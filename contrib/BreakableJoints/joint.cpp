@@ -2274,96 +2274,134 @@ dxJoint::Vtable __dnull_vtable = {
 
 /******************** breakable joint contribution ***********************/
 extern "C" void dJointSetBreakable (dxJoint *joint, int b) {
-	if (b) {
-		// we want this joint to be breakable but we must first check if it
-		// was already breakable
-		if (!joint->breakInfo) {
-			// allocate a dxJointBreakInfo struct
-			joint->breakInfo = new dxJointBreakInfo;
-			joint->breakInfo->flags = 0;
-			joint->breakInfo->broken = 0;
-			joint->breakInfo->breakForce = 0;
-			joint->breakInfo->breakTorque = 0;
-		}
-		else {
-			// the joint was already breakable
-			return;
-		}
-	}
-	else {
-		// we want this joint to be unbreakable mut we must first check if
-		// it is alreay unbreakable
-		if (joint->breakInfo) {
-			// deallocate the dxJointBreakInfo struct
-			delete joint->breakInfo;
-			joint->breakInfo = 0;
-		}
-		else {
-			// the joint was already unbreakable
-			return;
-		}
-	}
+  dAASSERT(joint);
+  if (b) {
+    // we want this joint to be breakable but we must first check if it
+    // was already breakable
+    if (!joint->breakInfo) {
+      // allocate a dxJointBreakInfo struct
+      joint->breakInfo = new dxJointBreakInfo;
+      joint->breakInfo->flags = 0;
+      for (int i = 0; i < 3; i++) {
+        joint->breakInfo->b1MaxF[0] = 0;
+        joint->breakInfo->b1MaxT[0] = 0;
+        joint->breakInfo->b2MaxF[0] = 0;
+        joint->breakInfo->b2MaxT[0] = 0;
+      }
+	  joint->breakInfo->callback = 0;
+    }
+    else {
+      // the joint was already breakable
+      return;
+    }
+  }
+  else {
+    // we want this joint to be unbreakable mut we must first check if
+    // it is alreay unbreakable
+    if (joint->breakInfo) {
+      // deallocate the dxJointBreakInfo struct
+      delete joint->breakInfo;
+      joint->breakInfo = 0;
+    }
+    else {
+      // the joint was already unbreakable
+      return;
+    }
+  }
 }
 
-extern "C" int dJointIsBreakable (dxJoint *joint) {
-	return joint->breakInfo != 0;
+extern "C" void dJointSetBreakCallback (dxJoint *joint, dJointBreakCallback *callbackFunc) {
+  dAASSERT(joint);
+# ifndef dNODEBUG
+  // only works for a breakable joint
+  if (!joint->breakInfo) {
+    dDebug (0, "dJointSetBreakCallback called on unbreakable joint");
+  }
+# endif
+  joint->breakInfo->callback = callbackFunc;
 }
 
 extern "C" void dJointSetBreakMode (dxJoint *joint, int mode) {
-	// only works for a breakable joint
-	if (!joint->breakInfo) {
-		dDebug (0, "dJointSetBreakMode called on unbreakable joint");
-		return;
-	}
-	joint->breakInfo->flags = mode;
+  dAASSERT(joint);
+# ifndef dNODEBUG
+  // only works for a breakable joint
+  if (!joint->breakInfo) {
+    dDebug (0, "dJointSetBreakMode called on unbreakable joint");
+  }
+# endif
+  joint->breakInfo->flags = mode;
 }
 
-extern "C" void dJointSetBreakForce (dxJoint *joint, dReal force) {
-	// only works for a breakable joint
-	if (!joint->breakInfo) {
-		dDebug (0, "dJointSetBreakForce called on unbreakable joint");
-		return;
-	}
-	joint->breakInfo->breakForce = force*force;
+extern "C" void dJointSetBreakForce (dxJoint *joint, int body, dReal x, dReal y, dReal z) {
+  dAASSERT(joint);
+# ifndef dNODEBUG
+  // only works for a breakable joint
+  if (!joint->breakInfo) {
+  dDebug (0, "dJointSetBreakForce called on unbreakable joint");
+  }
+# endif
+  if (body) {
+	joint->breakInfo->b2MaxF[0] = x;
+	joint->breakInfo->b2MaxF[1] = y;
+	joint->breakInfo->b2MaxF[2] = z;
+  }
+  else {
+	joint->breakInfo->b1MaxF[0] = x;
+	joint->breakInfo->b1MaxF[1] = y;
+	joint->breakInfo->b1MaxF[2] = z;
+  }
 }
 
-extern "C" void dJointSetBreakTorque (dxJoint *joint, dReal torque) {
-	// only works for a breakable joint
-	if (!joint->breakInfo) {
-		dDebug (0, "dJointSetBreakTorque called on unbreakable joint");
-		return;
-	}
-	joint->breakInfo->breakTorque = torque*torque;
+extern "C" void dJointSetBreakTorque (dxJoint *joint, int body, dReal x, dReal y, dReal z) {
+  dAASSERT(joint);
+# ifndef dNODEBUG
+  // only works for a breakable joint
+  if (!joint->breakInfo) {
+  dDebug (0, "dJointSetBreakTorque called on unbreakable joint");
+  }
+# endif
+  if (body) {
+	joint->breakInfo->b2MaxT[0] = x;
+	joint->breakInfo->b2MaxT[1] = y;
+	joint->breakInfo->b2MaxT[2] = z;
+  }
+  else {
+	joint->breakInfo->b1MaxT[0] = x;
+	joint->breakInfo->b1MaxT[1] = y;
+	joint->breakInfo->b1MaxT[2] = z;
+  }
 }
 
-extern "C" int dJointGetBreakMode (dxJoint *joint) {
-	// only works for a breakable joint
-	if (!joint->breakInfo) {
-		dDebug (0, "dJointGetBreakMode called on unbreakable joint");
-		return 0;
-	}
-	return joint->breakInfo->flags;
+extern "C" int dJointIsBreakable (dxJoint *joint) {
+  dAASSERT(joint);
+  return joint->breakInfo != 0;
 }
 
-extern "C" dReal dJointGetBreakForce (dxJoint *joint) {
-	// only works for a breakable joint
-	if (!joint->breakInfo) {
-		dDebug (0, "dJointGetBreakForce called on unbreakable joint");
-		return 0;
-	}
-
-	// we need to do a square root because the force is stored squared
-	return dSqrt(joint->breakInfo->breakForce);
+extern "C" void dJointGetBreakForce (dxJoint *joint, int body, dReal *force) {
+  dAASSERT(joint);
+# ifndef dNODEBUG
+  // only works for a breakable joint
+  if (!joint->breakInfo) {
+    dDebug (0, "dJointGetBreakForce called on unbreakable joint");
+  }
+# endif
+  if (body)
+    for (int i=0; i<3; i++) force[i]=joint->breakInfo->b2MaxF[i];
+  else
+    for (int i=0; i<3; i++) force[i]=joint->breakInfo->b1MaxF[i];
 }
 
-extern "C" dReal dJointGetBreakTorque (dxJoint *joint) {
-	// only works for a breakable joint
-	if (!joint->breakInfo) {
-		dDebug (0, "dJointGetBreakTorque called on unbreakable joint");
-		return 0;
-	}
-
-	// we need to do a square root because the torque is stored squared
-	return dSqrt(joint->breakInfo->breakTorque);
+extern "C" void dJointGetBreakTorque (dxJoint *joint, int body, dReal *torque) {
+  dAASSERT(joint);
+# ifndef dNODEBUG
+  // only works for a breakable joint
+  if (!joint->breakInfo) {
+    dDebug (0, "dJointGetBreakTorque called on unbreakable joint");
+  }
+# endif
+  if (body)
+    for (int i=0; i<3; i++) torque[i]=joint->breakInfo->b2MaxT[i];
+  else
+    for (int i=0; i<3; i++) torque[i]=joint->breakInfo->b1MaxT[i];
 }
 /*************************************************************************/

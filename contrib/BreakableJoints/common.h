@@ -205,15 +205,24 @@ enum {
   dJointTypeAMotor
 };
 
-
 /******************** breakable joint contribution ***********************/
+/* joint break callback function */
+typedef void dJointBreakCallback (dJointID joint);
+
 /* joint break modes */
 enum {
-	//dJOINT_DONT_BREAK = 0,      // not implemented (not necessary?)
-	dJOINT_BREAK_AT_FORCE = 1,
-	dJOINT_BREAK_AT_TORQUE = 2,
-	//dJOINT_BROKEN = 4
-	dJOINT_DELETE_ON_BREAK = 8
+  // if this flag is set, the joint wil break
+  dJOINT_BROKEN =             0x0001,
+  // if this flag is set, the joint wil be deleted when it breaks
+  dJOINT_DELETE_ON_BREAK =    0x0002,
+  // if this flag is set, the joint can break at a certain force on body 1
+  dJOINT_BREAK_AT_B1_FORCE =  0x0004,
+  // if this flag is set, the joint can break at a certain torque on body 1
+  dJOINT_BREAK_AT_B1_TORQUE = 0x0008,
+  // if this flag is set, the joint can break at a certain force on body 2
+  dJOINT_BREAK_AT_B2_FORCE =  0x0010,
+  // if this flag is set, the joint can break at a certain torque on body 2
+  dJOINT_BREAK_AT_B2_TORQUE = 0x0020
 };
 /*************************************************************************/
 

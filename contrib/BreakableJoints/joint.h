@@ -45,7 +45,6 @@ enum {
   dJOINT_TWOBODIES = 4
 };
 
-
 // there are two of these nodes in the joint, one for each connection to a
 // body. these are node of a linked list kept by each body of it's connecting
 // joints. but note that the body pointer in each node points to the body that
@@ -59,12 +58,13 @@ struct dxJointNode {
 };
 
 /******************** breakable joint contribution ***********************/
-// the break force and torque are squared for performance reasons.
 struct dxJointBreakInfo : public dBase {
 	int flags;
-	int broken; // the broken flag should be in flags
-	dReal breakForce;
-	dReal breakTorque;
+	dReal b1MaxF[3]; // maximum force on body 1
+	dReal b1MaxT[3]; // maximum torque on body 1
+	dReal b2MaxF[3]; // maximum force on body 2
+	dReal b2MaxT[3]; // maximum torque on body 2
+	dJointBreakCallback *callback; // function that is called when this joint breaks
 };
 /*************************************************************************/
 

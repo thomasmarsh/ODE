@@ -209,16 +209,18 @@ static void processIslands (dxWorld *world, dReal stepsize)
   dxJoint* nextJ = (dxJoint*)world->firstjoint->next;
   for (j=world->firstjoint; j; j=nextJ) {
   	nextJ = (dxJoint*)j->next;
-    if (j->breakInfo)
-      if (j->breakInfo->broken) {
+	// check if joint is breakable and broken
+    if (j->breakInfo && j->breakInfo->flags & dJOINT_BROKEN) {
+		// detach (break) the joint
         dJointAttach (j, 0, 0);
-        if (j->breakInfo->flags & dJOINT_DELETE_ON_BREAK) {
-          dJointDestroy (j);
-        }
+		// call the callback function if it is set
+		if (j->breakInfo->callback) j->breakInfo->callback (j);
+        if (j->breakInfo->flags & dJOINT_DELETE_ON_BREAK) dJointDestroy (j);
+		// reset the dJOINT_BROKEN flag
+		j->breakInfo->flags &= ~(dJOINT_BROKEN);
       }
-    }
+  }
   /*************************************************************************/
-
 }
 
 //****************************************************************************

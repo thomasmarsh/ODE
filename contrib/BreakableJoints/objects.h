@@ -145,13 +145,13 @@ dJointFeedback *dJointGetFeedback (dJointID);
 
 /******************** breakable joint contribution ***********************/
 void dJointSetBreakable (dJointID, int b);
-int dJointIsBreakable (dJointID);
+void dJointSetBreakCallback (dJointID, dJointBreakCallback *callbackFunc);
 void dJointSetBreakMode (dJointID, int mode);
-void dJointSetBreakForce (dJointID, dReal force);
-void dJointSetBreakTorque (dJointID, dReal torque);
-int dJointGetBreakMode (dJointID);
-dReal dJointGetBreakForce (dJointID);
-dReal dJointGetBreakTorque (dJointID);
+void dJointSetBreakForce (dJointID, int body, dReal x, dReal y, dReal z);
+void dJointSetBreakTorque (dJointID, int body, dReal x, dReal y, dReal z);
+int dJointIsBreakable (dJointID);
+void dJointGetBreakForce (dJointID, int body, dReal *force);
+void dJointGetBreakTorque (dJointID, int body, dReal *torque);
 /*************************************************************************/
 
 void dJointSetBallAnchor (dJointID, dReal x, dReal y, dReal z);
