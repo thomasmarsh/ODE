@@ -3327,11 +3327,16 @@ all the geoms in that space are automatically destroyed as well.
 
 @funcdef{
 void dHashSpaceSetLevels (dSpaceID space, int minlevel, int maxlevel);
+void dHashSpaceGetLevels (dSpaceID space, int *minlevel, int *maxlevel);
 }{
-This sets some parameters for a multi-resolution hash table space.
+Sets and get some parameters for a multi-resolution hash table space.
 The smallest and largest cell sizes used in the hash table will be
 2^@arg{minlevel} and 2^@arg{maxlevel} respectively.
 @arg{minlevel} must be less than or equal to @arg{maxlevel}.
+
+In @func{dHashSpaceGetLevels} the minimum and maximum levels are returned
+through pointers. If a pointer is zero then it is ignored and no
+argument is returned.
 }
 
 
