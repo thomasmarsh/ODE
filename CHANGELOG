@@ -9,6 +9,14 @@ the rules for this file:
 
 ------------------------------------------------------------------------------
 
+10/28/02 russ
+
+	* fixed two problems in the LCP code to improve the reliability of
+	  the dContactApprox1 contact mode.
+
+	* added a FAQ question about rolling bodies getting stuck when they
+	  hit multiple geoms.
+
 09/08/02 russ
 
 	* added dClosestLineSegmentPoints().
