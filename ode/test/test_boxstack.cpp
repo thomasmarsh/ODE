@@ -114,7 +114,7 @@ static void command (int cmd)
       nextobj++;
       if (nextobj >= num) nextobj = 0;
       dBodyDestroy (body[i]);
-      dDestroyGeom (geom[i]);
+      dGeomDestroy (geom[i]);
     }
     body[i] = dBodyCreate (world);
     for (int j=0; j<3; j++) sides[i][j] = dRandReal()*0.5+0.1;

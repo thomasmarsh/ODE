@@ -2,7 +2,7 @@
 MAKEFILE_INC=../../build/Makefile.inc
 include $(MAKEFILE_INC)
 
-APPNAMES = $(call fEXENAME,test_ode) $(call fEXENAME,test_chain) $(call fEXENAME,test_chain2) $(call fEXENAME,test_hinge) $(call fEXENAME,test_slider) $(call fEXENAME,test_collision) $(call fEXENAME,test_boxstack)
+APPNAMES = $(call fEXENAME,test_ode) $(call fEXENAME,test_chain1) $(call fEXENAME,test_chain2) $(call fEXENAME,test_hinge) $(call fEXENAME,test_slider) $(call fEXENAME,test_collision) $(call fEXENAME,test_boxstack)
 
 INCLUDE_PATHS = ../../include
 LIB_PATHS = ../../lib
@@ -19,8 +19,8 @@ $(call fEXENAME,test_ode): SUBSYSTEM=CONSOLE
 $(call fEXENAME,test_ode): $(call fTARGETS,test_ode.cpp)
 	$(call fLINK,$@,$(call fTARGETS,test_ode.cpp) $(call fLIB,ode) $(LINKMATH))
 
-$(call fEXENAME,test_chain): $(call fTARGETS,test_chain.cpp)
-	$(call fLINK,$@,$(call fTARGETS,test_chain.cpp) $(call fLIB,ode) $(call fLIB,drawstuff) $(LINKOPENGL) $(LINKWIN) $(LINKMATH) $(RSRC))
+$(call fEXENAME,test_chain1): $(call fTARGETS,test_chain1.c)
+	$(call fLINK,$@,$(call fTARGETS,test_chain1.c) $(call fLIB,ode) $(call fLIB,drawstuff) $(LINKOPENGL) $(LINKWIN) $(LINKMATH) $(RSRC))
 
 $(call fEXENAME,test_chain2): $(call fTARGETS,test_chain2.cpp)
 	$(call fLINK,$@,$(call fTARGETS,test_chain2.cpp) $(call fLIB,ode) $(call fLIB,drawstuff) $(LINKOPENGL) $(LINKWIN) $(LINKMATH) $(RSRC))

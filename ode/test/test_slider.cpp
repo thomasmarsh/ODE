@@ -154,7 +154,7 @@ int main (int argc, char **argv)
 
   slider = dJointCreateSlider (world,0);
   dJointAttach (slider,body[0],body[1]);
-  dJointSetAxis (slider,1,1,1);
+  dJointSetSliderAxis (slider,1,1,1);
 
   // run simulation
   dsSimulationLoop (argc,argv,352,288,&fn);
