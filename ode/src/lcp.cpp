@@ -1076,7 +1076,7 @@ void dSolveLCP (int n, dReal *A, dReal *x, dReal *b,
 
 # ifndef dNODEBUG
   // check restrictions on lo and hi
-  for (k=0; k<n; k++) dASSERT (lo[i] <= 0 && hi[i] >= 0);
+  for (k=0; k<n; k++) dASSERT (lo[k] <= 0 && hi[k] >= 0);
 # endif
 
   dReal *L = (dReal*) ALLOCA (n*nskip*sizeof(dReal));

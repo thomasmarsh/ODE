@@ -60,9 +60,19 @@ void dSpaceAdd (dSpaceID space, dGeomID obj)
 }
 
 
-void dSpaceRemove (dSpaceID, dGeomID)
+void dSpaceRemove (dSpaceID space, dGeomID geom_to_remove)
 {
-  dDebug (0,"unimplemented");
+  dGeomID last=0,g=space->first;
+  while (g) {
+    if (g==geom_to_remove) {
+      if (last) last->space.next = g->space.next;
+      else space->first = g->space.next;
+      geom_to_remove->space.next = 0;
+      return;
+    }
+    last = g;
+    g = g->space.next;
+  }
 }
 
 
