@@ -145,7 +145,7 @@ static bool GetContactData(const dVector3& Center, dReal Radius, const dVector3 
 			if (Det == REAL(0.0)){
 				u = REAL(0.0);
 				v = REAL(0.0);
-				DistSq = dInfinity;
+				DistSq = FLT_MAX;
 			}
 			else{
 				float InvDet = REAL(1.0) / Det;
