@@ -63,7 +63,6 @@ struct dxJoint : public dObject {
   // info returned by getInfo1 function. the constraint dimension is m (<=6).
   // i.e. that is the total number of rows in the jacobian. `nub' is the
   // number of unbounded variables (which have lo,hi = -/+ infinity).
-  // variables).
 
   struct Info1 {
     int m,nub;
