@@ -2568,6 +2568,26 @@ wheel's finite rotation axes should be set every time step to match their
 hinge axes.
 This will hopefully fix most of the problem.
 
+
+@section{How do I make ``one way'' collision interaction}
+
+Suppose you need to have two bodies (A and B) collide.
+The motion of A should affect the motion of B as usual, but B
+should not influence A at all.
+This might be necessary, for example, if B is a physically simulated camera
+in a VR environment.
+The camera needs collison response so that it doesn't enter into any scene
+objects by mistake, but the motion of the camera should not affect the
+simulation.
+How can this be achieved?
+
+Here is a good solution: when the collision is detected, don't create a
+contact joint between A and B as you normally would.
+Instead, attach the contact joint between B and 0 (the static environment).
+That way the body A will appear to B as though it is static and unmovable.
+This approach may result in some penetration between A and B, but
+this will not be a problem in many applications.
+
 #############################################################################
 @chapter{Known BUGS}
 
@@ -2634,10 +2654,38 @@ Thus: all 3x1 floating point vectors are stored as 4x1 vectors: (x,x,x,0).
 
 @section{Internals FAQ}
 
-@subsection{Why to some structures have a @c{dx} prefix and some have a
+
+@subsection{Why do some structures have a @c{dx} prefix and some have a
 @c{d} prefix?}
 
 The @c{dx} prefix is used for internal structures that should never be
 visible externally.
 The @c{d} prefix is used for structures that are part of the public
 interface.
+
+
+@subsection{Returned vectors}
+
+There seem to be 2 ways of returning vectors in ODE, e.g.:
+@code{@[
+    const dReal* dBodyGetPosition (dxBodyID);
+    void dWorldGetGravity (dxWorldID, dVector3);
+@]}
+Why?
+The second way is the 'official' way.
+The first way returns pointers to volatile internal data structures and is
+less clean API-wise.
+For a stable API I feel that filling in vectors is cleaner than returning
+pointers to vectors, for two reasons:
+@numlist{
+@*	The returned vector values may have to be calculated somehow, so
+	there is no internal ``cache'' to return a pointer to.
+@*	The internal data structures may be moved, which is a problem if
+	the user keeps the returned pointer and uses it later.
+}
+As it happens these two cases don't currently happen in ODE - most returned
+vector data is cached and always at the same address.
+But having the freedom to change things in the future is useful.
+The current API shouldn't slow you down because the cases where you need to
+be fast (i.e. getting body transforms) return pointers anyway - breaking my
+own rule.
