@@ -961,13 +961,15 @@ void dInternalStepIsland_x2 (dxWorld *world, dxBody * const *body, int nb,
       dxBody* b2 = joint[i]->node[1].body;
       dJointFeedback *fb = joint[i]->feedback;
 /******************** breakable joint contribution ***********************/
-	// we need joint feedback if the joint is breakable or if the user
-	// requested feedback.
-	if (joint[i]->breakInfo || fb) {
-	  // we need feedback on the amount of force that this joint is
-	  // applying to the bodies. we use a slightly slower computation
-	  // that splits out the force components and puts them in the
-	  // feedback structure.
+    // this saves us a few dereferences
+    dxJointBreakInfo *jBI = joint[i]->breakInfo;
+    // we need joint feedback if the joint is breakable or if the user
+    // requested feedback.
+	if (jBI||fb) {
+      // we need feedback on the amount of force that this joint is
+      // applying to the bodies. we use a slightly slower computation
+      // that splits out the force components and puts them in the
+      // feedback structure.
       dJointFeedback temp_fb; // temporary storage for joint feedback
 	  dReal data1[8],data2[8];
 	  Multiply1_8q1 (data1, JJ, lambda+ofs[i], info[i].m);
@@ -998,7 +1000,7 @@ void dInternalStepIsland_x2 (dxWorld *world, dxBody * const *body, int nb,
 	    fb->t1[0] = temp_fb.t1[0];
 	    fb->t1[1] = temp_fb.t1[1];
 	    fb->t1[2] = temp_fb.t1[2];
-	    if (b2){
+	    if (b2) {
 	      fb->f2[0] = temp_fb.f2[0];
 	      fb->f2[1] = temp_fb.f2[1];
 	      fb->f2[2] = temp_fb.f2[2];
@@ -1008,40 +1010,67 @@ void dInternalStepIsland_x2 (dxWorld *world, dxBody * const *body, int nb,
 	    }
 	  }
 	  // if the joint is breakable we need to check the breaking conditions
-	  if (joint[i]->breakInfo) {
-        dReal f1_sqr = temp_fb.f1[0]*temp_fb.f1[0] + temp_fb.f1[1]*temp_fb.f1[1] + temp_fb.f1[2]*temp_fb.f1[2];
-        dReal t1_sqr = temp_fb.t1[0]*temp_fb.t1[0] + temp_fb.t1[1]*temp_fb.t1[1] + temp_fb.t1[2]*temp_fb.t1[2];
-
-		if (joint[i]->breakInfo->flags&dJOINT_BREAK_AT_FORCE && f1_sqr*stepsize>joint[i]->breakInfo->breakForce) {
-			// flag the joint as broken
-			joint[i]->breakInfo->broken = 1;
+      if (jBI) {
+        dReal relCF1[3];
+		dReal relCT1[3];
+		// multiply the force and torque vectors by the rotation matrix of body 1
+		dMULTIPLY1_331 (&relCF1[0],b1->R,&temp_fb.f1[0]);
+		dMULTIPLY1_331 (&relCT1[0],b1->R,&temp_fb.t1[0]);
+		if (jBI->flags & dJOINT_BREAK_AT_B1_FORCE) {
+		  // check if the force is to high
+          for (int i = 0; i < 3; i++) {
+            if (relCF1[i] > jBI->b1MaxF[i]) {
+		      jBI->flags |= dJOINT_BROKEN;
+		      goto doneCheckingBreaks;
+		    }
+          }
 		}
-		if (joint[i]->breakInfo->flags&dJOINT_BREAK_AT_TORQUE && t1_sqr*stepsize>joint[i]->breakInfo->breakTorque) {
-			// flag the joint as broken
-			joint[i]->breakInfo->broken = 1;
+		if (jBI->flags & dJOINT_BREAK_AT_B1_TORQUE) {
+		  // check if the torque is to high
+          for (int i = 0; i < 3; i++) {
+            if (relCT1[i] > jBI->b1MaxT[i]) {
+		      jBI->flags |= dJOINT_BROKEN;
+		      goto doneCheckingBreaks;
+            }
+          }
 		}
         if (b2) {
-          dReal f2_sqr = temp_fb.f2[0]*temp_fb.f2[0] + temp_fb.f2[1]*temp_fb.f1[1] + temp_fb.f2[2]*temp_fb.f2[2];
-	      dReal t2_sqr = temp_fb.t2[0]*temp_fb.t2[0] + temp_fb.t2[1]*temp_fb.t1[1] + temp_fb.t2[2]*temp_fb.t2[2];
-	  		if (joint[i]->breakInfo->flags&dJOINT_BREAK_AT_FORCE && f2_sqr*stepsize>joint[i]->breakInfo->breakForce) {
-				// flag the joint as broken
-				joint[i]->breakInfo->broken = 1;
-			}
-			if (joint[i]->breakInfo->flags&dJOINT_BREAK_AT_TORQUE && t2_sqr*stepsize>joint[i]->breakInfo->breakTorque) {
-				// flag the joint as broken
-				joint[i]->breakInfo->broken = 1;
-			}
-	    }
-	  }
+          dReal relCF2[3];
+          dReal relCT2[3];
+          // multiply the force and torque vectors by the rotation matrix of body 2
+          dMULTIPLY1_331 (&relCF2[0],b2->R,&temp_fb.f2[0]);
+          dMULTIPLY1_331 (&relCT2[0],b2->R,&temp_fb.t2[0]);
+		  if (jBI->flags & dJOINT_BREAK_AT_B2_FORCE) {
+            // check if the force is to high
+            for (int i = 0; i < 3; i++) {
+              if (relCF2[i] > jBI->b2MaxF[i]) {
+                jBI->flags |= dJOINT_BROKEN;
+                goto doneCheckingBreaks;
+              }
+            }
+		  }
+		  if (jBI->flags & dJOINT_BREAK_AT_B2_TORQUE) {
+		  // check if the torque is to high
+            for (int i = 0; i < 3; i++) {
+              if (relCT2[i] > jBI->b2MaxT[i]) {
+                jBI->flags |= dJOINT_BROKEN;
+                goto doneCheckingBreaks;
+              }
+            }
+		  }
+        }
+		doneCheckingBreaks:
+		;
+      }
     }
 /*************************************************************************/
-      else {
-	// no feedback is required, let's compute cforce the faster way
-	MultiplyAdd1_8q1 (cforce + 8*b1->tag,JJ, lambda+ofs[i], info[i].m);
-	if (b2) {
-	  MultiplyAdd1_8q1 (cforce + 8*b2->tag,
-			    JJ + 8*info[i].m, lambda+ofs[i], info[i].m);
-	}
+	  else {
+	  // no feedback is required, let's compute cforce the faster way
+	  MultiplyAdd1_8q1 (cforce + 8*b1->tag,JJ, lambda+ofs[i], info[i].m);
+	  if (b2) {
+  	    MultiplyAdd1_8q1 (cforce + 8*b2->tag,
+        JJ + 8*info[i].m, lambda+ofs[i], info[i].m);
+	  }
       }
     }
   }

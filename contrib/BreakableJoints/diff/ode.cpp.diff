@@ -1,23 +1,25 @@
-207a208,221
->   /******************** breakable joint contribution ***********************/
->   dxJoint* nextJ = (dxJoint*)world->firstjoint->next;
->   for (j=world->firstjoint; j; j=nextJ) {
->   	nextJ = (dxJoint*)j->next;
->     if (j->breakInfo)
->       if (j->breakInfo->broken) {
->         dJointAttach (j, 0, 0);
->         if (j->breakInfo->flags & dJOINT_DELETE_ON_BREAK) {
->           dJointDestroy (j);
->         }
->       }
->     }
->   /*************************************************************************/
-> 
-907a922,924
->   /******************** breakable joint contribution ***********************/
->   j->breakInfo = 0;
->   /*************************************************************************/
-984a1002,1004
->   /******************** breakable joint contribution ***********************/
->   if (j->breakInfo) delete j->breakInfo;
->   /*************************************************************************/
+208,223d207
+<   /******************** breakable joint contribution ***********************/
+<   dxJoint* nextJ = (dxJoint*)world->firstjoint->next;
+<   for (j=world->firstjoint; j; j=nextJ) {
+<   	nextJ = (dxJoint*)j->next;
+< 	// check if joint is breakable and broken
+<     if (j->breakInfo && j->breakInfo->flags & dJOINT_BROKEN) {
+< 		// detach (break) the joint
+<         dJointAttach (j, 0, 0);
+< 		// call the callback function if it is set
+< 		if (j->breakInfo->callback) j->breakInfo->callback (j);
+<         if (j->breakInfo->flags & dJOINT_DELETE_ON_BREAK) dJointDestroy (j);
+< 		// reset the dJOINT_BROKEN flag
+< 		j->breakInfo->flags &= ~(dJOINT_BROKEN);
+<       }
+<   }
+<   /*************************************************************************/
+924,926d907
+<   /******************** breakable joint contribution ***********************/
+<   j->breakInfo = 0;
+<   /*************************************************************************/
+1004,1006d984
+<   /******************** breakable joint contribution ***********************/
+<   if (j->breakInfo) delete j->breakInfo;
+<   /*************************************************************************/

@@ -1,17 +1,20 @@
-60a61,69
-> /******************** breakable joint contribution ***********************/
-> // the break force and torque are squared for performance reasons.
-> struct dxJointBreakInfo : public dBase {
-> 	int flags;
-> 	int broken; // the broken flag should be in flags
-> 	dReal breakForce;
-> 	dReal breakTorque;
-> };
-> /*************************************************************************/
-124a134,139
+47a48
 > 
->   /******************** breakable joint contribution ***********************/
->   // optional break info structure. if this is not NULL the the joint is
->   // breakable.
->   dxJointBreakInfo *breakInfo;
->   /*************************************************************************/
+60,69d60
+< /******************** breakable joint contribution ***********************/
+< struct dxJointBreakInfo : public dBase {
+< 	int flags;
+< 	dReal b1MaxF[3]; // maximum force on body 1
+< 	dReal b1MaxT[3]; // maximum torque on body 1
+< 	dReal b2MaxF[3]; // maximum force on body 2
+< 	dReal b2MaxT[3]; // maximum torque on body 2
+< 	dJointBreakCallback *callback; // function that is called when this joint breaks
+< };
+< /*************************************************************************/
+134,139d124
+< 
+<   /******************** breakable joint contribution ***********************/
+<   // optional break info structure. if this is not NULL the the joint is
+<   // breakable.
+<   dxJointBreakInfo *breakInfo;
+<   /*************************************************************************/
