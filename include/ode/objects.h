@@ -190,11 +190,14 @@ void dJointSetFeedback (dJointID, dJointFeedback *);
 dJointFeedback *dJointGetFeedback (dJointID);
 
 void dJointSetBallAnchor (dJointID, dReal x, dReal y, dReal z);
+void dJointSetBallAnchor2 (dJointID, dReal x, dReal y, dReal z);
 void dJointSetHingeAnchor (dJointID, dReal x, dReal y, dReal z);
+void dJointSetHingeAnchorDelta (dJointID, dReal x, dReal y, dReal z, dReal ax, dReal ay, dReal az);
 void dJointSetHingeAxis (dJointID, dReal x, dReal y, dReal z);
 void dJointSetHingeParam (dJointID, int parameter, dReal value);
 void dJointAddHingeTorque(dJointID joint, dReal torque);
 void dJointSetSliderAxis (dJointID, dReal x, dReal y, dReal z);
+void dJointSetSliderAxisDelta (dJointID, dReal x, dReal y, dReal z, dReal ax, dReal ay, dReal az);
 void dJointSetSliderParam (dJointID, int parameter, dReal value);
 void dJointAddSliderForce(dJointID joint, dReal force);
 void dJointSetHinge2Anchor (dJointID, dReal x, dReal y, dReal z);
@@ -253,6 +256,8 @@ dReal dJointGetAMotorAngleRate (dJointID, int anum);
 dReal dJointGetAMotorParam (dJointID, int parameter);
 int dJointGetAMotorMode (dJointID);
 
+dJointID dConnectingJoint (dBodyID, dBodyID);
+int dConnectingJointList (dBodyID, dBodyID, dJointID*);
 int dAreConnected (dBodyID, dBodyID);
 int dAreConnectedExcluding (dBodyID, dBodyID, int joint_type);
 
