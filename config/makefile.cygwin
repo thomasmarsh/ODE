@@ -13,7 +13,7 @@ AR=ar rc
 RANLIB=
 LIB_PREFIX=lib
 LIB_SUFFIX=.a
-LINK_OPENGL=-lComctl32 -lkernel32 -luser32 -lgdi32 -lOpenGL32 -lGlu32
+LINK_OPENGL=-lstdc++ -lComctl32 -lkernel32 -luser32 -lgdi32 -lOpenGL32 -lGlu32
 LINK_MATH=-lm
 RC_RULE=windres -I rc -O coff $< $@
 
