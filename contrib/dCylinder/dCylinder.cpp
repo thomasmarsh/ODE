@@ -1408,7 +1408,7 @@ dxGeom *dCreateCylinder (dSpaceID space, dReal r, dReal lz)
 
 void dGeomCylinderSetParams (dGeomID g, dReal radius, dReal length)
 {
-  dUASSERT (g && dGeomGetClass(g) == dCCylinderClass,"argument not a ccylinder");
+  dUASSERT (g && dGeomGetClass(g) == dCylinderClassUser,"argument not a cylinder");
   dAASSERT (radius > 0 && length > 0);
   dxCylinder *c = (dxCylinder*) dGeomGetClassData(g);
   c->radius = radius;
