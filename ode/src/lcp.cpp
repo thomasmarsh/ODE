@@ -400,8 +400,11 @@ struct dLCP {
     // for all Nj. sign = +1,-1. assumes i > maximum index in N.
   void pC_plusequals_s_times_qC (dReal *p, dReal s, dReal *q);
   void pN_plusequals_s_times_qN (dReal *p, dReal s, dReal *q); // for all Nj
-  void solve1 (dReal *a, int i, int dir=1);
-    // get a(C) = - dir * A(C,C) \ A(C,i). dir must be +/- 1
+  void solve1 (dReal *a, int i, int dir=1, int only_transfer=0);
+    // get a(C) = - dir * A(C,C) \ A(C,i). dir must be +/- 1.
+    // the fast version of this function computes some data that is needed by
+    // transfer_i_to_C(). if only_transfer is nonzero then this function
+    // *only* computes that data, it does not set a(C).
 
   void unpermute();
   // call this at the end of the LCP function. if the x/w values have been
@@ -621,7 +624,7 @@ void dLCP::pN_plusequals_s_times_qN (dReal *p, dReal s, dReal *q)
 }
 
 
-void dLCP::solve1 (dReal *a, int i, int dir)
+void dLCP::solve1 (dReal *a, int i, int dir, int only_transfer)
 {
   dReal *AA = (dReal*) ALLOCA (n*nskip*sizeof(dReal));
   dReal *dd = (dReal*) ALLOCA (n*sizeof(dReal));
@@ -717,7 +720,7 @@ struct dLCP {
     { for (int i=0; i<nC; i++) p[i] += s*q[i]; }
   void pN_plusequals_s_times_qN (dReal *p, dReal s, dReal *q)
     { for (int i=0; i<nN; i++) p[i+nC] += s*q[i+nC]; }
-  void solve1 (dReal *a, int i, int dir=1);
+  void solve1 (dReal *a, int i, int dir=1, int only_transfer=0);
   void unpermute();
 };
 
@@ -933,7 +936,7 @@ void dLCP::pN_plusequals_ANi (dReal *p, int i, int sign)
 }
 
 
-void dLCP::solve1 (dReal *a, int i, int dir)
+void dLCP::solve1 (dReal *a, int i, int dir, int only_transfer)
 {
   // the `Dell' and `ell' that are computed here are saved. if index i is
   // later added to the factorization then they can be reused.
@@ -953,13 +956,16 @@ void dLCP::solve1 (dReal *a, int i, int dir)
 #   endif
     dSolveL1 (L,Dell,nC,nskip);
     for (j=0; j<nC; j++) ell[j] = Dell[j] * d[j];
-    for (j=0; j<nC; j++) tmp[j] = ell[j];
-    dSolveL1T (L,tmp,nC,nskip);
-    if (dir > 0) {
-      for (j=0; j<nC; j++) a[C[j]] = -tmp[j];
-    }
-    else {
-      for (j=0; j<nC; j++) a[C[j]] = tmp[j];
+
+    if (!only_transfer) {
+      for (j=0; j<nC; j++) tmp[j] = ell[j];
+      dSolveL1T (L,tmp,nC,nskip);
+      if (dir > 0) {
+	for (j=0; j<nC; j++) a[C[j]] = -tmp[j];
+      }
+      else {
+	for (j=0; j<nC; j++) a[C[j]] = tmp[j];
+      }
     }
   }
 }
@@ -1188,6 +1194,8 @@ void dSolveLCP (int n, dReal *A, dReal *x, dReal *b,
       // that lo != 0, which means that lo < 0 as lo is not allowed to be +ve,
       // and similarly that hi > 0. this means that the line segment
       // corresponding to set C is at least finite in extent, and we are on it.
+      // NOTE: we must call lcp.solve1() before lcp.transfer_i_to_C()
+      lcp.solve1 (delta_x,i,0,1);
       lcp.transfer_i_to_C (i);
     }
     else {
