@@ -279,7 +279,7 @@ void Texture::bind (int modulate)
 //***************************************************************************
 // the current drawing state (for when the user's step function is drawing)
 
-static float color[3] = {0,0,0};	// current r,g,b color
+static float color[4] = {0,0,0,0};	// current r,g,b,alpha color
 static int tnum = 0;			// current texture number
 
 //***************************************************************************
@@ -681,11 +681,11 @@ static void drawCylinder (float l, float r, float zoffset)
   glVertex3d (0,0,l+zoffset);
   for (i=0; i<=n; i++) {
     if (i==1 || i==n/2+1)
-      setColor (color[0]*0.75f,color[1]*0.75f,color[2]*0.75f,1);
+      setColor (color[0]*0.75f,color[1]*0.75f,color[2]*0.75f,color[3]);
     glNormal3d (0,0,1);
     glVertex3d (ny*r,nz*r,l+zoffset);
     if (i==1 || i==n/2+1)
-      setColor (color[0],color[1],color[2],1);
+      setColor (color[0],color[1],color[2],color[3]);
 
     // rotate ny,nz
     tmp = ca*ny - sa*nz;
@@ -701,11 +701,11 @@ static void drawCylinder (float l, float r, float zoffset)
   glVertex3d (0,0,-l+zoffset);
   for (i=0; i<=n; i++) {
     if (i==1 || i==n/2+1)
-      setColor (color[0]*0.75f,color[1]*0.75f,color[2]*0.75f,1);
+      setColor (color[0]*0.75f,color[1]*0.75f,color[2]*0.75f,color[3]);
     glNormal3d (0,0,-1);
     glVertex3d (ny*r,nz*r,-l+zoffset);
     if (i==1 || i==n/2+1)
-      setColor (color[0],color[1],color[2],1);
+      setColor (color[0],color[1],color[2],color[3]);
 
     // rotate ny,nz
     tmp = ca*ny + sa*nz;
@@ -1056,8 +1056,9 @@ void dsDrawFrame (int width, int height, dsFunctions *fn, int pause)
 
   // draw the rest of the objects. set drawing state first.
   color[0] = 1;
-  color[0] = 1;
-  color[0] = 1;
+  color[1] = 1;
+  color[2] = 1;
+  color[3] = 1;
   tnum = 0;
   if (fn->step) fn->step (pause);
 }
@@ -1113,7 +1114,15 @@ static void setupDrawingMode()
   else {
     glDisable (GL_TEXTURE_2D);
   }
-  setColor (color[0],color[1],color[2],1);
+  setColor (color[0],color[1],color[2],color[3]);
+
+  if (color[3] < 1) {
+    glEnable (GL_BLEND);
+    glBlendFunc (GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
+  }
+  else {
+    glDisable (GL_BLEND);
+  }
 }
 
 
@@ -1215,6 +1224,18 @@ extern "C" void dsSetColor (float red, float green, float blue)
   color[0] = red;
   color[1] = green;
   color[2] = blue;
+  color[3] = 1;
+}
+
+
+extern "C" void dsSetColorAlpha (float red, float green, float blue,
+				 float alpha)
+{
+  if (current_state != 2) dsError ("drawing function called outside simulation loop");
+  color[0] = red;
+  color[1] = green;
+  color[2] = blue;
+  color[3] = alpha;
 }
 
 
