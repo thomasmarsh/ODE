@@ -23,6 +23,13 @@
 #include "ode/odemath.h"
 
 
+// get some math functions under windows
+#ifdef WIN32
+#include <float.h>
+#define copysign _copysign
+#endif
+
+
 // this may be called for vectors `a' with extremely small magnitude, for
 // example the result of a cross product on two nearly perpendicular vectors.
 // we must be robust to these small vectors. to prevent numerical error,
