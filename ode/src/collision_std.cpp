@@ -503,56 +503,6 @@ int dGeomRayGetClosestHit (dxGeom *g)
 }
 
 //****************************************************************************
-// geom group public API
-
-enum {
-  dGeomGroupClass = dSimpleSpaceClass
-};
-
-
-dGeomID dCreateGeomGroup (dSpaceID space)
-{
-  dSpaceID s = dSimpleSpaceCreate (space);
-  dSpaceSetCleanup (s,0);
-  return s;
-}
-
-
-void dGeomGroupAdd (dxGeom *g, dxGeom *x)
-{
-  dUASSERT (g && g->type == dGeomGroupClass,"argument not a geomgroup");
-  dSpaceAdd ((dxSpace*)g,x);
-}
-
-
-void dGeomGroupRemove (dxGeom *g, dxGeom *x)
-{
-  dUASSERT (g && g->type == dGeomGroupClass,"argument not a geomgroup");
-  dSpaceRemove ((dxSpace*)g,x);
-}
-
-
-int dGeomGroupGetNumGeoms (dxGeom *g)
-{
-  dUASSERT (g && g->type == dGeomGroupClass,"argument not a geomgroup");
-  return dSpaceGetNumGeoms ((dxSpace*)g);
-}
-
-
-dGeomID dGeomGroupGetGeom (dxGeom *g, int i)
-{
-  dUASSERT (g && g->type == dGeomGroupClass,"argument not a geomgroup");
-  return dSpaceGetGeom ((dxSpace*)g,i);
-}
-
-
-int dGeomGroupQuery (dxGeom *g, dxGeom *x)
-{
-  dUASSERT (g && g->type == dGeomGroupClass,"argument not a geomgroup");
-  return dSpaceQuery ((dxSpace*)g,x);
-}
-
-//****************************************************************************
 // box-box collision utility
 
 

@@ -54,7 +54,6 @@ $a =~ s/\@funcdef{([^}]*)}/&exportFuncList($1)/ge;
 # add in some functions and symbols that are not currently shown in
 # the documentation
 
-push (@funcs,"dInfinityValue");
 push (@funcs,"dSetZero");
 push (@funcs,"dBoxBox");
 
@@ -79,6 +78,23 @@ push (@funcs,"dMessage");
 push (@funcs,"dSetMessageHandler");
 push (@funcs,"dSetErrorHandler");
 push (@funcs,"dSetDebugHandler");
+
+push (@funcs,"dFactorCholesky");
+push (@funcs,"dFactorLDLT");
+push (@funcs,"dGeomRayGetClosestHit");
+push (@funcs,"dGeomRaySetClosestHit");
+push (@funcs,"dGeomTriMeshDataBuildDouble");
+push (@funcs,"dGeomTriMeshDataBuildSingle");
+push (@funcs,"dInvertPDMatrix");
+push (@funcs,"dIsPositiveDefinite");
+push (@funcs,"dLDLTAddTL");
+push (@funcs,"dLDLTRemove");
+push (@funcs,"dRemoveRowCol");
+push (@funcs,"dRandGetSeed");
+push (@funcs,"dRFromZAxis");
+push (@funcs,"dSolveCholesky");
+push (@funcs,"dSolveLDLT");
+push (@funcs,"dSpaceClean");
 
 # sort the functions and generate the exports file
 print "LIBRARY ODE\n";

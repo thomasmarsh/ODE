@@ -306,7 +306,9 @@ void dxSimpleSpace::collide2 (void *data, dxGeom *geom,
 // utility stuff for hash table space
 
 // kind of silly, but oh well...
+#ifndef MAXINT
 #define MAXINT ((int)((((unsigned int)(-1)) << 1) >> 1))
+#endif
 
 
 // prime[i] is the largest prime smaller than 2^i
@@ -345,6 +347,12 @@ struct Node {
 
 static int findLevel (dReal bounds[6])
 {
+  if (bounds[0] <= -dInfinity || bounds[1] >= dInfinity ||
+      bounds[2] <= -dInfinity || bounds[3] >= dInfinity ||
+      bounds[4] <= -dInfinity || bounds[5] >= dInfinity) {
+    return MAXINT;
+  }
+
   // compute q
   dReal q,q2;
   q = bounds[1] - bounds[0];	// x bounds
@@ -352,8 +360,6 @@ static int findLevel (dReal bounds[6])
   if (q2 > q) q = q2;
   q2 = bounds[5] - bounds[4];	// z bounds
   if (q2 > q) q = q2;
-
-  if (q == dInfinity || q == -dInfinity) return MAXINT;
 
   // find level such that 0.5 * 2^level < q <= 2^level
   int level;

@@ -60,28 +60,25 @@ ODE_SRC = \
 	ode/src/joint.cpp \
 	ode/src/timer.cpp \
 	ode/src/mat.cpp \
-	ode/src/testing.cpp
+	ode/src/testing.cpp \
+	ode/src/collision_kernel.cpp \
+	ode/src/collision_util.cpp \
+	ode/src/collision_std.cpp \
+	ode/src/collision_space.cpp \
+	ode/src/collision_transform.cpp \
+	ode/src/collision_quadtreespace.cpp
 
-ODE_OLD_COLLISION_SRC = ode/src/space.cpp \
-			ode/src/geom.cpp
-
-ODE_NEW_COLLISION_SRC = ode/src/collision_kernel.cpp \
-			ode/src/collision_util.cpp \
-			ode/src/collision_std.cpp \
-			ode/src/collision_space.cpp \
-			ode/src/collision_transform.cpp \
-			ode/src/collision_quadtreespace.cpp
 ifdef OPCODE_DIRECTORY
 ifneq ($(PRECISION),SINGLE)
 $(error OpCode-enabled builds require PRECISION=SINGLE for correct operation.)
 endif
-ODE_NEW_COLLISION_SRC +=ode/src/collision_trimesh.cpp \
-			ode/src/collision_trimesh_sphere.cpp \
-			ode/src/collision_trimesh_box.cpp \
-                        ode/src/collision_trimesh_trimesh.cpp \
-			ode/src/collision_trimesh_ray.cpp \
-			ode/src/collision_trimesh_ccylinder.cpp \
-			ode/src/collision_trimesh_distance.cpp
+ODE_SRC +=ode/src/collision_trimesh.cpp \
+	ode/src/collision_trimesh_sphere.cpp \
+	ode/src/collision_trimesh_box.cpp \
+	ode/src/collision_trimesh_trimesh.cpp \
+	ode/src/collision_trimesh_ray.cpp \
+	ode/src/collision_trimesh_ccylinder.cpp \
+	ode/src/collision_trimesh_distance.cpp
 endif
 
 ODE_PREGEN_SRC = \
@@ -89,13 +86,6 @@ ODE_PREGEN_SRC = \
 	ode/src/fastlsolve.c \
 	ode/src/fastltsolve.c \
 	ode/src/fastdot.c
-
-ifeq ($(ODE_OLD_COLLISION),1)
-ODE_SRC += $(ODE_OLD_COLLISION_SRC)
-ODE_OLD_COLLISION_DEF=$(C_DEF)ODE_OLD_COLLISION
-else
-ODE_SRC += $(ODE_NEW_COLLISION_SRC)
-endif
 
 ifeq ($(WINDOWS),1)
 DRAWSTUFF_SRC = drawstuff/src/drawstuff.cpp drawstuff/src/windows.cpp
@@ -306,17 +296,17 @@ lib/resources.RES: drawstuff/src/resources.rc
 configure: $(CONFIG_H)
 
 $(CONFIG_H): $(CONFIGURATOR_EXE) $(USER_SETTINGS) $(PLATFORM_MAKEFILE)
-	$(THIS_DIR)$(CONFIGURATOR_EXE) $(CONFIG_H) "$(CC) $(DEFINES) $(C_EXEOUT)" "$(DEL_CMD)" $(THIS_DIR)
+	$(THIS_DIR1)$(CONFIGURATOR_EXE) $(CONFIG_H) "$(CC) $(DEFINES) $(C_EXEOUT)" "$(DEL_CMD)" $(THIS_DIR2)
 
 $(CONFIGURATOR_EXE): $(CONFIGURATOR_SRC) $(USER_SETTINGS) $(PLATFORM_MAKEFILE)
-	$(CC) $(C_DEF)d$(PRECISION) $(DEFINES) $(ODE_OLD_COLLISION_DEF) $(C_EXEOUT)$@ $<
+	$(CC) $(C_DEF)d$(PRECISION) $(DEFINES) $(C_EXEOUT)$@ $<
 
 
 # unix-gcc specific dependency making
 
 DEP_RULE=gcc -M $(C_INC)$(INCPATH) $(DEFINES)
 depend:
-	$(DEP_RULE) $(ODE_SRC) $(ODE_PREGEN_SRC) $(ODE_OLD_COLLISION_SRC) $(ODE_NEW_COLLISION_SRC) | tools/process_deps ode/src/ > Makefile.deps
+	$(DEP_RULE) $(ODE_SRC) $(ODE_PREGEN_SRC) | tools/process_deps ode/src/ > Makefile.deps
 	$(DEP_RULE) $(DRAWSTUFF_SRC) | tools/process_deps drawstuff/src/ >> Makefile.deps
 	$(DEP_RULE) $(ODE_TEST_SRC_CPP) | tools/process_deps ode/test/ >> Makefile.deps
 	$(DEP_RULE) $(DRAWSTUFF_TEST_SRC_CPP) | tools/process_deps drawstuff/dstest/ >> Makefile.deps

@@ -1026,7 +1026,7 @@ static void sliderGetInfo1 (dxJointSlider *j, dxJoint::Info1 *info)
 static void sliderGetInfo2 (dxJointSlider *joint, dxJoint::Info2 *info)
 {
   int i,s = info->rowskip;
-  int s2=2*s,s3=3*s,s4=4*s;
+  int s3=3*s,s4=4*s;
 
   // pull out pos and R for both bodies. also get the `connection'
   // vector pos2-pos1.

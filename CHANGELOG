@@ -9,6 +9,21 @@ the rules for this file:
 
 ------------------------------------------------------------------------------
 
+04/18/04 russ
+
+	* changed the way that the dInfinity constant is implemented: now it
+	  is #defined to be one of: FLT_MAX, DBL_MAX, HUGE_VAL, HUGE_VALF, or
+	  a large numeric constant. previously it was a variable that was
+	  exported from the library. this simplifies the configuration and
+	  build process quite a bit, especially in the case of DLLs.
+	
+	* removed the old, deprecated collision system (geom.cpp,space.cpp,
+	  geom.h,space.h,odecpp_old_collision.h). the ODE_OLD_COLLISION
+	  configuration setting no longer has any meaning.
+	
+	* removed support for dGeomGroups, which have been deprecated for
+	  a while and are equivalent to 'spaces' anyway.
+
 04/13/04 russ
 
 	* bug fix in dMassSetCappedCylinder(), from Matthew D. Hancher.

@@ -136,14 +136,6 @@ int dGeomRayGetClosestHit (dGeomID g);
 
 #include "collision_trimesh.h"
 
-/* for backward compatibility */
-dGeomID dCreateGeomGroup (dSpaceID space);
-void dGeomGroupAdd (dGeomID group, dGeomID x);
-void dGeomGroupRemove (dGeomID group, dGeomID x);
-int dGeomGroupGetNumGeoms (dGeomID group);
-dGeomID dGeomGroupGetGeom (dGeomID group, int i);
-int dGeomGroupQuery (dGeomID group, dGeomID x);
-
 dGeomID dCreateGeomTransform (dSpaceID space);
 void dGeomTransformSetGeom (dGeomID g, dGeomID obj);
 dGeomID dGeomTransformGetGeom (dGeomID g);

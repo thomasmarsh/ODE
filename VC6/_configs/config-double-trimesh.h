@@ -3,40 +3,18 @@
 
 
 #ifndef _ODE_CONFIG_H_
-
 #define _ODE_CONFIG_H_
 
 
 
-/* shared lib definitions */
-
-#ifndef SHAREDLIBIMPORT
-
-#define SHAREDLIBIMPORT
-
-#endif
-
-#ifndef SHAREDLIBEXPORT
-
-#define SHAREDLIBEXPORT
-
-#endif
-
-
-
 /* standard system headers */
-
 #include <stdio.h>
-
 #include <stdlib.h>
-
 #include <math.h>
-
 #include <string.h>
-
 #include <stdarg.h>
-
 #include <malloc.h>
+#include <float.h>
 
 
 
@@ -88,25 +66,7 @@ typedef unsigned int intP;
 
 /* the floating point infinity */
 
-#define DINFINITY_DECL SHAREDLIBEXPORT union dInfBytes dInfinityValue = {{0,0,0,0,0,0,0xf0,0x7f}};
-
-#if defined SHARED_CONFIG_H_INCLUDED_FROM_DEFINING_FILE
-
-  #define GLOBAL_SHAREDLIB_SPEC SHAREDLIBEXPORT
-
-#else 
-
-  #define GLOBAL_SHAREDLIB_SPEC SHAREDLIBIMPORT
-
-#endif
-
-union dInfBytes { unsigned char c[8]; double d; };
-
-extern GLOBAL_SHAREDLIB_SPEC union dInfBytes dInfinityValue;
-
-#define dInfinity (dInfinityValue.d)
-
-#undef GLOBAL_SHAREDLIB_SPEC
+#define dInfinity DBL_MAX
 
 
 

@@ -30,15 +30,7 @@ BUILD=release
 
 WINDOWS16=0
 
-# (5) ODE's collision system had a major change around 7/Nov/2002. The API of
-#     the new code is 99% compatible with the old ... however, some legacy
-#     applications may rely on subtle details of the old system. Uncomment
-#     this variable if you know you need to use the old code, otherwise
-#     leave it commented for all new development.
-
-#ODE_OLD_COLLISION=1
-
-# (6) If you want to use the TriList (triangle mesh) geometry class, you must
+# (5) If you want to use the TriList (triangle mesh) geometry class, you must
 #     have the OPCODE library installed somewhere. If this is the case then
 #     uncomment the following variable and set it to point to the directory
 #     where OPCODE is installed (note that you must have already compiled
