@@ -49,6 +49,7 @@ extern int dBoxClass;
 extern int dCCylinderClass;
 extern int dPlaneClass;
 extern int dGeomGroupClass;
+extern int dGeomTransformClass;
 
 /* constructors */
 dGeomID dCreateSphere (dSpaceID space, dReal radius);
@@ -91,6 +92,15 @@ void dGeomGroupAdd (dGeomID group, dGeomID x);
 void dGeomGroupRemove (dGeomID group, dGeomID x);
 int dGeomGroupGetNumGeoms (dGeomID group);
 dGeomID dGeomGroupGetGeom (dGeomID group, int i);
+
+/* ************************************************************************ */
+/* transformed geometry functions */
+
+dGeomID dCreateGeomTransform (dSpaceID space);
+void dGeomTransformSetGeom (dGeomID g, dGeomID obj);
+dGeomID dGeomTransformGetGeom (dGeomID g);
+void dGeomTransformSetCleanup (dGeomID g, int mode);
+int dGeomTransformGetCleanup (dGeomID g);
 
 /* ************************************************************************ */
 /* general collision */
