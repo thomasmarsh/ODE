@@ -27,6 +27,12 @@
 #include <ode/space.h>
 #include <ode/contact.h>
 
+#if defined SHARED_GEOM_H_INCLUDED_FROM_DEFINING_FILE
+#define GLOBAL_SHAREDLIB_SPEC SHAREDLIBEXPORT
+#else 
+#define GLOBAL_SHAREDLIB_SPEC SHAREDLIBIMPORT
+#endif
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -44,12 +50,12 @@ void dInfiniteAABB (dGeomID geom, dReal aabb[6]);
 /* standard classes */
 
 /* class numbers */
-extern int dSphereClass;
-extern int dBoxClass;
-extern int dCCylinderClass;
-extern int dPlaneClass;
-extern int dGeomGroupClass;
-extern int dGeomTransformClass;
+extern GLOBAL_SHAREDLIB_SPEC int dSphereClass;
+extern GLOBAL_SHAREDLIB_SPEC int dBoxClass;
+extern GLOBAL_SHAREDLIB_SPEC int dCCylinderClass;
+extern GLOBAL_SHAREDLIB_SPEC int dPlaneClass;
+extern GLOBAL_SHAREDLIB_SPEC int dGeomGroupClass;
+extern GLOBAL_SHAREDLIB_SPEC int dGeomTransformClass;
 
 /* constructors */
 dGeomID dCreateSphere (dSpaceID space, dReal radius);

@@ -14,6 +14,9 @@ the rules for this file:
 	* added the dBodySetGravityMode() and dBodyGetGravityMode()
 	  functions, which change the dxBodyNoGravity body flag.
 
+	* added support for building a DLL with MSVC - there is now a
+	  msvc-dll target. thanks to Norman Lin for doing this.
+
 12/28/01 russ
 
 	* added the dParamCFM joint parameter.
