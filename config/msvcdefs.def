@@ -1,6 +1,7 @@
 LIBRARY ODE
 EXPORTS
 dAreConnected
+dAreConnectedExcluding
 dBodyAddForce
 dBodyAddForceAtPos
 dBodyAddForceAtRelPos
@@ -56,12 +57,15 @@ dCreateBox
 dCreateCCylinder
 dCreateGeom
 dCreateGeomClass
+dCreateGeomGroup
 dCreateGeomTransform
 dCreatePlane
 dCreateRay
 dCreateSphere
 dDebug
 dError
+dFactorCholesky
+dFactorLDLT
 dGeomBoxGetLengths
 dGeomBoxPointDepth
 dGeomBoxSetLengths
@@ -69,8 +73,6 @@ dGeomCCylinderGetParams
 dGeomCCylinderPointDepth
 dGeomCCylinderSetParams
 dGeomDestroy
-dGeomDisable
-dGeomEnable
 dGeomGetAABB
 dGeomGetBody
 dGeomGetCategoryBits
@@ -80,7 +82,7 @@ dGeomGetCollideBits
 dGeomGetData
 dGeomGetPosition
 dGeomGetRotation
-dGeomIsEnabled
+dGeomGroupAdd
 dGeomIsSpace
 dGeomPlaneGetParams
 dGeomPlanePointDepth
@@ -108,6 +110,8 @@ dHashSpaceCreate
 dHashSpaceSetLevels
 dInfiniteAABB
 dInfinityValue
+dInvertPDMatrix
+dIsPositiveDefinite
 dJointAttach
 dJointCreateAMotor
 dJointCreateBall
@@ -173,6 +177,8 @@ dJointSetSliderParam
 dJointSetUniversalAnchor
 dJointSetUniversalAxis1
 dJointSetUniversalAxis2
+dLDLTAddTL
+dLDLTRemove
 dMakeRandomMatrix
 dMakeRandomVector
 dMassAdd
@@ -202,16 +208,21 @@ dQtoR
 dRFrom2Axes
 dRFromAxisAndAngle
 dRFromEulerAngles
+dRFromZAxis
 dRSetIdentity
+dRandGetSeed
 dRandInt
 dRandReal
 dRandSetSeed
+dRemoveRowCol
 dRtoQ
 dSetDebugHandler
 dSetErrorHandler
 dSetMessageHandler
 dSetZero
 dSimpleSpaceCreate
+dSolveCholesky
+dSolveLDLT
 dSpaceAdd
 dSpaceCollide
 dSpaceCollide2
@@ -222,6 +233,9 @@ dSpaceGetNumGeoms
 dSpaceQuery
 dSpaceRemove
 dSpaceSetCleanup
+dTestMatrixComparison
+dTestRand
+dTestSolveLCP
 dWorldCreate
 dWorldDestroy
 dWorldGetCFM
@@ -233,3 +247,4 @@ dWorldSetERP
 dWorldSetGravity
 dWorldStep
 dWtoDQ
+
