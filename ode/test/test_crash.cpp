@@ -65,6 +65,10 @@
 #define WALLHEIGHT 10		// height of wall
 #define DISABLE_THRESHOLD 0.008	// maximum velocity (squared) a body can have and be disabled
 #define DISABLE_STEPS 10	// number of steps a box has to have been disable-able before it will be disabled
+#define CANNON_X -10		// x position of cannon
+#define CANNON_Y 5		// y position of cannon
+#define CANNON_BALL_MASS 10	// mass of the cannon ball
+#define CANNON_BALL_RADIUS 0.5
 
 //#define BOX
 #define CARS
@@ -73,6 +77,7 @@
 //#define BALLSTACK
 //#define ONEBALL
 //#define CENTIPEDE
+#define CANNON
 
 // dynamics and collision objects (chassis, 3 wheels, environment)
 
@@ -90,6 +95,8 @@ static dGeomID sphere[10000];
 static int spheres;
 static dGeomID wall_boxes[10000];
 static dBodyID wall_bodies[10000];
+static dGeomID cannon_ball_geom;
+static dBodyID cannon_ball_body;
 static int wb_stepsdis[10000];
 static int wb;
 static bool doFast;
@@ -100,6 +107,7 @@ static dMass m;
 // things that the user controls
 
 static dReal turn = 0, speed = 0;	// user commands
+static dReal cannon_angle=0,cannon_elevation=-1.2;
 
 
 
@@ -140,14 +148,19 @@ static void nearCallback (void *data, dGeomID o1, dGeomID o2)
 
 static void start()
 {
-	static float xyz[3] = {10.0f,0.0f,2.000f};
-	static float hpr[3] = {180.0f,0.0f,0.25f};
+	static float xyz[3] = {3.8548f,9.0843f,7.5900f};
+	static float hpr[3] = {-145.5f,-22.5f,0.25f};
 	dsSetViewpoint (xyz,hpr);
 	printf ("Press:\t'a' to increase speed.\n"
 			"\t'z' to decrease speed.\n"
 			"\t',' to steer left.\n"
 			"\t'.' to steer right.\n"
 			"\t' ' to reset speed and steering.\n"
+			"\t'[' to turn the cannon left.\n"
+			"\t']' to turn the cannon right.\n"
+			"\t'1' to raise the cannon.\n"
+			"\t'2' to lower the cannon.\n"
+			"\t'x' to shoot from the cannon.\n"
 			"\t'f' to toggle fast step mode.\n"
 			"\t'+' to increase AutoEnableDepth.\n"
 			"\t'-' to decrease AutoEnableDepth.\n"
@@ -393,6 +406,14 @@ void resetSimulation()
 	box[boxes] = dCreateBox (space,LENGTH,WIDTH,HEIGHT);
 	dGeomSetBody (box[boxes++],body[bodies++]);	
 #endif
+#ifdef CANNON
+	cannon_ball_body = dBodyCreate (world);
+	cannon_ball_geom = dCreateSphere (space,CANNON_BALL_RADIUS);
+	dMassSetSphereTotal (&m,CANNON_BALL_MASS,CANNON_BALL_RADIUS);
+	dBodySetMass (cannon_ball_body,&m);
+	dGeomSetBody (cannon_ball_geom,cannon_ball_body);
+	dBodySetPosition (cannon_ball_body,CANNON_X,CANNON_Y,CANNON_BALL_RADIUS);
+#endif
 }
 
 // called when a key pressed
@@ -402,36 +423,61 @@ static void command (int cmd)
 	switch (cmd) {
 	case 'a': case 'A':
 		speed += 0.3;
-	break;
+		break;
 	case 'z': case 'Z':
 		speed -= 0.3;
-	break;
+		break;
 	case ',':
 		turn += 0.1;
 		if (turn > 0.3)
 			turn = 0.3;
-	break;
+		break;
 	case '.':
 		turn -= 0.1;
 		if (turn < -0.3)
 			turn = -0.3;
-	break;
+		break;
 	case ' ':
 		speed = 0;
 		turn = 0;
-	break;
+		break;
 	case 'f': case 'F':
 		doFast = !doFast;
-	break;
+		break;
 	case '+':
 		dWorldSetAutoEnableDepthSF1 (world, dWorldGetAutoEnableDepthSF1 (world) + 1);
-	break;
+		break;
 	case '-':
 		dWorldSetAutoEnableDepthSF1 (world, dWorldGetAutoEnableDepthSF1 (world) - 1);
-	break;
+		break;
 	case 'r': case 'R':
 		resetSimulation();
-	break;
+		break;
+	case '[':
+		cannon_angle += 0.1;
+		break;
+	case ']':
+		cannon_angle -= 0.1;
+		break;
+	case '1':
+		cannon_elevation += 0.1;
+		break;
+	case '2':
+		cannon_elevation -= 0.1;
+		break;
+	case 'x': case 'X': {
+		dMatrix3 R2,R3,R4;
+		dRFromAxisAndAngle (R2,0,0,1,cannon_angle);
+		dRFromAxisAndAngle (R3,0,1,0,cannon_elevation);
+		dMultiply0 (R4,R2,R3,3,3,3);
+		dReal cpos[3] = {CANNON_X,CANNON_Y,1};
+		for (int i=0; i<3; i++) cpos[i] += 3*R4[i*4+2];
+		dBodySetPosition (cannon_ball_body,cpos[0],cpos[1],cpos[2]);
+		dReal force = 10;
+		dBodySetLinearVel (cannon_ball_body,force*R4[2],force*R4[6],force*R4[10]);
+		dBodySetAngularVel (cannon_ball_body,0,0,0);
+		break;
+	}
 	}
 }
 
@@ -527,14 +573,6 @@ static void simLoop (int pause)
 		}
 	}
 	
-	if (doFast)
-		dsSetColor(0,1,0);
-	else
-		dsSetColor(1,0,0);
-	dReal pos[3] = {-10,0,10};
-	dReal R[12] = {1,0,0,0,0,1,0,0,0,0,1,0};
-	dsDrawSphere(pos, R, 2);
-	
 	dsSetColor (0,1,1);
 	dReal sides[3] = {LENGTH,WIDTH,HEIGHT};
 	for (i = 0; i < boxes; i++)
@@ -543,7 +581,21 @@ static void simLoop (int pause)
 	for (i=0; i< spheres; i++) dsDrawSphere (dGeomGetPosition(sphere[i]),
 				   dGeomGetRotation(sphere[i]),RADIUS);
 	
+	// draw the cannon
+	dsSetColor (1,1,0);
+	dMatrix3 R2,R3,R4;
+	dRFromAxisAndAngle (R2,0,0,1,cannon_angle);
+	dRFromAxisAndAngle (R3,0,1,0,cannon_elevation);
+	dMultiply0 (R4,R2,R3,3,3,3);
+	dReal cpos[3] = {CANNON_X,CANNON_Y,1};
+	dReal csides[3] = {2,2,2};
+	dsDrawBox (cpos,R2,csides);
+	for (i=0; i<3; i++) cpos[i] += 1.5*R4[i*4+2];
+	dsDrawCylinder (cpos,R4,3,0.5);
 	
+	// draw the cannon ball
+	dsDrawSphere (dBodyGetPosition(cannon_ball_body),dBodyGetRotation(cannon_ball_body),
+		      CANNON_BALL_RADIUS);
 }
 
 int main (int argc, char **argv)
