@@ -146,8 +146,8 @@ int main (int argc, char **argv)
 
   hinge = dJointCreateHinge (world,0);
   dJointAttach (hinge,body[0],body[1]);
-  dJointSetAnchor (hinge,0,0,1);
-  dJointSetAxis (hinge,1,-1,1.41421356);
+  dJointSetHingeAnchor (hinge,0,0,1);
+  dJointSetHingeAxis (hinge,1,-1,1.41421356);
 
   // run simulation
   dsSimulationLoop (argc,argv,352,288,&fn);
