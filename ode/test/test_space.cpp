@@ -204,7 +204,7 @@ int main (int argc, char **argv)
   fn.path_to_textures = "../../drawstuff/textures";
 
   // space = dSimpleSpaceCreate();
-  space = dHashSpaceCreate();
+  space = dHashSpaceCreate (0);
   dHashSpaceSetLevels (space,-10,10);
   for (i=0; i < NUM; i++) geom[i] = 0;
   init_test();
