@@ -37,6 +37,16 @@ void dSetZero (dReal *a, int n)
 }
 
 
+void dSetValue (dReal *a, int n, dReal value)
+{
+  dASSERT (a);
+  while (n) {
+    *(a++) = value;
+    n--;
+  }
+}
+
+
 void dMultiply0 (dReal *A, dReal *B, dReal *C, int p, int q, int r)
 {
   int i,j,k,qskip,rskip,rpad;

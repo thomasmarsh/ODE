@@ -221,27 +221,35 @@ void dInternalStepIsland_x1 (dxWorld *world, dxBody **body, int nb,
     body[i]->facc[2] += body[i]->mass.mass * world->gravity[2];
   }
 
-  // get m = total constraint dimension, nub = number of unbounded variables,
-  // nlcp = number of LCP variables. create constraint offset arrays for
-  // unbounded and LCP variables. note that the unbounded variables go at
-  // the start.
-  // @@@ TEMPORARY - the LCP-only constraints go at the end, to match the
-  // constraint ordering of the fast solver.
-  int nub = 0;
-  int nlcp = 0;
-  int *ofs1 = (int*) alloca (nj*sizeof(int));		// unbounded variables
-  int *ofs2 = (int*) alloca (nj*sizeof(int));		// lcp variables
+  // get m = total constraint dimension, nub = number of unbounded variables.
+  // create constraint offset array and number-of-rows array for all joints.
+  // the constraints are re-ordered as follows: the purely unbounded
+  // constraints, the mixed unbounded + LCP constraints, and last the purely
+  // LCP constraints.
+  int m = 0;
+  dxJoint::Info1 *info = (dxJoint::Info1*) alloca (nj*sizeof(dxJoint::Info1));
+  int *ofs = (int*) alloca (nj*sizeof(int));
   for (i=0; i<nj; i++) {
-    ofs1[i] = nub;
-    ofs2[i] = nlcp;
-    dxJoint::Info1 info;
-    joint[i]->vtable->getInfo1 (joint[i],&info);
-    dASSERT (info.nub >= 0 && info.nlcp >= 0 && (info.nub + info.nlcp) <= 6);
-    nub += info.nub;
-    nlcp += info.nlcp;
+    joint[i]->vtable->getInfo1 (joint[i],info+i);
+    dASSERT (info[i].m > 0 && info[i].m <= 6 &&
+	     info[i].nub >= 0 && info[i].nub <= info[i].m);
   }
-  for (i=0; i<nj; i++) ofs2[i] += nub;
-  int m = nub + nlcp;
+  // the purely unbounded constraints
+  for (i=0; i<nj; i++) if (info[i].nub == info[i].m) {
+    ofs[i] = m;
+    m += info[i].m;
+  }
+  int nub = m;
+  // the mixed unbounded + LCP constraints
+  for (i=0; i<nj; i++) if (info[i].nub > 0 && info[i].nub < info[i].m) {
+    ofs[i] = m;
+    m += info[i].m;
+  }
+  // the purely LCP constraints
+  for (i=0; i<nj; i++) if (info[i].nub == 0) {
+    ofs[i] = m;
+    m += info[i].m;
+  }
 
   // create (6*nb,6*nb) inverse mass matrix `invM', and fill it with mass
   // parameters
@@ -286,8 +294,8 @@ void dInternalStepIsland_x1 (dxWorld *world, dxBody **body, int nb,
     dReal *lo = (dReal*) alloca (m*sizeof(dReal));
     dReal *hi = (dReal*) alloca (m*sizeof(dReal));
     dSetZero (c,m);
-    dSetZero (lo,m);
-    dSetZero (hi,m);
+    dSetValue (lo,m,-dInfinity);
+    dSetValue (hi,m, dInfinity);
 
     // create (m,6*nb) jacobian mass matrix `J', and fill it with constraint
     // data. also fill the c vector.
@@ -301,26 +309,19 @@ void dInternalStepIsland_x1 (dxWorld *world, dxBody **body, int nb,
     Jinfo.fps = dRecip(stepsize);
     Jinfo.erp = erp;
     for (i=0; i<nj; i++) {
-      Jinfo.J1lu = J + nskip*ofs1[i] + 6*joint[i]->node[0].body->tag;
-      Jinfo.J1ll = J + nskip*ofs2[i] + 6*joint[i]->node[0].body->tag;
-      Jinfo.J1au = Jinfo.J1lu + 3;
-      Jinfo.J1al = Jinfo.J1ll + 3;
+      Jinfo.J1l = J + nskip*ofs[i] + 6*joint[i]->node[0].body->tag;
+      Jinfo.J1a = Jinfo.J1l + 3;
       if (joint[i]->node[1].body) {
-	Jinfo.J2lu = J + nskip*ofs1[i] + 6*joint[i]->node[1].body->tag;
-	Jinfo.J2ll = J + nskip*ofs2[i] + 6*joint[i]->node[1].body->tag;
-	Jinfo.J2au = Jinfo.J2lu + 3;
-	Jinfo.J2al = Jinfo.J2lu + 3;
+	Jinfo.J2l = J + nskip*ofs[i] + 6*joint[i]->node[1].body->tag;
+	Jinfo.J2a = Jinfo.J2l + 3;
       }
       else {
-	Jinfo.J2lu = 0;
-	Jinfo.J2au = 0;
-	Jinfo.J2ll = 0;
-	Jinfo.J2al = 0;
+	Jinfo.J2l = 0;
+	Jinfo.J2a = 0;
       }
-      Jinfo.cu = c + ofs1[i];
-      Jinfo.cl = c + ofs2[i];
-      Jinfo.lo = lo + ofs2[i];
-      Jinfo.hi = hi + ofs2[i];
+      Jinfo.c = c + ofs[i];
+      Jinfo.lo = lo + ofs[i];
+      Jinfo.hi = hi + ofs[i];
       joint[i]->vtable->getInfo2 (joint[i],&Jinfo);
     }
 
@@ -515,38 +516,36 @@ void dInternalStepIsland_x2 (dxWorld *world, dxBody **body, int nb,
     body[i]->facc[2] += body[i]->mass.mass * world->gravity[2];
   }
 
-  // get m = total constraint dimension, nub = number of unbounded variables
-  // at the start. create constraint offset array and number-of-rows array
-  // for all joints.
-  // @@@ TEMPORARY - the constraints are re-ordered according to if they are
-  // unbounded or LCP. mixed unbounded-LCP constraints are not supported here
-  // yet.
+  // get m = total constraint dimension, nub = number of unbounded variables.
+  // create constraint offset array and number-of-rows array for all joints.
+  // the constraints are re-ordered as follows: the purely unbounded
+  // constraints, the mixed unbounded + LCP constraints, and last the purely
+  // LCP constraints. this assists the LCP solver to put all unbounded
+  // variables at the start for a quick factorization.
   int m = 0;
-  int nub = 0;
   dxJoint::Info1 *info = (dxJoint::Info1*) alloca (nj*sizeof(dxJoint::Info1));
   int *ofs = (int*) alloca (nj*sizeof(int));
-  int *nrows = (int*) alloca (nj*sizeof(int));
   for (i=0; i<nj; i++) {
     joint[i]->vtable->getInfo1 (joint[i],info+i);
-    dASSERT (info[i].nub >= 0 && info[i].nlcp >= 0 &&
-	      (info[i].nub + info[i].nlcp) <= 6);
-    dASSERT (info[i].nub == 0 || info[i].nlcp == 0);	// temporary
+    dASSERT (info[i].m > 0 && info[i].m <= 6 &&
+	     info[i].nub >= 0 && info[i].nub <= info[i].m);
   }
-  for (i=0; i<nj; i++) {
-    if (info[i].nub > 0) {
-      ofs[i] = m;
-      nrows[i] = info[i].nub;
-      m += info[i].nub;
-    }
+  // the purely unbounded constraints
+  for (i=0; i<nj; i++) if (info[i].nub == info[i].m) {
+    ofs[i] = m;
+    m += info[i].m;
   }
-  for (i=0; i<nj; i++) {
-    if (info[i].nlcp > 0) {
-      ofs[i] = m;
-      nrows[i] = info[i].nlcp;
-      m += info[i].nlcp;
-    }
+  int nub = m;
+  // the mixed unbounded + LCP constraints
+  for (i=0; i<nj; i++) if (info[i].nub > 0 && info[i].nub < info[i].m) {
+    ofs[i] = m;
+    m += info[i].m;
   }
-  for (i=0; i<nj; i++) nub += info[i].nub;
+  // the purely LCP constraints
+  for (i=0; i<nj; i++) if (info[i].nub == 0) {
+    ofs[i] = m;
+    m += info[i].m;
+  }
 
   // this will be set to the force due to the constraints
   dReal *cforce = (dReal*) alloca (nb*8 * sizeof(dReal));
@@ -560,8 +559,8 @@ void dInternalStepIsland_x2 (dxWorld *world, dxBody **body, int nb,
     dReal *lo = (dReal*) alloca (m*sizeof(dReal));
     dReal *hi = (dReal*) alloca (m*sizeof(dReal));
     dSetZero (c,m);
-    dSetZero (lo,m);
-    dSetZero (hi,m);
+    dSetValue (lo,m,-dInfinity);
+    dSetValue (hi,m, dInfinity);
 
     // get jacobian data from constraints. a (2*m)x8 matrix will be created
     // to store the two jacobian blocks from each constraint. it has this
@@ -590,18 +589,13 @@ void dInternalStepIsland_x2 (dxWorld *world, dxBody **body, int nb,
     Jinfo.fps = stepsize1;
     Jinfo.erp = erp;
     for (i=0; i<nj; i++) {
-      Jinfo.J1lu = J + 2*8*ofs[i];
-      Jinfo.J1au = Jinfo.J1lu + 4;
-      Jinfo.J2lu = Jinfo.J1lu + 8*nrows[i];
-      Jinfo.J2au = Jinfo.J2lu + 4;
-      Jinfo.J1ll = Jinfo.J1lu + 8*info[i].nub;
-      Jinfo.J1al = Jinfo.J1au + 8*info[i].nub;
-      Jinfo.J2ll = Jinfo.J2lu + 8*info[i].nub;
-      Jinfo.J2al = Jinfo.J2au + 8*info[i].nub;
-      Jinfo.cu = c + ofs[i];
-      Jinfo.cl = c + ofs[i] + info[i].nub;
-      Jinfo.lo = lo + ofs[i] + info[i].nub;
-      Jinfo.hi = hi + ofs[i] + info[i].nub;
+      Jinfo.J1l = J + 2*8*ofs[i];
+      Jinfo.J1a = Jinfo.J1l + 4;
+      Jinfo.J2l = Jinfo.J1l + 8*info[i].m;
+      Jinfo.J2a = Jinfo.J2l + 4;
+      Jinfo.c = c + ofs[i];
+      Jinfo.lo = lo + ofs[i];
+      Jinfo.hi = hi + ofs[i];
       joint[i]->vtable->getInfo2 (joint[i],&Jinfo);
     }
 
@@ -619,7 +613,7 @@ void dInternalStepIsland_x2 (dxWorld *world, dxBody **body, int nb,
       dReal *body_invI = invI + b*12;
       dReal *Jsrc = J + 2*8*ofs[i];
       dReal *Jdst = JinvM + 2*8*ofs[i];
-      for (j=nrows[i]-1; j>=0; j--) {
+      for (j=info[i].m-1; j>=0; j--) {
 	for (k=0; k<3; k++) Jdst[k] = Jsrc[k] * body_invMass;
 	dMULTIPLY0_133 (Jdst+4,Jsrc+4,body_invI);
 	Jsrc += 8;
@@ -629,7 +623,7 @@ void dInternalStepIsland_x2 (dxWorld *world, dxBody **body, int nb,
 	b = joint[i]->node[1].body->tag;
 	body_invMass = body[b]->invMass;
 	body_invI = invI + b*12;
-	for (j=nrows[i]-1; j>=0; j--) {
+	for (j=info[i].m-1; j>=0; j--) {
 	  for (k=0; k<3; k++) Jdst[k] = Jsrc[k] * body_invMass;
 	  dMULTIPLY0_133 (Jdst+4,Jsrc+4,body_invI);
 	  Jsrc += 8;
@@ -680,9 +674,9 @@ void dInternalStepIsland_x2 (dxWorld *world, dxBody **body, int nb,
 
 	  // set block of A
 	  Multiply2_p8r (A + ofs[j1]*mskip + ofs[j2],
-			 JinvM + 2*8*ofs[j1] + jb1*8*nrows[j1],
-			 J     + 2*8*ofs[j2] + jb2*8*nrows[j2],
-			 nrows[j1],nrows[j2], mskip);
+			 JinvM + 2*8*ofs[j1] + jb1*8*info[j1].m,
+			 J     + 2*8*ofs[j2] + jb2*8*info[j2].m,
+			 info[j1].m,info[j2].m, mskip);
 	}
       }
     }
@@ -691,12 +685,12 @@ void dInternalStepIsland_x2 (dxWorld *world, dxBody **body, int nb,
       Multiply2_p8r (A + ofs[i]*(mskip+1),
 		     JinvM + 2*8*ofs[i],
 		     J + 2*8*ofs[i],
-		     nrows[i],nrows[i], mskip);
+		     info[i].m,info[i].m, mskip);
       if (joint[i]->node[1].body) {
 	MultiplyAdd2_p8r (A + ofs[i]*(mskip+1),
-			  JinvM + 2*8*ofs[i] + 8*nrows[i],
-			  J + 2*8*ofs[i] + 8*nrows[i],
-			  nrows[i],nrows[i], mskip);
+			  JinvM + 2*8*ofs[i] + 8*info[i].m,
+			  J + 2*8*ofs[i] + 8*info[i].m,
+			  info[i].m,info[i].m, mskip);
       }
     }
 
@@ -728,10 +722,10 @@ void dInternalStepIsland_x2 (dxWorld *world, dxBody **body, int nb,
     for (i=0; i<nj; i++) {
       dReal *JJ = J + 2*8*ofs[i];
       Multiply0_p81 (rhs+ofs[i],JJ,
-		     tmp1 + 8*joint[i]->node[0].body->tag, nrows[i]);
+		     tmp1 + 8*joint[i]->node[0].body->tag, info[i].m);
       if (joint[i]->node[1].body) {
-	MultiplyAdd0_p81 (rhs+ofs[i],JJ + 8*nrows[i],
-			  tmp1 + 8*joint[i]->node[1].body->tag, nrows[i]);
+	MultiplyAdd0_p81 (rhs+ofs[i],JJ + 8*info[i].m,
+			  tmp1 + 8*joint[i]->node[1].body->tag, info[i].m);
       }
     }
     // complete rhs
@@ -785,10 +779,10 @@ void dInternalStepIsland_x2 (dxWorld *world, dxBody **body, int nb,
     for (i=0; i<nj; i++) {
       dReal *JJ = J + 2*8*ofs[i];
       MultiplyAdd1_8q1 (cforce + 8*joint[i]->node[0].body->tag,JJ,
-			lambda+ofs[i], nrows[i]);
+			lambda+ofs[i], info[i].m);
       if (joint[i]->node[1].body) {
 	MultiplyAdd1_8q1 (cforce + 8*joint[i]->node[1].body->tag,
-			  JJ + 8*nrows[i], lambda+ofs[i], nrows[i]);
+			  JJ + 8*info[i].m, lambda+ofs[i], info[i].m);
       }
     }
   }
@@ -890,6 +884,7 @@ void dInternalStepIsland (dxWorld *world, dxBody **body, int nb,
   dInternalStepIsland_x2 (world,body,nb,joint,nj,stepsize);
   comparator.end();
 
+  //comparator.dump();
   //_exit (1);
 # endif
 }
