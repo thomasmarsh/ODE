@@ -87,6 +87,9 @@ void dBodyGetRelPointVel    (dBodyID, dReal px, dReal py, dReal pz,
 void dBodySetFiniteRotationMode (dBodyID, int mode);
 void dBodySetFiniteRotationAxis (dBodyID, dReal x, dReal y, dReal z);
 
+int dBodyGetFiniteRotationMode (dBodyID);
+void dBodyGetFiniteRotationAxis (dBodyID, dVector3 result);
+
 int dBodyGetNumJoints (dBodyID b);
 dJointID dBodyGetJoint (dBodyID, int index);
 
