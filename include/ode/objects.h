@@ -138,6 +138,7 @@ void dJointSetAMotorNumAxes (dJointID, int num);
 void dJointSetAMotorAxis (dJointID, int axis, int rel,
 			  dReal x, dReal y, dReal z);
 void dJointSetAMotorParam (dJointID, int parameter, dReal value);
+void dJointSetAMotorEulerMode (dJointID, int mode);
 
 void dJointGetBallAnchor (dJointID, dVector3 result);
 void dJointGetHingeAnchor (dJointID, dVector3 result);
@@ -160,6 +161,7 @@ int dJointGetAMotorNumAxes (dJointID);
 void dJointGetAMotorAxis (dJointID, int axis, dVector3 result);
 int dJointGetAMotorAxisRel (dJointID, int axis);
 dReal dJointGetAMotorParam (dJointID, int parameter);
+int dJointGetAMotorEulerMode (dJointID);
 
 int dAreConnected (dBodyID, dBodyID);
 
