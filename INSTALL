@@ -6,9 +6,9 @@ here are the steps to buid ODE:
     for windows at: http://q12.org/ode/bin/make.exe
 
 (2) edit the settings in the file config/user-settings. the list of supported
-    platforms is given is that file.
+    platforms is given in that file.
 
-(3) run 'make' to configure and build ODE and the graptical test programs.
+(3) run 'make' to configure and build ODE and the graphical test programs.
     to build parts of ODE the make targets are:
 
 	make configure		create configuration file include/ode/config.h
@@ -33,7 +33,7 @@ ODE has been verified to build on the following platforms:
 				------		------- 	--------
   windows
     MSVC			msvc		*		*
-    WinGW			mingw		*		*
+    MinGW			mingw		*		*
     CygWin			cygwin		*		*
   linux (x86, mandrake 8.1)	unix-gcc	*		*
   linux (alpha, debian 2.2)	unix-gcc	*		?
