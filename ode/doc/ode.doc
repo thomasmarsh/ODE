@@ -350,7 +350,7 @@ This is most useful with contact joints, which are added and remove from
 the world in groups every time step.
 
 
-@section{Joint error and the error reduction parameter}
+@section{Joint error and the error reduction parameter (ERP)}
 
 When a joint attaches two bodies, those bodies are required to have certain
 positions and orientations relative to each other.
@@ -388,7 +388,36 @@ However some joints have local ERP values that control various aspects of
 the joint.
 
 
-@section{Constraint force mixing (CFM)}
+@section{Soft constraint and constraint force mixing (CFM)}
+
+Most constraints are by nature ``hard''.
+This means that the constraints represent conditions that are never violated.
+For example, the ball must always be in the socket, and the two parts of the
+hinge must always be lined up.
+In practice constraints can be voilated by unintentional introduction of
+errors into the system, but the error reduction parameter can be set to
+correct these errors.
+
+Not all constraints are hard.
+Some ``soft'' constraints are designed to be violated.
+For example, the contact constraint that prevents colliding objects from
+penetrating is hard by default, so it acts as though the colliding surfaces
+are made of steel.
+But it can be made into a soft constraint to simulate softer materials,
+thereby allowing some natural penetration of the two objects when they are
+forced together.
+
+There are two parameters that control the distinction between hard and soft
+constraints. The first is the error reduction parameter (ERP) that has already
+been introduced.
+The second is the constraint force mixing (CFM) value, that is described below.
+
+
+@subsection{Constraint force mixing (CFM)}
+
+What follows is a somewhat technical description of the meaning of CFM.
+If you just want to know how it is used in practice then skip to the next
+section.
 
 Traditionally the constraint equation for every joint has the form
 
@@ -411,18 +440,57 @@ ODE's constraint equation has the form
 where @m{CFM} is a square diagonal matrix.
 @m{CFM} mixes the resulting constraint force in with the constraint that
 produces it.
-By using @m{CFM} you can model tire slip, suspension, soft ground and other
-things.
-
+A nonzero (positive) value of @m{CFM} allows the original constraint
+equation to be violated by an amount proportional to CFM times the restoring
+force @m{lamda} that is needed to enforce the constraint.
 Solving for @m{lambda} gives
 
 	@center{@m{(J M^-^1 J^T + CFM/h) lambda = c/h}}
 
 Thus @m{CFM} simply adds to the diagonal of the original system matrix.
-This has the additional benefit of taking the system away from singularity
-and improving factorizer accuracy.
+Using a positive value of @m{CFM} has the additional benefit of taking the
+system away from any singularity and thus improving the factorizer accuracy.
 
-[write more...]
+
+@subsection{How to use ERP and CFM}
+
+ERP and CFM can be independently set in many joints. They can be set in
+contact joints, in joint limits and various other places, to control the
+spongyness and springyness of the joint (or joint limit).
+
+If CFM is set to zero, the constraint will be hard.
+If CFM is set to a positive value, it will be possible to violate the
+constraint by ``pushing on it'' (for example, for contact constraints by
+forcing the two contacting objects together).
+In other words the constraint will be soft, and the softness will increase
+as CFM increases.
+What is actually happeneng here is that the constraint is allowed to be
+violated by an amount proportional to CFM times the restoring force that is
+needed to enforce the constraint.
+Note that setting CFM to a negative value can have undesirable bad effects,
+such as instability. Don't do it.
+
+By adjusting the values of ERP and CFM, you can achieve various effects.
+For example you can simulate springy constraints, where the two bodies
+oscillate as though connected by springs.
+Or you can simulate more spongy constraints, without the oscillation.
+In fact, ERP and CFM can be selected to have the same effect as any
+desired spring and damper constants.
+If you have a spring constant @m{k_p} and damping constant @m{k_d},
+then the corresponding ODE constants are:
+
+	@center{ERP = h k_p / (h k_p + k_d)}
+	@center{CFM = 1 / (h k_p + k_d)}
+
+where @m{h} is the stepsize.
+These values will give the same effect as a spring-and-damper system simulated
+with implicit first order integration.
+
+Increasing CFM, especially the global CFM, can reduce the numerical errors
+in the simulation. If the system is near-singular, then this can markedly
+increase stability.
+In fact, if the system is mis-behaving, one of the first things to try is
+to increase the global CFM.
 
 
 @section{Collision handling}
