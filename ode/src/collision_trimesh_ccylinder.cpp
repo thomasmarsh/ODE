@@ -155,9 +155,8 @@ typedef struct _sLocalContactData
 	int			nFlags; // 0 = filtered out, 1 = OK
 }sLocalContactData;
 
-static const int			gMaxLocalContacts = 32;
-static sLocalContactData	gLocalContacts[gMaxLocalContacts];
-static int					ctContacts = 0;
+static sLocalContactData   *gLocalContacts;
+static unsigned int			ctContacts = 0;
 
 // capsule data
 // real time data
@@ -212,7 +211,7 @@ inline int _IsNearContacts(sLocalContactData& c1,sLocalContactData& c2)
 	dVector3	vDiff;
 
 	// First check if they are "near" in position
-	SUBSTRACT(c1.vPos,c2.vPos,vDiff);
+	SUBTRACT(c1.vPos,c2.vPos,vDiff);
 	if (  (dFabs(vDiff[0]) < fSameContactPositionEpsilon)
 		&&(dFabs(vDiff[1]) < fSameContactPositionEpsilon)
 		&&(dFabs(vDiff[2]) < fSameContactPositionEpsilon))
@@ -221,7 +220,7 @@ inline int _IsNearContacts(sLocalContactData& c1,sLocalContactData& c2)
 	}
 
 	// Second check if they are "near" in normal direction
-	SUBSTRACT(c1.vNormal,c2.vNormal,vDiff);
+	SUBTRACT(c1.vNormal,c2.vNormal,vDiff);
 	if (  (dFabs(vDiff[0]) < fSameContactNormalEpsilon)
 		&&(dFabs(vDiff[1]) < fSameContactNormalEpsilon)
 		&&(dFabs(vDiff[2]) < fSameContactNormalEpsilon) )
@@ -274,6 +273,7 @@ inline int	_ProcessLocalContacts()
 {
 	if (ctContacts == 0)
 	{
+        delete[] gLocalContacts;
 		return 0;
 	}
 
@@ -285,13 +285,19 @@ inline int	_ProcessLocalContacts()
 	}
 #endif		
 
-	int iContact = 0;
+	unsigned int iContact = 0;
 	dContactGeom* Contact = 0;
 
 	int nFinalContact = 0;
 
 	for (iContact = 0; iContact < ctContacts; iContact ++)
 	{
+        // Ensure that we haven't created too many contacts
+        if( nFinalContact >= (iFlags & NUMC_MASK)) 
+		{
+            break;
+        }
+
 		if (1 == gLocalContacts[iContact].nFlags)
 		{
 				Contact =  SAFECONTACT(iFlags, ContactGeoms, nFinalContact, iStride);
@@ -310,6 +316,7 @@ inline int	_ProcessLocalContacts()
 	//	printf("[Info] %d contacts generated,%d  filtered.\n",ctContacts,ctContacts-nFinalContact);
 	//}
 
+    delete[] gLocalContacts;
 	return nFinalContact;
 }
 
@@ -454,7 +461,7 @@ inline void _CalculateAxis(const dVector3& v1,
 	dVector3 t1;
 	dVector3 t2;
 
-	SUBSTRACT(v1,v2,t1);
+	SUBTRACT(v1,v2,t1);
 	dCROSS(t2,=,t1,v3);
 	dCROSS(r,=,t2,v4);
 }
@@ -485,9 +492,9 @@ static BOOL _cldTestSeparatingAxesOfCapsule(const dVector3 &v0,
 	const dReal fEpsilon = 1e-6f;
 
 	// Translate triangle to Cc cord.
-	SUBSTRACT(v0 , vCapsulePosition, vV0);
-	SUBSTRACT(v1 , vCapsulePosition, vV1);
-	SUBSTRACT(v2 , vCapsulePosition, vV2);
+	SUBTRACT(v0 , vCapsulePosition, vV0);
+	SUBTRACT(v1 , vCapsulePosition, vV1);
+	SUBTRACT(v2 , vCapsulePosition, vV2);
 	
 	// We begin to test for 19 separating axis now
 	// I wonder does it help if we employ the method like ISA-GJK???
@@ -623,7 +630,7 @@ static BOOL _cldTestSeparatingAxesOfCapsule(const dVector3 &v0,
 
 	// first triangle vertex and first capsule point
 	//vAxis = v0 - vCp0;
-	SUBSTRACT(v0,vCp0,vAxis);
+	SUBTRACT(v0,vCp0,vAxis);
 	if(_length2OfVector3( vAxis ) > fEpsilon ) {
 		if (!_cldTestAxis( v0, v1, v2, vAxis, 14)) { 
 			return FALSE; 
@@ -632,7 +639,7 @@ static BOOL _cldTestSeparatingAxesOfCapsule(const dVector3 &v0,
 
 	// second triangle vertex and first capsule point
 	//vAxis = v1 - vCp0;
-	SUBSTRACT(v1,vCp0,vAxis);
+	SUBTRACT(v1,vCp0,vAxis);
 	if(_length2OfVector3( vAxis ) > fEpsilon ) {
 		if (!_cldTestAxis( v0, v1, v2, vAxis, 15)) { 
 			return FALSE; 
@@ -641,7 +648,7 @@ static BOOL _cldTestSeparatingAxesOfCapsule(const dVector3 &v0,
 
 	// third triangle vertex and first capsule point
 	//vAxis = v2 - vCp0;
-	SUBSTRACT(v2,vCp0,vAxis);
+	SUBTRACT(v2,vCp0,vAxis);
 	if(_length2OfVector3( vAxis ) > fEpsilon ) {
 		if (!_cldTestAxis( v0, v1, v2, vAxis, 16)) { 
 			return FALSE; 
@@ -650,7 +657,7 @@ static BOOL _cldTestSeparatingAxesOfCapsule(const dVector3 &v0,
 
 	// first triangle vertex and second capsule point
 	//vAxis = v0 - vCp1;
-	SUBSTRACT(v0,vCp1,vAxis);
+	SUBTRACT(v0,vCp1,vAxis);
 	if(_length2OfVector3( vAxis ) > fEpsilon ) {
 		if (!_cldTestAxis( v0, v1, v2, vAxis, 17)) { 
 			return FALSE; 
@@ -659,7 +666,7 @@ static BOOL _cldTestSeparatingAxesOfCapsule(const dVector3 &v0,
 
 	// second triangle vertex and second capsule point
 	//vAxis = v1 - vCp1;
-	SUBSTRACT(v1,vCp1,vAxis);
+	SUBTRACT(v1,vCp1,vAxis);
 	if(_length2OfVector3( vAxis ) > fEpsilon ) {
 		if (!_cldTestAxis( v0, v1, v2, vAxis, 18)) { 
 			return FALSE; 
@@ -668,7 +675,7 @@ static BOOL _cldTestSeparatingAxesOfCapsule(const dVector3 &v0,
 
 	// third triangle vertex and second capsule point
 	//vAxis = v2 - vCp1;
-	SUBSTRACT(v2,vCp1,vAxis);
+	SUBTRACT(v2,vCp1,vAxis);
 	if(_length2OfVector3( vAxis ) > fEpsilon ) {
 		if (!_cldTestAxis( v0, v1, v2, vAxis, 19)) { 
 			return FALSE; 
@@ -685,12 +692,12 @@ static void _cldTestOneTriangleVSCCylinder( const dVector3 &v0,
 {
 
 	// calculate edges
-	SUBSTRACT(v1,v0,vE0);
-	SUBSTRACT(v2,v1,vE1);
-	SUBSTRACT(v0,v2,vE2);
+	SUBTRACT(v1,v0,vE0);
+	SUBTRACT(v2,v1,vE1);
+	SUBTRACT(v0,v2,vE2);
 
 	dVector3	_minus_vE0;
-	SUBSTRACT(v0,v1,_minus_vE0);
+	SUBTRACT(v0,v1,_minus_vE0);
 
 	// calculate poly normal
 	dCROSS(vN,=,vE1,_minus_vE0);
@@ -812,9 +819,9 @@ static void _cldTestOneTriangleVSCCylinder( const dVector3 &v0,
 	vCEdgePoint1[2] += vPnt0[2];
 
 	// calculate depths for both contact points
-	SUBSTRACT(vCEdgePoint0,vCapsulePosition,vTemp);
+	SUBTRACT(vCEdgePoint0,vCapsulePosition,vTemp);
 	dReal fDepth0 = dDOT(vTemp,vNormal) - (fBestCenter-fBestrt);
-	SUBSTRACT(vCEdgePoint1,vCapsulePosition,vTemp);
+	SUBTRACT(vCEdgePoint1,vCapsulePosition,vTemp);
 	dReal fDepth1 = dDOT(vTemp,vNormal) - (fBestCenter-fBestrt);
 
 	// clamp depths to zero
@@ -830,18 +837,22 @@ static void _cldTestOneTriangleVSCCylinder( const dVector3 &v0,
 
 	// Cached contacts's data
 	// contact 0
+    if (ctContacts < (iFlags & NUMC_MASK)) {
 	gLocalContacts[ctContacts].fDepth = fDepth0;
 	SET(gLocalContacts[ctContacts].vNormal,vNormal);
 	SET(gLocalContacts[ctContacts].vPos,vCEdgePoint0);
 	gLocalContacts[ctContacts].nFlags = 1;
 	ctContacts++;
 
+        if (ctContacts < (iFlags & NUMC_MASK)) {
 	// contact 1
 	gLocalContacts[ctContacts].fDepth = fDepth1;
 	SET(gLocalContacts[ctContacts].vNormal,vNormal);
 	SET(gLocalContacts[ctContacts].vPos,vCEdgePoint1);
 	gLocalContacts[ctContacts].nFlags = 1;
 	ctContacts++;
+        }
+    }
 
 }
 
@@ -874,13 +885,14 @@ int dCollideCCTL(dxGeom *o1, dxGeom *o2, int flags, dContactGeom *contact, int s
 	memcpy(mTriMeshPos,pTriPos,sizeof(dVector3));	
 
 	// global info for contact creation
-	ctContacts		= 0;
 	iStride			=skip;
 	iFlags			=flags;
 	ContactGeoms	=contact;
 
 	// reset contact counter
 	ctContacts = 0;	
+    // allocat local contact workspace
+    gLocalContacts = new sLocalContactData[(iFlags & NUMC_MASK)];
 
 	// reset best depth
 	fBestDepth  = - MAX_REAL;
@@ -895,22 +907,22 @@ int dCollideCCTL(dxGeom *o1, dxGeom *o2, int flags, dContactGeom *contact, int s
 	// Will it better to use LSS here? -> confirm Pierre.
 	 OBBCollider& Collider = TriMesh->_OBBCollider;
 
-	 Point cCenter(vCapsulePosition[0],vCapsulePosition[1],vCapsulePosition[2]);
-	 Point cExtents(vCapsuleRadius,vCapsuleRadius,fCapsuleSize/2);
+	 Point cCenter((float) vCapsulePosition[0],(float) vCapsulePosition[1],(float) vCapsulePosition[2]);
+	 Point cExtents((float) vCapsuleRadius,(float) vCapsuleRadius,(float) fCapsuleSize/2);
 
 	 Matrix3x3 obbRot;
 
-	 obbRot[0][0] = mCapsuleRotation[0];
-	 obbRot[1][0] = mCapsuleRotation[1];
-	 obbRot[2][0] = mCapsuleRotation[2];
+	 obbRot[0][0] = (float) mCapsuleRotation[0];
+	 obbRot[1][0] = (float) mCapsuleRotation[1];
+	 obbRot[2][0] = (float) mCapsuleRotation[2];
 
-	 obbRot[0][1] = mCapsuleRotation[4];
-	 obbRot[1][1] = mCapsuleRotation[5];
-	 obbRot[2][1] = mCapsuleRotation[6];
+	 obbRot[0][1] = (float) mCapsuleRotation[4];
+	 obbRot[1][1] = (float) mCapsuleRotation[5];
+	 obbRot[2][1] = (float) mCapsuleRotation[6];
 
-	 obbRot[0][2] = mCapsuleRotation[8];
-	 obbRot[1][2] = mCapsuleRotation[9];
-	 obbRot[2][2] = mCapsuleRotation[10];
+	 obbRot[0][2] = (float) mCapsuleRotation[8];
+	 obbRot[1][2] = (float) mCapsuleRotation[9];
+	 obbRot[2][2] = (float) mCapsuleRotation[10];
 
 	 OBB obbCCylinder(cCenter,cExtents,obbRot);
 
@@ -962,8 +974,7 @@ int dCollideCCTL(dxGeom *o1, dxGeom *o2, int flags, dContactGeom *contact, int s
 		// loop through all intersecting triangles
 		for (int i = 0; i < TriCount; i++)
 		{
-			if ((ctContacts>=(iFlags & NUMC_MASK)) ||
-                            (ctContacts >= gMaxLocalContacts))
+			if(ctContacts>=(iFlags & NUMC_MASK)) 
 			{
 				break;
 			}
