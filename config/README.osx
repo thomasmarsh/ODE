@@ -1,0 +1,38 @@
+
+Building ODE tests on MacOS X
+-----------------------------
+
+ODE uses XWindows and OpenGL to render the scene being simulated. 
+In order to build the example you will need to install Apple X11
+server and the X11SDK (as well as the normal developer tools). 
+
+These are available from Apple:
+
+As of writing this can be found at:
+
+   http://www.apple.com/macosx/x11
+
+NOTE: there is a tiny link at the bottom right of the page for the SDK
+
+Once the software is installed follow the normal build instructions.
+
+Running ODE tests on MacOS X
+----------------------------
+
+Since ODE uses X11 you need to run the X11 server (which you should
+have installed, it's in the Applications Folder).
+
+If you run the test app in the XTerm that the X11 server opens by
+default then they should run fine. If however you run them from a MacOS X
+Terminal then you need to define the enviroment variable DISPLAY. If
+DISPLAY is not defined then you will get a message saying:
+
+    "cannot open X11 display"
+
+For example to run the boxstack test you would type
+
+   cd ode/test
+   DISPLAY=:0.0 ./test_boxstack.exe
+
+you can define this enviroment variable in your shell startup scripts 
+(for example in ~/.bashrc if you are using bash)
