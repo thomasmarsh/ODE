@@ -61,7 +61,7 @@ void dNormalize4 (dVector4 a)
 }
 
 
-void dPlaneSpace (dVector3 n, dVector3 p, dVector3 q)
+void dPlaneSpace (const dVector3 n, dVector3 p, dVector3 q)
 {
   if (dFabs(n[2]) > M_SQRT1_2) {
     // choose p in y-z plane

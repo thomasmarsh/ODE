@@ -115,7 +115,7 @@ void dClearUpperTriangle (dReal *A, int n)
 }
 
 
-dReal dMaxDifference (dReal *A, dReal *B, int n, int m)
+dReal dMaxDifference (const dReal *A, const dReal *B, int n, int m)
 {
   int i,j;
   int skip = dPAD(m);
@@ -131,7 +131,7 @@ dReal dMaxDifference (dReal *A, dReal *B, int n, int m)
 }
 
 
-dReal dMaxDifferenceLowerTriangle (dReal *A, dReal *B, int n)
+dReal dMaxDifferenceLowerTriangle (const dReal *A, const dReal *B, int n)
 {
   int i,j;
   int skip = dPAD(n);

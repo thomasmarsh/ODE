@@ -146,7 +146,7 @@ void dMatrixComparison::dump()
 
 static jmp_buf jump_buffer;
 
-void myDebug (int num, char *msg, va_list ap)
+void myDebug (int num, const char *msg, va_list ap)
 {
   // printf ("(Error %d: ",num);
   // vprintf (msg,ap);

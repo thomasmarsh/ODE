@@ -84,7 +84,7 @@ void dRFromEulerAngles (dMatrix3 R, dReal phi, dReal theta, dReal psi)
 
 
 void dRFrom2Axes (dMatrix3 R, dReal ax, dReal ay, dReal az,
-  dReal bx, dReal by, dReal bz)
+		  dReal bx, dReal by, dReal bz)
 {
   dReal l,k;
   dCHECKPTR(R);
@@ -128,7 +128,7 @@ void dQSetIdentity (dQuaternion q)
 
 
 void dQFromAxisAndAngle (dQuaternion q, dReal ax, dReal ay, dReal az,
-			  dReal angle)
+			 dReal angle)
 {
   dReal l = ax*ax + ay*ay + az*az;
   if (l > REAL(0.0)) {
@@ -148,7 +148,7 @@ void dQFromAxisAndAngle (dQuaternion q, dReal ax, dReal ay, dReal az,
 }
 
 
-void dQMultiply0 (dQuaternion qa, dQuaternion qb, dQuaternion qc)
+void dQMultiply0 (dQuaternion qa, const dQuaternion qb, const dQuaternion qc)
 {
   qa[0] = qb[0]*qc[0] - qb[1]*qc[1] - qb[2]*qc[2] - qb[3]*qc[3];
   qa[1] = qb[0]*qc[1] + qb[1]*qc[0] + qb[2]*qc[3] - qb[3]*qc[2];
@@ -157,7 +157,7 @@ void dQMultiply0 (dQuaternion qa, dQuaternion qb, dQuaternion qc)
 }
 
 
-void dQMultiply1 (dQuaternion qa, dQuaternion qb, dQuaternion qc)
+void dQMultiply1 (dQuaternion qa, const dQuaternion qb, const dQuaternion qc)
 {
   qa[0] = qb[0]*qc[0] + qb[1]*qc[1] + qb[2]*qc[2] + qb[3]*qc[3];
   qa[1] = qb[0]*qc[1] - qb[1]*qc[0] - qb[2]*qc[3] + qb[3]*qc[2];
@@ -166,7 +166,7 @@ void dQMultiply1 (dQuaternion qa, dQuaternion qb, dQuaternion qc)
 }
 
 
-void dQMultiply2 (dQuaternion qa, dQuaternion qb, dQuaternion qc)
+void dQMultiply2 (dQuaternion qa, const dQuaternion qb, const dQuaternion qc)
 {
   qa[0] =  qb[0]*qc[0] + qb[1]*qc[1] + qb[2]*qc[2] + qb[3]*qc[3];
   qa[1] = -qb[0]*qc[1] + qb[1]*qc[0] - qb[2]*qc[3] + qb[3]*qc[2];
@@ -175,7 +175,7 @@ void dQMultiply2 (dQuaternion qa, dQuaternion qb, dQuaternion qc)
 }
 
 
-void dQMultiply3 (dQuaternion qa, dQuaternion qb, dQuaternion qc)
+void dQMultiply3 (dQuaternion qa, const dQuaternion qb, const dQuaternion qc)
 {
   qa[0] =  qb[0]*qc[0] - qb[1]*qc[1] - qb[2]*qc[2] - qb[3]*qc[3];
   qa[1] = -qb[0]*qc[1] - qb[1]*qc[0] + qb[2]*qc[3] - qb[3]*qc[2];
@@ -189,7 +189,7 @@ void dQMultiply3 (dQuaternion qa, dQuaternion qb, dQuaternion qc)
 // Rigid Body Dynamics" by David Baraff, Robotics Institute, Carnegie Mellon
 // University, 1997.
 
-void dQtoR (dQuaternion q, dMatrix3 R)
+void dQtoR (const dQuaternion q, dMatrix3 R)
 {
   // q = (s,vx,vy,vz)
   dReal qq1 = 2*q[1]*q[1];
@@ -207,7 +207,7 @@ void dQtoR (dQuaternion q, dMatrix3 R)
 }
 
 
-void dRtoQ (dMatrix3 R, dQuaternion q)
+void dRtoQ (const dMatrix3 R, dQuaternion q)
 {
   dReal tr,s;
   tr = _R(0,0) + _R(1,1) + _R(2,2);
@@ -258,7 +258,7 @@ void dRtoQ (dMatrix3 R, dQuaternion q)
 }
 
 
-void dWtoDQ (dVector3 w, dQuaternion q, dVector4 dq)
+void dWtoDQ (const dVector3 w, const dQuaternion q, dVector4 dq)
 {
   dq[0] = REAL(0.5)*(- w[0]*q[1] - w[1]*q[2] - w[2]*q[3]);
   dq[1] = REAL(0.5)*(  w[0]*q[0] + w[1]*q[3] - w[2]*q[2]);
