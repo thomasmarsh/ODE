@@ -2714,6 +2714,17 @@ extern "C" void dJointSetBreakMode (dxJoint *joint, int mode) {
   joint->breakInfo->flags = mode;
 }
 
+extern "C" int dJointGetBreakMode (dxJoint *joint) {
+  dAASSERT(joint);
+# ifndef dNODEBUG
+  // only works for a breakable joint
+  if (!joint->breakInfo) {
+    dDebug (0, "dJointGetBreakMode called on unbreakable joint");
+  }
+# endif
+  return joint->breakInfo->flags;
+}
+
 extern "C" void dJointSetBreakForce (dxJoint *joint, int body, dReal x, dReal y, dReal z) {
   dAASSERT(joint);
 # ifndef dNODEBUG

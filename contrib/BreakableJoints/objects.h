@@ -167,6 +167,7 @@ dJointFeedback *dJointGetFeedback (dJointID);
 void dJointSetBreakable (dJointID, int b);
 void dJointSetBreakCallback (dJointID, dJointBreakCallback *callbackFunc);
 void dJointSetBreakMode (dJointID, int mode);
+int dJointGetBreakMode (dJointID);
 void dJointSetBreakForce (dJointID, int body, dReal x, dReal y, dReal z);
 void dJointSetBreakTorque (dJointID, int body, dReal x, dReal y, dReal z);
 int dJointIsBreakable (dJointID);
