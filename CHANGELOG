@@ -9,6 +9,10 @@ the rules for this file:
 
 ------------------------------------------------------------------------------
 
+12/01/03 adam
+
+	* implement dxHashSpace::collide2(), not particularly efficiently.
+
 11/14/03 adam
 
 	* applied several Trimesh fixes and improvements from
