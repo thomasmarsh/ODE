@@ -41,8 +41,10 @@ typedef unsigned char   uint8;
 
 
 /* if we're compiling on a pentium, we may need to know the clock rate so
- * that the timing function can report accurate times. i have not worked
- * out how to determine this automatically yet.
+ * that the timing function can report accurate times. this number only needs
+ * to be set accurately if we're doing performance tests - otherwise just
+ * ignore this. i have not worked out how to determine this number
+ * automatically yet.
  */
 
 #ifdef PENTIUM
