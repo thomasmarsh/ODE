@@ -132,7 +132,7 @@ static DWORD WINAPI renderingThread (LPVOID lpParam)
   if (maxtsize < 128) dsWarning ("max texture size too small (%dx%d)",
 				 maxtsize,maxtsize);
 
-  dsStartGraphics (renderer_width,renderer_height);
+  dsStartGraphics (renderer_width,renderer_height,renderer_fn);
   if (renderer_fn->start) renderer_fn->start();
 
   while (renderer_run) {

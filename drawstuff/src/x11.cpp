@@ -241,7 +241,7 @@ void dsPlatformSimLoop (int window_width, int window_height, dsFunctions *fn)
   createMainWindow (window_width, window_height);
   glXMakeCurrent (display,win,glx_context);
 
-  dsStartGraphics (window_width,window_height);
+  dsStartGraphics (window_width,window_height,fn);
   if (fn->start) fn->start();
 
   fprintf (stderr,
