@@ -3589,7 +3589,7 @@ from this information):
 	contact point.
 }
 
-Rays are useful for things like visibility testing, detemining the
+Rays are useful for things like visibility testing, determining the
 path of projectiles or light rays, and for object placement.
 
 
