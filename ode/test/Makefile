@@ -75,3 +75,6 @@ $(call fEXENAME,test_step): $(call fTARGETS,test_step.cpp)
 
 $(call fEXENAME,test_friction): $(call fTARGETS,test_friction.cpp)
 	$(call fLINK,$@,$(call fTARGETS,test_friction.cpp) $(call fLIB,ode) $(call fLIB,drawstuff) $(LINKOPENGL) $(LINKWIN) $(LINKMATH) $(RSRC))
+
+$(call fEXENAME,test_stuff): $(call fTARGETS,test_stuff.cpp)
+	$(call fLINK,$@,$(call fTARGETS,test_stuff.cpp) $(call fLIB,ode) $(call fLIB,drawstuff) $(LINKOPENGL) $(LINKWIN) $(LINKMATH) $(RSRC))

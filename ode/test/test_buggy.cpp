@@ -22,7 +22,8 @@
 
 /*
 
-buggy with suspension
+buggy with suspension.
+this also shows you how to use geom groups.
 
 */
 
@@ -60,7 +61,7 @@ static dSpaceID space;
 static dBodyID body[4];
 static dJointID joint[3];	// joint[0] is the front wheel
 static dJointGroupID contactgroup;
-static dGeomID ground;
+static dGeomID ground,geom_group;
 static dGeomID box[1];
 static dGeomID sphere[3];
 static dGeomID ground_box;
@@ -77,25 +78,30 @@ static dReal speed=0,steer=0;	// user commands
 
 static void nearCallback (void *data, dGeomID o1, dGeomID o2)
 {
+  int i,n;
+
   // only collide things with the ground
   int g1 = (o1 == ground || o1 == ground_box);
   int g2 = (o2 == ground || o2 == ground_box);
   if (!(g1 ^ g2)) return;
 
-  dContact contact;
-  contact.surface.mode = dContactSlip1 | dContactSlip2 |
-    dContactSoftERP | dContactSoftCFM;
-  contact.surface.mu = dInfinity;
-  contact.surface.slip1 = 0.1;
-  contact.surface.slip2 = 0.1;
-  contact.surface.soft_erp = 0.5;
-  contact.surface.soft_cfm = 0.3;
-  if (dCollide (o1,o2,0,&contact.geom,sizeof(dContactGeom))) {
-    //    if (o1==ground_box) printf ("foo 1\n");
-    //    if (o2==ground_box) printf ("foo 2\n");
-
-    dJointID c = dJointCreateContact (world,contactgroup,&contact);
-    dJointAttach (c,dGeomGetBody(o1),dGeomGetBody(o2));
+  const int N = 10;
+  dContact contact[N];
+  n = dCollide (o1,o2,N,&contact[0].geom,sizeof(dContact));
+  if (n > 0) {
+    for (i=0; i<n; i++) {
+      contact[i].surface.mode = dContactSlip1 | dContactSlip2 |
+	dContactSoftERP | dContactSoftCFM;
+      contact[i].surface.mu = dInfinity;
+      contact[i].surface.slip1 = 0.1;
+      contact[i].surface.slip2 = 0.1;
+      contact[i].surface.soft_erp = 0.5;
+      contact[i].surface.soft_cfm = 0.3;
+      dJointID c = dJointCreateContact (world,contactgroup,&contact[i]);
+      dJointAttach (c,
+		    dGeomGetBody(contact[i].geom.g1),
+		    dGeomGetBody(contact[i].geom.g2));
+    }
   }
 }
 
@@ -218,7 +224,7 @@ int main (int argc, char **argv)
   dMassSetBox (&m,1,LENGTH,WIDTH,HEIGHT);
   dMassAdjust (&m,CMASS);
   dBodySetMass (body[0],&m);
-  box[0] = dCreateBox (space,LENGTH,WIDTH,HEIGHT);
+  box[0] = dCreateBox (0,LENGTH,WIDTH,HEIGHT);
   dGeomSetBody (box[0],body[0]);
 
   // wheel bodies
@@ -230,7 +236,7 @@ int main (int argc, char **argv)
     dMassSetSphere (&m,1,RADIUS);
     dMassAdjust (&m,WMASS);
     dBodySetMass (body[i],&m);
-    sphere[i-1] = dCreateSphere (space,RADIUS);
+    sphere[i-1] = dCreateSphere (0,RADIUS);
     dGeomSetBody (sphere[i-1],body[i]);
   }
   dBodySetPosition (body[1],0.5*LENGTH,0,STARTZ-HEIGHT*0.5);
@@ -274,6 +280,13 @@ int main (int argc, char **argv)
     //   dJointSetHinge2Param (joint[i],dParamFMax,dInfinity);
   }
 
+  // create geometry group and add it to the space
+  geom_group = dCreateGeomGroup (space);  
+  dGeomGroupAdd (geom_group,box[0]);
+  dGeomGroupAdd (geom_group,sphere[0]);
+  dGeomGroupAdd (geom_group,sphere[1]);
+  dGeomGroupAdd (geom_group,sphere[2]);
+
   // environment
   ground_box = dCreateBox (space,2,1.5,1);
   dMatrix3 R;
@@ -287,6 +300,10 @@ int main (int argc, char **argv)
   dJointGroupDestroy (contactgroup);
   dSpaceDestroy (space);
   dWorldDestroy (world);
+  dGeomDestroy (box[0]);
+  dGeomDestroy (sphere[0]);
+  dGeomDestroy (sphere[1]);
+  dGeomDestroy (sphere[2]);
 
   return 0;
 }
