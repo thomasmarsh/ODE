@@ -33,6 +33,8 @@
 
 static int checkMass (dMass *m)
 {
+  int i;
+
   if (m->mass <= 0) {
     dDEBUGMSG ("mass must be > 0");
     return 0;
@@ -59,7 +61,9 @@ static int checkMass (dMass *m)
   dSetZero (chat,12);
   dCROSSMAT (chat,m->c,4,+,-);
   dMULTIPLY0_333 (I2,chat,chat);
-  for (int i=0; i<12; i++) I2[i] = m->I[i] + m->mass*I2[i];
+  for (i=0; i<3; i++) I2[i] = m->I[i] + m->mass*I2[i];
+  for (i=4; i<7; i++) I2[i] = m->I[i] + m->mass*I2[i];
+  for (i=8; i<11; i++) I2[i] = m->I[i] + m->mass*I2[i];
   if (!dIsPositiveDefinite (I2,3)) {
     dDEBUGMSG ("center of mass inconsistent with mass parameters");
     return 0;
