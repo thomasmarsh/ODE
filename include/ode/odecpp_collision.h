@@ -20,7 +20,7 @@
  *									 *
  *************************************************************************/
 
-// C++ interface for new collision API
+/* C++ interface for new collision API */
 
 
 #ifndef _ODE_ODECPP_COLLISION_H_
