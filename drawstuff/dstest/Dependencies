@@ -1,2 +1,0 @@
-dstest.o: dstest.cpp ../../include/drawstuff/drawstuff.h \
- ../../include/drawstuff/version.h

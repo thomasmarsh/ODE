@@ -20,13 +20,8 @@
  *                                                                       *
  *************************************************************************/
 
-#include <stdio.h>
-#include <string.h>
-#include <alloca.h>
-#include <malloc.h>		// for alloca under windows
-#include <math.h>
-#include "ode/common.h"
-#include "ode/matrix.h"
+#include <ode/common.h>
+#include <ode/matrix.h>
 
 // misc defines
 #define ALLOCA dALLOCA16

@@ -23,7 +23,7 @@
 #ifndef _ODE_STEP_H_
 #define _ODE_STEP_H_
 
-#include "ode/common.h"
+#include <ode/common.h>
 
 
 void dInternalStepIsland (dxWorld *world,

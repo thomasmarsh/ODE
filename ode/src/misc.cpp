@@ -20,10 +20,9 @@
  *                                                                       *
  *************************************************************************/
 
-#include <stdio.h>
-#include <math.h>
-#include "ode/misc.h"
-#include "ode/matrix.h"
+#include <ode/config.h>
+#include <ode/misc.h>
+#include <ode/matrix.h>
 
 //****************************************************************************
 // random numbers

@@ -22,7 +22,7 @@
 
 #include <stdio.h>
 #include <math.h>
-#include "drawstuff/drawstuff.h"
+#include <drawstuff/drawstuff.h>
 
 
 #ifndef M_PI

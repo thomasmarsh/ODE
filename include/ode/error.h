@@ -25,7 +25,7 @@
 #ifndef _ODE_ERROR_H_
 #define _ODE_ERROR_H_
 
-#include <stdarg.h>
+#include <ode/config.h>
 
 #ifdef __cplusplus
 extern "C" {

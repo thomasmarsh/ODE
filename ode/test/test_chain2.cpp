@@ -22,10 +22,8 @@
 
 /* exercise the C++ interface */
 
-
-#include <stdio.h>
-#include "ode/ode.h"
-#include "drawstuff/drawstuff.h"
+#include <ode/ode.h>
+#include <drawstuff/drawstuff.h>
 
 #ifdef MSVC
 #pragma warning(disable:4244 4305)  // for VC++, no precision loss complaints
@@ -129,7 +127,7 @@ int main (int argc, char **argv)
   // create world
 
   int i;
-  contactgroup.create (1000000);
+  contactgroup.create (0);
   world.setGravity (0,0,-0.5);
   dWorldSetCFM (world.id(),1e-5);
   dGeom plane;

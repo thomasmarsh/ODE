@@ -23,7 +23,7 @@
 #ifdef WIN32		// this prevents warnings when dependencies built
 #include <windows.h>
 #endif
-#include <stdio.h>
+#include <ode/config.h>
 #include <GL/gl.h>
 
 #include "resource.h"
@@ -319,7 +319,8 @@ static void drawStuffStartup()
   ghInstance = GetModuleHandleA (NULL);
   gnCmdShow = SW_SHOWNORMAL;		// @@@ fix this later
 
-  // redirect standard I/O to a new console
+  // redirect standard I/O to a new console (except on cygwin)
+#ifndef CYGWIN
   FreeConsole();
   if (AllocConsole()==0) dsError ("AllocConsole() failed");
   if (freopen ("CONIN$","rt",stdin)==0) dsError ("could not open stdin");
@@ -327,6 +328,7 @@ static void drawStuffStartup()
   if (freopen ("CONOUT$","wt",stderr)==0) dsError ("could not open stderr");
   BringWindowToTop (GetConsoleHwnd());
   SetConsoleTitle ("DrawStuff Messages");
+#endif
 
   // register the window class
   WNDCLASS wc;

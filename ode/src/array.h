@@ -39,7 +39,7 @@
 #ifndef _ODE_ARRAY_H_
 #define _ODE_ARRAY_H_
 
-#include <string.h>		// for memcpy and memmove()
+#include <ode/config.h>
 
 
 // this base class has no constructors or destructor, for your convenience.

@@ -20,16 +20,14 @@
  *                                                                       *
  *************************************************************************/
 
-#include <stdio.h>
-#include <malloc.h>		// for alloca under windows
-#include <alloca.h>
 #include "objects.h"
 #include "joint.h"
-#include "ode/odemath.h"
-#include "ode/rotation.h"
-#include "ode/timer.h"
-#include "ode/error.h"
-#include "ode/matrix.h"
+#include <ode/config.h>
+#include <ode/odemath.h>
+#include <ode/rotation.h>
+#include <ode/timer.h>
+#include <ode/error.h>
+#include <ode/matrix.h>
 #include "lcp.h"
 
 //****************************************************************************

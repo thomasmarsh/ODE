@@ -48,7 +48,7 @@ extern "C" {
 #endif
 
 
-#include "drawstuff/version.h"
+#include <drawstuff/version.h>
 
 
 /* texture numbers */

@@ -38,13 +38,9 @@ manage openGL state changes better
 
 #ifdef WIN32
 #include <windows.h>
-#include <malloc.h>		// to get alloca()
 #endif
 
-#include <stdio.h>
-#include <string.h>
-#include <alloca.h>
-#include <math.h>
+#include <ode/config.h>
 #include <GL/gl.h>
 #include <GL/glu.h>
 

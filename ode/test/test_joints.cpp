@@ -45,10 +45,8 @@ you must verify visually.
 */
 
 
-#include <stdio.h>
-#include <stdlib.h>
-#include "ode/ode.h"
-#include "drawstuff/drawstuff.h"
+#include <ode/ode.h>
+#include <drawstuff/drawstuff.h>
 
 #ifdef MSVC
 #pragma warning(disable:4244 4305)  // for VC++, no precision loss complaints

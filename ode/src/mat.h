@@ -26,8 +26,7 @@
 #ifndef _ODE_MAT_H_
 #define _ODE_MAT_H_
 
-#include <stdio.h>
-#include "ode/common.h"
+#include <ode/common.h>
 
 
 class dMatrix {

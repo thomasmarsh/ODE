@@ -20,10 +20,10 @@
  *                                                                       *
  *************************************************************************/
 
-#include <malloc.h>
+#include <ode/config.h>
+#include <ode/memory.h>
+#include <ode/error.h>
 #include "array.h"
-#include "ode/memory.h"
-#include "ode/error.h"
 
 
 static inline int roundUpToPowerOfTwo (int x)

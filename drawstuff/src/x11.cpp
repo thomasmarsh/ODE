@@ -22,7 +22,7 @@
 
 // main window and event handling for X11
 
-#include <stdio.h>
+#include <ode/config.h>
 #include <stdlib.h>
 #include <string.h>
 #include <stdarg.h>
@@ -31,8 +31,8 @@
 #include <X11/keysym.h>
 #include <GL/glx.h>
 
-#include "drawstuff/drawstuff.h"
-#include "drawstuff/version.h"
+#include <drawstuff/drawstuff.h>
+#include <drawstuff/version.h>
 #include "internal.h"
 
 //***************************************************************************

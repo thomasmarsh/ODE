@@ -25,20 +25,20 @@
 
 /* include *everything* here */
 
-#include "ode/config.h"
-#include "ode/contact.h"
-#include "ode/error.h"
-#include "ode/memory.h"
-#include "ode/odemath.h"
-#include "ode/matrix.h"
-#include "ode/timer.h"
-#include "ode/common.h"
-#include "ode/rotation.h"
-#include "ode/mass.h"
-#include "ode/space.h"
-#include "ode/geom.h"
-#include "ode/misc.h"
-#include "ode/objects.h"
-#include "ode/odecpp.h"
+#include <ode/config.h>
+#include <ode/common.h>
+#include <ode/contact.h>
+#include <ode/error.h>
+#include <ode/memory.h>
+#include <ode/odemath.h>
+#include <ode/matrix.h>
+#include <ode/timer.h>
+#include <ode/rotation.h>
+#include <ode/mass.h>
+#include <ode/space.h>
+#include <ode/geom.h>
+#include <ode/misc.h>
+#include <ode/objects.h>
+#include <ode/odecpp.h>
 
 #endif

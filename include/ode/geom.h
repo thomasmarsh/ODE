@@ -23,9 +23,9 @@
 #ifndef _ODE_GEOM_H_
 #define _ODE_GEOM_H_
 
-#include "ode/common.h"
-#include "ode/space.h"
-#include "ode/contact.h"
+#include <ode/common.h>
+#include <ode/space.h>
+#include <ode/contact.h>
 
 #ifdef __cplusplus
 extern "C" {

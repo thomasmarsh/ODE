@@ -44,9 +44,8 @@ slide.
 */
 
 
-#include <stdio.h>
-#include "ode/ode.h"
-#include "drawstuff/drawstuff.h"
+#include <ode/ode.h>
+#include <drawstuff/drawstuff.h>
 
 #ifdef MSVC
 #pragma warning(disable:4244 4305)  // for VC++, no precision loss complaints
@@ -173,7 +172,7 @@ int main (int argc, char **argv)
   // create world
   world = dWorldCreate();
   space = dHashSpaceCreate();
-  contactgroup = dJointGroupCreate (1000000);
+  contactgroup = dJointGroupCreate (0);
   dWorldSetGravity (world,0,0,-GRAVITY);
   ground = dCreatePlane (space,0,0,1,0);
 
