@@ -140,6 +140,9 @@ OBBCollider dxTriMesh::_OBBCollider;
 RayCollider dxTriMesh::_RayCollider;
 AABBTreeCollider dxTriMesh::_AABBTreeCollider;
 
+SphereCache dxTriMesh::defaultSphereCache;
+OBBCache dxTriMesh::defaultBoxCache;
+
 CollisionFaces dxTriMesh::Faces;
 
 dxTriMesh::dxTriMesh(dSpaceID Space, dTriMeshDataID Data) : dxGeom(Space, 1){
@@ -153,6 +156,9 @@ dxTriMesh::dxTriMesh(dSpaceID Space, dTriMeshDataID Data) : dxGeom(Space, 1){
 	_SphereCollider.SetTemporalCoherence(true);
 	_OBBCollider.SetTemporalCoherence(true);
 	_AABBTreeCollider.SetTemporalCoherence(true);
+
+	this->doSphereTC = true;
+	this->doBoxTC = true;
 
 	_SphereCollider.SetPrimitiveTests(false);
 }
@@ -210,6 +216,39 @@ dGeomID dCreateTriMesh(dSpaceID space, dTriMeshDataID Data, dTriCallback* Callba
 	Geom->RayCallback = RayCallback;
 
 	return Geom;
+}
+
+void dGeomTriMeshEnableTC(dGeomID g, int geomClass, int enable)
+{
+	dUASSERT(g && g->type == dTriMeshClass, "argument not a trimesh");
+  
+	switch (geomClass)
+	{
+		case dSphereClass: 
+			((dxTriMesh*)g)->doSphereTC = (1 == enable);
+			break;
+		case dBoxClass:
+			((dxTriMesh*)g)->doBoxTC = (1 == enable);
+			break;
+	}
+}
+
+int dGeomTriMeshIsTCEnabled(dGeomID g, int geomClass)
+{
+	dUASSERT(g && g->type == dTriMeshClass, "argument not a trimesh");
+  
+	switch (geomClass)
+	{
+		case dSphereClass:
+			if (((dxTriMesh*)g)->doSphereTC)
+				return 1;
+			break;
+		case dBoxClass:
+			if (((dxTriMesh*)g)->doBoxTC)
+				return 1;
+			break;
+	}
+	return 0;
 }
 
 void dGeomTriMeshClearTC(dGeomID g){

@@ -105,6 +105,10 @@ dGeomID dCreateTriMesh(dSpaceID space, dTriMeshDataID Data, dTriCallback* Callba
 
 void dGeomTriMeshSetData(dGeomID g, dTriMeshDataID Data);
 
+// enable/disable/check temporal coherence
+void dGeomTriMeshEnableTC(dGeomID g, int geomClass, int enable);
+int dGeomTriMeshIsTCEnabled(dGeomID g, int geomClass);
+
 /*
  * Clears the internal temporal coherence caches. When a geom has its
  * collision checked with a trimesh once, data is stored inside the trimesh.

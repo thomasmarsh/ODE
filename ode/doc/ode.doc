@@ -3763,6 +3763,24 @@ void dGeomTriMeshGetPoint (dGeomID g, int Index, dReal u, dReal v,
 Retrieves a position in objectspace based on the incoming data.
 }
 
+@funcdef{
+void dGeomTriMeshEnableTC(dGeomID g, int geomClass, int enable);
+int dGeomTriMeshIsTCEnabled(dGeomID g, int geomClass);
+}{
+These functions can be used to enable/disable the use of temporal coherence
+during tri-mesh collision checks. Temporal coherence can be enabled/disabled
+per tri-mesh instance/geom class pair, currently it works for spheres and
+boxes.  The default for spheres and boxes is 'true'.
+
+The 'enable' param should be 1 for true, 0 for false.
+
+Temporal coherence is optional because allowing it can cause subtle
+efficiency problems in situations where a tri-mesh may collide with many
+different geoms during its lifespan.  These problems can be eased by
+disabling temporal coherence for a tri-mesh or intermittantly calling
+ @func{dGeomTriMeshClearTCCache()} for it.
+}
+
 
 @subsection{Geometry Group class}
 
