@@ -118,6 +118,13 @@ extern "C" void dMessage (int num, const char *msg, ...)
 
 #ifdef WIN32
 
+// isn't cygwin annoying!
+#ifdef CYGWIN
+#define _snprintf snprintf
+#define _vsnprintf vsnprintf
+#endif
+
+
 #include "windows.h"
 
 
@@ -128,8 +135,8 @@ extern "C" void dError (int num, const char *msg, ...)
   if (error_function) error_function (num,msg,ap);
   else {
     char s[1000],title[100];
-    snprintf (title,sizeof(title),"ODE Error %d",num);
-    vsnprintf (s,sizeof(s),msg,ap);
+    _snprintf (title,sizeof(title),"ODE Error %d",num);
+    _vsnprintf (s,sizeof(s),msg,ap);
     s[sizeof(s)-1] = 0;
     MessageBox(0,s,title,MB_OK | MB_ICONWARNING);
   }
@@ -144,8 +151,8 @@ extern "C" void dDebug (int num, const char *msg, ...)
   if (debug_function) debug_function (num,msg,ap);
   else {
     char s[1000],title[100];
-    snprintf (title,sizeof(title),"ODE INTERNAL ERROR %d",num);
-    vsnprintf (s,sizeof(s),msg,ap);
+    _snprintf (title,sizeof(title),"ODE INTERNAL ERROR %d",num);
+    _vsnprintf (s,sizeof(s),msg,ap);
     s[sizeof(s)-1] = 0;
     MessageBox(0,s,title,MB_OK | MB_ICONSTOP);
   }
