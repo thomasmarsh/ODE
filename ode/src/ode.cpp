@@ -105,6 +105,8 @@ static void removeJointReferencesFromAttachedBodies (dxJoint *j)
 // this groups all joints and bodies in a world into islands. all objects
 // in an island are reachable by going through connected bodies and joints.
 // each island can be simulated separately.
+// note that joints that are not attached to anything will not be included
+// in any island, an so they do not affect the simulation.
 
 static void processIslands (dxWorld *world, dReal stepsize)
 {
@@ -696,8 +698,7 @@ void dJointAttach (dxJoint *joint, dxBody *body1, dxBody *body2)
 {
   // check arguments
   dUASSERT (joint,"bad joint argument");
-  dUASSERT (body1 || body2,"can't have body1==0 and body2==0");
-  dUASSERT (body1 != body2,"can't have body1==body2");
+  dUASSERT (body1 == 0 || body1 != body2,"can't have body1==body2");
   dxWorld *world = joint->world;
   dUASSERT ( (!body1 || body1->world == world) &&
 	     (!body2 || body2->world == world),
@@ -721,8 +722,11 @@ void dJointAttach (dxJoint *joint, dxBody *body1, dxBody *body2)
   // attach to new bodies
   joint->node[0].body = body1;
   joint->node[1].body = body2;
-  joint->node[1].next = body1->firstjoint;
-  body1->firstjoint = &joint->node[1];
+  if (body1) {
+    joint->node[1].next = body1->firstjoint;
+    body1->firstjoint = &joint->node[1];
+  }
+  else joint->node[1].next = 0;
   if (body2) {
     joint->node[0].next = body2->firstjoint;
     body2->firstjoint = &joint->node[0];
