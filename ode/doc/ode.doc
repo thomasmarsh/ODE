@@ -1403,13 +1403,27 @@ A ball and socket joint looks like this:
 @funcdef{
 void dJointSetBallAnchor (dJointID, dReal x, dReal y, dReal z);
 }{
-Set the joint anchor point.
+Set the joint anchor point.  The joint will try to keep this point on each body
+together.  The input is specified in world coordinates.
 }
 
 @funcdef{
 void dJointGetBallAnchor (dJointID, dVector3 result);
 }{
-Get the joint anchor point.
+Get the joint anchor point, in world coordinates.  This returns the point on
+body 1.  If the joint is perfectly satisfied, this will be the same as the
+point on body 2.
+}
+
+@funcdef{
+void dJointGetBallAnchor2 (dJointID, dVector3 result);
+}{
+Get the joint anchor point, in world coordinates.  This returns the point on
+body 2.  You can think of a ball and socket joint as trying to keep the result
+of dJointGetBallAnchor() and dJointGetBallAnchor2() the same.  If the joint is
+perfectly satisfied, this function will return the same value
+as @func{dJointGetBallAnchor()} to within roundoff errors.  @func{dJointGetBallAnchor2()} 
+can be used, along with @func{dJointGetBallAnchor()}, to see how far the joint has come apart.
 }
 
 
@@ -1430,9 +1444,25 @@ Set hinge anchor and axis parameters.
 
 @funcdef{
 void dJointGetHingeAnchor (dJointID, dVector3 result);
+}{
+Get the joint anchor point, in world coordinates.  This returns the point on
+body 1.  If the joint is perfectly satisfied, this will be the same as the
+point on body 2.
+}
+
+@funcdef{
+void dJointGetHingeAnchor2 (dJointID, dVector3 result);
+}{
+Get the joint anchor point, in world coordinates.  This returns the point on
+body 2.  If the joint is perfectly satisfied, this will return the same value
+as @func{dJointGetHingeAnchor()}.  If not, this value will be slightly different.
+This can be used, for example, to see how far the joint has come apart.
+}
+
+@funcdef{
 void dJointGetHingeAxis (dJointID, dVector3 result);
 }{
-Get hinge anchor and axis parameters.
+Get hinge axis parameter.
 }
 
 
@@ -1519,11 +1549,36 @@ Here are the universal joint functions:
 void dJointSetUniversalAnchor (dJointID, dReal x, dReal y, dReal z);
 void dJointSetUniversalAxis1 (dJointID, dReal x, dReal y, dReal z);
 void dJointSetUniversalAxis2 (dJointID, dReal x, dReal y, dReal z);
+}{
+Set universal anchor and axis parameters.
+Axis 1 and axis 2 should be perpendicular to each other.
+}
+
+@funcdef{
 void dJointGetUniversalAnchor (dJointID, dVector3 result);
+}{
+Get the joint anchor point, in world coordinates.  This returns the point on
+body 1.  If the joint is perfectly satisfied, this will be the same as the
+point on body 2.
+}
+
+@funcdef{
+void dJointGetUniversalAnchor2 (dJointID, dVector3 result);
+}{
+Get the joint anchor point, in world coordinates.  This returns the point on
+body 2.  You can think of the ball and socket part of a universal joint as
+trying to keep the result of dJointGetBallAnchor() and dJointGetBallAnchor2()
+the same.  If the joint is
+perfectly satisfied, this function will return the same value
+as @func{dJointGetUniversalAnchor()} to within roundoff errors.  @func{dJointGetUniveralAnchor2()} 
+can be used, along with @func{dJointGetUniversalAnchor()}, to see how far the joint has come apart.
+}
+
+@funcdef{
 void dJointGetUniversalAxis1 (dJointID, dVector3 result);
 void dJointGetUniversalAxis2 (dJointID, dVector3 result);
 }{
-@b{FIXME: I should eventually write a description of these functions here.}
+Get univeral axis parameters.
 }
 
 
@@ -1564,10 +1619,28 @@ Axis 1 and axis 2 must not lie along the same line.
 
 @funcdef{
 void dJointGetHinge2Anchor (dJointID, dVector3 result);
+}{
+Get the joint anchor point, in world coordinates.  This returns the point on
+body 1.  If the joint is perfectly satisfied, this will be the same as the
+point on body 2.
+}
+
+@funcdef{
+void dJointGetHinge2Anchor2 (dJointID, dVector3 result);
+}{
+Get the joint anchor point, in world coordinates.  This returns the point on
+body 2.  If the joint is perfectly satisfied, this will return the same value
+as @func{dJointGetHinge2Anchor()}.  If not, this value will be slightly different.
+This can be used, for example, to see how far the joint has come apart.
+}
+
+
+
+@funcdef{
 void dJointGetHinge2Axis1 (dJointID, dVector3 result);
 void dJointGetHinge2Axis2 (dJointID, dVector3 result);
 }{
-Get hinge-2 anchor and axis parameters.
+Get hinge-2 axis parameters.
 }
 
 
@@ -2504,7 +2577,7 @@ If the geom is attached to a body, the body's position / rotation
 pointers will be returned, i.e. the result will be identical to calling
 @func{dBodyGetPosition()} or @func{dBodyGetRotation()}.
 
-@func{dGeomGetQuaternion} copy's the geom's quaternion into the space provided.
+@func{dGeomGetQuaternion()} copies the geom's quaternion into the space provided.
 If the geom is attached to a body, the body's quaternion will be returned, i.e.
 the resulting quaternion will be the same as the result of calling
 @func{dBodyGetQuaternion()}.
