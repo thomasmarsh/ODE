@@ -248,7 +248,7 @@ void dMassRotate (dMass *m, const dMatrix3 R)
 }
 
 
-void dMassAdd (dMass *a, dMass *b)
+void dMassAdd (dMass *a, const dMass *b)
 {
   int i;
   dAASSERT (a && b);
