@@ -1,6 +1,119 @@
 
+@@@'s
+
+
+TODO for COLLISION
+------------------
+
+tidyups:
+	* rationalize what stuff goes in what source files, and file names
+	* minimize set of header files that all collision* sources use - after
+	  all changes.
+	* update ode-cpp stuff (C++ interface header files).
+	* update DLL declarations.
+
+what happens when a GeomTransform's encapsulated object is manipulated,
+e.g. position changed. should this be disallowed? should a GeomTransform
+behave like a space and propagate dirtyness upwards?
+
+hash space: implement collide2().
+
+hash space: incremental scheme, so we dont have to rebuild the data structures
+for geoms that don't move.
+
+disabled geoms (remove from all collision considerations) ... isn't this the
+same as just taking it out of its enclosing group/space?
+
+porting guide:
+	ODE list email
+
+	dGeomGetSpaceAABB() deleted
+
+	dGeomGetClass (geom_group); used to return a unique type for
+	GeomGroups, but now it returns dSimpleSpaceID.
+
+integrate:
+	dRay
+	triangle collider - get latest tri collider code from erwin
+	erwin's quadtree space
+
+tests:
+	all aspects of collision API
+
+	dGeomSetBody(0) maintains body-geom linked list properly.
+
+	simple space: instantiate lots of non-moving geoms (i.e. environmental
+	geoms and make sure that we're still able to collide efficiently.
+	make sure AABB computation is efficient, or can be made efficient
+	through proper use of the API.
+
+	test C interface support for making new classes.
+	make sure the dxGeom::aabbTest() function behaves as advertised.
+
+	testing for contact point consistency: test for things that
+	would cause the dynamics to fail or become unstable
+
+	test for: small adjustment in geom position causes a big jump in the
+	contact point set (bad for dynamics).
+
+	test for: if contact constraints observed then it's impossible
+	(or hard) to move the objects so that the penetration is
+	increased. relax this when only a subset of the contact points are
+	returned.
+
+	test for consistency, e.g. the boundary of geoms X and Y can
+	be defined by intersecting with a point, so test the intersection of X
+	and Y by comparing with the point tests.
+
+	check that contact points are in the collision volume
+
+	all existing space tests, and more.
+
+demos:
+	test_buggy: make a terrain out of non-moving geoms. use heirarchical
+	groups to get efficient collision, even with the simple space.
+
+go though the new collision docs and make sure the behavior that is described
+there is actually implemented.
+
+multi-resolution hash table:
+	the current implementation rebuilds a new hash table each time
+	collide() is called. we don't keep any state between calls. this is
+	wasteful if there are unmoving objects in the space.
+
+	make sure we prevent multiple collision callbacks for the same pair
+
+	better virtual address function.
+
+	the collision search can perhaps be optimized - as we search
+	chains we can come across other candidate intersections at
+	other levels, perhaps we should do the intersection check
+	straight away? --> save on list searching time only, which is
+	not too significant.
+
+collision docs:
+	optimization guide: whenever a single geom changes in a simple space,
+	the space AABB has to be recomputed by examining EVERY geom.
+	document this.
+
+
+
 TODO BEFORE NEXT RELEASE
 ------------------------
+
+add joint feedback info from lambda, so that we can get motor forces etc.
+need a way to map constraint indexes to what they mean.
+
+track down and fix the occasional popping/jumping problem in test_boxstack,
+especially when boxes are piled on top of each other. find out if this is
+caused by a configuration singularity or whether there is a bug in LCP.
+i need to add some kind of diagnostic tool to help resolve these kinds of
+problems.
+
+fixup ground plane jitter and shadow jumping in drawstuff.
+
+the inertias/COMs don't appear to be totally correct for the boxstack demo.
+fix up, and add a mode that shows the effective mass box (for a given density).
 
 Improve box-box collision, especially for face-face contact (3 contact points).
 Improve cylinder-box collision (2 contact points).
@@ -73,6 +186,8 @@ erwin says: Should the GeomGroup have a cleanupmode as the GeomTransform has?
 erwin says: http://q12.org/pipermail/ode/2002-January/000766.html
         and http://q12.org/pipermail/ode/2001-December/000753.html
 
+rename duplicate filenames (object.h?) - some environments can't handle this.
+
 
 TODO
 ----
@@ -96,7 +211,8 @@ joints:
 
 	more joints:
 		angular3 (constrian full angle not position)
-		fixed path 1 (point must follow fixed path
+		fixed path 1 (point must follow fixed path, etc etc)
+		  - other fixed path joints.
 		linear a (point in 1 body fixed to plane of other)
 		linear b (point in 1 body fixed to line on other)
 		linear c (line in 1 body fixed to plane on other)
@@ -216,6 +332,31 @@ consider making anchor,axis, (everything) into a joint parameter and setting
 them with a consistent interface. also consider overload the joint functions
 so they are not distinguished by joint type??
 
+collision memory optimizations?
+
+collision: support for persistent contact information?
+
+multiply reference tri list data so that it can be cloned
+	if the tri-list geoms could support rot/pos
+	transformations then we could have several tri-lists pointing to the
+	same vertex information.
+
+height fields
+
+pre-converted collision data -- Creating a hash space and associated
+opcode tree structures may take significant amounts of time for a
+large world with many 10s of thousands of triangles.  Any chance of
+pre-building that off-line and passing a memory block pointer to the
+collision system?
+
+putting objects in multiple spaces -- If it was possible to add
+objects to more than one space, you could do collision queries other
+than 1vsN and NvsN.  That flexibility might be useful when you want to
+only collide against a subset of the space.  For example, a camera
+system may want to collide some rays with occlusion walls but the
+occlusion walls may also need to be in the game-level space to bounce
+against.
+
 
 ALWAYS
 ------
@@ -228,6 +369,7 @@ vectors alloca()ed on the stack must have the correct alignment, use ALLOCA16.
 library should have no global constructors, as it might be used with C linkage.
 
 use `const' in function arguments. blah.
+
 
 
 DON'T BOTHER
@@ -425,3 +567,116 @@ extra API to get lambda and J'*lambda from last timestep.
 
 better stack implementation that is not so system dependent. but how will
 we do dynamic page allocation? do we even need to?
+
+
+all collision files will now be collision_*, not geom_*
+
+check exported global symbols - no C++ mangling.
+
+rename dSphere etc to dxSphere etc.
+
+C interface support for making new classes.
+
+make sure DLL-ized stuff preserved ... but class numbers should no longer be
+exported.
+
+point geom ( = sphere of radius 0 )
+
+geoms stored in doubly linked lists in space (fast removal).
+
+bodies need to keep geoms pointers and call dGeomMoved() in dBodySetPosition()
+etc and world step. PROBLEM: links dynamics and collision together too much,
+makes it hard to extract ODE collision ... unless we say: dGeomMoved() and
+dGeomID must be supplied by the new collision library!
+
+dCollide() should take spaces as arguments - it should call dSpaceCollide2()
+with its own callback that puts all found contacts in the array, stopping
+when there is no more space left in the array.
+
+dxSpace::getGeom() - the geom numbers will change as geoms are dirtied - find
+some other numbering scheme, or document this behavior.
+
+the 'placeable' property - objects that should not ever be attached to bodies
+should flag an error when setBody etc are called.
+
+dGeomSetBody(0) - DOC: the position and orientation of the body will be
+preserved. in this case the geom should NOT be dirtied (dGeomMoved() should
+not be called).
+
+DOC: dGeomGetBodyNext() as part of dynamics/collision interface
+
+groups/spaces are subclasses of geom.
+
+groups/spaces can contain other groups/spaces. geom can be owned by a
+group/space. collision handling:
+	geom-geom : standard collision function
+	geom-group : special space code
+	group-group : n^2 tests (or n space tests) - hard to optimize because
+		of disjoint space representations.
+	group internal : normal space internal-collision code
+
+groups/spaces can be told that some objects never move, i.e. that the objects
+are locked. should we lock the whole space?
+	locking: the AABB for the object is not recalculated
+
+groups/spaces can be told that the internal contents self-intersect or not.
+actually an old ODE group is the equivalent of an old ODE simple space.
+	- just call dCollide() or not.
+
+the group doesn't get passed to the space callback any more ... only the
+intersecting geoms get passed? maybe the callback can initiate the extra
+intersection tests itself? (because we want programmable flexibility to
+determine what gets intersected and what doesn't)
+	- NO
+
+infrastructure to indicate when an object has moved (and thus its AABB needs
+to be recalculated)
+
+space enumeration functions. make sure that there are no additions or deletions
+while enumeration is taking place.
+	- documented the behavior, didn't disallow it
+
+cache the AABB in the dxGeom? (for non-moving objects) - perhaps keep a
+pointer to separately allocated space? ... no
+
+DOC: dGeomGetClass() is a first-class geom function, not in the "User
+defined classes" section. it returns a constant that can be checked
+against dSphereClass etc.
+
+remove dxGeom dependence on dBodyID? ... not yet
+
+dBase -> dxBase
+
+allow a geom to be inserted into multiple spaces? need this to optimize some
+kinds of tests ... no
+
+update docs.
+
+make CHECK_NOT_LOCKED an assert.
+
+DOC: "Calling these functions on a non-placeable geom results in a
+runtime error." ...in the debug build only?
+
+non-placeable geoms should not allocate dxPosR. perhaps pass a dGeom
+constructor arg that says 'placeable' or not - this also sets the
+GEOM_PLACEABLE flag.
+
+GeomTransform:
+	final_pos and final_R valid if no GEOM_AABB_BAD flag!!!
+	fix up this code, esp use of ComputeTX().
+
+Space incompatibilities: no dSpaceDestroy(), dGeomDestroy() does not
+take a dSpaceID ... dSpaceDestroy() added.
+
+GeomGroup incompatibilities:
+	dCollide() used to take a GeomGroup and would return all the contact
+	points for all the intersecting objects. now you have to call
+	dSpaceCollide2() and get a callback for each one.
+	need to provide old behavior.
+
+simple space optimization: we should keep the precomputed AABB for the
+non-moving geoms around, so that when the other geoms move we can just
+compute the AABBs for those geoms and then combine it with the non-moving AABB.
+  --> too hard!
+
+collision build options: old and new
