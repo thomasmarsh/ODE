@@ -9,6 +9,11 @@ the rules for this file:
 
 ------------------------------------------------------------------------------
 
+11/14/03 adam
+
+	* applied several Trimesh fixes and improvements from
+	Aras Pranckevicius <nearaz@interamotion.com>
+
 10/22/03 adam
 
 	* apply Nguyen Binh's work for removing many dSetZero() calls
