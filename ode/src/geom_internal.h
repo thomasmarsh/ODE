@@ -29,6 +29,7 @@
 struct dxGeomClass {
   dGetColliderFnFn *collider;
   dGetAABBFn *aabb;
+  dGeomDtorFn *dtor;
   int num;		// class number
   int size;		// total size of object, including extra data area
 };

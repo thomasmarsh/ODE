@@ -20,17 +20,6 @@
  *                                                                       *
  *************************************************************************/
 
-/*
-
-TODO
-
-* for objects that are never meant to collide, dCollide() will always try
-  to find the collider functions, which wastes a bit of time.
-
-* get rid of global constructors here, they wont work in C linkage.
-
-*/
-
 #include "ode/geom.h"
 #include "ode/rotation.h"
 #include "ode/odemath.h"
@@ -43,7 +32,7 @@ TODO
 #include "geom_internal.h"
 
 //****************************************************************************
-// collision utilities
+// collision utilities.
 
 // given a pointer `p' to a dContactGeom, return the dContactGeom at
 // p + skip bytes.
@@ -458,6 +447,7 @@ int dCreateGeomClass (const dGeomClass *c)
   dAllocDontReport (gc);
   gc->collider = c->collider;
   gc->aabb = c->aabb;
+  gc->dtor = c->dtor;
   gc->num = n;
   gc->size = SIZEOF_DXGEOM + c->bytes;
   classes->push (gc);
@@ -624,7 +614,7 @@ dxGeom * dCreateGeom (int classnum)
 	    classnum < classes->size(),"bad class number");
   int size = (*classes)[classnum]->size;
   dxGeom *geom = (dxGeom*) dAlloc (size);
-  memset (geom,0,size);
+  memset (geom,0,size);		// everything is initially zeroed
 
   geom->_class = (*classes)[classnum];
   geom->data = 0;
@@ -636,9 +626,6 @@ dxGeom * dCreateGeom (int classnum)
   dSetZero (geom->pos,4);
   dRSetIdentity (geom->R);
 
-  // the `space' area is initially zeroed
-  memset (&geom->space,0,sizeof(geom->space));
-
   return geom;
 }
 
@@ -646,7 +633,8 @@ dxGeom * dCreateGeom (int classnum)
 void dGeomDestroy (dxGeom *g)
 {
   dAASSERT (g);
-  dSpaceRemove (g->spaceid,g);
+  if (g->spaceid) dSpaceRemove (g->spaceid,g);
+  if (g->_class->dtor) g->_class->dtor (g);
   if (!g->body) dFree (g->pos,sizeof(dxPosR));
   dFree (g,g->_class->size);
 }
@@ -670,14 +658,14 @@ struct dxPlane {
   dReal p[4];
 };
 
-struct dxComposite {
-  // stuff...
+struct dxGeomGroup {
+  dArray<dxGeom*> parts;	// all the geoms that make up the group
 };
 
 //****************************************************************************
 // primitive collision functions
 // same interface as dCollide().
-// S=sphere, B=box, C=capped cylinder, P=plane
+// S=sphere, B=box, C=capped cylinder, P=plane, G=group
 
 int dCollideSS (const dxGeom *o1, const dxGeom *o2, int flags,
 		dContactGeom *contact, int skip)
@@ -687,6 +675,8 @@ int dCollideSS (const dxGeom *o1, const dxGeom *o2, int flags,
   dIASSERT (o2->_class->num == dSphereClass);
   dxSphere *s1 = (dxSphere*) CLASSDATA(o1);
   dxSphere *s2 = (dxSphere*) CLASSDATA(o2);
+  contact->g1 = const_cast<dxGeom*> (o1);
+  contact->g2 = const_cast<dxGeom*> (o2);
   return dCollideSpheres (o1->pos,s1->radius,
 			  o2->pos,s2->radius,contact);
 }
@@ -710,6 +700,9 @@ int dCollideSB (const dxGeom *o1, const dxGeom *o2, int flags,
   dIASSERT (o2->_class->num == dBoxClass);
   dxSphere *sphere = (dxSphere*) CLASSDATA(o1);
   dxBox *box = (dxBox*) CLASSDATA(o2);
+
+  contact->g1 = const_cast<dxGeom*> (o1);
+  contact->g2 = const_cast<dxGeom*> (o2);
 
   p[0] = o1->pos[0] - o2->pos[0];
   p[1] = o1->pos[1] - o2->pos[1];
@@ -790,6 +783,8 @@ int dCollideSP (const dxGeom *o1, const dxGeom *o2, int flags,
   dIASSERT (skip >= (int)sizeof(dContactGeom));
   dIASSERT (o1->_class->num == dSphereClass);
   dIASSERT (o2->_class->num == dPlaneClass);
+  contact->g1 = const_cast<dxGeom*> (o1);
+  contact->g2 = const_cast<dxGeom*> (o2);
   dxSphere *sphere = (dxSphere*) CLASSDATA(o1);
   dxPlane *plane = (dxPlane*) CLASSDATA(o2);
   dReal k = dDOT (o1->pos,plane->p);
@@ -814,6 +809,8 @@ int dCollideBB (const dxGeom *o1, const dxGeom *o2, int flags,
   dVector3 normal;
   dReal depth;
   int code;
+  contact->g1 = const_cast<dxGeom*> (o1);
+  contact->g2 = const_cast<dxGeom*> (o2);
   dxBox *b1 = (dxBox*) CLASSDATA(o1);
   dxBox *b2 = (dxBox*) CLASSDATA(o2);
   int num = dBoxBox (o1->pos,o1->R,b1->side, o2->pos,o2->R,b2->side,
@@ -841,6 +838,8 @@ int dCollideBP (const dxGeom *o1, const dxGeom *o2,
   dIASSERT (skip >= (int)sizeof(dContactGeom));
   dIASSERT (o1->_class->num == dBoxClass);
   dIASSERT (o2->_class->num == dPlaneClass);
+  contact->g1 = const_cast<dxGeom*> (o1);
+  contact->g2 = const_cast<dxGeom*> (o2);
   dxBox *box = (dxBox*) CLASSDATA(o1);
   dxPlane *plane = (dxPlane*) CLASSDATA(o2);
 
@@ -960,6 +959,33 @@ int dCollideCP (const dxGeom *o1, const dxGeom *o2, int flags,
   return 0;
 }
 
+
+// this collides a group with another geom. the other geom can also be a
+// group, but this case is not handled specially.
+
+int dCollideG (const dxGeom *o1, const dxGeom *o2, int flags,
+	       dContactGeom *contact, int skip)
+{
+  dxGeomGroup *gr = (dxGeomGroup*) CLASSDATA(o1);
+  int numleft = flags & 0xff;
+  if (numleft == 0) numleft = 1;
+  flags &= ~0xff;
+  int num=0,i=0;
+  while (i < gr->parts.size() && numleft > 0) {
+    int n = dCollide (gr->parts[i],const_cast<dxGeom*>(o2),
+		      flags | numleft,contact,skip);
+    for (int k=0; k<n; k++) {
+      CONTACT (contact,skip*k)->g1 = gr->parts[i];
+      CONTACT (contact,skip*k)->g2 = const_cast<dxGeom*> (o2);
+    }
+    contact = CONTACT (contact,skip*n);
+    numleft -= n;
+    num += n;
+    i++;
+  }
+  return num;
+}
+
 //****************************************************************************
 // standard classes
 
@@ -967,7 +993,6 @@ int dSphereClass = -1;
 int dBoxClass = -1;
 int dCCylinderClass = -1;
 int dPlaneClass = -1;
-int dCompositeClass = -1;
 
 
 static dColliderFn * dSphereColliderFn (int num)
@@ -1038,17 +1063,17 @@ static void dPlaneAABB (dxGeom *geom, dReal aabb[6])
 
 dxGeom *dCreateSphere (dSpaceID space, dReal radius)
 {
-  dAASSERT (space);
   if (dSphereClass == -1) {
     dGeomClass c;
     c.bytes = sizeof (dxSphere);
     c.collider = &dSphereColliderFn;
     c.aabb = &dSphereAABB;
+    c.dtor = 0;
     dSphereClass = dCreateGeomClass (&c);
   }
 
   dxGeom *g = dCreateGeom (dSphereClass);
-  dSpaceAdd (space,g);
+  if (space) dSpaceAdd (space,g);
   dxSphere *s = (dxSphere*) CLASSDATA(g);
   s->radius = radius;
   return g;
@@ -1057,17 +1082,18 @@ dxGeom *dCreateSphere (dSpaceID space, dReal radius)
 
 dxGeom *dCreateBox (dSpaceID space, dReal lx, dReal ly, dReal lz)
 {
-  dAASSERT (space && lx > 0 && ly > 0 && lz > 0);
+  dAASSERT (lx > 0 && ly > 0 && lz > 0);
   if (dBoxClass == -1) {
     dGeomClass c;
     c.bytes = sizeof (dxBox);
     c.collider = &dBoxColliderFn;
     c.aabb = &dBoxAABB;
+    c.dtor = 0;
     dBoxClass = dCreateGeomClass (&c);
   }
 
   dxGeom *g = dCreateGeom (dBoxClass);
-  dSpaceAdd (space,g);
+  if (space) dSpaceAdd (space,g);
   dxBox *b = (dxBox*) CLASSDATA(g);
   b->side[0] = lx;
   b->side[1] = ly;
@@ -1079,17 +1105,17 @@ dxGeom *dCreateBox (dSpaceID space, dReal lx, dReal ly, dReal lz)
 dxGeom *dCreatePlane (dSpaceID space,
 		      dReal a, dReal b, dReal c, dReal d)
 {
-  dAASSERT (space);
   if (dPlaneClass == -1) {
     dGeomClass c;
     c.bytes = sizeof (dxPlane);
     c.collider = &dPlaneColliderFn;
     c.aabb = &dPlaneAABB;
+    c.dtor = 0;
     dPlaneClass = dCreateGeomClass (&c);
   }
 
   dxGeom *g = dCreateGeom (dPlaneClass);
-  dSpaceAdd (space,g);
+  if (space) dSpaceAdd (space,g);
   dxPlane *p = (dxPlane*) CLASSDATA(g);
 
   // make sure plane normal has unit length
@@ -1181,14 +1207,97 @@ void dGeomCCylinderGetParams (dGeomID g, dReal *a, dReal *b, int *dir)
 }
 
 //****************************************************************************
-// composite
+// geom group
 
-/*
-void dAddToComposite (dxGeom *composite, int i, dxGeom *obj)
+int dGeomGroupClass = -1;
+
+static dColliderFn * dGeomGroupColliderFn (int num)
 {
-  dDebug (0,"unimplemented");
+  return (dColliderFn *) &dCollideG;
 }
-*/
+
+
+static void dGeomGroupAABB (dxGeom *geom, dReal aabb[6])
+{
+  dxGeomGroup *gr = (dxGeomGroup*) CLASSDATA(geom);
+  aabb[0] = dInfinity;
+  aabb[1] = -dInfinity;
+  aabb[2] = dInfinity;
+  aabb[3] = -dInfinity;
+  aabb[4] = dInfinity;
+  aabb[5] = -dInfinity;
+  int i,j;
+  for (i=0; i < gr->parts.size(); i++) {
+    dReal aabb2[6];
+    gr->parts[i]->_class->aabb (gr->parts[i],aabb2);
+    for (j=0; j<6; j += 2) if (aabb2[j] < aabb[j]) aabb[j] = aabb2[j];
+    for (j=1; j<6; j += 2) if (aabb2[j] > aabb[j]) aabb[j] = aabb2[j];
+  }
+}
+
+
+void dGeomGroupDtor (dxGeom *geom)
+{
+  dxGeomGroup *gr = (dxGeomGroup*) CLASSDATA(geom);
+  gr->parts.~dArray();
+}
+
+
+dxGeom *dCreateGeomGroup (dSpaceID space)
+{
+  if (dGeomGroupClass == -1) {
+    dGeomClass c;
+    c.bytes = sizeof (dxGeomGroup);
+    c.collider = &dGeomGroupColliderFn;
+    c.aabb = &dGeomGroupAABB;
+    c.dtor = &dGeomGroupDtor;
+    dGeomGroupClass = dCreateGeomClass (&c);
+  }
+
+  dxGeom *g = dCreateGeom (dGeomGroupClass);
+  if (space) dSpaceAdd (space,g);
+  dxGeomGroup *gr = (dxGeomGroup*) CLASSDATA(g);
+  gr->parts.constructor();
+  return g;
+}
+
+
+void dGeomGroupAdd (dxGeom *g, dxGeom *x)
+{
+  dUASSERT (g && g->_class->num == dGeomGroupClass,"argument not a geomgroup");
+  dxGeomGroup *gr = (dxGeomGroup*) CLASSDATA(g);
+  gr->parts.push (x);
+}
+
+
+void dGeomGroupRemove (dxGeom *g, dxGeom *x)
+{
+  dUASSERT (g && g->_class->num == dGeomGroupClass,"argument not a geomgroup");
+  dxGeomGroup *gr = (dxGeomGroup*) CLASSDATA(g);
+  for (int i=0; i < gr->parts.size(); i++) {
+    if (gr->parts[i] == x) {
+      gr->parts.remove (i);
+      return;
+    }
+  }
+}
+
+
+int dGeomGroupGetNumGeoms (dxGeom *g)
+{
+  dUASSERT (g && g->_class->num == dGeomGroupClass,"argument not a geomgroup");
+  dxGeomGroup *gr = (dxGeomGroup*) CLASSDATA(g);
+  return gr->parts.size();
+}
+
+
+dxGeom * dGeomGroupGetGeom (dxGeom *g, int i)
+{
+  dUASSERT (g && g->_class->num == dGeomGroupClass,"argument not a geomgroup");
+  dxGeomGroup *gr = (dxGeomGroup*) CLASSDATA(g);
+  dAASSERT (i >= 0 && i < gr->parts.size());
+  return gr->parts[i];
+}
 
 //****************************************************************************
 // other utility functions
