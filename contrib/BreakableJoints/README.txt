@@ -73,5 +73,10 @@ Problems, known bugs & other issues:
   works.
 - I'm not sure if the forces are really relative to the connected bodies.
 
+================================================================================================
+
+Bugfixes:
+- I fixed a bug when there where 0 joints in the simulation
+
 Send me an e-mail if you have any suggestions, ideas, bugs, bug-fixes, anything!
 e-mail: roelvandijk@home.nl
