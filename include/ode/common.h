@@ -168,6 +168,33 @@ typedef struct dxJointGroup *dJointGroupID;
 #define d_ERR_UASSERT		2	/* user assertion failed */
 
 
+
+/* an alternative way of setting joint parameters, using joint parameter
+ * structures and member constants. we don't actually do this yet.
+ */
+
+/*
+typedef struct dLimot {
+  int mode;
+  dReal lostop, histop;
+  dReal vel, fmax;
+  dReal fudge_factor;
+  dReal bounce, soft;
+  dReal suspension_erp, suspension_cfm;
+} dLimot;
+
+enum {
+  dLimotLoStop		= 0x0001,
+  dLimotHiStop		= 0x0002,
+  dLimotVel		= 0x0004,
+  dLimotFMax		= 0x0008,
+  dLimotFudgeFactor	= 0x0010,
+  dLimotBounce		= 0x0020,
+  dLimotSoft		= 0x0040
+};
+*/
+
+
 /* standard joint parameter names. why are these here? - because we don't want
  * to include all the joint function definitions in joint.cpp. hmmmm.
  */
