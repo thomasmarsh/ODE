@@ -78,4 +78,4 @@ make_depend:
 
 # misc
 COPY_CMD=copy
-DIRSEP=\
+DIRSEP:=$(strip \)
