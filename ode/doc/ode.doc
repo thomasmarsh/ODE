@@ -20,14 +20,10 @@
 #                                                                       #
 #########################################################################
 
-@title{Open Dynamics Engine v0.039 User Guide}
-@subtitle{Russell Smith, @date{}}
-@author{Russell Smith, @date{}}
-
-@center{This document is Copyright &copy; 2001-2004 Russell Smith.}
-
-@chapter{Contents @nonumber @nocontents}
-@contents
+@title{Open Dynamics Engine}
+@subtitle{v0.039 User Guide}
+@author{Russell Smith}
+@copyright{This document is Copyright @C 2001-2004 Russell Smith.}
 
 #############################################################################
 @chapter{Introduction}
@@ -129,7 +125,7 @@ Here are the features:
 @*	Joint limits and motors have been added to the universal joints,
 	thanks to Martin C. Martin.
 @*	Miscellaneous functions: dMassSet*Total(), dJointGet*Anchor2(),
-	@func{dGeomSetQuaternion}, @func{dGeomGetQuaternion()}
+	@func{dGeomSetQuaternion()}, @func{dGeomGetQuaternion()},
 	@func{dGeomGetSpace()}, @func{dMassSetCylinder()}.
 }
 
@@ -234,7 +230,7 @@ Here are the features:
 
 @section{ODE's license}
 
-ODE is Copyright &copy; 2001-2004 Russell L. Smith.
+ODE is Copyright @C 2001-2004 Russell L. Smith.
 All rights reserved.
 
 This library is free software; you can redistribute it and/or
@@ -346,10 +342,10 @@ DISPLAY is not defined then you will get a message saying:
 "cannot open X11 display".
 
 For example to run the boxstack test you would type
-@code{@[
+@[
     cd ode/test
     DISPLAY=:0.0 ./test_boxstack.exe
-@]}
+@]
 You can define this enviroment variable in your shell startup scripts 
 (for example in ~/.bashrc if you are using bash)
 
@@ -360,17 +356,17 @@ The best way to understand how to use ODE is to look at the test/example
 programs that come with it. Note the following things:
 @list{
 @*	Source files that use ODE only need to include a single header file:
-@code{@[
+@[
  #include <ode/ode.h>
-@]}
+@]
 	The @c{ode} directory in this statement is actually the 
 	@c{include/ode} directory of the ODE distribution.
 	This header file will include others in the @c{ode} directory,
 	so you need to set the include path of your compiler,
 	e.g. in linux
-@code{@[
+@[
  gcc -c -I /home/username/ode/include myprogram.cpp
-@]}
+@]
 
 # NOT ANY MORE...
 # @*	ODE can be compiled to use single or double precision variables.
@@ -379,14 +375,14 @@ programs that come with it. Note the following things:
 #	@c{dDOUBLE} before any ODE header files are included.
 #	The easiest way to do this is on the compiler command line,
 #	e.g. in linux
-# @code{@[
+# @[
 #  gcc -c -I /home/username/ode/include -DdDOUBLE myprogram.cpp
-# @]}
+# @]
 
-@*	ODE with @func{dWorldStep} makes heavy use of the stack for storing temporary values.
+@*	ODE with @func{dWorldStep()} makes heavy use of the stack for storing temporary values.
 	For very large systems several megabytes of stack can be used.
 	If you experience unexplained out-of-memory errors or data
-	corruption, especially on Windows, try increasing the stack size, or switching to @func{dWorldStepFast1}.
+	corruption, especially on Windows, try increasing the stack size, or switching to @func{dWorldStepFast1()}.
 }
 
 #############################################################################
@@ -425,9 +421,9 @@ Other body properties are usually constant over time:
 	mass is distributed around the center of mass.
 }
 Conceptually each body has an x-y-z coordinate frame embedded in it, that moves
-and rotates with the body:
+and rotates with the body, as shown in @fig{body}.
 
-		@center{@picture{pix/body.jpg}}
+	@figure{body}{The body coordinate frame.}{3in}
 
 The origin of this coordinate frame is the body's point of reference.
 Some values in ODE (vectors, matrices etc) are relative to the body
@@ -506,9 +502,9 @@ two bodies so that they can only have certain positions and orientations
 relative to each other.
 This relationship is called a @emph{constraint} -- the words @emph{joint} and
 @emph{constraint} are often used interchangeably.
-The following picture shows three different constraint types:
+@Fig{joints} shows three different constraint types.
 
-		@center{@picture{pix/joints.jpg}}
+	@figure{joints}{Three different constraint types.}{5in}
 
 The first is a ball and socket joint that constraints the ``ball'' of one
 body to be in the same location as the ``socket'' of another body.
@@ -558,10 +554,10 @@ This ``joint error'' can happen in two ways:
 @*	During the simulation, errors can creep in that result in the bodies
 	drifting away from their required positions.
 }
-Here is an example of error in a ball and socket joint (where the ball and
-socket do not line up):
+@Fig{ball-and-socket-bad} shows an example of error in a ball and socket
+joint (where the ball and socket do not line up).
 
-		@center{@picture{pix/ball-and-socket-bad.jpg}}
+	@figure{ball-and-socket-bad}{An example of error in a ball and socket joint.}{3in}
 
 There is a mechanism to reduce joint error: during each simulation step each
 joint applies a special force to bring its bodies back into correct alignment.
@@ -616,7 +612,7 @@ section.
 
 Traditionally the constraint equation for every joint has the form
 
-	@center{@m{J * v = c}}
+	@eqn{J * v = c}
 
 where @m{v} is a velocity vector for the bodies involved, @m{J} is a
 ``Jacobian'' matrix with one row for every degree of freedom the joint
@@ -625,22 +621,22 @@ At the next time step, a vector @m{lambda} is calculated (of the same
 size as @m{c}) such that the forces applied to the bodies to preserve the
 joint constraint are
 
-	@center{@m{force = J^T * lambda}}
+	@eqn{force = J^T * @sym{lambda}}
 
 ODE adds a new twist.
 ODE's constraint equation has the form
 
-	@center{@m{J * v = c + CFM * lambda}}
+	@eqn{J * v = c + CFM * @sym{lambda}}
 
 where @m{CFM} is a square diagonal matrix.
 @m{CFM} mixes the resulting constraint force in with the constraint that
 produces it.
 A nonzero (positive) value of @m{CFM} allows the original constraint
 equation to be violated by an amount proportional to CFM times the restoring
-force @m{lamda} that is needed to enforce the constraint.
-Solving for @m{lambda} gives
+force @m{@sym{lambda}} that is needed to enforce the constraint.
+Solving for @m{@sym{lambda}} gives
 
-	@center{@m{(J M^-^1 J^T + CFM/h) lambda = c/h}}
+	@eqn{(J M^{-1} J^T + CFM/h) @sym{lambda} = c/h}
 
 Thus @m{CFM} simply adds to the diagonal of the original system matrix.
 Using a positive value of @m{CFM} has the additional benefit of taking the
@@ -674,8 +670,8 @@ desired spring and damper constants.
 If you have a spring constant @m{k_p} and damping constant @m{k_d},
 then the corresponding ODE constants are:
 
-	@center{ERP = h k_p / (h k_p + k_d)}
-	@center{CFM = 1 / (h k_p + k_d)}
+	@eqn{ERP = h k_p / (h k_p + k_d)}
+	@eqn{CFM = 1 / (h k_p + k_d)}
 
 where @m{h} is the stepsize.
 These values will give the same effect as a spring-and-damper system simulated
@@ -762,10 +758,10 @@ It is a simple relationship between the normal and tangential forces present
 at a contact point (see the contact joint section for a description of these
 forces). The rule is:
 
-	@center{@m{| f_T | <= mu * | f_N |}}
+	@eqn{| f_T | <= @sym{mu} * | f_N |}
 
 where @m{f_N} and @m{f_T} are the normal and tangential force vectors
-respectively, and @m{mu} is the friction coefficient (typically a number
+respectively, and @m{@sym{mu}} is the friction coefficient (typically a number
 around 1.0).
 This equation defines a "friction cone" - imagine a cone with @m{f_N} as the
 axis and the contact point as the vertex.
@@ -775,18 +771,18 @@ surfaces from moving with respect to each other.
 If the force vector is on the surface of the cone then the contact is in
 "sliding mode", and the friction force is typically not large enough to
 prevent the contacting surfaces from sliding.
-The parameter @m{mu} thus specifies the maximum ratio of tangential to normal
+The parameter @m{@sym{mu}} thus specifies the maximum ratio of tangential to normal
 force.
 
 ODE's friction models are approximations to the friction cone, for reasons of
 efficiency. There are currently two approximations to chose from:
 @numlist{
-@*	The meaning of @m{mu} is changed so that it specifies the
+@*	The meaning of @m{@sym{mu}} is changed so that it specifies the
 	maximum friction (tangential) force that can be present at a contact,
 	in either of the tangential friction directions.
 	This is rather non physical because it is independent of the normal
 	force, but it can be useful and it is the computationally cheapest
-	option. Note that in this case @m{mu} is a force limit an must be
+	option. Note that in this case @m{@sym{mu}} is a force limit an must be
 	chosen appropriate to the simulation.
 @*	The friction cone is approximated by a friction pyramid aligned with
 	the first and second friction directions [I really need a picture
@@ -795,13 +791,13 @@ efficiency. There are currently two approximations to chose from:
 	assuming that all the contacts are frictionless. Then it computes the
 	maximum limits @m{f_m} for the friction (tangential) forces from
 
-		@center{@m{f_m = mu * | f_N |}} 
+		@eqn{f_m = @sym{mu} * | f_N |}
 
 	and then proceeds to solve for the entire system with these fixed
 	limits (in a manner similar to approximation 1 above).
 	This differs from a true friction pyramid in that the "effective"
-	@m{mu} is not quite fixed.
-	This approximation is easier to use as @m{mu} is a unitless ratio
+	@m{@sym{mu}} is not quite fixed.
+	This approximation is easier to use as @m{@sym{mu}} is a unitless ratio
 	the same as the normal Coloumb friction coefficient, and thus can be
 	set to a constant value around 1.0 without regard for the specific
 	simulation.
@@ -930,9 +926,26 @@ void dWorldSetCFM (dWorldID, dReal cfm);
 dReal dWorldGetCFM (dWorldID);
 }{
 Set and get the global CFM (constraint force mixing) value.
-Typical values are in the range 1e-9 -- 1.
-The default is 1e-5 if single precision is being used, or 1e-10 if double
+Typical values are in the range @m{10^{-9}} -- 1.
+The default is @m{10^{-5}} if single precision is being used, or @m{10^{-10}} if double
 precision is being used.
+}
+
+
+@funcdef{
+void  dWorldSetAutoDisableFlag (dWorldID, int do_auto_disable);
+int   dWorldGetAutoDisableFlag (dWorldID);
+void  dWorldSetAutoDisableLinearThreshold (dWorldID, dReal linear_threshold);
+dReal dWorldGetAutoDisableLinearThreshold (dWorldID);
+void  dWorldSetAutoDisableAngularThreshold (dWorldID, dReal angular_threshold);
+dReal dWorldGetAutoDisableAngularThreshold (dWorldID);
+void  dWorldSetAutoDisableSteps (dWorldID, int steps);
+int   dWorldGetAutoDisableSteps (dWorldID);
+void  dWorldSetAutoDisableTime (dWorldID, dReal time);
+dReal dWorldGetAutoDisableTime (dWorldID);
+}{
+Set and get the default auto-disable parameters for newly created bodies.
+See @secref{Automatic Enabling and Disabling} for a description of the auto-disable feature.
 }
 
 
@@ -1126,6 +1139,108 @@ Given a vector expressed in the body (or world) coordinate system
 }
 
 
+@section{Automatic Enabling and Disabling}
+
+Every body can be enabled or disabled.
+Enabled bodies participate in the simulation, while
+disabled bodies are turned off and do not get updated during a simulation step.
+New bodies are always created in the enabled state.
+
+A disabled body that is connected through a joint to an enabled body will
+be automatically re-enabled at the next simulation step.
+
+Disabled bodies do not consume CPU time, therefore to speed up the simulation
+bodies should be disabled when they come to rest.
+This can be done automatically with the auto-disable feature.
+
+If a body has its auto-disable flag turned on, it will automatically disable itself
+when
+@numlist{
+@*	It has been idle for a given number of simulation steps.
+@*	It has also been idle for a given amout of simulation time.
+}
+A body is considered to be idle when the magnitudes of both its linear velocity
+and angular velocity are below given thresholds.
+
+Thus, every body has five auto-disable parameters: an enabled flag, a idle step count,
+an idle time, and linear/angular velocity thresholds.
+Newly created bodies get these parameters from world.
+
+The following functions set and get the enable/disable parameters of a body.
+
+
+@funcdef{
+void dBodyEnable (dBodyID);
+void dBodyDisable (dBodyID);
+}{
+Manually enable and disable a body.
+Note that a disabled body that is connected through a joint to an enabled body will
+be automatically re-enabled at the next simulation step.
+}
+
+
+@funcdef{
+int dBodyIsEnabled (dBodyID);
+}{
+Return 1 if a body is currently enabled or 0 if it is disabled.
+}
+
+
+@funcdef{
+void  dBodySetAutoDisableFlag (dBodyID, int do_auto_disable);
+int   dBodyGetAutoDisableFlag (dBodyID);
+}{
+Set and get the auto-disable flag of a body.
+If the @arg{do_auto_disable} is nonzero the body will be automatically disabled when
+it has been idle for long enough.
+}
+
+@funcdef{
+void  dBodySetAutoDisableLinearThreshold (dBodyID, dReal linear_threshold);
+dReal dBodyGetAutoDisableLinearThreshold (dBodyID);
+}{
+Set and get a body's linear velocity threshold for automatic disabling.
+The body's linear velocity magnitude must be less than this threshold for it
+to be considered idle.
+Set the threshold to @c{dInfinity} to prevent the linear velocity from being considered.
+}
+
+@funcdef{
+void  dBodySetAutoDisableAngularThreshold (dBodyID, dReal angular_threshold);
+dReal dBodyGetAutoDisableAngularThreshold (dBodyID);
+}{
+Set and get a body's angular velocity threshold for automatic disabling.
+The body's linear angular magnitude must be less than this threshold for it
+to be considered idle.
+Set the threshold to @c{dInfinity} to prevent the angular velocity from being considered.
+}
+
+@funcdef{
+void  dBodySetAutoDisableSteps (dBodyID, int steps);
+int   dBodyGetAutoDisableSteps (dBodyID);
+}{
+Set and get the number of simulation steps that a body must be idle before it
+is automatically disabled.
+Set this to zero to disable consideration of the number of steps.
+}
+
+@funcdef{
+void  dBodySetAutoDisableTime (dBodyID, dReal time);
+dReal dBodyGetAutoDisableTime (dBodyID);
+}{
+Set and get the amount of simulation time that a body must be idle before it
+is automatically disabled.
+Set this to zero to disable consideration of the amount of simulation time.
+}
+
+@funcdef{
+void  dBodySetAutoDisableDefaults (dBodyID);
+}{
+Set the auto-disable parameters of the body to the default parameters that have
+been set on the world.
+}
+
+
 @section{Miscellaneous}
 
 @funcdef{
@@ -1133,22 +1248,6 @@ void  dBodySetData (dBodyID, void *data);
 void *dBodyGetData (dBodyID);
 }{
 Get and set the body's user-data pointer.
-}
-
-
-@funcdef{
-void dBodyEnable (dBodyID);
-void dBodyDisable (dBodyID);
-int dBodyIsEnabled (dBodyID);
-}{
-Enable and disable a body.
-Disabled bodies are effectively ``turned off'' and are not updated during a
-simulation step.
-However, if a disabled body is connected to an island containing one or more
-enabled bodies then it will be re-enabled at the next simulation step.
-
-@c{dBodyIsEnabled()} returns 1 if a body is enabled or 0 if it is disabled.
-New bodies are created in the enabled state.
 }
 
 
@@ -1218,7 +1317,7 @@ Return the number of joints that are attached to this body.
 dJointID dBodyGetJoint (dBodyID, int index);
 }{
 Return a joint attached to this body, given by @arg{index}.
-Valid indexes are 0 to @m{n}-1 where @m{n} is the value returned by
+Valid indexes are 0 to @m{n-1} where @m{n} is the value returned by
 @func{dBodyGetNumJoints()}.
 }
 
@@ -1253,7 +1352,7 @@ The joint is initially in "limbo" (i.e. it has no effect on the simulation)
 because it does not connect to any bodies.
 The joint group ID is 0 to allocate the joint normally.
 If it is nonzero the joint is allocated in the given joint group.
-The contact joint will be initialized with the given @struct{dContact}
+The contact joint will be initialized with the given @c{dContact}
 structure.
 }
 
@@ -1361,14 +1460,14 @@ If this information is desired then the user can allocate a @c{dJointFeedback}
 structure and pass its pointer to the @c{dJointSetFeedback()} function.
 The feedback information structure is defined as follows:
 
-@code{@[
+@[
 typedef struct dJointFeedback {
   dVector3 f1;       // force that joint applies to body 1
   dVector3 t1;       // torque that joint applies to body 1
   dVector3 f2;       // force that joint applies to body 2
   dVector3 t2;       // torque that joint applies to body 2
 } dJointFeedback;
-@]}
+@]
 
 During the time step any feedback structures that are attached to joints will
 be filled in with the joint's force and torque information.
@@ -1429,9 +1528,9 @@ bodies that already have contacts.
 
 @subsection{Ball and socket}
 
-A ball and socket joint looks like this:
+A ball and socket joint is shown in @fig{ball-and-socket}.
 
-		@center{@picture{pix/ball-and-socket.jpg}}
+	@figure{ball-and-socket}{A ball and socket joint.}{3in}
 
 @funcdef{
 void dJointSetBallAnchor (dJointID, dReal x, dReal y, dReal z);
@@ -1462,10 +1561,9 @@ can be used, along with @func{dJointGetBallAnchor()}, to see how far the joint h
 
 @subsection{Hinge}
 
-A hinge joint looks like this:
+A hinge joint is shown in @fig{hinge}.
 
-		@center{@picture{pix/hinge.jpg}}
-
+	@figure{hinge}{A hinge joint.}{3in}
 
 @funcdef{
 void dJointSetHingeAnchor (dJointID, dReal x, dReal y, dReal z);
@@ -1516,9 +1614,9 @@ bodies is examined and that position will be the zero angle.
 
 @subsection{Slider}
 
-A slider joint looks like this:
+A slider joint is shown in @fig{slider}.
 
-		@center{@picture{pix/slider.jpg}}
+	@figure{slider}{A slider joint.}{3in}
 
 @funcdef{
 void dJointSetSliderAxis (dJointID, dReal x, dReal y, dReal z);
@@ -1548,9 +1646,9 @@ examined and that position will be the zero position.
 
 @subsection{Universal}
 
-A universal joint looks like this:
+A universal joint is shown in @fig{universal}.
 
-		@center{@picture{pix/universal.jpg}}
+	@figure{universal}{A universal joint.}{3in}
 
 A universal joint is like a ball and socket joint that constrains an
 extra degree of rotational freedom. Given axis 1 on body 1, and axis 2
@@ -1607,7 +1705,7 @@ body 2.  You can think of the ball and socket part of a universal joint as
 trying to keep the result of dJointGetBallAnchor() and dJointGetBallAnchor2()
 the same.  If the joint is
 perfectly satisfied, this function will return the same value
-as @func{dJointGetUniversalAnchor()} to within roundoff errors.  @func{dJointGetUniveralAnchor2()} 
+as @func{dJointGetUniversalAnchor()} to within roundoff errors.  @func{dJointGetUniversalAnchor2()} 
 can be used, along with @func{dJointGetUniversalAnchor()}, to see how far the joint has come apart.
 }
 
@@ -1621,9 +1719,9 @@ Get univeral axis parameters.
 
 @subsection{Hinge-2}
 
-A hinge-2 joint looks like this:
+A hinge-2 joint is shown in @fig{hinge2}.
 
-		@center{@picture{pix/hinge2.jpg}}
+	@figure{hinge2}{A hinge-2 joint.}{3in}
 
 The hinge-2 joint is the same as two hinges connected in series, with
 different hinge axes.
@@ -1716,9 +1814,9 @@ current desired relative offset and desired relative rotation between the bodies
 
 @subsection{Contact}
 
-A contact joint looks like this:
+A contact joint is shown in @fig{contact}.
 
-		@center{@picture{pix/contact.jpg}}
+	@figure{contact}{A contact joint.}{3in}
 
 The contact joint prevents body 1 and body 2 from inter-penetrating at the
 contact point.
@@ -1733,13 +1831,13 @@ normal.
 
 When a contact joint is created, a @c{dContact} structure must be supplied.
 This has the following definition:
-@code{@[
+@[
 struct dContact {
   dSurfaceParameters surface;
   dContactGeom geom;
   dVector3 fdir1;
 };
-@]}
+@]
 @c{geom} is a substructure that is set by the collision functions.
 It is described in the collision section.
 
@@ -1838,7 +1936,7 @@ It has the following members:
 	other with a velocity that is proportional to the force that is
 	being applied tangentially to that surface.
 
-	Consider a contact point where the coefficient of friction @m{mu} is
+	Consider a contact point where the coefficient of friction @m{@sym{mu}} is
 	infinite. Normally, if a force @m{f} is applied to the two contacting
 	surfaces, to try and get them to slide past each other, they will not
 	move.
@@ -1893,9 +1991,9 @@ controls.
 In @c{dAMotorEuler} mode, AMotor computes the @emph{euler angles}
 corresponding to the relative rotation, allowing euler angle torque motors
 and stops to be set.
-An AMotor joint with euler angles looks like this:
+An AMotor joint with euler angles is shown in @fig{amotor}.
 
-		@center{@picture{pix/amotor.jpg}}
+	@figure{amotor}{An AMotor joint with euler angles.}{3in}
 
 In this diagram, @m{a_0}, @m{a_1} and @m{a_2} are the three axes along
 which angular motion is controlled.
@@ -1904,17 +2002,17 @@ The blue axes (including @m{a_2}) are anchored to body 2.
 To get the body 2 axes from the body 1 axes the following sequence of
 rotations is performed:
 @list{
-@*	Rotate by @m{theta_0} about @m{a_0}.
-@*	Rotate by @m{theta_1} about @m{a_1} (@m{a_1} has been rotated from its
+@*	Rotate by @m{@sym{theta}_0} about @m{a_0}.
+@*	Rotate by @m{@sym{theta}_1} about @m{a_1} (@m{a_1} has been rotated from its
 	original position).
-@*	Rotate by @m{theta_2} about @m{a_2} (@m{a_2} has been rotated twice
+@*	Rotate by @m{@sym{theta}_2} about @m{a_2} (@m{a_2} has been rotated twice
 	from its original position).
 }
 
-There is an important restriction when using euler angles: the @m{theta_1}
-angle must not be allowed to get outside the range @m{-pi/2 ... pi/2}.
+There is an important restriction when using euler angles: the @m{@sym{theta}_1}
+angle must not be allowed to get outside the range @m{-@sym{pi}/2 ... @sym{pi}/2}.
 If this happens then the AMotor joint will become unstable (there is a
-singularity at @m{+/- pi/2}).
+singularity at @m{+/- @sym{pi}/2}).
 Thus you must set the appropriate stops on axis number 1.
 
 
@@ -1993,7 +2091,7 @@ dReal dJointGetAMotorAngle (dJointID, int anum);
 }{
 Return the current angle for axis @arg{anum}.
 In @c{dAMotorUser} mode this is simply the value that was set with
-@func{dJointSetAMotorAngle}.
+@func{dJointSetAMotorAngle()}.
 In @c{dAMotorEuler} mode this is the corresponding euler angle.
 }
 
@@ -2079,7 +2177,7 @@ velocity.
 To calculate this force you use information about the current velocity,
 something like this:
 
-	@center{@m{force = k * (desired speed - current speed)}}
+	@eqn{force = k * (desired speed - current speed)}
 
 This has several problems.
 First, the parameter @m{k} must be tuned by hand.
@@ -2127,11 +2225,11 @@ The parameter numbers are:
 
 @constdef{dParamLoStop}{Low stop angle or position. Setting this to
 	@c{-dInfinity} (the default value) turns off the low stop.
-	For rotational joints, this stop must be greater than @m{-Pi} to be
+	For rotational joints, this stop must be greater than @m{-@sym{pi}} to be
 	effective.}
 @constdef{dParamHiStop}{High stop angle or position. Setting this to
 	@c{dInfinity} (the default value) turns off the high stop.
-	For rotational joints, this stop must be less than @m{Pi} to be
+	For rotational joints, this stop must be less than @m{@sym{pi}} to be
 	effective.
 	If the high stop is less than the low stop then both stops will
 	be ineffective.}
@@ -2176,8 +2274,7 @@ These parameter names can be optionally followed by a digit (2 or 3)
 to indicate the second or third set of parameters, e.g. for the second axis
 in a hinge-2 joint, or the third axis in an AMotor joint.
 A constant @c{dParamGroup} is also defined such that:
-
-@center{@c{dParamX}@m{i} = @c{dParamX} + @c{dParamGroup} * @m{(i-1)}}
+@c{dParamX}@m{i} = @c{dParamX} + @c{dParamGroup} * @m{(i-1)}
 }
 
 @section{Setting Joint Torques/Forces Directly}
@@ -2221,7 +2318,8 @@ hinge2's axis 2.  This function is just a wrapper for @func{dBodyAddTorque()}.
 }
 
 @funcdef{
-dJointAddAMotorTorques(dJointID joint, dReal torque0, dReal torque1, dReal torque2)
+dJointAddAMotorTorques(dJointID joint, dReal torque0, dReal torque1,
+                       dReal torque2)
 }{
 Applies @arg{torque0} about the AMotor's axis 0, @arg{torque1} about the 
 AMotor's axis 1, and @arg{torque2} about the AMotor's axis 2.  If the motor has
@@ -2232,34 +2330,34 @@ wrapper for @func{dBodyAddTorque()}.
 #############################################################################
 @chapter{StepFast}
 
-ODE's @func{dWorldStep} function currently uses a "big matrix" method to
+ODE's @func{dWorldStep()} function currently uses a "big matrix" method to
 step the system. For some large systems this can be slow and can require
 a lot of memory.
 The StepFast1 algorithm provides an alternative way to step the system,
 that sacrifices some accuracy for a big gain in speed and memory.
-To use it, you simply call @func{dWorldStepFast1} instead of
-@func{dWorldStep}.
+To use it, you simply call @func{dWorldStepFast1()} instead of
+@func{dWorldStep()}.
 
-The chart below illustrates this speed advantage over the standard
-@func{dWorldStep} algorithm:
+The chart in @fig{} illustrates this speed advantage over the standard
+@func{dWorldStep()} algorithm.
 
-	@center{@picture{pix/sf-graph1.gif}}
+	@figure{sf-graph1}{Speed advantage of StepFast.}{4in}
 
 The graph relates the number of Degrees Of Freedom (DOFs) removed from a
 system to the running time of the step. You may be able to tell that the
-@func{dWorldStep} algorithm's running time is proportional to the cube of the
+@func{dWorldStep()} algorithm's running time is proportional to the cube of the
 number of DOF's removed. The StepFast1 algorithm, however, is roughly
 linear. So as islands increase in size (for example, when there is a large
 pile-up of cars, a pile of "ragdoll corpses", or a wall of bricks) the
-StepFast1 algorithm scales better than @func{dWorldStep}. All this means that
+StepFast1 algorithm scales better than @func{dWorldStep()}. All this means that
 your application is more likely to keep a steady framerate, even in the
 worst case scenario.
 
-The graph of DOFs removed to memory looks quite similar.
+The graph of DOFs removed to memory looks quite similar (see @fig{sf-graph2}).
 
-	@center{@picture{pix/sf-graph2.gif}}
+	@figure{sf-graph2}{Memory advantage of StepFast.}{4in}
 
-@func{dWorldStep} requires memory proportional only to the square of the
+@func{dWorldStep()} requires memory proportional only to the square of the
 number of DOF's removed. StepFast1, though, is still linear, but it has
 nothing to do with the number of iterations per step. So this means the
 dreaded "There was a big pile-up and ODE crashed without an error message"
@@ -2275,7 +2373,7 @@ a trade-off of one kind or another. I've already mentioned that StepFast1
 trades off accuracy for it's speed and memory advantages. You actually get
 to choose just how much accuracy you give away though, at the cost of speed,
 by adjusting the number of iterations per step. Though you may never reach
-the accuracy of @func{dWorldStep} (or you may surpass it, depending on the
+the accuracy of @func{dWorldStep()} (or you may surpass it, depending on the
 type of inaccuracy), you can be almost certain that a larger number of
 iterations will give you more accurate results (more slowly). So StepFast1
 can be used in a good variety of situations. 
@@ -2284,9 +2382,9 @@ The general answer to this question then, is: use StepFast1 when you don't
 mind having a few more parameters to play with to get the system stable, 
 and you want to take advantage of it's speed or memory advantages. If you 
 find yourself running into situations in your simulation where large numbers
-of bodies come in contact, and @func{dWorldStep} becomes too slow, try
+of bodies come in contact, and @func{dWorldStep()} becomes too slow, try
 switching to StepFast1. Many systems will work just fine with nothing more
-than changing the @func{dWorldStep} function call to @func{dWorldStepFast1}.
+than changing the @func{dWorldStep()} function call to @func{dWorldStepFast1()}.
 Others will require a little tweaking to get them to work well with
 StepFast1, usually in the masses of the bodies. When a joint connects two
 bodies with a large mass ratio (i.e. one body has several times the mass
@@ -2303,19 +2401,19 @@ joints as possible from the equation. It can likely be shown that you will
 get a better performance to stability ratio by spreading out mass among
 several bodies connected by fixed joints rather than trying to implement
 it as one massive body, especially if that one massive body means you have
-to switch back to @func{dWorldStep} to keep things stable. 
+to switch back to @func{dWorldStep()} to keep things stable. 
 
 A final prospect for StepFast1 is to use it only when you need to.
 Since StepFast1 uses the body and world structures in exactly the same 
-way as @func{dWorldStep}, you can actually switch back and forth between the two
+way as @func{dWorldStep()}, you can actually switch back and forth between the two
 solvers at will. A good heuristic for when to make this switch is to 
 simply count contact joints while you are running the collision detection.
 Since collision detection is normally called before the step, using this
 method will ensure that the large island that would slow you down is never 
-sent to the @func{dWorldStep} solver (as opposed to waiting until after you've
+sent to the @func{dWorldStep()} solver (as opposed to waiting until after you've
 already taken a step at 1 fps...). The only better solution would be a 
-hybrid island creation function, that sends small islands to @func{dWorldStep},
-and large islands to @func{dWorldStepFast1}. This may make it in the source at
+hybrid island creation function, that sends small islands to @func{dWorldStep()},
+and large islands to @func{dWorldStepFast1()}. This may make it in the source at
 some point in the future.
 
 @section{When NOT to use StepFast1}
@@ -2432,8 +2530,9 @@ If @arg{doAutoDisable} is zero, auto-disabling is disabled.
 @section{Rotation functions}
 
 Rigid body orientations are represented with quaternions.
-A quaternion is four numbers [cos(theta/2) sin(theta/2)*u] where
-theta is a rotation angle and `u' is a unit length rotation axis.
+A quaternion is four numbers @m{[cos(@sym{theta}/2),sin(@sym{theta}/2)*u]}
+where @m{@sym{theta}} is a rotation angle and @m{u} is a unit length rotation
+axis.
 
 Every rigid body also has a 3x3 rotation matrix that is derived from
 the quaternion.
@@ -2442,7 +2541,7 @@ The rotation matrix and the quaternion always match.
 Some information about quaternions:
 @list{
 @*	q and -q represent the same rotation.
-@*	The inverse of a quaternion is [ q[0] -q[1] -q[2] -q[3] ].
+@*	The inverse of a quaternion is @m{[ q[0] -q[1] -q[2] -q[3] ]}.
 }
 
 The following are utility functions for dealing with rotation matrices and
@@ -2537,13 +2636,13 @@ return in @arg{dq} the resulting dq/dt.
 @section{Mass functions}
 
 The mass parameters of a rigid body are described by a @c{dMass} structure:
-@code{@[
+@[
 typedef struct dMass {
   dReal mass;   // total mass of the rigid body
   dVector4 c;   // center of gravity position in body frame (x,y,z)
   dMatrix3 I;   // 3x3 inertia tensor in body frame, about POR
 } dMass;
-@]}
+@]
 
 The following functions operate on this structure:
 
@@ -2564,11 +2663,11 @@ Set the mass parameters to the given values.
 (@arg{cx},@arg{cy},@arg{cz}) is the center of gravity position in the body
 frame.
 The @c{Ixx} values are the elements of the inertia matrix:
-@code{
+@[
     [ I11 I12 I13 ]
     [ I12 I22 I23 ]
     [ I13 I23 I33 ]
-}
+@]
 }
 
 @funcdef{
@@ -2584,8 +2683,8 @@ the total mass of the sphere.
 @funcdef{
 void dMassSetCappedCylinder (dMass *, dReal density, int direction,
                              dReal radius, dReal length);
-void dMassSetCappedCylinderTotal (dMass *, dReal total_mass, int direction,
-                             dReal radius, dReal length);
+void dMassSetCappedCylinderTotal (dMass *, dReal total_mass,
+                             int direction, dReal radius, dReal length);
 }{
 Set the mass parameters to represent a capped cylinder of the given parameters
 and density, with the center of mass at (0,0,0) relative to the body.
@@ -2689,14 +2788,14 @@ of contact information.
 If two bodies touch, or if a body touches a static feature in its environment,
 the contact is represented by one or more "contact points".
 Each contact point has a corresponding @c{dContactGeom} structure:
-@code{@[
+@[
 struct dContactGeom {
   dVector3 pos;       // contact position
   dVector3 normal;    // normal vector
   dReal depth;        // penetration depth
   dGeomID g1,g2;      // the colliding geoms
 };
-@]}
+@]
 @arg{pos} records the contact position, in global coordinates.
 
 @arg{depth} is the depth to which the two bodies inter-penetrate each other.
@@ -3006,7 +3105,6 @@ This is useful for gaining extra collision performance by dividing the
 collision world into hierarchies. Here is an example of where this is
 useful:
 
-@indent{
 Suppose you have two cars driving over some terrain. Each car is made
 up of many geoms. If all these geoms were inserted into the same
 space, the collision computation time between the two cars would
@@ -3023,7 +3121,6 @@ The callback can then test the geoms in the car-spaces against each
 other using @func{dSpaceCollide2()}. If the cars are not near each
 other then the callback is not called and no time is wasted performing
 unnecessary tests.
-}
 
 If space hierarchies are being used then the callback function may be
 called recursively, e.g. if @func{dSpaceCollide()} calls the callback
@@ -3035,7 +3132,7 @@ Here is a sample callback function that traverses through all spaces
 and sub-spaces, generating all possible contact points for all
 intersecting geoms:
 
-@code{@[
+@[
   void nearCallback (void *data, dGeomID o1, dGeomID o2)
   {
     if (dGeomIsSpace (o1) || dGeomIsSpace (o2)) {
@@ -3058,7 +3155,7 @@ intersecting geoms:
 
   // collide all objects together
   dSpaceCollide (top_level_space,0,&nearCallback);
-@]}
+@]
 
 A space callback function is not allowed to modify a space while that
 space is being processed with @func{dSpaceCollide()} or
@@ -3086,7 +3183,7 @@ A pair of geoms will be considered by @func{dSpaceCollide()} and
 has a collide bit set that corresponds to a category bit in the other.
 The exact test is as follows:
 
-@code{@[
+@[
   // test if geom o1 and geom o2 can collide
   cat1 = dGeomGetCategoryBits (o1);
   cat2 = dGeomGetCategoryBits (o2);
@@ -3098,7 +3195,7 @@ The exact test is as follows:
   else {
     // do nothing, o1 and o2 do not collide
   }
-@]}
+@]
 
 Note that only @func{dSpaceCollide()} and @func{dSpaceCollide2()} use
 these bitfields, they are ignored by @func{dCollide()}.
@@ -3148,7 +3245,7 @@ generation strategies.
 The array must be able to hold at least the maximum number of contacts.
 These @c{dContactGeom} structures may be embedded within larger structures
 in the array - the @arg{skip} parameter is the byte offset from one
-@struct{dContactGeom} to the next in the array.
+@c{dContactGeom} to the next in the array.
 If @arg{skip} is @c{sizeof(dContactGeom)} then @arg{contact} points to a
 normal (C-style) array.
 It is an error for @arg{skip} to be smaller than @c{sizeof(dContactGeom)}.
@@ -3181,9 +3278,9 @@ void dSpaceCollide (dSpaceID space,
 This determines which pairs of geoms in a space may potentially intersect,
 and calls the callback function with each candidate pair.
 The @arg{callback} function is of type @c{dNearCallback}, which is defined as:
-@code{@[
+@[
 typedef void dNearCallback (void *data, dGeomID o1, dGeomID o2);
-@]}
+@]
 The @arg{data} argument is passed from @func{dSpaceCollide()} directly
 to the callback function. Its meaning is user defined.
 The @arg{o1} and @arg{o2} arguments are the geoms that may be near
@@ -3284,7 +3381,7 @@ perform the collision culling:
 	AABB tree to quickly cull collision checks. It's exceptionally
 	quick for large amounts of objects in landscape-shaped worlds.
 	The amount of memory used is 4^depth * 32 bytes.
-	Currently @func{dSpaceGetGeom} is not implemented for the quadtree
+	Currently @func{dSpaceGetGeom()} is not implemented for the quadtree
 	space.
 }
 
@@ -3337,7 +3434,7 @@ The smallest and largest cell sizes used in the hash table will be
 2^@arg{minlevel} and 2^@arg{maxlevel} respectively.
 @arg{minlevel} must be less than or equal to @arg{maxlevel}.
 
-In @func{dHashSpaceGetLevels} the minimum and maximum levels are returned
+In @func{dHashSpaceGetLevels()} the minimum and maximum levels are returned
 through pointers. If a pointer is zero then it is ignored and no
 argument is returned.
 }
@@ -3484,7 +3581,7 @@ dGeomID dCreatePlane (dSpaceID space,
 }{
 Create a plane geom of the given parameters, and return its ID.
 If @arg{space} is nonzero, insert it into that space.
-The plane equation is @center{@m{a*x+b*y+c*z = d}}
+The plane equation is @eqn{a*x+b*y+c*z = d}
 The plane's normal vector is @m{(a,b,c)}, and it must have length 1.
 Planes are non-placeable geoms. This means that, unlike placeable geoms,
 planes do not have an assigned position and rotation.
@@ -3554,7 +3651,8 @@ cylinder.
 
 
 @funcdef{
-dReal dGeomCCylinderPointDepth (dGeomID ccylinder, dReal x, dReal y, dReal z);
+dReal dGeomCCylinderPointDepth (dGeomID ccylinder,
+                                dReal x, dReal y, dReal z);
 }{
 Return the depth of the point (@arg{x},@arg{y},@arg{z}) in the given capped
 cylinder.
@@ -3646,7 +3744,7 @@ The triangle mesh collision system has the following features:
 @*	It uses temporal coherence to speed up collision tests.
 	When a geom has its collision checked with a trimesh once,
 	data is stored inside the trimesh.
-	This data can be cleared with the @func{dGeomTriMeshClearTCCache}
+	This data can be cleared with the @func{dGeomTriMeshClearTCCache()}
 	function.
 	In the future it will be possible to disable this functionality.
 }
@@ -3669,13 +3767,13 @@ Trimesh/Trimesh collisions, perform quite well, but there are three minor caveat
    the user to update these variables at every timestep.
    This update is performed outside of ODE, so it is not included
    in ODE itself.  The code to do this looks something like this:
-
-@code{@[
-           const double *DoubleArrayPtr =  Bodies[BodyIndex].TransformationMatrix->GetArray();
-           dGeomTriMeshDataSet( TriMeshData,
-                                TRIMESH_LAST_TRANSFORMATION,
-                                (void *) DoubleArrayPtr );
-@]}
+@[
+  const double *DoubleArrayPtr =
+    Bodies[BodyIndex].TransformationMatrix->GetArray();
+  dGeomTriMeshDataSet( TriMeshData,
+    TRIMESH_LAST_TRANSFORMATION,
+    (void *) DoubleArrayPtr );
+@]
 
    The transformation matrix is the standard 4x4 homogenous transform
    matrix, and the "DoubleArray" is the standard flattened array of 
@@ -3703,7 +3801,7 @@ Used for filling a @c{dTriMeshData} object with data. No data is copied
 here, so the pointers passed into this function must remain valid.
 This is how the strided data works:
 
-@code{@[
+@[
 struct StridedVertex {
   dVector3 Vertex;  // 4th component can be left out, reducing memory usage
   // Userdata
@@ -3715,11 +3813,11 @@ struct StridedTri {
   // Userdata
 };
 int TriStride = sizeof (StridedTri);
-@]}
+@]
 
 The @c{Normals} argument is optional: the normals of the faces of each trimesh object.  For example,
 
-@code{@[
+@[
          dTriMeshDataID TriMeshData;
          TriMeshData = dGeomTriMeshGetTriMeshDataID( Bodies[ BodyIndex ].GeomID );
 
@@ -3733,13 +3831,13 @@ The @c{Normals} argument is optional: the normals of the faces of each trimesh o
                                      (int) NumTriangles, 3*sizeof(unsigned int),
                                      // Normals
                                      Bodies[BodyIndex].FaceNormals);
-   @]}
+   @]
 
    This pre-calculation saves some time during evaulation of the
    contacts, but isn't necessary.  If you don't want to calculate
    the face normals before construction (or if you have enormous
    trimeshes and know that only very few faces will be touching
-   and want to save time), just pass a "NULL" for the @{Normals} argument,
+   and want to save time), just pass a "NULL" for the @c{Normals} argument,
    and dCollideTTL will take care of the normal calcuations itself.
 }
 
@@ -3951,19 +4049,19 @@ A new geometry class (call it `X') must provide the following to ODE:
 @*	Functions that will handle collision detection and contact generation
 	between X and one or more other classes.
 	These functions must be of type @c{dColliderFn}, which is defined as
-	@code{@[
+	@[
 typedef int dColliderFn (dGeomID o1, dGeomID o2, int flags,
                          dContactGeom *contact, int skip);
-	@]}
+	@]
 	This has exactly the same interface as @func{dCollide()}.
 	Each function will handle a specific collision case, where @arg{o1}
 	has type X and @arg{o2} has some other known type.
 
 @*	A "selector" function, of type @c{dGetColliderFnFn}, which is
 	defined as
-	@code{@[
+	@[
 typedef dColliderFn * dGetColliderFnFn (int num);
-	@]}
+	@]
 	This function takes a class number (@arg{num}), and returns the
 	collider function that can handle colliding X with class @arg{num}.
 	It should return 0 if X does not know how to collide with class
@@ -3977,9 +4075,9 @@ typedef dColliderFn * dGetColliderFnFn (int num);
 @*	A function that will compute the axis aligned bounding box (AABB) of
 	instances of this class.
 	This function must be of type @c{dGetAABBFn}, which is defined as
-	@code{@[
+	@[
 typedef void dGetAABBFn (dGeomID g, dReal aabb[6]);
-	@]}
+	@]
 	This function is given @arg{g}, which has type X, and returns the
 	axis-aligned bounding box for @arg{g}.
 	The @arg{aabb} array has elements
@@ -3998,18 +4096,18 @@ The following things are optional for a geometry class:
 	need this function, but some will want to deallocate heap memory
 	or release other resources.
 	This function must be of type @c{dGeomDtorFn}, which is defined as 
-	@code{@[
+	@[
 typedef void dGeomDtorFn (dGeomID o);
-	@]}
+	@]
 	The argument @arg{o} has type X.
 
 @*	A function that will test whether a given AABB intersects with an
 	instance of X.
 	This is used as an early-exit test in the space collision functions.
 	This function must be of type @c{dAABBTestFn}, which is defined as 
-	@code{@[
+	@[
 typedef int dAABBTestFn (dGeomID o1, dGeomID o2, dReal aabb2[6]);
-	@]}
+	@]
 	The argument @arg{o1} has type X.
 	If this function is provided it is called by @func{dSpaceCollide()}
 	when @arg{o1} intersects geom @arg{o2}, which has an
@@ -4039,7 +4137,7 @@ with the name @c{dXxxClass} where Xxx is the class name
 (e.g. @c{dSphereClass}).
 
 Here is the definition of the @c{dGeomClass} structure:
-@code{@[
+@[
 struct dGeomClass {
   int bytes;                  // bytes of custom data needed
   dGetColliderFnFn *collider; // collider function
@@ -4047,7 +4145,7 @@ struct dGeomClass {
   dAABBTestFn *aabb_test;     // aabb tester, can be 0 for none
   dGeomDtorFn *dtor;          // destructor, can be 0 for none
 };
-@]}
+@]
 }
 
 
@@ -4184,7 +4282,7 @@ that is used, except for four points:
 @*	The @c{dGeomMoved()} function must be defined, with the following
 	prototype:
 
-	@code{@[void dGeomMoved (dGeomID);@]}
+	@[void dGeomMoved (dGeomID);@]
 
 	This function is called by the dynamics code whenever a body moves:
 	it indicates that the geometry object associated with the body is
@@ -4193,7 +4291,7 @@ that is used, except for four points:
 @*	The @c{dGeomGetBodyNext()} function must be defined, with the following
 	prototype:
 
-	@code{@[dGeomID dGeomGetBodyNext (dGeomID);@]}
+	@[dGeomID dGeomGetBodyNext (dGeomID);@]
 
 	This function is called by the dynamics code to traverse the list of
 	geoms that are associated with each body. Given a geom attached to
@@ -4203,7 +4301,7 @@ that is used, except for four points:
 @*	The @c{dGeomSetBody()} function must be defined, with the following
 	prototype:
 
-	@code{@[void dGeomSetBody (dGeomID, dBodyID);@]}
+	@[void dGeomSetBody (dGeomID, dBodyID);@]
 
 	This function is called in the body destructor code (with the second
 	argument set to 0) to remove all references from the geom to the body.
@@ -4248,7 +4346,7 @@ For each separate group of bodies connected by joints, where:
 @*	@m{n} is the number of bodies in the group,
 }
 then the computing time per step for the group is proportional to:
-	@center{@m{k_1 O(m_1) + k_2 O(m_2^3) + k_2 O(n)}}
+	@eqn{k_1 O(m_1) + k_2 O(m_2^3) + k_2 O(n)}
 
 ODE currently relies on factorization of a ``system'' matrix that has one
 row/column for each DOF removed (this is where the @m{O(m_2^3)}
@@ -4356,7 +4454,7 @@ a community-supported website.
 
 @section{How do I connect a body to the static environment with a joint?}
 
-Use @func{dJointAttach} with arguments @c{(body,0)} or @c{(0,body)}.
+Use @func{dJointAttach()} with arguments @c{(body,0)} or @c{(0,body)}.
 
 
 @section{Does ODE need or use graphics library X ?}
@@ -4527,7 +4625,7 @@ this will not be a problem in many applications.
 
 @section{The Windows version of ODE crashes with large systems}
 
-ODE with @func{dWorldStep} requires stack space roughly on the order of @m{O(n)+O(m^2)},
+ODE with @func{dWorldStep()} requires stack space roughly on the order of @m{O(n)+O(m^2)},
 where @m{n} is the number of bodies and @m{m} is the sum of all the joint
 constraint dimensions.
 If @m{m} is large, this can be a lot of space!
@@ -4539,7 +4637,7 @@ If you experience crashes when running large systems, try increasing the
 stack size.
 For example, the MS VC++ command line compiler accepts the @c{/Stack:num}
 flag to set the upper limit.
-Or switch to @func{dWorldStepFast1}.
+Or switch to @func{dWorldStepFast1()}.
 
 @section{My simple rotating bodies are unstable!}
 
@@ -4611,10 +4709,10 @@ friction model. This section explains the problem and the solution.
 
 @subsection{The problem}
 
-An example of such a system is shown in the following picture of a
-ball that has just rolled down a ramp and touched the ground:
+An example of such a system is shown in @fig{rollingcontact}, which
+shows a ball that has just rolled down a ramp and touched the ground.
 
-		@center{@picture{pix/rollingcontact.gif}}
+	@figure{rollingcontact}{A problem with rolling contact.}{3in}
 
 Normally, the ball should continue rolling along the ground, towards
 the right. However, if ODE's default contact friction mode is being used
@@ -4706,7 +4804,7 @@ examples of non-physical behavior.
 }
 
 Why don't I implement a proper friction pyramid or friction cone
-(e.g. Baraff's version) ?}
+(e.g. Baraff's version) ?
 	Because I have to factor non-symmetric (and possibly indefinite)
 	matrices, for either static or dynamic friction.
 	Speed was considered more important - the current friction
@@ -4748,10 +4846,10 @@ interface.
 @subsection{Returned vectors}
 
 There seem to be 2 ways of returning vectors in ODE, e.g.:
-@code{@[
+@[
     const dReal* dBodyGetPosition (dxBodyID);
     void dWorldGetGravity (dxWorldID, dVector3);
-@]}
+@]
 Why?
 The second way is the 'official' way.
 The first way returns pointers to volatile internal data structures and is
