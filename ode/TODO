@@ -2,12 +2,6 @@
 TODO BEFORE NEXT RELEASE
 ------------------------
 
-library should have no global constructors, as it might be used with C linkage.
-
-contacts: cheaper friction: viscous friction? one step delay friction force.
-
-DOC cfm, the derivation and what it means.
-
 joint "get type" function
 
 joint limit spongyness: interacts with powered joints badly, because when the
@@ -175,6 +169,9 @@ copy stack.cpp, memory.cpp stuff to reuse
 dFactorLDLT() is not so efficient for matrix sizes < block size, e.g.
 redundant calls, zero loads, adds etc
 
+contacts: cheaper friction: viscous friction? one step delay friction force.
+
+
 
 MAYBE
 -----
@@ -299,3 +296,8 @@ really necessary.
 
 fix the "memory leak" in geom.cpp
 
+library should have no global constructors, as it might be used with C linkage.
+	--> as long as test_chain1 works, there are none.
+
+DOC cfm, the derivation and what it means.
+	--> partially done, could be better

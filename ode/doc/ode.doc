@@ -122,6 +122,7 @@ Here are the features:
 @* A few bug fixes.
 @* A few minor API changes so that the API matches the documentation.
 @* LCP solver optimized even more.
+@* Added the @func{dJointGetType()} function.
 }
 
 
@@ -911,6 +912,20 @@ void dJointSetData (dJointID, void *data);
 void *dJointGetData (dJointID);
 }{
 Get and set the joint's user-data pointer. 
+}
+
+
+@funcdef{
+int dJointGetType (dJointID);
+}{
+Get the joint's type. One of the following constants will be returned:
+
+@constdef{dJointTypeBall}{A ball-and-socket joint.}
+@constdef{dJointTypeHinge}{A hinge joint.}
+@constdef{dJointTypeSlider}{A slider joint.}
+@constdef{dJointTypeContact}{A contact joint.}
+@constdef{dJointTypeHinge2}{A hinge-2 joint.}
+@constdef{dJointTypeFixed}{A fixed joint.}
 }
 
 
