@@ -301,10 +301,11 @@ static LRESULT CALLBACK mainWndProc (HWND hWnd, UINT msg, WPARAM wParam,
 
 
 void dsPlatformSimLoop (int window_width, int window_height,
-			dsFunctions *fn)
+			dsFunctions *fn, int initial_pause)
 {
   if (!winmain_called)
     dsError ("WinMain() not called - make sure this isn't a console application");
+  renderer_pause = initial_pause;
 
   // create window - but first get window size for desired size of client area.
   // if this adjustment isn't made then the openGL area will be shifted into
