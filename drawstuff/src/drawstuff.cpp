@@ -1267,9 +1267,9 @@ void dsDrawBoxD (const double pos[3], const double R[12],
 {
   int i;
   float pos2[3],R2[12],fsides[3];
-  for (i=0; i<3; i++) pos2[i]=pos[i];
-  for (i=0; i<12; i++) R2[i]=R[i];
-  for (i=0; i<3; i++) fsides[i]=sides[i];
+  for (i=0; i<3; i++) pos2[i]=(float)pos[i];
+  for (i=0; i<12; i++) R2[i]=(float)R[i];
+  for (i=0; i<3; i++) fsides[i]=(float)sides[i];
   dsDrawBox (pos2,R2,fsides);
 }
 
@@ -1278,8 +1278,8 @@ void dsDrawSphereD (const double pos[3], const double R[12], float radius)
 {
   int i;
   float pos2[3],R2[12];
-  for (i=0; i<3; i++) pos2[i]=pos[i];
-  for (i=0; i<12; i++) R2[i]=R[i];
+  for (i=0; i<3; i++) pos2[i]=(float)pos[i];
+  for (i=0; i<12; i++) R2[i]=(float)R[i];
   dsDrawSphere (pos2,R2,radius);
 }
 
@@ -1289,8 +1289,8 @@ void dsDrawCylinderD (const double pos[3], const double R[12],
 {
   int i;
   float pos2[3],R2[12];
-  for (i=0; i<3; i++) pos2[i]=pos[i];
-  for (i=0; i<12; i++) R2[i]=R[i];
+  for (i=0; i<3; i++) pos2[i]=(float)pos[i];
+  for (i=0; i<12; i++) R2[i]=(float)R[i];
   dsDrawCylinder (pos2,R2,length,radius);
 }
 
@@ -1300,8 +1300,8 @@ void dsDrawCappedCylinderD (const double pos[3], const double R[12],
 {
   int i;
   float pos2[3],R2[12];
-  for (i=0; i<3; i++) pos2[i]=pos[i];
-  for (i=0; i<12; i++) R2[i]=R[i];
+  for (i=0; i<3; i++) pos2[i]=(float)pos[i];
+  for (i=0; i<12; i++) R2[i]=(float)R[i];
   dsDrawCappedCylinder (pos2,R2,length,radius);
 }
 
@@ -1310,7 +1310,7 @@ void dsDrawLineD (const double _pos1[3], const double _pos2[3])
 {
   int i;
   float pos1[3],pos2[3];
-  for (i=0; i<3; i++) pos1[i]=_pos1[i];
-  for (i=0; i<3; i++) pos2[i]=_pos2[i];
+  for (i=0; i<3; i++) pos1[i]=(float)_pos1[i];
+  for (i=0; i<3; i++) pos2[i]=(float)_pos2[i];
   dsDrawLine (pos1,pos2);
 }
