@@ -40,6 +40,10 @@ extern "C" {
 /* ************************************************************************ */
 /* utility functions */
 
+void dClosestLineSegmentPoints (const dVector3 a1, const dVector3 a2,
+				const dVector3 b1, const dVector3 b2,
+				dVector3 cp1, dVector3 cp2);
+
 int dBoxTouchesBox (const dVector3 _p1, const dMatrix3 R1,
 		    const dVector3 side1, const dVector3 _p2,
 		    const dMatrix3 R2, const dVector3 side2);
