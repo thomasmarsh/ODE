@@ -126,7 +126,19 @@ dxTriMesh::~dxTriMesh(){
 }
 
 void dxTriMesh::ClearTCCache(){
+  /* dxTriMesh::ClearTCCache uses dArray's setSize(0) to clear the caches -
+     but the destructor isn't called when doing this, so we would leak.
+     So, call the previous caches' containers' destructors by hand first. */
+	int i, n;
+	n = SphereTCCache.size();
+	for( i = 0; i < n; ++i ) {
+	  SphereTCCache[i].~SphereTC();
+	}
 	SphereTCCache.setSize(0);
+	n = BoxTCCache.size();
+	for( i = 0; i < n; ++i ) {
+	  BoxTCCache[i].~BoxTC();
+	}
 	BoxTCCache.setSize(0);
 }
 
