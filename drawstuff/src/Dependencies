@@ -1,9 +1,6 @@
-# generated dependency file, do not edit!
-
-drawstuff.o: drawstuff.cpp drawstuff/drawstuff.h \
- drawstuff/version.h internal.h
-windows.o: windows.cpp \
- resource.h internal.h \
- drawstuff/drawstuff.h drawstuff/version.h
-x11.o: x11.cpp drawstuff/drawstuff.h \
- drawstuff/version.h internal.h
+drawstuff.o: drawstuff.cpp ../../include/drawstuff/drawstuff.h \
+ ../../include/drawstuff/version.h internal.h
+windows.o: windows.cpp resource.h internal.h \
+ ../../include/drawstuff/drawstuff.h ../../include/drawstuff/version.h
+x11.o: x11.cpp ../../include/drawstuff/drawstuff.h \
+ ../../include/drawstuff/version.h internal.h
