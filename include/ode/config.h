@@ -40,6 +40,12 @@ typedef char            int8;
 typedef unsigned char   uint8;
 
 
+/* an integer type that we can safely cast a pointer to and from without
+ * loss of bits.
+ */
+typedef uint32 intP;
+
+
 /* if we're compiling on a pentium, we may need to know the clock rate so
  * that the timing function can report accurate times. this number only needs
  * to be set accurately if we're doing performance tests - otherwise just
