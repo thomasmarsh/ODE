@@ -269,6 +269,12 @@ void Texture::bind (int modulate)
 }
 
 //***************************************************************************
+// the current drawing state (for when the user's step function is drawing)
+
+static float color[3] = {0,0,0};	// current r,g,b color
+static int tnum = 0;			// current texture number
+
+//***************************************************************************
 // OpenGL utility stuff
 
 static void setCamera (float x, float y, float z, float h, float p, float r)
@@ -639,13 +645,19 @@ static void drawCylinder (float l, float r, float zoffset)
   glEnd();
 
   // draw top cap
+  glShadeModel (GL_FLAT);
   ny=1; nz=0;		  // normal vector = (0,ny,nz)
   glBegin (GL_TRIANGLE_FAN);
   glNormal3d (0,0,1);
   glVertex3d (0,0,l+zoffset);
   for (i=0; i<=n; i++) {
+    if (i==1 || i==n/2+1)
+      setColor (color[0]*0.75,color[1]*0.75,color[2]*0.75,1);
     glNormal3d (0,0,1);
     glVertex3d (ny*r,nz*r,l+zoffset);
+    if (i==1 || i==n/2+1)
+      setColor (color[0],color[1],color[2],1);
+
     // rotate ny,nz
     tmp = ca*ny - sa*nz;
     nz = sa*ny + ca*nz;
@@ -659,8 +671,13 @@ static void drawCylinder (float l, float r, float zoffset)
   glNormal3d (0,0,-1);
   glVertex3d (0,0,-l+zoffset);
   for (i=0; i<=n; i++) {
+    if (i==1 || i==n/2+1)
+      setColor (color[0]*0.75,color[1]*0.75,color[2]*0.75,1);
     glNormal3d (0,0,-1);
     glVertex3d (ny*r,nz*r,-l+zoffset);
+    if (i==1 || i==n/2+1)
+      setColor (color[0],color[1],color[2],1);
+
     // rotate ny,nz
     tmp = ca*ny + sa*nz;
     nz = -sa*ny + ca*nz;
@@ -737,10 +754,6 @@ static int use_shadows=1;		// 1 if shadows to be drawn
 static Texture *sky_texture = 0;
 static Texture *ground_texture = 0;
 static Texture *wood_texture = 0;
-
-// the current drawing state (for when the user's step function is drawing)
-static float color[3] = {0,0,0};	// current r,g,b color
-static int tnum = 0;			// current texture number
 
 
 void dsStartGraphics (int width, int height, dsFunctions *fn)
