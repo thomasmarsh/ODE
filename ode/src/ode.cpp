@@ -333,6 +333,7 @@ dxBody *dBodyCreate (dxWorld *w)
   initObject (b,w);
   b->firstjoint = 0;
   b->flags = 0;
+  b->geom = 0;
   dMassSetParameters (&b->mass,1,0,0,0,1,1,1,0,0,0);
   dSetZero (b->invI,4*3);
   b->invI[0] = 1;
@@ -395,6 +396,10 @@ void dBodySetPosition (dBodyID b, dReal x, dReal y, dReal z)
   b->pos[0] = x;
   b->pos[1] = y;
   b->pos[2] = z;
+
+  // notify all attached geoms that this body has moved
+  for (dxGeom *geom = b->geom; geom; geom = dGeomGetBodyNext (geom))
+    dGeomMoved (geom);
 }
 
 
@@ -409,6 +414,10 @@ void dBodySetRotation (dBodyID b, const dMatrix3 R)
   b->q[2] = q[2];
   b->q[3] = q[3];
   dQtoR (b->q,b->R);
+
+  // notify all attached geoms that this body has moved
+  for (dxGeom *geom = b->geom; geom; geom = dGeomGetBodyNext (geom))
+    dGeomMoved (geom);
 }
 
 
@@ -421,6 +430,10 @@ void dBodySetQuaternion (dBodyID b, const dQuaternion q)
   b->q[3] = q[3];
   dNormalize4 (b->q);
   dQtoR (b->q,b->R);
+
+  // notify all attached geoms that this body has moved
+  for (dxGeom *geom = b->geom; geom; geom = dGeomGetBodyNext (geom))
+    dGeomMoved (geom);
 }
 
 
