@@ -120,7 +120,8 @@ static void start()
 	  "\t'z' to decrease speed.\n"
 	  "\t',' to steer left.\n"
 	  "\t'.' to steer right.\n"
-	  "\t' ' to reset speed and steering.\n");
+	  "\t' ' to reset speed and steering.\n"
+	  "\t'1' to save the current state to 'state.dif'.\n");
 }
 
 
@@ -145,6 +146,13 @@ static void command (int cmd)
     speed = 0;
     steer = 0;
     break;
+  case '1': {
+      FILE *f = fopen ("state.dif","wt");
+      if (f) {
+        dWorldExportDIF (world,f,"");
+        fclose (f);
+      }
+    }
   }
 }
 

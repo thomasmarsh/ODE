@@ -62,6 +62,7 @@ static int selected = -1;	// selected object
 static int show_aabb = 0;	// show geom AABBs?
 static int show_contacts = 0;	// show contact points?
 static int random_pos = 1;	// drop objects from random position?
+static int write_world = 0;
 
 
 // this is called by dSpaceCollide when two objects in space are
@@ -118,6 +119,7 @@ static void start()
   printf ("To toggle showing the geom AABBs, press a.\n");
   printf ("To toggle showing the contact points, press t.\n");
   printf ("To toggle dropping from random position/orientation, press r.\n");
+  printf ("To save the current state to 'state.dif', press 1.\n");
 }
 
 
@@ -284,6 +286,9 @@ static void command (int cmd)
   else if (cmd == 'r') {
     random_pos ^= 1;
   }
+  else if (cmd == '1') {
+    write_world = 1;
+  }
 }
 
 
@@ -357,6 +362,15 @@ static void simLoop (int pause)
   dSpaceCollide (space,0,&nearCallback);
   if (!pause) dWorldStep (world,0.05);
 
+  if (write_world) {
+    FILE *f = fopen ("state.dif","wt");
+    if (f) {
+      dWorldExportDIF (world,f,"X");
+      fclose (f);
+    }
+    write_world = 0;
+  }
+  
   // remove all contact joints
   dJointGroupEmpty (contactgroup);
 
