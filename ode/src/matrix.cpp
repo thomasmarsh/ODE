@@ -26,6 +26,9 @@
 #include "ode/common.h"
 #include "ode/matrix.h"
 
+// misc defines
+#define ALLOCA dALLOCA16
+
 
 void dSetZero (dReal *a, int n)
 {
@@ -118,7 +121,7 @@ int dFactorCholesky (dReal *A, int n)
   dReal sum,*a,*b,*aa,*bb,*cc,*recip;
   dASSERT (n > 0 && A);
   nskip = dPAD (n);
-  recip = (dReal*) alloca (n * sizeof(dReal));
+  recip = (dReal*) ALLOCA (n * sizeof(dReal));
   aa = A;
   for (i=0; i<n; i++) {
     bb = A;
@@ -150,7 +153,7 @@ void dSolveCholesky (const dReal *L, dReal *b, int n)
   dReal sum,*y;
   dASSERT (n > 0 && L && b);
   nskip = dPAD (n);
-  y = (dReal*) alloca (n*sizeof(dReal));
+  y = (dReal*) ALLOCA (n*sizeof(dReal));
   for (i=0; i<n; i++) {
     sum = 0;
     for (k=0; k < i; k++) sum += L[i*nskip+k]*y[k];
@@ -169,9 +172,9 @@ int dInvertPDMatrix (const dReal *A, dReal *Ainv, int n)
   int i,j,nskip;
   dReal *L,*x;
   nskip = dPAD (n);
-  L = (dReal*) alloca (nskip*n*sizeof(dReal));
+  L = (dReal*) ALLOCA (nskip*n*sizeof(dReal));
   memcpy (L,A,nskip*n*sizeof(dReal));
-  x = (dReal*) alloca (n*sizeof(dReal));
+  x = (dReal*) ALLOCA (n*sizeof(dReal));
   if (dFactorCholesky (L,n)==0) return 0;
   dSetZero (Ainv,n*nskip);	// make sure all padding elements set to 0
   for (i=0; i<n; i++) {
@@ -189,7 +192,7 @@ int dIsPositiveDefinite (const dReal *A, int n)
   dReal *Acopy;
   dASSERT (n > 0 && A);
   int nskip = dPAD (n);
-  Acopy = (dReal*) alloca (nskip*n * sizeof(dReal));
+  Acopy = (dReal*) ALLOCA (nskip*n * sizeof(dReal));
   memcpy (Acopy,A,nskip*n * sizeof(dReal));
   return dFactorCholesky (Acopy,n);
 }
@@ -228,8 +231,8 @@ void dLDLTAddTL (dReal *L, dReal *d, const dReal *a, int n, int nskip)
   dReal *W1,*W2,W11,W21,alpha1,alpha2,alphanew,gamma1,gamma2,k1,k2,Wp,ell,dee;
 
   if (n < 2) return;
-  W1 = (dReal*) alloca (n*sizeof(dReal));
-  W2 = (dReal*) alloca (n*sizeof(dReal));
+  W1 = (dReal*) ALLOCA (n*sizeof(dReal));
+  W2 = (dReal*) ALLOCA (n*sizeof(dReal));
 
   W1[0] = 0;
   W2[0] = 0;
@@ -315,14 +318,14 @@ void dLDLTRemove (dReal **A, const int *p, dReal *L, dReal *d,
     return;		// deleting last row/col is easy
   }
   else if (r==0) {
-    dReal *a = (dReal*) alloca (n2 * sizeof(dReal));
+    dReal *a = (dReal*) ALLOCA (n2 * sizeof(dReal));
     for (i=0; i<n2; i++) a[i] = -GETA(p[i],p[0]);
     a[0] += REAL(1.0);
     dLDLTAddTL (L,d,a,n2,nskip);
   }
   else {
-    dReal *t = (dReal*) alloca (r * sizeof(dReal));
-    dReal *a = (dReal*) alloca ((n2-r) * sizeof(dReal));
+    dReal *t = (dReal*) ALLOCA (r * sizeof(dReal));
+    dReal *a = (dReal*) ALLOCA ((n2-r) * sizeof(dReal));
     for (i=0; i<r; i++) t[i] = L[r*nskip+i] / d[i];
     for (i=0; i<(n2-r); i++)
       a[i] = dDot(L+(r+i)*nskip,t,r) - GETA(p[r+i],p[r]);
