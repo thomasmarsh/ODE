@@ -79,8 +79,6 @@ static int dCollideSpheres (dVector3 p1, dReal r1,
 // return value will be the actual diameter, otherwise the result will be
 // scaled by the axis length.
 
-/*
-
 static inline dReal boxDiameter (const dMatrix3 R, const dVector3 side,
 				 const dVector3 axis)
 {
@@ -92,132 +90,60 @@ static inline dReal boxDiameter (const dMatrix3 R, const dVector3 side,
 
 // given boxes (p1,R1,side1) and (p1,R1,side1), return 1 if they intersect
 // or 0 if not.
-// @@@ should be worst case ~200 ops
 
-extern "C" int dBoxesTouch (const dVector3 _p1, const dMatrix3 R1,
-			    const dVector3 side1, const dVector3 _p2,
+extern "C" int dBoxesTouch (const dVector3 p1, const dMatrix3 R1,
+			    const dVector3 side1, const dVector3 p2,
 			    const dMatrix3 R2, const dVector3 side2)
 {
   // two boxes are disjoint if (and only if) there is a separating axis
   // perpendicular to a face from one box or perpendicular to an edge from
   // either box.
 
-  int i,j,k;
-  dVector3 p2,axis,u1,u2;
-  dReal dist,d1,d2;
-
-  // shift positions p1 and p2 so p1 is zero.
-  p2[0] = _p2[0] - _p1[0];
-  p2[1] = _p2[1] - _p1[1];
-  p2[2] = _p2[2] - _p1[2];
-
-  // test separating axes perpendicular to 3 faces of box 1
-  for (i=0; i<3; i++) {
-    for (k=0; k<3; k++) axis[k] = R1[4*k+i];
-    dist = dFabs (dDOT (axis,p2));
-    d2 = boxDiameter (R2,side2,axis);
-    if (2*dist > side1[i]+d2) return 0;
-  }
-
-  // test separating axes perpendicular to 3 faces of box 2
-  for (i=0; i<3; i++) {
-    for (k=0; k<3; k++) axis[k] = R2[4*k+i];
-    dist = dFabs (dDOT (axis,p2));
-    d1 = boxDiameter (R1,side1,axis);
-    if (2*dist > d1+side2[i]) return 0;
-  }
-
-  // test separating axes perpendicular to one edge from each box (9 cases)
-  for (i=0; i<3; i++) {
-    for (j=0; j<3; j++) {
-      for (k=0; k<3; k++) u1[k] = R1[4*k+i];
-      for (k=0; k<3; k++) u2[k] = R2[4*k+j];
-      dCROSS (axis,=,u1,u2);
-      // @@@ MUST account for axis -> 0
-      dist = dFabs (dDOT (axis,p2));
-      d1 = boxDiameter (R1,side1,axis);
-      d2 = boxDiameter (R2,side2,axis);
-      if (2*dist > d1+d2) return 0;
-    }
-  }
-
-  return 1;
-}
-*/
-
-
-
-extern "C" int dBoxesTouch (const dVector3 p1, const dMatrix3 R1,
-			    const dVector3 side1, const dVector3 p2,
-			    const dMatrix3 R2, const dVector3 side2)
-{
-  //@@@ check what happens when axes (u,v) aligned!
-
   dVector3 p,pp;
   dReal A1,A2,A3,B1,B2,B3,R11,R12,R13,R21,R22,R23,R31,R32,R33,
     Q11,Q12,Q13,Q21,Q22,Q23,Q31,Q32,Q33;
 
+  // get vector from centers of box 1 to box 2, relative to box 1
   p[0] = p2[0] - p1[0];
   p[1] = p2[1] - p1[1];
   p[2] = p2[2] - p1[2];
   dMULTIPLY1_331 (pp,R1,p);		// get pp = p relative to body 1
 
-  A1 = side1[0]*0.5;
-  A2 = side1[1]*0.5;
-  A3 = side1[2]*0.5;
-  B1 = side2[0]*0.5;
-  B2 = side2[1]*0.5;
-  B3 = side2[2]*0.5;
+  // get side lengths / 2
+  A1 = side1[0]*0.5; A2 = side1[1]*0.5; A3 = side1[2]*0.5;
+  B1 = side2[0]*0.5; B2 = side2[1]*0.5; B3 = side2[2]*0.5;
 
-  R11 = dDOT44(R1+0,R2+0);
-  R12 = dDOT44(R1+0,R2+1);
-  R13 = dDOT44(R1+0,R2+2);
-  R21 = dDOT44(R1+1,R2+0);
-  R22 = dDOT44(R1+1,R2+1);
-  R23 = dDOT44(R1+1,R2+2);
-  R31 = dDOT44(R1+2,R2+0);
-  R32 = dDOT44(R1+2,R2+1);
-  R33 = dDOT44(R1+2,R2+2);
+  // Rij is R1'*R2, i.e. the relative rotation between R1 and R2
+  R11 = dDOT44(R1+0,R2+0); R12 = dDOT44(R1+0,R2+1); R13 = dDOT44(R1+0,R2+2);
+  R21 = dDOT44(R1+1,R2+0); R22 = dDOT44(R1+1,R2+1); R23 = dDOT44(R1+1,R2+2);
+  R31 = dDOT44(R1+2,R2+0); R32 = dDOT44(R1+2,R2+1); R33 = dDOT44(R1+2,R2+2);
 
-  Q11 = dFabs(R11);
-  Q12 = dFabs(R12);
-  Q13 = dFabs(R13);
-  Q21 = dFabs(R21);
-  Q22 = dFabs(R22);
-  Q23 = dFabs(R23);
-  Q31 = dFabs(R31);
-  Q32 = dFabs(R32);
-  Q33 = dFabs(R33);
+  // take following takes, in the worst case, 15 compares, 60 adds, 81
+  // multiplies, and 24 absolutes.
+
+  Q11 = dFabs(R11); Q12 = dFabs(R12); Q13 = dFabs(R13);
+  Q21 = dFabs(R21); Q22 = dFabs(R22); Q23 = dFabs(R23);
+  Q31 = dFabs(R31); Q32 = dFabs(R32); Q33 = dFabs(R33);
 
   if (dFabs(pp[0]) > (A1 + B1*Q11 + B2*Q12 + B3*Q13)) return 0;
   if (dFabs(pp[1]) > (A2 + B1*Q21 + B2*Q22 + B3*Q23)) return 0;
   if (dFabs(pp[2]) > (A3 + B1*Q31 + B2*Q32 + B3*Q33)) return 0;
 
-  //@@@ speed this up any?
   if (dFabs(dDOT41(R2+0,p)) > (A1*Q11 + A2*Q21 + A3*Q31 + B1)) return 0;
   if (dFabs(dDOT41(R2+1,p)) > (A1*Q12 + A2*Q22 + A3*Q32 + B2)) return 0;
   if (dFabs(dDOT41(R2+2,p)) > (A1*Q13 + A2*Q23 + A3*Q33 + B3)) return 0;
 
-  if (dFabs(pp[2]*R21-pp[1]*R31) > (A2*Q31 + A3*Q21 + B2*Q13 + B3*Q12))
-    return 0;
-  if (dFabs(pp[2]*R22-pp[1]*R32) > (A2*Q32 + A3*Q22 + B1*Q13 + B3*Q11))
-    return 0;
-  if (dFabs(pp[2]*R23-pp[1]*R33) > (A2*Q33 + A3*Q23 + B1*Q12 + B2*Q11))
-    return 0;
+  if (dFabs(pp[2]*R21-pp[1]*R31) > A2*Q31 + A3*Q21 + B2*Q13 + B3*Q12) return 0;
+  if (dFabs(pp[2]*R22-pp[1]*R32) > A2*Q32 + A3*Q22 + B1*Q13 + B3*Q11) return 0;
+  if (dFabs(pp[2]*R23-pp[1]*R33) > A2*Q33 + A3*Q23 + B1*Q12 + B2*Q11) return 0;
 
-  if (dFabs(pp[0]*R31-pp[2]*R11) > (A1*Q31 + A3*Q11 + B2*Q23 + B3*Q22))
-    return 0;
-  if (dFabs(pp[0]*R32-pp[2]*R12) > (A1*Q32 + A3*Q12 + B1*Q23 + B3*Q21))
-    return 0;
-  if (dFabs(pp[0]*R33-pp[2]*R13) > (A1*Q33 + A3*Q13 + B1*Q22 + B2*Q21))
-    return 0;
+  if (dFabs(pp[0]*R31-pp[2]*R11) > A1*Q31 + A3*Q11 + B2*Q23 + B3*Q22) return 0;
+  if (dFabs(pp[0]*R32-pp[2]*R12) > A1*Q32 + A3*Q12 + B1*Q23 + B3*Q21) return 0;
+  if (dFabs(pp[0]*R33-pp[2]*R13) > A1*Q33 + A3*Q13 + B1*Q22 + B2*Q21) return 0;
 
-  if (dFabs(pp[1]*R11-pp[0]*R21) > (+ A1*Q21 + A2*Q11 + B2*Q33 + B3*Q32))
-    return 0;
-  if (dFabs(pp[1]*R12-pp[0]*R22) > (+ A1*Q22 + A2*Q12 + B1*Q33 + B3*Q31))
-    return 0;
-  if (dFabs(pp[1]*R13-pp[0]*R23) > (+ A1*Q23 + A2*Q13 + B1*Q32 + B2*Q31))
-    return 0;
+  if (dFabs(pp[1]*R11-pp[0]*R21) > A1*Q21 + A2*Q11 + B2*Q33 + B3*Q32) return 0;
+  if (dFabs(pp[1]*R12-pp[0]*R22) > A1*Q22 + A2*Q12 + B1*Q33 + B3*Q31) return 0;
+  if (dFabs(pp[1]*R13-pp[0]*R23) > A1*Q23 + A2*Q13 + B1*Q32 + B2*Q31) return 0;
 
   return 1;
 }
