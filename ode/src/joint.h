@@ -59,15 +59,13 @@ struct dxJoint : public dObject {
   // and the "second" body is node[1].body. if this joint is only connected
   // to one body then the second body is 0.
 
-  // info returned by getInfo1 function. the constraint dimension is nub+nlcp,
+  // info returned by getInfo1 function. the constraint dimension is m (<=6).
   // i.e. that is the total number of rows in the jacobian. `nub' is the
-  // number of unbounded variables at the start, and `nlcp' is the number of
-  // variables subject to LCP constraints (which appear after the `nub'
-  // variables). nub+nlcp must be <= 6.
+  // number of unbounded variables (which have lo,hi = -/+ infinity).
+  // variables).
 
   struct Info1 {
-    int nub;
-    int nlcp;
+    int m,nub;
   };
 
   // info returned by getInfo2 function
@@ -77,21 +75,20 @@ struct dxJoint : public dObject {
     // parameter (0..1).
     dReal fps,erp;
 
-    // for the first and second body, and for the unbounded and LCP variables,
-    // pointers to two (linear and angular) n*3 jacobian sub matrices, stored
-    // by rows. these matrices will have been initialized to 0 on entry.
-    // if the second body is zero then the J2xx pointers may be 0.
-    dReal *J1lu,*J1au,*J2lu,*J2au;	// unbounded variables
-    dReal *J1ll,*J1al,*J2ll,*J2al;	// LCP variables
+    // for the first and second body, pointers to two (linear and angular)
+    // n*3 jacobian sub matrices, stored by rows. these matrices will have
+    // been initialized to 0 on entry. if the second body is zero then the
+    // J2xx pointers may be 0.
+    dReal *J1l,*J1a,*J2l,*J2a;
 
     // elements to jump from one row to the next in J's
     int rowskip;
 
-    // right hand side of the equation J*a = c (unbounded,LCP). this vector
-    // will be set to zero on entry.
-    dReal *cu,*cl;
+    // right hand side of the equation J*a = c. this vector will be set to
+    // zero on entry.
+    dReal *c;
 
-    // lo and hi limits for the *LCP* variables only.
+    // lo and hi limits for variables (set to -/+ infinity on entry).
     dReal *lo,*hi;
   };
 

@@ -161,8 +161,12 @@ static inline dReal myDot (dReal *a, dReal *b, int n)
 
 // swap row/column i1 with i2 in the n*n matrix A. the leading dimension of
 // A is nskip. this only references and swaps the lower triangle.
+// if `do_fast_row_swaps' is nonzero and row pointers are being used, then
+// rows will be swapped by exchanging row pointers. otherwise the data will
+// be copied.
 
-static void swapRowsAndCols (ATYPE A, int n, int i1, int i2, int nskip)
+static void swapRowsAndCols (ATYPE A, int n, int i1, int i2, int nskip,
+			     int do_fast_row_swaps)
 {
   int i;
   dASSERT (A && n > 0 && i1 >= 0 && i2 >= 0 && i1 < n && i2 < n &&
@@ -175,10 +179,19 @@ static void swapRowsAndCols (ATYPE A, int n, int i1, int i2, int nskip)
   A[i1][i1] = A[i2][i1];
   A[i2][i1] = A[i2][i2];
   // swap rows, by swapping row pointers
-  dReal *tmpp;
-  tmpp = A[i1];
-  A[i1] = A[i2];
-  A[i2] = tmpp;
+  if (do_fast_row_swaps) {
+    dReal *tmpp;
+    tmpp = A[i1];
+    A[i1] = A[i2];
+    A[i2] = tmpp;
+  }
+  else {
+    dReal *tmprow = (dReal*) ALLOCA (n * sizeof(dReal));
+    memcpy (tmprow,A[i1],n * sizeof(dReal));
+    memcpy (A[i1],A[i2],n * sizeof(dReal));
+    memcpy (A[i2],tmprow,n * sizeof(dReal));
+  }
+  // swap columns the hard way
   for (i=i2+1; i<n; i++) {
     dReal tmp = A[i][i1];
     A[i][i1] = A[i][i2];
@@ -186,7 +199,7 @@ static void swapRowsAndCols (ATYPE A, int n, int i1, int i2, int nskip)
   }
 # else
   dReal tmp,*tmprow = (dReal*) ALLOCA (n * sizeof(dReal));
-  if (i1 > 0) {
+  if (i1 > 0) {		// @@@ hmmm, is this condition right?
     memcpy (tmprow,A+i1*nskip,i1*sizeof(dReal));
     memcpy (A+i1*nskip,A+i2*nskip,i1*sizeof(dReal));
     memcpy (A+i2*nskip,tmprow,i1*sizeof(dReal));
@@ -212,14 +225,15 @@ static void swapRowsAndCols (ATYPE A, int n, int i1, int i2, int nskip)
 
 static void swapProblem (ATYPE A, dReal *x, dReal *b, dReal *w, dReal *lo,
 			 dReal *hi, int *p, int *state,
-			 int n, int i1, int i2, int nskip)
+			 int n, int i1, int i2, int nskip,
+			 int do_fast_row_swaps)
 {
   dReal tmp;
   int tmpi;
   dASSERT (n>0 && i1 >=0 && i2 >= 0 && i1 < n && i2 < n && nskip >= n &&
-	    i1 <= i2);
+	   i1 <= i2);
   if (i1==i2) return;
-  swapRowsAndCols (A,n,i1,i2,nskip);
+  swapRowsAndCols (A,n,i1,i2,nskip,do_fast_row_swaps);
   tmp = x[i1];
   x[i1] = x[i2];
   x[i2] = tmp;
@@ -342,6 +356,10 @@ struct dLCP {
   // 0..nub-1 will be put into C.
 
   ~dLCP();
+
+  int getNub() { return nub; }
+  // return the value of `nub'. the constructor may want to change it,
+  // so the caller should find out its new value.
 
   // transfer functions: transfer index i to the given set (C or N). indexes
   // less than `nub' can never be given. A,x,b,w,etc may be permuted by these
@@ -649,6 +667,11 @@ void dLCP::unpermute()
 // thus L*D*L'=A[C,C], i.e. a permuted top left nC*nC submatrix of A.
 // the leading dimension of the matrix L is always `nskip'.
 //
+// at the start there may be other indexes that are unbounded but are not
+// included in `nub'. dLCP will permute the matrix so that absolutely all
+// unbounded vectors are at the start. thus there may be some initial
+// permutation.
+//
 // the algorithms here assume certain patterns, particularly with respect to
 // index transfer.
 
@@ -667,6 +690,7 @@ struct dLCP {
 	dReal *_lo, dReal *_hi, dReal *_L, dReal *_d,
 	dReal *_Dell, dReal *_ell, dReal *_tmp,
 	int *_state, int *_p, int *_C, dReal **Arows);
+  int getNub() { return nub; }
   void transfer_i_to_C (int i);
   void transfer_i_to_N (int i)
     { nN++; }			// because we can assume C and N span 1:i-1
@@ -727,7 +751,35 @@ dLCP::dLCP (int _n, int _nub, dReal *_Adata, dReal *_x, dReal *_b, dReal *_w,
 
   nC = 0;
   nN = 0;
-  for (int k=0; k<n; k++) p[k]=k;	// initially unpermuted
+  for (k=0; k<n; k++) p[k]=k;		// initially unpermuted
+
+  /*
+  // @@@ testing: do some random swaps in the area i > nub
+  if (nub < n) {
+    for (k=0; k<100; k++) {
+      int i1,i2;
+      do {
+	i1 = dRandInt(n-nub)+nub;
+	i2 = dRandInt(n-nub)+nub;
+      }
+      while (i1 > i2); 
+      //printf ("--> %d %d\n",i1,i2);
+      swapProblem (A,x,b,w,lo,hi,p,state,n,i1,i2,nskip,0);
+    }
+  }
+  */
+
+  // permute the problem so that *all* the unbounded variables are at the
+  // start, i.e. look for unbounded variables not included in `nub'. we can
+  // potentially push up `nub' this way and get a bigger initial factorization.
+  // note that when we swap rows/cols here we muust not just swap row pointers,
+  // as the initial factorization relies on the data being all in one chunk.
+  for (k=nub; k<n; k++) {
+    if (lo[k]==-dInfinity && hi[k]==dInfinity) {
+      swapProblem (A,x,b,w,lo,hi,p,state,n,nub,k,nskip,0);
+      nub++;
+    }
+  }
 
   // if there are unbounded variables at the start, factorize A up to that
   // point and solve for x. this puts all indexes 0..nub-1 into C.
@@ -740,6 +792,16 @@ dLCP::dLCP (int _n, int _nub, dReal *_Adata, dReal *_x, dReal *_b, dReal *_w,
     for (k=0; k<nub; k++) C[k] = k;
     nC = nub;
   }
+
+  // print info about indexes
+  /*
+  for (k=0; k<n; k++) {
+    if (k<nub) printf ("C");
+    else if (lo[k]==-dInfinity && hi[k]==dInfinity) printf ("c");
+    else printf (".");
+  }
+  printf ("\n");
+  */
 }
 
 
@@ -754,7 +816,7 @@ void dLCP::transfer_i_to_C (int i)
   else {
     d[0] = dRecip (AROW(i)[i]);
   }
-  swapProblem (A,x,b,w,lo,hi,p,state,n,nC,i,nskip);
+  swapProblem (A,x,b,w,lo,hi,p,state,n,nC,i,nskip,1);
   C[nC] = nC;
   nC++;
 
@@ -785,7 +847,7 @@ void dLCP::transfer_i_from_N_to_C (int i)
   else {
     d[0] = dRecip (AROW(i)[i]);
   }
-  swapProblem (A,x,b,w,lo,hi,p,state,n,nC,i,nskip);
+  swapProblem (A,x,b,w,lo,hi,p,state,n,nC,i,nskip,1);
   C[nC] = nC;
   nN--;
   nC++;
@@ -818,7 +880,7 @@ void dLCP::transfer_i_from_C_to_N (int i)
     break;
   }
   dASSERT (j < nC);
-  swapProblem (A,x,b,w,lo,hi,p,state,n,i,nC-1,nskip);
+  swapProblem (A,x,b,w,lo,hi,p,state,n,i,nC-1,nskip,1);
   nC--;
   nN++;
 
@@ -916,6 +978,7 @@ void dSolveLCPBasic (int n, dReal *A, dReal *x, dReal *b,
   int *dummy = (int*) ALLOCA (n*sizeof(int));
 
   dLCP lcp (n,0,A,x,b,w,tmp,tmp,L,d,Dell,ell,tmp,dummy,p,C,Arows);
+  nub = lcp.getNub();
 
   for (i=0; i<n; i++) {
     w[i] = lcp.AiC_times_qC (i,x) - b[i];
@@ -1034,6 +1097,7 @@ void dSolveLCP (int n, dReal *A, dReal *x, dReal *b,
   // create LCP object. note that tmp is set to delta_w to save space, this
   // optimization relies on knowledge of how tmp is used, so be careful!
   dLCP lcp (n,nub,A,x,b,w,lo,hi,L,d,Dell,ell,delta_w,state,p,C,Arows);
+  nub = lcp.getNub();
 
   // loop over all indexes nub..n-1. for index i, if x(i),w(i) satisfy the
   // LCP conditions then i is added to the appropriate index set. otherwise

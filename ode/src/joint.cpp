@@ -39,31 +39,31 @@ static inline void setBall (dxJoint *joint, dxJoint::Info2 *info,
   int s = info->rowskip;
 
   // set jacobian
-  info->J1lu[0] = 1;
-  info->J1lu[s+1] = 1;
-  info->J1lu[2*s+2] = 1;
+  info->J1l[0] = 1;
+  info->J1l[s+1] = 1;
+  info->J1l[2*s+2] = 1;
   dMULTIPLY0_331 (a1,joint->node[0].body->R,anchor1);
-  dCROSSMAT (info->J1au,a1,s,-,+);
+  dCROSSMAT (info->J1a,a1,s,-,+);
   if (joint->node[1].body) {
-    info->J2lu[0] = -1;
-    info->J2lu[s+1] = -1;
-    info->J2lu[2*s+2] = -1;
+    info->J2l[0] = -1;
+    info->J2l[s+1] = -1;
+    info->J2l[2*s+2] = -1;
     dMULTIPLY0_331 (a2,joint->node[1].body->R,anchor2);
-    dCROSSMAT (info->J2au,a2,s,+,-);
+    dCROSSMAT (info->J2a,a2,s,+,-);
   }
 
   // set right hand side
   dReal k = info->fps * info->erp;
   if (joint->node[1].body) {
     for (int j=0; j<3; j++) {
-      info->cu[j] = k * (a2[j] + joint->node[1].body->pos[j] -
-			 a1[j] - joint->node[0].body->pos[j]);
+      info->c[j] = k * (a2[j] + joint->node[1].body->pos[j] -
+			a1[j] - joint->node[0].body->pos[j]);
     }
   }
   else {
     for (int j=0; j<3; j++) {
-      info->cu[j] = k * (anchor2[j] - a1[j] -
-			 joint->node[0].body->pos[j]);
+      info->c[j] = k * (anchor2[j] - a1[j] -
+			joint->node[0].body->pos[j]);
     }
   }
 }
@@ -158,8 +158,8 @@ static void ballInit (dxJointBall *j)
 
 static void ballGetInfo1 (dxJointBall *j, dxJoint::Info1 *info)
 {
+  info->m = 3;
   info->nub = 3;
-  info->nlcp = 0;
 }
 
 
@@ -203,8 +203,8 @@ static void hingeInit (dxJointHinge *j)
 
 static void hingeGetInfo1 (dxJointHinge *j, dxJoint::Info1 *info)
 {
+  info->m = 5;
   info->nub = 5;
-  info->nlcp = 0;
 }
 
 
@@ -229,20 +229,20 @@ static void hingeGetInfo2 (dxJointHinge *joint, dxJoint::Info2 *info)
   int s3=3*info->rowskip;
   int s4=4*info->rowskip;
 
-  info->J1au[s3+0] = p[0];
-  info->J1au[s3+1] = p[1];
-  info->J1au[s3+2] = p[2];
-  info->J1au[s4+0] = q[0];
-  info->J1au[s4+1] = q[1];
-  info->J1au[s4+2] = q[2];
+  info->J1a[s3+0] = p[0];
+  info->J1a[s3+1] = p[1];
+  info->J1a[s3+2] = p[2];
+  info->J1a[s4+0] = q[0];
+  info->J1a[s4+1] = q[1];
+  info->J1a[s4+2] = q[2];
 
   if (joint->node[1].body) {
-    info->J2au[s3+0] = -p[0];
-    info->J2au[s3+1] = -p[1];
-    info->J2au[s3+2] = -p[2];
-    info->J2au[s4+0] = -q[0];
-    info->J2au[s4+1] = -q[1];
-    info->J2au[s4+2] = -q[2];
+    info->J2a[s3+0] = -p[0];
+    info->J2a[s3+1] = -p[1];
+    info->J2a[s3+2] = -p[2];
+    info->J2a[s4+0] = -q[0];
+    info->J2a[s4+1] = -q[1];
+    info->J2a[s4+2] = -q[2];
   }
 
   // compute the right hand side of the constraint equation. set relative
@@ -272,8 +272,8 @@ static void hingeGetInfo2 (dxJointHinge *joint, dxJoint::Info2 *info)
   }
   dCROSS (b,=,ax1,ax2);
   dReal k = info->fps * info->erp;
-  info->cu[3] = k * dDOT(b,p);
-  info->cu[4] = k * dDOT(b,q);
+  info->c[3] = k * dDOT(b,p);
+  info->c[4] = k * dDOT(b,q);
 }
 
 
@@ -324,8 +324,8 @@ static void sliderInit (dxJointSlider *j)
 
 static void sliderGetInfo1 (dxJointSlider *j, dxJoint::Info1 *info)
 {
+  info->m = 5;
   info->nub = 5;
-  info->nlcp = 0;
 }
 
 
@@ -352,13 +352,13 @@ static void sliderGetInfo2 (dxJointSlider *joint, dxJoint::Info2 *info)
   }
 
   // 3 rows to make body rotations equal
-  info->J1au[0] = 1;
-  info->J1au[s+1] = 1;
-  info->J1au[s2+2] = 1;
+  info->J1a[0] = 1;
+  info->J1a[s+1] = 1;
+  info->J1a[s2+2] = 1;
   if (joint->node[1].body) {
-    info->J2au[0] = -1;
-    info->J2au[s+1] = -1;
-    info->J2au[s2+2] = -1;
+    info->J2a[0] = -1;
+    info->J2a[s+1] = -1;
+    info->J2a[s2+2] = -1;
   }
 
   // remaining two rows. we want: vel2 = vel1 + w1 x c ... but this would
@@ -373,16 +373,16 @@ static void sliderGetInfo2 (dxJointSlider *joint, dxJoint::Info2 *info)
   if (joint->node[1].body) {
     dVector3 tmp;
     dCROSS (tmp, = REAL(0.5) * ,c,p);
-    for (i=0; i<3; i++) info->J2au[s3+i] = tmp[i];
-    for (i=0; i<3; i++) info->J2au[s3+i] = tmp[i];
+    for (i=0; i<3; i++) info->J2a[s3+i] = tmp[i];
+    for (i=0; i<3; i++) info->J2a[s3+i] = tmp[i];
     dCROSS (tmp, = REAL(0.5) * ,c,q);
-    for (i=0; i<3; i++) info->J2au[s4+i] = tmp[i];
-    for (i=0; i<3; i++) info->J2au[s4+i] = tmp[i];
-    for (i=0; i<3; i++) info->J2lu[s3+i] = -p[i];
-    for (i=0; i<3; i++) info->J2lu[s4+i] = -q[i];
+    for (i=0; i<3; i++) info->J2a[s4+i] = tmp[i];
+    for (i=0; i<3; i++) info->J2a[s4+i] = tmp[i];
+    for (i=0; i<3; i++) info->J2l[s3+i] = -p[i];
+    for (i=0; i<3; i++) info->J2l[s4+i] = -q[i];
   }
-  for (i=0; i<3; i++) info->J1lu[s3+i] = p[i];
-  for (i=0; i<3; i++) info->J1lu[s4+i] = q[i];
+  for (i=0; i<3; i++) info->J1l[s3+i] = p[i];
+  for (i=0; i<3; i++) info->J1l[s4+i] = q[i];
 
   // compute the right hand side. the first three elements will result in
   // relative angular velocity of the two bodies - this is set to bring them
@@ -416,9 +416,9 @@ static void sliderGetInfo2 (dxJointSlider *joint, dxJoint::Info2 *info)
   dVector3 e;
   dMULTIPLY0_331 (e,joint->node[0].body->R,qerr+1); // @@@ bad SIMD padding!
   dReal k = info->fps * info->erp;
-  info->cu[0] = 2*k * e[0];
-  info->cu[1] = 2*k * e[1];
-  info->cu[2] = 2*k * e[2];
+  info->c[0] = 2*k * e[0];
+  info->c[1] = 2*k * e[1];
+  info->c[2] = 2*k * e[2];
 
   // compute last two elements of right hand side. we want to align the offset
   // point (in body 2's frame) with the center of body 1.
@@ -426,14 +426,14 @@ static void sliderGetInfo2 (dxJointSlider *joint, dxJoint::Info2 *info)
     dVector3 ofs;		// offset point in global coordinates
     dMULTIPLY0_331 (ofs,R2,joint->offset);
     for (i=0; i<3; i++) c[i] += ofs[i];
-    info->cu[3] = k * dDOT(p,c);
-    info->cu[4] = k * dDOT(q,c);
+    info->c[3] = k * dDOT(p,c);
+    info->c[4] = k * dDOT(q,c);
   }
   else {
     dVector3 ofs;		// offset point in global coordinates
     for (i=0; i<3; i++) ofs[i] = joint->offset[i] - pos1[i];
-    info->cu[3] = k * dDOT(p,ofs);
-    info->cu[4] = k * dDOT(q,ofs);
+    info->c[3] = k * dDOT(p,ofs);
+    info->c[4] = k * dDOT(q,ofs);
   }
 }
 
@@ -489,44 +489,67 @@ static void contactInit (dxJointContact *j)
 
 static void contactGetInfo1 (dxJointContact *j, dxJoint::Info1 *info)
 {
+  info->m = 3;		// 1 or 3 will work
   info->nub = 0;
-  info->nlcp = 1;
 }
 
 
 static void contactGetInfo2 (dxJointContact *j, dxJoint::Info2 *info)
 {
-  int i; // s = info->rowskip;
+  int i,s = info->rowskip;
+  int s2 = 2*s;
 
   // c1,c2 = contact points with respect to body PORs
   dVector3 c1,c2;
   for (i=0; i<3; i++) c1[i] = j->contact.pos[i] - j->node[0].body->pos[i];
 
-  // set jacobian
-  info->J1ll[0] = j->contact.normal[0];
-  info->J1ll[1] = j->contact.normal[1];
-  info->J1ll[2] = j->contact.normal[2];
-  dCROSS (info->J1al,=  ,c1,j->contact.normal);
+  // set jacobian for normal
+  info->J1l[0] = j->contact.normal[0];
+  info->J1l[1] = j->contact.normal[1];
+  info->J1l[2] = j->contact.normal[2];
+  dCROSS (info->J1a,=  ,c1,j->contact.normal);
   if (j->node[1].body) {
     for (i=0; i<3; i++) c2[i] = j->contact.pos[i] - j->node[1].body->pos[i];
-    info->J2ll[0] = -j->contact.normal[0];
-    info->J2ll[1] = -j->contact.normal[1];
-    info->J2ll[2] = -j->contact.normal[2];
-    dCROSS (info->J2al,= -,c2,j->contact.normal);
+    info->J2l[0] = -j->contact.normal[0];
+    info->J2l[1] = -j->contact.normal[1];
+    info->J2l[2] = -j->contact.normal[2];
+    dCROSS (info->J2a,= -,c2,j->contact.normal);
   }
 
-  // set right hand side
+  // set right hand side for normal
   dReal k = info->fps * info->erp;
   if (j->flags & dJOINT_REVERSE) {
-    info->cl[0] = k*j->contact.depth;
+    info->c[0] = k*j->contact.depth;
   }
   else {
-    info->cl[0] = -k*j->contact.depth;
+    info->c[0] = -k*j->contact.depth;
   }
 
-  // set LCP limits
+  // set LCP limits for normal
   info->lo[0] = 0;
   info->hi[0] = dInfinity;
+
+  // now do jacobian for tangential forces
+  dVector3 t1,t2;	// two vectors tangential to normal
+  dPlaneSpace (j->contact.normal,t1,t2);
+  info->J1l[s+0] = t1[0];
+  info->J1l[s+1] = t1[1];
+  info->J1l[s+2] = t1[2];
+  dCROSS (info->J1a+s,=,c1,t1);
+  info->J1l[s2+0] = t2[0];
+  info->J1l[s2+1] = t2[1];
+  info->J1l[s2+2] = t2[2];
+  dCROSS (info->J1a+s2,=,c1,t2);
+  if (j->node[1].body) {
+    info->J2l[s+0] = t1[0];
+    info->J2l[s+1] = t1[1];
+    info->J2l[s+2] = t1[2];
+    dCROSS (info->J2a+s,=,c2,t2);
+    info->J2l[s2+0] = t2[0];
+    info->J2l[s2+1] = t2[1];
+    info->J2l[s2+2] = t2[2];
+    dCROSS (info->J2a+s2,=,c2,t2);
+  }
 }
 
 
