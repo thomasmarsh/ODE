@@ -93,6 +93,9 @@ tons of things in lcp.cpp (@@@), especially speed optimizations. also, do
 index block switching and index block updates to take advantage of the outer
 product trick.
 
+dSetZero() - make fast inline functions for fixed n e.g. (1-4).
+
+need proper `sticky' friction, i.e. compensation for numerical slip.
 
 DONE
 ----
