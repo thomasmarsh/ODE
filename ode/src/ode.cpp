@@ -853,6 +853,8 @@ void dBodyEnable (dBodyID b)
 {
   dAASSERT (b);
   b->flags &= ~dxBodyDisabled;
+  b->adis_stepsleft = b->adis.idle_steps;
+  b->adis_timeleft = b->adis.idle_time;
 }
 
 
