@@ -428,18 +428,20 @@ static inline void initCollisionArrays()
     //   classes = (dArray<dxGeomClass*> *) dAllocNoFree (sizeof(dArrayBase));
     //   classes->constructor();
     classes = new dArray<dxGeomClass*>;
-    classes->setSize (1);
+    classes->setSize (1);	// force allocation of array data memory
     dAllocDontReport (classes);
     dAllocDontReport (classes->data());
+    classes->setSize (0);
   }
   if (colliders==0) {
     // old way:
     //   colliders=(dArray<dColliderEntry> *)dAllocNoFree (sizeof(dArrayBase));
     //   colliders->constructor();
     colliders = new dArray<dColliderEntry>;
-    colliders->setSize (1);
+    colliders->setSize (1);	// force allocation of array data memory
     dAllocDontReport (colliders);
     dAllocDontReport (colliders->data());
+    colliders->setSize (0);
   }
 }
 
@@ -476,6 +478,10 @@ int dCollide (dxGeom *o1, dxGeom *o2, int flags, dContactGeom *contact,
   dColliderFn *fn;
   dAASSERT(o1 && o2 && contact);
   dUASSERT(classes && colliders,"no registered geometry classes");
+
+  // no contacts if both geoms on the same body (also if both bodies are 0)
+  if (o1->body == o2->body) return 0;
+
   dColliderEntry *colliders2 = colliders->data();
   c1 = o1->_class->num;
   c2 = o2->_class->num;
@@ -515,12 +521,13 @@ int dCollide (dxGeom *o1, dxGeom *o2, int flags, dContactGeom *contact,
 
   if (swap) {
     for (i=0; i<count; i++) {
-      contact[i].normal[0] = -contact[i].normal[0];
-      contact[i].normal[1] = -contact[i].normal[1];
-      contact[i].normal[2] = -contact[i].normal[2];
-      dxGeom *tmp = contact[i].g1;
-      contact[i].g1 = contact[i].g2;
-      contact[i].g2 = tmp;
+      dContactGeom *c = CONTACT(contact,skip*i);
+      c->normal[0] = -c->normal[0];
+      c->normal[1] = -c->normal[1];
+      c->normal[2] = -c->normal[2];
+      dxGeom *tmp = c->g1;
+      c->g1 = c->g2;
+      c->g2 = tmp;
     }
   }
 
@@ -690,7 +697,7 @@ struct dxGeomGroup {
 //****************************************************************************
 // primitive collision functions
 // same interface as dCollide().
-// S=sphere, B=box, C=capped cylinder, P=plane, G=group
+// S=sphere, B=box, C=capped cylinder, P=plane, G=group, T=transform
 
 int dCollideSS (const dxGeom *o1, const dxGeom *o2, int flags,
 		dContactGeom *contact, int skip)
@@ -1013,10 +1020,195 @@ int dCollideCB (const dxGeom *o1, const dxGeom *o2, int flags,
 }
 
 
+// this returns at most one contact point when the two cylinder's axes are not
+// aligned, and at most two (for stability) when they are aligned.
+// the algorithm minimizes the distance between two "sample spheres" that are
+// positioned along the cylinder axes according to:
+//    sphere1 = pos1 + alpha1 * axis1
+//    sphere2 = pos2 + alpha2 * axis2
+// alpha1 and alpha2 are limited to +/- half the length of the cylinders.
+// the algorithm works by finding a solution that has both alphas free, or
+// a solution that has one or both alphas fixed to the ends of the cylinder.
+
 int dCollideCC (const dxGeom *o1, const dxGeom *o2,
 		int flags, dContactGeom *contact, int skip)
 {
-  dDebug (0,"unimplemented");
+  int i;
+  const dReal tolerance = 1e-5;
+
+  dIASSERT (skip >= (int)sizeof(dContactGeom));
+  dIASSERT (o1->_class->num == dCCylinderClass);
+  dIASSERT (o2->_class->num == dCCylinderClass);
+  contact->g1 = const_cast<dxGeom*> (o1);
+  contact->g2 = const_cast<dxGeom*> (o2);
+  dxCCylinder *cyl1 = (dxCCylinder*) CLASSDATA(o1);
+  dxCCylinder *cyl2 = (dxCCylinder*) CLASSDATA(o2);
+
+  // copy out some variables, for convenience
+  dReal lz1 = cyl1->lz * REAL(0.5);
+  dReal lz2 = cyl2->lz * REAL(0.5);
+  dReal *pos1 = o1->pos;
+  dReal *pos2 = o2->pos;
+  dReal axis1[3],axis2[3];
+  axis1[0] = o1->R[2];
+  axis1[1] = o1->R[6];
+  axis1[2] = o1->R[10];
+  axis2[0] = o2->R[2];
+  axis2[1] = o2->R[6];
+  axis2[2] = o2->R[10];
+
+  dReal alpha1,alpha2,sphere1[3],sphere2[3];
+  int fix1 = 0;		// 0 if alpha1 is free, +/-1 to fix at +/- lz1
+  int fix2 = 0;		// 0 if alpha2 is free, +/-1 to fix at +/- lz2
+
+  for (int count=0; count<9; count++) {
+    // find a trial solution by fixing or not fixing the alphas
+    if (fix1) {
+      if (fix2) {
+	// alpha1 and alpha2 are fixed, so the solution is easy
+	if (fix1 > 0) alpha1 = lz1; else alpha1 = -lz1;
+	if (fix2 > 0) alpha2 = lz2; else alpha2 = -lz2;
+	for (i=0; i<3; i++) sphere1[i] = pos1[i] + alpha1*axis1[i];
+	for (i=0; i<3; i++) sphere2[i] = pos2[i] + alpha2*axis2[i];
+      }
+      else {
+	// fix alpha1 but let alpha2 be free
+	if (fix1 > 0) alpha1 = lz1; else alpha1 = -lz1;
+	for (i=0; i<3; i++) sphere1[i] = pos1[i] + alpha1*axis1[i];
+	alpha2 = (axis2[0]*(sphere1[0]-pos2[0]) +
+		  axis2[1]*(sphere1[1]-pos2[1]) +
+		  axis2[2]*(sphere1[2]-pos2[2]));
+	for (i=0; i<3; i++) sphere2[i] = pos2[i] + alpha2*axis2[i];
+      }
+    }
+    else {
+      if (fix2) {
+	// fix alpha2 but let alpha1 be free
+	if (fix2 > 0) alpha2 = lz2; else alpha2 = -lz2;
+	for (i=0; i<3; i++) sphere2[i] = pos2[i] + alpha2*axis2[i];
+	alpha1 = (axis1[0]*(sphere2[0]-pos1[0]) +
+		  axis1[1]*(sphere2[1]-pos1[1]) +
+		  axis1[2]*(sphere2[2]-pos1[2]));
+	for (i=0; i<3; i++) sphere1[i] = pos1[i] + alpha1*axis1[i];
+      }
+      else {
+	// let alpha1 and alpha2 be free
+	// compute determinant of d(d^2)\d(alpha) jacobian
+	dReal a1a2 = dDOT (axis1,axis2);
+	dReal det = 1.0-a1a2*a1a2;
+	if (det < tolerance) {
+	  // the cylinder axes (almost) parallel, so we will generate up to two
+	  // contacts. the solution matrix is rank deficient so alpha1 and
+	  // alpha2 are related by:
+	  //       alpha2 =   alpha1 + (pos1-pos2)'*axis1   (if axis1==axis2)
+	  //    or alpha2 = -(alpha1 + (pos1-pos2)'*axis1)  (if axis1==-axis2)
+	  // first compute where the two cylinders overlap in alpha1 space:
+	  if (a1a2 < 0) {
+	    axis2[0] = -axis2[0];
+	    axis2[1] = -axis2[1];
+	    axis2[2] = -axis2[2];
+	  }
+	  dReal q[3];
+	  for (i=0; i<3; i++) q[i] = pos1[i]-pos2[i];
+	  dReal k = dDOT (axis1,q);
+	  dReal a1lo = -lz1;
+	  dReal a1hi = lz1;
+	  dReal a2lo = -lz2 - k;
+	  dReal a2hi = lz2 - k;
+	  dReal lo = (a1lo > a2lo) ? a1lo : a2lo;
+	  dReal hi = (a1hi < a2hi) ? a1hi : a2hi;
+	  if (lo <= hi) {
+	    int num_contacts = flags & 0xff;
+	    if (num_contacts >= 2 && lo < hi) {
+	      // generate up to two contacts. if one of those contacts is
+	      // not made, fall back on the one-contact strategy.
+	      for (i=0; i<3; i++) sphere1[i] = pos1[i] + lo*axis1[i];
+	      for (i=0; i<3; i++) sphere2[i] = pos2[i] + (lo+k)*axis2[i];
+	      int n1 = dCollideSpheres (sphere1,cyl1->radius,
+					sphere2,cyl2->radius,contact);
+	      if (n1) {
+		for (i=0; i<3; i++) sphere1[i] = pos1[i] + hi*axis1[i];
+		for (i=0; i<3; i++) sphere2[i] = pos2[i] + (hi+k)*axis2[i];
+		dContactGeom *c2 = CONTACT(contact,skip);
+		int n2 = dCollideSpheres (sphere1,cyl1->radius,
+					  sphere2,cyl2->radius, c2);
+		if (n2) {
+		  c2->g1 = const_cast<dxGeom*> (o1);
+		  c2->g2 = const_cast<dxGeom*> (o2);
+		  return 2;
+		}
+	      }
+	    }
+
+	    // just one contact to generate, so put it in the middle of
+	    // the range
+	    alpha1 = (lo + hi) * REAL(0.5);
+	    alpha2 = alpha1 + k;
+	    for (i=0; i<3; i++) sphere1[i] = pos1[i] + alpha1*axis1[i];
+	    for (i=0; i<3; i++) sphere2[i] = pos2[i] + alpha2*axis2[i];
+	    return dCollideSpheres (sphere1,cyl1->radius,
+				    sphere2,cyl2->radius,contact);
+	  }
+	  else return 0;
+	}
+	det = 1.0/det;
+	dReal delta[3];
+	for (i=0; i<3; i++) delta[i] = pos1[i] - pos2[i];
+	dReal q1 = dDOT (delta,axis1);
+	dReal q2 = dDOT (delta,axis2);
+	alpha1 = det*(a1a2*q2-q1);
+	alpha2 = det*(q2-a1a2*q1);
+	for (i=0; i<3; i++) sphere1[i] = pos1[i] + alpha1*axis1[i];
+	for (i=0; i<3; i++) sphere2[i] = pos2[i] + alpha2*axis2[i];
+      }
+    }
+
+    // if the alphas are outside their allowed ranges then fix them and
+    // try again
+    if (fix1==0) {
+      if (alpha1 < -lz1) {
+	fix1 = -1;
+	continue;
+      }
+      if (alpha1 > lz1) {
+	fix1 = 1;
+	continue;
+      }
+    }
+    if (fix2==0) {
+      if (alpha2 < -lz2) {
+	fix2 = -1;
+	continue;
+      }
+      if (alpha2 > lz2) {
+	fix2 = 1;
+	continue;
+      }
+    }
+
+    // unfix the alpha variables if the local distance gradient indicates
+    // that we are not yet at the minimum
+    dReal tmp[3];
+    for (i=0; i<3; i++) tmp[i] = sphere1[i] - sphere2[i];
+    if (fix1) {
+      dReal gradient = dDOT (tmp,axis1);
+      if ((fix1 > 0 && gradient > 0) || (fix1 < 0 && gradient < 0)) {
+	fix1 = 0;
+	continue;
+      }
+    }
+    if (fix2) {
+      dReal gradient = -dDOT (tmp,axis2);
+      if ((fix2 > 0 && gradient > 0) || (fix2 < 0 && gradient < 0)) {
+	fix2 = 0;
+	continue;
+      }
+    }
+    return dCollideSpheres (sphere1,cyl1->radius,sphere2,cyl2->radius,contact);
+  }
+  // if we go through the loop too much, then give up. we should NEVER get to
+  // this point (i hope).
+  dMessage (0,"dCollideCC(): too many iterations");
   return 0;
 }
 
@@ -1160,7 +1352,7 @@ static dColliderFn * dCCylinderColliderFn (int num)
 {
   if (num == dSphereClass) return (dColliderFn *) &dCollideCS;
   if (num == dPlaneClass) return (dColliderFn *) &dCollideCP;
-  // if (num == dCCylinderClass) return (dColliderFn *) &dCollideCC;
+  if (num == dCCylinderClass) return (dColliderFn *) &dCollideCC;
   return 0;
 }
 
@@ -1409,7 +1601,7 @@ static void dGeomGroupAABB (dxGeom *geom, dReal aabb[6])
 }
 
 
-void dGeomGroupDtor (dxGeom *geom)
+static void dGeomGroupDtor (dxGeom *geom)
 {
   dxGeomGroup *gr = (dxGeomGroup*) CLASSDATA(geom);
   gr->parts.~dArray();
@@ -1471,6 +1663,173 @@ dxGeom * dGeomGroupGetGeom (dxGeom *g, int i)
   dxGeomGroup *gr = (dxGeomGroup*) CLASSDATA(g);
   dAASSERT (i >= 0 && i < gr->parts.size());
   return gr->parts[i];
+}
+
+//****************************************************************************
+// transformed geom
+
+int dGeomTransformClass = -1;
+
+struct dxGeomTransform {
+  dxGeom *obj;		// object that is being transformed
+  int cleanup;		// 1 to destroy obj when destroyed
+  dVector3 final_pos;	// final tx (body tx + relative tx) of the object.
+  dMatrix3 final_R;	//   this is only set if the AABB function is called
+};			//   by space collision before the collide fn is called
+
+
+// compute final pos and R for the encapsulated geom object
+
+static void compute_final_tx (const dxGeom *g)
+{
+  dxGeomTransform *tr = (dxGeomTransform*) CLASSDATA(g);
+  dMULTIPLY0_331 (tr->final_pos,g->R,tr->obj->pos);
+  tr->final_pos[0] += g->pos[0];
+  tr->final_pos[1] += g->pos[1];
+  tr->final_pos[2] += g->pos[2];
+  dMULTIPLY0_333 (tr->final_R,g->R,tr->obj->R);
+}
+
+
+
+// this collides a transformed geom with another geom. the other geom can
+// also be a transformed geom, but this case is not handled specially.
+
+int dCollideT (const dxGeom *o1, const dxGeom *o2, int flags,
+	       dContactGeom *contact, int skip)
+{
+  dxGeomTransform *tr = (dxGeomTransform*) CLASSDATA(o1);
+  if (!tr->obj) return 0;
+  dUASSERT (tr->obj->spaceid==0,
+	    "GeomTransform encapsulated object must not be in a space");
+  dUASSERT (tr->obj->body==0,
+	    "GeomTransform encapsulated object must not be attach to a body");
+
+  // backup the relative pos and R pointers of the encapsulated geom object,
+  // and the body pointer
+  dReal *posbak = tr->obj->pos;
+  dReal *Rbak = tr->obj->R;
+  dxBody *bodybak = tr->obj->body;
+
+  // compute temporary pos and R for the encapsulated geom object
+  if (!o1->space_aabb) compute_final_tx (o1);
+  tr->obj->pos = tr->final_pos;
+  tr->obj->R = tr->final_R;
+  tr->obj->body = o1->body;
+
+  // do the collision
+  int n = dCollide (tr->obj,const_cast<dxGeom*>(o2),flags,contact,skip);
+
+  // restore the pos, R and body
+  tr->obj->pos = posbak;
+  tr->obj->R = Rbak;
+  tr->obj->body = bodybak;
+  return n;
+}
+
+
+static dColliderFn * dGeomTransformColliderFn (int num)
+{
+  return (dColliderFn *) &dCollideT;
+}
+
+
+static void dGeomTransformAABB (dxGeom *geom, dReal aabb[6])
+{
+  dxGeomTransform *tr = (dxGeomTransform*) CLASSDATA(geom);
+  if (!tr->obj) {
+    dSetZero (aabb,6);
+    return;
+  }
+
+  // backup the relative pos and R pointers of the encapsulated geom object
+  dReal *posbak = tr->obj->pos;
+  dReal *Rbak = tr->obj->R;
+
+  // compute temporary pos and R for the encapsulated geom object
+  compute_final_tx (geom);
+  tr->obj->pos = tr->final_pos;
+  tr->obj->R = tr->final_R;
+
+  // compute the AABB
+  tr->obj->_class->aabb (tr->obj,aabb);
+
+  // restore the pos and R
+  tr->obj->pos = posbak;
+  tr->obj->R = Rbak;
+}
+
+
+static void dGeomTransformDtor (dxGeom *geom)
+{
+  dxGeomTransform *tr = (dxGeomTransform*) CLASSDATA(geom);
+  if (tr->obj && tr->cleanup) {
+    dGeomDestroy (tr->obj);
+  }
+}
+
+
+dxGeom *dCreateGeomTransform (dSpaceID space)
+{
+  if (dGeomTransformClass == -1) {
+    dGeomClass c;
+    c.bytes = sizeof (dxGeomTransform);
+    c.collider = &dGeomTransformColliderFn;
+    c.aabb = &dGeomTransformAABB;
+    c.aabb_test = 0;
+    c.dtor = dGeomTransformDtor;
+    dGeomTransformClass = dCreateGeomClass (&c);
+  }
+
+  dxGeom *g = dCreateGeom (dGeomTransformClass);
+  if (space) dSpaceAdd (space,g);
+
+  dxGeomTransform *tr = (dxGeomTransform*) CLASSDATA(g);
+  tr->obj = 0;
+  tr->cleanup = 0;
+  dSetZero (tr->final_pos,4);
+  dRSetIdentity (tr->final_R);
+
+  return g;
+}
+
+
+void dGeomTransformSetGeom (dxGeom *g, dxGeom *obj)
+{
+  dUASSERT (g && g->_class->num == dGeomTransformClass,
+	    "argument not a geom transform");
+  dxGeomTransform *tr = (dxGeomTransform*) CLASSDATA(g);
+  if (tr->obj && tr->cleanup) {
+    dGeomDestroy (tr->obj);
+  }
+  tr->obj = obj;
+}
+
+
+dxGeom * dGeomTransformGetGeom (dxGeom *g)
+{
+  dUASSERT (g && g->_class->num == dGeomTransformClass,
+	    "argument not a geom transform");
+  dxGeomTransform *tr = (dxGeomTransform*) CLASSDATA(g);
+  return tr->obj;
+}
+
+
+void dGeomTransformSetCleanup (dGeomID g, int mode)
+{
+  dUASSERT (g && g->_class->num == dGeomTransformClass,
+	    "argument not a geom transform");
+  dxGeomTransform *tr = (dxGeomTransform*) CLASSDATA(g);
+  tr->cleanup = mode;
+}
+
+
+int dGeomTransformGetCleanup (dGeomID g)
+{
+  dUASSERT (g && g->_class->num == dGeomTransformClass,
+	    "argument not a geom transform");
+  dxGeomTransform *tr = (dxGeomTransform*) CLASSDATA(g);
+  return tr->cleanup;
 }
 
 //****************************************************************************
