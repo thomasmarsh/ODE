@@ -26,7 +26,7 @@
 
 #include "objects.h"
 #include "ode/contact.h"
-#include "stack.h"
+#include "obstack.h"
 
 
 // joint flags
@@ -127,10 +127,9 @@ struct dxJoint : public dObject {
 // joint group. NOTE: any joints in the group that have their world destroyed
 // will have their world pointer set to 0.
 
-struct dxJointGroup {
+struct dxJointGroup : public dBase {
   int num;		// number of joints on the stack
-  dxJoint *firstjoint;	// address of first joint on the stack
-  dStack stack;		// a stack of (possibly differently sized) dxJoint
+  dObStack stack;	// a stack of (possibly differently sized) dxJoint
 };			// objects.
 
 

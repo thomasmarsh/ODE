@@ -57,8 +57,9 @@ struct dObStack {
 
   void *next (int num_bytes);
   // return the address of the next allocated block. 'num_bytes' is the size
-  // of the current block. this returns null if there are no more arenas.
-  // this behaves similarly to alloc, except that no new arenas are allocated.
+  // of the previous block. this returns null if there are no more arenas.
+  // the sequence of 'num_bytes' parameters passed to next() during a
+  // traversal of the list must exactly match the parameters passed to alloc().
 };
 
 

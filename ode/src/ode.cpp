@@ -867,11 +867,8 @@ void dJointDestroy (dxJoint *j)
 dJointGroupID dJointGroupCreate (int max_size)
 {
   dUASSERT (max_size > 0,"max size must be > 0");
-  dxJointGroup *group = (dxJointGroup*) dAlloc (sizeof(dxJointGroup));
-  group->stack.init (max_size);
-  group->stack.pushFrame();
+  dxJointGroup *group = new dxJointGroup;
   group->num = 0;
-  group->firstjoint = (dxJoint*) group->stack.nextAlloc();
   return group;
 }
 
@@ -880,8 +877,7 @@ void dJointGroupDestroy (dJointGroupID group)
 {
   dAASSERT (group);
   dJointGroupEmpty (group);
-  group->stack.destroy();
-  dFree (group,sizeof(dxJointGroup));
+  delete group;
 }
 
 
@@ -897,10 +893,10 @@ void dJointGroupEmpty (dJointGroupID group)
   dAASSERT (group);
   int i;
   dxJoint **jlist = (dxJoint**) ALLOCA (group->num * sizeof(dxJoint*));
-  dxJoint *j = group->firstjoint;
+  dxJoint *j = (dxJoint*) group->stack.rewind();
   for (i=0; i < group->num; i++) {
     jlist[i] = j;
-    j = (dxJoint*) ( ((char*)j) + j->vtable->size );
+    j = (dxJoint*) (group->stack.next (j->vtable->size));
   }
   for (i=group->num-1; i >= 0; i--) {
     if (jlist[i]->world) {
@@ -910,8 +906,7 @@ void dJointGroupEmpty (dJointGroupID group)
     }
   }
   group->num = 0;
-  group->stack.popFrame();
-  group->stack.pushFrame();
+  group->stack.freeAll();
 }
 
 
