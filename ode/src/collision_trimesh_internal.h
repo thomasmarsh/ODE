@@ -79,11 +79,16 @@ struct dxTriMesh : public dxGeom{
 		dxGeom* Geom;
 	};
 	dArray<SphereTC> SphereTCCache;
+	static SphereCache defaultSphereCache;
 
 	struct BoxTC : public OBBCache{
 		dxGeom* Geom;
 	};
 	dArray<BoxTC> BoxTCCache;
+	static OBBCache defaultBoxCache;
+
+	bool doSphereTC;
+	bool doBoxTC;
 
 	// Functions
 	dxTriMesh(dSpaceID Space, dTriMeshDataID Data);

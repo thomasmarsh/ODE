@@ -252,26 +252,37 @@ int dCollideSTL(dxGeom* g1, dxGeom* SphereGeom, int Flags, dContactGeom* Contact
 	Sphere.mCenter.z = Position[2];
 	Sphere.mRadius = Radius;
 
-	// TC results
-	dxTriMesh::SphereTC* SphereTC = 0;
-	for (int i = 0; i < TriMesh->SphereTCCache.size(); i++){
-		if (TriMesh->SphereTCCache[i].Geom == SphereGeom){
-			SphereTC = &TriMesh->SphereTCCache[i];
-			break;
-		}
-	}
-
-	if (!SphereTC){
-		TriMesh->SphereTCCache.push(dxTriMesh::SphereTC());
-
-		SphereTC = &TriMesh->SphereTCCache[TriMesh->SphereTCCache.size() - 1];
-		SphereTC->Geom = SphereGeom;
-	}
-
-	// Intersect
 	Matrix4x4 amatrix;
-	Collider.Collide(*SphereTC, Sphere, TriMesh->Data->BVTree, null, &MakeMatrix(TLPosition, TLRotation, amatrix));
 
+	// TC results
+	if (TriMesh->doSphereTC) {
+		dxTriMesh::SphereTC* sphereTC = 0;
+		for (int i = 0; i < TriMesh->SphereTCCache.size(); i++){
+			if (TriMesh->SphereTCCache[i].Geom == SphereGeom){
+				sphereTC = &TriMesh->SphereTCCache[i];
+				break;
+			}
+		}
+
+		if (!sphereTC){
+			TriMesh->SphereTCCache.push(dxTriMesh::SphereTC());
+
+			sphereTC = &TriMesh->SphereTCCache[TriMesh->SphereTCCache.size() - 1];
+			sphereTC->Geom = SphereGeom;
+		}
+		
+		// Intersect
+		Collider.SetTemporalCoherence(true);
+		Collider.Collide(*sphereTC, Sphere, TriMesh->Data->BVTree, null, 
+						 &MakeMatrix(TLPosition, TLRotation, amatrix));
+	}
+	else {
+		Collider.SetTemporalCoherence(false);
+		Collider.Collide(dxTriMesh::defaultSphereCache, Sphere, TriMesh->Data->BVTree, null, 
+						 &MakeMatrix(TLPosition, TLRotation, amatrix));
+ 	}
+
+	// get results
 	int TriCount = Collider.GetNbTouchedPrimitives();
 	const int* Triangles = (const int*)Collider.GetTouchedPrimitives();
 

@@ -370,24 +370,33 @@ int dCollideBTL(dxGeom* g1, dxGeom* BoxGeom, int Flags, dContactGeom* Contacts, 
 	InvertPRMatrix(InvBoxMatrix, BoxMatrix);
 
 	// TC results
-	dxTriMesh::BoxTC* BoxTC = 0;
-	for (int i = 0; i < TriMesh->BoxTCCache.size(); i++){
-		if (TriMesh->BoxTCCache[i].Geom == BoxGeom){
-			BoxTC = &TriMesh->BoxTCCache[i];
-			break;
+	if (TriMesh->doBoxTC) {
+		dxTriMesh::BoxTC* boxTC = 0;
+		for (int i = 0; i < TriMesh->BoxTCCache.size(); i++){
+			if (TriMesh->BoxTCCache[i].Geom == BoxGeom){
+				boxTC = &TriMesh->BoxTCCache[i];
+				break;
+			}
 		}
-	}
-	if (!BoxTC){
-		TriMesh->BoxTCCache.push(dxTriMesh::BoxTC());
+		if (!boxTC){
+			TriMesh->BoxTCCache.push(dxTriMesh::BoxTC());
 
-		BoxTC = &TriMesh->BoxTCCache[TriMesh->BoxTCCache.size() - 1];
-		BoxTC->Geom = BoxGeom;
-		BoxTC->FatCoeff = 1.0f;
+			boxTC = &TriMesh->BoxTCCache[TriMesh->BoxTCCache.size() - 1];
+			boxTC->Geom = BoxGeom;
+			boxTC->FatCoeff = 1.0f;
+		}
+		
+		// Intersect
+		Collider.SetTemporalCoherence(true);
+		Collider.Collide(*boxTC, Box, TriMesh->Data->BVTree, null, 
+						 &MakeMatrix(TLPosition, TLRotation, amatrix));
+	}
+	else {
+		Collider.SetTemporalCoherence(false);
+		Collider.Collide(dxTriMesh::defaultBoxCache, Box, TriMesh->Data->BVTree, null, 
+						 &MakeMatrix(TLPosition, TLRotation, amatrix));	
 	}
 
-	// Intersect
-	Collider.Collide(*BoxTC, Box, TriMesh->Data->BVTree, null, &MakeMatrix(TLPosition, TLRotation, amatrix));
-	
 	// Retrieve data
 	int TriCount = Collider.GetNbTouchedPrimitives();
 	const int* Triangles = (const int*)Collider.GetTouchedPrimitives();
