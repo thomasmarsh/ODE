@@ -10,15 +10,40 @@ dcTriListCollider* GetData(dxGeom* TriList){
 	return Data->Collider;
 }
 
+inline bool ValidateCollision(dxGeom* o1, dxGeom* o2){
+	dxBody* b1 = dGeomGetBody(o1);
+	dxBody* b2 = dGeomGetBody(o2);
+
+	if (b1){
+		if (!dBodyIsEnabled(b1)){
+			b1 = 0;
+		}
+	}
+	if (b2){
+		if (!dBodyIsEnabled(b2)){
+			b2 = 0;
+		}
+	}
+	return b1 || b2;
+}
+
 int dCollideSTL(dxGeom* TriList, dxGeom* Sphere, int Flags, dContactGeom* Contact, int Stride){
-	return GetData(TriList)->CollideSphere(Sphere, Flags, Contact, Stride);
+	if (ValidateCollision(Sphere, TriList)){
+		return GetData(TriList)->CollideSphere(Sphere, Flags, Contact, Stride);
+	}
+	else return 0;
 }
 
 int dCollideBTL(dxGeom* TriList, dxGeom* Box, int Flags, dContactGeom* Contact, int Stride){
-	return GetData(TriList)->CollideBox(Box, Flags, Contact, Stride);
+	if (ValidateCollision(Box, TriList)){
+		return GetData(TriList)->CollideBox(Box, Flags, Contact, Stride);
+	}
+	else return 0;
 }
 
 int dAABBTestTL(dxGeom* TriList, dxGeom* Object, dReal AABB[6]){
+	return 1;
+
 	int Class = dGeomGetClass(Object);
 	if (Class == dGeomGroupClass){
 		CollisionAABB Box;

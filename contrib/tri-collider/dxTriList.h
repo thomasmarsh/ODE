@@ -166,6 +166,7 @@ struct dcVector3{
 	}
 };
 
+
 /* Class ID */
 extern int dTriListClass;
 

@@ -147,6 +147,7 @@ int dcTriListCollider::CollideBox(dxGeom* Box, int Flags, dContactGeom* Contacts
 							dcVector3& RefNormal = (dcVector3&)Ref->normal;
 							RefNormal += Normal;
 							RefNormal.Normalize();
+							//break;/// PIERRE!
 						}
 					}
 					if (Index == OutTriCount){
@@ -276,11 +277,11 @@ int dcTriListCollider::CollideSphere(dxGeom* Sphere, int Flags, dContactGeom* Co
 
 				dContactGeom& OutContact = *Contacts;
 				((dcVector3&)OutContact.pos) = SphereCenter - OutNormal * SphereRadius;
-				((dcVector3&)OutContact.normal) = OutNormal;
+				((dcVector3&)OutContact.normal) = OutNormal * -1;
 				OutContact.depth = Depth;
 
-				OutContact.g1 = Sphere;
-				OutContact.g2 = Geometry;
+				OutContact.g1 = Geometry;
+				OutContact.g2 = Sphere;
 #ifdef GENERATEBODIES
 				OutContact.b1 = dGeomGetBody(Sphere);
 				OutContact.b2 = dGeomGetBody(Geometry);
