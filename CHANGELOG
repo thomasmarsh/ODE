@@ -9,6 +9,10 @@ the rules for this file:
 
 ------------------------------------------------------------------------------
 
+05/05/04 adam
+
+        * use dRandInt instead of rand() in stepfast.
+
 04/21/04 russ
 
 	* added auto-disable support from Aras Pranckevicius (with

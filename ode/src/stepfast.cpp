@@ -37,6 +37,7 @@
 #include <ode/timer.h>
 #include <ode/error.h>
 #include <ode/matrix.h>
+#include <ode/misc.h>
 #include "lcp.h"
 #include "step.h"
 #include "util.h"
@@ -835,7 +836,7 @@ dInternalStepIslandFast (dxWorld * world, dxBody * const *bodies, int nb, dxJoin
 			joint = joints[j];
 			dxJoint::Info1 i1 = info[j];
 			dxJoint::Info2 i2 = Jinfo[j];
-			int r = rand () % (j + 1);
+                        const int r = dRandInt(j+1);
 			joints[j] = joints[r];
 			info[j] = info[r];
 			Jinfo[j] = Jinfo[r];
