@@ -267,6 +267,14 @@ void get_ODE_integer_typedefs (FILE *file)
   if (sizeof(char) != 1) fatal_error ("expecting sizeof(char) == 1");
   if (sizeof(int) < 4) fatal_error ("expecting sizeof(int) >= 4");
   fprintf (file,"typedef char int8;\ntypedef unsigned char uint8;\n");
+
+  if (sizeof(short) == 2) {
+    fprintf (file,"typedef short int16;\ntypedef unsigned short uint16;\n");
+  }
+  else {
+    fatal_error ("can not find 2 byte integer type");
+  }
+
   if (sizeof(short) == 4) {
     fprintf (file,"typedef short int32;\ntypedef unsigned short uint32;\n");
   }
@@ -276,6 +284,7 @@ void get_ODE_integer_typedefs (FILE *file)
   else {
     fatal_error ("can not find 4 byte integer type");
   }
+
   fprintf (file,"\n"
 	   "/* an integer type that we can safely cast a pointer to and\n"
 	   " * from without loss of bits.\n"
@@ -289,6 +298,7 @@ void get_ODE_integer_typedefs (FILE *file)
   else if (sizeof(long int) == sizeof(void*)) {
     fprintf (file,"typedef unsigned long int intP;\n");
   }
+
   fprintf (file,"\n");
 }
 
