@@ -34,10 +34,6 @@ transform is the identity.
 #include <ode/matrix.h>
 #include "joint.h"
 
-// ********** : HEY!!! Remove this, it was for debugging
-#include <iostream>
-using namespace std;
-
 //****************************************************************************
 // externs
 
@@ -175,7 +171,7 @@ static void setAnchors (dxJoint *j, dReal x, dReal y, dReal z,
 }
 
 
-// compute axes relative to bodies. Either axis1 or axis2 can be 0
+// compute axes relative to bodies. either axis1 or axis2 can be 0.
 
 static void setAxes (dxJoint *j, dReal x, dReal y, dReal z,
 		     dVector3 axis1, dVector3 axis2)
@@ -254,8 +250,7 @@ static void getAxis2 (dxJoint *j, dVector3 result, dVector3 axis2)
 }
 
 
-static dReal getHingeAngleFromRelativeQuat(dQuaternion qrel,
-				  dVector3 axis)
+static dReal getHingeAngleFromRelativeQuat (dQuaternion qrel, dVector3 axis)
 {
   // the angle between the two bodies is extracted from the quaternion that
   // represents the relative rotation between them. recall that a quaternion
@@ -321,7 +316,7 @@ static dReal getHingeAngle (dxBody *body1, dxBody *body2, dVector3 axis,
     dQMultiply3 (qrel,body1->q,q_initial);
   }
 
-  return getHingeAngleFromRelativeQuat(qrel, axis);
+  return getHingeAngleFromRelativeQuat (qrel,axis);
 }
 
 //****************************************************************************
@@ -1672,6 +1667,7 @@ static void getUniversalAxes(dxJointUniversal *joint, dVector3 ax1, dVector3 ax2
   }
 }
 
+
 static dReal getUniversalAngle1(dxJointUniversal *joint)
 {
   if (joint->node[0].body) {
@@ -1753,6 +1749,7 @@ static dReal getUniversalAngle2(dxJointUniversal *joint)
   return 0;
 }
 
+
 /*
 static void getUniversalAngles(dxJointUniversal *joint, dReal &angle1, dReal &angle2)
 {
@@ -1807,6 +1804,7 @@ static void getUniversalAngles(dxJointUniversal *joint, dReal &angle1, dReal &an
 }
 */
 
+
 static void universalGetInfo1 (dxJointUniversal *j, dxJoint::Info1 *info)
 {
   info->nub = 4;
@@ -1837,13 +1835,6 @@ static void universalGetInfo1 (dxJointUniversal *j, dxJoint::Info1 *info)
     info->m++;
 }
 
-/*void print_row(const char *preface, const dReal *vec, int n)
-{
-	cout << preface << vec[0];
-	for (int i = 1; i < n; ++i)
-		cout << ", " << vec[i];
-	cout << "\n";
-}*/
 
 static void universalGetInfo2 (dxJointUniversal *joint, dxJoint::Info2 *info)
 {
@@ -1866,15 +1857,12 @@ static void universalGetInfo2 (dxJointUniversal *joint, dxJoint::Info2 *info)
   dReal k;
   
   getUniversalAxes(joint, ax1, ax2);
-//  print_row("ax1: ", ax1, 3);
-//  print_row("ax2: ", ax2, 3);
   k = dDOT(ax1, ax2);
   ax2_temp[0] = ax2[0] - k*ax1[0];
   ax2_temp[1] = ax2[1] - k*ax1[1];
   ax2_temp[2] = ax2[2] - k*ax1[2];
   dCROSS(p, =, ax1, ax2_temp);
   dNormalize3(p);
-//  print_row("p: ", p, 3);
  
   int s3=3*info->rowskip;
 
@@ -1904,15 +1892,11 @@ static void universalGetInfo2 (dxJointUniversal *joint, dxJoint::Info2 *info)
 
   info->c[3] = info->fps * info->erp * - dDOT(ax1, ax2);
 
-//  cout << "c[3]: " << info->c[3] << "\n";
-
   // if the first angle is powered, or has joint limits, add in the stuff
   int row = 4 + joint->limot1.addLimot (joint,info,4,ax1,1);
 
   // if the second angle is powered, or has joint limits, add in more stuff
   joint->limot2.addLimot (joint,info,row,ax2,1);
-
-//  cout << "row: " << row << "\n";
 }
 
 
@@ -2058,6 +2042,7 @@ extern "C" dReal dJointGetUniversalParam (dxJointUniversal *joint, int parameter
   }
 }
 
+
 extern "C" dReal dJointGetUniversalAngle1 (dxJointUniversal *joint)
 {
   dUASSERT(joint,"bad joint argument");
@@ -2067,6 +2052,7 @@ extern "C" dReal dJointGetUniversalAngle1 (dxJointUniversal *joint)
   else
     return getUniversalAngle1 (joint);
 }
+
 
 extern "C" dReal dJointGetUniversalAngle2 (dxJointUniversal *joint)
 {
@@ -2079,7 +2065,8 @@ extern "C" dReal dJointGetUniversalAngle2 (dxJointUniversal *joint)
 }
   
 
-/*extern "C" void dJointGetUniversalAngles (dxJointUniversal *joint, dReal *angle1,
+/*
+extern "C" void dJointGetUniversalAngles (dxJointUniversal *joint, dReal *angle1,
 					   dReal *angle2)
 {
   dUASSERT(joint,"bad joint argument");
@@ -2089,7 +2076,9 @@ extern "C" dReal dJointGetUniversalAngle2 (dxJointUniversal *joint)
   if (joint->node[0].body || joint->node[1].body) {
     getUniversalAngles(joint, angle1, angle2);
   }
-}*/
+}
+*/
+
 
 extern "C" dReal dJointGetUniversalAngle1Rate (dxJointUniversal *joint)
 {
@@ -2133,8 +2122,9 @@ extern "C" dReal dJointGetUniversalAngle2Rate (dxJointUniversal *joint)
 }
 
 
-/*extern "C" void dJointGetUniversalAngleRates (dxJointUniversal *joint, dReal *rate1,
-					   dReal *rate2)
+/*
+extern "C" void dJointGetUniversalAngleRates (dxJointUniversal *joint, dReal *rate1,
+					      dReal *rate2)
 {
   dUASSERT(joint,"bad joint argument");
   dUASSERT(joint->vtable == &__duniversal_vtable,"joint is not a universal");
@@ -2151,7 +2141,6 @@ extern "C" dReal dJointGetUniversalAngle2Rate (dxJointUniversal *joint)
     }
   }
 }*/
-
 
 
 dxJoint::Vtable __duniversal_vtable = {
