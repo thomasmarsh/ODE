@@ -1660,6 +1660,11 @@ extern "C" void dJointSetUniversalAxis1 (dxJointUniversal *joint,
     dNormalize3 (q);
     dMULTIPLY1_331 (joint->axis1,joint->node[0].body->R,q);
   }
+  else {
+    joint->axis1[0] = x;
+    joint->axis1[1] = y;
+    joint->axis1[2] = z;
+  }
   joint->axis1[3] = 0;
 }
 
@@ -1677,6 +1682,11 @@ extern "C" void dJointSetUniversalAxis2 (dxJointUniversal *joint,
     q[3] = 0;
     dNormalize3 (q);
     dMULTIPLY1_331 (joint->axis2,joint->node[1].body->R,q);
+  }
+  else {
+    joint->axis2[0] = x;
+    joint->axis2[1] = y;
+    joint->axis2[2] = z;
   }
   joint->axis2[3] = 0;
 }
@@ -1701,6 +1711,11 @@ extern "C" void dJointGetUniversalAxis1 (dxJointUniversal *joint,
   if (joint->node[0].body) {
     dMULTIPLY0_331 (result, joint->node[0].body->R, joint->axis1);
   }
+  else {
+    result[0] = joint->axis1[0];
+    result[1] = joint->axis1[1];
+    result[2] = joint->axis1[2];
+  }
 }
 
 
@@ -1712,6 +1727,11 @@ extern "C" void dJointGetUniversalAxis2 (dxJointUniversal *joint,
   dUASSERT(joint->vtable == &__duniversal_vtable,"joint is not a universal");
   if (joint->node[1].body) {
     dMULTIPLY0_331 (result, joint->node[1].body->R, joint->axis2);
+  }
+  else {
+    result[0] = joint->axis2[0];
+    result[1] = joint->axis2[1];
+    result[2] = joint->axis2[2];
   }
 }
 
