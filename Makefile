@@ -64,6 +64,7 @@ ODE_SRC = \
 	ode/src/timer.cpp \
 	ode/src/mat.cpp \
 	ode/src/testing.cpp \
+	ode/src/export-dif.cpp \
 	ode/src/collision_kernel.cpp \
 	ode/src/collision_util.cpp \
 	ode/src/collision_std.cpp \
@@ -197,9 +198,6 @@ endif
 # add some defines depending on the build mode
 ifeq ($(BUILD),release)
 DEFINES+=$(C_DEF)dNODEBUG
-endif
-ifeq ($(BUILD),debug)
-DEFINES+=$(C_DEF)dDEBUG_ALLOC
 endif
 
 # object file names
