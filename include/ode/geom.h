@@ -89,7 +89,7 @@ dReal *dGeomGetSpaceAABB (dGeomID);
 
 void dGeomGroupAdd (dGeomID group, dGeomID x);
 void dGeomGroupRemove (dGeomID group, dGeomID x);
-int dGeomGroupNumGeoms (dGeomID group);
+int dGeomGroupGetNumGeoms (dGeomID group);
 dGeomID dGeomGroupGetGeom (dGeomID group, int i);
 
 /* ************************************************************************ */
