@@ -217,7 +217,7 @@ extern struct dxJoint::Vtable __dhinge2_vtable;
 
 struct dxJointAMotor : public dxJoint {
   int num;			// number of axes (0..3)
-  int mode;			// bit 0 = euler mode?
+  int mode;			// a dAMotorXXX constant
   int rel[3];			// what the axes are relative to (global,b1,b2)
   dVector3 axis[3];		// three axes
   dxJointLimitMotor limot[3];	// limit+motor info for axes
