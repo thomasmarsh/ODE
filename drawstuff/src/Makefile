@@ -14,5 +14,8 @@ else
 endif
 
 all: $(LIB)
+ifeq ($(PLATFORM),win32)
+	copy resources.res ..\..\lib\drawstuff.res
+endif
 
 $(LIB): $(call fTARGETS,$(SRC))

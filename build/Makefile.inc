@@ -43,6 +43,6 @@ all: subdirs
 
 depend: make_depend depend_subdirs
 
-include $(dir $(MAKEFILE_INC))/Makefile.linux
+include $(dir $(MAKEFILE_INC))/Makefile.win32
 
 -include Dependencies

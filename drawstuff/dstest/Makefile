@@ -9,7 +9,11 @@ INCLUDE_PATHS = ../../include
 LIB_PATHS = ../../lib
 EXTRA_CLEAN = $(APPNAME)
 
+ifeq ($(PLATFORM),win32)
+  RSRC=../../lib/drawstuff.res
+endif
+
 all: $(APPNAME)
 
 $(APPNAME): $(call fTARGETS,$(SRC))
-	$(call fLINK,$(APPNAME),$(call fTARGETS,$(SRC)) $(call fLIB,drawstuff) $(LINKOPENGL) $(LINKWIN) $(LINKMATH))
+	$(call fLINK,$(APPNAME),$(call fTARGETS,$(SRC)) $(call fLIB,drawstuff) $(LINKOPENGL) $(LINKWIN) $(LINKMATH) $(RSRC))
