@@ -77,18 +77,37 @@ extern "C" {
 #endif
 #define dAASSERT(a) dUASSERT(a,"Bad argument(s)")
 
-
 /* floating point data type, vector, matrix and quaternion types */
 
 #if defined(dSINGLE)
 typedef float dReal;
-#define dInfinity HUGE_VALF
 #elif defined(dDOUBLE)
 typedef double dReal;
-#define dInfinity HUGE_VAL
 #else
 #error You must #define dSINGLE or dDOUBLE
 #endif
+
+
+/* infinity, for various platforms */
+
+#if defined(WIN32) && defined(MSVC)
+static union { unsigned char __c[4]; float __f; } __huge_valf =
+  {{0,0,0x80,0x7f}};
+#define _INFINITY4 (__huge_valf.__f)
+static union { unsigned char __c[8]; double __d; } __huge_val =
+  {{0,0,0,0,0,0,0xf0,0x7f }};
+#define _INFINITY8 (__huge_val.__d)
+#else
+#define _INFINITY8 HUGE_VAL
+#define _INFINITY4 HUGE_VALF
+#endif
+
+#if defined(dSINGLE)
+#define dInfinity _INFINITY4
+#else
+#define dInfinity _INFINITY8
+#endif
+
 
 /* round an integer up to a multiple of 4, except that 0 and 1 are unmodified
  * (used to compute matrix leading dimensions)
