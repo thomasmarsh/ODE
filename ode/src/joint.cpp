@@ -141,6 +141,61 @@ static inline void setBall2 (dxJoint *joint, dxJoint::Info2 *info,
 }
 
 
+// set three orientation rows in the constraint equation, and the
+// corresponding right hand side.
+
+static void setFixedOrientation(dxJoint *joint, dxJoint::Info2 *info, dQuaternion qrel, int start_row)
+{
+  int s = info->rowskip;
+  int start_index = start_row * s;
+
+  // 3 rows to make body rotations equal
+  info->J1a[start_index] = 1;
+  info->J1a[start_index + s + 1] = 1;
+  info->J1a[start_index + s*2+2] = 1;
+  if (joint->node[1].body) {
+    info->J2a[start_index] = -1;
+    info->J2a[start_index + s+1] = -1;
+    info->J2a[start_index + s*2+2] = -1;
+  }
+
+  // compute the right hand side. the first three elements will result in
+  // relative angular velocity of the two bodies - this is set to bring them
+  // back into alignment. the correcting angular velocity is
+  //   |angular_velocity| = angle/time = erp*theta / stepsize
+  //                      = (erp*fps) * theta
+  //    angular_velocity  = |angular_velocity| * u
+  //                      = (erp*fps) * theta * u
+  // where rotation along unit length axis u by theta brings body 2's frame
+  // to qrel with respect to body 1's frame. using a small angle approximation
+  // for sin(), this gives
+  //    angular_velocity  = (erp*fps) * 2 * v
+  // where the quaternion of the relative rotation between the two bodies is
+  //    q = [cos(theta/2) sin(theta/2)*u] = [s v]
+
+  // get qerr = relative rotation (rotation error) between two bodies
+  dQuaternion qerr,e;
+  if (joint->node[1].body) {
+    dQuaternion qq;
+    dQMultiply1 (qq,joint->node[0].body->q,joint->node[1].body->q);
+    dQMultiply2 (qerr,qq,qrel);
+  }
+  else {
+    dQMultiply3 (qerr,joint->node[0].body->q,qrel);
+  }
+  if (qerr[0] < 0) {
+    qerr[1] = -qerr[1];		// adjust sign of qerr to make theta small
+    qerr[2] = -qerr[2];
+    qerr[3] = -qerr[3];
+  }
+  dMULTIPLY0_331 (e,joint->node[0].body->R,qerr+1); // @@@ bad SIMD padding!
+  dReal k = info->fps * info->erp;
+  info->c[start_row] = 2*k * e[0];
+  info->c[start_row+1] = 2*k * e[1];
+  info->c[start_row+2] = 2*k * e[2];
+}
+
+
 // compute anchor points relative to bodies
 
 static void setAnchors (dxJoint *j, dReal x, dReal y, dReal z,
@@ -991,14 +1046,7 @@ static void sliderGetInfo2 (dxJointSlider *joint, dxJoint::Info2 *info)
   }
 
   // 3 rows to make body rotations equal
-  info->J1a[0] = 1;
-  info->J1a[s+1] = 1;
-  info->J1a[s2+2] = 1;
-  if (joint->node[1].body) {
-    info->J2a[0] = -1;
-    info->J2a[s+1] = -1;
-    info->J2a[s2+2] = -1;
-  }
+  setFixedOrientation(joint, info, joint->qrel, 0);
 
   // remaining two rows. we want: vel2 = vel1 + w1 x c ... but this would
   // result in three equations, so we project along the planespace vectors
@@ -1023,43 +1071,9 @@ static void sliderGetInfo2 (dxJointSlider *joint, dxJoint::Info2 *info)
   for (i=0; i<3; i++) info->J1l[s3+i] = p[i];
   for (i=0; i<3; i++) info->J1l[s4+i] = q[i];
 
-  // compute the right hand side. the first three elements will result in
-  // relative angular velocity of the two bodies - this is set to bring them
-  // back into alignment. the correcting angular velocity is
-  //   |angular_velocity| = angle/time = erp*theta / stepsize
-  //                      = (erp*fps) * theta
-  //    angular_velocity  = |angular_velocity| * u
-  //                      = (erp*fps) * theta * u
-  // where rotation along unit length axis u by theta brings body 2's frame
-  // to qrel with respect to body 1's frame. using a small angle approximation
-  // for sin(), this gives
-  //    angular_velocity  = (erp*fps) * 2 * v
-  // where the quaternion of the relative rotation between the two bodies is
-  //    q = [cos(theta/2) sin(theta/2)*u] = [s v]
-
-  // get qerr = relative rotation (rotation error) between two bodies
-  dQuaternion qerr,e;
-  if (joint->node[1].body) {
-    dQuaternion qq;
-    dQMultiply1 (qq,joint->node[0].body->q,joint->node[1].body->q);
-    dQMultiply2 (qerr,qq,joint->qrel);
-  }
-  else {
-    dQMultiply3 (qerr,joint->node[0].body->q,joint->qrel);
-  }
-  if (qerr[0] < 0) {
-    qerr[1] = -qerr[1];		// adjust sign of qerr to make theta small
-    qerr[2] = -qerr[2];
-    qerr[3] = -qerr[3];
-  }
-  dMULTIPLY0_331 (e,joint->node[0].body->R,qerr+1); // @@@ bad SIMD padding!
-  dReal k = info->fps * info->erp;
-  info->c[0] = 2*k * e[0];
-  info->c[1] = 2*k * e[1];
-  info->c[2] = 2*k * e[2];
-
   // compute last two elements of right hand side. we want to align the offset
   // point (in body 2's frame) with the center of body 1.
+  dReal k = info->fps * info->erp;
   if (joint->node[1].body) {
     dVector3 ofs;		// offset point in global coordinates
     dMULTIPLY0_331 (ofs,R2,joint->offset);
@@ -2539,6 +2553,7 @@ dxJoint::Vtable __damotor_vtable = {
 static void fixedInit (dxJointFixed *j)
 {
   dSetZero (j->offset,4);
+  dSetZero (j->qrel,4);
 }
 
 
@@ -2553,24 +2568,22 @@ static void fixedGetInfo2 (dxJointFixed *joint, dxJoint::Info2 *info)
 {
   int s = info->rowskip;
 
+  // Three rows for orientation
+  setFixedOrientation(joint, info, joint->qrel, 3);
+
+  // Three rows for position.
   // set jacobian
   info->J1l[0] = 1;
   info->J1l[s+1] = 1;
   info->J1l[2*s+2] = 1;
-  info->J1a[3*s] = 1;
-  info->J1a[4*s+1] = 1;
-  info->J1a[5*s+2] = 1;
 
   dVector3 ofs;
+  dMULTIPLY0_331 (ofs,joint->node[0].body->R,joint->offset);
   if (joint->node[1].body) {
-    dMULTIPLY0_331 (ofs,joint->node[0].body->R,joint->offset);
     dCROSSMAT (info->J1a,ofs,s,+,-);
     info->J2l[0] = -1;
     info->J2l[s+1] = -1;
     info->J2l[2*s+2] = -1;
-    info->J2a[3*s] = -1;
-    info->J2a[4*s+1] = -1;
-    info->J2a[5*s+2] = -1;
   }
 
   // set right hand side for the first three rows (linear)
@@ -2584,29 +2597,6 @@ static void fixedGetInfo2 (dxJointFixed *joint, dxJoint::Info2 *info)
     for (int j=0; j<3; j++)
       info->c[j] = k * (joint->offset[j] - joint->node[0].body->pos[j]);
   }
-
-  // set right hand side for the next three rows (angular). this code is
-  // borrowed from the slider, so look at the comments there.
-  // @@@ make a function common to both the slider and this joint !!!
-
-  // get qerr = relative rotation (rotation error) between two bodies
-  dQuaternion qerr,e;
-  if (joint->node[1].body) {
-    dQMultiply1 (qerr,joint->node[0].body->q,joint->node[1].body->q);
-  }
-  else {
-    qerr[0] = joint->node[0].body->q[0];
-    for (int i=1; i<4; i++) qerr[i] = -joint->node[0].body->q[i];
-  }
-  if (qerr[0] < 0) {
-    qerr[1] = -qerr[1];		// adjust sign of qerr to make theta small
-    qerr[2] = -qerr[2];
-    qerr[3] = -qerr[3];
-  }
-  dMULTIPLY0_331 (e,joint->node[0].body->R,qerr+1); // @@@ bad SIMD padding!
-  info->c[3] = 2*k * e[0];
-  info->c[4] = 2*k * e[1];
-  info->c[5] = 2*k * e[2];
 }
 
 
@@ -2616,15 +2606,21 @@ extern "C" void dJointSetFixed (dxJointFixed *joint)
   dUASSERT(joint->vtable == &__dfixed_vtable,"joint is not fixed");
   int i;
 
+  // This code is taken from sJointSetSliderAxis(), we should really put the
+  // common code in its own function.
   // compute the offset between the bodies
   if (joint->node[0].body) {
     if (joint->node[1].body) {
+      dQMultiply1 (joint->qrel,joint->node[0].body->q,joint->node[1].body->q);
       dReal ofs[4];
       for (i=0; i<4; i++) ofs[i] = joint->node[0].body->pos[i];
       for (i=0; i<4; i++) ofs[i] -= joint->node[1].body->pos[i];
       dMULTIPLY1_331 (joint->offset,joint->node[0].body->R,ofs);
     }
     else {
+      // set joint->qrel to the transpose of the first body's q
+      joint->qrel[0] = joint->node[0].body->q[0];
+      for (i=1; i<4; i++) joint->qrel[i] = -joint->node[0].body->q[i];
       for (i=0; i<4; i++) joint->offset[i] = joint->node[0].body->pos[i];
     }
   }
