@@ -1336,8 +1336,12 @@ Get the joint's type. One of the following constants will be returned:
 @funcdef{
 dBodyID dJointGetBody (dJointID, int index);
 }{
-Return the bodies that this joint connects. The @arg{index} must be either 0
-or 1, referring to either the ``first'' or ``second'' body.
+Return the bodies that this joint connects.
+If @arg{index} is 0 the ``first'' body will be returned, corresponding to the @c{body1}
+argument of @func{dJointAttach()}.
+If @arg{index} is 1 the ``second'' body will be returned, corresponding to the @c{body2}
+argument of @func{dJointAttach()}.
+
 If one of these returned body IDs is zero, the joint connects the other body
 to the static environment.
 If both body IDs are zero, the joint is in ``limbo'' and has no effect on
