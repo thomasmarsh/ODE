@@ -65,28 +65,28 @@ const double tol = 1e-5;
 static jmp_buf jump_buffer;
 
 
-void myFatalErrorFunction (int num, const char *msg, va_list ap)
+void myMessageFunction (int num, const char *msg, va_list ap)
 {
-  printf ("(Error %d: ",num);
+  printf ("(Message %d: ",num);
   vprintf (msg,ap);
   printf (")");
-  dSetErrorHandler (0);
+  dSetMessageHandler (0);
   longjmp (jump_buffer,1);
 }
 
 
-#define TRAP_ERROR(do,ifnoerror,iferror) \
-  dSetErrorHandler (&myFatalErrorFunction); \
+#define TRAP_MESSAGE(do,ifnomsg,ifmsg) \
+  dSetMessageHandler (&myMessageFunction); \
   if (setjmp (jump_buffer)) { \
-    dSetErrorHandler (0); \
-    iferror ; \
+    dSetMessageHandler (0); \
+    ifmsg ; \
   } \
   else { \
-    dSetErrorHandler (&myFatalErrorFunction); \
+    dSetMessageHandler (&myMessageFunction); \
     do ; \
-    ifnoerror ; \
+    ifnomsg ; \
   } \
-  dSetErrorHandler (0);
+  dSetMessageHandler (0);
 
 //****************************************************************************
 // utility stuff
@@ -637,13 +637,13 @@ void testMassFunctions()
 
   printf ("\t");
   dMassSetZero (&m);
-  TRAP_ERROR (dMassSetParameters (&m,10, 0,0,0, 1,2,3, 4,5,6),
-	      printf (" FAILED (1)\n"), printf (" passed (1)\n"));
+  TRAP_MESSAGE (dMassSetParameters (&m,10, 0,0,0, 1,2,3, 4,5,6),
+		printf (" FAILED (1)\n"), printf (" passed (1)\n"));
 
   printf ("\t");
   dMassSetZero (&m);
-  TRAP_ERROR (dMassSetParameters (&m,10, 0.1,0.2,0.15, 3,5,14, 3.1,3.2,4),
-	      printf (" passed (2)\n") , printf (" FAILED (2)\n"));
+  TRAP_MESSAGE (dMassSetParameters (&m,10, 0.1,0.2,0.15, 3,5,14, 3.1,3.2,4),
+		printf (" passed (2)\n") , printf (" FAILED (2)\n"));
   if (m.mass==10 && m.c[0]==REAL(0.1) && m.c[1]==REAL(0.2) &&
       m.c[2]==REAL(0.15) && m._I(0,0)==3 && m._I(1,1)==5 && m._I(2,2)==14 &&
       m._I(0,1)==REAL(3.1) && m._I(0,2)==REAL(3.2) && m._I(1,2)==4 &&
