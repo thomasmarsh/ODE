@@ -206,11 +206,12 @@ enum {
   dParamFMax,
   dParamFudgeFactor,
   dParamBounce,
-  dParamSoft,
+  dParamStopERP,
+  dParamStopCFM,
 
   /* parameters for suspension */
-  dParamSuspensionErp,
-  dParamSuspensionCfm,
+  dParamSuspensionERP,
+  dParamSuspensionCFM,
 
   /* a second set of all parameters, e.g. for the second joint limit, the
    * second suspension axis etc. this has bit 8 set.
@@ -221,9 +222,10 @@ enum {
   dParamFMax2,
   dParamFudgeFactor2,
   dParamBounce2,
-  dParamSoft2,
-  dParamSuspensionErp2,
-  dParamSuspensionCfm2
+  dParamStopERP2,
+  dParamStopCFM2,
+  dParamSuspensionERP2,
+  dParamSuspensionCFM2
 };
 
 

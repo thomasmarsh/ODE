@@ -115,8 +115,14 @@ works].
 @section{New in the 0.03 release}
 
 @list{
-@* Contact bounce (i.e. restitution) now works.
-@* Numerous bug fixes: contacts.
+@* Numerous bug fixes, including contacts.
+@* Updated documentation.
+@* Joint types: hinge, slider, ball and socket, hinge-2, contact.
+@* Special vehicle joint: hinge-2 - with steering and suspension.
+@* Powered hinge and slider joints (plus dry friction in those joints).
+@* Joint limits for hinge and slider.
+@* All contact modes work: bounce, soft, slip, restitution, tyre slip.
+@* CFM (constraint force mixing) framework.
 }
 
 
@@ -128,12 +134,6 @@ works].
 @* Update documentation.
 @* Improve the approximation to Coloumb friction.
 @* High level functions that create dynamics and collision objects together.
-@* Special vehicle joints.
-@* Contact modes: bounce, soft, slip.
-@* Powered hinge, prism joint, ball-n-socket (plus dry friction in joints).
-@* Joint limits.
-@* More contact modes: restitution, tyre slip.
-@* Implicit spring framework.
 @* Optimize LCP solver even more.
 @* Expose type-specific collision functions.
 @* More collision primitives: capped cylinder, composite objects.
@@ -153,6 +153,8 @@ works].
 @* More collision primitives: flat-end cylinder, cone?
 @* Higher order integrators for higher accuracy. Also force callback functions.
 @* More internals documentation.
+@* More joints.
+@* All joints powered with limits.
 }
 
 @subsection{Other stuff for later releases}
@@ -1076,7 +1078,8 @@ The parameter numbers are:
 	motor.}
 @constdef{dParamFudgeFactor}{Fudge factor. Controls powering away from a stop.}
 @constdef{dParamBounce}{Limit bounce. Not yet implemented.}
-@constdef{dParamSoft}{Limit softness. Not yet implemented.}
+@constdef{dParamStopERP}{Limit softness (ERP).}
+@constdef{dParamStopCFM}{Limit softness (CFM).}
 @constdef{dParamSuspensionERP}{Suspension error reduction parameter.
 	Currently this only works on the hinge-2 joint.}
 @constdef{dParamSuspensionCFM}{Suspension constraint force mixing parameter.
@@ -1906,6 +1909,24 @@ There are three fixes for this problem:
 @*	Increase ERP to make the problem less visible.
 @*	Do your own variable sized time stepping somehow.
 }
+
+
+@section{How can an immovable body be created?}
+
+In other words, how can you create a body that doesn't move, but that
+interacts with other bodies?
+The answer is to create a geometry object only, without the corresponding
+rigid body object.
+The geometry object is associated with a rigid body ID of zero.
+Then in the contact callback when you detect a collision between two geometry
+objects with a nonzero body ID and a zero body ID, you can simply pass those
+two IDs to the @func{dJointAttach()} function as normal.
+This will create a contact between the rigid body and the static environment.
+
+Don't try to get the same effect by setting a very high mass/inertia on the
+``motionless'' body and then resetting it's position/orientation on each
+time step.
+This can cause unexpected simulation errors.
 
 #############################################################################
 @chapter{Known BUGS}
