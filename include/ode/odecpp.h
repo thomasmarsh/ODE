@@ -218,8 +218,8 @@ class dSpace {
   void operator= (dSpace &) { dDebug (0,"bad"); }
 
 public:
-  dSpace()
-    { _id = dSpaceCreate(); }
+  dSpace ()
+    { _id = dHashSpaceCreate(); }
   ~dSpace()
     { dSpaceDestroy (_id); }
   dSpaceID id()

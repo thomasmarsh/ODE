@@ -1,4 +1,72 @@
 
+TODO BEFORE NEXT RELEASE
+------------------------
+
+library should have no global constructors, as it might be used with C linkage.
+
+contacts: cheaper friction: viscous friction? one step delay friction force.
+
+DOC cfm, the derivation and what it means.
+
+joint "get type" function
+
+joint limit spongyness: interacts with powered joints badly, because when the
+limit is reached full power is applied. fix or doc.
+
+various hinge2 functions may not function correctly if axis1 and axis2 are not
+perpendicular. in particular the getAngle() and getAngleRate() functions
+probably will give bogus answers.
+
+slow step function will not respect the joint getinfo2 functions calling
+addTorque() because it reads the force/torque accumulators before the
+getinfo2 functions are called.
+
+andy says: in ode/src/error.cpp _snprintf() and _vsnprintf() are missing
+in testode: finite and isnan are missing. copysign is missing
+	russ: okay here's the problem: i have Makefile.platform files for
+	VC++, MinGW, but not Cygwin. Cygwin uses the unix-like functions
+	for everything, but the VC++/MinGW configs assumes the MS C-runtime
+	functions. this is easy to fix, except i need to install Cygwin
+	which is a pain to do over MinGW. argh.
+
+build on linux - assumptions made about location of X11 lib, opengl etc.
+use autoconf? set paths in makefile?
+
+hinge2 needs to be attached to two bodies for it to work, make sure this is
+always the case.
+
+make sure joints can return 0 from GetInfo1, i.e. no constraints or "inactive"
+joint, and the step functions will handle it.
+
+if two joints connect to the same two bodies, check that the fast solver
+works!
+
+doccer: @func{} also refs second etc function in function *list*.
+
+warning if user tries to set mass params with nonzero center of mass.
+
+spaces need multiple lists of objects that can never overlap. objects in these
+lists are never tested against each other.
+
+space near-callback should be given potentially intersecting objects 100 at a
+time instead of 1 at a time, to save on calling costs.
+
+joint groups should also be destroyed by destroying the world.
+
+when attaching contact with (0,body), instead of setting the reverse flag
+on the joint and checking it in getInfo2(), we should just reverse the normal
+straight away ... ?
+
+functions to get body connectedness (e.g. return joint lists). also for joints.
+
+dJointAttach(), allow both bodies to be 0 to put the joint into limbo.
+
+timer reporting function:
+	void timerReport (void (*printFunction)(char *, ...));
+
+
+
+
 TODO
 ----
 
@@ -39,8 +107,6 @@ joints:
 
 no-arg init functions, for andy
 
-DOC how bodies and geoms associated then resolved in contact callback.
-
 explore: do joint parameters need to be set for the joint to be setup
 correctly, or should set some proper body-dependent params when it is
 attached? this is only really an issue for joints that have no parameters to
@@ -48,54 +114,11 @@ set, such as the fixed joint.
 
 extra API to get lambda and J'*lambda from last timestep.
 
-fix the "memory leak" in geom.cpp
-
-contacts: cheaper friction: viscous friction? one step delay friction force.
-
-DOC cfm, the derivation and what it means.
-
-joint "get type" function
-
-joint limit spongyness: interacts with powered joints badly, because when the
-limit is reached full power is applied.
-
-various hinge2 functions may not function correctly if axis1 and axis2 are not
-perpendicular. in particular the getAngle() and getAngleRate() functions
-probably will give bogus answers.
-
-slow step function will not respect the joint getinfo2 functions calling
-addTorque() because it reads the force/torque accumulators before the
-getinfo2 functions are called.
-
-andy says: still having trouble with those resource files..
-drawstuff.res doesn't seem to build or be found under cygwin gcc.
-andy says: in ode/src/error.cpp _snprintf() and _vsnprintf() are missing
-in testode: finite and isnan are missing. copysign is missing
-	russ: okay here's the problem: i have Makefile.platform files for
-	VC++, MinGW, but not Cygwin. Cygwin uses the unix-like functions
-	for everything, but the VC++/MinGW configs assumes the MS C-runtime
-	functions. this is easy to fix, except i need to install Cygwin
-	which is a pain to do over MinGW. argh.
-
-build on linux - assumptions made about location of X11 lib, opengl etc.
-use autoconf?
-
-hinge2 needs to be attached to two bodies for it to work, make sure this is
-always the case.
-
-make sure joints can return 0 from GetInfo1, i.e. no constraints or "inactive"
-joint, and the step functions will handle it.
-
 dAlloc() should take an arena parameters which is stored in dWorld.
 
 debugging mode should use dASSERT2 that prints a descriptive error message
 on error, not just the file:line or function. use dASSERT for internal
 consistency checking.
-
-if two joints connect to the same two bodies, check that the fast solver
-works!
-
-doccer: @func{} also refs second etc function in function *list*.
 
 better stack implementation that is not so system dependent. but how will
 we do dynamic page allocation? do we even need to?
@@ -127,24 +150,10 @@ point of view?
 consider splitting solver into functions, which can be optimized separately.
 might make things go faster.
 
-spaces need multiple lists of objects that can never overlap. objects in these
-lists are never tested against each other.
-
-space near-callback should be given potentially intersecting objects 100 at a
-time instead of 1 at a time, to save on calling costs.
-
 faster code for islands with a single body? faster code for dynamically
 symmetric bodies?
 
-joint groups should also be destroyed by destroying the world.
-
-when attaching contact with (0,body), instead of setting the reverse flag
-on the joint and checking it in getInfo2(), we should just reverse the normal
-straight away ... ?
-
 rotation.cpp functions that set matrices should also set padding elements.
-
-functions to get body connectedness (e.g. return joint lists). also for joints.
 
 lcp solver must return (L,d) and some other information, so we can re-solve
 for other right hand sides later on, but using the same complimentarity
@@ -154,19 +163,14 @@ dSetZero() - make fast inline functions for fixed n e.g. (1-4).
 
 need proper `sticky' friction, i.e. compensation for numerical slip.
 
-dJointAttach(), allow both bodies to be 0 to put the joint into limbo.
-
-timer reporting function:
-	void timerReport (void (*printFunction)(char *, ...));
-
 on windows, make sure gcc-compiles libs can be linked with VC++ apps. need
-to make sure some C++ runtime bits are present.
+to make sure some C++ runtime bits are present?
 
 kill all references to dArray<> (in geom.cpp).
 
 need testing code to test all joints with body-to-static-env
 
-copy stack.cpp stuff to reuse
+copy stack.cpp, memory.cpp stuff to reuse
 
 dFactorLDLT() is not so efficient for matrix sizes < block size, e.g.
 redundant calls, zero loads, adds etc
@@ -286,3 +290,12 @@ of the outer product trick ... but this is not worth the effort i think.
 
 lcp.cpp: if lo=hi=0, check operation. can we switch from NL <-> NH without
 going through C? --> done.
+
+andy says: still having trouble with those resource files..
+drawstuff.res doesn't seem to build or be found under cygwin gcc.
+
+DOC how bodies and geoms associated then resolved in contact callback ... not
+really necessary.
+
+fix the "memory leak" in geom.cpp
+
