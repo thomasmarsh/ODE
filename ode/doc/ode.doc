@@ -383,10 +383,10 @@ programs that come with it. Note the following things:
 #  gcc -c -I /home/username/ode/include -DdDOUBLE myprogram.cpp
 # @]}
 
-@*	ODE makes heavy use of the stack for storing temporary values.
+@*	ODE with @func{dWorldStep} makes heavy use of the stack for storing temporary values.
 	For very large systems several megabytes of stack can be used.
 	If you experience unexplained out-of-memory errors or data
-	corruption, especially on Windows, try increasing the stack size.
+	corruption, especially on Windows, try increasing the stack size, or switching to @func{dWorldStepFast1}.
 }
 
 #############################################################################
@@ -3637,7 +3637,7 @@ The triangle mesh collision system has the following features:
 @*	Any triangle ``soup'' can be represented --- i.e. the triangles
 	are not required to have any particular strip, fan or grid
 	structure.
-@*	Triangle meshes can interact with spheres, boxes and rays.
+@*	Triangle meshes can interact with spheres, boxes, rays and other triangle meshes.
 @*	It works well for relatively large triangles.
 @*	It uses temporal coherence to speed up collision tests.
 	When a geom has its collision checked with a trimesh once,
@@ -3645,6 +3645,37 @@ The triangle mesh collision system has the following features:
 	This data can be cleared with the @func{dGeomTriMeshClearTCCache}
 	function.
 	In the future it will be possible to disable this functionality.
+}
+
+Trimesh/Trimesh collisions, perform quite well, but there are three minor caveats:
+
+@list{
+@* The stepsize you use will, in general, have to be reduced for
+   accurate collision resolution.  Non-convex shape collision is much
+   more dependent on the collision geometry than primitive collisions.
+   Further, the local contact geometry will change more rapidly (and
+   in a more complex fashion) for non-convex polytopes than it does
+   for simple, convex polytopes such as spheres and cubes.
+
+@* In order to efficiently resolve collisions, dCollideTTL needs
+   the positions of the colliding trimeshes in the previous timestep.
+   This is used to calculate an estimated velocity of each colliding
+   triangle, which is used to find the direction of impact, contact
+   normals, etc.  This requires
+   the user to update these variables at every timestep.
+   This update is performed outside of ODE, so it is not included
+   in ODE itself.  The code to do this looks something like this:
+
+@code{@[
+           const double *DoubleArrayPtr =  Bodies[BodyIndex].TransformationMatrix->GetArray();
+           dGeomTriMeshDataSet( TriMeshData,
+                                TRIMESH_LAST_TRANSFORMATION,
+                                (void *) DoubleArrayPtr );
+@]}
+
+   The transformation matrix is the standard 4x4 homogenous transform
+   matrix, and the "DoubleArray" is the standard flattened array of 
+   the 16 matrix values. 
 }
 
 @b{NOTE: The triangle mesh class is not final, so in the future API changes
@@ -3662,7 +3693,7 @@ mesh data.
 void dGeomTriMeshDataBuild (dTriMeshDataID g, const void* Vertices,
                             int VertexStride, int VertexCount,
 			    const void* Indices, int IndexCount,
-                            int TriStride);
+                            int TriStride, const void* Normals);
 }{
 Used for filling a @c{dTriMeshData} object with data. No data is copied
 here, so the pointers passed into this function must remain valid.
@@ -3681,7 +3712,33 @@ struct StridedTri {
 };
 int TriStride = sizeof (StridedTri);
 @]}
+
+The @c{Normals} argument is optional: the normals of the faces of each trimesh object.  For example,
+
+@code{@[
+         dTriMeshDataID TriMeshData;
+         TriMeshData = dGeomTriMeshGetTriMeshDataID( Bodies[ BodyIndex ].GeomID );
+
+         // as long as dReal == floats
+         dGeomTriMeshDataBuildSingle(TriMeshData,
+                                     // Vertices
+                                     Bodies[BodyIndex].VertexPositions,
+                                     3*sizeof(dReal), (int) numVertices,
+                                     // Faces
+                                     Bodies[BodyIndex].TriangleIndices, 
+                                     (int) NumTriangles, 3*sizeof(unsigned int),
+                                     // Normals
+                                     Bodies[BodyIndex].FaceNormals);
+   @]}
+
+   This pre-calculation saves some time during evaulation of the
+   conacts, but isn't necessary.  If you don't want to calculate
+   the face normals before construction (or if you have enormous
+   trimeshes and know that only very few faces will be touching
+   and want to save time), just pass a "NULL" for the @{Normals} argument,
+   and dCollideTTL will take care of the normal calcuations itself.
 }
+
 
 @funcdef{
 void dGeomTriMeshDataBuildSimple (dTriMeshDataID g, const dVector3*Vertices,
@@ -3696,7 +3753,7 @@ typedef int dTriCallback (dGeomID TriMesh, dGeomID RefObject, int TriangleIndex)
 void dGeomTriMeshSetCallback (dGeomID g, dTriCallback *Callback);
 dTriCallback* dGeomTriMeshGetCallback (dGeomID g);
 }{
-Opional per triangle callback. Allows the user to say if collision with a
+Optional per triangle callback. Allows the user to say if collision with a
 particular triangle is wanted.
 If the return value is zero no contact will be generated.
 }
@@ -4492,7 +4549,7 @@ this will not be a problem in many applications.
 
 @section{The Windows version of ODE crashes with large systems}
 
-ODE requires stack space roughly on the order of @m{O(n)+O(m^2)},
+ODE with @func{dWorldStep} requires stack space roughly on the order of @m{O(n)+O(m^2)},
 where @m{n} is the number of bodies and @m{m} is the sum of all the joint
 constraint dimensions.
 If @m{m} is large, this can be a lot of space!
@@ -4504,7 +4561,7 @@ If you experience crashes when running large systems, try increasing the
 stack size.
 For example, the MS VC++ command line compiler accepts the @c{/Stack:num}
 flag to set the upper limit.
-
+Or switch to @func{dWorldStepFast1}.
 
 @section{My simple rotating bodies are unstable!}
 
