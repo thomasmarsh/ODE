@@ -5,12 +5,7 @@
 TODO for COLLISION
 ------------------
 
-tidyups:
-	* rationalize what stuff goes in what source files, and file names
-	* minimize set of header files that all collision* sources use - after
-	  all changes.
-	* update ode-cpp stuff (C++ interface header files).
-	* update DLL declarations.
+tidyups: update DLL declarations.
 
 what happens when a GeomTransform's encapsulated object is manipulated,
 e.g. position changed. should this be disallowed? should a GeomTransform
@@ -23,14 +18,6 @@ for geoms that don't move.
 
 disabled geoms (remove from all collision considerations) ... isn't this the
 same as just taking it out of its enclosing group/space?
-
-porting guide:
-	ODE list email
-
-	dGeomGetSpaceAABB() deleted
-
-	dGeomGetClass (geom_group); used to return a unique type for
-	GeomGroups, but now it returns dSimpleSpaceID.
 
 integrate:
 	dRay
@@ -680,3 +667,18 @@ compute the AABBs for those geoms and then combine it with the non-moving AABB.
   --> too hard!
 
 collision build options: old and new
+
+tidyups for collision:
+	* rationalize what stuff goes in what source files, and file names
+	* minimize set of header files that all collision* sources use - after
+	  all changes.
+	* update ode-cpp stuff (C++ interface header files).
+
+porting guide:
+	ODE list email
+
+	dGeomGetSpaceAABB() deleted
+
+	dGeomGetClass (geom_group); used to return a unique type for
+	GeomGroups, but now it returns dSimpleSpaceID.
+
