@@ -162,9 +162,9 @@ bool SAP_PairData::Init(udword nb_objects)
  *	\param		delta	[in] offset in bytes
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-inline_ void Remap(SAP_Element*& element, udword delta)
+inline_ void Remap(SAP_Element*& element, size_t delta)
 {
-	if(element)	element = (SAP_Element*)(udword(element) + delta);
+	if(element)	element = (SAP_Element*)(size_t(element) + delta);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -200,7 +200,7 @@ SAP_Element* SAP_PairData::GetFreeElem(udword id, SAP_Element* next, udword* rem
 
 			// Remap everything
 			{
-				udword Delta = udword(NewElems) - udword(mElementPool);
+				size_t Delta = size_t(NewElems) - size_t(mElementPool);
 
 				for(udword i=0;i<mNbUsedElements;i++)	Remap(NewElems[i].mNext, Delta);
 				for(udword i=0;i<mNbObjects;i++)		Remap(mArray[i], Delta);
