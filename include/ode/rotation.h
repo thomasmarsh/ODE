@@ -48,13 +48,13 @@ void dQFromAxisAndAngle (dQuaternion q, dReal ax, dReal ay, dReal az,
 			 dReal angle);
 
 /* Quaternion multiplication, analogous to the matrix multiplication routines. */
-// qa = rotate by qc, then qb.
+/* qa = rotate by qc, then qb */
 void dQMultiply0 (dQuaternion qa, const dQuaternion qb, const dQuaternion qc);
-// qa = rotate by qc, then by inverse of qb.
+/* qa = rotate by qc, then by inverse of qb */
 void dQMultiply1 (dQuaternion qa, const dQuaternion qb, const dQuaternion qc);
-// qa = rotate by inverse of qc, then by qb.
+/* qa = rotate by inverse of qc, then by qb */
 void dQMultiply2 (dQuaternion qa, const dQuaternion qb, const dQuaternion qc);
-// qa = rotate by inverse of qc, then by inverse of qb.
+/* qa = rotate by inverse of qc, then by inverse of qb */
 void dQMultiply3 (dQuaternion qa, const dQuaternion qb, const dQuaternion qc);
 
 void dQtoR (const dQuaternion q, dMatrix3 R);
