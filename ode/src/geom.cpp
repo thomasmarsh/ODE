@@ -155,8 +155,8 @@ int dBoxTouchesBox (const dVector3 p1, const dMatrix3 R1,
   dMULTIPLY1_331 (pp,R1,p);		// get pp = p relative to body 1
 
   // get side lengths / 2
-  A1 = side1[0]*0.5; A2 = side1[1]*0.5; A3 = side1[2]*0.5;
-  B1 = side2[0]*0.5; B2 = side2[1]*0.5; B3 = side2[2]*0.5;
+  A1 = side1[0]*REAL(0.5); A2 = side1[1]*REAL(0.5); A3 = side1[2]*REAL(0.5);
+  B1 = side2[0]*REAL(0.5); B2 = side2[1]*REAL(0.5); B3 = side2[2]*REAL(0.5);
 
   // for the following tests, excluding computation of Rij, in the worst case,
   // 15 compares, 60 adds, 81 multiplies, and 24 absolutes.
@@ -233,8 +233,8 @@ extern "C" int dBoxBox (const dVector3 p1, const dMatrix3 R1,
   dMULTIPLY1_331 (pp,R1,p);		// get pp = p relative to body 1
 
   // get side lengths / 2
-  A1 = side1[0]*0.5; A2 = side1[1]*0.5; A3 = side1[2]*0.5;
-  B1 = side2[0]*0.5; B2 = side2[1]*0.5; B3 = side2[2]*0.5;
+  A1 = side1[0]*REAL(0.5); A2 = side1[1]*REAL(0.5); A3 = side1[2]*REAL(0.5);
+  B1 = side2[0]*REAL(0.5); B2 = side2[1]*REAL(0.5); B3 = side2[2]*REAL(0.5);
 
   // Rij is R1'*R2, i.e. the relative rotation between R1 and R2
   R11 = dDOT44(R1+0,R2+0); R12 = dDOT44(R1+0,R2+1); R13 = dDOT44(R1+0,R2+2);
@@ -339,21 +339,21 @@ extern "C" int dBoxBox (const dVector3 p1, const dMatrix3 R1,
     dVector3 pa;
     dReal sign;
     for (i=0; i<3; i++) pa[i] = p1[i];
-    sign = (dDOT14(normal,R1+0) > 0) ? 1 : -1;
+    sign = (dDOT14(normal,R1+0) > 0) ? REAL(1.0) : REAL(-1.0);
     for (i=0; i<3; i++) pa[i] += sign * A1 * R1[i*4];
-    sign = (dDOT14(normal,R1+1) > 0) ? 1 : -1;
+    sign = (dDOT14(normal,R1+1) > 0) ? REAL(1.0) : REAL(-1.0);
     for (i=0; i<3; i++) pa[i] += sign * A2 * R1[i*4+1];
-    sign = (dDOT14(normal,R1+2) > 0) ? 1 : -1;
+    sign = (dDOT14(normal,R1+2) > 0) ? REAL(1.0) : REAL(-1.0);
     for (i=0; i<3; i++) pa[i] += sign * A3 * R1[i*4+2];
 
     // find a point pb on the intersecting edge of box 2
     dVector3 pb;
     for (i=0; i<3; i++) pb[i] = p2[i];
-    sign = (dDOT14(normal,R2+0) > 0) ? -1 : 1;
+    sign = (dDOT14(normal,R2+0) > 0) ? REAL(-1.0) : REAL(1.0);
     for (i=0; i<3; i++) pb[i] += sign * B1 * R2[i*4];
-    sign = (dDOT14(normal,R2+1) > 0) ? -1 : 1;
+    sign = (dDOT14(normal,R2+1) > 0) ? REAL(-1.0) : REAL(1.0);
     for (i=0; i<3; i++) pb[i] += sign * B2 * R2[i*4+1];
-    sign = (dDOT14(normal,R2+2) > 0) ? -1 : 1;
+    sign = (dDOT14(normal,R2+2) > 0) ? REAL(-1.0) : REAL(1.0);
     for (i=0; i<3; i++) pb[i] += sign * B3 * R2[i*4+2];
 
     dReal alpha,beta;
@@ -365,7 +365,7 @@ extern "C" int dBoxBox (const dVector3 p1, const dMatrix3 R1,
     for (i=0; i<3; i++) pa[i] += ua[i]*alpha;
     for (i=0; i<3; i++) pb[i] += ub[i]*beta;
 
-    for (i=0; i<3; i++) contact[0].pos[i] = 0.5*(pa[i]+pb[i]);
+    for (i=0; i<3; i++) contact[0].pos[i] = REAL(0.5)*(pa[i]+pb[i]);
     contact[0].depth = *depth;
     return 1;
   }
@@ -382,22 +382,22 @@ extern "C" int dBoxBox (const dVector3 p1, const dMatrix3 R1,
     // face from box 1 touches a vertex/edge/face from box 2.
     dReal sign;
     for (i=0; i<3; i++) vertex[i] = p2[i];
-    sign = (dDOT14(normal,R2+0) > 0) ? -1 : 1;
+    sign = (dDOT14(normal,R2+0) > 0) ? REAL(-1.0) : REAL(1.0);
     for (i=0; i<3; i++) vertex[i] += sign * B1 * R2[i*4];
-    sign = (dDOT14(normal,R2+1) > 0) ? -1 : 1;
+    sign = (dDOT14(normal,R2+1) > 0) ? REAL(-1.0) : REAL(1.0);
     for (i=0; i<3; i++) vertex[i] += sign * B2 * R2[i*4+1];
-    sign = (dDOT14(normal,R2+2) > 0) ? -1 : 1;
+    sign = (dDOT14(normal,R2+2) > 0) ? REAL(-1.0) : REAL(1.0);
     for (i=0; i<3; i++) vertex[i] += sign * B3 * R2[i*4+2];
   }
   else {
     // face from box 2 touches a vertex/edge/face from box 1.
     dReal sign;
     for (i=0; i<3; i++) vertex[i] = p1[i];
-    sign = (dDOT14(normal,R1+0) > 0) ? 1 : -1;
+    sign = (dDOT14(normal,R1+0) > 0) ? REAL(1.0) : REAL(-1.0);
     for (i=0; i<3; i++) vertex[i] += sign * A1 * R1[i*4];
-    sign = (dDOT14(normal,R1+1) > 0) ? 1 : -1;
+    sign = (dDOT14(normal,R1+1) > 0) ? REAL(1.0) : REAL(-1.0);
     for (i=0; i<3; i++) vertex[i] += sign * A2 * R1[i*4+1];
-    sign = (dDOT14(normal,R1+2) > 0) ? 1 : -1;
+    sign = (dDOT14(normal,R1+2) > 0) ? REAL(1.0) : REAL(-1.0);
     for (i=0; i<3; i++) vertex[i] += sign * A3 * R1[i*4+2];
   }
   for (i=0; i<3; i++) contact[0].pos[i] = vertex[i];
@@ -740,18 +740,18 @@ int dCollideSB (const dxGeom *o1, const dxGeom *o2, int flags,
   p[1] = o1->pos[1] - o2->pos[1];
   p[2] = o1->pos[2] - o2->pos[2];
 
-  l[0] = box->side[0]*0.5;
+  l[0] = box->side[0]*REAL(0.5);
   t[0] = dDOT14(p,o2->R);
   if (t[0] < -l[0]) { t[0] = -l[0]; onborder = 1; }
   if (t[0] >  l[0]) { t[0] =  l[0]; onborder = 1; }
 
-  l[1] = box->side[1]*0.5;
+  l[1] = box->side[1]*REAL(0.5);
   t[1] = dDOT14(p,o2->R+1);
   if (t[1] < -l[1]) { t[1] = -l[1]; onborder = 1; }
   if (t[1] >  l[1]) { t[1] =  l[1]; onborder = 1; }
 
   t[2] = dDOT14(p,o2->R+2);
-  l[2] = box->side[2]*0.5;
+  l[2] = box->side[2]*REAL(0.5);
   if (t[2] < -l[2]) { t[2] = -l[2]; onborder = 1; }
   if (t[2] >  l[2]) { t[2] =  l[2]; onborder = 1; }
 
@@ -775,7 +775,7 @@ int dCollideSB (const dxGeom *o1, const dxGeom *o2, int flags,
     tmp[0] = 0;
     tmp[1] = 0;
     tmp[2] = 0;
-    tmp[maxi] = (t[maxi] > 0) ? 1 : -1;
+    tmp[maxi] = (t[maxi] > 0) ? REAL(1.0) : REAL(-1.0);
     dMULTIPLY0_331 (contact->normal,o2->R,tmp);
     // contact depth = distance to wall along normal plus radius
     contact->depth = l[maxi] - max + sphere->radius;
@@ -876,7 +876,7 @@ int dCollideBP (const dxGeom *o1, const dxGeom *o2,
   dReal B3 = dFabs(A3);
 
   // early exit test
-  dReal depth = plane->p[3] + 0.5*(B1+B2+B3) - dDOT(n,o1->pos);
+  dReal depth = plane->p[3] + REAL(0.5)*(B1+B2+B3) - dDOT(n,o1->pos);
   if (depth < 0) return 0;
 
   // find number of contacts requested
@@ -890,9 +890,9 @@ int dCollideBP (const dxGeom *o1, const dxGeom *o2,
   p[1] = o1->pos[1];
   p[2] = o1->pos[2];
 #define FOO(i,op) \
-  p[0] op 0.5*box->side[i] * R[0+i]; \
-  p[1] op 0.5*box->side[i] * R[4+i]; \
-  p[2] op 0.5*box->side[i] * R[8+i];
+  p[0] op REAL(0.5)*box->side[i] * R[0+i]; \
+  p[1] op REAL(0.5)*box->side[i] * R[4+i]; \
+  p[2] op REAL(0.5)*box->side[i] * R[8+i];
 #define BAR(i,iinc) if (A ## iinc > 0) { FOO(i,-=) } else { FOO(i,+=) }
   BAR(0,1);
   BAR(1,2);
@@ -1034,7 +1034,7 @@ int dCollideCC (const dxGeom *o1, const dxGeom *o2,
 		int flags, dContactGeom *contact, int skip)
 {
   int i;
-  const dReal tolerance = 1e-5;
+  const dReal tolerance = REAL(1e-5);
 
   dIASSERT (skip >= (int)sizeof(dContactGeom));
   dIASSERT (o1->_class->num == dCCylinderClass);
@@ -1095,7 +1095,7 @@ int dCollideCC (const dxGeom *o1, const dxGeom *o2,
 	// let alpha1 and alpha2 be free
 	// compute determinant of d(d^2)\d(alpha) jacobian
 	dReal a1a2 = dDOT (axis1,axis2);
-	dReal det = 1.0-a1a2*a1a2;
+	dReal det = REAL(1.0)-a1a2*a1a2;
 	if (det < tolerance) {
 	  // the cylinder axes (almost) parallel, so we will generate up to two
 	  // contacts. the solution matrix is rank deficient so alpha1 and
@@ -1151,7 +1151,7 @@ int dCollideCC (const dxGeom *o1, const dxGeom *o2,
 	  }
 	  else return 0;
 	}
-	det = 1.0/det;
+	det = REAL(1.0)/det;
 	dReal delta[3];
 	for (i=0; i<3; i++) delta[i] = pos1[i] - pos2[i];
 	dReal q1 = dDOT (delta,axis1);
@@ -1223,7 +1223,7 @@ int dCollideCP (const dxGeom *o1, const dxGeom *o2, int flags,
   dxPlane *plane = (dxPlane*) CLASSDATA(o2);
 
   // collide the deepest capping sphere with the plane
-  dReal sign = (dDOT14 (plane->p,o1->R+2) > 0) ? -1 : 1;
+  dReal sign = (dDOT14 (plane->p,o1->R+2) > 0) ? REAL(-1.0) : REAL(1.0);
   dVector3 p;
   p[0] = o1->pos[0] + o1->R[2]  * ccyl->lz * REAL(0.5) * sign;
   p[1] = o1->pos[1] + o1->R[6]  * ccyl->lz * REAL(0.5) * sign;
