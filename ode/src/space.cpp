@@ -45,7 +45,7 @@ same pair?
 better virtual address function.
 
 the collision search can perhaps be optimized - as we search chains we can
-came across other candidate intersections at other levels, perhaps we should
+come across other candidate intersections at other levels, perhaps we should
 do the intersection check straight away? --> save on list searching time only,
 which is not too significant.
 
@@ -295,7 +295,8 @@ static int findLevel (dReal bounds[6])
 
 
 // find a virtual memory address for a cell at the given level and x,y,z
-// position. currently this is not very sophisticated, e.g. the scaling
+// position.
+// @@@ currently this is not very sophisticated, e.g. the scaling
 // factors could be better designed to avoid collisions, and they should
 // probably depend on the hash table physical size.
 
