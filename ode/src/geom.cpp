@@ -322,7 +322,7 @@ static void dClosestLineBoxPoints (const dVector3 p1, const dVector3 p2,
   // region is -1,0,+1 depending on which side of the box planes each
   // coordinate is on. tanchor in the next t value at which there is a
   // transition, or the last one if there are no more.
-  int region[i];
+  int region[3];
   dReal tanchor[3];
 
   // find the region and tanchor values for p1
