@@ -594,6 +594,13 @@ dxJoint * dJointCreateHinge2 (dWorldID w, dJointGroupID group)
 }
 
 
+dxJoint * dJointCreateFixed (dWorldID w, dJointGroupID group)
+{
+  dAASSERT (w);
+  return createJoint (w,group,&__dfixed_vtable);
+}
+
+
 void dJointDestroy (dxJoint *j)
 {
   dAASSERT (j);

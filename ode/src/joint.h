@@ -126,6 +126,7 @@ struct dxJointLimitMotor {
   dReal lostop,histop;		// joint limits, relative to initial position
   dReal fudge_factor;		// when powering away from joint limits
   dReal stop_erp,stop_cfm;	// erp and cfm for when at joint limit
+  dReal bounce;			// restitution factor
   // variables used between getInfo1() and getInfo2()
   int limit;			// 0=free, 1=at lo limit, 2=at hi limit
   dReal limit_err;		// if at limit, amount over limit
@@ -199,6 +200,14 @@ struct dxJointHinge2 : public dxJoint {
   dReal susp_erp,susp_cfm;	// suspension parameters (erp,cfm)
 };
 extern struct dxJoint::Vtable __dhinge2_vtable;
+
+
+// fixed
+
+struct dxJointFixed : public dxJoint {
+  dVector3 offset;		// relative offset between the bodies
+};
+extern struct dxJoint::Vtable __dfixed_vtable;
 
 
 

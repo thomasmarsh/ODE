@@ -72,7 +72,7 @@ Here are the features:
 @list{
 @*	Arbitrary mass distribution of the rigid bodies.
 @*	Current joint types: ball-and-socket, hinge, slider (prismatic),
-	hinge-2.
+	hinge-2, fixed.
 @*	Current collision primitives: sphere, box and plane.
 @*	Simulation method: The equations of motion are derived from a
 	Lagrange multiplier velocity based model due to Trinkle/Stewart and
@@ -117,7 +117,7 @@ works].
 @list{
 @* Numerous bug fixes, including contacts.
 @* Updated documentation.
-@* Joint types: hinge, slider, ball and socket, hinge-2, contact.
+@* Joint types: hinge, slider, ball and socket, hinge-2, fixed, contact.
 @* Special vehicle joint: hinge-2 - with steering and suspension.
 @* Powered hinge and slider joints (plus dry friction in those joints).
 @* Joint limits for hinge and slider.
@@ -684,6 +684,7 @@ dJointID dJointCreateSlider (dWorldID, dJointGroupID);
 dJointID dJointCreateContact (dWorldID, dJointGroupID,
                               const dContact *);
 dJointID dJointCreateHinge2 (dWorldID, dJointGroupID);
+dJointID dJointCreateFixed (dWorldID, dJointGroupID);
 }{
 Create a new joint of a given type.
 The joint is initially in "limbo" (i.e. it has no effect on the simulation)
@@ -907,6 +908,26 @@ of these values.
 
 When the anchor or axis is set, the current position of the attached
 bodies is examined and that position will be the zero angles.
+}
+
+
+@subsection{Fixed}
+
+The fixed joint maintains a fixed relative position and orientation between
+two bodies, or between a body and the static environment.
+Using this joint is almost never a good idea in practice, except when
+debugging.
+If you need two bodies to be glued together it is better to represent that as
+a single body.
+
+Currently the fixed joint does not support a non-identity relative rotation
+between two bodies, it only supports a relative offset.
+
+@funcdef{
+void dJointSetFixed (dJointID);
+}{
+Call this on the fixed joint after it has been attached to remember the
+current desired relative offset between the bodies.
 }
 
 
