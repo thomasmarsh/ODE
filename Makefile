@@ -131,17 +131,17 @@ DRAWSTUFF_TEST_SRC_CPP = \
 CONFIGURATOR_SRC=configurator.c
 CONFIG_H=include/ode/config.h
 
+##############################################################################
+# derived things
+
+DEFINES=
+
 # support TriMesh/OPCODE on the compiler command line
 ifdef OPCODE_DIRECTORY
 DEFINES+=$(C_DEF)dTRIMESH_ENABLED
 INC_OPCODE=$(C_INC)$(OPCODE_DIRECTORY)
 OPCODE_LIB=$(OPCODE_DIRECTORY)/$(LIB_PREFIX)opcode$(LIB_SUFFIX)
 endif
-
-##############################################################################
-# derived things
-
-DEFINES=
 
 # add some defines depending on the build mode
 ifeq ($(BUILD),release)
