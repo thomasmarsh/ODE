@@ -680,18 +680,40 @@ you specified body 1 as 0).
 @funcdef{
 void dJointSetHingeVel (dJointID, dReal vel);
 void dJointSetHingeTmax (dJointID, dReal tmax);
+void dJointSetHingeStops (dJointID, dReal low, dReal high);
+void dJointSetHingeFudgeFactor (dJointID, dReal factor);
+void dJointSetSliderVel (dJointID, dReal vel);
+void dJointSetSliderFmax (dJointID, dReal fmax);
+void dJointSetSliderStops (dJointID, dReal low, dReal high);
+void dJointSetSliderFudgeFactor (dJointID, dReal factor);
 void dJointSetRMotorVel (dJointID, dReal vel);
 void dJointSetRMotorTmax (dJointID, dReal tmax);
 }{
-Set hinge / rotational motor parameters (velocity, maximum torque).
+Set hinge / rotational motor parameters (velocity, maximum torque, etc).
+
+For the hinge, if the low stop is < -pi it will be ineffective, and
+if the high stop is > pi it will be ineffective.
+For the slider, all stop values are effective.
+
+If the low stop < the high stop then the stop functions will do nothing.
+
+The fudge factor controls powering away from a stop.
 }
 
 
 @funcdef{
 dReal dJointGetHingeVel (dJointID);
 dReal dJointGetHingeTmax (dJointID);
+dReal dJointGetHingeLowStop (dJointID);
+dReal dJointGetHingeHighStop (dJointID);
 dReal dJointGetHingeAngle (dJointID);
 dReal dJointGetHingeAngleRate (dJointID);
+dReal dJointGetSliderVel (dJointID);
+dReal dJointGetSliderFmax (dJointID);
+dReal dJointGetSliderLowStop (dJointID);
+dReal dJointGetSliderHighStop (dJointID);
+dReal dJointGetSliderPosition (dJointID);
+dReal dJointGetSliderPositionRate (dJointID);
 dReal dJointGetRMotorVel (dJointID);
 dReal dJointGetRMotorTmax (dJointID);
 dReal dJointGetRMotorAngle (dJointID);

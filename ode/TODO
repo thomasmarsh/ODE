@@ -3,36 +3,57 @@ TODO
 ----
 
 what i'm doing now: joints:
-	hinge
+	hinge & slider
 		measure angle, rate - DONE
 		power - DONE
-		joint limits
-		optional suspension:
-			alignment of B&S part to given axis
-			global framework for giving epsilon and gamma
+		joint limits - DONE
+		mixed powered+limited joints, powering away from limit - DONE
+
+	hinge2
+		steering angle and rate measurement - DONE
+		steering limits - DONE
+		steering motor - DONE
+		wheel motor
+		wheel angle and rate measurement
+
+	joint limit restitution and spongyness
+
+	optional hinge2 suspension:
+		alignment of B&S part to given axis
+		global framework for giving epsilon and gamma
 
 	toss away r-motor, power & stuff specific to joint. it's just easier
-	that way.
+	that way - DONE
 
-	r-motor joint needs to measure motor angle and vel, fn to get this info
-		* angle done. but the angle reading is wrong if the rmotor is
-		  used on a steering hinge (hinge2) and the wheel is moved on
-		  the steering axis.
-	r-motor joint needs stops (low and high)
 	make sure rmotor works with just one body and static env.
+
 	joint code reuse: use standard functions to set velocity (c),
 		limits (lo,hi), spongyness (epsilon) etc, this prevents these
 		functions from proliferating.
+
 	linear motor
+
 	implicit spring framework - actually allow joints to return a value `k'
 		such that J*vnew = c + k*f, where f = force needed to achieve
 		vnew.
+
 	contact slip
+
 	more joint code reuse - setting axes etc??
+
 	hinge and hinge2 joints need to have orientable ball-and-socket parts,
 		to allow directed suspension axes. suspension axis must have
 		stops - implement this with a separate joint??
+
 	more joints: spring, planar, fixed path, etc etc.
+
+various hinge2 functions may not function correctly if axis1 and axis2 are not
+perpendicular. in particular the getAngle() and getAngleRate() functions
+probably will give bogus answers.
+
+slow step function will not respect the joint getinfo2 functions calling
+addTorque() because it reads the force/torque accumulators before the
+getinfo2 functions are called.
 
 andy says: still having trouble with those resource files..
 drawstuff.res doesn't seem to build or be found under cygwin gcc.
