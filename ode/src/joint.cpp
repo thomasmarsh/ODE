@@ -2377,7 +2377,6 @@ extern "C" void dJointSetAMotorNumAxes (dxJointAMotor *joint, int num)
 extern "C" void dJointSetAMotorAxis (dxJointAMotor *joint, int anum, int rel,
 				     dReal x, dReal y, dReal z)
 {
-  dUASSERT(rel >= 0 && rel <= 2,"rel out of range");
   dAASSERT(joint && anum >= 0 && anum <= 2 && rel >= 0 && rel <= 2);
   dUASSERT(joint->vtable == &__damotor_vtable,"joint is not an amotor");
   dUASSERT(!(!joint->node[1].body &&  (joint->flags & dJOINT_REVERSE) && rel == 1),"no first body, can't set axis rel=1");
@@ -2386,7 +2385,7 @@ extern "C" void dJointSetAMotorAxis (dxJointAMotor *joint, int anum, int rel,
   if (anum > 2) anum = 2;
 
   // adjust rel to match the internal body order
-  if (joint->node[1].body && rel==2) rel = 1;
+  if (!joint->node[1].body && rel==2) rel = 1;
 
   joint->rel[anum] = rel;
 
