@@ -13,7 +13,7 @@
 #define __ICEINDEXEDTRIANGLE_H__
 
 	// Forward declarations
-#ifdef WIN32
+#ifdef MSVC
 	enum CubeIndex;
 #else
 	typedef int CubeIndex;

@@ -31,7 +31,7 @@
 #define asinf sinf
 #endif
 
-#ifndef WIN32
+#ifndef MSVC
 
 #define __int64 long long int
 #define __stdcall /* */
@@ -40,7 +40,7 @@
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Compilation messages
-#ifdef WIN32
+#ifdef MSVC
 	#if defined(OPCODE_EXPORTS)
 		// #pragma message("Compiling OPCODE")
 	#elif !defined(OPCODE_EXPORTS)
