@@ -962,7 +962,8 @@ int dCollideCCTL(dxGeom *o1, dxGeom *o2, int flags, dContactGeom *contact, int s
 		// loop through all intersecting triangles
 		for (int i = 0; i < TriCount; i++)
 		{
-			if(ctContacts>=(iFlags & NUMC_MASK)) 
+			if ((ctContacts>=(iFlags & NUMC_MASK)) ||
+                            (ctContacts >= gMaxLocalContacts))
 			{
 				break;
 			}
