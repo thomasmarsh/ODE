@@ -1842,7 +1842,7 @@ It has the following members:
 	This is only set if the corresponding flag is set in @c{mode}.
 
 @*	@c{dReal bounce_vel} : The minimum incoming velocity necessary for
-	bounce (in m/s). Incoming velocities below this will effectively have
+	bounce. Incoming velocities below this will effectively have
 	a bounce parameter of 0.
 	This is only set if the corresponding flag is set in @c{mode}.
 
@@ -1853,7 +1853,7 @@ It has the following members:
 	This is only set if the corresponding flag is set in @c{mode}.
 
 @*	@c{dReal motion1,motion2} : Surface velocity in friction directions
-	1 and 2 (in m/s).
+	1 and 2.
 	These are only set if the corresponding flags are set in @c{mode}.
 
 @*	@c{dReal slip1,slip2} : The coefficients of force-dependent-slip (FDS)
