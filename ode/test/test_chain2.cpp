@@ -128,6 +128,7 @@ int main (int argc, char **argv)
   int i;
   contactgroup.create (1000000);
   world.setGravity (0,0,-0.5);
+  dWorldSetCFM (world.id(),1e-5);
   dGeom plane;
   plane.createPlane (space,0,0,1,0);
 
