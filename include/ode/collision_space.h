@@ -49,6 +49,7 @@ int dSpaceGetCleanup (dSpaceID space);
 void dSpaceAdd (dSpaceID, dGeomID);
 void dSpaceRemove (dSpaceID, dGeomID);
 int dSpaceQuery (dSpaceID, dGeomID);
+void dSpaceClean (dSpaceID);
 int dSpaceGetNumGeoms (dSpaceID);
 dGeomID dSpaceGetGeom (dSpaceID, int i);
 

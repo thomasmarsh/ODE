@@ -684,6 +684,12 @@ int dSpaceQuery (dxSpace *space, dxGeom *g)
   return space->query (g);
 }
 
+void dSpaceClean (dxSpace *space){
+  dAASSERT (space);
+  dUASSERT (dGeomIsSpace(space),"argument not a space");
+
+  space->cleanGeoms();
+}
 
 int dSpaceGetNumGeoms (dxSpace *space)
 {
