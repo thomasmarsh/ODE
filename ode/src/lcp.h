@@ -42,7 +42,7 @@ for the special constraints are set:
   hi[i] = abs( hi[i] * x[findex[i]] )
   lo[i] = -hi[i]
 and the solution continues. this mechanism allows a friction approximation
-to be implemented.
+to be implemented. the first `nub' variables are assumed to have findex < 0.
 
 */
 

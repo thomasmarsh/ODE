@@ -782,7 +782,12 @@ dLCP::dLCP (int _n, int _nub, dReal *_Adata, dReal *_x, dReal *_b, dReal *_w,
   // potentially push up `nub' this way and get a bigger initial factorization.
   // note that when we swap rows/cols here we must not just swap row pointers,
   // as the initial factorization relies on the data being all in one chunk.
+  // variables that have findex >= 0 are *not* considered to be unbounded even
+  // if lo=-inf and hi=inf - this is because these limits may change during the
+  // solution process.
+
   for (k=nub; k<n; k++) {
+    if (findex && findex[k] >= 0) continue;
     if (lo[k]==-dInfinity && hi[k]==dInfinity) {
       swapProblem (A,x,b,w,lo,hi,p,state,findex,n,nub,k,nskip,0);
       nub++;
@@ -1151,13 +1156,25 @@ void dSolveLCP (int n, dReal *A, dReal *x, dReal *b,
     // hi values based on the values of x already computed. we have been
     // permuting the indexes, so the values stored in the findex vector are
     // no longer valid. thus we have to temporarily unpermute the x vector. 
+    // for the purposes of this computation, 0*infinity = 0 ... so if the
+    // contact constraint's normal force is 0, there should be no tangential
+    // force applied.
+
     if (hit_first_friction_index == 0 && findex && findex[i] >= 0) {
       // un-permute x into delta_w, which is not being used at the moment
       for (k=0; k<n; k++) delta_w[p[k]] = x[k];
+
       // set lo and hi values
       for (k=i; k<n; k++) {
-	hi[k] = dFabs (hi[k] * delta_w[findex[k]]);
-	lo[k] = -hi[k];
+	dReal wfk = delta_w[findex[k]];
+	if (wfk == 0) {
+	  hi[k] = 0;
+	  lo[k] = 0;
+	}
+	else {
+	  hi[k] = dFabs (hi[k] * wfk);
+	  lo[k] = -hi[k];
+	}
       }
       hit_first_friction_index = 1;
     }
