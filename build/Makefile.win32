@@ -52,10 +52,10 @@ _OPT_2=/O2
 _OPT_=$(_OPT_0)
 
 %.obj: %.cpp
-	cl /nologo /c /W3 /GF -DWIN32 $(_OPT_$(CPP_OPT)) $(addprefix /I,$(INCLUDE_PATHS)) $(addprefix /D,$(DEFINES)) $(_RTTI_$(CPP_RTTI)) $(_EX_$(CPP_EX)) $<
+	cl /nologo /c /W3 /GF -DWIN32 -DMSVC $(_OPT_$(CPP_OPT)) $(addprefix /I,$(INCLUDE_PATHS)) $(addprefix /D,$(DEFINES)) $(_RTTI_$(CPP_RTTI)) $(_EX_$(CPP_EX)) $<
 
 %.obj: %.c
-	cl /nologo /c /W3 /GF -DWIN32 $(_OPT_$(CPP_OPT)) $(addprefix /I,$(INCLUDE_PATHS)) $(addprefix /D,$(DEFINES)) $<
+	cl /nologo /c /W3 /GF -DWIN32 -DMSVC $(_OPT_$(CPP_OPT)) $(addprefix /I,$(INCLUDE_PATHS)) $(addprefix /D,$(DEFINES)) $<
 
 %.RES: %.rc
 	rc /r $<
