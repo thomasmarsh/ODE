@@ -209,7 +209,8 @@ enum {
   dJointTypeContact,
   dJointTypeHinge2,
   dJointTypeFixed,
-  dJointTypeNull
+  dJointTypeNull,
+  dJointTypeAMotor
 };
 
 
@@ -257,6 +258,9 @@ enum {
   dParamSuspensionERP,
   dParamSuspensionCFM,
 
+  /* parameter to set the angle for joints that don't know their own angle */
+  dParamAngle,
+
   /* a second set of all parameters, e.g. for the second joint limit, the
    * second suspension axis etc. this has bit 8 set.
    */
@@ -269,7 +273,12 @@ enum {
   dParamStopERP2,
   dParamStopCFM2,
   dParamSuspensionERP2,
-  dParamSuspensionCFM2
+  dParamSuspensionCFM2,
+
+  /* add a multiple of this constant to the basic parameter numbers to get
+   * the parameters for the second, third etc axes.
+   */
+  dParamGroup=0x100
 };
 
 

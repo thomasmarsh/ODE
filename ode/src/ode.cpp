@@ -853,6 +853,13 @@ dxJoint * dJointCreateNull (dWorldID w, dJointGroupID group)
 }
 
 
+dxJoint * dJointCreateAMotor (dWorldID w, dJointGroupID group)
+{
+  dAASSERT (w);
+  return createJoint (w,group,&__damotor_vtable);
+}
+
+
 void dJointDestroy (dxJoint *j)
 {
   dAASSERT (j);

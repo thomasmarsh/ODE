@@ -1512,6 +1512,164 @@ dxJoint::Vtable __dhinge2_vtable = {
   dJointTypeHinge2};
 
 //****************************************************************************
+// angular motor
+
+static void amotorInit (dxJointAMotor *j)
+{
+  int i;
+  j->num = 0;
+  for (i=0; i<3; i++) {
+    j->rel[i] = 0;
+    dSetZero (j->axis[i],4);
+    j->limot[i].init (j->world);
+    j->angle[i] = 0;
+  }
+}
+
+
+static void amotorGetInfo1 (dxJointAMotor *j, dxJoint::Info1 *info)
+{
+  info->m = 0;
+  info->nub = 0;
+
+  // see if we're powered or at a joint limit for each axis
+  for (int i=0; i < j->num; i++) {
+    if (j->limot[i].testRotationalLimit (j->angle[i]) ||
+	j->limot[i].fmax > 0) info->m++;
+  }
+}
+
+
+static void amotorGetInfo2 (dxJointAMotor *joint, dxJoint::Info2 *info)
+{
+  int i;
+
+  // compute the axes (if not global)
+  dVector3 ax[3];
+  for (i=0; i < joint->num; i++) {
+    if (joint->rel[i] == 1) {
+      // relative to b1
+      dMULTIPLY0_331 (ax[i],joint->node[0].body->R,joint->axis[i]);
+    }
+    if (joint->rel[i] == 2) {
+      // relative to b2
+      dMULTIPLY0_331 (ax[i],joint->node[1].body->R,joint->axis[i]);
+    }
+    else {
+      // global - just copy it
+      ax[i][0] = joint->axis[i][0];
+      ax[i][1] = joint->axis[i][1];
+      ax[i][2] = joint->axis[i][2];
+    }
+  }
+
+  int ofs=0,row=0;
+  for (i=0; i < joint->num; i++) {
+    if (joint->limot[i].limit || joint->limot[i].fmax > 0) {
+      dReal *a = ax[i];
+      info->J1a[ofs+0] = a[0];
+      info->J1a[ofs+1] = a[1];
+      info->J1a[ofs+2] = a[2];
+      if (joint->node[1].body) {
+	info->J2a[ofs+0] = -a[0];
+	info->J2a[ofs+1] = -a[1];
+	info->J2a[ofs+2] = -a[2];
+      }
+      joint->limot[i].addLimot (joint,info,row,a,1);
+      ofs += info->rowskip;
+      row++;
+    }
+  }
+}
+
+
+extern "C" void dJointSetAMotorNumAxes (dxJointAMotor *joint, int num)
+{
+  dAASSERT(joint);
+  if (num < 0) num = 0;
+  if (num > 3) num = 3;
+  joint->num = num;
+}
+
+
+extern "C" void dJointSetAMotorAxis (dxJointAMotor *joint, int axis, int rel,
+				     dReal x, dReal y, dReal z)
+{
+  dAASSERT(joint);
+  if (axis < 0) axis = 0;
+  if (axis > 2) axis = 2;
+  joint->rel[axis] = rel;
+  joint->axis[axis][0] = x;
+  joint->axis[axis][1] = y;
+  joint->axis[axis][2] = z;
+}
+
+
+extern "C" void dJointSetAMotorParam (dxJointAMotor *joint, int parameter,
+				      dReal value)
+{
+  dAASSERT(joint);
+  int axis = parameter >> 8;
+  if (axis < 0) axis = 0;
+  if (axis > 2) axis = 2;
+  parameter &= 0xff;
+  if (parameter == dParamAngle) {
+    joint->angle[axis] = value;
+  }
+  else joint->limot[axis].set (parameter, value);
+}
+
+
+extern "C" int dJointGetAMotorNumAxes (dxJointAMotor *joint)
+{
+  dAASSERT(joint);
+  return joint->num;
+}
+
+
+extern "C" void dJointGetAMotorAxis (dxJointAMotor *joint, int axis,
+				     dVector3 result)
+{
+  dAASSERT(joint);
+  if (axis < 0) axis = 0;
+  if (axis > 2) axis = 2;
+  result[0] = joint->axis[axis][0];
+  result[1] = joint->axis[axis][1];
+  result[2] = joint->axis[axis][2];
+}
+
+
+extern "C" int dJointGetAMotorAxisRel (dxJointAMotor *joint, int axis)
+{
+  dAASSERT(joint);
+  if (axis < 0) axis = 0;
+  if (axis > 2) axis = 2;
+  return joint->rel[axis];
+}
+
+
+extern "C" dReal dJointGetAMotorParam (dxJointAMotor *joint, int parameter)
+{
+  dAASSERT(joint);
+  int axis = parameter >> 8;
+  if (axis < 0) axis = 0;
+  if (axis > 2) axis = 2;
+  parameter &= 0xff;
+  if (parameter == dParamAngle) {
+    return joint->angle[axis];
+  }
+  else return joint->limot[axis].get (parameter);
+}
+
+
+dxJoint::Vtable __damotor_vtable = {
+  sizeof(dxJointAMotor),
+  (dxJoint::init_fn*) amotorInit,
+  (dxJoint::getInfo1_fn*) amotorGetInfo1,
+  (dxJoint::getInfo2_fn*) amotorGetInfo2,
+  dJointTypeAMotor};
+
+//****************************************************************************
 // fixed joint
 
 static void fixedInit (dxJointFixed *j)
