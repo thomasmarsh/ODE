@@ -40,7 +40,7 @@ TODO
 // return 1, else return 0.
 
 static int dCollideSpheres (dVector3 p1, dReal r1,
-			     dVector3 p2, dReal r2, dContact *c)
+			    dVector3 p2, dReal r2, dContactGeom *c)
 {
   // printf ("d=%.2f  (%.2f %.2f %.2f) (%.2f %.2f %.2f) r1=%.2f r2=%.2f\n",
   //	  d,p1[0],p1[1],p1[2],p2[0],p2[1],p2[2],r1,r2);
@@ -71,35 +71,35 @@ static int dCollideSpheres (dVector3 p1, dReal r1,
 }
 
 
-int dCollideSS (dSphere *o1, dSphere *o2, int flags, dContact *contact)
+int dCollideSS (dSphere *o1, dSphere *o2, int flags, dContactGeom *contact)
 {
   return dCollideSpheres (o1->geom.pos,o1->radius,
 			   o2->geom.pos,o2->radius,contact);
 }
 
 
-int dCollideSB (dSphere *o1, dBox *o2, int flags, dContact *contact)
+int dCollideSB (dSphere *o1, dBox *o2, int flags, dContactGeom *contact)
 {
   dDebug (0,"unimplemented");
   return 0;
 }
 
 
-int dCollideSC (dSphere *o1, dCCylinder *o2, int flags, dContact *contact)
+int dCollideSC (dSphere *o1, dCCylinder *o2, int flags, dContactGeom *contact)
 {
   dDebug (0,"unimplemented");
   return 0;
 }
 
 
-int dCollideSL (dSphere *o1, dSlab *o2, int flags, dContact *contact)
+int dCollideSL (dSphere *o1, dSlab *o2, int flags, dContactGeom *contact)
 {
   dDebug (0,"unimplemented");
   return 0;
 }
 
 
-int dCollideSP (dSphere *o1, dPlane *o2, int flags, dContact *contact)
+int dCollideSP (dSphere *o1, dPlane *o2, int flags, dContactGeom *contact)
 {
   dReal k = dDOT (o1->geom.pos,o2->p);
   dReal depth = o2->p[3] - k + o1->radius;
@@ -117,28 +117,28 @@ int dCollideSP (dSphere *o1, dPlane *o2, int flags, dContact *contact)
 }
 
 
-int dCollideBB (dBox *o1, dBox *o2, int flags, dContact *contact)
+int dCollideBB (dBox *o1, dBox *o2, int flags, dContactGeom *contact)
 {
   dDebug (0,"unimplemented");
   return 0;
 }
 
 
-int dCollideBC (dBox *o1, dCCylinder *o2, int flags, dContact *contact)
+int dCollideBC (dBox *o1, dCCylinder *o2, int flags, dContactGeom *contact)
 {
   dDebug (0,"unimplemented");
   return 0;
 }
 
 
-int dCollideBL (dBox *o1, dSlab *o2, int flags, dContact *contact)
+int dCollideBL (dBox *o1, dSlab *o2, int flags, dContactGeom *contact)
 {
   dDebug (0,"unimplemented");
   return 0;
 }
 
 
-int dCollideBP (dBox *o1, dPlane *o2, int flags, dContact *contact)
+int dCollideBP (dBox *o1, dPlane *o2, int flags, dContactGeom *contact)
 {
   dDebug (0,"unimplemented");
   return 0;
@@ -146,35 +146,35 @@ int dCollideBP (dBox *o1, dPlane *o2, int flags, dContact *contact)
 
 
 int dCollideCC (dCCylinder *o1, dCCylinder *o2,
-		 int flags, dContact *contact)
+		int flags, dContactGeom *contact)
 {
   dDebug (0,"unimplemented");
   return 0;
 }
 
 
-int dCollideCL (dCCylinder *o1, dSlab *o2, int flags, dContact *contact)
+int dCollideCL (dCCylinder *o1, dSlab *o2, int flags, dContactGeom *contact)
 {
   dDebug (0,"unimplemented");
   return 0;
 }
 
 
-int dCollideCP (dCCylinder *o1, dPlane *o2, int flags, dContact *contact)
+int dCollideCP (dCCylinder *o1, dPlane *o2, int flags, dContactGeom *contact)
 {
   dDebug (0,"unimplemented");
   return 0;
 }
 
 
-int dCollideLL (dSlab *o1, dSlab *o2, int flags, dContact *contact)
+int dCollideLL (dSlab *o1, dSlab *o2, int flags, dContactGeom *contact)
 {
   dDebug (0,"unimplemented");
   return 0;
 }
 
 
-int dCollideLP (dSlab *o1, dPlane *o2, int flags, dContact *contact)
+int dCollideLP (dSlab *o1, dPlane *o2, int flags, dContactGeom *contact)
 {
   dDebug (0,"unimplemented");
   return 0;
@@ -344,7 +344,7 @@ void dDestroyGeom (dSpaceID space, dGeomID geom)
 }
 
 
-int dCollide (dGeomID o1, dGeomID o2, int flags, dContact *contact)
+int dCollide (dGeomID o1, dGeomID o2, int flags, dContactGeom *contact)
 {
   int i,c1,c2,a1,a2,count,swap;
   dColliderFn *fn;

@@ -45,7 +45,9 @@ static void nearCallback (void *data, dGeomID o1, dGeomID o2)
   // @@@ it's still more convenient to use the C interface here.
 
   dContact contact;
-  if (dCollide (o1,o2,0,&contact)) {
+  contact.surface.mode = 0;
+  contact.surface.mu = dInfinity;
+  if (dCollide (o1,o2,0,&contact.geom)) {
     dJointID c = dJointCreateContact (world.id(),contactgroup.id(),&contact);
     dJointAttach (c,o1->body,o2->body);
   }
