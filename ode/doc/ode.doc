@@ -2112,20 +2112,20 @@ typedef void dGeomDtorFn (dGeomID o);
 	This is used as an early-exit test in the space collision functions.
 	This function must be of type @c{dAABBTestFn}, which is defined as 
 	@code{@[
-typedef int dAABBTestFn (dGeomID o, dReal aabb[6]);
+typedef int dAABBTestFn (dGeomID o1, dGeomID o2, dReal aabb2[6]);
 	@]}
-	The argument @arg{o} has type X.
+	The argument @arg{o1} has type X.
 	If this function is provided it is called by @func{dSpaceCollide()}
-	when (@arg{o}) intersects another object (that has an AABB given by
-	@arg{aabb}).
-	It returns 1 if @arg{aabb} intersects @arg{o}, or 0 if it does not.
+	when @arg{o1} intersects geometry object @arg{o2}, which has an
+	AABB given by @arg{aabb2}.
+	It returns 1 if @arg{aabb2} intersects @arg{o1}, or 0 if it does not.
 
 	This is useful, for example, for large terrains.
 	Terrains typically have very large AABBs, which are not very useful to
 	test intersections with other objects.
 	This function can test another object's AABB against the terrain
-	without going to the computational trouble of the specific collision
-	function.
+	without going to the computational trouble of calling the specific
+	collision function.
 	This has an especially big savings when testing against GeomGroup
 	objects.
 }
