@@ -20,6 +20,13 @@
  *                                                                       *
  *************************************************************************/
 
+/*
+
+the rule is that only the low level primitive collision functions should set
+dContactGeom::g1 and dContactGeom::g2.
+
+*/
+
 #include "ode/geom.h"
 #include "ode/rotation.h"
 #include "ode/odemath.h"
