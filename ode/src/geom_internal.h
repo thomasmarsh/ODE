@@ -67,7 +67,7 @@ struct dxGeom {		// a dGeomID is a pointer to this
 // bytes. any class specific data that comes after this will have the correct
 // alignment.
 
-#define SIZEOF_DXGEOM (((sizeof(dxGeom)-1)|15)+1)
+#define SIZEOF_DXGEOM dEFFICIENT_SIZE(sizeof(dxGeom))
 
 
 // given a pointer to a dxGeom, return a pointer to the class data that
