@@ -1330,7 +1330,7 @@ A universal joint is like a ball and socket joint that constrains an
 extra degree of rotational freedom. Given axis 1 on body 1, and axis 2
 on body 2 that is perpendicular to axis 1, it keeps them
 perpendicular. In other words, rotation of the two bodies about the
-direction perpendicular to the two axes will be the equal.
+direction perpendicular to the two axes will be equal.
 
 In the picture, the two bodies are joined together by a cross. Axis 1
 is attached to body 1, and axis 2 is attached to body 2. The cross
