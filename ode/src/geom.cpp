@@ -838,7 +838,7 @@ int dCollideBB (const dxGeom *o1, const dxGeom *o2, int flags,
   dxBox *b1 = (dxBox*) CLASSDATA(o1);
   dxBox *b2 = (dxBox*) CLASSDATA(o2);
   int num = dBoxBox (o1->pos,o1->R,b1->side, o2->pos,o2->R,b2->side,
-		     normal,&depth,&code,flags & 0xff,contact,skip);
+		     normal,&depth,&code,flags & NUMC_MASK,contact,skip);
   for (int i=0; i<num; i++) {
     CONTACT(contact,i*skip)->normal[0] = -normal[0];
     CONTACT(contact,i*skip)->normal[1] = -normal[1];
@@ -882,7 +882,7 @@ int dCollideBP (const dxGeom *o1, const dxGeom *o2,
   if (depth < 0) return 0;
 
   // find number of contacts requested
-  int maxc = flags & 0xff;
+  int maxc = flags & NUMC_MASK;
   if (maxc < 1) maxc = 1;
   if (maxc > 3) maxc = 3;	// no more than 3 contacts per box allowed
 
@@ -1120,7 +1120,7 @@ int dCollideCC (const dxGeom *o1, const dxGeom *o2,
 	  dReal lo = (a1lo > a2lo) ? a1lo : a2lo;
 	  dReal hi = (a1hi < a2hi) ? a1hi : a2hi;
 	  if (lo <= hi) {
-	    int num_contacts = flags & 0xff;
+	    int num_contacts = flags & NUMC_MASK;
 	    if (num_contacts >= 2 && lo < hi) {
 	      // generate up to two contacts. if one of those contacts is
 	      // not made, fall back on the one-contact strategy.
@@ -1243,7 +1243,7 @@ int dCollideCP (const dxGeom *o1, const dxGeom *o2, int flags,
   contact->depth = depth;
 
   int ncontacts = 1;
-  if ((flags & 0xff) >= 2) {
+  if ((flags & NUMC_MASK) >= 2) {
     // collide the other capping sphere with the plane
     p[0] = o1->pos[0] - o1->R[2]  * ccyl->lz * REAL(0.5) * sign;
     p[1] = o1->pos[1] - o1->R[6]  * ccyl->lz * REAL(0.5) * sign;
@@ -1279,9 +1279,9 @@ int dCollideG (const dxGeom *o1, const dxGeom *o2, int flags,
 	       dContactGeom *contact, int skip)
 {
   dxGeomGroup *gr = (dxGeomGroup*) CLASSDATA(o1);
-  int numleft = flags & 0xff;
+  int numleft = flags & NUMC_MASK;
   if (numleft == 0) numleft = 1;
-  flags &= ~0xff;
+  flags &= ~NUMC_MASK;
   int num=0,i=0;
   while (i < gr->parts.size() && numleft > 0) {
     int n = dCollide (gr->parts[i],const_cast<dxGeom*>(o2),

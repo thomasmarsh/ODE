@@ -24,6 +24,10 @@
 #define _ODE_GEOM_INTERNAL_H_
 
 
+// mask for the number-of-contacts field in the dCollide() flags parameter
+#define NUMC_MASK (0xffff)
+
+
 // internal info for geometry class
 
 struct dxGeomClass {
