@@ -338,6 +338,7 @@ void dGeomSetPosition (dxGeom *g, dReal x, dReal y, dReal z)
     g->pos[0] = x;
     g->pos[1] = y;
     g->pos[2] = z;
+    dGeomMoved (g);
   }
 }
 
@@ -353,6 +354,7 @@ void dGeomSetRotation (dxGeom *g, const dMatrix3 R)
   }
   else {
     memcpy (g->R,R,sizeof(dMatrix3));
+    dGeomMoved (g);
   }
 }
 
