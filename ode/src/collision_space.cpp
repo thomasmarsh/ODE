@@ -101,8 +101,8 @@ void dGeomMoved (dxGeom *geom)
   while (parent && (geom->flags & GEOM_DIRTY)==0) {
     CHECK_NOT_LOCKED (parent);
     geom->flags |= GEOM_DIRTY | GEOM_AABB_BAD;
-    geom->remove();
-    geom->add (&parent->first);
+    geom->spaceRemove();
+    geom->spaceAdd (&parent->first);
     geom = parent;
     parent = parent->parent_space;
   }
@@ -226,7 +226,7 @@ void dxSpace::add (dxGeom *geom)
 
   // add
   geom->parent_space = this;
-  geom->add (&first);
+  geom->spaceAdd (&first);
   count++;
 
   // enumerator has been invalidated
@@ -247,7 +247,7 @@ void dxSpace::remove (dxGeom *geom)
   dUASSERT (geom->parent_space == this,"object is not in this space");
 
   // remove
-  geom->remove();
+  geom->spaceRemove();
   count--;
 
   // safeguard

@@ -102,6 +102,7 @@ void dGeomSphereSetRadius (dGeomID g, dReal radius)
   dAASSERT (radius > 0);
   dxSphere *s = (dxSphere*) g;
   s->radius = radius;
+  dGeomMoved (g);
 }
 
 
@@ -156,6 +157,7 @@ void dGeomBoxSetLengths (dGeomID g, dReal lx, dReal ly, dReal lz)
   b->side[0] = lx;
   b->side[1] = ly;
   b->side[2] = lz;
+  dGeomMoved (g);
 }
 
 
@@ -208,6 +210,7 @@ void dGeomCCylinderSetParams (dGeomID g, dReal radius, dReal length)
   dxCCylinder *c = (dxCCylinder*) g;
   c->radius = radius;
   c->lz = length;
+  dGeomMoved (g);
 }
 
 
@@ -282,6 +285,7 @@ void dGeomPlaneSetParams (dGeomID g, dReal a, dReal b, dReal c, dReal d)
   p->p[2] = c;
   p->p[3] = d;
   make_sure_plane_normal_has_unit_length (p);
+  dGeomMoved (g);
 }
 
 
