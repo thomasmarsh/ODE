@@ -111,7 +111,6 @@ submatrix of A. there are two ways we could arrange the rows/columns in AC.
 #include <stdio.h>
 #include <string.h>
 #include <malloc.h>		// for alloca under windows
-#include <math.h>
 #include "ode/common.h"
 #include "lcp.h"
 #include "ode/matrix.h"
