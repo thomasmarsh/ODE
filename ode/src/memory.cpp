@@ -51,6 +51,7 @@ struct blockHeader {
   long pad1;			// protective padding
   long seq;			// sequence number
   long size;			// data size
+  long flags;			// bit 0 = ignore this block in final report
   blockHeader *next,*prev;	// next & previous blocks
   long pad[PADSIZE];		// protective padding
 };
@@ -62,7 +63,7 @@ struct blockHeader {
 #define BSIZE(size) (((((size)-1) | 3)+1) + sizeof(blockHeader) + \
   PADSIZE * sizeof(long))
 
-static blockHeader dummyblock = {0,0,0,&dummyblock,&dummyblock,
+static blockHeader dummyblock = {0,0,0,0,&dummyblock,&dummyblock,
 				 {0,0,0,0,0,0,0,0,0,0}};
 static blockHeader *firstblock = &dummyblock;
 static long num_blocks_alloced = 0;
@@ -77,6 +78,7 @@ void *ptrstop = 0;
 
 static int checkBlockOk (void *ptr, int fatal)
 {
+  if (ptr==0) dDebug (0,"0 passed to checkBlockOk()");
   blockHeader *b = ((blockHeader*) ptr) - 1;
   int i,ok = 1;
   if (b->pad1 != (long)0xdeadbeef || b->seq < 0 || b->size < 0) ok = 0;
@@ -144,6 +146,7 @@ void * dAlloc (int size)
     ((long*)b)[i] = 0xdeadbeef;
   b->seq = total_num_blocks_alloced;
   b->size = size;
+  b->flags = 0;
   b->next = firstblock->next;
   b->prev = firstblock;
   firstblock->next->prev = b;
@@ -165,6 +168,8 @@ void * dRealloc (void *ptr, int oldsize, int newsize)
     dDebug (0,"Realloc(%p,%d,%d) has bad old size, good size "
 	    "is %ld, seq=%ld",ptr,oldsize,newsize,b->size,b->seq);
   void *p = dAlloc (newsize);
+  blockHeader *newb = ((blockHeader*) p) - 1;
+  newb->flags = b->flags;
   if (oldsize>=1) memcpy (p,ptr,oldsize);
   dFree (ptr,oldsize);
   return p;
@@ -200,9 +205,13 @@ void dFree (void *ptr, int size)
 }
 
 
-void * dAllocNoFree (int size)
+void dAllocDontReport (void *ptr)
 {
-  if (allocfn) return allocfn (size); else return malloc (size);
+#ifdef dDEBUG_ALLOC
+  checkBlockOk (ptr,1);
+  blockHeader *b = ((blockHeader*) ptr) - 1;
+  b->flags |= 1;
+#endif
 }
 
 
@@ -212,6 +221,20 @@ void * dAllocNoFree (int size)
 
 static void printReport()
 {
+  // subtract the "dont report" blocks from the totals
+  blockHeader *b = firstblock;
+  do {
+    if (b != &dummyblock && (b->flags & 1)) {
+      num_blocks_alloced--;
+      num_bytes_alloced -= b->size;
+      if (!checkBlockOk (b+1,0))
+	fprintf (stderr,"\tCORRUPTED: %p, size=%ld, seq=%ld\n",b+1,
+		 b->size,b->seq);
+    }
+    b = b->prev;
+  }
+  while (b != firstblock);
+
   fprintf (stderr,"\nALLOCATOR REPORT\n");
   fprintf (stderr,"\tblocks still allocated:  %ld\n",num_blocks_alloced);
   fprintf (stderr,"\tbytes still allocated:   %ld\n",num_bytes_alloced);
@@ -220,9 +243,9 @@ static void printReport()
   fprintf (stderr,"\tmax blocks allocated:    %ld\n",max_blocks_alloced);
   fprintf (stderr,"\tmax bytes allocated:     %ld\n",max_bytes_alloced);
 
-  blockHeader *b = firstblock;
+  b = firstblock;
   do {
-    if (b != &dummyblock) {
+    if (b != &dummyblock && (b->flags & 1)==0) {
       int ok = checkBlockOk (b+1,0);
       fprintf (stderr,"\tUNFREED: %p, size=%ld, seq=%ld (%s)\n",b+1,
 	       b->size,b->seq, ok ? "ok" : "CORUPTED");
