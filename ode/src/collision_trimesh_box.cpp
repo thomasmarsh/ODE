@@ -382,7 +382,7 @@ int dCollideBTL(dxGeom* g1, dxGeom* BoxGeom, int Flags, dContactGeom* Contacts, 
 
 		BoxTC = &TriMesh->BoxTCCache[TriMesh->BoxTCCache.size() - 1];
 		BoxTC->Geom = BoxGeom;
-		BoxTC->FatCoeff = 5.0f;
+		BoxTC->FatCoeff = 1.0f;
 	}
 
 	// Intersect
