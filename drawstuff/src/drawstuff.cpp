@@ -5,6 +5,7 @@ simple graphics.
 the following command line flags can be used (typically under unix)
 	-notex		Do not use any textures
 	-noshadow[s]	Do not draw any shadows
+	-pause		Start the simulation paused
 
 TODO
 ----
@@ -1071,17 +1072,19 @@ extern "C" void dsSimulationLoop (int argc, char **argv,
   current_state = 1;
 
   // look for flags that apply to us
+  int initial_pause = 0;
   for (int i=1; i<argc; i++) {
     if (strcmp(argv[i],"-notex")==0) use_textures = 0;
     if (strcmp(argv[i],"-noshadow")==0) use_shadows = 0;
     if (strcmp(argv[i],"-noshadows")==0) use_shadows = 0;
+    if (strcmp(argv[i],"-pause")==0) initial_pause = 1;
   }
 
   if (fn->version > DS_VERSION)
     dsDebug ("bad version number in dsFunctions structure");
 
   initMotionModel();
-  dsPlatformSimLoop (window_width,window_height,fn);
+  dsPlatformSimLoop (window_width,window_height,fn,initial_pause);
 }
 
 

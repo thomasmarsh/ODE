@@ -243,8 +243,10 @@ static void handleEvent (XEvent &event, dsFunctions *fn)
 }
 
 
-void dsPlatformSimLoop (int window_width, int window_height, dsFunctions *fn)
+void dsPlatformSimLoop (int window_width, int window_height, dsFunctions *fn,
+			int initial_pause)
 {
+  pause = initial_pause;
   createMainWindow (window_width, window_height);
   glXMakeCurrent (display,win,glx_context);
 
