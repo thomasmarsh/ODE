@@ -42,7 +42,7 @@ various algorithms will be available:
 extern "C" {
 #endif
 
-struct dContact;
+struct dContactGeom;
 
 
 /* extra information the space needs in every geometry object */
@@ -84,7 +84,7 @@ void dSpaceCollide (dSpaceID space, void *data, dNearCallback *callback);
  * StackAlloc(), and a pointer to the array is returned. the size of the
  * array is returned by the function.
  */
-/* int dSpaceCollide (dSpaceID space, dContact **contact_array); */
+/* int dSpaceCollide (dSpaceID space, dContactGeom **contact_array); */
 
 
 /* tell the space that an object has moved, so its representation in the

@@ -52,7 +52,7 @@ typedef void dGetAABBFn (dGeomID, dReal aabb[6]);
  * the contact struct.
  */
 typedef int dColliderFn (dGeomID o1, dGeomID o2,
-			 int flags, dContact *contact);
+			 int flags, dContactGeom *contact);
 
 /* one of these functions is provided by each geometry class. it takes a class
  * number. it should return the collider function that can handle colliding
@@ -129,7 +129,7 @@ void dDestroyGeom (dSpaceID, dGeomID);
  *    bits 16..1 : maximum number of contact points to generate
  *                 (size of contact array). if this is 0 it is taken to be 1.
  */
-int dCollide (dGeomID o1, dGeomID o2, int flags, dContact *contact);
+int dCollide (dGeomID o1, dGeomID o2, int flags, dContactGeom *contact);
 
 /* *********************************************************************** */
 /* standard object types. the point of reference of all these objects
@@ -184,24 +184,24 @@ dGeomID dCreatePlane (dSpaceID space,
  * S=sphere, B=box, C=capped cylinder, L=slab, P=plane
  */
 
-int dCollideSS (dSphere *o1, dSphere *o2, int flags, dContact *contact);
-int dCollideSB (dSphere *o1, dBox *o2, int flags, dContact *contact);
-int dCollideSC (dSphere *o1, dCCylinder *o2, int flags, dContact *contact);
-int dCollideSL (dSphere *o1, dSlab *o2, int flags, dContact *contact);
-int dCollideSP (dSphere *o1, dPlane *o2, int flags, dContact *contact);
+int dCollideSS (dSphere *o1, dSphere *o2, int flags, dContactGeom *contact);
+int dCollideSB (dSphere *o1, dBox *o2, int flags, dContactGeom *contact);
+int dCollideSC (dSphere *o1, dCCylinder *o2, int flags, dContactGeom *contact);
+int dCollideSL (dSphere *o1, dSlab *o2, int flags, dContactGeom *contact);
+int dCollideSP (dSphere *o1, dPlane *o2, int flags, dContactGeom *contact);
 
-int dCollideBB (dBox *o1, dBox *o2, int flags, dContact *contact);
-int dCollideBC (dBox *o1, dCCylinder *o2, int flags, dContact *contact);
-int dCollideBL (dBox *o1, dSlab *o2, int flags, dContact *contact);
-int dCollideBP (dBox *o1, dPlane *o2, int flags, dContact *contact);
+int dCollideBB (dBox *o1, dBox *o2, int flags, dContactGeom *contact);
+int dCollideBC (dBox *o1, dCCylinder *o2, int flags, dContactGeom *contact);
+int dCollideBL (dBox *o1, dSlab *o2, int flags, dContactGeom *contact);
+int dCollideBP (dBox *o1, dPlane *o2, int flags, dContactGeom *contact);
 
 int dCollideCC (dCCylinder *o1, dCCylinder *o2, int flags,
-                 dContact *contact);
-int dCollideCL (dCCylinder *o1, dSlab *o2, int flags, dContact *contact);
-int dCollideCP (dCCylinder *o1, dPlane *o2, int flags, dContact *contact);
+		dContactGeom *contact);
+int dCollideCL (dCCylinder *o1, dSlab *o2, int flags, dContactGeom *contact);
+int dCollideCP (dCCylinder *o1, dPlane *o2, int flags, dContactGeom *contact);
 
-int dCollideLL (dSlab *o1, dSlab *o2, int flags, dContact *contact);
-int dCollideLP (dSlab *o1, dPlane *o2, int flags, dContact *contact);
+int dCollideLL (dSlab *o1, dSlab *o2, int flags, dContactGeom *contact);
+int dCollideLP (dSlab *o1, dPlane *o2, int flags, dContactGeom *contact);
 
 
 void dAddToComposite (dGeomID composite, int i, dGeomID obj);

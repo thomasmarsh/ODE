@@ -161,6 +161,7 @@ extern struct dxJoint::Vtable dslider_vtable;
 // contact
 
 struct dxJointContact : public dxJoint {
+  int the_m;			// number of rows computed by getInfo1
   dContact contact;
 };
 extern struct dxJoint::Vtable dcontact_vtable;

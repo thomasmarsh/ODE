@@ -481,16 +481,37 @@ dxJoint::Vtable dslider_vtable = {
 
 static void contactInit (dxJointContact *j)
 {
-  dSetZero (j->contact.pos,4);
-  dSetZero (j->contact.normal,4);
-  j->contact.depth = 0;
+  // default frictionless contact. hmmm, this info gets overwritten straight
+  // away anyway, so why bother?
+  j->contact.surface.mode = 0;
+  j->contact.surface.mu = 0;
+  dSetZero (j->contact.geom.pos,4);
+  dSetZero (j->contact.geom.normal,4);
+  j->contact.geom.depth = 0;
 }
 
 
 static void contactGetInfo1 (dxJointContact *j, dxJoint::Info1 *info)
 {
-  info->m = 3;		// 1 or 3 will work
-  info->nub = 0;
+  // make sure mu's >= 0, then calculate number of constraint rows and number
+  // of unbounded rows.
+  int m = 1, nub=0;
+  if (j->contact.surface.mu < 0) j->contact.surface.mu = 0;
+  if (j->contact.surface.mode & dContactMu2) {
+    if (j->contact.surface.mu > 0) m++;
+    if (j->contact.surface.mu2 < 0) j->contact.surface.mu2 = 0;
+    if (j->contact.surface.mu2 > 0) m++;
+    if (j->contact.surface.mu  == dInfinity) nub ++;
+    if (j->contact.surface.mu2 == dInfinity) nub ++;
+  }
+  else {
+    if (j->contact.surface.mu > 0) m += 2;
+    if (j->contact.surface.mu == dInfinity) nub += 2;
+  }
+
+  j->the_m = m;
+  info->m = m;
+  info->nub = nub;
 }
 
 
@@ -501,28 +522,29 @@ static void contactGetInfo2 (dxJointContact *j, dxJoint::Info2 *info)
 
   // c1,c2 = contact points with respect to body PORs
   dVector3 c1,c2;
-  for (i=0; i<3; i++) c1[i] = j->contact.pos[i] - j->node[0].body->pos[i];
+  for (i=0; i<3; i++) c1[i] = j->contact.geom.pos[i] - j->node[0].body->pos[i];
 
   // set jacobian for normal
-  info->J1l[0] = j->contact.normal[0];
-  info->J1l[1] = j->contact.normal[1];
-  info->J1l[2] = j->contact.normal[2];
-  dCROSS (info->J1a,=  ,c1,j->contact.normal);
+  info->J1l[0] = j->contact.geom.normal[0];
+  info->J1l[1] = j->contact.geom.normal[1];
+  info->J1l[2] = j->contact.geom.normal[2];
+  dCROSS (info->J1a,=  ,c1,j->contact.geom.normal);
   if (j->node[1].body) {
-    for (i=0; i<3; i++) c2[i] = j->contact.pos[i] - j->node[1].body->pos[i];
-    info->J2l[0] = -j->contact.normal[0];
-    info->J2l[1] = -j->contact.normal[1];
-    info->J2l[2] = -j->contact.normal[2];
-    dCROSS (info->J2a,= -,c2,j->contact.normal);
+    for (i=0; i<3; i++) c2[i] = j->contact.geom.pos[i] -
+			  j->node[1].body->pos[i];
+    info->J2l[0] = -j->contact.geom.normal[0];
+    info->J2l[1] = -j->contact.geom.normal[1];
+    info->J2l[2] = -j->contact.geom.normal[2];
+    dCROSS (info->J2a,= -,c2,j->contact.geom.normal);
   }
 
   // set right hand side for normal
   dReal k = info->fps * info->erp;
   if (j->flags & dJOINT_REVERSE) {
-    info->c[0] = k*j->contact.depth;
+    info->c[0] = k*j->contact.geom.depth;
   }
   else {
-    info->c[0] = -k*j->contact.depth;
+    info->c[0] = -k*j->contact.geom.depth;
   }
 
   // set LCP limits for normal
@@ -531,24 +553,62 @@ static void contactGetInfo2 (dxJointContact *j, dxJoint::Info2 *info)
 
   // now do jacobian for tangential forces
   dVector3 t1,t2;	// two vectors tangential to normal
-  dPlaneSpace (j->contact.normal,t1,t2);
-  info->J1l[s+0] = t1[0];
-  info->J1l[s+1] = t1[1];
-  info->J1l[s+2] = t1[2];
-  dCROSS (info->J1a+s,=,c1,t1);
-  info->J1l[s2+0] = t2[0];
-  info->J1l[s2+1] = t2[1];
-  info->J1l[s2+2] = t2[2];
-  dCROSS (info->J1a+s2,=,c1,t2);
-  if (j->node[1].body) {
-    info->J2l[s+0] = t1[0];
-    info->J2l[s+1] = t1[1];
-    info->J2l[s+2] = t1[2];
-    dCROSS (info->J2a+s,=,c2,t2);
-    info->J2l[s2+0] = t2[0];
-    info->J2l[s2+1] = t2[1];
-    info->J2l[s2+2] = t2[2];
-    dCROSS (info->J2a+s2,=,c2,t2);
+
+  // first friction direction
+  if (j->the_m >= 2) {
+    if (j->contact.surface.mode & dContactFDir1) {	// use fdir1 ?
+      t1[0] = j->contact.fdir1[0];
+      t1[1] = j->contact.fdir1[1];
+      t1[2] = j->contact.fdir1[2];
+      dCROSS (t2,=,j->contact.geom.normal,t1);
+    }
+    else {
+      dPlaneSpace (j->contact.geom.normal,t1,t2);
+    }
+    info->J1l[s+0] = t1[0];
+    info->J1l[s+1] = t1[1];
+    info->J1l[s+2] = t1[2];
+    dCROSS (info->J1a+s,=,c1,t1);
+    if (j->node[1].body) {
+      info->J2l[s+0] = -t1[0];
+      info->J2l[s+1] = -t1[1];
+      info->J2l[s+2] = -t1[2];
+      dCROSS (info->J2a+s,= -,c2,t1);
+    }
+    // set right hand side
+    if (j->contact.surface.mode & dContactMotion1) {
+      info->c[1] = j->contact.surface.motion1;
+    }
+    // set LCP bounds
+    info->lo[1] = -j->contact.surface.mu;
+    info->hi[1] = j->contact.surface.mu;
+  }
+
+  // second friction direction
+  if (j->the_m >= 3) {
+    info->J1l[s2+0] = t2[0];
+    info->J1l[s2+1] = t2[1];
+    info->J1l[s2+2] = t2[2];
+    dCROSS (info->J1a+s2,=,c1,t2);
+    if (j->node[1].body) {
+      info->J2l[s2+0] = -t2[0];
+      info->J2l[s2+1] = -t2[1];
+      info->J2l[s2+2] = -t2[2];
+      dCROSS (info->J2a+s2,= -,c2,t2);
+    }
+    // set right hand side
+    if (j->contact.surface.mode & dContactMotion2) {
+      info->c[2] = j->contact.surface.motion2;
+    }
+    // set LCP bounds
+    if (j->contact.surface.mode & dContactMu2) {
+      info->lo[2] = -j->contact.surface.mu2;
+      info->hi[2] = j->contact.surface.mu2;
+    }
+    else {
+      info->lo[2] = -j->contact.surface.mu;
+      info->hi[2] = j->contact.surface.mu;
+    }
   }
 }
 

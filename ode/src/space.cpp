@@ -78,18 +78,18 @@ void dSpaceCollide (dSpaceID space, void *data, dNearCallback *callback)
 
 // @@@ NOT FLEXIBLE ENOUGH
 //
-//int dSpaceCollide (dSpaceID space, dContact **contact_array)
+//int dSpaceCollide (dSpaceID space, dContactGeom **contact_array)
 //{
 //  int n = 0;
-//  dContact *base = (dContact*) dStackAlloc (sizeof(dContact));
-//  dContact *c = base;
+//  dContactGeom *base = (dContact*) dStackAlloc (sizeof(dContact));
+//  dContactGeom *c = base;
 //  for (dxGeom *g1=space->first; g1; g1=g1->space.next) {
 //    for (dxGeom *g2=g1->space.next; g2; g2=g2->space.next) {
 //      // generate at most 1 contact for this pair
 //      c->o1 = g1;
 //      c->o2 = g2;
 //      if (dCollide (0,c)) {
-//	c = (dContact*) dStackAlloc (sizeof(dContact));
+//	c = (dContactGeom*) dStackAlloc (sizeof(dContactGeom));
 //	n++;
 //      }
 //    }
