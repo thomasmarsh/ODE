@@ -225,7 +225,7 @@ static void swapRowsAndCols (ATYPE A, int n, int i1, int i2, int nskip,
 // swap two indexes in the n*n LCP problem. i1 must be <= i2.
 
 static void swapProblem (ATYPE A, dReal *x, dReal *b, dReal *w, dReal *lo,
-			 dReal *hi, int *p, int *state,
+			 dReal *hi, int *p, int *state, int *findex,
 			 int n, int i1, int i2, int nskip,
 			 int do_fast_row_swaps)
 {
@@ -256,6 +256,11 @@ static void swapProblem (ATYPE A, dReal *x, dReal *b, dReal *w, dReal *lo,
   tmpi = state[i1];
   state[i1] = state[i2];
   state[i2] = tmpi;
+  if (findex) {
+    tmpi = findex[i1];
+    findex[i1] = findex[i2];
+    findex[i2] = tmpi;
+  }
 }
 
 
@@ -347,7 +352,7 @@ struct dLCP {
   dLCP (int _n, int _nub, dReal *_Adata, dReal *_x, dReal *_b, dReal *_w,
 	dReal *_lo, dReal *_hi, dReal *_L, dReal *_d,
 	dReal *_Dell, dReal *_ell, dReal *_tmp,
-	int *_state, int *_p, int *_C, dReal **Arows);
+	int *_state, int *_findex, int *_p, int *_C, dReal **Arows);
   // the constructor is given an initial problem description (A,x,b,w) and
   // space for other working data (which the caller may allocate on the stack).
   // some of this data is specific to the fast dLCP implementation.
@@ -407,8 +412,10 @@ struct dLCP {
 dLCP::dLCP (int _n, int _nub, dReal *_Adata, dReal *_x, dReal *_b, dReal *_w,
 	    dReal *_lo, dReal *_hi, dReal *_L, dReal *_d,
 	    dReal *_Dell, dReal *_ell, dReal *_tmp,
-	    int *_state, int *_p, int *_C, dReal **Arows)
+	    int *_state, int *_findex, int *_p, int *_C, dReal **Arows)
 {
+  dUASSERT (_findex==0,"slow dLCP object does not support findex array");
+
   n = _n;
   nub = _nub;
   Adata = _Adata;
@@ -660,8 +667,8 @@ void dLCP::unpermute()
 // `p' records the permutation of A,x,b,w,etc. p is initially 1:n and is
 // permuted as the other vectors/matrices are permuted.
 //
-// A,x,b,w,lo,hi,state,p,c are permuted such that sets C,N have contiguous
-// indexes. the don't-care indexes follow N.
+// A,x,b,w,lo,hi,state,findex,p,c are permuted such that sets C,N have
+// contiguous indexes. the don't-care indexes follow N.
 //
 // an L*D*L' factorization is maintained of A(C,C), and whenever indexes are
 // added or removed from the set C the factorization is updated.
@@ -684,13 +691,13 @@ struct dLCP {
   dReal *Adata,*x,*b,*w,*lo,*hi;	// permuted LCP problem data
   dReal *L,*d;				// L*D*L' factorization of set C
   dReal *Dell,*ell,*tmp;
-  int *state,*p,*C;
+  int *state,*findex,*p,*C;
   int nC,nN;				// size of each index set
 
   dLCP (int _n, int _nub, dReal *_Adata, dReal *_x, dReal *_b, dReal *_w,
 	dReal *_lo, dReal *_hi, dReal *_L, dReal *_d,
 	dReal *_Dell, dReal *_ell, dReal *_tmp,
-	int *_state, int *_p, int *_C, dReal **Arows);
+	int *_state, int *_findex, int *_p, int *_C, dReal **Arows);
   int getNub() { return nub; }
   void transfer_i_to_C (int i);
   void transfer_i_to_N (int i)
@@ -718,7 +725,7 @@ struct dLCP {
 dLCP::dLCP (int _n, int _nub, dReal *_Adata, dReal *_x, dReal *_b, dReal *_w,
 	    dReal *_lo, dReal *_hi, dReal *_L, dReal *_d,
 	    dReal *_Dell, dReal *_ell, dReal *_tmp,
-	    int *_state, int *_p, int *_C, dReal **Arows)
+	    int *_state, int *_findex, int *_p, int *_C, dReal **Arows)
 {
   n = _n;
   nub = _nub;
@@ -735,6 +742,7 @@ dLCP::dLCP (int _n, int _nub, dReal *_Adata, dReal *_x, dReal *_b, dReal *_w,
   ell = _ell;
   tmp = _tmp;
   state = _state;
+  findex = _findex;
   p = _p;
   C = _C;
   nskip = dPAD(n);
@@ -765,7 +773,7 @@ dLCP::dLCP (int _n, int _nub, dReal *_Adata, dReal *_x, dReal *_b, dReal *_w,
       }
       while (i1 > i2); 
       //printf ("--> %d %d\n",i1,i2);
-      swapProblem (A,x,b,w,lo,hi,p,state,n,i1,i2,nskip,0);
+      swapProblem (A,x,b,w,lo,hi,p,state,findex,n,i1,i2,nskip,0);
     }
   }
   */
@@ -773,11 +781,11 @@ dLCP::dLCP (int _n, int _nub, dReal *_Adata, dReal *_x, dReal *_b, dReal *_w,
   // permute the problem so that *all* the unbounded variables are at the
   // start, i.e. look for unbounded variables not included in `nub'. we can
   // potentially push up `nub' this way and get a bigger initial factorization.
-  // note that when we swap rows/cols here we muust not just swap row pointers,
+  // note that when we swap rows/cols here we must not just swap row pointers,
   // as the initial factorization relies on the data being all in one chunk.
   for (k=nub; k<n; k++) {
     if (lo[k]==-dInfinity && hi[k]==dInfinity) {
-      swapProblem (A,x,b,w,lo,hi,p,state,n,nub,k,nskip,0);
+      swapProblem (A,x,b,w,lo,hi,p,state,findex,n,nub,k,nskip,0);
       nub++;
     }
   }
@@ -792,6 +800,17 @@ dLCP::dLCP (int _n, int _nub, dReal *_Adata, dReal *_x, dReal *_b, dReal *_w,
     dSetZero (w,nub);
     for (k=0; k<nub; k++) C[k] = k;
     nC = nub;
+  }
+
+  // permute the indexes > nub such that all findex variables are at the end
+  if (findex) {
+    int num_at_end = 0;
+    for (k=n-1; k >= nub; k--) {
+      if (findex[k] >= 0) {
+	swapProblem (A,x,b,w,lo,hi,p,state,findex,n,k,n-1-num_at_end,nskip,1);
+	num_at_end++;
+      }
+    }
   }
 
   // print info about indexes
@@ -817,7 +836,7 @@ void dLCP::transfer_i_to_C (int i)
   else {
     d[0] = dRecip (AROW(i)[i]);
   }
-  swapProblem (A,x,b,w,lo,hi,p,state,n,nC,i,nskip,1);
+  swapProblem (A,x,b,w,lo,hi,p,state,findex,n,nC,i,nskip,1);
   C[nC] = nC;
   nC++;
 
@@ -848,7 +867,7 @@ void dLCP::transfer_i_from_N_to_C (int i)
   else {
     d[0] = dRecip (AROW(i)[i]);
   }
-  swapProblem (A,x,b,w,lo,hi,p,state,n,nC,i,nskip,1);
+  swapProblem (A,x,b,w,lo,hi,p,state,findex,n,nC,i,nskip,1);
   C[nC] = nC;
   nN--;
   nC++;
@@ -881,7 +900,7 @@ void dLCP::transfer_i_from_C_to_N (int i)
     break;
   }
   dIASSERT (j < nC);
-  swapProblem (A,x,b,w,lo,hi,p,state,n,i,nC-1,nskip,1);
+  swapProblem (A,x,b,w,lo,hi,p,state,findex,n,i,nC-1,nskip,1);
   nC--;
   nN++;
 
@@ -978,7 +997,7 @@ void dSolveLCPBasic (int n, dReal *A, dReal *x, dReal *b,
   int *C = (int*) ALLOCA (n*sizeof(int));
   int *dummy = (int*) ALLOCA (n*sizeof(int));
 
-  dLCP lcp (n,0,A,x,b,w,tmp,tmp,L,d,Dell,ell,tmp,dummy,p,C,Arows);
+  dLCP lcp (n,0,A,x,b,w,tmp,tmp,L,d,Dell,ell,tmp,dummy,dummy,p,C,Arows);
   nub = lcp.getNub();
 
   for (i=0; i<n; i++) {
@@ -1059,10 +1078,10 @@ void dSolveLCPBasic (int n, dReal *A, dReal *x, dReal *b,
 //     without going through C?
 
 void dSolveLCP (int n, dReal *A, dReal *x, dReal *b,
-		dReal *w, int nub, dReal *lo, dReal *hi)
+		dReal *w, int nub, dReal *lo, dReal *hi, int *findex)
 {
   dAASSERT (n>0 && A && x && b && w && lo && hi && nub >= 0 && nub <= n);
-  int i,k;
+  int i,k,hit_first_friction_index = 0;
   int nskip = dPAD(n);
 
   // if all the variables are unbounded then we can just factor, solve,
@@ -1097,7 +1116,7 @@ void dSolveLCP (int n, dReal *A, dReal *x, dReal *b,
 
   // create LCP object. note that tmp is set to delta_w to save space, this
   // optimization relies on knowledge of how tmp is used, so be careful!
-  dLCP lcp (n,nub,A,x,b,w,lo,hi,L,d,Dell,ell,delta_w,state,p,C,Arows);
+  dLCP lcp (n,nub,A,x,b,w,lo,hi,L,d,Dell,ell,delta_w,state,findex,p,C,Arows);
   nub = lcp.getNub();
 
   // loop over all indexes nub..n-1. for index i, if x(i),w(i) satisfy the
@@ -1115,9 +1134,25 @@ void dSolveLCP (int n, dReal *A, dReal *x, dReal *b,
     // don't care what happens to those w's. in other words, we only consider
     // an (i+1)*(i+1) sub-problem of A*x=b+w.
 
+    // if we've hit the first friction index, we have to compute the lo and
+    // hi values based on the values of x already computed. we have been
+    // permuting the indexes, so the values stored in the findex vector are
+    // no longer valid. thus we have to temporarily unpermute the x vector. 
+    if (hit_first_friction_index == 0 && findex && findex[i] >= 0) {
+      // un-permute x into delta_w, which is not being used at the moment
+      for (k=0; k<n; k++) delta_w[p[k]] = x[k];
+      // set lo and hi values
+      for (k=i; k<n; k++) {
+	hi[k] = dFabs (hi[k] * delta_w[findex[k]]);
+	lo[k] = -hi[k];
+      }
+      hit_first_friction_index = 1;
+    }
+
     // thus far we have not even been computing the w values for indexes
     // greater than i, so compute w[i] now.
     // @@@ TODO: optimize for when values of lo/hi are known to be zero.
+    // @@@ this can happens for tangential friction when normals are 0.
     w[i] = lcp.AiC_times_qC (i,x) + lcp.AiN_times_qN (i,x) - b[i];
 
     // see if x(i),w(i) is in a valid region
@@ -1333,7 +1368,7 @@ extern "C" void dTestSolveLCP()
     dStopwatchReset (&sw);
     dStopwatchStart (&sw);
 
-    dSolveLCP (n,A2,x,b2,w,nub,lo2,hi2);
+    dSolveLCP (n,A2,x,b2,w,nub,lo2,hi2,0);
 
     dStopwatchStop (&sw);
     double time = dStopwatchTime(&sw);

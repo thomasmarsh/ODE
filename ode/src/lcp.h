@@ -35,6 +35,15 @@ we restrict lo(i) <= 0 and hi(i) >= 0.
 
 the original data (A,b) may be modified by this function.
 
+if the `findex' (friction index) parameter is nonzero, it points to an array
+of index values. in this case constraints that have findex[i] >= 0 are
+special. all non-special constraints are solved for, then the lo and hi values
+for the special constraints are set:
+  hi[i] = abs( hi[i] * x[findex[i]] )
+  lo[i] = -hi[i]
+and the solution continues. this mechanism allows a friction approximation
+to be implemented.
+
 */
 
 
@@ -43,7 +52,7 @@ the original data (A,b) may be modified by this function.
 
 
 void dSolveLCP (int n, dReal *A, dReal *x, dReal *b, dReal *w,
-		int nub, dReal *lo, dReal *hi);
+		int nub, dReal *lo, dReal *hi, int *findex);
 
 
 #endif

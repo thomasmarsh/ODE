@@ -92,6 +92,12 @@ struct dxJoint : public dObject {
 
     // lo and hi limits for variables (set to -/+ infinity on entry).
     dReal *lo,*hi;
+
+    // findex vector for variables. see the LCP solver interface for a
+    // description of what this does. this is set to -1 on entry.
+    // note that the returned indexes are relative to the first index of
+    // the constraint.
+    int *findex;
   };
 
   // virtual function table: size of the joint structure, function pointers.
