@@ -1,0 +1,3287 @@
+Only in ../..: .#Makefile.1.16
+Only in ../..: CHANGELOG
+Only in ../..: CVS
+Only in ../..: INSTALL
+Only in ../..: LICENSE-BSD.TXT
+Only in ../..: LICENSE.TXT
+Only in ../..: Makefile
+Only in ../..: Makefile.deps
+Only in ../..: OPCODE
+Only in ../..: PATCH1
+Only in ../..: PATCH2
+Only in ../..: README
+Only in ../..: TMTM
+Only in ../..: TRIMESHANNO
+Only in ../..: VC6
+Only in ../..: config
+Only in ../..: configurator.c
+Only in ../..: contrib
+Only in ../..: drawstuff
+Only in ../../include: CVS
+Only in ../../include: drawstuff
+Only in ../../include/ode: .#collision_trimesh.h.1.2
+Only in ../../include/ode: CVS
+Only in ../../include/ode: README
+diff -Pur ../../include/ode/collision.h ./include/ode/collision.h
+--- ../../include/ode/collision.h	Mon Apr 19 20:27:47 2004
++++ ./include/ode/collision.h	Tue May 18 09:46:44 2004
+@@ -117,6 +117,10 @@
+ void dGeomCCylinderGetParams (dGeomID ccylinder, dReal *radius, dReal *length);
+ dReal dGeomCCylinderPointDepth (dGeomID ccylinder, dReal x, dReal y, dReal z);
+ 
++dGeomID dCreateCylinder (dSpaceID space, dReal radius, dReal length);
++void dGeomCylinderSetParams (dGeomID cylinder, dReal radius, dReal length);
++void dGeomCylinderGetParams (dGeomID cylinder, dReal *radius, dReal *length);
++
+ dGeomID dCreateRay (dSpaceID space, dReal length);
+ void dGeomRaySetLength (dGeomID ray, dReal length);
+ dReal dGeomRayGetLength (dGeomID ray);
+Only in ../../include/ode: collision_space.h
+Only in ../../include/ode: collision_trimesh.h
+Only in ../../include/ode: common.h
+Only in ../../include/ode: compatibility.h
+Only in ../../include/ode: contact.h
+Only in ../../include/ode: error.h
+Only in ../../include/ode: export-dif.h
+Only in ../../include/ode: mass.h
+Only in ../../include/ode: matrix.h
+Only in ../../include/ode: memory.h
+Only in ../../include/ode: misc.h
+Only in ../../include/ode: objects.h
+Only in ../../include/ode: ode.h
+Only in ../../include/ode: odecpp.h
+Only in ../../include/ode: odecpp_collision.h
+Only in ../../include/ode: odecpp_old.h
+Only in ../../include/ode: odemath.h
+Only in ../../include/ode: rotation.h
+Only in ../../include/ode: timer.h
+Only in ../..: lib
+Only in ../../ode: CVS
+Only in ../../ode: README
+Only in ../../ode: TODO
+Only in ../../ode: doc
+Only in ../../ode/src: .#collision_kernel.cpp.1.13
+Only in ../../ode/src: .#collision_trimesh.cpp.1.4
+Only in ../../ode/src: .#collision_trimesh_internal.h.1.3
+Only in ../../ode/src: CVS
+Only in ../../ode/src: array.cpp
+Only in ../../ode/src: array.h
+diff -Pur ../../ode/src/collision_cylinder_box.cpp ./ode/src/collision_cylinder_box.cpp
+--- ../../ode/src/collision_cylinder_box.cpp	Thu Jan  1 01:00:00 1970
++++ ./ode/src/collision_cylinder_box.cpp	Tue May 18 09:46:44 2004
+@@ -0,0 +1,985 @@
++/*************************************************************************
++*                                                                       *
++* Open Dynamics Engine, Copyright (C) 2001-2003 Russell L. Smith.       *
++* All rights reserved.  Email: russ@q12.org   Web: www.q12.org          *
++*                                                                       *
++* This library is free software; you can redistribute it and/or         *
++* modify it under the terms of EITHER:                                  *
++*   (1) The GNU Lesser General Public License as published by the Free  *
++*       Software Foundation; either version 2.1 of the License, or (at  *
++*       your option) any later version. The text of the GNU Lesser      *
++*       General Public License is included with this library in the     *
++*       file LICENSE.TXT.                                               *
++*   (2) The BSD-style license that is included with this library in     *
++*       the file LICENSE-BSD.TXT.                                       *
++*                                                                       *
++* This library is distributed in the hope that it will be useful,       *
++* but WITHOUT ANY WARRANTY; without even the implied warranty of        *
++* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the files    *
++* LICENSE.TXT and LICENSE-BSD.TXT for more details.                     *
++*                                                                       *
++*************************************************************************/
++
++/*
++ *	Cylinder-box collider by Alen Ladavac
++ *  Ported to ODE by Nguyen Binh
++ */
++
++#include <ode/collision.h>
++#include <ode/matrix.h>
++#include <ode/rotation.h>
++#include <ode/odemath.h>
++#include "collision_util.h"
++
++static const int MAX_CYLBOX_CLIP_POINTS  = 16;
++static const int nCYLINDER_AXIS			 = 2;
++// Number of segment of cylinder base circle.
++// Must be divisible by 4.
++static const int nCYLINDER_SEGMENT		 = 8;
++
++#define MAX_FLOAT	dInfinity
++
++// Data that passed through the collider's functions
++typedef struct _sCylinderBoxData
++{
++	// cylinder parameters
++	dMatrix3			mCylinderRot;
++	dVector3			vCylinderPos;
++	dVector3			vCylinderAxis;
++	dReal				fCylinderRadius;
++	dReal				fCylinderSize;
++	dVector3			avCylinderNormals[nCYLINDER_SEGMENT];
++	
++	// box parameters
++
++	dMatrix3			mBoxRot;
++	dVector3			vBoxPos;
++	dVector3			vBoxHalfSize;
++	// box vertices array : 8 vertices
++	dVector3			avBoxVertices[8];
++
++	// global collider data
++	dVector3			vDiff;			
++	dVector3			vNormal;
++	dReal				fBestDepth;
++	dReal				fBestrb;
++	dReal				fBestrc;
++	int					iBestAxis;
++
++	// contact data
++	dVector3			vEp0, vEp1;
++	dReal				fDepth0, fDepth1;
++
++	// ODE stuff
++	dGeomID				gBox;
++	dGeomID				gCylinder;
++	dContactGeom*		gContact;
++	int					iFlags;
++	int					iSkip;
++	int					nContacts;
++	
++} sCylinderBoxData;
++
++
++// initialize collision data
++void _cldInitCylinderBox(sCylinderBoxData& cData) 
++{
++	// get cylinder position, orientation
++	const dReal* pRotCyc = dGeomGetRotation(cData.gCylinder); 
++	dMatrix3Copy(pRotCyc,cData.mCylinderRot);
++
++	const dVector3* pPosCyc = (const dVector3*)dGeomGetPosition(cData.gCylinder);
++	dVector3Copy(*pPosCyc,cData.vCylinderPos);
++
++	dMat3GetCol(cData.mCylinderRot,nCYLINDER_AXIS,cData.vCylinderAxis);
++	
++	// get cylinder radius and size
++	dGeomCylinderGetParams(cData.gCylinder,&cData.fCylinderRadius,&cData.fCylinderSize);
++
++	// get box position, orientation, size
++	const dReal* pRotBox = dGeomGetRotation(cData.gBox);
++	dMatrix3Copy(pRotBox,cData.mBoxRot);
++	const dVector3* pPosBox  = (const dVector3*)dGeomGetPosition(cData.gBox);
++	dVector3Copy(*pPosBox,cData.vBoxPos);
++
++	dGeomBoxGetLengths(cData.gBox, cData.vBoxHalfSize);
++	cData.vBoxHalfSize[0] *= REAL(0.5);
++	cData.vBoxHalfSize[1] *= REAL(0.5);
++	cData.vBoxHalfSize[2] *= REAL(0.5);
++
++	// vertex 0
++	cData.avBoxVertices[0][0] = -cData.vBoxHalfSize[0];
++	cData.avBoxVertices[0][1] =  cData.vBoxHalfSize[1];
++	cData.avBoxVertices[0][2] = -cData.vBoxHalfSize[2];
++
++	// vertex 1
++	cData.avBoxVertices[1][0] =  cData.vBoxHalfSize[0];
++	cData.avBoxVertices[1][1] =  cData.vBoxHalfSize[1];
++	cData.avBoxVertices[1][2] = -cData.vBoxHalfSize[2];
++
++	// vertex 2
++	cData.avBoxVertices[2][0] = -cData.vBoxHalfSize[0];
++	cData.avBoxVertices[2][1] = -cData.vBoxHalfSize[1];
++	cData.avBoxVertices[2][2] = -cData.vBoxHalfSize[2];
++
++	// vertex 3
++	cData.avBoxVertices[3][0] =  cData.vBoxHalfSize[0];
++	cData.avBoxVertices[3][1] = -cData.vBoxHalfSize[1];
++	cData.avBoxVertices[3][2] = -cData.vBoxHalfSize[2];
++
++	// vertex 4
++	cData.avBoxVertices[4][0] =  cData.vBoxHalfSize[0];
++	cData.avBoxVertices[4][1] =  cData.vBoxHalfSize[1];
++	cData.avBoxVertices[4][2] =  cData.vBoxHalfSize[2];
++
++	// vertex 5
++	cData.avBoxVertices[5][0] =  cData.vBoxHalfSize[0];
++	cData.avBoxVertices[5][1] = -cData.vBoxHalfSize[1];
++	cData.avBoxVertices[5][2] =  cData.vBoxHalfSize[2];
++
++	// vertex 6
++	cData.avBoxVertices[6][0] = -cData.vBoxHalfSize[0];
++	cData.avBoxVertices[6][1] = -cData.vBoxHalfSize[1];
++	cData.avBoxVertices[6][2] =  cData.vBoxHalfSize[2];
++
++	// vertex 7
++	cData.avBoxVertices[7][0] = -cData.vBoxHalfSize[0];
++	cData.avBoxVertices[7][1] =  cData.vBoxHalfSize[1];
++	cData.avBoxVertices[7][2] =  cData.vBoxHalfSize[2];
++
++	// temp index
++	int i = 0;
++	dVector3	vTempBoxVertices[8];
++	// transform vertices in absolute space
++	for(i=0; i < 8; i++) 
++	{
++		dMultiplyMat3Vec3(cData.mBoxRot,cData.avBoxVertices[i], vTempBoxVertices[i]);
++		dVector3Add(vTempBoxVertices[i], cData.vBoxPos, cData.avBoxVertices[i]);
++	}
++
++	// find relative position
++	dVector3Subtract(cData.vCylinderPos,cData.vBoxPos,cData.vDiff);
++	cData.fBestDepth = MAX_FLOAT;
++	cData.vNormal[0] = REAL(0.0);
++	cData.vNormal[1] = REAL(0.0);
++	cData.vNormal[2] = REAL(0.0);
++
++	// calculate basic angle for nCYLINDER_SEGMENT-gon
++	dReal fAngle = M_PI/nCYLINDER_SEGMENT;
++
++	// calculate angle increment
++	dReal fAngleIncrement = fAngle * REAL(2.0); 
++
++	// calculate nCYLINDER_SEGMENT-gon points
++	for(i = 0; i < nCYLINDER_SEGMENT; i++) 
++	{
++		cData.avCylinderNormals[i][0] = -dCos(fAngle);
++		cData.avCylinderNormals[i][1] = -dSin(fAngle);
++		cData.avCylinderNormals[i][2] = 0;
++
++		fAngle += fAngleIncrement;
++	}
++
++	cData.fBestrb		= 0;
++	cData.fBestrc		= 0;
++	cData.iBestAxis		= 0;
++	cData.nContacts		= 0;
++
++}
++
++// test for given separating axis
++int _cldTestAxis(sCylinderBoxData& cData, dVector3& vInputNormal, int iAxis ) 
++{
++	// check length of input normal
++	dReal fL = dVector3Length(vInputNormal);
++	// if not long enough
++	if ( fL < 1e-5f ) 
++	{
++		// do nothing
++		return 1;
++	}
++
++	// otherwise make it unit for sure
++	dNormalize3(vInputNormal);
++
++	// project box and Cylinder on mAxis
++	dReal fdot1 = dVector3Dot(cData.vCylinderAxis, vInputNormal);
++
++	dReal frc;
++
++	if (fdot1 > REAL(1.0)) 
++	{
++		fdot1 = REAL(1.0);
++		frc = dFabs(cData.fCylinderSize*REAL(0.5));
++	}
++
++	// project box and capsule on iAxis
++	frc = dFabs( fdot1 * (cData.fCylinderSize*REAL(0.5))) + cData.fCylinderRadius * dSqrt(REAL(1.0)-(fdot1*fdot1));
++
++	dVector3	vTemp1;
++	dReal frb = REAL(0.0);
++
++	dMat3GetCol(cData.mBoxRot,0,vTemp1);
++	frb = dFabs(dVector3Dot(vTemp1,vInputNormal))*cData.vBoxHalfSize[0];
++
++	dMat3GetCol(cData.mBoxRot,1,vTemp1);
++	frb += dFabs(dVector3Dot(vTemp1,vInputNormal))*cData.vBoxHalfSize[1];
++
++	dMat3GetCol(cData.mBoxRot,2,vTemp1);
++	frb += dFabs(dVector3Dot(vTemp1,vInputNormal))*cData.vBoxHalfSize[2];
++	
++	// project their distance on separating axis
++	dReal fd  = dVector3Dot(cData.vDiff,vInputNormal);
++
++	// if they do not overlap exit, we have no intersection
++	if ( dFabs(fd) > frc+frb )
++	{ 
++		return 0; 
++	} 
++
++	// get depth
++	dReal fDepth = - dFabs(fd) + (frc+frb);
++
++	// get maximum depth
++	if ( fDepth < cData.fBestDepth ) 
++	{
++		cData.fBestDepth = fDepth;
++		dVector3Copy(vInputNormal,cData.vNormal);
++		cData.iBestAxis  = iAxis;
++		cData.fBestrb    = frb;
++		cData.fBestrc    = frc;
++
++		// flip normal if interval is wrong faced
++		if (fd > 0) 
++		{ 
++			dVector3Inv(cData.vNormal);
++		}
++	}
++
++	return 1;
++}
++
++
++// check for separation between box edge and cylinder circle edge
++int _cldTestEdgeCircleAxis( sCylinderBoxData& cData,
++							const dVector3 &vCenterPoint, 
++							const dVector3 &vVx0, const dVector3 &vVx1, 
++							int iAxis ) 
++{
++	// calculate direction of edge
++	dVector3 vDirEdge;
++	dVector3Subtract(vVx1,vVx0,vDirEdge);
++	dNormalize3(vDirEdge);
++	// starting point of edge 
++	dVector3 vEStart;
++	dVector3Copy(vVx0,vEStart);;
++
++	// calculate angle cosine between cylinder axis and edge
++	dReal fdot2 = dVector3Dot (vDirEdge,cData.vCylinderAxis);
++
++	// if edge is perpendicular to cylinder axis
++	if(dFabs(fdot2) < 1e-5f) 
++	{
++		// this can't be separating axis, because edge is parallel to circle plane
++		return 1;
++	}
++
++	// find point of intersection between edge line and circle plane
++	dVector3 vTemp1;
++	dVector3Subtract(vCenterPoint,vEStart,vTemp1);
++	dReal fdot1 = dVector3Dot(vTemp1,cData.vCylinderAxis);
++	dVector3 vpnt;
++	vpnt[0]= vEStart[0] + vDirEdge[0] * (fdot1/fdot2);
++	vpnt[1]= vEStart[1] + vDirEdge[1] * (fdot1/fdot2);
++	vpnt[2]= vEStart[2] + vDirEdge[2] * (fdot1/fdot2);
++
++	// find tangent vector on circle with same center (vCenterPoint) that
++	// touches point of intersection (vpnt)
++	dVector3 vTangent;
++	dVector3Subtract(vCenterPoint,vpnt,vTemp1);
++	dVector3Cross(vTemp1,cData.vCylinderAxis,vTangent);
++	
++	// find vector orthogonal both to tangent and edge direction
++	dVector3 vAxis;
++	dVector3Cross(vTangent,vDirEdge,vAxis);
++
++	// use that vector as separating axis
++	return _cldTestAxis( cData, vAxis, iAxis );
++}
++
++// Test separating axis for collision
++int _cldTestSeparatingAxes(sCylinderBoxData& cData) 
++{
++	// reset best axis
++	cData.fBestDepth = MAX_FLOAT;
++	cData.iBestAxis = 0;
++	cData.fBestrb = 0;
++	cData.fBestrc = 0;
++	cData.nContacts = 0;
++
++	dVector3  vAxis = {REAL(0.0),REAL(0.0),REAL(0.0),REAL(0.0)};
++
++	// Epsilon value for checking axis vector length 
++	const dReal fEpsilon = 1e-6f;
++
++	// axis A0
++	dMat3GetCol(cData.mBoxRot, 0 , vAxis);
++	if (!_cldTestAxis( cData, vAxis, 1 )) 
++	{
++		return 0;
++	}
++
++	// axis A1
++	dMat3GetCol(cData.mBoxRot, 1 , vAxis);
++	if (!_cldTestAxis( cData, vAxis, 2 )) 
++	{
++		return 0;
++	}
++
++	// axis A2
++	dMat3GetCol(cData.mBoxRot, 2 , vAxis);
++	if (!_cldTestAxis( cData, vAxis, 3 )) 
++	{
++		return 0;
++	}
++
++	// axis C - Cylinder Axis
++	//vAxis = vCylinderAxis;
++	dVector3Copy(cData.vCylinderAxis , vAxis);
++	if (!_cldTestAxis( cData, vAxis, 4 )) 
++	{
++		return 0;
++	}
++
++	// axis CxA0
++	//vAxis = ( vCylinderAxis cross mthGetColM33f( mBoxRot, 0 ));
++	dVector3CrossMat3Col(cData.mBoxRot, 0 ,cData.vCylinderAxis, vAxis);
++	if(dVector3Length2( vAxis ) > fEpsilon ) 
++	{
++		if (!_cldTestAxis( cData, vAxis, 5 ))
++		{
++			return 0;
++		}
++	}
++
++	// axis CxA1
++	//vAxis = ( vCylinderAxis cross mthGetColM33f( mBoxRot, 1 ));
++	dVector3CrossMat3Col(cData.mBoxRot, 1 ,cData.vCylinderAxis, vAxis);
++	if(dVector3Length2( vAxis ) > fEpsilon ) 
++	{
++		if (!_cldTestAxis( cData, vAxis, 6 )) 
++		{
++			return 0;
++		}
++	}
++
++	// axis CxA2
++	//vAxis = ( vCylinderAxis cross mthGetColM33f( mBoxRot, 2 ));
++	dVector3CrossMat3Col(cData.mBoxRot, 2 ,cData.vCylinderAxis, vAxis);
++	if(dVector3Length2( vAxis ) > fEpsilon ) 
++	{
++		if (!_cldTestAxis( cData, vAxis, 7 ))
++		{
++			return 0;
++		}
++	}
++
++	int i = 0;
++	dVector3	vTemp1;
++	dVector3	vTemp2;
++	// here we check box's vertices axis
++	for(i=0; i< 8; i++) 
++	{
++		//vAxis = ( vCylinderAxis cross (cData.avBoxVertices[i] - vCylinderPos));
++		dVector3Subtract(cData.avBoxVertices[i],cData.vCylinderPos,vTemp1);
++		dVector3Cross(cData.vCylinderAxis,vTemp1,vTemp2);
++		//vAxis = ( vCylinderAxis cross vAxis );
++		dVector3Cross(cData.vCylinderAxis,vTemp2,vAxis);
++		if(dVector3Length2( vAxis ) > fEpsilon ) 
++		{
++			if (!_cldTestAxis( cData, vAxis, 8 + i ))
++			{
++				return 0;
++			}
++		}
++	}
++
++	// ************************************
++	// this is defined for first 12 axes
++	// normal of plane that contains top circle of cylinder
++	// center of top circle of cylinder
++	dVector3 vcc;
++	vcc[0] = (cData.vCylinderPos)[0] + cData.vCylinderAxis[0]*(cData.fCylinderSize*REAL(0.5));
++	vcc[1] = (cData.vCylinderPos)[1] + cData.vCylinderAxis[1]*(cData.fCylinderSize*REAL(0.5));
++	vcc[2] = (cData.vCylinderPos)[2] + cData.vCylinderAxis[2]*(cData.fCylinderSize*REAL(0.5));
++	// ************************************
++
++	if (!_cldTestEdgeCircleAxis( cData, vcc, cData.avBoxVertices[1], cData.avBoxVertices[0], 16)) 
++	{
++		return 0;
++	}
++
++	if (!_cldTestEdgeCircleAxis( cData, vcc, cData.avBoxVertices[1], cData.avBoxVertices[3], 17)) 
++	{
++		return 0;
++	}
++
++	if (!_cldTestEdgeCircleAxis( cData, vcc, cData.avBoxVertices[2], cData.avBoxVertices[3], 18))
++	{
++		return 0;
++	}
++
++	if (!_cldTestEdgeCircleAxis( cData, vcc, cData.avBoxVertices[2], cData.avBoxVertices[0], 19)) 
++	{
++		return 0;
++	}
++
++
++	if (!_cldTestEdgeCircleAxis( cData, vcc, cData.avBoxVertices[4], cData.avBoxVertices[1], 20))
++	{
++		return 0;
++	}
++
++	if (!_cldTestEdgeCircleAxis( cData, vcc, cData.avBoxVertices[4], cData.avBoxVertices[7], 21))
++	{
++		return 0;
++	}
++
++	if (!_cldTestEdgeCircleAxis( cData, vcc, cData.avBoxVertices[0], cData.avBoxVertices[7], 22)) 
++	{
++		return 0;
++	}
++
++	if (!_cldTestEdgeCircleAxis( cData, vcc, cData.avBoxVertices[5], cData.avBoxVertices[3], 23)) 
++	{
++		return 0;
++	}
++
++	if (!_cldTestEdgeCircleAxis( cData, vcc, cData.avBoxVertices[5], cData.avBoxVertices[6], 24)) 
++	{
++		return 0;
++	}
++
++	if (!_cldTestEdgeCircleAxis( cData, vcc, cData.avBoxVertices[2], cData.avBoxVertices[6], 25)) 
++	{
++		return 0;
++	}
++
++	if (!_cldTestEdgeCircleAxis( cData, vcc, cData.avBoxVertices[4], cData.avBoxVertices[5], 26)) 
++	{
++		return 0;
++	}
++
++	if (!_cldTestEdgeCircleAxis( cData, vcc, cData.avBoxVertices[6], cData.avBoxVertices[7], 27)) 
++	{
++		return 0;
++	}
++
++	// ************************************
++	// this is defined for second 12 axes
++	// normal of plane that contains bottom circle of cylinder
++	// center of bottom circle of cylinder
++	//	vcc = vCylinderPos - vCylinderAxis*(fCylinderSize*REAL(0.5));
++	vcc[0] = (cData.vCylinderPos)[0] - cData.vCylinderAxis[0]*(cData.fCylinderSize*REAL(0.5));
++	vcc[1] = (cData.vCylinderPos)[1] - cData.vCylinderAxis[1]*(cData.fCylinderSize*REAL(0.5));
++	vcc[2] = (cData.vCylinderPos)[2] - cData.vCylinderAxis[2]*(cData.fCylinderSize*REAL(0.5));
++	// ************************************
++
++	if (!_cldTestEdgeCircleAxis( cData, vcc, cData.avBoxVertices[1], cData.avBoxVertices[0], 28)) 
++	{
++		return 0;
++	}
++
++	if (!_cldTestEdgeCircleAxis( cData, vcc, cData.avBoxVertices[1], cData.avBoxVertices[3], 29)) 
++	{
++		return 0;
++	}
++
++	if (!_cldTestEdgeCircleAxis( cData, vcc, cData.avBoxVertices[2], cData.avBoxVertices[3], 30)) 
++	{
++		return 0;
++	}
++
++	if (!_cldTestEdgeCircleAxis( cData, vcc, cData.avBoxVertices[2], cData.avBoxVertices[0], 31)) 
++	{
++		return 0;
++	}
++
++	if (!_cldTestEdgeCircleAxis( cData, vcc, cData.avBoxVertices[4], cData.avBoxVertices[1], 32)) 
++	{
++		return 0;
++	}
++
++	if (!_cldTestEdgeCircleAxis( cData, vcc, cData.avBoxVertices[4], cData.avBoxVertices[7], 33)) 
++	{
++		return 0;
++	}
++
++	if (!_cldTestEdgeCircleAxis( cData, vcc, cData.avBoxVertices[0], cData.avBoxVertices[7], 34)) 
++	{
++		return 0;
++	}
++
++	if (!_cldTestEdgeCircleAxis( cData, vcc, cData.avBoxVertices[5], cData.avBoxVertices[3], 35)) 
++	{
++		return 0;
++	}
++
++	if (!_cldTestEdgeCircleAxis( cData, vcc, cData.avBoxVertices[5], cData.avBoxVertices[6], 36)) 
++	{
++		return 0;
++	}
++
++	if (!_cldTestEdgeCircleAxis( cData, vcc, cData.avBoxVertices[2], cData.avBoxVertices[6], 37)) 
++	{
++		return 0;
++	}
++
++	if (!_cldTestEdgeCircleAxis( cData, vcc, cData.avBoxVertices[4], cData.avBoxVertices[5], 38)) 
++	{
++		return 0;
++	}
++
++	if (!_cldTestEdgeCircleAxis( cData, vcc, cData.avBoxVertices[6], cData.avBoxVertices[7], 39)) 
++	{
++		return 0;
++	}
++
++	return 1;
++}
++
++int _cldClipCylinderToBox(sCylinderBoxData& cData)
++{
++
++	// calculate that vector perpendicular to cylinder axis which closes lowest angle with collision normal
++	dVector3 vN;
++	dReal fTemp1 = dVector3Dot(cData.vCylinderAxis,cData.vNormal);
++	vN[0]	=	cData.vNormal[0] - cData.vCylinderAxis[0]*fTemp1;
++	vN[1]	=	cData.vNormal[1] - cData.vCylinderAxis[1]*fTemp1;
++	vN[2]	=	cData.vNormal[2] - cData.vCylinderAxis[2]*fTemp1;
++
++	// normalize that vector
++	dNormalize3(vN);
++
++	// translate cylinder end points by the vector
++	dVector3 vCposTrans;
++	vCposTrans[0] = cData.vCylinderPos[0] + vN[0] * cData.fCylinderRadius;
++	vCposTrans[1] = cData.vCylinderPos[1] + vN[1] * cData.fCylinderRadius;
++	vCposTrans[2] = cData.vCylinderPos[2] + vN[2] * cData.fCylinderRadius;
++
++	cData.vEp0[0]  = vCposTrans[0] + cData.vCylinderAxis[0]*(cData.fCylinderSize*REAL(0.5));
++	cData.vEp0[1]  = vCposTrans[1] + cData.vCylinderAxis[1]*(cData.fCylinderSize*REAL(0.5));
++	cData.vEp0[2]  = vCposTrans[2] + cData.vCylinderAxis[2]*(cData.fCylinderSize*REAL(0.5));
++
++	cData.vEp1[0]  = vCposTrans[0] - cData.vCylinderAxis[0]*(cData.fCylinderSize*REAL(0.5));
++	cData.vEp1[1]  = vCposTrans[1] - cData.vCylinderAxis[1]*(cData.fCylinderSize*REAL(0.5));
++	cData.vEp1[2]  = vCposTrans[2] - cData.vCylinderAxis[2]*(cData.fCylinderSize*REAL(0.5));
++
++	// transform edge points in box space
++	cData.vEp0[0] -= cData.vBoxPos[0];
++	cData.vEp0[1] -= cData.vBoxPos[1];
++	cData.vEp0[2] -= cData.vBoxPos[2];
++
++	cData.vEp1[0] -= cData.vBoxPos[0];
++	cData.vEp1[1] -= cData.vBoxPos[1];
++	cData.vEp1[2] -= cData.vBoxPos[2];
++
++	dVector3 vTemp1;
++	// clip the edge to box 
++	dVector4 plPlane;
++	// plane 0 +x
++	dMat3GetCol(cData.mBoxRot,0,vTemp1);
++	dConstructPlane(vTemp1,cData.vBoxHalfSize[0],plPlane);
++	if(!dClipEdgeToPlane( cData.vEp0, cData.vEp1, plPlane )) 
++	{ 
++		return 0; 
++	}
++
++	// plane 1 +y
++	dMat3GetCol(cData.mBoxRot,1,vTemp1);
++	dConstructPlane(vTemp1,cData.vBoxHalfSize[1],plPlane);
++	if(!dClipEdgeToPlane( cData.vEp0, cData.vEp1, plPlane )) 
++	{ 
++		return 0; 
++	}
++
++	// plane 2 +z
++	dMat3GetCol(cData.mBoxRot,2,vTemp1);
++	dConstructPlane(vTemp1,cData.vBoxHalfSize[2],plPlane);
++	if(!dClipEdgeToPlane( cData.vEp0, cData.vEp1, plPlane )) 
++	{ 
++		return 0; 
++	}
++
++	// plane 3 -x
++	dMat3GetCol(cData.mBoxRot,0,vTemp1);
++	dVector3Inv(vTemp1);
++	dConstructPlane(vTemp1,cData.vBoxHalfSize[0],plPlane);
++	if(!dClipEdgeToPlane( cData.vEp0, cData.vEp1, plPlane )) 
++	{ 
++		return 0; 
++	}
++
++	// plane 4 -y
++	dMat3GetCol(cData.mBoxRot,1,vTemp1);
++	dVector3Inv(vTemp1);
++	dConstructPlane(vTemp1,cData.vBoxHalfSize[1],plPlane);
++	if(!dClipEdgeToPlane( cData.vEp0, cData.vEp1, plPlane )) 
++	{ 
++		return 0; 
++	}
++
++	// plane 5 -z
++	dMat3GetCol(cData.mBoxRot,2,vTemp1);
++	dVector3Inv(vTemp1);
++	dConstructPlane(vTemp1,cData.vBoxHalfSize[2],plPlane);
++	if(!dClipEdgeToPlane( cData.vEp0, cData.vEp1, plPlane )) 
++	{ 
++		return 0; 
++	}
++
++	// calculate depths for both contact points
++	cData.fDepth0 = cData.fBestrb + dVector3Dot(cData.vEp0, cData.vNormal);
++	cData.fDepth1 = cData.fBestrb + dVector3Dot(cData.vEp1, cData.vNormal);
++
++	// clamp depths to 0
++	if(cData.fDepth0<0) 
++	{
++		cData.fDepth0 = REAL(0.0);
++	}
++
++	if(cData.fDepth1<0) 
++	{
++		cData.fDepth1 = REAL(0.0);
++	}
++
++	// back transform edge points from box to absolute space
++	cData.vEp0[0] += cData.vBoxPos[0];
++	cData.vEp0[1] += cData.vBoxPos[1];
++	cData.vEp0[2] += cData.vBoxPos[2];
++
++	cData.vEp1[0] += cData.vBoxPos[0];
++	cData.vEp1[1] += cData.vBoxPos[1];
++	cData.vEp1[2] += cData.vBoxPos[2];
++
++	dContactGeom* Contact0 = SAFECONTACT(cData.iFlags, cData.gContact, cData.nContacts, cData.iSkip);
++	Contact0->depth = cData.fDepth0;
++	dVector3Copy(cData.vNormal,Contact0->normal);
++	dVector3Copy(cData.vEp0,Contact0->pos);
++	Contact0->g1 = cData.gCylinder;
++	Contact0->g2 = cData.gBox;
++	dVector3Inv(Contact0->normal);
++	cData.nContacts++;
++	
++	dContactGeom* Contact1 = SAFECONTACT(cData.iFlags, cData.gContact, cData.nContacts, cData.iSkip);
++	Contact1->depth = cData.fDepth1;
++	dVector3Copy(cData.vNormal,Contact1->normal);
++	dVector3Copy(cData.vEp1,Contact1->pos);
++	Contact1->g1 = cData.gCylinder;
++	Contact1->g2 = cData.gBox;
++	dVector3Inv(Contact1->normal);
++	cData.nContacts++;
++
++	return 1;
++}
++
++
++void _cldClipBoxToCylinder(sCylinderBoxData& cData ) 
++{
++	dVector3 vCylinderCirclePos, vCylinderCircleNormal_Rel;
++	// check which circle from cylinder we take for clipping
++	if ( dVector3Dot(cData.vCylinderAxis, cData.vNormal) > REAL(0.0) ) 
++	{
++		// get top circle
++		vCylinderCirclePos[0] = cData.vCylinderPos[0] + cData.vCylinderAxis[0]*(cData.fCylinderSize*REAL(0.5));
++		vCylinderCirclePos[1] = cData.vCylinderPos[1] + cData.vCylinderAxis[1]*(cData.fCylinderSize*REAL(0.5));
++		vCylinderCirclePos[2] = cData.vCylinderPos[2] + cData.vCylinderAxis[2]*(cData.fCylinderSize*REAL(0.5));
++
++		vCylinderCircleNormal_Rel[0] = REAL(0.0);
++		vCylinderCircleNormal_Rel[1] = REAL(0.0);
++		vCylinderCircleNormal_Rel[2] = REAL(0.0);
++		vCylinderCircleNormal_Rel[nCYLINDER_AXIS] = REAL(-1.0);
++	}
++	else 
++	{
++		// get bottom circle
++		vCylinderCirclePos[0] = cData.vCylinderPos[0] - cData.vCylinderAxis[0]*(cData.fCylinderSize*REAL(0.5));
++		vCylinderCirclePos[1] = cData.vCylinderPos[1] - cData.vCylinderAxis[1]*(cData.fCylinderSize*REAL(0.5));
++		vCylinderCirclePos[2] = cData.vCylinderPos[2] - cData.vCylinderAxis[2]*(cData.fCylinderSize*REAL(0.5));
++
++		vCylinderCircleNormal_Rel[0] = REAL(0.0);
++		vCylinderCircleNormal_Rel[1] = REAL(0.0);
++		vCylinderCircleNormal_Rel[2] = REAL(0.0);
++		vCylinderCircleNormal_Rel[nCYLINDER_AXIS] = REAL(1.0);
++	}
++
++	// vNr is normal in Box frame, pointing from Cylinder to Box
++	dVector3 vNr;
++	dMatrix3 mBoxInv;
++
++	// Find a way to use quaternion
++	dMatrix3Inv(cData.mBoxRot,mBoxInv);
++	dMultiplyMat3Vec3(mBoxInv,cData.vNormal,vNr);
++
++	dVector3 vAbsNormal;
++
++	vAbsNormal[0] = dFabs( vNr[0] );
++	vAbsNormal[1] = dFabs( vNr[1] );
++	vAbsNormal[2] = dFabs( vNr[2] );
++
++	// find which face in box is closest to cylinder
++	int iB0, iB1, iB2;
++
++	// Different from Croteam's code
++	if (vAbsNormal[1] > vAbsNormal[0]) 
++	{
++		// 1 > 0
++		if (vAbsNormal[0]> vAbsNormal[2]) 
++		{
++			// 0 > 2 -> 1 > 0 >2
++			iB0 = 1; iB1 = 0; iB2 = 2;
++		} 
++		else 
++		{
++			// 2 > 0-> Must compare 1 and 2
++			if (vAbsNormal[1] > vAbsNormal[2])
++			{
++				// 1 > 2 -> 1 > 2 > 0
++				iB0 = 1; iB1 = 2; iB2 = 0;
++			}
++			else
++			{
++				// 2 > 1 -> 2 > 1 > 0;
++				iB0 = 2; iB1 = 1; iB2 = 0;
++			}			
++		}
++	} 
++	else 
++	{
++		// 0 > 1
++		if (vAbsNormal[1] > vAbsNormal[2]) 
++		{
++			// 1 > 2 -> 0 > 1 > 2
++			iB0 = 0; iB1 = 1; iB2 = 2;
++		}
++		else 
++		{
++			// 2 > 1 -> Must compare 0 and 2
++			if (vAbsNormal[0] > vAbsNormal[2])
++			{
++				// 0 > 2 -> 0 > 2 > 1;
++				iB0 = 0; iB1 = 2; iB2 = 1;
++			}
++			else
++			{
++				// 2 > 0 -> 2 > 0 > 1;
++				iB0 = 2; iB1 = 0; iB2 = 1;
++			}		
++		}
++	}
++
++	dVector3 vCenter;
++	// find center of box polygon
++	dVector3 vTemp;
++	if (vNr[iB0] > 0) 
++	{
++		dMat3GetCol(cData.mBoxRot,iB0,vTemp);
++		vCenter[0] = cData.vBoxPos[0] - cData.vBoxHalfSize[iB0]*vTemp[0];
++		vCenter[1] = cData.vBoxPos[1] - cData.vBoxHalfSize[iB0]*vTemp[1];
++		vCenter[2] = cData.vBoxPos[2] - cData.vBoxHalfSize[iB0]*vTemp[2];
++	}
++	else 
++	{
++		dMat3GetCol(cData.mBoxRot,iB0,vTemp);
++		vCenter[0] = cData.vBoxPos[0] + cData.vBoxHalfSize[iB0]*vTemp[0];
++		vCenter[1] = cData.vBoxPos[1] + cData.vBoxHalfSize[iB0]*vTemp[1];
++		vCenter[2] = cData.vBoxPos[2] + cData.vBoxHalfSize[iB0]*vTemp[2];
++	}
++
++	// find the vertices of box polygon
++	dVector3 avPoints[4];
++	dVector3 avTempArray1[MAX_CYLBOX_CLIP_POINTS];
++	dVector3 avTempArray2[MAX_CYLBOX_CLIP_POINTS];
++
++	int i=0;
++	for(i=0; i<MAX_CYLBOX_CLIP_POINTS; i++) 
++	{
++		avTempArray1[i][0] = REAL(0.0);
++		avTempArray1[i][1] = REAL(0.0);
++		avTempArray1[i][2] = REAL(0.0);
++
++		avTempArray2[i][0] = REAL(0.0);
++		avTempArray2[i][1] = REAL(0.0);
++		avTempArray2[i][2] = REAL(0.0);
++	}
++
++	dVector3 vAxis1, vAxis2;
++
++	dMat3GetCol(cData.mBoxRot,iB1,vAxis1);
++	dMat3GetCol(cData.mBoxRot,iB2,vAxis2);
++
++	avPoints[0][0] = vCenter[0] + cData.vBoxHalfSize[iB1] * vAxis1[0] - cData.vBoxHalfSize[iB2] * vAxis2[0];
++	avPoints[0][1] = vCenter[1] + cData.vBoxHalfSize[iB1] * vAxis1[1] - cData.vBoxHalfSize[iB2] * vAxis2[1];
++	avPoints[0][2] = vCenter[2] + cData.vBoxHalfSize[iB1] * vAxis1[2] - cData.vBoxHalfSize[iB2] * vAxis2[2];
++
++	avPoints[1][0] = vCenter[0] - cData.vBoxHalfSize[iB1] * vAxis1[0] - cData.vBoxHalfSize[iB2] * vAxis2[0];
++	avPoints[1][1] = vCenter[1] - cData.vBoxHalfSize[iB1] * vAxis1[1] - cData.vBoxHalfSize[iB2] * vAxis2[1];
++	avPoints[1][2] = vCenter[2] - cData.vBoxHalfSize[iB1] * vAxis1[2] - cData.vBoxHalfSize[iB2] * vAxis2[2];
++
++	avPoints[2][0] = vCenter[0] - cData.vBoxHalfSize[iB1] * vAxis1[0] + cData.vBoxHalfSize[iB2] * vAxis2[0];
++	avPoints[2][1] = vCenter[1] - cData.vBoxHalfSize[iB1] * vAxis1[1] + cData.vBoxHalfSize[iB2] * vAxis2[1];
++	avPoints[2][2] = vCenter[2] - cData.vBoxHalfSize[iB1] * vAxis1[2] + cData.vBoxHalfSize[iB2] * vAxis2[2];
++
++	avPoints[3][0] = vCenter[0] + cData.vBoxHalfSize[iB1] * vAxis1[0] + cData.vBoxHalfSize[iB2] * vAxis2[0];
++	avPoints[3][1] = vCenter[1] + cData.vBoxHalfSize[iB1] * vAxis1[1] + cData.vBoxHalfSize[iB2] * vAxis2[1];
++	avPoints[3][2] = vCenter[2] + cData.vBoxHalfSize[iB1] * vAxis1[2] + cData.vBoxHalfSize[iB2] * vAxis2[2];
++
++	// transform box points to space of cylinder circle
++	dMatrix3 mCylinderInv;
++	dMatrix3Inv(cData.mCylinderRot,mCylinderInv);
++
++	for(i=0; i<4; i++) 
++	{
++		dVector3Subtract(avPoints[i],vCylinderCirclePos,vTemp);
++		dMultiplyMat3Vec3(mCylinderInv,vTemp,avPoints[i]);
++	}
++
++	int iTmpCounter1 = 0;
++	int iTmpCounter2 = 0;
++	dVector4 plPlane;
++
++	// plane of cylinder that contains circle for intersection
++	dConstructPlane(vCylinderCircleNormal_Rel,REAL(0.0),plPlane);
++	dClipPolyToPlane(avPoints, 4, avTempArray1, iTmpCounter1, plPlane);
++
++
++	// Body of base circle of Cylinder
++	int nCircleSegment = 0;
++	for (nCircleSegment = 0; nCircleSegment < nCYLINDER_SEGMENT; nCircleSegment++)
++	{
++		dConstructPlane(cData.avCylinderNormals[nCircleSegment],cData.fCylinderRadius,plPlane);
++
++		if (0 == (nCircleSegment % 2))
++		{
++			dClipPolyToPlane( avTempArray1 , iTmpCounter1 , avTempArray2, iTmpCounter2, plPlane);
++		}
++		else
++		{
++			dClipPolyToPlane( avTempArray2, iTmpCounter2, avTempArray1 , iTmpCounter1 , plPlane );
++		}
++
++		dIASSERT( iTmpCounter1 >= 0 && iTmpCounter1 <= MAX_CYLBOX_CLIP_POINTS );
++		dIASSERT( iTmpCounter2 >= 0 && iTmpCounter2 <= MAX_CYLBOX_CLIP_POINTS );
++	}
++	
++	// back transform clipped points to absolute space
++	dReal ftmpdot;	
++	dReal fTempDepth;
++	dVector3 vPoint;
++
++	if (nCircleSegment %2)
++	{
++		for( i=0; i<iTmpCounter2; i++)
++		{
++			dMULTIPLY0_331(vPoint,cData.mCylinderRot,avTempArray2[i]);
++			vPoint[0] += vCylinderCirclePos[0];
++			vPoint[1] += vCylinderCirclePos[1];
++			vPoint[2] += vCylinderCirclePos[2];
++
++			dVector3Subtract(vPoint,cData.vCylinderPos,vTemp);
++			ftmpdot	 = dVector3Dot(vTemp, cData.vNormal);
++			fTempDepth = cData.fBestrc - ftmpdot;
++			// Depth must be positive
++			if (fTempDepth > REAL(0.0))
++			{
++				// generate contacts
++				dContactGeom* Contact0 = SAFECONTACT(cData.iFlags, cData.gContact, cData.nContacts, cData.iSkip);
++				Contact0->depth = fTempDepth;
++				dVector3Copy(cData.vNormal,Contact0->normal);
++				dVector3Copy(vPoint,Contact0->pos);
++				Contact0->g1 = cData.gCylinder;
++				Contact0->g2 = cData.gBox;
++				dVector3Inv(Contact0->normal);
++				cData.nContacts++;
++			}
++		}
++	}
++	else
++	{
++		for( i=0; i<iTmpCounter1; i++)
++		{
++			dMULTIPLY0_331(vPoint,cData.mCylinderRot,avTempArray1[i]);
++			vPoint[0] += vCylinderCirclePos[0];
++			vPoint[1] += vCylinderCirclePos[1];
++			vPoint[2] += vCylinderCirclePos[2];
++
++			dVector3Subtract(vPoint,cData.vCylinderPos,vTemp);
++			ftmpdot	 = dVector3Dot(vTemp, cData.vNormal);
++			fTempDepth = cData.fBestrc - ftmpdot;
++			// Depth must be positive
++			if (fTempDepth > REAL(0.0))
++			{
++				// generate contacts
++				dContactGeom* Contact0 = SAFECONTACT(cData.iFlags, cData.gContact, cData.nContacts, cData.iSkip);
++				Contact0->depth = fTempDepth;
++				dVector3Copy(cData.vNormal,Contact0->normal);
++				dVector3Copy(vPoint,Contact0->pos);
++				Contact0->g1 = cData.gCylinder;
++				Contact0->g2 = cData.gBox;
++				dVector3Inv(Contact0->normal);
++				cData.nContacts++;
++			}
++		}
++	}
++}
++
++
++// Cylinder - Box by CroTeam
++// Ported by Nguyen Binh
++int dCollideCylinderBox(dxGeom *o1, dxGeom *o2, int flags, dContactGeom *contact, int skip)
++{
++	sCylinderBoxData	cData;
++
++	// Assign ODE stuff
++	cData.gCylinder = o1;
++	cData.gBox		= o2;
++	cData.iFlags	= flags;
++	cData.iSkip		= skip;
++	cData.gContact	= contact;
++
++	// initialize collider
++	_cldInitCylinderBox( cData );
++
++	// do intersection test and find best separating axis
++	if(!_cldTestSeparatingAxes( cData ) ) 
++	{
++		// if not found do nothing
++		return 0;
++	}
++
++	// if best separation axis is not found
++	if ( cData.iBestAxis == 0 ) 
++	{
++		// this should not happen (we should already exit in that case)
++		dIASSERT(0);
++		// do nothing
++		return 0;
++	}
++
++	dReal fdot = dVector3Dot(cData.vNormal,cData.vCylinderAxis);
++	// choose which clipping method are we going to apply
++	if (dFabs(fdot) < REAL(0.9) ) 
++	{
++		// clip cylinder over box
++		if(!_cldClipCylinderToBox(cData)) 
++		{
++			return 0;
++		}
++	} 
++	else 
++	{
++		_cldClipBoxToCylinder(cData);  
++	}
++
++	return cData.nContacts;
++}
+\ No newline at end of file
+diff -Pur ../../ode/src/collision_cylinder_sphere.cpp ./ode/src/collision_cylinder_sphere.cpp
+--- ../../ode/src/collision_cylinder_sphere.cpp	Thu Jan  1 01:00:00 1970
++++ ./ode/src/collision_cylinder_sphere.cpp	Tue May 18 09:46:44 2004
+@@ -0,0 +1,572 @@
++/*************************************************************************
++*                                                                       *
++* Open Dynamics Engine, Copyright (C) 2001-2003 Russell L. Smith.       *
++* All rights reserved.  Email: russ@q12.org   Web: www.q12.org          *
++*                                                                       *
++* This library is free software; you can redistribute it and/or         *
++* modify it under the terms of EITHER:                                  *
++*   (1) The GNU Lesser General Public License as published by the Free  *
++*       Software Foundation; either version 2.1 of the License, or (at  *
++*       your option) any later version. The text of the GNU Lesser      *
++*       General Public License is included with this library in the     *
++*       file LICENSE.TXT.                                               *
++*   (2) The BSD-style license that is included with this library in     *
++*       the file LICENSE-BSD.TXT.                                       *
++*                                                                       *
++* This library is distributed in the hope that it will be useful,       *
++* but WITHOUT ANY WARRANTY; without even the implied warranty of        *
++* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the files    *
++* LICENSE.TXT and LICENSE-BSD.TXT for more details.                     *
++*                                                                       *
++*************************************************************************/
++
++/*
++ *	Cylinder-sphere collider by Alen Ladavac (Croteam)
++ *  Ported to ODE by Nguyen Binh ( www.coderfarm.com )
++ */
++
++// NOTES :
++// I only try to solve some obvious problems on cylinder-sphere
++// If you like to solve all problem when very large sphere drop over 
++// very small cylinder or vice versa, you will need to re-organize the code.
++// I would eventually, try to do it later, when I have more time.
++// On this version, I only try to solve the problem when a very large cylinder
++// drop over very small sphere.
++
++#include <ode/collision.h>
++#include <ode/matrix.h>
++#include <ode/rotation.h>
++#include <ode/odemath.h>
++#include "collision_util.h"
++#include <ode/objects.h>
++
++// Axis of Cylinder - ODE use axis Z.
++static const int	nCYLINDER_AXIS = 2;
++
++// Method to cure very deep penetration
++// When two objects are in very deep penetration, we should exaggerate
++// the depth value between them or numerical errors will make one object go
++// through the other.
++// 0 : do nothing - keep the calculated depth
++// 1 : exaggerate calculated depth by multiple of fDepthRecoverRatio times.
++// 2 : exaggerate calculated depth by multiple of log of ration between
++//     heavy object and light object. This method take a little more computing
++//	   power but can be used to solved almost all "drop very large object over
++//	   small object" problems.
++
++#define _DEPTH_RECOVER_METHOD_ 0
++
++#if (_DEPTH_RECOVER_METHOD_ == 1)
++static const dReal fDepthRecoverRatio = REAL(2.0);
++#endif
++
++int dCollideCylinderSphere(dxGeom *gCylinder, dxGeom *gSphere, int flags, dContactGeom *contact, int skip)
++{
++	// get source hull position and orientation
++	// Number of contacts
++    int		nContacts = 0;
++
++	dQuaternion mQuatCylinder;
++	dGeomGetQuaternion(gCylinder,mQuatCylinder);
++
++	dVector3 vCylinderPos; 
++	dMatrix3 mCylinderRot;
++	const dReal* pRotCyc = dGeomGetRotation(gCylinder); 
++	dMatrix3Copy(pRotCyc,mCylinderRot);
++
++	const dVector3* pPosCyc = (const dVector3*)dGeomGetPosition(gCylinder);
++	dVector3Copy(*pPosCyc,vCylinderPos);
++
++	// get capsule radius and size
++	dReal fCylinderRadius;
++	dReal fCylinderSize;
++
++	dGeomCylinderGetParams(gCylinder,&fCylinderRadius,&fCylinderSize);
++
++	// get destination hull position and radius
++	dMatrix3 mSphereRot;
++	dVector3 vSpherePos;
++
++	dReal fSphereRadius = dGeomSphereGetRadius(gSphere);
++
++	const dReal* pSphereRot = dGeomGetRotation(gSphere); 
++	dMatrix3Copy(pSphereRot,mSphereRot);
++
++	const dVector3* pSpherePos = (const dVector3*)dGeomGetPosition(gSphere);
++	dVector3Copy(*pSpherePos,vSpherePos);
++
++	// transform sphere position in cylinder frame
++	dVector3 vSpherePosInCylinderFrame;
++	// temporary variables
++	dVector3 vTemp;
++	dVector3 vTemp2;
++	
++	// Sphere position relative to Cylinder
++	dVector3Subtract(vSpherePos,vCylinderPos,vTemp);
++
++	dQuaternion mInvQuatCylinder;
++	dQuatInv(mQuatCylinder,mInvQuatCylinder);
++	dQuatTransform(mInvQuatCylinder,vTemp,vSpherePosInCylinderFrame);
++
++	// cylinder boundaries along cylinder axis
++	dReal fHighCylinderBase =  fCylinderSize*0.5f;
++	dReal fLowCylinderBase  = -fCylinderSize*0.5f;
++
++	dReal fDeltaHigh = (vSpherePosInCylinderFrame[nCYLINDER_AXIS]  - fHighCylinderBase );
++	dReal fDeltaLow = (fLowCylinderBase - vSpherePosInCylinderFrame[nCYLINDER_AXIS] );
++
++	// check if sphere intersecting with cylindrical part - side part
++	if( fDeltaHigh <= REAL(0.0) && fDeltaLow <= REAL(0.0)) 
++	{
++		// This mean the center of sphere lies between high and low base along cylinder axis
++		// of the cylinder
++
++		// calculate center of sphere on cylindrical axis which is referent for collision
++		// This circle of cylinder is in the same level with the center of sphere
++		dVector3 vBodyPoint = {REAL(0.0),REAL(0.0),REAL(0.0)};
++		vBodyPoint[nCYLINDER_AXIS] = vSpherePosInCylinderFrame[nCYLINDER_AXIS];
++
++		// calculate distance between two spheres
++		dVector3Subtract(vSpherePosInCylinderFrame,vBodyPoint,vTemp );
++		dReal fDistance = dVector3Length( vTemp );
++
++		if ( fDistance <= (fCylinderRadius + fSphereRadius)) 
++		{			
++			dReal	 fTemp;
++			dReal	 fDepth;
++			dVector3 vPoint;
++
++			// Axis dependent - Should change when you don't use cylinder along z axis
++			if (dFabs(vSpherePosInCylinderFrame[0]) <= fCylinderRadius 
++				&& dFabs(vSpherePosInCylinderFrame[1]) <= fCylinderRadius)
++			{
++				// Actually, not side penetrate but very deep top (or) bottom penetrate
++				// We have to use some trick to solve it.
++
++				// First try to find top or bottom penetrate
++				dVector3	vCylinderLinearVel = {REAL(0.0),REAL(0.0),REAL(0.0),REAL(0.0)};
++				dVector3	vSphereLinearVel   = {REAL(0.0),REAL(0.0),REAL(0.0),REAL(0.0)};
++				dBodyID		CylinderBody	= dGeomGetBody(gCylinder);
++				dBodyID		SphereBody		= dGeomGetBody(gSphere);
++
++				// Get linear velocity
++				if (CylinderBody)
++				{
++					const dReal* pCylinderVel = dBodyGetLinearVel(CylinderBody);
++					vCylinderLinearVel[0] = pCylinderVel[0];
++					vCylinderLinearVel[1] = pCylinderVel[1];
++					vCylinderLinearVel[2] = pCylinderVel[2];
++				}
++
++				if (SphereBody)
++				{
++					const dReal* pSphereVel = dBodyGetLinearVel(SphereBody);
++					vSphereLinearVel[0] = pSphereVel[0];
++					vSphereLinearVel[1] = pSphereVel[1];
++					vSphereLinearVel[2] = pSphereVel[2];
++				}
++
++				dVector3	vSphereVelInCylinderFrame;
++				dVector3Subtract(vSphereLinearVel,vCylinderLinearVel,vSphereVelInCylinderFrame);
++
++				#if (_DEPTH_RECOVER_METHOD_ == 2)
++				dReal fRelativeVel = dVector3Length(vSphereVelInCylinderFrame);
++				#endif
++
++				dNormalize3(vSphereVelInCylinderFrame);
++
++                dVector3	vCylinderAxis;
++				dMat3GetCol(mCylinderRot,nCYLINDER_AXIS,vCylinderAxis);
++				dNormalize3(vCylinderAxis);
++
++                dReal fAngle = dVector3Dot(vSphereVelInCylinderFrame,vCylinderAxis);
++
++				// Solve problem when drop very large cylinder over very small sphere
++				if (fAngle < 0 )
++				{
++					// Top penetrate
++					// collision normal showing up from top cylinder plane
++					dVector3 vNormal = {REAL(0.0),REAL(0.0),REAL(0.0)};
++					vNormal[nCYLINDER_AXIS] = REAL(-1.0);
++
++					// Transform to cylinder space
++					dQuatTransform(mQuatCylinder,vNormal,vTemp2);
++					dNormalize3(vTemp2);
++
++					// set collision point in cylinder frame
++					dVector3Copy(vSpherePosInCylinderFrame,vPoint);
++					vPoint[nCYLINDER_AXIS] = fHighCylinderBase;
++
++					// transform in absolute space
++					dQuatTransform(mQuatCylinder,vPoint,vTemp);
++					dVector3Add(vTemp,vCylinderPos,vPoint);
++
++					// calculate collision depth          
++					dReal fDepth = fSphereRadius - fDeltaHigh;	
++					// Experiment show that we need to exaggerate depth ratio to 
++					// keep the small object from being stuck in other
++
++					#if (_DEPTH_RECOVER_METHOD_ == 1)
++					// Constant ratio
++					fDepth *= fDepthRecoverRatio;
++					#endif // (_DEPTH_RECOVER_METHOD_ == 1)
++
++					// use log of ratio between large object and small object masses
++					#if (_DEPTH_RECOVER_METHOD_ == 2)
++					if (CylinderBody && SphereBody) 
++					{
++						// No static geom -> need to exaggerate
++						dMass sphereMass;
++						dBodyGetMass(SphereBody,&sphereMass);
++						dMass cylinderMass;
++						dBodyGetMass(CylinderBody,&cylinderMass);
++
++						dReal fRatio1 = cylinderMass.mass/sphereMass.mass;
++						
++						if (fRatio1 > REAL(1.0))
++						{
++							fDepth *=  fRelativeVel *dSqrt(fRatio1);
++						}
++						else
++						{
++							fDepth *= fRelativeVel * dSqrt( REAL(1.0) / fRatio1);
++						}													
++					}
++					#endif // (_DEPTH_RECOVER_METHOD_ == 2)
++
++					// generate contact
++					{
++						dContactGeom* Contact = SAFECONTACT(flags, contact, nContacts, skip );
++						Contact->depth = fDepth;
++						dVector3Copy(vTemp2,Contact->normal);
++						dVector3Copy(vPoint,Contact->pos);
++						Contact->g1 = gCylinder;
++						Contact->g2 = gSphere;
++						nContacts++;
++					}
++
++					return nContacts;
++				}
++				else
++				{
++					// Near Bottom
++					dVector3 vNormal = {REAL(0.0),REAL(0.0),REAL(0.0)};
++					vNormal[nCYLINDER_AXIS] = REAL(1.0);
++					// Transform to cylinder space
++					dQuatTransform(mQuatCylinder,vNormal,vTemp2);
++					dNormalize3(vTemp2);
++
++					// set collision point in cylinder frame
++					dVector3Copy(vSpherePosInCylinderFrame,vPoint);
++					vPoint[nCYLINDER_AXIS] = fLowCylinderBase;
++
++					// transform in absolute space
++					dQuatTransform(mQuatCylinder,vPoint,vTemp);
++					dVector3Add(vTemp,vCylinderPos,vPoint);
++
++					// calculate collision depth          
++					dReal fDepth = fSphereRadius - fDeltaLow;
++					// Experiment show that we need to exaggerate depth ratio to 
++					// keep the small sphere from being stuck
++
++					#if (_DEPTH_RECOVER_METHOD_ == 1)
++					// Constant ratio
++					fDepth *= fDepthRecoverRatio;
++					#endif // (_DEPTH_RECOVER_METHOD_ == 1)
++
++					// use log of ratio between large object and small object masses
++					#if (_DEPTH_RECOVER_METHOD_ == 2)
++					if (CylinderBody && SphereBody) 
++					{
++						// No static geom -> need to exaggerate
++						dMass sphereMass;
++						dBodyGetMass(SphereBody,&sphereMass);
++						dMass cylinderMass;
++						dBodyGetMass(CylinderBody,&cylinderMass);
++
++						dReal fRatio1 = cylinderMass.mass/sphereMass.mass;
++
++						if (fRatio1 > REAL(1.0))
++						{
++							fDepth *=  fRelativeVel *dSqrt(fRatio1);
++						}
++						else
++						{
++							fDepth *= fRelativeVel * dSqrt( REAL(1.0) / fRatio1);
++						}								
++					}
++					#endif // (_DEPTH_RECOVER_METHOD_ == 2)
++
++
++					// generate contact
++					{
++						dContactGeom* Contact = SAFECONTACT(flags, contact, nContacts, skip );
++						Contact->depth = fDepth;
++						dVector3Copy(vTemp2,Contact->normal);
++						dVector3Copy(vPoint,Contact->pos);
++						Contact->g1 = gCylinder;
++						Contact->g2 = gSphere;
++						nContacts++;							
++					}
++
++					return nContacts;
++				}
++			}
++
++			// calculate collision normal
++			dVector3 vNormal;
++			dQuatTransform(mQuatCylinder,vBodyPoint,vTemp);
++			dVector3Add(vTemp,vCylinderPos,vTemp2);
++			dVector3Subtract(vSpherePos,vTemp2,vNormal);
++			dNormalize3(vNormal);
++	
++			// calculate collision point
++			fTemp = fCylinderRadius-fSphereRadius-fDistance;
++			
++			vPoint[0] = vSpherePos[0] + vNormal[0]* fTemp *REAL(0.5);
++			vPoint[1] = vSpherePos[1] + vNormal[1]* fTemp *REAL(0.5);
++			vPoint[2] = vSpherePos[2] + vNormal[2]* fTemp *REAL(0.5);
++
++			// calculate penetration depth
++			fDepth = fCylinderRadius + fSphereRadius-fDistance;
++
++			// generate contact
++			{
++				dContactGeom* Contact = SAFECONTACT(flags, contact, nContacts, skip );
++				Contact->depth = fDepth;
++				dVector3Copy(vNormal,Contact->normal);
++				dVector3Copy(vPoint,Contact->pos);
++				Contact->g1 = gCylinder;
++				Contact->g2 = gSphere;
++				nContacts++;
++				dVector3Inv(Contact->normal);
++			}
++
++			return nContacts;
++		}
++		// check if sphere is intersecting with top or bottom circle of cylinder
++	} 
++	else 
++	{
++		// test sphere on top circle of cylinder
++		if ( fDeltaHigh >  REAL(0.0)) 
++		{
++			// check if sphere is intersecting top plane
++			if( fDeltaHigh < fSphereRadius ) 
++			{
++				// calculate center of sphere on cylindrical axis which is referent for collision
++				dVector3 vBodyPoint = {REAL(0.0),REAL(0.0),REAL(0.0)};
++                vBodyPoint[nCYLINDER_AXIS] = vSpherePosInCylinderFrame[nCYLINDER_AXIS];
++
++				// distance between sphere and cylinder axis
++				dVector3Subtract(vSpherePosInCylinderFrame,vBodyPoint,vTemp);
++				dReal fDistance = dVector3Length(vTemp);
++
++				// see if our intersection point is inside top circle
++				if( fDistance < fCylinderRadius) 
++				{
++					// collision normal showing up from top cylinder plane
++					dVector3 vNormal = {REAL(0.0),REAL(0.0),REAL(0.0)};
++					vNormal[nCYLINDER_AXIS] = REAL(-1.0);
++					// Transform to cylinder space
++					dQuatTransform(mQuatCylinder,vNormal,vTemp2);
++					dNormalize3(vTemp2);
++					// set collision point in cylinder frame
++					dVector3 vPoint;
++					dVector3Copy(vSpherePosInCylinderFrame,vPoint);
++					vPoint[nCYLINDER_AXIS] = fHighCylinderBase;
++
++					// transform in absolute space
++					dQuatTransform(mQuatCylinder,vPoint,vTemp);
++					dVector3Add(vTemp,vCylinderPos,vPoint);
++
++					// calculate collision depth          
++					dReal fDepth = fSphereRadius - fDeltaHigh;
++
++					// generate contact
++					{
++						dContactGeom* Contact = SAFECONTACT(flags, contact, nContacts, skip );
++						Contact->depth = fDepth;
++						dVector3Copy(vTemp2,Contact->normal);
++						dVector3Copy(vPoint,Contact->pos);
++						Contact->g1 = gCylinder;
++						Contact->g2 = gSphere;
++						nContacts++;
++					}
++
++					return nContacts;
++				} 
++
++				// if we got here then we are potentially intersecting the top ring 
++				// of the cylinder
++
++				// define top circle center point on cylinder axis
++				dVector3 vE0 = {REAL(0.0),REAL(0.0),REAL(0.0)};
++				vE0[nCYLINDER_AXIS] = fHighCylinderBase;
++
++				// set direction vector from center to circle edge
++				dVector3 vDirVector;
++				dVector3Subtract(vSpherePosInCylinderFrame,vE0,vDirVector);
++
++				// project it onto top plane
++				vDirVector[nCYLINDER_AXIS] = REAL(0.0);
++
++				// and make it unit vector
++				dNormalize3(vDirVector);
++
++				// define point on the top circle edge
++				dVector3 vPoint;
++				vPoint[0] = vE0[0] + vDirVector[0] * fCylinderRadius;
++				vPoint[1] = vE0[1] + vDirVector[1] * fCylinderRadius;
++				vPoint[2] = vE0[2] + vDirVector[2] * fCylinderRadius;
++
++				// calculate distance from edge to sphere
++				dVector3Subtract(vPoint,vSpherePosInCylinderFrame,vTemp);
++				dReal fDistEdgeToSphere = dVector3Length(vTemp);
++				
++				// if edge/sphere are intersecting
++				if (fDistEdgeToSphere < fSphereRadius ) 
++				{
++					// transform in absolute space
++					dQuatTransform(mQuatCylinder,vPoint,vTemp);
++					dVector3Add(vTemp,vCylinderPos,vPoint);
++
++					// calculate collision normal
++					dVector3 vNormal;
++					dVector3Subtract(vPoint,vSpherePos,vNormal);
++
++					// and make it unit vector
++					dNormalize3(vNormal);
++					// calculate penetration depth
++					dReal fDepth = fSphereRadius - fDistEdgeToSphere;
++
++					// generate contact
++					{
++						dContactGeom* Contact = SAFECONTACT(flags, contact, nContacts, skip );
++						Contact->depth = fDepth;
++						dVector3Copy(vNormal,Contact->normal);
++						dVector3Copy(vPoint,Contact->pos);
++						Contact->g1 = gCylinder;
++						Contact->g2 = gSphere;
++						nContacts++;
++					}
++
++					return nContacts;
++				}
++			}
++ 
++			// test sphere on bottom circle of cylinder
++		} 
++		else 
++		if (vSpherePosInCylinderFrame[nCYLINDER_AXIS] < fLowCylinderBase) 
++		{
++
++			if( fDeltaLow < fSphereRadius ) 
++			{
++				// calculate center of sphere on cylindrical axis which is referent for collision
++				dVector3 vBodyPoint = {REAL(0.0),REAL(0.0),REAL(0.0)};
++				vBodyPoint[nCYLINDER_AXIS] = vSpherePosInCylinderFrame[nCYLINDER_AXIS];
++
++				// distance between sphere and cylinder axis
++				dVector3Subtract(vSpherePosInCylinderFrame,vBodyPoint,vTemp);
++				dReal fDistance = dVector3Length(vTemp);
++
++				// see if our intersection point is inside bottom circle
++				if( fDistance < fCylinderRadius ) 
++				{
++					// collision normal showing up from top cylinder plane
++					dVector3 vNormal =  {REAL(0.0),REAL(0.0),REAL(0.0)};//(0,-1,0);
++					vNormal[nCYLINDER_AXIS] = REAL(1.0);
++					
++					dQuatTransform(mQuatCylinder,vNormal,vTemp2);
++					dNormalize3(vTemp2);
++
++					// set collision point in cylinder frame
++					dVector3 vPoint;
++					dVector3Copy(vSpherePosInCylinderFrame,vPoint);
++					vPoint[nCYLINDER_AXIS] = fLowCylinderBase;
++
++					// transform in absolute space
++					dQuatTransform(mQuatCylinder,vPoint,vTemp);
++					dVector3Add(vTemp,vCylinderPos,vPoint);
++
++					// calculate collision depth          
++					dReal fDepth = fSphereRadius - fDeltaLow;
++
++					// generate contact
++					{
++						dContactGeom* Contact = SAFECONTACT(flags, contact, nContacts, skip );
++						Contact->depth = fDepth;
++						dVector3Copy(vTemp2,Contact->normal);
++						dVector3Copy(vPoint,Contact->pos);
++						Contact->g1 = gCylinder;
++						Contact->g2 = gSphere;
++						nContacts++;
++					}
++
++					return nContacts;
++				}
++
++				// if we got here then we are potentially intersecting the bottom ring 
++				// of the cylinder
++
++				// define top circle center point on cylinder axis
++				dVector3 vE0 =  {REAL(0.0),REAL(0.0),REAL(0.0)};//(0,fLowCylinderBase,0);
++				vE0[nCYLINDER_AXIS] = fLowCylinderBase;
++
++				// set direction vector from center to circle edge
++				dVector3 vDirVector;
++				dVector3Subtract(vSpherePosInCylinderFrame,vE0,vDirVector);
++
++				// project it onto top plane
++				vDirVector[nCYLINDER_AXIS] = REAL(0.0);
++
++				// and make it unit vector
++				dNormalize3(vDirVector);
++
++				// define point on the top circle edge
++				dVector3 vPoint;
++				vPoint[0] = vE0[0] + vDirVector[0] * fCylinderRadius;
++				vPoint[1] = vE0[1] + vDirVector[1] * fCylinderRadius;
++				vPoint[2] = vE0[2] + vDirVector[2] * fCylinderRadius;
++
++				dVector3Subtract(vPoint,vSpherePosInCylinderFrame,vTemp);
++				dReal fDistEdgeToSphere = dVector3Length(vTemp);
++
++				// if edge/sphere are intersecting
++				if (fDistEdgeToSphere < fSphereRadius )
++				{
++					// transform in absolute space
++					dQuatTransform(mQuatCylinder,vPoint,vTemp);
++					dVector3Add(vTemp,vCylinderPos,vPoint);
++
++					// calculate collision normal
++					dVector3 vNormal;// = dVector3(vPoint - vSpherePos);
++					dVector3Subtract(vPoint,vSpherePos,vNormal);
++
++					// and make it unit vector
++					dNormalize3(vNormal);
++
++					// calculate penetration depth
++					dReal fDepth = fSphereRadius - fDistEdgeToSphere;
++
++					{
++						dContactGeom* Contact = SAFECONTACT(flags, contact, nContacts, skip );
++						Contact->depth = fDepth;
++						dVector3Copy(vNormal,Contact->normal);
++						dVector3Copy(vPoint,Contact->pos);
++						Contact->g1 = gCylinder;
++						Contact->g2 = gSphere;
++						nContacts++;
++					}
++
++					return nContacts;
++				}
++			}    
++		}
++	} 
++
++	return nContacts;
++}
++
++
+diff -Pur ../../ode/src/collision_cylinder_trimesh.cpp ./ode/src/collision_cylinder_trimesh.cpp
+--- ../../ode/src/collision_cylinder_trimesh.cpp	Thu Jan  1 01:00:00 1970
++++ ./ode/src/collision_cylinder_trimesh.cpp	Tue May 18 09:46:44 2004
+@@ -0,0 +1,1032 @@
++/*************************************************************************
++*                                                                       *
++* Open Dynamics Engine, Copyright (C) 2001-2003 Russell L. Smith.       *
++* All rights reserved.  Email: russ@q12.org   Web: www.q12.org          *
++*                                                                       *
++* This library is free software; you can redistribute it and/or         *
++* modify it under the terms of EITHER:                                  *
++*   (1) The GNU Lesser General Public License as published by the Free  *
++*       Software Foundation; either version 2.1 of the License, or (at  *
++*       your option) any later version. The text of the GNU Lesser      *
++*       General Public License is included with this library in the     *
++*       file LICENSE.TXT.                                               *
++*   (2) The BSD-style license that is included with this library in     *
++*       the file LICENSE-BSD.TXT.                                       *
++*                                                                       *
++* This library is distributed in the hope that it will be useful,       *
++* but WITHOUT ANY WARRANTY; without even the implied warranty of        *
++* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the files    *
++* LICENSE.TXT and LICENSE-BSD.TXT for more details.                     *
++*                                                                       *
++*************************************************************************/
++
++/*
++ *	Cylinder-trimesh collider by Alen Ladavac
++ *   Ported to ODE by Nguyen Binh
++ */
++
++#include <ode/collision.h>
++#include <ode/matrix.h>
++#include <ode/rotation.h>
++#include <ode/odemath.h>
++#include "collision_util.h"
++
++#define TRIMESH_INTERNAL
++#include "collision_trimesh_internal.h"
++
++
++#define MAX_REAL	dInfinity
++static const int	nCYLINDER_AXIS				= 2;
++static const int    nCYLINDER_CIRCLE_SEGMENTS	= 8;
++static const int    nMAX_CYLINDER_TRIANGLE_CLIP_POINTS	= 12;
++static const int	gMaxLocalContacts = 32;
++
++#define OPTIMIZE_CONTACTS 1
++
++// Local contacts data
++typedef struct _sLocalContactData
++{
++	dVector3	vPos;
++	dVector3	vNormal;
++	dReal		fDepth;
++	int			nFlags; // 0 = filtered out, 1 = OK
++}sLocalContactData;
++
++typedef struct _sCylinderTrimeshColliderData
++{
++	// cylinder data
++	dMatrix3	mCylinderRot;
++	dQuaternion	qCylinderRot;
++	dQuaternion	qInvCylinderRot;
++	dVector3	vCylinderPos;
++	dVector3	vCylinderAxis;
++	dReal		fCylinderRadius;
++	dReal		fCylinderSize;
++	dVector3	avCylinderNormals[nCYLINDER_CIRCLE_SEGMENTS];
++
++	// mesh data
++	dQuaternion	qTrimeshRot;
++	dQuaternion	qInvTrimeshRot;
++	dMatrix3	mTrimeshRot;
++	dVector3	vTrimeshPos;
++
++	// global collider data
++	dVector3	vBestPoint;
++	dReal		fBestDepth;
++	dReal		fBestCenter;
++	dReal		fBestrt;
++	int			iBestAxis;
++	dVector3	vContactNormal;
++	dVector3	vNormal;
++	dVector3	vE0;
++	dVector3	vE1;
++	dVector3	vE2;
++
++	// ODE stuff
++	dGeomID				gCylinder;
++	dxTriMesh*			gTrimesh;
++	dContactGeom*		gContact;
++	int					iFlags;
++	int					iSkip;
++	int					nContacts;// = 0;
++	sLocalContactData	gLocalContacts[gMaxLocalContacts];
++} sCylinderTrimeshColliderData;
++
++// Short type name
++typedef  sCylinderTrimeshColliderData sData;
++
++// Use to classify contacts to be "near" in position
++static const dReal fSameContactPositionEpsilon = REAL(0.0001); // 1e-4
++// Use to classify contacts to be "near" in normal direction
++static const dReal fSameContactNormalEpsilon = REAL(0.0001); // 1e-4
++
++// If this two contact can be classified as "near"
++inline int _IsNearContacts(sLocalContactData& c1,sLocalContactData& c2)
++{
++	int bPosNear = 0;
++	int bSameDir = 0;
++	dVector3	vDiff;
++
++	// First check if they are "near" in position
++	dVector3Subtract(c1.vPos,c2.vPos,vDiff);
++	if (  (dFabs(vDiff[0]) < fSameContactPositionEpsilon)
++		&&(dFabs(vDiff[1]) < fSameContactPositionEpsilon)
++		&&(dFabs(vDiff[2]) < fSameContactPositionEpsilon))
++	{
++		bPosNear = 1;
++	}
++
++	// Second check if they are "near" in normal direction
++	dVector3Subtract(c1.vNormal,c2.vNormal,vDiff);
++	if (  (dFabs(vDiff[0]) < fSameContactNormalEpsilon)
++		&&(dFabs(vDiff[1]) < fSameContactNormalEpsilon)
++		&&(dFabs(vDiff[2]) < fSameContactNormalEpsilon) )
++	{
++		bSameDir = 1;
++	}
++
++	// Will be "near" if position and normal direction are "near"
++	return (bPosNear && bSameDir);
++}
++
++inline int _IsBetter(sLocalContactData& c1,sLocalContactData& c2)
++{
++	// The not better will be throw away
++	// You can change the selection criteria here
++	return (c1.fDepth > c2.fDepth);
++}
++
++// iterate through gLocalContacts and filtered out "near contact"
++inline void	_OptimizeLocalContacts(sData& cData)
++{
++	int nContacts = cData.nContacts;
++
++	for (int i = 0; i < nContacts-1; i++)
++	{
++		for (int j = i+1; j < nContacts; j++)
++		{
++			if (_IsNearContacts(cData.gLocalContacts[i],cData.gLocalContacts[j]))
++			{
++				// If they are seem to be the samed then filtered 
++				// out the least penetrate one
++				if (_IsBetter(cData.gLocalContacts[j],cData.gLocalContacts[i]))
++				{
++					cData.gLocalContacts[i].nFlags = 0; // filtered 1st contact
++				}
++				else
++				{
++					cData.gLocalContacts[j].nFlags = 0; // filtered 2nd contact
++				}
++
++				// NOTE
++				// There is other way is to add two depth together but
++				// it not work so well. Why???
++			}
++		}
++	}
++}
++
++inline int	_ProcessLocalContacts(sData& cData)
++{
++	if (cData.nContacts == 0)
++	{
++		return 0;
++	}
++
++#ifdef OPTIMIZE_CONTACTS
++	if (cData.nContacts > 1)
++	{
++		// Can be optimized...
++		_OptimizeLocalContacts(cData);
++	}
++#endif		
++
++	int iContact = 0;
++	dContactGeom* Contact = 0;
++
++	int nFinalContact = 0;
++
++	for (iContact = 0; iContact < cData.nContacts; iContact ++)
++	{
++		if (1 == cData.gLocalContacts[iContact].nFlags)
++		{
++			Contact = SAFECONTACT(cData.iFlags, cData.gContact, nFinalContact, cData.iSkip);
++			Contact->depth = cData.gLocalContacts[iContact].fDepth;
++			dVector3Copy(cData.gLocalContacts[iContact].vNormal,Contact->normal);
++			dVector3Copy(cData.gLocalContacts[iContact].vPos,Contact->pos);
++			Contact->g1 = cData.gCylinder;
++			Contact->g2 = cData.gTrimesh;
++			dVector3Inv(Contact->normal);
++
++			nFinalContact++;
++		}
++	}
++	// debug
++	//if (nFinalContact != cData.nContacts)
++	//{
++	//	printf("[Info] %d contacts generated,%d  filtered.\n",cData.nContacts,cData.nContacts-nFinalContact);
++	//}
++
++	return nFinalContact;
++}
++
++
++bool _cldTestAxis(sData& cData,
++				  const dVector3 &v0,
++				  const dVector3 &v1,
++				  const dVector3 &v2, 
++                  dVector3& vAxis, 
++				  int iAxis,
++				  bool bNoFlip = false)
++{
++  
++	// calculate length of separating axis vector
++	dReal fL = dVector3Length(vAxis);
++	// if not long enough
++	if ( fL < 1e-5f )
++	{
++		// do nothing
++		return true;
++	}
++
++	// otherwise normalize it
++	vAxis[0] /= fL;
++	vAxis[1] /= fL;
++	vAxis[2] /= fL;
++
++	dReal fdot1 = dVector3Dot(cData.vCylinderAxis,vAxis);
++	// project capsule on vAxis
++	dReal frc;
++
++	if (fdot1 > REAL(1.0) ) 
++	{
++		fdot1 = REAL(1.0);
++		frc = dFabs(cData.fCylinderSize* REAL(0.5));
++	}
++	else
++	{
++		frc = dFabs((cData.fCylinderSize* REAL(0.5)) * fdot1)
++			+ cData.fCylinderRadius * dFabs(REAL(1.0)-(fdot1*fdot1));
++	}
++  
++	dVector3 vV0;
++	dVector3Subtract(v0,cData.vCylinderPos,vV0);
++	dVector3 vV1;
++	dVector3Subtract(v1,cData.vCylinderPos,vV1);
++	dVector3 vV2;
++	dVector3Subtract(v2,cData.vCylinderPos,vV2);
++
++	// project triangle on vAxis
++	dReal afv[3];
++	afv[0] = dVector3Dot( vV0 , vAxis );
++	afv[1] = dVector3Dot( vV1 , vAxis );
++	afv[2] = dVector3Dot( vV2 , vAxis );
++
++	dReal fMin = MAX_REAL;
++	dReal fMax = -MAX_REAL;
++
++	// for each vertex 
++	for(int i = 0; i < 3; i++) 
++	{
++		// find minimum
++		if (afv[i]<fMin) 
++		{
++			fMin = afv[i];
++		}
++		// find maximum
++		if (afv[i]>fMax) 
++		{
++			fMax = afv[i];
++		}
++	}
++
++	// find capsule's center of interval on axis
++	dReal fCenter = (fMin+fMax)* REAL(0.5);
++	// calculate triangles halfinterval 
++	dReal fTriangleRadius = (fMax-fMin)*REAL(0.5);
++
++	// if they do not overlap, 
++	if( dFabs(fCenter) > (frc+fTriangleRadius) ) 
++	{ 
++		// exit, we have no intersection
++		return false; 
++	}
++
++	// calculate depth 
++	dReal fDepth = -(dFabs(fCenter) - (frc + fTriangleRadius ) );
++
++	// if greater then best found so far
++	if ( fDepth < cData.fBestDepth ) 
++	{
++		// remember depth
++		cData.fBestDepth			= fDepth;
++		cData.fBestCenter		    = fCenter;
++		cData.fBestrt				= frc;
++		dVector3Copy(vAxis,cData.vContactNormal);
++		cData.iBestAxis				= iAxis;
++	  
++		// flip normal if interval is wrong faced
++		if ( fCenter< REAL(0.0) && !bNoFlip) 
++		{ 
++			dVector3Inv(cData.vContactNormal);
++			cData.fBestCenter = -fCenter;
++		}
++	}
++  
++	return true;
++}
++
++// intersection test between edge and circle
++bool _cldTestCircleToEdgeAxis(sData& cData,
++							  const dVector3 &v0, const dVector3 &v1, const dVector3 &v2,
++                              const dVector3 &vCenterPoint, const dVector3 &vCylinderAxis1,
++                              const dVector3 &vVx0, const dVector3 &vVx1, int iAxis) 
++{
++	// calculate direction of edge
++	dVector3 vkl;
++	dVector3Subtract( vVx1 , vVx0 , vkl);
++	dNormalize3(vkl);
++	// starting point of edge 
++	dVector3 vol;
++	dVector3Copy(vVx0,vol);
++
++	// calculate angle cosine between cylinder axis and edge
++	dReal fdot2 = dVector3Dot(vkl , vCylinderAxis1);
++
++	// if edge is perpendicular to cylinder axis
++	if(dFabs(fdot2)<1e-5f)
++	{
++		// this can't be separating axis, because edge is parallel to circle plane
++		return true;
++	}
++    
++	// find point of intersection between edge line and circle plane
++	dVector3 vTemp;
++	dVector3Subtract(vCenterPoint,vol,vTemp);
++	dReal fdot1 = dVector3Dot(vTemp,vCylinderAxis1);
++	dVector3 vpnt;// = vol + vkl * (fdot1/fdot2);
++	vpnt[0] = vol[0] + vkl[0] * fdot1/fdot2;
++	vpnt[1] = vol[1] + vkl[1] * fdot1/fdot2;
++	vpnt[2] = vol[2] + vkl[2] * fdot1/fdot2;
++
++	// find tangent vector on circle with same center (vCenterPoint) that touches point of intersection (vpnt)
++	dVector3 vTangent;
++	dVector3Subtract(vCenterPoint,vpnt,vTemp);
++	dVector3Cross(vTemp,vCylinderAxis1,vTangent);
++  
++	// find vector orthogonal both to tangent and edge direction
++	dVector3 vAxis;
++	dVector3Cross(vTangent,vkl,vAxis);
++
++	// use that vector as separating axis
++	return _cldTestAxis( cData ,v0, v1, v2, vAxis, iAxis );
++}
++
++// helper for less key strokes
++// r = ( (v1 - v2) cross v3 ) cross v3
++inline void _CalculateAxis(const dVector3& v1,
++						   const dVector3& v2,
++						   const dVector3& v3,
++						   dVector3& r)
++{
++	dVector3 t1;
++	dVector3 t2;
++
++	dVector3Subtract(v1,v2,t1);
++	dVector3Cross(t1,v3,t2);
++	dVector3Cross(t2,v3,r);
++}
++
++bool _cldTestSeparatingAxes(sData& cData,
++							const dVector3 &v0,
++							const dVector3 &v1,
++							const dVector3 &v2) 
++{
++
++	// calculate edge vectors
++	dVector3Subtract(v1 ,v0 , cData.vE0);
++	// cData.vE1 has been calculated before -> so save some cycles here
++	dVector3Subtract(v0 ,v2 , cData.vE2);
++
++	// calculate caps centers in absolute space
++	dVector3 vCp0;
++	vCp0[0] = cData.vCylinderPos[0] + cData.vCylinderAxis[0]*(cData.fCylinderSize* REAL(0.5));
++	vCp0[1] = cData.vCylinderPos[1] + cData.vCylinderAxis[1]*(cData.fCylinderSize* REAL(0.5));
++	vCp0[2] = cData.vCylinderPos[2] + cData.vCylinderAxis[2]*(cData.fCylinderSize* REAL(0.5));
++
++	dVector3 vCp1;
++	vCp1[0] = cData.vCylinderPos[0] - cData.vCylinderAxis[0]*(cData.fCylinderSize* REAL(0.5));
++	vCp1[1] = cData.vCylinderPos[1] - cData.vCylinderAxis[1]*(cData.fCylinderSize* REAL(0.5));
++	vCp1[2] = cData.vCylinderPos[2] - cData.vCylinderAxis[2]*(cData.fCylinderSize* REAL(0.5));
++
++	// reset best axis
++	cData.iBestAxis = 0;
++	dVector3 vAxis;
++
++	// axis cData.vNormal
++	//vAxis = -cData.vNormal;
++	vAxis[0] = -cData.vNormal[0];
++	vAxis[1] = -cData.vNormal[1];
++	vAxis[2] = -cData.vNormal[2];
++	if (!_cldTestAxis(cData, v0, v1, v2, vAxis, 1, true)) 
++	{ 
++		return false; 
++	}
++
++	// axis CxE0
++	// vAxis = ( cData.vCylinderAxis cross cData.vE0 );
++	dVector3Cross(cData.vCylinderAxis, cData.vE0,vAxis);
++	if (!_cldTestAxis(cData, v0, v1, v2, vAxis, 2)) 
++	{ 
++		return false; 
++	}
++
++	// axis CxE1
++	// vAxis = ( cData.vCylinderAxis cross cData.vE1 );
++	dVector3Cross(cData.vCylinderAxis, cData.vE1,vAxis);
++	if (!_cldTestAxis(cData, v0, v1, v2, vAxis, 3)) 
++	{ 
++		return false; 
++	}
++
++	// axis CxE2
++	// vAxis = ( cData.vCylinderAxis cross cData.vE2 );
++	dVector3Cross(cData.vCylinderAxis, cData.vE2,vAxis);
++	if (!_cldTestAxis( cData ,v0, v1, v2, vAxis, 4)) 
++	{ 
++		return false; 
++	}
++
++	// first vertex on triangle
++	// axis ((V0-Cp0) x C) x C
++	//vAxis = ( ( v0-vCp0 ) cross cData.vCylinderAxis ) cross cData.vCylinderAxis;
++	_CalculateAxis(v0 , vCp0 , cData.vCylinderAxis , vAxis);
++	if (!_cldTestAxis(cData, v0, v1, v2, vAxis, 11)) 
++	{ 
++		return false; 
++	}
++
++	// second vertex on triangle
++	// axis ((V1-Cp0) x C) x C
++	// vAxis = ( ( v1-vCp0 ) cross cData.vCylinderAxis ) cross cData.vCylinderAxis;
++	_CalculateAxis(v1 , vCp0 , cData.vCylinderAxis , vAxis);
++	if (!_cldTestAxis(cData, v0, v1, v2, vAxis, 12)) 
++	{ 
++		return false; 
++	}
++
++	// third vertex on triangle
++	// axis ((V2-Cp0) x C) x C
++	//vAxis = ( ( v2-vCp0 ) cross cData.vCylinderAxis ) cross cData.vCylinderAxis;
++	_CalculateAxis(v2 , vCp0 , cData.vCylinderAxis , vAxis);
++	if (!_cldTestAxis(cData, v0, v1, v2, vAxis, 13))
++	{ 
++		return FALSE; 
++	}
++
++	// test cylinder axis
++	// vAxis = cData.vCylinderAxis;
++	dVector3Copy(cData.vCylinderAxis , vAxis);
++	if (!_cldTestAxis(cData , v0, v1, v2, vAxis, 14)) 
++	{ 
++		return false; 
++	}
++
++	// Test top and bottom circle ring of cylinder for separation
++	dVector3 vccATop;
++	vccATop[0] = cData.vCylinderPos[0] + cData.vCylinderAxis[0]*(cData.fCylinderSize * REAL(0.5));
++	vccATop[1] = cData.vCylinderPos[1] + cData.vCylinderAxis[1]*(cData.fCylinderSize * REAL(0.5));
++	vccATop[2] = cData.vCylinderPos[2] + cData.vCylinderAxis[2]*(cData.fCylinderSize * REAL(0.5));
++
++	dVector3 vccABottom;
++	vccABottom[0] = cData.vCylinderPos[0] - cData.vCylinderAxis[0]*(cData.fCylinderSize * REAL(0.5));
++	vccABottom[1] = cData.vCylinderPos[1] - cData.vCylinderAxis[1]*(cData.fCylinderSize * REAL(0.5));
++	vccABottom[2] = cData.vCylinderPos[2] - cData.vCylinderAxis[2]*(cData.fCylinderSize * REAL(0.5));
++
++
++  if (!_cldTestCircleToEdgeAxis(cData, v0, v1, v2, vccATop, cData.vCylinderAxis, v0, v1, 15)) 
++  {
++    return false;
++  }
++
++  if (!_cldTestCircleToEdgeAxis(cData, v0, v1, v2, vccATop, cData.vCylinderAxis, v1, v2, 16)) 
++  {
++    return false;
++  }
++
++  if (!_cldTestCircleToEdgeAxis(cData, v0, v1, v2, vccATop, cData.vCylinderAxis, v0, v2, 17)) 
++  {
++    return false;
++  }
++
++  if (!_cldTestCircleToEdgeAxis(cData, v0, v1, v2, vccABottom, cData.vCylinderAxis, v0, v1, 18)) 
++  {
++    return false;
++  }
++
++  if (!_cldTestCircleToEdgeAxis(cData, v0, v1, v2, vccABottom, cData.vCylinderAxis, v1, v2, 19)) 
++  {
++    return false;
++  }
++
++  if (!_cldTestCircleToEdgeAxis(cData, v0, v1, v2, vccABottom, cData.vCylinderAxis, v0, v2, 20)) 
++  {
++    return false;
++  }
++
++  return true;
++}
++
++bool _cldClipCylinderEdgeToTriangle(sData& cData, const dVector3 &v0, const dVector3 &v1, const dVector3 &v2)
++{
++	// translate cylinder
++	dReal fTemp = dVector3Dot(cData.vCylinderAxis , cData.vContactNormal);
++	dVector3 vN2;
++	vN2[0] = cData.vContactNormal[0] - cData.vCylinderAxis[0]*fTemp;
++	vN2[1] = cData.vContactNormal[1] - cData.vCylinderAxis[1]*fTemp;
++	vN2[2] = cData.vContactNormal[2] - cData.vCylinderAxis[2]*fTemp;
++
++	fTemp = dVector3Length(vN2);
++	if (fTemp < 1e-5)
++	{
++		return false;
++	}
++
++	// Normalize it
++	vN2[0] /= fTemp;
++	vN2[1] /= fTemp;
++	vN2[2] /= fTemp;
++
++	// calculate caps centers in absolute space
++	dVector3 vCposTrans;
++	vCposTrans[0] = cData.vCylinderPos[0] + vN2[0]*cData.fCylinderRadius;
++	vCposTrans[1] = cData.vCylinderPos[1] + vN2[1]*cData.fCylinderRadius;
++	vCposTrans[2] = cData.vCylinderPos[2] + vN2[2]*cData.fCylinderRadius;
++	  
++	dVector3 vCEdgePoint0;
++	vCEdgePoint0[0]  = vCposTrans[0] + cData.vCylinderAxis[0] * (cData.fCylinderSize* REAL(0.5));
++	vCEdgePoint0[1]  = vCposTrans[1] + cData.vCylinderAxis[1] * (cData.fCylinderSize* REAL(0.5));
++	vCEdgePoint0[2]  = vCposTrans[2] + cData.vCylinderAxis[2] * (cData.fCylinderSize* REAL(0.5));
++
++	dVector3 vCEdgePoint1;
++	vCEdgePoint1[0]  = vCposTrans[0] - cData.vCylinderAxis[0] * (cData.fCylinderSize* REAL(0.5));
++	vCEdgePoint1[1]  = vCposTrans[1] - cData.vCylinderAxis[1] * (cData.fCylinderSize* REAL(0.5));
++	vCEdgePoint1[2]  = vCposTrans[2] - cData.vCylinderAxis[2] * (cData.fCylinderSize* REAL(0.5));
++
++	// transform cylinder edge points into triangle space
++	vCEdgePoint0[0] -= v0[0];
++	vCEdgePoint0[1] -= v0[1];
++	vCEdgePoint0[2] -= v0[2];
++
++	vCEdgePoint1[0] -= v0[0];
++	vCEdgePoint1[1] -= v0[1];
++	vCEdgePoint1[2] -= v0[2];
++
++	dVector4 plPlane;
++	dVector3 vPlaneNormal;
++
++	// triangle plane
++	//plPlane = Plane4f( -cData.vNormal, 0);
++	vPlaneNormal[0] = -cData.vNormal[0];
++	vPlaneNormal[1] = -cData.vNormal[1];
++	vPlaneNormal[2] = -cData.vNormal[2];
++	dConstructPlane(vPlaneNormal,REAL(0.0),plPlane);
++	if(!dClipEdgeToPlane( vCEdgePoint0, vCEdgePoint1, plPlane )) 
++	{ 
++		return false; 
++	}
++
++	// plane with edge 0
++	//plPlane = Plane4f( ( cData.vNormal cross cData.vE0 ), 1e-5f);
++	dVector3Cross(cData.vNormal,cData.vE0,vPlaneNormal);
++	dConstructPlane(vPlaneNormal,1e-5f,plPlane);
++	if(!dClipEdgeToPlane( vCEdgePoint0, vCEdgePoint1, plPlane )) 
++	{ 
++		return false; 
++	}
++  
++	// plane with edge 1
++	//dVector3 vTemp = ( cData.vNormal cross cData.vE1 );
++	dVector3Cross(cData.vNormal,cData.vE1,vPlaneNormal);
++	fTemp = dVector3Dot(cData.vE0 , vPlaneNormal) - 1e-5;
++	//plPlane = Plane4f( vTemp, -(( cData.vE0 dot vTemp )-1e-5f));
++	dConstructPlane(vPlaneNormal,-fTemp,plPlane);
++	if(!dClipEdgeToPlane( vCEdgePoint0, vCEdgePoint1, plPlane )) 
++	{
++		return false;
++	}
++
++	// plane with edge 2
++	// plPlane = Plane4f( ( cData.vNormal cross cData.vE2 ), 1e-5f);
++	dVector3Cross(cData.vNormal,cData.vE2,vPlaneNormal);
++	dConstructPlane(vPlaneNormal,1e-5f,plPlane);
++	if(!dClipEdgeToPlane( vCEdgePoint0, vCEdgePoint1, plPlane )) 
++	{ 
++		return false; 
++	}
++
++	// return capsule edge points into absolute space
++	vCEdgePoint0[0] += v0[0];
++	vCEdgePoint0[1] += v0[1];
++	vCEdgePoint0[2] += v0[2];
++
++	vCEdgePoint1[0] += v0[0];
++	vCEdgePoint1[1] += v0[1];
++	vCEdgePoint1[2] += v0[2];
++
++	// calculate depths for both contact points
++	dVector3 vTemp;
++	dVector3Subtract(vCEdgePoint0,cData.vCylinderPos, vTemp);
++	dReal fRestDepth0 = -dVector3Dot(vTemp,cData.vContactNormal) + cData.fBestrt;
++	dVector3Subtract(vCEdgePoint1,cData.vCylinderPos, vTemp);
++	dReal fRestDepth1 = -dVector3Dot(vTemp,cData.vContactNormal) + cData.fBestrt;
++	
++	dReal fDepth0 = cData.fBestDepth - (fRestDepth0);
++	dReal fDepth1 = cData.fBestDepth - (fRestDepth1);
++		  
++	// clamp depths to zero
++	if(fDepth0 < REAL(0.0) ) 
++	{
++		fDepth0 = REAL(0.0);
++	}
++
++	if(fDepth1<REAL(0.0)) 
++	{
++		fDepth1 = REAL(0.0);
++	}
++
++	// Generate contact 0
++	{
++		cData.gLocalContacts[cData.nContacts].fDepth = fDepth0;
++		dVector3Copy(cData.vContactNormal,cData.gLocalContacts[cData.nContacts].vNormal);
++		dVector3Copy(vCEdgePoint0,cData.gLocalContacts[cData.nContacts].vPos);
++		cData.gLocalContacts[cData.nContacts].nFlags = 1;
++		cData.nContacts++;
++	}
++
++	// Generate contact 1
++	{
++		// generate contacts
++		cData.gLocalContacts[cData.nContacts].fDepth = fDepth1;
++		dVector3Copy(cData.vContactNormal,cData.gLocalContacts[cData.nContacts].vNormal);
++		dVector3Copy(vCEdgePoint1,cData.gLocalContacts[cData.nContacts].vPos);
++		cData.gLocalContacts[cData.nContacts].nFlags = 1;
++		cData.nContacts++;		
++	}
++
++	return true;
++}
++
++void _cldClipCylinderToTriangle(sData& cData,const dVector3 &v0, const dVector3 &v1, const dVector3 &v2)
++{
++	dVector3 avPoints[3];
++	dVector3 avTempArray1[nMAX_CYLINDER_TRIANGLE_CLIP_POINTS];
++	dVector3 avTempArray2[nMAX_CYLINDER_TRIANGLE_CLIP_POINTS];
++
++	dSetZero(&avTempArray1[0][0],nMAX_CYLINDER_TRIANGLE_CLIP_POINTS * 4);
++	dSetZero(&avTempArray2[0][0],nMAX_CYLINDER_TRIANGLE_CLIP_POINTS * 4);
++
++	// setup array of triangle vertices
++	dVector3Copy(v0,avPoints[0]);
++	dVector3Copy(v1,avPoints[1]);
++	dVector3Copy(v2,avPoints[2]);
++
++	dVector3 vCylinderCirclePos, vCylinderCircleNormal_Rel;
++	dSetZero(vCylinderCircleNormal_Rel,4);
++	// check which circle from cylinder we take for clipping
++	if ( dVector3Dot(cData.vCylinderAxis , cData.vContactNormal) > REAL(0.0)) 
++	{
++		// get top circle
++		vCylinderCirclePos[0] = cData.vCylinderPos[0] + cData.vCylinderAxis[0]*(cData.fCylinderSize*REAL(0.5));
++		vCylinderCirclePos[1] = cData.vCylinderPos[1] + cData.vCylinderAxis[1]*(cData.fCylinderSize*REAL(0.5));
++		vCylinderCirclePos[2] = cData.vCylinderPos[2] + cData.vCylinderAxis[2]*(cData.fCylinderSize*REAL(0.5));
++
++		vCylinderCircleNormal_Rel[nCYLINDER_AXIS] = REAL(-1.0);
++	} 
++	else 
++	{
++		// get bottom circle
++		vCylinderCirclePos[0] = cData.vCylinderPos[0] - cData.vCylinderAxis[0]*(cData.fCylinderSize*REAL(0.5));
++		vCylinderCirclePos[1] = cData.vCylinderPos[1] - cData.vCylinderAxis[1]*(cData.fCylinderSize*REAL(0.5));
++		vCylinderCirclePos[2] = cData.vCylinderPos[2] - cData.vCylinderAxis[2]*(cData.fCylinderSize*REAL(0.5));
++
++		vCylinderCircleNormal_Rel[nCYLINDER_AXIS] = REAL(1.0);
++	}
++
++	dVector3 vTemp;
++	dQuatInv(cData.qCylinderRot , cData.qInvCylinderRot);
++	// transform triangle points to space of cylinder circle
++	for(int i=0; i<3; i++) 
++	{
++		dVector3Subtract(avPoints[i] , vCylinderCirclePos , vTemp);
++		dQuatTransform(cData.qInvCylinderRot,vTemp,avPoints[i]);
++	}
++
++	int iTmpCounter1 = 0;
++	int iTmpCounter2 = 0;
++	dVector4 plPlane;
++
++	// plane of cylinder that contains circle for intersection
++	//plPlane = Plane4f( vCylinderCircleNormal_Rel, 0.0f );
++	dConstructPlane(vCylinderCircleNormal_Rel,REAL(0.0),plPlane);
++	dClipPolyToPlane(avPoints, 3, avTempArray1, iTmpCounter1, plPlane);
++
++	// Body of base circle of Cylinder
++	int nCircleSegment = 0;
++	for (nCircleSegment = 0; nCircleSegment < nCYLINDER_CIRCLE_SEGMENTS; nCircleSegment++)
++	{
++		dConstructPlane(cData.avCylinderNormals[nCircleSegment],cData.fCylinderRadius,plPlane);
++
++		if (0 == (nCircleSegment % 2))
++		{
++			dClipPolyToPlane( avTempArray1 , iTmpCounter1 , avTempArray2, iTmpCounter2, plPlane);
++		}
++		else
++		{
++			dClipPolyToPlane( avTempArray2, iTmpCounter2, avTempArray1 , iTmpCounter1 , plPlane );
++		}
++
++		dIASSERT( iTmpCounter1 >= 0 && iTmpCounter1 <= nMAX_CYLINDER_TRIANGLE_CLIP_POINTS );
++		dIASSERT( iTmpCounter2 >= 0 && iTmpCounter2 <= nMAX_CYLINDER_TRIANGLE_CLIP_POINTS );
++	}
++
++	// back transform clipped points to absolute space
++	dReal ftmpdot;	
++	dReal fTempDepth;
++	dVector3 vPoint;
++
++	int i = 0;
++	if (nCircleSegment %2)
++	{
++		for( i=0; i<iTmpCounter2; i++)
++		{
++			dQuatTransform(cData.qCylinderRot,avTempArray2[i], vPoint);
++			vPoint[0] += vCylinderCirclePos[0];
++			vPoint[1] += vCylinderCirclePos[1];
++			vPoint[2] += vCylinderCirclePos[2];
++
++			dVector3Subtract(vPoint,cData.vCylinderPos,vTemp);
++			ftmpdot	 = dFabs(dVector3Dot(vTemp, cData.vContactNormal));
++			fTempDepth = cData.fBestrt - ftmpdot;
++			// Depth must be positive
++			if (fTempDepth > REAL(0.0))
++			{
++				cData.gLocalContacts[cData.nContacts].fDepth = fTempDepth;
++				dVector3Copy(cData.vContactNormal,cData.gLocalContacts[cData.nContacts].vNormal);
++				dVector3Copy(vPoint,cData.gLocalContacts[cData.nContacts].vPos);
++				cData.gLocalContacts[cData.nContacts].nFlags = 1;
++				cData.nContacts++;
++			}
++		}
++	}
++	else
++	{
++		for( i=0; i<iTmpCounter1; i++)
++		{
++			dQuatTransform(cData.qCylinderRot,avTempArray1[i], vPoint);
++			vPoint[0] += vCylinderCirclePos[0];
++			vPoint[1] += vCylinderCirclePos[1];
++			vPoint[2] += vCylinderCirclePos[2];
++
++			dVector3Subtract(vPoint,cData.vCylinderPos,vTemp);
++			ftmpdot	 = dFabs(dVector3Dot(vTemp, cData.vContactNormal));
++			fTempDepth = cData.fBestrt - ftmpdot;
++			// Depth must be positive
++			if (fTempDepth > REAL(0.0))
++			{
++				cData.gLocalContacts[cData.nContacts].fDepth = fTempDepth;
++				dVector3Copy(cData.vContactNormal,cData.gLocalContacts[cData.nContacts].vNormal);
++				dVector3Copy(vPoint,cData.gLocalContacts[cData.nContacts].vPos);
++				cData.gLocalContacts[cData.nContacts].nFlags = 1;
++				cData.nContacts++;
++			}
++		}
++	}
++}
++
++void TestOneTriangleVsCylinder(   sData& cData, 
++								  const dVector3 &v0, 
++                                  const dVector3 &v1, 
++                                  const dVector3 &v2, 
++                                  const bool bDoubleSided)
++{
++
++	// calculate triangle normal
++	dVector3Subtract( v2 , v1 ,cData.vE1);
++	dVector3 vTemp;
++	dVector3Subtract( v0 , v1 ,vTemp);
++	dVector3Cross(cData.vE1 , vTemp , cData.vNormal );
++
++	dNormalize3( cData.vNormal);
++
++	// create plane from triangle
++	//Plane4f plTrianglePlane = Plane4f( vPolyNormal, v0 ); 
++	dReal plDistance = -dVector3Dot(v0, cData.vNormal);
++	dVector4 plTrianglePlane;
++	dConstructPlane( cData.vNormal,plDistance,plTrianglePlane);
++
++	 // calculate sphere distance to plane
++	dReal fDistanceCylinderCenterToPlane = dPointPlaneDistance(cData.vCylinderPos , plTrianglePlane);
++
++	// Sphere must be over positive side of triangle
++	if(fDistanceCylinderCenterToPlane < 0 && !bDoubleSided) 
++	{
++		// if not don't generate contacts
++		return;
++	 }
++
++	dVector3 vPnt0;
++	dVector3 vPnt1;
++	dVector3 vPnt2;
++
++	if (fDistanceCylinderCenterToPlane < REAL(0.0) )
++	{
++		// flip it
++		dVector3Copy(v0 , vPnt0);
++		dVector3Copy(v1 , vPnt2);
++		dVector3Copy(v2 , vPnt1);
++	}
++	else
++	{
++		dVector3Copy(v0 , vPnt0);
++		dVector3Copy(v1 , vPnt1);
++		dVector3Copy(v2 , vPnt2);
++	}
++
++	cData.fBestDepth = MAX_REAL;
++
++	// do intersection test and find best separating axis
++	if(!_cldTestSeparatingAxes(cData , vPnt0, vPnt1, vPnt2) ) 
++	{
++		// if not found do nothing
++		return;
++	}
++
++	// if best separation axis is not found
++	if ( cData.iBestAxis == 0 ) 
++	{
++		// this should not happen (we should already exit in that case)
++		dIASSERT(false);
++		// do nothing
++		return;
++	}
++
++	dReal fdot = dVector3Dot( cData.vContactNormal , cData.vCylinderAxis );
++
++	// choose which clipping method are we going to apply
++	if (dFabs(fdot) < REAL(0.9) ) 
++	{
++		if (!_cldClipCylinderEdgeToTriangle(cData ,vPnt0, vPnt1, vPnt2)) 
++		{
++			return;
++		}
++	}
++	else 
++	{
++		_cldClipCylinderToTriangle(cData ,vPnt0, vPnt1, vPnt2);
++	}
++
++}
++
++void _InitCylinderTrimeshData(sData& cData)
++{
++	// get cylinder information
++	// Rotation
++	const dReal* pRotCyc = dGeomGetRotation(cData.gCylinder); 
++	dMatrix3Copy(pRotCyc,cData.mCylinderRot);
++	dGeomGetQuaternion(cData.gCylinder,cData.qCylinderRot);
++	
++	// Position
++	const dVector3* pPosCyc = (const dVector3*)dGeomGetPosition(cData.gCylinder);
++	dVector3Copy(*pPosCyc,cData.vCylinderPos);
++	// Cylinder axis
++	dMat3GetCol(cData.mCylinderRot,nCYLINDER_AXIS,cData.vCylinderAxis);
++	// get cylinder radius and size
++	dGeomCylinderGetParams(cData.gCylinder,&cData.fCylinderRadius,&cData.fCylinderSize);
++	
++	// get trimesh position and orientation
++	const dReal* pRotTris = dGeomGetRotation(cData.gTrimesh); 
++	dMatrix3Copy(pRotTris,cData.mTrimeshRot);
++	dGeomGetQuaternion(cData.gTrimesh,cData.qTrimeshRot);
++	
++	// Position
++	const dVector3* pPosTris = (const dVector3*)dGeomGetPosition(cData.gTrimesh);
++	dVector3Copy(*pPosTris,cData.vTrimeshPos);
++
++
++	// calculate basic angle for 8-gon
++	dReal fAngle = M_PI / nCYLINDER_CIRCLE_SEGMENTS;
++	// calculate angle increment
++	dReal fAngleIncrement = fAngle*REAL(2.0); 
++
++	// calculate plane normals
++	// axis dependant code
++	for(int i=0; i<nCYLINDER_CIRCLE_SEGMENTS; i++) 
++	{
++		cData.avCylinderNormals[i][0] = -dCos(fAngle);
++		cData.avCylinderNormals[i][1] = -dSin(fAngle);
++		cData.avCylinderNormals[i][2] = REAL(0.0);
++
++		fAngle += fAngleIncrement;
++	}
++
++	dSetZero(cData.vBestPoint,4);
++	// reset best depth
++	cData.fBestCenter = REAL(0.0);	
++}
++
++// cylinder to mesh collider
++int dCollideCylinderTrimesh(dxGeom *o1, dxGeom *o2, int flags, dContactGeom *contact, int skip)
++{
++	// Main data holder
++	sData cData;
++
++	// Assign ODE stuff
++	cData.gCylinder	 = o1;
++	cData.gTrimesh	 = (dxTriMesh*)o2;
++	cData.iFlags	 = flags;
++	cData.iSkip		 = skip;
++	cData.gContact	 = contact;
++	cData.nContacts  = 0;
++
++	_InitCylinderTrimeshData(cData);
++ 
++	OBBCollider& Collider = cData.gTrimesh->_OBBCollider;
++
++	Point cCenter(cData.vCylinderPos[0],cData.vCylinderPos[1],cData.vCylinderPos[2]);
++
++	Point cExtents(cData.fCylinderRadius,cData.fCylinderRadius,cData.fCylinderRadius);
++	cExtents[nCYLINDER_AXIS] = cData.fCylinderSize * REAL(0.5);
++
++	Matrix3x3 obbRot;
++
++	obbRot[0][0] = cData.mCylinderRot[0];
++	obbRot[1][0] = cData.mCylinderRot[1];
++	obbRot[2][0] = cData.mCylinderRot[2];
++
++	obbRot[0][1] = cData.mCylinderRot[4];
++	obbRot[1][1] = cData.mCylinderRot[5];
++	obbRot[2][1] = cData.mCylinderRot[6];
++
++	obbRot[0][2] = cData.mCylinderRot[8];
++	obbRot[1][2] = cData.mCylinderRot[9];
++	obbRot[2][2] = cData.mCylinderRot[10];
++
++	OBB obbCCylinder(cCenter,cExtents,obbRot);
++
++	Matrix4x4 CCylinderMatrix;
++	MakeMatrix(cData.vCylinderPos, cData.mCylinderRot, CCylinderMatrix);
++
++	Matrix4x4 MeshMatrix;
++	MakeMatrix(cData.vTrimeshPos, cData.mTrimeshRot, MeshMatrix);
++
++	// TC results
++	if (cData.gTrimesh->doBoxTC) 
++	{
++		dxTriMesh::BoxTC* BoxTC = 0;
++		for (int i = 0; i < cData.gTrimesh->BoxTCCache.size(); i++)
++		{
++			if (cData.gTrimesh->BoxTCCache[i].Geom == cData.gCylinder)
++			{
++				BoxTC = &cData.gTrimesh->BoxTCCache[i];
++				break;
++			}
++		}
++		if (!BoxTC)
++		{
++			cData.gTrimesh->BoxTCCache.push(dxTriMesh::BoxTC());
++
++			BoxTC = &cData.gTrimesh->BoxTCCache[cData.gTrimesh->BoxTCCache.size() - 1];
++			BoxTC->Geom = cData.gCylinder;
++			BoxTC->FatCoeff = REAL(1.0);
++		}
++
++		// Intersect
++		Collider.SetTemporalCoherence(true);
++		Collider.Collide(*BoxTC, obbCCylinder, cData.gTrimesh->Data->BVTree, null, &MeshMatrix);
++	}
++	else 
++	{
++		Collider.SetTemporalCoherence(false);
++		Collider.Collide(dxTriMesh::defaultBoxCache, obbCCylinder, cData.gTrimesh->Data->BVTree, null,&MeshMatrix);
++	}
++
++	// Retrieve data
++	int TriCount = Collider.GetNbTouchedPrimitives();
++	const int* Triangles = (const int*)Collider.GetTouchedPrimitives();
++
++
++	if (TriCount != 0)
++	{
++		if (cData.gTrimesh->ArrayCallback != null)
++		{
++			cData.gTrimesh->ArrayCallback(cData.gTrimesh, cData.gCylinder, Triangles, TriCount);
++		}
++
++		int OutTriCount = 0;
++
++		// loop through all intersecting triangles
++		for (int i = 0; i < TriCount; i++)
++		{
++			if(cData.nContacts	>= (cData.iFlags & NUMC_MASK)) 
++			{
++				break;
++			}
++
++			const int& Triint = Triangles[i];
++			if (!Callback(cData.gTrimesh, cData.gCylinder, Triint)) continue;
++
++
++			dVector3 dv[3];
++			FetchTriangle(cData.gTrimesh, Triint, cData.vTrimeshPos, cData.mTrimeshRot, dv);
++			
++			// test this triangle
++			TestOneTriangleVsCylinder(cData , dv[0],dv[1],dv[2], false);
++		}
++	}
++
++	return _ProcessLocalContacts(cData);
++}
++
++
++
+Only in ../../ode/src: collision_kernel.cpp
+Only in ../../ode/src: collision_kernel.h
+Only in ../../ode/src: collision_quadtreespace.cpp
+Only in ../../ode/src: collision_space.cpp
+Only in ../../ode/src: collision_space_internal.h
+diff -Pur ../../ode/src/collision_std.cpp ./ode/src/collision_std.cpp
+--- ../../ode/src/collision_std.cpp	Mon Apr 19 20:27:54 2004
++++ ./ode/src/collision_std.cpp	Tue May 18 09:46:44 2004
+@@ -65,6 +65,12 @@
+   void computeAABB();
+ };
+ 
++struct dxCylinder : public dxGeom {
++	dReal radius,lz;	// radius, length along z axis
++	dxCylinder (dSpaceID space, dReal _radius, dReal _length);
++	void computeAABB();
++};
++
+ 
+ struct dxPlane : public dxGeom {
+   dReal p[4];
+@@ -282,6 +288,59 @@
+   a[2] = c->pos[2] + beta*c->R[2*4+2];
+   return c->radius -
+     dSqrt ((x-a[0])*(x-a[0]) + (y-a[1])*(y-a[1]) + (z-a[2])*(z-a[2]));
++}
++
++//****************************************************************************
++// flat cylinder public API
++
++dxCylinder::dxCylinder (dSpaceID space, dReal _radius, dReal _length) :
++dxGeom (space,1)
++{
++	dAASSERT (_radius > 0 && _length > 0);
++	type = dCylinderClass;
++	radius = _radius;
++	lz = _length;
++}
++
++
++void dxCylinder::computeAABB()
++{
++	dReal xrange = dFabs (R[0] * radius) +	 dFabs (R[1] * radius) + REAL(0.5)* dFabs (R[2] * 
++		lz);
++	dReal yrange = dFabs (R[4] * radius) +   dFabs (R[5] * radius) + REAL(0.5)* dFabs (R[6] * 
++		lz);
++	dReal zrange = dFabs (R[8] * radius) +	 dFabs (R[9] * radius) + REAL(0.5)* dFabs (R[10] * 
++		lz);
++	aabb[0] = pos[0] - xrange;
++	aabb[1] = pos[0] + xrange;
++	aabb[2] = pos[1] - yrange;
++	aabb[3] = pos[1] + yrange;
++	aabb[4] = pos[2] - zrange;
++	aabb[5] = pos[2] + zrange;
++}
++
++
++dGeomID dCreateCylinder (dSpaceID space, dReal radius, dReal length)
++{
++	return new dxCylinder (space,radius,length);
++}
++
++void dGeomCylinderSetParams (dGeomID cylinder, dReal radius, dReal length)
++{
++	dUASSERT (cylinder && cylinder->type == dCylinderClass,"argument not a ccylinder");
++	dAASSERT (radius > 0 && length > 0);
++	dxCylinder *c = (dxCylinder*) cylinder;
++	c->radius = radius;
++	c->lz = length;
++	dGeomMoved (cylinder);
++}
++
++void dGeomCylinderGetParams (dGeomID cylinder, dReal *radius, dReal *length)
++{
++	dUASSERT (cylinder && cylinder->type == dCylinderClass,"argument not a ccylinder");
++	dxCylinder *c = (dxCylinder*) cylinder;
++	*radius = c->radius;
++	*length = c->lz;
+ }
+ 
+ //****************************************************************************
+Only in ../../ode/src: collision_std.h
+Only in ../../ode/src: collision_transform.cpp
+Only in ../../ode/src: collision_transform.h
+Only in ../../ode/src: collision_trimesh.cpp
+Only in ../../ode/src: collision_trimesh_box.cpp
+Only in ../../ode/src: collision_trimesh_ccylinder.cpp
+Only in ../../ode/src: collision_trimesh_distance.cpp
+diff -Pur ../../ode/src/collision_trimesh_internal.h ./ode/src/collision_trimesh_internal.h
+--- ../../ode/src/collision_trimesh_internal.h	Mon Apr 19 20:27:55 2004
++++ ./ode/src/collision_trimesh_internal.h	Tue May 18 09:46:44 2004
+@@ -29,8 +29,14 @@
+ int dCollideBTL(dxGeom *o1, dxGeom *o2, int flags, dContactGeom *contact, int skip);
+ int dCollideRTL(dxGeom *o1, dxGeom *o2, int flags, dContactGeom *contact, int skip);
+ int dCollideTTL(dxGeom *o1, dxGeom *o2, int flags, dContactGeom *contact, int skip);
++
++// capped cylinder -trimesh
+ int dCollideCCTL(dxGeom *o1, dxGeom *o2, int flags, dContactGeom *contact, int skip);
+ 
++// cylinder - trimesh
++int dCollideCylinderTrimesh(dxGeom *o1, dxGeom *o2, int flags, dContactGeom *contact, int skip);
++
++
+ //****************************************************************************
+ // dxTriMesh class
+ 
+@@ -119,11 +125,11 @@
+ 	void computeAABB();
+ };
+ 
+-// Fetches a contact
+-inline dContactGeom* SAFECONTACT(int Flags, dContactGeom* Contacts, int Index, int Stride){
+-	dIASSERT(Index >= 0 && Index < (Flags & 0x0ffff));
+-	return ((dContactGeom*)(((char*)Contacts) + (Index * Stride)));
+-}
++//// Fetches a contact
++//inline dContactGeom* SAFECONTACT(int Flags, dContactGeom* Contacts, int Index, int Stride){
++//	dIASSERT(Index >= 0 && Index < (Flags & 0x0ffff));
++//	return ((dContactGeom*)(((char*)Contacts) + (Index * Stride)));
++//}
+ 
+ // Fetches a triangle
+ inline void FetchTriangle(dxTriMesh* TriMesh, int Index, dVector3 Out[3]){
+Only in ../../ode/src: collision_trimesh_ray.cpp
+Only in ../../ode/src: collision_trimesh_sphere.cpp
+Only in ../../ode/src: collision_trimesh_trimesh.cpp
+diff -Pur ../../ode/src/collision_util.cpp ./ode/src/collision_util.cpp
+--- ../../ode/src/collision_util.cpp	Sun Apr  4 11:25:50 2004
++++ ./ode/src/collision_util.cpp	Tue May 18 09:46:44 2004
+@@ -445,3 +445,151 @@
+   aabb[4] = -dInfinity;
+   aabb[5] = dInfinity;
+ }
++
++//****************************************************************************
++// Helpers for Croteam's collider - by Nguyen Binh
++
++int dClipEdgeToPlane( dVector3 &vEpnt0, dVector3 &vEpnt1, const dVector4& plPlane)
++{
++	// calculate distance of edge points to plane
++	dReal fDistance0 = dPointPlaneDistance(  vEpnt0 ,plPlane );
++	dReal fDistance1 = dPointPlaneDistance(  vEpnt1 ,plPlane );
++
++	// if both points are behind the plane
++	if ( fDistance0 < 0 && fDistance1 < 0 ) 
++	{
++		// do nothing
++		return 0;
++		// if both points in front of the plane
++	} 
++	else if ( fDistance0 > 0 && fDistance1 > 0 ) 
++	{
++		// accept them
++		return 1;
++		// if we have edge/plane intersection
++	} else if ((fDistance0 > 0 && fDistance1 < 0) || ( fDistance0 < 0 && fDistance1 > 0)) 
++	{
++
++		// find intersection point of edge and plane
++		dVector3 vIntersectionPoint;
++		vIntersectionPoint[0]= vEpnt0[0]-(vEpnt0[0]-vEpnt1[0])*fDistance0/(fDistance0-fDistance1);
++		vIntersectionPoint[1]= vEpnt0[1]-(vEpnt0[1]-vEpnt1[1])*fDistance0/(fDistance0-fDistance1);
++		vIntersectionPoint[2]= vEpnt0[2]-(vEpnt0[2]-vEpnt1[2])*fDistance0/(fDistance0-fDistance1);
++
++		// clamp correct edge to intersection point
++		if ( fDistance0 < 0 ) 
++		{
++			dVector3Copy(vIntersectionPoint,vEpnt0);
++		} else 
++		{
++			dVector3Copy(vIntersectionPoint,vEpnt1);
++		}
++		return 1;
++	}
++	return 1;
++}
++
++// clip polygon with plane and generate new polygon points
++void		 dClipPolyToPlane( const dVector3 avArrayIn[], const int ctIn, 
++							  dVector3 avArrayOut[], int &ctOut, 
++							  const dVector4 &plPlane )
++{
++	// start with no output points
++	ctOut = 0;
++
++	int i0 = ctIn-1;
++
++	// for each edge in input polygon
++	for (int i1=0; i1<ctIn; i0=i1, i1++) {
++
++
++		// calculate distance of edge points to plane
++		dReal fDistance0 = dPointPlaneDistance(  avArrayIn[i0],plPlane );
++		dReal fDistance1 = dPointPlaneDistance(  avArrayIn[i1],plPlane );
++
++		// if first point is in front of plane
++		if( fDistance0 >= 0 ) {
++			// emit point
++			avArrayOut[ctOut][0] = avArrayIn[i0][0];
++			avArrayOut[ctOut][1] = avArrayIn[i0][1];
++			avArrayOut[ctOut][2] = avArrayIn[i0][2];
++			ctOut++;
++		}
++
++		// if points are on different sides
++		if( (fDistance0 > 0 && fDistance1 < 0) || ( fDistance0 < 0 && fDistance1 > 0) ) {
++
++			// find intersection point of edge and plane
++			dVector3 vIntersectionPoint;
++			vIntersectionPoint[0]= avArrayIn[i0][0] - 
++				(avArrayIn[i0][0]-avArrayIn[i1][0])*fDistance0/(fDistance0-fDistance1);
++			vIntersectionPoint[1]= avArrayIn[i0][1] - 
++				(avArrayIn[i0][1]-avArrayIn[i1][1])*fDistance0/(fDistance0-fDistance1);
++			vIntersectionPoint[2]= avArrayIn[i0][2] - 
++				(avArrayIn[i0][2]-avArrayIn[i1][2])*fDistance0/(fDistance0-fDistance1);
++
++			// emit intersection point
++			avArrayOut[ctOut][0] = vIntersectionPoint[0];
++			avArrayOut[ctOut][1] = vIntersectionPoint[1];
++			avArrayOut[ctOut][2] = vIntersectionPoint[2];
++			ctOut++;
++		}
++	}
++
++}
++
++void		 dClipPolyToCircle(const dVector3 avArrayIn[], const int ctIn, 
++							   dVector3 avArrayOut[], int &ctOut, 
++							   const dVector4 &plPlane ,dReal fRadius)
++{
++	// start with no output points
++	ctOut = 0;
++
++	int i0 = ctIn-1;
++
++	// for each edge in input polygon
++	for (int i1=0; i1<ctIn; i0=i1, i1++) 
++	{
++		// calculate distance of edge points to plane
++		dReal fDistance0 = dPointPlaneDistance(  avArrayIn[i0],plPlane );
++		dReal fDistance1 = dPointPlaneDistance(  avArrayIn[i1],plPlane );
++
++		// if first point is in front of plane
++		if( fDistance0 >= 0 ) 
++		{
++			// emit point
++			if (dVector3Length2(avArrayIn[i0]) <= fRadius*fRadius)
++			{
++				avArrayOut[ctOut][0] = avArrayIn[i0][0];
++				avArrayOut[ctOut][1] = avArrayIn[i0][1];
++				avArrayOut[ctOut][2] = avArrayIn[i0][2];
++				ctOut++;
++			}
++		}
++
++		// if points are on different sides
++		if( (fDistance0 > 0 && fDistance1 < 0) || ( fDistance0 < 0 && fDistance1 > 0) ) 
++		{
++
++			// find intersection point of edge and plane
++			dVector3 vIntersectionPoint;
++			vIntersectionPoint[0]= avArrayIn[i0][0] - 
++				(avArrayIn[i0][0]-avArrayIn[i1][0])*fDistance0/(fDistance0-fDistance1);
++			vIntersectionPoint[1]= avArrayIn[i0][1] - 
++				(avArrayIn[i0][1]-avArrayIn[i1][1])*fDistance0/(fDistance0-fDistance1);
++			vIntersectionPoint[2]= avArrayIn[i0][2] - 
++				(avArrayIn[i0][2]-avArrayIn[i1][2])*fDistance0/(fDistance0-fDistance1);
++
++			// emit intersection point
++			if (dVector3Length2(avArrayIn[i0]) <= fRadius*fRadius)
++			{
++				avArrayOut[ctOut][0] = vIntersectionPoint[0];
++				avArrayOut[ctOut][1] = vIntersectionPoint[1];
++				avArrayOut[ctOut][2] = vIntersectionPoint[2];
++				ctOut++;
++			}
++		}
++	}	
++}
++
++// End
+\ No newline at end of file
+diff -Pur ../../ode/src/collision_util.h ./ode/src/collision_util.h
+--- ../../ode/src/collision_util.h	Fri Nov  8 07:29:35 2002
++++ ./ode/src/collision_util.h	Tue May 18 09:46:44 2004
+@@ -31,8 +31,9 @@
+ 
+ #include <ode/common.h>
+ #include <ode/contact.h>
+-
+-
++#include <ode/matrix.h>
++#include <ode/odemath.h>
++#include <ode/rotation.h>
+ // given a pointer `p' to a dContactGeom, return the dContactGeom at
+ // p + skip bytes.
+ #define CONTACT(p,skip) ((dContactGeom*) (((char*)p) + (skip)))
+@@ -41,8 +42,7 @@
+ // if the spheres (p1,r1) and (p2,r2) collide, set the contact `c' and
+ // return 1, else return 0.
+ 
+-int dCollideSpheres (dVector3 p1, dReal r1,
+-		     dVector3 p2, dReal r2, dContactGeom *c);
++int dCollideSpheres (dVector3 p1, dReal r1,dVector3 p2, dReal r2, dContactGeom *c);
+ 
+ 
+ // given two lines
+@@ -68,5 +68,272 @@
+ 			    const dVector3 c, const dMatrix3 R,
+ 			    const dVector3 side,
+ 			    dVector3 lret, dVector3 bret);
++
++// 20 Apr 2004
++// Start code by Nguyen Binh
++int			dClipEdgeToPlane( dVector3 &vEpnt0, dVector3 &vEpnt1, const dVector4& plPlane);
++// clip polygon with plane and generate new polygon points
++void		 dClipPolyToPlane(const dVector3 avArrayIn[], const int ctIn, 
++							  dVector3 avArrayOut[], int &ctOut, 
++							  const dVector4 &plPlane );
++
++void		 dClipPolyToCircle(const dVector3 avArrayIn[], const int ctIn, 
++							  dVector3 avArrayOut[], int &ctOut, 
++							  const dVector4 &plPlane ,dReal fRadius);
++
++
++// Some vector math
++inline void dVector3Subtract(const dVector3& a,const dVector3& b,dVector3& c)
++{
++	c[0] = a[0] - b[0];
++	c[1] = a[1] - b[1];
++	c[2] = a[2] - b[2];
++}
++
++// Some vector math
++inline void dVector3Scale(dVector3& a,dReal nScale)
++{
++	a[0] *= nScale ;
++	a[1] *= nScale ;
++	a[2] *= nScale ;
++}
++
++inline void dVector3Add(const dVector3& a,const dVector3& b,dVector3& c)
++{
++	c[0] = a[0] + b[0];
++	c[1] = a[1] + b[1];
++	c[2] = a[2] + b[2];
++}
++
++inline void dVector3Copy(const dVector3& a,dVector3& c)
++{
++	c[0] = a[0];
++	c[1] = a[1];
++	c[2] = a[2];
++}
++
++inline void dVector3Cross(const dVector3& a,const dVector3& b,dVector3& c)
++{
++	dCROSS(c,=,a,b);
++}
++
++inline dReal dVector3Length(const dVector3& a)
++{
++	return dSqrt(a[0]*a[0]+a[1]*a[1]+a[2]*a[2]);
++}
++
++inline dReal dVector3Dot(const dVector3& a,const dVector3& b)
++{
++	return dDOT(a,b);
++}
++
++inline void dVector3Inv(dVector3& a)
++{
++	a[0] = -a[0];
++	a[1] = -a[1];
++	a[2] = -a[2];
++}
++
++inline dReal dVector3Length2(const dVector3& a)
++{
++	return (a[0]*a[0]+a[1]*a[1]+a[2]*a[2]);
++}
++
++inline void dMat3GetCol(const dMatrix3& m,const int col, dVector3& v)
++{
++	v[0] = m[col + 0];
++	v[1] = m[col + 4];
++	v[2] = m[col + 8];
++}
++
++inline void dVector3CrossMat3Col(const dMatrix3& m,const int col,const dVector3& v,dVector3& r)
++{
++	r[0] =  v[1] * m[2*4 + col] - v[2] * m[1*4 + col]; 
++	r[1] =  v[2] * m[0*4 + col] - v[0] * m[2*4 + col]; 
++	r[2] =  v[0] * m[1*4 + col] - v[1] * m[0*4 + col];
++}
++
++inline void dMat3ColCrossVector3(const dMatrix3& m,const int col,const dVector3& v,dVector3& r)
++{
++	r[0] =   v[2] * m[1*4 + col] - v[1] * m[2*4 + col]; 
++	r[1] =   v[0] * m[2*4 + col] - v[2] * m[0*4 + col]; 
++	r[2] =   v[1] * m[0*4 + col] - v[0] * m[1*4 + col];
++}
++
++inline void dMultiplyMat3Vec3(const dMatrix3& m,const dVector3& v, dVector3& r)
++{
++	dMULTIPLY0_331(r,m,v);
++}
++
++inline dReal dPointPlaneDistance(const dVector3& point,const dVector4& plane)
++{
++	return (plane[0]*point[0] + plane[1]*point[1] + plane[2]*point[2] + plane[3]);
++}
++
++inline void dConstructPlane(const dVector3& normal,const dReal& distance, dVector4& plane)
++{
++	plane[0] = normal[0];
++	plane[1] = normal[1];
++	plane[2] = normal[2];
++	plane[3] = distance;
++}
++
++inline void dMatrix3Copy(const dReal* source,dMatrix3& dest)
++{
++	dest[0]	=	source[0];
++	dest[1]	=	source[1];
++	dest[2]	=	source[2];
++
++	dest[4]	=	source[4];
++	dest[5]	=	source[5];
++	dest[6]	=	source[6];
++
++	dest[8]	=	source[8];
++	dest[9]	=	source[9];
++	dest[10]=	source[10];
++}
++
++inline dReal dMatrix3Det( const dMatrix3& mat )
++{
++	dReal det;
++
++	det = mat[0] * ( mat[5]*mat[10] - mat[9]*mat[6] )
++		- mat[1] * ( mat[4]*mat[10] - mat[8]*mat[6] )
++		+ mat[2] * ( mat[4]*mat[9]  - mat[8]*mat[5] );
++
++	return( det );
++}
++
++
++inline void dMatrix3Inv( const dMatrix3& ma, dMatrix3& dst )
++{
++	dReal det = dMatrix3Det( ma );
++
++	if ( dFabs( det ) < REAL(0.0005) )
++	{
++		dRSetIdentity( dst );
++		return;
++	}
++
++	dst[0] =    ma[5]*ma[10] - ma[6]*ma[9]   / det;
++	dst[1] = -( ma[1]*ma[10] - ma[9]*ma[2] ) / det;
++	dst[2] =    ma[1]*ma[6]  - ma[5]*ma[2]   / det;
++
++	dst[4] = -( ma[4]*ma[10] - ma[6]*ma[8] ) / det;
++	dst[5] =    ma[0]*ma[10] - ma[8]*ma[2]   / det;
++	dst[6] = -( ma[0]*ma[6] - ma[4]*ma[2] ) / det;
++
++	dst[8] =    ma[4]*ma[9] - ma[8]*ma[5]   / det;
++	dst[9] = -( ma[0]*ma[9] - ma[8]*ma[1] ) / det;
++	dst[10] =    ma[0]*ma[5] - ma[1]*ma[4]   / det;
++}
++
++inline void dQuatTransform(const dQuaternion& quat,const dVector3& source,dVector3& dest)
++{
++
++	// Nguyen Binh : this code seem to be the fastest.
++	dReal x0 = 	source[0] * quat[0] + source[2] * quat[2] - source[1] * quat[3];
++	dReal x1 = 	source[1] * quat[0] + source[0] * quat[3] - source[2] * quat[1];
++	dReal x2 = 	source[2] * quat[0] + source[1] * quat[1] - source[0] * quat[2];
++	dReal x3 = 	source[0] * quat[1] + source[1] * quat[2] + source[2] * quat[3];
++
++	dest[0]  = 	quat[0] * x0 + quat[1] * x3 + quat[2] * x2 - quat[3] * x1;
++	dest[1]  = 	quat[0] * x1 + quat[2] * x3 + quat[3] * x0 - quat[1] * x2;
++	dest[2]  = 	quat[0] * x2 + quat[3] * x3 + quat[1] * x1 - quat[2] * x0;
++
++	/*
++	// nVidia SDK implementation
++	dVector3 uv, uuv; 
++	dVector3 qvec;
++	qvec[0] = quat[1];
++	qvec[1] = quat[2];
++	qvec[2] = quat[3];
++
++	dVector3Cross(qvec,source,uv);
++	dVector3Cross(qvec,uv,uuv);
++
++	dVector3Scale(uv,REAL(2.0)*quat[0]);
++	dVector3Scale(uuv,REAL(2.0));
++
++	dest[0] = source[0] + uv[0] + uuv[0];
++	dest[1] = source[1] + uv[1] + uuv[1];
++	dest[2] = source[2] + uv[2] + uuv[2];   
++	*/
++}
++
++inline void dQuatInvTransform(const dQuaternion& quat,const dVector3& source,dVector3& dest)
++{
++
++	dReal norm = quat[0]*quat[0] + quat[1]*quat[1] + quat[2]*quat[2] + quat[3]*quat[3];
++
++	if (norm > REAL(0.0))
++	{
++		dQuaternion invQuat;
++		invQuat[0] =  quat[0] / norm;
++		invQuat[1] = -quat[1] / norm;
++		invQuat[2] = -quat[2] / norm;
++		invQuat[3] = -quat[3] / norm;	
++		
++		dQuatTransform(invQuat,source,dest);
++
++	}
++	else
++	{
++		// Singular -> return identity
++		dVector3Copy(source,dest);
++	}
++}
++
++inline void dGetEulerAngleFromRot(const dMatrix3& mRot,dReal& rX,dReal& rY,dReal& rZ)
++{
++	rY = asin(mRot[0 * 4 + 2]);
++	if (rY < M_PI /2)
++	{
++		if (rY > -M_PI /2)
++		{
++			rX = atan2(-mRot[1*4 + 2], mRot[2*4 + 2]);
++			rZ = atan2(-mRot[0*4 + 1], mRot[0*4 + 0]);
++		}
++		else
++		{
++			// not unique
++			rX = -atan2(mRot[1*4 + 0], mRot[1*4 + 1]);
++			rZ = REAL(0.0);
++		}
++	}
++	else
++	{
++		// not unique
++		rX = atan2(mRot[1*4 + 0], mRot[1*4 + 1]);
++		rZ = REAL(0.0);
++	}
++}
++
++inline void dQuatInv(const dQuaternion& source, dQuaternion& dest)
++{
++	dReal norm = source[0]*source[0] + source[1]*source[1] + source[2]*source[2] + source[3]*source[3];
++
++	if (norm > 0.0f)
++	{
++		dest[0] = source[0] / norm;
++		dest[1] = -source[1] / norm;
++		dest[2] = -source[2] / norm;
++		dest[3] = -source[3] / norm;	
++	}
++	else
++	{
++		// Singular -> return identity
++		dest[0] = REAL(1.0);
++		dest[1] = REAL(0.0);
++		dest[2] = REAL(0.0);
++		dest[3] = REAL(0.0);
++	}
++}
++
++// Fetches a contact
++inline dContactGeom* SAFECONTACT(int Flags, dContactGeom* Contacts, int Index, int Stride){
++	dIASSERT(Index >= 0 && Index < (Flags & 0x0ffff));
++	return ((dContactGeom*)(((char*)Contacts) + (Index * Stride)));
++}
+ 
+ #endif
+Only in ../../ode/src: error.cpp
+Only in ../../ode/src: export-dif.cpp
+Only in ../../ode/src: fastdot.c
+Only in ../../ode/src: fastldlt.c
+Only in ../../ode/src: fastlsolve.c
+Only in ../../ode/src: fastltsolve.c
+Only in ../../ode/src: geom_internal.h
+Only in ../../ode/src: joint.cpp
+Only in ../../ode/src: joint.h
+Only in ../../ode/src: lcp.cpp
+Only in ../../ode/src: lcp.h
+Only in ../../ode/src: mass.cpp
+Only in ../../ode/src: mat.cpp
+Only in ../../ode/src: mat.h
+Only in ../../ode/src: matrix.cpp
+Only in ../../ode/src: memory.cpp
+Only in ../../ode/src: misc.cpp
+Only in ../../ode/src: objects.h
+Only in ../../ode/src: obstack.cpp
+Only in ../../ode/src: obstack.h
+Only in ../../ode/src: ode.cpp
+Only in ../../ode/src: odemath.cpp
+Only in ../../ode/src: rotation.cpp
+Only in ../../ode/src: scrapbook.cpp
+Only in ../../ode/src: stack.cpp
+Only in ../../ode/src: stack.h
+Only in ../../ode/src: step.cpp
+Only in ../../ode/src: step.h
+Only in ../../ode/src: stepfast.cpp
+Only in ../../ode/src: stepfast.cpp~
+Only in ../../ode/src: testing.cpp
+Only in ../../ode/src: testing.h
+Only in ../../ode/src: timer.cpp
+Only in ../../ode/src: util.cpp
+Only in ../../ode/src: util.h
+Only in ../../ode: test
+Only in ../..: tools
