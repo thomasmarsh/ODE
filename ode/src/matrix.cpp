@@ -32,8 +32,8 @@
 
 void dSetZero (dReal *a, int n)
 {
-  dASSERT (a);
-  while (n) {
+  dAASSERT (a && n >= 0);
+  while (n > 0) {
     *(a++) = 0;
     n--;
   }
@@ -42,8 +42,8 @@ void dSetZero (dReal *a, int n)
 
 void dSetValue (dReal *a, int n, dReal value)
 {
-  dASSERT (a);
-  while (n) {
+  dAASSERT (a && n >= 0);
+  while (n > 0) {
     *(a++) = value;
     n--;
   }
@@ -53,7 +53,7 @@ void dSetValue (dReal *a, int n, dReal value)
 void dMultiply0 (dReal *A, const dReal *B, const dReal *C, int p, int q, int r)
 {
   int i,j,k,qskip,rskip,rpad;
-  dASSERT (p>0 && q>0 && r>0 && A && B && C);
+  dAASSERT (A && B && C && p>0 && q>0 && r>0);
   qskip = dPAD(q);
   rskip = dPAD(r);
   rpad = rskip - r;
@@ -78,7 +78,7 @@ void dMultiply1 (dReal *A, const dReal *B, const dReal *C, int p, int q, int r)
 {
   int i,j,k,pskip,rskip;
   dReal sum;
-  dASSERT (p>0 && q>0 && r>0 && A && B && C);
+  dAASSERT (A && B && C && p>0 && q>0 && r>0);
   pskip = dPAD(p);
   rskip = dPAD(r);
   for (i=0; i<p; i++) {
@@ -96,7 +96,7 @@ void dMultiply2 (dReal *A, const dReal *B, const dReal *C, int p, int q, int r)
   int i,j,k,z,rpad,qskip;
   dReal sum;
   const dReal *bb,*cc;
-  dASSERT (p>0 && q>0 && r>0 && A && B && C);
+  dAASSERT (A && B && C && p>0 && q>0 && r>0);
   rpad = dPAD(r) - r;
   qskip = dPAD(q);
   bb = B;
@@ -119,7 +119,7 @@ int dFactorCholesky (dReal *A, int n)
 {
   int i,j,k,nskip;
   dReal sum,*a,*b,*aa,*bb,*cc,*recip;
-  dASSERT (n > 0 && A);
+  dAASSERT (n > 0 && A);
   nskip = dPAD (n);
   recip = (dReal*) ALLOCA (n * sizeof(dReal));
   aa = A;
@@ -151,7 +151,7 @@ void dSolveCholesky (const dReal *L, dReal *b, int n)
 {
   int i,k,nskip;
   dReal sum,*y;
-  dASSERT (n > 0 && L && b);
+  dAASSERT (n > 0 && L && b);
   nskip = dPAD (n);
   y = (dReal*) ALLOCA (n*sizeof(dReal));
   for (i=0; i<n; i++) {
@@ -171,6 +171,7 @@ int dInvertPDMatrix (const dReal *A, dReal *Ainv, int n)
 {
   int i,j,nskip;
   dReal *L,*x;
+  dAASSERT (n > 0 && A && Ainv);
   nskip = dPAD (n);
   L = (dReal*) ALLOCA (nskip*n*sizeof(dReal));
   memcpy (L,A,nskip*n*sizeof(dReal));
@@ -190,7 +191,7 @@ int dInvertPDMatrix (const dReal *A, dReal *Ainv, int n)
 int dIsPositiveDefinite (const dReal *A, int n)
 {
   dReal *Acopy;
-  dASSERT (n > 0 && A);
+  dAASSERT (n > 0 && A);
   int nskip = dPAD (n);
   Acopy = (dReal*) ALLOCA (nskip*n * sizeof(dReal));
   memcpy (Acopy,A,nskip*n * sizeof(dReal));
@@ -201,7 +202,7 @@ int dIsPositiveDefinite (const dReal *A, int n)
 void dSolveL1T (const dReal *L, dReal *b, int n, int nskip)
 {
   int i,j;
-  dASSERT (L && b && n > 0 && nskip >= n);
+  dAASSERT (L && b && n >= 0 && nskip >= n);
   dReal sum;
   for (i=n-2; i>=0; i--) {
     sum = 0;
@@ -213,12 +214,14 @@ void dSolveL1T (const dReal *L, dReal *b, int n, int nskip)
 
 void dVectorScale (dReal *a, const dReal *d, int n)
 {
+  dAASSERT (a && d && n >= 0);
   for (int i=0; i<n; i++) a[i] *= d[i];
 }
 
 
 void dSolveLDLT (const dReal *L, const dReal *d, dReal *b, int n, int nskip)
 {
+  dAASSERT (L && d && b && n > 0 && nskip >= n);
   dSolveL1 (L,b,n,nskip);
   dVectorScale (b,d,n);
   dSolveL1T (L,b,n,nskip);
@@ -229,6 +232,7 @@ void dLDLTAddTL (dReal *L, dReal *d, const dReal *a, int n, int nskip)
 {
   int j,p;
   dReal *W1,*W2,W11,W21,alpha1,alpha2,alphanew,gamma1,gamma2,k1,k2,Wp,ell,dee;
+  dAASSERT (L && d && a && n > 0 && nskip >= n);
 
   if (n < 2) return;
   W1 = (dReal*) ALLOCA (n*sizeof(dReal));
@@ -308,10 +312,10 @@ void dLDLTRemove (dReal **A, const int *p, dReal *L, dReal *d,
 		  int n1, int n2, int r, int nskip)
 {
   int i;
-  dASSERT(A && p && L && d && n1 > 0 && n2 > 0 && r >= 0 && r < n2 &&
+  dAASSERT(A && p && L && d && n1 > 0 && n2 > 0 && r >= 0 && r < n2 &&
 	   n1 >= n2 && nskip >= n1);
   #ifndef dNODEBUG
-  for (i=0; i<n2; i++) dASSERT(p[i] >= 0 && p[i] < n1);
+  for (i=0; i<n2; i++) dIASSERT(p[i] >= 0 && p[i] < n1);
   #endif
 
   if (r==n2-1) {
@@ -342,7 +346,7 @@ void dLDLTRemove (dReal **A, const int *p, dReal *L, dReal *d,
 void dRemoveRowCol (dReal *A, int n, int nskip, int r)
 {
   int i;
-  dASSERT(A && n > 0 && nskip >= n && r >= 0 && r < n);
+  dAASSERT(A && n > 0 && nskip >= n && r >= 0 && r < n);
   if (r >= n-1) return;
   if (r > 0) {
     for (i=0; i<r; i++)

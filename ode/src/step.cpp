@@ -59,7 +59,7 @@ static void Multiply2_p8r (dReal *A, dReal *B, dReal *C,
 {
   int i,j;
   dReal sum,*bb,*cc;
-  dASSERT (p>0 && r>0 && A && B && C);
+  dIASSERT (p>0 && r>0 && A && B && C);
   bb = B;
   for (i=p; i; i--) {
     cc = C;
@@ -86,7 +86,7 @@ static void MultiplyAdd2_p8r (dReal *A, dReal *B, dReal *C,
 {
   int i,j;
   dReal sum,*bb,*cc;
-  dASSERT (p>0 && r>0 && A && B && C);
+  dIASSERT (p>0 && r>0 && A && B && C);
   bb = B;
   for (i=p; i; i--) {
     cc = C;
@@ -111,7 +111,7 @@ static void MultiplyAdd2_p8r (dReal *A, dReal *B, dReal *C,
 static void Multiply0_p81 (dReal *A, dReal *B, dReal *C, int p)
 {
   int i;
-  dASSERT (p>0 && A && B && C);
+  dIASSERT (p>0 && A && B && C);
   dReal sum;
   for (i=p; i; i--) {
     sum =  B[0]*C[0];
@@ -131,7 +131,7 @@ static void Multiply0_p81 (dReal *A, dReal *B, dReal *C, int p)
 static void MultiplyAdd0_p81 (dReal *A, dReal *B, dReal *C, int p)
 {
   int i;
-  dASSERT (p>0 && A && B && C);
+  dIASSERT (p>0 && A && B && C);
   dReal sum;
   for (i=p; i; i--) {
     sum =  B[0]*C[0];
@@ -152,7 +152,7 @@ static void MultiplyAdd1_8q1 (dReal *A, dReal *B, dReal *C, int q)
 {
   int k;
   dReal sum;
-  dASSERT (q>0 && A && B && C);
+  dIASSERT (q>0 && A && B && C);
   sum = 0;
   for (k=0; k<q; k++) sum += B[k*8] * C[k];
   A[0] += sum;
@@ -236,8 +236,8 @@ void dInternalStepIsland_x1 (dxWorld *world, dxBody **body, int nb,
   int *ofs = (int*) ALLOCA (nj*sizeof(int));
   for (i=0; i<nj; i++) {
     joint[i]->vtable->getInfo1 (joint[i],info+i);
-    dASSERT (info[i].m > 0 && info[i].m <= 6 &&
-	     info[i].nub >= 0 && info[i].nub <= info[i].m);
+    dIASSERT (info[i].m > 0 && info[i].m <= 6 &&
+	      info[i].nub >= 0 && info[i].nub <= info[i].m);
   }
   // the purely unbounded constraints
   for (i=0; i<nj; i++) if (info[i].nub == info[i].m) {
@@ -532,8 +532,8 @@ void dInternalStepIsland_x2 (dxWorld *world, dxBody **body, int nb,
   int *ofs = (int*) ALLOCA (nj*sizeof(int));
   for (i=0; i<nj; i++) {
     joint[i]->vtable->getInfo1 (joint[i],info+i);
-    dASSERT (info[i].m > 0 && info[i].m <= 6 &&
-	     info[i].nub >= 0 && info[i].nub <= info[i].m);
+    dIASSERT (info[i].m > 0 && info[i].m <= 6 &&
+	      info[i].nub >= 0 && info[i].nub <= info[i].m);
   }
   // the purely unbounded constraints
   for (i=0; i<nj; i++) if (info[i].nub == info[i].m) {
@@ -674,8 +674,8 @@ void dInternalStepIsland_x2 (dxWorld *world, dxBody **body, int nb,
 	  int jb1 = (joint[j1]->node[1].body == body[i]);
 	  int jb2 = (joint[j2]->node[1].body == body[i]);
 	  // jb1/jb2 must be 0 for joints with only one body
-	  dASSERT(joint[j1]->node[1].body || jb1==0);
-	  dASSERT(joint[j2]->node[1].body || jb2==0);
+	  dIASSERT(joint[j1]->node[1].body || jb1==0);
+	  dIASSERT(joint[j2]->node[1].body || jb2==0);
 
 	  // set block of A
 	  Multiply2_p8r (A + ofs[j1]*mskip + ofs[j2],

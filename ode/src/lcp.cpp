@@ -169,7 +169,7 @@ static void swapRowsAndCols (ATYPE A, int n, int i1, int i2, int nskip,
 			     int do_fast_row_swaps)
 {
   int i;
-  dASSERT (A && n > 0 && i1 >= 0 && i2 >= 0 && i1 < n && i2 < n &&
+  dIASSERT (A && n > 0 && i1 >= 0 && i2 >= 0 && i1 < n && i2 < n &&
 	    nskip >= n && i1 < i2);
 
 # ifdef ROWPTRS
@@ -230,8 +230,8 @@ static void swapProblem (ATYPE A, dReal *x, dReal *b, dReal *w, dReal *lo,
 {
   dReal tmp;
   int tmpi;
-  dASSERT (n>0 && i1 >=0 && i2 >= 0 && i1 < n && i2 < n && nskip >= n &&
-	   i1 <= i2);
+  dIASSERT (n>0 && i1 >=0 && i2 >= 0 && i1 < n && i2 < n && nskip >= n &&
+	    i1 <= i2);
   if (i1==i2) return;
   swapRowsAndCols (A,n,i1,i2,nskip,do_fast_row_swaps);
   tmp = x[i1];
@@ -309,13 +309,13 @@ static void checkFactorization (ATYPE A, dReal *_L, dReal *_d,
 static void checkPermutations (int i, int n, int nC, int nN, int *p, int *C)
 {
   int j,k;
-  dASSERT (nC>=0 && nN>=0 && (nC+nN)==i && i < n);
-  for (k=0; k<i; k++) dASSERT (p[k] >= 0 && p[k] < i);
-  for (k=i; k<n; k++) dASSERT (p[k] == k);
+  dIASSERT (nC>=0 && nN>=0 && (nC+nN)==i && i < n);
+  for (k=0; k<i; k++) dIASSERT (p[k] >= 0 && p[k] < i);
+  for (k=i; k<n; k++) dIASSERT (p[k] == k);
   for (j=0; j<nC; j++) {
     int C_is_bad = 1;
     for (k=0; k<nC; k++) if (C[k]==j) C_is_bad = 0;
-    dASSERT (C_is_bad==0);
+    dIASSERT (C_is_bad==0);
   }
 }
 
@@ -876,10 +876,10 @@ void dLCP::transfer_i_from_C_to_N (int i)
       if (j < (nC-1)) memmove (C+j,C+j+1,(nC-j-1)*sizeof(int));
       break;
     }
-    dASSERT (k < nC);
+    dIASSERT (k < nC);
     break;
   }
-  dASSERT (j < nC);
+  dIASSERT (j < nC);
   swapProblem (A,x,b,w,lo,hi,p,state,n,i,nC-1,nskip,1);
   nC--;
   nN++;
@@ -961,7 +961,7 @@ void dLCP::unpermute()
 void dSolveLCPBasic (int n, dReal *A, dReal *x, dReal *b,
 		     dReal *w, int nub, dReal *lo, dReal *hi)
 {
-  dASSERT (n>0 && A && x && b && w && nub == 0);
+  dAASSERT (n>0 && A && x && b && w && nub == 0);
 
   int i,k;
   int nskip = dPAD(n);
@@ -1002,7 +1002,7 @@ void dSolveLCPBasic (int n, dReal *A, dReal *x, dReal *b,
 	int si = i;		// si = switch index
 	int si_in_N = 0;	// set to 1 if si in N
 	dReal s = -w[i]/delta_w[i];
-	if (s <= 0) dDebug (0,"LCP internal error, s <= 0");
+	if (s <= 0) dMessage (0,"LCP internal error, s <= 0");
 	for (k=0; k < lcp.numN(); k++) {
 	  if (delta_w[lcp.indexN(k)] < 0) {
 	    dReal s2 = -w[lcp.indexN(k)] / delta_w[lcp.indexN(k)];
@@ -1060,7 +1060,7 @@ void dSolveLCPBasic (int n, dReal *A, dReal *x, dReal *b,
 void dSolveLCP (int n, dReal *A, dReal *x, dReal *b,
 		dReal *w, int nub, dReal *lo, dReal *hi)
 {
-  dASSERT (n>0 && A && x && b && w && lo && hi && nub >= 0 && nub <= n);
+  dAASSERT (n>0 && A && x && b && w && lo && hi && nub >= 0 && nub <= n);
   int i,k;
   int nskip = dPAD(n);
 
@@ -1076,7 +1076,7 @@ void dSolveLCP (int n, dReal *A, dReal *x, dReal *b,
 
 # ifndef dNODEBUG
   // check restrictions on lo and hi
-  for (k=0; k<n; k++) dASSERT (lo[k] <= 0 && hi[k] >= 0);
+  for (k=0; k<n; k++) dIASSERT (lo[k] <= 0 && hi[k] >= 0);
 # endif
 
   dReal *L = (dReal*) ALLOCA (n*nskip*sizeof(dReal));
@@ -1218,7 +1218,7 @@ void dSolveLCP (int n, dReal *A, dReal *x, dReal *b,
 	//			     "C->NL","C->NH"};
 	//printf ("cmd=%d (%s), si=%d\n",cmd,cmdstring[cmd],(cmd>3) ? si : i);
 
-	if (s < 0) dDebug (0,"LCP internal error, s <= 0 (s=%.4e)",s);
+	if (s < 0) dMessage (0,"LCP internal error, s <= 0 (s=%.4e)",s);
 
 	// apply x = x + s * delta_x
 	lcp.pC_plusequals_s_times_qC (x,s,delta_x);

@@ -70,7 +70,7 @@ void dGeomSetPosition (dGeomID, dReal x, dReal y, dReal z);
 void dGeomSetRotation (dGeomID, const dMatrix3 R);
 const dReal * dGeomGetPosition (dGeomID);
 const dReal * dGeomGetRotation (dGeomID);
-void dDestroyGeom (dGeomID);
+void dGeomDestroy (dGeomID);
 
 /* ************************************************************************ */
 /* composite geoms */
@@ -91,15 +91,15 @@ typedef int dColliderFn (dGeomID o1, dGeomID o2,
 			 int flags, dContactGeom *contact, int skip);
 typedef dColliderFn * dGetColliderFnFn (int num);
 
-struct dGeomClass {
+typedef struct dGeomClass {
   int bytes;
   dGetColliderFnFn *collider;
   dGetAABBFn *aabb;
-};
+} dGeomClass;
 
 int dCreateGeomClass (const dGeomClass *classptr);
 void * dGeomGetClassData (dGeomID);
-dGeomID dCreateGeom (dSpaceID space, int classnum);
+dGeomID dCreateGeom (int classnum);
 
 /* ************************************************************************ */
 
