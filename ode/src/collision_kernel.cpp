@@ -355,6 +355,22 @@ void dGeomSetRotation (dxGeom *g, const dMatrix3 R)
 }
 
 
+void dGeomSetQuaternion (dxGeom *g, const dQuaternion quat)
+{
+  dAASSERT (g && quat);
+  dUASSERT (g->gflags & GEOM_PLACEABLE,"geom must be placeable");
+  CHECK_NOT_LOCKED (g->parent_space);
+  if (g->body) {
+    // this will call dGeomMoved (g), so we don't have to
+    dBodySetQuaternion (g->body,quat);
+  }
+  else {
+    dQtoR(quat, g->R);
+    dGeomMoved (g);
+  }
+}
+
+
 const dReal * dGeomGetPosition (dxGeom *g)
 {
   dAASSERT (g);
@@ -368,6 +384,21 @@ const dReal * dGeomGetRotation (dxGeom *g)
   dAASSERT (g);
   dUASSERT (g->gflags & GEOM_PLACEABLE,"geom must be placeable");
   return g->R;
+}
+
+void dGeomGetQuaternion (dxGeom *g, dQuaternion quat)
+{
+  dAASSERT (g);
+  dUASSERT (g->gflags & GEOM_PLACEABLE,"geom must be placeable");
+  if (g->body) {
+    const dReal * body_quat = dBodyGetQuaternion (g->body);
+    quat[0] = body_quat[0];
+    quat[1] = body_quat[1];
+    quat[2] = body_quat[2];
+    quat[3] = body_quat[3];
+  } else {
+    dRtoQ(g->R, quat);
+  }
 }
 
 
