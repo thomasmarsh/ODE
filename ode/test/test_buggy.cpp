@@ -93,7 +93,7 @@ static void nearCallback (void *data, dGeomID o1, dGeomID o2)
   if (n > 0) {
     for (i=0; i<n; i++) {
       contact[i].surface.mode = dContactSlip1 | dContactSlip2 |
-	dContactSoftERP | dContactSoftCFM;
+	dContactSoftERP | dContactSoftCFM | dContactApprox1;
       contact[i].surface.mu = dInfinity;
       contact[i].surface.slip1 = 0.1;
       contact[i].surface.slip2 = 0.1;
