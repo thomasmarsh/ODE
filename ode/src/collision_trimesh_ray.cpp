@@ -64,60 +64,63 @@ int dCollideRTL(dxGeom* g1, dxGeom* RayGeom, int Flags, dContactGeom* Contacts, 
 
 	/* Intersect */
 	Matrix4x4 amatrix;
-	Collider.Collide(WorldRay, TriMesh->Data->BVTree, &MakeMatrix(TLPosition, TLRotation, amatrix));
+        int TriCount = 0;
+        if (Collider.Collide(WorldRay, TriMesh->Data->BVTree, &MakeMatrix(TLPosition, TLRotation, amatrix))) {
+                TriCount = TriMesh->Faces.GetNbFaces();
+        }
 
-	/* Retrieve data */
-	int TriCount = TriMesh->Faces.GetNbFaces();
+        if (TriCount == 0) {
+                return 0;
+        }
 	
-	if (TriCount != 0){
-		const CollisionFace* Faces = TriMesh->Faces.GetFaces();
+	const CollisionFace* Faces = TriMesh->Faces.GetFaces();
 
-		int OutTriCount = 0;
-		for (int i = 0; i < TriCount; i++){
-			if (OutTriCount == (Flags & 0xffff)){
-				break;
-			}
-
-			if (TriMesh->RayCallback == null || TriMesh->RayCallback(TriMesh, RayGeom, Faces[i].mFaceID, Faces[i].mU, Faces[i].mV)){
-				const int& TriIndex = Faces[i].mFaceID;
-
-				if (!Callback(TriMesh, RayGeom, TriIndex)) continue;
-
-				dContactGeom* Contact = SAFECONTACT(Flags, Contacts, OutTriCount, Stride);
-
-				dVector3 dv[3];
-				FetchTriangle(TriMesh, TriIndex, TLPosition, TLRotation, dv);
-
-				float T = Faces[i].mDistance;
-				Contact->pos[0] = Origin[0] + (Direction[0] * T);
-				Contact->pos[1] = Origin[1] + (Direction[1] * T);
-				Contact->pos[2] = Origin[2] + (Direction[2] * T);
-				Contact->pos[3] = REAL(0.0);
-				
-				dVector3 vu;
-				vu[0] = dv[1][0] - dv[0][0];
-				vu[1] = dv[1][1] - dv[0][1];
-				vu[2] = dv[1][2] - dv[0][2];
-				vu[3] = REAL(0.0);
-				
-				dVector3 vv;
-				vv[0] = dv[2][0] - dv[0][0];
-				vv[1] = dv[2][1] - dv[0][1];
-				vv[2] = dv[2][2] - dv[0][2];
-				vv[3] = REAL(0.0);
-
-				dCROSS(Contact->normal, =, vv, vu);	// Reversed
-
-				dNormalize3(Contact->normal);
-
-				Contact->depth = T;
-				Contact->g1 = TriMesh;
-				Contact->g2 = RayGeom;
-				
-				OutTriCount++;
-			}
+	int OutTriCount = 0;
+	for (int i = 0; i < TriCount; i++) {
+		if (OutTriCount == (Flags & 0xffff)) {
+			break;
 		}
-		return OutTriCount;
+		if (TriMesh->RayCallback == null ||
+                    TriMesh->RayCallback(TriMesh, RayGeom, Faces[i].mFaceID,
+                                         Faces[i].mU, Faces[i].mV)) {
+			const int& TriIndex = Faces[i].mFaceID;
+			if (!Callback(TriMesh, RayGeom, TriIndex)) {
+                                continue;
+                        }
+
+			dContactGeom* Contact = SAFECONTACT(Flags, Contacts, OutTriCount, Stride);
+
+			dVector3 dv[3];
+			FetchTriangle(TriMesh, TriIndex, TLPosition, TLRotation, dv);
+
+			float T = Faces[i].mDistance;
+			Contact->pos[0] = Origin[0] + (Direction[0] * T);
+			Contact->pos[1] = Origin[1] + (Direction[1] * T);
+			Contact->pos[2] = Origin[2] + (Direction[2] * T);
+			Contact->pos[3] = REAL(0.0);
+				
+			dVector3 vu;
+			vu[0] = dv[1][0] - dv[0][0];
+			vu[1] = dv[1][1] - dv[0][1];
+			vu[2] = dv[1][2] - dv[0][2];
+			vu[3] = REAL(0.0);
+				
+			dVector3 vv;
+			vv[0] = dv[2][0] - dv[0][0];
+			vv[1] = dv[2][1] - dv[0][1];
+			vv[2] = dv[2][2] - dv[0][2];
+			vv[3] = REAL(0.0);
+
+			dCROSS(Contact->normal, =, vv, vu);	// Reversed
+
+			dNormalize3(Contact->normal);
+
+			Contact->depth = T;
+			Contact->g1 = TriMesh;
+			Contact->g2 = RayGeom;
+				
+			OutTriCount++;
+		}
 	}
-	else return 0;
+	return OutTriCount;
 }
