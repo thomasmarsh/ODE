@@ -46,17 +46,17 @@ void dMassSetSphereTotal (dMass *, dReal total_mass, dReal radius);
 void dMassSetCappedCylinder (dMass *, dReal density, int direction,
 			     dReal radius, dReal length);
 void dMassSetCappedCylinderTotal (dMass *, dReal total_mass, int direction,
-			     dReal radius, dReal length);
+				  dReal radius, dReal length);
 
 void dMassSetCylinder (dMass *, dReal density, int direction,
 		       dReal radius, dReal length);
 void dMassSetCylinderTotal (dMass *, dReal total_mass, int direction,
-		       dReal radius, dReal length);
+			    dReal radius, dReal length);
 
 void dMassSetBox (dMass *, dReal density,
 		  dReal lx, dReal ly, dReal lz);
 void dMassSetBoxTotal (dMass *, dReal total_mass,
-		  dReal lx, dReal ly, dReal lz);
+		       dReal lx, dReal ly, dReal lz);
 
 void dMassAdjust (dMass *, dReal newmass);
 
