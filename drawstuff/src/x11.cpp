@@ -307,7 +307,7 @@ void dsPlatformSimLoop (int window_width, int window_height, dsFunctions *fn,
   fprintf (stderr,
 	   "\n"
 	   "Simulation test environment v%d.%02d\n"
-	   "   Ctrl-P : pause / unpause.\n"
+	   "   Ctrl-P : pause / unpause (or say `-pause' on command line).\n"
 	   "   Ctrl-O : single step when paused.\n"
 	   "   Ctrl-T : toggle textures (or say `-notex' on command line).\n"
 	   "   Ctrl-S : toggle shadows (or say `-noshadow' on command line).\n"
