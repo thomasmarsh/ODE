@@ -434,22 +434,23 @@ dReal dGeomRayGetLength (dGeomID g)
 }
 
 
-void dGeomRaySet (dGeomID g, const dVector3 origin, const dVector3 dir)
+void dGeomRaySet (dGeomID g, dReal px, dReal py, dReal pz,
+		  dReal dx, dReal dy, dReal dz)
 {
   dUASSERT (g && g->type == dRayClass,"argument not a ray");
-  dGeomSetPosition (g,origin[0],origin[1],origin[2]);
+  dGeomSetPosition (g,px,py,pz);
   dMatrix3 R;
-  dRFromZAxis (R,dir[0],dir[1],dir[2]);
+  dRFromZAxis (R,dx,dy,dz);
   dGeomSetRotation (g,R);
 }
 
 
-void dGeomRayGet (dGeomID g, dVector3 origin, dVector3 dir)
+void dGeomRayGet (dGeomID g, dVector3 start, dVector3 dir)
 {
   dUASSERT (g && g->type == dRayClass,"argument not a ray");
-  origin[0] = g->pos[0];
-  origin[1] = g->pos[1];
-  origin[2] = g->pos[2];
+  start[0] = g->pos[0];
+  start[1] = g->pos[1];
+  start[2] = g->pos[2];
   dir[0] = g->R[0*4+2];
   dir[1] = g->R[1*4+2];
   dir[2] = g->R[2*4+2];
