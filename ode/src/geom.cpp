@@ -852,10 +852,12 @@ void dGeomSetBody (dxGeom *g, dBodyID b)
   }
   else {
     if (g->body) {
-      g->body = 0;
       dxPosR *pr = (dxPosR*) dAlloc (sizeof(dxPosR));
       g->pos = pr->pos;
       g->R = pr->R;
+      memcpy (g->pos,g->body->pos,sizeof(g->pos));
+      memcpy (g->R,g->body->R,sizeof(g->R));
+      g->body = 0;
     }
   }
 }
