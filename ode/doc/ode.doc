@@ -530,6 +530,17 @@ The default is 0.2.
 
 
 @funcdef{
+void dWorldSetCFM (dWorldID, dReal cfm);
+dReal dWorldGetCFM (dWorldID);
+}{
+Set and get the global CFM (constraint force mixing) value.
+Typical values are in the range 1e-9 -- 1.
+The default is 1e-5 if single precision is being used, or 1e-10 if double
+precision is being used.
+}
+
+
+@funcdef{
 void dWorldStep (dWorldID, dReal stepsize);
 }{
 Step the world.
@@ -684,6 +695,8 @@ but the joint group itself will not be destroyed.
 }
 
 
+@section{Miscellaneous}
+
 @funcdef{
 void dJointAttach (dJointID, dBodyID body1, dBodyID body2);
 }{
@@ -691,11 +704,19 @@ Attach the joint to some new bodies.
 If the joint is already attached, it will be detached from the old bodies
 first.
 To attach this joint to only one body, set body1 or body2 to zero - a zero
-body means the static environment.
+body refers to the static environment.
 Setting both bodies to zero puts the joint into "limbo", i.e. it will
 have no effect on the simulation.
 
 Some joints, like hinge-2 need to be attached to two bodies to work.
+}
+
+
+@funcdef{
+void dJointSetData (dJointID, void *data);
+void *dJointGetData (dJointID);
+}{
+Get and set the joint's user-data pointer. 
 }
 
 
@@ -862,6 +883,17 @@ A contact joint looks like this:
 
 		@center{@picture{pix/contact.jpg}}
 
+The contact joint prevents body 1 and body 2 from interpenetrating at the
+contact point.
+It does this by only allowing the bodies to have an ``outgoing'' velocity
+in the direction of the contact normal.
+Contact joints typically have a lifetime of one time step.
+They are created and deleted in response to collision detection.
+
+Contact joints can simulate friction at the contact by applying special
+forces in the two friction directions that are perpendicular to the
+normal.
+
 When a contact joint is created, a @c{dContact} structure must be supplied.
 This has the following definition:
 @code{@[
@@ -904,7 +936,7 @@ It has the following members:
 	@constdef{dContactSoftERP}{If set, the error reduction parameter of
 		the contact normal can be set with the @c{soft_erp} parameter.
 		This is useful to make surfaces soft.}
-	@constdef{dContactSoftCfm}{If set, the constraint force mixing
+	@constdef{dContactSoftCFM}{If set, the constraint force mixing
 		parameter of the contact normal can be set with the
 		@c{soft_cfm} parameter. This is useful to make surfaces soft.}
 	@constdef{dContactMotion1}{If set, the contact surface is assumed to
@@ -1016,7 +1048,7 @@ The parameter numbers are:
 @constdef{dParamSoft}{Limit softness. Not yet implemented.}
 @constdef{dParamSuspensionERP}{Suspension error reduction parameter.
 	Currently this only works on the hinge-2 joint.}
-@constdef{dParamSuspensionCfm}{Suspension constraint force mixing parameter.
+@constdef{dParamSuspensionCFM}{Suspension constraint force mixing parameter.
 	Currently this only works on the hinge-2 joint.}
 
 These parameter names can be followed by a digit >= 2 to indicate the second,
@@ -1031,6 +1063,10 @@ axes).
 
 If a particular parameter is not implemented by a given joint, setting it
 will have no effect.
+
+This interface for setting and getting parameters seems to be a bit
+inconsistent with the rest of ODE, I may consider modifying it in the
+future ... but it works well in practice.
 }
 
 #############################################################################
@@ -1688,31 +1724,100 @@ Future interface enhancements:
 }
 
 #############################################################################
+@chapter{FAQ}
+
+@section{How do I connect a body to the static environment with a joint?}
+
+Use @func{dJointAttach} with arguments @c{(body,0)} or @c{(0,body)}.
+
+
+@section{Does ODE need or use graphics library X ?}
+
+No. ODE is a computational engine, and is completely independent
+of any graphics library.
+However the examples that come with ODE use OpenGL,
+and most interesting uses of ODE will need some graphics library to
+make the simulation visible to the user.
+But that's your problem.
+
+
+@section{Why do my rigid bodies bounce or penetrate on collision?
+My restitution is zero!}
+
+Sometimes when rigid bodies collide without restitution, they appear to
+interpenetrate slightly and then get pushed apart so that they only just
+touch.
+The problem gets worse as the time step gets larger.
+What is going on?
+
+The contact joint constraint is only applied after the collision is detected.
+If a fixed time step is being used, it is likely that the bodies have
+already penetrated when this happens.
+The error reduction mechanism will push the bodies apart, but this can
+take a few time steps (depending on the value of the ERP parameter).
+
+This penetration and pushing apart sometimes makes the bodies look like they
+are bouncing, although it is completely independent of whether restitution
+is on or not.
+
+Some other simulators have individual rigid bodies take variable sized
+timesteps to make sure bodies never penetrate much.
+However ODE takes fixed size steps, as automatically choosing a
+non-penetrating step size is problematic for an articulated rigid body
+simulator (the entire ARB structure must be stepped to account for the
+first penetration, which may result in very small steps).
+
+There are three fixes for this problem:
+@list{
+@*	Take smaller time steps.
+@*	Increase ERP to make the problem less visible.
+@*	Do your own variable sized time stepping somehow.
+}
+
+
+@section{What factors does execution speed depend on?
+How do I make things go faster?}
+
+Each joint removes a number of degrees of freedom (DOFs) from the system.
+For example the ball and socket removes three, and the hinge removes five.
+For each separate group of bodies connected by joints, where:
+@list{
+@*	@m{m_1} is the number of joints in the group,
+@*	@m{m_2} is the total number of DOFs removed by those joints, and
+@*	@m{n} is the number of bodies in the group,
+}
+then the computing time per step for the group is proportional to:
+	@center{@m{k_1 O(m_1) + k_2 O(m_2^3) + k_2 O(n)}}
+
+ODE currently relies on factorization of a ``system'' matrix that has one
+row/column for each DOF removed (this is where the @m{O(m_2^3)}
+comes from).
+In a 10 body chain that uses ball and socket joints, roughly 30-40% of the
+time is spent filling in this matrix, and 30-40% of the time is spent
+factorizing it.
+
+Thus, to speed up your simulation you might consider:
+@list{
+@*	Using less joints - often small bodies and their associated joints
+	can be replaced by purely kinematic ``fakes'' without harming
+	physical realism.
+@*	Replacing multiple joints with simpler alternatives.
+	This will become easier as more specialized joint types are defined.
+@*	Using less contacts.
+@*	Preferring frictionless or viscous friction contacts (that remove one
+	DOF) over Coulomb friction contacts (that remove three DOFs)
+	where possible.
+}
+In the future ODE will implement techniques that scale better with the number
+of joints.
+
+#############################################################################
 @chapter{Known BUGS}
 
 @list{
 @*	When assigning a mass to a rigid body, the center of mass must be
 	(0,0,0) relative to the body's position.
 }
-
-#############################################################################
-@chapter{Appendix A: Matrix storage conventions}
-
-Matrix operations like factorization are expensive, so we must store the data
-in a way that is most useful to the matrix code.
-I want to do 4-way SIMD optimizations later, so the format is this: store
-the matrix by rows, and each row is rounded up to a multiple of 4 elements.
-The extra "padding" elements at the end of each row/column must be set
-to 0.
-This is called the "standard format".
-Hopefully this decision will remain good in the future, as more and
-more processors have 4-way SIMD (especially for fast 3D graphics).
-
-The exception: matrices that have only one column or row (vectors), are always
-stored as consecutive elements in standard row format, i.e. there is no
-interior padding, only padding at the end.
-
-Thus: all 3x1 floating point vectors are stored as 4x1 vectors: (x,x,x,0).
 
 #############################################################################
 @chapter{ODE internals}
@@ -1738,4 +1843,44 @@ Thus: all 3x1 floating point vectors are stored as 4x1 vectors: (x,x,x,0).
 @*	LCP solver.
 
 @*	Equations of motion.
+
+@*	Friction model and approximations.
 }
+
+Why don't I implement a proper friction pyramid or friction cone
+(e.g. Baraff's version) ?}
+	Because I have to factor non-symmetric (and possibly indefinite)
+	matrices, for either static or dynamic friction.
+	Speed was considered more important - the current friction
+	approximation only needs a symmetric factorization, which is twice
+	as fast.
+
+
+@section{Matrix storage conventions}
+
+Matrix operations like factorization are expensive, so we must store the data
+in a way that is most useful to the matrix code.
+I want to do 4-way SIMD optimizations later, so the format is this: store
+the matrix by rows, and each row is rounded up to a multiple of 4 elements.
+The extra "padding" elements at the end of each row/column must be set
+to 0.
+This is called the "standard format".
+Hopefully this decision will remain good in the future, as more and
+more processors have 4-way SIMD (especially for fast 3D graphics).
+
+The exception: matrices that have only one column or row (vectors), are always
+stored as consecutive elements in standard row format, i.e. there is no
+interior padding, only padding at the end.
+
+Thus: all 3x1 floating point vectors are stored as 4x1 vectors: (x,x,x,0).
+
+#############################################################################
+@chapter{Internals FAQ}
+
+@section{Why to some structures have a @c{dx} prefix and some have a
+@c{d} prefix?}
+
+The @c{dx} prefix is used for internal structures that should never be
+visible externally.
+The @c{d} prefix is used for structures that are part of the public
+interface.
