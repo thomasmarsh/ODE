@@ -2282,7 +2282,7 @@ Internally, this just calls the correct class-specific collision functions
 for @arg{o1} and @arg{o2}.
 
 @arg{flags} specifies how contacts should be generated if the objects touch.
-Currently the lower 8 bits of @arg{flags} specifies the maximum number of
+Currently the lower 16 bits of @arg{flags} specifies the maximum number of
 contact points to generate.
 If this number is zero, this function just pretends that it is one - in other
 words you can not ask for zero contacts.
