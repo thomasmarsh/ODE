@@ -20,7 +20,7 @@
  *									 *
  *************************************************************************/
 
-// C++ interface for non-collision stuff
+/* C++ interface for non-collision stuff */
 
 
 #ifndef _ODE_ODECPP_H_
