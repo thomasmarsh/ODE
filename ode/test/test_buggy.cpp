@@ -75,8 +75,10 @@ static void nearCallback (void *data, dGeomID o1, dGeomID o2)
   if (!(g1 ^ g2)) return;
 
   dContact contact;
-  contact.surface.mode = 0;
+  contact.surface.mode = dContactSlip1 | dContactSlip2;
   contact.surface.mu = dInfinity;
+  contact.surface.slip1 = 0.1;
+  contact.surface.slip2 = 0.1;
   if (dCollide (o1,o2,0,&contact.geom,sizeof(dContactGeom))) {
     //    if (o1==ground_box) printf ("foo 1\n");
     //    if (o2==ground_box) printf ("foo 2\n");
@@ -129,20 +131,19 @@ static void simLoop (int pause)
   int i;
   if (!pause) {
     // motor
-    dJointSetHingeParam (joint[2],dParamVel,speed);
-    dJointSetHingeParam (joint[2],dParamFMax,0.1);
+    dJointSetHinge2Param (joint[0],dParamVel2,speed);
+    dJointSetHinge2Param (joint[0],dParamFMax2,0.1);
 
     // steering
-    printf ("%.4f\n",dJointGetHinge2Angle1 (joint[0]));
     dReal v = steer - dJointGetHinge2Angle1 (joint[0]);
     if (v > 0.1) v = 0.1;
     if (v < -0.1) v = -0.1;
     v *= 10.0;
-    dJointSetHinge2Param1 (joint[0],dParamVel,v);
-    dJointSetHinge2Param1 (joint[0],dParamFMax,0.2);
-    dJointSetHinge2Param1 (joint[0],dParamLoStop,-0.75);
-    dJointSetHinge2Param1 (joint[0],dParamHiStop,0.75);
-    dJointSetHinge2Param1 (joint[0],dParamFudgeFactor,0.1);
+    dJointSetHinge2Param (joint[0],dParamVel,v);
+    dJointSetHinge2Param (joint[0],dParamFMax,0.2);
+    dJointSetHinge2Param (joint[0],dParamLoStop,-0.75);
+    dJointSetHinge2Param (joint[0],dParamHiStop,0.75);
+    dJointSetHinge2Param (joint[0],dParamFudgeFactor,0.1);
 
     dSpaceCollide (space,0,&nearCallback);
     dWorldStep (world,0.05);
@@ -223,20 +224,35 @@ int main (int argc, char **argv)
   dBodySetPosition (body[3],-0.5*LENGTH,-WIDTH*0.5,STARTZ-HEIGHT*0.5);
 
   // front wheel hinge
+  /*
   joint[0] = dJointCreateHinge2 (world,0);
   dJointAttach (joint[0],body[0],body[1]);
   const dReal *a = dBodyGetPosition (body[1]);
   dJointSetHinge2Anchor (joint[0],a[0],a[1],a[2]);
   dJointSetHinge2Axis1 (joint[0],0,0,1);
   dJointSetHinge2Axis2 (joint[0],0,1,0);
+  */
 
-  // back wheel hinges
-  for (i=1; i<3; i++) {
-    joint[i] = dJointCreateHinge (world,0);
+  // front and back wheel hinges
+  for (i=0; i<3; i++) {
+    joint[i] = dJointCreateHinge2 (world,0);
     dJointAttach (joint[i],body[0],body[i+1]);
     const dReal *a = dBodyGetPosition (body[i+1]);
-    dJointSetHingeAnchor (joint[i],a[0],a[1],a[2]);
-    dJointSetHingeAxis (joint[i],0,1,0);
+    dJointSetHinge2Anchor (joint[i],a[0],a[1],a[2]);
+    dJointSetHinge2Axis1 (joint[i],0,0,1);
+    dJointSetHinge2Axis2 (joint[i],0,1,0);
+  }
+
+  // set joint suspension
+  for (i=0; i<3; i++) {
+    dJointSetHinge2Param (joint[i],dParamSuspensionErp,0.4);
+    dJointSetHinge2Param (joint[i],dParamSuspensionCfm,0.8);
+  }
+
+  // lock back wheels along the steering axis
+  for (i=1; i<3; i++) {
+    dJointSetHinge2Param (joint[i],dParamVel,0);
+    dJointSetHinge2Param (joint[i],dParamFMax,dInfinity);
   }
 
   // environment
