@@ -2337,11 +2337,12 @@ This can save a huge amount of time.
 
 Two collision culling algorithms are currently available:
 @list{
-@*	Simple. This reports every possible pair of geometry objects as
-	potentially intersecting.
+@*	Simple. This checks every possible pair of geometry objects for
+	intersection, and reports the ones whose AABBs overlap.
 	The time required to do intersection testing for @m{n} objects is
 	@m{O(n^2)}.
-	This should not be used for large numbers of objects.
+	This should not be used for large numbers of objects, but it can be
+	the preferred algorithm for a small number of objects.
 
 @*	Multi-resolution hash table.
 	This records how each geometry object overlaps cells in
@@ -2352,6 +2353,14 @@ Two collision culling algorithms are currently available:
 	@m{O(n)}, as each object can be quickly paired with the objects
 	around it.
 }
+
+All spaces guarantee that if a geometry object's collider function is called,
+the object's AABB function will have been called prior to that without the
+geometry position having being changed in between the calls.
+This protocol can be useful if the AABB function wants to precompute some
+data that is used by the collider function.
+The collider function can check if it is being called inside a space by
+checking if the return value of @func{dGeomGetSpaceAABB()} is nonzero.
 
 Here are the functions used for spaces:
 
