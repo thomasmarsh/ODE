@@ -53,10 +53,14 @@ rotation.o: rotation.cpp ../../include/ode/ode.h \
  ../../include/ode/space.h ../../include/ode/geom.h \
  ../../include/ode/misc.h ../../include/ode/objects.h \
  ../../include/ode/odecpp.h
-space.o: space.cpp ../../include/ode/space.h \
- ../../include/ode/common.h ../../include/ode/error.h \
- ../../include/ode/geom.h ../../include/ode/contact.h \
- ../../include/ode/memory.h geom_internal.h
+space.o: space.cpp ../../include/ode/common.h \
+ ../../include/ode/error.h ../../include/ode/memory.h \
+ ../../include/ode/space.h ../../include/ode/geom.h \
+ ../../include/ode/contact.h geom_internal.h
+space2.o: space2.cpp ../../include/ode/common.h \
+ ../../include/ode/error.h ../../include/ode/memory.h \
+ ../../include/ode/space.h ../../include/ode/geom.h \
+ ../../include/ode/contact.h geom_internal.h
 stack.o: stack.cpp stack.h ../../include/ode/error.h \
  ../../include/ode/config.h
 step.o: step.cpp objects.h ../../include/ode/memory.h \
