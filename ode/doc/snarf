@@ -63,6 +63,7 @@
 #	@emph{...}		add emphasis to text
 #	@m{...}			mathematical stuff (^ and _ work like TeX)
 #	@c{...}			code (in a fixed width `courier' font)
+#	@c{...}			bold
 #	@list{unordered list}
 #	@numlist{numbered list}
 #	@link{URL}{anchortext}
@@ -314,6 +315,7 @@ sub main::Snarf1
     # text format commands
     $n += s/\@emph\{([^{]*?)\}/<i>$1<\/i>/gs;
     $n += s/\@c\{([^{]*?)\}/<tt>$1<\/tt>/gs;
+    $n += s/\@b\{([^{]*?)\}/<b>$1<\/b>/gs;
     $n += s/\@m\{([^{]*?)\}/ConvertMath($1)/gse;
     $n += s/\@code\{([^{]*?)\}/HandleCode($1)/gse;
     $n += s/\@funcdef\{([^{]*?)\}\{([^{]*?)\}/HandleFuncdef($1,$2)/gse;
