@@ -172,13 +172,31 @@ typedef struct dxJointGroup *dJointGroupID;
  * to include all the joint function definitions in joint.cpp. hmmmm.
  */
 enum {
-  dParamLoStop=0,
+  /* parameters for limits and motors */
+  dParamLoStop,
   dParamHiStop,
   dParamVel,
   dParamFMax,
   dParamFudgeFactor,
   dParamBounce,
-  dParamSoft
+  dParamSoft,
+
+  /* parameters for suspension */
+  dParamSuspensionErp,
+  dParamSuspensionCfm,
+
+  /* a second set of all parameters, e.g. for the second joint limit, the
+   * second suspension axis etc. this has bit 8 set.
+   */
+  dParamLoStop2=0x100,
+  dParamHiStop2,
+  dParamVel2,
+  dParamFMax2,
+  dParamFudgeFactor2,
+  dParamBounce2,
+  dParamSoft2,
+  dParamSuspensionErp2,
+  dParamSuspensionCfm2
 };
 
 
