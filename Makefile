@@ -72,6 +72,9 @@ ODE_NEW_COLLISION_SRC = ode/src/collision_kernel.cpp \
 			ode/src/collision_transform.cpp \
 			ode/src/collision_quadtreespace.cpp
 ifdef OPCODE_DIRECTORY
+ifneq ($(PRECISION),SINGLE)
+$(error OpCode-enabled builds require PRECISION=SINGLE for correct operation.)
+endif
 ODE_NEW_COLLISION_SRC +=ode/src/collision_trimesh.cpp \
 			ode/src/collision_trimesh_sphere.cpp \
 			ode/src/collision_trimesh_box.cpp \
