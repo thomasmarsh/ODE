@@ -2222,7 +2222,7 @@ void dQMultiply3 (dQuaternion qa,
 }{
 Set @arg{qa} = @arg{qb}*@arg{qc}.
 This is that same as @arg{qa} = rotation @arg{qc} followed by rotation
-@arg{qa}.
+@arg{qb}.
 The 0/1/2 versions are analogous to the multiply functions, i.e. 1 uses the
 inverse of @arg{qb}, and 2 uses the inverse of @arg{qc}.
 Option 3 uses the inverse of both.
@@ -2288,13 +2288,18 @@ The @c{Ixx} values are the elements of the inertia matrix:
 
 @funcdef{
 void dMassSetSphere (dMass *, dReal density, dReal radius);
+void dMassSetSphereTotal (dMass *, dReal total_mass, dReal radius);
 }{
 Set the mass parameters to represent a sphere of the given radius and
-density, with the center of mass at (0,0,0) relative to the body.
+density, with the center of mass at (0,0,0) relative to the body.  The
+first function accepts the density of the sphere, the second accepts
+the total mass of the sphere.
 }
 
 @funcdef{
 void dMassSetCappedCylinder (dMass *, dReal density, int direction,
+                             dReal radius, dReal length);
+void dMassSetCappedCylinderTotal (dMass *, dReal total_mass, int direction,
                              dReal radius, dReal length);
 }{
 Set the mass parameters to represent a capped cylinder of the given parameters
@@ -2302,11 +2307,15 @@ and density, with the center of mass at (0,0,0) relative to the body.
 The radius of the cylinder (and the spherical cap) is @arg{radius}.
 The length of the cylinder (not counting the spherical cap) is @arg{length}.
 The cylinder's long axis is oriented along the body's x, y or z axis according
-to the value of @arg{direction} (1=x, 2=y, 3=z).
+to the value of @arg{direction} (1=x, 2=y, 3=z).  The
+first function accepts the density of the object, the second accepts
+its total mass.
 }
 
 @funcdef{
 void dMassSetCylinder (dMass *, dReal density, int direction,
+		       dReal radius, dReal length);
+void dMassSetCylinderTotal (dMass *, dReal total_mass, int direction,
 		       dReal radius, dReal length);
 }{
 Set the mass parameters to represent a flat-ended cylinder of the given
@@ -2315,17 +2324,23 @@ body.
 The radius of the cylinder is @arg{radius}.
 The length of the cylinder is @arg{length}.
 The cylinder's long axis is oriented along the body's x, y or z axis according
-to the value of @arg{direction} (1=x, 2=y, 3=z).
+to the value of @arg{direction} (1=x, 2=y, 3=z).  The
+first function accepts the density of the object, the second accepts
+its total mass.
 }
 
 @funcdef{
 void dMassSetBox (dMass *, dReal density,
                   dReal lx, dReal ly, dReal lz);
+void dMassSetBoxTotal (dMass *, dReal total_mass,
+                  dReal lx, dReal ly, dReal lz);
 }{
 Set the mass parameters to represent a box of the given dimensions
 and density, with the center of mass at (0,0,0) relative to the body.
 The side lengths of the box along the x, y and z axes are @arg{lx}, @arg{ly}
-and @arg{lz}.
+and @arg{lz}.  The
+first function accepts the density of the object, the second accepts
+its total mass.
 }
 
 @funcdef{

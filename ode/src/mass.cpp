@@ -107,10 +107,16 @@ void dMassSetParameters (dMass *m, dReal themass,
 
 void dMassSetSphere (dMass *m, dReal density, dReal radius)
 {
+	dMassSetSphereTotal (m, 
+		(REAL(4.0)/REAL(3.0)) * M_PI * radius*radius*radius * density, radius);
+}
+
+void dMassSetSphereTotal (dMass *m, dReal total_mass, dReal radius)
+{
   dAASSERT (m);
   dMassSetZero (m);
-  m->mass = (REAL(4.0)/REAL(3.0)) * M_PI * radius*radius*radius * density;
-  dReal II = REAL(0.4) * m->mass * radius*radius;
+  m->mass = total_mass;
+  dReal II = REAL(0.4) * total_mass * radius*radius;
   m->_I(0,0) = II;
   m->_I(1,1) = II;
   m->_I(2,2) = II;
@@ -145,20 +151,34 @@ void dMassSetCappedCylinder (dMass *m, dReal density, int direction,
 }
 
 
+void dMassSetCappedCylinderTotal (dMass *m, dReal total_mass, int direction,
+			     dReal a, dReal b)
+{
+	dMassSetCappedCylinder(m, 1.0, direction, a, b);
+	dMassAdjust(m, total_mass);
+}
+
+
 void dMassSetCylinder (dMass *m, dReal density, int direction,
 		       dReal radius, dReal length)
 {
-  dReal M,r2,I;
+	dMassSetCylinderTotal(m, M_PI*radius*radius*length*density,		// cylinder mass
+		direction, radius, length);
+}
+
+void dMassSetCylinderTotal (dMass *m, dReal total_mass, int direction,
+		       dReal radius, dReal length)
+{
+  dReal r2,I;
   dAASSERT (m);
   dMassSetZero (m);
   r2 = radius*radius;
-  M = M_PI*r2*length*density;		// cylinder mass
-  m->mass = M;
-  I = M*(REAL(0.25)*r2 + (REAL(1.0)/REAL(12.0))*length*length);
+  m->mass = total_mass;
+  I = total_mass*(REAL(0.25)*r2 + (REAL(1.0)/REAL(12.0))*length*length);
   m->_I(0,0) = I;
   m->_I(1,1) = I;
   m->_I(2,2) = I;
-  m->_I(direction-1,direction-1) = M*REAL(0.5)*r2;
+  m->_I(direction-1,direction-1) = total_mass*REAL(0.5)*r2;
 
 # ifndef dNODEBUG
   checkMass (m);
