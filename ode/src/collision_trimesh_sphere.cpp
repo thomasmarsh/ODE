@@ -35,6 +35,29 @@
 
 // Ripped from Opcode 1.1.
 static bool GetContactData(const dVector3& Center, dReal Radius, const dVector3 Origin, const dVector3 Edge0, const dVector3 Edge1, dReal& Dist, float& u, float& v){
+	//calculate plane of triangle
+	dVector4 Plane;
+	dCROSS(Plane, =, Edge0, Edge1);
+	Plane[3] = dDOT(Plane, Origin);
+ 
+	//normalize
+        dNormalize4(Plane);
+  
+	/* If the center of the sphere is within the positive halfspace of the
+         * triangle's plane, allow a contact to be generated.
+         * If the center of the sphere made it into the positive halfspace of a
+         * back-facing triangle, then the physics update and/or velocity needs
+         * to be adjusted (penetration has occured anyway).
+         */
+  
+	float side = dDOT(Plane,Center) - Plane[3];
+  
+	if(side < 0.0f) {
+		return false;
+        }
+  
+        // now onto the bulk of the collision...
+
 	dVector3 Diff;
 	Diff[0] = Origin[0] - Center[0];
 	Diff[1] = Origin[1] - Center[1];
