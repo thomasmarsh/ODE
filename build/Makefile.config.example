@@ -1,6 +1,6 @@
 # configuration information
 
-# PLATFORM is one of: linux, win32, win32gcc.
+# PLATFORM is one of: linux, win32, win32gcc (mingw), cygwin.
 # there must be a Makefile.$(PLATFORM) file for every platform.
 
 PLATFORM=win32
