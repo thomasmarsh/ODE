@@ -2,7 +2,8 @@
 TODO BEFORE NEXT RELEASE
 ------------------------
 
-joint "get type" function
+functions to get all the joints/bodies a body/joint is connected to.
+function to get the entire island?
 
 joint limit spongyness: interacts with powered joints badly, because when the
 limit is reached full power is applied. fix or doc.
@@ -15,17 +16,6 @@ slow step function will not respect the joint getinfo2 functions calling
 addTorque() because it reads the force/torque accumulators before the
 getinfo2 functions are called.
 
-andy says: in ode/src/error.cpp _snprintf() and _vsnprintf() are missing
-in testode: finite and isnan are missing. copysign is missing
-	russ: okay here's the problem: i have Makefile.platform files for
-	VC++, MinGW, but not Cygwin. Cygwin uses the unix-like functions
-	for everything, but the VC++/MinGW configs assumes the MS C-runtime
-	functions. this is easy to fix, except i need to install Cygwin
-	which is a pain to do over MinGW. argh.
-
-build on linux - assumptions made about location of X11 lib, opengl etc.
-use autoconf? set paths in makefile?
-
 hinge2 needs to be attached to two bodies for it to work, make sure this is
 always the case.
 
@@ -36,8 +26,6 @@ if two joints connect to the same two bodies, check that the fast solver
 works!
 
 doccer: @func{} also refs second etc function in function *list*.
-
-warning if user tries to set mass params with nonzero center of mass.
 
 spaces need multiple lists of objects that can never overlap. objects in these
 lists are never tested against each other.
@@ -98,6 +86,8 @@ joints:
 	hinge2 suspension:
 		suspension limits
 		suspension limit restitution and spongyness??
+
+use autoconf? set paths in makefile?
 
 no-arg init functions, for andy
 
@@ -196,6 +186,12 @@ vectors alloca()ed on the stack must have the correct alignment, use ALLOCA16.
 library should have no global constructors, as it might be used with C linkage.
 
 use `const' in function arguments. blah.
+
+
+DON'T BOTHER
+------------
+
+warning if user tries to set mass params with nonzero center of mass.
 
 
 
@@ -301,3 +297,15 @@ library should have no global constructors, as it might be used with C linkage.
 
 DOC cfm, the derivation and what it means.
 	--> partially done, could be better
+
+joint "get type" function
+
+andy says: in ode/src/error.cpp _snprintf() and _vsnprintf() are missing
+in testode: finite and isnan are missing. copysign is missing
+	russ: okay here's the problem: i have Makefile.platform files for
+	VC++, MinGW, but not Cygwin. Cygwin uses the unix-like functions
+	for everything, but the VC++/MinGW configs assumes the MS C-runtime
+	functions. this is easy to fix, except i need to install Cygwin
+	which is a pain to do over MinGW. argh.
+
+build on linux - assumptions made about location of X11 lib, opengl etc.
