@@ -576,8 +576,8 @@ static void hingeGetInfo1 (dxJointHinge *j, dxJoint::Info1 *info)
   else info->m = 5;
 
   // see if we're at a joint limit.
-  if (j->limot.lostop >= -M_PI && j->limot.histop <= M_PI &&
-      j->limot.lostop <= j->limot.histop) {
+  if ((j->limot.lostop >= -M_PI || j->limot.histop <= M_PI) &&
+       j->limot.lostop <= j->limot.histop) {
     dReal angle = getHingeAngle (j->node[0].body,j->node[1].body,j->axis1,
 				 j->qrel);
     if (j->limot.testRotationalLimit (angle)) info->m = 6;
@@ -1242,7 +1242,7 @@ static void hinge2GetInfo1 (dxJointHinge2 *j, dxJoint::Info1 *info)
 
   // see if we're powered or at a joint limit for axis 1
   int atlimit=0;
-  if (j->limot1.lostop >= -M_PI && j->limot1.histop <= M_PI &&
+  if ((j->limot1.lostop >= -M_PI || j->limot1.histop <= M_PI) &&
       j->limot1.lostop <= j->limot1.histop) {
     dReal angle = measureHinge2Angle (j);
     if (j->limot1.testRotationalLimit (angle)) atlimit = 1;
@@ -1562,7 +1562,7 @@ static void fixedGetInfo2 (dxJointFixed *joint, dxJoint::Info2 *info)
   }
   else {
     for (int j=0; j<3; j++)
-      info->c[j] = k * (joint->node[0].body->pos[j] + ofs[j]);
+      info->c[j] = k * (joint->offset[j] - joint->node[0].body->pos[j]);
   }
 
   // set right hand side for the next three rows (angular). this code is
@@ -1575,7 +1575,8 @@ static void fixedGetInfo2 (dxJointFixed *joint, dxJoint::Info2 *info)
     dQMultiply1 (qerr,joint->node[0].body->q,joint->node[1].body->q);
   }
   else {
-    for (int i=0; i<4; i++) qerr[i] = joint->node[0].body->q[i];
+    qerr[0] = joint->node[0].body->q[0];
+    for (int i=1; i<4; i++) qerr[i] = -joint->node[0].body->q[i];
   }
   if (qerr[0] < 0) {
     qerr[1] = -qerr[1];		// adjust sign of qerr to make theta small
