@@ -55,10 +55,10 @@ dReal dRandReal();
 
 /* print out a matrix */
 #ifdef __cplusplus
-void dPrintMatrix (dReal *A, int n, int m, char *fmt = "%10.4f ",
+void dPrintMatrix (const dReal *A, int n, int m, char *fmt = "%10.4f ",
 		   FILE *f=stdout);
 #else
-void dPrintMatrix (dReal *A, int n, int m, char *fmt, FILE *f);
+void dPrintMatrix (const dReal *A, int n, int m, char *fmt, FILE *f);
 #endif
 
 /* make a random vector with entries between +/- range. A has n elements. */
