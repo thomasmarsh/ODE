@@ -230,9 +230,11 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 See the GNU Lesser General Public License for more details.
 
 
-@section{Call for volunteers}
+@section{The ODE community}
 
-Think you can help? Please @link{http://www.q12.org}{write to me}.
+Do you have questions or comments about ODE?
+Think you can help? Please @link{http://q12.org/mailman/listinfo/ode}{write to
+the ODE mailing list}.
 
 #############################################################################
 @chapter{How to install and use ODE}
