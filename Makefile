@@ -64,8 +64,7 @@ ODE_SRC = \
 ODE_OLD_COLLISION_SRC = ode/src/space.cpp \
 			ode/src/geom.cpp
 
-ODE_NEW_COLLISION_SRC = ode/src/space.cpp \
-			ode/src/collision_kernel.cpp \
+ODE_NEW_COLLISION_SRC = ode/src/collision_kernel.cpp \
 			ode/src/collision_util.cpp \
 			ode/src/collision_std.cpp \
 			ode/src/collision_space.cpp \
