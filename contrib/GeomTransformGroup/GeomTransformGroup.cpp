@@ -6,7 +6,6 @@
 */
 
 
-#define SHARED_GEOM_H_INCLUDED_FROM_DEFINING_FILE 1
 #include <ode/common.h>
 #include <ode/geom.h>
 #include <ode/rotation.h>

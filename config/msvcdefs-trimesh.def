@@ -185,6 +185,10 @@ dJointGetSliderPositionRate
 dJointGetType
 dJointGetUniversalAnchor
 dJointGetUniversalAnchor2
+dJointGetUniversalAngle1
+dJointGetUniversalAngle1Rate
+dJointGetUniversalAngle2
+dJointGetUniversalAngle2Rate
 dJointGetUniversalAxis1
 dJointGetUniversalAxis2
 dJointGetUniversalParam
@@ -276,6 +280,9 @@ dSpaceGetNumGeoms
 dSpaceQuery
 dSpaceRemove
 dSpaceSetCleanup
+dTestMatrixComparison
+dTestRand
+dTestSolveLCP
 dTriArrayCallback
 dTriCallback
 dTriRayCallback

@@ -53,9 +53,6 @@ static union { unsigned char __c[8]; double __d; } __ode_huge_val =
 #define dInfinity _INFINITY8
 #endif
 
-#define SHAREDLIBIMPORT __declspec (dllimport)
-#define SHAREDLIBEXPORT __declspec (dllexport)
-
 /* some types. assume `int' >= 32 bits */
 typedef unsigned int    uint;
 typedef int             int32;

@@ -112,7 +112,6 @@ dGeomTriListBuild
 dHashSpaceCreate
 dHashSpaceSetLevels
 dInfiniteAABB
-dInfinityValue
 dInvertPDMatrix
 dIsPositiveDefinite
 dJointAttach

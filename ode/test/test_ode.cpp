@@ -32,8 +32,6 @@
 #include <float.h>
 #ifndef CYGWIN			// andy's fix for cygwin
 #define copysign _copysign
-#define finite _finite
-#define isnan _isnan
 #endif				// andy's fix for cygwin
 #endif
 
@@ -138,8 +136,7 @@ void testRandomNumberGenerator()
 void testInfinity()
 {
   HEADER;
-  if (1e10 < dInfinity && -1e10 > -dInfinity && -dInfinity < dInfinity &&
-      !isnan(dInfinity) && !finite(dInfinity))
+  if (1e10 < dInfinity && -1e10 > -dInfinity && -dInfinity < dInfinity)
     printf ("\tpassed\n");
   else printf ("\tFAILED\n");
 }

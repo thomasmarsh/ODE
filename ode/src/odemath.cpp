@@ -20,7 +20,6 @@
  *                                                                       *
  *************************************************************************/
 
-#define SHARED_CONFIG_H_INCLUDED_FROM_DEFINING_FILE 1
 #include <ode/common.h>
 #include <ode/odemath.h>
 
@@ -31,13 +30,6 @@
 #ifndef CYGWIN			// added by andy for cygwin
 #define copysign(a,b) ((dReal)_copysign(a,b))
 #endif				// added by andy for cygwin
-#endif
-
-
-// infinity declaration
-
-#ifdef DINFINITY_DECL
-DINFINITY_DECL
 #endif
 
 

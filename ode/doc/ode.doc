@@ -2210,14 +2210,14 @@ wrapper for @func{dBodyAddForce()}.
 }
 
 @funcdef{
-dJointAddHinge2Torqe(dJointID joint, dReal torque1, dReal torque2)
+dJointAddHinge2Torques(dJointID joint, dReal torque1, dReal torque2)
 }{
 Applies @arg{torque1} about the hinge2's axis 1, and @arg{torque2} about the 
 hinge2's axis 2.  This function is just a wrapper for @func{dBodyAddTorque()}.
 }
 
 @funcdef{
-dJointAddAMotorTorque(dJointID joint, dReal torque0, dReal torque1, dReal torque2)
+dJointAddAMotorTorques(dJointID joint, dReal torque0, dReal torque1, dReal torque2)
 }{
 Applies @arg{torque0} about the AMotor's axis 0, @arg{torque1} about the 
 AMotor's axis 1, and @arg{torque2} about the AMotor's axis 2.  If the motor has
@@ -3834,32 +3834,6 @@ different geoms during its lifespan.  If you enable temporal coherence on
 a tri-mesh then these problems can be eased by intermittantly calling
  @func{dGeomTriMeshClearTCCache()} for it.
 }
-
-
-@subsection{Geometry Group class}
-
-@b{Geometry groups are deprecated, their functionality is now available
-through spaces. The geometry group functions are still available but they
-will be removed in some future version of ODE.}
-
-The geometry group functions are equivalent to the following space functions:
-@list{
-@*	@c{dCreateGeomGroup()}
-	= @func{dSimpleSpaceCreate()} followed by @func{dSpaceSetCleanup()}
-	to ensure that when the geometry group is destroyed the geoms that
-	it contains will not be.
-@*	@c{dGeomGroupAdd()}		= @func{dSpaceAdd()}
-@*	@c{dGeomGroupRemove()}		= @func{dSpaceRemove()}
-@*	@c{dGeomGroupGetNumGeoms()}	= @func{dSpaceGetNumGeoms()}
-@*	@c{dGeomGroupGetGeom()}		= @func{dSpaceGetGeom()}
-@*	@c{dGeomGroupQuery()}		= @func{dSpaceQuery()}
-}
-
-It used to be the case that if the user wanted the geoms inside a
-geometry group to self-intersect then the geoms would have to be inserted
-into a separate space and @func{dSpaceCollide()} called on that.
-This is no longer the case: @func{dSpaceCollide()} can be called on
-the geometry group directly (as it is now the same as a regular space).
 
 
 @subsection{Geometry Transform class}

@@ -75,7 +75,8 @@ static dBodyID body[5];
 static dJointID joint[4]; 
 static int joint_exists[4];
 static dJointGroupID contactgroup;
-static dGeomID ground,geom_group;
+static dGeomID ground;
+static dSpaceID car_space;
 static dGeomID box[1];
 static dGeomID sphere[4];
 static dGeomID ground_box;
@@ -370,13 +371,13 @@ int main (int argc, char **argv)
     //   dJointSetHinge2Param (joint[i],dParamFMax,dInfinity);
   }
   
-  // create geometry group and add it to the space
-  geom_group = dCreateGeomGroup (space);  
-  dGeomGroupAdd (geom_group,box[0]);
-  dGeomGroupAdd (geom_group,sphere[0]);
-  dGeomGroupAdd (geom_group,sphere[1]);
-  dGeomGroupAdd (geom_group,sphere[2]);
-  dGeomGroupAdd (geom_group,sphere[3]);
+  // create car space and add it to the top level space
+  car_space = dSimpleSpaceCreate (space);
+  dSpaceSetCleanup (car_space,0);
+  dSpaceAdd (car_space,box[0]);
+  dSpaceAdd (car_space,sphere[0]);
+  dSpaceAdd (car_space,sphere[1]);
+  dSpaceAdd (car_space,sphere[2]);
 
   // environment
   ground_box = dCreateBox (space,2,1.5,1);
