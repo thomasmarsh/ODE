@@ -22,11 +22,12 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories="../../../include"
-				PreprocessorDefinitions="WIN32;_WINDOWS;_DEBUG;_USRDLL;dDOUBLE"
+				PreprocessorDefinitions="WIN32;_WINDOWS;_DEBUG;_USRDLL;dSINGLE"
 				MinimalRebuild="TRUE"
 				BasicRuntimeChecks="3"
-				RuntimeLibrary="3"
+				RuntimeLibrary="5"
 				UsePrecompiledHeader="0"
+				BrowseInformation="1"
 				WarningLevel="3"
 				Detect64BitPortabilityProblems="FALSE"
 				DebugInformationFormat="4"/>
@@ -35,10 +36,10 @@
 			<Tool
 				Name="VCLinkerTool"
 				IgnoreImportLibrary="TRUE"
-				AdditionalDependencies="kernel32.lib user32.lib gdi32.lib opcode_d.lib"
+				AdditionalDependencies="opcode_d.lib"
 				OutputFile="$(OutDir)/ode.dll"
 				LinkIncremental="2"
-				ModuleDefinitionFile="..\..\..\config\msvcdefs.def"
+				ModuleDefinitionFile="..\..\..\contrib\msvc7\ode_triangle_collider\msvcdefs_triangle_collider.def"
 				GenerateDebugInformation="TRUE"
 				SubSystem="2"
 				ImportLibrary="$(OutDir)/ode.lib"
@@ -87,7 +88,7 @@
 				AdditionalIncludeDirectories="../../../include"
 				PreprocessorDefinitions="WIN32;_WINDOWS;NDEBUG;_USRDLL;dDOUBLE"
 				StringPooling="TRUE"
-				RuntimeLibrary="2"
+				RuntimeLibrary="4"
 				EnableFunctionLevelLinking="TRUE"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
@@ -98,9 +99,10 @@
 			<Tool
 				Name="VCLinkerTool"
 				IgnoreImportLibrary="TRUE"
+				AdditionalDependencies="opcode.lib"
 				OutputFile="$(OutDir)/ode.dll"
 				LinkIncremental="1"
-				ModuleDefinitionFile=""
+				ModuleDefinitionFile="..\..\..\contrib\msvc7\ode_triangle_collider\msvcdefs_triangle_collider.def"
 				GenerateDebugInformation="FALSE"
 				SubSystem="2"
 				ImportLibrary="$(OutDir)/ode.lib"
@@ -144,13 +146,31 @@
 				RelativePath="..\..\..\ode\src\array.cpp">
 			</File>
 			<File
+				RelativePath="..\..\..\ode\src\collision_kernel.cpp">
+			</File>
+			<File
+				RelativePath="..\..\..\ode\src\collision_space.cpp">
+			</File>
+			<File
+				RelativePath="..\..\..\ode\src\collision_std.cpp">
+			</File>
+			<File
+				RelativePath="..\..\..\ode\src\collision_transform.cpp">
+			</File>
+			<File
+				RelativePath="..\..\..\ode\src\collision_util.cpp">
+			</File>
+			<File
+				RelativePath="..\..\..\ode\src\dCylinder.cpp">
+			</File>
+			<File
+				RelativePath="..\..\..\ode\src\dTriList.cpp">
+			</File>
+			<File
 				RelativePath="..\..\..\ode\src\dcAABBCollider.cpp">
 			</File>
 			<File
 				RelativePath="..\..\..\ode\src\dcOBBCollider.cpp">
-			</File>
-			<File
-				RelativePath="..\..\..\ode\src\dTriList.cpp">
 			</File>
 			<File
 				RelativePath="..\..\..\ode\src\error.cpp">
@@ -166,9 +186,6 @@
 			</File>
 			<File
 				RelativePath="..\..\..\ode\src\fastltsolve.c">
-			</File>
-			<File
-				RelativePath="..\..\..\ode\src\geom.cpp">
 			</File>
 			<File
 				RelativePath="..\..\..\ode\src\joint.cpp">
@@ -192,7 +209,7 @@
 				RelativePath="..\..\..\ode\src\misc.cpp">
 			</File>
 			<File
-				RelativePath="..\..\..\config\msvcdefs.def">
+				RelativePath="msvcdefs_triangle_collider.def">
 			</File>
 			<File
 				RelativePath="..\..\..\ode\src\obstack.cpp">
@@ -207,9 +224,6 @@
 				RelativePath="..\..\..\ode\src\rotation.cpp">
 			</File>
 			<File
-				RelativePath="..\..\..\ode\src\space.cpp">
-			</File>
-			<File
 				RelativePath="..\..\..\ode\src\step.cpp">
 			</File>
 			<File
@@ -217,9 +231,6 @@
 			</File>
 			<File
 				RelativePath="..\..\..\ode\src\timer.cpp">
-			</File>
-			<File
-				RelativePath="..\..\..\ode\src\Win32.cpp">
 			</File>
 		</Filter>
 		<Filter
@@ -229,6 +240,9 @@
 				RelativePath="..\..\..\ode\src\array.h">
 			</File>
 			<File
+				RelativePath="..\..\..\ode\src\dTriList.h">
+			</File>
+			<File
 				RelativePath="..\..\..\ode\src\dcAABBCollider.h">
 			</File>
 			<File
@@ -236,9 +250,6 @@
 			</File>
 			<File
 				RelativePath="..\..\..\ode\src\dcTriListCollider.h">
-			</File>
-			<File
-				RelativePath="..\..\..\ode\src\dTriList.h">
 			</File>
 			<File
 				RelativePath="..\..\..\ode\src\dxTriList.h">
