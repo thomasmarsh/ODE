@@ -79,5 +79,3 @@ fastlsolve.o: fastlsolve.c ../../include/ode/matrix.h \
  ../../include/ode/common.h ../../include/ode/error.h
 fastltsolve.o: fastltsolve.c ../../include/ode/matrix.h \
  ../../include/ode/common.h ../../include/ode/error.h
-fastmultidot.o: fastmultidot.c ../../include/ode/matrix.h \
- ../../include/ode/common.h ../../include/ode/error.h
