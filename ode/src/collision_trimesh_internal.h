@@ -63,6 +63,23 @@ struct dxTriMeshData  : public dBase {
     const void* Normals;
     //Matrix4x4   last_trans;
     dMatrix4    last_trans;
+
+    /* Array of flags for which edges and verts should be used on each triangle */
+    enum UseFlags
+    {
+        kEdge0 = 0x1,
+        kEdge1 = 0x2,
+        kEdge2 = 0x4,
+        kVert0 = 0x8,
+        kVert1 = 0x10,
+        kVert2 = 0x20,
+
+        kUseAll = 0xFF,
+    };
+    uint8* UseFlags;
+
+    /* Setup the UseFlags array */
+    void Preprocess();
 };
 
 

@@ -9,6 +9,12 @@ the rules for this file:
 
 ------------------------------------------------------------------------------
 
+03/29/05 colin
+
+	* Added trimesh preprocessing to mark unneeded edges and verts.  Also
+	  added support for preprocessed info to the ccylinder-trimesh
+	  collider.
+
 12/07/04 adam
 
         * Important AMotors bugfix

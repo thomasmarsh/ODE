@@ -38,7 +38,7 @@ dxTriMeshData::dxTriMeshData(){
 }
 
 dxTriMeshData::~dxTriMeshData(){
-    //
+    delete [] UseFlags;
 }
 
 void 
@@ -118,6 +118,194 @@ dxTriMeshData::Build(const void* Vertices, int VertexStide, int VertexCount,
         last_trans[i] = 0.0;
 
     Normals = (dReal *) in_Normals;
+
+	UseFlags = 0;
+}
+
+struct EdgeRecord
+{
+	int VertIdx1;	// Index into vertex array for this edges vertices
+	int VertIdx2;
+	int TriIdx;		// Index into triangle array for triangle this edge belongs to
+
+	uint8 EdgeFlags;	
+	uint8 Vert1Flags;
+	uint8 Vert2Flags;
+	bool Concave;
+};
+
+// Edge comparison function for qsort
+static int EdgeCompare(const void* edge1, const void* edge2)
+{
+	EdgeRecord* e1 = (EdgeRecord*)edge1;
+	EdgeRecord* e2 = (EdgeRecord*)edge2;
+
+	if (e1->VertIdx1 == e2->VertIdx1)
+		return e1->VertIdx2 - e2->VertIdx2;
+	else
+		return e1->VertIdx1 - e2->VertIdx1;
+}
+
+void SetupEdge(EdgeRecord* edge, int edgeIdx, int triIdx, const unsigned int* vertIdxs)
+{
+	if (edgeIdx == 0)
+	{
+		edge->EdgeFlags  = dxTriMeshData::kEdge0;
+		edge->Vert1Flags = dxTriMeshData::kVert0;
+		edge->Vert2Flags = dxTriMeshData::kVert1;
+		edge->VertIdx1 = vertIdxs[0];
+		edge->VertIdx2 = vertIdxs[1];
+	}
+	else if (edgeIdx == 1)
+	{
+		edge->EdgeFlags  = dxTriMeshData::kEdge1;
+		edge->Vert1Flags = dxTriMeshData::kVert1;
+		edge->Vert2Flags = dxTriMeshData::kVert2;
+		edge->VertIdx1 = vertIdxs[1];
+		edge->VertIdx2 = vertIdxs[2];
+	}
+	else if (edgeIdx == 2)
+	{
+		edge->EdgeFlags  = dxTriMeshData::kEdge2;
+		edge->Vert1Flags = dxTriMeshData::kVert2;
+		edge->Vert2Flags = dxTriMeshData::kVert0;
+		edge->VertIdx1 = vertIdxs[2];
+		edge->VertIdx2 = vertIdxs[0];
+	}
+
+	// Make sure vert index 1 is less than index 2 (for easier sorting)
+	if (edge->VertIdx1 > edge->VertIdx2)
+	{
+		unsigned int tempIdx = edge->VertIdx1;
+		edge->VertIdx1 = edge->VertIdx2;
+		edge->VertIdx2 = tempIdx;
+
+		uint8 tempFlags = edge->Vert1Flags;
+		edge->Vert1Flags = edge->Vert2Flags;
+		edge->Vert2Flags = tempFlags;
+	}
+
+	edge->TriIdx = triIdx;
+	edge->Concave = false;
+}
+
+// Get the vertex opposite this edge in the triangle
+inline Point GetOppositeVert(EdgeRecord* edge, const Point* vertices[])
+{
+	if ((edge->Vert1Flags == dxTriMeshData::kVert0 && edge->Vert2Flags == dxTriMeshData::kVert1) ||
+		(edge->Vert1Flags == dxTriMeshData::kVert1 && edge->Vert2Flags == dxTriMeshData::kVert0))
+	{
+		return *vertices[2];
+	}
+	else if ((edge->Vert1Flags == dxTriMeshData::kVert1 && edge->Vert2Flags == dxTriMeshData::kVert2) ||
+		(edge->Vert1Flags == dxTriMeshData::kVert2 && edge->Vert2Flags == dxTriMeshData::kVert1))
+	{
+		return *vertices[0];
+	}
+	else
+		return *vertices[1];
+}
+
+void dxTriMeshData::Preprocess()
+{
+	// If this mesh has already been preprocessed, exit
+	if (UseFlags)
+		return;
+
+	udword numTris = Mesh.GetNbTriangles();
+	udword numEdges = numTris * 3;
+
+	UseFlags = new uint8[numTris];
+	memset(UseFlags, 0, sizeof(uint8) * numTris);
+
+	EdgeRecord* records = new EdgeRecord[numEdges];
+
+	// Make a list of every edge in the mesh
+	const IndexedTriangle* tris = Mesh.GetTris();
+    for (int i = 0; i < numTris; i++)
+	{
+		SetupEdge(&records[i*3],   0, i, tris->mVRef);
+		SetupEdge(&records[i*3+1], 1, i, tris->mVRef);
+		SetupEdge(&records[i*3+2], 2, i, tris->mVRef);
+
+		tris = (const IndexedTriangle*)(((uint8*)tris) + Mesh.GetTriStride());
+	}
+
+	// Sort the edges, so the ones sharing the same verts are beside each other
+	qsort(records, numEdges, sizeof(EdgeRecord), EdgeCompare);
+
+	// Go through the sorted list of edges and flag all the edges and vertices that we need to use
+	for (int i = 0; i < numEdges; i++)
+	{
+		EdgeRecord* rec1 = &records[i];
+		EdgeRecord* rec2 = 0;
+		if (i < numEdges - 1)
+			rec2 = &records[i+1];
+
+		if (rec2 &&
+			rec1->VertIdx1 == rec2->VertIdx1 &&
+			rec1->VertIdx2 == rec2->VertIdx2)
+		{
+			VertexPointers vp;
+			Mesh.GetTriangle(vp, rec1->TriIdx);
+
+			// Get the normal of the first triangle
+			Point triNorm = (*vp.Vertex[2] - *vp.Vertex[1]) ^ (*vp.Vertex[0] - *vp.Vertex[1]);
+			triNorm.Normalize();
+
+			// Get the vert opposite this edge in the first triangle
+			Point oppositeVert1 = GetOppositeVert(rec1, vp.Vertex);
+
+			// Get the vert opposite this edge in the second triangle
+			Mesh.GetTriangle(vp, rec2->TriIdx);
+			Point oppositeVert2 = GetOppositeVert(rec2, vp.Vertex);
+
+			float dot = triNorm.Dot((oppositeVert2 - oppositeVert1).Normalize());
+
+			// We let the dot threshold for concavity get slightly negative to allow for rounding errors
+			static const float kConcaveThresh = -0.000001f;
+
+			// This is a concave edge, leave it for the next pass
+			if (dot >= kConcaveThresh)
+				rec1->Concave = true;
+			// If this is a convex edge, mark its vertices and edge as used
+			else
+				UseFlags[rec1->TriIdx] |= rec1->Vert1Flags | rec1->Vert2Flags | rec1->EdgeFlags;
+
+			// Skip the second edge
+			i++;
+		}
+		// This is a boundary edge
+		else
+		{
+			UseFlags[rec1->TriIdx] |= rec1->Vert1Flags | rec1->Vert2Flags | rec1->EdgeFlags;
+		}
+	}
+
+	// Go through the list once more, and take any edge we marked as concave and
+	// clear it's vertices flags in any triangles they're used in
+	for (int i = 0; i < numEdges; i++)
+	{
+		EdgeRecord& er = records[i];
+
+		if (er.Concave)
+		{
+			for (int j = 0; j < numEdges; j++)
+			{
+				EdgeRecord& curER = records[j];
+
+				if (curER.VertIdx1 == er.VertIdx1 ||
+					curER.VertIdx1 == er.VertIdx2)
+					UseFlags[curER.TriIdx] &= ~curER.Vert1Flags;
+
+				if (curER.VertIdx2 == er.VertIdx1 ||
+					curER.VertIdx2 == er.VertIdx2)
+					UseFlags[curER.TriIdx] &= ~curER.Vert2Flags;
+			}
+		}
+	}
+
+	delete [] records;
 }
 
 dTriMeshDataID dGeomTriMeshDataCreate(){
@@ -244,6 +432,25 @@ void dGeomTriMeshDataBuildSimple(dTriMeshDataID g,
     dGeomTriMeshDataBuildSimple1(g,
                                  Vertices, VertexCount, Indices, IndexCount,
                                  (const int*)NULL);
+}
+
+void dGeomTriMeshDataPreprocess(dTriMeshDataID g)
+{
+    dUASSERT(g, "argument not trimesh data");
+	g->Preprocess();
+}
+
+void dGeomTriMeshDataGetBuffer(dTriMeshDataID g, unsigned char** buf, int* bufLen)
+{
+    dUASSERT(g, "argument not trimesh data");
+	*buf = g->UseFlags;
+	*bufLen = g->Mesh.GetNbTriangles();
+}
+
+void dGeomTriMeshDataSetBuffer(dTriMeshDataID g, unsigned char* buf)
+{
+    dUASSERT(g, "argument not trimesh data");
+	g->UseFlags = buf;
 }
 
 
