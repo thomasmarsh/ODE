@@ -248,6 +248,157 @@ void dClosestLineSegmentPoints (dVector3 const a1, dVector3 const a2,
 }
 
 
+// given a line segment p1-p2 and a box (center 'c', rotation 'R', side length
+// vector 'side'), compute the points of closest approach between the box
+// and the line. return these points in 'lret' (the point on the line) and
+// 'bret' (the point on the box). if the line actually penetrates the box
+// then the solution is not unique, but only one solution will be returned.
+// in this case the solution points will coincide.
+//
+// a simple root finding algorithm is used to find the value of 't' that
+// satisfies:
+//		d|D(t)|^2/dt = 0
+// where:
+//		|D(t)| = |p(t)-b(t)|
+// where p(t) is a point on the line parameterized by t:
+//		p(t) = p1 + t*(p2-p1)
+// and b(t) is that same point clipped to the boundary of the box. in box-
+// relative coordinates d|D(t)|^2/dt is the sum of three x,y,z components
+// each of which looks like this:
+//
+//	    t_lo     /
+//	      ______/    -->t
+//	     /     t_hi
+//	    /
+//
+// t_lo and t_hi are the t values where the line passes through the planes
+// corresponding to the sides of the box. the algorithm computes d|D(t)|^2/dt
+// in a piecewise fashion from t=0 to t=1, stopping at the point where
+// d|D(t)|^2/dt crosses from negative to positive.
+
+static void dClosestLineBoxPoints (const dVector3 p1, const dVector3 p2,
+				   const dVector3 c, const dMatrix3 R,
+				   const dVector3 side,
+				   dVector3 lret, dVector3 bret)
+{
+  int i;
+
+  // compute the start and delta of the line p1-p2 relative to the box.
+  // we will do all subsequent computations in this box-relative coordinate
+  // system. we have to do a translation and rotation for each point.
+  dVector3 tmp,s,v;
+  tmp[0] = p1[0] - c[0];
+  tmp[1] = p1[1] - c[1];
+  tmp[2] = p1[2] - c[2];
+  dMULTIPLY1_331 (s,R,tmp);
+  tmp[0] = p2[0] - p1[0];
+  tmp[1] = p2[1] - p1[1];
+  tmp[2] = p2[2] - p1[2];
+  dMULTIPLY1_331 (v,R,tmp);
+
+  // mirror the line so that v has all components >= 0
+  dVector3 sign;
+  for (i=0; i<3; i++) {
+    if (v[i] < 0) {
+      s[i] = -s[i];
+      v[i] = -v[i];
+      sign[i] = -1;
+    }
+    else sign[i] = 1;
+  }
+
+  // compute v^2
+  dVector3 v2;
+  v2[0] = v[0]*v[0];
+  v2[1] = v[1]*v[1];
+  v2[2] = v[2]*v[2];
+
+  // compute the half-sides of the box
+  dReal h[3];
+  h[0] = REAL(0.5) * side[0];
+  h[1] = REAL(0.5) * side[1];
+  h[2] = REAL(0.5) * side[2];
+
+  // region is -1,0,+1 depending on which side of the box planes each
+  // coordinate is on. tanchor in the next t value at which there is a
+  // transition, or the last one if there are no more.
+  int region[i];
+  dReal tanchor[3];
+
+  // find the region and tanchor values for p1
+  for (i=0; i<3; i++) {
+    if (v[i] > 0) {
+      if (s[i] < -h[i]) {
+	region[i] = -1;
+	tanchor[i] = (-h[i]-s[i])/v[i];
+      }
+      else {
+	region[i] = (s[i] > h[i]);
+	tanchor[i] = (h[i]-s[i])/v[i];
+      }
+    }
+    else {
+      region[i] = 0;
+      tanchor[i] = 2;		// this will never be a valid tanchor
+    }
+  }
+
+  // compute d|d|^2/dt for t=0. if it's >= 0 then p1 is the closest point
+  dReal t=0;
+  dReal dd2dt = 0;
+  for (i=0; i<3; i++) dd2dt -= (region[i] ? v2[i] : 0) * tanchor[i];
+  if (dd2dt >= 0) goto got_answer;
+
+  do {
+    // find the point on the line that is at the next clip plane boundary
+    dReal next_t = 1;
+    for (i=0; i<3; i++) {
+      if (tanchor[i] > t && tanchor[i] < 1 && tanchor[i] < next_t)
+        next_t = tanchor[i];
+    }
+
+    // compute d|d|^2/dt for the next t
+    dReal next_dd2dt = 0;
+    for (i=0; i<3; i++) {
+      next_dd2dt += (region[i] ? v2[i] : 0) * (next_t - tanchor[i]);
+    }
+
+    // if the sign of d|d|^2/dt has changed, solution = the crossover point
+    if (next_dd2dt >= 0) {
+      dReal m = (next_dd2dt-dd2dt)/(next_t - t);
+      t -= dd2dt/m;
+      goto got_answer;
+    }
+
+    // advance to the next anchor point / region
+    for (i=0; i<3; i++) {
+      if (tanchor[i] == next_t) {
+	tanchor[i] = (h[i]-s[i])/v[i];
+	region[i]++;
+      }
+    }
+    t = next_t;
+    dd2dt = next_dd2dt;
+  }
+  while (t < 1);
+  t = 1;
+
+  got_answer:
+
+  // compute closest point on the line
+  for (int i=0; i<3; i++) lret[i] = p1[i] + t*tmp[i];	// note: tmp=p2-p1
+
+  // compute closest point on the box
+  for (i=0; i<3; i++) {
+    tmp[i] = sign[i] * (s[i] + t*v[i]);
+    if (tmp[i] < -h[i]) tmp[i] = -h[i];
+    else if (tmp[i] > h[i]) tmp[i] = h[i];
+  }
+  dMULTIPLY0_331 (s,R,tmp);
+  for (int i=0; i<3; i++) bret[i] = s[i] + c[i];
+}
+
+
 // given a box (R,side), `R' is the rotation matrix for the box, and `side'
 // is a vector of x/y/z side lengths, return the size of the interval of the
 // box projected along the given axis. if the axis has unit length then the
@@ -1136,8 +1287,6 @@ int dCollideCS (const dxGeom *o1, const dxGeom *o2, int flags,
 int dCollideCB (const dxGeom *o1, const dxGeom *o2, int flags,
 		dContactGeom *contact, int skip)
 {
-  int i;
-
   dIASSERT (skip >= (int)sizeof(dContactGeom));
   dIASSERT (o1->_class->num == dCCylinderClass);
   dIASSERT (o2->_class->num == dBoxClass);
@@ -1162,165 +1311,12 @@ int dCollideCB (const dxGeom *o1, const dxGeom *o2, int flags,
   dReal *R = o2->R;
   dReal *side = box->side;
 
-  // compute the start and end of the line (p1 and p2) relative to the box.
-  // we will do all subsequent computations in this box-relative coordinate
-  // system. we have to do a translation and rotation for each point.
-  dVector3 tmp3,s,e;
-  tmp3[0] = p1[0] - c[0];
-  tmp3[1] = p1[1] - c[1];
-  tmp3[2] = p1[2] - c[2];
-  dMULTIPLY1_331 (s,R,tmp3);
-  tmp3[0] = p2[0] - c[0];
-  tmp3[1] = p2[1] - c[1];
-  tmp3[2] = p2[2] - c[2];
-  dMULTIPLY1_331 (e,R,tmp3);
+  // get the closest point between the cylinder axis and the box
+  dVector3 pl,pb;
+  dClosestLineBoxPoints (p1,p2,c,R,side,pl,pb);
 
-  // compute the vector 'v' from the start point to the end point
-  dVector3 v;
-  v[0] = e[0] - s[0];
-  v[1] = e[1] - s[1];
-  v[2] = e[2] - s[2];
-
-  // compute the half-sides of the box
-  dReal S0 = side[0] * REAL(0.5);
-  dReal S1 = side[1] * REAL(0.5);
-  dReal S2 = side[2] * REAL(0.5);
-
-  // compute the size of the bounding box around the line segment
-  dReal B0 = dFabs (v[0]);
-  dReal B1 = dFabs (v[1]);
-  dReal B2 = dFabs (v[2]);
-
-  // for all 6 separation axes, measure the penetration depth. if any depth is
-  // less than 0 then the objects don't penetrate at all so we can just
-  // return 0. find the axis with the smallest depth, and record its normal.
-
-  // note: normalR is set to point to a column of R if that is the smallest
-  // depth normal so far. otherwise normalR is 0 and normalC is set to a
-  // vector relative to the box. invert_normal is 1 if the sign of the normal
-  // should be flipped.
-
-  dReal depth,trial_depth,tmp,length;
-  const dReal *normalR=0;
-  dVector3 normalC;
-  int invert_normal = 0;
-  int code = 0;		// 0=no contact, 1-3=face contact, 4-6=edge contact
-
-  depth = dInfinity;
-
-  // look at face-normal axes
-
-#undef TEST
-#define TEST(center,depth_expr,norm,contact_code) \
-  tmp = (center); \
-  trial_depth = radius + REAL(0.5) * ((depth_expr) - dFabs(tmp)); \
-  if (trial_depth < 0) return 0; \
-  if (trial_depth < depth) { \
-    depth = trial_depth; \
-    normalR = (norm); \
-    invert_normal = (tmp < 0); \
-    code = contact_code; \
-  }
-
-  TEST (s[0]+e[0], side[0] + B0, R+0, 1);
-  TEST (s[1]+e[1], side[1] + B1, R+1, 2);
-  TEST (s[2]+e[2], side[2] + B2, R+2, 3);
-
-  // look at v x box-edge axes
-
-#undef TEST
-#define TEST(box_radius,line_offset,nx,ny,nz,contact_code) \
-  tmp = (line_offset); \
-  trial_depth = (box_radius) - dFabs(tmp); \
-  length = dSqrt ((nx)*(nx) + (ny)*(ny) + (nz)*(nz)); \
-  if (length > 0) { \
-    length = dRecip(length); \
-    trial_depth = trial_depth * length + radius; \
-    if (trial_depth < 0) return 0; \
-    if (trial_depth < depth) { \
-      depth = trial_depth; \
-      normalR = 0; \
-      normalC[0] = (nx)*length; \
-      normalC[1] = (ny)*length; \
-      normalC[2] = (nz)*length; \
-      invert_normal = (tmp < 0); \
-      code = contact_code; \
-    } \
-  }
-
-  TEST (B2*S1+B1*S2,v[1]*s[2]-v[2]*s[1], 0,-v[2],v[1], 4);
-  TEST (B2*S0+B0*S2,v[2]*s[0]-v[0]*s[2], v[2],0,-v[0], 5);
-  TEST (B1*S0+B0*S1,v[0]*s[1]-v[1]*s[0], -v[1],v[0],0, 6);
-
-#undef TEST
-
-  // if we get to this point, the box and ccylinder interpenetrate.
-  // compute the normal in global coordinates.
-  dReal *normal = contact[0].normal;
-  if (normalR) {
-    normal[0] = normalR[0];
-    normal[1] = normalR[4];
-    normal[2] = normalR[8];
-  }
-  else {
-    dMULTIPLY0_331 (normal,R,normalC);
-  }
-  if (invert_normal) {
-    normal[0] = -normal[0];
-    normal[1] = -normal[1];
-    normal[2] = -normal[2];
-  }
-
-  // set the depth
-  contact[0].depth = depth;
-
-  if (code == 0) {
-    return 0;		// should never get here
-  }
-  else if (code >= 4) {
-    // handle edge contacts
-    // find an endpoint q1 on the intersecting edge of the box
-    dVector3 q1;
-    dReal sign[3];
-    for (i=0; i<3; i++) q1[i] = c[i];
-    sign[0] = (dDOT14(normal,R+0) > 0) ? REAL(1.0) : REAL(-1.0);
-    for (i=0; i<3; i++) q1[i] += sign[0] * S0 * R[i*4];
-    sign[1] = (dDOT14(normal,R+1) > 0) ? REAL(1.0) : REAL(-1.0);
-    for (i=0; i<3; i++) q1[i] += sign[1] * S1 * R[i*4+1];
-    sign[2] = (dDOT14(normal,R+2) > 0) ? REAL(1.0) : REAL(-1.0);
-    for (i=0; i<3; i++) q1[i] += sign[2] * S2 * R[i*4+2];
-
-    // find the other endpoint q2 of the intersecting edge
-    dVector3 q2;
-    for (i=0; i<3; i++)
-      q2[i] = q1[i] - R[code-4 + i*4] * (sign[code-4] * side[code-4]);
-
-    // determine the closest point between the box edge and the line segment
-    dVector3 cp1,cp2;
-    dClosestLineSegmentPoints (q1,q2, p1,p2, cp1,cp2);
-    for (i=0; i<3; i++) contact[0].pos[i] = cp1[i] - REAL(0.5)*normal[i]*depth;
-    return 1;
-  }
-  else {
-    // handle face contacts.
-    // @@@ temporary: make deepest vertex on the line the contact point.
-    // @@@ this kind of works, but we sometimes need two contact points for
-    // @@@ stability.
-
-    // compute 'v' in global coordinates
-    dVector3 gv;
-    for (i=0; i<3; i++) gv[i] = p2[i] - p1[i];
-
-    if (dDOT (normal,gv) > 0) {
-      for (i=0; i<3; i++)
-	contact[0].pos[i] = p1[i] + (depth*REAL(0.5)-radius)*normal[i];
-    }
-    else {
-      for (i=0; i<3; i++)
-	contact[0].pos[i] = p2[i] + (depth*REAL(0.5)-radius)*normal[i];
-    }
-    return 1;
-  }
+  // generate contact point
+  return dCollideSpheres (pl,radius,pb,0,contact);
 }
 
 
