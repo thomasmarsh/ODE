@@ -1878,4 +1878,16 @@ void dCloseODE()
     delete classes;
     classes = 0;
   }
+
+  // reset geom class vars
+  dSphereClass = -1;
+  dBoxClass = -1;
+  dCCylinderClass = -1;
+  dPlaneClass = -1;
+  dGeomGroupClass = -1;
+  dGeomTransformClass = -1;
+
+  // if you're using contrib code you may want to uncomment the following:
+  // dTriListClass = -1;
+  // dRayClass = -1;
 }
