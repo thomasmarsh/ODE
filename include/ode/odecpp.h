@@ -76,27 +76,27 @@ public:
 
   void setPosition (dReal x, dReal y, dReal z)
     { dBodySetPosition (_id,x,y,z); }
-  void setRotation (dMatrix3 R)
+  void setRotation (const dMatrix3 R)
     { dBodySetRotation (_id,R); }
-  void setQuaternion (dQuaternion q)
+  void setQuaternion (const dQuaternion q)
     { dBodySetQuaternion (_id,q); }
   void setLinearVel  (dReal x, dReal y, dReal z)
     { dBodySetLinearVel (_id,x,y,z); }
   void setAngularVel (dReal x, dReal y, dReal z)
     { dBodySetAngularVel (_id,x,y,z); }
 
-  dReal * getPosition()
+  const dReal * getPosition()
     { return dBodyGetPosition (_id); }
-  dReal * getRotation()
+  const dReal * getRotation()
     { return dBodyGetRotation (_id); }
-  dReal * getQuaternion()
+  const dReal * getQuaternion()
     { return dBodyGetQuaternion (_id); }
-  dReal * getLinearVel()
+  const dReal * getLinearVel()
     { return dBodyGetLinearVel (_id); }
-  dReal * getAngularVel()
+  const dReal * getAngularVel()
     { return dBodyGetAngularVel (_id); }
 
-  void setMass (dMass *mass)
+  void setMass (const dMass *mass)
     { dBodySetMass (_id,mass); }
   void getMass (dMass *mass)
     { dBodyGetMass (_id,mass); }
@@ -132,7 +132,7 @@ public:
   void getPointRelVel (dReal px, dReal py, dReal pz, dVector3 result)
     { dBodyGetPointRelVel (_id, px, py, pz, result); }
 
-  int isConnectedTo (dBody &b)
+  int isConnectedTo (const dBody &b)
     { return dAreConnected (_id,b._id); }
 };
 

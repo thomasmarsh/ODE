@@ -34,13 +34,13 @@ extern "C" {
  */
 
 #ifdef __cplusplus
-inline dReal dDOT (dReal *a, dReal *b)
+inline dReal dDOT (const dReal *a, const dReal *b)
   { return ((a)[0]*(b)[0] + (a)[1]*(b)[1] + (a)[2]*(b)[2]); }
-inline dReal dDOT14(dReal *a, dReal *b)
+inline dReal dDOT14(const dReal *a, const dReal *b)
   { return ((a)[0]*(b)[0] + (a)[1]*(b)[4] + (a)[2]*(b)[8]); }
-inline dReal dDOT41(dReal *a, dReal *b)
+inline dReal dDOT41(const dReal *a, const dReal *b)
   { return ((a)[0]*(b)[0] + (a)[4]*(b)[1] + (a)[8]*(b)[2]); }
-inline dReal dDOT44(dReal *a, dReal *b)
+inline dReal dDOT44(const dReal *a, const dReal *b)
   { return ((a)[0]*(b)[0] + (a)[4]*(b)[4] + (a)[8]*(b)[8]); }
 #else
 #define dDOT(a,b)   ((a)[0]*(b)[0] + (a)[1]*(b)[1] + (a)[2]*(b)[2])
@@ -91,7 +91,7 @@ inline dReal dDOT44(dReal *a, dReal *b)
 
 /* compute the distance between two 3-vectors (oops, C++!) */
 #ifdef __cplusplus
-inline dReal dDISTANCE (dVector3 a, dVector3 b)
+inline dReal dDISTANCE (const dVector3 a, const dVector3 b)
   { return dSqrt( (a[0]-b[0])*(a[0]-b[0]) + (a[1]-b[1])*(a[1]-b[1]) +
 		   (a[2]-b[2])*(a[2]-b[2]) ); }
 #else
@@ -113,7 +113,7 @@ void dNormalize4 (dVector4 a);
  * q wont be.
  */
 
-void dPlaneSpace (dVector3 n, dVector3 p, dVector3 q);
+void dPlaneSpace (const dVector3 n, dVector3 p, dVector3 q);
 
 
 /* special case matrix multipication, with operator selection */
@@ -163,30 +163,30 @@ void dPlaneSpace (dVector3 n, dVector3 p, dVector3 q);
 
 #ifdef __cplusplus
 
-inline void dMULTIPLY0_331(dReal *A, dReal *B, dReal *C)
+inline void dMULTIPLY0_331(dReal *A, const dReal *B, const dReal *C)
   { dMULTIPLYOP0_331(A,=,B,C) }
-inline void dMULTIPLY1_331(dReal *A, dReal *B, dReal *C)
+inline void dMULTIPLY1_331(dReal *A, const dReal *B, const dReal *C)
   { dMULTIPLYOP1_331(A,=,B,C) }
-inline void dMULTIPLY0_133(dReal *A, dReal *B, dReal *C)
+inline void dMULTIPLY0_133(dReal *A, const dReal *B, const dReal *C)
   { dMULTIPLYOP0_133(A,=,B,C) }
-inline void dMULTIPLY0_333(dReal *A, dReal *B, dReal *C)
+inline void dMULTIPLY0_333(dReal *A, const dReal *B, const dReal *C)
   { dMULTIPLYOP0_333(A,=,B,C) }
-inline void dMULTIPLY1_333(dReal *A, dReal *B, dReal *C)
+inline void dMULTIPLY1_333(dReal *A, const dReal *B, const dReal *C)
   { dMULTIPLYOP1_333(A,=,B,C) }
-inline void dMULTIPLY2_333(dReal *A, dReal *B, dReal *C)
+inline void dMULTIPLY2_333(dReal *A, const dReal *B, const dReal *C)
   { dMULTIPLYOP2_333(A,=,B,C) }
 
-inline void dMULTIPLYADD0_331(dReal *A, dReal *B, dReal *C)
+inline void dMULTIPLYADD0_331(dReal *A, const dReal *B, const dReal *C)
   { dMULTIPLYOP0_331(A,+=,B,C) }
-inline void dMULTIPLYADD1_331(dReal *A, dReal *B, dReal *C)
+inline void dMULTIPLYADD1_331(dReal *A, const dReal *B, const dReal *C)
   { dMULTIPLYOP1_331(A,+=,B,C) }
-inline void dMULTIPLYADD0_133(dReal *A, dReal *B, dReal *C)
+inline void dMULTIPLYADD0_133(dReal *A, const dReal *B, const dReal *C)
   { dMULTIPLYOP0_133(A,+=,B,C) }
-inline void dMULTIPLYADD0_333(dReal *A, dReal *B, dReal *C)
+inline void dMULTIPLYADD0_333(dReal *A, const dReal *B, const dReal *C)
   { dMULTIPLYOP0_333(A,+=,B,C) }
-inline void dMULTIPLYADD1_333(dReal *A, dReal *B, dReal *C)
+inline void dMULTIPLYADD1_333(dReal *A, const dReal *B, const dReal *C)
   { dMULTIPLYOP1_333(A,+=,B,C) }
-inline void dMULTIPLYADD2_333(dReal *A, dReal *B, dReal *C)
+inline void dMULTIPLYADD2_333(dReal *A, const dReal *B, const dReal *C)
   { dMULTIPLYOP2_333(A,+=,B,C) }
 
 #else

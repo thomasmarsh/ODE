@@ -33,7 +33,7 @@ extern "C" {
 /* all user defined error functions have this type. error and debug functions
  * should not return.
  */
-typedef void dMessageFunction (int errnum, char *msg, va_list ap);
+typedef void dMessageFunction (int errnum, const char *msg, va_list ap);
 
 /* set a new error, debug or warning handler. if fn is 0, the default handlers
  * are used.
@@ -50,9 +50,9 @@ dMessageFunction *dGetDebugHandler();
 dMessageFunction *dGetMessageHandler();
 
 /* generate a fatal error, debug trap or a message. */
-void dError (int num, char *msg, ...);
-void dDebug (int num, char *msg, ...);
-void dMessage (int num, char *msg, ...);
+void dError (int num, const char *msg, ...);
+void dDebug (int num, const char *msg, ...);
+void dMessage (int num, const char *msg, ...);
 
 
 #ifdef __cplusplus

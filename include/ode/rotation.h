@@ -40,18 +40,18 @@ void dRFrom2Axes (dMatrix3 R, dReal ax, dReal ay, dReal az,
 void dQSetIdentity (dQuaternion q);
 
 void dQFromAxisAndAngle (dQuaternion q, dReal ax, dReal ay, dReal az,
-			  dReal angle);
+			 dReal angle);
 
-void dQMultiply0 (dQuaternion qa, dQuaternion qb, dQuaternion qc);
-void dQMultiply1 (dQuaternion qa, dQuaternion qb, dQuaternion qc);
-void dQMultiply2 (dQuaternion qa, dQuaternion qb, dQuaternion qc);
-void dQMultiply3 (dQuaternion qa, dQuaternion qb, dQuaternion qc);
+void dQMultiply0 (dQuaternion qa, const dQuaternion qb, const dQuaternion qc);
+void dQMultiply1 (dQuaternion qa, const dQuaternion qb, const dQuaternion qc);
+void dQMultiply2 (dQuaternion qa, const dQuaternion qb, const dQuaternion qc);
+void dQMultiply3 (dQuaternion qa, const dQuaternion qb, const dQuaternion qc);
 
-void dQtoR (dQuaternion q, dMatrix3 R);
+void dQtoR (const dQuaternion q, dMatrix3 R);
 
-void dRtoQ (dMatrix3 R, dQuaternion q);
+void dRtoQ (const dMatrix3 R, dQuaternion q);
 
-void dWtoDQ (dVector3 w, dQuaternion q, dVector4 dq);
+void dWtoDQ (const dVector3 w, const dQuaternion q, dVector4 dq);
 
 
 #ifdef __cplusplus
