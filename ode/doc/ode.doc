@@ -2187,37 +2187,46 @@ functions do just that.  Note that they don't affect the motor, but simply
 call @func{dBodyAddForce()}/@func{dBodyAddTorque()} on the bodies attached to
 it.
 
-@funcdef{dJointAddHingeTorque(dJointID joint, dReal torque)}
-
+@funcdef{
+dJointAddHingeTorque(dJointID joint, dReal torque)
+}{
 Applies the torque about the hinge axis.  That is, it applies a torque with
 magnitude @arg{torque}, in the direction of the hinge axis, to body 1, and 
 with the same magnitude but in opposite direction to body 2.  This function 
 is just a wrapper for @func{dBodyAddTorque()}
+}
 
-@funcdef{dJointAddUniversalTorques(dJointID joint, dReal torque1, dReal torque2)}
-
+@funcdef{
+dJointAddUniversalTorques(dJointID joint, dReal torque1, dReal torque2)
+}{
 Applies @arg{torque1} about the universal's axis 1, and @arg{torque2} about the
 universal's axis 2.  This function is just a wrapper for @func{dBodyAddTorque()}.
+}
 
-@funcdef{dJointAddSliderForce(dJointID joint, dReal force)}
-
+@funcdef{
+dJointAddSliderForce(dJointID joint, dReal force)
+}{
 Applies the given force in the slider's direction.  That is, it applies a force
 with magnitude @arg{force}, in the direction slider's axis, to body1, and with 
 the same magnitude but oppsite direction to body2.  This function is just a 
 wrapper for @func{dBodyAddForce()}.
+}
 
-@funcdef{dJointAddHinge2Torqe(dJointID joint, dReal torque1, dReal torque2)}
-
+@funcdef{
+dJointAddHinge2Torqe(dJointID joint, dReal torque1, dReal torque2)
+}{
 Applies @arg{torque1} about the hinge2's axis 1, and @arg{torque2} about the 
 hinge2's axis 2.  This function is just a wrapper for @func{dBodyAddTorque()}.
+}
 
-@funcdef{dJointAddAMotorTorque(dJointID joint, dReal torque0, dReal torque1, dReal torque2)}
-
+@funcdef{
+dJointAddAMotorTorque(dJointID joint, dReal torque0, dReal torque1, dReal torque2)
+}{
 Applies @arg{torque0} about the AMotor's axis 0, @arg{torque1} about the 
 AMotor's axis 1, and @arg{torque2} about the AMotor's axis 2.  If the motor has
 fewer than three axes, the higher torques are ignored.  This function is just a
 wrapper for @func{dBodyAddTorque()}.
-
+}
 
 #############################################################################
 @chapter{StepFast}
