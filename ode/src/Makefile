@@ -28,7 +28,7 @@ endif
 LIB=../../lib/$(call fLIBNAME,ode)
 SRC = array.cpp error.cpp memory.cpp stack.cpp odemath.cpp matrix.cpp \
   misc.cpp rotation.cpp mass.cpp ode.cpp step.cpp lcp.cpp joint.cpp space.cpp \
-  geom.cpp timer.cpp mat.cpp fastldlt.c fastlsolve.c fastdot.c
+  geom.cpp timer.cpp mat.cpp fastldlt.c fastlsolve.c fastdot.c testing.cpp
 
 all: $(LIB)
 

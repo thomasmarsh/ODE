@@ -129,3 +129,19 @@ dReal dMaxDifference (dReal *A, dReal *B, int n, int m)
   }
   return max;
 }
+
+
+dReal dMaxDifferenceLowerTriangle (dReal *A, dReal *B, int n)
+{
+  int i,j;
+  int skip = dPAD(n);
+  dReal diff,max;
+  max = 0;
+  for (i=0; i<n; i++) {
+    for (j=0; j<=i; j++) {
+      diff = dFabs(A[i*skip+j] - B[i*skip+j]);
+      if (diff > max) max = diff;
+    }
+  }
+  return max;
+}

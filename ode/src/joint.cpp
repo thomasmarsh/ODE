@@ -523,6 +523,10 @@ static void contactGetInfo2 (dxJointContact *j, dxJoint::Info2 *info)
   else {
     info->cl[0] = -k*j->contact.depth;
   }
+
+  // set LCP limits
+  info->lo[0] = 0;
+  info->hi[0] = dInfinity;
 }
 
 
