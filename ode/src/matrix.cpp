@@ -22,6 +22,7 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <alloca.h>
 #include <malloc.h>		// for alloca under windows
 #include <math.h>
 #include "ode/common.h"

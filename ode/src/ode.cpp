@@ -24,6 +24,7 @@
 // numerics.
 
 #include <stdio.h>
+#include <alloca.h>
 #include <malloc.h>		// for alloca under windows
 #include "objects.h"
 #include "ode/ode.h"

@@ -54,6 +54,7 @@ which is not too significant.
 //****************************************************************************
 
 #include <string.h>
+#include <alloca.h>
 #include <malloc.h>		// for alloca under windows
 #include "ode/common.h"
 #include "ode/space.h"
