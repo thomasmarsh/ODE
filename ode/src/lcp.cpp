@@ -200,7 +200,7 @@ static void swapRowsAndCols (ATYPE A, int n, int i1, int i2, int nskip,
   }
 # else
   dReal tmp,*tmprow = (dReal*) ALLOCA (n * sizeof(dReal));
-  if (i1 > 0) {		// @@@ hmmm, is this condition right?
+  if (i1 > 0) {
     memcpy (tmprow,A+i1*nskip,i1*sizeof(dReal));
     memcpy (A+i1*nskip,A+i2*nskip,i1*sizeof(dReal));
     memcpy (A+i2*nskip,tmprow,i1*sizeof(dReal));
@@ -763,7 +763,7 @@ dLCP::dLCP (int _n, int _nub, dReal *_Adata, dReal *_x, dReal *_b, dReal *_w,
   for (k=0; k<n; k++) p[k]=k;		// initially unpermuted
 
   /*
-  // @@@ testing: do some random swaps in the area i > nub
+  // for testing, we can do some random swaps in the area i > nub
   if (nub < n) {
     for (k=0; k<100; k++) {
       int i1,i2;
@@ -912,7 +912,11 @@ void dLCP::transfer_i_from_C_to_N (int i)
 
 void dLCP::pN_equals_ANC_times_qC (dReal *p, dReal *q)
 {
-  // @@@ make this faster with outer product matrix tricks.
+  // we could try to make this matrix-vector multiplication faster using
+  // outer product matrix tricks, e.g. with the dMultidotX() functions.
+  // but i tried it and it actually made things slower on random 100x100
+  // problems because of the overhead involved. so we'll stick with the
+  // simple method for now.
   for (int i=0; i<nN; i++) p[i+nC] = dDot (AROW(i+nC),q,nC);
 }
 
@@ -1073,9 +1077,6 @@ void dSolveLCPBasic (int n, dReal *A, dReal *x, dReal *b,
 
 //***************************************************************************
 // an optimized Dantzig LCP driver routine for the lo-hi LCP problem.
-//
-// @@@ TODO: if lo=hi=0, check operation. can we switch from NL <-> NH
-//     without going through C?
 
 void dSolveLCP (int n, dReal *A, dReal *x, dReal *b,
 		dReal *w, int nub, dReal *lo, dReal *hi, int *findex)
@@ -1151,9 +1152,17 @@ void dSolveLCP (int n, dReal *A, dReal *x, dReal *b,
 
     // thus far we have not even been computing the w values for indexes
     // greater than i, so compute w[i] now.
-    // @@@ TODO: optimize for when values of lo/hi are known to be zero.
-    // @@@ this can happens for tangential friction when normals are 0.
     w[i] = lcp.AiC_times_qC (i,x) + lcp.AiN_times_qN (i,x) - b[i];
+
+    // if lo=hi=0 (which can happen for tangential friction when normals are
+    // 0) then the index will be assigned to set N with some state. however,
+    // set C's line has zero size, so the index will always remain in set N.
+    // with the "normal" switching logic, if w changed sign then the index
+    // would have to switch to set C and then back to set N with an inverted
+    // state. this is pointless, and also computationally expensive. to
+    // prevent this from happening, we use the rule that indexes with lo=hi=0
+    // will never be checked for set changes. this means that the state for
+    // these indexes may be incorrect, but that doesn't matter.
 
     // see if x(i),w(i) is in a valid region
     if (lo[i]==0 && w[i] >= 0) {
@@ -1165,7 +1174,10 @@ void dSolveLCP (int n, dReal *A, dReal *x, dReal *b,
       state[i] = 1;
     }
     else if (w[i]==0) {
-      // @@@ degenerate case, check that this works!
+      // this is a degenerate case. by the time we get to this test we know
+      // that lo != 0, which means that lo < 0 as lo is not allowed to be +ve,
+      // and similarly that hi > 0. this means that the line segment
+      // corresponding to set C is at least finite in extent, and we are on it.
       lcp.transfer_i_to_C (i);
     }
     else {
@@ -1220,6 +1232,8 @@ void dSolveLCP (int n, dReal *A, dReal *x, dReal *b,
 	for (k=0; k < lcp.numN(); k++) {
 	  if ((state[lcp.indexN(k)]==0 && delta_w[lcp.indexN(k)] < 0) ||
 	      (state[lcp.indexN(k)]!=0 && delta_w[lcp.indexN(k)] > 0)) {
+	    // don't bother checking if lo=hi=0
+	    if (lo[lcp.indexN(k)] == 0 && hi[lcp.indexN(k)] == 0) continue;
 	    dReal s2 = -w[lcp.indexN(k)] / delta_w[lcp.indexN(k)];
 	    if (s2 < s) {
 	      s = s2;
@@ -1329,7 +1343,7 @@ extern "C" void dTestSolveLCP()
   dReal *tmp2 = (dReal*) ALLOCA (n*sizeof(dReal));
 
   double total_time = 0;
-  for (int count=0; count < 100; count++) {
+  for (int count=0; count < 1000; count++) {
 
     // form (A,b) = a random positive definite LCP problem
     dMakeRandomMatrix (A2,n,n,1.0);
@@ -1350,6 +1364,15 @@ extern "C" void dTestSolveLCP()
     //for (i=nub; i<n; i++) hi[i] = 0;
     for (i=nub; i<n; i++) lo[i] = -(dRandReal()*1.0)-0.01;
     for (i=nub; i<n; i++) hi[i] =  (dRandReal()*1.0)+0.01;
+
+    // set a few limits to lo=hi=0
+    /*
+    for (i=0; i<10; i++) {
+      int j = dRandInt (n-nub) + nub;
+      lo[j] = 0;
+      hi[j] = 0;
+    }
+    */
 
     // solve the LCP. we must make copy of A,b,lo,hi (A2,b2,lo2,hi2) for
     // SolveLCP() to permute. also, we'll clear the upper triangle of A2 to
@@ -1395,7 +1418,7 @@ extern "C" void dTestSolveLCP()
 	n3++;	// ok
       }
       else {
-	dDebug (0,"FAILED: x=%.4e w=%.4e lo=%.4e hi=%.4e",
+	dDebug (0,"FAILED: i=%d x=%.4e w=%.4e lo=%.4e hi=%.4e",i,
 		x[i],w[i],lo[i],hi[i]);
       }
     }
