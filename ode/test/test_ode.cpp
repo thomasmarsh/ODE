@@ -858,7 +858,7 @@ void testRotationFunctions()
 //****************************************************************************
 
 // internal unit tests
-extern "C" void testDynamicsStuff();
+extern "C" void dTestDataStructures();
 extern "C" void dTestMatrixComparison();
 extern "C" void dTestSolveLCP();
 
@@ -889,7 +889,7 @@ int main()
   testRotationFunctions();
   dTestMatrixComparison();
   dTestSolveLCP();
-  // testDynamicsStuff();
+  // dTestDataStructures();
 
   return 0;
 }
