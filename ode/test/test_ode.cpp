@@ -111,6 +111,17 @@ int cmpIdentityMat3 (dMatrix3 A)
      cmp(_A(2,0),0.0) && cmp(_A(2,1),0.0) && cmp(_A(2,2),1.0));
 }
 
+
+// transpose a 3x3 matrix in-line
+
+void transpose3x3 (dMatrix3 A)
+{
+  dReal tmp;
+  tmp=A[4]; A[4]=A[1]; A[1]=tmp;
+  tmp=A[8]; A[8]=A[2]; A[2]=tmp;
+  tmp=A[9]; A[9]=A[6]; A[6]=tmp;
+}
+
 //****************************************************************************
 // test miscellaneous math functions
 
@@ -777,6 +788,49 @@ void testRtoQandQtoR()
 }
 
 
+void testQuaternionMultiply()
+{
+  HEADER;
+  dMatrix3 RA,RB,RC,Rtest;
+  dQuaternion qa,qb,qc;
+  dReal diff,maxdiff=0;
+
+  for (int i=0; i<100; i++) {
+    makeRandomRotation (RB);
+    makeRandomRotation (RC);
+    dRtoQ (RB,qb);
+    dRtoQ (RC,qc);
+
+    dMultiply0 (RA,RB,RC,3,3,3);
+    dQMultiply0 (qa,qb,qc);
+    dQtoR (qa,Rtest);
+    diff = dMaxDifference (Rtest,RA,3,3);
+    if (diff > maxdiff) maxdiff = diff;
+
+    dMultiply1 (RA,RB,RC,3,3,3);
+    dQMultiply1 (qa,qb,qc);
+    dQtoR (qa,Rtest);
+    diff = dMaxDifference (Rtest,RA,3,3);
+    if (diff > maxdiff) maxdiff = diff;
+
+    dMultiply2 (RA,RB,RC,3,3,3);
+    dQMultiply2 (qa,qb,qc);
+    dQtoR (qa,Rtest);
+    diff = dMaxDifference (Rtest,RA,3,3);
+    if (diff > maxdiff) maxdiff = diff;
+
+    dMultiply0 (RA,RC,RB,3,3,3);
+    transpose3x3 (RA);
+    dQMultiply3 (qa,qb,qc);
+    dQtoR (qa,Rtest);
+    diff = dMaxDifference (Rtest,RA,3,3);
+    if (diff > maxdiff) maxdiff = diff;
+  }
+  printf ("\tmaximum difference = %e - %s\n",maxdiff,
+	  (maxdiff > tol) ? "FAILED" : "passed");
+}
+
+
 void testRotationFunctions()
 {
   dMatrix3 R1;
@@ -828,6 +882,7 @@ int main()
   testLDLTRemove();
   testMassFunctions();
   testRtoQandQtoR();
+  testQuaternionMultiply();
   testRotationFunctions();
   dTestMatrixComparison();
   dTestSolveLCP();
