@@ -1308,6 +1308,60 @@ the simulation.
 
 
 @funcdef{
+void dJointSetFeedback (dJointID, dJointFeedback *);
+dJointFeedback *dJointGetFeedback (dJointID);
+}{
+During the world time step, the forces that are applied by each joint are
+computed. These forces are added directly to the joined bodies, and the user
+normally has no way of telling which joint contributed how much force.
+
+If this information is desired then the user can allocate a @c{dJointFeedback}
+structure and pass its pointer to the @c{dJointSetFeedback()} function.
+The feedback information structure is defined as follows:
+
+@code{@[
+typedef struct dJointFeedback {
+  dVector3 f1;       // force that joint applies to body 1
+  dVector3 t1;       // torque that joint applies to body 1
+  dVector3 f2;       // force that joint applies to body 2
+  dVector3 t2;       // torque that joint applies to body 2
+} dJointFeedback;
+@]}
+
+During the time step any feedback structures that are attached to joints will
+be filled in with the joint's force and torque information.
+The @c{dJointGetFeedback()} function returns the current feedback
+structure pointer, or 0 if none is used (this is the default).
+@c{dJointSetFeedback()} can be passed 0 to disable feedback for that joint.
+
+Now for some API design notes.
+It might seem strange to require that users perform the allocation of
+these structures. Why not just store the data statically in each
+joint? The reason is that not all users will use the feedback
+information, and even when it is used not all joints will need it.
+It will waste memory to store it statically, especially as this
+structure could grow to store a lot of extra information in the
+future.
+
+Why not have ODE allocate the structure itself, at the user's request?
+The reason is that contact joints (which are created and destroyed
+every time step) would require a lot of time to be spent in memory
+allocation if feedback is required. Letting the user do the allocation
+means that a better allocation strategy can be provided, e.g simply
+allocating them out of a fixed array.
+
+The alternative to this API is to have a joint-force callback. This
+would work of course, but it has a few problems. First, callbacks tend
+to pollute APIs and sometimes require the user to go through unnatural
+contortions to get the data to the right place. Second, this would
+expose ODE to being changed in the middle of a step (which
+would have bad consequences), and there would have to be some kind of
+guard against this or a debugging check for it - which would complicate
+things.
+}
+
+
+@funcdef{
 int dAreConnected (dBodyID, dBodyID);
 }{
 Utility function: return 1 if the two bodies are connected together by

@@ -139,6 +139,9 @@ void *dJointGetData (dJointID);
 int dJointGetType (dJointID);
 dBodyID dJointGetBody (dJointID, int index);
 
+void dJointSetFeedback (dJointID, dJointFeedback *);
+dJointFeedback *dJointGetFeedback (dJointID);
+
 void dJointSetBallAnchor (dJointID, dReal x, dReal y, dReal z);
 void dJointSetHingeAnchor (dJointID, dReal x, dReal y, dReal z);
 void dJointSetHingeAxis (dJointID, dReal x, dReal y, dReal z);

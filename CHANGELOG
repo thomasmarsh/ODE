@@ -9,6 +9,10 @@ the rules for this file:
 
 ------------------------------------------------------------------------------
 
+08/28/02 russ
+
+	* added dJointSetFeedback() and dJointGetFeedback().
+
 08/05/02 russ
 
 	* added dGeomTransformSetInfo() and dGeomTransformGetInfo().
