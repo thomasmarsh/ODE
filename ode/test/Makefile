@@ -2,7 +2,7 @@
 MAKEFILE_INC=../../build/Makefile.inc
 include $(MAKEFILE_INC)
 
-APPNAMES = $(call fEXENAME,test_ode) $(call fEXENAME,test_chain) $(call fEXENAME,test_hinge) $(call fEXENAME,test_slider)
+APPNAMES = $(call fEXENAME,test_ode) $(call fEXENAME,test_chain) $(call fEXENAME,test_chain2) $(call fEXENAME,test_hinge) $(call fEXENAME,test_slider)
 
 INCLUDE_PATHS = ../../include
 LIB_PATHS = ../../lib
@@ -21,6 +21,9 @@ $(call fEXENAME,test_ode): $(call fTARGETS,test_ode.cpp)
 
 $(call fEXENAME,test_chain): $(call fTARGETS,test_chain.cpp)
 	$(call fLINK,$@,$(call fTARGETS,test_chain.cpp) $(call fLIB,ode) $(call fLIB,drawstuff) $(LINKOPENGL) $(LINKWIN) $(LINKMATH) $(RSRC))
+
+$(call fEXENAME,test_chain2): $(call fTARGETS,test_chain2.cpp)
+	$(call fLINK,$@,$(call fTARGETS,test_chain2.cpp) $(call fLIB,ode) $(call fLIB,drawstuff) $(LINKOPENGL) $(LINKWIN) $(LINKMATH) $(RSRC))
 
 $(call fEXENAME,test_hinge): $(call fTARGETS,test_hinge.cpp)
 	$(call fLINK,$@,$(call fTARGETS,test_hinge.cpp) $(call fLIB,ode) $(call fLIB,drawstuff) $(LINKOPENGL) $(LINKWIN) $(LINKMATH) $(RSRC))
