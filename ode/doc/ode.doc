@@ -897,6 +897,15 @@ Step the world.
 }
 
 
+@funcdef{
+void dCloseODE();
+}{
+This deallocates some extra memory used by ODE that can not be deallocated
+using the normal destroy functions, e.g. @func{dWorldDestroy()}.
+You can use this function at the end of your application to prevent
+memory leak checkers from complaining about ODE.
+}
+
 #############################################################################
 @chapter{Rigid body functions}
 
