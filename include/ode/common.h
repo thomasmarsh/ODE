@@ -198,6 +198,7 @@ enum {
   dJointTypeHinge,
   dJointTypeSlider,
   dJointTypeContact,
+  dJointTypeUniversal,
   dJointTypeHinge2,
   dJointTypeFixed,
   dJointTypeNull,

@@ -95,7 +95,7 @@ Here are the features:
 @list{
 @*	Arbitrary mass distribution of the rigid bodies.
 @*	Current joint types: ball-and-socket, hinge, slider (prismatic),
-	hinge-2, fixed, angular motor.
+	hinge-2, fixed, angular motor, universal.
 @*	Current collision primitives: sphere, box, capped cylinder and plane.
 @*	Simulation method: The equations of motion are derived from a
 	Lagrange multiplier velocity based model due to Trinkle/Stewart and
@@ -111,6 +111,14 @@ Here are the features:
 @*	Many unit tests, and more being written all the time.
 @*	Platform specific optimizations.
 @*	Other stuff I forgot to mention...
+}
+
+
+@section{New in the next release}
+
+@list{
+@* A universal joint, generously contributed by Martin C. Martin.
+   It doesn't (yet) have a motor or joint limits.
 }
 
 
@@ -1110,6 +1118,7 @@ dJointID dJointCreateHinge (dWorldID, dJointGroupID);
 dJointID dJointCreateSlider (dWorldID, dJointGroupID);
 dJointID dJointCreateContact (dWorldID, dJointGroupID,
                               const dContact *);
+dJointID dJointCreateUniversal (dWorldID, dJointGroupID);
 dJointID dJointCreateHinge2 (dWorldID, dJointGroupID);
 dJointID dJointCreateFixed (dWorldID, dJointGroupID);
 dJointID dJointCreateAMotor (dWorldID, dJointGroupID);
@@ -1192,6 +1201,7 @@ Get the joint's type. One of the following constants will be returned:
 @constdef{dJointTypeHinge}{A hinge joint.}
 @constdef{dJointTypeSlider}{A slider joint.}
 @constdef{dJointTypeContact}{A contact joint.}
+@constdef{dJointTypeUniversal}{A universal joint.}
 @constdef{dJointTypeHinge2}{A hinge-2 joint.}
 @constdef{dJointTypeFixed}{A fixed joint.}
 @constdef{dJointTypeAMotor}{An angular motor joint.}
@@ -1307,6 +1317,23 @@ derivative of this value.
 
 When the axis is set, the current position of the attached bodies is
 examined and that position will be the zero position.
+}
+
+
+@subsection{Universal}
+
+There is no description of what a universal joint actually is yet, but here
+are the functions:
+
+@funcdef{
+void dJointSetUniversalAnchor (dJointID, dReal x, dReal y, dReal z);
+void dJointSetUniversalAxis1 (dJointID, dReal x, dReal y, dReal z);
+void dJointSetUniversalAxis2 (dJointID, dReal x, dReal y, dReal z);
+void dJointGetUniversalAnchor (dJointID, dVector3 result);
+void dJointGetUniversalAxis1 (dJointID, dVector3 result);
+void dJointGetUniversalAxis2 (dJointID, dVector3 result);
+}{
+FIXME: I should eventually write some sort of description here.
 }
 
 

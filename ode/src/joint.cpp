@@ -1518,6 +1518,177 @@ dxJoint::Vtable __dhinge2_vtable = {
   dJointTypeHinge2};
 
 //****************************************************************************
+// universal
+
+static void universalInit (dxJointUniversal *j)
+{
+  dSetZero (j->anchor1,4);
+  dSetZero (j->anchor2,4);
+  dSetZero (j->axis1,4);
+  j->axis1[0] = 1;
+  dSetZero (j->axis2,4);
+  j->axis2[1] = 1;
+}
+
+
+static void universalGetInfo1 (dxJointUniversal *j, dxJoint::Info1 *info)
+{
+  info->nub = 4;
+  info->m = 4;
+}
+
+
+static void universalGetInfo2 (dxJointUniversal *joint, dxJoint::Info2 *info)
+{
+  // set the three ball-and-socket rows
+  setBall (joint,info,joint->anchor1,joint->anchor2);
+
+  // set the universal joint row. the angular velocity about an axis
+  // perpendicular to both joint axes should be equal. thus the constraint
+  // equation is
+  //    p*w1 - p*w2 = 0
+  // where p is a vector normal to both joint axes, and w1 and w2
+  // are the angular velocity vectors of the two bodies.
+
+  // length 1 joint axis in global coordinates, from each body
+  dVector3 ax1, ax2;
+  // length 1 vector perpendicular to ax1 and ax2. Neither body can rotate
+  // about this.
+  dVector3 p;
+  
+  // This says "ax1 = joint->node[0].body->R * joint->axis1"
+  dMULTIPLY0_331 (ax1,joint->node[0].body->R,joint->axis1);
+  if (joint->node[1].body) {
+    dMULTIPLY0_331 (ax2,joint->node[1].body->R,joint->axis2);
+  }
+  else {
+    ax2[0] = joint->axis2[0];
+    ax2[1] = joint->axis2[1];
+    ax2[2] = joint->axis2[2];
+  }
+
+  // if ax1 and ax2 are almost parallel, p won't be perpendicular to them.
+  // Is there some more robust way to do this?
+  dCROSS(p, =, ax1, ax2);
+  dNormalize3(p);
+ 
+  int s3=3*info->rowskip;
+
+  info->J1a[s3+0] = p[0];
+  info->J1a[s3+1] = p[1];
+  info->J1a[s3+2] = p[2];
+
+  if (joint->node[1].body) {
+    info->J2a[s3+0] = -p[0];
+    info->J2a[s3+1] = -p[1];
+    info->J2a[s3+2] = -p[2];
+  }
+
+  // compute the right hand side of the constraint equation. set relative
+  // body velocities along p to bring the axes back to perpendicular.
+  // If ax1, ax2 are unit length joint axes as computed from body1 and
+  // body2, we need to rotate both bodies along the axis p.  If theta
+  // is the angle between ax1 and ax2, we need an angular velocity
+  // along p to cover the angle erp * (theta - Pi/2) in one step:
+  //
+  //   |angular_velocity| = angle/time = erp*(theta - Pi/2) / stepsize
+  //                      = (erp*fps) * (theta - Pi/2)
+  //
+  // if theta is close to Pi/2, 
+  // theta - Pi/2 ~= cos(theta), so
+  //    |angular_velocity|  = (erp*fps) * (ax1 dot ax2)
+
+  info->c[3] = info->fps * info->erp * - dDOT(ax1, ax2);
+}
+
+
+extern "C" void dJointSetUniversalAnchor (dxJointUniversal *joint,
+					  dReal x, dReal y, dReal z)
+{
+  dUASSERT(joint,"bad joint argument");
+  dUASSERT(joint->vtable == &__duniversal_vtable,"joint is not a universal");
+  setAnchors (joint,x,y,z,joint->anchor1,joint->anchor2);
+}
+
+
+extern "C" void dJointSetUniversalAxis1 (dxJointUniversal *joint,
+					 dReal x, dReal y, dReal z)
+{
+  dUASSERT(joint,"bad joint argument");
+  dUASSERT(joint->vtable == &__duniversal_vtable,"joint is not a universal");
+  if (joint->node[0].body) {
+    dReal q[4];
+    q[0] = x;
+    q[1] = y;
+    q[2] = z;
+    q[3] = 0;
+    dNormalize3 (q);
+    dMULTIPLY1_331 (joint->axis1,joint->node[0].body->R,q);
+  }
+  joint->axis1[3] = 0;
+}
+
+
+extern "C" void dJointSetUniversalAxis2 (dxJointUniversal *joint,
+					 dReal x, dReal y, dReal z)
+{
+  dUASSERT(joint,"bad joint argument");
+  dUASSERT(joint->vtable == &__duniversal_vtable,"joint is not a universal");
+  if (joint->node[1].body) {
+    dReal q[4];
+    q[0] = x;
+    q[1] = y;
+    q[2] = z;
+    q[3] = 0;
+    dNormalize3 (q);
+    dMULTIPLY1_331 (joint->axis2,joint->node[1].body->R,q);
+  }
+  joint->axis2[3] = 0;
+}
+
+
+extern "C" void dJointGetUniversalAnchor (dxJointUniversal *joint,
+					  dVector3 result)
+{
+  dUASSERT(joint,"bad joint argument");
+  dUASSERT(result,"bad result argument");
+  dUASSERT(joint->vtable == &__duniversal_vtable,"joint is not a universal");
+  getAnchor (joint,result,joint->anchor1);
+}
+
+
+extern "C" void dJointGetUniversalAxis1 (dxJointUniversal *joint,
+					 dVector3 result)
+{
+  dUASSERT(joint,"bad joint argument");
+  dUASSERT(result,"bad result argument");
+  dUASSERT(joint->vtable == &__duniversal_vtable,"joint is not a universal");
+  if (joint->node[0].body) {
+    dMULTIPLY0_331 (result, joint->node[0].body->R, joint->axis1);
+  }
+}
+
+
+extern "C" void dJointGetUniversalAxis2 (dxJointUniversal *joint,
+					 dVector3 result)
+{
+  dUASSERT(joint,"bad joint argument");
+  dUASSERT(result,"bad result argument");
+  dUASSERT(joint->vtable == &__duniversal_vtable,"joint is not a universal");
+  if (joint->node[1].body) {
+    dMULTIPLY0_331 (result, joint->node[1].body->R, joint->axis2);
+  }
+}
+
+
+dxJoint::Vtable __duniversal_vtable = {
+  sizeof(dxJointUniversal),
+  (dxJoint::init_fn*) universalInit,
+  (dxJoint::getInfo1_fn*) universalGetInfo1,
+  (dxJoint::getInfo2_fn*) universalGetInfo2,
+  dJointTypeUniversal};
+
+//****************************************************************************
 // angular motor
 
 static void amotorInit (dxJointAMotor *j)
