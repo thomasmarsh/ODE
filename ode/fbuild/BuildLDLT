@@ -298,7 +298,7 @@ sub makeFastL1Solve # ( number-of-right-hand-sides )
  * if this is in the factorizer source file, n must be a multiple of $N1.
  */
 
-$staticvoid dSolveL1$funcsuffix (dReal *L, dReal *B, int n, int lskip1)
+$staticvoid dSolveL1$funcsuffix (const dReal *L, dReal *B, int n, int lskip1)
 {
 END
 
@@ -314,7 +314,7 @@ END
     output ("p$i,");
     output ("q$i,") if $i <= $nrhs;
   }
-  output ("*ell,*ex;\n");
+  output ("*ex;\nconst dReal *ell;\n");
   output ("int ");
   for ($i=2; $i<$N1; $i++) {
     output ("lskip$i,");
@@ -551,7 +551,7 @@ open (FOUT,">$FNAME.c") or die "can't open $FNAME.c for writing";
 output (<<END);
 /* generated code, do not edit. */
 
-#include "ode/common.h"
+#include "ode/matrix.h"
 END
 
 if ($TYPE eq 'f') {
