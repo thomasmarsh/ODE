@@ -49,6 +49,24 @@ extern "C" void dSetMessageHandler (dMessageFunction *fn)
 }
 
 
+extern "C" dMessageFunction *dGetErrorHandler()
+{
+  return error_function;
+}
+
+
+extern "C" dMessageFunction *dGetDebugHandler()
+{
+  return debug_function;
+}
+
+
+extern "C" dMessageFunction *dGetMessageHandler()
+{
+  return message_function;
+}
+
+
 static void printMessage (int num, char *msg1, char *msg2, va_list ap)
 {
   fflush (stderr);

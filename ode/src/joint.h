@@ -90,6 +90,9 @@ struct dxJoint : public dObject {
     // right hand side of the equation J*a = c (unbounded,LCP). this vector
     // will be set to zero on entry.
     dReal *cu,*cl;
+
+    // lo and hi limits for the *LCP* variables only.
+    dReal *lo,*hi;
   };
 
   // virtual function table: size of the joint structure, function pointers.
