@@ -70,7 +70,7 @@ static void nearCallback (void *data, dGeomID o1, dGeomID o2)
 
   b1 = dGeomGetBody(o1);
   b2 = dGeomGetBody(o2);
-  if (b2 && b2 && dAreConnected (b1,b2)) return;
+  if (b1 && b2 && dAreConnected (b1,b2)) return;
 
   contact.surface.mode = 0;
   contact.surface.mu = 0.1;
