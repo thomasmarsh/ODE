@@ -57,16 +57,32 @@ ODE_SRC = \
 	ode/src/step.cpp \
 	ode/src/lcp.cpp \
 	ode/src/joint.cpp \
-	ode/src/space.cpp \
-	ode/src/geom.cpp \
 	ode/src/timer.cpp \
 	ode/src/mat.cpp \
 	ode/src/testing.cpp
+
+ODE_OLD_COLLISION_SRC = ode/src/space.cpp \
+			ode/src/geom.cpp
+
+ODE_NEW_COLLISION_SRC = ode/src/space.cpp \
+			ode/src/collision_kernel.cpp \
+			ode/src/collision_util.cpp \
+			ode/src/collision_std.cpp \
+			ode/src/collision_space.cpp \
+			ode/src/collision_transform.cpp
+
 ODE_PREGEN_SRC = \
 	ode/src/fastldlt.c \
 	ode/src/fastlsolve.c \
 	ode/src/fastltsolve.c \
 	ode/src/fastdot.c
+
+ifeq ($(ODE_OLD_COLLISION),1)
+ODE_SRC += ODE_OLD_COLLISION_SRC
+ODE_OLD_COLLISION_DEF=$(C_DEF)ODE_OLD_COLLISION
+else
+ODE_SRC += ODE_NEW_COLLISION_SRC
+endif
 
 ifeq ($(WINDOWS),1)
 DRAWSTUFF_SRC = drawstuff/src/drawstuff.cpp drawstuff/src/windows.cpp
@@ -265,14 +281,14 @@ $(CONFIG_H): $(CONFIGURATOR_EXE) $(USER_SETTINGS) $(PLATFORM_MAKEFILE)
 	$(THIS_DIR)$(CONFIGURATOR_EXE) $(CONFIG_H) "$(CC) $(DEFINES) $(C_EXEOUT)" "$(DEL_CMD)" $(THIS_DIR)
 
 $(CONFIGURATOR_EXE): $(CONFIGURATOR_SRC) $(USER_SETTINGS) $(PLATFORM_MAKEFILE)
-	$(CC) $(C_DEF)d$(PRECISION) $(DEFINES) $(C_EXEOUT)$@ $<
+	$(CC) $(C_DEF)d$(PRECISION) $(DEFINES) $(ODE_OLD_COLLISION_DEF) $(C_EXEOUT)$@ $<
 
 
 # unix-gcc specific dependency making
 
 DEP_RULE=gcc -M $(C_INC)$(INCPATH) $(DEFINES)
-depend: $(ODE_SRC) $(ODE_PREGEN_SRC) $(DRAWSTUFF_SRC) $(ODE_TEST_SRC_CPP) $(ODE_TEST_SRC_C) $(DRAWSTUFF_TEST_SRC_CPP)
-	$(DEP_RULE) $(ODE_SRC) $(ODE_PREGEN_SRC) | tools/process_deps ode/src/ > Makefile.deps
+depend:
+	$(DEP_RULE) $(ODE_SRC) $(ODE_PREGEN_SRC) $(ODE_OLD_COLLISION_SRC) $(ODE_NEW_COLLISION_SRC) | tools/process_deps ode/src/ > Makefile.deps
 	$(DEP_RULE) $(DRAWSTUFF_SRC) | tools/process_deps drawstuff/src/ >> Makefile.deps
 	$(DEP_RULE) $(ODE_TEST_SRC_CPP) | tools/process_deps ode/test/ >> Makefile.deps
 	$(DEP_RULE) $(DRAWSTUFF_TEST_SRC_CPP) | tools/process_deps drawstuff/dstest/ >> Makefile.deps
