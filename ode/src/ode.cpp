@@ -359,6 +359,12 @@ void dBodyDestroy (dxBody *b)
 {
   dAASSERT (b);
 
+  // all geoms that link to this body must be notified that the body is about
+  // to disappear. 
+  for (dxGeom *geom = b->geom; geom; geom = dGeomGetBodyNext (geom)) {
+    dGeomSetBody (geom,0);
+  }
+
   // detach all neighbouring joints, then delete this body.
   dxJointNode *n = b->firstjoint;
   while (n) {
