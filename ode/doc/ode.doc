@@ -552,6 +552,14 @@ Release mode is faster, but no checking is done.
 @chapter{World}
 
 The world object is a container for rigid bodies and joints.
+Objects in different worlds can not interact, for example rigid bodies from
+two different worlds can not collide.
+
+All the objects in a world exist at the same point in time, thus one reason
+to use separate worlds is to simulate systems at different rates.
+
+Most applications will only need one world.
+
 
 @funcdef{
 dWorldID dWorldCreate();
