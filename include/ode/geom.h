@@ -113,13 +113,13 @@ struct dGeomClass {
  * we could provide accessor method for this data, but since we're making it
  * public, you can just access it yourself.
  */
-struct dGeom {
-  dGeomClass *_class;		/* class of this object */
-  void *data;			/* user data pointer */
-  dBodyID body;			/* dynamics body associated with this object */
-  dReal *pos;			/* pointer to object's position */
-  dReal *R;			/* pointer to object's rotation matrix */
-  dGeomSpaceData space;		/* reserved for use by space this object is in */
+struct dxGeom {
+  dGeomClass *_class;	/* class of this object */
+  void *data;		/* user data pointer */
+  dBodyID body;		/* dynamics body associated with this object */
+  dReal *pos;		/* pointer to object's position */
+  dReal *R;		/* pointer to object's rotation matrix */
+  dGeomSpaceData space;	/* reserved for use by space this object is in */
 };
 
 /* ************************************************************************ */
@@ -161,32 +161,32 @@ int dCollide (dGeomID o1, dGeomID o2, int flags, dContact *contact);
  */
 
 struct dSphere {
-  dGeom geom;
+  dxGeom geom;
   dReal radius;		/* sphere radius */
 };
 
 struct dBox {
-  dGeom geom;
+  dxGeom geom;
   dReal lx,ly,lz;	/* side lengths */
 };
 
 struct dCCylinder {	/* capped cylinder */
-  dGeom geom;
+  dxGeom geom;
   dReal radius,lz;	/* radius, length along z axis */
 };
 
 struct dSlab {
-  dGeom geom;
+  dxGeom geom;
   dReal radius,lx,ly;	/* radius, side length along x and y axes */
 };
 
 struct dPlane {
-  dGeom geom;
+  dxGeom geom;
   dReal p[4];		/* plane equation params: p[0]*x+p[1]*y+p[2]*z = p[3] */
 };			/* (p[0],p[1],p[2]) = normal vector, must have length=1 */
 
 struct dComposite {
-  dGeom geom;
+  dxGeom geom;
   /* ??? */
 };
 
@@ -196,9 +196,9 @@ struct dComposite {
  * part of the static environment.
  */
 
-dGeom *dCreateSphere (dSpaceID space, dReal radius);
-dGeom *dCreatePlane (dSpaceID space,
-		       dReal a, dReal b, dReal c, dReal d);
+dGeomID dCreateSphere (dSpaceID space, dReal radius);
+dGeomID dCreatePlane (dSpaceID space,
+		      dReal a, dReal b, dReal c, dReal d);
 
 
 

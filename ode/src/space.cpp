@@ -27,14 +27,14 @@
 #include "ode/memory.h"
 
 
-struct dSpace {
+struct dxSpace {
   dGeomID first;
 };
 
 
 dSpaceID dSpaceCreate()
 {
-  dSpace *w = (dSpace *) dAlloc (sizeof(dSpace));
+  dxSpace *w = (dxSpace *) dAlloc (sizeof(dxSpace));
   w->first = 0;
   return w;
 }
@@ -49,7 +49,7 @@ void dSpaceDestroy (dSpaceID space)
     dFree (g,g->_class->size);
     g = n;
   }
-  dFree (space,sizeof(dSpace));
+  dFree (space,sizeof(dxSpace));
 }
 
 
@@ -68,8 +68,8 @@ void dSpaceRemove (dSpaceID, dGeomID)
 
 void dSpaceCollide (dSpaceID space, void *data, dNearCallback *callback)
 {
-  for (dGeom *g1=space->first; g1; g1=g1->space.next) {
-    for (dGeom *g2=g1->space.next; g2; g2=g2->space.next) {
+  for (dxGeom *g1=space->first; g1; g1=g1->space.next) {
+    for (dxGeom *g2=g1->space.next; g2; g2=g2->space.next) {
       callback (data,g1,g2);
     }
   }
@@ -83,8 +83,8 @@ void dSpaceCollide (dSpaceID space, void *data, dNearCallback *callback)
 //  int n = 0;
 //  dContact *base = (dContact*) dStackAlloc (sizeof(dContact));
 //  dContact *c = base;
-//  for (dGeom *g1=space->first; g1; g1=g1->space.next) {
-//    for (dGeom *g2=g1->space.next; g2; g2=g2->space.next) {
+//  for (dxGeom *g1=space->first; g1; g1=g1->space.next) {
+//    for (dxGeom *g2=g1->space.next; g2; g2=g2->space.next) {
 //      // generate at most 1 contact for this pair
 //      c->o1 = g1;
 //      c->o2 = g2;

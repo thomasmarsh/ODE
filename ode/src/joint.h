@@ -47,14 +47,14 @@ enum {
 // makes use of the *other* node, not this node. this trick makes it a bit
 // easier to traverse the body/joint graph.
 
-struct dJointNode {
-  dJoint *joint;		// pointer to enclosing dJoint object
-  dBody *body;			// *other* body this joint is connected to
-  dJointNode *next;		// next node in body's list of connected joints
+struct dxJointNode {
+  dxJoint *joint;		// pointer to enclosing dxJoint object
+  dxBody *body;			// *other* body this joint is connected to
+  dxJointNode *next;		// next node in body's list of connected joints
 };
 
 
-struct dJoint : public dObject {
+struct dxJoint : public dObject {
   // naming convention: the "first" body this is connected to is node[0].body,
   // and the "second" body is node[1].body. if this joint is only connected
   // to one body then the second body is 0.
@@ -96,13 +96,13 @@ struct dJoint : public dObject {
   // we do it this way instead of using C++ virtual functions because
   // sometimes we need to allocate joints ourself within a memory pool.
 
-  typedef void init_fn (dJoint *joint);
-  typedef void getInfo1_fn (dJoint *joint, Info1 *info);
-  typedef void getInfo2_fn (dJoint *joint, Info2 *info);
-  typedef void setAnchor_fn (dJoint *joint, dReal x, dReal y, dReal z);
-  typedef void setAxis_fn (dJoint *joint, dReal x, dReal y, dReal z);
-  typedef void getAnchor_fn (dJoint *joint, dVector3 result);
-  typedef void getAxis_fn (dJoint *joint, dVector3 result);
+  typedef void init_fn (dxJoint *joint);
+  typedef void getInfo1_fn (dxJoint *joint, Info1 *info);
+  typedef void getInfo2_fn (dxJoint *joint, Info2 *info);
+  typedef void setAnchor_fn (dxJoint *joint, dReal x, dReal y, dReal z);
+  typedef void setAxis_fn (dxJoint *joint, dReal x, dReal y, dReal z);
+  typedef void getAnchor_fn (dxJoint *joint, dVector3 result);
+  typedef void getAxis_fn (dxJoint *joint, dVector3 result);
   struct Vtable {
     int size;
     init_fn *init;
@@ -116,54 +116,54 @@ struct dJoint : public dObject {
 
   Vtable *vtable;		// virtual function table
   int flags;			// dJOINT_xxx flags
-  dJointNode node[2];		// connections to bodies. node[1].body can be 0
+  dxJointNode node[2];		// connections to bodies. node[1].body can be 0
 };
 
 
-struct dJointGroup {
+struct dxJointGroup {
   int num;		// number of joints on the stack
-  dJoint *firstjoint;	// address of first joint on the stack
-  dStack stack;		// a stack of (possibly differently sized) dJoint
+  dxJoint *firstjoint;	// address of first joint on the stack
+  dStack stack;		// a stack of (possibly differently sized) dxJoint
 };			// objects.
 
 
 // ball and socket
 
-struct dJointBall : public dJoint {
+struct dxJointBall : public dxJoint {
   dVector3 anchor1;		// anchor w.r.t first body
   dVector3 anchor2;		// anchor w.r.t second body
 };
-extern struct dJoint::Vtable dball_vtable;
+extern struct dxJoint::Vtable dball_vtable;
 
 
 // hinge
 
-struct dJointHinge : public dJoint {
+struct dxJointHinge : public dxJoint {
   dVector3 anchor1;		// anchor w.r.t first body
   dVector3 anchor2;		// anchor w.r.t second body
   dVector3 axis1;		// axis w.r.t first body
   dVector3 axis2;		// axis w.r.t second body
 };
-extern struct dJoint::Vtable dhinge_vtable;
+extern struct dxJoint::Vtable dhinge_vtable;
 
 
 // slider. if body2 is 0 then qrel is the absolute rotation of body1 and
 // offset is the position of body1 center along axis1.
 
-struct dJointSlider : public dJoint {
+struct dxJointSlider : public dxJoint {
   dVector3 axis1;		// axis w.r.t first body
   dQuaternion qrel;		// relative rotation body1 -> body2
   dVector3 offset;		// point relative to body2 that should be
 };				// aligned with body1 center along axis1
-extern struct dJoint::Vtable dslider_vtable;
+extern struct dxJoint::Vtable dslider_vtable;
 
 
 // contact
 
-struct dJointContact : public dJoint {
+struct dxJointContact : public dxJoint {
   dContact contact;
 };
-extern struct dJoint::Vtable dcontact_vtable;
+extern struct dxJoint::Vtable dcontact_vtable;
 
 
 

@@ -44,7 +44,7 @@ struct dBase {
 // base class for bodies and joints
 
 struct dObject : public dBase {
-  dWorld *world;		// world this object is in
+  dxWorld *world;		// world this object is in
   dObject *next;		// next object of this type in list
   dObject **tome;		// pointer to previous object's next ptr
   void *userdata;		// user settable data
@@ -52,8 +52,8 @@ struct dObject : public dBase {
 };
 
 
-struct dBody : public dObject {
-  dJointNode *firstjoint;	// list of attached joints
+struct dxBody : public dObject {
+  dxJointNode *firstjoint;	// list of attached joints
   dMass mass;			// mass parameters about POR
   dMatrix3 invI;		// inverse of mass.I
   dReal invMass;		// 1 / mass.mass
@@ -65,9 +65,9 @@ struct dBody : public dObject {
 };
 
 
-struct dWorld : public dBase {
-  dBody *firstbody;		// body linked list
-  dJoint *firstjoint;		// joint linked list
+struct dxWorld : public dBase {
+  dxBody *firstbody;		// body linked list
+  dxJoint *firstjoint;		// joint linked list
   int nb,nj;			// number of bodies and joints in lists
   dVector3 gravity;		// gravity vector (m/s/s)
 };
