@@ -92,6 +92,7 @@ Here are the features:
 @* Framework now in place for more contact modes, powered and limited joints.
 @* Moving-surface contact mode.
 @* Argument checking for all functions.
+@* Build on windows using VC++ and MinGW.
 @* Various bugs fixed.
 }
 
@@ -395,6 +396,14 @@ C functions, not classes. Why is this?
 	compilers.
 @*	The user doesn't have to be familiar with C++ quirks to use ODE.
 }
+
+
+@section{Debugging}
+
+The ODE library can be compiled in "debugging" or "release" mode.
+Debugging mode is slower, but function arguments are checked and many
+compile-time tests are done to ensure internal consistency.
+Release mode is faster, but no checking is done.
 
 #############################################################################
 @chapter{World}
@@ -994,7 +1003,7 @@ struct dContactGeom {
 @]}
 @arg{pos} records the contact position, in global coordinates.
 
-@arg{depth} is the depth to which the two bodies interpenetrate each other.
+@arg{depth} is the depth to which the two bodies inter-penetrate each other.
 If the depth is zero then the two bodies have a grazing contact, i.e. they
 "only just" touch.
 However, this is rare - the simulation is not perfectly accurate and will
