@@ -647,7 +647,7 @@ static void hingeInit (dxJointHinge *j)
 
 static void hingeGetInfo1 (dxJointHinge *j, dxJoint::Info1 *info)
 {
-  info->nub = 5;    
+  info->nub = 5;
 
   // see if joint is powered
   if (j->limot.fmax > 0)
@@ -828,8 +828,12 @@ extern "C" dReal dJointGetHingeAngle (dxJointHinge *joint)
   dAASSERT(joint);
   dUASSERT(joint->vtable == &__dhinge_vtable,"joint is not a hinge");
   if (joint->node[0].body) {
-    return getHingeAngle (joint->node[0].body,joint->node[1].body,joint->axis1,
+    dReal ang = getHingeAngle (joint->node[0].body,joint->node[1].body,joint->axis1,
 			  joint->qrel);
+	if (joint->flags & dJOINT_REVERSE)
+	   return -ang;
+	else
+	   return ang;
   }
   else return 0;
 }
@@ -844,6 +848,7 @@ extern "C" dReal dJointGetHingeAngleRate (dxJointHinge *joint)
     dMULTIPLY0_331 (axis,joint->node[0].body->R,joint->axis1);
     dReal rate = dDOT(axis,joint->node[0].body->avel);
     if (joint->node[1].body) rate -= dDOT(axis,joint->node[1].body->avel);
+    if (joint->flags & dJOINT_REVERSE) rate = - rate;
     return rate;
   }
   else return 0;
@@ -858,7 +863,7 @@ extern "C" void dJointAddHingeTorque (dxJointHinge *joint, dReal torque)
 
   if (joint->flags & dJOINT_REVERSE)
     torque = -torque;
-  
+
   getAxis (joint,axis,joint->axis1);
   axis[0] *= torque;
   axis[1] *= torque;
@@ -903,13 +908,13 @@ extern "C" dReal dJointGetSliderPosition (dxJointSlider *joint)
   if (joint->node[1].body) {
     // get body2 + offset point in global coordinates
     dMULTIPLY0_331 (q,joint->node[1].body->R,joint->offset);
-    for (int i=0; i<3; i++) q[i] = joint->node[0].body->pos[i] - q[i] - 
+    for (int i=0; i<3; i++) q[i] = joint->node[0].body->pos[i] - q[i] -
 			      joint->node[1].body->pos[i];
   }
   else {
     for (int i=0; i<3; i++) q[i] = joint->node[0].body->pos[i] -
 			      joint->offset[i];
-			      
+
   }
   return dDOT(ax1,q);
 }
@@ -1020,7 +1025,7 @@ static void sliderGetInfo2 (dxJointSlider *joint, dxJoint::Info2 *info)
 
   // compute the right hand side. the first three elements will result in
   // relative angular velocity of the two bodies - this is set to bring them
-  // back into alignment. the correcting angular velocity is 
+  // back into alignment. the correcting angular velocity is
   //   |angular_velocity| = angle/time = erp*theta / stepsize
   //                      = (erp*fps) * theta
   //    angular_velocity  = |angular_velocity| * u
@@ -1747,7 +1752,7 @@ static dReal getUniversalAngle1(dxJointUniversal *joint)
 
     // It should be possible to get both angles without explicitly
     // constructing the rotation matrix of the cross.  Basically,
-    // orientation of the cross about axis1 comes from body 2, 
+    // orientation of the cross about axis1 comes from body 2,
     // about axis 2 comes from body 1, and the perpendicular
     // axis can come from the two bodies somehow.  (We don't really
     // want to assume it's 90 degrees, because in general the
@@ -1787,7 +1792,7 @@ static dReal getUniversalAngle2(dxJointUniversal *joint)
 
     // It should be possible to get both angles without explicitly
     // constructing the rotation matrix of the cross.  Basically,
-    // orientation of the cross about axis1 comes from body 2, 
+    // orientation of the cross about axis1 comes from body 2,
     // about axis 2 comes from body 1, and the perpendicular
     // axis can come from the two bodies somehow.  (We don't really
     // want to assume it's 90 degrees, because in general the
@@ -1858,7 +1863,7 @@ static void universalGetInfo2 (dxJointUniversal *joint, dxJoint::Info2 *info)
   //    p*w1 - p*w2 = 0
   // where p is a vector normal to both joint axes, and w1 and w2
   // are the angular velocity vectors of the two bodies.
-  
+
   // length 1 joint axis in global coordinates, from each body
   dVector3 ax1, ax2;
   dVector3 ax2_temp;
@@ -1866,7 +1871,7 @@ static void universalGetInfo2 (dxJointUniversal *joint, dxJoint::Info2 *info)
   // about this.
   dVector3 p;
   dReal k;
-  
+
   getUniversalAxes(joint, ax1, ax2);
   k = dDOT(ax1, ax2);
   ax2_temp[0] = ax2[0] - k*ax1[0];
@@ -1874,7 +1879,7 @@ static void universalGetInfo2 (dxJointUniversal *joint, dxJoint::Info2 *info)
   ax2_temp[2] = ax2[2] - k*ax1[2];
   dCROSS(p, =, ax1, ax2_temp);
   dNormalize3(p);
- 
+
   int s3=3*info->rowskip;
 
   info->J1a[s3+0] = p[0];
@@ -1897,7 +1902,7 @@ static void universalGetInfo2 (dxJointUniversal *joint, dxJoint::Info2 *info)
   //   |angular_velocity| = angle/time = erp*(theta - Pi/2) / stepsize
   //                      = (erp*fps) * (theta - Pi/2)
   //
-  // if theta is close to Pi/2, 
+  // if theta is close to Pi/2,
   // theta - Pi/2 ~= cos(theta), so
   //    |angular_velocity|  ~= (erp*fps) * (ax1 dot ax2)
 
@@ -2129,7 +2134,7 @@ extern "C" void dJointAddUniversalTorques (dxJointUniversal *joint, dReal torque
     torque1 = - torque2;
     torque2 = - temp;
   }
-  
+
   getAxis (joint,axis1,joint->axis1);
   getAxis2 (joint,axis2,joint->axis2);
   axis1[0] = axis1[0] * torque1 + axis2[0] * torque2;
