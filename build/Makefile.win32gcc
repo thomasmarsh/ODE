@@ -87,4 +87,4 @@ make_depend: $(wildcard *.cpp *.c)
 
 # misc
 COPY_CMD=copy
-DIRSEP=\
+DIRSEP:=$(strip \)
