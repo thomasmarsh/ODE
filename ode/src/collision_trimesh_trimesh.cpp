@@ -23,6 +23,10 @@
 // TriMesh/TriMesh collision code by Jeff Smith (c) 2004
 //
 
+#ifdef MSVC
+#pragma warning(disable:4244 4305)  // for VC++, no precision loss complaints
+#endif
+
 #include <ode/collision.h>
 #include <ode/matrix.h>
 #include <ode/rotation.h>
