@@ -88,7 +88,7 @@ typedef dReal *dRealMutablePtr;
 // help for motor-driven joints. unfortunately it appears to hurt
 // with high-friction contacts. use with care
 
-//#define WARM_STARTING 1
+#define WARM_STARTING 1
 
 
 struct IndexError {
@@ -127,7 +127,7 @@ static void SOR_LCP (int m, int nb, dRealMutablePtr J, int *jb, dxBody * const *
 #ifdef WARM_STARTING
 	// for warm starting, this seems to be necessary to prevent
 	// jerkiness in motor-driven joints. i have no idea why this works.
-	for (i=0; i<m; i++) lambda[i] *= 0.5;
+	for (i=0; i<m; i++) lambda[i] *= 0.9;
 #else
 	dSetZero (lambda,m);
 #endif
