@@ -42,9 +42,9 @@
 // Compilation messages
 #ifdef WIN32
 	#if defined(OPCODE_EXPORTS)
-		#pragma message("Compiling OPCODE")
+		// #pragma message("Compiling OPCODE")
 	#elif !defined(OPCODE_EXPORTS)
-		#pragma message("Using OPCODE")
+		// #pragma message("Using OPCODE")
 		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		// Automatic linking
 		#ifndef BAN_OPCODE_AUTOLINK
