@@ -108,6 +108,11 @@ static void removeJointReferencesFromAttachedBodies (dxJoint *j)
 // each island can be simulated separately.
 // note that joints that are not attached to anything will not be included
 // in any island, an so they do not affect the simulation.
+//
+// this function starts new island from unvisited bodies. however, it will
+// never start a new islands from a disabled body. thus islands of disabled
+// bodies will not be included in the simulation. disabled bodies are
+// re-enabled if they are found to be part of an active island.
 
 static void processIslands (dxWorld *world, dReal stepsize)
 {
@@ -135,8 +140,8 @@ static void processIslands (dxWorld *world, dReal stepsize)
   dxBody **stack = (dxBody**) ALLOCA (stackalloc * sizeof(dxBody*));
 
   for (bb=world->firstbody; bb; bb=(dxBody*)bb->next) {
-    // get bb = the next untagged body, and tag it
-    if (bb->tag) continue;
+    // get bb = the next enabled, untagged body, and tag it
+    if (bb->tag || (bb->flags & dxBodyDisabled)) continue;
     bb->tag = 1;
 
     // tag all bodies and joints starting from bb.
@@ -172,22 +177,34 @@ static void processIslands (dxWorld *world, dReal stepsize)
 
     // what we've just done may have altered the body/joint tag values.
     // we must make sure that these tags are nonzero.
+    // also make sure all bodies are in the enabled state.
     int i;
-    for (i=0; i<bcount; i++) body[i]->tag = 1;
+    for (i=0; i<bcount; i++) {
+      body[i]->tag = 1;
+      body[i]->flags &= ~dxBodyDisabled;
+    }
     for (i=0; i<jcount; i++) joint[i]->tag = 1;
   }
 
-  // if debugging, check that all objects (except for unconnected joints)
-  // were tagged
+  // if debugging, check that all objects (except for disabled bodies,
+  // unconnected joints, and joints that are connected to disabled bodies)
+  // were tagged.
 # ifndef dNODEBUG
-  for (b=world->firstbody; b; b=(dxBody*)b->next)
-    if (!b->tag) dDebug (0,"body not tagged");
-  for (j=world->firstjoint; j; j=(dxJoint*)j->next) {
-    if (j->node[0].body || j->node[1].body) {
-      if (!j->tag) dDebug (0,"attached joint not tagged");
+  for (b=world->firstbody; b; b=(dxBody*)b->next) {
+    if (b->flags & dxBodyDisabled) {
+      if (b->tag) dDebug (0,"disabled body tagged");
     }
     else {
-      if (j->tag) dDebug (0,"unattached joint tagged");
+      if (!b->tag) dDebug (0,"enabled body not tagged");
+    }
+  }
+  for (j=world->firstjoint; j; j=(dxJoint*)j->next) {
+    if ((j->node[0].body && (j->node[0].body->flags & dxBodyDisabled)==0) ||
+	(j->node[1].body && (j->node[1].body->flags & dxBodyDisabled)==0)) {
+      if (!j->tag) dDebug (0,"attached enabled joint not tagged");
+    }
+    else {
+      if (j->tag) dDebug (0,"unattached or disabled joint tagged");
     }
   }
 # endif
@@ -301,6 +318,12 @@ static void checkWorld (dxWorld *w)
 	(j->node[1].body && j->node[1].body->tag != count))
       dDebug (0,"bad body pointer in joint");
   }
+}
+
+
+void dWorldCheck (dxWorld *w)
+{
+  checkWorld (w);
 }
 
 //****************************************************************************
@@ -681,6 +704,27 @@ dJointID dBodyGetJoint (dBodyID b, int index)
   return 0;
 }
 
+
+void dBodyEnable (dBodyID b)
+{
+  dAASSERT (b);
+  b->flags &= ~dxBodyDisabled;
+}
+
+
+void dBodyDisable (dBodyID b)
+{
+  dAASSERT (b);
+  b->flags |= dxBodyDisabled;
+}
+
+
+int dBodyIsEnabled (dBodyID b)
+{
+  dAASSERT (b);
+  return ((b->flags & dxBodyDisabled) == 0);
+}
+
 //****************************************************************************
 // joints
 
@@ -810,6 +854,8 @@ void dJointGroupEmpty (dJointGroupID group)
   // added (at the top of the stack). this helps ensure that the various
   // linked lists are not traversed too much, as the joints will hopefully
   // be at the start of those lists.
+  // if any group joints have their world pointer set to 0, their world was
+  // previously destroyed. no special handling is required for these joints.
 
   dAASSERT (group);
   int i;
@@ -820,9 +866,11 @@ void dJointGroupEmpty (dJointGroupID group)
     j = (dxJoint*) ( ((char*)j) + j->vtable->size );
   }
   for (i=group->num-1; i >= 0; i--) {
-    removeJointReferencesFromAttachedBodies (jlist[i]);
-    removeObjectFromList (jlist[i]);
-    jlist[i]->world->nj--;
+    if (jlist[i]->world) {
+      removeJointReferencesFromAttachedBodies (jlist[i]);
+      removeObjectFromList (jlist[i]);
+      jlist[i]->world->nj--;
+    }
   }
   group->num = 0;
   group->stack.popFrame();
@@ -954,6 +1002,12 @@ void dWorldDestroy (dxWorld *w)
   while (j) {
     nextj = (dxJoint*)j->next;
     if (j->flags & dJOINT_INGROUP) {
+      // the joint is part of a group, so "deactivate" it instead
+      j->world = 0;
+      j->node[0].body = 0;
+      j->node[0].next = 0;
+      j->node[1].body = 0;
+      j->node[1].next = 0;
       dMessage (0,"warning: destroying world containing grouped joints");
     }
     else {
