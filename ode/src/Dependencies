@@ -3,8 +3,11 @@ array.o: array.cpp array.h ../../include/ode/memory.h \
 error.o: error.cpp ../../include/ode/error.h
 geom.o: geom.cpp ../../include/ode/geom.h ../../include/ode/common.h \
  ../../include/ode/error.h ../../include/ode/space.h \
- ../../include/ode/contact.h ../../include/ode/odemath.h \
- ../../include/ode/memory.h array.h
+ ../../include/ode/contact.h ../../include/ode/rotation.h \
+ ../../include/ode/odemath.h ../../include/ode/memory.h \
+ ../../include/ode/misc.h ../../include/ode/objects.h \
+ ../../include/ode/mass.h ../../include/ode/matrix.h objects.h array.h \
+ geom_internal.h
 joint.o: joint.cpp joint.h objects.h ../../include/ode/memory.h \
  ../../include/ode/common.h ../../include/ode/error.h \
  ../../include/ode/mass.h ../../include/ode/contact.h stack.h \
@@ -53,7 +56,7 @@ rotation.o: rotation.cpp ../../include/ode/ode.h \
 space.o: space.cpp ../../include/ode/space.h \
  ../../include/ode/common.h ../../include/ode/error.h \
  ../../include/ode/geom.h ../../include/ode/contact.h \
- ../../include/ode/memory.h
+ ../../include/ode/memory.h geom_internal.h
 stack.o: stack.cpp stack.h ../../include/ode/error.h
 step.o: step.cpp objects.h ../../include/ode/memory.h \
  ../../include/ode/common.h ../../include/ode/error.h \
@@ -65,9 +68,9 @@ testing.o: testing.cpp testing.h ../../include/ode/common.h \
  ../../include/ode/memory.h
 timer.o: timer.cpp ../../include/ode/timer.h \
  ../../include/ode/config.h
-fastdot.o: fastdot.c ../../include/ode/common.h \
- ../../include/ode/error.h
-fastldlt.o: fastldlt.c ../../include/ode/common.h \
- ../../include/ode/error.h
-fastlsolve.o: fastlsolve.c ../../include/ode/common.h \
- ../../include/ode/error.h
+fastdot.o: fastdot.c ../../include/ode/matrix.h \
+ ../../include/ode/common.h ../../include/ode/error.h
+fastldlt.o: fastldlt.c ../../include/ode/matrix.h \
+ ../../include/ode/common.h ../../include/ode/error.h
+fastlsolve.o: fastlsolve.c ../../include/ode/matrix.h \
+ ../../include/ode/common.h ../../include/ode/error.h

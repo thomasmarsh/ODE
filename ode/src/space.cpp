@@ -25,6 +25,7 @@
 #include "ode/geom.h"
 #include "ode/error.h"
 #include "ode/memory.h"
+#include "geom_internal.h"
 
 
 struct dxSpace {
@@ -42,11 +43,13 @@ dSpaceID dSpaceCreate()
 
 void dSpaceDestroy (dSpaceID space)
 {
+  // destroying each geom will call dSpaceRemove(). this will be efficient if
+  // we destroy geoms in list order.
   dGeomID g,n;
   g = space->first;
   while (g) {
     n = g->space.next;
-    dFree (g,g->_class->size);
+    dDestroyGeom (g);
     g = n;
   }
   dFree (space,sizeof(dxSpace));
