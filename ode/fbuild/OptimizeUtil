@@ -1,0 +1,85 @@
+#!/usr/bin/perl -w
+#
+########################################################################
+#                                                                      #
+# Open Dynamics Engine, Copyright (C) 2001 Russell L. Smith.           #
+#                                                                      #
+# This library is free software; you can redistribute it and/or        #
+# modify it under the terms of the GNU Lesser General Public           #
+# License as published by the Free Software Foundation; either         #
+# version 2.1 of the License, or (at your option) any later version.   #
+#                                                                      #
+# This library is distributed in the hope that it will be useful,      #
+# but WITHOUT ANY WARRANTY; without even the implied warranty of       #
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU     #
+# Lesser General Public License for more details.                      #
+#                                                                      #
+# You should have received a copy of the GNU Lesser General Public     #
+# License along with this library (see the file LICENSE.TXT); if not,  #
+# write to the Free Software Foundation, Inc., 59 Temple Place,        #
+# Suite 330, Boston, MA 02111-1307 USA.                                #
+#                                                                      #
+########################################################################
+
+package BuildUtil;
+
+
+sub main::doit
+{
+  my $cmd = $_[0];
+  print "$cmd\n";
+  system ($cmd)==0 or die "FAILED";
+}
+
+
+sub main::createParametersFile # (filename)
+{
+  open (PARAM,">$_[0]");
+  print PARAM <<END;
+# perl script to set parameters required by the code generator
+\$FNAME=\"$main::FNAME\";
+\$TYPE=\"$main::TYPE\";
+\$N1=$main::N1;
+\$UNROLL1=$main::UNROLL1;
+\$UNROLL2=$main::UNROLL2;
+\$MADD=$main::MADD;
+\$FETCH=$main::FETCH;
+\$LAT1=$main::LAT1;
+\$LAT2=$main::LAT2;
+END
+  close PARAM;
+}
+
+
+# read back a data file and find best parameters
+
+sub main::readBackDataFile # (filename)
+{
+  my $filename = $_[0];
+  my $maxtime = 1e10;
+  open (FILE,$filename);
+  while (<FILE>) {
+    next if /^\#/;
+    my $line = lc $_;
+    if ($line =~ /error/) {
+      print "ERRORS FOUND IN $filename\n";
+      exit 1;
+    }
+    $line =~ /^\s*(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)/;
+    $time = $1;
+    if ($time < $maxtime) {
+      $main::N1 = $2;
+      $main::UNROLL1 = $3;
+      $main::UNROLL2 = $4;
+      $main::MADD = $5;
+      $main::FETCH = $6;
+      $main::LAT1 = $7;
+      $main::LAT2 = $8;
+      $maxtime = $time;
+    }
+  }
+  close FILE;
+}
+
+
+1;

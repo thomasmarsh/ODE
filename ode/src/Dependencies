@@ -1,0 +1,67 @@
+array.o: array.cpp array.h ../../include/ode/memory.h \
+ ../../include/ode/error.h
+error.o: error.cpp ../../include/ode/error.h
+geom.o: geom.cpp ../../include/ode/geom.h ../../include/ode/common.h \
+ ../../include/ode/error.h ../../include/ode/space.h \
+ ../../include/ode/contact.h ../../include/ode/odemath.h \
+ ../../include/ode/memory.h array.h
+joint.o: joint.cpp joint.h objects.h ../../include/ode/memory.h \
+ ../../include/ode/common.h ../../include/ode/error.h \
+ ../../include/ode/mass.h ../../include/ode/contact.h stack.h \
+ ../../include/ode/odemath.h ../../include/ode/rotation.h \
+ ../../include/ode/matrix.h
+lcp.o: lcp.cpp ../../include/ode/common.h ../../include/ode/error.h \
+ lcp.h ../../include/ode/matrix.h ../../include/ode/misc.h mat.h \
+ ../../include/ode/timer.h
+mass.o: mass.cpp ../../include/ode/ode.h ../../include/ode/config.h \
+ ../../include/ode/contact.h ../../include/ode/common.h \
+ ../../include/ode/error.h ../../include/ode/memory.h \
+ ../../include/ode/odemath.h ../../include/ode/matrix.h \
+ ../../include/ode/timer.h ../../include/ode/rotation.h \
+ ../../include/ode/mass.h ../../include/ode/space.h \
+ ../../include/ode/geom.h ../../include/ode/misc.h
+mat.o: mat.cpp mat.h ../../include/ode/common.h \
+ ../../include/ode/error.h ../../include/ode/misc.h \
+ ../../include/ode/matrix.h ../../include/ode/memory.h
+matrix.o: matrix.cpp ../../include/ode/common.h \
+ ../../include/ode/error.h ../../include/ode/matrix.h
+memory.o: memory.cpp ../../include/ode/memory.h \
+ ../../include/ode/error.h
+misc.o: misc.cpp ../../include/ode/misc.h ../../include/ode/common.h \
+ ../../include/ode/error.h ../../include/ode/matrix.h
+ode.o: ode.cpp objects.h ../../include/ode/memory.h \
+ ../../include/ode/common.h ../../include/ode/error.h \
+ ../../include/ode/mass.h ../../include/ode/ode.h \
+ ../../include/ode/config.h ../../include/ode/contact.h \
+ ../../include/ode/odemath.h ../../include/ode/matrix.h \
+ ../../include/ode/timer.h ../../include/ode/rotation.h \
+ ../../include/ode/space.h ../../include/ode/geom.h \
+ ../../include/ode/misc.h joint.h stack.h step.h
+odemath.o: odemath.cpp ../../include/ode/common.h \
+ ../../include/ode/error.h ../../include/ode/odemath.h
+rotation.o: rotation.cpp ../../include/ode/ode.h \
+ ../../include/ode/config.h ../../include/ode/contact.h \
+ ../../include/ode/common.h ../../include/ode/error.h \
+ ../../include/ode/memory.h ../../include/ode/odemath.h \
+ ../../include/ode/matrix.h ../../include/ode/timer.h \
+ ../../include/ode/rotation.h ../../include/ode/mass.h \
+ ../../include/ode/space.h ../../include/ode/geom.h \
+ ../../include/ode/misc.h
+space.o: space.cpp ../../include/ode/space.h \
+ ../../include/ode/common.h ../../include/ode/error.h \
+ ../../include/ode/geom.h ../../include/ode/contact.h \
+ ../../include/ode/memory.h
+stack.o: stack.cpp stack.h ../../include/ode/error.h
+step.o: step.cpp objects.h ../../include/ode/memory.h \
+ ../../include/ode/common.h ../../include/ode/error.h \
+ ../../include/ode/mass.h joint.h ../../include/ode/contact.h stack.h \
+ ../../include/ode/odemath.h ../../include/ode/rotation.h \
+ ../../include/ode/timer.h ../../include/ode/matrix.h lcp.h
+timer.o: timer.cpp ../../include/ode/timer.h \
+ ../../include/ode/config.h
+fastdot.o: fastdot.c ../../include/ode/common.h \
+ ../../include/ode/error.h
+fastldlt.o: fastldlt.c ../../include/ode/common.h \
+ ../../include/ode/error.h
+fastlsolve.o: fastlsolve.c ../../include/ode/common.h \
+ ../../include/ode/error.h

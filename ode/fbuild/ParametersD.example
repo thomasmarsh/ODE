@@ -1,0 +1,10 @@
+# perl script to set parameters required by the code generator
+$FNAME="fastdot";
+$TYPE="unused";
+$N1=0;
+$UNROLL1=2;
+$UNROLL2=0;
+$MADD=0;
+$FETCH=1;
+$LAT1=1;
+$LAT2=2;

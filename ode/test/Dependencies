@@ -1,0 +1,35 @@
+test_chain.o: test_chain.cpp ../../include/ode/ode.h \
+ ../../include/ode/config.h ../../include/ode/contact.h \
+ ../../include/ode/common.h ../../include/ode/error.h \
+ ../../include/ode/memory.h ../../include/ode/odemath.h \
+ ../../include/ode/matrix.h ../../include/ode/timer.h \
+ ../../include/ode/rotation.h ../../include/ode/mass.h \
+ ../../include/ode/space.h ../../include/ode/geom.h \
+ ../../include/ode/misc.h ../../include/drawstuff/drawstuff.h \
+ ../../include/drawstuff/version.h
+test_hinge.o: test_hinge.cpp ../../include/ode/ode.h \
+ ../../include/ode/config.h ../../include/ode/contact.h \
+ ../../include/ode/common.h ../../include/ode/error.h \
+ ../../include/ode/memory.h ../../include/ode/odemath.h \
+ ../../include/ode/matrix.h ../../include/ode/timer.h \
+ ../../include/ode/rotation.h ../../include/ode/mass.h \
+ ../../include/ode/space.h ../../include/ode/geom.h \
+ ../../include/ode/misc.h ../../include/drawstuff/drawstuff.h \
+ ../../include/drawstuff/version.h
+test_ode.o: test_ode.cpp ../../include/ode/ode.h \
+ ../../include/ode/config.h ../../include/ode/contact.h \
+ ../../include/ode/common.h ../../include/ode/error.h \
+ ../../include/ode/memory.h ../../include/ode/odemath.h \
+ ../../include/ode/matrix.h ../../include/ode/timer.h \
+ ../../include/ode/rotation.h ../../include/ode/mass.h \
+ ../../include/ode/space.h ../../include/ode/geom.h \
+ ../../include/ode/misc.h
+test_slider.o: test_slider.cpp ../../include/ode/ode.h \
+ ../../include/ode/config.h ../../include/ode/contact.h \
+ ../../include/ode/common.h ../../include/ode/error.h \
+ ../../include/ode/memory.h ../../include/ode/odemath.h \
+ ../../include/ode/matrix.h ../../include/ode/timer.h \
+ ../../include/ode/rotation.h ../../include/ode/mass.h \
+ ../../include/ode/space.h ../../include/ode/geom.h \
+ ../../include/ode/misc.h ../../include/drawstuff/drawstuff.h \
+ ../../include/drawstuff/version.h

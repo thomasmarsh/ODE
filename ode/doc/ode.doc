@@ -1,0 +1,829 @@
+
+@title{Open Dynamics Engine v0.01 User Guide}
+@subtitle{Russell Smith, @date{}}
+@author{Russell Smith, @date{}}
+
+@center{This document is Copyright &copy 2001 Russell Smith.}
+@center{This is an unfinished DRAFT document}
+
+@chapter{Contents @nonumber @nocontents}
+@contents
+
+#############################################################################
+@chapter{Introduction}
+
+The Open Dynamics Engine (ODE) is a free software library for the simulation
+of Rigid Body Dynamics.
+If this does not make much sense to you, check out
+@link{http://www.q12.org/ode/slides/slides.html}{What is a Physics SDK?}.
+ODE is being developed by @link{http://www.q12.org}{Russell Smith}.
+
+The is the user guide for the first prototype release of ODE (version 0.01).
+This release is just for testing the core algorithms and evolving the API.
+Note that the API is not yet fixed, it will probably change in the future.
+
+Be warned - this document is an unfinished draft!
+
+
+
+@section{Current features}
+
+The current features are:
+@list{
+@*	ODE is best for simulating @emph{articulated} rigid body structures,
+	such as ground vehicles and legged creatures.
+	An articulated structure is when rigid bodies are created in a
+	dynamics-world and connected together with joints of various kinds.
+@*	ODE is also good for simulating objects in changing environments,
+	such as disordered virtual reality environments.
+	The user has complete freedom to change the structure of the system,
+	even while the simulation is running.
+@*	ODE uses a highly stable integrator, which means that the simulation
+	errors should not get out of control. This means that a simulated
+	system should not "explode" for no reason.
+
+@*	The equations of motion are derived from a Lagrange multiplier
+	velocity based model due to Trinkle and Stewart.
+@*	The friction model and LCP solver come from Baraff's work.
+
+@*	A first order integrator is being used. It's fast, but not accurate
+	enough for quantitative engineering yet. Higher order integrators
+	will come later.
+@*	ODE has @emph{hard} contacts. This means that a non-penetration
+	constraint is used when two bodies collide. The alternative is to
+	model contact with springs and dampers, but this is difficult and
+	error-prone.
+@*	ODE has built-in collision detection. However you can ignore it and
+	do your own collision detection if desired. Currently only
+	sphere-sphere collision is implemented. More collision objects will
+	come later, as well as quick identification of potentially
+	intersecting pairs.
+@*	Joints types: ball-and-socket, hinge, slider (prismatic).
+@*	Platform specific optimizations.
+@*	Has a C interface, even though it is written in C++.
+@*	Unit tests.
+@*	Other stuff I forgot to mention...
+}
+
+Some important things that are missing right now:
+@list{
+@*	Friction!
+}
+
+
+@section{Future features}
+
+@subsection{Plan for 0.02 release}
+
+@list{
+@* Update documentation.
+@* Rationalize collision framework.
+@* Box-box, box-sphere collision.
+@* 2D & 3D friction.
+@* Full cross platform build system and automatic configuration.
+@* Argument checking for all functions (especially joint-typed functions).
+}
+
+@subsection{Plan for 0.03 release}
+
+@list{
+@* Update documentation.
+@* High level functions that create dynamics and collision objects together.
+@* Special vehicle joints
+@* Powered hinge, prism joint, ball-n-socket (plus dry friction in joints).
+@* Joint limits.
+@* More contact modes: restitution, moving surface, tyre slip.
+@* Implicit spring framework.
+@* Optimize LCP solver even more.
+@* More collision primitives: capped cylinder, slab, composite objects.
+@* Some internals documentation.
+@* Automatic code optimization process.
+@* Collision space: quick identification of potentially intersecting pairs.
+}
+
+@subsection{Plan for 0.04 release}
+
+@list{
+@* Update documentation.
+@* Static (still) groups not simulated.
+@* SSE and 3DNow optimizations.
+@* More collision primitives: cylinder, cone?
+@* Higher order integrators for higher accuracy. Also force callback functions.
+@* More internals documentation.
+}
+
+@subsection{Other stuff for later releases}
+
+@list{
+@* Simulation tutorial, full documentation of internals and methods.
+@* Collision: polyhedral objects, triangle soup.
+@* Add reduced coordinate methods for a major speed improvement on
+   tree-structured systems.
+}
+
+
+@section{ODE's license}
+
+ODE is Copyright &copy; 2001 Russell Smith.
+
+This library is free software; you can redistribute it and/or
+modify it under the terms of the @link{http://www.opensource.org/licenses/lgpl-license.html}{GNU Lesser General Public License}
+as published by the Free Software Foundation; either
+version 2.1 of the License, or (at your option) any later version.
+
+This library is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+See the GNU Lesser General Public License for more details.
+
+
+@section{Call for volunteers}
+
+Think you can help? Please @link{http://www.q12.org}{write to me}.
+
+#############################################################################
+@chapter{Concepts}
+
+@section{Background}
+
+[Here is where I will write some background information about rigid body
+dynamics and simulation.
+But in the meantime, please refer to Baraff's excellent
+@link{http://www.cs.cmu.edu/~baraff/sigcourse/index.html}{SIGGRAPH tutorial}].
+
+
+@section{Rigid bodies}
+
+A rigid body has various properties from the point of view of the simulation.
+Some properties change over time:
+@list{
+@*	Position vector (x,y,z) of a point of reference.
+	Currently the point of reference is the center of mass.
+@*	Linear velocity vector (vx,vy,vz)
+@*	Orientation, represented by a quaternion (qs,qx,qy,qz) or a 3x3
+	rotation matrix.
+@*	Angular velocity vector (wx,wy,wz)
+
+}
+Other properties are usually constant over time:
+@list{
+@*	Mass.
+@*	Position of the center of mass with respect to the point of reference.
+	In the current implementation the center of mass and the point of
+	reference must coincide.
+@*	Inertia matrix. This is a 3x3 matrix that describes how the body's
+	mass is distributed around the center of mass.
+}
+Note that the @emph{shape} of a rigid body is not a dynamical properties
+(except insofar as it influences the various mass properties).
+It is only @emph{collision detection} that cares about the detailed shape of
+the body.
+
+
+@subsection{Force accumulators}
+
+Between each integrator step the user can call functions to apply forces
+to the rigid body.
+These forces are added to "force accumulators" in the rigid body object.
+When the next integrator step happens, the sum of all the applied forces
+will be used.
+The forces accumulators are set to zero after each integrator step.
+
+
+@section{Joints}
+
+A joint constrains two bodies so that they can only have certain positions
+relative to each other.
+For example, a ball and socket joint constraints the "ball" of one body to
+be in the same location as the "socket" of another body.
+
+[Describe the different kinds of joints here, and their parameters].
+
+The functions to set joint parameters all take global coordinates.
+An example is the position of the ball-and-socket point for a ball-and-socket
+joint.
+A consequence of this is that the rigid bodies that a joint connects must be
+positioned correctly @emph{before} the joint is attached.
+
+
+@section{Joint error}
+
+When a joint attaches two bodies, those bodies are required to have certain
+positions relative to each other [see the above description of what a joint
+actually is].
+However, it is possible for the bodies to be in positions where the joint
+constraint is not met. This "joint error" can happen in two ways:
+@numlist{
+@*	If the user sets the position/orientation of one body without correctly
+	setting the position/orientation of the other body.
+@*	During the simulation errors can creep in that result in the bodies
+	pulling away from their required positions.
+}
+There is a mechanism to reduce joint error.
+During each simulation step a special force is applied to bring the bodies
+back into correct alignment.
+This force is controlled by the error reduction parameter (erp), which has
+a value between 0 and 1.
+The erp parameter specifies what proportion of the joint error will be
+fixed during the next simulation step.
+If erp=0 then no correcting force is applied and the bodies will eventually
+drift apart as the simulation proceeds.
+If erp=1 then the simulation will attempt to fix all joint error during the
+next time step.
+However, setting erp=1 is not recommended, as the joint error will not be
+completely fixed due to various internal approximations.
+A value of erp=0.2 to 0.5 is recommended (0.2 is the default).
+
+
+@section{Collision handling}
+
+[There is a lot that needs to be written about collision handling.]
+
+Collisions between bodies or between bodies and the static environment are
+handled as follows:
+@numlist{
+@*	Before each simulation step, the user calls collision detection
+	functions to determine what is touching what.
+	The built-in collision functions can be used, or any others.
+@*	For each contact point between two bodies or between a body and the
+	static environment, a special contact joint is created.
+	The contact joint is given the position of the contact point, a normal
+	vector and a penetration depth.
+@*	The contact points are put in a joint "group", which allows them to be
+	added to and removed from the system very quickly.
+	The simulation will speed goes down as the number of contacts goes up,
+	so various strategies can be used to limit the number of contact
+	points.
+@*	A simulation step is taken.
+@*	All contact joints are removed from the system.
+}
+
+
+@section{Typical simulation code}
+
+A typical simulation will proceed like this:
+@numlist{
+@*	Create a dynamics world.
+@*	Create bodies in the dynamics world.
+@*	Set the state (position etc) of all bodies.
+@*	Create joints in the dynamics world.
+@*	Attach the joints to the bodies.
+@*	Set the parameters of all joints.
+@*	Create a collision world and collision geometry objects, as
+	necessary.
+@*	Create a joint group to hold the contact joints.
+@*	Loop: @numlist{
+	@*	Apply forces to the bodies as necessary.
+	@*	Adjust the joint parameters as necessary.
+	@*	Call collision detection.
+	@*	Create a contact joint for every collision point, and put it
+		in the contact joint group.
+	@*	Take a simulation step.
+	@*	Remove all joints in the contact joint group.
+	}
+@*	Destroy the dynamics and collision worlds.
+}
+
+
+@section{Physics model}
+
+[Discuss the various methods and approximations that are used.]
+
+
+#############################################################################
+@chapter{Data types and conventions}
+
+@section{The basic data types}
+
+The ODE library can be build to use either single or double precision floating
+point numbers.
+Single precision is faster and uses less memory, but the simulation will
+have more numerical error that can result in visible problems.
+You will get less accuracy and stability with single precision.
+
+[must describe what factors influence accuracy and stability].
+
+The floating point data type is @c{dReal}.
+Other commonly used types are @c{dVector3}, @c{dVector4}, @c{dMatrix3},
+@c{dMatrix4}, @c{dQuaternion}.
+
+
+@section{Objects and IDs}
+
+There are various kinds of object that can be created:
+@list{
+@*	dWorld - a dynamics world.
+@*	dSpace - a collision space.
+@*	dBody - a rigid body.
+@*	dGeom - geometry (for collision).
+@*	dJoint - a joint
+@*	dJointGroup - a group of joints.
+}
+Functions that deal with these objects take and return object IDs.
+The object ID types are @c{dWorldID}, @c{dBodyID}, etc.
+
+
+@section{Argument conventions}
+
+All 3-vectors (x,y,z) supplied to ``set'' functions are given as individual
+x,y,z arguments.
+
+All 3-vector result arguments to get() function are pointers to arrays of
+@c{dReal}.
+
+Larger vectors are always supplied and returned as pointers.
+
+All coordinates are in the global frame except where otherwise specified.
+
+
+@section{C versus C++}
+
+The ODE library is written in C++, but its public interface is made of simple
+C functions, not classes. Why is this?
+@list{
+@*	It helps simplicity.
+@*	It prevents C++ mangling and runtime-support problems across multiple
+	compilers.
+@*	The user doesn't have to be familiar with C++ quirks to use ODE.
+}
+
+#############################################################################
+@chapter{World}
+
+The world object is a container for rigid bodies and joints.
+
+@funcdef{
+dWorldID dWorldCreate();
+}{
+Create a new, empty world and return its ID number.
+}
+
+
+@funcdef{
+void dWorldDestroy (dWorldID);
+}{
+Destroy a world and everything in it.
+}
+
+
+@funcdef{
+void dWorldSetGravity (dWorldID, dReal x, dReal y, dReal z);
+void dWorldGetGravity (dWorldID, dVector3 gravity);
+}{
+Set and get the world's global gravity vector. The units are m/s/s, so Earth's
+gravity vector would be (0,0,-9.81).
+The default is no gravity, i.e. (0,0,0).
+}
+
+
+@funcdef{
+void dWorldStep (dWorldID, dReal stepsize);
+}{
+Step the world.
+}
+
+
+#############################################################################
+@chapter{Rigid body functions}
+
+@funcdef{
+dBodyID dBodyCreate (dWorldID);
+}{
+Create a body in the given world with default mass parameters at
+position (0,0,0).
+Return its ID.
+}
+
+
+@funcdef{
+void dBodyDestroy (dBodyID);
+}{
+Destroy a body.
+All joints that are attached to this body will be put into limbo
+(i.e. unattached and not affecting the simulation, but they will NOT be
+deleted).
+}
+
+
+@funcdef{
+void  dBodySetData (dBodyID, void *data);
+void *dBodyGetData (dBodyID);
+}{
+Get and set the body's user-data pointer.
+}
+
+
+@funcdef{
+void dBodySetPosition   (dBodyID, dReal x, dReal y, dReal z);
+void dBodySetRotation   (dBodyID, dMatrix3 R);
+void dBodySetQuaternion (dBodyID, dQuaternion q);
+void dBodySetLinearVel  (dBodyID, dReal x, dReal y, dReal z);
+void dBodySetAngularVel (dBodyID, dReal x, dReal y, dReal z);
+dReal    * dBodyGetPos        (dBodyID);
+dReal    * dBodyGetRotation   (dBodyID);     // ptr to 4x3 rot matrix
+dReal    * dBodyGetQuaternion (dBodyID);
+dReal    * dBodyGetLinearVel  (dBodyID);
+dReal    * dBodyGetAngularVel (dBodyID);
+}{
+These functions set and get the position, rotation, linear and angular
+velocity of the body.
+After setting a group of bodies, the outcome of the simulation is undefined
+if the new configuration is inconsistent with the joints/constraints that are
+present.
+When getting, the returned values are pointers to internal data structures,
+so the vectors are valid until any changes are made to the rigid body system
+structure.
+}
+
+
+@funcdef{
+void dBodySetMass (dBodyID, dMass *mass);
+void dBodyGetMass (dBodyID, dMass *mass);
+}{
+Set/get the mass of the body (see the mass functions).
+}
+
+
+@funcdef{
+void dBodyAddForce            (dBodyID, dReal fx, dReal fy, dReal fz);
+void dBodyAddTorque           (dBodyID, dReal fx, dReal fy, dReal fz);
+void dBodyAddRelForce         (dBodyID, dReal fx, dReal fy, dReal fz);
+void dBodyAddRelTorque        (dBodyID, dReal fx, dReal fy, dReal fz);
+void dBodyAddForceAtPos       (dBodyID, dReal fx, dReal fy, dReal fz,
+                                        dReal px, dReal py, dReal pz);
+void dBodyAddRelForceAtPos    (dBodyID, dReal fx, dReal fy, dReal fz,
+                                        dReal px, dReal py, dReal pz);
+void dBodyAddRelForceAtRelPos (dBodyID, dReal fx, dReal fy, dReal fz,
+                                        dReal px, dReal py, dReal pz);
+}{
+Add forces to bodies (absolute or relative coordinates).
+The forces are accumulated on to each body, and the accumulators are zeroed
+after each time step.
+}
+
+
+@funcdef{
+void dBodyGetPointPos    (dBodyID, dReal px, dReal py, dReal pz,
+                           dVector3 result);
+void dBodyGetPointVel    (dBodyID, dReal px, dReal py, dReal pz,
+                           dVector3 result);
+void dBodyGetPointRelVel (dBodyID, dReal px, dReal py, dReal pz,
+                           dVector3 result);
+}{
+Utility functions.
+}
+
+#############################################################################
+@chapter{Joint functions}
+
+@funcdef{
+dJointID dJointCreateBall (dWorldID, dJointGroupID);
+dJointID dJointCreateHinge (dWorldID, dJointGroupID);
+dJointID dJointCreateSlider (dWorldID, dJointGroupID);
+dJointID dJointCreateContact (dWorldID, dJointGroupID, dContact *);
+}{
+Initialize or create a new joint of a given type.
+The joint is initially in "limbo" (i.e. it has no effect on the simulation)
+because it does not connect any bodies.
+The joint group ID is 0 to allocate the joint normally.
+If it is nonzero the joint is allocated in a joint group.
+}
+
+
+@funcdef{
+void dJointDestroy (dJointID);
+}{
+Destroy a joint, disconnecting it from its attached bodies and removing
+it from the world.
+However, if the joint is a member of a group then this function has no
+effect - to destroy the joint the group must be emptied or destroyed.
+}
+
+
+@funcdef{
+dJointGroupID dJointGroupCreate (int max_size);   // max_size in bytes
+void dJointGroupDestroy (dJointGroupID);
+void dJointGroupEmpty (dJointGroupID);
+}{
+Groups of joints.
+Joints can be added to a group quickly, and the entire group can be emptied,
+which means that all of the contained joints are destroyed at once (quickly).
+However, individual joints in a group can not be destroyed before the entire
+group is emptied.
+Joint groups are most useful with contacts.
+}
+
+
+@funcdef{
+void dJointAttach (dJointID, dBodyID body1, dBodyID body2);
+}{
+Attach the joint to some new bodies.
+If the joint is already attached, it will be detached from the old bodies
+first.
+To attach this joint to only one body, set body1 or body2 to zero - a zero
+body means the static environment.
+It is an error to set both bodies to zero.
+}
+
+
+@funcdef{
+void dJointSetAnchor (dJointID, dReal x, dReal y, dReal z);
+void dJointSetAxis (dJointID, dReal x, dReal y, dReal z);
+}{
+Set joint parameters.
+The anchor and axis must be set after the joint has been attached to bodies
+and those bodies have been correctly positioned.
+If the joint is not attached, this will do nothing.
+The axis that is set will be normalized to unit length, this is what
+@c{dJointGetAxis()} will return.
+}
+
+
+@funcdef{
+void dJointGetAnchor (dJointID, dVector3 result);
+void dJointGetAxis (dJointID, dVector3 result);
+}{
+Get joint parameters.
+If the system is out of alignment (i.e. there is some joint error) then
+anchor/axis values will be correct with respect to body 1 only (or body2 if
+you specified body 1 as 0).
+}
+
+
+@funcdef{
+int dAreConnected (dBodyID, dBodyID);
+}{
+Utility function: return 1 if the two bodies are connected together by
+a joint, otherwise return 0.
+}
+
+#############################################################################
+@chapter{Rotation functions}
+
+Rigid body orientations are represented with quaternions.
+A quaternion is four numbers [cos(theta/2) sin(theta/2)*u] where
+theta is a rotation angle and `u' is a unit length rotation axis.
+
+Every rigid body also has a 3x3 rotation matrix that is derived from
+the quaternion.
+The rotation matrix and the quaternion always match.
+
+Some information about quaternions:
+@list{
+@*	q and -q represent the same rotation.
+@*	The inverse of a quaternion is [ q[0] -q[1] -q[2] -q[3] ].
+}
+
+The following are utility functions for dealing with rotation matrices and
+quaternions.
+
+@funcdef{
+void dRSetIdentity (dMatrix3 R);
+}{
+Set @arg{R} to the identity matrix (i.e. no rotation).
+}
+
+@funcdef{
+void dRFromAxisAndAngle (dMatrix3 R, dReal ax, dReal ay, dReal az,
+                         dReal angle);
+}{
+Compute the rotation matrix @arg{R} as a rotation of @arg{angle} radians
+along the axis (@arg{ax},@arg{ay},@arg{az}).
+}
+
+@funcdef{
+void dRFromEulerAngles (dMatrix3 R, dReal phi, dReal theta, dReal psi);
+}{
+Compute the rotation matrix @arg{R} from the three Euler rotation angles.
+}
+
+@funcdef{
+void dRFrom2Axes (dMatrix3 R, dReal ax, dReal ay, dReal az,
+                  dReal bx, dReal by, dReal bz);
+}{
+Compute the rotation matrix @arg{R} from the two vectors `a'
+(@arg{ax},@arg{ay},@arg{az}) and `b' (@arg{bx},@arg{by},@arg{bz}).
+`a' and `b' are the desired x and y axes of the rotated coordinate system.
+If necessary, `a' and `b' will be made unit length, and `b' will be
+projected so that it is perpendicular to `a'.
+The desired z axis is the cross product of `a' and `b'.
+}
+
+@funcdef{
+void dQSetIdentity (dQuaternion q);
+}{
+Set @arg{q} to the identity rotation (i.e. no rotation).
+}
+
+@funcdef{
+void dQFromAxisAndAngle (dQuaternion q, dReal ax, dReal ay, dReal az,
+                          dReal angle);
+}{
+Compute @arg{q} as a rotation of @arg{angle} radians along the axis
+(@arg{ax},@arg{ay},@arg{az}).
+}
+
+@funcdef{
+void dQMultiply0 (dQuaternion qa, dQuaternion qb, dQuaternion qc);
+void dQMultiply1 (dQuaternion qa, dQuaternion qb, dQuaternion qc);
+void dQMultiply2 (dQuaternion qa, dQuaternion qb, dQuaternion qc);
+void dQMultiply3 (dQuaternion qa, dQuaternion qb, dQuaternion qc);
+}{
+Set @arg{qa} = @arg{qb}*@arg{qc}.
+This is that same as @arg{qa} = rotation @arg{qc} followed by rotation
+@arg{qa}.
+The 0/1/2 versions are analogous to the multiply functions, i.e. 1 uses the
+inverse of @arg{qb}, and 2 uses the inverse of @arg{qc}.
+Option 3 uses the inverse of both.
+}
+
+@funcdef{
+void dQtoR (dQuaternion q, dMatrix3 R);
+}{
+Convert quaternion @arg{q} to rotation matrix @arg{R}.
+}
+
+@funcdef{
+void dRtoQ (dMatrix3 R, dQuaternion q);
+}{
+Convert rotation matrix @arg{R} to quaternion @arg{q}.
+}
+
+
+@funcdef{
+void dWtoDQ (dVector3 w, dQuaternion q, dVector4 dq);
+}{
+Given an existing orientation @arg{q} and an angular velocity vector @arg{w},
+return in @arg{dq} the resulting dq/dt.
+}
+
+#############################################################################
+@chapter{Mass functions}
+
+The mass parameters of a rigid body are described by a @c{dMass} structure:
+@code{@[
+typedef struct dMass {
+  dReal mass;   // total mass of the rigid body
+  dVector4 c;   // center of gravity position in body frame (x,y,z)
+  dMatrix3 I;   // 3x3 inertia tensor in body frame, about POR
+} dMass;
+@]}
+
+The following functions operate on this structure:
+
+@funcdef{
+void dMassSetZero (dMass *);
+}{
+Set all the mass parameters to zero.
+}
+
+@funcdef{
+void dMassSetParameters (dMass *, dReal mass,
+                         dReal cgx, dReal cgy, dReal cgz,
+                         dReal I11, dReal I22, dReal I33,
+                         dReal I12, dReal I13, dReal I23);
+}{
+Set the mass parameters to the given values.
+@arg{mass} is the mass of the body.
+(@arg{cx},@arg{cy},@arg{cz}) is the center of gravity position in the body
+frame.
+The @c{Ixx} values are the elements of the inertia matrix:
+@code{
+    [ I11 I12 I13 ]
+    [ I12 I22 I23 ]
+    [ I13 I23 I33 ]
+}
+}
+
+@funcdef{
+void dMassSetSphere (dMass *, dReal density, dReal radius);
+}{
+Set the mass parameters to represent a sphere of the given radius and
+density, with the center of mass at (0,0,0) relative to the body.
+}
+
+@funcdef{
+void dMassSetCappedCylinder (dMass *, dReal density, int direction,
+                             dReal a, dReal b);
+}{
+Set the mass parameters to represent a capped cylinder of the given parameters
+and density, with the center of mass at (0,0,0) relative to the body.
+The radius of the cylinder (and the spherical cap) is @arg{a}.
+The length of the cylinder (not counting the spherical cap) is @arg{b}.
+The cylinder's long axis is oriented along the body's x, y or z axis according
+to the value of @arg{direction} (1=x, 2=y, 3=z).
+}
+
+@funcdef{
+void dMassSetBox (dMass *, dReal density,
+                  dReal lx, dReal ly, dReal lz);
+}{
+Set the mass parameters to represent a box of the given dimensions
+and density, with the center of mass at (0,0,0) relative to the body.
+The side lengths of the box along the x, y and z axes are @arg{lx}, @arg{ly}
+and @arg{lz}.
+}
+
+@funcdef{
+void dMassAdjust (dMass *, dReal newmass);
+}{
+Given mass parameters for some object, adjust them so the total mass is
+now @arg{newmass}.
+This is useful when using the above functions to set the mass parameters for
+certain objects - they take the object density, not the total mass.
+}
+
+@funcdef{
+void dMassTranslate (dMass *, dReal x, dReal y, dReal z);
+}{
+Given mass parameters for some object, adjust them to represent the object
+displaced by (@arg{x},@arg{y},@arg{z}) relative to the body frame.
+}
+
+@funcdef{
+void dMassRotate (dMass *, dMatrix3 R);
+}{
+Given mass parameters for some object, adjust them to represent the object
+rotated by @arg{R} relative to the body frame.
+}
+
+#############################################################################
+@chapter{Math functions}
+
+[There are quite a lot of these, but they're not standardized enough to
+document yet].
+
+#############################################################################
+@chapter{Error and memory functions}
+
+[Document these later].
+
+#############################################################################
+@chapter{Collision functions}
+
+[Document these later].
+
+#############################################################################
+@chapter{How to make good simulations}
+
+[Just notes for now]
+
+@list{
+@*	Don't collide objects that are joined together.
+@*	Describe all factors that affect speed.
+@*	Use powered joint, joint limits, built-in springs as much as possible,
+	avoid explicit forces.
+}
+
+#############################################################################
+@chapter{Known BUGS}
+
+@list{
+@*	When assigning a mass to a rigid body, the center of mass must be
+	(0,0,0) relative to the body's position.
+}
+
+#############################################################################
+@chapter{Appendix A: Matrix storage conventions}
+
+Matrix operations like factorization are expensive, so we must store the data
+in a way that is most useful to the matrix code.
+I want to do 4-way SIMD optimizations later, so the format is this: store
+the matrix by rows, and each row is rounded up to a multiple of 4 elements.
+The extra "padding" elements at the end of each row/column must be set
+to 0.
+This is called the "standard format".
+Hopefully this decision will remain good in the future, as more and
+more processors have 4-way SIMD (especially for fast 3D graphics).
+
+The exception: matrices that have only one column or row (vectors), are always
+stored as consecutive elements in standard row format, i.e. there is no
+interior padding, only padding at the end.
+
+Thus: all 3x1 floating point vectors are stored as 4x1 vectors: (x,x,x,0).
+
+#############################################################################
+@chapter{ODE internals}
+
+[only notes for now]
+
+@list{
+
+@*	Internally, all 6x1 spatial velocities and accelerations are split
+	into 3x1 position and angular components, which are stored as
+	contiguous 4x1 vectors.
+
+@*	Lagrange multiplier velocity based model due to Trinkle and Stewart.
+@*	Friction due to Baraff.
+
+@*	Stability over accuracy.
+
+@*	Talk about the different methods possible.
+	Say how realtime constraints make the problem much more difficult.
+
+@*	Factorizer.
+
+@*	LCP solver.
+
+@*	Equations of motion.
+}

@@ -1,0 +1,91 @@
+
+TODO
+----
+
+when vectors and matrices are initialized, we must ensure that the padding
+elements are set to 0. this is going to be a problem everywhere!
+
+don't use 3-vectors anywhere. use SIMD friendly 4-vectors.
+
+make sure all data in body/joint etc objects is aligned well for single
+precision SIMD (i.e. all vectors start on a 16 byte boundary). also, all
+vectors alloca()ed on the stack must have the correct alignment (bummer!)
+
+think about more complicated uses of collision, e.g. a single geom representing
+an articulated structure.
+
+there should be functions to delete groups of bodies/joints in one go - this
+will be more efficient than deleting them one at a time, because less
+partitioning tests will be needed.
+
+check the overhead of resizing Array<>s as elements are pushed on to them.
+
+make sure we check all arguments of all functions.
+
+when deleting a body/joint that is not connected to anything, just remove it
+and adjust the other islands. note: an unconnected joint will be at the end
+of the joint list and not in an island anyway. when deleting other
+bodies/joints, perhaps we can use the computeIslands() function to close the
+gap.
+
+replace alloca() with dPushFrame(), dPopFrame(), and dAlloca(). allow for
+the possibility of allocating in non-stack memory.
+
+make sure that we can set mass parameters with non-zero center of mass.
+if this is done after the body position is set, the position is adjusted.
+if this is done before the body position is set, what do we do when the
+pos is set? does the pos always refer to the center of mass from the user's
+point of view?
+
+more comprehensive random number comparisons between slow and fast methods.
+	- random PD inertia (not just diagonal).
+	- random velocity
+	- random joint error (make joints then move bodies a bit)
+
+if two joints connect to the same two bodies, check that the fast solver
+works!
+
+consider splitting solver into functions, which can be optimized separately.
+might make things go faster.
+
+spaces need multiple lists of objects that can never overlap. objects in these
+lists are never tested against each other.
+
+should we expose body and joint object structures so that the user can
+explicitly allocate them locally, or e.g. on the stack? yes - makes allocating
+temporary contact constraints easier. no - helps data hiding and therefore
+library binary compatability.
+
+space near-callback should be given potentially intersecting objects 100 at a
+time instead of 1 at a time, to save on calling costs.
+
+final library should have no global constructors, as it might be used with
+C linkage.
+
+faster code for islands with a single body? faster code for dynamically
+symmetric bodies?
+
+joint groups should also be destroyed by destroying the world.
+
+when attaching contact with (0,body), instead of setting the reverse flag
+on the joint and checking it in getInfo2(), we should just reverse the normal
+straight away ... ?
+
+rotation.cpp functions that set matrices should also set padding elements.
+
+hinge and prismatic, attachment to static environment.
+
+turn macros into C++ inline functions? what about C users?
+
+functions to get body connectedness (e.g. return joint lists). also for joints.
+
+
+DONE
+----
+
+check: when contact attached with (body1,0) and (0,body1), check that polarity
+on depth and error info is okay for the two cases.
+
+set a better convention for which is the 1st and 2nd body in a joint, because
+sometimes we get things swapped (because of the way the joint nodes are used).
+

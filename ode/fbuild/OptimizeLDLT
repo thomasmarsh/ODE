@@ -1,0 +1,90 @@
+#!/usr/bin/perl
+#
+########################################################################
+#                                                                      #
+# Open Dynamics Engine, Copyright (C) 2001 Russell L. Smith.           #
+#                                                                      #
+# This library is free software; you can redistribute it and/or        #
+# modify it under the terms of the GNU Lesser General Public           #
+# License as published by the Free Software Foundation; either         #
+# version 2.1 of the License, or (at your option) any later version.   #
+#                                                                      #
+# This library is distributed in the hope that it will be useful,      #
+# but WITHOUT ANY WARRANTY; without even the implied warranty of       #
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU     #
+# Lesser General Public License for more details.                      #
+#                                                                      #
+# You should have received a copy of the GNU Lesser General Public     #
+# License along with this library (see the file LICENSE.TXT); if not,  #
+# write to the Free Software Foundation, Inc., 59 Temple Place,        #
+# Suite 330, Boston, MA 02111-1307 USA.                                #
+#                                                                      #
+########################################################################
+
+# optimize the factorizer built by BuildLDLT
+#
+#    FNAME   : name of source file to generate - .h and .c files will be made
+#    N1      : block size (size of outer product matrix) (1..9)
+#    UNROLL1 : solver inner loop unrolling factor (1..)
+#    UNROLL2 : factorizer inner loop unrolling factor (1..)
+#    MADD    : if nonzero, generate code for fused multiply-add (0,1)
+#    FETCH   : how to fetch data in the inner loop:
+#                0 - load in a batch (the `normal way')
+#                1 - delay inner loop loads until just before they're needed
+
+##############################################################################
+
+require ("OptimizeUtil");
+
+##############################################################################
+# optimize factorizer
+
+sub testFactorizer # (filename)
+{
+  my $filename = $_[0];
+  createParametersFile ('ParametersF');
+  $params = "$N1 $UNROLL1 $UNROLL2 $MADD $FETCH";
+  print "***** TESTING $params\n";
+  doit ("rm -f fastldlt.c fastldlt.o test_ldlt");
+  doit ("make test_ldlt");
+  doit ("./test_ldlt f >> $filename");
+  open (FILE,">>$filename");
+  print FILE " $params\n";
+  close FILE;
+}
+
+
+# first find optimal parameters ignoring UNROLL1 and UNROLL2, write results
+# to data1.txt
+
+open (FILE,">data1.txt");
+print FILE "# factorizer data from OptimizeLDLT\n";
+close FILE;
+$FNAME='fastldlt';
+$TYPE='f';
+$UNROLL1=4;
+$UNROLL2=4;
+for ($N1=1; $N1 <= 4; $N1++) {
+  for ($MADD=0; $MADD<=1; $MADD++) {
+    for ($FETCH=0; $FETCH<=1; $FETCH++) {
+      testFactorizer ('data1.txt');
+    }
+  }
+}
+
+readBackDataFile ('data1.txt');
+createParametersFile ('ParametersF');
+
+# now find optimal UNROLL1 and UNROLL2 values, write results to data2.txt
+
+open (FILE,">data2.txt");
+print FILE "# factorizer data from OptimizeLDLT\n";
+close FILE;
+for ($UNROLL1=1; $UNROLL1 <= 10; $UNROLL1++) {
+  for ($UNROLL2=1; $UNROLL2 <= 10; $UNROLL2++) {
+    testFactorizer ('data2.txt');
+  }
+}
+
+readBackDataFile ('data2.txt');
+createParametersFile ('ParametersF');

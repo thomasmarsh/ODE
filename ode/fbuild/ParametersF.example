@@ -1,0 +1,8 @@
+# perl script to set parameters required by the code generator
+$FNAME="fastldlt";
+$TYPE="f";
+$N1=2;
+$UNROLL1=2;
+$UNROLL2=6;
+$MADD=0;
+$FETCH=1;

@@ -1,0 +1,76 @@
+/*************************************************************************
+ *                                                                       *
+ * Open Dynamics Engine, Copyright (C) 2001 Russell L. Smith.            *
+ *                                                                       *
+ * This library is free software; you can redistribute it and/or         *
+ * modify it under the terms of the GNU Lesser General Public            *
+ * License as published by the Free Software Foundation; either          *
+ * version 2.1 of the License, or (at your option) any later version.    *
+ *                                                                       *
+ * This library is distributed in the hope that it will be useful,       *
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU      *
+ * Lesser General Public License for more details.                       *
+ *                                                                       *
+ * You should have received a copy of the GNU Lesser General Public      *
+ * License along with this library (see the file LICENSE.TXT); if not,   *
+ * write to the Free Software Foundation, Inc., 59 Temple Place,         *
+ * Suite 330, Boston, MA 02111-1307 USA.                                 *
+ *                                                                       *
+ *************************************************************************/
+
+// object, body, and world structs.
+
+
+#ifndef _ODE_OBJECT_H_
+#define _ODE_OBJECT_H_
+
+#include <stdio.h>
+#include "ode/memory.h"
+#include "ode/common.h"
+#include "ode/mass.h"
+
+
+// base class that does correct object allocation / deallocation
+
+struct dBase {
+  void *operator new (size_t size) { return dAlloc (size); }
+  void operator delete (void *ptr, size_t size) { dFree (ptr,size); }
+  void *operator new[] (size_t size) { return dAlloc (size); }
+  void operator delete[] (void *ptr, size_t size) { dFree (ptr,size); }
+};
+
+
+// base class for bodies and joints
+
+struct dObject : public dBase {
+  dWorld *world;		// world this object is in
+  dObject *next;		// next object of this type in list
+  dObject **tome;		// pointer to previous object's next ptr
+  void *userdata;		// user settable data
+  int tag;			// used by dynamics algorithms
+};
+
+
+struct dBody : public dObject {
+  dJointNode *firstjoint;	// list of attached joints
+  dMass mass;			// mass parameters about POR
+  dMatrix3 invI;		// inverse of mass.I
+  dReal invMass;		// 1 / mass.mass
+  dVector3 pos;		// position of POR (point of reference)
+  dQuaternion q;		// orientation quaternion
+  dMatrix3 R;			// rotation matrix, always corresponds to q
+  dVector3 lvel,avel;		// linear and angular velocity of POR
+  dVector3 facc,tacc;		// force and torque accululators
+};
+
+
+struct dWorld : public dBase {
+  dBody *firstbody;		// body linked list
+  dJoint *firstjoint;		// joint linked list
+  int nb,nj;			// number of bodies and joints in lists
+  dVector3 gravity;		// gravity vector (m/s/s)
+};
+
+
+#endif
