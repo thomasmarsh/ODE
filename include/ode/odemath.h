@@ -25,6 +25,11 @@
 
 #include <ode/common.h>
 
+#ifdef __GNUC__
+#define PURE_INLINE extern inline
+#else
+#define PURE_INLINE inline
+#endif
 
 /*
  * macro to access elements i,j in an NxM matrix A, independent of the
@@ -45,40 +50,40 @@
 #ifdef __cplusplus
 
 /* authoritative block */
-extern inline float dDOT   (const float *a, const float *b) { return dDOTpq(a,b,1,1); }
-extern inline float dDOT13 (const float *a, const float *b) { return dDOTpq(a,b,1,3); }
-extern inline float dDOT31 (const float *a, const float *b) { return dDOTpq(a,b,3,1); }
-extern inline float dDOT33 (const float *a, const float *b) { return dDOTpq(a,b,3,3); }
-extern inline float dDOT14 (const float *a, const float *b) { return dDOTpq(a,b,1,4); }
-extern inline float dDOT41 (const float *a, const float *b) { return dDOTpq(a,b,4,1); }
-extern inline float dDOT44 (const float *a, const float *b) { return dDOTpq(a,b,4,4); }
+PURE_INLINE float dDOT   (const float *a, const float *b) { return dDOTpq(a,b,1,1); }
+PURE_INLINE float dDOT13 (const float *a, const float *b) { return dDOTpq(a,b,1,3); }
+PURE_INLINE float dDOT31 (const float *a, const float *b) { return dDOTpq(a,b,3,1); }
+PURE_INLINE float dDOT33 (const float *a, const float *b) { return dDOTpq(a,b,3,3); }
+PURE_INLINE float dDOT14 (const float *a, const float *b) { return dDOTpq(a,b,1,4); }
+PURE_INLINE float dDOT41 (const float *a, const float *b) { return dDOTpq(a,b,4,1); }
+PURE_INLINE float dDOT44 (const float *a, const float *b) { return dDOTpq(a,b,4,4); }
 
 /* copy of authoritative block, with types changed */
-extern inline double dDOT   (const double *a, const double *b) { return dDOTpq(a,b,1,1); }
-extern inline double dDOT13 (const double *a, const double *b) { return dDOTpq(a,b,1,3); }
-extern inline double dDOT31 (const double *a, const double *b) { return dDOTpq(a,b,3,1); }
-extern inline double dDOT33 (const double *a, const double *b) { return dDOTpq(a,b,3,3); }
-extern inline double dDOT14 (const double *a, const double *b) { return dDOTpq(a,b,1,4); }
-extern inline double dDOT41 (const double *a, const double *b) { return dDOTpq(a,b,4,1); }
-extern inline double dDOT44 (const double *a, const double *b) { return dDOTpq(a,b,4,4); }
+PURE_INLINE double dDOT   (const double *a, const double *b) { return dDOTpq(a,b,1,1); }
+PURE_INLINE double dDOT13 (const double *a, const double *b) { return dDOTpq(a,b,1,3); }
+PURE_INLINE double dDOT31 (const double *a, const double *b) { return dDOTpq(a,b,3,1); }
+PURE_INLINE double dDOT33 (const double *a, const double *b) { return dDOTpq(a,b,3,3); }
+PURE_INLINE double dDOT14 (const double *a, const double *b) { return dDOTpq(a,b,1,4); }
+PURE_INLINE double dDOT41 (const double *a, const double *b) { return dDOTpq(a,b,4,1); }
+PURE_INLINE double dDOT44 (const double *a, const double *b) { return dDOTpq(a,b,4,4); }
 
 /* copy of authoritative block, with types changed */
-extern inline double dDOT   (const float *a, const double *b) { return dDOTpq(a,b,1,1); }
-extern inline double dDOT13 (const float *a, const double *b) { return dDOTpq(a,b,1,3); }
-extern inline double dDOT31 (const float *a, const double *b) { return dDOTpq(a,b,3,1); }
-extern inline double dDOT33 (const float *a, const double *b) { return dDOTpq(a,b,3,3); }
-extern inline double dDOT14 (const float *a, const double *b) { return dDOTpq(a,b,1,4); }
-extern inline double dDOT41 (const float *a, const double *b) { return dDOTpq(a,b,4,1); }
-extern inline double dDOT44 (const float *a, const double *b) { return dDOTpq(a,b,4,4); }
+PURE_INLINE double dDOT   (const float *a, const double *b) { return dDOTpq(a,b,1,1); }
+PURE_INLINE double dDOT13 (const float *a, const double *b) { return dDOTpq(a,b,1,3); }
+PURE_INLINE double dDOT31 (const float *a, const double *b) { return dDOTpq(a,b,3,1); }
+PURE_INLINE double dDOT33 (const float *a, const double *b) { return dDOTpq(a,b,3,3); }
+PURE_INLINE double dDOT14 (const float *a, const double *b) { return dDOTpq(a,b,1,4); }
+PURE_INLINE double dDOT41 (const float *a, const double *b) { return dDOTpq(a,b,4,1); }
+PURE_INLINE double dDOT44 (const float *a, const double *b) { return dDOTpq(a,b,4,4); }
 
 /* copy of authoritative block, with types changed */
-extern inline double dDOT   (const double *a, const float *b) { return dDOTpq(a,b,1,1); }
-extern inline double dDOT13 (const double *a, const float *b) { return dDOTpq(a,b,1,3); }
-extern inline double dDOT31 (const double *a, const float *b) { return dDOTpq(a,b,3,1); }
-extern inline double dDOT33 (const double *a, const float *b) { return dDOTpq(a,b,3,3); }
-extern inline double dDOT14 (const double *a, const float *b) { return dDOTpq(a,b,1,4); }
-extern inline double dDOT41 (const double *a, const float *b) { return dDOTpq(a,b,4,1); }
-extern inline double dDOT44 (const double *a, const float *b) { return dDOTpq(a,b,4,4); }
+PURE_INLINE double dDOT   (const double *a, const float *b) { return dDOTpq(a,b,1,1); }
+PURE_INLINE double dDOT13 (const double *a, const float *b) { return dDOTpq(a,b,1,3); }
+PURE_INLINE double dDOT31 (const double *a, const float *b) { return dDOTpq(a,b,3,1); }
+PURE_INLINE double dDOT33 (const double *a, const float *b) { return dDOTpq(a,b,3,3); }
+PURE_INLINE double dDOT14 (const double *a, const float *b) { return dDOTpq(a,b,1,4); }
+PURE_INLINE double dDOT41 (const double *a, const float *b) { return dDOTpq(a,b,4,1); }
+PURE_INLINE double dDOT44 (const double *a, const float *b) { return dDOTpq(a,b,4,4); }
 
 #else
 
@@ -139,9 +144,9 @@ extern inline double dDOT44 (const double *a, const float *b) { return dDOTpq(a,
  */
 
 #ifdef __cplusplus
-extern inline float dDISTANCE (const float a[3], const float b[3])
+PURE_INLINE float dDISTANCE (const float a[3], const float b[3])
 	{ return (float) dSqrt( (a[0]-b[0])*(a[0]-b[0]) + (a[1]-b[1])*(a[1]-b[1]) + (a[2]-b[2])*(a[2]-b[2]) ); }
-extern inline double dDISTANCE (const double a[3], const double b[3])
+PURE_INLINE double dDISTANCE (const double a[3], const double b[3])
 	{ return dSqrt( (a[0]-b[0])*(a[0]-b[0]) + (a[1]-b[1])*(a[1]-b[1]) + (a[2]-b[2])*(a[2]-b[2]) ); }
 #else
 #define dDISTANCE(a,b) \
@@ -198,7 +203,7 @@ extern inline double dDISTANCE (const double a[3], const double b[3])
 
 #ifdef __cplusplus
 
-#define DECL template <class TA, class TB, class TC> extern inline void
+#define DECL template <class TA, class TB, class TC> PURE_INLINE void
 
 DECL dMULTIPLY0_331(TA *A, const TB *B, const TC *C) { dMULTIPLYOP0_331(A,=,B,C) }
 DECL dMULTIPLY1_331(TA *A, const TB *B, const TC *C) { dMULTIPLYOP1_331(A,=,B,C) }
