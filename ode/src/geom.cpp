@@ -27,6 +27,8 @@ dContactGeom::g1 and dContactGeom::g2.
 
 */
 
+#include <stdio.h>
+#include "ode/common.h"
 #include "ode/geom.h"
 #include "ode/rotation.h"
 #include "ode/odemath.h"

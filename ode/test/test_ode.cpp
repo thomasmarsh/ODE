@@ -23,7 +23,6 @@
 #include <stdio.h>
 #include <setjmp.h>
 #include <string.h>
-#include <math.h>
 
 #include "ode/ode.h"
 
