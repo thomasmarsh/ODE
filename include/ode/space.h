@@ -48,6 +48,7 @@ void dSpaceDestroy (dSpaceID);
 void dSpaceAdd (dSpaceID, dGeomID);
 void dSpaceRemove (dSpaceID, dGeomID);
 void dSpaceCollide (dSpaceID space, void *data, dNearCallback *callback);
+int dSpaceQuery (dSpaceID, dGeomID);
 
 void dHashSpaceSetLevels (dSpaceID space, int minlevel, int maxlevel);
 

@@ -70,6 +70,7 @@ struct dxSpace : public dBase {
   virtual void add (dGeomID)=0;
   virtual void remove (dGeomID)=0;
   virtual void collide (void *data, dNearCallback *callback)=0;
+  virtual int query (dGeomID)=0;
 };
 
 #define TYPE_SIMPLE 0xbad
@@ -118,6 +119,7 @@ struct dxSimpleSpace : public dxSpace {
   void add (dGeomID);
   void remove (dGeomID);
   void collide (void *data, dNearCallback *callback);
+  int query (dGeomID);
 };
 
 
@@ -233,6 +235,20 @@ void dxSimpleSpace::collide (void *data, dNearCallback *callback)
 //  return n;
 //}
 
+
+int dxSimpleSpace::query (dGeomID obj)
+{
+  dAASSERT (this && obj);
+  if (obj->spaceid != this) return 0;
+  dGeomID compare = first;
+  while (compare) {
+    if (compare == obj) return 1;
+    compare = compare->space.next;
+  }
+  dDebug (0,"object is not in the space it thinks it is in");
+  return 0;
+}
+
 //****************************************************************************
 // hash table space
 
@@ -259,6 +275,7 @@ struct dxHashSpace : public dxSpace {
   void add (dGeomID);
   void remove (dGeomID);
   void collide (void *data, dNearCallback *callback);
+  int query (dGeomID);
 };
 
 
@@ -557,6 +574,20 @@ void dxHashSpace::collide (void *data, dNearCallback *callback)
   for (geom=first; geom; geom=geom->space.next) geom->space_aabb = 0;
 }
 
+
+int dxHashSpace::query (dGeomID obj)
+{
+  dAASSERT (this && obj);
+  if (obj->spaceid != this) return 0;
+  dGeomID compare = first;
+  while (compare) {
+    if (compare == obj) return 1;
+    compare = compare->space.next;
+  }
+  dDebug (0,"object is not in the space it thinks it is in");
+  return 0;
+}
+
 //****************************************************************************
 // space functions
 
@@ -575,6 +606,12 @@ void dSpaceAdd (dxSpace * space, dxGeom *g)
 void dSpaceRemove (dxSpace * space, dxGeom *g)
 {
   space->remove (g);
+}
+
+
+int dSpaceQuery (dxSpace * space, dxGeom *g)
+{
+  return space->query (g);
 }
 
 

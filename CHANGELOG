@@ -9,6 +9,10 @@ the rules for this file:
 
 ------------------------------------------------------------------------------
 
+05/16/02 russ
+
+	* added dSpaceQuery(), contributed by Nate Waddoups.
+
 04/07/02 russ
 
 	* added a section to the documentation for universal joints.
