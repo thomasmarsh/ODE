@@ -104,20 +104,26 @@ void dJointSetSliderParam (dJointID, int parameter, dReal value);
 void dJointSetHinge2Anchor (dJointID, dReal x, dReal y, dReal z);
 void dJointSetHinge2Axis1 (dJointID, dReal x, dReal y, dReal z);
 void dJointSetHinge2Axis2 (dJointID, dReal x, dReal y, dReal z);
+void dJointSetHinge2Param1 (dJointID, int parameter, dReal value);
+void dJointSetHinge2Param2 (dJointID, int parameter, dReal value);
 
 void dJointGetBallAnchor (dJointID, dVector3 result);
 void dJointGetHingeAnchor (dJointID, dVector3 result);
 void dJointGetHingeAxis (dJointID, dVector3 result);
+dReal dJointGetHingeParam (dJointID, int parameter);
 dReal dJointGetHingeAngle (dJointID);
 dReal dJointGetHingeAngleRate (dJointID);
 dReal dJointGetSliderPosition (dJointID);
 dReal dJointGetSliderPositionRate (dJointID);
 void dJointGetSliderAxis (dJointID, dVector3 result);
+dReal dJointGetSliderParam (dJointID, int parameter);
 void dJointGetHinge2Anchor (dJointID, dVector3 result);
 void dJointGetHinge2Axis1 (dJointID, dVector3 result);
 void dJointGetHinge2Axis2 (dJointID, dVector3 result);
-dReal dJointGetHingeParam (dJointID, int parameter);
-dReal dJointGetSliderParam (dJointID, int parameter);
+dReal dJointGetHinge2Param1 (dJointID, int parameter);
+dReal dJointGetHinge2Param2 (dJointID, int parameter);
+dReal dJointGetHinge2Angle1 (dJointID);
+dReal dJointGetHinge2Angle1Rate (dJointID);
 
 int dAreConnected (dBodyID, dBodyID);
 

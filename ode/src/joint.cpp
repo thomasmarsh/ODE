@@ -167,6 +167,9 @@ static void getAxis (dxJoint *j, dVector3 result, dVector3 axis1)
 // (q_initial), return the relative rotation angle. the initial relative
 // orientation corresponds to an angle of zero. if body2 is 0 then measure the
 // angle between body1 and the static frame.
+//
+// this will not return the correct angle if the bodies rotate along any axis
+// other than the given hinge axis.
 
 static dReal getHingeAngle (dxBody *body1, dxBody *body2, dVector3 axis,
 			    dQuaternion q_initial)
@@ -272,26 +275,22 @@ dReal dxJointLimitMotor::get (int num)
 }
 
 
-int dxJointLimitMotor::testRotationalLimit (dxBody *body1, dxBody *body2,
-					    dVector3 axis1, dQuaternion qrel)
+int dxJointLimitMotor::testRotationalLimit (dReal angle)
 {
-  // see if we're at a joint limit.
-  limit = 0;
-  if (lostop >= -M_PI && histop <= M_PI && lostop <= histop) {
-    // measure joint angle
-    dReal angle = getHingeAngle (body1,body2,axis1,qrel);
-    if (angle <= lostop) {
-      limit = 1;
-      limit_err = angle - lostop;
-      return 1;
-    }
-    else if (angle >= histop) {
-      limit = 2;
-      limit_err = angle - histop;
-      return 1;
-    }
+  if (angle <= lostop) {
+    limit = 1;
+    limit_err = angle - lostop;
+    return 1;
   }
-  return 0;
+  else if (angle >= histop) {
+    limit = 2;
+    limit_err = angle - histop;
+    return 1;
+  }
+  else {
+    limit = 0;
+    return 0;
+  }
 }
 
 
@@ -487,9 +486,11 @@ static void hingeGetInfo1 (dxJointHinge *j, dxJoint::Info1 *info)
   else info->m = 5;
 
   // see if we're at a joint limit.
-  if (j->limot.testRotationalLimit (j->node[0].body,j->node[1].body,
-				    j->axis1, j->qrel)) {
-    info->m = 6;
+  if (j->limot.lostop >= -M_PI && j->limot.histop <= M_PI &&
+      j->limot.lostop <= j->limot.histop) {
+    dReal angle = getHingeAngle (j->node[0].body,j->node[1].body,j->axis1,
+				 j->qrel);
+    if (j->limot.testRotationalLimit (angle)) info->m = 6;
   }
 }
 
@@ -1098,6 +1099,17 @@ dxJoint::Vtable __dcontact_vtable = {
 //****************************************************************************
 // hinge 2. note that this joint must be attached to two bodies for it to work
 
+static dReal measureHinge2Angle (dxJointHinge2 *joint)
+{
+  dVector3 a1,a2;
+  dMULTIPLY0_331 (a1,joint->node[1].body->R,joint->axis2);
+  dMULTIPLY1_331 (a2,joint->node[0].body->R,a1);
+  dReal x = dDOT(joint->v1,a2);
+  dReal y = dDOT(joint->v2,a2);
+  return dAtan2 (y,x);
+}
+
+
 static void hinge2Init (dxJointHinge2 *j)
 {
   dSetZero (j->anchor1,4);
@@ -1108,6 +1120,14 @@ static void hinge2Init (dxJointHinge2 *j)
   j->axis2[0] = 1;
   j->c0 = 0;
   j->s0 = 0;
+
+  dSetZero (j->v1,4);
+  j->v1[0] = 1;
+  dSetZero (j->v2,4);
+  j->v2[1] = 1;
+
+  j->limot1.init();
+  j->limot2.init();
 }
 
 
@@ -1115,6 +1135,15 @@ static void hinge2GetInfo1 (dxJointHinge2 *j, dxJoint::Info1 *info)
 {
   info->m = 4;
   info->nub = 4;
+
+  // see if we're powered or at a joint limit for axis 1
+  int atlimit=0;
+  if (j->limot1.lostop >= -M_PI && j->limot1.histop <= M_PI &&
+      j->limot1.lostop <= j->limot1.histop) {
+    dReal angle = measureHinge2Angle (j);
+    if (j->limot1.testRotationalLimit (angle)) atlimit = 1;
+  }
+  if (atlimit || j->limot1.fmax > 0) info->m++;
 }
 
 
@@ -1171,6 +1200,33 @@ static void hinge2GetInfo2 (dxJointHinge2 *joint, dxJoint::Info2 *info)
 
   dReal k = info->fps * info->erp;
   info->c[3] = k * (joint->c0 * s - joint->s0 * c);
+
+  // if the axis1 hinge is powered, or has joint limits, add in more stuff
+  joint->limot1.addRotationalLimot (joint,info,4,ax1);
+}
+
+
+// compute vectors v1 and v2 (embedded in body1), used to measure angle
+// between body 1 and body 2
+
+static void makeHinge2V1andV2 (dxJointHinge2 *joint)
+{
+  if (joint->node[0].body) {
+    // get axis 1 and 2 in global coords
+    dVector3 ax1,ax2,v;
+    dMULTIPLY0_331 (ax1,joint->node[0].body->R,joint->axis1);
+    dMULTIPLY0_331 (ax2,joint->node[1].body->R,joint->axis2);
+
+    // modify axis 2 so it's perpendicular to axis 1
+    dReal k = dDOT(ax1,ax2);
+    for (int i=0; i<3; i++) ax2[i] -= k*ax1[i];
+    dNormalize3 (ax2);
+
+    // make v1 = modified axis2, v2 = axis1 x (modified axis2)
+    dCROSS (v,=,ax1,ax2);
+    dMULTIPLY1_331 (joint->v1,joint->node[0].body->R,ax2);
+    dMULTIPLY1_331 (joint->v2,joint->node[0].body->R,v);
+  }
 }
 
 
@@ -1180,6 +1236,7 @@ extern "C" void dJointSetHinge2Anchor (dxJointHinge2 *joint,
   dUASSERT(joint,"bad joint argument");
   dUASSERT(joint->vtable == &__dhinge2_vtable,"joint is not a hinge2");
   setAnchors (joint,x,y,z,joint->anchor1,joint->anchor2);
+  makeHinge2V1andV2 (joint);
 }
 
 
@@ -1202,6 +1259,7 @@ extern "C" void dJointSetHinge2Axis1 (dxJointHinge2 *joint,
     dVector3 ax;
     HINGE2_GET_AXIS_INFO(ax,joint->s0,joint->c0);
   }
+  makeHinge2V1andV2 (joint);
 }
 
 
@@ -1224,6 +1282,25 @@ extern "C" void dJointSetHinge2Axis2 (dxJointHinge2 *joint,
     dVector3 ax;
     HINGE2_GET_AXIS_INFO(ax,joint->s0,joint->c0);
   }
+  makeHinge2V1andV2 (joint);
+}
+
+
+extern "C" void dJointSetHinge2Param1 (dxJointHinge2 *joint,
+				       int parameter, dReal value)
+{
+  dUASSERT(joint,"bad joint argument");
+  dUASSERT(joint->vtable == &__dhinge2_vtable,"joint is not a hinge2");
+  joint->limot1.set (parameter,value);
+}
+
+
+extern "C" void dJointSetHinge2Param2 (dxJointHinge2 *joint,
+				       int parameter, dReal value)
+{
+  dUASSERT(joint,"bad joint argument");
+  dUASSERT(joint->vtable == &__dhinge2_vtable,"joint is not a hinge2");
+  joint->limot2.set (parameter,value);
 }
 
 
@@ -1255,6 +1332,46 @@ extern "C" void dJointGetHinge2Axis2 (dxJointHinge2 *joint, dVector3 result)
   if (joint->node[1].body) {
     dMULTIPLY0_331 (result,joint->node[1].body->R,joint->axis2);
   }
+}
+
+
+extern "C" dReal dJointGetHinge2Param1 (dxJointHinge2 *joint, int parameter)
+{
+  dUASSERT(joint,"bad joint argument");
+  dUASSERT(joint->vtable == &__dhinge2_vtable,"joint is not a hinge2");
+  return joint->limot1.get (parameter);
+}
+
+
+extern "C" dReal dJointGetHinge2Param2 (dxJointHinge2 *joint, int parameter)
+{
+  dUASSERT(joint,"bad joint argument");
+  dUASSERT(joint->vtable == &__dhinge2_vtable,"joint is not a hinge2");
+  return joint->limot2.get (parameter);
+}
+
+
+extern "C" dReal dJointGetHinge2Angle1 (dxJointHinge2 *joint)
+{
+  dUASSERT(joint,"bad joint argument");
+  dUASSERT(joint->vtable == &__dhinge2_vtable,"joint is not a hinge2");
+  if (joint->node[0].body) return measureHinge2Angle (joint);
+  else return 0;
+}
+
+
+extern "C" dReal dJointGetHinge2Angle1Rate (dxJointHinge2 *joint)
+{
+  dUASSERT(joint,"bad joint argument");
+  dUASSERT(joint->vtable == &__dhinge2_vtable,"joint is not a hinge2");
+  if (joint->node[0].body) {
+    dVector3 axis;
+    dMULTIPLY0_331 (axis,joint->node[0].body->R,joint->axis1);
+    dReal rate = -dDOT(axis,joint->node[0].body->avel);
+    if (joint->node[1].body) rate += dDOT(axis,joint->node[1].body->avel);
+    return rate;
+  }
+  else return 0;
 }
 
 
