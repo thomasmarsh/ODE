@@ -2657,12 +2657,12 @@ extern "C" void dJointAddAMotorTorques (dxJointAMotor *joint, dReal torque1, dRe
   axes[0][2] *= torque1;
   if (joint->num >= 2) {
     axes[0][0] += axes[1][0] * torque2;
-    axes[0][1] += axes[1][0] * torque2;
-    axes[0][2] += axes[1][0] * torque2;
+    axes[0][1] += axes[1][1] * torque2;
+    axes[0][2] += axes[1][2] * torque2;
     if (joint->num >= 3) {
       axes[0][0] += axes[2][0] * torque3;
-      axes[0][1] += axes[2][0] * torque3;
-      axes[0][2] += axes[2][0] * torque3;
+      axes[0][1] += axes[2][1] * torque3;
+      axes[0][2] += axes[2][2] * torque3;
     }
   }
 
