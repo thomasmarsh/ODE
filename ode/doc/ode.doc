@@ -1115,7 +1115,7 @@ int dBodyIsEnabled (dBodyID);
 Enable and disable a body.
 Disabled bodies are effectively ``turned off'' and are not updated during a
 simulation step.
-However, if a disabled body is connected to island containing one or more
+However, if a disabled body is connected to an island containing one or more
 enabled bodies then it will be re-enabled at the next simulation step.
 
 @c{dBodyIsEnabled()} returns 1 if a body is enabled or 0 if it is disabled.
@@ -1126,7 +1126,7 @@ New bodies are created in the enabled state.
 @funcdef{
 void dBodySetFiniteRotationMode (dBodyID, int mode);
 }{
-This function control the way a body's orientation is updated at each time
+This function controls the way a body's orientation is updated at each time
 step. The @arg{mode} argument can be:
 @list{
 @*	0: An ``infitesimal'' orientation update is used.
