@@ -12,6 +12,7 @@ the rules for this file:
 09/08/02 russ
 
 	* added dClosestLineSegmentPoints().
+	* implemented dCollideCB().
 
 08/28/02 russ
 

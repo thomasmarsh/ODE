@@ -52,6 +52,7 @@ dBoxTouchesBox
 dCCylinderClass
 dClearUpperTriangle
 dCloseODE
+dClosestLineSegmentPoints
 dCollide
 dCreateBox
 dCreateCCylinder
