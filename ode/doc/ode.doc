@@ -2917,6 +2917,64 @@ stack size.
 For example, the MS VC++ command line compiler accepts the @c{/Stack:num}
 flag to set the upper limit.
 
+
+@section{My simple rotating bodies are unstable!}
+
+If you have a box whose sides have different lengths, and you start it
+rotating in free space, you should observe that it just tumbles at the same
+speed forever.
+But sometimes in ODE the box will gain speed by itself, spinning faster and
+faster until it ``explodes'' (disappears off to infinity).
+Here is the explanation:
+
+ODE uses a first order semi-implicit integrator.
+The ``semi implicit'' means that some forces are calculated as though an
+implicit integrator is being used, and other forces are calculated as though
+the integrator is explicit.
+The constraint forces (applied to bodies to keep the constraints together)
+are implicit, and the "external" forces (applied by the user, and due to
+rotational effects) are explicit.
+Now, inaccuracy in implicit integrators is manifested as a reduction in
+energy - in other words the integrator damps the system for you.
+Inaccuracy in explicit integrators has the opposite effect - it increases the
+system energy.
+This is why systems simulated with explicit first order integrators can
+explode.
+
+So, a single body tumbling in space is effectively explicitly integrated.
+If the body's moments of inertia were equal (e.g. if it is a sphere) then the
+rotation axis will remain constant, and the integrator error will be small.
+If the body's moments of inertia are unequal then the rotation axis wobbles
+as momentum is transferred between different rotation directions.
+This is the correct physical behavior, but it results in higher integrator
+error.
+The integrator in this case is explicit so the error increases the energy,
+which causes faster and faster rotation, causing more and more error -
+leading to the explosion.
+The problem is particularly evident with long thin objects, where the 3
+moments of inertia are highly unequal.
+
+To prevent this, do one or more of the following:
+@list{
+@*	Make sure freely rotating bodies are dynamically symmetric (i.e. all
+	moments of inertia are the same - the inertia matrix is a constant
+	times the identity matrix).
+	Note that you can still render and collide with a long thin box even
+	though it has the inertia of a sphere.
+@*	Make sure freely rotating bodies don't spin too fast (e.g. don't
+	apply large torques, or supply extra damping forces).
+@*	Add extra damping elements to the environment, e.g. don't use bouncy
+	collisions that can reflect energy.
+@*	Use smaller timesteps. This is bad for two reasons: it's slower,
+	and ODE currently only has a first order integrator so the added
+	accuracy is minimal.
+@*	Use a higher order integrator. This is not yet an option in ODE.
+}
+
+In the future I may add a feature to ODE to modify the rotational dynamics
+of selected bodies so that they exhibit no rotational error with ODEs
+integrator.
+
 #############################################################################
 @chapter{Known BUGS}
 
