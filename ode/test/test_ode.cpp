@@ -30,9 +30,11 @@
 // get some math functions under windows
 #ifdef WIN32
 #include <float.h>
+#ifndef PLATFORM_IS_CYGWIN	// andy's fix for cygwin
 #define copysign _copysign
 #define finite _finite
 #define isnan _isnan
+#endif				// andy's fix for cygwin
 #endif
 
 //****************************************************************************
