@@ -124,6 +124,9 @@ struct dxJoint : public dObject {
 };
 
 
+// joint group. NOTE: any joints in the group that have their world destroyed
+// will have their world pointer set to 0.
+
 struct dxJointGroup {
   int num;		// number of joints on the stack
   dxJoint *firstjoint;	// address of first joint on the stack
