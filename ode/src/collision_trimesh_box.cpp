@@ -1196,7 +1196,7 @@ int dCollideBTL(dxGeom* g1, dxGeom* BoxGeom, int Flags, dContactGeom* Contacts, 
          TriMesh->ArrayCallback(TriMesh, BoxGeom, Triangles, TriCount);
     }
     
-    int OutTriCount = 0;
+    //int OutTriCount = 0;
     
     // loop through all intersecting triangles
     for (int i = 0; i < TriCount; i++){
