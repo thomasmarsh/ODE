@@ -490,3 +490,11 @@ void dGeomTriMeshGetPoint(dGeomID g, int Index, dReal u, dReal v, dVector3 Out){
 
 	GetPointFromBarycentric(dv, u, v, Out);
 }
+
+
+
+int dGeomTriMeshGetTriangleCount (dGeomID g)
+{
+	dxTriMesh* Geom = (dxTriMesh*)g;
+	return Geom->Data->Mesh.GetNbTriangles();
+}
