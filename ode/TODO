@@ -17,7 +17,8 @@ that there is not excessive AABB computation when geoms are added/removed from
 the space. the space AABB is pretty much guaranteed to cover everything, so
 there's no need to compute/test the AABB in this case.
 
-hash space: implement collide2().
+hash space: implement collide2() efficiently instead of the current
+simple-space-like brute-force approach.
 
 hash space: incremental scheme, so we dont have to rebuild the data structures
 for geoms that don't move.

@@ -597,8 +597,21 @@ void dxHashSpace::collide (void *data, dNearCallback *callback)
 void dxHashSpace::collide2 (void *data, dxGeom *geom,
 			    dNearCallback *callback)
 {
-  //@@@
-  dDebug (0,"dxHashSpace::collide2() not yet implemented");
+  dAASSERT (geom && callback);
+  
+  // this could take advantage of the hash structure to avoid
+  // O(n2) complexity, but it does not yet.
+  
+  lock_count++;
+  cleanGeoms();
+  geom->recomputeAABB();
+  
+  // intersect bounding boxes
+  for (dxGeom *g=first; g; g=g->next) {
+    collideAABBs (g,geom,data,callback);
+  }
+  
+  lock_count--;
 }
 
 //****************************************************************************
