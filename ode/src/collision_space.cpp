@@ -383,6 +383,7 @@ struct dxHashSpace : public dxSpace {
 
   dxHashSpace (dSpaceID _space);
   void setLevels (int minlevel, int maxlevel);
+  void getLevels (int *minlevel, int *maxlevel);
   void cleanGeoms();
   void collide (void *data, dNearCallback *callback);
   void collide2 (void *data, dxGeom *geom, dNearCallback *callback);
@@ -402,6 +403,13 @@ void dxHashSpace::setLevels (int minlevel, int maxlevel)
   dAASSERT (minlevel <= maxlevel);
   global_minlevel = minlevel;
   global_maxlevel = maxlevel;
+}
+
+
+void dxHashSpace::getLevels (int *minlevel, int *maxlevel)
+{
+  if (minlevel) *minlevel = global_minlevel;
+  if (maxlevel) *maxlevel = global_maxlevel;
 }
 
 
@@ -615,6 +623,15 @@ void dHashSpaceSetLevels (dxSpace *space, int minlevel, int maxlevel)
   dUASSERT (space->type == dHashSpaceClass,"argument must be a hash space");
   dxHashSpace *hspace = (dxHashSpace*) space;
   hspace->setLevels (minlevel,maxlevel);
+}
+
+
+void dHashSpaceGetLevels (dxSpace *space, int *minlevel, int *maxlevel)
+{
+  dAASSERT (space);
+  dUASSERT (space->type == dHashSpaceClass,"argument must be a hash space");
+  dxHashSpace *hspace = (dxHashSpace*) space;
+  hspace->getLevels (minlevel,maxlevel);
 }
 
 
