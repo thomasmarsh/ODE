@@ -46,8 +46,9 @@ extern "C" {
  * the box, and `side' is a vector of x/y/z side lengths.
  */
 
-int dBoxesTouch (const dVector3 _p1, const dMatrix3 R1, const dVector3 side1,
-		 const dVector3 _p2, const dMatrix3 R2, const dVector3 side2);
+int dBoxTouchesBox (const dVector3 _p1, const dMatrix3 R1,
+		    const dVector3 side1, const dVector3 _p2,
+		    const dMatrix3 R2, const dVector3 side2);
 
 /* *********************************************************************** */
 /* typedefs and structures */
@@ -63,7 +64,7 @@ typedef void dGetAABBFn (dGeomID, dReal aabb[6]);
  * the contact struct.
  */
 typedef int dColliderFn (dGeomID o1, dGeomID o2,
-			 int flags, dContactGeom *contact);
+			 int flags, dContactGeom *contact, int skip);
 
 /* one of these functions is provided by each geometry class. it takes a class
  * number. it should return the collider function that can handle colliding
@@ -139,8 +140,16 @@ void dDestroyGeom (dSpaceID, dGeomID);
  * `flags' specifies what information should be computed for the collision:
  *    bits 16..1 : maximum number of contact points to generate
  *                 (size of contact array). if this is 0 it is taken to be 1.
+ * NOTE:
+ * the elements of the contact array do not necessarily have to be contiguous.
+ * `skip' is the number of bytes between each member of `contact'. if skip is
+ * sizeof(dContactGeom) then `contact' points to a "normal" contact array.
+ * if skip is larger than this, then the dContactGeom structures are embedded
+ * in some other larger structures. it is an error for skip to be smaller
+ * than sizeof(dContactGeom).
  */
-int dCollide (dGeomID o1, dGeomID o2, int flags, dContactGeom *contact);
+int dCollide (dGeomID o1, dGeomID o2, int flags, dContactGeom *contact,
+	      int skip);
 
 /* *********************************************************************** */
 /* standard object types. the point of reference of all these objects
@@ -156,7 +165,7 @@ struct dSphere {
 
 struct dBox {
   dxGeom geom;
-  dReal lx,ly,lz;	/* side lengths */
+  dVector3 side;	/* side lengths (x,y,z) */
 };
 
 struct dCCylinder {	/* capped cylinder */
@@ -164,13 +173,8 @@ struct dCCylinder {	/* capped cylinder */
   dReal radius,lz;	/* radius, length along z axis */
 };
 
-struct dSlab {
-  dxGeom geom;
-  dReal radius,lx,ly;	/* radius, side length along x and y axes */
-};
-
 struct dPlane {
-  dxGeom geom;
+  dxGeom geom;	/* assumptions: p=0 and R=I, i.e. always a static object */
   dReal p[4];	/* plane equation params: p[0]*x+p[1]*y+p[2]*z = p[3] */
 };		/* (p[0],p[1],p[2]) = normal vector, must have length=1 */
 
@@ -186,46 +190,37 @@ struct dComposite {
  */
 
 dGeomID dCreateSphere (dSpaceID space, dReal radius);
+dGeomID dCreateBox (dSpaceID space, dReal lx, dReal ly, dReal lz);
 dGeomID dCreatePlane (dSpaceID space,
 		      dReal a, dReal b, dReal c, dReal d);
 
 
 
 /* specific collision functions. save interface as dCollide().
- * S=sphere, B=box, C=capped cylinder, L=slab, P=plane
+ * S=sphere, B=box, C=capped cylinder, P=plane
  */
 
 int dCollideSS (const dSphere *o1, const dSphere *o2, int flags,
-		dContactGeom *contact);
+		dContactGeom *contact, int skip);
 int dCollideSB (const dSphere *o1, const dBox *o2, int flags,
-		dContactGeom *contact);
+		dContactGeom *contact, int skip);
 int dCollideSC (const dSphere *o1, const dCCylinder *o2, int flags,
-		dContactGeom *contact);
-int dCollideSL (const dSphere *o1, const dSlab *o2, int flags,
-		dContactGeom *contact);
+		dContactGeom *contact, int skip);
 int dCollideSP (const dSphere *o1, const dPlane *o2, int flags,
-		dContactGeom *contact);
+		dContactGeom *contact, int skip);
 
 int dCollideBB (const dBox *o1, const dBox *o2, int flags,
-		dContactGeom *contact);
+		dContactGeom *contact, int skip);
 int dCollideBC (const dBox *o1, const dCCylinder *o2, int flags,
-		dContactGeom *contact);
-int dCollideBL (const dBox *o1, const dSlab *o2, int flags,
-		dContactGeom *contact);
+		dContactGeom *contact, int skip);
 int dCollideBP (const dBox *o1, const dPlane *o2, int flags,
-		dContactGeom *contact);
+		dContactGeom *contact, int skip);
 
 int dCollideCC (const dCCylinder *o1, const dCCylinder *o2, int flags,
-		dContactGeom *contact);
-int dCollideCL (const dCCylinder *o1, const dSlab *o2, int flags,
-		dContactGeom *contact);
+		dContactGeom *contact, int skip);
 int dCollideCP (const dCCylinder *o1, const dPlane *o2, int flags,
-		dContactGeom *contact);
+		dContactGeom *contact, int skip);
 
-int dCollideLL (const dSlab *o1, const dSlab *o2, int flags,
-		dContactGeom *contact);
-int dCollideLP (const dSlab *o1, const dPlane *o2, int flags,
-		dContactGeom *contact);
 
 
 void dAddToComposite (dGeomID composite, int i, dGeomID obj);
@@ -233,7 +228,6 @@ void dAddToComposite (dGeomID composite, int i, dGeomID obj);
 extern int dSphereClass;
 extern int dBoxClass;
 extern int dCCylinderClass;
-extern int dSlabClass;
 extern int dPlaneClass;
 extern int dCompositeClass;
 
