@@ -37,6 +37,7 @@ is written in straight ANSI C and only uses the following library functions:
   * fprintf
   * system
   * exit
+  * unlink
 except where stated, we do not assume anything about the return codes from
 these functions.
 
@@ -168,15 +169,13 @@ void write_header_comment (FILE *file, char *description)
 
 /* delete a file */
 
-char *delete_cmd_line = 0;
+char *delete_cmd_line = 0;			// no longer used?
 void delete_file (char *filename)
 {
-  char cmd[1000];
-  strcpy (cmd,delete_cmd_line);
-  strcat (cmd," ");
-  strcat (cmd,filename);
-  printf ("%s\n",cmd);
-  system (cmd);
+  unlink (filename);
+  if (file_exists (filename)) {
+    fatal_error ("the delete_file() function does not work");
+  }
 }
 
 
@@ -191,7 +190,9 @@ void compile (char *output, char *input)
   strcat (cmd," ");
   strcat (cmd,input);
   printf ("%s\n",cmd);
-  system (cmd);
+  if (system (cmd) == -1) {
+    printf ("WARNING: may not be able to execute '%s'\n",cmd);
+  }
 }
 
 
@@ -204,7 +205,9 @@ void run (char *filename)
   strcpy (cmd,run_prefix);
   strcat (cmd,filename);
   printf ("%s\n",cmd);
-  system (cmd);
+  if (system (cmd) == -1) {
+    printf ("WARNING: may not be able to execute '%s'\n",cmd);
+  }
 }
 
 /****************************************************************************/
@@ -234,28 +237,71 @@ void check_if_this_is_a_pentium (FILE *file)
 /****************************************************************************/
 /* tests: standard headers */
 
+#define NUM_HEADERS 8
+char *header_files[NUM_HEADERS] = {
+  "stdio.h", "stdlib.h", "math.h", "string.h",
+  "stdarg.h", "malloc.h", "alloca.h",
+  "ieeefp.h"		// Solaris needs this apparently
+};
+int header_used[NUM_HEADERS];
+
+
 void get_all_standard_headers (FILE *file)
 {
   int i;
   FILE *f;
-  char *header[8] = {"stdio.h", "stdlib.h", "math.h", "string.h",
-		     "stdarg.h", "malloc.h", "alloca.h",
-		     "ieeefp.h"		// Solaris needs this apparently
-  };
 
-  for (i=0; i < sizeof(header)/sizeof(char*); i++) {
+  for (i=0; i < NUM_HEADERS; i++) {
     FILE *f = xfopen ("ctest.c","wt");
-    fprintf (f,"#include <%s>\nint main() { return 0; }\n",header[i]);
+    fprintf (f,"#include <%s>\nint main() { return 0; }\n",header_files[i]);
     fclose (f);
     delete_file ("ctest.exe");
     compile ("ctest.exe","ctest.c");
     if (file_exists ("ctest.exe")) {
-      fprintf (file,"#include <%s>\n",header[i]);
+      fprintf (file,"#include <%s>\n",header_files[i]);
+      header_used[i] = 1;
+    }
+    else {
+      header_used[i] = 0;
     }
   }
 
   delete_file ("ctest.c");
   delete_file ("ctest.exe");
+}
+
+/****************************************************************************/
+/* tests: see if alloca() is defined, if not try __builtin_alloca.
+ * this assumes that get_all_standard_headers() has been called.
+ */
+
+#define NUM_ALLOCA 2
+char *alloca_function[NUM_ALLOCA] = {"alloca","__builtin_alloca"};
+ 
+ 
+void get_alloca_usage (FILE *file)
+{
+  int i,j;
+  for (i=0; i<NUM_ALLOCA; i++) {
+    FILE *f = xfopen ("ctest.cpp","wt");
+    for (j=0; j < NUM_HEADERS; j++) {
+      if (header_used[j]) fprintf (f,"#include <%s>\n",header_files[j]);
+    }
+    fprintf (f,"int main() { void *foo = %s (10); }\n",alloca_function[i]);
+    fclose (f);
+    delete_file ("ctest.exe");
+    compile ("ctest.exe","ctest.cpp");
+    if (file_exists ("ctest.exe")) {
+      if (i > 0) {
+	write_header_comment (file,"how to use alloca()");
+	fprintf (file,"#define alloca %s\n\n",alloca_function[i]);
+      }
+      break;
+    }
+  }
+  delete_file ("ctest.cpp");
+  delete_file ("ctest.exe");
+  if (i == NUM_ALLOCA) fatal_error ("i can't find a way to use alloca()");
 }
 
 /****************************************************************************/
@@ -452,6 +498,7 @@ int main (int argc, char **argv)
   fprintf (file,config_h_part1);
   get_all_standard_headers (file);
   fprintf (file,config_h_part2);
+  get_alloca_usage (file);
   check_if_this_is_a_pentium (file);
   get_ODE_integer_typedefs (file);
   get_ODE_float_stuff (file);
