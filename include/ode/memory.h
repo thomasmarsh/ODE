@@ -40,6 +40,11 @@ void dSetAllocHandler (dAllocFunction *fn);
 void dSetReallocHandler (dReallocFunction *fn);
 void dSetFreeHandler (dFreeFunction *fn);
 
+/* get current memory management functions */
+dAllocFunction *dGetAllocHandler ();
+dReallocFunction *dGetReallocHandler ();
+dFreeFunction *dGetFreeHandler ();
+
 /* allocate and free memory. */
 void * dAlloc (int size);
 void * dRealloc (void *ptr, int oldsize, int newsize);

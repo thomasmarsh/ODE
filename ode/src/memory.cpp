@@ -122,6 +122,24 @@ void dSetFreeHandler (dFreeFunction *fn)
 }
 
 
+dAllocFunction *dGetAllocHandler()
+{
+  return allocfn;
+}
+
+
+dReallocFunction *dGetReallocHandler()
+{
+  return reallocfn;
+}
+
+
+dFreeFunction *dGetFreeHandler()
+{
+  return freefn;
+}
+
+
 void * dAlloc (int size)
 {
 #ifdef dDEBUG_ALLOC
