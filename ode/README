@@ -119,3 +119,15 @@ Optimization
 ------------
 
 doubles must be aligned on 8 byte boundaries!
+
+
+MinGW on Windows issues
+-----------------------
+
+* the .rc file for drawstuff needs a different include, try winresrc.h.
+
+* it seems we can't have both main() and WinMain() without the entry point
+  defaulting to main() and having resource loading problems. this screws up
+  what i was trying to do in the drawstuff library. perhaps main2() ?
+
+* remember to compile resources to COFF format RES files.

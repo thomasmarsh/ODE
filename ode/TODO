@@ -2,6 +2,11 @@
 TODO
 ----
 
+dAlloc() should take an arena parameters which is stored in dWorld.
+
+better stack implementation that is not so system dependent. but how will
+we do dynamic page allocation? do we even need to?
+
 when vectors and matrices are initialized, we must ensure that the padding
 elements are set to 0. this is going to be a problem everywhere!
 
