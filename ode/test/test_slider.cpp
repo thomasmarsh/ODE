@@ -144,7 +144,6 @@ int main (int argc, char **argv)
   body[0] = dBodyCreate (world);
   dBodySetMass (body[0],&m);
   dBodySetPosition (body[0],0,0,1);
-
   body[1] = dBodyCreate (world);
   dBodySetMass (body[1],&m);
   dQuaternion q;
