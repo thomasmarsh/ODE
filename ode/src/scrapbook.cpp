@@ -285,3 +285,201 @@ static inline dReal boxDiameter (const dMatrix3 R, const dVector3 side,
   dMULTIPLY1_331 (q,R,axis);	// transform axis to body-relative
   return dFabs(q[0])*side[0] + dFabs(q[1])*side[1] + dFabs(q[2])*side[2];
 }
+
+//***************************************************************************
+// the old capped cylinder to capped cylinder collision code. this fails to
+// detect cap-to-cap contact points when the cylinder axis are aligned, but
+// other that that it is pretty robust.
+
+// this returns at most one contact point when the two cylinder's axes are not
+// aligned, and at most two (for stability) when they are aligned.
+// the algorithm minimizes the distance between two "sample spheres" that are
+// positioned along the cylinder axes according to:
+//    sphere1 = pos1 + alpha1 * axis1
+//    sphere2 = pos2 + alpha2 * axis2
+// alpha1 and alpha2 are limited to +/- half the length of the cylinders.
+// the algorithm works by finding a solution that has both alphas free, or
+// a solution that has one or both alphas fixed to the ends of the cylinder.
+
+int dCollideCCylinderCCylinder (dxGeom *o1, dxGeom *o2,
+				int flags, dContactGeom *contact, int skip)
+{
+  int i;
+  const dReal tolerance = REAL(1e-5);
+
+  dIASSERT (skip >= (int)sizeof(dContactGeom));
+  dIASSERT (o1->type == dCCylinderClass);
+  dIASSERT (o2->type == dCCylinderClass);
+  dxCCylinder *cyl1 = (dxCCylinder*) o1;
+  dxCCylinder *cyl2 = (dxCCylinder*) o2;
+
+  contact->g1 = o1;
+  contact->g2 = o2;
+
+  // copy out some variables, for convenience
+  dReal lz1 = cyl1->lz * REAL(0.5);
+  dReal lz2 = cyl2->lz * REAL(0.5);
+  dReal *pos1 = o1->pos;
+  dReal *pos2 = o2->pos;
+  dReal axis1[3],axis2[3];
+  axis1[0] = o1->R[2];
+  axis1[1] = o1->R[6];
+  axis1[2] = o1->R[10];
+  axis2[0] = o2->R[2];
+  axis2[1] = o2->R[6];
+  axis2[2] = o2->R[10];
+
+  dReal alpha1,alpha2,sphere1[3],sphere2[3];
+  int fix1 = 0;		// 0 if alpha1 is free, +/-1 to fix at +/- lz1
+  int fix2 = 0;		// 0 if alpha2 is free, +/-1 to fix at +/- lz2
+
+  for (int count=0; count<9; count++) {
+    // find a trial solution by fixing or not fixing the alphas
+    if (fix1) {
+      if (fix2) {
+	// alpha1 and alpha2 are fixed, so the solution is easy
+	if (fix1 > 0) alpha1 = lz1; else alpha1 = -lz1;
+	if (fix2 > 0) alpha2 = lz2; else alpha2 = -lz2;
+	for (i=0; i<3; i++) sphere1[i] = pos1[i] + alpha1*axis1[i];
+	for (i=0; i<3; i++) sphere2[i] = pos2[i] + alpha2*axis2[i];
+      }
+      else {
+	// fix alpha1 but let alpha2 be free
+	if (fix1 > 0) alpha1 = lz1; else alpha1 = -lz1;
+	for (i=0; i<3; i++) sphere1[i] = pos1[i] + alpha1*axis1[i];
+	alpha2 = (axis2[0]*(sphere1[0]-pos2[0]) +
+		  axis2[1]*(sphere1[1]-pos2[1]) +
+		  axis2[2]*(sphere1[2]-pos2[2]));
+	for (i=0; i<3; i++) sphere2[i] = pos2[i] + alpha2*axis2[i];
+      }
+    }
+    else {
+      if (fix2) {
+	// fix alpha2 but let alpha1 be free
+	if (fix2 > 0) alpha2 = lz2; else alpha2 = -lz2;
+	for (i=0; i<3; i++) sphere2[i] = pos2[i] + alpha2*axis2[i];
+	alpha1 = (axis1[0]*(sphere2[0]-pos1[0]) +
+		  axis1[1]*(sphere2[1]-pos1[1]) +
+		  axis1[2]*(sphere2[2]-pos1[2]));
+	for (i=0; i<3; i++) sphere1[i] = pos1[i] + alpha1*axis1[i];
+      }
+      else {
+	// let alpha1 and alpha2 be free
+	// compute determinant of d(d^2)\d(alpha) jacobian
+	dReal a1a2 = dDOT (axis1,axis2);
+	dReal det = REAL(1.0)-a1a2*a1a2;
+	if (det < tolerance) {
+	  // the cylinder axes (almost) parallel, so we will generate up to two
+	  // contacts. the solution matrix is rank deficient so alpha1 and
+	  // alpha2 are related by:
+	  //       alpha2 =   alpha1 + (pos1-pos2)'*axis1   (if axis1==axis2)
+	  //    or alpha2 = -(alpha1 + (pos1-pos2)'*axis1)  (if axis1==-axis2)
+	  // first compute where the two cylinders overlap in alpha1 space:
+	  if (a1a2 < 0) {
+	    axis2[0] = -axis2[0];
+	    axis2[1] = -axis2[1];
+	    axis2[2] = -axis2[2];
+	  }
+	  dReal q[3];
+	  for (i=0; i<3; i++) q[i] = pos1[i]-pos2[i];
+	  dReal k = dDOT (axis1,q);
+	  dReal a1lo = -lz1;
+	  dReal a1hi = lz1;
+	  dReal a2lo = -lz2 - k;
+	  dReal a2hi = lz2 - k;
+	  dReal lo = (a1lo > a2lo) ? a1lo : a2lo;
+	  dReal hi = (a1hi < a2hi) ? a1hi : a2hi;
+	  if (lo <= hi) {
+	    int num_contacts = flags & NUMC_MASK;
+	    if (num_contacts >= 2 && lo < hi) {
+	      // generate up to two contacts. if one of those contacts is
+	      // not made, fall back on the one-contact strategy.
+	      for (i=0; i<3; i++) sphere1[i] = pos1[i] + lo*axis1[i];
+	      for (i=0; i<3; i++) sphere2[i] = pos2[i] + (lo+k)*axis2[i];
+	      int n1 = dCollideSpheres (sphere1,cyl1->radius,
+					sphere2,cyl2->radius,contact);
+	      if (n1) {
+		for (i=0; i<3; i++) sphere1[i] = pos1[i] + hi*axis1[i];
+		for (i=0; i<3; i++) sphere2[i] = pos2[i] + (hi+k)*axis2[i];
+		dContactGeom *c2 = CONTACT(contact,skip);
+		int n2 = dCollideSpheres (sphere1,cyl1->radius,
+					  sphere2,cyl2->radius, c2);
+		if (n2) {
+		  c2->g1 = o1;
+		  c2->g2 = o2;
+		  return 2;
+		}
+	      }
+	    }
+
+	    // just one contact to generate, so put it in the middle of
+	    // the range
+	    alpha1 = (lo + hi) * REAL(0.5);
+	    alpha2 = alpha1 + k;
+	    for (i=0; i<3; i++) sphere1[i] = pos1[i] + alpha1*axis1[i];
+	    for (i=0; i<3; i++) sphere2[i] = pos2[i] + alpha2*axis2[i];
+	    return dCollideSpheres (sphere1,cyl1->radius,
+				    sphere2,cyl2->radius,contact);
+	  }
+	  else return 0;
+	}
+	det = REAL(1.0)/det;
+	dReal delta[3];
+	for (i=0; i<3; i++) delta[i] = pos1[i] - pos2[i];
+	dReal q1 = dDOT (delta,axis1);
+	dReal q2 = dDOT (delta,axis2);
+	alpha1 = det*(a1a2*q2-q1);
+	alpha2 = det*(q2-a1a2*q1);
+	for (i=0; i<3; i++) sphere1[i] = pos1[i] + alpha1*axis1[i];
+	for (i=0; i<3; i++) sphere2[i] = pos2[i] + alpha2*axis2[i];
+      }
+    }
+
+    // if the alphas are outside their allowed ranges then fix them and
+    // try again
+    if (fix1==0) {
+      if (alpha1 < -lz1) {
+	fix1 = -1;
+	continue;
+      }
+      if (alpha1 > lz1) {
+	fix1 = 1;
+	continue;
+      }
+    }
+    if (fix2==0) {
+      if (alpha2 < -lz2) {
+	fix2 = -1;
+	continue;
+      }
+      if (alpha2 > lz2) {
+	fix2 = 1;
+	continue;
+      }
+    }
+
+    // unfix the alpha variables if the local distance gradient indicates
+    // that we are not yet at the minimum
+    dReal tmp[3];
+    for (i=0; i<3; i++) tmp[i] = sphere1[i] - sphere2[i];
+    if (fix1) {
+      dReal gradient = dDOT (tmp,axis1);
+      if ((fix1 > 0 && gradient > 0) || (fix1 < 0 && gradient < 0)) {
+	fix1 = 0;
+	continue;
+      }
+    }
+    if (fix2) {
+      dReal gradient = -dDOT (tmp,axis2);
+      if ((fix2 > 0 && gradient > 0) || (fix2 < 0 && gradient < 0)) {
+	fix2 = 0;
+	continue;
+      }
+    }
+    return dCollideSpheres (sphere1,cyl1->radius,sphere2,cyl2->radius,contact);
+  }
+  // if we go through the loop too much, then give up. we should NEVER get to
+  // this point (i hope).
+  dMessage (0,"dCollideCC(): too many iterations");
+  return 0;
+}
