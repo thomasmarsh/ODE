@@ -2880,6 +2880,20 @@ functions do.
 
 @section{Utility functions}
 
+@funcdef{
+void dClosestLineSegmentPoints (dVector3 const a1, dVector3 const a2,
+				dVector3 const b1, dVector3 const b2,
+				dVector3 cp1, dVector3 cp2)
+}{
+Given two line segments A and B with endpoints @arg{a1}-@arg{a2} and
+@arg{b1}-@arg{b2}, return the points on A and B that are closest to each
+other (in @arg{cp1} and @arg{cp2}).
+In the case of parallel lines where there are multiple solutions, a solution
+involving the endpoint of at least one line will be returned.
+This will work correctly for zero length lines, e.g. if @arg{a1}==@arg{a2}
+and/or @arg{b1}==@arg{b2}.
+}
+
 
 @funcdef{
 int dBoxTouchesBox (const dVector3 _p1, const dMatrix3 R1,
