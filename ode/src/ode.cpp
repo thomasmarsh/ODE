@@ -759,6 +759,21 @@ int dBodyIsEnabled (dBodyID b)
   return ((b->flags & dxBodyDisabled) == 0);
 }
 
+
+void dBodySetGravityMode (dBodyID b, int mode)
+{
+  dAASSERT (b);
+  if (mode) b->flags &= ~dxBodyNoGravity;
+  else b->flags |= dxBodyNoGravity;
+}
+
+
+int dBodyGetGravityMode (dBodyID b)
+{
+  dAASSERT (b);
+  return ((b->flags & dxBodyNoGravity) != 0);
+}
+
 //****************************************************************************
 // joints
 

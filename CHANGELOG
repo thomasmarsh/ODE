@@ -9,7 +9,13 @@ the rules for this file:
 
 ------------------------------------------------------------------------------
 
+01/06/02 russ
+
+	* added the dBodySetGravityMode() and dBodyGetGravityMode()
+	  functions, which change the dxBodyNoGravity body flag.
+
 12/28/01 russ
+
 	* added the dParamCFM joint parameter.
 
 12/24/01 russ
