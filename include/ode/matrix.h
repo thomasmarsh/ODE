@@ -47,6 +47,18 @@ void dSetValue (dReal *a, int n, dReal value);
 dReal dDot (const dReal *a, const dReal *b, int n);
 
 
+/* get the dot products of (a0,b), (a1,b), etc and return them in outsum.
+ * all vectors are n*1. if n <= 0 then zeroes will be returned (in which case
+ * the input vectors need not be valid). this function is somewhat faster
+ * than calling dDot() for all of the combinations separately.
+ */
+
+/* NOT INCLUDED in the library for now.
+void dMultidot2 (const dReal *a0, const dReal *a1,
+		 const dReal *b, dReal *outsum, int n);
+*/
+
+
 /* matrix multiplication. all matrices are stored in standard row format.
  * the digit refers to the argument that is transposed:
  *   0:   A = B  * C   (sizes: A:p*r B:p*q C:q*r)
