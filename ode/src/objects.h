@@ -98,7 +98,7 @@ struct dxBody : public dObject {
   dQuaternion q;		// orientation quaternion
   dMatrix3 R;			// rotation matrix, always corresponds to q
   dVector3 lvel,avel;		// linear and angular velocity of POR
-  dVector3 facc,tacc;		// force and torque accululators
+  dVector3 facc,tacc;		// force and torque accumulators
   dVector3 finite_rot_axis;	// finite rotation axis, unit length or 0=none
 
   // auto-disable information
