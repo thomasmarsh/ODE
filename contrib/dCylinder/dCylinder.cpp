@@ -1102,7 +1102,7 @@ int dCollideCylCyl (dxGeom *o1, dxGeom *o2, int flags,
 dReal cylRadius1,cylRadius2;
 dReal cylLength1,cylLength2;
 dGeomCylinderGetParams(o1,&cylRadius1,&cylLength1);
-dGeomCylinderGetParams(o1,&cylRadius2,&cylLength2);
+dGeomCylinderGetParams(o2,&cylRadius2,&cylLength2);
 int num = dCylCyl (dGeomGetPosition(o1),dGeomGetRotation(o1),cylRadius1,cylLength1,
 				   dGeomGetPosition(o2),dGeomGetRotation(o2),cylRadius2,cylLength2,
 				     normal,&depth,&code,flags & NUMC_MASK,contact,skip);
