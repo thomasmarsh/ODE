@@ -24,6 +24,7 @@
 #define _ODE_COMMON_H_
 
 #include "ode/error.h"
+#include "ode/config.h"
 
 #define __USE_ISOC9X 1	/* necessary to get HUGE_VALF on GNU systems? */
 #include <math.h>
@@ -156,13 +157,18 @@ typedef dReal dQuaternion[4];
 
 /* utility */
 
-/* alloca aligned to 16 bytes. on a pentium it is important to align doubles
- * to 8 byte boundaries, and the 4 floats in a SIMD register to 16 byte
- * boundaries. this alignment wont hurt for other architectures either.
- * note this can waste up to 15 bytes, depending on what alloca() returns.
+
+/* round something up to be a multiple of the EFFICIENT_ALIGNMENT */
+
+#define dEFFICIENT_SIZE(x) ((((x)-1)|(EFFICIENT_ALIGNMENT-1))+1)
+
+
+/* alloca aligned to the EFFICIENT_ALIGNMENT. note that this can waste
+ * up to 15 bytes per allocation, depending on what alloca() returns.
  */
 
-#define dALLOCA16(n) ((char*)(((((int)alloca((n)+15))-1)|15)+1))
+#define dALLOCA16(n) \
+  ((char*)dEFFICIENT_SIZE(((int)(alloca((n)+(EFFICIENT_ALIGNMENT-1))))))
 
 
 /* internal object types (all prefixed with `dx') */

@@ -54,6 +54,17 @@ typedef unsigned char   uint8;
 #endif
 
 
+/* the efficient alignment. most platforms align data structures to some
+ * number of bytes, but this is not always the most efficient alignment.
+ * for example, many x86 compilers align to 4 bytes, but on a pentium it is
+ * important to align doubles to 8 byte boundaries (for speed), and the 4
+ * floats in a SIMD register to 16 byte boundaries. many other platforms have
+ * similar behavior. setting a larger alignment can waste a (very) small
+ * amount of memory. NOTE: this number must be a power of two.
+ */
+
+#define EFFICIENT_ALIGNMENT 16
+
 
 /* for unix, define this if your system supports anonymous memory maps
  * (linux does).
