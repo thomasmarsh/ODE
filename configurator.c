@@ -238,8 +238,10 @@ void get_all_standard_headers (FILE *file)
 {
   int i;
   FILE *f;
-  char *header[7] = {"stdio.h", "stdlib.h", "math.h", "string.h",
-		     "stdarg.h", "malloc.h", "alloca.h"};
+  char *header[8] = {"stdio.h", "stdlib.h", "math.h", "string.h",
+		     "stdarg.h", "malloc.h", "alloca.h",
+		     "ieeefp.h"		// Solaris needs this apparently
+  };
 
   for (i=0; i < sizeof(header)/sizeof(char*); i++) {
     FILE *f = xfopen ("ctest.c","wt");
@@ -428,6 +430,8 @@ int main (int argc, char **argv)
   compile_cmd_line = argv[2];
   delete_cmd_line = argv[3];
   if (argc >= 5) run_prefix = argv[4];
+
+  printf ("\n*** configurator starting, you may see some harmless error messages ***\n\n");
 
   /* check some defines we should have been compiled with */
 #if !defined(dSINGLE) && !defined(dDOUBLE)
