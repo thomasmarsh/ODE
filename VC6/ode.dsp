@@ -205,6 +205,10 @@ SOURCE=..\ode\src\odemath.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=..\ode\src\quickstep.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=..\ode\src\rotation.cpp
 # End Source File
 # Begin Source File
@@ -281,11 +285,19 @@ SOURCE=..\ode\src\obstack.h
 # End Source File
 # Begin Source File
 
+SOURCE=..\ode\src\quickstep.h
+# End Source File
+# Begin Source File
+
 SOURCE=..\ode\src\step.h
 # End Source File
 # Begin Source File
 
 SOURCE=..\ode\src\testing.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\ode\src\util.h
 # End Source File
 # End Group
 # End Target
