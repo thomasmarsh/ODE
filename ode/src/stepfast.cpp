@@ -738,7 +738,7 @@ dInternalStepIslandFast (dxWorld * world, dxBody * const *bodies, int nb, dxJoin
 	dTimerNow ("create J");
 #   endif
 		J = (dReal *) ALLOCA (2 * m * 8 * sizeof (dReal));
-		//dSetZero (J, 2 * m * 8);
+		dSetZero (J, 2 * m * 8);
 		Jinfo = (dxJoint::Info2 *) ALLOCA (nj * sizeof (dxJoint::Info2));
 	for (i = 0; i < nj; i++)
 	{
