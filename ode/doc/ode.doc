@@ -929,6 +929,8 @@ void dBodyAddRelForce         (dBodyID, dReal fx, dReal fy, dReal fz);
 void dBodyAddRelTorque        (dBodyID, dReal fx, dReal fy, dReal fz);
 void dBodyAddForceAtPos       (dBodyID, dReal fx, dReal fy, dReal fz,
                                         dReal px, dReal py, dReal pz);
+void dBodyAddForceAtRelPos    (dBodyID, dReal fx, dReal fy, dReal fz,
+                                        dReal px, dReal py, dReal pz);
 void dBodyAddRelForceAtPos    (dBodyID, dReal fx, dReal fy, dReal fz,
                                         dReal px, dReal py, dReal pz);
 void dBodyAddRelForceAtRelPos (dBodyID, dReal fx, dReal fy, dReal fz,
