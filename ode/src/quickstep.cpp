@@ -109,12 +109,12 @@ static void SOR_LCP (int m, int nb, dRealMutablePtr J, int *jb, dxBody * const *
 
 	int i,j;
 
-	// the estimated solution lambda.
-	//	@@@ this could be warm started, but then we'd have to set fc too
-	dSetZero (lambda,m);
-        dSetZero (fc,nb*6);
-	
-	// the lambda computed at the previous iteration
+	// for warm starting, this seems to be necessary to prevent
+	// jerkiness in motor-driven joints. i have no idea why this works.
+	for (i=0; i<m; i++) lambda[i] *= 0.9;
+
+	// the lambda computed at the previous iteration.
+	// this is used to measure error for when we are reordering the indexes.
 	dRealAllocaArray (last_lambda,m);
 
 	// a copy of the 'hi' vector in case findex[] is being used
@@ -138,6 +138,25 @@ static void SOR_LCP (int m, int nb, dRealMutablePtr J, int *jb, dxBody * const *
 		}
 		J_ptr += 12;
 		iMJ_ptr += 12;
+	}
+
+	// compute fc=(inv(M)*J')*lambda. we will incrementally maintain fc
+	// as we change lambda.
+        dSetZero (fc,nb*6);
+	iMJ_ptr = iMJ;
+	for (i=0; i<m; i++) {
+		//@@@ code sequences like this one are very common here so we
+		// should try to factor them out (less stuff to optimize that way).
+		int b1 = jb[i*2];
+		int b2 = jb[i*2+1];
+		dRealMutablePtr fc_ptr = fc + 6*b1;
+		for (j=0; j<6; j++) fc_ptr[j] += iMJ_ptr[j] * lambda[i];
+		iMJ_ptr += 6;
+		if (b2 >= 0) {
+			fc_ptr = fc + 6*b2;
+			for (j=0; j<6; j++) fc_ptr[j] += iMJ_ptr[j] * lambda[i];
+		}
+		iMJ_ptr += 6;
 	}
 
 	// precompute 1 / diagonals of A
@@ -200,6 +219,7 @@ static void SOR_LCP (int m, int nb, dRealMutablePtr J, int *jb, dxBody * const *
 				dReal v2 = dFabs (last_lambda[i]);
 				dReal max = (v1 > v2) ? v1 : v2;
 				if (max > 0) {
+					//@@@ relative error: order[i].error = dFabs(lambda[i]-last_lambda[i])/max;
 					order[i].error = dFabs(lambda[i]-last_lambda[i]);
 				}
 				else {
@@ -235,9 +255,8 @@ static void SOR_LCP (int m, int nb, dRealMutablePtr J, int *jb, dxBody * const *
 			// the constraints are ordered so that all lambda[] values needed have
 			// already been computed.
 			if (findex[index] >= 0) {
-				//@@@
-				//hi[index] = dFabs (hicopy[index] * lambda[findex[index]]);
-				//lo[index] = -hi[index];
+				hi[index] = dFabs (hicopy[index] * lambda[findex[index]]);
+				lo[index] = -hi[index];
 			}
 
 			int b1 = jb[index*2];
@@ -296,7 +315,6 @@ static void SOR_LCP (int m, int nb, dRealMutablePtr J, int *jb, dxBody * const *
 			}
 		}
 	}
-
 }
 
 
@@ -467,11 +485,24 @@ void dxQuickStepper (dxWorld *world, dxBody * const *body, int nb,
 		// scale CFM
 		for (i=0; i<m; i++) cfm[i] *= stepsize1;
 
+		// load lambda from the value saved on the previous iteration
+		dRealAllocaArray (lambda,m);
+		dSetZero (lambda,m);	//@@@ shouldn't be necessary
+		for (i=0; i<nj; i++) {
+			memcpy (lambda+ofs[i],joint[i]->lambda,info[i].m * sizeof(dReal));
+		}
+
 		// solve the LCP problem and get lambda and constraint force
 		IFTIMING (dTimerNow ("solving LCP problem");)
-		dRealAllocaArray (lambda,m);
 		dRealAllocaArray (cforce,nb*6);
 		SOR_LCP (m,nb,J,jb,body,invI,lambda,cforce,rhs,lo,hi,cfm,findex,&world->qs);
+
+		// save lambda for the next iteration
+		//@@@ note that this doesn't work for contact joints yet, as they are
+		// recreated every iteration
+		for (i=0; i<nj; i++) {
+			memcpy (joint[i]->lambda,lambda+ofs[i],info[i].m * sizeof(dReal));
+		}
 
 		// note that rhs and J are overwritten at this point and should not be used again.
 		// make sure of this.

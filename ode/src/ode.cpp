@@ -875,6 +875,7 @@ static void dJointInit (dxWorld *w, dxJoint *j)
   j->node[1].joint = j;
   j->node[1].body = 0;
   j->node[1].next = 0;
+  dSetZero (j->lambda,6);
   addObjectToList (j,(dObject **) &w->firstjoint);
   w->nj++;
 }
