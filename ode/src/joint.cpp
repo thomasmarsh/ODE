@@ -2301,11 +2301,11 @@ static void amotorComputeGlobalAxes (dxJointAMotor *joint, dVector3 ax[3])
 	// relative to b1
 	dMULTIPLY0_331 (ax[i],joint->node[0].body->R,joint->axis[i]);
       }
-      if (joint->rel[i] == 2) {
+      else if (joint->rel[i] == 2) {
 	// relative to b2
 	if (joint->node[1].body) {   // jds: don't assert, just ignore
-	dMULTIPLY0_331 (ax[i],joint->node[1].body->R,joint->axis[i]);
-      }
+	        dMULTIPLY0_331 (ax[i],joint->node[1].body->R,joint->axis[i]);
+        }
       }
       else {
 	// global - just copy it
