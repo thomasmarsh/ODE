@@ -2,14 +2,22 @@
 TODO BEFORE NEXT RELEASE
 ------------------------
 
+NOTE: (*) = eli
+
+Expose type-specific collision functions. 
+
+Improve box-box collision, especially for face-face contact. 
+
+Automatic code optimization process.
+
 body & joint disabling / enabling. automatic??
 
 body/joint creators with world = 0 --> not inserted into any world.
 
 transformation geometry object.
 
-functions to get all the joints/bodies a body/joint is connected to.
-function to get the entire island?
+(*) functions to get all the joints/bodies a body/joint is connected to.
+    function to get the entire island?
 
 joint limit spongyness: interacts with powered joints badly, because when the
 limit is reached full power is applied. fix or doc.
@@ -22,26 +30,27 @@ slow step function will not respect the joint getinfo2 functions calling
 addTorque() because it reads the force/torque accumulators before the
 getinfo2 functions are called.
 
-hinge2 needs to be attached to two bodies for it to work, make sure this is
-always the case.
-
-if two joints connect to the same two bodies, check that the fast solver
-works!
-
 spaces need multiple lists of objects that can never overlap. objects in these
 lists are never tested against each other.
 
-joint groups should also be destroyed by destroying the world.
-
-when attaching contact with (0,body), instead of setting the reverse flag
-on the joint and checking it in getInfo2(), we should just reverse the normal
-straight away ... ?
-
-functions to get body connectedness (e.g. return joint lists). also for joints.
+(*) joint groups should also be destroyed by destroying the world.
 
 deleting a body a joint is attached to should adjust the joint to only have
 one body attached. currently the connected joints have *both* their body
-attachments removed.
+attachments removed. BUT, dont do this if the dJOINT_TWOBODIES flag is set
+on the joint.
+
+B&S joint limit.
+
+(*) update C++ interface.
+
+document error, mem and math functions.
+
+Web pages
+	credits section
+	projects using ODE
+
+start a change log.
 
 
 
@@ -330,3 +339,15 @@ doccer: @func{} also refs second etc function in function *list*.
 
 make sure joints can return 0 from GetInfo1, i.e. no constraints or "inactive"
 joint, and the step functions will handle it.
+
+when attaching contact with (0,body), instead of setting the reverse flag
+on the joint and checking it in getInfo2(), we should just reverse the normal
+straight away ... ?
+	--> trouble is, dJointAttach() knows nothing about what kind of joint
+	    it is attaching.
+
+hinge2 needs to be attached to two bodies for it to work, make sure this is
+always the case. --> assertion added in dJointAttach().
+
+if two joints connect to the same two bodies, check that the fast solver
+works! -> it should.
