@@ -334,6 +334,11 @@ void dsPlatformSimLoop (int window_width, int window_height, dsFunctions *fn,
 	   "   Ctrl-V : print current viewpoint coordinates (x,y,z,h,p,r).\n"
 	   "   Ctrl-W : write frames to ppm files: frame/frameNNN.ppm\n"
 	   "   Ctrl-X : exit.\n"
+	   "\n"
+	   "Change the camera position by clicking + dragging in the window.\n"
+	   "   Left button - pan and tilt.\n"
+	   "   Right button - forward and sideways.\n"
+	   "   Left + Right button (or middle button) - sideways and up.\n"
 	   "\n",DS_VERSION >> 8,DS_VERSION & 0xff);
 
   if (fn->start) fn->start();
