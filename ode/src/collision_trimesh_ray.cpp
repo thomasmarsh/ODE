@@ -22,6 +22,10 @@
 
 // TriMesh code by Erwin de Vries.
 
+#ifdef MSVC
+#pragma warning(disable:4800)  // for VC++, no complaints about implcit cast to bool
+#endif
+
 #include <ode/collision.h>
 #include <ode/matrix.h>
 #include <ode/rotation.h>
