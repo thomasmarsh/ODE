@@ -12,7 +12,7 @@ fEXENAME=$(addsuffix .exe,$(1))
 # convert source file names to object file names
 fTARGETS=$(patsubst %.cpp,%.obj,$(filter %.cpp,$(1))) \
 	$(patsubst %.c,%.obj,$(filter %.c,$(1))) \
-	$(patsubst %.rc,%.res,$(filter %.rc,$(1)))
+	$(patsubst %.rc,%.RES,$(filter %.rc,$(1)))
 
 # C++ RTTI options
 _RTTI_0=/GR-
@@ -36,7 +36,7 @@ _OPT_=$(_OPT_0)
 %.obj: %.c
 	cl /nologo /c /W3 /GF -DWIN32 $(_OPT_$(CPP_OPT)) $(addprefix /I,$(INCLUDE_PATHS)) $(addprefix /D,$(DEFINES)) $<
 
-%.res: %.rc
+%.RES: %.rc
 	rc /r $<
 
 %.lib:
@@ -50,7 +50,7 @@ LINKWIN=Comctl32.lib kernel32.lib user32.lib gdi32.lib
 LINKOPENGL=OpenGL32.lib Glu32.lib
 
 clean: clean_subdirs
-	-del *~ *.obj *.lib *.res $(EXTRA_CLEAN)
+	-del *~ *.obj *.lib *.res *.RES $(EXTRA_CLEAN)
 
 make_depend:
 	@echo depend target does nothing under windows.

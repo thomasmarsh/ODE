@@ -1,0 +1,6 @@
+# configuration information
+
+# PLATFORM can be one of: linux, win32.
+# there must be a Makefile.$(PLATFORM) file for every platform.
+
+PLATFORM=linux
