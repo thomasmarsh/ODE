@@ -100,8 +100,8 @@ static int writeframes=0;		// 1 if frame files to be written
 static void createMainWindow (int _width, int _height)
 {
   // create X11 display connection
-  display = XOpenDisplay (0);
-  if (!display) dsError (0,"can not open X11 display");
+  display = XOpenDisplay (NULL);
+  if (!display) dsError ("can not open X11 display");
   screen = DefaultScreen(display);
 
   // get GL visual
