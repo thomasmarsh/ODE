@@ -2,16 +2,17 @@
 TODO
 ----
 
-remove `space' argument to geom creation functions? make user add it?
-or just remove it from dCreateGeom() ?
+dAlloc() should take an arena parameters which is stored in dWorld.
+
+
+debugging mode should use dASSERT2 that prints a descriptive error message
+on error, not just the file:line or function. use dASSERT for internal
+consistency checking.
+
+if two joints connect to the same two bodies, check that the fast solver
+works!
 
 doccer: @func{} also refs second etc function in function *list*.
-
-test_chain should be in C, not C++. but first must remove global constructors.
-
-add more functionality to C++ interface - dMass, dSpace, dGeom, rotation?
-
-dAlloc() should take an arena parameters which is stored in dWorld.
 
 better stack implementation that is not so system dependent. but how will
 we do dynamic page allocation? do we even need to?
@@ -22,28 +23,17 @@ elements are set to 0. this is going to be a problem everywhere!
 don't use 3-vectors anywhere. use SIMD friendly 4-vectors.
 
 make sure all data in body/joint etc objects is aligned well for single
-precision SIMD (i.e. all vectors start on a 16 byte boundary). also, all
-vectors alloca()ed on the stack must have the correct alignment (bummer!)
+precision SIMD (i.e. all vectors start on a 16 byte boundary).
 
 think about more complicated uses of collision, e.g. a single geom representing
 an articulated structure.
 
-there should be functions to delete groups of bodies/joints in one go - this
-will be more efficient than deleting them one at a time, because less
-partitioning tests will be needed.
+bodyGroup? (like joint group but for bodies). systemGroup?
 
 check the overhead of resizing Array<>s as elements are pushed on to them.
 
-make sure we check all arguments of all functions.
-
-when deleting a body/joint that is not connected to anything, just remove it
-and adjust the other islands. note: an unconnected joint will be at the end
-of the joint list and not in an island anyway. when deleting other
-bodies/joints, perhaps we can use the computeIslands() function to close the
-gap.
-
-replace alloca() with dPushFrame(), dPopFrame(), and dAlloca(). allow for
-the possibility of allocating in non-stack memory.
+replace alloca() with dPushFrame(), dPopFrame(), and dAlloca() ? allow for
+the possibility of allocating in non-stack memory ?
 
 make sure that we can set mass parameters with non-zero center of mass.
 if this is done after the body position is set, the position is adjusted.
@@ -56,25 +46,14 @@ more comprehensive random number comparisons between slow and fast methods.
 	- random velocity
 	- random joint error (make joints then move bodies a bit)
 
-if two joints connect to the same two bodies, check that the fast solver
-works!
-
 consider splitting solver into functions, which can be optimized separately.
 might make things go faster.
 
 spaces need multiple lists of objects that can never overlap. objects in these
 lists are never tested against each other.
 
-should we expose body and joint object structures so that the user can
-explicitly allocate them locally, or e.g. on the stack? yes - makes allocating
-temporary contact constraints easier. no - helps data hiding and therefore
-library binary compatability.
-
 space near-callback should be given potentially intersecting objects 100 at a
 time instead of 1 at a time, to save on calling costs.
-
-final library should have no global constructors, as it might be used with
-C linkage.
 
 faster code for islands with a single body? faster code for dynamically
 symmetric bodies?
@@ -104,16 +83,23 @@ dSetZero() - make fast inline functions for fixed n e.g. (1-4).
 
 need proper `sticky' friction, i.e. compensation for numerical slip.
 
-use `const' in function arguments. blah.
-
-get rid of global constructors in geom.cpp.
-
 dJointAttach(), allow both bodies to be 0 to put the joint into limbo.
-
-geom class type checking for many geom functions.
 
 timer reporting function:
 	void timerReport (void (*printFunction)(char *, ...));
+
+ALWAYS
+------
+
+make sure functions check their arguments in debug mode (e.g. using dASSERT).
+make sure joint/geom functions check for the specific object type.
+
+vectors alloca()ed on the stack must have the correct alignment, use ALLOCA16.
+
+library should have no global constructors, as it might be used with C linkage.
+
+use `const' in function arguments. blah.
+
 
 
 DONE
@@ -128,3 +114,19 @@ sometimes we get things swapped (because of the way the joint nodes are used).
 hinge and prismatic, attachment to static environment.
 
 turn macros into C++ inline functions? what about C users?
+
+remove `space' argument to geom creation functions? make user add it?
+or just remove it from dCreateGeom() ?  <-- did this one.
+
+test_chain should be in C, not C++. but first must remove global constructors.
+
+add more functionality to C++ interface - dMass, dSpace, dGeom
+
+there should be functions to delete groups of bodies/joints in one go - this
+will be more efficient than deleting them one at a time, because less
+partitioning tests will be needed.
+
+should we expose body and joint object structures so that the user can
+explicitly allocate them locally, or e.g. on the stack? makes allocating
+temporary contact constraints easier. NO --> helps data hiding and therefore
+library binary compatability.

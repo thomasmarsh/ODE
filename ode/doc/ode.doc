@@ -591,8 +591,10 @@ have no effect on the simulation.
 
 
 @funcdef{
-void dJointSetAnchor (dJointID, dReal x, dReal y, dReal z);
-void dJointSetAxis (dJointID, dReal x, dReal y, dReal z);
+void dJointSetBallAnchor (dJointID, dReal x, dReal y, dReal z);
+void dJointSetHingeAnchor (dJointID, dReal x, dReal y, dReal z);
+void dJointSetHingeAxis (dJointID, dReal x, dReal y, dReal z);
+void dJointSetSliderAxis (dJointID, dReal x, dReal y, dReal z);
 }{
 Set joint parameters.
 The anchor and axis must be set after the joint has been attached to bodies
@@ -604,8 +606,10 @@ The axis that is set will be normalized to unit length, this is what
 
 
 @funcdef{
-void dJointGetAnchor (dJointID, dVector3 result);
-void dJointGetAxis (dJointID, dVector3 result);
+void dJointGetBallAnchor (dJointID, dVector3 result);
+void dJointGetHingeAnchor (dJointID, dVector3 result);
+void dJointGetHingeAxis (dJointID, dVector3 result);
+void dJointGetSliderAxis (dJointID, dVector3 result);
 }{
 Get joint parameters.
 If the system is out of alignment (i.e. there is some joint error) then
@@ -1160,7 +1164,7 @@ pointers will be returned, i.e. the result will be identical to calling
 
 
 @funcdef{
-void dDestroyGeom (dGeomID);
+void dGeomDestroy (dGeomID);
 }{
 Destroy a geometry object, removing it from the space first.
 }
@@ -1287,11 +1291,11 @@ Internal ODE classes may use a slightly faster macro instead.
 
 
 @funcdef{
-dGeomID dCreateGeom (dSpaceID space, int classnum);
+dGeomID dCreateGeom (int classnum);
 }{
-Create a geometry object of the given class number, and add it to the given
-@arg{space}.
+Create a geometry object of the given class number.
 The custom data block will initially be set to 0.
+This object can be added to a space using @func{dSpaceAdd()}.
 }
 
 
