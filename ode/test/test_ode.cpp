@@ -27,14 +27,6 @@
 #pragma warning(disable:4244 4305)  // for VC++, no precision loss complaints
 #endif
 
-// get some math functions under windows
-#ifdef WIN32
-#include <float.h>
-#ifndef CYGWIN			// andy's fix for cygwin
-#define copysign _copysign
-#endif				// andy's fix for cygwin
-#endif
-
 //****************************************************************************
 // matrix accessors
 

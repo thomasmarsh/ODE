@@ -25,8 +25,7 @@
 this program discovers some system configuration stuff, prior to compiling
 ODE. the usage is:
 
-  configurator <config.h-file-to-generate> <compiler-command-line>
-	<delete-command-line> <THIS_DIR-variable>
+  configurator <config.h-file-to-generate> <compiler-command-line> <THIS_DIR-variable>
 
 this program looks long, but it really has an extremely simple structure and
 should be very easy for anyone to modify. it should be very portable as it
@@ -175,7 +174,6 @@ void write_header_comment (FILE *file, char *description)
 
 /* delete a file */
 
-char *delete_cmd_line = 0;			// no longer used?
 void delete_file (char *filename)
 {
   unlink (filename);
@@ -432,17 +430,64 @@ void get_ODE_features (FILE *file)
   /* write_header_comment (file,"ODE feature configuration"); */
 }
 
-/****************************************************************************/
+/****************************************************************************
+ * figure out what functions are available in the system
+ */
+
+#define FUNCTIONS_TO_TEST 10
+
+void get_available_functions (FILE *file)
+{
+	int i,j;
+	char *fnames[FUNCTIONS_TO_TEST*3] = {
+		/* statement to compile,	if it works,	if not */
+		"sqrtf(1.0f);",			0,		"#define sqrtf sqrt",
+		"sinf(1.0f);",			0,		"#define sinf sin",
+		"cosf(1.0f);",			0,		"#define cosf cos",
+		"fabsf(1.0f);",			0,		"#define fabsf fabs",
+		"atan2f(1.0f,1.0f);",		0,		"#define atan2f atan2",
+		"fmodf(1.0f,1.0f);",		0,		"#define fmodf fmod",
+		"copysignf(1.0f,1.0f);",	0,		"#define copysignf copysign",
+		/* to handle cygwin: */
+		"copysign(1.0,1.0);",		0,		"#define copysign _copysign",
+		"snprintf(\"\",0,\"\");",	0,		"#define snprintf _snprintf",
+		"vsnprintf(\"\",0,\"\",0);",	0,		"#define vsnprintf _vsnprintf"
+	};
+
+	write_header_comment (file,"available functions");
+
+	for (i=0; i < FUNCTIONS_TO_TEST; i++) {
+		FILE *f = xfopen ("ctest.c","wt");
+		for (j=0; j < NUM_HEADERS; j++) {
+			if (header_used[j]) fprintf (f,"#include <%s>\n",header_files[j]);
+		}
+		fprintf (f,"int main() { %s return 0; }\n",fnames[i*3]);
+		fclose (f);
+		delete_file ("ctest.exe");
+		compile ("ctest.exe","ctest.c");
+		if (file_exists ("ctest.exe")) {
+			if (fnames[i*3+1]) fprintf (file,"%s\n",fnames[i*3+1]);
+		}
+		else {
+			if (fnames[i*3+2]) fprintf (file,"%s\n",fnames[i*3+2]);
+		}
+		delete_file ("ctest.c");
+		delete_file ("ctest.exe");
+	}
+}
+
+/****************************************************************************
+ * main
+ */
 
 int main (int argc, char **argv)
 {
   FILE *file;
 
-  if (argc < 4 || argc > 5)
-    fatal_error ("configurator expects 3 or 4 arguments");
+  if (argc < 3 || argc > 4)
+    fatal_error ("configurator expects 2 or 3 arguments");
   compile_cmd_line = argv[2];
-  delete_cmd_line = argv[3];
-  if (argc >= 5) run_prefix = argv[4];
+  if (argc >= 4) run_prefix = argv[3];
 
   printf ("\n*** configurator starting, you may see some harmless error messages ***\n\n");
 
@@ -461,6 +506,7 @@ int main (int argc, char **argv)
   get_ODE_integer_typedefs (file);
   get_ODE_float_stuff (file);
   get_ODE_features (file);
+  get_available_functions (file);
   fprintf (file,config_h_footer);
   fclose (file);
 

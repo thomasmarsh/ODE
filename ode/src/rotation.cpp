@@ -218,12 +218,12 @@ void dQMultiply3 (dQuaternion qa, const dQuaternion qb, const dQuaternion qc)
 }
 
 
-// QtoR(), RtoQ() and WtoDQ() are derived from equations in "An Introduction
+// dRfromQ(), dQfromR() and dDQfromW() are derived from equations in "An Introduction
 // to Physically Based Modeling: Rigid Body Simulation - 1: Unconstrained
 // Rigid Body Dynamics" by David Baraff, Robotics Institute, Carnegie Mellon
 // University, 1997.
 
-void dQtoR (const dQuaternion q, dMatrix3 R)
+void dRfromQ (dMatrix3 R, const dQuaternion q)
 {
   dAASSERT (q && R);
   // q = (s,vx,vy,vz)
@@ -242,7 +242,7 @@ void dQtoR (const dQuaternion q, dMatrix3 R)
 }
 
 
-void dRtoQ (const dMatrix3 R, dQuaternion q)
+void dQfromR (dQuaternion q, const dMatrix3 R)
 {
   dAASSERT (q && R);
   dReal tr,s;
@@ -294,7 +294,7 @@ void dRtoQ (const dMatrix3 R, dQuaternion q)
 }
 
 
-void dWtoDQ (const dVector3 w, const dQuaternion q, dVector4 dq)
+void dDQfromW (dReal dq[4], const dVector3 w, const dQuaternion q)
 {
   dAASSERT (w && q && dq);
   dq[0] = REAL(0.5)*(- w[0]*q[1] - w[1]*q[2] - w[2]*q[3]);

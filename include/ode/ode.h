@@ -26,6 +26,7 @@
 /* include *everything* here */
 
 #include <ode/config.h>
+#include <ode/compatibility.h>
 #include <ode/common.h>
 #include <ode/contact.h>
 #include <ode/error.h>

@@ -24,15 +24,6 @@
 #include <ode/odemath.h>
 
 
-// get some math functions under windows
-#ifdef WIN32
-#include <float.h>
-#ifndef CYGWIN			// added by andy for cygwin
-#define copysign(a,b) ((dReal)_copysign(a,b))
-#endif				// added by andy for cygwin
-#endif
-
-
 // this may be called for vectors `a' with extremely small magnitude, for
 // example the result of a cross product on two nearly perpendicular vectors.
 // we must be robust to these small vectors. to prevent numerical error,
@@ -60,7 +51,7 @@ void dNormalize3 (dVector3 a)
       a2 /= aa1;
       l = dRecipSqrt (a0*a0 + a2*a2 + 1);
       a[0] = a0*l;
-      a[1] = copysign(l,a1);
+      a[1] = dCopySign(l,a1);
       a[2] = a2*l;
     }
   }
@@ -72,7 +63,7 @@ void dNormalize3 (dVector3 a)
       l = dRecipSqrt (a0*a0 + a1*a1 + 1);
       a[0] = a0*l;
       a[1] = a1*l;
-      a[2] = copysign(l,a2);
+      a[2] = dCopySign(l,a2);
     }
     else {		// aa0 is largest
       if (aa0 <= 0) {
@@ -85,7 +76,7 @@ void dNormalize3 (dVector3 a)
       a1 /= aa0;
       a2 /= aa0;
       l = dRecipSqrt (a1*a1 + a2*a2 + 1);
-      a[0] = copysign(l,a0);
+      a[0] = dCopySign(l,a0);
       a[1] = a1*l;
       a[2] = a2*l;
     }
