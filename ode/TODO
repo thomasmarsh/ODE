@@ -150,10 +150,6 @@ lcp solver must return (L,d) and some other information, so we can re-solve
 for other right hand sides later on, but using the same complimentarity
 solution so there are no integrator discontinuities.
 
-tons of things in lcp.cpp (@@@), especially speed optimizations. also, do
-index block switching and index block updates to take advantage of the outer
-product trick.
-
 dSetZero() - make fast inline functions for fixed n e.g. (1-4).
 
 need proper `sticky' friction, i.e. compensation for numerical slip.
@@ -171,6 +167,9 @@ kill all references to dArray<> (in geom.cpp).
 need testing code to test all joints with body-to-static-env
 
 copy stack.cpp stuff to reuse
+
+dFactorLDLT() is not so efficient for matrix sizes < block size, e.g.
+redundant calls, zero loads, adds etc
 
 
 MAYBE
@@ -280,3 +279,10 @@ more comprehensive random number comparisons between slow and fast methods.
 
 check that J*vnew=c (slow step already does this, but it doesn't equal zero
 for some reason! - actually, when LCP constraint limits are reached, it wont!)
+
+tons of things in lcp.cpp (@@@), especially speed optimizations. also, we
+wanted to do index block switching and index block updates to take advantage
+of the outer product trick ... but this is not worth the effort i think.
+
+lcp.cpp: if lo=hi=0, check operation. can we switch from NL <-> NH without
+going through C? --> done.
