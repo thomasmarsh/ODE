@@ -50,20 +50,20 @@ static bool GetContactData(const dVector3& Center, dReal Radius, const dVector3 
 
 	float C = dDOT(Diff, Diff);
 
-	float Det = fabs(A00 * A11 - A01 * A01);
+	float Det = dFabs(A00 * A11 - A01 * A01);
 	u = A01 * B1 - A11 * B0;
 	v = A01 * B0 - A00 * B1;
 
 	float DistSq;
 
 	if (u + v <= Det){
-		if(u < 0.0){
-			if(v < 0.0){  // region 4
-				if(B0 < 0.0){
-					v = 0.0;
+		if(u < REAL(0.0)){
+			if(v < REAL(0.0)){  // region 4
+				if(B0 < REAL(0.0)){
+					v = REAL(0.0);
 					if (-B0 >= A00){
-						u = 1.0;
-						DistSq = A00 + 2.0 * B0 + C;
+						u = REAL(1.0);
+						DistSq = A00 + REAL(2.0) * B0 + C;
 					}
 					else{
 						u = -B0 / A00;
@@ -71,14 +71,14 @@ static bool GetContactData(const dVector3& Center, dReal Radius, const dVector3 
 					}
 				}
 				else{
-					u = 0.0;
-					if(B1 >= 0.0){
-						v = 0.0;
+					u = REAL(0.0);
+					if(B1 >= REAL(0.0)){
+						v = REAL(0.0);
 						DistSq = C;
 					}
 					else if(-B1 >= A11){
-						v = 1.0;
-						DistSq = A11 + 2.0 * B1 + C;
+						v = REAL(1.0);
+						DistSq = A11 + REAL(2.0) * B1 + C;
 					}
 					else{
 						v = -B1 / A11;
@@ -87,14 +87,14 @@ static bool GetContactData(const dVector3& Center, dReal Radius, const dVector3 
 				}
 			}
 			else{  // region 3
-				u = 0.0;
-				if(B1 >= 0.0){
-					v = 0.0;
+				u = REAL(0.0);
+				if(B1 >= REAL(0.0)){
+					v = REAL(0.0);
 					DistSq = C;
 				}
 				else if(-B1 >= A11){
-					v = 1.0;
-					DistSq = A11 + 2.0 * B1 + C;
+					v = REAL(1.0);
+					DistSq = A11 + REAL(2.0) * B1 + C;
 				}
 				else{
 					v = -B1 / A11;
@@ -102,15 +102,15 @@ static bool GetContactData(const dVector3& Center, dReal Radius, const dVector3 
 				}
 			}
 		}
-		else if(v < 0.0f){  // region 5
-			v = 0.0;
-			if (B0 >= 0.0){
-				u = 0.0;
+		else if(v < REAL(0.0)){  // region 5
+			v = REAL(0.0);
+			if (B0 >= REAL(0.0)){
+				u = REAL(0.0);
 				DistSq = C;
 			}
 			else if (-B0 >= A00){
-				u = 1.0;
-				DistSq = A00 + 2.0 * B0 + C;
+				u = REAL(1.0);
+				DistSq = A00 + REAL(2.0) * B0 + C;
 			}
 			else{
 				u = -B0 / A00;
@@ -119,47 +119,47 @@ static bool GetContactData(const dVector3& Center, dReal Radius, const dVector3 
 		}
 		else{  // region 0
 			// minimum at interior point
-			if (Det == 0.0){
-				u = 0.0;
-				v = 0.0;
+			if (Det == REAL(0.0)){
+				u = REAL(0.0);
+				v = REAL(0.0);
 				DistSq = dInfinity;
 			}
 			else{
-				float InvDet = 1.0 / Det;
+				float InvDet = REAL(1.0) / Det;
 				u *= InvDet;
 				v *= InvDet;
-				DistSq = u * (A00 * u + A01 * v + 2.0 * B0) + v * (A01 * u + A11 * v + 2.0 * B1) + C;
+				DistSq = u * (A00 * u + A01 * v + REAL(2.0) * B0) + v * (A01 * u + A11 * v + REAL(2.0) * B1) + C;
 			}
 		}
 	}
 	else{
 		float Tmp0, Tmp1, Numer, Denom;
 
-		if(u < 0.0){  // region 2
+		if(u < REAL(0.0)){  // region 2
 			Tmp0 = A01 + B0;
 			Tmp1 = A11 + B1;
 			if (Tmp1 > Tmp0){
 				Numer = Tmp1 - Tmp0;
-				Denom = A00 - 2.0 * A01 + A11;
+				Denom = A00 - REAL(2.0) * A01 + A11;
 				if (Numer >= Denom){
-					u = 1.0;
-					v = 0.0;
-					DistSq = A00 + 2.0 * B0 + C;
+					u = REAL(1.0);
+					v = REAL(0.0);
+					DistSq = A00 + REAL(2.0) * B0 + C;
 				}
 				else{
 					u = Numer / Denom;
-					v = 1.0 - u;
-					DistSq = u * (A00 * u + A01 * v + 2.0 * B0) + v * (A01 * u + A11 * v + 2.0 * B1) + C;
+					v = REAL(1.0) - u;
+					DistSq = u * (A00 * u + A01 * v + REAL(2.0) * B0) + v * (A01 * u + A11 * v + REAL(2.0) * B1) + C;
 				}
 			}
 			else{
-				u = 0.0;
-				if(Tmp1 <= 0.0){
-					v = 1.0;
-					DistSq = A11 + 2.0 * B1 + C;
+				u = REAL(0.0);
+				if(Tmp1 <= REAL(0.0)){
+					v = REAL(1.0);
+					DistSq = A11 + REAL(2.0) * B1 + C;
 				}
-				else if(B1 >= 0.0){
-					v = 0.0;
+				else if(B1 >= REAL(0.0)){
+					v = REAL(0.0);
 					DistSq = C;
 				}
 				else{
@@ -168,31 +168,31 @@ static bool GetContactData(const dVector3& Center, dReal Radius, const dVector3 
 				}
 			}
 		}
-		else if(v < 0.0){  // region 6
+		else if(v < REAL(0.0)){  // region 6
 			Tmp0 = A01 + B1;
 			Tmp1 = A00 + B0;
 			if (Tmp1 > Tmp0){
 				Numer = Tmp1 - Tmp0;
-				Denom = A00 - 2.0 * A01 + A11;
+				Denom = A00 - REAL(2.0) * A01 + A11;
 				if (Numer >= Denom){
-					v = 1.0;
-					u = 0.0;
-					DistSq = A11 + 2.0 * B1 + C;
+					v = REAL(1.0);
+					u = REAL(0.0);
+					DistSq = A11 + REAL(2.0) * B1 + C;
 				}
 				else{
 					v = Numer / Denom;
-					u = 1.0 - v;
-					DistSq =  u * (A00 * u + A01 * v + 2.0 * B0) + v * (A01 * u + A11 * v + 2.0 * B1) + C;
+					u = REAL(1.0) - v;
+					DistSq =  u * (A00 * u + A01 * v + REAL(2.0) * B0) + v * (A01 * u + A11 * v + REAL(2.0) * B1) + C;
 				}
 			}
 			else{
-				v = 0.0;
-				if (Tmp1 <= 0.0){
-					u = 1.0;
-					DistSq = A00 + 2.0 * B0 + C;
+				v = REAL(0.0);
+				if (Tmp1 <= REAL(0.0)){
+					u = REAL(1.0);
+					DistSq = A00 + REAL(2.0) * B0 + C;
 				}
-				else if(B0 >= 0.0){
-					u = 0.0;
+				else if(B0 >= REAL(0.0)){
+					u = REAL(0.0);
 					DistSq = C;
 				}
 				else{
@@ -203,22 +203,22 @@ static bool GetContactData(const dVector3& Center, dReal Radius, const dVector3 
 		}
 		else{  // region 1
 			Numer = A11 + B1 - A01 - B0;
-			if (Numer <= 0.0){
-				u = 0.0;
-				v = 1.0;
-				DistSq = A11 + 2.0 * B1 + C;
+			if (Numer <= REAL(0.0)){
+				u = REAL(0.0);
+				v = REAL(1.0);
+				DistSq = A11 + REAL(2.0) * B1 + C;
 			}
 			else{
-				Denom = A00 - 2.0 * A01 + A11;
+				Denom = A00 - REAL(2.0) * A01 + A11;
 				if (Numer >= Denom){
-					u = 1.0;
-					v = 0.0;
-					DistSq = A00 + 2.0 * B0 + C;
+					u = REAL(1.0);
+					v = REAL(0.0);
+					DistSq = A00 + REAL(2.0) * B0 + C;
 				}
 				else{
 					u = Numer / Denom;
-					v = 1.0 - u;
-					DistSq = u * (A00 * u + A01 * v + 2.0 * B0) + v * (A01 * u + A11 * v + 2.0 * B1) + C;
+					v = REAL(1.0) - u;
+					DistSq = u * (A00 * u + A01 * v + REAL(2.0) * B0) + v * (A01 * u + A11 * v + REAL(2.0) * B1) + C;
 				}
 			}
 		}
@@ -299,23 +299,23 @@ int dCollideSTL(dxGeom* g1, dxGeom* SphereGeom, int Flags, dContactGeom* Contact
 			vu[0] = v1[0] - v0[0];
 			vu[1] = v1[1] - v0[1];
 			vu[2] = v1[2] - v0[2];
-			vu[3] = 0.0;
+			vu[3] = REAL(0.0);
 
 			dVector3 vv;
 			vv[0] = v2[0] - v0[0];
 			vv[1] = v2[1] - v0[1];
 			vv[2] = v2[2] - v0[2];
-			vv[3] = 0.0;
+			vv[3] = REAL(0.0);
 
 			dReal Depth;
 			float u, v;
 			if (!GetContactData(Position, Radius, v0, vu, vv, Depth, u, v)){
 				continue;	// Sphere doesnt hit triangle
 			}
-			dReal w = 1.0 - u - v;
+			dReal w = REAL(1.0) - u - v;
 
-			if (Depth < 0.0f){
-				Depth = 0.0f;
+			if (Depth < REAL(0.0)){
+				Depth = REAL(0.0);
 			}
 
 			dContactGeom* Contact = SAFECONTACT(Flags, Contacts, OutTriCount, Stride);
