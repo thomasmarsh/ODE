@@ -2,6 +2,9 @@
 TODO BEFORE NEXT RELEASE
 ------------------------
 
+Improve box-box collision, especially for face-face contact (3 contact points).
+Improve cylinder-box collision (2 contact points).
+
 windows DLL building and unix shared libs. libtool?
 also MSVC project files.
 
@@ -28,8 +31,6 @@ but this wont work for geomgroup-to-environment. avoid stupid stuff like
 this also causes "failed-to-report" errors in the space test.
 
 Expose type-specific collision functions?
-
-Improve box-box collision, especially for face-face contact. 
 
 Automatic code optimization process.
 
@@ -68,9 +69,6 @@ only allows two-body attachments.
 implement dJointGetAMotorAngleRate()
 
 erwin says: Should the GeomGroup have a cleanupmode as the GeomTransform has?
-
-dCloseODE() - tidy up *all* allocated memory, esp in geom.cpp. used to keep
-leak detectors happy.
 
 erwin says: http://q12.org/pipermail/ode/2002-January/000766.html
         and http://q12.org/pipermail/ode/2001-December/000753.html
@@ -134,16 +132,11 @@ correctly, or should set some proper body-dependent params when it is
 attached? this is only really an issue for joints that have no parameters to
 set, such as the fixed joint.
 
-extra API to get lambda and J'*lambda from last timestep.
-
 dAlloc() should take an arena parameters which is stored in dWorld.
 
 debugging mode should use dASSERT2 that prints a descriptive error message
 on error, not just the file:line or function. use dASSERT for internal
 consistency checking.
-
-better stack implementation that is not so system dependent. but how will
-we do dynamic page allocation? do we even need to?
 
 when vectors and matrices are initialized, we must ensure that the padding
 elements are set to 0. this is going to be a problem everywhere!
@@ -424,3 +417,11 @@ get rid of the __USE_ISOC9X macro in common.h
 perhaps just use a "big" number instead of the actual IEEE infinity, it's
 more portable anyway.
 	--> new config system
+
+dCloseODE() - tidy up *all* allocated memory, esp in geom.cpp. used to keep
+leak detectors happy.
+
+extra API to get lambda and J'*lambda from last timestep.
+
+better stack implementation that is not so system dependent. but how will
+we do dynamic page allocation? do we even need to?
