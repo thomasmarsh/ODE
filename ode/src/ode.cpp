@@ -309,6 +309,7 @@ dxBody *dBodyCreate (dxWorld *w)
   dxBody *b = new dxBody;
   initObject (b,w);
   b->firstjoint = 0;
+  b->flags = 0;
   dMassSetParameters (&b->mass,1,0,0,0,1,1,1,0,0,0);
   dSetZero (b->invI,4*3);
   b->invI[0] = 1;
@@ -323,6 +324,7 @@ dxBody *dBodyCreate (dxWorld *w)
   dSetZero (b->avel,4);
   dSetZero (b->facc,4);
   dSetZero (b->tacc,4);
+  dSetZero (b->finite_rot_axis,4);
   addObjectToList (b,(dObject **) &w->firstbody);
   w->nb++;
   return b;
@@ -516,6 +518,36 @@ void dBodyAddRelTorque (dBodyID b, dReal fx, dReal fy, dReal fz)
   b->tacc[0] += t2[0];
   b->tacc[1] += t2[1];
   b->tacc[2] += t2[2];
+}
+
+
+void dBodySetFiniteRotationMode (dBodyID b, int mode)
+{
+  dAASSERT (b);
+  b->flags &= ~(dxBodyFlagFiniteRotation | dxBodyFlagFiniteRotationAxis);
+  if (mode) {
+    b->flags |= dxBodyFlagFiniteRotation;
+    if (b->finite_rot_axis[0] != 0 || b->finite_rot_axis[1] != 0 ||
+	b->finite_rot_axis[2] != 0) {
+      b->flags |= dxBodyFlagFiniteRotationAxis;
+    }
+  }
+}
+
+
+void dBodySetFiniteRotationAxis (dBodyID b, dReal x, dReal y, dReal z)
+{
+  dAASSERT (b);
+  b->finite_rot_axis[0] = x;
+  b->finite_rot_axis[1] = y;
+  b->finite_rot_axis[2] = z;
+  if (x != 0 || y != 0 || z != 0) {
+    dNormalize3 (b->finite_rot_axis);
+    b->flags |= dxBodyFlagFiniteRotationAxis;
+  }
+  else {
+    b->flags &= ~dxBodyFlagFiniteRotationAxis;
+  }
 }
 
 //****************************************************************************

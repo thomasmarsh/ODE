@@ -175,6 +175,99 @@ static void MultiplyAdd1_8q1 (dReal *A, dReal *B, dReal *C, int q)
 }
 
 //****************************************************************************
+// body rotation
+
+// return sin(x)/x. this has a singularity at 0 so special handling is needed
+// for small arguments.
+
+static inline dReal sinc (dReal x)
+{
+  // if |x| < 1e-4 then use a taylor series expansion. this two term expansion
+  // is actually accurate to one LS bit within this range if double precision
+  // is being used - so don't worry!
+  if (dFabs(x) < 1.0e-4) return REAL(1.0) - x*x*REAL(0.166666666666666666667);
+  else return dSin(x)/x;
+}
+
+
+// given a body b, apply its linear and angular rotation over the time
+// interval h, thereby adjusting its position and orientation.
+
+static inline void moveAndRotateBody (dxBody *b, dReal h)
+{
+  int j;
+
+  // handle linear velocity
+  for (j=0; j<3; j++) b->pos[j] += h * b->lvel[j];
+
+  if (b->flags & dxBodyFlagFiniteRotation) {
+    dVector3 irv;	// infitesimal rotation vector
+    dQuaternion q;	// quaternion for finite rotation
+
+    printf ("1\n");
+
+    if (b->flags & dxBodyFlagFiniteRotationAxis) {
+      printf ("2\n");
+
+      // split the angular velocity vector into a component along the finite
+      // rotation axis, and a component orthogonal to it.
+      dVector3 frv,irv;		// finite rotation vector
+      dReal k = dDOT (b->finite_rot_axis,b->avel);
+      frv[0] = b->finite_rot_axis[0] * k;
+      frv[1] = b->finite_rot_axis[1] * k;
+      frv[2] = b->finite_rot_axis[2] * k;
+      irv[0] = b->avel[0] - frv[0];
+      irv[1] = b->avel[1] - frv[1];
+      irv[2] = b->avel[2] - frv[2];
+
+      // make a rotation quaternion q that corresponds to frv * h.
+      // compare this with the full-finite-rotation case below.
+      h *= REAL(0.5);
+      dReal theta = k * h;
+      q[0] = dCos(theta);
+      dReal s = sinc(theta) * h;
+      q[1] = frv[0] * s;
+      q[2] = frv[1] * s;
+      q[3] = frv[2] * s;
+    }
+    else {
+      // make a rotation quaternion q that corresponds to w * h
+      dReal wlen = dSqrt (b->avel[0]*b->avel[0] + b->avel[1]*b->avel[1] +
+			  b->avel[2]*b->avel[2]);
+      h *= REAL(0.5);
+      dReal theta = wlen * h;
+      q[0] = dCos(theta);
+      dReal s = sinc(theta) * h;
+      q[1] = b->avel[0] * s;
+      q[2] = b->avel[1] * s;
+      q[3] = b->avel[2] * s;
+    }
+
+    // do the finite rotation
+    dQuaternion q2;
+    dQMultiply0 (q2,q,b->q);
+    for (j=0; j<4; j++) b->q[j] = q2[j];
+
+    // do the infitesimal rotation if required
+    if (b->flags & dxBodyFlagFiniteRotationAxis) {
+      dReal dq[4];
+      dWtoDQ (irv,b->q,dq);
+      for (j=0; j<4; j++) b->q[j] += h * dq[j];
+    }
+  }
+  else {
+    // the normal way - do an infitesimal rotation
+    dReal dq[4];
+    dWtoDQ (b->avel,b->q,dq);
+    for (j=0; j<4; j++) b->q[j] += h * dq[j];
+  }
+
+  // normalize the quaternion and convert it to a rotation matrix
+  dNormalize4 (b->q);
+  dQtoR (b->q,b->R);
+}
+
+//****************************************************************************
 // the slow, but sure way
 
 // given lists of bodies and joints that form an island, perform a first
@@ -450,22 +543,11 @@ void dInternalStepIsland_x1 (dxWorld *world, dxBody **body, int nb,
 # ifdef TIMING
   dTimerNow ("update position");
 # endif
-  for (i=0; i<nb; i++) {
-    for (j=0; j<3; j++) body[i]->pos[j] += stepsize * body[i]->lvel[j];
-    dReal dq[4];
-    dWtoDQ (body[i]->avel,body[i]->q,dq);
-    for (j=0; j<4; j++) body[i]->q[j] += stepsize * dq[j];
-  }
+  for (i=0; i<nb; i++) moveAndRotateBody (body[i],stepsize);
 
 # ifdef TIMING
   dTimerNow ("tidy up");
 # endif
-
-  // normalize all quaternions and convert them to rotation matrices
-  for (i=0; i<nb; i++) {
-    dNormalize4 (body[i]->q);
-    dQtoR (body[i]->q,body[i]->R);
-  }
 
   // zero all force accumulators
   for (i=0; i<nb; i++) {
@@ -837,12 +919,7 @@ void dInternalStepIsland_x2 (dxWorld *world, dxBody **body, int nb,
 # ifdef TIMING
   dTimerNow ("update position");
 # endif
-  for (i=0; i<nb; i++) {
-    for (j=0; j<3; j++) body[i]->pos[j] += stepsize * body[i]->lvel[j];
-    dReal dq[4];
-    dWtoDQ (body[i]->avel,body[i]->q,dq);
-    for (j=0; j<4; j++) body[i]->q[j] += stepsize * dq[j];
-  }
+  for (i=0; i<nb; i++) moveAndRotateBody (body[i],stepsize);
 
 # ifdef COMPARE_METHODS
   dReal *tmp_vnew = (dReal*) ALLOCA (nb*6*sizeof(dReal));
@@ -856,12 +933,6 @@ void dInternalStepIsland_x2 (dxWorld *world, dxBody **body, int nb,
 # ifdef TIMING
   dTimerNow ("tidy up");
 # endif
-
-  // normalize all quaternions and convert them to rotation matrices
-  for (i=0; i<nb; i++) {
-    dNormalize4 (body[i]->q);
-    dQtoR (body[i]->q,body[i]->R);
-  }
 
   // zero all force accumulators
   for (i=0; i<nb; i++) {
