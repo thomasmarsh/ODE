@@ -70,6 +70,7 @@ typedef struct dContactGeom {
   dVector3 pos;
   dVector3 normal;
   dReal depth;
+  dGeomID g1,g2;
 } dContactGeom;
 
 
