@@ -9,6 +9,20 @@ the rules for this file:
 
 ------------------------------------------------------------------------------
 
+07/01/03 martin
+
+	* added joint limits and motors to universal joints.
+
+	* reversed the polarity of the dJOINT_REVERSE flag.
+
+	* added dMassSetBoxTotal().
+
+06/30/03 russ
+
+	* added the TriMesh geom class and the quad tree space to the ODE
+	  core. both of these were developed by Erwin de Vries. added OPCODE
+	  to the ODE distribution, this is required by TriMesh.
+
 06/23/03 martin
 
 	* added dGeomSetQuaternion() and dGeomGetQuaternion()
