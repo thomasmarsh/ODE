@@ -22,7 +22,24 @@
 
 /*
 
-test the friction approximations.
+test the Coulomb friction approximation.
+
+a 10x10 array of boxes is made, each of which rests on the ground.
+a horizantal force is applied to each box to try and get it to slide.
+box[i][j] has a mass (i+1)*MASS and a force (j+1)*FORCE. by the Coloumb
+friction model, the box should only slide if the force is greater than MU
+times the contact normal force, i.e.
+
+  f > MU * body_mass * GRAVITY
+  (j+1)*FORCE > MU * (i+1)*MASS * GRAVITY
+  (j+1) > (i+1) * (MU*MASS*GRAVITY/FORCE)
+  (j+1) > (i+1) * k
+
+this should be independent of the number of contact points, as N contact
+points will each have 1/N'th the normal force but the pushing force will
+have to overcome N contacts. the constants are chosen so that k=1.
+thus you should see a triangle made of half the bodies in the array start to
+slide.
 
 */
 
@@ -49,6 +66,7 @@ test the friction approximations.
 #define MASS 0.2	// mass of box[i][j] = (i+1) * MASS
 #define FORCE 0.05	// force applied to box[i][j] = (j+1) * FORCE
 #define MU 0.5		// the global mu to use
+#define GRAVITY 0.5	// the global gravity to use
 #define N1 10		// number of different forces to try
 #define N2 10		// number of different masses to try
 
@@ -153,7 +171,7 @@ int main (int argc, char **argv)
   world = dWorldCreate();
   space = dHashSpaceCreate();
   contactgroup = dJointGroupCreate (1000000);
-  dWorldSetGravity (world,0,0,-0.5);
+  dWorldSetGravity (world,0,0,-GRAVITY);
   ground = dCreatePlane (space,0,0,1,0);
 
   // bodies
