@@ -1,6 +1,4 @@
-47a48
-> 
-60,69d60
+61,70d60
 < /******************** breakable joint contribution ***********************/
 < struct dxJointBreakInfo : public dBase {
 < 	int flags;
@@ -11,8 +9,8 @@
 < 	dJointBreakCallback *callback; // function that is called when this joint breaks
 < };
 < /*************************************************************************/
-134,139d124
-< 
+135,140d124
+<   
 <   /******************** breakable joint contribution ***********************/
 <   // optional break info structure. if this is not NULL the the joint is
 <   // breakable.

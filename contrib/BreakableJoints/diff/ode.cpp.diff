@@ -1,6 +1,10 @@
-208,223d207
+212,230d211
 <   /******************** breakable joint contribution ***********************/
-<   dxJoint* nextJ = (dxJoint*)world->firstjoint->next;
+<   dxJoint* nextJ;
+<   if (!world->firstjoint)
+<     nextJ = 0;
+<   else
+<     nextJ = (dxJoint*)world->firstjoint->next;
 <   for (j=world->firstjoint; j; j=nextJ) {
 <   	nextJ = (dxJoint*)j->next;
 < 	// check if joint is breakable and broken
@@ -9,17 +13,16 @@
 <         dJointAttach (j, 0, 0);
 < 		// call the callback function if it is set
 < 		if (j->breakInfo->callback) j->breakInfo->callback (j);
-<         if (j->breakInfo->flags & dJOINT_DELETE_ON_BREAK) dJointDestroy (j);
-< 		// reset the dJOINT_BROKEN flag
-< 		j->breakInfo->flags &= ~(dJOINT_BROKEN);
+< 		// finally destroy the joint if the dJOINT_DELETE_ON_BREAK is set
+< 		if (j->breakInfo->flags & dJOINT_DELETE_ON_BREAK) dJointDestroy (j);
 <       }
 <   }
 <   /*************************************************************************/
-924,926d907
+931,933d911
 <   /******************** breakable joint contribution ***********************/
 <   j->breakInfo = 0;
 <   /*************************************************************************/
-1004,1006d984
+1011,1013d988
 <   /******************** breakable joint contribution ***********************/
 <   if (j->breakInfo) delete j->breakInfo;
 <   /*************************************************************************/
