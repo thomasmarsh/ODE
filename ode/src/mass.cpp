@@ -129,18 +129,18 @@ void dMassSetSphereTotal (dMass *m, dReal total_mass, dReal radius)
 
 
 void dMassSetCappedCylinder (dMass *m, dReal density, int direction,
-			     dReal a, dReal b)
+			     dReal radius, dReal length)
 {
   dReal M1,M2,Ia,Ib;
   dAASSERT (m);
   dUASSERT (direction >= 1 && direction <= 3,"bad direction number");
   dMassSetZero (m);
-  M1 = M_PI*a*a*b*density;		// cylinder mass
-  M2 = (REAL(4.0)/REAL(3.0))*M_PI*a*a*a*density;	// total cap mass
+  M1 = M_PI*radius*radius*length*density;			// cylinder mass
+  M2 = (REAL(4.0)/REAL(3.0))*M_PI*radius*radius*radius*density;	// total cap mass
   m->mass = M1+M2;
-  Ia = M1*(REAL(0.25)*a*a + (REAL(1.0)/REAL(12.0))*b*b) +
-    M2*(REAL(0.4)*a*a + REAL(0.5)*b*b);
-  Ib = (M1*REAL(0.5) + M2*REAL(0.4))*a*a;
+  Ia = M1*(REAL(0.25)*radius*radius + (REAL(1.0)/REAL(12.0))*length*length) +
+    M2*(REAL(0.4)*radius*radius + REAL(0.375)*radius*length + REAL(0.25)*length*length);
+  Ib = (M1*REAL(0.5) + M2*REAL(0.4))*radius*radius;
   m->_I(0,0) = Ia;
   m->_I(1,1) = Ia;
   m->_I(2,2) = Ia;

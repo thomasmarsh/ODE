@@ -9,6 +9,10 @@ the rules for this file:
 
 ------------------------------------------------------------------------------
 
+04/13/04 russ
+
+	* bug fix in dMassSetCappedCylinder(), from Matthew D. Hancher.
+
 04/08/04 russ
 
 	* added trimesh-CCylinder capability, from Vadim Macagon
