@@ -51,6 +51,14 @@ typedef unsigned char   uint8;
 #endif
 
 
+
+/* for unix, define this if your system supports anonymous memory maps
+ * (linux does).
+ */
+
+#define MMAP_ANONYMOUS
+
+
 #ifdef __cplusplus
 }
 #endif
