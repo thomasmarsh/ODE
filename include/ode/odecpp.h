@@ -595,9 +595,12 @@ class dSpace {
 protected:
   dSpaceID _id;
 
+  // the default constructor is protected so that you
+  // can't instance this class. you must instance one
+  // of its subclasses instead.
+  dSpace () { _id = 0; }
+
 public:
-  dSpace ()
-    { _id = 0; }
   ~dSpace()
     { dSpaceDestroy (_id); }
 
