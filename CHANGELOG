@@ -9,6 +9,12 @@ the rules for this file:
 
 ------------------------------------------------------------------------------
 
+11/12/01 russ
+
+	* changed the meaning of the 'flags' parameter to dCollide() and
+	  related functions: now the size of the contact buffer is kept in
+	  the lower 16 bits. this change will be backward compatible.
+
 11/11/01 russ
 
 	* added the ability to manually enable and disable bodies.
