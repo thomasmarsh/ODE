@@ -321,7 +321,7 @@ static void SOR_LCP (int m, int nb, dRealMutablePtr J, int *jb, dxBody * const *
 #ifdef WARM_STARTING
 	// for warm starting, this seems to be necessary to prevent
 	// jerkiness in motor-driven joints. i have no idea why this works.
-	for (i=0; i<m; i++) lambda[i] *= 0.9;
+	for (i=0; i<m; i++) lambda[i] *= (dReal) 0.9;
 #else
 	dSetZero (lambda,m);
 #endif
