@@ -188,7 +188,7 @@ static void handleEvent (XEvent &event, dsFunctions *fn)
   case KeyPress: {
     KeySym key;
     XLookupString (&event.xkey,NULL,0,&key,0);
-    if ( (event.xkey.state & (ShiftMask | ControlMask)) == 0) {
+    if ((event.xkey.state & ControlMask) == 0) {
       if (key >= ' ' && key <= 126 && fn->command) fn->command (key);
     }
     else if (event.xkey.state & ControlMask) {
