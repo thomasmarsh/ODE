@@ -44,7 +44,7 @@
 #define NUM 200			// max number of objects
 #define DENSITY (5.0)		// density of all objects
 #define GPB 3			// maximum number of geometries per body
-#define MAX_CONTACTS 256		// maximum number of contact points per body
+#define MAX_CONTACTS 64		// maximum number of contact points per body
 
 
 // dynamics and collision objects
@@ -73,6 +73,7 @@ typedef dReal dVector3R[3];
 
 dGeomID TriMesh1;
 dGeomID TriMesh2;
+static dTriMeshDataID TriData1, TriData2;  // reusable static trimesh data
 
 dReal Vertices[VertexCount * 3] = {
 	REAL(-0.334392), REAL(0.133007), REAL(0.062259),
@@ -1484,6 +1485,7 @@ static void start()
   printf ("   s for sphere.\n");
   printf ("   c for cylinder.\n");
   printf ("   x for a composite object.\n");
+  printf ("   m for a trimesh (EXPERIMENTAL).\n");
   printf ("To select an object, press space.\n");
   printf ("To disable the selected object, press d.\n");
   printf ("To enable the selected object, press e.\n");
@@ -1509,7 +1511,7 @@ static void command (int cmd)
   dMass m;
 
   cmd = locase (cmd);
-  if (cmd == 'b' || cmd == 's' || cmd == 'c' || cmd == 'x'
+  if (cmd == 'b' || cmd == 's' || cmd == 'c' || cmd == 'x' || cmd == 'm'
       /* || cmd == 'l' */) {
     if (num < NUM) {
       i = num;
@@ -1534,7 +1536,7 @@ static void command (int cmd)
     dMatrix3 R;
     if (random_pos) {
       dBodySetPosition (obj[i].body,
-			dRandReal()*2-1,dRandReal()*2-1,dRandReal()+1);
+			dRandReal()*2-1,dRandReal()*2-1,dRandReal()+3);
       dRFromAxisAndAngle (R,dRandReal()*2.0-1.0,dRandReal()*2.0-1.0,
 			  dRandReal()*2.0-1.0,dRandReal()*10.0-5.0);
     }
@@ -1571,6 +1573,17 @@ static void command (int cmd)
       sides[0] *= 0.5;
       dMassSetSphere (&m,DENSITY,sides[0]);
       obj[i].geom[0] = dCreateSphere (space,sides[0]);
+    }
+    else if (cmd == 'm') {
+      dTriMeshDataID new_tmdata = dGeomTriMeshDataCreate();
+      dGeomTriMeshDataBuildSingle(new_tmdata, &Vertices[0], 3 * sizeof(dReal), VertexCount, (int*)&Indices[0], IndexCount, 3 * sizeof(int));
+
+      obj[i].geom[0] = dCreateTriMesh(space, new_tmdata, 0, 0, 0);
+
+      // remember the mesh's dTriMeshDataID on its userdata for convenience.
+      dGeomSetData(obj[i].geom[0], new_tmdata);      
+
+      dMassSetBox (&m,DENSITY,sides[0],sides[1],sides[2]);
     }
     else if (cmd == 'x') {
       dGeomID g2[GPB];		// encapsulated geometries
@@ -1724,8 +1737,8 @@ static void simLoop (int pause)
 {
   dsSetColor (0,0,2);
   dSpaceCollide (space,0,&nearCallback);
-  if (!pause) dWorldStep (world,0.05);
-  //if (!pause) dWorldStepFast (world,0.05, 5);
+  //if (!pause) dWorldStep (world,0.05);
+  if (!pause) dWorldStepFast1 (world,0.05, 5);
 
   for (int j = 0; j < dSpaceGetNumGeoms(space); j++){
 	  dSpaceGetGeom(space, j);
@@ -1738,16 +1751,47 @@ static void simLoop (int pause)
   dsSetTexture (DS_WOOD);
   for (int i=0; i<num; i++) {
     for (int j=0; j < GPB; j++) {
-      if (i==selected) {
-	dsSetColor (0,0.7,1);
+      if (obj[i].geom[j]) {
+        if (i==selected) {
+          dsSetColor (0,0.7,1);
+        }
+        else if (! dBodyIsEnabled (obj[i].body)) {
+          dsSetColor (1,0,0);
+        }
+        else {
+          dsSetColor (1,1,0);
+        }
+      
+        if (dGeomGetClass(obj[i].geom[j]) == dTriMeshClass) {
+          dVector3R* Vertices = (dVector3R*)::Vertices;
+          int* Indices = (int*)::Indices;
+
+          // assume all trimeshes are drawn as bunnies
+          const dReal* Pos = dGeomGetPosition(obj[i].geom[j]);
+          const dReal* Rot = dGeomGetRotation(obj[i].geom[j]);
+        
+          for (int ii = 0; ii < IndexCount / 3; ii++) {
+            const dVector3R& v0 = Vertices[Indices[ii * 3 + 0]];
+            const dVector3R& v1 = Vertices[Indices[ii * 3 + 1]];
+            const dVector3R& v2 = Vertices[Indices[ii * 3 + 2]];
+            dsDrawTriangle(Pos, Rot, (dReal*)&v0, (dReal*)&v1, (dReal*)&v2, 1);
+          }
+
+          // tell the tri-tri collider the current transform of the trimesh --
+          // this is fairly important for good results.
+          /*
+            // NOT IMPLEMENTED YET
+          dTriMeshDataID TriMeshData = geomGetData(obj[i].geom[j]);
+          const double *DoubleArrayPtr =  Bodies[BodyIndex].TransformationMatrix->GetArray();
+          dGeomTriMeshDataSet( TriMeshData,
+                               TRIMESH_LAST_TRANSFORMATION,
+                               (void *) DoubleArrayPtr );
+          */
+
+        } else {
+          drawGeom (obj[i].geom[j],0,0,show_aabb);
+        }
       }
-      else if (! dBodyIsEnabled (obj[i].body)) {
-	dsSetColor (1,0,0);
-      }
-      else {
-	dsSetColor (1,1,0);
-      }
-      drawGeom (obj[i].geom[j],0,0,show_aabb);
     }
   }
 
@@ -1798,11 +1842,14 @@ int main (int argc, char **argv)
   dCreatePlane (space,0,0,1,0);
   memset (obj,0,sizeof(obj));
 
-  dTriMeshDataID TriData = dGeomTriMeshDataCreate();
-  dGeomTriMeshDataBuildSingle(TriData, &Vertices[0], 3 * sizeof(dReal), VertexCount, (int*)&Indices[0], IndexCount, 3 * sizeof(int));
+  // note: can't share tridata if intending to trimesh-trimesh collide
+  TriData1 = dGeomTriMeshDataCreate();
+  dGeomTriMeshDataBuildSingle(TriData1, &Vertices[0], 3 * sizeof(dReal), VertexCount, (int*)&Indices[0], IndexCount, 3 * sizeof(int));
+  TriData2 = dGeomTriMeshDataCreate();
+  dGeomTriMeshDataBuildSingle(TriData2, &Vertices[0], 3 * sizeof(dReal), VertexCount, (int*)&Indices[0], IndexCount, 3 * sizeof(int));
   
-  TriMesh1 = dCreateTriMesh(space, TriData, 0, 0, 0);
-  TriMesh2 = dCreateTriMesh(space, TriData, 0, 0, 0);
+  TriMesh1 = dCreateTriMesh(space, TriData1, 0, 0, 0);
+  TriMesh2 = dCreateTriMesh(space, TriData2, 0, 0, 0);
   
   {dGeomSetPosition(TriMesh1, 0, 0, 0.9);
   dMatrix3 Rotation;

@@ -9,6 +9,18 @@ the rules for this file:
 
 ------------------------------------------------------------------------------
 
+04/04/04 adam
+
+        * merged trimesh-trimesh collision code by
+        Jeffrey Smith <jeffreys@Softimage.com>.
+
+        * changed it to not break the trimesh interface, fix
+        some GCC compilation problems, bring it up to date with
+        ODE changes from 2003-11-15 -> 2004-04-04.
+
+        * add ability to drop meshes on meshes in test_moving_trimesh,
+        not as good as it could be but it's illustrative.
+
 01/16/04 adam
 
 	* implement a bunch of ultra-simple TriMesh functions that were
