@@ -43,7 +43,7 @@ The current features are:
 	system should not "explode" for no reason.
 
 @*	The equations of motion are derived from a Lagrange multiplier
-	velocity based model due to Trinkle and Stewart.
+	velocity based model due to Trinkle/Stewart and Anitescu/Potra.
 @*	The friction model and LCP solver come from Baraff's work.
 
 @*	A first order integrator is being used. It's fast, but not accurate

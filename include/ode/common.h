@@ -23,7 +23,7 @@
 #define _ODE_COMMON_H_
 
 #include "ode/error.h"
-#include <math.h>	// only included so it gets a chance to define M_PI etc
+#include <math.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -70,8 +70,10 @@ extern "C" {
 
 #if defined(dSINGLE)
 typedef float dReal;
+#define dInfinity HUGE_VALF
 #elif defined(dDOUBLE)
 typedef double dReal;
+#define dInfinity HUGE_VAL
 #else
 #error You must #define dSINGLE or dDOUBLE
 #endif
