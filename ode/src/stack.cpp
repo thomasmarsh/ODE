@@ -23,21 +23,37 @@
 #include <errno.h>
 #include "stack.h"
 #include "ode/error.h"
+#include "ode/config.h"
 
 //****************************************************************************
+// unix version that uses mmap(). some systems have anonymous mmaps and some
+// need to mmap /dev/zero.
 
 #ifndef WIN32
 
 #include <unistd.h>
 #include <sys/mman.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
 
 
 void dStack::init (int max_size)
 {
   if (sizeof(long int) != sizeof(char*)) dDebug (0,"internal");
   if (max_size <= 0) dDebug (0,"Stack::init() given size <= 0");
+
+#ifndef MMAP_ANONYMOUS
+  static int dev_zero_fd = -1;	// cached file descriptor for /dev/zero
+  if (dev_zero_fd < 0) dev_zero_fd = open ("/dev/zero", O_RDWR);
+  if (dev_zero_fd < 0) dError (0,"can't open /dev/zero (%s)",strerror(errno));
+  base = (char*) mmap (0,max_size, PROT_READ | PROT_WRITE, MAP_PRIVATE,
+		       dev_zero_fd,0);
+#else
   base = (char*) mmap (0,max_size, PROT_READ | PROT_WRITE,
 		       MAP_PRIVATE | MAP_ANON,0,0);
+#endif
+
   if (int(base) == -1) dError (0,"Stack::init(), mmap() failed, "
     "max_size=%d (%s)",max_size,strerror(errno));
   size = max_size;
