@@ -26,7 +26,7 @@
 extern "C" {
 #endif
 
-typedef struct dMass;
+struct dMass;
 
 void dMassSetZero (dMass *);
 
