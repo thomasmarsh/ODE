@@ -1,3 +1,23 @@
+/*************************************************************************
+ *                                                                       *
+ * Open Dynamics Engine, Copyright (C) 2001 Russell L. Smith.            *
+ *                                                                       *
+ * This library is free software; you can redistribute it and/or         *
+ * modify it under the terms of the GNU Lesser General Public            *
+ * License as published by the Free Software Foundation; either          *
+ * version 2.1 of the License, or (at your option) any later version.    *
+ *                                                                       *
+ * This library is distributed in the hope that it will be useful,       *
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU      *
+ * Lesser General Public License for more details.                       *
+ *                                                                       *
+ * You should have received a copy of the GNU Lesser General Public      *
+ * License along with this library (see the file LICENSE.TXT); if not,   *
+ * write to the Free Software Foundation, Inc., 59 Temple Place,         *
+ * Suite 330, Boston, MA 02111-1307 USA.                                 *
+ *                                                                       *
+ *************************************************************************/
 
 #include <stdio.h>
 #include "ode/ode.h"
@@ -55,38 +75,38 @@ static void simLoop (int pause)
   if (!pause) {
     // add an oscillating torque to body 0, and also damp its rotational motion
     static dReal a=0;
-    dReal *w = dBodyGetAngularVel (body[0]);
+    const dReal *w = dBodyGetAngularVel (body[0]);
     dBodyAddTorque (body[0],kd*w[0],kd*w[1]+0.1*cos(a),kd*w[2]+0.1*sin(a));
     a += 0.01;
 
     // add a spring force to keep the bodies together, otherwise they will
     // fly apart along the slider axis.
-    dReal *p1 = dBodyGetPosition (body[0]);
-    dReal *p2 = dBodyGetPosition (body[1]);
+    const dReal *p1 = dBodyGetPosition (body[0]);
+    const dReal *p2 = dBodyGetPosition (body[1]);
     dBodyAddForce (body[0],ks*(p2[0]-p1[0]),ks*(p2[1]-p1[1]),
-		    ks*(p2[2]-p1[2]));
+		   ks*(p2[2]-p1[2]));
     dBodyAddForce (body[1],ks*(p1[0]-p2[0]),ks*(p1[1]-p2[1]),
-    		    ks*(p1[2]-p2[2]));
+		   ks*(p1[2]-p2[2]));
 
     // occasionally re-orient one of the bodies to create a deliberate error.
     if (occasional_error) {
       static int count = 0;
       if ((count % 20)==0) {
 	// randomly adjust orientation of body[0]
-	dReal *R1;
+	const dReal *R1;
 	dMatrix3 R2,R3;
 	R1 = dBodyGetRotation (body[0]);
 	dRFromAxisAndAngle (R2,dRandReal()-0.5,dRandReal()-0.5,
-			     dRandReal()-0.5,dRandReal()-0.5);
+			    dRandReal()-0.5,dRandReal()-0.5);
 	dMultiply0 (R3,R1,R2,3,3,3);
 	dBodySetRotation (body[0],R3);
 
 	// randomly adjust position of body[0]
-	dReal *pos = dBodyGetPosition (body[0]);
+	const dReal *pos = dBodyGetPosition (body[0]);
 	dBodySetPosition (body[0],
-			   pos[0]+0.2*(dRandReal()-0.5),
-			   pos[1]+0.2*(dRandReal()-0.5),
-			   pos[2]+0.2*(dRandReal()-0.5));
+			  pos[0]+0.2*(dRandReal()-0.5),
+			  pos[1]+0.2*(dRandReal()-0.5),
+			  pos[2]+0.2*(dRandReal()-0.5));
       }
       count++;
     }
@@ -94,8 +114,8 @@ static void simLoop (int pause)
     dWorldStep (world,0.05);
   }
 
-  float sides1[3] = {SIDE,SIDE,SIDE};
-  float sides2[3] = {SIDE*0.8f,SIDE*0.8f,SIDE*2.0f};
+  dReal sides1[3] = {SIDE,SIDE,SIDE};
+  dReal sides2[3] = {SIDE*0.8f,SIDE*0.8f,SIDE*2.0f};
   dsSetTexture (DS_WOOD);
   dsSetColor (1,1,0);
   dsDrawBox (dBodyGetPosition(body[0]),dBodyGetRotation(body[0]),sides1);

@@ -1,3 +1,23 @@
+/*************************************************************************
+ *                                                                       *
+ * Open Dynamics Engine, Copyright (C) 2001 Russell L. Smith.            *
+ *                                                                       *
+ * This library is free software; you can redistribute it and/or         *
+ * modify it under the terms of the GNU Lesser General Public            *
+ * License as published by the Free Software Foundation; either          *
+ * version 2.1 of the License, or (at your option) any later version.    *
+ *                                                                       *
+ * This library is distributed in the hope that it will be useful,       *
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU      *
+ * Lesser General Public License for more details.                       *
+ *                                                                       *
+ * You should have received a copy of the GNU Lesser General Public      *
+ * License along with this library (see the file LICENSE.TXT); if not,   *
+ * write to the Free Software Foundation, Inc., 59 Temple Place,         *
+ * Suite 330, Boston, MA 02111-1307 USA.                                 *
+ *                                                                       *
+ *************************************************************************/
 
 #include <stdio.h>
 #include <setjmp.h>
@@ -14,6 +34,17 @@
 #define _R(i,j) R[(i)*4+(j)]
 
 //****************************************************************************
+// tolerances
+
+#ifdef dDOUBLE
+const double tol = 1e-10;
+#endif
+
+#ifdef dSINGLE
+const double tol = 1e-5;
+#endif
+
+//****************************************************************************
 // misc messages and error handling
 
 #ifdef __GNUC__
@@ -25,7 +56,7 @@
 static jmp_buf jump_buffer;
 
 
-void myFatalErrorFunction (int num, char *msg, va_list ap)
+void myFatalErrorFunction (int num, const char *msg, va_list ap)
 {
   printf ("(Error %d: ",num);
   vprintf (msg,ap);
@@ -50,8 +81,6 @@ void myFatalErrorFunction (int num, char *msg, va_list ap)
 
 //****************************************************************************
 // utility stuff
-
-const double tol = 1e-5;
 
 // compare two numbers, within a threshhold, return 1 if approx equal
 
@@ -134,6 +163,29 @@ void testSetZero()
   for (int i=0; i<100; i++) if (a[i] != 0.0) {
     printf ("\tFAILED\n");
     return;
+  }
+  printf ("\tpassed\n");
+}
+
+
+void testNormalize3()
+{
+  HEADER;
+  int i,j,bad=0;
+  dVector3 n1,n2;
+  for (i=0; i<1000; i++) {
+    dMakeRandomVector (n1,3,1.0);
+    for (j=0; j<3; j++) n2[j]=n1[j];
+    dNormalize3 (n2);
+    if (dFabs(dDOT(n2,n2) - 1.0) > tol) bad |= 1;
+    if (dFabs(n2[0]/n1[0] - n2[1]/n1[1]) > tol) bad |= 2;
+    if (dFabs(n2[0]/n1[0] - n2[2]/n1[2]) > tol) bad |= 4;
+    if (dFabs(n2[1]/n1[1] - n2[2]/n1[2]) > tol) bad |= 8;
+    if (dFabs(dDOT(n2,n1) - dSqrt(dDOT(n1,n1))) > tol) bad |= 16;
+    if (bad) {
+      printf ("\tFAILED (code=%x)\n",bad);
+      return;
+    }
   }
   printf ("\tpassed\n");
 }
@@ -744,6 +796,7 @@ extern "C" void testDynamicsStuff();
 extern "C" void dTestMatrixComparison();
 extern "C" void dTestSolveLCP();
 
+
 int main()
 {
   testRandomNumberGenerator();
@@ -751,6 +804,7 @@ int main()
   testPad();
   testCrossProduct();
   testSetZero();
+  testNormalize3();
   //testReorthonormalize();     ... not any more
   testPlaneSpace();
   testMatrixMultiply();
