@@ -79,6 +79,10 @@ static void printMessage (int num, const char *msg1, const char *msg2,
   fflush (stderr);
 }
 
+//****************************************************************************
+// unix
+
+#ifndef WIN32
 
 extern "C" void dError (int num, const char *msg, ...)
 {
@@ -108,3 +112,56 @@ extern "C" void dMessage (int num, const char *msg, ...)
   if (message_function) message_function (num,msg,ap);
   else printMessage (num,"ODE Message",msg,ap);
 }
+
+#endif
+
+//****************************************************************************
+// windows
+
+#ifdef WIN32
+
+#include "windows.h"
+
+
+extern "C" void dError (int num, const char *msg, ...)
+{
+  va_list ap;
+  va_start (ap,msg);
+  if (error_function) error_function (num,msg,ap);
+  else {
+    char s[1000],title[100];
+    _snprintf (title,sizeof(title),"ODE Error %d",num);
+    _vsnprintf (s,sizeof(s),msg,ap);
+    s[sizeof(s)-1] = 0;
+    MessageBox(0,s,title,MB_OK | MB_ICONWARNING);
+  }
+  exit (1);
+}
+
+
+extern "C" void dDebug (int num, const char *msg, ...)
+{
+  va_list ap;
+  va_start (ap,msg);
+  if (debug_function) debug_function (num,msg,ap);
+  else {
+    char s[1000],title[100];
+    _snprintf (title,sizeof(title),"ODE INTERNAL ERROR %d",num);
+    _vsnprintf (s,sizeof(s),msg,ap);
+    s[sizeof(s)-1] = 0;
+    MessageBox(0,s,title,MB_OK | MB_ICONSTOP);
+  }
+  abort();
+}
+
+
+extern "C" void dMessage (int num, const char *msg, ...)
+{
+  va_list ap;
+  va_start (ap,msg);
+  if (message_function) message_function (num,msg,ap);
+  else printMessage (num,"ODE Message",msg,ap);
+}
+
+
+#endif
