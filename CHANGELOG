@@ -9,6 +9,10 @@ the rules for this file:
 
 ------------------------------------------------------------------------------
 
+12/07/02 russ
+
+	* added dAreConnectedExcluding().
+
 11/30/02 russ
 
 	* added the ray geom class.
