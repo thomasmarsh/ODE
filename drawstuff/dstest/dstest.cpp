@@ -22,7 +22,7 @@ void start()
 void simLoop (int pause)
 {
   float pos[3];
-  float R[9];
+  float R[12];
   static float a = 0;
 
   if (!pause) a += 0.02f;
@@ -37,8 +37,8 @@ void simLoop (int pause)
   pos[1] = 0;
   pos[2] = (float) (0.1f*(2*M_PI*b - b*b) + 0.65f);
   R[0] = ca; R[1] = 0; R[2] = -sa;
-  R[3] = 0;  R[4] = 1; R[5] = 0;
-  R[6] = sa; R[7] = 0; R[8] = ca;
+  R[4] = 0;  R[5] = 1; R[6] = 0;
+  R[8] = sa; R[9] = 0; R[10] = ca;
   dsSetColor (1,0.8f,0.6f);
   dsDrawSphere (pos,R,0.3f);
 
@@ -48,8 +48,8 @@ void simLoop (int pause)
   pos[1] = 0.8f;
   pos[2] = 0.4f;
   R[0] = ca; R[1] = -sa; R[2] = 0;
-  R[3] = sa; R[4] = ca;  R[5] = 0;
-  R[6] = 0;  R[7] = 0;	 R[8] = 1;
+  R[4] = sa; R[5] = ca;  R[6] = 0;
+  R[8] = 0;  R[9] = 0;	 R[10] = 1;
   float sides[3] = {0.1f,0.4f,0.8f};
   dsSetColor (0.6f,0.6f,1);
   dsDrawBox (pos,R,sides);
@@ -63,18 +63,18 @@ void simLoop (int pause)
   pos[0] = -0.2f;
   pos[1] = -1 + d;
   pos[2] = 0.3f;
-  R[0] = 0;  R[1] = -sd; R[2] = cd;
-  R[3] = 0;  R[4] = cd;  R[5] = sd;
-  R[6] = -1; R[7] = 0;	 R[8] = 0;
+  R[0] = 0;   R[1] = 0;  R[2] = -1;
+  R[4] = -sd; R[5] = cd; R[6] =  0;
+  R[8] =  cd; R[9] = sd; R[10] = 0;
   dsSetColor (0.4f,1,1);
   dsDrawCylinder (pos,R,0.8f,r);
 
   pos[0] = 0;
   pos[1] = 0;
   pos[2] = 0.2f;
-  R[0] = 0;   R[1] = 0;  R[2] = 1;
-  R[3] = sa;  R[4] = ca; R[5] = 0;
-  R[6] = -ca; R[7] = sa; R[8] = 0;
+  R[0] = 0; R[1] = sa; R[2] = -ca;
+  R[4] = 0; R[5] = ca; R[6] = sa;
+  R[8] = 1; R[9] = 0;  R[10] = 0;
   dsSetColor (1,0.9f,0.2f);
   dsDrawCappedCylinder (pos,R,0.8f,0.2f);
 }
@@ -98,7 +98,7 @@ int main (int argc, char **argv)
   fn.path_to_textures = 0;	// uses default
 
   // run simulation
-  dsSimulationLoop (argc,argv,600,600,&fn);
+  dsSimulationLoop (argc,argv,400,400,&fn);
 
   return 0;
 }
