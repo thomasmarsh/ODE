@@ -9,6 +9,12 @@ the rules for this file:
 
 ------------------------------------------------------------------------------
 
+05/18/04 russ
+
+	* added the QuickStep solver
+	
+	* added contact parameter functions.
+
 05/05/04 adam
 
         * use dRandInt instead of rand() in stepfast.
