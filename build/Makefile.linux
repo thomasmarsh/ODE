@@ -39,8 +39,8 @@ fLINK=gcc -o $(1) -g $(addprefix -L ,$(LIB_PATHS)) $(2)
 fLIB=-l$(1)
 
 LINKMATH=-lm
-LINKWIN=-L/usr/X11/lib -lX11
-LINKOPENGL=-L/usr/X11/lib -lGLU -lGL
+LINKWIN=-L/usr/X11/lib -L/usr/X11R6/lib -lX11
+LINKOPENGL=-L/usr/X11/lib -L/usr/X11R6/lib -lGLU -lGL
 
 clean: clean_subdirs
 	-rm -f *~ *.o a.out core *.a $(EXTRA_CLEAN)
