@@ -55,6 +55,7 @@ ODE_SRC = \
 	ode/src/mass.cpp \
 	ode/src/ode.cpp \
 	ode/src/step.cpp \
+	ode/src/stepfast.cpp \
 	ode/src/lcp.cpp \
 	ode/src/joint.cpp \
 	ode/src/timer.cpp \
@@ -111,6 +112,7 @@ ODE_TEST_SRC_CPP = \
 	ode/test/test_collision.cpp \
 	ode/test/test_boxstack.cpp \
 	ode/test/test_buggy.cpp \
+	ode/test/test_crash.cpp \
 	ode/test/test_joints.cpp \
 	ode/test/test_space.cpp \
 	ode/test/test_I.cpp \

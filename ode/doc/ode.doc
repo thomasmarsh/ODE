@@ -2142,6 +2142,201 @@ A constant @c{dParamGroup} is also defined such that:
 }
 
 #############################################################################
+@chapter{StepFast}
+
+ODE's @func{dWorldStep} function currently uses a "big matrix" method to
+step the system. For some large systems this can be slow and can require
+a lot of memory.
+The StepFast1 algorithm provides an alternative way to step the system,
+that sacrifices some accuracy for a big gain in speed and memory.
+To use it, you simply call @func{dWorldStepFast1} instead of
+@func{dWorldStep}.
+
+The chart below illustrates this speed advantage over the standard
+@func{dWorldStep} algorithm:
+
+	@center{@picture{pix/sf-graph1.gif}}
+
+The graph relates the number of Degrees Of Freedom (DOFs) removed from a
+system to the running time of the step. You may be able to tell that the
+@func{dWorldStep} algorithm's running time is proportional to the cube of the
+number of DOF's removed. The StepFast1 algorithm, however, is roughly
+linear. So as islands increase in size (for example, when there is a large
+pile-up of cars, a pile of "ragdoll corpses", or a wall of bricks) the
+StepFast1 algorithm scales better than @func{dWorldStep}. All this means that
+your application is more likely to keep a steady framerate, even in the
+worst case scenario.
+
+The graph of DOFs removed to memory looks quite similar.
+
+	@center{@picture{pix/sf-graph2.gif}}
+
+@func{dWorldStep} requires memory proportional only to the square of the
+number of DOF's removed. StepFast1, though, is still linear, but it has
+nothing to do with the number of iterations per step. So this means the
+dreaded "There was a big pile-up and ODE crashed without an error message"
+problems (usually stack overflows) won't happen with StepFast1. Or at
+least that you'll be rendering at a minute per frame or slower before
+they do. 
+
+@section{When to use StepFast1}
+
+As shown above, StepFast1 is quite good when it comes to speed and memory
+usage. All this power doesn't come for free, though; all optimizations are
+a trade-off of one kind or another. I've already mentioned that StepFast1
+trades off accuracy for it's speed and memory advantages. You actually get
+to choose just how much accuracy you give away though, at the cost of speed,
+by adjusting the number of iterations per step. Though you may never reach
+the accuracy of @func{dWorldStep} (or you may surpass it, depending on the
+type of inaccuracy), you can be almost certain that a larger number of
+iterations will give you more accurate results (more slowly). So StepFast1
+can be used in a good variety of situations. 
+
+The general answer to this question then, is: use StepFast1 when you don't 
+mind having a few more parameters to play with to get the system stable, 
+and you want to take advantage of it's speed or memory advantages. If you 
+find yourself running into situations in your simulation where large numbers
+of bodies come in contact, and @func{dWorldStep} becomes too slow, try
+switching to StepFast1. Many systems will work just fine with nothing more
+than changing the @func{dWorldStep} function call to @func{dWorldStepFast1}.
+Others will require a little tweaking to get them to work well with
+StepFast1, usually in the masses of the bodies. When a joint connects two
+bodies with a large mass ratio (i.e. one body has several times the mass
+of the other body) StepFast1 may have trouble solving it. 
+
+Another prospect for StepFast1 is designing for it from the ground up.
+If you know you are going to build large worlds with many physically based 
+objects in them, then go ahead and plan to use StepFast1. Noting the mass 
+ratio problem above, you might want to consider making the mass of every 
+body in your system equal to 1.0. Or in a very small range, for example
+between 0.5 and 1.5. Most of the other suggestions for speed and stability 
+apply to StepFast1, except that the object is no longer to remove as many
+joints as possible from the equation. It can likely be shown that you will
+get a better performance to stability ratio by spreading out mass among
+several bodies connected by fixed joints rather than trying to implement
+it as one massive body, especially if that one massive body means you have
+to switch back to @func{dWorldStep} to keep things stable. 
+
+A final prospect for StepFast1 is to use it only when you need to.
+Since StepFast1 uses the body and world structures in exactly the same 
+way as @func{dWorldStep}, you can actually switch back and forth between the two
+solvers at will. A good heuristic for when to make this switch is to 
+simply count contact joints while you are running the collision detection.
+Since collision detection is normally called before the step, using this
+method will ensure that the large island that would slow you down is never 
+sent to the @func{dWorldStep} solver (as opposed to waiting until after you've
+already taken a step at 1 fps...). The only better solution would be a 
+hybrid island creation function, that sends small islands to @func{dWorldStep},
+and large islands to @func{dWorldStepFast1}. This may make it in the source at
+some point in the future.
+
+@section{When NOT to use StepFast1}
+
+Though there are several specific situations when it as advisable not to
+use StepFast1, I believe they can all be summed up in a single statement:
+Don't use StepFast1 when accuracy is more important than speed or memory
+to you. You may still want to evaluate it in this case and see if the
+inaccuracies are even noticeable, perhaps with a relatively large number
+of iterations (20+). 
+
+@section{How it works}
+
+For any interested parties out there, here's a quick rundown of how the 
+StepFast1 algorithm works. The general problem that ODE tries to solve 
+is a system of linear (in)equalities in (@m{m} = constraints) unknowns, 
+where one constraint constrains 1 Degree of Freedom in one joint.
+For large islands of bodies with many joints between them, this can 
+take a rather large @m{O(m^2)} array, which takes @m{O(m^3)} time to solve. 
+StepFast1 completely avoids creating the large matrix by making an 
+assumption: at relatively small timesteps, the effect of any given joint 
+is so localized that it can be calculated without respect to any other 
+joint in the system, and any conflicting joints will cancel each other 
+out before the body actually moves. So StepFast1 uses the same solution
+method (LCP) to solve the same problem, only localized to a single joint
+(where m <= 6). It gets away with this by sub-dividing the timestep and
+repeating the process over really small timesteps (i = maxiterations) times.
+So the running time of StepFast1 is "roughly" @m{O(m i)}. It's really closer
+to @m{O(j i (m/j)^3) = O(m i (m/j)^2)}, where @m{j} = joints, but @m{(m/j)}
+is never > 6, so @m{(m/j)^2} is factored out as a constant. 
+
+@section{Experimental Utilities included with StepFast1}
+
+Several experimental functions have been added to ODE as part of the
+StepFast1 flow of code, at least until they are validated. Most have to do
+with the automatic disabling and enabling of bodies as yet another bit of
+optimization. Here's the general idea: 
+
+@list{
+@*	The body is considered a candidate for disabling when it falls
+	below a certain speed (linear and angular), called the
+	AutoDisableThreshold. In the interest of speedy execution, the actual
+	speed measured is the square of the speed of the body. So you may
+	need to set a lower value than you expected. 0.003 works well in
+	test_crash, and is the default. 
+@*	When the body has remained a disable candidate for a certain number
+	of steps (AutoDisableSteps), it is disabled. This is almost completely
+	for boxes, which like to land and bounce up on two points, and teeter
+	motionless for a few steps before falling back down. Round items
+	generally need a much lower (like 1) AutoDisableSteps than boxes do
+	(10+), 10 is the default. 
+@*	AutoDisabling is disabled by default, use
+	dBodySetAutoDisableSF1(body, true) to enable it.
+@*	A body is automatically re-enabled when it comes in contact with
+	another enabled body. 
+@*	Enabled bodies only enable bodies within (AutoEnableDepth) bodies 
+	of them each step. This, in conjunction with AutoDisabling, causes a
+	rim of bodies that are enabled and disabled each step to form,
+	containing the enabled bodies to the smallest area allowed by the
+	AutoDisable parameters. Setting AutoEnableDepth to a really large
+	number will retain the current functionality. Setting it to 0 will
+	give you a new functionality: disabled bodies will never be
+	automatically re-enabled, acting like geoms only. 3 seems to be a
+	good value for the wall in test_crash, but 1000 is the default to
+	retain standard functionality. 
+}
+
+@section{API}
+
+@funcdef{
+void dWorldStepFast1(dWorldID, dReal stepsize, int maxiterations);
+}{
+Step the world by @arg{stepsize} seconds using the StepFast1 algorithm.
+The number of iterations to perform is given by @arg{maxiterations}.
+}
+
+@funcdef{
+void dWorldSetAutoEnableDepthSF1(dWorldID, int autoEnableDepth);
+int dWorldGetAutoEnableDepthSF1(dWorldID);
+}{
+Set and get the AutoEnableDepth parameter used by the StepFast1 algorithm.
+}
+
+@funcdef{
+void dBodySetAutoDisableThresholdSF1(dBodyID, dReal autoDisableThreshold);
+dReal dBodyGetAutoDisableThresholdSF1(dBodyID);
+}{
+Set and get the per-body AutoDisableThreshold parameter used by the
+StepFast1 algorithm.
+}
+
+@funcdef{
+void dBodySetAutoDisableStepsSF1(dBodyID, int AutoDisableSteps);
+int dBodyGetAutoDisableStepsSF1(dBodyID);
+}{
+Set and get the per-body AutoDisableSteps parameter used by the StepFast1
+algorithm.
+}
+
+@funcdef{
+void dBodySetAutoDisableSF1(dBodyID, int doAutoDisable);
+int dBodyGetAutoDisableSF1(dBodyID);
+}{
+Set and get the per-body AutoDisable flag used by the StepFast1 algorithm.
+If @arg{doAutoDisable} is nonzero, auto-disabling is enabled.
+If @arg{doAutoDisable} is zero, auto-disabling is disabled.
+}
+
+#############################################################################
 @chapter{Support functions}
 
 @section{Rotation functions}
