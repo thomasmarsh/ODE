@@ -246,3 +246,14 @@ void dMassRotate (dMass *m, const dMatrix3 R)
   checkMass (m);
 # endif
 }
+
+
+void dMassAdd (dMass *a, dMass *b)
+{
+  int i;
+  dAASSERT (a && b);
+  dReal denom = dRecip (a->mass + b->mass);
+  for (i=0; i<3; i++) a->c[i] = (a->c[i]*a->mass + b->c[i]*b->mass)*denom;
+  a->mass += b->mass;
+  for (i=0; i<12; i++) a->I[i] += b->I[i];
+}
