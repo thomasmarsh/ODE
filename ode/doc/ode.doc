@@ -3443,8 +3443,8 @@ that is used, except for four points:
 	argument set to 0) to remove all references from the geom to the body.
 }
 If you want an alternative collision library to get body-movement
-notifications from ODE, you should redefine @c{dGeomID}, @c{dGeomMoved()}
-and @c{dGeomGetBodyNext()} appropriately.
+notifications from ODE, you should define these types and functions
+appropriately.
 
 #############################################################################
 @chapter{How to make good simulations}
