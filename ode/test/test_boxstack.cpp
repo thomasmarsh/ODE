@@ -42,6 +42,7 @@
 #define NUM 20			// max number of objects
 #define DENSITY (5.0)		// density of all objects
 #define GPB 3			// maximum number of geometries per body
+#define MAX_CONTACTS 4		// maximum number of contact points per body
 
 
 // dynamics and collision objects
@@ -76,8 +77,8 @@ static void nearCallback (void *data, dGeomID o1, dGeomID o2)
   dBodyID b2 = dGeomGetBody(o2);
   if (b1 && b2 && dAreConnectedExcluding (b1,b2,dJointTypeContact)) return;
 
-  dContact contact[4];			// up to 4 contacts per box-box
-  for (i=0; i<4; i++) {
+  dContact contact[MAX_CONTACTS];   // up to MAX_CONTACTS contacts per box-box
+  for (i=0; i<MAX_CONTACTS; i++) {
     contact[i].surface.mode = dContactBounce | dContactSoftCFM;
     contact[i].surface.mu = dInfinity;
     contact[i].surface.mu2 = 0;
@@ -85,7 +86,8 @@ static void nearCallback (void *data, dGeomID o1, dGeomID o2)
     contact[i].surface.bounce_vel = 0.1;
     contact[i].surface.soft_cfm = 0.01;
   }
-  if (int numc = dCollide (o1,o2,4,&contact[0].geom,sizeof(dContact))) {
+  if (int numc = dCollide (o1,o2,MAX_CONTACTS,&contact[0].geom,
+			   sizeof(dContact))) {
     dMatrix3 RI;
     dRSetIdentity (RI);
     const dReal ss[3] = {0.02,0.02,0.02};
@@ -211,7 +213,7 @@ static void command (int cmd)
 	for (k=0; k<3; k++) dpos[j][k] = dRandReal()*0.3-0.15;
       }
 
-      for (k=0; k<3; k++) {
+      for (k=0; k<GPB; k++) {
 	obj[i].geom[k] = dCreateGeomTransform (space);
 	dGeomTransformSetCleanup (obj[i].geom[k],1);
 	if (k==0) {
