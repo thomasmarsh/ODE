@@ -1,4 +1,4 @@
-//Benoit CHAPEROT 2003 www.jstarlab.com
+//Benoit CHAPEROT 2003-2004 www.jstarlab.com
 //some code inspired by Magic Software
 #include <ode/common.h>
 #include <ode/collision.h>
@@ -431,3 +431,66 @@ int dCollideRayCone (dxGeom *o1, dxGeom *o2, int flags,
 
 	return 0;
 }
+
+int dCollideConeSphere(dxGeom *o1, dxGeom *o2, int flags, dContactGeom *contact, int skip)
+{
+	dIASSERT (skip >= (int)sizeof(dContactGeom));
+	dIASSERT (o1->type == dConeClass);
+	dIASSERT (o2->type == dSphereClass);
+	dxCone		*cone = (dxCone*) o1;
+	
+	dxSphere ASphere(0,cone->radius);
+	dGeomSetRotation(&ASphere,cone->R);
+	dGeomSetPosition(&ASphere,cone->pos[0],cone->pos[1],cone->pos[2]);
+
+	return dCollideSphereSphere(&ASphere, o2, flags, contact, skip);
+}
+
+int dCollideConeBox(dxGeom *o1, dxGeom *o2, int flags, dContactGeom *contact, int skip)
+{
+	dIASSERT (skip >= (int)sizeof(dContactGeom));
+	dIASSERT (o1->type == dConeClass);
+	dIASSERT (o2->type == dBoxClass);
+	dxCone		*cone = (dxCone*) o1;
+	
+	dxSphere ASphere(0,cone->radius);
+	dGeomSetRotation(&ASphere,cone->R);
+	dGeomSetPosition(&ASphere,cone->pos[0],cone->pos[1],cone->pos[2]);
+
+	return dCollideSphereBox(&ASphere, o2, flags, contact, skip);
+}
+
+int dCollideCCylinderCone(dxGeom *o1, dxGeom *o2, int flags, dContactGeom *contact, int skip)
+{
+	dIASSERT (skip >= (int)sizeof(dContactGeom));
+	dIASSERT (o1->type == dCCylinderClass);
+	dIASSERT (o2->type == dConeClass);
+	dxCone		*cone = (dxCone*) o2;
+	
+	dxSphere ASphere(0,cone->radius);
+	dGeomSetRotation(&ASphere,cone->R);
+	dGeomSetPosition(&ASphere,cone->pos[0],cone->pos[1],cone->pos[2]);
+
+	return dCollideCCylinderSphere(o1, &ASphere, flags, contact, skip);
+}
+
+extern int dCollideSTL(dxGeom *o1, dxGeom *o2, int flags, dContactGeom *contact, int skip);
+
+int dCollideTriMeshCone(dxGeom *o1, dxGeom *o2, int flags, dContactGeom *contact, int skip)
+{
+	dIASSERT (skip >= (int)sizeof(dContactGeom));
+	dIASSERT (o1->type == dTriMeshClass);
+	dIASSERT (o2->type == dConeClass);
+	dxCone		*cone = (dxCone*) o2;
+
+	dxSphere ASphere(0,cone->radius);
+	dGeomSetRotation(&ASphere,cone->R);
+	dGeomSetPosition(&ASphere,cone->pos[0],cone->pos[1],cone->pos[2]);
+
+	return dCollideSTL(o1, &ASphere, flags, contact, skip);
+}
+
+
+	
+
+
