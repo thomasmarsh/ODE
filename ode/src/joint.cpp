@@ -1566,8 +1566,8 @@ static void amotorComputeEulerAngles (dxJointAMotor *joint, dVector3 ax[3])
 {
   // assumptions:
   //   global axes already calculated --> ax
-  //   ax[0] is relative to body 1
-  //   ax[2] is relative to body 2
+  //   axis[0] is relative to body 1 --> global ax[0]
+  //   axis[2] is relative to body 2 --> global ax[2]
   //   ax[1] = ax[2] x ax[0]
   //   original ax[0] and ax[2] are perpendicular
   //   reference1 is perpendicular to ax[0] (in body 1 frame)
@@ -1582,15 +1582,34 @@ static void amotorComputeEulerAngles (dxJointAMotor *joint, dVector3 ax[3])
   // get q perpendicular to both ax[0] and ref1, get first euler angle
   dVector3 q;
   dCROSS (q,=,ax[0],ref1);
-  joint->angle[0] = dAtan2 (dDOT(ax[2],q),dDOT(ax[2],ref1));
+  joint->angle[0] = -dAtan2 (dDOT(ax[2],q),dDOT(ax[2],ref1));
 
   // get q perpendicular to both ax[0] and ax[1], get second euler angle
   dCROSS (q,=,ax[0],ax[1]);
-  joint->angle[1] = dAtan2 (dDOT(ax[2],ax[0]),dDOT(ax[2],q));
+  joint->angle[1] = -dAtan2 (dDOT(ax[2],ax[0]),dDOT(ax[2],q));
 
   // get q perpendicular to both ax[1] and ax[2], get third euler angle
   dCROSS (q,=,ax[1],ax[2]);
-  joint->angle[2] = dAtan2 (dDOT(ref2,ax[1]), dDOT(ref2,q));
+  joint->angle[2] = -dAtan2 (dDOT(ref2,ax[1]), dDOT(ref2,q));
+}
+
+
+// set the reference vectors as follows:
+//   * reference1 = current axis[2] relative to body 1
+//   * reference2 = current axis[0] relative to body 2
+// this assumes that:
+//    * axis[0] is relative to body 1
+//    * axis[2] is relative to body 2
+
+static void amotorSetEulerReferenceVectors (dxJointAMotor *j)
+{
+  if (j->node[0].body && j->node[1].body) {
+    dVector3 r;		// axis[2] and axis[0] in global coordinates
+    dMULTIPLY0_331 (r,j->node[1].body->R,j->axis[2]);
+    dMULTIPLY1_331 (j->reference1,j->node[0].body->R,r);
+    dMULTIPLY0_331 (r,j->node[0].body->R,j->axis[0]);
+    dMULTIPLY1_331 (j->reference2,j->node[1].body->R,r);
+  }
 }
 
 
@@ -1609,7 +1628,9 @@ static void amotorGetInfo1 (dxJointAMotor *j, dxJoint::Info1 *info)
   // see if we're powered or at a joint limit for each axis
   for (int i=0; i < j->num; i++) {
     if (j->limot[i].testRotationalLimit (j->angle[i]) ||
-	j->limot[i].fmax > 0) info->m++;
+	j->limot[i].fmax > 0) {
+      info->m++;
+    }
   }
 }
 
@@ -1622,22 +1643,9 @@ static void amotorGetInfo2 (dxJointAMotor *joint, dxJoint::Info2 *info)
   dVector3 ax[3];
   amotorComputeGlobalAxes (joint,ax);
 
-  int ofs=0,row=0;
+  int row=0;
   for (i=0; i < joint->num; i++) {
-    if (joint->limot[i].limit || joint->limot[i].fmax > 0) {
-      dReal *a = ax[i];
-      info->J1a[ofs+0] = a[0];
-      info->J1a[ofs+1] = a[1];
-      info->J1a[ofs+2] = a[2];
-      if (joint->node[1].body) {
-	info->J2a[ofs+0] = -a[0];
-	info->J2a[ofs+1] = -a[1];
-	info->J2a[ofs+2] = -a[2];
-      }
-      joint->limot[i].addLimot (joint,info,row,a,1);
-      ofs += info->rowskip;
-      row++;
-    }
+    row += joint->limot[i].addLimot (joint,info,row,ax[i],1);
   }
 }
 
@@ -1655,12 +1663,34 @@ extern "C" void dJointSetAMotorAxis (dxJointAMotor *joint, int axis, int rel,
 				     dReal x, dReal y, dReal z)
 {
   dAASSERT(joint);
+  dAASSERT(axis >= 0 && axis <= 2 && rel >= 0 && rel <= 2);
   if (axis < 0) axis = 0;
   if (axis > 2) axis = 2;
   joint->rel[axis] = rel;
-  joint->axis[axis][0] = x;
-  joint->axis[axis][1] = y;
-  joint->axis[axis][2] = z;
+
+  // x,y,z is always in global coordinates regardless of rel, so we may have
+  // to convert it to be relative to a body
+  dVector3 r;
+  r[0] = x;
+  r[1] = y;
+  r[2] = z;
+  r[3] = 0;
+  dNormalize3 (r);
+  if (rel > 0) {
+    if (rel==1) {
+      dMULTIPLY1_331 (joint->axis[axis],joint->node[0].body->R,r);
+    }
+    else {
+      dMULTIPLY1_331 (joint->axis[axis],joint->node[1].body->R,r);
+    }
+  }
+  else {
+    joint->axis[axis][0] = r[0];
+    joint->axis[axis][1] = r[1];
+    joint->axis[axis][2] = r[2];
+  }
+
+  if (joint->mode == dAMotorEuler) amotorSetEulerReferenceVectors (joint);
 }
 
 
@@ -1683,6 +1713,7 @@ extern "C" void dJointSetAMotorMode (dxJointAMotor *joint, int mode)
 {
   dAASSERT(joint);
   joint->mode = mode;
+  if (joint->mode == dAMotorEuler) amotorSetEulerReferenceVectors (joint);
 }
 
 
