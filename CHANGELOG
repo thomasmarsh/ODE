@@ -9,6 +9,10 @@ the rules for this file:
 
 ------------------------------------------------------------------------------
 
+06/25/02 russ
+
+	* added an additional BSD-style licensing option for ODE.
+
 06/23/02 russ
 
 	* added dCloseODE(), contributed by Nate Waddoups and David McClurg.
