@@ -9,7 +9,8 @@ WINDOWS			set to 1 if this is a microsoft windows based platform
 filesystem stuff and commands
 -----------------------------
 
-THIS_DIR		prefix to run a command from the current directory
+THIS_DIR1		prefix to run a command from the current directory (from within make)
+THIS_DIR2		prefix to run a command from the current directory (from command line)
 DEL_CMD			the name of the delete command
 
 compiler stuff
