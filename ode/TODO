@@ -2,63 +2,48 @@
 TODO
 ----
 
-what i'm doing now: joints:
-	hinge & slider - DONE
-		measure angle, rate - DONE
-		power - DONE
-		joint limits - DONE
-		mixed powered+limited joints, powering away from limit - DONE
-
-	hinge2 - DONE
-		steering angle and rate measurement - DONE
-		steering limits - DONE
-		steering motor - DONE
-		wheel motor - DONE
-		wheel angle rate measurement - DONE
-
-	optional hinge2 suspension: - DONE
-		alignment of B&S part to given axis - DONE
-		global framework for giving epsilon and gamma - DONE
-		suspension limits
-		suspension limit restitution and spongyness??
-
-	toss away r-motor, make power & stuff specific to joint. it's just
-		easier that way - DONE
-
-	joint code reuse: use standard functions to set velocity (c),
-		limits (lo,hi), spongyness (epsilon) etc, this prevents these
-		functions from proliferating - DONE
-
-	implicit spring framework - actually allow joints to return a value `k'
-		such that J*vnew = c + k*f, where f = force needed to achieve
-		vnew - DONE
-
+joints:
 	joint limit restitution and spongyness
-
-	contact slip - DONE
-	contact erp & cfm parameters (not just "softness")
-
-	more joint code reuse - setting axes etc??
 
 	hinge2 joint - implement trail, i.e. non-convergent steering and wheel
 	axes.
 
-	hinge2: when we lock back wheels along the steering axis, there is no
-	error correction if they get out of alignment.
-
 	erp individually settable for each joint?
 
-	more joints: spring, planar, fixed path, etc etc.
+	more joints:
+		angular3 (constrian full angle not position)
+		fixed path 1 (point must follow fixed path
+		linear a (point in 1 body fixed to plane of other)
+		linear b (point in 1 body fixed to line on other)
+		linear c (line in 1 body fixed to plane on other)
+		linear d (line in 1 body fixed to line on other) - like
+			prismatic but orientation along line can change
+		Relative-Path-Relative-Oriention Joint (set all dofs of 2
+			bodies relative to each other)
+		spring (with natural length)
+		universal (2 kinds)
+		various angular relationships
+
+	when attaching joints to static env, provision to move attachment
+	point (e.g. give it a linear/angular velocity). this can be used
+	instead of a FPFO joint on a body in many cases.
+
+	interpretation of erp: is it (1) the error reduction per timestep,
+	(2) or a time constant independent of timestep?? if it's (2) then
+	perhaps this should be universal - this is already the meaning for
+	the suspension.
+
+	hinge2 suspension:
+		suspension limits
+		suspension limit restitution and spongyness??
+
+extra API to get lambda and J'*lambda from last timestep.
+
+contacts: cheaper friction: viscous friction? one step delay friction force.
 
 DOC cfm, the derivation and what it means.
 
-new implementation for joint groups that is not so system dependent.
-maybe individual contacts are reusable? in this case contact information
-should be settable in the contact joints.
-
-consider making anchor,axis, (everything) into a joint parameter and setting
-them with a consistent interface. also consider overload the joint functions
-so they are not distinguished by joint type??
+joint "get type" function
 
 various hinge2 functions may not function correctly if axis1 and axis2 are not
 perpendicular. in particular the getAngle() and getAngleRate() functions
@@ -182,6 +167,20 @@ kill all references to dArray<> (in geom.cpp).
 
 need testing code to test all joints with body-to-static-env
 
+copy stack.cpp stuff to reuse
+
+
+MAYBE
+-----
+
+new implementation for joint groups that is not so system dependent.
+maybe individual contacts are reusable? in this case contact information
+should be settable in the contact joints. max_size arg is really annoying.
+
+consider making anchor,axis, (everything) into a joint parameter and setting
+them with a consistent interface. also consider overload the joint functions
+so they are not distinguished by joint type??
+
 
 ALWAYS
 ------
@@ -225,3 +224,40 @@ should we expose body and joint object structures so that the user can
 explicitly allocate them locally, or e.g. on the stack? makes allocating
 temporary contact constraints easier. NO --> helps data hiding and therefore
 library binary compatability.
+
+joints:
+	hinge & slider - DONE
+		measure angle, rate - DONE
+		power - DONE
+		joint limits - DONE
+		mixed powered+limited joints, powering away from limit - DONE
+
+	hinge2 - DONE
+		steering angle and rate measurement - DONE
+		steering limits - DONE
+		steering motor - DONE
+		wheel motor - DONE
+		wheel angle rate measurement - DONE
+
+	optional hinge2 suspension: - DONE
+		alignment of B&S part to given axis - DONE
+		global framework for giving epsilon and gamma - DONE
+
+	toss away r-motor, make power & stuff specific to joint - DONE
+		it's just easier that way
+
+	joint code reuse: - DONE
+		use standard functions to set velocity (c), limits (lo,hi),
+		spongyness (epsilon) etc, this prevents these functions from
+		proliferating
+
+	implicit spring framework - actually allow joints to return a value `k'
+		such that J*vnew = c + k*f, where f = force needed to achieve
+		vnew - DONE
+
+	contact slip - DONE
+	contact erp & cfm parameters (not just "softness") - DONE
+
+	hinge2: when we lock back wheels along the steering axis, there is no
+	error correction if they get out of alignment - DONE, just use high
+	and low limits.

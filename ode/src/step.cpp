@@ -175,10 +175,6 @@ static void MultiplyAdd1_8q1 (dReal *A, dReal *B, dReal *C, int q)
 
 //****************************************************************************
 
-static const dReal erp = 0.2;		// error reduction parameter
-static const dReal epsilon = 0.0001;
-
-
 // given lists of bodies and joints that form an island, perform a first
 // order timestep.
 //
@@ -300,7 +296,7 @@ void dInternalStepIsland_x1 (dxWorld *world, dxBody **body, int nb,
     dReal *lo = (dReal*) ALLOCA (m*sizeof(dReal));
     dReal *hi = (dReal*) ALLOCA (m*sizeof(dReal));
     dSetZero (c,m);
-    dSetValue (cfm,m,epsilon);
+    dSetValue (cfm,m,world->global_cfm);
     dSetValue (lo,m,-dInfinity);
     dSetValue (hi,m, dInfinity);
 
@@ -314,7 +310,7 @@ void dInternalStepIsland_x1 (dxWorld *world, dxBody **body, int nb,
     dxJoint::Info2 Jinfo;
     Jinfo.rowskip = nskip;
     Jinfo.fps = dRecip(stepsize);
-    Jinfo.erp = erp;
+    Jinfo.erp = world->global_erp;
     for (i=0; i<nj; i++) {
       Jinfo.J1l = J + nskip*ofs[i] + 6*joint[i]->node[0].body->tag;
       Jinfo.J1a = Jinfo.J1l + 3;
@@ -568,7 +564,7 @@ void dInternalStepIsland_x2 (dxWorld *world, dxBody **body, int nb,
     dReal *lo = (dReal*) ALLOCA (m*sizeof(dReal));
     dReal *hi = (dReal*) ALLOCA (m*sizeof(dReal));
     dSetZero (c,m);
-    dSetValue (cfm,m,epsilon);
+    dSetValue (cfm,m,world->global_cfm);
     dSetValue (lo,m,-dInfinity);
     dSetValue (hi,m, dInfinity);
 
@@ -597,7 +593,7 @@ void dInternalStepIsland_x2 (dxWorld *world, dxBody **body, int nb,
     dxJoint::Info2 Jinfo;
     Jinfo.rowskip = 8;
     Jinfo.fps = stepsize1;
-    Jinfo.erp = erp;
+    Jinfo.erp = world->global_erp;
     for (i=0; i<nj; i++) {
       Jinfo.J1l = J + 2*8*ofs[i];
       Jinfo.J1a = Jinfo.J1l + 4;

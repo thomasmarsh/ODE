@@ -426,8 +426,18 @@ static dArray<dColliderEntry> *colliders=0;
 
 static inline void initCollisionArrays()
 {
-  if (classes==0) classes = new dArray<dxGeomClass*>;
-  if (colliders==0) colliders = new dArray<dColliderEntry>;
+  if (classes==0) {
+    classes = (dArray<dxGeomClass*> *) dAllocNoFree (sizeof(dArrayBase));
+    classes->constructor();
+    // old way, that fools memory leak detection:
+    //   classes = new dArray<dxGeomClass*>;
+  }
+  if (colliders==0) {
+    colliders = (dArray<dColliderEntry> *) dAllocNoFree (sizeof(dArrayBase));
+    colliders->constructor();
+    // old way, that fools memory leak detection:
+    //   colliders = new dArray<dColliderEntry>;
+  }
 }
 
 

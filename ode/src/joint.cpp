@@ -1060,9 +1060,14 @@ static void contactGetInfo2 (dxJointContact *j, dxJoint::Info2 *info)
     dCROSS (info->J2a,= -,c2,normal);
   }
 
-  // set right hand side for normal
-  dReal k = info->fps * info->erp;
+  // set right hand side and cfm value for normal
+  dReal erp = info->erp;
+  if (j->contact.surface.mode & dContactSoftErp)
+    erp = j->contact.surface.soft_erp;
+  dReal k = info->fps * erp;
   info->c[0] = k*j->contact.geom.depth;
+  if (j->contact.surface.mode & dContactSoftCfm)
+    info->cfm[0] = j->contact.surface.soft_cfm;
 
   // deal with bounce
   if (j->contact.surface.mode & dContactBounce) {
@@ -1075,8 +1080,8 @@ static void contactGetInfo2 (dxJointContact *j, dxJoint::Info2 *info)
     }
     // only apply bounce if the outgoing velocity is greater than the
     // threshold, and if the resulting c[0] exceeds what we already have.
-    if (j->contact.surface.bounceVel >= 0 &&
-	(-outgoing) > j->contact.surface.bounceVel) {
+    if (j->contact.surface.bounce_vel >= 0 &&
+	(-outgoing) > j->contact.surface.bounce_vel) {
       dReal newc = - j->contact.surface.bounce * outgoing;
       if (newc > info->c[0]) info->c[0] = newc;
     }
@@ -1212,7 +1217,7 @@ static void hinge2GetInfo1 (dxJointHinge2 *j, dxJoint::Info1 *info)
   }
   if (atlimit || j->limot1.fmax > 0) info->m++;
 
-  // see if we're poweing axis 2 (we currently never limit this axis)
+  // see if we're powering axis 2 (we currently never limit this axis)
   j->limot2.limit = 0;
   if (j->limot2.fmax > 0) info->m++;
 }

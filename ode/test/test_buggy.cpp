@@ -75,10 +75,13 @@ static void nearCallback (void *data, dGeomID o1, dGeomID o2)
   if (!(g1 ^ g2)) return;
 
   dContact contact;
-  contact.surface.mode = dContactSlip1 | dContactSlip2;
+  contact.surface.mode = dContactSlip1 | dContactSlip2 |
+    dContactSoftErp | dContactSoftCfm;
   contact.surface.mu = dInfinity;
   contact.surface.slip1 = 0.1;
   contact.surface.slip2 = 0.1;
+  contact.surface.soft_erp = 0.5;
+  contact.surface.soft_cfm = 0.3;
   if (dCollide (o1,o2,0,&contact.geom,sizeof(dContactGeom))) {
     //    if (o1==ground_box) printf ("foo 1\n");
     //    if (o2==ground_box) printf ("foo 2\n");
@@ -96,6 +99,10 @@ static void start()
   static float xyz[3] = {0.8317,-0.9817,0.8000};
   static float hpr[3] = {121.0000,-27.5000,0.0000};
   dsSetViewpoint (xyz,hpr);
+  printf ("Press:\t'a' to increase speed.\n"
+	  "\t'z' to decrease speed.\n"
+	  "\t',' to steer left.\n"
+	  "\t'.' to steer right.\n");
 }
 
 
