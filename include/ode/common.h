@@ -242,9 +242,26 @@ enum {
 
 /* standard joint parameter names. why are these here? - because we don't want
  * to include all the joint function definitions in joint.cpp. hmmmm.
+ * MSVC complains if we call D_ALL_PARAM_NAMES_X with a blank second argument,
+ * which is why we have the D_ALL_PARAM_NAMES macro as well. please copy and
+ * paste between these two.
  */
 
-#define D_ALL_PARAM_NAMES(start,x) \
+#define D_ALL_PARAM_NAMES(start) \
+  /* parameters for limits and motors */ \
+  dParamLoStop = start, \
+  dParamHiStop, \
+  dParamVel, \
+  dParamFMax, \
+  dParamFudgeFactor, \
+  dParamBounce, \
+  dParamStopERP, \
+  dParamStopCFM, \
+  /* parameters for suspension */ \
+  dParamSuspensionERP, \
+  dParamSuspensionCFM,
+
+#define D_ALL_PARAM_NAMES_X(start,x) \
   /* parameters for limits and motors */ \
   dParamLoStop ## x = start, \
   dParamHiStop ## x, \
@@ -259,9 +276,9 @@ enum {
   dParamSuspensionCFM ## x,
 
 enum {
-  D_ALL_PARAM_NAMES(0,)
-  D_ALL_PARAM_NAMES(0x100,2)
-  D_ALL_PARAM_NAMES(0x200,3)
+  D_ALL_PARAM_NAMES(0)
+  D_ALL_PARAM_NAMES_X(0x100,2)
+  D_ALL_PARAM_NAMES_X(0x200,3)
 
   /* add a multiple of this constant to the basic parameter numbers to get
    * the parameters for the second, third etc axes.
