@@ -114,6 +114,7 @@ typedef dReal dQuaternion[4];
 #define dSin(x) sin(x)			/* sine */
 #define dCos(x) cos(x)			/* cosine */
 #define dFabs(x) fabs(x)		/* absolute value */
+#define dAtan2(y,x) atan2((y),(x))	/* arc tangent with 2 args */
 
 #elif defined(dDOUBLE)
 
@@ -124,6 +125,7 @@ typedef dReal dQuaternion[4];
 #define dSin(x) sin(x)
 #define dCos(x) cos(x)
 #define dFabs(x) fabs(x)
+#define dAtan2(y,x) atan2((y),(x))
 
 #else
 #error You must #define dSINGLE or dDOUBLE
