@@ -287,6 +287,8 @@ public:
     { dJointSetBallAnchor (_id, x, y, z); }
   void getAnchor (dVector3 result) const
     { dJointGetBallAnchor (_id, result); }
+  void getAnchor2 (dVector3 result) const
+    { dJointGetBallAnchor2 (_id, result); }
 } ;
 
 
@@ -309,6 +311,8 @@ public:
     { dJointSetHingeAnchor (_id, x, y, z); }
   void getAnchor (dVector3 result) const
     { dJointGetHingeAnchor (_id, result); }
+  void getAnchor2 (dVector3 result) const
+    { dJointGetHingeAnchor2 (_id, result); }
 
   void setAxis (dReal x, dReal y, dReal z)
     { dJointSetHingeAxis (_id, x, y, z); }
@@ -383,6 +387,8 @@ public:
 
   void getAnchor (dVector3 result) const
     { dJointGetUniversalAnchor (_id, result); }
+  void getAnchor2 (dVector3 result) const
+    { dJointGetUniversalAnchor2 (_id, result); }
   void getAxis1 (dVector3 result) const
     { dJointGetUniversalAxis1 (_id, result); }
   void getAxis2 (dVector3 result) const
@@ -414,6 +420,8 @@ public:
 
   void getAnchor (dVector3 result) const
     { dJointGetHinge2Anchor (_id, result); }
+  void getAnchor2 (dVector3 result) const
+    { dJointGetHinge2Anchor2 (_id, result); }
   void getAxis1 (dVector3 result) const
     { dJointGetHinge2Axis1 (_id, result); }
   void getAxis2 (dVector3 result) const

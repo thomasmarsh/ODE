@@ -9,6 +9,12 @@ the rules for this file:
 
 ------------------------------------------------------------------------------
 
+06/23/03 martin
+
+	* added dGeomSetQuaternion() and dGeomGetQuaternion()
+	
+	* added dJointGet*Anchor2()
+
 05/07/03 russ
 
 	* added dGeomGetSpace().

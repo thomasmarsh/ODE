@@ -208,6 +208,27 @@ static void getAnchor (dxJoint *j, dVector3 result, dVector3 anchor1)
     result[1] += j->node[0].body->pos[1];
     result[2] += j->node[0].body->pos[2];
   }
+  else {
+    result[0] = anchor1[0];
+    result[1] = anchor1[1];
+    result[2] = anchor1[2];
+  }
+}
+
+
+static void getAnchor2 (dxJoint *j, dVector3 result, dVector3 anchor2)
+{
+  if (j->node[1].body) {
+    dMULTIPLY0_331 (result,j->node[1].body->R,anchor2);
+    result[0] += j->node[1].body->pos[0];
+    result[1] += j->node[1].body->pos[1];
+    result[2] += j->node[1].body->pos[2];
+  }
+  else {
+    result[0] = anchor2[0];
+    result[1] = anchor2[1];
+    result[2] = anchor2[2];
+  }
 }
 
 
@@ -570,6 +591,15 @@ extern "C" void dJointGetBallAnchor (dxJointBall *joint, dVector3 result)
 }
 
 
+extern "C" void dJointGetBallAnchor2 (dxJointBall *joint, dVector3 result)
+{
+  dUASSERT(joint,"bad joint argument");
+  dUASSERT(result,"bad result argument");
+  dUASSERT(joint->vtable == &__dball_vtable,"joint is not a ball");
+  getAnchor2 (joint,result,joint->anchor2);
+}
+
+
 dxJoint::Vtable __dball_vtable = {
   sizeof(dxJointBall),
   (dxJoint::init_fn*) ballInit,
@@ -727,6 +757,15 @@ extern "C" void dJointGetHingeAnchor (dxJointHinge *joint, dVector3 result)
   dUASSERT(result,"bad result argument");
   dUASSERT(joint->vtable == &__dhinge_vtable,"joint is not a hinge");
   getAnchor (joint,result,joint->anchor1);
+}
+
+
+extern "C" void dJointGetHingeAnchor2 (dxJointHinge *joint, dVector3 result)
+{
+  dUASSERT(joint,"bad joint argument");
+  dUASSERT(result,"bad result argument");
+  dUASSERT(joint->vtable == &__dhinge_vtable,"joint is not a hinge");
+  getAnchor2 (joint,result,joint->anchor2);
 }
 
 
@@ -1469,6 +1508,15 @@ extern "C" void dJointGetHinge2Anchor (dxJointHinge2 *joint, dVector3 result)
 }
 
 
+extern "C" void dJointGetHinge2Anchor2 (dxJointHinge2 *joint, dVector3 result)
+{
+  dUASSERT(joint,"bad joint argument");
+  dUASSERT(result,"bad result argument");
+  dUASSERT(joint->vtable == &__dhinge2_vtable,"joint is not a hinge2");
+  getAnchor2 (joint,result,joint->anchor2);
+}
+
+
 extern "C" void dJointGetHinge2Axis1 (dxJointHinge2 *joint, dVector3 result)
 {
   dUASSERT(joint,"bad joint argument");
@@ -1699,6 +1747,16 @@ extern "C" void dJointGetUniversalAnchor (dxJointUniversal *joint,
   dUASSERT(result,"bad result argument");
   dUASSERT(joint->vtable == &__duniversal_vtable,"joint is not a universal");
   getAnchor (joint,result,joint->anchor1);
+}
+
+
+extern "C" void dJointGetUniversalAnchor2 (dxJointUniversal *joint,
+					  dVector3 result)
+{
+  dUASSERT(joint,"bad joint argument");
+  dUASSERT(result,"bad result argument");
+  dUASSERT(joint->vtable == &__duniversal_vtable,"joint is not a universal");
+  getAnchor2 (joint,result,joint->anchor2);
 }
 
 
