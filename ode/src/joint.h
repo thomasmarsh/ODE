@@ -121,6 +121,7 @@ struct dxJoint : public dObject {
   Vtable *vtable;		// virtual function table
   int flags;			// dJOINT_xxx flags
   dxJointNode node[2];		// connections to bodies. node[1].body can be 0
+  dJointFeedback *feedback;	// optional feedback structure
 };
 
 

@@ -289,6 +289,16 @@ enum{
 };
 
 
+/* joint force feedback information */
+
+typedef struct dJointFeedback {
+  dVector3 f1;		// force applied to body 1
+  dVector3 t1;		// torque applied to body 1
+  dVector3 f2;		// force applied to body 2
+  dVector3 t2;		// torque applied to body 2
+} dJointFeedback;
+
+
 #ifdef __cplusplus
 }
 #endif

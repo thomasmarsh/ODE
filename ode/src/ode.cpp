@@ -881,6 +881,7 @@ static dxJoint *createJoint (dWorldID w, dJointGroupID group,
   j->vtable = vtable;
   if (group) j->flags |= dJOINT_INGROUP;
   if (vtable->init) vtable->init (j);
+  j->feedback = 0;
   return j;
 }
 
@@ -1083,6 +1084,20 @@ dBodyID dJointGetBody (dxJoint *joint, int index)
   dAASSERT (joint);
   if (index >= 0 && index < 2) return joint->node[index].body;
   else return 0;
+}
+
+
+void dJointSetFeedback (dxJoint *joint, dJointFeedback *f)
+{
+  dAASSERT (joint);
+  joint->feedback = f;
+}
+
+
+dJointFeedback *dJointGetFeedback (dxJoint *joint)
+{
+  dAASSERT (joint);
+  return joint->feedback;
 }
 
 
