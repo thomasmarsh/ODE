@@ -23,3 +23,9 @@ PRECISION=DOUBLE
 
 #BUILD=debug
 BUILD=release
+
+# (4) if you are using an old version of MS-Windows that has command line
+#     length limitations then you will need to set this to "1". otherwise,
+#     leave it at "0".
+
+WINDOWS16=0
