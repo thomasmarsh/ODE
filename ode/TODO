@@ -69,14 +69,6 @@ update C++ interface? use SWIG?
 
 collision exclusion groups - exclude if obj1.n == obj2.n ?
 
-The error messages that happen under windows when building ODE are not in
-fact due to the DIRSEP variable but due to there not being an actual
-copy.exe file within the system (at least on Windows 2000) the copy command
-is builtin in to the command processor. One fix is to change the COPY_CMD
-variable to xcopy (xcopy is a slightly enhanced version of copy) in
-Makefile.win32, since there should be a xcopy.exe file on most windows
-systems.
-
 
 TODO
 ----
