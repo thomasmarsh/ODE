@@ -86,8 +86,8 @@ This is difficult to do right and extremely error-prone.
 
 ODE has a built-in collision detection system.
 However you can ignore it and do your own collision detection if you want to.
-The current collision primitives are sphere, box, capped cylinder and plane -
-more collision objects will come later.
+The current collision primitives are sphere, box, capped cylinder, plane and
+ray - more collision objects will come later.
 ODE's collision system provides fast identification of potentially
 intersecting objects, through the concept of ``spaces''.
 
@@ -96,7 +96,8 @@ Here are the features:
 @*	Arbitrary mass distribution of the rigid bodies.
 @*	Current joint types: ball-and-socket, hinge, slider (prismatic),
 	hinge-2, fixed, angular motor, universal.
-@*	Current collision primitives: sphere, box, capped cylinder and plane.
+@*	Current collision primitives: sphere, box, capped cylinder, plane
+	and ray.
 @*	Simulation method: The equations of motion are derived from a
 	Lagrange multiplier velocity based model due to Trinkle/Stewart and
 	Anitescu/Potra.
@@ -2993,6 +2994,15 @@ Return the radius of the given sphere.
 }
 
 
+@funcdef{
+dReal dGeomSpherePointDepth (dGeomID sphere, dReal x, dReal y, dReal z);
+}{
+Return the depth of the point (@arg{x},@arg{y},@arg{z}) in the given sphere.
+Points inside the geom will have positive depth, points outside it will have
+negative depth, and points on the surface will have zero depth.
+}
+
+
 @subsection{Box class}
 
 @funcdef{
@@ -3016,6 +3026,15 @@ Set the side lengths of the given @arg{box}.
 void dGeomBoxGetLengths (dGeomID box, dVector3 result);
 }{
 Return in @arg{result} the side lengths of the given @arg{box}.
+}
+
+
+@funcdef{
+dReal dGeomBoxPointDepth (dGeomID box, dReal x, dReal y, dReal z);
+}{
+Return the depth of the point (@arg{x},@arg{y},@arg{z}) in the given box.
+Points inside the geom will have positive depth, points outside it will have
+negative depth, and points on the surface will have zero depth.
 }
 
 
@@ -3048,6 +3067,15 @@ Set the parameters of the given @arg{plane}.
 void dGeomPlaneGetParams (dGeomID plane, dVector4 result);
 }{
 Return in @arg{result} the parameters of the given @arg{plane}.
+}
+
+
+@funcdef{
+dReal dGeomPlanePointDepth (dGeomID plane, dReal x, dReal y, dReal z);
+}{
+Return the depth of the point (@arg{x},@arg{y},@arg{z}) in the given plane.
+Points inside the geom will have positive depth, points outside it will have
+negative depth, and points on the surface will have zero depth.
 }
 
 
@@ -3084,6 +3112,85 @@ void dGeomCCylinderGetParams (dGeomID ccylinder,
 }{
 Return in @arg{radius} and @arg{length} the parameters of the given capped
 cylinder.
+}
+
+
+@funcdef{
+dReal dGeomCCylinderPointDepth (dGeomID ccylinder, dReal x, dReal y, dReal z);
+}{
+Return the depth of the point (@arg{x},@arg{y},@arg{z}) in the given capped
+cylinder.
+Points inside the geom will have positive depth, points outside it will have
+negative depth, and points on the surface will have zero depth.
+}
+
+
+@subsection{Ray class}
+
+A ray is different from all the other geom classes in that it does not
+represent a solid object. It is an infinitely thin line that starts from
+the geom's position and extends in the direction of the geom's local Z-axis.
+
+Calling @func{dCollide()} between a ray and another geom will result in at
+most one contact point.
+Rays have their own conventions for the contact information in the
+@c{dContactGeom} structure (thus it is not useful to create contact joints
+from this information):
+
+@list{
+@*	@c{pos} - This is the point at which the ray intersects the surface of
+	the other geom, regardless of whether the ray starts from inside or
+	outside the geom.
+
+@*	@c{normal} - This is the surface normal of the other geom at the
+	contact point.
+	if @func{dCollide()} is passed the ray as its first geom then the
+	normal will be oriented correctly for ray reflection from that surface
+	(otherwise it will have the opposite sign).
+
+@*	@c{depth} - This is the distance from the start of the ray to the
+	contact point.
+}
+
+Rays are useful for things like visibility testing, detemining the
+path of projectiles or light rays, and for object placement.
+
+
+@funcdef{
+dGeomID dCreateRay (dSpaceID space, dReal length);
+}{
+Create a ray geom of the given length, and return its ID.
+If @arg{space} is nonzero, insert it into that space.
+}
+
+@funcdef{
+void dGeomRaySetLength (dGeomID ray, dReal length);
+}{
+Set the length of the given @arg{ray}.
+}
+
+@funcdef{
+dReal dGeomRayGetLength (dGeomID ray);
+}{
+Get the length of the given @arg{ray}.
+}
+
+@funcdef{
+void dGeomRaySet (dGeomID ray, dReal px, dReal py, dReal pz,
+                  dReal dx, dReal dy, dReal dz);
+}{
+Set the starting position (@arg{px},@arg{py},@arg{pz}) and direction
+(@arg{dx},@arg{dy},@arg{dz}) of the given @arg{ray}.
+The ray's rotation matrix will be adjusted so that the local Z-axis is
+aligned with the direction.
+Note that this does not adjust the ray's length.
+}
+
+@funcdef{
+void dGeomRayGet (dGeomID ray, dVector3 start, dVector3 dir);
+}{
+Get the starting position (@arg{start}) and direction (@arg{dir}) of the
+ray. The returned direction will be a unit length vector.
 }
 
 
