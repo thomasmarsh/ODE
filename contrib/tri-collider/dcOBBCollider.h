@@ -1,5 +1,6 @@
-#ifndef __DCCOBBCOLLIDER_INCLUDED__
-#define __DCCOBBCOLLIDER_INCLUDED__
+#ifndef __DCOBBCOLLIDER_INCLUDED__
+#define __DCOBBCOLLIDER_INCLUDED__
+
 
 class OPCODE_API dcOBBTreeCollider{
 	Point Box;
@@ -28,20 +29,17 @@ class OPCODE_API dcOBBTreeCollider{
 	udword LeafIndex;
 
 public:
-	dword BoxBoxTestCount;
-	dword BoxTriTestCount;
-
 	/* In */
-	const dcArray<Vertex>& Vertices;
-	const dcArray<dword>& Indices;
+	const dcVector3*& Vertices;
+	const int*& Indices;
 
-	dcVector<const AABBNoLeafNode*>* TCData;
+	dArray<const AABBNoLeafNode*>* TCData;
 
 	/* Out */
-	dcVector<dword> Contacts;
+	dArray<int> Contacts;
 
 	/* Constructor/destructor */
-	dcOBBTreeCollider(const dcArray<Vertex>& Vertices, const dcArray<dword>& Indices);
+	dcOBBTreeCollider(const dcVector3*& Vertices, const int*& Indices);
 	~dcOBBTreeCollider();
 
 	/* Collision queries */

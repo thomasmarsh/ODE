@@ -1,5 +1,6 @@
-#include "dcCore.h"
-#include "dcGraphicsTypes.h"
+#include "array.h"
+#include "dxTriList.h"
+
 #include "Opcode.h"
 using namespace Opcode;
 
@@ -34,9 +35,6 @@ __forceinline void TransformPoint(Point& dest, const Point* source, const Matrix
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 __forceinline bool dcOBBTreeCollider::BoxBoxOverlap(const Point& a, const Point& Pa){
 	const Point& b = Box;
-
-	// Stats
-	BoxBoxTestCount++;
 
 	float t,t2;
 
@@ -206,9 +204,6 @@ __forceinline bool dcOBBTreeCollider::TriBoxOverlap(){
 	// Setup
 	const Point& extents = Box;
 
-	// Stats
-	BoxTriTestCount++;
-
 	// use separating axis theorem to test overlap between triangle and box 
 	// need to test for overlap in these directions: 
 	// 1) the {x,y,z}-directions (actually, since we use the AABB of the triangle 
@@ -279,7 +274,7 @@ __forceinline bool dcOBBTreeCollider::TriBoxOverlap(){
 	return true;
 }
 
-dcOBBTreeCollider::dcOBBTreeCollider(const dcArray<Vertex>& _Vertices, const dcArray<dword>& _Indices) : Vertices(_Vertices), Indices(_Indices){
+dcOBBTreeCollider::dcOBBTreeCollider(const dcVector3*& _Vertices, const int*& _Indices) : Vertices(_Vertices), Indices(_Indices){
 	TCData = null;
 }
 
@@ -288,10 +283,7 @@ dcOBBTreeCollider::~dcOBBTreeCollider(){
 }
 
 void dcOBBTreeCollider::InitQuery(const Point& Box, const Matrix4x4& BoxMatrix){
-	// Reset stats & contact status
-	BoxBoxTestCount = 0;
-	BoxTriTestCount = 0;
-	Contacts.Clear();
+	Contacts.setSize(0);
 
 	this->Box = Box;
 
@@ -303,8 +295,8 @@ void dcOBBTreeCollider::InitQuery(const Point& Box, const Matrix4x4& BoxMatrix){
 	mR1to0 = BoxMatrix;		BoxMatrix.GetTrans(mT1to0);
 
 	// Precompute absolute 1-to-0 rotation matrix
-	for(dword i=0;i<3;i++){
-		for(dword j=0;j<3;j++){
+	for (int i = 0; i < 3; i++){
+		for (int j = 0; j < 3; j++){
 			// Epsilon value prevents floating-point inaccuracies (strategy borrowed from RAPID)
 			mAR.m[i][j] = 1e-6f + fabsf(mR1to0.m[i][j]);
 		}
@@ -330,7 +322,7 @@ void dcOBBTreeCollider::Collide(const AABBNoLeafTree* Tree, const Point& Box, co
 	InitQuery(Box, BoxMatrix);
 
 	if (TCData != null){
-		for (dword i = 0; i < TCData->GetLength(); i++){
+		for (int i = 0; i < TCData->size(); i++){
 			_Collide(TCData->operator[](i));
 		}
 	}
@@ -339,7 +331,7 @@ void dcOBBTreeCollider::Collide(const AABBNoLeafTree* Tree, const Point& Box, co
 
 void dcOBBTreeCollider::_CollideTriBox(){
 	if (TriBoxOverlap()){
-		Contacts.AddItem(LeafIndex);
+		Contacts.push(LeafIndex);
 	}
 }
 
@@ -354,13 +346,13 @@ void dcOBBTreeCollider::_Collide(const AABBNoLeafNode* a){
 	if (!BoxBoxOverlap(a->mAABB.mExtents, a->mAABB.mCenter)) return;
 
 	if (a->HasLeaf()){
-		FETCH_LEAF((dword)a->GetPrimitive(), mR0to1, mT0to1);
+		FETCH_LEAF(a->GetPrimitive(), mR0to1, mT0to1);
 		_CollideTriBox();
 	}
 	else _Collide(a->GetPos());
 
 	if (a->HasLeaf2()){
-		FETCH_LEAF((dword)a->GetPrimitive2(), mR0to1, mT0to1);
+		FETCH_LEAF(a->GetPrimitive2(), mR0to1, mT0to1);
 		_CollideTriBox();
 	}
 	else _Collide(a->GetNeg());

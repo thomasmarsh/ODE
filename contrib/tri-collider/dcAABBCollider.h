@@ -7,21 +7,18 @@ class OPCODE_API dcAABBTreeCollider{
 	Point* LeafVerts[3];
 	udword LeafIndex;
 public:
-	dword BoxBoxTestCount;
-	dword BoxTriTestCount;
-
 	/* In */
-	const dcArray<Vertex>& Vertices;
-	const dcArray<dword>& Indices;
+	const dcVector3*& Vertices;
+	const int*& Indices;
 
 	/* In/Out */
-	dcVector<const AABBNoLeafNode*>* TCData;
+	dArray<const AABBNoLeafNode*>* TCData;
 
 	/* Out */
-	dcVector<dword> Contacts;
+	dArray<int> Contacts;
 
 	/* Constructor/destructor */
-	dcAABBTreeCollider(const dcArray<Vertex>& Vertices, const dcArray<dword>& Indices);
+	dcAABBTreeCollider(const dcVector3*& Vertices, const int*& Indices);
 	~dcAABBTreeCollider();
 
 	/* Collide */
