@@ -150,6 +150,8 @@ double dTimerTicksPerSecond()
 
 #if !defined(PENTIUM) && !defined(WIN32)
 
+#ifndef macintosh
+
 #include <sys/time.h>
 #include <unistd.h>
 
@@ -161,6 +163,21 @@ static inline void getClockCount (unsigned long cc[2])
   cc[0] = tv.tv_usec;
   cc[1] = tv.tv_sec;
 }
+
+#else // macintosh
+
+#include <MacTypes.h>
+#include <Timer.h>
+
+static inline void getClockCount (unsigned long cc[2])
+{
+  UnsignedWide ms;
+  Microseconds (&ms);
+  cc[1] = ms.lo / 1000000;
+  cc[0] = ms.lo - ( cc[1] * 1000000 );
+}
+
+#endif
 
 
 static inline void serialize()

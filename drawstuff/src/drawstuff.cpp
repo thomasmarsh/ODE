@@ -754,6 +754,8 @@ static Texture *ground_texture = 0;
 static Texture *wood_texture = 0;
 
 
+#ifndef macintosh
+
 void dsStartGraphics (int width, int height, dsFunctions *fn)
 {
   char *prefix = DEFAULT_PATH_TO_TEXTURES;
@@ -772,6 +774,29 @@ void dsStartGraphics (int width, int height, dsFunctions *fn)
   strcat (s,"/wood.ppm");
   wood_texture = new Texture (s);
 }
+
+#else // macintosh
+
+void dsStartGraphics (int width, int height, dsFunctions *fn)
+{
+   // All examples build into the same dir
+   char *prefix = "::::drawstuff:textures";
+   char *s = (char*) alloca (strlen(prefix) + 20);
+
+   strcpy (s,prefix);
+   strcat (s,":sky.ppm");
+   sky_texture = new Texture (s);
+
+   strcpy (s,prefix);
+   strcat (s,":ground.ppm");
+   ground_texture = new Texture (s);
+
+   strcpy (s,prefix);
+   strcat (s,":wood.ppm");
+   wood_texture = new Texture (s);
+}
+
+#endif
 
 
 void dsStopGraphics()
