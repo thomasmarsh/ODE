@@ -10,11 +10,16 @@ MAKEFILE_INC=../../build/Makefile.inc
 include $(MAKEFILE_INC)
 
 INCLUDE_PATHS = ../../include
-CPP_OPT=2
-FAST=1
-DEFINES=dDOUBLE
-# -DdNODEBUG
-# CPP_FLAGS=-malign-double -mpentiumpro -march=pentiumpro
+DEFINES=d$(DREAL)
+
+ifeq ($(BUILD_MODE),release)
+  CPP_OPT=2
+  FAST=1
+  DEFINES += dNODEBUG
+  # CPP_FLAGS=-malign-double -mpentiumpro -march=pentiumpro
+else
+  DEFINES += dDEBUG_ALLOC
+endif
 
 ifeq ($(PLATFORM),linux)
   DEFINES += PENTIUM

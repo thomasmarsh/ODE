@@ -19,7 +19,7 @@
  *                                                                       *
  *************************************************************************/
 
-// if the DEBUG_ALLOC macro is defined, the following tests are performed in
+// if the dDEBUG_ALLOC macro is defined, the following tests are performed in
 // the default allocator:
 //   - size > 0 for alloc and realloc
 //   - realloc and free operate on uncorrupted blocks
@@ -34,9 +34,7 @@
 #include "ode/memory.h"
 #include "ode/error.h"
 
-#define DEBUG_ALLOC
-
-#ifdef DEBUG_ALLOC
+#ifdef dDEBUG_ALLOC
 
 #include <string.h>
 
@@ -123,7 +121,7 @@ void dSetFreeHandler (dFreeFunction *fn)
 
 void * dAlloc (int size)
 {
-#ifdef DEBUG_ALLOC
+#ifdef dDEBUG_ALLOC
   if (size < 1) dDebug (0,"bad block size to Alloc()");
 
   num_blocks_alloced++;
@@ -158,7 +156,7 @@ void * dAlloc (int size)
 
 void * dRealloc (void *ptr, int oldsize, int newsize)
 {
-#ifdef DEBUG_ALLOC
+#ifdef dDEBUG_ALLOC
   if (ptr==0) dDebug (0,"Realloc() called with ptr==0");
   checkBlockOk (ptr,1);
   blockHeader *b = ((blockHeader*) ptr) - 1;
@@ -179,7 +177,7 @@ void * dRealloc (void *ptr, int oldsize, int newsize)
 void dFree (void *ptr, int size)
 {
   if (!ptr) return;
-#ifdef DEBUG_ALLOC
+#ifdef dDEBUG_ALLOC
   checkBlockOk (ptr,1);
   blockHeader *b = ((blockHeader*) ptr) - 1;
   if (b->size != size)
@@ -201,7 +199,7 @@ void dFree (void *ptr, int size)
 }
 
 
-#ifdef DEBUG_ALLOC
+#ifdef dDEBUG_ALLOC
 
 #include <stdio.h>
 
