@@ -104,7 +104,7 @@
 		#endif
 
 	// Down the hatch
-#ifdef MSVC
+#ifdef _MSC_VER
 	#pragma inline_depth( 255 )
 #endif
 
