@@ -175,6 +175,7 @@ static void MultiplyAdd1_8q1 (dReal *A, dReal *B, dReal *C, int q)
 }
 
 //****************************************************************************
+// the slow, but sure way
 
 // given lists of bodies and joints that form an island, perform a first
 // order timestep.

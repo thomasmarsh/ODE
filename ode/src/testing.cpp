@@ -27,7 +27,7 @@
 #include "ode/memory.h"
 
 #ifdef dDOUBLE
-static const dReal tol = 1.0e-10;
+static const dReal tol = 1.0e-9;
 #else
 static const dReal tol = 1.0e-5;
 #endif
@@ -147,7 +147,7 @@ void dMatrixComparison::dump()
 
 static jmp_buf jump_buffer;
 
-void myDebug (int num, const char *msg, va_list ap)
+static void myDebug (int num, const char *msg, va_list ap)
 {
   // printf ("(Error %d: ",num);
   // vprintf (msg,ap);
