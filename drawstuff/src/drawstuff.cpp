@@ -741,8 +741,8 @@ static int tnum = 0;			// current texture number
 
 void dsStartGraphics (int width, int height)
 {
-  sky_texture = new Texture (PATH_TO_TEXTURES "sky2.ppm");
-  ground_texture = new Texture (PATH_TO_TEXTURES "ground2.ppm");
+  sky_texture = new Texture (PATH_TO_TEXTURES "sky.ppm");
+  ground_texture = new Texture (PATH_TO_TEXTURES "ground.ppm");
   wood_texture = new Texture (PATH_TO_TEXTURES "wood.ppm");
 }
 
