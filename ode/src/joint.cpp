@@ -392,6 +392,39 @@ int dxJointLimitMotor::addLimot (dxJoint *joint,
       J2[srow+2] = -ax1[2];
     }
 
+    // linear limot torque decoupling step:
+    //
+    // if this is a linear limot (e.g. from a slider), we have to be careful
+    // that the linear constraint forces (+/- ax1) applied to the two bodies
+    // do not create a torque couple. in other words, the points that the
+    // constraint force is applied at must lie along the same ax1 axis.
+    // but why? surely a constraint-force torque couple will not create a
+    // *real* torque? sadly, the default ODE constraint solving mechanism
+    // will take the constraint J*v=c and treat c in the same way that an
+    // external force is treated (the user may not be using the more accurate
+    // post-step constraint projection method as it has a slight speed
+    // penalty). a torque couple will result in powered or limited
+    // slider-jointed free bodies from gaining angular momentum.
+    // anyway, the solution used here is to apply the constraint forces at
+    // the point halfway between the body centers. there is no penalty (other
+    // than an extra tiny bit of computation) in doing this adjustment.
+    // note that we only need to do this if the constraint connects two bodies.
+
+    dVector3 ltd;	// a torque: Linear Torque Decoupling vector
+    if (!rotational && joint->node[1].body) {
+      dVector3 c;
+      c[0]=REAL(0.5)*(joint->node[1].body->pos[0]-joint->node[0].body->pos[0]);
+      c[1]=REAL(0.5)*(joint->node[1].body->pos[1]-joint->node[0].body->pos[1]);
+      c[2]=REAL(0.5)*(joint->node[1].body->pos[2]-joint->node[0].body->pos[2]);
+      dCROSS (ltd,=,c,ax1);
+      info->J1a[srow+0] = ltd[0];
+      info->J1a[srow+1] = ltd[1];
+      info->J1a[srow+2] = ltd[2];
+      info->J2a[srow+0] = ltd[0];
+      info->J2a[srow+1] = ltd[1];
+      info->J2a[srow+2] = ltd[2];
+    }
+
     // if we're limited low and high simultaneously, the joint motor is
     // ineffective
     if (limit && (lostop == histop)) powered = 0;
@@ -427,8 +460,15 @@ int dxJointLimitMotor::addLimot (dxJoint *joint,
 	}
 	else {
 	  dBodyAddForce (joint->node[0].body,-fm*ax1[0],-fm*ax1[1],-fm*ax1[2]);
-	  if (joint->node[1].body)
+	  if (joint->node[1].body) {
 	    dBodyAddForce (joint->node[1].body,fm*ax1[0],fm*ax1[1],fm*ax1[2]);
+
+	    // linear limot torque decoupling step: refer to above discussion
+	    //@@@ verify the following torques and signs in the test suite
+	    dBodyAddTorque (joint->node[0].body,-fm*ltd[0],-fm*ltd[1],
+			    -fm*ltd[2]);
+	    dBodyAddTorque (joint->node[1].body,fm*ltd[0],fm*ltd[1],fm*ltd[2]);
+	  }
 	}
       }
     }
