@@ -386,7 +386,7 @@ static void dClosestLineBoxPoints (const dVector3 p1, const dVector3 p2,
   got_answer:
 
   // compute closest point on the line
-  for (int i=0; i<3; i++) lret[i] = p1[i] + t*tmp[i];	// note: tmp=p2-p1
+  for (i=0; i<3; i++) lret[i] = p1[i] + t*tmp[i];	// note: tmp=p2-p1
 
   // compute closest point on the box
   for (i=0; i<3; i++) {
@@ -395,7 +395,7 @@ static void dClosestLineBoxPoints (const dVector3 p1, const dVector3 p2,
     else if (tmp[i] > h[i]) tmp[i] = h[i];
   }
   dMULTIPLY0_331 (s,R,tmp);
-  for (int i=0; i<3; i++) bret[i] = s[i] + c[i];
+  for (i=0; i<3; i++) bret[i] = s[i] + c[i];
 }
 
 
