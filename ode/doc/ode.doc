@@ -45,7 +45,7 @@ This is the user guide for ODE version 0.039.
 Despite the low version number, ODE is reasonably mature and stable.
 
 
-@section{Current features}
+@section{Current Features}
 
 ODE is best for simulating @emph{articulated} rigid body structures.
 An articulated structure is created when rigid bodies of various shapes are
@@ -113,7 +113,7 @@ Here are the features:
 }
 
 
-@section{New in the 0.039 release}
+@section{New in the 0.039 Release}
 
 @list{
 @*	A triangular mesh geometry class, contributed by Erwin de Vries.
@@ -130,7 +130,7 @@ Here are the features:
 }
 
 
-@section{New in the 0.035 release}
+@section{New in the 0.035 Release}
 
 @list{
 @* A universal joint, generously contributed by Martin C. Martin.
@@ -157,7 +157,7 @@ Here are the features:
 }
 
 
-@section{New in the 0.03 release}
+@section{New in the 0.03 Release}
 
 @list{
 @* Multi-resolution hash table based collision space, that performs quick
@@ -195,7 +195,7 @@ Here are the features:
 }
 
 
-@section{New in the 0.025 release}
+@section{New in the 0.025 Release}
 
 @list{
 @* Numerous bug fixes, including contacts.
@@ -213,7 +213,7 @@ Here are the features:
 }
 
 
-@section{New in the 0.02 release}
+@section{New in the 0.02 Release}
 
 @list{
 @* New demo: a box and sphere stacker.
@@ -228,7 +228,7 @@ Here are the features:
 }
 
 
-@section{ODE's license}
+@section{ODE's License}
 
 ODE is Copyright @C 2001-2004 Russell L. Smith.
 All rights reserved.
@@ -251,14 +251,14 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the files
 @c{LICENSE.TXT} and @c{LICENSE-BSD.TXT} for more details.
 
 
-@section{The ODE community}
+@section{The ODE Community}
 
 Do you have questions or comments about ODE?
 Think you can help? Please @link{http://q12.org/mailman/listinfo/ode}{write to
 the ODE mailing list}.
 
 #############################################################################
-@chapter{How to install and use ODE}
+@chapter{How to Install and Use ODE}
 
 @section{Installing ODE}
 
@@ -320,7 +320,7 @@ ODE has been verified to build on at least the following platforms:
 @* Solaris 8 (Sparc R220).
 }
 
-@subsection{Building and running ODE tests on MacOS X}
+@subsection{Building and Running ODE Tests on MacOS X}
 
 ODE uses XWindows and OpenGL to render the scene being simulated. 
 In order to build the example you will need to install Apple X11
@@ -435,7 +435,7 @@ It is only @emph{collision detection} that cares about the detailed shape of
 the body.
 
 
-@subsection{Islands and disabled bodies}
+@subsection{Islands and Disabled Bodies}
 
 Bodies are connected to each other with joints.
 An ``island'' of bodies is a group that can not be pulled apart - in other
@@ -604,7 +604,7 @@ been introduced.
 The second is the constraint force mixing (CFM) value, that is described below.
 
 
-@subsection{Constraint force mixing (CFM)}
+@subsection{Constraint Force Mixing (CFM)}
 
 What follows is a somewhat technical description of the meaning of CFM.
 If you just want to know how it is used in practice then skip to the next
@@ -643,7 +643,7 @@ Using a positive value of @m{CFM} has the additional benefit of taking the
 system away from any singularity and thus improving the factorizer accuracy.
 
 
-@subsection{How to use ERP and CFM}
+@subsection{How To Use ERP and CFM}
 
 ERP and CFM can be independently set in many joints. They can be set in
 contact joints, in joint limits and various other places, to control the
@@ -748,7 +748,7 @@ A typical simulation will proceed like this:
 The various methods and approximations that are used in ODE are discussed
 here.
 
-@subsection{Friction approximation}
+@subsection{Friction Approximation}
 
 [We really need more pictures here.]
 
@@ -804,7 +804,7 @@ efficiency. There are currently two approximations to chose from:
 }
 
 #############################################################################
-@chapter{Data types and conventions}
+@chapter{Data Types and Conventions}
 
 @section{The basic data types}
 
@@ -946,6 +946,14 @@ dReal dWorldGetAutoDisableTime (dWorldID);
 }{
 Set and get the default auto-disable parameters for newly created bodies.
 See @secref{Automatic Enabling and Disabling} for a description of the auto-disable feature.
+The default parameters are:
+@list{
+@*	AutoDisableFlag = disabled
+@*	AutoDisableLinearThreshold = 0.01
+@*	AutoDisableAngularThreshold = 0.01
+@*	AutoDisableSteps = 10
+@*	AutoDisableTime = 0
+}
 }
 
 
@@ -987,9 +995,9 @@ memory leak checkers from complaining about ODE.
 }
 
 #############################################################################
-@chapter{Rigid body functions}
+@chapter{Rigid Body Functions}
 
-@section{Creating and destroying}
+@section{Creating and Destroying Bodies}
 
 @funcdef{
 dBodyID dBodyCreate (dWorldID);
@@ -1241,7 +1249,7 @@ been set on the world.
 }
 
 
-@section{Miscellaneous}
+@section{Miscellaneous Body Functions}
 
 @funcdef{
 void  dBodySetData (dBodyID, void *data);
@@ -1332,9 +1340,9 @@ Newly created bodies are always influenced by the world's gravity.
 }
 
 #############################################################################
-@chapter{Joint types and joint functions}
+@chapter{Joint Types and Joint Functions}
 
-@section{Creating and destroying}
+@section{Creating and Destroying Joints}
 
 @funcdef{
 dJointID dJointCreateBall (dWorldID, dJointGroupID);
@@ -1391,7 +1399,7 @@ but the joint group itself will not be destroyed.
 }
 
 
-@section{Miscellaneous}
+@section{Miscellaneous Joint Functions}
 
 @funcdef{
 void dJointAttach (dJointID, dBodyID body1, dBodyID body2);
@@ -1526,7 +1534,7 @@ bodies that already have contacts.
 
 @section{Joint parameter setting functions}
 
-@subsection{Ball and socket}
+@subsection{Ball and Socket}
 
 A ball and socket joint is shown in @fig{ball-and-socket}.
 
@@ -2202,7 +2210,7 @@ This is especially true with larger rigid body systems.
 
 Similar arguments apply to joint stops.
 
-@subsection{Parameter functions}
+@subsection{Parameter Functions}
 
 Here are the functions that set stop and motor parameters (as well as other
 kinds of parameters) on a joint:
@@ -2338,7 +2346,7 @@ that sacrifices some accuracy for a big gain in speed and memory.
 To use it, you simply call @func{dWorldStepFast1()} instead of
 @func{dWorldStep()}.
 
-The chart in @fig{} illustrates this speed advantage over the standard
+The chart in @fig{sf-graph1} illustrates this speed advantage over the standard
 @func{dWorldStep()} algorithm.
 
 	@figure{sf-graph1}{Speed advantage of StepFast.}{4in}
@@ -2525,7 +2533,7 @@ If @arg{doAutoDisable} is zero, auto-disabling is disabled.
 }
 
 #############################################################################
-@chapter{Support functions}
+@chapter{Support Functions}
 
 @section{Rotation functions}
 
@@ -2769,7 +2777,7 @@ document yet].
 [Document these later].
 
 #############################################################################
-@chapter{Collision detection}
+@chapter{Collision Detection}
 
 ODE has two main components: a dynamics simulation engine and a collision
 detection engine.
@@ -3164,7 +3172,7 @@ from a space, and you can not reposition the geoms within a space.
 Doing so will trigger a runtime error in the debug build of ODE.
 
 
-@subsection{Category and Collide bitfields}
+@subsection{Category and Collide Bitfields}
 
 Each geom has a ``category'' and ``collide'' bitfield that can be used
 to assist the space algorithms in determining which geoms should
@@ -3220,7 +3228,7 @@ The simpler scheme also makes it harder to determine what the
 categories should be for some situations.
 
 
-@subsection{Collision detection functions}
+@subsection{Collision Detection Functions}
 
 
 @funcdef{
@@ -3504,7 +3512,7 @@ depending on the internal implementation.
 
 @section{Geometry Classes}
 
-@subsection{Sphere class}
+@subsection{Sphere Class}
 
 @funcdef{
 dGeomID dCreateSphere (dSpaceID space, dReal radius);
@@ -3538,7 +3546,7 @@ negative depth, and points on the surface will have zero depth.
 }
 
 
-@subsection{Box class}
+@subsection{Box Class}
 
 @funcdef{
 dGeomID dCreateBox (dSpaceID space, dReal lx, dReal ly, dReal lz);
@@ -3573,7 +3581,7 @@ negative depth, and points on the surface will have zero depth.
 }
 
 
-@subsection{Plane class}
+@subsection{Plane Class}
 
 @funcdef{
 dGeomID dCreatePlane (dSpaceID space,
@@ -3614,7 +3622,7 @@ negative depth, and points on the surface will have zero depth.
 }
 
 
-@subsection{Capped cylinder class}
+@subsection{Capped Cylinder Class}
 
 @funcdef{
 dGeomID dCreateCCylinder (dSpaceID space, dReal radius, dReal length);
@@ -3661,7 +3669,7 @@ negative depth, and points on the surface will have zero depth.
 }
 
 
-@subsection{Ray class}
+@subsection{Ray Class}
 
 A ray is different from all the other geom classes in that it does not
 represent a solid object. It is an infinitely thin line that starts from
@@ -3730,7 +3738,7 @@ ray. The returned direction will be a unit length vector.
 }
 
 
-@subsection{Triangle Mesh class}
+@subsection{Triangle Mesh Class}
 
 A triangle mesh (TriMesh) represents an arbitrary collection of
 triangles.
@@ -3938,7 +3946,7 @@ a tri-mesh then these problems can be eased by intermittantly calling
 }
 
 
-@subsection{Geometry Transform class}
+@subsection{Geometry Transform Class}
 
 A geometry transform `T' is a geom that encapsulates another geom `E',
 allowing E to be positioned and rotated arbitrarily with respect to its
@@ -4258,7 +4266,7 @@ It returns +/- infinity in each direction.
 
 @section{Implementation notes}
 
-@subsection{Large environments}
+@subsection{Large Environments}
 
 Often the collision world will contain many objects that are part of
 the static environment, that are not associated with rigid bodies.
@@ -4267,7 +4275,7 @@ move and to precompute as much information as possible about these
 objects to save time.  For example, bounding boxes and internal
 collision data structures are precomputed.
 
-@subsection{Using a different collision library}
+@subsection{Using a Different Collision Library}
 
 Using ODE's collision detection is optional - an alternative collision
 library can be used as long as it can supply @c{dContactGeom} structures
@@ -4311,7 +4319,7 @@ notifications from ODE, you should define these types and functions
 appropriately.
 
 #############################################################################
-@chapter{How to make good simulations}
+@chapter{How To Make Good Simulations}
 
 [just notes for now]
 
@@ -4707,7 +4715,7 @@ they roll from one geometry object to another, or when they receive
 multiple contact points, then you may need to use a different contact
 friction model. This section explains the problem and the solution.
 
-@subsection{The problem}
+@subsection{The Problem}
 
 An example of such a system is shown in @fig{rollingcontact}, which
 shows a ball that has just rolled down a ramp and touched the ground.
@@ -4748,7 +4756,7 @@ Note that this problem does not occur if @c{mu} is set to zero,
 but this is not a helpful solution because we need some amount of
 friction to model the real world.
 
-@subsection{The solution}
+@subsection{The Solution}
 
 The solution is to use the @c{dContactApprox1} flag in the contact's
 surface mode field, and set @c{mu} to some appropriate value between 0
@@ -4766,7 +4774,7 @@ friction. Thus it is still possible that you may encounter some
 examples of non-physical behavior.
 
 #############################################################################
-@chapter{Known issues}
+@chapter{Known Issues}
 
 @list{
 @*	When assigning a mass to a rigid body, the center of mass must be
@@ -4776,7 +4784,7 @@ examples of non-physical behavior.
 }
 
 #############################################################################
-@chapter{ODE internals}
+@chapter{ODE Internals}
 
 [only notes for now]
 
@@ -4843,7 +4851,7 @@ The @c{d} prefix is used for structures that are part of the public
 interface.
 
 
-@subsection{Returned vectors}
+@subsection{Returned Vectors}
 
 There seem to be 2 ways of returning vectors in ODE, e.g.:
 @[
