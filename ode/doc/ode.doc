@@ -269,6 +269,9 @@ the ODE mailing list}.
 @b{Step 1:}
 Unpack the ODE archive.
 
+@b{Steps 2-4 (alternate):}
+If you're on windows and using MSVC, you may not have the microsoft compiler in your command line path, or may encounter other problems using make.  It may be easier to use these instructions from the @link{http://q12.org/cgi-bin/wiki.pl?Building_ODE_With_MSVC6}{wiki FAQ.}
+
 @b{Step 2:}
 Get the GNU @c{make} tool. Many Unix platforms come with this, although
 sometimes it is called @c{gmake}. I have provided a version of GNU make
