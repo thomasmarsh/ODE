@@ -23,11 +23,13 @@
 #ifndef _ODE_OBSTACK_H_
 #define _ODE_OBSTACK_H_
 
+#include "objects.h" 
+
 // each obstack Arena pointer points to a block of this many bytes
 #define dOBSTACK_ARENA_SIZE 16384
 
 
-struct dObStack {
+struct dObStack : public dBase {
   struct Arena {
     Arena *next;	// next arena in linked list
     int used;		// total number of bytes used in this arena, counting
