@@ -353,10 +353,41 @@ However some joints have local ERP values that control various aspects of
 the joint.
 
 
-@section{Constraint force mixing}
+@section{Constraint force mixing (CFM)}
 
-[ Still to write. ]
+Traditionally the constraint equation for every joint has the form
 
+	@center{@m{J * v = c}}
+
+where @m{v} is a velocity vector for the bodies involved, @m{J} is a
+``Jacobian'' matrix with one row for every degree of freedom the joint
+removes from the system, and @m{c} is a right hand side vector.
+At the next time step, a vector @m{lambda} is calculated (of the same
+size as @m{c}) such that the forces applied to the bodies to preserve the
+joint constraint are
+
+	@center{@m{force = J^T * lambda}}
+
+ODE adds a new twist.
+ODE's constraint equation has the form
+
+	@center{@m{J * v = c + CFM * lambda}}
+
+where @m{CFM} is a square diagonal matrix.
+@m{CFM} mixes the resulting constraint force in with the constraint that
+produces it.
+By using @m{CFM} you can model tyre slip, suspension, soft ground and other
+things.
+
+Solving for @m{lambda} gives
+
+	@center{@m{(J M^-^1 J^T + CFM/h) lambda = c/h}}
+
+Thus @m{CFM} simply adds to the diagonal of the original system matrix.
+This has the additional benefit of taking the system away from singularity
+and improving factorizer accuracy.
+
+[write more...]
 
 
 @section{Collision handling}
@@ -1070,7 +1101,9 @@ future ... but it works well in practice.
 }
 
 #############################################################################
-@chapter{Rotation functions}
+@chapter{Support functions}
+
+@section{Rotation functions}
 
 Rigid body orientations are represented with quaternions.
 A quaternion is four numbers [cos(theta/2) sin(theta/2)*u] where
@@ -1174,8 +1207,8 @@ Given an existing orientation @arg{q} and an angular velocity vector @arg{w},
 return in @arg{dq} the resulting dq/dt.
 }
 
-#############################################################################
-@chapter{Mass functions}
+#............................................................................
+@section{Mass functions}
 
 The mass parameters of a rigid body are described by a @c{dMass} structure:
 @code{@[
@@ -1264,14 +1297,14 @@ Given mass parameters for some object, adjust them to represent the object
 rotated by @arg{R} relative to the body frame.
 }
 
-#############################################################################
-@chapter{Math functions}
+#............................................................................
+@section{Math functions}
 
 [There are quite a lot of these, but they're not standardized enough to
 document yet].
 
-#############################################################################
-@chapter{Error and memory functions}
+#............................................................................
+@section{Error and memory functions}
 
 [Document these later].
 
@@ -1714,13 +1747,113 @@ Future interface enhancements:
 #############################################################################
 @chapter{How to make good simulations}
 
-[Just notes for now]
+[just notes for now]
+
+@section{Integrator accuracy and stability}
 
 @list{
-@*	Don't collide objects that are joined together.
-@*	Describe all factors that affect speed.
+@*	integrator will not give exact solution
+@*	what is stabilty
+@*	integrator types (exp & imp, order)
+@*	tradeoff between accuracy, stability and work
+}
+
+
+@section{Behavior may depend on step size}
+
+@list{
+@*	smaller step = more accurate, more stable
+@*	10*0.1 not the same as 5*0.2
+@*	tweak at final frame rate
+}
+
+
+@section{Making things go faster}
+
+What factors does execution speed depend on?
+Each joint removes a number of degrees of freedom (DOFs) from the system.
+For example the ball and socket removes three, and the hinge removes five.
+For each separate group of bodies connected by joints, where:
+@list{
+@*	@m{m_1} is the number of joints in the group,
+@*	@m{m_2} is the total number of DOFs removed by those joints, and
+@*	@m{n} is the number of bodies in the group,
+}
+then the computing time per step for the group is proportional to:
+	@center{@m{k_1 O(m_1) + k_2 O(m_2^3) + k_2 O(n)}}
+
+ODE currently relies on factorization of a ``system'' matrix that has one
+row/column for each DOF removed (this is where the @m{O(m_2^3)}
+comes from).
+In a 10 body chain that uses ball and socket joints, roughly 30-40% of the
+time is spent filling in this matrix, and 30-40% of the time is spent
+factorizing it.
+
+Thus, to speed up your simulation you might consider:
+@list{
+@*	Using less joints - often small bodies and their associated joints
+	can be replaced by purely kinematic ``fakes'' without harming
+	physical realism.
+@*	Replacing multiple joints with simpler alternatives.
+	This will become easier as more specialized joint types are defined.
+@*	Using less contacts.
+@*	Preferring frictionless or viscous friction contacts (that remove one
+	DOF) over Coulomb friction contacts (that remove three DOFs)
+	where possible.
+}
+In the future ODE will implement techniques that scale better with the number
+of joints.
+
+
+@section{Making things stable}
+
+@list{
+@*	stiff springs / stiff forces are bad.
+@*	hard constraints are good.
+@*	dependence on integration timestep.
 @*	Use powered joint, joint limits, built-in springs as much as possible,
 	avoid explicit forces.
+@*	mass ratios - e.g. a whip
+@*	if bodies move faster than is reasonable for the timestep
+@*	inetias with long axes
+}
+
+
+@section{Using constraint force mixing (CFM)}
+
+@list{
+@*	allow singular configurations
+@*	effects: jitter or strange forces due to error amplification,
+	LCP solver may go slow
+@*	allow compliant joints (this may be unwanted also)
+}
+
+
+@section{Avoiding singularities}
+
+@list{
+@*	Singularity occurs when there are more joints than needed to constrain
+	the bodies motions.
+@*	Multiple (incompatible) joints between bodies, esp joint + contact
+	(don't collide objects that are joined together).
+@*	increasing CFM
+@*	unintentional - box chain on floor, other assemblies
+@*	use minimum joints for correct behavior. use correct joints for desired
+	behavior
+@*	adding global CFM usually helps
+}
+
+
+@section{Other stuff}
+
+@list{
+@*	contact jitter when pushed out too far - soln: use softness
+@*	keep lengths and masses around 1
+@*	LCP solver takes a variable number of iterations (only
+	non-deterministic part). if it takes too long, increase global
+	CFM, prevent multiple contacts (or similar), and limit high
+	ratio of force magnitudes (tree grabbing problem) 
+@*	hinge limits outside +/- pi
 }
 
 #############################################################################
@@ -1773,43 +1906,6 @@ There are three fixes for this problem:
 @*	Increase ERP to make the problem less visible.
 @*	Do your own variable sized time stepping somehow.
 }
-
-
-@section{What factors does execution speed depend on?
-How do I make things go faster?}
-
-Each joint removes a number of degrees of freedom (DOFs) from the system.
-For example the ball and socket removes three, and the hinge removes five.
-For each separate group of bodies connected by joints, where:
-@list{
-@*	@m{m_1} is the number of joints in the group,
-@*	@m{m_2} is the total number of DOFs removed by those joints, and
-@*	@m{n} is the number of bodies in the group,
-}
-then the computing time per step for the group is proportional to:
-	@center{@m{k_1 O(m_1) + k_2 O(m_2^3) + k_2 O(n)}}
-
-ODE currently relies on factorization of a ``system'' matrix that has one
-row/column for each DOF removed (this is where the @m{O(m_2^3)}
-comes from).
-In a 10 body chain that uses ball and socket joints, roughly 30-40% of the
-time is spent filling in this matrix, and 30-40% of the time is spent
-factorizing it.
-
-Thus, to speed up your simulation you might consider:
-@list{
-@*	Using less joints - often small bodies and their associated joints
-	can be replaced by purely kinematic ``fakes'' without harming
-	physical realism.
-@*	Replacing multiple joints with simpler alternatives.
-	This will become easier as more specialized joint types are defined.
-@*	Using less contacts.
-@*	Preferring frictionless or viscous friction contacts (that remove one
-	DOF) over Coulomb friction contacts (that remove three DOFs)
-	where possible.
-}
-In the future ODE will implement techniques that scale better with the number
-of joints.
 
 #############################################################################
 @chapter{Known BUGS}
@@ -1874,10 +1970,10 @@ interior padding, only padding at the end.
 
 Thus: all 3x1 floating point vectors are stored as 4x1 vectors: (x,x,x,0).
 
-#############################################################################
-@chapter{Internals FAQ}
 
-@section{Why to some structures have a @c{dx} prefix and some have a
+@section{Internals FAQ}
+
+@subsection{Why to some structures have a @c{dx} prefix and some have a
 @c{d} prefix?}
 
 The @c{dx} prefix is used for internal structures that should never be

@@ -57,7 +57,8 @@ space.o: space.cpp ../../include/ode/space.h \
  ../../include/ode/common.h ../../include/ode/error.h \
  ../../include/ode/geom.h ../../include/ode/contact.h \
  ../../include/ode/memory.h geom_internal.h
-stack.o: stack.cpp stack.h ../../include/ode/error.h
+stack.o: stack.cpp stack.h ../../include/ode/error.h \
+ ../../include/ode/config.h
 step.o: step.cpp objects.h ../../include/ode/memory.h \
  ../../include/ode/common.h ../../include/ode/error.h \
  ../../include/ode/mass.h joint.h ../../include/ode/contact.h stack.h \

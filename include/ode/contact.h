@@ -33,11 +33,12 @@ enum {
   dContactMu2		= 0x001,
   dContactFDir1		= 0x002,
   dContactBounce	= 0x004,
-  dContactSoft		= 0x008,
-  dContactMotion1	= 0x010,
-  dContactMotion2	= 0x020,
-  dContactSlip1		= 0x040,
-  dContactSlip2		= 0x080
+  dContactSoftErp	= 0x008,
+  dContactSoftCfm	= 0x010,
+  dContactMotion1	= 0x020,
+  dContactMotion2	= 0x040,
+  dContactSlip1		= 0x080,
+  dContactSlip2		= 0x100
 };
 
 
@@ -49,8 +50,9 @@ typedef struct dSurfaceParameters {
   /* only defined if the corresponding flag is set in mode */
   dReal mu2;
   dReal bounce;
-  dReal bounceVel;
-  dReal soft;
+  dReal bounce_vel;
+  dReal soft_erp;
+  dReal soft_cfm;
   dReal motion1,motion2;
   dReal slip1,slip2;
 } dSurfaceParameters;

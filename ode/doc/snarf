@@ -269,7 +269,7 @@ sub main::Snarf1
   s/\@\*/<li>/g;		# list item
 
   # convert commands where the arguments do not contain formatted text
-  s/\@picture\{([^{]*?)\}/<img src=\"$1\">/gs;
+  s/\@picture\{([^{]*?)\}/<img border=1 src=\"$1\">/gs;
   s/\@date\{([^{]*?)\}/&TheDate($1)/ge;
   s/\@arg\{([^{]*?)\}/<font color=\"#0000ff\"><tt>$1<\/tt><\/font>/gs;
   s/\@header\{([^{]*?)\}/<tt>$1<\/tt>/gs;
