@@ -2,6 +2,8 @@
 TODO
 ----
 
+add more functionality to C++ interface - dMass, dSpace, dGeom, rotation?
+
 dAlloc() should take an arena parameters which is stored in dWorld.
 
 better stack implementation that is not so system dependent. but how will
