@@ -1,0 +1,19 @@
+The Open Dynamics Engine (ODE), Copyright (C) 2001,2002 Russell L. Smith.
+-------------------------------------------------------------------------
+
+ODE is a free, industrial quality library for simulating articulated
+rigid body dynamics - for example ground vehicles, legged creatures,
+and moving objects in VR environments. It is fast, flexible, robust
+and platform independent, with advanced joints, contact with friction,
+and built-in collision detection.
+
+This library is free software; you can redistribute it and/or modify
+it under the terms of the GNU Lesser General Public License - see the
+file LICENSE.TXT for details.
+
+  * Installation instructions are in the INSTALL file
+
+  * The ODE web pages are at http://q12.org/ode/
+
+  * The ODE documentation is in the file ode/doc/ode.html, or you
+    can view it on the web at http://q12.org/ode/ode-docs.html
