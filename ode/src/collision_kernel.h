@@ -81,7 +81,7 @@ enum {
 
 struct dxGeom : public dBase {
   int type;		// geom type number, set by subclass constructor
-  int flags;		// flags used by geom and space
+  int gflags;		// flags used by geom and space
   void *data;		// user-defined data pointer
   dBodyID body;		// dynamics body associated with this object (if any)
   dxGeom *body_next;	// next geom in body's linked list of associated geoms
@@ -115,9 +115,9 @@ struct dxGeom : public dBase {
   // the GEOM_AABB_BAD flag.
 
   void recomputeAABB() {
-    if (flags & GEOM_AABB_BAD) {
+    if (gflags & GEOM_AABB_BAD) {
       computeAABB();
-      flags &= ~GEOM_AABB_BAD;
+      gflags &= ~GEOM_AABB_BAD;
     }
   }
 

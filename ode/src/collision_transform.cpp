@@ -138,7 +138,7 @@ int dCollideTransform (dxGeom *o1, dxGeom *o2, int flags,
   // because computeFinalTx() will have already been called in
   // dxGeomTransform::computeAABB()
 
-  if (flags & GEOM_AABB_BAD) tr->computeFinalTx();
+  if (tr->gflags & GEOM_AABB_BAD) tr->computeFinalTx();
   tr->obj->pos = tr->final_pos;
   tr->obj->R = tr->final_R;
   tr->obj->body = o1->body;

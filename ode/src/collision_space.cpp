@@ -53,8 +53,8 @@ spaces
 static void collideAABBs (dxGeom *g1, dxGeom *g2,
 			  void *data, dNearCallback *callback)
 {
-  dIASSERT((g1->flags & GEOM_AABB_BAD)==0);
-  dIASSERT((g2->flags & GEOM_AABB_BAD)==0);
+  dIASSERT((g1->gflags & GEOM_AABB_BAD)==0);
+  dIASSERT((g2->gflags & GEOM_AABB_BAD)==0);
 
   // no contacts if both geoms on the same body, and the body is not 0
   if (g1->body == g2->body && g1->body) return;
@@ -99,9 +99,9 @@ void dGeomMoved (dxGeom *geom)
   // turning them into dirty geoms.
   dxSpace *parent = geom->parent_space;
 
-  while (parent && (geom->flags & GEOM_DIRTY)==0) {
+  while (parent && (geom->gflags & GEOM_DIRTY)==0) {
     CHECK_NOT_LOCKED (parent);
-    geom->flags |= GEOM_DIRTY | GEOM_AABB_BAD;
+    geom->gflags |= GEOM_DIRTY | GEOM_AABB_BAD;
     geom->spaceRemove();
     geom->spaceAdd (&parent->first);
     geom = parent;
@@ -111,7 +111,7 @@ void dGeomMoved (dxGeom *geom)
   // all the remaining dirty geoms must have their AABB_BAD flags set, to
   // ensure that their AABBs get recomputed
   while (geom) {
-    geom->flags |= GEOM_DIRTY | GEOM_AABB_BAD;
+    geom->gflags |= GEOM_DIRTY | GEOM_AABB_BAD;
     CHECK_NOT_LOCKED (geom->parent_space);
     geom = geom->parent_space;
   }
@@ -241,7 +241,7 @@ void dxSpace::add (dxGeom *geom)
   // new geoms are added to the front of the list and are always
   // considered to be dirty. as a consequence, this space and all its
   // parents are dirty too.
-  geom->flags |= GEOM_DIRTY | GEOM_AABB_BAD;
+  geom->gflags |= GEOM_DIRTY | GEOM_AABB_BAD;
   dGeomMoved (this);
 }
 
@@ -290,12 +290,12 @@ void dxSimpleSpace::cleanGeoms()
 {
   // compute the AABBs of all dirty geoms, and clear the dirty flags
   lock_count++;
-  for (dxGeom *g=first; g && (g->flags & GEOM_DIRTY); g=g->next) {
+  for (dxGeom *g=first; g && (g->gflags & GEOM_DIRTY); g=g->next) {
     if (IS_SPACE(g)) {
       ((dxSpace*)g)->cleanGeoms();
     }
     g->recomputeAABB();
-    g->flags &= (~(GEOM_DIRTY|GEOM_AABB_BAD));
+    g->gflags &= (~(GEOM_DIRTY|GEOM_AABB_BAD));
   }
   lock_count--;
 }
@@ -443,12 +443,12 @@ void dxHashSpace::cleanGeoms()
 {
   // compute the AABBs of all dirty geoms, and clear the dirty flags
   lock_count++;
-  for (dxGeom *g=first; g && (g->flags & GEOM_DIRTY); g=g->next) {
+  for (dxGeom *g=first; g && (g->gflags & GEOM_DIRTY); g=g->next) {
     if (IS_SPACE(g)) {
       ((dxSpace*)g)->cleanGeoms();
     }
     g->recomputeAABB();
-    g->flags &= (~(GEOM_DIRTY|GEOM_AABB_BAD));
+    g->gflags &= (~(GEOM_DIRTY|GEOM_AABB_BAD));
   }
   lock_count--;
 }

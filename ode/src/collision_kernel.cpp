@@ -183,8 +183,8 @@ dxGeom::dxGeom (dSpaceID _space, int is_placeable)
 
   // setup body vars. invalid type of -1 must be changed by the constructor.
   type = -1;
-  flags = GEOM_DIRTY | GEOM_AABB_BAD;
-  if (is_placeable) flags |= GEOM_PLACEABLE;
+  gflags = GEOM_DIRTY | GEOM_AABB_BAD;
+  if (is_placeable) gflags |= GEOM_PLACEABLE;
   data = 0;
   body = 0;
   body_next = 0;
@@ -216,7 +216,7 @@ dxGeom::dxGeom (dSpaceID _space, int is_placeable)
 dxGeom::~dxGeom()
 {
   if (parent_space) dSpaceRemove (parent_space,this);
-  if ((flags & GEOM_PLACEABLE) && !body) dFree (pos,sizeof(dxPosR));
+  if ((gflags & GEOM_PLACEABLE) && !body) dFree (pos,sizeof(dxPosR));
   bodyRemove();
 }
 
@@ -285,7 +285,7 @@ void *dGeomGetData (dxGeom *g)
 void dGeomSetBody (dxGeom *g, dxBody *b)
 {
   dAASSERT (g);
-  dUASSERT (g->flags & GEOM_PLACEABLE,"geom must be placeable");
+  dUASSERT (g->gflags & GEOM_PLACEABLE,"geom must be placeable");
   CHECK_NOT_LOCKED (g->parent_space);
 
   if (b) {
@@ -324,7 +324,7 @@ dBodyID dGeomGetBody (dxGeom *g)
 void dGeomSetPosition (dxGeom *g, dReal x, dReal y, dReal z)
 {
   dAASSERT (g);
-  dUASSERT (g->flags & GEOM_PLACEABLE,"geom must be placeable");
+  dUASSERT (g->gflags & GEOM_PLACEABLE,"geom must be placeable");
   CHECK_NOT_LOCKED (g->parent_space);
   if (g->body) {
     // this will call dGeomMoved (g), so we don't have to
@@ -342,7 +342,7 @@ void dGeomSetPosition (dxGeom *g, dReal x, dReal y, dReal z)
 void dGeomSetRotation (dxGeom *g, const dMatrix3 R)
 {
   dAASSERT (g && R);
-  dUASSERT (g->flags & GEOM_PLACEABLE,"geom must be placeable");
+  dUASSERT (g->gflags & GEOM_PLACEABLE,"geom must be placeable");
   CHECK_NOT_LOCKED (g->parent_space);
   if (g->body) {
     // this will call dGeomMoved (g), so we don't have to
@@ -358,7 +358,7 @@ void dGeomSetRotation (dxGeom *g, const dMatrix3 R)
 const dReal * dGeomGetPosition (dxGeom *g)
 {
   dAASSERT (g);
-  dUASSERT (g->flags & GEOM_PLACEABLE,"geom must be placeable");
+  dUASSERT (g->gflags & GEOM_PLACEABLE,"geom must be placeable");
   return g->pos;
 }
 
@@ -366,7 +366,7 @@ const dReal * dGeomGetPosition (dxGeom *g)
 const dReal * dGeomGetRotation (dxGeom *g)
 {
   dAASSERT (g);
-  dUASSERT (g->flags & GEOM_PLACEABLE,"geom must be placeable");
+  dUASSERT (g->gflags & GEOM_PLACEABLE,"geom must be placeable");
   return g->R;
 }
 
