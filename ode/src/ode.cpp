@@ -828,7 +828,7 @@ void dWorldStep (dWorldID w, dReal stepsize)
 #define DO(x)
 
 
-extern "C" void testDynamicsStuff()
+extern "C" void dTestDataStructures()
 {
   int i;
   DO(printf ("testDynamicsStuff()\n"));
