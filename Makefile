@@ -68,7 +68,14 @@ ODE_NEW_COLLISION_SRC = ode/src/collision_kernel.cpp \
 			ode/src/collision_util.cpp \
 			ode/src/collision_std.cpp \
 			ode/src/collision_space.cpp \
-			ode/src/collision_transform.cpp
+			ode/src/collision_transform.cpp \
+			ode/src/collision_quadtreespace.cpp
+ifdef OPCODE_DIRECTORY
+ODE_NEW_COLLISION_SRC +=ode/src/collision_trimesh.cpp \
+			ode/src/collision_trimesh_sphere.cpp \
+			ode/src/collision_trimesh_box.cpp \
+			ode/src/collision_trimesh_ray.cpp
+endif
 
 ODE_PREGEN_SRC = \
 	ode/src/fastldlt.c \
@@ -108,7 +115,14 @@ ODE_TEST_SRC_CPP = \
 	ode/test/test_space.cpp \
 	ode/test/test_I.cpp \
 	ode/test/test_step.cpp \
-	ode/test/test_friction.cpp
+	ode/test/test_friction.cpp \
+	ode/test/test_space_stress.cpp
+ifdef OPCODE_DIRECTORY
+ODE_TEST_SRC_CPP += \
+	ode/test/test_trimesh.cpp \
+	ode/test/test_moving_trimesh.cpp
+endif
+
 ODE_TEST_SRC_C = \
 	ode/test/test_chain1.c
 DRAWSTUFF_TEST_SRC_CPP = \
@@ -116,6 +130,13 @@ DRAWSTUFF_TEST_SRC_CPP = \
 
 CONFIGURATOR_SRC=configurator.c
 CONFIG_H=include/ode/config.h
+
+# support TriMesh/OPCODE on the compiler command line
+ifdef OPCODE_DIRECTORY
+DEFINES+=$(C_DEF)dTRIMESH_ENABLED
+INC_OPCODE=$(C_INC)$(OPCODE_DIRECTORY)
+OPCODE_LIB=$(OPCODE_DIRECTORY)/$(LIB_PREFIX)opcode$(LIB_SUFFIX)
+endif
 
 ##############################################################################
 # derived things
@@ -260,10 +281,10 @@ clean:
 	$(CC) $(C_FLAGS) $(C_INC)$(INCPATH) $(DEFINES) $(C_OPT)1 $(C_OUT)$@ $<
 
 %$(OBJ): %.cpp
-	$(CC) $(C_FLAGS) $(C_INC)$(INCPATH) $(DEFINES) $(C_OPT)$(OPT) $(C_OUT)$@ $<
+	$(CC) $(C_FLAGS) $(C_INC)$(INCPATH) $(INC_OPCODE) $(DEFINES) $(C_OPT)$(OPT) $(C_OUT)$@ $<
 
 %.exe: %$(OBJ)
-	$(CC) $(C_EXEOUT)$@ $< $(ODE_LIB) $(DRAWSTUFF_LIB) $(RESOURCE_FILE) $(LINK_OPENGL) $(LINK_MATH)
+	$(CC) $(C_EXEOUT)$@ $< $(ODE_LIB) $(OPCODE_LIB) $(DRAWSTUFF_LIB) $(RESOURCE_FILE) $(LINK_OPENGL) $(LINK_MATH)
 
 
 # windows specific rules

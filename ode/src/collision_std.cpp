@@ -1,6 +1,6 @@
 /*************************************************************************
  *                                                                       *
- * Open Dynamics Engine, Copyright (C) 2001,2002 Russell L. Smith.       *
+ * Open Dynamics Engine, Copyright (C) 2001-2003 Russell L. Smith.       *
  * All rights reserved.  Email: russ@q12.org   Web: www.q12.org          *
  *                                                                       *
  * This library is free software; you can redistribute it and/or         *
@@ -135,7 +135,7 @@ dReal dGeomSpherePointDepth (dGeomID g, dReal x, dReal y, dReal z)
 
 dxBox::dxBox (dSpaceID space, dReal lx, dReal ly, dReal lz) : dxGeom (space,1)
 {
-  dAASSERT (lx > 0 && ly > 0 && lz > 0);
+  dAASSERT (lx >= 0 && ly >= 0 && lz >= 0);
   type = dBoxClass;
   side[0] = lx;
   side[1] = ly;
@@ -454,6 +454,31 @@ void dGeomRayGet (dGeomID g, dVector3 start, dVector3 dir)
   dir[0] = g->R[0*4+2];
   dir[1] = g->R[1*4+2];
   dir[2] = g->R[2*4+2];
+}
+
+
+void dGeomRaySetParams (dxGeom *g, int FirstContact, int BackfaceCull)
+{
+  dUASSERT (g && g->type == dRayClass,"argument not a ray");
+
+  if (FirstContact){
+    g->gflags |= RAY_FIRSTCONTACT;
+  }
+  else g->gflags &= ~RAY_FIRSTCONTACT;
+
+  if (BackfaceCull){
+    g->gflags |= RAY_BACKFACECULL;
+  }
+  else g->gflags &= ~RAY_BACKFACECULL;
+}
+
+
+void dGeomRayGetParams (dxGeom *g, int *FirstContact, int *BackfaceCull)
+{
+  dUASSERT (g && g->type == dRayClass,"argument not a ray");
+
+  (*FirstContact) = ((g->gflags & RAY_FIRSTCONTACT) != 0);
+  (*BackfaceCull) = ((g->gflags & RAY_BACKFACECULL) != 0);
 }
 
 //****************************************************************************

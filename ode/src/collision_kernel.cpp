@@ -1,6 +1,6 @@
 /*************************************************************************
  *                                                                       *
- * Open Dynamics Engine, Copyright (C) 2001,2002 Russell L. Smith.       *
+ * Open Dynamics Engine, Copyright (C) 2001-2003 Russell L. Smith.       *
  * All rights reserved.  Email: russ@q12.org   Web: www.q12.org          *
  *                                                                       *
  * This library is free software; you can redistribute it and/or         *
@@ -35,6 +35,7 @@ for geometry objects
 #include "collision_util.h"
 #include "collision_std.h"
 #include "collision_transform.h"
+#include "collision_trimesh_internal.h"
 
 //****************************************************************************
 // helper functions for dCollide()ing a space with another geom
@@ -134,6 +135,11 @@ static void initColliders()
   setCollider (dRayClass,dBoxClass,&dCollideRayBox);
   setCollider (dRayClass,dCCylinderClass,&dCollideRayCCylinder);
   setCollider (dRayClass,dPlaneClass,&dCollideRayPlane);
+#ifdef dTRIMESH_ENABLED
+  setCollider (dTriMeshClass,dSphereClass,&dCollideSTL);
+  setCollider (dTriMeshClass,dBoxClass,&dCollideBTL);
+  setCollider (dTriMeshClass,dRayClass,&dCollideRTL);
+#endif
   setAllColliders (dGeomTransformClass,&dCollideTransform);
 }
 
@@ -183,7 +189,7 @@ dxGeom::dxGeom (dSpaceID _space, int is_placeable)
 
   // setup body vars. invalid type of -1 must be changed by the constructor.
   type = -1;
-  gflags = GEOM_DIRTY | GEOM_AABB_BAD;
+  gflags = GEOM_DIRTY | GEOM_AABB_BAD | GEOM_ENABLED;
   if (is_placeable) gflags |= GEOM_PLACEABLE;
   data = 0;
   body = 0;
@@ -462,6 +468,26 @@ unsigned long dGeomGetCollideBits (dxGeom *g)
   dAASSERT (g);
   return g->collide_bits;
 }
+
+
+void dGeomEnable (dxGeom *g)
+{
+	dAASSERT (g);
+	g->gflags |= GEOM_ENABLED;
+}
+
+void dGeomDisable (dxGeom *g)
+{
+	dAASSERT (g);
+	g->gflags &= ~GEOM_ENABLED;
+}
+
+int dGeomIsEnabled (dxGeom *g)
+{
+	dAASSERT (g);
+	return (g->gflags & GEOM_ENABLED) != 0;
+}
+
 
 //****************************************************************************
 // C interface that lets the user make new classes. this interface is a lot

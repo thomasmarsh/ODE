@@ -1,6 +1,6 @@
 /*************************************************************************
  *                                                                       *
- * Open Dynamics Engine, Copyright (C) 2001,2002 Russell L. Smith.       *
+ * Open Dynamics Engine, Copyright (C) 2001-2003 Russell L. Smith.       *
  * All rights reserved.  Email: russ@q12.org   Web: www.q12.org          *
  *                                                                       *
  * This library is free software; you can redistribute it and/or         *
@@ -50,6 +50,7 @@ typedef struct dGeomSpaceData {
 
 dSpaceID dSimpleSpaceCreate (int dummy);
 dSpaceID dHashSpaceCreate (int dummy);
+dSpaceID dQuadTreeSpaceCreate (int dummy, dVector3 Center, dVector3 Extents, int Depth);
 
 void dSpaceDestroy (dSpaceID);
 void dSpaceAdd (dSpaceID, dGeomID);

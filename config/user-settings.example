@@ -37,3 +37,16 @@ WINDOWS16=0
 #     leave it commented for all new development.
 
 #ODE_OLD_COLLISION=1
+
+# (6) If you want to use the TriList (triangle mesh) geometry class, you must
+#     have the OPCODE library installed somewhere. If this is the case then
+#     uncomment the following variable and set it to point to the directory
+#     where OPCODE is installed (note that you must have already compiled
+#     OPCODE, ODE's build system will not do that for you).
+#     See http://www.codercorner.com/Opcode.htm for more information about
+#     OPCODE. A recent version of OPCODE is provided in the ODE distribution
+#     in the OPCODE subdirectory. This code was originally written for and
+#     compiled on windows, but it has been ported so that it should compile
+#     under unix/gcc too. Your mileage may vary.
+
+#OPCODE_DIRECTORY=OPCODE
