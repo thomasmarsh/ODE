@@ -282,6 +282,7 @@ int dCollideSTL(dxGeom* g1, dxGeom* SphereGeom, int Flags, dContactGeom* Contact
 
 		int OutTriCount = 0;
 		for (int i = 0; i < TriCount; i++){
+			if (OutTriCount >= Flags) break;
 			const int& TriIndex = Triangles[i];
 
 			dVector3 dv[3];

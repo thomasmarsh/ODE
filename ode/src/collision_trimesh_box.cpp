@@ -422,6 +422,7 @@ int dCollideBTL(dxGeom* g1, dxGeom* BoxGeom, int Flags, dContactGeom* Contacts, 
 
 				// Shouldnt we remove some irrelevant points? We do not care for >3 contacts.
 				for (int j = 0; j < InContacts.Count; j++){
+					if (OutTriCount >= Flags) break;
 					dContactGeom* Contact = SAFECONTACT(Flags, Contacts, OutTriCount, Stride);
 
 					Contact->pos[0] = InContacts.Points[j][0];
