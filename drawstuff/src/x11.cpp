@@ -302,7 +302,6 @@ void dsPlatformSimLoop (int window_width, int window_height, dsFunctions *fn,
   glXMakeCurrent (display,win,glx_context);
 
   dsStartGraphics (window_width,window_height,fn);
-  if (fn->start) fn->start();
 
   fprintf (stderr,
 	   "\n"
@@ -315,6 +314,8 @@ void dsPlatformSimLoop (int window_width, int window_height, dsFunctions *fn,
 	   "   Ctrl-W : write frames to ppm files: frame/frameNNN.ppm\n"
 	   "   Ctrl-X : exit.\n"
 	   "\n",DS_VERSION >> 8,DS_VERSION & 0xff);
+
+  if (fn->start) fn->start();
 
   int frame = 1;
   run = 1;
