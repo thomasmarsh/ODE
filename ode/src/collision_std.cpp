@@ -201,9 +201,9 @@ dReal dGeomBoxPointDepth (dGeomID g, dReal x, dReal y, dReal z)
   p[1] = y - b->pos[1];
   p[2] = z - b->pos[2];
   dMULTIPLY1_331 (q,b->R,p);
-  dReal dx = b->side[0]*0.5 - dFabs(q[0]);
-  dReal dy = b->side[1]*0.5 - dFabs(q[1]);
-  dReal dz = b->side[2]*0.5 - dFabs(q[2]);
+  dReal dx = b->side[0]*REAL(0.5) - dFabs(q[0]);
+  dReal dy = b->side[1]*REAL(0.5) - dFabs(q[1]);
+  dReal dz = b->side[2]*REAL(0.5) - dFabs(q[2]);
   if (dx < dy) {
     if (dx < dz) return dx; else return dz;
   }
@@ -707,7 +707,7 @@ int dBoxBox (const dVector3 p1, const dMatrix3 R1,
 	     dVector3 normal, dReal *depth, int *return_code,
 	     int maxc, dContactGeom *contact, int skip)
 {
-  const dReal fudge_factor = 1.05;
+  const dReal fudge_factor = REAL(1.05);
   dVector3 p,pp,normalC;
   const dReal *normalR = 0;
   dReal A[3],B[3],R11,R12,R13,R21,R22,R23,R31,R32,R33,
