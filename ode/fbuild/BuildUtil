@@ -79,6 +79,7 @@ sub main::ofs2 # (M,N,skip)
   my $M = $_[0];
   my $N = $_[1];
   my $skip = $_[2];
+  $M = '0' if $M eq '-0';
   my $a = $M;
   $a .= '+' . $skip . $N if ($N > 0);
   substr ($a,0,2)='' if substr ($a,0,2) eq '0+';
