@@ -293,12 +293,14 @@ void dInternalStepIsland_x1 (dxWorld *world, dxBody **body, int nb,
 
   // if there are constraints, compute cforce
   if (m > 0) {
-    // create a constraint equation right hand side vector `c', and LCP low
-    // and high bound vectors.
+    // create a constraint equation right hand side vector `c', a constraint
+    // force mixing vector `cfm', and LCP low and high bound vectors.
     dReal *c = (dReal*) ALLOCA (m*sizeof(dReal));
+    dReal *cfm = (dReal*) ALLOCA (m*sizeof(dReal));
     dReal *lo = (dReal*) ALLOCA (m*sizeof(dReal));
     dReal *hi = (dReal*) ALLOCA (m*sizeof(dReal));
     dSetZero (c,m);
+    dSetZero (cfm,m);
     dSetValue (lo,m,-dInfinity);
     dSetValue (hi,m, dInfinity);
 
@@ -325,6 +327,7 @@ void dInternalStepIsland_x1 (dxWorld *world, dxBody **body, int nb,
 	Jinfo.J2a = 0;
       }
       Jinfo.c = c + ofs[i];
+      Jinfo.cfm = cfm + ofs[i];
       Jinfo.lo = lo + ofs[i];
       Jinfo.hi = hi + ofs[i];
       joint[i]->vtable->getInfo2 (joint[i],&Jinfo);
@@ -558,12 +561,14 @@ void dInternalStepIsland_x2 (dxWorld *world, dxBody **body, int nb,
 
   // if there are constraints, compute cforce
   if (m > 0) {
-    // create a constraint equation right hand side vector `c', and LCP low
-    // and high bound vectors.
+    // create a constraint equation right hand side vector `c', a constraint
+    // force mixing vector `cfm', and LCP low and high bound vectors.
     dReal *c = (dReal*) ALLOCA (m*sizeof(dReal));
+    dReal *cfm = (dReal*) ALLOCA (m*sizeof(dReal));
     dReal *lo = (dReal*) ALLOCA (m*sizeof(dReal));
     dReal *hi = (dReal*) ALLOCA (m*sizeof(dReal));
     dSetZero (c,m);
+    dSetZero (cfm,m);
     dSetValue (lo,m,-dInfinity);
     dSetValue (hi,m, dInfinity);
 
@@ -599,6 +604,7 @@ void dInternalStepIsland_x2 (dxWorld *world, dxBody **body, int nb,
       Jinfo.J2l = Jinfo.J1l + 8*info[i].m;
       Jinfo.J2a = Jinfo.J2l + 4;
       Jinfo.c = c + ofs[i];
+      Jinfo.cfm = cfm + ofs[i];
       Jinfo.lo = lo + ofs[i];
       Jinfo.hi = hi + ofs[i];
       joint[i]->vtable->getInfo2 (joint[i],&Jinfo);
