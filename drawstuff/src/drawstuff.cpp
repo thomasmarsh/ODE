@@ -845,7 +845,7 @@ static void drawGround()
   */
 
   const float gsize = 100.0f;
-  const float offset = -0.001f;
+  const float offset = 0; // -0.001f; ... polygon offsetting doesn't work well
 
   glBegin (GL_QUADS);
   glNormal3f (0,0,1);
@@ -1069,6 +1069,7 @@ static void setShadowDrawingMode()
     glColor3f (GROUND_R*SHADOW_INTENSITY,GROUND_G*SHADOW_INTENSITY,
 	       GROUND_B*SHADOW_INTENSITY);
   }
+  glDepthRange (0,0.9999);
 }
 
 
@@ -1162,6 +1163,7 @@ extern "C" void dsDrawBox (const float pos[3], const float R[12],
     drawBox (sides);
     glPopMatrix();
     glPopMatrix();
+    glDepthRange (0,1);
   }
 }
 
@@ -1195,7 +1197,9 @@ extern "C" void dsDrawSphere (const float pos[3], const float R[12],
 		 GROUND_B*SHADOW_INTENSITY);
     }
     glShadeModel (GL_FLAT);
+    glDepthRange (0,0.9999);
     drawSphereShadow (pos[0],pos[1],pos[2],radius);
+    glDepthRange (0,1);
   }
 }
 
@@ -1217,6 +1221,7 @@ extern "C" void dsDrawCylinder (const float pos[3], const float R[12],
     drawCylinder (length,radius,0);
     glPopMatrix();
     glPopMatrix();
+    glDepthRange (0,1);
   }
 }
 
@@ -1238,6 +1243,7 @@ extern "C" void dsDrawCappedCylinder (const float pos[3], const float R[12],
     drawCappedCylinder (length,radius);
     glPopMatrix();
     glPopMatrix();
+    glDepthRange (0,1);
   }
 }
 
