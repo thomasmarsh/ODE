@@ -1,13 +1,27 @@
+
+readme.txt
+
+Cylinder geometry class.
+
+New in this version:
+
+Cylinder class implemented as User Geometry Class so it now can be
+used with old and new ODE collision detection.
+
+Cylinder - Ray has been contributed by Olivier Michel.
+
+THE IDENTIFIER dCylinderClass HAS BEEN REPLACED BY dCylinderClassUser
+
+to avoid conflict with dCylinderClass in the enum definite in collision.h
+
+///////////////////////////////////////////////////////////////////////
 The dCylinder class includes the following collisions:
 
 Cylinder - Box
 Cylinder - Cylinder
 Cylinder - Sphere
-Cylinder - Plan
+Cylinder - Plane
 Cylinder - Ray (contributed by Olivier Michel)
-
-I also included Cylinder -  Tri-Mesh in my version of Triangle
-collider.
 
 Cylinder aligned along axis - Y when created. (Not like Capped
 Cylinder which aligned along axis - Z).
@@ -31,7 +45,7 @@ void dGeomCylinderGetParams (dGeomID cylinder,
 Return in radius and length the parameters of the given cylinder.
 
 Identification number of the class:
- dCylinderClass
+ dCylinderClassUser
 
  I do not include a function that sets inertia tensor for cylinder.
  One may use existing ODE functions dMassSetCappedCylinder or dMassSetBox.
@@ -40,4 +54,4 @@ Identification number of the class:
  
  ///////////////////////////////////////////////////////////////////////////
  Konstantin Slipchenko
-  October 9, 2002
+ February 5, 2002
