@@ -422,24 +422,36 @@ int dxJointLimitMotor::addRotationalLimot (dxJoint *joint,
       }
       info->cfm[row] = stop_cfm;
 
-      //@@@@@@@@@@@@ under test
       // deal with bounce
       if (bounce > 0) {
 	// calculate outgoing velocity (-ve for incoming contact)
-	dReal outgoing = dDOT(joint->node[0].body->avel,ax1);
+	dReal outgoing = -dDOT(joint->node[0].body->avel,ax1);
 	if (joint->node[1].body)
-	  outgoing -= dDOT(joint->node[1].body->avel,ax1);
+	  outgoing += dDOT(joint->node[1].body->avel,ax1);
 
-	// only apply bounce if the outgoing velocity is greater than the
-	// threshold, and if the resulting c[0] exceeds what we already have.
-	//	if (j->contact.surface.bounce_vel >= 0 &&
-	//	    (-outgoing) > j->contact.surface.bounce_vel) {
-
-	dReal newc = - bounce * outgoing;
-	if (newc > info->c[row]) info->c[row] = newc;
+	// only apply bounce if the velocity is incoming, and if the
+	// resulting c[] exceeds what we already have.
+	if (limit == 1) {
+	  // low limit
+	  if (outgoing < 0) {
+	    dReal newc = bounce * outgoing;
+	    if (newc < info->c[row]) {
+	      info->c[row] = newc;
+	      printf ("lo %f\n",outgoing);
+	    }
+	  }
+	}
+	else {
+	  // high limit - all those computations are reversed
+	  if (outgoing > 0) {
+	    dReal newc = bounce * outgoing;
+	    if (newc > info->c[row]) {
+	      info->c[row] = newc;
+	      printf ("hi %f\n",outgoing);
+	    }
+	  }
+	}
       }
-      //@@@@@@@@@@@@
-
     }
     return 1;
   }
