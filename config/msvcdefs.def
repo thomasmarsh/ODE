@@ -1,4 +1,3 @@
-LIBRARY ODE
 EXPORTS
 dAreConnected
 dAreConnectedExcluding
