@@ -1,5 +1,5 @@
 
-@title{Open Dynamics Engine v0.02 User Guide}
+@title{Open Dynamics Engine v0.03 User Guide}
 @subtitle{Russell Smith, @date{}}
 @author{Russell Smith, @date{}}
 
@@ -12,13 +12,17 @@
 #############################################################################
 @chapter{Introduction}
 
-The Open Dynamics Engine (ODE) is a free software library for the simulation
-of Rigid Body Dynamics.
-If this does not make much sense to you, check out
-@link{http://www.q12.org/ode/slides/slides.html}{What is a Physics SDK?}.
+The Open Dynamics Engine (ODE) is a free, industrial quality library for
+simulating articulated rigid body dynamics.
+For example, it is good for simulating ground vehicles, legged creatures,
+and moving objects in VR environments.
+It is fast, flexible and robust, and it has built-in collision detection.
 ODE is being developed by @link{http://www.q12.org}{Russell Smith}.
 
-The is the user guide for the second prototype release of ODE (version 0.02).
+If ``rigid body simulation'' does not make much sense to you, check out
+@link{http://www.q12.org/ode/slides/slides.html}{What is a Physics SDK?}.
+
+The is the user guide for the third prototype release of ODE (version 0.03).
 This release is to help continue testing the core algorithms and solidifying
 the API.
 There will probably only be a few (hopefully minor) changes to the API in
@@ -27,31 +31,36 @@ the future.
 
 @section{Current features}
 
-ODE is best for simulating @emph{articulated} rigid body structures,
-such as ground vehicles and legged creatures.
+ODE is best for simulating @emph{articulated} rigid body structures.
 An articulated structure is created when rigid bodies of various shapes are
 connected together with joints of various kinds.
-ODE can of course also simulate disconnected rigid bodies that just move
-around on their own and perhaps collide with each other, but it is not
-optimized for this case.
+Examples are ground vehicles (where the wheels are connected to the chassis)
+or legged creatures (where the legs are connected to the body).
 
-ODE is particularly good for simulating moving objects in non-static
+ODE is designed to be used in interactive or realtime simulation.
+It is particularly good for simulating moving objects in changable
 virtual reality environments.
-This is because it is fast, robust, stable, and the user has complete
+This is because it is fast, robust and stable, and the user has complete
 freedom to change the structure of the system even while the simulation
 is running.
+
+# ODE can of course also simulate disconnected rigid bodies that just move
+# around on their own and perhaps collide with each other, but it is not
+# optimized for this case.
+#    --- but it will be!
 
 ODE uses a highly stable integrator, so that the simulation errors should
 not grow out of control.
 The physical meaning of this is that the simulated system should not
-"explode" for no reason (believe me, this happens a lot if you are not
-careful).
+"explode" for no reason (believe me, this happens a lot with other simulators
+if you are not careful).
 ODE emphasizes speed and stability over physical accuracy.
 
 ODE has @emph{hard} contacts. This means that a special non-penetration
 constraint is used whenever two bodies collide.
-The alternative is to use springs to represent contacts, but this is
-difficult to do right and extremely error-prone.
+The alternative, used in many other simulators, is to use virtual springs to
+represent contacts.
+This is difficult to do right and extremely error-prone.
 
 ODE has a built-in collision detection system.
 However you can ignore it and do your own collision detection if you want to.
@@ -62,7 +71,8 @@ intersecting objects.
 Here are the features:
 @list{
 @*	Arbitrary mass distribution of the rigid bodies.
-@*	Current joint types: ball-and-socket, hinge, slider (prismatic).
+@*	Current joint types: ball-and-socket, hinge, slider (prismatic),
+	hinge-2.
 @*	Current collision primitives: sphere, box and plane.
 @*	Simulation method: The equations of motion are derived from a
 	Lagrange multiplier velocity based model due to Trinkle/Stewart and
@@ -73,7 +83,7 @@ Here are the features:
 @*	Contact and friction model: This is based on the Dantzig LCP solver
 	described by Baraff, although ODE implements a faster approximation
 	to the Coloumb friction model.
-@*	Has a native C interface (even though it is mostly written in C++).
+@*	Has a native C interface (even though ODE is mostly written in C++).
 @*	Has a C++ interface built on top of the C one.
 @*	Many unit tests, and more being written all the time.
 @*	Platform specific optimizations.
@@ -191,51 +201,103 @@ But in the meantime, please refer to Baraff's excellent
 A rigid body has various properties from the point of view of the simulation.
 Some properties change over time:
 @list{
-@*	Position vector (x,y,z) of a point of reference.
-	Currently the point of reference is the center of mass.
-@*	Linear velocity vector (vx,vy,vz)
-@*	Orientation, represented by a quaternion (qs,qx,qy,qz) or a 3x3
-	rotation matrix.
-@*	Angular velocity vector (wx,wy,wz)
+@*	Position vector (x,y,z) of the body's point of reference.
+	Currently the point of reference must correspond to the body's
+	center of mass.
+@*	Linear velocity of the point of reference, a vector (vx,vy,vz).
+@*	Orientation of a body, represented by a quaternion (qs,qx,qy,qz) or
+	a 3x3 rotation matrix.
+@*	Angular velocity vector (wx,wy,wz) which describes how the orientation
+	changes over time.
 
 }
-Other properties are usually constant over time:
+Other body properties are usually constant over time:
 @list{
-@*	Mass.
+@*	Mass of the body.
 @*	Position of the center of mass with respect to the point of reference.
 	In the current implementation the center of mass and the point of
 	reference must coincide.
 @*	Inertia matrix. This is a 3x3 matrix that describes how the body's
 	mass is distributed around the center of mass.
 }
+Conceptually each body has an x-y-z coordinate frame embedded in it, that moves
+and rotates with the body:
+
+		@center{@picture{pix/body.jpg}}
+
+The origin of this coordinate frame is the body's point of reference.
+Some values in ODE (vectors, matrices etc) are relative to the body
+coordinate frame, and others are relative to the global coordinate frame.
+
 Note that the @emph{shape} of a rigid body is not a dynamical properties
 (except insofar as it influences the various mass properties).
 It is only @emph{collision detection} that cares about the detailed shape of
 the body.
 
 
-@subsection{Force accumulators}
+@section{Integration}
+
+The process of simulating the rigid body system through time is called
+integration.
+Each integration step advances the current time by a given step size,
+adjusting the state of all the rigid bodies for the new time value.
+There are two main issues to consider when working with any integrator:
+@list{
+@*	How accurate is it? That is, how closely does the behavior of the
+	simulated system match what would happen in real life?
+@*	How stable is it? That is, will calculation errors ever cause
+	completely non-physical behavior of the simulated system?
+	(e.g. causing the system to "explode" for no reason).
+}
+ODE's current integrator is very stable, but not particularly accurate
+unless the step size is small.
+For most uses of ODE this is not a problem -- ODE's behavior still looks
+perfectly physical in almost all cases.
+However ODE should not be used for quantative engineering until this accuracy
+issue has been addressed in a future release.
+
+
+@section{Force accumulators}
 
 Between each integrator step the user can call functions to apply forces
 to the rigid body.
 These forces are added to "force accumulators" in the rigid body object.
 When the next integrator step happens, the sum of all the applied forces
-will be used.
+will be used to push the body around.
 The forces accumulators are set to zero after each integrator step.
 
 
-@section{Joints}
+@section{Joints and constraints}
 
-A joint constrains two bodies so that they can only have certain positions
+In real life a joint is something like a hinge, that is used to connect two
+objects.
+In ODE a joint is very similar: It is a relationship that is enforced between
+two bodies so that they can only have certain positions and orientations
 relative to each other.
-For example, a ball and socket joint constraints the "ball" of one body to
-be in the same location as the "socket" of another body.
+This relationship is called a @emph{constraint} -- the words @emph{joint} and
+@emph{constraint} are often used interchangably.
+The following picture shows three different constraint types:
 
-[Describe the different kinds of joints here, and their parameters].
+		@center{@picture{pix/joints.jpg}}
 
-The functions to set joint parameters all take global coordinates.
+The first is a ball and socket joint that constraints the ``ball'' of one
+body to be in the same location as the ``socket'' of another body.
+The second is a hinge joint that constraints the two parts of the
+hinge to be in the same location and to line up along the hinge axle.
+The third is a slider joint that constraints the ``piston'' and ``socket''
+to line up, and additionally constraints the two bodies to have the same
+orientation.
+
+Each time the integrator takes a step all the joints are allowed to apply
+@emph{constraint forces} to the bodies they affect.
+These forces are calculated such that the bodies move in such a way to
+preserve all the joint relationships.
+
+Each joint has a number of parameters controlling its geometry.
 An example is the position of the ball-and-socket point for a ball-and-socket
 joint.
+The functions to set joint parameters all take @emph{global} coordinates,
+not body-relative coordinates.
 A consequence of this is that the rigid bodies that a joint connects must be
 positioned correctly @emph{before} the joint is attached.
 
@@ -253,33 +315,48 @@ This is most useful with contact joints, which are added and remove from
 the world in groups every time step.
 
 
-@section{Joint error}
+@section{Joint error and the error reduction parameter}
 
 When a joint attaches two bodies, those bodies are required to have certain
-positions relative to each other [see the above description of what a joint
-actually is].
+positions and orientations relative to each other.
 However, it is possible for the bodies to be in positions where the joint
-constraint is not met. This "joint error" can happen in two ways:
+constraints are not met.
+This ``joint error'' can happen in two ways:
 @numlist{
 @*	If the user sets the position/orientation of one body without correctly
 	setting the position/orientation of the other body.
-@*	During the simulation errors can creep in that result in the bodies
-	pulling away from their required positions.
+@*	During the simulation, errors can creep in that result in the bodies
+	drifting away from their required positions.
 }
-There is a mechanism to reduce joint error.
-During each simulation step a special force is applied to bring the bodies
-back into correct alignment.
-This force is controlled by the error reduction parameter (erp), which has
-a value between 0 and 1.
-The erp parameter specifies what proportion of the joint error will be
+Here is an example of error in a ball and socket joint (where the ball and
+socket do not line up):
+
+		@center{@picture{pix/ball-and-socket-bad.jpg}}
+
+There is a mechanism to reduce joint error: during each simulation step each
+joint applies a special force to bring its bodies back into correct alignment.
+This force is controlled by the @emph{error reduction parameter} (ERP),
+which has a value between 0 and 1.
+
+The ERP specifies what proportion of the joint error will be
 fixed during the next simulation step.
-If erp=0 then no correcting force is applied and the bodies will eventually
+If ERP=0 then no correcting force is applied and the bodies will eventually
 drift apart as the simulation proceeds.
-If erp=1 then the simulation will attempt to fix all joint error during the
+If ERP=1 then the simulation will attempt to fix all joint error during the
 next time step.
-However, setting erp=1 is not recommended, as the joint error will not be
+However, setting ERP=1 is not recommended, as the joint error will not be
 completely fixed due to various internal approximations.
-A value of erp=0.2 to 0.5 is recommended (0.2 is the default).
+A value of ERP=0.1 to 0.8 is recommended (0.2 is the default).
+
+A global ERP value can be set that affects most joints in the simulation.
+However some joints have local ERP values that control various aspects of
+the joint.
+
+
+@section{Constraint force mixing}
+
+[ Still to write. ]
+
 
 
 @section{Collision handling}
@@ -344,57 +421,6 @@ A typical simulation will proceed like this:
 @section{Physics model}
 
 [Discuss the various methods and approximations that are used.]
-
-#############################################################################
-@chapter{Joint types}
-
-@section{Ball and socket}
-@section{Hinge}
-
-The angle of a hinge joint is the angle between the two bodies
-(or between the body and the static environment) measured around the hinge
-axis.
-The angle will be between -pi..pi, with zero corresponding to the initial
-position of the bodies.
-
-@section{Slider}
-
-The position of a slider joint is the extension of the slider, with zero
-corresponding to the initial position of the bodies.
-
-@section{Contact}
-
-
-
-@section{Hinge2}
-
-The hinge2 joint is the same as two hinges connected in series, with
-different hinge axes.
-An example is the steering wheel of a car, where one axis allows the wheel
-to be steered and the other axis allows the wheel to rotate.
-
-The hinge2 joint has an anchor point and two hinge axes.
-Axis 1 is specified relative to body 1 (this would be the steering axis if
-body 1 is the chassis).
-Axis 2 is specified relative to body 2 (this would be the wheel axis if
-body 2 is the wheel).
-
-Axis 1 can have limits and a motor, axis 2 can only have a motor.
-
-Axis 1 can function as a suspension axis, i.e. the constraint can be
-compressible along that axis.
-
-
-@section{General}
-
-Setting joint limits prevents movement of the joint beyond the given
-low/high position values.
-
-For joint motors: conceptually, the joint is actually constructed from a
-motor and a friction plate [need a diagram here].
-The speed of the motor and the maximum torque or force that can be exerted
-by the friction plate are both controllable.
-
 
 #############################################################################
 @chapter{Data types and conventions}
@@ -489,6 +515,17 @@ void dWorldGetGravity (dWorldID, dVector3 gravity);
 Set and get the world's global gravity vector. The units are m/s/s, so Earth's
 gravity vector would be (0,0,-9.81), assuming that +z is up.
 The default is no gravity, i.e. (0,0,0).
+}
+
+
+@funcdef{
+void dWorldSetERP (dWorldID, dReal erp);
+dReal dWorldGetERP (dWorldID);
+}{
+Set and get the global ERP value, that controls how much error correction is
+performed in each time step.
+Typical values are in the range 0.1--0.8.
+The default is 0.2.
 }
 
 
@@ -592,7 +629,9 @@ Utility functions.
 }
 
 #############################################################################
-@chapter{Joint functions}
+@chapter{Joint types and joint functions}
+
+@section{Creating and destroying}
 
 @funcdef{
 dJointID dJointCreateBall (dWorldID, dJointGroupID);
@@ -604,9 +643,9 @@ dJointID dJointCreateHinge2 (dWorldID, dJointGroupID);
 }{
 Create a new joint of a given type.
 The joint is initially in "limbo" (i.e. it has no effect on the simulation)
-because it does not connect any bodies.
+because it does not connect to any bodies.
 The joint group ID is 0 to allocate the joint normally.
-If it is nonzero the joint is allocated in a joint group.
+If it is nonzero the joint is allocated in the given joint group.
 The contact joint will be initialized with the given @struct{dContact}
 structure.
 }
@@ -656,104 +695,7 @@ body means the static environment.
 Setting both bodies to zero puts the joint into "limbo", i.e. it will
 have no effect on the simulation.
 
-Some joints, like hinge2 need to be attached to two bodies to work.
-}
-
-
-@funcdef{
-void dJointSetBallAnchor (dJointID, dReal x, dReal y, dReal z);
-void dJointSetHingeAnchor (dJointID, dReal x, dReal y, dReal z);
-void dJointSetHingeAxis (dJointID, dReal x, dReal y, dReal z);
-void dJointSetSliderAxis (dJointID, dReal x, dReal y, dReal z);
-void dJointSetHinge2Anchor (dJointID, dReal x, dReal y, dReal z);
-void dJointSetHinge2Axis1 (dJointID, dReal x, dReal y, dReal z);
-void dJointSetHinge2Axis2 (dJointID, dReal x, dReal y, dReal z);
-}{
-Set joint anchor and axis parameters.
-The anchor and axis must be set after the joint has been attached to bodies
-and those bodies have been correctly positioned.
-If the joint is not attached, this will do nothing.
-The default axis for all joints is (1,0,0).
-The axis that is set will be normalized to unit length, this is what
-@c{dJointGetAxis()} will return.
-
-When the anchor or axis is set, the current position of the attached
-bodies is examined and that position will be the zero angle/position when
-the joint angle/position is read.
-}
-
-
-@funcdef{
-void dJointGetBallAnchor (dJointID, dVector3 result);
-void dJointGetHingeAnchor (dJointID, dVector3 result);
-void dJointGetHingeAxis (dJointID, dVector3 result);
-void dJointGetSliderAxis (dJointID, dVector3 result);
-void dJointGetHinge2Anchor (dJointID, dVector3 result);
-void dJointGetHinge2Axis1 (dJointID, dVector3 result);
-void dJointGetHinge2Axis2 (dJointID, dVector3 result);
-}{
-Get joint anchor and axis parameters.
-If the system is out of alignment (i.e. there is some joint error) then
-anchor/axis values will be correct with respect to body 1 only (or body2 if
-you specified body 1 as 0).
-}
-
-
-@funcdef{
-void dJointSetHingeParam (dJointID, int parameter, dReal value);
-void dJointSetSliderParam (dJointID, int parameter, dReal value);
-void dJointSetHinge2Param (dJointID, int parameter, dReal value);
-}{
-Set limit / motor parameters for each joint type.
-The parameter numbers are:
-
-@constdef{dParamLoStop}{Low limit angle/position. Setting this to
-	@c{-dInfinity} turns off the low limit.}
-@constdef{dParamHiStop}{High limit angle/position. Setting this to
-	@c{dInfinity} turns off the high limit.}
-@constdef{dParamVel}{Motor velocity (angular or linear).}
-@constdef{dParamFMax}{Motor maximum force. Setting this to zero turns off the
-	motor.}
-@constdef{dParamFudgeFactor}{Fudge factor. Controls powering away from a stop.}
-@constdef{dParamBounce}{Limit bounce. Not yet implemented.}
-@constdef{dParamSoft}{Limit softness. Not yet implemented.}
-@constdef{dParamSuspensionErp}{Suspension error reduction parameter.
-	Currently this only works on the hinge2 joint.}
-@constdef{dParamSuspensionCfm}{Suspension constraint force mixing parameter.
-	Currently this only works on the hinge2 joint.}
-
-These parameter names can be followed by a digit >= 2 to indicate the second,
-third etc set of parameters, e.g. for the second joint limit, the second
-suspension axis etc.
-
-If the low stop < the high stop then the stop functions will do nothing.
-For rotational joints, stops outside the range -pi..pi will be ineffective.
-
-The hinge2 joint has parameters for axis 1 and axis 2 (the steering and wheel
-axes).
-
-If a particular parameter is not implemented by a given joint, setting it
-will have no effect.
-}
-
-@funcdef{
-dReal dJointGetHingeParam (dJointID, int parameter);
-dReal dJointGetHingeAngle (dJointID);
-dReal dJointGetHingeAngleRate (dJointID);
-dReal dJointGetSliderPosition (dJointID);
-dReal dJointGetSliderPositionRate (dJointID);
-dReal dJointGetSliderParam (dJointID, int parameter);
-dReal dJointGetHinge2Param (dJointID, int parameter);
-dReal dJointGetHinge2Angle1 (dJointID);
-dReal dJointGetHinge2Angle1Rate (dJointID);
-dReal dJointGetHinge2Angle2Rate (dJointID);
-}{
-Get the limit / motor parameters.
-Get the joint angle / position and the time derivative of this value.
-Returned angles / positions of zero correspond to the initial position.
-
-There are no functions to set joint angle/position (and rates) directly,
-instead you must set the corresponding body positions and velocities.
+Some joints, like hinge-2 need to be attached to two bodies to work.
 }
 
 
@@ -765,7 +707,160 @@ a joint, otherwise return 0.
 }
 
 
-@section{Contact}
+
+@section{Joint parameter setting functions}
+
+@subsection{Ball and socket}
+
+A ball and socket joint looks like this:
+
+		@center{@picture{pix/ball-and-socket.jpg}}
+
+@funcdef{
+void dJointSetBallAnchor (dJointID, dReal x, dReal y, dReal z);
+}{
+Set the joint anchor point.
+}
+
+@funcdef{
+void dJointGetBallAnchor (dJointID, dVector3 result);
+}{
+Get the joint anchor point.
+}
+
+
+@subsection{Hinge}
+
+A hinge joint looks like this:
+
+		@center{@picture{pix/hinge.jpg}}
+
+
+@funcdef{
+void dJointSetHingeAnchor (dJointID, dReal x, dReal y, dReal z);
+void dJointSetHingeAxis (dJointID, dReal x, dReal y, dReal z);
+}{
+Set hinge anchor and axis parameters.
+}
+
+
+@funcdef{
+void dJointGetHingeAnchor (dJointID, dVector3 result);
+void dJointGetHingeAxis (dJointID, dVector3 result);
+}{
+Get hinge anchor and axis parameters.
+}
+
+
+@funcdef{
+dReal dJointGetHingeAngle (dJointID);
+dReal dJointGetHingeAngleRate (dJointID);
+}{
+Get the hinge angle and the time derivative of this value.
+The angle is measured between the two bodies, or between the body and
+the static environment.
+The angle will be between -pi..pi.
+
+When the hinge anchor or axis is set, the current position of the attached
+bodies is examined and that position will be the zero angle.
+}
+
+
+
+@subsection{Slider}
+
+A slider joint looks like this:
+
+		@center{@picture{pix/slider.jpg}}
+
+@funcdef{
+void dJointSetSliderAxis (dJointID, dReal x, dReal y, dReal z);
+}{
+Set the slider axis parameter.
+}
+
+
+@funcdef{
+void dJointGetSliderAxis (dJointID, dVector3 result);
+}{
+Get the slider axis parameter.
+}
+
+
+@funcdef{
+dReal dJointGetSliderPosition (dJointID);
+dReal dJointGetSliderPositionRate (dJointID);
+}{
+Get the slider linear position (i.e. the slider's ``extension'') and the time
+derivative of this value.
+
+When the axis is set, the current position of the attached bodies is
+examined and that position will be the zero position.
+}
+
+
+@subsection{Hinge-2}
+
+A hinge-2 joint looks like this:
+
+		@center{@picture{pix/hinge2.jpg}}
+
+The hinge-2 joint is the same as two hinges connected in series, with
+different hinge axes.
+An example, shown in the above picture is the steering wheel of a car,
+where one axis allows the wheel to be steered and the other axis allows
+the wheel to rotate.
+
+The hinge-2 joint has an anchor point and two hinge axes.
+Axis 1 is specified relative to body 1 (this would be the steering axis if
+body 1 is the chassis).
+Axis 2 is specified relative to body 2 (this would be the wheel axis if
+body 2 is the wheel).
+
+Axis 1 can have joint limits and a motor, axis 2 can only have a motor.
+
+Axis 1 can function as a suspension axis, i.e. the constraint can be
+compressible along that axis.
+
+
+
+@funcdef{
+void dJointSetHinge2Anchor (dJointID, dReal x, dReal y, dReal z);
+void dJointSetHinge2Axis1 (dJointID, dReal x, dReal y, dReal z);
+void dJointSetHinge2Axis2 (dJointID, dReal x, dReal y, dReal z);
+}{
+Set hinge-2 anchor and axis parameters.
+Axis 1 and axis 2 must not lie along the same line.
+}
+
+
+@funcdef{
+void dJointGetHinge2Anchor (dJointID, dVector3 result);
+void dJointGetHinge2Axis1 (dJointID, dVector3 result);
+void dJointGetHinge2Axis2 (dJointID, dVector3 result);
+}{
+Get hinge-2 anchor and axis parameters.
+}
+
+
+@funcdef{
+dReal dJointGetHinge2Angle1 (dJointID);
+dReal dJointGetHinge2Angle1Rate (dJointID);
+dReal dJointGetHinge2Angle2Rate (dJointID);
+}{
+Get the hinge-2 angles (around axis 1 and axis 2) and the time derivatives
+of these values.
+
+When the anchor or axis is set, the current position of the attached
+bodies is examined and that position will be the zero angles.
+}
+
+
+@subsection{Contact}
+
+A contact joint looks like this:
+
+		@center{@picture{pix/contact.jpg}}
 
 When a contact joint is created, a @c{dContact} structure must be supplied.
 This has the following definition:
@@ -806,8 +901,12 @@ It has the following members:
 		in other words the bodies will bounce off each other.
 		The exact amount of bouncyness is controlled by the
 		@c{bounce} parameter.}
-	@constdef{dContactSoft}{If set, the contact surface is soft.
-		[this needs more description].}
+	@constdef{dContactSoftERP}{If set, the error reduction parameter of
+		the contact normal can be set with the @c{soft_erp} parameter.
+		This is useful to make surfaces soft.}
+	@constdef{dContactSoftCfm}{If set, the constraint force mixing
+		parameter of the contact normal can be set with the
+		@c{soft_cfm} parameter. This is useful to make surfaces soft.}
 	@constdef{dContactMotion1}{If set, the contact surface is assumed to
 		be moving independently of the motion of the bodies.
 		This is kind of like a conveyor belt running over the surface.
@@ -837,12 +936,15 @@ It has the following members:
 	0 means the surfaces are not bouncy at all, 1 is maximum bouncyness.
 	This is only defined if the corresponding flag is set is @c{mode}.
 
-@*	@c{dReal bounceVel} : The minimum incoming velocity necessary for
+@*	@c{dReal bounce_vel} : The minimum incoming velocity necessary for
 	bounce (in m/s). Incoming velocities below this will effectively have
 	a bounce parameter of 0.
 	This is only defined if the corresponding flag is set is @c{mode}.
 
-@*	@c{dReal soft} : Contact softness parameter.
+@*	@c{dReal soft_erp} : Contact normal ``softness'' parameter.
+	This is only defined if the corresponding flag is set is @c{mode}.
+
+@*	@c{dReal soft_cfm} : Contact normal ``softness'' parameter.
 	This is only defined if the corresponding flag is set is @c{mode}.
 
 @*	@c{dReal motion1,motion2} : Surface velocity in friction directions
@@ -851,6 +953,84 @@ It has the following members:
 
 @*	@c{dReal slip1,slip2} : First order slip in friction directions 1/2.
 	This is only defined if the corresponding flag is set is @c{mode}.
+}
+
+
+@section{General}
+
+The joint geometry parameter setting functions should only be called after
+the joint has been attached to bodies, and those bodies have been correctly
+positioned, otherwise the joint may not be initialised correctly.
+If the joint is not already attached, these functions will do nothing.
+
+For the parameter getting functions, if the system is out of alignment
+(i.e. there is some joint error) then the anchor/axis values will be correct
+with respect to body 1 only (or body 2 if you specified body 1 as 0 in the
+attach function).
+
+The default anchor for all joints is (0,0,0).
+The default axis for all joints is (1,0,0).
+
+When an axis is set it will be normalized to unit length.
+The adjusted axis is what the axis getting functions will return.
+
+
+When measuring a joint angle or position, a value of zero corresponds to the
+initial position of the bodies relative to each other.
+
+Note that there are no functions to set joint angles or positions (or their
+rates) directly, instead you must set the corresponding body positions and
+velocities.
+
+Setting joint limits prevents movement of the joint beyond the given
+low/high position values.
+
+For joint motors: conceptually, the joint is actually constructed from a
+motor and a friction plate [need a diagram here].
+The speed of the motor and the maximum torque or force that can be exerted
+by the friction plate are both controllable.
+
+
+@section{Limit and motor parameters}
+
+@funcdef{
+void dJointSetHingeParam (dJointID, int parameter, dReal value);
+void dJointSetSliderParam (dJointID, int parameter, dReal value);
+void dJointSetHinge2Param (dJointID, int parameter, dReal value);
+dReal dJointGetHingeParam (dJointID, int parameter);
+dReal dJointGetSliderParam (dJointID, int parameter);
+dReal dJointGetHinge2Param (dJointID, int parameter);
+}{
+Set/get limit/motor parameters for each joint type.
+The parameter numbers are:
+
+@constdef{dParamLoStop}{Low limit angle/position. Setting this to
+	@c{-dInfinity} turns off the low limit.}
+@constdef{dParamHiStop}{High limit angle/position. Setting this to
+	@c{dInfinity} turns off the high limit.}
+@constdef{dParamVel}{Motor velocity (angular or linear).}
+@constdef{dParamFMax}{Motor maximum force. Setting this to zero turns off the
+	motor.}
+@constdef{dParamFudgeFactor}{Fudge factor. Controls powering away from a stop.}
+@constdef{dParamBounce}{Limit bounce. Not yet implemented.}
+@constdef{dParamSoft}{Limit softness. Not yet implemented.}
+@constdef{dParamSuspensionERP}{Suspension error reduction parameter.
+	Currently this only works on the hinge-2 joint.}
+@constdef{dParamSuspensionCfm}{Suspension constraint force mixing parameter.
+	Currently this only works on the hinge-2 joint.}
+
+These parameter names can be followed by a digit >= 2 to indicate the second,
+third etc set of parameters, e.g. for the second joint limit, the second
+suspension axis etc.
+
+If the low stop < the high stop then the stop functions will do nothing.
+For rotational joints, stops outside the range -pi..pi will be ineffective.
+
+The hinge-2 joint has parameters for axis 1 and axis 2 (the steering and wheel
+axes).
+
+If a particular parameter is not implemented by a given joint, setting it
+will have no effect.
 }
 
 #############################################################################
