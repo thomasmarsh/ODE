@@ -90,9 +90,15 @@ inline dReal dDOT44(dReal *a, dReal *b)
 
 
 /* compute the distance between two 3-vectors (oops, C++!) */
-inline dReal dDistance (dVector3 a, dVector3 b)
+#ifdef __cplusplus
+inline dReal dDISTANCE (dVector3 a, dVector3 b)
   { return dSqrt( (a[0]-b[0])*(a[0]-b[0]) + (a[1]-b[1])*(a[1]-b[1]) +
 		   (a[2]-b[2])*(a[2]-b[2]) ); }
+#else
+#define dDISTANCE(a,b) \
+ (dSqrt( ((a)[0]-(b)[0])*((a)[0]-(b)[0]) + ((a)[1]-(b)[1])*((a)[1]-(b)[1]) + \
+	 ((a)[2]-(b)[2])*((a)[2]-(b)[2]) ))
+#endif
 
 
 /* normalize 3x1 and 4x1 vectors (i.e. scale them to unit length) */
@@ -155,6 +161,36 @@ void dPlaneSpace (dVector3 n, dVector3 p, dVector3 q);
   (A)[9] op dDOT((B+8),(C+4)); \
   (A)[10] op dDOT((B+8),(C+8));
 
+#ifdef __cplusplus
+
+inline void dMULTIPLY0_331(dReal *A, dReal *B, dReal *C)
+  { dMULTIPLYOP0_331(A,=,B,C) }
+inline void dMULTIPLY1_331(dReal *A, dReal *B, dReal *C)
+  { dMULTIPLYOP1_331(A,=,B,C) }
+inline void dMULTIPLY0_133(dReal *A, dReal *B, dReal *C)
+  { dMULTIPLYOP0_133(A,=,B,C) }
+inline void dMULTIPLY0_333(dReal *A, dReal *B, dReal *C)
+  { dMULTIPLYOP0_333(A,=,B,C) }
+inline void dMULTIPLY1_333(dReal *A, dReal *B, dReal *C)
+  { dMULTIPLYOP1_333(A,=,B,C) }
+inline void dMULTIPLY2_333(dReal *A, dReal *B, dReal *C)
+  { dMULTIPLYOP2_333(A,=,B,C) }
+
+inline void dMULTIPLYADD0_331(dReal *A, dReal *B, dReal *C)
+  { dMULTIPLYOP0_331(A,+=,B,C) }
+inline void dMULTIPLYADD1_331(dReal *A, dReal *B, dReal *C)
+  { dMULTIPLYOP1_331(A,+=,B,C) }
+inline void dMULTIPLYADD0_133(dReal *A, dReal *B, dReal *C)
+  { dMULTIPLYOP0_133(A,+=,B,C) }
+inline void dMULTIPLYADD0_333(dReal *A, dReal *B, dReal *C)
+  { dMULTIPLYOP0_333(A,+=,B,C) }
+inline void dMULTIPLYADD1_333(dReal *A, dReal *B, dReal *C)
+  { dMULTIPLYOP1_333(A,+=,B,C) }
+inline void dMULTIPLYADD2_333(dReal *A, dReal *B, dReal *C)
+  { dMULTIPLYOP2_333(A,+=,B,C) }
+
+#else
+
 #define dMULTIPLY0_331(A,B,C) dMULTIPLYOP0_331(A,=,B,C)
 #define dMULTIPLY1_331(A,B,C) dMULTIPLYOP1_331(A,=,B,C)
 #define dMULTIPLY0_133(A,B,C) dMULTIPLYOP0_133(A,=,B,C)
@@ -169,29 +205,8 @@ void dPlaneSpace (dVector3 n, dVector3 p, dVector3 q);
 #define dMULTIPLYADD1_333(A,B,C) dMULTIPLYOP1_333(A,+=,B,C)
 #define dMULTIPLYADD2_333(A,B,C) dMULTIPLYOP2_333(A,+=,B,C)
 
+#endif
 
-/*
-C++ inline versions of the above, with only `='
-
-inline void dMultiply0_331 (dReal *A, dReal *B, dReal *C)
-  { (A)[0] = dDOT(B,C); (A)[1] = dDOT(B+4,C); (A)[2] = dDOT(B+8,C); }
-inline void dMultiply1_331 (dReal *A, dReal *B, dReal *C)
-  { (A)[0] = dDOT41(B,C); (A)[1] = dDOT41(B+1,C); (A)[2] = dDOT41(B+2,C); }
-inline void dMultiply0_133 (dReal *A, dReal *B, dReal *C)
-  { (A)[0] = dDOT14(B,C); (A)[1] = dDOT14(B,C+1); (A)[2] = dDOT14(B,C+2); }
-inline void dMultiply0_333 (dReal *A, dReal *B, dReal *C)
-{
-  (A)[0]=dDOT14(B,C); (A)[1]=dDOT14(B,C+1); (A)[2]=dDOT14(B,C+2);
-  (A)[4]=dDOT14(B+4,C); (A)[5]=dDOT14(B+4,C+1); (A)[6]=dDOT14(B+4,C+2);
-  (A)[8]=dDOT14(B+8,C); (A)[9]=dDOT14(B+8,C+1); (A)[10]=dDOT14(B+8,C+2);
-}
-inline void dMultiply2_333 (dReal *A, dReal *B, dReal *C)
-{
-  (A)[0] = dDOT(B,C); (A)[1] = dDOT(B,C+4); (A)[2] = dDOT(B,C+8);
-  (A)[4] = dDOT(B+4,C); (A)[5] = dDOT(B+4,C+4); (A)[6] = dDOT(B+4,C+8);
-  (A)[8] = dDOT(B+8,C); (A)[9] = dDOT(B+8,C+4); (A)[10] = dDOT(B+8,C+8);
-}
-*/
 
 #ifdef __cplusplus
 }
