@@ -350,26 +350,51 @@ A typical simulation will proceed like this:
 
 @section{Ball and socket}
 @section{Hinge}
-@section{Slider}
-@section{Contact}
-@section{RMotor}
 
-The angle of the motor can be read out.
+The angle of a hinge joint is the angle between the two bodies
+(or between the body and the static environment) measured around the hinge
+axis.
 The angle will be between -pi..pi, with zero corresponding to the initial
 position of the bodies.
 
-@section{Hinge-2}
+@section{Slider}
 
-The hinge-2 joint is the same as two hinges connected in series, with
+The position of a slider joint is the extension of the slider, with zero
+corresponding to the initial position of the bodies.
+
+@section{Contact}
+
+
+
+@section{Hinge2}
+
+The hinge2 joint is the same as two hinges connected in series, with
 different hinge axes.
 An example is the steering wheel of a car, where one axis allows the wheel
 to be steered and the other axis allows the wheel to rotate.
 
-The hinge-2 joint has an anchor point and two hinge axes.
+The hinge2 joint has an anchor point and two hinge axes.
 Axis 1 is specified relative to body 1 (this would be the steering axis if
 body 1 is the chassis).
 Axis 2 is specified relative to body 2 (this would be the wheel axis if
 body 2 is the wheel).
+
+Axis 1 can have limits and a motor, axis 2 can only have a motor.
+
+Axis 1 can function as a suspension axis, i.e. the constraint can be
+compressible along that axis.
+
+
+@section{General}
+
+Setting joint limits prevents movement of the joint beyond the given
+low/high position values.
+
+For joint motors: conceptually, the joint is actually constructed from a
+motor and a friction plate [need a diagram here].
+The speed of the motor and the maximum torque or force that can be exerted
+by the friction plate are both controllable.
+
 
 #############################################################################
 @chapter{Data types and conventions}
@@ -575,7 +600,6 @@ dJointID dJointCreateHinge (dWorldID, dJointGroupID);
 dJointID dJointCreateSlider (dWorldID, dJointGroupID);
 dJointID dJointCreateContact (dWorldID, dJointGroupID,
                               const dContact *);
-dJointID dJointCreateRMotor (dWorldID, dJointGroupID);
 dJointID dJointCreateHinge2 (dWorldID, dJointGroupID);
 }{
 Create a new joint of a given type.
@@ -632,7 +656,7 @@ body means the static environment.
 Setting both bodies to zero puts the joint into "limbo", i.e. it will
 have no effect on the simulation.
 
-Some joints, like hinge-2 need to be attached to two bodies to work.
+Some joints, like hinge2 need to be attached to two bodies to work.
 }
 
 
@@ -641,7 +665,6 @@ void dJointSetBallAnchor (dJointID, dReal x, dReal y, dReal z);
 void dJointSetHingeAnchor (dJointID, dReal x, dReal y, dReal z);
 void dJointSetHingeAxis (dJointID, dReal x, dReal y, dReal z);
 void dJointSetSliderAxis (dJointID, dReal x, dReal y, dReal z);
-void dJointSetRMotorAxis (dJointID, dReal x, dReal y, dReal z);
 void dJointSetHinge2Anchor (dJointID, dReal x, dReal y, dReal z);
 void dJointSetHinge2Axis1 (dJointID, dReal x, dReal y, dReal z);
 void dJointSetHinge2Axis2 (dJointID, dReal x, dReal y, dReal z);
@@ -654,9 +677,9 @@ The default axis for all joints is (1,0,0).
 The axis that is set will be normalized to unit length, this is what
 @c{dJointGetAxis()} will return.
 
-When the hinge anchor or axis is set, the current position of the attached
-bodies is examined and that position will be the zero angle when the hinge
-angle is read.
+When the anchor or axis is set, the current position of the attached
+bodies is examined and that position will be the zero angle/position when
+the joint angle/position is read.
 }
 
 
@@ -665,7 +688,6 @@ void dJointGetBallAnchor (dJointID, dVector3 result);
 void dJointGetHingeAnchor (dJointID, dVector3 result);
 void dJointGetHingeAxis (dJointID, dVector3 result);
 void dJointGetSliderAxis (dJointID, dVector3 result);
-void dJointGetRMotorAxis (dJointID, dVector3 result);
 void dJointGetHinge2Anchor (dJointID, dVector3 result);
 void dJointGetHinge2Axis1 (dJointID, dVector3 result);
 void dJointGetHinge2Axis2 (dJointID, dVector3 result);
@@ -678,102 +700,60 @@ you specified body 1 as 0).
 
 
 @funcdef{
-void dJointSetHingeVel (dJointID, dReal vel);
-void dJointSetHingeTmax (dJointID, dReal tmax);
-void dJointSetHingeStops (dJointID, dReal low, dReal high);
-void dJointSetHingeFudgeFactor (dJointID, dReal factor);
-void dJointSetSliderVel (dJointID, dReal vel);
-void dJointSetSliderFmax (dJointID, dReal fmax);
-void dJointSetSliderStops (dJointID, dReal low, dReal high);
-void dJointSetSliderFudgeFactor (dJointID, dReal factor);
-void dJointSetRMotorVel (dJointID, dReal vel);
-void dJointSetRMotorTmax (dJointID, dReal tmax);
+void dJointSetHingeParam (dJointID, int parameter, dReal value);
+void dJointSetSliderParam (dJointID, int parameter, dReal value);
+void dJointSetHinge2Param (dJointID, int parameter, dReal value);
 }{
-Set hinge / rotational motor parameters (velocity, maximum torque, etc).
+Set limit / motor parameters for each joint type.
+The parameter numbers are:
 
-For the hinge, if the low stop is < -pi it will be ineffective, and
-if the high stop is > pi it will be ineffective.
-For the slider, all stop values are effective.
+@constdef{dParamLoStop}{Low limit angle/position. Setting this to
+	@c{-dInfinity} turns off the low limit.}
+@constdef{dParamHiStop}{High limit angle/position. Setting this to
+	@c{dInfinity} turns off the high limit.}
+@constdef{dParamVel}{Motor velocity (angular or linear).}
+@constdef{dParamFMax}{Motor maximum force. Setting this to zero turns off the
+	motor.}
+@constdef{dParamFudgeFactor}{Fudge factor. Controls powering away from a stop.}
+@constdef{dParamBounce}{Limit bounce. Not yet implemented.}
+@constdef{dParamSoft}{Limit softness. Not yet implemented.}
+@constdef{dParamSuspensionErp}{Suspension error reduction parameter.
+	Currently this only works on the hinge2 joint.}
+@constdef{dParamSuspensionCfm}{Suspension constraint force mixing parameter.
+	Currently this only works on the hinge2 joint.}
+
+These parameter names can be followed by a digit >= 2 to indicate the second,
+third etc set of parameters, e.g. for the second joint limit, the second
+suspension axis etc.
 
 If the low stop < the high stop then the stop functions will do nothing.
+For rotational joints, stops outside the range -pi..pi will be ineffective.
 
-The fudge factor controls powering away from a stop.
+The hinge2 joint has parameters for axis 1 and axis 2 (the steering and wheel
+axes).
+
+If a particular parameter is not implemented by a given joint, setting it
+will have no effect.
 }
 
-
 @funcdef{
-dReal dJointGetHingeVel (dJointID);
-dReal dJointGetHingeTmax (dJointID);
-dReal dJointGetHingeLowStop (dJointID);
-dReal dJointGetHingeHighStop (dJointID);
+dReal dJointGetHingeParam (dJointID, int parameter);
 dReal dJointGetHingeAngle (dJointID);
 dReal dJointGetHingeAngleRate (dJointID);
-dReal dJointGetSliderVel (dJointID);
-dReal dJointGetSliderFmax (dJointID);
-dReal dJointGetSliderLowStop (dJointID);
-dReal dJointGetSliderHighStop (dJointID);
 dReal dJointGetSliderPosition (dJointID);
 dReal dJointGetSliderPositionRate (dJointID);
-dReal dJointGetRMotorVel (dJointID);
-dReal dJointGetRMotorTmax (dJointID);
-dReal dJointGetRMotorAngle (dJointID);
+dReal dJointGetSliderParam (dJointID, int parameter);
+dReal dJointGetHinge2Param (dJointID, int parameter);
+dReal dJointGetHinge2Angle1 (dJointID);
+dReal dJointGetHinge2Angle1Rate (dJointID);
+dReal dJointGetHinge2Angle2Rate (dJointID);
 }{
-Get the hinge / rotational motor velocity and maximum torque.
-Get the hinge / rotational motor angle (between -pi and pi) and derivate of
-angle.
-An angle of zero corresponds to the initial position.
-}
+Get the limit / motor parameters.
+Get the joint angle / position and the time derivative of this value.
+Returned angles / positions of zero correspond to the initial position.
 
-
-@funcdef{
-NOT YET IMPLEMENTED:
-dReal dJointGetHingePosition (dJointID);
-dReal dJointGetHingeVelocity (dJointID);
-dReal dJointGetSliderPosition (dJointID);
-dReal dJointGetSliderVelocity (dJointID);
-}{
-Returns the current position and velocity of the given hinge or slider joint.
-
-The position of a hinge joint is the angle between the two bodies
-(or between the body and the static environment) measured around the hinge
-axis. The initial position of the bodies will correspond to an angle of zero.
-
-The position of a slider joint is the extension of the slider.
-The initial position of the bodies will correspond to a position of zero.
-
-The returned velocity values are the rates of change of the position values.
-
-There are no functions to set joint positions and velocities directly,
+There are no functions to set joint angle/position (and rates) directly,
 instead you must set the corresponding body positions and velocities.
-}
-
-
-@funcdef{
-NOT YET IMPLEMENTED:
-void dJointSetHingeLimits (dJointID, dReal low, dReal high);
-void dJointSetSliderLimits (dJointID, dReal low, dReal high);
-void dJointGetHingeLimits (dJointID, dReal *low, dReal *high);
-void dJointGetSliderLimits (dJointID, dReal *low, dReal *high);
-}{
-Set/get joint limits.
-Setting joint limits prevents movement of the joint beyond the given
-low/high position values.
-It is acceptable to set low to @c{-dInfinity} or high to @c{dInfinity}.
-}
-
-
-@funcdef{
-NOT YET IMPLEMENTED:
-void dJointSetHingeMotor (dJointID, dReal speed, dReal torque);
-void dJointSetSliderMotor (dJointID, dReal speed, dReal force);
-void dJointGetHingeMotor (dJointID, dReal *speed, dReal *torque);
-void dJointGetSliderMotor (dJointID, dReal *speed, dReal *force);
-}{
-Set/get joint motor parameters.
-Conceptually, the hinge and slider joints are actually constructed from a
-motor and a friction plate [need a diagram here].
-This sets/gets the speed of the motor and the maximum torque or force that
-can be exerted by the friction plate.
 }
 
 
