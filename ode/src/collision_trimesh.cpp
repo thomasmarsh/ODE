@@ -449,7 +449,7 @@ void dGeomTriMeshGetTriangle(dGeomID g, int Index, dVector3* v0, dVector3* v1, d
 		(*v1)[0] = v[1][0];
 		(*v1)[1] = v[1][1];
 		(*v1)[2] = v[1][2];
-		(*v1)[3] = v[0][3];
+		(*v1)[3] = v[1][3];
 	}
 	if (v2){
 		(*v2)[0] = v[2][0];
