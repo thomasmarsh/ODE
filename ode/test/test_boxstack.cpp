@@ -59,6 +59,8 @@ static MyObject obj[NUM];
 static dJointGroupID contactgroup;
 static int selected = -1;	// selected object
 static int show_aabb = 0;	// show geom AABBs?
+static int show_contacts = 0;	// show contact points?
+static int random_pos = 1;	// drop objects from random position?
 
 
 // this is called by dSpaceCollide when two objects in space are
@@ -74,22 +76,23 @@ static void nearCallback (void *data, dGeomID o1, dGeomID o2)
   dBodyID b2 = dGeomGetBody(o2);
   if (b1 && b2 && dAreConnected (b1,b2)) return;
 
-  dContact contact[3];			// up to 3 contacts per box
-  for (i=0; i<3; i++) {
-    contact[i].surface.mode = dContactBounce; //dContactMu2;
+  dContact contact[4];			// up to 4 contacts per box-box
+  for (i=0; i<4; i++) {
+    contact[i].surface.mode = dContactBounce | dContactSoftCFM;
     contact[i].surface.mu = dInfinity;
     contact[i].surface.mu2 = 0;
-    contact[i].surface.bounce = 0.5;
+    contact[i].surface.bounce = 0.1;
     contact[i].surface.bounce_vel = 0.1;
+    contact[i].surface.soft_cfm = 0.01;
   }
-  if (int numc = dCollide (o1,o2,3,&contact[0].geom,sizeof(dContact))) {
-    // dMatrix3 RI;
-    // dRSetIdentity (RI);
-    // const dReal ss[3] = {0.02,0.02,0.02};
+  if (int numc = dCollide (o1,o2,4,&contact[0].geom,sizeof(dContact))) {
+    dMatrix3 RI;
+    dRSetIdentity (RI);
+    const dReal ss[3] = {0.02,0.02,0.02};
     for (i=0; i<numc; i++) {
       dJointID c = dJointCreateContact (world,contactgroup,contact+i);
       dJointAttach (c,b1,b2);
-      // dsDrawBox (contact[i].geom.pos,RI,ss);
+      if (show_contacts) dsDrawBox (contact[i].geom.pos,RI,ss);
     }
   }
 }
@@ -111,6 +114,8 @@ static void start()
   printf ("To disable the selected object, press d.\n");
   printf ("To enable the selected object, press e.\n");
   printf ("To toggle showing the geom AABBs, press a.\n");
+  printf ("To toggle showing the contact points, press t.\n");
+  printf ("To toggle dropping from random position/orientation, press r.\n");
 }
 
 
@@ -152,11 +157,22 @@ static void command (int cmd)
     obj[i].body = dBodyCreate (world);
     for (k=0; k<3; k++) sides[k] = dRandReal()*0.5+0.1;
 
-    dBodySetPosition (obj[i].body,
-		      dRandReal()*2-1,dRandReal()*2-1,dRandReal()+1);
     dMatrix3 R;
-    dRFromAxisAndAngle (R,dRandReal()*2.0-1.0,dRandReal()*2.0-1.0,
-			dRandReal()*2.0-1.0,dRandReal()*10.0-5.0);
+    if (random_pos) {
+      dBodySetPosition (obj[i].body,
+			dRandReal()*2-1,dRandReal()*2-1,dRandReal()+1);
+      dRFromAxisAndAngle (R,dRandReal()*2.0-1.0,dRandReal()*2.0-1.0,
+			  dRandReal()*2.0-1.0,dRandReal()*10.0-5.0);
+    }
+    else {
+      dReal maxheight = 0;
+      for (k=0; k<num; k++) {
+	const dReal *pos = dBodyGetPosition (obj[k].body);
+	if (pos[2] > maxheight) maxheight = pos[2];
+      }
+      dBodySetPosition (obj[i].body, 0,0,maxheight+1);
+      dRFromAxisAndAngle (R,0,0,1,dRandReal()*10.0-5.0);
+    }
     dBodySetRotation (obj[i].body,R);
     dBodySetData (obj[i].body,(void*) i);
 
@@ -258,6 +274,12 @@ static void command (int cmd)
   }
   else if (cmd == 'a') {
     show_aabb ^= 1;
+  }
+  else if (cmd == 't') {
+    show_contacts ^= 1;
+  }
+  else if (cmd == 'r') {
+    random_pos ^= 1;
   }
 }
 
