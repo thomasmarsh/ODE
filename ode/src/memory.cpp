@@ -28,7 +28,7 @@
 //   - on exit, report of block allocation statistics
 //   - on exit, report of unfreed blocks and if they are corrupted
 // the allocator will also call Debug() when it allocates a block with
-// sequence number `seqstop' or pointer value `ptrstop'. these variables
+// sequence number `_d_seqstop' or pointer value `_d_ptrstop'. these variables
 // are global and can be set in the debugger.
 
 #include <malloc.h>
@@ -73,8 +73,8 @@ static long total_num_bytes_alloced = 0;
 static long max_blocks_alloced = 0;
 static long max_bytes_alloced = 0;
 
-long seqstop = 0;
-void *ptrstop = 0;
+long _d_seqstop = 0;
+void *_d_ptrstop = 0;
 
 static int checkBlockOk (void *ptr, int fatal)
 {
@@ -136,12 +136,12 @@ void * dAlloc (int size)
   if (num_bytes_alloced > max_bytes_alloced)
     max_bytes_alloced = num_bytes_alloced;
 
-  if (total_num_blocks_alloced == seqstop)
-    dDebug (0,"ALLOCATOR TRAP ON SEQUENCE NUMBER %d",seqstop);
+  if (total_num_blocks_alloced == _d_seqstop)
+    dDebug (0,"ALLOCATOR TRAP ON SEQUENCE NUMBER %d",_d_seqstop);
   long size2 = BSIZE(size);
   blockHeader *b = (blockHeader*) malloc (size2);
-  if (b+1 == ptrstop)
-    dDebug (0,"ALLOCATOR TRAP ON BLOCK POINTER %p",ptrstop);
+  if (b+1 == _d_ptrstop)
+    dDebug (0,"ALLOCATOR TRAP ON BLOCK POINTER %p",_d_ptrstop);
   for (unsigned int i=0; i < (size2/sizeof(long)); i++)
     ((long*)b)[i] = 0xdeadbeef;
   b->seq = total_num_blocks_alloced;
