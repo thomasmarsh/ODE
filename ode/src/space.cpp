@@ -93,8 +93,9 @@ static inline void collideAABBs (dReal bounds1[6], dReal bounds2[6],
 				 dxGeom *g1, dxGeom *g2,
 				 void *data, dNearCallback *callback)
 {
-  // no contacts if both geoms on the same body (also if both bodies are 0)
-  if (g1->body == g2->body) return;
+  // no contacts if both geoms on the same body, and the body is not 0
+  if (g1->body == g2->body && g1->body) return;
+
   if (bounds1[0] > bounds2[1] ||
       bounds1[1] < bounds2[0] ||
       bounds1[2] > bounds2[3] ||
