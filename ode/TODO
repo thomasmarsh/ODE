@@ -72,6 +72,9 @@ erwin says: Should the GeomGroup have a cleanupmode as the GeomTransform has?
 dCloseODE() - tidy up *all* allocated memory, esp in geom.cpp. used to keep
 leak detectors happy.
 
+erwin says: http://q12.org/pipermail/ode/2002-January/000766.html
+        and http://q12.org/pipermail/ode/2001-December/000753.html
+
 
 TODO
 ----
