@@ -1,0 +1,73 @@
+#!/usr/bin/perl
+#
+########################################################################
+#                                                                      #
+# Open Dynamics Engine, Copyright (C) 2001 Russell L. Smith.           #
+#   Email: russ@q12.org   Web: www.q12.org                              #
+#                                                                      #
+# This library is free software; you can redistribute it and/or        #
+# modify it under the terms of the GNU Lesser General Public           #
+# License as published by the Free Software Foundation; either         #
+# version 2.1 of the License, or (at your option) any later version.   #
+#                                                                      #
+# This library is distributed in the hope that it will be useful,      #
+# but WITHOUT ANY WARRANTY; without even the implied warranty of       #
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU     #
+# Lesser General Public License for more details.                      #
+#                                                                      #
+# You should have received a copy of the GNU Lesser General Public     #
+# License along with this library (see the file LICENSE.TXT); if not,  #
+# write to the Free Software Foundation, Inc., 59 Temple Place,        #
+# Suite 330, Boston, MA 02111-1307 USA.                                #
+#                                                                      #
+########################################################################
+
+# optimize the dot product built by BuildMultidot
+
+##############################################################################
+
+require ("OptimizeUtil");
+
+# multiple
+$N1=2;
+
+# unused standard parameters
+$TYPE='unused';
+$UNROLL2=0;		# unused
+$MADD=0;		# unused
+
+##############################################################################
+
+sub testMultidot # (filename)
+{
+  my $filename = $_[0];
+  createParametersFile ('ParametersM');
+  $params = "$N1 $UNROLL1 $UNROLL2 $MADD $FETCH $LAT1 $LAT2";
+  print "***** TESTING $params\n";
+  doit ("rm -f fastmultidot.c fastmultidot.o test_multidot");
+  doit ("make test_multidot");
+  doit ("./test_multidot >> $filename");
+  open (FILE,">>$filename");
+  print FILE " $params\n";
+  close FILE;
+}
+
+# find optimal parameters. write results to data6.txt
+
+open (FILE,">data6.txt");
+print FILE "# multi-dot product data from OptimizeMultidot\n";
+close FILE;
+$FNAME='fastmultidot';
+
+for ($UNROLL1=1; $UNROLL1 <= 10; $UNROLL1++) {
+  for ($LAT1=1; $LAT1 <= 5; $LAT1++) {
+    for ($LAT2=1; $LAT2 <= 5; $LAT2++) {
+      for ($FETCH=1; $FETCH<=5; $FETCH++) {
+	testMultidot ('data6.txt');
+      }
+    }
+  }
+}
+
+readBackDataFile ('data6.txt');
+createParametersFile ('ParametersM');
