@@ -7,7 +7,7 @@ APPNAMES = $(call fEXENAME,test_ode) $(call fEXENAME,test_chain) $(call fEXENAME
 INCLUDE_PATHS = ../../include
 LIB_PATHS = ../../lib
 EXTRA_CLEAN = $(APPNAMES)
-DEFINES=dDOUBLE
+DEFINES=d$(DREAL)
 
 ifeq ($(PLATFORM),win32)
   RSRC=../../lib/drawstuff.res
