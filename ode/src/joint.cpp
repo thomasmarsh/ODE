@@ -729,7 +729,7 @@ extern "C" dReal dJointGetSliderPositionRate (dxJointSlider *joint)
 
 static void sliderGetInfo1 (dxJointSlider *j, dxJoint::Info1 *info)
 {
-  info->nub = 5;    
+  info->nub = 5;
 
   // see if joint is powered
   if (j->limot.fmax > 0)
@@ -1094,108 +1094,6 @@ dxJoint::Vtable __dcontact_vtable = {
   (dxJoint::init_fn*) contactInit,
   (dxJoint::getInfo1_fn*) contactGetInfo1,
   (dxJoint::getInfo2_fn*) contactGetInfo2};
-
-//****************************************************************************
-// rotational motor
-
-static void rMotorInit (dxJointRMotor *j)
-{
-  dSetZero (j->axis1,4);
-  j->axis1[0] = 1;
-  dSetZero (j->axis2,4);
-  j->axis2[0] = 1;
-  dSetZero (j->qrel,4);
-  j->vel = 0;
-  j->tmax = 1;
-}
-
-
-static void rMotorGetInfo1 (dxJointRMotor *j, dxJoint::Info1 *info)
-{
-  info->m = 1;		// @@@ 0 if tmax = 0
-  info->nub = 0;	// @@@ 1 if tmax is infinity
-}
-
-
-static void rMotorGetInfo2 (dxJointRMotor *joint, dxJoint::Info2 *info)
-{
-  dVector3 ax1;  // joint axis in global coordinates, from 1st body
-  dMULTIPLY0_331 (ax1,joint->node[0].body->R,joint->axis1);
-
-  info->J1a[0] = ax1[0];
-  info->J1a[1] = ax1[1];
-  info->J1a[2] = ax1[2];
-  if (joint->node[1].body) {
-    info->J2a[0] = -ax1[0];
-    info->J2a[1] = -ax1[1];
-    info->J2a[2] = -ax1[2];
-  }
-  info->c[0] = joint->vel;
-  info->lo[0] = -joint->tmax;
-  info->hi[0] = joint->tmax;
-}
-
-
-extern "C" void dJointSetRMotorAxis (dxJointRMotor *joint,
-				     dReal x, dReal y, dReal z)
-{
-  dUASSERT(joint,"bad joint argument");
-  dUASSERT(joint->vtable == &__drmotor_vtable,"joint is not an RMotor");
-  setAxes (joint,x,y,z,joint->axis1,joint->axis2);
-
-  // compute initial relative rotation body1 -> body2, or env -> body1
-  if (joint->node[1].body) {
-    dQMultiply1 (joint->qrel,joint->node[0].body->q,joint->node[1].body->q);
-  }
-  else {
-    for (int i=0; i<4; i++) joint->qrel[i] = joint->node[0].body->q[i];
-  }
-}
-
-
-extern "C" void dJointGetRMotorAxis (dxJointRMotor *joint, dVector3 result)
-{
-  dUASSERT(joint,"bad joint argument");
-  dUASSERT(result,"bad result argument");
-  dUASSERT(joint->vtable == &__drmotor_vtable,"joint is not an RMotor");
-  getAxis (joint,result,joint->axis1);
-}
-
-
-extern "C" void dJointSetRMotorVel (dxJointRMotor *joint, dReal vel)
-{
-  dAASSERT(joint);
-  dUASSERT(joint->vtable == &__drmotor_vtable,"joint is not an RMotor");
-  joint->vel = vel;
-}
-
-
-extern "C" void dJointSetRMotorTmax (dxJointRMotor *joint, dReal tmax)
-{
-  dAASSERT(joint);
-  dUASSERT(joint->vtable == &__drmotor_vtable,"joint is not an RMotor");
-  dUASSERT(tmax >= 0,"tmax must be >= 0");
-  joint->tmax = tmax;
-}
-
-
-extern "C" dReal dJointGetRMotorAngle (dxJointRMotor *joint)
-{
-  dAASSERT(joint);
-  dUASSERT(joint->vtable == &__drmotor_vtable,"joint is not an RMotor");
-  if (joint->node[0].body) {
-    return getHingeAngle (joint->node[0].body,joint->node[1].body,joint->axis1,
-			  joint->qrel);
-  }
-  else return 0;
-}
-
-
-dxJoint::Vtable __drmotor_vtable = {
-  sizeof(dxJointRMotor),
-  (dxJoint::init_fn*) rMotorInit,
-  (dxJoint::getInfo1_fn*) rMotorGetInfo1,
-  (dxJoint::getInfo2_fn*) rMotorGetInfo2};
 
 //****************************************************************************
 // hinge 2. note that this joint must be attached to two bodies for it to work
