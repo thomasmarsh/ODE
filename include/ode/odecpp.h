@@ -256,7 +256,7 @@ public:
 
   void setData (void *data)
     { dJointSetData (_id, data); }
-  void *getData (void *data) const
+  void *getData () const
     { return dJointGetData (_id); }
 
   int getType() const
