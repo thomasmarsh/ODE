@@ -55,6 +55,8 @@ int dWorldGetAutoEnableDepthSF1(dWorldID);
 
 void dBodySetAutoDisableThresholdSF1(dBodyID, dReal autoDisableThreshold);
 
+/* These functions are not yet implemented by ODE. */
+/*
 dReal dBodyGetAutoDisableThresholdSF1(dBodyID);
 
 void dBodySetAutoDisableStepsSF1(dBodyID, int AutoDisableSteps);
@@ -64,7 +66,7 @@ int dBodyGetAutoDisableStepsSF1(dBodyID);
 void dBodySetAutoDisableSF1(dBodyID, int doAutoDisable);
 
 int dBodyGetAutoDisableSF1(dBodyID);
-
+*/
 
 /* bodies */
 
