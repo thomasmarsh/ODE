@@ -36,11 +36,18 @@ TODO
 #include "ode/config.h"
 #include "ode/memory.h"
 
+typedef unsigned int intP;
+
 //****************************************************************************
-// constants
+// constants and macros
 
 // each Arena pointer points to a block of this many bytes
 #define ARENA_SIZE 4096
+
+#define ROUND_UP_OFFSET_TO_EFFICIENT_SIZE(arena,ofs) \
+  ofs = (int) dEFFICIENT_SIZE( ((intP)(arena)) + ofs ); \
+
+@@@@@@@@
 
 //****************************************************************************
 // dObStack
