@@ -44,7 +44,7 @@
 #define NUM 200			// max number of objects
 #define DENSITY (5.0)		// density of all objects
 #define GPB 3			// maximum number of geometries per body
-#define MAX_CONTACTS 128		// maximum number of contact points per body
+#define MAX_CONTACTS 256		// maximum number of contact points per body
 
 
 // dynamics and collision objects
@@ -1761,7 +1761,7 @@ static void simLoop (int pause)
     const dVector3R& v0 = Vertices[Indices[i * 3 + 0]];
 	const dVector3R& v1 = Vertices[Indices[i * 3 + 1]];
 	const dVector3R& v2 = Vertices[Indices[i * 3 + 2]];
-	dsDrawTriangle(Pos, Rot, (float*)&v0, (float*)&v1, (float*)&v2, 0);
+	dsDrawTriangle(Pos, Rot, (dReal*)&v0, (dReal*)&v1, (dReal*)&v2, 0);
   }}}
 
   {const dReal* Pos = dGeomGetPosition(TriMesh2);
@@ -1771,7 +1771,7 @@ static void simLoop (int pause)
     const dVector3R& v0 = Vertices[Indices[i * 3 + 0]];
 	const dVector3R& v1 = Vertices[Indices[i * 3 + 1]];
 	const dVector3R& v2 = Vertices[Indices[i * 3 + 2]];
-	dsDrawTriangle(Pos, Rot, (float*)&v0, (float*)&v1, (float*)&v2, 1);
+	dsDrawTriangle(Pos, Rot, (dReal*)&v0, (dReal*)&v1, (dReal*)&v2, 1);
   }}}
 }
 
@@ -1799,7 +1799,7 @@ int main (int argc, char **argv)
   memset (obj,0,sizeof(obj));
 
   dTriMeshDataID TriData = dGeomTriMeshDataCreate();
-  dGeomTriMeshDataBuild(TriData, &Vertices[0], sizeof(dVector3R), VertexCount, &Indices[0], IndexCount, 3 * sizeof(int));
+  dGeomTriMeshDataBuildSingle(TriData, &Vertices[0], 3 * sizeof(dReal), VertexCount, (int*)&Indices[0], IndexCount, 3 * sizeof(int));
   
   TriMesh1 = dCreateTriMesh(space, TriData, 0, 0, 0);
   TriMesh2 = dCreateTriMesh(space, TriData, 0, 0, 0);

@@ -122,9 +122,22 @@
 #else
 	#ifdef OPC_USE_STRIDE
 												const IndexedTriangle* T = (const IndexedTriangle*)(((ubyte*)mTris) + index * mTriStride);
-												vp.Vertex[0] = (const Point*)(((ubyte*)mVerts) + T->mVRef[0] * mVertexStride);
-												vp.Vertex[1] = (const Point*)(((ubyte*)mVerts) + T->mVRef[1] * mVertexStride);
-												vp.Vertex[2] = (const Point*)(((ubyte*)mVerts) + T->mVRef[2] * mVertexStride);
+
+												if (Single){
+													vp.Vertex[0] = (const Point*)(((ubyte*)mVerts) + T->mVRef[0] * mVertexStride);
+													vp.Vertex[1] = (const Point*)(((ubyte*)mVerts) + T->mVRef[1] * mVertexStride);
+													vp.Vertex[2] = (const Point*)(((ubyte*)mVerts) + T->mVRef[2] * mVertexStride);
+												}
+												else{
+													for (int i = 0; i < 3; i++){
+														const double* v = (const double*)(((ubyte*)mVerts) + T->mVRef[i] * mVertexStride);
+
+														VertexCache[i].x = (float)v[0];
+														VertexCache[i].y = (float)v[1];
+														VertexCache[i].z = (float)v[2];
+														vp.Vertex[i] = &VertexCache[i];
+													}
+												}
 	#else
 												const IndexedTriangle* T = &mTris[index];
 												vp.Vertex[0] = &mVerts[T->mVRef[0]];
@@ -176,6 +189,10 @@
 						udword				mTriStride;			//!< Possible triangle stride in bytes [Opcode 1.3]
 						udword				mVertexStride;		//!< Possible vertex stride in bytes [Opcode 1.3]
 	#endif
+		public:
+						bool Single;							//!< Use single or double precision vertices
+		private:
+						static Point VertexCache[3];
 #endif
 	};
 
