@@ -48,6 +48,7 @@ ode/src/rotation.o: \
   include/ode/common.h \
   include/ode/config.h \
   include/ode/error.h \
+  include/ode/compatibility.h \
   include/ode/odemath.h
 ode/src/mass.o: \
   ode/src/mass.cpp \
@@ -67,6 +68,7 @@ ode/src/ode.o: \
   include/ode/mass.h \
   ode/src/array.h \
   include/ode/ode.h \
+  include/ode/compatibility.h \
   include/ode/contact.h \
   include/ode/odemath.h \
   include/ode/matrix.h \
@@ -79,9 +81,11 @@ ode/src/ode.o: \
   include/ode/collision.h \
   include/ode/collision_trimesh.h \
   include/ode/odecpp_collision.h \
+  include/ode/export-dif.h \
   ode/src/joint.h \
   ode/src/obstack.h \
-  ode/src/step.h
+  ode/src/step.h \
+  ode/src/util.h
 ode/src/step.o: \
   ode/src/step.cpp \
   ode/src/objects.h \
@@ -96,6 +100,7 @@ ode/src/step.o: \
   ode/src/obstack.h \
   include/ode/odemath.h \
   include/ode/rotation.h \
+  include/ode/compatibility.h \
   include/ode/timer.h \
   include/ode/matrix.h \
   ode/src/lcp.h
@@ -114,10 +119,37 @@ ode/src/stepfast.o: \
   include/ode/objects.h \
   include/ode/odemath.h \
   include/ode/rotation.h \
+  include/ode/compatibility.h \
   include/ode/timer.h \
   include/ode/matrix.h \
   ode/src/lcp.h \
-  ode/src/step.h
+  ode/src/step.h \
+  ode/src/util.h
+ode/src/util.o: \
+  ode/src/util.cpp \
+  include/ode/ode.h \
+  include/ode/config.h \
+  include/ode/compatibility.h \
+  include/ode/common.h \
+  include/ode/error.h \
+  include/ode/contact.h \
+  include/ode/memory.h \
+  include/ode/odemath.h \
+  include/ode/matrix.h \
+  include/ode/timer.h \
+  include/ode/rotation.h \
+  include/ode/mass.h \
+  include/ode/misc.h \
+  include/ode/objects.h \
+  include/ode/odecpp.h \
+  include/ode/collision_space.h \
+  include/ode/collision.h \
+  include/ode/collision_trimesh.h \
+  include/ode/odecpp_collision.h \
+  include/ode/export-dif.h \
+  ode/src/objects.h \
+  ode/src/array.h \
+  ode/src/util.h
 ode/src/lcp.o: \
   ode/src/lcp.cpp \
   include/ode/common.h \
@@ -135,6 +167,7 @@ ode/src/joint.o: \
   include/ode/config.h \
   include/ode/error.h \
   include/ode/rotation.h \
+  include/ode/compatibility.h \
   include/ode/matrix.h \
   ode/src/joint.h \
   ode/src/objects.h \
@@ -167,6 +200,33 @@ ode/src/testing.o: \
   include/ode/memory.h \
   ode/src/testing.h \
   ode/src/array.h
+ode/src/export-dif.o: \
+  ode/src/export-dif.cpp \
+  include/ode/ode.h \
+  include/ode/config.h \
+  include/ode/compatibility.h \
+  include/ode/common.h \
+  include/ode/error.h \
+  include/ode/contact.h \
+  include/ode/memory.h \
+  include/ode/odemath.h \
+  include/ode/matrix.h \
+  include/ode/timer.h \
+  include/ode/rotation.h \
+  include/ode/mass.h \
+  include/ode/misc.h \
+  include/ode/objects.h \
+  include/ode/odecpp.h \
+  include/ode/collision_space.h \
+  include/ode/collision.h \
+  include/ode/collision_trimesh.h \
+  include/ode/odecpp_collision.h \
+  include/ode/export-dif.h \
+  ode/src/objects.h \
+  ode/src/array.h \
+  ode/src/joint.h \
+  ode/src/obstack.h \
+  ode/src/collision_kernel.h
 ode/src/collision_kernel.o: \
   ode/src/collision_kernel.cpp \
   include/ode/common.h \
@@ -174,6 +234,7 @@ ode/src/collision_kernel.o: \
   include/ode/error.h \
   include/ode/matrix.h \
   include/ode/rotation.h \
+  include/ode/compatibility.h \
   include/ode/objects.h \
   include/ode/mass.h \
   include/ode/contact.h \
@@ -210,6 +271,7 @@ ode/src/collision_std.o: \
   include/ode/collision_trimesh.h \
   include/ode/matrix.h \
   include/ode/rotation.h \
+  include/ode/compatibility.h \
   include/ode/odemath.h \
   ode/src/collision_kernel.h \
   ode/src/objects.h \
@@ -245,6 +307,7 @@ ode/src/collision_transform.o: \
   include/ode/collision_trimesh.h \
   include/ode/matrix.h \
   include/ode/rotation.h \
+  include/ode/compatibility.h \
   include/ode/odemath.h \
   ode/src/collision_transform.h \
   ode/src/collision_kernel.h \
@@ -309,26 +372,7 @@ ode/test/test_ode.o: \
   ode/test/test_ode.cpp \
   include/ode/ode.h \
   include/ode/config.h \
-  include/ode/common.h \
-  include/ode/error.h \
-  include/ode/contact.h \
-  include/ode/memory.h \
-  include/ode/odemath.h \
-  include/ode/matrix.h \
-  include/ode/timer.h \
-  include/ode/rotation.h \
-  include/ode/mass.h \
-  include/ode/misc.h \
-  include/ode/objects.h \
-  include/ode/odecpp.h \
-  include/ode/collision_space.h \
-  include/ode/collision.h \
-  include/ode/collision_trimesh.h \
-  include/ode/odecpp_collision.h
-ode/test/test_chain2.o: \
-  ode/test/test_chain2.cpp \
-  include/ode/ode.h \
-  include/ode/config.h \
+  include/ode/compatibility.h \
   include/ode/common.h \
   include/ode/error.h \
   include/ode/contact.h \
@@ -345,12 +389,36 @@ ode/test/test_chain2.o: \
   include/ode/collision.h \
   include/ode/collision_trimesh.h \
   include/ode/odecpp_collision.h \
+  include/ode/export-dif.h
+ode/test/test_chain2.o: \
+  ode/test/test_chain2.cpp \
+  include/ode/ode.h \
+  include/ode/config.h \
+  include/ode/compatibility.h \
+  include/ode/common.h \
+  include/ode/error.h \
+  include/ode/contact.h \
+  include/ode/memory.h \
+  include/ode/odemath.h \
+  include/ode/matrix.h \
+  include/ode/timer.h \
+  include/ode/rotation.h \
+  include/ode/mass.h \
+  include/ode/misc.h \
+  include/ode/objects.h \
+  include/ode/odecpp.h \
+  include/ode/collision_space.h \
+  include/ode/collision.h \
+  include/ode/collision_trimesh.h \
+  include/ode/odecpp_collision.h \
+  include/ode/export-dif.h \
   include/drawstuff/drawstuff.h \
   include/drawstuff/version.h
 ode/test/test_hinge.o: \
   ode/test/test_hinge.cpp \
   include/ode/ode.h \
   include/ode/config.h \
+  include/ode/compatibility.h \
   include/ode/common.h \
   include/ode/error.h \
   include/ode/contact.h \
@@ -367,12 +435,14 @@ ode/test/test_hinge.o: \
   include/ode/collision.h \
   include/ode/collision_trimesh.h \
   include/ode/odecpp_collision.h \
+  include/ode/export-dif.h \
   include/drawstuff/drawstuff.h \
   include/drawstuff/version.h
 ode/test/test_slider.o: \
   ode/test/test_slider.cpp \
   include/ode/ode.h \
   include/ode/config.h \
+  include/ode/compatibility.h \
   include/ode/common.h \
   include/ode/error.h \
   include/ode/contact.h \
@@ -389,12 +459,14 @@ ode/test/test_slider.o: \
   include/ode/collision.h \
   include/ode/collision_trimesh.h \
   include/ode/odecpp_collision.h \
+  include/ode/export-dif.h \
   include/drawstuff/drawstuff.h \
   include/drawstuff/version.h
 ode/test/test_collision.o: \
   ode/test/test_collision.cpp \
   include/ode/ode.h \
   include/ode/config.h \
+  include/ode/compatibility.h \
   include/ode/common.h \
   include/ode/error.h \
   include/ode/contact.h \
@@ -411,12 +483,14 @@ ode/test/test_collision.o: \
   include/ode/collision.h \
   include/ode/collision_trimesh.h \
   include/ode/odecpp_collision.h \
+  include/ode/export-dif.h \
   include/drawstuff/drawstuff.h \
   include/drawstuff/version.h
 ode/test/test_boxstack.o: \
   ode/test/test_boxstack.cpp \
   include/ode/ode.h \
   include/ode/config.h \
+  include/ode/compatibility.h \
   include/ode/common.h \
   include/ode/error.h \
   include/ode/contact.h \
@@ -433,12 +507,14 @@ ode/test/test_boxstack.o: \
   include/ode/collision.h \
   include/ode/collision_trimesh.h \
   include/ode/odecpp_collision.h \
+  include/ode/export-dif.h \
   include/drawstuff/drawstuff.h \
   include/drawstuff/version.h
 ode/test/test_buggy.o: \
   ode/test/test_buggy.cpp \
   include/ode/ode.h \
   include/ode/config.h \
+  include/ode/compatibility.h \
   include/ode/common.h \
   include/ode/error.h \
   include/ode/contact.h \
@@ -455,12 +531,14 @@ ode/test/test_buggy.o: \
   include/ode/collision.h \
   include/ode/collision_trimesh.h \
   include/ode/odecpp_collision.h \
+  include/ode/export-dif.h \
   include/drawstuff/drawstuff.h \
   include/drawstuff/version.h
 ode/test/test_crash.o: \
   ode/test/test_crash.cpp \
   include/ode/ode.h \
   include/ode/config.h \
+  include/ode/compatibility.h \
   include/ode/common.h \
   include/ode/error.h \
   include/ode/contact.h \
@@ -477,12 +555,14 @@ ode/test/test_crash.o: \
   include/ode/collision.h \
   include/ode/collision_trimesh.h \
   include/ode/odecpp_collision.h \
+  include/ode/export-dif.h \
   include/drawstuff/drawstuff.h \
   include/drawstuff/version.h
 ode/test/test_joints.o: \
   ode/test/test_joints.cpp \
   include/ode/ode.h \
   include/ode/config.h \
+  include/ode/compatibility.h \
   include/ode/common.h \
   include/ode/error.h \
   include/ode/contact.h \
@@ -499,12 +579,14 @@ ode/test/test_joints.o: \
   include/ode/collision.h \
   include/ode/collision_trimesh.h \
   include/ode/odecpp_collision.h \
+  include/ode/export-dif.h \
   include/drawstuff/drawstuff.h \
   include/drawstuff/version.h
 ode/test/test_space.o: \
   ode/test/test_space.cpp \
   include/ode/ode.h \
   include/ode/config.h \
+  include/ode/compatibility.h \
   include/ode/common.h \
   include/ode/error.h \
   include/ode/contact.h \
@@ -521,12 +603,14 @@ ode/test/test_space.o: \
   include/ode/collision.h \
   include/ode/collision_trimesh.h \
   include/ode/odecpp_collision.h \
+  include/ode/export-dif.h \
   include/drawstuff/drawstuff.h \
   include/drawstuff/version.h
 ode/test/test_I.o: \
   ode/test/test_I.cpp \
   include/ode/ode.h \
   include/ode/config.h \
+  include/ode/compatibility.h \
   include/ode/common.h \
   include/ode/error.h \
   include/ode/contact.h \
@@ -543,12 +627,14 @@ ode/test/test_I.o: \
   include/ode/collision.h \
   include/ode/collision_trimesh.h \
   include/ode/odecpp_collision.h \
+  include/ode/export-dif.h \
   include/drawstuff/drawstuff.h \
   include/drawstuff/version.h
 ode/test/test_step.o: \
   ode/test/test_step.cpp \
   include/ode/ode.h \
   include/ode/config.h \
+  include/ode/compatibility.h \
   include/ode/common.h \
   include/ode/error.h \
   include/ode/contact.h \
@@ -565,12 +651,14 @@ ode/test/test_step.o: \
   include/ode/collision.h \
   include/ode/collision_trimesh.h \
   include/ode/odecpp_collision.h \
+  include/ode/export-dif.h \
   include/drawstuff/drawstuff.h \
   include/drawstuff/version.h
 ode/test/test_friction.o: \
   ode/test/test_friction.cpp \
   include/ode/ode.h \
   include/ode/config.h \
+  include/ode/compatibility.h \
   include/ode/common.h \
   include/ode/error.h \
   include/ode/contact.h \
@@ -587,12 +675,14 @@ ode/test/test_friction.o: \
   include/ode/collision.h \
   include/ode/collision_trimesh.h \
   include/ode/odecpp_collision.h \
+  include/ode/export-dif.h \
   include/drawstuff/drawstuff.h \
   include/drawstuff/version.h
 ode/test/test_space_stress.o: \
   ode/test/test_space_stress.cpp \
   include/ode/ode.h \
   include/ode/config.h \
+  include/ode/compatibility.h \
   include/ode/common.h \
   include/ode/error.h \
   include/ode/contact.h \
@@ -609,6 +699,7 @@ ode/test/test_space_stress.o: \
   include/ode/collision.h \
   include/ode/collision_trimesh.h \
   include/ode/odecpp_collision.h \
+  include/ode/export-dif.h \
   include/drawstuff/drawstuff.h \
   include/drawstuff/version.h
 drawstuff/dstest/dstest.o: \
