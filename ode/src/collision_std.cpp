@@ -457,7 +457,7 @@ void cullPoints (int n, dReal p[], int m, int i0, int iret[])
   for (i=0; i<n; i++) A[i] = dAtan2(p[i*2+1]-cy,p[i*2]-cx);
 
   // search for points that have angles closest to A[i0] + i*(2*pi/m).
-  int avail[n];
+  int avail[8];
   for (i=0; i<n; i++) avail[i] = 1;
   avail[i0] = 0;
   iret[0] = i0;
