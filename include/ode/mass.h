@@ -52,6 +52,8 @@ void dMassTranslate (dMass *, dReal x, dReal y, dReal z);
 
 void dMassRotate (dMass *, const dMatrix3 R);
 
+void dMassAdd (dMass *a, const dMass *b);
+
 
 
 struct dMass {
@@ -80,6 +82,8 @@ struct dMass {
     { dMassTranslate (this,x,y,z); }
   void rotate (const dMatrix3 R)
     { dMassRotate (this,R); }
+  void add (const dMass *b)
+    { dMassAdd (this,b); }
 #endif
 };
 
