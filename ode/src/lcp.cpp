@@ -1026,7 +1026,16 @@ void dSolveLCPBasic (int n, dReal *A, dReal *x, dReal *b,
 	int si = i;		// si = switch index
 	int si_in_N = 0;	// set to 1 if si in N
 	dReal s = -w[i]/delta_w[i];
-	if (s <= 0) dMessage (0,"LCP internal error, s <= 0");
+
+	if (s <= 0) {
+	  dMessage (d_ERR_LCP, "LCP internal error, s <= 0 (s=%.4e)",s);
+	  if (i < (n-1)) {
+	    dSetZero (x+i,n-i);
+	    dSetZero (w+i,n-i);
+	  }
+	  goto done;
+	}
+
 	for (k=0; k < lcp.numN(); k++) {
 	  if (delta_w[lcp.indexN(k)] < 0) {
 	    dReal s2 = -w[lcp.indexN(k)] / delta_w[lcp.indexN(k)];
@@ -1072,6 +1081,7 @@ void dSolveLCPBasic (int n, dReal *A, dReal *x, dReal *b,
     }
   }
 
+ done:
   lcp.unpermute();
 }
 
@@ -1268,7 +1278,17 @@ void dSolveLCP (int n, dReal *A, dReal *x, dReal *b,
 	//			     "C->NL","C->NH"};
 	//printf ("cmd=%d (%s), si=%d\n",cmd,cmdstring[cmd],(cmd>3) ? si : i);
 
-	if (s < 0) dMessage (0,"LCP internal error, s <= 0 (s=%.4e)",s);
+	// if s <= 0 then we've got a problem. if we just keep going then
+	// we're going to get stuck in an infinite loop. instead, just cross
+	// our fingers and exit with the current solution.
+	if (s <= 0) {
+	  dMessage (d_ERR_LCP, "LCP internal error, s <= 0 (s=%.4e)",s);
+	  if (i < (n-1)) {
+	    dSetZero (x+i,n-i);
+	    dSetZero (w+i,n-i);
+	  }
+	  goto done;
+	}
 
 	// apply x = x + s * delta_x
 	lcp.pC_plusequals_s_times_qC (x,s,delta_x);
@@ -1315,6 +1335,7 @@ void dSolveLCP (int n, dReal *A, dReal *x, dReal *b,
     }
   }
 
+ done:
   lcp.unpermute();
 }
 
