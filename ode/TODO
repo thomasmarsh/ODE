@@ -37,6 +37,8 @@ joints:
 		suspension limits
 		suspension limit restitution and spongyness??
 
+no-arg init functions, for andy
+
 DOC how bodies and geoms associated then resolved in contact callback.
 
 explore: do joint parameters need to be set for the joint to be setup

@@ -994,7 +994,19 @@ static dColliderFn * dBoxColliderFn (int num)
 
 static void dBoxAABB (dxGeom *geom, dReal aabb[6])
 {
-  dDebug (0,"unimplemented");
+  dxBox *b = (dxBox*) CLASSDATA(geom);
+  dReal xrange = REAL(0.5) * (dFabs (geom->R[0] * b->side[0]) +
+    dFabs (geom->R[1] * b->side[1]) + dFabs (geom->R[2] * b->side[2]));
+  dReal yrange = REAL(0.5) * (dFabs (geom->R[4] * b->side[0]) +
+    dFabs (geom->R[5] * b->side[1]) + dFabs (geom->R[6] * b->side[2]));
+  dReal zrange = REAL(0.5) * (dFabs (geom->R[8] * b->side[0]) +
+    dFabs (geom->R[9] * b->side[1]) + dFabs (geom->R[10] * b->side[2]));
+  aabb[0] = geom->pos[0] - xrange;
+  aabb[1] = geom->pos[0] + xrange;
+  aabb[2] = geom->pos[1] - yrange;
+  aabb[3] = geom->pos[1] + yrange;
+  aabb[4] = geom->pos[2] - zrange;
+  aabb[5] = geom->pos[2] + zrange;
 }
 
 
@@ -1006,7 +1018,14 @@ dColliderFn * dPlaneColliderFn (int num)
 
 static void dPlaneAABB (dxGeom *geom, dReal aabb[6])
 {
-  dDebug (0,"PlaneAABB() not implemented, should not have to be");
+  // @@@ planes that have normal vectors aligned along an axis can use a
+  // @@@ less comprehensive bounding box.
+  aabb[0] = -dInfinity;
+  aabb[1] = dInfinity;
+  aabb[2] = -dInfinity;
+  aabb[3] = dInfinity;
+  aabb[4] = -dInfinity;
+  aabb[5] = dInfinity;
 }
 
 
