@@ -265,9 +265,14 @@ int main (int argc, char **argv)
     dJointSetHinge2Axis2 (joint[i],0,1,0);
 
     // breakable joints contribution
-		dJointSetBreakable (joint[i], 1);
-		dJointSetBreakMode (joint[i], dJOINT_BREAK_AT_FORCE);
-		dJointSetBreakForce (joint[i], 0.5);
+    // the wheels can break
+    dJointSetBreakable (joint[i], 1);
+    // the wheels wil break at a specific force
+    dJointSetBreakMode (joint[i], dJOINT_BREAK_AT_B1_FORCE|dJOINT_BREAK_AT_B2_FORCE);
+    // specify the force for the first body connected to the joint ...
+    dJointSetBreakForce (joint[i], 0, 1.5, 1.5, 1.5);
+    // and for the second body
+    dJointSetBreakForce (joint[i], 1, 1.5, 1.5, 1.5);
   }
 
   // set joint suspension
@@ -295,10 +300,10 @@ int main (int argc, char **argv)
   dGeomGroupAdd (geom_group,sphere[2]);
 
   // environment
-  ground_box = dCreateBox (space,2,1.5,5);
+  ground_box = dCreateBox (space,2,1.5,1);
   dMatrix3 R;
-  dRFromAxisAndAngle (R,0,1,0,-0.85);
-  dGeomSetPosition (ground_box,5,0,-1);
+  dRFromAxisAndAngle (R,0,1,0,-0.15);
+  dGeomSetPosition (ground_box,2,0,-0.34);
   dGeomSetRotation (ground_box,R);
 
   // run simulation

@@ -20,6 +20,10 @@
  *                                                                       *
  *************************************************************************/
 
+#ifdef _MSC_VER
+#pragma warning(disable:4291)  // for VC++, no complaints about "no matching operator delete found"
+#endif
+
 // this source file is mostly concerned with the data structures, not the
 // numerics.
 
@@ -206,7 +210,11 @@ static void processIslands (dxWorld *world, dReal stepsize)
   }
 # endif
   /******************** breakable joint contribution ***********************/
-  dxJoint* nextJ = (dxJoint*)world->firstjoint->next;
+  dxJoint* nextJ;
+  if (!world->firstjoint)
+    nextJ = 0;
+  else
+    nextJ = (dxJoint*)world->firstjoint->next;
   for (j=world->firstjoint; j; j=nextJ) {
   	nextJ = (dxJoint*)j->next;
 	// check if joint is breakable and broken
@@ -1079,10 +1087,10 @@ void dJointAttach (dxJoint *joint, dxBody *body1, dxBody *body2)
   if (body1==0) {
     body1 = body2;
     body2 = 0;
-    joint->flags &= (~dJOINT_REVERSE);
+    joint->flags |= dJOINT_REVERSE;
   }
   else {
-    joint->flags |= dJOINT_REVERSE;
+    joint->flags &= (~dJOINT_REVERSE);
   }
 
   // attach to new bodies

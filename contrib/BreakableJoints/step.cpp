@@ -960,6 +960,7 @@ void dInternalStepIsland_x2 (dxWorld *world, dxBody * const *body, int nb,
       dxBody* b1 = joint[i]->node[0].body;
       dxBody* b2 = joint[i]->node[1].body;
       dJointFeedback *fb = joint[i]->feedback;
+
 /******************** breakable joint contribution ***********************/
     // this saves us a few dereferences
     dxJointBreakInfo *jBI = joint[i]->breakInfo;
@@ -1064,18 +1065,16 @@ void dInternalStepIsland_x2 (dxWorld *world, dxBody * const *body, int nb,
       }
     }
 /*************************************************************************/
-	  else {
-	  // no feedback is required, let's compute cforce the faster way
-	  MultiplyAdd1_8q1 (cforce + 8*b1->tag,JJ, lambda+ofs[i], info[i].m);
-	  if (b2) {
-  	    MultiplyAdd1_8q1 (cforce + 8*b2->tag,
-        JJ + 8*info[i].m, lambda+ofs[i], info[i].m);
-	  }
+      else {
+	// no feedback is required, let's compute cforce the faster way
+	MultiplyAdd1_8q1 (cforce + 8*b1->tag,JJ, lambda+ofs[i], info[i].m);
+	if (b2) {
+	  MultiplyAdd1_8q1 (cforce + 8*b2->tag,
+			    JJ + 8*info[i].m, lambda+ofs[i], info[i].m);
+	}
       }
     }
   }
-
-
 
   // compute the velocity update
 # ifdef TIMING

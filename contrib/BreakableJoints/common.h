@@ -243,7 +243,7 @@ typedef struct dLimot {
 enum {
   dLimotLoStop		= 0x0001,
   dLimotHiStop		= 0x0002,
-  dLimotVel			= 0x0004,
+  dLimotVel		= 0x0004,
   dLimotFMax		= 0x0008,
   dLimotFudgeFactor	= 0x0010,
   dLimotBounce		= 0x0020,
@@ -308,13 +308,14 @@ enum{
   dAMotorEuler = 1
 };
 
+
 /* joint force feedback information */
 
 typedef struct dJointFeedback {
-  dVector3 f1;		// force applied to body 1
-  dVector3 t1;		// torque applied to body 1
-  dVector3 f2;		// force applied to body 2
-  dVector3 t2;		// torque applied to body 2
+  dVector3 f1;		/* force applied to body 1 */
+  dVector3 t1;		/* torque applied to body 1 */
+  dVector3 f2;		/* force applied to body 2 */
+  dVector3 t2;		/* torque applied to body 2 */
 } dJointFeedback;
 
 
