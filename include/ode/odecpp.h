@@ -205,7 +205,7 @@ public:
 
 
 
-// @@@ objects for Geom and Space
+// @@@ objects for Geom, Space - not standardized enough yet.
 
 
 #endif

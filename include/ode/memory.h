@@ -44,6 +44,12 @@ void * dAlloc (int size);
 void * dRealloc (void *ptr, int oldsize, int newsize);
 void dFree (void *ptr, int size);
 
+/* when alloc debugging is turned on, this allocates memory that will never
+ * be freed by the app (it is not included in the final allocator report).
+ * otherwise, this is equivalent to Alloc().
+ */
+void * dAllocNoFree (int size);
+
 #ifdef __cplusplus
 }
 #endif

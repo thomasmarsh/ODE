@@ -199,39 +199,6 @@ int dPlaneClass = -1;
 int dCompositeClass = -1;
 
 
-dxGeom *dCreateSphere (dSpaceID space, dReal radius)
-{
-  dSphere *s = (dSphere*) dAlloc (sizeof(dSphere));
-  dInitGeom (&s->geom,space,dSphereClass);
-  s->radius = radius;
-  return &s->geom;
-}
-
-
-dxGeom *dCreatePlane (dSpaceID space,
-		      dReal a, dReal b, dReal c, dReal d)
-{
-  dPlane *p = (dPlane*) dAlloc (sizeof(dPlane));
-  dInitGeom (&p->geom,space,dPlaneClass);
-  // make sure plane normal has unit length
-  dReal l = a*a + b*b + c*c;
-  if (l > 0) {
-    l = dRecipSqrt(l);
-    p->p[0] = a*l;
-    p->p[1] = b*l;
-    p->p[2] = c*l;
-    p->p[3] = d*l;
-  }
-  else {
-    p->p[0] = 1;
-    p->p[1] = 0;
-    p->p[2] = 0;
-    p->p[3] = 0;
-  }
-  return &p->geom;
-}
-
-
 dColliderFn * dSphereColliderFn (int num)
 {
   if (num == dSphereClass) return (dColliderFn *) &dCollideSS;
@@ -264,56 +231,93 @@ void dPlaneAABB (dGeomID geom, dReal aabb[6])
 }
 
 
-void dRegisterStandardCollisionClasses()
+dxGeom *dCreateSphere (dSpaceID space, dReal radius)
 {
-  dGeomClass c;
-  c.num = 0;
+  if (dSphereClass == -1) {
+    dGeomClass c;
+    c.num = 0;
+    c.size = sizeof (dSphere);
+    c.collider = &dSphereColliderFn;
+    c.aabb = &dSphereAABB;
+    dSphereClass = dCreateGeomClass (&c);
+  }
 
-  c.size = sizeof (dSphere);
-  c.collider = &dSphereColliderFn;
-  c.aabb = &dSphereAABB;
-  dSphereClass = dCreateGeomClass (&c);
+  dSphere *s = (dSphere*) dAlloc (sizeof(dSphere));
+  dInitGeom (&s->geom,space,dSphereClass);
+  s->radius = radius;
+  return &s->geom;
+}
 
-  c.size = sizeof (dPlane);
-  c.collider = &dPlaneColliderFn;
-  c.aabb = &dPlaneAABB;
-  dPlaneClass = dCreateGeomClass (&c);
+
+dxGeom *dCreatePlane (dSpaceID space,
+		      dReal a, dReal b, dReal c, dReal d)
+{
+  if (dPlaneClass == -1) {
+    dGeomClass c;
+    c.num = 0;
+    c.size = sizeof (dPlane);
+    c.collider = &dPlaneColliderFn;
+    c.aabb = &dPlaneAABB;
+    dPlaneClass = dCreateGeomClass (&c);
+  }
+
+  dPlane *p = (dPlane*) dAlloc (sizeof(dPlane));
+  dInitGeom (&p->geom,space,dPlaneClass);
+  // make sure plane normal has unit length
+  dReal l = a*a + b*b + c*c;
+  if (l > 0) {
+    l = dRecipSqrt(l);
+    p->p[0] = a*l;
+    p->p[1] = b*l;
+    p->p[2] = c*l;
+    p->p[3] = d*l;
+  }
+  else {
+    p->p[0] = 1;
+    p->p[1] = 0;
+    p->p[2] = 0;
+    p->p[3] = 0;
+  }
+  return &p->geom;
 }
 
 //****************************************************************************
 // geometry class stuff
 
-// NOTE! global constructors here.
+// NOTE! global constructors here, which is bad!!!
 
-struct dCollider {
+struct dColliderEntry {
   dColliderFn *fn;	// collider function
   int mode;		// 1 = reverse o1 and o2, 2 = no function available
 };
 
-// the class structures
-static dArray<dGeomClass> classes;
+// pointers to the class structures
+static dArray<dGeomClass*> classes;	// <--- update for pointers
 
 // function pointers and modes for n^2 class collider functions. this is an
 // n*n matrix stored by row. the functions pointers are extracted from the
 // class get-collider-function function.
-static dArray<dCollider> colliders;
+static dArray<dColliderEntry> colliders;
 
 
 int dCreateGeomClass (dGeomClass *c)
 {
   if (c->size < (int)sizeof(dxGeom))
-    dDebug (d_ERR_BAD_ARGS,"size too small in dGeomClass");
+    dDebug (d_ERR_BAD_ARGS,"dGeomClass size too small");
   if (!c->collider || !c->aabb)
-    dDebug (d_ERR_BAD_ARGS,"zero function pointers in dGeomClass");
+    dDebug (d_ERR_BAD_ARGS,"dGeomClass has zero function pointers");
 
   int n = classes.size();
-  classes.push (*c);
-  classes[n].num = n;		// set class number
+  dGeomClass *gc = (dGeomClass*) dAllocNoFree (sizeof(dGeomClass));
+
+  memcpy (gc,c,sizeof(dGeomClass));
+  gc->num = n;			// set class number
+  classes.push (gc);
 
   // make room for n^2 class collider function pointers - these entries will
   // be filled as dCollide() is called.
   colliders.setSize ((n+1)*(n+1));
-  memset (&colliders[0],0,(n+1)*(n+1)*sizeof(dCollider));
+  memset (&colliders[0],0,(n+1)*(n+1)*sizeof(dColliderEntry));
 
   return n;
 }
@@ -322,10 +326,9 @@ int dCreateGeomClass (dGeomClass *c)
 void dInitGeom (dGeomID geom, dSpaceID space, int classnum)
 {
   if (classnum < 0 || classnum >= classes.size())
-    dDebug (d_ERR_BAD_ARGS,"bad class number (maybe register standard "
-	     "classes?)");
-  memset (geom,0,classes[classnum].size);
-  geom->_class = &classes[classnum];
+    dDebug (d_ERR_BAD_ARGS,"dInitGeom(), bad class number");
+  memset (geom,0,classes[classnum]->size);
+  geom->_class = classes[classnum];
   geom->data = 0;
   geom->body = 0;
   geom->pos = 0;
@@ -359,7 +362,7 @@ int dCollide (dGeomID o1, dGeomID o2, int flags, dContact *contact)
     if (swap) count = (*fn) (o2,o1,flags,contact);
     else count = (*fn) (o1,o2,flags,contact);
   }
-  else if ((fn = classes[c1].collider (c2))) {
+  else if ((fn = classes[c1]->collider (c2))) {
     colliders [a2].fn = fn;
     colliders [a2].mode = 1;
     colliders [a1].fn = fn;	// do mode=0 assignment second so that
@@ -367,7 +370,7 @@ int dCollide (dGeomID o1, dGeomID o2, int flags, dContact *contact)
     count = (*fn) (o1,o2,flags,contact);
     swap = 0;
   }
-  else if ((fn = classes[c2].collider (c1))) {
+  else if ((fn = classes[c2]->collider (c1))) {
     colliders [a1].fn = fn;
     colliders [a1].mode = 1;
     colliders [a2].fn = fn;	// do mode=0 assignment second so that

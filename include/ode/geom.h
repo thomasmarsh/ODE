@@ -21,29 +21,7 @@
 
 /*
 
-This interface is used by the dynamics library to do implicit collision,
-e.g. every dynamics object that is created gets a collision representation
-as well.
-
-to plug in your own collision handling, replace (some of?) these functions
-with your own. collision should be a separate library that you can link in
-or not. your own library can call components in this collision library, e.g.
-if you want polymorphic spaces instead of a single statically called space.
-
-creating an object will automatically register the appropriate
-class (if necessary). how can we ensure that the minimum amount of code is
-linked in? e.g. only one space handler, and sphere-sphere and sphere-box and
-box-box collision code (if spheres and boxes instanced).
-
-the user creates a collision space, and for each dynamics object that is
-created a collision object is inserted into the space. the collision
-object's pos and R pointers are set to the corresponding dynamics
-variables.
-
-there should be utility functions which create the dynamics and collision
-objects at the same time, e.g. dMakeSphere().
-
-collision objects and dynamics objects keep pointers to each other.
+geometry objects for collision detection.
 
 "REQUIRED" is used to mark the functions that are referenced by the dynamics.
 
@@ -68,13 +46,13 @@ extern "C" {
  */
 typedef void dGetAABBFn (dGeomID, dReal aabb[6]);
 
-/* this is a template for a function that handles collision between specific
- * object types. when this is called, o1 and o2 have known types.
- * the `flags' and `contact' arguments are those passed to dCollide().
- * this function must fill in the other fields of the contact struct.
+/* this function handles collision between specific object types. when this
+ * is called, o1 and o2 have known types. the `flags' and `contact' arguments
+ * are those passed to dCollide(). this function must fill in the fields of
+ * the contact struct.
  */
 typedef int dColliderFn (dGeomID o1, dGeomID o2,
-			  int flags, dContact *contact);
+			 int flags, dContact *contact);
 
 /* one of these functions is provided by each geometry class. it takes a class
  * number. it should return the collider function that can handle colliding
@@ -90,7 +68,7 @@ typedef dColliderFn * dGetColliderFnFn (int num);
 
 /* geometry class information. why don't we just use C++? well, this is a
  * bit more flexible, e.g. the class number is assigned at runtime, the class
- * can have int parameters as well as functions.
+ * can have int and string parameters as well as functions.
  */
 struct dGeomClass {
   int num;			/* class number (globally unique) */
@@ -182,8 +160,8 @@ struct dSlab {
 
 struct dPlane {
   dxGeom geom;
-  dReal p[4];		/* plane equation params: p[0]*x+p[1]*y+p[2]*z = p[3] */
-};			/* (p[0],p[1],p[2]) = normal vector, must have length=1 */
+  dReal p[4];	/* plane equation params: p[0]*x+p[1]*y+p[2]*z = p[3] */
+};		/* (p[0],p[1],p[2]) = normal vector, must have length=1 */
 
 struct dComposite {
   dxGeom geom;
@@ -234,9 +212,6 @@ extern int dCCylinderClass;
 extern int dSlabClass;
 extern int dPlaneClass;
 extern int dCompositeClass;
-
-
-void dRegisterStandardCollisionClasses();
 
 
 #ifdef __cplusplus

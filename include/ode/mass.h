@@ -26,13 +26,7 @@
 extern "C" {
 #endif
 
-
-typedef struct dMass {
-  dReal mass;
-  dVector4 c;
-  dMatrix3 I;
-} dMass;
-
+typedef struct dMass;
 
 void dMassSetZero (dMass *);
 
@@ -54,6 +48,38 @@ void dMassAdjust (dMass *, dReal newmass);
 void dMassTranslate (dMass *, dReal x, dReal y, dReal z);
 
 void dMassRotate (dMass *, dMatrix3 R);
+
+
+
+typedef struct dMass {
+  dReal mass;
+  dVector4 c;
+  dMatrix3 I;
+
+#ifdef __cplusplus
+  dMass()
+    { dMassSetZero (this); }
+  void setZero()
+    { dMassSetZero (this); }
+  void setParameters (dReal themass, dReal cgx, dReal cgy, dReal cgz,
+		      dReal I11, dReal I22, dReal I33,
+		      dReal I12, dReal I13, dReal I23)
+    { dMassSetParameters (this,themass,cgx,cgy,cgz,I11,I22,I33,I12,I13,I23); }
+  void setSphere (dReal density, dReal radius)
+    { dMassSetSphere (this,density,radius); }
+  void setCappedCylinder (dReal density, int direction, dReal a, dReal b)
+    { dMassSetCappedCylinder (this,density,direction,a,b); }
+  void setBox (dReal density, dReal lx, dReal ly, dReal lz)
+    { dMassSetBox (this,density,lx,ly,lz); }
+  void adjust (dReal newmass)
+    { dMassAdjust (this,newmass); }
+  void translate (dReal x, dReal y, dReal z)
+    { dMassTranslate (this,x,y,z); }
+  void rotate (dMatrix3 R)
+    { dMassRotate (this,R); }
+#endif
+
+} dMass;
 
 
 #ifdef __cplusplus
