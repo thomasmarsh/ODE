@@ -171,6 +171,7 @@ int TriStride = sizeof(StridedTri);
 */
 
 
+int dGeomTriMeshGetTriangleCount (dGeomID g);
 
 
 #ifdef __cplusplus
