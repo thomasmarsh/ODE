@@ -123,7 +123,7 @@ static void nearCallback (void *data, dGeomID o1, dGeomID o2)
 	if (b1 && b2 && dAreConnected(b1, b2))
 		return;
 	
-	const int N = 10;
+	const int N = 4;
 	dContact contact[N];
 	n = dCollide (o1,o2,N,&contact[0].geom,sizeof(dContact));
 	if (n > 0) {
