@@ -1256,7 +1256,10 @@ static void contactGetInfo2 (dxJointContact *j, dxJoint::Info2 *info)
   if (j->contact.surface.mode & dContactSoftERP)
     erp = j->contact.surface.soft_erp;
   dReal k = info->fps * erp;
-  info->c[0] = k*j->contact.geom.depth;
+  dReal depth = j->contact.geom.depth - j->world->contactp.min_depth;
+  if (depth < 0) depth = 0;
+  dReal maxvel = j->world->contactp.max_vel;
+  if (k*depth > maxvel) info->c[0] = maxvel; else info->c[0] = k*depth;
   if (j->contact.surface.mode & dContactSoftCFM)
     info->cfm[0] = j->contact.surface.soft_cfm;
 

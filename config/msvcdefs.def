@@ -300,3 +300,12 @@ dWorldSetERP
 dWorldSetGravity
 dWorldStep
 dWorldStepFast1
+dWorldQuickStep
+dWorldSetQuickStepNumIterations
+dWorldGetQuickStepNumIterations
+dWorldSetQuickStepW
+dWorldGetQuickStepW
+dWorldSetContactMaxCorrectingVel
+dWorldGetContactMaxCorrectingVel
+dWorldSetContactSurfaceLayer
+dWorldGetContactSurfaceLayer
