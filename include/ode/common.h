@@ -282,6 +282,14 @@ enum {
 };
 
 
+/* angular motor mode numbers */
+
+enum{
+  dAMotorUser = 0,
+  dAMotorEuler = 1
+};
+
+
 #ifdef __cplusplus
 }
 #endif
