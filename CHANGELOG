@@ -9,13 +9,16 @@ the rules for this file:
 
 ------------------------------------------------------------------------------
 
+
+07/02/03 martin
+
+	* added dMassSet*Total().
+
 07/01/03 martin
 
 	* added joint limits and motors to universal joints.
 
 	* reversed the polarity of the dJOINT_REVERSE flag.
-
-	* added dMassSetBoxTotal().
 
 06/30/03 russ
 
