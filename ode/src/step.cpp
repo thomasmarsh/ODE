@@ -292,15 +292,18 @@ void dInternalStepIsland_x1 (dxWorld *world, dxBody **body, int nb,
   // if there are constraints, compute cforce
   if (m > 0) {
     // create a constraint equation right hand side vector `c', a constraint
-    // force mixing vector `cfm', and LCP low and high bound vectors.
+    // force mixing vector `cfm', and LCP low and high bound vectors, and an
+    // 'findex' vector.
     dReal *c = (dReal*) ALLOCA (m*sizeof(dReal));
     dReal *cfm = (dReal*) ALLOCA (m*sizeof(dReal));
     dReal *lo = (dReal*) ALLOCA (m*sizeof(dReal));
     dReal *hi = (dReal*) ALLOCA (m*sizeof(dReal));
+    int *findex = (int*) alloca (m*sizeof(int));
     dSetZero (c,m);
     dSetValue (cfm,m,world->global_cfm);
     dSetValue (lo,m,-dInfinity);
     dSetValue (hi,m, dInfinity);
+    for (i=0; i<m; i++) findex[i] = -1;
 
     // create (m,6*nb) jacobian mass matrix `J', and fill it with constraint
     // data. also fill the c vector.
@@ -328,7 +331,12 @@ void dInternalStepIsland_x1 (dxWorld *world, dxBody **body, int nb,
       Jinfo.cfm = cfm + ofs[i];
       Jinfo.lo = lo + ofs[i];
       Jinfo.hi = hi + ofs[i];
+      Jinfo.findex = findex + ofs[i];
       joint[i]->vtable->getInfo2 (joint[i],&Jinfo);
+      // adjust returned findex values for global index numbering
+      for (j=0; j<info[i].m; j++) {
+	if (findex[ofs[i] + j] >= 0) findex[ofs[i] + j] += ofs[i];
+      }
     }
 
     // compute A = J*invM*J'
@@ -375,7 +383,7 @@ void dInternalStepIsland_x1 (dxWorld *world, dxBody **body, int nb,
 #   endif
     dReal *lambda = (dReal*) ALLOCA (m * sizeof(dReal));
     dReal *residual = (dReal*) ALLOCA (m * sizeof(dReal));
-    dSolveLCP (m,A,lambda,rhs,residual,nub,lo,hi,0);
+    dSolveLCP (m,A,lambda,rhs,residual,nub,lo,hi,findex);
 
 //  OLD WAY - direct factor and solve
 //
