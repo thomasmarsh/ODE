@@ -1161,11 +1161,13 @@ static void contactInit (dxJointContact *j)
 {
   // default frictionless contact. hmmm, this info gets overwritten straight
   // away anyway, so why bother?
+#if 0 /* so don't bother ;) */
   j->contact.surface.mode = 0;
   j->contact.surface.mu = 0;
   dSetZero (j->contact.geom.pos,4);
   dSetZero (j->contact.geom.normal,4);
   j->contact.geom.depth = 0;
+#endif
 }
 
 

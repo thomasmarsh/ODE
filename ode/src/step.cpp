@@ -329,8 +329,9 @@ void dInternalStepIsland_x1 (dxWorld *world, dxBody * const *body, int nb,
   // @@@ check computation of rotational force.
   dReal *I = (dReal*) ALLOCA (3*nb*4 * sizeof(dReal));
   dReal *invI = (dReal*) ALLOCA (3*nb*4 * sizeof(dReal));
-  dSetZero (I,3*nb*4);
-  dSetZero (invI,3*nb*4);
+
+  //dSetZero (I,3*nb*4);
+  //dSetZero (invI,3*nb*4);
   for (i=0; i<nb; i++) {
     dReal tmp[12];
     // compute inertia tensor in global frame
@@ -414,8 +415,8 @@ void dInternalStepIsland_x1 (dxWorld *world, dxBody * const *body, int nb,
   // assemble some body vectors: fe = external forces, v = velocities
   dReal *fe = (dReal*) ALLOCA (n6 * sizeof(dReal));
   dReal *v = (dReal*) ALLOCA (n6 * sizeof(dReal));
-  dSetZero (fe,n6);
-  dSetZero (v,n6);
+  //dSetZero (fe,n6);
+  //dSetZero (v,n6);
   for (i=0; i<nb; i++) {
     for (j=0; j<3; j++) fe[i*6+j] = body[i]->facc[j];
     for (j=0; j<3; j++) fe[i*6+3+j] = body[i]->tacc[j];
@@ -482,11 +483,11 @@ void dInternalStepIsland_x1 (dxWorld *world, dxBody * const *body, int nb,
     dTimerNow ("compute A");
 #   endif
     dReal *JinvM = (dReal*) ALLOCA (m*nskip*sizeof(dReal));
-    dSetZero (JinvM,m*nskip);
+    //dSetZero (JinvM,m*nskip);
     dMultiply0 (JinvM,J,invM,m,n6,n6);
     int mskip = dPAD(m);
     dReal *A = (dReal*) ALLOCA (m*mskip*sizeof(dReal));
-    dSetZero (A,m*mskip);
+    //dSetZero (A,m*mskip);
     dMultiply2 (A,JinvM,J,m,n6,m);
 
     // add cfm to the diagonal of A
@@ -501,11 +502,11 @@ void dInternalStepIsland_x1 (dxWorld *world, dxBody * const *body, int nb,
     dTimerNow ("compute rhs");
 #   endif
     dReal *tmp1 = (dReal*) ALLOCA (n6 * sizeof(dReal));
-    dSetZero (tmp1,n6);
+    //dSetZero (tmp1,n6);
     dMultiply0 (tmp1,invM,fe,n6,n6,1);
     for (i=0; i<n6; i++) tmp1[i] += v[i]/stepsize;
     dReal *rhs = (dReal*) ALLOCA (m * sizeof(dReal));
-    dSetZero (rhs,m);
+    //dSetZero (rhs,m);
     dMultiply0 (rhs,J,tmp1,m,n6,1);
     for (i=0; i<m; i++) rhs[i] = c[i]/stepsize - rhs[i];
 
@@ -640,8 +641,9 @@ void dInternalStepIsland_x2 (dxWorld *world, dxBody * const *body, int nb,
   // @@@ check computation of rotational force.
   dReal *I = (dReal*) ALLOCA (3*nb*4 * sizeof(dReal));
   dReal *invI = (dReal*) ALLOCA (3*nb*4 * sizeof(dReal));
-  dSetZero (I,3*nb*4);
-  dSetZero (invI,3*nb*4);
+
+  //dSetZero (I,3*nb*4);
+  //dSetZero (invI,3*nb*4);
   for (i=0; i<nb; i++) {
     dReal tmp[12];
     // compute inertia tensor in global frame
@@ -885,7 +887,7 @@ void dInternalStepIsland_x2 (dxWorld *world, dxBody * const *body, int nb,
     dTimerNow ("compute rhs");
 #   endif
     dReal *tmp1 = (dReal*) ALLOCA (nb*8 * sizeof(dReal));
-    dSetZero (tmp1,nb*8);
+    //dSetZero (tmp1,nb*8);
     // put v/h + invM*fe into tmp1
     for (i=0; i<nb; i++) {
       dReal body_invMass = body[i]->invMass;
@@ -897,7 +899,7 @@ void dInternalStepIsland_x2 (dxWorld *world, dxBody * const *body, int nb,
     }
     // put J*tmp1 into rhs
     dReal *rhs = (dReal*) ALLOCA (m * sizeof(dReal));
-    dSetZero (rhs,m);
+    //dSetZero (rhs,m);
     for (i=0; i<nj; i++) {
       dReal *JJ = J + 2*8*ofs[i];
       Multiply0_p81 (rhs+ofs[i],JJ,

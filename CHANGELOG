@@ -9,6 +9,11 @@ the rules for this file:
 
 ------------------------------------------------------------------------------
 
+10/22/03 adam
+
+	* apply Nguyen Binh's work for removing many dSetZero() calls
+	and some other extraneous initializations.
+
 07/29/03 martin
 
 	* added dJointAdd*Torque/Force().
