@@ -245,7 +245,7 @@ void dRtoQ (const dMatrix3 R, dQuaternion q)
 
     case_0:
     s = dSqrt((_R(0,0) - (_R(1,1) + _R(2,2))) + 1);
-    q[1] = 0.5 * s;
+    q[1] = REAL(0.5) * s;
     s = REAL(0.5) * dRecip(s);
     q[2] = (_R(0,1) + _R(1,0)) * s;
     q[3] = (_R(2,0) + _R(0,2)) * s;
@@ -254,7 +254,7 @@ void dRtoQ (const dMatrix3 R, dQuaternion q)
 
     case_1:
     s = dSqrt((_R(1,1) - (_R(2,2) + _R(0,0))) + 1);
-    q[2] = 0.5 * s;
+    q[2] = REAL(0.5) * s;
     s = REAL(0.5) * dRecip(s);
     q[3] = (_R(1,2) + _R(2,1)) * s;
     q[1] = (_R(0,1) + _R(1,0)) * s;
@@ -263,7 +263,7 @@ void dRtoQ (const dMatrix3 R, dQuaternion q)
 
     case_2:
     s = dSqrt((_R(2,2) - (_R(0,0) + _R(1,1))) + 1);
-    q[3] = 0.5 * s;
+    q[3] = REAL(0.5) * s;
     s = REAL(0.5) * dRecip(s);
     q[1] = (_R(2,0) + _R(0,2)) * s;
     q[2] = (_R(1,2) + _R(2,1)) * s;
