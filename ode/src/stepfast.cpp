@@ -825,6 +825,7 @@ dInternalStepIslandFast (dxWorld * world, dxBody * const *bodies, int nb, dxJoin
                                 body->facc[0] = saveFacc[b * 4 + 0];
                                 body->facc[1] = saveFacc[b * 4 + 1];
                                 body->facc[2] = saveFacc[b * 4 + 2];
+				body->facc[3] = 0;
                         }
 
 		}
