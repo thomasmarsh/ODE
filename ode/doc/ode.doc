@@ -134,13 +134,15 @@ Here are the features:
 @* New collision utility function: @func{dInfiniteAABB()}.
 @* Finally implemented the @c{dBodyAddXXX} functions. Also implemented
    @func{dBodyGetRelPointPos()} and @func{dBodyGetRelPointVel()}.
-@* New geometry type: GeomGroup.
+@* New geometry types: capped cylinder, GeomGroup, GeomTransform.
+   Also a new documentation section on composite objects.
 @* New functions for AABBs: @func{dGeomGetAABB()}, @func{dGeomGetSpaceAABB()}.
 @* API change: geoms do not have to be added to a space on creation.
 @* API change: user defined collision functions have to fill in the @c{g1}
    and @c{g2} members of the @c{dContactGeom} structure.
 @* API change: added the @c{aabb_test} and @c{dtor} fields to @c{dGeomClass}.
 @* Implemented capped-cylinder collision (except for cylinder-to-box).
+@* Added @func{dMassAdd()}.
 }
 
 
@@ -1760,6 +1762,13 @@ Given mass parameters for some object, adjust them to represent the object
 rotated by @arg{R} relative to the body frame.
 }
 
+@funcdef{
+void dMassAdd (dMass *a, const dMass *b);
+}{
+Add the mass @arg{b} to the mass @arg{a}.
+}
+
+
 #............................................................................
 @section{Math functions}
 
@@ -1845,7 +1854,7 @@ This makes them particularly easy to connect to dynamics objects.
 If other points of reference are required, transformation objects should be
 used to encapsulate the primitives.
 
-@subsection{Sphere functions}
+@subsection{Sphere class}
 
 @funcdef{
 dGeomID dCreateSphere (dSpaceID space, dReal radius);
@@ -1870,7 +1879,7 @@ Return the radius of the given sphere.
 }
 
 
-@subsection{Box functions}
+@subsection{Box class}
 
 @funcdef{
 dGeomID dCreateBox (dSpaceID space, dReal lx, dReal ly, dReal lz);
@@ -1896,7 +1905,7 @@ Return in @arg{result} the side lengths of the given @arg{box}.
 }
 
 
-@subsection{Plane functions}
+@subsection{Plane class}
 
 @funcdef{
 dGeomID dCreatePlane (dSpaceID space,
@@ -1927,7 +1936,7 @@ Return in @arg{result} the parameters of the given @arg{plane}.
 }
 
 
-@subsection{Capped cylinder functions}
+@subsection{Capped cylinder class}
 
 @funcdef{
 dGeomID dCreateCCylinder (dSpaceID space, dReal radius, dReal length);
@@ -1962,7 +1971,7 @@ cylinder.
 }
 
 
-@subsection{Geometry object group functions}
+@subsection{Geometry Group class}
 
 Geometry object groups (GeomGroups) are a way to speed up collision detection
 in some situations.
@@ -2022,7 +2031,7 @@ If it is not in the GeomGroup then nothing is done.
 
 
 @funcdef{
-int dGeomGroupNumGeoms (dGeomID group);
+int dGeomGroupGetNumGeoms (dGeomID group);
 }{
 Return the number of geometry object in the given GeomGroup.
 }
@@ -2034,6 +2043,69 @@ dGeomID dGeomGroupGetGeom (dGeomID group, int i);
 Return a specific geometry object from the given GeomGroup.
 @arg{i} is the index of the object, it must be between 0 and @m{n-1}
 where @m{n} is the number of objects in the group.
+}
+
+
+@subsection{Geometry Transform class}
+
+A geometry transform object (T) encapsulates another geometry object (E),
+allowing E to be positioned and rotated arbitrarily with respect to its
+point of reference.
+
+Most geometry objects (like the sphere and box) have their point of reference
+corresponding to their center of mass, allowing them to be easily connected
+to dynamics objects.
+Transform objects give you more flexibiliy - for example, you can
+offset the center of a sphere, or rotate a cylinder so that its axis
+is something else.
+
+T mimics the object E that it encapsulates: T is inserted into a
+space and attached to a body as though it was E.
+E itself must @emph{not} be inserted into a space or attached to a body.
+E's position and rotation are set to constant values that say how it
+is transformed @emph{relative} to T.
+If E's position and rotation are left at their default values, T will
+behave exactly like E would have if you had used it directly.
+
+
+@funcdef{
+dGeomID dCreateGeomTransform (dSpaceID space);
+}{
+Create a new geometry transform object, and return its ID.
+If @arg{space} is nonzero, insert it into that space.
+On creation the encapsulated geometry is set to 0.
+}
+
+
+@funcdef{
+void dGeomTransformSetGeom (dGeomID g, dGeomID obj);
+}{
+Set the geometry object that the geometry transform @arg{g} encapsulates.
+The object @arg{obj} must not be inserted into any space, and must not be
+associated with any body.
+
+If @arg{g} has its clean-up mode turned on, and it already encapsulates
+an object, the old object will be destroyed before it is replaced with the
+new one.
+}
+
+
+@funcdef{
+dGeomID dGeomTransformGetGeom (dGeomID g);
+}{
+Get the geometry object that the geometry transform @arg{g} encapsulates.
+}
+
+
+@funcdef{
+void dGeomTransformSetCleanup (dGeomID g, int mode);
+int dGeomTransformGetCleanup (dGeomID g);
+}{
+Set and get the clean-up mode of geometry transform @arg{g}.
+If the clean-up mode is 1, then the encapsulated object will be destroyed
+when the geometry transform is destroyed.
+If the clean-up mode is 0 this does not happen.
+The default clean-up mode is 0.
 }
 
 
@@ -2110,6 +2182,45 @@ This returns 0 if the @func{dSpaceCollide()} function is not currently
 being called.
 This is much faster than calling @func{dGeomGetAABB()}.
 }
+
+
+@subsection{Composite objects}
+
+Consider the following collision objects: @list{
+@*	A table that is made out of a box for the top and a box for each leg.
+@*	A branch of a tree that is made out of several capped cylinders
+	joined together.
+@*	A molecule that has spheres representing each atom.
+}
+If these objects are meant to be @emph{rigid} then it is necessary to use
+a single rigid body to represent each of them.
+But there are no single geometry classes that can represent things like a
+table or a molecule.
+The solution is to use a @emph{composite} collision object that is a
+combination of several geometry objects.
+
+No extra functions are needed to manage composite objects: simply create
+each component geometry object and attach it to the same body.
+To move and rotate the component objects with respect to each other,
+use geometry transforms to encapsulate them.
+That's all there is to it!
+
+However there is one @emph{caveat}: You should never create a composite
+object that will result in collision points being generated very close
+together.
+For example, consider a table that is made up of a box for the top and four
+boxes for the legs.
+If the legs are flush with the top, and the table is lying on the ground on
+its side, then the contact points generated for the boxes may coincide
+where the legs join to the top.
+ODE does not currently optimize away coincident contact points, so this
+situation can lead to numerical errors and strange behavior.
+
+In this example the table geometry should be adjusted so that the legs are
+not flush with the sides, making it much more unlikely that coincident
+contact points will be generated.
+In general, avoid having different contact surfaces that overlap,
+or that line up along their edges.
 
 
 @section{Collision detection}
