@@ -5,7 +5,7 @@
 #       msvc		microsoft visual C/C++
 #       mingw		minimalist GNU for windows
 #       cygwin		cygnus GNU for windows
-#       unix-gcc	GNU gcc on windows
+#       unix-gcc	GNU gcc on unix
 #       unix-generic	generic unix compiler. you may need to edit the CC
 #			variable in makefile.unix-generic
 #	osx		Mac OS-X, with the gnu compiler.
