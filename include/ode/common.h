@@ -23,15 +23,27 @@
 #ifndef _ODE_COMMON_H_
 #define _ODE_COMMON_H_
 
-#include "ode/error.h"
-#include "ode/config.h"
-
-#define __USE_ISOC9X 1	/* necessary to get HUGE_VALF on GNU systems? */
-#include <math.h>
+#include <ode/config.h>
+#include <ode/error.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+
+/* configuration stuff */
+
+/* the efficient alignment. most platforms align data structures to some
+ * number of bytes, but this is not always the most efficient alignment.
+ * for example, many x86 compilers align to 4 bytes, but on a pentium it
+ * is important to align doubles to 8 byte boundaries (for speed), and
+ * the 4 floats in a SIMD register to 16 byte boundaries. many other
+ * platforms have similar behavior. setting a larger alignment can waste
+ * a (very) small amount of memory. NOTE: this number must be a power of
+ * two. this is set to 16 by default.
+ */
+#define EFFICIENT_ALIGNMENT 16
+
 
 /* constants */
 
@@ -88,27 +100,6 @@ typedef float dReal;
 typedef double dReal;
 #else
 #error You must #define dSINGLE or dDOUBLE
-#endif
-
-
-/* infinity, for various platforms */
-
-#if defined(WIN32) && (defined(MSVC) || defined(MINGW))
-static union { unsigned char __c[4]; float __f; } __ode_huge_valf =
-  {{0,0,0x80,0x7f}};
-#define _INFINITY4 (__ode_huge_valf.__f)
-static union { unsigned char __c[8]; double __d; } __ode_huge_val =
-  {{0,0,0,0,0,0,0xf0,0x7f }};
-#define _INFINITY8 (__ode_huge_val.__d)
-#else
-#define _INFINITY8 HUGE_VAL
-#define _INFINITY4 HUGE_VALF
-#endif
-
-#if defined(dSINGLE)
-#define dInfinity _INFINITY4
-#else
-#define dInfinity _INFINITY8
 #endif
 
 

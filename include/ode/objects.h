@@ -23,8 +23,8 @@
 #ifndef _ODE_OBJECTS_H_
 #define _ODE_OBJECTS_H_
 
-#include "ode/common.h"
-#include "ode/mass.h"
+#include <ode/common.h>
+#include <ode/mass.h>
 
 #ifdef __cplusplus
 extern "C" {

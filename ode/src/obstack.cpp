@@ -20,14 +20,10 @@
  *                                                                       *
  *************************************************************************/
 
-#include <string.h>
-#include <errno.h>
-#include <stdio.h>
+#include <ode/common.h>
+#include <ode/error.h>
+#include <ode/memory.h>
 #include "obstack.h"
-#include "ode/config.h"
-#include "ode/common.h"
-#include "ode/error.h"
-#include "ode/memory.h"
 
 //****************************************************************************
 // macros and constants

@@ -2,10 +2,8 @@
 TODO BEFORE NEXT RELEASE
 ------------------------
 
-ball & socket joint limits and motors.
-
-auto-build env on windows: 3 compilers, debug/release, short/double =
-12 combinations --> auto logs.
+windows DLL building and unix shared libs. libtool?
+also MSVC project files.
 
 dBodyGetPointVel()
 
@@ -20,11 +18,6 @@ functions to allow systems to be copied/cloned
 	dCloneJoint()
 	dCloseBodyAndJointList()
 	dCloneIsland()
-
-handle infinities better: HUGE_VALF is not commanly defined, it seems.
-get rid of the __USE_ISOC9X macro in common.h
-perhaps just use a "big" number instead of the actual IEEE infinity, it's
-more portable anyway.
 
 this collision rule:
     // no contacts if both geoms on the same body, and the body is not 0
@@ -412,3 +405,14 @@ collision flags - 0xffff mask.
 dBodyGetFiniteRotationMode() / ...Axis()
 
 dBodyAddForceAtRelPos()
+
+ball & socket joint limits and motors.
+
+auto-build env on windows: 3 compilers, debug/release, short/double =
+12 combinations --> auto logs.
+
+handle infinities better: HUGE_VALF is not commanly defined, it seems.
+get rid of the __USE_ISOC9X macro in common.h
+perhaps just use a "big" number instead of the actual IEEE infinity, it's
+more portable anyway.
+	--> new config system

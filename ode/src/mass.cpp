@@ -20,9 +20,10 @@
  *                                                                       *
  *************************************************************************/
 
-#include "ode/ode.h"
-#include "ode/odemath.h"
-#include "ode/matrix.h"
+#include <ode/config.h>
+#include <ode/mass.h>
+#include <ode/odemath.h>
+#include <ode/matrix.h>
 
 
 #define _I(i,j) I[(i)*4+(j)]

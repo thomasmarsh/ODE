@@ -30,12 +30,8 @@ TODO
 
 */
 
-#include <string.h>
-#include <alloca.h>
-#include <malloc.h>		// for alloca under windows
-#include "ode/common.h"
-#include "ode/timer.h"
-#include "ode/config.h"
+#include <ode/common.h>
+#include <ode/timer.h>
 
 // misc defines
 #define ALLOCA dALLOCA16
@@ -98,6 +94,15 @@ double dTimerTicksPerSecond()
 // time stamp counter is read. the CPUID instruction is used to serialize.
 
 #if defined(PENTIUM) && !defined(WIN32)
+
+// we need to know the clock rate so that the timing function can report
+// accurate times. this number only needs to be set accurately if we're
+// doing performance tests and care about real-world time numbers - otherwise,
+// just ignore this. i have not worked out how to determine this number
+// automatically yet.
+
+#define PENTIUM_HZ (500e6)
+
 
 static inline void getClockCount (unsigned long cc[2])
 {

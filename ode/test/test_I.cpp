@@ -36,10 +36,9 @@ typical errors for each test cycle are about 1e-5 ... 1e-4.
 */
 
 
-#include <stdio.h>
 #include <time.h>
-#include "ode/ode.h"
-#include "drawstuff/drawstuff.h"
+#include <ode/ode.h>
+#include <drawstuff/drawstuff.h>
 
 #ifdef MSVC
 #pragma warning(disable:4244 4305)  // for VC++, no precision loss complaints

@@ -20,11 +20,8 @@
  *                                                                       *
  *************************************************************************/
 
-#include <stdio.h>
 #include <setjmp.h>
-#include <string.h>
-
-#include "ode/ode.h"
+#include <ode/ode.h>
 
 #ifdef MSVC
 #pragma warning(disable:4244 4305)  // for VC++, no precision loss complaints

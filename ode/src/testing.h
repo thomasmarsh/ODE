@@ -25,7 +25,7 @@
 #ifndef _ODE_TESTING_H_
 #define _ODE_TESTING_H_
 
-#include "ode/common.h"
+#include <ode/common.h>
 #include "array.h"
 
 

@@ -20,10 +20,8 @@
  *                                                                       *
  *************************************************************************/
 
-#include <stdio.h>
-#include <string.h>
-#include "ode/ode.h"
-#include "drawstuff/drawstuff.h"
+#include <ode/ode.h>
+#include <drawstuff/drawstuff.h>
 
 #ifdef MSVC
 #pragma warning(disable:4244 4305)  // for VC++, no precision loss complaints
@@ -332,7 +330,7 @@ int main (int argc, char **argv)
 
   world = dWorldCreate();
   space = dHashSpaceCreate();
-  contactgroup = dJointGroupCreate (1000000);
+  contactgroup = dJointGroupCreate (0);
   dWorldSetGravity (world,0,0,-0.5);
   dWorldSetCFM (world,1e-5);
   dCreatePlane (space,0,0,1,0);

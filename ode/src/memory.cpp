@@ -31,13 +31,11 @@
 // sequence number `_d_seqstop' or pointer value `_d_ptrstop'. these variables
 // are global and can be set in the debugger.
 
-#include <malloc.h>
-#include "ode/memory.h"
-#include "ode/error.h"
+#include <ode/config.h>
+#include <ode/memory.h>
+#include <ode/error.h>
 
 #ifdef dDEBUG_ALLOC
-
-#include <string.h>
 
 // when debugging, this is a header that it put at start of all blocks.
 // it contains `padding', which are PADSIZE elements of known value just
@@ -234,8 +232,6 @@ void dAllocDontReport (void *ptr)
 
 
 #ifdef dDEBUG_ALLOC
-
-#include <stdio.h>
 
 static void printReport()
 {

@@ -20,11 +20,8 @@
  *                                                                       *
  *************************************************************************/
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <stdarg.h>
-
-#include "ode/error.h"
+#include <ode/config.h>
+#include <ode/error.h>
 
 
 static dMessageFunction *error_function = 0;

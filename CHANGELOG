@@ -9,6 +9,12 @@ the rules for this file:
 
 ------------------------------------------------------------------------------
 
+12/24/01 russ
+
+	* reworked the build system to make it more cross-platform.
+	  there is now a single top-level makefile and a configurator.c
+	  program. see the INSTALL file for details.
+
 12/04/01 russ
 
 	* the "angular motor" joint has been completed, and a new section
@@ -23,7 +29,7 @@ the rules for this file:
 11/22/01 russ
 
 	* replaced the mmap()-based joint group stack (stack.cpp) with a
-          malloc()-based arena stack (obstack.cpp). this will be more
+	  malloc()-based arena stack (obstack.cpp). this will be more
 	  portable and should not impact performance.
 
 11/12/01 russ

@@ -20,6 +20,8 @@
  *                                                                       *
  *************************************************************************/
 
+@@@ this file should not be compiled any more @@@
+
 #include <string.h>
 #include <errno.h>
 #include "stack.h"

@@ -23,17 +23,14 @@
 // this source file is mostly concerned with the data structures, not the
 // numerics.
 
-#include <stdio.h>
-#include <alloca.h>
-#include <malloc.h>		// for alloca under windows
 #include "objects.h"
-#include "ode/ode.h"
+#include <ode/ode.h>
 #include "joint.h"
-#include "ode/odemath.h"
-#include "ode/matrix.h"
+#include <ode/odemath.h>
+#include <ode/matrix.h>
 #include "step.h"
-#include "ode/memory.h"
-#include "ode/error.h"
+#include <ode/memory.h>
+#include <ode/error.h>
 
 // misc defines
 #define ALLOCA dALLOCA16

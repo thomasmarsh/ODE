@@ -20,8 +20,8 @@
  *                                                                       *
  *************************************************************************/
 
-#include "ode/common.h"
-#include "ode/odemath.h"
+#include <ode/common.h>
+#include <ode/odemath.h>
 
 
 // get some math functions under windows
@@ -30,6 +30,13 @@
 #ifndef CYGWIN			// added by andy for cygwin
 #define copysign(a,b) ((dReal)_copysign(a,b))
 #endif				// added by andy for cygwin
+#endif
+
+
+// infinity declaration
+
+#ifdef DINFINITY_DECL
+DINFINITY_DECL
 #endif
 
 
