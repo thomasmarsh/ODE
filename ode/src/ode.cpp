@@ -501,7 +501,7 @@ void dBodyAddRelForce (dBodyID b, dReal fx, dReal fy, dReal fz)
   t1[1] = fy;
   t1[2] = fz;
   t1[3] = 0;
-  dMULTIPLY1_331 (t2,b->R,t1);
+  dMULTIPLY0_331 (t2,b->R,t1);
   b->facc[0] += t2[0];
   b->facc[1] += t2[1];
   b->facc[2] += t2[2];
@@ -516,10 +516,104 @@ void dBodyAddRelTorque (dBodyID b, dReal fx, dReal fy, dReal fz)
   t1[1] = fy;
   t1[2] = fz;
   t1[3] = 0;
-  dMULTIPLY1_331 (t2,b->R,t1);
+  dMULTIPLY0_331 (t2,b->R,t1);
   b->tacc[0] += t2[0];
   b->tacc[1] += t2[1];
   b->tacc[2] += t2[2];
+}
+
+
+void dBodyAddForceAtPos (dBodyID b, dReal fx, dReal fy, dReal fz,
+			 dReal px, dReal py, dReal pz)
+{
+  dAASSERT (b);
+  b->facc[0] += fx;
+  b->facc[1] += fy;
+  b->facc[2] += fz;
+  dVector3 f,q;
+  f[0] = fx;
+  f[1] = fy;
+  f[2] = fz;
+  q[0] = px - b->pos[0];
+  q[1] = py - b->pos[1];
+  q[2] = pz - b->pos[2];
+  dCROSS (b->tacc,+=,q,f);
+}
+
+
+void dBodyAddRelForceAtPos (dBodyID b, dReal fx, dReal fy, dReal fz,
+			    dReal px, dReal py, dReal pz)
+{
+  dAASSERT (b);
+  dVector3 frel,f;
+  frel[0] = fx;
+  frel[1] = fy;
+  frel[2] = fz;
+  frel[3] = 0;
+  dMULTIPLY0_331 (f,b->R,frel);
+  b->facc[0] += f[0];
+  b->facc[1] += f[1];
+  b->facc[2] += f[2];
+  dVector3 q;
+  q[0] = px - b->pos[0];
+  q[1] = py - b->pos[1];
+  q[2] = pz - b->pos[2];
+  dCROSS (b->tacc,+=,q,f);
+}
+
+
+void dBodyAddRelForceAtRelPos (dBodyID b, dReal fx, dReal fy, dReal fz,
+			       dReal px, dReal py, dReal pz)
+{
+  dAASSERT (b);
+  dVector3 frel,prel,f,p;
+  frel[0] = fx;
+  frel[1] = fy;
+  frel[2] = fz;
+  frel[3] = 0;
+  prel[0] = px;
+  prel[1] = py;
+  prel[2] = pz;
+  prel[3] = 0;
+  dMULTIPLY0_331 (f,b->R,frel);
+  dMULTIPLY0_331 (p,b->R,prel);
+  b->facc[0] += f[0];
+  b->facc[1] += f[1];
+  b->facc[2] += f[2];
+  dCROSS (b->tacc,+=,p,f);
+}
+
+
+void dBodyGetRelPointPos (dBodyID b, dReal px, dReal py, dReal pz,
+			  dVector3 result)
+{
+  dAASSERT (b);
+  dVector3 prel,p;
+  prel[0] = px;
+  prel[1] = py;
+  prel[2] = pz;
+  prel[3] = 0;
+  dMULTIPLY0_331 (p,b->R,prel);
+  result[0] = p[0] + b->pos[0];
+  result[1] = p[1] + b->pos[1];
+  result[2] = p[2] + b->pos[2];
+}
+
+
+void dBodyGetRelPointVel (dBodyID b, dReal px, dReal py, dReal pz,
+			  dVector3 result)
+{
+  dAASSERT (b);
+  dVector3 prel,p;
+  prel[0] = px;
+  prel[1] = py;
+  prel[2] = pz;
+  prel[3] = 0;
+  dMULTIPLY0_331 (p,b->R,prel);
+  result[0] = b->lvel[0];
+  result[1] = b->lvel[1];
+  result[2] = b->lvel[2];
+  dCROSS (result,+=,b->avel,p);
 }
 
 
