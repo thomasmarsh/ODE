@@ -141,3 +141,12 @@ dBodyGetQuaternion
 dRandInt
 dBodySetGravityMode
 dBodyGetGravityMode
+dBodyAddRelTorque
+dBodyAddRelForceAtRelPos
+dJointCreateUniversal
+dJointSetUniversalAnchor
+dJointSetUniversalAxis1
+dJointSetUniversalAxis2
+dJointGetUniversalAnchor
+dJointGetUniversalAxis1
+dJointGetUniversalAxis2
