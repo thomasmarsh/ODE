@@ -120,6 +120,48 @@ ODE_PREGEN_OBJECTS=$(ODE_PREGEN_SRC:%.c=%$(OBJ))
 ODE_OBJECTS=$(ODE_SRC:%.cpp=%$(OBJ)) $(ODE_PREGEN_OBJECTS)
 DRAWSTUFF_OBJECTS=$(DRAWSTUFF_SRC:%.cpp=%$(OBJ)) $(RESOURCE_FILE)
 
+# side-effect variables causing creation of files containing lists of
+# filenames to be linked, to work around command-line-length limitations
+# on outdated 16-bit operating systems. because of command-line length
+# limitations we cannot issue a link command with all object filenames
+# specified (because this command is too long and overflows the command
+# buffer), but instead must create a file containing all object filenames
+# to be linked, and specify this list-file with @listfile on the command-line.
+#
+# the difficult part is doing this in a flexible way; we don't want to
+# hard-code the to-be-linked object filenames in a file, but instead
+# want to dynamically create a file containing a list of all object filenames
+# within the $XXX_OBJECTS makefile variables. to do this, we use side-effect
+# variables.
+#
+# idea: when these variables are EVALUATED (i.e. later during rule execution,
+# not now during variable definition), they cause a SIDE EFFECT which creates
+# a file with the list of all ODE object files. why the chicanery??? because
+# if we have a command-line length limitation, no SINGLE command we issue will 
+# be able to create a file containing all object files to be linked
+# (because that command itself would need to include all filenames, making
+# it too long to be executed). instead, we must use the gnu-make "foreach"
+# function, combined - probably in an unintended way - with the "shell" 
+# function. this is probably unintended because we are not using the "shell"
+# function to return a string value for variable evaluation, but are instead 
+# using the "shell" function to cause a side effect (appending of each filename
+# to the filename-list-file).
+#
+# one possible snag is that, forbidding use of any external EXE utilities and
+# relying only on the facilities provided by the outdated 16-bit operating
+# system, there is no way to issue a SERIES of commands which append text to
+# the end of a file WITHOUT adding newlines. therefore, the list of to-be-
+# linked object files is separated by newlines in the list file. fortunately,
+# the linker utility for this outdated 16-bit operating system accepts
+# filenames on separate lines in the list file.
+
+# remember: when we evaluate these variables later, this causes the creation
+# of the appropriate list file.
+ifeq ($(WINDOWS16),1)
+SIDE_EFFECT_ODE_OBJLIST = $(foreach o,$(ODE_OBJECTS),$(shell echo $(o) >> odeobj.txt ))
+SIDE_EFFECT_DRAWSTUFF_OBJLIST = $(foreach o,$(DRAWSTUFF_OBJECTS),$(shell echo $(o) >> dsobj.txt ))
+endif
+
 # library file names
 ODE_LIB=$(LIBPATH)/$(LIB_PREFIX)$(ODE_LIB_NAME)$(LIB_SUFFIX)
 DRAWSTUFF_LIB=$(LIBPATH)/$(LIB_PREFIX)$(DRAWSTUFF_LIB_NAME)$(LIB_SUFFIX)
@@ -151,16 +193,49 @@ ifndef ODE_LIB_AR_RULE
 ODE_LIB_AR_RULE=$(AR)$@
 endif
 
-$(ODE_LIB): $(ODE_OBJECTS)
+$(ODE_LIB): pre_ode_lib $(ODE_OBJECTS)
+ifeq ($(WINDOWS16),1)
+#   if we have a command-line-length limitation, then dynamically create
+#   a file containing all object filenames, and pass this file to the linker
+#   instead of directly specifying the object filenames on the command line.
+#   the very evaluation of the following variable causes creation of file
+#   odeobj.txt
+	$(SIDE_EFFECT_ODE_OBJLIST)
+	$(ODE_LIB_AR_RULE) @odeobj.txt
+else
+#   if we have no command-line-length limitation, directly specify all
+#   object files to be linked.
 	$(ODE_LIB_AR_RULE) $(ODE_OBJECTS)
+endif
+
 ifdef RANLIB
 	$(RANLIB) $@
 endif
 
-$(DRAWSTUFF_LIB): $(DRAWSTUFF_OBJECTS)
+$(DRAWSTUFF_LIB): pre_drawstuff_lib $(DRAWSTUFF_OBJECTS)
+ifeq ($WINDOWS16),1)
+#   if we have a command-line-length limitation, then do the same as above.
+	$(SIDE_EFFECT_DRAWSTUFF_OBJLIST)
+	$(AR)$@ @dsobj.txt
+else
+#   if we have no command-line-length limitation, directly specify all object
+#   files to be linked.
 	$(AR)$@ $(DRAWSTUFF_OBJECTS)
+endif
 ifdef RANLIB
 	$(RANLIB) $@
+endif
+
+# rules to be executed before library linking starts: delete list file (if one is used)
+
+pre_ode_lib:
+ifeq ($WINDOWS16),1)
+	$(DEL_CMD) odeobj.txt
+endif
+
+pre_drawstuff_lib:
+ifeq ($WINDOWS16),1)
+	$(DEL_CMD) dsobj.txt
 endif
 
 clean:
