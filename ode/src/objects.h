@@ -29,6 +29,7 @@
 #include "ode/memory.h"
 #include "ode/common.h"
 #include "ode/mass.h"
+#include "array.h"
 
 
 // base class that does correct object allocation / deallocation
@@ -70,6 +71,8 @@ struct dxWorld : public dBase {
   dxJoint *firstjoint;		// joint linked list
   int nb,nj;			// number of bodies and joints in lists
   dVector3 gravity;		// gravity vector (m/s/s)
+  dReal global_erp;		// global error reduction parameter
+  dReal global_cfm;		// global costraint force mixing parameter
 };
 
 
