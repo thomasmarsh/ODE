@@ -123,7 +123,9 @@ Here are the features:
 @* Bug fixes.
 @* A few minor API changes so that the API matches the documentation.
 @* LCP solver optimized even more.
-@* Added the @func{dJointGetType()} function.
+@* Added the accessor functions: @func{dJointGetType()},
+   @func{dBodyGetForce()}, @func{dBodyGetTorque()}, @func{dBodyGetNumJoints()},
+   @func{dBodyGetJoint()}, @func{dJointGetBody()}.
 @* Added finite rotation functions: @func{dBodySetFiniteRotationMode()}
    and @func{dBodySetFiniteRotationAxis()}.
 @* New functions to set geometry parameters:
@@ -911,6 +913,17 @@ All other functions apply the force at the center of mass.
 
 
 @funcdef{
+const dReal * dBodyGetForce  (dBodyID);
+const dReal * dBodyGetTorque (dBodyID);
+}{
+Return the current accumulated force and torque vector.
+The returned pointers point to an array of 3 @c{dReal}s.
+The returned values are pointers to internal data structures, so the vectors
+are only valid until any changes are made to the rigid body system.
+}
+
+
+@funcdef{
 void dBodyGetRelPointPos (dBodyID, dReal px, dReal py, dReal pz,
                           dVector3 result);
 void dBodyGetRelPointVel (dBodyID, dReal px, dReal py, dReal pz,
@@ -962,6 +975,22 @@ you can call this function with the wheel's hinge axis as the argument to
 try and improve its behavior.
 }
 
+
+@funcdef{
+int dBodyGetNumJoints (dBodyID b);
+}{
+Return the number of joints that are attached to this body.
+}
+
+
+@funcdef{
+dJointID dBodyGetJoint (dBodyID, int index);
+}{
+Return a joint attached to this body, given by @arg{index}.
+Valid indexes are 0 to @m{n}-1 where @m{n} is the value returned by
+@func{dBodyGetNumJoints()}.
+}
+ 
 #############################################################################
 @chapter{Joint types and joint functions}
 
@@ -1055,6 +1084,18 @@ Get the joint's type. One of the following constants will be returned:
 @constdef{dJointTypeContact}{A contact joint.}
 @constdef{dJointTypeHinge2}{A hinge-2 joint.}
 @constdef{dJointTypeFixed}{A fixed joint.}
+}
+
+
+@funcdef{
+dBodyID dJointGetBody (dJointID, int index);
+}{
+Return the bodies that this joint connects. The @arg{index} must be either 0
+or 1, referring to either the ``first'' or ``second'' body.
+If one of these returned body IDs is zero, the joint connects the other body
+to the static environment.
+If both body IDs are zero, the joint is in ``limbo'' and has no effect on
+the simulation.
 }
 
 
