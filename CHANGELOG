@@ -9,6 +9,12 @@ the rules for this file:
 
 ------------------------------------------------------------------------------
 
+01/16/04 adam
+
+	* implement a bunch of ultra-simple TriMesh functions that were
+	in the headers but not in the code -- patch by
+	Vadim Macagon <vadim_mcagon@hotmail.com>
+
 12/01/03 adam
 
 	* implement dxHashSpace::collide2(), not particularly efficiently.
