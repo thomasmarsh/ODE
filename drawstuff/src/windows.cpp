@@ -35,7 +35,6 @@ static int winmain_called = 0;
 static HINSTANCE ghInstance = 0;
 static int gnCmdShow = 0;
 static HACCEL accelerators = 0;
-static HWND message_window = 0;
 
 //***************************************************************************
 // error and message handling
@@ -76,49 +75,11 @@ extern "C" void dsDebug (char *msg, ...)
 }
 
 
-// callback function for the message window
-
-static int CALLBACK msgWndProc (HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
-{
-  return FALSE;
-}
-
-
-
 extern "C" void dsPrint (char *msg, ...)
 {
   va_list ap;
   va_start (ap,msg);
-
-  // make sure message window is visible
-  ShowWindow (message_window,SW_SHOWNORMAL);
-
-  static int num_messages = 0;	  // number of messages in listbox
-  static char buffer[1000] = {0}; // current un-written lines
-
-  // add new message to buffer
-  buffer[sizeof(buffer)-1]=0;
-  int len = strlen(buffer);
-  _vsnprintf (buffer+len,sizeof(buffer)-len,msg,ap);
-
-  // pull lines out of buffer and add them to the message box list
-  for(;;) {
-    buffer[sizeof(buffer)-1]=0;
-    buffer[sizeof(buffer)-2]='\n';
-
-    char *eol = strchr (buffer,'\n');
-    if (!eol) return;
-    *eol = 0;
-
-    if (num_messages > 500) {
-      SendDlgItemMessage (message_window,IDC_LIST1,LB_DELETESTRING,0,0);
-      num_messages--;
-    }
-    SendDlgItemMessage (message_window,IDC_LIST1,LB_ADDSTRING,0,(long) buffer);
-    num_messages++;
-    SendDlgItemMessage (message_window,IDC_LIST1,LB_SETTOPINDEX,num_messages-1,0);
-    memmove (buffer,eol+1,sizeof(buffer) - ((eol-buffer) + 1));
-  }
+  vprintf (msg,ap);
 }
 
 //***************************************************************************
@@ -426,6 +387,21 @@ void dsPlatformSimLoop (int window_width, int window_height,
 }
 
 
+// this comes from an MSDN example. believe it or not, this is the recommended
+// way to get the console window handle.
+
+static HWND GetConsoleHwnd()
+{
+  // the console window title to a "unique" value, then find the window
+  // that has this title.
+  char title[1024];
+  wsprintf (title,"DrawStuff:%d/%d",GetTickCount(),GetCurrentProcessId());
+  SetConsoleTitle (title);
+  Sleep(40);			// wnsure window title has been updated
+  return FindWindow (NULL,title);
+}
+
+
 extern "C" int main (int argc, char **argv);
 
 
@@ -447,7 +423,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
   if (freopen ("CONIN$","rt",stdin)==0) dsError ("could not open stdin");
   if (freopen ("CONOUT$","wt",stdout)==0) dsError ("could not open stdout");
   if (freopen ("CONOUT$","wt",stderr)==0) dsError ("could not open stderr");
-  // hmmmm ... BringWindowToTop (GetConsoleWindow());
+  BringWindowToTop (GetConsoleHwnd());
+  SetConsoleTitle ("DrawStuff Messages");
 
   // register the window class if this is not the first instance
   if (!hPrevInstance) {
@@ -466,13 +443,9 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
   }
 
   // load accelerators
-  accelerators = LoadAccelerators (hInstance,MAKEINTRESOURCE(IDR_ACCELERATOR1));
+  accelerators = LoadAccelerators (hInstance,
+				   MAKEINTRESOURCE(IDR_ACCELERATOR1));
   if (accelerators==NULL) dsError ("could not load accelerators");
-
-  // create message dialog (this must not be done from the rendering thread because
-  // only the main GUI thread actually has a message handling loop).
-  message_window = CreateDialog (ghInstance,MAKEINTRESOURCE(IDD_MSGDLG),NULL,&msgWndProc);
-  if (message_window==NULL) dsError ("could not create message window");
 
   main (0,0);
 
