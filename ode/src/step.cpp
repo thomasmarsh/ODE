@@ -30,8 +30,13 @@
 #include "ode/matrix.h"
 #include "lcp.h"
 
+//****************************************************************************
+// misc defines
+
 #define FAST_FACTOR
 //#define TIMING
+
+#define ALLOCA dALLOCA16
 
 //****************************************************************************
 // debugging - comparison of various vectors and matrices produced by the
@@ -197,8 +202,8 @@ void dInternalStepIsland_x1 (dxWorld *world, dxBody **body, int nb,
   // frame, and compute the rotational force and add it to the torque
   // accumulator.
   // @@@ check computation of rotational force.
-  dReal *I = (dReal*) alloca (3*nb*4 * sizeof(dReal));
-  dReal *invI = (dReal*) alloca (3*nb*4 * sizeof(dReal));
+  dReal *I = (dReal*) ALLOCA (3*nb*4 * sizeof(dReal));
+  dReal *invI = (dReal*) ALLOCA (3*nb*4 * sizeof(dReal));
   dSetZero (I,3*nb*4);
   dSetZero (invI,3*nb*4);
   for (i=0; i<nb; i++) {
@@ -227,8 +232,8 @@ void dInternalStepIsland_x1 (dxWorld *world, dxBody **body, int nb,
   // constraints, the mixed unbounded + LCP constraints, and last the purely
   // LCP constraints.
   int m = 0;
-  dxJoint::Info1 *info = (dxJoint::Info1*) alloca (nj*sizeof(dxJoint::Info1));
-  int *ofs = (int*) alloca (nj*sizeof(int));
+  dxJoint::Info1 *info = (dxJoint::Info1*) ALLOCA (nj*sizeof(dxJoint::Info1));
+  int *ofs = (int*) ALLOCA (nj*sizeof(int));
   for (i=0; i<nj; i++) {
     joint[i]->vtable->getInfo1 (joint[i],info+i);
     dASSERT (info[i].m > 0 && info[i].m <= 6 &&
@@ -257,7 +262,7 @@ void dInternalStepIsland_x1 (dxWorld *world, dxBody **body, int nb,
   dTimerNow ("create mass matrix");
 # endif
   int nskip = dPAD (n6);
-  dReal *invM = (dReal*) alloca (n6*nskip*sizeof(dReal));
+  dReal *invM = (dReal*) ALLOCA (n6*nskip*sizeof(dReal));
   dSetZero (invM,n6*nskip);
   for (i=0; i<nb; i++) {
     dReal *MM = invM+(i*6)*nskip+(i*6);
@@ -271,8 +276,8 @@ void dInternalStepIsland_x1 (dxWorld *world, dxBody **body, int nb,
   }
 
   // assemble some body vectors: fe = external forces, v = velocities
-  dReal *fe = (dReal*) alloca (n6 * sizeof(dReal));
-  dReal *v = (dReal*) alloca (n6 * sizeof(dReal));
+  dReal *fe = (dReal*) ALLOCA (n6 * sizeof(dReal));
+  dReal *v = (dReal*) ALLOCA (n6 * sizeof(dReal));
   dSetZero (fe,n6);
   dSetZero (v,n6);
   for (i=0; i<nb; i++) {
@@ -283,16 +288,16 @@ void dInternalStepIsland_x1 (dxWorld *world, dxBody **body, int nb,
   }
 
   // this will be set to the velocity update
-  dReal *vnew = (dReal*) alloca (n6 * sizeof(dReal));
+  dReal *vnew = (dReal*) ALLOCA (n6 * sizeof(dReal));
   dSetZero (vnew,n6);
 
   // if there are constraints, compute cforce
   if (m > 0) {
     // create a constraint equation right hand side vector `c', and LCP low
     // and high bound vectors.
-    dReal *c = (dReal*) alloca (m*sizeof(dReal));
-    dReal *lo = (dReal*) alloca (m*sizeof(dReal));
-    dReal *hi = (dReal*) alloca (m*sizeof(dReal));
+    dReal *c = (dReal*) ALLOCA (m*sizeof(dReal));
+    dReal *lo = (dReal*) ALLOCA (m*sizeof(dReal));
+    dReal *hi = (dReal*) ALLOCA (m*sizeof(dReal));
     dSetZero (c,m);
     dSetValue (lo,m,-dInfinity);
     dSetValue (hi,m, dInfinity);
@@ -302,7 +307,7 @@ void dInternalStepIsland_x1 (dxWorld *world, dxBody **body, int nb,
 #   ifdef TIMING
     dTimerNow ("create J");
 #   endif
-    dReal *J = (dReal*) alloca (m*nskip*sizeof(dReal));
+    dReal *J = (dReal*) ALLOCA (m*nskip*sizeof(dReal));
     dSetZero (J,m*nskip);
     dxJoint::Info2 Jinfo;
     Jinfo.rowskip = nskip;
@@ -329,11 +334,11 @@ void dInternalStepIsland_x1 (dxWorld *world, dxBody **body, int nb,
 #   ifdef TIMING
     dTimerNow ("compute A");
 #   endif
-    dReal *JinvM = (dReal*) alloca (m*nskip*sizeof(dReal));
+    dReal *JinvM = (dReal*) ALLOCA (m*nskip*sizeof(dReal));
     dSetZero (JinvM,m*nskip);
     dMultiply0 (JinvM,J,invM,m,n6,n6);
     int mskip = dPAD(m);
-    dReal *A = (dReal*) alloca (m*mskip*sizeof(dReal));
+    dReal *A = (dReal*) ALLOCA (m*mskip*sizeof(dReal));
     dSetZero (A,m*mskip);
     dMultiply2 (A,JinvM,J,m,n6,m);
 
@@ -348,11 +353,11 @@ void dInternalStepIsland_x1 (dxWorld *world, dxBody **body, int nb,
 #   ifdef TIMING
     dTimerNow ("compute rhs");
 #   endif
-    dReal *tmp1 = (dReal*) alloca (n6 * sizeof(dReal));
+    dReal *tmp1 = (dReal*) ALLOCA (n6 * sizeof(dReal));
     dSetZero (tmp1,n6);
     dMultiply0 (tmp1,invM,fe,n6,n6,1);
     for (i=0; i<n6; i++) tmp1[i] += v[i]/stepsize;
-    dReal *rhs = (dReal*) alloca (m * sizeof(dReal));
+    dReal *rhs = (dReal*) ALLOCA (m * sizeof(dReal));
     dSetZero (rhs,m);
     dMultiply0 (rhs,J,tmp1,m,n6,1);
     for (i=0; i<m; i++) rhs[i] = c[i]/stepsize - rhs[i];
@@ -367,8 +372,8 @@ void dInternalStepIsland_x1 (dxWorld *world, dxBody **body, int nb,
 #   ifdef TIMING
     dTimerNow ("solving LCP problem");
 #   endif
-    dReal *lambda = (dReal*) alloca (m * sizeof(dReal));
-    dReal *residual = (dReal*) alloca (m * sizeof(dReal));
+    dReal *lambda = (dReal*) ALLOCA (m * sizeof(dReal));
+    dReal *residual = (dReal*) ALLOCA (m * sizeof(dReal));
     dSolveLCP (m,A,lambda,rhs,residual,nub,lo,hi);
 
 //  OLD WAY - direct factor and solve
@@ -377,7 +382,7 @@ void dInternalStepIsland_x1 (dxWorld *world, dxBody **body, int nb,
 //#   ifdef TIMING
 //    dTimerNow ("factorize A");
 //#   endif
-//    dReal *L = (dReal*) alloca (m*mskip*sizeof(dReal));
+//    dReal *L = (dReal*) ALLOCA (m*mskip*sizeof(dReal));
 //    memcpy (L,A,m*mskip*sizeof(dReal));
 //    if (dFactorCholesky (L,m)==0) dDebug (0,"A is not positive definite");
 //
@@ -385,7 +390,7 @@ void dInternalStepIsland_x1 (dxWorld *world, dxBody **body, int nb,
 //#   ifdef TIMING
 //    dTimerNow ("compute lambda");
 //#   endif
-//    dReal *lambda = (dReal*) alloca (m * sizeof(dReal));
+//    dReal *lambda = (dReal*) ALLOCA (m * sizeof(dReal));
 //    memcpy (lambda,rhs,m * sizeof(dReal));
 //    dSolveCholesky (L,lambda,m);
 
@@ -492,8 +497,8 @@ void dInternalStepIsland_x2 (dxWorld *world, dxBody **body, int nb,
   // frame, and compute the rotational force and add it to the torque
   // accumulator. I and invI are vertically stacked 3x4 matrices, one per body.
   // @@@ check computation of rotational force.
-  dReal *I = (dReal*) alloca (3*nb*4 * sizeof(dReal));
-  dReal *invI = (dReal*) alloca (3*nb*4 * sizeof(dReal));
+  dReal *I = (dReal*) ALLOCA (3*nb*4 * sizeof(dReal));
+  dReal *invI = (dReal*) ALLOCA (3*nb*4 * sizeof(dReal));
   dSetZero (I,3*nb*4);
   dSetZero (invI,3*nb*4);
   for (i=0; i<nb; i++) {
@@ -523,8 +528,8 @@ void dInternalStepIsland_x2 (dxWorld *world, dxBody **body, int nb,
   // LCP constraints. this assists the LCP solver to put all unbounded
   // variables at the start for a quick factorization.
   int m = 0;
-  dxJoint::Info1 *info = (dxJoint::Info1*) alloca (nj*sizeof(dxJoint::Info1));
-  int *ofs = (int*) alloca (nj*sizeof(int));
+  dxJoint::Info1 *info = (dxJoint::Info1*) ALLOCA (nj*sizeof(dxJoint::Info1));
+  int *ofs = (int*) ALLOCA (nj*sizeof(int));
   for (i=0; i<nj; i++) {
     joint[i]->vtable->getInfo1 (joint[i],info+i);
     dASSERT (info[i].m > 0 && info[i].m <= 6 &&
@@ -548,16 +553,16 @@ void dInternalStepIsland_x2 (dxWorld *world, dxBody **body, int nb,
   }
 
   // this will be set to the force due to the constraints
-  dReal *cforce = (dReal*) alloca (nb*8 * sizeof(dReal));
+  dReal *cforce = (dReal*) ALLOCA (nb*8 * sizeof(dReal));
   dSetZero (cforce,nb*8);
 
   // if there are constraints, compute cforce
   if (m > 0) {
     // create a constraint equation right hand side vector `c', and LCP low
     // and high bound vectors.
-    dReal *c = (dReal*) alloca (m*sizeof(dReal));
-    dReal *lo = (dReal*) alloca (m*sizeof(dReal));
-    dReal *hi = (dReal*) alloca (m*sizeof(dReal));
+    dReal *c = (dReal*) ALLOCA (m*sizeof(dReal));
+    dReal *lo = (dReal*) ALLOCA (m*sizeof(dReal));
+    dReal *hi = (dReal*) ALLOCA (m*sizeof(dReal));
     dSetZero (c,m);
     dSetValue (lo,m,-dInfinity);
     dSetValue (hi,m, dInfinity);
@@ -582,7 +587,7 @@ void dInternalStepIsland_x2 (dxWorld *world, dxBody **body, int nb,
 #   ifdef TIMING
     dTimerNow ("create J");
 #   endif
-    dReal *J = (dReal*) alloca (2*m*8*sizeof(dReal));
+    dReal *J = (dReal*) ALLOCA (2*m*8*sizeof(dReal));
     dSetZero (J,2*m*8);
     dxJoint::Info2 Jinfo;
     Jinfo.rowskip = 8;
@@ -605,7 +610,7 @@ void dInternalStepIsland_x2 (dxWorld *world, dxBody **body, int nb,
 #   ifdef TIMING
     dTimerNow ("compute A");
 #   endif
-    dReal *JinvM = (dReal*) alloca (2*m*8*sizeof(dReal));
+    dReal *JinvM = (dReal*) ALLOCA (2*m*8*sizeof(dReal));
     dSetZero (JinvM,2*m*8);
     for (i=0; i<nj; i++) {
       int b = joint[i]->node[0].body->tag;
@@ -651,7 +656,7 @@ void dInternalStepIsland_x2 (dxWorld *world, dxBody **body, int nb,
     // another similar algorithm does that.
 
     int mskip = dPAD(m);
-    dReal *A = (dReal*) alloca (m*mskip*sizeof(dReal));
+    dReal *A = (dReal*) ALLOCA (m*mskip*sizeof(dReal));
     dSetZero (A,m*mskip);
     for (i=0; i<nb; i++) {
       for (dxJointNode *n1=body[i]->firstjoint; n1; n1=n1->next) {
@@ -705,7 +710,7 @@ void dInternalStepIsland_x2 (dxWorld *world, dxBody **body, int nb,
 #   ifdef TIMING
     dTimerNow ("compute rhs");
 #   endif
-    dReal *tmp1 = (dReal*) alloca (nb*8 * sizeof(dReal));
+    dReal *tmp1 = (dReal*) ALLOCA (nb*8 * sizeof(dReal));
     dSetZero (tmp1,nb*8);
     // put v/h + invM*fe into tmp1
     for (i=0; i<nb; i++) {
@@ -717,7 +722,7 @@ void dInternalStepIsland_x2 (dxWorld *world, dxBody **body, int nb,
       for (j=0; j<3; j++) tmp1[i*8+4+j] += body[i]->avel[j] * stepsize1;
     }
     // put J*tmp1 into rhs
-    dReal *rhs = (dReal*) alloca (m * sizeof(dReal));
+    dReal *rhs = (dReal*) ALLOCA (m * sizeof(dReal));
     dSetZero (rhs,m);
     for (i=0; i<nj; i++) {
       dReal *JJ = J + 2*8*ofs[i];
@@ -741,8 +746,8 @@ void dInternalStepIsland_x2 (dxWorld *world, dxBody **body, int nb,
 #   ifdef TIMING
     dTimerNow ("solving LCP problem");
 #   endif
-    dReal *lambda = (dReal*) alloca (m * sizeof(dReal));
-    dReal *residual = (dReal*) alloca (m * sizeof(dReal));
+    dReal *lambda = (dReal*) ALLOCA (m * sizeof(dReal));
+    dReal *residual = (dReal*) ALLOCA (m * sizeof(dReal));
     dSolveLCP (m,A,lambda,rhs,residual,nub,lo,hi);
 
 //  OLD WAY - direct factor and solve
@@ -751,7 +756,7 @@ void dInternalStepIsland_x2 (dxWorld *world, dxBody **body, int nb,
 //#   ifdef TIMING
 //    dTimerNow ("factorize A");
 //#   endif
-//    dReal *L = (dReal*) alloca (m*mskip*sizeof(dReal));
+//    dReal *L = (dReal*) ALLOCA (m*mskip*sizeof(dReal));
 //    memcpy (L,A,m*mskip*sizeof(dReal));
 //#   ifdef FAST_FACTOR
 //    dFastFactorCholesky (L,m);  // does not report non positive definiteness
@@ -763,7 +768,7 @@ void dInternalStepIsland_x2 (dxWorld *world, dxBody **body, int nb,
 //#   ifdef TIMING
 //    dTimerNow ("compute lambda");
 //#   endif
-//    dReal *lambda = (dReal*) alloca (m * sizeof(dReal));
+//    dReal *lambda = (dReal*) ALLOCA (m * sizeof(dReal));
 //    memcpy (lambda,rhs,m * sizeof(dReal));
 //    dSolveCholesky (L,lambda,m);
 
@@ -820,7 +825,7 @@ void dInternalStepIsland_x2 (dxWorld *world, dxBody **body, int nb,
   }
 
 # ifdef COMPARE_METHODS
-  dReal *tmp_vnew = (dReal*) alloca (nb*6*sizeof(dReal));
+  dReal *tmp_vnew = (dReal*) ALLOCA (nb*6*sizeof(dReal));
   for (i=0; i<nb; i++) {
     for (j=0; j<3; j++) tmp_vnew[i*6+j] = body[i]->lvel[j];
     for (j=0; j<3; j++) tmp_vnew[i*6+3+j] = body[i]->avel[j];
@@ -869,7 +874,7 @@ void dInternalStepIsland (dxWorld *world, dxBody **body, int nb,
   int i;
 
   // save body state
-  dxBody *state = (dxBody*) alloca (nb*sizeof(dxBody));
+  dxBody *state = (dxBody*) ALLOCA (nb*sizeof(dxBody));
   for (i=0; i<nb; i++) memcpy (state+i,body[i],sizeof(dxBody));
 
   // take slow step
