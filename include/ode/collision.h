@@ -156,7 +156,7 @@ int dBoxTouchesBox (const dVector3 _p1, const dMatrix3 R1,
 		    const dMatrix3 R2, const dVector3 side2);
 
 void dInfiniteAABB (dGeomID geom, dReal aabb[6]);
-void dCloseODE();
+void dCloseODE(void);
 
 /* ************************************************************************ */
 /* custom classes */

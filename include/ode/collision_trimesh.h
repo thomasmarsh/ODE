@@ -48,7 +48,7 @@ typedef struct dxTriMeshData* dTriMeshDataID;
  * These dont make much sense now, but they will later when we add more
  * features.
  */
-dTriMeshDataID dGeomTriMeshDataCreate();
+dTriMeshDataID dGeomTriMeshDataCreate(void);
 void dGeomTriMeshDataDestroy(dTriMeshDataID g);
 
 enum { TRIMESH_FACE_NORMALS, TRIMESH_LAST_TRANSFORMATION };

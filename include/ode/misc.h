@@ -34,15 +34,15 @@ extern "C" {
 
 
 /* return 1 if the random number generator is working. */
-int dTestRand();
+int dTestRand(void);
 
 /* return next 32 bit random number. this uses a not-very-random linear
  * congruential method.
  */
-unsigned long dRand();
+unsigned long dRand(void);
 
 /* get and set the current random number seed. */
-unsigned long  dRandGetSeed();
+unsigned long  dRandGetSeed(void);
 void dRandSetSeed (unsigned long s);
 
 /* return a random integer between 0..n-1. the distribution will get worse
@@ -51,7 +51,7 @@ void dRandSetSeed (unsigned long s);
 int dRandInt (int n);
 
 /* return a random real number between 0..1 */
-dReal dRandReal();
+dReal dRandReal(void);
 
 /* print out a matrix */
 #ifdef __cplusplus
