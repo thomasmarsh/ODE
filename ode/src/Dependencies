@@ -54,13 +54,10 @@ rotation.o: rotation.cpp ../../include/ode/ode.h \
  ../../include/ode/misc.h ../../include/ode/objects.h \
  ../../include/ode/odecpp.h
 space.o: space.cpp ../../include/ode/common.h \
- ../../include/ode/error.h ../../include/ode/memory.h \
- ../../include/ode/space.h ../../include/ode/geom.h \
- ../../include/ode/contact.h geom_internal.h
-space2.o: space2.cpp ../../include/ode/common.h \
- ../../include/ode/error.h ../../include/ode/memory.h \
- ../../include/ode/space.h ../../include/ode/geom.h \
- ../../include/ode/contact.h geom_internal.h
+ ../../include/ode/error.h ../../include/ode/space.h \
+ ../../include/ode/geom.h ../../include/ode/contact.h \
+ ../../include/ode/memory.h objects.h ../../include/ode/mass.h array.h \
+ geom_internal.h
 stack.o: stack.cpp stack.h ../../include/ode/error.h \
  ../../include/ode/config.h
 step.o: step.cpp objects.h ../../include/ode/memory.h \
@@ -79,4 +76,8 @@ fastdot.o: fastdot.c ../../include/ode/matrix.h \
 fastldlt.o: fastldlt.c ../../include/ode/matrix.h \
  ../../include/ode/common.h ../../include/ode/error.h
 fastlsolve.o: fastlsolve.c ../../include/ode/matrix.h \
+ ../../include/ode/common.h ../../include/ode/error.h
+fastltsolve.o: fastltsolve.c ../../include/ode/matrix.h \
+ ../../include/ode/common.h ../../include/ode/error.h
+fastmultidot.o: fastmultidot.c ../../include/ode/matrix.h \
  ../../include/ode/common.h ../../include/ode/error.h
