@@ -78,7 +78,7 @@ void dLineClosestApproach (const dVector3 pa, const dVector3 ua,
   dReal q1 =  dDOT(ua,p);
   dReal q2 = -dDOT(ub,p);
   dReal d = 1-uaub*uaub;
-  if (d <= 0) {
+  if (d <= REAL(0.0001)) {
     // @@@ this needs to be made more robust
     *alpha = 0;
     *beta  = 0;
