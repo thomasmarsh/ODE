@@ -168,6 +168,20 @@ typedef struct dxJointGroup *dJointGroupID;
 #define d_ERR_UASSERT		2	/* user assertion failed */
 
 
+/* standard joint parameter names. why are these here? - because we don't want
+ * to include all the joint function definitions in joint.cpp. hmmmm.
+ */
+enum {
+  dParamLoStop=0,
+  dParamHiStop,
+  dParamVel,
+  dParamFMax,
+  dParamFudgeFactor,
+  dParamBounce,
+  dParamSoft
+};
+
+
 #ifdef __cplusplus
 }
 #endif
