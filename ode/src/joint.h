@@ -144,7 +144,7 @@ extern struct dxJoint::Vtable __dhinge_vtable;
 
 struct dxJointSlider : public dxJoint {
   dVector3 axis1;		// axis w.r.t first body
-  dQuaternion qrel;		// relative rotation body1 -> body2
+  dQuaternion qrel;		// initial relative rotation body1 -> body2
   dVector3 offset;		// point relative to body2 that should be
 };				// aligned with body1 center along axis1
 extern struct dxJoint::Vtable __dslider_vtable;
@@ -164,6 +164,7 @@ extern struct dxJoint::Vtable __dcontact_vtable;
 struct dxJointRMotor : public dxJoint {
   dVector3 axis1;		// axis w.r.t first body
   dVector3 axis2;		// axis w.r.t second body
+  dQuaternion qrel;		// initial relative rotation body1 -> body2
   dReal vel,tmax;		// motor desired velocity, maximum torque
 };
 extern struct dxJoint::Vtable __drmotor_vtable;

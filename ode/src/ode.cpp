@@ -587,6 +587,20 @@ dxJoint * dJointCreateContact (dWorldID w, dJointGroupID group,
 }
 
 
+dxJoint * dJointCreateRMotor (dWorldID w, dJointGroupID group)
+{
+  dAASSERT (w);
+  return createJoint (w,group,&__drmotor_vtable);
+}
+
+
+dxJoint * dJointCreateHinge2 (dWorldID w, dJointGroupID group)
+{
+  dAASSERT (w);
+  return createJoint (w,group,&__dhinge2_vtable);
+}
+
+
 void dJointDestroy (dxJoint *j)
 {
   dAASSERT (j);

@@ -678,10 +678,10 @@ void dInternalStepIsland_x2 (dxWorld *world, dxBody **body, int nb,
 	  dIASSERT(joint[j2]->node[1].body || jb2==0);
 
 	  // set block of A
-	  Multiply2_p8r (A + ofs[j1]*mskip + ofs[j2],
-			 JinvM + 2*8*ofs[j1] + jb1*8*info[j1].m,
-			 J     + 2*8*ofs[j2] + jb2*8*info[j2].m,
-			 info[j1].m,info[j2].m, mskip);
+	  MultiplyAdd2_p8r (A + ofs[j1]*mskip + ofs[j2],
+			    JinvM + 2*8*ofs[j1] + jb1*8*info[j1].m,
+			    J     + 2*8*ofs[j2] + jb2*8*info[j2].m,
+			    info[j1].m,info[j2].m, mskip);
 	}
       }
     }
