@@ -104,8 +104,8 @@ void dMassSetSphere (dMass *m, dReal density, dReal radius)
 {
   dAASSERT (m);
   dMassSetZero (m);
-  m->mass = (4.0/3.0) * M_PI * radius*radius*radius * density;
-  dReal II = 0.4 * m->mass * radius*radius;
+  m->mass = (REAL(4.0)/REAL(3.0)) * M_PI * radius*radius*radius * density;
+  dReal II = REAL(0.4) * m->mass * radius*radius;
   m->_I(0,0) = II;
   m->_I(1,1) = II;
   m->_I(2,2) = II;
@@ -124,10 +124,11 @@ void dMassSetCappedCylinder (dMass *m, dReal density, int direction,
   dUASSERT (direction >= 1 && direction <= 3,"bad direction number");
   dMassSetZero (m);
   M1 = M_PI*a*a*b*density;		// cylinder mass
-  M2 = (4.0/3.0)*M_PI*a*a*a*density;	// total cap mass
+  M2 = (REAL(4.0)/REAL(3.0))*M_PI*a*a*a*density;	// total cap mass
   m->mass = M1+M2;
-  Ia = M1*(0.25*a*a + (1.0/12.0)*b*b) + M2*(0.4*a*a + 0.5*b*b);
-  Ib = (M1*0.5 + M2*0.4)*a*a;
+  Ia = M1*(REAL(0.25)*a*a + (REAL(1.0)/REAL(12.0))*b*b) +
+    M2*(REAL(0.4)*a*a + REAL(0.5)*b*b);
+  Ib = (M1*REAL(0.5) + M2*REAL(0.4))*a*a;
   m->_I(0,0) = Ia;
   m->_I(1,1) = Ia;
   m->_I(2,2) = Ia;
@@ -146,9 +147,9 @@ void dMassSetBox (dMass *m, dReal density,
   dMassSetZero (m);
   dReal M = lx*ly*lz*density;
   m->mass = M;
-  m->_I(0,0) = M/12.0 * (ly*ly + lz*lz);
-  m->_I(1,1) = M/12.0 * (lx*lx + lz*lz);
-  m->_I(2,2) = M/12.0 * (lx*lx + ly*ly);
+  m->_I(0,0) = M/REAL(12.0) * (ly*ly + lz*lz);
+  m->_I(1,1) = M/REAL(12.0) * (lx*lx + lz*lz);
+  m->_I(2,2) = M/REAL(12.0) * (lx*lx + ly*ly);
 
 # ifndef dNODEBUG
   checkMass (m);

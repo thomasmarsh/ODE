@@ -929,7 +929,7 @@ dxWorld * dWorldCreate()
   dSetZero (w->gravity,4);
   w->global_erp = REAL(0.2);
 #if defined(dSINGLE)
-  w->global_cfm = 1e-5;
+  w->global_cfm = 1e-5f;
 #elif defined(dDOUBLE)
   w->global_cfm = 1e-10;
 #else

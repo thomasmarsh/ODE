@@ -28,7 +28,7 @@
 #ifdef WIN32
 #include <float.h>
 #ifndef CYGWIN			// added by andy for cygwin
-#define copysign _copysign
+#define copysign(a,b) ((dReal)_copysign(a,b))
 #endif				// added by andy for cygwin
 #endif
 
