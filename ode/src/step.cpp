@@ -37,7 +37,19 @@
 #define FAST_FACTOR
 //#define TIMING
 
-#define ALLOCA dALLOCA16
+// memory allocation system
+#ifdef dUSE_MALLOC_FOR_ALLOCA
+unsigned int dMemoryFlag;
+#define REPORT_OUT_OF_MEMORY fprintf(stderr, "Insufficient memory to complete rigid body simulation.  Results will not be accurate.\n")
+
+#define ALLOCA(t,v,s) t* v=(t*)malloc(s)
+#define UNALLOCA(t)  free(t)
+
+#else
+#define ALLOCA(t,v,s) t* v=(t*)dALLOCA16(s)
+#define UNALLOCA(t)  /* nothing */
+#endif
+
 
 //****************************************************************************
 // debugging - comparison of various vectors and matrices produced by the
@@ -49,6 +61,10 @@
 #include "testing.h"
 dMatrixComparison comparator;
 #endif
+
+// undef to use the fast decomposition
+#define DIRECT_CHOLESKY
+#undef REPORT_ERROR
 
 //****************************************************************************
 // special matrix multipliers
@@ -218,9 +234,9 @@ void dInternalStepIsland_x1 (dxWorld *world, dxBody * const *body, int nb,
   int i,j,k;
   int n6 = 6*nb;
 
-# ifdef TIMING
+#ifdef TIMING
   dTimerStart("preprocessing");
-# endif
+#endif
 
   // number all bodies in the body list - set their tag values
   for (i=0; i<nb; i++) body[i]->tag = i;
@@ -228,15 +244,36 @@ void dInternalStepIsland_x1 (dxWorld *world, dxBody * const *body, int nb,
   // make a local copy of the joint array, because we might want to modify it.
   // (the "dxJoint *const*" declaration says we're allowed to modify the joints
   // but not the joint array, because the caller might need it unchanged).
-  dxJoint **joint = (dxJoint**) ALLOCA (nj * sizeof(dxJoint*));
+  ALLOCA(dxJoint*,joint,nj*sizeof(dxJoint*));
+#ifdef dUSE_MALLOC_FOR_ALLOCA
+    if (joint == NULL) {
+      dMemoryFlag = d_MEMORY_OUT_OF_MEMORY;
+      return;
+    }
+#endif
   memcpy (joint,_joint,nj * sizeof(dxJoint*));
 
   // for all bodies, compute the inertia tensor and its inverse in the global
   // frame, and compute the rotational force and add it to the torque
   // accumulator.
   // @@@ check computation of rotational force.
-  dReal *I = (dReal*) ALLOCA (3*nb*4 * sizeof(dReal));
-  dReal *invI = (dReal*) ALLOCA (3*nb*4 * sizeof(dReal));
+  ALLOCA(dReal,I,3*nb*4*sizeof(dReal));
+#ifdef dUSE_MALLOC_FOR_ALLOCA
+    if (I == NULL) {
+      UNALLOCA(joint);
+      dMemoryFlag = d_MEMORY_OUT_OF_MEMORY;
+      return;
+    }
+#endif
+  ALLOCA(dReal,invI,3*nb*4*sizeof(dReal));
+#ifdef dUSE_MALLOC_FOR_ALLOCA
+    if (invI == NULL) {
+      UNALLOCA(I);
+      UNALLOCA(joint);
+      dMemoryFlag = d_MEMORY_OUT_OF_MEMORY;
+      return;
+    }
+#endif
 
   //dSetZero (I,3*nb*4);
   //dSetZero (invI,3*nb*4);
@@ -271,8 +308,29 @@ void dInternalStepIsland_x1 (dxWorld *world, dxBody * const *body, int nb,
   // joints with m=0 are inactive and are removed from the joints array
   // entirely, so that the code that follows does not consider them.
   int m = 0;
-  dxJoint::Info1 *info = (dxJoint::Info1*) ALLOCA (nj*sizeof(dxJoint::Info1));
-  int *ofs = (int*) ALLOCA (nj*sizeof(int));
+  ALLOCA(dxJoint::Info1,info,nj*sizeof(dxJoint::Info1));
+#ifdef dUSE_MALLOC_FOR_ALLOCA
+    if (info == NULL) {
+      UNALLOCA(invI);
+      UNALLOCA(I);
+      UNALLOCA(joint);
+      dMemoryFlag = d_MEMORY_OUT_OF_MEMORY;
+      return;
+    }
+#endif
+
+  ALLOCA(int,ofs,nj*sizeof(int));
+#ifdef dUSE_MALLOC_FOR_ALLOCA
+    if (ofs == NULL) {
+      UNALLOCA(info);
+      UNALLOCA(invI);
+      UNALLOCA(I);
+      UNALLOCA(joint);
+      dMemoryFlag = d_MEMORY_OUT_OF_MEMORY;
+      return;
+    }
+#endif
+
   for (i=0, j=0; j<nj; j++) {	// i=dest, j=src
     joint[j]->vtable->getInfo1 (joint[j],info+i);
     dIASSERT (info[i].m >= 0 && info[i].m <= 6 &&
@@ -303,11 +361,23 @@ void dInternalStepIsland_x1 (dxWorld *world, dxBody * const *body, int nb,
 
   // create (6*nb,6*nb) inverse mass matrix `invM', and fill it with mass
   // parameters
-# ifdef TIMING
+#ifdef TIMING
   dTimerNow ("create mass matrix");
-# endif
+#endif
   int nskip = dPAD (n6);
-  dReal *invM = (dReal*) ALLOCA (n6*nskip*sizeof(dReal));
+  ALLOCA(dReal, invM, n6*nskip*sizeof(dReal));
+#ifdef dUSE_MALLOC_FOR_ALLOCA
+    if (invM == NULL) {
+      UNALLOCA(ofs);
+      UNALLOCA(info);
+      UNALLOCA(invI);
+      UNALLOCA(I);
+      UNALLOCA(joint);
+      dMemoryFlag = d_MEMORY_OUT_OF_MEMORY;
+      return;
+    }
+#endif
+
   dSetZero (invM,n6*nskip);
   for (i=0; i<nb; i++) {
     dReal *MM = invM+(i*6)*nskip+(i*6);
@@ -321,8 +391,35 @@ void dInternalStepIsland_x1 (dxWorld *world, dxBody * const *body, int nb,
   }
 
   // assemble some body vectors: fe = external forces, v = velocities
-  dReal *fe = (dReal*) ALLOCA (n6 * sizeof(dReal));
-  dReal *v = (dReal*) ALLOCA (n6 * sizeof(dReal));
+  ALLOCA(dReal,fe,n6*sizeof(dReal));
+#ifdef dUSE_MALLOC_FOR_ALLOCA
+    if (fe == NULL) {
+      UNALLOCA(invM);
+      UNALLOCA(ofs);
+      UNALLOCA(info);
+      UNALLOCA(invI);
+      UNALLOCA(I);
+      UNALLOCA(joint);
+      dMemoryFlag = d_MEMORY_OUT_OF_MEMORY;
+      return;
+    }
+#endif
+
+  ALLOCA(dReal,v,n6*sizeof(dReal));
+#ifdef dUSE_MALLOC_FOR_ALLOCA
+    if (v == NULL) {
+      UNALLOCA(fe);
+      UNALLOCA(invM);
+      UNALLOCA(ofs);
+      UNALLOCA(info);
+      UNALLOCA(invI);
+      UNALLOCA(I);
+      UNALLOCA(joint);
+      dMemoryFlag = d_MEMORY_OUT_OF_MEMORY;
+      return;
+    }
+#endif
+
   //dSetZero (fe,n6);
   //dSetZero (v,n6);
   for (i=0; i<nb; i++) {
@@ -333,7 +430,21 @@ void dInternalStepIsland_x1 (dxWorld *world, dxBody * const *body, int nb,
   }
 
   // this will be set to the velocity update
-  dReal *vnew = (dReal*) ALLOCA (n6 * sizeof(dReal));
+  ALLOCA(dReal,vnew,n6*sizeof(dReal));
+#ifdef dUSE_MALLOC_FOR_ALLOCA
+    if (vnew == NULL) {
+      UNALLOCA(v);
+      UNALLOCA(fe);
+      UNALLOCA(invM);
+      UNALLOCA(ofs);
+      UNALLOCA(info);
+      UNALLOCA(invI);
+      UNALLOCA(I);
+      UNALLOCA(joint);
+      dMemoryFlag = d_MEMORY_OUT_OF_MEMORY;
+      return;
+    }
+#endif
   dSetZero (vnew,n6);
 
   // if there are constraints, compute cforce
@@ -341,11 +452,96 @@ void dInternalStepIsland_x1 (dxWorld *world, dxBody * const *body, int nb,
     // create a constraint equation right hand side vector `c', a constraint
     // force mixing vector `cfm', and LCP low and high bound vectors, and an
     // 'findex' vector.
-    dReal *c = (dReal*) ALLOCA (m*sizeof(dReal));
-    dReal *cfm = (dReal*) ALLOCA (m*sizeof(dReal));
-    dReal *lo = (dReal*) ALLOCA (m*sizeof(dReal));
-    dReal *hi = (dReal*) ALLOCA (m*sizeof(dReal));
-    int *findex = (int*) alloca (m*sizeof(int));
+    ALLOCA(dReal,c,m*sizeof(dReal));
+#ifdef dUSE_MALLOC_FOR_ALLOCA
+    if (c == NULL) {
+      UNALLOCA(vnew);
+      UNALLOCA(v);
+      UNALLOCA(fe);
+      UNALLOCA(invM);
+      UNALLOCA(ofs);
+      UNALLOCA(info);
+      UNALLOCA(invI);
+      UNALLOCA(I);
+      UNALLOCA(joint);
+      dMemoryFlag = d_MEMORY_OUT_OF_MEMORY;
+      return;
+    }
+#endif
+    ALLOCA(dReal,cfm,m*sizeof(dReal));
+#ifdef dUSE_MALLOC_FOR_ALLOCA
+    if (cfm == NULL) {
+      UNALLOCA(c);
+      UNALLOCA(vnew);
+      UNALLOCA(v);
+      UNALLOCA(fe);
+      UNALLOCA(invM);
+      UNALLOCA(ofs);
+      UNALLOCA(info);
+      UNALLOCA(invI);
+      UNALLOCA(I);
+      UNALLOCA(joint);
+      dMemoryFlag = d_MEMORY_OUT_OF_MEMORY;
+      return;
+    }
+#endif
+    ALLOCA(dReal,lo,m*sizeof(dReal));
+#ifdef dUSE_MALLOC_FOR_ALLOCA
+    if (lo == NULL) {
+      UNALLOCA(cfm);
+      UNALLOCA(c);
+      UNALLOCA(vnew);
+      UNALLOCA(v);
+      UNALLOCA(fe);
+      UNALLOCA(invM);
+      UNALLOCA(ofs);
+      UNALLOCA(info);
+      UNALLOCA(invI);
+      UNALLOCA(I);
+      UNALLOCA(joint);
+      dMemoryFlag = d_MEMORY_OUT_OF_MEMORY;
+      return;
+    }
+#endif
+    ALLOCA(dReal,hi,m*sizeof(dReal));
+#ifdef dUSE_MALLOC_FOR_ALLOCA
+    if (hi == NULL) {
+      UNALLOCA(lo);
+      UNALLOCA(cfm);
+      UNALLOCA(c);
+      UNALLOCA(vnew);
+      UNALLOCA(v);
+      UNALLOCA(fe);
+      UNALLOCA(invM);
+      UNALLOCA(ofs);
+      UNALLOCA(info);
+      UNALLOCA(invI);
+      UNALLOCA(I);
+      UNALLOCA(joint);
+      dMemoryFlag = d_MEMORY_OUT_OF_MEMORY;
+      return;
+    }
+#endif
+    ALLOCA(int,findex,m*sizeof(int));
+#ifdef dUSE_MALLOC_FOR_ALLOCA
+    if (findex == NULL) {
+      UNALLOCA(hi);
+      UNALLOCA(lo);
+      UNALLOCA(cfm);
+      UNALLOCA(c);
+      UNALLOCA(vnew);
+      UNALLOCA(v);
+      UNALLOCA(fe);
+      UNALLOCA(invM);
+      UNALLOCA(ofs);
+      UNALLOCA(info);
+      UNALLOCA(invI);
+      UNALLOCA(I);
+      UNALLOCA(joint);
+      dMemoryFlag = d_MEMORY_OUT_OF_MEMORY;
+      return;
+    }
+#endif
     dSetZero (c,m);
     dSetValue (cfm,m,world->global_cfm);
     dSetValue (lo,m,-dInfinity);
@@ -357,7 +553,27 @@ void dInternalStepIsland_x1 (dxWorld *world, dxBody * const *body, int nb,
 #   ifdef TIMING
     dTimerNow ("create J");
 #   endif
-    dReal *J = (dReal*) ALLOCA (m*nskip*sizeof(dReal));
+    ALLOCA(dReal,J,m*nskip*sizeof(dReal));
+#ifdef dUSE_MALLOC_FOR_ALLOCA
+    if (J == NULL) {
+      UNALLOCA(findex);
+      UNALLOCA(hi);
+      UNALLOCA(lo);
+      UNALLOCA(cfm);
+      UNALLOCA(c);
+      UNALLOCA(vnew);
+      UNALLOCA(v);
+      UNALLOCA(fe);
+      UNALLOCA(invM);
+      UNALLOCA(ofs);
+      UNALLOCA(info);
+      UNALLOCA(invI);
+      UNALLOCA(I);
+      UNALLOCA(joint);
+      dMemoryFlag = d_MEMORY_OUT_OF_MEMORY;
+      return;
+    }
+#endif
     dSetZero (J,m*nskip);
     dxJoint::Info2 Jinfo;
     Jinfo.rowskip = nskip;
@@ -390,11 +606,54 @@ void dInternalStepIsland_x1 (dxWorld *world, dxBody * const *body, int nb,
 #   ifdef TIMING
     dTimerNow ("compute A");
 #   endif
-    dReal *JinvM = (dReal*) ALLOCA (m*nskip*sizeof(dReal));
+    ALLOCA(dReal,JinvM,m*nskip*sizeof(dReal));
+#ifdef dUSE_MALLOC_FOR_ALLOCA
+    if (JinvM == NULL) {
+      UNALLOCA(J);
+      UNALLOCA(findex);
+      UNALLOCA(hi);
+      UNALLOCA(lo);
+      UNALLOCA(cfm);
+      UNALLOCA(c);
+      UNALLOCA(vnew);
+      UNALLOCA(v);
+      UNALLOCA(fe);
+      UNALLOCA(invM);
+      UNALLOCA(ofs);
+      UNALLOCA(info);
+      UNALLOCA(invI);
+      UNALLOCA(I);
+      UNALLOCA(joint);
+      dMemoryFlag = d_MEMORY_OUT_OF_MEMORY;
+      return;
+    }
+#endif
     //dSetZero (JinvM,m*nskip);
     dMultiply0 (JinvM,J,invM,m,n6,n6);
     int mskip = dPAD(m);
-    dReal *A = (dReal*) ALLOCA (m*mskip*sizeof(dReal));
+    ALLOCA(dReal,A,m*mskip*sizeof(dReal));
+#ifdef dUSE_MALLOC_FOR_ALLOCA
+    if (A == NULL) {
+      UNALLOCA(JinvM);
+      UNALLOCA(J);
+      UNALLOCA(findex);
+      UNALLOCA(hi);
+      UNALLOCA(lo);
+      UNALLOCA(cfm);
+      UNALLOCA(c);
+      UNALLOCA(vnew);
+      UNALLOCA(v);
+      UNALLOCA(fe);
+      UNALLOCA(invM);
+      UNALLOCA(ofs);
+      UNALLOCA(info);
+      UNALLOCA(invI);
+      UNALLOCA(I);
+      UNALLOCA(joint);
+      dMemoryFlag = d_MEMORY_OUT_OF_MEMORY;
+      return;
+    }
+#endif
     //dSetZero (A,m*mskip);
     dMultiply2 (A,JinvM,J,m,n6,m);
 
@@ -409,11 +668,58 @@ void dInternalStepIsland_x1 (dxWorld *world, dxBody * const *body, int nb,
 #   ifdef TIMING
     dTimerNow ("compute rhs");
 #   endif
-    dReal *tmp1 = (dReal*) ALLOCA (n6 * sizeof(dReal));
+    ALLOCA(dReal,tmp1,n6*sizeof(dReal));
+#ifdef dUSE_MALLOC_FOR_ALLOCA
+    if (tmp1 == NULL) {
+      UNALLOCA(A);
+      UNALLOCA(JinvM);
+      UNALLOCA(J);
+      UNALLOCA(findex);
+      UNALLOCA(hi);
+      UNALLOCA(lo);
+      UNALLOCA(cfm);
+      UNALLOCA(c);
+      UNALLOCA(vnew);
+      UNALLOCA(v);
+      UNALLOCA(fe);
+      UNALLOCA(invM);
+      UNALLOCA(ofs);
+      UNALLOCA(info);
+      UNALLOCA(invI);
+      UNALLOCA(I);
+      UNALLOCA(joint);
+      dMemoryFlag = d_MEMORY_OUT_OF_MEMORY;
+      return;
+    }
+#endif
     //dSetZero (tmp1,n6);
     dMultiply0 (tmp1,invM,fe,n6,n6,1);
     for (i=0; i<n6; i++) tmp1[i] += v[i]/stepsize;
-    dReal *rhs = (dReal*) ALLOCA (m * sizeof(dReal));
+    ALLOCA(dReal,rhs,m*sizeof(dReal));
+#ifdef dUSE_MALLOC_FOR_ALLOCA
+    if (rhs == NULL) {
+      UNALLOCA(tmp1);
+      UNALLOCA(A);
+      UNALLOCA(JinvM);
+      UNALLOCA(J);
+      UNALLOCA(findex);
+      UNALLOCA(hi);
+      UNALLOCA(lo);
+      UNALLOCA(cfm);
+      UNALLOCA(c);
+      UNALLOCA(vnew);
+      UNALLOCA(v);
+      UNALLOCA(fe);
+      UNALLOCA(invM);
+      UNALLOCA(ofs);
+      UNALLOCA(info);
+      UNALLOCA(invI);
+      UNALLOCA(I);
+      UNALLOCA(joint);
+      dMemoryFlag = d_MEMORY_OUT_OF_MEMORY;
+      return;
+    }
+#endif
     //dSetZero (rhs,m);
     dMultiply0 (rhs,J,tmp1,m,n6,1);
     for (i=0; i<m; i++) rhs[i] = c[i]/stepsize - rhs[i];
@@ -423,32 +729,150 @@ void dInternalStepIsland_x1 (dxWorld *world, dxBody * const *body, int nb,
     comparator.nextMatrix (rhs,m,1,0,"rhs");
 #   endif
 
+
+
+ 
+
+#ifndef DIRECT_CHOLESKY
     // solve the LCP problem and get lambda.
     // this will destroy A but that's okay
 #   ifdef TIMING
     dTimerNow ("solving LCP problem");
 #   endif
-    dReal *lambda = (dReal*) ALLOCA (m * sizeof(dReal));
-    dReal *residual = (dReal*) ALLOCA (m * sizeof(dReal));
+    ALLOCA(dReal,lambda,m*sizeof(dReal));
+#ifdef dUSE_MALLOC_FOR_ALLOCA
+    if (lambda == NULL) {
+      UNALLOCA(rhs);
+      UNALLOCA(tmp1);
+      UNALLOCA(A);
+      UNALLOCA(JinvM);
+      UNALLOCA(J);
+      UNALLOCA(findex);
+      UNALLOCA(hi);
+      UNALLOCA(lo);
+      UNALLOCA(cfm);
+      UNALLOCA(c);
+      UNALLOCA(vnew);
+      UNALLOCA(v);
+      UNALLOCA(fe);
+      UNALLOCA(invM);
+      UNALLOCA(ofs);
+      UNALLOCA(info);
+      UNALLOCA(invI);
+      UNALLOCA(I);
+      UNALLOCA(joint);
+      dMemoryFlag = d_MEMORY_OUT_OF_MEMORY;
+      return;
+    }
+#endif
+    ALLOCA(dReal,residual,m*sizeof(dReal));
+#ifdef dUSE_MALLOC_FOR_ALLOCA
+    if (residual == NULL) {
+      UNALLOCA(lambda);
+      UNALLOCA(rhs);
+      UNALLOCA(tmp1);
+      UNALLOCA(A);
+      UNALLOCA(JinvM);
+      UNALLOCA(J);
+      UNALLOCA(findex);
+      UNALLOCA(hi);
+      UNALLOCA(lo);
+      UNALLOCA(cfm);
+      UNALLOCA(c);
+      UNALLOCA(vnew);
+      UNALLOCA(v);
+      UNALLOCA(fe);
+      UNALLOCA(invM);
+      UNALLOCA(ofs);
+      UNALLOCA(info);
+      UNALLOCA(invI);
+      UNALLOCA(I);
+      UNALLOCA(joint);
+      dMemoryFlag = d_MEMORY_OUT_OF_MEMORY;
+      return;
+    }
+#endif
     dSolveLCP (m,A,lambda,rhs,residual,nub,lo,hi,findex);
+    UNALLOCA(residual);
+    UNALLOCA(lambda);
 
-//  OLD WAY - direct factor and solve
-//
-//    // factorize A (L*L'=A)
-//#   ifdef TIMING
-//    dTimerNow ("factorize A");
-//#   endif
-//    dReal *L = (dReal*) ALLOCA (m*mskip*sizeof(dReal));
-//    memcpy (L,A,m*mskip*sizeof(dReal));
-//    if (dFactorCholesky (L,m)==0) dDebug (0,"A is not positive definite");
-//
-//    // compute lambda
-//#   ifdef TIMING
-//    dTimerNow ("compute lambda");
-//#   endif
-//    dReal *lambda = (dReal*) ALLOCA (m * sizeof(dReal));
-//    memcpy (lambda,rhs,m * sizeof(dReal));
-//    dSolveCholesky (L,lambda,m);
+#ifdef dUSE_MALLOC_FOR_ALLOCA
+    if (dMemoryFlag == d_MEMORY_OUT_OF_MEMORY)
+      return;
+#endif
+
+
+#else
+
+    // OLD WAY - direct factor and solve
+
+    // factorize A (L*L'=A)
+#   ifdef TIMING
+    dTimerNow ("factorize A");
+#   endif
+    ALLOCA(dReal,L,m*mskip*sizeof(dReal));
+#ifdef dUSE_MALLOC_FOR_ALLOCA
+    if (L == NULL) {
+      UNALLOCA(rhs);
+      UNALLOCA(tmp1);
+      UNALLOCA(A);
+      UNALLOCA(JinvM);
+      UNALLOCA(J);
+      UNALLOCA(findex);
+      UNALLOCA(hi);
+      UNALLOCA(lo);
+      UNALLOCA(cfm);
+      UNALLOCA(c);
+      UNALLOCA(vnew);
+      UNALLOCA(v);
+      UNALLOCA(fe);
+      UNALLOCA(invM);
+      UNALLOCA(ofs);
+      UNALLOCA(info);
+      UNALLOCA(invI);
+      UNALLOCA(I);
+      UNALLOCA(joint);
+      dMemoryFlag = d_MEMORY_OUT_OF_MEMORY;
+      return;
+    }
+#endif
+    memcpy (L,A,m*mskip*sizeof(dReal));
+    if (dFactorCholesky (L,m)==0) dDebug (0,"A is not positive definite");
+
+    // compute lambda
+#   ifdef TIMING
+    dTimerNow ("compute lambda");
+#   endif
+    ALLOCA(dReal,lambda,m*sizeof(dReal));
+#ifdef dUSE_MALLOC_FOR_ALLOCA
+    if (lambda == NULL) {
+      UNALLOCA(L);
+      UNALLOCA(rhs);
+      UNALLOCA(tmp1);
+      UNALLOCA(A);
+      UNALLOCA(JinvM);
+      UNALLOCA(J);
+      UNALLOCA(findex);
+      UNALLOCA(hi);
+      UNALLOCA(lo);
+      UNALLOCA(cfm);
+      UNALLOCA(c);
+      UNALLOCA(vnew);
+      UNALLOCA(v);
+      UNALLOCA(fe);
+      UNALLOCA(invM);
+      UNALLOCA(ofs);
+      UNALLOCA(info);
+      UNALLOCA(invI);
+      UNALLOCA(I);
+      UNALLOCA(joint);
+      dMemoryFlag = d_MEMORY_OUT_OF_MEMORY;
+      return;
+    }
+#endif
+    memcpy (lambda,rhs,m * sizeof(dReal));
+    dSolveCholesky (L,lambda,m);
+#endif
 
 #   ifdef COMPARE_METHODS
     comparator.nextMatrix (lambda,m,1,0,"lambda");
@@ -463,6 +887,7 @@ void dInternalStepIsland_x1 (dxWorld *world, dxBody * const *body, int nb,
     dMultiply0 (vnew,invM,tmp1,n6,n6,1);
     for (i=0; i<n6; i++) vnew[i] = v[i] + stepsize*vnew[i];
 
+#ifdef REPORT_ERROR
     // see if the constraint has worked: compute J*vnew and make sure it equals
     // `c' (to within a certain tolerance).
 #   ifdef TIMING
@@ -470,8 +895,24 @@ void dInternalStepIsland_x1 (dxWorld *world, dxBody * const *body, int nb,
 #   endif
     dMultiply0 (tmp1,J,vnew,m,n6,1);
     dReal err = 0;
-    for (i=0; i<m; i++) err += dFabs(tmp1[i]-c[i]);
-    printf ("%.6e\n",err);
+    for (i=0; i<m; i++) {
+		err += dFabs(tmp1[i]-c[i]);
+    }
+	printf ("total constraint error=%.6e\n",err);
+#endif
+
+    UNALLOCA(c);
+    UNALLOCA(cfm);
+    UNALLOCA(lo);
+    UNALLOCA(hi);
+    UNALLOCA(findex);
+    UNALLOCA(J);
+    UNALLOCA(JinvM);
+    UNALLOCA(A);
+    UNALLOCA(tmp1);
+    UNALLOCA(rhs);
+    UNALLOCA(lambda); 
+    UNALLOCA(L);
   }
   else {
     // no constraints
@@ -479,14 +920,14 @@ void dInternalStepIsland_x1 (dxWorld *world, dxBody * const *body, int nb,
     for (i=0; i<n6; i++) vnew[i] = v[i] + stepsize*vnew[i];
   }
 
-# ifdef COMPARE_METHODS
+#ifdef COMPARE_METHODS
   comparator.nextMatrix (vnew,n6,1,0,"vnew");
-# endif
+#endif
 
   // apply the velocity update to the bodies
-# ifdef TIMING
+#ifdef TIMING
   dTimerNow ("update velocity");
-# endif
+#endif
   for (i=0; i<nb; i++) {
     for (j=0; j<3; j++) body[i]->lvel[j] = vnew[i*6+j];
     for (j=0; j<3; j++) body[i]->avel[j] = vnew[i*6+3+j];
@@ -494,14 +935,14 @@ void dInternalStepIsland_x1 (dxWorld *world, dxBody * const *body, int nb,
 
   // update the position and orientation from the new linear/angular velocity
   // (over the given timestep)
-# ifdef TIMING
+#ifdef TIMING
   dTimerNow ("update position");
-# endif
+#endif
   for (i=0; i<nb; i++) dxStepBody (body[i],stepsize);
 
-# ifdef TIMING
+#ifdef TIMING
   dTimerNow ("tidy up");
-# endif
+#endif
 
   // zero all force accumulators
   for (i=0; i<nb; i++) {
@@ -515,10 +956,20 @@ void dInternalStepIsland_x1 (dxWorld *world, dxBody * const *body, int nb,
     body[i]->tacc[3] = 0;
   }
 
-# ifdef TIMING
+#ifdef TIMING
   dTimerEnd();
   if (m > 0) dTimerReport (stdout,1);
-# endif
+#endif
+
+  UNALLOCA(joint);
+  UNALLOCA(I);
+  UNALLOCA(invI);
+  UNALLOCA(info);
+  UNALLOCA(ofs);
+  UNALLOCA(invM);
+  UNALLOCA(fe);
+  UNALLOCA(v);
+  UNALLOCA(vnew);
 }
 
 //****************************************************************************
@@ -528,9 +979,9 @@ void dInternalStepIsland_x2 (dxWorld *world, dxBody * const *body, int nb,
 			     dxJoint * const *_joint, int nj, dReal stepsize)
 {
   int i,j,k;
-# ifdef TIMING
+#ifdef TIMING
   dTimerStart("preprocessing");
-# endif
+#endif
 
   dReal stepsize1 = dRecip(stepsize);
 
@@ -540,15 +991,36 @@ void dInternalStepIsland_x2 (dxWorld *world, dxBody * const *body, int nb,
   // make a local copy of the joint array, because we might want to modify it.
   // (the "dxJoint *const*" declaration says we're allowed to modify the joints
   // but not the joint array, because the caller might need it unchanged).
-  dxJoint **joint = (dxJoint**) ALLOCA (nj * sizeof(dxJoint*));
+  ALLOCA(dxJoint*,joint,nj*sizeof(dxJoint*));
+#ifdef dUSE_MALLOC_FOR_ALLOCA
+  if (joint == NULL) {
+    dMemoryFlag = d_MEMORY_OUT_OF_MEMORY;
+    return;
+  }
+#endif
   memcpy (joint,_joint,nj * sizeof(dxJoint*));
 
   // for all bodies, compute the inertia tensor and its inverse in the global
   // frame, and compute the rotational force and add it to the torque
   // accumulator. I and invI are vertically stacked 3x4 matrices, one per body.
   // @@@ check computation of rotational force.
-  dReal *I = (dReal*) ALLOCA (3*nb*4 * sizeof(dReal));
-  dReal *invI = (dReal*) ALLOCA (3*nb*4 * sizeof(dReal));
+  ALLOCA(dReal,I,3*nb*4*sizeof(dReal));
+#ifdef dUSE_MALLOC_FOR_ALLOCA
+  if (I == NULL) {
+    UNALLOCA(joint);
+    dMemoryFlag = d_MEMORY_OUT_OF_MEMORY;
+    return;
+  }
+#endif
+  ALLOCA(dReal,invI,3*nb*4*sizeof(dReal));
+#ifdef dUSE_MALLOC_FOR_ALLOCA
+  if (invI == NULL) {
+    UNALLOCA(I);
+    UNALLOCA(joint);
+    dMemoryFlag = d_MEMORY_OUT_OF_MEMORY;
+    return;
+  }
+#endif
 
   //dSetZero (I,3*nb*4);
   //dSetZero (invI,3*nb*4);
@@ -587,8 +1059,27 @@ void dInternalStepIsland_x2 (dxWorld *world, dxBody * const *body, int nb,
   // inactive joints receive a tag value of -1.
 
   int m = 0;
-  dxJoint::Info1 *info = (dxJoint::Info1*) ALLOCA (nj*sizeof(dxJoint::Info1));
-  int *ofs = (int*) ALLOCA (nj*sizeof(int));
+  ALLOCA(dxJoint::Info1,info,nj*sizeof(dxJoint::Info1));
+#ifdef dUSE_MALLOC_FOR_ALLOCA
+  if (info == NULL) {
+    UNALLOCA(invI);
+    UNALLOCA(I);
+    UNALLOCA(joint);
+    dMemoryFlag = d_MEMORY_OUT_OF_MEMORY;
+    return;
+  }
+#endif
+  ALLOCA(int,ofs,nj*sizeof(int));
+#ifdef dUSE_MALLOC_FOR_ALLOCA
+  if (ofs == NULL) {
+    UNALLOCA(info);
+    UNALLOCA(invI);
+    UNALLOCA(I);
+    UNALLOCA(joint);
+    dMemoryFlag = d_MEMORY_OUT_OF_MEMORY;
+    return;
+  }
+#endif
   for (i=0, j=0; j<nj; j++) {	// i=dest, j=src
     joint[j]->vtable->getInfo1 (joint[j],info+i);
     dIASSERT (info[i].m >= 0 && info[i].m <= 6 &&
@@ -622,7 +1113,18 @@ void dInternalStepIsland_x2 (dxWorld *world, dxBody * const *body, int nb,
   }
 
   // this will be set to the force due to the constraints
-  dReal *cforce = (dReal*) ALLOCA (nb*8 * sizeof(dReal));
+  ALLOCA(dReal,cforce,nb*8*sizeof(dReal));
+#ifdef dUSE_MALLOC_FOR_ALLOCA
+  if (cforce == NULL) {
+    UNALLOCA(ofs);
+    UNALLOCA(info);
+    UNALLOCA(invI);
+    UNALLOCA(I);
+    UNALLOCA(joint);
+    dMemoryFlag = d_MEMORY_OUT_OF_MEMORY;
+    return;
+  }
+#endif
   dSetZero (cforce,nb*8);
 
   // if there are constraints, compute cforce
@@ -630,11 +1132,81 @@ void dInternalStepIsland_x2 (dxWorld *world, dxBody * const *body, int nb,
     // create a constraint equation right hand side vector `c', a constraint
     // force mixing vector `cfm', and LCP low and high bound vectors, and an
     // 'findex' vector.
-    dReal *c = (dReal*) ALLOCA (m*sizeof(dReal));
-    dReal *cfm = (dReal*) ALLOCA (m*sizeof(dReal));
-    dReal *lo = (dReal*) ALLOCA (m*sizeof(dReal));
-    dReal *hi = (dReal*) ALLOCA (m*sizeof(dReal));
-    int *findex = (int*) alloca (m*sizeof(int));
+    ALLOCA(dReal,c,m*sizeof(dReal));
+#ifdef dUSE_MALLOC_FOR_ALLOCA
+    if (c == NULL) {
+      UNALLOCA(cforce);
+      UNALLOCA(ofs);
+      UNALLOCA(info);
+      UNALLOCA(invI);
+      UNALLOCA(I);
+      UNALLOCA(joint);
+      dMemoryFlag = d_MEMORY_OUT_OF_MEMORY;
+      return;
+    }
+#endif
+    ALLOCA(dReal,cfm,m*sizeof(dReal));
+#ifdef dUSE_MALLOC_FOR_ALLOCA
+    if (cfm == NULL) {
+      UNALLOCA(c);
+      UNALLOCA(cforce);
+      UNALLOCA(ofs);
+      UNALLOCA(info);
+      UNALLOCA(invI);
+      UNALLOCA(I);
+      UNALLOCA(joint);
+      dMemoryFlag = d_MEMORY_OUT_OF_MEMORY;
+      return;
+    }
+#endif
+    ALLOCA(dReal,lo,m*sizeof(dReal));
+#ifdef dUSE_MALLOC_FOR_ALLOCA
+    if (lo == NULL) {
+      UNALLOCA(cfm);
+      UNALLOCA(c);
+      UNALLOCA(cforce);
+      UNALLOCA(ofs);
+      UNALLOCA(info);
+      UNALLOCA(invI);
+      UNALLOCA(I);
+      UNALLOCA(joint);
+      dMemoryFlag = d_MEMORY_OUT_OF_MEMORY;
+      return;
+    }
+#endif
+    ALLOCA(dReal,hi,m*sizeof(dReal));
+#ifdef dUSE_MALLOC_FOR_ALLOCA
+    if (hi == NULL) {
+      UNALLOCA(lo);
+      UNALLOCA(cfm);
+      UNALLOCA(c);
+      UNALLOCA(cforce);
+      UNALLOCA(ofs);
+      UNALLOCA(info);
+      UNALLOCA(invI);
+      UNALLOCA(I);
+      UNALLOCA(joint);
+      dMemoryFlag = d_MEMORY_OUT_OF_MEMORY;
+      return;
+    }
+#endif
+    ALLOCA(int,findex,m*sizeof(int));
+#ifdef dUSE_MALLOC_FOR_ALLOCA
+    if (findex == NULL) {
+      UNALLOCA(hi);
+      UNALLOCA(lo);
+      UNALLOCA(cfm);
+      UNALLOCA(c);
+      UNALLOCA(cforce);
+      UNALLOCA(ofs);
+      UNALLOCA(info);
+      UNALLOCA(invI);
+      UNALLOCA(I);
+      UNALLOCA(joint);
+      dMemoryFlag = d_MEMORY_OUT_OF_MEMORY;
+      return;
+    }
+#endif
     dSetZero (c,m);
     dSetValue (cfm,m,world->global_cfm);
     dSetValue (lo,m,-dInfinity);
@@ -661,7 +1233,24 @@ void dInternalStepIsland_x2 (dxWorld *world, dxBody * const *body, int nb,
 #   ifdef TIMING
     dTimerNow ("create J");
 #   endif
-    dReal *J = (dReal*) ALLOCA (2*m*8*sizeof(dReal));
+    ALLOCA(dReal,J,2*m*8*sizeof(dReal));
+#ifdef dUSE_MALLOC_FOR_ALLOCA
+    if (J == NULL) {
+      UNALLOCA(findex);
+      UNALLOCA(hi);
+      UNALLOCA(lo);
+      UNALLOCA(cfm);
+      UNALLOCA(c);
+      UNALLOCA(cforce);
+      UNALLOCA(ofs);
+      UNALLOCA(info);
+      UNALLOCA(invI);
+      UNALLOCA(I);
+      UNALLOCA(joint);
+      dMemoryFlag = d_MEMORY_OUT_OF_MEMORY;
+      return;
+    }
+#endif
     dSetZero (J,2*m*8);
     dxJoint::Info2 Jinfo;
     Jinfo.rowskip = 8;
@@ -690,7 +1279,25 @@ void dInternalStepIsland_x2 (dxWorld *world, dxBody * const *body, int nb,
 #   ifdef TIMING
     dTimerNow ("compute A");
 #   endif
-    dReal *JinvM = (dReal*) ALLOCA (2*m*8*sizeof(dReal));
+    ALLOCA(dReal,JinvM,2*m*8*sizeof(dReal));
+#ifdef dUSE_MALLOC_FOR_ALLOCA
+    if (JinvM == NULL) {
+      UNALLOCA(J);
+      UNALLOCA(findex);
+      UNALLOCA(hi);
+      UNALLOCA(lo);
+      UNALLOCA(cfm);
+      UNALLOCA(c);
+      UNALLOCA(cforce);
+      UNALLOCA(ofs);
+      UNALLOCA(info);
+      UNALLOCA(invI);
+      UNALLOCA(I);
+      UNALLOCA(joint);
+      dMemoryFlag = d_MEMORY_OUT_OF_MEMORY;
+      return;
+    }
+#endif
     dSetZero (JinvM,2*m*8);
     for (i=0; i<nj; i++) {
       int b = joint[i]->node[0].body->tag;
@@ -736,7 +1343,26 @@ void dInternalStepIsland_x2 (dxWorld *world, dxBody * const *body, int nb,
     // another similar algorithm does that.
 
     int mskip = dPAD(m);
-    dReal *A = (dReal*) ALLOCA (m*mskip*sizeof(dReal));
+    ALLOCA(dReal,A,m*mskip*sizeof(dReal));
+#ifdef dUSE_MALLOC_FOR_ALLOCA
+    if (A == NULL) {
+      UNALLOCA(JinvM);
+      UNALLOCA(J);
+      UNALLOCA(findex);
+      UNALLOCA(hi);
+      UNALLOCA(lo);
+      UNALLOCA(cfm);
+      UNALLOCA(c);
+      UNALLOCA(cforce);
+      UNALLOCA(ofs);
+      UNALLOCA(info);
+      UNALLOCA(invI);
+      UNALLOCA(I);
+      UNALLOCA(joint);
+      dMemoryFlag = d_MEMORY_OUT_OF_MEMORY;
+      return;
+    }
+#endif
     dSetZero (A,m*mskip);
     for (i=0; i<nb; i++) {
       for (dxJointNode *n1=body[i]->firstjoint; n1; n1=n1->next) {
@@ -794,7 +1420,27 @@ void dInternalStepIsland_x2 (dxWorld *world, dxBody * const *body, int nb,
 #   ifdef TIMING
     dTimerNow ("compute rhs");
 #   endif
-    dReal *tmp1 = (dReal*) ALLOCA (nb*8 * sizeof(dReal));
+    ALLOCA(dReal,tmp1,nb*8*sizeof(dReal));
+#ifdef dUSE_MALLOC_FOR_ALLOCA
+    if (tmp1 == NULL) {
+      UNALLOCA(A);
+      UNALLOCA(JinvM);
+      UNALLOCA(J);
+      UNALLOCA(findex);
+      UNALLOCA(hi);
+      UNALLOCA(lo);
+      UNALLOCA(cfm);
+      UNALLOCA(c);
+      UNALLOCA(cforce);
+      UNALLOCA(ofs);
+      UNALLOCA(info);
+      UNALLOCA(invI);
+      UNALLOCA(I);
+      UNALLOCA(joint);
+      dMemoryFlag = d_MEMORY_OUT_OF_MEMORY;
+      return;
+    }
+#endif
     //dSetZero (tmp1,nb*8);
     // put v/h + invM*fe into tmp1
     for (i=0; i<nb; i++) {
@@ -806,7 +1452,28 @@ void dInternalStepIsland_x2 (dxWorld *world, dxBody * const *body, int nb,
       for (j=0; j<3; j++) tmp1[i*8+4+j] += body[i]->avel[j] * stepsize1;
     }
     // put J*tmp1 into rhs
-    dReal *rhs = (dReal*) ALLOCA (m * sizeof(dReal));
+    ALLOCA(dReal,rhs,m*sizeof(dReal));
+#ifdef dUSE_MALLOC_FOR_ALLOCA
+    if (rhs == NULL) {
+      UNALLOCA(tmp1);
+      UNALLOCA(A);
+      UNALLOCA(JinvM);
+      UNALLOCA(J);
+      UNALLOCA(findex);
+      UNALLOCA(hi);
+      UNALLOCA(lo);
+      UNALLOCA(cfm);
+      UNALLOCA(c);
+      UNALLOCA(cforce);
+      UNALLOCA(ofs);
+      UNALLOCA(info);
+      UNALLOCA(invI);
+      UNALLOCA(I);
+      UNALLOCA(joint);
+      dMemoryFlag = d_MEMORY_OUT_OF_MEMORY;
+      return;
+    }
+#endif
     //dSetZero (rhs,m);
     for (i=0; i<nj; i++) {
       dReal *JJ = J + 2*8*ofs[i];
@@ -830,9 +1497,60 @@ void dInternalStepIsland_x2 (dxWorld *world, dxBody * const *body, int nb,
 #   ifdef TIMING
     dTimerNow ("solving LCP problem");
 #   endif
-    dReal *lambda = (dReal*) ALLOCA (m * sizeof(dReal));
-    dReal *residual = (dReal*) ALLOCA (m * sizeof(dReal));
+    ALLOCA(dReal,lambda,m*sizeof(dReal));
+#ifdef dUSE_MALLOC_FOR_ALLOCA
+    if (lambda == NULL) {
+      UNALLOCA(rhs);
+      UNALLOCA(tmp1);
+      UNALLOCA(A);
+      UNALLOCA(JinvM);
+      UNALLOCA(J);
+      UNALLOCA(findex);
+      UNALLOCA(hi);
+      UNALLOCA(lo);
+      UNALLOCA(cfm);
+      UNALLOCA(c);
+      UNALLOCA(cforce);
+      UNALLOCA(ofs);
+      UNALLOCA(info);
+      UNALLOCA(invI);
+      UNALLOCA(I);
+      UNALLOCA(joint);
+      dMemoryFlag = d_MEMORY_OUT_OF_MEMORY;
+      return;
+    }
+#endif
+    ALLOCA(dReal,residual,m*sizeof(dReal));
+#ifdef dUSE_MALLOC_FOR_ALLOCA
+    if (residual == NULL) {
+      UNALLOCA(lambda);
+      UNALLOCA(rhs);
+      UNALLOCA(tmp1);
+      UNALLOCA(A);
+      UNALLOCA(JinvM);
+      UNALLOCA(J);
+      UNALLOCA(findex);
+      UNALLOCA(hi);
+      UNALLOCA(lo);
+      UNALLOCA(cfm);
+      UNALLOCA(c);
+      UNALLOCA(cforce);
+      UNALLOCA(ofs);
+      UNALLOCA(info);
+      UNALLOCA(invI);
+      UNALLOCA(I);
+      UNALLOCA(joint);
+      dMemoryFlag = d_MEMORY_OUT_OF_MEMORY;
+      return;
+    }
+#endif
     dSolveLCP (m,A,lambda,rhs,residual,nub,lo,hi,findex);
+
+#ifdef dUSE_MALLOC_FOR_ALLOCA
+    if (dMemoryFlag == d_MEMORY_OUT_OF_MEMORY)
+      return;
+#endif
+
 
 //  OLD WAY - direct factor and solve
 //
@@ -905,12 +1623,24 @@ void dInternalStepIsland_x2 (dxWorld *world, dxBody * const *body, int nb,
 	}
       }
     }
+    UNALLOCA(c);
+    UNALLOCA(cfm);
+    UNALLOCA(lo);
+    UNALLOCA(hi);
+    UNALLOCA(findex);
+    UNALLOCA(J);
+    UNALLOCA(JinvM);
+    UNALLOCA(A);
+    UNALLOCA(tmp1);
+    UNALLOCA(rhs);
+    UNALLOCA(lambda);
+    UNALLOCA(residual);
   }
 
   // compute the velocity update
-# ifdef TIMING
+#ifdef TIMING
   dTimerNow ("compute velocity update");
-# endif
+#endif
 
   // add fe to cforce
   for (i=0; i<nb; i++) {
@@ -934,18 +1664,31 @@ void dInternalStepIsland_x2 (dxWorld *world, dxBody * const *body, int nb,
 # endif
   for (i=0; i<nb; i++) dxStepBody (body[i],stepsize);
 
-# ifdef COMPARE_METHODS
-  dReal *tmp_vnew = (dReal*) ALLOCA (nb*6*sizeof(dReal));
+#ifdef COMPARE_METHODS
+  ALLOCA(dReal,tmp, ALLOCA (nb*6*sizeof(dReal));
+#ifdef dUSE_MALLOC_FOR_ALLOCA
+    if (tmp == NULL) {
+      UNALLOCA(cforce);
+      UNALLOCA(ofs);
+      UNALLOCA(info);
+      UNALLOCA(invI);
+      UNALLOCA(I);
+      UNALLOCA(joint);
+      dMemoryFlag = d_MEMORY_OUT_OF_MEMORY;
+      return;
+    }
+#endif
   for (i=0; i<nb; i++) {
     for (j=0; j<3; j++) tmp_vnew[i*6+j] = body[i]->lvel[j];
     for (j=0; j<3; j++) tmp_vnew[i*6+3+j] = body[i]->avel[j];
   }
   comparator.nextMatrix (tmp_vnew,nb*6,1,0,"vnew");
-# endif
+  UNALLOCA(tmp);
+#endif
 
-# ifdef TIMING
+#ifdef TIMING
   dTimerNow ("tidy up");
-# endif
+#endif
 
   // zero all force accumulators
   for (i=0; i<nb; i++) {
@@ -959,10 +1702,17 @@ void dInternalStepIsland_x2 (dxWorld *world, dxBody * const *body, int nb,
     body[i]->tacc[3] = 0;
   }
 
-# ifdef TIMING
+#ifdef TIMING
   dTimerEnd();
   if (m > 0) dTimerReport (stdout,1);
-# endif
+#endif
+      
+  UNALLOCA(joint);
+  UNALLOCA(I);
+  UNALLOCA(invI);
+  UNALLOCA(info);
+  UNALLOCA(ofs);
+  UNALLOCA(cforce);
 }
 
 //****************************************************************************
@@ -970,21 +1720,48 @@ void dInternalStepIsland_x2 (dxWorld *world, dxBody * const *body, int nb,
 void dInternalStepIsland (dxWorld *world, dxBody * const *body, int nb,
 			  dxJoint * const *joint, int nj, dReal stepsize)
 {
-# ifndef COMPARE_METHODS
-  dInternalStepIsland_x2 (world,body,nb,joint,nj,stepsize);
-# endif
 
-# ifdef COMPARE_METHODS
+#ifdef dUSE_MALLOC_FOR_ALLOCA
+  dMemoryFlag = d_MEMORY_OK;
+#endif
+
+#ifndef COMPARE_METHODS
+  dInternalStepIsland_x2 (world,body,nb,joint,nj,stepsize);
+
+#ifdef dUSE_MALLOC_FOR_ALLOCA
+    if (dMemoryFlag == d_MEMORY_OUT_OF_MEMORY) {
+      REPORT_OUT_OF_MEMORY;
+      return;
+    }
+#endif
+
+#endif
+
+#ifdef COMPARE_METHODS
   int i;
 
   // save body state
-  dxBody *state = (dxBody*) ALLOCA (nb*sizeof(dxBody));
+  ALLOCA(dxBody,state,nb*sizeof(dxBody));
+#ifdef dUSE_MALLOC_FOR_ALLOCA
+    if (state == NULL) {
+      dMemoryFlag = d_MEMORY_OUT_OF_MEMORY;
+      REPORT_OUT_OF_MEMORY;
+      return;
+    }
+#endif
   for (i=0; i<nb; i++) memcpy (state+i,body[i],sizeof(dxBody));
 
   // take slow step
   comparator.reset();
   dInternalStepIsland_x1 (world,body,nb,joint,nj,stepsize);
   comparator.end();
+#ifdef dUSE_MALLOC_FOR_ALLOCA
+  if (dMemoryFlag == d_MEMORY_OUT_OF_MEMORY) {
+    UNALLOCA(state);
+    REPORT_OUT_OF_MEMORY;
+    return;
+  }
+#endif
 
   // restore state
   for (i=0; i<nb; i++) memcpy (body[i],state+i,sizeof(dxBody));
@@ -992,8 +1769,18 @@ void dInternalStepIsland (dxWorld *world, dxBody * const *body, int nb,
   // take fast step
   dInternalStepIsland_x2 (world,body,nb,joint,nj,stepsize);
   comparator.end();
+#ifdef dUSE_MALLOC_FOR_ALLOCA
+    if (dMemoryFlag == d_MEMORY_OUT_OF_MEMORY) {
+      UNALLOCA(state);
+      REPORT_OUT_OF_MEMORY;
+      return;
+    }
+#endif
 
   //comparator.dump();
   //_exit (1);
-# endif
+  UNALLOCA(state);
+#endif
 }
+
+
