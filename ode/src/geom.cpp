@@ -1833,3 +1833,19 @@ void dInfiniteAABB (dxGeom *geom, dReal aabb[6])
   aabb[4] = -dInfinity;
   aabb[5] = dInfinity;
 }
+
+
+void dCloseODE()
+{
+  if (colliders) {
+    delete colliders;
+    colliders = 0;
+  }
+  if (classes) {
+    for (int i=0; i < classes->size(); i++) {
+      dFree ((*classes)[i], sizeof (dxGeomClass));
+    }
+    delete classes;
+    classes = 0;
+  }
+}
