@@ -853,10 +853,7 @@ void dBodySetAutoDisableDefaults (dBodyID b)
 	dAASSERT(b);
 	dWorldID w = b->world;
 	dAASSERT(w);
-	b->adis.linear_threshold = dWorldGetAutoDisableLinearThreshold (w);
-	b->adis.angular_threshold = dWorldGetAutoDisableAngularThreshold (w);
-	b->adis.idle_steps = dWorldGetAutoDisableSteps (w);
-	b->adis.idle_time = dWorldGetAutoDisableTime (w);
+	b->adis = w->adis;
 	dBodySetAutoDisableFlag (b, w->adis_flag);
 }
 
