@@ -29,6 +29,7 @@
 struct dxGeomClass {
   dGetColliderFnFn *collider;
   dGetAABBFn *aabb;
+  dAABBTestFn *aabb_test;
   dGeomDtorFn *dtor;
   int num;		// class number
   int size;		// total size of object, including extra data area
@@ -57,6 +58,7 @@ struct dxGeom {		// a dGeomID is a pointer to this
   dReal *R;		// pointer to object's rotation matrix
   dSpaceID spaceid;	// the space this object is in
   dGeomSpaceData space;	// reserved for use by space this object is in
+  dReal *space_aabb;	// ptr to aabb array held by dSpaceCollide() fn
   // class-specific data follows here, with proper alignment.
 };
 

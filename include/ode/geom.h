@@ -81,6 +81,8 @@ void dGeomSetRotation (dGeomID, const dMatrix3 R);
 const dReal * dGeomGetPosition (dGeomID);
 const dReal * dGeomGetRotation (dGeomID);
 void dGeomDestroy (dGeomID);
+void dGeomGetAABB (dGeomID, dReal aabb[6]);
+dReal *dGeomGetSpaceAABB (dGeomID);
 
 /* ************************************************************************ */
 /* geometry group functions */
@@ -104,11 +106,13 @@ typedef int dColliderFn (dGeomID o1, dGeomID o2,
 			 int flags, dContactGeom *contact, int skip);
 typedef dColliderFn * dGetColliderFnFn (int num);
 typedef void dGeomDtorFn (dGeomID o);
+typedef int dAABBTestFn (dGeomID o, dReal aabb[6]);
 
 typedef struct dGeomClass {
   int bytes;
   dGetColliderFnFn *collider;
   dGetAABBFn *aabb;
+  dAABBTestFn *aabb_test;
   dGeomDtorFn *dtor;
 } dGeomClass;
 
