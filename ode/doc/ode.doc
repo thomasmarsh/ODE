@@ -421,15 +421,15 @@ Get and set the body's user-data pointer.
 
 @funcdef{
 void dBodySetPosition   (dBodyID, dReal x, dReal y, dReal z);
-void dBodySetRotation   (dBodyID, dMatrix3 R);
-void dBodySetQuaternion (dBodyID, dQuaternion q);
+void dBodySetRotation   (dBodyID, const dMatrix3 R);
+void dBodySetQuaternion (dBodyID, const dQuaternion q);
 void dBodySetLinearVel  (dBodyID, dReal x, dReal y, dReal z);
 void dBodySetAngularVel (dBodyID, dReal x, dReal y, dReal z);
-dReal    * dBodyGetPos        (dBodyID);
-dReal    * dBodyGetRotation   (dBodyID);     // ptr to 4x3 rot matrix
-dReal    * dBodyGetQuaternion (dBodyID);
-dReal    * dBodyGetLinearVel  (dBodyID);
-dReal    * dBodyGetAngularVel (dBodyID);
+const dReal * dBodyGetPosition   (dBodyID);
+const dReal * dBodyGetRotation   (dBodyID);
+const dReal * dBodyGetQuaternion (dBodyID);
+const dReal * dBodyGetLinearVel  (dBodyID);
+const dReal * dBodyGetAngularVel (dBodyID);
 }{
 These functions set and get the position, rotation, linear and angular
 velocity of the body.
@@ -439,11 +439,13 @@ present.
 When getting, the returned values are pointers to internal data structures,
 so the vectors are valid until any changes are made to the rigid body system
 structure.
+
+Hmmm. c{dBodyGetRotation} returns a 4x3 rotation matrix.
 }
 
 
 @funcdef{
-void dBodySetMass (dBodyID, dMass *mass);
+void dBodySetMass (dBodyID, const dMass *mass);
 void dBodyGetMass (dBodyID, dMass *mass);
 }{
 Set/get the mass of the body (see the mass functions).
@@ -486,7 +488,7 @@ Utility functions.
 dJointID dJointCreateBall (dWorldID, dJointGroupID);
 dJointID dJointCreateHinge (dWorldID, dJointGroupID);
 dJointID dJointCreateSlider (dWorldID, dJointGroupID);
-dJointID dJointCreateContact (dWorldID, dJointGroupID, dContact *);
+dJointID dJointCreateContact (dWorldID, dJointGroupID, const dContact *);
 }{
 Initialize or create a new joint of a given type.
 The joint is initially in "limbo" (i.e. it has no effect on the simulation)
@@ -507,7 +509,7 @@ effect - to destroy the joint the group must be emptied or destroyed.
 
 
 @funcdef{
-dJointGroupID dJointGroupCreate (int max_size);   // max_size in bytes
+dJointGroupID dJointGroupCreate (int max_size);
 void dJointGroupDestroy (dJointGroupID);
 void dJointGroupEmpty (dJointGroupID);
 }{
@@ -517,6 +519,7 @@ which means that all of the contained joints are destroyed at once (quickly).
 However, individual joints in a group can not be destroyed before the entire
 group is emptied.
 Joint groups are most useful with contacts.
+@arg{max_size} is in bytes.
 }
 
 
@@ -623,17 +626,17 @@ Set @arg{q} to the identity rotation (i.e. no rotation).
 
 @funcdef{
 void dQFromAxisAndAngle (dQuaternion q, dReal ax, dReal ay, dReal az,
-                          dReal angle);
+                         dReal angle);
 }{
 Compute @arg{q} as a rotation of @arg{angle} radians along the axis
 (@arg{ax},@arg{ay},@arg{az}).
 }
 
 @funcdef{
-void dQMultiply0 (dQuaternion qa, dQuaternion qb, dQuaternion qc);
-void dQMultiply1 (dQuaternion qa, dQuaternion qb, dQuaternion qc);
-void dQMultiply2 (dQuaternion qa, dQuaternion qb, dQuaternion qc);
-void dQMultiply3 (dQuaternion qa, dQuaternion qb, dQuaternion qc);
+void dQMultiply0 (dQuaternion qa, const dQuaternion qb, const dQuaternion qc);
+void dQMultiply1 (dQuaternion qa, const dQuaternion qb, const dQuaternion qc);
+void dQMultiply2 (dQuaternion qa, const dQuaternion qb, const dQuaternion qc);
+void dQMultiply3 (dQuaternion qa, const dQuaternion qb, const dQuaternion qc);
 }{
 Set @arg{qa} = @arg{qb}*@arg{qc}.
 This is that same as @arg{qa} = rotation @arg{qc} followed by rotation
@@ -644,20 +647,20 @@ Option 3 uses the inverse of both.
 }
 
 @funcdef{
-void dQtoR (dQuaternion q, dMatrix3 R);
+void dQtoR (const dQuaternion q, dMatrix3 R);
 }{
 Convert quaternion @arg{q} to rotation matrix @arg{R}.
 }
 
 @funcdef{
-void dRtoQ (dMatrix3 R, dQuaternion q);
+void dRtoQ (const dMatrix3 R, dQuaternion q);
 }{
 Convert rotation matrix @arg{R} to quaternion @arg{q}.
 }
 
 
 @funcdef{
-void dWtoDQ (dVector3 w, dQuaternion q, dVector4 dq);
+void dWtoDQ (const dVector3 w, const dQuaternion q, dVector4 dq);
 }{
 Given an existing orientation @arg{q} and an angular velocity vector @arg{w},
 return in @arg{dq} the resulting dq/dt.
@@ -684,13 +687,13 @@ Set all the mass parameters to zero.
 }
 
 @funcdef{
-void dMassSetParameters (dMass *, dReal mass,
+void dMassSetParameters (dMass *, dReal themass,
                          dReal cgx, dReal cgy, dReal cgz,
                          dReal I11, dReal I22, dReal I33,
                          dReal I12, dReal I13, dReal I23);
 }{
 Set the mass parameters to the given values.
-@arg{mass} is the mass of the body.
+@arg{themass} is the mass of the body.
 (@arg{cx},@arg{cy},@arg{cz}) is the center of gravity position in the body
 frame.
 The @c{Ixx} values are the elements of the inertia matrix:
@@ -747,7 +750,7 @@ displaced by (@arg{x},@arg{y},@arg{z}) relative to the body frame.
 }
 
 @funcdef{
-void dMassRotate (dMass *, dMatrix3 R);
+void dMassRotate (dMass *, const dMatrix3 R);
 }{
 Given mass parameters for some object, adjust them to represent the object
 rotated by @arg{R} relative to the body frame.

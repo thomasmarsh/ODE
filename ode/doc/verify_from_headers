@@ -1,0 +1,51 @@
+#!/usr/bin/perl
+#
+# check ode.doc and make sure that all the function definitions match what's
+# in the headers. run this from the ode/doc directory!
+
+
+# read in all header files into $h
+$h='';
+$incdir = '../../include/ode';
+opendir (DIR,$incdir) or die "can't open directory \"$incdir\", stopped";
+while ($i = readdir(DIR)) {
+  next if ($i eq '.' or $i eq '..');
+  next if ! -f "$incdir/$i";
+  open (FILE,"$incdir/$i") or die "can't open file \"$incdir/$i\", stopped";
+  $h .= join('',<FILE>);
+  close (FILE);
+}
+closedir DIR;
+
+
+sub checkFunc
+{
+  my $fn;
+  foreach $fn (split (/;/,$_[0])) {	# split input on semicolons
+    $fn =~ s/^\s*//;		# strip whitespace at start
+    $fn =~ s/\s;\s*$//;		# strip semicolon and whitespace at end
+    next if $fn eq '';		# do next one if nothing left
+    $fn = " $fn; ";		# put back whitespace and semicolon
+
+    # protect some characters with backslash
+    $fn =~ s/([.*+?\\\/\$\^()\[\]])/\\$1/g;
+
+    printf "looking for \"$fn\"\n";
+    if ($h !~ /$fn/) {
+      print "\n*** COULD NOT FIND: \"$fn\"\n\n";
+      exit 1;
+    }
+  }
+}
+
+open (FILE,"ode.doc");
+$a = join('',<FILE>);
+close (FILE);
+
+# strip whitespace out of $h and $a
+$h =~ s/\s+/ /g;
+$a =~ s/\s+/ /g;
+
+$a =~ s/\@funcdef{([^}]*)}/&checkFunc($1)/ge;
+
+print "\n\nOK\n";
