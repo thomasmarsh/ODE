@@ -25,14 +25,16 @@
 #ifndef _ODE_MEMORY_H_
 #define _ODE_MEMORY_H_
 
+#include "ode/config.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 /* function types to allocate and free memory */
-typedef void * dAllocFunction (int size);
-typedef void * dReallocFunction (void *ptr, int oldsize, int newsize);
-typedef void dFreeFunction (void *ptr, int size);
+typedef void * dAllocFunction (size_t size);
+typedef void * dReallocFunction (void *ptr, size_t oldsize, size_t newsize);
+typedef void dFreeFunction (void *ptr, size_t size);
 
 /* set new memory management functions. if fn is 0, the default handlers are
  * used. */
@@ -46,15 +48,9 @@ dReallocFunction *dGetReallocHandler ();
 dFreeFunction *dGetFreeHandler ();
 
 /* allocate and free memory. */
-void * dAlloc (int size);
-void * dRealloc (void *ptr, int oldsize, int newsize);
-void dFree (void *ptr, int size);
-
-/* when alloc debugging is turned on, this indicates that the given block of
- * alloc()ed memory should not be reported as "still in use" when the program
- * exits.
- */
-void dAllocDontReport (void *ptr);
+void * dAlloc (size_t size);
+void * dRealloc (void *ptr, size_t oldsize, size_t newsize);
+void dFree (void *ptr, size_t size);
 
 #ifdef __cplusplus
 }

@@ -114,7 +114,6 @@ dGeomTransformSetCleanup
 dGeomTransformSetGeom
 dGeomTransformSetInfo
 dGeomTriMeshClearTCCache
-dGeomTriMeshDataBuild
 dGeomTriMeshDataBuildDouble
 dGeomTriMeshDataBuildSimple
 dGeomTriMeshDataBuildSingle
@@ -283,9 +282,6 @@ dSpaceSetCleanup
 dTestMatrixComparison
 dTestRand
 dTestSolveLCP
-dTriArrayCallback
-dTriCallback
-dTriRayCallback
 dWorldCreate
 dWorldDestroy
 dWorldGetAutoEnableDepthSF1
