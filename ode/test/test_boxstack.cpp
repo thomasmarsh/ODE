@@ -184,7 +184,7 @@ int main (int argc, char **argv)
   // create world
 
   world = dWorldCreate();
-  space = dSpaceCreate();
+  space = dHashSpaceCreate();
   contactgroup = dJointGroupCreate (1000000);
   dWorldSetGravity (world,0,0,-0.5);
   dCreatePlane (space,0,0,1,0);
