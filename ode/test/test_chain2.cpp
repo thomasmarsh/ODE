@@ -1,3 +1,24 @@
+/*************************************************************************
+ *                                                                       *
+ * Open Dynamics Engine, Copyright (C) 2001 Russell L. Smith.            *
+ *                                                                       *
+ * This library is free software; you can redistribute it and/or         *
+ * modify it under the terms of the GNU Lesser General Public            *
+ * License as published by the Free Software Foundation; either          *
+ * version 2.1 of the License, or (at your option) any later version.    *
+ *                                                                       *
+ * This library is distributed in the hope that it will be useful,       *
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU      *
+ * Lesser General Public License for more details.                       *
+ *                                                                       *
+ * You should have received a copy of the GNU Lesser General Public      *
+ * License along with this library (see the file LICENSE.TXT); if not,   *
+ * write to the Free Software Foundation, Inc., 59 Temple Place,         *
+ * Suite 330, Boston, MA 02111-1307 USA.                                 *
+ *                                                                       *
+ *************************************************************************/
+
 /* test using C++ interface */
 
 
@@ -31,7 +52,7 @@ static dSpaceID space;
 static dBody body[NUM];
 static dJoint joint[NUM-1];
 static dJointGroup contactgroup;
-static dGeomID sphere[NUM];
+static dGeomID box[NUM];
 
 
 // this is called by dSpaceCollide when two objects in space are
@@ -47,7 +68,7 @@ static void nearCallback (void *data, dGeomID o1, dGeomID o2)
   dContact contact;
   contact.surface.mode = 0;
   contact.surface.mu = dInfinity;
-  if (dCollide (o1,o2,0,&contact.geom)) {
+  if (dCollide (o1,o2,0,&contact.geom,sizeof(dContactGeom))) {
     dJointID c = dJointCreateContact (world.id(),contactgroup.id(),&contact);
     dJointAttach (c,o1->body,o2->body);
   }
@@ -80,11 +101,11 @@ static void simLoop (int pause)
     contactgroup.empty();
   }
 
-  // float sides[3] = {SIDE,SIDE,SIDE};
+  dReal sides[3] = {SIDE,SIDE,SIDE};
   dsSetColor (1,1,0);
   dsSetTexture (DS_WOOD);
   for (int i=0; i<NUM; i++)
-    dsDrawSphere (body[i].getPosition(),body[i].getRotation(),RADIUS);
+    dsDrawBox (body[i].getPosition(),body[i].getRotation(),sides);
 }
 
 
@@ -117,10 +138,10 @@ int main (int argc, char **argv)
     body[i].setMass (&m);
     body[i].setData ((void*) i);
 
-    sphere[i] = dCreateSphere (space,RADIUS);
-    sphere[i]->body = body[i].id();
-    sphere[i]->pos = body[i].getPosition();
-    sphere[i]->R = body[i].getRotation();
+    box[i] = dCreateBox (space,SIDE,SIDE,SIDE);
+    box[i]->body = body[i].id();
+    box[i]->pos = const_cast<dReal*> (body[i].getPosition());
+    box[i]->R = const_cast<dReal*> (body[i].getRotation());
   }
   for (i=0; i<(NUM-1); i++) {
     joint[i].createBall (world);
