@@ -1107,6 +1107,8 @@ extern "C" void dsSimulationLoop (int argc, char **argv,
 
   initMotionModel();
   dsPlatformSimLoop (window_width,window_height,fn,initial_pause);
+
+  current_state = 0;
 }
 
 

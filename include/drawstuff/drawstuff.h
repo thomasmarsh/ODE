@@ -94,6 +94,13 @@ void dsPrint (char *msg, ...);
 void dsSetViewpoint (float xyz[3], float hpr[3]);
 void dsGetViewpoint (float xyz[3], float hpr[3]);
 
+/* stop the simulation loop. calling this from within dsSimulationLoop()
+ * will cause it to exit and return to the caller. it is the same as if the
+ * user used the exit command. using this outside the loop will have no
+ * effect.
+ */
+void dsStop();
+
 /* change the way objects are drawn. these changes will apply to all further
  * dsDrawXXX() functions. the texture number must be a DS_xxx texture
  * constant. the red, green, and blue number are between 0 and 1.
