@@ -42,13 +42,13 @@ typedef unsigned int intP;
 #define dTRIMESH_ENABLED 1
 
 /* available functions */
-#define sqrtf sqrt
-#define sinf sin
-#define cosf cos
-#define fabsf fabs
-#define atan2f atan2
-#define fmodf fmod
-#define copysignf copysign
+//#define sqrtf sqrtf
+//#define sinf sinf
+//#define cosf cosf
+//#define fabsf fabsf
+//#define atan2f atan2f
+//#define fmodf fmodf
+#define copysignf _copysign
 #define copysign _copysign
 #define snprintf _snprintf
 #define vsnprintf _vsnprintf
