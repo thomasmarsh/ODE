@@ -159,8 +159,6 @@ void*  dGeomTriMeshDataGet(dTriMeshDataID g, int data_id)
 {
     dUASSERT(g, "argument not trimesh data");
 
-    double *elem;
-    
     switch (data_id) {
     case TRIMESH_FACE_NORMALS:
         return (void *) g->Normals;
@@ -523,4 +521,10 @@ void dGeomTriMeshGetPoint(dGeomID g, int Index, dReal u, dReal v, dVector3 Out){
     FetchTriangle(Geom, Index, Position, Rotation, dv);
 
     GetPointFromBarycentric(dv, u, v, Out);
+}
+
+int dGeomTriMeshGetTriangleCount (dGeomID g)	 	
+{	 	
+    dxTriMesh* Geom = (dxTriMesh*)g;	 	
+    return Geom->Data->Mesh.GetNbTriangles();	 	
 }
