@@ -3652,7 +3652,7 @@ Set the starting position (@arg{px},@arg{py},@arg{pz}) and direction
 (@arg{dx},@arg{dy},@arg{dz}) of the given @arg{ray}.
 The ray's rotation matrix will be adjusted so that the local Z-axis is
 aligned with the direction.
-Note that this does not adjust the ray's length.
+Note that this does not adjust the ray's length.  The (@arg{dx},@arg{dy},@arg{dz}) direction vector must be of unit length.
 }
 
 @funcdef{
