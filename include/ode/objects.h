@@ -99,6 +99,9 @@ void dBodyEnable (dBodyID);
 void dBodyDisable (dBodyID);
 int dBodyIsEnabled (dBodyID);
 
+void dBodySetGravityMode (dBodyID b, int mode);
+int dBodyGetGravityMode (dBodyID b);
+
 
 /* joints */
 

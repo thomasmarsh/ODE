@@ -1088,7 +1088,17 @@ Return a joint attached to this body, given by @arg{index}.
 Valid indexes are 0 to @m{n}-1 where @m{n} is the value returned by
 @func{dBodyGetNumJoints()}.
 }
- 
+
+
+@funcdef{
+void dBodySetGravityMode (dBodyID b, int mode);
+int dBodyGetGravityMode (dBodyID b);
+}{
+Set/get whether the body is influenced by the world's gravity or not.
+If @arg{mode} is nonzero it is, if @arg{mode} is zero, it isn't.
+Newly created bodies are always influenced by the world's gravity.
+}
+
 #############################################################################
 @chapter{Joint types and joint functions}
 

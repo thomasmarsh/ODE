@@ -313,9 +313,11 @@ void dInternalStepIsland_x1 (dxWorld *world, dxBody * const *body, int nb,
 
   // add the gravity force to all bodies
   for (i=0; i<nb; i++) {
-    body[i]->facc[0] += body[i]->mass.mass * world->gravity[0];
-    body[i]->facc[1] += body[i]->mass.mass * world->gravity[1];
-    body[i]->facc[2] += body[i]->mass.mass * world->gravity[2];
+    if ((body[i]->flags & dxBodyNoGravity)==0) {
+      body[i]->facc[0] += body[i]->mass.mass * world->gravity[0];
+      body[i]->facc[1] += body[i]->mass.mass * world->gravity[1];
+      body[i]->facc[2] += body[i]->mass.mass * world->gravity[2];
+    }
   }
 
   // get m = total constraint dimension, nub = number of unbounded variables.
@@ -622,9 +624,11 @@ void dInternalStepIsland_x2 (dxWorld *world, dxBody * const *body, int nb,
 
   // add the gravity force to all bodies
   for (i=0; i<nb; i++) {
-    body[i]->facc[0] += body[i]->mass.mass * world->gravity[0];
-    body[i]->facc[1] += body[i]->mass.mass * world->gravity[1];
-    body[i]->facc[2] += body[i]->mass.mass * world->gravity[2];
+    if ((body[i]->flags & dxBodyNoGravity)==0) {
+      body[i]->facc[0] += body[i]->mass.mass * world->gravity[0];
+      body[i]->facc[1] += body[i]->mass.mass * world->gravity[1];
+      body[i]->facc[2] += body[i]->mass.mass * world->gravity[2];
+    }
   }
 
   // get m = total constraint dimension, nub = number of unbounded variables.

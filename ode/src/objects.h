@@ -37,7 +37,8 @@
 enum {
   dxBodyFlagFiniteRotation = 1,		// use finite rotations
   dxBodyFlagFiniteRotationAxis = 2,	// use finite rotations only along axis
-  dxBodyDisabled = 4			// body is disabled
+  dxBodyDisabled = 4,			// body is disabled
+  dxBodyNoGravity = 8			// body is not influenced by gravity
 };
 
 
