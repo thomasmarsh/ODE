@@ -84,7 +84,7 @@ void dNormalize3 (dVector3 a)
     }
     else {		// aa0 is largest
       if (aa0 <= 0) {
-	dDEBUGMSG ("vector has zero size");
+	// dDEBUGMSG ("vector has zero size"); ... this messace is annoying
 	a[0] = 1;	// if all a's are zero, this is where we'll end up.
 	a[1] = 0;	// return a default unit length vector.
 	a[2] = 0;
