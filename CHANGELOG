@@ -9,6 +9,11 @@ the rules for this file:
 
 ------------------------------------------------------------------------------
 
+11/10/02 russ
+
+	* added new collision system. select between the old/new system by
+	  setting the ODE_OLD_COLLISION variable in config/user-settings.
+
 10/28/02 russ
 
 	* fixed two problems in the LCP code to improve the reliability of
