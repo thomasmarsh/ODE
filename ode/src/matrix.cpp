@@ -200,6 +200,7 @@ int dIsPositiveDefinite (const dReal *A, int n)
 }
 
 
+/***** this has been replaced by a faster version
 void dSolveL1T (const dReal *L, dReal *b, int n, int nskip)
 {
   int i,j;
@@ -211,6 +212,7 @@ void dSolveL1T (const dReal *L, dReal *b, int n, int nskip)
     b[i] -= sum;
   }
 }
+*/
 
 
 void dVectorScale (dReal *a, const dReal *d, int n)
