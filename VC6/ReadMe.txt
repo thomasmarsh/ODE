@@ -1,8 +1,10 @@
+
 -------------------------------------------
- MS VisualC++ 6 workspace for ODE (v0.9).
+ MS VisualC++ 6 workspace for ODE (v0.91).
 -------------------------------------------
 
-This directory contains these VC6 workspaces:
+This directory contains these VC6 workspaces (they should also load into
+later VC versions, eg. .NET):
 
 1) "ode.dsw"                  - for building ODE as a static library
 2) "odeDLL.dsw"               - for building ODE as a DLL
@@ -15,8 +17,7 @@ Before you can use these, you must:
 with/without Trimesh support.  Simply double-click one of the included batch
 files (you can do this at any time) and then perform a build.
 
- b) add the ODE and Opcode (if using trimesh) include and library paths to your
-    app's project settings - there are two ways to do this:
+ b) add the ODE and Opcode (if using trimesh) include and library paths to your app's project settings - there are two ways to do this:
 
         1) If you intend to use different versions of ODE with different 
            applications, you can set them up for each project independently:

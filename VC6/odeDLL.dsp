@@ -69,7 +69,7 @@ LINK32=link.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MTd /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "ODEDLL_EXPORTS" /Yu"stdafx.h" /FD /GZ /c
-# ADD CPP /nologo /MDd /W2 /Gm /GX /ZI /Od /I "..\Include" /I "..\OPCODE" /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "ODEDLL_EXPORTS" /YX /FD /GZ /c
+# ADD CPP /nologo /MDd /W2 /Gm /GX /ZI /Od /I "..\Include" /I "..\OPCODE" /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "ODEDLL_EXPORTS" /FR /YX /FD /GZ /c
 # ADD BASE MTL /nologo /D "_DEBUG" /mktyplib203 /win32
 # ADD MTL /nologo /D "_DEBUG" /mktyplib203 /win32
 # ADD BASE RSC /l 0x809 /d "_DEBUG"
@@ -197,6 +197,10 @@ SOURCE=..\ode\src\memory.cpp
 # Begin Source File
 
 SOURCE=..\ode\src\misc.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\msvcdefs.def
 # End Source File
 # Begin Source File
 
