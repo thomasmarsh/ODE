@@ -26,6 +26,15 @@
 
 #include "ode/ode.h"
 
+
+// get some math functions under windows
+#ifdef WIN32
+#include <float.h>
+#define copysign _copysign
+#define finite _finite
+#define isnan _isnan
+#endif
+
 //****************************************************************************
 // matrix accessors
 
@@ -117,7 +126,7 @@ void testInfinity()
 {
   HEADER;
   if (1e10 < dInfinity && -1e10 > -dInfinity && -dInfinity < dInfinity &&
-      isinf(dInfinity) && !isnan(dInfinity) && !finite(dInfinity))
+      !isnan(dInfinity) && !finite(dInfinity))
     printf ("\tpassed\n");
   else printf ("\tFAILED\n");
 }
