@@ -669,26 +669,6 @@ static void drawCylinder (float l, float r, float zoffset)
   glEnd();
 }
 
-
-static void drawVectors()
-{
-  /* @@@
-  if (num_vectors > 0) {
-    glColor3f (0,0,1);
-    glDisable (GL_LIGHTING);
-    glLineWidth (3);
-    glBegin (GL_LINES);
-    for (int i=0; i<num_vectors; i++) {
-      glVertex3f (vectors[i][0],vectors[i][1],vectors[i][2]);
-      glVertex3f (vectors[i][0]+vectors[i][3],vectors[i][1]+vectors[i][4],
-		  vectors[i][2]+vectors[i][5]);
-    }
-    glEnd();
-    glEnable (GL_LIGHTING);
-  }
-  */
-}
-
 //***************************************************************************
 // motion model
 
@@ -1262,6 +1242,20 @@ extern "C" void dsDrawCappedCylinder (const float pos[3], const float R[12],
 }
 
 
+void dsDrawLine (const float pos1[3], const float pos2[3])
+{
+  setupDrawingMode();
+  glColor3f (color[0],color[1],color[2]);
+  glDisable (GL_LIGHTING);
+  glLineWidth (2);
+  glShadeModel (GL_FLAT);
+  glBegin (GL_LINES);
+  glVertex3f (pos1[0],pos1[1],pos1[2]);
+  glVertex3f (pos2[0],pos2[1],pos2[2]);
+  glEnd();
+}
+
+
 void dsDrawBoxD (const double pos[3], const double R[12],
 		 const double sides[3])
 {
@@ -1303,4 +1297,14 @@ void dsDrawCappedCylinderD (const double pos[3], const double R[12],
   for (i=0; i<3; i++) pos2[i]=pos[i];
   for (i=0; i<12; i++) R2[i]=R[i];
   dsDrawCappedCylinder (pos2,R2,length,radius);
+}
+
+
+void dsDrawLineD (const double _pos1[3], const double _pos2[3])
+{
+  int i;
+  float pos1[3],pos2[3];
+  for (i=0; i<3; i++) pos1[i]=_pos1[i];
+  for (i=0; i<3; i++) pos2[i]=_pos2[i];
+  dsDrawLine (pos1,pos2);
 }
