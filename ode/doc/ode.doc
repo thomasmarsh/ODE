@@ -119,10 +119,24 @@ Here are the features:
 @* Multi-resolution hash table based collision space, that performs quick
    identification of potentially intersecting pairs.
 @* Improved the approximation to Coloumb friction.
-@* A few bug fixes.
+@* Bug fixes.
 @* A few minor API changes so that the API matches the documentation.
 @* LCP solver optimized even more.
 @* Added the @func{dJointGetType()} function.
+@* Added finite rotation functions: @func{dBodySetFiniteRotationMode()}
+   and @func{dBodySetFiniteRotationAxis()}.
+@* New functions to set geometry parameters:
+   @func{dGeomSphereSetRadius()}, @func{dGeomBoxSetLengths()},
+   @func{dGeomPlaneSetParams()}, @func{dGeomCCylinderSetParams()}.
+@* New collision utility function: @func{dInfiniteAABB()}.
+@* Finally implemented the @c{dBodyAddXXX} functions. Also implemented
+   @func{dBodyGetRelPointPos()} and @func{dBodyGetRelPointVel()}.
+@* New geometry type: GeomGroup.
+@* New functions for AABBs: @func{dGeomGetAABB()}, @func{dGeomGetSpaceAABB()}.
+@* API change: geoms do not have to be added to a space on creation.
+@* API change: user defined collision functions have to fill in the @c{g1}
+   and @c{g2} members of the @c{dContactGeom} structure.
+@* API change: added the @c{aabb_test} and @c{dtor} fields to @c{dGeomClass}.
 }
 
 
@@ -166,7 +180,7 @@ Here are the features:
 @list{
 @* Update documentation.
 @* Expose type-specific collision functions.
-@* More collision primitives: capped cylinder, composite objects.
+@* More collision primitives: capped cylinder, transformation objects.
 @* Improve box-box collision, especially for face-face contact.
 @* Internals documentation.
 @* Automatic code optimization process.
@@ -823,12 +837,10 @@ after each time step.
 
 
 @funcdef{
-void dBodyGetPointPos    (dBodyID, dReal px, dReal py, dReal pz,
-                          dVector3 result);
-void dBodyGetPointVel    (dBodyID, dReal px, dReal py, dReal pz,
-                          dVector3 result);
-void dBodyGetPointRelVel (dBodyID, dReal px, dReal py, dReal pz,
-                          dVector3 result);
+void dBodyGetRelPointPos    (dBodyID, dReal px, dReal py, dReal pz,
+                             dVector3 result);
+void dBodyGetRelPointVel    (dBodyID, dReal px, dReal py, dReal pz,
+                             dVector3 result);
 }{
 Utility functions.
 }
@@ -1658,6 +1670,7 @@ struct dContactGeom {
   dVector3 pos;       // contact position
   dVector3 normal;    // normal vector
   dReal depth;        // penetration depth
+  dGeomID g1,g2;      // the colliding geoms
 };
 @]}
 @arg{pos} records the contact position, in global coordinates.
@@ -1670,6 +1683,8 @@ often step the bodies too far so that the depth is nonzero.
 
 @arg{normal} is a unit length vector that is, generally speaking,
 perpendicular to the contact surface.
+
+@arg{g1} and @arg{g2} are the geometry objects that collided.
 
 The convention is that if body 1 is moved along the @arg{normal} vector by a
 distance @arg{depth} (or equivalently if body 2 is moved the same distance in
@@ -1708,17 +1723,24 @@ rotation is actually the position and rotation of that body.
 The point of reference for the standard classes usually corresponds to their
 centers of mass.
 This makes them particularly easy to connect to dynamics objects.
-If other points of reference are required, composite objects should be used
-to encapsulate the primitives.
+If other points of reference are required, transformation objects should be
+used to encapsulate the primitives.
 
 @subsection{Sphere functions}
 
 @funcdef{
 dGeomID dCreateSphere (dSpaceID space, dReal radius);
 }{
-Create a sphere geometry object of the given @arg{radius}, insert it into the
-given @arg{space}, and return its ID.
+Create a sphere geometry object of the given @arg{radius}, and return its ID.
+If @arg{space} is nonzero, insert it into that space.
 The point of reference for a sphere is its center.
+}
+
+
+@funcdef{
+void dGeomSphereSetRadius (dGeomID sphere, dReal radius);
+}{
+Set the radius of the given sphere.
 }
 
 
@@ -1735,9 +1757,16 @@ Return the radius of the given sphere.
 dGeomID dCreateBox (dSpaceID space, dReal lx, dReal ly, dReal lz);
 }{
 Create a box geometry object of the given x/y/z side lengths
-(@arg{lx},@arg{ly},@arg{lz}), insert it into the given @arg{space}, and
-return its ID.
+(@arg{lx},@arg{ly},@arg{lz}), and return its ID.
+If @arg{space} is nonzero, insert it into that space.
 The point of reference for a box is its center.
+}
+
+
+@funcdef{
+void dGeomBoxSetLengths (dGeomID box, dReal lx, dReal ly, dReal lz);
+}{
+Set the side lengths of the given @arg{box}.
 }
 
 
@@ -1754,14 +1783,21 @@ Return in @arg{result} the side lengths of the given @arg{box}.
 dGeomID dCreatePlane (dSpaceID space,
                       dReal a, dReal b, dReal c, dReal d);
 }{
-Create a plane geometry object of the given parameters, insert it into the
-given @arg{space}, and return its ID.
+Create a plane geometry object of the given parameters, and return its ID.
+If @arg{space} is nonzero, insert it into that space.
 The plane equation is @center{@m{a*x+b*y+c*z = d}}
 The plane's normal vector is @m{(a,b,c)}, and it must have length 1.
 Unlike other geometry objects, planes disregard their assigned position and
 rotation, i.e. the parameters are always in global coordinates.
 In other words it is assumed that the plane is always part of the static
 environment and not tied to any movable object.
+}
+
+
+@funcdef{
+void dGeomPlaneSetParams (dGeomID plane, dReal a, dReal b, dReal c, dReal d);
+}{
+Set the parameters of the given @arg{plane}.
 }
 
 
@@ -1776,6 +1812,7 @@ Return in @arg{result} the parameters of the given @arg{plane}.
 
 @funcdef{
 dGeomID dCreateCCylinder (dSpaceID space, dReal a, dReal b, int dir);
+void dGeomCCylinderSetParams (dGeomID ccylinder, dReal a, dReal b, int dir);
 void dGeomCCylinderGetParams (dGeomID ccylinder,
                               dReal *a, dReal *b, int *dir);
 }{
@@ -1783,7 +1820,89 @@ void dGeomCCylinderGetParams (dGeomID ccylinder,
 }
 
 
+@subsection{Geometry object group functions}
+
+Geometry object groups (GeomGroups) are a way to speed up collision detection
+in some situations.
+They represent a collection of geometry objects that are located together
+in space.
+
+GeomGroups solve the following problem:
+Suppose you have two cars driving over some terrain.
+Each car is made up of many bodies.
+Without GeomGroups, the collision computation time between the two cars is
+proportional to the total number of parts (or even to the square of this
+number, depending on which space container is used).
+To speed up the process, a GeomGroup object is created to represent each car.
+The GeomGroup is inserted into the space, but the individual geometry objects
+of the cars are not.
+The bounding box of each GeomGroup is computed to encompass the car
+geometry objects.
+At each time step, the @func{dSpaceCollide()} function does a single
+intersection test between the GeomGroups.
+If there is an intersection, the contents of the GeomGroup will be
+individually tested against each other.
+In this way the best case performance (when the cars are far away from
+each other) is improved.
+
+GeomGroups have the same interface as any other geometry object.
+
+The geometry objects inside a GeomGroup will not self-intersect if they are
+not a member of a space.
+If you want them to self-intersect, insert them into a separate space and
+call @func{dSpaceCollide()} on that.
+Do not insert them into the same space the GeomGroup is in.
+
+
+@funcdef{
+dGeomID dCreateGeomGroup (dSpaceID space);
+}{
+Create an empty geometry group object, and return its ID.
+If @arg{space} is nonzero, insert it into that space.
+}
+
+
+@funcdef{
+void dGeomGroupAdd (dGeomID group, dGeomID x);
+}{
+Add the geometry object @arg{x} to the given GeomGroup.
+Note that when the GeomGroup is destroyed, the objects that it contains will
+@emph{not} be.
+}
+
+
+@funcdef{
+void dGeomGroupRemove (dGeomID group, dGeomID x);
+}{
+Remove the geometry object @arg{x} from the given GeomGroup.
+If it is not in the GeomGroup then nothing is done.
+}
+
+
+@funcdef{
+int dGeomGroupNumGeoms (dGeomID group);
+}{
+Return the number of geometry object in the given GeomGroup.
+}
+
+
+@funcdef{
+dGeomID dGeomGroupGetGeom (dGeomID group, int i);
+}{
+Return a specific geometry object from the given GeomGroup.
+@arg{i} is the index of the object, it must be between 0 and @m{n-1}
+where @m{n} is the number of objects in the group.
+}
+
+
 @subsection{General geometry object functions}
+
+@funcdef{
+void dGeomDestroy (dGeomID);
+}{
+Destroy a geometry object, removing it from any space it is in first.
+}
+
 
 @funcdef{
 void dGeomSetData (dGeomID, void *);
@@ -1832,10 +1951,24 @@ pointers will be returned, i.e. the result will be identical to calling
 
 
 @funcdef{
-void dGeomDestroy (dGeomID);
+void dGeomGetAABB (dGeomID, dReal aabb[6]);
 }{
-Destroy a geometry object, removing it from the space first.
+Return in @arg{aabb} the axis aligned bounding box for the given geometry
+object.
 }
+
+
+@funcdef{
+dReal *dGeomGetSpaceAABB (dGeomID);
+}{
+Return a pointer to the axis aligned bounding box that was
+precomputed for the given geometry object by the @func{dSpaceCollide()}
+function.
+This returns 0 if the @func{dSpaceCollide()} function is not currently
+being called.
+This is much faster than calling @func{dGeomGetAABB()}.
+}
+
 
 @section{Collision detection}
 
@@ -1910,7 +2043,7 @@ typedef dColliderFn * dGetColliderFnFn (int num);
 	This function is called infrequently - the return values are cached
 	and reused.
 
-@*	A function that will compute the axis aligned bounding box of
+@*	A function that will compute the axis aligned bounding box (AABB) of
 	instances of this class.
 	This function must be of type @c{dGetAABBFn}, which is defined as
 	@code{@[
@@ -1920,10 +2053,46 @@ typedef void dGetAABBFn (dGeomID g, dReal aabb[6]);
 	axis-aligned bounding box for @arg{g}.
 	The @arg{aabb} array has elements
 	@m{(minx, maxx, miny, maxy, minz, maxz)}.
+	If you don't want to compute tight bounds for the AABB, you can just
+	supply a pointer to @func{dInfiniteAABB()}, which returns +/- infinity
+	in each direction.
 
 @*	The number of bytes of "class data" that instances of this class
 	need. For example a sphere stores its radius in the class data area,
 	and a box stores its side lengths there.
+}
+The following things are optional for a geometry class:
+@numlist{
+@*	A function that will destroy the class data. Most classes will not
+	need this function, but some will want to deallocate heap memory
+	or release other resources.
+	This function must be of type @c{dGeomDtorFn}, which is defined as 
+	@code{@[
+typedef void dGeomDtorFn (dGeomID o);
+	@]}
+	The argument @arg{o} has type X.
+
+@*	A function that will test whether a given AABB intersects with an
+	instance of X.
+	This is used as an early-exit test in the space collision functions.
+	This function must be of type @c{dAABBTestFn}, which is defined as 
+	@code{@[
+typedef int dAABBTestFn (dGeomID o, dReal aabb[6]);
+	@]}
+	The argument @arg{o} has type X.
+	If this function is provided it is called by @func{dSpaceCollide()}
+	when (@arg{o}) intersects another object (that has an AABB given by
+	@arg{aabb}).
+	It returns 1 if @arg{aabb} intersects @arg{o}, or 0 if it does not.
+
+	This is useful, for example, for large terrains.
+	Terrains typically have very large AABBs, which are not very useful to
+	test intersections with other objects.
+	This function can test another object's AABB against the terrain
+	without going to the computational trouble of the specific collision
+	function.
+	This has an especially big savings when testing against GeomGroup
+	objects.
 }
 
 Here are the functions used to manage custom classes:
@@ -1944,6 +2113,8 @@ struct dGeomClass {
   int bytes;                  // bytes of custom data needed
   dGetColliderFnFn *collider; // collider function
   dGetAABBFn *aabb;           // bounding box function
+  dAABBTestFn *aabb_test;     // aabb tester, can be 0 for none
+  dGeomDtorFn *dtor;          // destructor, can be 0 for none
 };
 @]}
 }
@@ -1998,6 +2169,15 @@ Given boxes (@arg{p1},@arg{R1},@arg{side1}) and
 (@arg{p2},@arg{R2},@arg{side2}), return 1 if they intersect or 0 if not.
 @arg{p} is the center of the box, @arg{R} is the rotation matrix for
 the box, and @arg{side} is a vector of x/y/z side lengths.
+}
+
+
+@funcdef{
+void dInfiniteAABB (dxGeom *geom, dReal aabb[6]);
+}{
+This function can be used as the AABB-getting function in a geometry class,
+if you don't want to compute tight bounds for the AABB.
+It returns +/- infinity in each direction.
 }
 
 
@@ -2064,8 +2244,8 @@ void dSpaceAdd (dSpaceID, dGeomID);
 void dSpaceRemove (dSpaceID, dGeomID);
 }{
 Add and remove geometry objects to/from the space.
-These functions are normally only called by the geometry object
-creation/deletion functions.
+These functions may be called by the geometry object creation/deletion
+functions.
 }
 
 
@@ -2086,14 +2266,6 @@ each other.
 The callback function can call @func{dCollide()} on @arg{o1} and @arg{o2},
 perhaps first determining whether to collide them at all based on other
 information.
-}
-
-
-@section{Future}
-
-Future interface enhancements:
-@list{
-@*	Composite objects.
 }
 
 #############################################################################
