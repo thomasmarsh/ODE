@@ -105,12 +105,14 @@ void dsStop();
 /* change the way objects are drawn. these changes will apply to all further
  * dsDrawXXX() functions. the texture number must be a DS_xxx texture
  * constant. the red, green, and blue number are between 0 and 1.
+ * alpha is between 0 and 1 - if alpha is not specified it's assubed to be 1.
  * the current texture is colored according to the current color.
  * at the start of each frame, the texture is reset to none and the color is
  * reset to white.
  */
 void dsSetTexture (int texture_number);
 void dsSetColor (float red, float green, float blue);
+void dsSetColorAlpha (float red, float green, float blue, float alpha);
 
 /* draw objects.
  *   - pos[] is the x,y,z of the center of the object.
