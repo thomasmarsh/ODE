@@ -9,6 +9,10 @@ the rules for this file:
 
 ------------------------------------------------------------------------------
 
+03/31/05 tfautre
+
+	* Fixed timer.cpp compiler error on x86-64 using GCC.
+
 03/29/05 colin
 
 	* Added trimesh preprocessing to mark unneeded edges and verts.  Also
