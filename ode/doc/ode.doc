@@ -20,7 +20,7 @@
 #                                                                       #
 #########################################################################
 
-@title{Open Dynamics Engine v0.025 User Guide}
+@title{Open Dynamics Engine v0.03 User Guide}
 @subtitle{Russell Smith, @date{}}
 @author{Russell Smith, @date{}}
 
@@ -44,7 +44,7 @@ ODE is being developed by @link{http://www.q12.org}{Russell Smith}.
 If ``rigid body simulation'' does not make much sense to you, check out
 @link{http://www.q12.org/ode/slides/slides.html}{What is a Physics SDK?}.
 
-The is the user guide for the third prototype release of ODE (version 0.025).
+The is the user guide for the fourth prototype release of ODE (version 0.03).
 This release is to help continue testing the core algorithms and solidifying
 the API.
 There will probably only be a few (hopefully minor) changes to the API in
@@ -120,6 +120,14 @@ tangential to normal force. This will be fixed in the next release.
 works].
 
 
+@section{New in the 0.03 release}
+
+@list{
+@* Multi-resolution hash table based collision space, that performs quick
+   identification of potentially intersecting pairs.
+}
+
+
 @section{New in the 0.025 release}
 
 @list{
@@ -166,7 +174,6 @@ works].
 @* Improve box-box collision, especially for face-face contact.
 @* Internals documentation.
 @* Automatic code optimization process.
-@* Collision space: quick identification of potentially intersecting pairs.
 @* High level functions that create dynamics and collision objects together?
 }
 
@@ -1820,21 +1827,41 @@ identify which pairs of geometry objects are potentially touching.
 You can safely call @func{dCollide()} for only those pairs, instead of
 having to call @func{dCollide()} for @emph{every} object-object pair.
 This can save a huge amount of time.
-Various collision culling algorithms will be available, however only the
-first is currently implemented:
+
+Two collision culling algorithms are currently available:
 @list{
-@*	Simple @m{n^2} object intersections.
-@*	Oct tree.
-@*	Coordinate sorting.
-@*	Hash table?
+@*	Simple. This reports every possible pair of geometry objects as
+	potentially intersecting.
+	The time required to do intersection testing for @m{n} objects is
+	@m{O(n^2)}.
+	This should not be used for large numbers of objects.
+
+@*	Multi-resolution hash table.
+	This records how each geometry object overlaps cells in
+	one of several three dimensional tables.
+	Each tables has cubical cells of different sizes (actually with
+	side lengths of @m{2^i}).
+	The time required to do intersection testing for @m{n} objects is
+	@m{O(n)}, as each object can be quickly paired with the objects
+	around it.
 }
 
 Here are the functions used for spaces:
 
 @funcdef{
-dSpaceID dSpaceCreate();
+dSpaceID dSimpleSpaceCreate();
+dSpaceID dHashSpaceCreate();
 }{
-Create a space.
+Create a space, either of the simple or multi-resolution hash table kind.
+}
+
+
+@funcdef{
+void dHashSpaceSetLevels (dSpaceID space, int minlevel, int maxlevel);
+}{
+This sets some parameters for a multi-resolution hash table space.
+The smallest and largest cell sizes used in the hash table will be
+2^@arg{minlevel} and 2^@arg{maxlevel} respectively.
 }
 
 
