@@ -169,11 +169,12 @@ void dMassSetCylinder (dMass *m, dReal density, int direction,
 void dMassSetBox (dMass *m, dReal density,
 		  dReal lx, dReal ly, dReal lz)
 {
-  dMassSetBoxTotal(m, lx*ly*lz*density, lx, ly, lz);
+  dMassSetBoxTotal (m, lx*ly*lz*density, lx, ly, lz);
 }
 
+
 void dMassSetBoxTotal (dMass *m, dReal total_mass,
-		  dReal lx, dReal ly, dReal lz)
+		       dReal lx, dReal ly, dReal lz)
 {
   dAASSERT (m);
   dMassSetZero (m);
