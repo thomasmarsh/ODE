@@ -234,7 +234,7 @@ static inline void moveAndRotateBody (dxBody *b, dReal h)
     if (b->flags & dxBodyFlagFiniteRotationAxis) {
       // split the angular velocity vector into a component along the finite
       // rotation axis, and a component orthogonal to it.
-      dVector3 frv,irv;		// finite rotation vector
+      dVector3 frv;		// finite rotation vector
       dReal k = dDOT (b->finite_rot_axis,b->avel);
       frv[0] = b->finite_rot_axis[0] * k;
       frv[1] = b->finite_rot_axis[1] * k;
