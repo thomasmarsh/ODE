@@ -424,7 +424,7 @@ void dxHashSpace::collide (void *data, dNearCallback *callback)
       aabb->level = level;
       if (level > maxlevel) maxlevel = level;
       // cellsize = 2^level
-      dReal cellsize = ldexp (1.0,level);
+      dReal cellsize = (dReal) ldexp (1.0,level);
       // discretize AABB position to cell size
       for (i=0; i < 6; i++) aabb->dbounds[i] = (int)
 			      floor (aabb->bounds[i]/cellsize);

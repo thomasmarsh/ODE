@@ -29,7 +29,7 @@
 #ifdef dDOUBLE
 static const dReal tol = 1.0e-9;
 #else
-static const dReal tol = 1.0e-5;
+static const dReal tol = 1.0e-5f;
 #endif
 
 
@@ -201,7 +201,7 @@ extern "C" void dTestMatrixComparison()
     else {
       dSetDebugHandler (&myDebug);
       dMakeRandomMatrix (A,i,i+1,1.0);
-      A[(i-1)*dPAD(i+1)+i] += 0.01;
+      A[(i-1)*dPAD(i+1)+i] += REAL(0.01);
       mc.nextMatrix (A,i,i+1,0,"A%d",i);
       dSetDebugHandler (orig_debug);
     }

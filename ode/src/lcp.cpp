@@ -1346,7 +1346,7 @@ extern "C" void dTestSolveLCP()
 {
   int n = 100;
   int i,nskip = dPAD(n);
-  const dReal tol = 1e-9;
+  const dReal tol = REAL(1e-9);
   printf ("dTestSolveLCP()\n");
 
   dReal *A = (dReal*) ALLOCA (n*nskip*sizeof(dReal));
@@ -1371,7 +1371,7 @@ extern "C" void dTestSolveLCP()
     dMultiply2 (A,A2,A2,n,n,n);
     dMakeRandomMatrix (x,n,1,1.0);
     dMultiply0 (b,A,x,n,n,1);
-    for (i=0; i<n; i++) b[i] += (dRandReal()*0.2)-0.1;
+    for (i=0; i<n; i++) b[i] += (dRandReal()*REAL(0.2))-REAL(0.1);
 
     // choose `nub' in the range 0..n-1
     int nub = 50; //dRandInt (n);
@@ -1383,8 +1383,8 @@ extern "C" void dTestSolveLCP()
     //for (i=nub; i<n; i++) hi[i] = dInfinity;
     //for (i=nub; i<n; i++) lo[i] = -dInfinity;
     //for (i=nub; i<n; i++) hi[i] = 0;
-    for (i=nub; i<n; i++) lo[i] = -(dRandReal()*1.0)-0.01;
-    for (i=nub; i<n; i++) hi[i] =  (dRandReal()*1.0)+0.01;
+    for (i=nub; i<n; i++) lo[i] = -(dRandReal()*REAL(1.0))-REAL(0.01);
+    for (i=nub; i<n; i++) hi[i] =  (dRandReal()*REAL(1.0))+REAL(0.01);
 
     // set a few limits to lo=hi=0
     /*
