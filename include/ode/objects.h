@@ -36,7 +36,10 @@ void dWorldDestroy (dWorldID);
 
 void dWorldSetGravity (dWorldID, dReal x, dReal y, dReal z);
 void dWorldGetGravity (dWorldID, dVector3 gravity);
-
+void dWorldSetERP (dWorldID, dReal erp);
+dReal dWorldGetERP (dWorldID);
+void dWorldSetCFM (dWorldID, dReal cfm);
+dReal dWorldGetCFM (dWorldID);
 void dWorldStep (dWorldID, dReal stepsize);
 
 /* bodies */
