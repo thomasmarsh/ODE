@@ -372,3 +372,9 @@ void dsPlatformSimLoop (int window_width, int window_height, dsFunctions *fn,
 
   destroyMainWindow();
 }
+
+
+extern "C" void dsStop()
+{
+  run = 0;
+}

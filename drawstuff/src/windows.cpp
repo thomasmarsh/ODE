@@ -439,6 +439,12 @@ void dsPlatformSimLoop (int window_width, int window_height,
   //DestroyWindow (hWnd);
 }
 
+
+extern "C" void dsStop()
+{
+  PostQuitMessage (0);
+}
+
 //***************************************************************************
 // windows entry point
 //
