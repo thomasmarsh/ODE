@@ -19,14 +19,6 @@
  *                                                                       *
  *************************************************************************/
 
-/*
-
-geometry objects for collision detection.
-
-"REQUIRED" is used to mark the functions that are referenced by the dynamics.
-
-*/
-
 #ifndef _ODE_GEOM_H_
 #define _ODE_GEOM_H_
 
@@ -38,199 +30,77 @@ geometry objects for collision detection.
 extern "C" {
 #endif
 
-/* *********************************************************************** */
+/* ************************************************************************ */
 /* utility functions */
-
-/* given boxes (p1,R1,side1) and (p2,R2,side2), return 1 if they intersect
- * or 0 if not. `p' is the center of the box, `R' is the rotation matrix for
- * the box, and `side' is a vector of x/y/z side lengths.
- */
 
 int dBoxTouchesBox (const dVector3 _p1, const dMatrix3 R1,
 		    const dVector3 side1, const dVector3 _p2,
 		    const dMatrix3 R2, const dVector3 side2);
 
-/* *********************************************************************** */
-/* typedefs and structures */
-
-/* this function returns an axis-aligned bounding box for an object of a
- * known class (minx,maxx,miny,maxy,minz,maxz).
- */
-typedef void dGetAABBFn (dGeomID, dReal aabb[6]);
-
-/* this function handles collision between specific object types. when this
- * is called, o1 and o2 have known types. the `flags' and `contact' arguments
- * are those passed to dCollide(). this function must fill in the fields of
- * the contact struct.
- */
-typedef int dColliderFn (dGeomID o1, dGeomID o2,
-			 int flags, dContactGeom *contact, int skip);
-
-/* one of these functions is provided by each geometry class. it takes a class
- * number. it should return the collider function that can handle colliding
- * this class with class `num'. it should return 0 if that capability does not
- * exist in this class. this function is only ever called once for each num,
- * thereafter the cached pointers are used. the returned collider function can
- * assume that its first dGeomID argument is a member of this class.
- * note that if classes A and B are to collide, only *one* needs to provide a
- * function to collide with the other.
- */
-typedef dColliderFn * dGetColliderFnFn (int num);
-
-
-/* geometry class information. why don't we just use C++? well, this is a
- * bit more flexible, e.g. the class number is assigned at runtime, the class
- * can have int and string parameters as well as functions.
- */
-struct dGeomClass {
-  int num;			/* class number (globally unique) */
-  int size;			/* size of geometry object for this class */
-  dGetColliderFnFn *collider;	/* get collider functions */
-  dGetAABBFn *aabb;		/* get axis aligned bounding box */
-};
-
-
-/* common data for all geometry objects. specific geometry objects subclass
- * this, adding their own data at the end. some geometry objects will want
- * to add buffers for their own pos and R at the end too.
- * body is 0 for a non dynamics object (e.g. the static environment).
- *
- * this structure is made public because you may want to add your own
- * collision objects, in which case you need to subclass this struct. we could
- * have hidden it and had the geometry-specific data separate, but that's
- * kind of inefficient.
- *
- * we could provide accessor method for this data, but since we're making it
- * public, you can just access it yourself.
- */
-struct dxGeom {
-  dGeomClass *_class;	/* class of this object */
-  void *data;		/* user data pointer */
-  dBodyID body;		/* dynamics body associated with this object */
-  dReal *pos;		/* pointer to object's position */
-  dReal *R;		/* pointer to object's rotation matrix */
-  dGeomSpaceData space;	/* reserved for use by space this object is in */
-};
-
 /* ************************************************************************ */
-/* collision objects */
+/* standard classes */
 
-/* register new geometry classes. the new class number is returned (0,1,2,...).
- * the class number should be assigned to a global variable with the name
- * dXxxClass (e.g. dSphereClass). the class number in the class structure
- * should be set to 0 on entry.
- */
-int dCreateGeomClass (const dGeomClass *);
-
-/* initialize a newly created collision object and put it in a space.
- * this is a utility function called by geometry object creation functions.
- */
-void dInitGeom (dGeomID, dSpaceID, int classnum);
-
-/* destroy a collision object, removing it from the space first. */
-
-void dDestroyGeom (dSpaceID, dGeomID);
-
-/* REQUIRED.
- * given two COs that potentially touch (o1 and o2), generate contact
- * information for them. this just calls the correct geometry-specific
- * function for o1 and o2. return the number of contact points if they touch
- * (in which case the `contact' array is updated) or 0 if they don't
- * (in which case the `contact' array is not changed).
- * `flags' specifies what information should be computed for the collision:
- *    bits 16..1 : maximum number of contact points to generate
- *                 (size of contact array). if this is 0 it is taken to be 1.
- * NOTE:
- * the elements of the contact array do not necessarily have to be contiguous.
- * `skip' is the number of bytes between each member of `contact'. if skip is
- * sizeof(dContactGeom) then `contact' points to a "normal" contact array.
- * if skip is larger than this, then the dContactGeom structures are embedded
- * in some other larger structures. it is an error for skip to be smaller
- * than sizeof(dContactGeom).
- */
-int dCollide (dGeomID o1, dGeomID o2, int flags, dContactGeom *contact,
-	      int skip);
-
-/* *********************************************************************** */
-/* standard object types. the point of reference of all these objects
- * corresponds to their center of mass - this makes them easy to connect to
- * dynamics objects. if other points of reference are required, composite
- * objects should be used to encapsulate these primitives.
- */
-
-struct dSphere {
-  dxGeom geom;
-  dReal radius;		/* sphere radius */
-};
-
-struct dBox {
-  dxGeom geom;
-  dVector3 side;	/* side lengths (x,y,z) */
-};
-
-struct dCCylinder {	/* capped cylinder */
-  dxGeom geom;
-  dReal radius,lz;	/* radius, length along z axis */
-};
-
-struct dPlane {
-  dxGeom geom;	/* assumptions: p=0 and R=I, i.e. always a static object */
-  dReal p[4];	/* plane equation params: p[0]*x+p[1]*y+p[2]*z = p[3] */
-};		/* (p[0],p[1],p[2]) = normal vector, must have length=1 */
-
-struct dComposite {
-  dxGeom geom;
-  /* ??? */
-};
-
-
-
-/* the pos and R fields of the plane are ignored, i.e. the plane is always
- * part of the static environment.
- */
-
-dGeomID dCreateSphere (dSpaceID space, dReal radius);
-dGeomID dCreateBox (dSpaceID space, dReal lx, dReal ly, dReal lz);
-dGeomID dCreatePlane (dSpaceID space,
-		      dReal a, dReal b, dReal c, dReal d);
-
-
-
-/* specific collision functions. save interface as dCollide().
- * S=sphere, B=box, C=capped cylinder, P=plane
- */
-
-int dCollideSS (const dSphere *o1, const dSphere *o2, int flags,
-		dContactGeom *contact, int skip);
-int dCollideSB (const dSphere *o1, const dBox *o2, int flags,
-		dContactGeom *contact, int skip);
-int dCollideSC (const dSphere *o1, const dCCylinder *o2, int flags,
-		dContactGeom *contact, int skip);
-int dCollideSP (const dSphere *o1, const dPlane *o2, int flags,
-		dContactGeom *contact, int skip);
-
-int dCollideBB (const dBox *o1, const dBox *o2, int flags,
-		dContactGeom *contact, int skip);
-int dCollideBC (const dBox *o1, const dCCylinder *o2, int flags,
-		dContactGeom *contact, int skip);
-int dCollideBP (const dBox *o1, const dPlane *o2, int flags,
-		dContactGeom *contact, int skip);
-
-int dCollideCC (const dCCylinder *o1, const dCCylinder *o2, int flags,
-		dContactGeom *contact, int skip);
-int dCollideCP (const dCCylinder *o1, const dPlane *o2, int flags,
-		dContactGeom *contact, int skip);
-
-
-
-void dAddToComposite (dGeomID composite, int i, dGeomID obj);
-
+/* class numbers */
 extern int dSphereClass;
 extern int dBoxClass;
 extern int dCCylinderClass;
 extern int dPlaneClass;
 extern int dCompositeClass;
 
+/* constructors */
+dGeomID dCreateSphere (dSpaceID space, dReal radius);
+dGeomID dCreateBox (dSpaceID space, dReal lx, dReal ly, dReal lz);
+dGeomID dCreatePlane (dSpaceID space, dReal a, dReal b, dReal c, dReal d);
+dGeomID dCreateCCylinder (dSpaceID space, dReal a, dReal b, int dir);
+
+/* get geometry parameters */
+int   dGeomGetClass (dGeomID);
+dReal dGeomSphereGetRadius (dGeomID);
+void  dGeomBoxGetLengths (dGeomID, dVector3 result);
+void  dGeomPlaneGetParams (dGeomID, dVector4 result);
+void  dGeomCCylinderGetParams (dGeomID, dReal *a, dReal *b, int *dir);
+
+/* general functions */
+void dGeomSetData (dGeomID, void *);
+void *dGeomGetData (dGeomID);
+void dGeomSetBody (dGeomID, dBodyID);
+dBodyID dGeomGetBody (dGeomID);
+void dGeomSetPosition (dGeomID, dReal x, dReal y, dReal z);
+void dGeomSetRotation (dGeomID, const dMatrix3 R);
+const dReal * dGeomGetPosition (dGeomID);
+const dReal * dGeomGetRotation (dGeomID);
+void dDestroyGeom (dGeomID);
+
+/* ************************************************************************ */
+/* composite geoms */
+
+/* void dAddToComposite (dGeomID composite, int i, dGeomID obj); */
+
+/* ************************************************************************ */
+/* general collision */
+
+int dCollide (dGeomID o1, dGeomID o2, int flags, dContactGeom *contact,
+	      int skip);
+
+/* ************************************************************************ */
+/* custom classes */
+
+typedef void dGetAABBFn (dGeomID, dReal aabb[6]);
+typedef int dColliderFn (dGeomID o1, dGeomID o2,
+			 int flags, dContactGeom *contact, int skip);
+typedef dColliderFn * dGetColliderFnFn (int num);
+
+struct dGeomClass {
+  int bytes;
+  dGetColliderFnFn *collider;
+  dGetAABBFn *aabb;
+};
+
+int dCreateGeomClass (const dGeomClass *classptr);
+void * dGeomGetClassData (dGeomID);
+dGeomID dCreateGeom (dSpaceID space, int classnum);
+
+/* ************************************************************************ */
 
 #ifdef __cplusplus
 }

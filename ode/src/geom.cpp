@@ -26,14 +26,20 @@ TODO
 * for objects that are never meant to collide, dCollide() will always try
   to find the collider functions, which wastes a bit of time.
 
+* get rid of global constructors here, they wont work in C linkage.
+
 */
 
-#include "ode/geom.h"
+#include "ode/geom2.h"
 #include "ode/rotation.h"
 #include "ode/odemath.h"
 #include "ode/memory.h"
 #include "ode/misc.h"
+#include "ode/objects.h"
+#include "ode/matrix.h"
+#include "objects.h"
 #include "array.h"
+#include "geom_internal.h"
 
 //****************************************************************************
 // collision utilities
@@ -41,7 +47,7 @@ TODO
 // given a pointer `p' to a dContactGeom, return the dContactGeom at
 // p + skip bytes.
 
-#define CONTACT(p,skip) ((dContactGeom*) (((char*)p) + skip))
+#define CONTACT(p,skip) ((dContactGeom*) (((char*)p) + (skip)))
 
 
 // if the spheres (p1,r1) and (p2,r2) collide, set the contact `c' and
@@ -129,9 +135,9 @@ static inline dReal boxDiameter (const dMatrix3 R, const dVector3 side,
 // given boxes (p1,R1,side1) and (p1,R1,side1), return 1 if they intersect
 // or 0 if not.
 
-extern "C" int dBoxTouchesBox (const dVector3 p1, const dMatrix3 R1,
-			       const dVector3 side1, const dVector3 p2,
-			       const dMatrix3 R2, const dVector3 side2)
+int dBoxTouchesBox (const dVector3 p1, const dMatrix3 R1,
+		    const dVector3 side1, const dVector3 p2,
+		    const dMatrix3 R2, const dVector3 side2)
 {
   // two boxes are disjoint if (and only if) there is a separating axis
   // perpendicular to a face from one box or perpendicular to an edge from
@@ -194,19 +200,33 @@ extern "C" int dBoxTouchesBox (const dVector3 p1, const dMatrix3 R1,
 }
 
 
+// given two boxes (p1,R1,side1) and (p2,R2,side2), collide them together and
+// generate contact points. this returns 0 if there is no contact otherwise
+// it returns the number of contacts generated.
+// `normal' returns the contact normal.
+// `depth' returns the maximum penetration depth along that normal.
+// `code' returns a number indicating the type of contact that was detected:
+//        1,2,3 = box 2 intersects with a face of box 1
+//        4,5,6 = box 1 intersects with a face of box 2
+//        7..15 = edge-edge contact
+// `maxc' is the maximum number of contacts allowed to be generated, i.e.
+// the size of the `contact' array.
+// `contact' and `skip' are the contact array information provided to the
+// collision functions. this function only fills in the position and depth
+// fields.
+//
+// @@@ some stuff to optimize here, reuse code in contact point calculations.
+
 extern "C" int dBoxBox (const dVector3 p1, const dMatrix3 R1,
 			const dVector3 side1, const dVector3 p2,
 			const dMatrix3 R2, const dVector3 side2,
-			dVector3 normal, dReal *depth,
-			int *code, int *coderu,
-			dVector3 contact)
+			dVector3 normal, dReal *depth, int *code,
+			int maxc, dContactGeom *contact, int skip)
 {
-  //@@@ coderu/sru = runner up values
-
   dVector3 p,pp,normalC;
   const dReal *normalR = 0;
   dReal A1,A2,A3,B1,B2,B3,R11,R12,R13,R21,R22,R23,R31,R32,R33,
-    Q11,Q12,Q13,Q21,Q22,Q23,Q31,Q32,Q33,s,s2,sru,l;
+    Q11,Q12,Q13,Q21,Q22,Q23,Q31,Q32,Q33,s,s2,l;
   int i,invert_normal;
 
   // get vector from centers of box 1 to box 2, relative to box 1
@@ -233,32 +253,24 @@ extern "C" int dBoxBox (const dVector3 p1, const dMatrix3 R1,
   //   * find the depth of the penetration along the separating axis (s2)
   //   * if this is the largest depth so far, record it.
   // the normal vector will be set to the separating axis with the smallest
-  // depth. note: normalR is set to point to a column of R1,R2 if that is the
-  // smallest depth normal so far. otherwise normalR is 0 and normalC is set
-  // to a vector relative to body 1. invert_normal is 1 if the sign of the
-  // normal should be flipped.
+  // depth. note: normalR is set to point to a column of R1 or R2 if that is
+  // the smallest depth normal so far. otherwise normalR is 0 and normalC is
+  // set to a vector relative to body 1. invert_normal is 1 if the sign of
+  // the normal should be flipped.
 
 #define TEST(expr1,expr2,norm,cc) \
   s2 = dFabs(expr1) - (expr2); \
   if (s2 > 0) return 0; \
   if (s2 > s) { \
-    sru = s; \
     s = s2; \
     normalR = norm; \
     invert_normal = ((expr1) < 0); \
-    *coderu = *code; \
     *code = (cc); \
-  } \
-  else if (s2 > sru) { \
-    sru = s2; \
-    *coderu = (cc); \
   }
 
   s = -dInfinity;
-  sru = -dInfinity;
   invert_normal = 0;
   *code = 0;
-  *coderu = 0;
 
   // separating axis = u1,u2,u3
   TEST (pp[0],(A1 + B1*Q11 + B2*Q12 + B3*Q13),R1+0,1);
@@ -270,8 +282,8 @@ extern "C" int dBoxBox (const dVector3 p1, const dMatrix3 R1,
   TEST (dDOT41(R2+1,p),(A1*Q12 + A2*Q22 + A3*Q32 + B2),R2+1,5);
   TEST (dDOT41(R2+2,p),(A1*Q13 + A2*Q23 + A3*Q33 + B3),R2+2,6);
 
-  //@@@ note: cross product axes need to be scaled when s computed!!!
-  // normal (n1,n2,n3) is relative to box 1!
+  // note: cross product axes need to be scaled when s is computed.
+  // normal (n1,n2,n3) is relative to box 1.
 #undef TEST
 #define TEST(expr1,expr2,n1,n2,n3,cc) \
   s2 = dFabs(expr1) - (expr2); \
@@ -280,17 +292,11 @@ extern "C" int dBoxBox (const dVector3 p1, const dMatrix3 R1,
   if (l > 0) { \
     s2 /= l; \
     if (s2 > s) { \
-      sru = s; \
       s = s2; \
       normalR = 0; \
       normalC[0] = (n1)/l; normalC[1] = (n2)/l; normalC[2] = (n3)/l; \
       invert_normal = ((expr1) < 0); \
-      *coderu = *code; \
       *code = (cc); \
-    } \
-    else if (s2 > sru) { \
-      sru = s2; \
-      *coderu = (cc); \
     } \
   }
 
@@ -328,10 +334,10 @@ extern "C" int dBoxBox (const dVector3 p1, const dMatrix3 R1,
   }
   *depth = -s;
 
-  for (i=0; i<3; i++) contact[i] = 0;
-
   // compute contact point(s)
+
   if (*code > 6) {
+    // an edge from box 1 touches an edge from box 2.
     // find a point pa on the intersecting edge of box 1
     dVector3 pa;
     dReal sign;
@@ -362,56 +368,300 @@ extern "C" int dBoxBox (const dVector3 p1, const dMatrix3 R1,
     for (i=0; i<3; i++) pa[i] += ua[i]*alpha;
     for (i=0; i<3; i++) pb[i] += ub[i]*beta;
 
-    for (i=0; i<3; i++) contact[i] = 0.5*(pa[i]+pb[i]);
+    for (i=0; i<3; i++) contact[0].pos[i] = 0.5*(pa[i]+pb[i]);
+    contact[0].depth = *depth;
     return 1;
   }
 
   // okay, we have a face-something intersection (because the separating
-  // axis is perpendicular to a face). if all elements of Q are "very
-  // nonzero", then the (u1,u2,u3) don't line up with any of the (v1,v2,v3).
-  // thus there should only be one point of contact with the face.
+  // axis is perpendicular to a face).
 
-  //if () {
-  //  ...
-  //  return 1;
-  //}
+  // @@@ temporary: make deepest vertex on the "other" box the contact point.
+  // @@@ this kind of works, but we need multiple contact points for stability,
+  // @@@ especially for face-face contact.
 
-  //@@@ testing
-  const dReal tol = 0.9999;
-  int foo = 0;
+  dVector3 vertex;
   if (*code <= 3) {
-    for (i=0; i<3; i++) if (dFabs(dDOT14(normal,R2+i)) > tol) foo=1;
+    // face from box 1 touches a vertex/edge/face from box 2.
+    dReal sign;
+    for (i=0; i<3; i++) vertex[i] = p2[i];
+    sign = (dDOT14(normal,R2+0) > 0) ? -1 : 1;
+    for (i=0; i<3; i++) vertex[i] += sign * B1 * R2[i*4];
+    sign = (dDOT14(normal,R2+1) > 0) ? -1 : 1;
+    for (i=0; i<3; i++) vertex[i] += sign * B2 * R2[i*4+1];
+    sign = (dDOT14(normal,R2+2) > 0) ? -1 : 1;
+    for (i=0; i<3; i++) vertex[i] += sign * B3 * R2[i*4+2];
   }
   else {
-    for (i=0; i<3; i++) if (dFabs(dDOT14(normal,R1+i)) > tol) foo=1;
+    // face from box 2 touches a vertex/edge/face from box 1.
+    dReal sign;
+    for (i=0; i<3; i++) vertex[i] = p1[i];
+    sign = (dDOT14(normal,R1+0) > 0) ? 1 : -1;
+    for (i=0; i<3; i++) vertex[i] += sign * A1 * R1[i*4];
+    sign = (dDOT14(normal,R1+1) > 0) ? 1 : -1;
+    for (i=0; i<3; i++) vertex[i] += sign * A2 * R1[i*4+1];
+    sign = (dDOT14(normal,R1+2) > 0) ? 1 : -1;
+    for (i=0; i<3; i++) vertex[i] += sign * A3 * R1[i*4+2];
   }
-  if (foo) {
-    //printf ("%6.3f %6.3f %6.3f\n",Q11,Q12,Q13);
-    //printf ("%6.3f %6.3f %6.3f\n",Q21,Q22,Q23);
-    //printf ("%6.3f %6.3f %6.3f\n",Q31,Q32,Q33);
-    return 2;
-  }
-
-  // we now know that either an edge or a face is aligned with the face.
-  // this can generate two or more contact points.
-
-
+  for (i=0; i<3; i++) contact[0].pos[i] = vertex[i];
+  contact[0].depth = *depth;
   return 1;
 }
 
 //****************************************************************************
-// primitives collision functions
+// general support for geometry objects and classes
 
-int dCollideSS (const dSphere *o1, const dSphere *o2, int flags,
-		dContactGeom *contact, int skip)
+struct dColliderEntry {
+  dColliderFn *fn;	// collider function
+  int mode;		// 1 = reverse o1 and o2, 2 = no function available
+};
+
+static dArray<dxGeomClass*> *classes=0;
+
+// function pointers and modes for n^2 class collider functions. this is an
+// n*n matrix stored by row. the functions pointers are extracted from the
+// class get-collider-function function.
+static dArray<dColliderEntry> *colliders=0;
+
+
+static inline void initCollisionArrays()
 {
-  dASSERT (skip >= (int)sizeof(dContactGeom));
-  return dCollideSpheres (o1->geom.pos,o1->radius,
-			  o2->geom.pos,o2->radius,contact);
+  if (classes==0) classes = new dArray<dxGeomClass*>;
+  if (colliders==0) colliders = new dArray<dColliderEntry>;
 }
 
 
-int dCollideSB (const dSphere *o1, const dBox *o2, int flags,
+int dCreateGeomClass (const dGeomClass *c)
+{
+  dASSERT(c->bytes >= 0 && c->collider && c->aabb);
+  initCollisionArrays();
+
+  int n = classes->size();
+  dxGeomClass *gc = (dxGeomClass*) dAllocNoFree (sizeof(dxGeomClass));
+  gc->collider = c->collider;
+  gc->aabb = c->aabb;
+  gc->num = n;
+  gc->size = SIZEOF_DXGEOM + c->bytes;
+  classes->push (gc);
+
+  // make room for n^2 class collider function pointers - these entries will
+  // be filled as dCollide() is called.
+  colliders->setSize ((n+1)*(n+1));
+  memset (colliders->data(),0,(n+1)*(n+1)*sizeof(dColliderEntry));
+
+  return n;
+}
+
+
+int dCollide (dxGeom *o1, dxGeom *o2, int flags, dContactGeom *contact,
+	      int skip)
+{
+  int i,c1,c2,a1,a2,count,swap;
+  dColliderFn *fn;
+  dASSERT(classes && colliders);
+  dColliderEntry *colliders2 = colliders->data();
+  c1 = o1->_class->num;
+  c2 = o2->_class->num;
+  a1 = c1 * classes->size() + c2;	// address 1 in collider array
+  a2 = c2 * classes->size() + c1;	// address 2 in collider array
+  swap = 0;		// set to 1 to swap normals before returning
+
+  // return if there are no collider functions available
+  if ((colliders2[a1].mode==2) || (colliders2[a2].mode==2)) return 0;
+
+  if ((fn = colliders2[a1].fn)) {
+    swap = colliders2[a1].mode;
+    if (swap) count = (*fn) (o2,o1,flags,contact,skip);
+    else count = (*fn) (o1,o2,flags,contact,skip);
+  }
+  else if ((fn = (*classes)[c1]->collider (c2))) {
+    colliders2 [a2].fn = fn;
+    colliders2 [a2].mode = 1;
+    colliders2 [a1].fn = fn;	// do mode=0 assignment second so that
+    colliders2 [a1].mode = 0;	// diagonal entries will have mode 0
+    count = (*fn) (o1,o2,flags,contact,skip);
+    swap = 0;
+  }
+  else if ((fn = (*classes)[c2]->collider (c1))) {
+    colliders2 [a1].fn = fn;
+    colliders2 [a1].mode = 1;
+    colliders2 [a2].fn = fn;	// do mode=0 assignment second so that
+    colliders2 [a2].mode = 0;	// diagonal entries will have mode 0
+    count = (*fn) (o2,o1,flags,contact,skip);
+    swap = 1;
+  }
+  else {
+    colliders2[a1].mode = 2;
+    colliders2[a2].mode = 2;
+    return 0;
+  }
+
+  if (swap) {
+    for (i=0; i<count; i++) {
+      contact[i].normal[0] = -contact[i].normal[0];
+      contact[i].normal[1] = -contact[i].normal[1];
+      contact[i].normal[2] = -contact[i].normal[2];
+    }
+  }
+
+  return count;
+}
+
+
+int dGeomGetClass (dxGeom *g)
+{
+  return g->_class->num;
+}
+
+
+void dGeomSetData (dxGeom *g, void *data)
+{
+  g->data = data;
+}
+
+
+void *dGeomGetData (dxGeom *g)
+{
+  return g->data;
+}
+
+
+void dGeomSetBody (dxGeom *g, dBodyID b)
+{
+  if (b) {
+    if (!g->body) dFree (g->pos,sizeof(dxPosR));
+    g->body = b;
+    g->pos = b->pos;
+    g->R = b->R;
+  }
+  else {
+    if (g->body) {
+      g->body = 0;
+      dxPosR *pr = (dxPosR*) dAlloc (sizeof(dxPosR));
+      g->pos = pr->pos;
+      g->R = pr->R;
+    }
+  }
+}
+
+
+dBodyID dGeomGetBody (dxGeom *g)
+{
+  return g->body;
+}
+
+
+void dGeomSetPosition (dxGeom *g, dReal x, dReal y, dReal z)
+{
+  if (g->body) dBodySetPosition (g->body,x,y,z);
+  else {
+    g->pos[0] = x;
+    g->pos[1] = y;
+    g->pos[2] = z;
+  }
+}
+
+
+void dGeomSetRotation (dxGeom *g, const dMatrix3 R)
+{
+  if (g->body) dBodySetRotation (g->body,R);
+  else memcpy (g->R,R,sizeof(dMatrix3));
+}
+
+
+const dReal * dGeomGetPosition (dxGeom *g)
+{
+  return g->pos;
+}
+
+
+const dReal * dGeomGetRotation (dxGeom *g)
+{
+  return g->R;
+}
+
+
+// for external use only. use the CLASSDATA macro inside ODE.
+
+void * dGeomGetClassData (dxGeom *g)
+{
+  return (void*) CLASSDATA(g);
+}
+
+
+dxGeom * dCreateGeom (dSpaceID space, int classnum)
+{
+  if (!classes || !colliders || classnum < 0 || classnum >= classes->size())
+    dDebug (d_ERR_BAD_ARGS,"dCreateGeom(), bad class number");
+  int size = (*classes)[classnum]->size;
+  dxGeom *geom = (dxGeom*) dAlloc (size);
+  memset (geom,0,size);
+
+  geom->_class = (*classes)[classnum];
+  geom->data = 0;
+  geom->body = 0;
+
+  dxPosR *pr = (dxPosR*) dAlloc (sizeof(dxPosR));
+  geom->pos = pr->pos;
+  geom->R = pr->R;
+  dSetZero (geom->pos,4);
+  dRSetIdentity (geom->R);
+
+  geom->spaceid = space;
+  dSpaceAdd (space,geom);
+  return geom;
+}
+
+
+void dDestroyGeom (dxGeom *g)
+{
+  dSpaceRemove (g->spaceid,g);
+  if (!g->body) dFree (g->pos,sizeof(dxPosR));
+  dFree (g,g->_class->size);
+}
+
+//****************************************************************************
+// data for the standard classes
+
+struct dxSphere {
+  dReal radius;		// sphere radius
+};
+
+struct dxBox {
+  dVector3 side;	// side lengths (x,y,z)
+};
+
+struct dxCCylinder {	// capped cylinder
+  dReal radius,lz;	// radius, length along z axis */
+};
+
+struct dxPlane {
+  dReal p[4];
+};
+
+struct dxComposite {
+  // stuff...
+};
+
+//****************************************************************************
+// primitive collision functions
+// same interface as dCollide().
+// S=sphere, B=box, C=capped cylinder, P=plane
+
+int dCollideSS (const dxGeom *o1, const dxGeom *o2, int flags,
+		dContactGeom *contact, int skip)
+{
+  dASSERT (skip >= (int)sizeof(dContactGeom));
+  dASSERT (o1->_class->num == dSphereClass);
+  dASSERT (o2->_class->num == dSphereClass);
+  dxSphere *s1 = (dxSphere*) CLASSDATA(o1);
+  dxSphere *s2 = (dxSphere*) CLASSDATA(o2);
+  return dCollideSpheres (o1->pos,s1->radius,
+			  o2->pos,s2->radius,contact);
+}
+
+
+int dCollideSB (const dxGeom *o1, const dxGeom *o2, int flags,
 		dContactGeom *contact, int skip)
 {
   // this is easy. get the sphere center `p' relative to the box, and then clip
@@ -424,22 +674,27 @@ int dCollideSB (const dSphere *o1, const dBox *o2, int flags,
   dReal depth;
   int onborder = 0;
 
-  p[0] = o1->geom.pos[0] - o2->geom.pos[0];
-  p[1] = o1->geom.pos[1] - o2->geom.pos[1];
-  p[2] = o1->geom.pos[2] - o2->geom.pos[2];
+  dASSERT (o1->_class->num == dSphereClass);
+  dASSERT (o2->_class->num == dBoxClass);
+  dxSphere *sphere = (dxSphere*) CLASSDATA(o1);
+  dxBox *box = (dxBox*) CLASSDATA(o2);
 
-  l[0] = o2->side[0]*0.5;
-  t[0] = dDOT14(p,o2->geom.R);
+  p[0] = o1->pos[0] - o2->pos[0];
+  p[1] = o1->pos[1] - o2->pos[1];
+  p[2] = o1->pos[2] - o2->pos[2];
+
+  l[0] = box->side[0]*0.5;
+  t[0] = dDOT14(p,o2->R);
   if (t[0] < -l[0]) { t[0] = -l[0]; onborder = 1; }
   if (t[0] >  l[0]) { t[0] =  l[0]; onborder = 1; }
 
-  l[1] = o2->side[1]*0.5;
-  t[1] = dDOT14(p,o2->geom.R+1);
+  l[1] = box->side[1]*0.5;
+  t[1] = dDOT14(p,o2->R+1);
   if (t[1] < -l[1]) { t[1] = -l[1]; onborder = 1; }
   if (t[1] >  l[1]) { t[1] =  l[1]; onborder = 1; }
 
-  t[2] = dDOT14(p,o2->geom.R+2);
-  l[2] = o2->side[2]*0.5;
+  t[2] = dDOT14(p,o2->R+2);
+  l[2] = box->side[2]*0.5;
   if (t[2] < -l[2]) { t[2] = -l[2]; onborder = 1; }
   if (t[2] >  l[2]) { t[2] =  l[2]; onborder = 1; }
 
@@ -455,31 +710,31 @@ int dCollideSB (const dSphere *o1, const dBox *o2, int flags,
       }
     }
     // contact position = sphere center
-    contact->pos[0] = o1->geom.pos[0];
-    contact->pos[1] = o1->geom.pos[1];
-    contact->pos[2] = o1->geom.pos[2];
+    contact->pos[0] = o1->pos[0];
+    contact->pos[1] = o1->pos[1];
+    contact->pos[2] = o1->pos[2];
     // contact normal aligned with box edge along largest `t' value
     dVector3 tmp;
     tmp[0] = 0;
     tmp[1] = 0;
     tmp[2] = 0;
     tmp[maxi] = (t[maxi] > 0) ? 1 : -1;
-    dMULTIPLY0_331 (contact->normal,o2->geom.R,tmp);
+    dMULTIPLY0_331 (contact->normal,o2->R,tmp);
     // contact depth = distance to wall along normal plus radius
-    contact->depth = l[maxi] - max + o1->radius;
+    contact->depth = l[maxi] - max + sphere->radius;
     return 1;
   }
 
   t[3] = 0;			//@@@ hmmm
-  dMULTIPLY0_331 (q,o2->geom.R,t);
+  dMULTIPLY0_331 (q,o2->R,t);
   r[0] = p[0] - q[0];
   r[1] = p[1] - q[1];
   r[2] = p[2] - q[2];
-  depth = o1->radius - dSqrt(dDOT(r,r));
+  depth = sphere->radius - dSqrt(dDOT(r,r));
   if (depth < 0) return 0;
-  contact->pos[0] = q[0] + o2->geom.pos[0];
-  contact->pos[1] = q[1] + o2->geom.pos[1];
-  contact->pos[2] = q[2] + o2->geom.pos[2];
+  contact->pos[0] = q[0] + o2->pos[0];
+  contact->pos[1] = q[1] + o2->pos[1];
+  contact->pos[2] = q[2] + o2->pos[2];
   contact->normal[0] = r[0];
   contact->normal[1] = r[1];
   contact->normal[2] = r[2];
@@ -489,7 +744,7 @@ int dCollideSB (const dSphere *o1, const dBox *o2, int flags,
 }
 
 
-int dCollideSC (const dSphere *o1, const dCCylinder *o2, int flags,
+int dCollideSC (const dxGeom *o1, const dxGeom *o2, int flags,
 		dContactGeom *contact, int skip)
 {
   dDebug (0,"unimplemented");
@@ -497,19 +752,23 @@ int dCollideSC (const dSphere *o1, const dCCylinder *o2, int flags,
 }
 
 
-int dCollideSP (const dSphere *o1, const dPlane *o2, int flags,
+int dCollideSP (const dxGeom *o1, const dxGeom *o2, int flags,
 		dContactGeom *contact, int skip)
 {
   dASSERT (skip >= (int)sizeof(dContactGeom));
-  dReal k = dDOT (o1->geom.pos,o2->p);
-  dReal depth = o2->p[3] - k + o1->radius;
+  dASSERT (o1->_class->num == dSphereClass);
+  dASSERT (o2->_class->num == dPlaneClass);
+  dxSphere *sphere = (dxSphere*) CLASSDATA(o1);
+  dxPlane *plane = (dxPlane*) CLASSDATA(o2);
+  dReal k = dDOT (o1->pos,plane->p);
+  dReal depth = plane->p[3] - k + sphere->radius;
   if (depth >= 0) {
-    contact->normal[0] = o2->p[0];
-    contact->normal[1] = o2->p[1];
-    contact->normal[2] = o2->p[2];
-    contact->pos[0] = o1->geom.pos[0] - o2->p[0] * o1->radius;
-    contact->pos[1] = o1->geom.pos[1] - o2->p[1] * o1->radius;
-    contact->pos[2] = o1->geom.pos[2] - o2->p[2] * o1->radius;
+    contact->normal[0] = plane->p[0];
+    contact->normal[1] = plane->p[1];
+    contact->normal[2] = plane->p[2];
+    contact->pos[0] = o1->pos[0] - plane->p[0] * sphere->radius;
+    contact->pos[1] = o1->pos[1] - plane->p[1] * sphere->radius;
+    contact->pos[2] = o1->pos[2] - plane->p[2] * sphere->radius;
     contact->depth = depth;
     return 1;
   }
@@ -517,7 +776,26 @@ int dCollideSP (const dSphere *o1, const dPlane *o2, int flags,
 }
 
 
-int dCollideBB (const dBox *o1, const dBox *o2, int flags,
+int dCollideBB (const dxGeom *o1, const dxGeom *o2, int flags,
+		dContactGeom *contact, int skip)
+{
+  dVector3 normal;
+  dReal depth;
+  int code;
+  dxBox *b1 = (dxBox*) CLASSDATA(o1);
+  dxBox *b2 = (dxBox*) CLASSDATA(o2);
+  int num = dBoxBox (o1->pos,o1->R,b1->side, o2->pos,o2->R,b2->side,
+		     normal,&depth,&code,flags & 0xff,contact,skip);
+  for (int i=0; i<num; i++) {
+    CONTACT(contact,i*skip)->normal[0] = -normal[0];
+    CONTACT(contact,i*skip)->normal[1] = -normal[1];
+    CONTACT(contact,i*skip)->normal[2] = -normal[2];
+  }
+  return num;
+}
+
+
+int dCollideBC (const dxGeom *o1, const dxGeom *o2, int flags,
 		dContactGeom *contact, int skip)
 {
   dDebug (0,"unimplemented");
@@ -525,49 +803,48 @@ int dCollideBB (const dBox *o1, const dBox *o2, int flags,
 }
 
 
-int dCollideBC (const dBox *o1, const dCCylinder *o2, int flags,
-		dContactGeom *contact, int skip)
-{
-  dDebug (0,"unimplemented");
-  return 0;
-}
-
-
-int dCollideBP (const dBox *o1, const dPlane *o2,
+int dCollideBP (const dxGeom *o1, const dxGeom *o2,
 		int flags, dContactGeom *contact, int skip)
 {
   dASSERT (skip >= (int)sizeof(dContactGeom));
+  dASSERT (o1->_class->num == dBoxClass);
+  dASSERT (o2->_class->num == dPlaneClass);
+  dxBox *box = (dxBox*) CLASSDATA(o1);
+  dxPlane *plane = (dxPlane*) CLASSDATA(o2);
 
-  //@@@ problem: using 4-vector (o2->p) as 3-vector (normal).
-  const dReal *R = o1->geom.R;		// rotation of box
-  const dReal *n = o2->p;		// normal vector
+  //@@@ problem: using 4-vector (plane->p) as 3-vector (normal).
+  const dReal *R = o1->R;		// rotation of box
+  const dReal *n = plane->p;		// normal vector
 
   // project sides lengths along normal vector, get absolute values
-  dReal A1 = o1->side[0] * dDOT14(n,R+0);
-  dReal A2 = o1->side[1] * dDOT14(n,R+1);
-  dReal A3 = o1->side[2] * dDOT14(n,R+2);
+  dReal Q1 = dDOT14(n,R+0);
+  dReal Q2 = dDOT14(n,R+1);
+  dReal Q3 = dDOT14(n,R+2);
+  dReal A1 = box->side[0] * Q1;
+  dReal A2 = box->side[1] * Q2;
+  dReal A3 = box->side[2] * Q3;
   dReal B1 = dFabs(A1);
   dReal B2 = dFabs(A2);
   dReal B3 = dFabs(A3);
 
   // early exit test
-  dReal depth = o2->p[3] + 0.5*(B1+B2+B3) - dDOT(n,o1->geom.pos);
+  dReal depth = plane->p[3] + 0.5*(B1+B2+B3) - dDOT(n,o1->pos);
   if (depth < 0) return 0;
 
   // find number of contacts requested
-  int maxc = flags & 0xffff;
+  int maxc = flags & 0xff;
   if (maxc < 1) maxc = 1;
   if (maxc > 3) maxc = 3;	// no more than 3 contacts per box allowed
 
   // find deepest point
   dVector3 p;
-  p[0] = o1->geom.pos[0];
-  p[1] = o1->geom.pos[1];
-  p[2] = o1->geom.pos[2];
+  p[0] = o1->pos[0];
+  p[1] = o1->pos[1];
+  p[2] = o1->pos[2];
 #define FOO(i,op) \
-  p[0] op 0.5*o1->side[i] * R[0+i]; \
-  p[1] op 0.5*o1->side[i] * R[4+i]; \
-  p[2] op 0.5*o1->side[i] * R[8+i];
+  p[0] op 0.5*box->side[i] * R[0+i]; \
+  p[1] op 0.5*box->side[i] * R[4+i]; \
+  p[2] op 0.5*box->side[i] * R[8+i];
 #define BAR(i,iinc) if (A ## iinc > 0) { FOO(i,-=) } else { FOO(i,+=) }
   BAR(0,1);
   BAR(1,2);
@@ -589,9 +866,9 @@ int dCollideBP (const dBox *o1, const dPlane *o2,
   // along the two sides with the smallest projected length.
 
 #define FOO(i,j,op) \
-  CONTACT(contact,i*skip)->pos[0] = p[0] op o1->side[j] * R[0+j]; \
-  CONTACT(contact,i*skip)->pos[1] = p[1] op o1->side[j] * R[4+j]; \
-  CONTACT(contact,i*skip)->pos[2] = p[2] op o1->side[j] * R[8+j];
+  CONTACT(contact,i*skip)->pos[0] = p[0] op box->side[j] * R[0+j]; \
+  CONTACT(contact,i*skip)->pos[1] = p[1] op box->side[j] * R[4+j]; \
+  CONTACT(contact,i*skip)->pos[2] = p[2] op box->side[j] * R[8+j];
 #define BAR(ctact,side,sideinc) \
   depth -= B ## sideinc; \
   if (depth < 0) return 1; \
@@ -636,7 +913,7 @@ int dCollideBP (const dBox *o1, const dPlane *o2,
 }
 
 
-int dCollideCC (const dCCylinder *o1, const dCCylinder *o2,
+int dCollideCC (const dxGeom *o1, const dxGeom *o2,
 		int flags, dContactGeom *contact, int skip)
 {
   dDebug (0,"unimplemented");
@@ -644,19 +921,11 @@ int dCollideCC (const dCCylinder *o1, const dCCylinder *o2,
 }
 
 
-int dCollideCP (const dCCylinder *o1, const dPlane *o2, int flags,
+int dCollideCP (const dxGeom *o1, const dxGeom *o2, int flags,
 		dContactGeom *contact, int skip)
 {
   dDebug (0,"unimplemented");
   return 0;
-}
-
-//****************************************************************************
-// composite
-
-void dAddToComposite (dGeomID composite, int i, dGeomID obj)
-{
-  dDebug (0,"unimplemented");
 }
 
 //****************************************************************************
@@ -678,26 +947,27 @@ static dColliderFn * dSphereColliderFn (int num)
 }
 
 
-static void dSphereAABB (dGeomID geom, dReal aabb[6])
+static void dSphereAABB (dxGeom *geom, dReal aabb[6])
 {
-  dSphere *s = (dSphere*) geom;
-  aabb[0] = s->geom.pos[0] - s->radius;
-  aabb[1] = s->geom.pos[0] + s->radius;
-  aabb[2] = s->geom.pos[1] - s->radius;
-  aabb[3] = s->geom.pos[1] + s->radius;
-  aabb[4] = s->geom.pos[2] - s->radius;
-  aabb[5] = s->geom.pos[2] + s->radius;
+  dxSphere *s = (dxSphere*) CLASSDATA(geom);
+  aabb[0] = geom->pos[0] - s->radius;
+  aabb[1] = geom->pos[0] + s->radius;
+  aabb[2] = geom->pos[1] - s->radius;
+  aabb[3] = geom->pos[1] + s->radius;
+  aabb[4] = geom->pos[2] - s->radius;
+  aabb[5] = geom->pos[2] + s->radius;
 }
 
 
 static dColliderFn * dBoxColliderFn (int num)
 {
+  if (num == dBoxClass) return (dColliderFn *) &dCollideBB;
   if (num == dPlaneClass) return (dColliderFn *) &dCollideBP;
   return 0;
 }
 
 
-static void dBoxAABB (dGeomID geom, dReal aabb[6])
+static void dBoxAABB (dxGeom *geom, dReal aabb[6])
 {
   dDebug (0,"unimplemented");
 }
@@ -709,7 +979,7 @@ dColliderFn * dPlaneColliderFn (int num)
 }
 
 
-static void dPlaneAABB (dGeomID geom, dReal aabb[6])
+static void dPlaneAABB (dxGeom *geom, dReal aabb[6])
 {
   dDebug (0,"PlaneAABB() not implemented, should not have to be");
 }
@@ -719,17 +989,16 @@ dxGeom *dCreateSphere (dSpaceID space, dReal radius)
 {
   if (dSphereClass == -1) {
     dGeomClass c;
-    c.num = 0;
-    c.size = sizeof (dSphere);
+    c.bytes = sizeof (dxSphere);
     c.collider = &dSphereColliderFn;
     c.aabb = &dSphereAABB;
     dSphereClass = dCreateGeomClass (&c);
   }
 
-  dSphere *s = (dSphere*) dAlloc (sizeof(dSphere));
-  dInitGeom (&s->geom,space,dSphereClass);
+  dxGeom *g = dCreateGeom (space,dSphereClass);
+  dxSphere *s = (dxSphere*) CLASSDATA(g);
   s->radius = radius;
-  return &s->geom;
+  return g;
 }
 
 
@@ -737,19 +1006,18 @@ dxGeom *dCreateBox (dSpaceID space, dReal lx, dReal ly, dReal lz)
 {
   if (dBoxClass == -1) {
     dGeomClass c;
-    c.num = 0;
-    c.size = sizeof (dBox);
+    c.bytes = sizeof (dxBox);
     c.collider = &dBoxColliderFn;
     c.aabb = &dBoxAABB;
     dBoxClass = dCreateGeomClass (&c);
   }
 
-  dBox *b = (dBox*) dAlloc (sizeof(dBox));
-  dInitGeom (&b->geom,space,dBoxClass);
+  dxGeom *g = dCreateGeom (space,dBoxClass);
+  dxBox *b = (dxBox*) CLASSDATA(g);
   b->side[0] = lx;
   b->side[1] = ly;
   b->side[2] = lz;
-  return &b->geom;
+  return g;
 }
 
 
@@ -758,15 +1026,15 @@ dxGeom *dCreatePlane (dSpaceID space,
 {
   if (dPlaneClass == -1) {
     dGeomClass c;
-    c.num = 0;
-    c.size = sizeof (dPlane);
+    c.bytes = sizeof (dxPlane);
     c.collider = &dPlaneColliderFn;
     c.aabb = &dPlaneAABB;
     dPlaneClass = dCreateGeomClass (&c);
   }
 
-  dPlane *p = (dPlane*) dAlloc (sizeof(dPlane));
-  dInitGeom (&p->geom,space,dPlaneClass);
+  dxGeom *g = dCreateGeom (space,dPlaneClass);
+  dxPlane *p = (dxPlane*) CLASSDATA(g);
+
   // make sure plane normal has unit length
   dReal l = a*a + b*b + c*c;
   if (l > 0) {
@@ -782,120 +1050,50 @@ dxGeom *dCreatePlane (dSpaceID space,
     p->p[2] = 0;
     p->p[3] = 0;
   }
-  return &p->geom;
+  return g;
+}
+
+
+dReal dGeomSphereGetRadius (dGeomID g)
+{
+  dASSERT (g->_class->num == dSphereClass);
+  dxSphere *s = (dxSphere*) CLASSDATA(g);
+  return s->radius;
+}
+
+
+void  dGeomBoxGetLengths (dGeomID g, dVector3 result)
+{
+  dASSERT (g->_class->num == dBoxClass);
+  dxBox *b = (dxBox*) CLASSDATA(g);
+  result[0] = b->side[0];
+  result[1] = b->side[1];
+  result[2] = b->side[2];
+}
+
+
+void  dGeomPlaneGetParams (dGeomID g, dVector4 result)
+{
+  dASSERT (g->_class->num == dPlaneClass);
+  dxPlane *p = (dxPlane*) CLASSDATA(g);
+  result[0] = p->p[0];
+  result[1] = p->p[1];
+  result[2] = p->p[2];
+  result[3] = p->p[3];
+}
+
+
+void dGeomCCylinderGetParams (dGeomID g, dReal *a, dReal *b, int *dir)
+{
+  dDebug (0,"not implemented");
 }
 
 //****************************************************************************
-// geometry class stuff
+// composite
 
-// @@@ NOTE! global constructors here, which is bad!!!
-
-struct dColliderEntry {
-  dColliderFn *fn;	// collider function
-  int mode;		// 1 = reverse o1 and o2, 2 = no function available
-};
-
-// pointers to the class structures
-static dArray<dGeomClass*> classes;	// <--- update for pointers
-
-// function pointers and modes for n^2 class collider functions. this is an
-// n*n matrix stored by row. the functions pointers are extracted from the
-// class get-collider-function function.
-static dArray<dColliderEntry> colliders;
-
-
-int dCreateGeomClass (const dGeomClass *c)
+/*
+void dAddToComposite (dxGeom *composite, int i, dxGeom *obj)
 {
-  if (c->size < (int)sizeof(dxGeom))
-    dDebug (d_ERR_BAD_ARGS,"dGeomClass size too small");
-  if (!c->collider || !c->aabb)
-    dDebug (d_ERR_BAD_ARGS,"dGeomClass has zero function pointers");
-
-  int n = classes.size();
-  dGeomClass *gc = (dGeomClass*) dAllocNoFree (sizeof(dGeomClass));
-
-  memcpy (gc,c,sizeof(dGeomClass));
-  gc->num = n;			// set class number
-  classes.push (gc);
-
-  // make room for n^2 class collider function pointers - these entries will
-  // be filled as dCollide() is called.
-  colliders.setSize ((n+1)*(n+1));
-  memset (&colliders[0],0,(n+1)*(n+1)*sizeof(dColliderEntry));
-
-  return n;
+  dDebug (0,"unimplemented");
 }
-
-
-void dInitGeom (dGeomID geom, dSpaceID space, int classnum)
-{
-  if (classnum < 0 || classnum >= classes.size())
-    dDebug (d_ERR_BAD_ARGS,"dInitGeom(), bad class number");
-  memset (geom,0,classes[classnum]->size);
-  geom->_class = classes[classnum];
-  geom->data = 0;
-  geom->body = 0;
-  geom->pos = 0;
-  geom->R = 0;
-  dSpaceAdd (space,geom);
-}
-
-
-void dDestroyGeom (dSpaceID space, dGeomID geom)
-{
-  dSpaceRemove (space,geom);
-  dFree (geom,geom->_class->size);
-}
-
-
-int dCollide (dGeomID o1, dGeomID o2, int flags, dContactGeom *contact,
-	      int skip)
-{
-  int i,c1,c2,a1,a2,count,swap;
-  dColliderFn *fn;
-  c1 = o1->_class->num;
-  c2 = o2->_class->num;
-  a1 = c1 * classes.size() + c2;	// address 1 in collider array
-  a2 = c2 * classes.size() + c1;	// address 2 in collider array
-  swap = 0;		// set to 1 to swap normals before returning
-
-  // return if there are no collider functions available
-  if ((colliders[a1].mode==2) || (colliders[a2].mode==2)) return 0;
-
-  if ((fn = colliders[a1].fn)) {
-    swap = colliders[a1].mode;
-    if (swap) count = (*fn) (o2,o1,flags,contact,skip);
-    else count = (*fn) (o1,o2,flags,contact,skip);
-  }
-  else if ((fn = classes[c1]->collider (c2))) {
-    colliders [a2].fn = fn;
-    colliders [a2].mode = 1;
-    colliders [a1].fn = fn;	// do mode=0 assignment second so that
-    colliders [a1].mode = 0;	// diagonal entries will have mode 0
-    count = (*fn) (o1,o2,flags,contact,skip);
-    swap = 0;
-  }
-  else if ((fn = classes[c2]->collider (c1))) {
-    colliders [a1].fn = fn;
-    colliders [a1].mode = 1;
-    colliders [a2].fn = fn;	// do mode=0 assignment second so that
-    colliders [a2].mode = 0;	// diagonal entries will have mode 0
-    count = (*fn) (o2,o1,flags,contact,skip);
-    swap = 1;
-  }
-  else {
-    colliders[a1].mode = 2;
-    colliders[a2].mode = 2;
-    return 0;
-  }
-
-  if (swap) {
-    for (i=0; i<count; i++) {
-      contact[i].normal[0] = -contact[i].normal[0];
-      contact[i].normal[1] = -contact[i].normal[1];
-      contact[i].normal[2] = -contact[i].normal[2];
-    }
-  }
-
-  return count;
-}
+*/
