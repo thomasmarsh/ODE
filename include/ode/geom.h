@@ -55,10 +55,11 @@ dGeomID dCreateCCylinder (dSpaceID space, dReal a, dReal b, int dir);
 
 /* get geometry parameters */
 int   dGeomGetClass (dGeomID);
-dReal dGeomSphereGetRadius (dGeomID);
-void  dGeomBoxGetLengths (dGeomID, dVector3 result);
-void  dGeomPlaneGetParams (dGeomID, dVector4 result);
-void  dGeomCCylinderGetParams (dGeomID, dReal *a, dReal *b, int *dir);
+dReal dGeomSphereGetRadius (dGeomID sphere);
+void  dGeomBoxGetLengths (dGeomID box, dVector3 result);
+void  dGeomPlaneGetParams (dGeomID plane, dVector4 result);
+void  dGeomCCylinderGetParams (dGeomID ccylinder,
+			       dReal *a, dReal *b, int *dir);
 
 /* general functions */
 void dGeomSetData (dGeomID, void *);

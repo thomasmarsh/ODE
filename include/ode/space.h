@@ -19,20 +19,6 @@
  *                                                                       *
  *************************************************************************/
 
-/*
-
-space - a container for geometry objects that does high level collision
-culling.
-
-various algorithms will be available:
-  - simple n^2 object intersections
-  - oct tree
-  - coordinate sorting
-  - hash table
-
-*/
-
-
 #ifndef _ODE_SPACE_H_
 #define _ODE_SPACE_H_
 
@@ -52,27 +38,12 @@ struct dGeomSpaceData {
 };
 
 
-/* create and destroy a space. when a space is destroyed, all the geometry
- * objects in that space are automatically destroyed as well.
- */
-
 dSpaceID dSpaceCreate();
 void dSpaceDestroy (dSpaceID);
 
-
-/* add and remove geometry objects to/from the space. these functions are
- * normally only called by the geometry object creation/deletion functions.
- */
-
-void dSpaceAdd (dSpaceID space, dGeomID);
+void dSpaceAdd (dSpaceID, dGeomID);
 void dSpaceRemove (dSpaceID, dGeomID);
 
-
-/* call the callback function for all potentially intersection objects in the
- * space. the callback function will usually:
- *   * determine if the objects can intersect based on other properties
- *   * if so, collide them
- */
 typedef void dNearCallback (void *data, dGeomID o1, dGeomID o2);
 void dSpaceCollide (dSpaceID space, void *data, dNearCallback *callback);
 
@@ -87,11 +58,11 @@ void dSpaceCollide (dSpaceID space, void *data, dNearCallback *callback);
 /* int dSpaceCollide (dSpaceID space, dContactGeom **contact_array); */
 
 
-/* tell the space that an object has moved, so its representation in the
+/* HMMMMM... i dont think so.
+ * tell the space that an object has moved, so its representation in the
  * space should be changed.
  */
-
-void dSpaceObjectMoved (dSpaceID, dGeomID);
+/* void dSpaceObjectMoved (dSpaceID, dGeomID); */
 
 
 #ifdef __cplusplus
