@@ -87,11 +87,24 @@
 #   l = inv(D) * Dl
 #   e*d*e' = b - l'*Dl       (m*m LDLT factorization)
 #
+#
+# L-transpose solver
+# ------------------
+#
+# the LT (L-transpose) solver uses the same logic as the standard L-solver,
+# with a few tricks to make it work. to solve L^T*X=B we first remap:
+#    L to Lhat : Lhat(i,j) = L(n-j,n-i)
+#    X to Xhat : Xhat(i) = X(n-i)
+#    B to Bhat : Bhat(i) = B(n-i)
+# and then solve Lhat*Xhat = Bhat. the current LT solver only supports one
+# right hand side, but that's okay as it is not used in the factorizer.
+#
 #############################################################################
 #
 # code generation parameters, set in a parameters file:
 #    FNAME   : name of source file to generate - a .c file will be made
-#    TYPE    : 'f' to build factorizer, 's' to build solver.
+#    TYPE    : 'f' to build factorizer, 's' to build solver, 't' to build the
+#              transpose solver.
 #    N1      : block size (size of outer product matrix) (1..9)
 #    UNROLL1 : solver inner loop unrolling factor (1..)
 #    UNROLL2 : factorizer inner loop unrolling factor (1..)
@@ -129,7 +142,7 @@ if (!defined($FNAME) || !defined($TYPE) || !defined($N1) ||
 }
 
 # check parameters
-error ("bad TYPE") if $TYPE ne 'f' && $TYPE ne 's';
+error ("bad TYPE") if $TYPE ne 'f' && $TYPE ne 's' && $TYPE ne 't';
 error ("bad N1") if $N1 < 1 || $N1 > 9;
 error ("bad UNROLL1") if $UNROLL1 < 1;
 error ("bad UNROLL2") if $UNROLL2 < 1;
@@ -190,8 +203,14 @@ sub innerOuterProductLoop # (M,k,nrhs,increment)
   if ($FETCH==0) {
     comment ("load p and q values");
     for ($i=1; $i<=$M; $i++) {
-      output ("p$i=ell[".ofs2($k,$i-1,'lskip')."];\n");
-      output ("q$i=ex[".ofs2($k,$i-1,'lskip')."];\n") if $i <= $nrhs;
+      if ($TYPE eq 't') {
+        output ("p$i=ell[".ofs2(-($i-1),0,'lskip')."];\n");
+        output ("q$i=ex[".ofs2(-($k),$i-1,'lskip')."];\n") if $i <= $nrhs;
+      }
+      else {
+        output ("p$i=ell[".ofs2($k,$i-1,'lskip')."];\n");
+        output ("q$i=ex[".ofs2($k,$i-1,'lskip')."];\n") if $i <= $nrhs;
+      }
     }
     loadedEverything;
   }
@@ -199,17 +218,34 @@ sub innerOuterProductLoop # (M,k,nrhs,increment)
   comment ("compute outer product and add it to the Z matrix");
   for ($i=1; $i<=$M; $i++) {
     for ($j=1; $j<=$nrhs; $j++) {
-      loadP ($i,"p$i=ell[".ofs2($k,$i-1,'lskip')."];\n");
-      loadQ ($j,"q$j=ex[".ofs2($k,$j-1,'lskip')."];\n");
+      if ($TYPE eq 't') {
+        loadP ($i,"p$i=ell[".ofs2(-($i-1),0,'lskip')."];\n");
+        loadQ ($j,"q$j=ex[".ofs2(-($k),$j-1,'lskip')."];\n");
+      }
+      else {
+        loadP ($i,"p$i=ell[".ofs2($k,$i-1,'lskip')."];\n");
+        loadQ ($j,"q$j=ex[".ofs2($k,$j-1,'lskip')."];\n");
+      }
       my $var = $MADD ? "Z$i$j +=" : "m$i$j =";
       output ("$var p$i * q$j;\n");
     }
   }
 
-  if ($increment > 0) {
-    comment ("advance pointers");
-    output ("ell += $increment;\n");
-    output ("ex += $increment;\n");
+  if ($TYPE eq 't') {
+    if ($increment > 0) {
+      output ("ell += lskip1;\n");
+      output ("ex -= $increment;\n");
+    }
+    else {
+      output ("ell += lskip1;\n");
+    }
+  }
+  else {
+    if ($increment > 0) {
+      comment ("advance pointers");
+      output ("ell += $increment;\n");
+      output ("ex += $increment;\n");
+    }
   }
 
   if ($MADD==0) {
@@ -236,7 +272,12 @@ sub computeRows # (nrhs,rows)
       output ("Z$i$j=0;\n");
     }
   }
-  output ("ell = L + i*lskip1;\n");
+  if ($TYPE eq 't') {
+    output ("ell = L - i;\n");
+  }
+  else {
+    output ("ell = L + i*lskip1;\n");
+  }
   output ("ex = B;\n");
 
   comment ("the inner loop that computes outer products and adds them to Z");
@@ -259,21 +300,42 @@ sub computeRows # (nrhs,rows)
   comment ("finish computing the X(i) block");
 
   for ($j=1; $j<=$nrhs; $j++) {
-    output ("Z1$j = ex[".ofs1($j-1,'lskip')."] - Z1$j;\n");
-    output ("ex[".ofs1($j-1,'lskip')."] = Z1$j;\n");
+    if ($TYPE eq 't') {
+      output ("Z1$j = ex[".ofs1(-($j-1),'lskip')."] - Z1$j;\n");
+      output ("ex[".ofs1(-($j-1),'lskip')."] = Z1$j;\n");
+    }
+    else {
+      output ("Z1$j = ex[".ofs1($j-1,'lskip')."] - Z1$j;\n");
+      output ("ex[".ofs1($j-1,'lskip')."] = Z1$j;\n");
+    }
   }
 
   for ($i=2; $i<=$rows; $i++) {
     for ($j=1; $j<$i; $j++) {
-      output ("p$j = ell[".ofs2($j-1,$i-1,'lskip')."];\n");
+      if ($TYPE eq 't') {
+        output ("p$j = ell[".ofs2(-($i-1),$j-1,'lskip')."];\n");
+      }
+      else {
+        output ("p$j = ell[".ofs2($j-1,$i-1,'lskip')."];\n");
+      }
     }
     for ($j=1; $j<=$nrhs; $j++) {
-      output ("Z$i$j = ex[".ofs2($i-1,$j-1,'lskip')."] - Z$i$j");
+      if ($TYPE eq 't') {
+        output ("Z$i$j = ex[".ofs2(-($i-1),$j-1,'lskip')."] - Z$i$j");
+      }
+      else {
+        output ("Z$i$j = ex[".ofs2($i-1,$j-1,'lskip')."] - Z$i$j");
+      }
       for ($k=1; $k < $i; $k++) {
         output (" - p$k*Z$k$j");
       }
       output (";\n");
-      output ("ex[".ofs2($i-1,$j-1,'lskip')."] = Z$i$j;\n");
+      if ($TYPE eq 't') {
+        output ("ex[".ofs2(-($i-1),$j-1,'lskip')."] = Z$i$j;\n");
+      }
+      else {
+        output ("ex[".ofs2($i-1,$j-1,'lskip')."] = Z$i$j;\n");
+      }
     }
   }
 }
@@ -287,7 +349,23 @@ sub makeFastL1Solve # ( number-of-right-hand-sides )
   my $staticvoid = ($TYPE eq 'f') ? 'static void' : 'void';
 
   # function header
-  output (<<END);
+  if ($TYPE eq 't') {
+    output (<<END);
+
+/* solve L^T * x=b, with b containing 1 right hand side.
+ * L is an n*n lower triangular matrix with ones on the diagonal.
+ * L is stored by rows and its leading dimension is lskip.
+ * b is an n*1 matrix that contains the right hand side.
+ * b is overwritten with x.
+ * this processes blocks of $N1.
+ */
+
+void dSolveL1T (const dReal *L, dReal *B, int n, int lskip1)
+{
+END
+  }
+  else {
+    output (<<END);
 
 /* solve L*X=B, with B containing $nrhs right hand sides.
  * L is an n*n lower triangular matrix with ones on the diagonal.
@@ -302,6 +380,7 @@ sub makeFastL1Solve # ( number-of-right-hand-sides )
 $staticvoid dSolveL1$funcsuffix (const dReal *L, dReal *B, int n, int lskip1)
 {
 END
+  }
 
   comment ("declare variables - Z matrix, p and q vectors, etc");
   output ("dReal ");
@@ -322,6 +401,13 @@ END
   }
   output ("i,j;\n");
 
+  if ($TYPE eq 't') {
+    comment ("special handling for L and B because we're solving L1 *transpose*");
+    output ("L = L + (n-1)*(lskip1+1);\n");
+    output ("B = B + n-1;\n");
+    output ("lskip1 = -lskip1;\n");
+  }
+
   if ($N1 > 2) {
     comment ("compute lskip values");
     for ($i=2; $i<$N1; $i++) {
@@ -330,7 +416,7 @@ END
   }
 
   comment ("compute all $N1 x $nrhs blocks of X");
-  if ($TYPE eq 's') {
+  if ($TYPE eq 's' or $TYPE eq 't') {
     output ("for (i=0; i <= n-$N1; i+=$N1) {\n");
   }
   else {
@@ -340,7 +426,7 @@ END
   comment ("end of outer loop");
   output ("}\n");
 
-  if ($TYPE eq 's') {
+  if ($TYPE eq 's' or $TYPE eq 't') {
     comment ("compute rows at end that are not a multiple of block size");
     output ("for (; i < n; i++) {\n");
     computeRows ($nrhs,1);
