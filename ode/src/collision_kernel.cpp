@@ -37,6 +37,10 @@ for geometry objects
 #include "collision_transform.h"
 #include "collision_trimesh_internal.h"
 
+#ifdef _MSC_VER
+#pragma warning(disable:4291)  // for VC++, no complaints about "no matching operator delete found"
+#endif
+
 //****************************************************************************
 // helper functions for dCollide()ing a space with another geom
 
