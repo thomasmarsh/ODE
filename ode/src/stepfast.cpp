@@ -781,8 +781,8 @@ dInternalStepIslandFast (dxWorld * world, dxBody * const *bodies, int nb, dxJoin
 		{
 			saveFacc[b * 4 + i] = bodies[b]->facc[i];
 			saveTacc[b * 4 + i] = bodies[b]->tacc[i];
-			bodies[b]->tag = b;
 		}
+                bodies[b]->tag = b;
 	}
 
 	for (iter = 0; iter < maxiterations; iter++)
@@ -821,7 +821,11 @@ dInternalStepIslandFast (dxWorld * world, dxBody * const *bodies, int nb, dxJoin
 				body->facc[1] = saveFacc[b * 4 + 1] + body->mass.mass * world->gravity[1];
 				body->facc[2] = saveFacc[b * 4 + 2] + body->mass.mass * world->gravity[2];
 				body->facc[3] = 0;
-			}
+			} else {
+                                body->facc[0] = saveFacc[b * 4 + 0];
+                                body->facc[1] = saveFacc[b * 4 + 1];
+                                body->facc[2] = saveFacc[b * 4 + 2];
+                        }
 
 		}
 
