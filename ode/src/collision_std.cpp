@@ -196,20 +196,64 @@ dReal dGeomBoxPointDepth (dGeomID g, dReal x, dReal y, dReal z)
 {
   dUASSERT (g && g->type == dBoxClass,"argument not a box");
   dxBox *b = (dxBox*) g;
+
+  // Set p = (x,y,z) relative to box center
+  //
+  // This will be (0,0,0) if the point is at (side[0]/2,side[1]/2,side[2]/2)
+
   dVector3 p,q;
+
   p[0] = x - b->pos[0];
   p[1] = y - b->pos[1];
   p[2] = z - b->pos[2];
+
+  // Rotate p into box's coordinate frame, so we can
+  // treat the OBB as an AABB
+
   dMULTIPLY1_331 (q,b->R,p);
-  dReal dx = b->side[0]*REAL(0.5) - dFabs(q[0]);
-  dReal dy = b->side[1]*REAL(0.5) - dFabs(q[1]);
-  dReal dz = b->side[2]*REAL(0.5) - dFabs(q[2]);
-  if (dx < dy) {
-    if (dx < dz) return dx; else return dz;
+
+  // Record distance from point to each successive box side, and see
+  // if the point is inside all six sides
+
+  dReal dist[6];
+  int   i;
+
+  bool inside = true;
+
+  for (i=0; i < 3; i++) {
+    dReal side = b->side[i] * REAL(0.5);
+
+    dist[i  ] = side - q[i];
+    dist[i+3] = side + q[i];
+
+    if ((dist[i] < 0) || (dist[i+3] < 0)) {
+      inside = false;
+    }
   }
-  else {
-    if (dy < dz) return dy; else return dz;
+
+  // If point is inside the box, the depth is the smallest positive distance
+  // to any side
+
+  if (inside) {
+    dReal smallest_dist = (dReal) (unsigned) -1;
+
+    for (i=0; i < 6; i++) {
+      if (dist[i] < smallest_dist) smallest_dist = dist[i];
+    }
+
+    return smallest_dist;
   }
+
+  // Otherwise, if point is outside the box, the depth is the largest
+  // distance to any side
+
+  dReal largest_dist = 0;
+
+  for (i=0; i < 6; i++) {
+    if (dist[i] > largest_dist) largest_dist = dist[i];
+  }
+
+  return -largest_dist;
 }
 
 //****************************************************************************
