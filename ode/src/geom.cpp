@@ -1111,6 +1111,41 @@ dxGeom *dCreatePlane (dSpaceID space,
 }
 
 
+void dGeomSphereSetRadius (dGeomID sphere, dReal radius)
+{
+  dUASSERT (g && g->_class->num == dSphereClass,"argument not a sphere");
+  dxSphere *s = (dxSphere*) CLASSDATA(g);
+  s->radius = radius;
+}
+
+
+void dGeomBoxSetLengths (dGeomID box, dReal lx, dReal ly, dReal lz)
+{
+  dUASSERT (g && g->_class->num == dBoxClass,"argument not a box");
+  dxBox *b = (dxBox*) CLASSDATA(g);
+  b->side[0] = lx;
+  b->side[1] = ly;
+  b->side[2] = lz;
+}
+
+
+void dGeomPlaneSetParams (dGeomID plane, dReal a, dReal b, dReal c, dReal d)
+{
+  dUASSERT (g && g->_class->num == dPlaneClass,"argument not a plane");
+  dxPlane *p = (dxPlane*) CLASSDATA(g);
+  p->p[0] = a;
+  p->p[1] = b;
+  p->p[2] = c;
+  p->p[3] = d;
+}
+
+
+void dGeomCCylinderSetParams (dGeomID ccylinder, dReal a, dReal b, int dir)
+{
+  dDebug (0,"not implemented");
+}
+
+
 dReal dGeomSphereGetRadius (dGeomID g)
 {
   dUASSERT (g && g->_class->num == dSphereClass,"argument not a sphere");
