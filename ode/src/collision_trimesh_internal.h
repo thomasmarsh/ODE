@@ -45,6 +45,10 @@ struct dxTriMeshData{
 	Model BVTree;
 	MeshInterface Mesh;
 
+        /* aabb in model space */
+        dVector3 AABBCenter;
+        dVector3 AABBExtents;
+
 	dxTriMeshData();
 	~dxTriMeshData();
 
