@@ -1,0 +1,4 @@
+# generated dependency file, do not edit!
+
+dstest.o: dstest.cpp drawstuff/drawstuff.h \
+ drawstuff/version.h
