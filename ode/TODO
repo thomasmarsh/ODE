@@ -3,13 +3,6 @@ TODO
 ----
 
 joints:
-	joint limit spongyness
-		- erp and cfm for joint set from world (global) values when
-		  joint created.
-		- interacts with powered joints badly
-
-	joint limit restitution
-
 	hinge2 joint - implement trail, i.e. non-convergent steering and wheel
 	axes.
 
@@ -44,13 +37,25 @@ joints:
 		suspension limits
 		suspension limit restitution and spongyness??
 
+DOC how bodies and geoms associated then resolved in contact callback.
+
+explore: do joint parameters need to be set for the joint to be setup
+correctly, or should set some proper body-dependent params when it is
+attached? this is only really an issue for joints that have no parameters to
+set, such as the fixed joint.
+
 extra API to get lambda and J'*lambda from last timestep.
+
+fix the "memory leak" in geom.cpp
 
 contacts: cheaper friction: viscous friction? one step delay friction force.
 
 DOC cfm, the derivation and what it means.
 
 joint "get type" function
+
+joint limit spongyness: interacts with powered joints badly, because when the
+limit is reached full power is applied.
 
 various hinge2 functions may not function correctly if axis1 and axis2 are not
 perpendicular. in particular the getAngle() and getAngleRate() functions
@@ -268,3 +273,9 @@ joints:
 	hinge2: when we lock back wheels along the steering axis, there is no
 	error correction if they get out of alignment - DONE, just use high
 	and low limits.
+
+	joint limit spongyness: erp and cfm for joint set from world (global)
+	values when joint created. - DONE
+
+	joint limit restitution - DONE
+
