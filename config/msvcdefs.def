@@ -83,6 +83,7 @@ dBodyDestroy
 dJointDestroy
 dGeomDestroy
 dBodySetData
+dBodyGetData
 dBodySetQuaternion
 dQFromAxisAndAngle
 dRFromAxisAndAngle
@@ -150,3 +151,11 @@ dJointSetUniversalAxis2
 dJointGetUniversalAnchor
 dJointGetUniversalAxis1
 dJointGetUniversalAxis2
+dJointGetData
+dJointSetData
+dJointGetHingeAnchor
+dJointGetHingeAxis
+dJointGetSliderAxis
+dJointGetBody
+dJointGetBallAnchor
+dRFrom2Axes
