@@ -26,16 +26,7 @@
 	#define ICE_COMPILE_TIME_ASSERT(exp)	extern char ICE_Dummy[ (exp) ? 1 : -1 ]
 
 	#define	Log				{}
-#ifdef WIN32
-	#define	SetIceError		false
-#else
-	//@@@ this prototype is just here to get OPCODE to compile.
-	//@@@ where should this function be defined???
-	inline int SetIceError (const char *msg, const void *ptr) {
-		printf ("SetIceError (%s,%p)\n",msg,ptr);
-		return 0;
-	}
-#endif
+	#define	SetIceError(a,b)	false
 	#define	EC_OUTOFMEMORY	"Out of memory"
 
 	#include "Ice/IcePreprocessor.h"
