@@ -1262,13 +1262,15 @@ extern "C" void dsDrawCappedCylinder (const float pos[3], const float R[12],
 }
 
 
-void dsDrawBoxD (const double pos[3], const double R[12], const float sides[3])
+void dsDrawBoxD (const double pos[3], const double R[12],
+		 const double sides[3])
 {
   int i;
-  float pos2[3],R2[12];
+  float pos2[3],R2[12],fsides[3];
   for (i=0; i<3; i++) pos2[i]=pos[i];
   for (i=0; i<12; i++) R2[i]=R[i];
-  dsDrawBox (pos2,R2,sides);
+  for (i=0; i<3; i++) fsides[i]=sides[i];
+  dsDrawBox (pos2,R2,fsides);
 }
 
 
