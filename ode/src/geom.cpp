@@ -910,10 +910,8 @@ int dCollideBP (const dxGeom *o1, const dxGeom *o2,
   contact->normal[1] = n[1];
   contact->normal[2] = n[2];
   contact->depth = depth;
-  if (maxc == 1) {
-    ret = 1;
-    goto done;
-  }
+  ret = 1;		// ret is number of contact points found so far
+  if (maxc == 1) goto done;
 
   // get the second and third contact points by starting from `p' and going
   // along the two sides with the smallest projected length.
@@ -924,12 +922,10 @@ int dCollideBP (const dxGeom *o1, const dxGeom *o2,
   CONTACT(contact,i*skip)->pos[2] = p[2] op box->side[j] * R[8+j];
 #define BAR(ctact,side,sideinc) \
   depth -= B ## sideinc; \
-  if (depth < 0) { \
-    ret = 1; \
-    goto done; \
-  } \
+  if (depth < 0) goto done; \
   if (A ## sideinc > 0) { FOO(ctact,side,+) } else { FOO(ctact,side,-) } \
-  CONTACT(contact,ctact*skip)->depth = depth;
+  CONTACT(contact,ctact*skip)->depth = depth; \
+  ret++;
 
   CONTACT(contact,skip)->normal[0] = n[0];
   CONTACT(contact,skip)->normal[1] = n[1];
@@ -943,10 +939,7 @@ int dCollideBP (const dxGeom *o1, const dxGeom *o2,
   if (B1 < B2) {
     if (B3 < B1) goto use_side_3; else {
       BAR(1,0,1);	// use side 1
-      if (maxc == 2) {
-	ret = 2;
-	goto done;
-      }
+      if (maxc == 2) goto done;
       if (B2 < B3) goto contact2_2; else goto contact2_3;
     }
   }
@@ -954,25 +947,19 @@ int dCollideBP (const dxGeom *o1, const dxGeom *o2,
     if (B3 < B2) {
       use_side_3:	// use side 3
       BAR(1,2,3);
-      if (maxc == 2) {
-	ret = 2;
-	goto done;
-      }
+      if (maxc == 2) goto done;
       if (B1 < B2) goto contact2_1; else goto contact2_2;
     }
     else {
       BAR(1,1,2);	// use side 2
-      if (maxc == 2) {
-	ret = 2;
-	goto done;
-      }
+      if (maxc == 2) goto done;
       if (B1 < B3) goto contact2_1; else goto contact2_3;
     }
   }
 
-  contact2_1: BAR(2,0,1); ret = 3; goto done;
-  contact2_2: BAR(2,1,2); ret = 3; goto done;
-  contact2_3: BAR(2,2,3); ret = 3; goto done;
+  contact2_1: BAR(2,0,1); goto done;
+  contact2_2: BAR(2,1,2); goto done;
+  contact2_3: BAR(2,2,3); goto done;
 #undef FOO
 #undef BAR
 
