@@ -2,6 +2,8 @@
 TODO BEFORE NEXT RELEASE
 ------------------------
 
+transformation geometry object.
+
 functions to get all the joints/bodies a body/joint is connected to.
 function to get the entire island?
 
@@ -161,6 +163,12 @@ redundant calls, zero loads, adds etc
 
 contacts: cheaper friction: viscous friction? one step delay friction force.
 
+in geom.cpp, for objects that are never meant to collide, dCollide() will
+always try to find the collider functions, which wastes a bit of time.
+
+geom.cpp:dCollideG() - handle special case of colliding 2 groups more
+efficiently.
+
 
 
 MAYBE
@@ -309,3 +317,7 @@ in testode: finite and isnan are missing. copysign is missing
 	which is a pain to do over MinGW. argh.
 
 build on linux - assumptions made about location of X11 lib, opengl etc.
+
+implement: dBodyAddForceAtPos,dBodyAddRelForceAtPos,dBodyAddRelForceAtRelPos,
+	dBodyGetPointPos,dBodyGetPointVel,dBodyGetPointRelVel
+
