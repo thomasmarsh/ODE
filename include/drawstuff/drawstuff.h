@@ -55,7 +55,7 @@ extern "C" {
 #define DS_WOOD   1
 
 
-struct dsFunctions {
+typedef struct dsFunctions {
   int version;			/* put DS_VERSION here */
   /* version 1 data */
   void (*start)();		/* called before sim loop starts */
@@ -64,7 +64,7 @@ struct dsFunctions {
   void (*stop)();		/* called after sim loop exits */
   /* version 2 data */
   char *path_to_textures;	/* if nonzero, path to texture files */
-};
+} dsFunctions;
 
 
 /* the main() function should fill in the dsFunctions structure then
@@ -72,7 +72,7 @@ struct dsFunctions {
  */
 void dsSimulationLoop (int argc, char **argv,
 		       int window_width, int window_height,
-		       dsFunctions *fn);
+		       struct dsFunctions *fn);
 
 /* these functions display an error message then exit. they take arguments
  * in the same way as printf(), except you do not have to add a terminating
