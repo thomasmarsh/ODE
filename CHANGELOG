@@ -9,6 +9,10 @@ the rules for this file:
 
 ------------------------------------------------------------------------------
 
+05/29/04 russ
+
+	* added joint feedback to the QuickStep solver
+
 05/18/04 russ
 
 	* added warm starting to the QuickStep solver
