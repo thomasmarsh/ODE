@@ -9,6 +9,16 @@ the rules for this file:
 
 ------------------------------------------------------------------------------
 
+04/20/04 russ
+
+	* changed the meaning of the 'index' argument to dJointGetBody():
+	  it was the only remaining API function that does not respect
+	  dJOINT_REVERSE (spotted by Matthew D. Hancher).
+	
+	* updated the C++ headers: fixed two minor bugs and added
+	  support for dQuadTreeSpace, dRay, and the dGeom::getSpace() method
+	  (from Matthew D. Hancher).
+
 04/18/04 russ
 
 	* changed the way that the dInfinity constant is implemented: now it
