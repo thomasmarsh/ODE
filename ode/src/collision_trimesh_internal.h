@@ -48,7 +48,7 @@ struct dxTriMeshData{
 	dxTriMeshData();
 	~dxTriMeshData();
 
-	void Build(const void* Vertices, int VertexStide, int VertexCount, const void* Indices, int IndexCount, int TriStride);
+	void Build(const void* Vertices, int VertexStide, int VertexCount, const void* Indices, int IndexCount, int TriStride, bool Single);
 };
 
 struct dxTriMesh : public dxGeom{

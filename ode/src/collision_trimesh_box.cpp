@@ -35,168 +35,7 @@
 #define TRIMESH_INTERNAL
 #include "collision_trimesh_internal.h"
 
-struct LineContactSet{
-    dVector3 Points[8];
-
-	int Count;
-};
-
-const dReal Epsilon = REAL(1e-08);
-
-static void ClipConvexPolygonAgainstPlane(const dVector3 N, dReal C, LineContactSet& Contacts){
-    // The input vertices are assumed to be in counterclockwise order.  The
-    // ordering is an invariant of this function.
-	
-    // test on which side of line are the vertices
-    int Positive = 0, Negative = 0, PIndex = -1;
-    int Quantity = Contacts.Count;
-	
-    dReal Test[8];
-    for (int i = 0; i < Contacts.Count; i++){
-        // An epsilon is used here because it is possible for the dot product
-        // and fC to be exactly equal to each other (in theory), but differ
-        // slightly because of floating point problems.  Thus, add a little
-        // to the test number to push actually equal numbers over the edge
-        // towards the positive.
-		
-        // NOLAN: This should probably be somehow a relative tolerance, and
-        // I don't think multiplying by the constant is somehow the best
-        // way to do this.
-        Test[i] = dDOT(N, Contacts.Points[i]) - C + dFabs(C) * Epsilon;
-		
-        if (Test[i] >= REAL(0.0)){
-            Positive++;
-            if (PIndex < 0){
-                PIndex = i;
-			}
-        }
-        else Negative++;
-    }
-	
-	if (Positive > 0){
-		if (Negative > 0){
-			// plane transversely intersects polygon
-			dVector3 CV[8];
-			int CQuantity = 0, Cur, Prv;
-			dReal T;
-			
-			if (PIndex > 0){
-				// first clip vertex on line
-				Cur = PIndex;
-				Prv = Cur - 1;
-				T = Test[Cur] / (Test[Cur] - Test[Prv]);
-				CV[CQuantity][0] = Contacts.Points[Cur][0] + T * (Contacts.Points[Prv][0] - Contacts.Points[Cur][0]);
-				CV[CQuantity][1] = Contacts.Points[Cur][1] + T * (Contacts.Points[Prv][1] - Contacts.Points[Cur][1]);
-				CV[CQuantity][2] = Contacts.Points[Cur][2] + T * (Contacts.Points[Prv][2] - Contacts.Points[Cur][2]);
-				CV[CQuantity][3] = Contacts.Points[Cur][3] + T * (Contacts.Points[Prv][3] - Contacts.Points[Cur][3]);
-				CQuantity++;
-				
-				// vertices on positive side of line
-				while (Cur < Quantity && Test[Cur] >= REAL(0.0)){
-					CV[CQuantity][0] = Contacts.Points[Cur][0];
-					CV[CQuantity][1] = Contacts.Points[Cur][1];
-					CV[CQuantity][2] = Contacts.Points[Cur][2];
-					CV[CQuantity][3] = Contacts.Points[Cur][3];
-					CQuantity++;
-					Cur++;
-				}
-				
-				// last clip vertex on line
-				if (Cur < Quantity){
-					Prv = Cur - 1;
-				}
-				else{
-					Cur = 0;
-					Prv = Quantity - 1;
-				}
-				T = Test[Cur] / (Test[Cur] - Test[Prv]);
-				CV[CQuantity][0] = Contacts.Points[Cur][0] + T * (Contacts.Points[Prv][0] - Contacts.Points[Cur][0]);
-				CV[CQuantity][1] = Contacts.Points[Cur][1] + T * (Contacts.Points[Prv][1] - Contacts.Points[Cur][1]);
-				CV[CQuantity][2] = Contacts.Points[Cur][2] + T * (Contacts.Points[Prv][2] - Contacts.Points[Cur][2]);
-				CV[CQuantity][3] = Contacts.Points[Cur][3] + T * (Contacts.Points[Prv][3] - Contacts.Points[Cur][3]);
-				CQuantity++;
-			}
-			else{  // iPIndex is 0
-				// vertices on positive side of line
-				Cur = 0;
-				while (Cur < Quantity && Test[Cur] >= REAL(0.0)){
-					CV[CQuantity][0] = Contacts.Points[Cur][0];
-					CV[CQuantity][1] = Contacts.Points[Cur][1];
-					CV[CQuantity][2] = Contacts.Points[Cur][2];
-					CV[CQuantity][3] = Contacts.Points[Cur][3];
-					CQuantity++;
-					Cur++;
-				}
-				
-				// last clip vertex on line
-				Prv = Cur - 1;
-				T = Test[Cur] / (Test[Cur] - Test[Prv]);
-				CV[CQuantity][0] = Contacts.Points[Cur][0] + T * (Contacts.Points[Prv][0] - Contacts.Points[Cur][0]);
-				CV[CQuantity][1] = Contacts.Points[Cur][1] + T * (Contacts.Points[Prv][1] - Contacts.Points[Cur][1]);
-				CV[CQuantity][2] = Contacts.Points[Cur][2] + T * (Contacts.Points[Prv][2] - Contacts.Points[Cur][2]);
-				CV[CQuantity][3] = Contacts.Points[Cur][3] + T * (Contacts.Points[Prv][3] - Contacts.Points[Cur][3]);
-				CQuantity++;
-				
-				// skip vertices on negative side
-				while (Cur < Quantity && Test[Cur] < REAL(0.0)){
-					Cur++;
-				}
-				
-				// first clip vertex on line
-				if (Cur < Quantity){
-					Prv = Cur - 1;
-					T = Test[Cur] / (Test[Cur] - Test[Prv]);
-					CV[CQuantity][0] = Contacts.Points[Cur][0] + T * (Contacts.Points[Prv][0] - Contacts.Points[Cur][0]);
-					CV[CQuantity][1] = Contacts.Points[Cur][1] + T * (Contacts.Points[Prv][1] - Contacts.Points[Cur][1]);
-					CV[CQuantity][2] = Contacts.Points[Cur][2] + T * (Contacts.Points[Prv][2] - Contacts.Points[Cur][2]);
-					CV[CQuantity][3] = Contacts.Points[Cur][3] + T * (Contacts.Points[Prv][3] - Contacts.Points[Cur][3]);
-					CQuantity++;
-					
-					// vertices on positive side of line
-					while (Cur < Quantity && Test[Cur] >= REAL(0.0)){
-						CV[CQuantity][0] = Contacts.Points[Cur][0];
-						CV[CQuantity][1] = Contacts.Points[Cur][1];
-						CV[CQuantity][2] = Contacts.Points[Cur][2];
-						CV[CQuantity][3] = Contacts.Points[Cur][3];
-						CQuantity++;
-						Cur++;
-					}
-				}
-				else{
-					// iCur = 0
-					Prv = Quantity - 1;
-					T = Test[0] / (Test[0] - Test[Prv]);
-					CV[CQuantity][0] = Contacts.Points[0][0] + T * (Contacts.Points[Prv][0] - Contacts.Points[0][0]);
-					CV[CQuantity][1] = Contacts.Points[0][1] + T * (Contacts.Points[Prv][1] - Contacts.Points[0][1]);
-					CV[CQuantity][2] = Contacts.Points[0][2] + T * (Contacts.Points[Prv][2] - Contacts.Points[0][2]);
-					CV[CQuantity][3] = Contacts.Points[0][3] + T * (Contacts.Points[Prv][3] - Contacts.Points[0][3]);
-					CQuantity++;
-				}
-			}
-			Quantity = CQuantity;
-			memcpy(Contacts.Points, CV, CQuantity * sizeof(dVector3));
-        }
-		// else polygon fully on positive side of plane, nothing to do
-		
-		Contacts.Count = Quantity;
-	}
-	else Contacts.Count = 0;	// This should not happen, but for safety
-}
-
-static bool FindTriBoxIntersection(const dVector3 Tri[3], const dVector4 Planes[6], LineContactSet& Contacts){	
-    Contacts.Count = 3;
-	memcpy(Contacts.Points, Tri, 3 * sizeof(dVector3));
-	
-	for (int i = 0; i < 6; i++){
-		ClipConvexPolygonAgainstPlane(Planes[i], Planes[i][3], Contacts);
-	}
-	return Contacts.Count > 0;
-}
-	
-static void ComputeVertices(const dVector3 Center, const dVector3 Extents, const dMatrix3 Matrix, dVector3 Vertices[8]){
-	dVector3 Axis[3];
-	Decompose(Matrix, Axis);
-
+static void ComputeVertices(const dVector3 Center, const dVector3 Extents, const dVector3 Axis[3], dVector3 Vertices[8]){
 	dVector3 TransExtents[3];
 	for (int i = 0; i < 3; i++){
 		TransExtents[i][0] = Axis[i][0] * Extents[i];
@@ -222,43 +61,264 @@ static void ComputeVertices(const dVector3 Center, const dVector3 Extents, const
 #undef COMPUTEVERTEX
 }
 
-static dReal PointLineDist(const dVector3 Point, const dVector3 Origin, const dVector3 Direction, dReal& T){
-	dVector3 Diff;
-	Diff[0] = Point[0] - Origin[0];
-	Diff[1] = Point[1] - Origin[1];
-	Diff[2] = Point[2] - Origin[2];
-	Diff[3] = Point[3] - Origin[3];
-
-	T = dDOT(Diff, Direction);
-
-	if (T <= REAL(0.0)){
-		T = REAL(0.0);
+static bool PointPlaneIntersect(const dVector3 Origin, const dVector4 Plane){
+	dReal k = dDOT(Origin, Plane);
+	dReal depth = Plane[3] - k;
+	if (depth >= REAL(-0.00001)) {
+		return true;
 	}
-	else{
-        dReal MagSq = dDOT(Direction, Direction);
-        if (T >= MagSq){
-            T = REAL(1.0);
-            Diff[0] -= Direction[0];
-			Diff[1] -= Direction[1];
-			Diff[2] -= Direction[2];
-			Diff[3] -= Direction[3];
-        }
-        else{
-            T /= MagSq;
-
-			Diff[0] -= T * Direction[0];
-			Diff[1] -= T * Direction[1];
-			Diff[2] -= T * Direction[2];
-			Diff[3] -= T * Direction[3];
-        }
-    }
-    return dSqrt(dDOT(Diff, Diff));
+	else return false;
 }
 
-extern int dcBoxPrimCount;
-extern int dcPrimPrimCount;
-extern int dcTCSucceed;
-extern int dcTCFail;
+static bool LinePlaneIntersect(const dVector3 Origin, const dVector3 Dir, dReal Length, const dVector4 Plane, dVector3 OutPos){
+	dReal alpha = Plane[3] - dDOT(Plane, Origin);
+
+	// note: if alpha > 0 the starting point is below the plane
+	dReal k = dDOT(Plane, Dir);
+	if (k == 0){
+		return false;		// line parallel to plane
+	}
+
+	alpha /= k;
+	if (alpha < 0 || alpha > Length){
+		return false;
+	}
+	OutPos[0] = Origin[0] + alpha * Dir[0];
+	OutPos[1] = Origin[1] + alpha * Dir[1];
+	OutPos[2] = Origin[2] + alpha * Dir[2];
+	return true;
+}
+
+// Horrible precision in single precision mode. Did i do something wrong?
+// Not in use currently
+static dReal PointTriDist(const dVector3 Point, const dVector3 Origin, const dVector3 Edge0, const dVector3 Edge1, dReal& S, dReal& T){
+	dVector3 Diff;
+	Diff[0] = Origin[0] - Point[0];
+	Diff[1] = Origin[1] - Point[1];
+	Diff[2] = Origin[2] - Point[2];
+	Diff[3] = Origin[3] - Point[3];
+
+	dReal A00 = dDOT(Edge0, Edge0);
+    dReal A01 = dDOT(Edge0, Edge1);
+    dReal A11 = dDOT(Edge1, Edge1);
+    dReal B0 = dDOT(Diff, Edge0);
+    dReal B1 = dDOT(Diff, Edge1);
+    dReal C = dDOT(Diff, Diff);
+    dReal Det = dFabs(A00 * A11 - A01 * A01);
+    S = A01 * B1 - A11 * B0;
+    T = A01 * B0 - A00 * B1;
+    dReal DistSq;
+
+    if (S + T <= Det){
+        if (S < REAL(0.0)){
+            if (T < REAL(0.0)){  // region 4
+                if (B0 < REAL(0.0)){
+                    T = REAL(0.0);
+                    if (-B0 >= A00){
+                        S = 1.0f;
+                        DistSq = A00 + REAL(2.0) * B0 + C;
+                    }
+                    else{
+                        S = -B0 / A00;
+                        DistSq =  B0 * S + C;
+                    }
+                }
+                else{
+                    S = REAL(0.0);
+                    if (B1 >= REAL(0.0)){
+                        T = REAL(0.0);
+                        DistSq = C;
+                    }
+                    else if (-B1 >= A11){
+                        T = REAL(1.0);
+                        DistSq = A11 + REAL(2.0) * B1 + C;
+                    }
+                    else{
+                        T = -B1 / A11;
+                        DistSq = B1 * T + C;
+                    }
+                }
+            }
+            else{  // region 3
+                S = REAL(0.0);
+                if (B1 >= REAL(0.0)){
+                    T = REAL(0.0);
+                    DistSq = C;
+                }
+                else if (-B1 >= A11){
+                    T = REAL(1.0);
+                    DistSq = A11 + REAL(2.0) * B1 + C;
+                }
+                else{
+                    T = -B1 / A11;
+                    DistSq = B1 * T + C;
+                }
+            }
+        }
+        else if (T < REAL(0.0)){  // region 5
+            T = REAL(0.0);
+            if (B0 >= REAL(0.0)){
+                S = REAL(0.0);
+                DistSq = C;
+            }
+            else if (-B0 >= A00){
+                S = 1.0f;
+                DistSq = A00 + REAL(2.0) * B0 + C;
+            }
+            else{
+                S = -B0 / A00;
+                DistSq = B0 * S + C;
+            }
+        }
+        else{  // region 0
+            // minimum at interior point
+            dReal InvDet = REAL(1.0) / Det;
+            S *= InvDet;
+            T *= InvDet;
+            DistSq = S * (A00 * S + A01 * T + REAL(2.0) * B0) + T * (A01 * S + A11 * T + REAL(2.0) * B1) + C;
+        }
+    }
+    else{
+        dReal Tmp0, Tmp1, Numer, Denom;
+
+        if (S < REAL(0.0)){  // region 2
+            Tmp0 = A01 + B0;
+            Tmp1 = A11 + B1;
+            if (Tmp1 > Tmp0){
+                Numer = Tmp1 - Tmp0;
+                Denom = A00 - REAL(2.0) * A01 + A11;
+                if (Numer >= Denom){
+                    S = REAL(1.0);
+                    T = REAL(0.0);
+                    DistSq = A00 + REAL(2.0) * B0 + C;
+                }
+                else{
+                    S = Numer / Denom;
+                    T = REAL(1.0) - S;
+                    DistSq = S * (A00 * S + A01 * T + REAL(2.0) * B0) + T * (A01 * S + A11 * T + REAL(2.0) * B1) + C;
+                }
+            }
+            else{
+                S = REAL(0.0);
+                if (Tmp1 <= REAL(0.0)){
+                    T = REAL(1.0);
+                    DistSq = A11 + REAL(2.0) * B1 + C;
+                }
+                else if (B1 >= REAL(0.0)){
+                    T = REAL(0.0);
+                    DistSq = C;
+                }
+                else{
+                    T = -B1 / A11;
+                    DistSq = B1 * T + C;
+                }
+            }
+        }
+        else if (T < REAL(0.0)){  // region 6
+            Tmp0 = A01 + B1;
+            Tmp1 = A00 + B0;
+            if (Tmp1 > Tmp0){
+                Numer = Tmp1 - Tmp0;
+                Denom = A00 - REAL(2.0) * A01 + A11;
+                if (Numer >= Denom){
+                    T = REAL(1.0);
+                    S = REAL(0.0);
+                    DistSq = A11 + REAL(2.0) * B1 + C;
+                }
+                else{
+                    T = Numer / Denom;
+                    S = REAL(1.0) - T;
+                    DistSq = S * (A00 * S + A01 * T + REAL(2.0) * B0) + T * (A01 * S + A11 * T + REAL(2.0) * B1) + C;
+                }
+            }
+            else{
+                T = REAL(0.0);
+                if (Tmp1 <= REAL(0.0)){
+                    S = REAL(1.0);
+                    DistSq = A00 + REAL(2.0) * B0 + C;
+                }
+                else if (B0 >= REAL(0.0)){
+                    S = REAL(0.0);
+                    DistSq = C;
+                }
+                else{
+                    S = -B0 / A00;
+                    DistSq = B0 * S + C;
+                }
+            }
+        }
+        else{  // region 1
+            Numer = A11 + B1 - A01 - B0;
+            if (Numer <= REAL(0.0)){
+                S = REAL(0.0);
+                T = REAL(1.0);
+                DistSq = A11 + REAL(2.0) * B1 + C;
+            }
+            else{
+                Denom = A00 - REAL(2.0) * A01 + A11;
+                if (Numer >= Denom){
+                    S = REAL(1.0);
+                    T = REAL(0.0);
+                    DistSq = A00 + REAL(2.0) * B0 + C;
+                }
+                else{
+                    S = Numer / Denom;
+                    T = REAL(1.0) - S;
+                    DistSq = S * (A00 * S + A01 * T + REAL(2.0) * B0) + T * (A01 * S + A11 * T + REAL(2.0) * B1) + C;
+                }
+            }
+        }
+    }
+    return dSqrt(dFabs(DistSq));
+}
+
+void GenerateContact(int Flags, dContactGeom* Contacts, int Stride, const dVector3 ContactPos, const dVector4 Plane, int& OutTriCount, int BoxVertex){
+	dReal Depth = -(dDOT(Plane, ContactPos) - Plane[3]);
+
+	if (Depth > 0.0){
+		int ContactIndex = OutTriCount;
+		if (ContactIndex != 0){
+			dVector3 Normal;
+			Normal[0] = -Plane[0];
+			Normal[1] = -Plane[1];
+			Normal[2] = -Plane[2];
+
+			for (int i = 0; i < OutTriCount; i++){
+				dContactGeom* Contact = SAFECONTACT(Flags, Contacts, i, Stride);
+ 				if ((int&)Contact->g1 == BoxVertex){
+					if (dDOT(Contact->normal, Normal) > REAL(0.9)){
+						if (Depth > Contact->depth){
+							ContactIndex = i;
+							OutTriCount--;
+							break;
+						}
+						else return;
+					}
+				}
+			}
+			OutTriCount++;
+		}
+		else OutTriCount++;
+
+		dContactGeom* Contact = SAFECONTACT(Flags, Contacts, ContactIndex, Stride);
+
+		Contact->pos[0] = ContactPos[0];
+		Contact->pos[1] = ContactPos[1];
+		Contact->pos[2] = ContactPos[2];
+		Contact->pos[3] = REAL(0.0);
+		
+		Contact->normal[0] = -Plane[0];
+		Contact->normal[1] = -Plane[1];
+		Contact->normal[2] = -Plane[2];
+		Contact->normal[3] = REAL(0.0);
+
+		Contact->depth = Depth;
+
+		Contact->g1 = (dxGeom*&)BoxVertex;
+	}
+}
+
+//#include "..\..\Include\drawstuff\\drawstuff.h"
 
 int dCollideBTL(dxGeom* g1, dxGeom* BoxGeom, int Flags, dContactGeom* Contacts, int Stride){
 	dxTriMesh* TriMesh = (dxTriMesh*)g1;
@@ -341,35 +401,17 @@ int dCollideBTL(dxGeom* g1, dxGeom* BoxGeom, int Flags, dContactGeom* Contacts, 
 		dVector3 Axis[3];
 		Decompose(BoxRotation, Axis);
 
-		// Compute box planes
-		dVector4 Planes[6];
-		int PlaneCounter = 0;
-		
-		for (dReal Dir = REAL(-1.0); Dir <= REAL(1.0); Dir += REAL(2.0)){
-			for (int Side = 0; Side < 3; Side++){
-				Planes[PlaneCounter][0] = Dir * Axis[Side][0];
-				Planes[PlaneCounter][1] = Dir * Axis[Side][1];
-				Planes[PlaneCounter][2] = Dir * Axis[Side][2];
-				
-				dVector3 Temp;
-				Temp[0] = BoxCenter[0] - Dir * BoxExtents[Side] * Axis[Side][0];
-				Temp[1] = BoxCenter[1] - Dir * BoxExtents[Side] * Axis[Side][1];
-				Temp[2] = BoxCenter[2] - Dir * BoxExtents[Side] * Axis[Side][2];
-				Temp[3] = BoxCenter[3] - Dir * BoxExtents[Side] * Axis[Side][3];
-				
-				Planes[PlaneCounter][3] = Dir * dDOT(Axis[Side], Temp);
-				
-				PlaneCounter++;
-			}
-		}
+		dVector3 BoxVertices[8];
+		ComputeVertices(BoxCenter, BoxExtents, Axis, BoxVertices);
 
-		Point Trans;
-		InvBoxMatrix.GetTrans(Trans);
-
-		Matrix3x3 InvBoxMatrix3 = (Matrix3x3)InvBoxMatrix;
+		//const Box3& MagicBox = (const Box3&)Box;
 
 		int OutTriCount = 0;
 		for (int i = 0; i < TriCount; i++){
+			if (OutTriCount == (Flags & 0xffff)){
+				break;
+			}
+
 			const int& TriIndex = Triangles[i];
 
 			if (!Callback(TriMesh, BoxGeom, TriIndex)) continue;
@@ -377,131 +419,206 @@ int dCollideBTL(dxGeom* g1, dxGeom* BoxGeom, int Flags, dContactGeom* Contacts, 
 			dVector3 dv[3];
 			FetchTriangle(TriMesh, TriIndex, TLPosition, TLRotation, dv);
 
-			// Apply some magic to find collision points
-			LineContactSet InContacts;
-			if (FindTriBoxIntersection(dv, Planes, InContacts)){
-				// Compute triangle plane
-				dVector3 vu;
-				vu[0] = dv[1][0] - dv[0][0];
-				vu[1] = dv[1][1] - dv[0][1];
-				vu[2] = dv[1][2] - dv[0][2];
-				vu[3] = REAL(0.0);
+			dVector3 vu;
+			vu[0] = dv[1][0] - dv[0][0];
+			vu[1] = dv[1][1] - dv[0][1];
+			vu[2] = dv[1][2] - dv[0][2];
+			vu[3] = REAL(0.0);
+			
+			dVector3 vv;
+			vv[0] = dv[2][0] - dv[0][0];
+			vv[1] = dv[2][1] - dv[0][1];
+			vv[2] = dv[2][2] - dv[0][2];
+			vv[3] = REAL(0.0);
+			
+			dVector4 Plane;
+			dCROSS(Plane, =, vu, vv);
+			Plane[3] = dDOT(Plane, dv[0]);
+			
+			// Normalize the plane
+			dReal Area = dSqrt(dDOT(Plane, Plane));
+			Plane[0] /= Area;
+			Plane[1] /= Area;
+			Plane[2] /= Area;
+			Plane[3] /= Area;
+
+			bool PointBehind[8];
+			int BehindPointCount = 0;
+			for (int j = 0; j < 8; j++){
+				dReal Behind = dDOT(Plane, BoxVertices[j]) - Plane[3];
 				
-				dVector3 vv;
-				vv[0] = dv[2][0] - dv[0][0];
-				vv[1] = dv[2][1] - dv[0][1];
-				vv[2] = dv[2][2] - dv[0][2];
-				vv[3] = REAL(0.0);
-
-				dVector4 Plane;
-				dCROSS(Plane, =, vu, vv);
-				Plane[3] = dDOT(Plane, dv[0]);
-
-				// Normalize the plane
-				dReal Area = dSqrt(dDOT(Plane, Plane));	// Use this later for epsilons
-				Plane[0] /= Area;
-				Plane[1] /= Area;
-				Plane[2] /= Area;
-				Plane[3] /= Area;
-
-				// Compute box vertices
-				dVector3 Vertices[8];
-				ComputeVertices(BoxCenter, BoxExtents, BoxRotation, Vertices);
-
-				// Find the smallest penetration depth of the box and a plane going through the triangle.
-				// This needs to be optimized.
-				dReal Depth = 0;
-				for (int j = 0; j < 8; j++){
-					dReal Behind = dDOT(Plane, Vertices[j]) - Plane[3];
-
-					if (Behind < REAL(0.00001)){	// Should be relative. How?
-						Depth = dcMAX(Depth, -Behind);
-					}
+				if (Behind < REAL(0.0)){//00001)){
+					PointBehind[j] = true;
+					BehindPointCount++;
 				}
-				Depth = dcMAX(Depth, REAL(0.0));	// For small inaccuracies
+				else PointBehind[j] = false;
+			}
 
-				// Shouldnt we remove some irrelevant points? We do not care for >3 contacts.
-				for (int j = 0; j < InContacts.Count; j++){
-					if (OutTriCount >= Flags) break;
-					dContactGeom* Contact = SAFECONTACT(Flags, Contacts, OutTriCount, Stride);
+			if (BehindPointCount != 0){
+				dVector4 EdgePlanes[3];
+				for (int j = 0; j < 3; j++){
+					dVector3 ev0;
+					ev0[0] =  dv[j][0];
+					ev0[1] =  dv[j][1];
+					ev0[2] =  dv[j][2];
+					ev0[3] =  dv[j][3];
 
-					Contact->pos[0] = InContacts.Points[j][0];
-					Contact->pos[1] = InContacts.Points[j][1];
-					Contact->pos[2] = InContacts.Points[j][2];
-					Contact->pos[3] = InContacts.Points[j][3];
+					dVector3 ev1;
+					ev1[0] =  dv[(j + 1) % 3][0];
+					ev1[1] =  dv[(j + 1) % 3][1];
+					ev1[2] =  dv[(j + 1) % 3][2];
+					ev1[3] =  dv[(j + 1) % 3][3];
 
-					// Always use triangle's normal. For edge contacts this is not preferable.
-					// How do we determine a correct edge-contact normal?
-					Contact->normal[0] = -Plane[0];
-					Contact->normal[1] = -Plane[1];
-					Contact->normal[2] = -Plane[2];
-					Contact->normal[3] = REAL(0.0);
+					dVector3 ev2;
+					ev2[0] =  dv[j][0] + Plane[0];
+					ev2[1] =  dv[j][1] + Plane[1];
+					ev2[2] =  dv[j][2] + Plane[2];
+					ev2[3] =  dv[j][3];
 
-					// Test all 3 triangle edges to see if we can find a smaller penetration.
-					// This is good for sharp edges. Doesnt this interfere with sliding objects? Hopefully not!
-					dReal MinDepth = Depth;
-					for (int k = 0; k < 3; k++){
-						const dVector3& Origin = dv[k];
-						dVector3 Direction;
-						Direction[0] = dv[(k + 1) % 3][0] - Origin[0];
-						Direction[1] = dv[(k + 1) % 3][1] - Origin[1];
-						Direction[2] = dv[(k + 1) % 3][2] - Origin[2];
-						Direction[3] = dv[(k + 1) % 3][3] - Origin[3];
-						
-						dReal T;	// Maybe use this to adjust contact position? Sounds logical.
-						dReal Dist = PointLineDist(Contact->pos, Origin, Direction, T);
-
-						if (Dist <= MinDepth){
-							MinDepth = Dist;
-
-							/*if (MinDepth > REAL(0.0001)){	// Is this any help?
-								Contact->normal[0] = Contact->pos[0] - (Origin[0] + Direction[0] * T);
-								Contact->normal[1] = Contact->pos[1] - (Origin[1] + Direction[1] * T);
-								Contact->normal[2] = Contact->pos[2] - (Origin[2] + Direction[2] * T);
-								Contact->normal[3] = REAL(0.0);
-								dNormalize3(Contact->normal);
-							}*/
-						}
-					}
+					/*dVector3 Pos;
+					Pos[0] = 0;
+					Pos[1] = 0;
+					Pos[2] = 0;
+					dMatrix3 Rotation;
+					dRSetIdentity(Rotation);
 					
-					Contact->depth = MinDepth;
-					Contact->g1 = (dxGeom*)1;	// WARNING: Large hack. Using g1 as a counter.
+					dsDrawTriangle(Pos, Rotation, ev0, ev1, ev2, 1);*/
 
-					int Index;
-					for (Index = 0; Index < OutTriCount; Index++){
-						dContactGeom* TempContact = SAFECONTACT(Flags, Contacts, Index, Stride);
-						
-						dVector3 Diff;
-						Diff[0] = TempContact->pos[0] - Contact->pos[0];
-						Diff[1] = TempContact->pos[1] - Contact->pos[1];
-						Diff[2] = TempContact->pos[2] - Contact->pos[2];
-						Diff[3] = TempContact->pos[3] - Contact->pos[3];
-						
-						dReal DistSq = dDOT(Diff, Diff);
-						
-						if (DistSq < 0.001){//BoxRadius * REAL(0.1)){	// Tweak?
-							break;
+					dVector3 u;
+					u[0] = ev1[0] - ev0[0];
+					u[1] = ev1[1] - ev0[1];
+					u[2] = ev1[2] - ev0[2];
+					u[3] = REAL(0.0);
+					
+					dVector3 v;
+					v[0] = ev2[0] - ev0[0];
+					v[1] = ev2[1] - ev0[1];
+					v[2] = ev2[2] - ev0[2];
+					v[3] = REAL(0.0);
+
+					dCROSS(EdgePlanes[j], =, u, v);
+					EdgePlanes[j][3] = dDOT(EdgePlanes[j], ev0);
+
+					dReal Area = dSqrt(dDOT(EdgePlanes[j], EdgePlanes[j]));
+					EdgePlanes[j][0] /= Area;
+					EdgePlanes[j][1] /= Area;
+					EdgePlanes[j][2] /= Area;
+					EdgePlanes[j][3] /= Area;
+
+					/*dVector3 Temp;
+					Temp[0] = ev0[0] + EdgePlanes[j][0];
+					Temp[1] = ev0[1] + EdgePlanes[j][1];
+					Temp[2] = ev0[2] + EdgePlanes[j][2];
+					Temp[3] = ev0[3] + EdgePlanes[j][3];
+
+					dsDrawLine(ev0, Temp);
+
+					Temp[0] = ev1[0] + EdgePlanes[j][0];
+					Temp[1] = ev1[1] + EdgePlanes[j][1];
+					Temp[2] = ev1[2] + EdgePlanes[j][2];
+					Temp[3] = ev1[3] + EdgePlanes[j][3];
+
+					dsDrawLine(ev1, Temp);*/
+				}
+
+				int BoxEdges[8][3];
+				BoxEdges[0][0] = 1;
+				BoxEdges[0][1] = 3;
+				BoxEdges[0][2] = 4;
+				
+				BoxEdges[1][0] = 2;
+				BoxEdges[1][1] = 5;
+				BoxEdges[1][2] = 0;
+				
+				BoxEdges[2][0] = 3;
+				BoxEdges[2][1] = 1;
+				BoxEdges[2][2] = 6;
+				
+				BoxEdges[3][0] = 0;
+				BoxEdges[3][1] = 7;
+				BoxEdges[3][2] = 2;
+				
+				BoxEdges[4][0] = 7;
+				BoxEdges[4][1] = 0;
+				BoxEdges[4][2] = 5;
+				
+				BoxEdges[5][0] = 6;
+				BoxEdges[5][1] = 4;
+				BoxEdges[5][2] = 1;
+				
+				BoxEdges[6][0] = 2;
+				BoxEdges[6][1] = 5;
+				BoxEdges[6][2] = 7;
+				
+				BoxEdges[7][0] = 6;
+				BoxEdges[7][1] = 4;
+				BoxEdges[7][2] = 3;
+
+				for (int j = 0; j < 8; j++){
+					if (!PointBehind[j]){
+						continue;
+					}
+
+					bool NeedClipping = false;
+					for (int k = 0; k < 3; k++){
+						if (!PointPlaneIntersect(BoxVertices[j], EdgePlanes[k])){
+							dVector3 ContactPos;
+							ContactPos[0] = BoxVertices[j][0];
+							ContactPos[1] = BoxVertices[j][1];
+							ContactPos[2] = BoxVertices[j][2];
+							ContactPos[3] = REAL(0.0);
+
+							/*dMatrix3 Rotation;
+							dRSetIdentity(Rotation);
+							const dReal ss[3] = {0.02,0.02,0.02};
+							dsDrawBox(ContactPos, Rotation, ss);*/
+
+							for (int l = 0; l < 3; l++){
+								dVector3 Dir;
+								Dir[0] = BoxVertices[BoxEdges[j][l]][0] - ContactPos[0];
+								Dir[1] = BoxVertices[BoxEdges[j][l]][1] - ContactPos[1];
+								Dir[2] = BoxVertices[BoxEdges[j][l]][2] - ContactPos[2];
+								
+								dReal Length = dSqrt(dDOT(Dir, Dir));
+								dNormalize3(Dir);
+
+								for (int m = 0; m < 3; m++){
+									dVector3 OutPos;
+									if (LinePlaneIntersect(ContactPos, Dir, Length, EdgePlanes[m], OutPos)){
+										//dsDrawLine(ContactPos, BoxVertices[BoxEdges[j][l]]);
+										int Index;
+										for (Index = 0; Index < 3; Index++){
+											if (!PointPlaneIntersect(OutPos, EdgePlanes[Index])){
+												break;
+											}
+										}
+										if (Index == 3){
+											if (PointPlaneIntersect(OutPos, Plane)){
+												/*dMatrix3 Rotation;
+												dRSetIdentity(Rotation);
+												dsDrawSphere(OutPos, Rotation, REAL(0.01));*/
+
+												GenerateContact(Flags, Contacts, Stride, OutPos, Plane, OutTriCount, j);
+											}
+										}
+									}
+								}
+							}
+							NeedClipping = true;
 						}
 					}
-					if (Index != OutTriCount){
-						dContactGeom* TempContact = SAFECONTACT(Flags, Contacts, Index, Stride);
-						TempContact->normal[0] += Contact->normal[0];
-						TempContact->normal[1] += Contact->normal[1];
-						TempContact->normal[2] += Contact->normal[2];
-						TempContact->normal[3] += Contact->normal[3];
 
-						TempContact->depth += Contact->depth;
-						Contact->g1 = (dxGeom*)(((char*)Contact->g1) + 1);
+					if (!NeedClipping){
+						GenerateContact(Flags, Contacts, Stride, BoxVertices[j], Plane, OutTriCount, j);
 					}
-					else OutTriCount++;
 				}
 			}
 		}
-		for (int i = 0; i < OutTriCount; i++){	// Now normalize normals
-			dContactGeom* Contact = SAFECONTACT(Flags, Contacts, i, Stride);
-			dNormalize3(Contact->normal);
 
-			Contact->depth /= (int&)Contact->g1;	// Hacking again.
+		for (int i = 0; i < OutTriCount; i++){
+			dContactGeom* Contact = SAFECONTACT(Flags, Contacts, i, Stride);
+			//Contact->depth = dDOT(Contact->normal, Contact->normal);
+			//dNormalize3(Contact->normal);
 
 			Contact->g1 = TriMesh;
 			Contact->g2 = BoxGeom;

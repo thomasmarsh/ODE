@@ -74,7 +74,10 @@ int dCollideRTL(dxGeom* g1, dxGeom* RayGeom, int Flags, dContactGeom* Contacts, 
 
 		int OutTriCount = 0;
 		for (int i = 0; i < TriCount; i++){
-			if (OutTriCount >= Flags) break;
+			if (OutTriCount == (Flags & 0xffff)){
+				break;
+			}
+
 			if (TriMesh->RayCallback == null || TriMesh->RayCallback(TriMesh, RayGeom, Faces[i].mFaceID, Faces[i].mU, Faces[i].mV)){
 				const int& TriIndex = Faces[i].mFaceID;
 
@@ -85,17 +88,6 @@ int dCollideRTL(dxGeom* g1, dxGeom* RayGeom, int Flags, dContactGeom* Contacts, 
 				dVector3 dv[3];
 				FetchTriangle(TriMesh, TriIndex, TLPosition, TLRotation, dv);
 
-				/*
-				dVector3 Temp;
-				GetPointFromBarycentric(dv, Faces[i].mU, Faces[i].mV, Temp);
-
-				dMULTIPLY0_331(Contact->pos, TLRotation, Temp);
-				Contact->pos[0] += TLPosition[0];
-				Contact->pos[1] += TLPosition[1];
-				Contact->pos[2] += TLPosition[2];
-				Contact->pos[3] = REAL(0.0);
-				*/
-				
 				float T = Faces[i].mDistance;
 				Contact->pos[0] = Origin[0] + (Direction[0] * T);
 				Contact->pos[1] = Origin[1] + (Direction[1] * T);
@@ -116,13 +108,9 @@ int dCollideRTL(dxGeom* g1, dxGeom* RayGeom, int Flags, dContactGeom* Contacts, 
 
 				dCROSS(Contact->normal, =, vv, vu);	// Reversed
 
-				/*
-				float T = -(dDOT(Contact->normal, Origin) - dDOT(Contact->normal, dv[0])) / dDOT(Contact->normal, Direction);
-				*/
-
 				dNormalize3(Contact->normal);
 
-				Contact->depth = T;		// was Length - T, but that seemed wrong
+				Contact->depth = T;
 				Contact->g1 = TriMesh;
 				Contact->g2 = RayGeom;
 				

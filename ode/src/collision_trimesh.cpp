@@ -32,18 +32,21 @@
 
 // Trimesh data
 dxTriMeshData::dxTriMeshData(){
-	//
+#ifndef dTRIMESH_ENABLED
+  dUASSERT(g, "dTRIMESH_ENABLED is not defined. Trimesh geoms will not work");
+#endif
 }
 
 dxTriMeshData::~dxTriMeshData(){
 	//
 }
 
-void dxTriMeshData::Build(const void* Vertices, int VertexStide, int VertexCount, const void* Indices, int IndexCount, int TriStride){
+void dxTriMeshData::Build(const void* Vertices, int VertexStide, int VertexCount, const void* Indices, int IndexCount, int TriStride, bool Single){
 	Mesh.SetNbTriangles(IndexCount / 3);
 	Mesh.SetNbVertices(VertexCount);
 	Mesh.SetPointers((IndexedTriangle*)Indices, (Point*)Vertices);
 	Mesh.SetStrides(TriStride, VertexStide);
+	Mesh.Single = Single;
 	
 	// Build tree
 	BuildSettings Settings;
@@ -70,14 +73,28 @@ void dGeomTriMeshDataDestroy(dTriMeshDataID g){
 	delete g;
 }
 
-void dGeomTriMeshDataBuild(dTriMeshDataID g, const void* Vertices, int VertexStride, int VertexCount, const void* Indices, int IndexCount, int TriStride){
+void dGeomTriMeshDataBuildSingle(dTriMeshDataID g, const void* Vertices, int VertexStride, int VertexCount, 
+								 const void* Indices, int IndexCount, int TriStride){
 	dUASSERT(g, "argument not trimesh data");
 
-	g->Build(Vertices, VertexStride, VertexCount, Indices, IndexCount, TriStride);
+	g->Build(Vertices, VertexStride, VertexCount, Indices, IndexCount, TriStride, true);
 }
 
-void dGeomTriMeshDataBuildSimple(dTriMeshDataID g, const dVector3* Vertices, int VertexCount, const int* Indices, int IndexCount){
-	dGeomTriMeshDataBuild(g, Vertices, sizeof(dVector3), VertexCount, Indices, IndexCount, 3 * sizeof(int));
+void dGeomTriMeshDataBuildDouble(dTriMeshDataID g, const void* Vertices, int VertexStride, int VertexCount, 
+								 const void* Indices, int IndexCount, int TriStride){
+	dUASSERT(g, "argument not trimesh data");
+
+	g->Build(Vertices, VertexStride, VertexCount, Indices, IndexCount, TriStride, false);
+}
+
+
+void dGeomTriMeshDataBuildSimple(dTriMeshDataID g, const dReal* Vertices, int VertexCount, 
+								 const int* Indices, int IndexCount){
+#ifdef dSINGLE
+	dGeomTriMeshDataBuildSingle(g, Vertices, 4 * sizeof(dReal), VertexCount, Indices, IndexCount, 3 * sizeof(unsigned int));
+#else
+	dGeomTriMeshDataBuildDouble(g, Vertices, 4 * sizeof(dReal), VertexCount, Indices, IndexCount, 3 * sizeof(unsigned int));
+#endif
 }
 
 // Trimesh

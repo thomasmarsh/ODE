@@ -52,15 +52,25 @@ dTriMeshDataID dGeomTriMeshDataCreate();
 void dGeomTriMeshDataDestroy(dTriMeshDataID g);
 
 /*
- * Build function.
+ * Build TriMesh data with single pricision used in vertex data .
  */
-void dGeomTriMeshDataBuild(dTriMeshDataID g, const void* Vertices, int VertexStride, int VertexCount, const void* Indices, int IndexCount, int TriStride);
+void dGeomTriMeshDataBuildSingle(dTriMeshDataID g, const void* Vertices,
+								 int VertexStride, int VertexCount, 
+								 const void* Indices, int IndexCount, 
+								 int TriStride);
+/*
+* Build TriMesh data with double pricision used in vertex data .
+*/
+void dGeomTriMeshDataBuildDouble(dTriMeshDataID g, const void* Vertices,
+								 int VertexStride, int VertexCount, 
+								 const void* Indices, 
+								 int IndexCount, int TriStride);
 
 /*
- * Simple build. Works only for single precision!
+ * Simple build. Single/double precision based on dSINGLE/dDOUBLE!
  */
-void dGeomTriMeshDataBuildSimple(dTriMeshDataID g, const dVector3* Vertices, int VertexCount, const int* Indices, int IndexCount);
-
+void dGeomTriMeshDataBuildSimple(dTriMeshDataID g, const dReal* Vertices, 
+								 int VertexCount, const int* Indices,int IndexCount);
 /*
  * Per triangle callback. Allows the user to say if he wants a collision with
  * a particular triangle.

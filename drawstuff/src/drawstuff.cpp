@@ -556,6 +556,26 @@ static void drawTriangle (const float *v0, const float *v1, const float *v2, int
   glEnd();
 }
 
+static void drawTriangleD (const double *v0, const double *v1, const double *v2, int solid)
+{
+  float u[3],v[3],normal[3];
+  u[0] = v1[0] - v0[0];
+  u[1] = v1[1] - v0[1];
+  u[2] = v1[2] - v0[2];
+  v[0] = v2[0] - v0[0];
+  v[1] = v2[1] - v0[1];
+  v[2] = v2[2] - v0[2];
+  dCROSS (normal,=,u,v);
+  normalizeVector3 (normal);
+
+  glBegin(solid ? GL_TRIANGLES : GL_LINE_STRIP);
+  glNormal3fv (normal);
+  glVertex3dv (v0);
+  glVertex3dv (v1);
+  glVertex3dv (v2);
+  glEnd();
+}
+
 
 // draw a capped cylinder of length l and radius r, aligned along the x axis
 
@@ -1395,15 +1415,20 @@ void dsDrawSphereD (const double pos[3], const double R[12], float radius)
 }
 
 
-extern "C" void dsDrawTriangleD (const double pos[3], const double R[12],
-				 const float *v0, const float *v1,
-				 const float *v2, int solid)
+void dsDrawTriangleD (const double pos[3], const double R[12],
+				 const double *v0, const double *v1,
+				 const double *v2, int solid)
 {
   int i;
   float pos2[3],R2[12];
   for (i=0; i<3; i++) pos2[i]=(float)pos[i];
   for (i=0; i<12; i++) R2[i]=(float)R[i];
-  dsDrawTriangle (pos2,R2,v0,v1,v2, solid);
+
+  setupDrawingMode();
+  glShadeModel (GL_FLAT);
+  setTransform (pos2,R2);
+  drawTriangleD (v0, v1, v2, solid);
+  glPopMatrix();
 }
 
 

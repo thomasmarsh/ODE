@@ -73,6 +73,7 @@ static dVector3 Size;
 static dVector3 Vertices[VertexCount];
 static int Indices[IndexCount];
 
+static dGeomID TriMesh;
 static dGeomID Ray;
 
 
@@ -402,11 +403,21 @@ static void simLoop (int pause)
     }
   }
 
-  {
+  /*{
     for (int i = 1; i < IndexCount; i++) {
       dsDrawLine(Vertices[Indices[i - 1]], Vertices[Indices[i]]);
     }
-  }
+  }*/
+
+  {const dReal* Pos = dGeomGetPosition(TriMesh);
+  const dReal* Rot = dGeomGetRotation(TriMesh);
+
+  {for (int i = 0; i < IndexCount / 3; i++){
+    const dVector3& v0 = Vertices[Indices[i * 3 + 0]];
+	const dVector3& v1 = Vertices[Indices[i * 3 + 1]];
+	const dVector3& v2 = Vertices[Indices[i * 3 + 2]];
+	dsDrawTriangle(Pos, Rot, (dReal*)&v0, (dReal*)&v1, (dReal*)&v2, 0);
+  }}}
 
   if (Ray){
 	  dVector3 Origin, Direction;
@@ -447,9 +458,9 @@ int main (int argc, char **argv)
   //dCreatePlane (space,0,0,1,0);
   memset (obj,0,sizeof(obj));
   
-  Size[0] = 50.0f;
-  Size[1] = 50.0f;
-  Size[2] = 5.5f;
+  Size[0] = 5.0f;
+  Size[1] = 5.0f;
+  Size[2] = 2.5f;
   
   Vertices[0][0] = -Size[0];
   Vertices[0][1] = -Size[1];
@@ -488,9 +499,12 @@ int main (int argc, char **argv)
   Indices[11] = 4;
 
   dTriMeshDataID Data = dGeomTriMeshDataCreate();
-  dGeomTriMeshDataBuildSimple(Data, Vertices, VertexCount, Indices, IndexCount);
+
+  dGeomTriMeshDataBuildSimple(Data, (dReal*)Vertices, VertexCount, Indices, IndexCount);
   
-  dGeomID TriMesh = dCreateTriMesh(space, Data, 0, 0, 0);
+  TriMesh = dCreateTriMesh(space, Data, 0, 0, 0);
+
+  //dGeomSetPosition(TriMesh, 0, 0, 1.0);
   
   Ray = dCreateRay(space, 0.9);
   dVector3 Origin, Direction;
