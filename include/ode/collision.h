@@ -45,6 +45,7 @@ const dReal * dGeomGetPosition (dGeomID);
 const dReal * dGeomGetRotation (dGeomID);
 void dGeomGetAABB (dGeomID, dReal aabb[6]);
 int dGeomIsSpace (dGeomID);
+dSpaceID dGeomGetSpace (dGeomID);
 int dGeomGetClass (dGeomID);
 void dGeomSetCategoryBits (dGeomID, unsigned long bits);
 void dGeomSetCollideBits (dGeomID, unsigned long bits);

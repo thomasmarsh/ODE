@@ -9,6 +9,10 @@ the rules for this file:
 
 ------------------------------------------------------------------------------
 
+05/07/03 russ
+
+	* added dGeomGetSpace().
+
 02/05/03 russ
 
 	* added dMassSetCylinder().
