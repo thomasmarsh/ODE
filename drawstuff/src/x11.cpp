@@ -208,6 +208,13 @@ static void handleEvent (XEvent &event, dsFunctions *fn)
       case 'o': case 'O':
 	if (pause) singlestep = 1;
 	break;
+      case 'v': case 'V': {
+	float xyz[3],hpr[3];
+	dsGetViewpoint (xyz,hpr);
+	printf ("Viewpoint = (%.4f,%.4f,%.4f,%.4f,%.4f,%.4f)\n",
+		xyz[0],xyz[1],xyz[2],hpr[0],hpr[1],hpr[2]);
+	break;
+      }
       }
     }
     last_key_pressed = key;		// a kludgy place to put this...
@@ -251,6 +258,7 @@ void dsPlatformSimLoop (int window_width, int window_height, dsFunctions *fn)
 	   "   Ctrl-O : single step when paused.\n"
 	   "   Ctrl-T : toggle textures (or say `-notex' on command line).\n"
 	   "   Ctrl-S : toggle shadows (or say `-noshadow' on command line).\n"
+	   "   Ctrl-V : print current viewpoint coordinates (x,y,z,h,p,r).\n"
 	   "   Ctrl-X : exit.\n"
 	   "\n",DS_VERSION >> 8,DS_VERSION & 0xff);
 
