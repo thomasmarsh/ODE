@@ -1,4 +1,4 @@
-The Open Dynamics Engine (ODE), Copyright (C) 2001,2002 Russell L. Smith.
+The Open Dynamics Engine (ODE), Copyright (C) 2001-2003 Russell L. Smith.
 -------------------------------------------------------------------------
 
 ODE is a free, industrial quality library for simulating articulated
@@ -27,4 +27,4 @@ LICENSE.TXT and LICENSE-BSD.TXT for more details.
   * The ODE web pages are at http://q12.org/ode/
 
   * The ODE documentation is in the file ode/doc/ode.html, or you
-    can view it on the web at http://q12.org/ode/ode-docs.html
+    can view it on the web at http://q12.org/ode/
