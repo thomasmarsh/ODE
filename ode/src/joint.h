@@ -159,5 +159,27 @@ struct dxJointContact : public dxJoint {
 extern struct dxJoint::Vtable __dcontact_vtable;
 
 
+// rotational motor
+
+struct dxJointRMotor : public dxJoint {
+  dVector3 axis1;		// axis w.r.t first body
+  dVector3 axis2;		// axis w.r.t second body
+  dReal vel,tmax;		// motor desired velocity, maximum torque
+};
+extern struct dxJoint::Vtable __drmotor_vtable;
+
+
+// hinge 2
+
+struct dxJointHinge2 : public dxJoint {
+  dVector3 anchor1;		// anchor w.r.t first body
+  dVector3 anchor2;		// anchor w.r.t second body
+  dVector3 axis1;		// axis 1 w.r.t first body
+  dVector3 axis2;		// axis 2 w.r.t second body
+  dReal c0,s0;			// cos,sin of desired angle between axis 1,2
+};
+extern struct dxJoint::Vtable __dhinge2_vtable;
+
+
 
 #endif
