@@ -104,7 +104,7 @@
 		#endif
 
 	// Down the hatch
-#ifdef WIN32
+#ifdef MSVC
 	#pragma inline_depth( 255 )
 #endif
 
