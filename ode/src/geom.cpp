@@ -511,6 +511,9 @@ int dCollide (dxGeom *o1, dxGeom *o2, int flags, dContactGeom *contact,
       contact[i].normal[0] = -contact[i].normal[0];
       contact[i].normal[1] = -contact[i].normal[1];
       contact[i].normal[2] = -contact[i].normal[2];
+      dxGeom *tmp = contact[i].g1;
+      contact[i].g1 = contact[i].g2;
+      contact[i].g2 = tmp;
     }
   }
 
