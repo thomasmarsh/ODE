@@ -40,8 +40,72 @@
 //#define COMPARE_METHODS
 
 #ifdef COMPARE_METHODS
-#include "testing.h"
-dMatrixComparison comparator;
+
+static int slow_m=0;
+static dReal *slow_A=0, *slow_c=0, *slow_rhs=0, *slow_lambda=0, *slow_vnew=0;
+static dReal *fast_A=0, *fast_c=0, *fast_rhs=0, *fast_lambda=0, *fast_vnew=0;
+
+
+static dReal * copyMatrix (dReal *A, int n, int m)
+{
+  if (A && n > 0 && m > 0) {
+    int skip = dPAD(m);
+    dReal *A2 = (dReal*) dAlloc (n*skip*sizeof(dReal));
+    memcpy (A2,A,n*skip*sizeof(dReal));
+    return A2;
+  }
+  else return 0;
+}
+
+
+static void deleteMatrix (dReal * & A, int n, int m)
+{
+  if (A) {
+    int skip = dPAD(m);
+    dFree (A,n*skip*sizeof(dReal));
+  }
+  A = 0;
+}
+
+
+static void compareMatrix (char *name, dReal *A, dReal *B, int n, int m)
+{
+  if (A) {
+    dReal maxdiff=0;
+    int skip = dPAD(m);
+    for (int i=0; i < n*skip; i++) {
+      dReal diff = dFabs (A[i] - B[i]);
+      if (diff > maxdiff) maxdiff = diff;
+    }
+    printf ("comparing %s : max difference = %.4e\n",name,maxdiff);
+  }
+}
+
+
+// compare the lower triangle of square matrices only
+
+static void compareMatrixLT (char *name, dReal *A, dReal *B, int n)
+{
+  if (A) {
+    dReal maxdiff=0;
+    int skip = dPAD(n);
+    for (int i=0; i<n; i++) {
+      for (int j=0; j <= i; j++) {
+	dReal diff = dFabs (A[i*skip+j] - B[i*skip+j]);
+	if (diff > maxdiff) maxdiff = diff;
+      }
+    }
+    printf ("comparing %s : max difference = %.4e\n",name,maxdiff);
+    if (maxdiff > 1e-8) {
+      printf ("A1=\n");
+      dPrintMatrix (A,n,n);
+      printf ("\nA2=\n");
+      dPrintMatrix (B,n,n);
+      exit(1);
+    }
+  }
+}
+
 #endif
 
 //****************************************************************************
@@ -280,14 +344,9 @@ void dInternalStepIsland_x1 (dxWorld *world, dxBody **body, int nb,
 
   // if there are constraints, compute cforce
   if (m > 0) {
-    // create a constraint equation right hand side vector `c', and LCP low
-    // and high bound vectors.
+    // create a constraint equation right hand side vector `c'
     dReal *c = (dReal*) alloca (m*sizeof(dReal));
-    dReal *lo = (dReal*) alloca (m*sizeof(dReal));
-    dReal *hi = (dReal*) alloca (m*sizeof(dReal));
     dSetZero (c,m);
-    dSetZero (lo,m);
-    dSetZero (hi,m);
 
     // create (m,6*nb) jacobian mass matrix `J', and fill it with constraint
     // data. also fill the c vector.
@@ -319,8 +378,6 @@ void dInternalStepIsland_x1 (dxWorld *world, dxBody **body, int nb,
       }
       Jinfo.cu = c + ofs1[i];
       Jinfo.cl = c + ofs2[i];
-      Jinfo.lo = lo + ofs2[i];
-      Jinfo.hi = hi + ofs2[i];
       joint[i]->vtable->getInfo2 (joint[i],&Jinfo);
     }
 
@@ -340,7 +397,8 @@ void dInternalStepIsland_x1 (dxWorld *world, dxBody **body, int nb,
     for (i=0; i<m; i++) A[i*mskip+i] += epsilon;
 
 #   ifdef COMPARE_METHODS
-    comparator.nextMatrix (A,m,m,1,"A");
+    slow_m = m;
+    slow_A = copyMatrix (A,m,m);
 #   endif
 
     // compute `rhs', the right hand side of the equation J*a=c
@@ -357,8 +415,8 @@ void dInternalStepIsland_x1 (dxWorld *world, dxBody **body, int nb,
     for (i=0; i<m; i++) rhs[i] = c[i]/stepsize - rhs[i];
 
 #   ifdef COMPARE_METHODS
-    comparator.nextMatrix (c,m,1,0,"c");
-    comparator.nextMatrix (rhs,m,1,0,"rhs");
+    slow_c = copyMatrix (c,m,1);
+    slow_rhs = copyMatrix (rhs,m,1);
 #   endif
 
     // solve the LCP problem and get lambda.
@@ -368,7 +426,7 @@ void dInternalStepIsland_x1 (dxWorld *world, dxBody **body, int nb,
 #   endif
     dReal *lambda = (dReal*) alloca (m * sizeof(dReal));
     dReal *residual = (dReal*) alloca (m * sizeof(dReal));
-    dSolveLCP (m,A,lambda,rhs,residual,nub,lo,hi);
+    dSolveLCP (m,A,lambda,rhs,residual,nub,0,0,0);
 
 //  OLD WAY - direct factor and solve
 //
@@ -389,7 +447,7 @@ void dInternalStepIsland_x1 (dxWorld *world, dxBody **body, int nb,
 //    dSolveCholesky (L,lambda,m);
 
 #   ifdef COMPARE_METHODS
-    comparator.nextMatrix (lambda,m,1,0,"lambda");
+    slow_lambda = copyMatrix (lambda,m,1);
 #   endif
 
     // compute the velocity update `vnew'
@@ -418,7 +476,7 @@ void dInternalStepIsland_x1 (dxWorld *world, dxBody **body, int nb,
   }
 
 # ifdef COMPARE_METHODS
-  comparator.nextMatrix (vnew,n6,1,0,"vnew");
+  slow_vnew = copyMatrix (vnew,n6,1);
 # endif
 
   // apply the velocity update to the bodies
@@ -554,14 +612,9 @@ void dInternalStepIsland_x2 (dxWorld *world, dxBody **body, int nb,
 
   // if there are constraints, compute cforce
   if (m > 0) {
-    // create a constraint equation right hand side vector `c', and LCP low
-    // and high bound vectors.
+    // create a constraint equation right hand side vector `c'.
     dReal *c = (dReal*) alloca (m*sizeof(dReal));
-    dReal *lo = (dReal*) alloca (m*sizeof(dReal));
-    dReal *hi = (dReal*) alloca (m*sizeof(dReal));
     dSetZero (c,m);
-    dSetZero (lo,m);
-    dSetZero (hi,m);
 
     // get jacobian data from constraints. a (2*m)x8 matrix will be created
     // to store the two jacobian blocks from each constraint. it has this
@@ -600,8 +653,6 @@ void dInternalStepIsland_x2 (dxWorld *world, dxBody **body, int nb,
       Jinfo.J2al = Jinfo.J2au + 8*info[i].nub;
       Jinfo.cu = c + ofs[i];
       Jinfo.cl = c + ofs[i] + info[i].nub;
-      Jinfo.lo = lo + ofs[i] + info[i].nub;
-      Jinfo.hi = hi + ofs[i] + info[i].nub;
       joint[i]->vtable->getInfo2 (joint[i],&Jinfo);
     }
 
@@ -704,7 +755,7 @@ void dInternalStepIsland_x2 (dxWorld *world, dxBody **body, int nb,
     for (i=0; i<m; i++) A[i*mskip+i] += epsilon;
 
 #   ifdef COMPARE_METHODS
-    comparator.nextMatrix (A,m,m,1,"A");
+    fast_A = copyMatrix (A,m,m);
 #   endif
 
     // compute the right hand side `rhs'
@@ -738,8 +789,8 @@ void dInternalStepIsland_x2 (dxWorld *world, dxBody **body, int nb,
     for (i=0; i<m; i++) rhs[i] = c[i]*stepsize1 - rhs[i];
 
 #   ifdef COMPARE_METHODS
-    comparator.nextMatrix (c,m,1,0,"c");
-    comparator.nextMatrix (rhs,m,1,0,"rhs");
+    fast_c = copyMatrix (c,m,1);
+    fast_rhs = copyMatrix (rhs,m,1);
 #   endif
 
     // solve the LCP problem and get lambda.
@@ -749,7 +800,7 @@ void dInternalStepIsland_x2 (dxWorld *world, dxBody **body, int nb,
 #   endif
     dReal *lambda = (dReal*) alloca (m * sizeof(dReal));
     dReal *residual = (dReal*) alloca (m * sizeof(dReal));
-    dSolveLCP (m,A,lambda,rhs,residual,nub,lo,hi);
+    dSolveLCP (m,A,lambda,rhs,residual,nub,0,0,0);
 
 //  OLD WAY - direct factor and solve
 //
@@ -774,7 +825,7 @@ void dInternalStepIsland_x2 (dxWorld *world, dxBody **body, int nb,
 //    dSolveCholesky (L,lambda,m);
 
 #   ifdef COMPARE_METHODS
-    comparator.nextMatrix (lambda,m,1,0,"lambda");
+    fast_lambda = copyMatrix (lambda,m,1);
 #   endif
 
     // compute the constraint force `cforce'
@@ -831,7 +882,7 @@ void dInternalStepIsland_x2 (dxWorld *world, dxBody **body, int nb,
     for (j=0; j<3; j++) tmp_vnew[i*6+j] = body[i]->lvel[j];
     for (j=0; j<3; j++) tmp_vnew[i*6+3+j] = body[i]->avel[j];
   }
-  comparator.nextMatrix (tmp_vnew,nb*6,1,0,"vnew");
+  fast_vnew = copyMatrix (tmp_vnew,nb*6,1);
 # endif
 
 # ifdef TIMING
@@ -879,16 +930,36 @@ void dInternalStepIsland (dxWorld *world, dxBody **body, int nb,
   for (i=0; i<nb; i++) memcpy (state+i,body[i],sizeof(dxBody));
 
   // take slow step
-  comparator.reset();
   dInternalStepIsland_x1 (world,body,nb,joint,nj,stepsize);
-  comparator.end();
 
   // restore state
   for (i=0; i<nb; i++) memcpy (body[i],state+i,sizeof(dxBody));
 
   // take fast step
   dInternalStepIsland_x2 (world,body,nb,joint,nj,stepsize);
-  comparator.end();
+
+  // see if there's a difference
+  int m = slow_m;
+  compareMatrixLT ("A     ",slow_A,fast_A,m);
+  compareMatrix ("c     ",slow_c,fast_c,m,1);
+  compareMatrix ("error ",slow_error,fast_error,m,1);
+  compareMatrix ("rhs   ",slow_rhs,fast_rhs,m,1);
+  compareMatrix ("lambda",slow_lambda,fast_lambda,m,1);
+  compareMatrix ("vnew  ",slow_vnew,fast_vnew,nb*6,1);
+
+  // delete comparison matrices
+  deleteMatrix (slow_A,m,m);
+  deleteMatrix (slow_c,m,1);
+  deleteMatrix (slow_error,m,1);
+  deleteMatrix (slow_rhs,m,1);
+  deleteMatrix (slow_lambda,m,1);
+  deleteMatrix (slow_vnew,nb*6,1);
+  deleteMatrix (fast_A,m,m);
+  deleteMatrix (fast_c,m,1);
+  deleteMatrix (fast_error,m,1);
+  deleteMatrix (fast_rhs,m,1);
+  deleteMatrix (fast_lambda,m,1);
+  deleteMatrix (fast_vnew,nb*6,1);
 
   //_exit (1);
 # endif
