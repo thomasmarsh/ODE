@@ -1097,7 +1097,8 @@ effect - to destroy that joint the group must be emptied or destroyed.
 dJointGroupID dJointGroupCreate (int max_size);
 }{
 Create a joint group.
-@arg{max_size} is in bytes.
+The @arg{max_size} argument is now unused and should be set to 0.
+It is kept for backwards compatibility.
 }
 
 
