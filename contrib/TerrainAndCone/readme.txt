@@ -1,20 +1,34 @@
-Benoit CHAPEROT 2003 www.jstarlab.com
+Benoit CHAPEROT 2003-2004 www.jstarlab.com
 Support for terrain and cones, collision and drawing.
 
-For terrains, z axis is assumed to point upwards.
-Terrains are defined by a height field, and repeat themselves infinitely in the x and y directions.
+Terrains can be with z up (dTerrainZ) or y up (dTerrainY).
+Terrains are defined by a height field.
+Terrains are now placeable.
+Terrains can now be finite or infinite (repeat themselve in the x and (y or z) directions).
+
 Terrains can potentially collide with everything that collides with planes and rays; 
-see the switch statement in dTerrain.cpp line 230.
-Terrains are non movable.
+see the switch statement.
 
 Cones currently collides only with terrain and planes and rays.
+Cones, with high radius to height ratios are perfect to simulate vehicle wheels on terrains.
+
+
+
+There was an error in the depths returned by dCollideTerrain.
+Plus now contacts are not sorted according to their depths.
+Contact sorting is now supposed to be done externally. 
+Not all dCollide functions seem to sort contacts according to depth.
+Requesting a high number of contacts, sorting them and then considering only the most significant contacts
+is a good way I think to improve stability.
+* Cones Collisions with spheres, boxes, ccylinder and trimesh are now roughly approximated using sphere collisions.
 
 You will need to complete the following operations (with ODE 0.039):
 
 *** add to folder ode\src:
 
 dCone.cpp
-dTerrain.cpp 
+dTerrainY.cpp 
+dTerrainZ.cpp 
 collision_std_internal.h
 
 *** add to drawstuff\src\drawstuff.cpp:
@@ -107,19 +121,29 @@ static float GetHeight(int x,int y,int nNumNodesPerSide,float *pHeights)
 					+	 ((unsigned int)(x) & nNumNodesPerSideMask)];
 }
 
-void dsDrawTerrain(int x,int y,float vLength,float vNodeLength,int nNumNodesPerSide,float *pHeights)
+void dsDrawTerrainY(int x,int z,float vLength,float vNodeLength,int nNumNodesPerSide,float *pHeights,const float *pR,const float *ppos)
 {
 	float A[3],B[3],C[3],D[3];
 	float R[12];
-	memset(R,0,sizeof(R));
-	R[0] = 1.f;
-	R[5] = 1.f;
-	R[10] = 1.f;
 	float pos[3];
-	pos[0] = pos[1] = pos[2] = 0.f;
-	float vx,vy;
+	if (pR)
+		memcpy(R,pR,sizeof(R));
+	else
+	{
+		memset(R,0,sizeof(R));
+		R[0] = 1.f;
+		R[5] = 1.f;
+		R[10] = 1.f;
+	}
+	
+	if (ppos)
+		memcpy(pos,ppos,sizeof(pos));
+	else
+		memset(pos,0,sizeof(pos));
+	
+	float vx,vz;
 	vx = vLength * x;
-	vy = vLength * y;
+	vz = vLength * z;
 	
 	int i;
 	for (i=0;i<nNumNodesPerSide;i++)
@@ -127,16 +151,63 @@ void dsDrawTerrain(int x,int y,float vLength,float vNodeLength,int nNumNodesPerS
 		for (int j=0;j<nNumNodesPerSide;j++)
 		{
 			A[0] = i * vNodeLength + vx;
-			A[1] = j * vNodeLength + vy;
+			A[2] = j * vNodeLength + vz;
+			A[1] = GetHeight(i,j,nNumNodesPerSide,pHeights);
+			B[0] = (i+1) * vNodeLength + vx;
+			B[2] = j * vNodeLength + vz;
+			B[1] = GetHeight(i+1,j,nNumNodesPerSide,pHeights);
+			C[0] = i * vNodeLength + vx;
+			C[2] = (j+1) * vNodeLength + vz;
+			C[1] = GetHeight(i,j+1,nNumNodesPerSide,pHeights);
+			D[0] = (i+1) * vNodeLength + vx;
+			D[2] = (j+1) * vNodeLength + vz;
+			D[1] = GetHeight(i+1,j+1,nNumNodesPerSide,pHeights);
+			dsDrawTriangle(pos,R,C,B,A,1);
+			dsDrawTriangle(pos,R,D,B,C,1);
+		}
+	}
+}
+
+void dsDrawTerrainZ(int x,int z,float vLength,float vNodeLength,int nNumNodesPerSide,float *pHeights,const float *pR,const float *ppos)
+{
+	float A[3],B[3],C[3],D[3];
+	float R[12];
+	float pos[3];
+	if (pR)
+		memcpy(R,pR,sizeof(R));
+	else
+	{
+		memset(R,0,sizeof(R));
+		R[0] = 1.f;
+		R[5] = 1.f;
+		R[10] = 1.f;
+	}
+	
+	if (ppos)
+		memcpy(pos,ppos,sizeof(pos));
+	else
+		memset(pos,0,sizeof(pos));
+	
+	float vx,vz;
+	vx = vLength * x;
+	vz = vLength * z;
+	
+	int i;
+	for (i=0;i<nNumNodesPerSide;i++)
+	{
+		for (int j=0;j<nNumNodesPerSide;j++)
+		{
+			A[0] = i * vNodeLength + vx;
+			A[1] = j * vNodeLength + vz;
 			A[2] = GetHeight(i,j,nNumNodesPerSide,pHeights);
 			B[0] = (i+1) * vNodeLength + vx;
-			B[1] = j * vNodeLength + vy;
+			B[1] = j * vNodeLength + vz;
 			B[2] = GetHeight(i+1,j,nNumNodesPerSide,pHeights);
 			C[0] = i * vNodeLength + vx;
-			C[1] = (j+1) * vNodeLength + vy;
+			C[1] = (j+1) * vNodeLength + vz;
 			C[2] = GetHeight(i,j+1,nNumNodesPerSide,pHeights);
 			D[0] = (i+1) * vNodeLength + vx;
-			D[1] = (j+1) * vNodeLength + vy;
+			D[1] = (j+1) * vNodeLength + vz;
 			D[2] = GetHeight(i+1,j+1,nNumNodesPerSide,pHeights);
 			dsDrawTriangle(pos,R,C,A,B,1);
 			dsDrawTriangle(pos,R,D,C,B,1);
@@ -147,7 +218,8 @@ void dsDrawTerrain(int x,int y,float vLength,float vNodeLength,int nNumNodesPerS
 *** add to include\drawstuff\drawstuff.h:
 void dsDrawCone (const float pos[3], const float R[12],	float length, float radius);
 void dsDrawConeD (const double pos[3], const double R[12], float length, float radius);
-void dsDrawTerrain(int x,int y,float vLength,float vNodeLength,int nNumNodesPerSide,float *pHeights);
+void dsDrawTerrainY(int x,int y,float vLength,float vNodeLength,int nNumNodesPerSide,float *pHeights,const float *pR,const float *ppos);
+void dsDrawTerrainZ(int x,int y,float vLength,float vNodeLength,int nNumNodesPerSide,float *pHeights,const float *pR,const float *ppos);
 
 *** add in include\ode\collision.h line 77:
 /* class numbers - each geometry object needs a unique number */
@@ -161,7 +233,8 @@ enum {
   dGeomTransformClass,
   dTriMeshClass,
 
-  dTerrainClass,	//here
+  dTerrainYClass,	//here
+  dTerrainZClass,	//here
   dConeClass,		//here
 
   dFirstSpaceClass,
@@ -176,16 +249,15 @@ enum {
   dGeomNumClasses
 };
 
-dGeomID dCreateTerrain (dSpaceID space, dReal *pHeights,dReal vLength,int nNumNodesPerSide);
-dReal dGeomTerrainPointDepth (dGeomID ccylinder, dReal x, dReal y, dReal z);
+dGeomID dCreateTerrainY (dSpaceID space, dReal *pHeights,dReal vLength,int nNumNodesPerSide, int bFinite, int bPlaceable);
+dReal dGeomTerrainYPointDepth (dGeomID g, dReal x, dReal y, dReal z);
+dGeomID dCreateTerrainZ (dSpaceID space, dReal *pHeights,dReal vLength,int nNumNodesPerSide, int bFinite, int bPlaceable);
+dReal dGeomTerrainZPointDepth (dGeomID g, dReal x, dReal y, dReal z);
 
 dGeomID dCreateCone(dSpaceID space, dReal radius, dReal length);
 void dGeomConeSetParams (dGeomID cone, dReal radius, dReal length);
 void dGeomConeGetParams (dGeomID cone, dReal *radius, dReal *length);
 dReal dGeomConePointDepth(dGeomID g, dReal x, dReal y, dReal z);
-
-*** add in include\ode\geom.h:
-dGeomID dCreateTerrain(dSpaceID space, dReal *pHeights,dReal vLength,int nNumNodesPerSide);
 
 *** add in include\ode\odemath.h:
 #define dOP(a,op,b,c) \
@@ -210,44 +282,37 @@ dGeomID dCreateTerrain(dSpaceID space, dReal *pHeights,dReal vLength,int nNumNod
 	(((a)[0])*((a)[0]) + ((a)[1])*((a)[1]) + ((a)[2])*((a)[2]));
 
 *** add in ode\src\collision_kernel.cpp line 137:
-  setCollider (dTerrainClass,dSphereClass,&dCollideTerrain);
-  setCollider (dTerrainClass,dBoxClass,&dCollideTerrain);
-  setCollider (dTerrainClass,dCCylinderClass,&dCollideTerrain);
-  setCollider (dTerrainClass,dRayClass,&dCollideTerrain);
-  setCollider (dTerrainClass,dConeClass,&dCollideTerrain);
+  setCollider (dTerrainYClass,dSphereClass,&dCollideTerrainY);
+  setCollider (dTerrainYClass,dBoxClass,&dCollideTerrainY);
+  setCollider (dTerrainYClass,dCCylinderClass,&dCollideTerrainY);
+  setCollider (dTerrainYClass,dRayClass,&dCollideTerrainY);
+  setCollider (dTerrainYClass,dConeClass,&dCollideTerrainY);
+
+  setCollider (dTerrainZClass,dSphereClass,&dCollideTerrainZ);
+  setCollider (dTerrainZClass,dBoxClass,&dCollideTerrainZ);
+  setCollider (dTerrainZClass,dCCylinderClass,&dCollideTerrainZ);
+  setCollider (dTerrainZClass,dRayClass,&dCollideTerrainZ);
+  setCollider (dTerrainZClass,dConeClass,&dCollideTerrainZ);
+
+  setCollider (dRayClass,dConeClass,&dCollideRayCone);
   setCollider (dConeClass,dPlaneClass,&dCollideConePlane);
+  setCollider (dConeClass,dSphereClass,&dCollideConeSphere);
+  setCollider (dConeClass,dBoxClass,&dCollideConeBox);
+  setCollider (dCCylinderClass,dConeClass,&dCollideCCylinderCone);
+  setCollider (dTriMeshClass,dConeClass,&dCollideTriMeshCone);
 
 *** add in ode\src\collision_std.h:
-int dCollideTerrain(dxGeom *o1, dxGeom *o2, int flags,dContactGeom *contact, int skip);
+int dCollideTerrainY(dxGeom *o1, dxGeom *o2, int flags,dContactGeom *contact, int skip);
+int dCollideTerrainZ(dxGeom *o1, dxGeom *o2, int flags,dContactGeom *contact, int skip);
+
 int dCollideConePlane (dxGeom *o1, dxGeom *o2, int flags,dContactGeom *contact, int skip);
 int dCollideRayCone (dxGeom *o1, dxGeom *o2, int flags,dContactGeom *contact, int skip);
+int dCollideConeSphere(dxGeom *o1, dxGeom *o2, int flags, dContactGeom *contact, int skip);
+int dCollideConeBox(dxGeom *o1, dxGeom *o2, int flags, dContactGeom *contact, int skip);
+int dCollideCCylinderCone(dxGeom *o1, dxGeom *o2, int flags, dContactGeom *contact, int skip);
+int dCollideTriMeshCone(dxGeom *o1, dxGeom *o2, int flags, dContactGeom *contact, int skip);
 
-***
-*** ok, maybe now you want to try the terrain;
-***
-*** in ode\test\testboxstack.cpp;
-*** add line 41 (top of file):
+*** add dCone.cpp, dTerrainY.cpp and dTerrainZ.cpp to the the ODE_SRC variable in the makefile
 
-const int TERRAINNODES = 4;
-dReal pTerrainHeights[TERRAINNODES*TERRAINNODES];
-const dReal vTerrainLength = 4.f;
-const dReal vTerrainHeight = 0.5f;
-dGeomID terrain = NULL;
-
-*** add line 365 (in simLoop()):
-
-dAASSERT(terrain);
-dsSetColor (0,1,0);
-dsDrawTerrain(0,0,vTerrainLength,vTerrainLength/TERRAINNODES,TERRAINNODES,pTerrainHeights);
-dsDrawTerrain(0,-1,vTerrainLength,vTerrainLength/TERRAINNODES,TERRAINNODES,pTerrainHeights);
-dsDrawTerrain(-1,0,vTerrainLength,vTerrainLength/TERRAINNODES,TERRAINNODES,pTerrainHeights);
-dsDrawTerrain(-1,-1,vTerrainLength,vTerrainLength/TERRAINNODES,TERRAINNODES,pTerrainHeights);
-dsSetColor (1,1,0);
-
-*** add line 416 (in main(), just before dsSimulationLoop()):
-
-for (int i=0;i<TERRAINNODES*TERRAINNODES;i++)	pTerrainHeights[i] = vTerrainHeight * dRandReal();
-terrain = dCreateTerrain(space,pTerrainHeights,vTerrainLength,TERRAINNODES);
-
-
+*** now you can now test using file test_boxstackb.cpp (to add in folder ode\test).
 

@@ -1,4 +1,4 @@
-//Benoit CHAPEROT 2003 www.jstarlab.com
+//Benoit CHAPEROT 2003-2004 www.jstarlab.com
 #ifndef _ODE_COLLISION_STD_INTERNAL_H_
 #define _ODE_COLLISION_STD_INTERNAL_H_
 
@@ -51,7 +51,7 @@ struct dxRay : public dxGeom {
   void computeAABB();
 };
 
-struct dxTerrain : public dxGeom {
+struct dxTerrainY : public dxGeom {
   dReal m_vLength;
   dReal *m_pHeights;
   dReal m_vMinHeight;
@@ -60,13 +60,41 @@ struct dxTerrain : public dxGeom {
   int	m_nNumNodesPerSide;
   int	m_nNumNodesPerSideShift;
   int	m_nNumNodesPerSideMask;
-  dxTerrain(dSpaceID space, dReal *pHeights,dReal vLength,int nNumNodesPerSide);
-  ~dxTerrain();
+  int	m_bFinite;
+  dxTerrainY(dSpaceID space, dReal *pHeights,dReal vLength,int nNumNodesPerSide, int bFinite, int bPlaceable);
+  ~dxTerrainY();
+  void computeAABB();
+  dReal GetHeight(dReal x,dReal z);
+  dReal GetHeight(int x,int z);
+  int dCollideTerrainUnit(int x,int z,dxGeom *o2,int numMaxContacts,int flags,dContactGeom *contact, int skip);
+  bool IsOnTerrain(int nx,int nz,int w,dReal *pos);
+};
+
+struct dxTerrainZ : public dxGeom {
+  dReal m_vLength;
+  dReal *m_pHeights;
+  dReal m_vMinHeight;
+  dReal m_vMaxHeight;
+  dReal m_vNodeLength;
+  int	m_nNumNodesPerSide;
+  int	m_nNumNodesPerSideShift;
+  int	m_nNumNodesPerSideMask;
+  int	m_bFinite;
+  dxTerrainZ(dSpaceID space, dReal *pHeights,dReal vLength,int nNumNodesPerSide, int bFinite, int bPlaceable);
+  ~dxTerrainZ();
   void computeAABB();
   dReal GetHeight(dReal x,dReal y);
   dReal GetHeight(int x,int y);
-  int dCollideTerrainUnit(int x,int y,dxGeom *o2,int numMaxContacts,int flags,dContactGeom *pContact);
+  int dCollideTerrainUnit(int x,int y,dxGeom *o2,int numMaxContacts,int flags,dContactGeom *contact, int skip);
   bool IsOnTerrain(int nx,int ny,int w,dReal *pos);
 };
+
+#ifndef MIN
+#define MIN(a,b)	((a<b)?a:b)
+#endif
+
+#ifndef MAX
+#define MAX(a,b)	((a>b)?a:b)
+#endif
 
 #endif //_ODE_COLLISION_STD_INTERNAL_H_
