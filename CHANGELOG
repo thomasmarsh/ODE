@@ -9,6 +9,11 @@ the rules for this file:
 
 ------------------------------------------------------------------------------
 
+03/11/02 russ
+
+	* makefile changes to accomodate OSs with command line length
+	  limitations (thanks to Norman Lin).
+
 01/06/02 russ
 
 	* added the dBodySetGravityMode() and dBodyGetGravityMode()
