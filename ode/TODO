@@ -2,8 +2,45 @@
 TODO
 ----
 
-dAlloc() should take an arena parameters which is stored in dWorld.
+what i'm doing now: joints:
+	r-motor joint needs to measure motor angle and vel, fn to get this info
+		* angle done
+	r-motor joint needs stops (low and high)
+	make sure rmotor works with just one body and static env.
+	joint code reuse: use standard functions to set velocity (c),
+		limits (lo,hi), spongyness (epsilon) etc, this prevents these
+		functions from proliferating.
+	linear motor
+	implicit spring framework - actually allow joints to return a value `k'
+		such that J*vnew = c + k*f, where f = force needed to achieve
+		vnew.
+	contact slip
+	more joint code reuse - setting axes etc??
+	hinge and hinge2 joints need to have orientable ball-and-socket parts,
+		to allow directed suspension axes. suspension axis must have
+		stops - implement this with a separate joint??
+	more joints: spring, planar, fixed path, etc etc.
 
+andy says: still having trouble with those resource files..
+drawstuff.res doesn't seem to build or be found under cygwin gcc.
+andy says: in ode/src/error.cpp _snprintf() and _vsnprintf() are missing
+in testode: finite and isnan are missing. copysign is missing
+	russ: okay here's the problem: i have Makefile.platform files for
+	VC++, MinGW, but not Cygwin. Cygwin uses the unix-like functions
+	for everything, but the VC++/MinGW configs assumes the MS C-runtime
+	functions. this is easy to fix, except i need to install Cygwin
+	which is a pain to do over MinGW. argh.
+
+hinge2 needs to be attached to two bodies for it to work, make sure this is
+always the case.
+
+make sure joints can return 0 from GetInfo1, i.e. no constraints or "inactive"
+joint, and the step functions will handle it.
+
+check inertia transformations, e.g. by applying steering torque to a thin
+wheel.
+
+dAlloc() should take an arena parameters which is stored in dWorld.
 
 debugging mode should use dASSERT2 that prints a descriptive error message
 on error, not just the file:line or function. use dASSERT for internal
@@ -92,6 +129,8 @@ on windows, make sure gcc-compiles libs can be linked with VC++ apps. need
 to make sure some C++ runtime bits are present.
 
 kill all references to dArray<> (in geom.cpp).
+
+need testing code to test all joints with body-to-static-env
 
 
 ALWAYS

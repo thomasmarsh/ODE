@@ -1,7 +1,7 @@
 
 the configuration process is not currently automated. currently only linux
-and MS-windows (using VC++) have been verified to work. you will need
-GNU make 3.78.1 or later.
+and MS-windows (using VC++ or GCC-MinGW) have been verified to work.
+you will need GNU make 3.78.1 or later.
 
 step 1
 ------

@@ -102,6 +102,14 @@ tangential to normal force. This will be fixed in the next release.
 works].
 
 
+@section{New in the 0.03 release}
+
+@list{
+@* Contact bounce (i.e. restitution) now works.
+@* Numerous bug fixes: contacts.
+}
+
+
 @section{Future features}
 
 @subsection{Plan for 0.03 release}
@@ -337,6 +345,31 @@ A typical simulation will proceed like this:
 
 [Discuss the various methods and approximations that are used.]
 
+#############################################################################
+@chapter{Joint types}
+
+@section{Ball and socket}
+@section{Hinge}
+@section{Slider}
+@section{Contact}
+@section{RMotor}
+
+The angle of the motor can be read out.
+The angle will be between -pi..pi, with zero corresponding to the initial
+position of the bodies.
+
+@section{Hinge-2}
+
+The hinge-2 joint is the same as two hinges connected in series, with
+different hinge axes.
+An example is the steering wheel of a car, where one axis allows the wheel
+to be steered and the other axis allows the wheel to rotate.
+
+The hinge-2 joint has an anchor point and two hinge axes.
+Axis 1 is specified relative to body 1 (this would be the steering axis if
+body 1 is the chassis).
+Axis 2 is specified relative to body 2 (this would be the wheel axis if
+body 2 is the wheel).
 
 #############################################################################
 @chapter{Data types and conventions}
@@ -542,6 +575,8 @@ dJointID dJointCreateHinge (dWorldID, dJointGroupID);
 dJointID dJointCreateSlider (dWorldID, dJointGroupID);
 dJointID dJointCreateContact (dWorldID, dJointGroupID,
                               const dContact *);
+dJointID dJointCreateRMotor (dWorldID, dJointGroupID);
+dJointID dJointCreateHinge2 (dWorldID, dJointGroupID);
 }{
 Create a new joint of a given type.
 The joint is initially in "limbo" (i.e. it has no effect on the simulation)
@@ -596,6 +631,8 @@ To attach this joint to only one body, set body1 or body2 to zero - a zero
 body means the static environment.
 Setting both bodies to zero puts the joint into "limbo", i.e. it will
 have no effect on the simulation.
+
+Some joints, like hinge-2 need to be attached to two bodies to work.
 }
 
 
@@ -604,11 +641,17 @@ void dJointSetBallAnchor (dJointID, dReal x, dReal y, dReal z);
 void dJointSetHingeAnchor (dJointID, dReal x, dReal y, dReal z);
 void dJointSetHingeAxis (dJointID, dReal x, dReal y, dReal z);
 void dJointSetSliderAxis (dJointID, dReal x, dReal y, dReal z);
+void dJointSetRMotorAxis (dJointID, dReal x, dReal y, dReal z);
+void dJointSetRMotor (dJointID, dReal vel, dReal tmax);
+void dJointSetHinge2Anchor (dJointID, dReal x, dReal y, dReal z);
+void dJointSetHinge2Axis1 (dJointID, dReal x, dReal y, dReal z);
+void dJointSetHinge2Axis2 (dJointID, dReal x, dReal y, dReal z);
 }{
 Set joint parameters.
 The anchor and axis must be set after the joint has been attached to bodies
 and those bodies have been correctly positioned.
 If the joint is not attached, this will do nothing.
+The default axis for all joints is (1,0,0).
 The axis that is set will be normalized to unit length, this is what
 @c{dJointGetAxis()} will return.
 }
@@ -619,6 +662,11 @@ void dJointGetBallAnchor (dJointID, dVector3 result);
 void dJointGetHingeAnchor (dJointID, dVector3 result);
 void dJointGetHingeAxis (dJointID, dVector3 result);
 void dJointGetSliderAxis (dJointID, dVector3 result);
+void dJointGetRMotorAxis (dJointID, dVector3 result);
+dReal dJointGetRMotorAngle (dJointID);
+void dJointGetHinge2Anchor (dJointID, dVector3 result);
+void dJointGetHinge2Axis1 (dJointID, dVector3 result);
+void dJointGetHinge2Axis2 (dJointID, dVector3 result);
 }{
 Get joint parameters.
 If the system is out of alignment (i.e. there is some joint error) then
@@ -1263,7 +1311,7 @@ typedef void dGetAABBFn (dGeomID g, dReal aabb[6]);
 	@m{(minx, maxx, miny, maxy, minz, maxz)}.
 
 @*	The number of bytes of "class data" that instances of this class
-	need. For example a sphere store its radius in the class data area,
+	need. For example a sphere stores its radius in the class data area,
 	and a box stores its side lengths there.
 }
 
