@@ -11,6 +11,12 @@ the rules for this file:
 
 04/04/04 adam
 
+        * yet another rewrite of triangle-box collision code, this
+        time based on code donated by Croteam, ported by asko@jetti.org
+        and tweaked by Erwin.
+
+04/04/04 adam
+
         * merged trimesh-trimesh collision code by
         Jeffrey Smith <jeffreys@Softimage.com>.
 
