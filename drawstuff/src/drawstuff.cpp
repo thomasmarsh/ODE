@@ -308,7 +308,7 @@ static void setColor (float r, float g, float b, float alpha)
 }
 
 
-static void setTransform (float pos[3], float R[12])
+static void setTransform (const float pos[3], const float R[12])
 {
   GLfloat matrix[16];
   matrix[0]=R[0];
@@ -348,7 +348,7 @@ static void setShadowTransform()
 }
 
 
-static void drawBox (float sides[3])
+static void drawBox (const float sides[3])
 {
   float lx = sides[0]*0.5f;
   float ly = sides[1]*0.5f;
@@ -1165,7 +1165,8 @@ extern "C" void dsSetColor (float red, float green, float blue)
 }
 
 
-extern "C" void dsDrawBox (float pos[3], float R[12], float sides[3])
+extern "C" void dsDrawBox (const float pos[3], const float R[12],
+			   const float sides[3])
 {
   if (current_state != 2) dsError ("drawing function called outside simulation loop");
   setupDrawingMode();
@@ -1185,7 +1186,8 @@ extern "C" void dsDrawBox (float pos[3], float R[12], float sides[3])
 }
 
 
-extern "C" void dsDrawSphere (float pos[3], float R[12], float radius)
+extern "C" void dsDrawSphere (const float pos[3], const float R[12],
+			      float radius)
 {
   if (current_state != 2) dsError ("drawing function called outside simulation loop");
   setupDrawingMode();
@@ -1218,7 +1220,7 @@ extern "C" void dsDrawSphere (float pos[3], float R[12], float radius)
 }
 
 
-extern "C" void dsDrawCylinder (float pos[3], float R[12],
+extern "C" void dsDrawCylinder (const float pos[3], const float R[12],
 				float length, float radius)
 {
   if (current_state != 2) dsError ("drawing function called outside simulation loop");
@@ -1239,7 +1241,7 @@ extern "C" void dsDrawCylinder (float pos[3], float R[12],
 }
 
 
-extern "C" void dsDrawCappedCylinder (float pos[3], float R[12],
+extern "C" void dsDrawCappedCylinder (const float pos[3], const float R[12],
 				      float length, float radius)
 {
   if (current_state != 2) dsError ("drawing function called outside simulation loop");
@@ -1260,7 +1262,7 @@ extern "C" void dsDrawCappedCylinder (float pos[3], float R[12],
 }
 
 
-void dsDrawBoxD (double pos[3], double R[12], float sides[3])
+void dsDrawBoxD (const double pos[3], const double R[12], const float sides[3])
 {
   int i;
   float pos2[3],R2[12];
@@ -1270,7 +1272,7 @@ void dsDrawBoxD (double pos[3], double R[12], float sides[3])
 }
 
 
-void dsDrawSphereD (double pos[3], double R[12], float radius)
+void dsDrawSphereD (const double pos[3], const double R[12], float radius)
 {
   int i;
   float pos2[3],R2[12];
@@ -1280,7 +1282,8 @@ void dsDrawSphereD (double pos[3], double R[12], float radius)
 }
 
 
-void dsDrawCylinderD (double pos[3], double R[12], float length, float radius)
+void dsDrawCylinderD (const double pos[3], const double R[12],
+		      float length, float radius)
 {
   int i;
   float pos2[3],R2[12];
@@ -1290,7 +1293,7 @@ void dsDrawCylinderD (double pos[3], double R[12], float length, float radius)
 }
 
 
-void dsDrawCappedCylinderD (double pos[3], double R[12],
+void dsDrawCappedCylinderD (const double pos[3], const double R[12],
 			    float length, float radius)
 {
   int i;
