@@ -2,7 +2,12 @@
 TODO
 ----
 
-test_chain should be in C, not C++
+remove `space' argument to geom creation functions? make user add it?
+or just remove it from dCreateGeom() ?
+
+doccer: @func{} also refs second etc function in function *list*.
+
+test_chain should be in C, not C++. but first must remove global constructors.
 
 add more functionality to C++ interface - dMass, dSpace, dGeom, rotation?
 
@@ -102,6 +107,13 @@ need proper `sticky' friction, i.e. compensation for numerical slip.
 use `const' in function arguments. blah.
 
 get rid of global constructors in geom.cpp.
+
+dJointAttach(), allow both bodies to be 0 to put the joint into limbo.
+
+geom class type checking for many geom functions.
+
+timer reporting function:
+	void timerReport (void (*printFunction)(char *, ...));
 
 
 DONE
