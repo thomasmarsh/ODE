@@ -584,6 +584,20 @@ void dBodyAddRelForceAtRelPos (dBodyID b, dReal fx, dReal fy, dReal fz,
 }
 
 
+const dReal * dBodyGetForce (dBodyID b)
+{
+  dAASSERT (b);
+  return b->facc;
+}
+
+
+const dReal * dBodyGetTorque (dBodyID b)
+{
+  dAASSERT (b);
+  return b->tacc;
+}
+
+
 void dBodyGetRelPointPos (dBodyID b, dReal px, dReal py, dReal pz,
 			  dVector3 result)
 {
@@ -644,6 +658,26 @@ void dBodySetFiniteRotationAxis (dBodyID b, dReal x, dReal y, dReal z)
   else {
     b->flags &= ~dxBodyFlagFiniteRotationAxis;
   }
+}
+
+
+int dBodyGetNumJoints (dBodyID b)
+{
+  dAASSERT (b);
+  int count=0;
+  for (dxJointNode *n=b->firstjoint; n; n=n->next, count++);
+  return count;
+}
+
+
+dJointID dBodyGetJoint (dBodyID b, int index)
+{
+  dAASSERT (b);
+  int i=0;
+  for (dxJointNode *n=b->firstjoint; n; n=n->next, i++) {
+    if (i == index) return n->joint;
+  }
+  return 0;
 }
 
 //****************************************************************************
@@ -861,6 +895,14 @@ int dJointGetType (dxJoint *joint)
 {
   dAASSERT (joint);
   return joint->vtable->typenum;
+}
+
+
+dBodyID dJointGetBody (dxJoint *joint, int index)
+{
+  dAASSERT (joint);
+  if (index >= 0 && index < 2) return joint->node[index].body;
+  else return 0;
 }
 
 
