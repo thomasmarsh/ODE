@@ -83,6 +83,16 @@ const float sky_height = 1.0f;		// sky height above viewpoint
 //***************************************************************************
 // misc mathematics stuff
 
+#define dCROSS(a,op,b,c) \
+  (a)[0] op ((b)[1]*(c)[2] - (b)[2]*(c)[1]); \
+  (a)[1] op ((b)[2]*(c)[0] - (b)[0]*(c)[2]); \
+  (a)[2] op ((b)[0]*(c)[1] - (b)[1]*(c)[0]);
+
+
+inline float dDOT (const float *a, const float *b)
+  { return ((a)[0]*(b)[0] + (a)[1]*(b)[1] + (a)[2]*(b)[2]); }
+
+
 static void normalizeVector3 (float v[3])
 {
   float len = v[0]*v[0] + v[1]*v[1] + v[2]*v[2];
@@ -520,6 +530,27 @@ static void drawSphereShadow (float px, float py, float pz, float radius)
     y = ky*x + kx*y;
     x = xtmp;
   }
+  glEnd();
+}
+
+
+static void drawTriangle (const float *v0, const float *v1, const float *v2)
+{
+  float u[3],v[3],normal[3];
+  u[0] = v1[0] - v0[0];
+  u[1] = v1[1] - v0[1];
+  u[2] = v1[2] - v0[2];
+  v[0] = v2[0] - v0[0];
+  v[1] = v2[1] - v0[1];
+  v[2] = v2[2] - v0[2];
+  dCROSS (normal,=,u,v);
+  normalizeVector3 (normal);
+
+  glBegin(GL_TRIANGLES);
+  glNormal3fv (normal);
+  glVertex3fv (v0);
+  glVertex3fv (v1);
+  glVertex3fv (v2);
   glEnd();
 }
 
@@ -1242,6 +1273,19 @@ extern "C" void dsDrawSphere (const float pos[3], const float R[12],
     drawSphereShadow (pos[0],pos[1],pos[2],radius);
     glDepthRange (0,1);
   }
+}
+
+
+extern "C" void dsDrawTriangle (const float pos[3], const float R[12],
+				const float *v0, const float *v1,
+				const float *v2)
+{
+  if (current_state != 2) dsError ("drawing function called outside simulation loop");
+  setupDrawingMode();
+  glShadeModel (GL_FLAT);
+  setTransform (pos,R);
+  drawTriangle (v0, v1, v2);
+  glPopMatrix();
 }
 
 
