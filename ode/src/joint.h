@@ -71,8 +71,8 @@ struct dxJoint : public dObject {
   // info returned by getInfo2 function
 
   struct Info2 {
-    // integrator parameters: frames per second (1/stepsize), error reduction
-    // parameter (0..1).
+    // integrator parameters: frames per second (1/stepsize), default error
+    // reduction parameter (0..1).
     dReal fps,erp;
 
     // for the first and second body, pointers to two (linear and angular)
@@ -84,9 +84,10 @@ struct dxJoint : public dObject {
     // elements to jump from one row to the next in J's
     int rowskip;
 
-    // right hand side of the equation J*a = c. this vector will be set to
-    // zero on entry.
-    dReal *c;
+    // right hand sides of the equation J*v = c + cfm * lambda. cfm is the
+    // "constraint force mixing" vector. c is set to zero on entry, cfm is
+    // set to a constant value (typically very small or zero) value on entry.
+    dReal *c,*cfm;
 
     // lo and hi limits for variables (set to -/+ infinity on entry).
     dReal *lo,*hi;
@@ -132,8 +133,8 @@ struct dxJointLimitMotor {
   void set (int num, dReal value);
   dReal get (int num);
   int testRotationalLimit (dReal angle);
-  void addRotationalLimot (dxJoint *joint, dxJoint::Info2 *info, int row,
-			   dVector3 ax1);
+  int addRotationalLimot (dxJoint *joint, dxJoint::Info2 *info, int row,
+			  dVector3 ax1);
   void addLinearLimot (dxJoint *joint, dxJoint::Info2 *info, int row,
 		       dVector3 ax1);
 };
@@ -194,6 +195,7 @@ struct dxJointHinge2 : public dxJoint {
   dVector3 v1,v2;		// angle ref vectors embedded in first body
   dxJointLimitMotor limot1;	// limit+motor info for axis 1
   dxJointLimitMotor limot2;	// limit+motor info for axis 2
+  dReal susp_erp,susp_cfm;	// suspension parameters (erp,cfm)
 };
 extern struct dxJoint::Vtable __dhinge2_vtable;
 
