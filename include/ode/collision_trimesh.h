@@ -89,6 +89,14 @@ void dGeomTriMeshDataBuildSimple1(dTriMeshDataID g,
                                   const dReal* Vertices, int VertexCount,
                                   const int* Indices, int IndexCount,
                                   const int* Normals);
+
+/* Preprocess the trimesh data to remove mark unnecessary edges and vertices */
+void dGeomTriMeshDataPreprocess(dTriMeshDataID g);
+/* Get and set the internal preprocessed trimesh data buffer, for loading and saving */
+void dGeomTriMeshDataGetBuffer(dTriMeshDataID g, unsigned char** buf, int* bufLen);
+void dGeomTriMeshDataSetBuffer(dTriMeshDataID g, unsigned char* buf);
+
+
 /*
  * Per triangle callback. Allows the user to say if he wants a collision with
  * a particular triangle.
