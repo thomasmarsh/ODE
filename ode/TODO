@@ -78,10 +78,6 @@ straight away ... ?
 
 rotation.cpp functions that set matrices should also set padding elements.
 
-hinge and prismatic, attachment to static environment.
-
-turn macros into C++ inline functions? what about C users?
-
 functions to get body connectedness (e.g. return joint lists). also for joints.
 
 
@@ -94,3 +90,6 @@ on depth and error info is okay for the two cases.
 set a better convention for which is the 1st and 2nd body in a joint, because
 sometimes we get things swapped (because of the way the joint nodes are used).
 
+hinge and prismatic, attachment to static environment.
+
+turn macros into C++ inline functions? what about C users?

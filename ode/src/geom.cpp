@@ -199,7 +199,7 @@ int dPlaneClass = -1;
 int dCompositeClass = -1;
 
 
-dGeom *dCreateSphere (dSpaceID space, dReal radius)
+dxGeom *dCreateSphere (dSpaceID space, dReal radius)
 {
   dSphere *s = (dSphere*) dAlloc (sizeof(dSphere));
   dInitGeom (&s->geom,space,dSphereClass);
@@ -208,8 +208,8 @@ dGeom *dCreateSphere (dSpaceID space, dReal radius)
 }
 
 
-dGeom *dCreatePlane (dSpaceID space,
-		       dReal a, dReal b, dReal c, dReal d)
+dxGeom *dCreatePlane (dSpaceID space,
+		      dReal a, dReal b, dReal c, dReal d)
 {
   dPlane *p = (dPlane*) dAlloc (sizeof(dPlane));
   dInitGeom (&p->geom,space,dPlaneClass);
@@ -301,7 +301,7 @@ static dArray<dCollider> colliders;
 
 int dCreateGeomClass (dGeomClass *c)
 {
-  if (c->size < (int)sizeof(dGeom))
+  if (c->size < (int)sizeof(dxGeom))
     dDebug (d_ERR_BAD_ARGS,"size too small in dGeomClass");
   if (!c->collider || !c->aabb)
     dDebug (d_ERR_BAD_ARGS,"zero function pointers in dGeomClass");

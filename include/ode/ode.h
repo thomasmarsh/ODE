@@ -37,6 +37,7 @@
 #include "ode/space.h"
 #include "ode/geom.h"
 #include "ode/misc.h"
+#include "ode/odecpp.h"
 
 #ifdef __cplusplus
 extern "C" {

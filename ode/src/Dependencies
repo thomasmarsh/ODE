@@ -19,7 +19,8 @@ mass.o: mass.cpp ../../include/ode/ode.h ../../include/ode/config.h \
  ../../include/ode/odemath.h ../../include/ode/matrix.h \
  ../../include/ode/timer.h ../../include/ode/rotation.h \
  ../../include/ode/mass.h ../../include/ode/space.h \
- ../../include/ode/geom.h ../../include/ode/misc.h
+ ../../include/ode/geom.h ../../include/ode/misc.h \
+ ../../include/ode/odecpp.h
 mat.o: mat.cpp mat.h ../../include/ode/common.h \
  ../../include/ode/error.h ../../include/ode/misc.h \
  ../../include/ode/matrix.h ../../include/ode/memory.h
@@ -36,7 +37,8 @@ ode.o: ode.cpp objects.h ../../include/ode/memory.h \
  ../../include/ode/odemath.h ../../include/ode/matrix.h \
  ../../include/ode/timer.h ../../include/ode/rotation.h \
  ../../include/ode/space.h ../../include/ode/geom.h \
- ../../include/ode/misc.h joint.h stack.h step.h
+ ../../include/ode/misc.h ../../include/ode/odecpp.h joint.h stack.h \
+ step.h
 odemath.o: odemath.cpp ../../include/ode/common.h \
  ../../include/ode/error.h ../../include/ode/odemath.h
 rotation.o: rotation.cpp ../../include/ode/ode.h \
@@ -46,7 +48,7 @@ rotation.o: rotation.cpp ../../include/ode/ode.h \
  ../../include/ode/matrix.h ../../include/ode/timer.h \
  ../../include/ode/rotation.h ../../include/ode/mass.h \
  ../../include/ode/space.h ../../include/ode/geom.h \
- ../../include/ode/misc.h
+ ../../include/ode/misc.h ../../include/ode/odecpp.h
 space.o: space.cpp ../../include/ode/space.h \
  ../../include/ode/common.h ../../include/ode/error.h \
  ../../include/ode/geom.h ../../include/ode/contact.h \

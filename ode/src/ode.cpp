@@ -36,7 +36,7 @@
 //****************************************************************************
 // utility
 
-static inline void initObject (dObject *obj, dWorld *w)
+static inline void initObject (dObject *obj, dxWorld *w)
 {
   obj->world = w;
   obj->next = 0;
@@ -71,13 +71,13 @@ static inline void removeObjectFromList (dObject *obj)
 
 // remove the joint from neighbour lists of all connected bodies
 
-static void removeJointReferencesFromAttachedBodies (dJoint *j)
+static void removeJointReferencesFromAttachedBodies (dxJoint *j)
 {
   for (int i=0; i<2; i++) {
-    dBody *body = j->node[i].body;
+    dxBody *body = j->node[i].body;
     if (body) {
-      dJointNode *n = body->firstjoint;
-      dJointNode *last = 0;
+      dxJointNode *n = body->firstjoint;
+      dxJointNode *last = 0;
       while (n) {
 	if (n->joint == j) {
 	  if (last) last->next = n->next;
@@ -102,32 +102,32 @@ static void removeJointReferencesFromAttachedBodies (dJoint *j)
 // in an island are reachable by going through connected bodies and joints.
 // each island can be simulated separately.
 
-static void processIslands (dWorld *world, dReal stepsize)
+static void processIslands (dxWorld *world, dReal stepsize)
 {
-  dBody *b,*bb,**body;
-  dJoint *j,**joint;
+  dxBody *b,*bb,**body;
+  dxJoint *j,**joint;
 
   // nothing to do if no bodies
   if (world->nb <= 0) return;
 
   // make arrays for body and joint lists (for a single island) to go into
-  body = (dBody**) alloca (world->nb * sizeof(dBody*));
-  joint = (dJoint**) alloca (world->nj * sizeof(dJoint*));
+  body = (dxBody**) alloca (world->nb * sizeof(dxBody*));
+  joint = (dxJoint**) alloca (world->nj * sizeof(dxJoint*));
   int bcount = 0;	// number of bodies in `body'
   int jcount = 0;	// number of joints in `joint'
 
   // set all body/joint tags to 0
-  for (b=world->firstbody; b; b=(dBody*)b->next) b->tag = 0;
-  for (j=world->firstjoint; j; j=(dJoint*)j->next) j->tag = 0;
+  for (b=world->firstbody; b; b=(dxBody*)b->next) b->tag = 0;
+  for (j=world->firstjoint; j; j=(dxJoint*)j->next) j->tag = 0;
 
   // allocate a stack of unvisited bodies in the island. the maximum size of
   // the stack can be the lesser of the number of bodies or joints, because
   // new bodies are only ever added to the stack by going through untagged
   // joints. all the bodies in the stack must be tagged!
   int stackalloc = (world->nj < world->nb) ? world->nj : world->nb;
-  dBody **stack = (dBody**) alloca (stackalloc * sizeof(dBody*));
+  dxBody **stack = (dxBody**) alloca (stackalloc * sizeof(dxBody*));
 
-  for (bb=world->firstbody; bb; bb=(dBody*)bb->next) {
+  for (bb=world->firstbody; bb; bb=(dxBody*)bb->next) {
     // get bb = the next untagged body, and tag it
     if (bb->tag) continue;
     bb->tag = 1;
@@ -146,7 +146,7 @@ static void processIslands (dWorld *world, dReal stepsize)
 
       // traverse and tag all body's joints, add untagged connected bodies
       // to stack
-      for (dJointNode *n=b->firstjoint; n; n=n->next) {
+      for (dxJointNode *n=b->firstjoint; n; n=n->next) {
 	if (!n->joint->tag) {
 	  n->joint->tag = 1;
 	  joint[jcount++] = n->joint;
@@ -173,9 +173,9 @@ static void processIslands (dWorld *world, dReal stepsize)
   // if debugging, check that all objects (except for unconnected joints)
   // were tagged
 # ifndef dNODEBUG
-  for (b=world->firstbody; b; b=(dBody*)b->next)
+  for (b=world->firstbody; b; b=(dxBody*)b->next)
     if (!b->tag) dDebug (0,"body not tagged");
-  for (j=world->firstjoint; j; j=(dJoint*)j->next) {
+  for (j=world->firstjoint; j; j=(dxJoint*)j->next) {
     if (j->node[0].body || j->node[1].body) {
       if (!j->tag) dDebug (0,"attached joint not tagged");
     }
@@ -208,48 +208,48 @@ static int listHasLoops (dObject *first)
 
 // check the validity of the world data structures
 
-static void checkWorld (dWorld *w)
+static void checkWorld (dxWorld *w)
 {
-  dBody *b;
-  dJoint *j;
+  dxBody *b;
+  dxJoint *j;
 
   // check there are no loops
   if (listHasLoops (w->firstbody)) dDebug (0,"body list has loops");
   if (listHasLoops (w->firstjoint)) dDebug (0,"joint list has loops");
 
   // check lists are well formed (check `tome' pointers)
-  for (b=w->firstbody; b; b=(dBody*)b->next) {
+  for (b=w->firstbody; b; b=(dxBody*)b->next) {
     if (b->next && b->next->tome != &b->next)
       dDebug (0,"bad tome pointer in body list");
   }
-  for (j=w->firstjoint; j; j=(dJoint*)j->next) {
+  for (j=w->firstjoint; j; j=(dxJoint*)j->next) {
     if (j->next && j->next->tome != &j->next)
       dDebug (0,"bad tome pointer in joint list");
   }
 
   // check counts
   int n = 0;
-  for (b=w->firstbody; b; b=(dBody*)b->next) n++;
+  for (b=w->firstbody; b; b=(dxBody*)b->next) n++;
   if (w->nb != n) dDebug (0,"body count incorrect");
   n = 0;
-  for (j=w->firstjoint; j; j=(dJoint*)j->next) n++;
+  for (j=w->firstjoint; j; j=(dxJoint*)j->next) n++;
   if (w->nj != n) dDebug (0,"joint count incorrect");
 
   // set all tag values to a known value
   static int count = 0;
   count++;
-  for (b=w->firstbody; b; b=(dBody*)b->next) b->tag = count;
-  for (j=w->firstjoint; j; j=(dJoint*)j->next) j->tag = count;
+  for (b=w->firstbody; b; b=(dxBody*)b->next) b->tag = count;
+  for (j=w->firstjoint; j; j=(dxJoint*)j->next) j->tag = count;
 
   // check all body/joint world pointers are ok
-  for (b=w->firstbody; b; b=(dBody*)b->next) if (b->world != w)
+  for (b=w->firstbody; b; b=(dxBody*)b->next) if (b->world != w)
     dDebug (0,"bad world pointer in body list");
-  for (j=w->firstjoint; j; j=(dJoint*)j->next) if (j->world != w)
+  for (j=w->firstjoint; j; j=(dxJoint*)j->next) if (j->world != w)
     dDebug (0,"bad world pointer in joint list");
 
   /*
   // check for half-connected joints - actually now these are valid
-  for (j=w->firstjoint; j; j=(dJoint*)j->next) {
+  for (j=w->firstjoint; j; j=(dxJoint*)j->next) {
     if (j->node[0].body || j->node[1].body) {
       if (!(j->node[0].body && j->node[1].body))
 	dDebug (0,"half connected joint found");
@@ -259,11 +259,11 @@ static void checkWorld (dWorld *w)
 
   // check that every joint node appears in the joint lists of both bodies it
   // attaches
-  for (j=w->firstjoint; j; j=(dJoint*)j->next) {
+  for (j=w->firstjoint; j; j=(dxJoint*)j->next) {
     for (int i=0; i<2; i++) {
       if (j->node[i].body) {
 	int ok = 0;
-	for (dJointNode *n=j->node[i].body->firstjoint; n; n=n->next) {
+	for (dxJointNode *n=j->node[i].body->firstjoint; n; n=n->next) {
 	  if (n->joint == j) ok = 1;
 	}
 	if (ok==0) dDebug (0,"joint not in joint list of attached body");
@@ -272,8 +272,8 @@ static void checkWorld (dWorld *w)
   }
 
   // check all body joint lists (correct body ptrs)
-  for (b=w->firstbody; b; b=(dBody*)b->next) {
-    for (dJointNode *n=b->firstjoint; n; n=n->next) {
+  for (b=w->firstbody; b; b=(dxBody*)b->next) {
+    for (dxJointNode *n=b->firstjoint; n; n=n->next) {
       if (&n->joint->node[0] == n) {
 	if (n->joint->node[1].body != b)
 	  dDebug (0,"bad body pointer in joint node of body list (1)");
@@ -287,7 +287,7 @@ static void checkWorld (dWorld *w)
   }
 
   // check all body pointers in joints, check they are distinct
-  for (j=w->firstjoint; j; j=(dJoint*)j->next) {
+  for (j=w->firstjoint; j; j=(dxJoint*)j->next) {
     if (j->node[0].body && (j->node[0].body == j->node[1].body))
       dDebug (0,"non-distinct body pointers in joint");
     if ((j->node[0].body && j->node[0].body->tag != count) ||
@@ -299,10 +299,10 @@ static void checkWorld (dWorld *w)
 //****************************************************************************
 // body
 
-dBody *dBodyCreate (dWorld *w)
+dxBody *dBodyCreate (dxWorld *w)
 {
   dCHECKPTR (w);
-  dBody *b = new dBody;
+  dxBody *b = new dxBody;
   initObject (b,w);
   b->firstjoint = 0;
   dMassSetParameters (&b->mass,1,0,0,0,1,1,1,0,0,0);
@@ -325,17 +325,17 @@ dBody *dBodyCreate (dWorld *w)
 }
 
 
-void dBodyDestroy (dBody *b)
+void dBodyDestroy (dxBody *b)
 {
   dCHECKPTR (b);
 
   // detach all neighbouring joints, then delete this body.
-  dJointNode *n = b->firstjoint;
+  dxJointNode *n = b->firstjoint;
   while (n) {
     // sneaky trick to speed up removal of joint references (black magic)
     n->joint->node[(n == n->joint->node)].body = 0;
 
-    dJointNode *next = n->next;
+    dxJointNode *next = n->next;
     n->next = 0;
     removeJointReferencesFromAttachedBodies (n->joint);
     n = next;
@@ -519,7 +519,7 @@ void dBodyAddRelTorque (dBodyID b, dReal fx, dReal fy, dReal fz)
 //****************************************************************************
 // joints
 
-void dJointInit (dWorld *w, dJoint *j)
+void dJointInit (dxWorld *w, dxJoint *j)
 {
   dCHECKPTR (w);
   dCHECKPTR (j);
@@ -537,16 +537,16 @@ void dJointInit (dWorld *w, dJoint *j)
 }
 
 
-static dJoint *createJoint (dWorldID w, dJointGroupID group,
-			     dJoint::Vtable *vtable)
+static dxJoint *createJoint (dWorldID w, dJointGroupID group,
+			     dxJoint::Vtable *vtable)
 {
   dCHECKPTR (w);
-  dJoint *j;
+  dxJoint *j;
   if (group) {
-    j = (dJoint*) group->stack.alloc (vtable->size);
+    j = (dxJoint*) group->stack.alloc (vtable->size);
     group->num++;
   }
-  else j = (dJoint*) dAlloc (vtable->size);
+  else j = (dxJoint*) dAlloc (vtable->size);
   dJointInit (w,j);
   j->vtable = vtable;
   if (group) j->flags |= dJOINT_INGROUP;
@@ -555,35 +555,35 @@ static dJoint *createJoint (dWorldID w, dJointGroupID group,
 }
 
 
-dJoint * dJointCreateBall (dWorldID w, dJointGroupID group)
+dxJoint * dJointCreateBall (dWorldID w, dJointGroupID group)
 {
   return createJoint (w,group,&dball_vtable);
 }
 
 
-dJoint * dJointCreateHinge (dWorldID w, dJointGroupID group)
+dxJoint * dJointCreateHinge (dWorldID w, dJointGroupID group)
 {
   return createJoint (w,group,&dhinge_vtable);
 }
 
 
-dJoint * dJointCreateSlider (dWorldID w, dJointGroupID group)
+dxJoint * dJointCreateSlider (dWorldID w, dJointGroupID group)
 {
   return createJoint (w,group,&dslider_vtable);
 }
 
 
-dJointID dJointCreateContact (dWorldID w, dJointGroupID group,
-				dContact *c)
+dxJoint * dJointCreateContact (dWorldID w, dJointGroupID group,
+			       dContact *c)
 {
-  dJointContact *j = (dJointContact *)
+  dxJointContact *j = (dxJointContact *)
     createJoint (w,group,&dcontact_vtable);
   j->contact = *c;
   return j;
 }
 
 
-void dJointDestroy (dJoint *j)
+void dJointDestroy (dxJoint *j)
 {
   dCHECKPTR (j);
   if (j->flags & dJOINT_INGROUP) return;
@@ -597,11 +597,11 @@ void dJointDestroy (dJoint *j)
 dJointGroupID dJointGroupCreate (int max_size)
 {
   dASSERT (max_size > 0);
-  dJointGroup *group = (dJointGroup*) dAlloc (sizeof(dJointGroup));
+  dxJointGroup *group = (dxJointGroup*) dAlloc (sizeof(dxJointGroup));
   group->stack.init (max_size);
   group->stack.pushFrame();
   group->num = 0;
-  group->firstjoint = (dJoint*) group->stack.nextAlloc();
+  group->firstjoint = (dxJoint*) group->stack.nextAlloc();
   return group;
 }
 
@@ -610,7 +610,7 @@ void dJointGroupDestroy (dJointGroupID group)
 {
   dJointGroupEmpty (group);
   group->stack.destroy();
-  dFree (group,sizeof(dJointGroup));
+  dFree (group,sizeof(dxJointGroup));
 }
 
 
@@ -622,11 +622,11 @@ void dJointGroupEmpty (dJointGroupID group)
   // be at the start of those lists.
 
   int i;
-  dJoint **jlist = (dJoint**) alloca (group->num * sizeof(dJoint*));
-  dJoint *j = group->firstjoint;
+  dxJoint **jlist = (dxJoint**) alloca (group->num * sizeof(dxJoint*));
+  dxJoint *j = group->firstjoint;
   for (i=0; i < group->num; i++) {
     jlist[i] = j;
-    j = (dJoint*) ( ((char*)j) + j->vtable->size );
+    j = (dxJoint*) ( ((char*)j) + j->vtable->size );
   }
   for (i=group->num-1; i >= 0; i--) {
     removeJointReferencesFromAttachedBodies (jlist[i]);
@@ -639,7 +639,7 @@ void dJointGroupEmpty (dJointGroupID group)
 }
 
 
-void dJointAttach (dJoint *joint, dBody *body1, dBody *body2)
+void dJointAttach (dxJoint *joint, dxBody *body1, dxBody *body2)
 {
   // check arguments
   dCHECKPTR (joint);
@@ -647,7 +647,7 @@ void dJointAttach (dJoint *joint, dBody *body1, dBody *body2)
     dError (d_ERR_BAD_ARGS,"can't have body1==0 and body2==0");
   if (body1 == body2)
     dError (d_ERR_BAD_ARGS,"can't have body1==body2");
-  dWorld *world = joint->world;
+  dxWorld *world = joint->world;
   if ((body1 && body1->world != world) ||
       (body2 && body2->world != world))
     dError (d_ERR_SAME_WORLD,"joint and bodies must be in same world");
@@ -721,7 +721,7 @@ int dAreConnected (dBodyID b1, dBodyID b2)
   dCHECKPTR(b1);
   dCHECKPTR(b2);
   // look through b1's neighbour list for b2
-  for (dJointNode *n=b1->firstjoint; n; n=n->next) {
+  for (dxJointNode *n=b1->firstjoint; n; n=n->next) {
     if (n->body == b2) return 1;
   }
   return 0;
@@ -730,9 +730,9 @@ int dAreConnected (dBodyID b1, dBodyID b2)
 //****************************************************************************
 // world
 
-dWorld * dWorldCreate()
+dxWorld * dWorldCreate()
 {
-  dWorld *w = new dWorld;
+  dxWorld *w = new dxWorld;
   w->firstbody = 0;
   w->firstjoint = 0;
   w->nb = 0;
@@ -742,19 +742,19 @@ dWorld * dWorldCreate()
 }
 
 
-void dWorldDestroy (dWorld *w)
+void dWorldDestroy (dxWorld *w)
 {
   // delete all bodies and joints
   dCHECKPTR (w);
-  dBody *nextb, *b = w->firstbody;
+  dxBody *nextb, *b = w->firstbody;
   while (b) {
-    nextb = (dBody*) b->next;
+    nextb = (dxBody*) b->next;
     delete b;
     b = nextb;
   }
-  dJoint *nextj, *j = w->firstjoint;
+  dxJoint *nextj, *j = w->firstjoint;
   while (j) {
-    nextj = (dJoint*)j->next;
+    nextj = (dxJoint*)j->next;
     if (j->flags & dJOINT_INGROUP) {
       dMessage (0,"warning: destroying world containing grouped joints");
     }

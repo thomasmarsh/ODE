@@ -25,10 +25,10 @@
 #include "ode/common.h"
 
 
-void dInternalStepIsland (dWorld *world,
-			   dBody **body, int nb,
-			   dJoint **joint, int nj,
-			   dReal stepsize);
+void dInternalStepIsland (dxWorld *world,
+			  dxBody **body, int nb,
+			  dxJoint **joint, int nj,
+			  dReal stepsize);
 
 
 

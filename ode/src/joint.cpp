@@ -30,7 +30,7 @@
 // set three "ball-and-socket" rows in the constraint equation, and the
 // corresponding right hand side.
 
-static inline void setBall (dJoint *joint, dJoint::Info2 *info,
+static inline void setBall (dxJoint *joint, dxJoint::Info2 *info,
 			    dVector3 anchor1, dVector3 anchor2)
 {
   // anchor points in global coordinates with respect to body PORs.
@@ -71,7 +71,7 @@ static inline void setBall (dJoint *joint, dJoint::Info2 *info,
 
 // compute anchor points relative to bodies
 
-static void setAnchors (dJoint *j, dReal x, dReal y, dReal z,
+static void setAnchors (dxJoint *j, dReal x, dReal y, dReal z,
 			dVector3 anchor1, dVector3 anchor2)
 {
   if (j->node[0].body) {
@@ -101,7 +101,7 @@ static void setAnchors (dJoint *j, dReal x, dReal y, dReal z,
 
 // compute axes relative to bodies. axis2 can be 0
 
-static void setAxes (dJoint *j, dReal x, dReal y, dReal z,
+static void setAxes (dxJoint *j, dReal x, dReal y, dReal z,
 		     dVector3 axis1, dVector3 axis2)
 {
   if (j->node[0].body) {
@@ -128,7 +128,7 @@ static void setAxes (dJoint *j, dReal x, dReal y, dReal z,
 }
 
 
-static void getAnchor (dJoint *j, dVector3 result, dVector3 anchor1)
+static void getAnchor (dxJoint *j, dVector3 result, dVector3 anchor1)
 {
   if (j->node[0].body) {
     dMULTIPLY0_331 (result,j->node[0].body->R,anchor1);
@@ -139,7 +139,7 @@ static void getAnchor (dJoint *j, dVector3 result, dVector3 anchor1)
 }
 
 
-static void getAxis (dJoint *j, dVector3 result, dVector3 axis1)
+static void getAxis (dxJoint *j, dVector3 result, dVector3 axis1)
 {
   if (j->node[0].body) {
     dMULTIPLY0_331 (result,j->node[0].body->R,axis1);
@@ -149,50 +149,50 @@ static void getAxis (dJoint *j, dVector3 result, dVector3 axis1)
 //****************************************************************************
 // ball and socket
 
-static void ballInit (dJointBall *j)
+static void ballInit (dxJointBall *j)
 {
   dSetZero (j->anchor1,4);
   dSetZero (j->anchor2,4);
 }
 
 
-static void ballGetInfo1 (dJointBall *j, dJoint::Info1 *info)
+static void ballGetInfo1 (dxJointBall *j, dxJoint::Info1 *info)
 {
   info->nub = 3;
   info->nlcp = 0;
 }
 
 
-static void ballGetInfo2 (dJointBall *joint, dJoint::Info2 *info)
+static void ballGetInfo2 (dxJointBall *joint, dxJoint::Info2 *info)
 {
   setBall (joint,info,joint->anchor1,joint->anchor2);
 }
 
 
-static void ballSetAnchor (dJointBall *joint, dReal x, dReal y, dReal z)
+static void ballSetAnchor (dxJointBall *joint, dReal x, dReal y, dReal z)
 {
   setAnchors (joint,x,y,z,joint->anchor1,joint->anchor2);
 }
 
 
-static void ballGetAnchor (dJointBall *joint, dVector3 result)
+static void ballGetAnchor (dxJointBall *joint, dVector3 result)
 {
   getAnchor (joint,result,joint->anchor1);
 }
 
 
-dJoint::Vtable dball_vtable = {
-  sizeof(dJointBall),
-  (dJoint::init_fn*) ballInit,
-  (dJoint::getInfo1_fn*) ballGetInfo1,
-  (dJoint::getInfo2_fn*) ballGetInfo2,
-  (dJoint::setAnchor_fn*) ballSetAnchor, 0,
-  (dJoint::getAnchor_fn*) ballGetAnchor, 0};
+dxJoint::Vtable dball_vtable = {
+  sizeof(dxJointBall),
+  (dxJoint::init_fn*) ballInit,
+  (dxJoint::getInfo1_fn*) ballGetInfo1,
+  (dxJoint::getInfo2_fn*) ballGetInfo2,
+  (dxJoint::setAnchor_fn*) ballSetAnchor, 0,
+  (dxJoint::getAnchor_fn*) ballGetAnchor, 0};
 
 //****************************************************************************
 // hinge
 
-static void hingeInit (dJointHinge *j)
+static void hingeInit (dxJointHinge *j)
 {
   dSetZero (j->anchor1,4);
   dSetZero (j->anchor2,4);
@@ -201,14 +201,14 @@ static void hingeInit (dJointHinge *j)
 }
 
 
-static void hingeGetInfo1 (dJointHinge *j, dJoint::Info1 *info)
+static void hingeGetInfo1 (dxJointHinge *j, dxJoint::Info1 *info)
 {
   info->nub = 5;
   info->nlcp = 0;
 }
 
 
-static void hingeGetInfo2 (dJointHinge *joint, dJoint::Info2 *info)
+static void hingeGetInfo2 (dxJointHinge *joint, dxJoint::Info2 *info)
 {
   // set the three ball-and-socket rows
   setBall (joint,info,joint->anchor1,joint->anchor2);
@@ -277,44 +277,44 @@ static void hingeGetInfo2 (dJointHinge *joint, dJoint::Info2 *info)
 }
 
 
-static void hingeSetAnchor (dJointHinge *joint, dReal x, dReal y, dReal z)
+static void hingeSetAnchor (dxJointHinge *joint, dReal x, dReal y, dReal z)
 {
   setAnchors (joint,x,y,z,joint->anchor1,joint->anchor2);
 }
 
 
-static void hingeSetAxis (dJointHinge *joint, dReal x, dReal y, dReal z)
+static void hingeSetAxis (dxJointHinge *joint, dReal x, dReal y, dReal z)
 {
   setAxes (joint,x,y,z,joint->axis1,joint->axis2);
 }
 
 
-static void hingeGetAnchor (dJointHinge *joint, dVector3 result)
+static void hingeGetAnchor (dxJointHinge *joint, dVector3 result)
 {
   getAnchor (joint,result,joint->anchor1);
 }
 
 
-static void hingeGetAxis (dJointHinge *joint, dVector3 result)
+static void hingeGetAxis (dxJointHinge *joint, dVector3 result)
 {
   getAxis (joint,result,joint->axis1);
 }
 
 
-dJoint::Vtable dhinge_vtable = {
-  sizeof(dJointHinge),
-  (dJoint::init_fn*) hingeInit,
-  (dJoint::getInfo1_fn*) hingeGetInfo1,
-  (dJoint::getInfo2_fn*) hingeGetInfo2,
-  (dJoint::setAnchor_fn*) hingeSetAnchor,
-  (dJoint::setAxis_fn*) hingeSetAxis,
-  (dJoint::getAnchor_fn*) hingeGetAnchor,
-  (dJoint::getAxis_fn*) hingeGetAxis};
+dxJoint::Vtable dhinge_vtable = {
+  sizeof(dxJointHinge),
+  (dxJoint::init_fn*) hingeInit,
+  (dxJoint::getInfo1_fn*) hingeGetInfo1,
+  (dxJoint::getInfo2_fn*) hingeGetInfo2,
+  (dxJoint::setAnchor_fn*) hingeSetAnchor,
+  (dxJoint::setAxis_fn*) hingeSetAxis,
+  (dxJoint::getAnchor_fn*) hingeGetAnchor,
+  (dxJoint::getAxis_fn*) hingeGetAxis};
 
 //****************************************************************************
 // slider
 
-static void sliderInit (dJointSlider *j)
+static void sliderInit (dxJointSlider *j)
 {
   dSetZero (j->axis1,4);
   dSetZero (j->qrel,4);
@@ -322,14 +322,14 @@ static void sliderInit (dJointSlider *j)
 }
 
 
-static void sliderGetInfo1 (dJointSlider *j, dJoint::Info1 *info)
+static void sliderGetInfo1 (dxJointSlider *j, dxJoint::Info1 *info)
 {
   info->nub = 5;
   info->nlcp = 0;
 }
 
 
-static void sliderGetInfo2 (dJointSlider *joint, dJoint::Info2 *info)
+static void sliderGetInfo2 (dxJointSlider *joint, dxJoint::Info2 *info)
 {
   int i,s = info->rowskip;
   int s2=2*s,s3=3*s,s4=4*s;
@@ -438,7 +438,7 @@ static void sliderGetInfo2 (dJointSlider *joint, dJoint::Info2 *info)
 }
 
 
-static void sliderSetAxis (dJointSlider *joint, dReal x, dReal y, dReal z)
+static void sliderSetAxis (dxJointSlider *joint, dReal x, dReal y, dReal z)
 {
   int i;
   setAxes (joint,x,y,z,joint->axis1,0);
@@ -460,26 +460,26 @@ static void sliderSetAxis (dJointSlider *joint, dReal x, dReal y, dReal z)
 }
 
 
-static void sliderGetAxis (dJointSlider *joint, dVector3 result)
+static void sliderGetAxis (dxJointSlider *joint, dVector3 result)
 {
   getAxis (joint,result,joint->axis1);
 }
 
 
-dJoint::Vtable dslider_vtable = {
-  sizeof(dJointSlider),
-  (dJoint::init_fn*) sliderInit,
-  (dJoint::getInfo1_fn*) sliderGetInfo1,
-  (dJoint::getInfo2_fn*) sliderGetInfo2,
+dxJoint::Vtable dslider_vtable = {
+  sizeof(dxJointSlider),
+  (dxJoint::init_fn*) sliderInit,
+  (dxJoint::getInfo1_fn*) sliderGetInfo1,
+  (dxJoint::getInfo2_fn*) sliderGetInfo2,
   0,
-  (dJoint::setAxis_fn*) sliderSetAxis,
+  (dxJoint::setAxis_fn*) sliderSetAxis,
   0,
-  (dJoint::getAxis_fn*) sliderGetAxis};
+  (dxJoint::getAxis_fn*) sliderGetAxis};
 
 //****************************************************************************
 // contact
 
-static void contactInit (dJointContact *j)
+static void contactInit (dxJointContact *j)
 {
   dSetZero (j->contact.pos,4);
   dSetZero (j->contact.normal,4);
@@ -487,14 +487,14 @@ static void contactInit (dJointContact *j)
 }
 
 
-static void contactGetInfo1 (dJointContact *j, dJoint::Info1 *info)
+static void contactGetInfo1 (dxJointContact *j, dxJoint::Info1 *info)
 {
   info->nub = 0;
   info->nlcp = 1;
 }
 
 
-static void contactGetInfo2 (dJointContact *j, dJoint::Info2 *info)
+static void contactGetInfo2 (dxJointContact *j, dxJoint::Info2 *info)
 {
   int i; // s = info->rowskip;
 
@@ -526,9 +526,9 @@ static void contactGetInfo2 (dJointContact *j, dJoint::Info2 *info)
 }
 
 
-dJoint::Vtable dcontact_vtable = {
-  sizeof(dJointContact),
-  (dJoint::init_fn*) contactInit,
-  (dJoint::getInfo1_fn*) contactGetInfo1,
-  (dJoint::getInfo2_fn*) contactGetInfo2,
+dxJoint::Vtable dcontact_vtable = {
+  sizeof(dxJointContact),
+  (dxJoint::init_fn*) contactInit,
+  (dxJoint::getInfo1_fn*) contactGetInfo1,
+  (dxJoint::getInfo2_fn*) contactGetInfo2,
   0,0,0,0};

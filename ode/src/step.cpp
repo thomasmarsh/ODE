@@ -253,8 +253,8 @@ static const dReal epsilon = 0.0001;
 // `body' is the body array, `nb' is the size of the array.
 // `joint' is the body array, `nj' is the size of the array.
 
-void dInternalStepIsland_x1 (dWorld *world, dBody **body, int nb,
-			      dJoint **joint, int nj, dReal stepsize)
+void dInternalStepIsland_x1 (dxWorld *world, dxBody **body, int nb,
+			     dxJoint **joint, int nj, dReal stepsize)
 {
   int i,j,k;
   int n6 = 6*nb;
@@ -307,7 +307,7 @@ void dInternalStepIsland_x1 (dWorld *world, dBody **body, int nb,
   for (i=0; i<nj; i++) {
     ofs1[i] = nub;
     ofs2[i] = nlcp;
-    dJoint::Info1 info;
+    dxJoint::Info1 info;
     joint[i]->vtable->getInfo1 (joint[i],&info);
     dASSERT (info.nub >= 0 && info.nlcp >= 0 && (info.nub + info.nlcp) <= 6);
     nub += info.nub;
@@ -364,7 +364,7 @@ void dInternalStepIsland_x1 (dWorld *world, dBody **body, int nb,
 #   endif
     dReal *J = (dReal*) alloca (m*nskip*sizeof(dReal));
     dSetZero (J,m*nskip);
-    dJoint::Info2 Jinfo;
+    dxJoint::Info2 Jinfo;
     Jinfo.rowskip = nskip;
     Jinfo.fps = dRecip(stepsize);
     Jinfo.erp = erp;
@@ -540,8 +540,8 @@ void dInternalStepIsland_x1 (dWorld *world, dBody **body, int nb,
 //****************************************************************************
 // an optimized version of dInternalStepIsland1()
 
-void dInternalStepIsland_x2 (dWorld *world, dBody **body, int nb,
-			      dJoint **joint, int nj, dReal stepsize)
+void dInternalStepIsland_x2 (dxWorld *world, dxBody **body, int nb,
+			     dxJoint **joint, int nj, dReal stepsize)
 {
   int i,j,k;
 # ifdef TIMING
@@ -590,7 +590,7 @@ void dInternalStepIsland_x2 (dWorld *world, dBody **body, int nb,
   // yet.
   int m = 0;
   int nub = 0;
-  dJoint::Info1 *info = (dJoint::Info1*) alloca (nj*sizeof(dJoint::Info1));
+  dxJoint::Info1 *info = (dxJoint::Info1*) alloca (nj*sizeof(dxJoint::Info1));
   int *ofs = (int*) alloca (nj*sizeof(int));
   int *nrows = (int*) alloca (nj*sizeof(int));
   for (i=0; i<nj; i++) {
@@ -647,7 +647,7 @@ void dInternalStepIsland_x2 (dWorld *world, dBody **body, int nb,
 #   endif
     dReal *J = (dReal*) alloca (2*m*8*sizeof(dReal));
     dSetZero (J,2*m*8);
-    dJoint::Info2 Jinfo;
+    dxJoint::Info2 Jinfo;
     Jinfo.rowskip = 8;
     Jinfo.fps = stepsize1;
     Jinfo.erp = erp;
@@ -720,8 +720,8 @@ void dInternalStepIsland_x2 (dWorld *world, dBody **body, int nb,
     dReal *A = (dReal*) alloca (m*mskip*sizeof(dReal));
     dSetZero (A,m*mskip);
     for (i=0; i<nb; i++) {
-      for (dJointNode *n1=body[i]->firstjoint; n1; n1=n1->next) {
-	for (dJointNode *n2=n1->next; n2; n2=n2->next) {
+      for (dxJointNode *n1=body[i]->firstjoint; n1; n1=n1->next) {
+	for (dxJointNode *n2=n1->next; n2; n2=n2->next) {
 	  // get joint numbers and ensure ofs[j1] >= ofs[j2]
 	  int j1 = n1->joint->tag;
 	  int j2 = n2->joint->tag;
@@ -924,8 +924,8 @@ void dInternalStepIsland_x2 (dWorld *world, dBody **body, int nb,
 
 //****************************************************************************
 
-void dInternalStepIsland (dWorld *world, dBody **body, int nb,
-			   dJoint **joint, int nj, dReal stepsize)
+void dInternalStepIsland (dxWorld *world, dxBody **body, int nb,
+			  dxJoint **joint, int nj, dReal stepsize)
 {
 # ifndef COMPARE_METHODS
   dInternalStepIsland_x2 (world,body,nb,joint,nj,stepsize);
@@ -935,14 +935,14 @@ void dInternalStepIsland (dWorld *world, dBody **body, int nb,
   int i;
 
   // save body state
-  dBody *state = (dBody*) alloca (nb*sizeof(dBody));
-  for (i=0; i<nb; i++) memcpy (state+i,body[i],sizeof(dBody));
+  dxBody *state = (dxBody*) alloca (nb*sizeof(dxBody));
+  for (i=0; i<nb; i++) memcpy (state+i,body[i],sizeof(dxBody));
 
   // take slow step
   dInternalStepIsland_x1 (world,body,nb,joint,nj,stepsize);
 
   // restore state
-  for (i=0; i<nb; i++) memcpy (body[i],state+i,sizeof(dBody));
+  for (i=0; i<nb; i++) memcpy (body[i],state+i,sizeof(dxBody));
 
   // take fast step
   dInternalStepIsland_x2 (world,body,nb,joint,nj,stepsize);

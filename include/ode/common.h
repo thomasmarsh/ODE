@@ -128,22 +128,22 @@ typedef dReal dQuaternion[4];
 #define dALLOCA16(n) ((char*)(((((int)alloca((n)+15))-1)|15)+1))
 
 
-/* object types */
+/* internal object types (all prefixed with `dx') */
 
-struct dWorld;		/* dynamics world */
-struct dSpace;		/* collision space */
-struct dBody;		/* rigid body (dynamics object) */
-struct dGeom;		/* geometry (collision object) */
-struct dJoint;
-struct dJointNode;
-struct dJointGroup;
+struct dxWorld;		/* dynamics world */
+struct dxSpace;		/* collision space */
+struct dxBody;		/* rigid body (dynamics object) */
+struct dxGeom;		/* geometry (collision object) */
+struct dxJoint;
+struct dxJointNode;
+struct dxJointGroup;
 
-typedef struct dWorld *dWorldID;
-typedef struct dSpace *dSpaceID;
-typedef struct dBody *dBodyID;
-typedef struct dGeom *dGeomID;
-typedef struct dJoint *dJointID;
-typedef struct dJointGroup *dJointGroupID;
+typedef struct dxWorld *dWorldID;
+typedef struct dxSpace *dSpaceID;
+typedef struct dxBody *dBodyID;
+typedef struct dxGeom *dGeomID;
+typedef struct dxJoint *dJointID;
+typedef struct dxJointGroup *dJointGroupID;
 
 
 /* error numbers */
