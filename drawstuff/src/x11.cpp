@@ -70,6 +70,7 @@ static int last_key_pressed=0;		// last key pressed in the window
 static int run=1;			// 1 if simulation running
 static int pause=0;			// 1 if in `pause' mode
 static int singlestep=0;		// 1 if single step key pressed
+static int writeframes=0;		// 1 if frame files to be written
 
 
 static void createMainWindow (int _width, int _height)
@@ -215,6 +216,10 @@ static void handleEvent (XEvent &event, dsFunctions *fn)
 		xyz[0],xyz[1],xyz[2],hpr[0],hpr[1],hpr[2]);
 	break;
       }
+      case 'w': case 'W':
+	writeframes ^= 1;
+	if (writeframes) printf ("Now writing frames to PPM files\n");
+	break;
       }
     }
     last_key_pressed = key;		// a kludgy place to put this...
@@ -243,6 +248,52 @@ static void handleEvent (XEvent &event, dsFunctions *fn)
 }
 
 
+// return the index of the highest bit
+static int getHighBitIndex (unsigned int x)
+{
+  int i = 0;
+  while (x) {
+    i++;
+    x >>= 1;
+  }
+  return i-1;
+}
+
+
+// shift x left by i, where i can be positive or negative
+#define SHIFTL(x,i) (((i) >= 0) ? ((x) << (i)) : ((x) >> (-i)))
+
+
+static void captureFrame (int num)
+{
+  fprintf (stderr,"capturing frame %04d\n",num);
+
+  char s[100];
+  sprintf (s,"frame/frame%04d.ppm",num);
+  FILE *f = fopen (s,"wb");
+  if (!f) dsError ("can't open \"%s\" for writing",s);
+  fprintf (f,"P6\n%d %d\n255\n",width,height);
+  XImage *image = XGetImage (display,win,0,0,width,height,~0,ZPixmap);
+
+  int rshift = 7 - getHighBitIndex (image->red_mask);
+  int gshift = 7 - getHighBitIndex (image->green_mask);
+  int bshift = 7 - getHighBitIndex (image->blue_mask);
+
+  for (int y=0; y<height; y++) {
+    for (int x=0; x<width; x++) {
+      unsigned long pixel = XGetPixel (image,x,y);
+      unsigned char b[3];
+      b[0] = SHIFTL(pixel & image->red_mask,rshift);
+      b[1] = SHIFTL(pixel & image->green_mask,gshift);
+      b[2] = SHIFTL(pixel & image->blue_mask,bshift);
+      fwrite (b,3,1,f);
+    }
+  }
+  fclose (f);
+  XDestroyImage (image);
+}
+
+
 void dsPlatformSimLoop (int window_width, int window_height, dsFunctions *fn,
 			int initial_pause)
 {
@@ -261,9 +312,11 @@ void dsPlatformSimLoop (int window_width, int window_height, dsFunctions *fn,
 	   "   Ctrl-T : toggle textures (or say `-notex' on command line).\n"
 	   "   Ctrl-S : toggle shadows (or say `-noshadow' on command line).\n"
 	   "   Ctrl-V : print current viewpoint coordinates (x,y,z,h,p,r).\n"
+	   "   Ctrl-W : write frames to ppm files: frame/frameNNN.ppm\n"
 	   "   Ctrl-X : exit.\n"
 	   "\n",DS_VERSION >> 8,DS_VERSION & 0xff);
 
+  int frame = 1;
   run = 1;
   while (run) {
     // read in and process all pending events for the main window
@@ -279,6 +332,13 @@ void dsPlatformSimLoop (int window_width, int window_height, dsFunctions *fn,
     glFlush();
     glXSwapBuffers (display,win);
     XSync (display,0);
+
+    // capture frames if necessary
+    printf ("%d %d\n",pause,writeframes);
+    if (pause==0 && writeframes) {
+      captureFrame (frame);
+      frame++;
+    }
   };
 
   if (fn->stop) fn->stop();
