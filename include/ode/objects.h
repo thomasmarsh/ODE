@@ -85,6 +85,8 @@ dJointID dJointCreateBall (dWorldID, dJointGroupID);
 dJointID dJointCreateHinge (dWorldID, dJointGroupID);
 dJointID dJointCreateSlider (dWorldID, dJointGroupID);
 dJointID dJointCreateContact (dWorldID, dJointGroupID, const dContact *);
+dJointID dJointCreateRMotor (dWorldID, dJointGroupID);
+dJointID dJointCreateHinge2 (dWorldID, dJointGroupID);
 
 void dJointDestroy (dJointID);
 
@@ -98,11 +100,21 @@ void dJointSetBallAnchor (dJointID, dReal x, dReal y, dReal z);
 void dJointSetHingeAnchor (dJointID, dReal x, dReal y, dReal z);
 void dJointSetHingeAxis (dJointID, dReal x, dReal y, dReal z);
 void dJointSetSliderAxis (dJointID, dReal x, dReal y, dReal z);
+void dJointSetRMotorAxis (dJointID, dReal x, dReal y, dReal z);
+void dJointSetRMotor (dJointID, dReal vel, dReal tmax);
+void dJointSetHinge2Anchor (dJointID, dReal x, dReal y, dReal z);
+void dJointSetHinge2Axis1 (dJointID, dReal x, dReal y, dReal z);
+void dJointSetHinge2Axis2 (dJointID, dReal x, dReal y, dReal z);
 
 void dJointGetBallAnchor (dJointID, dVector3 result);
 void dJointGetHingeAnchor (dJointID, dVector3 result);
 void dJointGetHingeAxis (dJointID, dVector3 result);
 void dJointGetSliderAxis (dJointID, dVector3 result);
+void dJointGetRMotorAxis (dJointID, dVector3 result);
+dReal dJointGetRMotorAngle (dJointID);
+void dJointGetHinge2Anchor (dJointID, dVector3 result);
+void dJointGetHinge2Axis1 (dJointID, dVector3 result);
+void dJointGetHinge2Axis2 (dJointID, dVector3 result);
 
 int dAreConnected (dBodyID, dBodyID);
 
