@@ -33,6 +33,10 @@ geom transform
 #include "collision_transform.h"
 #include "collision_util.h"
 
+#ifdef _MSC_VER
+#pragma warning(disable:4291)  // for VC++, no complaints about "no matching operator delete found"
+#endif
+
 //****************************************************************************
 // dxGeomTransform class
 

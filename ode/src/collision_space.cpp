@@ -34,6 +34,10 @@ spaces
 
 #include "collision_space_internal.h"
 
+#ifdef _MSC_VER
+#pragma warning(disable:4291)  // for VC++, no complaints about "no matching operator delete found"
+#endif
+
 //****************************************************************************
 // make the geom dirty by setting the GEOM_DIRTY and GEOM_BAD_AABB flags
 // and moving it to the front of the space's list. all the parents of a

@@ -20,6 +20,10 @@
  *                                                                       *
  *************************************************************************/
 
+#ifdef _MSC_VER
+#pragma warning(disable:4291)  // for VC++, no complaints about "no matching operator delete found"
+#endif
+
 // this source file is mostly concerned with the data structures, not the
 // numerics.
 
