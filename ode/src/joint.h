@@ -213,6 +213,18 @@ struct dxJointHinge2 : public dxJoint {
 extern struct dxJoint::Vtable __dhinge2_vtable;
 
 
+// angular motor
+
+struct dxJointAMotor : public dxJoint {
+  int num;			// number of axes (0..3)
+  int rel[3];			// what the axes are relative to (global,b1,b2)
+  dVector3 axis[3];		// three axes
+  dxJointLimitMotor limot[3];	// limit+motor info for axes
+  dReal angle[3];		// user-supplied angles for axes
+};
+extern struct dxJoint::Vtable __damotor_vtable;
+
+
 // fixed
 
 struct dxJointFixed : public dxJoint {

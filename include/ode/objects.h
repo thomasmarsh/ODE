@@ -109,6 +109,7 @@ dJointID dJointCreateContact (dWorldID, dJointGroupID, const dContact *);
 dJointID dJointCreateHinge2 (dWorldID, dJointGroupID);
 dJointID dJointCreateFixed (dWorldID, dJointGroupID);
 dJointID dJointCreateNull (dWorldID, dJointGroupID);
+dJointID dJointCreateAMotor (dWorldID, dJointGroupID);
 
 void dJointDestroy (dJointID);
 
@@ -133,6 +134,10 @@ void dJointSetHinge2Axis1 (dJointID, dReal x, dReal y, dReal z);
 void dJointSetHinge2Axis2 (dJointID, dReal x, dReal y, dReal z);
 void dJointSetHinge2Param (dJointID, int parameter, dReal value);
 void dJointSetFixed (dJointID);
+void dJointSetAMotorNumAxes (dJointID, int num);
+void dJointSetAMotorAxis (dJointID, int axis, int rel,
+			  dReal x, dReal y, dReal z);
+void dJointSetAMotorParam (dJointID, int parameter, dReal value);
 
 void dJointGetBallAnchor (dJointID, dVector3 result);
 void dJointGetHingeAnchor (dJointID, dVector3 result);
@@ -151,6 +156,10 @@ dReal dJointGetHinge2Param (dJointID, int parameter);
 dReal dJointGetHinge2Angle1 (dJointID);
 dReal dJointGetHinge2Angle1Rate (dJointID);
 dReal dJointGetHinge2Angle2Rate (dJointID);
+int dJointGetAMotorNumAxes (dJointID);
+void dJointGetAMotorAxis (dJointID, int axis, dVector3 result);
+int dJointGetAMotorAxisRel (dJointID, int axis);
+dReal dJointGetAMotorParam (dJointID, int parameter);
 
 int dAreConnected (dBodyID, dBodyID);
 
