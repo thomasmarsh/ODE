@@ -193,7 +193,7 @@ dReal dJointGetAMotorParam (dJointID, int parameter);
 int dJointGetAMotorMode (dJointID);
 
 int dAreConnected (dBodyID, dBodyID);
-int dAreConnectedExcluding (dBodyID b1, dBodyID b2, int joint_type);
+int dAreConnectedExcluding (dBodyID, dBodyID, int joint_type);
 
 
 #ifdef __cplusplus

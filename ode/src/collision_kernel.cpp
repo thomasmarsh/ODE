@@ -387,6 +387,13 @@ int dGeomIsSpace (dxGeom *g)
 }
 
 
+dSpaceID dGeomGetSpace (dxGeom *g)
+{
+  dAASSERT (g);
+  return g->parent_space;
+}
+
+
 int dGeomGetClass (dxGeom *g)
 {
   dAASSERT (g);

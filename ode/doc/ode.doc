@@ -2501,6 +2501,14 @@ Return 1 if the given geom is a space, or 0 if not.
 
 
 @funcdef{
+dSpaceID dGeomGetSpace (dGeomID);
+}{
+Return the space that the given geometry is contained in, or return 0 if it is
+not contained in any space.
+}
+
+
+@funcdef{
 int dGeomGetClass (dGeomID);
 }{
 Given a geom, this returns its class number.
