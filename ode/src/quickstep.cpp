@@ -30,6 +30,7 @@
 #include <ode/timer.h>
 #include <ode/error.h>
 #include <ode/matrix.h>
+#include <ode/misc.h>
 #include "lcp.h"
 #include "util.h"
 
@@ -76,6 +77,20 @@ typedef dReal *dRealMutablePtr;
 //#define REORDER_CONSTRAINTS 1
 
 
+// uncomment the following line to randomly reorder constraint rows
+// during the solution. depending on the situation, this can help a lot
+// or hardly at all, but it doesn't seem to hurt.
+
+#define RANDOMLY_REORDER_CONSTRAINTS 1
+
+
+// uncomment the following line to use warm starting. this definitely
+// help for motor-driven joints. unfortunately it appears to hurt
+// with high-friction contacts. use with care
+
+//#define WARM_STARTING 1
+
+
 struct IndexError {
 	dReal error;		// error to sort on
 	int findex;
@@ -109,9 +124,13 @@ static void SOR_LCP (int m, int nb, dRealMutablePtr J, int *jb, dxBody * const *
 
 	int i,j;
 
+#ifdef WARM_STARTING
 	// for warm starting, this seems to be necessary to prevent
 	// jerkiness in motor-driven joints. i have no idea why this works.
-	for (i=0; i<m; i++) lambda[i] *= 0.9;
+	for (i=0; i<m; i++) lambda[i] *= 0.5;
+#else
+	dSetZero (lambda,m);
+#endif
 
 	// the lambda computed at the previous iteration.
 	// this is used to measure error for when we are reordering the indexes.
@@ -143,6 +162,7 @@ static void SOR_LCP (int m, int nb, dRealMutablePtr J, int *jb, dxBody * const *
 	// compute fc=(inv(M)*J')*lambda. we will incrementally maintain fc
 	// as we change lambda.
         dSetZero (fc,nb*6);
+#ifdef WARM_STARTING
 	iMJ_ptr = iMJ;
 	for (i=0; i<m; i++) {
 		//@@@ code sequences like this one are very common here so we
@@ -158,6 +178,7 @@ static void SOR_LCP (int m, int nb, dRealMutablePtr J, int *jb, dxBody * const *
 		}
 		iMJ_ptr += 6;
 	}
+#endif
 
 	// precompute 1 / diagonals of A
 	dRealAllocaArray (Ad,m);
@@ -231,7 +252,15 @@ static void SOR_LCP (int m, int nb, dRealMutablePtr J, int *jb, dxBody * const *
 		}
 		qsort (order,m,sizeof(IndexError),&compare_index_error);
 #endif
-	
+#ifdef RANDOMLY_REORDER_CONSTRAINTS
+		for (i=1; i<m; ++i) {
+			IndexError tmp = order[i];
+			int swapi = dRandInt(i+1);
+			order[i] = order[swapi];
+			order[swapi] = tmp;
+		}
+#endif
+
 		//@@@ potential optimization: swap lambda and last_lambda pointers rather
 		//    than copying the data. we must make sure lambda is properly
 		//    returned to the caller
@@ -487,22 +516,26 @@ void dxQuickStepper (dxWorld *world, dxBody * const *body, int nb,
 
 		// load lambda from the value saved on the previous iteration
 		dRealAllocaArray (lambda,m);
+#ifdef WARM_STARTING
 		dSetZero (lambda,m);	//@@@ shouldn't be necessary
 		for (i=0; i<nj; i++) {
 			memcpy (lambda+ofs[i],joint[i]->lambda,info[i].m * sizeof(dReal));
 		}
+#endif
 
 		// solve the LCP problem and get lambda and constraint force
 		IFTIMING (dTimerNow ("solving LCP problem");)
 		dRealAllocaArray (cforce,nb*6);
 		SOR_LCP (m,nb,J,jb,body,invI,lambda,cforce,rhs,lo,hi,cfm,findex,&world->qs);
 
+#ifdef WARM_STARTING
 		// save lambda for the next iteration
 		//@@@ note that this doesn't work for contact joints yet, as they are
 		// recreated every iteration
 		for (i=0; i<nj; i++) {
 			memcpy (joint[i]->lambda,lambda+ofs[i],info[i].m * sizeof(dReal));
 		}
+#endif
 
 		// note that rhs and J are overwritten at this point and should not be used again.
 		// make sure of this.
