@@ -19,15 +19,6 @@
  *                                                                       *
  *************************************************************************/
 
-/*
-
-TODO
-----
-
-* rename topvt and quadADR. in fact, do it better.
-
-*/
-
 #include <stdio.h>
 #include <malloc.h>		// for alloca under windows
 #include "objects.h"
