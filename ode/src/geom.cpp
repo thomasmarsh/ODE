@@ -447,6 +447,7 @@ int dCreateGeomClass (const dGeomClass *c)
   dAllocDontReport (gc);
   gc->collider = c->collider;
   gc->aabb = c->aabb;
+  gc->aabb_test = c->aabb_test;
   gc->dtor = c->dtor;
   gc->num = n;
   gc->size = SIZEOF_DXGEOM + c->bytes;
@@ -637,6 +638,20 @@ void dGeomDestroy (dxGeom *g)
   if (g->_class->dtor) g->_class->dtor (g);
   if (!g->body) dFree (g->pos,sizeof(dxPosR));
   dFree (g,g->_class->size);
+}
+
+
+void dGeomGetAABB (dxGeom *g, dReal aabb[6])
+{
+  dAASSERT (g);
+  g->_class->aabb (g,aabb);
+}
+
+
+dReal *dGeomGetSpaceAABB (dxGeom *g)
+{
+  dAASSERT (g);
+  return g->space_aabb;
 }
 
 //****************************************************************************
@@ -1068,6 +1083,7 @@ dxGeom *dCreateSphere (dSpaceID space, dReal radius)
     c.bytes = sizeof (dxSphere);
     c.collider = &dSphereColliderFn;
     c.aabb = &dSphereAABB;
+    c.aabb_test = 0;
     c.dtor = 0;
     dSphereClass = dCreateGeomClass (&c);
   }
@@ -1088,6 +1104,7 @@ dxGeom *dCreateBox (dSpaceID space, dReal lx, dReal ly, dReal lz)
     c.bytes = sizeof (dxBox);
     c.collider = &dBoxColliderFn;
     c.aabb = &dBoxAABB;
+    c.aabb_test = 0;
     c.dtor = 0;
     dBoxClass = dCreateGeomClass (&c);
   }
@@ -1110,6 +1127,7 @@ dxGeom *dCreatePlane (dSpaceID space,
     c.bytes = sizeof (dxPlane);
     c.collider = &dPlaneColliderFn;
     c.aabb = &dPlaneAABB;
+    c.aabb_test = 0;
     c.dtor = 0;
     dPlaneClass = dCreateGeomClass (&c);
   }
@@ -1250,6 +1268,7 @@ dxGeom *dCreateGeomGroup (dSpaceID space)
     c.bytes = sizeof (dxGeomGroup);
     c.collider = &dGeomGroupColliderFn;
     c.aabb = &dGeomGroupAABB;
+    c.aabb_test = 0;
     c.dtor = &dGeomGroupDtor;
     dGeomGroupClass = dCreateGeomClass (&c);
   }

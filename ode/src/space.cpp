@@ -84,7 +84,9 @@ struct dxSpace : public dBase {
 
 // collide two AABBs together. for the hash table space, this is called if
 // the two AABBs inhabit the same hash table cells. this only calls the
-// callback function if the boxes actually intersect.
+// callback function if the boxes actually intersect. if a geom has an
+// AABB test function, that is called to provide a further refinement of
+// the intersection.
 
 static inline void collideAABBs (dReal bounds1[6], dReal bounds2[6],
 				 dxGeom *g1, dxGeom *g2,
@@ -96,6 +98,12 @@ static inline void collideAABBs (dReal bounds1[6], dReal bounds2[6],
       bounds1[3] < bounds2[2] ||
       bounds1[4] > bounds2[5] ||
       bounds1[5] < bounds2[4]) return;
+  if (g1->_class->aabb_test) {
+    if (g1->_class->aabb_test (g1,bounds2) == 0) return;
+  }
+  if (g2->_class->aabb_test) {
+    if (g2->_class->aabb_test (g2,bounds1) == 0) return;
+  }
   callback (data,g1,g2);
 }
 
@@ -181,6 +189,7 @@ void dxSimpleSpace::collide (void *data, dNearCallback *callback)
   i=0;
   for (g1=first; g1; g1=g1->space.next) {
     g1->_class->aabb (g1,bounds + i);
+    g1->space_aabb = bounds + i;
     i += 6;
   }
 
@@ -194,6 +203,9 @@ void dxSimpleSpace::collide (void *data, dNearCallback *callback)
     }
     i += 6;
   }
+
+  // reset the aabb fields of the geoms back to 0
+  for (g1=first; g1; g1=g1->space.next) g1->space_aabb = 0;
 }
 
 
@@ -397,6 +409,7 @@ void dxHashSpace::collide (void *data, dNearCallback *callback)
     ntotal++;
     dxAABB *aabb = (dxAABB*) ALLOCA (sizeof(dxAABB));
     geom->_class->aabb (geom,aabb->bounds);
+    geom->space_aabb = aabb->bounds;
     aabb->geom = geom;
     // compute level, but prevent cells from getting too small
     int level = findLevel (aabb->bounds);
@@ -537,6 +550,9 @@ void dxHashSpace::collide (void *data, dNearCallback *callback)
 		    data,callback);
     }
   }
+
+  // reset the aabb fields of the geoms back to 0
+  for (geom=first; geom; geom=geom->space.next) geom->space_aabb = 0;
 }
 
 //****************************************************************************
