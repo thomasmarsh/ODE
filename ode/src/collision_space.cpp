@@ -27,6 +27,7 @@ spaces
 */
 
 #include <ode/common.h>
+#include <ode/matrix.h>
 #include <ode/collision_space.h>
 #include <ode/collision.h>
 #include "collision_kernel.h"
@@ -153,20 +154,25 @@ dxSpace::~dxSpace()
 
 void dxSpace::computeAABB()
 {
-  int i;
-  dReal a[6];
-  a[0] = dInfinity;
-  a[1] = -dInfinity;
-  a[2] = dInfinity;
-  a[3] = -dInfinity;
-  a[4] = dInfinity;
-  a[5] = -dInfinity;
-  for (dxGeom *g=first; g; g=g->next) {
-    g->recomputeAABB();
-    for (i=0; i<6; i += 2) if (g->aabb[i] < a[i]) a[i] = g->aabb[i];
-    for (i=1; i<6; i += 2) if (g->aabb[i] > a[i]) a[i] = g->aabb[i];
+  if (first) {
+    int i;
+    dReal a[6];
+    a[0] = dInfinity;
+    a[1] = -dInfinity;
+    a[2] = dInfinity;
+    a[3] = -dInfinity;
+    a[4] = dInfinity;
+    a[5] = -dInfinity;
+    for (dxGeom *g=first; g; g=g->next) {
+      g->recomputeAABB();
+      for (i=0; i<6; i += 2) if (g->aabb[i] < a[i]) a[i] = g->aabb[i];
+      for (i=1; i<6; i += 2) if (g->aabb[i] > a[i]) a[i] = g->aabb[i];
+    }
+    memcpy(aabb,a,6*sizeof(dReal));
   }
-  memcpy(aabb,a,6*sizeof(dReal));
+  else {
+    dSetZero (aabb,6);
+  }
 }
 
 
@@ -381,7 +387,7 @@ static int findLevel (dReal bounds[6])
   q2 = bounds[5] - bounds[4];	// z bounds
   if (q2 > q) q = q2;
 
-  if (q == dInfinity) return MAXINT;
+  if (q == dInfinity || q == -dInfinity) return MAXINT;
 
   // find level such that 0.5 * 2^level < q <= 2^level
   int level;
