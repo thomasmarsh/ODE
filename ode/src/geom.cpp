@@ -27,6 +27,7 @@ dContactGeom::g1 and dContactGeom::g2.
 
 */
 
+#define SHARED_GEOM_H_INCLUDED_FROM_DEFINING_FILE 1
 #include <ode/common.h>
 #include <ode/geom.h>
 #include <ode/rotation.h>
@@ -1283,10 +1284,10 @@ int dCollideG (const dxGeom *o1, const dxGeom *o2, int flags,
 //****************************************************************************
 // standard classes
 
-int dSphereClass = -1;
-int dBoxClass = -1;
-int dCCylinderClass = -1;
-int dPlaneClass = -1;
+SHAREDLIBEXPORT int dSphereClass = -1;
+SHAREDLIBEXPORT int dBoxClass = -1;
+SHAREDLIBEXPORT int dCCylinderClass = -1;
+SHAREDLIBEXPORT int dPlaneClass = -1;
 
 
 static dColliderFn * dSphereColliderFn (int num)

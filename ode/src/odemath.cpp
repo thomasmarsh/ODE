@@ -20,6 +20,7 @@
  *                                                                       *
  *************************************************************************/
 
+#define SHARED_CONFIG_H_INCLUDED_FROM_DEFINING_FILE 1
 #include <ode/common.h>
 #include <ode/odemath.h>
 

@@ -147,8 +147,15 @@ drawstuff-lib: configure $(DRAWSTUFF_LIB)
 ode-test: ode-lib drawstuff-lib $(ODE_TEST_EXE)
 drawstuff-test: drawstuff-lib $(DRAWSTUFF_TEST_EXE)
 
+ifndef ODE_LIB_AR_RULE
+ODE_LIB_AR_RULE=$(AR)$@
+endif
+
 $(ODE_LIB): $(ODE_OBJECTS)
-	$(AR)$@ $(ODE_OBJECTS)
+	$(ODE_LIB_AR_RULE) $(ODE_OBJECTS)
+ifdef RANLIB
+	$(RANLIB) $@
+endif
 
 $(DRAWSTUFF_LIB): $(DRAWSTUFF_OBJECTS)
 	$(AR)$@ $(DRAWSTUFF_OBJECTS)
