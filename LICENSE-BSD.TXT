@@ -3,7 +3,7 @@ This is the BSD-style license for the Open Dynamics Engine
 ----------------------------------------------------------
 
 Open Dynamics Engine
-Copyright (c) 2001-2003, Russell L. Smith.
+Copyright (c) 2001-2004, Russell L. Smith.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
