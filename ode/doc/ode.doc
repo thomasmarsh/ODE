@@ -3410,10 +3410,11 @@ library can be used as long as it can supply @c{dContactGeom} structures
 to initialize contact joints.
 
 The dynamics core of ODE is mostly independent of the collision library
-that is used, except for three points:
+that is used, except for four points:
 @numlist{
 @*	The @c{dGeomID} type must be defined, as each body can store a
 	pointer to the first geometry object that it is associated with.
+
 @*	The @c{dGeomMoved()} function must be defined, with the following
 	prototype:
 
@@ -3422,6 +3423,7 @@ that is used, except for three points:
 	This function is called by the dynamics code whenever a body moves:
 	it indicates that the geometry object associated with the body is
 	now in a new position.
+
 @*	The @c{dGeomGetBodyNext()} function must be defined, with the following
 	prototype:
 
@@ -3431,6 +3433,14 @@ that is used, except for three points:
 	geoms that are associated with each body. Given a geom attached to
 	a body, it returns the next geom attached to that body, or 0 if there
 	are no more geoms.
+
+@*	The @c{dGeomSetBody()} function must be defined, with the following
+	prototype:
+
+	@code{@[void dGeomSetBody (dGeomID, dBodyID);@]}
+
+	This function is called in the body destructor code (with the second
+	argument set to 0) to remove all references from the geom to the body.
 }
 If you want an alternative collision library to get body-movement
 notifications from ODE, you should redefine @c{dGeomID}, @c{dGeomMoved()}
