@@ -1,6 +1,7 @@
 /*************************************************************************
  *                                                                       *
  * DrawStuff Library, Copyright (C) 2001 Russell L. Smith.               *
+ *   Email: russ@q12.org   Web: www.q12.org                              *
  *                                                                       *
  * This library is free software; you can redistribute it and/or         *
  * modify it under the terms of the GNU Lesser General Public            *

@@ -1,6 +1,7 @@
 /*************************************************************************
  *                                                                       *
  * Open Dynamics Engine, Copyright (C) 2001 Russell L. Smith.            *
+ *   Email: russ@q12.org   Web: www.q12.org                              *
  *                                                                       *
  * This library is free software; you can redistribute it and/or         *
  * modify it under the terms of the GNU Lesser General Public            *
@@ -109,7 +110,8 @@ static void start()
   printf ("Press:\t'a' to increase speed.\n"
 	  "\t'z' to decrease speed.\n"
 	  "\t',' to steer left.\n"
-	  "\t'.' to steer right.\n");
+	  "\t'.' to steer right.\n"
+	  "\t' ' to reset speed and steering.\n");
 }
 
 
@@ -263,8 +265,13 @@ int main (int argc, char **argv)
 
   // lock back wheels along the steering axis
   for (i=1; i<3; i++) {
-    dJointSetHinge2Param (joint[i],dParamVel,0);
-    dJointSetHinge2Param (joint[i],dParamFMax,dInfinity);
+    // set stops to make sure wheels always stay in alignment
+    dJointSetHinge2Param (joint[i],dParamLoStop,0);
+    dJointSetHinge2Param (joint[i],dParamHiStop,0);
+    // the following alternative method is no good as the wheels may get out
+    // of alignment:
+    //   dJointSetHinge2Param (joint[i],dParamVel,0);
+    //   dJointSetHinge2Param (joint[i],dParamFMax,dInfinity);
   }
 
   // environment
