@@ -147,10 +147,14 @@ static void simLoop (int pause)
     if (v < -0.1) v = -0.1;
     v *= 10.0;
     dJointSetHinge2Param (joint[0],dParamVel,v);
-    dJointSetHinge2Param (joint[0],dParamFMax,0.2);
+    dJointSetHinge2Param (joint[0],dParamFMax,0); //.2);    //@@@
     dJointSetHinge2Param (joint[0],dParamLoStop,-0.75);
     dJointSetHinge2Param (joint[0],dParamHiStop,0.75);
     dJointSetHinge2Param (joint[0],dParamFudgeFactor,0.1);
+    dJointSetHinge2Param (joint[0],dParamStopERP,0.01);     //@@@
+    dJointSetHinge2Param (joint[0],dParamStopCFM,100.0);    //@@@
+
+    dBodyAddTorque (body[1],0,0,-0.001);                    //@@@
 
     dSpaceCollide (space,0,&nearCallback);
     dWorldStep (world,0.05);
@@ -252,8 +256,8 @@ int main (int argc, char **argv)
 
   // set joint suspension
   for (i=0; i<3; i++) {
-    dJointSetHinge2Param (joint[i],dParamSuspensionErp,0.4);
-    dJointSetHinge2Param (joint[i],dParamSuspensionCfm,0.8);
+    dJointSetHinge2Param (joint[i],dParamSuspensionERP,0.4);
+    dJointSetHinge2Param (joint[i],dParamSuspensionCFM,0.8);
   }
 
   // lock back wheels along the steering axis

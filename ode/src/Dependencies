@@ -10,7 +10,7 @@ geom.o: geom.cpp ../../include/ode/geom.h ../../include/ode/common.h \
  geom_internal.h
 joint.o: joint.cpp joint.h objects.h ../../include/ode/memory.h \
  ../../include/ode/common.h ../../include/ode/error.h \
- ../../include/ode/mass.h ../../include/ode/contact.h stack.h \
+ ../../include/ode/mass.h array.h ../../include/ode/contact.h stack.h \
  ../../include/ode/odemath.h ../../include/ode/rotation.h \
  ../../include/ode/matrix.h
 lcp.o: lcp.cpp ../../include/ode/common.h ../../include/ode/error.h \
@@ -35,7 +35,7 @@ misc.o: misc.cpp ../../include/ode/misc.h ../../include/ode/common.h \
  ../../include/ode/error.h ../../include/ode/matrix.h
 ode.o: ode.cpp objects.h ../../include/ode/memory.h \
  ../../include/ode/common.h ../../include/ode/error.h \
- ../../include/ode/mass.h ../../include/ode/ode.h \
+ ../../include/ode/mass.h array.h ../../include/ode/ode.h \
  ../../include/ode/config.h ../../include/ode/contact.h \
  ../../include/ode/odemath.h ../../include/ode/matrix.h \
  ../../include/ode/timer.h ../../include/ode/rotation.h \
@@ -61,8 +61,8 @@ stack.o: stack.cpp stack.h ../../include/ode/error.h \
  ../../include/ode/config.h
 step.o: step.cpp objects.h ../../include/ode/memory.h \
  ../../include/ode/common.h ../../include/ode/error.h \
- ../../include/ode/mass.h joint.h ../../include/ode/contact.h stack.h \
- ../../include/ode/odemath.h ../../include/ode/rotation.h \
+ ../../include/ode/mass.h array.h joint.h ../../include/ode/contact.h \
+ stack.h ../../include/ode/odemath.h ../../include/ode/rotation.h \
  ../../include/ode/timer.h ../../include/ode/matrix.h lcp.h
 testing.o: testing.cpp testing.h ../../include/ode/common.h \
  ../../include/ode/error.h array.h ../../include/ode/misc.h \
