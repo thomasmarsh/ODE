@@ -39,6 +39,7 @@
 #include <ode/matrix.h>
 #include "lcp.h"
 #include "step.h"
+#include "util.h"
 
 
 // misc defines
@@ -927,6 +928,8 @@ processIslandsFast (dxWorld * world, dReal stepsize, int maxiterations)
 	// nothing to do if no bodies
 	if (world->nb <= 0)
 		return;
+
+	dInternalHandleAutoDisabling (world,stepsize);
 
 #	ifdef TIMING
 	dTimerStart ("creating joint and body arrays");

@@ -50,23 +50,32 @@ void dWorldImpulseToForce (dWorldID, dReal stepsize,
 
 void dWorldStepFast1(dWorldID, dReal stepsize, int maxiterations);
 void dWorldSetAutoEnableDepthSF1(dWorldID, int autoEnableDepth);
-
 int dWorldGetAutoEnableDepthSF1(dWorldID);
 
-void dBodySetAutoDisableThresholdSF1(dBodyID, dReal autoDisableThreshold);
+/* Auto-disable functions */
 
-/* These functions are not yet implemented by ODE. */
-/*
-dReal dBodyGetAutoDisableThresholdSF1(dBodyID);
+dReal dWorldGetAutoDisableLinearThreshold (dWorldID);
+void  dWorldSetAutoDisableLinearThreshold (dWorldID, dReal linear_threshold);
+dReal dWorldGetAutoDisableAngularThreshold (dWorldID);
+void  dWorldSetAutoDisableAngularThreshold (dWorldID, dReal angular_threshold);
+int   dWorldGetAutoDisableSteps (dWorldID);
+void  dWorldSetAutoDisableSteps (dWorldID, int steps);
+dReal dWorldGetAutoDisableTime (dWorldID);
+void  dWorldSetAutoDisableTime (dWorldID, dReal time);
+int   dWorldGetAutoDisableFlag (dWorldID);
+void  dWorldSetAutoDisableFlag (dWorldID, int do_auto_disable);
 
-void dBodySetAutoDisableStepsSF1(dBodyID, int AutoDisableSteps);
-
-int dBodyGetAutoDisableStepsSF1(dBodyID);
-
-void dBodySetAutoDisableSF1(dBodyID, int doAutoDisable);
-
-int dBodyGetAutoDisableSF1(dBodyID);
-*/
+dReal dBodyGetAutoDisableLinearThreshold (dBodyID);
+void  dBodySetAutoDisableLinearThreshold (dBodyID, dReal linear_threshold);
+dReal dBodyGetAutoDisableAngularThreshold (dBodyID);
+void  dBodySetAutoDisableAngularThreshold (dBodyID, dReal angular_threshold);
+int   dBodyGetAutoDisableSteps (dBodyID);
+void  dBodySetAutoDisableSteps (dBodyID, int steps);
+dReal dBodyGetAutoDisableTime (dBodyID);
+void  dBodySetAutoDisableTime (dBodyID, dReal time);
+int   dBodyGetAutoDisableFlag (dBodyID);
+void  dBodySetAutoDisableFlag (dBodyID, int do_auto_disable);
+void  dBodySetAutoDisableDefaults (dBodyID);
 
 /* bodies */
 

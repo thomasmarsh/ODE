@@ -292,7 +292,7 @@ static void command (int cmd)
 void drawGeom (dGeomID g, const dReal *pos, const dReal *R, int show_aabb)
 {
   int i;
-
+	
   if (!g) return;
   if (!pos) pos = dGeomGetPosition (g);
   if (!R) R = dGeomGetRotation (g);
@@ -397,6 +397,7 @@ int main (int argc, char **argv)
   contactgroup = dJointGroupCreate (0);
   dWorldSetGravity (world,0,0,-0.5);
   dWorldSetCFM (world,1e-5);
+  dWorldSetAutoDisableFlag (world,1);
   dCreatePlane (space,0,0,1,0);
   memset (obj,0,sizeof(obj));
 

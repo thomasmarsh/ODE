@@ -38,7 +38,8 @@ enum {
   dxBodyFlagFiniteRotation = 1,		// use finite rotations
   dxBodyFlagFiniteRotationAxis = 2,	// use finite rotations only along axis
   dxBodyDisabled = 4,			// body is disabled
-  dxBodyNoGravity = 8			// body is not influenced by gravity
+  dxBodyNoGravity = 8,			// body is not influenced by gravity
+  dxBodyAutoDisable = 16		// enable auto-disable on body
 };
 
 
@@ -63,6 +64,15 @@ struct dObject : public dBase {
 };
 
 
+// auto disable parameters
+struct dxAutoDisable {
+  dReal linear_threshold;	// linear (squared) velocity treshold
+  dReal angular_threshold;	// angular (squared) velocity treshold
+  dReal idle_time;		// time the body needs to be idle to auto-disable it
+  int idle_steps;		// steps the body needs to be idle to auto-disable it
+};
+
+
 struct dxBody : public dObject {
   dxJointNode *firstjoint;	// list of attached joints
   int flags;			// some dxBodyFlagXXX flags
@@ -76,6 +86,11 @@ struct dxBody : public dObject {
   dVector3 lvel,avel;		// linear and angular velocity of POR
   dVector3 facc,tacc;		// force and torque accululators
   dVector3 finite_rot_axis;	// finite rotation axis, unit length or 0=none
+
+  // auto-disable information
+  dxAutoDisable adis;		// auto-disable parameters
+  dReal adis_timeleft;		// time left to be idle
+  int adis_stepsleft;		// steps left to be idle
 };
 
 
@@ -86,6 +101,8 @@ struct dxWorld : public dBase {
   dVector3 gravity;		// gravity vector (m/s/s)
   dReal global_erp;		// global error reduction parameter
   dReal global_cfm;		// global costraint force mixing parameter
+  dxAutoDisable adis;		// auto-disable parameters
+  int adis_flag;		// auto-disable flag for new bodies
 };
 
 
