@@ -1,0 +1,45 @@
+
+PLATFORM=linux
+
+# convert a name into a library name or an executable name
+fLIBNAME=lib$(1).a
+fEXENAME=$(1)
+
+# convert source file names to object file names
+fTARGETS=$(patsubst %.cpp,%.o,$(filter %.cpp,$(1))) \
+	$(patsubst %.c,%.o,$(filter %.c,$(1)))
+
+# C++ RTTI options
+_RTTI_0=-fno-rtti
+_RTTI_1=-frtti
+_RTTI_=$(_RTTI_0)
+
+# C++ exception options
+_EX_0=-fno-exceptions
+_EX_1=
+_EX_=$(_EX_0)
+
+# optimization options
+_OPT_0=
+_OPT_1=-O1
+_OPT_2=-O2
+_OPT_=$(_OPT_0)
+
+%.o: %.cpp
+	gcc -c -g -Wall $(_OPT_$(CPP_OPT)) $(addprefix -I ,$(INCLUDE_PATHS)) $(addprefix -D,$(DEFINES)) $(_RTTI_$(CPP_RTTI)) $(_EX_$(CPP_EX)) $<
+
+%.a:
+	ar rc $@ $^
+
+fLINK=gcc -o $(1) -g $(addprefix -L ,$(LIB_PATHS)) $(2) 
+fLIB=-l$(1)
+
+LINKMATH=-lm
+LINKWIN=-L/usr/X11/lib -lX11
+LINKOPENGL=-L/usr/X11/lib -lGLU -lGL
+
+clean: clean_subdirs
+	-rm -f *~ *.o a.out core *.a $(EXTRA_CLEAN)
+
+make_depend: $(wildcard *.cpp *.c)
+	$(if $^,gcc -MM $(addprefix -I ,$(INCLUDE_PATHS)) $(addprefix -D,$(DEFINES)) $^ > Dependencies)
