@@ -39,8 +39,8 @@ static int seed=0;
 extern "C" int dBoxBox (const dVector3 p1, const dMatrix3 R1,
 			const dVector3 side1, const dVector3 p2,
 			const dMatrix3 R2, const dVector3 side2,
-			dVector3 normal, dReal *depth, int *code, int *coderu,
-			dVector3 contact);
+			dVector3 normal, dReal *depth, int *code,
+			int maxc, dContactGeom *contact, int skip);
 
 extern "C" void lineClosestApproach (const dVector3 pa, const dVector3 ua,
 				     const dVector3 pb, const dVector3 ub,
@@ -234,10 +234,11 @@ static void testBoxTouchesBox()
 static void testBoxToBoxCollision()
 {
   int k,bt;
-  dVector3 p1,p2,side1,side2,normal,contact;
+  dVector3 p1,p2,side1,side2,normal;
   dMatrix3 R1,R2;
   dReal depth;
-  int code,coderu,ok;
+  int code,ok;
+  dContactGeom contact[48];
 
   do {
     dRandSetSeed (seed);
@@ -254,23 +255,24 @@ static void testBoxToBoxCollision()
     p2[2] += 1;
 
     code = 0;
-    coderu = 0;
     depth = 0;
-    bt = dBoxBox (p1,R1,side1,p2,R2,side2,normal,&depth,&code,&coderu,contact);
+    bt = dBoxBox (p1,R1,side1,p2,R2,side2,normal,&depth,&code,1,contact,
+		  sizeof(dContactGeom));
 
     //@@@
     p2[0] += normal[0] * 0.99 * depth;
     p2[1] += normal[1] * 0.99 * depth;
     p2[2] += normal[2] * 0.99 * depth;
-    bt = dBoxBox (p1,R1,side1,p2,R2,side2,normal,&depth,&code,&coderu,contact);
+    bt = dBoxBox (p1,R1,side1,p2,R2,side2,normal,&depth,&code,1,contact,
+		  sizeof(dContactGeom));
 
-    ok = bt && code <= 6 && bt==2; // && normal[2] > 0;
+    ok = bt; // && code <= 6 && bt==2; // && normal[2] > 0;
 
     if (!ok) seed++;
   }
   while (!ok);
 
-  printf ("seed=%d  code=%2d  coderu=%d  depth=%.4f  ",seed,code,coderu,depth);
+  printf ("seed=%d  code=%2d  depth=%.4f  ",seed,code,depth);
   printf ("  |n|=%f\n",dSqrt(dDOT(normal,normal)));
 
   /*
@@ -299,7 +301,7 @@ static void testBoxToBoxCollision()
 
   dsSetColor (2,2,2);
   const dReal ss[3] = {0.02,0.02,0.02};
-  dsDrawBox (contact,R1,ss);
+  dsDrawBox (contact[0].pos,R1,ss);
 }
 
 //****************************************************************************

@@ -61,7 +61,9 @@ static dGeomID box[NUM];
 static void nearCallback (void *data, dGeomID o1, dGeomID o2)
 {
   // exit without doing anything if the two bodies are connected by a joint
-  if (o1->body && o2->body && dAreConnected (o1->body,o2->body)) return;
+  dBodyID b1 = dGeomGetBody(o1);
+  dBodyID b2 = dGeomGetBody(o2);
+  if (b1 && b2 && dAreConnected (b1,b2)) return;
 
   // @@@ it's still more convenient to use the C interface here.
 
@@ -70,7 +72,7 @@ static void nearCallback (void *data, dGeomID o1, dGeomID o2)
   contact.surface.mu = dInfinity;
   if (dCollide (o1,o2,0,&contact.geom,sizeof(dContactGeom))) {
     dJointID c = dJointCreateContact (world.id(),contactgroup.id(),&contact);
-    dJointAttach (c,o1->body,o2->body);
+    dJointAttach (c,b1,b2);
   }
 }
 
@@ -139,9 +141,7 @@ int main (int argc, char **argv)
     body[i].setData ((void*) i);
 
     box[i] = dCreateBox (space,SIDE,SIDE,SIDE);
-    box[i]->body = body[i].id();
-    box[i]->pos = const_cast<dReal*> (body[i].getPosition());
-    box[i]->R = const_cast<dReal*> (body[i].getRotation());
+    dGeomSetBody (box[i],body[i].id());
   }
   for (i=0; i<(NUM-1); i++) {
     joint[i].createBall (world);

@@ -36,7 +36,7 @@
 
 // some constants
 
-#define NUM 10			// max number of objects
+#define NUM 20			// max number of objects
 #define MASS (1.0)		// mass of a box / sphere
 
 
@@ -62,7 +62,9 @@ static void nearCallback (void *data, dGeomID o1, dGeomID o2)
   // if (o1->body && o2->body) return;
 
   // exit without doing anything if the two bodies are connected by a joint
-  if (o1->body && o2->body && dAreConnected (o1->body,o2->body)) return;
+  dBodyID b1 = dGeomGetBody(o1);
+  dBodyID b2 = dGeomGetBody(o2);
+  if (b1 && b2 && dAreConnected (b1,b2)) return;
 
   dContact contact[3];			// up to 3 contacts per box
   for (i=0; i<3; i++) {
@@ -71,14 +73,14 @@ static void nearCallback (void *data, dGeomID o1, dGeomID o2)
     contact[i].surface.mu2 = 0;
   }
   if (int numc = dCollide (o1,o2,3,&contact[0].geom,sizeof(dContact))) {
-    dMatrix3 RI;
-    dRSetIdentity (RI);
-    const dReal ss[3] = {0.02,0.02,0.02};
+    //dMatrix3 RI;
+    //dRSetIdentity (RI);
+    //const dReal ss[3] = {0.02,0.02,0.02};
 
     for (i=0; i<numc; i++) {
       dJointID c = dJointCreateContact (world,contactgroup,contact+i);
-      dJointAttach (c,o1->body,o2->body);
-      dsDrawBox (contact[i].geom.pos,RI,ss);
+      dJointAttach (c,b1,b2);
+      // dsDrawBox (contact[i].geom.pos,RI,ss);
     }
   }
 }
@@ -112,7 +114,7 @@ static void command (int cmd)
       nextobj++;
       if (nextobj >= num) nextobj = 0;
       dBodyDestroy (body[i]);
-      dDestroyGeom (space,geom[i]);
+      dDestroyGeom (geom[i]);
     }
     body[i] = dBodyCreate (world);
     for (int j=0; j<3; j++) sides[i][j] = dRandReal()*0.5+0.1;
@@ -137,9 +139,7 @@ static void command (int cmd)
       geom[i] = dCreateSphere (space,sides[i][0]);
       objtype[i] = 1;
     }
-    geom[i]->body = body[i];
-    geom[i]->pos = const_cast<dReal*> (dBodyGetPosition(body[i]));
-    geom[i]->R = const_cast<dReal*> (dBodyGetRotation(body[i]));
+    dGeomSetBody (geom[i],body[i]);
   }
 }
 
