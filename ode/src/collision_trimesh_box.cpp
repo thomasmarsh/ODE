@@ -49,23 +49,23 @@
 
 // dVector3
 // r=a-b
-#define SUBSTRACT(a,b,r) \
+#define SUBTRACT(a,b,r) do{ \
   (r)[0]=(a)[0] - (b)[0]; \
   (r)[1]=(a)[1] - (b)[1]; \
-  (r)[2]=(a)[2] - (b)[2]; 
+  (r)[2]=(a)[2] - (b)[2]; }while(0)
 
 
 // dVector3
 // a=b
-#define SET(a,b) \
+#define SET(a,b) do{ \
   (a)[0]=(b)[0]; \
   (a)[1]=(b)[1]; \
-  (a)[2]=(b)[2]; 
+  (a)[2]=(b)[2]; }while(0)
 
 
 // dMatrix3
 // a=b
-#define SETM(a,b) \
+#define SETM(a,b) do{ \
   (a)[0]=(b)[0]; \
   (a)[1]=(b)[1]; \
   (a)[2]=(b)[2]; \
@@ -77,44 +77,44 @@
   (a)[8]=(b)[8]; \
   (a)[9]=(b)[9]; \
   (a)[10]=(b)[10]; \
-  (a)[11]=(b)[11];
+                     (a)[11]=(b)[11]; }while(0)
 
 
 // dVector3
 // r=a+b
-#define ADD(a,b,r) \
+#define ADD(a,b,r) do{ \
   (r)[0]=(a)[0] + (b)[0]; \
   (r)[1]=(a)[1] + (b)[1]; \
-  (r)[2]=(a)[2] + (b)[2]; 
+  (r)[2]=(a)[2] + (b)[2]; }while(0)
 
 
 // dMatrix3, int, dVector3
 // v=column a from m
-#define GETCOL(m,a,v) \
+#define GETCOL(m,a,v) do{ \
   (v)[0]=(m)[(a)+0]; \
   (v)[1]=(m)[(a)+4]; \
-  (v)[2]=(m)[(a)+8];
+  (v)[2]=(m)[(a)+8]; }while(0)
 
 
 // dVector4, dVector3
 // distance between plane p and point v
 #define POINTDISTANCE(p,v) \
-  ( p[0]*v[0] + p[1]*v[1] + p[2]*v[2] + p[3] ); \
+  ( p[0]*v[0] + p[1]*v[1] + p[2]*v[2] + p[3] )
 
 
 // dVector4, dVector3, dReal
 // construct plane from normal and d
-#define CONSTRUCTPLANE(plane,normal,d) \
+#define CONSTRUCTPLANE(plane,normal,d) do{ \
   plane[0]=normal[0];\
   plane[1]=normal[1];\
   plane[2]=normal[2];\
-  plane[3]=d;
+  plane[3]=d; }while(0)
 
 
 // dVector3
 // length of vector a
 #define LENGTHOF(a) \
-  dSqrt(a[0]*a[0]+a[1]*a[1]+a[2]*a[2]);\
+  dSqrt(a[0]*a[0]+a[1]*a[1]+a[2]*a[2])
 
 
 // box data
@@ -394,9 +394,9 @@ static BOOL _cldTestSeparatingAxes(const dVector3 &v0, const dVector3 &v1, const
   fBestDepth = MAXVALUE;
 
   // calculate edges
-  SUBSTRACT(v1,v0,vE0);
-  SUBSTRACT(v2,v0,vE1);
-  SUBSTRACT(vE1,vE0,vE2);
+  SUBTRACT(v1,v0,vE0);
+  SUBTRACT(v2,v0,vE1);
+  SUBTRACT(vE1,vE0,vE2);
 
   // calculate poly normal
   dCROSS(vN,=,vE0,vE1);
@@ -414,7 +414,7 @@ static BOOL _cldTestSeparatingAxes(const dVector3 &v0, const dVector3 &v1, const
 
   // calculate relative position between box and triangle
   dVector3 vD;
-  SUBSTRACT(v0,vHullBoxPos,vD);
+  SUBTRACT(v0,vHullBoxPos,vD);
 
   // calculate length of face normal
   dReal fNLen = LENGTHOF( vN );
@@ -653,7 +653,7 @@ static BOOL _cldClosestPointOnTwoLines( dVector3 vPoint1, dVector3 vLenVec1,
 {
   // calulate denominator
   dVector3 vp;
-  SUBSTRACT(vPoint2,vPoint1,vp);
+  SUBTRACT(vPoint2,vPoint1,vp);
   dReal fuaub  = dDOT(vLenVec1,vLenVec2);
   dReal fq1    = dDOT(vLenVec1,vp);
   dReal fq2    = -dDOT(vLenVec2,vp);
@@ -869,7 +869,7 @@ static void _cldClipping(const dVector3 &v0, const dVector3 &v1, const dVector3 
 
     // Plane p0
     dVector3 vTemp2;
-    SUBSTRACT(v1,v0,vTemp2);
+    SUBTRACT(v1,v0,vTemp2);
     dCROSS(vTemp,=,vN,vTemp2);
     dNormalize3(vTemp);
     CONSTRUCTPLANE(plPlane,vTemp,0);
@@ -878,17 +878,17 @@ static void _cldClipping(const dVector3 &v0, const dVector3 &v1, const dVector3 
 
 
     // Plane p1
-    SUBSTRACT(v2,v1,vTemp2);
+    SUBTRACT(v2,v1,vTemp2);
     dCROSS(vTemp,=,vN,vTemp2);
     dNormalize3(vTemp);
-    SUBSTRACT(v0,v2,vTemp2);
+    SUBTRACT(v0,v2,vTemp2);
     CONSTRUCTPLANE(plPlane,vTemp,dDOT(vTemp2,vTemp));
 
     _cldClipPolyToPlane( avTempArray2, iTempCnt2, avTempArray1, iTempCnt1, plPlane  );
 
 
     // Plane p2
-    SUBSTRACT(v0,v2,vTemp2);
+    SUBTRACT(v0,v2,vTemp2);
     dCROSS(vTemp,=,vN,vTemp2);
     dNormalize3(vTemp);
     CONSTRUCTPLANE(plPlane,vTemp,0);
@@ -949,9 +949,9 @@ static void _cldClipping(const dVector3 &v0, const dVector3 &v1, const dVector3 
 
     dVector3 avPoints[3];
     // calculate triangle vertices in box frame
-    SUBSTRACT(v0,vHullBoxPos,avPoints[0]);
-    SUBSTRACT(v1,vHullBoxPos,avPoints[1]);
-    SUBSTRACT(v2,vHullBoxPos,avPoints[2]);
+    SUBTRACT(v0,vHullBoxPos,avPoints[0]);
+    SUBTRACT(v1,vHullBoxPos,avPoints[1]);
+    SUBTRACT(v2,vHullBoxPos,avPoints[2]);
 
     // CLIP Polygons
     // define temp data for clipping
