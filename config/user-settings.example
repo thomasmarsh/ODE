@@ -29,3 +29,11 @@ BUILD=release
 #     leave it at "0".
 
 WINDOWS16=0
+
+# (5) ODE's collision system had a major change around 7/Nov/2002. The API of
+#     the new code is 99% compatible with the old ... however, some legacy
+#     applications may rely on subtle details of the old system. Uncomment
+#     this variable if you know you need to use the old code, otherwise
+#     leave it commented for all new development.
+
+#ODE_OLD_COLLISION=1
