@@ -1,10 +1,10 @@
 
-@title{Open Dynamics Engine v0.01 User Guide}
+@title{Open Dynamics Engine v0.015 User Guide}
 @subtitle{Russell Smith, @date{}}
 @author{Russell Smith, @date{}}
 
 @center{This document is Copyright &copy 2001 Russell Smith.}
-@center{This is an unfinished DRAFT document}
+@center{This is a DRAFT document}
 
 @chapter{Contents @nonumber @nocontents}
 @contents
@@ -18,12 +18,10 @@ If this does not make much sense to you, check out
 @link{http://www.q12.org/ode/slides/slides.html}{What is a Physics SDK?}.
 ODE is being developed by @link{http://www.q12.org}{Russell Smith}.
 
-The is the user guide for the first prototype release of ODE (version 0.01).
+The is the user guide for the second prototype release of ODE (version 0.015).
 This release is just for testing the core algorithms and evolving the API.
-Note that the API is not yet fixed, it will probably change in the future.
-
-Be warned - this document is an unfinished draft!
-
+The API is becoming more solid, though expect a few (hopefully minor) changes
+in the future.
 
 
 @section{Current features}
@@ -53,26 +51,33 @@ The current features are:
 	constraint is used when two bodies collide. The alternative is to
 	model contact with springs and dampers, but this is difficult and
 	error-prone.
+@*	ODE implements a fast approximation to the Coloumb friction model.
 @*	ODE has built-in collision detection. However you can ignore it and
-	do your own collision detection if desired. Currently only
-	sphere-sphere collision is implemented. More collision objects will
-	come later, as well as quick identification of potentially
-	intersecting pairs.
+	do your own collision detection if desired.
+	The current collision primitives are sphere, box and plane
+	(but box-box collision is not yet fully working).
+	More collision objects will come later, as well as quick
+	identification of potentially intersecting pairs.
 @*	Joints types: ball-and-socket, hinge, slider (prismatic).
 @*	Platform specific optimizations.
-@*	Has a C interface, even though it is written in C++.
+@*	Has a native C interface, even though it is written in C++.
+@*	Has a C++ interface built on top of the C one.
 @*	Unit tests.
 @*	Other stuff I forgot to mention...
 }
 
-Some more features:
-@list{
-@*	C/C++ interface.
-}
-
 Some important things that are missing right now:
 @list{
-@*	Friction!
+@*	Box-box collision.
+}
+
+@section{New in the 0.015 release}
+
+@list{
+@* Collision framework nearing stability.
+@* Collision: all interactions of sphere, box, plane, except box-box is not yet
+   fully implemented.
+@* 2D & 3D friction.
 }
 
 
@@ -83,8 +88,8 @@ Some important things that are missing right now:
 @list{
 @* Update documentation.
 @* Rationalize collision framework.
-@* Box-box, box-sphere collision.
-@* 2D & 3D friction.
+@* Box-box collision.
+@* Improve the approximation to Coloumb friction.
 @* Full cross platform build system and automatic configuration.
 @* Argument checking for all functions (especially joint-typed functions).
 }
@@ -210,6 +215,19 @@ An example is the position of the ball-and-socket point for a ball-and-socket
 joint.
 A consequence of this is that the rigid bodies that a joint connects must be
 positioned correctly @emph{before} the joint is attached.
+
+
+@section{Joint groups}
+
+A joint group is a special container that holds joints in a world.
+Joints can be added to a group, and then when those joints are no
+longer needed the entire group of joints can be very quickly destroyed
+with one function call.
+However, individual joints in a group can not be destroyed before the entire
+group is emptied.
+
+This is most useful with contact joints, which are added and remove from
+the world in groups every time step.
 
 
 @section{Joint error}
@@ -377,7 +395,7 @@ void dWorldSetGravity (dWorldID, dReal x, dReal y, dReal z);
 void dWorldGetGravity (dWorldID, dVector3 gravity);
 }{
 Set and get the world's global gravity vector. The units are m/s/s, so Earth's
-gravity vector would be (0,0,-9.81).
+gravity vector would be (0,0,-9.81), assuming that +z is up.
 The default is no gravity, i.e. (0,0,0).
 }
 
@@ -440,7 +458,7 @@ When getting, the returned values are pointers to internal data structures,
 so the vectors are valid until any changes are made to the rigid body system
 structure.
 
-Hmmm. c{dBodyGetRotation} returns a 4x3 rotation matrix.
+Hmmm. @c{dBodyGetRotation} returns a 4x3 rotation matrix.
 }
 
 
@@ -472,11 +490,11 @@ after each time step.
 
 @funcdef{
 void dBodyGetPointPos    (dBodyID, dReal px, dReal py, dReal pz,
-                           dVector3 result);
+                          dVector3 result);
 void dBodyGetPointVel    (dBodyID, dReal px, dReal py, dReal pz,
-                           dVector3 result);
+                          dVector3 result);
 void dBodyGetPointRelVel (dBodyID, dReal px, dReal py, dReal pz,
-                           dVector3 result);
+                          dVector3 result);
 }{
 Utility functions.
 }
@@ -490,11 +508,13 @@ dJointID dJointCreateHinge (dWorldID, dJointGroupID);
 dJointID dJointCreateSlider (dWorldID, dJointGroupID);
 dJointID dJointCreateContact (dWorldID, dJointGroupID, const dContact *);
 }{
-Initialize or create a new joint of a given type.
+Create a new joint of a given type.
 The joint is initially in "limbo" (i.e. it has no effect on the simulation)
 because it does not connect any bodies.
 The joint group ID is 0 to allocate the joint normally.
 If it is nonzero the joint is allocated in a joint group.
+The contact joint will be initialized with the given @struct{dContact}
+structure.
 }
 
 
@@ -504,22 +524,30 @@ void dJointDestroy (dJointID);
 Destroy a joint, disconnecting it from its attached bodies and removing
 it from the world.
 However, if the joint is a member of a group then this function has no
-effect - to destroy the joint the group must be emptied or destroyed.
+effect - to destroy that joint the group must be emptied or destroyed.
 }
 
 
 @funcdef{
 dJointGroupID dJointGroupCreate (int max_size);
+}{
+Create a joint group.
+@arg{max_size} is in bytes.
+}
+
+
+@funcdef{
 void dJointGroupDestroy (dJointGroupID);
+}{
+Destroy a joint group. All joints in the joint group will be destroyed.
+}
+
+
+@funcdef{
 void dJointGroupEmpty (dJointGroupID);
 }{
-Groups of joints.
-Joints can be added to a group quickly, and the entire group can be emptied,
-which means that all of the contained joints are destroyed at once (quickly).
-However, individual joints in a group can not be destroyed before the entire
-group is emptied.
-Joint groups are most useful with contacts.
-@arg{max_size} is in bytes.
+Empty a joint group. All joints in the joint group will be destroyed,
+but the joint group itself will not be destroyed.
 }
 
 
@@ -531,7 +559,8 @@ If the joint is already attached, it will be detached from the old bodies
 first.
 To attach this joint to only one body, set body1 or body2 to zero - a zero
 body means the static environment.
-It is an error to set both bodies to zero.
+Setting both bodies to zero puts the joint into "limbo", i.e. it will
+have no effect on the simulation.
 }
 
 
@@ -556,6 +585,55 @@ Get joint parameters.
 If the system is out of alignment (i.e. there is some joint error) then
 anchor/axis values will be correct with respect to body 1 only (or body2 if
 you specified body 1 as 0).
+}
+
+
+@funcdef{
+dReal dJointGetHingePosition (dJointID);
+dReal dJointGetHingeVelocity (dJointID);
+dReal dJointGetSliderPosition (dJointID);
+dReal dJointGetSliderVelocity (dJointID);
+}{
+Returns the current position and velocity of the given hinge or slider joint.
+
+The position of a hinge joint is the angle between the two bodies
+(or between the body and the static environment) measured around the hinge
+axis. The initial position of the bodies will correspond to an angle of zero.
+
+The position of a slider joint is the extension of the slider.
+The initial position of the bodies will correspond to a position of zero.
+
+The returned velocity values are the rates of change of the position values.
+
+There are no functions to set joint positions and velocities directly,
+instead you must set the corresponding body positions and velocities.
+}
+
+
+@funcdef{
+void dJointSetHingeLimits (dJointID, dReal low, dReal high);
+void dJointSetSliderLimits (dJointID, dReal low, dReal high);
+void dJointGetHingeLimits (dJointID, dReal *low, dReal *high);
+void dJointGetSliderLimits (dJointID, dReal *low, dReal *high);
+}{
+Set/get joint limits.
+Setting joint limits prevents movement of the joint beyond the given
+low/high position values.
+It is acceptable to set low to @c{-dInfinity} or high to @c{dInfinity}.
+}
+
+
+@funcdef{
+void dJointSetHingeMotor (dJointID, dReal speed, dReal torque);
+void dJointSetSliderMotor (dJointID, dReal speed, dReal force);
+void dJointGetHingeMotor (dJointID, dReal *speed, dReal *torque);
+void dJointGetSliderMotor (dJointID, dReal *speed, dReal *force);
+}{
+Set/get joint motor parameters.
+Conceptually, the hinge and slider joints are actually constructed from a
+motor and a friction plate [need a diagram here].
+This sets/gets the speed of the motor and the maximum torque or force that
+can be exerted by the friction plate.
 }
 
 
@@ -770,13 +848,435 @@ document yet].
 #############################################################################
 @chapter{Collision functions}
 
-[Document these later].
+This chapter describes the built-in collision detection system of ODE.
+Using ODE's collision detection is optional - an alternative collision
+detection system can be used as long as it can supply the right kinds
+of information to ODE.
 
-Some notes:
+@section{Contact points}
+
+If two bodies touch, or if a body touches a static feature in its environment,
+the contact is represented by one or more "contact points".
+Each contact point has a corresponding @c{dContactGeom} structure:
+@code{@[
+struct dContactGeom {
+  dVector3 pos;       // contact position
+  dVector3 normal;    // normal vector
+  dReal depth;        // penetration depth
+};
+@]}
+@arg{pos} records the contact position, in global coordinates.
+
+@arg{depth} is the depth to which the two bodies interpenetrate each other.
+If the depth is zero then the two bodies have a grazing contact, i.e. they
+"only just" touch.
+However, this is rare - the simulation is not perfectly accurate and will
+often step the bodies too far so that the depth is nonzero.
+
+@arg{normal} is a unit length vector that is, generally speaking,
+perpendicular to the contact surface.
+
+The convention is that if body 1 is moved along the @arg{normal} vector by a
+distance @arg{depth} (or equivalently if body 2 is moved the same distance in
+the opposite direction) then the contact depth will be reduced to zero.
+This means that the normal vector points "in" to body 1.
+
+In real life, contact between two bodies is a sophisticated thing.
+Representing contacts by contact points is only an approximation.
+Contact "patches" or "surfaces" might be more physically accurate, but
+representing these things in high speed simulation software is a challenge.
+
+Each extra contact point added to the simulation will slow it down some more,
+so sometimes we are forced to ignore contact points in the interests of speed.
+For example, when two boxes collide many contact points may be needed to
+properly represent the geometry of the situation, but we may choose to
+keep only the "best" three. Thus we are piling approximation on top of
+approximation.
+
+
+@section{Geometry objects}
+
+To use ODE's collision detection, geometry objects must be associated with
+the rigid bodies.
+A geometry object represents a rigid @emph{shape} in space.
+Geometry objects are distinct from rigid bodies in that a geometry object
+has geometrical properties (size, shape, position and orientation) but no
+dynamical properties (such as velocity or mass).
+
+Every geometry object is an instance of a @emph{class}.
+The built in classes are currently: sphere, plane, and box
+(more will be added later).
+You can define your own classes as well.
+
+Every geometry object has a position vector and a 3*3 rotation matrix.
+If a geometry object is associated with a rigid body then its position and
+rotation is actually the position and rotation of that body.
+The point of reference for the standard classes usually corresponds to their
+center of mass.
+This makes them particularly easy to connect to dynamics objects.
+If other points of reference are required, composite objects should be used
+to encapsulate the primitives (note that composite objects are not implemented
+just yet).
+
+@subsection{Sphere functions}
+
+@funcdef{
+dGeomID dCreateSphere (dSpaceID space, dReal radius);
+}{
+Create a sphere geometry object of the given @arg{radius}, insert it into the
+given @arg{space}, and return its ID.
+The point of reference for a sphere is its center.
+}
+
+
+@funcdef{
+dReal dGeomSphereGetRadius (dGeomID sphere);
+}{
+Return the radius of the given sphere.
+}
+
+
+@subsection{Box functions}
+
+@funcdef{
+dGeomID dCreateBox (dSpaceID space, dReal lx, dReal ly, dReal lz);
+}{
+Create a box geometry object of the given x/y/z side lengths
+(@arg{lx},@arg{ly},@arg{lz}) insert it into the given @arg{space}, and
+return its ID.
+The point of reference for a box is its center.
+}
+
+
+@funcdef{
+void dGeomBoxGetLengths (dGeomID box, dVector3 result);
+}{
+Return in @arg{result} the side lengths of the given @arg{box}.
+}
+
+
+@subsection{Plane functions}
+
+@funcdef{
+dGeomID dCreatePlane (dSpaceID space, dReal a, dReal b, dReal c, dReal d);
+}{
+Create a plane geometry object of the given parameters, insert it into the
+given @arg{space}, and return its ID.
+The plane equation is @center{@m{a*x+b*y+c*z = d}}
+The plane's normal vector is @m{(a,b,c)}, and it must have length 1.
+Unlike other geometry objects, planes disregard their assigned position and
+rotation, i.e. the parameters are always in global coordinates.
+In other words it is assumed that the plane is always part of the static
+environment and not tied to any movable object.
+}
+
+
+@funcdef{
+void dGeomPlaneGetParams (dGeomID plane, dVector4 result);
+}{
+Return in @arg{result} the parameters of the given @arg{plane}.
+}
+
+
+@subsection{Capped cylinder functions}
+
+@funcdef{
+dGeomID dCreateCCylinder (dSpaceID space, dReal a, dReal b, int dir);
+void dGeomCCylinderGetParams (dGeomID, dReal *a, dReal *b, int *dir);
+}{
+(not implemented yet.)
+}
+
+
+@subsection{General geometry object functions}
+
+@funcdef{
+void dGeomSetData (dGeomID, void *);
+void *dGeomGetData (dGeomID);
+}{
+These functions set and get the user-defined data pointer stored in the
+geometry object.
+}
+
+
+@funcdef{
+void dGeomSetBody (dGeomID, dBodyID);
+dBodyID dGeomGetBody (dGeomID);
+}{
+These functions set and get the body associated with the geometry object.
+Setting the body automatically attaches the position vector and rotation
+matrix of the body to the geometry object.
+Setting a body ID of zero gives the geometry object its own position and
+rotation, independent from any body.
+}
+
+
+@funcdef{
+void dGeomSetPosition (dGeomID, dReal x, dReal y, dReal z);
+void dGeomSetRotation (dGeomID, const dMatrix3 R);
+}{
+Set the position vector and rotation matrix of the geometry object.
+These functions are analogous to @func{dBodySetPosition()} and
+@func{dBodySetRotation()}.
+If the geometry object is attached to a body, the body's position / rotation
+will also be changed.
+}
+
+
+@funcdef{
+const dReal * dGeomGetPosition (dGeomID);
+const dReal * dGeomGetRotation (dGeomID);
+}{
+Return pointers to the geometry object's position vector and rotation matrix.
+The returned values are pointers to internal data structures, so the vectors
+are valid until any changes are made to the geometry object.
+If the geometry object is attached to a body, the body's position / rotation
+pointers will be returned, i.e. the result will be identical to calling
+@func{dBodyGetPosition()} or @func{dBodyGetRotation()}.
+}
+
+
+@funcdef{
+void dDestroyGeom (dGeomID);
+}{
+Destroy a geometry object, removing it from the space first.
+}
+
+@section{Collision detection}
+
+@funcdef{
+int dCollide (dGeomID o1, dGeomID o2, int flags,
+              dContactGeom *contact, int skip);
+}{
+Given two geometry objects that potentially touch (@arg{o1} and @arg{o2}),
+generate contact information for them.
+Internally, this just calls the correct class-specific collision functions
+for @arg{o1} and @arg{o2}.
+
+@arg{flags} specifies how contacts should be generated if the objects touch.
+Currently the lower 8 bits of @arg{flags} specifies the maximum number of
+contact points to generate.
+If this number is zero, this function just pretends that it is one - in other
+words you can not ask for zero contacts.
+All other bits in @arg{flags} must be zero.
+In the future the other bits may be used to select other contact generation
+strategies.
+
+@arg{contact} must point to an array of contact geometry information that
+can hold at least the maximum number of contacts.
+@emph{Note:} the elements of the @arg{contact} array do not necessarily have
+to be contiguous.
+@arg{skip} is the number of bytes between each @struct{dContactGeom}
+structure in the @arg{contact} array.
+If @arg{skip} is @c{sizeof(dContactGeom)} then @arg{contact} points to a
+"normal" (C-style) contact array.
+If skip is larger than this, then the @struct{dContactGeom} structures are
+embedded in some other larger structures.
+It is an error for @arg{skip} to be smaller than @c{sizeof(dContactGeom)}.
+
+If the objects touch, this returns the number of contact points generated
+(and updates the @arg{contact} array), otherwise it returns 0 (and the
+@arg{contact} array is not touched).
+}
+
+
+@section{User defined classes}
+
+You can define your own geometry classes using the functions in this section.
+The standard geometry classes do not have any special access to the internals
+of ODE, they use the public functions exactly as you would.
+
+Every geometry class has a unique number (0,1,2, etc...).
+A new geometry class (call it `X') must provide the following to ODE:
+@numlist{
+@*	Functions that will handle collision detection and contact generation
+	between X and one or more other classes.
+	These functions must be of type @c{dColliderFn}, which is defined as
+	@code{@[
+typedef int dColliderFn (dGeomID o1, dGeomID o2, int flags,
+                         dContactGeom *contact, int skip);
+	@]}
+	This has exactly the same interface as @func{dCollide()}.
+	Each function will handle a specific collision case, where @arg{o1}
+	has type X and @arg{o2} has some other known type.
+
+@*	A "selector" function, of type @c{dGetColliderFnFn}, which is
+	defined as
+	@code{@[
+typedef dColliderFn * dGetColliderFnFn (int num);
+	@]}
+	This function takes a class number (@arg{num}), and returns the
+	collider function that can handle colliding X with class @arg{num}.
+	It should return 0 if X does not know how to collide with class
+	@arg{num}.
+	Note that if classes X and Y are to collide, only @emph{one} needs
+	to provide a function to collide with the other.
+
+	This function is called infrequently each @arg{num}, usually the
+	return values are cached and reused.
+
+@*	A function that will compute the axis aligned bounding box of
+	instances of this class.
+	This function must be of type @c{dGetAABBFn}, which is defined as
+	@code{@[
+typedef void dGetAABBFn (dGeomID g, dReal aabb[6]);
+	@]}
+	This function is given @arg{g}, which has type X, and returns the
+	axis-aligned bounding box for @arg{g}.
+	The @arg{aabb} array has elements
+	@m{(minx, maxx, miny, maxy, minz, maxz)}.
+
+@*	The number of bytes of "class data" that instances of this class
+	need. For example a sphere store its radius in the class data area,
+	and a box stores its side lengths there.
+}
+
+Here are the functions used to manage custom classes:
+
+
+@funcdef{
+int dCreateGeomClass (const dGeomClass *classptr);
+}{
+Register a new geometry class, defined by @arg{classptr}.
+The number of the new class is returned.
+The convention used in ODE is to assign the class number to a global variable
+with the name @c{dXxxClass} where Xxx is the class name
+(e.g. @c{dSphereClass}).
+
+Here is the definition of the @c{dGeomClass} structure:
+@code{@[
+struct dGeomClass {
+  int bytes;                  // bytes of custom data needed
+  dGetColliderFnFn *collider; // collider function
+  dGetAABBFn *aabb;           // bounding box function
+};
+@]}
+}
+
+
+@funcdef{
+void * dGeomGetClassData (dGeomID);
+}{
+Given a geometry object, return a pointer to the class's custom data
+(this will be a block of the required number of bytes).
+Note that internal ODE classes use a faster macro instead.
+}
+
+
+@funcdef{
+dGeomID dCreateGeom (dSpaceID space, int classnum);
+}{
+Create a geometry object of the given class number, and add it to the given
+@arg{space}.
+The custom data block will initially be set to 0.
+}
+
+
+@funcdef{
+int dGeomGetClass (dGeomID);
+}{
+Given a geometry object, this returns its class number.
+}
+
+
+When you implement a new class you will usually write a function that does
+the following:
+@numlist{
+@*	If the class has not yet been created, create it.
+	You should be careful to only ever create the class once.
+@*	Call @func{dCreateGeom()} to make an instance of the class.
+@*	Set up the custom data area.
+}
+This is what @func{dCreateSphere()} and the other such functions do.
+
+
+@section{Utility functions}
+
+
+@funcdef{
+int dBoxTouchesBox (const dVector3 _p1, const dMatrix3 R1,
+                    const dVector3 side1, const dVector3 _p2,
+                    const dMatrix3 R2, const dVector3 side2);
+}{
+Given boxes (@arg{p1},@arg{R1},@arg{side1}) and
+(@arg{p2},@arg{R2},@arg{side2}), return 1 if they intersect or 0 if not.
+@arg{p} is the center of the box, @arg{R} is the rotation matrix for
+the box, and @arg{side} is a vector of x/y/z side lengths.
+}
+
+
+@section{Space}
+
+A space is a container for geometry objects.
+It is similar to the rigid body "world", except for collision instead of
+dynamics.
+
+The space does high level collision culling, which means that it can
+identify which pairs of geometry objects are potentially touching.
+You can safely call @func{dCollide()} for only those pairs, instead of
+having to call @func{dCollide()} for @emph{every} object-object pair.
+This can save a huge amount of time.
+Various collision culling algorithms will be available, however only the
+first is currently implemented:
 @list{
-@*	By creating one of the standard geometry objects, the object's class
-	is automatically registered with the collision system.
-	User provided classes should have the same behavior.
+@*	Simple @m{n^2} object intersections.
+@*	Oct tree.
+@*	Coordinate sorting.
+@*	Hash table?
+}
+
+Here are the functions used for spaces:
+
+@funcdef{
+dSpaceID dSpaceCreate();
+}{
+Create a space.
+}
+
+
+@funcdef{
+void dSpaceDestroy (dSpaceID);
+}{
+Destroy a space.
+When a space is destroyed, all the geometry objects in that space are
+automatically destroyed as well.
+}
+
+
+@funcdef{
+void dSpaceAdd (dSpaceID, dGeomID);
+void dSpaceRemove (dSpaceID, dGeomID);
+}{
+Add and remove geometry objects to/from the space.
+These functions are normally only called by the geometry object
+creation/deletion functions.
+}
+
+
+@funcdef{
+void dSpaceCollide (dSpaceID space, void *data, dNearCallback *callback);
+}{
+Call a callback function one or more times, for all potentially intersecting
+objects in the space.
+The @arg{callback} function is of type @c{dNearCallback}, which is defined as:
+@code{@[
+typedef void dNearCallback (void *data, dGeomID o1, dGeomID o2);
+@]}
+The @arg{data} variable is passed from @func{dSpaceCollide()} to the
+callback function. Its meaning is user defined.
+The @arg{o1} and @arg{o2} arguments are the geometry objects that may be near
+each other.
+The callback function can call @func{dCollide()} on @arg{o1} and @arg{o2},
+perhaps first determining whether to collide them at all based on other
+information.
+}
+
+
+@section{Future}
+
+Future interface enhancements:
+@list{
+@*	Composite objects.
 }
 
 #############################################################################
