@@ -805,6 +805,11 @@ void dJointAttach (dxJoint *joint, dxBody *body1, dxBody *body2)
 	     (!body2 || body2->world == world),
 	     "joint and bodies must be in same world");
 
+  // check if the joint can not be attached to just one body
+  dUASSERT (!((joint->flags & dJOINT_TWOBODIES) &&
+	      ((body1 != 0) ^ (body2 != 0))),
+	    "joint can not be attached to just one body");
+
   // remove any existing body attachments
   if (joint->node[0].body || joint->node[1].body) {
     removeJointReferencesFromAttachedBodies (joint);

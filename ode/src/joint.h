@@ -38,7 +38,11 @@ enum {
   // our convention is to treat all attaches as (body,0), i.e. so node[0].body
   // is always nonzero, so this flag records the fact that the arguments were
   // swapped.
-  dJOINT_REVERSE = 2
+  dJOINT_REVERSE = 2,
+
+  // if this flag is set, the joint can not have just one body attached to it,
+  // it must have either zero or two bodies attached.
+  dJOINT_TWOBODIES = 4
 };
 
 
