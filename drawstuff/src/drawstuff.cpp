@@ -927,7 +927,14 @@ void dsDrawFrame (int width, int height, dsFunctions *fn, int pause)
   const float vnear = 0.1f;
   const float vfar = 100.0f;
   const float k = 0.8f;     // view scale, 1 = +/- 45 degrees
-  glFrustum (-vnear*k,vnear*k,-vnear*k,vnear*k,vnear,vfar);
+  if (width >= height) {
+    float k2 = float(height)/float(width);
+    glFrustum (-vnear*k,vnear*k,-vnear*k*k2,vnear*k*k2,vnear,vfar);
+  }
+  else {
+    float k2 = float(width)/float(height);
+    glFrustum (-vnear*k*k2,vnear*k*k2,-vnear*k,vnear*k,vnear,vfar);
+  }
 
   // setup lights. it makes a difference whether this is done in the
   // GL_PROJECTION matrix mode (lights are scene relative) or the
