@@ -9,6 +9,10 @@ the rules for this file:
 
 ------------------------------------------------------------------------------
 
+02/05/03 russ
+
+	* added dMassSetCylinder().
+
 12/07/02 russ
 
 	* added dAreConnectedExcluding().

@@ -2193,12 +2193,25 @@ density, with the center of mass at (0,0,0) relative to the body.
 
 @funcdef{
 void dMassSetCappedCylinder (dMass *, dReal density, int direction,
-                             dReal a, dReal b);
+                             dReal radius, dReal length);
 }{
 Set the mass parameters to represent a capped cylinder of the given parameters
 and density, with the center of mass at (0,0,0) relative to the body.
-The radius of the cylinder (and the spherical cap) is @arg{a}.
-The length of the cylinder (not counting the spherical cap) is @arg{b}.
+The radius of the cylinder (and the spherical cap) is @arg{radius}.
+The length of the cylinder (not counting the spherical cap) is @arg{length}.
+The cylinder's long axis is oriented along the body's x, y or z axis according
+to the value of @arg{direction} (1=x, 2=y, 3=z).
+}
+
+@funcdef{
+void dMassSetCylinder (dMass *, dReal density, int direction,
+		       dReal radius, dReal length);
+}{
+Set the mass parameters to represent a flat-ended cylinder of the given
+parameters and density, with the center of mass at (0,0,0) relative to the
+body.
+The radius of the cylinder is @arg{radius}.
+The length of the cylinder is @arg{length}.
 The cylinder's long axis is oriented along the body's x, y or z axis according
 to the value of @arg{direction} (1=x, 2=y, 3=z).
 }

@@ -141,6 +141,27 @@ void dMassSetCappedCylinder (dMass *m, dReal density, int direction,
 }
 
 
+void dMassSetCylinder (dMass *m, dReal density, int direction,
+		       dReal radius, dReal length)
+{
+  dReal M,r2,I;
+  dAASSERT (m);
+  dMassSetZero (m);
+  r2 = radius*radius;
+  M = M_PI*r2*length*density;		// cylinder mass
+  m->mass = M;
+  I = M*(REAL(0.25)*r2 + (REAL(1.0)/REAL(12.0))*length*length);
+  m->_I(0,0) = I;
+  m->_I(1,1) = I;
+  m->_I(2,2) = I;
+  m->_I(direction-1,direction-1) = M*REAL(0.5)*r2;
+
+# ifndef dNODEBUG
+  checkMass (m);
+# endif
+}
+
+
 void dMassSetBox (dMass *m, dReal density,
 		  dReal lx, dReal ly, dReal lz)
 {
