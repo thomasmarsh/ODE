@@ -219,6 +219,202 @@ static dReal getHingeAngle (dxBody *body1, dxBody *body2, dVector3 axis,
 }
 
 //****************************************************************************
+// dxJointLimitMotor
+
+void dxJointLimitMotor::init()
+{
+  vel = 0;
+  fmax = 0;
+  lostop = -dInfinity;
+  histop = dInfinity;
+  fudge_factor = 1;
+  limit = 0;
+  limit_err = 0;
+}
+
+
+void dxJointLimitMotor::set (int num, dReal value)
+{
+  switch (num) {
+  case dParamLoStop:
+    if (value <= histop) lostop = value;
+    break;
+  case dParamHiStop:
+    if (value >= lostop) histop = value;
+    break;
+  case dParamVel:
+    vel = value;
+    break;
+  case dParamFMax:
+    if (value >= 0) fmax = value;
+    break;
+  case dParamFudgeFactor:
+    if (value >= 0 && value <= 1) fudge_factor = value;
+    break;
+  // case dParamBounce:
+  // case dParamSoft:
+  }
+}
+
+
+dReal dxJointLimitMotor::get (int num)
+{
+  switch (num) {
+  case dParamLoStop: return lostop;
+  case dParamHiStop: return histop;
+  case dParamVel: return vel;
+  case dParamFMax: return fmax;
+  case dParamFudgeFactor: return fudge_factor;
+  // case dParamBounce:
+  // case dParamSoft:
+  default: return 0;
+  }
+}
+
+
+int dxJointLimitMotor::testRotationalLimit (dxBody *body1, dxBody *body2,
+					    dVector3 axis1, dQuaternion qrel)
+{
+  // see if we're at a joint limit.
+  limit = 0;
+  if (lostop >= -M_PI && histop <= M_PI && lostop <= histop) {
+    // measure joint angle
+    dReal angle = getHingeAngle (body1,body2,axis1,qrel);
+    if (angle <= lostop) {
+      limit = 1;
+      limit_err = angle - lostop;
+      return 1;
+    }
+    else if (angle >= histop) {
+      limit = 2;
+      limit_err = angle - histop;
+      return 1;
+    }
+  }
+  return 0;
+}
+
+
+void dxJointLimitMotor::addRotationalLimot (dxJoint *joint,
+					    dxJoint::Info2 *info, int row,
+					    dVector3 ax1)
+{
+  int srow = row * info->rowskip;
+
+  // if the joint is powered, or has joint limits, add in the extra row
+  int powered = fmax > 0;
+  if (powered || limit) {
+    info->J1a[srow+0] = ax1[0];
+    info->J1a[srow+1] = ax1[1];
+    info->J1a[srow+2] = ax1[2];
+    if (joint->node[1].body) {
+      info->J2a[srow+0] = -ax1[0];
+      info->J2a[srow+1] = -ax1[1];
+      info->J2a[srow+2] = -ax1[2];
+    }
+
+    if (powered) {
+      if (! limit) {
+	info->c[row] = -vel;
+	info->lo[row] = -fmax;
+	info->hi[row] = fmax;
+      }
+      else {
+	// the joint is at a limit, AND is being powered. if the joint is
+	// being powered into the limit then we apply the maximum motor force
+	// in that direction, because the motor is working against the
+	// immovable limit. if the joint is being powered away from the limit
+	// then we have problems because actually we need *two* lcp
+	// constraints to handle this case. so we fake it and apply some
+	// fraction of the maximum force. the fraction to use can be set as
+	// a fudge factor.
+
+	dReal fm = fmax;
+	if (vel < 0) fm = -fm;
+
+	// if we're powering away from the limit, apply the fudge factor
+	if ((limit==1 && vel > 0) || (limit==2 && vel < 0)) fm *= fudge_factor;
+
+	dBodyAddTorque (joint->node[0].body,-fm*ax1[0],-fm*ax1[1],-fm*ax1[2]);
+	if (joint->node[1].body)
+	  dBodyAddTorque (joint->node[1].body,fm*ax1[0],fm*ax1[1],fm*ax1[2]);
+      }
+    }
+
+    if (limit) {
+      dReal k = info->fps * info->erp;
+      info->c[row] = k * limit_err;
+      if (limit == 1) {
+	// low limit
+	info->lo[row] = -dInfinity;
+	info->hi[row] = 0;
+      }
+      else {
+	// high limit
+	info->lo[row] = 0;
+	info->hi[row] = dInfinity;
+      }
+    }
+  }
+}
+
+
+void dxJointLimitMotor::addLinearLimot (dxJoint *joint, dxJoint::Info2 *info,
+					int row, dVector3 ax1)
+{
+  int srow = row * info->rowskip;
+
+  // if the joint is powered, or has joint limits, add in the extra row
+  int powered = fmax > 0;
+  if (powered || limit) {
+    info->J1l[srow+0] = ax1[0];
+    info->J1l[srow+1] = ax1[1];
+    info->J1l[srow+2] = ax1[2];
+    if (joint->node[1].body) {
+      info->J2l[srow+0] = -ax1[0];
+      info->J2l[srow+1] = -ax1[1];
+      info->J2l[srow+2] = -ax1[2];
+    }
+
+    if (powered) {
+      if (! limit) {
+        info->c[row] = vel;
+        info->lo[row] = -fmax;
+        info->hi[row] = fmax;
+      }
+      else {
+        // the joint is at a limit, AND is being powered. see the comment
+	// for the hinge.
+        dReal fm = fmax;
+        if (vel > 0) fm = -fm;
+
+	// if we're powering away from the limit, apply the fudge factor
+	if ((limit==1 && vel > 0) || (limit==2 && vel < 0)) fm *= fudge_factor;
+
+        dBodyAddForce (joint->node[0].body,-fm*ax1[0],-fm*ax1[1],-fm*ax1[2]);
+	if (joint->node[1].body)
+          dBodyAddForce (joint->node[1].body,fm*ax1[0],fm*ax1[1],fm*ax1[2]);
+      }
+    }
+
+    if (limit) {
+      dReal k = info->fps * info->erp;
+      info->c[row] = -k * limit_err;
+      if (limit == 1) {
+        // low limit
+        info->lo[row] = 0;
+        info->hi[row] = dInfinity;
+      }
+      else {
+        // high limit
+        info->lo[row] = -dInfinity;
+        info->hi[row] = 0;
+      }
+    }
+  }
+}
+
+//****************************************************************************
 // ball and socket
 
 static void ballInit (dxJointBall *j)
@@ -277,13 +473,7 @@ static void hingeInit (dxJointHinge *j)
   dSetZero (j->axis2,4);
   j->axis2[0] = 1;
   dSetZero (j->qrel,4);
-  j->vel = 0;
-  j->tmax = 0;
-  j->lostop = -1000;	// less than -pi, so ineffective
-  j->histop = 1000;	// more than  pi, so ineffective
-  j->fudge_factor = 1;
-  j->limit = 0;
-  j->angle_err = 0;
+  j->limot.init();
 }
 
 
@@ -292,26 +482,14 @@ static void hingeGetInfo1 (dxJointHinge *j, dxJoint::Info1 *info)
   info->nub = 5;    
 
   // see if joint is powered
-  if (j->tmax > 0)
+  if (j->limot.fmax > 0)
     info->m = 6;	// powered hinge needs an extra constraint row
   else info->m = 5;
 
   // see if we're at a joint limit.
-  j->limit = 0;
-  if (j->lostop >= -M_PI && j->histop <= M_PI && j->lostop <= j->histop) {
-    // measure joint angle
-    dReal angle = getHingeAngle (j->node[0].body,j->node[1].body,
-				 j->axis1, j->qrel);
-    if (angle <= j->lostop) {
-      j->limit = 1;
-      j->angle_err = angle - j->lostop;
-      info->m = 6;
-    }
-    else if (angle >= j->histop) {
-      j->limit = 2;
-      j->angle_err = angle - j->histop;
-      info->m = 6;
-    }
+  if (j->limot.testRotationalLimit (j->node[0].body,j->node[1].body,
+				    j->axis1, j->qrel)) {
+    info->m = 6;
   }
 }
 
@@ -336,7 +514,6 @@ static void hingeGetInfo2 (dxJointHinge *joint, dxJoint::Info2 *info)
 
   int s3=3*info->rowskip;
   int s4=4*info->rowskip;
-  int s5=5*info->rowskip;
 
   info->J1a[s3+0] = p[0];
   info->J1a[s3+1] = p[1];
@@ -384,63 +561,8 @@ static void hingeGetInfo2 (dxJointHinge *joint, dxJoint::Info2 *info)
   info->c[3] = k * dDOT(b,p);
   info->c[4] = k * dDOT(b,q);
 
-  // if the hinge is powered, or has joint limits, add in the extra row
-  int powered = joint->tmax > 0;
-  if (powered || joint->limit) {
-    info->J1a[s5+0] = ax1[0];
-    info->J1a[s5+1] = ax1[1];
-    info->J1a[s5+2] = ax1[2];
-    if (joint->node[1].body) {
-      info->J2a[s5+0] = -ax1[0];
-      info->J2a[s5+1] = -ax1[1];
-      info->J2a[s5+2] = -ax1[2];
-    }
-
-    if (powered) {
-      if (! joint->limit) {
-	info->c[5] = -joint->vel;
-	info->lo[5] = -joint->tmax;
-	info->hi[5] = joint->tmax;
-      }
-      else {
-	// the joint is at a limit, AND is being powered. if the joint is
-	// being powered into the limit then we apply the maximum motor force
-	// in that direction, because the motor is working against the
-	// immovable limit. if the joint is being powered away from the limit
-	// then we have problems because actually we need *two* lcp
-	// constraints to handle this case. so we fake it and apply some
-	// fraction of the maximum force. the fraction to use can be set as
-	// a fudge factor.
-
-	dReal fmax = joint->tmax;
-	if (joint->vel < 0) fmax = -fmax;
-
-	// if we're powering away from the limit, apply the fudge factor
-	if ((joint->limit==1 && joint->vel > 0) ||
-	    (joint->limit==2 && joint->vel < 0)) fmax *= joint->fudge_factor;
-
-	dBodyAddTorque (joint->node[0].body,
-			-fmax*ax1[0],-fmax*ax1[1],-fmax*ax1[2]);
-	if (joint->node[1].body)
-	  dBodyAddTorque (joint->node[1].body,
-			  fmax*ax1[0],fmax*ax1[1],fmax*ax1[2]);
-      }
-    }
-
-    if (joint->limit) {
-      info->c[5] = k * joint->angle_err;
-      if (joint->limit == 1) {
-	// low limit
-	info->lo[5] = -dInfinity;
-	info->hi[5] = 0;
-      }
-      else {
-	// high limit
-	info->lo[5] = 0;
-	info->hi[5] = dInfinity;
-      }
-    }
-  }
+  // if the hinge is powered, or has joint limits, add in the stuff
+  joint->limot.addRotationalLimot (joint,info,5,ax1);
 }
 
 
@@ -499,80 +621,20 @@ extern "C" void dJointGetHingeAxis (dxJointHinge *joint, dVector3 result)
 }
 
 
-extern "C" void dJointSetHingeVel (dxJointHinge *joint, dReal vel)
+extern "C" void dJointSetHingeParam (dxJointHinge *joint,
+				     int parameter, dReal value)
 {
   dUASSERT(joint,"bad joint argument");
   dUASSERT(joint->vtable == &__dhinge_vtable,"joint is not a hinge");
-  joint->vel = vel;
+  joint->limot.set (parameter,value);
 }
 
 
-extern "C" void dJointSetHingeTmax (dxJointHinge *joint, dReal tmax)
+extern "C" dReal dJointGetHingeParam (dxJointHinge *joint, int parameter)
 {
   dUASSERT(joint,"bad joint argument");
   dUASSERT(joint->vtable == &__dhinge_vtable,"joint is not a hinge");
-  if (tmax < REAL(0.0)) tmax = 0;
-  joint->tmax = tmax;
-}
-
-
-extern "C" void dJointSetHingeStops (dxJointHinge *joint,
-				     dReal low, dReal high)
-{
-  dUASSERT(joint,"bad joint argument");
-  dUASSERT(joint->vtable == &__dhinge_vtable,"joint is not a hinge");
-  if (low < high) {
-    joint->lostop = low;
-    joint->histop = high;
-  }
-}
-
-
-extern "C" void dJointSetHingeFudgeFactor (dxJointHinge *joint, dReal factor)
-{
-  dUASSERT(joint,"bad joint argument");
-  dUASSERT(joint->vtable == &__dhinge_vtable,"joint is not a hinge");
-  joint->fudge_factor = factor;
-}
-
-
-extern "C" dReal dJointGetHingeVel (dxJointHinge *joint)
-{
-  dUASSERT(joint,"bad joint argument");
-  dUASSERT(joint->vtable == &__dhinge_vtable,"joint is not a hinge");
-  return joint->vel;
-}
-
-
-extern "C" dReal dJointGetHingeTmax (dxJointHinge *joint)
-{
-  dUASSERT(joint,"bad joint argument");
-  dUASSERT(joint->vtable == &__dhinge_vtable,"joint is not a hinge");
-  return joint->tmax;
-}
-
-
-extern "C" dReal dJointGetHingeLowStop (dxJointHinge *joint)
-{
-  dUASSERT(joint,"bad joint argument");
-  dUASSERT(joint->vtable == &__dhinge_vtable,"joint is not a hinge");
-  return joint->lostop;
-}
-
-
-extern "C" dReal dJointGetHingeHighStop (dxJointHinge *joint)
-{
-  dUASSERT(joint,"bad joint argument");
-  dUASSERT(joint->vtable == &__dhinge_vtable,"joint is not a hinge");
-  return joint->histop;
-}
-
-
-extern "C" dReal dJointGetHingeFudgeFactor (dxJointHinge *joint)
-{
-  dAASSERT(joint);
-  dUASSERT(joint->vtable == &__dhinge_vtable,"joint is not a hinge");
-  return joint->fudge_factor;
+  return joint->limot.get (parameter);
 }
 
 
@@ -618,13 +680,7 @@ static void sliderInit (dxJointSlider *j)
   j->axis1[0] = 1;
   dSetZero (j->qrel,4);
   dSetZero (j->offset,4);
-  j->vel = 0;
-  j->fmax = 0;
-  j->lostop = -dInfinity;
-  j->histop = dInfinity;
-  j->fudge_factor = 1;
-  j->limit = 0;
-  j->pos_err = 0;
+  j->limot.init();
 }
 
 
@@ -676,24 +732,24 @@ static void sliderGetInfo1 (dxJointSlider *j, dxJoint::Info1 *info)
   info->nub = 5;    
 
   // see if joint is powered
-  if (j->fmax > 0)
+  if (j->limot.fmax > 0)
     info->m = 6;	// powered slider needs an extra constraint row
   else info->m = 5;
 
   // see if we're at a joint limit.
-  j->limit = 0;
-  if ((j->lostop > -dInfinity || j->histop < dInfinity) &&
-      j->lostop <= j->histop) {
+  j->limot.limit = 0;
+  if ((j->limot.lostop > -dInfinity || j->limot.histop < dInfinity) &&
+      j->limot.lostop <= j->limot.histop) {
     // measure joint position
     dReal pos = dJointGetSliderPosition (j);
-    if (pos <= j->lostop) {
-      j->limit = 1;
-      j->pos_err = pos - j->lostop;
+    if (pos <= j->limot.lostop) {
+      j->limot.limit = 1;
+      j->limot.limit_err = pos - j->limot.lostop;
       info->m = 6;
     }
-    else if (pos >= j->histop) {
-      j->limit = 2;
-      j->pos_err = pos - j->histop;
+    else if (pos >= j->limot.histop) {
+      j->limot.limit = 2;
+      j->limot.limit_err = pos - j->limot.histop;
       info->m = 6;
     }
   }
@@ -703,7 +759,7 @@ static void sliderGetInfo1 (dxJointSlider *j, dxJoint::Info1 *info)
 static void sliderGetInfo2 (dxJointSlider *joint, dxJoint::Info2 *info)
 {
   int i,s = info->rowskip;
-  int s2=2*s,s3=3*s,s4=4*s,s5=5*s;
+  int s2=2*s,s3=3*s,s4=4*s;
 
   // pull out pos and R for both bodies. also get the `connection'
   // vector pos2-pos1.
@@ -807,55 +863,7 @@ static void sliderGetInfo2 (dxJointSlider *joint, dxJoint::Info2 *info)
   }
 
   // if the slider is powered, or has joint limits, add in the extra row
-  int powered = joint->fmax > 0;
-  if (powered || joint->limit) {
-    info->J1l[s5+0] = ax1[0];
-    info->J1l[s5+1] = ax1[1];
-    info->J1l[s5+2] = ax1[2];
-    if (joint->node[1].body) {
-      info->J2l[s5+0] = -ax1[0];
-      info->J2l[s5+1] = -ax1[1];
-      info->J2l[s5+2] = -ax1[2];
-    }
-
-    if (powered) {
-      if (! joint->limit) {
-        info->c[5] = joint->vel;
-        info->lo[5] = -joint->fmax;
-        info->hi[5] = joint->fmax;
-      }
-      else {
-        // the joint is at a limit, AND is being powered. see the comment
-	// for the hinge.
-        dReal fmax = joint->fmax;
-        if (joint->vel > 0) fmax = -fmax;
-
-	// if we're powering away from the limit, apply the fudge factor
-	if ((joint->limit==1 && joint->vel > 0) ||
-	    (joint->limit==2 && joint->vel < 0)) fmax *= joint->fudge_factor;
-
-        dBodyAddForce (joint->node[0].body,
-		       -fmax*ax1[0],-fmax*ax1[1],-fmax*ax1[2]);
-        if (joint->node[1].body)
-          dBodyAddForce (joint->node[1].body,
-			 fmax*ax1[0],fmax*ax1[1],fmax*ax1[2]);
-      }
-    }
-
-    if (joint->limit) {
-      info->c[5] = -k * joint->pos_err;
-      if (joint->limit == 1) {
-        // low limit
-        info->lo[5] = 0;
-        info->hi[5] = dInfinity;
-      }
-      else {
-        // high limit
-        info->lo[5] = -dInfinity;
-        info->hi[5] = 0;
-      }
-    }
-  }
+  joint->limot.addLinearLimot (joint,info,5,ax1);
 }
 
 
@@ -894,80 +902,20 @@ extern "C" void dJointGetSliderAxis (dxJointSlider *joint, dVector3 result)
 }
 
 
-extern "C" void dJointSetSliderVel (dxJointSlider *joint, dReal vel)
+extern "C" void dJointSetSliderParam (dxJointSlider *joint,
+				      int parameter, dReal value)
 {
   dUASSERT(joint,"bad joint argument");
   dUASSERT(joint->vtable == &__dslider_vtable,"joint is not a slider");
-  joint->vel = vel;
+  joint->limot.set (parameter,value);
 }
 
 
-extern "C" void dJointSetSliderFmax (dxJointSlider *joint, dReal fmax)
+extern "C" dReal dJointGetSliderParam (dxJointSlider *joint, int parameter)
 {
   dUASSERT(joint,"bad joint argument");
   dUASSERT(joint->vtable == &__dslider_vtable,"joint is not a slider");
-  if (fmax < REAL(0.0)) fmax = 0;
-  joint->fmax = fmax;
-}
-
-
-extern "C" void dJointSetSliderStops (dxJointSlider *joint,
-				      dReal low, dReal high)
-{
-  dUASSERT(joint,"bad joint argument");
-  dUASSERT(joint->vtable == &__dslider_vtable,"joint is not a slider");
-  if (low < high) {
-    joint->lostop = low;
-    joint->histop = high;
-  }
-}
-
-
-extern "C" void dJointSetSliderFudgeFactor (dxJointSlider *joint, dReal factor)
-{
-  dUASSERT(joint,"bad joint argument");
-  dUASSERT(joint->vtable == &__dslider_vtable,"joint is not a slider");
-  joint->fudge_factor = factor;
-}
-
-
-extern "C" dReal dJointGetSliderVel (dxJointSlider *joint)
-{
-  dUASSERT(joint,"bad joint argument");
-  dUASSERT(joint->vtable == &__dslider_vtable,"joint is not a slider");
-  return joint->vel;
-}
-
-
-extern "C" dReal dJointGetSliderFmax (dxJointSlider *joint)
-{
-  dUASSERT(joint,"bad joint argument");
-  dUASSERT(joint->vtable == &__dslider_vtable,"joint is not a slider");
-  return joint->fmax;
-}
-
-
-extern "C" dReal dJointGetSliderLowStop (dxJointSlider *joint)
-{
-  dUASSERT(joint,"bad joint argument");
-  dUASSERT(joint->vtable == &__dslider_vtable,"joint is not a slider");
-  return joint->lostop;
-}
-
-
-extern "C" dReal dJointGetSliderHighStop (dxJointSlider *joint)
-{
-  dUASSERT(joint,"bad joint argument");
-  dUASSERT(joint->vtable == &__dslider_vtable,"joint is not a slider");
-  return joint->histop;
-}
-
-
-extern "C" dReal dJointGetSliderFudgeFactor (dxJointSlider *joint)
-{
-  dAASSERT(joint);
-  dUASSERT(joint->vtable == &__dslider_vtable,"joint is not a slider");
-  return joint->fudge_factor;
+  return joint->limot.get (parameter);
 }
 
 
