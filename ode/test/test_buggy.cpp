@@ -19,6 +19,13 @@
  *                                                                       *
  *************************************************************************/
 
+/*
+
+buggy with suspension
+
+*/
+
+
 #include <stdio.h>
 #include "ode/ode.h"
 #include "drawstuff/drawstuff.h"
@@ -167,11 +174,9 @@ static void simLoop (int pause)
   for (i=1; i<=3; i++) dsDrawCylinder (dBodyGetPosition(body[i]),
 				       dBodyGetRotation(body[i]),0.02,RADIUS);
 
-  /*
   dVector3 ss;
   dGeomBoxGetLengths (ground_box,ss);
   dsDrawBox (dGeomGetPosition(ground_box),dGeomGetRotation(ground_box),ss);
-  */
 
   /*
   printf ("%.10f %.10f %.10f %.10f\n",
@@ -263,13 +268,11 @@ int main (int argc, char **argv)
   }
 
   // environment
-  /*
   ground_box = dCreateBox (space,2,1.5,1);
   dMatrix3 R;
   dRFromAxisAndAngle (R,0,1,0,-0.15);
   dGeomSetPosition (ground_box,2,0,-0.34);
   dGeomSetRotation (ground_box,R);
-  */
 
   // run simulation
   dsSimulationLoop (argc,argv,352,288,&fn);
