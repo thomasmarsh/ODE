@@ -1,5 +1,7 @@
 
-MS VisualC++ 6 workspace for ODE (v0.81).
+-------------------------------------------
+ MS VisualC++ 6 workspace for ODE (v0.82).
+-------------------------------------------
 
 This directory contains these VC6 workspaces:
 
@@ -36,23 +38,3 @@ Enjoy.
 --
 gl
 
-
------------------------------------------------------------------------------
-0.8 Changes:
-
-MS VC6 Workspace:
-> created new 'VC6' directory in <ode>/ode/src
-> created 'ode'    workspace (builds libs in <ode>/lib)
-> created 'odeDLL' workspace (builds DLLs in <ode>/lib).
-> created build config presets (based on Frank Compagner's files) for
-   single/double with/without trimesh support.
-> created batch files to auto-configure the VC6 build (they copy the correct
-   config file to <ode>/include/config.h and clear the Debug and Release dirs
-   to force a rebuild).
-
-> created 'Samples' subdir that contains all the samples and drawstuff.
-> added trimesh samples.
-> note: changed drawstuff to build 'drawstuffd.lib' under debug.
-
-Opcode:
-Changed Opcode workspace to create libs in <ode>/lib
