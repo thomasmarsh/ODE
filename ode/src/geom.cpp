@@ -30,7 +30,7 @@ TODO
 
 */
 
-#include "ode/geom2.h"
+#include "ode/geom.h"
 #include "ode/rotation.h"
 #include "ode/odemath.h"
 #include "ode/memory.h"
