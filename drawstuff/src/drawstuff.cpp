@@ -448,6 +448,8 @@ static void drawPatch (float p1[3], float p2[3], float p3[3], int level)
 
 // draw a sphere of radius 1
 
+static int sphere_quality = 1;
+
 static void drawSphere()
 {
   // icosahedron data for an icosahedron of radius 1.0
@@ -488,7 +490,7 @@ static void drawSphere()
     glBegin (GL_TRIANGLES);
     for (int i=0; i<20; i++) {
       drawPatch (&idata[index[i][2]][0],&idata[index[i][1]][0],
-		 &idata[index[i][0]][0],1);
+		 &idata[index[i][0]][0],sphere_quality);
     }
     glEnd();
     glEndList();
@@ -557,11 +559,14 @@ static void drawTriangle (const float *v0, const float *v1, const float *v2)
 
 // draw a capped cylinder of length l and radius r, aligned along the x axis
 
+static int capped_cylinder_quality = 3;
+
 static void drawCappedCylinder (float l, float r)
 {
   int i,j;
   float tmp,nx,ny,nz,start_nx,start_ny,a,ca,sa;
-  const int n = 12;	// number of sides to the cylinder (divisible by 4)
+  // number of sides to the cylinder (divisible by 4):
+  const int n = capped_cylinder_quality*4;
 
   l *= 0.5;
   a = float(M_PI*2.0)/float(n);
@@ -1419,4 +1424,16 @@ void dsDrawLineD (const double _pos1[3], const double _pos2[3])
   for (i=0; i<3; i++) pos1[i]=(float)_pos1[i];
   for (i=0; i<3; i++) pos2[i]=(float)_pos2[i];
   dsDrawLine (pos1,pos2);
+}
+
+
+void dsSetSphereQuality (int n)
+{
+  sphere_quality = n;
+}
+
+
+void dsSetCappedCylinderQuality (int n)
+{
+  capped_cylinder_quality = n;
 }

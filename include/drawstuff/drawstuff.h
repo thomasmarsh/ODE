@@ -146,6 +146,13 @@ void dsDrawCappedCylinderD (const double pos[3], const double R[12],
 			    float length, float radius);
 void dsDrawLineD (const double pos1[3], const double pos2[3]);
 
+/* Set the drawn quality of the objects. Higher numbers are higher quality,
+ * but slower to draw. This must be set before the first objects are drawn to
+ * be effective.
+ */
+void dsSetSphereQuality (int n);		/* default = 1 */
+void dsSetCappedCylinderQuality (int n);	/* default = 3 */
+
 
 /* closing bracket for extern "C" */
 #ifdef __cplusplus
