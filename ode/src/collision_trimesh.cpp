@@ -41,7 +41,11 @@ dxTriMeshData::~dxTriMeshData(){
 	//
 }
 
-void dxTriMeshData::Build(const void* Vertices, int VertexStide, int VertexCount, const void* Indices, int IndexCount, int TriStride, bool Single){
+void 
+dxTriMeshData::Build(const void* Vertices, int VertexStide, int VertexCount,
+		     const void* Indices, int IndexCount, int TriStride,
+		     const void* in_Normals,
+		     bool Single){
 	Mesh.SetNbTriangles(IndexCount / 3);
 	Mesh.SetNbVertices(VertexCount);
 	Mesh.SetPointers((IndexedTriangle*)Indices, (Point*)Vertices);
@@ -50,7 +54,14 @@ void dxTriMeshData::Build(const void* Vertices, int VertexStide, int VertexCount
 	
 	// Build tree
 	BuildSettings Settings;
+    // recommended in Opcode User Manual
+    //Settings.mRules = SPLIT_COMPLETE | SPLIT_SPLATTERPOINTS | SPLIT_GEOMCENTER;
+    // used in ODE, why?
 	Settings.mRules = SPLIT_BEST_AXIS;
+
+    // best compromise?
+    //Settings.mRules = SPLIT_BEST_AXIS | SPLIT_SPLATTER_POINTS | SPLIT_GEOM_CENTER;
+
 
 	OPCODECREATE TreeBuilder;
 	TreeBuilder.mIMesh = &Mesh;
@@ -66,8 +77,8 @@ void dxTriMeshData::Build(const void* Vertices, int VertexStide, int VertexCount
 
 	// compute model space AABB
 	dVector3 AABBMax, AABBMin;
-	AABBMax[0] = AABBMax[1] = AABBMax[2] = -dInfinity;
-	AABBMin[0] = AABBMin[1] = AABBMin[2] = dInfinity;
+    AABBMax[0] = AABBMax[1] = AABBMax[2] = (dReal) -dInfinity;
+    AABBMin[0] = AABBMin[1] = AABBMin[2] = (dReal) dInfinity;
 	if( Single ) {
         const char* verts = (const char*)Vertices;
         for( int i = 0; i < VertexCount; ++i ) {
@@ -84,12 +95,12 @@ void dxTriMeshData::Build(const void* Vertices, int VertexStide, int VertexCount
         const char* verts = (const char*)Vertices;
         for( int i = 0; i < VertexCount; ++i ) {
             const double* v = (const double*)verts;
-            if( v[0] > AABBMax[0] ) AABBMax[0] = v[0];
-            if( v[1] > AABBMax[1] ) AABBMax[1] = v[1];
-            if( v[2] > AABBMax[2] ) AABBMax[2] = v[2];
-            if( v[0] < AABBMin[0] ) AABBMin[0] = v[0];
-            if( v[1] < AABBMin[1] ) AABBMin[1] = v[1];
-            if( v[2] < AABBMin[2] ) AABBMin[2] = v[2];
+        if( v[0] > AABBMax[0] ) AABBMax[0] = (dReal) v[0];
+        if( v[1] > AABBMax[1] ) AABBMax[1] = (dReal) v[1];
+        if( v[2] > AABBMax[2] ) AABBMax[2] = (dReal) v[2];
+        if( v[0] < AABBMin[0] ) AABBMin[0] = (dReal) v[0];
+        if( v[1] < AABBMin[1] ) AABBMin[1] = (dReal) v[1];
+        if( v[2] < AABBMin[2] ) AABBMin[2] = (dReal) v[2];
             verts += VertexStide;
         }
     }
@@ -99,6 +110,13 @@ void dxTriMeshData::Build(const void* Vertices, int VertexStide, int VertexCount
     AABBExtents[0] = AABBMax[0] - AABBCenter[0];
     AABBExtents[1] = AABBMax[1] - AABBCenter[1];
     AABBExtents[2] = AABBMax[2] - AABBCenter[2];
+
+    // user data (not used by OPCODE)
+    for (int i=0; i<3; i++)
+	for (int j=0; j<3; j++)
+	    last_trans.m[i][j] = 0;
+
+    Normals = (dReal *) in_Normals;
 }
 
 dTriMeshDataID dGeomTriMeshDataCreate(){
@@ -109,29 +127,101 @@ void dGeomTriMeshDataDestroy(dTriMeshDataID g){
 	delete g;
 }
 
-void dGeomTriMeshDataBuildSingle(dTriMeshDataID g, const void* Vertices, int VertexStride, int VertexCount, 
-								 const void* Indices, int IndexCount, int TriStride){
+void dGeomTriMeshDataSet(dTriMeshDataID g, int data_id, void* in_data)
+{
 	dUASSERT(g, "argument not trimesh data");
 
-	g->Build(Vertices, VertexStride, VertexCount, Indices, IndexCount, TriStride, true);
+    double *elem;
+    
+    switch (data_id) {
+    case TRIMESH_FACE_NORMALS:
+	g->Normals = (dReal *) in_data;
+	break;
+
+    case TRIMESH_LAST_TRANSFORMATION:
+	elem = (double *) in_data;
+	for (int i=0; i<4; i++)
+	    for (int j=0; j<4; j++)
+		g->last_trans.m[i][j] = (dReal) elem[i*4 + j];
+	
+	break;
+    default:
+	dUASSERT(data_id, "invalid data type");
+	break;
+    }
+
+    return;
 }
 
-void dGeomTriMeshDataBuildDouble(dTriMeshDataID g, const void* Vertices, int VertexStride, int VertexCount, 
-								 const void* Indices, int IndexCount, int TriStride){
-	dUASSERT(g, "argument not trimesh data");
 
-	g->Build(Vertices, VertexStride, VertexCount, Indices, IndexCount, TriStride, false);
+void dGeomTriMeshDataBuildSingle1(dTriMeshDataID g,
+                                  const void* Vertices, int VertexStride, int VertexCount, 
+                                  const void* Indices, int IndexCount, int TriStride,
+                                  const void* Normals){
+    dUASSERT(g, "argument not trimesh data");
+
+    g->Build(Vertices, VertexStride, VertexCount, 
+	     Indices, IndexCount, TriStride, 
+	     Normals, 
+	     true);
 }
 
 
-void dGeomTriMeshDataBuildSimple(dTriMeshDataID g, const dReal* Vertices, int VertexCount, 
-								 const int* Indices, int IndexCount){
+void dGeomTriMeshDataBuildSingle(dTriMeshDataID g,
+
+				 const void* Vertices, int VertexStride, int VertexCount, 
+                                 const void* Indices, int IndexCount, int TriStride) {
+    dGeomTriMeshDataBuildSingle1(g, Vertices, VertexStride, VertexCount,
+                                 Indices, IndexCount, TriStride, (void*)NULL);
+}
+
+
+void dGeomTriMeshDataBuildDouble1(dTriMeshDataID g,
+                                  const void* Vertices, int VertexStride, int VertexCount, 
+                                  const void* Indices, int IndexCount, int TriStride,
+                                  const void* Normals){
+    dUASSERT(g, "argument not trimesh data");
+
+    g->Build(Vertices, VertexStride, VertexCount, 
+	     Indices, IndexCount, TriStride, 
+	     Normals, 
+	     false);
+}
+
+
+void dGeomTriMeshDataBuildDouble(dTriMeshDataID g,
+				 const void* Vertices, int VertexStride, int VertexCount, 
+                                 const void* Indices, int IndexCount, int TriStride) {
+    dGeomTriMeshDataBuildDouble1(g, Vertices, VertexStride, VertexCount,
+                                 Indices, IndexCount, TriStride, NULL);
+}
+
+
+void dGeomTriMeshDataBuildSimple1(dTriMeshDataID g,
+                                  const dReal* Vertices, int VertexCount, 
+                                  const int* Indices, int IndexCount,
+                                  const int* Normals){
 #ifdef dSINGLE
-	dGeomTriMeshDataBuildSingle(g, Vertices, 4 * sizeof(dReal), VertexCount, Indices, IndexCount, 3 * sizeof(unsigned int));
+    dGeomTriMeshDataBuildSingle1(g,
+                                 Vertices, 4 * sizeof(dReal), VertexCount, 
+                                 Indices, IndexCount, 3 * sizeof(unsigned int),
+                                 Normals);
 #else
-	dGeomTriMeshDataBuildDouble(g, Vertices, 4 * sizeof(dReal), VertexCount, Indices, IndexCount, 3 * sizeof(unsigned int));
+    dGeomTriMeshDataBuildDouble1(g, Vertices, 4 * sizeof(dReal), VertexCount, 
+                                 Indices, IndexCount, 3 * sizeof(unsigned int),
+                                 Normals);
 #endif
 }
+
+
+void dGeomTriMeshDataBuildSimple(dTriMeshDataID g,
+                                 const dReal* Vertices, int VertexCount, 
+                                 const int* Indices, int IndexCount) {
+    dGeomTriMeshDataBuildSimple1(g,
+                                 Vertices, VertexCount, Indices, IndexCount,
+                                 (const int*)NULL);
+}
+
 
 // Trimesh
 PlanesCollider dxTriMesh::_PlanesCollider;
@@ -153,21 +243,36 @@ dxTriMesh::dxTriMesh(dSpaceID Space, dTriMeshDataID Data) : dxGeom(Space, 1){
 	_RayCollider.SetDestination(&Faces);
 
 	_PlanesCollider.SetTemporalCoherence(true);
+
 	_SphereCollider.SetTemporalCoherence(true);
+        _SphereCollider.SetPrimitiveTests(false);
+
+
 	_OBBCollider.SetTemporalCoherence(true);
-	_AABBTreeCollider.SetTemporalCoherence(true);
+
+    // no first-contact test (i.e. return full contact info)
+	_AABBTreeCollider.SetFirstContact( false );     
+    // temporal coherence only works with "first conact" tests
+    _AABBTreeCollider.SetTemporalCoherence(false);
+    // Perform full BV-BV tests (true) or SAT-lite tests (false)
+	_AABBTreeCollider.SetFullBoxBoxTest( true );
+    // Perform full Primitive-BV tests (true) or SAT-lite tests (false)
+	_AABBTreeCollider.SetFullPrimBoxTest( true );
 
 	/* TC has speed/space 'issues' that don't make it a clear
-	   win by default. */
+	   win by default on spheres/boxes. */
 	this->doSphereTC = false;
 	this->doBoxTC = false;
 
-	_SphereCollider.SetPrimitiveTests(false);
+    const char* msg;
+    if ((msg =_AABBTreeCollider.ValidateSettings()))
+        dDebug (d_ERR_UASSERT, msg, " (%s:%d)", __FILE__,__LINE__);
 }
 
 dxTriMesh::~dxTriMesh(){
 	//
 }
+
 
 void dxTriMesh::ClearTCCache(){
   /* dxTriMesh::ClearTCCache uses dArray's setSize(0) to clear the caches -
@@ -186,29 +291,48 @@ void dxTriMesh::ClearTCCache(){
 	BoxTCCache.setSize(0);
 }
 
+
 int dxTriMesh::AABBTest(dxGeom* g, dReal aabb[6]){
 	return 1;
 }
 
-void dxTriMesh::computeAABB(){
+
+void dxTriMesh::computeAABB() {
         const dxTriMeshData* d = Data;
         dVector3 c;
+    
         dMULTIPLY0_331( c, R, d->AABBCenter );
+    
         dReal xrange = dFabs(R[0] * Data->AABBExtents[0]) +
-	  dFabs(R[1] * Data->AABBExtents[1]) + dFabs(R[2] *
-						     Data->AABBExtents[2]);
+        dFabs(R[1] * Data->AABBExtents[1]) + 
+        dFabs(R[2] * Data->AABBExtents[2]);
         dReal yrange = dFabs(R[4] * Data->AABBExtents[0]) +
-	  dFabs(R[5] * Data->AABBExtents[1]) + dFabs(R[6] *
-						     Data->AABBExtents[2]);
+        dFabs(R[5] * Data->AABBExtents[1]) + 
+        dFabs(R[6] * Data->AABBExtents[2]);
         dReal zrange = dFabs(R[8] * Data->AABBExtents[0]) +
-	  dFabs(R[9] * Data->AABBExtents[1]) + dFabs(R[10] *
-						     Data->AABBExtents[2]);
+        dFabs(R[9] * Data->AABBExtents[1]) + 
+        dFabs(R[10] * Data->AABBExtents[2]);
+
         aabb[0] = c[0] + pos[0] - xrange;
         aabb[1] = c[0] + pos[0] + xrange;
         aabb[2] = c[1] + pos[1] - yrange;
         aabb[3] = c[1] + pos[1] + yrange;
         aabb[4] = c[2] + pos[2] - zrange;
         aabb[5] = c[2] + pos[2] + zrange;
+}
+
+dGeomID dCreateTriMesh(dSpaceID space, 
+		       dTriMeshDataID Data,
+		       dTriCallback* Callback,
+		       dTriArrayCallback* ArrayCallback,
+		       dTriRayCallback* RayCallback)
+{
+	dxTriMesh* Geom = new dxTriMesh(space, Data);
+	Geom->Callback = Callback;
+	Geom->ArrayCallback = ArrayCallback;
+	Geom->RayCallback = RayCallback;
+
+	return Geom;
 }
 
 void dGeomTriMeshSetCallback(dGeomID g, dTriCallback* Callback)
@@ -245,15 +369,6 @@ dTriRayCallback* dGeomTriMeshGetRayCallback(dGeomID g)
 {
 	dUASSERT(g && g->type == dTriMeshClass, "argument not a trimesh");	
 	return ((dxTriMesh*)g)->RayCallback;
-}
-
-dGeomID dCreateTriMesh(dSpaceID space, dTriMeshDataID Data, dTriCallback* Callback, dTriArrayCallback* ArrayCallback, dTriRayCallback* RayCallback){
-	dxTriMesh* Geom = new dxTriMesh(space, Data);
-	Geom->Callback = Callback;
-	Geom->ArrayCallback = ArrayCallback;
-	Geom->RayCallback = RayCallback;
-
-	return Geom;
 }
 
 void dGeomTriMeshSetData(dGeomID g, dTriMeshDataID Data)
@@ -302,6 +417,16 @@ void dGeomTriMeshClearTCCache(dGeomID g){
 	Geom->ClearTCCache();
 }
 
+/*
+ * returns the TriMeshDataID
+ */
+dTriMeshDataID
+dGeomTriMeshGetTriMeshDataID(dGeomID g)
+{
+    dxTriMesh* Geom = (dxTriMesh*) g;
+    return Geom->Data;
+}
+
 // Getting data
 void dGeomTriMeshGetTriangle(dGeomID g, int Index, dVector3* v0, dVector3* v1, dVector3* v2){
 	dUASSERT(g && g->type == dTriMeshClass, "argument not a trimesh");
@@ -343,7 +468,7 @@ void dGeomTriMeshGetPoint(dGeomID g, int Index, dReal u, dReal v, dVector3 Out){
 	const dMatrix3& Rotation = *(const dMatrix3*)dGeomGetRotation(g);
 
 	dVector3 dv[3];
-	FetchTriangle(Geom, Index, Position, Rotation, dv);
+        FetchTriangle(Geom, Index, Position, Rotation, dv);
 
 	GetPointFromBarycentric(dv, u, v, Out);
 }

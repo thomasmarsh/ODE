@@ -28,6 +28,7 @@
 int dCollideSTL(dxGeom *o1, dxGeom *o2, int flags, dContactGeom *contact, int skip);
 int dCollideBTL(dxGeom *o1, dxGeom *o2, int flags, dContactGeom *contact, int skip);
 int dCollideRTL(dxGeom *o1, dxGeom *o2, int flags, dContactGeom *contact, int skip);
+int dCollideTTL(dxGeom *o1, dxGeom *o2, int flags, dContactGeom *contact, int skip);
 
 //****************************************************************************
 // dxTriMesh class
@@ -45,15 +46,23 @@ struct dxTriMeshData{
 	Model BVTree;
 	MeshInterface Mesh;
 
+    dxTriMeshData();
+    ~dxTriMeshData();
+    
+    void Build(const void* Vertices, int VertexStide, int VertexCount, 
+	       const void* Indices, int IndexCount, int TriStride, 
+	       const void* Normals, 
+	       bool Single);
+    
         /* aabb in model space */
         dVector3 AABBCenter;
         dVector3 AABBExtents;
 
-	dxTriMeshData();
-	~dxTriMeshData();
-
-	void Build(const void* Vertices, int VertexStide, int VertexCount, const void* Indices, int IndexCount, int TriStride, bool Single);
+    /* data for use in collison resolution */
+    const void* Normals;
+    Matrix4x4   last_trans;
 };
+
 
 struct dxTriMesh : public dxGeom{
 	// Callbacks
@@ -63,6 +72,7 @@ struct dxTriMesh : public dxGeom{
 
 	// Data types
 	dxTriMeshData* Data;
+
 
 	// Colliders
 	static PlanesCollider _PlanesCollider;

@@ -143,6 +143,7 @@ static void initColliders()
   setCollider (dTriMeshClass,dSphereClass,&dCollideSTL);
   setCollider (dTriMeshClass,dBoxClass,&dCollideBTL);
   setCollider (dTriMeshClass,dRayClass,&dCollideRTL);
+  setCollider (dTriMeshClass,dTriMeshClass,&dCollideTTL);
 #endif
   setAllColliders (dGeomTransformClass,&dCollideTransform);
 }

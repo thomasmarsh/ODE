@@ -51,26 +51,44 @@ typedef struct dxTriMeshData* dTriMeshDataID;
 dTriMeshDataID dGeomTriMeshDataCreate();
 void dGeomTriMeshDataDestroy(dTriMeshDataID g);
 
+enum { TRIMESH_FACE_NORMALS, TRIMESH_LAST_TRANSFORMATION };
+void dGeomTriMeshDataSet(dTriMeshDataID g, int data_id, void* data);
+
+
 /*
  * Build TriMesh data with single pricision used in vertex data .
  */
-void dGeomTriMeshDataBuildSingle(dTriMeshDataID g, const void* Vertices,
-								 int VertexStride, int VertexCount, 
-								 const void* Indices, int IndexCount, 
-								 int TriStride);
+void dGeomTriMeshDataBuildSingle(dTriMeshDataID g,
+                                 const void* Vertices, int VertexStride, int VertexCount, 
+                                 const void* Indices, int IndexCount, int TriStride);
+/* same again with a normals array (used as trimesh-trimesh optimization) */
+void dGeomTriMeshDataBuildSingle1(dTriMeshDataID g,
+                                  const void* Vertices, int VertexStride, int VertexCount, 
+                                  const void* Indices, int IndexCount, int TriStride,
+                                  const void* Normals);
 /*
 * Build TriMesh data with double pricision used in vertex data .
 */
-void dGeomTriMeshDataBuildDouble(dTriMeshDataID g, const void* Vertices,
-								 int VertexStride, int VertexCount, 
-								 const void* Indices, 
-								 int IndexCount, int TriStride);
+void dGeomTriMeshDataBuildDouble(dTriMeshDataID g, 
+                                 const void* Vertices,  int VertexStride, int VertexCount, 
+                                 const void* Indices, int IndexCount, int TriStride);
+/* same again with a normals array (used as trimesh-trimesh optimization) */
+void dGeomTriMeshDataBuildDouble1(dTriMeshDataID g, 
+                                  const void* Vertices,  int VertexStride, int VertexCount, 
+                                  const void* Indices, int IndexCount, int TriStride,
+                                  const void* Normals);
 
 /*
  * Simple build. Single/double precision based on dSINGLE/dDOUBLE!
  */
-void dGeomTriMeshDataBuildSimple(dTriMeshDataID g, const dReal* Vertices, 
-								 int VertexCount, const int* Indices,int IndexCount);
+void dGeomTriMeshDataBuildSimple(dTriMeshDataID g,
+                                 const dReal* Vertices, int VertexCount,
+                                 const int* Indices, int IndexCount);
+/* same again with a normals array (used as trimesh-trimesh optimization) */
+void dGeomTriMeshDataBuildSimple1(dTriMeshDataID g,
+                                  const dReal* Vertices, int VertexCount,
+                                  const int* Indices, int IndexCount,
+                                  const int* Normals);
 /*
  * Per triangle callback. Allows the user to say if he wants a collision with
  * a particular triangle.
@@ -117,6 +135,12 @@ int dGeomTriMeshIsTCEnabled(dGeomID g, int geomClass);
  */
 void dGeomTriMeshClearTCCache(dGeomID g);
 
+
+/*
+ * returns the TriMeshDataID
+ */
+dTriMeshDataID dGeomTriMeshGetTriMeshDataID(dGeomID g);
+
 /*
  * Gets a triangle.
  */
@@ -145,6 +169,9 @@ struct StridedTri{
 int TriStride = sizeof(StridedTri);
 
 */
+
+
+
 
 #ifdef __cplusplus
 }
