@@ -223,7 +223,7 @@ inline void GetPointFromBarycentric(const dVector3 dv[3], dReal u, dReal v, dVec
 // Performs a callback
 inline bool Callback(dxTriMesh* TriMesh, dxGeom* Object, int TriIndex){
 	if (TriMesh->Callback != null){
-		return TriMesh->Callback(TriMesh, Object, TriIndex);
+		return (TriMesh->Callback(TriMesh, Object, TriIndex) != 0);
 	}
 	else return true;
 }
