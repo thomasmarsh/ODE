@@ -21,7 +21,7 @@
 #########################################################################
 
 @title{Open Dynamics Engine}
-@subtitle{v0.039 User Guide}
+@subtitle{v0.5 User Guide}
 @author{Russell Smith}
 @copyright{This document is Copyright @C 2001-2004 Russell Smith.}
 
@@ -41,13 +41,13 @@ If ``rigid body simulation'' does not make much sense to you, check out
 @link{http://opende.sourceforge.net/slides/slides.html}{What is a Physics
 SDK?}.
 
-This is the user guide for ODE version 0.039.
+This is the user guide for ODE version 0.5.
 Despite the low version number, ODE is reasonably mature and stable.
 
 
-@section{Current Features}
+@section{Features}
 
-ODE is best for simulating @emph{articulated} rigid body structures.
+ODE is good for simulating @emph{articulated} rigid body structures.
 An articulated structure is created when rigid bodies of various shapes are
 connected together with joints of various kinds.
 Examples are ground vehicles (where the wheels are connected to the chassis),
@@ -60,11 +60,6 @@ virtual reality environments.
 This is because it is fast, robust and stable, and the user has complete
 freedom to change the structure of the system even while the simulation
 is running.
-
-# ODE can of course also simulate disconnected rigid bodies that just move
-# around on their own and perhaps collide with each other, but it is not
-# optimized for this case.
-#    --- but it will be!
 
 ODE uses a highly stable integrator, so that the simulation errors should
 not grow out of control.
@@ -113,121 +108,6 @@ Here are the features:
 }
 
 
-@section{New in the 0.039 Release}
-
-@list{
-@*	A triangular mesh geometry class, contributed by Erwin de Vries.
-	To support this, the @link{http://www.codercorner.com/Opcode.htm}{OPCODE}
-	collision library has been added to the ODE distribution, with the
-	blessing of its author Pierre Terdiman.
-@*	A quad tree collision space, contributed by Erwin de Vries.
-@*	A new, fast iterative solver, contributed by David Whittaker.
-@*	Joint limits and motors have been added to the universal joints,
-	thanks to Martin C. Martin.
-@*	Miscellaneous functions: dMassSet*Total(), dJointGet*Anchor2(),
-	@func{dGeomSetQuaternion()}, @func{dGeomGetQuaternion()},
-	@func{dGeomGetSpace()}, @func{dMassSetCylinder()}.
-}
-
-
-@section{New in the 0.035 Release}
-
-@list{
-@* A universal joint, generously contributed by Martin C. Martin.
-   It doesn't (yet) have a motor or joint limits.
-@* A new collision system that supports hierarchical spaces, has the ability to
-   collide spaces with single geoms, and has the ability to collide spaces
-   together. Geom groups are now spaces, geoms now have 'category' and
-   'collide' bits for early culling, the behavior of various functions is more
-   well defined, and geoms can be disabled/enabled.
-   Internally, the collision system is now optimized for larger environments.
-@* Collision improvements: added support for multiple box-box contacts, added
-   the CCylinder-box collision case, added the ray geom class, added the
-   dGeomXXXPointDepth() functions, added a collision test infrastructure,
-   and some more tests.
-@* Fixed two problems in the LCP code to improve the reliability of the
-   dContactApprox1 contact mode.
-@* New API functions: dAreConnectedExcluding(), dBodySetGravityMode(),
-   dBodyGetGravityMode(), dSpaceQuery(), dCloseODE(), dBodySetForce(),
-   dBodySetTorque(), dWorldImpulseToForce(), dBodyGetPosRelPoint(),
-   dBodyGetPosRelPoint(), dBodyVectorToWorld(), dBodyVectorFromWorld(),
-   dBodyGetPointVel(), dGeomTransformSetInfo(), dGeomTransformGetInfo(),
-   dJointSetFeedback(), dJointGetFeedback(), dClosestLineSegmentPoints(),
-@* added the dParamCFM joint parameter.
-}
-
-
-@section{New in the 0.03 Release}
-
-@list{
-@* Multi-resolution hash table based collision space, that performs quick
-   identification of potentially intersecting pairs.
-@* Improved the approximation to Coloumb friction.
-@* Bug fixes.
-@* New joint type: Angular Motor.
-@* A few minor API changes so that the API matches the documentation.
-@* LCP solver optimized even more.
-@* A better build system.
-@* Added the accessor functions: @func{dJointGetType()},
-   @func{dBodyGetForce()}, @func{dBodyGetTorque()}, @func{dBodyGetNumJoints()},
-   @func{dBodyGetJoint()}, @func{dJointGetBody()}.
-@* Added finite rotation functions: @func{dBodySetFiniteRotationMode()}
-   and @func{dBodySetFiniteRotationAxis()} (and the corresponding "get"
-   functions).
-@* New functions to set geometry parameters:
-   @func{dGeomSphereSetRadius()}, @func{dGeomBoxSetLengths()},
-   @func{dGeomPlaneSetParams()}, @func{dGeomCCylinderSetParams()}.
-@* New collision utility function: @func{dInfiniteAABB()}.
-@* Finally implemented the @c{dBodyAddXXX} functions. Also implemented
-   @func{dBodyGetRelPointPos()} and @func{dBodyGetRelPointVel()}.
-@* New geometry types: capped cylinder, GeomGroup, GeomTransform.
-   Also a new documentation section on composite objects.
-@* New functions for AABBs: @func{dGeomGetAABB()}, @func{dGeomGetSpaceAABB()}.
-@* API change: geoms do not have to be added to a space on creation.
-@* API change: user defined collision functions have to fill in the @c{g1}
-   and @c{g2} members of the @c{dContactGeom} structure.
-@* API change: added the @c{aabb_test} and @c{dtor} fields to @c{dGeomClass}.
-@* Implemented capped-cylinder collision (except for cylinder-to-box).
-@* Added @func{dMassAdd()}.
-@* Ability to disable and enable bodies - see @func{dBodyEnable()},
-   @func{dBodyDisable()}, @func{dBodyIsEnabled()}.
-   See the new section: Concepts / Rigid bodies / Islands and disabled bodies.
-}
-
-
-@section{New in the 0.025 Release}
-
-@list{
-@* Numerous bug fixes, including contacts.
-@* Updated documentation.
-@* Much more commenting in the source code.
-@* Joint types: hinge, slider, ball and socket, hinge-2, fixed, contact.
-@* Special vehicle joint: hinge-2 - with steering and suspension.
-@* Powered hinge and slider joints (plus dry friction in those joints).
-@* Joint limits for hinge and slider.
-@* All contact modes work: bounce, soft, slip, restitution, tire slip.
-@* CFM (constraint force mixing) framework.
-@* New testing code.
-@* New demo - buggy that you can drive around.
-@* Cygwin (GNU on windows) builds now supported.
-}
-
-
-@section{New in the 0.02 Release}
-
-@list{
-@* New demo: a box and sphere stacker.
-@* Collision framework nearing stability.
-@* Collision: all interactions of sphere, box, and plane now work.
-@* 2D & 3D friction now works.
-@* Framework now in place for more contact modes, powered and limited joints.
-@* Moving-surface contact mode.
-@* Argument checking for all functions.
-@* Cross platform: build on windows using VC++ and MinGW, and linux.
-@* Various bugs fixed.
-}
-
-
 @section{ODE's License}
 
 ODE is Copyright @C 2001-2004 Russell L. Smith.
@@ -266,34 +146,21 @@ the ODE mailing list}.
 Unpack the ODE archive.
 
 @b{Steps 2-4 (alternate):}
-If you're on windows and using MSVC, you may not have the microsoft compiler
-in your command line path, or may encounter other problems using make.
-It may be easier to use these instructions from the
-@link{http://q12.org/cgi-bin/wiki.pl?Building_ODE_With_MSVC6}{wiki FAQ}.
+If you're on windows and using MSVC, you can use the workspace and project
+files in the VC6 subdirectory of the distribution.
 
 @b{Step 2:}
 Get the GNU @c{make} tool. Many Unix platforms come with this, although
-sometimes it is called @c{gmake}. I have provided a version of GNU make
-for windows @link{http://q12.org/ode/bin/make.exe}{here}.
+sometimes it is called @c{gmake}. A version of GNU make for windows is
+available @link{http://q12.org/ode/bin/make.exe}{here}.
 
 @b{Step 3:}
 Edit the settings in the file @c{config/user-settings}.
 The list of supported platforms is given in that file.
 
 @b{Step 4:}
-Run @c{make} to configure and build ODE and the graphical test programs.
-Be @emph{sure} you are using the correct version of GNU make.
-The make targets for building the parts of ODE are:
-@list{
-@* @c{make configure} : Create the configuration file @c{include/ode/config.h}.
-@* @c{make ode-lib} : Build the core ODE library.
-@* @c{make drawstuff-lib} : Build the OpenGL-based graphics library.
-@* @c{make ode-test} : Build some ODE tests (they need drawstuff).
-@* @c{make drawstuff-test} : Build a simple test app for the drawstuff library.
-}
-All of these targets will do an implicit @c{make configure}.
-If the configurator screws up then you can edit the settings directly in
-@c{include/ode/config.h}.
+Run GNU @c{make} to configure and build ODE and the graphical test programs.
+The configuration process creates the file @c{include/ode/config.h}.
 
 @b{Step 5:}
 To install the ODE library onto your system you should copy the @c{lib/} and
@@ -303,22 +170,6 @@ To install the ODE library onto your system you should copy the @c{lib/} and
 @* @c{lib/libode.a --> /usr/local/lib/libode.a}
 }
 
-There is currently no built-in support to build Windows DLLs or Unix shared
-libraries --- although it is not hard to add this yourself.
-
-ODE has been verified to build on at least the following platforms:
-@list{
-@* MS-Windows, Microsoft Visual C/C++ 6.
-@* MS-Windows, MinGW (minimalist GNU for windows).
-@* MS-Windows, CygWin (Cygnus GNU for windows).
-@* Linux (x86, mandrake 8.1).
-@* Linux (alpha, debian 2.2).
-@* Linux (RS/6000, debian 2.2).
-@* Linux (Sparc Ultra 60, debian 2.2).
-@* FreeBSD 4.3.
-@* Mac OS-X.
-@* Solaris 8 (Sparc R220).
-}
 
 @subsection{Building and Running ODE Tests on MacOS X}
 
@@ -337,7 +188,7 @@ have installed, it's in the Applications Folder).
 
 If you run the test app in the XTerm that the X11 server opens by
 default then they should run fine. If however you run them from a MacOS X
-Terminal then you need to define the enviroment variable DISPLAY. If
+Terminal then you need to define the environment variable DISPLAY. If
 DISPLAY is not defined then you will get a message saying:
 "cannot open X11 display".
 
@@ -346,7 +197,7 @@ For example to run the boxstack test you would type
     cd ode/test
     DISPLAY=:0.0 ./test_boxstack.exe
 @]
-You can define this enviroment variable in your shell startup scripts 
+You can define this environment variable in your shell startup scripts 
 (for example in ~/.bashrc if you are using bash)
 
 
@@ -368,21 +219,12 @@ programs that come with it. Note the following things:
  gcc -c -I /home/username/ode/include myprogram.cpp
 @]
 
-# NOT ANY MORE...
-# @*	ODE can be compiled to use single or double precision variables.
-#	To let the ODE header files know which precision is being used,
-#	the user program must define one of the macros @c{dSINGLE} or
-#	@c{dDOUBLE} before any ODE header files are included.
-#	The easiest way to do this is on the compiler command line,
-#	e.g. in linux
-# @[
-#  gcc -c -I /home/username/ode/include -DdDOUBLE myprogram.cpp
-# @]
-
-@*	ODE with @func{dWorldStep()} makes heavy use of the stack for storing temporary values.
+@*	When ODE is used with the @func{dWorldStep()} function, heavy use is made
+	of the stack for storing temporary values.
 	For very large systems several megabytes of stack can be used.
 	If you experience unexplained out-of-memory errors or data
-	corruption, especially on Windows, try increasing the stack size, or switching to @func{dWorldQuickStep()}.
+	corruption, especially on Windows, try increasing the stack size, or
+	switching to @func{dWorldQuickStep()}.
 }
 
 #############################################################################
@@ -450,7 +292,7 @@ Each body can be enabled or disabled.
 Disabled bodies are effectively ``turned off'' and are not updated during a
 simulation step.
 Disabling bodies is an effective way to save computation time when it is known
-that the bodies are motionless or otherwise irrelevent to the simulation.
+that the bodies are motionless or otherwise irrelevant to the simulation.
 
 If there are any enabled bodies in an island then every body in the island
 will be enabled at the next simulation step.
@@ -585,7 +427,7 @@ Most constraints are by nature ``hard''.
 This means that the constraints represent conditions that are never violated.
 For example, the ball must always be in the socket, and the two parts of the
 hinge must always be lined up.
-In practice constraints can be voilated by unintentional introduction of
+In practice constraints can be violated by unintentional introduction of
 errors into the system, but the error reduction parameter can be set to
 correct these errors.
 
@@ -655,7 +497,7 @@ constraint by ``pushing on it'' (for example, for contact constraints by
 forcing the two contacting objects together).
 In other words the constraint will be soft, and the softness will increase
 as CFM increases.
-What is actually happeneng here is that the constraint is allowed to be
+What is actually happening here is that the constraint is allowed to be
 violated by an amount proportional to CFM times the restoring force that is
 needed to enforce the constraint.
 Note that setting CFM to a negative value can have undesirable bad effects,
@@ -797,7 +639,7 @@ efficiency. There are currently two approximations to chose from:
 	limits (in a manner similar to approximation 1 above).
 	This differs from a true friction pyramid in that the "effective"
 	@m{@sym{mu}} is not quite fixed.
-	This approximation is easier to use as @m{@sym{mu}} is a unitless ratio
+	This approximation is easier to use as @m{@sym{mu}} is a unit-less ratio
 	the same as the normal Coloumb friction coefficient, and thus can be
 	set to a constant value around 1.0 without regard for the specific
 	simulation.
@@ -997,7 +839,8 @@ Step the world.
 This uses a "big matrix" method that takes time on the order of @m{m^3}
 and memory on the order of @m{m^2}, where @m{m} is the total number of constraint rows.
 
-For large systems this will use a lot of memory and be very slow.
+For large systems this will use a lot of memory and can be very slow,
+but this is currently the most accurate method.
 }
 
 
@@ -1011,6 +854,29 @@ and @m{N} is the number of iterations.
 
 For large systems this is a lot faster than @func{dWorldStep()},
 but it is less accurate.
+
+QuickStep is great for stacks of objects especially when the auto-disable feature
+is used as well.
+However, it has poor accuracy for near-singular systems.
+Near-singular systems can occur when using high-friction contacts, motors,
+or certain articulated structures. For example, a robot with multiple legs
+sitting on the ground may be near-singular.
+
+There are ways to help overcome QuickStep's inaccuracy problems:
+@list{
+@*	Increase CFM.
+@*	Reduce the number of contacts in your system (e.g. use the minimum
+	number of contacts for the feet of a robot or creature).
+@*	Don't use excessive friction in the contacts.
+@*	Use contact slip if appropriate
+@*	Avoid kinematic loops (however, kinematic loops are inevitable in
+	legged creatures).
+@*	Don't use excessive motor strength.
+@*	Use force-based motors instead of velocity-based motors.
+}
+Increasing the number of QuickStep iterations may help a little bit, but
+it is not going to help much if your system is really near singular.
+
 }
 
 
@@ -1219,7 +1085,7 @@ If a body has its auto-disable flag turned on, it will automatically disable its
 when
 @numlist{
 @*	It has been idle for a given number of simulation steps.
-@*	It has also been idle for a given amout of simulation time.
+@*	It has also been idle for a given amount of simulation time.
 }
 A body is considered to be idle when the magnitudes of both its linear velocity
 and angular velocity are below given thresholds.
@@ -1319,7 +1185,7 @@ void dBodySetFiniteRotationMode (dBodyID, int mode);
 This function controls the way a body's orientation is updated at each time
 step. The @arg{mode} argument can be:
 @list{
-@*	0: An ``infitesimal'' orientation update is used.
+@*	0: An ``infinitesimal'' orientation update is used.
 	This is fast to compute, but it can occasionally cause inaccuracies
 	for bodies that are rotating at high speed, especially when those
 	bodies are joined to other bodies.
@@ -1351,7 +1217,7 @@ This is axis only has meaning when the finite rotation mode is set
 If this axis is zero (0,0,0), full finite rotations are performed on the body.
 
 If this axis is nonzero, the body is rotated by performing a partial finite
-rotation along the axis direction followed by an infitesimal rotation along
+rotation along the axis direction followed by an infinitesimal rotation along
 an orthogonal direction.
 
 This can be useful to alleviate certain sources of error caused by quickly
@@ -2368,7 +2234,7 @@ dJointAddSliderForce(dJointID joint, dReal force)
 }{
 Applies the given force in the slider's direction.  That is, it applies a force
 with magnitude @arg{force}, in the direction slider's axis, to body1, and with 
-the same magnitude but oppsite direction to body2.  This function is just a 
+the same magnitude but opposite direction to body2.  This function is just a 
 wrapper for @func{dBodyAddForce()}.
 }
 
@@ -2392,7 +2258,7 @@ wrapper for @func{dBodyAddTorque()}.
 #############################################################################
 @chapter{StepFast}
 
-@b{NOTE: The StepFast algorithm has been superceeded by the QuickStep algorithm:
+@b{NOTE: The StepFast algorithm has been superseded by the QuickStep algorithm:
 see the @func{dWorldQuickStep()} function.
 However, much of the following discussion also applies to QuickStep, except for
 the details of the method used.}
@@ -3564,7 +3430,7 @@ geom will change.
 Thus no space changes should be made while enumerating the geoms.
 
 This function is guaranteed to be fastest when the geoms are accessed in
-the order 0,1,2,etc. Other nonsequential orders may result in slower access,
+the order 0,1,2,etc. Other non-sequential orders may result in slower access,
 depending on the internal implementation.
 }
 
@@ -3842,7 +3708,7 @@ Trimesh/Trimesh collisions, perform quite well, but there are three minor caveat
     (void *) DoubleArrayPtr );
 @]
 
-   The transformation matrix is the standard 4x4 homogenous transform
+   The transformation matrix is the standard 4x4 homogeneous transform
    matrix, and the "DoubleArray" is the standard flattened array of 
    the 16 matrix values. 
 }
@@ -3885,27 +3751,28 @@ int TriStride = sizeof (StridedTri);
 The @c{Normals} argument is optional: the normals of the faces of each trimesh object.  For example,
 
 @[
-         dTriMeshDataID TriMeshData;
-         TriMeshData = dGeomTriMeshGetTriMeshDataID( Bodies[ BodyIndex ].GeomID );
+  dTriMeshDataID TriMeshData;
+  TriMeshData = dGeomTriMeshGetTriMeshDataID (
+        Bodies[BodyIndex].GeomID);
 
-         // as long as dReal == floats
-         dGeomTriMeshDataBuildSingle(TriMeshData,
-                                     // Vertices
-                                     Bodies[BodyIndex].VertexPositions,
-                                     3*sizeof(dReal), (int) numVertices,
-                                     // Faces
-                                     Bodies[BodyIndex].TriangleIndices, 
-                                     (int) NumTriangles, 3*sizeof(unsigned int),
-                                     // Normals
-                                     Bodies[BodyIndex].FaceNormals);
-   @]
+  // as long as dReal == floats
+  dGeomTriMeshDataBuildSingle (TriMeshData,
+        // Vertices
+        Bodies[BodyIndex].VertexPositions,
+        3*sizeof(dReal), (int) numVertices,
+        // Faces
+        Bodies[BodyIndex].TriangleIndices, 
+        (int) NumTriangles, 3*sizeof(unsigned int),
+        // Normals
+        Bodies[BodyIndex].FaceNormals);
+@]
 
-   This pre-calculation saves some time during evaulation of the
-   contacts, but isn't necessary.  If you don't want to calculate
-   the face normals before construction (or if you have enormous
-   trimeshes and know that only very few faces will be touching
-   and want to save time), just pass a "NULL" for the @c{Normals} argument,
-   and dCollideTTL will take care of the normal calcuations itself.
+This pre-calculation saves some time during evaluation of the
+contacts, but isn't necessary.  If you don't want to calculate
+the face normals before construction (or if you have enormous
+trimeshes and know that only very few faces will be touching
+and want to save time), just pass a "NULL" for the @c{Normals} argument,
+and dCollideTTL will take care of the normal calculations itself.
 }
 
 
@@ -3975,7 +3842,7 @@ Clears the internal temporal coherence caches.
 void dGeomTriMeshGetTriangle (dGeomID g, int Index, dVector3 *v0,
                               dVector3 *v1, dVector3 *v2);
 }{
-Retrieves a triangle in objectspace. The @arg{v0}, @arg{v1} and
+Retrieves a triangle in object space. The @arg{v0}, @arg{v1} and
 @arg{v2} arguments are optional.
 }
 
@@ -3983,7 +3850,7 @@ Retrieves a triangle in objectspace. The @arg{v0}, @arg{v1} and
 void dGeomTriMeshGetPoint (dGeomID g, int Index, dReal u, dReal v,
                            dVector3 Out);
 }{
-Retrieves a position in objectspace based on the incoming data.
+Retrieves a position in object space based on the incoming data.
 }
 
 @funcdef{
@@ -4000,7 +3867,7 @@ The 'enable' param should be 1 for true, 0 for false.
 Temporal coherence is optional because allowing it can cause subtle
 efficiency problems in situations where a tri-mesh may collide with many
 different geoms during its lifespan.  If you enable temporal coherence on
-a tri-mesh then these problems can be eased by intermittantly calling
+a tri-mesh then these problems can be eased by intermittently calling
  @func{dGeomTriMeshClearTCCache()} for it.
 }
 
@@ -4449,11 +4316,11 @@ of joints.
 @*	mass ratios - e.g. a whip. Joints that connect large and small masses
 	together will have a harder time keeping their error low.
 @*	if bodies move faster than is reasonable for the timestep
-@*	inetias with long axes
+@*	inertias with long axes
 }
 
 Increasing the global CFM will make the system more numerically robust and
-less susceptable to stability problems.
+less susceptible to stability problems.
 It will also make the system look more ``spongy'', so a tradeoff has to be
 found.
 
@@ -4704,7 +4571,8 @@ If you experience crashes when running large systems, try increasing the
 stack size.
 For example, the MS VC++ command line compiler accepts the @c{/Stack:num}
 flag to set the upper limit.
-Or switch to @func{dWorldQuickStep()}.
+
+Another option is to switch to @func{dWorldQuickStep()}.
 
 @section{My simple rotating bodies are unstable!}
 
