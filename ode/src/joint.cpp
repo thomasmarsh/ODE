@@ -784,7 +784,7 @@ static void hinge2GetInfo2 (dxJointHinge2 *joint, dxJoint::Info2 *info)
   dReal s,c;
   dVector3 q;
   HINGE2_GET_AXIS_INFO (q,s,c);
-  dNormalize3 (q);
+  dNormalize3 (q);		// @@@ quicker: divide q by s ?
 
   int s3=3*info->rowskip;
   info->J1a[s3+0] = q[0];
@@ -798,7 +798,7 @@ static void hinge2GetInfo2 (dxJointHinge2 *joint, dxJoint::Info2 *info)
 
   // compute the right hand side for the constrained rotational DOF.
   // axis 1 and axis 2 are separated by an angle `theta'. the desired
-  // separation angle is theta0 - sin(theta0) and cos(theta0) are recorded
+  // separation angle is theta0. sin(theta0) and cos(theta0) are recorded
   // in the joint structure. the correcting angular velocity is:
   //   |angular_velocity| = angle/time = erp*(theta0-theta) / stepsize
   //                      = (erp*fps) * (theta0-theta)
