@@ -24,6 +24,8 @@
 #define _ODE_COMMON_H_
 
 #include "ode/error.h"
+
+#define __USE_ISOC9X 1	/* necessary to get HUGE_VALF on GNU systems? */
 #include <math.h>
 
 #ifdef __cplusplus
