@@ -20,28 +20,13 @@
  *                                                                       *
  *************************************************************************/
 
-#ifndef _ODE_ODE_H_
-#define _ODE_ODE_H_
+#ifndef _ODE_EXPORT_DIF_
+#define _ODE_EXPORT_DIF_
 
-/* include *everything* here */
-
-#include <ode/config.h>
-#include <ode/compatibility.h>
 #include <ode/common.h>
-#include <ode/contact.h>
-#include <ode/error.h>
-#include <ode/memory.h>
-#include <ode/odemath.h>
-#include <ode/matrix.h>
-#include <ode/timer.h>
-#include <ode/rotation.h>
-#include <ode/mass.h>
-#include <ode/misc.h>
-#include <ode/objects.h>
-#include <ode/odecpp.h>
-#include <ode/collision_space.h>
-#include <ode/collision.h>
-#include <ode/odecpp_collision.h>
-#include <ode/export-dif.h>
+
+
+void dWorldExportDIF (dWorldID w, FILE *file, const char *world_name);
+
 
 #endif
