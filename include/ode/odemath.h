@@ -140,7 +140,7 @@ extern inline double dDOT44 (const double *a, const float *b) { return dDOTpq(a,
 
 #ifdef __cplusplus
 extern inline float dDISTANCE (const float a[3], const float b[3])
-	{ return dSqrt( (a[0]-b[0])*(a[0]-b[0]) + (a[1]-b[1])*(a[1]-b[1]) + (a[2]-b[2])*(a[2]-b[2]) ); }
+	{ return (float) dSqrt( (a[0]-b[0])*(a[0]-b[0]) + (a[1]-b[1])*(a[1]-b[1]) + (a[2]-b[2])*(a[2]-b[2]) ); }
 extern inline double dDISTANCE (const double a[3], const double b[3])
 	{ return dSqrt( (a[0]-b[0])*(a[0]-b[0]) + (a[1]-b[1])*(a[1]-b[1]) + (a[2]-b[2])*(a[2]-b[2]) ); }
 #else
