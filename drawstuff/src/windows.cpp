@@ -35,6 +35,7 @@
 static HINSTANCE ghInstance = 0;
 static int gnCmdShow = 0;
 static HACCEL accelerators = 0;
+static HWND main_window = 0;
 
 //***************************************************************************
 // error and message handling
@@ -87,16 +88,31 @@ extern "C" void dsPrint (char *msg, ...)
 
 // globals used to communicate with rendering thread
 
-static int renderer_run = 1;
-static int renderer_pause = 0;	  // 0=run, 1=pause
-static int renderer_ss = 0;	  // single step command
-static int renderer_width = 1;
-static int renderer_height = 1;
+static volatile int renderer_run = 1;
+static volatile int renderer_pause = 0;	  // 0=run, 1=pause
+static volatile int renderer_ss = 0;	  // single step command
+static volatile int renderer_width = 1;
+static volatile int renderer_height = 1;
 static dsFunctions *renderer_fn = 0;
-static HDC renderer_dc = 0;
-static int keybuffer[16];	  // fifo ring buffer for keypresses
-static int keybuffer_head = 0;	  // index of next key to put in (modified by GUI)
-static int keybuffer_tail = 0;	  // index of next key to take out (modified by renderer)
+static volatile HDC renderer_dc = 0;
+static volatile int keybuffer[16];	  // fifo ring buffer for keypresses
+static volatile int keybuffer_head = 0;	  // index of next key to put in (modified by GUI)
+static volatile int keybuffer_tail = 0;	  // index of next key to take out (modified by renderer)
+
+
+static void setupRendererGlobals()
+{
+  renderer_run = 1;
+  renderer_pause = 0;
+  renderer_ss = 0;
+  renderer_width = 1;
+  renderer_height = 1;
+  renderer_fn = 0;
+  renderer_dc = 0;
+  keybuffer[16];
+  keybuffer_head = 0;
+  keybuffer_tail = 0;
+}
 
 
 static DWORD WINAPI renderingThread (LPVOID lpParam)
@@ -268,7 +284,7 @@ static LRESULT CALLBACK mainWndProc (HWND hWnd, UINT msg, WPARAM wParam,
     }
     break;
 
-  case WM_DESTROY:
+  case WM_CLOSE:
     PostQuitMessage (0);
     break;
 
@@ -290,7 +306,7 @@ static HWND GetConsoleHwnd()
   char title[1024];
   wsprintf (title,"DrawStuff:%d/%d",GetTickCount(),GetCurrentProcessId());
   SetConsoleTitle (title);
-  Sleep(40);			// wnsure window title has been updated
+  Sleep(40);			// ensure window title has been updated
   return FindWindow (NULL,title);
 }
 
@@ -340,12 +356,13 @@ void dsPlatformSimLoop (int window_width, int window_height,
 			dsFunctions *fn, int initial_pause)
 {
   drawStuffStartup();
+  setupRendererGlobals();
   renderer_pause = initial_pause;
 
   // create window - but first get window size for desired size of client area.
   // if this adjustment isn't made then the openGL area will be shifted into
   // the nonclient area and determining the frame buffer coordinate from the
-  // client area coordinate is hard.
+  // client area coordinate will be hard.
   RECT winrect;
   winrect.left = 50;
   winrect.top = 80;
@@ -356,13 +373,13 @@ void dsPlatformSimLoop (int window_width, int window_height,
   char title[100];
   sprintf (title,"Simulation test environment v%d.%02d",
 	   DS_VERSION >> 8,DS_VERSION & 0xff);
-  HWND hWnd = CreateWindow ("SimAppClass",title,style,
+  main_window = CreateWindow ("SimAppClass",title,style,
     winrect.left,winrect.top,winrect.right-winrect.left,winrect.bottom-winrect.top,
     NULL,NULL,ghInstance,NULL);
-  if (hWnd==NULL) dsError ("could not create main window");
-  ShowWindow (hWnd, gnCmdShow);
+  if (main_window==NULL) dsError ("could not create main window");
+  ShowWindow (main_window, gnCmdShow);
 
-  HDC dc = GetDC (hWnd);			// get DC for this window
+  HDC dc = GetDC (main_window);			// get DC for this window
   if (dc==NULL) dsError ("could not get window DC");
 
   // set pixel format for DC
@@ -399,7 +416,6 @@ void dsPlatformSimLoop (int window_width, int window_height,
   // start the rendering thread
 
   // set renderer globals
-  renderer_run = 1;
   renderer_dc = dc;
   renderer_width = window_width;
   renderer_height = window_height;
@@ -407,6 +423,7 @@ void dsPlatformSimLoop (int window_width, int window_height,
 
   DWORD threadId, thirdParam = 0;
   HANDLE hThread;
+
   hThread = CreateThread(
 	NULL,			     // no security attributes
 	0,			     // use default stack size
@@ -414,14 +431,15 @@ void dsPlatformSimLoop (int window_width, int window_height,
 	&thirdParam,		     // argument to thread function
 	0,			     // use default creation flags
 	&threadId);		     // returns the thread identifier
+
   if (hThread==NULL) dsError ("Could not create rendering thread");
 
   // **********
   // start GUI message processing
 
   MSG msg;
-  while (GetMessage (&msg,NULL,0,0)) {
-    if (!TranslateAccelerator (hWnd,accelerators,&msg)) {
+  while (GetMessage (&msg,main_window,0,0)) {
+    if (!TranslateAccelerator (main_window,accelerators,&msg)) {
       TranslateMessage (&msg);
       DispatchMessage (&msg);
     }
@@ -436,14 +454,18 @@ void dsPlatformSimLoop (int window_width, int window_height,
     dsWarning ("Could not kill rendering thread (2)");
   CloseHandle (hThread);	     // dont need thread handle anymore
 
-  // destroy window ... perhaps i dont want to do this
-  //DestroyWindow (hWnd);
+  // destroy window
+  DestroyWindow (main_window);
 }
 
 
 extern "C" void dsStop()
 {
-  PostQuitMessage (0);
+  // just calling PostQuitMessage() here wont work, as this function is
+  // typically called from the rendering thread, not the GUI thread.
+  // instead we must post the message to the GUI window explicitly.
+
+  if (main_window) PostMessage (main_window,WM_QUIT,0,0);
 }
 
 //***************************************************************************
