@@ -19,6 +19,15 @@
  *                                                                       *
  *************************************************************************/
 
+/*
+
+design note: the general principle for giving a joint the option of connecting
+to the static environment (i.e. the absolute frame) is to check the second
+body (joint->node[1].body), and if it is zero then behave as if it's body
+transform is the identity.
+
+*/
+
 #include "joint.h"
 #include "ode/odemath.h"
 #include "ode/rotation.h"
@@ -185,7 +194,8 @@ static dReal getHingeAngle (dxBody *body1, dxBody *body2, dVector3 axis,
     dQMultiply2 (qrel,qq,q_initial);
   }
   else {
-    dQMultiply2 (qrel,body1->q,q_initial);
+    // pretend body2->q is the identity
+    dQMultiply3 (qrel,body1->q,q_initial);
   }
 
   // extract the angle from the quaternion. cost2 = cos(theta/2),
@@ -349,7 +359,9 @@ static void hingeComputeInitialRelativeRotation (dxJointHinge *joint)
       dQMultiply1 (joint->qrel,joint->node[0].body->q,joint->node[1].body->q);
     }
     else {
-      for (int i=0; i<4; i++) joint->qrel[i] = joint->node[0].body->q[i];
+      // set joint->qrel to the transpose of the first body q
+      joint->qrel[0] = joint->node[0].body->q[0];
+      for (int i=1; i<4; i++) joint->qrel[i] = -joint->node[0].body->q[i];
     }
   }
 }
@@ -506,34 +518,24 @@ static void sliderGetInfo2 (dxJointSlider *joint, dxJoint::Info2 *info)
 
   // get qerr = relative rotation (rotation error) between two bodies
   dQuaternion qerr,e;
-  dReal k = info->fps * info->erp;
   if (joint->node[1].body) {
     dQuaternion qq;
     dQMultiply1 (qq,joint->node[0].body->q,joint->node[1].body->q);
     dQMultiply2 (qerr,qq,joint->qrel);
-    if (qerr[0] < 0) {
-      qerr[1] = -qerr[1];	// adjust sign of qerr to make theta small
-      qerr[2] = -qerr[2];
-      qerr[3] = -qerr[3];
-    }
-    dMULTIPLY0_331 (e,joint->node[0].body->R,qerr+1); // @@@ bad SIMD padding!
-    info->c[0] = 2*k * e[0];
-    info->c[1] = 2*k * e[1];
-    info->c[2] = 2*k * e[2];
   }
   else {
-    dQMultiply2 (qerr,joint->node[0].body->q,joint->qrel);
-    if (qerr[0] < 0) {		// adjust sign of qerr to make theta small
-      info->c[0] = 2*k * qerr[1];
-      info->c[1] = 2*k * qerr[2];
-      info->c[2] = 2*k * qerr[3];
-    }
-    else {
-      info->c[0] = -2*k * qerr[1];
-      info->c[1] = -2*k * qerr[2];
-      info->c[2] = -2*k * qerr[3];
-    }
+    dQMultiply3 (qerr,joint->node[0].body->q,joint->qrel);
   }
+  if (qerr[0] < 0) {
+    qerr[1] = -qerr[1];		// adjust sign of qerr to make theta small
+    qerr[2] = -qerr[2];
+    qerr[3] = -qerr[3];
+  }
+  dMULTIPLY0_331 (e,joint->node[0].body->R,qerr+1); // @@@ bad SIMD padding!
+  dReal k = info->fps * info->erp;
+  info->c[0] = 2*k * e[0];
+  info->c[1] = 2*k * e[1];
+  info->c[2] = 2*k * e[2];
 
   // compute last two elements of right hand side. we want to align the offset
   // point (in body 2's frame) with the center of body 1.
@@ -571,7 +573,9 @@ extern "C" void dJointSetSliderAxis (dxJointSlider *joint,
     dMULTIPLY1_331 (joint->offset,joint->node[1].body->R,c);
   }
   else {
-    for (i=0; i<4; i++) joint->qrel[i] = joint->node[0].body->q[i];
+    // set joint->qrel to the transpose of the first body's q
+    joint->qrel[0] = joint->node[0].body->q[0];
+    for (i=1; i<4; i++) joint->qrel[i] = joint->node[0].body->q[i];
     for (i=0; i<3; i++) joint->offset[i] = joint->node[0].body->pos[i];
   }
 }
