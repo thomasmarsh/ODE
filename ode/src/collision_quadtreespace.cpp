@@ -573,7 +573,7 @@ void dxQuadTreeSpace::collide2(void* UserData, dxGeom* g1, dNearCallback* Callba
 		  CurrentBlock->CollideLocal(g1, UserData, Callback);
 	  }
   }
-  else Blocks[0].Collide(g1, 0, UserData, Callback);
+  else Blocks[0].Collide(g1, Blocks[0].First, UserData, Callback);
 
   lock_count--;
 }
