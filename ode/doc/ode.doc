@@ -422,8 +422,9 @@ If there are any enabled bodies in an island then every body in the island
 will be enabled at the next simulation step.
 Thus to effectively disable an island of bodies, @emph{every} body in the
 island must be disabled.
-If a disabled island is touched by another enabled body then the entire will
-be enabled, as a contact joint will join the enabled body to the island.
+If a disabled island is touched by another enabled body then the entire
+island will be enabled, as a contact joint will join the enabled body to
+the island.
 
 
 @section{Integration}
@@ -832,7 +833,7 @@ C functions, not classes. Why is this?
 
 The ODE library can be compiled in "debugging" or "release" mode.
 Debugging mode is slower, but function arguments are checked and many
-compile-time tests are done to ensure internal consistency.
+run-time tests are done to ensure internal consistency.
 Release mode is faster, but no checking is done.
 
 #############################################################################
@@ -905,6 +906,27 @@ Step the world.
 
 
 @funcdef{
+void dWorldImpulseToForce (dWorldID, dReal stepsize,
+			   dReal ix, dReal iy, dReal iz, dVector3 force);
+}{
+If you want to apply a linear or angular impulse to a rigid body,
+instead of a force or a torque, then you can use this function to convert
+the desired impulse into a force/torque vector before calling the
+@c{dBodyAdd...} function.
+
+This function is given the desired impulse as (@arg{ix},@arg{iy},@arg{iz})
+and puts the force vector in @arg{force}.
+The current algorithm simply scales the impulse by 1/@arg{stepsize},
+where @arg{stepsize} is the step size for the @emph{next} step that will
+be taken.
+
+This function is given a @c{dWorldID} because, in the future, the force
+computation may depend on integrator parameters that are set as
+properties of the world.
+}
+
+
+@funcdef{
 void dCloseODE();
 }{
 This deallocates some extra memory used by ODE that can not be deallocated
@@ -915,6 +937,8 @@ memory leak checkers from complaining about ODE.
 
 #############################################################################
 @chapter{Rigid body functions}
+
+@section{Creating and destroying}
 
 @funcdef{
 dBodyID dBodyCreate (dWorldID);
@@ -935,13 +959,7 @@ deleted).
 }
 
 
-@funcdef{
-void  dBodySetData (dBodyID, void *data);
-void *dBodyGetData (dBodyID);
-}{
-Get and set the body's user-data pointer.
-}
-
+@section{Position and orientation}
 
 @funcdef{
 void dBodySetPosition   (dBodyID, dReal x, dReal y, dReal z);
@@ -967,6 +985,9 @@ structure.
 Hmmm. @c{dBodyGetRotation} returns a 4x3 rotation matrix.
 }
 
+
+
+@section{Mass and force}
 
 @funcdef{
 void dBodySetMass (dBodyID, const dMass *mass);
@@ -1016,6 +1037,68 @@ are only valid until any changes are made to the rigid body system.
 
 
 @funcdef{
+void dBodySetForce  (dBodyID b, dReal x, dReal y, dReal z);
+void dBodySetTorque (dBodyID b, dReal x, dReal y, dReal z);
+}{
+Set the body force and torque accumulation vectors.
+This is mostly useful to zero the force and torque for deactivated bodies
+before they are reactivated, in the case where the force-adding functions
+were called on them while they were deactivated.
+}
+
+
+@section{Utility}
+
+@funcdef{
+void dBodyGetRelPointPos (dBodyID, dReal px, dReal py, dReal pz,
+                          dVector3 result);
+void dBodyGetRelPointVel (dBodyID, dReal px, dReal py, dReal pz,
+                          dVector3 result);
+void dBodyGetPointVel    (dBodyID, dReal px, dReal py, dReal pz,
+                          dVector3 result);
+}{
+Utility functions that take a point on a body (@arg{px},@arg{py},@arg{pz}) and
+return that point's position or velocity in global coordinates
+(in @arg{result}).
+The @c{dBodyGetRelPointXXX} functions are given the point in body
+relative coordinates, and the @c{dBodyGetPointVel} function is given
+the point in global coordinates.
+}
+
+
+@funcdef{
+void dBodyGetPosRelPoint (dBodyID, dReal px, dReal py, dReal pz,
+                       	  dVector3 result);
+}{
+This is the inverse of @func{dBodyGetRelPointPos()}.
+It takes a point in global coordinates (@arg{x},@arg{y},@arg{z}) and returns
+the point's position in body-relative coordinates (@arg{result}).
+}
+
+
+@funcdef{
+void dBodyVectorToWorld   (dBodyID, dReal px, dReal py, dReal pz,
+                           dVector3 result);
+void dBodyVectorFromWorld (dBodyID, dReal px, dReal py, dReal pz,
+                           dVector3 result);
+}{
+Given a vector expressed in the body (or world) coordinate system
+(@arg{x},@arg{y},@arg{z}), rotate it to the world (or body) coordinate system
+(@arg{result}).
+}
+
+
+@section{Miscellaneous}
+
+@funcdef{
+void  dBodySetData (dBodyID, void *data);
+void *dBodyGetData (dBodyID);
+}{
+Get and set the body's user-data pointer.
+}
+
+
+@funcdef{
 void dBodyEnable (dBodyID);
 void dBodyDisable (dBodyID);
 int dBodyIsEnabled (dBodyID);
@@ -1028,18 +1111,6 @@ enabled bodies then it will be re-enabled at the next simulation step.
 
 @c{dBodyIsEnabled} return 1 if a body is enabled or 0 if it is disabled.
 New bodies are created in the enabled state.
-}
-
-
-@funcdef{
-void dBodyGetRelPointPos (dBodyID, dReal px, dReal py, dReal pz,
-                          dVector3 result);
-void dBodyGetRelPointVel (dBodyID, dReal px, dReal py, dReal pz,
-                          dVector3 result);
-}{
-These utility functions take a body point (in body relative coordinates)
-and return that point's position and velocity in global coordinates
-(in @arg{result}).
 }
 
 

@@ -42,6 +42,8 @@ dReal dWorldGetERP (dWorldID);
 void dWorldSetCFM (dWorldID, dReal cfm);
 dReal dWorldGetCFM (dWorldID);
 void dWorldStep (dWorldID, dReal stepsize);
+void dWorldImpulseToForce (dWorldID, dReal stepsize,
+			   dReal ix, dReal iy, dReal iz, dVector3 force);
 
 /* bodies */
 
@@ -80,10 +82,20 @@ void dBodyAddRelForceAtRelPos (dBodyID, dReal fx, dReal fy, dReal fz,
 
 const dReal * dBodyGetForce   (dBodyID);
 const dReal * dBodyGetTorque  (dBodyID);
+void dBodySetForce  (dBodyID b, dReal x, dReal y, dReal z);
+void dBodySetTorque (dBodyID b, dReal x, dReal y, dReal z);
 
 void dBodyGetRelPointPos    (dBodyID, dReal px, dReal py, dReal pz,
 			     dVector3 result);
 void dBodyGetRelPointVel    (dBodyID, dReal px, dReal py, dReal pz,
+			     dVector3 result);
+void dBodyGetPointVel       (dBodyID, dReal px, dReal py, dReal pz,
+			     dVector3 result);
+void dBodyGetPosRelPoint    (dBodyID, dReal px, dReal py, dReal pz,
+			     dVector3 result);
+void dBodyVectorToWorld     (dBodyID, dReal px, dReal py, dReal pz,
+			     dVector3 result);
+void dBodyVectorFromWorld   (dBodyID, dReal px, dReal py, dReal pz,
 			     dVector3 result);
 
 void dBodySetFiniteRotationMode (dBodyID, int mode);

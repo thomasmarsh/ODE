@@ -50,11 +50,11 @@
 // dynamics and collision objects
 
 static dWorld world;
-static dSpace space;
+static dSimpleSpace space;
 static dBody body[NUM];
-static dJoint joint[NUM-1];
+static dBallJoint joint[NUM-1];
 static dJointGroup contactgroup;
-static dGeom box[NUM];
+static dBox box[NUM];
 
 
 // this is called by space.collide when two objects in space are
@@ -130,8 +130,7 @@ int main (int argc, char **argv)
   contactgroup.create (0);
   world.setGravity (0,0,-0.5);
   dWorldSetCFM (world.id(),1e-5);
-  dGeom plane;
-  plane.createPlane (space,0,0,1,0);
+  dPlane plane (space,0,0,1,0);
 
   for (i=0; i<NUM; i++) {
     body[i].create (world);
@@ -143,14 +142,14 @@ int main (int argc, char **argv)
     body[i].setMass (&m);
     body[i].setData ((void*) i);
 
-    box[i].createBox (space,SIDE,SIDE,SIDE);
+    box[i].create (space,SIDE,SIDE,SIDE);
     box[i].setBody (body[i]);
   }
   for (i=0; i<(NUM-1); i++) {
-    joint[i].createBall (world);
+    joint[i].create (world);
     joint[i].attach (body[i],body[i+1]);
     dReal k = (i+0.5)*SIDE;
-    joint[i].setBallAnchor (k,k,k+0.4);
+    joint[i].setAnchor (k,k,k+0.4);
   }
 
   // run simulation
