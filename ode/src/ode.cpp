@@ -360,8 +360,12 @@ void dBodyDestroy (dxBody *b)
   dAASSERT (b);
 
   // all geoms that link to this body must be notified that the body is about
-  // to disappear. 
-  for (dxGeom *geom = b->geom; geom; geom = dGeomGetBodyNext (geom)) {
+  // to disappear. note that the call to dGeomSetBody(geom,0) will result in
+  // dGeomGetBodyNext() returning 0 for the body, so we must get the next body
+  // before setting the body to 0.
+  dxGeom *next_geom = 0;
+  for (dxGeom *geom = b->geom; geom; geom = next_geom) {
+    next_geom = dGeomGetBodyNext (geom);
     dGeomSetBody (geom,0);
   }
 
