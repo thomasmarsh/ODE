@@ -4,7 +4,8 @@
 @author{Russell Smith, @date{}}
 
 @center{This document is Copyright &copy 2001 Russell Smith.}
-@center{This is an UNFINISHED document}
+@center{This is an UNFINISHED document, there is still a lot of stuff
+to write.}
 
 @chapter{Contents @nonumber @nocontents}
 @contents
@@ -37,8 +38,8 @@ connected together with joints of various kinds.
 Examples are ground vehicles (where the wheels are connected to the chassis)
 or legged creatures (where the legs are connected to the body).
 
-ODE is designed to be used in interactive or realtime simulation.
-It is particularly good for simulating moving objects in changable
+ODE is designed to be used in interactive or real-time simulation.
+It is particularly good for simulating moving objects in changeable
 virtual reality environments.
 This is because it is fast, robust and stable, and the user has complete
 freedom to change the structure of the system even while the simulation
@@ -121,7 +122,7 @@ works].
 @* Special vehicle joint: hinge-2 - with steering and suspension.
 @* Powered hinge and slider joints (plus dry friction in those joints).
 @* Joint limits for hinge and slider.
-@* All contact modes work: bounce, soft, slip, restitution, tyre slip.
+@* All contact modes work: bounce, soft, slip, restitution, tire slip.
 @* CFM (constraint force mixing) framework.
 }
 
@@ -255,7 +256,7 @@ ODE's current integrator is very stable, but not particularly accurate
 unless the step size is small.
 For most uses of ODE this is not a problem -- ODE's behavior still looks
 perfectly physical in almost all cases.
-However ODE should not be used for quantative engineering until this accuracy
+However ODE should not be used for quantitative engineering until this accuracy
 issue has been addressed in a future release.
 
 
@@ -277,7 +278,7 @@ In ODE a joint is very similar: It is a relationship that is enforced between
 two bodies so that they can only have certain positions and orientations
 relative to each other.
 This relationship is called a @emph{constraint} -- the words @emph{joint} and
-@emph{constraint} are often used interchangably.
+@emph{constraint} are often used interchangeably.
 The following picture shows three different constraint types:
 
 		@center{@picture{pix/joints.jpg}}
@@ -378,7 +379,7 @@ ODE's constraint equation has the form
 where @m{CFM} is a square diagonal matrix.
 @m{CFM} mixes the resulting constraint force in with the constraint that
 produces it.
-By using @m{CFM} you can model tyre slip, suspension, soft ground and other
+By using @m{CFM} you can model tire slip, suspension, soft ground and other
 things.
 
 Solving for @m{lambda} gives
@@ -937,7 +938,7 @@ A contact joint looks like this:
 
 		@center{@picture{pix/contact.jpg}}
 
-The contact joint prevents body 1 and body 2 from interpenetrating at the
+The contact joint prevents body 1 and body 2 from inter-penetrating at the
 contact point.
 It does this by only allowing the bodies to have an ``outgoing'' velocity
 in the direction of the contact normal.
@@ -1046,13 +1047,13 @@ It has the following members:
 
 The joint geometry parameter setting functions should only be called after
 the joint has been attached to bodies, and those bodies have been correctly
-positioned, otherwise the joint may not be initialised correctly.
+positioned, otherwise the joint may not be initialized correctly.
 If the joint is not already attached, these functions will do nothing.
 
 For the parameter getting functions, if the system is out of alignment
 (i.e. there is some joint error) then the anchor/axis values will be correct
-with respect to body 1 only (or body 2 if you specified body 1 as 0 in the
-attach function).
+with respect to body 1 only (or body 2 if you specified body 1 as zero in the
+@func{dJointAttach()} function).
 
 The default anchor for all joints is (0,0,0).
 The default axis for all joints is (1,0,0).
@@ -1068,16 +1069,82 @@ Note that there are no functions to set joint angles or positions (or their
 rates) directly, instead you must set the corresponding body positions and
 velocities.
 
-Setting joint limits prevents movement of the joint beyond the given
-low/high position values.
 
-For joint motors: conceptually, the joint is actually constructed from a
-motor and a friction plate [need a diagram here].
-The speed of the motor and the maximum torque or force that can be exerted
-by the friction plate are both controllable.
+@section{Stop and motor parameters}
 
+When a joint is first created there is nothing to prevent it from
+moving through its entire range of motion.
+For example a hinge will be able to move through its entire angle,
+and a slider will slide to any length.
 
-@section{Limit and motor parameters}
+This range of motion can be limited by setting stops on the joint.
+The joint angle (or position) will be prevented from going below the
+low stop value, or from going above the high stop value.
+Note that a joint angle (or position) of zero corresponds to the
+initial body positions.
+
+As well as stops, many joint types can have motors.
+A motor applies a torque (or force) to a joint's degree(s) of freedom to
+get it to pivot (or slide) at a desired speed.
+Motors have force limits, which means they can apply no more than a
+given maximum force/torque to the joint.
+
+Motors have two parameters: a desired speed, and the maximum force that is
+available to reach that speed.
+This is a very simple model of real life motors, engines or servos.
+However, is it quite useful when modeling a motor (or engine or servo) that
+is geared down with a gearbox before being connected to the joint.
+Such devices are often controlled by setting a desired speed, and can only
+generate a maximum amount of power to achieve that speed (which corresponds
+to a certain amount of force available at the joint).
+
+Motors can also be used to accurately model dry (or Coulomb) friction in
+joints.
+Simply set the desired velocity to zero and set the maximum force to some
+constant value - then all joint motion will be impeded by that force.
+
+The alternative to using joint stops and motors is to simply apply forces
+to the affected bodies yourself.
+Applying motor forces is easy, and joint stops can be emulated with
+restraining spring forces.
+However applying forces directly is often not a good approach and can lead
+to severe stability problems if it is not done carefully.
+
+Consider the case of applying a force to a body to achieve a desired
+velocity.
+To calculate this force you use information about the current velocity,
+something like this:
+
+	@center{@m{force = k * (desired speed - current speed)}}
+
+This has several problems.
+First, the parameter @m{k} must be tuned by hand.
+If it is too low the body will take a long time to come up to speed.
+If it is too high the simulation will become unstable.
+Second, even if @m{k} is chosen well the body will still take a few time steps
+to come up to speed.
+Third, if any other ``external'' forces are being applied to the body, the
+desired velocity may never even be reached (a more complicated force equation
+would be needed, which would have extra parameters and its own problems).
+
+Joint motors solve all these problems: they bring the body up to speed
+in one time step, provided that does not take more force than is allowed.
+Joint motors need no extra parameters because they are actually implemented as
+constraints.
+They can effectively see one time step into the future to work out the correct
+force.
+This makes joint motors more computationally expensive than computing the
+forces yourself, but they are much more robust and stable, and far less time
+consuming to design with.
+This is especially true with larger rigid body systems.
+
+Similar arguments apply to joint stops.
+
+@subsection{Parameter functions}
+
+Here are the functions that set stop and motor parameters (as well as other
+kinds of parameters) on a joint:
+
 
 @funcdef{
 void dJointSetHingeParam (dJointID, int parameter, dReal value);
@@ -1090,38 +1157,54 @@ dReal dJointGetHinge2Param (dJointID, int parameter);
 Set/get limit/motor parameters for each joint type.
 The parameter numbers are:
 
-@constdef{dParamLoStop}{Low limit angle/position. Setting this to
-	@c{-dInfinity} turns off the low limit.}
-@constdef{dParamHiStop}{High limit angle/position. Setting this to
-	@c{dInfinity} turns off the high limit.}
-@constdef{dParamVel}{Motor velocity (angular or linear).}
-@constdef{dParamFMax}{Motor maximum force. Setting this to zero turns off the
-	motor.}
-@constdef{dParamFudgeFactor}{Fudge factor. Controls powering away from a stop.}
-@constdef{dParamBounce}{Limit bounce. Not yet implemented.}
-@constdef{dParamStopERP}{Limit softness (ERP).}
-@constdef{dParamStopCFM}{Limit softness (CFM).}
-@constdef{dParamSuspensionERP}{Suspension error reduction parameter.
-	Currently this only works on the hinge-2 joint.}
-@constdef{dParamSuspensionCFM}{Suspension constraint force mixing parameter.
-	Currently this only works on the hinge-2 joint.}
-
-These parameter names can be followed by a digit >= 2 to indicate the second,
-third etc set of parameters, e.g. for the second joint limit, the second
-suspension axis etc.
-
-If the low stop < the high stop then the stop functions will do nothing.
-For rotational joints, stops outside the range -pi..pi will be ineffective.
-
-The hinge-2 joint has parameters for axis 1 and axis 2 (the steering and wheel
-axes).
+@constdef{dParamLoStop}{Low stop angle or position. Setting this to
+	@c{-dInfinity} (the default value) turns off the low stop.
+	For rotational joints, this stop must be greater than @m{-Pi} to be
+	effective.}
+@constdef{dParamHiStop}{High stop angle or position. Setting this to
+	@c{dInfinity} (the default value) turns off the high stop.
+	For rotational joints, this stop must be less than @m{Pi} to be
+	effective.
+	If the high stop is less than the low stop then both stops will
+	be ineffective.}
+@constdef{dParamVel}{Desired motor velocity (this will be an angular or
+	linear velocity).}
+@constdef{dParamFMax}{The maximum force or torque that the motor will use to
+	achieve the desired velocity.
+	This must always be greater than or equal to zero.
+	Setting this to zero (the default value) turns off the motor.}
+@constdef{dParamFudgeFactor}{The current joint stop/motor implementation has
+	a small problem:
+	when the joint is at one stop and the motor is set to move it away
+	from the stop, too much force may be applied for one time step,
+	causing a ``jumping'' motion.
+	This fudge factor is used to scale this excess force.
+	It should have a value between zero and one (the default value).
+	If the jumping motion is too visible in a joint, the value can be
+	reduced.
+	Making this value too small can prevent the motor from being able to
+	move the joint away from a stop.}
+@constdef{dParamBounce}{The bouncyness of the stops.
+	This is a restitution parameter in the range 0..1.
+	0 means the stops are not bouncy at all, 1 means maximum bouncyness.}
+@constdef{dParamStopERP}{The error reduction parameter (ERP) used by the
+	stops.}
+@constdef{dParamStopCFM}{The constraint force mixing (CFM) value used by the
+	stops. Together with the ERP value this can be used to get spongy or
+	soft stops.
+	Note that this is intended for unpowered joints, it does not really
+	work as expected when a powered joint reaches its limit.}
+@constdef{dParamSuspensionERP}{Suspension error reduction parameter (ERP).
+	Currently this is only implemented on the hinge-2 joint.}
+@constdef{dParamSuspensionCFM}{Suspension constraint force mixing (CFM) value.
+	Currently this is only implemented on the hinge-2 joint.}
 
 If a particular parameter is not implemented by a given joint, setting it
 will have no effect.
 
-This interface for setting and getting parameters seems to be a bit
-inconsistent with the rest of ODE, I may consider modifying it in the
-future ... but it works well in practice.
+These parameter names can be optionally followed by a digit (currently only 2)
+to indicate the second set of parameters, e.g. for the second axis in a
+hinge-2 joint.
 }
 
 #############################################################################
@@ -1902,7 +1985,7 @@ But that's your problem.
 My restitution is zero!}
 
 Sometimes when rigid bodies collide without restitution, they appear to
-interpenetrate slightly and then get pushed apart so that they only just
+inter-penetrate slightly and then get pushed apart so that they only just
 touch.
 The problem gets worse as the time step gets larger.
 What is going on?
