@@ -66,6 +66,34 @@ public:
   void step (dReal stepsize)
     { dWorldStep (_id,stepsize); }
 
+  void stepFast1 (dReal stepsize, int maxiterations)
+    { dWorldStepFast1 (_id,stepsize,maxiterations); }
+  void setAutoEnableDepthSF1(dWorldID, int depth)
+    { dWorldSetAutoEnableDepthSF1 (_id, depth); }
+  int getAutoEnableDepthSF1(dWorldID)
+    { return dWorldGetAutoEnableDepthSF1 (_id); }
+
+  void  setAutoDisableLinearThreshold (dReal threshold) 
+    { dWorldSetAutoDisableLinearThreshold (_id,threshold); }
+  dReal getAutoDisableLinearThreshold()
+    { return dWorldGetAutoDisableLinearThreshold (_id); }
+  void setAutoDisableAngularThreshold (dReal threshold)
+    { dWorldSetAutoDisableAngularThreshold (_id,threshold); }
+  dReal getAutoDisableAngularThreshold()
+    { return dWorldGetAutoDisableAngularThreshold (_id); }
+  void setAutoDisableSteps (int steps)
+    { dWorldSetAutoDisableSteps (_id,steps); }
+  int getAutoDisableSteps()
+    { return dWorldGetAutoDisableSteps (_id); }
+  void setAutoDisableTime (dReal time)
+    { dWorldSetAutoDisableTime (_id,time); }
+  dReal getAutoDisableTime()
+    { return dWorldGetAutoDisableTime (_id); }
+  void setAutoDisableFlag (int do_auto_disable)
+    { dWorldSetAutoDisableFlag (_id,do_auto_disable); }
+  int getAutoDisableFlag()
+    { return dWorldGetAutoDisableFlag (_id); }
+
   void impulseToForce (dReal stepsize, dReal ix, dReal iy, dReal iz,
 		       dVector3 force)
     { dWorldImpulseToForce (_id,stepsize,ix,iy,iz,force); }
@@ -201,6 +229,27 @@ public:
 
   int isConnectedTo (dBodyID body) const
     { return dAreConnected (_id, body); }
+
+  void  setAutoDisableLinearThreshold (dReal threshold) 
+    { dBodySetAutoDisableLinearThreshold (_id,threshold); }
+  dReal getAutoDisableLinearThreshold()
+    { return dBodyGetAutoDisableLinearThreshold (_id); }
+  void setAutoDisableAngularThreshold (dReal threshold)
+    { dBodySetAutoDisableAngularThreshold (_id,threshold); }
+  dReal getAutoDisableAngularThreshold()
+    { return dBodyGetAutoDisableAngularThreshold (_id); }
+  void setAutoDisableSteps (int steps)
+    { dBodySetAutoDisableSteps (_id,steps); }
+  int getAutoDisableSteps()
+    { return dBodyGetAutoDisableSteps (_id); }
+  void setAutoDisableTime (dReal time)
+    { dBodySetAutoDisableTime (_id,time); }
+  dReal getAutoDisableTime()
+    { return dBodyGetAutoDisableTime (_id); }
+  void setAutoDisableFlag (int do_auto_disable)
+    { dBodySetAutoDisableFlag (_id,do_auto_disable); }
+  int getAutoDisableFlag()
+    { return dBodyGetAutoDisableFlag (_id); }
 };
 
 
@@ -256,7 +305,7 @@ public:
 
   void setData (void *data)
     { dJointSetData (_id, data); }
-  void *getData () const
+  void *getData() const
     { return dJointGetData (_id); }
 
   int getType() const
