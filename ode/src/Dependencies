@@ -11,7 +11,7 @@ geom.o: geom.cpp ../../include/ode/common.h ../../include/ode/error.h \
 joint.o: joint.cpp joint.h objects.h ../../include/ode/memory.h \
   ../../include/ode/common.h ../../include/ode/error.h \
   ../../include/ode/config.h ../../include/ode/mass.h array.h \
-  ../../include/ode/contact.h stack.h ../../include/ode/odemath.h \
+  ../../include/ode/contact.h obstack.h ../../include/ode/odemath.h \
   ../../include/ode/rotation.h ../../include/ode/matrix.h
 lcp.o: lcp.cpp ../../include/ode/common.h ../../include/ode/error.h \
   ../../include/ode/config.h lcp.h ../../include/ode/matrix.h \
@@ -33,6 +33,9 @@ memory.o: memory.cpp ../../include/ode/memory.h ../../include/ode/error.h
 misc.o: misc.cpp ../../include/ode/misc.h ../../include/ode/common.h \
   ../../include/ode/error.h ../../include/ode/config.h \
   ../../include/ode/matrix.h
+obstack.o: obstack.cpp obstack.h ../../include/ode/config.h \
+  ../../include/ode/common.h ../../include/ode/error.h \
+  ../../include/ode/memory.h
 ode.o: ode.cpp objects.h ../../include/ode/memory.h \
   ../../include/ode/common.h ../../include/ode/error.h \
   ../../include/ode/config.h ../../include/ode/mass.h array.h \
@@ -41,7 +44,7 @@ ode.o: ode.cpp objects.h ../../include/ode/memory.h \
   ../../include/ode/timer.h ../../include/ode/rotation.h \
   ../../include/ode/space.h ../../include/ode/geom.h \
   ../../include/ode/misc.h ../../include/ode/objects.h \
-  ../../include/ode/odecpp.h joint.h stack.h step.h
+  ../../include/ode/odecpp.h joint.h obstack.h step.h
 odemath.o: odemath.cpp ../../include/ode/common.h \
   ../../include/ode/error.h ../../include/ode/config.h \
   ../../include/ode/odemath.h
@@ -64,7 +67,7 @@ stack.o: stack.cpp stack.h ../../include/ode/error.h \
 step.o: step.cpp objects.h ../../include/ode/memory.h \
   ../../include/ode/common.h ../../include/ode/error.h \
   ../../include/ode/config.h ../../include/ode/mass.h array.h joint.h \
-  ../../include/ode/contact.h stack.h ../../include/ode/odemath.h \
+  ../../include/ode/contact.h obstack.h ../../include/ode/odemath.h \
   ../../include/ode/rotation.h ../../include/ode/timer.h \
   ../../include/ode/matrix.h lcp.h
 testing.o: testing.cpp testing.h ../../include/ode/common.h \

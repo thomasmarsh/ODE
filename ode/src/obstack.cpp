@@ -22,6 +22,7 @@
 
 #include <string.h>
 #include <errno.h>
+#include <stdio.h>
 #include "obstack.h"
 #include "ode/config.h"
 #include "ode/common.h"
@@ -98,8 +99,10 @@ void *dObStack::alloc (int num_bytes)
 void dObStack::freeAll()
 {
   last = first;
-  first->used = sizeof(Arena);
-  ROUND_UP_OFFSET_TO_EFFICIENT_SIZE (first,first->used);
+  if (first) {
+    first->used = sizeof(Arena);
+    ROUND_UP_OFFSET_TO_EFFICIENT_SIZE (first,first->used);
+  }
 }
 
 
@@ -117,18 +120,15 @@ void *dObStack::rewind()
 
 void *dObStack::next (int num_bytes)
 {
-  // this functions exactly like alloc, except that no new storage is ever
-  // allocated
-  if (num_bytes > MAX_ALLOC_SIZE) dDebug (0,"num_bytes too large");
+  // this functions like alloc, except that no new storage is ever allocated
   if (!current_arena) return 0;
-  if ((current_ofs + num_bytes) > dOBSTACK_ARENA_SIZE) {
+  current_ofs += num_bytes;
+  ROUND_UP_OFFSET_TO_EFFICIENT_SIZE (current_arena,current_ofs);
+  if (current_ofs >= current_arena->used) {
     current_arena = current_arena->next;
     if (!current_arena) return 0;
     current_ofs = sizeof (Arena);
-    ROUND_UP_OFFSET_TO_EFFICIENT_SIZE (current_arena,current_ofs)
+    ROUND_UP_OFFSET_TO_EFFICIENT_SIZE (current_arena,current_ofs);
   }
-  char *c = ((char*) current_arena) + current_ofs;
-  current_arena += num_bytes;
-  ROUND_UP_OFFSET_TO_EFFICIENT_SIZE (current_arena,current_ofs)
-  return c;
+  return ((char*) current_arena) + current_ofs;
 }

@@ -49,7 +49,7 @@ endif
 
 LIB=../../lib/$(call fLIBNAME,ode)
 PREGEN_SRC = fastldlt.c fastlsolve.c fastltsolve.c fastdot.c
-SRC = array.cpp error.cpp memory.cpp stack.cpp odemath.cpp matrix.cpp \
+SRC = array.cpp error.cpp memory.cpp obstack.cpp odemath.cpp matrix.cpp \
   misc.cpp rotation.cpp mass.cpp ode.cpp step.cpp lcp.cpp joint.cpp space.cpp \
   geom.cpp timer.cpp mat.cpp $(PREGEN_SRC) testing.cpp
 
