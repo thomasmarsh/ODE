@@ -134,8 +134,21 @@ submatrix of A. there are two ways we could arrange the rows/columns in AC.
 //#define ATYPE dReal *
 //#define AROW(i) (A+(i)*nskip)
 
-// misc defines
-#define ALLOCA dALLOCA16
+// use protected, non-stack memory allocation system
+
+#ifdef dUSE_MALLOC_FOR_ALLOCA
+extern unsigned int dMemoryFlag;
+
+#define ALLOCA(t,v,s) t* v = (t*) malloc(s)
+#define UNALLOCA(t)  free(t)
+
+#else
+
+#define ALLOCA(t,v,s) t* v =(t*)dALLOCA16(s)
+#define UNALLOCA(t)  /* nothing */
+
+#endif
+
 //#define dDot myDot
 #define NUB_OPTIMIZATIONS
 
@@ -166,7 +179,7 @@ static void swapRowsAndCols (ATYPE A, int n, int i1, int i2, int nskip,
 			     int do_fast_row_swaps)
 {
   int i;
-  dIASSERT (A && n > 0 && i1 >= 0 && i2 >= 0 && i1 < n && i2 < n &&
+  dAASSERT (A && n > 0 && i1 >= 0 && i2 >= 0 && i1 < n && i2 < n &&
 	    nskip >= n && i1 < i2);
 
 # ifdef ROWPTRS
@@ -183,10 +196,19 @@ static void swapRowsAndCols (ATYPE A, int n, int i1, int i2, int nskip,
     A[i2] = tmpp;
   }
   else {
-    dReal *tmprow = (dReal*) ALLOCA (n * sizeof(dReal));
+    ALLOCA (dReal,tmprow,n * sizeof(dReal));
+
+#ifdef dUSE_MALLOC_FOR_ALLOCA
+    if (tmprow == NULL) {
+      dMemoryFlag = d_MEMORY_OUT_OF_MEMORY;      
+      return;
+    }
+#endif
+
     memcpy (tmprow,A[i1],n * sizeof(dReal));
     memcpy (A[i1],A[i2],n * sizeof(dReal));
     memcpy (A[i2],tmprow,n * sizeof(dReal));
+    UNALLOCA(tmprow);
   }
   // swap columns the hard way
   for (i=i2+1; i<n; i++) {
@@ -195,7 +217,15 @@ static void swapRowsAndCols (ATYPE A, int n, int i1, int i2, int nskip,
     A[i][i2] = tmp;
   }
 # else
-  dReal tmp,*tmprow = (dReal*) ALLOCA (n * sizeof(dReal));
+  dReal tmp;
+  ALLOCA (dReal,tmprow,n * sizeof(dReal));
+
+#ifdef dUSE_MALLOC_FOR_ALLOCA
+  if (tmprow == NULL) {
+    return;
+  }
+#endif
+
   if (i1 > 0) {
     memcpy (tmprow,A+i1*nskip,i1*sizeof(dReal));
     memcpy (A+i1*nskip,A+i2*nskip,i1*sizeof(dReal));
@@ -214,7 +244,9 @@ static void swapRowsAndCols (ATYPE A, int n, int i1, int i2, int nskip,
     A[i*nskip+i1] = A[i*nskip+i2];
     A[i*nskip+i2] = tmp;
   }
+  UNALLOCA(tmprow);
 # endif
+
 }
 
 
@@ -231,6 +263,10 @@ static void swapProblem (ATYPE A, dReal *x, dReal *b, dReal *w, dReal *lo,
 	    i1 <= i2);
   if (i1==i2) return;
   swapRowsAndCols (A,n,i1,i2,nskip,do_fast_row_swaps);
+#ifdef dUSE_MALLOC_FOR_ALLOCA
+  if (dMemoryFlag == d_MEMORY_OUT_OF_MEMORY)
+    return;
+#endif
   tmp = x[i1];
   x[i1] = x[i2];
   x[i2] = tmp;
@@ -622,9 +658,32 @@ void dLCP::pN_plusequals_s_times_qN (dReal *p, dReal s, dReal *q)
 
 void dLCP::solve1 (dReal *a, int i, int dir, int only_transfer)
 {
-  dReal *AA = (dReal*) ALLOCA (n*nskip*sizeof(dReal));
-  dReal *dd = (dReal*) ALLOCA (n*sizeof(dReal));
-  dReal *bb = (dReal*) ALLOCA (n*sizeof(dReal));
+
+  ALLOCA (dReal,AA,n*nskip*sizeof(dReal));
+#ifdef dUSE_MALLOC_FOR_ALLOCA
+    if (AA == NULL) {
+      dMemoryFlag = d_MEMORY_OUT_OF_MEMORY;
+      return;
+    }
+#endif
+  ALLOCA (dReal,dd,n*sizeof(dReal));
+#ifdef dUSE_MALLOC_FOR_ALLOCA
+    if (dd == NULL) {
+      UNALLOCA(AA);
+      dMemoryFlag = d_MEMORY_OUT_OF_MEMORY;
+      return;
+    }
+#endif
+  ALLOCA (dReal,bb,n*sizeof(dReal));
+#ifdef dUSE_MALLOC_FOR_ALLOCA
+    if (bb == NULL) {
+      UNALLOCA(AA);
+      UNALLOCA(dd);
+      dMemoryFlag = d_MEMORY_OUT_OF_MEMORY;
+      return;
+    }
+#endif
+
   int ii,jj,AAi,AAj;
 
   last_i_for_solve1 = i;
@@ -638,7 +697,12 @@ void dLCP::solve1 (dReal *a, int i, int dir, int only_transfer)
     bb[AAi] = AROW(i)[ii];
     AAi++;
   }
-  if (AAi==0) return;
+  if (AAi==0) {
+      UNALLOCA (AA);
+      UNALLOCA (dd);
+      UNALLOCA (bb);
+      return;
+  }
 
   dFactorLDLT (AA,dd,AAi,nskip);
   dSolveLDLT (AA,dd,bb,AAi,nskip);
@@ -650,6 +714,10 @@ void dLCP::solve1 (dReal *a, int i, int dir, int only_transfer)
   else {
     for (ii=0; ii<n; ii++) if (C[ii]) a[ii] = bb[AAi++];
   }
+
+  UNALLOCA (AA);
+  UNALLOCA (dd);
+  UNALLOCA (bb);
 }
 
 
@@ -976,11 +1044,19 @@ void dLCP::unpermute()
 {
   // now we have to un-permute x and w
   int j;
-  dReal *tmp = (dReal*) ALLOCA (n*sizeof(dReal));
+  ALLOCA (dReal,tmp,n*sizeof(dReal));
+#ifdef dUSE_MALLOC_FOR_ALLOCA
+    if (tmp == NULL) {
+      dMemoryFlag = d_MEMORY_OUT_OF_MEMORY;
+      return;
+    }
+#endif
   memcpy (tmp,x,n*sizeof(dReal));
   for (j=0; j<n; j++) x[p[j]] = tmp[j];
   memcpy (tmp,w,n*sizeof(dReal));
   for (j=0; j<n; j++) w[p[j]] = tmp[j];
+
+  UNALLOCA (tmp);
 }
 
 #endif // dLCP_FAST
@@ -996,17 +1072,139 @@ void dSolveLCPBasic (int n, dReal *A, dReal *x, dReal *b,
 
   int i,k;
   int nskip = dPAD(n);
-  dReal *L = (dReal*) ALLOCA (n*nskip*sizeof(dReal));
-  dReal *d = (dReal*) ALLOCA (n*sizeof(dReal));
-  dReal *delta_x = (dReal*) ALLOCA (n*sizeof(dReal));
-  dReal *delta_w = (dReal*) ALLOCA (n*sizeof(dReal));
-  dReal *Dell = (dReal*) ALLOCA (n*sizeof(dReal));
-  dReal *ell = (dReal*) ALLOCA (n*sizeof(dReal));
-  dReal *tmp = (dReal*) ALLOCA (n*sizeof(dReal));
-  dReal **Arows = (dReal**) ALLOCA (n*sizeof(dReal*));
-  int *p = (int*) ALLOCA (n*sizeof(int));
-  int *C = (int*) ALLOCA (n*sizeof(int));
-  int *dummy = (int*) ALLOCA (n*sizeof(int));
+  ALLOCA (dReal,L,n*nskip*sizeof(dReal));
+#ifdef dUSE_MALLOC_FOR_ALLOCA
+    if (L == NULL) {
+      dMemoryFlag = d_MEMORY_OUT_OF_MEMORY;
+      return;
+    }
+#endif
+  ALLOCA (dReal,d,n*sizeof(dReal));
+#ifdef dUSE_MALLOC_FOR_ALLOCA
+    if (d == NULL) {
+      UNALLOCA(L);
+      dMemoryFlag = d_MEMORY_OUT_OF_MEMORY;
+      return;
+    }
+#endif
+  ALLOCA (dReal,delta_x,n*sizeof(dReal));
+#ifdef dUSE_MALLOC_FOR_ALLOCA
+    if (delta_x == NULL) {
+      UNALLOCA(d);
+      UNALLOCA(L);
+      dMemoryFlag = d_MEMORY_OUT_OF_MEMORY;
+      return;
+    }
+#endif
+  ALLOCA (dReal,delta_w,n*sizeof(dReal));
+#ifdef dUSE_MALLOC_FOR_ALLOCA
+    if (delta_w == NULL) {
+      UNALLOCA(delta_x);
+      UNALLOCA(d);
+      UNALLOCA(L);
+      dMemoryFlag = d_MEMORY_OUT_OF_MEMORY;
+      return;
+    }
+#endif
+  ALLOCA (dReal,Dell,n*sizeof(dReal));
+#ifdef dUSE_MALLOC_FOR_ALLOCA
+    if (Dell == NULL) {
+      UNALLOCA(delta_w);
+      UNALLOCA(delta_x);
+      UNALLOCA(d);
+      UNALLOCA(L);
+      dMemoryFlag = d_MEMORY_OUT_OF_MEMORY;
+      return;
+    }
+#endif
+  ALLOCA (dReal,ell,n*sizeof(dReal));
+#ifdef dUSE_MALLOC_FOR_ALLOCA
+    if (ell == NULL) {
+      UNALLOCA(Dell);
+      UNALLOCA(delta_w);
+      UNALLOCA(delta_x);
+      UNALLOCA(d);
+      UNALLOCA(L);
+      dMemoryFlag = d_MEMORY_OUT_OF_MEMORY;
+      return;
+    }
+#endif
+  ALLOCA (dReal,tmp,n*sizeof(dReal));
+#ifdef dUSE_MALLOC_FOR_ALLOCA
+    if (tmp == NULL) {
+      UNALLOCA(ell);
+      UNALLOCA(Dell);
+      UNALLOCA(delta_w);
+      UNALLOCA(delta_x);
+      UNALLOCA(d);
+      UNALLOCA(L);
+      dMemoryFlag = d_MEMORY_OUT_OF_MEMORY;
+      return;
+    }
+#endif
+  ALLOCA (dReal*,Arows,n*sizeof(dReal*));
+#ifdef dUSE_MALLOC_FOR_ALLOCA
+    if (Arows == NULL) {
+      UNALLOCA(tmp);
+      UNALLOCA(ell);
+      UNALLOCA(Dell);
+      UNALLOCA(delta_w);
+      UNALLOCA(delta_x);
+      UNALLOCA(d);
+      UNALLOCA(L);
+      dMemoryFlag = d_MEMORY_OUT_OF_MEMORY;
+      return;
+    }
+#endif
+  ALLOCA (int,p,n*sizeof(int));
+#ifdef dUSE_MALLOC_FOR_ALLOCA
+    if (p == NULL) {
+      UNALLOCA(Arows);
+      UNALLOCA(tmp);
+      UNALLOCA(ell);
+      UNALLOCA(Dell);
+      UNALLOCA(delta_w);
+      UNALLOCA(delta_x);
+      UNALLOCA(d);
+      UNALLOCA(L);
+      dMemoryFlag = d_MEMORY_OUT_OF_MEMORY;
+      return;
+    }
+#endif
+  ALLOCA (int,C,n*sizeof(int));
+#ifdef dUSE_MALLOC_FOR_ALLOCA
+    if (C == NULL) {
+      UNALLOCA(p);
+      UNALLOCA(Arows);
+      UNALLOCA(tmp);
+      UNALLOCA(ell);
+      UNALLOCA(Dell);
+      UNALLOCA(delta_w);
+      UNALLOCA(delta_x);
+      UNALLOCA(d);
+      UNALLOCA(L);
+      dMemoryFlag = d_MEMORY_OUT_OF_MEMORY;
+      return;
+    }
+#endif
+  ALLOCA (int,dummy,n*sizeof(int));
+#ifdef dUSE_MALLOC_FOR_ALLOCA
+    if (dummy == NULL) {
+      UNALLOCA(C);
+      UNALLOCA(p);
+      UNALLOCA(Arows);
+      UNALLOCA(tmp);
+      UNALLOCA(ell);
+      UNALLOCA(Dell);
+      UNALLOCA(delta_w);
+      UNALLOCA(delta_x);
+      UNALLOCA(d);
+      UNALLOCA(L);
+      dMemoryFlag = d_MEMORY_OUT_OF_MEMORY;
+      return;
+    }
+#endif
+
 
   dLCP lcp (n,0,A,x,b,w,tmp,tmp,L,d,Dell,ell,tmp,dummy,dummy,p,C,Arows);
   nub = lcp.getNub();
@@ -1021,6 +1219,22 @@ void dSolveLCPBasic (int n, dReal *A, dReal *x, dReal *b,
 	// compute: delta_x(C) = -A(C,C)\A(C,i)
 	dSetZero (delta_x,n);
 	lcp.solve1 (delta_x,i);
+#ifdef dUSE_MALLOC_FOR_ALLOCA
+	if (dMemoryFlag == d_MEMORY_OUT_OF_MEMORY) {
+	  UNALLOCA(dummy);
+	  UNALLOCA(C);
+	  UNALLOCA(p);
+	  UNALLOCA(Arows);
+	  UNALLOCA(tmp);
+	  UNALLOCA(ell);
+	  UNALLOCA(Dell);
+	  UNALLOCA(delta_w);
+	  UNALLOCA(delta_x);
+	  UNALLOCA(d);
+	  UNALLOCA(L);
+	  return;
+	}
+#endif
 	delta_x[i] = 1;
 
 	// compute: delta_w = A*delta_x
@@ -1090,6 +1304,18 @@ void dSolveLCPBasic (int n, dReal *A, dReal *x, dReal *b,
 
  done:
   lcp.unpermute();
+
+  UNALLOCA (L);
+  UNALLOCA (d);
+  UNALLOCA (delta_x);
+  UNALLOCA (delta_w);
+  UNALLOCA (Dell);
+  UNALLOCA (ell);
+  UNALLOCA (tmp);
+  UNALLOCA (Arows);
+  UNALLOCA (p);
+  UNALLOCA (C);
+  UNALLOCA (dummy);
 }
 
 //***************************************************************************
@@ -1099,6 +1325,7 @@ void dSolveLCP (int n, dReal *A, dReal *x, dReal *b,
 		dReal *w, int nub, dReal *lo, dReal *hi, int *findex)
 {
   dAASSERT (n>0 && A && x && b && w && lo && hi && nub >= 0 && nub <= n);
+
   int i,k,hit_first_friction_index = 0;
   int nskip = dPAD(n);
 
@@ -1109,33 +1336,138 @@ void dSolveLCP (int n, dReal *A, dReal *x, dReal *b,
     dSolveLDLT (A,w,b,n,nskip);
     memcpy (x,b,n*sizeof(dReal));
     dSetZero (w,n);
+
     return;
   }
-
 # ifndef dNODEBUG
   // check restrictions on lo and hi
   for (k=0; k<n; k++) dIASSERT (lo[k] <= 0 && hi[k] >= 0);
 # endif
+  ALLOCA (dReal,L,n*nskip*sizeof(dReal));
+#ifdef dUSE_MALLOC_FOR_ALLOCA
+    if (L == NULL) {
+      dMemoryFlag = d_MEMORY_OUT_OF_MEMORY;
+      return;
+    }
+#endif
+  ALLOCA (dReal,d,n*sizeof(dReal));
+#ifdef dUSE_MALLOC_FOR_ALLOCA
+    if (d == NULL) {
+      UNALLOCA(L);
+      dMemoryFlag = d_MEMORY_OUT_OF_MEMORY;
+      return;
+    }
+#endif
+  ALLOCA (dReal,delta_x,n*sizeof(dReal));
+#ifdef dUSE_MALLOC_FOR_ALLOCA
+    if (delta_x == NULL) {
+      UNALLOCA(d);
+      UNALLOCA(L);
+      dMemoryFlag = d_MEMORY_OUT_OF_MEMORY;
+      return;
+    }
+#endif
+  ALLOCA (dReal,delta_w,n*sizeof(dReal));
+#ifdef dUSE_MALLOC_FOR_ALLOCA
+    if (delta_w == NULL) {
+      UNALLOCA(delta_x);
+      UNALLOCA(d);
+      UNALLOCA(L);
+      dMemoryFlag = d_MEMORY_OUT_OF_MEMORY;
+      return;
+    }
+#endif
+  ALLOCA (dReal,Dell,n*sizeof(dReal));
+#ifdef dUSE_MALLOC_FOR_ALLOCA
+    if (Dell == NULL) {
+      UNALLOCA(delta_w);
+      UNALLOCA(delta_x);
+      UNALLOCA(d);
+      UNALLOCA(L);
+      dMemoryFlag = d_MEMORY_OUT_OF_MEMORY;
+      return;
+    }
+#endif
+  ALLOCA (dReal,ell,n*sizeof(dReal));
+#ifdef dUSE_MALLOC_FOR_ALLOCA
+    if (ell == NULL) {
+      UNALLOCA(Dell);
+      UNALLOCA(delta_w);
+      UNALLOCA(delta_x);
+      UNALLOCA(d);
+      UNALLOCA(L);
+      dMemoryFlag = d_MEMORY_OUT_OF_MEMORY;
+      return;
+    }
+#endif
+  ALLOCA (dReal*,Arows,n*sizeof(dReal*));
+#ifdef dUSE_MALLOC_FOR_ALLOCA
+    if (Arows == NULL) {
+      UNALLOCA(ell);
+      UNALLOCA(Dell);
+      UNALLOCA(delta_w);
+      UNALLOCA(delta_x);
+      UNALLOCA(d);
+      UNALLOCA(L);
+      dMemoryFlag = d_MEMORY_OUT_OF_MEMORY;
+      return;
+    }
+#endif
+  ALLOCA (int,p,n*sizeof(int));
+#ifdef dUSE_MALLOC_FOR_ALLOCA
+    if (p == NULL) {
+      UNALLOCA(Arows);
+      UNALLOCA(ell);
+      UNALLOCA(Dell);
+      UNALLOCA(delta_w);
+      UNALLOCA(delta_x);
+      UNALLOCA(d);
+      UNALLOCA(L);
+      dMemoryFlag = d_MEMORY_OUT_OF_MEMORY;
+      return;
+    }
+#endif
+  ALLOCA (int,C,n*sizeof(int));
+#ifdef dUSE_MALLOC_FOR_ALLOCA
+    if (C == NULL) {
+      UNALLOCA(p);
+      UNALLOCA(Arows);
+      UNALLOCA(ell);
+      UNALLOCA(Dell);
+      UNALLOCA(delta_w);
+      UNALLOCA(delta_x);
+      UNALLOCA(d);
+      UNALLOCA(L);
+      dMemoryFlag = d_MEMORY_OUT_OF_MEMORY;
+      return;
+    }
+#endif
 
-  dReal *L = (dReal*) ALLOCA (n*nskip*sizeof(dReal));
-  dReal *d = (dReal*) ALLOCA (n*sizeof(dReal));
-  dReal *delta_x = (dReal*) ALLOCA (n*sizeof(dReal));
-  dReal *delta_w = (dReal*) ALLOCA (n*sizeof(dReal));
-  dReal *Dell = (dReal*) ALLOCA (n*sizeof(dReal));
-  dReal *ell = (dReal*) ALLOCA (n*sizeof(dReal));
-  dReal **Arows = (dReal**) ALLOCA (n*sizeof(dReal*));
-  int *p = (int*) ALLOCA (n*sizeof(int));
-  int *C = (int*) ALLOCA (n*sizeof(int));
   int dir;
   dReal dirf;
 
   // for i in N, state[i] is 0 if x(i)==lo(i) or 1 if x(i)==hi(i)
-  int *state = (int*) ALLOCA (n*sizeof(int));
+  ALLOCA (int,state,n*sizeof(int));
+#ifdef dUSE_MALLOC_FOR_ALLOCA
+    if (state == NULL) {
+      UNALLOCA(C);
+      UNALLOCA(p);
+      UNALLOCA(Arows);
+      UNALLOCA(ell);
+      UNALLOCA(Dell);
+      UNALLOCA(delta_w);
+      UNALLOCA(delta_x);
+      UNALLOCA(d);
+      UNALLOCA(L);
+      dMemoryFlag = d_MEMORY_OUT_OF_MEMORY;
+      return;
+    }
+#endif
 
   // create LCP object. note that tmp is set to delta_w to save space, this
   // optimization relies on knowledge of how tmp is used, so be careful!
-  dLCP lcp (n,nub,A,x,b,w,lo,hi,L,d,Dell,ell,delta_w,state,findex,p,C,Arows);
-  nub = lcp.getNub();
+  dLCP *lcp=new dLCP(n,nub,A,x,b,w,lo,hi,L,d,Dell,ell,delta_w,state,findex,p,C,Arows);
+  nub = lcp->getNub();
 
   // loop over all indexes nub..n-1. for index i, if x(i),w(i) satisfy the
   // LCP conditions then i is added to the appropriate index set. otherwise
@@ -1181,7 +1513,7 @@ void dSolveLCP (int n, dReal *A, dReal *x, dReal *b,
 
     // thus far we have not even been computing the w values for indexes
     // greater than i, so compute w[i] now.
-    w[i] = lcp.AiC_times_qC (i,x) + lcp.AiN_times_qN (i,x) - b[i];
+    w[i] = lcp->AiC_times_qC (i,x) + lcp->AiN_times_qN (i,x) - b[i];
 
     // if lo=hi=0 (which can happen for tangential friction when normals are
     // 0) then the index will be assigned to set N with some state. however,
@@ -1195,11 +1527,11 @@ void dSolveLCP (int n, dReal *A, dReal *x, dReal *b,
 
     // see if x(i),w(i) is in a valid region
     if (lo[i]==0 && w[i] >= 0) {
-      lcp.transfer_i_to_N (i);
+      lcp->transfer_i_to_N (i);
       state[i] = 0;
     }
     else if (hi[i]==0 && w[i] <= 0) {
-      lcp.transfer_i_to_N (i);
+      lcp->transfer_i_to_N (i);
       state[i] = 1;
     }
     else if (w[i]==0) {
@@ -1207,9 +1539,26 @@ void dSolveLCP (int n, dReal *A, dReal *x, dReal *b,
       // that lo != 0, which means that lo < 0 as lo is not allowed to be +ve,
       // and similarly that hi > 0. this means that the line segment
       // corresponding to set C is at least finite in extent, and we are on it.
-      // NOTE: we must call lcp.solve1() before lcp.transfer_i_to_C()
-      lcp.solve1 (delta_x,i,0,1);
-      lcp.transfer_i_to_C (i);
+      // NOTE: we must call lcp->solve1() before lcp->transfer_i_to_C()
+      lcp->solve1 (delta_x,i,0,1);
+
+#ifdef dUSE_MALLOC_FOR_ALLOCA
+      if (dMemoryFlag == d_MEMORY_OUT_OF_MEMORY) {
+	UNALLOCA(state);
+	UNALLOCA(C);
+	UNALLOCA(p);
+	UNALLOCA(Arows);
+	UNALLOCA(ell);
+	UNALLOCA(Dell);
+	UNALLOCA(delta_w);
+	UNALLOCA(delta_x);
+	UNALLOCA(d);
+	UNALLOCA(L);
+	return;
+      }
+#endif
+
+      lcp->transfer_i_to_C (i);
     }
     else {
       // we must push x(i) and w(i)
@@ -1225,14 +1574,31 @@ void dSolveLCP (int n, dReal *A, dReal *x, dReal *b,
 	}
 
 	// compute: delta_x(C) = -dir*A(C,C)\A(C,i)
-	lcp.solve1 (delta_x,i,dir);
+	lcp->solve1 (delta_x,i,dir);
+
+#ifdef dUSE_MALLOC_FOR_ALLOCA
+	if (dMemoryFlag == d_MEMORY_OUT_OF_MEMORY) {
+	  UNALLOCA(state);
+	  UNALLOCA(C);
+	  UNALLOCA(p);
+	  UNALLOCA(Arows);
+	  UNALLOCA(ell);
+	  UNALLOCA(Dell);
+	  UNALLOCA(delta_w);
+	  UNALLOCA(delta_x);
+	  UNALLOCA(d);
+	  UNALLOCA(L);
+	  return;
+	}
+#endif
+
 	// note that delta_x[i] = dirf, but we wont bother to set it
 
 	// compute: delta_w = A*delta_x ... note we only care about
         // delta_w(N) and delta_w(i), the rest is ignored
-	lcp.pN_equals_ANC_times_qC (delta_w,delta_x);
-	lcp.pN_plusequals_ANi (delta_w,i,dir);
-        delta_w[i] = lcp.AiC_times_qC (i,delta_x) + lcp.Aii(i)*dirf;
+	lcp->pN_equals_ANC_times_qC (delta_w,delta_x);
+	lcp->pN_plusequals_ANi (delta_w,i,dir);
+        delta_w[i] = lcp->AiC_times_qC (i,delta_x) + lcp->Aii(i)*dirf;
 
 	// find largest step we can take (size=s), either to drive x(i),w(i)
 	// to the valid LCP region or to drive an already-valid variable
@@ -1260,37 +1626,37 @@ void dSolveLCP (int n, dReal *A, dReal *x, dReal *b,
 	  }
 	}
 
-	for (k=0; k < lcp.numN(); k++) {
-	  if ((state[lcp.indexN(k)]==0 && delta_w[lcp.indexN(k)] < 0) ||
-	      (state[lcp.indexN(k)]!=0 && delta_w[lcp.indexN(k)] > 0)) {
+	for (k=0; k < lcp->numN(); k++) {
+	  if ((state[lcp->indexN(k)]==0 && delta_w[lcp->indexN(k)] < 0) ||
+	      (state[lcp->indexN(k)]!=0 && delta_w[lcp->indexN(k)] > 0)) {
 	    // don't bother checking if lo=hi=0
-	    if (lo[lcp.indexN(k)] == 0 && hi[lcp.indexN(k)] == 0) continue;
-	    dReal s2 = -w[lcp.indexN(k)] / delta_w[lcp.indexN(k)];
+	    if (lo[lcp->indexN(k)] == 0 && hi[lcp->indexN(k)] == 0) continue;
+	    dReal s2 = -w[lcp->indexN(k)] / delta_w[lcp->indexN(k)];
 	    if (s2 < s) {
 	      s = s2;
 	      cmd = 4;
-	      si = lcp.indexN(k);
+	      si = lcp->indexN(k);
 	    }
 	  }
 	}
 
-	for (k=nub; k < lcp.numC(); k++) {
-	  if (delta_x[lcp.indexC(k)] < 0 && lo[lcp.indexC(k)] > -dInfinity) {
-	    dReal s2 = (lo[lcp.indexC(k)]-x[lcp.indexC(k)]) /
-	      delta_x[lcp.indexC(k)];
+	for (k=nub; k < lcp->numC(); k++) {
+	  if (delta_x[lcp->indexC(k)] < 0 && lo[lcp->indexC(k)] > -dInfinity) {
+	    dReal s2 = (lo[lcp->indexC(k)]-x[lcp->indexC(k)]) /
+	      delta_x[lcp->indexC(k)];
 	    if (s2 < s) {
 	      s = s2;
 	      cmd = 5;
-	      si = lcp.indexC(k);
+	      si = lcp->indexC(k);
 	    }
 	  }
-	  if (delta_x[lcp.indexC(k)] > 0 && hi[lcp.indexC(k)] < dInfinity) {
-	    dReal s2 = (hi[lcp.indexC(k)]-x[lcp.indexC(k)]) /
-	      delta_x[lcp.indexC(k)];
+	  if (delta_x[lcp->indexC(k)] > 0 && hi[lcp->indexC(k)] < dInfinity) {
+	    dReal s2 = (hi[lcp->indexC(k)]-x[lcp->indexC(k)]) /
+	      delta_x[lcp->indexC(k)];
 	    if (s2 < s) {
 	      s = s2;
 	      cmd = 6;
-	      si = lcp.indexC(k);
+	      si = lcp->indexC(k);
 	    }
 	  }
 	}
@@ -1312,42 +1678,42 @@ void dSolveLCP (int n, dReal *A, dReal *x, dReal *b,
 	}
 
 	// apply x = x + s * delta_x
-	lcp.pC_plusequals_s_times_qC (x,s,delta_x);
+	lcp->pC_plusequals_s_times_qC (x,s,delta_x);
 	x[i] += s * dirf;
 
 	// apply w = w + s * delta_w
-	lcp.pN_plusequals_s_times_qN (w,s,delta_w);
+	lcp->pN_plusequals_s_times_qN (w,s,delta_w);
 	w[i] += s * delta_w[i];
 
 	// switch indexes between sets if necessary
 	switch (cmd) {
 	case 1:		// done
 	  w[i] = 0;
-	  lcp.transfer_i_to_C (i);
+	  lcp->transfer_i_to_C (i);
 	  break;
 	case 2:		// done
 	  x[i] = lo[i];
 	  state[i] = 0;
-	  lcp.transfer_i_to_N (i);
+	  lcp->transfer_i_to_N (i);
 	  break;
 	case 3:		// done
 	  x[i] = hi[i];
 	  state[i] = 1;
-	  lcp.transfer_i_to_N (i);
+	  lcp->transfer_i_to_N (i);
 	  break;
 	case 4:		// keep going
 	  w[si] = 0;
-	  lcp.transfer_i_from_N_to_C (si);
+	  lcp->transfer_i_from_N_to_C (si);
 	  break;
 	case 5:		// keep going
 	  x[si] = lo[si];
 	  state[si] = 0;
-	  lcp.transfer_i_from_C_to_N (si);
+	  lcp->transfer_i_from_C_to_N (si);
 	  break;
 	case 6:		// keep going
 	  x[si] = hi[si];
 	  state[si] = 1;
-	  lcp.transfer_i_from_C_to_N (si);
+	  lcp->transfer_i_from_C_to_N (si);
 	  break;
 	}
 
@@ -1357,7 +1723,19 @@ void dSolveLCP (int n, dReal *A, dReal *x, dReal *b,
   }
 
  done:
-  lcp.unpermute();
+  lcp->unpermute();
+  delete lcp;
+
+  UNALLOCA (L);
+  UNALLOCA (d);
+  UNALLOCA (delta_x);
+  UNALLOCA (delta_w);
+  UNALLOCA (Dell);
+  UNALLOCA (ell);
+  UNALLOCA (Arows);
+  UNALLOCA (p);
+  UNALLOCA (C);
+  UNALLOCA (state);
 }
 
 //***************************************************************************
@@ -1370,19 +1748,157 @@ extern "C" void dTestSolveLCP()
   const dReal tol = REAL(1e-9);
   printf ("dTestSolveLCP()\n");
 
-  dReal *A = (dReal*) ALLOCA (n*nskip*sizeof(dReal));
-  dReal *x = (dReal*) ALLOCA (n*sizeof(dReal));
-  dReal *b = (dReal*) ALLOCA (n*sizeof(dReal));
-  dReal *w = (dReal*) ALLOCA (n*sizeof(dReal));
-  dReal *lo = (dReal*) ALLOCA (n*sizeof(dReal));
-  dReal *hi = (dReal*) ALLOCA (n*sizeof(dReal));
+  ALLOCA (dReal,A,n*nskip*sizeof(dReal));
+#ifdef dUSE_MALLOC_FOR_ALLOCA
+    if (A == NULL) {
+      dMemoryFlag = d_MEMORY_OUT_OF_MEMORY;
+      return;
+    }
+#endif
+  ALLOCA (dReal,x,n*sizeof(dReal));
+#ifdef dUSE_MALLOC_FOR_ALLOCA
+    if (x == NULL) {
+      UNALLOCA (A);
+      dMemoryFlag = d_MEMORY_OUT_OF_MEMORY;
+      return;
+    }
+#endif
+  ALLOCA (dReal,b,n*sizeof(dReal));
+#ifdef dUSE_MALLOC_FOR_ALLOCA
+    if (b == NULL) {
+      UNALLOCA (x);
+      UNALLOCA (A);
+      dMemoryFlag = d_MEMORY_OUT_OF_MEMORY;
+      return;
+    }
+#endif
+  ALLOCA (dReal,w,n*sizeof(dReal));
+#ifdef dUSE_MALLOC_FOR_ALLOCA
+    if (w == NULL) {
+      UNALLOCA (b);
+      UNALLOCA (x);
+      UNALLOCA (A);
+      dMemoryFlag = d_MEMORY_OUT_OF_MEMORY;
+      return;
+    }
+#endif
+  ALLOCA (dReal,lo,n*sizeof(dReal));
+#ifdef dUSE_MALLOC_FOR_ALLOCA
+    if (lo == NULL) {
+      UNALLOCA (w);
+      UNALLOCA (b);
+      UNALLOCA (x);
+      UNALLOCA (A);
+      dMemoryFlag = d_MEMORY_OUT_OF_MEMORY;
+      return;
+    }
+#endif
+  ALLOCA (dReal,hi,n*sizeof(dReal));
+#ifdef dUSE_MALLOC_FOR_ALLOCA
+    if (hi == NULL) {
+      UNALLOCA (lo);
+      UNALLOCA (w);
+      UNALLOCA (b);
+      UNALLOCA (x);
+      UNALLOCA (A);
+      dMemoryFlag = d_MEMORY_OUT_OF_MEMORY;
+      return;
+    }
+#endif
 
-  dReal *A2 = (dReal*) ALLOCA (n*nskip*sizeof(dReal));
-  dReal *b2 = (dReal*) ALLOCA (n*sizeof(dReal));
-  dReal *lo2 = (dReal*) ALLOCA (n*sizeof(dReal));
-  dReal *hi2 = (dReal*) ALLOCA (n*sizeof(dReal));
-  dReal *tmp1 = (dReal*) ALLOCA (n*sizeof(dReal));
-  dReal *tmp2 = (dReal*) ALLOCA (n*sizeof(dReal));
+  ALLOCA (dReal,A2,n*nskip*sizeof(dReal));
+#ifdef dUSE_MALLOC_FOR_ALLOCA
+    if (A2 == NULL) {
+      UNALLOCA (hi);
+      UNALLOCA (lo);
+      UNALLOCA (w);
+      UNALLOCA (b);
+      UNALLOCA (x);
+      UNALLOCA (A);
+      dMemoryFlag = d_MEMORY_OUT_OF_MEMORY;
+      return;
+    }
+#endif
+  ALLOCA (dReal,b2,n*sizeof(dReal));
+#ifdef dUSE_MALLOC_FOR_ALLOCA
+    if (b2 == NULL) {
+      UNALLOCA (A2);
+      UNALLOCA (hi);
+      UNALLOCA (lo);
+      UNALLOCA (w);
+      UNALLOCA (b);
+      UNALLOCA (x);
+      UNALLOCA (A);
+      dMemoryFlag = d_MEMORY_OUT_OF_MEMORY;
+      return;
+    }
+#endif
+  ALLOCA (dReal,lo2,n*sizeof(dReal));
+#ifdef dUSE_MALLOC_FOR_ALLOCA
+    if (lo2 == NULL) {
+      UNALLOCA (b2);
+      UNALLOCA (A2);
+      UNALLOCA (hi);
+      UNALLOCA (lo);
+      UNALLOCA (w);
+      UNALLOCA (b);
+      UNALLOCA (x);
+      UNALLOCA (A);
+      dMemoryFlag = d_MEMORY_OUT_OF_MEMORY;
+      return;
+    }
+#endif
+  ALLOCA (dReal,hi2,n*sizeof(dReal));
+#ifdef dUSE_MALLOC_FOR_ALLOCA
+    if (hi2 == NULL) {
+      UNALLOCA (lo2);
+      UNALLOCA (b2);
+      UNALLOCA (A2);
+      UNALLOCA (hi);
+      UNALLOCA (lo);
+      UNALLOCA (w);
+      UNALLOCA (b);
+      UNALLOCA (x);
+      UNALLOCA (A);
+      dMemoryFlag = d_MEMORY_OUT_OF_MEMORY;
+      return;
+    }
+#endif
+  ALLOCA (dReal,tmp1,n*sizeof(dReal));
+#ifdef dUSE_MALLOC_FOR_ALLOCA
+    if (tmp1 == NULL) {
+      UNALLOCA (hi2);
+      UNALLOCA (lo2);
+      UNALLOCA (b2);
+      UNALLOCA (A2);
+      UNALLOCA (hi);
+      UNALLOCA (lo);
+      UNALLOCA (w);
+      UNALLOCA (b);
+      UNALLOCA (x);
+      UNALLOCA (A);
+      dMemoryFlag = d_MEMORY_OUT_OF_MEMORY;
+      return;
+    }
+#endif
+  ALLOCA (dReal,tmp2,n*sizeof(dReal));
+#ifdef dUSE_MALLOC_FOR_ALLOCA
+    if (tmp2 == NULL) {
+      UNALLOCA (tmp1);
+      UNALLOCA (hi2);
+      UNALLOCA (lo2);
+      UNALLOCA (b2);
+      UNALLOCA (A2);
+      UNALLOCA (hi);
+      UNALLOCA (lo);
+      UNALLOCA (w);
+      UNALLOCA (b);
+      UNALLOCA (x);
+      UNALLOCA (A);
+      dMemoryFlag = d_MEMORY_OUT_OF_MEMORY;
+      return;
+    }
+#endif
 
   double total_time = 0;
   for (int count=0; count < 1000; count++) {
@@ -1434,6 +1950,23 @@ extern "C" void dTestSolveLCP()
     dStopwatchStart (&sw);
 
     dSolveLCP (n,A2,x,b2,w,nub,lo2,hi2,0);
+#ifdef dUSE_MALLOC_FOR_ALLOCA
+    if (dMemoryFlag == d_MEMORY_OUT_OF_MEMORY) {
+      UNALLOCA (tmp2);
+      UNALLOCA (tmp1);
+      UNALLOCA (hi2);
+      UNALLOCA (lo2);
+      UNALLOCA (b2);
+      UNALLOCA (A2);
+      UNALLOCA (hi);
+      UNALLOCA (lo);
+      UNALLOCA (w);
+      UNALLOCA (b);
+      UNALLOCA (x);
+      UNALLOCA (A);
+      return;
+    }
+#endif
 
     dStopwatchStop (&sw);
     double time = dStopwatchTime(&sw);
@@ -1469,4 +2002,17 @@ extern "C" void dTestSolveLCP()
     printf ("passed: NL=%3d NH=%3d C=%3d   ",n1,n2,n3);
     printf ("time=%10.3f ms  avg=%10.4f\n",time * 1000.0,average);
   }
+
+  UNALLOCA (A);
+  UNALLOCA (x);
+  UNALLOCA (b);
+  UNALLOCA (w);
+  UNALLOCA (lo);
+  UNALLOCA (hi);
+  UNALLOCA (A2);
+  UNALLOCA (b2);
+  UNALLOCA (lo2);
+  UNALLOCA (hi2);
+  UNALLOCA (tmp1);
+  UNALLOCA (tmp2);
 }
