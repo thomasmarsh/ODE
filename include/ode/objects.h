@@ -76,12 +76,10 @@ void dBodyAddRelForceAtPos    (dBodyID, dReal fx, dReal fy, dReal fz,
 void dBodyAddRelForceAtRelPos (dBodyID, dReal fx, dReal fy, dReal fz,
 			                dReal px, dReal py, dReal pz);
 
-void dBodyGetPointPos    (dBodyID, dReal px, dReal py, dReal pz,
-			  dVector3 result);
-void dBodyGetPointVel    (dBodyID, dReal px, dReal py, dReal pz,
-			  dVector3 result);
-void dBodyGetPointRelVel (dBodyID, dReal px, dReal py, dReal pz,
-			  dVector3 result);
+void dBodyGetRelPointPos    (dBodyID, dReal px, dReal py, dReal pz,
+			     dVector3 result);
+void dBodyGetRelPointVel    (dBodyID, dReal px, dReal py, dReal pz,
+			     dVector3 result);
 
 void dBodySetFiniteRotationMode (dBodyID, int mode);
 void dBodySetFiniteRotationAxis (dBodyID, dReal x, dReal y, dReal z);

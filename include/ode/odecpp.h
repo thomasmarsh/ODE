@@ -120,12 +120,10 @@ public:
 			    dReal px, dReal py, dReal pz)
     { dBodyAddRelForceAtRelPos (_id, fx, fy, fz, px, py, pz); }
 
-  void getPointPos (dReal px, dReal py, dReal pz, dVector3 result)
-    { dBodyGetPointPos (_id, px, py, pz, result); }
-  void getPointVel (dReal px, dReal py, dReal pz, dVector3 result)
-    { dBodyGetPointVel (_id, px, py, pz, result); }
-  void getPointRelVel (dReal px, dReal py, dReal pz, dVector3 result)
-    { dBodyGetPointRelVel (_id, px, py, pz, result); }
+  void getRelPointPos (dReal px, dReal py, dReal pz, dVector3 result)
+    { dBodyGetRelPointPos (_id, px, py, pz, result); }
+  void getRelPointVel (dReal px, dReal py, dReal pz, dVector3 result)
+    { dBodyGetRelPointVel (_id, px, py, pz, result); }
 
   int isConnectedTo (const dBody &b)
     { return dAreConnected (_id,b._id); }
