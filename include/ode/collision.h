@@ -131,6 +131,8 @@ void dGeomRayGet (dGeomID ray, dVector3 start, dVector3 dir);
  */
 void dGeomRaySetParams (dGeomID g, int FirstContact, int BackfaceCull);
 void dGeomRayGetParams (dGeomID g, int *FirstContact, int *BackfaceCull);
+void dGeomRaySetClosestHit (dGeomID g, int closestHit);
+int dGeomRayGetClosestHit (dGeomID g);
 
 #include "collision_trimesh.h"
 

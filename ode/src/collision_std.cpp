@@ -485,6 +485,23 @@ void dGeomRayGetParams (dxGeom *g, int *FirstContact, int *BackfaceCull)
   (*BackfaceCull) = ((g->gflags & RAY_BACKFACECULL) != 0);
 }
 
+
+void dGeomRaySetClosestHit (dxGeom *g, int closestHit)
+{
+  dUASSERT (g && g->type == dRayClass,"argument not a ray");
+  if (closestHit){
+    g->gflags |= RAY_CLOSEST_HIT;
+  }
+  else g->gflags &= ~RAY_CLOSEST_HIT;
+}
+
+
+int dGeomRayGetClosestHit (dxGeom *g)
+{
+  dUASSERT (g && g->type == dRayClass,"argument not a ray");
+  return ((g->gflags & RAY_CLOSEST_HIT) != 0);
+}
+
 //****************************************************************************
 // geom group public API
 
