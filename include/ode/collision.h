@@ -96,28 +96,29 @@ enum {
 dGeomID dCreateSphere (dSpaceID space, dReal radius);
 void dGeomSphereSetRadius (dGeomID sphere, dReal radius);
 dReal dGeomSphereGetRadius (dGeomID sphere);
-dReal dGeomSpherePointDepth (dGeomID g, dReal x, dReal y, dReal z);
+dReal dGeomSpherePointDepth (dGeomID sphere, dReal x, dReal y, dReal z);
 
 dGeomID dCreateBox (dSpaceID space, dReal lx, dReal ly, dReal lz);
 void dGeomBoxSetLengths (dGeomID box, dReal lx, dReal ly, dReal lz);
 void dGeomBoxGetLengths (dGeomID box, dVector3 result);
-dReal dGeomBoxPointDepth (dGeomID g, dReal x, dReal y, dReal z);
+dReal dGeomBoxPointDepth (dGeomID box, dReal x, dReal y, dReal z);
 
 dGeomID dCreatePlane (dSpaceID space, dReal a, dReal b, dReal c, dReal d);
 void dGeomPlaneSetParams (dGeomID plane, dReal a, dReal b, dReal c, dReal d);
 void dGeomPlaneGetParams (dGeomID plane, dVector4 result);
-dReal dGeomPlanePointDepth (dGeomID g, dReal x, dReal y, dReal z);
+dReal dGeomPlanePointDepth (dGeomID plane, dReal x, dReal y, dReal z);
 
 dGeomID dCreateCCylinder (dSpaceID space, dReal radius, dReal length);
 void dGeomCCylinderSetParams (dGeomID ccylinder, dReal radius, dReal length);
 void dGeomCCylinderGetParams (dGeomID ccylinder, dReal *radius, dReal *length);
-dReal dGeomCCylinderPointDepth (dGeomID g, dReal x, dReal y, dReal z);
+dReal dGeomCCylinderPointDepth (dGeomID ccylinder, dReal x, dReal y, dReal z);
 
 dGeomID dCreateRay (dSpaceID space, dReal length);
 void dGeomRaySetLength (dGeomID ray, dReal length);
 dReal dGeomRayGetLength (dGeomID ray);
-void dGeomRaySet (dGeomID ray, const dVector3 origin, const dVector3 dir);
-void dGeomRayGet (dGeomID ray, dVector3 origin, dVector3 dir);
+void dGeomRaySet (dGeomID ray, dReal px, dReal py, dReal pz,
+		  dReal dx, dReal dy, dReal dz);
+void dGeomRayGet (dGeomID ray, dVector3 start, dVector3 dir);
 
 /* for backward compatibility */
 dGeomID dCreateGeomGroup (dSpaceID space);
