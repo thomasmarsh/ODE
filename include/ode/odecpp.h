@@ -784,6 +784,11 @@ public:
     { dGeomTransformSetCleanup (_id,mode); }
   int getCleanup (dGeomID g)
     { return dGeomTransformGetCleanup (_id); }
+
+  void setInfo (int mode)
+    { dGeomTransformSetInfo (_id,mode); }
+  int getInfo()
+    { return dGeomTransformGetInfo (_id); }
 };
 
 

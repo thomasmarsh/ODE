@@ -2497,6 +2497,32 @@ The default clean-up mode is 0.
 }
 
 
+@funcdef{
+void dGeomTransformSetInfo (dGeomID g, int mode);
+int dGeomTransformGetInfo (dGeomID g);
+}{
+Set and get the "information" mode of geometry transform @arg{g}.
+The mode can be 0 or 1. The default mode is 0.
+
+With mode 0, when a transform object is collided with another object
+(using @c{dCollide (tx_geom,other_geom,...)}), the @c{g1} field of the
+@c{dContactGeom} structure is set to the geometry object that is
+@emph{encapsulated} by the transform object. This value of @c{g1} allows
+the caller to interrogate the type of the geometry that is transformed,
+but it does not allow the caller to determine the position in global
+coordinates or the associated body, as both of these properties are used
+differently for encapsulated geometry objects.
+
+With mode 1, the @c{g1} field of the @c{dContactGeom} structure is set
+to the transform object itself.
+This makes the object appear just like any other kind of geometry object,
+as @func{dGeomGetBody()} will return the attached body,
+and @func{dGeomGetPosition()} will return the global position.
+To get the actual type of the encapsulated geometry in this case,
+@func{dGeomTransformGetGeom()} must be used.
+}
+
+
 @subsection{General geometry object functions}
 
 @funcdef{

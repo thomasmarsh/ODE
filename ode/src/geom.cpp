@@ -1662,6 +1662,7 @@ int dGeomTransformClass = -1;
 struct dxGeomTransform {
   dxGeom *obj;		// object that is being transformed
   int cleanup;		// 1 to destroy obj when destroyed
+  int infomode;		// 1 to put Tx geom in dContactGeom g1
   dVector3 final_pos;	// final tx (body tx + relative tx) of the object.
   dMatrix3 final_R;	//   this is only set if the AABB function is called
 };			//   by space collision before the collide fn is called
@@ -1708,6 +1709,16 @@ int dCollideT (const dxGeom *o1, const dxGeom *o2, int flags,
 
   // do the collision
   int n = dCollide (tr->obj,const_cast<dxGeom*>(o2),flags,contact,skip);
+
+  // if required, adjust the 'g1' values in the generated contacts so that
+  // thay indicated the GeomTransform object instead of the encapsulated
+  // object.
+  if (tr->infomode) {
+    for (int i=0; i<n; i++) {
+      dContactGeom *c = CONTACT(contact,skip*i);
+      c->g1 = const_cast<dxGeom*> (o1);
+    }
+  }
 
   // restore the pos, R and body
   tr->obj->pos = posbak;
@@ -1776,6 +1787,7 @@ dxGeom *dCreateGeomTransform (dSpaceID space)
   dxGeomTransform *tr = (dxGeomTransform*) CLASSDATA(g);
   tr->obj = 0;
   tr->cleanup = 0;
+  tr->infomode = 0;
   dSetZero (tr->final_pos,4);
   dRSetIdentity (tr->final_R);
 
@@ -1819,6 +1831,24 @@ int dGeomTransformGetCleanup (dGeomID g)
 	    "argument not a geom transform");
   dxGeomTransform *tr = (dxGeomTransform*) CLASSDATA(g);
   return tr->cleanup;
+}
+
+
+void dGeomTransformSetInfo (dGeomID g, int mode)
+{
+  dUASSERT (g && g->_class->num == dGeomTransformClass,
+	    "argument not a geom transform");
+  dxGeomTransform *tr = (dxGeomTransform*) CLASSDATA(g);
+  tr->infomode = mode;
+}
+
+
+int dGeomTransformGetInfo (dGeomID g)
+{
+  dUASSERT (g && g->_class->num == dGeomTransformClass,
+	    "argument not a geom transform");
+  dxGeomTransform *tr = (dxGeomTransform*) CLASSDATA(g);
+  return tr->infomode;
 }
 
 //****************************************************************************

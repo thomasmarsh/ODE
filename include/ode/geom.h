@@ -108,6 +108,8 @@ void dGeomTransformSetGeom (dGeomID g, dGeomID obj);
 dGeomID dGeomTransformGetGeom (dGeomID g);
 void dGeomTransformSetCleanup (dGeomID g, int mode);
 int dGeomTransformGetCleanup (dGeomID g);
+void dGeomTransformSetInfo (dGeomID g, int mode);
+int dGeomTransformGetInfo (dGeomID g);
 
 /* ************************************************************************ */
 /* general collision */
