@@ -103,31 +103,50 @@ double dTimerTicksPerSecond()
 
 #define PENTIUM_HZ (500e6)
 
-
 static inline void getClockCount (unsigned long cc[2])
 {
+#ifndef SYS64bits	
   asm volatile (
 	"rdtsc\n"
 	"movl %%eax,(%%esi)\n"
 	"movl %%edx,4(%%esi)\n"
 	: : "S" (cc) : "%eax","%edx","cc","memory");
+#else
+  asm volatile (
+	"rdtsc\n"
+	"movl %%eax,(%%rsi)\n"
+	"movl %%edx,4(%%rsi)\n"
+	: : "S" (cc) : "%eax","%edx","cc","memory");
+#endif  
 }
 
 
 static inline void serialize()
 {
+#ifndef SYS64bits
   asm volatile (
 	"mov $0,%%eax\n"
 	"cpuid\n"
 	: : : "%eax","%ebx","%ecx","%edx","cc","memory");
+#else
+  asm volatile (
+	"mov $0,%%rax\n"
+	"cpuid\n"
+	: : : "%rax","%rbx","%rcx","%rdx","cc","memory");
+#endif  
 }
 
 
 static inline double loadClockCount (unsigned long a[2])
 {
   double ret;
+#ifndef SYS64bits  
   asm volatile ("fildll %1; fstpl %0" : "=m" (ret) : "m" (a[0]) :
 		"cc","memory");
+#else
+  asm volatile ("fildll %1; fstpl %0" : "=m" (ret) : "m" (a[0]) :
+		"cc","memory");
+#endif  
   return ret;
 }
 

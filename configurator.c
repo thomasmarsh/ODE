@@ -238,6 +238,30 @@ void check_if_this_is_a_pentium (FILE *file)
   delete_file ("ctest.exe");
 }
 
+
+void check_if_this_is_a_64bits (FILE *file)
+{
+  write_header_comment (file,"is this a 64bit system on a gcc-based platform?");
+  write_to_file ("ctest.cpp",
+		 "int main() {\n"
+		 "int a = 0; int * pa = &a;\n"
+		 "  asm (\"mov %0,%%rax\\n\"\n    \"movl (%%rax),%%eax\"\n"
+		 "  : : \"r\"(pa) : \"%rax\");\n"
+		 "  return 0;\n"
+		 "}\n");
+  delete_file ("ctest.exe");
+  compile ("ctest.exe","ctest.cpp");
+  if (file_exists ("ctest.exe")) {
+    fprintf (file,"#define SYS64bits 1\n\n");
+  }
+  else {
+    fprintf (file,"/* #define SYS64bits 1 -- not a 64bits system */\n\n");
+  }
+
+  delete_file ("ctest.cpp");
+  delete_file ("ctest.exe");
+}
+
 /****************************************************************************/
 /* tests: standard headers */
 
@@ -503,6 +527,7 @@ int main (int argc, char **argv)
   fprintf (file,config_h_part2);
   get_alloca_usage (file);
   check_if_this_is_a_pentium (file);
+  check_if_this_is_a_64bits (file);
   get_ODE_integer_typedefs (file);
   get_ODE_float_stuff (file);
   get_ODE_features (file);
