@@ -408,10 +408,6 @@ int dCollideBTL(dxGeom* g1, dxGeom* BoxGeom, int Flags, dContactGeom* Contacts, 
 
 		int OutTriCount = 0;
 		for (int i = 0; i < TriCount; i++){
-			if (OutTriCount == (Flags & 0xffff)){
-				break;
-			}
-
 			const int& TriIndex = Triangles[i];
 
 			if (!Callback(TriMesh, BoxGeom, TriIndex)) continue;
@@ -598,7 +594,10 @@ int dCollideBTL(dxGeom* g1, dxGeom* BoxGeom, int Flags, dContactGeom* Contacts, 
 												dRSetIdentity(Rotation);
 												dsDrawSphere(OutPos, Rotation, REAL(0.01));*/
 
-												GenerateContact(Flags, Contacts, Stride, OutPos, Plane, OutTriCount, j);
+											        GenerateContact(Flags, Contacts, Stride, OutPos, Plane, OutTriCount, j);
+												if(OutTriCount == (Flags & 0xffff)) {
+												  goto _fullContacts;
+												}
 											}
 										}
 									}
@@ -610,10 +609,15 @@ int dCollideBTL(dxGeom* g1, dxGeom* BoxGeom, int Flags, dContactGeom* Contacts, 
 
 					if (!NeedClipping){
 						GenerateContact(Flags, Contacts, Stride, BoxVertices[j], Plane, OutTriCount, j);
+						if(OutTriCount == (Flags & 0xffff)) {
+						  goto _fullContacts;
+						}
 					}
 				}
 			}
 		}
+
+	_fullContacts:
 
 		for (int i = 0; i < OutTriCount; i++){
 			dContactGeom* Contact = SAFECONTACT(Flags, Contacts, i, Stride);
