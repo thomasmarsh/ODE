@@ -1057,10 +1057,10 @@ void dJointAttach (dxJoint *joint, dxBody *body1, dxBody *body2)
   if (body1==0) {
     body1 = body2;
     body2 = 0;
-    joint->flags &= (~dJOINT_REVERSE);
+    joint->flags |= dJOINT_REVERSE;
   }
   else {
-    joint->flags |= dJOINT_REVERSE;
+    joint->flags &= (~dJOINT_REVERSE);
   }
 
   // attach to new bodies

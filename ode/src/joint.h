@@ -184,6 +184,10 @@ struct dxJointUniversal : public dxJoint {
   dVector3 anchor2;		// anchor w.r.t second body
   dVector3 axis1;		// axis w.r.t first body
   dVector3 axis2;		// axis w.r.t second body
+  dQuaternion qrel1;	// initial relative rotation body1 -> virtual cross piece
+  dQuaternion qrel2;    // initial relative rotation virtual cross piece -> body2
+  dxJointLimitMotor limot1;	// limit and motor information for axis1
+  dxJointLimitMotor limot2;	// limit and motor information for axis2
 };
 extern struct dxJoint::Vtable __duniversal_vtable;
 
