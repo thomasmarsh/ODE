@@ -9,6 +9,17 @@ the rules for this file:
 
 ------------------------------------------------------------------------------
 
+07/13/02 russ
+
+	* added dBodySetForce(), dBodySetTorque(), dWorldImpulseToForce(),
+	  dBodyGetPosRelPoint(), dBodyGetPosRelPoint(), dBodyVectorToWorld(),
+	  dBodyVectorFromWorld().
+
+	* added dBodyGetPointVel() (thanks to Colin Reed).
+
+	* added a new C++ interface (from Martin C. Martin, with modifications
+	  by russ). the old C++ interface is now in odecpp_old.h.
+
 06/25/02 russ
 
 	* added an additional BSD-style licensing option for ODE.

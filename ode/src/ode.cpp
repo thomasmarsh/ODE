@@ -640,6 +640,24 @@ const dReal * dBodyGetTorque (dBodyID b)
 }
 
 
+void dBodySetForce (dBodyID b, dReal x, dReal y, dReal z)
+{
+  dAASSERT (b);
+  b->facc[0] = x;
+  b->facc[1] = y;
+  b->facc[2] = z;
+}
+
+
+void dBodySetTorque (dBodyID b, dReal x, dReal y, dReal z)
+{
+  dAASSERT (b);
+  b->tacc[0] = x;
+  b->tacc[1] = y;
+  b->tacc[2] = z;
+}
+
+
 void dBodyGetRelPointPos (dBodyID b, dReal px, dReal py, dReal pz,
 			  dVector3 result)
 {
@@ -670,6 +688,61 @@ void dBodyGetRelPointVel (dBodyID b, dReal px, dReal py, dReal pz,
   result[1] = b->lvel[1];
   result[2] = b->lvel[2];
   dCROSS (result,+=,b->avel,p);
+}
+
+
+void dBodyGetPointVel (dBodyID b, dReal px, dReal py, dReal pz,
+		       dVector3 result)
+{
+  dAASSERT (b);
+  dVector3 p;
+  p[0] = px - b->pos[0];
+  p[1] = py - b->pos[1];
+  p[2] = pz - b->pos[2];
+  p[3] = 0;
+  result[0] = b->lvel[0];
+  result[1] = b->lvel[1];
+  result[2] = b->lvel[2];
+  dCROSS (result,+=,b->avel,p);
+}
+
+
+void dBodyGetPosRelPoint (dBodyID b, dReal px, dReal py, dReal pz,
+			  dVector3 result)
+{
+  dAASSERT (b);
+  dVector3 prel;
+  prel[0] = px - b->pos[0];
+  prel[1] = py - b->pos[1];
+  prel[2] = pz - b->pos[2];
+  prel[3] = 0;
+  dMULTIPLY1_331 (result,b->R,prel);
+}
+
+
+void dBodyVectorToWorld (dBodyID b, dReal px, dReal py, dReal pz,
+			 dVector3 result)
+{
+  dAASSERT (b);
+  dVector3 p;
+  p[0] = px;
+  p[1] = py;
+  p[2] = pz;
+  p[3] = 0;
+  dMULTIPLY0_331 (result,b->R,p);
+}
+
+
+void dBodyVectorFromWorld (dBodyID b, dReal px, dReal py, dReal pz,
+			   dVector3 result)
+{
+  dAASSERT (b);
+  dVector3 p;
+  p[0] = px;
+  p[1] = py;
+  p[2] = pz;
+  p[3] = 0;
+  dMULTIPLY1_331 (result,b->R,p);
 }
 
 
@@ -1097,24 +1170,28 @@ void dWorldGetGravity (dWorldID w, dVector3 g)
 
 void dWorldSetERP (dWorldID w, dReal erp)
 {
+  dAASSERT (w);
   w->global_erp = erp;
 }
 
 
 dReal dWorldGetERP (dWorldID w)
 {
+  dAASSERT (w);
   return w->global_erp;
 }
 
 
 void dWorldSetCFM (dWorldID w, dReal cfm)
 {
+  dAASSERT (w);
   w->global_cfm = cfm;
 }
 
 
 dReal dWorldGetCFM (dWorldID w)
 {
+  dAASSERT (w);
   return w->global_cfm;
 }
 
@@ -1124,6 +1201,19 @@ void dWorldStep (dWorldID w, dReal stepsize)
   dUASSERT (w,"bad world argument");
   dUASSERT (stepsize > 0,"stepsize must be > 0");
   processIslands (w,stepsize);
+}
+
+
+void dWorldImpulseToForce (dWorldID w, dReal stepsize,
+			   dReal ix, dReal iy, dReal iz,
+			   dVector3 force)
+{
+  dAASSERT (w);
+  stepsize = dRecip(stepsize);
+  force[0] = stepsize * ix;
+  force[1] = stepsize * iy;
+  force[2] = stepsize * iz;
+  // @@@ force[3] = 0;
 }
 
 //****************************************************************************
