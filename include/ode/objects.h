@@ -90,6 +90,10 @@ void dBodySetFiniteRotationAxis (dBodyID, dReal x, dReal y, dReal z);
 int dBodyGetNumJoints (dBodyID b);
 dJointID dBodyGetJoint (dBodyID, int index);
 
+void dBodyEnable (dBodyID);
+void dBodyDisable (dBodyID);
+int dBodyIsEnabled (dBodyID);
+
 
 /* joints */
 
