@@ -365,7 +365,7 @@ void dGeomSetQuaternion (dxGeom *g, const dQuaternion quat)
     dBodySetQuaternion (g->body,quat);
   }
   else {
-    dQtoR(quat, g->R);
+    dQtoR (quat, g->R);
     dGeomMoved (g);
   }
 }
@@ -386,6 +386,7 @@ const dReal * dGeomGetRotation (dxGeom *g)
   return g->R;
 }
 
+
 void dGeomGetQuaternion (dxGeom *g, dQuaternion quat)
 {
   dAASSERT (g);
@@ -396,8 +397,9 @@ void dGeomGetQuaternion (dxGeom *g, dQuaternion quat)
     quat[1] = body_quat[1];
     quat[2] = body_quat[2];
     quat[3] = body_quat[3];
-  } else {
-    dRtoQ(g->R, quat);
+  }
+  else {
+    dRtoQ (g->R, quat);
   }
 }
 
