@@ -50,6 +50,8 @@ void dMassSetCylinder (dMass *, dReal density, int direction,
 
 void dMassSetBox (dMass *, dReal density,
 		  dReal lx, dReal ly, dReal lz);
+void dMassSetBoxTotal (dMass *, dReal total_mass,
+		  dReal lx, dReal ly, dReal lz);
 
 void dMassAdjust (dMass *, dReal newmass);
 

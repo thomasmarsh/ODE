@@ -384,6 +384,8 @@ public:
     { dJointSetUniversalAxis1 (_id, x, y, z); }
   void setAxis2 (dReal x, dReal y, dReal z)
     { dJointSetUniversalAxis2 (_id, x, y, z); }
+  void setParam (int parameter, dReal value)
+    { dJointSetUniversalParam (_id, parameter, value); }
 
   void getAnchor (dVector3 result) const
     { dJointGetUniversalAnchor (_id, result); }
@@ -393,6 +395,16 @@ public:
     { dJointGetUniversalAxis1 (_id, result); }
   void getAxis2 (dVector3 result) const
     { dJointGetUniversalAxis2 (_id, result); }
+  dReal getParam (int parameter) const
+    { return dJointGetUniversalParam (_id, parameter); }
+  dReal getAngle1() const
+    { return dJointGetUniversalAngle1 (_id); }
+  dReal getAngle1Rate() const
+    { return dJointGetUniversalAngle1Rate (_id); }
+  dReal getAngle2() const
+    { return dJointGetUniversalAngle2 (_id); }
+  dReal getAngle2Rate() const
+    { return dJointGetUniversalAngle2Rate (_id); }
 };
 
 

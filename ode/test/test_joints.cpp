@@ -401,6 +401,8 @@ int setupTest (int n)
     // ********** universal joint
 
   case 700:			// 2 body
+  case 701:
+  case 702:
     constructWorldForTest (0,2,
  			   0.5*SIDE,0.5*SIDE,1, -0.5*SIDE,-0.5*SIDE,1,
  			   1,1,0, 1,1,0, 0.25*M_PI,0.25*M_PI);
@@ -412,8 +414,14 @@ int setupTest (int n)
     return 1;
 
   case 720:		// universal transmit torque test
+  case 721:
+  case 722:
   case 730:		// universal torque about axis 1
+  case 731:
+  case 732:
   case 740:		// universal torque about axis 2
+  case 741:
+  case 742:
     constructWorldForTest (0,2,
  			   0.5*SIDE,0.5*SIDE,1, -0.5*SIDE,-0.5*SIDE,1,
  			   1,0,0, 1,0,0, 0,0);
@@ -422,7 +430,7 @@ int setupTest (int n)
     dJointSetUniversalAnchor (joint,0,0,1);
     dJointSetUniversalAxis1 (joint,0,0,1);
     dJointSetUniversalAxis2 (joint, 1, -1,0);
-    max_iterations = 50;
+    max_iterations = 100;
     return 1;
   }
   return 0;
@@ -641,7 +649,7 @@ dReal doStuffAndGetError (int n)
 
   // ********** universal joint
 
-  case 700: {		// 2 body
+  case 700: {		// 2 body: joint constraint
     dVector3 ax1, ax2;
 
     addOscillatingTorque (0.1);
@@ -651,13 +659,71 @@ dReal doStuffAndGetError (int n)
     return fabs(10*dDOT(ax1, ax2));
   }
 
-  case 720: {		// universal transmit torque test
+  case 701: {		// 2 body: angle 1 rate
+    static dReal last_angle = 0;
+    addOscillatingTorque (0.1);
+    dampRotationalMotion (0.1);
+    dReal a = dJointGetUniversalAngle1(joint);
+    dReal r = dJointGetUniversalAngle1Rate(joint);
+    dReal diff = a - last_angle;
+    if (diff > M_PI) diff -= 2*M_PI;
+    if (diff < -M_PI) diff += 2*M_PI;
+    dReal er = diff / STEPSIZE;    // estimated rate
+    last_angle = a;
+    // I'm not sure why the error is so large here.
+    return fabs(r - er) * 1e1;
+  }
+
+  case 702: {		// 2 body: angle 2 rate
+    static dReal last_angle = 0;
+    addOscillatingTorque (0.1);
+    dampRotationalMotion (0.1);
+    dReal a = dJointGetUniversalAngle2(joint);
+    dReal r = dJointGetUniversalAngle2Rate(joint);
+    dReal diff = a - last_angle;
+    if (diff > M_PI) diff -= 2*M_PI;
+    if (diff < -M_PI) diff += 2*M_PI;
+    dReal er = diff / STEPSIZE;    // estimated rate
+    last_angle = a;
+    // I'm not sure why the error is so large here.
+    return fabs(r - er) * 1e1;
+  }
+
+  case 720: {		// universal transmit torque test: constraint error
     dVector3 ax1, ax2;
     addOscillatingTorqueAbout (0.1, 1, 1, 0);
     dampRotationalMotion (0.1);
     dJointGetUniversalAxis1(joint, ax1);
     dJointGetUniversalAxis2(joint, ax2);
     return fabs(10*dDOT(ax1, ax2));
+  }
+
+  case 721: {		// universal transmit torque test: angle1 rate
+    static dReal last_angle = 0;
+    addOscillatingTorqueAbout (0.1, 1, 1, 0);
+    dampRotationalMotion (0.1);
+    dReal a = dJointGetUniversalAngle1(joint);
+    dReal r = dJointGetUniversalAngle1Rate(joint);
+    dReal diff = a - last_angle;
+    if (diff > M_PI) diff -= 2*M_PI;
+    if (diff < -M_PI) diff += 2*M_PI;
+    dReal er = diff / STEPSIZE;    // estimated rate
+    last_angle = a;
+    return fabs(r - er) * 1e10;
+  }
+
+  case 722: {		// universal transmit torque test: angle2 rate
+    static dReal last_angle = 0;
+    addOscillatingTorqueAbout (0.1, 1, 1, 0);
+    dampRotationalMotion (0.1);
+    dReal a = dJointGetUniversalAngle2(joint);
+    dReal r = dJointGetUniversalAngle2Rate(joint);
+    dReal diff = a - last_angle;
+    if (diff > M_PI) diff -= 2*M_PI;
+    if (diff < -M_PI) diff += 2*M_PI;
+    dReal er = diff / STEPSIZE;    // estimated rate
+    last_angle = a;
+    return fabs(r - er) * 1e10;
   }
 
   case 730:{
@@ -669,6 +735,38 @@ dReal doStuffAndGetError (int n)
     return fabs(10*dDOT(ax1, ax2));
   }
 
+  case 731:{
+    dVector3 ax1;
+    static dReal last_angle = 0;
+    dJointGetUniversalAxis1(joint, ax1);
+    addOscillatingTorqueAbout (0.1, ax1[0], ax1[1], ax1[2]);
+    dampRotationalMotion (0.1);
+    dReal a = dJointGetUniversalAngle1(joint);
+    dReal r = dJointGetUniversalAngle1Rate(joint);
+    dReal diff = a - last_angle;
+    if (diff > M_PI) diff -= 2*M_PI;
+    if (diff < -M_PI) diff += 2*M_PI;
+    dReal er = diff / STEPSIZE;    // estimated rate
+    last_angle = a;
+    return fabs(r - er) * 2e3;
+  }
+
+  case 732:{
+    dVector3 ax1;
+    static dReal last_angle = 0;
+    dJointGetUniversalAxis1(joint, ax1);
+    addOscillatingTorqueAbout (0.1, ax1[0], ax1[1], ax1[2]);
+    dampRotationalMotion (0.1);
+    dReal a = dJointGetUniversalAngle2(joint);
+    dReal r = dJointGetUniversalAngle2Rate(joint);
+    dReal diff = a - last_angle;
+    if (diff > M_PI) diff -= 2*M_PI;
+    if (diff < -M_PI) diff += 2*M_PI;
+    dReal er = diff / STEPSIZE;    // estimated rate
+    last_angle = a;
+    return fabs(r - er) * 1e10;
+  }
+
   case 740:{
     dVector3 ax1, ax2;
     dJointGetUniversalAxis1(joint, ax1);
@@ -676,6 +774,38 @@ dReal doStuffAndGetError (int n)
     addOscillatingTorqueAbout (0.1, ax2[0], ax2[1], ax2[2]);
     dampRotationalMotion (0.1);
     return fabs(10*dDOT(ax1, ax2));
+  }
+
+  case 741:{
+    dVector3 ax2;
+    static dReal last_angle = 0;
+    dJointGetUniversalAxis2(joint, ax2);
+    addOscillatingTorqueAbout (0.1, ax2[0], ax2[1], ax2[2]);
+    dampRotationalMotion (0.1);
+    dReal a = dJointGetUniversalAngle1(joint);
+    dReal r = dJointGetUniversalAngle1Rate(joint);
+    dReal diff = a - last_angle;
+    if (diff > M_PI) diff -= 2*M_PI;
+    if (diff < -M_PI) diff += 2*M_PI;
+    dReal er = diff / STEPSIZE;    // estimated rate
+    last_angle = a;
+    return fabs(r - er) * 1e10;
+  }
+
+  case 742:{
+    dVector3 ax2;
+    static dReal last_angle = 0;
+    dJointGetUniversalAxis2(joint, ax2);
+    addOscillatingTorqueAbout (0.1, ax2[0], ax2[1], ax2[2]);
+    dampRotationalMotion (0.1);
+    dReal a = dJointGetUniversalAngle2(joint);
+    dReal r = dJointGetUniversalAngle2Rate(joint);
+    dReal diff = a - last_angle;
+    if (diff > M_PI) diff -= 2*M_PI;
+    if (diff < -M_PI) diff += 2*M_PI;
+    dReal er = diff / STEPSIZE;    // estimated rate
+    last_angle = a;
+    return fabs(r - er) * 1e4;
   }
   }
 

@@ -169,13 +169,18 @@ void dMassSetCylinder (dMass *m, dReal density, int direction,
 void dMassSetBox (dMass *m, dReal density,
 		  dReal lx, dReal ly, dReal lz)
 {
+  dMassSetBoxTotal(m, lx*ly*lz*density, lx, ly, lz);
+}
+
+void dMassSetBoxTotal (dMass *m, dReal total_mass,
+		  dReal lx, dReal ly, dReal lz)
+{
   dAASSERT (m);
   dMassSetZero (m);
-  dReal M = lx*ly*lz*density;
-  m->mass = M;
-  m->_I(0,0) = M/REAL(12.0) * (ly*ly + lz*lz);
-  m->_I(1,1) = M/REAL(12.0) * (lx*lx + lz*lz);
-  m->_I(2,2) = M/REAL(12.0) * (lx*lx + ly*ly);
+  m->mass = total_mass;
+  m->_I(0,0) = total_mass/REAL(12.0) * (ly*ly + lz*lz);
+  m->_I(1,1) = total_mass/REAL(12.0) * (lx*lx + lz*lz);
+  m->_I(2,2) = total_mass/REAL(12.0) * (lx*lx + ly*ly);
 
 # ifndef dNODEBUG
   checkMass (m);
