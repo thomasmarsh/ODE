@@ -49,41 +49,13 @@
 
 #ifdef __cplusplus
 
-/* authoritative block */
-PURE_INLINE float dDOT   (const float *a, const float *b) { return dDOTpq(a,b,1,1); }
-PURE_INLINE float dDOT13 (const float *a, const float *b) { return dDOTpq(a,b,1,3); }
-PURE_INLINE float dDOT31 (const float *a, const float *b) { return dDOTpq(a,b,3,1); }
-PURE_INLINE float dDOT33 (const float *a, const float *b) { return dDOTpq(a,b,3,3); }
-PURE_INLINE float dDOT14 (const float *a, const float *b) { return dDOTpq(a,b,1,4); }
-PURE_INLINE float dDOT41 (const float *a, const float *b) { return dDOTpq(a,b,4,1); }
-PURE_INLINE float dDOT44 (const float *a, const float *b) { return dDOTpq(a,b,4,4); }
-
-/* copy of authoritative block, with types changed */
-PURE_INLINE double dDOT   (const double *a, const double *b) { return dDOTpq(a,b,1,1); }
-PURE_INLINE double dDOT13 (const double *a, const double *b) { return dDOTpq(a,b,1,3); }
-PURE_INLINE double dDOT31 (const double *a, const double *b) { return dDOTpq(a,b,3,1); }
-PURE_INLINE double dDOT33 (const double *a, const double *b) { return dDOTpq(a,b,3,3); }
-PURE_INLINE double dDOT14 (const double *a, const double *b) { return dDOTpq(a,b,1,4); }
-PURE_INLINE double dDOT41 (const double *a, const double *b) { return dDOTpq(a,b,4,1); }
-PURE_INLINE double dDOT44 (const double *a, const double *b) { return dDOTpq(a,b,4,4); }
-
-/* copy of authoritative block, with types changed */
-PURE_INLINE double dDOT   (const float *a, const double *b) { return dDOTpq(a,b,1,1); }
-PURE_INLINE double dDOT13 (const float *a, const double *b) { return dDOTpq(a,b,1,3); }
-PURE_INLINE double dDOT31 (const float *a, const double *b) { return dDOTpq(a,b,3,1); }
-PURE_INLINE double dDOT33 (const float *a, const double *b) { return dDOTpq(a,b,3,3); }
-PURE_INLINE double dDOT14 (const float *a, const double *b) { return dDOTpq(a,b,1,4); }
-PURE_INLINE double dDOT41 (const float *a, const double *b) { return dDOTpq(a,b,4,1); }
-PURE_INLINE double dDOT44 (const float *a, const double *b) { return dDOTpq(a,b,4,4); }
-
-/* copy of authoritative block, with types changed */
-PURE_INLINE double dDOT   (const double *a, const float *b) { return dDOTpq(a,b,1,1); }
-PURE_INLINE double dDOT13 (const double *a, const float *b) { return dDOTpq(a,b,1,3); }
-PURE_INLINE double dDOT31 (const double *a, const float *b) { return dDOTpq(a,b,3,1); }
-PURE_INLINE double dDOT33 (const double *a, const float *b) { return dDOTpq(a,b,3,3); }
-PURE_INLINE double dDOT14 (const double *a, const float *b) { return dDOTpq(a,b,1,4); }
-PURE_INLINE double dDOT41 (const double *a, const float *b) { return dDOTpq(a,b,4,1); }
-PURE_INLINE double dDOT44 (const double *a, const float *b) { return dDOTpq(a,b,4,4); }
+PURE_INLINE dReal dDOT   (const dReal *a, const dReal *b) { return dDOTpq(a,b,1,1); }
+PURE_INLINE dReal dDOT13 (const dReal *a, const dReal *b) { return dDOTpq(a,b,1,3); }
+PURE_INLINE dReal dDOT31 (const dReal *a, const dReal *b) { return dDOTpq(a,b,3,1); }
+PURE_INLINE dReal dDOT33 (const dReal *a, const dReal *b) { return dDOTpq(a,b,3,3); }
+PURE_INLINE dReal dDOT14 (const dReal *a, const dReal *b) { return dDOTpq(a,b,1,4); }
+PURE_INLINE dReal dDOT41 (const dReal *a, const dReal *b) { return dDOTpq(a,b,4,1); }
+PURE_INLINE dReal dDOT44 (const dReal *a, const dReal *b) { return dDOTpq(a,b,4,4); }
 
 #else
 
