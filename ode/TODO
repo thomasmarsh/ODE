@@ -91,6 +91,9 @@ timer reporting function:
 on windows, make sure gcc-compiles libs can be linked with VC++ apps. need
 to make sure some C++ runtime bits are present.
 
+kill all references to dArray<> (in geom.cpp).
+
+
 ALWAYS
 ------
 

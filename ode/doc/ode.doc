@@ -4,7 +4,7 @@
 @author{Russell Smith, @date{}}
 
 @center{This document is Copyright &copy 2001 Russell Smith.}
-@center{This is a DRAFT document}
+@center{This is an UNFINISHED document}
 
 @chapter{Contents @nonumber @nocontents}
 @contents
@@ -80,8 +80,6 @@ Here are the features:
 @*	Other stuff I forgot to mention...
 }
 
-
-
 @section{New in the 0.02 release}
 
 @list{
@@ -92,23 +90,25 @@ Here are the features:
 @* Framework now in place for more contact modes, powered and limited joints.
 @* Moving-surface contact mode.
 @* Argument checking for all functions.
-@* Build on windows using VC++ and MinGW.
+@* Cross platform: build on windows using VC++ and MinGW, and linux.
 @* Various bugs fixed.
 }
 
+One current problem is that the @c{mu} parameter that controls Coulomb friction
+is not yet interpreted correctly - it specifies the maximum friction force
+that can be present at a contact, rather than specifying the maximum ratio of
+tangential to normal force. This will be fixed in the next release.
+[Note: I need lots more documentation about how the friction approximation
+works].
+
 
 @section{Future features}
-
-@subsection{Plan for 0.02 release}
-@list{
-@* Improve the approximation to Coloumb friction.
-@* Full cross platform build system and automatic configuration.
-}
 
 @subsection{Plan for 0.03 release}
 
 @list{
 @* Update documentation.
+@* Improve the approximation to Coloumb friction.
 @* High level functions that create dynamics and collision objects together.
 @* Special vehicle joints.
 @* Contact modes: bounce, soft, slip.
