@@ -3,7 +3,12 @@ TODO
 ----
 
 joints:
-	joint limit restitution and spongyness
+	joint limit spongyness
+		- erp and cfm for joint set from world (global) values when
+		  joint created.
+		- interacts with powered joints badly
+
+	joint limit restitution
 
 	hinge2 joint - implement trail, i.e. non-convergent steering and wheel
 	axes.
@@ -27,6 +32,8 @@ joints:
 	when attaching joints to static env, provision to move attachment
 	point (e.g. give it a linear/angular velocity). this can be used
 	instead of a FPFO joint on a body in many cases.
+	also do this with contacts to static env, to allow for contacts to
+	*moving* objects in the static env.
 
 	interpretation of erp: is it (1) the error reduction per timestep,
 	(2) or a time constant independent of timestep?? if it's (2) then
