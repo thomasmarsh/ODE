@@ -9,6 +9,12 @@ the rules for this file:
 
 ------------------------------------------------------------------------------
 
+11/26/01 russ
+
+	* added a new joint type: "angular motor". using this joint is a good
+	  way to get ball-joint motors and limits. this is work in progress -
+	  it has not been fully implemented or tested yet.
+
 11/22/01 russ
 
 	* replaced the mmap()-based joint group stack (stack.cpp) with a
