@@ -95,6 +95,7 @@ int main (int argc, char **argv)
   fn.step = &simLoop;
   fn.command = command;
   fn.stop = 0;
+  fn.path_to_textures = 0;	// uses default
 
   // run simulation
   dsSimulationLoop (argc,argv,600,600,&fn);
