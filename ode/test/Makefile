@@ -23,7 +23,7 @@
 MAKEFILE_INC=../../build/Makefile.inc
 include $(MAKEFILE_INC)
 
-APPNAMES = $(call fEXENAME,test_ode) $(call fEXENAME,test_chain1) $(call fEXENAME,test_chain2) $(call fEXENAME,test_hinge) $(call fEXENAME,test_slider) $(call fEXENAME,test_collision) $(call fEXENAME,test_boxstack) $(call fEXENAME,test_buggy) $(call fEXENAME,test_joints) $(call fEXENAME,test_space)
+APPNAMES = $(call fEXENAME,test_ode) $(call fEXENAME,test_chain1) $(call fEXENAME,test_chain2) $(call fEXENAME,test_hinge) $(call fEXENAME,test_slider) $(call fEXENAME,test_collision) $(call fEXENAME,test_boxstack) $(call fEXENAME,test_buggy) $(call fEXENAME,test_joints) $(call fEXENAME,test_space) $(call fEXENAME,test_I)
 
 INCLUDE_PATHS = ../../include
 LIB_PATHS = ../../lib
@@ -66,3 +66,6 @@ $(call fEXENAME,test_joints): $(call fTARGETS,test_joints.cpp)
 
 $(call fEXENAME,test_space): $(call fTARGETS,test_space.cpp)
 	$(call fLINK,$@,$(call fTARGETS,test_space.cpp) $(call fLIB,ode) $(call fLIB,drawstuff) $(LINKOPENGL) $(LINKWIN) $(LINKMATH) $(RSRC))
+
+$(call fEXENAME,test_I): $(call fTARGETS,test_I.cpp)
+	$(call fLINK,$@,$(call fTARGETS,test_I.cpp) $(call fLIB,ode) $(call fLIB,drawstuff) $(LINKOPENGL) $(LINKWIN) $(LINKMATH) $(RSRC))
