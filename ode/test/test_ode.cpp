@@ -293,7 +293,7 @@ void testSmallMatrixMultiply()
   dMakeRandomMatrix (A,3,3,1.0);
   dMakeRandomMatrix (B,3,3,1.0);
   dMakeRandomMatrix (C,3,3,1.0);
-  dMakeRandomMatrix (x,MSIZE,1,1.0);
+  dMakeRandomMatrix (x,3,1,1.0);
 
   // dMULTIPLY0_331()
   dMULTIPLY0_331 (a,B,x);
