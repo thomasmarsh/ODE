@@ -274,6 +274,10 @@ static dReal getHingeAngle (dxBody *body1, dxBody *body2, dVector3 axis,
   // the angle we get will be between 0..2*pi, but we want to return angles
   // between -pi..pi
   if (theta > M_PI) theta -= 2*M_PI;
+
+  // the angle we've just extracted has the wrong sign
+  theta = -theta;
+
   return theta;
 }
 
@@ -361,27 +365,30 @@ int dxJointLimitMotor::testRotationalLimit (dReal angle)
 }
 
 
-int dxJointLimitMotor::addRotationalLimot (dxJoint *joint,
-					   dxJoint::Info2 *info, int row,
-					   dVector3 ax1)
+int dxJointLimitMotor::addLimot (dxJoint *joint,
+				 dxJoint::Info2 *info, int row,
+				 dVector3 ax1, int rotational)
 {
   int srow = row * info->rowskip;
 
   // if the joint is powered, or has joint limits, add in the extra row
   int powered = fmax > 0;
   if (powered || limit) {
-    info->J1a[srow+0] = ax1[0];
-    info->J1a[srow+1] = ax1[1];
-    info->J1a[srow+2] = ax1[2];
+    dReal *J1 = rotational ? info->J1a : info->J1l;
+    dReal *J2 = rotational ? info->J2a : info->J2l;
+
+    J1[srow+0] = ax1[0];
+    J1[srow+1] = ax1[1];
+    J1[srow+2] = ax1[2];
     if (joint->node[1].body) {
-      info->J2a[srow+0] = -ax1[0];
-      info->J2a[srow+1] = -ax1[1];
-      info->J2a[srow+2] = -ax1[2];
+      J2[srow+0] = -ax1[0];
+      J2[srow+1] = -ax1[1];
+      J2[srow+2] = -ax1[2];
     }
 
     if (powered) {
       if (! limit) {
-	info->c[row] = -vel;
+	info->c[row] = vel;
 	info->lo[row] = -fmax;
 	info->hi[row] = fmax;
       }
@@ -396,104 +403,22 @@ int dxJointLimitMotor::addRotationalLimot (dxJoint *joint,
 	// a fudge factor.
 
 	dReal fm = fmax;
-	if (vel < 0) fm = -fm;
+	if (vel > 0) fm = -fm;
 
 	// if we're powering away from the limit, apply the fudge factor
 	if ((limit==1 && vel > 0) || (limit==2 && vel < 0)) fm *= fudge_factor;
 
-	dBodyAddTorque (joint->node[0].body,-fm*ax1[0],-fm*ax1[1],-fm*ax1[2]);
-	if (joint->node[1].body)
-	  dBodyAddTorque (joint->node[1].body,fm*ax1[0],fm*ax1[1],fm*ax1[2]);
-      }
-    }
-
-    if (limit) {
-      dReal k = info->fps * stop_erp;
-      info->c[row] = k * limit_err;
-      if (limit == 1) {
-	// low limit
-	info->lo[row] = -dInfinity;
-	info->hi[row] = 0;
-      }
-      else {
-	// high limit
-	info->lo[row] = 0;
-	info->hi[row] = dInfinity;
-      }
-      info->cfm[row] = stop_cfm;
-
-      // deal with bounce
-      if (bounce > 0) {
-	// calculate outgoing velocity (-ve for incoming contact)
-	dReal outgoing = -dDOT(joint->node[0].body->avel,ax1);
-	if (joint->node[1].body)
-	  outgoing += dDOT(joint->node[1].body->avel,ax1);
-
-	// only apply bounce if the velocity is incoming, and if the
-	// resulting c[] exceeds what we already have.
-	if (limit == 1) {
-	  // low limit
-	  if (outgoing < 0) {
-	    dReal newc = bounce * outgoing;
-	    if (newc < info->c[row]) {
-	      info->c[row] = newc;
-	      printf ("lo %f\n",outgoing);
-	    }
-	  }
+	if (rotational) {
+	  dBodyAddTorque (joint->node[0].body,-fm*ax1[0],-fm*ax1[1],
+			  -fm*ax1[2]);
+	  if (joint->node[1].body)
+	    dBodyAddTorque (joint->node[1].body,fm*ax1[0],fm*ax1[1],fm*ax1[2]);
 	}
 	else {
-	  // high limit - all those computations are reversed
-	  if (outgoing > 0) {
-	    dReal newc = bounce * outgoing;
-	    if (newc > info->c[row]) {
-	      info->c[row] = newc;
-	      printf ("hi %f\n",outgoing);
-	    }
-	  }
+	  dBodyAddForce (joint->node[0].body,-fm*ax1[0],-fm*ax1[1],-fm*ax1[2]);
+	  if (joint->node[1].body)
+	    dBodyAddForce (joint->node[1].body,fm*ax1[0],fm*ax1[1],fm*ax1[2]);
 	}
-      }
-    }
-    return 1;
-  }
-  else return 0;
-}
-
-
-void dxJointLimitMotor::addLinearLimot (dxJoint *joint, dxJoint::Info2 *info,
-					int row, dVector3 ax1)
-{
-  int srow = row * info->rowskip;
-
-  // if the joint is powered, or has joint limits, add in the extra row
-  int powered = fmax > 0;
-  if (powered || limit) {
-    info->J1l[srow+0] = ax1[0];
-    info->J1l[srow+1] = ax1[1];
-    info->J1l[srow+2] = ax1[2];
-    if (joint->node[1].body) {
-      info->J2l[srow+0] = -ax1[0];
-      info->J2l[srow+1] = -ax1[1];
-      info->J2l[srow+2] = -ax1[2];
-    }
-
-    if (powered) {
-      if (! limit) {
-        info->c[row] = vel;
-        info->lo[row] = -fmax;
-        info->hi[row] = fmax;
-      }
-      else {
-        // the joint is at a limit, AND is being powered. see the comment
-	// for the hinge.
-        dReal fm = fmax;
-        if (vel > 0) fm = -fm;
-
-	// if we're powering away from the limit, apply the fudge factor
-	if ((limit==1 && vel > 0) || (limit==2 && vel < 0)) fm *= fudge_factor;
-
-        dBodyAddForce (joint->node[0].body,-fm*ax1[0],-fm*ax1[1],-fm*ax1[2]);
-	if (joint->node[1].body)
-          dBodyAddForce (joint->node[1].body,fm*ax1[0],fm*ax1[1],fm*ax1[2]);
       }
     }
 
@@ -501,18 +426,51 @@ void dxJointLimitMotor::addLinearLimot (dxJoint *joint, dxJoint::Info2 *info,
       dReal k = info->fps * stop_erp;
       info->c[row] = -k * limit_err;
       if (limit == 1) {
-        // low limit
-        info->lo[row] = 0;
-        info->hi[row] = dInfinity;
+	// low limit
+	info->lo[row] = 0;
+	info->hi[row] = dInfinity;
       }
       else {
-        // high limit
-        info->lo[row] = -dInfinity;
-        info->hi[row] = 0;
+	// high limit
+	info->lo[row] = -dInfinity;
+	info->hi[row] = 0;
       }
       info->cfm[row] = stop_cfm;
+
+      // deal with bounce
+      if (bounce > 0) {
+	// calculate joint velocity
+	dReal vel;
+	if (rotational) {
+	  vel = dDOT(joint->node[0].body->avel,ax1);
+	  if (joint->node[1].body) vel -= dDOT(joint->node[1].body->avel,ax1);
+	}
+	else {
+	  vel = dDOT(joint->node[0].body->lvel,ax1);
+	  if (joint->node[1].body) vel -= dDOT(joint->node[1].body->lvel,ax1);
+	}
+
+	// only apply bounce if the velocity is incoming, and if the
+	// resulting c[] exceeds what we already have.
+	if (limit == 1) {
+	  // low limit
+	  if (vel < 0) {
+	    dReal newc = -bounce * vel;
+	    if (newc > info->c[row]) info->c[row] = newc;
+	  }
+	}
+	else {
+	  // high limit - all those computations are reversed
+	  if (vel > 0) {
+	    dReal newc = -bounce * vel;
+	    if (newc < info->c[row]) info->c[row] = newc;
+	  }
+	}
+      }
     }
+    return 1;
   }
+  else return 0;
 }
 
 //****************************************************************************
@@ -665,7 +623,7 @@ static void hingeGetInfo2 (dxJointHinge *joint, dxJoint::Info2 *info)
   info->c[4] = k * dDOT(b,q);
 
   // if the hinge is powered, or has joint limits, add in the stuff
-  joint->limot.addRotationalLimot (joint,info,5,ax1);
+  joint->limot.addLimot (joint,info,5,ax1,1);
 }
 
 
@@ -760,8 +718,8 @@ extern "C" dReal dJointGetHingeAngleRate (dxJointHinge *joint)
   if (joint->node[0].body) {
     dVector3 axis;
     dMULTIPLY0_331 (axis,joint->node[0].body->R,joint->axis1);
-    dReal rate = -dDOT(axis,joint->node[0].body->avel);
-    if (joint->node[1].body) rate += dDOT(axis,joint->node[1].body->avel);
+    dReal rate = dDOT(axis,joint->node[0].body->avel);
+    if (joint->node[1].body) rate -= dDOT(axis,joint->node[1].body->avel);
     return rate;
   }
   else return 0;
@@ -966,7 +924,7 @@ static void sliderGetInfo2 (dxJointSlider *joint, dxJoint::Info2 *info)
   }
 
   // if the slider is powered, or has joint limits, add in the extra row
-  joint->limot.addLinearLimot (joint,info,5,ax1);
+  joint->limot.addLimot (joint,info,5,ax1,0);
 }
 
 
@@ -1219,7 +1177,7 @@ static dReal measureHinge2Angle (dxJointHinge2 *joint)
   dMULTIPLY1_331 (a2,joint->node[0].body->R,a1);
   dReal x = dDOT(joint->v1,a2);
   dReal y = dDOT(joint->v2,a2);
-  return dAtan2 (y,x);
+  return -dAtan2 (y,x);
 }
 
 
@@ -1242,8 +1200,8 @@ static void hinge2Init (dxJointHinge2 *j)
   j->limot1.init (j->world);
   j->limot2.init (j->world);
 
-  j->susp_erp = 0.2;
-  j->susp_cfm = 0;
+  j->susp_erp = j->world->global_erp;
+  j->susp_cfm = j->world->global_cfm;;
 }
 
 
@@ -1323,10 +1281,10 @@ static void hinge2GetInfo2 (dxJointHinge2 *joint, dxJoint::Info2 *info)
   info->c[3] = k * (joint->c0 * s - joint->s0 * c);
 
   // if the axis1 hinge is powered, or has joint limits, add in more stuff
-  int row = 4 + joint->limot1.addRotationalLimot (joint,info,4,ax1);
+  int row = 4 + joint->limot1.addLimot (joint,info,4,ax1,1);
 
   // if the axis2 hinge is powered, add in more stuff
-  joint->limot2.addRotationalLimot (joint,info,row,ax2);
+  joint->limot2.addLimot (joint,info,row,ax2,1);
 
   // set parameter for the suspension
   info->cfm[0] = joint->susp_cfm;
@@ -1496,8 +1454,8 @@ extern "C" dReal dJointGetHinge2Angle1Rate (dxJointHinge2 *joint)
   if (joint->node[0].body) {
     dVector3 axis;
     dMULTIPLY0_331 (axis,joint->node[0].body->R,joint->axis1);
-    dReal rate = -dDOT(axis,joint->node[0].body->avel);
-    if (joint->node[1].body) rate += dDOT(axis,joint->node[1].body->avel);
+    dReal rate = dDOT(axis,joint->node[0].body->avel);
+    if (joint->node[1].body) rate -= dDOT(axis,joint->node[1].body->avel);
     return rate;
   }
   else return 0;
@@ -1511,8 +1469,8 @@ extern "C" dReal dJointGetHinge2Angle2Rate (dxJointHinge2 *joint)
   if (joint->node[0].body && joint->node[1].body) {
     dVector3 axis;
     dMULTIPLY0_331 (axis,joint->node[1].body->R,joint->axis2);
-    dReal rate = -dDOT(axis,joint->node[0].body->avel);
-    if (joint->node[1].body) rate += dDOT(axis,joint->node[1].body->avel);
+    dReal rate = dDOT(axis,joint->node[0].body->avel);
+    if (joint->node[1].body) rate -= dDOT(axis,joint->node[1].body->avel);
     return rate;
   }
   else return 0;
