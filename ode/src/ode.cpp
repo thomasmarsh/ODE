@@ -1115,6 +1115,59 @@ dJointFeedback *dJointGetFeedback (dxJoint *joint)
 }
 
 
+
+dJointID dConnectingJoint (dBodyID in_b1, dBodyID in_b2)
+{
+    dAASSERT (in_b1 || in_b2);
+
+	dBodyID b1, b2;
+
+	if (in_b1 == 0) {
+		b1 = in_b2;
+		b2 = in_b1;
+	}
+	else {
+		b1 = in_b1;
+		b2 = in_b2;
+	}
+		
+    // look through b1's neighbour list for b2
+    for (dxJointNode *n=b1->firstjoint; n; n=n->next) {
+        if (n->body == b2) return n->joint;
+    }
+
+    return 0;
+}
+
+
+
+int dConnectingJointList (dBodyID in_b1, dBodyID in_b2, dJointID* out_list)
+{
+    dAASSERT (in_b1 || in_b2);
+
+
+	dBodyID b1, b2;
+
+	if (in_b1 == 0) {
+		b1 = in_b2;
+		b2 = in_b1;
+	}
+	else {
+		b1 = in_b1;
+		b2 = in_b2;
+	}
+		
+    // look through b1's neighbour list for b2
+    int numConnectingJoints = 0;
+    for (dxJointNode *n=b1->firstjoint; n; n=n->next) {
+        if (n->body == b2)
+            out_list[numConnectingJoints++] = n->joint;
+    }
+
+    return numConnectingJoints;
+}
+
+
 int dAreConnected (dBodyID b1, dBodyID b2)
 {
   dAASSERT (b1 && b2);
