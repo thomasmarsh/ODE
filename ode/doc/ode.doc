@@ -101,7 +101,7 @@ Here are the features:
 	enough for quantitative engineering yet. Higher order integrators
 	will come later.
 @*	Choice of time stepping methods: either the standard ``big matrix''
-	method or the newer iterative StepFast method can be used.
+	method or the newer iterative QuickStep method can be used.
 @*	Contact and friction model: This is based on the Dantzig LCP solver
 	described by Baraff, although ODE implements a faster approximation
 	to the Coloumb friction model.
@@ -382,7 +382,7 @@ programs that come with it. Note the following things:
 @*	ODE with @func{dWorldStep()} makes heavy use of the stack for storing temporary values.
 	For very large systems several megabytes of stack can be used.
 	If you experience unexplained out-of-memory errors or data
-	corruption, especially on Windows, try increasing the stack size, or switching to @func{dWorldStepFast1()}.
+	corruption, especially on Windows, try increasing the stack size, or switching to @func{dWorldQuickStep()}.
 }
 
 #############################################################################
@@ -958,13 +958,6 @@ The default parameters are:
 
 
 @funcdef{
-void dWorldStep (dWorldID, dReal stepsize);
-}{
-Step the world.
-}
-
-
-@funcdef{
 void dWorldImpulseToForce (dWorldID, dReal stepsize,
 			   dReal ix, dReal iy, dReal iz, dVector3 force);
 }{
@@ -992,6 +985,67 @@ This deallocates some extra memory used by ODE that can not be deallocated
 using the normal destroy functions, e.g. @func{dWorldDestroy()}.
 You can use this function at the end of your application to prevent
 memory leak checkers from complaining about ODE.
+}
+
+
+@section{Stepping Functions}
+
+@funcdef{
+void dWorldStep (dWorldID, dReal stepsize);
+}{
+Step the world.
+This uses a "big matrix" method that takes time on the order of @m{m^3}
+and memory on the order of @m{m^2}, where @m{m} is the total number of constraint rows.
+
+For large systems this will use a lot of memory and be very slow.
+}
+
+
+@funcdef{
+void dWorldQuickStep (dWorldID, dReal stepsize);
+}{
+Step the world.
+This uses an iterative method that takes time on the order of @m{m*N}
+and memory on the order of @m{m}, where @m{m} is the total number of constraint rows
+and @m{N} is the number of iterations.
+
+For large systems this is a lot faster than @func{dWorldStep()},
+but it is less accurate.
+}
+
+
+@funcdef{
+void dWorldSetQuickStepNumIterations (dWorldID, int num);
+int dWorldGetQuickStepNumIterations (dWorldID);
+}{
+Set and get the number of iterations that the QuickStep method performs per step.
+More iterations will give a more accurate solution, but will take longer to compute.
+The default is 20 iterations.
+}
+
+
+@section{Contact Parameters}
+
+@funcdef{
+void dWorldSetContactMaxCorrectingVel (dWorldID, dReal vel);
+dReal dWorldGetContactMaxCorrectingVel (dWorldID);
+}{
+Set and get the maximum correcting velocity that contacts are allowed to generate.
+The default value is infinity (i.e. no limit).
+Reducing this value can help prevent "popping" of deeply embedded objects.
+}
+
+
+@funcdef{
+void dWorldSetContactSurfaceLayer (dWorldID, dReal depth);
+dReal dWorldGetContactSurfaceLayer (dWorldID);
+}{
+Set and get the depth of the surface layer around all geometry objects.
+Contacts are allowed to sink into the surface layer up to the given
+depth before coming to rest.
+The default value is zero.
+Increasing this to some small value (e.g. 0.001) can help prevent jittering problems
+due to contacts being repeatedly made and broken.
 }
 
 #############################################################################
@@ -2337,6 +2391,11 @@ wrapper for @func{dBodyAddTorque()}.
 
 #############################################################################
 @chapter{StepFast}
+
+@b{NOTE: The StepFast algorithm has been superceeded by the QuickStep algorithm:
+see the @func{dWorldQuickStep()} function.
+However, much of the following discussion also applies to QuickStep, except for
+the details of the method used.}
 
 ODE's @func{dWorldStep()} function currently uses a "big matrix" method to
 step the system. For some large systems this can be slow and can require
@@ -4645,7 +4704,7 @@ If you experience crashes when running large systems, try increasing the
 stack size.
 For example, the MS VC++ command line compiler accepts the @c{/Stack:num}
 flag to set the upper limit.
-Or switch to @func{dWorldStepFast1()}.
+Or switch to @func{dWorldQuickStep()}.
 
 @section{My simple rotating bodies are unstable!}
 

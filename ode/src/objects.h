@@ -73,6 +73,20 @@ struct dxAutoDisable {
 };
 
 
+// quick-step parameters
+struct dxQuickStepParameters {
+  int num_iterations;		// number of SOR iterations to perform
+  dReal w;			// the SOR over-relaxation parameter
+};
+
+
+// contact generation parameters
+struct dxContactParameters {
+  dReal max_vel;		// maximum correcting velocity
+  dReal min_depth;		// thickness of 'surface layer'
+};
+
+
 struct dxBody : public dObject {
   dxJointNode *firstjoint;	// list of attached joints
   int flags;			// some dxBodyFlagXXX flags
@@ -103,6 +117,8 @@ struct dxWorld : public dBase {
   dReal global_cfm;		// global costraint force mixing parameter
   dxAutoDisable adis;		// auto-disable parameters
   int adis_flag;		// auto-disable flag for new bodies
+  dxQuickStepParameters qs;
+  dxContactParameters contactp;
 };
 
 

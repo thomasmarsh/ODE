@@ -46,6 +46,21 @@ void dWorldStep (dWorldID, dReal stepsize);
 void dWorldImpulseToForce (dWorldID, dReal stepsize,
 			   dReal ix, dReal iy, dReal iz, dVector3 force);
 
+/* World QuickStep functions */
+
+void dWorldQuickStep (dWorldID w, dReal stepsize);
+void dWorldSetQuickStepNumIterations (dWorldID, int num);
+int dWorldGetQuickStepNumIterations (dWorldID);
+void dWorldSetQuickStepW (dWorldID, dReal param);
+dReal dWorldGetQuickStepW (dWorldID);
+
+/* World contact parameter functions */
+
+void dWorldSetContactMaxCorrectingVel (dWorldID, dReal vel);
+dReal dWorldGetContactMaxCorrectingVel (dWorldID);
+void dWorldSetContactSurfaceLayer (dWorldID, dReal depth);
+dReal dWorldGetContactSurfaceLayer (dWorldID);
+
 /* StepFast1 functions */
 
 void dWorldStepFast1(dWorldID, dReal stepsize, int maxiterations);

@@ -58,6 +58,7 @@ ODE_SRC = \
 	ode/src/ode.cpp \
 	ode/src/step.cpp \
 	ode/src/stepfast.cpp \
+	ode/src/quickstep.cpp \
 	ode/src/util.cpp \
 	ode/src/lcp.cpp \
 	ode/src/joint.cpp \

@@ -39,7 +39,7 @@
 
 // some constants
 
-#define NUM 20			// max number of objects
+#define NUM 100			// max number of objects
 #define DENSITY (5.0)		// density of all objects
 #define GPB 3			// maximum number of geometries per body
 #define MAX_CONTACTS 4		// maximum number of contact points per body
@@ -165,7 +165,7 @@ static void command (int cmd)
     dMatrix3 R;
     if (random_pos) {
       dBodySetPosition (obj[i].body,
-			dRandReal()*2-1,dRandReal()*2-1,dRandReal()+1);
+			dRandReal()*2-1,dRandReal()*2-1,dRandReal()+2);
       dRFromAxisAndAngle (R,dRandReal()*2.0-1.0,dRandReal()*2.0-1.0,
 			  dRandReal()*2.0-1.0,dRandReal()*10.0-5.0);
     }
@@ -360,7 +360,7 @@ static void simLoop (int pause)
 {
   dsSetColor (0,0,2);
   dSpaceCollide (space,0,&nearCallback);
-  if (!pause) dWorldStep (world,0.05);
+  if (!pause) dWorldQuickStep (world,0.05);
 
   if (write_world) {
     FILE *f = fopen ("state.dif","wt");
@@ -382,7 +382,7 @@ static void simLoop (int pause)
 	dsSetColor (0,0.7,1);
       }
       else if (! dBodyIsEnabled (obj[i].body)) {
-	dsSetColor (1,0,0);
+	dsSetColor (1,0.8,0);
       }
       else {
 	dsSetColor (1,1,0);
@@ -412,6 +412,8 @@ int main (int argc, char **argv)
   dWorldSetGravity (world,0,0,-0.5);
   dWorldSetCFM (world,1e-5);
   dWorldSetAutoDisableFlag (world,1);
+  dWorldSetContactMaxCorrectingVel (world,0.1);
+  dWorldSetContactSurfaceLayer (world,0.001);
   dCreatePlane (space,0,0,1,0);
   memset (obj,0,sizeof(obj));
 

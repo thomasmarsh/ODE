@@ -20,19 +20,14 @@
  *                                                                       *
  *************************************************************************/
 
-#ifndef _ODE_UTIL_H_
-#define _ODE_UTIL_H_
+#ifndef _ODE_QUICK_STEP_H_
+#define _ODE_QUICK_STEP_H_
 
-#include "objects.h"
+#include <ode/common.h>
 
 
-void dInternalHandleAutoDisabling (dxWorld *world, dReal stepsize);
-void dxStepBody (dxBody *b, dReal h);
-
-typedef void (*dstepper_fn_t) (dxWorld *world, dxBody * const *body, int nb,
-        dxJoint * const *_joint, int nj, dReal stepsize);
-
-void dxProcessIslands (dxWorld *world, dReal stepsize, dstepper_fn_t stepper);
+void dxQuickStepper (dxWorld *world, dxBody * const *body, int nb,
+		     dxJoint * const *_joint, int nj, dReal stepsize);
 
 
 #endif
