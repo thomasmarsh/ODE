@@ -1,6 +1,6 @@
 THIS_DIR=./
 DEL_CMD=rm -f
-CC=gcc
+CC=g++
 OBJ=.o
 C_FLAGS=-c -Wall -fno-rtti -fno-exceptions -Wall
 C_INC=-I

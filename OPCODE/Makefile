@@ -52,9 +52,9 @@ clean:
 	-rm -f *.o Ice/*.o libopcode.a
 
 %.o : %.cpp
-	gcc -c -o $@ -g -O2 -I. -fno-rtti -fno-exceptions $<
+	g++ -c -o $@ -g -O1 -I. -fno-rtti -fno-exceptions $<
 
 depend:
-	gcc -MM -I. $(SRC) > Dependencies
+	g++ -MM -I. $(SRC) > Dependencies
 
 include Dependencies
