@@ -693,6 +693,18 @@ void dJointAttach (dxJoint *joint, dxBody *body1, dxBody *body2)
 }
 
 
+void dJointSetData (dxJoint *joint, void *data)
+{
+  joint->userdata = data;
+}
+
+
+void *dJointGetData (dxJoint *joint)
+{
+  return joint->userdata;
+}
+
+
 int dAreConnected (dBodyID b1, dBodyID b2)
 {
   dAASSERT (b1 && b2);
@@ -714,6 +726,14 @@ dxWorld * dWorldCreate()
   w->nb = 0;
   w->nj = 0;
   dSetZero (w->gravity,4);
+  w->global_erp = REAL(0.2);
+#if defined(dSINGLE)
+  w->global_cfm = 1e-5;
+#elif defined(dDOUBLE)
+  w->global_cfm = 1e-10;
+#else
+  #error dSINGLE or dDOUBLE must be defined
+#endif
   return w;
 }
 
@@ -758,6 +778,30 @@ void dWorldGetGravity (dWorldID w, dVector3 g)
   g[0] = w->gravity[0];
   g[1] = w->gravity[1];
   g[2] = w->gravity[2];
+}
+
+
+void dWorldSetERP (dWorldID w, dReal erp)
+{
+  w->global_erp = erp;
+}
+
+
+dReal dWorldGetERP (dWorldID w)
+{
+  return w->global_erp;
+}
+
+
+void dWorldSetCFM (dWorldID w, dReal cfm)
+{
+  w->global_cfm = cfm;
+}
+
+
+dReal dWorldGetCFM (dWorldID w)
+{
+  return w->global_cfm;
 }
 
 
