@@ -57,7 +57,15 @@ why didn't i just use GNU autoconf? :
 #include <stdio.h>
 #include <stdlib.h>
 
-int unlink (char *pathname);
+#ifndef unlink
+#ifdef __cplusplus
+extern "C" {
+#endif
+int unlink (const char *pathname);
+#ifdef __cplusplus
+}
+#endif
+#endif
 
 /****************************************************************************/
 /* project constants */
