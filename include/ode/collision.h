@@ -1,6 +1,6 @@
 /*************************************************************************
  *                                                                       *
- * Open Dynamics Engine, Copyright (C) 2001,2002 Russell L. Smith.       *
+ * Open Dynamics Engine, Copyright (C) 2001-2003 Russell L. Smith.       *
  * All rights reserved.  Email: russ@q12.org   Web: www.q12.org          *
  *                                                                       *
  * This library is free software; you can redistribute it and/or         *
@@ -88,7 +88,8 @@ enum {
   dFirstSpaceClass,
   dSimpleSpaceClass = dFirstSpaceClass,
   dHashSpaceClass,
-  dLastSpaceClass = dHashSpaceClass,
+  dQuadTreeSpaceClass,
+  dLastSpaceClass = dQuadTreeSpaceClass,
 
   dFirstUserClass,
   dLastUserClass = dFirstUserClass + dMaxUserClasses - 1,
@@ -122,6 +123,16 @@ dReal dGeomRayGetLength (dGeomID ray);
 void dGeomRaySet (dGeomID ray, dReal px, dReal py, dReal pz,
 		  dReal dx, dReal dy, dReal dz);
 void dGeomRayGet (dGeomID ray, dVector3 start, dVector3 dir);
+
+/*
+ * Set/get ray flags that influence ray collision detection.
+ * These flags are currently only noticed by the trimesh collider, because
+ * they can make a major differences there.
+ */
+void dGeomRaySetParams (dGeomID g, int FirstContact, int BackfaceCull);
+void dGeomRayGetParams (dGeomID g, int *FirstContact, int *BackfaceCull);
+
+#include "collision_trimesh.h"
 
 /* for backward compatibility */
 dGeomID dCreateGeomGroup (dSpaceID space);

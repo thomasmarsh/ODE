@@ -1,6 +1,6 @@
 /*************************************************************************
  *                                                                       *
- * Open Dynamics Engine, Copyright (C) 2001,2002 Russell L. Smith.       *
+ * Open Dynamics Engine, Copyright (C) 2001-2003 Russell L. Smith.       *
  * All rights reserved.  Email: russ@q12.org   Web: www.q12.org          *
  *                                                                       *
  * This library is free software; you can redistribute it and/or         *
@@ -536,7 +536,7 @@ static void drawSphereShadow (float px, float py, float pz, float radius)
 }
 
 
-static void drawTriangle (const float *v0, const float *v1, const float *v2)
+static void drawTriangle (const float *v0, const float *v1, const float *v2, int solid)
 {
   float u[3],v[3],normal[3];
   u[0] = v1[0] - v0[0];
@@ -548,7 +548,7 @@ static void drawTriangle (const float *v0, const float *v1, const float *v2)
   dCROSS (normal,=,u,v);
   normalizeVector3 (normal);
 
-  glBegin(GL_TRIANGLES);
+  glBegin(solid ? GL_TRIANGLES : GL_LINE_STRIP);
   glNormal3fv (normal);
   glVertex3fv (v0);
   glVertex3fv (v1);
@@ -1304,13 +1304,13 @@ extern "C" void dsDrawSphere (const float pos[3], const float R[12],
 
 extern "C" void dsDrawTriangle (const float pos[3], const float R[12],
 				const float *v0, const float *v1,
-				const float *v2)
+				const float *v2, int solid)
 {
   if (current_state != 2) dsError ("drawing function called outside simulation loop");
   setupDrawingMode();
   glShadeModel (GL_FLAT);
   setTransform (pos,R);
-  drawTriangle (v0, v1, v2);
+  drawTriangle (v0, v1, v2, solid);
   glPopMatrix();
 }
 
@@ -1397,13 +1397,13 @@ void dsDrawSphereD (const double pos[3], const double R[12], float radius)
 
 extern "C" void dsDrawTriangleD (const double pos[3], const double R[12],
 				 const float *v0, const float *v1,
-				 const float *v2)
+				 const float *v2, int solid)
 {
   int i;
   float pos2[3],R2[12];
   for (i=0; i<3; i++) pos2[i]=(float)pos[i];
   for (i=0; i<12; i++) R2[i]=(float)R[i];
-  dsDrawTriangle (pos2,R2,v0,v1,v2);
+  dsDrawTriangle (pos2,R2,v0,v1,v2, solid);
 }
 
 

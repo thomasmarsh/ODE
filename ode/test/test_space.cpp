@@ -1,6 +1,6 @@
 /*************************************************************************
  *                                                                       *
- * Open Dynamics Engine, Copyright (C) 2001,2002 Russell L. Smith.       *
+ * Open Dynamics Engine, Copyright (C) 2001-2003 Russell L. Smith.       *
  * All rights reserved.  Email: russ@q12.org   Web: www.q12.org          *
  *                                                                       *
  * This library is free software; you can redistribute it and/or         *
@@ -203,9 +203,18 @@ int main (int argc, char **argv)
   fn.stop = 0;
   fn.path_to_textures = "../../drawstuff/textures";
 
+  // test the simple space:
   // space = dSimpleSpaceCreate();
-  space = dHashSpaceCreate (0);
-  dHashSpaceSetLevels (space,-10,10);
+
+  // test the hash space:
+  // space = dHashSpaceCreate (0);
+  // dHashSpaceSetLevels (space,-10,10);
+
+  // test the quadtree space
+  dVector3 Center = {0, 0, 0, 0};
+  dVector3 Extents = {10, 0, 10, 0};
+  space = dQuadTreeSpaceCreate(0, Center, Extents, 7);
+
   for (i=0; i < NUM; i++) geom[i] = 0;
   init_test();
 

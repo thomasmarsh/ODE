@@ -1,6 +1,6 @@
 /*************************************************************************
  *                                                                       *
- * Open Dynamics Engine, Copyright (C) 2001,2002 Russell L. Smith.       *
+ * Open Dynamics Engine, Copyright (C) 2001-2003 Russell L. Smith.       *
  * All rights reserved.  Email: russ@q12.org   Web: www.q12.org          *
  *                                                                       *
  * This library is free software; you can redistribute it and/or         *
@@ -126,7 +126,7 @@ void dsSetColorAlpha (float red, float green, float blue, float alpha);
 void dsDrawBox (const float pos[3], const float R[12], const float sides[3]);
 void dsDrawSphere (const float pos[3], const float R[12], float radius);
 void dsDrawTriangle (const float pos[3], const float R[12],
-		     const float *v0, const float *v1, const float *v2);
+		     const float *v0, const float *v1, const float *v2, int solid);
 void dsDrawCylinder (const float pos[3], const float R[12],
 		     float length, float radius);
 void dsDrawCappedCylinder (const float pos[3], const float R[12],
@@ -141,7 +141,7 @@ void dsDrawBoxD (const double pos[3], const double R[12],
 void dsDrawSphereD (const double pos[3], const double R[12],
 		    const float radius);
 void dsDrawTriangleD (const double pos[3], const double R[12],
-		      const float *v0, const float *v1, const float *v2);
+		      const float *v0, const float *v1, const float *v2, int solid);
 void dsDrawCylinderD (const double pos[3], const double R[12],
 		      float length, float radius);
 void dsDrawCappedCylinderD (const double pos[3], const double R[12],

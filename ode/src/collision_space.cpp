@@ -1,6 +1,6 @@
 /*************************************************************************
  *                                                                       *
- * Open Dynamics Engine, Copyright (C) 2001,2002 Russell L. Smith.       *
+ * Open Dynamics Engine, Copyright (C) 2001-2003 Russell L. Smith.       *
  * All rights reserved.  Email: russ@q12.org   Web: www.q12.org          *
  *                                                                       *
  * This library is free software; you can redistribute it and/or         *
@@ -32,61 +32,9 @@ spaces
 #include <ode/collision.h>
 #include "collision_kernel.h"
 
+#include "collision_space_internal.h"
+
 //****************************************************************************
-// stuff common to all spaces
-
-#define ALLOCA(x) dALLOCA16(x)
-
-#define CHECK_NOT_LOCKED(space) \
-  dUASSERT ((space)==0 || (space)->lock_count==0, \
-	    "invalid operation for locked space");
-
-
-// collide two geoms together. for the hash table space, this is
-// called if the two AABBs inhabit the same hash table cells.
-// this only calls the callback function if the AABBs actually
-// intersect. if a geom has an AABB test function, that is called to
-// provide a further refinement of the intersection.
-//
-// NOTE: this assumes that the geom AABBs are valid on entry
-
-static void collideAABBs (dxGeom *g1, dxGeom *g2,
-			  void *data, dNearCallback *callback)
-{
-  dIASSERT((g1->gflags & GEOM_AABB_BAD)==0);
-  dIASSERT((g2->gflags & GEOM_AABB_BAD)==0);
-
-  // no contacts if both geoms on the same body, and the body is not 0
-  if (g1->body == g2->body && g1->body) return;
-
-  // test if the category and collide bitfields match
-  if ( ((g1->category_bits & g2->collide_bits) ||
-	(g2->category_bits & g1->collide_bits)) == 0) {
-    return;
-  }
-
-  // if the bounding boxes are disjoint then don't do anything
-  dReal *bounds1 = g1->aabb;
-  dReal *bounds2 = g2->aabb;
-  if (bounds1[0] > bounds2[1] ||
-      bounds1[1] < bounds2[0] ||
-      bounds1[2] > bounds2[3] ||
-      bounds1[3] < bounds2[2] ||
-      bounds1[4] > bounds2[5] ||
-      bounds1[5] < bounds2[4]) {
-    return;
-  }
-
-  // check if either object is able to prove that it doesn't intersect the
-  // AABB of the other
-  if (g1->AABBTest (g2,bounds2) == 0) return;
-  if (g2->AABBTest (g1,bounds1) == 0) return;
-
-  // the objects might actually intersect - call the space callback function
-  callback (data,g1,g2);
-}
-
-
 // make the geom dirty by setting the GEOM_DIRTY and GEOM_BAD_AABB flags
 // and moving it to the front of the space's list. all the parents of a
 // dirty geom also become dirty.
@@ -102,8 +50,7 @@ void dGeomMoved (dxGeom *geom)
   while (parent && (geom->gflags & GEOM_DIRTY)==0) {
     CHECK_NOT_LOCKED (parent);
     geom->gflags |= GEOM_DIRTY | GEOM_AABB_BAD;
-    geom->spaceRemove();
-    geom->spaceAdd (&parent->first);
+    parent->dirty (geom);
     geom = parent;
     parent = parent->parent_space;
   }
@@ -116,6 +63,8 @@ void dGeomMoved (dxGeom *geom)
     geom = geom->parent_space;
   }
 }
+
+#define GEOM_ENABLED(g) ((g)->gflags & GEOM_ENABLED)
 
 //****************************************************************************
 // dxSpace
@@ -269,6 +218,13 @@ void dxSpace::remove (dxGeom *geom)
   dGeomMoved (this);
 }
 
+
+void dxSpace::dirty (dxGeom *geom)
+{
+  geom->spaceRemove();
+  geom->spaceAdd (&first);
+}
+
 //****************************************************************************
 // simple space - reports all n^2 object intersections
 
@@ -310,8 +266,12 @@ void dxSimpleSpace::collide (void *data, dNearCallback *callback)
 
   // intersect all bounding boxes
   for (dxGeom *g1=first; g1; g1=g1->next) {
-    for (dxGeom *g2=g1->next; g2; g2=g2->next) {
-      collideAABBs (g1,g2,data,callback);
+    if (GEOM_ENABLED(g1)){
+      for (dxGeom *g2=g1->next; g2; g2=g2->next) {
+	if (GEOM_ENABLED(g2)){
+	  collideAABBs (g1,g2,data,callback);
+	}
+      }
     }
   }
 
@@ -330,7 +290,9 @@ void dxSimpleSpace::collide2 (void *data, dxGeom *geom,
 
   // intersect bounding boxes
   for (dxGeom *g=first; g; g=g->next) {
-    collideAABBs (g,geom,data,callback);
+    if (GEOM_ENABLED(g)){
+      collideAABBs (g,geom,data,callback);
+    }
   }
 
   lock_count--;
@@ -478,6 +440,9 @@ void dxHashSpace::collide (void *data, dNearCallback *callback)
   dxAABB *big_boxes = 0;	// list of AABBs too big for hash table
   maxlevel = global_minlevel - 1;
   for (geom = first; geom; geom=geom->next) {
+    if (!GEOM_ENABLED(geom)){
+      continue;
+    }
     dxAABB *aabb = (dxAABB*) ALLOCA (sizeof(dxAABB));
     aabb->geom = geom;
     // compute level, but prevent cells from getting too small
