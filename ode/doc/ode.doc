@@ -2805,10 +2805,12 @@ automatically destroyed as well.
 @funcdef{
 void dSpaceAdd (dSpaceID, dGeomID);
 void dSpaceRemove (dSpaceID, dGeomID);
+int dSpaceQuery (dSpaceID, dGeomID);
 }{
-Add and remove geometry objects to/from the space.
-These functions may be called by the geometry object creation/deletion
-functions.
+The first two functions add and remove geometry objects to/from the space.
+They may be called by the geometry object creation/deletion functions.
+@c{dSpaceQuery()} will return 1 if the given geometry object is in the given
+space, 0 if not. It is provided for convenience.
 }
 
 
