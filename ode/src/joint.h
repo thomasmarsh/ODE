@@ -131,8 +131,7 @@ struct dxJointLimitMotor {
   void init();
   void set (int num, dReal value);
   dReal get (int num);
-  int testRotationalLimit (dxBody *body1, dxBody *body2,
-			   dVector3 axis1, dQuaternion qrel);
+  int testRotationalLimit (dReal angle);
   void addRotationalLimot (dxJoint *joint, dxJoint::Info2 *info, int row,
 			   dVector3 ax1);
   void addLinearLimot (dxJoint *joint, dxJoint::Info2 *info, int row,
@@ -192,6 +191,9 @@ struct dxJointHinge2 : public dxJoint {
   dVector3 axis1;		// axis 1 w.r.t first body
   dVector3 axis2;		// axis 2 w.r.t second body
   dReal c0,s0;			// cos,sin of desired angle between axis 1,2
+  dVector3 v1,v2;		// angle ref vectors embedded in first body
+  dxJointLimitMotor limot1;	// limit+motor info for axis 1
+  dxJointLimitMotor limot2;	// limit+motor info for axis 2
 };
 extern struct dxJoint::Vtable __dhinge2_vtable;
 
