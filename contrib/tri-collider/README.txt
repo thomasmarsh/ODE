@@ -1,3 +1,11 @@
+
+As of June 30 2003 the TriMesh geometry class support was moved into the
+ODE core, so this code is now DEPRECATED, and is only here for historical
+purposes.
+
+Russ.
+
+-----------------------------------------------------------------------------
 24-6-2002
 
 Trianglecollider by Erwin de Vries (erwin@vo.com) for use with ODE 0.03
