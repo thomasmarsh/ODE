@@ -118,10 +118,10 @@ static void command (int cmd)
     speed -= 0.3;
     break;
   case ',':
-    steer += 0.5;
+    steer -= 0.5;
     break;
   case '.':
-    steer -= 0.5;
+    steer += 0.5;
     break;
   case ' ':
     speed = 0;
@@ -138,7 +138,7 @@ static void simLoop (int pause)
   int i;
   if (!pause) {
     // motor
-    dJointSetHinge2Param (joint[0],dParamVel2,speed);
+    dJointSetHinge2Param (joint[0],dParamVel2,-speed);
     dJointSetHinge2Param (joint[0],dParamFMax2,0.1);
 
     // steering
@@ -147,14 +147,10 @@ static void simLoop (int pause)
     if (v < -0.1) v = -0.1;
     v *= 10.0;
     dJointSetHinge2Param (joint[0],dParamVel,v);
-    dJointSetHinge2Param (joint[0],dParamFMax,0); //.2);    //@@@
+    dJointSetHinge2Param (joint[0],dParamFMax,0.2);
     dJointSetHinge2Param (joint[0],dParamLoStop,-0.75);
     dJointSetHinge2Param (joint[0],dParamHiStop,0.75);
     dJointSetHinge2Param (joint[0],dParamFudgeFactor,0.1);
-    dJointSetHinge2Param (joint[0],dParamStopERP,0.01);     //@@@
-    dJointSetHinge2Param (joint[0],dParamStopCFM,100.0);    //@@@
-
-    dBodyAddTorque (body[1],0,0,-0.001);                    //@@@
 
     dSpaceCollide (space,0,&nearCallback);
     dWorldStep (world,0.05);
