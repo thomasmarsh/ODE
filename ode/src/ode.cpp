@@ -369,7 +369,7 @@ void dBodySetPosition (dBodyID b, dReal x, dReal y, dReal z)
 }
 
 
-void dBodySetRotation   (dBodyID b, dMatrix3 R)
+void dBodySetRotation (dBodyID b, const dMatrix3 R)
 {
   dCHECKPTR(b);
   dCHECKPTR(R);
@@ -384,7 +384,7 @@ void dBodySetRotation   (dBodyID b, dMatrix3 R)
 }
 
 
-void dBodySetQuaternion (dBodyID b, dQuaternion q)
+void dBodySetQuaternion (dBodyID b, const dQuaternion q)
 {
   dCHECKPTR(b);
   dCHECKPTR(q);
@@ -415,42 +415,42 @@ void dBodySetAngularVel (dBodyID b, dReal x, dReal y, dReal z)
 }
 
 
-dReal * dBodyGetPosition (dBodyID b)
+const dReal * dBodyGetPosition (dBodyID b)
 {
   dCHECKPTR(b);
   return b->pos;
 }
 
 
-dReal * dBodyGetRotation (dBodyID b)
+const dReal * dBodyGetRotation (dBodyID b)
 {
   dCHECKPTR(b);
   return b->R;
 }
 
 
-dReal * dBodyGetQuaternion (dBodyID b)
+const dReal * dBodyGetQuaternion (dBodyID b)
 {
   dCHECKPTR(b);
   return b->q;
 }
 
 
-dReal * dBodyGetLinearVel (dBodyID b)
+const dReal * dBodyGetLinearVel (dBodyID b)
 {
   dCHECKPTR(b);
   return b->lvel;
 }
 
 
-dReal * dBodyGetAngularVel (dBodyID b)
+const dReal * dBodyGetAngularVel (dBodyID b)
 {
   dCHECKPTR(b);
   return b->avel;
 }
 
 
-void dBodySetMass (dBodyID b, dMass *mass)
+void dBodySetMass (dBodyID b, const dMass *mass)
 {
   dCHECKPTR(b);
   dCHECKPTR(mass);
@@ -574,7 +574,7 @@ dxJoint * dJointCreateSlider (dWorldID w, dJointGroupID group)
 
 
 dxJoint * dJointCreateContact (dWorldID w, dJointGroupID group,
-			       dContact *c)
+			       const dContact *c)
 {
   dxJointContact *j = (dxJointContact *)
     createJoint (w,group,&dcontact_vtable);

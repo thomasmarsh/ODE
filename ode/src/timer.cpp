@@ -253,22 +253,22 @@ static void initSlots()
 }
 
 
-void dTimerStart (char *description)
+void dTimerStart (const char *description)
 {
   initSlots();
-  event[0].description = description;
+  event[0].description = const_cast<char*> (description);
   num = 1;
   serialize();
   getClockCount (event[0].cc);
 }
 
 
-void dTimerNow (char *description)
+void dTimerNow (const char *description)
 {
   if (num < MAXNUM) {
     // do not serialize
     getClockCount (event[num].cc);
-    event[num].description = description;
+    event[num].description = const_cast<char*> (description);
     num++;
   }
 }

@@ -196,7 +196,7 @@ void dMassTranslate (dMass *m, dReal x, dReal y, dReal z)
 }
 
 
-void dMassRotate (dMass *m, dMatrix3 R)
+void dMassRotate (dMass *m, const dMatrix3 R)
 {
   // if the body is rotated by `R' relative to its point of reference,
   // the new inertia about the point of reference is:

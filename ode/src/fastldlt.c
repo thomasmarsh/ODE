@@ -1,6 +1,6 @@
 /* generated code, do not edit. */
 
-#include "ode/common.h"
+#include "ode/matrix.h"
 
 /* solve L*X=B, with B containing 1 right hand sides.
  * L is an n*n lower triangular matrix with ones on the diagonal.
@@ -12,10 +12,11 @@
  * if this is in the factorizer source file, n must be a multiple of 2.
  */
 
-static void dSolveL1_1 (dReal *L, dReal *B, int n, int lskip1)
+static void dSolveL1_1 (const dReal *L, dReal *B, int n, int lskip1)
 {  
   /* declare variables - Z matrix, p and q vectors, etc */
-  dReal Z11,m11,Z21,m21,p1,q1,p2,*ell,*ex;
+  dReal Z11,m11,Z21,m21,p1,q1,p2,*ex;
+  const dReal *ell;
   int i,j;
   /* compute all 2 x 1 blocks of X */
   for (i=0; i < n; i+=2) {
@@ -83,10 +84,11 @@ static void dSolveL1_1 (dReal *L, dReal *B, int n, int lskip1)
  * if this is in the factorizer source file, n must be a multiple of 2.
  */
 
-static void dSolveL1_2 (dReal *L, dReal *B, int n, int lskip1)
+static void dSolveL1_2 (const dReal *L, dReal *B, int n, int lskip1)
 {  
   /* declare variables - Z matrix, p and q vectors, etc */
-  dReal Z11,m11,Z12,m12,Z21,m21,Z22,m22,p1,q1,p2,q2,*ell,*ex;
+  dReal Z11,m11,Z12,m12,Z21,m21,Z22,m22,p1,q1,p2,q2,*ex;
+  const dReal *ell;
   int i,j;
   /* compute all 2 x 2 blocks of X */
   for (i=0; i < n; i+=2) {

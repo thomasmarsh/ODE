@@ -1,11 +1,11 @@
 /* generated code, do not edit. */
 
-#include "ode/common.h"
+#include "ode/matrix.h"
 
 
-dReal dDot (dReal *a, dReal *b, int n)
+dReal dDot (const dReal *a, const dReal *b, int n)
 {  
-  dReal p,q,p0,q0,m0,p1,q1,m1,sum;
+  dReal p0,q0,m0,p1,q1,m1,sum;
   sum = 0;
   n -= 2;
   while (n >= 0) {

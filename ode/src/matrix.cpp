@@ -47,14 +47,15 @@ void dSetValue (dReal *a, int n, dReal value)
 }
 
 
-void dMultiply0 (dReal *A, dReal *B, dReal *C, int p, int q, int r)
+void dMultiply0 (dReal *A, const dReal *B, const dReal *C, int p, int q, int r)
 {
   int i,j,k,qskip,rskip,rpad;
   dASSERT (p>0 && q>0 && r>0 && A && B && C);
   qskip = dPAD(q);
   rskip = dPAD(r);
   rpad = rskip - r;
-  dReal sum,*b,*c,*bb;
+  dReal sum;
+  const dReal *b,*c,*bb;
   bb = B;
   for (i=p; i; i--) {
     for (j=0 ; j<r; j++) {
@@ -70,7 +71,7 @@ void dMultiply0 (dReal *A, dReal *B, dReal *C, int p, int q, int r)
 }
 
 
-void dMultiply1 (dReal *A, dReal *B, dReal *C, int p, int q, int r)
+void dMultiply1 (dReal *A, const dReal *B, const dReal *C, int p, int q, int r)
 {
   int i,j,k,pskip,rskip;
   dReal sum;
@@ -87,10 +88,11 @@ void dMultiply1 (dReal *A, dReal *B, dReal *C, int p, int q, int r)
 }
 
 
-void dMultiply2 (dReal *A, dReal *B, dReal *C, int p, int q, int r)
+void dMultiply2 (dReal *A, const dReal *B, const dReal *C, int p, int q, int r)
 {
   int i,j,k,z,rpad,qskip;
-  dReal sum,*bb,*cc;
+  dReal sum;
+  const dReal *bb,*cc;
   dASSERT (p>0 && q>0 && r>0 && A && B && C);
   rpad = dPAD(r) - r;
   qskip = dPAD(q);
@@ -142,7 +144,7 @@ int dFactorCholesky (dReal *A, int n)
 }
 
 
-void dSolveCholesky (dReal *L, dReal *b, int n)
+void dSolveCholesky (const dReal *L, dReal *b, int n)
 {
   int i,k,nskip;
   dReal sum,*y;
@@ -162,7 +164,7 @@ void dSolveCholesky (dReal *L, dReal *b, int n)
 }
 
 
-int dInvertPDMatrix (dReal *A, dReal *Ainv, int n)
+int dInvertPDMatrix (const dReal *A, dReal *Ainv, int n)
 {
   int i,j,nskip;
   dReal *L,*x;
@@ -182,7 +184,7 @@ int dInvertPDMatrix (dReal *A, dReal *Ainv, int n)
 }
 
 
-int dIsPositiveDefinite (dReal *A, int n)
+int dIsPositiveDefinite (const dReal *A, int n)
 {
   dReal *Acopy;
   dASSERT (n > 0 && A);
@@ -193,7 +195,7 @@ int dIsPositiveDefinite (dReal *A, int n)
 }
 
 
-void dSolveL1T (dReal *L, dReal *b, int n, int nskip)
+void dSolveL1T (const dReal *L, dReal *b, int n, int nskip)
 {
   int i,j;
   dASSERT (L && b && n > 0 && nskip >= n);
@@ -206,13 +208,13 @@ void dSolveL1T (dReal *L, dReal *b, int n, int nskip)
 }
 
 
-void dVectorScale (dReal *a, dReal *d, int n)
+void dVectorScale (dReal *a, const dReal *d, int n)
 {
   for (int i=0; i<n; i++) a[i] *= d[i];
 }
 
 
-void dSolveLDLT (dReal *L, dReal *d, dReal *b, int n, int nskip)
+void dSolveLDLT (const dReal *L, const dReal *d, dReal *b, int n, int nskip)
 {
   dSolveL1 (L,b,n,nskip);
   dVectorScale (b,d,n);
@@ -220,7 +222,7 @@ void dSolveLDLT (dReal *L, dReal *d, dReal *b, int n, int nskip)
 }
 
 
-void dLDLTAddTL (dReal *L, dReal *d, dReal *a, int n, int nskip)
+void dLDLTAddTL (dReal *L, dReal *d, const dReal *a, int n, int nskip)
 {
   int j,p;
   dReal *W1,*W2,W11,W21,alpha1,alpha2,alphanew,gamma1,gamma2,k1,k2,Wp,ell,dee;
@@ -299,8 +301,8 @@ void dLDLTAddTL (dReal *L, dReal *d, dReal *a, int n, int nskip)
 #define GETA(i,j) ((i > j) ? _GETA(i,j) : _GETA(j,i))
 
 
-void dLDLTRemove (dReal **A, int *p, dReal *L, dReal *d, int n1, int n2,
-		   int r, int nskip)
+void dLDLTRemove (dReal **A, const int *p, dReal *L, dReal *d,
+		  int n1, int n2, int r, int nskip)
 {
   int i;
   dASSERT(A && p && L && d && n1 > 0 && n2 > 0 && r >= 0 && r < n2 &&

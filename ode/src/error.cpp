@@ -67,7 +67,8 @@ extern "C" dMessageFunction *dGetMessageHandler()
 }
 
 
-static void printMessage (int num, char *msg1, char *msg2, va_list ap)
+static void printMessage (int num, const char *msg1, const char *msg2,
+			  va_list ap)
 {
   fflush (stderr);
   fflush (stdout);
@@ -79,7 +80,7 @@ static void printMessage (int num, char *msg1, char *msg2, va_list ap)
 }
 
 
-extern "C" void dError (int num, char *msg, ...)
+extern "C" void dError (int num, const char *msg, ...)
 {
   va_list ap;
   va_start (ap,msg);
@@ -89,7 +90,7 @@ extern "C" void dError (int num, char *msg, ...)
 }
 
 
-extern "C" void dDebug (int num, char *msg, ...)
+extern "C" void dDebug (int num, const char *msg, ...)
 {
   va_list ap;
   va_start (ap,msg);
@@ -100,7 +101,7 @@ extern "C" void dDebug (int num, char *msg, ...)
 }
 
 
-extern "C" void dMessage (int num, char *msg, ...)
+extern "C" void dMessage (int num, const char *msg, ...)
 {
   va_list ap;
   va_start (ap,msg);

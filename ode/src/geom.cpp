@@ -34,7 +34,7 @@ TODO
 #include "array.h"
 
 //****************************************************************************
-// primitives collision functions
+// collision utilities
 
 // if the spheres (p1,r1) and (p2,r2) collide, set the contact `c' and
 // return 1, else return 0.
@@ -71,35 +71,111 @@ static int dCollideSpheres (dVector3 p1, dReal r1,
 }
 
 
-int dCollideSS (dSphere *o1, dSphere *o2, int flags, dContactGeom *contact)
+// given a box (p,R,side), where `p' is the center of the box, `R' is the
+// rotation matrix for the box, and `side' is a vector of x/y/z side lengths,
+// return the size of the interval of the box projected along the
+// (unit length?) axis a.
+
+static inline dReal boxDiameter (const dMatrix3 R, const dVector3 side,
+				 const dVector3 axis)
+{
+  dVector3 q;
+  dMULTIPLY1_331 (q,R,axis);	// transform axis to body-relative
+  return dFabs(q[0])*side[0] + dFabs(q[1])*side[1] + dFabs(q[2])*side[2];
+}
+
+
+// given boxes (p1,R1,side1) and (p1,R1,side1), return 1 if they intersect
+// or 0 if not.
+// @@@ should be worst case ~200 ops
+
+extern "C" int dBoxesTouch (const dVector3 _p1, const dMatrix3 R1,
+			    const dVector3 side1, const dVector3 _p2,
+			    const dMatrix3 R2, const dVector3 side2)
+{
+  // two boxes are disjoint if (and only if) there is a separating axis
+  // perpendicular to a face from one box or perpendicular to an edge from
+  // either box.
+
+  int i,j,k;
+  dVector3 p2,axis,u1,u2;
+  dReal dist,d1,d2;
+
+  // shift positions p1 and p2 so p1 is zero.
+  p2[0] = _p2[0] - _p2[0];
+  p2[1] = _p2[1] - _p2[1];
+  p2[2] = _p2[2] - _p2[2];
+
+  // test separating axes perpendicular to 3 faces of box 1
+  for (i=0; i<3; i++) {
+    for (k=0; k<3; k++) axis[k] = R1[4*k+i];
+    dist = dDOT (axis,p2);
+    d2 = boxDiameter (R2,side2,axis);
+    if (2*dist > side1[i]+d2) return 0;
+  }
+
+  // test separating axes perpendicular to 3 faces of box 2
+  for (i=0; i<3; i++) {
+    for (k=0; k<3; k++) axis[k] = R2[4*k+i];
+    dist = dDOT (axis,p2);
+    d1 = boxDiameter (R1,side1,axis);
+    if (2*dist > d1+side2[i]) return 0;
+  }
+
+  // test separating axes perpendicular to one edge from each box (9 cases)
+  for (i=0; i<3; i++) {
+    for (j=0; j<3; j++) {
+      for (k=0; k<3; k++) u1[k] = R1[4*k+i];
+      for (k=0; k<3; k++) u2[k] = R2[4*k+j];
+      dCROSS (axis,=,u1,u2);
+      dNormalize3 (axis);	// axis is not necessarily unit length
+      dist = dDOT (axis,p2);
+      d1 = boxDiameter (R1,side1,axis);
+      d2 = boxDiameter (R2,side2,axis);
+      if (2*dist > d1+d2) return 0;
+    }
+  }
+
+  return 1;
+}
+
+//****************************************************************************
+// primitives collision functions
+
+int dCollideSS (const dSphere *o1, const dSphere *o2, int flags,
+		dContactGeom *contact)
 {
   return dCollideSpheres (o1->geom.pos,o1->radius,
 			   o2->geom.pos,o2->radius,contact);
 }
 
 
-int dCollideSB (dSphere *o1, dBox *o2, int flags, dContactGeom *contact)
+int dCollideSB (const dSphere *o1, const dBox *o2, int flags,
+		dContactGeom *contact)
 {
   dDebug (0,"unimplemented");
   return 0;
 }
 
 
-int dCollideSC (dSphere *o1, dCCylinder *o2, int flags, dContactGeom *contact)
+int dCollideSC (const dSphere *o1, const dCCylinder *o2, int flags,
+		dContactGeom *contact)
 {
   dDebug (0,"unimplemented");
   return 0;
 }
 
 
-int dCollideSL (dSphere *o1, dSlab *o2, int flags, dContactGeom *contact)
+int dCollideSL (const dSphere *o1, const dSlab *o2, int flags,
+		dContactGeom *contact)
 {
   dDebug (0,"unimplemented");
   return 0;
 }
 
 
-int dCollideSP (dSphere *o1, dPlane *o2, int flags, dContactGeom *contact)
+int dCollideSP (const dSphere *o1, const dPlane *o2, int flags,
+		dContactGeom *contact)
 {
   dReal k = dDOT (o1->geom.pos,o2->p);
   dReal depth = o2->p[3] - k + o1->radius;
@@ -117,35 +193,31 @@ int dCollideSP (dSphere *o1, dPlane *o2, int flags, dContactGeom *contact)
 }
 
 
-int dCollideBB (dBox *o1, dBox *o2, int flags, dContactGeom *contact)
+int dCollideBB (const dBox *o1, const dBox *o2, int flags,
+		dContactGeom *contact)
 {
   dDebug (0,"unimplemented");
   return 0;
 }
 
 
-int dCollideBC (dBox *o1, dCCylinder *o2, int flags, dContactGeom *contact)
+int dCollideBC (const dBox *o1, const dCCylinder *o2, int flags,
+		dContactGeom *contact)
 {
   dDebug (0,"unimplemented");
   return 0;
 }
 
 
-int dCollideBL (dBox *o1, dSlab *o2, int flags, dContactGeom *contact)
+int dCollideBL (const dBox *o1, const dSlab *o2, int flags,
+		dContactGeom *contact)
 {
   dDebug (0,"unimplemented");
   return 0;
 }
 
 
-int dCollideBP (dBox *o1, dPlane *o2, int flags, dContactGeom *contact)
-{
-  dDebug (0,"unimplemented");
-  return 0;
-}
-
-
-int dCollideCC (dCCylinder *o1, dCCylinder *o2,
+int dCollideBP (const dBox *o1, const dPlane *o2,
 		int flags, dContactGeom *contact)
 {
   dDebug (0,"unimplemented");
@@ -153,28 +225,40 @@ int dCollideCC (dCCylinder *o1, dCCylinder *o2,
 }
 
 
-int dCollideCL (dCCylinder *o1, dSlab *o2, int flags, dContactGeom *contact)
+int dCollideCC (const dCCylinder *o1, const dCCylinder *o2,
+		int flags, dContactGeom *contact)
 {
   dDebug (0,"unimplemented");
   return 0;
 }
 
 
-int dCollideCP (dCCylinder *o1, dPlane *o2, int flags, dContactGeom *contact)
+int dCollideCL (const dCCylinder *o1, const dSlab *o2, int flags,
+		dContactGeom *contact)
 {
   dDebug (0,"unimplemented");
   return 0;
 }
 
 
-int dCollideLL (dSlab *o1, dSlab *o2, int flags, dContactGeom *contact)
+int dCollideCP (const dCCylinder *o1, const dPlane *o2, int flags,
+		dContactGeom *contact)
 {
   dDebug (0,"unimplemented");
   return 0;
 }
 
 
-int dCollideLP (dSlab *o1, dPlane *o2, int flags, dContactGeom *contact)
+int dCollideLL (const dSlab *o1, const dSlab *o2, int flags,
+		dContactGeom *contact)
+{
+  dDebug (0,"unimplemented");
+  return 0;
+}
+
+
+int dCollideLP (const dSlab *o1, const dPlane *o2, int flags,
+		dContactGeom *contact)
 {
   dDebug (0,"unimplemented");
   return 0;
@@ -300,7 +384,7 @@ static dArray<dGeomClass*> classes;	// <--- update for pointers
 static dArray<dColliderEntry> colliders;
 
 
-int dCreateGeomClass (dGeomClass *c)
+int dCreateGeomClass (const dGeomClass *c)
 {
   if (c->size < (int)sizeof(dxGeom))
     dDebug (d_ERR_BAD_ARGS,"dGeomClass size too small");
