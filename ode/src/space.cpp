@@ -22,6 +22,10 @@
 
 /*
 
+old collision code. this code is deprecated and will eventually be removed
+from ODE.
+
+
 simple space 
 ------------
 
@@ -123,7 +127,7 @@ struct dxSimpleSpace : public dxSpace {
 };
 
 
-dSpaceID dSimpleSpaceCreate()
+dSpaceID dSimpleSpaceCreate (int dummy)
 {
   dxSimpleSpace *w = new dxSimpleSpace;
   w->type = TYPE_SIMPLE;
@@ -339,7 +343,7 @@ static unsigned long getVirtualAddress (int level, int x, int y, int z)
 //****************************************************************************
 // hash space public functions
 
-dSpaceID dHashSpaceCreate()
+dSpaceID dHashSpaceCreate (int dummy)
 {
   dxHashSpace *w = new dxHashSpace;
   w->type = TYPE_HASH;
