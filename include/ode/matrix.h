@@ -33,9 +33,10 @@ extern "C" {
 #endif
 
 
-/* set a vector/matrix of size n to all zeros. */
+/* set a vector/matrix of size n to all zeros, or to a specific value. */
 
 void dSetZero (dReal *a, int n);
+void dSetValue (dReal *a, int n, dReal value);
 
 
 /* get the dot product of two n*1 vectors. if n <= 0 then
