@@ -2351,7 +2351,7 @@ is never > 6, so @m{(m/j)^2} is factored out as a constant.
 Several experimental functions have been added to ODE as part of the
 StepFast1 flow of code, at least until they are validated. Most have to do
 with the automatic disabling and enabling of bodies as yet another bit of
-optimization. Here's the general idea: 
+optimization.  Here's the general idea: 
 
 @list{
 @*	The body is considered a candidate for disabling when it falls
@@ -2381,6 +2381,8 @@ optimization. Here's the general idea:
 	good value for the wall in test_crash, but 1000 is the default to
 	retain standard functionality. 
 }
+
+Note that the functions pertaining to auto-disabling are not yet implemented!  
 
 @section{API}
 
