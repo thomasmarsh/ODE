@@ -1,6 +1,6 @@
 
 -------------------------------------------
- MS VisualC++ 6 workspace for ODE (v0.82).
+ MS VisualC++ 6 workspace for ODE (v0.83).
 -------------------------------------------
 
 This directory contains these VC6 workspaces:
@@ -22,15 +22,22 @@ Before you can use these, you must:
 	<ode dir>\lib
 
  c) configure the ODE build for either single or double floating point, and
-with/without Trimesh support.  To do this, simply double-click one of the
-included batch files (you can do this at any time) and then perform a build.
+with/without Trimesh support.  Simply double-click one of the included batch
+files (you can do this at any time) and then perform a build.
 
 Notes:
 
  All libs will be built in the <ode_dir>/lib directory.
  All samples will be copied to the <ode_dir>/test directory.
- Opcode is only required for Trimesh support - it can be removed from the ODE
+ Opcode is only required for Trimesh support - it can be removed from the
   workspaces otherwise.
+
+Important:
+ The workspaces are set to use the '(Debug) Multithreaded DLL' C runtime.  If 
+  your app is compiled with a different type, you must change them so they all
+  use the same (which type is up to you) - otherwise you will get all kinds of
+  linker errors.  This is a standard VC issue, and not related to ODE or these
+  workspaces.
 
 Thanks to Frank Compagner for his original VC6 workspace and config presets.
 
