@@ -32,6 +32,7 @@ this also shows you how to use geom groups.
 #include "ode/ode.h"
 #include "drawstuff/drawstuff.h"
 
+#pragma warning(disable:4244 4305)  // for VC++, no precision loss complaints
 
 // select correct drawing functions
 
