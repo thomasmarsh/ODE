@@ -630,6 +630,9 @@ void cullPoints (int n, dReal p[], int m, int i0, int iret[])
     a = dReal(j)*(2*M_PI/m) + A[i0];
     if (a > M_PI) a -= 2*M_PI;
     dReal maxdiff=1e9,diff;
+#ifndef dNODEBUG
+    *iret = i0;			// iret is not allowed to keep this value
+#endif
     for (i=0; i<n; i++) {
       if (avail[i]) {
 	diff = dFabs (A[i]-a);
@@ -640,6 +643,9 @@ void cullPoints (int n, dReal p[], int m, int i0, int iret[])
 	}
       }
     }
+#ifndef dNODEBUG
+    dIASSERT (*iret != i0);	// ensure iret got set
+#endif
     avail[*iret] = 0;
     iret++;
   }
