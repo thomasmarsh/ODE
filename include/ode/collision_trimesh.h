@@ -52,8 +52,8 @@ dTriMeshDataID dGeomTriMeshDataCreate(void);
 void dGeomTriMeshDataDestroy(dTriMeshDataID g);
 
 enum { TRIMESH_FACE_NORMALS, TRIMESH_LAST_TRANSFORMATION };
-void dGeomTriMeshDataSet(dTriMeshDataID g, int data_id, void* data);
-
+void dGeomTriMeshDataSet(dTriMeshDataID g, int data_id, void* in_data);
+void* dGeomTriMeshDataGet(dTriMeshDataID g, int data_id);
 
 /*
  * Build TriMesh data with single pricision used in vertex data .
@@ -122,6 +122,8 @@ dTriRayCallback* dGeomTriMeshGetRayCallback(dGeomID g);
 dGeomID dCreateTriMesh(dSpaceID space, dTriMeshDataID Data, dTriCallback* Callback, dTriArrayCallback* ArrayCallback, dTriRayCallback* RayCallback);
 
 void dGeomTriMeshSetData(dGeomID g, dTriMeshDataID Data);
+dTriMeshDataID dGeomTriMeshGetData(dGeomID g);
+
 
 // enable/disable/check temporal coherence
 void dGeomTriMeshEnableTC(dGeomID g, int geomClass, int enable);
