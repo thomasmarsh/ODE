@@ -9,6 +9,14 @@ the rules for this file:
 
 ------------------------------------------------------------------------------
 
+04/21/04 russ
+
+	* added auto-disable support from Aras Pranckevicius (with
+	  modifications by russ). this useful feature can speed up
+	  simulation significantly in some cases.
+	
+	* various internal tidyups.
+
 04/20/04 russ
 
 	* changed the meaning of the 'index' argument to dJointGetBody():
