@@ -88,6 +88,9 @@ dJointAttach(), allow both bodies to be 0 to put the joint into limbo.
 timer reporting function:
 	void timerReport (void (*printFunction)(char *, ...));
 
+on windows, make sure gcc-compiles libs can be linked with VC++ apps. need
+to make sure some C++ runtime bits are present.
+
 ALWAYS
 ------
 
