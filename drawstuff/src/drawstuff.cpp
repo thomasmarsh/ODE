@@ -18,6 +18,7 @@ manage openGL state changes better
 #endif
 
 #include <stdio.h>
+#include <string.h>
 #include <math.h>
 #include <GL/gl.h>
 #include <GL/glu.h>
@@ -29,9 +30,9 @@ manage openGL state changes better
 // misc
 
 #ifdef WIN32
-#define PATH_TO_TEXTURES "..\\textures\\"
+#define DEFAULT_PATH_TO_TEXTURES "..\\textures\\"
 #else
-#define PATH_TO_TEXTURES "../textures/"
+#define DEFAULT_PATH_TO_TEXTURES "../textures/"
 #endif
 
 #ifndef M_PI
@@ -739,11 +740,23 @@ static float color[3] = {0,0,0};	// current r,g,b color
 static int tnum = 0;			// current texture number
 
 
-void dsStartGraphics (int width, int height)
+void dsStartGraphics (int width, int height, dsFunctions *fn)
 {
-  sky_texture = new Texture (PATH_TO_TEXTURES "sky.ppm");
-  ground_texture = new Texture (PATH_TO_TEXTURES "ground.ppm");
-  wood_texture = new Texture (PATH_TO_TEXTURES "wood.ppm");
+  char *prefix = DEFAULT_PATH_TO_TEXTURES;
+  if (fn->version >= 2 && fn->path_to_textures) prefix = fn->path_to_textures;
+  char *s = (char*) alloca (strlen(prefix) + 20);
+
+  strcpy (s,prefix);
+  strcat (s,"/sky.ppm");
+  sky_texture = new Texture (s);
+
+  strcpy (s,prefix);
+  strcat (s,"/ground.ppm");
+  ground_texture = new Texture (s);
+
+  strcpy (s,prefix);
+  strcat (s,"/wood.ppm");
+  wood_texture = new Texture (s);
 }
 
 
@@ -1063,7 +1076,7 @@ extern "C" void dsSimulationLoop (int argc, char **argv,
     if (strcmp(argv[i],"-noshadows")==0) use_shadows = 0;
   }
 
-  if (fn->version != DS_VERSION)
+  if (fn->version > DS_VERSION)
     dsDebug ("bad version number in dsFunctions structure");
 
   initMotionModel();
