@@ -65,6 +65,11 @@ The current features are:
 @*	Other stuff I forgot to mention...
 }
 
+Some more features:
+@list{
+@*	C/C++ interface.
+}
+
 Some important things that are missing right now:
 @list{
 @*	Friction!
@@ -119,6 +124,7 @@ Some important things that are missing right now:
 @* Collision: polyhedral objects, triangle soup.
 @* Add reduced coordinate methods for a major speed improvement on
    tree-structured systems.
+@* Thread safe.
 }
 
 
@@ -762,6 +768,13 @@ document yet].
 @chapter{Collision functions}
 
 [Document these later].
+
+Some notes:
+@list{
+@*	By creating one of the standard geometry objects, the object's class
+	is automatically registered with the collision system.
+	User provided classes should have the same behavior.
+}
 
 #############################################################################
 @chapter{How to make good simulations}
