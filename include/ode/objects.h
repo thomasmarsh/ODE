@@ -76,6 +76,9 @@ void dBodyAddRelForceAtPos    (dBodyID, dReal fx, dReal fy, dReal fz,
 void dBodyAddRelForceAtRelPos (dBodyID, dReal fx, dReal fy, dReal fz,
 			                dReal px, dReal py, dReal pz);
 
+const dReal * dBodyGetForce   (dBodyID);
+const dReal * dBodyGetTorque  (dBodyID);
+
 void dBodyGetRelPointPos    (dBodyID, dReal px, dReal py, dReal pz,
 			     dVector3 result);
 void dBodyGetRelPointVel    (dBodyID, dReal px, dReal py, dReal pz,
@@ -83,6 +86,9 @@ void dBodyGetRelPointVel    (dBodyID, dReal px, dReal py, dReal pz,
 
 void dBodySetFiniteRotationMode (dBodyID, int mode);
 void dBodySetFiniteRotationAxis (dBodyID, dReal x, dReal y, dReal z);
+
+int dBodyGetNumJoints (dBodyID b);
+dJointID dBodyGetJoint (dBodyID, int index);
 
 
 /* joints */
@@ -105,6 +111,7 @@ void dJointAttach (dJointID, dBodyID body1, dBodyID body2);
 void dJointSetData (dJointID, void *data);
 void *dJointGetData (dJointID);
 int dJointGetType (dJointID);
+dBodyID dJointGetBody (dJointID, int index);
 
 void dJointSetBallAnchor (dJointID, dReal x, dReal y, dReal z);
 void dJointSetHingeAnchor (dJointID, dReal x, dReal y, dReal z);
