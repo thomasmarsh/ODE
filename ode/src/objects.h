@@ -33,6 +33,14 @@
 #include "array.h"
 
 
+// some body flags
+
+enum {
+  dxBodyFlagFiniteRotation = 1,		// use finite rotations
+  dxBodyFlagFiniteRotationAxis = 2	// use finite rotations only along axis
+};
+
+
 // base class that does correct object allocation / deallocation
 
 struct dBase {
@@ -56,14 +64,16 @@ struct dObject : public dBase {
 
 struct dxBody : public dObject {
   dxJointNode *firstjoint;	// list of attached joints
+  int flags;			// some dxBodyFlagXXX flags
   dMass mass;			// mass parameters about POR
   dMatrix3 invI;		// inverse of mass.I
   dReal invMass;		// 1 / mass.mass
-  dVector3 pos;		// position of POR (point of reference)
+  dVector3 pos;			// position of POR (point of reference)
   dQuaternion q;		// orientation quaternion
   dMatrix3 R;			// rotation matrix, always corresponds to q
   dVector3 lvel,avel;		// linear and angular velocity of POR
   dVector3 facc,tacc;		// force and torque accululators
+  dVector3 finite_rot_axis;	// finite rotation axis, unit length or 0=none
 };
 
 
