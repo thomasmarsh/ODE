@@ -704,7 +704,7 @@ handled as follows:
 
 @*	The contact joints are put in a joint "group", which allows them to be
 	added to and removed from the system very quickly.
-	The simulation will speed goes down as the number of contacts goes up,
+	The simulation speed goes down as the number of contacts goes up,
 	so various strategies can be used to limit the number of contact
 	points.
 
