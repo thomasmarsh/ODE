@@ -105,8 +105,8 @@ void dLineClosestApproach (const dVector3 pa, const dVector3 ua,
 // PB between X and Y are globally the closest points if PA is in V(Y) and
 // PB is in V(X), where V(X) is the voronoi region of X.
 
-void dClosestLineSegmentPoints (dVector3 const a1, dVector3 const a2,
-				dVector3 const b1, dVector3 const b2,
+void dClosestLineSegmentPoints (const dVector3 a1, const dVector3 a2,
+				const dVector3 b1, const dVector3 b2,
 				dVector3 cp1, dVector3 cp2)
 {
   dVector3 a1a2,b1b2,a1b1,a1b2,a2b1,a2b2,n;
@@ -287,7 +287,7 @@ void dClosestLineBoxPoints (const dVector3 p1, const dVector3 p2,
   h[2] = REAL(0.5) * side[2];
 
   // region is -1,0,+1 depending on which side of the box planes each
-  // coordinate is on. tanchor in the next t value at which there is a
+  // coordinate is on. tanchor is the next t value at which there is a
   // transition, or the last one if there are no more.
   int region[3];
   dReal tanchor[3];
