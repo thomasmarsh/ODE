@@ -1085,10 +1085,6 @@ int dCollideG (const dxGeom *o1, const dxGeom *o2, int flags,
   while (i < gr->parts.size() && numleft > 0) {
     int n = dCollide (gr->parts[i],const_cast<dxGeom*>(o2),
 		      flags | numleft,contact,skip);
-    for (int k=0; k<n; k++) {
-      CONTACT (contact,skip*k)->g1 = gr->parts[i];
-      CONTACT (contact,skip*k)->g2 = const_cast<dxGeom*> (o2);
-    }
     contact = CONTACT (contact,skip*n);
     numleft -= n;
     num += n;
