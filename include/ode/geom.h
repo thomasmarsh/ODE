@@ -38,6 +38,8 @@ int dBoxTouchesBox (const dVector3 _p1, const dMatrix3 R1,
 		    const dVector3 side1, const dVector3 _p2,
 		    const dMatrix3 R2, const dVector3 side2);
 
+void dInfiniteAABB (dxGeom *geom, dReal aabb[6]);
+
 /* ************************************************************************ */
 /* standard classes */
 

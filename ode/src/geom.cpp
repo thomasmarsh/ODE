@@ -1111,7 +1111,7 @@ dxGeom *dCreatePlane (dSpaceID space,
 }
 
 
-void dGeomSphereSetRadius (dGeomID sphere, dReal radius)
+void dGeomSphereSetRadius (dGeomID g, dReal radius)
 {
   dUASSERT (g && g->_class->num == dSphereClass,"argument not a sphere");
   dxSphere *s = (dxSphere*) CLASSDATA(g);
@@ -1119,7 +1119,7 @@ void dGeomSphereSetRadius (dGeomID sphere, dReal radius)
 }
 
 
-void dGeomBoxSetLengths (dGeomID box, dReal lx, dReal ly, dReal lz)
+void dGeomBoxSetLengths (dGeomID g, dReal lx, dReal ly, dReal lz)
 {
   dUASSERT (g && g->_class->num == dBoxClass,"argument not a box");
   dxBox *b = (dxBox*) CLASSDATA(g);
@@ -1129,7 +1129,7 @@ void dGeomBoxSetLengths (dGeomID box, dReal lx, dReal ly, dReal lz)
 }
 
 
-void dGeomPlaneSetParams (dGeomID plane, dReal a, dReal b, dReal c, dReal d)
+void dGeomPlaneSetParams (dGeomID g, dReal a, dReal b, dReal c, dReal d)
 {
   dUASSERT (g && g->_class->num == dPlaneClass,"argument not a plane");
   dxPlane *p = (dxPlane*) CLASSDATA(g);
@@ -1140,7 +1140,7 @@ void dGeomPlaneSetParams (dGeomID plane, dReal a, dReal b, dReal c, dReal d)
 }
 
 
-void dGeomCCylinderSetParams (dGeomID ccylinder, dReal a, dReal b, int dir)
+void dGeomCCylinderSetParams (dGeomID g, dReal a, dReal b, int dir)
 {
   dDebug (0,"not implemented");
 }
@@ -1189,3 +1189,16 @@ void dAddToComposite (dxGeom *composite, int i, dxGeom *obj)
   dDebug (0,"unimplemented");
 }
 */
+
+//****************************************************************************
+// other utility functions
+
+void dInfiniteAABB (dxGeom *geom, dReal aabb[6])
+{
+  aabb[0] = -dInfinity;
+  aabb[1] = dInfinity;
+  aabb[2] = -dInfinity;
+  aabb[3] = dInfinity;
+  aabb[4] = -dInfinity;
+  aabb[5] = dInfinity;
+}
