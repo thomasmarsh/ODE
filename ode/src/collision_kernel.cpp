@@ -518,6 +518,7 @@ int dCreateGeomClass (const dGeomClass *c)
   }
   user_classes[num_user_classes] = *c;
   int class_number = num_user_classes + dFirstUserClass;
+  initColliders();
   setAllColliders (class_number,&dCollideUserGeomWithGeom);
 
   num_user_classes++;
