@@ -1,5 +1,10 @@
-
 readme.txt
+
+WARNING: THIS IS NOT VERY RELIABLE CODE.  IT HAS BUGS.  YOUR
+         SUCCESS MAY VARY.  CONTRIBUTIONS OF FIXES/REWRITES ARE
+         WELCOME.
+
+///////////////////////////////////////////////////////////////////////
 
 Cylinder geometry class.
 
