@@ -850,6 +850,27 @@ extern "C" dReal dJointGetHingeAngleRate (dxJointHinge *joint)
 }
 
 
+extern "C" void dJointAddHingeTorque (dxJointHinge *joint, dReal torque)
+{
+  dVector3 axis;
+  dAASSERT(joint);
+  dUASSERT(joint->vtable == &__dhinge_vtable,"joint is not a Hinge");
+
+  if (joint->flags & dJOINT_REVERSE)
+    torque = -torque;
+  
+  getAxis (joint,axis,joint->axis1);
+  axis[0] *= torque;
+  axis[1] *= torque;
+  axis[2] *= torque;
+
+  if (joint->node[0].body != 0)
+    dBodyAddTorque (joint->node[0].body, axis[0], axis[1], axis[2]);
+  if (joint->node[1].body != 0)
+    dBodyAddTorque(joint->node[1].body, -axis[0], -axis[1], -axis[2]);
+}
+
+
 dxJoint::Vtable __dhinge_vtable = {
   sizeof(dxJointHinge),
   (dxJoint::init_fn*) hingeInit,
@@ -1102,6 +1123,27 @@ extern "C" dReal dJointGetSliderParam (dxJointSlider *joint, int parameter)
   dUASSERT(joint,"bad joint argument");
   dUASSERT(joint->vtable == &__dslider_vtable,"joint is not a slider");
   return joint->limot.get (parameter);
+}
+
+
+extern "C" void dJointAddSliderForce (dxJointSlider *joint, dReal force)
+{
+  dVector3 axis;
+  dUASSERT(joint,"bad joint argument");
+  dUASSERT(joint->vtable == &__dslider_vtable,"joint is not a slider");
+
+  if (joint->flags & dJOINT_REVERSE)
+    force -= force;
+
+  getAxis (joint,axis,joint->axis1);
+  axis[0] *= force;
+  axis[1] *= force;
+  axis[2] *= force;
+
+  if (joint->node[0].body != 0)
+    dBodyAddForce (joint->node[0].body,axis[0],axis[1],axis[2]);
+  if (joint->node[1].body != 0)
+    dBodyAddForce(joint->node[1].body, -axis[0], -axis[1], -axis[2]);
 }
 
 
@@ -1627,6 +1669,24 @@ extern "C" dReal dJointGetHinge2Angle2Rate (dxJointHinge2 *joint)
 }
 
 
+extern "C" void dJointAddHinge2Torques (dxJointHinge2 *joint, dReal torque1, dReal torque2)
+{
+  dVector3 axis1, axis2;
+  dUASSERT(joint,"bad joint argument");
+  dUASSERT(joint->vtable == &__dhinge2_vtable,"joint is not a hinge2");
+
+  if (joint->node[0].body && joint->node[1].body) {
+    dMULTIPLY0_331 (axis1,joint->node[0].body->R,joint->axis1);
+    dMULTIPLY0_331 (axis2,joint->node[1].body->R,joint->axis2);
+    axis1[0] = axis1[0] * torque1 + axis2[0] * torque2;
+    axis1[1] = axis1[1] * torque1 + axis2[1] * torque2;
+    axis1[2] = axis1[2] * torque1 + axis2[2] * torque2;
+    dBodyAddTorque (joint->node[0].body,axis1[0],axis1[1],axis1[2]);
+    dBodyAddTorque(joint->node[1].body, -axis1[0], -axis1[1], -axis1[2]);
+  }
+}
+
+
 dxJoint::Vtable __dhinge2_vtable = {
   sizeof(dxJointHinge2),
   (dxJoint::init_fn*) hinge2Init,
@@ -1636,6 +1696,11 @@ dxJoint::Vtable __dhinge2_vtable = {
 
 //****************************************************************************
 // universal
+
+// I just realized that the universal joint is equivalent to a hinge 2 joint with
+// perfectly stiff suspension.  By comparing the hinge 2 implementation to
+// the universal implementation, you may be able to improve this
+// implementation (or, less likely, the hinge2 implementation).
 
 static void universalInit (dxJointUniversal *j)
 {
@@ -2051,6 +2116,34 @@ extern "C" dReal dJointGetUniversalAngle2Rate (dxJointUniversal *joint)
 }
 
 
+extern "C" void dJointAddUniversalTorques (dxJointUniversal *joint, dReal torque1, dReal torque2)
+{
+  dVector3 axis1, axis2;
+  dAASSERT(joint);
+  dUASSERT(joint->vtable == &__duniversal_vtable,"joint is not a universal");
+
+  if (joint->flags & dJOINT_REVERSE) {
+    dReal temp = torque1;
+    torque1 = - torque2;
+    torque2 = - temp;
+  }
+  
+  getAxis (joint,axis1,joint->axis1);
+  getAxis2 (joint,axis2,joint->axis2);
+  axis1[0] = axis1[0] * torque1 + axis2[0] * torque2;
+  axis1[1] = axis1[1] * torque1 + axis2[1] * torque2;
+  axis1[2] = axis1[2] * torque1 + axis2[2] * torque2;
+
+  if (joint->node[0].body != 0)
+    dBodyAddTorque (joint->node[0].body,axis1[0],axis1[1],axis1[2]);
+  if (joint->node[1].body != 0)
+    dBodyAddTorque(joint->node[1].body, -axis1[0], -axis1[1], -axis1[2]);
+}
+
+
+
+
+
 dxJoint::Vtable __duniversal_vtable = {
   sizeof(dxJointUniversal),
   (dxJoint::init_fn*) universalInit,
@@ -2391,6 +2484,38 @@ extern "C" int dJointGetAMotorMode (dxJointAMotor *joint)
   dAASSERT(joint);
   dUASSERT(joint->vtable == &__damotor_vtable,"joint is not an amotor");
   return joint->mode;
+}
+
+
+extern "C" void dJointAddAMotorTorques (dxJointAMotor *joint, dReal torque1, dReal torque2, dReal torque3)
+{
+  dVector3 axes[3];
+  dAASSERT(joint);
+  dUASSERT(joint->vtable == &__damotor_vtable,"joint is not an amotor");
+
+  if (joint->num == 0)
+    return;
+  dUASSERT((joint->flags & dJOINT_REVERSE) == 0, "dJointAddAMotorTorques not yet implemented for reverse AMotor joints");
+
+  amotorComputeGlobalAxes (joint,axes);
+  axes[0][0] *= torque1;
+  axes[0][1] *= torque1;
+  axes[0][2] *= torque1;
+  if (joint->num >= 2) {
+    axes[0][0] += axes[1][0] * torque2;
+    axes[0][1] += axes[1][0] * torque2;
+    axes[0][2] += axes[1][0] * torque2;
+    if (joint->num >= 3) {
+      axes[0][0] += axes[2][0] * torque3;
+      axes[0][1] += axes[2][0] * torque3;
+      axes[0][2] += axes[2][0] * torque3;
+    }
+  }
+
+  if (joint->node[0].body != 0)
+    dBodyAddTorque (joint->node[0].body,axes[0][0],axes[0][1],axes[0][2]);
+  if (joint->node[1].body != 0)
+    dBodyAddTorque(joint->node[1].body, -axes[0][0], -axes[0][1], -axes[0][2]);
 }
 
 

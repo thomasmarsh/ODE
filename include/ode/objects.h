@@ -50,13 +50,21 @@ void dWorldImpulseToForce (dWorldID, dReal stepsize,
 
 void dWorldStepFast1(dWorldID, dReal stepsize, int maxiterations);
 void dWorldSetAutoEnableDepthSF1(dWorldID, int autoEnableDepth);
+
 int dWorldGetAutoEnableDepthSF1(dWorldID);
+
 void dBodySetAutoDisableThresholdSF1(dBodyID, dReal autoDisableThreshold);
+
 dReal dBodyGetAutoDisableThresholdSF1(dBodyID);
+
 void dBodySetAutoDisableStepsSF1(dBodyID, int AutoDisableSteps);
+
 int dBodyGetAutoDisableStepsSF1(dBodyID);
+
 void dBodySetAutoDisableSF1(dBodyID, int doAutoDisable);
+
 int dBodyGetAutoDisableSF1(dBodyID);
+
 
 /* bodies */
 
@@ -159,16 +167,20 @@ void dJointSetBallAnchor (dJointID, dReal x, dReal y, dReal z);
 void dJointSetHingeAnchor (dJointID, dReal x, dReal y, dReal z);
 void dJointSetHingeAxis (dJointID, dReal x, dReal y, dReal z);
 void dJointSetHingeParam (dJointID, int parameter, dReal value);
+void dJointAddHingeTorque(dJointID joint, dReal torque);
 void dJointSetSliderAxis (dJointID, dReal x, dReal y, dReal z);
 void dJointSetSliderParam (dJointID, int parameter, dReal value);
+void dJointAddSliderForce(dJointID joint, dReal force);
 void dJointSetHinge2Anchor (dJointID, dReal x, dReal y, dReal z);
 void dJointSetHinge2Axis1 (dJointID, dReal x, dReal y, dReal z);
 void dJointSetHinge2Axis2 (dJointID, dReal x, dReal y, dReal z);
 void dJointSetHinge2Param (dJointID, int parameter, dReal value);
+void dJointAddHinge2Torques(dJointID joint, dReal torque1, dReal torque2);
 void dJointSetUniversalAnchor (dJointID, dReal x, dReal y, dReal z);
 void dJointSetUniversalAxis1 (dJointID, dReal x, dReal y, dReal z);
 void dJointSetUniversalAxis2 (dJointID, dReal x, dReal y, dReal z);
 void dJointSetUniversalParam (dJointID, int parameter, dReal value);
+void dJointAddUniversalTorques(dJointID joint, dReal torque1, dReal torque2);
 void dJointSetFixed (dJointID);
 void dJointSetAMotorNumAxes (dJointID, int num);
 void dJointSetAMotorAxis (dJointID, int anum, int rel,
@@ -176,6 +188,7 @@ void dJointSetAMotorAxis (dJointID, int anum, int rel,
 void dJointSetAMotorAngle (dJointID, int anum, dReal angle);
 void dJointSetAMotorParam (dJointID, int parameter, dReal value);
 void dJointSetAMotorMode (dJointID, int mode);
+void dJointAddAMotorTorques (dJointID, dReal torque1, dReal torque2, dReal torque3);
 
 void dJointGetBallAnchor (dJointID, dVector3 result);
 void dJointGetBallAnchor2 (dJointID, dVector3 result);

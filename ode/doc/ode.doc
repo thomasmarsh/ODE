@@ -1559,6 +1559,10 @@ is attached to body 1, and axis 2 is attached to body 2. The cross
 keeps these axes at 90 degrees, so if you grab body 1 and twist it,
 body 2 will twist as well.
 
+A Universal joint is equivalent to a hinge-2 joint where the hinge-2's
+axes are perpendicular to each other, and with a perfectly
+rigid connection in place of the suspension.
+
 Universal joints show up in cars, where the engine causes a shaft, the
 drive shaft, to rotate along its own axis. At some point you'd like to
 change the direction of the shaft. The problem is, if you just bend
@@ -1633,6 +1637,9 @@ Axis 1 can have joint limits and a motor, axis 2 can only have a motor.
 
 Axis 1 can function as a suspension axis, i.e. the constraint can be
 compressible along that axis.
+
+The hinge-2 joint where axis1 is perpendicular to axis 2 is equivalent to
+a universal joint with added suspension.
 
 
 
@@ -2106,10 +2113,12 @@ kinds of parameters) on a joint:
 void dJointSetHingeParam (dJointID, int parameter, dReal value);
 void dJointSetSliderParam (dJointID, int parameter, dReal value);
 void dJointSetHinge2Param (dJointID, int parameter, dReal value);
+void dJointSetUniversalParam (dJointID, int parameter, dReal value);
 void dJointSetAMotorParam (dJointID, int parameter, dReal value);
 dReal dJointGetHingeParam (dJointID, int parameter);
 dReal dJointGetSliderParam (dJointID, int parameter);
 dReal dJointGetHinge2Param (dJointID, int parameter);
+dReal dJointGetUniversalParam (dJointID, int parameter);
 dReal dJointGetAMotorParam (dJointID, int parameter);
 }{
 Set/get limit/motor parameters for each joint type.
@@ -2169,6 +2178,46 @@ A constant @c{dParamGroup} is also defined such that:
 
 @center{@c{dParamX}@m{i} = @c{dParamX} + @c{dParamGroup} * @m{(i-1)}}
 }
+
+@section{Setting Joint Torques/Forces Directly}
+
+Motors (see above) allow you to set joint velocities directly.  However, you 
+may instead wish to set the torque or force at a joint instead.  These 
+functions do just that.  Note that they don't affect the motor, but simply
+call @func{dBodyAddForce()}/@func{dBodyAddTorque()} on the bodies attached to
+it.
+
+@funcdef{dJointAddHingeTorque(dJointID joint, dReal torque)}
+
+Applies the torque about the hinge axis.  That is, it applies a torque with
+magnitude @arg{torque}, in the direction of the hinge axis, to body 1, and 
+with the same magnitude but in opposite direction to body 2.  This function 
+is just a wrapper for @func{dBodyAddTorque()}
+
+@funcdef{dJointAddUniversalTorques(dJointID joint, dReal torque1, dReal torque2)}
+
+Applies @arg{torque1} about the universal's axis 1, and @arg{torque2} about the
+universal's axis 2.  This function is just a wrapper for @func{dBodyAddTorque()}.
+
+@funcdef{dJointAddSliderForce(dJointID joint, dReal force)}
+
+Applies the given force in the slider's direction.  That is, it applies a force
+with magnitude @arg{force}, in the direction slider's axis, to body1, and with 
+the same magnitude but oppsite direction to body2.  This function is just a 
+wrapper for @func{dBodyAddForce()}.
+
+@funcdef{dJointAddHinge2Torqe(dJointID joint, dReal torque1, dReal torque2)}
+
+Applies @arg{torque1} about the hinge2's axis 1, and @arg{torque2} about the 
+hinge2's axis 2.  This function is just a wrapper for @func{dBodyAddTorque()}.
+
+@funcdef{dJointAddAMotorTorque(dJointID joint, dReal torque0, dReal torque1, dReal torque2)}
+
+Applies @arg{torque0} about the AMotor's axis 0, @arg{torque1} about the 
+AMotor's axis 1, and @arg{torque2} about the AMotor's axis 2.  If the motor has
+fewer than three axes, the higher torques are ignored.  This function is just a
+wrapper for @func{dBodyAddTorque()}.
+
 
 #############################################################################
 @chapter{StepFast}

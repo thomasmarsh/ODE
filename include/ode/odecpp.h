@@ -328,6 +328,9 @@ public:
     { dJointSetHingeParam (_id, parameter, value); }
   dReal getParam (int parameter) const
     { return dJointGetHingeParam (_id, parameter); }
+
+  void addTorque (dReal torque)
+	{ dJointAddHingeTorque(_id, torque); }
 };
 
 
@@ -360,6 +363,9 @@ public:
     { dJointSetSliderParam (_id, parameter, value); }
   dReal getParam (int parameter) const
     { return dJointGetSliderParam (_id, parameter); }
+
+  void addForce (dReal force)
+	{ dJointAddSliderForce(_id, force); }
 };
 
 
@@ -405,6 +411,9 @@ public:
     { return dJointGetUniversalAngle2 (_id); }
   dReal getAngle2Rate() const
     { return dJointGetUniversalAngle2Rate (_id); }
+
+  void addTorques (dReal torque1, dReal torque2)
+	{ dJointAddUniversalTorques(_id, torque1, torque2); }
 };
 
 
@@ -450,6 +459,9 @@ public:
     { dJointSetHinge2Param (_id, parameter, value); }
   dReal getParam (int parameter) const
     { return dJointGetHinge2Param (_id, parameter); }
+
+  void addTorques(dReal torque1, dReal torque2)
+	{ dJointAddHinge2Torques(_id, torque1, torque2); }
 };
 
 
@@ -550,6 +562,9 @@ public:
     { dJointSetAMotorParam (_id, parameter, value); }
   dReal getParam (int parameter) const
     { return dJointGetAMotorParam (_id, parameter); }
+
+  void addTorques(dReal torque1, dReal torque2, dReal torque3)
+	{ dJointAddAMotorTorques(_id, torque1, torque2, torque3); }
 };
 
 
