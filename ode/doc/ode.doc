@@ -20,13 +20,11 @@
 #                                                                       #
 #########################################################################
 
-@title{Open Dynamics Engine v0.035 Pre-release User Guide}
+@title{Open Dynamics Engine v0.035 User Guide}
 @subtitle{Russell Smith, @date{}}
 @author{Russell Smith, @date{}}
 
 @center{This document is Copyright &copy; 2001-2003 Russell Smith.}
-@center{This is an UNFINISHED document, there is still a lot of stuff
-to write.}
 
 @chapter{Contents @nonumber @nocontents}
 @contents
@@ -42,13 +40,11 @@ It is fast, flexible and robust, and it has built-in collision detection.
 ODE is being developed by @link{http://www.q12.org}{Russell Smith}.
 
 If ``rigid body simulation'' does not make much sense to you, check out
-@link{http://www.q12.org/ode/slides/slides.html}{What is a Physics SDK?}.
+@link{http://opende.sourceforge.net/slides/slides.html}{What is a Physics
+SDK?}.
 
-This is the user guide for the fourth prototype release of ODE (version 0.03).
-This release is to help continue testing the core algorithms and solidifying
-the API.
-There will probably only be a few (hopefully minor) changes to the API in
-the future.
+This is the user guide for ODE version 0.035.
+Despite the low version number, ODE is reasonably mature and stable.
 
 
 @section{Current features}
@@ -115,17 +111,30 @@ Here are the features:
 }
 
 
-@section{New in the next release}
+@section{New in the 0.035 release}
 
 @list{
 @* A universal joint, generously contributed by Martin C. Martin.
    It doesn't (yet) have a motor or joint limits.
-@* A new collision system that supports heirarchical spaces, has the ability to
+@* A new collision system that supports hierarchical spaces, has the ability to
    collide spaces with single geoms, and has the ability to collide spaces
    together. Geom groups are now spaces, geoms now have 'category' and
    'collide' bits for early culling, the behavior of various functions is more
    well defined, and geoms can be disabled/enabled.
    Internally, the collision system is now optimized for larger environments.
+@* Collision improvements: added support for multiple box-box contacts, added
+   the CCylinder-box collision case, added the ray geom class, added the
+   dGeomXXXPointDepth() functions, added a collision test infrastructure,
+   and some more tests.
+@* Fixed two problems in the LCP code to improve the reliability of the
+   dContactApprox1 contact mode.
+@* New API functions: dAreConnectedExcluding(), dBodySetGravityMode(),
+   dBodyGetGravityMode(), dSpaceQuery(), dCloseODE(), dBodySetForce(),
+   dBodySetTorque(), dWorldImpulseToForce(), dBodyGetPosRelPoint(),
+   dBodyGetPosRelPoint(), dBodyVectorToWorld(), dBodyVectorFromWorld(),
+   dBodyGetPointVel(), dGeomTransformSetInfo(), dGeomTransformGetInfo(),
+   dJointSetFeedback(), dJointGetFeedback(), dClosestLineSegmentPoints(),
+@* added the dParamCFM joint parameter.
 }
 
 
@@ -200,43 +209,6 @@ Here are the features:
 }
 
 
-@section{Future features}
-
-@subsection{Plan for 0.035 release}
-
-@list{
-@* Update documentation.
-@* Expose type-specific collision functions.
-@* More collision primitives: transformation objects.
-@* Improve box-box collision, especially for face-face contact.
-@* Internals documentation.
-@* Automatic code optimization process.
-}
-
-@subsection{Plan for 0.04 release}
-
-@list{
-@* Update documentation.
-@* Static (still) groups not simulated.
-@* SSE and 3DNow optimizations.
-@* Implicit body damping, with reference velocity.
-@* More collision primitives: flat-end cylinder? cone?
-@* Higher order integrators for higher accuracy. Also force callback functions.
-@* More internals documentation.
-@* More joints.
-}
-
-@subsection{Other stuff for later releases}
-
-@list{
-@* Simulation tutorial, full documentation of internals and methods.
-@* Collision: polyhedral objects, triangle soup.
-@* Add reduced coordinate methods for a major speed improvement on
-   tree-structured systems.
-@* Thread safe.
-}
-
-
 @section{ODE's license}
 
 ODE is Copyright &copy; 2001-2003 Russell L. Smith.
@@ -250,7 +222,8 @@ modify it under the terms of EITHER:
 	Foundation; either version 2.1 of the License, or (at your option)
 	any later version. The text of the GNU Lesser General Public License
 	is included with this library in the file @c{LICENSE.TXT}.
-@*	The BSD-style license that is included with this library in
+@*	The @link{http://opende.sourceforge.net/ode-license.html}{BSD-style
+	license} that is included with this library in
 	the file @c{LICENSE-BSD.TXT}.
 }
 This library is distributed in the hope that it will be useful,
