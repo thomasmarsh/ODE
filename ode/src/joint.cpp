@@ -387,6 +387,10 @@ int dxJointLimitMotor::addLimot (dxJoint *joint,
       J2[srow+2] = -ax1[2];
     }
 
+    // if we're limited low and high simultaneously, the joint motor is
+    // ineffective
+    if (limit && (lostop == histop)) powered = 0;
+
     if (powered) {
       if (! limit) {
 	info->c[row] = vel;
@@ -426,45 +430,55 @@ int dxJointLimitMotor::addLimot (dxJoint *joint,
     if (limit) {
       dReal k = info->fps * stop_erp;
       info->c[row] = -k * limit_err;
-      if (limit == 1) {
-	// low limit
-	info->lo[row] = 0;
+
+      if (lostop == histop) {
+	// limited low and high simultaneously
+	info->lo[row] = -dInfinity;
 	info->hi[row] = dInfinity;
       }
       else {
-	// high limit
-	info->lo[row] = -dInfinity;
-	info->hi[row] = 0;
-      }
-      info->cfm[row] = stop_cfm;
-
-      // deal with bounce
-      if (bounce > 0) {
-	// calculate joint velocity
-	dReal vel;
-	if (rotational) {
-	  vel = dDOT(joint->node[0].body->avel,ax1);
-	  if (joint->node[1].body) vel -= dDOT(joint->node[1].body->avel,ax1);
-	}
-	else {
-	  vel = dDOT(joint->node[0].body->lvel,ax1);
-	  if (joint->node[1].body) vel -= dDOT(joint->node[1].body->lvel,ax1);
-	}
-
-	// only apply bounce if the velocity is incoming, and if the
-	// resulting c[] exceeds what we already have.
 	if (limit == 1) {
 	  // low limit
-	  if (vel < 0) {
-	    dReal newc = -bounce * vel;
-	    if (newc > info->c[row]) info->c[row] = newc;
-	  }
+	  info->lo[row] = 0;
+	  info->hi[row] = dInfinity;
 	}
 	else {
-	  // high limit - all those computations are reversed
-	  if (vel > 0) {
-	    dReal newc = -bounce * vel;
-	    if (newc < info->c[row]) info->c[row] = newc;
+	  // high limit
+	  info->lo[row] = -dInfinity;
+	  info->hi[row] = 0;
+	}
+	info->cfm[row] = stop_cfm;
+
+	// deal with bounce
+	if (bounce > 0) {
+	  // calculate joint velocity
+	  dReal vel;
+	  if (rotational) {
+	    vel = dDOT(joint->node[0].body->avel,ax1);
+	    if (joint->node[1].body)
+	      vel -= dDOT(joint->node[1].body->avel,ax1);
+	  }
+	  else {
+	    vel = dDOT(joint->node[0].body->lvel,ax1);
+	    if (joint->node[1].body)
+	      vel -= dDOT(joint->node[1].body->lvel,ax1);
+	  }
+
+	  // only apply bounce if the velocity is incoming, and if the
+	  // resulting c[] exceeds what we already have.
+	  if (limit == 1) {
+	    // low limit
+	    if (vel < 0) {
+	      dReal newc = -bounce * vel;
+	      if (newc > info->c[row]) info->c[row] = newc;
+	    }
+	  }
+	  else {
+	    // high limit - all those computations are reversed
+	    if (vel > 0) {
+	      dReal newc = -bounce * vel;
+	      if (newc < info->c[row]) info->c[row] = newc;
+	    }
 	  }
 	}
       }
