@@ -9,6 +9,11 @@ the rules for this file:
 
 ------------------------------------------------------------------------------
 
+12/04/01 russ
+
+	* the "angular motor" joint has been completed, and a new section
+	  has been added to the documentation.
+
 11/26/01 russ
 
 	* added a new joint type: "angular motor". using this joint is a good
