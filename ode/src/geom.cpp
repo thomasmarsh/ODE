@@ -428,16 +428,22 @@ static dArray<dColliderEntry> *colliders=0;
 static inline void initCollisionArrays()
 {
   if (classes==0) {
-    classes = (dArray<dxGeomClass*> *) dAllocNoFree (sizeof(dArrayBase));
-    classes->constructor();
-    // old way, that fools memory leak detection:
-    //   classes = new dArray<dxGeomClass*>;
+    // old way:
+    //   classes = (dArray<dxGeomClass*> *) dAllocNoFree (sizeof(dArrayBase));
+    //   classes->constructor();
+    classes = new dArray<dxGeomClass*>;
+    classes->setSize (1);
+    dAllocDontReport (classes);
+    dAllocDontReport (classes->data());
   }
   if (colliders==0) {
-    colliders = (dArray<dColliderEntry> *) dAllocNoFree (sizeof(dArrayBase));
-    colliders->constructor();
-    // old way, that fools memory leak detection:
-    //   colliders = new dArray<dColliderEntry>;
+    // old way:
+    //   colliders=(dArray<dColliderEntry> *)dAllocNoFree (sizeof(dArrayBase));
+    //   colliders->constructor();
+    colliders = new dArray<dColliderEntry>;
+    colliders->setSize (1);
+    dAllocDontReport (colliders);
+    dAllocDontReport (colliders->data());
   }
 }
 
@@ -448,7 +454,8 @@ int dCreateGeomClass (const dGeomClass *c)
   initCollisionArrays();
 
   int n = classes->size();
-  dxGeomClass *gc = (dxGeomClass*) dAllocNoFree (sizeof(dxGeomClass));
+  dxGeomClass *gc = (dxGeomClass*) dAlloc (sizeof(dxGeomClass));
+  dAllocDontReport (gc);
   gc->collider = c->collider;
   gc->aabb = c->aabb;
   gc->num = n;
