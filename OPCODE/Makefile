@@ -51,6 +51,11 @@ libopcode.a: $(OBJ)
 clean:
 	-rm -f *.o Ice/*.o libopcode.a
 
+# GCC versions 3.X generate bad code for some modules
+# with -O2, so we use -O1 until we get this tied down a bit more.
+# There are at least two problematic code modules with -O2, one of
+# which is OPC_TreeCollider (if you identify the other, which causes
+# problems with trimesh-trimesh collisions, then let us know).
 %.o : %.cpp
 	g++ -c -o $@ -g -O1 -I. -fno-rtti -fno-exceptions $<
 
