@@ -44,7 +44,7 @@ ODE is being developed by @link{http://www.q12.org}{Russell Smith}.
 If ``rigid body simulation'' does not make much sense to you, check out
 @link{http://www.q12.org/ode/slides/slides.html}{What is a Physics SDK?}.
 
-The is the user guide for the fourth prototype release of ODE (version 0.03).
+This is the user guide for the fourth prototype release of ODE (version 0.03).
 This release is to help continue testing the core algorithms and solidifying
 the API.
 There will probably only be a few (hopefully minor) changes to the API in
@@ -231,6 +231,70 @@ See the GNU Lesser General Public License for more details.
 @section{Call for volunteers}
 
 Think you can help? Please @link{http://www.q12.org}{write to me}.
+
+#############################################################################
+@chapter{How to install and use ODE}
+
+@section{Installing ODE}
+
+@b{Step 1:}
+Unpack the ODE archive.
+
+@b{Step 2:}
+The configuration process is not currently automated, so you have to
+copy @c{build/Makefile.config.example} to @c{build/Makefile.config}
+and then edit the settings in the following files to match your
+platform:
+@list{
+@*	@c{build/Makefile.config}
+@*	@c{include/ode/config.h}
+}
+The currently supported platforms are Linux, and MS-windows using Visual C++, GCC-MinGW or CygWin. Other unixes may build with the Linux configuration.
+
+@b{Step 3:}
+You will need GNU make 3.78.1 or later.
+I have provided an appropriate version of GNU make for windows
+@link{http://q12.org/ode/snapshots/make.exe}{here}.
+
+@b{Step 4:}
+From the top level directory, type @c{make}.
+Be @emph{sure} you are using the correct version of GNU make.
+This will hopefully build all libraries and test applications.
+You can also type @c{make} from any sub directory to only build that
+directory and below.
+
+
+@section{Using ODE}
+
+The best way to understand how to use ODE is to look at the test/example
+programs that come with it. Note the following things:
+@list{
+@*	Source files that use ODE only need to include a single header file:
+@code{@[
+ #include "ode/ode.h"
+@]}
+	The @c{ode} directory in this statement is actually the 
+	@c{include/ode} directory of the ODE distribution.
+	This header file will include others in the @c{ode} directory,
+	so you need to set the include path of your compiler to @c{include},
+	e.g. in linux
+@code{@[
+ gcc -c -I /home/username/ode/include myprogram.cpp
+@]}
+@*	ODE can be compiled to use single or double precision variables.
+	To let the ODE header files know which precision is being used,
+	the user program must define one of the macros @c{dSINGLE} or
+	@c{dDOUBLE} before any ODE header files are included.
+	The easiest way to do this is on the compiler command line,
+	e.g. in linux
+@code{@[
+ gcc -c -I /home/username/ode/include -DdDOUBLE myprogram.cpp
+@]}
+@*	ODE makes heavy use of the stack for storing temporary values.
+	For very large systems several megabytes of stack can be used.
+	If you experience unexplained out-of-memory errors or data
+	corruption, especially on Windows, try increasing the stack size.
+}
 
 #############################################################################
 @chapter{Concepts}
