@@ -23,6 +23,14 @@
 #include <ode/common.h>
 #include <ode/odemath.h>
 
+// get some math functions under windows
+#ifdef WIN32
+#include <float.h>
+#ifndef CYGWIN			// added by andy for cygwin
+#define copysign(a,b) ((dReal)_copysign(a,b))
+#endif				// added by andy for cygwin
+#endif
+
 
 // this may be called for vectors `a' with extremely small magnitude, for
 // example the result of a cross product on two nearly perpendicular vectors.
