@@ -9,6 +9,10 @@ the rules for this file:
 
 ------------------------------------------------------------------------------
 
+07/29/03 martin
+
+	* added dJointAdd*Torque/Force().
+
 07/10/03 russ
 
 	* added the StepFast code, by David Whittaker.
