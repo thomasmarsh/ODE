@@ -1630,16 +1630,16 @@ both the contact normal and @c{fdir1}.
 Its members define the properties of the colliding surfaces.
 It has the following members:
 @list{
-@*	@c{int mode} - Contact flags. This must always be defined.
+@*	@c{int mode} - Contact flags. This must always be set.
 	This is a combination of one or more of the following flags:
 
 	@constdef{dContactMu2}{If not set, use @c{mu} for both friction
 		directions. If set, use @c{mu} for friction direction 1,
 		use @c{mu2} for friction direction 2.}
 	@constdef{dContactFDir1}{If set, take @c{fdir1} as friction direction
-		1, otherwise compute friction direction 1 to be perpendicular
-		to the contact normal (in which case its resulting orientation
-		is not defined).}
+		1, otherwise automatically compute friction direction 1 to be
+		perpendicular to the contact normal (in which case its
+		resulting orientation is unpredictable).}
 	@constdef{dContactBounce}{If set, the contact surface is bouncy,
 		in other words the bodies will bounce off each other.
 		The exact amount of bouncyness is controlled by the
@@ -1657,10 +1657,10 @@ It has the following members:
 		velocity in friction direction 1.}
 	@constdef{dContactMotion2}{The same thing as above, but for
 		friction direction 2.}
-	@constdef{dContactSlip1}{Slip, friction direction 1.
-		[this needs more description].}
-	@constdef{dContactSlip2}{Slip, friction direction 2.
-		[this needs more description].}
+	@constdef{dContactSlip1}{Force-dependent-slip (FDS) in friction
+		direction 1.}
+	@constdef{dContactSlip2}{Force-dependent-slip (FDS) in friction
+		direction 2.}
 	@constdef{dContactApprox1_1}{Use the friction pyramid approximation
 		for friction direction 1. If this is not specified then the
 		constant-force-limit approximation is used (and @c{mu} is a
@@ -1679,33 +1679,72 @@ It has the following members:
 	Note that frictionless contacts are less time consuming to compute
 	than ones with friction, and infinite friction contacts can be cheaper
 	than contacts with finite friction.
-	This must always be defined.
+	This must always be set.
 
 @*	@c{dReal mu2} : Optional Coulomb friction coefficient for friction
-		direction 2 (0..@c{dInfinity}). This is only defined if the
-		corresponding flag is set is @c{mode}.
+		direction 2 (0..@c{dInfinity}). This is only set if the
+		corresponding flag is set in @c{mode}.
 
 @*	@c{dReal bounce} : Restitution parameter (0..1).
 	0 means the surfaces are not bouncy at all, 1 is maximum bouncyness.
-	This is only defined if the corresponding flag is set is @c{mode}.
+	This is only set if the corresponding flag is set in @c{mode}.
 
 @*	@c{dReal bounce_vel} : The minimum incoming velocity necessary for
 	bounce (in m/s). Incoming velocities below this will effectively have
 	a bounce parameter of 0.
-	This is only defined if the corresponding flag is set is @c{mode}.
+	This is only set if the corresponding flag is set in @c{mode}.
 
 @*	@c{dReal soft_erp} : Contact normal ``softness'' parameter.
-	This is only defined if the corresponding flag is set is @c{mode}.
+	This is only set if the corresponding flag is set in @c{mode}.
 
 @*	@c{dReal soft_cfm} : Contact normal ``softness'' parameter.
-	This is only defined if the corresponding flag is set is @c{mode}.
+	This is only set if the corresponding flag is set in @c{mode}.
 
 @*	@c{dReal motion1,motion2} : Surface velocity in friction directions
-	1/2 (m/s).
-	This is only defined if the corresponding flag is set is @c{mode}.
+	1 and 2 (in m/s).
+	These are only set if the corresponding flags are set in @c{mode}.
 
-@*	@c{dReal slip1,slip2} : First order slip in friction directions 1/2.
-	This is only defined if the corresponding flag is set is @c{mode}.
+@*	@c{dReal slip1,slip2} : The coefficients of force-dependent-slip (FDS)
+	for friction directions 1 and 2.
+	These are only set if the corresponding flags are set in @c{mode}.
+
+	FDS is an effect that causes the contacting surfaces to side past each
+	other with a velocity that is proportional to the force that is
+	being applied tangentially to that surface.
+
+	Consider a contact point where the coefficient of friction @m{mu} is
+	infinite. Normally, if a force @m{f} is applied to the two contacting
+	surfaces, to try and get them to slide past each other, they will not
+	move.
+	However, if the FDS coefficient is set to a positive value @m{k}
+	then the surfaces will slide past each other, building up to a
+	steady velocity of @m{k*f} relative to each other.
+
+	Note that this is quite different from normal frictional effects:
+	the force does not cause a constant @emph{acceleration} of the surfaces
+	relative to each other - it causes a brief acceleration to achieve the
+	steady velocity.
+
+	This is useful for modeling some situations, in particular tires.
+	For example consider a car at rest on a road.
+	Pushing the car in its direction of travel will cause it to start
+	moving (i.e. the tires will start rolling).
+	Pushing the car in the perpendicular direction will have no effect, as
+	the tires do not roll in that direction.
+	However - if the car is moving at a velocity @m{v}, applying a force
+	@m{f} in the perpendicular direction will cause the tires to slip on
+	the road with a velocity proportional to @m{f*v} (Yes, this really
+	happens).
+
+	To model this in ODE set the tire-road contact parameters as follows:
+	set friction direction 1 in the direction that the tire is rolling in,
+	and set the FDS slip coefficient in friction direction 2 to @m{k*v},
+	where @m{v} is the tire rolling velocity and @m{k} is a tire parameter
+	that you can chose based on experimentation.
+
+	Note that FDS is quite separate from the sticking/slipping effects of
+	Coulomb friction - both modes can be used together at a single contact
+	point.
 }
 
 
