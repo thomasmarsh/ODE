@@ -653,7 +653,7 @@ static void drawCylinder (float l, float r, float zoffset)
   glVertex3d (0,0,l+zoffset);
   for (i=0; i<=n; i++) {
     if (i==1 || i==n/2+1)
-      setColor (color[0]*0.75,color[1]*0.75,color[2]*0.75,1);
+      setColor (color[0]*0.75f,color[1]*0.75f,color[2]*0.75f,1);
     glNormal3d (0,0,1);
     glVertex3d (ny*r,nz*r,l+zoffset);
     if (i==1 || i==n/2+1)
@@ -673,7 +673,7 @@ static void drawCylinder (float l, float r, float zoffset)
   glVertex3d (0,0,-l+zoffset);
   for (i=0; i<=n; i++) {
     if (i==1 || i==n/2+1)
-      setColor (color[0]*0.75,color[1]*0.75,color[2]*0.75,1);
+      setColor (color[0]*0.75f,color[1]*0.75f,color[2]*0.75f,1);
     glNormal3d (0,0,-1);
     glVertex3d (ny*r,nz*r,-l+zoffset);
     if (i==1 || i==n/2+1)
@@ -782,6 +782,9 @@ void dsStopGraphics()
   delete sky_texture;
   delete ground_texture;
   delete wood_texture;
+  sky_texture = 0;
+  ground_texture = 0;
+  wood_texture = 0;
 }
 
 
