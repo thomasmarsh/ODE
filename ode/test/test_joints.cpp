@@ -260,8 +260,8 @@ int setupTest (int n)
     }
     return 1;
 
-  case 250:			// limit bounce tests
-  case 251: {
+  case 250:			// limit bounce test (gravity down)
+  case 251: {			// ...gravity up
     constructWorldForTest ((n==251) ? 0.1 : -0.1, 2,
 			   0.5*SIDE,0,1+0.5*SIDE, -0.5*SIDE,0,1-0.5*SIDE,
 			   1,0,0, 1,0,0, 0,0);

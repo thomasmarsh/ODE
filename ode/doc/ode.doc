@@ -1,5 +1,5 @@
 
-@title{Open Dynamics Engine v0.03 User Guide}
+@title{Open Dynamics Engine v0.025 User Guide}
 @subtitle{Russell Smith, @date{}}
 @author{Russell Smith, @date{}}
 
@@ -23,7 +23,7 @@ ODE is being developed by @link{http://www.q12.org}{Russell Smith}.
 If ``rigid body simulation'' does not make much sense to you, check out
 @link{http://www.q12.org/ode/slides/slides.html}{What is a Physics SDK?}.
 
-The is the user guide for the third prototype release of ODE (version 0.03).
+The is the user guide for the third prototype release of ODE (version 0.025).
 This release is to help continue testing the core algorithms and solidifying
 the API.
 There will probably only be a few (hopefully minor) changes to the API in
@@ -91,6 +91,31 @@ Here are the features:
 @*	Other stuff I forgot to mention...
 }
 
+One current problem is that the @c{mu} parameter that controls Coulomb friction
+is not yet interpreted correctly - it specifies the maximum friction force
+that can be present at a contact, rather than specifying the maximum ratio of
+tangential to normal force. This will be fixed in the next release.
+[Note: I need lots more documentation about how the friction approximation
+works].
+
+
+@section{New in the 0.025 release}
+
+@list{
+@* Numerous bug fixes, including contacts.
+@* Updated documentation.
+@* Joint types: hinge, slider, ball and socket, hinge-2, fixed, contact.
+@* Special vehicle joint: hinge-2 - with steering and suspension.
+@* Powered hinge and slider joints (plus dry friction in those joints).
+@* Joint limits for hinge and slider.
+@* All contact modes work: bounce, soft, slip, restitution, tire slip.
+@* CFM (constraint force mixing) framework.
+@* New testing code.
+@* New demo - buggy that you can drive around.
+@* Cygwin (GNU on windows) builds now supported.
+}
+
+
 @section{New in the 0.02 release}
 
 @list{
@@ -105,27 +130,6 @@ Here are the features:
 @* Various bugs fixed.
 }
 
-One current problem is that the @c{mu} parameter that controls Coulomb friction
-is not yet interpreted correctly - it specifies the maximum friction force
-that can be present at a contact, rather than specifying the maximum ratio of
-tangential to normal force. This will be fixed in the next release.
-[Note: I need lots more documentation about how the friction approximation
-works].
-
-
-@section{New in the 0.03 release}
-
-@list{
-@* Numerous bug fixes, including contacts.
-@* Updated documentation.
-@* Joint types: hinge, slider, ball and socket, hinge-2, fixed, contact.
-@* Special vehicle joint: hinge-2 - with steering and suspension.
-@* Powered hinge and slider joints (plus dry friction in those joints).
-@* Joint limits for hinge and slider.
-@* All contact modes work: bounce, soft, slip, restitution, tire slip.
-@* CFM (constraint force mixing) framework.
-}
-
 
 @section{Future features}
 
@@ -134,14 +138,14 @@ works].
 @list{
 @* Update documentation.
 @* Improve the approximation to Coloumb friction.
-@* High level functions that create dynamics and collision objects together.
 @* Optimize LCP solver even more.
 @* Expose type-specific collision functions.
 @* More collision primitives: capped cylinder, composite objects.
 @* Improve box-box collision, especially for face-face contact.
-@* Some internals documentation.
+@* Internals documentation.
 @* Automatic code optimization process.
 @* Collision space: quick identification of potentially intersecting pairs.
+@* High level functions that create dynamics and collision objects together?
 }
 
 @subsection{Plan for 0.04 release}
@@ -151,11 +155,10 @@ works].
 @* Static (still) groups not simulated.
 @* SSE and 3DNow optimizations.
 @* Implicit body damping, with reference velocity.
-@* More collision primitives: flat-end cylinder, cone?
+@* More collision primitives: flat-end cylinder? cone?
 @* Higher order integrators for higher accuracy. Also force callback functions.
 @* More internals documentation.
 @* More joints.
-@* All joints powered with limits.
 }
 
 @subsection{Other stuff for later releases}
