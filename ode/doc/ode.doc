@@ -20,7 +20,7 @@
 #                                                                       #
 #########################################################################
 
-@title{Open Dynamics Engine v0.035 User Guide}
+@title{Open Dynamics Engine v0.039 User Guide}
 @subtitle{Russell Smith, @date{}}
 @author{Russell Smith, @date{}}
 
@@ -37,13 +37,15 @@ simulating articulated rigid body dynamics.
 For example, it is good for simulating ground vehicles, legged creatures,
 and moving objects in VR environments.
 It is fast, flexible and robust, and it has built-in collision detection.
-ODE is being developed by @link{http://www.q12.org}{Russell Smith}.
+ODE is being developed by @link{http://www.q12.org}{Russell Smith}
+with help from several
+@link{http://opende.sourceforge.net/community.html}{contributors}.
 
 If ``rigid body simulation'' does not make much sense to you, check out
 @link{http://opende.sourceforge.net/slides/slides.html}{What is a Physics
 SDK?}.
 
-This is the user guide for ODE version 0.035.
+This is the user guide for ODE version 0.039.
 Despite the low version number, ODE is reasonably mature and stable.
 
 
@@ -52,8 +54,9 @@ Despite the low version number, ODE is reasonably mature and stable.
 ODE is best for simulating @emph{articulated} rigid body structures.
 An articulated structure is created when rigid bodies of various shapes are
 connected together with joints of various kinds.
-Examples are ground vehicles (where the wheels are connected to the chassis)
-or legged creatures (where the legs are connected to the body).
+Examples are ground vehicles (where the wheels are connected to the chassis),
+legged creatures (where the legs are connected to the body), or stacks of
+objects.
 
 ODE is designed to be used in interactive or real-time simulation.
 It is particularly good for simulating moving objects in changeable
@@ -82,24 +85,27 @@ This is difficult to do right and extremely error-prone.
 
 ODE has a built-in collision detection system.
 However you can ignore it and do your own collision detection if you want to.
-The current collision primitives are sphere, box, capped cylinder, plane and
-ray - more collision objects will come later.
+The current collision primitives are sphere, box, capped cylinder, plane,
+ray, and triangular mesh - more collision objects will come later.
 ODE's collision system provides fast identification of potentially
 intersecting objects, through the concept of ``spaces''.
 
 Here are the features:
 @list{
-@*	Arbitrary mass distribution of the rigid bodies.
-@*	Current joint types: ball-and-socket, hinge, slider (prismatic),
+@*	Rigid bodies with arbitrary mass distribution.
+@*	Joint types: ball-and-socket, hinge, slider (prismatic),
 	hinge-2, fixed, angular motor, universal.
-@*	Current collision primitives: sphere, box, capped cylinder, plane
-	and ray.
+@*	Collision primitives: sphere, box, capped cylinder, plane,
+	ray, and triangular mesh.
+@*	Collision spaces: Quad tree, hash space, and simple.
 @*	Simulation method: The equations of motion are derived from a
 	Lagrange multiplier velocity based model due to Trinkle/Stewart and
 	Anitescu/Potra.
 @*	A first order integrator is being used. It's fast, but not accurate
 	enough for quantitative engineering yet. Higher order integrators
 	will come later.
+@*	Choice of time stepping methods: either the standard ``big matrix''
+	method or the newer iterative StepFast method can be used.
 @*	Contact and friction model: This is based on the Dantzig LCP solver
 	described by Baraff, although ODE implements a faster approximation
 	to the Coloumb friction model.
@@ -108,6 +114,23 @@ Here are the features:
 @*	Many unit tests, and more being written all the time.
 @*	Platform specific optimizations.
 @*	Other stuff I forgot to mention...
+}
+
+
+@section{New in the 0.039 release}
+
+@list{
+@*	A triangular mesh geometry class, contributed by Erwin de Vries.
+	To support this, the @link{http://www.codercorner.com/Opcode.htm}{OPCODE}
+	collision library has been added to the ODE distribution, with the
+	blessing of its author Pierre Terdiman.
+@*	A quad tree collision space, contributed by Erwin de Vries.
+@*	A new, fast iterative solver, contributed by David Whittaker.
+@*	Joint limits and motors have been added to the universal joints,
+	thanks to Martin C. Martin.
+@*	Miscellaneous functions: dMassSet*Total(), dJointGet*Anchor2(),
+	@func{dGeomSetQuaternion}, @func{dGeomGetQuaternion()}
+	@func{dGeomGetSpace()}, @func{dMassSetCylinder()}.
 }
 
 
@@ -4054,6 +4077,12 @@ of its own, with complete disregard for gravity.
 #############################################################################
 @chapter{FAQ}
 
+This chapter has some common questions and their answers.
+For further information, you can check out the
+@link{http://q12.org/cgi-bin/wiki.pl?ODE_Wiki_Area}{ODE Wiki},
+a community-supported website.
+
+
 @section{How do I connect a body to the static environment with a joint?}
 
 Use @func{dJointAttach} with arguments @c{(body,0)} or @c{(0,body)}.
@@ -4368,11 +4397,13 @@ friction. Thus it is still possible that you may encounter some
 examples of non-physical behavior.
 
 #############################################################################
-@chapter{Known BUGS}
+@chapter{Known issues}
 
 @list{
 @*	When assigning a mass to a rigid body, the center of mass must be
 	(0,0,0) relative to the body's position.
+	But in fact this limitation has been in ODE from the start, so
+	we can now regard it as a ``feature'' :)
 }
 
 #############################################################################
