@@ -189,7 +189,7 @@ static void handleEvent (XEvent &event, dsFunctions *fn)
     KeySym key;
     XLookupString (&event.xkey,NULL,0,&key,0);
     if ( (event.xkey.state & (ShiftMask | ControlMask)) == 0) {
-      if (key >= ' ' && key <= 126) fn->command (key);
+      if (key >= ' ' && key <= 126 && fn->command) fn->command (key);
     }
     else if (event.xkey.state & ControlMask) {
       switch (key) {
