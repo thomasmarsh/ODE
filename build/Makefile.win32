@@ -1,0 +1,49 @@
+
+PLATFORM=win32
+
+# convert a name into a library name or an executable name
+fLIBNAME=$(1).lib
+fEXENAME=$(1).exe
+
+# convert source file names to object file names
+fTARGETS=$(patsubst %.cpp,%.obj,$(filter %.cpp,$(1))) \
+	$(patsubst %.c,%.obj,$(filter %.c,$(1))) \
+	$(patsubst %.rc,%.res,$(filter %.rc,$(1)))
+
+# C++ RTTI options
+_RTTI_0=/GR-
+_RTTI_1=/GR
+_RTTI_=$(_RTTI_0)
+
+# C++ exception options
+_EX_0=/GX-
+_EX_1=/GX
+_EX_=$(_EX_0)
+
+# optimization options
+_OPT_0=
+_OPT_1=/O1
+_OPT_2=/O2
+_OPT_=$(_OPT_0)
+
+%.obj: %.cpp
+	cl /nologo /c /W3 /GF -DWIN32 $(_OPT_$(CPP_OPT)) $(addprefix /I,$(INCLUDE_PATHS)) $(addprefix /D,$(DEFINES)) $(_RTTI_$(CPP_RTTI)) $(_EX_$(CPP_EX)) $<
+
+%.res: %.rc
+	rc /r $<
+
+%.lib:
+	lib /nologo /SUBSYSTEM:WINDOWS /OUT:$@ $^
+
+fLINK=link /nologo /INCREMENTAL:NO /SUBSYSTEM:WINDOWS /OUT:$(1) $(addprefix /LIBPATH:,$(LIB_PATHS)) $(2) 
+fLIB=$(1).lib
+
+LINKMATH=
+LINKWIN=Comctl32.lib kernel32.lib user32.lib gdi32.lib
+LINKOPENGL=OpenGL32.lib Glu32.lib
+
+clean: clean_subdirs
+	-del *~ *.obj *.lib *.res $(EXTRA_CLEAN)
+
+make_depend:
+	@echo depend target does nothing under windows.
