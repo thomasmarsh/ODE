@@ -33,6 +33,9 @@
 #include "ode/memory.h"
 #include "ode/error.h"
 
+// misc defines
+#define ALLOCA dALLOCA16
+
 //****************************************************************************
 // utility
 
@@ -111,8 +114,8 @@ static void processIslands (dxWorld *world, dReal stepsize)
   if (world->nb <= 0) return;
 
   // make arrays for body and joint lists (for a single island) to go into
-  body = (dxBody**) alloca (world->nb * sizeof(dxBody*));
-  joint = (dxJoint**) alloca (world->nj * sizeof(dxJoint*));
+  body = (dxBody**) ALLOCA (world->nb * sizeof(dxBody*));
+  joint = (dxJoint**) ALLOCA (world->nj * sizeof(dxJoint*));
   int bcount = 0;	// number of bodies in `body'
   int jcount = 0;	// number of joints in `joint'
 
@@ -125,7 +128,7 @@ static void processIslands (dxWorld *world, dReal stepsize)
   // new bodies are only ever added to the stack by going through untagged
   // joints. all the bodies in the stack must be tagged!
   int stackalloc = (world->nj < world->nb) ? world->nj : world->nb;
-  dxBody **stack = (dxBody**) alloca (stackalloc * sizeof(dxBody*));
+  dxBody **stack = (dxBody**) ALLOCA (stackalloc * sizeof(dxBody*));
 
   for (bb=world->firstbody; bb; bb=(dxBody*)bb->next) {
     // get bb = the next untagged body, and tag it
@@ -557,19 +560,19 @@ static dxJoint *createJoint (dWorldID w, dJointGroupID group,
 
 dxJoint * dJointCreateBall (dWorldID w, dJointGroupID group)
 {
-  return createJoint (w,group,&dball_vtable);
+  return createJoint (w,group,&__dball_vtable);
 }
 
 
 dxJoint * dJointCreateHinge (dWorldID w, dJointGroupID group)
 {
-  return createJoint (w,group,&dhinge_vtable);
+  return createJoint (w,group,&__dhinge_vtable);
 }
 
 
 dxJoint * dJointCreateSlider (dWorldID w, dJointGroupID group)
 {
-  return createJoint (w,group,&dslider_vtable);
+  return createJoint (w,group,&__dslider_vtable);
 }
 
 
@@ -577,7 +580,7 @@ dxJoint * dJointCreateContact (dWorldID w, dJointGroupID group,
 			       const dContact *c)
 {
   dxJointContact *j = (dxJointContact *)
-    createJoint (w,group,&dcontact_vtable);
+    createJoint (w,group,&__dcontact_vtable);
   j->contact = *c;
   return j;
 }
@@ -622,7 +625,7 @@ void dJointGroupEmpty (dJointGroupID group)
   // be at the start of those lists.
 
   int i;
-  dxJoint **jlist = (dxJoint**) alloca (group->num * sizeof(dxJoint*));
+  dxJoint **jlist = (dxJoint**) ALLOCA (group->num * sizeof(dxJoint*));
   dxJoint *j = group->firstjoint;
   for (i=0; i < group->num; i++) {
     jlist[i] = j;
@@ -679,40 +682,6 @@ void dJointAttach (dxJoint *joint, dxBody *body1, dxBody *body2)
   else {
     joint->node[0].next = 0;
   }
-}
-
-
-void dJointSetAnchor (dJointID j, dReal x, dReal y, dReal z)
-{
-  dCHECKPTR(j);
-  if (j->vtable->setAnchor) j->vtable->setAnchor (j,x,y,z);
-  else dDebug (d_ERR_BAD_ARGS,"can not set anchor on this joint");
-}
-
-
-void dJointSetAxis (dJointID j, dReal x, dReal y, dReal z)
-{
-  dCHECKPTR(j);
-  if (j->vtable->setAxis) j->vtable->setAxis (j,x,y,z);
-  else dDebug (d_ERR_BAD_ARGS,"can not set axis on this joint");
-}
-
-
-void dJointGetAnchor (dJointID j, dVector3 result)
-{
-  dCHECKPTR(j);
-  dCHECKPTR(result);
-  if (j->vtable->getAnchor) j->vtable->getAnchor (j,result);
-  else dDebug (d_ERR_BAD_ARGS,"can not get anchor on this joint");
-}
-
-
-void dJointGetAxis (dJointID j, dVector3 result)
-{
-  dCHECKPTR(j);
-  dCHECKPTR(result);
-  if (j->vtable->getAxis) j->vtable->getAxis (j,result);
-  else dDebug (d_ERR_BAD_ARGS,"can not get axis on this joint");
 }
 
 

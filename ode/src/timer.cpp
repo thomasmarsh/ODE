@@ -33,6 +33,9 @@ TODO
 #include "ode/timer.h"
 #include "ode/config.h"
 
+// misc defines
+#define ALLOCA dALLOCA16
+
 //****************************************************************************
 // implementation for windows based on the multimedia performance counter.
 
@@ -334,7 +337,7 @@ void dTimerReport (FILE *fout, int average)
   if (total <= 0) total = 1;
 
   // compute time difference for all slots except the last one. update totals
-  double *times = (double*) alloca (num * sizeof(double));
+  double *times = (double*) ALLOCA (num * sizeof(double));
   for (i=0; i < (num-1); i++) {
     double t1 = loadClockCount (event[i].cc);
     double t2 = loadClockCount (event[i+1].cc);
