@@ -135,6 +135,7 @@ struct dxJointHinge : public dxJoint {
   dVector3 anchor2;		// anchor w.r.t second body
   dVector3 axis1;		// axis w.r.t first body
   dVector3 axis2;		// axis w.r.t second body
+  dQuaternion qrel;		// initial relative rotation body1 -> body2
 };
 extern struct dxJoint::Vtable __dhinge_vtable;
 
