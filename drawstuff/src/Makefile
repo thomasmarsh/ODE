@@ -15,7 +15,7 @@ endif
 
 all: $(LIB)
 ifeq ($(PLATFORM_IS_WINDOWS),1)
-	copy resources.RES ..\..\lib\drawstuff.res
+	$(COPY_CMD) resources.RES ../../lib/drawstuff.res
 endif
 
 $(LIB): $(call fTARGETS,$(SRC))
