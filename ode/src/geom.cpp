@@ -819,8 +819,6 @@ int dCollideBB (const dxGeom *o1, const dxGeom *o2, int flags,
   dVector3 normal;
   dReal depth;
   int code;
-  contact->g1 = const_cast<dxGeom*> (o1);
-  contact->g2 = const_cast<dxGeom*> (o2);
   dxBox *b1 = (dxBox*) CLASSDATA(o1);
   dxBox *b2 = (dxBox*) CLASSDATA(o2);
   int num = dBoxBox (o1->pos,o1->R,b1->side, o2->pos,o2->R,b2->side,
@@ -829,6 +827,8 @@ int dCollideBB (const dxGeom *o1, const dxGeom *o2, int flags,
     CONTACT(contact,i*skip)->normal[0] = -normal[0];
     CONTACT(contact,i*skip)->normal[1] = -normal[1];
     CONTACT(contact,i*skip)->normal[2] = -normal[2];
+    CONTACT(contact,i*skip)->g1 = const_cast<dxGeom*> (o1);
+    CONTACT(contact,i*skip)->g2 = const_cast<dxGeom*> (o2);
   }
   return num;
 }
@@ -844,6 +844,7 @@ int dCollideBP (const dxGeom *o1, const dxGeom *o2,
   contact->g2 = const_cast<dxGeom*> (o2);
   dxBox *box = (dxBox*) CLASSDATA(o1);
   dxPlane *plane = (dxPlane*) CLASSDATA(o2);
+  int ret = 0;
 
   //@@@ problem: using 4-vector (plane->p) as 3-vector (normal).
   const dReal *R = o1->R;		// rotation of box
@@ -893,7 +894,10 @@ int dCollideBP (const dxGeom *o1, const dxGeom *o2,
   contact->normal[1] = n[1];
   contact->normal[2] = n[2];
   contact->depth = depth;
-  if (maxc == 1) return 1;
+  if (maxc == 1) {
+    ret = 1;
+    goto done;
+  }
 
   // get the second and third contact points by starting from `p' and going
   // along the two sides with the smallest projected length.
@@ -904,7 +908,10 @@ int dCollideBP (const dxGeom *o1, const dxGeom *o2,
   CONTACT(contact,i*skip)->pos[2] = p[2] op box->side[j] * R[8+j];
 #define BAR(ctact,side,sideinc) \
   depth -= B ## sideinc; \
-  if (depth < 0) return 1; \
+  if (depth < 0) { \
+    ret = 1; \
+    goto done; \
+  } \
   if (A ## sideinc > 0) { FOO(ctact,side,+) } else { FOO(ctact,side,-) } \
   CONTACT(contact,ctact*skip)->depth = depth;
 
@@ -920,7 +927,10 @@ int dCollideBP (const dxGeom *o1, const dxGeom *o2,
   if (B1 < B2) {
     if (B3 < B1) goto use_side_3; else {
       BAR(1,0,1);	// use side 1
-      if (maxc == 2) return 2;
+      if (maxc == 2) {
+	ret = 2;
+	goto done;
+      }
       if (B2 < B3) goto contact2_2; else goto contact2_3;
     }
   }
@@ -928,21 +938,34 @@ int dCollideBP (const dxGeom *o1, const dxGeom *o2,
     if (B3 < B2) {
       use_side_3:	// use side 3
       BAR(1,2,3);
-      if (maxc == 2) return 2;
+      if (maxc == 2) {
+	ret = 2;
+	goto done;
+      }
       if (B1 < B2) goto contact2_1; else goto contact2_2;
     }
     else {
       BAR(1,1,2);	// use side 2
-      if (maxc == 2) return 2;
+      if (maxc == 2) {
+	ret = 2;
+	goto done;
+      }
       if (B1 < B3) goto contact2_1; else goto contact2_3;
     }
   }
 
-  contact2_1: BAR(2,0,1); return 3;
-  contact2_2: BAR(2,1,2); return 3;
-  contact2_3: BAR(2,2,3); return 3;
+  contact2_1: BAR(2,0,1); ret = 3; goto done;
+  contact2_2: BAR(2,1,2); ret = 3; goto done;
+  contact2_3: BAR(2,2,3); ret = 3; goto done;
 #undef FOO
 #undef BAR
+
+ done:
+  for (int i=0; i<ret; i++) {
+    CONTACT(contact,i*skip)->g1 = const_cast<dxGeom*> (o1);
+    CONTACT(contact,i*skip)->g2 = const_cast<dxGeom*> (o2);
+  }
+  return ret;
 }
 
 
@@ -997,41 +1020,38 @@ int dCollideCP (const dxGeom *o1, const dxGeom *o2, int flags,
   dIASSERT (skip >= (int)sizeof(dContactGeom));
   dIASSERT (o1->_class->num == dCCylinderClass);
   dIASSERT (o2->_class->num == dPlaneClass);
-  contact->g1 = const_cast<dxGeom*> (o1);
-  contact->g2 = const_cast<dxGeom*> (o2);
   dxCCylinder *ccyl = (dxCCylinder*) CLASSDATA(o1);
   dxPlane *plane = (dxPlane*) CLASSDATA(o2);
 
-  // collide first capping sphere with the plane
+  // collide the deepest capping sphere with the plane
+  dReal sign = (dDOT14 (plane->p,o1->R+2) > 0) ? -1 : 1;
   dVector3 p;
-  p[0] = o1->pos[0] + o1->R[2]  * ccyl->lz * REAL(0.5);
-  p[1] = o1->pos[1] + o1->R[6]  * ccyl->lz * REAL(0.5);
-  p[2] = o1->pos[2] + o1->R[10] * ccyl->lz * REAL(0.5);
+  p[0] = o1->pos[0] + o1->R[2]  * ccyl->lz * REAL(0.5) * sign;
+  p[1] = o1->pos[1] + o1->R[6]  * ccyl->lz * REAL(0.5) * sign;
+  p[2] = o1->pos[2] + o1->R[10] * ccyl->lz * REAL(0.5) * sign;
 
-  int ncontacts = 0;
   dReal k = dDOT (p,plane->p);
   dReal depth = plane->p[3] - k + ccyl->radius;
-  if (depth >= 0) {
-    contact->normal[0] = plane->p[0];
-    contact->normal[1] = plane->p[1];
-    contact->normal[2] = plane->p[2];
-    contact->pos[0] = p[0] - plane->p[0] * ccyl->radius;
-    contact->pos[1] = p[1] - plane->p[1] * ccyl->radius;
-    contact->pos[2] = p[2] - plane->p[2] * ccyl->radius;
-    contact->depth = depth;
-    ncontacts = 1;
-  }
+  if (depth < 0) return 0;
+  contact->normal[0] = plane->p[0];
+  contact->normal[1] = plane->p[1];
+  contact->normal[2] = plane->p[2];
+  contact->pos[0] = p[0] - plane->p[0] * ccyl->radius;
+  contact->pos[1] = p[1] - plane->p[1] * ccyl->radius;
+  contact->pos[2] = p[2] - plane->p[2] * ccyl->radius;
+  contact->depth = depth;
 
+  int ncontacts = 1;
   if ((flags & 0xff) >= 2) {
-    // collide second capping sphere with the plane
-    p[0] = o1->pos[0] - o1->R[2]  * ccyl->lz * REAL(0.5);
-    p[1] = o1->pos[1] - o1->R[6]  * ccyl->lz * REAL(0.5);
-    p[2] = o1->pos[2] - o1->R[10] * ccyl->lz * REAL(0.5);
+    // collide the other capping sphere with the plane
+    p[0] = o1->pos[0] - o1->R[2]  * ccyl->lz * REAL(0.5) * sign;
+    p[1] = o1->pos[1] - o1->R[6]  * ccyl->lz * REAL(0.5) * sign;
+    p[2] = o1->pos[2] - o1->R[10] * ccyl->lz * REAL(0.5) * sign;
 
     k = dDOT (p,plane->p);
     depth = plane->p[3] - k + ccyl->radius;
     if (depth >= 0) {
-      dContactGeom *c2 = CONTACT(contact,ncontacts*skip);
+      dContactGeom *c2 = CONTACT(contact,skip);
       c2->normal[0] = plane->p[0];
       c2->normal[1] = plane->p[1];
       c2->normal[2] = plane->p[2];
@@ -1039,10 +1059,14 @@ int dCollideCP (const dxGeom *o1, const dxGeom *o2, int flags,
       c2->pos[1] = p[1] - plane->p[1] * ccyl->radius;
       c2->pos[2] = p[2] - plane->p[2] * ccyl->radius;
       c2->depth = depth;
-      ncontacts++;
+      ncontacts = 2;
     }
   }
 
+  for (int i=0; i < ncontacts; i++) {
+    CONTACT(contact,i*skip)->g1 = const_cast<dxGeom*> (o1);
+    CONTACT(contact,i*skip)->g2 = const_cast<dxGeom*> (o2);
+  }
   return ncontacts;
 }
 
