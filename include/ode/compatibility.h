@@ -20,51 +20,21 @@
  *                                                                       *
  *************************************************************************/
 
-#ifndef _ODE_ROTATION_H_
-#define _ODE_ROTATION_H_
+#ifndef _ODE_COMPATIBILITY_H_
+#define _ODE_COMPATIBILITY_H_
 
-#include <ode/common.h>
-#include <ode/compatibility.h>
+/*
+ * ODE's backward compatibility system ensures that as ODE's API
+ * evolves, user code will not break.
+ */
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+/*
+ * These new rotation function names are more consistent with the
+ * rest of the API.
+ */
+#define dQtoR(q,R) dRfromQ((R),(q))
+#define dRtoQ(R,q) dQfromR((q),(R))
+#define dWtoDQ(w,q,dq) dDQfromW((dq),(w),(q))
 
-
-void dRSetIdentity (dMatrix3 R);
-
-void dRFromAxisAndAngle (dMatrix3 R, dReal ax, dReal ay, dReal az,
-			 dReal angle);
-
-void dRFromEulerAngles (dMatrix3 R, dReal phi, dReal theta, dReal psi);
-
-void dRFrom2Axes (dMatrix3 R, dReal ax, dReal ay, dReal az,
-		  dReal bx, dReal by, dReal bz);
-
-void dRFromZAxis (dMatrix3 R, dReal ax, dReal ay, dReal az);
-
-void dQSetIdentity (dQuaternion q);
-
-void dQFromAxisAndAngle (dQuaternion q, dReal ax, dReal ay, dReal az,
-			 dReal angle);
-
-/* Quaternion multiplication, analogous to the matrix multiplication routines. */
-/* qa = rotate by qc, then qb */
-void dQMultiply0 (dQuaternion qa, const dQuaternion qb, const dQuaternion qc);
-/* qa = rotate by qc, then by inverse of qb */
-void dQMultiply1 (dQuaternion qa, const dQuaternion qb, const dQuaternion qc);
-/* qa = rotate by inverse of qc, then by qb */
-void dQMultiply2 (dQuaternion qa, const dQuaternion qb, const dQuaternion qc);
-/* qa = rotate by inverse of qc, then by inverse of qb */
-void dQMultiply3 (dQuaternion qa, const dQuaternion qb, const dQuaternion qc);
-
-void dRfromQ (dMatrix3 R, const dQuaternion q);
-void dQfromR (dQuaternion q, const dMatrix3 R);
-void dDQfromW (dReal dq[4], const dVector3 w, const dQuaternion q);
-
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif

@@ -25,33 +25,76 @@
 
 #include <ode/common.h>
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+
+/*
+ * macro to access elements i,j in an NxM matrix A, independent of the
+ * matrix storage convention.
+ */
+#define dACCESS33(A,i,j) ((A)[(i)*4+(j)])
 
 
-/* 3-way dot product. dDOTpq means that elements of `a' and `b' are spaced
+/*
+ * 3-way dot product. dDOTpq means that elements of `a' and `b' are spaced
  * p and q indexes apart respectively. dDOT() means dDOT11.
+ * in C++ we could use function templates to get all the versions of these
+ * functions - but on some compilers this will result in sub-optimal code.
  */
 
+#define dDOTpq(a,b,p,q) ((a)[0]*(b)[0] + (a)[p]*(b)[q] + (a)[2*(p)]*(b)[2*(q)])
+
 #ifdef __cplusplus
-inline dReal dDOT (const dReal *a, const dReal *b)
-  { return ((a)[0]*(b)[0] + (a)[1]*(b)[1] + (a)[2]*(b)[2]); }
-inline dReal dDOT14(const dReal *a, const dReal *b)
-  { return ((a)[0]*(b)[0] + (a)[1]*(b)[4] + (a)[2]*(b)[8]); }
-inline dReal dDOT41(const dReal *a, const dReal *b)
-  { return ((a)[0]*(b)[0] + (a)[4]*(b)[1] + (a)[8]*(b)[2]); }
-inline dReal dDOT44(const dReal *a, const dReal *b)
-  { return ((a)[0]*(b)[0] + (a)[4]*(b)[4] + (a)[8]*(b)[8]); }
+
+/* authoritative block */
+extern inline float dDOT   (const float *a, const float *b) { return dDOTpq(a,b,1,1); }
+extern inline float dDOT13 (const float *a, const float *b) { return dDOTpq(a,b,1,3); }
+extern inline float dDOT31 (const float *a, const float *b) { return dDOTpq(a,b,3,1); }
+extern inline float dDOT33 (const float *a, const float *b) { return dDOTpq(a,b,3,3); }
+extern inline float dDOT14 (const float *a, const float *b) { return dDOTpq(a,b,1,4); }
+extern inline float dDOT41 (const float *a, const float *b) { return dDOTpq(a,b,4,1); }
+extern inline float dDOT44 (const float *a, const float *b) { return dDOTpq(a,b,4,4); }
+
+/* copy of authoritative block, with types changed */
+extern inline double dDOT   (const double *a, const double *b) { return dDOTpq(a,b,1,1); }
+extern inline double dDOT13 (const double *a, const double *b) { return dDOTpq(a,b,1,3); }
+extern inline double dDOT31 (const double *a, const double *b) { return dDOTpq(a,b,3,1); }
+extern inline double dDOT33 (const double *a, const double *b) { return dDOTpq(a,b,3,3); }
+extern inline double dDOT14 (const double *a, const double *b) { return dDOTpq(a,b,1,4); }
+extern inline double dDOT41 (const double *a, const double *b) { return dDOTpq(a,b,4,1); }
+extern inline double dDOT44 (const double *a, const double *b) { return dDOTpq(a,b,4,4); }
+
+/* copy of authoritative block, with types changed */
+extern inline double dDOT   (const float *a, const double *b) { return dDOTpq(a,b,1,1); }
+extern inline double dDOT13 (const float *a, const double *b) { return dDOTpq(a,b,1,3); }
+extern inline double dDOT31 (const float *a, const double *b) { return dDOTpq(a,b,3,1); }
+extern inline double dDOT33 (const float *a, const double *b) { return dDOTpq(a,b,3,3); }
+extern inline double dDOT14 (const float *a, const double *b) { return dDOTpq(a,b,1,4); }
+extern inline double dDOT41 (const float *a, const double *b) { return dDOTpq(a,b,4,1); }
+extern inline double dDOT44 (const float *a, const double *b) { return dDOTpq(a,b,4,4); }
+
+/* copy of authoritative block, with types changed */
+extern inline double dDOT   (const double *a, const float *b) { return dDOTpq(a,b,1,1); }
+extern inline double dDOT13 (const double *a, const float *b) { return dDOTpq(a,b,1,3); }
+extern inline double dDOT31 (const double *a, const float *b) { return dDOTpq(a,b,3,1); }
+extern inline double dDOT33 (const double *a, const float *b) { return dDOTpq(a,b,3,3); }
+extern inline double dDOT14 (const double *a, const float *b) { return dDOTpq(a,b,1,4); }
+extern inline double dDOT41 (const double *a, const float *b) { return dDOTpq(a,b,4,1); }
+extern inline double dDOT44 (const double *a, const float *b) { return dDOTpq(a,b,4,4); }
+
 #else
-#define dDOT(a,b)   ((a)[0]*(b)[0] + (a)[1]*(b)[1] + (a)[2]*(b)[2])
-#define dDOT14(a,b) ((a)[0]*(b)[0] + (a)[1]*(b)[4] + (a)[2]*(b)[8])
-#define dDOT41(a,b) ((a)[0]*(b)[0] + (a)[4]*(b)[1] + (a)[8]*(b)[2])
-#define dDOT44(a,b) ((a)[0]*(b)[0] + (a)[4]*(b)[4] + (a)[8]*(b)[8])
-#endif
+
+#define dDOT(a,b)   dDOTpq(a,b,1,1)
+#define dDOT13(a,b) dDOTpq(a,b,1,3)
+#define dDOT31(a,b) dDOTpq(a,b,3,1)
+#define dDOT33(a,b) dDOTpq(a,b,3,3)
+#define dDOT14(a,b) dDOTpq(a,b,1,4)
+#define dDOT41(a,b) dDOTpq(a,b,4,1)
+#define dDOT44(a,b) dDOTpq(a,b,4,4)
+
+#endif /* __cplusplus */
 
 
-/* cross product, set a = b x c. dCROSSpqr means that elements of `a', `b'
+/*
+ * cross product, set a = b x c. dCROSSpqr means that elements of `a', `b'
  * and `c' are spaced p, q and r indexes apart respectively.
  * dCROSS() means dCROSS111. `op' is normally `=', but you can set it to
  * +=, -= etc to get other effects.
@@ -74,7 +117,8 @@ inline dReal dDOT44(const dReal *a, const dReal *b)
 #define dCROSS444(a,op,b,c) dCROSSpqr(a,op,b,c,4,4,4)
 
 
-/* set a 3x3 submatrix of A to a matrix such that submatrix(A)*b = a x b.
+/*
+ * set a 3x3 submatrix of A to a matrix such that submatrix(A)*b = a x b.
  * A is stored by rows, and has `skip' elements per row. the matrix is
  * assumed to be already zero, so this does not write zero elements!
  * if (plus,minus) is (+,-) then a positive version will be written.
@@ -90,34 +134,24 @@ inline dReal dDOT44(const dReal *a, const dReal *b)
   (A)[2*(skip)+1] = plus (a)[0];
 
 
-/* compute the distance between two 3-vectors (oops, C++!) */
+/*
+ * compute the distance between two 3-vectors
+ */
+
 #ifdef __cplusplus
-inline dReal dDISTANCE (const dVector3 a, const dVector3 b)
-  { return dSqrt( (a[0]-b[0])*(a[0]-b[0]) + (a[1]-b[1])*(a[1]-b[1]) +
-		   (a[2]-b[2])*(a[2]-b[2]) ); }
+extern inline float dDISTANCE (const float a[3], const float b[3])
+	{ return dSqrt( (a[0]-b[0])*(a[0]-b[0]) + (a[1]-b[1])*(a[1]-b[1]) + (a[2]-b[2])*(a[2]-b[2]) ); }
+extern inline double dDISTANCE (const double a[3], const double b[3])
+	{ return dSqrt( (a[0]-b[0])*(a[0]-b[0]) + (a[1]-b[1])*(a[1]-b[1]) + (a[2]-b[2])*(a[2]-b[2]) ); }
 #else
 #define dDISTANCE(a,b) \
- (dSqrt( ((a)[0]-(b)[0])*((a)[0]-(b)[0]) + ((a)[1]-(b)[1])*((a)[1]-(b)[1]) + \
-	 ((a)[2]-(b)[2])*((a)[2]-(b)[2]) ))
+	(dSqrt( ((a)[0]-(b)[0])*((a)[0]-(b)[0]) + ((a)[1]-(b)[1])*((a)[1]-(b)[1]) + ((a)[2]-(b)[2])*((a)[2]-(b)[2]) ))
 #endif
 
 
-/* normalize 3x1 and 4x1 vectors (i.e. scale them to unit length) */
-void dNormalize3 (dVector3 a);
-void dNormalize4 (dVector4 a);
-
-
-/* given a unit length "normal" vector n, generate vectors p and q vectors
- * that are an orthonormal basis for the plane space perpendicular to n.
- * i.e. this makes p,q such that n,p,q are all perpendicular to each other.
- * q will equal n x p. if n is not unit length then p will be unit length but
- * q wont be.
+/*
+ * special case matrix multipication, with operator selection
  */
-
-void dPlaneSpace (const dVector3 n, dVector3 p, dVector3 q);
-
-
-/* special case matrix multipication, with operator selection */
 
 #define dMULTIPLYOP0_331(A,op,B,C) \
   (A)[0] op dDOT((B),(C)); \
@@ -164,31 +198,23 @@ void dPlaneSpace (const dVector3 n, dVector3 p, dVector3 q);
 
 #ifdef __cplusplus
 
-inline void dMULTIPLY0_331(dReal *A, const dReal *B, const dReal *C)
-  { dMULTIPLYOP0_331(A,=,B,C) }
-inline void dMULTIPLY1_331(dReal *A, const dReal *B, const dReal *C)
-  { dMULTIPLYOP1_331(A,=,B,C) }
-inline void dMULTIPLY0_133(dReal *A, const dReal *B, const dReal *C)
-  { dMULTIPLYOP0_133(A,=,B,C) }
-inline void dMULTIPLY0_333(dReal *A, const dReal *B, const dReal *C)
-  { dMULTIPLYOP0_333(A,=,B,C) }
-inline void dMULTIPLY1_333(dReal *A, const dReal *B, const dReal *C)
-  { dMULTIPLYOP1_333(A,=,B,C) }
-inline void dMULTIPLY2_333(dReal *A, const dReal *B, const dReal *C)
-  { dMULTIPLYOP2_333(A,=,B,C) }
+#define DECL template <class TA, class TB, class TC> extern inline void
 
-inline void dMULTIPLYADD0_331(dReal *A, const dReal *B, const dReal *C)
-  { dMULTIPLYOP0_331(A,+=,B,C) }
-inline void dMULTIPLYADD1_331(dReal *A, const dReal *B, const dReal *C)
-  { dMULTIPLYOP1_331(A,+=,B,C) }
-inline void dMULTIPLYADD0_133(dReal *A, const dReal *B, const dReal *C)
-  { dMULTIPLYOP0_133(A,+=,B,C) }
-inline void dMULTIPLYADD0_333(dReal *A, const dReal *B, const dReal *C)
-  { dMULTIPLYOP0_333(A,+=,B,C) }
-inline void dMULTIPLYADD1_333(dReal *A, const dReal *B, const dReal *C)
-  { dMULTIPLYOP1_333(A,+=,B,C) }
-inline void dMULTIPLYADD2_333(dReal *A, const dReal *B, const dReal *C)
-  { dMULTIPLYOP2_333(A,+=,B,C) }
+DECL dMULTIPLY0_331(TA *A, const TB *B, const TC *C) { dMULTIPLYOP0_331(A,=,B,C) }
+DECL dMULTIPLY1_331(TA *A, const TB *B, const TC *C) { dMULTIPLYOP1_331(A,=,B,C) }
+DECL dMULTIPLY0_133(TA *A, const TB *B, const TC *C) { dMULTIPLYOP0_133(A,=,B,C) }
+DECL dMULTIPLY0_333(TA *A, const TB *B, const TC *C) { dMULTIPLYOP0_333(A,=,B,C) }
+DECL dMULTIPLY1_333(TA *A, const TB *B, const TC *C) { dMULTIPLYOP1_333(A,=,B,C) }
+DECL dMULTIPLY2_333(TA *A, const TB *B, const TC *C) { dMULTIPLYOP2_333(A,=,B,C) }
+
+DECL dMULTIPLYADD0_331(TA *A, const TB *B, const TC *C) { dMULTIPLYOP0_331(A,+=,B,C) }
+DECL dMULTIPLYADD1_331(TA *A, const TB *B, const TC *C) { dMULTIPLYOP1_331(A,+=,B,C) }
+DECL dMULTIPLYADD0_133(TA *A, const TB *B, const TC *C) { dMULTIPLYOP0_133(A,+=,B,C) }
+DECL dMULTIPLYADD0_333(TA *A, const TB *B, const TC *C) { dMULTIPLYOP0_333(A,+=,B,C) }
+DECL dMULTIPLYADD1_333(TA *A, const TB *B, const TC *C) { dMULTIPLYOP1_333(A,+=,B,C) }
+DECL dMULTIPLYADD2_333(TA *A, const TB *B, const TC *C) { dMULTIPLYOP2_333(A,+=,B,C) }
+
+#undef DECL
 
 #else
 
@@ -208,6 +234,27 @@ inline void dMULTIPLYADD2_333(dReal *A, const dReal *B, const dReal *C)
 
 #endif
 
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+/*
+ * normalize 3x1 and 4x1 vectors (i.e. scale them to unit length)
+ */
+void dNormalize3 (dVector3 a);
+void dNormalize4 (dVector4 a);
+
+
+/*
+ * given a unit length "normal" vector n, generate vectors p and q vectors
+ * that are an orthonormal basis for the plane space perpendicular to n.
+ * i.e. this makes p,q such that n,p,q are all perpendicular to each other.
+ * q will equal n x p. if n is not unit length then p will be unit length but
+ * q wont be.
+ */
+
+void dPlaneSpace (const dVector3 n, dVector3 p, dVector3 q);
 
 #ifdef __cplusplus
 }
