@@ -15,6 +15,7 @@ manage openGL state changes better
 
 #ifdef WIN32
 #include <windows.h>
+#include <malloc.h>		// to get alloca()
 #endif
 
 #include <stdio.h>
