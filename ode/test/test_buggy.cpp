@@ -51,7 +51,6 @@ static dWorldID world;
 static dSpaceID space;
 static dBodyID body[4];
 static dJointID joint[3];	// joint[0] is the front wheel
-static dJointID dmotor,smotor;	// front wheel drive & steering motors
 static dJointGroupID contactgroup;
 static dGeomID ground;
 static dGeomID box[1];
@@ -110,10 +109,10 @@ static void command (int cmd)
     speed -= 0.3;
     break;
   case ',':
-    steer -= 0.2;
+    steer += 0.5;
     break;
   case '.':
-    steer += 0.2;
+    steer -= 0.5;
     break;
   case ' ':
     speed = 0;
@@ -129,13 +128,21 @@ static void simLoop (int pause)
 {
   int i;
   if (!pause) {
-    //dJointSetRMotorVel (dmotor,speed);
-    //dJointSetRMotorTmax (dmotor,0.1);
-    dJointSetHingeVel (joint[2],speed);
-    dJointSetHingeTmax (joint[2],0.1);
+    // motor
+    dJointSetHingeParam (joint[2],dParamVel,speed);
+    dJointSetHingeParam (joint[2],dParamFMax,0.1);
 
-    dJointSetRMotorVel (smotor,steer);
-    dJointSetRMotorTmax (smotor,0.1);
+    // steering
+    printf ("%.4f\n",dJointGetHinge2Angle1 (joint[0]));
+    dReal v = steer - dJointGetHinge2Angle1 (joint[0]);
+    if (v > 0.1) v = 0.1;
+    if (v < -0.1) v = -0.1;
+    v *= 10.0;
+    dJointSetHinge2Param1 (joint[0],dParamVel,v);
+    dJointSetHinge2Param1 (joint[0],dParamFMax,0.2);
+    dJointSetHinge2Param1 (joint[0],dParamLoStop,-0.75);
+    dJointSetHinge2Param1 (joint[0],dParamHiStop,0.75);
+    dJointSetHinge2Param1 (joint[0],dParamFudgeFactor,0.1);
 
     dSpaceCollide (space,0,&nearCallback);
     dWorldStep (world,0.05);
@@ -158,11 +165,13 @@ static void simLoop (int pause)
   dsDrawBox (dGeomGetPosition(ground_box),dGeomGetRotation(ground_box),ss);
   */
 
+  /*
   printf ("%.10f %.10f %.10f %.10f\n",
 	  dJointGetHingeAngle (joint[1]),
 	  dJointGetHingeAngle (joint[2]),
 	  dJointGetHingeAngleRate (joint[1]),
 	  dJointGetHingeAngleRate (joint[2]));
+  */
 }
 
 
@@ -229,14 +238,6 @@ int main (int argc, char **argv)
     dJointSetHingeAnchor (joint[i],a[0],a[1],a[2]);
     dJointSetHingeAxis (joint[i],0,1,0);
   }
-
-  // front wheel motors
-  //dmotor = dJointCreateRMotor (world,0);
-  //dJointAttach (dmotor,body[1],body[0]);
-  //dJointSetRMotorAxis (dmotor,0,1,0);		// motor axis rel to 1st body
-  smotor = dJointCreateRMotor (world,0);
-  dJointAttach (smotor,body[0],body[1]);
-  dJointSetRMotorAxis (smotor,0,0,1);		// motor axis rel to 1st body
 
   // environment
   /*
