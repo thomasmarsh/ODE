@@ -270,7 +270,10 @@ the ODE mailing list}.
 Unpack the ODE archive.
 
 @b{Steps 2-4 (alternate):}
-If you're on windows and using MSVC, you may not have the microsoft compiler in your command line path, or may encounter other problems using make.  It may be easier to use these instructions from the @link{http://q12.org/cgi-bin/wiki.pl?Building_ODE_With_MSVC6}{wiki FAQ.}
+If you're on windows and using MSVC, you may not have the microsoft compiler
+in your command line path, or may encounter other problems using make.
+It may be easier to use these instructions from the
+@link{http://q12.org/cgi-bin/wiki.pl?Building_ODE_With_MSVC6}{wiki FAQ}.
 
 @b{Step 2:}
 Get the GNU @c{make} tool. Many Unix platforms come with this, although
@@ -3215,6 +3218,13 @@ perform the collision culling:
 	@m{O(n)} (as long as those objects are not clustered together too
 	closely), as each object can be quickly paired with the objects
 	around it.
+
+@*	Quadtree space. This uses a pre-allocated hierarchical grid-based
+	AABB tree to quickly cull collision checks. It's exceptionally
+	quick for large amounts of objects in landscape-shaped worlds.
+	The amount of memory used is 4^depth * 32 bytes.
+	Currently @func{dSpaceGetGeom} is not implemented for the quadtree
+	space.
 }
 
 # DEPRECATED:
@@ -3234,6 +3244,16 @@ dSpaceID dHashSpaceCreate (dSpaceID space);
 }{
 Create a space, either of the simple or multi-resolution hash table kind.
 If @arg{space} is nonzero, insert the new space into that space.
+}
+
+
+@funcdef{
+dSpaceID dQuadTreeSpaceCreate (dSpaceID space, dVector3 Center,
+                               dVector3 Extents, int Depth);
+}{
+Creates a quadtree space. @arg{center} and @arg{extents} define the size
+of the root block. @arg{depth} sets the depth of the tree - the number
+of blocks that are created is 4^depth.
 }
 
 
@@ -3543,6 +3563,139 @@ void dGeomRayGet (dGeomID ray, dVector3 start, dVector3 dir);
 }{
 Get the starting position (@arg{start}) and direction (@arg{dir}) of the
 ray. The returned direction will be a unit length vector.
+}
+
+
+@subsection{Triangle Mesh class}
+
+A triangle mesh (TriMesh) represents an arbitrary collection of
+triangles.
+The triangle mesh collision system has the following features:
+@list{
+@*	Any triangle ``soup'' can be represented --- i.e. the triangles
+	are not required to have any particular strip, fan or grid
+	structure.
+@*	Triangle meshes can interact with spheres, boxes and rays.
+@*	It works well for relatively large triangles.
+@*	It uses temporal coherence to speed up collision tests.
+	When a geom has its collision checked with a trimesh once,
+	data is stored inside the trimesh.
+	This data can be cleared with the @func{dGeomTriMeshClearTCCache}
+	function.
+	In the future it will be possible to disable this functionality.
+}
+
+@b{NOTE: The triangle mesh class is not final, so in the future API changes
+might be expected.}
+
+@funcdef{
+dTriMeshDataID dGeomTriMeshDataCreate();
+void dGeomTriMeshDataDestroy (dTriMeshDataID g);
+}{
+Creates and destroys a dTriMeshData object which is used to store
+mesh data.
+}
+
+@funcdef{
+void dGeomTriMeshDataBuild (dTriMeshDataID g, const void* Vertices,
+                            int VertexStride, int VertexCount,
+			    const void* Indices, int IndexCount,
+                            int TriStride);
+}{
+Used for filling a @c{dTriMeshData} object with data. No data is copied
+here, so the pointers passed into this function must remain valid.
+This is how the strided data works:
+
+@code{@[
+struct StridedVertex {
+  dVector3 Vertex;  // 4th component can be left out, reducing memory usage
+  // Userdata
+};
+int VertexStride = sizeof (StridedVertex);
+
+struct StridedTri {
+  int Indices[3];
+  // Userdata
+};
+int TriStride = sizeof (StridedTri);
+@]}
+}
+
+@funcdef{
+void dGeomTriMeshDataBuildSimple (dTriMeshDataID g, const dVector3*Vertices,
+                                  int VertexCount, const int* Indices,
+                                  int IndexCount);
+}{
+Simple build function provided for convenience.
+}
+
+@funcdef{
+typedef int dTriCallback (dGeomID TriMesh, dGeomID RefObject, int TriangleIndex);
+void dGeomTriMeshSetCallback (dGeomID g, dTriCallback *Callback);
+dTriCallback* dGeomTriMeshGetCallback (dGeomID g);
+}{
+Opional per triangle callback. Allows the user to say if collision with a
+particular triangle is wanted.
+If the return value is zero no contact will be generated.
+}
+
+@funcdef{
+typedef void dTriArrayCallback (dGeomID TriMesh, dGeomID RefObject,
+                                const int* TriIndices, int TriCount);
+void dGeomTriMeshSetArrayCallback (dGeomID g, dTriArrayCallback* ArrayCallback);
+dTriArrayCallback *dGeomTriMeshGetArrayCallback (dGeomID g);
+}{
+Opional per geom callback. Allows the user to get the list of all
+intersecting triangles in one shot.
+}
+
+@funcdef{
+typedef int dTriRayCallback (dGeomID TriMesh, dGeomID Ray, int TriangleIndex,
+                             dReal u, dReal v);
+void dGeomTriMeshSetRayCallback (dGeomID g, dTriRayCallback* Callback);
+dTriRayCallback *dGeomTriMeshGetRayCallback (dGeomID g);
+}{
+Opional Ray callback. Allows the user to determine if a ray collides with
+a triangle based on the barycentric coordinates of an intersection.
+The user can for example sample a bitmap to determine if a collision
+should occur.
+}
+
+@funcdef{
+dGeomID dCreateTriMesh (dSpaceID space, dTriMeshDataID Data,
+                        dTriCallback *Callback,
+                        dTriArrayCallback * ArrayCallback,
+                        dTriRayCallback* RayCallback);
+}{
+Constructor. The @arg{Data} member defines the vertex data the newly
+created triangle mesh will use.
+}
+
+@funcdef{
+void dGeomTriMeshSetData (dGeomID g, dTriMeshDataID Data);
+}{
+Replaces the current data.
+}
+
+@funcdef{
+void dGeomTriMeshClearTCCache (dGeomID g);
+}{
+Clears the internal temporal coherence caches.
+}
+
+@funcdef{
+void dGeomTriMeshGetTriangle (dGeomID g, int Index, dVector3 *v0,
+                              dVector3 *v1, dVector3 *v2);
+}{
+Retrieves a triangle in objectspace. The @arg{v0}, @arg{v1} and
+@arg{v2} arguments are optional.
+}
+
+@funcdef{
+void dGeomTriMeshGetPoint (dGeomID g, int Index, dReal u, dReal v,
+                           dVector3 Out);
+}{
+Retrieves a position in objectspace based on the incoming data.
 }
 
 
