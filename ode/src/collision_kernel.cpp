@@ -186,8 +186,6 @@ dxGeom::dxGeom (dSpaceID _space, int is_placeable)
   initColliders();
 
   // setup body vars. invalid type of -1 must be changed by the constructor.
-  // flags: we know nothing about new geoms, and assume that they're
-  // placeable.
   type = -1;
   flags = GEOM_DIRTY | GEOM_AABB_BAD;
   if (is_placeable) flags |= GEOM_PLACEABLE;
@@ -223,12 +221,32 @@ dxGeom::~dxGeom()
 {
   if (parent_space) dSpaceRemove (parent_space,this);
   if ((flags & GEOM_PLACEABLE) && !body) dFree (pos,sizeof(dxPosR));
+  bodyRemove();
 }
 
 
 int dxGeom::AABBTest (dxGeom *o, dReal aabb[6])
 {
   return 1;
+}
+
+
+void dxGeom::bodyRemove()
+{
+  if (body) {
+    // delete this geom from body list
+    dxGeom **last = &body->geom, *g = body->geom;
+    while (g) {
+      if (g == this) {
+	*last = g->body_next;
+	break;
+      }
+      last = &g->body_next;
+      g = g->body_next;
+    }
+    body = 0;
+    body_next = 0;
+  }
 }
 
 //****************************************************************************
@@ -273,12 +291,16 @@ void dGeomSetBody (dxGeom *g, dxBody *b)
   dAASSERT (g);
   dUASSERT (g->flags & GEOM_PLACEABLE,"geom must be placeable");
   CHECK_NOT_LOCKED (g->parent_space);
+
   if (b) {
     if (!g->body) dFree (g->pos,sizeof(dxPosR));
-    g->body = b;
     g->pos = b->pos;
     g->R = b->R;
     dGeomMoved (g);
+    if (g->body != b) {
+      g->bodyRemove();
+      g->bodyAdd (b);
+    }
   }
   else {
     if (g->body) {
@@ -287,31 +309,11 @@ void dGeomSetBody (dxGeom *g, dxBody *b)
       g->R = pr->R;
       memcpy (g->pos,g->body->pos,sizeof(g->pos));
       memcpy (g->R,g->body->R,sizeof(g->R));
-      g->body = 0;
+      g->bodyRemove();
     }
     // dGeomMoved() should not be called if the body is being set to 0, as the
     // new position of the geom is set to the old position of the body, so the
     // effective position of the geom remains unchanged.
-  }
-
-  // maintain body pointer to associated geom
-  if (b) {
-    // add this geom to body list
-    g->body_next = b->geom;
-    b->geom = g;
-  }
-  else {
-    // delete this geom from body list
-    dxGeom **last = &b->geom, *h = b->geom;
-    while (h) {
-      if (h == g) {
-	*last = h->body_next;
-	break;
-      }
-      last = &h->body_next;
-      h = h->next;
-    }
-    g->body_next = 0;
   }
 }
 

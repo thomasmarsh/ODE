@@ -123,17 +123,25 @@ struct dxGeom : public dBase {
 
   // add and remove this geom from a linked list maintained by a space.
 
-  void add (dxGeom **first_ptr) {
+  void spaceAdd (dxGeom **first_ptr) {
     next = *first_ptr;
     tome = first_ptr;
     if (*first_ptr) (*first_ptr)->tome = &next;
     *first_ptr = this;
   }
-
-  void remove() {
+  void spaceRemove() {
     if (next) next->tome = tome;
     *tome = next;
   }
+
+  // add and remove this geom from a linked list maintained by a body.
+
+  void bodyAdd (dxBody *b) {
+    body = b;
+    body_next = b->geom;
+    b->geom = this;
+  }
+  void bodyRemove();
 };
 
 //****************************************************************************
