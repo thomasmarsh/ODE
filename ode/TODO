@@ -2,6 +2,8 @@
 TODO
 ----
 
+test_chain should be in C, not C++
+
 add more functionality to C++ interface - dMass, dSpace, dGeom, rotation?
 
 dAlloc() should take an arena parameters which is stored in dWorld.
@@ -96,6 +98,11 @@ product trick.
 dSetZero() - make fast inline functions for fixed n e.g. (1-4).
 
 need proper `sticky' friction, i.e. compensation for numerical slip.
+
+use `const' in function arguments. blah.
+
+get rid of global constructors in geom.cpp.
+
 
 DONE
 ----
