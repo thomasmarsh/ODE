@@ -209,6 +209,42 @@ void dxTriMesh::computeAABB(){
         aabb[5] = c[2] + pos[2] + zrange;
 }
 
+void dGeomTriMeshSetCallback(dGeomID g, dTriCallback* Callback)
+{
+	dUASSERT(g && g->type == dTriMeshClass, "argument not a trimesh");
+	((dxTriMesh*)g)->Callback = Callback;
+}
+
+dTriCallback* dGeomTriMeshGetCallback(dGeomID g)
+{
+	dUASSERT(g && g->type == dTriMeshClass, "argument not a trimesh");
+	return ((dxTriMesh*)g)->Callback;
+}
+
+void dGeomTriMeshSetArrayCallback(dGeomID g, dTriArrayCallback* ArrayCallback)
+{
+	dUASSERT(g && g->type == dTriMeshClass, "argument not a trimesh");
+	((dxTriMesh*)g)->ArrayCallback = ArrayCallback;
+}
+
+dTriArrayCallback* dGeomTriMeshGetArrayCallback(dGeomID g)
+{
+	dUASSERT(g && g->type == dTriMeshClass, "argument not a trimesh");
+	return ((dxTriMesh*)g)->ArrayCallback;
+}
+
+void dGeomTriMeshSetRayCallback(dGeomID g, dTriRayCallback* Callback)
+{
+	dUASSERT(g && g->type == dTriMeshClass, "argument not a trimesh");
+	((dxTriMesh*)g)->RayCallback = Callback;
+}
+
+dTriRayCallback* dGeomTriMeshGetRayCallback(dGeomID g)
+{
+	dUASSERT(g && g->type == dTriMeshClass, "argument not a trimesh");	
+	return ((dxTriMesh*)g)->RayCallback;
+}
+
 dGeomID dCreateTriMesh(dSpaceID space, dTriMeshDataID Data, dTriCallback* Callback, dTriArrayCallback* ArrayCallback, dTriRayCallback* RayCallback){
 	dxTriMesh* Geom = new dxTriMesh(space, Data);
 	Geom->Callback = Callback;
@@ -216,6 +252,12 @@ dGeomID dCreateTriMesh(dSpaceID space, dTriMeshDataID Data, dTriCallback* Callba
 	Geom->RayCallback = RayCallback;
 
 	return Geom;
+}
+
+void dGeomTriMeshSetData(dGeomID g, dTriMeshDataID Data)
+{
+	dUASSERT(g && g->type == dTriMeshClass, "argument not a trimesh");
+	((dxTriMesh*)g)->Data = Data;
 }
 
 void dGeomTriMeshEnableTC(dGeomID g, int geomClass, int enable)
@@ -251,7 +293,7 @@ int dGeomTriMeshIsTCEnabled(dGeomID g, int geomClass)
 	return 0;
 }
 
-void dGeomTriMeshClearTC(dGeomID g){
+void dGeomTriMeshClearTCCache(dGeomID g){
 	dUASSERT(g && g->type == dTriMeshClass, "argument not a trimesh");
 
 	dxTriMesh* Geom = (dxTriMesh*)g;
