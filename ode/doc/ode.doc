@@ -89,7 +89,9 @@ Here are the features:
 @* Collision framework nearing stability.
 @* Collision: all interactions of sphere, box, and plane now work.
 @* 2D & 3D friction now works.
+@* Framework now in place for more contact modes, powered and limited joints.
 @* Moving-surface contact mode.
+@* Various bugs fixed.
 }
 
 
@@ -108,6 +110,7 @@ Here are the features:
 @* Update documentation.
 @* High level functions that create dynamics and collision objects together.
 @* Special vehicle joints.
+@* Contact modes: bounce, soft, slip.
 @* Powered hinge, prism joint, ball-n-socket (plus dry friction in joints).
 @* Joint limits.
 @* More contact modes: restitution, tyre slip.
@@ -279,19 +282,28 @@ handled as follows:
 @numlist{
 @*	Before each simulation step, the user calls collision detection
 	functions to determine what is touching what.
-	The built-in collision functions can be used, or any others.
-@*	For each contact point between two bodies or between a body and the
-	static environment, a special contact joint is created.
-	The contact joint is given the position of the contact point, a normal
-	vector and a penetration depth.
-@*	The contact points are put in a joint "group", which allows them to be
+	These functions return a list of contact points.
+	Each contact point specifies a position in space, a surface normal
+	vector, and a penetration depth.
+
+@*	A special contact joint is created for each contact point.
+	The contact joint is given extra information about the contact,
+	for example the friction present at the contact surface, how bouncy
+	or soft it is, and various other properties.
+
+@*	The contact joints are put in a joint "group", which allows them to be
 	added to and removed from the system very quickly.
 	The simulation will speed goes down as the number of contacts goes up,
 	so various strategies can be used to limit the number of contact
 	points.
+
 @*	A simulation step is taken.
+
 @*	All contact joints are removed from the system.
 }
+Note that the built-in collision functions do not have to be used -
+other collision detection libraries can be used as long as they provide
+the right kinds of contact point information.
 
 
 @section{Typical simulation code}
@@ -659,6 +671,95 @@ int dAreConnected (dBodyID, dBodyID);
 }{
 Utility function: return 1 if the two bodies are connected together by
 a joint, otherwise return 0.
+}
+
+
+@section{Contact}
+
+When a contact joint is created, a @c{dContact} structure must be supplied.
+This has the following definition:
+@code{@[
+struct dContact {
+  dSurfaceParameters surface;
+  dContactGeom geom;
+  dVector3 fdir1;
+};
+@]}
+@c{geom} is a substructure that is set by the collision functions.
+It is described in the collision section.
+
+@c{fdir1} is a "first friction direction" vector that defines a direction
+along which frictional force is applied.
+It must be of unit length and perpendicular to the contact normal
+(so it is typically tangential to the contact surface).
+It should only be defined if the @const{dContactFDir1} flag is set in
+@c{surface.mode}.
+The "second friction direction" is a vector computed to be perpendicular to
+both the contact normal and @c{fdir1}.
+
+@c{surface} is a substructure that is set by the user.
+Its members define the properties of the colliding surfaces.
+It has the following members:
+@list{
+@*	@c{int mode} - Contact flags. This must always be defined.
+	This is a combination of one or more of the following flags:
+
+	@constdef{dContactMu2}{If not set, use @c{mu} for both friction
+		directions. If set, use @c{mu} for friction direction 1,
+		use @c{mu2} for friction direction 2.}
+	@constdef{dContactFDir1}{If set, take @c{fdir1} as friction direction
+		1, otherwise compute friction direction 1 to be perpendicular
+		to the contact normal (in which case its resulting orientation
+		is not defined).}
+	@constdef{dContactBounce}{If set, the contact surface is bouncy,
+		in other words the bodies will bounce off each other.
+		The exact amount of bouncyness is controlled by the
+		@c{bounce} parameter.}
+	@constdef{dContactSoft}{If set, the contact surface is soft.
+		[this needs more description].}
+	@constdef{dContactMotion1}{If set, the contact surface is assumed to
+		be moving independently of the motion of the bodies.
+		This is kind of like a conveyor belt running over the surface.
+		When this flag is set, @c{motion1} defines the surface
+		velocity in friction direction 1.}
+	@constdef{dContactMotion2}{The same thing as above, but for
+		friction direction 2.}
+	@constdef{dContactSlip1}{Slip, friction direction 1.
+		[this needs more description].}
+	@constdef{dContactSlip2}{Slip, friction direction 2.
+		[this needs more description].}
+
+@*	@c{dReal mu} : Coulomb friction coefficient.
+	This must be in the range 0 to @c{dInfinity}. 0 results in a
+	frictionless contact, and @c{dInfinity} results in a contact that
+	never slips.
+	Note that frictionless contacts are less time consuming to compute
+	than ones with friction, and infinite friction contacts can be cheaper
+	than contacts with finite friction.
+	This must always be defined.
+
+@*	@c{dReal mu2} : Optional Coulomb friction coefficient for friction
+		direction 2 (0..@c{dInfinity}). This is only defined if the
+		corresponding flag is set is @c{mode}.
+
+@*	@c{dReal bounce} : Restitution parameter (0..1).
+	0 means the surfaces are not bouncy at all, 1 is maximum bouncyness.
+	This is only defined if the corresponding flag is set is @c{mode}.
+
+@*	@c{dReal bounceVel} : The minimum incoming velocity necessary for
+	bounce (in m/s). Incoming velocities below this will effectively have
+	a bounce parameter of 0.
+	This is only defined if the corresponding flag is set is @c{mode}.
+
+@*	@c{dReal soft} : Contact softness parameter.
+	This is only defined if the corresponding flag is set is @c{mode}.
+
+@*	@c{dReal motion1,motion2} : Surface velocity in friction directions
+	1/2 (m/s).
+	This is only defined if the corresponding flag is set is @c{mode}.
+
+@*	@c{dReal slip1,slip2} : First order slip in friction directions 1/2.
+	This is only defined if the corresponding flag is set is @c{mode}.
 }
 
 #############################################################################

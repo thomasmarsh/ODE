@@ -39,8 +39,8 @@
 #	@[ ... @]		bracket verbatim text, no substitutions made
 #	@code{...}		source code. internal whitespace preserved
 #	@emph{...}		add emphasis to text
-#	@m{...}  mathematical stuff (^ and _ work like TeX)
-#	@c{...}  code (in a fixed width `courier' font)
+#	@m{...}			mathematical stuff (^ and _ work like TeX)
+#	@c{...}			code (in a fixed width `courier' font)
 #	@list{unordered list}
 #	@numlist{numbered list}
 #	@link{URL}{anchortext}
