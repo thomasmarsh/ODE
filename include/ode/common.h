@@ -108,14 +108,14 @@ typedef dReal dQuaternion[4];
 
 #if defined(dSINGLE)
 
-#define REAL(x) (x ## f)		/* form a constant */
-#define dRecip(x) (1.0f/(x))		/* reciprocal */
-#define dSqrt(x) sqrt(x)		/* square root */
-#define dRecipSqrt(x) (1.0f/sqrt(x))	/* reciprocal square root */
-#define dSin(x) sin(x)			/* sine */
-#define dCos(x) cos(x)			/* cosine */
-#define dFabs(x) fabs(x)		/* absolute value */
-#define dAtan2(y,x) atan2((y),(x))	/* arc tangent with 2 args */
+#define REAL(x) (x ## f)			/* form a constant */
+#define dRecip(x) ((float)(1.0f/(x)))		/* reciprocal */
+#define dSqrt(x) ((float)sqrt(x))		/* square root */
+#define dRecipSqrt(x) ((float)(1.0f/sqrt(x)))	/* reciprocal square root */
+#define dSin(x) ((float)sin(x))			/* sine */
+#define dCos(x) ((float)cos(x))			/* cosine */
+#define dFabs(x) ((float)fabs(x))		/* absolute value */
+#define dAtan2(y,x) ((float)atan2((y),(x)))	/* arc tangent with 2 args */
 
 #elif defined(dDOUBLE)
 
