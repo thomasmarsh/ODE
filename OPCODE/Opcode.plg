@@ -1,0 +1,153 @@
+<html>
+<body>
+<pre>
+<h1>Build Log</h1>
+<h3>
+--------------------Configuration: Opcode - Win32 Release--------------------
+</h3>
+<h3>Command Lines</h3>
+Creating temporary file "F:\DOCUME~1\ADMINI~1\LOCALS~1\Temp\RSP245.tmp" with contents
+[
+/nologo /MD /W3 /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "OPCODE_EXPORTS" /Fp"Release/Opcode.pch" /Yu"stdafx.h" /Fo"Release/" /Fd"Release/" /FD /QIfist /c 
+"Y:\APIs\Ice\OpcodeDistrib\Opcode\OPC_BaseModel.cpp"
+"Y:\APIs\Ice\OpcodeDistrib\Opcode\OPC_HybridModel.cpp"
+"Y:\APIs\Ice\OpcodeDistrib\Opcode\OPC_Model.cpp"
+"Y:\APIs\Ice\OpcodeDistrib\Opcode\Opcode.cpp"
+"Y:\APIs\Ice\OpcodeDistrib\Opcode\OPC_Collider.cpp"
+"Y:\APIs\Ice\OpcodeDistrib\Opcode\OPC_VolumeCollider.cpp"
+"Y:\APIs\Ice\OpcodeDistrib\Opcode\OPC_AABBCollider.cpp"
+"Y:\APIs\Ice\OpcodeDistrib\Opcode\OPC_LSSCollider.cpp"
+"Y:\APIs\Ice\OpcodeDistrib\Opcode\OPC_OBBCollider.cpp"
+"Y:\APIs\Ice\OpcodeDistrib\Opcode\OPC_PlanesCollider.cpp"
+"Y:\APIs\Ice\OpcodeDistrib\Opcode\OPC_RayCollider.cpp"
+"Y:\APIs\Ice\OpcodeDistrib\Opcode\OPC_SphereCollider.cpp"
+"Y:\APIs\Ice\OpcodeDistrib\Opcode\OPC_TreeCollider.cpp"
+"Y:\APIs\Ice\OpcodeDistrib\Opcode\OPC_AABBTree.cpp"
+"Y:\APIs\Ice\OpcodeDistrib\Opcode\OPC_Common.cpp"
+"Y:\APIs\Ice\OpcodeDistrib\Opcode\OPC_MeshInterface.cpp"
+"Y:\APIs\Ice\OpcodeDistrib\Opcode\OPC_OptimizedTree.cpp"
+"Y:\APIs\Ice\OpcodeDistrib\Opcode\OPC_TreeBuilders.cpp"
+"Y:\APIs\Ice\OpcodeDistrib\Opcode\OPC_BoxPruning.cpp"
+"Y:\APIs\Ice\OpcodeDistrib\Opcode\OPC_SweepAndPrune.cpp"
+"Y:\APIs\Ice\OpcodeDistrib\Opcode\OPC_Picking.cpp"
+"Y:\APIs\Ice\OpcodeDistrib\Opcode\Ice\IceAABB.cpp"
+"Y:\APIs\Ice\OpcodeDistrib\Opcode\Ice\IceContainer.cpp"
+"Y:\APIs\Ice\OpcodeDistrib\Opcode\Ice\IceHPoint.cpp"
+"Y:\APIs\Ice\OpcodeDistrib\Opcode\Ice\IceIndexedTriangle.cpp"
+"Y:\APIs\Ice\OpcodeDistrib\Opcode\Ice\IceMatrix3x3.cpp"
+"Y:\APIs\Ice\OpcodeDistrib\Opcode\Ice\IceMatrix4x4.cpp"
+"Y:\APIs\Ice\OpcodeDistrib\Opcode\Ice\IceOBB.cpp"
+"Y:\APIs\Ice\OpcodeDistrib\Opcode\Ice\IcePlane.cpp"
+"Y:\APIs\Ice\OpcodeDistrib\Opcode\Ice\IcePoint.cpp"
+"Y:\APIs\Ice\OpcodeDistrib\Opcode\Ice\IceRandom.cpp"
+"Y:\APIs\Ice\OpcodeDistrib\Opcode\Ice\IceRay.cpp"
+"Y:\APIs\Ice\OpcodeDistrib\Opcode\Ice\IceRevisitedRadix.cpp"
+"Y:\APIs\Ice\OpcodeDistrib\Opcode\Ice\IceSegment.cpp"
+"Y:\APIs\Ice\OpcodeDistrib\Opcode\Ice\IceTriangle.cpp"
+"Y:\APIs\Ice\OpcodeDistrib\Opcode\Ice\IceUtils.cpp"
+]
+Creating command line "cl.exe @F:\DOCUME~1\ADMINI~1\LOCALS~1\Temp\RSP245.tmp" 
+Creating temporary file "F:\DOCUME~1\ADMINI~1\LOCALS~1\Temp\RSP246.tmp" with contents
+[
+/nologo /MD /W3 /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "OPCODE_EXPORTS" /Fp"Release/Opcode.pch" /Yc"stdafx.h" /Fo"Release/" /Fd"Release/" /FD /QIfist /c 
+"Y:\APIs\Ice\OpcodeDistrib\Opcode\StdAfx.cpp"
+]
+Creating command line "cl.exe @F:\DOCUME~1\ADMINI~1\LOCALS~1\Temp\RSP246.tmp" 
+Creating temporary file "F:\DOCUME~1\ADMINI~1\LOCALS~1\Temp\RSP247.tmp" with contents
+[
+/nologo /dll /incremental:no /pdb:"Release/Opcode.pdb" /machine:I386 /out:"Release/Opcode.dll" /implib:"Release/Opcode.lib" 
+.\Release\OPC_BaseModel.obj
+.\Release\OPC_HybridModel.obj
+.\Release\OPC_Model.obj
+.\Release\Opcode.obj
+.\Release\StdAfx.obj
+.\Release\OPC_Collider.obj
+.\Release\OPC_VolumeCollider.obj
+.\Release\OPC_AABBCollider.obj
+.\Release\OPC_LSSCollider.obj
+.\Release\OPC_OBBCollider.obj
+.\Release\OPC_PlanesCollider.obj
+.\Release\OPC_RayCollider.obj
+.\Release\OPC_SphereCollider.obj
+.\Release\OPC_TreeCollider.obj
+.\Release\OPC_AABBTree.obj
+.\Release\OPC_Common.obj
+.\Release\OPC_MeshInterface.obj
+.\Release\OPC_OptimizedTree.obj
+.\Release\OPC_TreeBuilders.obj
+.\Release\OPC_BoxPruning.obj
+.\Release\OPC_SweepAndPrune.obj
+.\Release\OPC_Picking.obj
+.\Release\IceAABB.obj
+.\Release\IceContainer.obj
+.\Release\IceHPoint.obj
+.\Release\IceIndexedTriangle.obj
+.\Release\IceMatrix3x3.obj
+.\Release\IceMatrix4x4.obj
+.\Release\IceOBB.obj
+.\Release\IcePlane.obj
+.\Release\IcePoint.obj
+.\Release\IceRandom.obj
+.\Release\IceRay.obj
+.\Release\IceRevisitedRadix.obj
+.\Release\IceSegment.obj
+.\Release\IceTriangle.obj
+.\Release\IceUtils.obj
+]
+Creating command line "link.exe @F:\DOCUME~1\ADMINI~1\LOCALS~1\Temp\RSP247.tmp"
+<h3>Output Window</h3>
+Compiling...
+StdAfx.cpp
+Compiling OPCODE
+Compiling on Windows...
+Compiling with VC++...
+Compiling...
+OPC_BaseModel.cpp
+OPC_HybridModel.cpp
+OPC_Model.cpp
+Opcode.cpp
+OPC_Collider.cpp
+OPC_VolumeCollider.cpp
+OPC_AABBCollider.cpp
+OPC_LSSCollider.cpp
+OPC_OBBCollider.cpp
+OPC_PlanesCollider.cpp
+OPC_RayCollider.cpp
+OPC_SphereCollider.cpp
+OPC_TreeCollider.cpp
+OPC_AABBTree.cpp
+OPC_Common.cpp
+OPC_MeshInterface.cpp
+OPC_OptimizedTree.cpp
+OPC_TreeBuilders.cpp
+OPC_BoxPruning.cpp
+OPC_SweepAndPrune.cpp
+Generating Code...
+Compiling...
+OPC_Picking.cpp
+IceAABB.cpp
+IceContainer.cpp
+IceHPoint.cpp
+IceIndexedTriangle.cpp
+IceMatrix3x3.cpp
+IceMatrix4x4.cpp
+IceOBB.cpp
+IcePlane.cpp
+IcePoint.cpp
+IceRandom.cpp
+IceRay.cpp
+IceRevisitedRadix.cpp
+IceSegment.cpp
+IceTriangle.cpp
+IceUtils.cpp
+Generating Code...
+Linking...
+   Creating library Release/Opcode.lib and object Release/Opcode.exp
+
+
+
+<h3>Results</h3>
+Opcode.dll - 0 error(s), 0 warning(s)
+</pre>
+</body>
+</html>
