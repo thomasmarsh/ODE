@@ -26,11 +26,12 @@
 
 struct dObStack {
   struct Arena {
-    Arena *next;
-    int used;		// total number of bytes used in this arena
-  };
+    Arena *next;	// next arena in linked list
+    int used;		// total number of bytes used in this arena, counting
+  };			//   this header
 
-  Arena *first,last;
+  Arena *first;		// head of the arena linked list. 0 if no arenas yet
+  Arena *last;		// arena where blocks are currently being allocated
 
   // used for iterator
   Arena *current_arena;
@@ -39,13 +40,21 @@ struct dObStack {
   dObStack();
   ~dObStack();
 
-  // allocate and free
   void *alloc (int num_bytes);
-  void freeAll();
+  // allocate a block in the last arena, allocating a new arena if necessary.
 
-  // obstack iterator
-  void rewind();
+  void freeAll();
+  // free all blocks in all arenas. this does not deallocate the arenas
+  // themselves, so future alloc()s will reuse them.
+
+  void *rewind();
+  // rewind the obstack iterator, and return the address of the first
+  // allocated block. return 0 if there are no allocated blocks.
+
   void *next (int num_bytes);
+  // return the address of the next allocated block. 'num_bytes' is the size
+  // of the current block. this returns null if there are no more arenas.
+  // this behaves similarly to alloc, except that no new arenas are allocated.
 };
 
 
