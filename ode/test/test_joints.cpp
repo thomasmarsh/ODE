@@ -570,9 +570,9 @@ dReal doStuffAndGetError (int n)
     static dReal a1,a2,a3;
 
     // find actual euler angles
-    dReal aa1 = dJointGetAMotorParam (joint,dParamAngle);
-    dReal aa2 = dJointGetAMotorParam (joint,dParamAngle+dParamGroup);
-    dReal aa3 = dJointGetAMotorParam (joint,dParamAngle+2*dParamGroup);
+    dReal aa1 = dJointGetAMotorAngle (joint,0);
+    dReal aa2 = dJointGetAMotorAngle (joint,1);
+    dReal aa3 = dJointGetAMotorAngle (joint,2);
     // printf ("actual  = %.4f %.4f %.4f\n\n",aa1,aa2,aa3);
 
     dReal err = dInfinity;
