@@ -100,10 +100,10 @@ static inline void collideAABBs (dReal bounds1[6], dReal bounds2[6],
       bounds1[4] > bounds2[5] ||
       bounds1[5] < bounds2[4]) return;
   if (g1->_class->aabb_test) {
-    if (g1->_class->aabb_test (g1,bounds2) == 0) return;
+    if (g1->_class->aabb_test (g1,g2,bounds2) == 0) return;
   }
   if (g2->_class->aabb_test) {
-    if (g2->_class->aabb_test (g2,bounds1) == 0) return;
+    if (g2->_class->aabb_test (g2,g1,bounds1) == 0) return;
   }
   callback (data,g1,g2);
 }

@@ -106,7 +106,7 @@ typedef int dColliderFn (dGeomID o1, dGeomID o2,
 			 int flags, dContactGeom *contact, int skip);
 typedef dColliderFn * dGetColliderFnFn (int num);
 typedef void dGeomDtorFn (dGeomID o);
-typedef int dAABBTestFn (dGeomID o, dReal aabb[6]);
+typedef int dAABBTestFn (dGeomID o1, dGeomID o2, dReal aabb[6]);
 
 typedef struct dGeomClass {
   int bytes;
