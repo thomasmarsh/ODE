@@ -25,6 +25,7 @@
 
 #include <ode/common.h>
 #include <ode/mass.h>
+#include <ode/contact.h>
 
 #ifdef __cplusplus
 extern "C" {
