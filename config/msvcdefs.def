@@ -107,6 +107,7 @@ dGeomRayGetLength
 dGeomRaySet
 dGeomRaySetClosestHit
 dGeomRaySetLength
+dGeomRaySetParams
 dGeomSetBody
 dGeomSetCategoryBits
 dGeomSetCollideBits

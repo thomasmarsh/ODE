@@ -108,6 +108,7 @@ dGeomRayGetLength
 dGeomRaySet
 dGeomRaySetClosestHit
 dGeomRaySetLength
+dGeomRaySetParams
 dGeomSetBody
 dGeomSetCategoryBits
 dGeomSetCollideBits
@@ -136,6 +137,7 @@ dGeomTriMeshGetCallback
 dGeomTriMeshGetPoint
 dGeomTriMeshGetRayCallback
 dGeomTriMeshGetTriangle
+dGeomTriMeshGetTriangleCount
 dGeomTriMeshIsTCEnabled
 dGeomTriMeshSetArrayCallback
 dGeomTriMeshSetCallback
