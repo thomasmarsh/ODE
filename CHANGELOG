@@ -9,6 +9,9 @@ the rules for this file:
 
 ------------------------------------------------------------------------------
 
+12/28/01 russ
+	* added the dParamCFM joint parameter.
+
 12/24/01 russ
 
 	* reworked the build system to make it more cross-platform.
