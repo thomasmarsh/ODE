@@ -23,6 +23,7 @@
 /*
 
 perform tests on all the joint types.
+this should be done using the double precision version of the library.
 
 usage:
   test_joints [test_number] [g] [i] [e]
@@ -192,6 +193,7 @@ void addSpringForce (dReal ks)
 //   3xx : slider
 //   4xx : hinge 2
 //   5xx : contact
+//   6xx : amotor
 
 
 // setup for the given test. return 0 if there is no such test
@@ -372,6 +374,21 @@ int setupTest (int n)
     }
     return 1;
 
+  // ********** angular motor joint
+
+  case 600:			// test euler angle calculations
+    constructWorldForTest (0,2,
+			   -SIDE*0.5,0,1, SIDE*0.5,0,1,
+			   0,0,1, 0,0,1, 0,0);
+    joint = dJointCreateAMotor (world,0);
+    dJointAttach (joint,body[0],body[1]);
+
+    dJointSetAMotorNumAxes (joint,3);
+    dJointSetAMotorAxis (joint,0,1, 0,0,1);
+    dJointSetAMotorAxis (joint,2,2, 1,0,0);
+    dJointSetAMotorMode (joint,dAMotorEuler);
+    max_iterations = 200;
+    return 1;
   }
   return 0;
 }
@@ -546,6 +563,46 @@ dReal doStuffAndGetError (int n)
     return err * 1e6;
   }
 
+  // ********** angular motor joint
+
+  case 600: {			// test euler angle calculations
+    // desired euler angles from last iteration
+    static dReal a1,a2,a3;
+
+    // find actual euler angles
+    dReal aa1 = dJointGetAMotorParam (joint,dParamAngle);
+    dReal aa2 = dJointGetAMotorParam (joint,dParamAngle+dParamGroup);
+    dReal aa3 = dJointGetAMotorParam (joint,dParamAngle+2*dParamGroup);
+    // printf ("actual  = %.4f %.4f %.4f\n\n",aa1,aa2,aa3);
+
+    dReal err = dInfinity;
+    if (iteration > 0) {
+      err = dFabs(aa1-a1) + dFabs(aa2-a2) + dFabs(aa3-a3);
+      err *= 1e10;
+    }
+
+    // get random base rotation for both bodies
+    dMatrix3 Rbase;
+    dRFromAxisAndAngle (Rbase, 3*(dRandReal()-0.5), 3*(dRandReal()-0.5),
+			3*(dRandReal()-0.5), 3*(dRandReal()-0.5));
+    dBodySetRotation (body[0],Rbase);
+
+    // rotate body 2 by random euler angles w.r.t. body 1
+    a1 = 3.14 * 2 * (dRandReal()-0.5);
+    a2 = 1.57 * 2 * (dRandReal()-0.5);
+    a3 = 3.14 * 2 * (dRandReal()-0.5);
+    dMatrix3 R1,R2,R3,Rtmp1,Rtmp2;
+    dRFromAxisAndAngle (R1,0,0,1,-a1);
+    dRFromAxisAndAngle (R2,0,1,0,a2);
+    dRFromAxisAndAngle (R3,1,0,0,-a3);
+    dMultiply0 (Rtmp1,R2,R3,3,3,3);
+    dMultiply0 (Rtmp2,R1,Rtmp1,3,3,3);
+    dMultiply0 (Rtmp1,Rbase,Rtmp2,3,3,3);
+    dBodySetRotation (body[1],Rtmp1);
+    // printf ("desired = %.4f %.4f %.4f\n",a1,a2,a3);
+
+    return err;
+  }
   }
 
   return dInfinity;
