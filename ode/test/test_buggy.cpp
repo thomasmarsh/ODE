@@ -110,8 +110,8 @@ static void nearCallback (void *data, dGeomID o1, dGeomID o2)
 
 static void start()
 {
-  static float xyz[3] = {0.8317,-0.9817,0.8000};
-  static float hpr[3] = {121.0000,-27.5000,0.0000};
+  static float xyz[3] = {0.8317f,-0.9817f,0.8000f};
+  static float hpr[3] = {121.0000f,-27.5000f,0.0000f};
   dsSetViewpoint (xyz,hpr);
   printf ("Press:\t'a' to increase speed.\n"
 	  "\t'z' to decrease speed.\n"
@@ -180,7 +180,7 @@ static void simLoop (int pause)
   dsDrawBox (dBodyGetPosition(body[0]),dBodyGetRotation(body[0]),sides);
   dsSetColor (1,1,1);
   for (i=1; i<=3; i++) dsDrawCylinder (dBodyGetPosition(body[i]),
-				       dBodyGetRotation(body[i]),0.02,RADIUS);
+				       dBodyGetRotation(body[i]),0.02f,RADIUS);
 
   dVector3 ss;
   dGeomBoxGetLengths (ground_box,ss);

@@ -64,7 +64,7 @@ static dJointID joint[NUMJ];
 
 void createTest()
 {
-  int i;
+  int i,j;
   if (world) dWorldDestroy (world);
 
   world = dWorldCreate();
@@ -76,7 +76,7 @@ void createTest()
     dBodySetPosition (body[i],dRandReal()*2-1,dRandReal()*2-1,
 		      dRandReal()*2+RADIUS);
     dReal q[4];
-    for (int j=0; j<4; j++) q[j] = dRandReal()*2-1;
+    for (j=0; j<4; j++) q[j] = dRandReal()*2-1;
     dBodySetQuaternion (body[i],q);
 
     // set random velocity
@@ -90,7 +90,7 @@ void createTest()
     dMatrix3 R;
     dMassSetBox (&m,1,dRandReal()+0.1,dRandReal()+0.1,dRandReal()+0.1);
     dMassAdjust (&m,dRandReal()+1);
-    for (int j=0; j<4; j++) q[j] = dRandReal()*2-1;
+    for (j=0; j<4; j++) q[j] = dRandReal()*2-1;
     dQtoR (q,R);
     dMassRotate (&m,R);
     dBodySetMass (body[i],&m);
