@@ -48,13 +48,14 @@ extern int dSphereClass;
 extern int dBoxClass;
 extern int dCCylinderClass;
 extern int dPlaneClass;
-extern int dCompositeClass;
+extern int dGeomGroupClass;
 
 /* constructors */
 dGeomID dCreateSphere (dSpaceID space, dReal radius);
 dGeomID dCreateBox (dSpaceID space, dReal lx, dReal ly, dReal lz);
 dGeomID dCreatePlane (dSpaceID space, dReal a, dReal b, dReal c, dReal d);
 dGeomID dCreateCCylinder (dSpaceID space, dReal a, dReal b, int dir);
+dGeomID dCreateGeomGroup (dSpaceID space);
 
 /* set geometry parameters */
 void dGeomSphereSetRadius (dGeomID sphere, dReal radius);
@@ -82,9 +83,12 @@ const dReal * dGeomGetRotation (dGeomID);
 void dGeomDestroy (dGeomID);
 
 /* ************************************************************************ */
-/* composite geoms */
+/* geometry group functions */
 
-/* void dAddToComposite (dGeomID composite, int i, dGeomID obj); */
+void dGeomGroupAdd (dGeomID group, dGeomID x);
+void dGeomGroupRemove (dGeomID group, dGeomID x);
+int dGeomGroupNumGeoms (dGeomID group);
+dGeomID dGeomGroupGetGeom (dGeomID group, int i);
 
 /* ************************************************************************ */
 /* general collision */
@@ -99,11 +103,13 @@ typedef void dGetAABBFn (dGeomID, dReal aabb[6]);
 typedef int dColliderFn (dGeomID o1, dGeomID o2,
 			 int flags, dContactGeom *contact, int skip);
 typedef dColliderFn * dGetColliderFnFn (int num);
+typedef void dGeomDtorFn (dGeomID o);
 
 typedef struct dGeomClass {
   int bytes;
   dGetColliderFnFn *collider;
   dGetAABBFn *aabb;
+  dGeomDtorFn *dtor;
 } dGeomClass;
 
 int dCreateGeomClass (const dGeomClass *classptr);
