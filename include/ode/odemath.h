@@ -33,10 +33,21 @@ extern "C" {
  * p and q indexes apart respectively. dDOT() means dDOT11.
  */
 
+#ifdef __cplusplus
+inline dReal dDOT (dReal *a, dReal *b)
+  { return ((a)[0]*(b)[0] + (a)[1]*(b)[1] + (a)[2]*(b)[2]); }
+inline dReal dDOT14(dReal *a, dReal *b)
+  { return ((a)[0]*(b)[0] + (a)[1]*(b)[4] + (a)[2]*(b)[8]); }
+inline dReal dDOT41(dReal *a, dReal *b)
+  { return ((a)[0]*(b)[0] + (a)[4]*(b)[1] + (a)[8]*(b)[2]); }
+inline dReal dDOT44(dReal *a, dReal *b)
+  { return ((a)[0]*(b)[0] + (a)[4]*(b)[4] + (a)[8]*(b)[8]); }
+#else
 #define dDOT(a,b)   ((a)[0]*(b)[0] + (a)[1]*(b)[1] + (a)[2]*(b)[2])
 #define dDOT14(a,b) ((a)[0]*(b)[0] + (a)[1]*(b)[4] + (a)[2]*(b)[8])
 #define dDOT41(a,b) ((a)[0]*(b)[0] + (a)[4]*(b)[1] + (a)[8]*(b)[2])
 #define dDOT44(a,b) ((a)[0]*(b)[0] + (a)[4]*(b)[4] + (a)[8]*(b)[8])
+#endif
 
 
 /* cross product, set a = b x c. dCROSSpqr means that elements of `a', `b'
