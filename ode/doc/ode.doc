@@ -121,6 +121,7 @@ Here are the features:
 @* Improved the approximation to Coloumb friction.
 @* A few bug fixes.
 @* A few minor API changes so that the API matches the documentation.
+@* LCP solver optimized even more.
 }
 
 
@@ -163,7 +164,6 @@ Here are the features:
 
 @list{
 @* Update documentation.
-@* Optimize LCP solver even more.
 @* Expose type-specific collision functions.
 @* More collision primitives: capped cylinder, composite objects.
 @* Improve box-box collision, especially for face-face contact.
