@@ -9,7 +9,7 @@ INCLUDE_PATHS = ../../include
 LIB_PATHS = ../../lib
 EXTRA_CLEAN = $(APPNAME)
 
-ifeq ($(PLATFORM),win32)
+ifeq ($(PLATFORM_IS_WINDOWS),1)
   RSRC=../../lib/drawstuff.res
 endif
 
