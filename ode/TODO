@@ -2,9 +2,14 @@
 TODO BEFORE NEXT RELEASE
 ------------------------
 
-NOTE: (*) = eli
+this collision rule:
+    // no contacts if both geoms on the same body, and the body is not 0
+    if (g1->body == g2->body && g1->body) return 0;
+needs to be replaced. sometimes we want no collision when both bodies are 0,
+but this wont work for geomgroup-to-environment. avoid stupid stuff like
+    dGeomSetBody (geom_group, (dBodyID) 1);
 
-Expose type-specific collision functions. 
+Expose type-specific collision functions?
 
 Improve box-box collision, especially for face-face contact. 
 
@@ -13,11 +18,6 @@ Automatic code optimization process.
 body & joint disabling / enabling. automatic??
 
 body/joint creators with world = 0 --> not inserted into any world.
-
-transformation geometry object.
-
-(*) functions to get all the joints/bodies a body/joint is connected to.
-    function to get the entire island?
 
 joint limit spongyness: interacts with powered joints badly, because when the
 limit is reached full power is applied. fix or doc.
@@ -33,7 +33,7 @@ getinfo2 functions are called.
 spaces need multiple lists of objects that can never overlap. objects in these
 lists are never tested against each other.
 
-(*) joint groups should also be destroyed by destroying the world.
+joint groups should also be destroyed by destroying the world.
 
 deleting a body a joint is attached to should adjust the joint to only have
 one body attached. currently the connected joints have *both* their body
@@ -41,8 +41,6 @@ attachments removed. BUT, dont do this if the dJOINT_TWOBODIES flag is set
 on the joint.
 
 B&S joint limit.
-
-(*) update C++ interface.
 
 document error, mem and math functions.
 
@@ -52,12 +50,16 @@ Web pages
 
 start a change log.
 
+update C++ interface? use SWIG?
+
 
 
 TODO
 ----
 
 sometimes getting LCP infinite loops.
+
+function to get the entire island of bodies/joints
 
 joints:
 	hinge2 joint - implement trail, i.e. non-convergent steering and wheel
@@ -351,3 +353,12 @@ always the case. --> assertion added in dJointAttach().
 
 if two joints connect to the same two bodies, check that the fast solver
 works! -> it should.
+
+functions to get all the joints/bodies a body/joint is connected to.
+
+If I don't have the GCC libraries installed, HUGE_VALF is undefined.
+
+fix capped cylinder - capped cylinder collision so that two contacts can
+be generated.
+
+transformation geometry object.
