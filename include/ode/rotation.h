@@ -40,6 +40,8 @@ void dRFromEulerAngles (dMatrix3 R, dReal phi, dReal theta, dReal psi);
 void dRFrom2Axes (dMatrix3 R, dReal ax, dReal ay, dReal az,
 		  dReal bx, dReal by, dReal bz);
 
+void dRFromZAxis (dMatrix3 R, dReal ax, dReal ay, dReal az);
+
 void dQSetIdentity (dQuaternion q);
 
 void dQFromAxisAndAngle (dQuaternion q, dReal ax, dReal ay, dReal az,
