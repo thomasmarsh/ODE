@@ -1068,7 +1068,7 @@ int dCollideSphereBox (dxGeom *o1, dxGeom *o2, int flags,
   // that to the boundary of the box (call that point `q'). if q is on the
   // boundary of the box and |p-q| is <= sphere radius, they touch.
   // if q is inside the box, the sphere is inside the box, so set a contact
-  // normal to push the sphere to the closest box edge.
+  // normal to push the sphere to the closest box face.
 
   dVector3 l,t,p,q,r;
   dReal depth;
@@ -1103,29 +1103,29 @@ int dCollideSphereBox (dxGeom *o1, dxGeom *o2, int flags,
   if (t[2] >  l[2]) { t[2] =  l[2]; onborder = 1; }
 
   if (!onborder) {
-    // sphere center inside box. find largest `t' value
-    dReal max = dFabs(t[0]);
-    int maxi = 0;
+    // sphere center inside box. find closest face to `t'
+    dReal min_distance = l[0] - dFabs(t[0]);
+    int mini = 0;
     for (int i=1; i<3; i++) {
-      dReal tt = dFabs(t[i]);
-      if (tt > max) {
-	max = tt;
-	maxi = i;
+      dReal face_distance = l[i] - dFabs(t[i]);
+      if (face_distance < min_distance) {
+	min_distance = face_distance;
+	mini = i;
       }
     }
     // contact position = sphere center
     contact->pos[0] = o1->pos[0];
     contact->pos[1] = o1->pos[1];
     contact->pos[2] = o1->pos[2];
-    // contact normal aligned with box edge along largest `t' value
+    // contact normal points to closest face
     dVector3 tmp;
     tmp[0] = 0;
     tmp[1] = 0;
     tmp[2] = 0;
-    tmp[maxi] = (t[maxi] > 0) ? REAL(1.0) : REAL(-1.0);
+    tmp[mini] = (t[mini] > 0) ? REAL(1.0) : REAL(-1.0);
     dMULTIPLY0_331 (contact->normal,o2->R,tmp);
     // contact depth = distance to wall along normal plus radius
-    contact->depth = l[maxi] - max + sphere->radius;
+    contact->depth = min_distance + sphere->radius;
     return 1;
   }
 
