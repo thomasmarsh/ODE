@@ -1684,6 +1684,7 @@ static void amotorGetInfo2 (dxJointAMotor *joint, dxJoint::Info2 *info)
 extern "C" void dJointSetAMotorNumAxes (dxJointAMotor *joint, int num)
 {
   dAASSERT(joint && num >= 0 && num <= 3);
+  dUASSERT(joint->vtable == &__damotor_vtable,"joint is not an amotor");
   if (joint->mode == dAMotorEuler) {
     joint->num = 3;
   }
@@ -1699,6 +1700,7 @@ extern "C" void dJointSetAMotorAxis (dxJointAMotor *joint, int anum, int rel,
 				     dReal x, dReal y, dReal z)
 {
   dAASSERT(joint && anum >= 0 && anum <= 2 && rel >= 0 && rel <= 2);
+  dUASSERT(joint->vtable == &__damotor_vtable,"joint is not an amotor");
   if (anum < 0) anum = 0;
   if (anum > 2) anum = 2;
   joint->rel[anum] = rel;
@@ -1732,6 +1734,7 @@ extern "C" void dJointSetAMotorAngle (dxJointAMotor *joint, int anum,
 				      dReal angle)
 {
   dAASSERT(joint && anum >= 0 && anum < 3);
+  dUASSERT(joint->vtable == &__damotor_vtable,"joint is not an amotor");
   if (joint->mode == dAMotorUser) {
     if (anum < 0) anum = 0;
     if (anum > 3) anum = 3;
@@ -1744,6 +1747,7 @@ extern "C" void dJointSetAMotorParam (dxJointAMotor *joint, int parameter,
 				      dReal value)
 {
   dAASSERT(joint);
+  dUASSERT(joint->vtable == &__damotor_vtable,"joint is not an amotor");
   int anum = parameter >> 8;
   if (anum < 0) anum = 0;
   if (anum > 2) anum = 2;
@@ -1755,6 +1759,7 @@ extern "C" void dJointSetAMotorParam (dxJointAMotor *joint, int parameter,
 extern "C" void dJointSetAMotorMode (dxJointAMotor *joint, int mode)
 {
   dAASSERT(joint);
+  dUASSERT(joint->vtable == &__damotor_vtable,"joint is not an amotor");
   joint->mode = mode;
   if (joint->mode == dAMotorEuler) {
     joint->num = 3;
@@ -1766,6 +1771,7 @@ extern "C" void dJointSetAMotorMode (dxJointAMotor *joint, int mode)
 extern "C" int dJointGetAMotorNumAxes (dxJointAMotor *joint)
 {
   dAASSERT(joint);
+  dUASSERT(joint->vtable == &__damotor_vtable,"joint is not an amotor");
   return joint->num;
 }
 
@@ -1774,6 +1780,7 @@ extern "C" void dJointGetAMotorAxis (dxJointAMotor *joint, int anum,
 				     dVector3 result)
 {
   dAASSERT(joint && anum >= 0 && anum < 3);
+  dUASSERT(joint->vtable == &__damotor_vtable,"joint is not an amotor");
   if (anum < 0) anum = 0;
   if (anum > 2) anum = 2;
   if (joint->rel[anum] > 0) {
@@ -1795,6 +1802,7 @@ extern "C" void dJointGetAMotorAxis (dxJointAMotor *joint, int anum,
 extern "C" int dJointGetAMotorAxisRel (dxJointAMotor *joint, int anum)
 {
   dAASSERT(joint && anum >= 0 && anum < 3);
+  dUASSERT(joint->vtable == &__damotor_vtable,"joint is not an amotor");
   if (anum < 0) anum = 0;
   if (anum > 2) anum = 2;
   return joint->rel[anum];
@@ -1804,6 +1812,7 @@ extern "C" int dJointGetAMotorAxisRel (dxJointAMotor *joint, int anum)
 extern "C" dReal dJointGetAMotorAngle (dxJointAMotor *joint, int anum)
 {
   dAASSERT(joint && anum >= 0 && anum < 3);
+  dUASSERT(joint->vtable == &__damotor_vtable,"joint is not an amotor");
   if (anum < 0) anum = 0;
   if (anum > 3) anum = 3;
   return joint->angle[anum];
@@ -1821,6 +1830,7 @@ extern "C" dReal dJointGetAMotorAngleRate (dxJointAMotor *joint, int anum)
 extern "C" dReal dJointGetAMotorParam (dxJointAMotor *joint, int parameter)
 {
   dAASSERT(joint);
+  dUASSERT(joint->vtable == &__damotor_vtable,"joint is not an amotor");
   int anum = parameter >> 8;
   if (anum < 0) anum = 0;
   if (anum > 2) anum = 2;
@@ -1832,6 +1842,7 @@ extern "C" dReal dJointGetAMotorParam (dxJointAMotor *joint, int parameter)
 extern "C" int dJointGetAMotorMode (dxJointAMotor *joint)
 {
   dAASSERT(joint);
+  dUASSERT(joint->vtable == &__damotor_vtable,"joint is not an amotor");
   return joint->mode;
 }
 
