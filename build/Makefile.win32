@@ -54,3 +54,6 @@ clean: clean_subdirs
 
 make_depend:
 	@echo depend target does nothing under windows.
+
+# misc
+COPY_CMD=copy

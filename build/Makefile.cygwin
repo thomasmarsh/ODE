@@ -60,7 +60,10 @@ LINKWIN=-lComctl32 -lkernel32 -luser32 -lgdi32
 LINKOPENGL=-lOpenGL32 -lGlu32
 
 clean: clean_subdirs
-	-del *~ *.obj *.lib *.a *.o *.res *.RES $(EXTRA_CLEAN)
+	-rm *~ *.obj *.lib *.a *.o *.res *.RES $(EXTRA_CLEAN)
 
 make_depend: $(wildcard *.cpp *.c)
 	$(if $^,gcc -MM $(addprefix -I ,$(INCLUDE_PATHS)) $(addprefix -D,$(DEFINES)) $^ > Dependencies)
+
+# misc
+COPY_CMD=cp

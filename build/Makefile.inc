@@ -14,6 +14,7 @@
 #   SUBDIRS : subdirectories to build (*)
 #   SUBDIR_TARGET : target to build in subdirectories
 #   SUBSYSTEM : set to `WINDOWS' or `CONSOLE', for Win32 targets only
+#   COPY_CMD : the name of the copy command (typically "cp" or "copy")
 #
 # variables defined here
 #   PLATFORM : win32, linux, etc

@@ -63,3 +63,6 @@ clean: clean_subdirs
 
 make_depend: $(wildcard *.cpp *.c)
 	$(if $^,gcc -MM $(addprefix -I ,$(INCLUDE_PATHS)) $(addprefix -D,$(DEFINES)) $^ > Dependencies)
+
+# misc
+COPY_CMD=copy
