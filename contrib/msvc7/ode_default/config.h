@@ -35,7 +35,7 @@ extern "C" {
 #include <string.h>
 #include <math.h>
 
-#if defined(WIN32) && (defined(MSVC) || defined(MINGW))
+#if defined(WIN32) && (defined(_MSC_VER) || defined(MINGW))
 static union { unsigned char __c[4]; float __f; } __ode_huge_valf =
   {{0,0,0x80,0x7f}};
 #define _INFINITY4 (__ode_huge_valf.__f)

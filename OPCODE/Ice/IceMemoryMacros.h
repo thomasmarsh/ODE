@@ -54,7 +54,7 @@
 		//
 		//	2) for(udword i=0;i<nb;i++)	dest[i] = value;
 		//
-#ifdef MSVC
+#ifdef _MSC_VER
 		_asm push eax
 		_asm push ecx
 		_asm push edi

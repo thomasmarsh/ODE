@@ -23,7 +23,7 @@
 #include <ode/ode.h>
 #include <drawstuff/drawstuff.h>
 
-#ifdef MSVC
+#ifdef _MSC_VER
 #pragma warning(disable:4244 4305)  // for VC++, no precision loss complaints
 #endif
 
