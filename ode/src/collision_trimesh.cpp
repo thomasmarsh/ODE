@@ -157,8 +157,10 @@ dxTriMesh::dxTriMesh(dSpaceID Space, dTriMeshDataID Data) : dxGeom(Space, 1){
 	_OBBCollider.SetTemporalCoherence(true);
 	_AABBTreeCollider.SetTemporalCoherence(true);
 
-	this->doSphereTC = true;
-	this->doBoxTC = true;
+	/* TC has speed/space 'issues' that don't make it a clear
+	   win by default. */
+	this->doSphereTC = false;
+	this->doBoxTC = false;
 
 	_SphereCollider.SetPrimitiveTests(false);
 }
