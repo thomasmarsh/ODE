@@ -290,6 +290,8 @@ static void command (int cmd)
 
 void drawGeom (dGeomID g, const dReal *pos, const dReal *R, int show_aabb)
 {
+  int i;
+
   if (!g) return;
   if (!pos) pos = dGeomGetPosition (g);
   if (!R) R = dGeomGetRotation (g);
@@ -335,9 +337,9 @@ void drawGeom (dGeomID g, const dReal *pos, const dReal *R, int show_aabb)
     dReal aabb[6];
     dGeomGetAABB (g,aabb);
     dVector3 bbpos;
-    for (int i=0; i<3; i++) bbpos[i] = 0.5*(aabb[i*2] + aabb[i*2+1]);
+    for (i=0; i<3; i++) bbpos[i] = 0.5*(aabb[i*2] + aabb[i*2+1]);
     dVector3 bbsides;
-    for (int i=0; i<3; i++) bbsides[i] = aabb[i*2+1] - aabb[i*2];
+    for (i=0; i<3; i++) bbsides[i] = aabb[i*2+1] - aabb[i*2];
     dMatrix3 RI;
     dRSetIdentity (RI);
     dsSetColorAlpha (1,0,0,0.5);

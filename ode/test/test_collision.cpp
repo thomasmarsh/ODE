@@ -130,6 +130,8 @@ void nearCallback (void *data, dGeomID o1, dGeomID o2)
 
 void draw_all_objects (dSpaceID space)
 {
+  int i, j;
+
   draw_all_objects_called = 1;
   if (!graphical_test) return;
   int n = dSpaceGetNumGeoms (space);
@@ -139,7 +141,7 @@ void draw_all_objects (dSpaceID space)
   dSpaceCollide (space,0,&nearCallback);
 
   // draw all rays
-  for (int i=0; i<n; i++) {
+  for (i=0; i<n; i++) {
     dGeomID g = dSpaceGetGeom (space,i);
     if (dGeomGetClass (g) == dRayClass) {
       dsSetColor (1,1,1);
@@ -147,7 +149,7 @@ void draw_all_objects (dSpaceID space)
       dGeomRayGet (g,origin,dir);
       origin[2] += Z_OFFSET;
       dReal length = dGeomRayGetLength (g);
-      for (int j=0; j<3; j++) dir[j] = dir[j]*length + origin[j];
+      for (j=0; j<3; j++) dir[j] = dir[j]*length + origin[j];
       dsDrawLine (origin,dir);
       dsSetColor (0,0,1);
       dsDrawSphere (origin,dGeomGetRotation(g),0.01);
@@ -155,7 +157,7 @@ void draw_all_objects (dSpaceID space)
   }
 
   // draw all other objects
-  for (int i=0; i<n; i++) {
+  for (i=0; i<n; i++) {
     dGeomID g = dSpaceGetGeom (space,i);
     dVector3 pos;
     if (dGeomGetClass (g) != dPlaneClass) {
@@ -194,13 +196,13 @@ void draw_all_objects (dSpaceID space)
       dVector3 pos2;
       dGeomPlaneGetParams (g,n);
       dRFromZAxis (R,n[0],n[1],n[2]);
-      for (int j=0; j<3; j++) pos[j] = n[j]*n[3];
+      for (j=0; j<3; j++) pos[j] = n[j]*n[3];
       pos[2] += Z_OFFSET;
       sides[0] = 2;
       sides[1] = 2;
       sides[2] = 0.001;
       dsSetColor (1,0,1);
-      for (int j=0; j<3; j++) pos2[j] = pos[j] + 0.1*n[j];
+      for (j=0; j<3; j++) pos2[j] = pos[j] + 0.1*n[j];
       dsDrawLine (pos,pos2);
       dsSetColorAlpha (1,0,1,0.8);
       dsDrawBox (pos,R,sides);
