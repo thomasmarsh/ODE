@@ -109,7 +109,7 @@ int dCollideRTL(dxGeom* g1, dxGeom* RayGeom, int Flags, dContactGeom* Contacts, 
 
 				dNormalize3(Contact->normal);
 
-				Contact->depth = Length - T;
+				Contact->depth = T;		// was Length - T, but that seemed wrong
 				Contact->g1 = TriMesh;
 				Contact->g2 = RayGeom;
 				
