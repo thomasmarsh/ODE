@@ -2,6 +2,11 @@
 TODO BEFORE NEXT RELEASE
 ------------------------
 
+handle infinities better: HUGE_VALF is not commanly defined, it seems.
+get rid of the __USE_ISOC9X macro in common.h
+perhaps just use a "big" number instead of the actual IEEE infinity, it's
+more portable anyway.
+
 this collision rule:
     // no contacts if both geoms on the same body, and the body is not 0
     if (g1->body == g2->body && g1->body) return 0;
