@@ -1130,6 +1130,17 @@ int dAreConnected (dBodyID b1, dBodyID b2)
   return 0;
 }
 
+
+int dAreConnectedExcluding (dBodyID b1, dBodyID b2, int joint_type)
+{
+  dAASSERT (b1 && b2);
+  // look through b1's neighbour list for b2
+  for (dxJointNode *n=b1->firstjoint; n; n=n->next) {
+    if (dJointGetType (n->joint) != joint_type && n->body == b2) return 1;
+  }
+  return 0;
+}
+
 //****************************************************************************
 // world
 
