@@ -300,7 +300,7 @@ void dInternalStepIsland_x1 (dxWorld *world, dxBody **body, int nb,
     dReal *lo = (dReal*) ALLOCA (m*sizeof(dReal));
     dReal *hi = (dReal*) ALLOCA (m*sizeof(dReal));
     dSetZero (c,m);
-    dSetZero (cfm,m);
+    dSetValue (cfm,m,-epsilon * stepsize);
     dSetValue (lo,m,-dInfinity);
     dSetValue (hi,m, dInfinity);
 
@@ -345,8 +345,8 @@ void dInternalStepIsland_x1 (dxWorld *world, dxBody **body, int nb,
     dSetZero (A,m*mskip);
     dMultiply2 (A,JinvM,J,m,n6,m);
 
-    // add epsilon to the diagonal of A
-    for (i=0; i<m; i++) A[i*mskip+i] += epsilon;
+    // add cfm to the diagonal of A
+    for (i=0; i<m; i++) A[i*mskip+i] -= cfm[i] * Jinfo.fps;
 
 #   ifdef COMPARE_METHODS
     comparator.nextMatrix (A,m,m,1,"A");
@@ -568,7 +568,7 @@ void dInternalStepIsland_x2 (dxWorld *world, dxBody **body, int nb,
     dReal *lo = (dReal*) ALLOCA (m*sizeof(dReal));
     dReal *hi = (dReal*) ALLOCA (m*sizeof(dReal));
     dSetZero (c,m);
-    dSetZero (cfm,m);
+    dSetValue (cfm,m,-epsilon * stepsize);
     dSetValue (lo,m,-dInfinity);
     dSetValue (hi,m, dInfinity);
 
@@ -705,8 +705,8 @@ void dInternalStepIsland_x2 (dxWorld *world, dxBody **body, int nb,
       }
     }
 
-    // add epsilon to the diagonal of A
-    for (i=0; i<m; i++) A[i*mskip+i] += epsilon;
+    // add cfm to the diagonal of A
+    for (i=0; i<m; i++) A[i*mskip+i] -= cfm[i] * Jinfo.fps;
 
 #   ifdef COMPARE_METHODS
     comparator.nextMatrix (A,m,m,1,"A");
