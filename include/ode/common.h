@@ -121,16 +121,16 @@ typedef dReal dQuaternion[4];
 
 #if defined(dSINGLE)
 
-#define REAL(x) (x ## f)			/* form a constant */
-#define dRecip(x) ((float)(1.0f/(x)))		/* reciprocal */
-#define dSqrt(x) ((float)sqrtf(x))		/* square root */
-#define dRecipSqrt(x) ((float)(1.0f/sqrtf(x)))	/* reciprocal square root */
-#define dSin(x) ((float)sinf(x))		/* sine */
-#define dCos(x) ((float)cosf(x))		/* cosine */
-#define dFabs(x) ((float)fabsf(x))		/* absolute value */
-#define dAtan2(y,x) ((float)atan2f((y),(x)))	/* arc tangent with 2 args */
-#define dFMod(a,b) ((float)fmodf((a),(b)))	/* modulo */
-#define dCopySign(a,b) ((float)copysignf((a),(b)))
+#define REAL(x) (x ## f)					/* form a constant */
+#define dRecip(x) ((float)(1.0f/(x)))				/* reciprocal */
+#define dSqrt(x) ((float)sqrtf(float(x)))			/* square root */
+#define dRecipSqrt(x) ((float)(1.0f/sqrtf(float(x))))		/* reciprocal square root */
+#define dSin(x) ((float)sinf(float(x)))				/* sine */
+#define dCos(x) ((float)cosf(float(x)))				/* cosine */
+#define dFabs(x) ((float)fabsf(float(x)))			/* absolute value */
+#define dAtan2(y,x) ((float)atan2f(float(y),float(x)))		/* arc tangent with 2 args */
+#define dFMod(a,b) ((float)fmodf(float(a),float(b)))		/* modulo */
+#define dCopySign(a,b) ((float)copysignf(float(a),float(b)))
 
 #elif defined(dDOUBLE)
 
