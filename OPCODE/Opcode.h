@@ -24,11 +24,13 @@
 // Things to help us compile on non-windows platforms
 
 #if defined(__APPLE__) || defined(__MACOSX__)
+#if __APPLE_CC__ < 1495
 #define sqrtf sqrt
 #define sinf sin
 #define cosf cos
 #define acosf acos
 #define asinf sinf
+#endif
 #endif
 
 #ifndef _MSC_VER
