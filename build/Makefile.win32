@@ -3,7 +3,7 @@ PLATFORM=win32
 
 # convert a name into a library name or an executable name
 fLIBNAME=$(1).lib
-fEXENAME=$(1).exe
+fEXENAME=$(addsuffix .exe,$(1))
 
 # convert source file names to object file names
 fTARGETS=$(patsubst %.cpp,%.obj,$(filter %.cpp,$(1))) \

@@ -8,7 +8,9 @@
 #   EXTRA_CLEAN : extra stuff to clean up for `clean' target
 #   CPP_RTTI : defined to 1 if C++ RTTI should be used
 #   CPP_EX : defined to 1 if C++ exceptions should be used
-#   CPP_OPT : defined to 0,1,2 to set the level of C++ optimization
+#   CPP_OPT : defined to 0,1,2 to set the level of C and C++ optimization
+#   CPP_FLAGS : extra flags to C/C++ compiler
+#   FAST : defined to 1 to apply extra non-detrimental optimizations
 #   SUBDIRS : subdirectories to build (*)
 #   SUBDIR_TARGET : target to build in subdirectories
 #

@@ -22,11 +22,17 @@ _EX_=$(_EX_0)
 # optimization options
 _OPT_0=
 _OPT_1=-O1
-_OPT_2=-O2
+_OPT_2=-O2 
 _OPT_=$(_OPT_0)
 
+# some other optimization things
+_FAST_1=-ffast-math -fomit-frame-pointer
+
 %.o: %.cpp
-	gcc -c -g -Wall $(_OPT_$(CPP_OPT)) $(addprefix -I ,$(INCLUDE_PATHS)) $(addprefix -D,$(DEFINES)) $(_RTTI_$(CPP_RTTI)) $(_EX_$(CPP_EX)) $<
+	gcc -c -g -Wall $(_OPT_$(CPP_OPT)) $(addprefix -I ,$(INCLUDE_PATHS)) $(addprefix -D,$(DEFINES)) $(_RTTI_$(CPP_RTTI)) $(_EX_$(CPP_EX)) $(_FAST_$(FAST)) $(CPP_FLAGS) $<
+
+%.o: %.c
+	gcc -c -g -Wall $(_OPT_$(CPP_OPT)) $(addprefix -I ,$(INCLUDE_PATHS)) $(addprefix -D,$(DEFINES)) $(_FAST_$(FAST)) $(CPP_FLAGS) $<
 
 %.a:
 	ar rc $@ $^
