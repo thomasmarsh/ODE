@@ -123,6 +123,8 @@ void dsSetColor (float red, float green, float blue);
  */
 void dsDrawBox (const float pos[3], const float R[12], const float sides[3]);
 void dsDrawSphere (const float pos[3], const float R[12], float radius);
+void dsDrawTriangle (const float pos[3], const float R[12],
+		     const float *v0, const float *v1, const float *v2);
 void dsDrawCylinder (const float pos[3], const float R[12],
 		     float length, float radius);
 void dsDrawCappedCylinder (const float pos[3], const float R[12],
