@@ -23,6 +23,8 @@
 // main window and event handling for X11
 
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include <stdarg.h>
 #include <X11/Xlib.h>
 #include <X11/Xatom.h>

@@ -43,6 +43,7 @@ manage openGL state changes better
 
 #include <stdio.h>
 #include <string.h>
+#include <alloca.h>
 #include <math.h>
 #include <GL/gl.h>
 #include <GL/glu.h>
