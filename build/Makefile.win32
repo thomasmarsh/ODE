@@ -1,6 +1,4 @@
 
-PLATFORM=win32
-
 ifndef SUBSYSTEM
 SUBSYSTEM=WINDOWS
 endif
