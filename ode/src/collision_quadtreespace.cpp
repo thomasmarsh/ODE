@@ -331,6 +331,8 @@ struct dxQuadTreeSpace : public dxSpace{
 	void add(dxGeom* g);
 	void remove(dxGeom* g);
 	void dirty(dxGeom* g);
+
+	void computeAABB();
 	
 	void cleanGeoms();
 	void collide(void* UserData, dNearCallback* Callback);
@@ -362,6 +364,14 @@ dxQuadTreeSpace::dxQuadTreeSpace(dSpaceID _space, dVector3 Center, dVector3 Exte
 	CurrentLevel = 0;
 	CurrentObject = 0;
 	CurrentIndex = -1;
+
+	// Init AABB. We initialize to infinity because it is not illegal for an object to be outside of the tree. Its simply inserted in the root block
+	aabb[0] = -dInfinity;
+	aabb[1] = dInfinity;
+	aabb[2] = -dInfinity;
+	aabb[3] = dInfinity;
+	aabb[4] = -dInfinity;
+	aabb[5] = dInfinity;
 }
 
 dxQuadTreeSpace::~dxQuadTreeSpace(){
@@ -459,6 +469,9 @@ void dxQuadTreeSpace::add(dxGeom* g){
 	dAASSERT(g);
 	dUASSERT(g->parent_space == 0 && g->next == 0, "geom is already in a space");
 
+	g->gflags |= GEOM_DIRTY | GEOM_AABB_BAD;
+	DirtyList.push(g);
+
 	// add
 	g->parent_space = this;
 	Blocks[0].GetBlock(g->aabb)->AddObject(g);	// Add to best block
@@ -467,13 +480,7 @@ void dxQuadTreeSpace::add(dxGeom* g){
 	// enumerator has been invalidated
 	current_geom = 0;
 	
-	// new geoms are added to the front of the list and are always
-	// considered to be dirty. as a consequence, this space and all its
-	// parents are dirty too.
-	g->gflags |= GEOM_DIRTY | GEOM_AABB_BAD;
 	dGeomMoved(this);
-
-	dirty(g);
 }
 
 void dxQuadTreeSpace::remove(dxGeom* g){
@@ -507,6 +514,10 @@ void dxQuadTreeSpace::remove(dxGeom* g){
 
 void dxQuadTreeSpace::dirty(dxGeom* g){
 	DirtyList.push(g);
+}
+
+void dxQuadTreeSpace::computeAABB(){
+	//
 }
 
 void dxQuadTreeSpace::cleanGeoms(){
