@@ -49,6 +49,7 @@ you must verify visually.
 #include "ode/ode.h"
 #include "drawstuff/drawstuff.h"
 
+#pragma warning(disable:4244 4305)  // for VC++, no precision loss complaints
 
 // select correct drawing functions
 #ifdef dDOUBLE

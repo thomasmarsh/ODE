@@ -27,6 +27,7 @@
 
 #include "ode/ode.h"
 
+#pragma warning(disable:4244 4305)  // for VC++, no precision loss complaints
 
 // get some math functions under windows
 #ifdef WIN32
