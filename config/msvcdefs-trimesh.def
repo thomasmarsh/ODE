@@ -296,6 +296,7 @@ dTestRand
 dTestSolveLCP
 dWorldCreate
 dWorldDestroy
+dWorldExportDIF
 dWorldGetAutoDisableAngularThreshold
 dWorldGetAutoDisableFlag
 dWorldGetAutoDisableLinearThreshold
