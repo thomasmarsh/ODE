@@ -245,7 +245,8 @@ dReal dGeomBoxPointDepth (dGeomID g, dReal x, dReal y, dReal z)
   }
 
   // Otherwise, if point is outside the box, the depth is the largest
-  // distance to any side
+  // distance to any side.  This is an approximation to the 'proper'
+  // solution (the proper solution may be larger in some cases).
 
   dReal largest_dist = 0;
 
