@@ -82,6 +82,7 @@ char *config_h_part2 =
 
 /* the config.h footer */
 char *config_h_footer =
+"\n"
 "#ifdef __cplusplus\n"
 "}\n"
 "#endif\n"
@@ -394,7 +395,7 @@ void get_ODE_float_stuff (FILE *file)
     run ("ctest.exe");
     if (file_exists ("data")) {
       fprintf (file,"#define DINFINITY_DECL %s\n",decl[i]);
-      fprintf (file,"%s\n\n",inf[i]);
+      fprintf (file,"%s\n",inf[i]);
       delete_file ("ctest.c");
       delete_file ("ctest.exe");
       delete_file ("data");
@@ -403,6 +404,17 @@ void get_ODE_float_stuff (FILE *file)
   }
 
   fatal_error ("can't determine dInfinity constant");
+}
+
+/****************************************************************************/
+/* configuration of ODE features */
+
+void get_ODE_features (FILE *file)
+{
+  write_header_comment (file,"ODE feature configuration");
+#ifdef ODE_OLD_COLLISION
+  fprintf (file,"#define ODE_OLD_COLLISION 1\n");
+#endif
 }
 
 /****************************************************************************/
@@ -429,6 +441,7 @@ int main (int argc, char **argv)
   check_if_this_is_a_pentium (file);
   get_ODE_integer_typedefs (file);
   get_ODE_float_stuff (file);
+  get_ODE_features (file);
   fprintf (file,config_h_footer);
   fclose (file);
 
