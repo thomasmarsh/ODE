@@ -575,7 +575,7 @@ extern "C" void dJointSetSliderAxis (dxJointSlider *joint,
   else {
     // set joint->qrel to the transpose of the first body's q
     joint->qrel[0] = joint->node[0].body->q[0];
-    for (i=1; i<4; i++) joint->qrel[i] = joint->node[0].body->q[i];
+    for (i=1; i<4; i++) joint->qrel[i] = -joint->node[0].body->q[i];
     for (i=0; i<3; i++) joint->offset[i] = joint->node[0].body->pos[i];
   }
 }
