@@ -38,15 +38,15 @@
 
 static int seed=0;
 
-extern "C" int dBoxBox (const dVector3 p1, const dMatrix3 R1,
-			const dVector3 side1, const dVector3 p2,
-			const dMatrix3 R2, const dVector3 side2,
-			dVector3 normal, dReal *depth, int *code,
-			int maxc, dContactGeom *contact, int skip);
+int dBoxBox (const dVector3 p1, const dMatrix3 R1,
+	     const dVector3 side1, const dVector3 p2,
+	     const dMatrix3 R2, const dVector3 side2,
+	     dVector3 normal, dReal *depth, int *code,
+	     int maxc, dContactGeom *contact, int skip);
 
-extern "C" void lineClosestApproach (const dVector3 pa, const dVector3 ua,
-				     const dVector3 pb, const dVector3 ub,
-				     dReal *alpha, dReal *beta);
+void dLineClosestApproach (const dVector3 pa, const dVector3 ua,
+			   const dVector3 pb, const dVector3 ub,
+			   dReal *alpha, dReal *beta);
 
 //****************************************************************************
 // a really inefficient, but hopefully correct implementation of
