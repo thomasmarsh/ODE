@@ -1,5 +1,5 @@
-#include "dcCore.h"
-#include "dcGraphicsTypes.h"
+#include "array.h"
+#include "dxTriList.h"
 
 #include "Opcode.h"
 using namespace Opcode;
@@ -13,9 +13,6 @@ __forceinline bool dcAABBTreeCollider::BoxBoxOverlap(const Point& Extents0, cons
 	/* Setup */
 	const Point& Center1 = Box.mCenter;
 	const Point& Extents1 = Box.mExtents;
-
-	/* Stats */
-	BoxBoxTestCount++;
 
 	/* Originally by Pierre */
 	float tx = Center0.x - Center1.x;
@@ -128,9 +125,6 @@ __forceinline bool dcAABBTreeCollider::TriBoxOverlap(){
 	const Point& center = Box.mCenter;
 	const Point& extents = Box.mExtents;
 
-	// Stats
-	BoxTriTestCount++;
-
 	// use separating axis theorem to test overlap between triangle and box 
 	// need to test for overlap in these directions: 
 	// 1) the {x,y,z}-directions (actually, since we use the AABB of the triangle 
@@ -208,7 +202,7 @@ __forceinline bool dcAABBTreeCollider::TriBoxOverlap(){
 	return true;
 }
 
-dcAABBTreeCollider::dcAABBTreeCollider(const dcArray<Vertex>& _Vertices, const dcArray<dword>& _Indices) : Vertices(_Vertices), Indices(_Indices){
+dcAABBTreeCollider::dcAABBTreeCollider(const dcVector3*& _Vertices, const int*& _Indices) : Vertices(_Vertices), Indices(_Indices){
 	TCData = null;
 }
 
@@ -224,9 +218,7 @@ dcAABBTreeCollider::~dcAABBTreeCollider(){
 
 
 void dcAABBTreeCollider::InitQuery(const CollisionAABB& Box){
-	BoxBoxTestCount = 0;
-	BoxTriTestCount = 0;
-	Contacts.Clear();
+	Contacts.setSize(0);
 
 	this->Box = Box;
 }
@@ -235,7 +227,7 @@ void dcAABBTreeCollider::InitQuery(const CollisionAABB& Box){
 void dcAABBTreeCollider::Collide(const AABBNoLeafTree* Tree, const CollisionAABB& Box){
 	InitQuery(Box);
 	if (TCData != null){
-		for (dword i = 0; i < TCData->GetLength(); i++){
+		for (int i = 0; i < TCData->size(); i++){
 			_Collide(TCData->operator[](i));
 		}
 	}
@@ -245,7 +237,7 @@ void dcAABBTreeCollider::Collide(const AABBNoLeafTree* Tree, const CollisionAABB
 
 void dcAABBTreeCollider::_CollideTriBox(){
 	if (TriBoxOverlap()){
-		Contacts.AddItem(LeafIndex);
+		Contacts.push(LeafIndex);
 	}
 }
 
@@ -253,13 +245,13 @@ void dcAABBTreeCollider::_Collide(const AABBNoLeafNode* a){
 	if (!BoxBoxOverlap(a->mAABB.mExtents, a->mAABB.mCenter)) return;
 
 	if (a->HasLeaf()){
-		FETCH_LEAF((dword)a->GetPrimitive());
+		FETCH_LEAF(a->GetPrimitive());
 		_CollideTriBox();
 	}
 	else _Collide(a->GetPos());
 
 	if (a->HasLeaf2()){
-		FETCH_LEAF((dword)a->GetPrimitive2());
+		FETCH_LEAF(a->GetPrimitive2());
 		_CollideTriBox();
 	}
 	else _Collide(a->GetNeg());
@@ -277,18 +269,18 @@ void dcAABBTreeCollider::_GenerateTC(const AABBNoLeafNode* a){
 	if (!BoxBoxOverlap(a->mAABB.mExtents, a->mAABB.mCenter)) return;
 
 	if (a->HasLeaf()){
-		FETCH_LEAF((dword)a->GetPrimitive());
+		FETCH_LEAF(a->GetPrimitive());
 		if (TriBoxOverlap()){
-			TCData->AddItem(a);
+			TCData->push(a);
 			return;
 		}
 	}
 	else _GenerateTC(a->GetPos());
 
 	if (a->HasLeaf2()){
-		FETCH_LEAF((dword)a->GetPrimitive2());
+		FETCH_LEAF(a->GetPrimitive2());
 		if (TriBoxOverlap()){
-			TCData->AddItem(a);
+			TCData->push(a);
 			return;
 		}
 	}

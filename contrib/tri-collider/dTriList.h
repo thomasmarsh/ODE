@@ -1,15 +1,20 @@
-/* The only external header */
+#include "ode\ode.h"
 
 /* Class ID */
 extern int dTriListClass;
 
+/* Single precision, no padding vector used for storage */
+struct dcVector3{
+	float x, y, z;
+};
+
 /* Per triangle callback */
-typedef int dTriCallback(dGeomID TriList, dGeomID RefObject, dword TriangleIndex);
+typedef int dTriCallback(dGeomID TriList, dGeomID RefObject, int TriangleIndex);
 void dGeomTriListSetCallback(dGeomID g, dTriCallback* Callback);
 dTriCallback* dGeomTriListGetCallback(dGeomID g);
 
 /* Per object callback */
-typedef void dTriArrayCallback(dGeomID TriList, dGeomID RefObject, dcVector<dword>& TriIndices);
+typedef void dTriArrayCallback(dGeomID TriList, dGeomID RefObject, const int* TriIndices, int TriCount);
 void dGeomTriListSetArrayCallback(dGeomID g, dTriArrayCallback* ArrayCallback);
 dTriArrayCallback* dGeomTriListGetArrayCallback(dGeomID g);
 
@@ -17,9 +22,7 @@ dTriArrayCallback* dGeomTriListGetArrayCallback(dGeomID g);
 dxGeom* dCreateTriList(dSpaceID space, dTriCallback* Callback, dTriArrayCallback* ArrayCallback);
 
 /* Setting data */
-dcArray<Vertex>& dGeomTriListGetVertexArray(dGeomID g);
-dcArray<dword>& dGeomTriListGetIndexArray(dGeomID g);
-void dGeomTriListBuild(dGeomID g);
+void dGeomTriListBuild(dGeomID g, const dcVector3* Vertices, int VertexCount, const int* Indices, int IndexCount);
 
 /* Getting data */
-void dGeomTriListGetTriangle(dGeomID g, dword Index, Vertex* v0, Vertex* v1, Vertex* v2);
+void dGeomTriListGetTriangle(dGeomID g, int Index, dVector3* v0, dVector3* v1, dVector3* v2);
