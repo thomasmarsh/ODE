@@ -212,6 +212,10 @@ SOURCE=..\ode\src\odemath.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=..\ode\src\quickstep.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=..\ode\src\rotation.cpp
 # End Source File
 # Begin Source File
@@ -285,6 +289,10 @@ SOURCE=..\ode\src\objects.h
 # Begin Source File
 
 SOURCE=..\ode\src\obstack.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\ode\src\quickstep.h
 # End Source File
 # Begin Source File
 
