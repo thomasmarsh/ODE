@@ -20,7 +20,8 @@
  *                                                                       *
  *************************************************************************/
 
-// This is a demo of the StepFast code, by David Whittaker.
+// This is a demo of the QuickStep and StepFast methods,
+// originally by David Whittaker.
 
 #include <ode/ode.h>
 #include <drawstuff/drawstuff.h>
@@ -39,6 +40,10 @@
 #endif
 
 
+// select the method you want to test here (only uncomment *one* line)
+#define QUICKSTEP 1
+//#define STEPFAST 1
+
 // some constants
 
 #define LENGTH 3.5		// chassis length
@@ -54,7 +59,7 @@
 #define FMAX 25			// car engine fmax
 #define ROWS 1			// rows of cars
 #define COLS 1			// columns of cars
-#define ITERS 10		// number of iterations
+#define ITERS 20		// number of iterations
 #define WBOXSIZE 1.0		// size of wall boxes
 #define WALLWIDTH 20		// width of wall
 #define WALLHEIGHT 10		// height of wall
@@ -237,6 +242,7 @@ void resetSimulation()
 	dWorldSetGravity (world,0,0,-1.5);
 	dWorldSetCFM (world, 1e-5);
 	dWorldSetERP (world, 0.8);
+	dWorldSetQuickStepNumIterations (world,ITERS);
 	ground = dCreatePlane (space,0,0,1,0);
 	
 	bodies = 0;
@@ -456,7 +462,11 @@ static void simLoop (int pause)
 		if (doFast)
 		{
 			dSpaceCollide (space,0,&nearCallback);
+#if defined(QUICKSTEP)
+			dWorldQuickStep (world,0.05);
+#elif defined(STEPFAST)
 			dWorldStepFast1 (world,0.05,ITERS);
+#endif
 			dJointGroupEmpty (contactgroup);
 		}
 		else
