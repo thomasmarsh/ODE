@@ -88,6 +88,8 @@ collision docs:
 TODO BEFORE NEXT RELEASE
 ------------------------
 
+g++ needed for compiling tests using gcc 3.2 ? what is the problem?
+
 add joint feedback info from lambda, so that we can get motor forces etc.
 need a way to map constraint indexes to what they mean.
 
