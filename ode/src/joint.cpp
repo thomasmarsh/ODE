@@ -1079,11 +1079,11 @@ static void contactGetInfo2 (dxJointContact *j, dxJoint::Info2 *info)
 
   // set right hand side and cfm value for normal
   dReal erp = info->erp;
-  if (j->contact.surface.mode & dContactSoftErp)
+  if (j->contact.surface.mode & dContactSoftERP)
     erp = j->contact.surface.soft_erp;
   dReal k = info->fps * erp;
   info->c[0] = k*j->contact.geom.depth;
-  if (j->contact.surface.mode & dContactSoftCfm)
+  if (j->contact.surface.mode & dContactSoftCFM)
     info->cfm[0] = j->contact.surface.soft_cfm;
 
   // deal with bounce
@@ -1136,9 +1136,12 @@ static void contactGetInfo2 (dxJointContact *j, dxJoint::Info2 *info)
     if (j->contact.surface.mode & dContactMotion1) {
       info->c[1] = j->contact.surface.motion1;
     }
-    // set LCP bounds
+    // set LCP bounds and friction index. this depends on the approximation
+    // mode
     info->lo[1] = -j->contact.surface.mu;
     info->hi[1] = j->contact.surface.mu;
+    if (j->contact.surface.mode & dContactApprox1_1) info->findex[1] = 0;
+
     // set slip (constraint force mixing)
     if (j->contact.surface.mode & dContactSlip1)
       info->cfm[1] = j->contact.surface.slip1;
@@ -1160,7 +1163,8 @@ static void contactGetInfo2 (dxJointContact *j, dxJoint::Info2 *info)
     if (j->contact.surface.mode & dContactMotion2) {
       info->c[2] = j->contact.surface.motion2;
     }
-    // set LCP bounds
+    // set LCP bounds and friction index. this depends on the approximation
+    // mode
     if (j->contact.surface.mode & dContactMu2) {
       info->lo[2] = -j->contact.surface.mu2;
       info->hi[2] = j->contact.surface.mu2;
@@ -1169,6 +1173,8 @@ static void contactGetInfo2 (dxJointContact *j, dxJoint::Info2 *info)
       info->lo[2] = -j->contact.surface.mu;
       info->hi[2] = j->contact.surface.mu;
     }
+    if (j->contact.surface.mode & dContactApprox1_2) info->findex[2] = 0;
+
     // set slip (constraint force mixing)
     if (j->contact.surface.mode & dContactSlip2)
       info->cfm[2] = j->contact.surface.slip2;
