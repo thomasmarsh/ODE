@@ -1322,8 +1322,35 @@ examined and that position will be the zero position.
 
 @subsection{Universal}
 
-There is no description of what a universal joint actually is yet, but here
-are the functions:
+A universal joint looks like this:
+
+		@center{@picture{pix/universal.jpg}}
+
+A universal joint is like a ball and socket joint that constrains an
+extra degree of rotational freedom. Given axis 1 on body 1, and axis 2
+on body 2 that is perpendicular to the first, it keeps them
+perpendicular. In other words, it eliminates rotation about the
+direction perpendicular to the two axes.
+
+In the picture, the two bodies are joined together by a cross.  The
+horizontal axis of the cross is attached to the body 1, and the
+vertical axis to body 2. The cross keeps these axes at 90 degrees, so
+if you grab the body 1 and twist it, the body 2 will twist as well.
+
+Universal joints show up in cars, where the engine causes a shaft, the
+drive shaft, to rotate along its own axis. At some point you'd like to
+change the direction of the shaft. The problem is, if you just bend
+the shaft, then the part after the bend won't rotate about its own
+axis. So if you cut it at the bend location and insert a universal
+joint, you can use the constraint to force the second shaft to rotate
+about the same angle as the first shaft.
+
+Another use of this joint is to attach the arms of a simple virtual
+creature to its body. Imagine a person holding their arms straight
+out. You may want the arm to be able to move up and down, and forward
+and back, but not to rotate about its own axis.
+
+Here are the universal joint functions:
 
 @funcdef{
 void dJointSetUniversalAnchor (dJointID, dReal x, dReal y, dReal z);
@@ -1333,7 +1360,7 @@ void dJointGetUniversalAnchor (dJointID, dVector3 result);
 void dJointGetUniversalAxis1 (dJointID, dVector3 result);
 void dJointGetUniversalAxis2 (dJointID, dVector3 result);
 }{
-FIXME: I should eventually write some sort of description here.
+FIXME: I should eventually write a description of these functions here.
 }
 
 

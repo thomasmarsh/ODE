@@ -9,6 +9,11 @@ the rules for this file:
 
 ------------------------------------------------------------------------------
 
+04/07/02 russ
+
+	* added a section to the documentation for universal joints.
+	  this includes a picture of the joint.
+
 04/05/02 russ
 
 	* added a universal joint class (generously contributed by
