@@ -2221,6 +2221,67 @@ Don't try to get the same effect by setting a very high mass/inertia on the
 time step.
 This can cause unexpected simulation errors.
 
+
+@section{Why would you ever want to set ERP less than one?}
+
+From the definition of the ERP value, it seems than setting it to one is the
+best approach, because then all joint errors will be fully corrected at
+each time step.
+However, ODE uses various approximations in its integrator, so ERP=1 will not
+usually fix 100% of the joint error.
+ERP=1 can work in some cases, but it can also result in instability in some
+systems.
+In these cases you have the option of reducing ERP to get a better behaving
+system.
+
+
+@section{Is it advisable to set body velocities directly, instead of
+applying a force or torque?}
+
+You should only set body velocities directly if you are setting the system
+to some initial configuration.
+If you are setting body velocities every time step (for example from motion
+capture data) then you are probably abusing your physical model, i.e. forcing
+the system to do what you want rather than letting it happen naturally.
+
+The preferred method of setting body velocities during the simulation is to
+use joint motors.
+They can set body velocities to a desired value in one time step, provided
+that the force/torque limit is high enough.
+
+
+@section{Why, when I set a body's velocity directly, does it come up to speed
+slower when joined to other bodies?}
+
+What is likely happening is that you are setting the velocity of one
+body without also setting the velocity of the bodies that it is joined to.
+When you do this, you cause error in the system in subsequent time steps
+as the bodies come apart at their joints.
+The error reduction mechanism will eventually correct for this and pull the
+other bodies along, but it may take a few time steps and it will cause a
+noticeable "drag" on the original body.
+
+Setting the velocity of a body will affect that body alone.
+If it is joined to other bodies, you must set the velocity of each one
+separately (and correctly) to prevent this behavior.
+
+
+@section{Should I scale my units to be around 1.0 ?}
+
+Say you need to simulate some behavior on the scale of a few millimeters
+and a few grams.
+These small lengths and masses will usually work in ODE with no problem.
+However occasionally you may experience stability problems that are caused
+by lack of precision in the factorizer.
+If this is the case, you can try scaling the lengths and masses in your
+system to be around 0.1..10.
+The time step should also be be scaled accordingly.
+The same guideline applies when large lengths and masses are being used.
+
+In general, length and mass values around 0.1..1.0 are better as the
+factorizer may not lose so much precision.
+This guideline is especially helpful when single precision is being used.
+
 #############################################################################
 @chapter{Known BUGS}
 
