@@ -20,6 +20,7 @@ mkdir /tmp/ode-$VER
 cp -av $ODE_DIR/* /tmp/ode-$VER
 find /tmp/ode-$VER -type d -name CVS -exec rm -rf {} \; -print
 find /tmp/ode-$VER -type f -name *~ -exec rm -f {} \; -print
+rmdir /tmp/ode-$VER/build
 
 cd /tmp/ode-$VER
 make clean
@@ -36,4 +37,9 @@ cd /tmp
 tar cfvz ode-$VER.tgz ode-$VER
 rm -rf /tmp/ode-$VER
 
-# scp1 ode-$VER.tgz q12.org:~/q12/ode/snapshots
+echo -e "\ntype <return> to exit or 'c' to copy to q12"
+read Q
+if [ $Q ]; then
+  echo copying...
+  scp1 ode-$VER.tgz q12.org:~/q12/ode/release/
+fi
