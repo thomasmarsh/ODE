@@ -32,6 +32,7 @@ $incdir = '../../include/ode';
 opendir (DIR,$incdir) or die "can't open directory \"$incdir\", stopped";
 while ($i = readdir(DIR)) {
   next if ($i eq '.' or $i eq '..');
+  next if ($i eq 'geom.h' or $i eq 'space.h');	# disregard old collision
   next if ! -f "$incdir/$i";
   open (FILE,"$incdir/$i") or die "can't open file \"$incdir/$i\", stopped";
   $h .= join('',<FILE>);
