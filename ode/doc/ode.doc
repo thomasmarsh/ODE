@@ -24,7 +24,7 @@
 @subtitle{Russell Smith, @date{}}
 @author{Russell Smith, @date{}}
 
-@center{This document is Copyright &copy 2001 Russell Smith.}
+@center{This document is Copyright &copy; 2001 Russell Smith.}
 @center{This is an UNFINISHED document, there is still a lot of stuff
 to write.}
 
@@ -2599,10 +2599,31 @@ of joints.
 @*	dependence on integration timestep.
 @*	Use powered joint, joint limits, built-in springs as much as possible,
 	avoid explicit forces.
-@*	mass ratios - e.g. a whip
+@*	mass ratios - e.g. a whip. Joints that connect large and small masses
+	together will have a harder time keeping their error low.
 @*	if bodies move faster than is reasonable for the timestep
 @*	inetias with long axes
 }
+
+Increasing the global CFM will make the system more numerically robust and
+less susceptable to stability problems.
+It will also make the system look more ``spongy'', so a tradeoff has to be
+found.
+
+Redundant constraints (two or more constraints that ``try and do the same
+job'') will fight each other and cause stability problems.
+The numerical cause of this problem is singularity in the system matrix.
+One example of this is if two contacts joints connect the same pair of
+bodies at the same point.
+Another example is if a virtual hinge joint is created between two bodies
+by connecting them with two ball joints, spaced apart along the hinge axis
+(this is bad because the two ball joints try to remove six degrees of freedom
+from the system, but a real hinge joint would only remove five).
+
+Redundant constraints fight each other and generate strange forces in the
+system that can swamp the normal forces.
+For example, an affected body might fly around as though it has a life
+of its own, with complete disregard for gravity.
 
 
 @section{Using constraint force mixing (CFM)}
@@ -2814,6 +2835,22 @@ Instead, attach the contact joint between B and 0 (the static environment).
 That way the body A will appear to B as though it is static and unmovable.
 This approach may result in some penetration between A and B, but
 this will not be a problem in many applications.
+
+
+@section{The Windows version of ODE crashes with large systems}
+
+ODE requires stack space roughly on the order of @m{O(n)+O(m^2)},
+where @m{n} is the number of bodies and @m{m} is the sum of all the joint
+constraint dimensions.
+If @m{m} is large, this can be a lot of space!
+
+Unix-like operating systems typically allocate stack space as it is needed,
+with an upper limit that might be in the hundreds of Mb.
+Windows compilers normally allocate a much smaller stack.
+If you experience crashes when running large systems, try increasing the
+stack size.
+For example, the MS VC++ command line compiler accepts the @c{/Stack:num}
+flag to set the upper limit.
 
 #############################################################################
 @chapter{Known BUGS}
