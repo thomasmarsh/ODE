@@ -34,12 +34,17 @@ enum {
   dContactMu2		= 0x001,
   dContactFDir1		= 0x002,
   dContactBounce	= 0x004,
-  dContactSoftErp	= 0x008,
-  dContactSoftCfm	= 0x010,
+  dContactSoftERP	= 0x008,
+  dContactSoftCFM	= 0x010,
   dContactMotion1	= 0x020,
   dContactMotion2	= 0x040,
   dContactSlip1		= 0x080,
-  dContactSlip2		= 0x100
+  dContactSlip2		= 0x100,
+
+  dContactApprox0	= 0x0000,
+  dContactApprox1_1	= 0x1000,
+  dContactApprox1_2	= 0x2000,
+  dContactApprox1	= 0x3000
 };
 
 
