@@ -48,7 +48,7 @@ typedef unsigned int intP;
 #define fabsf fabs
 #define atan2f atan2
 #define fmodf fmod
-#define copysignf copysign
+#define copysignf _copysign
 #define copysign _copysign
 #define snprintf _snprintf
 #define vsnprintf _vsnprintf
