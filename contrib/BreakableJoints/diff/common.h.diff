@@ -1,0 +1,12 @@
+208a209,219
+> /******************** breakable joint contribution ***********************/
+> /* joint break modes */
+> enum {
+> 	//dJOINT_DONT_BREAK = 0,      // not implemented (not necessary?)
+> 	dJOINT_BREAK_AT_FORCE = 1,
+> 	dJOINT_BREAK_AT_TORQUE = 2,
+> 	//dJOINT_BROKEN = 4
+> 	dJOINT_DELETE_ON_BREAK = 8
+> };
+> /*************************************************************************/
+> 

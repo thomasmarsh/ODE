@@ -1,0 +1,23 @@
+207a208,221
+>   /******************** breakable joint contribution ***********************/
+>   dxJoint* nextJ = (dxJoint*)world->firstjoint->next;
+>   for (j=world->firstjoint; j; j=nextJ) {
+>   	nextJ = (dxJoint*)j->next;
+>     if (j->breakInfo)
+>       if (j->breakInfo->broken) {
+>         dJointAttach (j, 0, 0);
+>         if (j->breakInfo->flags & dJOINT_DELETE_ON_BREAK) {
+>           dJointDestroy (j);
+>         }
+>       }
+>     }
+>   /*************************************************************************/
+> 
+907a922,924
+>   /******************** breakable joint contribution ***********************/
+>   j->breakInfo = 0;
+>   /*************************************************************************/
+984a1002,1004
+>   /******************** breakable joint contribution ***********************/
+>   if (j->breakInfo) delete j->breakInfo;
+>   /*************************************************************************/
