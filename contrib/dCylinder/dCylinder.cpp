@@ -1137,6 +1137,7 @@ int dCollideCylPlane
  dReal radius;
  dReal hlz;
  dGeomCylinderGetParams(o1,&radius,&hlz);
+ hlz /= 2;
  
  const dReal *R	=	dGeomGetRotation(o1);// rotation of cylinder
  const dReal* p	=	dGeomGetPosition(o1);
