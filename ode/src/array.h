@@ -98,7 +98,7 @@ public:
 
   void push (const T item) {
     if (_size < _anum) _size++; else _setSize (_size+1,sizeof(T));
-    ((T*)_data)[_size-1] = item;
+    memcpy (&(((T*)_data)[_size-1]), &item, sizeof(T));
   }
 
   void swap (dArray<T> &x) {
