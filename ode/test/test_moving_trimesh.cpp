@@ -75,7 +75,7 @@ dGeomID TriMesh1;
 dGeomID TriMesh2;
 static dTriMeshDataID TriData1, TriData2;  // reusable static trimesh data
 
-dReal Vertices[VertexCount * 3] = {
+float Vertices[VertexCount * 3] = {
 	REAL(-0.334392), REAL(0.133007), REAL(0.062259),
 	REAL(-0.350189), REAL(0.150354), REAL(-0.147769),
 	REAL(-0.234201), REAL(0.343811), REAL(-0.174307),
@@ -1576,7 +1576,7 @@ static void command (int cmd)
     }
     else if (cmd == 'm') {
       dTriMeshDataID new_tmdata = dGeomTriMeshDataCreate();
-      dGeomTriMeshDataBuildSingle(new_tmdata, &Vertices[0], 3 * sizeof(dReal), VertexCount, (int*)&Indices[0], IndexCount, 3 * sizeof(int));
+      dGeomTriMeshDataBuildSingle(new_tmdata, &Vertices[0], 3 * sizeof(float), VertexCount, (int*)&Indices[0], IndexCount, 3 * sizeof(int));
 
       obj[i].geom[0] = dCreateTriMesh(space, new_tmdata, 0, 0, 0);
 
@@ -1763,7 +1763,6 @@ static void simLoop (int pause)
         }
       
         if (dGeomGetClass(obj[i].geom[j]) == dTriMeshClass) {
-          dVector3R* Vertices = (dVector3R*)::Vertices;
           int* Indices = (int*)::Indices;
 
           // assume all trimeshes are drawn as bunnies
@@ -1771,10 +1770,18 @@ static void simLoop (int pause)
           const dReal* Rot = dGeomGetRotation(obj[i].geom[j]);
         
           for (int ii = 0; ii < IndexCount / 3; ii++) {
-            const dVector3R& v0 = Vertices[Indices[ii * 3 + 0]];
-            const dVector3R& v1 = Vertices[Indices[ii * 3 + 1]];
-            const dVector3R& v2 = Vertices[Indices[ii * 3 + 2]];
-            dsDrawTriangle(Pos, Rot, (dReal*)&v0, (dReal*)&v1, (dReal*)&v2, 1);
+            const dReal v[9] = { // explicit conversion from float to dReal
+              Vertices[Indices[ii * 3 + 0] * 3 + 0],
+              Vertices[Indices[ii * 3 + 0] * 3 + 1],
+              Vertices[Indices[ii * 3 + 0] * 3 + 2],
+              Vertices[Indices[ii * 3 + 1] * 3 + 0],
+              Vertices[Indices[ii * 3 + 1] * 3 + 1],
+              Vertices[Indices[ii * 3 + 1] * 3 + 2],
+              Vertices[Indices[ii * 3 + 2] * 3 + 0],
+              Vertices[Indices[ii * 3 + 2] * 3 + 1],
+              Vertices[Indices[ii * 3 + 2] * 3 + 2]
+            };
+            dsDrawTriangle(Pos, Rot, &v[0], &v[3], &v[6], 1);
           }
 
           // tell the tri-tri collider the current transform of the trimesh --
@@ -1795,27 +1802,42 @@ static void simLoop (int pause)
     }
   }
 
-  dVector3R* Vertices = (dVector3R*)::Vertices;
   int* Indices = (int*)::Indices;
 
   {const dReal* Pos = dGeomGetPosition(TriMesh1);
   const dReal* Rot = dGeomGetRotation(TriMesh1);
 
   {for (int i = 0; i < IndexCount / 3; i++){
-    const dVector3R& v0 = Vertices[Indices[i * 3 + 0]];
-	const dVector3R& v1 = Vertices[Indices[i * 3 + 1]];
-	const dVector3R& v2 = Vertices[Indices[i * 3 + 2]];
-	dsDrawTriangle(Pos, Rot, (dReal*)&v0, (dReal*)&v1, (dReal*)&v2, 0);
+    const dReal v[9] = { // explicit conversion from float to dReal
+      Vertices[Indices[i * 3 + 0] * 3 + 0],
+      Vertices[Indices[i * 3 + 0] * 3 + 1],
+      Vertices[Indices[i * 3 + 0] * 3 + 2],
+      Vertices[Indices[i * 3 + 1] * 3 + 0],
+      Vertices[Indices[i * 3 + 1] * 3 + 1],
+      Vertices[Indices[i * 3 + 1] * 3 + 2],
+      Vertices[Indices[i * 3 + 2] * 3 + 0],
+      Vertices[Indices[i * 3 + 2] * 3 + 1],
+      Vertices[Indices[i * 3 + 2] * 3 + 2]
+    };
+    dsDrawTriangle(Pos, Rot, &v[0], &v[3], &v[6], 0);
   }}}
 
   {const dReal* Pos = dGeomGetPosition(TriMesh2);
   const dReal* Rot = dGeomGetRotation(TriMesh2);
 
   {for (int i = 0; i < IndexCount / 3; i++){
-    const dVector3R& v0 = Vertices[Indices[i * 3 + 0]];
-	const dVector3R& v1 = Vertices[Indices[i * 3 + 1]];
-	const dVector3R& v2 = Vertices[Indices[i * 3 + 2]];
-	dsDrawTriangle(Pos, Rot, (dReal*)&v0, (dReal*)&v1, (dReal*)&v2, 1);
+    const dReal v[9] = { // explicit conversion from float to dReal
+      Vertices[Indices[i * 3 + 0] * 3 + 0],
+      Vertices[Indices[i * 3 + 0] * 3 + 1],
+      Vertices[Indices[i * 3 + 0] * 3 + 2],
+      Vertices[Indices[i * 3 + 1] * 3 + 0],
+      Vertices[Indices[i * 3 + 1] * 3 + 1],
+      Vertices[Indices[i * 3 + 1] * 3 + 2],
+      Vertices[Indices[i * 3 + 2] * 3 + 0],
+      Vertices[Indices[i * 3 + 2] * 3 + 1],
+      Vertices[Indices[i * 3 + 2] * 3 + 2]
+    };
+    dsDrawTriangle(Pos, Rot, &v[0], &v[3], &v[6], 1);
   }}}
 }
 
@@ -1844,9 +1866,9 @@ int main (int argc, char **argv)
 
   // note: can't share tridata if intending to trimesh-trimesh collide
   TriData1 = dGeomTriMeshDataCreate();
-  dGeomTriMeshDataBuildSingle(TriData1, &Vertices[0], 3 * sizeof(dReal), VertexCount, (int*)&Indices[0], IndexCount, 3 * sizeof(int));
+  dGeomTriMeshDataBuildSingle(TriData1, &Vertices[0], 3 * sizeof(float), VertexCount, (int*)&Indices[0], IndexCount, 3 * sizeof(int));
   TriData2 = dGeomTriMeshDataCreate();
-  dGeomTriMeshDataBuildSingle(TriData2, &Vertices[0], 3 * sizeof(dReal), VertexCount, (int*)&Indices[0], IndexCount, 3 * sizeof(int));
+  dGeomTriMeshDataBuildSingle(TriData2, &Vertices[0], 3 * sizeof(float), VertexCount, (int*)&Indices[0], IndexCount, 3 * sizeof(int));
   
   TriMesh1 = dCreateTriMesh(space, TriData1, 0, 0, 0);
   TriMesh2 = dCreateTriMesh(space, TriData2, 0, 0, 0);
