@@ -130,15 +130,11 @@ static void initColliders()
   setCollider (dCCylinderClass,dBoxClass,&dCollideCCylinderBox);
   setCollider (dCCylinderClass,dCCylinderClass,&dCollideCCylinderCCylinder);
   setCollider (dCCylinderClass,dPlaneClass,&dCollideCCylinderPlane);
+  setCollider (dRayClass,dSphereClass,&dCollideRaySphere);
+  setCollider (dRayClass,dBoxClass,&dCollideRayBox);
+  setCollider (dRayClass,dCCylinderClass,&dCollideRayCCylinder);
+  setCollider (dRayClass,dPlaneClass,&dCollideRayPlane);
   setAllColliders (dGeomTransformClass,&dCollideTransform);
-
-  /*
-    @@@ put this in when the ray class is added
-    setCollider (dRayClass,dSphereClass,&dCollideRaySphere);
-    setCollider (dRayClass,dBoxClass,&dCollideRayBox);
-    setCollider (dRayClass,dCCylinderClass,&dCollideRayCCylinder);
-    setCollider (dRayClass,dPlaneClass,&dCollideRayPlane);
-  */
 }
 
 
