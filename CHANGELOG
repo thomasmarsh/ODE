@@ -9,6 +9,12 @@ the rules for this file:
 
 ------------------------------------------------------------------------------
 
+11/22/01 russ
+
+	* replaced the mmap()-based joint group stack (stack.cpp) with a
+          malloc()-based arena stack (obstack.cpp). this will be more
+	  portable and should not impact performance.
+
 11/12/01 russ
 
 	* changed the meaning of the 'flags' parameter to dCollide() and
