@@ -1,0 +1,17 @@
+60a61,69
+> /******************** breakable joint contribution ***********************/
+> // the break force and torque are squared for performance reasons.
+> struct dxJointBreakInfo : public dBase {
+> 	int flags;
+> 	int broken; // the broken flag should be in flags
+> 	dReal breakForce;
+> 	dReal breakTorque;
+> };
+> /*************************************************************************/
+124a134,139
+> 
+>   /******************** breakable joint contribution ***********************/
+>   // optional break info structure. if this is not NULL the the joint is
+>   // breakable.
+>   dxJointBreakInfo *breakInfo;
+>   /*************************************************************************/

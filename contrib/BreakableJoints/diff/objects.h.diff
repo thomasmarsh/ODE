@@ -1,0 +1,12 @@
+145a146,156
+> /******************** breakable joint contribution ***********************/
+> void dJointSetBreakable (dJointID, int b);
+> int dJointIsBreakable (dJointID);
+> void dJointSetBreakMode (dJointID, int mode);
+> void dJointSetBreakForce (dJointID, dReal force);
+> void dJointSetBreakTorque (dJointID, dReal torque);
+> int dJointGetBreakMode (dJointID);
+> dReal dJointGetBreakForce (dJointID);
+> dReal dJointGetBreakTorque (dJointID);
+> /*************************************************************************/
+> 
