@@ -76,6 +76,11 @@ public:
     { dGeomSetRotation (_id,R); }
   const dReal * getRotation() const
     { return dGeomGetRotation (_id); }
+    
+  void setQuaternion (const dQuaternion quat)
+    { dGeomSetQuaternion (_id,quat); }
+  void getQuaternion (dQuaternion quat) const
+    { dGeomGetQuaternion (_id,quat); }
 
   void getAABB (dReal aabb[6]) const
     { dGeomGetAABB (_id, aabb); }
