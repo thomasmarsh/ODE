@@ -268,3 +268,20 @@ int dCollideCB (const dxGeom *o1, const dxGeom *o2, int flags,
     return 1;
   }
 }
+
+//***************************************************************************
+// this function works, it's just not being used for anything at the moment:
+
+// given a box (R,side), `R' is the rotation matrix for the box, and `side'
+// is a vector of x/y/z side lengths, return the size of the interval of the
+// box projected along the given axis. if the axis has unit length then the
+// return value will be the actual diameter, otherwise the result will be
+// scaled by the axis length.
+
+static inline dReal boxDiameter (const dMatrix3 R, const dVector3 side,
+				 const dVector3 axis)
+{
+  dVector3 q;
+  dMULTIPLY1_331 (q,R,axis);	// transform axis to body-relative
+  return dFabs(q[0])*side[0] + dFabs(q[1])*side[1] + dFabs(q[2])*side[2];
+}
