@@ -31,14 +31,25 @@ sub checkFunc
     # protect some characters with backslash
     $fn =~ s/([.*+?\\\/\$\^()\[\]])/\\$1/g;
 
+    # look for the function - if its there, remove it from the header
     printf "looking for \"$fn\"\n";
     if ($h !~ /$fn/) {
       print "\n*** COULD NOT FIND: \"$fn\"\n\n";
       exit 1;
     }
+    $h =~ s/$fn/ /;
   }
+  return '';
 }
 
+sub printFunc
+{
+  my $fn = $_[0];
+  print "Undocumented: $fn\n";
+}
+
+
+# read the documentation
 open (FILE,"ode.doc");
 $a = join('',<FILE>);
 close (FILE);
@@ -47,6 +58,14 @@ close (FILE);
 $h =~ s/\s+/ /g;
 $a =~ s/\s+/ /g;
 
+# check that all documentation function definitions exist in the headers
 $a =~ s/\@funcdef{([^}]*)}/&checkFunc($1)/ge;
+
+# print out what's left - see if there are any functions that aren't documented
+# first attempt to remove comments
+print "\n\n";
+$h =~ s/\/\*.+?\*\// /g;
+$h =~ s/;\s*([^\(]+\([^\)]+\))\s*;/&printFunc($1)/ge;
+
 
 print "\n\nOK\n";

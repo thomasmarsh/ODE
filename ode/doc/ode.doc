@@ -642,18 +642,21 @@ void dJointSetHingeAnchor (dJointID, dReal x, dReal y, dReal z);
 void dJointSetHingeAxis (dJointID, dReal x, dReal y, dReal z);
 void dJointSetSliderAxis (dJointID, dReal x, dReal y, dReal z);
 void dJointSetRMotorAxis (dJointID, dReal x, dReal y, dReal z);
-void dJointSetRMotor (dJointID, dReal vel, dReal tmax);
 void dJointSetHinge2Anchor (dJointID, dReal x, dReal y, dReal z);
 void dJointSetHinge2Axis1 (dJointID, dReal x, dReal y, dReal z);
 void dJointSetHinge2Axis2 (dJointID, dReal x, dReal y, dReal z);
 }{
-Set joint parameters.
+Set joint anchor and axis parameters.
 The anchor and axis must be set after the joint has been attached to bodies
 and those bodies have been correctly positioned.
 If the joint is not attached, this will do nothing.
 The default axis for all joints is (1,0,0).
 The axis that is set will be normalized to unit length, this is what
 @c{dJointGetAxis()} will return.
+
+When the hinge anchor or axis is set, the current position of the attached
+bodies is examined and that position will be the zero angle when the hinge
+angle is read.
 }
 
 
@@ -663,15 +666,40 @@ void dJointGetHingeAnchor (dJointID, dVector3 result);
 void dJointGetHingeAxis (dJointID, dVector3 result);
 void dJointGetSliderAxis (dJointID, dVector3 result);
 void dJointGetRMotorAxis (dJointID, dVector3 result);
-dReal dJointGetRMotorAngle (dJointID);
 void dJointGetHinge2Anchor (dJointID, dVector3 result);
 void dJointGetHinge2Axis1 (dJointID, dVector3 result);
 void dJointGetHinge2Axis2 (dJointID, dVector3 result);
 }{
-Get joint parameters.
+Get joint anchor and axis parameters.
 If the system is out of alignment (i.e. there is some joint error) then
 anchor/axis values will be correct with respect to body 1 only (or body2 if
 you specified body 1 as 0).
+}
+
+
+@funcdef{
+void dJointSetHingeVel (dJointID, dReal vel);
+void dJointSetHingeTmax (dJointID, dReal tmax);
+void dJointSetRMotorVel (dJointID, dReal vel);
+void dJointSetRMotorTmax (dJointID, dReal tmax);
+}{
+Set hinge / rotational motor parameters (velocity, maximum torque).
+}
+
+
+@funcdef{
+dReal dJointGetHingeVel (dJointID);
+dReal dJointGetHingeTmax (dJointID);
+dReal dJointGetHingeAngle (dJointID);
+dReal dJointGetHingeAngleRate (dJointID);
+dReal dJointGetRMotorVel (dJointID);
+dReal dJointGetRMotorTmax (dJointID);
+dReal dJointGetRMotorAngle (dJointID);
+}{
+Get the hinge / rotational motor velocity and maximum torque.
+Get the hinge / rotational motor angle (between -pi and pi) and derivate of
+angle.
+An angle of zero corresponds to the initial position.
 }
 
 

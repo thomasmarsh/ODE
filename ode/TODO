@@ -3,8 +3,21 @@ TODO
 ----
 
 what i'm doing now: joints:
+	hinge
+		measure angle, rate - DONE
+		power - DONE
+		joint limits
+		optional suspension:
+			alignment of B&S part to given axis
+			global framework for giving epsilon and gamma
+
+	toss away r-motor, power & stuff specific to joint. it's just easier
+	that way.
+
 	r-motor joint needs to measure motor angle and vel, fn to get this info
-		* angle done
+		* angle done. but the angle reading is wrong if the rmotor is
+		  used on a steering hinge (hinge2) and the wheel is moved on
+		  the steering axis.
 	r-motor joint needs stops (low and high)
 	make sure rmotor works with just one body and static env.
 	joint code reuse: use standard functions to set velocity (c),
@@ -30,6 +43,9 @@ in testode: finite and isnan are missing. copysign is missing
 	for everything, but the VC++/MinGW configs assumes the MS C-runtime
 	functions. this is easy to fix, except i need to install Cygwin
 	which is a pain to do over MinGW. argh.
+
+build on linux - assumptions made about location of X11 lib, opengl etc.
+use autoconf?
 
 hinge2 needs to be attached to two bodies for it to work, make sure this is
 always the case.
