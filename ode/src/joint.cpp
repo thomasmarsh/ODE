@@ -1,6 +1,7 @@
 /*************************************************************************
  *                                                                       *
  * Open Dynamics Engine, Copyright (C) 2001 Russell L. Smith.            *
+ *   Email: russ@q12.org   Web: www.q12.org                              *
  *                                                                       *
  * This library is free software; you can redistribute it and/or         *
  * modify it under the terms of the GNU Lesser General Public            *
@@ -1564,17 +1565,18 @@ extern "C" void dJointSetFixed (dxJointFixed *joint)
 {
   dUASSERT(joint,"bad joint argument");
   dUASSERT(joint->vtable == &__dfixed_vtable,"joint is not fixed");
+  int i;
 
   // compute the offset between the bodies
   if (joint->node[0].body) {
     if (joint->node[1].body) {
       dReal ofs[4];
-      for (int i=0; i<4; i++) ofs[i] = joint->node[0].body->pos[i];
-      for (int i=0; i<4; i++) ofs[i] -= joint->node[1].body->pos[i];
+      for (i=0; i<4; i++) ofs[i] = joint->node[0].body->pos[i];
+      for (i=0; i<4; i++) ofs[i] -= joint->node[1].body->pos[i];
       dMULTIPLY1_331 (joint->offset,joint->node[0].body->R,ofs);
     }
     else {
-      for (int i=0; i<4; i++) joint->offset[i] = joint->node[0].body->pos[i];
+      for (i=0; i<4; i++) joint->offset[i] = joint->node[0].body->pos[i];
     }
   }
 }
