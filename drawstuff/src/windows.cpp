@@ -322,9 +322,6 @@ static void drawStuffStartup()
   // redirect standard I/O to a new console
   FreeConsole();
   if (AllocConsole()==0) dsError ("AllocConsole() failed");
-  fclose (stdin);
-  fclose (stdout);
-  fclose (stderr);
   if (freopen ("CONIN$","rt",stdin)==0) dsError ("could not open stdin");
   if (freopen ("CONOUT$","wt",stdout)==0) dsError ("could not open stdout");
   if (freopen ("CONOUT$","wt",stderr)==0) dsError ("could not open stderr");
