@@ -31,8 +31,8 @@ DEFINES=dDOUBLE
 
 SOURCES_CPP=test_ldlt.cpp
 SOURCES_C=fastldlt.c fastlsolve.c fastltsolve.c
-APPS=$(call fEXENAME,test_ldlt) $(call fEXENAME,test_dot)
-EXTRA_CLEAN=test_ldlt test_dot fastldlt.c fastlsolve.c fastltsolve.c fastdot.c
+APPS=$(call fEXENAME,test_ldlt) $(call fEXENAME,test_dot) $(call fEXENAME,test_multidot)
+EXTRA_CLEAN=test_ldlt test_dot test_multidot fastldlt.c fastlsolve.c fastltsolve.c fastdot.c fastmultidot.c
 
 
 all: $(APPS)
@@ -42,6 +42,9 @@ $(call fEXENAME,test_ldlt): $(call fTARGETS,$(SOURCES_CPP) $(SOURCES_C))
 
 $(call fEXENAME,test_dot): test_dot.o fastdot.o
 	gcc -o $@ test_dot.o fastdot.o -L $(LIB_PATHS) $(call fLIB,ode) -lm
+
+$(call fEXENAME,test_multidot): test_multidot.o fastmultidot.o
+	gcc -o $@ test_multidot.o fastmultidot.o -L $(LIB_PATHS) $(call fLIB,ode) -lm
 
 fastldlt.o: fastldlt.c
 	gcc -O1 -I$(INCLUDE_PATHS) -ffast-math -fomit-frame-pointer -c -D$(DEFINES) $<
@@ -55,6 +58,9 @@ fastltsolve.o: fastltsolve.c
 fastdot.o: fastdot.c
 	gcc -O1 -I$(INCLUDE_PATHS) -ffast-math -fomit-frame-pointer -c -D$(DEFINES) $<
 
+fastmultidot.o: fastmultidot.c
+	gcc -O1 -I$(INCLUDE_PATHS) -ffast-math -fomit-frame-pointer -c -D$(DEFINES) $<
+
 fastldlt.c: BuildLDLT BuildUtil ParametersF
 	./BuildLDLT ParametersF
 
@@ -66,3 +72,6 @@ fastltsolve.c: BuildLDLT BuildUtil ParametersT
 
 fastdot.c: BuildDot BuildUtil ParametersD
 	./BuildDot ParametersD
+
+fastmultidot.c: BuildMultidot BuildUtil ParametersM
+	./BuildMultidot ParametersM
