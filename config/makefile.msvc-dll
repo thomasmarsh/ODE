@@ -1,5 +1,6 @@
 WINDOWS=1
-THIS_DIR=
+THIS_DIR1=
+THIS_DIR2=
 DEL_CMD=tools\rm
 CC=cl /nologo /DWIN32 /DMSVC /DSHAREDLIBIMPORT=__declspec(dllimport) /DSHAREDLIBEXPORT=__declspec(dllexport)
 OBJ=.obj
