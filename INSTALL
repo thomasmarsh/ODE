@@ -1,0 +1,21 @@
+
+the configuration process is not currently automated. currently only linux
+and MS-windows have been verified to work. you will need GNU make 3.78.1
+or later.
+
+step 1
+------
+
+copy build/Makefile.config.example to build/Makefile.config
+
+edit the settings in the following files to match your platform
+
+	* build/Makefile.config
+	* include/ode/config.h
+
+
+step 2
+------
+
+from the top level directory, type `make'. this will hopefully build all
+libraries and test applications.

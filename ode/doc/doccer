@@ -1,0 +1,174 @@
+#!/usr/bin/perl -w
+#
+# This converts a special documentation format into html.
+#
+# Format
+# ------
+#
+# In addition to the "snarf" format:
+
+# Formatting commands:
+#	@chapter{header}	Section heading commands, three levels are
+#	@section{heading}	provided. The sections will be prefixed by
+#	@subsection{heading}	the section number unless @nonumber is given.
+#
+# Special commands
+#	@title{text}		Set the title of this document (for HTML),
+#				and generates a title page.
+#	@subtitle{text}		Sets sub-title for title page
+#	@author{text}		Sets author for title page (this may actually
+#				appear at the end of the document in HTML).
+#	@contents		Put a contents section here
+#	@nocontents		inside a heading, prevents a contents listing
+#	@nonumber		inside a header, prevents a section number
+
+require ("snarf");
+
+# read the whole file
+open (FILE,$ARGV[0]);
+read (FILE,$_,10000000);
+close FILE;
+
+$_ = &Snarf1 ($_);
+
+# convert sectioning commands - also remove any trailing <br>'s
+$sec[1] = 0;
+$sec[2] = 0;
+$sec[3] = 0;
+sub ReplaceHeading	# (heading-type,heading-text)
+{
+  my $type = $_[0];
+  my $name = $_[1];
+  my $num = 6;
+  $num = 1 if $type eq 'chapter';
+  $num = 2 if $type eq 'section';
+  $num = 3 if $type eq 'subsection';
+  my $hr = '';
+  $hr = '<hr>' if $num == 1;
+  if ($name =~ s/\@nonumber//g) {
+    return "$hr<h$num>$name</h$num>\n";
+  }
+  else {
+    $sec[$num]++;
+    $sec[$num+1]=0;
+    $sec[$num+2]=0;
+    my $sec = "$sec[1].";
+    $sec .= "$sec[2]." if $num >= 2;
+    $sec .= "$sec[3]." if $num >= 3;
+    return "$hr<h$num>$sec $name</h$num>\n";
+  }
+}
+s/\@(chapter|section|subsection)\{([^{]*?)\}\s*(<br>\s*)*/ReplaceHeading($1,$2)/gse;
+
+# make the contents section
+$contents = '';
+$contentslevel=0;
+$refnum=0;
+sub GotoLevel
+{
+  my $a = '';
+  $a =  "<ul>" x ($_[0] - $contentslevel) if $_[0] > $contentslevel;
+  $a =  "</ul>" x ($contentslevel - $_[0]) if $_[0] < $contentslevel;
+  $contentslevel = $_[0];
+  return "$a";
+}
+sub AddHeading
+{
+  my $level = $_[0];
+  my $name = $_[1];
+  if ($name =~ s/\@nocontents//g) {
+    return "<h$level>$name</h$level>";
+  }
+  else {
+    $refnum++;
+    $contents .= GotoLevel($level) . "<li><a href=\"#ref$refnum\">$name</a>\n";
+    return "<h$level><a name=\"ref$refnum\">$name</a></h$level>";
+  }
+}
+s/\<h([123456])>(.*?)\<\/h[123456]\>/AddHeading($1,$2)/gse;
+$contents .= GotoLevel(0);
+s/\@contents/$contents/gs;
+
+# remove any <hr>'s before the first <h?> heading command
+$pos = length;			# get pos = position of 1st heading command
+for ($i=1; $i<=6; $i++) {
+  my $j = index($_,"<h$i>");
+  $pos = $j if $j < $pos && $j >= 0;
+}
+while ($pos >= 0 && ($i=index($_,'<hr>')) >= 0 && $i < $pos) {
+  substr ($_,$i,4)='';
+  $pos -= 4;
+}
+
+# make title (only one is allowed), do this after contents stuff
+$title = "No Title";
+$subtitle = '';
+$author = '';
+sub SetSubtitle { $subtitle = $_[0]; return ''; }
+sub SetAuthor   { $author   = $_[0]; return ''; }
+sub MakeTitle
+{
+  my $title = $_[0];
+  my $a = "<h1 align=center><hr><font color=\"#0000ff\">$title".
+	"</font>";
+  $a .= "<br><i><small>$subtitle</small></i>" if $subtitle;
+  $a .= "<hr></h1>";
+  return $a;
+}
+s/\@subtitle\{([^{]*?)\}/SetSubtitle($1)/e;
+s/\@author\{([^{]*?)\}/SetAuthor($1)/e;
+s/\@title\{([^{]*?)\}/&MakeTitle($1)/e;
+$title = $1 if ($1);
+
+$_ = &Snarf2($_);
+
+# get better horizontal rules
+s/<hr>/<hr noshade size=2>/g;
+
+print <<END;
+<html>
+<head>
+<title>$title</title>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<style type="text/css">
+    A.funcXX { text-decoration: none }
+    A.func:link { color: #0000ff }
+    A.func:visited { color: #0000ff }
+    A.constXX { text-decoration: none }
+    A.const:link { color: #c00000 }
+    A.const:visited { color: #c00000 }
+    DIV.code {
+	white-space:	pre;
+    }
+    DIV.example {
+	background:	#c0ffff;
+	color:		#0000ff;
+	width:		auto;
+	font-weight:	bold;
+	margin-left:	0em;
+	margin-right:	0em;
+	border-top:		solid 1px black;
+	border-bottom:		solid 1px black;
+	white-space:	pre;
+	font-family:	Courier, fixed, serif;
+	font-style:	normal;
+	text-align:	left;
+    }
+    PRE.code {
+	background:	#c0ffff;
+	color:		#0000ff;
+	width:		auto;
+	margin-left:	0em;
+	margin-right:	0em;
+	white-space:	pre;
+    }
+</style>
+</head>
+<body bgcolor="#ffffff" link="#0000ff" alink="#0000ff" vlink="#0000ff">
+END
+
+print "$_";
+
+print "<hr noshade size=2><div align=\"right\"><i>$author</i></div>"
+	    if $author;
+print "</body></html>\n";

@@ -1,0 +1,16 @@
+
+this is the public C interface to the ODE library.
+
+all these files should be includable from C, i.e. they should not use any
+C++ features. everything should be protected with
+
+	#ifdef __cplusplus
+	extern "C" {
+	#endif
+
+	...
+
+	#ifdef __cplusplus
+	}
+	#endif
+
