@@ -477,6 +477,41 @@ int dxUserGeom::AABBTest (dxGeom *o, dReal aabb[6])
 }
 
 
+static int dCollideUserGeomWithGeom (dxGeom *o1, dxGeom *o2, int flags,
+				     dContactGeom *contact, int skip)
+{
+  // this generic collider function is called the first time that a user class
+  // tries to collide against something. it will find out the correct collider
+  // function and then set the colliders array so that the correct function is
+  // called directly the next time around.
+
+  int t1 = o1->type;	// note that o1 is a user geom
+  int t2 = o2->type;	// o2 *may* be a user geom
+
+  // find the collider function to use. if o1 does not know how to collide with
+  // o2, then o2 might know how to collide with o1 (provided that it is a user
+  // geom).
+  dColliderFn *fn = user_classes[t1-dFirstUserClass].collider (t2);
+  int reverse = 0;
+  if (!fn && t2 >= dFirstUserClass && t2 <= dLastUserClass) {
+    fn = user_classes[t2-dFirstUserClass].collider (t1);
+    reverse = 1;
+  }
+
+  // set the colliders array so that the correct function is called directly
+  // the next time around. note that fn can be 0 here if no collider was found,
+  // which means that dCollide() will always return 0 for this case.
+  colliders[t1][t2].fn = fn;
+  colliders[t1][t2].reverse = reverse;
+  colliders[t2][t1].fn = fn;
+  colliders[t2][t1].reverse = !reverse;
+
+  // now call the collider function indirectly through dCollide(), so that
+  // contact reversing is properly handled.
+  return dCollide (o1,o2,flags,contact,skip);
+}
+
+
 int dCreateGeomClass (const dGeomClass *c)
 {
   dUASSERT(c && c->bytes >= 0 && c->collider && c->aabb,"bad geom class");
@@ -486,15 +521,11 @@ int dCreateGeomClass (const dGeomClass *c)
 	      "recompile ODE");
   }
   user_classes[num_user_classes] = *c;
-
-  // populate the colliders array
-  initColliders();
-  for (int i=0; i<dGeomNumClasses; i++) {
-    setCollider (dFirstUserClass + num_user_classes,i,c->collider (i));
-  }
+  int class_number = num_user_classes + dFirstUserClass;
+  setAllColliders (class_number,&dCollideUserGeomWithGeom);
 
   num_user_classes++;
-  return num_user_classes-1 + dFirstUserClass;
+  return class_number;
 }
 
 
