@@ -39,6 +39,17 @@ extern "C" {
 #endif
 
 /* *********************************************************************** */
+/* utility functions */
+
+/* given boxes (p1,R1,side1) and (p2,R2,side2), return 1 if they intersect
+ * or 0 if not. `p' is the center of the box, `R' is the rotation matrix for
+ * the box, and `side' is a vector of x/y/z side lengths.
+ */
+
+int dBoxesTouch (const dVector3 _p1, const dMatrix3 R1, const dVector3 side1,
+		 const dVector3 _p2, const dMatrix3 R2, const dVector3 side2);
+
+/* *********************************************************************** */
 /* typedefs and structures */
 
 /* this function returns an axis-aligned bounding box for an object of a
@@ -108,7 +119,7 @@ struct dxGeom {
  * dXxxClass (e.g. dSphereClass). the class number in the class structure
  * should be set to 0 on entry.
  */
-int dCreateGeomClass (dGeomClass *);
+int dCreateGeomClass (const dGeomClass *);
 
 /* initialize a newly created collision object and put it in a space.
  * this is a utility function called by geometry object creation functions.
@@ -184,24 +195,37 @@ dGeomID dCreatePlane (dSpaceID space,
  * S=sphere, B=box, C=capped cylinder, L=slab, P=plane
  */
 
-int dCollideSS (dSphere *o1, dSphere *o2, int flags, dContactGeom *contact);
-int dCollideSB (dSphere *o1, dBox *o2, int flags, dContactGeom *contact);
-int dCollideSC (dSphere *o1, dCCylinder *o2, int flags, dContactGeom *contact);
-int dCollideSL (dSphere *o1, dSlab *o2, int flags, dContactGeom *contact);
-int dCollideSP (dSphere *o1, dPlane *o2, int flags, dContactGeom *contact);
-
-int dCollideBB (dBox *o1, dBox *o2, int flags, dContactGeom *contact);
-int dCollideBC (dBox *o1, dCCylinder *o2, int flags, dContactGeom *contact);
-int dCollideBL (dBox *o1, dSlab *o2, int flags, dContactGeom *contact);
-int dCollideBP (dBox *o1, dPlane *o2, int flags, dContactGeom *contact);
-
-int dCollideCC (dCCylinder *o1, dCCylinder *o2, int flags,
+int dCollideSS (const dSphere *o1, const dSphere *o2, int flags,
 		dContactGeom *contact);
-int dCollideCL (dCCylinder *o1, dSlab *o2, int flags, dContactGeom *contact);
-int dCollideCP (dCCylinder *o1, dPlane *o2, int flags, dContactGeom *contact);
+int dCollideSB (const dSphere *o1, const dBox *o2, int flags,
+		dContactGeom *contact);
+int dCollideSC (const dSphere *o1, const dCCylinder *o2, int flags,
+		dContactGeom *contact);
+int dCollideSL (const dSphere *o1, const dSlab *o2, int flags,
+		dContactGeom *contact);
+int dCollideSP (const dSphere *o1, const dPlane *o2, int flags,
+		dContactGeom *contact);
 
-int dCollideLL (dSlab *o1, dSlab *o2, int flags, dContactGeom *contact);
-int dCollideLP (dSlab *o1, dPlane *o2, int flags, dContactGeom *contact);
+int dCollideBB (const dBox *o1, const dBox *o2, int flags,
+		dContactGeom *contact);
+int dCollideBC (const dBox *o1, const dCCylinder *o2, int flags,
+		dContactGeom *contact);
+int dCollideBL (const dBox *o1, const dSlab *o2, int flags,
+		dContactGeom *contact);
+int dCollideBP (const dBox *o1, const dPlane *o2, int flags,
+		dContactGeom *contact);
+
+int dCollideCC (const dCCylinder *o1, const dCCylinder *o2, int flags,
+		dContactGeom *contact);
+int dCollideCL (const dCCylinder *o1, const dSlab *o2, int flags,
+		dContactGeom *contact);
+int dCollideCP (const dCCylinder *o1, const dPlane *o2, int flags,
+		dContactGeom *contact);
+
+int dCollideLL (const dSlab *o1, const dSlab *o2, int flags,
+		dContactGeom *contact);
+int dCollideLP (const dSlab *o1, const dPlane *o2, int flags,
+		dContactGeom *contact);
 
 
 void dAddToComposite (dGeomID composite, int i, dGeomID obj);

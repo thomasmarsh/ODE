@@ -34,7 +34,7 @@ dWorldID dWorldCreate();
 void dWorldDestroy (dWorldID);
 
 void dWorldSetGravity (dWorldID, dReal x, dReal y, dReal z);
-void dWorldGetGravity (dWorldID, dVector3 g);
+void dWorldGetGravity (dWorldID, dVector3 gravity);
 
 void dWorldStep (dWorldID, dReal stepsize);
 
@@ -47,17 +47,17 @@ void  dBodySetData (dBodyID, void *data);
 void *dBodyGetData (dBodyID);
 
 void dBodySetPosition   (dBodyID, dReal x, dReal y, dReal z);
-void dBodySetRotation   (dBodyID, dMatrix3 R);
-void dBodySetQuaternion (dBodyID, dQuaternion q);
+void dBodySetRotation   (dBodyID, const dMatrix3 R);
+void dBodySetQuaternion (dBodyID, const dQuaternion q);
 void dBodySetLinearVel  (dBodyID, dReal x, dReal y, dReal z);
 void dBodySetAngularVel (dBodyID, dReal x, dReal y, dReal z);
-dReal    * dBodyGetPosition   (dBodyID);
-dReal    * dBodyGetRotation   (dBodyID);	/* ptr to 4x3 rot matrix */
-dReal    * dBodyGetQuaternion (dBodyID);
-dReal    * dBodyGetLinearVel  (dBodyID);
-dReal    * dBodyGetAngularVel (dBodyID);
+const dReal * dBodyGetPosition   (dBodyID);
+const dReal * dBodyGetRotation   (dBodyID);	/* ptr to 4x3 rot matrix */
+const dReal * dBodyGetQuaternion (dBodyID);
+const dReal * dBodyGetLinearVel  (dBodyID);
+const dReal * dBodyGetAngularVel (dBodyID);
 
-void dBodySetMass (dBodyID, dMass *mass);
+void dBodySetMass (dBodyID, const dMass *mass);
 void dBodyGetMass (dBodyID, dMass *mass);
 
 void dBodyAddForce            (dBodyID, dReal fx, dReal fy, dReal fz);
@@ -65,25 +65,25 @@ void dBodyAddTorque           (dBodyID, dReal fx, dReal fy, dReal fz);
 void dBodyAddRelForce         (dBodyID, dReal fx, dReal fy, dReal fz);
 void dBodyAddRelTorque        (dBodyID, dReal fx, dReal fy, dReal fz);
 void dBodyAddForceAtPos       (dBodyID, dReal fx, dReal fy, dReal fz,
-					  dReal px, dReal py, dReal pz);
+			                dReal px, dReal py, dReal pz);
 void dBodyAddRelForceAtPos    (dBodyID, dReal fx, dReal fy, dReal fz,
-					  dReal px, dReal py, dReal pz);
+			                dReal px, dReal py, dReal pz);
 void dBodyAddRelForceAtRelPos (dBodyID, dReal fx, dReal fy, dReal fz,
-					  dReal px, dReal py, dReal pz);
+			                dReal px, dReal py, dReal pz);
 
 void dBodyGetPointPos    (dBodyID, dReal px, dReal py, dReal pz,
-			   dVector3 result);
+			  dVector3 result);
 void dBodyGetPointVel    (dBodyID, dReal px, dReal py, dReal pz,
-			   dVector3 result);
+			  dVector3 result);
 void dBodyGetPointRelVel (dBodyID, dReal px, dReal py, dReal pz,
-			   dVector3 result);
+			  dVector3 result);
 
 /* joints */
 
 dJointID dJointCreateBall (dWorldID, dJointGroupID);
 dJointID dJointCreateHinge (dWorldID, dJointGroupID);
 dJointID dJointCreateSlider (dWorldID, dJointGroupID);
-dJointID dJointCreateContact (dWorldID, dJointGroupID, dContact *);
+dJointID dJointCreateContact (dWorldID, dJointGroupID, const dContact *);
 
 void dJointDestroy (dJointID);
 

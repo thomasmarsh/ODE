@@ -44,8 +44,8 @@ double dStopwatchTime (dStopwatch *);	  /* returns total time in seconds */
 
 /* code timers */
 
-void dTimerStart (char *description);	/* pass in a static string here */
-void dTimerNow (char *description);	/* pass in a static string here */
+void dTimerStart (const char *description);	/* pass a static string here */
+void dTimerNow (const char *description);	/* pass a static string here */
 void dTimerEnd();
 
 /* print out a timer report. if `average' is nonzero, print out the average

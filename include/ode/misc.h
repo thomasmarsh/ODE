@@ -67,11 +67,11 @@ void dMakeRandomMatrix (dReal *A, int n, int m, dReal range);
 void dClearUpperTriangle (dReal *A, int n);
 
 /* return the maximum element difference between the two n*m matrices */
-dReal dMaxDifference (dReal *A, dReal *B, int n, int m);
+dReal dMaxDifference (const dReal *A, const dReal *B, int n, int m);
 
 /* return the maximum element difference between the lower triangle of two
  * n*n matrices */
-dReal dMaxDifferenceLowerTriangle (dReal *A, dReal *B, int n);
+dReal dMaxDifferenceLowerTriangle (const dReal *A, const dReal *B, int n);
 
 
 #ifdef __cplusplus
