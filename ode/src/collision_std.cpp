@@ -442,10 +442,16 @@ void dGeomRaySet (dGeomID g, dReal px, dReal py, dReal pz,
 		  dReal dx, dReal dy, dReal dz)
 {
   dUASSERT (g && g->type == dRayClass,"argument not a ray");
-  dGeomSetPosition (g,px,py,pz);
-  dMatrix3 R;
-  dRFromZAxis (R,dx,dy,dz);
-  dGeomSetRotation (g,R);
+  dReal* rot = g->R;
+  dReal* pos = g->pos;
+  pos[0] = px;
+  pos[1] = py;
+  pos[2] = pz;
+
+  rot[0*4+2] = dx;
+  rot[1*4+2] = dy;
+  rot[2*4+2] = dz;
+  dGeomMoved (g);
 }
 
 
