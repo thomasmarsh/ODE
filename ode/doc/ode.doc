@@ -86,16 +86,17 @@ This is difficult to do right and extremely error-prone.
 
 ODE has a built-in collision detection system.
 However you can ignore it and do your own collision detection if you want to.
-The current collision primitives are sphere, box and plane - more collision
-objects will come later, as well as fast identification of potentially
-intersecting objects.
+The current collision primitives are sphere, box, capped cylinder and plane -
+more collision objects will come later.
+ODE's collision system provides fast identification of potentially
+intersecting objects, through the concept of ``spaces''.
 
 Here are the features:
 @list{
 @*	Arbitrary mass distribution of the rigid bodies.
 @*	Current joint types: ball-and-socket, hinge, slider (prismatic),
 	hinge-2, fixed.
-@*	Current collision primitives: sphere, box and plane.
+@*	Current collision primitives: sphere, box, capped cylinder and plane.
 @*	Simulation method: The equations of motion are derived from a
 	Lagrange multiplier velocity based model due to Trinkle/Stewart and
 	Anitescu/Potra.
@@ -137,6 +138,7 @@ Here are the features:
 @* API change: user defined collision functions have to fill in the @c{g1}
    and @c{g2} members of the @c{dContactGeom} structure.
 @* API change: added the @c{aabb_test} and @c{dtor} fields to @c{dGeomClass}.
+@* Implemented capped-cylinder collision (except for cylinder-to-box).
 }
 
 
@@ -180,7 +182,7 @@ Here are the features:
 @list{
 @* Update documentation.
 @* Expose type-specific collision functions.
-@* More collision primitives: capped cylinder, transformation objects.
+@* More collision primitives: transformation objects.
 @* Improve box-box collision, especially for face-face contact.
 @* Internals documentation.
 @* Automatic code optimization process.
@@ -1821,12 +1823,35 @@ Return in @arg{result} the parameters of the given @arg{plane}.
 @subsection{Capped cylinder functions}
 
 @funcdef{
-dGeomID dCreateCCylinder (dSpaceID space, dReal a, dReal b, int dir);
-void dGeomCCylinderSetParams (dGeomID ccylinder, dReal a, dReal b, int dir);
-void dGeomCCylinderGetParams (dGeomID ccylinder,
-                              dReal *a, dReal *b, int *dir);
+dGeomID dCreateCCylinder (dSpaceID space, dReal radius, dReal length);
 }{
-(not implemented yet.)
+Create a capped cylinder geometry object of the given parameters, and return
+its ID.
+If @arg{space} is nonzero, insert it into that space.
+
+A capped cylinder is like a normal cylinder except it has half-sphere caps
+at its ends.
+This feature makes collision detection particularly easy.
+The cylinder's length, not counting the caps, is given by @arg{length}.
+The cylinder is aligned along the geometry's local Z axis.
+The radius of the caps, and of the cylinder itself, is given by @arg{radius}.
+}
+
+
+@funcdef{
+void dGeomCCylinderSetParams (dGeomID ccylinder,
+                              dReal radius, dReal length);
+}{
+Set the parameters of the given capped cylinder.
+}
+
+
+@funcdef{
+void dGeomCCylinderGetParams (dGeomID ccylinder,
+                              dReal *radius, dReal *length);
+}{
+Return in @arg{radius} and @arg{length} the parameters of the given capped
+cylinder.
 }
 
 

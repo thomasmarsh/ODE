@@ -784,14 +784,6 @@ int dCollideSB (const dxGeom *o1, const dxGeom *o2, int flags,
 }
 
 
-int dCollideSC (const dxGeom *o1, const dxGeom *o2, int flags,
-		dContactGeom *contact, int skip)
-{
-  dDebug (0,"unimplemented");
-  return 0;
-}
-
-
 int dCollideSP (const dxGeom *o1, const dxGeom *o2, int flags,
 		dContactGeom *contact, int skip)
 {
@@ -836,14 +828,6 @@ int dCollideBB (const dxGeom *o1, const dxGeom *o2, int flags,
     CONTACT(contact,i*skip)->normal[2] = -normal[2];
   }
   return num;
-}
-
-
-int dCollideBC (const dxGeom *o1, const dxGeom *o2, int flags,
-		dContactGeom *contact, int skip)
-{
-  dDebug (0,"unimplemented");
-  return 0;
 }
 
 
@@ -959,6 +943,43 @@ int dCollideBP (const dxGeom *o1, const dxGeom *o2,
 }
 
 
+int dCollideCS (const dxGeom *o1, const dxGeom *o2, int flags,
+		dContactGeom *contact, int skip)
+{
+  dIASSERT (skip >= (int)sizeof(dContactGeom));
+  dIASSERT (o1->_class->num == dCCylinderClass);
+  dIASSERT (o2->_class->num == dSphereClass);
+  contact->g1 = const_cast<dxGeom*> (o1);
+  contact->g2 = const_cast<dxGeom*> (o2);
+  dxCCylinder *ccyl = (dxCCylinder*) CLASSDATA(o1);
+  dxSphere *sphere = (dxSphere*) CLASSDATA(o2);
+
+  // find the point on the cylinder axis that is closest to the sphere
+  dReal alpha = 
+    o1->R[2]  * (o2->pos[0] - o1->pos[0]) +
+    o1->R[6]  * (o2->pos[1] - o1->pos[1]) +
+    o1->R[10] * (o2->pos[2] - o1->pos[2]);
+  dReal lz2 = ccyl->lz * REAL(0.5);
+  if (alpha > lz2) alpha = lz2;
+  if (alpha < -lz2) alpha = -lz2;
+
+  // collide the spheres
+  dVector3 p;
+  p[0] = o1->pos[0] + alpha * o1->R[2];
+  p[1] = o1->pos[1] + alpha * o1->R[6];
+  p[2] = o1->pos[2] + alpha * o1->R[10];
+  return dCollideSpheres (p,ccyl->radius,o2->pos,sphere->radius,contact);
+}
+
+
+int dCollideCB (const dxGeom *o1, const dxGeom *o2, int flags,
+		dContactGeom *contact, int skip)
+{
+  dDebug (0,"unimplemented");
+  return 0;
+}
+
+
 int dCollideCC (const dxGeom *o1, const dxGeom *o2,
 		int flags, dContactGeom *contact, int skip)
 {
@@ -970,8 +991,56 @@ int dCollideCC (const dxGeom *o1, const dxGeom *o2,
 int dCollideCP (const dxGeom *o1, const dxGeom *o2, int flags,
 		dContactGeom *contact, int skip)
 {
-  dDebug (0,"unimplemented");
-  return 0;
+  dIASSERT (skip >= (int)sizeof(dContactGeom));
+  dIASSERT (o1->_class->num == dCCylinderClass);
+  dIASSERT (o2->_class->num == dPlaneClass);
+  contact->g1 = const_cast<dxGeom*> (o1);
+  contact->g2 = const_cast<dxGeom*> (o2);
+  dxCCylinder *ccyl = (dxCCylinder*) CLASSDATA(o1);
+  dxPlane *plane = (dxPlane*) CLASSDATA(o2);
+
+  // collide first capping sphere with the plane
+  dVector3 p;
+  p[0] = o1->pos[0] + o1->R[2]  * ccyl->lz * REAL(0.5);
+  p[1] = o1->pos[1] + o1->R[6]  * ccyl->lz * REAL(0.5);
+  p[2] = o1->pos[2] + o1->R[10] * ccyl->lz * REAL(0.5);
+
+  int ncontacts = 0;
+  dReal k = dDOT (p,plane->p);
+  dReal depth = plane->p[3] - k + ccyl->radius;
+  if (depth >= 0) {
+    contact->normal[0] = plane->p[0];
+    contact->normal[1] = plane->p[1];
+    contact->normal[2] = plane->p[2];
+    contact->pos[0] = p[0] - plane->p[0] * ccyl->radius;
+    contact->pos[1] = p[1] - plane->p[1] * ccyl->radius;
+    contact->pos[2] = p[2] - plane->p[2] * ccyl->radius;
+    contact->depth = depth;
+    ncontacts = 1;
+  }
+
+  if ((flags & 0xff) >= 2) {
+    // collide second capping sphere with the plane
+    p[0] = o1->pos[0] - o1->R[2]  * ccyl->lz * REAL(0.5);
+    p[1] = o1->pos[1] - o1->R[6]  * ccyl->lz * REAL(0.5);
+    p[2] = o1->pos[2] - o1->R[10] * ccyl->lz * REAL(0.5);
+
+    k = dDOT (p,plane->p);
+    depth = plane->p[3] - k + ccyl->radius;
+    if (depth >= 0) {
+      dContactGeom *c2 = CONTACT(contact,ncontacts*skip);
+      c2->normal[0] = plane->p[0];
+      c2->normal[1] = plane->p[1];
+      c2->normal[2] = plane->p[2];
+      c2->pos[0] = p[0] - plane->p[0] * ccyl->radius;
+      c2->pos[1] = p[1] - plane->p[1] * ccyl->radius;
+      c2->pos[2] = p[2] - plane->p[2] * ccyl->radius;
+      c2->depth = depth;
+      ncontacts++;
+    }
+  }
+
+  return ncontacts;
 }
 
 
@@ -1057,6 +1126,30 @@ static void dBoxAABB (dxGeom *geom, dReal aabb[6])
 }
 
 
+static dColliderFn * dCCylinderColliderFn (int num)
+{
+  if (num == dSphereClass) return (dColliderFn *) &dCollideCS;
+  if (num == dPlaneClass) return (dColliderFn *) &dCollideCP;
+  // if (num == dCCylinderClass) return (dColliderFn *) &dCollideCC;
+  return 0;
+}
+
+
+static void dCCylinderAABB (dxGeom *geom, dReal aabb[6])
+{
+  dxCCylinder *c = (dxCCylinder*) CLASSDATA(geom);
+  dReal xrange = dFabs(geom->R[2]  * c->lz) * REAL(0.5) + c->radius;
+  dReal yrange = dFabs(geom->R[6]  * c->lz) * REAL(0.5) + c->radius;
+  dReal zrange = dFabs(geom->R[10] * c->lz) * REAL(0.5) + c->radius;
+  aabb[0] = geom->pos[0] - xrange;
+  aabb[1] = geom->pos[0] + xrange;
+  aabb[2] = geom->pos[1] - yrange;
+  aabb[3] = geom->pos[1] + yrange;
+  aabb[4] = geom->pos[2] - zrange;
+  aabb[5] = geom->pos[2] + zrange;
+}
+
+
 dColliderFn * dPlaneColliderFn (int num)
 {
   return 0;
@@ -1078,6 +1171,7 @@ static void dPlaneAABB (dxGeom *geom, dReal aabb[6])
 
 dxGeom *dCreateSphere (dSpaceID space, dReal radius)
 {
+  dAASSERT (radius > 0);
   if (dSphereClass == -1) {
     dGeomClass c;
     c.bytes = sizeof (dxSphere);
@@ -1115,6 +1209,28 @@ dxGeom *dCreateBox (dSpaceID space, dReal lx, dReal ly, dReal lz)
   b->side[0] = lx;
   b->side[1] = ly;
   b->side[2] = lz;
+  return g;
+}
+
+
+dxGeom * dCreateCCylinder (dSpaceID space, dReal radius, dReal length)
+{
+  dAASSERT (radius > 0 && length > 0);
+  if (dCCylinderClass == -1) {
+    dGeomClass c;
+    c.bytes = sizeof (dxCCylinder);
+    c.collider = &dCCylinderColliderFn;
+    c.aabb = &dCCylinderAABB;
+    c.aabb_test = 0;
+    c.dtor = 0;
+    dCCylinderClass = dCreateGeomClass (&c);
+  }
+
+  dxGeom *g = dCreateGeom (dCCylinderClass);
+  if (space) dSpaceAdd (space,g);
+  dxCCylinder *c = (dxCCylinder*) CLASSDATA(g);
+  c->radius = radius;
+  c->lz = length;
   return g;
 }
 
@@ -1158,6 +1274,7 @@ dxGeom *dCreatePlane (dSpaceID space,
 void dGeomSphereSetRadius (dGeomID g, dReal radius)
 {
   dUASSERT (g && g->_class->num == dSphereClass,"argument not a sphere");
+  dAASSERT (radius > 0);
   dxSphere *s = (dxSphere*) CLASSDATA(g);
   s->radius = radius;
 }
@@ -1166,6 +1283,7 @@ void dGeomSphereSetRadius (dGeomID g, dReal radius)
 void dGeomBoxSetLengths (dGeomID g, dReal lx, dReal ly, dReal lz)
 {
   dUASSERT (g && g->_class->num == dBoxClass,"argument not a box");
+  dAASSERT (lx > 0 && ly > 0 && lz > 0);
   dxBox *b = (dxBox*) CLASSDATA(g);
   b->side[0] = lx;
   b->side[1] = ly;
@@ -1184,9 +1302,13 @@ void dGeomPlaneSetParams (dGeomID g, dReal a, dReal b, dReal c, dReal d)
 }
 
 
-void dGeomCCylinderSetParams (dGeomID g, dReal a, dReal b, int dir)
+void dGeomCCylinderSetParams (dGeomID g, dReal radius, dReal length)
 {
-  dDebug (0,"not implemented");
+  dUASSERT (g && g->_class->num == dCCylinderClass,"argument not a ccylinder");
+  dAASSERT (radius > 0 && length > 0);
+  dxCCylinder *c = (dxCCylinder*) CLASSDATA(g);
+  c->radius = radius;
+  c->lz = length;
 }
 
 
@@ -1219,9 +1341,12 @@ void  dGeomPlaneGetParams (dGeomID g, dVector4 result)
 }
 
 
-void dGeomCCylinderGetParams (dGeomID g, dReal *a, dReal *b, int *dir)
+void dGeomCCylinderGetParams (dGeomID g, dReal *radius, dReal *length)
 {
-  dDebug (0,"not implemented");
+  dUASSERT (g && g->_class->num == dCCylinderClass,"argument not a ccylinder");
+  dxCCylinder *c = (dxCCylinder*) CLASSDATA(g);
+  *radius = c->radius;
+  *length = c->lz;
 }
 
 //****************************************************************************

@@ -50,7 +50,7 @@ static dSpaceID space;
 static dBodyID body[NUM];
 static dJointGroupID contactgroup;
 static dGeomID geom[NUM];
-static int objtype[NUM];	// 0=box, 1=sphere
+static int objtype[NUM];	// 0=box, 1=sphere, 2=capped cyl
 static dReal sides[NUM][3];
 
 
@@ -96,7 +96,7 @@ static void start()
   static float xyz[3] = {2.1640f,-1.3079f,1.7600f};
   static float hpr[3] = {125.5000f,-17.0000f,0.0000f};
   dsSetViewpoint (xyz,hpr);
-  printf ("Press b or s to drop another box or sphere.\n");
+  printf ("Press b,s or c to drop another box, sphere or cylinder.\n");
 }
 
 
@@ -106,7 +106,8 @@ static void command (int cmd)
 {
   if (cmd == 'B') cmd = 'b';
   if (cmd == 'S') cmd = 's';
-  if (cmd == 'b' || cmd == 's') {
+  if (cmd == 'C') cmd = 'c';
+  if (cmd == 'b' || cmd == 's' || cmd == 'c') {
     int i;
     if (num < NUM) {
       i = num;
@@ -137,6 +138,11 @@ static void command (int cmd)
       geom[i] = dCreateBox (space,sides[i][0],sides[i][1],sides[i][2]);
       objtype[i] = 0;
     }
+    else if (cmd == 'c') {
+      sides[i][0] *= 0.5;
+      geom[i] = dCreateCCylinder (space,sides[i][0],sides[i][1]);
+      objtype[i] = 2;
+    }
     else {
       sides[i][0] *= 0.5;
       geom[i] = dCreateSphere (space,sides[i][0]);
@@ -161,11 +167,18 @@ static void simLoop (int pause)
   dsSetColor (1,1,0);
   dsSetTexture (DS_WOOD);
   for (int i=0; i<num; i++) {
-    if (objtype[i]==0)
+    if (objtype[i]==0) {
       dsDrawBox (dBodyGetPosition(body[i]),dBodyGetRotation(body[i]),sides[i]);
-    else
+    }
+    else if (objtype[i]==1) {
       dsDrawSphere (dBodyGetPosition(body[i]),dBodyGetRotation(body[i]),
 		    (float) sides[i][0]);
+    }
+    else { 
+      dsDrawCappedCylinder (dBodyGetPosition(body[i]),
+			    dBodyGetRotation(body[i]),
+			    (float) sides[i][1], (float) sides[i][0]);
+    }
   }
 }
 

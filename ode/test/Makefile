@@ -23,7 +23,7 @@
 MAKEFILE_INC=../../build/Makefile.inc
 include $(MAKEFILE_INC)
 
-APPNAMES = $(call fEXENAME,test_ode) $(call fEXENAME,test_chain1) $(call fEXENAME,test_chain2) $(call fEXENAME,test_hinge) $(call fEXENAME,test_slider) $(call fEXENAME,test_collision) $(call fEXENAME,test_boxstack) $(call fEXENAME,test_buggy) $(call fEXENAME,test_joints) $(call fEXENAME,test_space) $(call fEXENAME,test_I) $(call fEXENAME,test_step) $(call fEXENAME,test_friction)
+APPNAMES = $(call fEXENAME,test_ode) $(call fEXENAME,test_chain1) $(call fEXENAME,test_chain2) $(call fEXENAME,test_hinge) $(call fEXENAME,test_slider) $(call fEXENAME,test_collision) $(call fEXENAME,test_boxstack) $(call fEXENAME,test_buggy) $(call fEXENAME,test_joints) $(call fEXENAME,test_space) $(call fEXENAME,test_I) $(call fEXENAME,test_step) $(call fEXENAME,test_friction) $(call fEXENAME,test_stuff)
 
 INCLUDE_PATHS = ../../include
 LIB_PATHS = ../../lib

@@ -256,9 +256,9 @@ public:
     _id = dCreatePlane (space.id(),a,b,c,d);
   }
 
-  void createCCylinder (dSpace &space, dReal a, dReal b, int dir) {
+  void createCCylinder (dSpace &space, dReal radius, dReal length) {
     if (_id) dGeomDestroy (_id);
-    _id = dCreateCCylinder (space.id(),a,b,dir);
+    _id = dCreateCCylinder (space.id(),radius,length);
   }
 
   void destroy() {
@@ -278,8 +278,8 @@ public:
   void planeGetParams (dVector4 result)
     { dGeomPlaneGetParams (_id,result); }
 
-  void CCylinderGetParams (dReal *a, dReal *b, int *dir)
-    { dGeomCCylinderGetParams (_id,a,b,dir); }
+  void CCylinderGetParams (dReal *radius, dReal *length)
+    { dGeomCCylinderGetParams (_id,radius,length); }
 
   void setData (void *data)
     { dGeomSetData (_id,data); }
