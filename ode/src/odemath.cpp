@@ -26,7 +26,9 @@
 // get some math functions under windows
 #ifdef WIN32
 #include <float.h>
+#ifndef CYGWIN			// added by andy for cygwin
 #define copysign _copysign
+#endif				// added by andy for cygwin
 #endif
 
 
