@@ -68,9 +68,11 @@ static void nearCallback (void *data, dGeomID o1, dGeomID o2)
 
   dContact contact[3];			// up to 3 contacts per box
   for (i=0; i<3; i++) {
-    contact[i].surface.mode = 0; //dContactMu2;
+    contact[i].surface.mode = dContactBounce; //dContactMu2;
     contact[i].surface.mu = dInfinity;
     contact[i].surface.mu2 = 0;
+    contact[i].surface.bounce = 0.5;
+    contact[i].surface.bounceVel = 0.1;
   }
   if (int numc = dCollide (o1,o2,3,&contact[0].geom,sizeof(dContact))) {
     //dMatrix3 RI;
