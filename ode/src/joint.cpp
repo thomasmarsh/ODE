@@ -289,6 +289,7 @@ void dxJointLimitMotor::init (dxWorld *world)
   fudge_factor = 1;
   stop_erp = world->global_erp;
   stop_cfm = world->global_cfm;
+  bounce = 0;
   limit = 0;
   limit_err = 0;
 }
@@ -312,7 +313,9 @@ void dxJointLimitMotor::set (int num, dReal value)
   case dParamFudgeFactor:
     if (value >= 0 && value <= 1) fudge_factor = value;
     break;
-  // case dParamBounce:
+  case dParamBounce:
+    bounce = value;
+    break;
   case dParamStopERP:
     stop_erp = value;
     break;
@@ -331,7 +334,7 @@ dReal dxJointLimitMotor::get (int num)
   case dParamVel: return vel;
   case dParamFMax: return fmax;
   case dParamFudgeFactor: return fudge_factor;
-  // case dParamBounce:
+  case dParamBounce: return bounce;
   case dParamStopERP: return stop_erp;
   case dParamStopCFM: return stop_cfm;
   default: return 0;
@@ -418,6 +421,25 @@ int dxJointLimitMotor::addRotationalLimot (dxJoint *joint,
 	info->hi[row] = dInfinity;
       }
       info->cfm[row] = stop_cfm;
+
+      //@@@@@@@@@@@@ under test
+      // deal with bounce
+      if (bounce > 0) {
+	// calculate outgoing velocity (-ve for incoming contact)
+	dReal outgoing = dDOT(joint->node[0].body->avel,ax1);
+	if (joint->node[1].body)
+	  outgoing -= dDOT(joint->node[1].body->avel,ax1);
+
+	// only apply bounce if the outgoing velocity is greater than the
+	// threshold, and if the resulting c[0] exceeds what we already have.
+	//	if (j->contact.surface.bounce_vel >= 0 &&
+	//	    (-outgoing) > j->contact.surface.bounce_vel) {
+
+	dReal newc = - bounce * outgoing;
+	if (newc > info->c[row]) info->c[row] = newc;
+      }
+      //@@@@@@@@@@@@
+
     }
     return 1;
   }
@@ -1490,3 +1512,105 @@ dxJoint::Vtable __dhinge2_vtable = {
   (dxJoint::init_fn*) hinge2Init,
   (dxJoint::getInfo1_fn*) hinge2GetInfo1,
   (dxJoint::getInfo2_fn*) hinge2GetInfo2};
+
+//****************************************************************************
+// fixed joint
+
+static void fixedInit (dxJointFixed *j)
+{
+  dSetZero (j->offset,4);
+}
+
+
+static void fixedGetInfo1 (dxJointFixed *j, dxJoint::Info1 *info)
+{
+  info->m = 6;
+  info->nub = 6;
+}
+
+
+static void fixedGetInfo2 (dxJointFixed *joint, dxJoint::Info2 *info)
+{
+  int s = info->rowskip;
+
+  // set jacobian
+  info->J1l[0] = 1;
+  info->J1l[s+1] = 1;
+  info->J1l[2*s+2] = 1;
+  info->J1a[3*s] = 1;
+  info->J1a[4*s+1] = 1;
+  info->J1a[5*s+2] = 1;
+
+  dVector3 ofs;
+  if (joint->node[1].body) {
+    dMULTIPLY0_331 (ofs,joint->node[0].body->R,joint->offset);
+    dCROSSMAT (info->J1a,ofs,s,+,-);
+    info->J2l[0] = -1;
+    info->J2l[s+1] = -1;
+    info->J2l[2*s+2] = -1;
+    info->J2a[3*s] = -1;
+    info->J2a[4*s+1] = -1;
+    info->J2a[5*s+2] = -1;
+  }
+
+  // set right hand side for the first three rows (linear)
+  dReal k = info->fps * info->erp;
+  if (joint->node[1].body) {
+    for (int j=0; j<3; j++)
+      info->c[j] = k * (joint->node[1].body->pos[j] -
+			joint->node[0].body->pos[j] + ofs[j]);
+  }
+  else {
+    for (int j=0; j<3; j++)
+      info->c[j] = k * (joint->node[0].body->pos[j] + ofs[j]);
+  }
+
+  // set right hand side for the next three rows (angular). this code is
+  // borrowed from the slider, so look at the comments there.
+  // @@@ make a function common to both the slider and this joint !!!
+
+  // get qerr = relative rotation (rotation error) between two bodies
+  dQuaternion qerr,e;
+  if (joint->node[1].body) {
+    dQMultiply1 (qerr,joint->node[0].body->q,joint->node[1].body->q);
+  }
+  else {
+    for (int i=0; i<4; i++) qerr[i] = joint->node[0].body->q[i];
+  }
+  if (qerr[0] < 0) {
+    qerr[1] = -qerr[1];		// adjust sign of qerr to make theta small
+    qerr[2] = -qerr[2];
+    qerr[3] = -qerr[3];
+  }
+  dMULTIPLY0_331 (e,joint->node[0].body->R,qerr+1); // @@@ bad SIMD padding!
+  info->c[3] = 2*k * e[0];
+  info->c[4] = 2*k * e[1];
+  info->c[5] = 2*k * e[2];
+}
+
+
+extern "C" void dJointSetFixed (dxJointFixed *joint)
+{
+  dUASSERT(joint,"bad joint argument");
+  dUASSERT(joint->vtable == &__dfixed_vtable,"joint is not fixed");
+
+  // compute the offset between the bodies
+  if (joint->node[0].body) {
+    if (joint->node[1].body) {
+      dReal ofs[4];
+      for (int i=0; i<4; i++) ofs[i] = joint->node[0].body->pos[i];
+      for (int i=0; i<4; i++) ofs[i] -= joint->node[1].body->pos[i];
+      dMULTIPLY1_331 (joint->offset,joint->node[0].body->R,ofs);
+    }
+    else {
+      for (int i=0; i<4; i++) joint->offset[i] = joint->node[0].body->pos[i];
+    }
+  }
+}
+
+
+dxJoint::Vtable __dfixed_vtable = {
+  sizeof(dxJointFixed),
+  (dxJoint::init_fn*) fixedInit,
+  (dxJoint::getInfo1_fn*) fixedGetInfo1,
+  (dxJoint::getInfo2_fn*) fixedGetInfo2};

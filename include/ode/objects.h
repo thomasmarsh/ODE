@@ -89,6 +89,7 @@ dJointID dJointCreateHinge (dWorldID, dJointGroupID);
 dJointID dJointCreateSlider (dWorldID, dJointGroupID);
 dJointID dJointCreateContact (dWorldID, dJointGroupID, const dContact *);
 dJointID dJointCreateHinge2 (dWorldID, dJointGroupID);
+dJointID dJointCreateFixed (dWorldID, dJointGroupID);
 
 void dJointDestroy (dJointID);
 
@@ -110,6 +111,7 @@ void dJointSetHinge2Anchor (dJointID, dReal x, dReal y, dReal z);
 void dJointSetHinge2Axis1 (dJointID, dReal x, dReal y, dReal z);
 void dJointSetHinge2Axis2 (dJointID, dReal x, dReal y, dReal z);
 void dJointSetHinge2Param (dJointID, int parameter, dReal value);
+void dJointSetFixed (dJointID);
 
 void dJointGetBallAnchor (dJointID, dVector3 result);
 void dJointGetHingeAnchor (dJointID, dVector3 result);
