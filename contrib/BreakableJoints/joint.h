@@ -125,14 +125,14 @@ struct dxJoint : public dObject {
     init_fn *init;
     getInfo1_fn *getInfo1;
     getInfo2_fn *getInfo2;
-    int typenum;		// a dJointTypeXXX type number 
+    int typenum;		// a dJointTypeXXX type number
   };
 
   Vtable *vtable;		// virtual function table
   int flags;			// dJOINT_xxx flags
   dxJointNode node[2];		// connections to bodies. node[1].body can be 0
   dJointFeedback *feedback;	// optional feedback structure
-
+  
   /******************** breakable joint contribution ***********************/
   // optional break info structure. if this is not NULL the the joint is
   // breakable.
@@ -265,6 +265,7 @@ extern struct dxJoint::Vtable __damotor_vtable;
 // fixed
 
 struct dxJointFixed : public dxJoint {
+  dQuaternion qrel;		// initial relative rotation body1 -> body2
   dVector3 offset;		// relative offset between the bodies
 };
 extern struct dxJoint::Vtable __dfixed_vtable;

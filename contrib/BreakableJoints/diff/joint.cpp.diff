@@ -1,4 +1,4 @@
-2274,2407d2273
+2659,2804d2658
 < 
 < /******************** breakable joint contribution ***********************/
 < extern "C" void dJointSetBreakable (dxJoint *joint, int b) {
@@ -58,6 +58,17 @@
 <   }
 < # endif
 <   joint->breakInfo->flags = mode;
+< }
+< 
+< extern "C" int dJointGetBreakMode (dxJoint *joint) {
+<   dAASSERT(joint);
+< # ifndef dNODEBUG
+<   // only works for a breakable joint
+<   if (!joint->breakInfo) {
+<     dDebug (0, "dJointGetBreakMode called on unbreakable joint");
+<   }
+< # endif
+<   return joint->breakInfo->flags;
 < }
 < 
 < extern "C" void dJointSetBreakForce (dxJoint *joint, int body, dReal x, dReal y, dReal z) {
@@ -133,3 +144,5 @@
 <     for (int i=0; i<3; i++) torque[i]=joint->breakInfo->b1MaxT[i];
 < }
 < /*************************************************************************/
+<   
+\ No newline at end of file

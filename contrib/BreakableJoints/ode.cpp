@@ -223,9 +223,8 @@ static void processIslands (dxWorld *world, dReal stepsize)
         dJointAttach (j, 0, 0);
 		// call the callback function if it is set
 		if (j->breakInfo->callback) j->breakInfo->callback (j);
-        if (j->breakInfo->flags & dJOINT_DELETE_ON_BREAK) dJointDestroy (j);
-		// reset the dJOINT_BROKEN flag
-		j->breakInfo->flags &= ~(dJOINT_BROKEN);
+		// finally destroy the joint if the dJOINT_DELETE_ON_BREAK is set
+		if (j->breakInfo->flags & dJOINT_DELETE_ON_BREAK) dJointDestroy (j);
       }
   }
   /*************************************************************************/
