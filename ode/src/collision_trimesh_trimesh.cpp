@@ -63,7 +63,7 @@ static bool FindTriSolidIntrsection(const dVector3 Tri[3],
                                     LineContactSet& ClippedPolygon );
 static void ClipConvexPolygonAgainstPlane( const dVector3, dReal, LineContactSet& );
 static bool SimpleUnclippedTest(dVector3 in_CoplanarPt, dVector3 in_v, dVector3 in_elt,
-                                dVector3 in_n, dVector3* in_col_v, double &out_depth);
+                                dVector3 in_n, dVector3* in_col_v, dReal &out_depth);
 static int ExamineContactPoint(dVector3* v_col, dVector3 in_n, dVector3 in_point);
 static int RayTriangleIntersect(const dVector3 orig, const dVector3 dir,
                                 const dVector3 vert0, const dVector3 vert1,const dVector3 vert2,
@@ -175,7 +175,7 @@ dCollideTTL(dxGeom* g1, dxGeom* g2, int Flags, dContactGeom* Contacts, int Strid
                 dReal           depth;
                 dVector3        orig_pos, old_pos1, old_pos2, elt1, elt2, elt_sum;
                 dVector3        elt_f1[3], elt_f2[3];
-                double          contact_elt_length = SMALL_ELT;
+                dReal          contact_elt_length = SMALL_ELT;
                 LineContactSet  firstClippedTri, secondClippedTri;
                 dVector3       *firstClippedElt = NULL;
                 dVector3       *secondClippedElt = NULL;
@@ -311,7 +311,7 @@ dCollideTTL(dxGeom* g1, dxGeom* g2, int Flags, dContactGeom* Contacts, int Strid
                                 // Calculate how much the vertices of each face moved in the
                                 //  direction of the opposite face's normal
                                 //
-                                double    total_dp1, total_dp2;
+                                dReal    total_dp1, total_dp2;
                                 total_dp1 = 0.0;
                                 total_dp2 = 0.0;
                                 
@@ -355,7 +355,7 @@ dCollideTTL(dxGeom* g1, dxGeom* g2, int Flags, dContactGeom* Contacts, int Strid
                                 ////////
                                 // Estimate the penetration depth.  
                                 //                            
-                                double    dp;
+                                dReal    dp;
                                 BOOL      badPen = true;
                                 dVector3 *pen_v;   // the "penetrating vertices"
                                 dVector3 *pen_elt; // the elt_f of the penetrating face
@@ -1002,7 +1002,7 @@ dMakeMatrix4(const dVector3 Position, const dMatrix3 Rotation, dMatrix4 &B)
 static void
 dInvertMatrix4( dMatrix4& B, dMatrix4& Binv )
 {
-    double det =  (B11 * B22 - B12 * B21) * (B33 * B44 - B34 * B43)
+    dReal det =  (B11 * B22 - B12 * B21) * (B33 * B44 - B34 * B43)
         -(B11 * B23 - B13 * B21) * (B32 * B44 - B34 * B42)
         +(B11 * B24 - B14 * B21) * (B32 * B43 - B33 * B42)
         +(B12 * B23 - B13 * B22) * (B31 * B44 - B34 * B41)
@@ -1855,10 +1855,10 @@ RayTriangleIntersect(const dVector3 orig, const dVector3 dir,
 
 static bool
 SimpleUnclippedTest(dVector3 in_CoplanarPt, dVector3 in_v, dVector3 in_elt,
-                    dVector3 in_n, dVector3* in_col_v, double &out_depth)
+                    dVector3 in_n, dVector3* in_col_v, dReal &out_depth)
 {
-    double dp = 0.0;
-    double contact_elt_length;
+    dReal dp = 0.0;
+    dReal contact_elt_length;
 
     DEPTH(dp, in_CoplanarPt, in_v, in_n);
     
