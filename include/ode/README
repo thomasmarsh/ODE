@@ -14,5 +14,5 @@ C++ features. everything should be protected with
 	}
 	#endif
 
-the only exception is the odecpp.h file, which defines a C++ wrapper for
+the only exceptions are the odecpp.h and odecpp_collisioh.h files, which define a C++ wrapper for
 the C interface. remember to keep this in sync!
