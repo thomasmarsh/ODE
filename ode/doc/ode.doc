@@ -2488,6 +2488,14 @@ where @m{n} is the number of objects in the group.
 }
 
 
+@funcdef{
+int dGeomGroupQuery (dGeomID group, dGeomID x);
+}{
+Return 1 if @arg{x} is contained in the given GeomGroup, or 0 if it is not.
+}
+
+
+
 @subsection{Geometry Transform class}
 
 A geometry transform object (T) encapsulates another geometry object (E),
@@ -3393,6 +3401,75 @@ To prevent this, do one or more of the following:
 In the future I may add a feature to ODE to modify the rotational dynamics
 of selected bodies so that they exhibit no rotational error with ODEs
 integrator.
+
+
+@section{My rolling bodies (e.g. wheels) sometimes get stuck between geoms}
+
+Consider a system where rolling bodies roll over an environment made
+up of multiple geometry objects. For example, this might be a car
+driving over a terrain (the rolling bodies are the wheels).
+If you find that the rolling bodies mysteriously come to a stop when
+they roll from one geometry object to another, or when they receive
+multiple contact points, then you may need to use a different contact
+friction model. This section explains the problem and the solution.
+
+@subsection{The problem}
+
+An example of such a system is shown in the following picture of a
+ball that has just rolled down a ramp and touched the ground:
+
+		@center{@picture{pix/rollingcontact.gif}}
+
+Normally, the ball should continue rolling along the ground, towards
+the right. However, if ODE's default contact friction mode is being used
+then the ball will come to a complete stop when it hits the ground.
+Why?
+
+ODE has two ways to approximate friction: the default way (called the
+constant-force-limit approximation, or ``box friction'') and an
+improved way (called ``friction pyramid approximation 1'') which is
+obtained by setting the @c{dContactApprox1} flag in the contact
+joint's surface mode field.
+
+Consider the above picture. There are two contact points, one between
+the ball and the ramp, the other between the ball and the ground.  If
+the box friction mode is used in both contacts and the @c{mu} parameter
+is set to @c{dInfinity} then the ball can not slip against the ramp or
+ground at either contact.
+
+If no slip is possible at a ball contact point, then the center of the
+ball @emph{must} move along a path that is an arc around the contact
+point. Thus the center of the ball is required to simultaneously move
+along the path ``Arc 1'' and ``Arc 2''. The only way to satisfy both
+paths at once is for the ball to stop moving altogether.
+
+This is not a bug in ODE - so what is going on here? Objects in real
+life do not get stuck like this. The problem is that, in the simple
+``box'' approximation of friction the tangential force available at a
+contact constraint to stop it slipping is @emph{independent} of the
+normal force that prevents penetration. This is not real-life physics,
+so we should not be surprised that non-real-life motion results.
+
+Note that this problem does not occur if @c{mu} is set to zero,
+but this is not a helpful solution because we need some amount of
+friction to model the real world.
+
+@subsection{The solution}
+
+The solution is to use the @c{dContactApprox1} flag in the contact's
+surface mode field, and set @c{mu} to some appropriate value between 0
+and infinity. This mode ensures that there will only be a tangential
+anti-slipping force at the contact point if the contact normal force
+is nonzero. In the above example it turns out that contact-1 will have
+a zero normal force, so there will be no force applied at contact-1 at
+all, and the problem is solved! (the ball will roll along the ground
+properly.)
+
+The @c{dContactApprox1} mode may not be appropriate in all situations,
+which is why it is optional. It is important to remember that,
+although it is a better friction approximation, it is not true Coulomb
+friction. Thus it is still possible that you may encounter some
+examples of non-physical behavior.
 
 #############################################################################
 @chapter{Known BUGS}
