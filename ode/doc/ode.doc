@@ -833,16 +833,26 @@ void dBodyAddRelForceAtRelPos (dBodyID, dReal fx, dReal fy, dReal fz,
 Add forces to bodies (absolute or relative coordinates).
 The forces are accumulated on to each body, and the accumulators are zeroed
 after each time step.
+
+The ...@c{RelForce} and ...@c{RelTorque} functions take force vectors that are
+relative to the body's own frame of reference.
+
+The ...@c{ForceAtPos} and ...@c{ForceAtRelPos} functions take an extra
+position vector (in global or body-relative coordinates respectively)
+that specifies the point at which the force is applied.
+All other functions apply the force at the center of mass.
 }
 
 
 @funcdef{
-void dBodyGetRelPointPos    (dBodyID, dReal px, dReal py, dReal pz,
-                             dVector3 result);
-void dBodyGetRelPointVel    (dBodyID, dReal px, dReal py, dReal pz,
-                             dVector3 result);
+void dBodyGetRelPointPos (dBodyID, dReal px, dReal py, dReal pz,
+                          dVector3 result);
+void dBodyGetRelPointVel (dBodyID, dReal px, dReal py, dReal pz,
+                          dVector3 result);
 }{
-Utility functions.
+These utility functions take a body point (in body relative coordinates)
+and return that point's position and velocity in global coordinates
+(in @arg{result}).
 }
 
 
@@ -2173,7 +2183,7 @@ the box, and @arg{side} is a vector of x/y/z side lengths.
 
 
 @funcdef{
-void dInfiniteAABB (dxGeom *geom, dReal aabb[6]);
+void dInfiniteAABB (dGeomID geom, dReal aabb[6]);
 }{
 This function can be used as the AABB-getting function in a geometry class,
 if you don't want to compute tight bounds for the AABB.
