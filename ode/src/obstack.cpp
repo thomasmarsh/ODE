@@ -45,20 +45,6 @@ TODO
 //****************************************************************************
 // dObStack
 
-struct dObStack {
-  struct Arena {
-    Arena *next;
-    int used;		// total number of bytes used in this arena
-  };
-
-  Arena *first,last;
-
-  // used for iterator
-  Arena *current_arena;
-  int current_ofs;
-};
-
-
 dObStack::dObStack()
 {
   first = 0;
@@ -75,7 +61,7 @@ dObStack::~dObStack()
   a = first;
   while (a) {
     nexta = a->next;
-    dFree (a,a->size);
+    dFree (a,ARENA_SIZE);
     a = nexta;
   }
 }
@@ -85,37 +71,22 @@ void *dObStack::alloc (int num_bytes)
 {
   // @@@ assumes num_bytes is not too large.
 
-  // see if a new arena must be used
-  int new_arena = 0;
-  if (last) {
-    if ((last->used + num_bytes) > ARENA_SIZE) {
-      new_arena = 1;
-    }
+  // allocate or move to a new arena if necessary
+  if (!first) {
+    // allocate the first arena if necessary
+    first = last = (Arena *) dAlloc (ARENA_SIZE);
+    first->next = 0;
+    first->used = sizeof (Arena);
   }
   else {
-    new_arena = 1;
-  }
-
-  // allocate or move to a new arena if necessary
-  if (new_arena) {
-    if (last && last->next) {
-      // the next arena has already been allocated
+    // we already have one or more arenas, see if a new arena must be used
+    if ((last->used + num_bytes) > ARENA_SIZE) {
+      if (!last->next) {
+	last->next = (Arena *) dAlloc (ARENA_SIZE);
+	last->next->next = 0;
+      }
       last = last->next;
-      last->size = sizeof (Arena);
-    }
-    else {
-      // the next arena must be allocated
-      Arena *a = (Arena *) dAlloc (ARENA_SIZE);
-      a->next = 0;
-      a->used = sizeof (Arena);
-      if (last) {
-	last->next = a;
-	last = a;
-      }
-      else {
-	first = a;
-	last = a;
-      }
+      last->used = sizeof (Arena);
     }
   }
 
@@ -133,10 +104,13 @@ void dObStack::freeAll()
 }
 
 
-void dObStack::rewind()
+void *dObStack::rewind()
 {
   current_arena = first;
   current_ofs = sizeof (Arena);
+  if (current_arena)
+    return ((char*) current_arena) + current_ofs;
+  else return 0;
 }
 
 
@@ -147,19 +121,13 @@ void *dObStack::next (int num_bytes)
 
   // @@@ assumes num_bytes is not too large.
 
-  if (!first) return 0;
-
-  // jump to a new arena if necessary
-  int new_arena = 0;
+  if (!current_arena) return 0;
   if ((current_ofs + num_bytes) > ARENA_SIZE) {
-    new_arena = 1;
-    if (!last->next) return 0;
     current_arena = current_arena->next;
+    if (!current_arena) return 0;
     current_ofs = sizeof (Arena);
   }
-
-  // allocate an area in the arena
-  char *c = ((char*) current_arena) + current_offset;
-  current_offset += num_bytes;
+  char *c = ((char*) current_arena) + current_ofs;
+  current_arena += num_bytes;
   return c;
 }
