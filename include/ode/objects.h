@@ -93,6 +93,7 @@ dJointID dJointCreateSlider (dWorldID, dJointGroupID);
 dJointID dJointCreateContact (dWorldID, dJointGroupID, const dContact *);
 dJointID dJointCreateHinge2 (dWorldID, dJointGroupID);
 dJointID dJointCreateFixed (dWorldID, dJointGroupID);
+dJointID dJointCreateNull (dWorldID, dJointGroupID);
 
 void dJointDestroy (dJointID);
 
