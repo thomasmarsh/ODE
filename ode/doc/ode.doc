@@ -1,6 +1,6 @@
 #########################################################################
 #                                                                       #
-# Open Dynamics Engine, Copyright (C) 2001 Russell L. Smith.            #
+# Open Dynamics Engine, Copyright (C) 2001,2002 Russell L. Smith.       #
 #   Email: russ@q12.org   Web: www.q12.org                              #
 #                                                                       #
 # This library is free software; you can redistribute it and/or         #
@@ -24,7 +24,7 @@
 @subtitle{Russell Smith, @date{}}
 @author{Russell Smith, @date{}}
 
-@center{This document is Copyright &copy; 2001 Russell Smith.}
+@center{This document is Copyright &copy; 2001,2002 Russell Smith.}
 @center{This is an UNFINISHED document, there is still a lot of stuff
 to write.}
 
@@ -232,7 +232,7 @@ Here are the features:
 
 @section{ODE's license}
 
-ODE is Copyright &copy; 2001 Russell Smith.
+ODE is Copyright &copy; 2001,2002 Russell Smith.
 
 This library is free software; you can redistribute it and/or
 modify it under the terms of the @link{http://www.opensource.org/licenses/lgpl-license.html}{GNU Lesser General Public License}
