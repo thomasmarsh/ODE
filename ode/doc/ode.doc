@@ -91,6 +91,7 @@ Here are the features:
 @* 2D & 3D friction now works.
 @* Framework now in place for more contact modes, powered and limited joints.
 @* Moving-surface contact mode.
+@* Argument checking for all functions.
 @* Various bugs fixed.
 }
 
@@ -101,7 +102,6 @@ Here are the features:
 @list{
 @* Improve the approximation to Coloumb friction.
 @* Full cross platform build system and automatic configuration.
-@* Argument checking for all functions (especially joint-typed functions).
 }
 
 @subsection{Plan for 0.03 release}
