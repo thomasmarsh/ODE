@@ -226,6 +226,10 @@ SOURCE=..\ode\src\testing.cpp
 
 SOURCE=..\ode\src\timer.cpp
 # End Source File
+# Begin Source File
+
+SOURCE=..\ode\src\util.cpp
+# End Source File
 # End Group
 # Begin Group "Headers"
 

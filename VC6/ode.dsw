@@ -3,14 +3,10 @@ Microsoft Developer Studio Workspace File, Format Version 6.00
 
 ###############################################################################
 
-Project: "OPCODE"=..\OPCODE\Opcode.dsp - Package Owner=<4>
+Project: "Opcode2"=..\OPCODE\Opcode2.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
-    begin source code control
-    "$/TR4/ODE/VC6", WNKAAAAA
-    .
-    end source code control
 }}}
 
 Package=<4>
@@ -23,10 +19,6 @@ Project: "ode"=.\ode.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
-    begin source code control
-    "$/TR4/ODE/VC6", WNKAAAAA
-    .
-    end source code control
 }}}
 
 Package=<4>
