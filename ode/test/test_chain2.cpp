@@ -50,7 +50,7 @@
 // dynamics and collision objects
 
 static dWorld world;
-static dSimpleSpace space;
+static dSimpleSpace space (0);
 static dBody body[NUM];
 static dBallJoint joint[NUM-1];
 static dJointGroup contactgroup;

@@ -171,7 +171,7 @@ int main (int argc, char **argv)
 
   // create world
   world = dWorldCreate();
-  space = dHashSpaceCreate();
+  space = dHashSpaceCreate (0);
   contactgroup = dJointGroupCreate (0);
   dWorldSetGravity (world,0,0,-GRAVITY);
   ground = dCreatePlane (space,0,0,1,0);
