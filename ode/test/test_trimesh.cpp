@@ -37,6 +37,7 @@
 #define dsDrawCylinder dsDrawCylinderD
 #define dsDrawCappedCylinder dsDrawCappedCylinderD
 #define dsDrawLine dsDrawLineD
+#define dsDrawTriangle dsDrawTriangleD
 #endif
 
 
