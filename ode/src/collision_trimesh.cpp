@@ -139,9 +139,11 @@ SphereCollider dxTriMesh::_SphereCollider;
 OBBCollider dxTriMesh::_OBBCollider;
 RayCollider dxTriMesh::_RayCollider;
 AABBTreeCollider dxTriMesh::_AABBTreeCollider;
+LSSCollider dxTriMesh::_LSSCollider;
 
 SphereCache dxTriMesh::defaultSphereCache;
 OBBCache dxTriMesh::defaultBoxCache;
+LSSCache dxTriMesh::defaultCCylinderCache;
 
 CollisionFaces dxTriMesh::Faces;
 
@@ -156,13 +158,17 @@ dxTriMesh::dxTriMesh(dSpaceID Space, dTriMeshDataID Data) : dxGeom(Space, 1){
 	_SphereCollider.SetTemporalCoherence(true);
 	_OBBCollider.SetTemporalCoherence(true);
 	_AABBTreeCollider.SetTemporalCoherence(true);
+	_LSSCollider.SetTemporalCoherence(false);
 
 	/* TC has speed/space 'issues' that don't make it a clear
 	   win by default. */
 	this->doSphereTC = false;
 	this->doBoxTC = false;
+	this->doCCylinderTC = false;
 
 	_SphereCollider.SetPrimitiveTests(false);
+	_LSSCollider.SetPrimitiveTests(false);
+	_LSSCollider.SetFirstContact(false);
 }
 
 dxTriMesh::~dxTriMesh(){
@@ -184,6 +190,11 @@ void dxTriMesh::ClearTCCache(){
 	  BoxTCCache[i].~BoxTC();
 	}
 	BoxTCCache.setSize(0);
+	n = CCylinderTCCache.size();
+	for( i = 0; i < n; ++i ) {
+	  CCylinderTCCache[i].~CCylinderTC();
+	}
+	CCylinderTCCache.setSize(0);
 }
 
 int dxTriMesh::AABBTest(dxGeom* g, dReal aabb[6]){
@@ -274,6 +285,9 @@ void dGeomTriMeshEnableTC(dGeomID g, int geomClass, int enable)
 		case dBoxClass:
 			((dxTriMesh*)g)->doBoxTC = (1 == enable);
 			break;
+		case dCCylinderClass:
+			((dxTriMesh*)g)->doCCylinderTC = (1 == enable);
+			break;
 	}
 }
 
@@ -289,6 +303,10 @@ int dGeomTriMeshIsTCEnabled(dGeomID g, int geomClass)
 			break;
 		case dBoxClass:
 			if (((dxTriMesh*)g)->doBoxTC)
+				return 1;
+			break;
+		case dCCylinderClass:
+			if (((dxTriMesh*)g)->doCCylinderTC)
 				return 1;
 			break;
 	}

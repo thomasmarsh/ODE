@@ -78,7 +78,9 @@ endif
 ODE_NEW_COLLISION_SRC +=ode/src/collision_trimesh.cpp \
 			ode/src/collision_trimesh_sphere.cpp \
 			ode/src/collision_trimesh_box.cpp \
-			ode/src/collision_trimesh_ray.cpp
+			ode/src/collision_trimesh_ray.cpp \
+			ode/src/collision_trimesh_ccylinder.cpp \
+			ode/src/collision_trimesh_distance.cpp
 endif
 
 ODE_PREGEN_SRC = \
