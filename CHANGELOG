@@ -9,6 +9,11 @@ the rules for this file:
 
 ------------------------------------------------------------------------------
 
+04/08/04 russ
+
+	* added trimesh-CCylinder capability, from Vadim Macagon
+	  <vadim_mcagon@hotmail.com>.
+
 04/04/04 adam
 
         * yet another rewrite of triangle-box collision code, this

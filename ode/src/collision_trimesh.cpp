@@ -229,9 +229,11 @@ SphereCollider dxTriMesh::_SphereCollider;
 OBBCollider dxTriMesh::_OBBCollider;
 RayCollider dxTriMesh::_RayCollider;
 AABBTreeCollider dxTriMesh::_AABBTreeCollider;
+LSSCollider dxTriMesh::_LSSCollider;
 
 SphereCache dxTriMesh::defaultSphereCache;
 OBBCache dxTriMesh::defaultBoxCache;
+LSSCache dxTriMesh::defaultCCylinderCache;
 
 CollisionFaces dxTriMesh::Faces;
 
@@ -258,15 +260,19 @@ dxTriMesh::dxTriMesh(dSpaceID Space, dTriMeshDataID Data) : dxGeom(Space, 1){
 	_AABBTreeCollider.SetFullBoxBoxTest( true );
     // Perform full Primitive-BV tests (true) or SAT-lite tests (false)
 	_AABBTreeCollider.SetFullPrimBoxTest( true );
+	_LSSCollider.SetTemporalCoherence(false);
 
 	/* TC has speed/space 'issues' that don't make it a clear
 	   win by default on spheres/boxes. */
 	this->doSphereTC = false;
 	this->doBoxTC = false;
+	this->doCCylinderTC = false;
 
     const char* msg;
     if ((msg =_AABBTreeCollider.ValidateSettings()))
         dDebug (d_ERR_UASSERT, msg, " (%s:%d)", __FILE__,__LINE__);
+	_LSSCollider.SetPrimitiveTests(false);
+	_LSSCollider.SetFirstContact(false);
 }
 
 dxTriMesh::~dxTriMesh(){
@@ -289,6 +295,11 @@ void dxTriMesh::ClearTCCache(){
 	  BoxTCCache[i].~BoxTC();
 	}
 	BoxTCCache.setSize(0);
+	n = CCylinderTCCache.size();
+	for( i = 0; i < n; ++i ) {
+	  CCylinderTCCache[i].~CCylinderTC();
+	}
+	CCylinderTCCache.setSize(0);
 }
 
 
@@ -389,6 +400,9 @@ void dGeomTriMeshEnableTC(dGeomID g, int geomClass, int enable)
 		case dBoxClass:
 			((dxTriMesh*)g)->doBoxTC = (1 == enable);
 			break;
+		case dCCylinderClass:
+			((dxTriMesh*)g)->doCCylinderTC = (1 == enable);
+			break;
 	}
 }
 
@@ -404,6 +418,10 @@ int dGeomTriMeshIsTCEnabled(dGeomID g, int geomClass)
 			break;
 		case dBoxClass:
 			if (((dxTriMesh*)g)->doBoxTC)
+				return 1;
+			break;
+		case dCCylinderClass:
+			if (((dxTriMesh*)g)->doCCylinderTC)
 				return 1;
 			break;
 	}
