@@ -101,6 +101,7 @@ void dJointGroupEmpty (dJointGroupID);
 void dJointAttach (dJointID, dBodyID body1, dBodyID body2);
 void dJointSetData (dJointID, void *data);
 void *dJointGetData (dJointID);
+int dJointGetType (dJointID);
 
 void dJointSetBallAnchor (dJointID, dReal x, dReal y, dReal z);
 void dJointSetHingeAnchor (dJointID, dReal x, dReal y, dReal z);

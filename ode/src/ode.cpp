@@ -703,13 +703,22 @@ void dJointAttach (dxJoint *joint, dxBody *body1, dxBody *body2)
 
 void dJointSetData (dxJoint *joint, void *data)
 {
+  dAASSERT (joint);
   joint->userdata = data;
 }
 
 
 void *dJointGetData (dxJoint *joint)
 {
+  dAASSERT (joint);
   return joint->userdata;
+}
+
+
+int dJointGetType (dxJoint *joint)
+{
+  dAASSERT (joint);
+  return joint->vtable->typenum;
 }
 
 

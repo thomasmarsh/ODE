@@ -169,6 +169,18 @@ typedef struct dxJointGroup *dJointGroupID;
 #define d_ERR_UASSERT		2	/* user assertion failed */
 
 
+/* joint type numbers */
+
+enum {
+  dJointTypeNone = 0,		/* or "unknown" */
+  dJointTypeBall,
+  dJointTypeHinge,
+  dJointTypeSlider,
+  dJointTypeContact,
+  dJointTypeHinge2,
+  dJointTypeFixed,
+};
+
 
 /* an alternative way of setting joint parameters, using joint parameter
  * structures and member constants. we don't actually do this yet.

@@ -533,7 +533,8 @@ dxJoint::Vtable __dball_vtable = {
   sizeof(dxJointBall),
   (dxJoint::init_fn*) ballInit,
   (dxJoint::getInfo1_fn*) ballGetInfo1,
-  (dxJoint::getInfo2_fn*) ballGetInfo2};
+  (dxJoint::getInfo2_fn*) ballGetInfo2,
+  dJointTypeBall};
 
 //****************************************************************************
 // hinge
@@ -745,7 +746,8 @@ dxJoint::Vtable __dhinge_vtable = {
   sizeof(dxJointHinge),
   (dxJoint::init_fn*) hingeInit,
   (dxJoint::getInfo1_fn*) hingeGetInfo1,
-  (dxJoint::getInfo2_fn*) hingeGetInfo2};
+  (dxJoint::getInfo2_fn*) hingeGetInfo2,
+  dJointTypeHinge};
 
 //****************************************************************************
 // slider
@@ -999,7 +1001,8 @@ dxJoint::Vtable __dslider_vtable = {
   sizeof(dxJointSlider),
   (dxJoint::init_fn*) sliderInit,
   (dxJoint::getInfo1_fn*) sliderGetInfo1,
-  (dxJoint::getInfo2_fn*) sliderGetInfo2};
+  (dxJoint::getInfo2_fn*) sliderGetInfo2,
+  dJointTypeSlider};
 
 //****************************************************************************
 // contact
@@ -1186,7 +1189,8 @@ dxJoint::Vtable __dcontact_vtable = {
   sizeof(dxJointContact),
   (dxJoint::init_fn*) contactInit,
   (dxJoint::getInfo1_fn*) contactGetInfo1,
-  (dxJoint::getInfo2_fn*) contactGetInfo2};
+  (dxJoint::getInfo2_fn*) contactGetInfo2,
+  dJointTypeContact};
 
 //****************************************************************************
 // hinge 2. note that this joint must be attached to two bodies for it to work
@@ -1502,7 +1506,8 @@ dxJoint::Vtable __dhinge2_vtable = {
   sizeof(dxJointHinge2),
   (dxJoint::init_fn*) hinge2Init,
   (dxJoint::getInfo1_fn*) hinge2GetInfo1,
-  (dxJoint::getInfo2_fn*) hinge2GetInfo2};
+  (dxJoint::getInfo2_fn*) hinge2GetInfo2,
+  dJointTypeHinge2};
 
 //****************************************************************************
 // fixed joint
@@ -1606,4 +1611,5 @@ dxJoint::Vtable __dfixed_vtable = {
   sizeof(dxJointFixed),
   (dxJoint::init_fn*) fixedInit,
   (dxJoint::getInfo1_fn*) fixedGetInfo1,
-  (dxJoint::getInfo2_fn*) fixedGetInfo2};
+  (dxJoint::getInfo2_fn*) fixedGetInfo2,
+  dJointTypeFixed};
