@@ -43,7 +43,7 @@ int dCollideCCTL(dxGeom *o1, dxGeom *o2, int flags, dContactGeom *contact, int s
 #include "Opcode.h"
 using namespace Opcode;
 
-struct dxTriMeshData{
+struct dxTriMeshData  : public dBase {
 	Model BVTree;
 	MeshInterface Mesh;
 
@@ -61,7 +61,8 @@ struct dxTriMeshData{
 
     /* data for use in collison resolution */
     const void* Normals;
-    Matrix4x4   last_trans;
+    //Matrix4x4   last_trans;
+    dMatrix4    last_trans;
 };
 
 
@@ -158,21 +159,21 @@ inline void FetchTriangle(dxTriMesh* TriMesh, int Index, const dVector3 Position
 
 // Creates an OPCODE matrix from an ODE matrix
 inline Matrix4x4& MakeMatrix(const dVector3 Position, const dMatrix3 Rotation, Matrix4x4& Out){
-	Out.m[0][0] = Rotation[0];
-	Out.m[1][0] = Rotation[1];
-	Out.m[2][0] = Rotation[2];
+	Out.m[0][0] = (float) Rotation[0];
+	Out.m[1][0] = (float) Rotation[1];
+	Out.m[2][0] = (float) Rotation[2];
 
-	Out.m[0][1] = Rotation[4];
-	Out.m[1][1] = Rotation[5];
-	Out.m[2][1] = Rotation[6];
+	Out.m[0][1] = (float) Rotation[4];
+	Out.m[1][1] = (float) Rotation[5];
+	Out.m[2][1] = (float) Rotation[6];
 
-	Out.m[0][2] = Rotation[8];
-	Out.m[1][2] = Rotation[9];
-	Out.m[2][2] = Rotation[10];
+	Out.m[0][2] = (float) Rotation[8];
+	Out.m[1][2] = (float) Rotation[9];
+	Out.m[2][2] = (float) Rotation[10];
 
-	Out.m[3][0] = Position[0];
-	Out.m[3][1] = Position[1];
-	Out.m[3][2] = Position[2];
+	Out.m[3][0] = (float) Position[0];
+	Out.m[3][1] = (float) Position[1];
+	Out.m[3][2] = (float) Position[2];
 
 	Out.m[0][3] = 0.0f;
 	Out.m[1][3] = 0.0f;
@@ -223,7 +224,7 @@ inline void GetPointFromBarycentric(const dVector3 dv[3], dReal u, dReal v, dVec
 // Performs a callback
 inline bool Callback(dxTriMesh* TriMesh, dxGeom* Object, int TriIndex){
 	if (TriMesh->Callback != null){
-		return (TriMesh->Callback(TriMesh, Object, TriIndex) != 0);
+		return TriMesh->Callback(TriMesh, Object, TriIndex);
 	}
 	else return true;
 }
