@@ -76,6 +76,37 @@ void testSolverAccuracy (int n)
 }
 
 //****************************************************************************
+// test L^T*X=B solver accuracy.
+
+void testTransposeSolverAccuracy (int n)
+{
+  int i;
+  int npad = dPAD(n);
+  dReal *L = (dReal*) ALLOCA (n*npad*sizeof(dReal));
+  dReal *B = (dReal*) ALLOCA (n*sizeof(dReal));
+  dReal *B2 = (dReal*) ALLOCA (n*sizeof(dReal));
+  dReal *X = (dReal*) ALLOCA (n*sizeof(dReal));
+
+  // L is a random lower triangular matrix with 1's on the diagonal
+  dMakeRandomMatrix (L,n,n,1.0);
+  dClearUpperTriangle (L,n);
+  for (i=0; i<n; i++) L[i*npad+i] = 1;
+
+  // B is the right hand side
+  dMakeRandomMatrix (B,n,1,1.0);
+  memcpy (X,B,n*sizeof(dReal));	// copy B to X
+
+  dSolveL1T (L,X,n,npad);
+
+  dSetZero (B2,n);
+  dMultiply1 (B2,L,X,n,n,1);
+  dReal error = dMaxDifference (B,B2,1,n);
+  if (error > TOL) {
+    printf ("error = %e, size = %d\n",error,n);
+  }
+}
+
+//****************************************************************************
 // test L*D*L' factorizer accuracy.
 
 void testLDLTAccuracy (int n)
@@ -163,7 +194,7 @@ void testLDLTSpeed (int n)
 //****************************************************************************
 // test solver speed.
 
-void testSolverSpeed (int n)
+void testSolverSpeed (int n, int transpose)
 {
   int i;
   int npad = dPAD(n);
@@ -186,12 +217,20 @@ void testSolverSpeed (int n)
   dStopwatch sw;
   for (int i=0; i<100; i++) {
     memcpy (X,B,n*sizeof(dReal));	// copy B to X
-    dStopwatchReset (&sw);
-    dStopwatchStart (&sw);
 
-    dSolveL1 (L,X,n,npad);
+    if (transpose) {
+      dStopwatchReset (&sw);
+      dStopwatchStart (&sw);
+      dSolveL1T (L,X,n,npad);
+      dStopwatchStop (&sw);
+    }
+    else {
+      dStopwatchReset (&sw);
+      dStopwatchStart (&sw);
+      dSolveL1 (L,X,n,npad);
+      dStopwatchStop (&sw);
+    }
 
-    dStopwatchStop (&sw);
     double time = dStopwatchTime (&sw);
     if (time < mintime) mintime = time;
   }
@@ -208,21 +247,23 @@ void testAccuracy (int n, char type)
 {
   if (type == 'f') testLDLTAccuracy (n);
   if (type == 's') testSolverAccuracy (n);
+  if (type == 't') testTransposeSolverAccuracy (n);
 }
 
 
 void testSpeed (int n, char type)
 {
   if (type == 'f') testLDLTSpeed (n);
-  if (type == 's') testSolverSpeed (n);
+  if (type == 's') testSolverSpeed (n,0);
+  if (type == 't') testSolverSpeed (n,1);
 }
 
 
 int main (int argc, char **argv)
 {
   if (argc != 2 || argv[1][0] == 0 || argv[1][1] != 0 ||
-      (argv[1][0] != 'f' && argv[1][0] != 's')) {
-    fprintf (stderr,"Usage: test_ldlt [f|s]\n");
+      (argv[1][0] != 'f' && argv[1][0] != 's' && argv[1][0] != 't')) {
+    fprintf (stderr,"Usage: test_ldlt [f|s|t]\n");
     exit (1);
   }
   char type = argv[1][0];
@@ -251,8 +292,8 @@ int main (int argc, char **argv)
   testAccuracy (97,type);
   testAccuracy (101,type);
 
-  // test speed on a 128x128 matrix
-  testSpeed (128,type);
+  // test speed on a 127x127 matrix
+  testSpeed (127,type);
 
   return 0;
 }
