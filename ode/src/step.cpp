@@ -204,11 +204,7 @@ static inline void moveAndRotateBody (dxBody *b, dReal h)
     dVector3 irv;	// infitesimal rotation vector
     dQuaternion q;	// quaternion for finite rotation
 
-    printf ("1\n");
-
     if (b->flags & dxBodyFlagFiniteRotationAxis) {
-      printf ("2\n");
-
       // split the angular velocity vector into a component along the finite
       // rotation axis, and a component orthogonal to it.
       dVector3 frv,irv;		// finite rotation vector
@@ -274,10 +270,10 @@ static inline void moveAndRotateBody (dxBody *b, dReal h)
 // order timestep.
 //
 // `body' is the body array, `nb' is the size of the array.
-// `joint' is the body array, `nj' is the size of the array.
+// `_joint' is the body array, `nj' is the size of the array.
 
-void dInternalStepIsland_x1 (dxWorld *world, dxBody **body, int nb,
-			     dxJoint **joint, int nj, dReal stepsize)
+void dInternalStepIsland_x1 (dxWorld *world, dxBody * const *body, int nb,
+			     dxJoint * const *_joint, int nj, dReal stepsize)
 {
   int i,j,k;
   int n6 = 6*nb;
@@ -288,6 +284,12 @@ void dInternalStepIsland_x1 (dxWorld *world, dxBody **body, int nb,
 
   // number all bodies in the body list - set their tag values
   for (i=0; i<nb; i++) body[i]->tag = i;
+
+  // make a local copy of the joint array, because we might want to modify it.
+  // (the "dxJoint *const*" declaration says we're allowed to modify the joints
+  // but not the joint array, because the caller might need it unchanged).
+  dxJoint **joint = (dxJoint**) ALLOCA (nj * sizeof(dxJoint*));
+  memcpy (joint,_joint,nj * sizeof(dxJoint*));
 
   // for all bodies, compute the inertia tensor and its inverse in the global
   // frame, and compute the rotational force and add it to the torque
@@ -322,14 +324,23 @@ void dInternalStepIsland_x1 (dxWorld *world, dxBody **body, int nb,
   // the constraints are re-ordered as follows: the purely unbounded
   // constraints, the mixed unbounded + LCP constraints, and last the purely
   // LCP constraints.
+  //
+  // joints with m=0 are inactive and are removed from the joints array
+  // entirely, so that the code that follows does not consider them.
   int m = 0;
   dxJoint::Info1 *info = (dxJoint::Info1*) ALLOCA (nj*sizeof(dxJoint::Info1));
   int *ofs = (int*) ALLOCA (nj*sizeof(int));
-  for (i=0; i<nj; i++) {
-    joint[i]->vtable->getInfo1 (joint[i],info+i);
-    dIASSERT (info[i].m > 0 && info[i].m <= 6 &&
+  for (i=0, j=0; j<nj; j++) {	// i=dest, j=src
+    joint[j]->vtable->getInfo1 (joint[j],info+i);
+    dIASSERT (info[i].m >= 0 && info[i].m <= 6 &&
 	      info[i].nub >= 0 && info[i].nub <= info[i].m);
+    if (info[i].m > 0) {
+      joint[i] = joint[j];
+      i++;
+    }
   }
+  nj = i;
+
   // the purely unbounded constraints
   for (i=0; i<nj; i++) if (info[i].nub == info[i].m) {
     ofs[i] = m;
@@ -570,8 +581,8 @@ void dInternalStepIsland_x1 (dxWorld *world, dxBody **body, int nb,
 //****************************************************************************
 // an optimized version of dInternalStepIsland1()
 
-void dInternalStepIsland_x2 (dxWorld *world, dxBody **body, int nb,
-			     dxJoint **joint, int nj, dReal stepsize)
+void dInternalStepIsland_x2 (dxWorld *world, dxBody * const *body, int nb,
+			     dxJoint * const *_joint, int nj, dReal stepsize)
 {
   int i,j,k;
 # ifdef TIMING
@@ -580,9 +591,14 @@ void dInternalStepIsland_x2 (dxWorld *world, dxBody **body, int nb,
 
   dReal stepsize1 = dRecip(stepsize);
 
-  // number all bodies and joints in the body list - set their tag values
+  // number all bodies in the body list - set their tag values
   for (i=0; i<nb; i++) body[i]->tag = i;
-  for (i=0; i<nj; i++) joint[i]->tag = i;
+
+  // make a local copy of the joint array, because we might want to modify it.
+  // (the "dxJoint *const*" declaration says we're allowed to modify the joints
+  // but not the joint array, because the caller might need it unchanged).
+  dxJoint **joint = (dxJoint**) ALLOCA (nj * sizeof(dxJoint*));
+  memcpy (joint,_joint,nj * sizeof(dxJoint*));
 
   // for all bodies, compute the inertia tensor and its inverse in the global
   // frame, and compute the rotational force and add it to the torque
@@ -618,14 +634,30 @@ void dInternalStepIsland_x2 (dxWorld *world, dxBody **body, int nb,
   // constraints, the mixed unbounded + LCP constraints, and last the purely
   // LCP constraints. this assists the LCP solver to put all unbounded
   // variables at the start for a quick factorization.
+  //
+  // joints with m=0 are inactive and are removed from the joints array
+  // entirely, so that the code that follows does not consider them.
+  // also number all active joints in the joint list (set their tag values).
+  // inactive joints receive a tag value of -1.
+
   int m = 0;
   dxJoint::Info1 *info = (dxJoint::Info1*) ALLOCA (nj*sizeof(dxJoint::Info1));
   int *ofs = (int*) ALLOCA (nj*sizeof(int));
-  for (i=0; i<nj; i++) {
-    joint[i]->vtable->getInfo1 (joint[i],info+i);
-    dIASSERT (info[i].m > 0 && info[i].m <= 6 &&
+  for (i=0, j=0; j<nj; j++) {	// i=dest, j=src
+    joint[j]->vtable->getInfo1 (joint[j],info+i);
+    dIASSERT (info[i].m >= 0 && info[i].m <= 6 &&
 	      info[i].nub >= 0 && info[i].nub <= info[i].m);
+    if (info[i].m > 0) {
+      joint[i] = joint[j];
+      joint[i]->tag = i;
+      i++;
+    }
+    else {
+      joint[j]->tag = -1;
+    }
   }
+  nj = i;
+
   // the purely unbounded constraints
   for (i=0; i<nj; i++) if (info[i].nub == info[i].m) {
     ofs[i] = m;
@@ -771,6 +803,10 @@ void dInternalStepIsland_x2 (dxWorld *world, dxBody **body, int nb,
 	    j1 = j2;
 	    j2 = tmp;
 	  }
+
+	  // if either joint was tagged as -1 then it is an inactive (m=0)
+	  // joint that should not be considered
+	  if (j1==-1 || j2==-1) continue;
 
 	  // determine if body i is the 1st or 2nd body of joints j1 and j2
 	  int jb1 = (joint[j1]->node[1].body == body[i]);
@@ -954,8 +990,8 @@ void dInternalStepIsland_x2 (dxWorld *world, dxBody **body, int nb,
 
 //****************************************************************************
 
-void dInternalStepIsland (dxWorld *world, dxBody **body, int nb,
-			  dxJoint **joint, int nj, dReal stepsize)
+void dInternalStepIsland (dxWorld *world, dxBody * const *body, int nb,
+			  dxJoint * const *joint, int nj, dReal stepsize)
 {
 # ifndef COMPARE_METHODS
   dInternalStepIsland_x2 (world,body,nb,joint,nj,stepsize);

@@ -1613,3 +1613,26 @@ dxJoint::Vtable __dfixed_vtable = {
   (dxJoint::getInfo1_fn*) fixedGetInfo1,
   (dxJoint::getInfo2_fn*) fixedGetInfo2,
   dJointTypeFixed};
+
+//****************************************************************************
+// null joint
+
+static void nullGetInfo1 (dxJointNull *j, dxJoint::Info1 *info)
+{
+  info->m = 0;
+  info->nub = 0;
+}
+
+
+static void nullGetInfo2 (dxJointNull *joint, dxJoint::Info2 *info)
+{
+  dDebug (0,"this should never get called");
+}
+
+
+dxJoint::Vtable __dnull_vtable = {
+  sizeof(dxJointNull),
+  (dxJoint::init_fn*) 0,
+  (dxJoint::getInfo1_fn*) nullGetInfo1,
+  (dxJoint::getInfo2_fn*) nullGetInfo2,
+  dJointTypeNull};

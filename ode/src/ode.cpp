@@ -679,7 +679,7 @@ static dxJoint *createJoint (dWorldID w, dJointGroupID group,
   dJointInit (w,j);
   j->vtable = vtable;
   if (group) j->flags |= dJOINT_INGROUP;
-  vtable->init (j);
+  if (vtable->init) vtable->init (j);
   return j;
 }
 
@@ -727,6 +727,13 @@ dxJoint * dJointCreateFixed (dWorldID w, dJointGroupID group)
 {
   dAASSERT (w);
   return createJoint (w,group,&__dfixed_vtable);
+}
+
+
+dxJoint * dJointCreateNull (dWorldID w, dJointGroupID group)
+{
+  dAASSERT (w);
+  return createJoint (w,group,&__dnull_vtable);
 }
 
 

@@ -182,6 +182,7 @@ enum {
   dJointTypeContact,
   dJointTypeHinge2,
   dJointTypeFixed,
+  dJointTypeNull
 };
 
 
