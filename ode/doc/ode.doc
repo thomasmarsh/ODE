@@ -143,6 +143,9 @@ Here are the features:
 @* API change: added the @c{aabb_test} and @c{dtor} fields to @c{dGeomClass}.
 @* Implemented capped-cylinder collision (except for cylinder-to-box).
 @* Added @func{dMassAdd()}.
+@* Ability to disable and enable bodies - see @func{dBodyEnable()},
+   @func{dBodyDisable()}, @func{dBodyIsEnabled()}.
+   See the new section: Concepts / Rigid bodies / Islands and disabled bodies.
 }
 
 
@@ -350,6 +353,31 @@ Note that the @emph{shape} of a rigid body is not a dynamical property
 (except insofar as it influences the various mass properties).
 It is only @emph{collision detection} that cares about the detailed shape of
 the body.
+
+
+@subsection{Islands and disabled bodies}
+
+Bodies are connected to each other with joints.
+An ``island'' of bodies is a group that can not be pulled apart - in other
+words each body is connected somehow to every other body in the island.
+
+Each island in the world is treated separately when the simulation step is
+taken.
+This is useful to know: if there are @m{N} similar islands in the
+simulation then the step computation time will be @m{O(N)}.
+
+Each body can be enabled or disabled.
+Disabled bodies are effectively ``turned off'' and are not updated during a
+simulation step.
+Disabling bodies is an effective way to save computation time when it is known
+that the bodies are motionless or otherwise irrelevent to the simulation.
+
+If there are any enabled bodies in an island then every body in the island
+will be enabled at the next simulation step.
+Thus to effectively disable an island of bodies, @emph{every} body in the
+island must be disabled.
+If a disabled island is touched by another enabled body then the entire will
+be enabled, as a contact joint will join the enabled body to the island.
 
 
 @section{Integration}
@@ -784,7 +812,10 @@ Create a new, empty world and return its ID number.
 @funcdef{
 void dWorldDestroy (dWorldID);
 }{
-Destroy a world and everything in it.
+Destroy a world and everything in it. This includes all bodies, and all
+joints that are not part of a joint group.
+Joints that are part of a joint group will be deactivated, and can be
+destroyed by calling, for example, @func{dJointGroupEmpty()}.
 }
 
 
@@ -924,6 +955,22 @@ Return the current accumulated force and torque vector.
 The returned pointers point to an array of 3 @c{dReal}s.
 The returned values are pointers to internal data structures, so the vectors
 are only valid until any changes are made to the rigid body system.
+}
+
+
+@funcdef{
+void dBodyEnable (dBodyID);
+void dBodyDisable (dBodyID);
+int dBodyIsEnabled (dBodyID);
+}{
+Enable and disable a body.
+Disabled bodies are effectively ``turned off'' and are not updated during a
+simulation step.
+However, if a disabled body is connected to island containing one or more
+enabled bodies then it will be re-enabled at the next simulation step.
+
+@c{dBodyIsEnabled} return 1 if a body is enabled or 0 if it is disabled.
+New bodies are created in the enabled state.
 }
 
 
@@ -1256,7 +1303,7 @@ Get the hinge-2 angles (around axis 1 and axis 2) and the time derivatives
 of these values.
 
 When the anchor or axis is set, the current position of the attached
-bodies is examined and that position will be the zero angles.
+bodies is examined and that position will be the zero angle.
 }
 
 
