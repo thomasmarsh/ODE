@@ -61,10 +61,10 @@ _OPT_=$(_OPT_0)
 _FAST_1=-ffast-math -fomit-frame-pointer
 
 %.o: %.cpp
-	gcc -c -g -Wall -DWIN32 $(_OPT_$(CPP_OPT)) $(addprefix -I ,$(INCLUDE_PATHS)) $(addprefix -D,$(DEFINES)) $(_RTTI_$(CPP_RTTI)) $(_EX_$(CPP_EX)) $(_FAST_$(FAST)) $(CPP_FLAGS) $<
+	gcc -c -g -Wall -DWIN32 -DMINGW $(_OPT_$(CPP_OPT)) $(addprefix -I ,$(INCLUDE_PATHS)) $(addprefix -D,$(DEFINES)) $(_RTTI_$(CPP_RTTI)) $(_EX_$(CPP_EX)) $(_FAST_$(FAST)) $(CPP_FLAGS) $<
 
 %.o: %.c
-	gcc -c -g -Wall -DWIN32 $(_OPT_$(CPP_OPT)) $(addprefix -I ,$(INCLUDE_PATHS)) $(addprefix -D,$(DEFINES)) $(_FAST_$(FAST)) $(CPP_FLAGS) $<
+	gcc -c -g -Wall -DWIN32 -DMINGW $(_OPT_$(CPP_OPT)) $(addprefix -I ,$(INCLUDE_PATHS)) $(addprefix -D,$(DEFINES)) $(_FAST_$(FAST)) $(CPP_FLAGS) $<
 
 %.lib:
 	ar rc $@ $^
