@@ -2,6 +2,10 @@
 TODO BEFORE NEXT RELEASE
 ------------------------
 
+body & joint disabling / enabling. automatic??
+
+body/joint creators with world = 0 --> not inserted into any world.
+
 transformation geometry object.
 
 functions to get all the joints/bodies a body/joint is connected to.
@@ -21,19 +25,11 @@ getinfo2 functions are called.
 hinge2 needs to be attached to two bodies for it to work, make sure this is
 always the case.
 
-make sure joints can return 0 from GetInfo1, i.e. no constraints or "inactive"
-joint, and the step functions will handle it.
-
 if two joints connect to the same two bodies, check that the fast solver
 works!
 
-doccer: @func{} also refs second etc function in function *list*.
-
 spaces need multiple lists of objects that can never overlap. objects in these
 lists are never tested against each other.
-
-space near-callback should be given potentially intersecting objects 100 at a
-time instead of 1 at a time, to save on calling costs.
 
 joint groups should also be destroyed by destroying the world.
 
@@ -43,16 +39,16 @@ straight away ... ?
 
 functions to get body connectedness (e.g. return joint lists). also for joints.
 
-dJointAttach(), allow both bodies to be 0 to put the joint into limbo.
-
-timer reporting function:
-	void timerReport (void (*printFunction)(char *, ...));
-
+deleting a body a joint is attached to should adjust the joint to only have
+one body attached. currently the connected joints have *both* their body
+attachments removed.
 
 
 
 TODO
 ----
+
+sometimes getting LCP infinite loops.
 
 joints:
 	hinge2 joint - implement trail, i.e. non-convergent steering and wheel
@@ -168,6 +164,9 @@ always try to find the collider functions, which wastes a bit of time.
 
 geom.cpp:dCollideG() - handle special case of colliding 2 groups more
 efficiently.
+
+timer reporting function:
+	void timerReport (void (*printFunction)(char *, ...));
 
 
 
@@ -321,3 +320,13 @@ build on linux - assumptions made about location of X11 lib, opengl etc.
 implement: dBodyAddForceAtPos,dBodyAddRelForceAtPos,dBodyAddRelForceAtRelPos,
 	dBodyGetPointPos,dBodyGetPointVel,dBodyGetPointRelVel
 
+dJointAttach(), allow both bodies to be 0 to put the joint into limbo.
+
+space near-callback should be given potentially intersecting objects 100 at a
+time instead of 1 at a time, to save on calling costs ... which are trivial,
+so we don't bother to do this.
+
+doccer: @func{} also refs second etc function in function *list*.
+
+make sure joints can return 0 from GetInfo1, i.e. no constraints or "inactive"
+joint, and the step functions will handle it.
