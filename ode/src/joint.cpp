@@ -1750,61 +1750,6 @@ static dReal getUniversalAngle2(dxJointUniversal *joint)
 }
 
 
-/*
-static void getUniversalAngles(dxJointUniversal *joint, dReal &angle1, dReal &angle2)
-{
-  // length 1 joint axis in global coordinates, from each body
-  dVector3 ax1, ax2;
-  dMatrix3 R;
-  dQuaternion qcross, qq, qrel;
-
-  getUniversalAxes(joint, ax1, ax2);
-
-  // It should be possible to get both angles without explicitly
-  // constructing the rotation matrix of the cross.  Basically,
-  // orientation of the cross about axis1 comes from body 2, 
-  // about axis 2 comes from body 1, and the perpendicular
-  // axis can come from the two bodies somehow.  (We don't really
-  // want to assume it's 90 degrees, because in general the
-  // constraints won't be perfectly satisfied, or even very well
-  // satisfied.)
-  //
-  // However, we'd need a version of getHingeAngleFromRElativeQuat()
-  // that CAN handle when its relative quat is rotated along a direction
-  // other than the given axis.  What I have here works,
-  // although it's probably much slower than need be.
-
-  ///// Angle 1
-  dRFrom2Axes(R, ax1[0], ax1[1], ax1[2], ax2[0], ax2[1], ax2[2]);
-  dRtoQ(R, qcross);
-
-  // This code is essential the same as getHingeAngle(), see the comments
-  // there for details.
-
-  // get qrel = relative rotation between node[0] and the cross
-  dQMultiply1 (qq,joint->node[0].body->q,qcross);
-  dQMultiply2 (qrel,qq,joint->qrel1);
-
-  angle1 = getHingeAngleFromRelativeQuat(qrel, joint->axis1);
-
-  ///// Angle 2
-  dRFrom2Axes(R, ax2[0], ax2[1], ax2[2], ax1[0], ax1[1], ax1[2]);
-  dRtoQ(R, qcross);
-
-  if (joint->node[1].body) {
-    dQMultiply1 (qq, joint->node[1].body->q, qcross);
-    dQMultiply2 (qrel,qq,joint->qrel2);
-  }
-  else {
-    // pretend joint->node[1].body->q is the identity
-    dQMultiply2 (qrel,qcross, joint->qrel2);
-  }
-
-  angle2 = - getHingeAngleFromRelativeQuat(qrel, joint->axis2);
-}
-*/
-
-
 static void universalGetInfo1 (dxJointUniversal *j, dxJoint::Info1 *info)
 {
   info->nub = 4;
@@ -1825,7 +1770,6 @@ static void universalGetInfo1 (dxJointUniversal *j, dxJoint::Info1 *info)
     dReal angle1, angle2;
     angle1 = getUniversalAngle1(j);
     angle2 = getUniversalAngle2(j);
-//    getUniversalAngles (j, &angle1, &angle2);
     if (limiting1 && j->limot1.testRotationalLimit (angle1)) constraint1 = true;
     if (limiting2 && j->limot2.testRotationalLimit (angle2)) constraint2 = true;
   }
@@ -2063,21 +2007,6 @@ extern "C" dReal dJointGetUniversalAngle2 (dxJointUniversal *joint)
   else
     return getUniversalAngle2 (joint);
 }
-  
-
-/*
-extern "C" void dJointGetUniversalAngles (dxJointUniversal *joint, dReal *angle1,
-					   dReal *angle2)
-{
-  dUASSERT(joint,"bad joint argument");
-  dUASSERT(joint->vtable == &__duniversal_vtable,"joint is not a universal");
-  dAASSERT(angle1);
-  dAASSERT(angle2);
-  if (joint->node[0].body || joint->node[1].body) {
-    getUniversalAngles(joint, angle1, angle2);
-  }
-}
-*/
 
 
 extern "C" dReal dJointGetUniversalAngle1Rate (dxJointUniversal *joint)
@@ -2120,27 +2049,6 @@ extern "C" dReal dJointGetUniversalAngle2Rate (dxJointUniversal *joint)
   }
   return 0;
 }
-
-
-/*
-extern "C" void dJointGetUniversalAngleRates (dxJointUniversal *joint, dReal *rate1,
-					      dReal *rate2)
-{
-  dUASSERT(joint,"bad joint argument");
-  dUASSERT(joint->vtable == &__duniversal_vtable,"joint is not a universal");
-  dAASSERT(rate1);
-  dAASSERT(rate2);
-  if (joint->node[0].body) {
-    dVector3 axis1, axis2;
-    getUniversalAxes(joint, axis1, axis2);
-    *rate1 = dDOT(axis1, joint->node[0].body->avel);
-    *rate2 = dDOT(axis2, joint->node[0].body->avel);
-    if (joint->node[1].body) {
-      *rate1 -= dDOT(axis1, joint->node[1].body->avel);
-      *rate2 -= dDOT(axis2, joint->node[1].body->avel);
-    }
-  }
-}*/
 
 
 dxJoint::Vtable __duniversal_vtable = {
