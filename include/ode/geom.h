@@ -20,6 +20,13 @@
  *                                                                       *
  *************************************************************************/
 
+/*
+
+old collision code. this code is deprecated and will eventually be removed
+from ODE.
+
+*/
+
 #ifndef _ODE_GEOM_H_
 #define _ODE_GEOM_H_
 
