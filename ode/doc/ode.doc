@@ -127,7 +127,8 @@ Here are the features:
    @func{dBodyGetForce()}, @func{dBodyGetTorque()}, @func{dBodyGetNumJoints()},
    @func{dBodyGetJoint()}, @func{dJointGetBody()}.
 @* Added finite rotation functions: @func{dBodySetFiniteRotationMode()}
-   and @func{dBodySetFiniteRotationAxis()}.
+   and @func{dBodySetFiniteRotationAxis()} (and the corresponding "get"
+   functions).
 @* New functions to set geometry parameters:
    @func{dGeomSphereSetRadius()}, @func{dGeomBoxSetLengths()},
    @func{dGeomPlaneSetParams()}, @func{dGeomCCylinderSetParams()}.
@@ -1008,6 +1009,13 @@ step. The @arg{mode} argument can be:
 
 
 @funcdef{
+int dBodyGetFiniteRotationMode (dBodyID);
+}{
+Return the current finite rotation mode of a body (0 or 1).
+}
+
+
+@funcdef{
 void dBodySetFiniteRotationAxis (dBodyID, dReal x, dReal y, dReal z);
 }{
 This sets the finite rotation axis for a body.
@@ -1024,6 +1032,13 @@ This can be useful to alleviate certain sources of error caused by quickly
 spinning bodies. For example, if a car wheel is rotating at high speed
 you can call this function with the wheel's hinge axis as the argument to
 try and improve its behavior.
+}
+
+
+@funcdef{
+void dBodyGetFiniteRotationAxis (dBodyID, dVector3 result);
+}{
+Return the current finite rotation axis of a body.
 }
 
 

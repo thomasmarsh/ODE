@@ -685,6 +685,22 @@ void dBodySetFiniteRotationAxis (dBodyID b, dReal x, dReal y, dReal z)
 }
 
 
+int dBodyGetFiniteRotationMode (dBodyID b)
+{
+  dAASSERT (b);
+  return ((b->flags & dxBodyFlagFiniteRotation) != 0);
+}
+
+
+void dBodyGetFiniteRotationAxis (dBodyID b, dVector3 result)
+{
+  dAASSERT (b);
+  result[0] = b->finite_rot_axis[0];
+  result[1] = b->finite_rot_axis[1];
+  result[2] = b->finite_rot_axis[2];
+}
+
+
 int dBodyGetNumJoints (dBodyID b)
 {
   dAASSERT (b);
