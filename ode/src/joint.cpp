@@ -653,6 +653,18 @@ extern "C" void dJointSetBallAnchor (dxJointBall *joint,
 }
 
 
+extern "C" void dJointSetBallAnchor2 (dxJointBall *joint,
+				      dReal x, dReal y, dReal z)
+{
+  dUASSERT(joint,"bad joint argument");
+  dUASSERT(joint->vtable == &__dball_vtable,"joint is not a ball");
+  joint->anchor2[0] = x;
+  joint->anchor2[1] = y;
+  joint->anchor2[2] = z;
+  joint->anchor2[3] = 0;
+
+}
+
 extern "C" void dJointGetBallAnchor (dxJointBall *joint, dVector3 result)
 {
   dUASSERT(joint,"bad joint argument");
@@ -816,6 +828,44 @@ extern "C" void dJointSetHingeAnchor (dxJointHinge *joint,
   setAnchors (joint,x,y,z,joint->anchor1,joint->anchor2);
   hingeComputeInitialRelativeRotation (joint);
 }
+
+
+extern "C" void dJointSetHingeAnchorDelta (dxJointHinge *joint,
+					   dReal x, dReal y, dReal z,
+					   dReal dx, dReal dy, dReal dz)
+{
+  dUASSERT(joint,"bad joint argument");
+  dUASSERT(joint->vtable == &__dhinge_vtable,"joint is not a hinge");
+
+  if (joint->node[0].body) {
+    dReal q[4];
+    q[0] = x - joint->node[0].body->pos[0];
+    q[1] = y - joint->node[0].body->pos[1];
+    q[2] = z - joint->node[0].body->pos[2];
+    q[3] = 0;
+    dMULTIPLY1_331 (joint->anchor1,joint->node[0].body->R,q);
+
+    if (joint->node[1].body) {
+      q[0] = x - joint->node[1].body->pos[0];
+      q[1] = y - joint->node[1].body->pos[1];
+      q[2] = z - joint->node[1].body->pos[2];
+      q[3] = 0;
+      dMULTIPLY1_331 (joint->anchor2,joint->node[1].body->R,q);
+    }
+    else {
+      // Move the relative displacement between the passive body and the
+      //  anchor in the same direction as the passive body has just moved
+      joint->anchor2[0] = x + dx;
+      joint->anchor2[1] = y + dy;
+      joint->anchor2[2] = z + dz;
+    }
+  }
+  joint->anchor1[3] = 0;
+  joint->anchor2[3] = 0;
+
+  hingeComputeInitialRelativeRotation (joint);
+}
+
 
 
 extern "C" void dJointSetHingeAxis (dxJointHinge *joint,
@@ -1117,6 +1167,39 @@ extern "C" void dJointSetSliderAxis (dxJointSlider *joint,
     for (i=0; i<3; i++) joint->offset[i] = joint->node[0].body->pos[i];
   }
 }
+
+
+extern "C" void dJointSetSliderAxisDelta (dxJointSlider *joint,
+					  dReal x, dReal y, dReal z,
+					  dReal dx, dReal dy, dReal dz)
+{
+  int i;
+  dUASSERT(joint,"bad joint argument");
+  dUASSERT(joint->vtable == &__dslider_vtable,"joint is not a slider");
+  setAxes (joint,x,y,z,joint->axis1,0);
+  
+  // compute initial relative rotation body1 -> body2, or env -> body1
+  // also compute center of body1 w.r.t body 2
+  if (joint->node[1].body) {
+    dQMultiply1 (joint->qrel,joint->node[0].body->q,joint->node[1].body->q);
+    dVector3 c;
+    for (i=0; i<3; i++)
+      c[i] = joint->node[0].body->pos[i] - joint->node[1].body->pos[i];
+    dMULTIPLY1_331 (joint->offset,joint->node[1].body->R,c);
+  }
+  else {
+    // set joint->qrel to the transpose of the first body's q
+    joint->qrel[0] = joint->node[0].body->q[0];
+
+    for (i=1; i<4; i++)
+      joint->qrel[i] = -joint->node[0].body->q[i];
+
+    joint->offset[0] = joint->node[0].body->pos[0] + dx;
+    joint->offset[1] = joint->node[0].body->pos[1] + dy;
+    joint->offset[2] = joint->node[0].body->pos[2] + dz;
+  }
+}
+
 
 
 extern "C" void dJointGetSliderAxis (dxJointSlider *joint, dVector3 result)
@@ -2220,8 +2303,9 @@ static void amotorComputeGlobalAxes (dxJointAMotor *joint, dVector3 ax[3])
       }
       if (joint->rel[i] == 2) {
 	// relative to b2
-        dIASSERT(joint->node[1].body);
+	if (joint->node[1].body) {   // jds: don't assert, just ignore
 	dMULTIPLY0_331 (ax[i],joint->node[1].body->R,joint->axis[i]);
+      }
       }
       else {
 	// global - just copy it
@@ -2289,9 +2373,19 @@ static void amotorSetEulerReferenceVectors (dxJointAMotor *j)
     dMULTIPLY0_331 (r,j->node[0].body->R,j->axis[0]);
     dMULTIPLY1_331 (j->reference2,j->node[1].body->R,r);
   }
-  else if (j->node[0].body) {
-     dMULTIPLY1_331 (j->reference1,j->node[0].body->R,j->axis[2]);
-     dMULTIPLY0_331 (j->reference2,j->node[0].body->R,j->axis[0]);
+
+  else {   // jds
+    // else if (j->node[0].body) {
+    // dMULTIPLY1_331 (j->reference1,j->node[0].body->R,j->axis[2]);
+    // dMULTIPLY0_331 (j->reference2,j->node[0].body->R,j->axis[0]);
+
+    // We want to handle angular motors attached to passive geoms
+    dVector3 r;		// axis[2] and axis[0] in global coordinates
+    r[0] = j->axis[2][0]; r[1] = j->axis[2][1]; r[2] = j->axis[2][2]; r[3] = j->axis[2][3];
+    dMULTIPLY1_331 (j->reference1,j->node[0].body->R,r);
+    dMULTIPLY0_331 (r,j->node[0].body->R,j->axis[0]);
+    j->reference2[0] += r[0]; j->reference2[1] += r[1];
+    j->reference2[2] += r[2]; j->reference2[3] += r[3];
   }
 }
 
@@ -2404,8 +2498,14 @@ extern "C" void dJointSetAMotorAxis (dxJointAMotor *joint, int anum, int rel,
       dMULTIPLY1_331 (joint->axis[anum],joint->node[0].body->R,r);
     }
     else {
-      dIASSERT (joint->node[1].body);
+      // don't assert; handle the case of attachment to a bodiless geom
+      if (joint->node[1].body) {   // jds
       dMULTIPLY1_331 (joint->axis[anum],joint->node[1].body->R,r);
+    }
+      else {
+	joint->axis[anum][0] = r[0]; joint->axis[anum][1] = r[1];
+	joint->axis[anum][2] = r[2]; joint->axis[anum][3] = r[3];
+      }
     }
   }
   else {
@@ -2476,7 +2576,13 @@ extern "C" void dJointGetAMotorAxis (dxJointAMotor *joint, int anum,
       dMULTIPLY0_331 (result,joint->node[0].body->R,joint->axis[anum]);
     }
     else {
+      if (joint->node[1].body) {   // jds
       dMULTIPLY0_331 (result,joint->node[1].body->R,joint->axis[anum]);
+      }
+      else {
+	result[0] = joint->axis[anum][0]; result[1] = joint->axis[anum][1];
+	result[2] = joint->axis[anum][2]; result[3] = joint->axis[anum][3];
+      }
     }
   }
   else {
