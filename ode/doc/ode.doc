@@ -124,6 +124,7 @@ Here are the features:
 @* New joint type: Angular Motor.
 @* A few minor API changes so that the API matches the documentation.
 @* LCP solver optimized even more.
+@* A better build system.
 @* Added the accessor functions: @func{dJointGetType()},
    @func{dBodyGetForce()}, @func{dBodyGetTorque()}, @func{dBodyGetNumJoints()},
    @func{dBodyGetJoint()}, @func{dJointGetBody()}.
@@ -186,7 +187,7 @@ Here are the features:
 
 @section{Future features}
 
-@subsection{Plan for 0.03 release}
+@subsection{Plan for 0.035 release}
 
 @list{
 @* Update documentation.
@@ -195,7 +196,6 @@ Here are the features:
 @* Improve box-box collision, especially for face-face contact.
 @* Internals documentation.
 @* Automatic code optimization process.
-@* High level functions that create dynamics and collision objects together?
 }
 
 @subsection{Plan for 0.04 release}
@@ -252,27 +252,53 @@ the ODE mailing list}.
 Unpack the ODE archive.
 
 @b{Step 2:}
-The configuration process is not currently automated, so you have to
-copy @c{build/Makefile.config.example} to @c{build/Makefile.config}
-and then edit the settings in the following files to match your
-platform:
-@list{
-@*	@c{build/Makefile.config}
-@*	@c{include/ode/config.h}
-}
-The currently supported platforms are Linux, and MS-windows using Visual C++, GCC-MinGW or CygWin. Other unixes may build with the Linux configuration.
+Get the GNU @c{make} tool. Many Unix platforms come with this, although
+sometimes it is called @c{gmake}. I have provided a version of GNU make
+for windows @link{http://q12.org/ode/bin/make.exe}{here}.
 
 @b{Step 3:}
-You will need GNU make 3.78.1 or later.
-I have provided an appropriate version of GNU make for windows
-@link{http://q12.org/ode/snapshots/make.exe}{here}.
+Edit the settings in the file @c{config/user-settings}.
+The list of supported platforms is given in that file.
 
 @b{Step 4:}
-From the top level directory, type @c{make}.
+Run @c{make} to configure and build ODE and the graphical test programs.
 Be @emph{sure} you are using the correct version of GNU make.
-This will hopefully build all libraries and test applications.
-You can also type @c{make} from any sub directory to only build that
-directory and below.
+The make targets for building the parts of ODE are:
+@list{
+@* @c{make configure} : Create the configuration file @c{include/ode/config.h}.
+@* @c{make ode-lib} : Build the core ODE library.
+@* @c{make drawstuff-lib} : Build the OpenGL-based graphics library.
+@* @c{make ode-test} : Build some ODE tests (they need drawstuff).
+@* @c{make drawstuff-test} : Build a simple test app for the drawstuff library.
+}
+All of these targets will do an implicit @c{make configure}.
+If the configurator screws up then you can edit the settings directly in
+@c{include/ode/config.h}.
+
+@b{Step 5:}
+To install the ODE library onto your system you should copy the @c{lib/} and
+@c{include/} directories to a suitable place, e.g. on Unix:
+@list{
+@* @c{include/ode/  --> /usr/local/include/ode/}
+@* @c{lib/libode.a --> /usr/local/lib/libode.a}
+}
+
+There is currently no built-in support to build Windows DLLs or Unix shared
+libraries --- although it is not hard to add this yourself.
+
+ODE has been verified to build on at least the following platforms:
+@list{
+@* MS-Windows, Microsoft Visual C/C++ 6.
+@* MS-Windows, MinGW (minimalist GNU for windows).
+@* MS-Windows, CygWin (Cygnus GNU for windows).
+@* Linux (x86, mandrake 8.1).
+@* Linux (alpha, debian 2.2).
+@* Linux (RS/6000, debian 2.2).
+@* Linux (Sparc Ultra 60, debian 2.2).
+@* FreeBSD 4.3.
+@* Mac OS-X.
+@* Solaris 8 (Sparc R220).
+}
 
 
 @section{Using ODE}
@@ -282,25 +308,28 @@ programs that come with it. Note the following things:
 @list{
 @*	Source files that use ODE only need to include a single header file:
 @code{@[
- #include "ode/ode.h"
+ #include <ode/ode.h>
 @]}
 	The @c{ode} directory in this statement is actually the 
 	@c{include/ode} directory of the ODE distribution.
 	This header file will include others in the @c{ode} directory,
-	so you need to set the include path of your compiler to @c{include},
+	so you need to set the include path of your compiler,
 	e.g. in linux
 @code{@[
  gcc -c -I /home/username/ode/include myprogram.cpp
 @]}
-@*	ODE can be compiled to use single or double precision variables.
-	To let the ODE header files know which precision is being used,
-	the user program must define one of the macros @c{dSINGLE} or
-	@c{dDOUBLE} before any ODE header files are included.
-	The easiest way to do this is on the compiler command line,
-	e.g. in linux
-@code{@[
- gcc -c -I /home/username/ode/include -DdDOUBLE myprogram.cpp
-@]}
+
+# NOT ANY MORE...
+# @*	ODE can be compiled to use single or double precision variables.
+#	To let the ODE header files know which precision is being used,
+#	the user program must define one of the macros @c{dSINGLE} or
+#	@c{dDOUBLE} before any ODE header files are included.
+#	The easiest way to do this is on the compiler command line,
+#	e.g. in linux
+# @code{@[
+#  gcc -c -I /home/username/ode/include -DdDOUBLE myprogram.cpp
+# @]}
+
 @*	ODE makes heavy use of the stack for storing temporary values.
 	For very large systems several megabytes of stack can be used.
 	If you experience unexplained out-of-memory errors or data
