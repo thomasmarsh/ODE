@@ -22,6 +22,9 @@
 
 /*
 
+old collision code. this code is deprecated and will eventually be removed
+from ODE.
+
 the rule is that only the low level primitive collision functions should set
 dContactGeom::g1 and dContactGeom::g2.
 
@@ -499,11 +502,11 @@ int dBoxTouchesBox (const dVector3 p1, const dMatrix3 R1,
 //
 // @@@ some stuff to optimize here, reuse code in contact point calculations.
 
-extern "C" int dBoxBox (const dVector3 p1, const dMatrix3 R1,
-			const dVector3 side1, const dVector3 p2,
-			const dMatrix3 R2, const dVector3 side2,
-			dVector3 normal, dReal *depth, int *code,
-			int maxc, dContactGeom *contact, int skip)
+int dBoxBox (const dVector3 p1, const dMatrix3 R1,
+	     const dVector3 side1, const dVector3 p2,
+	     const dMatrix3 R2, const dVector3 side2,
+	     dVector3 normal, dReal *depth, int *code,
+	     int maxc, dContactGeom *contact, int skip)
 {
   dVector3 p,pp,normalC;
   const dReal *normalR = 0;
@@ -2204,4 +2207,18 @@ void dCloseODE()
   // if you're using contrib code you may want to uncomment the following:
   // dTriListClass = -1;
   // dRayClass = -1;
+}
+
+//****************************************************************************
+// geom notification functions that are required to co-exist with the new
+// collision infrastructure.
+
+void dGeomMoved (dxGeom *)
+{
+}
+
+
+dxGeom *dGeomGetBodyNext (dxGeom *)
+{
+  return 0;
 }
