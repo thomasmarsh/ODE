@@ -54,14 +54,14 @@ extern int dGeomGroupClass;
 dGeomID dCreateSphere (dSpaceID space, dReal radius);
 dGeomID dCreateBox (dSpaceID space, dReal lx, dReal ly, dReal lz);
 dGeomID dCreatePlane (dSpaceID space, dReal a, dReal b, dReal c, dReal d);
-dGeomID dCreateCCylinder (dSpaceID space, dReal a, dReal b, int dir);
+dGeomID dCreateCCylinder (dSpaceID space, dReal radius, dReal length);
 dGeomID dCreateGeomGroup (dSpaceID space);
 
 /* set geometry parameters */
 void dGeomSphereSetRadius (dGeomID sphere, dReal radius);
 void dGeomBoxSetLengths (dGeomID box, dReal lx, dReal ly, dReal lz);
 void dGeomPlaneSetParams (dGeomID plane, dReal a, dReal b, dReal c, dReal d);
-void dGeomCCylinderSetParams (dGeomID ccylinder, dReal a, dReal b, int dir);
+void dGeomCCylinderSetParams (dGeomID ccylinder, dReal radius, dReal length);
 
 /* get geometry parameters */
 int   dGeomGetClass (dGeomID);
@@ -69,7 +69,7 @@ dReal dGeomSphereGetRadius (dGeomID sphere);
 void  dGeomBoxGetLengths (dGeomID box, dVector3 result);
 void  dGeomPlaneGetParams (dGeomID plane, dVector4 result);
 void  dGeomCCylinderGetParams (dGeomID ccylinder,
-			       dReal *a, dReal *b, int *dir);
+			       dReal *radius, dReal *length);
 
 /* general functions */
 void dGeomSetData (dGeomID, void *);
