@@ -1,5 +1,5 @@
 
-@title{Open Dynamics Engine v0.015 User Guide}
+@title{Open Dynamics Engine v0.02 User Guide}
 @subtitle{Russell Smith, @date{}}
 @author{Russell Smith, @date{}}
 
@@ -18,77 +18,85 @@ If this does not make much sense to you, check out
 @link{http://www.q12.org/ode/slides/slides.html}{What is a Physics SDK?}.
 ODE is being developed by @link{http://www.q12.org}{Russell Smith}.
 
-The is the user guide for the second prototype release of ODE (version 0.015).
-This release is just for testing the core algorithms and evolving the API.
-The API is becoming more solid, though expect a few (hopefully minor) changes
-in the future.
+The is the user guide for the second prototype release of ODE (version 0.02).
+This release is to help continue testing the core algorithms and solidifying
+the API.
+There will probably only be a few (hopefully minor) changes to the API in
+the future.
 
 
 @section{Current features}
 
-The current features are:
+ODE is best for simulating @emph{articulated} rigid body structures,
+such as ground vehicles and legged creatures.
+An articulated structure is created when rigid bodies of various shapes are
+connected together with joints of various kinds.
+ODE can of course also simulate disconnected rigid bodies that just move
+around on their own and perhaps collide with each other, but it is not
+optimized for this case.
+
+ODE is particularly good for simulating moving objects in non-static
+virtual reality environments.
+This is because it is fast, robust, stable, and the user has complete
+freedom to change the structure of the system even while the simulation
+is running.
+
+ODE uses a highly stable integrator, so that the simulation errors should
+not grow out of control.
+The physical meaning of this is that the simulated system should not
+"explode" for no reason (believe me, this happens a lot if you are not
+careful).
+ODE emphasizes speed and stability over physical accuracy.
+
+ODE has @emph{hard} contacts. This means that a special non-penetration
+constraint is used whenever two bodies collide.
+The alternative is to use springs to represent contacts, but this is
+difficult to do right and extremely error-prone.
+
+ODE has a built-in collision detection system.
+However you can ignore it and do your own collision detection if you want to.
+The current collision primitives are sphere, box and plane - more collision
+objects will come later, as well as fast identification of potentially
+intersecting objects.
+
+Here are the features:
 @list{
-@*	ODE is best for simulating @emph{articulated} rigid body structures,
-	such as ground vehicles and legged creatures.
-	An articulated structure is when rigid bodies are created in a
-	dynamics-world and connected together with joints of various kinds.
-@*	ODE is also good for simulating objects in changing environments,
-	such as disordered virtual reality environments.
-	The user has complete freedom to change the structure of the system,
-	even while the simulation is running.
-@*	ODE uses a highly stable integrator, which means that the simulation
-	errors should not get out of control. This means that a simulated
-	system should not "explode" for no reason.
-
-@*	The equations of motion are derived from a Lagrange multiplier
-	velocity based model due to Trinkle/Stewart and Anitescu/Potra.
-@*	The friction model and LCP solver come from Baraff's work.
-
+@*	Arbitrary mass distribution of the rigid bodies.
+@*	Current joint types: ball-and-socket, hinge, slider (prismatic).
+@*	Current collision primitives: sphere, box and plane.
+@*	Simulation method: The equations of motion are derived from a
+	Lagrange multiplier velocity based model due to Trinkle/Stewart and
+	Anitescu/Potra.
 @*	A first order integrator is being used. It's fast, but not accurate
 	enough for quantitative engineering yet. Higher order integrators
 	will come later.
-@*	ODE has @emph{hard} contacts. This means that a non-penetration
-	constraint is used when two bodies collide. The alternative is to
-	model contact with springs and dampers, but this is difficult and
-	error-prone.
-@*	ODE implements a fast approximation to the Coloumb friction model.
-@*	ODE has built-in collision detection. However you can ignore it and
-	do your own collision detection if desired.
-	The current collision primitives are sphere, box and plane
-	(but box-box collision is not yet fully working).
-	More collision objects will come later, as well as quick
-	identification of potentially intersecting pairs.
-@*	Joints types: ball-and-socket, hinge, slider (prismatic).
-@*	Platform specific optimizations.
-@*	Has a native C interface, even though it is written in C++.
+@*	Contact and friction model: This is based on the Dantzig LCP solver
+	described by Baraff, although ODE implements a faster approximation
+	to the Coloumb friction model.
+@*	Has a native C interface (even though it is mostly written in C++).
 @*	Has a C++ interface built on top of the C one.
-@*	Unit tests.
+@*	Many unit tests, and more being written all the time.
+@*	Platform specific optimizations.
 @*	Other stuff I forgot to mention...
 }
 
-Some important things that are missing right now:
-@list{
-@*	Box-box collision.
-}
 
-@section{New in the 0.015 release}
+
+@section{New in the 0.02 release}
 
 @list{
+@* New demo: a box and sphere stacker.
 @* Collision framework nearing stability.
-@* Collision: all interactions of sphere, box, plane, except box-box is not yet
-   fully implemented.
-@* 2D & 3D friction.
+@* Collision: all interactions of sphere, box, and plane now work.
+@* 2D & 3D friction now works.
+@* Moving-surface contact mode.
 }
 
 
 @section{Future features}
 
 @subsection{Plan for 0.02 release}
-
 @list{
-@* Update documentation.
-@* Rationalize collision framework.
-@* Box-box collision.
 @* Improve the approximation to Coloumb friction.
 @* Full cross platform build system and automatic configuration.
 @* Argument checking for all functions (especially joint-typed functions).
@@ -99,13 +107,15 @@ Some important things that are missing right now:
 @list{
 @* Update documentation.
 @* High level functions that create dynamics and collision objects together.
-@* Special vehicle joints
+@* Special vehicle joints.
 @* Powered hinge, prism joint, ball-n-socket (plus dry friction in joints).
 @* Joint limits.
-@* More contact modes: restitution, moving surface, tyre slip.
+@* More contact modes: restitution, tyre slip.
 @* Implicit spring framework.
 @* Optimize LCP solver even more.
-@* More collision primitives: capped cylinder, slab, composite objects.
+@* Expose type-specific collision functions.
+@* More collision primitives: capped cylinder, composite objects.
+@* Improve box-box collision, especially for face-face contact.
 @* Some internals documentation.
 @* Automatic code optimization process.
 @* Collision space: quick identification of potentially intersecting pairs.
@@ -117,7 +127,8 @@ Some important things that are missing right now:
 @* Update documentation.
 @* Static (still) groups not simulated.
 @* SSE and 3DNow optimizations.
-@* More collision primitives: cylinder, cone?
+@* Implicit body damping, with reference velocity.
+@* More collision primitives: flat-end cylinder, cone?
 @* Higher order integrators for higher accuracy. Also force callback functions.
 @* More internals documentation.
 }
@@ -143,7 +154,7 @@ as published by the Free Software Foundation; either
 version 2.1 of the License, or (at your option) any later version.
 
 This library is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
+but @emph{WITHOUT ANY WARRANTY}; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 See the GNU Lesser General Public License for more details.
 
@@ -319,7 +330,7 @@ A typical simulation will proceed like this:
 
 @section{The basic data types}
 
-The ODE library can be build to use either single or double precision floating
+The ODE library can be built to use either single or double precision floating
 point numbers.
 Single precision is faster and uses less memory, but the simulation will
 have more numerical error that can result in visible problems.
@@ -355,7 +366,8 @@ x,y,z arguments.
 All 3-vector result arguments to get() function are pointers to arrays of
 @c{dReal}.
 
-Larger vectors are always supplied and returned as pointers.
+Larger vectors are always supplied and returned as pointers to arrays of
+@c{dReal}.
 
 All coordinates are in the global frame except where otherwise specified.
 
@@ -365,7 +377,8 @@ All coordinates are in the global frame except where otherwise specified.
 The ODE library is written in C++, but its public interface is made of simple
 C functions, not classes. Why is this?
 @list{
-@*	It helps simplicity.
+@*	Using a C interface only is simpler - the features of C++ features do
+	not help much for ODE.
 @*	It prevents C++ mangling and runtime-support problems across multiple
 	compilers.
 @*	The user doesn't have to be familiar with C++ quirks to use ODE.
@@ -506,7 +519,8 @@ Utility functions.
 dJointID dJointCreateBall (dWorldID, dJointGroupID);
 dJointID dJointCreateHinge (dWorldID, dJointGroupID);
 dJointID dJointCreateSlider (dWorldID, dJointGroupID);
-dJointID dJointCreateContact (dWorldID, dJointGroupID, const dContact *);
+dJointID dJointCreateContact (dWorldID, dJointGroupID,
+                              const dContact *);
 }{
 Create a new joint of a given type.
 The joint is initially in "limbo" (i.e. it has no effect on the simulation)
@@ -589,6 +603,7 @@ you specified body 1 as 0).
 
 
 @funcdef{
+NOT YET IMPLEMENTED:
 dReal dJointGetHingePosition (dJointID);
 dReal dJointGetHingeVelocity (dJointID);
 dReal dJointGetSliderPosition (dJointID);
@@ -611,6 +626,7 @@ instead you must set the corresponding body positions and velocities.
 
 
 @funcdef{
+NOT YET IMPLEMENTED:
 void dJointSetHingeLimits (dJointID, dReal low, dReal high);
 void dJointSetSliderLimits (dJointID, dReal low, dReal high);
 void dJointGetHingeLimits (dJointID, dReal *low, dReal *high);
@@ -624,6 +640,7 @@ It is acceptable to set low to @c{-dInfinity} or high to @c{dInfinity}.
 
 
 @funcdef{
+NOT YET IMPLEMENTED:
 void dJointSetHingeMotor (dJointID, dReal speed, dReal torque);
 void dJointSetSliderMotor (dJointID, dReal speed, dReal force);
 void dJointGetHingeMotor (dJointID, dReal *speed, dReal *torque);
@@ -671,15 +688,16 @@ Set @arg{R} to the identity matrix (i.e. no rotation).
 }
 
 @funcdef{
-void dRFromAxisAndAngle (dMatrix3 R, dReal ax, dReal ay, dReal az,
-                         dReal angle);
+void dRFromAxisAndAngle (dMatrix3 R,
+                         dReal ax, dReal ay, dReal az, dReal angle);
 }{
 Compute the rotation matrix @arg{R} as a rotation of @arg{angle} radians
 along the axis (@arg{ax},@arg{ay},@arg{az}).
 }
 
 @funcdef{
-void dRFromEulerAngles (dMatrix3 R, dReal phi, dReal theta, dReal psi);
+void dRFromEulerAngles (dMatrix3 R,
+                        dReal phi, dReal theta, dReal psi);
 }{
 Compute the rotation matrix @arg{R} from the three Euler rotation angles.
 }
@@ -711,10 +729,14 @@ Compute @arg{q} as a rotation of @arg{angle} radians along the axis
 }
 
 @funcdef{
-void dQMultiply0 (dQuaternion qa, const dQuaternion qb, const dQuaternion qc);
-void dQMultiply1 (dQuaternion qa, const dQuaternion qb, const dQuaternion qc);
-void dQMultiply2 (dQuaternion qa, const dQuaternion qb, const dQuaternion qc);
-void dQMultiply3 (dQuaternion qa, const dQuaternion qb, const dQuaternion qc);
+void dQMultiply0 (dQuaternion qa,
+                  const dQuaternion qb, const dQuaternion qc);
+void dQMultiply1 (dQuaternion qa,
+                  const dQuaternion qb, const dQuaternion qc);
+void dQMultiply2 (dQuaternion qa,
+                  const dQuaternion qb, const dQuaternion qc);
+void dQMultiply3 (dQuaternion qa,
+                  const dQuaternion qb, const dQuaternion qc);
 }{
 Set @arg{qa} = @arg{qb}*@arg{qc}.
 This is that same as @arg{qa} = rotation @arg{qc} followed by rotation
@@ -890,7 +912,7 @@ Each extra contact point added to the simulation will slow it down some more,
 so sometimes we are forced to ignore contact points in the interests of speed.
 For example, when two boxes collide many contact points may be needed to
 properly represent the geometry of the situation, but we may choose to
-keep only the "best" three. Thus we are piling approximation on top of
+keep only the best three. Thus we are piling approximation on top of
 approximation.
 
 
@@ -903,20 +925,18 @@ Geometry objects are distinct from rigid bodies in that a geometry object
 has geometrical properties (size, shape, position and orientation) but no
 dynamical properties (such as velocity or mass).
 
-Every geometry object is an instance of a @emph{class}.
-The built in classes are currently: sphere, plane, and box
-(more will be added later).
+Every geometry object is an instance of a @emph{class}, such as
+sphere, plane, or box.
 You can define your own classes as well.
 
 Every geometry object has a position vector and a 3*3 rotation matrix.
 If a geometry object is associated with a rigid body then its position and
 rotation is actually the position and rotation of that body.
 The point of reference for the standard classes usually corresponds to their
-center of mass.
+centers of mass.
 This makes them particularly easy to connect to dynamics objects.
 If other points of reference are required, composite objects should be used
-to encapsulate the primitives (note that composite objects are not implemented
-just yet).
+to encapsulate the primitives.
 
 @subsection{Sphere functions}
 
@@ -942,7 +962,7 @@ Return the radius of the given sphere.
 dGeomID dCreateBox (dSpaceID space, dReal lx, dReal ly, dReal lz);
 }{
 Create a box geometry object of the given x/y/z side lengths
-(@arg{lx},@arg{ly},@arg{lz}) insert it into the given @arg{space}, and
+(@arg{lx},@arg{ly},@arg{lz}), insert it into the given @arg{space}, and
 return its ID.
 The point of reference for a box is its center.
 }
@@ -958,7 +978,8 @@ Return in @arg{result} the side lengths of the given @arg{box}.
 @subsection{Plane functions}
 
 @funcdef{
-dGeomID dCreatePlane (dSpaceID space, dReal a, dReal b, dReal c, dReal d);
+dGeomID dCreatePlane (dSpaceID space,
+                      dReal a, dReal b, dReal c, dReal d);
 }{
 Create a plane geometry object of the given parameters, insert it into the
 given @arg{space}, and return its ID.
@@ -982,7 +1003,8 @@ Return in @arg{result} the parameters of the given @arg{plane}.
 
 @funcdef{
 dGeomID dCreateCCylinder (dSpaceID space, dReal a, dReal b, int dir);
-void dGeomCCylinderGetParams (dGeomID, dReal *a, dReal *b, int *dir);
+void dGeomCCylinderGetParams (dGeomID ccylinder,
+                              dReal *a, dReal *b, int *dir);
 }{
 (not implemented yet.)
 }
@@ -1112,8 +1134,8 @@ typedef dColliderFn * dGetColliderFnFn (int num);
 	Note that if classes X and Y are to collide, only @emph{one} needs
 	to provide a function to collide with the other.
 
-	This function is called infrequently each @arg{num}, usually the
-	return values are cached and reused.
+	This function is called infrequently - the return values are cached
+	and reused.
 
 @*	A function that will compute the axis aligned bounding box of
 	instances of this class.
@@ -1159,7 +1181,7 @@ void * dGeomGetClassData (dGeomID);
 }{
 Given a geometry object, return a pointer to the class's custom data
 (this will be a block of the required number of bytes).
-Note that internal ODE classes use a faster macro instead.
+Internal ODE classes may use a slightly faster macro instead.
 }
 
 
@@ -1187,7 +1209,8 @@ the following:
 @*	Call @func{dCreateGeom()} to make an instance of the class.
 @*	Set up the custom data area.
 }
-This is what @func{dCreateSphere()} and the other such functions do.
+This is what @func{dCreateSphere()} and the other geometry creation
+functions do.
 
 
 @section{Utility functions}
@@ -1254,7 +1277,8 @@ creation/deletion functions.
 
 
 @funcdef{
-void dSpaceCollide (dSpaceID space, void *data, dNearCallback *callback);
+void dSpaceCollide (dSpaceID space, void *data,
+                    dNearCallback *callback);
 }{
 Call a callback function one or more times, for all potentially intersecting
 objects in the space.
