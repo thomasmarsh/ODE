@@ -49,9 +49,9 @@
 		// Automatic linking
 		#ifndef BAN_OPCODE_AUTOLINK
 			#ifdef _DEBUG
-				#pragma comment(lib, "Opcode_D.lib")
+				//#pragma comment(lib, "Opcode_D.lib")
 			#else
-				#pragma comment(lib, "Opcode.lib")
+				//#pragma comment(lib, "Opcode.lib")
 			#endif
 		#endif
 	#endif
