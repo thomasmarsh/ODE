@@ -84,7 +84,7 @@ static void nearCallback (void *data, dGeomID o1, dGeomID o2)
 
   dContact contact;
   contact.surface.mode = dContactSlip1 | dContactSlip2 |
-    dContactSoftErp | dContactSoftCfm;
+    dContactSoftERP | dContactSoftCFM;
   contact.surface.mu = dInfinity;
   contact.surface.slip1 = 0.1;
   contact.surface.slip2 = 0.1;
