@@ -2,10 +2,14 @@
 TODO BEFORE NEXT RELEASE
 ------------------------
 
-joint allocation in joint groups. allocation size should be rounded up using
-dEFFICIENT_SIZE, to properly align all the data members.
+ball & socket joint limits and motors.
 
-all dAlloc() allocations should be aligned using dEFFICIENT_SIZE() ???
+auto-build env on windows: 3 compilers, debug/release, short/double =
+12 combinations --> auto logs.
+
+dBodyGetPointVel()
+
+contrib directory - all stuff in ~/3/ode
 
 functions to allow systems to be copied/cloned
 	dBodyTransplant (b, world)
@@ -28,6 +32,7 @@ this collision rule:
 needs to be replaced. sometimes we want no collision when both bodies are 0,
 but this wont work for geomgroup-to-environment. avoid stupid stuff like
     dGeomSetBody (geom_group, (dBodyID) 1);
+this also causes "failed-to-report" errors in the space test.
 
 Expose type-specific collision functions?
 
@@ -54,8 +59,6 @@ one body attached. currently the connected joints have *both* their body
 attachments removed. BUT, dont do this if the dJOINT_TWOBODIES flag is set
 on the joint.
 
-B&S joint limit.
-
 document error, mem and math functions.
 
 Web pages
@@ -64,10 +67,24 @@ Web pages
 
 update C++ interface? use SWIG?
 
+collision exclusion groups - exclude if obj1.n == obj2.n ?
+
+The error messages that happen under windows when building ODE are not in
+fact due to the DIRSEP variable but due to there not being an actual
+copy.exe file within the system (at least on Windows 2000) the copy command
+is builtin in to the command processor. One fix is to change the COPY_CMD
+variable to xcopy (xcopy is a slightly enhanced version of copy) in
+Makefile.win32, since there should be a xcopy.exe file on most windows
+systems.
 
 
 TODO
 ----
+
+joint allocation in joint groups. allocation size should be rounded up using
+dEFFICIENT_SIZE, to properly align all the data members.
+
+all dAlloc() allocations should be aligned using dEFFICIENT_SIZE() ???
 
 automatic body & joint disabling / enabling.
 
@@ -392,3 +409,9 @@ to grouped joints when a world is destroyed).
 body & joint disabling / enabling
 
 start a change log.
+
+collision flags - 0xffff mask.
+
+dBodyGetFiniteRotationMode() / ...Axis()
+
+dBodyAddForceAtRelPos()
