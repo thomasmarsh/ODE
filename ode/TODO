@@ -67,6 +67,8 @@ only allows two-body attachments.
 
 implement dJointGetAMotorAngleRate()
 
+erwin says: Should the GeomGroup have a cleanupmode as the GeomTransform has?
+
 
 TODO
 ----
