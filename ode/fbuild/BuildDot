@@ -57,14 +57,14 @@ open (FOUT,">$FNAME.c") or die "can't open $FNAME.c for writing";
 output (<<END);
 /* generated code, do not edit. */
 
-#include "ode/common.h"
+#include "ode/matrix.h"
 
 
-dReal dDot (dReal *a, dReal *b, int n)
+dReal dDot (const dReal *a, const dReal *b, int n)
 {
 END
 
-output ("dReal p,q,");
+output ("dReal ");
 for ($i=0; $i<$UNROLL1; $i++) {
   output ("p$i,q$i,m$i,");
 }
