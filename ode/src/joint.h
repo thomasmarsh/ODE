@@ -125,11 +125,12 @@ struct dxJointLimitMotor {
   dReal vel,fmax;		// powered joint: velocity, max force
   dReal lostop,histop;		// joint limits, relative to initial position
   dReal fudge_factor;		// when powering away from joint limits
+  dReal stop_erp,stop_cfm;	// erp and cfm for when at joint limit
   // variables used between getInfo1() and getInfo2()
   int limit;			// 0=free, 1=at lo limit, 2=at hi limit
   dReal limit_err;		// if at limit, amount over limit
 
-  void init();
+  void init (dxWorld *);
   void set (int num, dReal value);
   dReal get (int num);
   int testRotationalLimit (dReal angle);

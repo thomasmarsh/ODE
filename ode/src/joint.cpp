@@ -23,7 +23,7 @@
 
 design note: the general principle for giving a joint the option of connecting
 to the static environment (i.e. the absolute frame) is to check the second
-body (joint->node[1].body), and if it is zero then behave as if it's body
+body (joint->node[1].body), and if it is zero then behave as if its body
 transform is the identity.
 
 */
@@ -280,13 +280,15 @@ static dReal getHingeAngle (dxBody *body1, dxBody *body2, dVector3 axis,
 //****************************************************************************
 // dxJointLimitMotor
 
-void dxJointLimitMotor::init()
+void dxJointLimitMotor::init (dxWorld *world)
 {
   vel = 0;
   fmax = 0;
   lostop = -dInfinity;
   histop = dInfinity;
   fudge_factor = 1;
+  stop_erp = world->global_erp;
+  stop_cfm = world->global_cfm;
   limit = 0;
   limit_err = 0;
 }
@@ -311,7 +313,12 @@ void dxJointLimitMotor::set (int num, dReal value)
     if (value >= 0 && value <= 1) fudge_factor = value;
     break;
   // case dParamBounce:
-  // case dParamSoft:
+  case dParamStopERP:
+    stop_erp = value;
+    break;
+  case dParamStopCFM:
+    stop_cfm = value;
+    break;
   }
 }
 
@@ -325,7 +332,8 @@ dReal dxJointLimitMotor::get (int num)
   case dParamFMax: return fmax;
   case dParamFudgeFactor: return fudge_factor;
   // case dParamBounce:
-  // case dParamSoft:
+  case dParamStopERP: return stop_erp;
+  case dParamStopCFM: return stop_cfm;
   default: return 0;
   }
 }
@@ -397,7 +405,7 @@ int dxJointLimitMotor::addRotationalLimot (dxJoint *joint,
     }
 
     if (limit) {
-      dReal k = info->fps * info->erp;
+      dReal k = info->fps * stop_erp;
       info->c[row] = k * limit_err;
       if (limit == 1) {
 	// low limit
@@ -409,6 +417,7 @@ int dxJointLimitMotor::addRotationalLimot (dxJoint *joint,
 	info->lo[row] = 0;
 	info->hi[row] = dInfinity;
       }
+      info->cfm[row] = stop_cfm;
     }
     return 1;
   }
@@ -455,7 +464,7 @@ void dxJointLimitMotor::addLinearLimot (dxJoint *joint, dxJoint::Info2 *info,
     }
 
     if (limit) {
-      dReal k = info->fps * info->erp;
+      dReal k = info->fps * stop_erp;
       info->c[row] = -k * limit_err;
       if (limit == 1) {
         // low limit
@@ -467,6 +476,7 @@ void dxJointLimitMotor::addLinearLimot (dxJoint *joint, dxJoint::Info2 *info,
         info->lo[row] = -dInfinity;
         info->hi[row] = 0;
       }
+      info->cfm[row] = stop_cfm;
     }
   }
 }
@@ -530,7 +540,7 @@ static void hingeInit (dxJointHinge *j)
   dSetZero (j->axis2,4);
   j->axis2[0] = 1;
   dSetZero (j->qrel,4);
-  j->limot.init();
+  j->limot.init (j->world);
 }
 
 
@@ -739,7 +749,7 @@ static void sliderInit (dxJointSlider *j)
   j->axis1[0] = 1;
   dSetZero (j->qrel,4);
   dSetZero (j->offset,4);
-  j->limot.init();
+  j->limot.init (j->world);
 }
 
 
@@ -1195,8 +1205,8 @@ static void hinge2Init (dxJointHinge2 *j)
   dSetZero (j->v2,4);
   j->v2[1] = 1;
 
-  j->limot1.init();
-  j->limot2.init();
+  j->limot1.init (j->world);
+  j->limot2.init (j->world);
 
   j->susp_erp = 0.2;
   j->susp_cfm = 0;
@@ -1383,8 +1393,8 @@ extern "C" void dJointSetHinge2Param (dxJointHinge2 *joint,
     joint->limot2.set (parameter & 0xff,value);
   }
   else {
-    if (parameter == dParamSuspensionErp) joint->susp_erp = value;
-    else if (parameter == dParamSuspensionCfm) joint->susp_cfm = value;
+    if (parameter == dParamSuspensionERP) joint->susp_erp = value;
+    else if (parameter == dParamSuspensionCFM) joint->susp_cfm = value;
     else joint->limot1.set (parameter,value);
   }
 }
@@ -1429,8 +1439,8 @@ extern "C" dReal dJointGetHinge2Param (dxJointHinge2 *joint, int parameter)
     return joint->limot2.get (parameter & 0xff);
   }
   else {
-    if (parameter == dParamSuspensionErp) return joint->susp_erp;
-    else if (parameter == dParamSuspensionCfm) return joint->susp_cfm;
+    if (parameter == dParamSuspensionERP) return joint->susp_erp;
+    else if (parameter == dParamSuspensionCFM) return joint->susp_cfm;
     else return joint->limot1.get (parameter);
   }
 }
