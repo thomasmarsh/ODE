@@ -113,19 +113,23 @@ void dsSetColor (float red, float green, float blue);
  *   - sides[] is an array of x,y,z side lengths.
  *   - all cylinders are aligned along the z axis.
  */
-void dsDrawBox (float pos[3], float R[12], float sides[3]);
-void dsDrawSphere (float pos[3], float R[12], float radius);
-void dsDrawCylinder (float pos[3], float R[12], float length, float radius);
-void dsDrawCappedCylinder (float pos[3], float R[12],
+void dsDrawBox (const float pos[3], const float R[12], const float sides[3]);
+void dsDrawSphere (const float pos[3], const float R[12], float radius);
+void dsDrawCylinder (const float pos[3], const float R[12],
+		     float length, float radius);
+void dsDrawCappedCylinder (const float pos[3], const float R[12],
 			   float length, float radius);
 
 /* these drawing functions are identical to the ones above, except they take
  * double arrays for `pos' and `R'.
  */
-void dsDrawBoxD (double pos[3], double R[12], float sides[3]);
-void dsDrawSphereD (double pos[3], double R[12], float radius);
-void dsDrawCylinderD (double pos[3], double R[12], float length, float radius);
-void dsDrawCappedCylinderD (double pos[3], double R[12],
+void dsDrawBoxD (const double pos[3], const double R[12],
+		 const float sides[3]);
+void dsDrawSphereD (const double pos[3], const double R[12],
+		    const float radius);
+void dsDrawCylinderD (const double pos[3], const double R[12],
+		      float length, float radius);
+void dsDrawCappedCylinderD (const double pos[3], const double R[12],
 			    float length, float radius);
 
 
