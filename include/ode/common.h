@@ -142,8 +142,8 @@ typedef dReal dQuaternion[4];
 #define dCos(x) cos(x)
 #define dFabs(x) fabs(x)
 #define dAtan2(y,x) atan2((y),(x))
-#define dFMod(a,b) ((float)fmod((a),(b)))
-#define dCopySign(a,b) ((float)copysign((a),(b)))
+#define dFMod(a,b) (fmod((a),(b)))
+#define dCopySign(a,b) (copysign((a),(b)))
 
 #else
 #error You must #define dSINGLE or dDOUBLE
