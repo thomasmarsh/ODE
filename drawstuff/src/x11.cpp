@@ -334,7 +334,6 @@ void dsPlatformSimLoop (int window_width, int window_height, dsFunctions *fn,
     XSync (display,0);
 
     // capture frames if necessary
-    printf ("%d %d\n",pause,writeframes);
     if (pause==0 && writeframes) {
       captureFrame (frame);
       frame++;
