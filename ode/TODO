@@ -5,11 +5,17 @@
 TODO for COLLISION
 ------------------
 
-tidyups: update DLL declarations.
+box-box collision: adjust generated face-face contact points by depth/2 to
+be more fair.
 
 what happens when a GeomTransform's encapsulated object is manipulated,
 e.g. position changed. should this be disallowed? should a GeomTransform
 behave like a space and propagate dirtyness upwards?
+
+make sure that when we are using a large space for static environmental geoms,
+that there is not excessive AABB computation when geoms are added/removed from
+the space. the space AABB is pretty much guaranteed to cover everything, so
+there's no need to compute/test the AABB in this case.
 
 hash space: implement collide2().
 
@@ -81,7 +87,7 @@ multi-resolution hash table:
 collision docs:
 	optimization guide: whenever a single geom changes in a simple space,
 	the space AABB has to be recomputed by examining EVERY geom.
-	document this.
+	document this, or find a better behavior.
 
 
 
@@ -176,6 +182,9 @@ erwin says: http://q12.org/pipermail/ode/2002-January/000766.html
         and http://q12.org/pipermail/ode/2001-December/000753.html
 
 rename duplicate filenames (object.h?) - some environments can't handle this.
+
+naming inconsistency: dCreateSphere() should be dSphereCreate() (etc...) to
+match the rest of the API.
 
 
 TODO
@@ -683,4 +692,6 @@ porting guide:
 
 	dGeomGetClass (geom_group); used to return a unique type for
 	GeomGroups, but now it returns dSimpleSpaceID.
+
+tidyups: update DLL declarations.
 
