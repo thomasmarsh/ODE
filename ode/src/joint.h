@@ -137,6 +137,11 @@ struct dxJointHinge : public dxJoint {
   dVector3 axis2;		// axis w.r.t second body
   dQuaternion qrel;		// initial relative rotation body1 -> body2
   dReal vel,tmax;		// powered joint: velocity, max torque
+  dReal lostop,histop;		// joint limits, relative to initial rotation
+  dReal fudge_factor;		// controls powering away from joint limits
+  // variables used between getInfo1() and getInfo2()
+  int limit;			// 0=free, 1=at lo limit, 2=at hi limit
+  dReal angle_err;		// if at limit, amount over limit
 };
 extern struct dxJoint::Vtable __dhinge_vtable;
 
@@ -148,7 +153,14 @@ struct dxJointSlider : public dxJoint {
   dVector3 axis1;		// axis w.r.t first body
   dQuaternion qrel;		// initial relative rotation body1 -> body2
   dVector3 offset;		// point relative to body2 that should be
-};				// aligned with body1 center along axis1
+				// aligned with body1 center along axis1
+  dReal vel,fmax;		// powered joint: velocity, max force
+  dReal lostop,histop;		// joint limits, relative to initial rotation
+  dReal fudge_factor;		// controls powering away from joint limits
+  // variables used between getInfo1() and getInfo2()
+  int limit;			// 0=free, 1=at lo limit, 2=at hi limit
+  dReal pos_err;		// if at limit, amount over limit
+};
 extern struct dxJoint::Vtable __dslider_vtable;
 
 
