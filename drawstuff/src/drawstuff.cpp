@@ -1395,6 +1395,18 @@ void dsDrawSphereD (const double pos[3], const double R[12], float radius)
 }
 
 
+extern "C" void dsDrawTriangleD (const double pos[3], const double R[12],
+				 const float *v0, const float *v1,
+				 const float *v2)
+{
+  int i;
+  float pos2[3],R2[12];
+  for (i=0; i<3; i++) pos2[i]=(float)pos[i];
+  for (i=0; i<12; i++) R2[i]=(float)R[i];
+  dsDrawTriangle (pos2,R2,v0,v1,v2);
+}
+
+
 void dsDrawCylinderD (const double pos[3], const double R[12],
 		      float length, float radius)
 {

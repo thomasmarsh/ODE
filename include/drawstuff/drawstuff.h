@@ -140,6 +140,8 @@ void dsDrawBoxD (const double pos[3], const double R[12],
 		 const double sides[3]);
 void dsDrawSphereD (const double pos[3], const double R[12],
 		    const float radius);
+void dsDrawTriangleD (const double pos[3], const double R[12],
+		      const float *v0, const float *v1, const float *v2);
 void dsDrawCylinderD (const double pos[3], const double R[12],
 		      float length, float radius);
 void dsDrawCappedCylinderD (const double pos[3], const double R[12],
