@@ -1,6 +1,4 @@
 
-PLATFORM=linux
-
 # convert a name into a library name or an executable name
 fLIBNAME=lib$(1).a
 fEXENAME=$(1)
@@ -22,7 +20,7 @@ _EX_=$(_EX_0)
 # optimization options
 _OPT_0=
 _OPT_1=-O1
-_OPT_2=-O2 
+_OPT_2=-O2
 _OPT_=$(_OPT_0)
 
 # some other optimization things

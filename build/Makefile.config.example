@@ -1,6 +1,17 @@
 # configuration information
 
-# PLATFORM can be one of: linux, win32.
+# PLATFORM is one of: linux, win32.
 # there must be a Makefile.$(PLATFORM) file for every platform.
 
 PLATFORM=linux
+
+
+# BUILD_MODE is one of: debug, release. this variable is not used by the
+# makefiles in this directory, it is used by the package makefiles.
+#
+#BUILD_MODE=debug
+
+
+# DREAL is for the ODE package, it must be one of: SINGLE, DOUBLE
+
+DREAL=DOUBLE
