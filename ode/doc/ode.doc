@@ -1109,7 +1109,7 @@ simulation step.
 However, if a disabled body is connected to island containing one or more
 enabled bodies then it will be re-enabled at the next simulation step.
 
-@c{dBodyIsEnabled} return 1 if a body is enabled or 0 if it is disabled.
+@c{dBodyIsEnabled()} returns 1 if a body is enabled or 0 if it is disabled.
 New bodies are created in the enabled state.
 }
 
@@ -1501,7 +1501,7 @@ void dJointGetUniversalAnchor (dJointID, dVector3 result);
 void dJointGetUniversalAxis1 (dJointID, dVector3 result);
 void dJointGetUniversalAxis2 (dJointID, dVector3 result);
 }{
-FIXME: I should eventually write a description of these functions here.
+@b{FIXME: I should eventually write a description of these functions here.}
 }
 
 
@@ -2223,12 +2223,19 @@ document yet].
 [Document these later].
 
 #############################################################################
-@chapter{Collision functions}
+@chapter{Collision detection}
 
-This chapter describes the built-in collision detection system of ODE.
+ODE has two main components: a dynamics simulation engine and a collision
+detection engine.
+The collision engine is given information about the @emph{shape} of each
+body. At each time step it figures out which bodies touch each other and
+passes the resulting contact point information to the user.
+The user in turn creates contact joints between bodies.
+
 Using ODE's collision detection is optional - an alternative collision
 detection system can be used as long as it can supply the right kinds
-of information to ODE.
+of contact information.
+
 
 @section{Contact points}
 
@@ -2261,7 +2268,7 @@ distance @arg{depth} (or equivalently if body 2 is moved the same distance in
 the opposite direction) then the contact depth will be reduced to zero.
 This means that the normal vector points "in" to body 1.
 
-In real life, contact between two bodies is a sophisticated thing.
+In real life, contact between two bodies is a complex thing.
 Representing contacts by contact points is only an approximation.
 Contact "patches" or "surfaces" might be more physically accurate, but
 representing these things in high speed simulation software is a challenge.
@@ -2274,34 +2281,654 @@ keep only the best three. Thus we are piling approximation on top of
 approximation.
 
 
-@section{Geometry objects}
+@section{Geoms}
 
-To use ODE's collision detection, geometry objects must be associated with
-the rigid bodies.
-A geometry object represents a rigid @emph{shape} in space.
-Geometry objects are distinct from rigid bodies in that a geometry object
-has geometrical properties (size, shape, position and orientation) but no
-dynamical properties (such as velocity or mass).
+Geometry objects (or ``geoms'' for short) are the fundamental objects
+in the collision system. A geom can represents a single rigid shape
+(such as a sphere or box), or it can represents a group of
+other geoms - this is a special kind of geom called a ``space''.
 
-Every geometry object is an instance of a @emph{class}, such as
-sphere, plane, or box.
-You can define your own classes as well.
+Any geom can be collided against any other geom to yield zero or more
+contact points. Spaces have the extra capability of being able to
+collide their contained geoms together to yield internal contact
+points.
 
-Every geometry object has a position vector and a 3*3 rotation matrix.
-If a geometry object is associated with a rigid body then its position and
-rotation is actually the position and rotation of that body.
-The point of reference for the standard classes usually corresponds to their
-centers of mass.
-This makes them particularly easy to connect to dynamics objects.
-If other points of reference are required, transformation objects should be
-used to encapsulate the primitives.
+Geoms can be placeable or non-placeable. A placeable geom has a
+position vector and a 3*3 rotation matrix, just like a rigid body,
+that can be changed during the simulation.
+A non-placeable geom does not have this capability - for example, it
+may represent some static feature of the environment that can not be
+moved. Spaces are non-placeable geoms, because each contained geom may
+have its own position and orientation but it does not make sense for
+the space itself to have a position and orientation.
+
+To use the collision engine in a rigid body simulation, placeable
+geoms are associated with rigid body objects. This allows the
+collision engine to get the position and orientation of the geoms from
+the bodies. Note that geoms are distinct from rigid bodies in that a
+geom has geometrical properties (size, shape, position and
+orientation) but no dynamical properties (such as velocity or mass).
+A body and a geom together represent all the properties of the
+simulated object.
+
+Every geom is an instance of a @emph{class}, such as sphere, plane, or
+box. There are a number of built-in classes, described below, and you
+can define your own classes as well.
+
+The point of reference of a placeable geoms is the point that is
+controlled by its position vector. The point of reference for the
+standard classes usually corresponds to the geom's center of
+mass. This feature allows the standard classes to be easily connected
+to dynamics bodies. If other points of reference are required, a
+transformation object can be used to encapsulate a geom.
+
+The concepts and functions that apply to all geoms will be described
+below, followed by the various geometry classes and the functions that
+manipulate them.
+
+
+@section{Spaces}
+
+A space is a non-placeable geom that can contain other geoms.
+It is similar to the rigid body concept of the ``world'', except that
+it applies to collision instead of dynamics.
+
+Space objects exist to make collision detection go faster.
+Without spaces, you might generate contacts in your simulation by
+calling @func{dCollide()} to get contact points for every single
+pair of geoms.
+For N geoms this is @m{O(N^2)} tests, which is too computationally
+expensive if your environment has many objects.
+
+A better approach is to insert the geoms into a space and call
+@func{dSpaceCollide()}.
+The space will then perform collision culling, which means
+that it will quickly identify which pairs of geoms are @emph{potentially}
+intersecting.
+Those pairs will be passed to a callback function, which can in turn
+call @func{dCollide()} on them.
+This saves a lot of time that would have been spent in useless
+@func{dCollide()} tests, because the number of pairs passed to the
+callback function will be a small fraction of every possible
+object-object pair.
+
+Spaces can contain other spaces. This is useful for dividing a
+collision environment into several hierarchies to further optimize
+collision detection speed. This will be described in more detail
+below.
+
+
+@section{General geom functions}
+
+The following functions can be applied to any geom.
+
+@funcdef{
+void dGeomDestroy (dGeomID);
+}{
+Destroy a geom, removing it from any space it is in first.  This one
+function destroys a geom of any type, but to create a geom you must
+call a creation function for that type.
+
+When a space is destroyed, if its cleanup mode is 1 (the default) then
+all the geoms in that space are automatically destroyed as well.
+}
+
+
+@funcdef{
+void dGeomSetData (dGeomID, void *);
+void *dGeomGetData (dGeomID);
+}{
+These functions set and get the user-defined data pointer stored in the
+geom.
+}
+
+
+@funcdef{
+void dGeomSetBody (dGeomID, dBodyID);
+dBodyID dGeomGetBody (dGeomID);
+}{
+These functions set and get the body associated with a placeable geom.
+Setting a body on a geom automatically combines the position vector
+and rotation matrix of the body and geom, so that setting the position
+or orientation of one will set the value for both objects.
+
+Setting a body ID of zero gives the geom its own position and
+rotation, independent from any body. If the geom was previously connected
+to a body then its new independent position/rotation is set to the current
+position/rotation of the body.
+
+Calling these functions on a non-placeable geom results in a runtime
+error in the debug build of ODE.
+}
+
+
+@funcdef{
+void dGeomSetPosition (dGeomID, dReal x, dReal y, dReal z);
+void dGeomSetRotation (dGeomID, const dMatrix3 R);
+}{
+Set the position vector and rotation matrix of a placeable geom.
+These functions are analogous to @func{dBodySetPosition()} and
+@func{dBodySetRotation()}.
+If the geom is attached to a body, the body's position / rotation
+will also be changed.
+
+Calling these functions on a non-placeable geom results in a runtime
+error in the debug build of ODE.
+}
+
+
+@funcdef{
+const dReal * dGeomGetPosition (dGeomID);
+const dReal * dGeomGetRotation (dGeomID);
+}{
+Return pointers to the geom's position vector and rotation matrix.
+The returned values are pointers to internal data structures, so the vectors
+are valid until any changes are made to the geom.
+If the geom is attached to a body, the body's position / rotation
+pointers will be returned, i.e. the result will be identical to calling
+@func{dBodyGetPosition()} or @func{dBodyGetRotation()}.
+
+Calling these functions on a non-placeable geom results in a runtime
+error in the debug build of ODE.
+}
+
+
+@funcdef{
+void dGeomGetAABB (dGeomID, dReal aabb[6]);
+}{
+Return in @arg{aabb} an axis aligned bounding box that surrounds the
+given geom.
+The @arg{aabb} array has elements @m{(minx, maxx, miny, maxy, minz, maxz)}.
+If the geom is a space, a bounding box that surrounds all contained
+geoms is returned.
+
+This function may return a pre-computed cached bounding box, if it can
+determine that the geom has not moved since the last time the bounding
+box was computed.
+}
+
+
+@funcdef{
+int dGeomIsSpace (dGeomID);
+}{
+Return 1 if the given geom is a space, or 0 if not.
+}
+
+
+@funcdef{
+int dGeomGetClass (dGeomID);
+}{
+Given a geom, this returns its class number.
+The standard class numbers are:
+
+@constdef{dSphereClass}{Sphere}
+@constdef{dBoxClass}{Box}
+@constdef{dCCylinderClass}{Capped cylinder}
+@constdef{dCylinderClass}{Regular flat-ended cylinder}
+@constdef{dPlaneClass}{Infinite plane (non-placeable)}
+@constdef{dGeomTransformClass}{Geometry transform}
+@constdef{dRayClass}{Ray}
+@constdef{dTriMeshClass}{Triangle mesh}
+@constdef{dSimpleSpaceClass}{Simple space}
+@constdef{dHashSpaceClass}{Hash table based space}
+
+User defined classes will return their own numbers.
+}
+
+
+@funcdef{
+void dGeomSetCategoryBits (dGeomID, unsigned long bits);
+void dGeomSetCollideBits (dGeomID, unsigned long bits);
+unsigned long dGeomGetCategoryBits (dGeomID);
+unsigned long dGeomGetCollideBits (dGeomID);
+}{
+Set and get the ``category'' and ``collide'' bitfields for the given geom.
+These bitfields are use by spaces to govern which geoms will interact
+with each other.
+The bit fields are guaranteed to be at least 32 bits wide.
+The default category and collide values for newly created geoms have
+all bits set.
+}
+
+
+@funcdef{
+void dGeomEnable (dGeomID);
+void dGeomDisable (dGeomID);
+int dGeomIsEnabled (dGeomID);
+}{
+Enable and disable a geom.
+Disabled geoms are completely ignored by @func{dSpaceCollide()} and
+@func{dSpaceCollide2()}, although they can still be members of a space.
+
+@c{dGeomIsEnabled()} returns 1 if a geom is enabled or 0 if it is disabled.
+New geoms are created in the enabled state.
+}
+
+
+@section{Collision detection}
+
+A collision detection ``world'' is created by making a space and then adding
+geoms to that space.
+At every time step we want to generate a list of contacts for all the geoms
+that intersect each other.
+Three functions are used to do this:
+@list{
+@*	@func{dCollide()} intersects two geoms and generates contact points.
+
+@*	@func{dSpaceCollide()} determines which pairs of geoms in a space
+	may potentially intersect, and calls a callback function with each
+	candidate pair.
+	This does not generate contact points directly, because the user may
+	want to handle some pairs specially - for example by ignoring
+	them or using different contact generating strategies.
+	Such decisions are made in the callback function, which can choose
+	whether or not to call @func{dCollide()} for each pair.
+
+@*	@func{dSpaceCollide2()} determines which geoms from one space
+	may potentially intersect with geoms from another space,
+	and calls a callback function with each candidate pair.
+	It can also test a single non-space geom against a space.
+	This function is useful when there is a collision hierarchy, i.e.
+	when there are spaces that contain other spaces.
+}
+
+The collision system has been designed to give the user maximum
+flexibility to decide which objects will be tested against each other.
+This is why are there are three collision functions instead of, for example,
+one function that just generates all the contact points.
+
+Spaces may contain other spaces. These sub-spaces will typically
+represent a collection of geoms (or other spaces) that are located
+near each other.
+This is useful for gaining extra collision performance by dividing the
+collision world into hierarchies. Here is an example of where this is
+useful:
+
+@indent{
+Suppose you have two cars driving over some terrain. Each car is made
+up of many geoms. If all these geoms were inserted into the same
+space, the collision computation time between the two cars would
+always be proportional to the total number of geoms (or even to the
+square of this number, depending on which space type is used).
+
+To speed up collision a separate space is created to represent each
+car. The car geoms are inserted into the car-spaces, and the
+car-spaces are inserted into the top level space.  At each time step
+@func{dSpaceCollide()} is called for the top level space. This will do
+a single intersection test between the car-spaces (actually between
+their bounding boxes) and call the callback if they touch.
+The callback can then test the geoms in the car-spaces against each
+other using @func{dSpaceCollide2()}. If the cars are not near each
+other then the callback is not called and no time is wasted performing
+unnecessary tests.
+}
+
+If space hierarchies are being used then the callback function may be
+called recursively, e.g. if @func{dSpaceCollide()} calls the callback
+which in turn calls @func{dSpaceCollide()} with the same callback function.
+In this case the user must make sure that the callback function is
+properly reentrant.
+
+Here is a sample callback function that traverses through all spaces
+and sub-spaces, generating all possible contact points for all
+intersecting geoms:
+
+@code{@[
+  void nearCallback (void *data, dGeomID o1, dGeomID o2)
+  {
+    if (dGeomIsSpace (o1) || dGeomIsSpace (o2)) {
+      // colliding a space with something
+      dSpaceCollide2 (o1,o2,data,&nearCallback);
+      // collide all geoms internal to the space(s)
+      if (dGeomIsSpace (o1)) dSpaceCollide (o1,data,&nearCallback);
+      if (dGeomIsSpace (o2)) dSpaceCollide (o2,data,&nearCallback);
+    }
+    else {
+      // colliding two non-space geoms, so generate contact
+      // points between o1 and o2
+      int num_contact = dCollide (o1,o2,max_contacts,contact_array,skip);
+      // add these contact points to the simulation
+      ...
+    }
+  }
+
+  ...
+
+  // collide all objects together
+  dSpaceCollide (top_level_space,0,&nearCallback);
+@]}
+
+A space callback function is not allowed to modify a space while that
+space is being processed with @func{dSpaceCollide()} or
+@func{dSpaceCollide2()}. For example, you can not add or remove geoms
+from a space, and you can not reposition the geoms within a space.
+Doing so will trigger a runtime error in the debug build of ODE.
+
+
+@subsection{Category and Collide bitfields}
+
+Each geom has a ``category'' and ``collide'' bitfield that can be used
+to assist the space algorithms in determining which geoms should
+interact and which should not. Use of this feature is optional - by
+default geoms are considered to be capable of colliding with any
+other geom.
+
+Each bit position in the bitfield represents a different category of
+object. The actual meaning of these categories (if any) is user defined.
+The category bitfield indicates which categories a geom is a member of.
+The collide bitfield indicates which categories the geom will collide with
+during collision detection.
+
+A pair of geoms will be considered by @func{dSpaceCollide()} and
+@func{dSpaceCollide2()} for passing to the callback only if one of them
+has a collide bit set that corresponds to a category bit in the other.
+The exact test is as follows:
+
+@code{@[
+  // test if geom o1 and geom o2 can collide
+  cat1 = dGeomGetCategoryBits (o1);
+  cat2 = dGeomGetCategoryBits (o2);
+  col1 = dGeomGetCollideBits (o1);
+  col2 = dGeomGetCollideBits (o2);
+  if ((cat1 & col2) || (cat2 & col1)) {
+    // call the callback with o1 and o2
+  }
+  else {
+    // do nothing, o1 and o2 do not collide
+  }
+@]}
+
+Note that only @func{dSpaceCollide()} and @func{dSpaceCollide2()} use
+these bitfields, they are ignored by @func{dCollide()}.
+
+Typically a geom will belong only to a single category, so only one bit will
+be set in the category bitfield.
+The bitfields are guaranteed to be at least 32 bits wide, so the user is
+able to specify an arbitrary pattern of interactions for up to 32 objects.
+If there are more than 32 objects then some of them will obviously have
+to have the same category.
+
+Sometimes the category field will contain multiple bits set, e.g. if
+the geom is a space them you may want to set the category to the union of
+all the geom categories that are contained.
+
+@b{Design note:} Why don't we just have a single category bitfield and
+use the test @c{(cat1 & cat2)} ? This is simpler, but a single field
+requires more bits to represent some patterns of interaction.
+For example, if 32 geoms have an interaction pattern that is a 5
+dimensional hypercube, 80 bit are required in the simpler scheme.
+The simpler scheme also makes it harder to determine what the
+categories should be for some situations.
+
+
+@subsection{Collision detection functions}
+
+
+@funcdef{
+int dCollide (dGeomID o1, dGeomID o2, int flags,
+              dContactGeom *contact, int skip);
+}{
+Given two geoms @arg{o1} and @arg{o2} that potentially intersect,
+generate contact information for them.
+Internally, this just calls the correct class-specific collision functions
+for @arg{o1} and @arg{o2}.
+
+@arg{flags} specifies how contacts should be generated if the geoms touch.
+The lower 16 bits of @arg{flags} is an integer that specifies the maximum
+number of contact points to generate.
+Note that if this number is zero, this function just pretends that it
+is one - in other words you can not ask for zero contacts.
+All other bits in @arg{flags} must be zero.
+In the future the other bits may be used to select from different contact
+generation strategies.
+
+@arg{contact} points to an array of @c{dContactGeom} structures.
+The array must be able to hold at least the maximum number of contacts.
+These @c{dContactGeom} structures may be embedded within larger structures
+in the array - the @arg{skip} parameter is the byte offset from one
+@struct{dContactGeom} to the next in the array.
+If @arg{skip} is @c{sizeof(dContactGeom)} then @arg{contact} points to a
+normal (C-style) array.
+It is an error for @arg{skip} to be smaller than @c{sizeof(dContactGeom)}.
+
+If the geoms intersect, this function returns the number of contact
+points generated (and updates the @arg{contact} array), otherwise it
+returns 0 (and the @arg{contact} array is not touched).
+
+If a space is passed as @arg{o1} or @arg{o2} then this function will collide
+all objects contained in @arg{o1} with all objects contained in @arg{o2},
+and return the resulting contact points.
+This method for colliding spaces with geoms (or spaces with spaces) provides
+no user control over the individual collisions.
+To get that control, use @func{dSpaceCollide()} or @func{dSpaceCollide2()}
+instead.
+
+If @arg{o1} and @arg{o2} are the same geom then this function will do
+nothing and return 0. Technically speaking an object intersects with
+itself, but it is not useful to find contact points in this case.
+
+This function does not care if @arg{o1} and @arg{o2} are in the same
+space or not (or indeed if they are in any space at all).
+}
+
+
+@funcdef{
+void dSpaceCollide (dSpaceID space,
+                    void *data, dNearCallback *callback);
+}{
+This determines which pairs of geoms in a space may potentially intersect,
+and calls the callback function with each candidate pair.
+The @arg{callback} function is of type @c{dNearCallback}, which is defined as:
+@code{@[
+typedef void dNearCallback (void *data, dGeomID o1, dGeomID o2);
+@]}
+The @arg{data} argument is passed from @func{dSpaceCollide()} directly
+to the callback function. Its meaning is user defined.
+The @arg{o1} and @arg{o2} arguments are the geoms that may be near
+each other.
+
+The callback function can call @func{dCollide()} on @arg{o1} and
+@arg{o2} to generate contact points between each pair.
+Then these contact points may be added to the simulation as contact
+joints.
+The user's callback function can of course chose not to call
+@func{dCollide()} for any pair, e.g. if the user decides that
+those pairs should not interact.
+
+Other spaces that are contained within the colliding space are not
+treated specially, i.e. they are not recursed into.
+The callback function may be passed these contained spaces as one or
+both geom arguments.
+
+@c{dSpaceCollide()} is guaranteed to pass all intersecting geom pairs
+to the callback function, but it may also make mistakes and pass
+non-intersecting pairs. The number of mistaken calls depends on the
+internal algorithms used by the space.
+Thus you should not expect that @func{dCollide()} will return
+contacts for every pair passed to the callback.
+}
+
+
+@funcdef{
+void dSpaceCollide2 (dGeomID o1, dGeomID o2,
+                     void *data, dNearCallback *callback);
+}{
+
+This function is similar to @func{dSpaceCollide()}, except that it is
+passed two geoms (or spaces) as arguments.
+It calls the callback for all potentially intersecting pairs that contain
+one geom from @arg{o1} and one geom from @arg{o2}.
+
+The exact behavior depends on the types of @arg{o1} and @arg{o2}:
+@list{
+@*	If one argument is a non-space geom and the other is a space,
+	the callback is called with all potential intersections between
+	the geom and the objects in the space.
+@*	If both @arg{o1} and @arg{o2} are spaces then this calls the
+	callback for all potentially intersecting pairs that contain
+	one geom from @arg{o1} and one geom from @arg{o2}.
+	The algorithm that is used depends on what kinds of spaces are
+	being collided. If no optimized algorithm can be selected then
+	this function will resort to one of the following two strategies:
+	@numlist{
+	@*	All the geoms in @arg{o1} are tested one-by-one against
+		@arg{o2}.
+	@*	All the geoms in @arg{o2} are tested one-by-one against
+		@arg{o1}.
+	}
+	The strategy used may depends on a number of rules, but in general
+	the space with less objects has its geoms examined one-by-one.
+@*	If both arguments are the same space, this is equivalent to
+	calling @func{dSpaceCollide()} on that space.
+@*	If both arguments are non-space geoms, this simply calls the
+	callback once with these arguments.
+}
+If this function is given a space and an geom X in that same space,
+this case is not treated specially. In this case the callback will
+always be called with the pair (X,X), because an objects always
+intersects with itself.
+The user may either test for this case and ignore it, or just pass the
+pair (X,X) to @func{dCollide()} (which will be guaranteed to return 0).
+}
+
+
+@section{Space functions}
+
+There are several kinds of spaces. Each kind uses different internal
+data structures to store the geoms, and different algorithms to
+perform the collision culling:
+@list{
+@*	Simple space. This does not do any collision culling - it simply
+	checks every possible pair of geoms for intersection, and reports
+	the pairs whose AABBs overlap.
+	The time required to do intersection testing for @m{n} objects is
+	@m{O(n^2)}.
+	This should not be used for large numbers of objects, but it can be
+	the preferred algorithm for a small number of objects.
+	This is also useful for debugging potential problems with the
+	collision system.
+
+@*	Multi-resolution hash table space.
+	This uses an internal data structure that records how each geom
+	overlaps cells in one of several three dimensional grids.
+	Each grid has cubical cells of side lengths @m{2^i}, where @m{i}
+	is an integer that ranges from a minimum to a maximum value.
+	The time required to do intersection testing for @m{n} objects is
+	@m{O(n)} (as long as those objects are not clustered together too
+	closely), as each object can be quickly paired with the objects
+	around it.
+}
+
+# DEPRECATED:
+# All spaces guarantee that if a geom's collider function is called,
+# the object's AABB function will have been called prior to that without the
+# geometry position having being changed in between the calls.
+# This protocol can be useful if the AABB function wants to precompute some
+# data that is used by the collider function.
+# The collider function can check if it is being called inside a space by
+# checking if the return value of @func{dGeomGetSpaceAABB()} is nonzero.
+
+Here are the functions used for spaces:
+
+@funcdef{
+dSpaceID dSimpleSpaceCreate (dSpaceID space);
+dSpaceID dHashSpaceCreate (dSpaceID space);
+}{
+Create a space, either of the simple or multi-resolution hash table kind.
+If @arg{space} is nonzero, insert the new space into that space.
+}
+
+
+@funcdef{
+void dSpaceDestroy (dSpaceID);
+}{
+This destroys a space. It functions exactly like @func{dGeomDestroy()}
+except that it takes a @c{dSpaceID} argument.
+When a space is destroyed, if its cleanup mode is 1 (the default) then
+all the geoms in that space are automatically destroyed as well. 
+}
+
+
+@funcdef{
+void dHashSpaceSetLevels (dSpaceID space, int minlevel, int maxlevel);
+}{
+This sets some parameters for a multi-resolution hash table space.
+The smallest and largest cell sizes used in the hash table will be
+2^@arg{minlevel} and 2^@arg{maxlevel} respectively.
+@arg{minlevel} must be less than or equal to @arg{maxlevel}.
+}
+
+
+@funcdef{
+void dSpaceSetCleanup (dSpaceID space, int mode);
+int dSpaceGetCleanup (dSpaceID space);
+}{
+Set and get the clean-up mode of the space.
+If the clean-up mode is 1, then the contained geoms will be destroyed when
+the space is destroyed. If the clean-up mode is 0 this does not happen.
+The default clean-up mode for new spaces is 1.
+}
+
+
+@funcdef{
+void dSpaceAdd (dSpaceID, dGeomID);
+}{
+Add a geom to a space.
+This does nothing if the geom is already in the space.
+This function can be called automatically if a @arg{space} argument is
+given to a geom creation function.
+}
+
+
+@funcdef{
+void dSpaceRemove (dSpaceID, dGeomID);
+}{
+Remove a geom from a space.
+This does nothing if the geom is not actually in the space.
+This function is called automatically by @func{dGeomDestroy()} if the
+geom is in a space.
+}
+
+
+@funcdef{
+int dSpaceQuery (dSpaceID, dGeomID);
+}{
+Return 1 if the given geom is in the given space, or return 0 if it is not.
+}
+
+
+@funcdef{
+int dSpaceGetNumGeoms (dSpaceID);
+}{
+Return the number of geoms contained within a space.
+}
+
+
+@funcdef{
+dGeomID dSpaceGetGeom (dSpaceID, int i);
+}{
+Return the @arg{i}'th geom contained within the space.
+@arg{i} must range from 0 to @arg{dSpaceGetNumGeoms()}-1.
+
+If any change is made to the space (including adding and deleting geoms)
+then no guarantee can be made about how the index number of any particular
+geom will change.
+Thus no space changes should be made while enumerating the geoms.
+
+This function is guaranteed to be fastest when the geoms are accessed in
+the order 0,1,2,etc. Other nonsequential orders may result in slower access,
+depending on the internal implementation.
+}
+
+
+@section{Geometry Classes}
 
 @subsection{Sphere class}
 
 @funcdef{
 dGeomID dCreateSphere (dSpaceID space, dReal radius);
 }{
-Create a sphere geometry object of the given @arg{radius}, and return its ID.
+Create a sphere geom of the given @arg{radius}, and return its ID.
 If @arg{space} is nonzero, insert it into that space.
 The point of reference for a sphere is its center.
 }
@@ -2326,7 +2953,7 @@ Return the radius of the given sphere.
 @funcdef{
 dGeomID dCreateBox (dSpaceID space, dReal lx, dReal ly, dReal lz);
 }{
-Create a box geometry object of the given x/y/z side lengths
+Create a box geom of the given x/y/z side lengths
 (@arg{lx},@arg{ly},@arg{lz}), and return its ID.
 If @arg{space} is nonzero, insert it into that space.
 The point of reference for a box is its center.
@@ -2353,12 +2980,13 @@ Return in @arg{result} the side lengths of the given @arg{box}.
 dGeomID dCreatePlane (dSpaceID space,
                       dReal a, dReal b, dReal c, dReal d);
 }{
-Create a plane geometry object of the given parameters, and return its ID.
+Create a plane geom of the given parameters, and return its ID.
 If @arg{space} is nonzero, insert it into that space.
 The plane equation is @center{@m{a*x+b*y+c*z = d}}
 The plane's normal vector is @m{(a,b,c)}, and it must have length 1.
-Unlike other geometry objects, planes disregard their assigned position and
-rotation, i.e. the parameters are always in global coordinates.
+Planes are non-placeable geoms. This means that, unlike placeable geoms,
+planes do not have an assigned position and rotation.
+This means that the parameters (a,b,c,d) are always in global coordinates.
 In other words it is assumed that the plane is always part of the static
 environment and not tied to any movable object.
 }
@@ -2383,15 +3011,16 @@ Return in @arg{result} the parameters of the given @arg{plane}.
 @funcdef{
 dGeomID dCreateCCylinder (dSpaceID space, dReal radius, dReal length);
 }{
-Create a capped cylinder geometry object of the given parameters, and return
+Create a capped cylinder geom of the given parameters, and return
 its ID.
 If @arg{space} is nonzero, insert it into that space.
 
 A capped cylinder is like a normal cylinder except it has half-sphere caps
 at its ends.
-This feature makes collision detection particularly easy.
+This feature makes the internal collision detection code particularly fast
+and accurate.
 The cylinder's length, not counting the caps, is given by @arg{length}.
-The cylinder is aligned along the geometry's local Z axis.
+The cylinder is aligned along the geom's local Z axis.
 The radius of the caps, and of the cylinder itself, is given by @arg{radius}.
 }
 
@@ -2415,99 +3044,42 @@ cylinder.
 
 @subsection{Geometry Group class}
 
-Geometry object groups (GeomGroups) are a way to speed up collision detection
-in some situations.
-They represent a collection of geometry objects that are located together
-in space.
+@b{Geometry groups are deprecated, their functionality is now available
+through spaces. The geometry group functions are still available but they
+will be removed in some future version of ODE.}
 
-GeomGroups solve the following problem:
-Suppose you have two cars driving over some terrain.
-Each car is made up of many bodies.
-Without GeomGroups, the collision computation time between the two cars is
-proportional to the total number of parts (or even to the square of this
-number, depending on which space container is used).
-To speed up the process, a GeomGroup object is created to represent each car.
-The GeomGroup is inserted into the space, but the individual geometry objects
-of the cars are not.
-The bounding box of each GeomGroup is computed to encompass the car
-geometry objects.
-At each time step, the @func{dSpaceCollide()} function does a single
-intersection test between the GeomGroups.
-If there is an intersection, the contents of the GeomGroup will be
-individually tested against each other.
-In this way the best case performance (when the cars are far away from
-each other) is improved.
-
-GeomGroups have the same interface as any other geometry object.
-
-The geometry objects inside a GeomGroup will not self-intersect if they are
-not a member of a space.
-If you want them to self-intersect, insert them into a separate space and
-call @func{dSpaceCollide()} on that.
-Do not insert them into the same space the GeomGroup is in.
-
-
-@funcdef{
-dGeomID dCreateGeomGroup (dSpaceID space);
-}{
-Create an empty geometry group object, and return its ID.
-If @arg{space} is nonzero, insert it into that space.
+The geometry group functions are equivalent to the following space functions:
+@list{
+@*	@c{dCreateGeomGroup()}
+	= @func{dSimpleSpaceCreate()} followed by @func{dSpaceSetCleanup()}
+	to ensure that when the geometry group is destroyed the geoms that
+	it contains will not be.
+@*	@c{dGeomGroupAdd()}		= @func{dSpaceAdd()}
+@*	@c{dGeomGroupRemove()}		= @func{dSpaceRemove()}
+@*	@c{dGeomGroupGetNumGeoms()}	= @func{dSpaceGetNumGeoms()}
+@*	@c{dGeomGroupGetGeom()}		= @func{dSpaceGetGeom()}
+@*	@c{dGeomGroupQuery()}		= @func{dSpaceQuery()}
 }
 
-
-@funcdef{
-void dGeomGroupAdd (dGeomID group, dGeomID x);
-}{
-Add the geometry object @arg{x} to the given GeomGroup.
-Note that when the GeomGroup is destroyed, the objects that it contains will
-@emph{not} be.
-}
-
-
-@funcdef{
-void dGeomGroupRemove (dGeomID group, dGeomID x);
-}{
-Remove the geometry object @arg{x} from the given GeomGroup.
-If it is not in the GeomGroup then nothing is done.
-}
-
-
-@funcdef{
-int dGeomGroupGetNumGeoms (dGeomID group);
-}{
-Return the number of geometry object in the given GeomGroup.
-}
-
-
-@funcdef{
-dGeomID dGeomGroupGetGeom (dGeomID group, int i);
-}{
-Return a specific geometry object from the given GeomGroup.
-@arg{i} is the index of the object, it must be between 0 and @m{n-1}
-where @m{n} is the number of objects in the group.
-}
-
-
-@funcdef{
-int dGeomGroupQuery (dGeomID group, dGeomID x);
-}{
-Return 1 if @arg{x} is contained in the given GeomGroup, or 0 if it is not.
-}
-
+It used to be the case that if the user wanted the geoms inside a
+geometry group to self-intersect then the geoms would have to be inserted
+into a separate space and @func{dSpaceCollide()} called on that.
+This is no longer the case: @func{dSpaceCollide()} can be called on
+the geometry group directly (as it is now the same as a regular space).
 
 
 @subsection{Geometry Transform class}
 
-A geometry transform object (T) encapsulates another geometry object (E),
+A geometry transform `T' is a geom that encapsulates another geom `E',
 allowing E to be positioned and rotated arbitrarily with respect to its
 point of reference.
 
-Most geometry objects (like the sphere and box) have their point of reference
+Most placeable geoms (like the sphere and box) have their point of reference
 corresponding to their center of mass, allowing them to be easily connected
 to dynamics objects.
-Transform objects give you more flexibiliy - for example, you can
+Transform objects give you more flexibility - for example, you can
 offset the center of a sphere, or rotate a cylinder so that its axis
-is something else.
+is something other than the default.
 
 T mimics the object E that it encapsulates: T is inserted into a
 space and attached to a body as though it was E.
@@ -2530,7 +3102,7 @@ On creation the encapsulated geometry is set to 0.
 @funcdef{
 void dGeomTransformSetGeom (dGeomID g, dGeomID obj);
 }{
-Set the geometry object that the geometry transform @arg{g} encapsulates.
+Set the geom that the geometry transform @arg{g} encapsulates.
 The object @arg{obj} must not be inserted into any space, and must not be
 associated with any body.
 
@@ -2543,7 +3115,7 @@ new one.
 @funcdef{
 dGeomID dGeomTransformGetGeom (dGeomID g);
 }{
-Get the geometry object that the geometry transform @arg{g} encapsulates.
+Get the geom that the geometry transform @arg{g} encapsulates.
 }
 
 
@@ -2568,182 +3140,40 @@ The mode can be 0 or 1. The default mode is 0.
 
 With mode 0, when a transform object is collided with another object
 (using @c{dCollide (tx_geom,other_geom,...)}), the @c{g1} field of the
-@c{dContactGeom} structure is set to the geometry object that is
+@c{dContactGeom} structure is set to the geom that is
 @emph{encapsulated} by the transform object. This value of @c{g1} allows
-the caller to interrogate the type of the geometry that is transformed,
+the caller to interrogate the type of the geom that is transformed,
 but it does not allow the caller to determine the position in global
 coordinates or the associated body, as both of these properties are used
-differently for encapsulated geometry objects.
+differently for encapsulated geoms.
 
 With mode 1, the @c{g1} field of the @c{dContactGeom} structure is set
 to the transform object itself.
-This makes the object appear just like any other kind of geometry object,
+This makes the object appear just like any other kind of geom,
 as @func{dGeomGetBody()} will return the attached body,
 and @func{dGeomGetPosition()} will return the global position.
-To get the actual type of the encapsulated geometry in this case,
+To get the actual type of the encapsulated geom in this case,
 @func{dGeomTransformGetGeom()} must be used.
 }
 
 
-@subsection{General geometry object functions}
-
-@funcdef{
-void dGeomDestroy (dGeomID);
-}{
-Destroy a geometry object, removing it from any space it is in first.
-}
-
-
-@funcdef{
-void dGeomSetData (dGeomID, void *);
-void *dGeomGetData (dGeomID);
-}{
-These functions set and get the user-defined data pointer stored in the
-geometry object.
-}
-
-
-@funcdef{
-void dGeomSetBody (dGeomID, dBodyID);
-dBodyID dGeomGetBody (dGeomID);
-}{
-These functions set and get the body associated with the geometry object.
-Setting the body automatically attaches the position vector and rotation
-matrix of the body to the geometry object.
-Setting a body ID of zero gives the geometry object its own position and
-rotation, independent from any body.
-}
-
-
-@funcdef{
-void dGeomSetPosition (dGeomID, dReal x, dReal y, dReal z);
-void dGeomSetRotation (dGeomID, const dMatrix3 R);
-}{
-Set the position vector and rotation matrix of the geometry object.
-These functions are analogous to @func{dBodySetPosition()} and
-@func{dBodySetRotation()}.
-If the geometry object is attached to a body, the body's position / rotation
-will also be changed.
-}
-
-
-@funcdef{
-const dReal * dGeomGetPosition (dGeomID);
-const dReal * dGeomGetRotation (dGeomID);
-}{
-Return pointers to the geometry object's position vector and rotation matrix.
-The returned values are pointers to internal data structures, so the vectors
-are valid until any changes are made to the geometry object.
-If the geometry object is attached to a body, the body's position / rotation
-pointers will be returned, i.e. the result will be identical to calling
-@func{dBodyGetPosition()} or @func{dBodyGetRotation()}.
-}
-
-
-@funcdef{
-void dGeomGetAABB (dGeomID, dReal aabb[6]);
-}{
-Return in @arg{aabb} the axis aligned bounding box for the given geometry
-object.
-}
-
-
-@funcdef{
-dReal *dGeomGetSpaceAABB (dGeomID);
-}{
-Return a pointer to the axis aligned bounding box that was
-precomputed for the given geometry object by the @func{dSpaceCollide()}
-function.
-This returns 0 if the @func{dSpaceCollide()} function is not currently
-being called.
-This is much faster than calling @func{dGeomGetAABB()}.
-}
-
-
-@subsection{Composite objects}
-
-Consider the following collision objects: @list{
-@*	A table that is made out of a box for the top and a box for each leg.
-@*	A branch of a tree that is made out of several capped cylinders
-	joined together.
-@*	A molecule that has spheres representing each atom.
-}
-If these objects are meant to be @emph{rigid} then it is necessary to use
-a single rigid body to represent each of them.
-But there are no single geometry classes that can represent things like a
-table or a molecule.
-The solution is to use a @emph{composite} collision object that is a
-combination of several geometry objects.
-
-No extra functions are needed to manage composite objects: simply create
-each component geometry object and attach it to the same body.
-To move and rotate the component objects with respect to each other,
-use geometry transforms to encapsulate them.
-That's all there is to it!
-
-However there is one @emph{caveat}: You should never create a composite
-object that will result in collision points being generated very close
-together.
-For example, consider a table that is made up of a box for the top and four
-boxes for the legs.
-If the legs are flush with the top, and the table is lying on the ground on
-its side, then the contact points generated for the boxes may coincide
-where the legs join to the top.
-ODE does not currently optimize away coincident contact points, so this
-situation can lead to numerical errors and strange behavior.
-
-In this example the table geometry should be adjusted so that the legs are
-not flush with the sides, making it much more unlikely that coincident
-contact points will be generated.
-In general, avoid having different contact surfaces that overlap,
-or that line up along their edges.
-
-
-@section{Collision detection}
-
-@funcdef{
-int dCollide (dGeomID o1, dGeomID o2, int flags,
-              dContactGeom *contact, int skip);
-}{
-Given two geometry objects that potentially touch (@arg{o1} and @arg{o2}),
-generate contact information for them.
-Internally, this just calls the correct class-specific collision functions
-for @arg{o1} and @arg{o2}.
-
-@arg{flags} specifies how contacts should be generated if the objects touch.
-Currently the lower 16 bits of @arg{flags} specifies the maximum number of
-contact points to generate.
-If this number is zero, this function just pretends that it is one - in other
-words you can not ask for zero contacts.
-All other bits in @arg{flags} must be zero.
-In the future the other bits may be used to select other contact generation
-strategies.
-
-@arg{contact} must point to an array of contact geometry information that
-can hold at least the maximum number of contacts.
-@emph{Note:} the elements of the @arg{contact} array do not necessarily have
-to be contiguous.
-@arg{skip} is the number of bytes between each @struct{dContactGeom}
-structure in the @arg{contact} array.
-If @arg{skip} is @c{sizeof(dContactGeom)} then @arg{contact} points to a
-"normal" (C-style) contact array.
-If skip is larger than this, then the @struct{dContactGeom} structures are
-embedded in some other larger structures.
-It is an error for @arg{skip} to be smaller than @c{sizeof(dContactGeom)}.
-
-If the objects touch, this returns the number of contact points generated
-(and updates the @arg{contact} array), otherwise it returns 0 (and the
-@arg{contact} array is not touched).
-}
-
 
 @section{User defined classes}
 
-You can define your own geometry classes using the functions in this section.
-The standard geometry classes do not have any special access to the internals
-of ODE, they use the public functions exactly as you would.
+ODE's geometry classes are implemented internally as C++ classes.
+If you want to define your own geometry classes you can do this in two ways:
+@numlist{
+@*	Use the C functions in this section. This has the advantage of
+	providing a clean separation between your code and ODE.
+@*	Add the classes directly to ODE's source code. This has the
+	advantage that you can use C++ so the implementation will
+	potentially be a bit cleaner. This is also the preferred method
+	if your collision class is generally useful and you want to
+	contribute it to the public source base.
+}
+What follows is the C API for user defined geometry classes.
 
-Every geometry class has a unique number (0,1,2, etc...).
+Every user defined geometry class has a unique integer number.
 A new geometry class (call it `X') must provide the following to ODE:
 @numlist{
 @*	Functions that will handle collision detection and contact generation
@@ -2810,7 +3240,7 @@ typedef int dAABBTestFn (dGeomID o1, dGeomID o2, dReal aabb2[6]);
 	@]}
 	The argument @arg{o1} has type X.
 	If this function is provided it is called by @func{dSpaceCollide()}
-	when @arg{o1} intersects geometry object @arg{o2}, which has an
+	when @arg{o1} intersects geom @arg{o2}, which has an
 	AABB given by @arg{aabb2}.
 	It returns 1 if @arg{aabb2} intersects @arg{o1}, or 0 if it does not.
 
@@ -2852,25 +3282,17 @@ struct dGeomClass {
 @funcdef{
 void * dGeomGetClassData (dGeomID);
 }{
-Given a geometry object, return a pointer to the class's custom data
+Given a geom, return a pointer to the class's custom data
 (this will be a block of the required number of bytes).
-Internal ODE classes may use a slightly faster macro instead.
 }
 
 
 @funcdef{
 dGeomID dCreateGeom (int classnum);
 }{
-Create a geometry object of the given class number.
+Create a geom of the given class number.
 The custom data block will initially be set to 0.
 This object can be added to a space using @func{dSpaceAdd()}.
-}
-
-
-@funcdef{
-int dGeomGetClass (dGeomID);
-}{
-Given a geometry object, this returns its class number.
 }
 
 
@@ -2882,16 +3304,56 @@ the following:
 @*	Call @func{dCreateGeom()} to make an instance of the class.
 @*	Set up the custom data area.
 }
-This is what @func{dCreateSphere()} and the other geometry creation
-functions do.
+
+
+@section{Composite objects}
+
+Consider the following objects: @list{
+@*	A table that is made out of a box for the top and a box for each leg.
+@*	A branch of a tree that is modeled from several cylinders
+	joined together.
+@*	A molecule that has spheres representing each atom.
+}
+If these objects are meant to be @emph{rigid} then it is necessary to use
+a single rigid body to represent each of them.
+But it might seem that performing collision detection is a problem,
+because there is no single geometry class that can represent a
+complex shape like a table or a molecule.
+The solution is to use a @emph{composite} collision object that is a
+combination of several geoms.
+
+No extra functions are needed to manage composite objects: simply
+create each component geom and attach it to the same body. To move
+and rotate the separate geoms with respect to each other in the same
+object, geometry transforms can be used to encapsulate them. That's
+all there is to it!
+
+However there is one @emph{caveat}: You should never create a composite
+object that will result in collision points being generated very close
+together.
+For example, consider a table that is made up of a box for the top and four
+boxes for the legs.
+If the legs are flush with the top, and the table is lying on the ground on
+its side, then the contact points generated for the boxes may coincide
+where the legs join to the top.
+ODE does not currently optimize away coincident contact points, so this
+situation can lead to numerical errors and strange behavior.
+
+In this example the table geometry should be adjusted so that the legs are
+not flush with the sides, making it much more unlikely that coincident
+contact points will be generated.
+In general, avoid having different contact surfaces that overlap,
+or that line up along their edges.
+
+# we obviously need a picture here to explain this better!
 
 
 @section{Utility functions}
 
 @funcdef{
-void dClosestLineSegmentPoints (dVector3 const a1, dVector3 const a2,
-				dVector3 const b1, dVector3 const b2,
-				dVector3 cp1, dVector3 cp2)
+void dClosestLineSegmentPoints (const dVector3 a1, const dVector3 a2,
+				const dVector3 b1, const dVector3 b2,
+				dVector3 cp1, dVector3 cp2);
 }{
 Given two line segments A and B with endpoints @arg{a1}-@arg{a2} and
 @arg{b1}-@arg{b2}, return the points on A and B that are closest to each
@@ -2924,103 +3386,49 @@ It returns +/- infinity in each direction.
 }
 
 
-@section{Space}
+@section{Implementation notes}
 
-A space is a container for geometry objects.
-It is similar to the rigid body "world", except for collision instead of
-dynamics.
+@subsection{Large environments}
 
-The space does high level collision culling, which means that it can
-identify which pairs of geometry objects are potentially touching.
-You can safely call @func{dCollide()} for only those pairs, instead of
-having to call @func{dCollide()} for @emph{every} object-object pair.
-This can save a huge amount of time.
+Often the collision world will contain many objects that are part of
+the static environment, that are not associated with rigid bodies.
+ODE's collision detection is optimized to detect geoms that do not
+move and to precompute as much information as possible about these
+objects to save time.  For example, bounding boxes and internal
+collision data structures are precomputed.
 
-Two collision culling algorithms are currently available:
-@list{
-@*	Simple. This checks every possible pair of geometry objects for
-	intersection, and reports the ones whose AABBs overlap.
-	The time required to do intersection testing for @m{n} objects is
-	@m{O(n^2)}.
-	This should not be used for large numbers of objects, but it can be
-	the preferred algorithm for a small number of objects.
+@subsection{Using a different collision library}
 
-@*	Multi-resolution hash table.
-	This records how each geometry object overlaps cells in
-	one of several three dimensional tables.
-	Each tables has cubical cells of different sizes (actually with
-	side lengths of @m{2^i}).
-	The time required to do intersection testing for @m{n} objects is
-	@m{O(n)}, as each object can be quickly paired with the objects
-	around it.
+Using ODE's collision detection is optional - an alternative collision
+library can be used as long as it can supply @c{dContactGeom} structures
+to initialize contact joints.
+
+The dynamics core of ODE is mostly independent of the collision library
+that is used, except for three points:
+@numlist{
+@*	The @c{dGeomID} type must be defined, as each body can store a
+	pointer to the first geometry object that it is associated with.
+@*	The @c{dGeomMoved()} function must be defined, with the following
+	prototype:
+
+	@code{@[void dGeomMoved (dGeomID);@]}
+
+	This function is called by the dynamics code whenever a body moves:
+	it indicates that the geometry object associated with the body is
+	now in a new position.
+@*	The @c{dGeomGetBodyNext()} function must be defined, with the following
+	prototype:
+
+	@code{@[dGeomID dGeomGetBodyNext (dGeomID);@]}
+
+	This function is called by the dynamics code to traverse the list of
+	geoms that are associated with each body. Given a geom attached to
+	a body, it returns the next geom attached to that body, or 0 if there
+	are no more geoms.
 }
-
-All spaces guarantee that if a geometry object's collider function is called,
-the object's AABB function will have been called prior to that without the
-geometry position having being changed in between the calls.
-This protocol can be useful if the AABB function wants to precompute some
-data that is used by the collider function.
-The collider function can check if it is being called inside a space by
-checking if the return value of @func{dGeomGetSpaceAABB()} is nonzero.
-
-Here are the functions used for spaces:
-
-@funcdef{
-dSpaceID dSimpleSpaceCreate();
-dSpaceID dHashSpaceCreate();
-}{
-Create a space, either of the simple or multi-resolution hash table kind.
-}
-
-
-@funcdef{
-void dHashSpaceSetLevels (dSpaceID space, int minlevel, int maxlevel);
-}{
-This sets some parameters for a multi-resolution hash table space.
-The smallest and largest cell sizes used in the hash table will be
-2^@arg{minlevel} and 2^@arg{maxlevel} respectively.
-}
-
-
-@funcdef{
-void dSpaceDestroy (dSpaceID);
-}{
-Destroy a space.
-When a space is destroyed, all the geometry objects in that space are
-automatically destroyed as well.
-}
-
-
-@funcdef{
-void dSpaceAdd (dSpaceID, dGeomID);
-void dSpaceRemove (dSpaceID, dGeomID);
-int dSpaceQuery (dSpaceID, dGeomID);
-}{
-The first two functions add and remove geometry objects to/from the space.
-They may be called by the geometry object creation/deletion functions.
-@c{dSpaceQuery()} will return 1 if the given geometry object is in the given
-space, 0 if not. It is provided for convenience.
-}
-
-
-@funcdef{
-void dSpaceCollide (dSpaceID space, void *data,
-                    dNearCallback *callback);
-}{
-Call a callback function one or more times, for all potentially intersecting
-objects in the space.
-The @arg{callback} function is of type @c{dNearCallback}, which is defined as:
-@code{@[
-typedef void dNearCallback (void *data, dGeomID o1, dGeomID o2);
-@]}
-The @arg{data} variable is passed from @func{dSpaceCollide()} to the
-callback function. Its meaning is user defined.
-The @arg{o1} and @arg{o2} arguments are the geometry objects that may be near
-each other.
-The callback function can call @func{dCollide()} on @arg{o1} and @arg{o2},
-perhaps first determining whether to collide them at all based on other
-information.
-}
+If you want an alternative collision library to get body-movement
+notifications from ODE, you should redefine @c{dGeomID}, @c{dGeomMoved()}
+and @c{dGeomGetBodyNext()} appropriately.
 
 #############################################################################
 @chapter{How to make good simulations}
@@ -3211,11 +3619,11 @@ There are three fixes for this problem:
 
 In other words, how can you create a body that doesn't move, but that
 interacts with other bodies?
-The answer is to create a geometry object only, without the corresponding
+The answer is to create a geom only, without the corresponding
 rigid body object.
-The geometry object is associated with a rigid body ID of zero.
-Then in the contact callback when you detect a collision between two geometry
-objects with a nonzero body ID and a zero body ID, you can simply pass those
+The geom is associated with a rigid body ID of zero.
+Then in the contact callback when you detect a collision between two geoms
+with a nonzero body ID and a zero body ID, you can simply pass those
 two IDs to the @func{dJointAttach()} function as normal.
 This will create a contact between the rigid body and the static environment.
 
@@ -3316,7 +3724,7 @@ The motion of A should affect the motion of B as usual, but B
 should not influence A at all.
 This might be necessary, for example, if B is a physically simulated camera
 in a VR environment.
-The camera needs collison response so that it doesn't enter into any scene
+The camera needs collision response so that it doesn't enter into any scene
 objects by mistake, but the motion of the camera should not affect the
 simulation.
 How can this be achieved?
