@@ -2479,11 +2479,12 @@ error in the debug build of ODE.
 @funcdef{
 void dGeomSetPosition (dGeomID, dReal x, dReal y, dReal z);
 void dGeomSetRotation (dGeomID, const dMatrix3 R);
+void dGeomSetQuaternion (dGeomID, const dQuaternion);
 }{
-Set the position vector and rotation matrix of a placeable geom.
-These functions are analogous to @func{dBodySetPosition()} and
-@func{dBodySetRotation()}.
-If the geom is attached to a body, the body's position / rotation
+Set the position vector, rotation matrix or quaternion of a placeable geom.
+These functions are analogous to @func{dBodySetPosition()},
+@func{dBodySetRotation()} and @func{dBodySetQuaternion()}.
+If the geom is attached to a body, the body's position / rotation / quaternion
 will also be changed.
 
 Calling these functions on a non-placeable geom results in a runtime
@@ -2494,13 +2495,19 @@ error in the debug build of ODE.
 @funcdef{
 const dReal * dGeomGetPosition (dGeomID);
 const dReal * dGeomGetRotation (dGeomID);
+void dGeomGetQuaternion (dGeomID, dQuaternion result);
 }{
-Return pointers to the geom's position vector and rotation matrix.
+The first two return pointers to the geom's position vector and rotation matrix.
 The returned values are pointers to internal data structures, so the vectors
 are valid until any changes are made to the geom.
 If the geom is attached to a body, the body's position / rotation
 pointers will be returned, i.e. the result will be identical to calling
 @func{dBodyGetPosition()} or @func{dBodyGetRotation()}.
+
+@func{dGeomGetQuaternion} copy's the geom's quaternion into the space provided.
+If the geom is attached to a body, the body's quaternion will be returned, i.e.
+the resulting quaternion will be the same as the result of calling
+@func{dBodyGetQuaternion()}.
 
 Calling these functions on a non-placeable geom results in a runtime
 error in the debug build of ODE.
