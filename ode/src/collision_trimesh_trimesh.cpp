@@ -918,13 +918,14 @@ dCollideTTL(dxGeom* g1, dxGeom* g2, int Flags, dContactGeom* Contacts, int Strid
                                 
                             } // not coplanar (main loop)
                         } // TriTriIntersectWithIsectLine
-                    } // if (OutTriCount < (Flags & 0xffff))
                 
-                // Free memory
-                if (firstClippedElt)
+                    // Free memory
                     delete[] firstClippedElt;
-                if (secondClippedElt)
-                    delete[] secondClippedElt;
+	            firstClippedElt = NULL;
+                    delete[] secondClippedElt;	
+        	    secondClippedElt = NULL;
+
+                } // if (OutTriCount < (Flags & 0xffff))
 
                 // Return the number of contacts
                 return OutTriCount; 
