@@ -13,6 +13,7 @@
 #   FAST : defined to 1 to apply extra non-detrimental optimizations
 #   SUBDIRS : subdirectories to build (*)
 #   SUBDIR_TARGET : target to build in subdirectories
+#   SUBSYSTEM : set to `WINDOWS' or `CONSOLE', for Win32 targets only
 #
 # variables defined here
 #   PLATFORM : win32, linux, etc
