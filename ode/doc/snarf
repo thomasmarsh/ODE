@@ -188,10 +188,13 @@ sub HandleFuncdef
 
   # try to make anchor for pure function name
   my $a = $func;
-  $a =~ s/(\w+)\s*\(.*//;
-  $a = $1;
-  $a = "<a name=\"func_$a\">" if ($a ne '');
-  return "$a<pre><font color=\"#0000ff\">$func</font></pre><blockquote>$desc</blockquote>";
+  my $b = '';
+  while ($a =~ s/(\w+)\s*\(.*//) {
+    if ($1 ne '') {
+      $b .= "<a name=\"func_$1\">\n" 
+    }
+  }
+  return "$b<pre><font color=\"#0000ff\">$func</font></pre><blockquote>$desc</blockquote>";
 }
 
 
