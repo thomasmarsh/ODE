@@ -220,13 +220,13 @@ void run (char *filename)
 void check_if_this_is_a_pentium (FILE *file)
 {
   write_header_comment (file,"is this a pentium on a gcc-based platform?");
-  write_to_file ("ctest.c",
+  write_to_file ("ctest.cpp",
 		 "int main() {\n"
 		 "  asm (\"mov $0,%%eax\\n cpuid\\n\" : : : \"%eax\");\n"
 		 "  return 0;\n"
 		 "}\n");
   delete_file ("ctest.exe");
-  compile ("ctest.exe","ctest.c");
+  compile ("ctest.exe","ctest.cpp");
   if (file_exists ("ctest.exe")) {
     fprintf (file,"#define PENTIUM 1\n\n");
   }
@@ -234,7 +234,7 @@ void check_if_this_is_a_pentium (FILE *file)
     fprintf (file,"/* #define PENTIUM 1 -- not a pentium */\n\n");
   }
 
-  delete_file ("ctest.c");
+  delete_file ("ctest.cpp");
   delete_file ("ctest.exe");
 }
 
@@ -257,11 +257,11 @@ void get_all_standard_headers (FILE *file)
   int i;
 
   for (i=0; i < NUM_HEADERS; i++) {
-    FILE *f = xfopen ("ctest.c","wt");
+    FILE *f = xfopen ("ctest.cpp","wt");
     fprintf (f,"#include <%s>\nint main() { return 0; }\n",header_files[i]);
     fclose (f);
     delete_file ("ctest.exe");
-    compile ("ctest.exe","ctest.c");
+    compile ("ctest.exe","ctest.cpp");
     if (file_exists ("ctest.exe")) {
       fprintf (file,"#include <%s>\n",header_files[i]);
       header_used[i] = 1;
@@ -271,7 +271,7 @@ void get_all_standard_headers (FILE *file)
     }
   }
 
-  delete_file ("ctest.c");
+  delete_file ("ctest.cpp");
   delete_file ("ctest.exe");
 }
 
@@ -389,7 +389,7 @@ void get_ODE_float_stuff (FILE *file)
 
   /* try the different infinity constants until one works */
   for (i=0; i < INFINITIES_TO_TEST; i++) {
-    f = xfopen ("ctest.c","wt");
+    f = xfopen ("ctest.cpp","wt");
     for (j=0; j < NUM_HEADERS; j++) {
       if (header_used[j]) fprintf (f,"#include <%s>\n",header_files[j]);
     }
@@ -407,11 +407,11 @@ void get_ODE_float_stuff (FILE *file)
 	     ,decl[i],suffix,suffix);
     fclose (f);
     delete_file ("data");
-    compile ("ctest.exe","ctest.c");
+    compile ("ctest.exe","ctest.cpp");
     run ("ctest.exe");
     if (file_exists ("data")) {
       fprintf (file,"%s\n\n",decl[i]);
-      delete_file ("ctest.c");
+      delete_file ("ctest.cpp");
       delete_file ("ctest.exe");
       delete_file ("data");
       return;
@@ -457,21 +457,21 @@ void get_available_functions (FILE *file)
 	write_header_comment (file,"available functions");
 
 	for (i=0; i < FUNCTIONS_TO_TEST; i++) {
-		FILE *f = xfopen ("ctest.c","wt");
+		FILE *f = xfopen ("ctest.cpp","wt");
 		for (j=0; j < NUM_HEADERS; j++) {
 			if (header_used[j]) fprintf (f,"#include <%s>\n",header_files[j]);
 		}
 		fprintf (f,"int main() { %s return 0; }\n",fnames[i*3]);
 		fclose (f);
 		delete_file ("ctest.exe");
-		compile ("ctest.exe","ctest.c");
+		compile ("ctest.exe","ctest.cpp");
 		if (file_exists ("ctest.exe")) {
 			if (fnames[i*3+1]) fprintf (file,"%s\n",fnames[i*3+1]);
 		}
 		else {
 			if (fnames[i*3+2]) fprintf (file,"%s\n",fnames[i*3+2]);
 		}
-		delete_file ("ctest.c");
+		delete_file ("ctest.cpp");
 		delete_file ("ctest.exe");
 	}
 }
