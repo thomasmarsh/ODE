@@ -162,7 +162,7 @@ static void simLoop (int pause)
       dsDrawBox (dBodyGetPosition(body[i]),dBodyGetRotation(body[i]),sides[i]);
     else
       dsDrawSphere (dBodyGetPosition(body[i]),dBodyGetRotation(body[i]),
-		    sides[i][0]);
+		    (float) sides[i][0]);
   }
 }
 
