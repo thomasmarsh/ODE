@@ -63,6 +63,42 @@ void dxTriMeshData::Build(const void* Vertices, int VertexStide, int VertexCount
 	TreeBuilder.mCanRemap = false;
 
 	BVTree.Build(TreeBuilder);
+
+	// compute model space AABB
+	dVector3 AABBMax, AABBMin;
+	AABBMax[0] = AABBMax[1] = AABBMax[2] = -dInfinity;
+	AABBMin[0] = AABBMin[1] = AABBMin[2] = dInfinity;
+	if( Single ) {
+        const char* verts = (const char*)Vertices;
+        for( int i = 0; i < VertexCount; ++i ) {
+            const float* v = (const float*)verts;
+            if( v[0] > AABBMax[0] ) AABBMax[0] = v[0];
+            if( v[1] > AABBMax[1] ) AABBMax[1] = v[1];
+            if( v[2] > AABBMax[2] ) AABBMax[2] = v[2];
+            if( v[0] < AABBMin[0] ) AABBMin[0] = v[0];
+            if( v[1] < AABBMin[1] ) AABBMin[1] = v[1];
+            if( v[2] < AABBMin[2] ) AABBMin[2] = v[2];
+            verts += VertexStide;
+        }
+    } else {
+        const char* verts = (const char*)Vertices;
+        for( int i = 0; i < VertexCount; ++i ) {
+            const double* v = (const double*)verts;
+            if( v[0] > AABBMax[0] ) AABBMax[0] = v[0];
+            if( v[1] > AABBMax[1] ) AABBMax[1] = v[1];
+            if( v[2] > AABBMax[2] ) AABBMax[2] = v[2];
+            if( v[0] < AABBMin[0] ) AABBMin[0] = v[0];
+            if( v[1] < AABBMin[1] ) AABBMin[1] = v[1];
+            if( v[2] < AABBMin[2] ) AABBMin[2] = v[2];
+            verts += VertexStide;
+        }
+    }
+    AABBCenter[0] = (AABBMin[0] + AABBMax[0]) * REAL(0.5);
+    AABBCenter[1] = (AABBMin[1] + AABBMax[1]) * REAL(0.5);
+    AABBCenter[2] = (AABBMin[2] + AABBMax[2]) * REAL(0.5);
+    AABBExtents[0] = AABBMax[0] - AABBCenter[0];
+    AABBExtents[1] = AABBMax[1] - AABBCenter[1];
+    AABBExtents[2] = AABBMax[2] - AABBCenter[2];
 }
 
 dTriMeshDataID dGeomTriMeshDataCreate(){
@@ -147,12 +183,24 @@ int dxTriMesh::AABBTest(dxGeom* g, dReal aabb[6]){
 }
 
 void dxTriMesh::computeAABB(){
-	aabb[0] = -dInfinity;
-	aabb[1] = dInfinity;
-	aabb[2] = -dInfinity;
-	aabb[3] = dInfinity;
-	aabb[4] = -dInfinity;
-	aabb[5] = dInfinity;
+        const dxTriMeshData* d = Data;
+        dVector3 c;
+        dMULTIPLY0_331( c, R, d->AABBCenter );
+        dReal xrange = dFabs(R[0] * Data->AABBExtents[0]) +
+	  dFabs(R[1] * Data->AABBExtents[1]) + dFabs(R[2] *
+						     Data->AABBExtents[2]);
+        dReal yrange = dFabs(R[4] * Data->AABBExtents[0]) +
+	  dFabs(R[5] * Data->AABBExtents[1]) + dFabs(R[6] *
+						     Data->AABBExtents[2]);
+        dReal zrange = dFabs(R[8] * Data->AABBExtents[0]) +
+	  dFabs(R[9] * Data->AABBExtents[1]) + dFabs(R[10] *
+						     Data->AABBExtents[2]);
+        aabb[0] = c[0] + pos[0] - xrange;
+        aabb[1] = c[0] + pos[0] + xrange;
+        aabb[2] = c[1] + pos[1] - yrange;
+        aabb[3] = c[1] + pos[1] + yrange;
+        aabb[4] = c[2] + pos[2] - zrange;
+        aabb[5] = c[2] + pos[2] + zrange;
 }
 
 dGeomID dCreateTriMesh(dSpaceID space, dTriMeshDataID Data, dTriCallback* Callback, dTriArrayCallback* ArrayCallback, dTriRayCallback* RayCallback){
