@@ -20,6 +20,8 @@
 #                                                                       #
 #########################################################################
 
+.SUFFIXES:
+
 USER_SETTINGS=config/user-settings
 include $(USER_SETTINGS)
 PLATFORM_MAKEFILE=config/makefile.$(PLATFORM)
@@ -130,6 +132,60 @@ CONFIGURATOR_SRC=configurator.c
 CONFIG_H=include/ode/config.h
 
 ##############################################################################
+# OPCODE build rules
+
+ifdef OPCODE_DIRECTORY
+
+ODE_SRC+=\
+	OPCODE/OPC_AABBCollider.cpp \
+	OPCODE/OPC_AABBTree.cpp \
+	OPCODE/OPC_BaseModel.cpp \
+	OPCODE/OPC_BoxPruning.cpp \
+	OPCODE/OPC_Collider.cpp \
+	OPCODE/OPC_Common.cpp \
+	OPCODE/OPC_HybridModel.cpp \
+	OPCODE/OPC_LSSCollider.cpp \
+	OPCODE/OPC_MeshInterface.cpp \
+	OPCODE/OPC_Model.cpp \
+	OPCODE/OPC_OBBCollider.cpp \
+	OPCODE/Opcode.cpp \
+	OPCODE/OPC_OptimizedTree.cpp \
+	OPCODE/OPC_Picking.cpp \
+	OPCODE/OPC_PlanesCollider.cpp \
+	OPCODE/OPC_RayCollider.cpp \
+	OPCODE/OPC_SphereCollider.cpp \
+	OPCODE/OPC_SweepAndPrune.cpp \
+	OPCODE/OPC_TreeBuilders.cpp \
+	OPCODE/OPC_TreeCollider.cpp \
+	OPCODE/OPC_VolumeCollider.cpp \
+	OPCODE/Ice/IceAABB.cpp \
+	OPCODE/Ice/IceContainer.cpp \
+	OPCODE/Ice/IceHPoint.cpp \
+	OPCODE/Ice/IceIndexedTriangle.cpp \
+	OPCODE/Ice/IceMatrix3x3.cpp \
+	OPCODE/Ice/IceMatrix4x4.cpp \
+	OPCODE/Ice/IceOBB.cpp \
+	OPCODE/Ice/IcePlane.cpp \
+	OPCODE/Ice/IcePoint.cpp \
+	OPCODE/Ice/IceRandom.cpp \
+	OPCODE/Ice/IceRay.cpp \
+	OPCODE/Ice/IceRevisitedRadix.cpp \
+	OPCODE/Ice/IceSegment.cpp \
+	OPCODE/Ice/IceTriangle.cpp \
+	OPCODE/Ice/IceUtils.cpp
+
+# GCC versions 3.X generate bad code for some modules
+# with -O2, so we use -O1 until we get this tied down a bit more.
+# There are at least two problematic code modules with -O2, one of
+# which is OPC_TreeCollider (if you identify the other, which causes
+# problems with trimesh-trimesh collisions, then let us know).
+ifeq ($(CC),g++)
+OPCODE/%.o: OPT=1
+endif
+
+endif
+
+##############################################################################
 # derived things
 
 DEFINES=
@@ -138,7 +194,6 @@ DEFINES=
 ifdef OPCODE_DIRECTORY
 DEFINES+=$(C_DEF)dTRIMESH_ENABLED
 INC_OPCODE=$(C_INC)$(OPCODE_DIRECTORY)
-OPCODE_LIB=$(OPCODE_DIRECTORY)/$(LIB_PREFIX)opcode$(LIB_SUFFIX)
 endif
 
 # add some defines depending on the build mode
@@ -274,6 +329,7 @@ endif
 
 clean:
 	-$(DEL_CMD) $(ODE_OBJECTS) $(ODE_TEST_EXE) $(ODE_LIB) $(DRAWSTUFF_OBJECTS) $(DRAWSTUFF_TEST_EXE) $(DRAWSTUFF_LIB) ode/test/*$(OBJ) drawstuff/dstest/*$(OBJ) $(CONFIGURATOR_EXE) $(CONFIG_H)
+	-$(DEL_CMD) OPCODE/*.obj OPCODE/*.o OPCODE/Ice/*.obj OPCODE/Ice/*.o
 
 %$(OBJ): %.c
 	$(CC) $(C_FLAGS) $(C_INC)$(INCPATH) $(DEFINES) $(C_OPT)1 $(C_OUT)$@ $<
@@ -282,7 +338,7 @@ clean:
 	$(CC) $(C_FLAGS) $(C_INC)$(INCPATH) $(INC_OPCODE) $(DEFINES) $(C_OPT)$(OPT) $(C_OUT)$@ $<
 
 %.exe: %$(OBJ)
-	$(CC) $(C_EXEOUT)$@ $< $(ODE_LIB) $(OPCODE_LIB) $(DRAWSTUFF_LIB) $(RESOURCE_FILE) $(LINK_OPENGL) $(LINK_MATH)
+	$(CC) $(C_EXEOUT)$@ $< $(ODE_LIB) $(DRAWSTUFF_LIB) $(RESOURCE_FILE) $(LINK_OPENGL) $(LINK_MATH)
 
 
 # windows specific rules

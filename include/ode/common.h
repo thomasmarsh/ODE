@@ -159,7 +159,7 @@ typedef dReal dQuaternion[4];
  */
 
 #define dALLOCA16(n) \
-  ((char*)dEFFICIENT_SIZE(((int)(alloca((n)+(EFFICIENT_ALIGNMENT-1))))))
+  ((char*)dEFFICIENT_SIZE(((size_t)(alloca((n)+(EFFICIENT_ALIGNMENT-1))))))
 
 
 /* internal object types (all prefixed with `dx') */

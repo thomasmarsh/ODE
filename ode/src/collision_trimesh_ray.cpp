@@ -22,10 +22,6 @@
 
 // TriMesh code by Erwin de Vries.
 
-#ifdef MSVC
-#pragma warning(disable:4800)  // for VC++, no complaints about implcit cast to bool
-#endif
-
 #include <ode/collision.h>
 #include <ode/matrix.h>
 #include <ode/rotation.h>
@@ -49,9 +45,9 @@ int dCollideRTL(dxGeom* g1, dxGeom* RayGeom, int Flags, dContactGeom* Contacts, 
 	dGeomRayGetParams(RayGeom, &FirstContact, &BackfaceCull);
 	int ClosestHit = dGeomRayGetClosestHit(RayGeom);
 
-	Collider.SetFirstContact(FirstContact);
-	Collider.SetClosestHit(ClosestHit);
-	Collider.SetCulling(BackfaceCull);
+	Collider.SetFirstContact(FirstContact != 0);
+	Collider.SetClosestHit(ClosestHit != 0);
+	Collider.SetCulling(BackfaceCull != 0);
 	Collider.SetMaxDist(Length);
 
 	dVector3 Origin, Direction;

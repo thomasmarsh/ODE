@@ -29,10 +29,10 @@
 // macros and constants
 
 #define ROUND_UP_OFFSET_TO_EFFICIENT_SIZE(arena,ofs) \
-  ofs = (int) (dEFFICIENT_SIZE( ((intP)(arena)) + ofs ) - ((intP)(arena)) );
+  ofs = (size_t) (dEFFICIENT_SIZE( ((intP)(arena)) + ofs ) - ((intP)(arena)) );
 
 #define MAX_ALLOC_SIZE \
-  ((int)(dOBSTACK_ARENA_SIZE - sizeof (Arena) - EFFICIENT_ALIGNMENT + 1))
+  ((size_t)(dOBSTACK_ARENA_SIZE - sizeof (Arena) - EFFICIENT_ALIGNMENT + 1))
 
 //****************************************************************************
 // dObStack
@@ -61,7 +61,7 @@ dObStack::~dObStack()
 
 void *dObStack::alloc (int num_bytes)
 {
-  if (num_bytes > MAX_ALLOC_SIZE) dDebug (0,"num_bytes too large");
+  if ((size_t)num_bytes > MAX_ALLOC_SIZE) dDebug (0,"num_bytes too large");
 
   // allocate or move to a new arena if necessary
   if (!first) {

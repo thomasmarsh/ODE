@@ -35,4 +35,4 @@ else
 DEFS_FILE=msvcdefs.def
 endif
 
-ODE_LIB_AR_RULE=link /dll /nologo /SUBSYSTEM:WINDOWS /LIBPATH:"C:\Programme\Micros~2\VC98\Lib" /def:config/msvcdefs.def $(LINK_OPENGL) /OUT:$(patsubst %.lib,%.dll,$@)
+ODE_LIB_AR_RULE=link /dll /nologo /SUBSYSTEM:WINDOWS /LIBPATH:"C:\Programme\Micros~2\VC98\Lib" /def:config/$(DEFS_FILE) $(LINK_OPENGL) /OUT:$(patsubst %.lib,%.dll,$@)
