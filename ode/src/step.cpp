@@ -288,6 +288,10 @@ static inline void moveAndRotateBody (dxBody *b, dReal h)
   // normalize the quaternion and convert it to a rotation matrix
   dNormalize4 (b->q);
   dQtoR (b->q,b->R);
+
+  // notify all attached geoms that this body has moved
+  for (dxGeom *geom = b->geom; geom; geom = dGeomGetBodyNext (geom))
+    dGeomMoved (geom);
 }
 
 //****************************************************************************
@@ -731,10 +735,10 @@ void dInternalStepIsland_x2 (dxWorld *world, dxBody * const *body, int nb,
     // to store the two jacobian blocks from each constraint. it has this
     // format:
     //
-    //   l l l 0 a a a 0  \ 
+    //   l l l 0 a a a 0  \    .
     //   l l l 0 a a a 0   }-- jacobian body 1 block for joint 0 (3 rows)
     //   l l l 0 a a a 0  /
-    //   l l l 0 a a a 0  \ 
+    //   l l l 0 a a a 0  \    .
     //   l l l 0 a a a 0   }-- jacobian body 2 block for joint 0 (3 rows)
     //   l l l 0 a a a 0  /
     //   l l l 0 a a a 0  }--- jacobian body 1 block for joint 1 (1 row)
