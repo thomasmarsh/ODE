@@ -229,7 +229,7 @@ void dGeomTriMeshGetTriangle(dGeomID g, int Index, dVector3* v0, dVector3* v1, d
 	const dMatrix3& Rotation = *(const dMatrix3*)dGeomGetRotation(g);
 
 	dVector3 v[3];
-	FetchTriangle(Geom, Index, Rotation, Position, v);
+	FetchTriangle(Geom, Index, Position, Rotation, v);
 
 	if (v0){
 		(*v0)[0] = v[0][0];
@@ -260,7 +260,7 @@ void dGeomTriMeshGetPoint(dGeomID g, int Index, dReal u, dReal v, dVector3 Out){
 	const dMatrix3& Rotation = *(const dMatrix3*)dGeomGetRotation(g);
 
 	dVector3 dv[3];
-	FetchTriangle(Geom, Index, Rotation, Position, dv);
+	FetchTriangle(Geom, Index, Position, Rotation, dv);
 
 	GetPointFromBarycentric(dv, u, v, Out);
 }
