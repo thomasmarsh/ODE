@@ -9,7 +9,7 @@ LIB_PATHS = ../../lib
 EXTRA_CLEAN = $(APPNAMES)
 DEFINES=d$(DREAL)
 
-ifeq ($(PLATFORM),win32)
+ifeq ($(PLATFORM_IS_WINDOWS),1)
   RSRC=../../lib/drawstuff.res
 endif
 
@@ -17,7 +17,7 @@ all: $(APPNAMES)
 
 $(call fEXENAME,test_ode): SUBSYSTEM=CONSOLE
 $(call fEXENAME,test_ode): $(call fTARGETS,test_ode.cpp)
-	$(call fLINK,$@,$(call fTARGETS,test_ode.cpp) $(call fLIB,ode) $(LINKMATH))
+	$(call fLINK,$@,$(call fTARGETS,test_ode.cpp) $(call fLIB,ode) $(LINKWIN) $(LINKMATH))
 
 $(call fEXENAME,test_chain1): $(call fTARGETS,test_chain1.c)
 	$(call fLINK,$@,$(call fTARGETS,test_chain1.c) $(call fLIB,ode) $(call fLIB,drawstuff) $(LINKOPENGL) $(LINKWIN) $(LINKMATH) $(RSRC))
