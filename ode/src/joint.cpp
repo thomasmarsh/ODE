@@ -1518,12 +1518,79 @@ static void amotorInit (dxJointAMotor *j)
 {
   int i;
   j->num = 0;
+  j->mode = 0;
   for (i=0; i<3; i++) {
     j->rel[i] = 0;
     dSetZero (j->axis[i],4);
     j->limot[i].init (j->world);
     j->angle[i] = 0;
   }
+  dSetZero (j->reference1,4);
+  dSetZero (j->reference2,4);
+}
+
+
+// compute the 3 axes in global coordinates
+
+static void amotorComputeGlobalAxes (dxJointAMotor *joint, dVector3 ax[3])
+{
+  if (joint->mode & 1) {
+    // special handling for euler mode
+    dMULTIPLY0_331 (ax[0],joint->node[0].body->R,joint->axis[0]);
+    dMULTIPLY0_331 (ax[2],joint->node[1].body->R,joint->axis[2]);
+    dCROSS (ax[1],=,ax[2],ax[0]);
+    dNormalize3 (ax[1]);
+  }
+  else {
+    for (int i=0; i < joint->num; i++) {
+      if (joint->rel[i] == 1) {
+	// relative to b1
+	dMULTIPLY0_331 (ax[i],joint->node[0].body->R,joint->axis[i]);
+      }
+      if (joint->rel[i] == 2) {
+	// relative to b2
+	dMULTIPLY0_331 (ax[i],joint->node[1].body->R,joint->axis[i]);
+      }
+      else {
+	// global - just copy it
+	ax[i][0] = joint->axis[i][0];
+	ax[i][1] = joint->axis[i][1];
+	ax[i][2] = joint->axis[i][2];
+      }
+    }
+  }
+}
+
+
+static void amotorComputeEulerAngles (dxJointAMotor *joint, dVector3 ax[3])
+{
+  // assumptions:
+  //   global axes already calculated --> ax
+  //   ax[0] is relative to body 1
+  //   ax[2] is relative to body 2
+  //   ax[1] = ax[2] x ax[0]
+  //   original ax[0] and ax[2] are perpendicular
+  //   reference1 is perpendicular to ax[0] (in body 1 frame)
+  //   reference2 is perpendicular to ax[2] (in body 2 frame)
+  //   all ax[] and reference vectors are unit length
+
+  // calculate references in global frame
+  dVector3 ref1,ref2;
+  dMULTIPLY0_331 (ref1,joint->node[0].body->R,joint->reference1);
+  dMULTIPLY0_331 (ref2,joint->node[1].body->R,joint->reference2);
+
+  // get q perpendicular to both ax[0] and ref1, get first euler angle
+  dVector3 q;
+  dCROSS (q,=,ax[0],ref1);
+  joint->angle[0] = dAtan2 (dDOT(ax[2],q),dDOT(ax[2],ref1));
+
+  // get q perpendicular to both ax[0] and ax[1], get second euler angle
+  dCROSS (q,=,ax[0],ax[1]);
+  joint->angle[1] = dAtan2 (dDOT(ax[2],ax[0]),dDOT(ax[2],q));
+
+  // get q perpendicular to both ax[1] and ax[2], get third euler angle
+  dCROSS (q,=,ax[1],ax[2]);
+  joint->angle[2] = dAtan2 (dDOT(ref2,ax[1]), dDOT(ref2,q));
 }
 
 
@@ -1531,6 +1598,13 @@ static void amotorGetInfo1 (dxJointAMotor *j, dxJoint::Info1 *info)
 {
   info->m = 0;
   info->nub = 0;
+
+  // compute the axes and angles, if in euler mode
+  if (j->mode & 1) {
+    dVector3 ax[3];
+    amotorComputeGlobalAxes (j,ax);
+    amotorComputeEulerAngles (j,ax);
+  }
 
   // see if we're powered or at a joint limit for each axis
   for (int i=0; i < j->num; i++) {
@@ -1546,22 +1620,7 @@ static void amotorGetInfo2 (dxJointAMotor *joint, dxJoint::Info2 *info)
 
   // compute the axes (if not global)
   dVector3 ax[3];
-  for (i=0; i < joint->num; i++) {
-    if (joint->rel[i] == 1) {
-      // relative to b1
-      dMULTIPLY0_331 (ax[i],joint->node[0].body->R,joint->axis[i]);
-    }
-    if (joint->rel[i] == 2) {
-      // relative to b2
-      dMULTIPLY0_331 (ax[i],joint->node[1].body->R,joint->axis[i]);
-    }
-    else {
-      // global - just copy it
-      ax[i][0] = joint->axis[i][0];
-      ax[i][1] = joint->axis[i][1];
-      ax[i][2] = joint->axis[i][2];
-    }
-  }
+  amotorComputeGlobalAxes (joint,ax);
 
   int ofs=0,row=0;
   for (i=0; i < joint->num; i++) {
@@ -1620,6 +1679,13 @@ extern "C" void dJointSetAMotorParam (dxJointAMotor *joint, int parameter,
 }
 
 
+extern "C" void dJointSetAMotorEulerMode (dxJointAMotor *joint, int mode)
+{
+  dAASSERT(joint);
+  joint->mode = (mode != 0);
+}
+
+
 extern "C" int dJointGetAMotorNumAxes (dxJointAMotor *joint)
 {
   dAASSERT(joint);
@@ -1659,6 +1725,13 @@ extern "C" dReal dJointGetAMotorParam (dxJointAMotor *joint, int parameter)
     return joint->angle[axis];
   }
   else return joint->limot[axis].get (parameter);
+}
+
+
+extern "C" int dJointGetAMotorEulerMode (dxJointAMotor *joint)
+{
+  dAASSERT(joint);
+  return joint->mode;
 }
 
 
