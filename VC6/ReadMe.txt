@@ -1,6 +1,5 @@
-
 -------------------------------------------
- MS VisualC++ 6 workspace for ODE (v0.83).
+ MS VisualC++ 6 workspace for ODE (v0.9).
 -------------------------------------------
 
 This directory contains these VC6 workspaces:
@@ -12,18 +11,28 @@ This directory contains these VC6 workspaces:
 
 Before you can use these, you must:
 
- a) add the following directories to your VC include dirs:
-
-	<ode dir>\Include
-	<ode dir>\OPCODE  (needed only for Trimesh support).
-
- b) add the following directory to your VC library dirs:
-
-	<ode dir>\lib
-
- c) configure the ODE build for either single or double floating point, and
+ a) configure the ODE build for either single or double floating point, and
 with/without Trimesh support.  Simply double-click one of the included batch
 files (you can do this at any time) and then perform a build.
+
+ b) add the ODE and Opcode (if using trimesh) include and library paths to your
+    app's project settings - there are two ways to do this:
+
+        1) If you intend to use different versions of ODE with different 
+           applications, you can set them up for each project independently:
+
+           "Project Settings->C/C++->Preprocessor->Additional include directories"
+              add:  <ode dir>\Include;<ode dir>\OPCODE
+
+           "Project Settings->C/C++->Link->Input->Additional library path" 
+              add:  <ode dir>\lib
+
+        2) Otherwise you can just globally set them via:
+
+           "Tools->Options->Directories"
+             "Include files", add:  <ode dir>\Include
+                                    <ode dir>\Opcode
+             "Library files", add:  <ode dir>\lib
 
 Notes:
 
@@ -44,4 +53,3 @@ Thanks to Frank Compagner for his original VC6 workspace and config presets.
 Enjoy.
 --
 gl
-
