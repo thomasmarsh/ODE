@@ -48,7 +48,16 @@ why didn't i just use GNU autoconf? :
 
 */
 
+/****************************************************************************/
+/* include some system header files. <stdio.h> and <stdlib.h> are probably
+ * safe on all systems, but <unistd.h> may not be, so we make explicit
+ * prototypes for the other functions we need.
+ */
+
 #include <stdio.h>
+#include <stdlib.h>
+
+int unlink (char *pathname);
 
 /****************************************************************************/
 /* project constants */
@@ -249,7 +258,6 @@ int header_used[NUM_HEADERS];
 void get_all_standard_headers (FILE *file)
 {
   int i;
-  FILE *f;
 
   for (i=0; i < NUM_HEADERS; i++) {
     FILE *f = xfopen ("ctest.c","wt");
@@ -491,6 +499,7 @@ int main (int argc, char **argv)
 
   /* check some defines we should have been compiled with */
 #if !defined(dSINGLE) && !defined(dDOUBLE)
+#error you must set the dSINGLE or dDOUBLE macro
   fatal_error ("you must set PRECISION to either SINGLE or DOUBLE");
 #endif
 
