@@ -26,7 +26,9 @@
 #include "ode/ode.h"
 #include "drawstuff/drawstuff.h"
 
+#ifdef MSVC
 #pragma warning(disable:4244 4305)  // for VC++, no precision loss complaints
+#endif
 
 // select correct drawing functions
 #ifdef dDOUBLE
