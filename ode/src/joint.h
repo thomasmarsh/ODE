@@ -138,6 +138,7 @@ struct dxJointLimitMotor {
   dReal vel,fmax;		// powered joint: velocity, max force
   dReal lostop,histop;		// joint limits, relative to initial position
   dReal fudge_factor;		// when powering away from joint limits
+  dReal normal_cfm;		// cfm to use when not at a stop
   dReal stop_erp,stop_cfm;	// erp and cfm for when at joint limit
   dReal bounce;			// restitution factor
   // variables used between getInfo1() and getInfo2()

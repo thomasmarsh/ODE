@@ -292,6 +292,7 @@ void dxJointLimitMotor::init (dxWorld *world)
   lostop = -dInfinity;
   histop = dInfinity;
   fudge_factor = 1;
+  normal_cfm = world->global_cfm;
   stop_erp = world->global_erp;
   stop_cfm = world->global_cfm;
   bounce = 0;
@@ -321,6 +322,9 @@ void dxJointLimitMotor::set (int num, dReal value)
   case dParamBounce:
     bounce = value;
     break;
+  case dParamCFM:
+    normal_cfm = value;
+    break;
   case dParamStopERP:
     stop_erp = value;
     break;
@@ -340,6 +344,7 @@ dReal dxJointLimitMotor::get (int num)
   case dParamFMax: return fmax;
   case dParamFudgeFactor: return fudge_factor;
   case dParamBounce: return bounce;
+  case dParamCFM: return normal_cfm;
   case dParamStopERP: return stop_erp;
   case dParamStopCFM: return stop_cfm;
   default: return 0;
@@ -392,6 +397,7 @@ int dxJointLimitMotor::addLimot (dxJoint *joint,
     if (limit && (lostop == histop)) powered = 0;
 
     if (powered) {
+      info->cfm[row] = normal_cfm;
       if (! limit) {
 	info->c[row] = vel;
 	info->lo[row] = -fmax;
@@ -430,6 +436,7 @@ int dxJointLimitMotor::addLimot (dxJoint *joint,
     if (limit) {
       dReal k = info->fps * stop_erp;
       info->c[row] = -k * limit_err;
+      info->cfm[row] = stop_cfm;
 
       if (lostop == histop) {
 	// limited low and high simultaneously
@@ -447,7 +454,6 @@ int dxJointLimitMotor::addLimot (dxJoint *joint,
 	  info->lo[row] = -dInfinity;
 	  info->hi[row] = 0;
 	}
-	info->cfm[row] = stop_cfm;
 
 	// deal with bounce
 	if (bounce > 0) {

@@ -1777,6 +1777,8 @@ The parameter numbers are:
 @constdef{dParamBounce}{The bouncyness of the stops.
 	This is a restitution parameter in the range 0..1.
 	0 means the stops are not bouncy at all, 1 means maximum bouncyness.}
+@constdef{dParamCFM}{The constraint force mixing (CFM) value used when not
+	at a stop.}
 @constdef{dParamStopERP}{The error reduction parameter (ERP) used by the
 	stops.}
 @constdef{dParamStopCFM}{The constraint force mixing (CFM) value used by the

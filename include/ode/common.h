@@ -246,6 +246,7 @@ enum {
   dParamFMax, \
   dParamFudgeFactor, \
   dParamBounce, \
+  dParamCFM, \
   dParamStopERP, \
   dParamStopCFM, \
   /* parameters for suspension */ \
