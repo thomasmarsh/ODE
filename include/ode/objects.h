@@ -46,6 +46,18 @@ void dWorldStep (dWorldID, dReal stepsize);
 void dWorldImpulseToForce (dWorldID, dReal stepsize,
 			   dReal ix, dReal iy, dReal iz, dVector3 force);
 
+/* StepFast1 functions */
+
+void dWorldStepFast1(dWorldID, dReal stepsize, int maxiterations);
+void dWorldSetAutoEnableDepthSF1(dWorldID, int autoEnableDepth);
+int dWorldGetAutoEnableDepthSF1(dWorldID);
+void dBodySetAutoDisableThresholdSF1(dBodyID, dReal autoDisableThreshold);
+dReal dBodyGetAutoDisableThresholdSF1(dBodyID);
+void dBodySetAutoDisableStepsSF1(dBodyID, int AutoDisableSteps);
+int dBodyGetAutoDisableStepsSF1(dBodyID);
+void dBodySetAutoDisableSF1(dBodyID, int doAutoDisable);
+int dBodyGetAutoDisableSF1(dBodyID);
+
 /* bodies */
 
 dBodyID dBodyCreate (dWorldID);

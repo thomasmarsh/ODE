@@ -97,6 +97,28 @@ ode/src/step.o: \
   include/ode/timer.h \
   include/ode/matrix.h \
   ode/src/lcp.h
+ode/src/stepfast.o: \
+  ode/src/stepfast.cpp \
+  ode/src/objects.h \
+  include/ode/common.h \
+  include/ode/config.h \
+  include/ode/error.h \
+  include/ode/memory.h \
+  include/ode/mass.h \
+  ode/src/array.h \
+  ode/src/joint.h \
+  include/ode/contact.h \
+  ode/src/obstack.h \
+  include/ode/odemath.h \
+  include/ode/rotation.h \
+  include/ode/timer.h \
+  include/ode/matrix.h \
+  include/ode/misc.h \
+  include/ode/odecpp.h \
+  include/ode/collision_space.h \
+  include/ode/collision.h \
+  include/ode/odecpp_collision.h \
+  ode/src/lcp.h
 ode/src/lcp.o: \
   ode/src/lcp.cpp \
   include/ode/common.h \
@@ -430,6 +452,27 @@ ode/test/test_boxstack.o: \
   include/drawstuff/version.h
 ode/test/test_buggy.o: \
   ode/test/test_buggy.cpp \
+  include/ode/ode.h \
+  include/ode/config.h \
+  include/ode/common.h \
+  include/ode/error.h \
+  include/ode/contact.h \
+  include/ode/memory.h \
+  include/ode/odemath.h \
+  include/ode/matrix.h \
+  include/ode/timer.h \
+  include/ode/rotation.h \
+  include/ode/mass.h \
+  include/ode/misc.h \
+  include/ode/objects.h \
+  include/ode/odecpp.h \
+  include/ode/collision_space.h \
+  include/ode/collision.h \
+  include/ode/odecpp_collision.h \
+  include/drawstuff/drawstuff.h \
+  include/drawstuff/version.h
+ode/test/test_crash.o: \
+  ode/test/test_crash.cpp \
   include/ode/ode.h \
   include/ode/config.h \
   include/ode/common.h \
