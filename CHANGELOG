@@ -9,6 +9,14 @@ the rules for this file:
 
 ------------------------------------------------------------------------------
 
+11/30/02 russ
+
+	* added the ray geom class.
+
+	* added the dGeomXXXPointDepth() functions.
+
+	* added a collision test infrastructure, and some more tests.
+
 11/24/02 russ
 
 	* added support for multiple box-box contacts.
