@@ -1,9 +1,13 @@
 
 here are the steps to buid ODE:
 
+(0) if you're using Microsoft's Visual C++ compiler, you have the option
+    of using the workspace and project files in the VC6 subdirectory,
+    or you can follow the instructions below.    
+
 (1) get the GNU 'make' tool. many unix platforms come with this, although
-    sometimes it is called 'gmake'. i have provided a version of GNU make
-    for windows at: http://q12.org/ode/bin/make.exe
+    sometimes it is called 'gmake'. a version of GNU make for windows
+    is available at: http://q12.org/ode/bin/make.exe
 
 (2) edit the settings in the file config/user-settings. the list of supported
     platforms is given in that file.
@@ -26,19 +30,3 @@ here are the steps to buid ODE:
 
 	include/ode  --> /usr/local/include/ode
 	lib/libode.a --> /usr/local/lib/libode.a
-
-ODE has been verified to build on the following platforms:
-
-				config		ode-lib 	ode-test
-				------		------- 	--------
-  windows
-    MSVC			msvc		*		*
-    MinGW			mingw		*		*
-    CygWin			cygwin		*		*
-  linux (x86, mandrake 8.1)	unix-gcc	*		*
-  linux (alpha, debian 2.2)	unix-gcc	*		?
-  linux (RS/6000, debian 2.2)	unix-gcc	*		?
-  linux (Sparc U60, debian 2.2) unix-gcc	*		?
-  freebsd 4.3			unix-gcc	*		?
-  Mac OS-X			osx		*		?
-  Solaris 8 (Sparc R220)	unix-gcc	*		?
