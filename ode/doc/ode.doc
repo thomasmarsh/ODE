@@ -112,19 +112,15 @@ Here are the features:
 @*	Other stuff I forgot to mention...
 }
 
-One current problem is that the @c{mu} parameter that controls Coulomb friction
-is not yet interpreted correctly - it specifies the maximum friction force
-that can be present at a contact, rather than specifying the maximum ratio of
-tangential to normal force. This will be fixed in the next release.
-[Note: I need lots more documentation about how the friction approximation
-works].
-
 
 @section{New in the 0.03 release}
 
 @list{
 @* Multi-resolution hash table based collision space, that performs quick
    identification of potentially intersecting pairs.
+@* Improved the approximation to Coloumb friction.
+@* A few bug fixes.
+@* A few minor API changes so that the API matches the documentation.
 }
 
 
@@ -167,7 +163,6 @@ works].
 
 @list{
 @* Update documentation.
-@* Improve the approximation to Coloumb friction.
 @* Optimize LCP solver even more.
 @* Expose type-specific collision functions.
 @* More collision primitives: capped cylinder, composite objects.
@@ -264,7 +259,7 @@ The origin of this coordinate frame is the body's point of reference.
 Some values in ODE (vectors, matrices etc) are relative to the body
 coordinate frame, and others are relative to the global coordinate frame.
 
-Note that the @emph{shape} of a rigid body is not a dynamical properties
+Note that the @emph{shape} of a rigid body is not a dynamical property
 (except insofar as it influences the various mass properties).
 It is only @emph{collision detection} that cares about the detailed shape of
 the body.
@@ -554,7 +549,63 @@ A typical simulation will proceed like this:
 
 @section{Physics model}
 
-[Discuss the various methods and approximations that are used.]
+The various methods and approximations that are used in ODE are discussed
+here.
+
+@subsection{Friction approximation}
+
+[We really need more pictures here.]
+
+The Coulomb friction model is a simple, but effective way to model friction
+at contact points.
+It is a simple relationship between the normal and tangential forces present
+at a contact point (see the contact joint section for a description of these
+forces). The rule is:
+
+	@center{@m{| f_T | <= mu * | f_N |}}
+
+where @m{f_N} and @m{f_T} are the normal and tangential force vectors
+respectively, and @m{mu} is the friction coefficient (typically a number
+around 1.0).
+This equation defines a "friction cone" - imagine a cone with @m{f_N} as the
+axis and the contact point as the vertex.
+If the total friction force vector is within the cone then the contact is in
+"sticking mode", and the friction force is enough to prevent the contacting
+surfaces from moving with respect to each other.
+If the force vector is on the surface of the cone then the contact is in
+"sliding mode", and the friction force is typically not large enough to
+prevent the contacting surfaces from sliding.
+The parameter @m{mu} thus specifies the maximum ratio of tangential to normal
+force.
+
+ODE's friction models are approximations to the friction cone, for reasons of
+efficiency. There are currently two approximations to chose from:
+@numlist{
+@*	The meaning of @m{mu} is changed so that it specifies the
+	maximum friction (tangential) force that can be present at a contact,
+	in either of the tangential friction directions.
+	This is rather non physical because it is independent of the normal
+	force, but it can be useful and it is the computationally cheapest
+	option. Note that in this case @m{mu} is a force limit an must be
+	chosen appropriate to the simulation.
+@*	The friction cone is approximated by a friction pyramid aligned with
+	the first and second friction directions [I really need a picture
+	here].
+	A further approximation is made: first ODE computes the normal forces
+	assuming that all the contacts are frictionless. Then it computes the
+	maximum limits @m{f_m} for the friction (tangential) forces from
+
+		@center{@m{f_m = mu * | f_N |}} 
+
+	and then proceeds to solve for the entire system with these fixed
+	limits (in a manner similar to approximation 1 above).
+	This differs from a true friction pyramid in that the "effective"
+	@m{mu} is not quite fixed.
+	This approximation is easier to use as @m{mu} is a unitless ratio
+	the same as the normal Coloumb friction coefficient, and thus can be
+	set to a constant value around 1.0 without regard for the specific
+	simulation.
+}
 
 #############################################################################
 @chapter{Data types and conventions}
@@ -1113,6 +1164,16 @@ It has the following members:
 		[this needs more description].}
 	@constdef{dContactSlip2}{Slip, friction direction 2.
 		[this needs more description].}
+	@constdef{dContactApprox1_1}{Use the friction pyramid approximation
+		for friction direction 1. If this is not specified then the
+		constant-force-limit approximation is used (and @c{mu} is a
+		force limit).}
+	@constdef{dContactApprox1_2}{Use the friction pyramid approximation
+		for friction direction 2. If this is not specified then the
+		constant-force-limit approximation is used (and @c{mu} is a
+		force limit).}
+	@constdef{dContactApprox1}{Equivalent to both @c{dContactApprox1_1}
+		and @c{dContactApprox1_2}.}
 
 @*	@c{dReal mu} : Coulomb friction coefficient.
 	This must be in the range 0 to @c{dInfinity}. 0 results in a
