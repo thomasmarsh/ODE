@@ -33,6 +33,7 @@
 #include <ode/odemath.h>
 #include <ode/matrix.h>
 #include "step.h"
+#include "util.h"
 #include <ode/memory.h>
 #include <ode/error.h>
 
@@ -123,6 +124,9 @@ static void processIslands (dxWorld *world, dReal stepsize)
   // nothing to do if no bodies
   if (world->nb <= 0) return;
 
+  // handle auto-disabling of bodies
+  dInternalHandleAutoDisabling (world,stepsize);
+  
   // make arrays for body and joint lists (for a single island) to go into
   body = (dxBody**) ALLOCA (world->nb * sizeof(dxBody*));
   joint = (dxJoint**) ALLOCA (world->nj * sizeof(dxJoint*));
@@ -355,6 +359,12 @@ dxBody *dBodyCreate (dxWorld *w)
   dSetZero (b->finite_rot_axis,4);
   addObjectToList (b,(dObject **) &w->firstbody);
   w->nb++;
+
+  // set auto-disable parameters
+  dBodySetAutoDisableDefaults (b);	// must do this after adding to world
+  b->adis_stepsleft = b->adis.idle_steps;
+  b->adis_timeleft = b->adis.idle_time;
+
   return b;
 }
 
@@ -874,6 +884,92 @@ int dBodyGetGravityMode (dBodyID b)
   return ((b->flags & dxBodyNoGravity) == 0);
 }
 
+
+// body auto-disable functions
+
+dReal dBodyGetAutoDisableLinearThreshold (dBodyID b)
+{
+	dAASSERT(b);
+	return dSqrt (b->adis.linear_threshold);
+}
+
+
+void dBodySetAutoDisableLinearThreshold (dBodyID b, dReal linear_threshold)
+{
+	dAASSERT(b);
+	b->adis.linear_threshold = linear_threshold * linear_threshold;
+}
+
+
+dReal dBodyGetAutoDisableAngularThreshold (dBodyID b)
+{
+	dAASSERT(b);
+	return dSqrt (b->adis.angular_threshold);
+}
+
+
+void dBodySetAutoDisableAngularThreshold (dBodyID b, dReal angular_threshold)
+{
+	dAASSERT(b);
+	b->adis.angular_threshold = angular_threshold * angular_threshold;
+}
+
+
+int dBodyGetAutoDisableSteps (dBodyID b)
+{
+	dAASSERT(b);
+	return b->adis.idle_steps;
+}
+
+
+void dBodySetAutoDisableSteps (dBodyID b, int steps)
+{
+	dAASSERT(b);
+	b->adis.idle_steps = steps;
+}
+
+
+dReal dBodyGetAutoDisableTime (dBodyID b)
+{
+	dAASSERT(b);
+	return b->adis.idle_time;
+}
+
+
+void dBodySetAutoDisableTime (dBodyID b, dReal time)
+{
+	dAASSERT(b);
+	b->adis.idle_time = time;
+}
+
+
+int dBodyGetAutoDisableFlag (dBodyID b)
+{
+	dAASSERT(b);
+	return ((b->flags & dxBodyAutoDisable) != 0);
+}
+
+
+void dBodySetAutoDisableFlag (dBodyID b, int do_auto_disable)
+{
+	dAASSERT(b);
+	if (!do_auto_disable) b->flags &= ~dxBodyAutoDisable;
+	else b->flags |= dxBodyAutoDisable;
+}
+
+
+void dBodySetAutoDisableDefaults (dBodyID b)
+{
+	dAASSERT(b);
+	dWorldID w = b->world;
+	dAASSERT(w);
+	b->adis.linear_threshold = dWorldGetAutoDisableLinearThreshold (w);
+	b->adis.angular_threshold = dWorldGetAutoDisableAngularThreshold (w);
+	b->adis.idle_steps = dWorldGetAutoDisableSteps (w);
+	b->adis.idle_time = dWorldGetAutoDisableTime (w);
+	dBodySetAutoDisableFlag (b, w->adis_flag);
+}
+
 //****************************************************************************
 // joints
 
@@ -1171,6 +1267,13 @@ dxWorld * dWorldCreate()
 #else
   #error dSINGLE or dDOUBLE must be defined
 #endif
+
+  w->adis.linear_threshold = REAL(0.001)*REAL(0.001);	// (magnitude squared)
+  w->adis.angular_threshold = REAL(0.001)*REAL(0.001);	// (magnitude squared)
+  w->adis.idle_steps = 10;
+  w->adis.idle_time = 0;
+  w->adis_flag = 0;
+
   return w;
 }
 
@@ -1270,6 +1373,78 @@ void dWorldImpulseToForce (dWorldID w, dReal stepsize,
   force[1] = stepsize * iy;
   force[2] = stepsize * iz;
   // @@@ force[3] = 0;
+}
+
+
+// world auto-disable functions
+
+dReal dWorldGetAutoDisableLinearThreshold (dWorldID w)
+{
+	dAASSERT(w);
+	return dSqrt (w->adis.linear_threshold);
+}
+
+
+void dWorldSetAutoDisableLinearThreshold (dWorldID w, dReal linear_threshold)
+{
+	dAASSERT(w);
+	w->adis.linear_threshold = linear_threshold * linear_threshold;
+}
+
+
+dReal dWorldGetAutoDisableAngularThreshold (dWorldID w)
+{
+	dAASSERT(w);
+	return dSqrt (w->adis.angular_threshold);
+}
+
+
+void dWorldSetAutoDisableAngularThreshold (dWorldID w, dReal angular_threshold)
+{
+	dAASSERT(w);
+	w->adis.angular_threshold = angular_threshold * angular_threshold;
+}
+
+
+int dWorldGetAutoDisableSteps (dWorldID w)
+{
+	dAASSERT(w);
+	return w->adis.idle_steps;
+}
+
+
+void dWorldSetAutoDisableSteps (dWorldID w, int steps)
+{
+	dAASSERT(w);
+	w->adis.idle_steps = steps;
+}
+
+
+dReal dWorldGetAutoDisableTime (dWorldID w)
+{
+	dAASSERT(w);
+	return w->adis.idle_time;
+}
+
+
+void dWorldSetAutoDisableTime (dWorldID w, dReal time)
+{
+	dAASSERT(w);
+	w->adis.idle_time = time;
+}
+
+
+int dWorldGetAutoDisableFlag (dWorldID w)
+{
+	dAASSERT(w);
+	return w->adis_flag;
+}
+
+
+void dWorldSetAutoDisableFlag (dWorldID w, int do_auto_disable)
+{
+	dAASSERT(w);
+	w->adis_flag = (do_auto_disable != 0);
 }
 
 //****************************************************************************
