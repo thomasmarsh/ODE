@@ -559,12 +559,12 @@ static void drawTriangle (const float *v0, const float *v1, const float *v2, int
 static void drawTriangleD (const double *v0, const double *v1, const double *v2, int solid)
 {
   float u[3],v[3],normal[3];
-  u[0] = v1[0] - v0[0];
-  u[1] = v1[1] - v0[1];
-  u[2] = v1[2] - v0[2];
-  v[0] = v2[0] - v0[0];
-  v[1] = v2[1] - v0[1];
-  v[2] = v2[2] - v0[2];
+  u[0] = float( v1[0] - v0[0] );
+  u[1] = float( v1[1] - v0[1] );
+  u[2] = float( v1[2] - v0[2] );
+  v[0] = float( v2[0] - v0[0] );
+  v[1] = float( v2[1] - v0[1] );
+  v[2] = float( v2[2] - v0[2] );
   dCROSS (normal,=,u,v);
   normalizeVector3 (normal);
 
