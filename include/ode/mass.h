@@ -43,7 +43,7 @@ void dMassSetParameters (dMass *, dReal themass,
 void dMassSetSphere (dMass *, dReal density, dReal radius);
 
 void dMassSetCappedCylinder (dMass *, dReal density, int direction,
-			     dReal a, dReal b);
+			     dReal radius, dReal length);
 
 void dMassSetCylinder (dMass *, dReal density, int direction,
 		       dReal radius, dReal length);
