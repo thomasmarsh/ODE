@@ -1,5 +1,11 @@
-Cylinder class includes collisions
-Cylinder - Box Cylinder-Cylinder Cylinder - Sphere and Cylinder-Plain
+The dCylinder class includes the following collisions:
+
+Cylinder - Box
+Cylinder - Cylinder
+Cylinder - Sphere
+Cylinder - Plan
+Cylinder - Ray (contributed by Olivier Michel)
+
 I also included Cylinder -  Tri-Mesh in my version of Triangle
 collider.
 
