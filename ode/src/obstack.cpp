@@ -20,34 +20,22 @@
  *                                                                       *
  *************************************************************************/
 
-/*
-
-@@@ WORK IN PROGRESS @@@
-
-TODO
-  * ALIGN allocations to dEFFICIENT_SIZE
-
-*/
-
 #include <string.h>
 #include <errno.h>
 #include "obstack.h"
-#include "ode/error.h"
 #include "ode/config.h"
+#include "ode/common.h"
+#include "ode/error.h"
 #include "ode/memory.h"
 
-typedef unsigned int intP;
-
 //****************************************************************************
-// constants and macros
-
-// each Arena pointer points to a block of this many bytes
-#define ARENA_SIZE 4096
+// macros and constants
 
 #define ROUND_UP_OFFSET_TO_EFFICIENT_SIZE(arena,ofs) \
-  ofs = (int) dEFFICIENT_SIZE( ((intP)(arena)) + ofs ); \
+  ofs = (int) (dEFFICIENT_SIZE( ((intP)(arena)) + ofs ) - ((intP)(arena)) );
 
-@@@@@@@@
+#define MAX_ALLOC_SIZE \
+  ((int)(dOBSTACK_ARENA_SIZE - sizeof (Arena) - EFFICIENT_ALIGNMENT + 1))
 
 //****************************************************************************
 // dObStack
@@ -68,7 +56,7 @@ dObStack::~dObStack()
   a = first;
   while (a) {
     nexta = a->next;
-    dFree (a,ARENA_SIZE);
+    dFree (a,dOBSTACK_ARENA_SIZE);
     a = nexta;
   }
 }
@@ -76,30 +64,33 @@ dObStack::~dObStack()
 
 void *dObStack::alloc (int num_bytes)
 {
-  // @@@ assumes num_bytes is not too large.
+  if (num_bytes > MAX_ALLOC_SIZE) dDebug (0,"num_bytes too large");
 
   // allocate or move to a new arena if necessary
   if (!first) {
     // allocate the first arena if necessary
-    first = last = (Arena *) dAlloc (ARENA_SIZE);
+    first = last = (Arena *) dAlloc (dOBSTACK_ARENA_SIZE);
     first->next = 0;
     first->used = sizeof (Arena);
+    ROUND_UP_OFFSET_TO_EFFICIENT_SIZE (first,first->used);
   }
   else {
     // we already have one or more arenas, see if a new arena must be used
-    if ((last->used + num_bytes) > ARENA_SIZE) {
+    if ((last->used + num_bytes) > dOBSTACK_ARENA_SIZE) {
       if (!last->next) {
-	last->next = (Arena *) dAlloc (ARENA_SIZE);
+	last->next = (Arena *) dAlloc (dOBSTACK_ARENA_SIZE);
 	last->next->next = 0;
       }
       last = last->next;
       last->used = sizeof (Arena);
+      ROUND_UP_OFFSET_TO_EFFICIENT_SIZE (last,last->used);
     }
   }
 
   // allocate an area in the arena
   char *c = ((char*) last) + last->used;
   last->used += num_bytes;
+  ROUND_UP_OFFSET_TO_EFFICIENT_SIZE (last,last->used);
   return c;
 }
 
@@ -108,6 +99,7 @@ void dObStack::freeAll()
 {
   last = first;
   first->used = sizeof(Arena);
+  ROUND_UP_OFFSET_TO_EFFICIENT_SIZE (first,first->used);
 }
 
 
@@ -115,8 +107,10 @@ void *dObStack::rewind()
 {
   current_arena = first;
   current_ofs = sizeof (Arena);
-  if (current_arena)
+  if (current_arena) {
+    ROUND_UP_OFFSET_TO_EFFICIENT_SIZE (current_arena,current_ofs)
     return ((char*) current_arena) + current_ofs;
+  }
   else return 0;
 }
 
@@ -125,16 +119,16 @@ void *dObStack::next (int num_bytes)
 {
   // this functions exactly like alloc, except that no new storage is ever
   // allocated
-
-  // @@@ assumes num_bytes is not too large.
-
+  if (num_bytes > MAX_ALLOC_SIZE) dDebug (0,"num_bytes too large");
   if (!current_arena) return 0;
-  if ((current_ofs + num_bytes) > ARENA_SIZE) {
+  if ((current_ofs + num_bytes) > dOBSTACK_ARENA_SIZE) {
     current_arena = current_arena->next;
     if (!current_arena) return 0;
     current_ofs = sizeof (Arena);
+    ROUND_UP_OFFSET_TO_EFFICIENT_SIZE (current_arena,current_ofs)
   }
   char *c = ((char*) current_arena) + current_ofs;
   current_arena += num_bytes;
+  ROUND_UP_OFFSET_TO_EFFICIENT_SIZE (current_arena,current_ofs)
   return c;
 }

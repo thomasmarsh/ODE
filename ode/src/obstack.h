@@ -23,6 +23,9 @@
 #ifndef _ODE_OBSTACK_H_
 #define _ODE_OBSTACK_H_
 
+// each obstack Arena pointer points to a block of this many bytes
+#define dOBSTACK_ARENA_SIZE 16384
+
 
 struct dObStack {
   struct Arena {
@@ -42,6 +45,7 @@ struct dObStack {
 
   void *alloc (int num_bytes);
   // allocate a block in the last arena, allocating a new arena if necessary.
+  // it is a runtime error if num_bytes is larger than the arena size.
 
   void freeAll();
   // free all blocks in all arenas. this does not deallocate the arenas
