@@ -69,6 +69,11 @@ update C++ interface? use SWIG?
 
 collision exclusion groups - exclude if obj1.n == obj2.n ?
 
+make sure the amotor joint can be used with just one body. at the moment it
+only allows two-body attachments.
+
+implement dJointGetAMotorAngleRate()
+
 
 TODO
 ----

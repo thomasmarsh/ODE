@@ -135,8 +135,9 @@ void dJointSetHinge2Axis2 (dJointID, dReal x, dReal y, dReal z);
 void dJointSetHinge2Param (dJointID, int parameter, dReal value);
 void dJointSetFixed (dJointID);
 void dJointSetAMotorNumAxes (dJointID, int num);
-void dJointSetAMotorAxis (dJointID, int axis, int rel,
+void dJointSetAMotorAxis (dJointID, int anum, int rel,
 			  dReal x, dReal y, dReal z);
+void dJointSetAMotorAngle (dJointID, int anum, dReal angle);
 void dJointSetAMotorParam (dJointID, int parameter, dReal value);
 void dJointSetAMotorMode (dJointID, int mode);
 
@@ -158,8 +159,10 @@ dReal dJointGetHinge2Angle1 (dJointID);
 dReal dJointGetHinge2Angle1Rate (dJointID);
 dReal dJointGetHinge2Angle2Rate (dJointID);
 int dJointGetAMotorNumAxes (dJointID);
-void dJointGetAMotorAxis (dJointID, int axis, dVector3 result);
-int dJointGetAMotorAxisRel (dJointID, int axis);
+void dJointGetAMotorAxis (dJointID, int anum, dVector3 result);
+int dJointGetAMotorAxisRel (dJointID, int anum);
+dReal dJointGetAMotorAngle (dJointID, int anum);
+dReal dJointGetAMotorAngleRate (dJointID, int anum);
 dReal dJointGetAMotorParam (dJointID, int parameter);
 int dJointGetAMotorMode (dJointID);
 

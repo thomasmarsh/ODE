@@ -1527,6 +1527,8 @@ static void amotorInit (dxJointAMotor *j)
   }
   dSetZero (j->reference1,4);
   dSetZero (j->reference2,4);
+
+  j->flags |= dJOINT_TWOBODIES;
 }
 
 
@@ -1643,30 +1645,63 @@ static void amotorGetInfo2 (dxJointAMotor *joint, dxJoint::Info2 *info)
   dVector3 ax[3];
   amotorComputeGlobalAxes (joint,ax);
 
+  // in euler angle mode we do not actually constrain the angular velocity
+  // along the axes axis[0] and axis[2] (although we do use axis[1]) :
+  //
+  //    to get			constrain w2-w1 along		...not
+  //    ------			---------------------		------
+  //    d(angle[0])/dt = 0	ax[1] x ax[2]			ax[0]
+  //    d(angle[1])/dt = 0	ax[1]
+  //    d(angle[2])/dt = 0	ax[0] x ax[1]			ax[2]
+  //
+  // constraining w2-w1 along an axis 'a' means that a'*(w2-w1)=0.
+  // to prove the result for angle[0], write the expression for angle[0] from
+  // GetInfo1 then take the derivative. to prove this for angle[2] it is
+  // easier to take the euler rate expression for d(angle[2])/dt with respect
+  // to the components of w and set that to 0.
+
+  dVector3 *axptr[3];
+  axptr[0] = &ax[0];
+  axptr[1] = &ax[1];
+  axptr[2] = &ax[2];
+
+  dVector3 ax0_cross_ax1;
+  dVector3 ax1_cross_ax2;
+  if (joint->mode == dAMotorEuler) {
+    dCROSS (ax0_cross_ax1,=,ax[0],ax[1]);
+    axptr[2] = &ax0_cross_ax1;
+    dCROSS (ax1_cross_ax2,=,ax[1],ax[2]);
+    axptr[0] = &ax1_cross_ax2;
+  }
+
   int row=0;
   for (i=0; i < joint->num; i++) {
-    row += joint->limot[i].addLimot (joint,info,row,ax[i],1);
+    row += joint->limot[i].addLimot (joint,info,row,*(axptr[i]),1);
   }
 }
 
 
 extern "C" void dJointSetAMotorNumAxes (dxJointAMotor *joint, int num)
 {
-  dAASSERT(joint);
-  if (num < 0) num = 0;
-  if (num > 3) num = 3;
-  joint->num = num;
+  dAASSERT(joint && num >= 0 && num <= 3);
+  if (joint->mode == dAMotorEuler) {
+    joint->num = 3;
+  }
+  else {
+    if (num < 0) num = 0;
+    if (num > 3) num = 3;
+    joint->num = num;
+  }
 }
 
 
-extern "C" void dJointSetAMotorAxis (dxJointAMotor *joint, int axis, int rel,
+extern "C" void dJointSetAMotorAxis (dxJointAMotor *joint, int anum, int rel,
 				     dReal x, dReal y, dReal z)
 {
-  dAASSERT(joint);
-  dAASSERT(axis >= 0 && axis <= 2 && rel >= 0 && rel <= 2);
-  if (axis < 0) axis = 0;
-  if (axis > 2) axis = 2;
-  joint->rel[axis] = rel;
+  dAASSERT(joint && anum >= 0 && anum <= 2 && rel >= 0 && rel <= 2);
+  if (anum < 0) anum = 0;
+  if (anum > 2) anum = 2;
+  joint->rel[anum] = rel;
 
   // x,y,z is always in global coordinates regardless of rel, so we may have
   // to convert it to be relative to a body
@@ -1675,22 +1710,33 @@ extern "C" void dJointSetAMotorAxis (dxJointAMotor *joint, int axis, int rel,
   r[1] = y;
   r[2] = z;
   r[3] = 0;
-  dNormalize3 (r);
   if (rel > 0) {
     if (rel==1) {
-      dMULTIPLY1_331 (joint->axis[axis],joint->node[0].body->R,r);
+      dMULTIPLY1_331 (joint->axis[anum],joint->node[0].body->R,r);
     }
     else {
-      dMULTIPLY1_331 (joint->axis[axis],joint->node[1].body->R,r);
+      dMULTIPLY1_331 (joint->axis[anum],joint->node[1].body->R,r);
     }
   }
   else {
-    joint->axis[axis][0] = r[0];
-    joint->axis[axis][1] = r[1];
-    joint->axis[axis][2] = r[2];
+    joint->axis[anum][0] = r[0];
+    joint->axis[anum][1] = r[1];
+    joint->axis[anum][2] = r[2];
   }
-
+  dNormalize3 (joint->axis[anum]);
   if (joint->mode == dAMotorEuler) amotorSetEulerReferenceVectors (joint);
+}
+
+
+extern "C" void dJointSetAMotorAngle (dxJointAMotor *joint, int anum,
+				      dReal angle)
+{
+  dAASSERT(joint && anum >= 0 && anum < 3);
+  if (joint->mode == dAMotorUser) {
+    if (anum < 0) anum = 0;
+    if (anum > 3) anum = 3;
+    joint->angle[anum] = angle;
+  }
 }
 
 
@@ -1698,14 +1744,11 @@ extern "C" void dJointSetAMotorParam (dxJointAMotor *joint, int parameter,
 				      dReal value)
 {
   dAASSERT(joint);
-  int axis = parameter >> 8;
-  if (axis < 0) axis = 0;
-  if (axis > 2) axis = 2;
+  int anum = parameter >> 8;
+  if (anum < 0) anum = 0;
+  if (anum > 2) anum = 2;
   parameter &= 0xff;
-  if (parameter == dParamAngle) {
-    joint->angle[axis] = value;
-  }
-  else joint->limot[axis].set (parameter, value);
+  joint->limot[anum].set (parameter, value);
 }
 
 
@@ -1713,7 +1756,10 @@ extern "C" void dJointSetAMotorMode (dxJointAMotor *joint, int mode)
 {
   dAASSERT(joint);
   joint->mode = mode;
-  if (joint->mode == dAMotorEuler) amotorSetEulerReferenceVectors (joint);
+  if (joint->mode == dAMotorEuler) {
+    joint->num = 3;
+    amotorSetEulerReferenceVectors (joint);
+  }
 }
 
 
@@ -1724,38 +1770,62 @@ extern "C" int dJointGetAMotorNumAxes (dxJointAMotor *joint)
 }
 
 
-extern "C" void dJointGetAMotorAxis (dxJointAMotor *joint, int axis,
+extern "C" void dJointGetAMotorAxis (dxJointAMotor *joint, int anum,
 				     dVector3 result)
 {
-  dAASSERT(joint);
-  if (axis < 0) axis = 0;
-  if (axis > 2) axis = 2;
-  result[0] = joint->axis[axis][0];
-  result[1] = joint->axis[axis][1];
-  result[2] = joint->axis[axis][2];
+  dAASSERT(joint && anum >= 0 && anum < 3);
+  if (anum < 0) anum = 0;
+  if (anum > 2) anum = 2;
+  if (joint->rel[anum] > 0) {
+    if (joint->rel[anum]==1) {
+      dMULTIPLY0_331 (result,joint->node[0].body->R,joint->axis[anum]);
+    }
+    else {
+      dMULTIPLY0_331 (result,joint->node[1].body->R,joint->axis[anum]);
+    }
+  }
+  else {
+    result[0] = joint->axis[anum][0];
+    result[1] = joint->axis[anum][1];
+    result[2] = joint->axis[anum][2];
+  }
 }
 
 
-extern "C" int dJointGetAMotorAxisRel (dxJointAMotor *joint, int axis)
+extern "C" int dJointGetAMotorAxisRel (dxJointAMotor *joint, int anum)
 {
-  dAASSERT(joint);
-  if (axis < 0) axis = 0;
-  if (axis > 2) axis = 2;
-  return joint->rel[axis];
+  dAASSERT(joint && anum >= 0 && anum < 3);
+  if (anum < 0) anum = 0;
+  if (anum > 2) anum = 2;
+  return joint->rel[anum];
+}
+
+
+extern "C" dReal dJointGetAMotorAngle (dxJointAMotor *joint, int anum)
+{
+  dAASSERT(joint && anum >= 0 && anum < 3);
+  if (anum < 0) anum = 0;
+  if (anum > 3) anum = 3;
+  return joint->angle[anum];
+}
+
+
+extern "C" dReal dJointGetAMotorAngleRate (dxJointAMotor *joint, int anum)
+{
+  // @@@
+  dDebug (0,"not yet implemented");
+  return 0;
 }
 
 
 extern "C" dReal dJointGetAMotorParam (dxJointAMotor *joint, int parameter)
 {
   dAASSERT(joint);
-  int axis = parameter >> 8;
-  if (axis < 0) axis = 0;
-  if (axis > 2) axis = 2;
+  int anum = parameter >> 8;
+  if (anum < 0) anum = 0;
+  if (anum > 2) anum = 2;
   parameter &= 0xff;
-  if (parameter == dParamAngle) {
-    return joint->angle[axis];
-  }
-  else return joint->limot[axis].get (parameter);
+  return joint->limot[anum].get (parameter);
 }
 
 
