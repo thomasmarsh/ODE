@@ -201,7 +201,9 @@ static void hingeInit (dxJointHinge *j)
   dSetZero (j->anchor1,4);
   dSetZero (j->anchor2,4);
   dSetZero (j->axis1,4);
+  j->axis1[0] = 1;
   dSetZero (j->axis2,4);
+  j->axis2[0] = 1;
 }
 
 
@@ -329,6 +331,7 @@ dxJoint::Vtable __dhinge_vtable = {
 static void sliderInit (dxJointSlider *j)
 {
   dSetZero (j->axis1,4);
+  j->axis1[0] = 1;
   dSetZero (j->qrel,4);
   dSetZero (j->offset,4);
 }
@@ -534,31 +537,58 @@ static void contactGetInfo2 (dxJointContact *j, dxJoint::Info2 *info)
   int i,s = info->rowskip;
   int s2 = 2*s;
 
+  // get normal, with sign adjusted for body1/body2 polarity
+  dVector3 normal;
+  if (j->flags & dJOINT_REVERSE) {
+    normal[0] = j->contact.geom.normal[0];
+    normal[1] = j->contact.geom.normal[1];
+    normal[2] = j->contact.geom.normal[2];
+  }
+  else {
+    normal[0] = - j->contact.geom.normal[0];
+    normal[1] = - j->contact.geom.normal[1];
+    normal[2] = - j->contact.geom.normal[2];
+  }
+  normal[3] = 0;	// @@@ hmmm
+
   // c1,c2 = contact points with respect to body PORs
   dVector3 c1,c2;
   for (i=0; i<3; i++) c1[i] = j->contact.geom.pos[i] - j->node[0].body->pos[i];
 
   // set jacobian for normal
-  info->J1l[0] = j->contact.geom.normal[0];
-  info->J1l[1] = j->contact.geom.normal[1];
-  info->J1l[2] = j->contact.geom.normal[2];
-  dCROSS (info->J1a,=  ,c1,j->contact.geom.normal);
+  info->J1l[0] = normal[0];
+  info->J1l[1] = normal[1];
+  info->J1l[2] = normal[2];
+  dCROSS (info->J1a,=,c1,normal);
   if (j->node[1].body) {
     for (i=0; i<3; i++) c2[i] = j->contact.geom.pos[i] -
 			  j->node[1].body->pos[i];
-    info->J2l[0] = -j->contact.geom.normal[0];
-    info->J2l[1] = -j->contact.geom.normal[1];
-    info->J2l[2] = -j->contact.geom.normal[2];
-    dCROSS (info->J2a,= -,c2,j->contact.geom.normal);
+    info->J2l[0] = -normal[0];
+    info->J2l[1] = -normal[1];
+    info->J2l[2] = -normal[2];
+    dCROSS (info->J2a,= -,c2,normal);
   }
 
   // set right hand side for normal
   dReal k = info->fps * info->erp;
-  if (j->flags & dJOINT_REVERSE) {
-    info->c[0] = k*j->contact.geom.depth;
-  }
-  else {
-    info->c[0] = -k*j->contact.geom.depth;
+  info->c[0] = k*j->contact.geom.depth;
+
+  // deal with bounce
+  if (j->contact.surface.mode & dContactBounce) {
+    // calculate outgoing velocity (-ve for incoming contact)
+    dReal outgoing = dDOT(info->J1l,j->node[0].body->lvel) +
+      dDOT(info->J1a,j->node[0].body->avel);
+    if (j->node[1].body) {
+      outgoing += dDOT(info->J2l,j->node[1].body->lvel) +
+	dDOT(info->J2a,j->node[1].body->avel);
+    }
+    // only apply bounce if the outgoing velocity is greater than the
+    // threshold, and if the resulting c[0] exceeds what we already have.
+    if (j->contact.surface.bounceVel >= 0 &&
+	(-outgoing) > j->contact.surface.bounceVel) {
+      dReal newc = - j->contact.surface.bounce * outgoing;
+      if (newc > info->c[0]) info->c[0] = newc;
+    }
   }
 
   // set LCP limits for normal
@@ -574,10 +604,10 @@ static void contactGetInfo2 (dxJointContact *j, dxJoint::Info2 *info)
       t1[0] = j->contact.fdir1[0];
       t1[1] = j->contact.fdir1[1];
       t1[2] = j->contact.fdir1[2];
-      dCROSS (t2,=,j->contact.geom.normal,t1);
+      dCROSS (t2,=,normal,t1);
     }
     else {
-      dPlaneSpace (j->contact.geom.normal,t1,t2);
+      dPlaneSpace (normal,t1,t2);
     }
     info->J1l[s+0] = t1[0];
     info->J1l[s+1] = t1[1];
@@ -632,3 +662,246 @@ dxJoint::Vtable __dcontact_vtable = {
   (dxJoint::init_fn*) contactInit,
   (dxJoint::getInfo1_fn*) contactGetInfo1,
   (dxJoint::getInfo2_fn*) contactGetInfo2};
+
+//****************************************************************************
+// rotational motor
+
+static void rMotorInit (dxJointRMotor *j)
+{
+  dSetZero (j->axis1,4);
+  j->axis1[0] = 1;
+  dSetZero (j->axis2,4);
+  j->axis2[0] = 1;
+  j->vel = 0;
+  j->tmax = 1;
+}
+
+
+static void rMotorGetInfo1 (dxJointRMotor *j, dxJoint::Info1 *info)
+{
+  info->m = 1;		// @@@ 0 if tmax = 0
+  info->nub = 0;	// @@@ 1 if tmax is infinity
+}
+
+
+static void rMotorGetInfo2 (dxJointRMotor *joint, dxJoint::Info2 *info)
+{
+  dVector3 ax1;  // joint axis in global coordinates, from 1st body
+  dMULTIPLY0_331 (ax1,joint->node[0].body->R,joint->axis1);
+
+  info->J1a[0] = ax1[0];
+  info->J1a[1] = ax1[1];
+  info->J1a[2] = ax1[2];
+  if (joint->node[1].body) {
+    info->J2a[0] = -ax1[0];
+    info->J2a[1] = -ax1[1];
+    info->J2a[2] = -ax1[2];
+  }
+  info->c[0] = joint->vel;
+  info->lo[0] = -joint->tmax;
+  info->hi[0] = joint->tmax;
+}
+
+
+extern "C" void dJointSetRMotorAxis (dxJointRMotor *joint,
+				     dReal x, dReal y, dReal z)
+{
+  dUASSERT(joint,"bad joint argument");
+  dUASSERT(joint->vtable == &__drmotor_vtable,"joint is not an RMotor");
+  setAxes (joint,x,y,z,joint->axis1,joint->axis2);
+}
+
+
+extern "C" void dJointGetRMotorAxis (dxJointRMotor *joint, dVector3 result)
+{
+  dUASSERT(joint,"bad joint argument");
+  dUASSERT(result,"bad result argument");
+  dUASSERT(joint->vtable == &__drmotor_vtable,"joint is not an RMotor");
+  getAxis (joint,result,joint->axis1);
+}
+
+
+extern "C" void dJointSetRMotor (dxJointRMotor *joint, dReal vel, dReal tmax)
+{
+  dAASSERT(joint);
+  dUASSERT(tmax >= 0,"tmax must be >= 0");
+  joint->vel = vel;
+  if (tmax < 0) tmax = 0;
+  joint->tmax = tmax;
+}
+
+
+dxJoint::Vtable __drmotor_vtable = {
+  sizeof(dxJointRMotor),
+  (dxJoint::init_fn*) rMotorInit,
+  (dxJoint::getInfo1_fn*) rMotorGetInfo1,
+  (dxJoint::getInfo2_fn*) rMotorGetInfo2};
+
+//****************************************************************************
+// hinge 2. note that this joint must be attached to two bodies for it to work
+
+static void hinge2Init (dxJointHinge2 *j)
+{
+  dSetZero (j->anchor1,4);
+  dSetZero (j->anchor2,4);
+  dSetZero (j->axis1,4);
+  j->axis1[0] = 1;
+  dSetZero (j->axis2,4);
+  j->axis2[0] = 1;
+  j->c0 = 0;
+  j->s0 = 0;
+}
+
+
+static void hinge2GetInfo1 (dxJointHinge2 *j, dxJoint::Info1 *info)
+{
+  info->m = 4;
+  info->nub = 4;
+}
+
+
+// macro that computes ax1,ax2 = axis 1 and 2 in global coordinates (they are
+// relative to body 1 and 2 initially) and then computes the constrained
+// rotational axis as the cross product of ax1 and ax2.
+// the sin and cos of the angle between axis 1 and 2 is computed, this comes
+// from dot and cross product rules.
+
+#define HINGE2_GET_AXIS_INFO(axis,sin_angle,cos_angle) \
+  dVector3 ax1,ax2; \
+  dMULTIPLY0_331 (ax1,joint->node[0].body->R,joint->axis1); \
+  dMULTIPLY0_331 (ax2,joint->node[1].body->R,joint->axis2); \
+  dCROSS (axis,=,ax1,ax2); \
+  sin_angle = dSqrt (axis[0]*axis[0] + axis[1]*axis[1] + axis[2]*axis[2]); \
+  cos_angle = dDOT (ax1,ax2);
+
+
+static void hinge2GetInfo2 (dxJointHinge2 *joint, dxJoint::Info2 *info)
+{
+  // set the three ball-and-socket rows
+  setBall (joint,info,joint->anchor1,joint->anchor2);
+
+  // set the hinge row.
+  dReal s,c;
+  dVector3 q;
+  HINGE2_GET_AXIS_INFO (q,s,c);
+  dNormalize3 (q);
+
+  int s3=3*info->rowskip;
+  info->J1a[s3+0] = q[0];
+  info->J1a[s3+1] = q[1];
+  info->J1a[s3+2] = q[2];
+  if (joint->node[1].body) {
+    info->J2a[s3+0] = -q[0];
+    info->J2a[s3+1] = -q[1];
+    info->J2a[s3+2] = -q[2];
+  }
+
+  // compute the right hand side for the constrained rotational DOF.
+  // axis 1 and axis 2 are separated by an angle `theta'. the desired
+  // separation angle is theta0 - sin(theta0) and cos(theta0) are recorded
+  // in the joint structure. the correcting angular velocity is:
+  //   |angular_velocity| = angle/time = erp*(theta0-theta) / stepsize
+  //                      = (erp*fps) * (theta0-theta)
+  // (theta0-theta) can be computed using the following small-angle-difference
+  // approximation:
+  //   theta0-theta ~= tan(theta0-theta)
+  //                 = sin(theta0-theta)/cos(theta0-theta)
+  //                 = (c*s0 - s*c0) / (c*c0 + s*s0)
+  //                 = c*s0 - s*c0         assuming c*c0 + s*s0 ~= 1
+  // where c = cos(theta), s = sin(theta)
+  //       c0 = cos(theta0), s0 = sin(theta0)
+
+  dReal k = info->fps * info->erp;
+  info->c[3] = k * (joint->c0 * s - joint->s0 * c);
+}
+
+
+extern "C" void dJointSetHinge2Anchor (dxJointHinge2 *joint,
+				       dReal x, dReal y, dReal z)
+{
+  dUASSERT(joint,"bad joint argument");
+  dUASSERT(joint->vtable == &__dhinge2_vtable,"joint is not a hinge2");
+  setAnchors (joint,x,y,z,joint->anchor1,joint->anchor2);
+}
+
+
+extern "C" void dJointSetHinge2Axis1 (dxJointHinge2 *joint,
+				      dReal x, dReal y, dReal z)
+{
+  dUASSERT(joint,"bad joint argument");
+  dUASSERT(joint->vtable == &__dhinge2_vtable,"joint is not a hinge2");
+  if (joint->node[0].body) {
+    dReal q[4];
+    q[0] = x;
+    q[1] = y;
+    q[2] = z;
+    q[3] = 0;
+    dNormalize3 (q);
+    dMULTIPLY1_331 (joint->axis1,joint->node[0].body->R,q);
+    joint->axis1[3] = 0;
+
+    // compute the sin and cos of the angle between axis 1 and axis 2
+    dVector3 ax;
+    HINGE2_GET_AXIS_INFO(ax,joint->s0,joint->c0);
+  }
+}
+
+
+extern "C" void dJointSetHinge2Axis2 (dxJointHinge2 *joint,
+				      dReal x, dReal y, dReal z)
+{
+  dUASSERT(joint,"bad joint argument");
+  dUASSERT(joint->vtable == &__dhinge2_vtable,"joint is not a hinge2");
+  if (joint->node[1].body) {
+    dReal q[4];
+    q[0] = x;
+    q[1] = y;
+    q[2] = z;
+    q[3] = 0;
+    dNormalize3 (q);
+    dMULTIPLY1_331 (joint->axis2,joint->node[1].body->R,q);
+    joint->axis1[3] = 0;
+
+    // compute the sin and cos of the angle between axis 1 and axis 2
+    dVector3 ax;
+    HINGE2_GET_AXIS_INFO(ax,joint->s0,joint->c0);
+  }
+}
+
+
+extern "C" void dJointGetHinge2Anchor (dxJointHinge2 *joint, dVector3 result)
+{
+  dUASSERT(joint,"bad joint argument");
+  dUASSERT(result,"bad result argument");
+  dUASSERT(joint->vtable == &__dhinge2_vtable,"joint is not a hinge2");
+  getAnchor (joint,result,joint->anchor1);
+}
+
+
+extern "C" void dJointGetHinge2Axis1 (dxJointHinge2 *joint, dVector3 result)
+{
+  dUASSERT(joint,"bad joint argument");
+  dUASSERT(result,"bad result argument");
+  dUASSERT(joint->vtable == &__dhinge2_vtable,"joint is not a hinge2");
+  if (joint->node[0].body) {
+    dMULTIPLY0_331 (result,joint->node[0].body->R,joint->axis1);
+  }
+}
+
+
+extern "C" void dJointGetHinge2Axis2 (dxJointHinge2 *joint, dVector3 result)
+{
+  dUASSERT(joint,"bad joint argument");
+  dUASSERT(result,"bad result argument");
+  dUASSERT(joint->vtable == &__dhinge2_vtable,"joint is not a hinge2");
+  if (joint->node[1].body) {
+    dMULTIPLY0_331 (result,joint->node[1].body->R,joint->axis2);
+  }
+}
+
+
+dxJoint::Vtable __dhinge2_vtable = {
+  sizeof(dxJointHinge2),
+  (dxJoint::init_fn*) hinge2Init,
+  (dxJoint::getInfo1_fn*) hinge2GetInfo1,
+  (dxJoint::getInfo2_fn*) hinge2GetInfo2};
