@@ -833,6 +833,47 @@ void dBodyGetPointRelVel (dBodyID, dReal px, dReal py, dReal pz,
 Utility functions.
 }
 
+
+@funcdef{
+void dBodySetFiniteRotationMode (dBodyID, int mode);
+}{
+This function control the way a body's orientation is updated at each time
+step. The @arg{mode} argument can be:
+@list{
+@*	0: An ``infitesimal'' orientation update is used.
+	This is fast to compute, but it can occasionally cause inaccuracies
+	for bodies that are rotating at high speed, especially when those
+	bodies are joined to other bodies.
+	This is the default for every new body that is created.
+@*	1: A ``finite'' orientation update is used.
+	This is more costly to compute, but will be more accurate for high
+	speed rotations.
+	Note however that high speed rotations can result in many types of
+	error in a simulation, and this mode will only fix one of those
+	sources of error.
+}
+}
+
+
+@funcdef{
+void dBodySetFiniteRotationAxis (dBodyID, dReal x, dReal y, dReal z);
+}{
+This sets the finite rotation axis for a body.
+This is axis only has meaning when the finite rotation mode is set
+(see @func{dBodySetFiniteRotationMode()}).
+
+If this axis is zero (0,0,0), full finite rotations are performed on the body.
+
+If this axis is nonzero, the body is rotated by performing a partial finite
+rotation along the axis direction followed by an infitesimal rotation along
+an orthogonal direction.
+
+This can be useful to alleviate certain sources of error caused by quickly
+spinning bodies. For example, if a car wheel is rotating at high speed
+you can call this function with the wheel's hinge axis as the argument to
+try and improve its behavior.
+}
+
 #############################################################################
 @chapter{Joint types and joint functions}
 
@@ -2296,6 +2337,29 @@ The same guideline applies when large lengths and masses are being used.
 In general, length and mass values around 0.1..1.0 are better as the
 factorizer may not lose so much precision.
 This guideline is especially helpful when single precision is being used.
+
+
+@section{I've made a car, but the wheels don't stay on properly!}
+
+If you are building a car simulation, typically you create a chassis body
+and attach four wheel bodies. However, you may discover that when you drive
+it around the wheels rotate in incorrect directions, as though the joint
+was somehow becoming ineffective.
+The problem is observed when the car is moving fast (so the wheels are
+rotating fast), and the car tries to turn a corner.
+The wheels appear to rotate off their proper constraints as though the
+``axles'' had become bent.
+If the wheels are rotating slowly, or the turn is made slowly, the problem
+is less apparent.
+
+The problem is that numerical errors are being caused by the high rotation
+speed of the wheels.
+Two functions are provided to fix this problem:
+@func{dBodySetFiniteRotationMode()} and @func{dBodySetFiniteRotationAxis()}.
+The wheel bodies should have their finite rotation mode set, and the
+wheel's finite rotation axes should be set every time step to match their
+hinge axes.
+This will hopefully fix most of the problem.
 
 #############################################################################
 @chapter{Known BUGS}
