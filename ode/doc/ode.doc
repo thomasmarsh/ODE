@@ -119,6 +119,12 @@ Here are the features:
 @list{
 @* A universal joint, generously contributed by Martin C. Martin.
    It doesn't (yet) have a motor or joint limits.
+@* A new collision system that supports heirarchical spaces, has the ability to
+   collide spaces with single geoms, and has the ability to collide spaces
+   together. Geom groups are now spaces, geoms now have 'category' and
+   'collide' bits for early culling, the behavior of various functions is more
+   well defined, and geoms can be disabled/enabled.
+   Internally, the collision system is now optimized for larger environments.
 }
 
 
