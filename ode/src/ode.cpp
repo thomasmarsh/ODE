@@ -1109,7 +1109,10 @@ int dJointGetType (dxJoint *joint)
 dBodyID dJointGetBody (dxJoint *joint, int index)
 {
   dAASSERT (joint);
-  if (index >= 0 && index < 2) return joint->node[index].body;
+  if (index == 0 || index == 1) {
+    if (joint->flags & dJOINT_REVERSE) return joint->node[1-index].body;
+    else return joint->node[index].body;
+  }
   else return 0;
 }
 
