@@ -41,8 +41,8 @@ typedef struct dGeomSpaceData {
 } dGeomSpaceData;
 
 
-dSpaceID dSimpleSpaceCreate();
-dSpaceID dHashSpaceCreate();
+dSpaceID dSimpleSpaceCreate (int dummy);
+dSpaceID dHashSpaceCreate (int dummy);
 
 void dSpaceDestroy (dSpaceID);
 void dSpaceAdd (dSpaceID, dGeomID);

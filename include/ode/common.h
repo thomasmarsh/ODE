@@ -299,6 +299,17 @@ typedef struct dJointFeedback {
 } dJointFeedback;
 
 
+/* private functions that must be implemented by the collision library:
+ * (1) indicate that a geom has moved, (2) get the next geom in a body list.
+ * these functions are called whenever the position of geoms connected to a
+ * body have changed, e.g. with dBodySetPosition(), dBodySetRotation(), or
+ * when the ODE step function updates the body state.
+ */
+
+void dGeomMoved (dGeomID);
+dGeomID dGeomGetBodyNext (dGeomID);
+
+
 #ifdef __cplusplus
 }
 #endif
