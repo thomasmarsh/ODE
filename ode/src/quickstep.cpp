@@ -253,12 +253,14 @@ static void SOR_LCP (int m, int nb, dRealMutablePtr J, int *jb, dxBody * const *
 		qsort (order,m,sizeof(IndexError),&compare_index_error);
 #endif
 #ifdef RANDOMLY_REORDER_CONSTRAINTS
-		for (i=1; i<m; ++i) {
-			IndexError tmp = order[i];
-			int swapi = dRandInt(i+1);
-			order[i] = order[swapi];
-			order[swapi] = tmp;
-		}
+                if (iteration % 8 == 0) {
+			for (i=1; i<m; ++i) {
+				IndexError tmp = order[i];
+				int swapi = dRandInt(i+1);
+				order[i] = order[swapi];
+				order[swapi] = tmp;
+			}
+                }
 #endif
 
 		//@@@ potential optimization: swap lambda and last_lambda pointers rather
