@@ -851,6 +851,13 @@ dxJoint * dJointCreateHinge2 (dWorldID w, dJointGroupID group)
 }
 
 
+dxJoint * dJointCreateUniversal (dWorldID w, dJointGroupID group)
+{
+  dAASSERT (w);
+  return createJoint (w,group,&__duniversal_vtable);
+}
+
+
 dxJoint * dJointCreateFixed (dWorldID w, dJointGroupID group)
 {
   dAASSERT (w);

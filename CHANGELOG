@@ -9,6 +9,12 @@ the rules for this file:
 
 ------------------------------------------------------------------------------
 
+04/05/02 russ
+
+	* added a universal joint class (generously contributed by
+	  Martin C. Martin). it doesn't (yet) have a motor or joint limits,
+	  but it does come with tests.
+
 03/11/02 russ
 
 	* makefile changes to accomodate OSs with command line length

@@ -176,6 +176,17 @@ struct dxJointHinge : public dxJoint {
 extern struct dxJoint::Vtable __dhinge_vtable;
 
 
+// universal
+
+struct dxJointUniversal : public dxJoint {
+  dVector3 anchor1;		// anchor w.r.t first body
+  dVector3 anchor2;		// anchor w.r.t second body
+  dVector3 axis1;		// axis w.r.t first body
+  dVector3 axis2;		// axis w.r.t second body
+};
+extern struct dxJoint::Vtable __duniversal_vtable;
+
+
 // slider. if body2 is 0 then qrel is the absolute rotation of body1 and
 // offset is the position of body1 center along axis1.
 

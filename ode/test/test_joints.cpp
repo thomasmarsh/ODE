@@ -162,6 +162,15 @@ void addOscillatingTorque (dReal tscale)
 }
 
 
+void addOscillatingTorqueAbout(dReal tscale, dReal x, dReal y, dReal z)
+{
+  static dReal a=0;
+  dBodyAddTorque (body[0], tscale*cos(a) * x, tscale*cos(a) * y,
+		  tscale * cos(a) * z);
+  a += 0.02;
+}
+
+
 // damp the rotational motion of body 0 a bit
 
 void dampRotationalMotion (dReal kd)
@@ -192,6 +201,7 @@ void addSpringForce (dReal ks)
 //   4xx : hinge 2
 //   5xx : contact
 //   6xx : amotor
+//   7xx : universal joint
 
 
 // setup for the given test. return 0 if there is no such test
@@ -386,6 +396,33 @@ int setupTest (int n)
     dJointSetAMotorAxis (joint,2,2, 1,0,0);
     dJointSetAMotorMode (joint,dAMotorEuler);
     max_iterations = 200;
+    return 1;
+
+    // ********** universal joint
+
+  case 700:			// 2 body
+    constructWorldForTest (0,2,
+ 			   0.5*SIDE,0.5*SIDE,1, -0.5*SIDE,-0.5*SIDE,1,
+ 			   1,1,0, 1,1,0, 0.25*M_PI,0.25*M_PI);
+    joint = dJointCreateUniversal (world,0);
+    dJointAttach (joint,body[0],body[1]);
+    dJointSetUniversalAnchor (joint,0,0,1);
+    dJointSetUniversalAxis1 (joint, 1, -1, 1.41421356);
+    dJointSetUniversalAxis2 (joint, 1, -1, -1.41421356);
+    return 1;
+
+  case 720:		// universal transmit torque test
+  case 730:		// universal torque about axis 1
+  case 740:		// universal torque about axis 2
+    constructWorldForTest (0,2,
+ 			   0.5*SIDE,0.5*SIDE,1, -0.5*SIDE,-0.5*SIDE,1,
+ 			   1,0,0, 1,0,0, 0,0);
+    joint = dJointCreateUniversal (world,0);
+    dJointAttach (joint,body[0],body[1]);
+    dJointSetUniversalAnchor (joint,0,0,1);
+    dJointSetUniversalAxis1 (joint,0,0,1);
+    dJointSetUniversalAxis2 (joint, 1, -1,0);
+    max_iterations = 50;
     return 1;
   }
   return 0;
@@ -600,6 +637,45 @@ dReal doStuffAndGetError (int n)
     // printf ("desired = %.4f %.4f %.4f\n",a1,a2,a3);
 
     return err;
+  }
+
+  // ********** universal joint
+
+  case 700: {		// 2 body
+    dVector3 ax1, ax2;
+
+    addOscillatingTorque (0.1);
+    dampRotationalMotion (0.1);
+    dJointGetUniversalAxis1(joint, ax1);
+    dJointGetUniversalAxis2(joint, ax2);
+    return fabs(10*dDOT(ax1, ax2));
+  }
+
+  case 720: {		// universal transmit torque test
+    dVector3 ax1, ax2;
+    addOscillatingTorqueAbout (0.1, 1, 1, 0);
+    dampRotationalMotion (0.1);
+    dJointGetUniversalAxis1(joint, ax1);
+    dJointGetUniversalAxis2(joint, ax2);
+    return fabs(10*dDOT(ax1, ax2));
+  }
+
+  case 730:{
+    dVector3 ax1, ax2;
+    dJointGetUniversalAxis1(joint, ax1);
+    dJointGetUniversalAxis2(joint, ax2);
+    addOscillatingTorqueAbout (0.1, ax1[0], ax1[1], ax1[2]);
+    dampRotationalMotion (0.1);
+    return fabs(10*dDOT(ax1, ax2));
+  }
+
+  case 740:{
+    dVector3 ax1, ax2;
+    dJointGetUniversalAxis1(joint, ax1);
+    dJointGetUniversalAxis2(joint, ax2);
+    addOscillatingTorqueAbout (0.1, ax2[0], ax2[1], ax2[2]);
+    dampRotationalMotion (0.1);
+    return fabs(10*dDOT(ax1, ax2));
   }
   }
 
