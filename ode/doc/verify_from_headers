@@ -22,6 +22,7 @@ sub checkFunc
 {
   my $fn;
   foreach $fn (split (/;/,$_[0])) {	# split input on semicolons
+    return if $fn =~ /NOT YET IMPLEMENTED/;
     $fn =~ s/^\s*//;		# strip whitespace at start
     $fn =~ s/\s;\s*$//;		# strip semicolon and whitespace at end
     next if $fn eq '';		# do next one if nothing left
