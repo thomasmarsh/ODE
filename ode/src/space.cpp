@@ -45,11 +45,12 @@ void dSpaceDestroy (dSpaceID space)
 {
   // destroying each geom will call dSpaceRemove(). this will be efficient if
   // we destroy geoms in list order.
+  dAASSERT (space);
   dGeomID g,n;
   g = space->first;
   while (g) {
     n = g->space.next;
-    dDestroyGeom (g);
+    dGeomDestroy (g);
     g = n;
   }
   dFree (space,sizeof(dxSpace));
@@ -58,19 +59,26 @@ void dSpaceDestroy (dSpaceID space)
 
 void dSpaceAdd (dSpaceID space, dGeomID obj)
 {
+  dAASSERT (space && obj);
+  dUASSERT (obj->spaceid == 0 && obj->space.next == 0,
+	    "object is already in a space");
   obj->space.next = space->first;
   space->first = obj;
+  obj->spaceid = space;
 }
 
 
 void dSpaceRemove (dSpaceID space, dGeomID geom_to_remove)
 {
+  dAASSERT (space && geom_to_remove);
+  dUASSERT (geom_to_remove->spaceid,"object is not in a space");
   dGeomID last=0,g=space->first;
   while (g) {
     if (g==geom_to_remove) {
       if (last) last->space.next = g->space.next;
       else space->first = g->space.next;
       geom_to_remove->space.next = 0;
+      geom_to_remove->spaceid = 0;
       return;
     }
     last = g;
@@ -81,6 +89,7 @@ void dSpaceRemove (dSpaceID space, dGeomID geom_to_remove)
 
 void dSpaceCollide (dSpaceID space, void *data, dNearCallback *callback)
 {
+  dAASSERT (space && callback);
   for (dxGeom *g1=space->first; g1; g1=g1->space.next) {
     for (dxGeom *g2=g1->space.next; g2; g2=g2->space.next) {
       callback (data,g1,g2);
@@ -110,8 +119,3 @@ void dSpaceCollide (dSpaceID space, void *data, dNearCallback *callback)
 //  *contact_array = base;
 //  return n;
 //}
-
-
-void dSpaceObjectMoved (dSpaceID, dGeomID)
-{
-}

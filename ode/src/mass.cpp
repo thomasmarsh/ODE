@@ -27,12 +27,18 @@
 #define _I(i,j) I[(i)*4+(j)]
 
 
-static void checkMass (dMass *m)
+// return 1 if ok, 0 if bad
+
+static int checkMass (dMass *m)
 {
-  if (m->mass <= 0)
-    dError (d_ERR_BAD_ARGS,"mass must be > 0");
-  if (!dIsPositiveDefinite (m->I,3))
-    dError (d_ERR_NON_PD,"inertia must be positive definite");
+  if (m->mass <= 0) {
+    dDEBUGMSG ("mass must be > 0");
+    return 0;
+  }
+  if (!dIsPositiveDefinite (m->I,3)) {
+    dDEBUGMSG ("inertia must be positive definite");
+    return 0;
+  }
 
   // verify that the center of mass position is consistent with the mass
   // and inertia matrix. this is done by checking that the inertia around
@@ -52,13 +58,17 @@ static void checkMass (dMass *m)
   dCROSSMAT (chat,m->c,4,+,-);
   dMULTIPLY0_333 (I2,chat,chat);
   for (int i=0; i<12; i++) I2[i] = m->I[i] + m->mass*I2[i];
-  if (!dIsPositiveDefinite (I2,3))
-    dError (d_ERR_NON_PD,"center of mass inconsistent with mass parameters");
+  if (!dIsPositiveDefinite (I2,3)) {
+    dDEBUGMSG ("center of mass inconsistent with mass parameters");
+    return 0;
+  }
+  return 1;
 }
 
 
 void dMassSetZero (dMass *m)
 {
+  dAASSERT (m);
   m->mass = REAL(0.0);
   dSetZero (m->c,sizeof(m->c) / sizeof(dReal));
   dSetZero (m->I,sizeof(m->I) / sizeof(dReal));
@@ -66,10 +76,11 @@ void dMassSetZero (dMass *m)
 
 
 void dMassSetParameters (dMass *m, dReal themass,
-			  dReal cgx, dReal cgy, dReal cgz,
-			  dReal I11, dReal I22, dReal I33,
-			  dReal I12, dReal I13, dReal I23)
+			 dReal cgx, dReal cgy, dReal cgz,
+			 dReal I11, dReal I22, dReal I33,
+			 dReal I12, dReal I13, dReal I23)
 {
+  dAASSERT (m);
   dMassSetZero (m);
   m->mass = themass;
   m->c[0] = cgx;
@@ -90,6 +101,7 @@ void dMassSetParameters (dMass *m, dReal themass,
 
 void dMassSetSphere (dMass *m, dReal density, dReal radius)
 {
+  dAASSERT (m);
   dMassSetZero (m);
   m->mass = (4.0/3.0) * M_PI * radius*radius*radius * density;
   dReal II = 0.4 * m->mass * radius*radius;
@@ -104,11 +116,11 @@ void dMassSetSphere (dMass *m, dReal density, dReal radius)
 
 
 void dMassSetCappedCylinder (dMass *m, dReal density, int direction,
-			      dReal a, dReal b)
+			     dReal a, dReal b)
 {
   dReal M1,M2,Ia,Ib;
-  if (direction < 1 || direction > 3)
-    dError (d_ERR_BAD_ARGS,"bad direction number");
+  dAASSERT (m);
+  dUASSERT (direction >= 1 && direction <= 3,"bad direction number");
   dMassSetZero (m);
   M1 = M_PI*a*a*b*density;		// cylinder mass
   M2 = (4.0/3.0)*M_PI*a*a*a*density;	// total cap mass
@@ -127,8 +139,9 @@ void dMassSetCappedCylinder (dMass *m, dReal density, int direction,
 
 
 void dMassSetBox (dMass *m, dReal density,
-		   dReal lx, dReal ly, dReal lz)
+		  dReal lx, dReal ly, dReal lz)
 {
+  dAASSERT (m);
   dMassSetZero (m);
   dReal M = lx*ly*lz*density;
   m->mass = M;
@@ -144,6 +157,7 @@ void dMassSetBox (dMass *m, dReal density,
 
 void dMassAdjust (dMass *m, dReal newmass)
 {
+  dAASSERT (m);
   dReal scale = newmass / m->mass;
   m->mass = newmass;
   for (int i=0; i<3; i++) for (int j=0; j<3; j++) m->_I(i,j) *= scale;
@@ -166,6 +180,8 @@ void dMassTranslate (dMass *m, dReal x, dReal y, dReal z)
   int i,j;
   dMatrix3 ahat,chat,t1,t2;
   dReal a[3];
+
+  dAASSERT (m);
 
   // adjust inertia matrix
   dSetZero (chat,12);
@@ -207,6 +223,8 @@ void dMassRotate (dMass *m, const dMatrix3 R)
 
   dMatrix3 t1;
   dReal t2[3];
+
+  dAASSERT (m);
 
   // rotate inertia matrix
   dMULTIPLY2_333 (t1,m->I,R);

@@ -99,19 +99,11 @@ struct dxJoint : public dObject {
   typedef void init_fn (dxJoint *joint);
   typedef void getInfo1_fn (dxJoint *joint, Info1 *info);
   typedef void getInfo2_fn (dxJoint *joint, Info2 *info);
-  typedef void setAnchor_fn (dxJoint *joint, dReal x, dReal y, dReal z);
-  typedef void setAxis_fn (dxJoint *joint, dReal x, dReal y, dReal z);
-  typedef void getAnchor_fn (dxJoint *joint, dVector3 result);
-  typedef void getAxis_fn (dxJoint *joint, dVector3 result);
   struct Vtable {
     int size;
     init_fn *init;
     getInfo1_fn *getInfo1;
     getInfo2_fn *getInfo2;
-    setAnchor_fn *setAnchor;
-    setAxis_fn *setAxis;
-    getAnchor_fn *getAnchor;
-    getAxis_fn *getAxis;
   };
 
   Vtable *vtable;		// virtual function table
@@ -133,7 +125,7 @@ struct dxJointBall : public dxJoint {
   dVector3 anchor1;		// anchor w.r.t first body
   dVector3 anchor2;		// anchor w.r.t second body
 };
-extern struct dxJoint::Vtable dball_vtable;
+extern struct dxJoint::Vtable __dball_vtable;
 
 
 // hinge
@@ -144,7 +136,7 @@ struct dxJointHinge : public dxJoint {
   dVector3 axis1;		// axis w.r.t first body
   dVector3 axis2;		// axis w.r.t second body
 };
-extern struct dxJoint::Vtable dhinge_vtable;
+extern struct dxJoint::Vtable __dhinge_vtable;
 
 
 // slider. if body2 is 0 then qrel is the absolute rotation of body1 and
@@ -155,7 +147,7 @@ struct dxJointSlider : public dxJoint {
   dQuaternion qrel;		// relative rotation body1 -> body2
   dVector3 offset;		// point relative to body2 that should be
 };				// aligned with body1 center along axis1
-extern struct dxJoint::Vtable dslider_vtable;
+extern struct dxJoint::Vtable __dslider_vtable;
 
 
 // contact
@@ -164,7 +156,7 @@ struct dxJointContact : public dxJoint {
   int the_m;			// number of rows computed by getInfo1
   dContact contact;
 };
-extern struct dxJoint::Vtable dcontact_vtable;
+extern struct dxJoint::Vtable __dcontact_vtable;
 
 
 

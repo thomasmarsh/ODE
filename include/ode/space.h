@@ -33,9 +33,9 @@ struct dContactGeom;
 
 /* extra information the space needs in every geometry object */
 
-struct dGeomSpaceData {
+typedef struct dGeomSpaceData {
   dGeomID next;
-};
+} dGeomSpaceData;
 
 
 dSpaceID dSpaceCreate();

@@ -433,7 +433,7 @@ static inline void initCollisionArrays()
 
 int dCreateGeomClass (const dGeomClass *c)
 {
-  dASSERT(c->bytes >= 0 && c->collider && c->aabb);
+  dUASSERT(c && c->bytes >= 0 && c->collider && c->aabb,"bad geom class");
   initCollisionArrays();
 
   int n = classes->size();
@@ -458,7 +458,8 @@ int dCollide (dxGeom *o1, dxGeom *o2, int flags, dContactGeom *contact,
 {
   int i,c1,c2,a1,a2,count,swap;
   dColliderFn *fn;
-  dASSERT(classes && colliders);
+  dAASSERT(o1 && o2 && contact);
+  dUASSERT(classes && colliders,"no registered geometry classes");
   dColliderEntry *colliders2 = colliders->data();
   c1 = o1->_class->num;
   c2 = o2->_class->num;
@@ -510,24 +511,28 @@ int dCollide (dxGeom *o1, dxGeom *o2, int flags, dContactGeom *contact,
 
 int dGeomGetClass (dxGeom *g)
 {
+  dAASSERT (g);
   return g->_class->num;
 }
 
 
 void dGeomSetData (dxGeom *g, void *data)
 {
+  dAASSERT (g);
   g->data = data;
 }
 
 
 void *dGeomGetData (dxGeom *g)
 {
+  dAASSERT (g);
   return g->data;
 }
 
 
 void dGeomSetBody (dxGeom *g, dBodyID b)
 {
+  dAASSERT (g);
   if (b) {
     if (!g->body) dFree (g->pos,sizeof(dxPosR));
     g->body = b;
@@ -547,12 +552,14 @@ void dGeomSetBody (dxGeom *g, dBodyID b)
 
 dBodyID dGeomGetBody (dxGeom *g)
 {
+  dAASSERT (g);
   return g->body;
 }
 
 
 void dGeomSetPosition (dxGeom *g, dReal x, dReal y, dReal z)
 {
+  dAASSERT (g);
   if (g->body) dBodySetPosition (g->body,x,y,z);
   else {
     g->pos[0] = x;
@@ -564,6 +571,7 @@ void dGeomSetPosition (dxGeom *g, dReal x, dReal y, dReal z)
 
 void dGeomSetRotation (dxGeom *g, const dMatrix3 R)
 {
+  dAASSERT (g);
   if (g->body) dBodySetRotation (g->body,R);
   else memcpy (g->R,R,sizeof(dMatrix3));
 }
@@ -571,12 +579,14 @@ void dGeomSetRotation (dxGeom *g, const dMatrix3 R)
 
 const dReal * dGeomGetPosition (dxGeom *g)
 {
+  dAASSERT (g);
   return g->pos;
 }
 
 
 const dReal * dGeomGetRotation (dxGeom *g)
 {
+  dAASSERT (g);
   return g->R;
 }
 
@@ -585,14 +595,15 @@ const dReal * dGeomGetRotation (dxGeom *g)
 
 void * dGeomGetClassData (dxGeom *g)
 {
+  dAASSERT (g);
   return (void*) CLASSDATA(g);
 }
 
 
-dxGeom * dCreateGeom (dSpaceID space, int classnum)
+dxGeom * dCreateGeom (int classnum)
 {
-  if (!classes || !colliders || classnum < 0 || classnum >= classes->size())
-    dDebug (d_ERR_BAD_ARGS,"dCreateGeom(), bad class number");
+  dUASSERT (classes && colliders && classnum >= 0 &&
+	    classnum < classes->size(),"bad class number");
   int size = (*classes)[classnum]->size;
   dxGeom *geom = (dxGeom*) dAlloc (size);
   memset (geom,0,size);
@@ -607,14 +618,16 @@ dxGeom * dCreateGeom (dSpaceID space, int classnum)
   dSetZero (geom->pos,4);
   dRSetIdentity (geom->R);
 
-  geom->spaceid = space;
-  dSpaceAdd (space,geom);
+  // the `space' area is initially zeroed
+  memset (&geom->space,0,sizeof(geom->space));
+
   return geom;
 }
 
 
-void dDestroyGeom (dxGeom *g)
+void dGeomDestroy (dxGeom *g)
 {
+  dAASSERT (g);
   dSpaceRemove (g->spaceid,g);
   if (!g->body) dFree (g->pos,sizeof(dxPosR));
   dFree (g,g->_class->size);
@@ -651,9 +664,9 @@ struct dxComposite {
 int dCollideSS (const dxGeom *o1, const dxGeom *o2, int flags,
 		dContactGeom *contact, int skip)
 {
-  dASSERT (skip >= (int)sizeof(dContactGeom));
-  dASSERT (o1->_class->num == dSphereClass);
-  dASSERT (o2->_class->num == dSphereClass);
+  dIASSERT (skip >= (int)sizeof(dContactGeom));
+  dIASSERT (o1->_class->num == dSphereClass);
+  dIASSERT (o2->_class->num == dSphereClass);
   dxSphere *s1 = (dxSphere*) CLASSDATA(o1);
   dxSphere *s2 = (dxSphere*) CLASSDATA(o2);
   return dCollideSpheres (o1->pos,s1->radius,
@@ -674,8 +687,9 @@ int dCollideSB (const dxGeom *o1, const dxGeom *o2, int flags,
   dReal depth;
   int onborder = 0;
 
-  dASSERT (o1->_class->num == dSphereClass);
-  dASSERT (o2->_class->num == dBoxClass);
+  dIASSERT (skip >= (int)sizeof(dContactGeom));
+  dIASSERT (o1->_class->num == dSphereClass);
+  dIASSERT (o2->_class->num == dBoxClass);
   dxSphere *sphere = (dxSphere*) CLASSDATA(o1);
   dxBox *box = (dxBox*) CLASSDATA(o2);
 
@@ -755,9 +769,9 @@ int dCollideSC (const dxGeom *o1, const dxGeom *o2, int flags,
 int dCollideSP (const dxGeom *o1, const dxGeom *o2, int flags,
 		dContactGeom *contact, int skip)
 {
-  dASSERT (skip >= (int)sizeof(dContactGeom));
-  dASSERT (o1->_class->num == dSphereClass);
-  dASSERT (o2->_class->num == dPlaneClass);
+  dIASSERT (skip >= (int)sizeof(dContactGeom));
+  dIASSERT (o1->_class->num == dSphereClass);
+  dIASSERT (o2->_class->num == dPlaneClass);
   dxSphere *sphere = (dxSphere*) CLASSDATA(o1);
   dxPlane *plane = (dxPlane*) CLASSDATA(o2);
   dReal k = dDOT (o1->pos,plane->p);
@@ -806,9 +820,9 @@ int dCollideBC (const dxGeom *o1, const dxGeom *o2, int flags,
 int dCollideBP (const dxGeom *o1, const dxGeom *o2,
 		int flags, dContactGeom *contact, int skip)
 {
-  dASSERT (skip >= (int)sizeof(dContactGeom));
-  dASSERT (o1->_class->num == dBoxClass);
-  dASSERT (o2->_class->num == dPlaneClass);
+  dIASSERT (skip >= (int)sizeof(dContactGeom));
+  dIASSERT (o1->_class->num == dBoxClass);
+  dIASSERT (o2->_class->num == dPlaneClass);
   dxBox *box = (dxBox*) CLASSDATA(o1);
   dxPlane *plane = (dxPlane*) CLASSDATA(o2);
 
@@ -987,6 +1001,7 @@ static void dPlaneAABB (dxGeom *geom, dReal aabb[6])
 
 dxGeom *dCreateSphere (dSpaceID space, dReal radius)
 {
+  dAASSERT (space);
   if (dSphereClass == -1) {
     dGeomClass c;
     c.bytes = sizeof (dxSphere);
@@ -995,7 +1010,8 @@ dxGeom *dCreateSphere (dSpaceID space, dReal radius)
     dSphereClass = dCreateGeomClass (&c);
   }
 
-  dxGeom *g = dCreateGeom (space,dSphereClass);
+  dxGeom *g = dCreateGeom (dSphereClass);
+  dSpaceAdd (space,g);
   dxSphere *s = (dxSphere*) CLASSDATA(g);
   s->radius = radius;
   return g;
@@ -1004,6 +1020,7 @@ dxGeom *dCreateSphere (dSpaceID space, dReal radius)
 
 dxGeom *dCreateBox (dSpaceID space, dReal lx, dReal ly, dReal lz)
 {
+  dAASSERT (space && lx > 0 && ly > 0 && lz > 0);
   if (dBoxClass == -1) {
     dGeomClass c;
     c.bytes = sizeof (dxBox);
@@ -1012,7 +1029,8 @@ dxGeom *dCreateBox (dSpaceID space, dReal lx, dReal ly, dReal lz)
     dBoxClass = dCreateGeomClass (&c);
   }
 
-  dxGeom *g = dCreateGeom (space,dBoxClass);
+  dxGeom *g = dCreateGeom (dBoxClass);
+  dSpaceAdd (space,g);
   dxBox *b = (dxBox*) CLASSDATA(g);
   b->side[0] = lx;
   b->side[1] = ly;
@@ -1024,6 +1042,7 @@ dxGeom *dCreateBox (dSpaceID space, dReal lx, dReal ly, dReal lz)
 dxGeom *dCreatePlane (dSpaceID space,
 		      dReal a, dReal b, dReal c, dReal d)
 {
+  dAASSERT (space);
   if (dPlaneClass == -1) {
     dGeomClass c;
     c.bytes = sizeof (dxPlane);
@@ -1032,7 +1051,8 @@ dxGeom *dCreatePlane (dSpaceID space,
     dPlaneClass = dCreateGeomClass (&c);
   }
 
-  dxGeom *g = dCreateGeom (space,dPlaneClass);
+  dxGeom *g = dCreateGeom (dPlaneClass);
+  dSpaceAdd (space,g);
   dxPlane *p = (dxPlane*) CLASSDATA(g);
 
   // make sure plane normal has unit length
@@ -1056,7 +1076,7 @@ dxGeom *dCreatePlane (dSpaceID space,
 
 dReal dGeomSphereGetRadius (dGeomID g)
 {
-  dASSERT (g->_class->num == dSphereClass);
+  dUASSERT (g && g->_class->num == dSphereClass,"argument not a sphere");
   dxSphere *s = (dxSphere*) CLASSDATA(g);
   return s->radius;
 }
@@ -1064,7 +1084,7 @@ dReal dGeomSphereGetRadius (dGeomID g)
 
 void  dGeomBoxGetLengths (dGeomID g, dVector3 result)
 {
-  dASSERT (g->_class->num == dBoxClass);
+  dUASSERT (g && g->_class->num == dBoxClass,"argument not a box");
   dxBox *b = (dxBox*) CLASSDATA(g);
   result[0] = b->side[0];
   result[1] = b->side[1];
@@ -1074,7 +1094,7 @@ void  dGeomBoxGetLengths (dGeomID g, dVector3 result)
 
 void  dGeomPlaneGetParams (dGeomID g, dVector4 result)
 {
-  dASSERT (g->_class->num == dPlaneClass);
+  dUASSERT (g && g->_class->num == dPlaneClass,"argument not a plane");
   dxPlane *p = (dxPlane*) CLASSDATA(g);
   result[0] = p->p[0];
   result[1] = p->p[1];

@@ -169,25 +169,29 @@ static void ballGetInfo2 (dxJointBall *joint, dxJoint::Info2 *info)
 }
 
 
-static void ballSetAnchor (dxJointBall *joint, dReal x, dReal y, dReal z)
+extern "C" void dJointSetBallAnchor (dxJointBall *joint,
+				     dReal x, dReal y, dReal z)
 {
+  dUASSERT(joint,"bad joint argument");
+  dUASSERT(joint->vtable == &__dball_vtable,"joint is not a ball");
   setAnchors (joint,x,y,z,joint->anchor1,joint->anchor2);
 }
 
 
-static void ballGetAnchor (dxJointBall *joint, dVector3 result)
+extern "C" void dJointGetBallAnchor (dxJointBall *joint, dVector3 result)
 {
+  dUASSERT(joint,"bad joint argument");
+  dUASSERT(result,"bad result argument");
+  dUASSERT(joint->vtable == &__dball_vtable,"joint is not a ball");
   getAnchor (joint,result,joint->anchor1);
 }
 
 
-dxJoint::Vtable dball_vtable = {
+dxJoint::Vtable __dball_vtable = {
   sizeof(dxJointBall),
   (dxJoint::init_fn*) ballInit,
   (dxJoint::getInfo1_fn*) ballGetInfo1,
-  (dxJoint::getInfo2_fn*) ballGetInfo2,
-  (dxJoint::setAnchor_fn*) ballSetAnchor, 0,
-  (dxJoint::getAnchor_fn*) ballGetAnchor, 0};
+  (dxJoint::getInfo2_fn*) ballGetInfo2};
 
 //****************************************************************************
 // hinge
@@ -277,39 +281,47 @@ static void hingeGetInfo2 (dxJointHinge *joint, dxJoint::Info2 *info)
 }
 
 
-static void hingeSetAnchor (dxJointHinge *joint, dReal x, dReal y, dReal z)
+extern "C" void dJointSetHingeAnchor (dxJointHinge *joint,
+				      dReal x, dReal y, dReal z)
 {
+  dUASSERT(joint,"bad joint argument");
+  dUASSERT(joint->vtable == &__dhinge_vtable,"joint is not a hinge");
   setAnchors (joint,x,y,z,joint->anchor1,joint->anchor2);
 }
 
 
-static void hingeSetAxis (dxJointHinge *joint, dReal x, dReal y, dReal z)
+extern "C" void dJointSetHingeAxis (dxJointHinge *joint,
+				    dReal x, dReal y, dReal z)
 {
+  dUASSERT(joint,"bad joint argument");
+  dUASSERT(joint->vtable == &__dhinge_vtable,"joint is not a hinge");
   setAxes (joint,x,y,z,joint->axis1,joint->axis2);
 }
 
 
-static void hingeGetAnchor (dxJointHinge *joint, dVector3 result)
+extern "C" void dJointGetHingeAnchor (dxJointHinge *joint, dVector3 result)
 {
+  dUASSERT(joint,"bad joint argument");
+  dUASSERT(result,"bad result argument");
+  dUASSERT(joint->vtable == &__dhinge_vtable,"joint is not a hinge");
   getAnchor (joint,result,joint->anchor1);
 }
 
 
-static void hingeGetAxis (dxJointHinge *joint, dVector3 result)
+extern "C" void dJointGetHingeAxis (dxJointHinge *joint, dVector3 result)
 {
+  dUASSERT(joint,"bad joint argument");
+  dUASSERT(result,"bad result argument");
+  dUASSERT(joint->vtable == &__dhinge_vtable,"joint is not a hinge");
   getAxis (joint,result,joint->axis1);
 }
 
 
-dxJoint::Vtable dhinge_vtable = {
+dxJoint::Vtable __dhinge_vtable = {
   sizeof(dxJointHinge),
   (dxJoint::init_fn*) hingeInit,
   (dxJoint::getInfo1_fn*) hingeGetInfo1,
-  (dxJoint::getInfo2_fn*) hingeGetInfo2,
-  (dxJoint::setAnchor_fn*) hingeSetAnchor,
-  (dxJoint::setAxis_fn*) hingeSetAxis,
-  (dxJoint::getAnchor_fn*) hingeGetAnchor,
-  (dxJoint::getAxis_fn*) hingeGetAxis};
+  (dxJoint::getInfo2_fn*) hingeGetInfo2};
 
 //****************************************************************************
 // slider
@@ -438,9 +450,12 @@ static void sliderGetInfo2 (dxJointSlider *joint, dxJoint::Info2 *info)
 }
 
 
-static void sliderSetAxis (dxJointSlider *joint, dReal x, dReal y, dReal z)
+extern "C" void dJointSetSliderAxis (dxJointSlider *joint,
+				     dReal x, dReal y, dReal z)
 {
   int i;
+  dUASSERT(joint,"bad joint argument");
+  dUASSERT(joint->vtable == &__dslider_vtable,"joint is not a slider");
   setAxes (joint,x,y,z,joint->axis1,0);
 
   if (joint->node[1].body) {
@@ -460,21 +475,20 @@ static void sliderSetAxis (dxJointSlider *joint, dReal x, dReal y, dReal z)
 }
 
 
-static void sliderGetAxis (dxJointSlider *joint, dVector3 result)
+extern "C" void dJointGetSliderAxis (dxJointSlider *joint, dVector3 result)
 {
+  dUASSERT(joint,"bad joint argument");
+  dUASSERT(result,"bad result argument");
+  dUASSERT(joint->vtable == &__dslider_vtable,"joint is not a slider");
   getAxis (joint,result,joint->axis1);
 }
 
 
-dxJoint::Vtable dslider_vtable = {
+dxJoint::Vtable __dslider_vtable = {
   sizeof(dxJointSlider),
   (dxJoint::init_fn*) sliderInit,
   (dxJoint::getInfo1_fn*) sliderGetInfo1,
-  (dxJoint::getInfo2_fn*) sliderGetInfo2,
-  0,
-  (dxJoint::setAxis_fn*) sliderSetAxis,
-  0,
-  (dxJoint::getAxis_fn*) sliderGetAxis};
+  (dxJoint::getInfo2_fn*) sliderGetInfo2};
 
 //****************************************************************************
 // contact
@@ -613,9 +627,8 @@ static void contactGetInfo2 (dxJointContact *j, dxJoint::Info2 *info)
 }
 
 
-dxJoint::Vtable dcontact_vtable = {
+dxJoint::Vtable __dcontact_vtable = {
   sizeof(dxJointContact),
   (dxJoint::init_fn*) contactInit,
   (dxJoint::getInfo1_fn*) contactGetInfo1,
-  (dxJoint::getInfo2_fn*) contactGetInfo2,
-  0,0,0,0};
+  (dxJoint::getInfo2_fn*) contactGetInfo2};

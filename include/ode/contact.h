@@ -41,7 +41,7 @@ enum {
 };
 
 
-struct dSurfaceParameters {
+typedef struct dSurfaceParameters {
   /* must always be defined */
   int mode;
   dReal mu;
@@ -53,25 +53,25 @@ struct dSurfaceParameters {
   dReal soft;
   dReal motion1,motion2;
   dReal slip1,slip2;
-};
+} dSurfaceParameters;
 
 
 /* contact info set by collision functions */
 
-struct dContactGeom {
+typedef struct dContactGeom {
   dVector3 pos;
   dVector3 normal;
   dReal depth;
-};
+} dContactGeom;
 
 
 /* contact info used by contact joint */
 
-struct dContact {
+typedef struct dContact {
   dSurfaceParameters surface;
   dContactGeom geom;
   dVector3 fdir1;
-};
+} dContact;
 
 
 #ifdef __cplusplus

@@ -159,8 +159,8 @@ static void processIslands (dxWorld *world, dReal stepsize)
 	  }
 	}
       }
-      dASSERT(stacksize <= world->nb);
-      dASSERT(stacksize <= world->nj);
+      dIASSERT(stacksize <= world->nb);
+      dIASSERT(stacksize <= world->nj);
     }
 
     // now do something with body and joint lists
@@ -304,7 +304,7 @@ static void checkWorld (dxWorld *w)
 
 dxBody *dBodyCreate (dxWorld *w)
 {
-  dCHECKPTR (w);
+  dAASSERT (w);
   dxBody *b = new dxBody;
   initObject (b,w);
   b->firstjoint = 0;
@@ -330,7 +330,7 @@ dxBody *dBodyCreate (dxWorld *w)
 
 void dBodyDestroy (dxBody *b)
 {
-  dCHECKPTR (b);
+  dAASSERT (b);
 
   // detach all neighbouring joints, then delete this body.
   dxJointNode *n = b->firstjoint;
@@ -349,23 +349,23 @@ void dBodyDestroy (dxBody *b)
 }
 
 
-void  dBodySetData (dBodyID b, void *data)
+void dBodySetData (dBodyID b, void *data)
 {
-  dCHECKPTR(b);
+  dAASSERT (b);
   b->userdata = data;
 }
 
 
 void *dBodyGetData (dBodyID b)
 {
-  dCHECKPTR(b);
+  dAASSERT (b);
   return b->userdata;
 }
 
 
 void dBodySetPosition (dBodyID b, dReal x, dReal y, dReal z)
 {
-  dCHECKPTR(b);
+  dAASSERT (b);
   b->pos[0] = x;
   b->pos[1] = y;
   b->pos[2] = z;
@@ -374,8 +374,7 @@ void dBodySetPosition (dBodyID b, dReal x, dReal y, dReal z)
 
 void dBodySetRotation (dBodyID b, const dMatrix3 R)
 {
-  dCHECKPTR(b);
-  dCHECKPTR(R);
+  dAASSERT (b && R);
   dQuaternion q;
   dRtoQ (R,q);
   dNormalize4 (q);
@@ -389,8 +388,7 @@ void dBodySetRotation (dBodyID b, const dMatrix3 R)
 
 void dBodySetQuaternion (dBodyID b, const dQuaternion q)
 {
-  dCHECKPTR(b);
-  dCHECKPTR(q);
+  dAASSERT (b && q);
   b->q[0] = q[0];
   b->q[1] = q[1];
   b->q[2] = q[2];
@@ -402,7 +400,7 @@ void dBodySetQuaternion (dBodyID b, const dQuaternion q)
 
 void dBodySetLinearVel  (dBodyID b, dReal x, dReal y, dReal z)
 {
-  dCHECKPTR(b);
+  dAASSERT (b);
   b->lvel[0] = x;
   b->lvel[1] = y;
   b->lvel[2] = z;
@@ -411,7 +409,7 @@ void dBodySetLinearVel  (dBodyID b, dReal x, dReal y, dReal z)
 
 void dBodySetAngularVel (dBodyID b, dReal x, dReal y, dReal z)
 {
-  dCHECKPTR(b);
+  dAASSERT (b);
   b->avel[0] = x;
   b->avel[1] = y;
   b->avel[2] = z;
@@ -420,61 +418,61 @@ void dBodySetAngularVel (dBodyID b, dReal x, dReal y, dReal z)
 
 const dReal * dBodyGetPosition (dBodyID b)
 {
-  dCHECKPTR(b);
+  dAASSERT (b);
   return b->pos;
 }
 
 
 const dReal * dBodyGetRotation (dBodyID b)
 {
-  dCHECKPTR(b);
+  dAASSERT (b);
   return b->R;
 }
 
 
 const dReal * dBodyGetQuaternion (dBodyID b)
 {
-  dCHECKPTR(b);
+  dAASSERT (b);
   return b->q;
 }
 
 
 const dReal * dBodyGetLinearVel (dBodyID b)
 {
-  dCHECKPTR(b);
+  dAASSERT (b);
   return b->lvel;
 }
 
 
 const dReal * dBodyGetAngularVel (dBodyID b)
 {
-  dCHECKPTR(b);
+  dAASSERT (b);
   return b->avel;
 }
 
 
 void dBodySetMass (dBodyID b, const dMass *mass)
 {
-  dCHECKPTR(b);
-  dCHECKPTR(mass);
+  dAASSERT (b && mass);
   memcpy (&b->mass,mass,sizeof(dMass));
-  if (dInvertPDMatrix (b->mass.I,b->invI,3)==0)
-    dError (d_ERR_NON_PD,"inertia must be positive definite");
+  if (dInvertPDMatrix (b->mass.I,b->invI,3)==0) {
+    dDEBUGMSG ("inertia must be positive definite");
+    dRSetIdentity (b->invI);
+  }
   b->invMass = dRecip(b->mass.mass);
 }
 
 
 void dBodyGetMass (dBodyID b, dMass *mass)
 {
-  dCHECKPTR(b);
-  dCHECKPTR(mass);
+  dAASSERT (b && mass);
   memcpy (mass,&b->mass,sizeof(dMass));
 }
 
 
 void dBodyAddForce (dBodyID b, dReal fx, dReal fy, dReal fz)
 {
-  dCHECKPTR(b);
+  dAASSERT (b);
   b->facc[0] += fx;
   b->facc[1] += fy;
   b->facc[2] += fz;
@@ -483,7 +481,7 @@ void dBodyAddForce (dBodyID b, dReal fx, dReal fy, dReal fz)
 
 void dBodyAddTorque (dBodyID b, dReal fx, dReal fy, dReal fz)
 {
-  dCHECKPTR(b);
+  dAASSERT (b);
   b->tacc[0] += fx;
   b->tacc[1] += fy;
   b->tacc[2] += fz;
@@ -492,7 +490,7 @@ void dBodyAddTorque (dBodyID b, dReal fx, dReal fy, dReal fz)
 
 void dBodyAddRelForce (dBodyID b, dReal fx, dReal fy, dReal fz)
 {
-  dCHECKPTR(b);
+  dAASSERT (b);
   dVector3 t1,t2;
   t1[0] = fx;
   t1[1] = fy;
@@ -507,7 +505,7 @@ void dBodyAddRelForce (dBodyID b, dReal fx, dReal fy, dReal fz)
 
 void dBodyAddRelTorque (dBodyID b, dReal fx, dReal fy, dReal fz)
 {
-  dCHECKPTR(b);
+  dAASSERT (b);
   dVector3 t1,t2;
   t1[0] = fx;
   t1[1] = fy;
@@ -522,10 +520,9 @@ void dBodyAddRelTorque (dBodyID b, dReal fx, dReal fy, dReal fz)
 //****************************************************************************
 // joints
 
-void dJointInit (dxWorld *w, dxJoint *j)
+static void dJointInit (dxWorld *w, dxJoint *j)
 {
-  dCHECKPTR (w);
-  dCHECKPTR (j);
+  dIASSERT (w && j);
   initObject (j,w);
   j->vtable = 0;
   j->flags = 0;
@@ -543,7 +540,7 @@ void dJointInit (dxWorld *w, dxJoint *j)
 static dxJoint *createJoint (dWorldID w, dJointGroupID group,
 			     dxJoint::Vtable *vtable)
 {
-  dCHECKPTR (w);
+  dIASSERT (w && vtable);
   dxJoint *j;
   if (group) {
     j = (dxJoint*) group->stack.alloc (vtable->size);
@@ -560,18 +557,21 @@ static dxJoint *createJoint (dWorldID w, dJointGroupID group,
 
 dxJoint * dJointCreateBall (dWorldID w, dJointGroupID group)
 {
+  dAASSERT (w);
   return createJoint (w,group,&__dball_vtable);
 }
 
 
 dxJoint * dJointCreateHinge (dWorldID w, dJointGroupID group)
 {
+  dAASSERT (w);
   return createJoint (w,group,&__dhinge_vtable);
 }
 
 
 dxJoint * dJointCreateSlider (dWorldID w, dJointGroupID group)
 {
+  dAASSERT (w);
   return createJoint (w,group,&__dslider_vtable);
 }
 
@@ -579,6 +579,7 @@ dxJoint * dJointCreateSlider (dWorldID w, dJointGroupID group)
 dxJoint * dJointCreateContact (dWorldID w, dJointGroupID group,
 			       const dContact *c)
 {
+  dAASSERT (w && c);
   dxJointContact *j = (dxJointContact *)
     createJoint (w,group,&__dcontact_vtable);
   j->contact = *c;
@@ -588,7 +589,7 @@ dxJoint * dJointCreateContact (dWorldID w, dJointGroupID group,
 
 void dJointDestroy (dxJoint *j)
 {
-  dCHECKPTR (j);
+  dAASSERT (j);
   if (j->flags & dJOINT_INGROUP) return;
   removeJointReferencesFromAttachedBodies (j);
   removeObjectFromList (j);
@@ -599,7 +600,7 @@ void dJointDestroy (dxJoint *j)
 
 dJointGroupID dJointGroupCreate (int max_size)
 {
-  dASSERT (max_size > 0);
+  dUASSERT (max_size > 0,"max size must be > 0");
   dxJointGroup *group = (dxJointGroup*) dAlloc (sizeof(dxJointGroup));
   group->stack.init (max_size);
   group->stack.pushFrame();
@@ -611,6 +612,7 @@ dJointGroupID dJointGroupCreate (int max_size)
 
 void dJointGroupDestroy (dJointGroupID group)
 {
+  dAASSERT (group);
   dJointGroupEmpty (group);
   group->stack.destroy();
   dFree (group,sizeof(dxJointGroup));
@@ -624,6 +626,7 @@ void dJointGroupEmpty (dJointGroupID group)
   // linked lists are not traversed too much, as the joints will hopefully
   // be at the start of those lists.
 
+  dAASSERT (group);
   int i;
   dxJoint **jlist = (dxJoint**) ALLOCA (group->num * sizeof(dxJoint*));
   dxJoint *j = group->firstjoint;
@@ -645,15 +648,13 @@ void dJointGroupEmpty (dJointGroupID group)
 void dJointAttach (dxJoint *joint, dxBody *body1, dxBody *body2)
 {
   // check arguments
-  dCHECKPTR (joint);
-  if (body1 == 0 && body2 == 0)
-    dError (d_ERR_BAD_ARGS,"can't have body1==0 and body2==0");
-  if (body1 == body2)
-    dError (d_ERR_BAD_ARGS,"can't have body1==body2");
+  dUASSERT (joint,"bad joint argument");
+  dUASSERT (body1 || body2,"can't have body1==0 and body2==0");
+  dUASSERT (body1 != body2,"can't have body1==body2");
   dxWorld *world = joint->world;
-  if ((body1 && body1->world != world) ||
-      (body2 && body2->world != world))
-    dError (d_ERR_SAME_WORLD,"joint and bodies must be in same world");
+  dUASSERT ( (!body1 || body1->world == world) &&
+	     (!body2 || body2->world == world),
+	     "joint and bodies must be in same world");
 
   // remove any existing body attachments
   if (joint->node[0].body || joint->node[1].body) {
@@ -687,8 +688,7 @@ void dJointAttach (dxJoint *joint, dxBody *body1, dxBody *body2)
 
 int dAreConnected (dBodyID b1, dBodyID b2)
 {
-  dCHECKPTR(b1);
-  dCHECKPTR(b2);
+  dAASSERT (b1 && b2);
   // look through b1's neighbour list for b2
   for (dxJointNode *n=b1->firstjoint; n; n=n->next) {
     if (n->body == b2) return 1;
@@ -714,7 +714,7 @@ dxWorld * dWorldCreate()
 void dWorldDestroy (dxWorld *w)
 {
   // delete all bodies and joints
-  dCHECKPTR (w);
+  dAASSERT (w);
   dxBody *nextb, *b = w->firstbody;
   while (b) {
     nextb = (dxBody*) b->next;
@@ -738,7 +738,7 @@ void dWorldDestroy (dxWorld *w)
 
 void dWorldSetGravity (dWorldID w, dReal x, dReal y, dReal z)
 {
-  dCHECKPTR(w);
+  dAASSERT (w);
   w->gravity[0] = x;
   w->gravity[1] = y;
   w->gravity[2] = z;
@@ -747,7 +747,7 @@ void dWorldSetGravity (dWorldID w, dReal x, dReal y, dReal z)
 
 void dWorldGetGravity (dWorldID w, dVector3 g)
 {
-  dCHECKPTR(w);
+  dAASSERT (w);
   g[0] = w->gravity[0];
   g[1] = w->gravity[1];
   g[2] = w->gravity[2];
@@ -756,7 +756,8 @@ void dWorldGetGravity (dWorldID w, dVector3 g)
 
 void dWorldStep (dWorldID w, dReal stepsize)
 {
-  dCHECKPTR(w);
+  dUASSERT (w,"bad world argument");
+  dUASSERT (stepsize > 0,"stepsize must be > 0");
   processIslands (w,stepsize);
 }
 

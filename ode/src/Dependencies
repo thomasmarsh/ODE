@@ -66,7 +66,8 @@ step.o: step.cpp objects.h ../../include/ode/memory.h \
 testing.o: testing.cpp testing.h ../../include/ode/common.h \
  ../../include/ode/error.h array.h ../../include/ode/misc.h \
  ../../include/ode/memory.h
-timer.o: timer.cpp ../../include/ode/timer.h \
+timer.o: timer.cpp ../../include/ode/common.h \
+ ../../include/ode/error.h ../../include/ode/timer.h \
  ../../include/ode/config.h
 fastdot.o: fastdot.c ../../include/ode/matrix.h \
  ../../include/ode/common.h ../../include/ode/error.h

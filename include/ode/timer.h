@@ -31,15 +31,15 @@ extern "C" {
 
 /* stop watch objects */
 
-struct dStopwatch {
+typedef struct dStopwatch {
   double time;			/* total clock count */
   unsigned long cc[2];		/* clock count since last `start' */
-};
+} dStopwatch;
 
 void dStopwatchReset (dStopwatch *);
 void dStopwatchStart (dStopwatch *);
 void dStopwatchStop  (dStopwatch *);
-double dStopwatchTime (dStopwatch *);	  /* returns total time in seconds */
+double dStopwatchTime (dStopwatch *);	/* returns total time in secs */
 
 
 /* code timers */

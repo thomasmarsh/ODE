@@ -41,10 +41,10 @@
 void dNormalize3 (dVector3 a)
 {
   dReal a0,a1,a2,aa0,aa1,aa2,l;
+  dAASSERT (a);
   a0 = a[0];
   a1 = a[1];
   a2 = a[2];
-  dASSERT (a);
   aa0 = dFabs(a0);
   aa1 = dFabs(a1);
   aa2 = dFabs(a2);
@@ -73,6 +73,7 @@ void dNormalize3 (dVector3 a)
     }
     else {		// aa0 is largest
       if (aa0 <= 0) {
+	dDEBUGMSG ("vector has zero size");
 	a[0] = 1;	// if all a's are zero, this is where we'll end up.
 	a[1] = 0;	// return a default unit length vector.
 	a[2] = 0;
@@ -112,7 +113,7 @@ void dNormalize3 (dVector3 a)
 
 void dNormalize4 (dVector4 a)
 {
-  dASSERT (a);
+  dAASSERT (a);
   dReal l = dDOT(a,a)+a[3]*a[3];
   if (l > 0) {
     l = dRecipSqrt(l);
@@ -122,6 +123,7 @@ void dNormalize4 (dVector4 a)
     a[3] *= l;
   }
   else {
+    dDEBUGMSG ("vector has zero size");
     a[0] = 1;
     a[1] = 0;
     a[2] = 0;
@@ -132,6 +134,7 @@ void dNormalize4 (dVector4 a)
 
 void dPlaneSpace (const dVector3 n, dVector3 p, dVector3 q)
 {
+  dAASSERT (n && p && q);
   if (dFabs(n[2]) > M_SQRT1_2) {
     // choose p in y-z plane
     dReal a = n[1]*n[1] + n[2]*n[2];

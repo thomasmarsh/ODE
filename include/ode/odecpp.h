@@ -25,7 +25,7 @@
 
 #include "ode/error.h"
 
-// C++ interface for everything
+/* C++ interface for everything */
 
 
 class dWorld {
@@ -58,7 +58,7 @@ class dBody {
   void operator= (dBody &) { dDebug (0,"bad"); }
 
 public:
-  dBody ()
+  dBody()
     { _id = 0; }
   dBody (dWorld &world)
     { _id = dBodyCreate (world.id()); }
@@ -100,12 +100,6 @@ public:
     { dBodySetMass (_id,mass); }
   void getMass (dMass *mass)
     { dBodyGetMass (_id,mass); }
-
-  //@@@
-  //  void setMass (dMassObject &mass)
-  //    { dBodySetMass (_id,mass.massPtr()) }
-  //  void getMass (dMassObject &mass)
-  //    { dBodyGetMass (_id,mass.massPtr()); }
 
   void addForce (dReal fx, dReal fy, dReal fz)
     { dBodyAddForce (_id, fx, fy, fz); }
@@ -193,19 +187,127 @@ public:
 
   void attach (dBody &body1, dBody &body2)
     { dJointAttach (_id, body1.id(), body2.id()); }
-  void setAnchor (dReal x, dReal y, dReal z)
-    { dJointSetAnchor (_id, x, y, z); }
-  void setAxis (dReal x, dReal y, dReal z)
-    { dJointSetAxis (_id, x, y, z); }
-  void getAnchor (dVector3 result)
-    { dJointGetAnchor (_id, result); }
-  void getAxis (dVector3 result)
-    { dJointGetAxis (_id, result); }
+
+  void setBallAnchor (dReal x, dReal y, dReal z)
+    { dJointSetBallAnchor (_id, x, y, z); }
+  void setHingeAnchor (dReal x, dReal y, dReal z)
+    { dJointSetHingeAnchor (_id, x, y, z); }
+
+  void setHingeAxis (dReal x, dReal y, dReal z)
+    { dJointSetHingeAxis (_id, x, y, z); }
+  void setSliderAxis (dReal x, dReal y, dReal z)
+    { dJointSetSliderAxis (_id, x, y, z); }
+
+  void getBallAnchor (dVector3 result)
+    { dJointGetBallAnchor (_id, result); }
+  void getHingeAnchor (dVector3 result)
+    { dJointGetHingeAnchor (_id, result); }
+
+  void getHingeAxis (dVector3 result)
+    { dJointGetHingeAxis (_id, result); }
+  void getSliderAxis (dVector3 result)
+    { dJointGetSliderAxis (_id, result); }
 };
 
 
+class dSpace {
+  dSpaceID _id;
 
-// @@@ objects for Geom, Space - not standardized enough yet.
+  dSpace (dSpace &) { dDebug (0,"bad"); }
+  void operator= (dSpace &) { dDebug (0,"bad"); }
+
+public:
+  dSpace()
+    { _id = dSpaceCreate(); }
+  ~dSpace()
+    { dSpaceDestroy (_id); }
+  dSpaceID id()
+    { return _id; }
+  void collide (void *data, dNearCallback *callback)
+    { dSpaceCollide (_id,data,callback); }
+};
+
+
+class dGeom {
+  dGeomID _id;
+
+  dGeom (dGeom &) { dDebug (0,"bad"); }
+  void operator= (dGeom &) { dDebug (0,"bad"); }
+
+public:
+  dGeom()
+    { _id = 0; }
+  ~dGeom()
+    { dGeomDestroy (_id); }
+  dGeomID id()
+    { return _id; }
+
+  void createSphere (dSpace &space, dReal radius) {
+    if (_id) dGeomDestroy (_id);
+    _id = dCreateSphere (space.id(),radius);
+  }
+
+  void createBox (dSpace &space, dReal lx, dReal ly, dReal lz) {
+    if (_id) dGeomDestroy (_id);
+    _id = dCreateBox (space.id(),lx,ly,lz);
+  }
+
+  void createPlane (dSpace &space, dReal a, dReal b, dReal c, dReal d) {
+    if (_id) dGeomDestroy (_id);
+    _id = dCreatePlane (space.id(),a,b,c,d);
+  }
+
+  void createCCylinder (dSpace &space, dReal a, dReal b, int dir) {
+    if (_id) dGeomDestroy (_id);
+    _id = dCreateCCylinder (space.id(),a,b,dir);
+  }
+
+  void destroy() {
+    if (_id) dGeomDestroy (_id);
+    _id = 0;
+  }
+
+  int getClass()
+    { return dGeomGetClass (_id); }
+
+  dReal sphereGetRadius()
+    { return dGeomSphereGetRadius (_id); }
+
+  void boxGetLengths (dVector3 result)
+    { dGeomBoxGetLengths (_id,result); }
+
+  void planeGetParams (dVector4 result)
+    { dGeomPlaneGetParams (_id,result); }
+
+  void CCylinderGetParams (dReal *a, dReal *b, int *dir)
+    { dGeomCCylinderGetParams (_id,a,b,dir); }
+
+  void setData (void *data)
+    { dGeomSetData (_id,data); }
+
+  void *getData()
+    { return dGeomGetData (_id); }
+
+  void setBody (dBody &b)
+    { dGeomSetBody (_id,b.id()); }
+  void setBody (dBodyID b)
+    { dGeomSetBody (_id,b); }
+
+  dBodyID getBody()
+    { return dGeomGetBody (_id); }
+
+  void setPosition (dReal x, dReal y, dReal z)
+    { dGeomSetPosition (_id,x,y,z); }
+
+  void setRotation (const dMatrix3 R)
+    { dGeomSetRotation (_id,R); }
+
+  const dReal * getPosition()
+    { return dGeomGetPosition (_id); }
+
+  const dReal * getRotation()
+    { return dGeomGetRotation (_id); }
+};
 
 
 #endif

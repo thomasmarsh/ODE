@@ -48,13 +48,15 @@ quaternions have the format: (s,vx,vy,vz) where (vx,vy,vz) is the
 
 void dRSetIdentity (dMatrix3 R)
 {
+  dAASSERT (R);
   SET_3x3_IDENTITY;
 }
 
 
 void dRFromAxisAndAngle (dMatrix3 R, dReal ax, dReal ay, dReal az,
-			  dReal angle)
+			 dReal angle)
 {
+  dAASSERT (R);
   dQuaternion q;
   dQFromAxisAndAngle (q,ax,ay,az,angle);
   dQtoR (q,R);
@@ -64,7 +66,7 @@ void dRFromAxisAndAngle (dMatrix3 R, dReal ax, dReal ay, dReal az,
 void dRFromEulerAngles (dMatrix3 R, dReal phi, dReal theta, dReal psi)
 {
   dReal sphi,cphi,stheta,ctheta,spsi,cpsi;
-  dCHECKPTR(R);
+  dAASSERT (R);
   sphi = dSin(phi);
   cphi = dCos(phi);
   stheta = dSin(theta);
@@ -87,10 +89,12 @@ void dRFrom2Axes (dMatrix3 R, dReal ax, dReal ay, dReal az,
 		  dReal bx, dReal by, dReal bz)
 {
   dReal l,k;
-  dCHECKPTR(R);
+  dAASSERT (R);
   l = dSqrt (ax*ax + ay*ay + az*az);
-  if (l <= REAL(0.0))
-    dError (d_ERR_ZERO_LENGTH,"zero length vector in dRFrom2Axes()");
+  if (l <= REAL(0.0)) {
+    dDEBUGMSG ("zero length vector");
+    return;
+  }
   l = dRecip(l);
   ax *= l;
   ay *= l;
@@ -100,8 +104,10 @@ void dRFrom2Axes (dMatrix3 R, dReal ax, dReal ay, dReal az,
   by -= k*ay;
   bz -= k*az;
   l = dSqrt (bx*bx + by*by + bz*bz);
-  if (l <= REAL(0.0))
-    dError (d_ERR_ZERO_LENGTH,"zero length vector in dRFrom2Axes()");
+  if (l <= REAL(0.0)) {
+    dDEBUGMSG ("zero length vector");
+    return;
+  }
   l = dRecip(l);
   bx *= l;
   by *= l;
@@ -120,6 +126,7 @@ void dRFrom2Axes (dMatrix3 R, dReal ax, dReal ay, dReal az,
 
 void dQSetIdentity (dQuaternion q)
 {
+  dAASSERT (q);
   q[0] = 1;
   q[1] = 0;
   q[2] = 0;
@@ -130,6 +137,7 @@ void dQSetIdentity (dQuaternion q)
 void dQFromAxisAndAngle (dQuaternion q, dReal ax, dReal ay, dReal az,
 			 dReal angle)
 {
+  dAASSERT (q);
   dReal l = ax*ax + ay*ay + az*az;
   if (l > REAL(0.0)) {
     angle *= REAL(0.5);
@@ -150,6 +158,7 @@ void dQFromAxisAndAngle (dQuaternion q, dReal ax, dReal ay, dReal az,
 
 void dQMultiply0 (dQuaternion qa, const dQuaternion qb, const dQuaternion qc)
 {
+  dAASSERT (qa && qb && qc);
   qa[0] = qb[0]*qc[0] - qb[1]*qc[1] - qb[2]*qc[2] - qb[3]*qc[3];
   qa[1] = qb[0]*qc[1] + qb[1]*qc[0] + qb[2]*qc[3] - qb[3]*qc[2];
   qa[2] = qb[0]*qc[2] + qb[2]*qc[0] + qb[3]*qc[1] - qb[1]*qc[3];
@@ -159,6 +168,7 @@ void dQMultiply0 (dQuaternion qa, const dQuaternion qb, const dQuaternion qc)
 
 void dQMultiply1 (dQuaternion qa, const dQuaternion qb, const dQuaternion qc)
 {
+  dAASSERT (qa && qb && qc);
   qa[0] = qb[0]*qc[0] + qb[1]*qc[1] + qb[2]*qc[2] + qb[3]*qc[3];
   qa[1] = qb[0]*qc[1] - qb[1]*qc[0] - qb[2]*qc[3] + qb[3]*qc[2];
   qa[2] = qb[0]*qc[2] - qb[2]*qc[0] - qb[3]*qc[1] + qb[1]*qc[3];
@@ -168,6 +178,7 @@ void dQMultiply1 (dQuaternion qa, const dQuaternion qb, const dQuaternion qc)
 
 void dQMultiply2 (dQuaternion qa, const dQuaternion qb, const dQuaternion qc)
 {
+  dAASSERT (qa && qb && qc);
   qa[0] =  qb[0]*qc[0] + qb[1]*qc[1] + qb[2]*qc[2] + qb[3]*qc[3];
   qa[1] = -qb[0]*qc[1] + qb[1]*qc[0] - qb[2]*qc[3] + qb[3]*qc[2];
   qa[2] = -qb[0]*qc[2] + qb[2]*qc[0] - qb[3]*qc[1] + qb[1]*qc[3];
@@ -177,6 +188,7 @@ void dQMultiply2 (dQuaternion qa, const dQuaternion qb, const dQuaternion qc)
 
 void dQMultiply3 (dQuaternion qa, const dQuaternion qb, const dQuaternion qc)
 {
+  dAASSERT (qa && qb && qc);
   qa[0] =  qb[0]*qc[0] - qb[1]*qc[1] - qb[2]*qc[2] - qb[3]*qc[3];
   qa[1] = -qb[0]*qc[1] - qb[1]*qc[0] + qb[2]*qc[3] - qb[3]*qc[2];
   qa[2] = -qb[0]*qc[2] - qb[2]*qc[0] + qb[3]*qc[1] - qb[1]*qc[3];
@@ -191,6 +203,7 @@ void dQMultiply3 (dQuaternion qa, const dQuaternion qb, const dQuaternion qc)
 
 void dQtoR (const dQuaternion q, dMatrix3 R)
 {
+  dAASSERT (q && R);
   // q = (s,vx,vy,vz)
   dReal qq1 = 2*q[1]*q[1];
   dReal qq2 = 2*q[2]*q[2];
@@ -209,6 +222,7 @@ void dQtoR (const dQuaternion q, dMatrix3 R)
 
 void dRtoQ (const dMatrix3 R, dQuaternion q)
 {
+  dAASSERT (q && R);
   dReal tr,s;
   tr = _R(0,0) + _R(1,1) + _R(2,2);
   if (tr >= 0) {
@@ -260,6 +274,7 @@ void dRtoQ (const dMatrix3 R, dQuaternion q)
 
 void dWtoDQ (const dVector3 w, const dQuaternion q, dVector4 dq)
 {
+  dAASSERT (w && q && dq);
   dq[0] = REAL(0.5)*(- w[0]*q[1] - w[1]*q[2] - w[2]*q[3]);
   dq[1] = REAL(0.5)*(  w[0]*q[0] + w[1]*q[3] - w[2]*q[2]);
   dq[2] = REAL(0.5)*(- w[0]*q[3] + w[1]*q[0] + w[2]*q[1]);

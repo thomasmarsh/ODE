@@ -43,27 +43,38 @@ extern "C" {
 #endif
 
 
-/* debugging */
+/* debugging:
+ *   IASSERT  is an internal assertion, i.e. a consistency check. if it fails
+ *            we want to know where.
+ *   UASSERT  is a user assertion, i.e. if it fails a nice error message
+ *            should be printed for the user.
+ *   AASSERT  is an arguments assertion, i.e. if it fails "bad argument(s)"
+ *            is printed.
+ *   DEBUGMSG just prints out a message
+ */
 
 #ifndef dNODEBUG
 #ifdef __GNUC__
-#define dASSERT(a) if (!(a)) dDebug (d_ERR_ASSERTION, \
-  "assertion \"" #a "\" failed in %s()",__FUNCTION__);
+#define dIASSERT(a) if (!(a)) dDebug (d_ERR_IASSERT, \
+  "assertion \"" #a "\" failed in %s() [%s]",__FUNCTION__,__FILE__);
+#define dUASSERT(a,msg) if (!(a)) dDebug (d_ERR_UASSERT, \
+  msg " in %s()", __FUNCTION__);
+#define dDEBUGMSG(msg) dMessage (d_ERR_UASSERT, \
+  msg " in %s()", __FUNCTION__);
 #else
-#define dASSERT(a) if (!(a)) dDebug (d_ERR_ASSERTION, \
+#define dIASSERT(a) if (!(a)) dDebug (d_ERR_ASSERTION, \
   "assertion \"" #a "\" failed in %s:%d",__FILE__,__LINE__);
+#define dUASSERT(a,msg) if (!(a)) dDebug (d_ERR_UASSERT, \
+  msg " (%s:%d)", __FILE__,__LINE__);
+#define dDEBUGMSG(msg) dMessage (d_ERR_UASSERT, \
+  msg " (%s:%d)", __FILE__,__LINE__);
 #endif
 #else
-#define dASSERT(a) ;
+#define dIASSERT(a) ;
+#define dUASSERT(a) ;
+#define dDEBUGMSG(a) ;
 #endif
-
-#ifdef __GNUC__
-#define dCHECKPTR(ptr) if (!(ptr)) \
-  dError (d_ERR_BAD_ARGS,"pointer argument is 0 in %s()",__FUNCTION__);
-#else
-#define dCHECKPTR(ptr) if (!(ptr)) \
-  dError (d_ERR_BAD_ARGS,"pointer argument is 0 in %s:%d",__FILE__,__LINE__);
-#endif
+#define dAASSERT(a) dUASSERT(a,"Bad argument(s)")
 
 
 /* floating point data type, vector, matrix and quaternion types */
@@ -151,11 +162,8 @@ typedef struct dxJointGroup *dJointGroupID;
 /* error numbers */
 
 #define d_ERR_UNKNOWN		0	/* unknown error */
-#define d_ERR_NON_PD		1	/* non positive definite inertia */
-#define d_ERR_ASSERTION		2	/* assertion failed */
-#define d_ERR_BAD_ARGS		3	/* bad arguments to functions */
-#define d_ERR_ZERO_LENGTH	4	/* non zero length vector needed */
-#define d_ERR_SAME_WORLD	5	/* objects must be in the same world */
+#define d_ERR_IASSERT		1	/* internal assertion failed */
+#define d_ERR_UASSERT		2	/* user assertion failed */
 
 
 #ifdef __cplusplus

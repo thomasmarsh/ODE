@@ -27,6 +27,8 @@ extern "C" {
 #endif
 
 struct dMass;
+typedef struct dMass dMass;
+
 
 void dMassSetZero (dMass *);
 
@@ -51,7 +53,7 @@ void dMassRotate (dMass *, const dMatrix3 R);
 
 
 
-typedef struct dMass {
+struct dMass {
   dReal mass;
   dVector4 c;
   dMatrix3 I;
@@ -78,8 +80,7 @@ typedef struct dMass {
   void rotate (const dMatrix3 R)
     { dMassRotate (this,R); }
 #endif
-
-} dMass;
+};
 
 
 #ifdef __cplusplus

@@ -94,11 +94,15 @@ void dJointGroupEmpty (dJointGroupID);
 
 void dJointAttach (dJointID, dBodyID body1, dBodyID body2);
 
-void dJointSetAnchor (dJointID, dReal x, dReal y, dReal z);
-void dJointSetAxis (dJointID, dReal x, dReal y, dReal z);
+void dJointSetBallAnchor (dJointID, dReal x, dReal y, dReal z);
+void dJointSetHingeAnchor (dJointID, dReal x, dReal y, dReal z);
+void dJointSetHingeAxis (dJointID, dReal x, dReal y, dReal z);
+void dJointSetSliderAxis (dJointID, dReal x, dReal y, dReal z);
 
-void dJointGetAnchor (dJointID, dVector3 result);
-void dJointGetAxis (dJointID, dVector3 result);
+void dJointGetBallAnchor (dJointID, dVector3 result);
+void dJointGetHingeAnchor (dJointID, dVector3 result);
+void dJointGetHingeAxis (dJointID, dVector3 result);
+void dJointGetSliderAxis (dJointID, dVector3 result);
 
 int dAreConnected (dBodyID, dBodyID);
 
