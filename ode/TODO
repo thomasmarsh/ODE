@@ -82,6 +82,17 @@ rotation.cpp functions that set matrices should also set padding elements.
 
 functions to get body connectedness (e.g. return joint lists). also for joints.
 
+check that J*vnew=c (slow step already does this, but it doesn't equal zero
+for some reason!)
+
+lcp solver must return (L,d) and some other information, so we can re-solve
+for other right hand sides later on, but using the same complimentarity
+solution so there are no integrator discontinuities.
+
+tons of things in lcp.cpp (@@@), especially speed optimizations. also, do
+index block switching and index block updates to take advantage of the outer
+product trick.
+
 
 DONE
 ----

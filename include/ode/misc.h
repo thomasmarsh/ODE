@@ -69,6 +69,10 @@ void dClearUpperTriangle (dReal *A, int n);
 /* return the maximum element difference between the two n*m matrices */
 dReal dMaxDifference (dReal *A, dReal *B, int n, int m);
 
+/* return the maximum element difference between the lower triangle of two
+ * n*n matrices */
+dReal dMaxDifferenceLowerTriangle (dReal *A, dReal *B, int n);
+
 
 #ifdef __cplusplus
 }

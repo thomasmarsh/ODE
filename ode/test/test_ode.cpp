@@ -14,11 +14,6 @@
 #define _R(i,j) R[(i)*4+(j)]
 
 //****************************************************************************
-// externs
-
-void dTestSolveLCP();
-
-//****************************************************************************
 // misc messages and error handling
 
 #ifdef __GNUC__
@@ -81,10 +76,20 @@ int cmpIdentityMat3 (dMatrix3 A)
 //****************************************************************************
 // test miscellaneous math functions
 
-static void testRandomNumberGenerator()
+void testRandomNumberGenerator()
 {
   HEADER;
   if (dTestRand()) printf ("\tpassed\n");
+  else printf ("\tFAILED\n");
+}
+
+
+void testInfinity()
+{
+  HEADER;
+  if (1e10 < dInfinity && -1e10 > -dInfinity && -dInfinity < dInfinity &&
+      isinf(dInfinity) && !isnan(dInfinity) && !finite(dInfinity))
+    printf ("\tpassed\n");
   else printf ("\tFAILED\n");
 }
 
@@ -734,11 +739,15 @@ void testRotationFunctions()
 
 //****************************************************************************
 
+// internal unit tests
 extern "C" void testDynamicsStuff();
+extern "C" void dTestMatrixComparison();
+extern "C" void dTestSolveLCP();
 
 int main()
 {
   testRandomNumberGenerator();
+  testInfinity();
   testPad();
   testCrossProduct();
   testSetZero();
@@ -757,7 +766,8 @@ int main()
   testMassFunctions();
   testRtoQandQtoR();
   testRotationFunctions();
-  //dTestSolveLCP();
+  dTestMatrixComparison();
+  dTestSolveLCP();
   // testDynamicsStuff();
 
   return 0;

@@ -42,6 +42,13 @@ void dSetErrorHandler (dMessageFunction *fn);
 void dSetDebugHandler (dMessageFunction *fn);
 void dSetMessageHandler (dMessageFunction *fn);
 
+/* return the current error, debug or warning handler. if the return value is
+ * 0, the default handlers are in place.
+ */
+dMessageFunction *dGetErrorHandler();
+dMessageFunction *dGetDebugHandler();
+dMessageFunction *dGetMessageHandler();
+
 /* generate a fatal error, debug trap or a message. */
 void dError (int num, char *msg, ...);
 void dDebug (int num, char *msg, ...);
