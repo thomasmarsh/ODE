@@ -9,6 +9,14 @@ the rules for this file:
 
 ------------------------------------------------------------------------------
 
+09/22/04 jeff
+
+	* added functions to joint.cpp to allow joint attachment to moving
+	  geoms.
+
+	* added malloc-based memory allocation in step.cpp & lcp.cpp (turned
+	  on with a #define switch in common.h)
+	
 05/29/04 russ
 
 	* added joint feedback to the QuickStep solver
