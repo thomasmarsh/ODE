@@ -131,3 +131,28 @@ MinGW on Windows issues
   what i was trying to do in the drawstuff library. perhaps main2() ?
 
 * remember to compile resources to COFF format RES files.
+
+
+
+Collision
+---------
+
+to plug in your own collision handling, replace (some of?) these functions
+with your own. collision should be a separate library that you can link in
+or not. your own library can call components in this collision library, e.g.
+if you want polymorphic spaces instead of a single statically called space.
+
+creating an object will automatically register the appropriate
+class (if necessary). how can we ensure that the minimum amount of code is
+linked in? e.g. only one space handler, and sphere-sphere and sphere-box and
+box-box collision code (if spheres and boxes instanced).
+
+the user creates a collision space, and for each dynamics object that is
+created a collision object is inserted into the space. the collision
+object's pos and R pointers are set to the corresponding dynamics
+variables.
+
+there should be utility functions which create the dynamics and collision
+objects at the same time, e.g. dMakeSphere().
+
+collision objects and dynamics objects keep pointers to each other.
