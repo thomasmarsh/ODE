@@ -1,4 +1,6 @@
 
+PLATFORM_IS_WINDOWS=1
+
 ifndef SUBSYSTEM
 SUBSYSTEM=WINDOWS
 endif
@@ -48,7 +50,7 @@ LINKWIN=Comctl32.lib kernel32.lib user32.lib gdi32.lib
 LINKOPENGL=OpenGL32.lib Glu32.lib
 
 clean: clean_subdirs
-	-del *~ *.obj *.lib *.res *.RES $(EXTRA_CLEAN)
+	-del *~ *.obj *.lib *.a *.o *.res *.RES $(EXTRA_CLEAN)
 
 make_depend:
 	@echo depend target does nothing under windows.
