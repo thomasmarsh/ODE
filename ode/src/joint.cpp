@@ -2188,8 +2188,6 @@ static void amotorInit (dxJointAMotor *j)
   }
   dSetZero (j->reference1,4);
   dSetZero (j->reference2,4);
-
-  j->flags |= dJOINT_TWOBODIES;
 }
 
 
@@ -2200,7 +2198,14 @@ static void amotorComputeGlobalAxes (dxJointAMotor *joint, dVector3 ax[3])
   if (joint->mode == dAMotorEuler) {
     // special handling for euler mode
     dMULTIPLY0_331 (ax[0],joint->node[0].body->R,joint->axis[0]);
-    dMULTIPLY0_331 (ax[2],joint->node[1].body->R,joint->axis[2]);
+    if (joint->node[1].body) {
+      dMULTIPLY0_331 (ax[2],joint->node[1].body->R,joint->axis[2]);
+    }
+    else {
+      ax[2][0] = joint->axis[2][0];
+      ax[2][1] = joint->axis[2][1];
+      ax[2][2] = joint->axis[2][2];
+    }
     dCROSS (ax[1],=,ax[2],ax[0]);
     dNormalize3 (ax[1]);
   }
@@ -2212,6 +2217,7 @@ static void amotorComputeGlobalAxes (dxJointAMotor *joint, dVector3 ax[3])
       }
       if (joint->rel[i] == 2) {
 	// relative to b2
+        dIASSERT(joint->node[1].body);
 	dMULTIPLY0_331 (ax[i],joint->node[1].body->R,joint->axis[i]);
       }
       else {
@@ -2240,7 +2246,14 @@ static void amotorComputeEulerAngles (dxJointAMotor *joint, dVector3 ax[3])
   // calculate references in global frame
   dVector3 ref1,ref2;
   dMULTIPLY0_331 (ref1,joint->node[0].body->R,joint->reference1);
-  dMULTIPLY0_331 (ref2,joint->node[1].body->R,joint->reference2);
+  if (joint->node[1].body) {
+    dMULTIPLY0_331 (ref2,joint->node[1].body->R,joint->reference2);
+  }
+  else {
+    ref2[0] = joint->reference2[0];
+    ref2[1] = joint->reference2[1];
+    ref2[2] = joint->reference2[2];
+  }
 
   // get q perpendicular to both ax[0] and ref1, get first euler angle
   dVector3 q;
@@ -2272,6 +2285,10 @@ static void amotorSetEulerReferenceVectors (dxJointAMotor *j)
     dMULTIPLY1_331 (j->reference1,j->node[0].body->R,r);
     dMULTIPLY0_331 (r,j->node[0].body->R,j->axis[0]);
     dMULTIPLY1_331 (j->reference2,j->node[1].body->R,r);
+  }
+  else if (j->node[0].body) {
+     dMULTIPLY1_331 (j->reference1,j->node[0].body->R,j->axis[2]);
+     dMULTIPLY0_331 (j->reference2,j->node[0].body->R,j->axis[0]);
   }
 }
 
@@ -2360,10 +2377,17 @@ extern "C" void dJointSetAMotorNumAxes (dxJointAMotor *joint, int num)
 extern "C" void dJointSetAMotorAxis (dxJointAMotor *joint, int anum, int rel,
 				     dReal x, dReal y, dReal z)
 {
+  dUASSERT(rel >= 0 && rel <= 2,"rel out of range");
   dAASSERT(joint && anum >= 0 && anum <= 2 && rel >= 0 && rel <= 2);
   dUASSERT(joint->vtable == &__damotor_vtable,"joint is not an amotor");
+  dUASSERT(!(!joint->node[1].body &&  (joint->flags & dJOINT_REVERSE) && rel == 1),"no first body, can't set axis rel=1");
+  dUASSERT(!(!joint->node[1].body && !(joint->flags & dJOINT_REVERSE) && rel == 2),"no second body, can't set axis rel=2");
   if (anum < 0) anum = 0;
   if (anum > 2) anum = 2;
+
+  // adjust rel to match the internal body order
+  if (joint->node[1].body && rel==2) rel = 1;
+
   joint->rel[anum] = rel;
 
   // x,y,z is always in global coordinates regardless of rel, so we may have
@@ -2378,6 +2402,7 @@ extern "C" void dJointSetAMotorAxis (dxJointAMotor *joint, int anum, int rel,
       dMULTIPLY1_331 (joint->axis[anum],joint->node[0].body->R,r);
     }
     else {
+      dIASSERT (joint->node[1].body);
       dMULTIPLY1_331 (joint->axis[anum],joint->node[1].body->R,r);
     }
   }
