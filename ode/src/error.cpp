@@ -120,6 +120,13 @@ extern "C" void dMessage (int num, const char *msg, ...)
 
 #ifdef WIN32
 
+// isn't cygwin annoying
+#ifdef PLATFORM_IS_CYGWIN
+#define _snprintf snprintf
+#define _vsnprintf vsnprintf
+#endif
+
+
 #include "windows.h"
 
 
