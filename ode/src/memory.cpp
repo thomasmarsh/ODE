@@ -199,6 +199,12 @@ void dFree (void *ptr, int size)
 }
 
 
+void * dAllocNoFree (int size)
+{
+  if (allocfn) return allocfn (size); else return malloc (size);
+}
+
+
 #ifdef dDEBUG_ALLOC
 
 #include <stdio.h>
