@@ -2,6 +2,21 @@
 TODO BEFORE NEXT RELEASE
 ------------------------
 
+joint allocation in joint groups. allocation size should be rounded up using
+dEFFICIENT_SIZE, to properly align all the data members.
+
+all dAlloc() allocations should be aligned using dEFFICIENT_SIZE() ???
+
+functions to allow systems to be copied/cloned
+	dBodyTransplant (b, world)
+	dTransplantIsland (b, world)
+	dBodyCopy (bdest, bsrc)
+	dJointCopy (jdest, jsrc)  -- what about body connections?
+	dCloneBody()
+	dCloneJoint()
+	dCloseBodyAndJointList()
+	dCloneIsland()
+
 handle infinities better: HUGE_VALF is not commanly defined, it seems.
 get rid of the __USE_ISOC9X macro in common.h
 perhaps just use a "big" number instead of the actual IEEE infinity, it's
@@ -20,10 +35,6 @@ Improve box-box collision, especially for face-face contact.
 
 Automatic code optimization process.
 
-body & joint disabling / enabling. automatic??
-
-body/joint creators with world = 0 --> not inserted into any world.
-
 joint limit spongyness: interacts with powered joints badly, because when the
 limit is reached full power is applied. fix or doc.
 
@@ -38,8 +49,6 @@ getinfo2 functions are called.
 spaces need multiple lists of objects that can never overlap. objects in these
 lists are never tested against each other.
 
-joint groups should also be destroyed by destroying the world.
-
 deleting a body a joint is attached to should adjust the joint to only have
 one body attached. currently the connected joints have *both* their body
 attachments removed. BUT, dont do this if the dJOINT_TWOBODIES flag is set
@@ -53,14 +62,14 @@ Web pages
 	credits section
 	projects using ODE
 
-start a change log.
-
 update C++ interface? use SWIG?
 
 
 
 TODO
 ----
+
+automatic body & joint disabling / enabling.
 
 sometimes getting LCP infinite loops.
 
@@ -184,6 +193,8 @@ efficiently.
 timer reporting function:
 	void timerReport (void (*printFunction)(char *, ...));
 
+disabled bodies stored in a separate list, so they are never traversed at all,
+for speed when there are many disabled bodies.
 
 
 MAYBE
@@ -367,3 +378,17 @@ fix capped cylinder - capped cylinder collision so that two contacts can
 be generated.
 
 transformation geometry object.
+
+joint groups should also be destroyed by destroying the world --> naaahhh.
+
+DONT DO THIS: body/joint creators with world = 0 --> not inserted into any
+world. allow bodies/joints to be detached from a world (this is what happens
+to grouped joints when a world is destroyed).
+	can bodies and joints be linked together when not attached to world??
+	what happens when we have an island of b/j, some of which are not in
+	world? soln: dont keep lists of b/j in the world, just infer it from
+	the islands?
+
+body & joint disabling / enabling
+
+start a change log.
