@@ -83,6 +83,10 @@ void dBodyGetPointVel    (dBodyID, dReal px, dReal py, dReal pz,
 void dBodyGetPointRelVel (dBodyID, dReal px, dReal py, dReal pz,
 			  dVector3 result);
 
+void dBodySetFiniteRotationMode (dBodyID, int mode);
+void dBodySetFiniteRotationAxis (dBodyID, dReal x, dReal y, dReal z);
+
+
 /* joints */
 
 dJointID dJointCreateBall (dWorldID, dJointGroupID);
