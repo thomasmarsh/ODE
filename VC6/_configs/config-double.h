@@ -42,12 +42,6 @@ typedef unsigned int intP;
 
 
 /* available functions */
-#define sqrtf sqrt
-#define sinf sin
-#define cosf cos
-#define fabsf fabs
-#define atan2f atan2
-#define fmodf fmod
 #define copysignf _copysign
 #define copysign _copysign
 #define snprintf _snprintf
