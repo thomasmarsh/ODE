@@ -1702,14 +1702,11 @@ debugging.
 If you need two bodies to be glued together it is better to represent that as
 a single body.
 
-Currently the fixed joint does not support a non-identity relative rotation
-between two bodies, it only supports a relative offset.
-
 @funcdef{
 void dJointSetFixed (dJointID);
 }{
 Call this on the fixed joint after it has been attached to remember the
-current desired relative offset between the bodies.
+current desired relative offset and desired relative rotation between the bodies.
 }
 
 

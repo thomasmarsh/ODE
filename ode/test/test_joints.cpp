@@ -234,6 +234,28 @@ int setupTest (int n)
     return 1;
   }
 
+  case 2: {			// 2 body with relative rotation
+    constructWorldForTest (0,2,
+			   0.5*SIDE,0.5*SIDE,1, -0.5*SIDE,-0.5*SIDE,1,
+			   1,1,0, 1,1,0,
+			   0.25*M_PI,-0.25*M_PI);
+    joint = dJointCreateFixed (world,0);
+    dJointAttach (joint,body[0],body[1]);
+    dJointSetFixed (joint);
+    return 1;
+  }
+
+  case 3: {			// 1 body to static env with relative rotation
+    constructWorldForTest (0,1,
+			   0.5*SIDE,0.5*SIDE,1, 0,0,0,
+			   1,0,0, 1,0,0,
+			   0.25*M_PI,0);
+    joint = dJointCreateFixed (world,0);
+    dJointAttach (joint,body[0],0);
+    dJointSetFixed (joint);
+    return 1;
+  }
+
   // ********** hinge joint
 
   case 200:			// 2 body
@@ -481,6 +503,36 @@ dReal doStuffAndGetError (int n)
     p[2] -= 1;
     return (err1 + length (p)) * 1e6;
   }
+
+  case 2: {			// 2 body
+    addOscillatingTorque (0.1);
+    dampRotationalMotion (0.1);
+    // check the body offset is correct
+    // Should really check body rotation too.  Oh well.
+    const dReal *R1 = dBodyGetRotation (body[0]);
+    dVector3 p,pp;
+    const dReal *p1 = dBodyGetPosition (body[0]);
+    const dReal *p2 = dBodyGetPosition (body[1]);
+    for (int i=0; i<3; i++) p[i] = p2[i] - p1[i];
+    dMULTIPLY1_331 (pp,R1,p);
+    pp[0] += 0.5;
+    pp[1] += 0.5;
+    return length(pp) * 300;
+  }
+
+  case 3: {			// 1 body to static env with relative rotation
+    addOscillatingTorque (0.1);
+
+    // check the body offset is correct
+    dVector3 p;
+    const dReal *p1 = dBodyGetPosition (body[0]);
+    for (int i=0; i<3; i++) p[i] = p1[i];
+    p[0] -= 0.25;
+    p[1] -= 0.25;
+    p[2] -= 1;
+    return  length (p) * 1e6;
+  }
+
 
   // ********** hinge joint
 
