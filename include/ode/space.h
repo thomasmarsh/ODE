@@ -31,6 +31,8 @@ extern "C" {
 
 struct dContactGeom;
 
+typedef void dNearCallback (void *data, dGeomID o1, dGeomID o2);
+
 
 /* extra information the space needs in every geometry object */
 
@@ -39,14 +41,15 @@ typedef struct dGeomSpaceData {
 } dGeomSpaceData;
 
 
-dSpaceID dSpaceCreate();
-void dSpaceDestroy (dSpaceID);
+dSpaceID dSimpleSpaceCreate();
+dSpaceID dHashSpaceCreate();
 
+void dSpaceDestroy (dSpaceID);
 void dSpaceAdd (dSpaceID, dGeomID);
 void dSpaceRemove (dSpaceID, dGeomID);
-
-typedef void dNearCallback (void *data, dGeomID o1, dGeomID o2);
 void dSpaceCollide (dSpaceID space, void *data, dNearCallback *callback);
+
+void dHashSpaceSetLevels (dSpaceID space, int minlevel, int maxlevel);
 
 
 /* @@@ NOT FLEXIBLE ENOUGH
