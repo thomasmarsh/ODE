@@ -59,6 +59,7 @@ static dWorldID world;
 static dSpaceID space;
 static MyObject obj[NUM];
 static dJointGroupID contactgroup;
+static int selected = -1;	// selected object
 
 
 // this is called by dSpaceCollide when two objects in space are
@@ -107,6 +108,9 @@ static void start()
   printf ("   s for sphere.\n");
   printf ("   c for cylinder.\n");
   printf ("   x for a composite object.\n");
+  printf ("To select an object, press space.\n");
+  printf ("To disable the selected object, press d.\n");
+  printf ("To enable the selected object, press e.\n");
 }
 
 
@@ -231,6 +235,18 @@ static void command (int cmd)
 
     dBodySetMass (obj[i].body,&m);
   }
+
+  if (cmd == ' ') {
+    selected++;
+    if (selected >= num) selected = 0;
+    if (selected < 0) selected = 0;
+  }
+  else if (cmd == 'd' && selected >= 0 && selected < num) {
+    dBodyDisable (obj[selected].body);
+  }
+  else if (cmd == 'e' && selected >= 0 && selected < num) {
+    dBodyEnable (obj[selected].body);
+  }
 }
 
 
@@ -286,7 +302,17 @@ static void simLoop (int pause)
   dsSetColor (1,1,0);
   dsSetTexture (DS_WOOD);
   for (int i=0; i<num; i++) {
+    int color_changed = 0;
+    if (i==selected) {
+      dsSetColor (0,0.7,1);
+      color_changed = 1;
+    }
+    else if (! dBodyIsEnabled (obj[i].body)) {
+      dsSetColor (1,0,0);
+      color_changed = 1;
+    }
     for (int j=0; j < GPB; j++) drawGeom (obj[i].geom[j],0,0);
+    if (color_changed) dsSetColor (1,1,0);
   }
 }
 
