@@ -33,7 +33,7 @@ extern "C" {
 
 /* world */
 
-dWorldID dWorldCreate();
+dWorldID dWorldCreate(void);
 void dWorldDestroy (dWorldID);
 
 void dWorldSetGravity (dWorldID, dReal x, dReal y, dReal z);
