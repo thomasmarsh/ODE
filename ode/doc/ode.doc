@@ -3732,7 +3732,7 @@ The @c{Normals} argument is optional: the normals of the faces of each trimesh o
    @]}
 
    This pre-calculation saves some time during evaulation of the
-   conacts, but isn't necessary.  If you don't want to calculate
+   contacts, but isn't necessary.  If you don't want to calculate
    the face normals before construction (or if you have enormous
    trimeshes and know that only very few faces will be touching
    and want to save time), just pass a "NULL" for the @{Normals} argument,
@@ -3764,7 +3764,7 @@ typedef void dTriArrayCallback (dGeomID TriMesh, dGeomID RefObject,
 void dGeomTriMeshSetArrayCallback (dGeomID g, dTriArrayCallback* ArrayCallback);
 dTriArrayCallback *dGeomTriMeshGetArrayCallback (dGeomID g);
 }{
-Opional per geom callback. Allows the user to get the list of all
+Optional per geom callback. Allows the user to get the list of all
 intersecting triangles in one shot.
 }
 
@@ -3774,7 +3774,7 @@ typedef int dTriRayCallback (dGeomID TriMesh, dGeomID Ray, int TriangleIndex,
 void dGeomTriMeshSetRayCallback (dGeomID g, dTriRayCallback* Callback);
 dTriRayCallback *dGeomTriMeshGetRayCallback (dGeomID g);
 }{
-Opional Ray callback. Allows the user to determine if a ray collides with
+Optional Ray callback. Allows the user to determine if a ray collides with
 a triangle based on the barycentric coordinates of an intersection.
 The user can for example sample a bitmap to determine if a collision
 should occur.
