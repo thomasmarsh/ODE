@@ -58,12 +58,15 @@ dCreateGeom
 dCreateGeomClass
 dCreateGeomTransform
 dCreatePlane
+dCreateRay
 dCreateSphere
 dDebug
 dError
 dGeomBoxGetLengths
+dGeomBoxPointDepth
 dGeomBoxSetLengths
 dGeomCCylinderGetParams
+dGeomCCylinderPointDepth
 dGeomCCylinderSetParams
 dGeomDestroy
 dGeomDisable
@@ -80,7 +83,12 @@ dGeomGetRotation
 dGeomIsEnabled
 dGeomIsSpace
 dGeomPlaneGetParams
+dGeomPlanePointDepth
 dGeomPlaneSetParams
+dGeomRayGet
+dGeomRayGetLength
+dGeomRaySet
+dGeomRaySetLength
 dGeomSetBody
 dGeomSetCategoryBits
 dGeomSetCollideBits
@@ -88,6 +96,7 @@ dGeomSetData
 dGeomSetPosition
 dGeomSetRotation
 dGeomSphereGetRadius
+dGeomSpherePointDepth
 dGeomSphereSetRadius
 dGeomTransformGetCleanup
 dGeomTransformGetGeom
