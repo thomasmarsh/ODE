@@ -58,6 +58,7 @@ static dSpaceID space;
 static MyObject obj[NUM];
 static dJointGroupID contactgroup;
 static int selected = -1;	// selected object
+static int show_aabb = 0;	// show geom AABBs?
 
 
 // this is called by dSpaceCollide when two objects in space are
@@ -109,6 +110,7 @@ static void start()
   printf ("To select an object, press space.\n");
   printf ("To disable the selected object, press d.\n");
   printf ("To enable the selected object, press e.\n");
+  printf ("To toggle showing the geom AABBs, press a.\n");
 }
 
 
@@ -128,7 +130,8 @@ static void command (int cmd)
   dMass m;
 
   cmd = locase (cmd);
-  if (cmd == 'b' || cmd == 's' || cmd == 'c' || cmd == 'x') {
+  if (cmd == 'b' || cmd == 's' || cmd == 'c' || cmd == 'x'
+      /* || cmd == 'l' */) {
     if (num < NUM) {
       i = num;
       num++;
@@ -166,6 +169,14 @@ static void command (int cmd)
       dMassSetCappedCylinder (&m,DENSITY,3,sides[0],sides[1]);
       obj[i].geom[0] = dCreateCCylinder (space,sides[0],sides[1]);
     }
+/*
+    // cylinder option not yet implemented
+    else if (cmd == 'l') {
+      sides[1] *= 0.5;
+      dMassSetCappedCylinder (&m,DENSITY,3,sides[0],sides[1]);
+      obj[i].geom[0] = dCreateCylinder (space,sides[0],sides[1]);
+    }
+*/
     else if (cmd == 's') {
       sides[0] *= 0.5;
       dMassSetSphere (&m,DENSITY,sides[0]);
@@ -245,12 +256,15 @@ static void command (int cmd)
   else if (cmd == 'e' && selected >= 0 && selected < num) {
     dBodyEnable (obj[selected].body);
   }
+  else if (cmd == 'a') {
+    show_aabb ^= 1;
+  }
 }
 
 
 // draw a geom
 
-void drawGeom (dGeomID g, const dReal *pos, const dReal *R)
+void drawGeom (dGeomID g, const dReal *pos, const dReal *R, int show_aabb)
 {
   if (!g) return;
   if (!pos) pos = dGeomGetPosition (g);
@@ -270,6 +284,14 @@ void drawGeom (dGeomID g, const dReal *pos, const dReal *R)
     dGeomCCylinderGetParams (g,&radius,&length);
     dsDrawCappedCylinder (pos,R,length,radius);
   }
+/*
+  // cylinder option not yet implemented
+  else if (type == dCylinderClass) {
+    dReal radius,length;
+    dGeomCylinderGetParams (g,&radius,&length);
+    dsDrawCylinder (pos,R,length,radius);
+  }
+*/
   else if (type == dGeomTransformClass) {
     dGeomID g2 = dGeomTransformGetGeom (g);
     const dReal *pos2 = dGeomGetPosition (g2);
@@ -281,7 +303,21 @@ void drawGeom (dGeomID g, const dReal *pos, const dReal *R)
     actual_pos[1] += pos[1];
     actual_pos[2] += pos[2];
     dMULTIPLY0_333 (actual_R,R,R2);
-    drawGeom (g2,actual_pos,actual_R);
+    drawGeom (g2,actual_pos,actual_R,0);
+  }
+
+  if (show_aabb) {
+    // draw the bounding box for this geom
+    dReal aabb[6];
+    dGeomGetAABB (g,aabb);
+    dVector3 bbpos;
+    for (int i=0; i<3; i++) bbpos[i] = 0.5*(aabb[i*2] + aabb[i*2+1]);
+    dVector3 bbsides;
+    for (int i=0; i<3; i++) bbsides[i] = aabb[i*2+1] - aabb[i*2];
+    dMatrix3 RI;
+    dRSetIdentity (RI);
+    dsSetColorAlpha (1,0,0,0.5);
+    dsDrawBox (bbpos,RI,bbsides);
   }
 }
 
@@ -300,17 +336,18 @@ static void simLoop (int pause)
   dsSetColor (1,1,0);
   dsSetTexture (DS_WOOD);
   for (int i=0; i<num; i++) {
-    int color_changed = 0;
-    if (i==selected) {
-      dsSetColor (0,0.7,1);
-      color_changed = 1;
+    for (int j=0; j < GPB; j++) {
+      if (i==selected) {
+	dsSetColor (0,0.7,1);
+      }
+      else if (! dBodyIsEnabled (obj[i].body)) {
+	dsSetColor (1,0,0);
+      }
+      else {
+	dsSetColor (1,1,0);
+      }
+      drawGeom (obj[i].geom[j],0,0,show_aabb);
     }
-    else if (! dBodyIsEnabled (obj[i].body)) {
-      dsSetColor (1,0,0);
-      color_changed = 1;
-    }
-    for (int j=0; j < GPB; j++) drawGeom (obj[i].geom[j],0,0);
-    if (color_changed) dsSetColor (1,1,0);
   }
 }
 
@@ -329,7 +366,7 @@ int main (int argc, char **argv)
   // create world
 
   world = dWorldCreate();
-  space = dHashSpaceCreate();
+  space = dHashSpaceCreate (0);
   contactgroup = dJointGroupCreate (0);
   dWorldSetGravity (world,0,0,-0.5);
   dWorldSetCFM (world,1e-5);
