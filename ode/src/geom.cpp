@@ -45,7 +45,7 @@ static int dCollideSpheres (dVector3 p1, dReal r1,
   // printf ("d=%.2f  (%.2f %.2f %.2f) (%.2f %.2f %.2f) r1=%.2f r2=%.2f\n",
   //	  d,p1[0],p1[1],p1[2],p2[0],p2[1],p2[2],r1,r2);
 
-  dReal d = dDistance (p1,p2);
+  dReal d = dDISTANCE (p1,p2);
   if (d > (r1 + r2)) return 0;
   if (d <= 0) {
     c->pos[0] = p1[0];
