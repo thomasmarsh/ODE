@@ -271,13 +271,22 @@ static void hingeInit (dxJointHinge *j)
   dSetZero (j->axis2,4);
   j->axis2[0] = 1;
   dSetZero (j->qrel,4);
+  j->vel = 0;
+  j->tmax = 0;
 }
 
 
 static void hingeGetInfo1 (dxJointHinge *j, dxJoint::Info1 *info)
 {
-  info->m = 5;
-  info->nub = 5;
+  if (j->tmax > 0) {
+    // powered hinge needs an extra constraint row
+    info->m = 6;
+    info->nub = 5;    
+  }
+  else {
+    info->m = 5;
+    info->nub = 5;
+  }
 }
 
 
@@ -301,6 +310,7 @@ static void hingeGetInfo2 (dxJointHinge *joint, dxJoint::Info2 *info)
 
   int s3=3*info->rowskip;
   int s4=4*info->rowskip;
+  int s5=5*info->rowskip;
 
   info->J1a[s3+0] = p[0];
   info->J1a[s3+1] = p[1];
@@ -347,6 +357,21 @@ static void hingeGetInfo2 (dxJointHinge *joint, dxJoint::Info2 *info)
   dReal k = info->fps * info->erp;
   info->c[3] = k * dDOT(b,p);
   info->c[4] = k * dDOT(b,q);
+
+  // if the hinge is powered, add in the extra row
+  if (joint->tmax > 0) {
+    info->J1a[s5+0] = ax1[0];
+    info->J1a[s5+1] = ax1[1];
+    info->J1a[s5+2] = ax1[2];
+    if (joint->node[1].body) {
+      info->J2a[s5+0] = -ax1[0];
+      info->J2a[s5+1] = -ax1[1];
+      info->J2a[s5+2] = -ax1[2];
+    }
+    info->c[5] = joint->vel;
+    info->lo[5] = -joint->tmax;
+    info->hi[5] = joint->tmax;
+  }
 }
 
 
@@ -405,6 +430,39 @@ extern "C" void dJointGetHingeAxis (dxJointHinge *joint, dVector3 result)
 }
 
 
+extern "C" void dJointSetHingeVel (dxJointHinge *joint, dReal vel)
+{
+  dUASSERT(joint,"bad joint argument");
+  dUASSERT(joint->vtable == &__dhinge_vtable,"joint is not a hinge");
+  joint->vel = vel;
+}
+
+
+extern "C" void dJointSetHingeTmax (dxJointHinge *joint, dReal tmax)
+{
+  dUASSERT(joint,"bad joint argument");
+  dUASSERT(joint->vtable == &__dhinge_vtable,"joint is not a hinge");
+  if (tmax < REAL(0.0)) tmax = 0;
+  joint->tmax = tmax;
+}
+
+
+extern "C" dReal dJointGetHingeVel (dxJointHinge *joint)
+{
+  dUASSERT(joint,"bad joint argument");
+  dUASSERT(joint->vtable == &__dhinge_vtable,"joint is not a hinge");
+  return joint->vel;
+}
+
+
+extern "C" dReal dJointGetHingeTmax (dxJointHinge *joint)
+{
+  dUASSERT(joint,"bad joint argument");
+  dUASSERT(joint->vtable == &__dhinge_vtable,"joint is not a hinge");
+  return joint->tmax;
+}
+
+
 extern "C" dReal dJointGetHingeAngle (dxJointHinge *joint)
 {
   dAASSERT(joint);
@@ -419,6 +477,16 @@ extern "C" dReal dJointGetHingeAngle (dxJointHinge *joint)
 
 extern "C" dReal dJointGetHingeAngleRate (dxJointHinge *joint)
 {
+  dAASSERT(joint);
+  dUASSERT(joint->vtable == &__dhinge_vtable,"joint is not a Hinge");
+  if (joint->node[0].body) {
+    dVector3 axis;
+    dMULTIPLY0_331 (axis,joint->node[0].body->R,joint->axis1);
+    dReal rate = -dDOT(axis,joint->node[0].body->avel);
+    if (joint->node[1].body) rate += dDOT(axis,joint->node[1].body->avel);
+    return rate;
+  }
+  else return 0;
 }
 
 
@@ -859,11 +927,6 @@ extern "C" dReal dJointGetRMotorAngle (dxJointRMotor *joint)
 			  joint->qrel);
   }
   else return 0;
-}
-
-
-extern "C" dReal dJointGetRMotorAngleRate (dxJointRMotor *joint)
-{
 }
 
 
