@@ -62,8 +62,9 @@ int dCollideCCTL( dxGeom* g1, dxGeom* capsuleGeom, int flags,
     TransformVector3( tempCapOrigin, capRotation, capPosition, capOrigin );
     TransformVector3( tempCapEnd, capRotation, capPosition, capEnd );
     // construct opcode capsule
-    Segment capSeg( Point( capOrigin[0], capOrigin[1], capOrigin[2] ), 
-                    Point( capEnd[0], capEnd[1], capEnd[2] ) );
+    Point p1 ( capOrigin[0], capOrigin[1], capOrigin[2] );
+    Point p2 ( capEnd[0], capEnd[1], capEnd[2] );
+    Segment capSeg(p1,p2);
     LSS opcodeCapsule( capSeg, capRad );
   
     Matrix4x4 meshTransform;

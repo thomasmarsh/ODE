@@ -29,6 +29,7 @@ int dCollideSTL(dxGeom *o1, dxGeom *o2, int flags, dContactGeom *contact, int sk
 int dCollideBTL(dxGeom *o1, dxGeom *o2, int flags, dContactGeom *contact, int skip);
 int dCollideRTL(dxGeom *o1, dxGeom *o2, int flags, dContactGeom *contact, int skip);
 int dCollideTTL(dxGeom *o1, dxGeom *o2, int flags, dContactGeom *contact, int skip);
+int dCollideCCTL(dxGeom *o1, dxGeom *o2, int flags, dContactGeom *contact, int skip);
 
 //****************************************************************************
 // dxTriMesh class
@@ -80,6 +81,7 @@ struct dxTriMesh : public dxGeom{
 	static OBBCollider _OBBCollider;
 	static RayCollider _RayCollider;
 	static AABBTreeCollider _AABBTreeCollider;
+	static LSSCollider _LSSCollider;
 
 	// Some constants
 	static CollisionFaces Faces;
@@ -96,9 +98,16 @@ struct dxTriMesh : public dxGeom{
 	};
 	dArray<BoxTC> BoxTCCache;
 	static OBBCache defaultBoxCache;
+	
+	struct CCylinderTC : public LSSCache{
+		dxGeom* Geom;
+	};
+	dArray<CCylinderTC> CCylinderTCCache;
+	static LSSCache defaultCCylinderCache;
 
 	bool doSphereTC;
 	bool doBoxTC;
+	bool doCCylinderTC;
 
 	// Functions
 	dxTriMesh(dSpaceID Space, dTriMeshDataID Data);
@@ -226,6 +235,109 @@ template<class T> const T& dcMAX(const T& x, const T& y){
 
 template<class T> const T& dcMIN(const T& x, const T& y){
 	return x < y ? x : y;
+}
+
+dReal SqrDistancePointTri( const dVector3 p, const dVector3 triOrigin, 
+                           const dVector3 triEdge1, const dVector3 triEdge2,
+                           dReal* pfSParam = 0, dReal* pfTParam = 0 );
+
+dReal SqrDistanceSegments( const dVector3 seg1Origin, const dVector3 seg1Direction, 
+                           const dVector3 seg2Origin, const dVector3 seg2Direction,
+                           dReal* pfSegP0 = 0, dReal* pfSegP1 = 0 );
+
+dReal SqrDistanceSegTri( const dVector3 segOrigin, const dVector3 segEnd, 
+                         const dVector3 triOrigin, 
+                         const dVector3 triEdge1, const dVector3 triEdge2,
+                         dReal* t = 0, dReal* u = 0, dReal* v = 0 );
+
+inline
+void Vector3Subtract( const dVector3 left, const dVector3 right, dVector3 result )
+{
+    result[0] = left[0] - right[0];
+    result[1] = left[1] - right[1];
+    result[2] = left[2] - right[2];
+    result[3] = REAL(0.0);
+}
+
+inline
+void Vector3Add( const dVector3 left, const dVector3 right, dVector3 result )
+{
+    result[0] = left[0] + right[0];
+    result[1] = left[1] + right[1];
+    result[2] = left[2] + right[2];
+    result[3] = REAL(0.0);
+}
+
+inline
+void Vector3Negate( const dVector3 in, dVector3 out )
+{
+    out[0] = -in[0];
+    out[1] = -in[1];
+    out[2] = -in[2];
+    out[3] = REAL(0.0);
+}
+
+inline
+void Vector3Copy( const dVector3 in, dVector3 out )
+{
+    out[0] = in[0];
+    out[1] = in[1];
+    out[2] = in[2];
+    out[3] = REAL(0.0);
+}
+
+inline
+void Vector3Multiply( const dVector3 in, dReal scalar, dVector3 out )
+{
+    out[0] = in[0] * scalar;
+    out[1] = in[1] * scalar;
+    out[2] = in[2] * scalar;
+    out[3] = REAL(0.0);
+}
+
+inline
+void TransformVector3( const dVector3 in, 
+                       const dMatrix3 orientation, const dVector3 position, 
+                       dVector3 out )
+{
+    dMULTIPLY0_331( out, orientation, in );
+    out[0] += position[0];
+    out[1] += position[1];
+    out[2] += position[2];
+}
+
+//------------------------------------------------------------------------------
+/**
+  @brief Check for intersection between triangle and capsule.
+  
+  @param dist [out] Shortest distance squared between the triangle and 
+                    the capsule segment (central axis).
+  @param t    [out] t value of point on segment that's the shortest distance 
+                    away from the triangle, the coordinates of this point 
+                    can be found by (cap.seg.end - cap.seg.start) * t,
+                    or cap.seg.ipol(t).
+  @param u    [out] Barycentric coord on triangle.
+  @param v    [out] Barycentric coord on triangle.
+  @return True if intersection exists.
+  
+  The third Barycentric coord is implicit, ie. w = 1.0 - u - v
+  The Barycentric coords give the location of the point on the triangle
+  closest to the capsule (where the distance between the two shapes
+  is the shortest).
+*/
+inline
+bool IntersectCapsuleTri( const dVector3 segOrigin, const dVector3 segEnd, 
+                          const dReal radius, const dVector3 triOrigin, 
+                          const dVector3 triEdge0, const dVector3 triEdge1,
+                          dReal* dist, dReal* t, dReal* u, dReal* v )
+{
+    dReal sqrDist = SqrDistanceSegTri( segOrigin, segEnd, triOrigin, triEdge0, triEdge1, 
+                                       t, u, v );
+  
+    if ( dist )
+      *dist = sqrDist;
+    
+    return ( sqrDist <= (radius * radius) );
 }
 
 #endif	//TRIMESH_INTERNAL
