@@ -983,6 +983,8 @@ processIslandsFast (dxWorld * world, dReal stepsize, int maxiterations)
 	if (world->nb <= 0)
 		return;
 
+	dInternalHandleAutoDisabling (world,stepsize);
+
 	// make arrays for body and joint lists (for a single island) to go into
 	body = (dxBody **) ALLOCA (world->nb * sizeof (dxBody *));
 	joint = (dxJoint **) ALLOCA (world->nj * sizeof (dxJoint *));
