@@ -1518,7 +1518,7 @@ static void amotorInit (dxJointAMotor *j)
 {
   int i;
   j->num = 0;
-  j->mode = 0;
+  j->mode = dAMotorUser;
   for (i=0; i<3; i++) {
     j->rel[i] = 0;
     dSetZero (j->axis[i],4);
@@ -1534,7 +1534,7 @@ static void amotorInit (dxJointAMotor *j)
 
 static void amotorComputeGlobalAxes (dxJointAMotor *joint, dVector3 ax[3])
 {
-  if (joint->mode & 1) {
+  if (joint->mode == dAMotorEuler) {
     // special handling for euler mode
     dMULTIPLY0_331 (ax[0],joint->node[0].body->R,joint->axis[0]);
     dMULTIPLY0_331 (ax[2],joint->node[1].body->R,joint->axis[2]);
@@ -1600,7 +1600,7 @@ static void amotorGetInfo1 (dxJointAMotor *j, dxJoint::Info1 *info)
   info->nub = 0;
 
   // compute the axes and angles, if in euler mode
-  if (j->mode & 1) {
+  if (j->mode == dAMotorEuler) {
     dVector3 ax[3];
     amotorComputeGlobalAxes (j,ax);
     amotorComputeEulerAngles (j,ax);
@@ -1679,10 +1679,10 @@ extern "C" void dJointSetAMotorParam (dxJointAMotor *joint, int parameter,
 }
 
 
-extern "C" void dJointSetAMotorEulerMode (dxJointAMotor *joint, int mode)
+extern "C" void dJointSetAMotorMode (dxJointAMotor *joint, int mode)
 {
   dAASSERT(joint);
-  joint->mode = (mode != 0);
+  joint->mode = mode;
 }
 
 
@@ -1728,7 +1728,7 @@ extern "C" dReal dJointGetAMotorParam (dxJointAMotor *joint, int parameter)
 }
 
 
-extern "C" int dJointGetAMotorEulerMode (dxJointAMotor *joint)
+extern "C" int dJointGetAMotorMode (dxJointAMotor *joint)
 {
   dAASSERT(joint);
   return joint->mode;
