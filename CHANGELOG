@@ -15,6 +15,9 @@ the rules for this file:
 	in the headers but not in the code -- patch by
 	Vadim Macagon <vadim_mcagon@hotmail.com>
 
+	* disable temporal coherence on trimeshes by default, since
+	it has scaleability issues that don't make it a general clear win.
+
 12/01/03 adam
 
 	* implement dxHashSpace::collide2(), not particularly efficiently.
