@@ -31,7 +31,6 @@
 //***************************************************************************
 // application globals
 
-static int winmain_called = 0;
 static HINSTANCE ghInstance = 0;
 static int gnCmdShow = 0;
 static HACCEL accelerators = 0;
@@ -235,7 +234,6 @@ static LRESULT CALLBACK mainWndProc (HWND hWnd, UINT msg, WPARAM wParam,
       break;
     }
     case IDM_SINGLE_STEP: {
-      static int ss = 0;
       renderer_ss = 1;
       break;
     }
@@ -281,11 +279,66 @@ static LRESULT CALLBACK mainWndProc (HWND hWnd, UINT msg, WPARAM wParam,
 }
 
 
+// this comes from an MSDN example. believe it or not, this is the recommended
+// way to get the console window handle.
+
+static HWND GetConsoleHwnd()
+{
+  // the console window title to a "unique" value, then find the window
+  // that has this title.
+  char title[1024];
+  wsprintf (title,"DrawStuff:%d/%d",GetTickCount(),GetCurrentProcessId());
+  SetConsoleTitle (title);
+  Sleep(40);			// wnsure window title has been updated
+  return FindWindow (NULL,title);
+}
+
+
+static void drawStuffStartup()
+{
+  static int startup_called = 0;
+  if (startup_called) return;
+  startup_called = 1;
+  ghInstance = GetModuleHandleA (NULL);
+  gnCmdShow = SW_SHOWNORMAL;		// @@@ fix this later
+
+  // redirect standard I/O to a new console
+  FreeConsole();
+  if (AllocConsole()==0) dsError ("AllocConsole() failed");
+  fclose (stdin);
+  fclose (stdout);
+  fclose (stderr);
+  if (freopen ("CONIN$","rt",stdin)==0) dsError ("could not open stdin");
+  if (freopen ("CONOUT$","wt",stdout)==0) dsError ("could not open stdout");
+  if (freopen ("CONOUT$","wt",stderr)==0) dsError ("could not open stderr");
+  BringWindowToTop (GetConsoleHwnd());
+  SetConsoleTitle ("DrawStuff Messages");
+
+  // register the window class
+  WNDCLASS wc;
+  wc.style = CS_OWNDC | CS_VREDRAW | CS_HREDRAW;
+  wc.lpfnWndProc = mainWndProc;
+  wc.cbClsExtra = 0;
+  wc.cbWndExtra = 0;
+  wc.hInstance = ghInstance;
+  wc.hIcon = LoadIcon (NULL,IDI_APPLICATION);
+  wc.hCursor = LoadCursor (NULL,IDC_ARROW);
+  wc.hbrBackground = (HBRUSH) (COLOR_WINDOW+1);
+  wc.lpszMenuName = MAKEINTRESOURCE(IDR_MENU1);
+  wc.lpszClassName = "SimAppClass";
+  if (RegisterClass (&wc)==0) dsError ("could not register window class");
+
+  // load accelerators
+  accelerators = LoadAccelerators (ghInstance,
+				   MAKEINTRESOURCE(IDR_ACCELERATOR1));
+  if (accelerators==NULL) dsError ("could not load accelerators");
+}
+
+
 void dsPlatformSimLoop (int window_width, int window_height,
 			dsFunctions *fn, int initial_pause)
 {
-  if (!winmain_called)
-    dsError ("WinMain() not called - make sure this isn't a console application");
+  drawStuffStartup();
   renderer_pause = initial_pause;
 
   // create window - but first get window size for desired size of client area.
@@ -386,68 +439,20 @@ void dsPlatformSimLoop (int window_width, int window_height,
   //DestroyWindow (hWnd);
 }
 
-
-// this comes from an MSDN example. believe it or not, this is the recommended
-// way to get the console window handle.
-
-static HWND GetConsoleHwnd()
-{
-  // the console window title to a "unique" value, then find the window
-  // that has this title.
-  char title[1024];
-  wsprintf (title,"DrawStuff:%d/%d",GetTickCount(),GetCurrentProcessId());
-  SetConsoleTitle (title);
-  Sleep(40);			// wnsure window title has been updated
-  return FindWindow (NULL,title);
-}
-
+//***************************************************************************
+// windows entry point
+//
+// NOTE: WinMain is not guaranteed to be called with MinGW, because MinGW
+// always calls main if it is defined and most users of this library will
+// define their own main. So the startup functionality is kept in
+// zDriverStartup(), which is also called when dsSimulationLoop() is called.
 
 extern "C" int main (int argc, char **argv);
 
 
-// windows entry point
-
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 		   LPSTR lpCmdLine, int nCmdShow)
 {
-  winmain_called = 1;
-  ghInstance = hInstance;
-  gnCmdShow = nCmdShow;
-
-  // redirect standard I/O to a new console
-  FreeConsole();
-  if (AllocConsole()==0) dsError ("AllocConsole() failed");
-  fclose (stdin);
-  fclose (stdout);
-  fclose (stderr);
-  if (freopen ("CONIN$","rt",stdin)==0) dsError ("could not open stdin");
-  if (freopen ("CONOUT$","wt",stdout)==0) dsError ("could not open stdout");
-  if (freopen ("CONOUT$","wt",stderr)==0) dsError ("could not open stderr");
-  BringWindowToTop (GetConsoleHwnd());
-  SetConsoleTitle ("DrawStuff Messages");
-
-  // register the window class if this is not the first instance
-  if (!hPrevInstance) {
-    WNDCLASS wc;
-    wc.style = CS_OWNDC | CS_VREDRAW | CS_HREDRAW;
-    wc.lpfnWndProc = mainWndProc;
-    wc.cbClsExtra = 0;
-    wc.cbWndExtra = 0;
-    wc.hInstance = hInstance;
-    wc.hIcon = LoadIcon (NULL,IDI_APPLICATION);
-    wc.hCursor = LoadCursor (NULL,IDC_ARROW);
-    wc.hbrBackground = (HBRUSH) (COLOR_WINDOW+1);
-    wc.lpszMenuName = MAKEINTRESOURCE(IDR_MENU1);
-    wc.lpszClassName = "SimAppClass";
-    if (RegisterClass (&wc)==0) dsError ("could not register window class");
-  }
-
-  // load accelerators
-  accelerators = LoadAccelerators (hInstance,
-				   MAKEINTRESOURCE(IDR_ACCELERATOR1));
-  if (accelerators==NULL) dsError ("could not load accelerators");
-
-  main (0,0);
-
-  return 0;
+  drawStuffStartup();
+  return main (0,0);	// @@@ should really pass cmd line arguments
 }
