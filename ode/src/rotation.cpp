@@ -28,6 +28,7 @@ quaternions have the format: (s,vx,vy,vz) where (vx,vy,vz) is the
 */
 
 #include <ode/rotation.h>
+#include <ode/odemath.h>
 
 
 #define _R(i,j) R[(i)*4+(j)]
@@ -122,6 +123,26 @@ void dRFrom2Axes (dMatrix3 R, dReal ax, dReal ay, dReal az,
   _R(0,2) = - by*az + ay*bz;
   _R(1,2) = - bz*ax + az*bx;
   _R(2,2) = - bx*ay + ax*by;
+}
+
+
+void dRFromZAxis (dMatrix3 R, dReal ax, dReal ay, dReal az)
+{
+  dVector3 n,p,q;
+  n[0] = ax;
+  n[1] = ay;
+  n[2] = az;
+  dNormalize3 (n);
+  dPlaneSpace (n,p,q);
+  _R(0,0) = p[0];
+  _R(1,0) = p[1];
+  _R(2,0) = p[2];
+  _R(0,1) = q[0];
+  _R(1,1) = q[1];
+  _R(2,1) = q[2];
+  _R(0,2) = n[0];
+  _R(1,2) = n[1];
+  _R(2,2) = n[2];
 }
 
 
