@@ -36,10 +36,10 @@
 #define TRIMESH_INTERNAL
 #include "collision_trimesh_internal.h"
 
-#define SMALL_ELT         2.5e-4
-#define DISTANCE_EPSILON  1.0e-8
-#define VELOCITY_EPSILON  1.0e-5
-#define TINY_PENETRATION  5.0e-6
+#define SMALL_ELT         REAL(2.5e-4)
+#define DISTANCE_EPSILON  REAL(1.0e-8)
+#define VELOCITY_EPSILON  REAL(1.0e-5)
+#define TINY_PENETRATION  REAL(5.0e-6)
 
 struct LineContactSet
 {
@@ -910,7 +910,7 @@ dCollideTTL(dxGeom* g1, dxGeom* g2, int Flags, dContactGeom* Contacts, int Strid
 
                                     //depth = dMin(TINY_PENETRATION, fabs(dDOT(elt_sum, ContactNormal)));
                                     GenerateContact(Flags, Contacts, Stride,  TriMesh1,  TriMesh2,
-                                                    CoplanarPt, ContactNormal, 1.0e-8, OutTriCount);
+                                                    CoplanarPt, ContactNormal, DISTANCE_EPSILON, OutTriCount);
                                     badPen = false;
                                 }
 
