@@ -413,7 +413,7 @@ static void sliderGetInfo2 (dxJointSlider *joint, dxJoint::Info2 *info)
   // where the quaternion of the relative rotation between the two bodies is
   //    q = [cos(theta/2) sin(theta/2)*u] = [s v]
 
-  // get qerr = rotation error between two bodies
+  // get qerr = relative rotation (rotation error) between two bodies
   dQuaternion qerr;
   if (joint->node[1].body) {
     dQuaternion qq;
@@ -461,11 +461,10 @@ extern "C" void dJointSetSliderAxis (dxJointSlider *joint,
   dUASSERT(joint->vtable == &__dslider_vtable,"joint is not a slider");
   setAxes (joint,x,y,z,joint->axis1,0);
 
+  // compute initial relative rotation body1 -> body2, or env -> body1
+  // also compute center of body1 w.r.t body 2
   if (joint->node[1].body) {
-    // compute relative rotation body1 -> body2
     dQMultiply2 (joint->qrel,joint->node[1].body->q,joint->node[0].body->q);
-
-    // compute center of body1 w.r.t body 2
     dVector3 c;
     for (i=0; i<3; i++)
       c[i] = joint->node[0].body->pos[i] - joint->node[1].body->pos[i];
@@ -672,6 +671,7 @@ static void rMotorInit (dxJointRMotor *j)
   j->axis1[0] = 1;
   dSetZero (j->axis2,4);
   j->axis2[0] = 1;
+  dSetZero (j->qrel,4);
   j->vel = 0;
   j->tmax = 1;
 }
@@ -709,6 +709,14 @@ extern "C" void dJointSetRMotorAxis (dxJointRMotor *joint,
   dUASSERT(joint,"bad joint argument");
   dUASSERT(joint->vtable == &__drmotor_vtable,"joint is not an RMotor");
   setAxes (joint,x,y,z,joint->axis1,joint->axis2);
+
+  // compute initial relative rotation body1 -> body2, or env -> body1
+  if (joint->node[1].body) {
+    dQMultiply2 (joint->qrel,joint->node[1].body->q,joint->node[0].body->q);
+  }
+  else {
+    for (int i=0; i<4; i++) joint->qrel[i] = joint->node[0].body->q[i];
+  }
 }
 
 
@@ -724,10 +732,63 @@ extern "C" void dJointGetRMotorAxis (dxJointRMotor *joint, dVector3 result)
 extern "C" void dJointSetRMotor (dxJointRMotor *joint, dReal vel, dReal tmax)
 {
   dAASSERT(joint);
+  dUASSERT(joint->vtable == &__drmotor_vtable,"joint is not an RMotor");
   dUASSERT(tmax >= 0,"tmax must be >= 0");
   joint->vel = vel;
   if (tmax < 0) tmax = 0;
   joint->tmax = tmax;
+}
+
+
+extern "C" dReal dJointGetRMotorAngle (dxJointRMotor *joint)
+{
+  // the angle between the two bodies is extracted from the quaternion that
+  // represents the relative rotation between them. recall that a quaternion
+  // q is:
+  //    [s,v] = [ cos(theta/2) , sin(theta/2) * u ]
+  // where s is a scalar and v is a 3-vector. u is a unit length axis and
+  // theta is a rotation along that axis. we can get theta/2 by:
+  //    theta/2 = atan2 ( sin(theta/2) , cos(theta/2) )
+  // but we can't get sin(theta/2) directly, only its absolute value, i.e.:
+  //    |v| = |sin(theta/2)| * |u|
+  //        = |sin(theta/2)|
+  // using this value will have a strange effect. recall that there are two
+  // quaternion representations of a given rotation, q and -q. typically as
+  // a body rotates it will go through a complete cycle using one
+  // representation and then the next cycle will use the other representation.
+  // this corresponds to u pointing in the direction of the hinge axis and
+  // then in the opposite direction. the result is that theta will appear to
+  // go "backwards" every other cycle. here is a fix: if u points "away" from
+  // the direction of the hinge (motor) axis (i.e. more than 90 degrees) then
+  // use -q instead of q. this represents the same rotation, but results in
+  // the cos(theta/2) value being sign inverted.
+
+  dAASSERT(joint);
+  dUASSERT(joint->vtable == &__drmotor_vtable,"joint is not an RMotor");
+
+  // get qrel = relative rotation between the two bodies
+  dQuaternion qrel;
+  if (joint->node[1].body) {
+    dQuaternion qq;
+    dQMultiply2 (qq,joint->node[1].body->q,joint->node[0].body->q);
+    dQMultiply2 (qrel,qq,joint->qrel);
+  }
+  else {
+    dQMultiply3 (qrel,joint->node[0].body->q,joint->qrel);
+  }
+
+  // extract the angle from the quaternion. cost2 = cos(theta/2),
+  // sint2 = |sin(theta/2)|
+  dReal cost2 = qrel[0];
+  dReal sint2 = dSqrt (qrel[1]*qrel[1]+qrel[2]*qrel[2]+qrel[3]*qrel[3]);
+  dReal theta = (dDOT(qrel+1,joint->axis1) >= 0) ?  // @@@ padding assumptions
+    (2 * dAtan2(sint2,cost2)) :		// if u points in direction of axis
+    (2 * dAtan2(sint2,-cost2));		// if u points in opposite direction
+
+  // the angle we get will be between 0..2*pi, but we want to return angles
+  // between -pi..pi
+  if (theta > M_PI) theta -= 2*M_PI;
+  return theta;
 }
 
 
