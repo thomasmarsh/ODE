@@ -1,4 +1,4 @@
-9-1-2002
+24-6-2002
 
 Trianglecollider by Erwin de Vries (erwin@vo.com) for use with ODE 0.03
 (and hopefully up) and Win32 using MSVC6.
@@ -19,3 +19,7 @@ Possile future improvements:
 - Add support for other platforms.
 
 If you have problems, bugs, fixes, addons, or anything related let me know.
+
+Some quick notes:
+- Dont use doubles.
+- Compile Opcode and this source in seperate libs.
