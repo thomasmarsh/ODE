@@ -479,8 +479,8 @@ int dCollide (dxGeom *o1, dxGeom *o2, int flags, dContactGeom *contact,
   dAASSERT(o1 && o2 && contact);
   dUASSERT(classes && colliders,"no registered geometry classes");
 
-  // no contacts if both geoms on the same body (also if both bodies are 0)
-  if (o1->body == o2->body) return 0;
+  // no contacts if both geoms on the same body, and the body is not 0
+  if (o1->body == o2->body && o1->body) return 0;
 
   dColliderEntry *colliders2 = colliders->data();
   c1 = o1->_class->num;
