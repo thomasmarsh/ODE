@@ -19,7 +19,78 @@ the rules for this file:
 	  the joint group, so when the joint group is destroyed they can be
 	  ignored.
 
+	* the test_boxstack demo has new options to enable and disable bodies.
+
+	* new configuration parameter in config.h: dEFFICIENT_SIZE.
+
 11/11/01 russ
 
-	* started the change log for ODE. for changes older than today you
-	  have to look in the CVS logs.
+	* started the change log for ODE. changes older than today were added
+	  to this file by inspecting the CVS logs.
+
+11/05/01 russ
+
+	* added REAL() constructions for floating point numbers, to prevent
+	  many warnings when compiling under VC++.
+
+11/03/01 russ
+
+	* added geometry transform class, documented composite objects.
+
+	* added collision rule: no contacts if both geoms on the same body.
+	  this is not the best rule, may have to remove this in the future.
+
+	* new dMassAdd() function.
+
+	* capped cylinder to capped cylinder collision function.
+
+10/31/01 russ
+
+	* increase CFM in some demos to make them more robust.
+
+10/29/01 russ
+
+	* added new accessor functions.
+
+10/19/01 russ
+
+	* added the dJOINT_TWOBODIES flag to the joint, that says it can not
+	  be attached to just one body.
+
+10/12/01 russ
+
+	* fixed a collision bug in dCollide() that was causing memory
+	  corruption when multiple contacts were being returned.
+
+10/11/01 russ
+
+	* joints can now return m=0 to be "inactive". added a "null" joint
+	  to test this.
+
+10/09/01 russ
+
+	* in the LCP solver, try to fail gracefully when s <= 0.
+
+	* dAABBTestFn() API change.
+
+10/08/01 russ
+
+	* fixed a contact swapping bug in dCollide().
+
+10/07/01 russ
+
+	* added capped cylinder geometry object.
+
+09/30/01 russ
+
+	* the test_buggy demo now uses geometry groups.
+
+	* added a dAABBTestFn field in the geometry classes.
+
+09/29/01 russ
+
+	* added geometry groups.
+
+09/20/01 russ
+
+	* added finite rotation stuff.
