@@ -104,6 +104,7 @@ works].
 @list{
 @* Numerous bug fixes, including contacts.
 @* Updated documentation.
+@* Much more commenting in the source code.
 @* Joint types: hinge, slider, ball and socket, hinge-2, fixed, contact.
 @* Special vehicle joint: hinge-2 - with steering and suspension.
 @* Powered hinge and slider joints (plus dry friction in those joints).
