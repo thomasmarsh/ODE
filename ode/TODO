@@ -3,49 +3,62 @@ TODO
 ----
 
 what i'm doing now: joints:
-	hinge & slider
+	hinge & slider - DONE
 		measure angle, rate - DONE
 		power - DONE
 		joint limits - DONE
 		mixed powered+limited joints, powering away from limit - DONE
 
-	hinge2
+	hinge2 - DONE
 		steering angle and rate measurement - DONE
 		steering limits - DONE
 		steering motor - DONE
-		wheel motor
-		wheel angle and rate measurement
+		wheel motor - DONE
+		wheel angle rate measurement - DONE
 
-	joint limit restitution and spongyness
+	optional hinge2 suspension: - DONE
+		alignment of B&S part to given axis - DONE
+		global framework for giving epsilon and gamma - DONE
+		suspension limits
+		suspension limit restitution and spongyness??
 
-	optional hinge2 suspension:
-		alignment of B&S part to given axis
-		global framework for giving epsilon and gamma
-
-	toss away r-motor, power & stuff specific to joint. it's just easier
-	that way - DONE
-
-	make sure rmotor works with just one body and static env.
+	toss away r-motor, make power & stuff specific to joint. it's just
+		easier that way - DONE
 
 	joint code reuse: use standard functions to set velocity (c),
 		limits (lo,hi), spongyness (epsilon) etc, this prevents these
-		functions from proliferating.
-
-	linear motor
+		functions from proliferating - DONE
 
 	implicit spring framework - actually allow joints to return a value `k'
 		such that J*vnew = c + k*f, where f = force needed to achieve
-		vnew.
+		vnew - DONE
 
-	contact slip
+	joint limit restitution and spongyness
+
+	contact slip - DONE
+	contact erp & cfm parameters (not just "softness")
 
 	more joint code reuse - setting axes etc??
 
-	hinge and hinge2 joints need to have orientable ball-and-socket parts,
-		to allow directed suspension axes. suspension axis must have
-		stops - implement this with a separate joint??
+	hinge2 joint - implement trail, i.e. non-convergent steering and wheel
+	axes.
+
+	hinge2: when we lock back wheels along the steering axis, there is no
+	error correction if they get out of alignment.
+
+	erp individually settable for each joint?
 
 	more joints: spring, planar, fixed path, etc etc.
+
+DOC cfm, the derivation and what it means.
+
+new implementation for joint groups that is not so system dependent.
+maybe individual contacts are reusable? in this case contact information
+should be settable in the contact joints.
+
+consider making anchor,axis, (everything) into a joint parameter and setting
+them with a consistent interface. also consider overload the joint functions
+so they are not distinguished by joint type??
 
 various hinge2 functions may not function correctly if axis1 and axis2 are not
 perpendicular. in particular the getAngle() and getAngleRate() functions
