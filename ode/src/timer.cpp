@@ -105,7 +105,7 @@ double dTimerTicksPerSecond()
 
 static inline void getClockCount (unsigned long cc[2])
 {
-#ifndef SYS64bits	
+#ifndef X86_64_SYSTEM	
   asm volatile (
 	"rdtsc\n"
 	"movl %%eax,(%%esi)\n"
@@ -123,7 +123,7 @@ static inline void getClockCount (unsigned long cc[2])
 
 static inline void serialize()
 {
-#ifndef SYS64bits
+#ifndef X86_64_SYSTEM
   asm volatile (
 	"mov $0,%%eax\n"
 	"cpuid\n"
@@ -140,7 +140,7 @@ static inline void serialize()
 static inline double loadClockCount (unsigned long a[2])
 {
   double ret;
-#ifndef SYS64bits  
+#ifndef X86_64_SYSTEM
   asm volatile ("fildll %1; fstpl %0" : "=m" (ret) : "m" (a[0]) :
 		"cc","memory");
 #else
