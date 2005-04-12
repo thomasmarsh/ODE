@@ -241,7 +241,7 @@ void check_if_this_is_a_pentium (FILE *file)
 
 void check_if_this_is_a_64bits (FILE *file)
 {
-  write_header_comment (file,"is this a 64bit system on a gcc-based platform?");
+  write_header_comment (file,"is this an x86-64 system on a gcc-based platform?");
   write_to_file ("ctest.cpp",
 		 "int main() {\n"
 		 "int a = 0; int * pa = &a;\n"
@@ -252,10 +252,10 @@ void check_if_this_is_a_64bits (FILE *file)
   delete_file ("ctest.exe");
   compile ("ctest.exe","ctest.cpp");
   if (file_exists ("ctest.exe")) {
-    fprintf (file,"#define SYS64bits 1\n\n");
+    fprintf (file,"#define X86_64_SYSTEM 1\n\n");
   }
   else {
-    fprintf (file,"/* #define SYS64bits 1 -- not a 64bits system */\n\n");
+    fprintf (file,"/* #define X86_64_SYSTEM 1 -- not an x86-64 system */\n\n");
   }
 
   delete_file ("ctest.cpp");
