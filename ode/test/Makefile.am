@@ -2,7 +2,8 @@ AM_CXXFLAGS = @CXXFLAGS@ -I@TOPDIR@/include
 AM_CFLAGS = @CXXFLAGS@ -I@TOPDIR@/include
 AM_LDFLAGS = 	-L@TOPDIR@/drawstuff/src \
 		-L../../ode/src -ldrawstuff -lode @LDFLAGS@ \
-		@GL_LIBS@ @LIBS@ 
+		@GL_LIBS@ @LIBS@
+
 noinst_PROGRAMS=test_collision \
 		test_slider \
 		test_crash \
@@ -35,9 +36,26 @@ test_joints_SOURCES= test_joints.cpp
 test_chain1_SOURCES= test_chain1.c
 test_chain2_SOURCES= test_chain2.cpp
 test_ode_SOURCES= test_ode.cpp
+test_collision_LDFLAGS= $(AM_LDFLAGS)
+test_slider_LDFLAGS= $(AM_LDFLAGS) 
+test_crash_LDFLAGS= $(AM_LDFLAGS)
+test_space_LDFLAGS= $(AM_LDFLAGS)
+test_I_LDFLAGS= $(AM_LDFLAGS)
+test_friction_LDFLAGS= $(AM_LDFLAGS)
+test_space_stress_LDFLAGS= $(AM_LDFLAGS)
+test_boxstack_LDFLAGS= $(AM_LDFLAGS)
+test_hinge_LDFLAGS= $(AM_LDFLAGS)
+test_step_LDFLAGS= $(AM_LDFLAGS)
+test_buggy_LDFLAGS= $(AM_LDFLAGS)
+test_joints_LDFLAGS= $(AM_LDFLAGS)
+test_chain1_LDFLAGS= $(AM_LDFLAGS)
+test_chain2_LDFLAGS= $(AM_LDFLAGS)
+test_ode_LDFLAGS= $(AM_LDFLAGS)
 if OPCODE
 test_trimesh_SOURCES= test_trimesh.cpp
 test_moving_trimesh_SOURCES= test_moving_trimesh.cpp
+test_trimesh_LDFLAGS= $(AM_LDFLAGS)
+test_moving_trimesh_LDFLAGS= $(AM_LDFLAGS)
 endif
 
 if WIN32

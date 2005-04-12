@@ -1,5 +1,5 @@
 AM_CXXFLAGS = @CXXFLAGS@ -I@TOPDIR@/include
-AM_LDFLAGS = -ldrawstuff @LDFLAGS@ @GL_LIBS@ @LIBS@ -L@TOPDIR@/drawstuff/src
+dstest_LDFLAGS = -ldrawstuff @LDFLAGS@ @GL_LIBS@ @LIBS@ -L@TOPDIR@/drawstuff/src
 
 noinst_PROGRAMS= dstest
 
