@@ -20,7 +20,7 @@
  *                                                                       *
  *************************************************************************/
 
-#ifdef WIN32		// this prevents warnings when dependencies built
+#if defined(WIN32) || defined(__CYGWIN__)// this prevents warnings when dependencies built
 #include <windows.h>
 #endif
 #include <ode/config.h>
