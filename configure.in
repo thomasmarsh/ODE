@@ -164,7 +164,7 @@ fi
 AC_MSG_RESULT($pentium)
 
 dnl Check for 64bit CPU
-AC_MSG_CHECKING(for a 64 bit processor)
+AC_MSG_CHECKING(for a x86-64 CPU)
 AC_TRY_RUN([
 int main()
 {
@@ -178,7 +178,7 @@ return 0;
 ],cpu64=yes,cpu64=no,)
 if test "x$cpu64" == xyes 
 then
-AC_DEFINE(SYS64bits,1,[is this a 64bit system on a gcc-based platform?])
+AC_DEFINE(X86_64_SYSTEM,1,[is this a X86_64 system on a gcc-based platform?])
 fi
 AC_MSG_RESULT($cpu64)
 
