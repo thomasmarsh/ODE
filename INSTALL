@@ -1,5 +1,59 @@
 
-here are the steps to buid ODE:
+ODE NOW HAS AUTOTOOLS SUPPORT!!!!
+
+if you want to build ODE with autotools follow these steps, if not skip ahead:
+
+(0) if you are building from CVS you must bootstrap the process first
+    by running:
+
+    $ sh autogen.sh
+
+    you may see some "underquoted definition" warnings depending on your
+    platform, these are (for now) harmless warnings regarding scripts 
+    from other m4 installed packages.
+
+(1) The default build process builds ODE with single precision, no trimesh
+    support, and debug enabled (leaves OPCODE out), if this is what you want,
+    simply run:
+
+    $ ./configure
+
+    double precision is enabled with the argument --with-double-precision
+    opcode support is enabled with the --with-opcode argument, and finally,
+    a release build is enabled with --enable-release.
+    So, if you want to build ODE with trimesh support, you would run:
+
+    $ ./configure --with-opcode
+
+    if you want to build ODE with trimesh support and double precision:
+
+    $ ./configure --with-double-precision --with-opcode
+
+    etc, each of these arguments are independent of each other.
+
+(2) Run:
+
+    $ make
+
+(3) To install the library run:
+
+    $ make install
+
+Autotools Notes:
+
+1. Currently because of the nuisances of the Windows DLL system shared 
+   libraries are disabled, so autotools will build a static library only, 
+   on non Windows systems, you can get a shared library by adding the 
+   argument --enable-shared to the configure script.
+2. the autotools build process creates and installs a 'ode-config' script
+   similar to that of gtk, useful for passing cflags and libs to your projects,
+   run ode-config from a command prompt to find out how it works.
+3. The initial autotools build support was written by 
+   Rodrigo Hernandez (kwizatz at aeongames.com) feel free to contact me,
+   if you have any questions regarging the ODE autotools scripts.
+
+
+And here are the steps to build ODE without autotools:
 
 (0) if you're using Microsoft's Visual C++ compiler, you have the option
     of using the workspace and project files in the VC6 subdirectory,
