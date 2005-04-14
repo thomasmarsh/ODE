@@ -184,13 +184,17 @@ AC_MSG_RESULT($cpu64)
 
 AC_MSG_CHECKING(if building a release library)
 AC_ARG_ENABLE(release,AC_HELP_STRING([--enable-release],
-[build a release library with -fomit-frame-pointer, -ffast-math and -O3]),
+[build a release library with -fomit-frame-pointer and -ffast-math]),
 release=$withval,precision=no)
 if test "x$release" == xyes
 then
-    CFLAGS="-fomit-frame-pointer -ffast-math -O3"
-    CPPFLAGS="-fomit-frame-pointer -ffast-math -O3"
-    CXXFLAGS="-fomit-frame-pointer -ffast-math -O3"
+    CFLAGS="-fomit-frame-pointer -ffast-math"
+    CPPFLAGS="-fomit-frame-pointer -ffast-math"
+    CXXFLAGS="-fomit-frame-pointer -ffast-math"
+else
+    CFLAGS="-g"
+    CPPFLAGS="-g"
+    CXXFLAGS="-g"
 fi
 AC_MSG_RESULT($release)
 

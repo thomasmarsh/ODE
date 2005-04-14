@@ -34,8 +34,9 @@
 #endif
 
 #ifndef _MSC_VER
-
+#ifndef __int64
 #define __int64 long long int
+#endif
 #ifndef __stdcall /* this is defined in MinGW and CygWin, so avoid the warning */
 #define __stdcall /* */
 #endif

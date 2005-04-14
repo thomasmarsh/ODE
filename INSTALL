@@ -41,14 +41,18 @@ if you want to build ODE with autotools follow these steps, if not skip ahead:
 
 Autotools Notes:
 
-1. Currently because of the nuisances of the Windows DLL system shared 
+1. Automake 1.8.x or higher is required in order to build ODE
+   using autotools, some Linux distributions (Debian) may install
+   by default a lower version even if there are packages for higher versions,
+   make sure you have the correct one.
+2. Currently because of the nuisances of the Windows DLL system shared 
    libraries are disabled, so autotools will build a static library only, 
    on non Windows systems, you can get a shared library by adding the 
    argument --enable-shared to the configure script.
-2. the autotools build process creates and installs a 'ode-config' script
+3. the autotools build process creates and installs a 'ode-config' script
    similar to that of gtk, useful for passing cflags and libs to your projects,
    run ode-config from a command prompt to find out how it works.
-3. The initial autotools build support was written by 
+4. The initial autotools build support was written by 
    Rodrigo Hernandez (kwizatz at aeongames.com) feel free to contact me,
    if you have any questions regarging the ODE autotools scripts.
 
