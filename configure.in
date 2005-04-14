@@ -184,13 +184,13 @@ AC_MSG_RESULT($cpu64)
 
 AC_MSG_CHECKING(if building a release library)
 AC_ARG_ENABLE(release,AC_HELP_STRING([--enable-release],
-[build a release library with -fomit-frame-pointer and -ffast-math]),
+[build a release library with -fomit-frame-pointer, -ffast-math and -O3]),
 release=$withval,precision=no)
 if test "x$release" == xyes
 then
-    CFLAGS="-fomit-frame-pointer -ffast-math $CFLAGS"
-    CPPFLAGS="-fomit-frame-pointer -ffast-math $CPPFLAGS"
-    CXXFLAGS="-fomit-frame-pointer -ffast-math $CXXFLAGS"
+    CFLAGS="-fomit-frame-pointer -ffast-math -O3"
+    CPPFLAGS="-fomit-frame-pointer -ffast-math -O3"
+    CXXFLAGS="-fomit-frame-pointer -ffast-math -O3"
 fi
 AC_MSG_RESULT($release)
 
@@ -226,7 +226,7 @@ AC_CHECK_LIB(gdi32,main,[LIBS="$LIBS -lgdi32"])
 dnl Add math and standard c++ lib just in case
 AC_CHECK_LIB(stdc++,main,[LIBS="$LIBS -lstdc++"])
 AC_CHECK_LIB(m,main,[LIBS="$LIBS -lm"])
-
+AC_CHECK_LIB(pthread,main,[LIBS="$LIBS -lpthread"])
 
 dnl Decide which version of the drawstuff library we should build
 AC_MSG_CHECKING(which drawstuff lib to build)
