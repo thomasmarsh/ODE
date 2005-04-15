@@ -125,6 +125,10 @@ libode_la-OPC_AABBCollider.lo: @TOPDIR@/OPCODE/OPC_AABBCollider.cpp
 	if $(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) -O1 $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libode_la-OPC_AABBCollider.lo -MD -MP -MF "$(DEPDIR)/libode_la-OPC_AABBCollider.Tpo" -c -o libode_la-OPC_AABBCollider.lo `test -f '@TOPDIR@/OPCODE/OPC_AABBCollider.cpp' || echo '$(srcdir)/'`@TOPDIR@/OPCODE/OPC_AABBCollider.cpp; \
 	then mv -f "$(DEPDIR)/libode_la-OPC_AABBCollider.Tpo" "$(DEPDIR)/libode_la-OPC_AABBCollider.Plo"; else rm -f "$(DEPDIR)/libode_la-OPC_AABBCollider.Tpo"; exit 1; fi
 
+libode_la-Opcode.lo: @TOPDIR@/OPCODE/Opcode.cpp
+	if $(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) -O1 $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libode_la-Opcode.lo -MD -MP -MF "$(DEPDIR)/libode_la-Opcode.Tpo" -c -o libode_la-Opcode.lo `test -f '@TOPDIR@/OPCODE/Opcode.cpp' || echo '$(srcdir)/'`@TOPDIR@/OPCODE/Opcode.cpp; \
+	then mv -f "$(DEPDIR)/libode_la-Opcode.Tpo" "$(DEPDIR)/libode_la-Opcode.Plo"; else rm -f "$(DEPDIR)/libode_la-Opcode.Tpo"; exit 1; fi
+
 libode_la-OPC_AABBTree.lo: @TOPDIR@/OPCODE/OPC_AABBTree.cpp
 	if $(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) -O1 $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libode_la-OPC_AABBTree.lo -MD -MP -MF "$(DEPDIR)/libode_la-OPC_AABBTree.Tpo" -c -o libode_la-OPC_AABBTree.lo `test -f '@TOPDIR@/OPCODE/OPC_AABBTree.cpp' || echo '$(srcdir)/'`@TOPDIR@/OPCODE/OPC_AABBTree.cpp; \
 	then mv -f "$(DEPDIR)/libode_la-OPC_AABBTree.Tpo" "$(DEPDIR)/libode_la-OPC_AABBTree.Plo"; else rm -f "$(DEPDIR)/libode_la-OPC_AABBTree.Tpo"; exit 1; fi
@@ -277,6 +281,7 @@ libode_la-IceTriangle.lo: @TOPDIR@/OPCODE/Ice/IceTriangle.cpp
 libode_la-IceUtils.lo: @TOPDIR@/OPCODE/Ice/IceUtils.cpp
 	if $(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) -O1 $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libode_la-IceUtils.lo -MD -MP -MF "$(DEPDIR)/libode_la-IceUtils.Tpo" -c -o libode_la-IceUtils.lo `test -f '@TOPDIR@/OPCODE/Ice/IceUtils.cpp' || echo '$(srcdir)/'`@TOPDIR@/OPCODE/Ice/IceUtils.cpp; \
 	then mv -f "$(DEPDIR)/libode_la-IceUtils.Tpo" "$(DEPDIR)/libode_la-IceUtils.Plo"; else rm -f "$(DEPDIR)/libode_la-IceUtils.Tpo"; exit 1; fi
+
 endif
 
 
