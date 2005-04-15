@@ -1644,6 +1644,24 @@ void dJointGetUniversalAxis2 (dJointID, dVector3 result);
 Get univeral axis parameters.
 }
 
+@funcdef{
+dReal dJointGetUniversalAngle1 (dJointID);
+dReal dJointGetUniversalAngle2 (dJointID);
+dReal dJointGetUniversalAngleRate1 (dJointID);
+dReal dJointGetUniversalAngleRate2 (dJointID);
+}{
+Get the universal angles and the time derivatives of these values.
+The angle is measured between a body and the cross, or between the static environment and the cross.
+The angle will be between -pi..pi.
+
+When the universal anchor or axis is set, the current position of the attached
+bodies is examined and that position will be the zero angle.
+}
+
+
+
+
+
 
 @subsection{Hinge-2}
 
