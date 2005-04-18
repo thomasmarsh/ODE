@@ -50,6 +50,23 @@ opcode=$withval,opcode=no)
 AC_MSG_RESULT($opcode)
 AM_CONDITIONAL(OPCODE, test x$opcode = xyes)
 
+AC_MSG_CHECKING(if FreeSOLID support is requested)
+AC_ARG_WITH(freesolid,AC_HELP_STRING([--with-freesolid],
+[Cofigure ODE to work with the FreeSOLID collision detection library for trimesh support]),
+freesolid=$withval,freesolid=no)
+AC_MSG_RESULT($freesolid)
+AM_CONDITIONAL(FREESOLID, test x$freesolid = xyes)
+
+if test x$freesolid = xyes && test x$opcode = xyes
+then
+AC_MSG_ERROR([Support for both OPCODE and FreeSOLID has been requested, the two of them cannot coexists.])
+fi
+
+if test x$freesolid = xyes
+then
+AC_CHECK_LIB(FreeSOLID, main,[LIBS="$LIBS -lFreeSOLID"],AC_MSG_ERROR([Support for FreeSOLID has been requested but the FreeSOLID development library cannot be found.]))
+fi
+
 dnl Check Precision, define the dInfinity constant--------------------------/
 AC_MSG_CHECKING(if double precision is requested)
 AC_ARG_WITH(double-precision,AC_HELP_STRING([--with-double-precision],
@@ -380,6 +397,7 @@ echo "  Build  system type:      $build"
 echo "  Host   system type:      $host"
 echo "  Use double precision:    $precision"
 echo "  Use OPCODE:              $opcode"
+echo "  Use FreeSOLID            $freesolid"
 echo "  Is this a Pentium:       $pentium"
 echo "  Is the CPU x86-64:       $cpu64"
 echo "  Is this a release build: $release"

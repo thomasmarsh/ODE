@@ -70,5 +70,19 @@ libode_la_SOURCES+=	collision_trimesh_trimesh.cpp \
 			collision_trimesh_distance.cpp \
 			collision_trimesh_internal.h
 endif
+if FREESOLID
+# we just asume the fresolid-config script to exist here
+libode_la_LDFLAGS+= `freesolid-config --libs`
+AM_CXXFLAGS += `freesolid-config --cflags` -DdTRIMESH_ENABLED -DWITH_FREESOLID
+AM_CFLAGS +=  `freesolid-config --cflags` -DdTRIMESH_ENABLED -DWITH_FREESOLID
+libode_la_SOURCES+=	collision_trimesh_trimesh.cpp \
+			collision_trimesh_sphere.cpp \
+			collision_trimesh_ray.cpp \
+			collision_trimesh.cpp \
+			collision_trimesh_box.cpp \
+			collision_trimesh_ccylinder.cpp \
+			collision_trimesh_distance.cpp \
+			collision_trimesh_internal.h
+endif
 
 
