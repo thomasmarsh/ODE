@@ -1,0 +1,40 @@
+if OPCODE
+noinst_LTLIBRARIES= libOPCODE.la
+libOPCODE_la_CPPFLAGS= -O1
+libOPCODE_la_SOURCES=	OPC_AABBCollider.cpp \
+			OPC_AABBTree.cpp \
+			OPC_BaseModel.cpp \
+			OPC_BoxPruning.cpp \
+			OPC_Collider.cpp \
+			OPC_Common.cpp \
+			OPC_HybridModel.cpp \
+			OPC_LSSCollider.cpp \
+			OPC_MeshInterface.cpp \
+			OPC_Model.cpp \
+			OPC_OBBCollider.cpp \
+			Opcode.cpp \
+			OPC_OptimizedTree.cpp \
+			OPC_Picking.cpp \
+			OPC_PlanesCollider.cpp \
+			OPC_RayCollider.cpp \
+			OPC_SphereCollider.cpp \
+			OPC_SweepAndPrune.cpp \
+			OPC_TreeBuilders.cpp \
+			OPC_TreeCollider.cpp \
+			OPC_VolumeCollider.cpp \
+			@TOPDIR@/OPCODE/Ice/IceAABB.cpp \
+			@TOPDIR@/OPCODE/Ice/IceContainer.cpp \
+			@TOPDIR@/OPCODE/Ice/IceHPoint.cpp \
+			@TOPDIR@/OPCODE/Ice/IceIndexedTriangle.cpp \
+			@TOPDIR@/OPCODE/Ice/IceMatrix3x3.cpp \
+			@TOPDIR@/OPCODE/Ice/IceMatrix4x4.cpp \
+			@TOPDIR@/OPCODE/Ice/IceOBB.cpp \
+			@TOPDIR@/OPCODE/Ice/IcePlane.cpp \
+			@TOPDIR@/OPCODE/Ice/IcePoint.cpp \
+			@TOPDIR@/OPCODE/Ice/IceRandom.cpp \
+			@TOPDIR@/OPCODE/Ice/IceRay.cpp \
+			@TOPDIR@/OPCODE/Ice/IceRevisitedRadix.cpp \
+			@TOPDIR@/OPCODE/Ice/IceSegment.cpp \
+			@TOPDIR@/OPCODE/Ice/IceTriangle.cpp \
+			@TOPDIR@/OPCODE/Ice/IceUtils.cpp
+endif

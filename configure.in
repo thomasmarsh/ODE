@@ -367,6 +367,7 @@ AC_OUTPUT([
  drawstuff/src/Makefile
  drawstuff/dstest/Makefile
  ode/test/Makefile
+ OPCODE/Makefile
  ode-config
  ])
 
