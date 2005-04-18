@@ -30,6 +30,9 @@ if you want to build ODE with autotools follow these steps, if not skip ahead:
     $ ./configure --with-double-precision --with-opcode
 
     etc, each of these arguments are independent of each other.
+    FreeSOLID support can be enabled with the --with-freesolid argument,
+    this requires that the FreeSOLID library had been previously build and
+    installed, the --with-opcode and --with-freesolid cannot be used together.
 
 (2) Run:
 
