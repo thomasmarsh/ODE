@@ -21,6 +21,7 @@
  *************************************************************************/
 
 // TriMesh code by Erwin de Vries.
+// Modified for FreeSOLID Compatibility by Rodrigo Hernandez
 
 #ifndef _ODE_COLLISION_TRIMESH_INTERNAL_H_
 #define _ODE_COLLISION_TRIMESH_INTERNAL_H_
@@ -40,12 +41,21 @@ int dCollideCCTL(dxGeom *o1, dxGeom *o2, int flags, dContactGeom *contact, int s
 #include <ode/collision_trimesh.h>
 
 #define BAN_OPCODE_AUTOLINK
+
+#ifdef WITH_FREESOLID
+#include "solid.h"
+#else
 #include "Opcode.h"
 using namespace Opcode;
+#endif
 
 struct dxTriMeshData  : public dBase {
+#ifdef WITH_FREESOLID
+  DtShapeRef Mesh;
+#else
 	Model BVTree;
 	MeshInterface Mesh;
+#endif
 
     dxTriMeshData();
     ~dxTriMeshData();
@@ -94,12 +104,16 @@ struct dxTriMesh : public dxGeom{
 
 
 	// Colliders
+#ifndef WITH_FREESOLID
+        Model BVTree;
+	MeshInterface Mesh;
 	static PlanesCollider _PlanesCollider;
 	static SphereCollider _SphereCollider;
 	static OBBCollider _OBBCollider;
 	static RayCollider _RayCollider;
 	static AABBTreeCollider _AABBTreeCollider;
 	static LSSCollider _LSSCollider;
+#endif
 
 	// Some constants
 	static CollisionFaces Faces;
