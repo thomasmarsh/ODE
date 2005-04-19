@@ -105,19 +105,16 @@ struct dxTriMesh : public dxGeom{
 
 	// Colliders
 #ifndef WITH_FREESOLID
-        Model BVTree;
-	MeshInterface Mesh;
 	static PlanesCollider _PlanesCollider;
 	static SphereCollider _SphereCollider;
 	static OBBCollider _OBBCollider;
 	static RayCollider _RayCollider;
 	static AABBTreeCollider _AABBTreeCollider;
 	static LSSCollider _LSSCollider;
-#endif
 
 	// Some constants
 	static CollisionFaces Faces;
-
+#endif
 	// Temporal coherence
 	struct SphereTC : public SphereCache{
 		dxGeom* Geom;
