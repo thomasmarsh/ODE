@@ -164,6 +164,29 @@ AC_MSG_CHECKING(for appropriate dInfinity constant)
 AC_MSG_RESULT($dinfinity)
 dnl --------------------------------------------------------------------------/
 
+dnl Define dEpsilon
+AC_CHECK_HEADER(float.h,[have_float_h=yes],[have_float_h=no])
+AC_MSG_CHECKING(for appropriate dEpsilon constant)
+if test "x$have_float_h" == xyes 
+then
+if test $precision == yes
+then
+dEpsilon=DBL_EPSILON
+else
+dEpsilon=FLT_EPSILON
+fi
+else
+if test $precision == yes
+then
+dEpsilon=2.2204460492503131e-16
+else
+dEpsilon=1.19209290e-07f
+fi
+fi
+AC_DEFINE_UNQUOTED(dEpsilon,${dEpsilon},[dEpsilon Constant])
+AC_MSG_RESULT($dEpsilon)
+
+
 dnl Check for PENTIUM
 AC_MSG_CHECKING(for a Pentium CPU)
 AC_TRY_RUN([
@@ -202,7 +225,7 @@ AC_MSG_RESULT($cpu64)
 AC_MSG_CHECKING(if building a release library)
 AC_ARG_ENABLE(release,AC_HELP_STRING([--enable-release],
 [build a release library with -fomit-frame-pointer and -ffast-math]),
-release=$withval,precision=no)
+release=$withval,release=no)
 if test "x$release" == xyes
 then
     CFLAGS="-fomit-frame-pointer -ffast-math"
