@@ -1918,10 +1918,10 @@ GenerateContact(int in_Flags, dContactGeom* in_Contacts, int in_Stride,
 
         // same position?
         SUB(diff, in_ContactPos, Contact->pos);
-        if (dDOT(diff, diff) < 0.01) 
+        if (dDOT(diff, diff) < dEpsilon) 
         {
             // same normal?
-            if (fabs(dDOT(in_Normal, Contact->normal)) > 0.99 )
+            if (fabs(dDOT(in_Normal, Contact->normal)) > (dReal(1.0)-dEpsilon))
             {
                 if (in_Depth > Contact->depth) {
                     Contact->depth = in_Depth;
