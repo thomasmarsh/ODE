@@ -63,8 +63,9 @@ int dTestRand()
 
 int dRandInt (int n)
 {
-  double a = double(n) / 4294967296.0;
-  return (int) (double(dRand()) * a);
+  seed = (seed * 16807) & 0x7fffffff;
+
+  return ((seed >> 15) * n) >> 16;
 }
 
 
