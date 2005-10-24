@@ -28,3 +28,7 @@ endif
 
 # some other possible flags:
 #   -malign-double -mpentiumpro -march=pentiumpro
+
+I_AM_GCC=yes
+
+
