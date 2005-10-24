@@ -408,6 +408,12 @@ void get_ODE_float_stuff (FILE *file)
   suffix = "";
 #endif
 
+#ifdef dSINGLE
+  fprintf (file,"#define dEpsilon FLT_EPSILON\n\n");
+#else
+  fprintf (file,"#define dEpsilon DBL_EPSILON\n\n");
+#endif
+
   /* infinity */
   write_header_comment (file,"the floating point infinity");
 
