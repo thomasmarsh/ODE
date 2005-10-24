@@ -9,6 +9,13 @@ the rules for this file:
 
 ------------------------------------------------------------------------------
 
+10/24/05 tfautre
+
+	(Backported patches from STABLE branch, applied by Adam)
+	
+	* dRandInt changed for a non-double all-int version.
+	* mics minor fixes and improvements.
+
 04/05/05 tfautre
 
 	* Fixed segmentation fault with OPCODE on 64 bits systems.
