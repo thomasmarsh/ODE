@@ -1013,6 +1013,11 @@ int dCollideCCTL(dxGeom *o1, dxGeom *o2, int flags, dContactGeom *contact, int s
 		 Collider.SetTemporalCoherence(false);
 		 Collider.Collide(dxTriMesh::defaultBoxCache, obbCCylinder, TriMesh->Data->BVTree, null,&MeshMatrix);
 	 }
+	 
+	 if (! Collider.GetContactStatus()) {
+	 	// no collision occurred
+	 	return 0;
+	 }
 
 	 // Retrieve data
 	 int TriCount = Collider.GetNbTouchedPrimitives();

@@ -305,6 +305,11 @@ int dCollideSTL(dxGeom* g1, dxGeom* SphereGeom, int Flags, dContactGeom* Contact
 						 &MakeMatrix(TLPosition, TLRotation, amatrix));
  	}
 
+	if (! Collider.GetContactStatus()) {
+		// no collision occurred
+		return 0;
+	}
+
 	// get results
 	int TriCount = Collider.GetNbTouchedPrimitives();
 	const int* Triangles = (const int*)Collider.GetTouchedPrimitives();
