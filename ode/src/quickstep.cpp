@@ -355,10 +355,12 @@ static void SOR_LCP (int m, int nb, dRealMutablePtr J, int *jb, dxBody * const *
 	dSetZero (lambda,m);
 #endif
 
+#ifdef REORDER_CONSTRAINTS	
 	// the lambda computed at the previous iteration.
 	// this is used to measure error for when we are reordering the indexes.
 	dRealAllocaArray (last_lambda,m);
-
+#endif
+	
 	// a copy of the 'hi' vector in case findex[] is being used
 	dRealAllocaArray (hicopy,m);
 	memcpy (hicopy,hi,m*sizeof(dReal));
@@ -446,6 +448,11 @@ static void SOR_LCP (int m, int nb, dRealMutablePtr J, int *jb, dxBody * const *
 			}
 		}
 		qsort (order,m,sizeof(IndexError),&compare_index_error);
+		
+		//@@@ potential optimization: swap lambda and last_lambda pointers rather
+		//    than copying the data. we must make sure lambda is properly
+		//    returned to the caller
+		memcpy (last_lambda,lambda,m*sizeof(dReal));                                
 #endif
 #ifdef RANDOMLY_REORDER_CONSTRAINTS
                 if ((iteration & 7) == 0) {
@@ -457,11 +464,6 @@ static void SOR_LCP (int m, int nb, dRealMutablePtr J, int *jb, dxBody * const *
 			}
                 }
 #endif
-
-		//@@@ potential optimization: swap lambda and last_lambda pointers rather
-		//    than copying the data. we must make sure lambda is properly
-		//    returned to the caller
-		memcpy (last_lambda,lambda,m*sizeof(dReal));
 
 		for (int i=0; i<m; i++) {
 			// @@@ potential optimization: we could pre-sort J and iMJ, thereby
