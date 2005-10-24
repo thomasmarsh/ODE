@@ -182,6 +182,9 @@ ODE_SRC+=\
 ifeq ($(CC),g++)
 OPCODE/%.o: OPT=1
 endif
+ifeq ($(I_AM_GCC),yes)
+OPCODE/%.o: OPT=1
+endif
 
 endif
 

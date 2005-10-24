@@ -27,3 +27,7 @@ ifeq ($(BUILD),debug)
 OPT=0
 C_FLAGS+=-g
 endif
+
+I_AM_GCC=yes
+
+
