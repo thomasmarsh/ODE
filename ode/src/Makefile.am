@@ -1,19 +1,18 @@
 AM_CXXFLAGS = -I@TOPDIR@/include
 AM_CPPFLAGS = -I@TOPDIR@/include
 AM_CFLAGS = -I@TOPDIR@/include
-lib_LTLIBRARIES = libode.la
-libode_la_LDFLAGS = -no-undefined -version-info @ODE_CURRENT@:@ODE_REVISION@:@ODE_AGE@ -release @ODE_RELEASE@
-libode_la_CPPFLAGS = -O2
+lib_LIBRARIES = libode.a
+libode_a_CPPFLAGS = -O2
 
 # convenience library to simulate per object cflags
-noinst_LTLIBRARIES= libfast.la
-libfast_la_CFLAGS= -O1
-libfast_la_SOURCES= fastldlt.c fastltsolve.c fastdot.c fastlsolve.c
+noinst_LIBRARIES= libfast.a
+libfast_a_CFLAGS= -O1
+libfast_a_SOURCES= fastldlt.c fastltsolve.c fastdot.c fastlsolve.c
 
-libode_la_DEPENDENCIES = libfast.la
-libode_la_LIBADD= libfast.la
+libode_a_DEPENDENCIES = libfast.a
+libode_a_LIBADD= $(libfast_a_OBJECTS)
 
-libode_la_SOURCES = 	objects.h \
+libode_a_SOURCES = 	objects.h \
 			obstack.cpp \
 			collision_util.cpp \
 			obstack.h \
@@ -57,25 +56,50 @@ libode_la_SOURCES = 	objects.h \
 			misc.cpp
 
 if OPCODE
-libode_la_DEPENDENCIES+=@TOPDIR@/OPCODE/libOPCODE.la
-libode_la_LIBADD+= @TOPDIR@/OPCODE/libOPCODE.la
+noinst_LIBRARIES+= libOPCODE.a
+libOPCODE_a_CPPFLAGS= -O1
+libOPCODE_a_SOURCES=	@TOPDIR@/OPCODE/OPC_AABBCollider.cpp \
+			@TOPDIR@/OPCODE/OPC_AABBTree.cpp \
+			@TOPDIR@/OPCODE/OPC_BaseModel.cpp \
+			@TOPDIR@/OPCODE/OPC_BoxPruning.cpp \
+			@TOPDIR@/OPCODE/OPC_Collider.cpp \
+			@TOPDIR@/OPCODE/OPC_Common.cpp \
+			@TOPDIR@/OPCODE/OPC_HybridModel.cpp \
+			@TOPDIR@/OPCODE/OPC_LSSCollider.cpp \
+			@TOPDIR@/OPCODE/OPC_MeshInterface.cpp \
+			@TOPDIR@/OPCODE/OPC_Model.cpp \
+			@TOPDIR@/OPCODE/OPC_OBBCollider.cpp \
+			@TOPDIR@/OPCODE/Opcode.cpp \
+			@TOPDIR@/OPCODE/OPC_OptimizedTree.cpp \
+			@TOPDIR@/OPCODE/OPC_Picking.cpp \
+			@TOPDIR@/OPCODE/OPC_PlanesCollider.cpp \
+			@TOPDIR@/OPCODE/OPC_RayCollider.cpp \
+			@TOPDIR@/OPCODE/OPC_SphereCollider.cpp \
+			@TOPDIR@/OPCODE/OPC_SweepAndPrune.cpp \
+			@TOPDIR@/OPCODE/OPC_TreeBuilders.cpp \
+			@TOPDIR@/OPCODE/OPC_TreeCollider.cpp \
+			@TOPDIR@/OPCODE/OPC_VolumeCollider.cpp \
+			@TOPDIR@/OPCODE/Ice/IceAABB.cpp \
+			@TOPDIR@/OPCODE/Ice/IceContainer.cpp \
+			@TOPDIR@/OPCODE/Ice/IceHPoint.cpp \
+			@TOPDIR@/OPCODE/Ice/IceIndexedTriangle.cpp \
+			@TOPDIR@/OPCODE/Ice/IceMatrix3x3.cpp \
+			@TOPDIR@/OPCODE/Ice/IceMatrix4x4.cpp \
+			@TOPDIR@/OPCODE/Ice/IceOBB.cpp \
+			@TOPDIR@/OPCODE/Ice/IcePlane.cpp \
+			@TOPDIR@/OPCODE/Ice/IcePoint.cpp \
+			@TOPDIR@/OPCODE/Ice/IceRandom.cpp \
+			@TOPDIR@/OPCODE/Ice/IceRay.cpp \
+			@TOPDIR@/OPCODE/Ice/IceRevisitedRadix.cpp \
+			@TOPDIR@/OPCODE/Ice/IceSegment.cpp \
+			@TOPDIR@/OPCODE/Ice/IceTriangle.cpp \
+			@TOPDIR@/OPCODE/Ice/IceUtils.cpp
+libode_a_DEPENDENCIES+=libOPCODE.a
+
+libode_a_LIBADD+= $(libOPCODE_a_OBJECTS)
 AM_CXXFLAGS += -I@TOPDIR@/OPCODE -I@TOPDIR@/OPCODE/Ice -DdTRIMESH_ENABLED
 AM_CFLAGS += -I@TOPDIR@/OPCODE -I@TOPDIR@/OPCODE/Ice -DdTRIMESH_ENABLED
-libode_la_SOURCES+=	collision_trimesh_trimesh.cpp \
-			collision_trimesh_sphere.cpp \
-			collision_trimesh_ray.cpp \
-			collision_trimesh.cpp \
-			collision_trimesh_box.cpp \
-			collision_trimesh_ccylinder.cpp \
-			collision_trimesh_distance.cpp \
-			collision_trimesh_internal.h
-endif
-if FREESOLID
-# we just asume the fresolid-config script to exist here
-libode_la_LDFLAGS+= `freesolid-config --libs`
-AM_CXXFLAGS += `freesolid-config --cflags` -DdTRIMESH_ENABLED -DWITH_FREESOLID
-AM_CFLAGS +=  `freesolid-config --cflags` -DdTRIMESH_ENABLED -DWITH_FREESOLID
-libode_la_SOURCES+=	collision_trimesh_trimesh.cpp \
+libode_a_SOURCES+=	collision_trimesh_trimesh.cpp \
 			collision_trimesh_sphere.cpp \
 			collision_trimesh_ray.cpp \
 			collision_trimesh.cpp \

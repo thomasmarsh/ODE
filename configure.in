@@ -1,4 +1,5 @@
-dnl initial configure.in by Rodrigo Hernandez
+dnl Initial configure.in by Rodrigo Hernandez
+dnl Modified in 26/10/2005 by Rodrigo Hernandez
 AC_INIT(ODE,0.5.0,ode@q12.org)
 
 AC_CANONICAL_HOST
@@ -6,14 +7,6 @@ AC_CANONICAL_TARGET
 
 AM_INIT_AUTOMAKE(ODE,0.5.0)
 AM_CONFIG_HEADER(include/ode/config.h)
-dnl Libtool stuff
-AC_LIBTOOL_DLOPEN
-dnl AC_DISABLE_STATIC
-AC_DISABLE_SHARED
-AC_LIBTOOL_WIN32_DLL
-AC_PROG_LIBTOOL
-AC_SUBST(LIBTOOL_DEPS)
-AC_SUBST(LIBTOOL)
 AC_C_BIGENDIAN
 AC_PATH_X
 AC_PATH_XTRA
@@ -49,23 +42,6 @@ AC_ARG_WITH(opcode,AC_HELP_STRING([--with-opcode],
 opcode=$withval,opcode=no)
 AC_MSG_RESULT($opcode)
 AM_CONDITIONAL(OPCODE, test x$opcode = xyes)
-
-AC_MSG_CHECKING(if FreeSOLID support is requested)
-AC_ARG_WITH(freesolid,AC_HELP_STRING([--with-freesolid],
-[Cofigure ODE to work with the FreeSOLID collision detection library for trimesh support]),
-freesolid=$withval,freesolid=no)
-AC_MSG_RESULT($freesolid)
-AM_CONDITIONAL(FREESOLID, test x$freesolid = xyes)
-
-if test x$freesolid = xyes && test x$opcode = xyes
-then
-AC_MSG_ERROR([Support for both OPCODE and FreeSOLID has been requested, the two of them cannot coexists.])
-fi
-
-if test x$freesolid = xyes
-then
-AC_CHECK_LIB(FreeSOLID, main,[LIBS="$LIBS -lFreeSOLID"],AC_MSG_ERROR([Support for FreeSOLID has been requested but the FreeSOLID development library cannot be found.]))
-fi
 
 dnl Check Precision, define the dInfinity constant--------------------------/
 AC_MSG_CHECKING(if double precision is requested)
@@ -407,7 +383,6 @@ AC_OUTPUT([
  drawstuff/src/Makefile
  drawstuff/dstest/Makefile
  ode/test/Makefile
- OPCODE/Makefile
  ode-config
  ])
 
@@ -420,7 +395,6 @@ echo "  Build  system type:      $build"
 echo "  Host   system type:      $host"
 echo "  Use double precision:    $precision"
 echo "  Use OPCODE:              $opcode"
-echo "  Use FreeSOLID            $freesolid"
 echo "  Is this a Pentium:       $pentium"
 echo "  Is the CPU x86-64:       $cpu64"
 echo "  Is this a release build: $release"
