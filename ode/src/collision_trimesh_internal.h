@@ -42,20 +42,13 @@ int dCollideCCTL(dxGeom *o1, dxGeom *o2, int flags, dContactGeom *contact, int s
 
 #define BAN_OPCODE_AUTOLINK
 
-#ifdef WITH_FREESOLID
-#include "solid.h"
-#else
 #include "Opcode.h"
 using namespace Opcode;
-#endif
 
-struct dxTriMeshData  : public dBase {
-#ifdef WITH_FREESOLID
-  DtShapeRef Mesh;
-#else
+struct dxTriMeshData  : public dBase 
+{
 	Model BVTree;
 	MeshInterface Mesh;
-#endif
 
     dxTriMeshData();
     ~dxTriMeshData();
@@ -104,7 +97,6 @@ struct dxTriMesh : public dxGeom{
 
 
 	// Colliders
-#ifndef WITH_FREESOLID
 	static PlanesCollider _PlanesCollider;
 	static SphereCollider _SphereCollider;
 	static OBBCollider _OBBCollider;
@@ -114,7 +106,6 @@ struct dxTriMesh : public dxGeom{
 
 	// Some constants
 	static CollisionFaces Faces;
-#endif
 	// Temporal coherence
 	struct SphereTC : public SphereCache{
 		dxGeom* Geom;

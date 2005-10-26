@@ -1,7 +1,7 @@
 LIBTOOL_DEPS = @LIBTOOL_DEPS@
 libtool: $(LIBTOOL_DEPS)
 	$(SHELL) ./config.status --recheck
-SUBDIRS =   include drawstuff OPCODE ode 
+SUBDIRS =   include drawstuff ode 
 
 bin_SCRIPTS = ode-config
 
