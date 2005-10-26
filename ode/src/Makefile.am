@@ -4,6 +4,17 @@ AM_CFLAGS = -I@TOPDIR@/include
 lib_LIBRARIES = libode.a
 libode_a_CPPFLAGS = -O2
 
+# Fake an executable in order to get a shared library
+EXEEXT=@so_ext@
+bin_PROGRAMS=libode
+libode_DEPENDENCIES = libfast.a libode.a
+libode_LDFLAGS=-shared
+libode_SOURCES=$(libode_a_SOURCES) $(libfast_a_SOURCES)
+if OPCODE
+libode_DEPENDENCIES+= libOPCODE.a
+libode_SOURCES+=$(libOPCODE_a_SOURCES)
+endif
+
 # convenience library to simulate per object cflags
 noinst_LIBRARIES= libfast.a
 libfast_a_CFLAGS= -O1
