@@ -372,6 +372,29 @@ typedef unsigned long int intP;
 #endif /* #define ODE_CONFIG_H */
 ])
 
+AC_MSG_CHECKING(for the suffix of shared libraries)
+case "$host_os" in
+  hpux9* | hpux10* | hpux11*)  # taken from ltconfig
+    so_ext=".sl"
+    DLLDEFINE=""
+    ;;
+  cygwin* | mingw*)
+    so_ext=".dll"
+    DLLDEFINE="-DDLL_EXPORT"
+    ;;
+  *apple*) # For Mac OS X
+    so_ext=".dylib"
+    DLLDEFINE=""
+    ;;
+  *)
+   so_ext=".so"
+    DLLDEFINE=""
+    ;;
+esac
+AC_MSG_RESULT(.$SO_EXT)
+AC_DEFINE_UNQUOTED(SO_EXT,"$so_ext",[The extension for shared libraries.])
+AC_SUBST(so_ext)
+
 dnl Finally write our Makefiles
 AC_OUTPUT([
  Makefile

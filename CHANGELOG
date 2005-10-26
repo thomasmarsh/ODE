@@ -8,6 +8,11 @@ the rules for this file:
   * keep the format consistent (79 char width, M/D/Y date format).
 
 ------------------------------------------------------------------------------
+10/26/05 rodrigo
+
+	* Removed LIBTOOL from autotools since it was not really required.
+	* Added a target to build ODE as a shared library, this shared
+	  library gets build alongside the static one, no flags required.
 
 10/24/05 tfautre
 
