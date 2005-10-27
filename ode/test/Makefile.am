@@ -34,50 +34,35 @@ test_chain1_SOURCES= test_chain1.c
 test_chain2_SOURCES= test_chain2.cpp
 test_ode_SOURCES= test_ode.cpp
 test_collision_LDFLAGS= -L@TOPDIR@/drawstuff/src \
-		-L@TOPDIR@/ode/src @LDFLAGS@ \
-		@GL_LIBS@ @LIBS@
+		-L@TOPDIR@/ode/src @LDFLAGS@ 
 test_slider_LDFLAGS= -L@TOPDIR@/drawstuff/src \
-		-L@TOPDIR@/ode/src @LDFLAGS@ \
-		@GL_LIBS@ @LIBS@ 
+		-L@TOPDIR@/ode/src @LDFLAGS@  
 test_crash_LDFLAGS= -L@TOPDIR@/drawstuff/src \
-		-L@TOPDIR@/ode/src @LDFLAGS@ \
-		@GL_LIBS@ @LIBS@
+		-L@TOPDIR@/ode/src @LDFLAGS@ 
 test_space_LDFLAGS= -L@TOPDIR@/drawstuff/src \
-		-L@TOPDIR@/ode/src @LDFLAGS@ \
-		@GL_LIBS@ @LIBS@
+		-L@TOPDIR@/ode/src @LDFLAGS@ 
 test_I_LDFLAGS= -L@TOPDIR@/drawstuff/src \
-		-L@TOPDIR@/ode/src @LDFLAGS@ \
-		@GL_LIBS@ @LIBS@
+		-L@TOPDIR@/ode/src @LDFLAGS@ 
 test_friction_LDFLAGS= -L@TOPDIR@/drawstuff/src \
-		-L@TOPDIR@/ode/src @LDFLAGS@ \
-		@GL_LIBS@ @LIBS@
+		-L@TOPDIR@/ode/src @LDFLAGS@ 
 test_space_stress_LDFLAGS= -L@TOPDIR@/drawstuff/src \
-		-L@TOPDIR@/ode/src @LDFLAGS@ \
-		@GL_LIBS@ @LIBS@
+		-L@TOPDIR@/ode/src @LDFLAGS@ 
 test_boxstack_LDFLAGS= -L@TOPDIR@/drawstuff/src \
-		-L@TOPDIR@/ode/src @LDFLAGS@ \
-		@GL_LIBS@ @LIBS@
+		-L@TOPDIR@/ode/src @LDFLAGS@ 
 test_hinge_LDFLAGS= -L@TOPDIR@/drawstuff/src \
-		-L@TOPDIR@/ode/src @LDFLAGS@ \
-		@GL_LIBS@ @LIBS@
+		-L@TOPDIR@/ode/src @LDFLAGS@ 
 test_step_LDFLAGS= -L@TOPDIR@/drawstuff/src \
-		-L@TOPDIR@/ode/src @LDFLAGS@ \
-		@GL_LIBS@ @LIBS@
+		-L@TOPDIR@/ode/src @LDFLAGS@ 
 test_buggy_LDFLAGS= -L@TOPDIR@/drawstuff/src \
-		-L@TOPDIR@/ode/src @LDFLAGS@ \
-		@GL_LIBS@ @LIBS@
+		-L@TOPDIR@/ode/src @LDFLAGS@ 
 test_joints_LDFLAGS= -L@TOPDIR@/drawstuff/src \
-		-L@TOPDIR@/ode/src @LDFLAGS@ \
-		@GL_LIBS@ @LIBS@
+		-L@TOPDIR@/ode/src @LDFLAGS@ 
 test_chain1_LDFLAGS= -L@TOPDIR@/drawstuff/src \
-		-L@TOPDIR@/ode/src @LDFLAGS@ \
-		@GL_LIBS@ @LIBS@
+		-L@TOPDIR@/ode/src @LDFLAGS@ 
 test_chain2_LDFLAGS= -L@TOPDIR@/drawstuff/src \
-		-L@TOPDIR@/ode/src @LDFLAGS@ \
-		@GL_LIBS@ @LIBS@
+		-L@TOPDIR@/ode/src @LDFLAGS@ 
 test_ode_LDFLAGS= -L@TOPDIR@/drawstuff/src \
-		-L@TOPDIR@/ode/src @LDFLAGS@ \
-		@GL_LIBS@ @LIBS@
+		-L@TOPDIR@/ode/src @LDFLAGS@ 
 
 test_collision_DEPENDENCIES=	@TOPDIR@/ode/src/libode.a \
 				@TOPDIR@/drawstuff/src/libdrawstuff.a
@@ -126,24 +111,24 @@ test_moving_trimesh_DEPENDENCIES=	@TOPDIR@/ode/src/libode.a \
 
 endif
 
-test_ode_LDADD= -ldrawstuff -lode
-test_chain2_LDADD= -ldrawstuff -lode
-test_chain1_LDADD= -ldrawstuff -lode
-test_joints_LDADD= -ldrawstuff -lode
-test_buggy_LDADD= -ldrawstuff -lode
-test_step_LDADD= -ldrawstuff -lode
-test_hinge_LDADD= -ldrawstuff -lode
-test_boxstack_LDADD= -ldrawstuff -lode
-test_space_stress_LDADD= -ldrawstuff -lode
-test_friction_LDADD= -ldrawstuff -lode
-test_I_LDADD= -ldrawstuff -lode
-test_space_LDADD= -ldrawstuff -lode
-test_crash_LDADD= -ldrawstuff -lode
-test_slider_LDADD= -ldrawstuff -lode
-test_collision_LDADD= -ldrawstuff -lode
+test_ode_LDADD= -ldrawstuff -lode @GL_LIBS@ @LIBS@
+test_chain2_LDADD= -ldrawstuff -lode @GL_LIBS@ @LIBS@
+test_chain1_LDADD= -ldrawstuff -lode @GL_LIBS@ @LIBS@
+test_joints_LDADD= -ldrawstuff -lode @GL_LIBS@ @LIBS@
+test_buggy_LDADD= -ldrawstuff -lode @GL_LIBS@ @LIBS@
+test_step_LDADD= -ldrawstuff -lode @GL_LIBS@ @LIBS@
+test_hinge_LDADD= -ldrawstuff -lode @GL_LIBS@ @LIBS@
+test_boxstack_LDADD= -ldrawstuff -lode @GL_LIBS@ @LIBS@
+test_space_stress_LDADD= -ldrawstuff -lode @GL_LIBS@ @LIBS@
+test_friction_LDADD= -ldrawstuff -lode @GL_LIBS@ @LIBS@
+test_I_LDADD= -ldrawstuff -lode @GL_LIBS@ @LIBS@
+test_space_LDADD= -ldrawstuff -lode @GL_LIBS@ @LIBS@
+test_crash_LDADD= -ldrawstuff -lode @GL_LIBS@ @LIBS@
+test_slider_LDADD= -ldrawstuff -lode @GL_LIBS@ @LIBS@
+test_collision_LDADD= -ldrawstuff -lode @GL_LIBS@ @LIBS@
 if OPCODE
-test_trimesh_LDADD= -ldrawstuff -lode
-test_moving_trimesh_LDADD= -ldrawstuff -lode
+test_trimesh_LDADD= -ldrawstuff -lode @GL_LIBS@ @LIBS@
+test_moving_trimesh_LDADD= -ldrawstuff -lode @GL_LIBS@ @LIBS@
 endif
 
 
@@ -165,8 +150,25 @@ test_space_LDADD+= resources.o
 test_crash_LDADD+= resources.o
 test_slider_LDADD+= resources.o
 test_collision_LDADD+= resources.o
+test_ode_DEPENDENCIES+= resources.o
+test_chain2_DEPENDENCIES+= resources.o
+test_chain1_DEPENDENCIES+= resources.o
+test_joints_DEPENDENCIES+= resources.o
+test_buggy_DEPENDENCIES+= resources.o
+test_step_DEPENDENCIES+= resources.o
+test_hinge_DEPENDENCIES+= resources.o
+test_boxstack_DEPENDENCIES+= resources.o
+test_space_stress_DEPENDENCIES+= resources.o
+test_friction_DEPENDENCIES+= resources.o
+test_I_DEPENDENCIES+= resources.o
+test_space_DEPENDENCIES+= resources.o
+test_crash_DEPENDENCIES+= resources.o
+test_slider_DEPENDENCIES+= resources.o
+test_collision_DEPENDENCIES+= resources.o
 if OPCODE
 test_trimesh_LDADD+= resources.o
 test_moving_trimesh_LDADD+= resources.o
+test_trimesh_DEPENDENCIES+= resources.o
+test_moving_trimesh_DEPENDENCIES+= resources.o
 endif
 endif

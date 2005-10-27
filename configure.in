@@ -391,7 +391,7 @@ case "$host_os" in
     DLLDEFINE=""
     ;;
 esac
-AC_MSG_RESULT(.$SO_EXT)
+AC_MSG_RESULT($so_ext)
 AC_DEFINE_UNQUOTED(SO_EXT,"$so_ext",[The extension for shared libraries.])
 AC_SUBST(so_ext)
 
