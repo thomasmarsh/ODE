@@ -26,6 +26,10 @@
 #ifndef _ODE_COLLISION_TRIMESH_INTERNAL_H_
 #define _ODE_COLLISION_TRIMESH_INTERNAL_H_
 
+#ifdef dCYLINDER_ENABLED
+int dCollideCylinderTrimesh(dxGeom *o1, dxGeom *o2, int flags, dContactGeom *contact, int skip);
+#endif
+
 int dCollideSTL(dxGeom *o1, dxGeom *o2, int flags, dContactGeom *contact, int skip);
 int dCollideBTL(dxGeom *o1, dxGeom *o2, int flags, dContactGeom *contact, int skip);
 int dCollideRTL(dxGeom *o1, dxGeom *o2, int flags, dContactGeom *contact, int skip);
@@ -139,11 +143,13 @@ struct dxTriMesh : public dxGeom{
 	void computeAABB();
 };
 
+#if 0
 // Fetches a contact
 inline dContactGeom* SAFECONTACT(int Flags, dContactGeom* Contacts, int Index, int Stride){
 	dIASSERT(Index >= 0 && Index < (Flags & 0x0ffff));
 	return ((dContactGeom*)(((char*)Contacts) + (Index * Stride)));
 }
+#endif
 
 // Fetches a triangle
 inline void FetchTriangle(dxTriMesh* TriMesh, int Index, dVector3 Out[3]){

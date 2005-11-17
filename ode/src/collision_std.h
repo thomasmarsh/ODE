@@ -64,5 +64,14 @@ int dCollideRayCCylinder (dxGeom *o1, dxGeom *o2,
 int dCollideRayPlane (dxGeom *o1, dxGeom *o2, int flags,
 		      dContactGeom *contact, int skip);
 
+#ifdef dCYLINDER_ENABLED
+// Cylinder - Box/Sphere by (C) CroTeam
+// Ported by Nguyen Binh
+int dCollideCylinderBox(dxGeom *o1, dxGeom *o2, 
+                        int flags, dContactGeom *contact, int skip);
+int dCollideCylinderSphere(dxGeom *gCylinder, dxGeom *gSphere, 
+                           int flags, dContactGeom *contact, int skip); 
+#endif
+
 
 #endif
