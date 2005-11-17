@@ -445,3 +445,153 @@ void dInfiniteAABB (dxGeom *geom, dReal aabb[6])
   aabb[4] = -dInfinity;
   aabb[5] = dInfinity;
 }
+
+
+//****************************************************************************
+// Helpers for Croteam's collider - by Nguyen Binh
+
+#ifdef dCYLINDER_ENABLED
+int dClipEdgeToPlane( dVector3 &vEpnt0, dVector3 &vEpnt1, const dVector4& plPlane)
+{
+	// calculate distance of edge points to plane
+	dReal fDistance0 = dPointPlaneDistance(  vEpnt0 ,plPlane );
+	dReal fDistance1 = dPointPlaneDistance(  vEpnt1 ,plPlane );
+
+	// if both points are behind the plane
+	if ( fDistance0 < 0 && fDistance1 < 0 ) 
+	{
+		// do nothing
+		return 0;
+		// if both points in front of the plane
+	} 
+	else if ( fDistance0 > 0 && fDistance1 > 0 ) 
+	{
+		// accept them
+		return 1;
+		// if we have edge/plane intersection
+	} else if ((fDistance0 > 0 && fDistance1 < 0) || ( fDistance0 < 0 && fDistance1 > 0)) 
+	{
+
+		// find intersection point of edge and plane
+		dVector3 vIntersectionPoint;
+		vIntersectionPoint[0]= vEpnt0[0]-(vEpnt0[0]-vEpnt1[0])*fDistance0/(fDistance0-fDistance1);
+		vIntersectionPoint[1]= vEpnt0[1]-(vEpnt0[1]-vEpnt1[1])*fDistance0/(fDistance0-fDistance1);
+		vIntersectionPoint[2]= vEpnt0[2]-(vEpnt0[2]-vEpnt1[2])*fDistance0/(fDistance0-fDistance1);
+
+		// clamp correct edge to intersection point
+		if ( fDistance0 < 0 ) 
+		{
+			dVector3Copy(vIntersectionPoint,vEpnt0);
+		} else 
+		{
+			dVector3Copy(vIntersectionPoint,vEpnt1);
+		}
+		return 1;
+	}
+	return 1;
+}
+
+// clip polygon with plane and generate new polygon points
+void		 dClipPolyToPlane( const dVector3 avArrayIn[], const int ctIn, 
+							  dVector3 avArrayOut[], int &ctOut, 
+							  const dVector4 &plPlane )
+{
+	// start with no output points
+	ctOut = 0;
+
+	int i0 = ctIn-1;
+
+	// for each edge in input polygon
+	for (int i1=0; i1<ctIn; i0=i1, i1++) {
+
+
+		// calculate distance of edge points to plane
+		dReal fDistance0 = dPointPlaneDistance(  avArrayIn[i0],plPlane );
+		dReal fDistance1 = dPointPlaneDistance(  avArrayIn[i1],plPlane );
+
+		// if first point is in front of plane
+		if( fDistance0 >= 0 ) {
+			// emit point
+			avArrayOut[ctOut][0] = avArrayIn[i0][0];
+			avArrayOut[ctOut][1] = avArrayIn[i0][1];
+			avArrayOut[ctOut][2] = avArrayIn[i0][2];
+			ctOut++;
+		}
+
+		// if points are on different sides
+		if( (fDistance0 > 0 && fDistance1 < 0) || ( fDistance0 < 0 && fDistance1 > 0) ) {
+
+			// find intersection point of edge and plane
+			dVector3 vIntersectionPoint;
+			vIntersectionPoint[0]= avArrayIn[i0][0] - 
+				(avArrayIn[i0][0]-avArrayIn[i1][0])*fDistance0/(fDistance0-fDistance1);
+			vIntersectionPoint[1]= avArrayIn[i0][1] - 
+				(avArrayIn[i0][1]-avArrayIn[i1][1])*fDistance0/(fDistance0-fDistance1);
+			vIntersectionPoint[2]= avArrayIn[i0][2] - 
+				(avArrayIn[i0][2]-avArrayIn[i1][2])*fDistance0/(fDistance0-fDistance1);
+
+			// emit intersection point
+			avArrayOut[ctOut][0] = vIntersectionPoint[0];
+			avArrayOut[ctOut][1] = vIntersectionPoint[1];
+			avArrayOut[ctOut][2] = vIntersectionPoint[2];
+			ctOut++;
+		}
+	}
+
+}
+
+void		 dClipPolyToCircle(const dVector3 avArrayIn[], const int ctIn, 
+							   dVector3 avArrayOut[], int &ctOut, 
+							   const dVector4 &plPlane ,dReal fRadius)
+{
+	// start with no output points
+	ctOut = 0;
+
+	int i0 = ctIn-1;
+
+	// for each edge in input polygon
+	for (int i1=0; i1<ctIn; i0=i1, i1++) 
+	{
+		// calculate distance of edge points to plane
+		dReal fDistance0 = dPointPlaneDistance(  avArrayIn[i0],plPlane );
+		dReal fDistance1 = dPointPlaneDistance(  avArrayIn[i1],plPlane );
+
+		// if first point is in front of plane
+		if( fDistance0 >= 0 ) 
+		{
+			// emit point
+			if (dVector3Length2(avArrayIn[i0]) <= fRadius*fRadius)
+			{
+				avArrayOut[ctOut][0] = avArrayIn[i0][0];
+				avArrayOut[ctOut][1] = avArrayIn[i0][1];
+				avArrayOut[ctOut][2] = avArrayIn[i0][2];
+				ctOut++;
+			}
+		}
+
+		// if points are on different sides
+		if( (fDistance0 > 0 && fDistance1 < 0) || ( fDistance0 < 0 && fDistance1 > 0) ) 
+		{
+
+			// find intersection point of edge and plane
+			dVector3 vIntersectionPoint;
+			vIntersectionPoint[0]= avArrayIn[i0][0] - 
+				(avArrayIn[i0][0]-avArrayIn[i1][0])*fDistance0/(fDistance0-fDistance1);
+			vIntersectionPoint[1]= avArrayIn[i0][1] - 
+				(avArrayIn[i0][1]-avArrayIn[i1][1])*fDistance0/(fDistance0-fDistance1);
+			vIntersectionPoint[2]= avArrayIn[i0][2] - 
+				(avArrayIn[i0][2]-avArrayIn[i1][2])*fDistance0/(fDistance0-fDistance1);
+
+			// emit intersection point
+			if (dVector3Length2(avArrayIn[i0]) <= fRadius*fRadius)
+			{
+				avArrayOut[ctOut][0] = vIntersectionPoint[0];
+				avArrayOut[ctOut][1] = vIntersectionPoint[1];
+				avArrayOut[ctOut][2] = vIntersectionPoint[2];
+				ctOut++;
+			}
+		}
+	}	
+}
+#endif
+

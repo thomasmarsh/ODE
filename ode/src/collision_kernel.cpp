@@ -145,6 +145,14 @@ static void initColliders()
   setCollider (dTriMeshClass,dRayClass,&dCollideRTL);
   setCollider (dTriMeshClass,dTriMeshClass,&dCollideTTL);
   setCollider (dTriMeshClass,dCCylinderClass,&dCollideCCTL);
+#ifdef dCYLINDER_ENABLED
+  setCollider (dCylinderClass,dTriMeshClass,&dCollideCylinderTrimesh);
+#endif
+#endif
+#ifdef dCYLINDER_ENABLED
+  setCollider (dCylinderClass,dBoxClass,&dCollideCylinderBox);
+  setCollider (dCylinderClass,dSphereClass,&dCollideCylinderSphere);
+  //setCollider (dCylinderClass,dCylinderClass,&dCollideCylinderCylinder);
 #endif
   setAllColliders (dGeomTransformClass,&dCollideTransform);
 }
