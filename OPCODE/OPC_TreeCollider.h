@@ -49,12 +49,14 @@
 #endif // __MESHMERIZER_H__
 							}
 
-		inline_		void	ResetCountDown()
-							{
 #ifdef __MESHMERIZER_H__		// Collision hulls only supported within ICE !
-								CountDown		= 50;
+	  inline_ void ResetCountDown()
+	  {
+	    CountDown		= 50;
+	  }
+#else
+	  void	ResetCountDown(){};
 #endif // __MESHMERIZER_H__
-							}
 
 		const Model*		Model0;	//!< Model for first object
 		const Model*		Model1;	//!< Model for second object
