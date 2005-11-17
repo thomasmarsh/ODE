@@ -117,6 +117,12 @@ void dGeomCCylinderSetParams (dGeomID ccylinder, dReal radius, dReal length);
 void dGeomCCylinderGetParams (dGeomID ccylinder, dReal *radius, dReal *length);
 dReal dGeomCCylinderPointDepth (dGeomID ccylinder, dReal x, dReal y, dReal z);
 
+#ifdef dCYLINDER_ENABLED
+dGeomID dCreateCylinder (dSpaceID space, dReal radius, dReal length);
+void dGeomCylinderSetParams (dGeomID cylinder, dReal radius, dReal length);
+void dGeomCylinderGetParams (dGeomID cylinder, dReal *radius, dReal *length);
+#endif
+
 dGeomID dCreateRay (dSpaceID space, dReal length);
 void dGeomRaySetLength (dGeomID ray, dReal length);
 dReal dGeomRayGetLength (dGeomID ray);
