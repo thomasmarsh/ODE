@@ -38,10 +38,17 @@ AC_CHECK_HEADERS( alloca.h ieeefp.h stdio.h stdlib.h math.h string.h stdarg.h ma
 
 AC_MSG_CHECKING(if OPCODE support is requested)
 AC_ARG_WITH(opcode,AC_HELP_STRING([--with-opcode],
-[Cofigure ODE to work with the OPCODE collision detection library for trimesh support]),
+[Configure ODE to work with the OPCODE collision detection library for trimesh support]),
 opcode=$withval,opcode=no)
 AC_MSG_RESULT($opcode)
 AM_CONDITIONAL(OPCODE, test x$opcode = xyes)
+
+AC_MSG_CHECKING(if cylinder support is requested)
+AC_ARG_WITH(cylinder,AC_HELP_STRING([--with-cylinder],
+[Configure ODE to have non capped cylinder support]),
+cylinder=$withval,cylinder=no)
+AC_MSG_RESULT($cylinder)
+AM_CONDITIONAL(CYLINDER, test x$cylinder = xyes)
 
 dnl Check Precision, define the dInfinity constant--------------------------/
 AC_MSG_CHECKING(if double precision is requested)
@@ -418,6 +425,7 @@ echo "  Build  system type:      $build"
 echo "  Host   system type:      $host"
 echo "  Use double precision:    $precision"
 echo "  Use OPCODE:              $opcode"
+echo "  Support cylinder:        $cylinder"
 echo "  Is this a Pentium:       $pentium"
 echo "  Is the CPU x86-64:       $cpu64"
 echo "  Is this a release build: $release"
