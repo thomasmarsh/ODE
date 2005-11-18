@@ -239,9 +239,9 @@ bool _cldTestAxis(sData& cData,
 	// project capsule on vAxis
 	dReal frc;
 
-	if (fdot1 > REAL(1.0) ) 
+	if (dFabs(fdot1) > REAL(1.0) ) 
 	{
-		fdot1 = REAL(1.0);
+//		fdot1 = REAL(1.0);
 		frc = dFabs(cData.fCylinderSize* REAL(0.5));
 	}
 	else
