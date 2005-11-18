@@ -221,7 +221,7 @@ int main (int argc, char **argv)
 
   // Super weird: comment out next printf, and run with single-precision:
   // collisions are not detected.
-  fprintf(stderr,"Building Single Precision Mesh\n");
+//  fprintf(stderr,"Building Single Precision Mesh\n");
 
   dGeomTriMeshDataBuildSingle
   (
