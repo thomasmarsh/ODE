@@ -1,6 +1,6 @@
-AM_CXXFLAGS = -I@TOPDIR@/include
-AM_CPPFLAGS = -I@TOPDIR@/include
-AM_CFLAGS = -I@TOPDIR@/include
+AM_CXXFLAGS = -I$(top_srcdir)/include -I$(top_builddir)/include
+AM_CPPFLAGS = -I$(top_srcdir)/include -I$(top_builddir)/include
+AM_CFLAGS = -I$(topsrcdir)/include -I$(top_builddir)/include
 lib_LIBRARIES = libode.a
 libode_a_CPPFLAGS = -O2
 

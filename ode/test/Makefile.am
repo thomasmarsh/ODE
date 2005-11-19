@@ -1,5 +1,5 @@
-AM_CXXFLAGS = @CXXFLAGS@ -I@TOPDIR@/include
-AM_CFLAGS = @CXXFLAGS@ -I@TOPDIR@/include
+AM_CXXFLAGS = @CXXFLAGS@ -I$(top_srcdir)/include -I$(top_builddir)/include
+AM_CFLAGS = @CXXFLAGS@ -I$(top_srcdir)/include -I$(top_builddir)/include
 
 noinst_PROGRAMS=test_collision \
 		test_slider \
@@ -19,6 +19,7 @@ if OPCODE
 noinst_PROGRAMS+= test_trimesh test_moving_trimesh
 if CYLINDER
 noinst_PROGRAMS+= test_cyl
+#noinst_PROGRAMS+= test_car
 endif
 endif
 test_collision_SOURCES= test_collision.cpp
@@ -32,98 +33,98 @@ test_boxstack_SOURCES= test_boxstack.cpp
 test_hinge_SOURCES= test_hinge.cpp
 test_step_SOURCES= test_step.cpp
 test_buggy_SOURCES= test_buggy.cpp
-#test_car_SOURCES= test_car.cpp
+#test_car_SOURCES= test_car.cpp world_geom3.h
 test_cyl_SOURCES= test_cyl.cpp world_geom3.h
 test_joints_SOURCES= test_joints.cpp
 test_chain1_SOURCES= test_chain1.c
 test_chain2_SOURCES= test_chain2.cpp
 test_ode_SOURCES= test_ode.cpp
-test_collision_LDFLAGS= -L@TOPDIR@/drawstuff/src \
-		-L@TOPDIR@/ode/src @LDFLAGS@ 
-test_slider_LDFLAGS= -L@TOPDIR@/drawstuff/src \
-		-L@TOPDIR@/ode/src @LDFLAGS@  
-test_crash_LDFLAGS= -L@TOPDIR@/drawstuff/src \
-		-L@TOPDIR@/ode/src @LDFLAGS@ 
-test_space_LDFLAGS= -L@TOPDIR@/drawstuff/src \
-		-L@TOPDIR@/ode/src @LDFLAGS@ 
-test_I_LDFLAGS= -L@TOPDIR@/drawstuff/src \
-		-L@TOPDIR@/ode/src @LDFLAGS@ 
-test_friction_LDFLAGS= -L@TOPDIR@/drawstuff/src \
-		-L@TOPDIR@/ode/src @LDFLAGS@ 
-test_space_stress_LDFLAGS= -L@TOPDIR@/drawstuff/src \
-		-L@TOPDIR@/ode/src @LDFLAGS@ 
-test_boxstack_LDFLAGS= -L@TOPDIR@/drawstuff/src \
-		-L@TOPDIR@/ode/src @LDFLAGS@ 
-test_hinge_LDFLAGS= -L@TOPDIR@/drawstuff/src \
-		-L@TOPDIR@/ode/src @LDFLAGS@ 
-test_step_LDFLAGS= -L@TOPDIR@/drawstuff/src \
-		-L@TOPDIR@/ode/src @LDFLAGS@ 
-test_buggy_LDFLAGS= -L@TOPDIR@/drawstuff/src \
-		-L@TOPDIR@/ode/src @LDFLAGS@ 
-#test_car_LDFLAGS= -L@TOPDIR@/drawstuff/src \
-#		-L@TOPDIR@/ode/src @LDFLAGS@ 
-test_cyl_LDFLAGS= -L@TOPDIR@/drawstuff/src \
-		-L@TOPDIR@/ode/src @LDFLAGS@ 
-test_joints_LDFLAGS= -L@TOPDIR@/drawstuff/src \
-		-L@TOPDIR@/ode/src @LDFLAGS@ 
-test_chain1_LDFLAGS= -L@TOPDIR@/drawstuff/src \
-		-L@TOPDIR@/ode/src @LDFLAGS@ 
-test_chain2_LDFLAGS= -L@TOPDIR@/drawstuff/src \
-		-L@TOPDIR@/ode/src @LDFLAGS@ 
-test_ode_LDFLAGS= -L@TOPDIR@/drawstuff/src \
-		-L@TOPDIR@/ode/src @LDFLAGS@ 
+test_collision_LDFLAGS= -L$(top_builddir)/drawstuff/src \
+		-L$(top_builddir)/ode/src @LDFLAGS@ 
+test_slider_LDFLAGS= -L$(top_builddir)/drawstuff/src \
+		-L$(top_builddir)/ode/src @LDFLAGS@  
+test_crash_LDFLAGS= -L$(top_builddir)/drawstuff/src \
+		-L$(top_builddir)/ode/src @LDFLAGS@ 
+test_space_LDFLAGS= -L$(top_builddir)/drawstuff/src \
+		-L$(top_builddir)/ode/src @LDFLAGS@ 
+test_I_LDFLAGS= -L$(top_builddir)/drawstuff/src \
+		-L$(top_builddir)/ode/src @LDFLAGS@ 
+test_friction_LDFLAGS= -L$(top_builddir)/drawstuff/src \
+		-L$(top_builddir)/ode/src @LDFLAGS@ 
+test_space_stress_LDFLAGS= -L$(top_builddir)/drawstuff/src \
+		-L$(top_builddir)/ode/src @LDFLAGS@ 
+test_boxstack_LDFLAGS= -L$(top_builddir)/drawstuff/src \
+		-L$(top_builddir)/ode/src @LDFLAGS@ 
+test_hinge_LDFLAGS= -L$(top_builddir)/drawstuff/src \
+		-L$(top_builddir)/ode/src @LDFLAGS@ 
+test_step_LDFLAGS= -L$(top_builddir)/drawstuff/src \
+		-L$(top_builddir)/ode/src @LDFLAGS@ 
+test_buggy_LDFLAGS= -L$(top_builddir)/drawstuff/src \
+		-L$(top_builddir)/ode/src @LDFLAGS@ 
+#test_car_LDFLAGS= -L$(top_builddir)/drawstuff/src \
+#		-L$(top_builddir)/ode/src @LDFLAGS@ 
+test_cyl_LDFLAGS= -L$(top_builddir)/drawstuff/src \
+		-L$(top_builddir)/ode/src @LDFLAGS@ 
+test_joints_LDFLAGS= -L$(top_builddir)/drawstuff/src \
+		-L$(top_builddir)/ode/src @LDFLAGS@ 
+test_chain1_LDFLAGS= -L$(top_builddir)/drawstuff/src \
+		-L$(top_builddir)/ode/src @LDFLAGS@ 
+test_chain2_LDFLAGS= -L$(top_builddir)/drawstuff/src \
+		-L$(top_builddir)/ode/src @LDFLAGS@ 
+test_ode_LDFLAGS= -L$(top_builddir)/drawstuff/src \
+		-L$(top_builddir)/ode/src @LDFLAGS@ 
 
-#test_car_CXXFLAGS= @CXXFLAGS@ -I@TOPDIR@/include -DdCYLINDER_ENABLED
-test_cyl_CXXFLAGS= @CXXFLAGS@ -I@TOPDIR@/include -DdCYLINDER_ENABLED
+#test_car_CXXFLAGS= @CXXFLAGS@ -I$(top_builddir)/include -I$(top_srcdir)/include -DdCYLINDER_ENABLED
+test_cyl_CXXFLAGS= @CXXFLAGS@ -I$(top_builddir)/include -I$(top_srcdir)/include -DdCYLINDER_ENABLED
 
-test_collision_DEPENDENCIES=	@TOPDIR@/ode/src/libode.a \
-				@TOPDIR@/drawstuff/src/libdrawstuff.a
-test_slider_DEPENDENCIES=	@TOPDIR@/ode/src/libode.a \
-				@TOPDIR@/drawstuff/src/libdrawstuff.a
-test_crash_DEPENDENCIES=	@TOPDIR@/ode/src/libode.a \
-				@TOPDIR@/drawstuff/src/libdrawstuff.a
-test_space_DEPENDENCIES=	@TOPDIR@/ode/src/libode.a \
-				@TOPDIR@/drawstuff/src/libdrawstuff.a
-test_I_DEPENDENCIES=		@TOPDIR@/ode/src/libode.a \
-				@TOPDIR@/drawstuff/src/libdrawstuff.a
-test_friction_DEPENDENCIES=	@TOPDIR@/ode/src/libode.a \
-				@TOPDIR@/drawstuff/src/libdrawstuff.a
-test_space_stress_DEPENDENCIES=	@TOPDIR@/ode/src/libode.a \
-				@TOPDIR@/drawstuff/src/libdrawstuff.a
-test_boxstack_DEPENDENCIES=	@TOPDIR@/ode/src/libode.a \
-				@TOPDIR@/drawstuff/src/libdrawstuff.a
-test_hinge_DEPENDENCIES=	@TOPDIR@/ode/src/libode.a \
-				@TOPDIR@/drawstuff/src/libdrawstuff.a
-test_step_DEPENDENCIES=		@TOPDIR@/ode/src/libode.a \
-				@TOPDIR@/drawstuff/src/libdrawstuff.a
-test_buggy_DEPENDENCIES=	@TOPDIR@/ode/src/libode.a \
-				@TOPDIR@/drawstuff/src/libdrawstuff.a
-#test_car_DEPENDENCIES=		@TOPDIR@/ode/src/libode.a \
-				@TOPDIR@/drawstuff/src/libdrawstuff.a
-test_cyl_DEPENDENCIES=		@TOPDIR@/ode/src/libode.a \
-				@TOPDIR@/drawstuff/src/libdrawstuff.a
-test_joints_DEPENDENCIES=	@TOPDIR@/ode/src/libode.a \
-				@TOPDIR@/drawstuff/src/libdrawstuff.a
-test_chain1_DEPENDENCIES=	@TOPDIR@/ode/src/libode.a \
-				@TOPDIR@/drawstuff/src/libdrawstuff.a
-test_chain2_DEPENDENCIES=	@TOPDIR@/ode/src/libode.a \
-				@TOPDIR@/drawstuff/src/libdrawstuff.a
-test_ode_DEPENDENCIES=		@TOPDIR@/ode/src/libode.a \
-				@TOPDIR@/drawstuff/src/libdrawstuff.a
+test_collision_DEPENDENCIES=	$(top_builddir)/ode/src/libode.a \
+				$(top_builddir)/drawstuff/src/libdrawstuff.a
+test_slider_DEPENDENCIES=	$(top_builddir)/ode/src/libode.a \
+				$(top_builddir)/drawstuff/src/libdrawstuff.a
+test_crash_DEPENDENCIES=	$(top_builddir)/ode/src/libode.a \
+				$(top_builddir)/drawstuff/src/libdrawstuff.a
+test_space_DEPENDENCIES=	$(top_builddir)/ode/src/libode.a \
+				$(top_builddir)/drawstuff/src/libdrawstuff.a
+test_I_DEPENDENCIES=		$(top_builddir)/ode/src/libode.a \
+				$(top_builddir)/drawstuff/src/libdrawstuff.a
+test_friction_DEPENDENCIES=	$(top_builddir)/ode/src/libode.a \
+				$(top_builddir)/drawstuff/src/libdrawstuff.a
+test_space_stress_DEPENDENCIES=	$(top_builddir)/ode/src/libode.a \
+				$(top_builddir)/drawstuff/src/libdrawstuff.a
+test_boxstack_DEPENDENCIES=	$(top_builddir)/ode/src/libode.a \
+				$(top_builddir)/drawstuff/src/libdrawstuff.a
+test_hinge_DEPENDENCIES=	$(top_builddir)/ode/src/libode.a \
+				$(top_builddir)/drawstuff/src/libdrawstuff.a
+test_step_DEPENDENCIES=		$(top_builddir)/ode/src/libode.a \
+				$(top_builddir)/drawstuff/src/libdrawstuff.a
+test_buggy_DEPENDENCIES=	$(top_builddir)/ode/src/libode.a \
+				$(top_builddir)/drawstuff/src/libdrawstuff.a
+#test_car_DEPENDENCIES=		$(top_builddir)/ode/src/libode.a \
+#				$(top_builddir)/drawstuff/src/libdrawstuff.a
+test_cyl_DEPENDENCIES=		$(top_builddir)/ode/src/libode.a \
+				$(top_builddir)/drawstuff/src/libdrawstuff.a
+test_joints_DEPENDENCIES=	$(top_builddir)/ode/src/libode.a \
+				$(top_builddir)/drawstuff/src/libdrawstuff.a
+test_chain1_DEPENDENCIES=	$(top_builddir)/ode/src/libode.a \
+				$(top_builddir)/drawstuff/src/libdrawstuff.a
+test_chain2_DEPENDENCIES=	$(top_builddir)/ode/src/libode.a \
+				$(top_builddir)/drawstuff/src/libdrawstuff.a
+test_ode_DEPENDENCIES=		$(top_builddir)/ode/src/libode.a \
+				$(top_builddir)/drawstuff/src/libdrawstuff.a
 
 if OPCODE
 test_trimesh_SOURCES= 			test_trimesh.cpp
 test_moving_trimesh_SOURCES= 		test_moving_trimesh.cpp
-test_trimesh_LDFLAGS= 			-L@TOPDIR@/drawstuff/src \
-					-L@TOPDIR@/ode/src @LDFLAGS@ \
+test_trimesh_LDFLAGS= 			-L$(top_builddir)/drawstuff/src \
+					-L$(top_builddir)/ode/src @LDFLAGS@ \
 					@GL_LIBS@ @LIBS@
-test_moving_trimesh_LDFLAGS= 		-L@TOPDIR@/drawstuff/src \
-					-L@TOPDIR@/ode/src @LDFLAGS@ \
+test_moving_trimesh_LDFLAGS= 		-L$(top_builddir)/drawstuff/src \
+					-L$(top_builddir)/ode/src @LDFLAGS@ \
 					@GL_LIBS@ @LIBS@
-test_trimesh_DEPENDENCIES=		@TOPDIR@/ode/src/libode.a \
-					@TOPDIR@/drawstuff/src/libdrawstuff.a
-test_moving_trimesh_DEPENDENCIES=	@TOPDIR@/ode/src/libode.a \
-					@TOPDIR@/drawstuff/src/libdrawstuff.a
+test_trimesh_DEPENDENCIES=		$(top_builddir)/ode/src/libode.a \
+					$(top_builddir)/drawstuff/src/libdrawstuff.a
+test_moving_trimesh_DEPENDENCIES=	$(top_builddir)/ode/src/libode.a \
+					$(top_builddir)/drawstuff/src/libdrawstuff.a
 
 endif
 
