@@ -15,6 +15,10 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SingleTrimesh", "SingleTrim
 	ProjectSection(ProjectDependencies) = postProject
 	EndProjectSection
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "drawstuff", "drawstuff.vcproj", "{261B7044-1808-44DD-81BF-CF8062CF4D3E}"
+	ProjectSection(ProjectDependencies) = postProject
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfiguration) = preSolution
 		Debug = Debug
@@ -37,6 +41,10 @@ Global
 		{5A5BDDC7-FCCA-4CBE-B6B3-564E42794483}.Debug.Build.0 = Debug|Win32
 		{5A5BDDC7-FCCA-4CBE-B6B3-564E42794483}.Release.ActiveCfg = Release|Win32
 		{5A5BDDC7-FCCA-4CBE-B6B3-564E42794483}.Release.Build.0 = Release|Win32
+		{261B7044-1808-44DD-81BF-CF8062CF4D3E}.Debug.ActiveCfg = Debug|Win32
+		{261B7044-1808-44DD-81BF-CF8062CF4D3E}.Debug.Build.0 = Debug|Win32
+		{261B7044-1808-44DD-81BF-CF8062CF4D3E}.Release.ActiveCfg = Release|Win32
+		{261B7044-1808-44DD-81BF-CF8062CF4D3E}.Release.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 	EndGlobalSection
