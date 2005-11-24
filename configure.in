@@ -33,6 +33,15 @@ AC_HEADER_STDBOOL
 AC_PROG_RANLIB
 AC_TYPE_SIZE_T
 
+AC_ARG_WITH(arch,
+[	--with-arch=[arch]	build for $arch, where arch is any of the -march flags passed to gcc, without the -march, for example --with-arch=pentium3],
+arch=$withval,arch=no)
+if test "x$arch" != xno
+then
+    ARCHFLAGS="-march=$arch"
+fi
+AC_SUBST(ARCHFLAGS)
+
 dnl check for required headers
 AC_CHECK_HEADERS( alloca.h ieeefp.h stdio.h stdlib.h math.h string.h stdarg.h malloc.h values.h float.h )
 
