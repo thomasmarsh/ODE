@@ -1,5 +1,5 @@
-AM_CXXFLAGS = @CXXFLAGS@ -I$(top_srcdir)/include -I$(top_builddir)/include
-AM_CFLAGS = @CXXFLAGS@ -I$(top_srcdir)/include -I$(top_builddir)/include
+AM_CXXFLAGS = @ARCHFLAGS@ @CXXFLAGS@ -I$(top_srcdir)/include -I$(top_builddir)/include
+AM_CFLAGS = @ARCHFLAGS@ @CXXFLAGS@ -I$(top_srcdir)/include -I$(top_builddir)/include
 
 noinst_PROGRAMS=test_collision \
 		test_slider \

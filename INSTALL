@@ -30,9 +30,14 @@ if you want to build ODE with autotools follow these steps, if not skip ahead:
     $ ./configure --with-double-precision --with-opcode
 
     etc, each of these arguments are independent of each other.
-    FreeSOLID support can be enabled with the --with-freesolid argument,
-    this requires that the FreeSOLID library had been previously build and
-    installed, the --with-opcode and --with-freesolid cannot be used together.
+    In addition the option --with-arch= allows the user to pass the
+    -march flag to GCC, in order to tune the library for a particular
+    architecture, the argument --with-arch= takes are the ones listed on the
+    this page for -mtune: 
+    http://gcc.gnu.org/onlinedocs/gcc-3.4.1/gcc/i386-and-x86-64-Options.html#i386%20and%20x86-64%20Options
+    Note that the link points to posible values for Intel processors, 
+    but other processors are also supported, check the page for your particular
+    processor to see what parameters can be passed to -march in your case.
 
 (2) Run:
 
