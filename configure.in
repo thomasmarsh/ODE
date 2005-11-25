@@ -42,6 +42,19 @@ then
 fi
 AC_SUBST(ARCHFLAGS)
 
+dnl Decide whether or not SSE is available
+dnl Why dont we compile and run programs like we do to find out if
+dnl this is a Pentium machine further down? simple!
+dnl this may NOT be the machine on which the code is going to run in,
+dnl so allow users to compile programs for their target machine.
+case "$arch" in
+  pentium3 | pentium4 | athlon* )
+	AC_DEFINE(HAVE_SSE,,[Use SSE Optimizations])
+    ;;
+dnl this space available for other architectures specific extensions and/or
+dnl other Intel based extensions such as 3DNow, SSE2, MMX, etc.
+esac
+
 dnl check for required headers
 AC_CHECK_HEADERS( alloca.h ieeefp.h stdio.h stdlib.h math.h string.h stdarg.h malloc.h values.h float.h )
 
