@@ -1110,10 +1110,10 @@ static void sliderGetInfo2 (dxJointSlider *joint, dxJoint::Info2 *info)
   if (joint->node[1].body) {
     dVector3 tmp;
     dCROSS (tmp, = REAL(0.5) * ,c,p);
-    for (i=0; i<3; i++) info->J2a[s3+i] = tmp[i];
+    for (i=0; i<3; i++) info->J1a[s3+i] = tmp[i];
     for (i=0; i<3; i++) info->J2a[s3+i] = tmp[i];
     dCROSS (tmp, = REAL(0.5) * ,c,q);
-    for (i=0; i<3; i++) info->J2a[s4+i] = tmp[i];
+    for (i=0; i<3; i++) info->J1a[s4+i] = tmp[i];
     for (i=0; i<3; i++) info->J2a[s4+i] = tmp[i];
     for (i=0; i<3; i++) info->J2l[s3+i] = -p[i];
     for (i=0; i<3; i++) info->J2l[s4+i] = -q[i];
@@ -1246,6 +1246,23 @@ extern "C" void dJointAddSliderForce (dxJointSlider *joint, dReal force)
     dBodyAddForce (joint->node[0].body,axis[0],axis[1],axis[2]);
   if (joint->node[1].body != 0)
     dBodyAddForce(joint->node[1].body, -axis[0], -axis[1], -axis[2]);
+
+  if (joint->node[0].body != 0 && joint->node[1].body != 0) {
+    // linear torque decoupling:
+    // we have to compensate the torque, that this slider force may generate
+    // if body centers are not aligned along the slider axis
+
+    dVector3 ltd; // Linear Torque Decoupling vector (a torque)
+
+    dVector3 c;
+    c[0]=REAL(0.5)*(joint->node[1].body->pos[0]-joint->node[0].body->pos[0]);
+    c[1]=REAL(0.5)*(joint->node[1].body->pos[1]-joint->node[0].body->pos[1]);
+    c[2]=REAL(0.5)*(joint->node[1].body->pos[2]-joint->node[0].body->pos[2]);
+    dCROSS (ltd,=,c,axis);
+
+    dBodyAddTorque (joint->node[0].body,ltd[0],ltd[1], ltd[2]);
+    dBodyAddTorque (joint->node[1].body,ltd[0],ltd[1], ltd[2]);
+  }
 }
 
 
