@@ -843,8 +843,18 @@ int dBodyGetAutoDisableFlag (dBodyID b)
 void dBodySetAutoDisableFlag (dBodyID b, int do_auto_disable)
 {
 	dAASSERT(b);
-	if (!do_auto_disable) b->flags &= ~dxBodyAutoDisable;
-	else b->flags |= dxBodyAutoDisable;
+	if (!do_auto_disable)
+	{
+		b->flags &= ~dxBodyAutoDisable;
+		// (mg) we should also reset the IsDisabled state to correspond to the DoDisabling flag
+		b->flags &= ~dxBodyDisabled;
+		b->adis.idle_steps = dWorldGetAutoDisableSteps(b->world);
+		b->adis.idle_time = dWorldGetAutoDisableTime(b->world);
+	}
+	else 
+	{
+		b->flags |= dxBodyAutoDisable;
+	}
 }
 
 
