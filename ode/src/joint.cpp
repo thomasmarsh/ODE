@@ -397,10 +397,10 @@ void dxJointLimitMotor::set (int num, dReal value)
 {
   switch (num) {
   case dParamLoStop:
-    if (value <= histop) lostop = value;
+    lostop = value;
     break;
   case dParamHiStop:
-    if (value >= lostop) histop = value;
+    histop = value;
     break;
   case dParamVel:
     vel = value;
