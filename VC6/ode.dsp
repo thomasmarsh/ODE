@@ -89,6 +89,18 @@ SOURCE=..\ode\src\array.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=..\ode\src\collision_cylinder_box.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\ode\src\collision_cylinder_sphere.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\ode\src\collision_cylinder_trimesh.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=..\ode\src\collision_kernel.cpp
 # End Source File
 # Begin Source File
