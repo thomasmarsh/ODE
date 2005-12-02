@@ -11,7 +11,7 @@ traplibdir=$(prefix)/lib
 EXEEXT=@so_ext@
 traplib_PROGRAMS=libode
 libode_DEPENDENCIES = libfast.a libode.a
-libode_LDFLAGS=-shared
+libode_LDFLAGS=-shared -fPIC
 libode_SOURCES=$(libode_a_SOURCES) $(libfast_a_SOURCES)
 if OPCODE
 libode_DEPENDENCIES+= libOPCODE.a
