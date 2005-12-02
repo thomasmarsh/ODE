@@ -40,6 +40,10 @@ testing procedure:
 #pragma warning(disable:4244 4305)  // for VC++, no precision loss complaints
 #endif
 
+#ifdef HAVE_CONFIG
+#include "config.h"
+#endif
+
 // select correct drawing functions
 
 #ifdef dDOUBLE
@@ -60,9 +64,14 @@ testing procedure:
 static dSpaceID space;
 static dGeomID geom[NUM];
 static dReal bounds[NUM][6];
-static int good_matrix[NUM][NUM];	// correct collision matrix
-static int test_matrix[NUM][NUM];	// testing collision matrix
-static int hits[NUM];			// number of collisions a box has
+#ifdef X86_64_SYSTEM
+#define INT long
+#else
+#define INT int
+#endif
+static INT good_matrix[NUM][NUM];	// correct collision matrix
+static INT test_matrix[NUM][NUM];	// testing collision matrix
+static INT hits[NUM];			// number of collisions a box has
 static unsigned long seed=37;
 
 
@@ -123,9 +132,9 @@ static void init_test()
 
 static void nearCallback (void *data, dGeomID o1, dGeomID o2)
 {
-  int i,j;
-  i = (int) dGeomGetData (o1);
-  j = (int) dGeomGetData (o2);
+  INT i,j;
+  i = (INT) dGeomGetData (o1);
+  j = (INT) dGeomGetData (o2);
   if (i==j)
     printf ("collision (%d,%d) is between the same object\n",i,j);
   if (!good_matrix[i][j] || !good_matrix[j][i])
