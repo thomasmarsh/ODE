@@ -45,7 +45,7 @@ while test $# -gt 0; do
       echo  -L@libdir@ -lode
       ;;
     --shared-libs)
-      echo  -L@prefix@/bin -lode@so_ext@
+      echo  -L@prefix@/lib -lode@so_ext@
       ;;
     *)
       echo "${usage}" 1>&2

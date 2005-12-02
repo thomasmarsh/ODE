@@ -5,8 +5,11 @@ lib_LIBRARIES = libode.a
 libode_a_CPPFLAGS = -O2
 
 # Fake an executable in order to get a shared library
+# Note the elegant and cunning way to trick Autotools to install a program
+# in a lib directory. --Rodrigo
+traplibdir=$(prefix)/lib
 EXEEXT=@so_ext@
-bin_PROGRAMS=libode
+traplib_PROGRAMS=libode
 libode_DEPENDENCIES = libfast.a libode.a
 libode_LDFLAGS=-shared
 libode_SOURCES=$(libode_a_SOURCES) $(libfast_a_SOURCES)
