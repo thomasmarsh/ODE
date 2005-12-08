@@ -250,7 +250,8 @@ static bool GetContactData(const dVector3& Center, dReal Radius, const dVector3 
 	Dist = dSqrt(dFabs(DistSq));
 
 	if (Dist <= Radius){
-		Dist = Radius - Dist;
+		//Dist= Radius - Dist;
+		Dist= Radius - side; // (mg) penetration depth is distance along normal not shortest distance
 		return true;
 	}
 	else return false;
