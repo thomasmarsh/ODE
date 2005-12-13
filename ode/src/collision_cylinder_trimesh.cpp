@@ -247,7 +247,7 @@ bool _cldTestAxis(sData& cData,
 	else
 	{
 		frc = dFabs((cData.fCylinderSize* REAL(0.5)) * fdot1)
-			+ cData.fCylinderRadius * dFabs(REAL(1.0)-(fdot1*fdot1));
+			+ cData.fCylinderRadius * dSqrt(REAL(1.0)-(fdot1*fdot1));
 	}
   
 	dVector3 vV0;
