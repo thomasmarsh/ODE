@@ -31,6 +31,8 @@ typedef unsigned int intP;
 #define dEpsilon FLT_EPSILON
 /* enable trimesh support */
 #define dTRIMESH_ENABLED 1
+/* enable non capped cyl support */
+#define dCYLINDER_ENABLED 1
 /* available functions */
 #define copysignf _copysign
 #define copysign _copysign
