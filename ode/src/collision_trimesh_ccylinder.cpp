@@ -947,8 +947,8 @@ int dCollideCCTL(dxGeom *o1, dxGeom *o2, int flags, dContactGeom *contact, int s
 
 	// reset contact counter
 	ctContacts = 0;	
-    // allocat local contact workspace
-    gLocalContacts = new sLocalContactData[(iFlags & NUMC_MASK)];
+	// allocate local contact workspace
+	gLocalContacts = new sLocalContactData[(iFlags & NUMC_MASK)];
 
 	// reset best depth
 	fBestDepth  = - MAX_REAL;
@@ -1016,6 +1016,7 @@ int dCollideCCTL(dxGeom *o1, dxGeom *o2, int flags, dContactGeom *contact, int s
 	 
 	 if (! Collider.GetContactStatus()) {
 	 	// no collision occurred
+		delete[] gLocalContacts;
 	 	return 0;
 	 }
 
