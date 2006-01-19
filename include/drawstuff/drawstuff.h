@@ -132,8 +132,13 @@ void dsDrawCylinder (const float pos[3], const float R[12],
 void dsDrawCappedCylinder (const float pos[3], const float R[12],
 			   float length, float radius);
 void dsDrawLine (const float pos1[3], const float pos2[3]);
-
-/* these drawing functions are identical to the ones above, except they take
+void dsDrawConvex(const float pos[3], const float R[12],
+		  float *_planes,
+		  unsigned int _planecount,
+		  float *_points,
+		  unsigned int _pointcount,
+		  unsigned int *_polygons);
+ /* these drawing functions are identical to the ones above, except they take
  * double arrays for `pos' and `R'.
  */
 void dsDrawBoxD (const double pos[3], const double R[12],
