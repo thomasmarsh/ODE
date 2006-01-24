@@ -1,0 +1,18 @@
+Import("env")
+
+cppFiles = Split("""
+                 TestChecks.cpp        
+                 TestTestResults.cpp   
+                 main.cpp
+                 TestCppTestHarness.cpp  
+                 TestTestRunner.cpp
+                 TestTypedTestLauncher.cpp
+                 TestTest.cpp
+                 """)
+#cppFiles += ["TestFailure.cpp"] #uncomment if we want to se a test fail
+
+tests = env.Program('test_TestCppTestHarness', cppFiles,
+                    LIBS = ["TestHarness"],
+                    LIBPATH = [".."])
+
+env.Alias("self_test", tests)
