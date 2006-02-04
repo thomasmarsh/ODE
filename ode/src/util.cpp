@@ -94,7 +94,7 @@ void dxStepBody (dxBody *b, dReal h)
   int j;
 
   // handle linear velocity
-  for (j=0; j<3; j++) b->pos[j] += h * b->lvel[j];
+  for (j=0; j<3; j++) b->posr.pos[j] += h * b->lvel[j];
 
   if (b->flags & dxBodyFlagFiniteRotation) {
     dVector3 irv;	// infitesimal rotation vector
@@ -156,7 +156,7 @@ void dxStepBody (dxBody *b, dReal h)
 
   // normalize the quaternion and convert it to a rotation matrix
   dNormalize4 (b->q);
-  dQtoR (b->q,b->R);
+  dQtoR (b->q,b->posr.R);
 
   // notify all attached geoms that this body has moved
   for (dxGeom *geom = b->geom; geom; geom = dGeomGetBodyNext (geom))
