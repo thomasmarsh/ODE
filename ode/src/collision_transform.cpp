@@ -47,15 +47,22 @@ struct dxGeomTransform : public dxGeom {
 
   // cached final object transform (body tx + relative tx). this is set by
   // computeAABB(), and it is valid while the AABB is valid.
-  dVector3 final_pos;
-  dMatrix3 final_R;
+  dxPosR transform_posr;
 
   dxGeomTransform (dSpaceID space);
   ~dxGeomTransform();
   void computeAABB();
   void computeFinalTx();
 };
-
+/*
+void RunMe()
+{
+  printf("sizeof body = %i\n", sizeof(dxBody));
+  printf("sizeof geom = %i\n", sizeof(dxGeom));
+  printf("sizeof geomtransform = %i\n", sizeof(dxGeomTransform));
+  printf("sizeof posr = %i\n", sizeof(dxPosR));
+}
+*/
 
 dxGeomTransform::dxGeomTransform (dSpaceID space) : dxGeom (space,1)
 {
@@ -63,8 +70,8 @@ dxGeomTransform::dxGeomTransform (dSpaceID space) : dxGeom (space,1)
   obj = 0;
   cleanup = 0;
   infomode = 0;
-  dSetZero (final_pos,4);
-  dRSetIdentity (final_R);
+  dSetZero (transform_posr.pos,4);
+  dRSetIdentity (transform_posr.R);
 }
 
 
@@ -82,21 +89,18 @@ void dxGeomTransform::computeAABB()
   }
 
   // backup the relative pos and R pointers of the encapsulated geom object
-  dReal *posbak = obj->pos;
-  dReal *Rbak = obj->R;
+  dxPosR* posr_bak = obj->final_posr;
 
   // compute temporary pos and R for the encapsulated geom object
   computeFinalTx();
-  obj->pos = final_pos;
-  obj->R = final_R;
+  obj->final_posr = &transform_posr;
 
   // compute the AABB
   obj->computeAABB();
   memcpy (aabb,obj->aabb,6*sizeof(dReal));
 
   // restore the pos and R
-  obj->pos = posbak;
-  obj->R = Rbak;
+  obj->final_posr = posr_bak;
 }
 
 
@@ -105,11 +109,11 @@ void dxGeomTransform::computeAABB()
 
 void dxGeomTransform::computeFinalTx()
 {
-  dMULTIPLY0_331 (final_pos,R,obj->pos);
-  final_pos[0] += pos[0];
-  final_pos[1] += pos[1];
-  final_pos[2] += pos[2];
-  dMULTIPLY0_333 (final_R,R,obj->R);
+  dMULTIPLY0_331 (transform_posr.pos,final_posr->R,obj->final_posr->pos);
+  transform_posr.pos[0] += final_posr->pos[0];
+  transform_posr.pos[1] += final_posr->pos[1];
+  transform_posr.pos[2] += final_posr->pos[2];
+  dMULTIPLY0_333 (transform_posr.R,final_posr->R,obj->final_posr->R);
 }
 
 //****************************************************************************
@@ -133,8 +137,7 @@ int dCollideTransform (dxGeom *o1, dxGeom *o2, int flags,
 
   // backup the relative pos and R pointers of the encapsulated geom object,
   // and the body pointer
-  dReal *posbak = tr->obj->pos;
-  dReal *Rbak = tr->obj->R;
+  dxPosR *posr_bak = tr->obj->final_posr;
   dxBody *bodybak = tr->obj->body;
 
   // compute temporary pos and R for the encapsulated geom object.
@@ -143,8 +146,7 @@ int dCollideTransform (dxGeom *o1, dxGeom *o2, int flags,
   // dxGeomTransform::computeAABB()
 
   if (tr->gflags & GEOM_AABB_BAD) tr->computeFinalTx();
-  tr->obj->pos = tr->final_pos;
-  tr->obj->R = tr->final_R;
+  tr->obj->final_posr = &tr->transform_posr;
   tr->obj->body = o1->body;
 
   // do the collision
@@ -161,8 +163,7 @@ int dCollideTransform (dxGeom *o1, dxGeom *o2, int flags,
   }
 
   // restore the pos, R and body
-  tr->obj->pos = posbak;
-  tr->obj->R = Rbak;
+  tr->obj->final_posr = posr_bak;
   tr->obj->body = bodybak;
   return n;
 }

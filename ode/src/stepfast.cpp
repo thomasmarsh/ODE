@@ -239,7 +239,7 @@ moveAndRotateBody (dxBody * b, dReal h)
 
 	// handle linear velocity
 	for (j = 0; j < 3; j++)
-		b->pos[j] += h * b->lvel[j];
+		b->posr.pos[j] += h * b->lvel[j];
 
 	if (b->flags & dxBodyFlagFiniteRotation)
 	{
@@ -308,7 +308,7 @@ moveAndRotateBody (dxBody * b, dReal h)
 
 	// normalize the quaternion and convert it to a rotation matrix
 	dNormalize4 (b->q);
-	dQtoR (b->q, b->R);
+	dQtoR (b->q, b->posr.R);
 
 	// notify all attached geoms that this body has moved
 	for (dxGeom * geom = b->geom; geom; geom = dGeomGetBodyNext (geom))
@@ -802,11 +802,11 @@ dInternalStepIslandFast (dxWorld * world, dxBody * const *bodies, int nb, dxJoin
 			// @@@ check computation of rotational force.
 
 			// compute inertia tensor in global frame
-			dMULTIPLY2_333 (tmp, body->mass.I, body->R);
-			dMULTIPLY0_333 (globalI + b * 12, body->R, tmp);
+			dMULTIPLY2_333 (tmp, body->mass.I, body->posr.R);
+			dMULTIPLY0_333 (globalI + b * 12, body->posr.R, tmp);
 			// compute inverse inertia tensor in global frame
-			dMULTIPLY2_333 (tmp, body->invI, body->R);
-			dMULTIPLY0_333 (globalInvI + b * 12, body->R, tmp);
+			dMULTIPLY2_333 (tmp, body->invI, body->posr.R);
+			dMULTIPLY0_333 (globalInvI + b * 12, body->posr.R, tmp);
 
 			for (i = 0; i < 4; i++)
 				body->tacc[i] = saveTacc[b * 4 + i];

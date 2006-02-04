@@ -8,6 +8,10 @@ the rules for this file:
   * keep the format consistent (79 char width, M/D/Y date format).
 
 ------------------------------------------------------------------------------
+02/04/06 gcarlton
+
+	* Added support for geom offsets.
+
 10/26/05 rodrigo
 
 	* Removed LIBTOOL from autotools since it was not really required.

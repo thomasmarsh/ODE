@@ -58,6 +58,21 @@ void dGeomDisable (dGeomID);
 int dGeomIsEnabled (dGeomID);
 
 /* ************************************************************************ */
+/* geom offset from body */
+
+void dGeomSetOffsetPosition (dGeomID, dReal x, dReal y, dReal z);
+void dGeomSetOffsetRotation (dGeomID, const dMatrix3 R);
+void dGeomSetOffsetQuaternion (dGeomID, const dQuaternion);
+void dGeomSetOffsetWorldPosition (dGeomID, dReal x, dReal y, dReal z);
+void dGeomSetOffsetWorldRotation (dGeomID, const dMatrix3 R);
+void dGeomSetOffsetWorldQuaternion (dGeomID, const dQuaternion);
+void dGeomClearOffset(dGeomID);
+int dGeomIsOffset(dGeomID);
+const dReal * dGeomGetOffsetPosition (dGeomID);
+const dReal * dGeomGetOffsetRotation (dGeomID);
+void dGeomGetOffsetQuaternion (dGeomID, dQuaternion result);
+
+/* ************************************************************************ */
 /* collision detection */
 
 int dCollide (dGeomID o1, dGeomID o2, int flags, dContactGeom *contact,

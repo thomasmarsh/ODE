@@ -577,12 +577,12 @@ void dxQuickStepper (dxWorld *world, dxBody * const *body, int nb,
 		dMatrix3 tmp;
 		dMatrix3 I;
 		// compute inertia tensor in global frame
-		dMULTIPLY2_333 (tmp,body[i]->mass.I,body[i]->R);
-		//dMULTIPLY0_333 (I+i*12,body[i]->R,tmp);
-		dMULTIPLY0_333 (I,body[i]->R,tmp);
+		dMULTIPLY2_333 (tmp,body[i]->mass.I,body[i]->posr.R);
+		//dMULTIPLY0_333 (I+i*12,body[i]->posr.R,tmp);
+		dMULTIPLY0_333 (I,body[i]->posr.R,tmp);
 		// compute inverse inertia tensor in global frame
-		dMULTIPLY2_333 (tmp,body[i]->invI,body[i]->R);
-		dMULTIPLY0_333 (invI+i*12,body[i]->R,tmp);
+		dMULTIPLY2_333 (tmp,body[i]->invI,body[i]->posr.R);
+		dMULTIPLY0_333 (invI+i*12,body[i]->posr.R,tmp);
 		// compute rotational force
 		//dMULTIPLY0_331 (tmp,I+i*12,body[i]->avel);
 		dMULTIPLY0_331 (tmp,I,body[i]->avel);

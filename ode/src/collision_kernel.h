@@ -46,14 +46,6 @@ internal data structures and functions for collision detection.
 //****************************************************************************
 // geometry object base class
 
-// position vector and rotation matrix for geometry objects that are not
-// connected to bodies.
-
-struct dxPosR {
-  dVector3 pos;
-  dMatrix3 R;
-};
-
 
 // geom flags.
 //
@@ -65,13 +57,18 @@ struct dxPosR {
 // note that GEOM_DIRTY does not imply GEOM_AABB_BAD, as the geom might
 // recalculate its own AABB but does not know how to update the space data
 // structures for the space it is in. but GEOM_AABB_BAD implies GEOM_DIRTY.
-// the valid combinations are: 0, GEOM_DIRTY, GEOM_DIRTY|GEOM_AABB_BAD.
+// the valid combinations are: 
+//		0
+//		GEOM_DIRTY
+//		GEOM_DIRTY|GEOM_AABB_BAD
+//		GEOM_DIRTY|GEOM_AABB_BAD|GEOM_POSR_BAD
 
 enum {
   GEOM_DIRTY	= 1,	// geom is 'dirty', i.e. position unknown
-  GEOM_AABB_BAD	= 2,	// geom's AABB is not valid
-  GEOM_PLACEABLE = 4,	// geom is placeable
-  GEOM_ENABLED = 8,		// geom is enabled
+  GEOM_POSR_BAD = 2,	// geom's final posr is not valid
+  GEOM_AABB_BAD	= 4,	// geom's AABB is not valid
+  GEOM_PLACEABLE = 8,	// geom is placeable
+  GEOM_ENABLED = 16,		// geom is enabled
 
   // Ray specific
   RAY_FIRSTCONTACT = 0x10000,
@@ -91,8 +88,8 @@ struct dxGeom : public dBase {
   void *data;		// user-defined data pointer
   dBodyID body;		// dynamics body associated with this object (if any)
   dxGeom *body_next;	// next geom in body's linked list of associated geoms
-  dReal *pos;		// pointer to object's position vector
-  dReal *R;		// pointer to object's rotation matrix
+  dxPosR *final_posr;	// final position of the geom in world coordinates
+  dxPosR *offset_posr;	// offset from body in local coordinates
 
   // information used by spaces
   dxGeom *next;		// next geom in linked list of geoms
@@ -103,6 +100,19 @@ struct dxGeom : public dBase {
 
   dxGeom (dSpaceID _space, int is_placeable);
   virtual ~dxGeom();
+
+
+  // calculate our new final position from our offset and body
+  void computePosr();
+
+  // recalculate our new final position if needed
+  void recomputePosr()
+  {
+    if (gflags & GEOM_POSR_BAD) {
+      computePosr();
+      gflags &= ~GEOM_POSR_BAD;
+    }
+  }
 
   virtual void computeAABB()=0;
   // compute the AABB for this object and put it in aabb. this function
@@ -122,6 +132,8 @@ struct dxGeom : public dBase {
 
   void recomputeAABB() {
     if (gflags & GEOM_AABB_BAD) {
+      // our aabb functions assume final_posr is up to date
+      recomputePosr(); 
       computeAABB();
       gflags &= ~GEOM_AABB_BAD;
     }

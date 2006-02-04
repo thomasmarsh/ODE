@@ -542,6 +542,8 @@ int dxTriMesh::AABBTest(dxGeom* g, dReal aabb[6]){
 void dxTriMesh::computeAABB() {
     const dxTriMeshData* d = Data;
     dVector3 c;
+    const dMatrix3& R = final_posr->R;
+    const dVector3& pos = final_posr->pos;
     
     dMULTIPLY0_331( c, R, d->AABBCenter );
     
