@@ -161,8 +161,9 @@ dxBox::dxBox (dSpaceID space, dReal lx, dReal ly, dReal lz) : dxGeom (space,1)
 
 void dxBox::computeAABB()
 {
-  const float* R = final_posr->R;
-  const float* pos = final_posr->pos;
+  const dMatrix3& R = final_posr->R;
+  const dVector3& pos = final_posr->pos;
+  
   dReal xrange = REAL(0.5) * (dFabs (R[0] * side[0]) +
     dFabs (R[1] * side[1]) + dFabs (R[2] * side[2]));
   dReal yrange = REAL(0.5) * (dFabs (R[4] * side[0]) +
@@ -287,9 +288,9 @@ dxCCylinder::dxCCylinder (dSpaceID space, dReal _radius, dReal _length) :
 
 void dxCCylinder::computeAABB()
 {
-  const float* R = final_posr->R;
-  const float* pos = final_posr->pos;
-
+  const dMatrix3& R = final_posr->R;
+  const dVector3& pos = final_posr->pos;
+  
   dReal xrange = dFabs(R[2]  * lz) * REAL(0.5) + radius;
   dReal yrange = dFabs(R[6]  * lz) * REAL(0.5) + radius;
   dReal zrange = dFabs(R[10] * lz) * REAL(0.5) + radius;
@@ -1916,6 +1917,9 @@ dxGeom (space,1)
 
 void dxCylinder::computeAABB()
 {
+    const dMatrix3& R = final_posr->R;
+    const dVector3& pos = final_posr->pos;
+
 	dReal xrange = dFabs (R[0] * radius) +	 dFabs (R[1] * radius) + REAL(0.5)* dFabs (R[2] * 
 		lz);
 	dReal yrange = dFabs (R[4] * radius) +   dFabs (R[5] * radius) + REAL(0.5)* dFabs (R[6] * 
