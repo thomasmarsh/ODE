@@ -140,7 +140,7 @@ dReal dGeomSpherePointDepth (dGeomID g, dReal x, dReal y, dReal z)
   g->recomputePosr();
   
   dxSphere *s = (dxSphere*) g;
-  const float* pos = s->final_posr->pos;
+  dReal * pos = s->final_posr->pos;
   return s->radius - dSqrt ((x-pos[0])*(x-pos[0]) +
 			    (y-pos[1])*(y-pos[1]) +
 			    (z-pos[2])*(z-pos[2]));
@@ -335,8 +335,8 @@ dReal dGeomCCylinderPointDepth (dGeomID g, dReal x, dReal y, dReal z)
   g->recomputePosr();
   dxCCylinder *c = (dxCCylinder*) g;
 
-  const float* R = g->final_posr->R;
-  const float* pos = g->final_posr->pos;
+  const dReal* R = g->final_posr->R;
+  const dReal* pos = g->final_posr->pos;
   
   dVector3 a;
   a[0] = x - pos[0];
