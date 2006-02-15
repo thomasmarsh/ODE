@@ -961,6 +961,8 @@ void doTest (int argc, char **argv, int n, int fatal_if_bad_n)
   fn.command = 0;
   fn.stop = 0;
   fn.path_to_textures = "../../drawstuff/textures";
+  if (argc>=2)
+    fn.path_to_textures = argv[1];
 
   // run simulation
   if (cmd_graphics) {
