@@ -21,9 +21,9 @@
  *************************************************************************/
 
 // Test for non-capped cylinder, by Bram Stolk
-
+#include <ode/config.h>
 #include <assert.h>
-#ifndef WIN32
+#ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
 #include <ode/ode.h>
