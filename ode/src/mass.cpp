@@ -172,6 +172,7 @@ void dMassSetCylinderTotal (dMass *m, dReal total_mass, int direction,
 {
   dReal r2,I;
   dAASSERT (m);
+  dUASSERT (direction >= 1 && direction <= 3,"bad direction number");
   dMassSetZero (m);
   r2 = radius*radius;
   m->mass = total_mass;
