@@ -23,7 +23,9 @@
 // Test for non-capped cylinder, by Bram Stolk
 
 #include <assert.h>
+#ifndef WIN32
 #include <unistd.h>
+#endif
 #include <ode/ode.h>
 #include <drawstuff/drawstuff.h>
 
@@ -129,8 +131,6 @@ static void command (int cmd)
 
 static void simLoop (int pause)
 {
-  int i;
-
   dSpaceCollide (space,0,&nearCallback);
   dWorldQuickStep (world,0.02); // assume 50 fps
   dJointGroupEmpty (contactgroup);
@@ -270,7 +270,7 @@ int main (int argc, char **argv)
 #endif
 
   // run simulation
-  dsSimulationLoop (argc,argv,704,576,&fn);
+  dsSimulationLoop (argc,argv,352,288,&fn);
 
   dJointGroupEmpty (contactgroup);
   dJointGroupDestroy (contactgroup);
