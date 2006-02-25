@@ -497,7 +497,6 @@ void dxQuadTreeSpace::remove(dxGeom* g){
 			DirtyList.remove(i);
 			// (mg) there can be multiple instances of a dirty object on stack  be sure to remove ALL and not just first, for this we decrement i
 			--i;
-			break;
 		}
 	}
 	
