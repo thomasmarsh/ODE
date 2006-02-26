@@ -80,32 +80,32 @@ void dxTerrainY::computeAABB()
 		{
 			dReal dx[6],dy[6],dz[6];
 			dx[0] = 0;
-			dx[1] = R[0] * m_vLength;
-			dx[2] = R[1] * m_vMinHeight;
-			dx[3] = R[1] * m_vMaxHeight;
+			dx[1] = final_posr->R[0] * m_vLength;
+			dx[2] = final_posr->R[1] * m_vMinHeight;
+			dx[3] = final_posr->R[1] * m_vMaxHeight;
 			dx[4] = 0;
-			dx[5] = R[2] * m_vLength;
+			dx[5] = final_posr->R[2] * m_vLength;
 
 			dy[0] = 0;
-			dy[1] = R[4] * m_vLength;
-			dy[2] = R[5] * m_vMinHeight;
-			dy[3] = R[5] * m_vMaxHeight;
+			dy[1] = final_posr->R[4] * m_vLength;
+			dy[2] = final_posr->R[5] * m_vMinHeight;
+			dy[3] = final_posr->R[5] * m_vMaxHeight;
 			dy[4] = 0;
-			dy[5] = R[6] * m_vLength;
+			dy[5] = final_posr->R[6] * m_vLength;
 
 			dz[0]  = 0;
-			dz[1]  = R[8] * m_vLength;
-			dz[2]  = R[9] * m_vMinHeight;
-			dz[3]  = R[9] * m_vMaxHeight;
+			dz[1]  = final_posr->R[8] * m_vLength;
+			dz[2]  = final_posr->R[9] * m_vMinHeight;
+			dz[3]  = final_posr->R[9] * m_vMaxHeight;
 			dz[4]  = 0;
-			dz[5]  = R[10] * m_vLength;
+			dz[5]  = final_posr->R[10] * m_vLength;
 
-			aabb[0] = pos[0] + MIN(dx[0],dx[1]) + MIN(dx[2],dx[3]) + MIN(dx[4],dx[5]);
-			aabb[1] = pos[0] + MAX(dx[0],dx[1]) + MAX(dx[2],dx[3]) + MAX(dx[4],dx[5]);
-			aabb[2] = pos[1] + MIN(dy[0],dy[1]) + MIN(dy[2],dy[3]) + MIN(dy[4],dy[5]);
-			aabb[3] = pos[1] + MAX(dy[0],dy[1]) + MAX(dy[2],dy[3]) + MAX(dy[4],dy[5]);
-			aabb[4] = pos[2] + MIN(dz[0],dz[1]) + MIN(dz[2],dz[3]) + MIN(dz[4],dz[5]);
-			aabb[5] = pos[2] + MAX(dz[0],dz[1]) + MAX(dz[2],dz[3]) + MAX(dz[4],dz[5]);
+			aabb[0] = final_posr->pos[0] + MIN(dx[0],dx[1]) + MIN(dx[2],dx[3]) + MIN(dx[4],dx[5]);
+			aabb[1] = final_posr->pos[0] + MAX(dx[0],dx[1]) + MAX(dx[2],dx[3]) + MAX(dx[4],dx[5]);
+			aabb[2] = final_posr->pos[1] + MIN(dy[0],dy[1]) + MIN(dy[2],dy[3]) + MIN(dy[4],dy[5]);
+			aabb[3] = final_posr->pos[1] + MAX(dy[0],dy[1]) + MAX(dy[2],dy[3]) + MAX(dy[4],dy[5]);
+			aabb[4] = final_posr->pos[2] + MIN(dz[0],dz[1]) + MIN(dz[2],dz[3]) + MIN(dz[4],dz[5]);
+			aabb[5] = final_posr->pos[2] + MAX(dz[0],dz[1]) + MAX(dz[2],dz[3]) + MAX(dz[4],dz[5]);
 		}
 		else
 		{
@@ -210,6 +210,7 @@ dGeomID dCreateTerrainY(dSpaceID space, dReal *pHeights,dReal vLength,int nNumNo
 dReal dGeomTerrainYPointDepth (dGeomID g, dReal x, dReal y, dReal z)
 {
 	dUASSERT (g && g->type == dTerrainYClass,"argument not a terrain");
+  g->recomputePosr();
 	dxTerrainY *t = (dxTerrainY*) g;
 	return t->GetHeight(x,z) - y;
 }
@@ -406,11 +407,34 @@ int dxTerrainY::dCollideTerrainUnit(
 					numContacts++;	
 				}
 #else
-				pContact->depth =  GetDepth(o2,
-				pContact->pos[0],
-				pContact->pos[1],
-				pContact->pos[2]);
-				numContacts++;
+
+            if (GetDepth == NULL)
+               {
+				   dxRay rayV(0,1000.f);
+				   dGeomRaySet(&rayV,	pContact->pos[0],
+									   pContact->pos[1],
+									   pContact->pos[2],
+									   -pContact->normal[0],
+									   -pContact->normal[1],
+									   -pContact->normal[2]);
+		
+				   dContactGeom ContactV;
+
+				   if (CollideRayN(&rayV,o2,flags,&ContactV,sizeof(dContactGeom)))
+				      {
+					   pContact->depth = ContactV.depth;
+					   numContacts++;	
+				      }
+               }
+            else
+               {
+				   pContact->depth =  GetDepth(o2,
+				      pContact->pos[0],
+				      pContact->pos[1],
+				      pContact->pos[2]);
+				   numContacts++;
+               }
+
 #endif
 				if (numContacts == numMaxContacts)
 					return numContacts;
@@ -487,24 +511,22 @@ int dCollideTerrainY(dxGeom *o1, dxGeom *o2, int flags,dContactGeom *contact, in
 	int numMaxTerrainContacts = (flags & 0xffff);
 	dxTerrainY *terrain = (dxTerrainY*) o1;
 
-	dReal *posbak;
-	dReal *Rbak;
 	dReal aabbbak[6];
 	int gflagsbak;
 
-	dVector3 pos0,pos1;
-	dMatrix4 R1;
+	dVector3 pos0;
 	int numTerrainContacts = 0;
+
+	dxPosR *bak;
+   dxPosR X1;
 	
 	if (terrain->gflags & GEOM_PLACEABLE)
 	{
-		dOP(pos0,-,o2->pos,terrain->pos);
-		dMULTIPLY1_331(pos1,terrain->R,pos0);
-		dMULTIPLY1_333(R1,terrain->R,o2->R);
-		posbak = o2->pos;
-		Rbak = o2->R;
-		o2->pos = pos1;
-		o2->R = R1;
+		dOP(pos0,-,o2->final_posr->pos,terrain->final_posr->pos);
+		dMULTIPLY1_331(X1.pos,terrain->final_posr->R,pos0);
+		dMULTIPLY1_333(X1.R,terrain->final_posr->R,o2->final_posr->R);
+		bak = o2->final_posr;
+		o2->final_posr = &X1;
 		memcpy(aabbbak,o2->aabb,sizeof(dReal)*6);
 		gflagsbak = o2->gflags;
 		o2->computeAABB();
@@ -573,19 +595,18 @@ dCollideTerrainYExit:
 
 	if (terrain->gflags & GEOM_PLACEABLE)
 	{
-		o2->pos = posbak;
-		o2->R = Rbak;
+      o2->final_posr = bak;
 		memcpy(o2->aabb,aabbbak,sizeof(dReal)*6);
 		o2->gflags = gflagsbak;
 
 		for (i=0; i<numTerrainContacts; i++) 
 		{
 			dOPE(pos0,=,CONTACT(contact,i*skip)->pos);
-			dMULTIPLY0_331(CONTACT(contact,i*skip)->pos,terrain->R,pos0);
-			dOP(CONTACT(contact,i*skip)->pos,+,CONTACT(contact,i*skip)->pos,terrain->pos);
+			dMULTIPLY0_331(CONTACT(contact,i*skip)->pos,terrain->final_posr->R,pos0);
+			dOP(CONTACT(contact,i*skip)->pos,+,CONTACT(contact,i*skip)->pos,terrain->final_posr->pos);
 
 			dOPE(pos0,=,CONTACT(contact,i*skip)->normal);
-			dMULTIPLY0_331(CONTACT(contact,i*skip)->normal,terrain->R,pos0);
+			dMULTIPLY0_331(CONTACT(contact,i*skip)->normal,terrain->final_posr->R,pos0);
 		}
 	}
 
