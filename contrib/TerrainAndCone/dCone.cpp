@@ -32,6 +32,9 @@ dxCone::~dxCone()
 
 void dxCone::computeAABB()
 {
+  const dMatrix3& R = final_posr->R;
+  const dVector3& pos = final_posr->pos;
+
 	dReal xrange = dFabs(R[2]  * lz) + radius;
 	dReal yrange = dFabs(R[6]  * lz) + radius;
 	dReal zrange = dFabs(R[10] * lz) + radius;
@@ -53,6 +56,7 @@ void dGeomConeSetParams (dGeomID g, dReal _radius, dReal _length)
 	dUASSERT (g && g->type == dConeClass,"argument not a cone");
 	dAASSERT (_radius > 0.f);
 	dAASSERT (_length > 0.f);
+  g->recomputePosr();
 	dxCone *c = (dxCone*) g;
 	c->radius = _radius;
 	c->lz = _length;
@@ -63,6 +67,7 @@ void dGeomConeSetParams (dGeomID g, dReal _radius, dReal _length)
 void dGeomConeGetParams (dGeomID g, dReal *_radius, dReal *_length)
 {
 	dUASSERT (g && g->type == dConeClass,"argument not a cone");
+  g->recomputePosr();
 	dxCone *c = (dxCone*) g;
 	*_radius = c->radius;
 	*_length = c->lz;
@@ -72,12 +77,15 @@ void dGeomConeGetParams (dGeomID g, dReal *_radius, dReal *_length)
 dReal dGeomConePointDepth(dGeomID g, dReal x, dReal y, dReal z)
 {
 	dUASSERT (g && g->type == dConeClass,"argument not a cone");
+
+   g->recomputePosr();
 	dxCone *cone = (dxCone*) g;
+
 	dVector3 tmp,q;
-	tmp[0] = x - cone->pos[0];
-	tmp[1] = y - cone->pos[1];
-	tmp[2] = z - cone->pos[2];
-	dMULTIPLY1_331 (q,cone->R,tmp);
+	tmp[0] = x - cone->final_posr->pos[0];
+	tmp[1] = y - cone->final_posr->pos[1];
+	tmp[2] = z - cone->final_posr->pos[2];
+	dMULTIPLY1_331 (q,cone->final_posr->R,tmp);
 
 	dReal r = cone->radius;
 	dReal h = cone->lz;
@@ -322,10 +330,10 @@ int dCollideConePlane (dxGeom *o1, dxGeom *o2, int flags,
 	contact->g2 = o2;
 
 	dVector3 p0,p1,pp0,pp1;
-	dOPE(p0,=,cone->pos);
-	p1[0] = cone->R[0*4+2] * cone->lz + p0[0];
-	p1[1] = cone->R[1*4+2] * cone->lz + p0[1];
-	p1[2] = cone->R[2*4+2] * cone->lz + p0[2];
+	dOPE(p0,=,cone->final_posr->pos);
+	p1[0] = cone->final_posr->R[0*4+2] * cone->lz + p0[0];
+	p1[1] = cone->final_posr->R[1*4+2] * cone->lz + p0[1];
+	p1[2] = cone->final_posr->R[2*4+2] * cone->lz + p0[2];
 
 	dReal u;
 	FindIntersectionPlaneRay(plane->p,p0,plane->p,u,pp0);
@@ -333,16 +341,16 @@ int dCollideConePlane (dxGeom *o1, dxGeom *o2, int flags,
 
 	if (dDISTANCE(pp0,pp1) < fEPSILON)
 	{
-		p1[0] = cone->R[0*4+0] * cone->lz + p0[0];
-		p1[1] = cone->R[1*4+0] * cone->lz + p0[1];
-		p1[2] = cone->R[2*4+0] * cone->lz + p0[2];
+		p1[0] = cone->final_posr->R[0*4+0] * cone->lz + p0[0];
+		p1[1] = cone->final_posr->R[1*4+0] * cone->lz + p0[1];
+		p1[2] = cone->final_posr->R[2*4+0] * cone->lz + p0[2];
 		FindIntersectionPlaneRay(plane->p,p1,plane->p,u,pp1);
 		dIASSERT(dDISTANCE(pp0,pp1) >= fEPSILON);
 	}
 	dVector3 h,r0,r1;
-	h[0] = cone->R[0*4+2];
-	h[1] = cone->R[1*4+2];
-	h[2] = cone->R[2*4+2];
+	h[0] = cone->final_posr->R[0*4+2];
+	h[1] = cone->final_posr->R[1*4+2];
+	h[2] = cone->final_posr->R[2*4+2];
 	
 	dOP(r0,-,pp0,pp1);
 	dCROSS(r1,=,h,r0);
@@ -352,9 +360,9 @@ int dCollideConePlane (dxGeom *o1, dxGeom *o2, int flags,
 	dOPEC(r0,*=,cone->radius);
 
 	dVector3 p[3];
-	dOP(p[0],+,cone->pos,h);
-	dOP(p[1],+,cone->pos,r0);
-	dOP(p[2],-,cone->pos,r0);
+	dOP(p[0],+,cone->final_posr->pos,h);
+	dOP(p[1],+,cone->final_posr->pos,r0);
+	dOP(p[2],-,cone->final_posr->pos,r0);
 	
 	int numMaxContacts = flags & 0xffff;
 	if (numMaxContacts == 0) 
@@ -395,14 +403,14 @@ int dCollideRayCone (dxGeom *o1, dxGeom *o2, int flags,
 	contact->g2 = o2;
 
 	dVector3 tmp,q,v;
-	tmp[0] = ray->pos[0] - cone->pos[0];
-	tmp[1] = ray->pos[1] - cone->pos[1];
-	tmp[2] = ray->pos[2] - cone->pos[2];
-	dMULTIPLY1_331 (q,cone->R,tmp);
-	tmp[0] = ray->R[0*4+2] * ray->length;
-	tmp[1] = ray->R[1*4+2] * ray->length;
-	tmp[2] = ray->R[2*4+2] * ray->length;
-	dMULTIPLY1_331 (v,cone->R,tmp);
+	tmp[0] = ray->final_posr->pos[0] - cone->final_posr->pos[0];
+	tmp[1] = ray->final_posr->pos[1] - cone->final_posr->pos[1];
+	tmp[2] = ray->final_posr->pos[2] - cone->final_posr->pos[2];
+	dMULTIPLY1_331 (q,cone->final_posr->R,tmp);
+	tmp[0] = ray->final_posr->R[0*4+2] * ray->length;
+	tmp[1] = ray->final_posr->R[1*4+2] * ray->length;
+	tmp[2] = ray->final_posr->R[2*4+2] * ray->length;
+	dMULTIPLY1_331 (v,cone->final_posr->R,tmp);
 
 	dReal r = cone->radius;
 	dReal h = cone->lz;
@@ -411,9 +419,9 @@ int dCollideRayCone (dxGeom *o1, dxGeom *o2, int flags,
 
 	if (FindIntersectionConeRay(r,h,q,v,Contact))
 	{
-		dMULTIPLY0_331(contact->normal,cone->R,Contact[0].normal);
-		dMULTIPLY0_331(contact->pos,cone->R,Contact[0].pos);
-		dOPE(contact->pos,+=,cone->pos);
+		dMULTIPLY0_331(contact->normal,cone->final_posr->R,Contact[0].normal);
+		dMULTIPLY0_331(contact->pos,cone->final_posr->R,Contact[0].pos);
+		dOPE(contact->pos,+=,cone->final_posr->pos);
 		contact->depth = Contact[0].depth * dLENGTH(v);
 /*
 		dMatrix3 RI;
@@ -440,8 +448,8 @@ int dCollideConeSphere(dxGeom *o1, dxGeom *o2, int flags, dContactGeom *contact,
 	dxCone		*cone = (dxCone*) o1;
 	
 	dxSphere ASphere(0,cone->radius);
-	dGeomSetRotation(&ASphere,cone->R);
-	dGeomSetPosition(&ASphere,cone->pos[0],cone->pos[1],cone->pos[2]);
+	dGeomSetRotation(&ASphere,cone->final_posr->R);
+	dGeomSetPosition(&ASphere,cone->final_posr->pos[0],cone->final_posr->pos[1],cone->final_posr->pos[2]);
 
 	return dCollideSphereSphere(&ASphere, o2, flags, contact, skip);
 }
@@ -454,8 +462,8 @@ int dCollideConeBox(dxGeom *o1, dxGeom *o2, int flags, dContactGeom *contact, in
 	dxCone		*cone = (dxCone*) o1;
 	
 	dxSphere ASphere(0,cone->radius);
-	dGeomSetRotation(&ASphere,cone->R);
-	dGeomSetPosition(&ASphere,cone->pos[0],cone->pos[1],cone->pos[2]);
+	dGeomSetRotation(&ASphere,cone->final_posr->R);
+	dGeomSetPosition(&ASphere,cone->final_posr->pos[0],cone->final_posr->pos[1],cone->final_posr->pos[2]);
 
 	return dCollideSphereBox(&ASphere, o2, flags, contact, skip);
 }
@@ -468,8 +476,8 @@ int dCollideCCylinderCone(dxGeom *o1, dxGeom *o2, int flags, dContactGeom *conta
 	dxCone		*cone = (dxCone*) o2;
 	
 	dxSphere ASphere(0,cone->radius);
-	dGeomSetRotation(&ASphere,cone->R);
-	dGeomSetPosition(&ASphere,cone->pos[0],cone->pos[1],cone->pos[2]);
+	dGeomSetRotation(&ASphere,cone->final_posr->R);
+	dGeomSetPosition(&ASphere,cone->final_posr->pos[0],cone->final_posr->pos[1],cone->final_posr->pos[2]);
 
 	return dCollideCCylinderSphere(o1, &ASphere, flags, contact, skip);
 }
@@ -484,8 +492,8 @@ int dCollideTriMeshCone(dxGeom *o1, dxGeom *o2, int flags, dContactGeom *contact
 	dxCone		*cone = (dxCone*) o2;
 
 	dxSphere ASphere(0,cone->radius);
-	dGeomSetRotation(&ASphere,cone->R);
-	dGeomSetPosition(&ASphere,cone->pos[0],cone->pos[1],cone->pos[2]);
+	dGeomSetRotation(&ASphere,cone->final_posr->R);
+	dGeomSetPosition(&ASphere,cone->final_posr->pos[0],cone->final_posr->pos[1],cone->final_posr->pos[2]);
 
 	return dCollideSTL(o1, &ASphere, flags, contact, skip);
 }
