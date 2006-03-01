@@ -367,7 +367,7 @@ static void drawConvex (float *_planes,unsigned int _planecount,
 			unsigned int *_polygons)
 {
   unsigned int polyindex=0;
-  for(int i=0;i<_planecount;++i)
+  for(unsigned int i=0;i<_planecount;++i)
     {
       unsigned int pointcount=_polygons[polyindex];
       polyindex++;
@@ -375,7 +375,7 @@ static void drawConvex (float *_planes,unsigned int _planecount,
        glNormal3f(_planes[(i*4)+0],
 		  _planes[(i*4)+1],
 		  _planes[(i*4)+2]);
-      for(int j=0;j<pointcount;++j)
+      for(unsigned int j=0;j<pointcount;++j)
 	{
 	  glVertex3f(_points[_polygons[polyindex]*3],
 		     _points[(_polygons[polyindex]*3)+1],
