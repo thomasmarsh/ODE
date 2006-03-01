@@ -61,14 +61,14 @@ AC_CHECK_HEADERS( alloca.h ieeefp.h stdio.h stdlib.h math.h string.h stdarg.h ma
 AC_MSG_CHECKING(if OPCODE support is requested)
 AC_ARG_WITH(opcode,AC_HELP_STRING([--with-opcode],
 [Configure ODE to work with the OPCODE collision detection library for trimesh support]),
-opcode=$withval,opcode=no)
+opcode=$withval,opcode=yes)
 AC_MSG_RESULT($opcode)
 AM_CONDITIONAL(OPCODE, test x$opcode = xyes)
 
 AC_MSG_CHECKING(if cylinder support is requested)
 AC_ARG_WITH(cylinder,AC_HELP_STRING([--with-cylinder],
 [Configure ODE to have non capped cylinder support]),
-cylinder=$withval,cylinder=no)
+cylinder=$withval,cylinder=yes)
 AC_MSG_RESULT($cylinder)
 AM_CONDITIONAL(CYLINDER, test x$cylinder = xyes)
 
