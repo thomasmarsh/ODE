@@ -190,7 +190,7 @@ static dVector3 vV1;
 static dVector3 vV2;
 
 // ODE contact's specific
-static int iFlags;
+static unsigned int iFlags;
 static dContactGeom *ContactGeoms;
 static int iStride;
 
@@ -288,7 +288,7 @@ inline int	_ProcessLocalContacts()
 	unsigned int iContact = 0;
 	dContactGeom* Contact = 0;
 
-	int nFinalContact = 0;
+	unsigned int nFinalContact = 0;
 
 	for (iContact = 0; iContact < ctContacts; iContact ++)
 	{

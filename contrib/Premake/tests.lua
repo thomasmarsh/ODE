@@ -30,12 +30,6 @@ package.language = "c++"
 
   package.files =
   {
-    "main.cpp",
-    
-    -- Collision primitives
-    "colliders/box_sphere.cpp",
-    
-    -- CppTestHarness testing framework (http://cnicholson.net/content.php?id=52)
-    matchfiles("CppTestHarness/*.h", "CppTestHarness/*.cpp")
+    matchrecursive("*.h", "*.cpp")
   }
   

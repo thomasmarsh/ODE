@@ -222,7 +222,7 @@ void dxTriMeshData::Preprocess()
 
 	// Make a list of every edge in the mesh
 	const IndexedTriangle* tris = Mesh.GetTris();
-    for (int i = 0; i < numTris; i++)
+    for (unsigned int i = 0; i < numTris; i++)
 	{
 		SetupEdge(&records[i*3],   0, i, tris->mVRef);
 		SetupEdge(&records[i*3+1], 1, i, tris->mVRef);
@@ -235,7 +235,7 @@ void dxTriMeshData::Preprocess()
 	qsort(records, numEdges, sizeof(EdgeRecord), EdgeCompare);
 
 	// Go through the sorted list of edges and flag all the edges and vertices that we need to use
-	for (int i = 0; i < numEdges; i++)
+	for (unsigned int i = 0; i < numEdges; i++)
 	{
 		EdgeRecord* rec1 = &records[i];
 		EdgeRecord* rec2 = 0;
@@ -284,13 +284,13 @@ void dxTriMeshData::Preprocess()
 
 	// Go through the list once more, and take any edge we marked as concave and
 	// clear it's vertices flags in any triangles they're used in
-	for (int i = 0; i < numEdges; i++)
+	for (unsigned int i = 0; i < numEdges; i++)
 	{
 		EdgeRecord& er = records[i];
 
 		if (er.Concave)
 		{
-			for (int j = 0; j < numEdges; j++)
+			for (unsigned int j = 0; j < numEdges; j++)
 			{
 				EdgeRecord& curER = records[j];
 
