@@ -329,6 +329,8 @@ int dCollideSTL(dxGeom* g1, dxGeom* SphereGeom, int Flags, dContactGeom* Contact
 			const int& TriIndex = Triangles[i];
 
 			dVector3 dv[3];
+			if (!Callback(TriMesh, SphereGeom, TriIndex))
+				continue;
 			FetchTriangle(TriMesh, TriIndex, TLPosition, TLRotation, dv);
 
 			dVector3& v0 = dv[0];
