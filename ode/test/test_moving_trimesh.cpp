@@ -1731,12 +1731,47 @@ void drawGeom (dGeomID g, const dReal *pos, const dReal *R, int show_aabb)
 }
 
 
+// set previous transformation matrix for trimesh
+void setCurrentTransform(dGeomID geom)
+{
+ const dTriMeshDataID TriMeshData = static_cast<dTriMeshDataID>(dGeomGetData(geom));
+ const dReal* Pos = dGeomGetPosition(geom);
+ const dReal* Rot = dGeomGetRotation(geom);
+
+ const double Transform[16] = 
+ {
+   Rot[0], Rot[4], Rot[8],  0,
+   Rot[1], Rot[5], Rot[9],  0,
+   Rot[2], Rot[6], Rot[10], 0,
+   Pos[0], Pos[1], Pos[2],  1
+ };
+ dGeomTriMeshDataSet(TriMeshData, TRIMESH_LAST_TRANSFORMATION, (void *)Transform);
+}
+
+
 // simulation loop
 
 static void simLoop (int pause)
 {
   dsSetColor (0,0,2);
   dSpaceCollide (space,0,&nearCallback);
+
+
+#if 0
+  // What is this for??? - Bram
+  if (!pause) 
+  {
+    for (int i=0; i<num; i++)
+      for (int j=0; j < GPB; j++)
+        if (obj[i].geom[j])
+          if (dGeomGetClass(obj[i].geom[j]) == dTriMeshClass)
+            setCurrentTransform(obj[i].geom[j]);
+ 
+    setCurrentTransform(TriMesh1);
+    setCurrentTransform(TriMesh2);
+  }
+#endif
+
   //if (!pause) dWorldStep (world,0.05);
   if (!pause) dWorldStepFast1 (world,0.05, 5);
 
@@ -1876,6 +1911,8 @@ int main (int argc, char **argv)
   
   TriMesh1 = dCreateTriMesh(space, TriData1, 0, 0, 0);
   TriMesh2 = dCreateTriMesh(space, TriData2, 0, 0, 0);
+  dGeomSetData(TriMesh1, TriData1);
+  dGeomSetData(TriMesh2, TriData2);
   
   {dGeomSetPosition(TriMesh1, 0, 0, 0.9);
   dMatrix3 Rotation;
