@@ -2697,6 +2697,155 @@ dxJoint::Vtable __damotor_vtable = {
   (dxJoint::getInfo2_fn*) amotorGetInfo2,
   dJointTypeAMotor};
 
+
+
+//****************************************************************************
+// lmotor joint
+static void lmotorInit (dxJointLMotor *j)
+{
+  int i;
+  j->num = 0;
+  for (i=0;i<3;i++) {
+    dSetZero(j->axis[i],4);
+    j->limot[i].init(j->world);
+  }
+}
+
+static void lmotorComputeGlobalAxes (dxJointLMotor *joint, dVector3 ax[3])
+{
+  for (int i=0; i< joint->num; i++) {
+    if (joint->rel[i] == 1) {
+      dMULTIPLY0_331 (ax[i],joint->node[0].body->posr.R,joint->axis[i]);
+    }
+    else if (joint->rel[i] == 2) {
+      if (joint->node[1].body) {   // jds: don't assert, just ignore
+        dMULTIPLY0_331 (ax[i],joint->node[1].body->posr.R,joint->axis[i]);
+      } 
+    } else {
+      ax[i][0] = joint->axis[i][0];
+      ax[i][1] = joint->axis[i][1];
+      ax[i][2] = joint->axis[i][2];
+    }
+  }
+}
+
+static void lmotorGetInfo1 (dxJointLMotor *j, dxJoint::Info1 *info) 
+{
+  info->m = 0;
+  info->nub = 0;
+  for (int i=0; i < j->num; i++) {
+    if (j->limot[i].fmax > 0) {
+      info->m++;
+    }
+  }
+}
+
+static void lmotorGetInfo2 (dxJointLMotor *joint, dxJoint::Info2 *info)
+{
+  int row=0;
+  dVector3 ax[3];
+  lmotorComputeGlobalAxes(joint, ax);
+ 
+  for (int i=0;i<joint->num;i++) {  	
+    row += joint->limot[i].addLimot(joint,info,row,ax[i], 0);
+  }	
+}
+
+extern "C" void dJointSetLMotorAxis (dxJointLMotor *joint, int anum, int rel,
+				     dReal x, dReal y, dReal z)
+{
+//for now we are ignoring rel!
+  dAASSERT(joint && anum >= 0 && anum <= 2 && rel >= 0 && rel <= 2);
+  dUASSERT(joint->vtable == &__dlmotor_vtable,"joint is not an lmotor");
+  if (anum < 0) anum = 0;
+  if (anum > 2) anum = 2;
+
+  if (!joint->node[1].body && rel==2) rel = 1; //ref 1
+
+  joint->rel[anum] = rel;
+
+  dVector3 r;
+  r[0] = x;
+  r[1] = y;
+  r[2] = z;
+  r[3] = 0;
+  if (rel > 0) {
+    if (rel==1) {
+      dMULTIPLY1_331 (joint->axis[anum],joint->node[0].body->posr.R,r);
+	} else {
+	  //second body has to exists thanks to ref 1 line	
+      dMULTIPLY1_331 (joint->axis[anum],joint->node[1].body->posr.R,r);
+	}
+  } else {
+    joint->axis[anum][0] = r[0];
+    joint->axis[anum][1] = r[1];
+    joint->axis[anum][2] = r[2];
+  }
+
+  dNormalize3 (joint->axis[anum]);
+}
+
+extern "C" void dJointSetLMotorNumAxes (dxJointLMotor *joint, int num)
+{
+  dAASSERT(joint && num >= 0 && num <= 3);
+  dUASSERT(joint->vtable == &__dlmotor_vtable,"joint is not an lmotor");
+  if (num < 0) num = 0;
+  if (num > 3) num = 3;
+  joint->num = num;
+}
+
+extern "C" void dJointSetLMotorParam (dxJointLMotor *joint, int parameter,
+				      dReal value)
+{
+  dAASSERT(joint);
+  dUASSERT(joint->vtable == &__dlmotor_vtable,"joint is not an lmotor");
+  int anum = parameter >> 8;
+  if (anum < 0) anum = 0;
+  if (anum > 2) anum = 2;
+  parameter &= 0xff;
+  joint->limot[anum].set (parameter, value);
+}
+
+extern "C" int dJointGetLMotorNumAxes (dxJointLMotor *joint)
+{
+  dAASSERT(joint);
+  dUASSERT(joint->vtable == &__dlmotor_vtable,"joint is not an lmotor");
+  return joint->num;
+}
+
+
+extern "C" void dJointGetLMotorAxis (dxJointLMotor *joint, int anum,
+				     dVector3 result)
+{
+  dAASSERT(joint && anum >= 0 && anum < 3);
+  dUASSERT(joint->vtable == &__dlmotor_vtable,"joint is not an lmotor");
+  if (anum < 0) anum = 0;
+  if (anum > 2) anum = 2;
+  result[0] = joint->axis[anum][0];
+  result[1] = joint->axis[anum][1];
+  result[2] = joint->axis[anum][2];
+}
+
+extern "C" dReal dJointGetLMotorParam (dxJointLMotor *joint, int parameter)
+{
+  dAASSERT(joint);
+  dUASSERT(joint->vtable == &__dlmotor_vtable,"joint is not an lmotor");
+  int anum = parameter >> 8;
+  if (anum < 0) anum = 0;
+  if (anum > 2) anum = 2;
+  parameter &= 0xff;
+  return joint->limot[anum].get (parameter);
+}
+
+dxJoint::Vtable __dlmotor_vtable = {
+  sizeof(dxJointLMotor),
+	(dxJoint::init_fn*) lmotorInit,
+	(dxJoint::getInfo1_fn*) lmotorGetInfo1,
+	(dxJoint::getInfo2_fn*) lmotorGetInfo2,
+	dJointTypeLMotor
+};
+
+
 //****************************************************************************
 // fixed joint
 

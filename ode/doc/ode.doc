@@ -1274,6 +1274,7 @@ dJointID dJointCreateUniversal (dWorldID, dJointGroupID);
 dJointID dJointCreateHinge2 (dWorldID, dJointGroupID);
 dJointID dJointCreateFixed (dWorldID, dJointGroupID);
 dJointID dJointCreateAMotor (dWorldID, dJointGroupID);
+dJointID dJointCreateLMotor (dWorldID, dJointGroupID);
 }{
 Create a new joint of a given type.
 The joint is initially in "limbo" (i.e. it has no effect on the simulation)
@@ -1357,6 +1358,7 @@ Get the joint's type. One of the following constants will be returned:
 @constdef{dJointTypeHinge2}{A hinge-2 joint.}
 @constdef{dJointTypeFixed}{A fixed joint.}
 @constdef{dJointTypeAMotor}{An angular motor joint.}
+@constdef{dJointTypeLMotor}{An linear motor joint.}
 }
 
 
@@ -2050,6 +2052,40 @@ available.
 In @c{dAMotorEuler} mode this is the corresponding euler angle rate.
 }
 
+@subsection{Linear Motor}
+
+An linear motor (LMotor) allows the relative linear velocities of two
+bodies to be controlled.
+
+
+@funcdef{
+void dJointSetLMotorNumAxes (dJointID, int num);
+int dJointGetLMotorNumAxes (dJointID);
+}{
+Set (and get) the number of axes that will be controlled by the
+LMotor.
+The argument @arg{num} can range from 0 (which effectively deactivates the
+joint) to 3.
+
+}
+
+@funcdef{
+void dJointSetLMotorAxis (dJointID, int anum, int rel,
+                         dReal x, dReal y, dReal z);
+void dJointGetLMotorAxis (dJointID, int anum, dVector3 result);
+}{
+Set (and get) the AMotor axes.
+The @arg{anum} argument selects the axis to change (0,1 or 2).
+Each axis can have one of three ``relative orientation'' modes, selected by
+@arg{rel}:
+@list{
+@* 0: The axis is anchored to the global frame.
+@* 1: The axis is anchored to the first body.
+@* 2: The axis is anchored to the second body.
+}
+The axis vector (@arg{x},@arg{y},@arg{z}) is always specified in global
+coordinates regardless of the setting of @arg{rel}.
+}
 
 @section{General}
 

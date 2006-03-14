@@ -187,6 +187,7 @@ static const char *getJointName (dxJoint *j)
 		case dJointTypeFixed: return "fixed";
 		case dJointTypeNull: return "null";
 		case dJointTypeAMotor: return "ODE_angular_motor";
+                case dJointTypeLMotor: return "ODE_linear_motor";
 	}
 	return "unknown";
 }
@@ -285,6 +286,18 @@ static void printFixed (PrintingContext &c, dxJoint *j)
 	dxJointFixed *f = (dxJointFixed*) j;
 	c.print ("qrel",f->qrel);
 	c.print ("offset",f->offset);
+}
+
+static void printLMotor (PrintingContext &c, dxJoint *j)
+{
+       dxJointLMotor *a = (dxJointLMotor*) j;
+       c.print("num", a->num);
+       c.printIndent();
+       fprintf (c.file,"rel = {%d,%d,%d},\n",a->rel[0],a->rel[1],a->rel[2]);
+       c.print ("axis1",a->axis[0]);
+       c.print ("axis2",a->axis[1]);
+       c.print ("axis3",a->axis[2]);
+       for (int i=0; i<3; i++) printLimot (c,a->limot[i],i+1);
 }
 
 
@@ -525,6 +538,7 @@ void dWorldExportDIF (dWorldID w, FILE *file, const char *prefix)
 			case dJointTypeHinge2: printHinge2 (c,j); break;
 			case dJointTypeFixed: printFixed (c,j); break;
 			case dJointTypeAMotor: printAMotor (c,j); break;
+                        case dJointTypeLMotor: printLMotor (c,j); break;
 		}		
 		c.indent--;
 		c.print ("}");

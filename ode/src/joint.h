@@ -247,6 +247,15 @@ struct dxJointAMotor : public dxJoint {
 extern struct dxJoint::Vtable __damotor_vtable;
 
 
+struct dxJointLMotor : public dxJoint {
+  int num;
+  int rel[3];
+  dVector3 axis[3];
+  dxJointLimitMotor limot[3];
+};
+  
+extern struct dxJoint::Vtable __dlmotor_vtable;
+
 // fixed
 
 struct dxJointFixed : public dxJoint {
