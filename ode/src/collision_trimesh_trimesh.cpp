@@ -361,7 +361,7 @@ dCollideTTL(dxGeom* g1, dxGeom* g2, int Flags, dContactGeom* Contacts, int Strid
                                 dVector3 *pen_elt; // the elt_f of the penetrating face
                                 dVector3 *col_v;   // the "collision vertices" (the penetrated face)
                                 
-                                
+                                SMULT(n2, n2, -1.0); // SF PATCH #1335183
                                 depth = 0.0;
                                 if ((total_dp1 > DISTANCE_EPSILON) || (total_dp2 > DISTANCE_EPSILON)) {
                                     ////////
