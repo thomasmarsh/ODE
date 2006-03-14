@@ -223,7 +223,8 @@ enum {
   dJointTypeHinge2,
   dJointTypeFixed,
   dJointTypeNull,
-  dJointTypeAMotor
+  dJointTypeAMotor,
+  dJointTypeLMotor
 };
 
 

@@ -173,6 +173,7 @@ dJointID dJointCreateUniversal (dWorldID, dJointGroupID);
 dJointID dJointCreateFixed (dWorldID, dJointGroupID);
 dJointID dJointCreateNull (dWorldID, dJointGroupID);
 dJointID dJointCreateAMotor (dWorldID, dJointGroupID);
+dJointID dJointCreateLMotor (dWorldID, dJointGroupID);
 
 void dJointDestroy (dJointID);
 
@@ -218,6 +219,9 @@ void dJointSetAMotorAngle (dJointID, int anum, dReal angle);
 void dJointSetAMotorParam (dJointID, int parameter, dReal value);
 void dJointSetAMotorMode (dJointID, int mode);
 void dJointAddAMotorTorques (dJointID, dReal torque1, dReal torque2, dReal torque3);
+void dJointSetLMotorNumAxes (dJointID, int num);
+void dJointSetLMotorAxis (dJointID, int anum, int rel, dReal x, dReal y, dReal z);
+void dJointSetLMotorParam (dJointID, int parameter, dReal value);
 
 void dJointGetBallAnchor (dJointID, dVector3 result);
 void dJointGetBallAnchor2 (dJointID, dVector3 result);
@@ -255,6 +259,9 @@ dReal dJointGetAMotorAngle (dJointID, int anum);
 dReal dJointGetAMotorAngleRate (dJointID, int anum);
 dReal dJointGetAMotorParam (dJointID, int parameter);
 int dJointGetAMotorMode (dJointID);
+int dJointGetLMotorNumAxes (dJointID);
+void dJointGetLMotorAxis (dJointID, int anum, dVector3 result);
+dReal dJointGetLMotorParam (dJointID, int parameter);
 
 dJointID dConnectingJoint (dBodyID, dBodyID);
 int dConnectingJointList (dBodyID, dBodyID, dJointID*);

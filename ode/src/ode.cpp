@@ -407,7 +407,7 @@ void dBodySetMass (dBodyID b, const dMass *mass)
   dAASSERT (b && mass);
   memcpy (&b->mass,mass,sizeof(dMass));
   if (dInvertPDMatrix (b->mass.I,b->invI,3)==0) {
-    dDEBUGMSG ("inertia must be positive definite");
+    dDEBUGMSG ("inertia must be positive definite!");
     dRSetIdentity (b->invI);
   }
   b->invMass = dRecip(b->mass.mass);
@@ -973,6 +973,11 @@ dxJoint * dJointCreateAMotor (dWorldID w, dJointGroupID group)
   return createJoint (w,group,&__damotor_vtable);
 }
 
+dxJoint * dJointCreateLMotor (dWorldID w, dJointGroupID group)
+{
+  dAASSERT (w);
+  return createJoint (w,group,&__dlmotor_vtable);
+}
 
 void dJointDestroy (dxJoint *j)
 {
