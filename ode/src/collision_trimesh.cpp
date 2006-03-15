@@ -565,6 +565,13 @@ void dxTriMesh::computeAABB() {
     aabb[5] = c[2] + pos[2] + zrange;
 }
 
+
+void dxTriMeshData::UpdateData()
+{
+  BVTree.Refit();
+}
+
+
 dGeomID dCreateTriMesh(dSpaceID space, 
 		       dTriMeshDataID Data,
 		       dTriCallback* Callback,
@@ -737,3 +744,9 @@ int dGeomTriMeshGetTriangleCount (dGeomID g)
     dxTriMesh* Geom = (dxTriMesh*)g;	 	
     return Geom->Data->Mesh.GetNbTriangles();	 	
 }
+
+void dGeomTriMeshDataUpdate(dTriMeshDataID g) {
+    dUASSERT(g, "argument not trimesh data");
+    g->UpdateData();
+}
+
