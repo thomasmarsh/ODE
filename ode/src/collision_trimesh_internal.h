@@ -87,6 +87,8 @@ struct dxTriMeshData  : public dBase
 
     /* Setup the UseFlags array */
     void Preprocess();
+    /* For when app changes the vertices */
+    void UpdateData();
 };
 
 
