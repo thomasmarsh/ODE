@@ -140,8 +140,8 @@ static void command (int cmd)
   dMass m;
 
   cmd = locase (cmd);
-  if (cmd == 'b' || cmd == 's' || cmd == 'c' || cmd == 'x'
-      /* || cmd == 'l' */) {
+  if (cmd == 'b' || cmd == 's' || cmd == 'c' || cmd == 'x' || cmd == 'y')
+  {
     if (num < NUM) {
       i = num;
       num++;
@@ -190,14 +190,13 @@ static void command (int cmd)
       dMassSetCappedCylinder (&m,DENSITY,3,sides[0],sides[1]);
       obj[i].geom[0] = dCreateCCylinder (space,sides[0],sides[1]);
     }
-/*
+#ifdef dCYLINDER_ENABLED
     // cylinder option not yet implemented
-    else if (cmd == 'l') {
-      sides[1] *= 0.5;
+    else if (cmd == 'y') {
       dMassSetCappedCylinder (&m,DENSITY,3,sides[0],sides[1]);
       obj[i].geom[0] = dCreateCylinder (space,sides[0],sides[1]);
     }
-*/
+#endif
     else if (cmd == 's') {
       sides[0] *= 0.5;
       dMassSetSphere (&m,DENSITY,sides[0]);
@@ -316,14 +315,14 @@ void drawGeom (dGeomID g, const dReal *pos, const dReal *R, int show_aabb)
     dGeomCCylinderGetParams (g,&radius,&length);
     dsDrawCappedCylinder (pos,R,length,radius);
   }
-/*
+#ifdef dCYLINDER_ENABLED
   // cylinder option not yet implemented
   else if (type == dCylinderClass) {
     dReal radius,length;
     dGeomCylinderGetParams (g,&radius,&length);
     dsDrawCylinder (pos,R,length,radius);
   }
-*/
+#endif
   else if (type == dGeomTransformClass) {
     dGeomID g2 = dGeomTransformGetGeom (g);
     const dReal *pos2 = dGeomGetPosition (g2);
@@ -360,7 +359,7 @@ static void simLoop (int pause)
 {
   dsSetColor (0,0,2);
   dSpaceCollide (space,0,&nearCallback);
-  if (!pause) dWorldQuickStep (world,0.05);
+  if (!pause) dWorldQuickStep (world,0.02);
 
   if (write_world) {
     FILE *f = fopen ("state.dif","wt");
