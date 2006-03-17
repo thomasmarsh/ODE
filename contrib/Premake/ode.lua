@@ -58,6 +58,7 @@ package.language = "c++"
   {
     "src/collision_cylinder_box.cpp",
     "src/collision_cylinder_sphere.cpp",
+    "src/collision_cylinder_plane.cpp",
     "src/collision_cylinder_trimesh.cpp",
   }
    

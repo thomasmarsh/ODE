@@ -71,6 +71,8 @@ int dCollideCylinderBox(dxGeom *o1, dxGeom *o2,
                         int flags, dContactGeom *contact, int skip);
 int dCollideCylinderSphere(dxGeom *gCylinder, dxGeom *gSphere, 
                            int flags, dContactGeom *contact, int skip); 
+int dCollideCylinderPlane(dxGeom *gCylinder, dxGeom *gPlane, 
+                           int flags, dContactGeom *contact, int skip); 
 #endif
 
 

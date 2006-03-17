@@ -192,6 +192,7 @@ static void initColliders()
 #ifdef dCYLINDER_ENABLED
   setCollider (dCylinderClass,dBoxClass,&dCollideCylinderBox);
   setCollider (dCylinderClass,dSphereClass,&dCollideCylinderSphere);
+  setCollider (dCylinderClass,dPlaneClass,&dCollideCylinderPlane);
   //setCollider (dCylinderClass,dCylinderClass,&dCollideCylinderCylinder);
 #endif
   setAllColliders (dGeomTransformClass,&dCollideTransform);

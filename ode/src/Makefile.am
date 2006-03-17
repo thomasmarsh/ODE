@@ -127,6 +127,7 @@ if CYLINDER
 AM_CXXFLAGS += -DdCYLINDER_ENABLED
 libode_a_SOURCES+=      collision_cylinder_box.cpp \
                         collision_cylinder_sphere.cpp \
+                        collision_cylinder_plane.cpp \
                         collision_cylinder_trimesh.cpp
 endif
 

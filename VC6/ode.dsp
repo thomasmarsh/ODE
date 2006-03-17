@@ -97,6 +97,10 @@ SOURCE=..\ode\src\collision_cylinder_sphere.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=..\ode\src\collision_cylinder_plane.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=..\ode\src\collision_cylinder_trimesh.cpp
 # End Source File
 # Begin Source File
