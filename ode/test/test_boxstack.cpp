@@ -111,7 +111,8 @@ static void start()
   printf ("To drop another object, press:\n");
   printf ("   b for box.\n");
   printf ("   s for sphere.\n");
-  printf ("   c for cylinder.\n");
+  printf ("   c for capsule.\n");
+  printf ("   y for cylinder.\n");
   printf ("   x for a composite object.\n");
   printf ("To select an object, press space.\n");
   printf ("To disable the selected object, press d.\n");
