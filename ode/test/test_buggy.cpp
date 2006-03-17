@@ -313,13 +313,13 @@ int main (int argc, char **argv)
   // run simulation
   dsSimulationLoop (argc,argv,352,288,&fn);
 
-  dJointGroupDestroy (contactgroup);
-  dSpaceDestroy (space);
-  dWorldDestroy (world);
   dGeomDestroy (box[0]);
   dGeomDestroy (sphere[0]);
   dGeomDestroy (sphere[1]);
   dGeomDestroy (sphere[2]);
+  dJointGroupDestroy (contactgroup);
+  dSpaceDestroy (space);
+  dWorldDestroy (world);
 
   return 0;
 }
