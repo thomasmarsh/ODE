@@ -213,6 +213,7 @@ int dCollideCylinderPlane(dxGeom *cylgeom, dxGeom *planegeom, int flags, dContac
       dVector3 y;
       dVector3Cross(axis, x, y);
       dVector3 p;
+      dVector3Scale(x, radius); dVector3Scale(y, radius);
       dContactGeom *Contact;
 
       // Contact 1
@@ -264,6 +265,7 @@ int dCollideCylinderPlane(dxGeom *cylgeom, dxGeom *planegeom, int flags, dContac
       dVector3 y;
       dVector3Cross(axis, x, y);
       dVector3 p;
+      dVector3Scale(x, radius); dVector3Scale(y, radius);
       dContactGeom *Contact;
 
       // Contact 1
