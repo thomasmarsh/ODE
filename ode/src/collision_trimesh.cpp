@@ -464,7 +464,7 @@ LSSCollider dxTriMesh::_LSSCollider;
 
 SphereCache dxTriMesh::defaultSphereCache;
 OBBCache dxTriMesh::defaultBoxCache;
-LSSCache dxTriMesh::defaultCCylinderCache;
+LSSCache dxTriMesh::defaultCapsuleCache;
 
 CollisionFaces dxTriMesh::Faces;
 
@@ -497,7 +497,7 @@ dxTriMesh::dxTriMesh(dSpaceID Space, dTriMeshDataID Data) : dxGeom(Space, 1){
 	   win by default on spheres/boxes. */
 	this->doSphereTC = false;
 	this->doBoxTC = false;
-	this->doCCylinderTC = false;
+	this->doCapsuleTC = false;
 
     const char* msg;
     if ((msg =_AABBTreeCollider.ValidateSettings()))
@@ -526,11 +526,11 @@ void dxTriMesh::ClearTCCache(){
         BoxTCCache[i].~BoxTC();
     }
     BoxTCCache.setSize(0);
-	n = CCylinderTCCache.size();
+	n = CapsuleTCCache.size();
 	for( i = 0; i < n; ++i ) {
-	  CCylinderTCCache[i].~CCylinderTC();
+	  CapsuleTCCache[i].~CapsuleTC();
 	}
-	CCylinderTCCache.setSize(0);
+	CapsuleTCCache.setSize(0);
 }
 
 
@@ -648,8 +648,8 @@ void dGeomTriMeshEnableTC(dGeomID g, int geomClass, int enable)
 		case dBoxClass:
 			((dxTriMesh*)g)->doBoxTC = (1 == enable);
 			break;
-		case dCCylinderClass:
-			((dxTriMesh*)g)->doCCylinderTC = (1 == enable);
+		case dCapsuleClass:
+			((dxTriMesh*)g)->doCapsuleTC = (1 == enable);
 			break;
 	}
 }
@@ -668,8 +668,8 @@ int dGeomTriMeshIsTCEnabled(dGeomID g, int geomClass)
 			if (((dxTriMesh*)g)->doBoxTC)
 				return 1;
 			break;
-		case dCCylinderClass:
-			if (((dxTriMesh*)g)->doCCylinderTC)
+		case dCapsuleClass:
+			if (((dxTriMesh*)g)->doCapsuleTC)
 				return 1;
 			break;
 	}

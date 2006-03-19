@@ -33,7 +33,7 @@
 #define dsDrawBox dsDrawBoxD
 #define dsDrawSphere dsDrawSphereD
 #define dsDrawCylinder dsDrawCylinderD
-#define dsDrawCappedCylinder dsDrawCappedCylinderD
+#define dsDrawCapsule dsDrawCapsuleD
 #define dsDrawLine dsDrawLineD
 #define dsDrawTriangle dsDrawTriangleD
 #endif
@@ -1558,14 +1558,14 @@ static void command (int cmd)
     }
     else if (cmd == 'c') {
       sides[0] *= 0.5;
-      dMassSetCappedCylinder (&m,DENSITY,3,sides[0],sides[1]);
-      obj[i].geom[0] = dCreateCCylinder (space,sides[0],sides[1]);
+      dMassSetCapsule (&m,DENSITY,3,sides[0],sides[1]);
+      obj[i].geom[0] = dCreateCapsule (space,sides[0],sides[1]);
     }
 /*
     // cylinder option not yet implemented
     else if (cmd == 'l') {
       sides[1] *= 0.5;
-      dMassSetCappedCylinder (&m,DENSITY,3,sides[0],sides[1]);
+      dMassSetCapsule (&m,DENSITY,3,sides[0],sides[1]);
       obj[i].geom[0] = dCreateCylinder (space,sides[0],sides[1]);
     }
 */
@@ -1613,8 +1613,8 @@ static void command (int cmd)
 	else {
 	  dReal radius = dRandReal()*0.1+0.05;
 	  dReal length = dRandReal()*1.0+0.1;
-	  g2[k] = dCreateCCylinder (0,radius,length);
-	  dMassSetCappedCylinder (&m2,DENSITY,3,radius,length);
+	  g2[k] = dCreateCapsule (0,radius,length);
+	  dMassSetCapsule (&m2,DENSITY,3,radius,length);
 	}
 	dGeomTransformSetGeom (obj[i].geom[k],g2[k]);
 
@@ -1688,10 +1688,10 @@ void drawGeom (dGeomID g, const dReal *pos, const dReal *R, int show_aabb)
   else if (type == dSphereClass) {
     dsDrawSphere (pos,R,dGeomSphereGetRadius (g));
   }
-  else if (type == dCCylinderClass) {
+  else if (type == dCapsuleClass) {
     dReal radius,length;
-    dGeomCCylinderGetParams (g,&radius,&length);
-    dsDrawCappedCylinder (pos,R,length,radius);
+    dGeomCapsuleGetParams (g,&radius,&length);
+    dsDrawCapsule (pos,R,length,radius);
   }
 /*
   // cylinder option not yet implemented

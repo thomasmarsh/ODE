@@ -3011,7 +3011,7 @@ The standard class numbers are:
 
 @constdef{dSphereClass}{Sphere}
 @constdef{dBoxClass}{Box}
-@constdef{dCCylinderClass}{Capped cylinder}
+@constdef{dCapsuleClass}{Capped cylinder}
 @constdef{dCylinderClass}{Regular flat-ended cylinder}
 @constdef{dPlaneClass}{Infinite plane (non-placeable)}
 @constdef{dGeomTransformClass}{Geometry transform}
@@ -3604,7 +3604,7 @@ negative depth, and points on the surface will have zero depth.
 @subsection{Capped Cylinder Class}
 
 @funcdef{
-dGeomID dCreateCCylinder (dSpaceID space, dReal radius, dReal length);
+dGeomID dCreateCapsule (dSpaceID space, dReal radius, dReal length);
 }{
 Create a capped cylinder geom of the given parameters, and return
 its ID.
@@ -3621,7 +3621,7 @@ The radius of the caps, and of the cylinder itself, is given by @arg{radius}.
 
 
 @funcdef{
-void dGeomCCylinderSetParams (dGeomID ccylinder,
+void dGeomCapsuleSetParams (dGeomID ccylinder,
                               dReal radius, dReal length);
 }{
 Set the parameters of the given capped cylinder.
@@ -3629,7 +3629,7 @@ Set the parameters of the given capped cylinder.
 
 
 @funcdef{
-void dGeomCCylinderGetParams (dGeomID ccylinder,
+void dGeomCapsuleGetParams (dGeomID ccylinder,
                               dReal *radius, dReal *length);
 }{
 Return in @arg{radius} and @arg{length} the parameters of the given capped
@@ -3638,7 +3638,7 @@ cylinder.
 
 
 @funcdef{
-dReal dGeomCCylinderPointDepth (dGeomID ccylinder,
+dReal dGeomCapsulePointDepth (dGeomID ccylinder,
                                 dReal x, dReal y, dReal z);
 }{
 Return the depth of the point (@arg{x},@arg{y},@arg{z}) in the given capped

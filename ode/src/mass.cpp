@@ -128,8 +128,8 @@ void dMassSetSphereTotal (dMass *m, dReal total_mass, dReal radius)
 }
 
 
-void dMassSetCappedCylinder (dMass *m, dReal density, int direction,
-			     dReal radius, dReal length)
+void dMassSetCapsule (dMass *m, dReal density, int direction,
+		      dReal radius, dReal length)
 {
   dReal M1,M2,Ia,Ib;
   dAASSERT (m);
@@ -152,10 +152,10 @@ void dMassSetCappedCylinder (dMass *m, dReal density, int direction,
 }
 
 
-void dMassSetCappedCylinderTotal (dMass *m, dReal total_mass, int direction,
-			     dReal a, dReal b)
+void dMassSetCapsuleTotal (dMass *m, dReal total_mass, int direction,
+			   dReal a, dReal b)
 {
-  dMassSetCappedCylinder (m, 1.0, direction, a, b);
+  dMassSetCapsule (m, 1.0, direction, a, b);
   dMassAdjust (m, total_mass);
 }
 

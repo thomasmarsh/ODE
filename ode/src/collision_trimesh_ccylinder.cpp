@@ -21,7 +21,7 @@
 *************************************************************************/
 
 /*
- *	Triangle-CCylinder(Capsule) collider by Alen Ladavac
+ *	Triangle-Capsule(Capsule) collider by Alen Ladavac
  *  Ported to ODE by Nguyen Binh
  */
 
@@ -30,7 +30,7 @@
 //       There is a problem when you use original Step and set contact friction
 //		surface.mu = dInfinity;
 //		More description : 
-//			When I dropped CCylinder over the bunny ears, it seems to stuck
+//			When I dropped Capsule over the bunny ears, it seems to stuck
 //			there for a while. I think the cause is when you set surface.mu = dInfinity;
 //			the friction force is too high so it just hang the capsule there.
 //			So the good cure for this is to set mu = around 1.5 (in my case)
@@ -741,7 +741,7 @@ static BOOL _cldTestSeparatingAxesOfCapsule(const dVector3 &v0,
 }
 
 // test one mesh triangle on intersection with capsule
-static void _cldTestOneTriangleVSCCylinder( const dVector3 &v0, 
+static void _cldTestOneTriangleVSCapsule( const dVector3 &v0, 
 											const dVector3 &v1, 
 											const dVector3 &v2,
 											uint8 flags)
@@ -930,8 +930,8 @@ int dCollideCCTL(dxGeom *o1, dxGeom *o2, int flags, dContactGeom *contact, int s
 	vCapsuleAxis[1] = mCapsuleRotation[1*4 + nCAPSULE_AXIS];
 	vCapsuleAxis[2] = mCapsuleRotation[2*4 + nCAPSULE_AXIS];
 
-	// Get size of CCylinder
-	dGeomCCylinderGetParams(gCylinder,&vCapsuleRadius,&fCapsuleSize);
+	// Get size of Capsule
+	dGeomCapsuleGetParams(gCylinder,&vCapsuleRadius,&fCapsuleSize);
 	fCapsuleSize += 2*vCapsuleRadius;
 
 	const dMatrix3* pTriRot = (const dMatrix3*)dGeomGetRotation(TriMesh);
@@ -980,10 +980,10 @@ int dCollideCCTL(dxGeom *o1, dxGeom *o2, int flags, dContactGeom *contact, int s
 	 obbRot[1][2] = (float) mCapsuleRotation[9];
 	 obbRot[2][2] = (float) mCapsuleRotation[10];
 
-	 OBB obbCCylinder(cCenter,cExtents,obbRot);
+	 OBB obbCapsule(cCenter,cExtents,obbRot);
 
-	 Matrix4x4 CCylinderMatrix;
-	 MakeMatrix(vCapsulePosition, mCapsuleRotation, CCylinderMatrix);
+	 Matrix4x4 CapsuleMatrix;
+	 MakeMatrix(vCapsulePosition, mCapsuleRotation, CapsuleMatrix);
 
 	 Matrix4x4 MeshMatrix;
 	 MakeMatrix(mTriMeshPos, mTriMeshRot, MeshMatrix);
@@ -1007,11 +1007,11 @@ int dCollideCCTL(dxGeom *o1, dxGeom *o2, int flags, dContactGeom *contact, int s
 
 		 // Intersect
 		 Collider.SetTemporalCoherence(true);
-		 Collider.Collide(*BoxTC, obbCCylinder, TriMesh->Data->BVTree, null, &MeshMatrix);
+		 Collider.Collide(*BoxTC, obbCapsule, TriMesh->Data->BVTree, null, &MeshMatrix);
 	 }
 	 else {
 		 Collider.SetTemporalCoherence(false);
-		 Collider.Collide(dxTriMesh::defaultBoxCache, obbCCylinder, TriMesh->Data->BVTree, null,&MeshMatrix);
+		 Collider.Collide(dxTriMesh::defaultBoxCache, obbCapsule, TriMesh->Data->BVTree, null,&MeshMatrix);
 	 }
 	 
 	 if (! Collider.GetContactStatus()) {
@@ -1053,7 +1053,7 @@ int dCollideCCTL(dxGeom *o1, dxGeom *o2, int flags, dContactGeom *contact, int s
 			uint8 flags = UseFlags ? UseFlags[Triint] : dxTriMeshData::kUseAll;
 
 			// test this triangle
-			_cldTestOneTriangleVSCCylinder(dv[0],dv[1],dv[2], flags);
+			_cldTestOneTriangleVSCapsule(dv[0],dv[1],dv[2], flags);
 			
 		}
 	 }

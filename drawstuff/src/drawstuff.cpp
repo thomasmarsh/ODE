@@ -605,7 +605,7 @@ static void drawTriangleD (const double *v0, const double *v1, const double *v2,
 
 static int capped_cylinder_quality = 3;
 
-static void drawCappedCylinder (float l, float r)
+static void drawCapsule (float l, float r)
 {
   int i,j;
   float tmp,nx,ny,nz,start_nx,start_ny,a,ca,sa;
@@ -1404,21 +1404,21 @@ extern "C" void dsDrawCylinder (const float pos[3], const float R[12],
 }
 
 
-extern "C" void dsDrawCappedCylinder (const float pos[3], const float R[12],
+extern "C" void dsDrawCapsule (const float pos[3], const float R[12],
 				      float length, float radius)
 {
   if (current_state != 2) dsError ("drawing function called outside simulation loop");
   setupDrawingMode();
   glShadeModel (GL_SMOOTH);
   setTransform (pos,R);
-  drawCappedCylinder (length,radius);
+  drawCapsule (length,radius);
   glPopMatrix();
 
   if (use_shadows) {
     setShadowDrawingMode();
     setShadowTransform();
     setTransform (pos,R);
-    drawCappedCylinder (length,radius);
+    drawCapsule (length,radius);
     glPopMatrix();
     glPopMatrix();
     glDepthRange (0,1);
@@ -1490,14 +1490,14 @@ void dsDrawCylinderD (const double pos[3], const double R[12],
 }
 
 
-void dsDrawCappedCylinderD (const double pos[3], const double R[12],
+void dsDrawCapsuleD (const double pos[3], const double R[12],
 			    float length, float radius)
 {
   int i;
   float pos2[3],R2[12];
   for (i=0; i<3; i++) pos2[i]=(float)pos[i];
   for (i=0; i<12; i++) R2[i]=(float)R[i];
-  dsDrawCappedCylinder (pos2,R2,length,radius);
+  dsDrawCapsule (pos2,R2,length,radius);
 }
 
 
@@ -1517,7 +1517,7 @@ void dsSetSphereQuality (int n)
 }
 
 
-void dsSetCappedCylinderQuality (int n)
+void dsSetCapsuleQuality (int n)
 {
   capped_cylinder_quality = n;
 }

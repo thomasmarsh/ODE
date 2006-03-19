@@ -43,10 +43,10 @@ void dMassSetParameters (dMass *, dReal themass,
 void dMassSetSphere (dMass *, dReal density, dReal radius);
 void dMassSetSphereTotal (dMass *, dReal total_mass, dReal radius);
 
-void dMassSetCappedCylinder (dMass *, dReal density, int direction,
-			     dReal radius, dReal length);
-void dMassSetCappedCylinderTotal (dMass *, dReal total_mass, int direction,
-				  dReal radius, dReal length);
+void dMassSetCapsule (dMass *, dReal density, int direction,
+		  	dReal radius, dReal length);
+void dMassSetCapsuleTotal (dMass *, dReal total_mass, int direction,
+			dReal radius, dReal length);
 
 void dMassSetCylinder (dMass *, dReal density, int direction,
 		       dReal radius, dReal length);
@@ -66,6 +66,9 @@ void dMassRotate (dMass *, const dMatrix3 R);
 
 void dMassAdd (dMass *a, const dMass *b);
 
+// Backwards compatible API
+#define dMassSetCappedCylinder dMassSetCapsule
+#define dMassSetCappedCylinderTotal dMassSetCapsuleTotal
 
 
 struct dMass {
@@ -84,8 +87,10 @@ struct dMass {
     { dMassSetParameters (this,themass,cgx,cgy,cgz,I11,I22,I33,I12,I13,I23); }
   void setSphere (dReal density, dReal radius)
     { dMassSetSphere (this,density,radius); }
-  void setCappedCylinder (dReal density, int direction, dReal a, dReal b)
+  void setCapsule (dReal density, int direction, dReal a, dReal b)
     { dMassSetCappedCylinder (this,density,direction,a,b); }
+  void setCappedCylinder (dReal density, int direction, dReal a, dReal b)
+    { setCapsule(density, direction, a, b); }
   void setBox (dReal density, dReal lx, dReal ly, dReal lz)
     { dMassSetBox (this,density,lx,ly,lz); }
   void adjust (dReal newmass)

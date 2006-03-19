@@ -50,7 +50,7 @@ typical errors for each test cycle are about 1e-5 ... 1e-4.
 #define dsDrawBox dsDrawBoxD
 #define dsDrawSphere dsDrawSphereD
 #define dsDrawCylinder dsDrawCylinderD
-#define dsDrawCappedCylinder dsDrawCappedCylinderD
+#define dsDrawCapsule dsDrawCapsuleD
 #endif
 
 

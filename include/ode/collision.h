@@ -93,7 +93,7 @@ enum {
 enum {
   dSphereClass = 0,
   dBoxClass,
-  dCCylinderClass,
+  dCapsuleClass,
   dCylinderClass,
   dPlaneClass,
   dRayClass,
@@ -127,10 +127,17 @@ void dGeomPlaneSetParams (dGeomID plane, dReal a, dReal b, dReal c, dReal d);
 void dGeomPlaneGetParams (dGeomID plane, dVector4 result);
 dReal dGeomPlanePointDepth (dGeomID plane, dReal x, dReal y, dReal z);
 
-dGeomID dCreateCCylinder (dSpaceID space, dReal radius, dReal length);
-void dGeomCCylinderSetParams (dGeomID ccylinder, dReal radius, dReal length);
-void dGeomCCylinderGetParams (dGeomID ccylinder, dReal *radius, dReal *length);
-dReal dGeomCCylinderPointDepth (dGeomID ccylinder, dReal x, dReal y, dReal z);
+dGeomID dCreateCapsule (dSpaceID space, dReal radius, dReal length);
+void dGeomCapsuleSetParams (dGeomID ccylinder, dReal radius, dReal length);
+void dGeomCapsuleGetParams (dGeomID ccylinder, dReal *radius, dReal *length);
+dReal dGeomCapsulePointDepth (dGeomID ccylinder, dReal x, dReal y, dReal z);
+
+// For now we want to have a backwards compatible C-API, note: C++ API is not.
+#define dCreateCCylinder dCreateCapsule
+#define dGeomCCylinderSetParams dGeomCapsuleSetParams
+#define dGeomCCylinderGetParams dGeomCapsuleGetParams
+#define dGeomCCylinderPointDepth dGeomCapsulePointDepth
+#define dCCylinderClass dCapsuleClass
 
 #ifdef dCYLINDER_ENABLED
 dGeomID dCreateCylinder (dSpaceID space, dReal radius, dReal length);

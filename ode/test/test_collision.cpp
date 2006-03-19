@@ -43,7 +43,7 @@ change the random test conditions.
 #define dsDrawSphere dsDrawSphereD
 #define dsDrawBox dsDrawBoxD
 #define dsDrawLine dsDrawLineD
-#define dsDrawCappedCylinder dsDrawCappedCylinderD
+#define dsDrawCapsule dsDrawCapsuleD
 #endif
 
 //****************************************************************************
@@ -182,11 +182,11 @@ void draw_all_objects (dSpaceID space)
       break;
     }
 
-    case dCCylinderClass: {
+    case dCapsuleClass: {
       dsSetColorAlpha (0,1,0,0.8);
       dReal radius,length;
-      dGeomCCylinderGetParams (g,&radius,&length);
-      dsDrawCappedCylinder (pos,dGeomGetRotation(g),length,radius);
+      dGeomCapsuleGetParams (g,&radius,&length);
+      dsDrawCapsule (pos,dGeomGetRotation(g),length,radius);
       break;
     }
 
@@ -337,14 +337,14 @@ int test_ccylinder_point_depth()
   dReal r,l,beta,x,y,d;
 
   dSimpleSpace space(0);
-  dGeomID ccyl = dCreateCCylinder (0,1,1);
+  dGeomID ccyl = dCreateCapsule (0,1,1);
   dSpaceAdd (space,ccyl);
 
   // ********** make a random ccyl
 
   r = dRandReal()*0.5 + 0.01;
   l = dRandReal()*1 + 0.01;
-  dGeomCCylinderSetParams (ccyl,r,l);
+  dGeomCapsuleSetParams (ccyl,r,l);
   dMakeRandomVector (p,3,1.0);
   dGeomSetPosition (ccyl,p[0],p[1],p[2]);
   dRFromAxisAndAngle (R,dRandReal()*2-1,dRandReal()*2-1,
@@ -355,7 +355,7 @@ int test_ccylinder_point_depth()
 
   beta = dRandReal()-0.5;
   for (j=0; j<3; j++) a[j] = p[j] + l*beta*R[j*4+2];
-  if (dFabs(dGeomCCylinderPointDepth (ccyl,a[0],a[1],a[2]) - r) >= tol)
+  if (dFabs(dGeomCapsulePointDepth (ccyl,a[0],a[1],a[2]) - r) >= tol)
     FAILED();
 
   // ********** test point on surface (excluding caps) has depth 0
@@ -365,7 +365,7 @@ int test_ccylinder_point_depth()
   y = r*cos(beta);
   beta = dRandReal()-0.5;
   for (j=0; j<3; j++) a[j] = p[j] + x*R[j*4+0] + y*R[j*4+1] + l*beta*R[j*4+2];
-  if (dFabs(dGeomCCylinderPointDepth (ccyl,a[0],a[1],a[2])) >= tol) FAILED();
+  if (dFabs(dGeomCapsulePointDepth (ccyl,a[0],a[1],a[2])) >= tol) FAILED();
 
   // ********** test point on surface of caps has depth 0
 
@@ -377,7 +377,7 @@ int test_ccylinder_point_depth()
   else {
     for (j=0; j<3; j++) a[j] = p[j] + a[j]*r - l*0.5*R[j*4+2];
   }
-  if (dFabs(dGeomCCylinderPointDepth (ccyl,a[0],a[1],a[2])) >= tol) FAILED();
+  if (dFabs(dGeomCapsulePointDepth (ccyl,a[0],a[1],a[2])) >= tol) FAILED();
 
   // ********** test point inside ccyl has positive depth
 
@@ -385,7 +385,7 @@ int test_ccylinder_point_depth()
   dNormalize3 (a);
   beta = dRandReal()-0.5;
   for (j=0; j<3; j++) a[j] = p[j] + a[j]*r*0.99 + l*beta*R[j*4+2];
-  if (dGeomCCylinderPointDepth (ccyl,a[0],a[1],a[2]) < 0) FAILED();
+  if (dGeomCapsulePointDepth (ccyl,a[0],a[1],a[2]) < 0) FAILED();
 
   // ********** test point depth (1)
 
@@ -395,7 +395,7 @@ int test_ccylinder_point_depth()
   y = (r-d)*cos(beta);
   beta = dRandReal()-0.5;
   for (j=0; j<3; j++) a[j] = p[j] + x*R[j*4+0] + y*R[j*4+1] + l*beta*R[j*4+2];
-  if (dFabs(dGeomCCylinderPointDepth (ccyl,a[0],a[1],a[2]) - d) >= tol)
+  if (dFabs(dGeomCapsulePointDepth (ccyl,a[0],a[1],a[2]) - d) >= tol)
     FAILED();
 
   // ********** test point depth (2)
@@ -409,7 +409,7 @@ int test_ccylinder_point_depth()
   else {
     for (j=0; j<3; j++) a[j] = p[j] + a[j]*(r-d) - l*0.5*R[j*4+2];
   }
-  if (dFabs(dGeomCCylinderPointDepth (ccyl,a[0],a[1],a[2]) - d) >= tol)
+  if (dFabs(dGeomCapsulePointDepth (ccyl,a[0],a[1],a[2]) - d) >= tol)
     FAILED();
 
   PASSED();
@@ -747,7 +747,7 @@ int test_ray_and_ccylinder()
 
   dSimpleSpace space(0);
   dGeomID ray = dCreateRay (0,0);
-  dGeomID ccyl = dCreateCCylinder (0,1,1);
+  dGeomID ccyl = dCreateCapsule (0,1,1);
   dSpaceAdd (space,ray);
   dSpaceAdd (space,ccyl);
 
@@ -755,7 +755,7 @@ int test_ray_and_ccylinder()
 
   r = dRandReal()*0.5 + 0.01;
   l = dRandReal()*1 + 0.01;
-  dGeomCCylinderSetParams (ccyl,r,l);
+  dGeomCapsuleSetParams (ccyl,r,l);
   dMakeRandomVector (p,3,1.0);
   dGeomSetPosition (ccyl,p[0],p[1],p[2]);
   dRFromAxisAndAngle (R,dRandReal()*2-1,dRandReal()*2-1,
@@ -795,7 +795,7 @@ int test_ray_and_ccylinder()
   dGeomRaySetLength (ray,r*1.01);
   if (dCollide (ray,ccyl,0,&contact,sizeof(dContactGeom)) != 1) FAILED();
   // check depth of contact point
-  if (dFabs (dGeomCCylinderPointDepth
+  if (dFabs (dGeomCapsulePointDepth
 	     (ccyl,contact.pos[0],contact.pos[1],contact.pos[2])) > tol)
     FAILED();
 
@@ -818,7 +818,7 @@ int test_ray_and_ccylinder()
   dGeomRaySetLength (ray,r*1.01);
   if (dCollide (ray,ccyl,0,&contact,sizeof(dContactGeom)) != 1) FAILED();
   // check depth of contact point
-  if (dFabs (dGeomCCylinderPointDepth
+  if (dFabs (dGeomCapsulePointDepth
 	     (ccyl,contact.pos[0],contact.pos[1],contact.pos[2])) > tol)
     FAILED();
 
@@ -832,7 +832,7 @@ int test_ray_and_ccylinder()
 
   if (dCollide (ray,ccyl,0,&contact,sizeof(dContactGeom))) {
     // check depth of contact point
-    if (dFabs (dGeomCCylinderPointDepth
+    if (dFabs (dGeomCapsulePointDepth
 	       (ccyl,contact.pos[0],contact.pos[1],contact.pos[2])) > tol)
       FAILED();
 
@@ -1287,7 +1287,7 @@ void do_tests (int argc, char **argv)
     fn.path_to_textures = "../../drawstuff/textures";
 
     dsSetSphereQuality (3);
-    dsSetCappedCylinderQuality (8);
+    dsSetCapsuleQuality (8);
     dsSimulationLoop (argc,argv,1280,900,&fn);
   }
   else {
