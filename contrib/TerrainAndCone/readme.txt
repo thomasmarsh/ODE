@@ -26,10 +26,13 @@ You will need to complete the following operations (with ODE 0.039):
 
 *** add to folder ode\src:
 
-dCone.cpp
+dCone.cpp        
 dTerrainY.cpp 
 dTerrainZ.cpp 
 collision_std_internal.h
+
+On linux => edit each .cpp file and comment out     #include "windows.h"    &    #include "ode\ode.h"
+
 
 *** add to drawstuff\src\drawstuff.cpp:
 
@@ -281,7 +284,7 @@ dReal dGeomConePointDepth(dGeomID g, dReal x, dReal y, dReal z);
 #define dLENGTHSQUARED(a) \
 	(((a)[0])*((a)[0]) + ((a)[1])*((a)[1]) + ((a)[2])*((a)[2]));
 
-*** add in ode\src\collision_kernel.cpp line 137:
+*** add in ode\src\collision_kernel.cpp function  'static void initColliders()'  next to other 'setCollider' calls:
   setCollider (dTerrainYClass,dSphereClass,&dCollideTerrainY);
   setCollider (dTerrainYClass,dBoxClass,&dCollideTerrainY);
   setCollider (dTerrainYClass,dCCylinderClass,&dCollideTerrainY);
@@ -313,6 +316,7 @@ int dCollideCCylinderCone(dxGeom *o1, dxGeom *o2, int flags, dContactGeom *conta
 int dCollideTriMeshCone(dxGeom *o1, dxGeom *o2, int flags, dContactGeom *contact, int skip);
 
 *** add dCone.cpp, dTerrainY.cpp and dTerrainZ.cpp to the the ODE_SRC variable in the makefile
+On Linux => add dCone.cpp, dTerrainY.cpp and dTerrainZ.cpp to the the libode_a_SOURCES variable in the ode/src/Makefile.am file.
 
 *** now you can now test using file test_boxstackb.cpp (to add in folder ode\test).
 
