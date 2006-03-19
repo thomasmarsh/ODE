@@ -339,10 +339,10 @@ static void printBox (PrintingContext &c, dxGeom *g)
 
 
 
-static void printCCylinder (PrintingContext &c, dxGeom *g)
+static void printCapsule (PrintingContext &c, dxGeom *g)
 {
 	dReal radius,length;
-	dGeomCCylinderGetParams (g,&radius,&length);
+	dGeomCapsuleGetParams (g,&radius,&length);
 	c.print ("type","capsule");
 	c.print ("radius",radius);
 	c.print ("length",length);
@@ -415,7 +415,7 @@ static void printGeom (PrintingContext &c, dxGeom *g)
 	switch (g->type) {
 		case dSphereClass: printSphere (c,g); break;
 		case dBoxClass: printBox (c,g); break;
-		case dCCylinderClass: printCCylinder (c,g); break;
+		case dCapsuleClass: printCapsule (c,g); break;
 		case dPlaneClass: printPlane (c,g); break;
 		case dRayClass: printRay (c,g); break;
 		case dGeomTransformClass: printGeomTransform (c,g); break;

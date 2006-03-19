@@ -57,7 +57,7 @@ slide.
 #define dsDrawBox dsDrawBoxD
 #define dsDrawSphere dsDrawSphereD
 #define dsDrawCylinder dsDrawCylinderD
-#define dsDrawCappedCylinder dsDrawCappedCylinderD
+#define dsDrawCapsule dsDrawCapsuleD
 #endif
 
 

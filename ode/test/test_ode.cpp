@@ -663,7 +663,7 @@ void testMassFunctions()
     printf ("\tpassed (4)\n"); else printf ("\tFAILED (4)\n");
 
   dMassSetZero (&m);
-  dMassSetCappedCylinder (&m,1.3,1,0.76,1.53);
+  dMassSetCapsule (&m,1.3,1,0.76,1.53);
   if (cmp(m.mass,5.99961928996029) && m.c[0]==0 && m.c[1]==0 && m.c[2]==0 &&
       cmp(m._I(0,0),1.59461986077384) &&
       cmp(m._I(1,1),4.57537403079093) &&

@@ -953,10 +953,10 @@ int dCollideCylinderTrimesh(dxGeom *o1, dxGeom *o2, int flags, dContactGeom *con
 	obbRot[1][2] = cData.mCylinderRot[9];
 	obbRot[2][2] = cData.mCylinderRot[10];
 
-	OBB obbCCylinder(cCenter,cExtents,obbRot);
+	OBB obbCapsule(cCenter,cExtents,obbRot);
 
-	Matrix4x4 CCylinderMatrix;
-	MakeMatrix(cData.vCylinderPos, cData.mCylinderRot, CCylinderMatrix);
+	Matrix4x4 CapsuleMatrix;
+	MakeMatrix(cData.vCylinderPos, cData.mCylinderRot, CapsuleMatrix);
 
 	Matrix4x4 MeshMatrix;
 	MakeMatrix(cData.vTrimeshPos, cData.mTrimeshRot, MeshMatrix);
@@ -984,12 +984,12 @@ int dCollideCylinderTrimesh(dxGeom *o1, dxGeom *o2, int flags, dContactGeom *con
 
 		// Intersect
 		Collider.SetTemporalCoherence(true);
-		Collider.Collide(*BoxTC, obbCCylinder, cData.gTrimesh->Data->BVTree, null, &MeshMatrix);
+		Collider.Collide(*BoxTC, obbCapsule, cData.gTrimesh->Data->BVTree, null, &MeshMatrix);
 	}
 	else 
 	{
 		Collider.SetTemporalCoherence(false);
-		Collider.Collide(dxTriMesh::defaultBoxCache, obbCCylinder, cData.gTrimesh->Data->BVTree, null,&MeshMatrix);
+		Collider.Collide(dxTriMesh::defaultBoxCache, obbCapsule, cData.gTrimesh->Data->BVTree, null,&MeshMatrix);
 	}
 
 	// Retrieve data
