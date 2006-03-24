@@ -164,6 +164,7 @@ static void destroyMainWindow()
   glXDestroyContext (display,glx_context);
   XDestroyWindow (display,win);
   XSync (display,0);
+  XCloseDisplay(display);
   display = 0;
   win = 0;
   glx_context = 0;
@@ -327,22 +328,30 @@ void dsPlatformSimLoop (int window_width, int window_height, dsFunctions *fn,
 
   dsStartGraphics (window_width,window_height,fn);
 
-  fprintf (stderr,
-	   "\n"
-	   "Simulation test environment v%d.%02d\n"
-	   "   Ctrl-P : pause / unpause (or say `-pause' on command line).\n"
-	   "   Ctrl-O : single step when paused.\n"
-	   "   Ctrl-T : toggle textures (or say `-notex' on command line).\n"
-	   "   Ctrl-S : toggle shadows (or say `-noshadow' on command line).\n"
-	   "   Ctrl-V : print current viewpoint coordinates (x,y,z,h,p,r).\n"
-	   "   Ctrl-W : write frames to ppm files: frame/frameNNN.ppm\n"
-	   "   Ctrl-X : exit.\n"
-	   "\n"
-	   "Change the camera position by clicking + dragging in the window.\n"
-	   "   Left button - pan and tilt.\n"
-	   "   Right button - forward and sideways.\n"
-	   "   Left + Right button (or middle button) - sideways and up.\n"
-	   "\n",DS_VERSION >> 8,DS_VERSION & 0xff);
+  static bool firsttime=true;
+  if (firsttime)
+  {
+    fprintf
+    (
+      stderr,
+      "\n"
+      "Simulation test environment v%d.%02d\n"
+      "   Ctrl-P : pause / unpause (or say `-pause' on command line).\n"
+      "   Ctrl-O : single step when paused.\n"
+      "   Ctrl-T : toggle textures (or say `-notex' on command line).\n"
+      "   Ctrl-S : toggle shadows (or say `-noshadow' on command line).\n"
+      "   Ctrl-V : print current viewpoint coordinates (x,y,z,h,p,r).\n"
+      "   Ctrl-W : write frames to ppm files: frame/frameNNN.ppm\n"
+      "   Ctrl-X : exit.\n"
+      "\n"
+      "Change the camera position by clicking + dragging in the window.\n"
+      "   Left button - pan and tilt.\n"
+      "   Right button - forward and sideways.\n"
+      "   Left + Right button (or middle button) - sideways and up.\n"
+      "\n",DS_VERSION >> 8,DS_VERSION & 0xff
+    );
+    firsttime = false;
+  }
 
   if (fn->start) fn->start();
 
