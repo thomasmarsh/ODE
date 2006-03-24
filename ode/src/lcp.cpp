@@ -1741,7 +1741,7 @@ void dSolveLCP (int n, dReal *A, dReal *x, dReal *b,
 //***************************************************************************
 // accuracy and timing test
 
-extern "C" void dTestSolveLCP()
+extern "C" ODE_API void dTestSolveLCP()
 {
   int n = 100;
   int i,nskip = dPAD(n);

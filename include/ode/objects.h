@@ -33,240 +33,240 @@ extern "C" {
 
 /* world */
 
-dWorldID dWorldCreate(void);
-void dWorldDestroy (dWorldID);
+ODE_API dWorldID dWorldCreate(void);
+ODE_API void dWorldDestroy (dWorldID);
 
-void dWorldSetGravity (dWorldID, dReal x, dReal y, dReal z);
-void dWorldGetGravity (dWorldID, dVector3 gravity);
-void dWorldSetERP (dWorldID, dReal erp);
-dReal dWorldGetERP (dWorldID);
-void dWorldSetCFM (dWorldID, dReal cfm);
-dReal dWorldGetCFM (dWorldID);
-void dWorldStep (dWorldID, dReal stepsize);
-void dWorldImpulseToForce (dWorldID, dReal stepsize,
+ODE_API void dWorldSetGravity (dWorldID, dReal x, dReal y, dReal z);
+ODE_API void dWorldGetGravity (dWorldID, dVector3 gravity);
+ODE_API void dWorldSetERP (dWorldID, dReal erp);
+ODE_API dReal dWorldGetERP (dWorldID);
+ODE_API void dWorldSetCFM (dWorldID, dReal cfm);
+ODE_API dReal dWorldGetCFM (dWorldID);
+ODE_API void dWorldStep (dWorldID, dReal stepsize);
+ODE_API void dWorldImpulseToForce (dWorldID, dReal stepsize,
 			   dReal ix, dReal iy, dReal iz, dVector3 force);
 
 /* World QuickStep functions */
 
-void dWorldQuickStep (dWorldID w, dReal stepsize);
-void dWorldSetQuickStepNumIterations (dWorldID, int num);
-int dWorldGetQuickStepNumIterations (dWorldID);
-void dWorldSetQuickStepW (dWorldID, dReal param);
-dReal dWorldGetQuickStepW (dWorldID);
+ODE_API void dWorldQuickStep (dWorldID w, dReal stepsize);
+ODE_API void dWorldSetQuickStepNumIterations (dWorldID, int num);
+ODE_API int dWorldGetQuickStepNumIterations (dWorldID);
+ODE_API void dWorldSetQuickStepW (dWorldID, dReal param);
+ODE_API dReal dWorldGetQuickStepW (dWorldID);
 
 /* World contact parameter functions */
 
-void dWorldSetContactMaxCorrectingVel (dWorldID, dReal vel);
-dReal dWorldGetContactMaxCorrectingVel (dWorldID);
-void dWorldSetContactSurfaceLayer (dWorldID, dReal depth);
-dReal dWorldGetContactSurfaceLayer (dWorldID);
+ODE_API void dWorldSetContactMaxCorrectingVel (dWorldID, dReal vel);
+ODE_API dReal dWorldGetContactMaxCorrectingVel (dWorldID);
+ODE_API void dWorldSetContactSurfaceLayer (dWorldID, dReal depth);
+ODE_API dReal dWorldGetContactSurfaceLayer (dWorldID);
 
 /* StepFast1 functions */
 
-void dWorldStepFast1(dWorldID, dReal stepsize, int maxiterations);
-void dWorldSetAutoEnableDepthSF1(dWorldID, int autoEnableDepth);
-int dWorldGetAutoEnableDepthSF1(dWorldID);
+ODE_API void dWorldStepFast1(dWorldID, dReal stepsize, int maxiterations);
+ODE_API void dWorldSetAutoEnableDepthSF1(dWorldID, int autoEnableDepth);
+ODE_API int dWorldGetAutoEnableDepthSF1(dWorldID);
 
 /* Auto-disable functions */
 
-dReal dWorldGetAutoDisableLinearThreshold (dWorldID);
-void  dWorldSetAutoDisableLinearThreshold (dWorldID, dReal linear_threshold);
-dReal dWorldGetAutoDisableAngularThreshold (dWorldID);
-void  dWorldSetAutoDisableAngularThreshold (dWorldID, dReal angular_threshold);
-int   dWorldGetAutoDisableSteps (dWorldID);
-void  dWorldSetAutoDisableSteps (dWorldID, int steps);
-dReal dWorldGetAutoDisableTime (dWorldID);
-void  dWorldSetAutoDisableTime (dWorldID, dReal time);
-int   dWorldGetAutoDisableFlag (dWorldID);
-void  dWorldSetAutoDisableFlag (dWorldID, int do_auto_disable);
+ODE_API dReal dWorldGetAutoDisableLinearThreshold (dWorldID);
+ODE_API void  dWorldSetAutoDisableLinearThreshold (dWorldID, dReal linear_threshold);
+ODE_API dReal dWorldGetAutoDisableAngularThreshold (dWorldID);
+ODE_API void  dWorldSetAutoDisableAngularThreshold (dWorldID, dReal angular_threshold);
+ODE_API int   dWorldGetAutoDisableSteps (dWorldID);
+ODE_API void  dWorldSetAutoDisableSteps (dWorldID, int steps);
+ODE_API dReal dWorldGetAutoDisableTime (dWorldID);
+ODE_API void  dWorldSetAutoDisableTime (dWorldID, dReal time);
+ODE_API int   dWorldGetAutoDisableFlag (dWorldID);
+ODE_API void  dWorldSetAutoDisableFlag (dWorldID, int do_auto_disable);
 
-dReal dBodyGetAutoDisableLinearThreshold (dBodyID);
-void  dBodySetAutoDisableLinearThreshold (dBodyID, dReal linear_threshold);
-dReal dBodyGetAutoDisableAngularThreshold (dBodyID);
-void  dBodySetAutoDisableAngularThreshold (dBodyID, dReal angular_threshold);
-int   dBodyGetAutoDisableSteps (dBodyID);
-void  dBodySetAutoDisableSteps (dBodyID, int steps);
-dReal dBodyGetAutoDisableTime (dBodyID);
-void  dBodySetAutoDisableTime (dBodyID, dReal time);
-int   dBodyGetAutoDisableFlag (dBodyID);
-void  dBodySetAutoDisableFlag (dBodyID, int do_auto_disable);
-void  dBodySetAutoDisableDefaults (dBodyID);
+ODE_API dReal dBodyGetAutoDisableLinearThreshold (dBodyID);
+ODE_API void  dBodySetAutoDisableLinearThreshold (dBodyID, dReal linear_threshold);
+ODE_API dReal dBodyGetAutoDisableAngularThreshold (dBodyID);
+ODE_API void  dBodySetAutoDisableAngularThreshold (dBodyID, dReal angular_threshold);
+ODE_API int   dBodyGetAutoDisableSteps (dBodyID);
+ODE_API void  dBodySetAutoDisableSteps (dBodyID, int steps);
+ODE_API dReal dBodyGetAutoDisableTime (dBodyID);
+ODE_API void  dBodySetAutoDisableTime (dBodyID, dReal time);
+ODE_API int   dBodyGetAutoDisableFlag (dBodyID);
+ODE_API void  dBodySetAutoDisableFlag (dBodyID, int do_auto_disable);
+ODE_API void  dBodySetAutoDisableDefaults (dBodyID);
 
 /* bodies */
 
-dBodyID dBodyCreate (dWorldID);
-void dBodyDestroy (dBodyID);
+ODE_API dBodyID dBodyCreate (dWorldID);
+ODE_API void dBodyDestroy (dBodyID);
 
-void  dBodySetData (dBodyID, void *data);
-void *dBodyGetData (dBodyID);
+ODE_API void  dBodySetData (dBodyID, void *data);
+ODE_API void *dBodyGetData (dBodyID);
 
-void dBodySetPosition   (dBodyID, dReal x, dReal y, dReal z);
-void dBodySetRotation   (dBodyID, const dMatrix3 R);
-void dBodySetQuaternion (dBodyID, const dQuaternion q);
-void dBodySetLinearVel  (dBodyID, dReal x, dReal y, dReal z);
-void dBodySetAngularVel (dBodyID, dReal x, dReal y, dReal z);
-const dReal * dBodyGetPosition   (dBodyID);
-const dReal * dBodyGetRotation   (dBodyID);	/* ptr to 4x3 rot matrix */
-const dReal * dBodyGetQuaternion (dBodyID);
-const dReal * dBodyGetLinearVel  (dBodyID);
-const dReal * dBodyGetAngularVel (dBodyID);
+ODE_API void dBodySetPosition   (dBodyID, dReal x, dReal y, dReal z);
+ODE_API void dBodySetRotation   (dBodyID, const dMatrix3 R);
+ODE_API void dBodySetQuaternion (dBodyID, const dQuaternion q);
+ODE_API void dBodySetLinearVel  (dBodyID, dReal x, dReal y, dReal z);
+ODE_API void dBodySetAngularVel (dBodyID, dReal x, dReal y, dReal z);
+ODE_API const dReal * dBodyGetPosition   (dBodyID);
+ODE_API const dReal * dBodyGetRotation   (dBodyID);	/* ptr to 4x3 rot matrix */
+ODE_API const dReal * dBodyGetQuaternion (dBodyID);
+ODE_API const dReal * dBodyGetLinearVel  (dBodyID);
+ODE_API const dReal * dBodyGetAngularVel (dBodyID);
 
-void dBodySetMass (dBodyID, const dMass *mass);
-void dBodyGetMass (dBodyID, dMass *mass);
+ODE_API void dBodySetMass (dBodyID, const dMass *mass);
+ODE_API void dBodyGetMass (dBodyID, dMass *mass);
 
-void dBodyAddForce            (dBodyID, dReal fx, dReal fy, dReal fz);
-void dBodyAddTorque           (dBodyID, dReal fx, dReal fy, dReal fz);
-void dBodyAddRelForce         (dBodyID, dReal fx, dReal fy, dReal fz);
-void dBodyAddRelTorque        (dBodyID, dReal fx, dReal fy, dReal fz);
-void dBodyAddForceAtPos       (dBodyID, dReal fx, dReal fy, dReal fz,
+ODE_API void dBodyAddForce            (dBodyID, dReal fx, dReal fy, dReal fz);
+ODE_API void dBodyAddTorque           (dBodyID, dReal fx, dReal fy, dReal fz);
+ODE_API void dBodyAddRelForce         (dBodyID, dReal fx, dReal fy, dReal fz);
+ODE_API void dBodyAddRelTorque        (dBodyID, dReal fx, dReal fy, dReal fz);
+ODE_API void dBodyAddForceAtPos       (dBodyID, dReal fx, dReal fy, dReal fz,
 			                dReal px, dReal py, dReal pz);
-void dBodyAddForceAtRelPos    (dBodyID, dReal fx, dReal fy, dReal fz,
+ODE_API void dBodyAddForceAtRelPos    (dBodyID, dReal fx, dReal fy, dReal fz,
 			                dReal px, dReal py, dReal pz);
-void dBodyAddRelForceAtPos    (dBodyID, dReal fx, dReal fy, dReal fz,
+ODE_API void dBodyAddRelForceAtPos    (dBodyID, dReal fx, dReal fy, dReal fz,
 			                dReal px, dReal py, dReal pz);
-void dBodyAddRelForceAtRelPos (dBodyID, dReal fx, dReal fy, dReal fz,
+ODE_API void dBodyAddRelForceAtRelPos (dBodyID, dReal fx, dReal fy, dReal fz,
 			                dReal px, dReal py, dReal pz);
 
-const dReal * dBodyGetForce   (dBodyID);
-const dReal * dBodyGetTorque  (dBodyID);
-void dBodySetForce  (dBodyID b, dReal x, dReal y, dReal z);
-void dBodySetTorque (dBodyID b, dReal x, dReal y, dReal z);
+ODE_API const dReal * dBodyGetForce   (dBodyID);
+ODE_API const dReal * dBodyGetTorque  (dBodyID);
+ODE_API void dBodySetForce  (dBodyID b, dReal x, dReal y, dReal z);
+ODE_API void dBodySetTorque (dBodyID b, dReal x, dReal y, dReal z);
 
-void dBodyGetRelPointPos    (dBodyID, dReal px, dReal py, dReal pz,
+ODE_API void dBodyGetRelPointPos    (dBodyID, dReal px, dReal py, dReal pz,
 			     dVector3 result);
-void dBodyGetRelPointVel    (dBodyID, dReal px, dReal py, dReal pz,
+ODE_API void dBodyGetRelPointVel    (dBodyID, dReal px, dReal py, dReal pz,
 			     dVector3 result);
-void dBodyGetPointVel       (dBodyID, dReal px, dReal py, dReal pz,
+ODE_API void dBodyGetPointVel       (dBodyID, dReal px, dReal py, dReal pz,
 			     dVector3 result);
-void dBodyGetPosRelPoint    (dBodyID, dReal px, dReal py, dReal pz,
+ODE_API void dBodyGetPosRelPoint    (dBodyID, dReal px, dReal py, dReal pz,
 			     dVector3 result);
-void dBodyVectorToWorld     (dBodyID, dReal px, dReal py, dReal pz,
+ODE_API void dBodyVectorToWorld     (dBodyID, dReal px, dReal py, dReal pz,
 			     dVector3 result);
-void dBodyVectorFromWorld   (dBodyID, dReal px, dReal py, dReal pz,
+ODE_API void dBodyVectorFromWorld   (dBodyID, dReal px, dReal py, dReal pz,
 			     dVector3 result);
 
-void dBodySetFiniteRotationMode (dBodyID, int mode);
-void dBodySetFiniteRotationAxis (dBodyID, dReal x, dReal y, dReal z);
+ODE_API void dBodySetFiniteRotationMode (dBodyID, int mode);
+ODE_API void dBodySetFiniteRotationAxis (dBodyID, dReal x, dReal y, dReal z);
 
-int dBodyGetFiniteRotationMode (dBodyID);
-void dBodyGetFiniteRotationAxis (dBodyID, dVector3 result);
+ODE_API int dBodyGetFiniteRotationMode (dBodyID);
+ODE_API void dBodyGetFiniteRotationAxis (dBodyID, dVector3 result);
 
-int dBodyGetNumJoints (dBodyID b);
-dJointID dBodyGetJoint (dBodyID, int index);
+ODE_API int dBodyGetNumJoints (dBodyID b);
+ODE_API dJointID dBodyGetJoint (dBodyID, int index);
 
-void dBodyEnable (dBodyID);
-void dBodyDisable (dBodyID);
-int dBodyIsEnabled (dBodyID);
+ODE_API void dBodyEnable (dBodyID);
+ODE_API void dBodyDisable (dBodyID);
+ODE_API int dBodyIsEnabled (dBodyID);
 
-void dBodySetGravityMode (dBodyID b, int mode);
-int dBodyGetGravityMode (dBodyID b);
+ODE_API void dBodySetGravityMode (dBodyID b, int mode);
+ODE_API int dBodyGetGravityMode (dBodyID b);
 
 
 /* joints */
 
-dJointID dJointCreateBall (dWorldID, dJointGroupID);
-dJointID dJointCreateHinge (dWorldID, dJointGroupID);
-dJointID dJointCreateSlider (dWorldID, dJointGroupID);
-dJointID dJointCreateContact (dWorldID, dJointGroupID, const dContact *);
-dJointID dJointCreateHinge2 (dWorldID, dJointGroupID);
-dJointID dJointCreateUniversal (dWorldID, dJointGroupID);
-dJointID dJointCreateFixed (dWorldID, dJointGroupID);
-dJointID dJointCreateNull (dWorldID, dJointGroupID);
-dJointID dJointCreateAMotor (dWorldID, dJointGroupID);
-dJointID dJointCreateLMotor (dWorldID, dJointGroupID);
+ODE_API dJointID dJointCreateBall (dWorldID, dJointGroupID);
+ODE_API dJointID dJointCreateHinge (dWorldID, dJointGroupID);
+ODE_API dJointID dJointCreateSlider (dWorldID, dJointGroupID);
+ODE_API dJointID dJointCreateContact (dWorldID, dJointGroupID, const dContact *);
+ODE_API dJointID dJointCreateHinge2 (dWorldID, dJointGroupID);
+ODE_API dJointID dJointCreateUniversal (dWorldID, dJointGroupID);
+ODE_API dJointID dJointCreateFixed (dWorldID, dJointGroupID);
+ODE_API dJointID dJointCreateNull (dWorldID, dJointGroupID);
+ODE_API dJointID dJointCreateAMotor (dWorldID, dJointGroupID);
+ODE_API dJointID dJointCreateLMotor (dWorldID, dJointGroupID);
 
-void dJointDestroy (dJointID);
+ODE_API void dJointDestroy (dJointID);
 
-dJointGroupID dJointGroupCreate (int max_size);
-void dJointGroupDestroy (dJointGroupID);
-void dJointGroupEmpty (dJointGroupID);
+ODE_API dJointGroupID dJointGroupCreate (int max_size);
+ODE_API void dJointGroupDestroy (dJointGroupID);
+ODE_API void dJointGroupEmpty (dJointGroupID);
 
-void dJointAttach (dJointID, dBodyID body1, dBodyID body2);
-void dJointSetData (dJointID, void *data);
-void *dJointGetData (dJointID);
-int dJointGetType (dJointID);
-dBodyID dJointGetBody (dJointID, int index);
+ODE_API void dJointAttach (dJointID, dBodyID body1, dBodyID body2);
+ODE_API void dJointSetData (dJointID, void *data);
+ODE_API void *dJointGetData (dJointID);
+ODE_API int dJointGetType (dJointID);
+ODE_API dBodyID dJointGetBody (dJointID, int index);
 
-void dJointSetFeedback (dJointID, dJointFeedback *);
-dJointFeedback *dJointGetFeedback (dJointID);
+ODE_API void dJointSetFeedback (dJointID, dJointFeedback *);
+ODE_API dJointFeedback *dJointGetFeedback (dJointID);
 
-void dJointSetBallAnchor (dJointID, dReal x, dReal y, dReal z);
-void dJointSetBallAnchor2 (dJointID, dReal x, dReal y, dReal z);
-void dJointSetHingeAnchor (dJointID, dReal x, dReal y, dReal z);
-void dJointSetHingeAnchorDelta (dJointID, dReal x, dReal y, dReal z, dReal ax, dReal ay, dReal az);
-void dJointSetHingeAxis (dJointID, dReal x, dReal y, dReal z);
-void dJointSetHingeParam (dJointID, int parameter, dReal value);
-void dJointAddHingeTorque(dJointID joint, dReal torque);
-void dJointSetSliderAxis (dJointID, dReal x, dReal y, dReal z);
-void dJointSetSliderAxisDelta (dJointID, dReal x, dReal y, dReal z, dReal ax, dReal ay, dReal az);
-void dJointSetSliderParam (dJointID, int parameter, dReal value);
-void dJointAddSliderForce(dJointID joint, dReal force);
-void dJointSetHinge2Anchor (dJointID, dReal x, dReal y, dReal z);
-void dJointSetHinge2Axis1 (dJointID, dReal x, dReal y, dReal z);
-void dJointSetHinge2Axis2 (dJointID, dReal x, dReal y, dReal z);
-void dJointSetHinge2Param (dJointID, int parameter, dReal value);
-void dJointAddHinge2Torques(dJointID joint, dReal torque1, dReal torque2);
-void dJointSetUniversalAnchor (dJointID, dReal x, dReal y, dReal z);
-void dJointSetUniversalAxis1 (dJointID, dReal x, dReal y, dReal z);
-void dJointSetUniversalAxis2 (dJointID, dReal x, dReal y, dReal z);
-void dJointSetUniversalParam (dJointID, int parameter, dReal value);
-void dJointAddUniversalTorques(dJointID joint, dReal torque1, dReal torque2);
-void dJointSetFixed (dJointID);
-void dJointSetAMotorNumAxes (dJointID, int num);
-void dJointSetAMotorAxis (dJointID, int anum, int rel,
+ODE_API void dJointSetBallAnchor (dJointID, dReal x, dReal y, dReal z);
+ODE_API void dJointSetBallAnchor2 (dJointID, dReal x, dReal y, dReal z);
+ODE_API void dJointSetHingeAnchor (dJointID, dReal x, dReal y, dReal z);
+ODE_API void dJointSetHingeAnchorDelta (dJointID, dReal x, dReal y, dReal z, dReal ax, dReal ay, dReal az);
+ODE_API void dJointSetHingeAxis (dJointID, dReal x, dReal y, dReal z);
+ODE_API void dJointSetHingeParam (dJointID, int parameter, dReal value);
+ODE_API void dJointAddHingeTorque(dJointID joint, dReal torque);
+ODE_API void dJointSetSliderAxis (dJointID, dReal x, dReal y, dReal z);
+ODE_API void dJointSetSliderAxisDelta (dJointID, dReal x, dReal y, dReal z, dReal ax, dReal ay, dReal az);
+ODE_API void dJointSetSliderParam (dJointID, int parameter, dReal value);
+ODE_API void dJointAddSliderForce(dJointID joint, dReal force);
+ODE_API void dJointSetHinge2Anchor (dJointID, dReal x, dReal y, dReal z);
+ODE_API void dJointSetHinge2Axis1 (dJointID, dReal x, dReal y, dReal z);
+ODE_API void dJointSetHinge2Axis2 (dJointID, dReal x, dReal y, dReal z);
+ODE_API void dJointSetHinge2Param (dJointID, int parameter, dReal value);
+ODE_API void dJointAddHinge2Torques(dJointID joint, dReal torque1, dReal torque2);
+ODE_API void dJointSetUniversalAnchor (dJointID, dReal x, dReal y, dReal z);
+ODE_API void dJointSetUniversalAxis1 (dJointID, dReal x, dReal y, dReal z);
+ODE_API void dJointSetUniversalAxis2 (dJointID, dReal x, dReal y, dReal z);
+ODE_API void dJointSetUniversalParam (dJointID, int parameter, dReal value);
+ODE_API void dJointAddUniversalTorques(dJointID joint, dReal torque1, dReal torque2);
+ODE_API void dJointSetFixed (dJointID);
+ODE_API void dJointSetAMotorNumAxes (dJointID, int num);
+ODE_API void dJointSetAMotorAxis (dJointID, int anum, int rel,
 			  dReal x, dReal y, dReal z);
-void dJointSetAMotorAngle (dJointID, int anum, dReal angle);
-void dJointSetAMotorParam (dJointID, int parameter, dReal value);
-void dJointSetAMotorMode (dJointID, int mode);
-void dJointAddAMotorTorques (dJointID, dReal torque1, dReal torque2, dReal torque3);
-void dJointSetLMotorNumAxes (dJointID, int num);
-void dJointSetLMotorAxis (dJointID, int anum, int rel, dReal x, dReal y, dReal z);
-void dJointSetLMotorParam (dJointID, int parameter, dReal value);
+ODE_API void dJointSetAMotorAngle (dJointID, int anum, dReal angle);
+ODE_API void dJointSetAMotorParam (dJointID, int parameter, dReal value);
+ODE_API void dJointSetAMotorMode (dJointID, int mode);
+ODE_API void dJointAddAMotorTorques (dJointID, dReal torque1, dReal torque2, dReal torque3);
+ODE_API void dJointSetLMotorNumAxes (dJointID, int num);
+ODE_API void dJointSetLMotorAxis (dJointID, int anum, int rel, dReal x, dReal y, dReal z);
+ODE_API void dJointSetLMotorParam (dJointID, int parameter, dReal value);
 
-void dJointGetBallAnchor (dJointID, dVector3 result);
-void dJointGetBallAnchor2 (dJointID, dVector3 result);
-void dJointGetHingeAnchor (dJointID, dVector3 result);
-void dJointGetHingeAnchor2 (dJointID, dVector3 result);
-void dJointGetHingeAxis (dJointID, dVector3 result);
-dReal dJointGetHingeParam (dJointID, int parameter);
-dReal dJointGetHingeAngle (dJointID);
-dReal dJointGetHingeAngleRate (dJointID);
-dReal dJointGetSliderPosition (dJointID);
-dReal dJointGetSliderPositionRate (dJointID);
-void dJointGetSliderAxis (dJointID, dVector3 result);
-dReal dJointGetSliderParam (dJointID, int parameter);
-void dJointGetHinge2Anchor (dJointID, dVector3 result);
-void dJointGetHinge2Anchor2 (dJointID, dVector3 result);
-void dJointGetHinge2Axis1 (dJointID, dVector3 result);
-void dJointGetHinge2Axis2 (dJointID, dVector3 result);
-dReal dJointGetHinge2Param (dJointID, int parameter);
-dReal dJointGetHinge2Angle1 (dJointID);
-dReal dJointGetHinge2Angle1Rate (dJointID);
-dReal dJointGetHinge2Angle2Rate (dJointID);
-void dJointGetUniversalAnchor (dJointID, dVector3 result);
-void dJointGetUniversalAnchor2 (dJointID, dVector3 result);
-void dJointGetUniversalAxis1 (dJointID, dVector3 result);
-void dJointGetUniversalAxis2 (dJointID, dVector3 result);
-dReal dJointGetUniversalParam (dJointID, int parameter);
-dReal dJointGetUniversalAngle1 (dJointID);
-dReal dJointGetUniversalAngle2 (dJointID);
-dReal dJointGetUniversalAngle1Rate (dJointID);
-dReal dJointGetUniversalAngle2Rate (dJointID);
-int dJointGetAMotorNumAxes (dJointID);
-void dJointGetAMotorAxis (dJointID, int anum, dVector3 result);
-int dJointGetAMotorAxisRel (dJointID, int anum);
-dReal dJointGetAMotorAngle (dJointID, int anum);
-dReal dJointGetAMotorAngleRate (dJointID, int anum);
-dReal dJointGetAMotorParam (dJointID, int parameter);
-int dJointGetAMotorMode (dJointID);
-int dJointGetLMotorNumAxes (dJointID);
-void dJointGetLMotorAxis (dJointID, int anum, dVector3 result);
-dReal dJointGetLMotorParam (dJointID, int parameter);
+ODE_API void dJointGetBallAnchor (dJointID, dVector3 result);
+ODE_API void dJointGetBallAnchor2 (dJointID, dVector3 result);
+ODE_API void dJointGetHingeAnchor (dJointID, dVector3 result);
+ODE_API void dJointGetHingeAnchor2 (dJointID, dVector3 result);
+ODE_API void dJointGetHingeAxis (dJointID, dVector3 result);
+ODE_API dReal dJointGetHingeParam (dJointID, int parameter);
+ODE_API dReal dJointGetHingeAngle (dJointID);
+ODE_API dReal dJointGetHingeAngleRate (dJointID);
+ODE_API dReal dJointGetSliderPosition (dJointID);
+ODE_API dReal dJointGetSliderPositionRate (dJointID);
+ODE_API void dJointGetSliderAxis (dJointID, dVector3 result);
+ODE_API dReal dJointGetSliderParam (dJointID, int parameter);
+ODE_API void dJointGetHinge2Anchor (dJointID, dVector3 result);
+ODE_API void dJointGetHinge2Anchor2 (dJointID, dVector3 result);
+ODE_API void dJointGetHinge2Axis1 (dJointID, dVector3 result);
+ODE_API void dJointGetHinge2Axis2 (dJointID, dVector3 result);
+ODE_API dReal dJointGetHinge2Param (dJointID, int parameter);
+ODE_API dReal dJointGetHinge2Angle1 (dJointID);
+ODE_API dReal dJointGetHinge2Angle1Rate (dJointID);
+ODE_API dReal dJointGetHinge2Angle2Rate (dJointID);
+ODE_API void dJointGetUniversalAnchor (dJointID, dVector3 result);
+ODE_API void dJointGetUniversalAnchor2 (dJointID, dVector3 result);
+ODE_API void dJointGetUniversalAxis1 (dJointID, dVector3 result);
+ODE_API void dJointGetUniversalAxis2 (dJointID, dVector3 result);
+ODE_API dReal dJointGetUniversalParam (dJointID, int parameter);
+ODE_API dReal dJointGetUniversalAngle1 (dJointID);
+ODE_API dReal dJointGetUniversalAngle2 (dJointID);
+ODE_API dReal dJointGetUniversalAngle1Rate (dJointID);
+ODE_API dReal dJointGetUniversalAngle2Rate (dJointID);
+ODE_API int dJointGetAMotorNumAxes (dJointID);
+ODE_API void dJointGetAMotorAxis (dJointID, int anum, dVector3 result);
+ODE_API int dJointGetAMotorAxisRel (dJointID, int anum);
+ODE_API dReal dJointGetAMotorAngle (dJointID, int anum);
+ODE_API dReal dJointGetAMotorAngleRate (dJointID, int anum);
+ODE_API dReal dJointGetAMotorParam (dJointID, int parameter);
+ODE_API int dJointGetAMotorMode (dJointID);
+ODE_API int dJointGetLMotorNumAxes (dJointID);
+ODE_API void dJointGetLMotorAxis (dJointID, int anum, dVector3 result);
+ODE_API dReal dJointGetLMotorParam (dJointID, int parameter);
 
-dJointID dConnectingJoint (dBodyID, dBodyID);
-int dConnectingJointList (dBodyID, dBodyID, dJointID*);
-int dAreConnected (dBodyID, dBodyID);
-int dAreConnectedExcluding (dBodyID, dBodyID, int joint_type);
+ODE_API dJointID dConnectingJoint (dBodyID, dBodyID);
+ODE_API int dConnectingJointList (dBodyID, dBodyID, dJointID*);
+ODE_API int dAreConnected (dBodyID, dBodyID);
+ODE_API int dAreConnectedExcluding (dBodyID, dBodyID, int joint_type);
 
 
 #ifdef __cplusplus
