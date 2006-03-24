@@ -390,12 +390,12 @@ typedef unsigned long int intP;
 #endif
 
 /* Handle Windows DLL odities */
-#if defined(DLL_EXPORT) && defined(WIN32)
-#define DLL __declspec( dllexport )
-#elif !defined(DLL_EXPORT) && defined(WIN32)
-#define DLL __declspec( dllimport )
+#if defined(ODE_DLL) && defined(WIN32)
+#define ODE_API __declspec( dllexport )
+#elif !defined(ODE_DLL) && defined(WIN32)
+#define ODE_API __declspec( dllimport )
 #else
-#define DLL
+#define ODE_API
 #endif
 
 #endif /* #define ODE_CONFIG_H */
@@ -409,7 +409,7 @@ case "$host_os" in
     ;;
   cygwin* | mingw*)
     so_ext=".dll"
-    DLLDEFINE="-DDLL_EXPORT"
+    DLLDEFINE="-DODE_DLL"
     ;;
   *apple*) # For Mac OS X
     so_ext=".dylib"

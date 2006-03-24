@@ -88,11 +88,11 @@ int draw_all_objects_called;
 //****************************************************************************
 // globals
 
-int dBoxBox (const dVector3 p1, const dMatrix3 R1,
+/* int dBoxBox (const dVector3 p1, const dMatrix3 R1,
 	     const dVector3 side1, const dVector3 p2,
 	     const dMatrix3 R2, const dVector3 side2,
 	     dVector3 normal, dReal *depth, int *code,
-	     int maxc, dContactGeom *contact, int skip);
+	     int maxc, dContactGeom *contact, int skip); */
 
 void dLineClosestApproach (const dVector3 pa, const dVector3 ua,
 			   const dVector3 pb, const dVector3 ub,
