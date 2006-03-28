@@ -188,7 +188,7 @@ static LRESULT CALLBACK mainWndProc (HWND hWnd, UINT msg, WPARAM wParam,
 				     LPARAM lParam)
 {
   static int button=0,lastx=0,lasty=0;
-  int ctrl = wParam & MK_CONTROL;
+  int ctrl = int(wParam & MK_CONTROL);
 
   switch (msg) {
   case WM_LBUTTONDOWN:
@@ -224,7 +224,7 @@ static LRESULT CALLBACK mainWndProc (HWND hWnd, UINT msg, WPARAM wParam,
     if (wParam >= ' ' && wParam <= 126) {
       int nexth = (keybuffer_head+1) & 15;
       if (nexth != keybuffer_tail) {
-	keybuffer[keybuffer_head] = wParam;
+	keybuffer[keybuffer_head] = int(wParam);
 	keybuffer_head = nexth;
       }
     }

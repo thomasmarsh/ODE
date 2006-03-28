@@ -144,7 +144,7 @@ int main (int argc, char **argv)
     m.setBox (1,SIDE,SIDE,SIDE);
     m.adjust (MASS);
     body[i].setMass (&m);
-    body[i].setData ((void*) i);
+    body[i].setData ((void*)(size_t)i);
 
     box[i].create (space,SIDE,SIDE,SIDE);
     box[i].setBody (body[i]);

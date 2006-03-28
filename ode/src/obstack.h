@@ -32,7 +32,7 @@
 struct dObStack : public dBase {
   struct Arena {
     Arena *next;	// next arena in linked list
-    int used;		// total number of bytes used in this arena, counting
+    size_t used;		// total number of bytes used in this arena, counting
   };			//   this header
 
   Arena *first;		// head of the arena linked list. 0 if no arenas yet
@@ -40,7 +40,7 @@ struct dObStack : public dBase {
 
   // used for iterator
   Arena *current_arena;
-  int current_ofs;
+  size_t current_ofs;
 
   dObStack();
   ~dObStack();

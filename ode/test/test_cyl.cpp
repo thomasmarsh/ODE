@@ -192,7 +192,6 @@ static void simLoop (int pause)
 
 int main (int argc, char **argv)
 {
-  int i;
   dMass m;
   dMatrix3 R;
 

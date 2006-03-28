@@ -129,7 +129,7 @@ dReal SqrDistancePointTri( const dVector3 p, const dVector3 triOrigin,
       } 
       else
       {
-        float fInvDet = REAL(1.0)/fDet;
+        dReal fInvDet = REAL(1.0)/fDet;
         fS *= fInvDet;
         fT *= fInvDet;
         fSqrDist = fS*(fA00*fS+fA01*fT+REAL(2.0)*fB0) +
@@ -139,7 +139,7 @@ dReal SqrDistancePointTri( const dVector3 p, const dVector3 triOrigin,
   }
   else
   {
-    float fTmp0, fTmp1, fNumer, fDenom;
+    dReal fTmp0, fTmp1, fNumer, fDenom;
 
     if ( fS < REAL(0.0) )  // region 2
     {
