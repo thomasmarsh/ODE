@@ -4,8 +4,7 @@ Contributed by Jason Perkins (jason379@users.sourceforge.net)
 
  SVN USERS: Before using these project files you must copy
  config-default.h to ode/include/ode/config.h (or run Premake to
- generate a new set of project files, see below). Feel free to 
- modify your copied config.h for your target environment.
+ generate a new set of project files, see below). 
 
 
  ABOUT THESE FILES
