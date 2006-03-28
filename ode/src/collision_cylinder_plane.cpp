@@ -59,7 +59,7 @@ static bool isect_plane_plane
   dReal norms_dot = dDOT(nrm0,nrm1);
   if (norms_dot >= (1.0-dEpsilon))
     return false; // planes are parallel
-  dReal inv_det = 1.0 / (1.0 - norms_dot*norms_dot);
+  dReal inv_det = dReal(1.0) / (dReal(1.0) - norms_dot*norms_dot);
 
   dReal planeconstant0 = dDOT(nrm0, pos0);
   dReal planeconstant1 = dDOT(nrm1, pos1);
@@ -147,9 +147,9 @@ static int minor_axis(const dVector3 &v, dVector3 &axis)
   dVector3 x={1,0,0};
   dVector3 y={0,1,0};
   dVector3 z={0,0,1};
-  float dotx = dFabs(dDOT(v,x));
-  float doty = dFabs(dDOT(v,y));
-  float dotz = dFabs(dDOT(v,z));
+  float dotx = (float)dFabs(dDOT(v,x));
+  float doty = (float)dFabs(dDOT(v,y));
+  float dotz = (float)dFabs(dDOT(v,z));
   if (dotx <= doty && dotx <= dotz) 
   {
     dVector3Copy(x, axis);
@@ -193,7 +193,7 @@ int dCollideCylinderPlane(dxGeom *cylgeom, dxGeom *planegeom, int flags, dContac
   dIASSERT(axislen>=0.9999);
   dIASSERT(axislen<=1.0001);
 
-  dReal hl = length/2.0;
+  dReal hl = length/dReal(2.0);
   dVector3 disc_top_pos = { cylpos[0]+axis[0]*hl, cylpos[1]+axis[1]*hl, cylpos[2]+axis[2]*hl };
   dVector3 disc_bot_pos = { cylpos[0]-axis[0]*hl, cylpos[1]-axis[1]*hl, cylpos[2]-axis[2]*hl };
   dVector3 disc_top_nrm = {  axis[0],  axis[1],  axis[2] };
@@ -313,8 +313,6 @@ int dCollideCylinderPlane(dxGeom *cylgeom, dxGeom *planegeom, int flags, dContac
   }
 
   // Test the discs!
-
-  dVector3 closest0, closest1, diff0, diff1;
 
   dVector3 poi_top, doi_top;
   dVector3 poi_bot, doi_bot;

@@ -27,11 +27,11 @@
 		inline_								base_class() : mData(0)	{}										\
 		inline_								~base_class()			{}										\
 		/* Leaf test */																						\
-		inline_			BOOL				IsLeaf()		const	{ return mData&1;					}	\
+		inline_			BOOL				IsLeaf()		const	{ return (mData&1)!=0;					}	\
 		/* Data access */																					\
 		inline_			const base_class*	GetPos()		const	{ return (base_class*)mData;		}	\
 		inline_			const base_class*	GetNeg()		const	{ return ((base_class*)mData)+1;	}	\
-		inline_			udword				GetPrimitive()	const	{ return (mData>>1);				}	\
+		inline_			size_t				GetPrimitive()	const	{ return (mData>>1);				}	\
 		/* Stats */																							\
 		inline_			udword				GetNodeSize()	const	{ return SIZEOFOBJECT;				}	\
 																											\
@@ -45,13 +45,13 @@
 		inline_								base_class() : mPosData(0), mNegData(0)	{}						\
 		inline_								~base_class()							{}						\
 		/* Leaf tests */																					\
-		inline_			BOOL				HasPosLeaf()		const	{ return mPosData&1;			}	\
-		inline_			BOOL				HasNegLeaf()		const	{ return mNegData&1;			}	\
+		inline_			BOOL				HasPosLeaf()		const	{ return (mPosData&1)!=0;			}	\
+		inline_			BOOL				HasNegLeaf()		const	{ return (mNegData&1)!=0;			}	\
 		/* Data access */																					\
 		inline_			const base_class*	GetPos()			const	{ return (base_class*)mPosData;	}	\
 		inline_			const base_class*	GetNeg()			const	{ return (base_class*)mNegData;	}	\
-		inline_			udword				GetPosPrimitive()	const	{ return (mPosData>>1);			}	\
-		inline_			udword				GetNegPrimitive()	const	{ return (mNegData>>1);			}	\
+		inline_			size_t				GetPosPrimitive()	const	{ return (mPosData>>1);			}	\
+		inline_			size_t				GetNegPrimitive()	const	{ return (mNegData>>1);			}	\
 		/* Stats */																							\
 		inline_			udword				GetNodeSize()		const	{ return SIZEOFOBJECT;			}	\
 																											\

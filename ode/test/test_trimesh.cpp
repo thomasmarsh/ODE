@@ -205,7 +205,7 @@ static void command (int cmd)
       dRFromAxisAndAngle (R,0,0,1,dRandReal()*10.0-5.0);
     }
     dBodySetRotation (obj[i].body,R);
-    dBodySetData (obj[i].body,(void*) i);
+    dBodySetData (obj[i].body,(void*)(size_t)i);
 
     if (cmd == 'b') {
       dMassSetBox (&m,DENSITY,sides[0],sides[1],sides[2]);

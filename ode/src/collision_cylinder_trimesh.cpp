@@ -589,7 +589,7 @@ bool _cldClipCylinderEdgeToTriangle(sData& cData, const dVector3 &v0, const dVec
 	// plane with edge 1
 	//dVector3 vTemp = ( cData.vNormal cross cData.vE1 );
 	dVector3Cross(cData.vNormal,cData.vE1,vPlaneNormal);
-	fTemp = dVector3Dot(cData.vE0 , vPlaneNormal) - 1e-5;
+	fTemp = dVector3Dot(cData.vE0 , vPlaneNormal) - dReal(1e-5);
 	//plPlane = Plane4f( vTemp, -(( cData.vE0 dot vTemp )-1e-5f));
 	dConstructPlane(vPlaneNormal,-fTemp,plPlane);
 	if(!dClipEdgeToPlane( vCEdgePoint0, vCEdgePoint1, plPlane )) 
@@ -941,17 +941,17 @@ int dCollideCylinderTrimesh(dxGeom *o1, dxGeom *o2, int flags, dContactGeom *con
 
 	Matrix3x3 obbRot;
 
-	obbRot[0][0] = cData.mCylinderRot[0];
-	obbRot[1][0] = cData.mCylinderRot[1];
-	obbRot[2][0] = cData.mCylinderRot[2];
+	obbRot[0][0] = (float)cData.mCylinderRot[0];
+	obbRot[1][0] = (float)cData.mCylinderRot[1];
+	obbRot[2][0] = (float)cData.mCylinderRot[2];
 
-	obbRot[0][1] = cData.mCylinderRot[4];
-	obbRot[1][1] = cData.mCylinderRot[5];
-	obbRot[2][1] = cData.mCylinderRot[6];
+	obbRot[0][1] = (float)cData.mCylinderRot[4];
+	obbRot[1][1] = (float)cData.mCylinderRot[5];
+	obbRot[2][1] = (float)cData.mCylinderRot[6];
 
-	obbRot[0][2] = cData.mCylinderRot[8];
-	obbRot[1][2] = cData.mCylinderRot[9];
-	obbRot[2][2] = cData.mCylinderRot[10];
+	obbRot[0][2] = (float)cData.mCylinderRot[8];
+	obbRot[1][2] = (float)cData.mCylinderRot[9];
+	obbRot[2][2] = (float)cData.mCylinderRot[10];
 
 	OBB obbCapsule(cCenter,cExtents,obbRot);
 

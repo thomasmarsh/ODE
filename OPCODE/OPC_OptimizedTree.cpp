@@ -550,7 +550,7 @@ bool AABBNoLeafTree::Walk(GenericWalkingCallback callback, void* user_data) cons
 	if(!(Data&1))													\
 	{																\
 		/* Compute box number */									\
-		udword Nb = (Data - size_t(Nodes))/Nodes[i].GetNodeSize();	\
+		size_t Nb = (Data - size_t(Nodes))/Nodes[i].GetNodeSize();	\
 		Data = (size_t) &mNodes[Nb];								\
 	}																\
 	/* ...remapped */												\

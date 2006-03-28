@@ -34,7 +34,7 @@
 #define MERGECONTACTS
 
 // Ripped from Opcode 1.1.
-static bool GetContactData(const dVector3& Center, dReal Radius, const dVector3 Origin, const dVector3 Edge0, const dVector3 Edge1, dReal& Dist, float& u, float& v){
+static bool GetContactData(const dVector3& Center, dReal Radius, const dVector3 Origin, const dVector3 Edge0, const dVector3 Edge1, dReal& Dist, dReal& u, dReal& v){
 	//calculate plane of triangle
 	dVector4 Plane;
 	dCROSS(Plane, =, Edge0, Edge1);
@@ -50,7 +50,7 @@ static bool GetContactData(const dVector3& Center, dReal Radius, const dVector3 
          * to be adjusted (penetration has occured anyway).
          */
   
-	float side = dDOT(Plane,Center) - Plane[3];
+	dReal side = dDOT(Plane,Center) - Plane[3];
   
 	if(side < 0.0f) {
 		return false;
@@ -64,20 +64,20 @@ static bool GetContactData(const dVector3& Center, dReal Radius, const dVector3 
 	Diff[2] = Origin[2] - Center[2];
 	Diff[3] = Origin[3] - Center[3];
 
-	float A00 = dDOT(Edge0, Edge0);
-	float A01 = dDOT(Edge0, Edge1);
-	float A11 = dDOT(Edge1, Edge1);
+	float A00 = (float)dDOT(Edge0, Edge0);
+	float A01 = (float)dDOT(Edge0, Edge1);
+	float A11 = (float)dDOT(Edge1, Edge1);
 
-	float B0 = dDOT(Diff, Edge0);
-	float B1 = dDOT(Diff, Edge1);
+	float B0 = (float)dDOT(Diff, Edge0);
+	float B1 = (float)dDOT(Diff, Edge1);
 
-	float C = dDOT(Diff, Diff);
+	float C = (float)dDOT(Diff, Diff);
 
-	float Det = dFabs(A00 * A11 - A01 * A01);
+	float Det = (float)dFabs(A00 * A11 - A01 * A01);
 	u = A01 * B1 - A11 * B0;
 	v = A01 * B0 - A00 * B1;
 
-	float DistSq;
+	dReal DistSq;
 
 	if (u + v <= Det){
 		if(u < REAL(0.0)){
@@ -148,7 +148,7 @@ static bool GetContactData(const dVector3& Center, dReal Radius, const dVector3 
 				DistSq = FLT_MAX;
 			}
 			else{
-				float InvDet = REAL(1.0) / Det;
+				dReal InvDet = REAL(1.0) / Det;
 				u *= InvDet;
 				v *= InvDet;
 				DistSq = u * (A00 * u + A01 * v + REAL(2.0) * B0) + v * (A01 * u + A11 * v + REAL(2.0) * B1) + C;
@@ -156,7 +156,7 @@ static bool GetContactData(const dVector3& Center, dReal Radius, const dVector3 
 		}
 	}
 	else{
-		float Tmp0, Tmp1, Numer, Denom;
+		dReal Tmp0, Tmp1, Numer, Denom;
 
 		if(u < REAL(0.0)){  // region 2
 			Tmp0 = A01 + B0;
@@ -350,7 +350,7 @@ int dCollideSTL(dxGeom* g1, dxGeom* SphereGeom, int Flags, dContactGeom* Contact
 			vv[3] = REAL(0.0);
 
 			dReal Depth;
-			float u, v;
+			dReal u, v;
 			if (!GetContactData(Position, Radius, v0, vu, vv, Depth, u, v)){
 				continue;	// Sphere doesnt hit triangle
 			}
