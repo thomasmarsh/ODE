@@ -1,20 +1,33 @@
 project.name = "ode"
 
-if (not options["enable-shared-only"] and not options["enable-static-only"]) then
-  project.configs = { "DebugDLL", "ReleaseDLL", "DebugLib", "ReleaseLib" }
-end
+
+-- Define the build configurations. VC6 doesn't support different output types
+-- within a project, so I must limit the configuration to just a DLL or just a
+-- static library. You can also use these flags `--enable-shared-only` and
+-- `--enable-static-only` if you want to call these packages from within your
+-- own Premake-enabled project.
+
+  if (options["target"] == "vs6" and not options["enable-static-only"]) then
+    options["enabled-shared-only"] = 1
+  end
+  
+  if (not options["enable-shared-only"] and not options["enable-static-only"]) then
+    project.configs = { "DebugDLL", "ReleaseDLL", "DebugLib", "ReleaseLib" }
+  end
 
 
 -- Project options
 
-  addoption("with-doubles",  "Enables double-precision math")
+  addoption("with-doubles",  "Use double instead of float as base numeric type")
   addoption("with-tests",    "Builds the test applications and DrawStuff library")
   addoption("no-cylinder",   "Disable cylinder collision geometry")
   addoption("no-dif",        "Exclude DIF (Dynamics Interchange Format) exports")
   addoption("no-trimesh",    "Exclude trimesh collision geometry")
   
   
--- Separate distribution files into toolset subdirectories
+-- If the `--usetargetpath` flag is specified, each set of generated files
+-- be placed in a directory named for the target toolset. This flag is
+-- used by the `--makeall` command (see below).
 
   if (options["usetargetpath"]) then
     project.path = options["target"]

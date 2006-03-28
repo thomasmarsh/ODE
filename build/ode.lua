@@ -2,6 +2,7 @@ package.name = "ode"
 package.language = "c++"
 package.objdir = "obj/ode"
 
+
 -- Separate distribution files into toolset subdirectories
 
   if (options["usetargetpath"]) then
@@ -55,7 +56,6 @@ package.objdir = "obj/ode"
 
     table.insert(package.config["DebugDLL"].defines, "ODE_DLL")
     table.insert(package.config["ReleaseDLL"].defines, "ODE_DLL")
-  
     table.insert(package.config["DebugLib"].defines, "ODE_LIB")
     table.insert(package.config["ReleaseLib"].defines, "ODE_LIB")
   end
