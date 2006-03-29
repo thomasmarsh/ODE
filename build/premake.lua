@@ -8,7 +8,7 @@ project.name = "ode"
 -- own Premake-enabled project.
 
   if (options["target"] == "vs6" and not options["enable-static-only"]) then
-    options["enabled-shared-only"] = 1
+    options["enable-shared-only"] = 1
   end
   
   if (not options["enable-shared-only"] and not options["enable-static-only"]) then
