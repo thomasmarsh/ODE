@@ -45,8 +45,19 @@ echo.
 echo RETRIEVING SOURCE CODE FROM REPOSITORY...
 echo.
 
-rem svn co https://svn.sourceforge.net/svnroot/opende/branches/%1 ode-%1
+svn export https://svn.sourceforge.net/svnroot/opende/branches/%2 ode-%1
 copy ode-%1\build\config-default.h ode-%1\include\ode\config.h
+
+
+###################################################################
+# Package source code
+###################################################################
+
+echo ""
+echo "PACKAGING SOURCE CODE..."
+echo ""
+
+zip -r9 ode-src-%1.zip ode-%1/*
 
 
 rem ***********************************************************
@@ -58,10 +69,10 @@ echo BUILDING RELEASE BINARIES...
 echo.
 
 cd ode-%1\build\vs2003
-rem devenv.exe ode.sln /build DebugLib /project ode
-rem devenv.exe ode.sln /build DebugDLL /project ode
-rem devenv.exe ode.sln /build ReleaseLib /project ode
-rem devenv.exe ode.sln /build ReleaseDLL /project ode
+devenv.exe ode.sln /build DebugLib /project ode
+devenv.exe ode.sln /build DebugDLL /project ode
+devenv.exe ode.sln /build ReleaseLib /project ode
+devenv.exe ode.sln /build ReleaseDLL /project ode
 
 
 rem ***********************************************************
@@ -70,14 +81,28 @@ rem ***********************************************************
 
 cd ..\..\..
 rename lib\ReleaseDLL\ode.lib lib\ReleaseDLL\ode-imports.lib
-zip -r9 ode-win32-%1.zip ode-%1\*.txt ode-%1\include\ode\*.h ode-%1\lib\* -x ode-%1\lib\.svn\*
+zip -r9 ode-win32-%1.zip ode-%1\*.txt ode-%1\include\ode\*.h ode-%1\lib\*
 
 
 rem ***********************************************************
 rem * Clean up
 rem ***********************************************************
 
+echo.
+echo CLEANING UP...
+echo.
+
 rmdir /s /q ode-%1
+
+
+rem ***********************************************************
+rem * Upload to SF.net
+rem ***********************************************************
+
+echo.
+echo Ready to upload package to SourceForce, press ^^C to abort.
+pause
+ftp -s:ftp_msw_script upload.sourceforge.net
 goto done
 
 
