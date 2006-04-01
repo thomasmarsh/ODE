@@ -17,7 +17,7 @@ noinst_PROGRAMS=test_collision \
 		test_chain2 \
 		test_ode
 if OPCODE
-noinst_PROGRAMS+= test_trimesh test_moving_trimesh
+noinst_PROGRAMS+= test_trimesh test_moving_trimesh test_basket
 if CYLINDER
 noinst_PROGRAMS+= test_cyl
 endif
@@ -115,17 +115,22 @@ test_ode_DEPENDENCIES=		$(top_builddir)/ode/src/libode.a \
 if OPCODE
 test_trimesh_SOURCES= 			test_trimesh.cpp
 test_moving_trimesh_SOURCES= 		test_moving_trimesh.cpp
+test_basket_SOURCES= 			test_basket.cpp
 test_trimesh_LDFLAGS= 			-L$(top_builddir)/drawstuff/src \
 					-L$(top_builddir)/ode/src @LDFLAGS@ \
 					@GL_LIBS@ @LIBS@
 test_moving_trimesh_LDFLAGS= 		-L$(top_builddir)/drawstuff/src \
 					-L$(top_builddir)/ode/src @LDFLAGS@ \
 					@GL_LIBS@ @LIBS@
+test_basket_LDFLAGS=          		-L$(top_builddir)/drawstuff/src \
+                                        -L$(top_builddir)/ode/src @LDFLAGS@ \
+                                        @GL_LIBS@ @LIBS@
 test_trimesh_DEPENDENCIES=		$(top_builddir)/ode/src/libode.a \
 					$(top_builddir)/drawstuff/src/libdrawstuff.a
 test_moving_trimesh_DEPENDENCIES=	$(top_builddir)/ode/src/libode.a \
 					$(top_builddir)/drawstuff/src/libdrawstuff.a
-
+test_basket_DEPENDENCIES=	        $(top_builddir)/ode/src/libode.a \
+				        $(top_builddir)/drawstuff/src/libdrawstuff.a
 endif
 
 test_ode_LDADD= -ldrawstuff -lode @GL_LIBS@ @LIBS@
@@ -148,6 +153,7 @@ test_collision_LDADD= -ldrawstuff -lode @GL_LIBS@ @LIBS@
 if OPCODE
 test_trimesh_LDADD= -ldrawstuff -lode @GL_LIBS@ @LIBS@
 test_moving_trimesh_LDADD= -ldrawstuff -lode @GL_LIBS@ @LIBS@
+test_basket_LDADD= -ldrawstuff -lode @GL_LIBS@ @LIBS@
 endif
 
 
@@ -193,5 +199,6 @@ test_trimesh_LDADD+= resources.o
 test_moving_trimesh_LDADD+= resources.o
 test_trimesh_DEPENDENCIES+= resources.o
 test_moving_trimesh_DEPENDENCIES+= resources.o
+test_basket_DEPENDENCIES+= resources.o
 endif
 endif
