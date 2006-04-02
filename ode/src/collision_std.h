@@ -75,5 +75,50 @@ int dCollideCylinderPlane(dxGeom *gCylinder, dxGeom *gPlane,
                            int flags, dContactGeom *contact, int skip); 
 #endif
 
+//****************************************************************************
+// the basic geometry objects
+
+struct dxSphere : public dxGeom {
+  dReal radius;		// sphere radius
+  dxSphere (dSpaceID space, dReal _radius);
+  void computeAABB();
+};
+
+
+struct dxBox : public dxGeom {
+  dVector3 side;	// side lengths (x,y,z)
+  dxBox (dSpaceID space, dReal lx, dReal ly, dReal lz);
+  void computeAABB();
+};
+
+
+struct dxCapsule : public dxGeom {
+  dReal radius,lz;	// radius, length along z axis
+  dxCapsule (dSpaceID space, dReal _radius, dReal _length);
+  void computeAABB();
+};
+
+
+#ifdef dCYLINDER_ENABLED
+struct dxCylinder : public dxGeom {
+        dReal radius,lz;        // radius, length along z axis
+        dxCylinder (dSpaceID space, dReal _radius, dReal _length);
+        void computeAABB();
+};
+#endif
+
+
+struct dxPlane : public dxGeom {
+  dReal p[4];
+  dxPlane (dSpaceID space, dReal a, dReal b, dReal c, dReal d);
+  void computeAABB();
+};
+
+
+struct dxRay : public dxGeom {
+  dReal length;
+  dxRay (dSpaceID space, dReal _length);
+  void computeAABB();
+};
 
 #endif
