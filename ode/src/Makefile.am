@@ -45,7 +45,12 @@ libode_a_SOURCES = 	objects.h \
 			rotation.cpp \
 			collision_space.cpp \
 			collision_space_internal.h \
-			collision_std.cpp \
+			sphere.cpp \
+			box.cpp \
+			capsule.cpp \
+			plane.cpp \
+			ray.cpp \
+			cylinder.cpp \
 			joint.cpp \
 			stack.h \
 			collision_std.h \

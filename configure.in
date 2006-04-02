@@ -389,10 +389,15 @@ typedef unsigned int intP;
 typedef unsigned long int intP;
 #endif
 
-/* Handle Windows DLL odities */
-#if defined(ODE_DLL) && defined(WIN32)
+/* 
+Handle Windows DLL odities
+Its easier to export all symbols using the -shared flag
+for MinGW than differentiating with declspec,
+so only do it for MSVC
+*/
+#if defined(ODE_DLL) && defined(WIN32) && defined(_MSC_VER)
 #define ODE_API __declspec( dllexport )
-#elif !defined(ODE_DLL) && defined(WIN32)
+#elif !defined(ODE_DLL) && defined(WIN32) && defined(MSC_VER)
 #define ODE_API __declspec( dllimport )
 #else
 #define ODE_API

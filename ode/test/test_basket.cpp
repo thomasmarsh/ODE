@@ -124,8 +124,9 @@ static void command (int cmd)
 // This should be a drawstuff func, so that all tst progs can use it.
 static double elapsed(void)
 {
-#if HAVE_GETTIMEOFDAY
   static double prev=0.0;
+
+#if HAVE_GETTIMEOFDAY
   timeval tv ;
 
   gettimeofday(&tv, 0);
@@ -137,9 +138,17 @@ static double elapsed(void)
   if (retval>1.0) retval=1.0;
   if (retval<0.001) retval=0.001;
   return retval;
+#elseif defined(WIN32) 
+  double curr = timeGetTime()/1000.0;
+  if (prev!=0.0)
+    prev=curr;
+  double retval = curr-prev;
+  prev=curr;
+  if (retval>1.0) retval=1.0;
+  if (retval<0.001) retval=0.001;
+  return retval;
 #else
-  // Can someone write a win32 equivalent?
-  return 0.016666d; // assume 60fps
+  return 0.016666; // assume 60fps
 #endif
 }
 
