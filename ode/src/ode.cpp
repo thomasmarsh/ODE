@@ -20,6 +20,8 @@
  *                                                                       *
  *************************************************************************/
 
+/** @file */
+
 #ifdef _MSC_VER
 #pragma warning(disable:4291)  // for VC++, no complaints about "no matching operator delete found"
 #endif
@@ -1207,6 +1209,10 @@ int dAreConnectedExcluding (dBodyID b1, dBodyID b2, int joint_type)
 //****************************************************************************
 // world
 
+/**
+ * @brief Create a new, empty world and return its ID number.
+ * @ingroup world
+ */
 dxWorld * dWorldCreate()
 {
   dxWorld *w = new dxWorld;
