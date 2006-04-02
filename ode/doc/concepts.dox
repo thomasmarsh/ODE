@@ -1,0 +1,32 @@
+/**
+@page concepts Basic Concepts
+
+@section Background
+
+[Here is where I will write some background information about rigid body 
+dynamics and simulation. But in the meantime, please refer to Baraff's 
+excellent 
+<a href="http://www.cs.cmu.edu/~baraff/sigcourse/index.html">SIGGRAPH tutorial</a>].
+
+@section Rigid Bodies
+
+A rigid body has various properties from the point of view of the simulation. 
+Some properties change over time:
+
+@li Position vector (x,y,z) of the body's point of reference. Currently the point of reference must correspond to the body's center of mass.
+@li Linear velocity of the point of reference, a vector (vx,vy,vz).
+@li Orientation of a body, represented by a quaternion (qs,qx,qy,qz) or a 3x3 rotation matrix.
+@li Angular velocity vector (wx,wy,wz) which describes how the orientation changes over time.
+
+Other body properties are usually constant over time:
+
+@li Mass of the body.
+@li Position of the center of mass with respect to the point of reference. In the current implementation the center of mass and the point of reference must coincide.
+@li Inertia matrix. This is a 3x3 matrix that describes how the body's mass is distributed around the center of mass. 
+
+Conceptually each body has an x-y-z coordinate frame embedded in it, that 
+moves and rotates with the body, as shown in figure 1.
+
+@image html body.jpg "Figure 1. The body coordinate frame"
+
+*/
