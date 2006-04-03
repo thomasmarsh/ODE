@@ -129,8 +129,10 @@ test_trimesh_DEPENDENCIES=		$(top_builddir)/ode/src/libode.a \
 					$(top_builddir)/drawstuff/src/libdrawstuff.a
 test_moving_trimesh_DEPENDENCIES=	$(top_builddir)/ode/src/libode.a \
 					$(top_builddir)/drawstuff/src/libdrawstuff.a
-test_basket_DEPENDENCIES=	        $(top_builddir)/ode/src/libode.a \
-				        $(top_builddir)/drawstuff/src/libdrawstuff.a
+
+test_basket_DEPENDENCIES=		$(top_builddir)/ode/src/libode.a \
+					$(top_builddir)/drawstuff/src/libdrawstuff.a
+
 endif
 
 test_ode_LDADD= -ldrawstuff -lode @GL_LIBS@ @LIBS@

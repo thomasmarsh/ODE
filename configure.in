@@ -271,6 +271,7 @@ AC_CHECK_LIB(comctl32,main,[LIBS="$LIBS -lcomctl32"])
 AC_CHECK_LIB(kernel32,main,[LIBS="$LIBS -lkernel32"])
 AC_CHECK_LIB(user32,main,[LIBS="$LIBS -luser32"])
 AC_CHECK_LIB(gdi32,main,[LIBS="$LIBS -lgdi32"])
+AC_CHECK_LIB(winmm,main,[LIBS="$LIBS -lwinmm"])
 
 dnl Add math and standard c++ lib just in case
 AC_CHECK_LIB(stdc++,main,[LIBS="$LIBS -lstdc++"])
