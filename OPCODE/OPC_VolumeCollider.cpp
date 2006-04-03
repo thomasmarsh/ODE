@@ -70,12 +70,12 @@ const char* VolumeCollider::ValidateSettings()
 #define IMPLEMENT_NOLEAFDUMP(type)												\
 void VolumeCollider::_Dump(const type* node)									\
 {																				\
-	if(node->HasPosLeaf())	mTouchedPrimitives->Add(node->GetPosPrimitive());	\
+	if(node->HasPosLeaf())	mTouchedPrimitives->Add(udword(node->GetPosPrimitive()));	\
 	else					_Dump(node->GetPos());								\
 																				\
 	if(ContactFound()) return;													\
 																				\
-	if(node->HasNegLeaf())	mTouchedPrimitives->Add(node->GetNegPrimitive());	\
+	if(node->HasNegLeaf())	mTouchedPrimitives->Add(udword(node->GetNegPrimitive()));	\
 	else					_Dump(node->GetNeg());								\
 }
 
@@ -84,7 +84,7 @@ void VolumeCollider::_Dump(const type* node)			\
 {														\
 	if(node->IsLeaf())									\
 	{													\
-		mTouchedPrimitives->Add(node->GetPrimitive());	\
+		mTouchedPrimitives->Add(udword(node->GetPrimitive()));	\
 	}													\
 	else												\
 	{													\
