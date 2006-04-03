@@ -353,7 +353,7 @@ int dCollideSTL(dxGeom* g1, dxGeom* SphereGeom, int Flags, dContactGeom* Contact
 			}
 
 			dReal Depth;
-			dReal u, v;
+			float u, v;
 			if (!GetContactData(Position, Radius, v0, vu, vv, Depth, u, v)){
 				continue;	// Sphere doesnt hit triangle
 			}

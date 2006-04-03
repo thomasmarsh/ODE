@@ -122,15 +122,20 @@ static void command (int cmd)
 
 static void simLoop (int pause)
 {
+  double simstep = 0.001; // 1ms simulation steps
   double dt = dsElapsedTime();
-//  fprintf(stderr,"dt=%lf\n", dt);
 
-  dSpaceCollide (space,0,&nearCallback);
-  dWorldQuickStep (world, dt);
-  dJointGroupEmpty (contactgroup);
+  int nrofsteps = (int) ceilf(dt/simstep);
+//  fprintf(stderr, "dt=%f, nr of steps = %d\n", dt, nrofsteps);
+
+  for (int i=0; i<nrofsteps; i++)
+  {
+    dSpaceCollide (space,0,&nearCallback);
+    dWorldQuickStep (world, simstep);
+    dJointGroupEmpty (contactgroup);
+  }
 
   dsSetColor (1,1,1);
-
   const dReal *SPos = dBodyGetPosition(sphbody);
   const dReal *SRot = dBodyGetRotation(sphbody);
   float spos[3] = {SPos[0], SPos[1], SPos[2]};
@@ -214,7 +219,7 @@ int main (int argc, char **argv)
   dRFromAxisAndAngle (R, 0,1,0, 0.0);
   dGeomSetRotation (world_mesh, R);
 
-  float sx=0, sy=3.2, sz=6.0;
+  float sx=0.0, sy=3.40, sz=6.65;
   sphbody = dBodyCreate (world);
   dMassSetSphere (&m,1,RADIUS);
   dBodySetMass (sphbody,&m);
