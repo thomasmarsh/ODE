@@ -26,9 +26,6 @@
 
 #include <ode/config.h>
 #include <assert.h>
-#ifdef HAVE_SYS_TIME_H
-#include <sys/time.h>
-#endif
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
@@ -121,44 +118,11 @@ static void command (int cmd)
 }
 
 
-// This should be a drawstuff func, so that all tst progs can use it.
-static double elapsed(void)
-{
-  static double prev=0.0;
-
-#if HAVE_GETTIMEOFDAY
-  timeval tv ;
-
-  gettimeofday(&tv, 0);
-  double curr = tv.tv_sec + (double) tv.tv_usec / 1000000.0 ;
-  if (!prev)
-    prev=curr;
-  double retval = curr-prev;
-  prev=curr;
-  if (retval>1.0) retval=1.0;
-  if (retval<0.001) retval=0.001;
-  return retval;
-#elseif defined(WIN32) 
-  double curr = timeGetTime()/1000.0;
-  if (prev!=0.0)
-    prev=curr;
-  double retval = curr-prev;
-  prev=curr;
-  if (retval>1.0) retval=1.0;
-  if (retval<0.001) retval=0.001;
-  return retval;
-#else
-  return 0.016666; // assume 60fps
-#endif
-}
-
-
-
 // simulation loop
 
 static void simLoop (int pause)
 {
-  double dt = elapsed();
+  double dt = dsElapsedTime();
 //  fprintf(stderr,"dt=%lf\n", dt);
 
   dSpaceCollide (space,0,&nearCallback);

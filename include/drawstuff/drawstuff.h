@@ -102,6 +102,13 @@ void dsGetViewpoint (float xyz[3], float hpr[3]);
  */
 void dsStop();
 
+/* Get the elapsed time since the last call to this function.
+ * It will always return a non zero, positive value, not greater than 1.0
+ * The returned value can be used in the application loop as a dt value
+ * to the step function.
+ */
+double dsElapsedTime();
+
 /* change the way objects are drawn. these changes will apply to all further
  * dsDrawXXX() functions. the texture number must be a DS_xxx texture
  * constant. the red, green, and blue number are between 0 and 1.

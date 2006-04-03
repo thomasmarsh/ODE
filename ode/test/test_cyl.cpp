@@ -132,7 +132,7 @@ static void command (int cmd)
 static void simLoop (int pause)
 {
   dSpaceCollide (space,0,&nearCallback);
-  dWorldQuickStep (world,0.02); // assume 50 fps
+  dWorldQuickStep (world, dsElapsedTime());
   dJointGroupEmpty (contactgroup);
 
   dsSetColor (1,1,1);

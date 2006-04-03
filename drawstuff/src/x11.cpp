@@ -31,6 +31,10 @@
 #include <X11/keysym.h>
 #include <GL/glx.h>
 
+#ifdef HAVE_SYS_TIME_H
+#include <sys/time.h>
+#endif
+
 #include <drawstuff/drawstuff.h>
 #include <drawstuff/version.h>
 #include "internal.h"
@@ -390,3 +394,25 @@ extern "C" void dsStop()
 {
   run = 0;
 }
+
+
+extern "C" double dsElapsedTime()
+{
+#if HAVE_GETTIMEOFDAY
+  static double prev=0.0;
+  timeval tv ;
+
+  gettimeofday(&tv, 0);
+  double curr = tv.tv_sec + (double) tv.tv_usec / 1000000.0 ;
+  if (!prev)
+    prev=curr;
+  double retval = curr-prev;
+  prev=curr;
+  if (retval>1.0) retval=1.0;
+  if (retval<dEpsilon) retval=dEpsilon;
+  return retval;
+#else
+  return 0.01666; // Assume 60 fps
+#endif
+}
+
