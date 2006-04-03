@@ -40,7 +40,6 @@
 static const int	nCYLINDER_AXIS				= 2;
 static const int    nCYLINDER_CIRCLE_SEGMENTS	= 8;
 static const int    nMAX_CYLINDER_TRIANGLE_CLIP_POINTS	= 12;
-static const int	gMaxLocalContacts = 32;
 
 #define OPTIMIZE_CONTACTS 1
 
@@ -90,7 +89,7 @@ typedef struct _sCylinderTrimeshColliderData
 	int					iFlags;
 	int					iSkip;
 	int					nContacts;// = 0;
-	sLocalContactData	gLocalContacts[gMaxLocalContacts];
+	sLocalContactData*	gLocalContacts;
 } sCylinderTrimeshColliderData;
 
 // Short type name
@@ -643,6 +642,8 @@ bool _cldClipCylinderEdgeToTriangle(sData& cData, const dVector3 &v0, const dVec
 		dVector3Copy(vCEdgePoint0,cData.gLocalContacts[cData.nContacts].vPos);
 		cData.gLocalContacts[cData.nContacts].nFlags = 1;
 		cData.nContacts++;
+		if(cData.nContacts >= (cData.iFlags & NUMC_MASK)) 
+			return true;
 	}
 
 	// Generate contact 1
@@ -757,6 +758,8 @@ void _cldClipCylinderToTriangle(sData& cData,const dVector3 &v0, const dVector3 
 				dVector3Copy(vPoint,cData.gLocalContacts[cData.nContacts].vPos);
 				cData.gLocalContacts[cData.nContacts].nFlags = 1;
 				cData.nContacts++;
+				if(cData.nContacts >= (cData.iFlags & NUMC_MASK)) 
+					return;;
 			}
 		}
 	}
@@ -780,6 +783,8 @@ void _cldClipCylinderToTriangle(sData& cData,const dVector3 &v0, const dVector3 
 				dVector3Copy(vPoint,cData.gLocalContacts[cData.nContacts].vPos);
 				cData.gLocalContacts[cData.nContacts].nFlags = 1;
 				cData.nContacts++;
+				if(cData.nContacts >= (cData.iFlags & NUMC_MASK)) 
+					return;;
 			}
 		}
 	}
@@ -1003,6 +1008,9 @@ int dCollideCylinderTrimesh(dxGeom *o1, dxGeom *o2, int flags, dContactGeom *con
 		{
 			cData.gTrimesh->ArrayCallback(cData.gTrimesh, cData.gCylinder, Triangles, TriCount);
 		}
+
+		// allocate buffer for local contacts on stack
+		cData.gLocalContacts = (sLocalContactData*)dALLOCA16(sizeof(sLocalContactData)*(cData.iFlags & NUMC_MASK));
 
 		int OutTriCount = 0;
 
