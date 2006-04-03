@@ -1,6 +1,6 @@
 AM_CXXFLAGS = @ARCHFLAGS@ -I$(top_srcdir)/include -I$(top_builddir)/include
 AM_CPPFLAGS = @ARCHFLAGS@ -I$(top_srcdir)/include -I$(top_builddir)/include
-AM_CFLAGS = @ARCHFLAGS@ -I$(topsrcdir)/include -I$(top_builddir)/include
+AM_CFLAGS = @ARCHFLAGS@ -I$(top_srcdir)/include -I$(top_builddir)/include
 lib_LIBRARIES = libode.a
 libode_a_CPPFLAGS = -O2
 
@@ -12,10 +12,10 @@ EXEEXT=@so_ext@
 traplib_PROGRAMS=libode
 libode_DEPENDENCIES = libfast.a libode.a
 libode_LDFLAGS=-shared -fPIC
-libode_SOURCES=$(libode_a_SOURCES) $(libfast_a_SOURCES)
+libode_OBJECTS=$(libode_a_OBJECTS) $(libfast_a_OBJECTS)
 if OPCODE
 libode_DEPENDENCIES+= libOPCODE.a
-libode_SOURCES+=$(libOPCODE_a_SOURCES)
+libode_OBJECTS+=$(libOPCODE_a_OBJECTS)
 endif
 
 # convenience library to simulate per object cflags
