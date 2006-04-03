@@ -231,14 +231,15 @@ int main (int argc, char **argv)
   // run simulation
   dsSimulationLoop (argc,argv,352,288,&fn);
 
+  // Causes segm violation? Why?
+  // (because dWorldDestroy() destroys body connected to geom; must call first!)
+  dGeomDestroy(sphgeom);
+  dGeomDestroy (world_mesh);
+
   dJointGroupEmpty (contactgroup);
   dJointGroupDestroy (contactgroup);
   dSpaceDestroy (space);
   dWorldDestroy (world);
-
-  // Causes segm violation? Why?
-  dGeomDestroy(sphgeom);
-  dGeomDestroy (world_mesh);
 
   return 0;
 }

@@ -49,8 +49,8 @@ BSC32=bscmake.exe
 # ADD BASE BSC32 /nologo
 # ADD BSC32 /nologo
 LINK32=link.exe
-# ADD BASE LINK32 user32.lib gdi32.lib opengl32.lib glu32.lib /nologo /entry:"mainCRTStartup" /subsystem:console /machine:I386 /out:"../../lib/release/test_step.exe" /libpath:".."
-# ADD LINK32 user32.lib gdi32.lib opengl32.lib glu32.lib /nologo /entry:"mainCRTStartup" /subsystem:console /machine:I386 /out:"../../lib/release/test_step.exe" /libpath:".."
+# ADD BASE LINK32 user32.lib winmm.lib gdi32.lib opengl32.lib glu32.lib /nologo /entry:"mainCRTStartup" /subsystem:console /machine:I386 /out:"../../lib/release/test_step.exe" /libpath:".."
+# ADD LINK32 user32.lib winmm.lib gdi32.lib opengl32.lib glu32.lib /nologo /entry:"mainCRTStartup" /subsystem:console /machine:I386 /out:"../../lib/release/test_step.exe" /libpath:".."
 
 !ELSEIF  "$(CFG)" == "test_step - Win32 Debug"
 
@@ -72,8 +72,8 @@ BSC32=bscmake.exe
 # ADD BASE BSC32 /nologo
 # ADD BSC32 /nologo
 LINK32=link.exe
-# ADD BASE LINK32 user32.lib gdi32.lib opengl32.lib glu32.lib /nologo /entry:"mainCRTStartup" /subsystem:console /incremental:yes /debug /machine:I386 /out:"../../lib/debug/test_step.exe" /pdbtype:sept /libpath:"../../lib/debug"
-# ADD LINK32 user32.lib gdi32.lib opengl32.lib glu32.lib /nologo /entry:"mainCRTStartup" /subsystem:console /incremental:yes /debug /machine:I386 /out:"../../lib/debug/test_step.exe" /pdbtype:sept /libpath:"../../lib/debug"
+# ADD BASE LINK32 user32.lib winmm.lib gdi32.lib opengl32.lib glu32.lib /nologo /entry:"mainCRTStartup" /subsystem:console /incremental:yes /debug /machine:I386 /out:"../../lib/debug/test_step.exe" /pdbtype:sept /libpath:"../../lib/debug"
+# ADD LINK32 user32.lib winmm.lib gdi32.lib opengl32.lib glu32.lib /nologo /entry:"mainCRTStartup" /subsystem:console /incremental:yes /debug /machine:I386 /out:"../../lib/debug/test_step.exe" /pdbtype:sept /libpath:"../../lib/debug"
 
 !ENDIF
 

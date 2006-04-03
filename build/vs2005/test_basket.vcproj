@@ -2,9 +2,9 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="8.00"
-	Name="test_space"
-	ProjectGUID="{3E4E6A8B-6CA6-8A4F-89C3-A56F1E892BED}"
-	RootNamespace="test_space"
+	Name="test_basket"
+	ProjectGUID="{B4BF4C9D-BE4D-B541-8584-5A2D517E4D70}"
+	RootNamespace="test_basket"
 	Keyword="Win32Proj"
 	>
 	<Platforms>
@@ -18,7 +18,7 @@
 		<Configuration
 			Name="DebugDLL|Win32"
 			OutputDirectory="../../lib/DebugDLL"
-			IntermediateDirectory="obj/space/DebugDLL"
+			IntermediateDirectory="obj/basket/DebugDLL"
 			ConfigurationType="1"
 			CharacterSet="2"
 			>
@@ -64,11 +64,11 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="../../lib/DebugDLL/ode.lib ../../lib/DebugDLL/drawstuff.lib user32.lib winmm.lib gdi32.lib opengl32.lib glu32.lib"
-				OutputFile="$(OutDir)/test_space.exe"
+				OutputFile="$(OutDir)/test_basket.exe"
 				LinkIncremental="2"
 				AdditionalLibraryDirectories="../../lib/DebugDLL"
 				GenerateDebugInformation="true"
-				ProgramDatabaseFile="$(OutDir)/test_space.pdb"
+				ProgramDatabaseFile="$(OutDir)/test_basket.pdb"
 				SubSystem="1"
 				EntryPointSymbol="mainCRTStartup"
 				TargetMachine="1"
@@ -101,7 +101,7 @@
 		<Configuration
 			Name="ReleaseDLL|Win32"
 			OutputDirectory="../../lib/ReleaseDLL"
-			IntermediateDirectory="obj/space/ReleaseDLL"
+			IntermediateDirectory="obj/basket/ReleaseDLL"
 			ConfigurationType="1"
 			CharacterSet="2"
 			>
@@ -147,11 +147,11 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="../../lib/ReleaseDLL/ode.lib ../../lib/ReleaseDLL/drawstuff.lib user32.lib winmm.lib gdi32.lib opengl32.lib glu32.lib"
-				OutputFile="$(OutDir)/test_space.exe"
+				OutputFile="$(OutDir)/test_basket.exe"
 				LinkIncremental="2"
 				AdditionalLibraryDirectories="../../lib/ReleaseDLL"
 				GenerateDebugInformation="true"
-				ProgramDatabaseFile="$(OutDir)/test_space.pdb"
+				ProgramDatabaseFile="$(OutDir)/test_basket.pdb"
 				SubSystem="1"
 				EntryPointSymbol="mainCRTStartup"
 				TargetMachine="1"
@@ -184,7 +184,7 @@
 		<Configuration
 			Name="DebugLib|Win32"
 			OutputDirectory="../../lib/DebugLib"
-			IntermediateDirectory="obj/space/DebugLib"
+			IntermediateDirectory="obj/basket/DebugLib"
 			ConfigurationType="1"
 			CharacterSet="2"
 			>
@@ -230,11 +230,11 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="../../lib/DebugLib/ode.lib ../../lib/DebugLib/drawstuff.lib user32.lib winmm.lib gdi32.lib opengl32.lib glu32.lib"
-				OutputFile="$(OutDir)/test_space.exe"
+				OutputFile="$(OutDir)/test_basket.exe"
 				LinkIncremental="2"
 				AdditionalLibraryDirectories="../../lib/DebugLib"
 				GenerateDebugInformation="true"
-				ProgramDatabaseFile="$(OutDir)/test_space.pdb"
+				ProgramDatabaseFile="$(OutDir)/test_basket.pdb"
 				SubSystem="1"
 				EntryPointSymbol="mainCRTStartup"
 				TargetMachine="1"
@@ -267,7 +267,7 @@
 		<Configuration
 			Name="ReleaseLib|Win32"
 			OutputDirectory="../../lib/ReleaseLib"
-			IntermediateDirectory="obj/space/ReleaseLib"
+			IntermediateDirectory="obj/basket/ReleaseLib"
 			ConfigurationType="1"
 			CharacterSet="2"
 			>
@@ -313,11 +313,11 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="../../lib/ReleaseLib/ode.lib ../../lib/ReleaseLib/drawstuff.lib user32.lib winmm.lib gdi32.lib opengl32.lib glu32.lib"
-				OutputFile="$(OutDir)/test_space.exe"
+				OutputFile="$(OutDir)/test_basket.exe"
 				LinkIncremental="2"
 				AdditionalLibraryDirectories="../../lib/ReleaseLib"
 				GenerateDebugInformation="true"
-				ProgramDatabaseFile="$(OutDir)/test_space.pdb"
+				ProgramDatabaseFile="$(OutDir)/test_basket.pdb"
 				SubSystem="1"
 				EntryPointSymbol="mainCRTStartup"
 				TargetMachine="1"
@@ -360,7 +360,7 @@
 				Filter=""
 				>
 				<File
-					RelativePath="..\..\ode\test\test_space.cpp">
+					RelativePath="..\..\ode\test\test_basket.cpp">
 				</File>
 			</Filter>
 		</Filter>

@@ -1,24 +1,24 @@
-# Microsoft Developer Studio Project File - Name="test_I" - Package Owner=<4>
+# Microsoft Developer Studio Project File - Name="test_basket" - Package Owner=<4>
 # Microsoft Developer Studio Generated Build File, Format Version 6.00
 # ** DO NOT EDIT **
 
 # TARGTYPE "Win32 (x86) Console Application" 0x0103
 
-CFG=test_I - Win32 Debug
+CFG=test_basket - Win32 Debug
 !MESSAGE This is not a valid makefile. To build this project using NMAKE,
 !MESSAGE use the Export Makefile command and run
 !MESSAGE 
-!MESSAGE NMAKE /f "test_I.mak".
+!MESSAGE NMAKE /f "test_basket.mak".
 !MESSAGE 
 !MESSAGE You can specify a configuration when running NMAKE
 !MESSAGE by defining the macro CFG on the command line. For example:
 !MESSAGE 
-!MESSAGE NMAKE /f "test_I.mak" CFG="test_I - Win32 Debug"
+!MESSAGE NMAKE /f "test_basket.mak" CFG="test_basket - Win32 Debug"
 !MESSAGE 
 !MESSAGE Possible choices for configuration are:
 !MESSAGE 
-!MESSAGE "test_I - Win32 Release" (based on "Win32 (x86) Console Application")
-!MESSAGE "test_I - Win32 Debug" (based on "Win32 (x86) Console Application")
+!MESSAGE "test_basket - Win32 Release" (based on "Win32 (x86) Console Application")
+!MESSAGE "test_basket - Win32 Debug" (based on "Win32 (x86) Console Application")
 !MESSAGE 
 
 # Begin Project
@@ -29,17 +29,17 @@ CPP=cl.exe
 MTL=midl.exe
 RSC=rc.exe
 
-!IF  "$(CFG)" == "test_I - Win32 Release"
+!IF  "$(CFG)" == "test_basket - Win32 Release"
 
 # PROP BASE Use_MFC 0
 # PROP BASE Use_Debug_Libraries 1
 # PROP BASE Output_Dir "../../lib/release"
-# PROP BASE Intermediate_Dir "obj/I/Release"
+# PROP BASE Intermediate_Dir "obj/basket/Release"
 # PROP BASE Target_Dir ""
 # PROP Use_MFC 0
 # PROP Use_Debug_Libraries 1
 # PROP Output_Dir "../../lib/release"
-# PROP Intermediate_Dir "obj/I/Release"
+# PROP Intermediate_Dir "obj/basket/Release"
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MD /W3 /GR /GX /O2 /I "../../include" /D "_CRT_SECURE_NO_DEPRECATE" /D "WIN32" /YX /FD /c
 # ADD CPP /nologo /MD /W3 /GR /GX /O2 /I "../../include" /D "_CRT_SECURE_NO_DEPRECATE" /D "WIN32" /YX /FD /c
@@ -49,20 +49,20 @@ BSC32=bscmake.exe
 # ADD BASE BSC32 /nologo
 # ADD BSC32 /nologo
 LINK32=link.exe
-# ADD BASE LINK32 user32.lib winmm.lib gdi32.lib opengl32.lib glu32.lib /nologo /entry:"mainCRTStartup" /subsystem:console /machine:I386 /out:"../../lib/release/test_I.exe" /libpath:".."
-# ADD LINK32 user32.lib winmm.lib gdi32.lib opengl32.lib glu32.lib /nologo /entry:"mainCRTStartup" /subsystem:console /machine:I386 /out:"../../lib/release/test_I.exe" /libpath:".."
+# ADD BASE LINK32 user32.lib winmm.lib gdi32.lib opengl32.lib glu32.lib /nologo /entry:"mainCRTStartup" /subsystem:console /machine:I386 /out:"../../lib/release/test_basket.exe" /libpath:".."
+# ADD LINK32 user32.lib winmm.lib gdi32.lib opengl32.lib glu32.lib /nologo /entry:"mainCRTStartup" /subsystem:console /machine:I386 /out:"../../lib/release/test_basket.exe" /libpath:".."
 
-!ELSEIF  "$(CFG)" == "test_I - Win32 Debug"
+!ELSEIF  "$(CFG)" == "test_basket - Win32 Debug"
 
 # PROP BASE Use_MFC 0
 # PROP BASE Use_Debug_Libraries 0
 # PROP BASE Output_Dir "../../lib/debug"
-# PROP BASE Intermediate_Dir "obj/I/Debug"
+# PROP BASE Intermediate_Dir "obj/basket/Debug"
 # PROP BASE Target_Dir ""
 # PROP Use_MFC 0
 # PROP Use_Debug_Libraries 0
 # PROP Output_Dir "../../lib/debug"
-# PROP Intermediate_Dir "obj/I/Debug"
+# PROP Intermediate_Dir "obj/basket/Debug"
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MDd /W3 /Gm /GR /GX /ZI /Od /I "../../include" /D "_CRT_SECURE_NO_DEPRECATE" /D "WIN32" /YX /FD /GZ /c
 # ADD CPP /nologo /MDd /W3 /Gm /GR /GX /ZI /Od /I "../../include" /D "_CRT_SECURE_NO_DEPRECATE" /D "WIN32" /YX /FD /GZ /c
@@ -72,15 +72,15 @@ BSC32=bscmake.exe
 # ADD BASE BSC32 /nologo
 # ADD BSC32 /nologo
 LINK32=link.exe
-# ADD BASE LINK32 user32.lib winmm.lib gdi32.lib opengl32.lib glu32.lib /nologo /entry:"mainCRTStartup" /subsystem:console /incremental:yes /debug /machine:I386 /out:"../../lib/debug/test_I.exe" /pdbtype:sept /libpath:"../../lib/debug"
-# ADD LINK32 user32.lib winmm.lib gdi32.lib opengl32.lib glu32.lib /nologo /entry:"mainCRTStartup" /subsystem:console /incremental:yes /debug /machine:I386 /out:"../../lib/debug/test_I.exe" /pdbtype:sept /libpath:"../../lib/debug"
+# ADD BASE LINK32 user32.lib winmm.lib gdi32.lib opengl32.lib glu32.lib /nologo /entry:"mainCRTStartup" /subsystem:console /incremental:yes /debug /machine:I386 /out:"../../lib/debug/test_basket.exe" /pdbtype:sept /libpath:"../../lib/debug"
+# ADD LINK32 user32.lib winmm.lib gdi32.lib opengl32.lib glu32.lib /nologo /entry:"mainCRTStartup" /subsystem:console /incremental:yes /debug /machine:I386 /out:"../../lib/debug/test_basket.exe" /pdbtype:sept /libpath:"../../lib/debug"
 
 !ENDIF
 
 # Begin Target
 
-# Name "test_I - Win32 Release"
-# Name "test_I - Win32 Debug"
+# Name "test_basket - Win32 Release"
+# Name "test_basket - Win32 Debug"
 # Begin Group "ode"
 
 # PROP Default_Filter ""
@@ -89,7 +89,7 @@ LINK32=link.exe
 # PROP Default_Filter ""
 # Begin Source File
 
-SOURCE=../../ode/test/test_I.cpp
+SOURCE=../../ode/test/test_basket.cpp
 # End Source File
 # End Group
 # End Group
