@@ -273,7 +273,6 @@ inline int	_ProcessLocalContacts()
 {
 	if (ctContacts == 0)
 	{
-        delete[] gLocalContacts;
 		return 0;
 	}
 
@@ -316,7 +315,6 @@ inline int	_ProcessLocalContacts()
 	//	printf("[Info] %d contacts generated,%d  filtered.\n",ctContacts,ctContacts-nFinalContact);
 	//}
 
-    delete[] gLocalContacts;
 	return nFinalContact;
 }
 
@@ -947,13 +945,14 @@ int dCollideCCTL(dxGeom *o1, dxGeom *o2, int flags, dContactGeom *contact, int s
 
 	// reset contact counter
 	ctContacts = 0;	
-	// allocate local contact workspace
-	gLocalContacts = new sLocalContactData[(iFlags & NUMC_MASK)];
 
 	// reset best depth
 	fBestDepth  = - MAX_REAL;
 	fBestCenter = 0;
 	fBestrt     = 0;
+
+
+
 
 	// reset collision normal
 	vNormal[0] = REAL(0.0);
@@ -1016,7 +1015,6 @@ int dCollideCCTL(dxGeom *o1, dxGeom *o2, int flags, dContactGeom *contact, int s
 	 
 	 if (! Collider.GetContactStatus()) {
 	 	// no collision occurred
-		delete[] gLocalContacts;
 	 	return 0;
 	 }
 
@@ -1030,6 +1028,9 @@ int dCollideCCTL(dxGeom *o1, dxGeom *o2, int flags, dContactGeom *contact, int s
 		 {
 			 TriMesh->ArrayCallback(TriMesh, gCylinder, Triangles, TriCount);
 		 }
+
+		// allocate buffer for local contacts on stack
+		gLocalContacts = (sLocalContactData*)dALLOCA16(sizeof(sLocalContactData)*(iFlags & NUMC_MASK));
 
 		int OutTriCount = 0;
 
