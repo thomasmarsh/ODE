@@ -467,6 +467,21 @@ extern "C" void dsStop()
   if (main_window) PostMessage (main_window,WM_QUIT,0,0);
 }
 
+
+extern "C" double dsElapsedTime()
+{
+  static double prev=0.0;
+  double curr = timeGetTime()/1000.0;
+  if (prev!=0.0)
+    prev=curr;
+  double retval = curr-prev;
+  prev=curr;
+  if (retval>1.0) retval=1.0;
+  if (retval<dEpsilon) retval=dEpsilon;
+  return retval;
+}
+
+
 //***************************************************************************
 // windows entry point
 //
