@@ -76,7 +76,7 @@ libode_a_SOURCES = 	objects.h \
 
 if OPCODE
 noinst_LIBRARIES+= libOPCODE.a
-libOPCODE_a_CPPFLAGS= -O1
+libOPCODE_a_CPPFLAGS= -O2 -fno-strict-aliasing
 libOPCODE_a_SOURCES=	@TOPDIR@/OPCODE/OPC_AABBCollider.cpp \
 			@TOPDIR@/OPCODE/OPC_AABBTree.cpp \
 			@TOPDIR@/OPCODE/OPC_BaseModel.cpp \
