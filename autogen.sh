@@ -8,7 +8,7 @@ automake_revision=${automake_version##*.}
 echo "AutoMake Version: $automake_mayor.$automake_minor.$automake_revision"
 
 if [ $automake_mayor -eq 1 ]; then
-    if [ $automake_minor -lt 9 ]; then
+    if [ $automake_minor -lt 8 ]; then
 	echo "Automake must be 1.8.2 or higher, please upgrade"
 	exit
     else
