@@ -34,27 +34,7 @@
 #define MERGECONTACTS
 
 // Ripped from Opcode 1.1.
-static bool GetContactData(const dVector3& Center, dReal Radius, const dVector3 Origin, const dVector3 Edge0, const dVector3 Edge1, dReal& Dist, dReal& u, dReal& v){
-	//calculate plane of triangle
-	dVector4 Plane;
-	dCROSS(Plane, =, Edge0, Edge1);
-	Plane[3] = dDOT(Plane, Origin);
- 
-	//normalize
-        dNormalize4(Plane);
-  
-	/* If the center of the sphere is within the positive halfspace of the
-         * triangle's plane, allow a contact to be generated.
-         * If the center of the sphere made it into the positive halfspace of a
-         * back-facing triangle, then the physics update and/or velocity needs
-         * to be adjusted (penetration has occured anyway).
-         */
-  
-	dReal side = dDOT(Plane,Center) - Plane[3];
-  
-	if(side < 0.0f) {
-		return false;
-        }
+static bool GetContactData(const dVector3& Center, dReal Radius, const dVector3 Origin, const dVector3 Edge0, const dVector3 Edge1, dReal& Dist, float& u, float& v){
   
         // now onto the bulk of the collision...
 
@@ -250,8 +230,7 @@ static bool GetContactData(const dVector3& Center, dReal Radius, const dVector3 
 	Dist = dSqrt(dFabs(DistSq));
 
 	if (Dist <= Radius){
-		//Dist= Radius - Dist;
-		Dist= Radius - side; // (mg) penetration depth is distance along normal not shortest distance
+		Dist = Radius - Dist;
 		return true;
 	}
 	else return false;
@@ -349,12 +328,35 @@ int dCollideSTL(dxGeom* g1, dxGeom* SphereGeom, int Flags, dContactGeom* Contact
 			vv[2] = v2[2] - v0[2];
 			vv[3] = REAL(0.0);
 
+			// Get plane coefficients
+			dVector4 Plane;
+			dCROSS(Plane, =, vu, vv);
+
+			dReal Area = dSqrt(dDOT(Plane, Plane));	// We can use this later
+			Plane[0] /= Area;
+			Plane[1] /= Area;
+			Plane[2] /= Area;
+
+			Plane[3] = dDOT(Plane, v0);	
+
+			/* If the center of the sphere is within the positive halfspace of the
+				* triangle's plane, allow a contact to be generated.
+				* If the center of the sphere made it into the positive halfspace of a
+				* back-facing triangle, then the physics update and/or velocity needs
+				* to be adjusted (penetration has occured anyway).
+				*/
+		  
+			float side = dDOT(Plane,Position) - Plane[3];
+
+			if(side < 0.0f) {
+				continue;
+			}
+
 			dReal Depth;
 			dReal u, v;
 			if (!GetContactData(Position, Radius, v0, vu, vv, Depth, u, v)){
 				continue;	// Sphere doesnt hit triangle
 			}
-			dReal w = REAL(1.0) - u - v;
 
 			if (Depth < REAL(0.0)){
 				Depth = REAL(0.0);
@@ -362,27 +364,28 @@ int dCollideSTL(dxGeom* g1, dxGeom* SphereGeom, int Flags, dContactGeom* Contact
 
 			dContactGeom* Contact = SAFECONTACT(Flags, Contacts, OutTriCount, Stride);
 
+			dReal w = REAL(1.0) - u - v;
 			Contact->pos[0] = (v0[0] * w) + (v1[0] * u) + (v2[0] * v);
 			Contact->pos[1] = (v0[1] * w) + (v1[1] * u) + (v2[1] * v);
 			Contact->pos[2] = (v0[2] * w) + (v1[2] * u) + (v2[2] * v);
 			Contact->pos[3] = REAL(0.0);
 
-			dVector4 Plane;
-			dCROSS(Plane, =, vv, vu);	// Reversed
-			Plane[3] = dDOT(Plane, v0);	// Using normal as plane.
-
-			dReal Area = dSqrt(dDOT(Plane, Plane));	// We can use this later
-			Plane[0] /= Area;
-			Plane[1] /= Area;
-			Plane[2] /= Area;
-			Plane[3] /= Area;
-
-			Contact->normal[0] = Plane[0];
-			Contact->normal[1] = Plane[1];
-			Contact->normal[2] = Plane[2];
+			// Using normal as plane (reversed)
+			Contact->normal[0] = -Plane[0];
+			Contact->normal[1] = -Plane[1];
+			Contact->normal[2] = -Plane[2];
 			Contact->normal[3] = REAL(0.0);
 
-			Contact->depth = Depth;
+			// Depth returned from GetContactData is depth along 
+			// contact point - sphere center direction
+			// we'll project it to contact normal
+			dVector3 dir;
+			dir[0] = Position[0]-Contact->pos[0];
+			dir[1] = Position[1]-Contact->pos[1];
+			dir[2] = Position[2]-Contact->pos[2];
+			dReal dirProj = dDOT(dir, Plane) / dSqrt(dDOT(dir, dir));
+			Contact->depth = Depth * dirProj;
+			//Contact->depth = Radius - side; // (mg) penetration depth is distance along normal not shortest distance
 
 			//Contact->g1 = TriMesh;
 			//Contact->g2 = SphereGeom;
