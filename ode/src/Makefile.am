@@ -10,12 +10,13 @@ libode_a_CPPFLAGS = -O2
 traplibdir=$(prefix)/lib
 EXEEXT=@so_ext@
 traplib_PROGRAMS=libode
+libode_SOURCES=
 libode_DEPENDENCIES = libfast.a libode.a
 libode_LDFLAGS=-shared -fPIC
-libode_OBJECTS=$(libode_a_OBJECTS) $(libfast_a_OBJECTS)
+libode_LDADD=$(libode_a_OBJECTS) $(libfast_a_OBJECTS)
 if OPCODE
 libode_DEPENDENCIES+= libOPCODE.a
-libode_OBJECTS+=$(libOPCODE_a_OBJECTS)
+libode_LDADD+=$(libOPCODE_a_OBJECTS)
 endif
 
 # convenience library to simulate per object cflags
@@ -51,6 +52,7 @@ libode_a_SOURCES = 	objects.h \
 			plane.cpp \
 			ray.cpp \
 			cylinder.cpp \
+			convex.cpp \
 			joint.cpp \
 			stack.h \
 			collision_std.h \

@@ -344,6 +344,28 @@ static void setTransform (const float pos[3], const float R[12])
   glPushMatrix();
   glMultMatrixf (matrix);
 }
+static void setTransformD (const double pos[3], const double R[12])
+{
+  GLdouble matrix[16];
+  matrix[0]=R[0];
+  matrix[1]=R[4];
+  matrix[2]=R[8];
+  matrix[3]=0;
+  matrix[4]=R[1];
+  matrix[5]=R[5];
+  matrix[6]=R[9];
+  matrix[7]=0;
+  matrix[8]=R[2];
+  matrix[9]=R[6];
+  matrix[10]=R[10];
+  matrix[11]=0;
+  matrix[12]=pos[0];
+  matrix[13]=pos[1];
+  matrix[14]=pos[2];
+  matrix[15]=1;
+  glPushMatrix();
+  glMultMatrixd (matrix);
+}
 
 
 // set shadow projection transform
@@ -378,6 +400,31 @@ static void drawConvex (float *_planes,unsigned int _planecount,
       for(unsigned int j=0;j<pointcount;++j)
 	{
 	  glVertex3f(_points[_polygons[polyindex]*3],
+		     _points[(_polygons[polyindex]*3)+1],
+		     _points[(_polygons[polyindex]*3)+2]);
+	  polyindex++;
+	}
+      glEnd();
+    }
+}
+
+static void drawConvexD (double *_planes,unsigned int _planecount,
+			 double *_points,
+			 unsigned int _pointcount,
+			 unsigned int *_polygons)
+{
+  unsigned int polyindex=0;
+  for(unsigned int i=0;i<_planecount;++i)
+    {
+      unsigned int pointcount=_polygons[polyindex];
+      polyindex++;
+      glBegin (GL_POLYGON);
+      glNormal3d(_planes[(i*4)+0],
+		 _planes[(i*4)+1],
+		 _planes[(i*4)+2]);
+      for(unsigned int j=0;j<pointcount;++j)
+	{
+	  glVertex3d(_points[_polygons[polyindex]*3],
 		     _points[(_polygons[polyindex]*3)+1],
 		     _points[(_polygons[polyindex]*3)+2]);
 	  polyindex++;
@@ -1451,6 +1498,28 @@ void dsDrawBoxD (const double pos[3], const double R[12],
   dsDrawBox (pos2,R2,fsides);
 }
 
+extern "C" void dsDrawConvexD (const double pos[3], const double R[12],
+			       double *_planes,unsigned int _planecount,
+			       double *_points,
+			       unsigned int _pointcount,
+			       unsigned int *_polygons)
+{
+  if (current_state != 2) dsError ("drawing function called outside simulation loop");
+  setupDrawingMode();
+  glShadeModel (GL_FLAT);
+  setTransformD (pos,R);
+  drawConvexD(_planes,_planecount,_points,_pointcount,_polygons);
+  glPopMatrix();
+  if (use_shadows) {
+    setShadowDrawingMode();
+    setShadowTransform();
+    setTransformD (pos,R);
+    drawConvexD(_planes,_planecount,_points,_pointcount,_polygons);
+    glPopMatrix();
+    glPopMatrix();
+    glDepthRange (0,1);
+  }
+}
 
 void dsDrawSphereD (const double pos[3], const double R[12], float radius)
 {
