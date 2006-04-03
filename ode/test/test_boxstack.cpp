@@ -27,6 +27,53 @@
 #pragma warning(disable:4244 4305)  // for VC++, no precision loss complaints
 #endif
 
+
+//<---- Convex Object
+dReal planes[]= // planes for a cube
+  {
+    1.0f ,0.0f ,0.0f ,0.25f,
+    0.0f ,1.0f ,0.0f ,0.25f,
+    0.0f ,0.0f ,1.0f ,0.25f,
+    0.0f ,0.0f ,-1.0f,0.25f,
+    0.0f ,-1.0f,0.0f ,0.25f,
+    -1.0f,0.0f ,0.0f ,0.25f
+    /*
+    1.0f ,0.0f ,0.0f ,2.0f,
+    0.0f ,1.0f ,0.0f ,1.0f,
+    0.0f ,0.0f ,1.0f ,1.0f,
+    0.0f ,0.0f ,-1.0f,1.0f,
+    0.0f ,-1.0f,0.0f ,1.0f,
+    -1.0f,0.0f ,0.0f ,0.0f
+    */
+  };
+const unsigned int planecount=6;
+
+dReal points[]= // points for a cube
+  {
+    0.25f,0.25f,0.25f,  //  point 0
+    -0.25f,0.25f,0.25f, //  point 1
+
+    0.25f,-0.25f,0.25f, //  point 2
+    -0.25f,-0.25f,0.25f,//  point 3
+
+    0.25f,0.25f,-0.25f, //  point 4
+    -0.25f,0.25f,-0.25f,//  point 5
+
+    0.25f,-0.25f,-0.25f,//  point 6
+    -0.25f,-0.25f,-0.25f,// point 7 
+  };
+const unsigned int pointcount=8;
+unsigned int polygons[] = //Polygons for a cube (6 squares)
+  {
+    4,0,2,6,4, // positive X
+    4,1,0,4,5, // positive Y
+    4,0,1,3,2, // positive Z
+    4,3,1,5,7, // negative X 
+    4,2,3,7,6, // negative Y
+    4,5,4,6,7, // negative Z
+  };
+//----> Convex Object
+
 // select correct drawing functions
 
 #ifdef dDOUBLE
@@ -34,6 +81,7 @@
 #define dsDrawSphere dsDrawSphereD
 #define dsDrawCylinder dsDrawCylinderD
 #define dsDrawCapsule dsDrawCapsuleD
+#define dsDrawConvex dsDrawConvexD
 #endif
 
 
@@ -113,6 +161,7 @@ static void start()
   printf ("   s for sphere.\n");
   printf ("   c for capsule.\n");
   printf ("   y for cylinder.\n");
+  printf ("   v for a convex object.\n");
   printf ("   x for a composite object.\n");
   printf ("To select an object, press space.\n");
   printf ("To disable the selected object, press d.\n");
@@ -141,7 +190,7 @@ static void command (int cmd)
   dMass m;
 
   cmd = locase (cmd);
-  if (cmd == 'b' || cmd == 's' || cmd == 'c' || cmd == 'x' || cmd == 'y')
+  if (cmd == 'b' || cmd == 's' || cmd == 'c' || cmd == 'x' || cmd == 'y' || cmd == 'v')
   {
     if (num < NUM) {
       i = num;
@@ -191,6 +240,19 @@ static void command (int cmd)
       dMassSetCapsule (&m,DENSITY,3,sides[0],sides[1]);
       obj[i].geom[0] = dCreateCapsule (space,sides[0],sides[1]);
     }
+    //<---- Convex Object    
+    else if (cmd == 'v') 
+      {
+	dMassSetBox (&m,DENSITY,0.25,0.25,0.25);
+	obj[i].geom[0] = dCreateConvex (space,
+					planes,
+					planecount,
+					points,
+					pointcount,
+					polygons);
+      }
+    //----> Convex Object
+
 #ifdef dCYLINDER_ENABLED
     // cylinder option not yet implemented
     else if (cmd == 'y') {
@@ -316,6 +378,18 @@ void drawGeom (dGeomID g, const dReal *pos, const dReal *R, int show_aabb)
     dGeomCapsuleGetParams (g,&radius,&length);
     dsDrawCapsule (pos,R,length,radius);
   }
+  //<---- Convex Object
+  else if (type == dConvexClass) 
+    {
+      //dVector3 sides={0.50,0.50,0.50};
+      dsDrawConvex(pos,R,planes,
+		   planecount,
+		   points,
+		   pointcount,
+		   polygons);
+    }
+  //----> Convex Object
+
 #ifdef dCYLINDER_ENABLED
   // cylinder option not yet implemented
   else if (type == dCylinderClass) {

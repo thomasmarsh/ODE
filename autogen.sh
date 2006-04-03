@@ -1,5 +1,7 @@
 #!/bin/sh
 
+# The reason this uses sed instead of "grep --only-matches"
+# is because MinGW's grep is an old version and does not contain that flag.
 automake_version=`automake --version | grep --regexp='[+0-9].[+0-9].[+0-9]' | sed -n 's/[* ()A-Za-z]//g;p'`
 automake_mayor=${automake_version%.*.*}
 automake_minor=${automake_version%.*}

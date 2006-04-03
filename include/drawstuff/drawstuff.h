@@ -159,6 +159,12 @@ void dsDrawCylinderD (const double pos[3], const double R[12],
 void dsDrawCapsuleD (const double pos[3], const double R[12],
 		     float length, float radius);
 void dsDrawLineD (const double pos1[3], const double pos2[3]);
+void dsDrawConvexD(const double pos[3], const double R[12],
+		  double *_planes,
+		  unsigned int _planecount,
+		  double *_points,
+		  unsigned int _pointcount,
+		  unsigned int *_polygons);
 
 /* Set the drawn quality of the objects. Higher numbers are higher quality,
  * but slower to draw. This must be set before the first objects are drawn to
