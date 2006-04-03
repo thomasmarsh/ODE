@@ -472,7 +472,7 @@ extern "C" double dsElapsedTime()
 {
   static double prev=0.0;
   double curr = timeGetTime()/1000.0;
-  if (prev!=0.0)
+  if (!prev)
     prev=curr;
   double retval = curr-prev;
   prev=curr;
