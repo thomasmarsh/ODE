@@ -1,3 +1,36 @@
+-- Here are the lists of tests to build. Add/remove new 
+-- tests here and everything else should just work
+
+  local tests =
+  {
+    "basket",
+    "boxstack",
+    "buggy",
+    "chain1",
+    "chain2",
+    "collision",
+    "crash",
+    "friction",
+    "hinge",
+    "I",
+    "joints",
+    "ode",
+    "slider",
+    "space",
+    "space_stress",
+    "step"
+  }
+
+  if (not options["no-cylinder"]) then
+    table.insert(tests, "cyl")
+  end
+    
+  if (not options["no-trimesh"]) then
+    table.insert(tests, "moving_trimesh")
+    table.insert(tests, "trimesh")
+  end
+
+
 -- Separate distribution files into toolset subdirectories
 
   if (options["usetargetpath"]) then
@@ -40,7 +73,7 @@
 
 -- Factory function for test packages
 
-  function maketest(name)
+  function maketest(index, name)
     package = newpackage()
     package.name = "test_" .. name
     package.kind = "exe"
@@ -53,7 +86,7 @@
 	
     package.links = { "ode", "drawstuff" }
     if (windows) then
-      table.insert(package.links, { "user32", "gdi32", "opengl32", "glu32" })
+      table.insert(package.links, { "user32", "winmm", "gdi32", "opengl32", "glu32" })
     else
       table.insert(package.links, { "GL", "GLU" })
     end
@@ -70,30 +103,7 @@
     end
   end
 
-  maketest("boxstack")
-  maketest("buggy")
-  maketest("chain1")
-  maketest("chain2")
-  maketest("collision")
-  maketest("crash")
-  maketest("friction")
-  maketest("hinge")
-  maketest("I")
-  maketest("joints")
-  maketest("ode")
-  maketest("slider")
-  maketest("space")
-  maketest("space_stress")
-  maketest("step")
-
-  if (not options["no-cylinder"]) then
-    maketest("cyl")
-  end
-    
-  if (not options["no-trimesh"]) then
-    maketest("moving_trimesh")
-    maketest("trimesh")
-  end
+  table.foreach(tests, maketest)
 
 
 -- Unit tests

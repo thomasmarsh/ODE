@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="Windows-1252"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="7.10"
-	Name="test_buggy"
-	ProjectGUID="{A1E6B32B-2E5A-2046-BFC0-E9B3A6E201CD}"
+	Version="7.00"
+	Name="test_basket"
+	ProjectGUID="{3EDCE6F6-33EA-224C-B7D7-45B248A71C7A}"
 	Keyword="Win32Proj">
 	<Platforms>
 		<Platform
@@ -13,7 +13,7 @@
 		<Configuration
 			Name="DebugDLL|Win32"
 			OutputDirectory="../../lib/DebugDLL"
-			IntermediateDirectory="obj/buggy/DebugDLL"
+			IntermediateDirectory="obj/basket/DebugDLL"
 			ConfigurationType="1"
 			CharacterSet="2">
 			<Tool
@@ -35,11 +35,11 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="../../lib/DebugDLL/ode.lib ../../lib/DebugDLL/drawstuff.lib user32.lib winmm.lib gdi32.lib opengl32.lib glu32.lib"
-				OutputFile="$(OutDir)/test_buggy.exe"
+				OutputFile="$(OutDir)/test_basket.exe"
 				LinkIncremental="2"
 				AdditionalLibraryDirectories="../../lib/DebugDLL"
 				GenerateDebugInformation="TRUE"
-				ProgramDatabaseFile="$(OutDir)/test_buggy.pdb"
+				ProgramDatabaseFile="$(OutDir)/test_basket.pdb"
 				SubSystem="1"
 				EntryPointSymbol="mainCRTStartup"
 				TargetMachine="1"/>
@@ -57,18 +57,12 @@
 			<Tool
 				Name="VCWebServiceProxyGeneratorTool"/>
 			<Tool
-				Name="VCXMLDataGeneratorTool"/>
-			<Tool
 				Name="VCWebDeploymentTool"/>
-			<Tool
-				Name="VCManagedWrapperGeneratorTool"/>
-			<Tool
-				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
 		</Configuration>
 		<Configuration
 			Name="ReleaseDLL|Win32"
 			OutputDirectory="../../lib/ReleaseDLL"
-			IntermediateDirectory="obj/buggy/ReleaseDLL"
+			IntermediateDirectory="obj/basket/ReleaseDLL"
 			ConfigurationType="1"
 			CharacterSet="2">
 			<Tool
@@ -90,11 +84,11 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="../../lib/ReleaseDLL/ode.lib ../../lib/ReleaseDLL/drawstuff.lib user32.lib winmm.lib gdi32.lib opengl32.lib glu32.lib"
-				OutputFile="$(OutDir)/test_buggy.exe"
+				OutputFile="$(OutDir)/test_basket.exe"
 				LinkIncremental="2"
 				AdditionalLibraryDirectories="../../lib/ReleaseDLL"
 				GenerateDebugInformation="TRUE"
-				ProgramDatabaseFile="$(OutDir)/test_buggy.pdb"
+				ProgramDatabaseFile="$(OutDir)/test_basket.pdb"
 				SubSystem="1"
 				EntryPointSymbol="mainCRTStartup"
 				TargetMachine="1"/>
@@ -112,18 +106,12 @@
 			<Tool
 				Name="VCWebServiceProxyGeneratorTool"/>
 			<Tool
-				Name="VCXMLDataGeneratorTool"/>
-			<Tool
 				Name="VCWebDeploymentTool"/>
-			<Tool
-				Name="VCManagedWrapperGeneratorTool"/>
-			<Tool
-				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
 		</Configuration>
 		<Configuration
 			Name="DebugLib|Win32"
 			OutputDirectory="../../lib/DebugLib"
-			IntermediateDirectory="obj/buggy/DebugLib"
+			IntermediateDirectory="obj/basket/DebugLib"
 			ConfigurationType="1"
 			CharacterSet="2">
 			<Tool
@@ -145,11 +133,11 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="../../lib/DebugLib/ode.lib ../../lib/DebugLib/drawstuff.lib user32.lib winmm.lib gdi32.lib opengl32.lib glu32.lib"
-				OutputFile="$(OutDir)/test_buggy.exe"
+				OutputFile="$(OutDir)/test_basket.exe"
 				LinkIncremental="2"
 				AdditionalLibraryDirectories="../../lib/DebugLib"
 				GenerateDebugInformation="TRUE"
-				ProgramDatabaseFile="$(OutDir)/test_buggy.pdb"
+				ProgramDatabaseFile="$(OutDir)/test_basket.pdb"
 				SubSystem="1"
 				EntryPointSymbol="mainCRTStartup"
 				TargetMachine="1"/>
@@ -167,18 +155,12 @@
 			<Tool
 				Name="VCWebServiceProxyGeneratorTool"/>
 			<Tool
-				Name="VCXMLDataGeneratorTool"/>
-			<Tool
 				Name="VCWebDeploymentTool"/>
-			<Tool
-				Name="VCManagedWrapperGeneratorTool"/>
-			<Tool
-				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
 		</Configuration>
 		<Configuration
 			Name="ReleaseLib|Win32"
 			OutputDirectory="../../lib/ReleaseLib"
-			IntermediateDirectory="obj/buggy/ReleaseLib"
+			IntermediateDirectory="obj/basket/ReleaseLib"
 			ConfigurationType="1"
 			CharacterSet="2">
 			<Tool
@@ -200,11 +182,11 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="../../lib/ReleaseLib/ode.lib ../../lib/ReleaseLib/drawstuff.lib user32.lib winmm.lib gdi32.lib opengl32.lib glu32.lib"
-				OutputFile="$(OutDir)/test_buggy.exe"
+				OutputFile="$(OutDir)/test_basket.exe"
 				LinkIncremental="2"
 				AdditionalLibraryDirectories="../../lib/ReleaseLib"
 				GenerateDebugInformation="TRUE"
-				ProgramDatabaseFile="$(OutDir)/test_buggy.pdb"
+				ProgramDatabaseFile="$(OutDir)/test_basket.pdb"
 				SubSystem="1"
 				EntryPointSymbol="mainCRTStartup"
 				TargetMachine="1"/>
@@ -222,17 +204,9 @@
 			<Tool
 				Name="VCWebServiceProxyGeneratorTool"/>
 			<Tool
-				Name="VCXMLDataGeneratorTool"/>
-			<Tool
 				Name="VCWebDeploymentTool"/>
-			<Tool
-				Name="VCManagedWrapperGeneratorTool"/>
-			<Tool
-				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
 		</Configuration>
 	</Configurations>
-	<References>
-	</References>
 	<Files>
 		<Filter
 			Name="ode"
@@ -241,7 +215,7 @@
 				Name="test"
 				Filter="">
 				<File
-					RelativePath="..\..\ode\test\test_buggy.cpp">
+					RelativePath="..\..\ode\test\test_basket.cpp">
 				</File>
 			</Filter>
 		</Filter>

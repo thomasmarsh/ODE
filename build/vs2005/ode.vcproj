@@ -3,7 +3,7 @@
 	ProjectType="Visual C++"
 	Version="8.00"
 	Name="ode"
-	ProjectGUID="{76AA41D4-0DB2-3142-8045-5EBA28CF667A}"
+	ProjectGUID="{76D3AE9B-9E94-9947-86F2-C11B7AE2EC4B}"
 	RootNamespace="ode"
 	Keyword="Win32Proj"
 	>
@@ -483,6 +483,12 @@
 					RelativePath="..\..\ode\src\array.cpp">
 				</File>
 				<File
+					RelativePath="..\..\ode\src\box.cpp">
+				</File>
+				<File
+					RelativePath="..\..\ode\src\capsule.cpp">
+				</File>
+				<File
 					RelativePath="..\..\ode\src\collision_cylinder_box.cpp">
 				</File>
 				<File
@@ -502,9 +508,6 @@
 				</File>
 				<File
 					RelativePath="..\..\ode\src\collision_space.cpp">
-				</File>
-				<File
-					RelativePath="..\..\ode\src\collision_std.cpp">
 				</File>
 				<File
 					RelativePath="..\..\ode\src\collision_transform.cpp">
@@ -532,6 +535,9 @@
 				</File>
 				<File
 					RelativePath="..\..\ode\src\collision_util.cpp">
+				</File>
+				<File
+					RelativePath="..\..\ode\src\cylinder.cpp">
 				</File>
 				<File
 					RelativePath="..\..\ode\src\error.cpp">
@@ -570,10 +576,19 @@
 					RelativePath="..\..\ode\src\odemath.cpp">
 				</File>
 				<File
+					RelativePath="..\..\ode\src\plane.cpp">
+				</File>
+				<File
 					RelativePath="..\..\ode\src\quickstep.cpp">
 				</File>
 				<File
+					RelativePath="..\..\ode\src\ray.cpp">
+				</File>
+				<File
 					RelativePath="..\..\ode\src\rotation.cpp">
+				</File>
+				<File
+					RelativePath="..\..\ode\src\sphere.cpp">
 				</File>
 				<File
 					RelativePath="..\..\ode\src\step.cpp">

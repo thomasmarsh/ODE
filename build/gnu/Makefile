@@ -9,11 +9,11 @@ endif
 
 export CONFIG
 
-.PHONY: all clean ode drawstuff test_boxstack test_buggy test_chain1 test_chain2 test_collision test_crash test_friction test_hinge test_I test_joints test_ode test_slider test_space test_space_stress test_step test_cyl test_moving_trimesh test_trimesh tests
+.PHONY: all clean ode drawstuff test_basket test_boxstack test_buggy test_chain1 test_chain2 test_collision test_crash test_friction test_hinge test_I test_joints test_ode test_slider test_space test_space_stress test_step test_cyl test_moving_trimesh test_trimesh tests
 
-all: ode drawstuff test_boxstack test_buggy test_chain1 test_chain2 test_collision test_crash test_friction test_hinge test_I test_joints test_ode test_slider test_space test_space_stress test_step test_cyl test_moving_trimesh test_trimesh tests
+all: ode drawstuff test_basket test_boxstack test_buggy test_chain1 test_chain2 test_collision test_crash test_friction test_hinge test_I test_joints test_ode test_slider test_space test_space_stress test_step test_cyl test_moving_trimesh test_trimesh tests
 
-Makefile: ../premake.lua ../ode.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua
+Makefile: ../premake.lua ../ode.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua
 	@echo ==== Regenerating Makefiles ====
 	@premake --file $^ --usetargetpath --with-tests --clean --target gnu
 
@@ -24,6 +24,10 @@ ode:
 drawstuff:
 	@echo ==== Building drawstuff ====
 	@$(MAKE) --no-print-directory -C . -f drawstuff.make
+
+test_basket: ode drawstuff
+	@echo ==== Building test_basket ====
+	@$(MAKE) --no-print-directory -C . -f test_basket.make
 
 test_boxstack: ode drawstuff
 	@echo ==== Building test_boxstack ====
@@ -104,6 +108,7 @@ tests: ode
 clean:
 	@$(MAKE) --no-print-directory -C . -f ode.make clean
 	@$(MAKE) --no-print-directory -C . -f drawstuff.make clean
+	@$(MAKE) --no-print-directory -C . -f test_basket.make clean
 	@$(MAKE) --no-print-directory -C . -f test_boxstack.make clean
 	@$(MAKE) --no-print-directory -C . -f test_buggy.make clean
 	@$(MAKE) --no-print-directory -C . -f test_chain1.make clean
