@@ -38,7 +38,7 @@ using namespace Opcode;
 #define SET_CONTACT(prim_index, flag)		\
 	/* Set contact status */				\
 	mFlags |= flag;							\
-	mTouchedPrimitives->Add(prim_index);
+	mTouchedPrimitives->Add(udword(prim_index));
 
 //! Planes-triangle test
 #define PLANES_PRIM(prim_index, flag)		\
