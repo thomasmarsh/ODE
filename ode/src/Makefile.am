@@ -2,7 +2,11 @@ AM_CXXFLAGS = @ARCHFLAGS@ -I$(top_srcdir)/include -I$(top_builddir)/include
 AM_CPPFLAGS = @ARCHFLAGS@ -I$(top_srcdir)/include -I$(top_builddir)/include
 AM_CFLAGS = @ARCHFLAGS@ -I$(top_srcdir)/include -I$(top_builddir)/include
 lib_LIBRARIES = libode.a
-libode_a_CPPFLAGS = -O2 -fPIC
+libode_a_CPPFLAGS = -O2
+
+if X86_64_SYSTEM
+libode_a_CPPFLAGS += -fPIC
+endif
 
 # Fake an executable in order to get a shared library
 # Note the elegant and cunning way to trick Autotools to install a program
@@ -21,8 +25,12 @@ endif
 
 # convenience library to simulate per object cflags
 noinst_LIBRARIES= libfast.a
-libfast_a_CFLAGS= -O1 -fPIC
+libfast_a_CFLAGS= -O1
 libfast_a_SOURCES= fastldlt.c fastltsolve.c fastdot.c fastlsolve.c
+
+if X86_64_SYSTEM
+libfast_a_CFLAGS += -fPIC
+endif
 
 libode_a_DEPENDENCIES = libfast.a
 libode_a_LIBADD= $(libfast_a_OBJECTS)
@@ -79,6 +87,11 @@ libode_a_SOURCES = 	objects.h \
 if OPCODE
 noinst_LIBRARIES+= libOPCODE.a
 libOPCODE_a_CPPFLAGS= -O2 -fno-strict-aliasing -fPIC
+
+if X86_64_SYSTEM
+libOPCODE_a_CPPFLAGS += -fPIC
+endif
+
 libOPCODE_a_SOURCES=	@TOPDIR@/OPCODE/OPC_AABBCollider.cpp \
 			@TOPDIR@/OPCODE/OPC_AABBTree.cpp \
 			@TOPDIR@/OPCODE/OPC_BaseModel.cpp \
