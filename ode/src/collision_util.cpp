@@ -450,7 +450,6 @@ void dInfiniteAABB (dxGeom *geom, dReal aabb[6])
 //****************************************************************************
 // Helpers for Croteam's collider - by Nguyen Binh
 
-#ifdef dCYLINDER_ENABLED
 int dClipEdgeToPlane( dVector3 &vEpnt0, dVector3 &vEpnt1, const dVector4& plPlane)
 {
 	// calculate distance of edge points to plane
@@ -593,5 +592,4 @@ void		 dClipPolyToCircle(const dVector3 avArrayIn[], const int ctIn,
 		}
 	}	
 }
-#endif
 

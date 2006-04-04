@@ -140,14 +140,11 @@ libode_a_SOURCES+=	collision_trimesh_trimesh.cpp \
 			collision_trimesh_box.cpp \
 			collision_trimesh_ccylinder.cpp \
 			collision_trimesh_distance.cpp \
-			collision_trimesh_internal.h
-endif
-
-if CYLINDER
-AM_CXXFLAGS += -DdCYLINDER_ENABLED
-libode_a_SOURCES+=      collision_cylinder_box.cpp \
+			collision_trimesh_internal.h \
+                        collision_cylinder_box.cpp \
                         collision_cylinder_sphere.cpp \
                         collision_cylinder_plane.cpp \
                         collision_cylinder_trimesh.cpp
 endif
+
 

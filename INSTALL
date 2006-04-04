@@ -12,22 +12,21 @@ if you want to build ODE with autotools follow these steps, if not skip ahead:
     platform, these are (for now) harmless warnings regarding scripts 
     from other m4 installed packages.
 
-(1) The default build process builds ODE with single precision, no trimesh
-    support, and debug enabled (leaves OPCODE out), if this is what you want,
-    simply run:
+(1) The default build process builds ODE with single precision, with trimesh
+    support, and debug enabled if this is what you want, simply run:
 
     $ ./configure
 
     double precision is enabled with the argument --with-double-precision
-    opcode support is enabled with the --with-opcode argument, and finally,
+    opcode support is disabled with the --without-opcode argument, and finally,
     a release build is enabled with --enable-release.
-    So, if you want to build ODE with trimesh support, you would run:
+    So, if you want to build ODE without trimesh support, you would run:
 
-    $ ./configure --with-opcode
+    $ ./configure --without-opcode
 
-    if you want to build ODE with trimesh support and double precision:
+    if you want to build ODE without trimesh support and double precision:
 
-    $ ./configure --with-double-precision --with-opcode
+    $ ./configure --with-double-precision --without-opcode
 
     etc, each of these arguments are independent of each other.
     In addition the option --with-arch= allows the user to pass the

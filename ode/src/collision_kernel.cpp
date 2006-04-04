@@ -185,16 +185,12 @@ static void initColliders()
   setCollider (dTriMeshClass,dRayClass,&dCollideRTL);
   setCollider (dTriMeshClass,dTriMeshClass,&dCollideTTL);
   setCollider (dTriMeshClass,dCapsuleClass,&dCollideCCTL);
-#ifdef dCYLINDER_ENABLED
   setCollider (dCylinderClass,dTriMeshClass,&dCollideCylinderTrimesh);
 #endif
-#endif
-#ifdef dCYLINDER_ENABLED
   setCollider (dCylinderClass,dBoxClass,&dCollideCylinderBox);
   setCollider (dCylinderClass,dSphereClass,&dCollideCylinderSphere);
   setCollider (dCylinderClass,dPlaneClass,&dCollideCylinderPlane);
   //setCollider (dCylinderClass,dCylinderClass,&dCollideCylinderCylinder);
-#endif
 //--> Convex Collision
   setCollider (dConvexClass,dPlaneClass,&dCollideConvexPlane);
   setCollider (dSphereClass,dConvexClass,&dCollideSphereConvex);

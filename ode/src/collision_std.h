@@ -64,7 +64,6 @@ int dCollideRayCapsule (dxGeom *o1, dxGeom *o2,
 int dCollideRayPlane (dxGeom *o1, dxGeom *o2, int flags,
 		      dContactGeom *contact, int skip);
 
-#ifdef dCYLINDER_ENABLED
 // Cylinder - Box/Sphere by (C) CroTeam
 // Ported by Nguyen Binh
 int dCollideCylinderBox(dxGeom *o1, dxGeom *o2, 
@@ -73,7 +72,6 @@ int dCollideCylinderSphere(dxGeom *gCylinder, dxGeom *gSphere,
                            int flags, dContactGeom *contact, int skip); 
 int dCollideCylinderPlane(dxGeom *gCylinder, dxGeom *gPlane, 
                            int flags, dContactGeom *contact, int skip); 
-#endif
 
 //--> Convex Collision
 int dCollideConvexPlane (dxGeom *o1, dxGeom *o2, int flags,
@@ -112,13 +110,11 @@ struct dxCapsule : public dxGeom {
 };
 
 
-#ifdef dCYLINDER_ENABLED
 struct dxCylinder : public dxGeom {
         dReal radius,lz;        // radius, length along z axis
         dxCylinder (dSpaceID space, dReal _radius, dReal _length);
         void computeAABB();
 };
-#endif
 
 
 struct dxPlane : public dxGeom {
