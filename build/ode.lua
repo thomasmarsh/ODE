@@ -93,6 +93,7 @@ package.objdir = "obj/ode"
 
   excluded_files =
   {
+    "../../ode/src/collision_std.cpp",
     "../../ode/src/scrapbook.cpp",
     "../../ode/src/stack.cpp"
   }

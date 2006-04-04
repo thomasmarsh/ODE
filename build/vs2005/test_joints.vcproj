@@ -3,7 +3,7 @@
 	ProjectType="Visual C++"
 	Version="8.00"
 	Name="test_joints"
-	ProjectGUID="{CF8F8512-1372-2B48-A7D8-3E7938FC28CC}"
+	ProjectGUID="{E0C81655-E1EF-C24C-B44E-88F04078DF6D}"
 	RootNamespace="test_joints"
 	Keyword="Win32Proj"
 	>

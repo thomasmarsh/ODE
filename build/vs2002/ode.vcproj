@@ -3,7 +3,7 @@
 	ProjectType="Visual C++"
 	Version="7.00"
 	Name="ode"
-	ProjectGUID="{45A65668-5A63-1443-9DBC-8A92B65583CC}"
+	ProjectGUID="{26FCEC2B-65E1-E044-95C0-418E0DF02B9F}"
 	Keyword="Win32Proj">
 	<Platforms>
 		<Platform
@@ -388,6 +388,9 @@
 				</File>
 				<File
 					RelativePath="..\..\ode\src\collision_util.cpp">
+				</File>
+				<File
+					RelativePath="..\..\ode\src\convex.cpp">
 				</File>
 				<File
 					RelativePath="..\..\ode\src\cylinder.cpp">
