@@ -226,6 +226,7 @@ then
 AC_DEFINE(X86_64_SYSTEM,1,[is this a X86_64 system on a gcc-based platform?])
 fi
 AC_MSG_RESULT($cpu64)
+AM_CONDITIONAL(X86_64_SYSTEM, test x$cpu64 = xyes)
 
 AC_MSG_CHECKING(if building a release library)
 AC_ARG_ENABLE(release,AC_HELP_STRING([--enable-release],
