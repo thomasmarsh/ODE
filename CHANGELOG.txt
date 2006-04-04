@@ -9,6 +9,11 @@ the rules for this file:
 
 ------------------------------------------------------------------------------
 
+04/03/06 rodrigo
+
+	* Added Convex primitive collision code,
+	  currently only convex-sphere and convex-plane work
+
 04/01/06 bram
 
 	* Added program to test trimesh vs sphere: ode/test/test_basket
