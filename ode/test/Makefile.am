@@ -15,12 +15,11 @@ noinst_PROGRAMS=test_collision \
 		test_motor \
 		test_chain1 \
 		test_chain2 \
+                test_cyl \
+                test_cylvssphere \
 		test_ode
 if OPCODE
 noinst_PROGRAMS+= test_trimesh test_moving_trimesh test_basket
-if CYLINDER
-noinst_PROGRAMS+= test_cyl
-endif
 endif
 test_collision_SOURCES= test_collision.cpp
 test_slider_SOURCES= test_slider.cpp 
@@ -34,6 +33,7 @@ test_hinge_SOURCES= test_hinge.cpp
 test_step_SOURCES= test_step.cpp
 test_buggy_SOURCES= test_buggy.cpp
 test_cyl_SOURCES= test_cyl.cpp world_geom3.h
+test_cylvssphere_SOURCES= test_cylvssphere.cpp
 test_joints_SOURCES= test_joints.cpp
 test_motor_SOURCES= test_motor.cpp
 test_chain1_SOURCES= test_chain1.c
@@ -63,6 +63,8 @@ test_buggy_LDFLAGS= -L$(top_builddir)/drawstuff/src \
 		-L$(top_builddir)/ode/src @LDFLAGS@ 
 test_cyl_LDFLAGS= -L$(top_builddir)/drawstuff/src \
 		-L$(top_builddir)/ode/src @LDFLAGS@ 
+test_cylvssphere_LDFLAGS= -L$(top_builddir)/drawstuff/src \
+		-L$(top_builddir)/ode/src @LDFLAGS@ 
 test_joints_LDFLAGS= -L$(top_builddir)/drawstuff/src \
 		-L$(top_builddir)/ode/src @LDFLAGS@ 
 test_motor_LDFLAGS= -L$(top_builddir)/drawstuff/src \
@@ -73,9 +75,6 @@ test_chain2_LDFLAGS= -L$(top_builddir)/drawstuff/src \
 		-L$(top_builddir)/ode/src @LDFLAGS@ 
 test_ode_LDFLAGS= -L$(top_builddir)/drawstuff/src \
 		-L$(top_builddir)/ode/src @LDFLAGS@ 
-
-test_boxstack_CXXFLAGS= @CXXFLAGS@ -I$(top_builddir)/include -I$(top_srcdir)/include -DdCYLINDER_ENABLED
-test_cyl_CXXFLAGS= @CXXFLAGS@ -I$(top_builddir)/include -I$(top_srcdir)/include -DdCYLINDER_ENABLED
 
 test_collision_DEPENDENCIES=	$(top_builddir)/ode/src/libode.a \
 				$(top_builddir)/drawstuff/src/libdrawstuff.a
@@ -100,6 +99,8 @@ test_step_DEPENDENCIES=		$(top_builddir)/ode/src/libode.a \
 test_buggy_DEPENDENCIES=	$(top_builddir)/ode/src/libode.a \
 				$(top_builddir)/drawstuff/src/libdrawstuff.a
 test_cyl_DEPENDENCIES=		$(top_builddir)/ode/src/libode.a \
+				$(top_builddir)/drawstuff/src/libdrawstuff.a
+test_cylvssphere_DEPENDENCIES=	$(top_builddir)/ode/src/libode.a \
 				$(top_builddir)/drawstuff/src/libdrawstuff.a
 test_joints_DEPENDENCIES=	$(top_builddir)/ode/src/libode.a \
 				$(top_builddir)/drawstuff/src/libdrawstuff.a
@@ -142,6 +143,7 @@ test_joints_LDADD= -ldrawstuff -lode @GL_LIBS@ @LIBS@
 test_motor_LDADD= -ldrawstuff -lode @GL_LIBS@ @LIBS@
 test_buggy_LDADD= -ldrawstuff -lode @GL_LIBS@ @LIBS@
 test_cyl_LDADD= -ldrawstuff -lode @GL_LIBS@ @LIBS@
+test_cylvssphere_LDADD= -ldrawstuff -lode @GL_LIBS@ @LIBS@
 test_step_LDADD= -ldrawstuff -lode @GL_LIBS@ @LIBS@
 test_hinge_LDADD= -ldrawstuff -lode @GL_LIBS@ @LIBS@
 test_boxstack_LDADD= -ldrawstuff -lode @GL_LIBS@ @LIBS@
@@ -169,6 +171,7 @@ test_joints_LDADD+= resources.o
 test_motor_LDADD+= resources.o
 test_buggy_LDADD+= resources.o
 test_cyl_LDADD+= resources.o
+test_cylvssphere_LDADD+= resources.o
 test_step_LDADD+= resources.o
 test_hinge_LDADD+= resources.o
 test_boxstack_LDADD+= resources.o
@@ -186,6 +189,7 @@ test_joints_DEPENDENCIES+= resources.o
 test_motor_DEPENDENCIES+= resources.o
 test_buggy_DEPENDENCIES+= resources.o
 test_cyl_DEPENDENCIES+= resources.o
+test_cylvssphere_DEPENDENCIES+= resources.o
 test_step_DEPENDENCIES+= resources.o
 test_hinge_DEPENDENCIES+= resources.o
 test_boxstack_DEPENDENCIES+= resources.o

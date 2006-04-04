@@ -253,13 +253,11 @@ static void command (int cmd)
       }
     //----> Convex Object
 
-#ifdef dCYLINDER_ENABLED
     // cylinder option not yet implemented
     else if (cmd == 'y') {
       dMassSetCylinder (&m,DENSITY,3,sides[0],sides[1]);
       obj[i].geom[0] = dCreateCylinder (space,sides[0],sides[1]);
     }
-#endif
     else if (cmd == 's') {
       sides[0] *= 0.5;
       dMassSetSphere (&m,DENSITY,sides[0]);
@@ -390,14 +388,12 @@ void drawGeom (dGeomID g, const dReal *pos, const dReal *R, int show_aabb)
     }
   //----> Convex Object
 
-#ifdef dCYLINDER_ENABLED
   // cylinder option not yet implemented
   else if (type == dCylinderClass) {
     dReal radius,length;
     dGeomCylinderGetParams (g,&radius,&length);
     dsDrawCylinder (pos,R,length,radius);
   }
-#endif
   else if (type == dGeomTransformClass) {
     dGeomID g2 = dGeomTransformGetGeom (g);
     const dReal *pos2 = dGeomGetPosition (g2);

@@ -42,8 +42,6 @@ dContactGeom::g1 and dContactGeom::g2.
 #pragma warning(disable:4291)  // for VC++, no complaints about "no matching operator delete found"
 #endif
 
-#ifdef dCYLINDER_ENABLED
-
 // flat cylinder public API
 
 dxCylinder::dxCylinder (dSpaceID space, dReal _radius, dReal _length) :
@@ -99,5 +97,4 @@ void dGeomCylinderGetParams (dGeomID cylinder, dReal *radius, dReal *length)
 	*length = c->lz;
 }
 
-#endif
 

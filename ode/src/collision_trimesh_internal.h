@@ -26,9 +26,7 @@
 #ifndef _ODE_COLLISION_TRIMESH_INTERNAL_H_
 #define _ODE_COLLISION_TRIMESH_INTERNAL_H_
 
-#ifdef dCYLINDER_ENABLED
 int dCollideCylinderTrimesh(dxGeom *o1, dxGeom *o2, int flags, dContactGeom *contact, int skip);
-#endif
 
 int dCollideSTL(dxGeom *o1, dxGeom *o2, int flags, dContactGeom *contact, int skip);
 int dCollideBTL(dxGeom *o1, dxGeom *o2, int flags, dContactGeom *contact, int skip);

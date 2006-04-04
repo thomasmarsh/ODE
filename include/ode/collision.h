@@ -154,11 +154,9 @@ ODE_API dReal dGeomCapsulePointDepth (dGeomID ccylinder, dReal x, dReal y, dReal
 #define dGeomCCylinderPointDepth dGeomCapsulePointDepth
 #define dCCylinderClass dCapsuleClass
 
-#ifdef dCYLINDER_ENABLED
 ODE_API dGeomID dCreateCylinder (dSpaceID space, dReal radius, dReal length);
 ODE_API void dGeomCylinderSetParams (dGeomID cylinder, dReal radius, dReal length);
 ODE_API void dGeomCylinderGetParams (dGeomID cylinder, dReal *radius, dReal *length);
-#endif
 
 ODE_API dGeomID dCreateRay (dSpaceID space, dReal length);
 ODE_API void dGeomRaySetLength (dGeomID ray, dReal length);
