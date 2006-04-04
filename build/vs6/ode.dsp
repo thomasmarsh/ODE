@@ -345,6 +345,10 @@ SOURCE=../../ode/src/collision_util.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=../../ode/src/convex.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=../../ode/src/cylinder.cpp
 # End Source File
 # Begin Source File

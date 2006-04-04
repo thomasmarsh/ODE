@@ -85,6 +85,7 @@ OBJECTS := \
 	$(OBJDIR)/collision_trimesh_sphere.o \
 	$(OBJDIR)/collision_trimesh_trimesh.o \
 	$(OBJDIR)/collision_util.o \
+	$(OBJDIR)/convex.o \
 	$(OBJDIR)/cylinder.o \
 	$(OBJDIR)/error.o \
 	$(OBJDIR)/export-dif.o \
@@ -285,6 +286,11 @@ $(OBJDIR)/collision_trimesh_trimesh.o: ../../ode/src/collision_trimesh_trimesh.c
 	@$(CXX) $(CXXFLAGS) -o $@ -c $<
 
 $(OBJDIR)/collision_util.o: ../../ode/src/collision_util.cpp
+	-@$(CMD_MKOBJDIR)
+	@echo $(notdir $<)
+	@$(CXX) $(CXXFLAGS) -o $@ -c $<
+
+$(OBJDIR)/convex.o: ../../ode/src/convex.cpp
 	-@$(CMD_MKOBJDIR)
 	@echo $(notdir $<)
 	@$(CXX) $(CXXFLAGS) -o $@ -c $<

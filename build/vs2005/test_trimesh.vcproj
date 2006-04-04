@@ -3,7 +3,7 @@
 	ProjectType="Visual C++"
 	Version="8.00"
 	Name="test_trimesh"
-	ProjectGUID="{78DD4FE7-C8F7-DA47-9112-BD993F2387F9}"
+	ProjectGUID="{E16F4D5A-5864-844E-BDEC-B7D568D36C2D}"
 	RootNamespace="test_trimesh"
 	Keyword="Win32Proj"
 	>
