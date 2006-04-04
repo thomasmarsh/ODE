@@ -131,9 +131,15 @@ static void command (int cmd)
 
 static void simLoop (int pause)
 {
-  dSpaceCollide (space,0,&nearCallback);
-  dWorldQuickStep (world, dsElapsedTime());
-  dJointGroupEmpty (contactgroup);
+  double simstep = 0.001; // 1ms simulation steps
+  double dt = dsElapsedTime();
+  int nrofsteps = (int) ceilf(dt/simstep);
+  for (int i=0; i<nrofsteps && !pause; i++)
+  {
+    dSpaceCollide (space,0,&nearCallback);
+    dWorldQuickStep (world, simstep);
+    dJointGroupEmpty (contactgroup);
+  }
 
   dsSetColor (1,1,1);
 #ifdef BOX
@@ -213,7 +219,7 @@ int main (int argc, char **argv)
   space = dHashSpaceCreate (0);
   contactgroup = dJointGroupCreate (0);
   dWorldSetGravity (world,0,0,-9.8);
-  dWorldSetQuickStepNumIterations (world, 64);
+  dWorldSetQuickStepNumIterations (world, 32);
 
 
   // Create a static world using a triangle mesh that we can collide with.
