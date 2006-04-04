@@ -59,8 +59,8 @@ dnl check for required headers
 AC_CHECK_HEADERS( alloca.h ieeefp.h stdio.h stdlib.h math.h string.h stdarg.h malloc.h values.h float.h time.h sys/time.h )
 
 AC_MSG_CHECKING(if OPCODE support is requested)
-AC_ARG_WITH(opcode,AC_HELP_STRING([--with-opcode],
-[Configure ODE to work with the OPCODE collision detection library for trimesh support]),
+AC_ARG_WITH(opcode,AC_HELP_STRING([--without-opcode],
+[Configure ODE to work without OPCODE (disables trimesh support)]),
 opcode=$withval,opcode=yes)
 AC_MSG_RESULT($opcode)
 AM_CONDITIONAL(OPCODE, test x$opcode = xyes)
