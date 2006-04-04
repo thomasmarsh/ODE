@@ -59,7 +59,7 @@ dnl check for required headers
 AC_CHECK_HEADERS( alloca.h ieeefp.h stdio.h stdlib.h math.h string.h stdarg.h malloc.h values.h float.h time.h sys/time.h )
 
 AC_MSG_CHECKING(if OPCODE support is requested)
-AC_ARG_WITH(opcode,AC_HELP_STRING([--without-opcode],
+AC_ARG_ENABLE(opcode,AC_HELP_STRING([--disable-opcode],
 [Configure ODE to work without OPCODE (disables trimesh support)]),
 opcode=$withval,opcode=yes)
 AC_MSG_RESULT($opcode)
@@ -67,8 +67,8 @@ AM_CONDITIONAL(OPCODE, test x$opcode = xyes)
 
 dnl Check Precision, define the dInfinity constant--------------------------/
 AC_MSG_CHECKING(if double precision is requested)
-AC_ARG_WITH(double-precision,AC_HELP_STRING([--with-double-precision],
-[Cofigure ODE to work with double precision, if not specified, single precision is used]),
+AC_ARG_ENABLE(double-precision,AC_HELP_STRING([--enable-double-precision],
+[Configure ODE to work with double precision, if not specified, single precision is used]),
 precision=$withval,precision=no)
 if test "$precision" != no
 then
@@ -294,7 +294,7 @@ AC_SUBST(TOPDIR)
 dnl Check if the user wants to profile ODE using gprof
 AC_MSG_CHECKING(for gprof)
 AC_ARG_ENABLE(gprof,
-[       --enable-gprof          enable profiling with gprof],
+AC_HELP_STRING([--enable-gprof],[enable profiling with gprof]),
 gprof=$enableval,gprof=no)
 if test "$gprof" != no
 then
