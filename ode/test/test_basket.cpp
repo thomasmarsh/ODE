@@ -40,7 +40,7 @@
 
 // some constants
 
-#define RADIUS 0.12
+#define RADIUS 0.14
 
 // dynamics and collision objects (chassis, 3 wheels, environment)
 
@@ -128,7 +128,7 @@ static void simLoop (int pause)
   int nrofsteps = (int) ceilf(dt/simstep);
 //  fprintf(stderr, "dt=%f, nr of steps = %d\n", dt, nrofsteps);
 
-  for (int i=0; i<nrofsteps; i++)
+  for (int i=0; i<nrofsteps && !pause; i++)
   {
     dSpaceCollide (space,0,&nearCallback);
     dWorldQuickStep (world, simstep);
@@ -219,7 +219,7 @@ int main (int argc, char **argv)
   dRFromAxisAndAngle (R, 0,1,0, 0.0);
   dGeomSetRotation (world_mesh, R);
 
-  float sx=0.0, sy=3.40, sz=6.65;
+  float sx=0.0, sy=3.40, sz=6.80;
   sphbody = dBodyCreate (world);
   dMassSetSphere (&m,1,RADIUS);
   dBodySetMass (sphbody,&m);
