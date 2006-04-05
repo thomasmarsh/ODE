@@ -17,9 +17,11 @@ if you want to build ODE with autotools follow these steps, if not skip ahead:
 
     $ ./configure
 
-    double precision is enabled with the argument --enable-double-precision
-    opcode support is disabled with the --disable-opcode argument, and finally,
-    a release build is enabled with --enable-release.
+    Double precision is enabled with the argument --enable-double-precision
+    opcode support is disabled with the --disable-opcode argument.
+    To disable the gyroscopic term, which may improve stability, use
+    --disable-gyroscopic
+    A release build is enabled with --enable-release.
     So, if you want to build ODE without trimesh support, you would run:
 
     $ ./configure --disable-opcode

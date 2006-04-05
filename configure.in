@@ -65,11 +65,21 @@ opcode=$withval,opcode=yes)
 AC_MSG_RESULT($opcode)
 AM_CONDITIONAL(OPCODE, test x$opcode = xyes)
 
+AC_MSG_CHECKING(if gyroscopic term should be used)
+AC_ARG_ENABLE(gyroscopic,AC_HELP_STRING([--disable-gyroscopic],
+[Configure ODE to work without gyroscopic term (may improve stability)]),
+gyroscopic=$enableval,gyroscopic=yes)
+AC_MSG_RESULT($gyroscopic)
+if test x"$gyroscopic" = xyes
+then
+AC_DEFINE(dGYROSCOPIC,,[Use gyroscopic terms])
+fi
+
 dnl Check Precision, define the dInfinity constant--------------------------/
 AC_MSG_CHECKING(if double precision is requested)
 AC_ARG_ENABLE(double-precision,AC_HELP_STRING([--enable-double-precision],
 [Configure ODE to work with double precision, if not specified, single precision is used]),
-precision=$withval,precision=no)
+precision=$enableval,precision=no)
 if test "$precision" != no
 then
 dnl DOUBLE was chosen
@@ -447,6 +457,7 @@ echo "  Build  system type:      $build"
 echo "  Host   system type:      $host"
 echo "  Use double precision:    $precision"
 echo "  Use OPCODE:              $opcode"
+echo "  Use gyroscopic term:     $gyroscopic"
 echo "  Is this a Pentium:       $pentium"
 echo "  Is the CPU x86-64:       $cpu64"
 echo "  Is this a release build: $release"
