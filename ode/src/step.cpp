@@ -1032,9 +1032,11 @@ void dInternalStepIsland_x2 (dxWorld *world, dxBody * const *body, int nb,
     // compute inverse inertia tensor in global frame
     dMULTIPLY2_333 (tmp,body[i]->invI,body[i]->posr.R);
     dMULTIPLY0_333 (invI+i*12,body[i]->posr.R,tmp);
+#ifdef dGYROSCOPIC
     // compute rotational force
     dMULTIPLY0_331 (tmp,I+i*12,body[i]->avel);
     dCROSS (body[i]->tacc,-=,body[i]->avel,tmp);
+#endif
   }
 
   // add the gravity force to all bodies
