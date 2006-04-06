@@ -266,7 +266,10 @@ AC_CHECK_HEADERS(GL/gl.h GL/glu.h GL/glext.h,,,
        #endif
      ]])
 AC_CHECK_LIB(GL, main,[GL_LIBS="$GL_LIBS -lGL"])
+TEMP_LDFLAGS="$LDFLAGS"
+LDFLAGS="$LDFLAGS $GL_LIBS"
 AC_CHECK_LIB(GLU, main,[GL_LIBS="$GL_LIBS -lGLU"])
+LDFLAGS="$TEMP_LDFLAGS"
 AC_CHECK_LIB(opengl32, main,[GL_LIBS="$GL_LIBS -lopengl32"])
 AC_CHECK_LIB(glu32, main,[GL_LIBS="$GL_LIBS -lglu32"])
 AC_CHECK_LIB(Xmu, main,[GL_LIBS="$GL_LIBS -lXmu"])
