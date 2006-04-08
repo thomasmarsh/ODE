@@ -126,14 +126,18 @@ static inline void serialize()
 #ifndef X86_64_SYSTEM
   asm volatile (
 	"mov $0,%%eax\n"
+	"push %%ebx\n"
 	"cpuid\n"
-	: : : "%eax","%ebx","%ecx","%edx","cc","memory");
+	"pop %%ebx\n"
+	: : : "%eax","%ecx","%edx","cc","memory");
 #else
   asm volatile (
 	"mov $0,%%rax\n"
+	"push %rbx\n"
 	"cpuid\n"
-	: : : "%rax","%rbx","%rcx","%rdx","cc","memory");
-#endif  
+	"pop %rbx\n"
+	: : : "%rax","%rcx","%rdx","cc","memory");
+#endif
 }
 
 
