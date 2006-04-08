@@ -279,17 +279,18 @@ int main (int argc, char **argv)
 
   dJointGroupEmpty (contactgroup);
   dJointGroupDestroy (contactgroup);
-  dSpaceDestroy (space);
-  dWorldDestroy (world);
 
-  // Causes segm violation? Why?
+  // First destroy geoms, then space, then the world.
 #ifdef CYL
-//  dGeomDestroy (cylgeom);
+  dGeomDestroy (cylgeom);
 #endif
 #ifdef BOX
-//  dGeomDestroy (boxgeom);
+  dGeomDestroy (boxgeom);
 #endif
-//  dGeomDestroy (world_mesh);
+  dGeomDestroy (world_mesh);
+
+  dSpaceDestroy (space);
+  dWorldDestroy (world);
 
   return 0;
 }
