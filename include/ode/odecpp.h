@@ -313,6 +313,11 @@ public:
 
   dBodyID getBody (int index) const
     { return dJointGetBody (_id, index); }
+
+  void setFeedback(dJointFeedback *fb)
+    { dJointSetFeedback(_id, fb); }
+  dJointFeedback *getFeedback() const
+    { return dJointGetFeedback(_id); }
 };
 
 
