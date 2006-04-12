@@ -12,9 +12,7 @@ Smith</a> with help from several
 <a href="http://ode.org/community.html">contributors</a>.
 
 If "rigid body simulation" does not make much sense to you, check out 
-<a href="http://opende.sourceforge.net/slides/slides.html">What is a 
-Physics SDK?</a>.
-
+<a href="http://ode.org/slides/slides.html">What is a Physics SDK?</a>.
 
 @li @ref introduction
 @li @ref installation
