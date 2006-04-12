@@ -484,7 +484,7 @@ int dCollideConvexCapsule (dxGeom *o1, dxGeom *o2,
 			     int flags, dContactGeom *contact, int skip)
 {
   dIASSERT (o1->type == dConvexClass);
-  dIASSERT (o2->type == dCCylinderClass);
+  dIASSERT (o2->type == dCapsuleClass);
   dxConvex *Convex = (dxConvex*) o1;
   dxCapsule *Capsule = (dxCapsule*) o2;
   return 0;
