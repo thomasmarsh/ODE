@@ -16,7 +16,7 @@ EXEEXT=@so_ext@
 traplib_PROGRAMS=libode
 libode_SOURCES=
 libode_DEPENDENCIES = libfast.a libode.a
-libode_LDFLAGS=-shared
+libode_LDFLAGS= @SHARED_LDFLAGS@
 libode_LDADD=$(libode_a_OBJECTS) $(libfast_a_OBJECTS)
 if OPCODE
 libode_DEPENDENCIES+= libOPCODE.a

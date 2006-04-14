@@ -422,23 +422,28 @@ case "$host_os" in
   hpux9* | hpux10* | hpux11*)  # taken from ltconfig
     so_ext=".sl"
     DLLDEFINE=""
+    SHARED_LDFLAGS="-shared"
     ;;
   cygwin* | mingw*)
     so_ext=".dll"
     DLLDEFINE="-DODE_DLL"
+    SHARED_LDFLAGS="-shared"
     ;;
   *apple*) # For Mac OS X
     so_ext=".dylib"
     DLLDEFINE=""
+    SHARED_LDFLAGS="-dylib"
     ;;
   *)
    so_ext=".so"
     DLLDEFINE=""
+    SHARED_LDFLAGS="-shared"
     ;;
 esac
 AC_MSG_RESULT($so_ext)
 AC_DEFINE_UNQUOTED(SO_EXT,"$so_ext",[The extension for shared libraries.])
 AC_SUBST(so_ext)
+AC_SUBST(SHARED_LDFLAGS)
 
 dnl Finally write our Makefiles
 AC_OUTPUT([
