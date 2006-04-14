@@ -76,6 +76,20 @@ package.objdir = "obj/ode"
   end
   
 
+-- Build Flags
+
+	release_flags = 
+	{
+		"optimize-speed",
+		"no-symbols",
+		"no-frame-pointer"
+	}
+
+		package.config["Release"].buildflags = release_flags
+		package.config["ReleaseDLL"].buildflags = release_flags
+		package.config["ReleaseLib"].buildflags = release_flags
+	
+	
 -- Libraries
 
   if (windows) then
