@@ -25,9 +25,9 @@ ifeq ($(CONFIG),ReleaseDLL)
   OBJDIR := obj/ode/ReleaseDLL
   OUTDIR := ../../lib/ReleaseDLL
   CPPFLAGS := -MD -D "WIN32" -D "ODE_DLL" -I "../../include" -I "../../OPCODE"
-  CFLAGS += $(CPPFLAGS) -g
+  CFLAGS += $(CPPFLAGS) -O3 -fomit-frame-pointer
   CXXFLAGS := $(CFLAGS)
-  LDFLAGS += -L$(BINDIR) -L$(LIBDIR) -shared -luser32
+  LDFLAGS += -L$(BINDIR) -L$(LIBDIR) -shared -s -luser32
   LDDEPS :=
   TARGET := ode.dll
   BLDCMD = $(CXX) -o $(OUTDIR)/$(TARGET) $(OBJECTS) $(LDFLAGS) $(RESOURCES)
@@ -53,9 +53,9 @@ ifeq ($(CONFIG),ReleaseLib)
   OBJDIR := obj/ode/ReleaseLib
   OUTDIR := ../../lib/ReleaseLib
   CPPFLAGS := -MD -D "WIN32" -D "ODE_LIB" -I "../../include" -I "../../OPCODE"
-  CFLAGS += $(CPPFLAGS) -g
+  CFLAGS += $(CPPFLAGS) -O3 -fomit-frame-pointer
   CXXFLAGS := $(CFLAGS)
-  LDFLAGS += -L$(BINDIR) -L$(LIBDIR) -luser32
+  LDFLAGS += -L$(BINDIR) -L$(LIBDIR) -s -luser32
   LDDEPS :=
   TARGET := ode.lib
   BLDCMD = ar -cr $(OUTDIR)/$(TARGET) $(OBJECTS); ranlib $(OUTDIR)/$(TARGET)

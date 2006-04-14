@@ -3,7 +3,7 @@
 	ProjectType="Visual C++"
 	Version="7.10"
 	Name="ode"
-	ProjectGUID="{E52F3C04-65D4-7D4A-BB43-3713098F304E}"
+	ProjectGUID="{FB603612-D49E-0B48-B1BC-5B7D627796DC}"
 	Keyword="Win32Proj">
 	<Platforms>
 		<Platform
@@ -73,29 +73,30 @@
 			CharacterSet="2">
 			<Tool
 				Name="VCCLCompilerTool"
-				Optimization="0"
+				Optimization="2"
+				OmitFramePointers="TRUE"
 				AdditionalIncludeDirectories="../../include;../../OPCODE"
 				PreprocessorDefinitions="WIN32;ODE_DLL"
-				MinimalRebuild="TRUE"
-				BasicRuntimeChecks="3"
-				RuntimeLibrary="3"
+				StringPooling="TRUE"
+				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="TRUE"
 				RuntimeTypeInfo="TRUE"
 				UsePrecompiledHeader="2"
 				WarningLevel="3"
 				Detect64BitPortabilityProblems="TRUE"
-				DebugInformationFormat="4"/>
+				DebugInformationFormat="0"/>
 			<Tool
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="user32.lib"
 				OutputFile="$(OutDir)/ode.dll"
-				LinkIncremental="2"
+				LinkIncremental="1"
 				AdditionalLibraryDirectories="../../lib/ReleaseDLL"
-				GenerateDebugInformation="TRUE"
-				ProgramDatabaseFile="$(OutDir)/ode.pdb"
+				GenerateDebugInformation="FALSE"
 				SubSystem="2"
+				OptimizeReferences="2"
+				EnableCOMDATFolding="2"
 				ImportLibrary="../../lib/ReleaseDLL/ode.lib"
 				TargetMachine="1"/>
 			<Tool
@@ -175,18 +176,18 @@
 			CharacterSet="2">
 			<Tool
 				Name="VCCLCompilerTool"
-				Optimization="0"
+				Optimization="2"
+				OmitFramePointers="TRUE"
 				AdditionalIncludeDirectories="../../include;../../OPCODE"
 				PreprocessorDefinitions="WIN32;ODE_LIB"
-				MinimalRebuild="TRUE"
-				BasicRuntimeChecks="3"
-				RuntimeLibrary="3"
+				StringPooling="TRUE"
+				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="TRUE"
 				RuntimeTypeInfo="TRUE"
 				UsePrecompiledHeader="2"
 				WarningLevel="3"
 				Detect64BitPortabilityProblems="TRUE"
-				DebugInformationFormat="4"/>
+				DebugInformationFormat="0"/>
 			<Tool
 				Name="VCCustomBuildTool"/>
 			<Tool
