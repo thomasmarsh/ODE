@@ -429,7 +429,7 @@ case "$host_os" in
     DLLDEFINE="-DODE_DLL"
     SHARED_LDFLAGS="-shared"
     ;;
-  *apple*) # For Mac OS X
+  *apple* | *darwin*) # For Mac OS X
     so_ext=".dylib"
     DLLDEFINE=""
     SHARED_LDFLAGS="-dylib"
