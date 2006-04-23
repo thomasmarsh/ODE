@@ -115,7 +115,10 @@ static void start()
 static void reset_ball(void)
 {
   float sx=0.0, sy=3.40, sz=6.80;
+  dQuaternion q;
+  dQSetIdentity(q);
   dBodySetPosition (sphbody, sx, sy, sz);
+  dBodySetQuaternion(sphbody, q);
   dBodySetLinearVel (sphbody, 0,0,0);
   dBodySetAngularVel (sphbody, 0,0,0);
 }
