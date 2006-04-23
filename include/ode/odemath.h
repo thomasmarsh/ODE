@@ -37,6 +37,13 @@
  */
 #define dACCESS33(A,i,j) ((A)[(i)*4+(j)])
 
+/*
+ * Macro to test for valid floating point values
+ */
+#define dVALIDVEC3(v) (!(dIsNan(v[0]) | dIsNan(v[1]) | dIsNan(v[2])))
+#define dVALIDVEC4(v) (!(dIsNan(v[0]) | dIsNan(v[2]) | dIsNan(v[2]) | dIsNan(v[3])))
+#define dVALIDMAT(m) (!(dIsNan(m[0]) | dIsNan(m[2]) | dIsNan(m[2]) | dIsNan(m[3]) | dIsNan(m[4]) | dIsNan(m[5]) | dIsNan(m[6]) | dIsNan(m[7]) | dIsNan(m[8]) | dIsNan(m[9]) | dIsNan(m[10]) | dIsNan(m[11])))
+
 
 /*
  * 3-way dot product. dDOTpq means that elements of `a' and `b' are spaced
