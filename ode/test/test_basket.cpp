@@ -82,6 +82,10 @@ static void nearCallback (void *data, dGeomID o1, dGeomID o2)
   {
     for (int i=0; i<n; i++) 
     {
+	  // Paranoia
+	  dIASSERT(dVALIDVEC3(contact[i].geom.pos));
+	  dIASSERT(dVALIDVEC3(contact[i].geom.normal));
+	  dIASSERT(!dIsNan(contact[i].geom.depth));
       contact[i].surface.slip1 = 0.7;
       contact[i].surface.slip2 = 0.7;
       contact[i].surface.mode = dContactSoftERP | dContactSoftCFM | dContactApprox1 | dContactSlip1 | dContactSlip2;
@@ -164,9 +168,11 @@ static void simLoop (int pause)
   dsSetTexture (DS_NONE);
 
   const dReal* Pos = dGeomGetPosition(world_mesh);
+  dIASSERT(dVALIDVEC3(Pos));
   float pos[3] = { Pos[0], Pos[1], Pos[2] };
 
   const dReal* Rot = dGeomGetRotation(world_mesh);
+  dIASSERT(dVALIDMAT(Rot));
   float rot[12] = { Rot[0], Rot[1], Rot[2], Rot[3], Rot[4], Rot[5], Rot[6], Rot[7], Rot[8], Rot[9], Rot[10], Rot[11] };
 
   int numi = sizeof(world_indices)  / sizeof(int);
@@ -203,12 +209,13 @@ int main (int argc, char **argv)
   // create world
   world = dWorldCreate();
   space = dHashSpaceCreate (0);
+
   contactgroup = dJointGroupCreate (0);
   dWorldSetGravity (world,0,0,-9.8);
   dWorldSetQuickStepNumIterations (world, 64);
 
   // Create a static world using a triangle mesh that we can collide with.
-  int numv = sizeof(world_vertices)/sizeof(dReal);
+  int numv = sizeof(world_vertices)/(3*sizeof(float));
   int numi = sizeof(world_indices)/ sizeof(int);
   printf("numv=%d, numi=%d\n", numv, numi);
   dTriMeshDataID Data = dGeomTriMeshDataCreate();
@@ -227,6 +234,8 @@ int main (int argc, char **argv)
   );
 
   world_mesh = dCreateTriMesh(space, Data, 0, 0, 0);
+  dGeomTriMeshEnableTC(world_mesh, dSphereClass, false);
+  dGeomTriMeshEnableTC(world_mesh, dBoxClass, false);
   dGeomSetPosition(world_mesh, 0, 0, 0.5);
   dRFromAxisAndAngle (R, 0,1,0, 0.0);
   dGeomSetRotation (world_mesh, R);
