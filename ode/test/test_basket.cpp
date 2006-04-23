@@ -23,6 +23,7 @@
 // Basket ball demo.
 // Serves as a test for the sphere vs trimesh collider
 // By Bram Stolk.
+// Press the spacebar to reset the position of the ball.
 
 #include <ode/config.h>
 #include <assert.h>
@@ -106,6 +107,16 @@ static void start()
 }
 
 
+
+static void reset_ball(void)
+{
+  float sx=0.0, sy=3.40, sz=6.80;
+  dBodySetPosition (sphbody, sx, sy, sz);
+  dBodySetLinearVel (sphbody, 0,0,0);
+  dBodySetAngularVel (sphbody, 0,0,0);
+}
+
+
 // called when a key pressed
 
 static void command (int cmd)
@@ -113,6 +124,7 @@ static void command (int cmd)
   switch (cmd) 
   {
     case ' ':
+	  reset_ball();
       break;
   }
 }
@@ -225,7 +237,7 @@ int main (int argc, char **argv)
   dBodySetMass (sphbody,&m);
   sphgeom = dCreateSphere(0, RADIUS);
   dGeomSetBody (sphgeom,sphbody);
-  dBodySetPosition (sphbody, sx, sy, sz);
+  reset_ball();
   dSpaceAdd (space, sphgeom);
 
   // run simulation
