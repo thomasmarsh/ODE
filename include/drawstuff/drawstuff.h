@@ -20,7 +20,7 @@
  *                                                                       *
  *************************************************************************/
 
-/*
+/** @file
 
 Draw Stuff
 ----------
@@ -56,6 +56,11 @@ extern "C" {
 #define DS_WOOD   1
 
 
+/**
+ * @struct dsFunctions
+ * @brief Set of functions to be used as callbacks by the simulation loop.
+ * @ingroup support
+ */
 typedef struct dsFunctions {
   int version;			/* put DS_VERSION here */
   /* version 1 data */
@@ -68,83 +73,171 @@ typedef struct dsFunctions {
 } dsFunctions;
 
 
-/* the main() function should fill in the dsFunctions structure then
- * call this.
+/**
+ * @brief Does the complete simulation.
+ * @ingroup support
+ * This function starts running the simulation, and only exits when the simulation is done.
+ * Function pointers should be provided for the callbacks.
+ * @param argv supports flags like '-notex' '-noshadow' '-pause'
+ * @param fn Callback functions.
  */
 void dsSimulationLoop (int argc, char **argv,
 		       int window_width, int window_height,
 		       struct dsFunctions *fn);
 
-/* these functions display an error message then exit. they take arguments
- * in the same way as printf(), except you do not have to add a terminating
- * '\n'. Debug() tries to dump core or start the debugger.
+/**
+ * @brief exit with error message.
+ * @ingroup support
+ * This function displays an error message then exit.
+ * @param msg format strin, like printf, without the newline character.
  */
 void dsError (char *msg, ...);
+
+/**
+ * @brief exit with error message and core dump.
+ * @ingroup support
+ * this functions tries to dump core or start the debugger.
+ * @param msg format strin, like printf, without the newline character.
+ */
 void dsDebug (char *msg, ...);
 
-/* dsPrint() prints out a message. it takes arguments in the same way as
- * printf() (i.e. you must add a '\n' at the end of every line).
+/**
+ * @brief print log message
+ * @ingroup support
+ * @param msg format string, like printf, without the \n.
  */
 void dsPrint (char *msg, ...);
 
-/* set and get the camera position. xyz is the cameria position (x,y,z).
- * hpr contains heading, pitch and roll numbers in degrees. heading=0
+/**
+ * @brief Sets the viewpoint
+ * @ingroup support
+ * @param xyz camera position.
+ * @param hpr contains heading, pitch and roll numbers in degrees. heading=0
  * points along the x axis, pitch=0 is looking towards the horizon, and
  * roll 0 is "unrotated".
  */
 void dsSetViewpoint (float xyz[3], float hpr[3]);
+
+
+/**
+ * @brief Gets the viewpoint
+ * @ingroup support
+ * @param xyz position
+ * @param hpr heading,pitch,roll.
+ */
 void dsGetViewpoint (float xyz[3], float hpr[3]);
 
-/* stop the simulation loop. calling this from within dsSimulationLoop()
+/**
+ * @brief Stop the simulation loop.
+ * @ingroup support
+ * Calling this from within dsSimulationLoop()
  * will cause it to exit and return to the caller. it is the same as if the
  * user used the exit command. using this outside the loop will have no
  * effect.
  */
 void dsStop();
 
-/* Get the elapsed time since the last call to this function.
- * It will always return a non zero, positive value, not greater than 1.0
- * The returned value can be used in the application loop as a dt value
- * to the step function.
+/**
+ * @brief Get the elapsed time (on wall-clock)
+ * @ingroup support
+ * It returns the nr of seconds since the last call to this function.
  */
 double dsElapsedTime();
 
-/* change the way objects are drawn. these changes will apply to all further
- * dsDrawXXX() functions. the texture number must be a DS_xxx texture
- * constant. the red, green, and blue number are between 0 and 1.
- * alpha is between 0 and 1 - if alpha is not specified it's assubed to be 1.
- * the current texture is colored according to the current color.
- * at the start of each frame, the texture is reset to none and the color is
+/**
+ * @brief Toggle the rendering of textures.
+ * @ingroup support
+ * It changes the way objects are drawn. these changes will apply to all further
+ * dsDrawXXX() functions. 
+ * @param the texture number must be a DS_xxx texture constant.
+ * The current texture is colored according to the current color.
+ * At the start of each frame, the texture is reset to none and the color is
  * reset to white.
  */
 void dsSetTexture (int texture_number);
+
+/**
+ * @brief Set the color with which geometry is drawn.
+ * @ingroup support
+ * @param red Red component from 0 to 1
+ * @param green Green component from 0 to 1
+ * @param blue Blue component from 0 to 1
+ */
 void dsSetColor (float red, float green, float blue);
+
+/**
+ * @brief Set the color and transparency with which geometry is drawn.
+ * @ingroup support
+ * @param alpha Note that alpha transparency is a misnomer: it is alpha opacity.
+ * 1.0 means fully opaque, and 0.0 means fully transparent.
+ */
 void dsSetColorAlpha (float red, float green, float blue, float alpha);
 
-/* draw objects.
- *   - pos[] is the x,y,z of the center of the object.
- *   - R[] is a 3x3 rotation matrix for the object, stored by row like this:
+/**
+ * @brief Draw a box.
+ * @ingroup support
+ * @param pos is the x,y,z of the center of the object.
+ * @param R is a 3x3 rotation matrix for the object, stored by row like this:
  *        [ R11 R12 R13 0 ]
  *        [ R21 R22 R23 0 ]
  *        [ R31 R32 R33 0 ]
- *   - sides[] is an array of x,y,z side lengths.
- *   - all cylinders are aligned along the z axis.
+ * @param sides[] is an array of x,y,z side lengths.
  */
 void dsDrawBox (const float pos[3], const float R[12], const float sides[3]);
+
+/**
+ * @brief Draw a sphere.
+ * @ingroup support
+ * @param pos Position of center.
+ * @param R orientation.
+ * @param radius
+ */
 void dsDrawSphere (const float pos[3], const float R[12], float radius);
+
+/**
+ * @brief Draw a triangle.
+ * @ingroup support
+ * @param pos Position of center
+ * @param R orientation
+ * @param v0 first vertex
+ * @param v1 second
+ * @param v2 third vertex
+ * @param solid set to 0 for wireframe
+ */
 void dsDrawTriangle (const float pos[3], const float R[12],
 		     const float *v0, const float *v1, const float *v2, int solid);
+
+/**
+ * @brief Draw a z-aligned cylinder
+ * @ingroup support
+ */
 void dsDrawCylinder (const float pos[3], const float R[12],
 		     float length, float radius);
+
+/**
+ * @brief Draw a z-aligned capsule
+ * @ingroup support
+ */
 void dsDrawCapsule (const float pos[3], const float R[12],
 		    float length, float radius);
+
+/**
+ * @brief Draw a line.
+ * @ingroup support
+ */
 void dsDrawLine (const float pos1[3], const float pos2[3]);
+
+/**
+ * @brief Draw a convex shape.
+ * @ingroup support
+ */
 void dsDrawConvex(const float pos[3], const float R[12],
 		  float *_planes,
 		  unsigned int _planecount,
 		  float *_points,
 		  unsigned int _pointcount,
 		  unsigned int *_polygons);
+
  /* these drawing functions are identical to the ones above, except they take
  * double arrays for `pos' and `R'.
  */
@@ -166,9 +259,12 @@ void dsDrawConvexD(const double pos[3], const double R[12],
 		  unsigned int _pointcount,
 		  unsigned int *_polygons);
 
-/* Set the drawn quality of the objects. Higher numbers are higher quality,
- * but slower to draw. This must be set before the first objects are drawn to
- * be effective.
+/**
+ * @brief Set the quality with which curved objects are rendered.
+ * @ingroup support
+ * Higher numbers are higher quality, but slower to draw. 
+ * This must be set before the first objects are drawn to be effective.
+ * Default sphere quality is 1, default capsule quality is 3.
  */
 void dsSetSphereQuality (int n);		/* default = 1 */
 void dsSetCapsuleQuality (int n);		/* default = 3 */
@@ -178,11 +274,10 @@ void dsSetCapsuleQuality (int n);		/* default = 3 */
 #define dsDrawCappedCylinderD dsDrawCapsuleD
 #define dsSetCappedCylinderQuality dsSetCapsuleQuality
 
-
-
 /* closing bracket for extern "C" */
 #ifdef __cplusplus
 }
 #endif
 
 #endif
+
