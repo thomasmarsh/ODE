@@ -386,6 +386,7 @@ int dCollideSTL(dxGeom* g1, dxGeom* SphereGeom, int Flags, dContactGeom* Contact
 			dReal dirProj = dDOT(dir, Plane) / dSqrt(dDOT(dir, dir));
 			Contact->depth = Depth * dirProj;
 			//Contact->depth = Radius - side; // (mg) penetration depth is distance along normal not shortest distance
+			Contact->side1 = TriIndex;
 
 			//Contact->g1 = TriMesh;
 			//Contact->g2 = SphereGeom;
@@ -429,6 +430,10 @@ int dCollideSTL(dxGeom* g1, dxGeom* SphereGeom, int Flags, dContactGeom* Contact
 
 			Contact->g1 = TriMesh;
 			Contact->g2 = SphereGeom;
+
+			// TODO:
+			// Side1 now contains index of triangle that gave first hit
+			// Probably we should find index of triangle with deepest penetration
 
 			return 1;
 		}

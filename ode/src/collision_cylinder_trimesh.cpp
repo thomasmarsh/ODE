@@ -49,6 +49,7 @@ typedef struct _sLocalContactData
 	dVector3	vPos;
 	dVector3	vNormal;
 	dReal		fDepth;
+	int			triIndex;
 	int			nFlags; // 0 = filtered out, 1 = OK
 }sLocalContactData;
 
@@ -196,6 +197,7 @@ inline int	_ProcessLocalContacts(sData& cData)
 			dVector3Copy(cData.gLocalContacts[iContact].vPos,Contact->pos);
 			Contact->g1 = cData.gCylinder;
 			Contact->g2 = cData.gTrimesh;
+			Contact->side2 = cData.gLocalContacts[iContact].triIndex;
 			dVector3Inv(Contact->normal);
 
 			nFinalContact++;
@@ -1012,7 +1014,7 @@ int dCollideCylinderTrimesh(dxGeom *o1, dxGeom *o2, int flags, dContactGeom *con
 		// allocate buffer for local contacts on stack
 		cData.gLocalContacts = (sLocalContactData*)dALLOCA16(sizeof(sLocalContactData)*(cData.iFlags & NUMC_MASK));
 
-		int OutTriCount = 0;
+	    int ctContacts0 = 0;
 
 		// loop through all intersecting triangles
 		for (int i = 0; i < TriCount; i++)
@@ -1031,6 +1033,10 @@ int dCollideCylinderTrimesh(dxGeom *o1, dxGeom *o2, int flags, dContactGeom *con
 			
 			// test this triangle
 			TestOneTriangleVsCylinder(cData , dv[0],dv[1],dv[2], false);
+
+			// fill-in tri index for generated contacts
+			for (; ctContacts0<cData.nContacts; ctContacts0++)
+				cData.gLocalContacts[ctContacts0].triIndex = Triint;
 		}
 	}
 

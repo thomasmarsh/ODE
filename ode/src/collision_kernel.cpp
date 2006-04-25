@@ -233,6 +233,9 @@ int dCollide (dxGeom *o1, dxGeom *o2, int flags, dContactGeom *contact,
 	dxGeom *tmp = c->g1;
 	c->g1 = c->g2;
 	c->g2 = tmp;
+	int tmpint = c->side1;
+	c->side1 = c->side2;
+	c->side2 = tmpint;
       }
     }
     else {

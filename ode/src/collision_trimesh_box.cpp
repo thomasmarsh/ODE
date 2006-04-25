@@ -1218,7 +1218,7 @@ int dCollideBTL(dxGeom* g1, dxGeom* BoxGeom, int Flags, dContactGeom* Contacts, 
          TriMesh->ArrayCallback(TriMesh, BoxGeom, Triangles, TriCount);
     }
     
-    int OutTriCount = 0;
+    int ctContacts0 = ctContacts;
     
     // loop through all intersecting triangles
     for (int i = 0; i < TriCount; i++){
@@ -1234,6 +1234,10 @@ int dCollideBTL(dxGeom* g1, dxGeom* BoxGeom, int Flags, dContactGeom* Contacts, 
 
         // test this triangle
         _cldTestOneTriangle(dv[0],dv[1],dv[2]);
+
+		// fill-in tri index for generated contacts
+		for (; ctContacts0<ctContacts; ctContacts0++)
+			SAFECONTACT(iFlags, ContactGeoms, ctContacts0, iStride)->side1 = Triint;
     }
   }
 

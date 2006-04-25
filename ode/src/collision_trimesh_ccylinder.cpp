@@ -152,6 +152,7 @@ typedef struct _sLocalContactData
 	dVector3	vPos;
 	dVector3	vNormal;
 	dReal		fDepth;
+	int			triIndex;
 	int			nFlags; // 0 = filtered out, 1 = OK
 }sLocalContactData;
 
@@ -305,6 +306,7 @@ inline int	_ProcessLocalContacts()
 				SET(Contact->pos,gLocalContacts[iContact].vPos);
 				Contact->g1 = gCylinder;
 				Contact->g2 = gTriMesh;
+				Contact->side2 = gLocalContacts[iContact].triIndex;
 
 				nFinalContact++;
 		}
@@ -1032,7 +1034,7 @@ int dCollideCCTL(dxGeom *o1, dxGeom *o2, int flags, dContactGeom *contact, int s
 		// allocate buffer for local contacts on stack
 		gLocalContacts = (sLocalContactData*)dALLOCA16(sizeof(sLocalContactData)*(iFlags & NUMC_MASK));
 
-		int OutTriCount = 0;
+	    int ctContacts0 = ctContacts;
 
 		uint8* UseFlags = TriMesh->Data->UseFlags;
 
@@ -1056,6 +1058,9 @@ int dCollideCCTL(dxGeom *o1, dxGeom *o2, int flags, dContactGeom *contact, int s
 			// test this triangle
 			_cldTestOneTriangleVSCapsule(dv[0],dv[1],dv[2], flags);
 			
+			// fill-in tri index for generated contacts
+			for (; ctContacts0<ctContacts; ctContacts0++)
+				gLocalContacts[ctContacts0].triIndex = Triint;
 		}
 	 }
 
