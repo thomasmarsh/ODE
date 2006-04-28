@@ -257,23 +257,38 @@ AC_CHECK_SIZEOF(void*)
 
 
 dnl Check for OpenGL
-AC_CHECK_HEADERS(GL/gl.h GL/glu.h GL/glext.h,,,
-     [[#if HAVE_GL_GL_H
-       #include <GL/gl.h>
-       #endif
-	   #if HAVE_GL_GLU_H
-       #include <GL/glu.h>
-       #endif
-     ]])
-AC_CHECK_LIB(GL, main,[GL_LIBS="$GL_LIBS -lGL"])
-TEMP_LDFLAGS="$LDFLAGS"
-LDFLAGS="$LDFLAGS $GL_LIBS"
-AC_CHECK_LIB(GLU, main,[GL_LIBS="$GL_LIBS -lGLU"])
-LDFLAGS="$TEMP_LDFLAGS"
-AC_CHECK_LIB(opengl32, main,[GL_LIBS="$GL_LIBS -lopengl32"])
-AC_CHECK_LIB(glu32, main,[GL_LIBS="$GL_LIBS -lglu32"])
-AC_CHECK_LIB(Xmu, main,[GL_LIBS="$GL_LIBS -lXmu"])
-AC_CHECK_LIB(Xi, main,[GL_LIBS="$GL_LIBS -lXi"])
+AC_ARG_WITH([apple-opengl-framework],
+            [AC_HELP_STRING([--with-apple-opengl-framework],
+                            [use Apple OpenGL framework (Mac OS X only)])])
+if test "X$with_apple_opengl_framework" = "Xyes"; then
+  AC_DEFINE([HAVE_APPLE_OPENGL_FRAMEWORK], [1],
+            [Use the Apple OpenGL framework.])
+  GL_LIBS="-framework OpenGL"
+else
+dnl Add X include and lib paths
+  if test "X$no_x" != "Xyes"; then
+    CXXFLAGS="$CXXFLAGS -I${x_includes}"
+    CFLAGS="$CFLAGS -I${x_includes}"
+    LDFLAGS="$LDFLAGS -L${x_libraries}"
+  fi
+  AC_CHECK_HEADERS(GL/gl.h GL/glu.h GL/glext.h,,,
+       [[#if HAVE_GL_GL_H
+         #include <GL/gl.h>
+         #endif
+  	   #if HAVE_GL_GLU_H
+         #include <GL/glu.h>
+         #endif
+       ]])
+  AC_CHECK_LIB(GL, main,[GL_LIBS="$GL_LIBS -lGL"])
+  TEMP_LDFLAGS="$LDFLAGS"
+  LDFLAGS="$LDFLAGS $GL_LIBS"
+  AC_CHECK_LIB(GLU, main,[GL_LIBS="$GL_LIBS -lGLU"])
+  LDFLAGS="$TEMP_LDFLAGS"
+  AC_CHECK_LIB(opengl32, main,[GL_LIBS="$GL_LIBS -lopengl32"])
+  AC_CHECK_LIB(glu32, main,[GL_LIBS="$GL_LIBS -lglu32"])
+  AC_CHECK_LIB(Xmu, main,[GL_LIBS="$GL_LIBS -lXmu"])
+  AC_CHECK_LIB(Xi, main,[GL_LIBS="$GL_LIBS -lXi"])
+fi
 AC_SUBST(GL_LIBS)
 
 dnl Add some Windows libraries if found
@@ -324,7 +339,7 @@ else
 fi
 
 dnl Check for autoscan sugested functions
-AC_CHECK_FUNCS([floor memmove memset select sqrt sqrtf sinf cosf fabsf atan2f fmodf copysignf copysign snprintf vsnprintf gettimeofday])
+AC_CHECK_FUNCS([floor memmove memset select sqrt sqrtf sinf cosf fabsf atan2f fmodf copysignf copysign snprintf vsnprintf gettimeofday isnan isnanf])
 AC_FUNC_ALLOCA 
 AC_FUNC_MALLOC
 AC_FUNC_OBSTACK 
