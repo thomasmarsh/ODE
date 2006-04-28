@@ -252,8 +252,6 @@ static void command (int cmd)
 					polygons);
       }
     //----> Convex Object
-
-    // cylinder option not yet implemented
     else if (cmd == 'y') {
       dMassSetCylinder (&m,DENSITY,3,sides[0],sides[1]);
       obj[i].geom[0] = dCreateCylinder (space,sides[0],sides[1]);
@@ -387,8 +385,6 @@ void drawGeom (dGeomID g, const dReal *pos, const dReal *R, int show_aabb)
 		   polygons);
     }
   //----> Convex Object
-
-  // cylinder option not yet implemented
   else if (type == dCylinderClass) {
     dReal radius,length;
     dGeomCylinderGetParams (g,&radius,&length);
