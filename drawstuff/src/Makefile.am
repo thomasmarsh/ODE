@@ -15,3 +15,7 @@ endif
 if X11
 libdrawstuff_a_SOURCES+= x11.cpp
 endif
+if OSX
+libdrawstuff_a_SOURCES+= osx.cpp
+endif
+

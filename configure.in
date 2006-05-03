@@ -255,15 +255,30 @@ AC_CHECK_SIZEOF(short)
 AC_CHECK_SIZEOF(long int)
 AC_CHECK_SIZEOF(void*)
 
+dnl Decide which version of the drawstuff library we should build
+AC_MSG_CHECKING(which drawstuff lib to build)
+case "$host_os" in
+  cygwin* | mingw*)
+    drawstuff="Win32" # if in a Windows enviroment
+    ;;
+  *apple* | *darwin*) # For Mac OS X
+    drawstuff="OSX"
+    ;;
+  *)
+   drawstuff="X11" # if anything else default to X11
+    ;;
+esac
+AC_MSG_RESULT($drawstuff)
+AM_CONDITIONAL(WIN32, test x$drawstuff = xWin32)
+AM_CONDITIONAL(X11, test x$drawstuff = xX11)
+AM_CONDITIONAL(OSX, test x$drawstuff = xOSX)
+AC_SUBST(DRAWSTUFF)
 
 dnl Check for OpenGL
-AC_ARG_WITH([apple-opengl-framework],
-            [AC_HELP_STRING([--with-apple-opengl-framework],
-                            [use Apple OpenGL framework (Mac OS X only)])])
-if test "X$with_apple_opengl_framework" = "Xyes"; then
+if test "x$drawstuff" = "xOSX"; then
   AC_DEFINE([HAVE_APPLE_OPENGL_FRAMEWORK], [1],
             [Use the Apple OpenGL framework.])
-  GL_LIBS="-framework OpenGL"
+  GL_LIBS="-framework OpenGL -framework Carbon -framework AGL"
 else
 dnl Add X include and lib paths
   if test "X$no_x" != "Xyes"; then
@@ -303,21 +318,6 @@ AC_CHECK_LIB(stdc++,main,[LIBS="$LIBS -lstdc++"])
 AC_CHECK_LIB(m,main,[LIBS="$LIBS -lm"])
 AC_CHECK_LIB(pthread,main,[LIBS="$LIBS -lpthread"])
 
-dnl Decide which version of the drawstuff library we should build
-AC_MSG_CHECKING(which drawstuff lib to build)
-case "$host_os" in
-  cygwin* | mingw*)
-    drawstuff="Win32" # if in a Windows enviroment
-    ;;
-  *)
-   drawstuff="X11" # if anything else default to X11
-    ;;
-esac
-AC_MSG_RESULT($drawstuff)
-AM_CONDITIONAL(WIN32, test x$drawstuff = xWin32)
-AM_CONDITIONAL(X11, test x$drawstuff = xX11)
-
-AC_SUBST(DRAWSTUFF)
 
 TOPDIR=`cd $srcdir;pwd`
 AC_SUBST(TOPDIR)
