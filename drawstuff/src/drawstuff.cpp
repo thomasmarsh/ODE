@@ -41,7 +41,7 @@ manage openGL state changes better
 #endif
 
 #include <ode/config.h>
-#ifdef MAC_OS_X
+#ifdef HAVE_APPLE_OPENGL_FRAMEWORK
 #include <OpenGL/gl.h>
 #include <OpenGL/glu.h>
 #else
