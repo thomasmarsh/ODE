@@ -1,22 +1,16 @@
 /**
-@mainpage Open Dynamics Engine User Guide
+@mainpage Open Dynamics Engine API Reference
  
 <center><em>This document is &copy; Russell Smith and the ODE Project</em></center>
 
 The Open Dynamics Engine (ODE) is a free, industrial quality library for 
-simulating articulated rigid body dynamics. For example, it is good for 
-simulating ground vehicles, legged creatures, and moving objects in VR 
-environments. It is fast, flexible and robust, and it has built-in collision 
-detection. ODE is being developed by <a href="http://www.q12.org/">Russell 
-Smith</a> with help from several 
+simulating articulated rigid body dynamics. ODE is being developed by 
+<a href="http://www.q12.org/">Russell Smith</a> with help from several 
 <a href="http://ode.org/community.html">contributors</a>.
 
-If "rigid body simulation" does not make much sense to you, check out 
-<a href="http://ode.org/slides/slides.html">What is a Physics SDK?</a>.
-
-@li @ref introduction
-@li @ref installation
-@li @ref concepts
+This document describes the library API. For a more general introduction 
+to ODE, please see the <a href="http://opende.sourceforge.net/wiki/index.php/Manual">
+Online Handbook</a>.
 
 */
  
