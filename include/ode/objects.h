@@ -858,72 +858,298 @@ ODE_API int dBodyGetGravityMode (dBodyID b);
 
 
 
-/* joints */
+/**
+ * @defgroup joints Joints
+ *
+ * In real life a joint is something like a hinge, that is used to connect two
+ * objects.
+ * In ODE a joint is very similar: It is a relationship that is enforced between
+ * two bodies so that they can only have certain positions and orientations
+ * relative to each other.
+ * This relationship is called a constraint -- the words joint and
+ * constraint are often used interchangeably.
+ */
 
 
-
-
+/**
+ * @brief Create a new joint of the ball type.
+ * @ingroup joints
+ * @remarks
+ * The joint is initially in "limbo" (i.e. it has no effect on the simulation)
+ * because it does not connect to any bodies.
+ * @param dJointGroupID set to 0 to allocate the joint normally.
+ * If it is nonzero the joint is allocated in the given joint group.
+ */
 ODE_API dJointID dJointCreateBall (dWorldID, dJointGroupID);
+
+/**
+ * @brief Create a new joint of the hinge type.
+ * @ingroup joints
+ * @param dJointGroupID set to 0 to allocate the joint normally.
+ * If it is nonzero the joint is allocated in the given joint group.
+ */
 ODE_API dJointID dJointCreateHinge (dWorldID, dJointGroupID);
+
+/**
+ * @brief Create a new joint of the slider type.
+ * @ingroup joints
+ * @param dJointGroupID set to 0 to allocate the joint normally.
+ * If it is nonzero the joint is allocated in the given joint group.
+ */
 ODE_API dJointID dJointCreateSlider (dWorldID, dJointGroupID);
+
+/**
+ * @brief Create a new joint of the contact type.
+ * @ingroup joints
+ * @param dJointGroupID set to 0 to allocate the joint normally.
+ * If it is nonzero the joint is allocated in the given joint group.
+ */
 ODE_API dJointID dJointCreateContact (dWorldID, dJointGroupID, const dContact *);
+
+/**
+ * @brief Create a new joint of the hinge2 type.
+ * @ingroup joints
+ * @param dJointGroupID set to 0 to allocate the joint normally.
+ * If it is nonzero the joint is allocated in the given joint group.
+ */
 ODE_API dJointID dJointCreateHinge2 (dWorldID, dJointGroupID);
+
+/**
+ * @brief Create a new joint of the universal type.
+ * @ingroup joints
+ * @param dJointGroupID set to 0 to allocate the joint normally.
+ * If it is nonzero the joint is allocated in the given joint group.
+ */
 ODE_API dJointID dJointCreateUniversal (dWorldID, dJointGroupID);
+
+/**
+ * @brief Create a new joint of the fixed type.
+ * @ingroup joints
+ * @param dJointGroupID set to 0 to allocate the joint normally.
+ * If it is nonzero the joint is allocated in the given joint group.
+ */
 ODE_API dJointID dJointCreateFixed (dWorldID, dJointGroupID);
+
 ODE_API dJointID dJointCreateNull (dWorldID, dJointGroupID);
+
+/**
+ * @brief Create a new joint of the A-motor type.
+ * @ingroup joints
+ * @param dJointGroupID set to 0 to allocate the joint normally.
+ * If it is nonzero the joint is allocated in the given joint group.
+ */
 ODE_API dJointID dJointCreateAMotor (dWorldID, dJointGroupID);
+
+/**
+ * @brief Create a new joint of the L-motor type.
+ * @ingroup joints
+ * @param dJointGroupID set to 0 to allocate the joint normally.
+ * If it is nonzero the joint is allocated in the given joint group.
+ */
 ODE_API dJointID dJointCreateLMotor (dWorldID, dJointGroupID);
 
+
+/**
+ * @brief Destroy a joint.
+ * @ingroup joints
+ *
+ * disconnects it from its attached bodies and removing it from the world.
+ * However, if the joint is a member of a group then this function has no
+ * effect - to destroy that joint the group must be emptied or destroyed.
+ */
 ODE_API void dJointDestroy (dJointID);
 
+
+/**
+ * @brief Create a joint group
+ * @ingroup joints
+ * @param max_size deprecated. Set to 0.
+ */
 ODE_API dJointGroupID dJointGroupCreate (int max_size);
+
+/**
+ * @brief Destroy a joint group.
+ * @ingroup joints
+ * 
+ * All joints in the joint group will be destroyed.
+ */
 ODE_API void dJointGroupDestroy (dJointGroupID);
+
+/**
+ * @brief Empty a joint group.
+ * @ingroup joints
+ *
+ * All joints in the joint group will be destroyed,
+ * but the joint group itself will not be destroyed.
+ */
 ODE_API void dJointGroupEmpty (dJointGroupID);
 
+/**
+ * @brief Attach the joint to some new bodies.
+ * @ingroup joints
+ *
+ * If the joint is already attached, it will be detached from the old bodies
+ * first.
+ * To attach this joint to only one body, set body1 or body2 to zero - a zero
+ * body refers to the static environment.
+ * Setting both bodies to zero puts the joint into "limbo", i.e. it will
+ * have no effect on the simulation.
+ * @remarks
+ * Some joints, like hinge-2 need to be attached to two bodies to work.
+ */
 ODE_API void dJointAttach (dJointID, dBodyID body1, dBodyID body2);
+
+/**
+ * @brief Set the user-data pointer
+ * @ingroup joints
+ */
 ODE_API void dJointSetData (dJointID, void *data);
+
+/**
+ * @brief Get the user-data pointer
+ * @ingroup joints
+ */
 ODE_API void *dJointGetData (dJointID);
+
+/**
+ * @brief Get the type of the joint
+ * @ingroup joints
+ * @return the type, being one of these:
+ * \li JointTypeBall
+ * \li JointTypeHinge
+ * \li JointTypeSlider
+ * \li JointTypeContact
+ * \li JointTypeUniversal
+ * \li JointTypeHinge2
+ * \li JointTypeFixed
+ * \li JointTypeAMotor
+ * \li JointTypeLMotor
+ */
 ODE_API int dJointGetType (dJointID);
+
+/**
+ * @brief Return the bodies that this joint connects.
+ * @ingroup joints
+ * @param index return the first (0) or second (1) body.
+ * @remarks
+ * If one of these returned body IDs is zero, the joint connects the other body
+ * to the static environment.
+ * If both body IDs are zero, the joint is in ``limbo'' and has no effect on
+ * the simulation.
+ */
 ODE_API dBodyID dJointGetBody (dJointID, int index);
 
+/**
+ * @brief Sets the datastructure that is to receive the feedback.
+ *
+ * The feedback can be used by the user, so that it is known how
+ * much force an individual joint exerts. 
+ * @ingroup joints
+ */
 ODE_API void dJointSetFeedback (dJointID, dJointFeedback *);
+
+/**
+ * @brief Gets the datastructure that is to receive the feedback.
+ * @ingroup joints
+ */
 ODE_API dJointFeedback *dJointGetFeedback (dJointID);
 
+/** 
+ * @brief Set the joint anchor point. 
+ * @ingroup joints
+ *
+ * The joint will try to keep this point on each body
+ * together. The input is specified in world coordinates.
+ */
 ODE_API void dJointSetBallAnchor (dJointID, dReal x, dReal y, dReal z);
+
 ODE_API void dJointSetBallAnchor2 (dJointID, dReal x, dReal y, dReal z);
+
+/**
+ * @brief Set hinge anchor parameter.
+ * @ingroup joints
+ */
 ODE_API void dJointSetHingeAnchor (dJointID, dReal x, dReal y, dReal z);
+
 ODE_API void dJointSetHingeAnchorDelta (dJointID, dReal x, dReal y, dReal z, dReal ax, dReal ay, dReal az);
+
+/**
+ * @brief Set hinge axis parameter.
+ * @ingroup joints
+ */
 ODE_API void dJointSetHingeAxis (dJointID, dReal x, dReal y, dReal z);
+
 ODE_API void dJointSetHingeParam (dJointID, int parameter, dReal value);
+
 ODE_API void dJointAddHingeTorque(dJointID joint, dReal torque);
+
 ODE_API void dJointSetSliderAxis (dJointID, dReal x, dReal y, dReal z);
+
 ODE_API void dJointSetSliderAxisDelta (dJointID, dReal x, dReal y, dReal z, dReal ax, dReal ay, dReal az);
+
 ODE_API void dJointSetSliderParam (dJointID, int parameter, dReal value);
+
 ODE_API void dJointAddSliderForce(dJointID joint, dReal force);
+
 ODE_API void dJointSetHinge2Anchor (dJointID, dReal x, dReal y, dReal z);
+
 ODE_API void dJointSetHinge2Axis1 (dJointID, dReal x, dReal y, dReal z);
+
 ODE_API void dJointSetHinge2Axis2 (dJointID, dReal x, dReal y, dReal z);
+
 ODE_API void dJointSetHinge2Param (dJointID, int parameter, dReal value);
+
 ODE_API void dJointAddHinge2Torques(dJointID joint, dReal torque1, dReal torque2);
 ODE_API void dJointSetUniversalAnchor (dJointID, dReal x, dReal y, dReal z);
+
 ODE_API void dJointSetUniversalAxis1 (dJointID, dReal x, dReal y, dReal z);
+
 ODE_API void dJointSetUniversalAxis2 (dJointID, dReal x, dReal y, dReal z);
+
 ODE_API void dJointSetUniversalParam (dJointID, int parameter, dReal value);
+
 ODE_API void dJointAddUniversalTorques(dJointID joint, dReal torque1, dReal torque2);
 ODE_API void dJointSetFixed (dJointID);
+
 ODE_API void dJointSetAMotorNumAxes (dJointID, int num);
+
 ODE_API void dJointSetAMotorAxis (dJointID, int anum, int rel,
 			  dReal x, dReal y, dReal z);
+
 ODE_API void dJointSetAMotorAngle (dJointID, int anum, dReal angle);
+
 ODE_API void dJointSetAMotorParam (dJointID, int parameter, dReal value);
+
 ODE_API void dJointSetAMotorMode (dJointID, int mode);
+
 ODE_API void dJointAddAMotorTorques (dJointID, dReal torque1, dReal torque2, dReal torque3);
+
 ODE_API void dJointSetLMotorNumAxes (dJointID, int num);
+
 ODE_API void dJointSetLMotorAxis (dJointID, int anum, int rel, dReal x, dReal y, dReal z);
+
 ODE_API void dJointSetLMotorParam (dJointID, int parameter, dReal value);
 
+/**
+ * @brief Get the joint anchor point, in world coordinates.
+ *
+ * This returns the point on body 1. If the joint is perfectly satisfied, 
+ * this will be the same as the point on body 2.
+ */
 ODE_API void dJointGetBallAnchor (dJointID, dVector3 result);
+
+/**
+ * @brief Get the joint anchor point, in world coordinates.
+ *
+ * This returns the point on body 2. You can think of a ball and socket 
+ * joint as trying to keep the result of dJointGetBallAnchor() and 
+ * dJointGetBallAnchor2() the same.  If the joint is perfectly satisfied,
+ * this function will return the same value as dJointGetBallAnchor() to
+ * within roundoff errors. dJointGetBallAnchor2() can be used, along with 
+ * dJointGetBallAnchor(), to see how far the joint has come apart.
+ */
 ODE_API void dJointGetBallAnchor2 (dJointID, dVector3 result);
+
 ODE_API void dJointGetHingeAnchor (dJointID, dVector3 result);
 ODE_API void dJointGetHingeAnchor2 (dJointID, dVector3 result);
 ODE_API void dJointGetHingeAxis (dJointID, dVector3 result);
