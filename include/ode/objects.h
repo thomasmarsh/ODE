@@ -31,18 +31,17 @@
 extern "C" {
 #endif
 
-/** @file */
-
-
-
-
-
-/* world */
-
-
-
-
-
+/**
+ * @defgroup world World
+ *
+ * The world object is a container for rigid bodies and joints. Objects in 
+ * different worlds can not interact, for example rigid bodies from two 
+ * different worlds can not collide.
+ *
+ * All the objects in a world exist at the same point in time, thus one 
+ * reason to use separate worlds is to simulate systems at different rates.
+ * Most applications will only need one world. 
+ */
 
 
 /**
@@ -51,36 +50,36 @@ extern "C" {
  */
 ODE_API dWorldID dWorldCreate(void);
 
+
 /**
- * @brief Destroy a world and everything in it. This includes all bodies, 
- * and all joints that are not part of a joint group.
- * Joints that are part of a joint group will be deactivated, and can be
- * destroyed by calling, for example, dJointGroupEmpty().
+ * @brief Destroy a world and everything in it. 
+ *
+ * This includes all bodies, and all joints that are not part of a joint 
+ * group. Joints that are part of a joint group will be deactivated, and 
+ * can be destroyed by calling, for example, dJointGroupEmpty().
  * @ingroup world
  * @param dWorldID the identifier for the world the be destroyed.
  */
 ODE_API void dWorldDestroy (dWorldID);
 
-/**
- * @brief
- * @ingroup world
- * @param
- */
 
 /**
  * @brief Set the world's global gravity vector. 
+ *
  * The units are m/s^2, so Earth's gravity vector would be (0,0,-9.81), 
- * assuming that +z is up.
- * The default is no gravity, i.e. (0,0,0).
+ * assuming that +z is up. The default is no gravity, i.e. (0,0,0).
+ *
  * @ingroup world
  */
 ODE_API void dWorldSetGravity (dWorldID, dReal x, dReal y, dReal z);
+
 
 /**
  * @brief Get the gravity vector for a given world.
  * @ingroup world
  */
 ODE_API void dWorldGetGravity (dWorldID, dVector3 gravity);
+
 
 /**
  * @brief Set the global ERP value, that controls how much error 
@@ -97,6 +96,7 @@ ODE_API void dWorldSetERP (dWorldID, dReal erp);
  */
 ODE_API dReal dWorldGetERP (dWorldID);
 
+
 /**
  * @brief Set the global CFM (constraint force mixing) value.
  * @ingroup world
@@ -112,17 +112,19 @@ ODE_API void dWorldSetCFM (dWorldID, dReal cfm);
  */
 ODE_API dReal dWorldGetCFM (dWorldID);
 
+
 /**
  * @brief Step the world.
+ *
  * This uses a "big matrix" method that takes time on the order of m^3
  * and memory on the order of m^2, where m is the total number of constraint 
- * rows.
- * For large systems this will use a lot of memory and can be very slow,
+ * rows. For large systems this will use a lot of memory and can be very slow,
  * but this is currently the most accurate method.
  * @ingroup world
  * @param stepsize The number of seconds that the simulation has to advance.
  */
 ODE_API void dWorldStep (dWorldID, dReal stepsize);
+
 
 /**
  * @brief Converts an impulse to a force.
@@ -143,6 +145,7 @@ ODE_API void dWorldImpulseToForce
   dWorldID, dReal stepsize,
   dReal ix, dReal iy, dReal iz, dVector3 force
 );
+
 
 /**
  * @brief Step the world.
@@ -177,6 +180,7 @@ ODE_API void dWorldImpulseToForce
  */
 ODE_API void dWorldQuickStep (dWorldID w, dReal stepsize);
 
+
 /**
  * @brief Set the number of iterations that the QuickStep method performs per
  *        step.
@@ -187,6 +191,7 @@ ODE_API void dWorldQuickStep (dWorldID w, dReal stepsize);
  * @param num The default is 20 iterations.
  */
 ODE_API void dWorldSetQuickStepNumIterations (dWorldID, int num);
+
 
 /**
  * @brief Get the number of iterations that the QuickStep method performs per
@@ -255,91 +260,145 @@ ODE_API dReal dWorldGetContactSurfaceLayer (dWorldID);
  */
 ODE_API void dWorldStepFast1(dWorldID, dReal stepsize, int maxiterations);
 
+
+/**
+ * @defgroup disable Automatic Enabling and Disabling
+ *
+ * Every body can be enabled or disabled. Enabled bodies participate in the 
+ * simulation, while disabled bodies are turned off and do not get updated 
+ * during a simulation step. New bodies are always created in the enabled state.
+ *
+ * A disabled body that is connected through a joint to an enabled body will be 
+ * automatically re-enabled at the next simulation step.
+ *
+ * Disabled bodies do not consume CPU time, therefore to speed up the simulation 
+ * bodies should be disabled when they come to rest. This can be done automatically 
+ * with the auto-disable feature.
+ *
+ * If a body has its auto-disable flag turned on, it will automatically disable 
+ * itself when
+ *   @li It has been idle for a given number of simulation steps.
+ *   @li It has also been idle for a given amount of simulation time. 
+ *
+ * A body is considered to be idle when the magnitudes of both its linear velocity 
+ * and angular velocity are below given thresholds.
+ *
+ * Thus, every body has five auto-disable parameters: an enabled flag, a idle step 
+ * count, an idle time, and linear/angular velocity thresholds. Newly created bodies 
+ * get these parameters from world.
+ */
+
 /**
  * @brief Set the AutoEnableDepth parameter used by the StepFast1 algorithm.
- * @ingroup world
+ * @ingroup disable
  */
 ODE_API void dWorldSetAutoEnableDepthSF1(dWorldID, int autoEnableDepth);
 
 /**
  * @brief Get the AutoEnableDepth parameter used by the StepFast1 algorithm.
- * @ingroup world
+ * @ingroup disable
  */
 ODE_API int dWorldGetAutoEnableDepthSF1(dWorldID);
 
 /**
  * @brief Get auto disable linear threshold for newly created bodies.
- * @ingroup world
+ * @ingroup disable
  */
 ODE_API dReal dWorldGetAutoDisableLinearThreshold (dWorldID);
 
 /**
  * @brief Set auto disable linear threshold for newly created bodies.
  * @param linear_threshold default is 0.01
- * @ingroup world
+ * @ingroup disable
  */
 ODE_API void  dWorldSetAutoDisableLinearThreshold (dWorldID, dReal linear_threshold);
 
 /**
  * @brief Get auto disable angular threshold for newly created bodies.
- * @ingroup world
+ * @ingroup disable
  */
 ODE_API dReal dWorldGetAutoDisableAngularThreshold (dWorldID);
 
 /**
  * @brief Set auto disable angular threshold for newly created bodies.
  * @param linear_threshold default is 0.01
- * @ingroup world
+ * @ingroup disable
  */
 ODE_API void  dWorldSetAutoDisableAngularThreshold (dWorldID, dReal angular_threshold);
 
 /**
  * @brief Get auto disable steps for newly created bodies.
- * @ingroup world
+ * @ingroup disable
  */
 ODE_API int   dWorldGetAutoDisableSteps (dWorldID);
 
 /**
  * @brief Set auto disable steps for newly created bodies.
- * @ingroup world
+ * @ingroup disable
  * @param steps default is 10
  */
 ODE_API void  dWorldSetAutoDisableSteps (dWorldID, int steps);
 
 /**
  * @brief Get auto disable time for newly created bodies.
- * @ingroup world
+ * @ingroup disable
  */
 ODE_API dReal dWorldGetAutoDisableTime (dWorldID);
 
 /**
  * @brief Set auto disable time for newly created bodies.
- * @ingroup world
+ * @ingroup disable
  * @param time default is 0 seconds
  */
 ODE_API void  dWorldSetAutoDisableTime (dWorldID, dReal time);
 
 /**
  * @brief Get auto disable flag for newly created bodies.
- * @ingroup world
+ * @ingroup disable
  */
 ODE_API int   dWorldGetAutoDisableFlag (dWorldID);
 
 /**
  * @brief Set auto disable flag for newly created bodies.
- * @ingroup world
+ * @ingroup disable
  * @param do_auto_disable default is false.
  */
 ODE_API void  dWorldSetAutoDisableFlag (dWorldID, int do_auto_disable);
 
 
 
-
-
-
-/* bodies */
-
-
+/**
+ * @defgroup bodies Rigid Bodies
+ *
+ * A rigid body has various properties from the point of view of the 
+ * simulation. Some properties change over time:
+ *
+ *  @li Position vector (x,y,z) of the body's point of reference. 
+ *      Currently the point of reference must correspond to the body's center of mass.
+ *  @li Linear velocity of the point of reference, a vector (vx,vy,vz).
+ *  @li Orientation of a body, represented by a quaternion (qs,qx,qy,qz) or 
+ *      a 3x3 rotation matrix.
+ *  @li Angular velocity vector (wx,wy,wz) which describes how the orientation 
+ *      changes over time. 
+ *
+ * Other body properties are usually constant over time:
+ *
+ *  @li Mass of the body.
+ *  @li Position of the center of mass with respect to the point of reference. 
+ *      In the current implementation the center of mass and the point of 
+ *      reference must coincide.
+ *  @li Inertia matrix. This is a 3x3 matrix that describes how the body's mass 
+ *      is distributed around the center of mass. Conceptually each body has an 
+ *      x-y-z coordinate frame embedded in it that moves and rotates with the body.
+ *
+ * The origin of this coordinate frame is the body's point of reference. Some values 
+ * in ODE (vectors, matrices etc) are relative to the body coordinate frame, and others 
+ * are relative to the global coordinate frame.
+ *
+ * Note that the shape of a rigid body is not a dynamical property (except insofar as 
+ * it influences the various mass properties). It is only collision detection that cares 
+ * about the detailed shape of the body. 
+ */
 
 
 /**
