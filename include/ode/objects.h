@@ -46,6 +46,7 @@ extern "C" {
 
 /**
  * @brief Create a new, empty world and return its ID number.
+ * @return an identifier
  * @ingroup world
  */
 ODE_API dWorldID dWorldCreate(void);
@@ -93,6 +94,7 @@ ODE_API void dWorldSetERP (dWorldID, dReal erp);
 /**
  * @brief Get the error reduction parameter.
  * @ingroup world
+ * @return ERP value
  */
 ODE_API dReal dWorldGetERP (dWorldID);
 
@@ -109,6 +111,7 @@ ODE_API void dWorldSetCFM (dWorldID, dReal cfm);
 /**
  * @brief Get the constraint force mixing value.
  * @ingroup world
+ * @return CFM value
  */
 ODE_API dReal dWorldGetCFM (dWorldID);
 
@@ -197,18 +200,21 @@ ODE_API void dWorldSetQuickStepNumIterations (dWorldID, int num);
  * @brief Get the number of iterations that the QuickStep method performs per
  *        step.
  * @ingroup world
+ * @return nr of iterations
  */
 ODE_API int dWorldGetQuickStepNumIterations (dWorldID);
 
 /**
  * @brief Set the SOR over-relaxation parameter
  * @ingroup world
+ * @param over_relaxation value to use by SOR
  */
-ODE_API void dWorldSetQuickStepW (dWorldID, dReal param);
+ODE_API void dWorldSetQuickStepW (dWorldID, dReal over_relaxation);
 
 /**
  * @brief Get the SOR over-relaxation parameter
  * @ingroup world
+ * @returns the over-relaxation setting
  */
 ODE_API dReal dWorldGetQuickStepW (dWorldID);
 
@@ -247,6 +253,7 @@ ODE_API void dWorldSetContactSurfaceLayer (dWorldID, dReal depth);
 /**
  * @brief Get the depth of the surface layer around all geometry objects.
  * @ingroup world
+ * @returns the depth
  */
 ODE_API dReal dWorldGetContactSurfaceLayer (dWorldID);
 
@@ -303,6 +310,7 @@ ODE_API int dWorldGetAutoEnableDepthSF1(dWorldID);
 /**
  * @brief Get auto disable linear threshold for newly created bodies.
  * @ingroup disable
+ * @return the threshold
  */
 ODE_API dReal dWorldGetAutoDisableLinearThreshold (dWorldID);
 
@@ -316,6 +324,7 @@ ODE_API void  dWorldSetAutoDisableLinearThreshold (dWorldID, dReal linear_thresh
 /**
  * @brief Get auto disable angular threshold for newly created bodies.
  * @ingroup disable
+ * @return the threshold
  */
 ODE_API dReal dWorldGetAutoDisableAngularThreshold (dWorldID);
 
@@ -324,24 +333,26 @@ ODE_API dReal dWorldGetAutoDisableAngularThreshold (dWorldID);
  * @param linear_threshold default is 0.01
  * @ingroup disable
  */
-ODE_API void  dWorldSetAutoDisableAngularThreshold (dWorldID, dReal angular_threshold);
+ODE_API void dWorldSetAutoDisableAngularThreshold (dWorldID, dReal angular_threshold);
 
 /**
  * @brief Get auto disable steps for newly created bodies.
  * @ingroup disable
+ * @return nr of steps
  */
-ODE_API int   dWorldGetAutoDisableSteps (dWorldID);
+ODE_API int dWorldGetAutoDisableSteps (dWorldID);
 
 /**
  * @brief Set auto disable steps for newly created bodies.
  * @ingroup disable
  * @param steps default is 10
  */
-ODE_API void  dWorldSetAutoDisableSteps (dWorldID, int steps);
+ODE_API void dWorldSetAutoDisableSteps (dWorldID, int steps);
 
 /**
  * @brief Get auto disable time for newly created bodies.
  * @ingroup disable
+ * @return nr of seconds
  */
 ODE_API dReal dWorldGetAutoDisableTime (dWorldID);
 
@@ -350,20 +361,21 @@ ODE_API dReal dWorldGetAutoDisableTime (dWorldID);
  * @ingroup disable
  * @param time default is 0 seconds
  */
-ODE_API void  dWorldSetAutoDisableTime (dWorldID, dReal time);
+ODE_API void dWorldSetAutoDisableTime (dWorldID, dReal time);
 
 /**
  * @brief Get auto disable flag for newly created bodies.
  * @ingroup disable
+ * @return 0 or 1
  */
-ODE_API int   dWorldGetAutoDisableFlag (dWorldID);
+ODE_API int dWorldGetAutoDisableFlag (dWorldID);
 
 /**
  * @brief Set auto disable flag for newly created bodies.
  * @ingroup disable
  * @param do_auto_disable default is false.
  */
-ODE_API void  dWorldSetAutoDisableFlag (dWorldID, int do_auto_disable);
+ODE_API void dWorldSetAutoDisableFlag (dWorldID, int do_auto_disable);
 
 
 
@@ -404,65 +416,77 @@ ODE_API void  dWorldSetAutoDisableFlag (dWorldID, int do_auto_disable);
 /**
  * @brief Get auto disable linear threshold.
  * @ingroup bodies
+ * @return the threshold
  */
 ODE_API dReal dBodyGetAutoDisableLinearThreshold (dBodyID);
 
 /**
  * @brief Set auto disable linear threshold.
  * @ingroup bodies
+ * @return the threshold
  */
 ODE_API void  dBodySetAutoDisableLinearThreshold (dBodyID, dReal linear_threshold);
 
 /**
  * @brief Get auto disable angular threshold.
  * @ingroup bodies
+ * @return the threshold
  */
 ODE_API dReal dBodyGetAutoDisableAngularThreshold (dBodyID);
 
 /**
  * @brief Set auto disable angular threshold.
  * @ingroup bodies
+ * @return the threshold
  */
 ODE_API void  dBodySetAutoDisableAngularThreshold (dBodyID, dReal angular_threshold);
 
 /**
  * @brief Get auto disable steps.
  * @ingroup bodies
+ * @return the nr of steps
  */
-ODE_API int   dBodyGetAutoDisableSteps (dBodyID);
+ODE_API int dBodyGetAutoDisableSteps (dBodyID);
 
 /**
  * @brief Set auto disable steps.
  * @ingroup bodies
+ * @param steps the nr of steps.
  */
-ODE_API void  dBodySetAutoDisableSteps (dBodyID, int steps);
+ODE_API void dBodySetAutoDisableSteps (dBodyID, int steps);
 
 /**
  * @brief Get auto disable time.
  * @ingroup bodies
+ * @return nr of seconds
  */
 ODE_API dReal dBodyGetAutoDisableTime (dBodyID);
 
 /**
  * @brief Set auto disable time.
  * @ingroup bodies
+ * @param time nr of seconds.
  */
 ODE_API void  dBodySetAutoDisableTime (dBodyID, dReal time);
 
 /**
  * @brief Get auto disable flag.
  * @ingroup bodies
+ * @return 0 or 1
  */
-ODE_API int   dBodyGetAutoDisableFlag (dBodyID);
+ODE_API int dBodyGetAutoDisableFlag (dBodyID);
 
 /**
  * @brief Set auto disable flag.
  * @ingroup bodies
+ * @param do_auto_disable 0 or 1
  */
-ODE_API void  dBodySetAutoDisableFlag (dBodyID, int do_auto_disable);
+ODE_API void dBodySetAutoDisableFlag (dBodyID, int do_auto_disable);
 
 /**
  * @brief Set auto disable defaults.
+ * @remarks
+ * Set the values for the body to those set as default for the world.
  * @ingroup bodies
  */
 ODE_API void  dBodySetAutoDisableDefaults (dBodyID);
@@ -490,12 +514,14 @@ ODE_API void dBodyDestroy (dBodyID);
 /**
  * @brief Set the body's user-data pointer.
  * @ingroup bodies
+ * @param data arbitraty pointer
  */
 ODE_API void  dBodySetData (dBodyID, void *data);
 
 /**
  * @brief Get the body's user-data pointer.
  * @ingroup bodies
+ * @return a pointer to the user's data.
  */
 ODE_API void *dBodyGetData (dBodyID);
 
@@ -857,7 +883,6 @@ ODE_API int dBodyGetGravityMode (dBodyID b);
 
 
 
-
 /**
  * @defgroup joints Joints
  *
@@ -868,6 +893,59 @@ ODE_API int dBodyGetGravityMode (dBodyID b);
  * relative to each other.
  * This relationship is called a constraint -- the words joint and
  * constraint are often used interchangeably.
+ *
+ * A joint has a set of parameters that can be set. These include:
+ *
+ *
+ * \li  dParamLoStop Low stop angle or position. Setting this to
+ *	-dInfinity (the default value) turns off the low stop.
+ *	For rotational joints, this stop must be greater than -pi to be
+ *	effective.
+ * \li  dParamHiStop High stop angle or position. Setting this to
+ *	dInfinity (the default value) turns off the high stop.
+ *	For rotational joints, this stop must be less than pi to be
+ *	effective.
+ *	If the high stop is less than the low stop then both stops will
+ *	be ineffective.
+ * \li  dParamVel Desired motor velocity (this will be an angular or
+ *	linear velocity).
+ * \li  dParamFMax The maximum force or torque that the motor will use to
+ *	achieve the desired velocity.
+ *	This must always be greater than or equal to zero.
+ *	Setting this to zero (the default value) turns off the motor.
+ * \li  dParamFudgeFactor The current joint stop/motor implementation has
+ *	a small problem:
+ *	when the joint is at one stop and the motor is set to move it away
+ *	from the stop, too much force may be applied for one time step,
+ *	causing a ``jumping'' motion.
+ *	This fudge factor is used to scale this excess force.
+ *	It should have a value between zero and one (the default value).
+ *	If the jumping motion is too visible in a joint, the value can be
+ *	reduced.
+ *	Making this value too small can prevent the motor from being able to
+ *	move the joint away from a stop.
+ * \li  dParamBounce The bouncyness of the stops.
+ *	This is a restitution parameter in the range 0..1.
+ *	0 means the stops are not bouncy at all, 1 means maximum bouncyness.
+ * \li  dParamCFM The constraint force mixing (CFM) value used when not
+ *	at a stop.
+ * \li  dParamStopERP The error reduction parameter (ERP) used by the
+ *	stops.
+ * \li  dParamStopCFM The constraint force mixing (CFM) value used by the
+ *	stops. Together with the ERP value this can be used to get spongy or
+ *	soft stops.
+ *	Note that this is intended for unpowered joints, it does not really
+ *	work as expected when a powered joint reaches its limit.
+ * \li  dParamSuspensionERP Suspension error reduction parameter (ERP).
+ *	Currently this is only implemented on the hinge-2 joint.
+ * \li  dParamSuspensionCFM Suspension constraint force mixing (CFM) value.
+ *	Currently this is only implemented on the hinge-2 joint.
+ *
+ * If a particular parameter is not implemented by a given joint, setting it
+ * will have no effect.
+ * These parameter names can be optionally followed by a digit (2 or 3)
+ * to indicate the second or third set of parameters, e.g. for the second axis
+ * in a hinge-2 joint, or the third axis in an AMotor joint.
  */
 
 
@@ -1063,6 +1141,10 @@ ODE_API dJointFeedback *dJointGetFeedback (dJointID);
  */
 ODE_API void dJointSetBallAnchor (dJointID, dReal x, dReal y, dReal z);
 
+/** 
+ * @brief Set the joint anchor point. 
+ * @ingroup joints
+ */
 ODE_API void dJointSetBallAnchor2 (dJointID, dReal x, dReal y, dReal z);
 
 /**
@@ -1074,60 +1156,197 @@ ODE_API void dJointSetHingeAnchor (dJointID, dReal x, dReal y, dReal z);
 ODE_API void dJointSetHingeAnchorDelta (dJointID, dReal x, dReal y, dReal z, dReal ax, dReal ay, dReal az);
 
 /**
- * @brief Set hinge axis parameter.
+ * @brief Set hinge axis.
  * @ingroup joints
  */
 ODE_API void dJointSetHingeAxis (dJointID, dReal x, dReal y, dReal z);
 
+/**
+ * @brief set joint parameter
+ * @ingroup joints
+ */
 ODE_API void dJointSetHingeParam (dJointID, int parameter, dReal value);
 
+/**
+ * @brief Applies the torque about the hinge axis.
+ *
+ * That is, it applies a torque with specified magnitude in the direction 
+ * of the hinge axis, to body 1, and with the same magnitude but in opposite 
+ * direction to body 2. This function is just a wrapper for dBodyAddTorque()}
+ * @ingroup joints
+ */
 ODE_API void dJointAddHingeTorque(dJointID joint, dReal torque);
 
+/**
+ * @brief set the joint axis
+ * @ingroup joints
+ */
 ODE_API void dJointSetSliderAxis (dJointID, dReal x, dReal y, dReal z);
 
+/**
+ * @ingroup joints
+ */
 ODE_API void dJointSetSliderAxisDelta (dJointID, dReal x, dReal y, dReal z, dReal ax, dReal ay, dReal az);
 
+/**
+ * @brief set joint parameter
+ * @ingroup joints
+ */
 ODE_API void dJointSetSliderParam (dJointID, int parameter, dReal value);
 
+/**
+ * @brief Applies the given force in the slider's direction. 
+ * 
+ * That is, it applies a force with specified magnitude, in the direction of
+ * slider's axis, to body1, and with the same magnitude but opposite 
+ * direction to body2.  This function is just a wrapper for dBodyAddForce().
+ * @ingroup joints
+ */
 ODE_API void dJointAddSliderForce(dJointID joint, dReal force);
 
+/**
+ * @brief set anchor
+ * @ingroup joints
+ */
 ODE_API void dJointSetHinge2Anchor (dJointID, dReal x, dReal y, dReal z);
 
+/**
+ * @brief set axis
+ * @ingroup joints
+ */
 ODE_API void dJointSetHinge2Axis1 (dJointID, dReal x, dReal y, dReal z);
 
+/**
+ * @brief set axis
+ * @ingroup joints
+ */
 ODE_API void dJointSetHinge2Axis2 (dJointID, dReal x, dReal y, dReal z);
 
+/**
+ * @brief set joint parameter
+ * @ingroup joints
+ */
 ODE_API void dJointSetHinge2Param (dJointID, int parameter, dReal value);
 
+/**
+ * @brief Applies torque1 about the hinge2's axis 1, torque2 about the 
+ * hinge2's axis 2.
+ * @remarks  This function is just a wrapper for dBodyAddTorque().
+ * @ingroup joints
+ */
 ODE_API void dJointAddHinge2Torques(dJointID joint, dReal torque1, dReal torque2);
+
+/**
+ * @brief set anchor
+ * @ingroup joints
+ */
 ODE_API void dJointSetUniversalAnchor (dJointID, dReal x, dReal y, dReal z);
 
+/**
+ * @brief set axis
+ * @ingroup joints
+ */
 ODE_API void dJointSetUniversalAxis1 (dJointID, dReal x, dReal y, dReal z);
 
+/**
+ * @brief set axis
+ * @ingroup joints
+ */
 ODE_API void dJointSetUniversalAxis2 (dJointID, dReal x, dReal y, dReal z);
 
+/**
+ * @brief set joint parameter
+ * @ingroup joints
+ */
 ODE_API void dJointSetUniversalParam (dJointID, int parameter, dReal value);
 
+/**
+ * @brief Applies torque1 about the universal's axis 1, torque2 about the
+ * universal's axis 2.
+ * @remarks This function is just a wrapper for dBodyAddTorque().
+ * @ingroup joints
+ */
 ODE_API void dJointAddUniversalTorques(dJointID joint, dReal torque1, dReal torque2);
+
+/**
+ * @brief Call this on the fixed joint after it has been attached to 
+ * remember the current desired relative offset and desired relative 
+ * rotation between the bodies.
+ * @ingroup joints
+ */
 ODE_API void dJointSetFixed (dJointID);
 
+/**
+ * @brief set the nr of axes
+ * @param num 0..3
+ * @ingroup joints
+ */
 ODE_API void dJointSetAMotorNumAxes (dJointID, int num);
 
+/**
+ * @brief set axis
+ * @ingroup joints
+ */
 ODE_API void dJointSetAMotorAxis (dJointID, int anum, int rel,
 			  dReal x, dReal y, dReal z);
 
+/**
+ * @brief Tell the AMotor what the current angle is along axis anum.
+ * 
+ * This function should only be called in dAMotorUser mode, because in this
+ * mode the AMotor has no other way of knowing the joint angles.
+ * The angle information is needed if stops have been set along the axis,
+ * but it is not needed for axis motors.
+ * @ingroup joints
+ */
 ODE_API void dJointSetAMotorAngle (dJointID, int anum, dReal angle);
 
+/**
+ * @brief set joint parameter
+ * @ingroup joints
+ */
 ODE_API void dJointSetAMotorParam (dJointID, int parameter, dReal value);
 
+/**
+ * @brief set mode
+ * @ingroup joints
+ */
 ODE_API void dJointSetAMotorMode (dJointID, int mode);
 
+/**
+ * @brief Applies torque0 about the AMotor's axis 0, torque1 about the 
+ * AMotor's axis 1, and torque2 about the AMotor's axis 2.
+ * @remarks 
+ * If the motor has fewer than three axes, the higher torques are ignored. 
+ * This function is just a wrapper for dBodyAddTorque().
+ * @ingroup joints
+ */
 ODE_API void dJointAddAMotorTorques (dJointID, dReal torque1, dReal torque2, dReal torque3);
 
+/**
+ * @brief Set the number of axes that will be controlled by the LMotor.
+ * @param num can range from 0 (which effectively deactivates the joint) to 3.
+ * @ingroup joints
+ */
 ODE_API void dJointSetLMotorNumAxes (dJointID, int num);
 
+/**
+ * @brief Set the AMotor axes.
+ * @param anum selects the axis to change (0,1 or 2).
+ * @param rel Each axis can have one of three ``relative orientation'' modes
+ * \li 0: The axis is anchored to the global frame.
+ * \li 1: The axis is anchored to the first body.
+ * \li 2: The axis is anchored to the second body.
+ * @remarks The axis vector is always specified in global coordinates 
+ * regardless of the setting of rel.
+ * @ingroup joints
+ */
 ODE_API void dJointSetLMotorAxis (dJointID, int anum, int rel, dReal x, dReal y, dReal z);
 
+/**
+ * @brief set joint parameter
+ * @ingroup joints
+ */
 ODE_API void dJointSetLMotorParam (dJointID, int parameter, dReal value);
 
 /**
@@ -1150,47 +1369,329 @@ ODE_API void dJointGetBallAnchor (dJointID, dVector3 result);
  */
 ODE_API void dJointGetBallAnchor2 (dJointID, dVector3 result);
 
+/**
+ * @brief Get the hinge anchor point, in world coordinates.
+ *
+ * This returns the point on body 1. If the joint is perfectly satisfied, 
+ * this will be the same as the point on body 2.
+ * @ingroup joints
+ */
 ODE_API void dJointGetHingeAnchor (dJointID, dVector3 result);
+
+/**
+ * @brief Get the joint anchor point, in world coordinates. 
+ * @return The point on body 2. If the joint is perfectly satisfied, 
+ * this will return the same value as dJointGetHingeAnchor().
+ * If not, this value will be slightly different.
+ * This can be used, for example, to see how far the joint has come apart.
+ * @ingroup joints
+ */
 ODE_API void dJointGetHingeAnchor2 (dJointID, dVector3 result);
+
+/**
+ * @brief get axis
+ * @ingroup joints
+ */
 ODE_API void dJointGetHingeAxis (dJointID, dVector3 result);
+
+/**
+ * @brief get joint parameter
+ * @ingroup joints
+ */
 ODE_API dReal dJointGetHingeParam (dJointID, int parameter);
+
+/**
+ * @brief Get the hinge angle.
+ *
+ * The angle is measured between the two bodies, or between the body and
+ * the static environment.
+ * The angle will be between -pi..pi.
+ * When the hinge anchor or axis is set, the current position of the attached
+ * bodies is examined and that position will be the zero angle.
+ * @ingroup joints
+ */
 ODE_API dReal dJointGetHingeAngle (dJointID);
+
+/**
+ * @brief Get the hinge angle time derivative.
+ * @ingroup joints
+ */
 ODE_API dReal dJointGetHingeAngleRate (dJointID);
+
+/**
+ * @brief Get the slider linear position (i.e. the slider's extension)
+ *
+ * When the axis is set, the current position of the attached bodies is
+ * examined and that position will be the zero position.
+ * @ingroup joints
+ */
 ODE_API dReal dJointGetSliderPosition (dJointID);
+
+/**
+ * @brief Get the slider linear position's time derivative.
+ * @ingroup joints
+ */
 ODE_API dReal dJointGetSliderPositionRate (dJointID);
+
+/**
+ * @brief Get the slider axis
+ * @ingroup joints
+ */
 ODE_API void dJointGetSliderAxis (dJointID, dVector3 result);
+
+/**
+ * @brief get joint parameter
+ * @ingroup joints
+ */
 ODE_API dReal dJointGetSliderParam (dJointID, int parameter);
+
+/**
+ * @brief Get the joint anchor point, in world coordinates. 
+ * @return the point on body 1.  If the joint is perfectly satisfied, 
+ * this will be the same as the point on body 2.
+ * @ingroup joints
+ */
 ODE_API void dJointGetHinge2Anchor (dJointID, dVector3 result);
+
+/**
+ * @brief Get the joint anchor point, in world coordinates.
+ * This returns the point on body 2. If the joint is perfectly satisfied, 
+ * this will return the same value as dJointGetHinge2Anchor.
+ * If not, this value will be slightly different.
+ * This can be used, for example, to see how far the joint has come apart.
+ * @ingroup joints
+ */
 ODE_API void dJointGetHinge2Anchor2 (dJointID, dVector3 result);
+
+/**
+ * @brief Get joint axis
+ * @ingroup joints
+ */
 ODE_API void dJointGetHinge2Axis1 (dJointID, dVector3 result);
+
+/**
+ * @brief Get joint axis
+ * @ingroup joints
+ */
 ODE_API void dJointGetHinge2Axis2 (dJointID, dVector3 result);
+
+/**
+ * @brief get joint parameter
+ * @ingroup joints
+ */
 ODE_API dReal dJointGetHinge2Param (dJointID, int parameter);
+
+/**
+ * @brief Get angle
+ * @ingroup joints
+ */
 ODE_API dReal dJointGetHinge2Angle1 (dJointID);
+
+/**
+ * @brief Get time derivative of angle
+ * @ingroup joints
+ */
 ODE_API dReal dJointGetHinge2Angle1Rate (dJointID);
+
+/**
+ * @brief Get time derivative of angle
+ * @ingroup joints
+ */
 ODE_API dReal dJointGetHinge2Angle2Rate (dJointID);
+
+/**
+ * @brief Get the joint anchor point, in world coordinates.
+ * @return the point on body 1. If the joint is perfectly satisfied, 
+ * this will be the same as the point on body 2.
+ * @ingroup joints
+ */
 ODE_API void dJointGetUniversalAnchor (dJointID, dVector3 result);
+
+/**
+ * @brief Get the joint anchor point, in world coordinates. 
+ * @return This returns the point on body 2. 
+ * @remarks
+ * You can think of the ball and socket part of a universal joint as
+ * trying to keep the result of dJointGetBallAnchor() and 
+ * dJointGetBallAnchor2() the same. If the joint is
+ * perfectly satisfied, this function will return the same value
+ * as dJointGetUniversalAnchor() to within roundoff errors. 
+ * dJointGetUniversalAnchor2() can be used, along with 
+ * dJointGetUniversalAnchor(), to see how far the joint has come apart.
+ * @ingroup joints
+ */
 ODE_API void dJointGetUniversalAnchor2 (dJointID, dVector3 result);
+
+/**
+ * @brief Get axis
+ * @ingroup joints
+ */
 ODE_API void dJointGetUniversalAxis1 (dJointID, dVector3 result);
+
+/**
+ * @brief Get axis
+ * @ingroup joints
+ */
 ODE_API void dJointGetUniversalAxis2 (dJointID, dVector3 result);
+
+
+/**
+ * @brief get joint parameter
+ * @ingroup joints
+ */
 ODE_API dReal dJointGetUniversalParam (dJointID, int parameter);
+
+/**
+ * @brief Get angle
+ * @ingroup joints
+ */
 ODE_API dReal dJointGetUniversalAngle1 (dJointID);
+
+/**
+ * @brief Get angle
+ * @ingroup joints
+ */
 ODE_API dReal dJointGetUniversalAngle2 (dJointID);
+
+/**
+ * @brief Get time derivative of angle
+ * @ingroup joints
+ */
 ODE_API dReal dJointGetUniversalAngle1Rate (dJointID);
+
+/**
+ * @brief Get time derivative of angle
+ * @ingroup joints
+ */
 ODE_API dReal dJointGetUniversalAngle2Rate (dJointID);
+
+/**
+ * @brief Get the number of angular axes that will be controlled by the
+ * AMotor.
+ * @param num can range from 0 (which effectively deactivates the
+ * joint) to 3.
+ * This is automatically set to 3 in dAMotorEuler mode.
+ * @ingroup joints
+ */
 ODE_API int dJointGetAMotorNumAxes (dJointID);
+
+/**
+ * @brief Get the AMotor axes.
+ * @param anum selects the axis to change (0,1 or 2).
+ * @param rel Each axis can have one of three ``relative orientation'' modes.
+ * \li 0: The axis is anchored to the global frame.
+ * \li 1: The axis is anchored to the first body.
+ * \li 2: The axis is anchored to the second body.
+ * @ingroup joints
+ */
 ODE_API void dJointGetAMotorAxis (dJointID, int anum, dVector3 result);
+
+/**
+ * @brief Get axis
+ * @remarks
+ * The axis vector is always specified in global coordinates regardless 
+ * of the setting of rel.
+ * There are two GetAMotorAxis functions, one to return the axis and one to
+ * return the relative mode.
+ *
+ * For dAMotorEuler mode:
+ * \li	Only axes 0 and 2 need to be set. Axis 1 will be determined
+	automatically at each time step.
+ * \li	Axes 0 and 2 must be perpendicular to each other.
+ * \li	Axis 0 must be anchored to the first body, axis 2 must be anchored
+	to the second body.
+ * @ingroup joints
+ */
 ODE_API int dJointGetAMotorAxisRel (dJointID, int anum);
+
+/**
+ * @brief Get the current angle for axis.
+ * @remarks
+ * In dAMotorUser mode this is simply the value that was set with
+ * dJointSetAMotorAngle().
+ * In dAMotorEuler mode this is the corresponding euler angle.
+ * @ingroup joints
+ */
 ODE_API dReal dJointGetAMotorAngle (dJointID, int anum);
+
+/**
+ * @brief Get the current angle rate for axis anum.
+ * @remarks
+ * In dAMotorUser mode this is always zero, as not enough information is
+ * available.
+ * In dAMotorEuler mode this is the corresponding euler angle rate.
+ * @ingroup joints
+ */
 ODE_API dReal dJointGetAMotorAngleRate (dJointID, int anum);
+
+/**
+ * @brief get joint parameter
+ * @ingroup joints
+ */
 ODE_API dReal dJointGetAMotorParam (dJointID, int parameter);
+
+/**
+ * @brief Get the angular motor mode. 
+ * @param mode must be one of the following constants:
+ * \li dAMotorUser The AMotor axes and joint angle settings are entirely
+ * controlled by the user.  This is the default mode.
+ * \li dAMotorEuler Euler angles are automatically computed.
+ * The axis a1 is also automatically computed.
+ * The AMotor axes must be set correctly when in this mode,
+ * as described below.
+ * When this mode is initially set the current relative orientations
+ * of the bodies will correspond to all euler angles at zero.
+ * @ingroup joints
+ */
 ODE_API int dJointGetAMotorMode (dJointID);
+
+/**
+ * @brief Get nr of axes.
+ * @ingroup joints
+ */
 ODE_API int dJointGetLMotorNumAxes (dJointID);
+
+/**
+ * @brief Get axis.
+ * @ingroup joints
+ */
 ODE_API void dJointGetLMotorAxis (dJointID, int anum, dVector3 result);
+
+/**
+ * @brief get joint parameter
+ * @ingroup joints
+ */
 ODE_API dReal dJointGetLMotorParam (dJointID, int parameter);
 
+/**
+ * @ingroup joints
+ */
 ODE_API dJointID dConnectingJoint (dBodyID, dBodyID);
+
+/**
+ * @ingroup joints
+ */
 ODE_API int dConnectingJointList (dBodyID, dBodyID, dJointID*);
+
+/**
+ * @brief Utility function
+ * @return 1 if the two bodies are connected together by
+ * a joint, otherwise return 0.
+ * @ingroup joints
+ */
 ODE_API int dAreConnected (dBodyID, dBodyID);
+
+/**
+ * @brief Utility function
+ * @return 1 if the two bodies are connected together by
+ * a joint that does not have type @arg{joint_type}, otherwise return 0.
+ * @param joint_type is a dJointTypeXXX constant.
+ * This is useful for deciding whether to add contact joints between two bodies:
+ * if they are already connected by non-contact joints then it may not be
+ * appropriate to add contacts, however it is okay to add more contact between-
+ * bodies that already have contacts.
+ * @ingroup joints
+ */
 ODE_API int dAreConnectedExcluding (dBodyID, dBodyID, int joint_type);
 
 
@@ -1199,4 +1700,3 @@ ODE_API int dAreConnectedExcluding (dBodyID, dBodyID, int joint_type);
 #endif
 
 #endif
-
