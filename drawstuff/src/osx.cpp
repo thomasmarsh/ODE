@@ -44,7 +44,7 @@
 
 // Global variables
 
-static bool running = true;				// 1 if simulation running
+static bool running = true;			// 1 if simulation running
 static bool paused = false;			// 1 if in `pause' mode
 static bool singlestep = false;		// 1 if single step key pressed
 static bool writeframes = false;	// 1 if frame files to be written
@@ -52,6 +52,9 @@ static bool writeframes = false;	// 1 if frame files to be written
 static int					   	windowWidth = -1;
 static int					   	windowHeight = -1;
 static UInt32 					modifierMask = 0;
+static int 						mouseButtonMode = 0;	
+static bool						mouseWithOption = false;	// Set if dragging the mouse with alt pressed
+static bool						mouseWithControl = false;	// Set if dragging the mouse with ctrl pressed
 
 static dsFunctions*			   	functions = NULL;
 static WindowRef               	windowReference;
@@ -79,7 +82,7 @@ EventTypeSpec OSX_MOUSE_EVENT_TYPES[] = {
 // Describes the key-events we are interested in
 EventTypeSpec OSX_KEY_EVENT_TYPES[] = {		
 	{ kEventClassKeyboard, kEventRawKeyDown },
-	{ kEventClassKeyboard, kEventRawKeyUp },
+//	{ kEventClassKeyboard, kEventRawKeyUp },
 	{ kEventClassKeyboard, kEventRawKeyModifiersChanged }
 };	
 
@@ -127,7 +130,7 @@ static void captureFrame( int num ){
 	unsigned char buffer[windowWidth*windowHeight][3];
 	glReadPixels( 0, 0, windowWidth, windowHeight, GL_RGB, GL_UNSIGNED_BYTE, &buffer );
 	char s[100];
-	sprintf (s,"frame/frame%04d.ppm",num);
+	sprintf (s,"frame%04d.ppm",num);
 	FILE *f = fopen (s,"wb");
 	if( !f ){
 		dsError( "can't open \"%s\" for writing", s );
@@ -168,28 +171,27 @@ OSStatus osxKeyEventHandler( EventHandlerCallRef handlerCallRef, EventRef event,
 	
 	UInt32 keyCode;
 	UInt32 state = 0;
-	short int keyChar;
-	bool keyDown = false;
+	void* KCHR = NULL;
+	char charCode = 0;
+	char uppercase = 0;
 	
     switch( GetEventKind( event ) ){
         case kEventRawKeyDown:
-			keyDown = true;
-        case kEventRawKeyUp:
 			if( GetEventParameter( event, kEventParamKeyCode, typeUInt32, NULL, sizeof( UInt32 ), NULL, &keyCode ) != noErr ){
 				break;														
 			}
-			const void *KCHR = (const void *)GetScriptVariable( smCurrentScript, smKCHRCache );
-			char charCode = (char)KeyTranslate( KCHR, keyCode, &state );
-			char uppercase = charCode;			
+			KCHR = (void *)GetScriptVariable( smCurrentScript, smKCHRCache );
+			charCode = (char)KeyTranslate( KCHR, keyCode, &state );
+			uppercase = charCode;			
 			UppercaseText( &uppercase, 1, smSystemScript );
 			//printf( "Character %d [%c] [%c] modifiers [%d]\n", charCode, charCode, uppercase, modifierMask );
 			
-			if( keyDown && modifierMask == 0 ){
+			if( modifierMask == 0 ){
 				if( charCode >= ' ' && charCode <= 126 && functions -> command ){
 					functions -> command( charCode );	
 				}
 			}
-			else if( keyDown && ( modifierMask & controlKey ) ){
+			else if( ( modifierMask & controlKey ) ){
 				// ctrl+key was pressed
 				switch(uppercase ){
 					case 'T':
@@ -228,17 +230,24 @@ OSStatus osxKeyEventHandler( EventHandlerCallRef handlerCallRef, EventRef event,
 		return noErr;
         case kEventRawKeyModifiersChanged:
 			if( GetEventParameter( event, kEventParamKeyModifiers, typeUInt32, NULL, sizeof( UInt32 ), NULL, &modifierMask ) == noErr ){
+				if( ( mouseWithOption && !( modifierMask & optionKey ) ) || ( mouseWithControl && !( modifierMask & controlKey ) ) ){
+					// The mouse was being dragged using either the command-key or the option-key modifier to emulate 
+					// the right button or both left + right.
+					// Now the modifier-key has been released so the mouseButtonMode must be changed accordingly
+					// The following releases the right-button.
+					mouseButtonMode &= (~4);
+					mouseWithOption = false;
+					mouseWithControl = false;
+				}
 				return noErr;
 			}
-		break;
+		break;		
     }	
     return eventNotHandledErr;
 }
 
 OSStatus osxMouseEventHandler( EventHandlerCallRef handlerCallRef, EventRef event, void *userData ){
 	
-	static int mode = 0;	
-
 	bool buttonDown = false;	
 	HIPoint mouseLocation;
 
@@ -253,32 +262,29 @@ OSStatus osxMouseEventHandler( EventHandlerCallRef handlerCallRef, EventRef even
 			EventMouseButton button;
 			if( GetEventParameter( event, kEventParamMouseButton, typeMouseButton, NULL, sizeof( EventMouseButton ), NULL, &button ) == noErr ){
 				
-				if( ( modifierMask & controlKey ) && button == kEventMouseButtonPrimary ){
-					/*
-					if( modifierMask & optionKey ){
-						if( buttonDown ){
-							mode |= 5;							
-						}
-						else{
-							mode &= (~5);	
-						}
+				if( button == kEventMouseButtonPrimary ){					
+					if( modifierMask & controlKey ){
+						// Ctrl+button == right
+						button = kEventMouseButtonSecondary;
+						mouseWithControl = true;
+					}	
+					else if( modifierMask & optionKey ){
+						// Alt+button == left+right
+						mouseButtonMode = 5;
+						mouseWithOption = true;
 						return noErr;
 					}
-					else{
-					*/	
-						button = kEventMouseButtonSecondary;
-					//}
 				}
 				if( buttonDown ){
-					if( button == kEventMouseButtonPrimary ) mode |= 1;		// Left
-					if( button == kEventMouseButtonTertiary ) mode |= 2;	// Middle				
-					if( button == kEventMouseButtonSecondary ) mode |= 4;	// Right
+					if( button == kEventMouseButtonPrimary ) mouseButtonMode |= 1;		// Left
+					if( button == kEventMouseButtonTertiary ) mouseButtonMode |= 2;	// Middle				
+					if( button == kEventMouseButtonSecondary ) mouseButtonMode |= 4;	// Right
 				}
 				else{
-					if( button == kEventMouseButtonPrimary ) mode &= (~1);	// Left
-					if( button == kEventMouseButtonTertiary ) mode &= (~2);	// Middle									
-					if( button == kEventMouseButtonSecondary ) mode &= (~4);// Right
-				}				
+					if( button == kEventMouseButtonPrimary ) mouseButtonMode &= (~1);	// Left
+					if( button == kEventMouseButtonTertiary ) mouseButtonMode &= (~2);	// Middle									
+					if( button == kEventMouseButtonSecondary ) mouseButtonMode &= (~4);// Right
+				}		
 				return noErr;
 			}
 		break;
@@ -288,8 +294,8 @@ OSStatus osxMouseEventHandler( EventHandlerCallRef handlerCallRef, EventRef even
         case kEventMouseDragged:
 			// Carbon provides mouse-position deltas, so we don't have to store the old state ourselves
 			if( GetEventParameter( event, kEventParamMouseDelta, typeHIPoint, NULL, sizeof( HIPoint ), NULL, &mouseLocation ) == noErr ){
-				//printf( "Mode %d\n", mode );
-				dsMotion( mode, (int)mouseLocation.x, (int)mouseLocation.y );
+				//printf( "Mode %d\n", mouseButtonMode );
+				dsMotion( mouseButtonMode, (int)mouseLocation.x, (int)mouseLocation.y );
 				return noErr;
 			}
         break;
@@ -331,8 +337,6 @@ OSStatus osxWindowEventHandler( EventHandlerCallRef handlerCallRef, EventRef eve
       		GetWindowPortBounds( window, &rect );			
 			windowWidth = rect.right;
 			windowHeight = rect.bottom;
-			
-			//printf( "(%d, %d) -> (%d, %d)\n", rect.top, rect.left, rect.bottom, rect.right );
 			aglUpdateContext( aglContext );
 		break;			
     	case kEventWindowClose:
@@ -498,9 +502,8 @@ extern void dsPlatformSimLoop( int givenWindowWidth, int givenWindowHeight, dsFu
 		 "\n"
 		 "Change the camera position by clicking + dragging in the window.\n"
 		 "   Left button - pan and tilt.\n"
-		 "   Right button - forward and sideways.\n"
-		 "   Left + Right button (or middle button) - sideways and up.\n"
-		 "   With a one-button mouse the right-button can be emulated with Ctrl + click\n"
+		 "   Right button (or Ctrl + button) - forward and sideways.\n"
+		 "   Left + Right button (or middle button, or Alt + button) - sideways and up.\n"
 		 "\n",DS_VERSION >> 8,DS_VERSION & 0xff
 		 );
 		firsttime = false;
