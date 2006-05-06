@@ -4,6 +4,10 @@ AM_CFLAGS = @ARCHFLAGS@ -I$(top_srcdir)/include -I$(top_builddir)/include
 lib_LIBRARIES = libode.a
 libode_a_CPPFLAGS = -O2
 
+if OSX
+LINK=$(CXXLINK)
+endif
+
 if X86_64_SYSTEM
 libode_a_CPPFLAGS += -fPIC
 endif

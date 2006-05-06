@@ -1,6 +1,11 @@
 AM_CXXFLAGS = @ARCHFLAGS@ @CXXFLAGS@ -I$(top_srcdir)/include -I$(top_builddir)/include
 AM_CFLAGS = @ARCHFLAGS@ @CXXFLAGS@ -I$(top_srcdir)/include -I$(top_builddir)/include
 
+if OSX
+CC=$(CXX)
+LINK=$(CXXLINK)
+endif
+
 noinst_PROGRAMS=test_collision \
 		test_slider \
 		test_crash \
