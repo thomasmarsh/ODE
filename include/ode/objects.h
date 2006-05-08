@@ -59,9 +59,9 @@ ODE_API dWorldID dWorldCreate(void);
  * group. Joints that are part of a joint group will be deactivated, and 
  * can be destroyed by calling, for example, dJointGroupEmpty().
  * @ingroup world
- * @param dWorldID the identifier for the world the be destroyed.
+ * @param world the identifier for the world the be destroyed.
  */
-ODE_API void dWorldDestroy (dWorldID);
+ODE_API void dWorldDestroy (dWorldID world);
 
 
 /**

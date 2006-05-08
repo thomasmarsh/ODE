@@ -31,13 +31,77 @@
 extern "C" {
 #endif
 
+/**
+ * @defgroup collide Collision Detection
+ *
+ * ODE has two main components: a dynamics simulation engine and a collision 
+ * detection engine. The collision engine is given information about the 
+ * shape of each body. At each time step it figures out which bodies touch 
+ * each other and passes the resulting contact point information to the user. 
+ * The user in turn creates contact joints between bodies.
+ *
+ * Using ODE's collision detection is optional - an alternative collision 
+ * detection system can be used as long as it can supply the right kinds of 
+ * contact information. 
+ */
+
 /* ************************************************************************ */
 /* general functions */
 
-ODE_API void dGeomDestroy (dGeomID);
-ODE_API void dGeomSetData (dGeomID, void *);
-ODE_API void *dGeomGetData (dGeomID);
-ODE_API void dGeomSetBody (dGeomID, dBodyID);
+/**
+ * @brief Destroy a geom, removing it from any space.
+ *
+ * Destroy a geom, removing it from any space it is in first. This one 
+ * function destroys a geom of any type, but to create a geom you must call 
+ * a creation function for that type.
+ *
+ * When a space is destroyed, if its cleanup mode is 1 (the default) then all 
+ * the geoms in that space are automatically destroyed as well. 
+ *
+ * @param geom the geom to be destroyed.
+ * @ingroup collide
+ */
+ODE_API void dGeomDestroy (dGeomID geom);
+
+
+/**
+ * @brief Set the user-defined data pointer stored in the geom.
+ *
+ * @param geom the geom to hold the data
+ * @param data the data pointer to be stored
+ * @ingroup collide
+ */
+ODE_API void dGeomSetData (dGeomID geom, void* data);
+
+
+/**
+ * @brief Get the user-defined data pointer stored in the geom.
+ *
+ * @param geom the geom containing the data
+ * @ingroup collide
+ */
+ODE_API void *dGeomGetData (dGeomID geom);
+
+
+/**
+ * @brief Set body associated with a placeable geom. 
+ *
+ * Setting a body on a geom automatically combines the position vector and 
+ * rotation matrix of the body and geom, so that setting the position or 
+ * orientation of one will set the value for both objects. Setting a body 
+ * ID of zero gives the geom its own position and rotation, independent 
+ * from any body. If the geom was previously connected to a body then its 
+ * new independent position/rotation is set to the current position/rotation 
+ * of the body.
+ *
+ * Calling these functions on a non-placeable geom results in a runtime 
+ * error in the debug build of ODE. 
+ *
+ * @param geom the geom to connect
+ * @param body the body to attach to the geom
+ * @ingroup collide
+ */
+ODE_API void dGeomSetBody (dGeomID geom, dBodyID body);
 ODE_API dBodyID dGeomGetBody (dGeomID);
 ODE_API void dGeomSetPosition (dGeomID, dReal x, dReal y, dReal z);
 ODE_API void dGeomSetRotation (dGeomID, const dMatrix3 R);
