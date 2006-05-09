@@ -84,7 +84,7 @@ ODE_API void *dGeomGetData (dGeomID geom);
 
 
 /**
- * @brief Set body associated with a placeable geom. 
+ * @brief Set the body associated with a placeable geom. 
  *
  * Setting a body on a geom automatically combines the position vector and 
  * rotation matrix of the body and geom, so that setting the position or 
@@ -102,13 +102,119 @@ ODE_API void *dGeomGetData (dGeomID geom);
  * @ingroup collide
  */
 ODE_API void dGeomSetBody (dGeomID geom, dBodyID body);
-ODE_API dBodyID dGeomGetBody (dGeomID);
-ODE_API void dGeomSetPosition (dGeomID, dReal x, dReal y, dReal z);
-ODE_API void dGeomSetRotation (dGeomID, const dMatrix3 R);
-ODE_API void dGeomSetQuaternion (dGeomID, const dQuaternion);
-ODE_API const dReal * dGeomGetPosition (dGeomID);
-ODE_API const dReal * dGeomGetRotation (dGeomID);
-ODE_API void dGeomGetQuaternion (dGeomID, dQuaternion result);
+
+
+/**
+ * @brief Get the body associated with a placeable geom. 
+ * @param geom the geom to query.
+ * @sa dGeomSetBody
+ * @ingroup collide
+ */
+ODE_API dBodyID dGeomGetBody (dGeomID geom);
+
+
+/**
+ * @brief Set the position vector of a placeable geom.
+ *
+ * If the geom is attached to a body, the body's position will also be changed.
+ * Calling this function on a non-placeable geom results in a runtime error in 
+ * the debug build of ODE. 
+ *
+ * @param geom the geom to set.
+ * @param x the new X coordinate.
+ * @param y the new Y coordinate.
+ * @param z the new Z coordinate.
+ * @sa dBodySetPosition
+ * @ingroup collide
+ */
+ODE_API void dGeomSetPosition (dGeomID geom, dReal x, dReal y, dReal z);
+
+
+/**
+ * @brief Set the rotation matrix of a placeable geom.
+ *
+ * If the geom is attached to a body, the body's rotation will also be changed.
+ * Calling this function on a non-placeable geom results in a runtime error in 
+ * the debug build of ODE. 
+ *
+ * @param geom the geom to set.
+ * @param R the new rotation matrix.
+ * @sa dBodySetRotation
+ * @ingroup collide
+ */
+ODE_API void dGeomSetRotation (dGeomID geom, const dMatrix3 R);
+
+
+/**
+ * @brief Set the rotation of a placeable geom.
+ *
+ * If the geom is attached to a body, the body's rotation will also be changed.
+ *
+ * Calling this function on a non-placeable geom results in a runtime error in 
+ * the debug build of ODE. 
+ *
+ * @param geom the geom to set.
+ * @param Q the new rotation.
+ * @sa dBodySetQuaternion
+ * @ingroup collide
+ */
+ODE_API void dGeomSetQuaternion (dGeomID geom, const dQuaternion Q);
+
+
+/**
+ * @brief Get the position vector of a placeable geom.
+ *
+ * If the geom is attached to a body, the body's position will be returned.
+ *
+ * Calling this function on a non-placeable geom results in a runtime error in 
+ * the debug build of ODE. 
+ *
+ * @param geom the geom to query.
+ * @returns A pointer to the geom's position vector.
+ * @remarks The returned value is a pointer to the geom's internal
+ *          data structure. It is valid until any changes are made
+ *          to the geom.
+ * @sa dBodyGetPosition
+ * @ingroup collide
+ */
+ODE_API const dReal * dGeomGetPosition (dGeomID geom);
+
+
+/**
+ * @brief Get the rotation matrix of a placeable geom.
+ *
+ * If the geom is attached to a body, the body's rotation will be returned.
+ *
+ * Calling this function on a non-placeable geom results in a runtime error in 
+ * the debug build of ODE. 
+ *
+ * @param geom the geom to query.
+ * @returns A pointer to the geom's rotation matrix.
+ * @remarks The returned value is a pointer to the geom's internal
+ *          data structure. It is valid until any changes are made
+ *          to the geom.
+ * @sa dBodyGetRotation
+ * @ingroup collide
+ */
+ODE_API const dReal * dGeomGetRotation (dGeomID geom);
+
+
+/**
+ * @brief Get the rotation quaternion of a placeable geom.
+ *
+ * If the geom is attached to a body, the body's quaternion will be returned.
+ *
+ * Calling this function on a non-placeable geom results in a runtime error in 
+ * the debug build of ODE. 
+ *
+ * @param geom the geom to query.
+ * @param result a copy of the rotation quaternion.
+ * @sa dBodyGetQuaternion
+ * @ingroup collide
+ */
+ODE_API void dGeomGetQuaternion (dGeomID geom, dQuaternion result);
+
+
 ODE_API void dGeomGetAABB (dGeomID, dReal aabb[6]);
 ODE_API int dGeomIsSpace (dGeomID);
 ODE_API dSpaceID dGeomGetSpace (dGeomID);
