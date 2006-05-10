@@ -255,24 +255,60 @@ AC_CHECK_SIZEOF(short)
 AC_CHECK_SIZEOF(long int)
 AC_CHECK_SIZEOF(void*)
 
-dnl Decide which version of the drawstuff library we should build
-AC_MSG_CHECKING(which drawstuff lib to build)
+
+case "$host_os" in
+  hpux9* | hpux10* | hpux11*)  # taken from ltconfig
+    so_ext=".sl"
+    DLLDEFINE=""
+    SHARED_LDFLAGS="-shared"
+    ;;
+  cygwin* | mingw*)
+    ;;
+  *apple* | *darwin*) # For Mac OS X
+    ;;
+  *)
+    ;;
+esac
+
+dnl Set some Platform Specific Variables
 case "$host_os" in
   cygwin* | mingw*)
+    so_ext=".dll"
+    DLLDEFINE="-DODE_DLL"
+    SHARED_LDFLAGS="-shared"
     drawstuff="Win32" # if in a Windows enviroment
     ;;
   *apple* | *darwin*) # For Mac OS X
+    so_ext=".dylib"
+    DLLDEFINE=""
+    SHARED_LDFLAGS="-dynamiclib"
     drawstuff="OSX"
+    dnl We need to use C++ compilation and linking for ode on Mac
+    dnl Might as well do it for all code.
+    CC="$(CXX)"
+    LINK="$(CXXLINK)"
     ;;
   *)
    drawstuff="X11" # if anything else default to X11
+   so_ext=".so"
+    DLLDEFINE=""
+    SHARED_LDFLAGS="-shared"
     ;;
 esac
-AC_MSG_RESULT($drawstuff)
+dnl Set Conditionals
 AM_CONDITIONAL(WIN32, test x$drawstuff = xWin32)
 AM_CONDITIONAL(X11, test x$drawstuff = xX11)
 AM_CONDITIONAL(OSX, test x$drawstuff = xOSX)
+dnl Set Drawstuff variables
+AC_MSG_CHECKING(which drawstuff lib to build)
+AC_MSG_RESULT($drawstuff)
 AC_SUBST(DRAWSTUFF)
+dnl Set shared library variables
+AC_MSG_CHECKING(for the suffix of shared libraries)
+AC_MSG_RESULT($so_ext)
+AC_DEFINE_UNQUOTED(SO_EXT,"$so_ext",[The extension for shared libraries.])
+AC_SUBST(so_ext)
+AC_SUBST(SHARED_LDFLAGS)
 
 dnl Check for OpenGL
 if test "x$drawstuff" = "xOSX"; then
@@ -359,7 +395,7 @@ AH_BOTTOM([
 #endif
 #if defined(HAVE_IEEEFP_H) && !defined(__CYGWIN__)
 // This header creates conflicts with math.h in Cygwin.
-#include <alloca.h>
+#include <ieeefp.h>
 #endif
 #ifdef HAVE_STDIO_H
 #include <stdio.h>
@@ -432,33 +468,6 @@ so only do it for MSVC
 #endif /* #define ODE_CONFIG_H */
 ])
 
-AC_MSG_CHECKING(for the suffix of shared libraries)
-case "$host_os" in
-  hpux9* | hpux10* | hpux11*)  # taken from ltconfig
-    so_ext=".sl"
-    DLLDEFINE=""
-    SHARED_LDFLAGS="-shared"
-    ;;
-  cygwin* | mingw*)
-    so_ext=".dll"
-    DLLDEFINE="-DODE_DLL"
-    SHARED_LDFLAGS="-shared"
-    ;;
-  *apple* | *darwin*) # For Mac OS X
-    so_ext=".dylib"
-    DLLDEFINE=""
-    SHARED_LDFLAGS="-dynamiclib"
-    ;;
-  *)
-   so_ext=".so"
-    DLLDEFINE=""
-    SHARED_LDFLAGS="-shared"
-    ;;
-esac
-AC_MSG_RESULT($so_ext)
-AC_DEFINE_UNQUOTED(SO_EXT,"$so_ext",[The extension for shared libraries.])
-AC_SUBST(so_ext)
-AC_SUBST(SHARED_LDFLAGS)
 
 dnl Finally write our Makefiles
 AC_OUTPUT([
