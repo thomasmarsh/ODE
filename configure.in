@@ -255,21 +255,6 @@ AC_CHECK_SIZEOF(short)
 AC_CHECK_SIZEOF(long int)
 AC_CHECK_SIZEOF(void*)
 
-
-case "$host_os" in
-  hpux9* | hpux10* | hpux11*)  # taken from ltconfig
-    so_ext=".sl"
-    DLLDEFINE=""
-    SHARED_LDFLAGS="-shared"
-    ;;
-  cygwin* | mingw*)
-    ;;
-  *apple* | *darwin*) # For Mac OS X
-    ;;
-  *)
-    ;;
-esac
-
 dnl Set some Platform Specific Variables
 case "$host_os" in
   cygwin* | mingw*)
