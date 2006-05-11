@@ -302,10 +302,12 @@ if test "x$drawstuff" = "xOSX"; then
   GL_LIBS="-framework OpenGL -framework Carbon -framework AGL"
 else
 dnl Add X include and lib paths
-  if test "X$no_x" != "Xyes"; then
-    CXXFLAGS="$CXXFLAGS -I${x_includes}"
-    CFLAGS="$CFLAGS -I${x_includes}"
-    LDFLAGS="$LDFLAGS -L${x_libraries}"
+  if test "X$x_includes" != "XNONE"; then
+    CXXFLAGS="$CXXFLAGS -I$x_includes"
+    CFLAGS="$CFLAGS -I$x_includes"
+  fi
+  if test "X$x_libraries" != "XNONE"; then
+    LDFLAGS="$LDFLAGS -L$x_libraries"
   fi
   AC_CHECK_HEADERS(GL/gl.h GL/glu.h GL/glext.h,,,
        [[#if HAVE_GL_GL_H
@@ -481,5 +483,11 @@ echo "  Use gyroscopic term:     $gyroscopic"
 echo "  Is this a Pentium:       $pentium"
 echo "  Is the CPU x86-64:       $cpu64"
 echo "  Is this a release build: $release"
+if test "X$x_includes" != "XNONE"; then
+echo "  X includes located at $x_includes"
+fi
+if test "X$x_libraries" != "XNONE"; then
+echo "  X library path at $x_libraries"
+fi
 echo "  Headers will be installed in $prefix/include/ode"
 echo "  Libraries will be installed in $prefix/lib"
