@@ -45,6 +45,7 @@ extern "C" {
  * contact information. 
  */
 
+
 /* ************************************************************************ */
 /* general functions */
 
@@ -215,9 +216,43 @@ ODE_API const dReal * dGeomGetRotation (dGeomID geom);
 ODE_API void dGeomGetQuaternion (dGeomID geom, dQuaternion result);
 
 
-ODE_API void dGeomGetAABB (dGeomID, dReal aabb[6]);
-ODE_API int dGeomIsSpace (dGeomID);
+/**
+ * @brief Return the axis-aligned bounding box.
+ *
+ * Return in aabb an axis aligned bounding box that surrounds the given geom. 
+ * The aabb array has elements (minx, maxx, miny, maxy, minz, maxz). If the 
+ * geom is a space, a bounding box that surrounds all contained geoms is 
+ * returned.
+ *
+ * This function may return a pre-computed cached bounding box, if it can 
+ * determine that the geom has not moved since the last time the bounding 
+ * box was computed.
+ *
+ * @param geom the geom to query
+ * @param aabb the returned bounding box
+ * @ingroup collide
+ */
+ODE_API void dGeomGetAABB (dGeomID geom, dReal aabb[6]);
+
+
+/**
+ * @brief Determing if a geom is a space.
+ * @param geom the geom to query
+ * @returns Non-zero if the geom is a space, zero otherwise.
+ * @ingroup collide
+ */
+ODE_API int dGeomIsSpace (dGeomID geom);
+
+
+/**
+ * @brief Query for the space containing a particular geom.
+ * @param geom the geom to query
+ * @returns The space that contains the geom, or NULL if the geom is
+ *          not contained by a space.
+ * @ingroup collide
+ */
 ODE_API dSpaceID dGeomGetSpace (dGeomID);
+
 ODE_API int dGeomGetClass (dGeomID);
 ODE_API void dGeomSetCategoryBits (dGeomID, unsigned long bits);
 ODE_API void dGeomSetCollideBits (dGeomID, unsigned long bits);
