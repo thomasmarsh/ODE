@@ -130,7 +130,26 @@ typedef dReal dQuaternion[4];
 #define dFabs(x) (fabsf(x))			/* absolute value */
 #define dAtan2(y,x) (atan2f(y,x))		/* arc tangent with 2 args */
 #define dFMod(a,b) (fmodf(a,b))		/* modulo */
+
+#ifdef HAVE___ISNANF
+#define dIsNan(x) (__isnanf(x))
+#elif defined(HAVE__ISNANF)
+#define dIsNan(x) (_isnanf(x))
+#elif defined(HAVE_ISNANF)
 #define dIsNan(x) (isnanf(x))
+#else
+  /* 
+     fall back to _isnanf which is the VC way,
+     this may seem redundant since we already checked
+     for _isnan before, but if isnan is detected by
+     configure but is not found during compilation
+     we should always make sure we check for __isnanf,
+     _isnan and isnan in that order before falling
+     back to a default
+  */
+#define dIsNan(x) (_isnanf(x))
+#endif
+
 #define dCopySign(a,b) ((dReal)copysignf(a,b))
 
 #elif defined(dDOUBLE)
@@ -144,7 +163,16 @@ typedef dReal dQuaternion[4];
 #define dFabs(x) fabs(x)
 #define dAtan2(y,x) atan2((y),(x))
 #define dFMod(a,b) (fmod((a),(b)))
+#ifdef HAVE___ISNAN
+#define dIsNan(x) (__isnan(x))
+#elif defined(HAVE__ISNAN)
+#define dIsNan(x) (_isnan(x))
+#elif defined(HAVE_ISNAN)
 #define dIsNan(x) (isnan(x))
+#else
+#define dIsNan(x) (_isnan(x))
+#endif
+
 #define dCopySign(a,b) (copysign((a),(b)))
 
 #else

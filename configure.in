@@ -354,7 +354,7 @@ else
 fi
 
 dnl Check for autoscan sugested functions
-AC_CHECK_FUNCS([floor memmove memset select sqrt sqrtf sinf cosf fabsf atan2f fmodf copysignf copysign snprintf vsnprintf gettimeofday isnan isnanf])
+AC_CHECK_FUNCS([floor memmove memset select sqrt sqrtf sinf cosf fabsf atan2f fmodf copysignf copysign snprintf vsnprintf gettimeofday isnan isnanf _isnan _isnanf __isnan __isnanf])
 AC_FUNC_ALLOCA 
 AC_FUNC_MALLOC
 AC_FUNC_OBSTACK 
