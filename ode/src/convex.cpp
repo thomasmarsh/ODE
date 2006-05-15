@@ -579,12 +579,13 @@ bool SeidelLP(dxConvex& cvx1,dxConvex& cvx2)
   dVector3 c1; // ,c2;
   dVector4 aoveral,aoveram; // these will contain cached computations
   unsigned int l,m,n; // l and m are the axes to the zerod dimensions, n is the axe for the last dimension
+  int i,j,k;
   dVector4 eq1,eq2,eq3; // cached equations for 3d,2d and 1d respectivelly
   // Get the support mapping for a HUGE bounding box in direction c
   solution[0]= (c[0]>0) ? dInfinity : -dInfinity;
   solution[1]= (c[1]>0) ? dInfinity : -dInfinity;
   solution[2]= (c[2]>0) ? dInfinity : -dInfinity;
-  for(int i=0;i<planecount;++i)
+  for( i=0;i<planecount;++i)
     {
       // Isolate plane equation
       cvx=GetPlaneIndex(cvx1,cvx2,i,index);
@@ -622,7 +623,7 @@ bool SeidelLP(dxConvex& cvx1,dxConvex& cvx2)
 	  // go down a dimension by eliminating a variable
 	  // first find l
 	  l=0;
-	  for(int j=0;j<3;++j)
+	  for( j=0;j<3;++j)
 	    {
 	      if(fabs(eq1[j])>fabs(eq1[l]))
 		{
@@ -650,7 +651,7 @@ bool SeidelLP(dxConvex& cvx1,dxConvex& cvx2)
 	  solution[1]=solution[1]-((solution[l]/eq1[l])*eq1[1]);
 	  solution[2]=solution[2]-((solution[l]/eq1[l])*eq1[2]);
 	  // iterate a to get the new equations with the help of a/a[l]
-	  for(j=0;j<planecount;++j)
+	  for( j=0;j<planecount;++j)
 	    {
 	      if(i!=j)
 		{
@@ -693,7 +694,7 @@ bool SeidelLP(dxConvex& cvx1,dxConvex& cvx2)
 		  if(sum>0)
 		    {
 		      m=0;
-		      for(int k=0;k<3;++k)
+		      for( k=0;k<3;++k)
 			{
 			  if(fabs(eq2[k])>fabs(eq2[m]))
 			    {
