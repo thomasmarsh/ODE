@@ -38,6 +38,9 @@ By Rodrigo Hernandez
 #pragma warning(disable:4291)  // for VC++, no complaints about "no matching operator delete found"
 #endif
 
+#define dMIN(A,B)  ((A)>(B) ? B : A)
+#define dMAX(A,B)  ((A)>(B) ? A : B)
+
 
 //****************************************************************************
 // Convex public API
@@ -78,12 +81,12 @@ void dxConvex::computeAABB()
   for(unsigned int i=3;i<(pointcount*3);i+=3)
     {
       dMULTIPLY0_331 (point,final_posr->R,&points[i]);
-      aabb[0] = std::min(aabb[0],point[0]+final_posr->pos[0]);
-      aabb[1] = std::max(aabb[1],point[0]+final_posr->pos[0]);
-      aabb[2] = std::min(aabb[2],point[1]+final_posr->pos[1]);
-      aabb[3] = std::max(aabb[3],point[1]+final_posr->pos[1]);
-      aabb[4] = std::min(aabb[4],point[2]+final_posr->pos[2]);
-      aabb[5] = std::max(aabb[5],point[2]+final_posr->pos[2]);
+      aabb[0] = dMIN(aabb[0],point[0]+final_posr->pos[0]);
+      aabb[1] = dMAX(aabb[1],point[0]+final_posr->pos[0]);
+      aabb[2] = dMIN(aabb[2],point[1]+final_posr->pos[1]);
+      aabb[3] = dMAX(aabb[3],point[1]+final_posr->pos[1]);
+      aabb[4] = dMIN(aabb[4],point[2]+final_posr->pos[2]);
+      aabb[5] = dMAX(aabb[5],point[2]+final_posr->pos[2]);
     }
 }
 
@@ -356,7 +359,7 @@ int dCollideSphereConvex (dxGeom *o1, dxGeom *o2, int flags,
   dxConvex *Convex = (dxConvex*) o2;
   dReal dist,closestdist=dInfinity;
   dVector4 plane;
-  dVector3 contactpoint;
+  // dVector3 contactpoint;
   dVector3 offsetpos,out,temp;
   unsigned int *pPoly=Convex->polygons;
   int closestplane;
@@ -573,7 +576,7 @@ bool SeidelLP(dxConvex& cvx1,dxConvex& cvx2)
   unsigned int index;
   unsigned int planecount=cvx1.planecount+cvx2.planecount;
   dReal sum,min,max,med;
-  dVector3 c1,c2;
+  dVector3 c1; // ,c2;
   dVector4 aoveral,aoveram; // these will contain cached computations
   unsigned int l,m,n; // l and m are the axes to the zerod dimensions, n is the axe for the last dimension
   dVector4 eq1,eq2,eq3; // cached equations for 3d,2d and 1d respectivelly
@@ -647,7 +650,7 @@ bool SeidelLP(dxConvex& cvx1,dxConvex& cvx2)
 	  solution[1]=solution[1]-((solution[l]/eq1[l])*eq1[1]);
 	  solution[2]=solution[2]-((solution[l]/eq1[l])*eq1[2]);
 	  // iterate a to get the new equations with the help of a/a[l]
-	  for(int j=0;j<planecount;++j)
+	  for(j=0;j<planecount;++j)
 	    {
 	      if(i!=j)
 		{
@@ -722,7 +725,7 @@ bool SeidelLP(dxConvex& cvx1,dxConvex& cvx2)
 		      // iterate a to get the new equations with the help of a/a[l]
 		      min=-dInfinity;
 		      max=med=dInfinity;
-		      for(int k=0;k<planecount;++k)
+		      for(k=0;k<planecount;++k)
 			{
 			  if((i!=k)&&(j!=k))
 			    {
@@ -759,15 +762,15 @@ bool SeidelLP(dxConvex& cvx1,dxConvex& cvx2)
 			      eq3[3]-=(cvx->planes[(index*4)+m]*aoveram[3]);
 			      if(eq3[n]>0)
 				{
-				  max=std::min(max,eq3[3]/eq3[n]);
+				  max=dMIN(max,eq3[3]/eq3[n]);
 				}
 			      else if(eq3[n]<0)
 				{
-				  min=std::max(min,eq3[3]/eq3[n]);
+				  min=dMAX(min,eq3[3]/eq3[n]);
 				}
 			      else
 				{
-				  med=std::min(med,eq3[3]);
+				  med=dMIN(med,eq3[3]);
 				}
 			    }
 			}
@@ -850,7 +853,7 @@ inline void AgarwalPD(dxConvex& cvx1,dxConvex& cvx2,dVector4 pd)
   dVector4 minkowskiplane;
   unsigned int index;
   pd[3]=dInfinity;
-  dReal distance;
+  // dReal distance;
   for(int i=0;i<cvx1.planecount;++i)
     {
       // Rotate
