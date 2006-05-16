@@ -253,11 +253,86 @@ ODE_API int dGeomIsSpace (dGeomID geom);
  */
 ODE_API dSpaceID dGeomGetSpace (dGeomID);
 
-ODE_API int dGeomGetClass (dGeomID);
-ODE_API void dGeomSetCategoryBits (dGeomID, unsigned long bits);
-ODE_API void dGeomSetCollideBits (dGeomID, unsigned long bits);
+
+/**
+ * @brief Given a geom, this returns its class.
+ *
+ * The ODE classes are:
+ *  @li dSphereClass
+ *  @li dBoxClass
+ *  @li dCylinderClass
+ *  @li dPlaneClass
+ *  @li dRayClass
+ *  @li dConvexClass
+ *  @li dGeomTransformClass
+ *  @li dTriMeshClass
+ *  @li dSimpleSpaceClass
+ *  @li dHashSpaceClass
+ *  @li dQuadTreeSpaceClass
+ *  @li dFirstUserClass
+ *  @li dLastUserClass
+ *
+ * User-defined class will return their own number.
+ *
+ * @param geom the geom to query
+ * @returns The geom class ID.
+ * @ingroup collide
+ */
+ODE_API int dGeomGetClass (dGeomID geom);
+
+
+/**
+ * @brief Set the "category" bitfield for the given geom. 
+ *
+ * The category bitfield is used by spaces to govern which geoms will 
+ * interact with each other. The bitfield is guaranteed to be at least 
+ * 32 bits wide. The default category values for newly created geoms 
+ * have all bits set.
+ *
+ * @param geom the geom to set
+ * @param bits the new bitfield value
+ * @ingroup collide
+ */
+ODE_API void dGeomSetCategoryBits (dGeomID geom, unsigned long bits);
+
+
+/**
+ * @brief Set the "collide" bitfield for the given geom. 
+ *
+ * The collide bitfield is used by spaces to govern which geoms will 
+ * interact with each other. The bitfield is guaranteed to be at least 
+ * 32 bits wide. The default category values for newly created geoms 
+ * have all bits set.
+ *
+ * @param geom the geom to set
+ * @param bits the new bitfield value
+ * @ingroup collide
+ */
+ODE_API void dGeomSetCollideBits (dGeomID geom, unsigned long bits);
+
+
+/**
+ * @brief Get the "category" bitfield for the given geom. 
+ *
+ * @param geom the geom to set
+ * @param bits the new bitfield value
+ * @sa dGeomSetCategoryBits
+ * @ingroup collide
+ */
 ODE_API unsigned long dGeomGetCategoryBits (dGeomID);
+
+
+/**
+ * @brief Get the "collide" bitfield for the given geom. 
+ *
+ * @param geom the geom to set
+ * @param bits the new bitfield value
+ * @sa dGeomSetCollideBits
+ * @ingroup collide
+ */
 ODE_API unsigned long dGeomGetCollideBits (dGeomID);
+
+
 ODE_API void dGeomEnable (dGeomID);
 ODE_API void dGeomDisable (dGeomID);
 ODE_API int dGeomIsEnabled (dGeomID);
