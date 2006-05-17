@@ -318,6 +318,8 @@ else
   AC_CHECK_LIB(glu32, main,[GL_LIBS="$GL_LIBS -lglu32"])
   AC_CHECK_LIB(Xmu, main,[GL_LIBS="$GL_LIBS -lXmu"])
   AC_CHECK_LIB(Xi, main,[GL_LIBS="$GL_LIBS -lXi"])
+  AC_CHECK_LIB(X, main,[GL_LIBS="$GL_LIBS -lX"])
+  AC_CHECK_LIB(X11, main,[GL_LIBS="$GL_LIBS -lX11"])
 fi
 AC_SUBST(GL_LIBS)
 
