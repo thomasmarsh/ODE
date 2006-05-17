@@ -333,9 +333,50 @@ ODE_API unsigned long dGeomGetCategoryBits (dGeomID);
 ODE_API unsigned long dGeomGetCollideBits (dGeomID);
 
 
-ODE_API void dGeomEnable (dGeomID);
-ODE_API void dGeomDisable (dGeomID);
-ODE_API int dGeomIsEnabled (dGeomID);
+/**
+ * @brief Enable a geom. 
+ *
+ * Disabled geoms are completely ignored by dSpaceCollide and dSpaceCollide2,
+ * although they can still be members of a space. New geoms are created in 
+ * the enabled state. 
+ *
+ * @param geom   the geom to enable
+ * @sa dGeomDisable
+ * @sa dGeomIsEnabled
+ * @ingroup collide
+ */
+ODE_API void dGeomEnable (dGeomID geom);
+
+
+/**
+ * @brief Disable a geom. 
+ *
+ * Disabled geoms are completely ignored by dSpaceCollide and dSpaceCollide2,
+ * although they can still be members of a space. New geoms are created in 
+ * the enabled state. 
+ *
+ * @param geom   the geom to disable
+ * @sa dGeomDisable
+ * @sa dGeomIsEnabled
+ * @ingroup collide
+ */
+ODE_API void dGeomDisable (dGeomID geom);
+
+
+/**
+ * @brief Check to see if a geom is enabled.
+ *
+ * Disabled geoms are completely ignored by dSpaceCollide and dSpaceCollide2,
+ * although they can still be members of a space. New geoms are created in 
+ * the enabled state. 
+ *
+ * @param geom   the geom to query
+ * @returns Non-zero if the geom is enabled, zero otherwise.
+ * @sa dGeomDisable
+ * @sa dGeomIsEnabled
+ * @ingroup collide
+ */
+ODE_API int dGeomIsEnabled (dGeomID geom);
 
 /* ************************************************************************ */
 /* geom offset from body */
