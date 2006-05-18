@@ -270,8 +270,8 @@ case "$host_os" in
     drawstuff="OSX"
     dnl We need to use C++ compilation and linking for ode on Mac
     dnl Might as well do it for all code.
-    CC="$(CXX)"
-    LINK="$(CXXLINK)"
+    CC="$CXX"
+    LINK="$CXXLINK"
     ;;
   *)
    drawstuff="X11" # if anything else default to X11
