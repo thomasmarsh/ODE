@@ -304,8 +304,8 @@ inline int	_ProcessLocalContacts()
 				Contact->depth = gLocalContacts[iContact].fDepth;
 				SET(Contact->normal,gLocalContacts[iContact].vNormal);
 				SET(Contact->pos,gLocalContacts[iContact].vPos);
-				Contact->g1 = gCylinder;
-				Contact->g2 = gTriMesh;
+				Contact->g1 = gTriMesh;
+				Contact->g2 = gCylinder;
 				Contact->side2 = gLocalContacts[iContact].triIndex;
 
 				nFinalContact++;
