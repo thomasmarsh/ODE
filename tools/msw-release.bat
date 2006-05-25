@@ -38,7 +38,7 @@ pause
 
 
 rem ***********************************************************
-rem * Prepare source code
+rem * Retrieve source code
 rem ***********************************************************
 
 echo.
@@ -46,7 +46,24 @@ echo RETRIEVING SOURCE CODE FROM REPOSITORY...
 echo.
 
 svn export https://svn.sourceforge.net/svnroot/opende/branches/%2 ode-%1
-copy ode-%1\build\config-default.h ode-%1\include\ode\config.h
+
+
+
+rem ***********************************************************
+rem * Prepare source code
+rem ***********************************************************
+
+echo.
+echo PREPARING SOURCE CODE FROM REPOSITORY...
+echo.
+
+cd ode-%1
+copy build\config-default.h include\ode\config.h
+
+cd ode\doc
+doxygen
+
+cd ..\..\..
 
 
 rem ***********************************************************
@@ -70,7 +87,7 @@ rem ***********************************************************
 
 cd ..\..\..
 rename lib\ReleaseDLL\ode.lib lib\ReleaseDLL\ode-imports.lib
-zip -r9 ode-win32-%1.zip ode-%1\*.txt ode-%1\include\ode\*.h ode-%1\lib\*
+zip -r9 ode-win32-%1.zip ode-%1\*.txt ode-%1\include\ode\*.h ode-%1\lib\* ode-%1\docs\*
 
 
 rem ***********************************************************
