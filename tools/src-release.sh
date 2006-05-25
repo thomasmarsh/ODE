@@ -38,7 +38,7 @@ read line
 
 
 ###################################################################
-# Prepare source code
+# Retrieve source code
 ###################################################################
 
 echo ""
@@ -47,11 +47,26 @@ echo ""
 
 svn export https://svn.sourceforge.net/svnroot/opende/branches/$2 ode-$1
 
+
+###################################################################
+# Prepare source code
+###################################################################
+
+echo ""
+echo "PREPARING SOURCE TREE..."
+echo ""
+
 cd ode-$1
 chmod 755 autogen.sh
 ./autogen.sh
 rm -rf autom4te.cache
-cd ..
+
+cp build\config-default.h include\ode\config.h
+
+cd ode/doc
+doxygen
+
+cd ../../..
 
 
 ###################################################################
