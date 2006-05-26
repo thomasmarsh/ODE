@@ -61,7 +61,7 @@ chmod 755 autogen.sh
 ./autogen.sh
 rm -rf autom4te.cache
 
-cp build\config-default.h include\ode\config.h
+cp build/config-default.h include/ode/config.h
 
 cd ode/doc
 doxygen
