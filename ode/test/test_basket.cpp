@@ -85,7 +85,7 @@ static void nearCallback (void *data, dGeomID o1, dGeomID o2)
 	  // Paranoia
 	  dIASSERT(dVALIDVEC3(contact[i].geom.pos));
 	  dIASSERT(dVALIDVEC3(contact[i].geom.normal));
-	  dIASSERT(!dIsNan(contact[i].geom.depth));
+	  // dIASSERT(!dIsNan(contact[i].geom.depth));  <-- not working for some people, temporarily removed for 0.6
       contact[i].surface.slip1 = 0.7;
       contact[i].surface.slip2 = 0.7;
       contact[i].surface.mode = dContactSoftERP | dContactSoftCFM | dContactApprox1 | dContactSlip1 | dContactSlip2;
