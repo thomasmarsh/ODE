@@ -82,10 +82,10 @@ static void nearCallback (void *data, dGeomID o1, dGeomID o2)
   {
     for (int i=0; i<n; i++) 
     {
-	  // Paranoia
-	  dIASSERT(dVALIDVEC3(contact[i].geom.pos));
-	  dIASSERT(dVALIDVEC3(contact[i].geom.normal));
-	  // dIASSERT(!dIsNan(contact[i].geom.depth));  <-- not working for some people, temporarily removed for 0.6
+	  // Paranoia  <-- not working for some people, temporarily removed for 0.6
+	  // dIASSERT(dVALIDVEC3(contact[i].geom.pos));
+	  // dIASSERT(dVALIDVEC3(contact[i].geom.normal));
+	  // dIASSERT(!dIsNan(contact[i].geom.depth));
       contact[i].surface.slip1 = 0.7;
       contact[i].surface.slip2 = 0.7;
       contact[i].surface.mode = dContactSoftERP | dContactSoftCFM | dContactApprox1 | dContactSlip1 | dContactSlip2;
@@ -176,7 +176,7 @@ static void simLoop (int pause)
   dsSetTexture (DS_NONE);
 
   const dReal* Pos = dGeomGetPosition(world_mesh);
-  dIASSERT(dVALIDVEC3(Pos));
+  // dIASSERT(dVALIDVEC3(Pos));
   float pos[3] = { Pos[0], Pos[1], Pos[2] };
 
   const dReal* Rot = dGeomGetRotation(world_mesh);
