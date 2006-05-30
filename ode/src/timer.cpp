@@ -133,9 +133,9 @@ static inline void serialize()
 #else
   asm volatile (
 	"mov $0,%%rax\n"
-	"push %rbx\n"
+	"push %%rbx\n"
 	"cpuid\n"
-	"pop %rbx\n"
+	"pop %%rbx\n"
 	: : : "%rax","%rcx","%rdx","cc","memory");
 #endif
 }
