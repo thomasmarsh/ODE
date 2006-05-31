@@ -139,15 +139,15 @@ typedef dReal dQuaternion[4];
 #define dIsNan(x) (isnanf(x))
 #else
   /* 
-     fall back to _isnanf which is the VC way,
+     fall back to _isnan which is the VC way,
      this may seem redundant since we already checked
      for _isnan before, but if isnan is detected by
      configure but is not found during compilation
      we should always make sure we check for __isnanf,
-     _isnan and isnan in that order before falling
+     _isnanf and isnanf in that order before falling
      back to a default
   */
-#define dIsNan(x) (_isnanf(x))
+#define dIsNan(x) (_isnan(x))
 #endif
 
 #define dCopySign(a,b) ((dReal)copysignf(a,b))
