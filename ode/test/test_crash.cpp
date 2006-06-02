@@ -61,7 +61,7 @@
 #define COLS 1			// columns of cars
 #define ITERS 20		// number of iterations
 #define WBOXSIZE 1.0		// size of wall boxes
-#define WALLWIDTH 20		// width of wall
+#define WALLWIDTH 12		// width of wall
 #define WALLHEIGHT 10		// height of wall
 #define DISABLE_THRESHOLD 0.008	// maximum velocity (squared) a body can have and be disabled
 #define DISABLE_STEPS 10	// number of steps a box has to have been disable-able before it will be disabled
