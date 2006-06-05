@@ -381,17 +381,186 @@ ODE_API int dGeomIsEnabled (dGeomID geom);
 /* ************************************************************************ */
 /* geom offset from body */
 
-ODE_API void dGeomSetOffsetPosition (dGeomID, dReal x, dReal y, dReal z);
-ODE_API void dGeomSetOffsetRotation (dGeomID, const dMatrix3 R);
-ODE_API void dGeomSetOffsetQuaternion (dGeomID, const dQuaternion);
-ODE_API void dGeomSetOffsetWorldPosition (dGeomID, dReal x, dReal y, dReal z);
-ODE_API void dGeomSetOffsetWorldRotation (dGeomID, const dMatrix3 R);
-ODE_API void dGeomSetOffsetWorldQuaternion (dGeomID, const dQuaternion);
-ODE_API void dGeomClearOffset(dGeomID);
-ODE_API int dGeomIsOffset(dGeomID);
-ODE_API const dReal * dGeomGetOffsetPosition (dGeomID);
-ODE_API const dReal * dGeomGetOffsetRotation (dGeomID);
-ODE_API void dGeomGetOffsetQuaternion (dGeomID, dQuaternion result);
+/**
+ * @brief Set the local offset position of a geom from its body.
+ *
+ * Sets the geom's positional offset in local coordinates.
+ * After this call, the geom will be at a new position determined from the
+ * body's position and the offset.
+ * The geom must be attached to a body.
+ * If the geom did not have an offset, it is automatically created.
+ *
+ * @param geom the geom to set.
+ * @param x the new X coordinate.
+ * @param y the new Y coordinate.
+ * @param z the new Z coordinate.
+ * @ingroup collide
+ */
+ODE_API void dGeomSetOffsetPosition (dGeomID geom, dReal x, dReal y, dReal z);
+
+
+/**
+ * @brief Set the local offset rotation matrix of a geom from its body.
+ *
+ * Sets the geom's rotational offset in local coordinates.
+ * After this call, the geom will be at a new position determined from the
+ * body's position and the offset.
+ * The geom must be attached to a body.
+ * If the geom did not have an offset, it is automatically created.
+ *
+ * @param geom the geom to set.
+ * @param R the new rotation matrix.
+ * @ingroup collide
+ */
+ODE_API void dGeomSetOffsetRotation (dGeomID geom, const dMatrix3 R);
+
+
+/**
+ * @brief Set the local offset rotation of a geom from its body.
+ *
+ * Sets the geom's rotational offset in local coordinates.
+ * After this call, the geom will be at a new position determined from the
+ * body's position and the offset.
+ * The geom must be attached to a body.
+ * If the geom did not have an offset, it is automatically created.
+ *
+ * @param geom the geom to set.
+ * @param Q the new rotation.
+ * @ingroup collide
+ */
+ODE_API void dGeomSetOffsetQuaternion (dGeomID geom, const dQuaternion Q);
+
+
+/**
+ * @brief Set the offset position of a geom from its body.
+ *
+ * Sets the geom's positional offset to move it to the new world
+ * coordinates.
+ * After this call, the geom will be at the world position passed in,
+ * and the offset will be the difference from the current body position.
+ * The geom must be attached to a body.
+ * If the geom did not have an offset, it is automatically created.
+ *
+ * @param geom the geom to set.
+ * @param x the new X coordinate.
+ * @param y the new Y coordinate.
+ * @param z the new Z coordinate.
+ * @ingroup collide
+ */
+ODE_API void dGeomSetOffsetWorldPosition (dGeomID geom, dReal x, dReal y, dReal z);
+
+
+/**
+ * @brief Set the offset rotation of a geom from its body.
+ *
+ * Sets the geom's rotational offset to orient it to the new world
+ * rotation matrix.
+ * After this call, the geom will be at the world orientation passed in,
+ * and the offset will be the difference from the current body orientation.
+ * The geom must be attached to a body.
+ * If the geom did not have an offset, it is automatically created.
+ *
+ * @param geom the geom to set.
+ * @param R the new rotation matrix.
+ * @ingroup collide
+ */
+ODE_API void dGeomSetOffsetWorldRotation (dGeomID geom, const dMatrix3 R);
+
+
+/**
+ * @brief Set the offset rotation of a geom from its body.
+ *
+ * Sets the geom's rotational offset to orient it to the new world
+ * rotation matrix.
+ * After this call, the geom will be at the world orientation passed in,
+ * and the offset will be the difference from the current body orientation.
+ * The geom must be attached to a body.
+ * If the geom did not have an offset, it is automatically created.
+ *
+ * @param geom the geom to set.
+ * @param Q the new rotation.
+ * @ingroup collide
+ */
+ODE_API void dGeomSetOffsetWorldQuaternion (dGeomID geom, const dQuaternion);
+
+
+/**
+ * @brief Clear any offset from the geom.
+ *
+ * If the geom has an offset, it is eliminated and the geom is
+ * repositioned at the body's position.  If the geom has no offset,
+ * this function does nothing.
+ * This is more efficient than calling dGeomSetOffsetPosition(zero)
+ * and dGeomSetOffsetRotation(identiy), because this function actually
+ * eliminates the offset, rather than leaving it as the identity transform.
+ *
+ * @param geom the geom to have its offset destroyed.
+ * @ingroup collide
+ */
+ODE_API void dGeomClearOffset(dGeomID geom);
+
+
+/**
+ * @brief Check to see whether the geom has an offset.
+ *
+ * This function will return non-zero if the offset has been created.
+ * Note that there is a difference between a geom with no offset,
+ * and a geom with an offset that is the identity transform.
+ * In the latter case, although the observed behaviour is identical,
+ * there is a unnecessary computation involved because the geom will
+ * be applying the transform whenever it needs to recalculate its world
+ * position.
+ *
+ * @param geom the geom to query.
+ * @returns Non-zero if the geom has an offset, zero otherwise.
+ * @ingroup collide
+ */
+ODE_API int dGeomIsOffset(dGeomID geom);
+
+
+/**
+ * @brief Get the offset position vector of a geom.
+ *
+ * Returns the positional offset of the geom in local coordinates.
+ * If the geom has no offset, this function returns the zero vector.
+ *
+ * @param geom the geom to query.
+ * @returns A pointer to the geom's offset vector.
+ * @remarks The returned value is a pointer to the geom's internal
+ *          data structure. It is valid until any changes are made
+ *          to the geom.
+ * @ingroup collide
+ */
+ODE_API const dReal * dGeomGetOffsetPosition (dGeomID geom);
+
+
+/**
+ * @brief Get the offset position vector of a geom.
+ *
+ * Returns the positional offset of the geom in local coordinates.
+ * If the geom has no offset, this function returns the zero vector.
+ *
+ * @param geom the geom to query.
+ * @returns A pointer to the geom's offset vector.
+ * @remarks The returned value is a pointer to the geom's internal
+ *          data structure. It is valid until any changes are made
+ *          to the geom.
+ * @ingroup collide
+ */
+ODE_API const dReal * dGeomGetOffsetRotation (dGeomID geom);
+
+
+/**
+ * @brief Get the offset rotation quaternion of a geom.
+ *
+ * Returns the rotation offset of the geom as a quaternion.
+ * If the geom has no offset, the identity quaternion is returned.
+ *
+ * @param geom the geom to query.
+ * @param result a copy of the rotation quaternion.
+ * @ingroup collide
+ */
+ODE_API void dGeomGetOffsetQuaternion (dGeomID geom, dQuaternion result);
 
 /* ************************************************************************ */
 /* collision detection */
