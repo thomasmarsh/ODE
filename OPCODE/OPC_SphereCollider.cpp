@@ -99,6 +99,19 @@ bool SphereCollider::Collide(SphereCache& cache, const Sphere& sphere, const Mod
 	// Init collision query
 	if(InitQuery(cache, sphere, worlds, worldm))	return true;
 
+	// Special case for 1-leaf trees
+	if(mCurrentModel && mCurrentModel->HasSingleNode())
+	{
+		// Here we're supposed to perform a normal query, except our tree has a single node, i.e. just a few triangles
+		udword Nb = mIMesh->GetNbTriangles();
+		// Loop through all triangles
+		for(udword i=0;i<Nb;i++)
+		{
+			SPHERE_PRIM(i, OPC_CONTACT)
+		}
+		return true;
+	}
+
 	if(!model.HasLeafNodes())
 	{
 		if(model.IsQuantized())
