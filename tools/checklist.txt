@@ -1,0 +1,6 @@
+* include/ode/config.h exists
+
+* configure script exists - if not: is autotools installed?
+
+* docs have been generated in docs/
+
