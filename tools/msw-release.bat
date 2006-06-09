@@ -33,7 +33,10 @@ echo.
 echo Is the Changelog up to date?
 pause
 echo.
-echo Okay, ready to build the source and Windows binary packages for version %1!
+echo Is 'svn' and 'zip' on the path?
+pause
+echo.
+echo Okay, ready to build the Windows binary packages for version %1!
 pause
 
 
