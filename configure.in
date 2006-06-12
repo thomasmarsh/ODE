@@ -33,9 +33,10 @@ AC_HEADER_STDBOOL
 AC_PROG_RANLIB
 AC_TYPE_SIZE_T
 
-AC_ARG_WITH(arch,
-[	--with-arch=[arch]	build for $arch, where arch is any of the -march flags passed to gcc, without the -march, for example --with-arch=pentium3],
+AC_ARG_WITH(arch,AC_HELP_STRING([--with-arch=[arch]],
+[build for $arch, where arch is any of the -march flags passed to gcc, without the -march, for example --with-arch=pentium3]),
 arch=$withval,arch=no)
+ARCHFLAGS=""
 if test "x$arch" != xno
 then
     ARCHFLAGS="-march=$arch"
@@ -241,12 +242,21 @@ then
     CPPFLAGS="-fomit-frame-pointer -ffast-math"
     CXXFLAGS="-fomit-frame-pointer -ffast-math"
     AC_DEFINE(dNODEBUG,,[Disable debug output])
-else
+fi
+AC_MSG_RESULT($release)
+
+AC_MSG_CHECKING(if building a debug library)
+AC_ARG_ENABLE(debug,AC_HELP_STRING([--enable-debug],
+[build a debug library with -g]),
+debug=$enableval,debug=no)
+if test "x$debug" == xyes
+then
     CFLAGS="-g"
     CPPFLAGS="-g"
     CXXFLAGS="-g"
 fi
-AC_MSG_RESULT($release)
+AC_MSG_RESULT($debug)
+
 
 dnl Check variable type sizes
 AC_CHECK_SIZEOF(char)
@@ -477,5 +487,6 @@ echo "  Use gyroscopic term:     $gyroscopic"
 echo "  Is this a Pentium:       $pentium"
 echo "  Is the CPU x86-64:       $cpu64"
 echo "  Is this a release build: $release"
+echo "  Is this a debug build:   $debug"
 echo "  Headers will be installed in $prefix/include/ode"
 echo "  Libraries will be installed in $prefix/lib"

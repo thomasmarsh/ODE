@@ -29,13 +29,13 @@ echo "Please make sure that you use automake 1.8.2 or later"
 echo "Warnings about underquoted definitions are harmless"
  
 echo "Running aclocal"
-aclocal -I .
+aclocal -I . || exit 1
 echo "Running autoheader"
-autoheader
+autoheader || exit 1
 echo "Running automake"
-automake --foreign --include-deps --add-missing --copy
+automake --foreign --include-deps --add-missing --copy || exit 1
 echo "Running autoconf"
-autoconf
+autoconf || exit 1
 
 #./configure $*
 
