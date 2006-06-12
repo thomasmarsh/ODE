@@ -38,7 +38,7 @@ AC_TYPE_SIZE_T
 dnl Check if using sonames is requested
 dnl THIS IS TEMPORARY!
 AC_MSG_CHECKING(if a soname should be set)
-AC_ARG_ENABLE(soname,AC_HELP_STRING([--enable-opcode],
+AC_ARG_ENABLE(soname,AC_HELP_STRING([--enable-soname],
 [Configure ODE shared library to set the soname field on ELF files]),
 use_soname=$enableval,use_soname=no)
 AC_MSG_RESULT($use_soname)

@@ -136,28 +136,28 @@ test_basket_DEPENDENCIES=		$(top_builddir)/ode/src/libode.a \
 
 endif
 
-test_ode_LDADD= -ldrawstuff -lode @GL_LIBS@ @LIBS@
-test_chain2_LDADD= -ldrawstuff -lode @GL_LIBS@ @LIBS@
-test_chain1_LDADD= -ldrawstuff -lode @GL_LIBS@ @LIBS@
-test_joints_LDADD= -ldrawstuff -lode @GL_LIBS@ @LIBS@
-test_motor_LDADD= -ldrawstuff -lode @GL_LIBS@ @LIBS@
-test_buggy_LDADD= -ldrawstuff -lode @GL_LIBS@ @LIBS@
-test_cyl_LDADD= -ldrawstuff -lode @GL_LIBS@ @LIBS@
-test_cylvssphere_LDADD= -ldrawstuff -lode @GL_LIBS@ @LIBS@
-test_step_LDADD= -ldrawstuff -lode @GL_LIBS@ @LIBS@
-test_hinge_LDADD= -ldrawstuff -lode @GL_LIBS@ @LIBS@
-test_boxstack_LDADD= -ldrawstuff -lode @GL_LIBS@ @LIBS@
-test_space_stress_LDADD= -ldrawstuff -lode @GL_LIBS@ @LIBS@
-test_friction_LDADD= -ldrawstuff -lode @GL_LIBS@ @LIBS@
-test_I_LDADD= -ldrawstuff -lode @GL_LIBS@ @LIBS@
-test_space_LDADD= -ldrawstuff -lode @GL_LIBS@ @LIBS@
-test_crash_LDADD= -ldrawstuff -lode @GL_LIBS@ @LIBS@
-test_slider_LDADD= -ldrawstuff -lode @GL_LIBS@ @LIBS@
-test_collision_LDADD= -ldrawstuff -lode @GL_LIBS@ @LIBS@
+test_ode_LDADD= -ldrawstuff $(top_builddir)/ode/src/libode.a @GL_LIBS@ @LIBS@
+test_chain2_LDADD= -ldrawstuff $(top_builddir)/ode/src/libode.a @GL_LIBS@ @LIBS@
+test_chain1_LDADD= -ldrawstuff $(top_builddir)/ode/src/libode.a @GL_LIBS@ @LIBS@
+test_joints_LDADD= -ldrawstuff $(top_builddir)/ode/src/libode.a @GL_LIBS@ @LIBS@
+test_motor_LDADD= -ldrawstuff $(top_builddir)/ode/src/libode.a @GL_LIBS@ @LIBS@
+test_buggy_LDADD= -ldrawstuff $(top_builddir)/ode/src/libode.a @GL_LIBS@ @LIBS@
+test_cyl_LDADD= -ldrawstuff $(top_builddir)/ode/src/libode.a @GL_LIBS@ @LIBS@
+test_cylvssphere_LDADD= -ldrawstuff $(top_builddir)/ode/src/libode.a @GL_LIBS@ @LIBS@
+test_step_LDADD= -ldrawstuff $(top_builddir)/ode/src/libode.a @GL_LIBS@ @LIBS@
+test_hinge_LDADD= -ldrawstuff $(top_builddir)/ode/src/libode.a @GL_LIBS@ @LIBS@
+test_boxstack_LDADD= -ldrawstuff $(top_builddir)/ode/src/libode.a @GL_LIBS@ @LIBS@
+test_space_stress_LDADD= -ldrawstuff $(top_builddir)/ode/src/libode.a @GL_LIBS@ @LIBS@
+test_friction_LDADD= -ldrawstuff $(top_builddir)/ode/src/libode.a @GL_LIBS@ @LIBS@
+test_I_LDADD= -ldrawstuff $(top_builddir)/ode/src/libode.a @GL_LIBS@ @LIBS@
+test_space_LDADD= -ldrawstuff $(top_builddir)/ode/src/libode.a @GL_LIBS@ @LIBS@
+test_crash_LDADD= -ldrawstuff $(top_builddir)/ode/src/libode.a @GL_LIBS@ @LIBS@
+test_slider_LDADD= -ldrawstuff $(top_builddir)/ode/src/libode.a @GL_LIBS@ @LIBS@
+test_collision_LDADD= -ldrawstuff $(top_builddir)/ode/src/libode.a @GL_LIBS@ @LIBS@
 if OPCODE
-test_trimesh_LDADD= -ldrawstuff -lode @GL_LIBS@ @LIBS@
-test_moving_trimesh_LDADD= -ldrawstuff -lode @GL_LIBS@ @LIBS@
-test_basket_LDADD= -ldrawstuff -lode @GL_LIBS@ @LIBS@
+test_trimesh_LDADD= -ldrawstuff $(top_builddir)/ode/src/libode.a @GL_LIBS@ @LIBS@
+test_moving_trimesh_LDADD= -ldrawstuff $(top_builddir)/ode/src/libode.a @GL_LIBS@ @LIBS@
+test_basket_LDADD= -ldrawstuff $(top_builddir)/ode/src/libode.a @GL_LIBS@ @LIBS@
 endif
 
 
