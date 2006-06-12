@@ -20,9 +20,11 @@ dist-zip: ${PACKAGE}-${VERSION}.tar.gz
 
 if USE_SONAME
 install-exec-hook:
-	/sbin/ldconfig
 	ln -s $(prefix)/lib/@ODE_SONAME@.@ODE_REVISION@.@ODE_AGE@ \
 	$(prefix)/lib/libode.so
 	ln -s $(prefix)/lib/@ODE_SONAME@.@ODE_REVISION@.@ODE_AGE@ \
+	$(prefix)/lib/@ODE_SONAME@
+	ln -s $(prefix)/lib/@ODE_SONAME@.@ODE_REVISION@.@ODE_AGE@ \
 	$(prefix)/lib/@ODE_SONAME@.@ODE_REVISION@
+	/sbin/ldconfig
 endif
