@@ -17,3 +17,12 @@ dist-zip: ${PACKAGE}-${VERSION}.tar.gz
 	tar -zxf ${PACKAGE}-${VERSION}.tar.gz && \
 	zip -r ${PACKAGE}-${VERSION}.zip ${PACKAGE}-${VERSION} && \
 	rm -rf ${PACKAGE}-${VERSION}
+
+if USE_SONAME
+install-exec-hook:
+	/sbin/ldconfig
+	ln -s $(prefix)/lib/@ODE_SONAME@.@ODE_REVISION@.@ODE_AGE@ \
+	$(prefix)/lib/libode.so
+	ln -s $(prefix)/lib/@ODE_SONAME@.@ODE_REVISION@.@ODE_AGE@ \
+	$(prefix)/lib/@ODE_SONAME@.@ODE_REVISION@
+endif
