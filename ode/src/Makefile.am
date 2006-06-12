@@ -17,6 +17,9 @@ traplib_PROGRAMS=libode
 libode_SOURCES=
 libode_DEPENDENCIES = libfast.a libode.a
 libode_LDFLAGS= @SHARED_LDFLAGS@
+if USE_SONAME
+libode_LDFLAGS+=-Wl,-soname,@ODE_SONAME@
+endif
 libode_LDADD=$(libode_a_OBJECTS) $(libfast_a_OBJECTS)
 if OPCODE
 libode_DEPENDENCIES+= libOPCODE.a
