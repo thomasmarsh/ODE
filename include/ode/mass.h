@@ -32,6 +32,15 @@ extern "C" {
 struct dMass;
 typedef struct dMass dMass;
 
+/**
+ * Check if a mass structure has valid value.
+ * The function check if the mass and innertia matrix are positive definits
+ *
+ * @param m A mass structure to check
+ *
+ * @return 1 if both codition are met
+ */
+ODE_API int dMassCheck(const dMass *m);
 
 ODE_API void dMassSetZero (dMass *);
 

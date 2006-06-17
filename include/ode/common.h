@@ -196,7 +196,7 @@ typedef dReal dQuaternion[4];
   ((char*)dEFFICIENT_SIZE(((size_t)(alloca((n)+(EFFICIENT_ALIGNMENT-1))))))
 
 
-// Use the error-checking memory allocation system.  Becuase this system uses heap
+// Use the error-checking memory allocation system.  Because this system uses heap
 //  (malloc) instead of stack (alloca), it is slower.  However, it allows you to
 //  simulate larger scenes, as well as handle out-of-memory errors in a somewhat
 //  graceful manner

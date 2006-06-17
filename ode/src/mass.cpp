@@ -31,7 +31,7 @@
 
 // return 1 if ok, 0 if bad
 
-static int checkMass (dMass *m)
+int dMassCheck (const dMass *m)
 {
   int i;
 
@@ -101,7 +101,7 @@ void dMassSetParameters (dMass *m, dReal themass,
   m->_I(1,0) = I12;
   m->_I(2,0) = I13;
   m->_I(2,1) = I23;
-  checkMass (m);
+  dMassCheck (m);
 }
 
 
@@ -123,7 +123,7 @@ void dMassSetSphereTotal (dMass *m, dReal total_mass, dReal radius)
   m->_I(2,2) = II;
 
 # ifndef dNODEBUG
-  checkMass (m);
+  dMassCheck (m);
 # endif
 }
 
@@ -147,7 +147,7 @@ void dMassSetCapsule (dMass *m, dReal density, int direction,
   m->_I(direction-1,direction-1) = Ib;
 
 # ifndef dNODEBUG
-  checkMass (m);
+  dMassCheck (m);
 # endif
 }
 
@@ -183,7 +183,7 @@ void dMassSetCylinderTotal (dMass *m, dReal total_mass, int direction,
   m->_I(direction-1,direction-1) = total_mass*REAL(0.5)*r2;
 
 # ifndef dNODEBUG
-  checkMass (m);
+  dMassCheck (m);
 # endif
 }
 
@@ -206,7 +206,7 @@ void dMassSetBoxTotal (dMass *m, dReal total_mass,
   m->_I(2,2) = total_mass/REAL(12.0) * (lx*lx + ly*ly);
 
 # ifndef dNODEBUG
-  checkMass (m);
+  dMassCheck (m);
 # endif
 }
 
@@ -219,7 +219,7 @@ void dMassAdjust (dMass *m, dReal newmass)
   for (int i=0; i<3; i++) for (int j=0; j<3; j++) m->_I(i,j) *= scale;
 
 # ifndef dNODEBUG
-  checkMass (m);
+  dMassCheck (m);
 # endif
 }
 
@@ -263,7 +263,7 @@ void dMassTranslate (dMass *m, dReal x, dReal y, dReal z)
   m->c[2] += z;
 
 # ifndef dNODEBUG
-  checkMass (m);
+  dMassCheck (m);
 # endif
 }
 
@@ -298,7 +298,7 @@ void dMassRotate (dMass *m, const dMatrix3 R)
   m->c[2] = t2[2];
 
 # ifndef dNODEBUG
-  checkMass (m);
+  dMassCheck (m);
 # endif
 }
 
