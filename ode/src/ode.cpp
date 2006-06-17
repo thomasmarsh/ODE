@@ -404,7 +404,9 @@ const dReal * dBodyGetAngularVel (dBodyID b)
 
 void dBodySetMass (dBodyID b, const dMass *mass)
 {
-  dAASSERT (b && mass);
+  dAASSERT (b && mass );
+  dIASSERT(dMassCheck(mass));
+
   memcpy (&b->mass,mass,sizeof(dMass));
   if (dInvertPDMatrix (b->mass.I,b->invI,3)==0) {
     dDEBUGMSG ("inertia must be positive definite!");
