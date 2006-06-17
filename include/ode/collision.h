@@ -565,9 +565,83 @@ ODE_API void dGeomGetOffsetQuaternion (dGeomID geom, dQuaternion result);
 /* ************************************************************************ */
 /* collision detection */
 
+/**
+ *
+ * @brief Given two geoms o1 and o2 that potentially intersect, 
+ * generate contact information for them. 
+ *
+ * Internally, this just calls the correct class-specific collision 
+ * functions for o1 and o2. 
+ *
+ * @param o1 The first geom to test.
+ * @param o2 The second geom to test.
+ *
+ * @param flags The flags specify how contacts should be generated if 
+ * the geoms touch. The lower 16 bits of flags is an integer that 
+ * specifies the maximum number of contact points to generate. Note 
+ * that if this number is zero, this function just pretends that it is 
+ * one -- in other words you can not ask for zero contacts. All other bits 
+ * in flags must be zero. In the future the other bits may be used to 
+ * select from different contact generation strategies.
+ *
+ * @param contact Points to an array of dContactGeom structures. The array 
+ * must be able to hold at least the maximum number of contacts. These 
+ * dContactGeom structures may be embedded within larger structures in the 
+ * array -- the skip parameter is the byte offset from one dContactGeom to 
+ * the next in the array. If skip is sizeof(dContactGeom) then contact 
+ * points to a normal (C-style) array. It is an error for skip to be smaller 
+ * than sizeof(dContactGeom).
+ *
+ * @returns If the geoms intersect, this function returns the number of contact 
+ * points generated (and updates the contact array), otherwise it returns 0 
+ * (and the contact array is not touched).
+ *
+ * @remarks If a space is passed as o1 or o2 then this function will collide 
+ * all objects contained in o1 with all objects contained in o2, and return 
+ * the resulting contact points. This method for colliding spaces with geoms 
+ * (or spaces with spaces) provides no user control over the individual 
+ * collisions. To get that control, use dSpaceCollide or dSpaceCollide2 instead.
+ *
+ * @remarks If o1 and o2 are the same geom then this function will do nothing 
+ * and return 0. Technically speaking an object intersects with itself, but it 
+ * is not useful to find contact points in this case.
+ *
+ * @remarks This function does not care if o1 and o2 are in the same space or not 
+ * (or indeed if they are in any space at all).
+ *
+ * @ingroup collide
+ */
 ODE_API int dCollide (dGeomID o1, dGeomID o2, int flags, dContactGeom *contact,
 	      int skip);
+
+/**
+ * @brief Determines which pairs of geoms in a space may potentially intersect, 
+ * and calls the callback function for each candidate pair. 
+ *
+ * @param space The space to test.
+ * 
+ * @param data Passed from dSpaceCollide directly to the callback 
+ * function. Its meaning is user defined. The o1 and o2 arguments are the 
+ * geoms that may be near each other.
+ *
+ * @param callback A callback function is of type @ref dNearCallback.
+ *
+ * @remarks Other spaces that are contained within the colliding space are 
+ * not treated specially, i.e. they are not recursed into. The callback 
+ * function may be passed these contained spaces as one or both geom 
+ * arguments.
+ *
+ * @remarks dSpaceCollide() is guaranteed to pass all intersecting geom 
+ * pairs to the callback function, but may also pass close but 
+ * non-intersecting pairs. The number of these calls depends on the 
+ * internal algorithms used by the space. Thus you should not expect 
+ * that dCollide will return contacts for every pair passed to the 
+ * callback.
+ *
+ * @ingroup collide
+ */
 ODE_API void dSpaceCollide (dSpaceID space, void *data, dNearCallback *callback);
+
 ODE_API void dSpaceCollide2 (dGeomID o1, dGeomID o2, void *data,
 		     dNearCallback *callback);
 
