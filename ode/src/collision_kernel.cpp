@@ -409,7 +409,7 @@ void *dGeomGetData (dxGeom *g)
 void dGeomSetBody (dxGeom *g, dxBody *b)
 {
   dAASSERT (g);
-  dUASSERT (g->gflags & GEOM_PLACEABLE,"geom must be placeable");
+  dUASSERT (b == NULL || (g->gflags & GEOM_PLACEABLE),"geom must be placeable");
   CHECK_NOT_LOCKED (g->parent_space);
 
   if (b) {
