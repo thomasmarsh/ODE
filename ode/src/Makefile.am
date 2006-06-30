@@ -57,6 +57,9 @@ libode_a_SOURCES = 	objects.h \
 			rotation.cpp \
 			collision_space.cpp \
 			collision_space_internal.h \
+                        collision_cylinder_box.cpp \
+                        collision_cylinder_sphere.cpp \
+                        collision_cylinder_plane.cpp \
 			sphere.cpp \
 			box.cpp \
 			capsule.cpp \
@@ -144,9 +147,6 @@ libode_a_SOURCES+=	collision_trimesh_trimesh.cpp \
 			collision_trimesh_ccylinder.cpp \
 			collision_trimesh_distance.cpp \
 			collision_trimesh_internal.h \
-                        collision_cylinder_box.cpp \
-                        collision_cylinder_sphere.cpp \
-                        collision_cylinder_plane.cpp \
                         collision_cylinder_trimesh.cpp
 endif
 
