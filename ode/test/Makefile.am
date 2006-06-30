@@ -15,11 +15,10 @@ noinst_PROGRAMS=test_collision \
 		test_motor \
 		test_chain1 \
 		test_chain2 \
-                test_cyl \
                 test_cylvssphere \
 		test_ode
 if OPCODE
-noinst_PROGRAMS+= test_trimesh test_moving_trimesh test_basket
+noinst_PROGRAMS+= test_trimesh test_moving_trimesh test_basket test_cyl
 endif
 test_collision_SOURCES= test_collision.cpp
 test_slider_SOURCES= test_slider.cpp 
