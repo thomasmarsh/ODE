@@ -29,6 +29,7 @@ the standard ODE geometry primitives.
 #ifndef _ODE_COLLISION_STD_H_
 #define _ODE_COLLISION_STD_H_
 
+#include <set>
 #include <ode/common.h>
 #include "collision_kernel.h"
 
@@ -130,8 +131,10 @@ struct dxRay : public dxGeom {
   void computeAABB();
 };
 
+typedef std::pair<unsigned int,unsigned int> edge; /*!< Used to descrive a convex hull edge, an edge is a pair or indices into the hull's points */
 struct dxConvex : public dxGeom 
 {
+  
   dReal *planes; /*!< An array of planes in the form:
 		   normal X, normal Y, normal Z,Distance
 		 */
@@ -140,6 +143,7 @@ struct dxConvex : public dxGeom
   unsigned int planecount; /*!< Amount of planes in planes */
   unsigned int pointcount;/*!< Amount of points in points */
   dReal saabb[6];/*!< Static AABB */
+  std::set<edge> edges;
   dxConvex(dSpaceID space,
 	   dReal *planes,
 	   unsigned int planecount,
@@ -151,6 +155,9 @@ struct dxConvex : public dxGeom
     //fprintf(stdout,"dxConvex Destroy\n");
   }
   void computeAABB();
+  private:
+  // For Internal Use Only
+  void FillEdges();
 };
 
 

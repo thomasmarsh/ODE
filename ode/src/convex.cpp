@@ -68,6 +68,7 @@ dxConvex::dxConvex (dSpaceID space,
   points = _points;
   pointcount = _pointcount;
   polygons=_polygons;
+  FillEdges();
 }
 
 
@@ -94,6 +95,34 @@ void dxConvex::computeAABB()
     }
 }
 
+/*! \brief Populates the edges set, should be called only once whenever
+  the polygon array gets updated */
+void dxConvex::FillEdges()
+{
+  unsigned int *points_in_poly=polygons;
+  unsigned int *index=polygons+1;
+  for(unsigned int i=0;i<planecount;++i)
+    {
+      //fprintf(stdout,"Points in Poly: %d\n",*points_in_poly);
+      for(int j=0;j<*points_in_poly;++j)
+	{
+	  edges.insert(edge(dMIN(index[j],index[(j+1)%*points_in_poly]),
+			    dMAX(index[j],index[(j+1)%*points_in_poly])));
+	  //fprintf(stdout,"Insert %d-%d\n",index[j],index[(j+1)%*points_in_poly]);
+	}
+      points_in_poly+=(*points_in_poly+1);
+      index=points_in_poly+1;
+    }
+  /*
+    fprintf(stdout,"Edge Count: %d\n",edges.size());
+    for(std::set<edge>::iterator it=edges.begin();
+    it!=edges.end();
+    ++it)
+    {
+    fprintf(stdout,"Edge: %d-%d\n",it->first,it->second);
+    }
+  */
+}
 
 dGeomID dCreateConvex (dSpaceID space,dReal *_planes,unsigned int _planecount,
 		    dReal *_points,
