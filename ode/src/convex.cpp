@@ -924,14 +924,136 @@ inline void AgarwalPD(dxConvex& cvx1,dxConvex& cvx2,dVector4 pd)
     }
 }
 
+inline void ComputeInterval(dxConvex& cvx,dVector3 axis,dReal& min,dReal& max)
+{
+  dVector3 point;
+  dReal value;
+  //fprintf(stdout,"Compute Interval Axis %f,%f,%f\n",axis[0],axis[1],axis[2]);
+  dMULTIPLY0_331 (point,cvx.final_posr->R,cvx.points);
+  //fprintf(stdout,"initial point %f,%f,%f\n",point[0],point[1],point[2]);
+  point[0]+=cvx.final_posr->pos[0];
+  point[1]+=cvx.final_posr->pos[1];
+  point[2]+=cvx.final_posr->pos[2];
+  max = min = dDOT(axis,cvx.points);
+  for (int i = 1; i < cvx.pointcount; ++i) 
+    {
+      dMULTIPLY0_331 (point,cvx.final_posr->R,cvx.points+(i*3));
+      point[0]+=cvx.final_posr->pos[0];
+      point[1]+=cvx.final_posr->pos[1];
+      point[2]+=cvx.final_posr->pos[2];
+      value = dDOT(axis,point);
+      if(value<min) 
+	min=value;
+      else if(value>max)
+	max=value;
+    }
+  //fprintf(stdout,"Compute Interval Min Max %f,%f\n",min,max);
+
+}
+
+/*! \brief Does an axis separation test between the 2 convex shapes
+  using faces and edges */
+bool TestConvexIntersection(dxConvex& cvx1,dxConvex& cvx2)
+{
+  dVector3 plane;
+  dReal min1,max1,min2,max2,depth,max_depth=0;
+  dVector3 e1,e2,t, axis;
+  // Test faces of cvx1 for separation
+  for(int i=0;i<cvx1.planecount;++i)
+    {
+      // -- Apply Transforms --
+      // Rotate
+      dMULTIPLY0_331(plane,cvx1.final_posr->R,cvx1.planes+(i*4));
+      // Translate
+//       plane[3]=
+// 	(cvx1.planes[(i*4)+3])+
+// 	((plane[0] * cvx1.final_posr->pos[0]) + 
+// 	 (plane[1] * cvx1.final_posr->pos[1]) + 
+// 	 (plane[2] * cvx1.final_posr->pos[2]));
+      ComputeInterval(cvx1,plane,min1,max1);
+      ComputeInterval(cvx2,plane,min2,max2);
+      if(max2<min1 || max1 < min2) return false;
+      else if(max2>max1) depth= max1-min2;
+      else depth=max2-min1;
+      if(dFabs(depth)>dFabs(max_depth))
+	{
+	  max_depth=depth;
+	  fprintf(stdout,"Max Depth is %f on a Face in cvx2\n",max_depth);
+	}      
+    }
+  // Test faces of cvx2 for separation
+  for(int i=0;i<cvx2.planecount;++i)
+    {
+      // -- Apply Transforms --
+      // Rotate
+      dMULTIPLY0_331(plane,cvx2.final_posr->R,cvx2.planes+(i*4));
+      // Translate
+//       plane[3]=
+// 	(cvx2.planes[(i*4)+3])+
+// 	((plane[0] * cvx2.final_posr->pos[0]) + 
+// 	 (plane[1] * cvx2.final_posr->pos[1]) + 
+// 	 (plane[2] * cvx2.final_posr->pos[2]));
+      ComputeInterval(cvx1,plane,min1,max1);
+      ComputeInterval(cvx2,plane,min2,max2);
+      if(max2<min1 || max1 < min2) return false;
+      else if(max2>max1) depth= max1-min2;
+      else depth=max2-min1;
+      if(dFabs(depth)>dFabs(max_depth))
+	{
+	  max_depth=depth;
+	  fprintf(stdout,"Max Depth is %f on a Face in cvx2\n",max_depth);
+	}
+    }
+  // Test cross products of pairs of edges
+  for(std::set<edge>::iterator i = cvx1.edges.begin();
+      i!= cvx1.edges.end();
+      ++i)
+    {
+      // we only need to apply rotation here
+      dMULTIPLY0_331 (t,cvx1.final_posr->R,cvx1.points+(i->first*3));
+      dMULTIPLY0_331 (e1,cvx1.final_posr->R,cvx1.points+(i->second*3));
+      e1[0]-=t[0];
+      e1[1]-=t[1];
+      e1[2]-=t[2];
+      for(std::set<edge>::iterator j = cvx2.edges.begin();
+	  j!= cvx2.edges.end();
+	  ++j)
+	{
+	  // we only need to apply rotation here
+	  dMULTIPLY0_331 (t,cvx2.final_posr->R,cvx2.points+(j->first*3));
+	  dMULTIPLY0_331 (e2,cvx2.final_posr->R,cvx2.points+(j->second*3));
+	  e2[0]-=t[0];
+	  e2[1]-=t[1];
+	  e2[2]-=t[2];
+	  dCROSS(axis,=,e1,e2);
+	  ComputeInterval(cvx1,axis,min1,max1);
+	  ComputeInterval(cvx2,axis,min2,max2);
+	  if(max2<min1 || max1 < min2) return false;
+	  else if(max2>max1) depth= max1-min2;
+	  else depth=max2-min1;
+	  if(dFabs(depth)>dFabs(max_depth))
+	    {
+	      max_depth=depth;
+	      fprintf(stdout,"Max Depth is %f on an Edge\n",max_depth);
+	    }
+	}      
+    }
+  return true;
+}
+
 int dCollideConvexConvex (dxGeom *o1, dxGeom *o2, int flags,
 			  dContactGeom *contact, int skip)
 {
   dIASSERT (o1->type == dConvexClass);
   dIASSERT (o2->type == dConvexClass);
-  if(!hit) fprintf(stdout,"dCollideConvexConvex\n");
+//   if(!hit) fprintf(stdout,"dCollideConvexConvex\n");
   dxConvex *Convex1 = (dxConvex*) o1;
   dxConvex *Convex2 = (dxConvex*) o2;
+  if(TestConvexIntersection(*Convex1,*Convex2))
+    {
+      fprintf(stdout,"We have a Hit!\n");
+    }
+#if 0
   dVector4 out;
   if(SeidelLP(*Convex1,*Convex2))
     {
@@ -958,6 +1080,7 @@ int dCollideConvexConvex (dxGeom *o1, dxGeom *o2, int flags,
       return 1;
     }
   hit=true;
+#endif
   return 0;
 }
 
