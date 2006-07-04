@@ -197,6 +197,7 @@ static void initColliders()
   setCollider (dConvexClass,dBoxClass,&dCollideConvexBox);
   setCollider (dConvexClass,dCapsuleClass,&dCollideConvexCapsule);
   setCollider (dConvexClass,dConvexClass,&dCollideConvexConvex);
+  setCollider (dRayClass,dConvexClass,&dCollideRayConvex);
 //<-- Convex Collision
 
   setAllColliders (dGeomTransformClass,&dCollideTransform);

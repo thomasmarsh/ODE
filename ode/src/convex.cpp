@@ -154,7 +154,42 @@ void dGeomSetConvex (dGeomID g,dReal *_planes,unsigned int _planecount,
 //****************************************************************************
 // Helper Inlines
 //
+
+/*! \brief Returns Whether or not the segment ab intersects plane p
+  \param a origin of the segment
+  \param b segment destination
+  \param p plane to test for intersection
+  \param t returns the time "t" in the segment ray that gives us the intersecting 
+  point
+  \param q returns the intersection point
+  \return true if there is an intersection, otherwise false.
+*/
+bool IntersectSegmentPlane(dVector3 a, 
+			   dVector3 b, 
+			   dVector4 p, 
+			   float &t, 
+			   dVector3 q)
+{
+  // Compute the t value for the directed line ab intersecting the plane
+  dVector3 ab;
+  ab[0]= b[0] - a[0];
+  ab[1]= b[1] - a[1];
+  ab[2]= b[2] - a[2];
   
+  t = (p[3] - dDOT(p,a)) / dDOT(p,ab);
+  
+  // If t in [0..1] compute and return intersection point
+  if (t >= 0.0 && t <= 1.0) 
+    {
+      q[0] = a[0] + t * ab[0];
+      q[1] = a[1] + t * ab[1];
+      q[2] = a[2] + t * ab[2];
+      return true;
+    }
+  // Else no intersection
+  return false;
+}
+
 /*! \brief Returns the Closest Point in Ray 1 to Ray 2
   \param Origin1 The origin of Ray 1
   \param Direction1 The direction of Ray 1
@@ -842,6 +877,7 @@ bool SeidelLP(dxConvex& cvx1,dxConvex& cvx2)
  */
 inline unsigned int Support(dVector3 dir,dxConvex& cvx)
 {
+  // I Think this needs transformations applied
   unsigned int index = 0;
   dReal max = dDOT(cvx.points,dir);
   dReal tmp;
@@ -1084,10 +1120,61 @@ int dCollideConvexConvex (dxGeom *o1, dxGeom *o2, int flags,
   return 0;
 }
 
+int dCollideRayConvex (dxGeom *o1, dxGeom *o2, int flags, 
+		       dContactGeom *contact, int skip)
+{
+  dIASSERT( o1->type == dRayClass );
+  dIASSERT( o2->type == dConvexClass );
+  dxRay* ray = (dxRay*) o1;
+  dxConvex* convex = (dxConvex*) o2;
+  dVector3 origin,destination,contactpoint,out;
+  dReal depth;
+  dVector4 plane;
+  unsigned int *pPoly=convex->polygons;
+  // Calculate ray origin and destination
+  destination[0]=0;
+  destination[1]=0;
+  destination[2]= ray->length;
+;
+  dMULTIPLY0_331(destination,ray->final_posr->R,destination);
+  origin[0]=ray->final_posr->pos[0];
+  origin[1]=ray->final_posr->pos[1];
+  origin[2]=ray->final_posr->pos[2];
+  destination[0]+=origin[0];
+  destination[1]+=origin[1];
+  destination[2]+=origin[2];
+  for(int i=0;i<convex->planecount;++i)
+    {
+      // Rotate
+      dMULTIPLY0_331(plane,convex->final_posr->R,convex->planes+(i*4));
+      // Translate
+      plane[3]=
+	(convex->planes[(i*4)+3])+
+	((plane[0] * convex->final_posr->pos[0]) + 
+	 (plane[1] * convex->final_posr->pos[1]) + 
+	 (plane[2] * convex->final_posr->pos[2]));
+      if(IntersectSegmentPlane(origin, 
+			       destination, 
+			       plane, 
+			       depth, 
+			       contactpoint))
+	{
+	  if(IsPointInPolygon(contactpoint,pPoly,convex,out))
+	    {
+	      contact->pos[0]=contactpoint[0];
+	      contact->pos[1]=contactpoint[1];
+	      contact->pos[2]=contactpoint[2];
+	      contact->normal[0]=plane[0];
+	      contact->normal[1]=plane[1];
+	      contact->normal[2]=plane[2];
+	      contact->depth=depth;
+	      contact->g1 = ray;
+	      contact->g2 = convex;
+	    }
+	}
+      pPoly+=pPoly[0]+1;
+    }
+  return 0;
+}
+
 //<-- Convex Collision
-/*
-Plane 0: -0.107566  0.994198  0.000011 0.249995
-Plane 1: -0.994198 -0.107566 -0.000057 0.249998
-Plane 2: -0.000056 -0.000017  1.000000 0.499968
-Plane 3:  0.000056  0.000017 -1.000000 0.000032
-*/
