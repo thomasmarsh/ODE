@@ -85,6 +85,8 @@ int dCollideConvexCapsule (dxGeom *o1, dxGeom *o2,
 			   int flags, dContactGeom *contact, int skip);
 int dCollideConvexConvex (dxGeom *o1, dxGeom *o2, int flags, 
 			  dContactGeom *contact, int skip);
+int dCollideRayConvex (dxGeom *o1, dxGeom *o2, int flags, 
+		       dContactGeom *contact, int skip);
 //<-- Convex Collision
 
 //****************************************************************************
