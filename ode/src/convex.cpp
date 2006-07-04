@@ -989,7 +989,8 @@ inline void ComputeInterval(dxConvex& cvx,dVector3 axis,dReal& min,dReal& max)
 
 /*! \brief Does an axis separation test between the 2 convex shapes
   using faces and edges */
-bool TestConvexIntersection(dxConvex& cvx1,dxConvex& cvx2)
+bool TestConvexIntersection(dxConvex& cvx1,dxConvex& cvx2, int flags,
+			    dContactGeom *contact, int skip)
 {
   dVector3 plane;
   dReal min1,max1,min2,max2,depth,max_depth=0;
@@ -1085,7 +1086,8 @@ int dCollideConvexConvex (dxGeom *o1, dxGeom *o2, int flags,
 //   if(!hit) fprintf(stdout,"dCollideConvexConvex\n");
   dxConvex *Convex1 = (dxConvex*) o1;
   dxConvex *Convex2 = (dxConvex*) o2;
-  if(TestConvexIntersection(*Convex1,*Convex2))
+  if(TestConvexIntersection(*Convex1,*Convex2,flags,
+			    contact,skip))
     {
       fprintf(stdout,"We have a Hit!\n");
     }
@@ -1120,6 +1122,7 @@ int dCollideConvexConvex (dxGeom *o1, dxGeom *o2, int flags,
   return 0;
 }
 
+#if 1
 int dCollideRayConvex (dxGeom *o1, dxGeom *o2, int flags, 
 		       dContactGeom *contact, int skip)
 {
@@ -1135,7 +1138,7 @@ int dCollideRayConvex (dxGeom *o1, dxGeom *o2, int flags,
   destination[0]=0;
   destination[1]=0;
   destination[2]= ray->length;
-
+  // -- Rotate --
   dMULTIPLY0_331(destination,ray->final_posr->R,destination);
   origin[0]=ray->final_posr->pos[0];
   origin[1]=ray->final_posr->pos[1];
@@ -1177,5 +1180,125 @@ int dCollideRayConvex (dxGeom *o1, dxGeom *o2, int flags,
     }
   return 0;
 }
+
+#else
+// Ray - Convex collider by David Walters, June 2006
+int dCollideRayConvex( dxGeom *o1, dxGeom *o2,
+		       int flags, 
+		       dContactGeom *contact, 
+		       int skip )
+{
+  dIASSERT( skip >= (int)sizeof(dContactGeom) );
+  dIASSERT( o1->type == dRayClass );
+  dIASSERT( o2->type == dConvexClass );
+  dxRay* ray = (dxRay*) o1;
+  dxConvex* convex = (dxConvex*) o2;
+
+  dUASSERT( convex->pointcount < 64, "Too many planes in this hull." );
+
+  contact->g1 = ray;
+  contact->g2 = convex;
+
+  dReal alphas[ 64 ], alpha, beta, nsign;
+  int flag;
+  
+  //
+  // Compute some useful info
+  //
+  
+  flag = 0;	// Assume start point is behind all planes.
+  
+  for ( unsigned int i = 0; i < convex->planecount; ++i )
+    {
+      // Alias this plane.
+      dReal* plane = convex->planes + ( i * 4 );
+      
+      // If alpha >= 0 then start is outside of plane.
+      alphas[ i ] = dDOT( plane, ray->final_posr->pos ) - plane[3];
+      
+      // If any alpha is positive, then
+      // the ray start is _outside_ of the hull
+      if ( alphas[ i ] >= 0 )
+	{
+	  flag = 1;
+	}
+    }
+
+  // If the ray starts inside the convex hull, then everything is flipped.
+  nsign = ( flag ) ? REAL( 1.0 ) : REAL( -1.0 );
+
+
+  //
+  // Find closest contact point
+  //
+  
+  // Assume no contacts.
+  contact->depth = dInfinity;
+  
+  for ( unsigned int i = 0; i < convex->planecount; ++i )
+    {
+      // Alias this plane.
+      dReal* plane = convex->planes + ( i * 4 );
+      
+      // Use precomputed alpha, (/flip)
+      alpha = alphas[ i ] * nsign;
+      
+      // Compute [ plane-normal DOT ray-normal ], (/flip)
+      beta = dDOT13( plane, ray->final_posr->R+2 ) * nsign;
+      
+      // Ray is pointing at the plane? ( beta < 0 )
+      // Ray start to plane is within maximum ray length?
+      // Ray start to plane is closer than the current best distance?
+      if ( beta < -dEpsilon &&
+	   alpha >= 0 && alpha <= ray->length &&
+	   alpha < contact->depth )
+	{
+	  // Compute contact point on convex hull surface.
+	  contact->pos[0] = ray->final_posr->pos[0] + alpha * ray->final_posr->R[0*4+2];
+	  contact->pos[1] = ray->final_posr->pos[1] + alpha * ray->final_posr->R[1*4+2];
+	  contact->pos[2] = ray->final_posr->pos[2] + alpha * ray->final_posr->R[2*4+2];
+	  
+	  flag = 0;
+	  
+	  // For all _other_ planes.
+	  for ( unsigned int j = 0; j < convex->planecount; ++j )
+	    {
+	      if ( i == j )
+		continue;	// Skip self.
+	      
+				// Alias this plane.
+	      dReal* planej = convex->planes + ( j * 4 );
+	      
+	      // If beta >= 0 then start is outside of plane.
+	      beta = dDOT( planej, contact->pos ) - plane[3];
+	      
+	      // If any beta is positive, then the contact point
+	      // is not on the surface of the convex hull - it's just
+	      // intersecting some part of its infinite extent.
+	      if ( beta > dEpsilon )
+		{
+		  flag = 1;
+		  break;
+		}
+	    }
+	  
+	  // Contact point isn't outside hull's surface? then it's a good contact!
+	  if ( flag == 0 )
+	    {
+	      // Store the contact normal, possibly flipped.
+	      contact->normal[0] = nsign * plane[0];
+	      contact->normal[1] = nsign * plane[1];
+	      contact->normal[2] = nsign * plane[2];
+	      
+	      // Store depth
+	      contact->depth = alpha;
+	    }
+	}
+    }
+  
+  // Contact?
+  return ( contact->depth <= ray->length );
+}
+#endif
 
 //<-- Convex Collision
