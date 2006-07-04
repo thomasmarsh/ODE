@@ -1135,7 +1135,7 @@ int dCollideRayConvex (dxGeom *o1, dxGeom *o2, int flags,
   destination[0]=0;
   destination[1]=0;
   destination[2]= ray->length;
-;
+
   dMULTIPLY0_331(destination,ray->final_posr->R,destination);
   origin[0]=ray->final_posr->pos[0];
   origin[1]=ray->final_posr->pos[1];
@@ -1170,6 +1170,7 @@ int dCollideRayConvex (dxGeom *o1, dxGeom *o2, int flags,
 	      contact->depth=depth;
 	      contact->g1 = ray;
 	      contact->g2 = convex;
+	      return 1;
 	    }
 	}
       pPoly+=pPoly[0]+1;
