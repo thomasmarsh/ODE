@@ -873,26 +873,36 @@ bool SeidelLP(dxConvex& cvx1,dxConvex& cvx2)
 /*! \brief A Support mapping function for convex shapes
   \param dir direction to find the Support Point for
   \param cvx convex object to find the support point for
-  \return the index of the point in the convex that supports the given direction
+  \param out the support mapping in dir.
  */
-inline unsigned int Support(dVector3 dir,dxConvex& cvx)
+inline void Support(dVector3 dir,dxConvex& cvx,dVector3 out)
 {
-  // I Think this needs transformations applied
   unsigned int index = 0;
-  dReal max = dDOT(cvx.points,dir);
+  dVector3 point;
+  dMULTIPLY0_331 (point,cvx.final_posr->R,cvx.points);
+  point[0]+=cvx.final_posr->pos[0];
+  point[1]+=cvx.final_posr->pos[1];
+  point[2]+=cvx.final_posr->pos[2];
+  
+  dReal max = dDOT(point,dir);
   dReal tmp;
   for (int i = 1; i < cvx.pointcount; ++i) 
     {
-      tmp = dDOT(cvx.points+(i*3), dir);
+      dMULTIPLY0_331 (point,cvx.final_posr->R,cvx.points+(i*3));
+      point[0]+=cvx.final_posr->pos[0];
+      point[1]+=cvx.final_posr->pos[1];
+      point[2]+=cvx.final_posr->pos[2];      
+      tmp = dDOT(point, dir);
       if (tmp > max) 
 	{ 
-	  index = i; 
+	  out[0]=point[0];
+	  out[1]=point[1];
+	  out[2]=point[2];
 	  max = tmp; 
 	}
     }
-  return index;
 }
-
+#if 0
 /* \brief Finds the penetration depth of 2 colliding convex shapes.
 
    This function is based on the following paper:
@@ -959,6 +969,7 @@ inline void AgarwalPD(dxConvex& cvx1,dxConvex& cvx2,dVector4 pd)
 	}
     }
 }
+#endif
 
 inline void ComputeInterval(dxConvex& cvx,dVector3 axis,dReal& min,dReal& max)
 {
@@ -989,12 +1000,14 @@ inline void ComputeInterval(dxConvex& cvx,dVector3 axis,dReal& min,dReal& max)
 
 /*! \brief Does an axis separation test between the 2 convex shapes
   using faces and edges */
-bool TestConvexIntersection(dxConvex& cvx1,dxConvex& cvx2, int flags,
+int TestConvexIntersection(dxConvex& cvx1,dxConvex& cvx2, int flags,
 			    dContactGeom *contact, int skip)
 {
   dVector3 plane;
   dReal min1,max1,min2,max2,depth,max_depth=0;
   dVector3 e1,e2,t, axis;
+  int maxc = flags & NUMC_MASK;
+  int contacts=0;
   // Test faces of cvx1 for separation
   for(int i=0;i<cvx1.planecount;++i)
     {
@@ -1009,14 +1022,19 @@ bool TestConvexIntersection(dxConvex& cvx1,dxConvex& cvx2, int flags,
 // 	 (plane[2] * cvx1.final_posr->pos[2]));
       ComputeInterval(cvx1,plane,min1,max1);
       ComputeInterval(cvx2,plane,min2,max2);
-      if(max2<min1 || max1 < min2) return false;
-      else if(max2>max1) depth= max1-min2;
-      else depth=max2-min1;
-      if(dFabs(depth)>dFabs(max_depth))
+      if(max2<min1 || max1 < min2) return 0;
+      else if(contacts<maxc)
 	{
-	  max_depth=depth;
-	  fprintf(stdout,"Max Depth is %f on a Face in cvx2\n",max_depth);
-	}      
+	  CONTACT(contact,skip*contacts)->normal[0] = plane[0];
+	  CONTACT(contact,skip*contacts)->normal[1] = plane[1];
+	  CONTACT(contact,skip*contacts)->normal[2] = plane[2];
+	  Support(plane,cvx1,CONTACT(contact,skip*contacts)->pos);
+	  if(max2>max1) CONTACT(contact,skip*contacts)->depth = max1-min2;
+	  else CONTACT(contact,skip*contacts)->depth = max2-min1;
+ 	  CONTACT(contact,skip*contacts)->g1 = &cvx2;
+	  CONTACT(contact,skip*contacts)->g2 = &cvx1;
+	  contacts++;
+	}
     }
   // Test faces of cvx2 for separation
   for(int i=0;i<cvx2.planecount;++i)
@@ -1032,14 +1050,14 @@ bool TestConvexIntersection(dxConvex& cvx1,dxConvex& cvx2, int flags,
 // 	 (plane[2] * cvx2.final_posr->pos[2]));
       ComputeInterval(cvx1,plane,min1,max1);
       ComputeInterval(cvx2,plane,min2,max2);
-      if(max2<min1 || max1 < min2) return false;
-      else if(max2>max1) depth= max1-min2;
-      else depth=max2-min1;
-      if(dFabs(depth)>dFabs(max_depth))
-	{
-	  max_depth=depth;
-	  fprintf(stdout,"Max Depth is %f on a Face in cvx2\n",max_depth);
-	}
+      if(max2<min1 || max1 < min2) return 0;
+//       else if(max2>max1) depth= max1-min2;
+//       else depth=max2-min1;
+//       if(dFabs(depth)>dFabs(max_depth))
+// 	{
+// 	  max_depth=depth;
+// 	  fprintf(stdout,"Max Depth is %f on a Face in cvx2\n",max_depth);
+// 	}
     }
   // Test cross products of pairs of edges
   for(std::set<edge>::iterator i = cvx1.edges.begin();
@@ -1065,17 +1083,17 @@ bool TestConvexIntersection(dxConvex& cvx1,dxConvex& cvx2, int flags,
 	  dCROSS(axis,=,e1,e2);
 	  ComputeInterval(cvx1,axis,min1,max1);
 	  ComputeInterval(cvx2,axis,min2,max2);
-	  if(max2<min1 || max1 < min2) return false;
-	  else if(max2>max1) depth= max1-min2;
-	  else depth=max2-min1;
-	  if(dFabs(depth)>dFabs(max_depth))
-	    {
-	      max_depth=depth;
-	      fprintf(stdout,"Max Depth is %f on an Edge\n",max_depth);
-	    }
+	  if(max2<min1 || max1 < min2) return 0;
+// 	  else if(max2>max1) depth= max1-min2;
+// 	  else depth=max2-min1;
+// 	  if(dFabs(depth)>dFabs(max_depth))
+// 	    {
+// 	      max_depth=depth;
+// 	      fprintf(stdout,"Max Depth is %f on an Edge\n",max_depth);
+// 	    }
 	}      
     }
-  return true;
+  return contacts;
 }
 
 int dCollideConvexConvex (dxGeom *o1, dxGeom *o2, int flags,
@@ -1086,11 +1104,13 @@ int dCollideConvexConvex (dxGeom *o1, dxGeom *o2, int flags,
 //   if(!hit) fprintf(stdout,"dCollideConvexConvex\n");
   dxConvex *Convex1 = (dxConvex*) o1;
   dxConvex *Convex2 = (dxConvex*) o2;
-  if(TestConvexIntersection(*Convex1,*Convex2,flags,
-			    contact,skip))
+  int contacts;
+  if(contacts=TestConvexIntersection(*Convex1,*Convex2,flags,
+				     contact,skip))
     {
-      fprintf(stdout,"We have a Hit!\n");
+      //fprintf(stdout,"We have a Hit!\n");
     }
+  return contacts;
 #if 0
   dVector4 out;
   if(SeidelLP(*Convex1,*Convex2))

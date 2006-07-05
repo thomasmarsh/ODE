@@ -75,8 +75,8 @@ extern "C" {
   "assertion \"" #a "\" failed in %s() [%s]",__FUNCTION__,__FILE__);
 #define dUASSERT(a,msg) if (!(a)) dDebug (d_ERR_UASSERT, \
   msg " in %s()", __FUNCTION__);
-#define dDEBUGMSG(msg) dMessage (d_ERR_UASSERT, \
-  msg " in %s()", __FUNCTION__);
+#define dDEBUGMSG(msg) dMessage (d_ERR_UASSERT,				\
+msg " in %s() File %s Line %d", __FUNCTION__, __FILE__,__LINE__);
 #else
 #define dIASSERT(a) if (!(a)) dDebug (d_ERR_IASSERT, \
   "assertion \"" #a "\" failed in %s:%d",__FILE__,__LINE__);
