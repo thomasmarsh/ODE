@@ -98,6 +98,8 @@ then
 dnl DOUBLE was chosen
 AC_DEFINE(dDOUBLE,,[Use double precision])
 dnl Check from lest likelly to more likelly.
+if test "$build_os" == "$target_os"
+then
 AC_TRY_RUN([
 #define dInfinity 1e20
 int main()
@@ -137,9 +139,15 @@ else return -1;
 }
 ],dinfinity=DBL_MAX,,)
 else
+#cross-compiling, use a reasonable value. We should add an option for setting this.
+dinfinity=DBL_MAX
+fi
+else
 dnl default to SINGLE.
 AC_DEFINE(dSINGLE,,[Use single precision])
 dnl Check from lest likelly to more likelly.
+if test "$build_os" == "$target_os"
+then
 AC_TRY_RUN([
 #define dInfinity 1e20f
 int main()
@@ -178,6 +186,9 @@ return 0;
 else return -1;
 }
 ],dinfinity=FLT_MAX,,)
+#cross-compiling, use a reasonable value. We should add an option for setting this.
+dinfinity=FLT_MAX
+fi
 fi
 AC_MSG_RESULT($precision)
 AC_DEFINE_UNQUOTED(dInfinity,${dinfinity},[dInfinity Constant])
@@ -209,6 +220,8 @@ AC_MSG_RESULT($dEpsilon)
 
 
 dnl Check for PENTIUM
+if test "$build_os" == "$target_os"
+then
 AC_MSG_CHECKING(for a Pentium CPU)
 AC_TRY_RUN([
 int main() 
@@ -218,6 +231,9 @@ asm ("mov \$0,%%eax;\n"
 return 0;
 };
 ],pentium=yes,pentium=no,)
+else
+pentium=no
+fi
 if test "x$pentium" == xyes 
 then
 AC_DEFINE(PENTIUM,1,[is this a pentium on a gcc-based platform?])
@@ -226,6 +242,8 @@ AC_MSG_RESULT($pentium)
 
 dnl Check for 64bit CPU
 AC_MSG_CHECKING(for a x86-64 CPU)
+if test "$build_os" == "$target_os"
+then
 AC_TRY_RUN([
 int main()
 {
@@ -237,6 +255,9 @@ asm ("mov %0,%%rax\n"
 return 0;
 };
 ],cpu64=yes,cpu64=no,)
+else
+cpu64=no
+fi
 if test "x$cpu64" == xyes 
 then
 AC_DEFINE(X86_64_SYSTEM,1,[is this a X86_64 system on a gcc-based platform?])
@@ -383,12 +404,15 @@ fi
 
 dnl Check for autoscan sugested functions
 AC_CHECK_FUNCS([floor memmove memset select sqrt sqrtf sinf cosf fabsf atan2f fmodf copysignf copysign snprintf vsnprintf gettimeofday isnan isnanf _isnan _isnanf __isnan __isnanf])
+if test "$build_os" == "$target_os"
+then
 AC_FUNC_ALLOCA 
 AC_FUNC_MALLOC
 AC_FUNC_OBSTACK 
 AC_FUNC_REALLOC
 AC_FUNC_SELECT_ARGTYPES
 AC_FUNC_VPRINTF
+fi
 
 dnl include found system headers into config.h
 AH_TOP([

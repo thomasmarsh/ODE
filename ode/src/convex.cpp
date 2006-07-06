@@ -1025,6 +1025,7 @@ int TestConvexIntersection(dxConvex& cvx1,dxConvex& cvx2, int flags,
       if(max2<min1 || max1 < min2) return 0;
       else if(contacts<maxc)
 	{
+	  // This aint right
 	  CONTACT(contact,skip*contacts)->normal[0] = plane[0];
 	  CONTACT(contact,skip*contacts)->normal[1] = plane[1];
 	  CONTACT(contact,skip*contacts)->normal[2] = plane[2];
@@ -1034,6 +1035,18 @@ int TestConvexIntersection(dxConvex& cvx1,dxConvex& cvx2, int flags,
  	  CONTACT(contact,skip*contacts)->g1 = &cvx2;
 	  CONTACT(contact,skip*contacts)->g2 = &cvx1;
 	  contacts++;
+	  fprintf(stdout,
+		  "Contact Info:\n"
+		  "Normal %f,%f,%f\n"
+		  "Position %f,%f,%f\n"
+		  "Depth %f\n",
+		  CONTACT(contact,skip*contacts)->normal[0],
+		  CONTACT(contact,skip*contacts)->normal[1],
+		  CONTACT(contact,skip*contacts)->normal[2],
+		  CONTACT(contact,skip*contacts)->pos[0],
+		  CONTACT(contact,skip*contacts)->pos[1],
+		  CONTACT(contact,skip*contacts)->pos[2],
+		  CONTACT(contact,skip*contacts)->depth);	  
 	}
     }
   // Test faces of cvx2 for separation
