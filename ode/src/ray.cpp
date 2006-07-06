@@ -477,3 +477,201 @@ int dCollideRayPlane (dxGeom *o1, dxGeom *o2, int flags,
   contact->g2 = plane;
   return 1;
 }
+
+// Ray - Cylinder collider by David Walters (June 2006)
+int dCollideRayCylinder( dxGeom *o1, dxGeom *o2, int flags, dContactGeom *contact, int skip )
+{
+	dIASSERT( skip >= (int)sizeof( dContactGeom ) );
+	dIASSERT( o1->type == dRayClass );
+	dIASSERT( o2->type == dCylinderClass );
+
+	dxRay* ray = (dxRay*)( o1 );
+	dxCylinder* cyl = (dxCylinder*)( o2 );
+
+	// Fill in contact information.
+	contact->g1 = ray;
+	contact->g2 = cyl;
+
+	const dReal half_length = cyl->lz * REAL( 0.5 );
+
+	//
+	// Compute some useful info
+	//
+
+	dVector3 q, r;
+	dReal d, e, C, k;
+
+	// Vector 'r', line segment from C to R (ray start) ( r = R - C )
+	r[ 0 ] = ray->final_posr->pos[0] - cyl->final_posr->pos[0];
+	r[ 1 ] = ray->final_posr->pos[1] - cyl->final_posr->pos[1];
+	r[ 2 ] = ray->final_posr->pos[2] - cyl->final_posr->pos[2];
+
+	// Distance that ray start is along cyl axis ( Z-axis direction )
+	d = dDOT41( cyl->final_posr->R + 2, r );
+
+	//
+	// Compute vector 'q' representing the shortest line from R to the cylinder z-axis (Cz).
+	//
+	// Point on axis ( in world space ):	cp = ( d * Cz ) + C
+	//
+	// Line 'q' from R to cp:				q = cp - R
+	//										q = ( d * Cz ) + C - R
+	//										q = ( d * Cz ) - ( R - C )
+
+	q[ 0 ] = ( d * cyl->final_posr->R[0*4+2] ) - r[ 0 ];
+	q[ 1 ] = ( d * cyl->final_posr->R[1*4+2] ) - r[ 1 ];
+	q[ 2 ] = ( d * cyl->final_posr->R[2*4+2] ) - r[ 2 ];
+
+
+	// Compute square length of 'q'. Subtract from radius squared to
+	// get square distance 'C' between the line q and the radius.
+
+	// if C < 0 then ray start position is within infinite extension of cylinder
+
+	C = dDOT( q, q ) - ( cyl->radius * cyl->radius );
+
+	// Compute the projection of ray direction normal onto cylinder direction normal.
+	dReal uv = dDOT44( cyl->final_posr->R+2, ray->final_posr->R+2 );
+
+
+
+	//
+	// Find ray collision with infinite cylinder
+	//
+
+	// Compute vector from end of ray direction normal to projection on cylinder direction normal.
+	r[ 0 ] = ( uv * cyl->final_posr->R[0*4+2] ) - ray->final_posr->R[0*4+2];
+	r[ 1 ] = ( uv * cyl->final_posr->R[1*4+2] ) - ray->final_posr->R[1*4+2];
+	r[ 2 ] = ( uv * cyl->final_posr->R[2*4+2] ) - ray->final_posr->R[2*4+2];
+
+
+	// Quadratic Formula Magic
+	// Compute discriminant 'k':
+
+	// k < 0 : No intersection
+	// k = 0 : Tangent
+	// k > 0 : Intersection
+
+	dReal A = dDOT( r, r );
+	dReal B = 2 * dDOT( q, r );
+
+	k = B*B - 4*A*C;
+
+
+
+
+	//
+	// Collision with Flat Caps ?
+	//
+
+	// No collision with cylinder edge. ( Use epsilon here or we miss some obvious cases )
+	if ( k < dEpsilon && C <= 0 )
+	{
+		// The ray does not intersect the edge of the infinite cylinder,
+		// but the ray start is inside and so must run parallel to the axis.
+		// It may yet intersect an end cap. The following cases are valid:
+
+		//        -ve-cap , -half              centre               +half , +ve-cap
+		//  <<================|-------------------|------------->>>---|================>>
+		//                    |                                       |
+		//                    |                              d------------------->    1.
+		//   2.    d------------------>                               |
+		//   3.    <------------------d                               |
+		//                    |                              <-------------------d    4.
+		//                    |                                       |
+		//  <<================|-------------------|------------->>>---|===============>>
+
+		// Negative if the ray and cylinder axes point in opposite directions.
+		const dReal uvsign = ( uv < 0 ) ? REAL( -1.0 ) : REAL( 1.0 );
+
+		// Negative if the ray start is inside the cylinder
+		const dReal internal = ( d >= -half_length && d <= +half_length ) ? REAL( -1.0 ) : REAL( 1.0 );
+
+		// Ray and Cylinder axes run in the same direction ( cases 1, 2 )
+		// Ray and Cylinder axes run in opposite directions ( cases 3, 4 )
+		if ( ( ( uv > 0 ) && ( d + ( uvsign * ray->length ) < half_length * internal ) ) ||
+		     ( ( uv < 0 ) && ( d + ( uvsign * ray->length ) > half_length * internal ) ) )
+		{
+			return 0; // No intersection with caps or curved surface.
+		}
+
+		// Compute depth (distance from ray to cylinder)
+		contact->depth = ( ( -uvsign * d ) - ( internal * half_length ) );
+
+		// Compute contact point.
+		contact->pos[0] = ray->final_posr->pos[0] + ( contact->depth * ray->final_posr->R[0*4+2] );
+		contact->pos[1] = ray->final_posr->pos[1] + ( contact->depth * ray->final_posr->R[1*4+2] );
+		contact->pos[2] = ray->final_posr->pos[2] + ( contact->depth * ray->final_posr->R[2*4+2] );
+
+		// Compute reflected contact normal.
+		contact->normal[0] = uvsign * ( cyl->final_posr->R[0*4+2] );
+		contact->normal[1] = uvsign * ( cyl->final_posr->R[1*4+2] );
+		contact->normal[2] = uvsign * ( cyl->final_posr->R[2*4+2] );
+
+		// Contact!
+		return 1;
+	}
+
+
+
+	//
+	// Collision with Curved Edge ?
+	//
+
+	if ( k > 0 )
+	{
+		// Finish off quadratic formula to get intersection co-efficient
+		k = dSqrt( k );
+		A = dRecip( 2 * A );
+
+		// Compute distance along line to contact point.
+		dReal alpha = ( -B - k ) * A;
+		if ( alpha < 0 )
+		{
+			// Flip in the other direction.
+			alpha = ( -B + k ) * A;
+		}
+
+		// Intersection point is within ray length?
+		if ( alpha >= 0 && alpha <= ray->length )
+		{
+			// The ray intersects the infinite cylinder!
+
+			// Compute contact point.
+			contact->pos[0] = ray->final_posr->pos[0] + ( alpha * ray->final_posr->R[0*4+2] );
+			contact->pos[1] = ray->final_posr->pos[1] + ( alpha * ray->final_posr->R[1*4+2] );
+			contact->pos[2] = ray->final_posr->pos[2] + ( alpha * ray->final_posr->R[2*4+2] );
+
+			// q is the vector from the cylinder centre to the contact point.
+			q[0] = contact->pos[0] - cyl->final_posr->pos[0];
+			q[1] = contact->pos[1] - cyl->final_posr->pos[1];
+			q[2] = contact->pos[2] - cyl->final_posr->pos[2];
+
+			// Compute the distance along the cylinder axis of this contact point.
+			d = dDOT14( q, cyl->final_posr->R+2 );
+
+			// Check to see if the intersection point is between the flat end caps
+			if ( d >= -half_length && d <= +half_length )
+			{
+				// Flip the normal if the start point is inside the cylinder.
+				const dReal nsign = ( C < 0 ) ? REAL( -1.0 ) : REAL( 1.0 );
+
+				// Compute contact normal.
+				contact->normal[0] = nsign * (contact->pos[0] - (cyl->final_posr->pos[0] + d*cyl->final_posr->R[0*4+2]));
+				contact->normal[1] = nsign * (contact->pos[1] - (cyl->final_posr->pos[1] + d*cyl->final_posr->R[1*4+2]));
+				contact->normal[2] = nsign * (contact->pos[2] - (cyl->final_posr->pos[2] + d*cyl->final_posr->R[2*4+2]));
+				dNormalize3( contact->normal );
+
+				// Store depth.
+				contact->depth = alpha;
+
+				// Contact!
+				return 1;
+			}
+		}
+	}
+
+	// No contact with anything.
+	return 0;
+}
+

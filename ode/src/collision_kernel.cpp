@@ -179,6 +179,7 @@ static void initColliders()
   setCollider (dRayClass,dBoxClass,&dCollideRayBox);
   setCollider (dRayClass,dCapsuleClass,&dCollideRayCapsule);
   setCollider (dRayClass,dPlaneClass,&dCollideRayPlane);
+  setCollider (dRayClass,dCylinderClass,&dCollideRayCylinder);
 #ifdef dTRIMESH_ENABLED
   setCollider (dTriMeshClass,dSphereClass,&dCollideSTL);
   setCollider (dTriMeshClass,dBoxClass,&dCollideBTL);
