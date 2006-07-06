@@ -89,6 +89,10 @@ int dCollideRayConvex (dxGeom *o1, dxGeom *o2, int flags,
 		       dContactGeom *contact, int skip);
 //<-- Convex Collision
 
+// dHeightfield
+int dCollideHeightfield( dxGeom *o1, dxGeom *o2, 
+						 int flags, dContactGeom *contact, int skip );
+
 //****************************************************************************
 // the basic geometry objects
 

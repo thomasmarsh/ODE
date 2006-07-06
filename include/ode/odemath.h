@@ -45,6 +45,52 @@
 #define dVALIDMAT(m) (!(dIsNan(m[0]) | dIsNan(m[2]) | dIsNan(m[2]) | dIsNan(m[3]) | dIsNan(m[4]) | dIsNan(m[5]) | dIsNan(m[6]) | dIsNan(m[7]) | dIsNan(m[8]) | dIsNan(m[9]) | dIsNan(m[10]) | dIsNan(m[11])))
 
 
+
+
+
+/*
+ * General purpose vector operations with other vectors or constants.
+ */
+
+#define dOP(a,op,b,c) \
+    (a)[0] = ((b)[0]) op ((c)[0]); \
+    (a)[1] = ((b)[1]) op ((c)[1]); \
+    (a)[2] = ((b)[2]) op ((c)[2]);
+#define dOPC(a,op,b,c) \
+    (a)[0] = ((b)[0]) op (c); \
+    (a)[1] = ((b)[1]) op (c); \
+    (a)[2] = ((b)[2]) op (c);
+#define dOPE(a,op,b) \
+    (a)[0] op ((b)[0]); \
+    (a)[1] op ((b)[1]); \
+    (a)[2] op ((b)[2]);
+#define dOPEC(a,op,c) \
+    (a)[0] op (c); \
+    (a)[1] op (c); \
+    (a)[2] op (c);
+
+
+/*
+ * Length, and squared length helpers. dLENGTH returns the length of a dVector3.
+ * dLENGTHSQUARED return the squared length of a dVector3.
+ */
+
+#define dLENGTHSQUARED(a) (((a)[0])*((a)[0]) + ((a)[1])*((a)[1]) + ((a)[2])*((a)[2]))
+
+#ifdef __cplusplus
+
+PURE_INLINE dReal dLENGTH (const dReal *a) { return dSqrt(dLENGTHSQUARED(a)); }
+
+#else
+
+#define dLENGTH(a) ( dSqrt( ((a)[0])*((a)[0]) + ((a)[1])*((a)[1]) + ((a)[2])*((a)[2]) ) )
+
+#endif /* __cplusplus */
+
+
+
+
+
 /*
  * 3-way dot product. dDOTpq means that elements of `a' and `b' are spaced
  * p and q indexes apart respectively. dDOT() means dDOT11.

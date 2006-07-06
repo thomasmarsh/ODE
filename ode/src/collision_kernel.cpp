@@ -200,6 +200,13 @@ static void initColliders()
   setCollider (dRayClass,dConvexClass,&dCollideRayConvex);
 //<-- Convex Collision
 
+//--> dHeightfield Collision
+  setCollider (dHeightfieldClass,dRayClass,&dCollideHeightfield);
+  setCollider (dHeightfieldClass,dSphereClass,&dCollideHeightfield);
+  setCollider (dHeightfieldClass,dBoxClass,&dCollideHeightfield);
+  setCollider (dHeightfieldClass,dCapsuleClass,&dCollideHeightfield);
+//<-- dHeightfield Collision
+
   setAllColliders (dGeomTransformClass,&dCollideTransform);
 }
 
