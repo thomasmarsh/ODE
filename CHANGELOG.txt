@@ -9,6 +9,11 @@ the rules for this file:
 
 ------------------------------------------------------------------------------
 
+07/06/06 david
+
+	* Added heightfield primitive collision code. Simple test available in
+	  ode/test/test_heightfield
+
 04/03/06 rodrigo
 
 	* Added Convex primitive collision code,

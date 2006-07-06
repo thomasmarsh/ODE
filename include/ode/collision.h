@@ -664,6 +664,7 @@ enum {
   dConvexClass,
   dGeomTransformClass,
   dTriMeshClass,
+  dHeightfieldClass,
 
   dFirstSpaceClass,
   dSimpleSpaceClass = dFirstSpaceClass,
@@ -748,6 +749,60 @@ ODE_API void dGeomTransformSetCleanup (dGeomID g, int mode);
 ODE_API int dGeomTransformGetCleanup (dGeomID g);
 ODE_API void dGeomTransformSetInfo (dGeomID g, int mode);
 ODE_API int dGeomTransformGetInfo (dGeomID g);
+
+
+/* ************************************************************************ */
+/* heightfield functions */
+
+
+// Callback prototype
+typedef dReal dHeightfieldGetHeight( void* pUserData, int x, int z );
+
+// Data storage for triangle meshes.
+struct dxHeightfieldData;
+typedef struct dxHeightfieldData* dHeightfieldDataID;
+
+ODE_API dGeomID dCreateHeightfield( dSpaceID space,
+				dHeightfieldDataID Data, int bPlaceable );
+
+ODE_API dHeightfieldDataID dGeomHeightfieldDataCreate();
+
+ODE_API void dGeomHeightfieldDataBuildCallback( dHeightfieldDataID d,
+				void *pUserData, dHeightfieldGetHeight *Callback,
+				int nWidthSamples, int nDepthSamples, dReal vWidth, dReal vDepth,
+				dReal vScale, dReal vOffset,
+				int nWrapMode, dReal vThickness );
+
+ODE_API void dGeomHeightfieldDataBuildByte( dHeightfieldDataID d,
+				unsigned char *pHeightData, int bCopyHeightData,
+				int nWidthSamples, int nDepthSamples, dReal vWidth, dReal vDepth,
+				dReal vScale, dReal vOffset,
+				int nWrapMode, dReal vThickness );
+
+ODE_API void dGeomHeightfieldDataBuildShort( dHeightfieldDataID d,
+				unsigned char *pHeightData, int bCopyHeightData,
+				int nWidthSamples, int nDepthSamples, dReal vWidth, dReal vDepth,
+				dReal vScale, dReal vOffset,
+				int nWrapMode, dReal vThickness );
+
+ODE_API void dGeomHeightfieldDataBuildFloat( dHeightfieldDataID d,
+				dReal *pHeightData, int bCopyHeightData,
+				int nWidthSamples, int nDepthSamples, dReal vWidth, dReal vDepth,
+				dReal vScale, dReal vOffset,
+				int nWrapMode, dReal vThickness );
+
+ODE_API void dGeomHeightfieldDataSetBounds( dHeightfieldDataID d,
+				dReal vMinHeight, dReal vMaxHeight );
+
+ODE_API void dGeomHeightfieldDataDestroy( dHeightfieldDataID d );
+
+ODE_API void dGeomHeightfieldSetHeightfieldData( dGeomID g, dHeightfieldDataID Data );
+
+ODE_API dHeightfieldDataID dGeomHeightfieldGetHeightfieldData( dGeomID g );
+
+ODE_API dReal dGeomHeightfieldPointDepth( dGeomID g, dReal x, dReal y, dReal z );
+
+
 
 /* ************************************************************************ */
 /* utility functions */
