@@ -167,7 +167,7 @@ void dGeomSetConvex (dGeomID g,dReal *_planes,unsigned int _planecount,
 bool IntersectSegmentPlane(dVector3 a, 
 			   dVector3 b, 
 			   dVector4 p, 
-			   float &t, 
+			   dReal &t, 
 			   dVector3 q)
 {
   // Compute the t value for the directed line ab intersecting the plane
@@ -203,17 +203,17 @@ inline bool ClosestPointInRay(const dVector3 Origin1,
 			      const dVector3 Direction1,
 			      const dVector3 Origin2,
 			      const dVector3 Direction2,
-			      float& t)
+			      dReal& t)
 {
   dVector3 w = {Origin1[0]-Origin2[0],
 		Origin1[1]-Origin2[1],
 		Origin1[2]-Origin2[2]};
-  float a = dDOT(Direction1 , Direction1);
-  float b = dDOT(Direction1 , Direction2);
-  float c = dDOT(Direction2 , Direction2);
-  float d = dDOT(Direction1 , w);
-  float e = dDOT(Direction2 , w);
-  float denominator = (a*c)-(b*b);
+  dReal a = dDOT(Direction1 , Direction1);
+  dReal b = dDOT(Direction1 , Direction2);
+  dReal c = dDOT(Direction2 , Direction2);
+  dReal d = dDOT(Direction1 , w);
+  dReal e = dDOT(Direction2 , w);
+  dReal denominator = (a*c)-(b*b);
   if(denominator==0.0f)
     {
       return false;
@@ -237,7 +237,7 @@ inline bool IntersectPlanes(const dVector4 p1, const dVector4 p2, dVector3 p, dV
   
   // If d is (near) zero, the planes are parallel (and separated)
   // or coincident, so they're not considered intersecting
-  float denom = dDOT(d, d);
+  dReal denom = dDOT(d, d);
   if (denom < dEpsilon) return false;
 
   dVector3 n;
