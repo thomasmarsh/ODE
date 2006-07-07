@@ -117,11 +117,15 @@ static int write_world = 0;
 
 
 
-#define HFIELD_WSTEP			32
-#define HFIELD_DSTEP			32
+#define HFIELD_WSTEP			8
+#define HFIELD_DSTEP			8
 
-#define HFIELD_WIDTH			REAL( 16.0 )
-#define HFIELD_DEPTH			REAL( 16.0 )
+#define HFIELD_WIDTH			REAL( 4.0 )
+#define HFIELD_DEPTH			REAL( 4.0 )
+
+#define HFIELD_WSAMP			( HFIELD_WIDTH / HFIELD_WSTEP )
+#define HFIELD_DSAMP			( HFIELD_DEPTH / HFIELD_DSTEP )			
+
 
 dReal heightfield_callback( void* pUserData, int x, int z )
 {
@@ -129,7 +133,7 @@ dReal heightfield_callback( void* pUserData, int x, int z )
 	dReal fz = ( ((dReal)z) - HFIELD_DSTEP/2 ) / (dReal)HFIELD_DSTEP;
 
 	// Create an interesting 'bowl' shape
-	dReal h = ( REAL( 64.0 ) * ( fx*fx + fz*fz ) );
+	dReal h = ( REAL( 4.0 ) * ( fx*fx + fz*fz ) );
 
 	return h;
 }
@@ -239,9 +243,9 @@ static void command (int cmd)
     dMatrix3 R;
     if (random_pos) {
       dBodySetPosition (obj[i].body, 
-		  (dRandReal()*HFIELD_WIDTH*0.125), 
-		  (dRandReal()*HFIELD_DEPTH*0.125), 
-		  dRandReal() + 4 );
+		  (dRandReal()-0.5)*HFIELD_WIDTH*0.75, 
+		  (dRandReal()-0.5)*HFIELD_DEPTH*0.75, 
+		  dRandReal() + 2 );
       dRFromAxisAndAngle (R,dRandReal()*2.0-1.0,dRandReal()*2.0-1.0,
 			  dRandReal()*2.0-1.0,dRandReal()*10.0-5.0);
     }
@@ -447,6 +451,43 @@ void drawGeom (dGeomID g, const dReal *pos, const dReal *R, int show_aabb)
 }
 
 
+// Heightfield Data structure
+struct dxHeightfieldData
+{
+	dReal m_vWidth;            // world space heightfield dimension on X axis
+	dReal m_vDepth;            // world space heightfield dimension on Z axis
+	dReal m_vMinHeight;        // min sample height value (scaled and offset)
+	dReal m_vMaxHeight;        // max sample height value (scaled and offset)
+	dReal m_vSampleWidth;      // sample spacing on X axis (== m_vWidth / m_nWidthSamples)
+	dReal m_vSampleDepth;      // sample spacing on Z axis (== m_vDepth / m_nDepthSamples)
+	dReal m_vThickness;        // surface thickness (currently only added to bottom AABB)
+	dReal m_vScale;            // sample value multiplier
+	dReal m_vOffset;           // vertical sample offset
+	int	m_nWidthSamples;       // number of samples on X axis
+	int	m_nDepthSamples;       // number of samples on Z axis
+	int m_bCopyHeightData;     // copy sample data flag
+	int	m_nWrapMode;           // heightfield wrapping mode (0=finite, 1=infinite)
+	int m_nGetHeightMode;      // getheight mode (0=callback, 1=byte, 2=short, 3=float)
+	void *m_pHeightData;       // sample data array
+	void *m_pUserData;         // callback user data
+
+	dHeightfieldGetHeight* m_pGetHeightCallback;
+
+	dxHeightfieldData();
+	~dxHeightfieldData();
+
+	void SetData( int nWidthSamples, int nDepthSamples,
+				  dReal vWidth, dReal vDepth,
+				  dReal vScale, dReal vOffset,
+				  int bFinite, dReal vThickness );
+
+	void ComputeHeightBounds();
+
+	bool IsOnHeightfield(int nx, int nz, int w, dReal *pos);
+	dReal GetHeight(int x, int z);
+	dReal GetHeight(dReal x, dReal z);
+};
+
 // simulation loop
 
 static void simLoop (int pause)
@@ -467,6 +508,49 @@ static void simLoop (int pause)
   
   // remove all contact joints
   dJointGroupEmpty (contactgroup);
+
+
+	//
+	// Draw Heightfield (slow and crappy)
+	//
+
+	{
+		dsSetColorAlpha (0.5,1,0.5,0.5);
+		dsSetTexture( DS_WOOD );
+
+		for ( int i = 0; i < HFIELD_WSTEP - 1; ++i )
+		for ( int j = 0; j < HFIELD_DSTEP - 1; ++j )
+		{
+			dVector3 a, b, c, d;
+
+			a[ 0 ] = ( i ) * HFIELD_WSAMP;
+			a[ 1 ] = heightfield_callback( NULL, i, j );
+			a[ 2 ] = ( j ) * HFIELD_DSAMP;
+
+			b[ 0 ] = ( i + 1 ) * HFIELD_WSAMP;
+			b[ 1 ] = heightfield_callback( NULL, i + 1, j );
+			b[ 2 ] = ( j ) * HFIELD_DSAMP;
+
+			c[ 0 ] = ( i ) * HFIELD_WSAMP;
+			c[ 1 ] = heightfield_callback( NULL, i, j + 1 );
+			c[ 2 ] = ( j + 1 ) * HFIELD_DSAMP;
+			
+			d[ 0 ] = ( i + 1 ) * HFIELD_WSAMP;
+			d[ 1 ] = heightfield_callback( NULL, i + 1, j + 1 );
+			d[ 2 ] = ( j + 1 ) * HFIELD_DSAMP;
+
+			dsDrawTriangle( dGeomGetPosition( gheight ), 
+							dGeomGetRotation( gheight ),
+							a, c, b, 1 );
+			dsDrawTriangle( dGeomGetPosition( gheight ), 
+							dGeomGetRotation( gheight ),
+							b, c, d, 1 );
+		}
+	}
+
+
+
+
 
   dsSetColor (1,1,0);
   dsSetTexture (DS_WOOD);
@@ -528,7 +612,8 @@ int main (int argc, char **argv)
 	dWorldSetContactSurfaceLayer (world,0.001);
 	memset (obj,0,sizeof(obj));
 
-
+	// base plane to catch overspill
+	dCreatePlane( space, 0, 0, 1, 0 );
 
 
 	// our heightfield floor
@@ -543,7 +628,6 @@ int main (int argc, char **argv)
 	// Give some very bounds which, while conservative,
 	// makes AABB computation more accurate than +/-INF.
 	dGeomHeightfieldDataSetBounds( heightid, REAL( -100.0 ), REAL( 100.0 ) );
-
 
 	gheight = dCreateHeightfield( space, heightid, 1 );
 
