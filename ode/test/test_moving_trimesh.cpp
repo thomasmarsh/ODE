@@ -52,6 +52,10 @@
 struct MyObject {
   dBodyID body;			// the body
   dGeomID geom[GPB];		// geometries representing this body
+
+  // Trimesh only - double buffered matrices for 'last transform' setup
+  dReal matrix_dblbuff[ 16 * 2 ];
+  int last_matrix_index;
 };
 
 static int num=0;		// number of objects in simulation
@@ -1483,7 +1487,7 @@ static void start()
   printf ("To drop another object, press:\n");
   printf ("   b for box.\n");
   printf ("   s for sphere.\n");
-  printf ("   c for cylinder.\n");
+  printf ("   c for capsule.\n");
   printf ("   x for a composite object.\n");
   printf ("   m for a trimesh (EXPERIMENTAL).\n");
   printf ("To select an object, press space.\n");
@@ -1821,14 +1825,24 @@ static void simLoop (int pause)
 
           // tell the tri-tri collider the current transform of the trimesh --
           // this is fairly important for good results.
-          /*
-            // NOT IMPLEMENTED YET
-          dTriMeshDataID TriMeshData = geomGetData(obj[i].geom[j]);
-          const double *DoubleArrayPtr =  Bodies[BodyIndex].TransformationMatrix->GetArray();
-          dGeomTriMeshDataSet( TriMeshData,
-                               TRIMESH_LAST_TRANSFORMATION,
-                               (void *) DoubleArrayPtr );
-          */
+          
+		  // Fill in the (4x4) matrix.
+		  dReal* p_matrix = obj[i].matrix_dblbuff + ( obj[i].last_matrix_index * 16 );
+
+		  p_matrix[ 0 ] = Rot[ 0 ];	p_matrix[ 1 ] = Rot[ 1 ];	p_matrix[ 2 ] = Rot[ 2 ];	p_matrix[ 3 ] = 0;
+		  p_matrix[ 4 ] = Rot[ 4 ];	p_matrix[ 5 ] = Rot[ 5 ];	p_matrix[ 6 ] = Rot[ 6 ];	p_matrix[ 7 ] = 0;
+		  p_matrix[ 8 ] = Rot[ 8 ];	p_matrix[ 9 ] = Rot[ 9 ];	p_matrix[10 ] = Rot[10 ];	p_matrix[11 ] = 0;
+		  p_matrix[12 ] = Pos[ 0 ];	p_matrix[13 ] = Pos[ 1 ];	p_matrix[14 ] = Pos[ 2 ];	p_matrix[15 ] = 1;
+
+		  // Flip to other matrix.
+		  obj[i].last_matrix_index = !obj[i].last_matrix_index;
+          
+          dTriMeshDataID TriMeshData = dGeomTriMeshGetTriMeshDataID( obj[i].geom[j] );
+          
+		  // Apply the 'other' matrix which is the oldest.
+		  dGeomTriMeshDataSet( TriMeshData, TRIMESH_LAST_TRANSFORMATION,
+				(void *)( obj[i].matrix_dblbuff + ( obj[i].last_matrix_index * 16 ) ) );
+
 
         } else {
           drawGeom (obj[i].geom[j],0,0,show_aabb);
