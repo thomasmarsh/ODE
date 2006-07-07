@@ -186,6 +186,7 @@ static void initColliders()
   setCollider (dTriMeshClass,dRayClass,&dCollideRTL);
   setCollider (dTriMeshClass,dTriMeshClass,&dCollideTTL);
   setCollider (dTriMeshClass,dCapsuleClass,&dCollideCCTL);
+  setCollider (dTriMeshClass,dPlaneClass,&dCollideTrimeshPlane);
   setCollider (dCylinderClass,dTriMeshClass,&dCollideCylinderTrimesh);
 #endif
   setCollider (dCylinderClass,dBoxClass,&dCollideCylinderBox);
