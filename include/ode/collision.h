@@ -755,52 +755,309 @@ ODE_API int dGeomTransformGetInfo (dGeomID g);
 /* heightfield functions */
 
 
-// Callback prototype
-typedef dReal dHeightfieldGetHeight( void* pUserData, int x, int z );
-
-// Data storage for triangle meshes.
+// Data storage for heightfield data.
 struct dxHeightfieldData;
 typedef struct dxHeightfieldData* dHeightfieldDataID;
 
-ODE_API dGeomID dCreateHeightfield( dSpaceID space,
-				dHeightfieldDataID Data, int bPlaceable );
 
+/**
+ * @brief Callback prototype
+ *
+ * Used by the callback heightfield data type to sample a height for a
+ * given cell position.
+ *
+ * @param p_user_data User data specified when creating the dHeightfieldDataID
+ * @param x The index of a sample in the local x axis. It is a value
+ * in the range zero to ( nWidthSamples - 1 ).
+ * @param x The index of a sample in the local z axis. It is a value
+ * in the range zero to ( nDepthSamples - 1 ).
+ *
+ * @return The sample height which is then scaled and offset using the
+ * values specified when the heightfield data was created.
+ *
+ * @ingroup collide
+ */
+typedef dReal dHeightfieldGetHeight( void* p_user_data, int x, int z );
+
+
+
+/**
+ * @brief Creates a heightfield geom.
+ *
+ * Uses the information in the given dHeightfieldDataID to construct
+ * a geom representing a heightfield in a collision space.
+ *
+ * @param space The space to add the geom to.
+ * @param data The dHeightfieldDataID created by dGeomHeightfieldDataCreate and
+ * setup by dGeomHeightfieldDataBuildCallback, dGeomHeightfieldDataBuildByte,
+ * dGeomHeightfieldDataBuildShort or dGeomHeightfieldDataBuildFloat.
+ * @param bPlaceable If non-zero this geom can be transformed in the world using the
+ * usual functions such as dGeomSetPosition and dGeomSetRotation. If the geom is
+ * not set as placeable, then it uses a fixed orientation where the global y axis
+ * represents the dynamic 'height' of the heightfield.
+ *
+ * @return A geom id to reference this geom in other calls.
+ *
+ * @ingroup collide
+ */
+ODE_API dGeomID dCreateHeightfield( dSpaceID space,
+					dHeightfieldDataID data, int bPlaceable );
+
+
+/**
+ * @brief Creates a new empty dHeightfieldDataID.
+ *
+ * Allocates a new dHeightfieldDataID and returns it. You must call 
+ * dGeomHeightfieldDataDestroy to destroy it after the geom has been removed.
+ * The dHeightfieldDataID value is used when specifying a data format type.
+ *
+ * @return A dHeightfieldDataID for use with dGeomHeightfieldDataBuildCallback,
+ * dGeomHeightfieldDataBuildByte, dGeomHeightfieldDataBuildShort or 
+ * dGeomHeightfieldDataBuildFloat.
+ * @ingroup collide
+ */
 ODE_API dHeightfieldDataID dGeomHeightfieldDataCreate();
 
-ODE_API void dGeomHeightfieldDataBuildCallback( dHeightfieldDataID d,
-				void *pUserData, dHeightfieldGetHeight *Callback,
-				int nWidthSamples, int nDepthSamples, dReal vWidth, dReal vDepth,
-				dReal vScale, dReal vOffset,
-				int nWrapMode, dReal vThickness );
 
-ODE_API void dGeomHeightfieldDataBuildByte( dHeightfieldDataID d,
-				unsigned char *pHeightData, int bCopyHeightData,
-				int nWidthSamples, int nDepthSamples, dReal vWidth, dReal vDepth,
-				dReal vScale, dReal vOffset,
-				int nWrapMode, dReal vThickness );
-
-ODE_API void dGeomHeightfieldDataBuildShort( dHeightfieldDataID d,
-				unsigned char *pHeightData, int bCopyHeightData,
-				int nWidthSamples, int nDepthSamples, dReal vWidth, dReal vDepth,
-				dReal vScale, dReal vOffset,
-				int nWrapMode, dReal vThickness );
-
-ODE_API void dGeomHeightfieldDataBuildFloat( dHeightfieldDataID d,
-				dReal *pHeightData, int bCopyHeightData,
-				int nWidthSamples, int nDepthSamples, dReal vWidth, dReal vDepth,
-				dReal vScale, dReal vOffset,
-				int nWrapMode, dReal vThickness );
-
-ODE_API void dGeomHeightfieldDataSetBounds( dHeightfieldDataID d,
-				dReal vMinHeight, dReal vMaxHeight );
-
+/**
+ * @brief Destroys a dHeightfieldDataID.
+ *
+ * Deallocates a given dHeightfieldDataID and all managed resources.
+ *
+ * @param d A dHeightfieldDataID created by dGeomHeightfieldDataCreate
+ * @ingroup collide
+ */
 ODE_API void dGeomHeightfieldDataDestroy( dHeightfieldDataID d );
 
-ODE_API void dGeomHeightfieldSetHeightfieldData( dGeomID g, dHeightfieldDataID Data );
 
+
+/**
+ * @brief Configures a dHeightfieldDataID to use a callback to 
+ * retrieve height data.
+ *
+ * Before a dHeightfieldDataID can be used by a geom it must be 
+ * configured to specify the format of the height data.
+ * This call specifies that the heightfield data is computed by
+ * the user and it should use the given callback when determining
+ * the height of a given element of it's shape.
+ *
+ * @param d A new dHeightfieldDataID created by dGeomHeightfieldDataCreate
+ * 
+ * @param width Specifies the total 'width' of the heightfield along
+ * the geom's local x axis.
+ * @param depth Specifies the total 'depth' of the heightfield along
+ * the geom's local z axis.
+ * @param widthSamples Specifies the number of equal sized subdivisions
+ * to make along the width of the heightfield. Each grid sample has a 
+ * corresponding height value in the data which forms the overall shape.
+ * @param depthSamples Specifies the number of equal sized subdivisions
+ * to make along the depth of the heightfield.
+ *
+ * @param scale A uniform scale applied to all raw height data.
+ * @param offset An offset applied to the scaled height data.
+ *
+ * @param thickness A value subtracted from the lowest height
+ * value which in effect adds an additional cuboid to the base of the
+ * heightfield. This is used to prevent geoms from looping under the 
+ * desired terrain and not registering as a collision. Note that the
+ * thickness is not affected by the scale or offset parameters.
+ *
+ * @param bWrap If non-zero the heightfield will infinitely tile in both
+ * directions along the local x and z axes. If zero the heightfield is
+ * bounded from zero to width in the local x axis, and zero to depth in
+ * the local z axis.
+ *
+ * @ingroup collide
+ */
+ODE_API void dGeomHeightfieldDataBuildCallback( dHeightfieldDataID d,
+				void* pUserData, dHeightfieldGetHeight* pCallback,
+				dReal width, dReal depth, int widthSamples, int depthSamples,
+				dReal scale, dReal offset, dReal thickness, int bWrap );
+
+/**
+ * @brief Configures a dHeightfieldDataID to use height data in byte format.
+ *
+ * Before a dHeightfieldDataID can be used by a geom it must be 
+ * configured to specify the format of the height data.
+ * This call specifies that the heightfield data is stored as a rectangular
+ * array of bytes (8 bit unsigned) representing the height at each sample point.
+ *
+ * @param d A new dHeightfieldDataID created by dGeomHeightfieldDataCreate
+ * 
+ * @param pHeightData A pointer to the height data.
+ * @param bCopyHeightData When non-zero the height data is copied to an
+ * internal store. When zero the height data is accessed by reference and
+ * so must persist throughout the lifetime of the heightfield.
+ *
+ * @param width Specifies the total 'width' of the heightfield along
+ * the geom's local x axis.
+ * @param depth Specifies the total 'depth' of the heightfield along
+ * the geom's local z axis.
+ * @param widthSamples Specifies the number of equal sized subdivisions
+ * to make along the width of the heightfield. Each grid sample has a 
+ * corresponding height value in the data which forms the overall shape.
+ * @param depthSamples Specifies the number of equal sized subdivisions
+ * to make along the depth of the heightfield.
+ *
+ * @param scale A uniform scale applied to all raw height data.
+ * @param offset An offset applied to the scaled height data.
+ *
+ * @param thickness A value subtracted from the lowest height
+ * value which in effect adds an additional cuboid to the base of the
+ * heightfield. This is used to prevent geoms from looping under the 
+ * desired terrain and not registering as a collision. Note that the
+ * thickness is not affected by the scale or offset parameters.
+ *
+ * @param bWrap If non-zero the heightfield will infinitely tile in both
+ * directions along the local x and z axes. If zero the heightfield is
+ * bounded from zero to width in the local x axis, and zero to depth in
+ * the local z axis.
+ *
+ * @ingroup collide
+ */
+ODE_API void dGeomHeightfieldDataBuildByte( dHeightfieldDataID d,
+				unsigned char* pHeightData, int bCopyHeightData,
+				dReal width, dReal depth, int widthSamples, int depthSamples,
+				dReal scale, dReal offset, dReal thickness,	int bWrap );
+
+/**
+ * @brief Configures a dHeightfieldDataID to use height data in short format.
+ *
+ * Before a dHeightfieldDataID can be used by a geom it must be 
+ * configured to specify the format of the height data.
+ * This call specifies that the heightfield data is stored as a rectangular
+ * array of shorts (16 bit signed) representing the height at each sample point.
+ *
+ * @param d A new dHeightfieldDataID created by dGeomHeightfieldDataCreate
+ * 
+ * @param pHeightData A pointer to the height data.
+ * @param bCopyHeightData When non-zero the height data is copied to an
+ * internal store. When zero the height data is accessed by reference and
+ * so must persist throughout the lifetime of the heightfield.
+ *
+ * @param width Specifies the total 'width' of the heightfield along
+ * the geom's local x axis.
+ * @param depth Specifies the total 'depth' of the heightfield along
+ * the geom's local z axis.
+ * @param widthSamples Specifies the number of equal sized subdivisions
+ * to make along the width of the heightfield. Each grid sample has a 
+ * corresponding height value in the data which forms the overall shape.
+ * @param depthSamples Specifies the number of equal sized subdivisions
+ * to make along the depth of the heightfield.
+ *
+ * @param scale A uniform scale applied to all raw height data.
+ * @param offset An offset applied to the scaled height data.
+ *
+ * @param thickness A value subtracted from the lowest height
+ * value which in effect adds an additional cuboid to the base of the
+ * heightfield. This is used to prevent geoms from looping under the 
+ * desired terrain and not registering as a collision. Note that the
+ * thickness is not affected by the scale or offset parameters.
+ *
+ * @param bWrap If non-zero the heightfield will infinitely tile in both
+ * directions along the local x and z axes. If zero the heightfield is
+ * bounded from zero to width in the local x axis, and zero to depth in
+ * the local z axis.
+ *
+ * @ingroup collide
+ */
+ODE_API void dGeomHeightfieldDataBuildShort( dHeightfieldDataID d,
+				short* pHeightData, int bCopyHeightData,
+				dReal width, dReal depth, int widthSamples, int depthSamples,
+				dReal scale, dReal offset, dReal thickness, int bWrap );
+
+/**
+ * @brief Configures a dHeightfieldDataID to use height data in floating point format.
+ *
+ * Before a dHeightfieldDataID can be used by a geom it must be 
+ * configured to specify the format of the height data.
+ * This call specifies that the heightfield data is stored as a rectangular
+ * array of 'dReal's (either single or double precision float) representing 
+ * the height at each sample point.
+ *
+ * @param d A new dHeightfieldDataID created by dGeomHeightfieldDataCreate
+ * 
+ * @param pHeightData A pointer to the height data.
+ * @param bCopyHeightData When non-zero the height data is copied to an
+ * internal store. When zero the height data is accessed by reference and
+ * so must persist throughout the lifetime of the heightfield.
+ *
+ * @param width Specifies the total 'width' of the heightfield along
+ * the geom's local x axis.
+ * @param depth Specifies the total 'depth' of the heightfield along
+ * the geom's local z axis.
+ * @param widthSamples Specifies the number of equal sized subdivisions
+ * to make along the width of the heightfield. Each grid sample has a 
+ * corresponding height value in the data which forms the overall shape.
+ * @param depthSamples Specifies the number of equal sized subdivisions
+ * to make along the depth of the heightfield.
+ *
+ * @param scale A uniform scale applied to all raw height data.
+ * @param offset An offset applied to the scaled height data.
+ *
+ * @param thickness A value subtracted from the lowest height
+ * value which in effect adds an additional cuboid to the base of the
+ * heightfield. This is used to prevent geoms from looping under the 
+ * desired terrain and not registering as a collision. Note that the
+ * thickness is not affected by the scale or offset parameters.
+ *
+ * @param bWrap If non-zero the heightfield will infinitely tile in both
+ * directions along the local x and z axes. If zero the heightfield is
+ * bounded from zero to width in the local x axis, and zero to depth in
+ * the local z axis.
+ *
+ * @ingroup collide
+ */
+ODE_API void dGeomHeightfieldDataBuildFloat( dHeightfieldDataID d,
+				dReal* pHeightData, int bCopyHeightData,
+				dReal width, dReal depth, int widthSamples, int depthSamples,
+				dReal scale, dReal offset, dReal thickness, int bWrap );
+
+
+/**
+ * @brief Manually set the minimum and maximum height bounds.
+ *
+ * This call allows you to set explicit min / max values after initial
+ * creation typically for callback heightfields which default to +/- infinity,
+ * or those whose data has changed. This must be set prior to binding with a
+ * geom, as the the AABB is not recomputed after it's first generation.
+ *
+ * @remarks The minimum and maximum values are used to compute the AABB
+ * for the heightfield which is used for early rejection of collisions.
+ * A close fit will yield a more efficient collision check.
+ *
+ * @param d A dHeightfieldDataID created by dGeomHeightfieldDataCreate
+ * @param min_height The new minimum height value. Scale, offset and thickness is then applied.
+ * @param max_height The new maximum height value. Scale and offset is then applied.
+ * @ingroup collide
+ */
+ODE_API void dGeomHeightfieldDataSetBounds( dHeightfieldDataID d,
+				dReal minHeight, dReal maxHeight );
+
+
+/**
+ * @brief Assigns a dHeightfieldDataID to a heightfield geom.
+ *
+ * Associates the given dHeightfieldDataID with a heightfield geom.
+ * This is done without affecting the GEOM_PLACEABLE flag.
+ *
+ * @param g A geom created by dCreateHeightfield
+ * @param d A dHeightfieldDataID created by dGeomHeightfieldDataCreate
+ * @ingroup collide
+ */
+ODE_API void dGeomHeightfieldSetHeightfieldData( dGeomID g, dHeightfieldDataID d );
+
+
+/**
+ * @brief Gets the dHeightfieldDataID bound to a heightfield geom.
+ *
+ * Returns the dHeightfieldDataID associated with a heightfield geom.
+ *
+ * @param g A geom created by dCreateHeightfield
+ * @return The dHeightfieldDataID which may be NULL if none was assigned.
+ * @ingroup collide
+ */
 ODE_API dHeightfieldDataID dGeomHeightfieldGetHeightfieldData( dGeomID g );
-
-ODE_API dReal dGeomHeightfieldPointDepth( dGeomID g, dReal x, dReal y, dReal z );
 
 
 
