@@ -14,6 +14,10 @@
 #include "collision_util.h"
 #include "heightfield.h"
 
+#ifdef dTRIMESH_ENABLED
+#include "collision_trimesh_internal.h"
+#endif // dTRIMESH_ENABLED
+
 #define CONTACT(p,skip) ((dContactGeom*) (((char*)p) + (skip)))
 #define MAXCONTACT 10
 #define TERRAINTOL 0.0f
@@ -554,7 +558,6 @@ dReal dGeomHeightfieldPointDepth( dGeomID g, dReal x, dReal y, dReal z )
 typedef dReal dGetDepthFn( dGeomID g, dReal x, dReal y, dReal z );
 
 #define RECOMPUTE_RAYNORMAL
-//#define DO_RAYDEPTH
 
 #define DMESS(A)	\
 			dMessage(0,"Contact Plane (%d %d %d) %.5e %.5e (%.5e %.5e %.5e)(%.5e %.5e %.5e)).",	\
@@ -618,21 +621,16 @@ int dxHeightfield::dCollideHeightfieldUnit( int x, int z, dxGeom* o2, int numMax
 		CollideNPlane	= dCollideCapsulePlane;
 		GetDepth		= dGeomCapsulePointDepth;
 		break;
-/*	case dCylinderClass:
+	case dCylinderClass:
 		CollideRayN		= dCollideRayCylinder;
 		CollideNPlane	= dCollideCylinderPlane;
-		GetDepth		= dGeomCylinderPointDepth;
-		break;*/
-/*	case dConvexClass:
+		GetDepth		= NULL;// TODO: dGeomCylinderPointDepth;
+		break;
+	case dConvexClass:
 		CollideRayN		= dCollideRayConvex;
 		CollideNPlane	= dCollideConvexPlane;
-		GetDepth		= dGeomConvexPointDepth;
-		break;*/
-/*	case dConeClass:
-		CollideRayN		= dCollideRayCone;
-		CollideNPlane	= dCollideConePlane;
-		GetDepth		= dGeomConePointDepth;
-		break;*/
+		GetDepth		= NULL;// TODO: dGeomConvexPointDepth;
+		break;
 
 	default:
 		dIASSERT(0);
@@ -755,34 +753,37 @@ int dxHeightfield::dCollideHeightfieldUnit( int x, int z, dxGeom* o2, int numMax
 #endif // RECOMPUTE_RAYNORMAL
 
 
-#ifdef DO_RAYDEPTH
 
-				dxRay rayV(0,1000.f);
-				dGeomRaySet( &rayV, pContact->pos[0],
-									pContact->pos[1],
-									pContact->pos[2],
-									-pContact->normal[0],
-									-pContact->normal[1],
-									-pContact->normal[2] );
+				//
+				// Find Contact Penetration Depth
+				//
 
-				dContactGeom ContactV;
-				if ( CollideRayN( &rayV, o2, flags, &ContactV, sizeof(dContactGeom) ) )
+				if ( GetDepth )
 				{
-					pContact->depth = ContactV.depth;
+					pContact->depth = GetDepth( o2, 
+						pContact->pos[0], pContact->pos[1], pContact->pos[2] );
+
 					numContacts++;
 				}
+				else
+				{
+					// We don't have a GetDepth function, so do a ray cast instead.
+					// NOTE: This isn't ideal, and a GetDepth function should be 
+					// written for all geom classes.
+					dxRay rayV( 0, 1000.f );
+					dGeomRaySet( &rayV, pContact->pos[0], pContact->pos[1], pContact->pos[2],
+										-pContact->normal[0], -pContact->normal[1], -pContact->normal[2] );
 
-#else // DO_RAYDEPTH
+					dContactGeom ContactV;
+					if ( CollideRayN( &rayV, o2, flags, &ContactV, sizeof( dContactGeom ) ) )
+					{
+						pContact->depth = ContactV.depth;
+						numContacts++;
+					}
+				}
 
-				pContact->depth = GetDepth( o2, pContact->pos[0],
-												pContact->pos[1],
-												pContact->pos[2] );
-				
-				numContacts++;
-
-#endif // DO_RAYDEPTH
-
-				if (numContacts == numMaxContacts)	return numContacts;
+				if (numContacts == numMaxContacts)
+					return numContacts;
 
 			}
 		}
