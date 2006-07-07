@@ -88,7 +88,9 @@ libode_a_SOURCES = 	objects.h \
 			util.cpp \
 			memory.cpp \
 			util.h \
-			misc.cpp
+			misc.cpp \
+			heightfield.cpp \
+			heightfield.h
 
 if OPCODE
 noinst_LIBRARIES+= libOPCODE.a

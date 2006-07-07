@@ -452,6 +452,7 @@ void drawGeom (dGeomID g, const dReal *pos, const dReal *R, int show_aabb)
 static void simLoop (int pause)
 {
   dsSetColor (0,0,2);
+  int i,j;
   dSpaceCollide (space,0,&nearCallback);
   if (!pause) dWorldQuickStep (world,0.02);
 
@@ -469,8 +470,8 @@ static void simLoop (int pause)
 
   dsSetColor (1,1,0);
   dsSetTexture (DS_WOOD);
-  for (int i=0; i<num; i++) {
-    for (int j=0; j < GPB; j++) {
+  for (i=0; i<num; i++) {
+    for (j=0; j < GPB; j++) {
       if (i==selected) {
 	dsSetColor (0,0.7,1);
       }
