@@ -1,4 +1,4 @@
--- Here are the lists of tests to build. Add/remove new 
+-- Here are the lists of tests to build. Add/remove new
 -- tests here and everything else should just work
 
   local tests =
@@ -11,6 +11,7 @@
     "collision",
     "crash",
     "friction",
+    "heightfield",
     "hinge",
     "I",
     "joints",
@@ -24,7 +25,7 @@
   if (not options["no-cylinder"]) then
     table.insert(tests, "cyl")
   end
-    
+
   if (not options["no-trimesh"]) then
     table.insert(tests, "moving_trimesh")
     table.insert(tests, "trimesh")
@@ -51,10 +52,10 @@
   {
     "../../include"
   }
-  
+
   package.defines = { "_CRT_SECURE_NO_DEPRECATE" }
 
-  package.files = 
+  package.files =
   {
     matchfiles("../../include/drawstuff/*.h"),
     "../../drawstuff/src/internal.h",
@@ -69,7 +70,7 @@
   else
     table.insert(package.files, "../../drawstuff/src/x11.cpp")
   end
-  
+
 
 -- Factory function for test packages
 
@@ -80,17 +81,17 @@
     package.language = "c++"
     package.path = packagepath
     package.objdir = "obj/"..name
-  
+
     package.includepaths = { "../../include" }
     package.defines = { "_CRT_SECURE_NO_DEPRECATE" }
-	
+
     package.links = { "ode", "drawstuff" }
     if (windows) then
       table.insert(package.links, { "user32", "winmm", "gdi32", "opengl32", "glu32" })
     else
       table.insert(package.links, { "GL", "GLU" })
     end
-  
+
     if (name == "chain1") then
       package.files = { "../../ode/test/test_" .. name .. ".c" }
     else
@@ -114,25 +115,24 @@
   package.language = "c++"
   package.path = packagepath
   package.objdir = "obj/tests"
-  
+
   package.includepaths =
   {
     "../../include",
     "../../tests/CppTestHarness"
   }
 
-  package.defines = 
-  { 
-    "_CRT_SECURE_NO_DEPRECATE" 
+  package.defines =
+  {
+    "_CRT_SECURE_NO_DEPRECATE"
   }
-  
+
   package.links =
   {
     "ode"
   }
-  
+
   package.files =
   {
     matchrecursive("../../tests/*.h", "../../tests/*.cpp")
   }
-  
