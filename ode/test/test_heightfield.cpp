@@ -537,8 +537,8 @@ int main (int argc, char **argv)
 
 	// Create a single non repeating heightfield.
 	dGeomHeightfieldDataBuildCallback( heightid, NULL, heightfield_callback, 
-		HFIELD_WSTEP, HFIELD_DSTEP, HFIELD_WIDTH, HFIELD_DEPTH, 
-		REAL( 1.0 ), REAL( 0.0 ), 0, REAL( 10.0 ) );
+		HFIELD_WIDTH, HFIELD_DEPTH, HFIELD_WSTEP, HFIELD_DSTEP, 
+		REAL( 1.0 ), REAL( 0.0 ), REAL( 10.0 ), 0 );
 
 	// Give some very bounds which, while conservative,
 	// makes AABB computation more accurate than +/-INF.

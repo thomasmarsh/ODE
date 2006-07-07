@@ -50,13 +50,15 @@ struct dxHeightfieldData
 // Heightfield geom structure
 struct dxHeightfield : public dxGeom
 {
-	dxHeightfieldData *Data;
+	dxHeightfieldData* m_p_data;
 
-	dxHeightfield( dSpaceID space, dHeightfieldDataID Data, int bPlaceable );
+	dxHeightfield( dSpaceID space, dHeightfieldDataID data, int bPlaceable );
 	~dxHeightfield();
 
 	void computeAABB();
-	int dCollideHeightfieldUnit( int x, int z, dxGeom *o2, int numMaxContacts, int flags, dContactGeom *contact, int skip );
+
+	int dCollideHeightfieldUnit( int x, int z, dxGeom *o2, int numMaxContacts, 
+		int flags, dContactGeom *contact, int skip );
 };
 
 

@@ -270,18 +270,18 @@ dxHeightfieldData::~dxHeightfieldData()
 
 // dxHeightfield constructor
 dxHeightfield::dxHeightfield( dSpaceID space,
-							  dHeightfieldDataID Data,
-							  int bPlaceable ) : dxGeom( space, bPlaceable )
+							  dHeightfieldDataID data,
+							  int bPlaceable )			: dxGeom( space, bPlaceable )
 {
 	type = dHeightfieldClass;
-	this->Data = Data;
+	this->m_p_data = data;
 }
 
 
 // compute axis aligned bounding box
 void dxHeightfield::computeAABB()
 {
-	const dxHeightfieldData *d = Data;
+	const dxHeightfieldData *d = m_p_data;
 
 	if ( d->m_nWrapMode == 0 )
 	{
@@ -375,21 +375,20 @@ dHeightfieldDataID dGeomHeightfieldDataCreate()
 
 
 void dGeomHeightfieldDataBuildCallback( dHeightfieldDataID d,
-									    void *pUserData, dHeightfieldGetHeight *Callback,
-                                        int nWidthSamples, int nDepthSamples, dReal vWidth, dReal vDepth,
-										dReal vScale, dReal vOffset,
-										int nWrapMode, dReal vThickness )
+									    void* pUserData, dHeightfieldGetHeight* pCallback,
+										dReal width, dReal depth, int widthSamples, int depthSamples,
+										dReal scale, dReal offset, dReal thickness, int bWrap )
 {
 	dUASSERT( d, "argument not Heightfield data" );
-	dIASSERT( Callback );
+	dIASSERT( pCallback );
 
 	// callback
 	d->m_nGetHeightMode = 0;
 	d->m_pUserData = pUserData;
-	d->m_pGetHeightCallback = Callback;
+	d->m_pGetHeightCallback = pCallback;
 
 	// set info
-	d->SetData(nWidthSamples, nDepthSamples, vWidth, vDepth, vScale, vOffset, nWrapMode, vThickness);
+	d->SetData( widthSamples, depthSamples, width, depth, scale, offset, bWrap, thickness );
 
 	// default bounds
 	d->m_vMinHeight = -dInfinity;
@@ -399,101 +398,113 @@ void dGeomHeightfieldDataBuildCallback( dHeightfieldDataID d,
 
 void dGeomHeightfieldDataBuildByte( dHeightfieldDataID d,
                                     unsigned char *pHeightData, int bCopyHeightData,
-									int nWidthSamples, int nDepthSamples, dReal vWidth, dReal vDepth,
-									dReal vScale, dReal vOffset,
-									int nWrapMode, dReal vThickness )
+									dReal width, dReal depth, int widthSamples, int depthSamples,
+									dReal scale, dReal offset, dReal thickness, int bWrap )
 {
 	dUASSERT( d, "Argument not Heightfield data" );
 	dIASSERT( pHeightData );
 
 	// set info
-	d->SetData(nWidthSamples, nDepthSamples, vWidth, vDepth, vScale, vOffset, nWrapMode, vThickness);
+	d->SetData( widthSamples, depthSamples, width, depth, scale, offset, bWrap, thickness );
 	d->m_nGetHeightMode = 1;
 	d->m_bCopyHeightData = bCopyHeightData;
 
-	if (!d->m_bCopyHeightData)
+	if ( d->m_bCopyHeightData == 0 )
 	{
+		// Data is referenced only.
 		d->m_pHeightData = pHeightData;
 	}
 	else
 	{
-		// copy data
-		d->m_pHeightData = new unsigned char[d->m_nWidthSamples * d->m_nDepthSamples];
-		dIASSERT(d->m_pHeightData);
-		memcpy(d->m_pHeightData, pHeightData, sizeof(unsigned char)*d->m_nWidthSamples*d->m_nDepthSamples);
+		// We own the height data, allocate storage
+		d->m_pHeightData = new unsigned char[ d->m_nWidthSamples * d->m_nDepthSamples ];
+		dIASSERT( d->m_pHeightData );
+		
+		// Copy data.
+		memcpy( d->m_pHeightData, pHeightData, 
+			sizeof( unsigned char ) * d->m_nWidthSamples * d->m_nDepthSamples );
 	}
 
-	// height bounds
+	// Find height bounds
 	d->ComputeHeightBounds();
 }
 
 
 void dGeomHeightfieldDataBuildShort( dHeightfieldDataID d,
-									 short *pHeightData, int bCopyHeightData,
-									 int nWidthSamples, int nDepthSamples, dReal vWidth, dReal vDepth,
-									 dReal vScale, dReal vOffset,
-									 int nWrapMode, dReal vThickness )
+									 short* pHeightData, int bCopyHeightData,
+									 dReal width, dReal depth, int widthSamples, int depthSamples,
+									 dReal scale, dReal offset, dReal thickness, int bWrap )
 {
-	dUASSERT(d, "argument not Heightfield data");
-	dIASSERT(pHeightData);
+	dUASSERT( d, "Argument not Heightfield data" );
+	dIASSERT( pHeightData );
 
 	// set info
-	d->SetData(nWidthSamples, nDepthSamples, vWidth, vDepth, vScale, vOffset, nWrapMode, vThickness);
+	d->SetData( widthSamples, depthSamples, width, depth, scale, offset, bWrap, thickness );
 	d->m_nGetHeightMode = 2;
 	d->m_bCopyHeightData = bCopyHeightData;
-	if (!d->m_bCopyHeightData)
+
+	if ( d->m_bCopyHeightData == 0 )
 	{
+		// Data is referenced only.
 		d->m_pHeightData = pHeightData;
 	}
 	else
 	{
-		// copy data
-		d->m_pHeightData = new short[nWidthSamples * nDepthSamples];
-		dIASSERT(d->m_pHeightData);
-		memcpy(d->m_pHeightData, pHeightData, sizeof(short)*nWidthSamples*nDepthSamples);
+		// We own the height data, allocate storage
+		d->m_pHeightData = new short[ d->m_nWidthSamples * d->m_nDepthSamples ];
+		dIASSERT( d->m_pHeightData );
+		
+		// Copy data.
+		memcpy( d->m_pHeightData, pHeightData, 
+			sizeof( short ) * d->m_nWidthSamples * d->m_nDepthSamples );
 	}
 
-	// height bounds
+	// Find height bounds
 	d->ComputeHeightBounds();
 }
 
 
 void dGeomHeightfieldDataBuildFloat( dHeightfieldDataID d,
                                      dReal *pHeightData, int bCopyHeightData,
-                                     int nWidthSamples, int nDepthSamples, dReal vWidth, dReal vDepth,
-                                     dReal vScale, dReal vOffset,
-                                     int nWrapMode, dReal vThickness )
+									 dReal width, dReal depth, int widthSamples, int depthSamples,
+									 dReal scale, dReal offset, dReal thickness, int bWrap )
 {
-	dUASSERT(d, "argument not Heightfield data");
-	dIASSERT(pHeightData);
+	dUASSERT( d, "Argument not Heightfield data" );
+	dIASSERT( pHeightData );
 
 	// set info
-	d->SetData(nWidthSamples, nDepthSamples, vWidth, vDepth, vScale, vOffset, nWrapMode, vThickness);
+	d->SetData( widthSamples, depthSamples, width, depth, scale, offset, bWrap, thickness );
 	d->m_nGetHeightMode = 3;
 	d->m_bCopyHeightData = bCopyHeightData;
 
-	if (!d->m_bCopyHeightData)
+	if ( d->m_bCopyHeightData == 0 )
 	{
+		// Data is referenced only.
 		d->m_pHeightData = pHeightData;
 	}
 	else
 	{
-		// copy data
-		d->m_pHeightData = new dReal[nWidthSamples * nDepthSamples];
-		dIASSERT(d->m_pHeightData);
-		memcpy(d->m_pHeightData, pHeightData, sizeof(dReal)*nWidthSamples*nDepthSamples);
+		// We own the height data, allocate storage
+		d->m_pHeightData = new dReal[ d->m_nWidthSamples * d->m_nDepthSamples ];
+		dIASSERT( d->m_pHeightData );
+		
+		// Copy data.
+		memcpy( d->m_pHeightData, pHeightData, 
+			sizeof( dReal ) * d->m_nWidthSamples * d->m_nDepthSamples );
 	}
 
-	// height bounds
+	// Find height bounds
 	d->ComputeHeightBounds();
 }
 
 
-void dGeomHeightfieldDataSetBounds( dHeightfieldDataID d, dReal vMinHeight, dReal vMaxHeight )
+
+
+void dGeomHeightfieldDataSetBounds( dHeightfieldDataID d, dReal minHeight, dReal maxHeight )
 {
-	dUASSERT(d, "argument not Heightfield data");
-	d->m_vMinHeight = (vMinHeight * d->m_vScale) + d->m_vOffset - d->m_vThickness;
-	d->m_vMaxHeight = (vMaxHeight * d->m_vScale) + d->m_vOffset;
+	dUASSERT(d, "Argument not Heightfield data");
+	d->m_vMinHeight = ( minHeight * d->m_vScale ) + d->m_vOffset - d->m_vThickness;
+	d->m_vMaxHeight = ( maxHeight * d->m_vScale ) + d->m_vOffset;
 }
 
 
@@ -507,38 +518,41 @@ void dGeomHeightfieldDataDestroy( dHeightfieldDataID d )
 //////// Heightfield geom interface ////////////////////////////////////////////////////
 
 
-dGeomID dCreateHeightfield( dSpaceID space, dHeightfieldDataID Data, int bPlaceable )
+dGeomID dCreateHeightfield( dSpaceID space, dHeightfieldDataID data, int bPlaceable )
 {
-	return new dxHeightfield( space, Data, bPlaceable );
+	return new dxHeightfield( space, data, bPlaceable );
 }
 
 
-void dGeomHeightfieldSetHeightfieldData( dGeomID g, dHeightfieldDataID Data )
+void dGeomHeightfieldSetHeightfieldData( dGeomID g, dHeightfieldDataID d )
 {
-	dxHeightfield* Geom = (dxHeightfield*) g;
-	Geom->Data = Data;
+	dxHeightfield* geom = (dxHeightfield*) g;
+	geom->data = d;
 }
 
 
 dHeightfieldDataID dGeomHeightfieldGetHeightfieldData( dGeomID g )
 {
-	dxHeightfield* Geom = (dxHeightfield*) g;
-	return Geom->Data;
+	dxHeightfield* geom = (dxHeightfield*) g;
+	return geom->m_p_data;
 }
 
 
+/* Disabled by David Walters, 7/7/2006 as this function
+// doesn't respect geom placement.
 dReal dGeomHeightfieldPointDepth( dGeomID g, dReal x, dReal y, dReal z )
 {
 	dUASSERT (g && g->type == dHeightfieldClass,"argument not a dHeightfield");
 	dxHeightfield *t = (dxHeightfield*) g;
-	return t->Data->GetHeight(x,z) - y;
-}
-
+	return t->m_p_data->GetHeight( x, z ) - y;
+}*/
 
 //////// dxHeightfield /////////////////////////////////////////////////////////////////
 
 
-typedef dReal dGetDepthFn(dGeomID g, dReal x, dReal y, dReal z);
+// Typdef for generic 'get point depth' function
+typedef dReal dGetDepthFn( dGeomID g, dReal x, dReal y, dReal z );
+
 #define RECOMPUTE_RAYNORMAL
 //#define DO_RAYDEPTH
 
@@ -553,6 +567,7 @@ typedef dReal dGetDepthFn(dGeomID g, dReal x, dReal y, dReal z);
 					pContact->normal[0],	\
 					pContact->normal[1],	\
 					pContact->normal[2]);
+
 /*
 (y is up)
 
@@ -564,8 +579,9 @@ F
 .
 z
 */
-int dxHeightfield::dCollideHeightfieldUnit(int x, int z, dxGeom *o2, int numMaxContacts,
-	                                          int flags, dContactGeom *contact, int skip)
+
+int dxHeightfield::dCollideHeightfieldUnit( int x, int z, dxGeom* o2, int numMaxContacts,
+	                                        int flags, dContactGeom* contact, int skip )
 {
 	dColliderFn *CollideRayN;
 	dColliderFn *CollideNPlane;
@@ -574,7 +590,8 @@ int dxHeightfield::dCollideHeightfieldUnit(int x, int z, dxGeom *o2, int numMaxC
 	int numPlaneContacts = 0;
 	int i;
 
-	if (numContacts == numMaxContacts)	return numContacts;
+	if ( numContacts == numMaxContacts )
+		return numContacts;
 
 	dContactGeom PlaneContact[MAXCONTACT];
 	flags = (flags & 0xffff0000) | MAXCONTACT;
@@ -616,27 +633,29 @@ int dxHeightfield::dCollideHeightfieldUnit(int x, int z, dxGeom *o2, int numMaxC
 		CollideNPlane	= dCollideConePlane;
 		GetDepth		= dGeomConePointDepth;
 		break;*/
+
 	default:
 		dIASSERT(0);
+
 	}
 
 	dReal Plane[4],lBD,lCD,lBC;
 	dVector3 A,B,C,D,BD,CD,BC,AB,AC;
-	A[0] = x * Data->m_vSampleWidth;
-	A[2] = z * Data->m_vSampleDepth;
-	A[1] = Data->GetHeight(x,z);
+	A[0] = x * m_p_data->m_vSampleWidth;
+	A[2] = z * m_p_data->m_vSampleDepth;
+	A[1] = m_p_data->GetHeight(x,z);
 
-	B[0] = (x+1) * Data->m_vSampleWidth;
-	B[2] = z * Data->m_vSampleDepth;
-	B[1] = Data->GetHeight(x+1,z);
+	B[0] = (x+1) * m_p_data->m_vSampleWidth;
+	B[2] = z * m_p_data->m_vSampleDepth;
+	B[1] = m_p_data->GetHeight(x+1,z);
 
-	C[0] = x * Data->m_vSampleWidth;
-	C[2] = (z+1) * Data->m_vSampleDepth;
-	C[1] = Data->GetHeight(x,z+1);
+	C[0] = x * m_p_data->m_vSampleWidth;
+	C[2] = (z+1) * m_p_data->m_vSampleDepth;
+	C[1] = m_p_data->GetHeight(x,z+1);
 
-	D[0] = (x+1) * Data->m_vSampleWidth;
-	D[2] = (z+1) * Data->m_vSampleDepth;
-	D[1] = Data->GetHeight(x+1,z+1);
+	D[0] = (x+1) * m_p_data->m_vSampleWidth;
+	D[2] = (z+1) * m_p_data->m_vSampleDepth;
+	D[1] = m_p_data->GetHeight(x+1,z+1);
 
 	dOP(BC,-,C,B);
 	lBC = dLENGTH(BC);
@@ -656,18 +675,20 @@ int dxHeightfield::dCollideHeightfieldUnit(int x, int z, dxGeom *o2, int numMaxC
 	dOP(AC,-,C,A);
 	dNormalize3(AC);
 
-	if (CollideRayN)
+	if ( CollideRayN )
 	{
+
 #ifdef RECOMPUTE_RAYNORMAL
+
 		dVector3 E,F;
 		dVector3 CE,FB,AD;
 		dVector3 Normal[3];
-		E[0] = (x+2) * Data->m_vSampleWidth;
-		E[2] = z * Data->m_vSampleDepth;
-		E[1] = Data->GetHeight(x+2,z);
-		F[0] = x * Data->m_vSampleWidth;
-		F[2] = (z+2) * Data->m_vSampleDepth;
-		F[1] = Data->GetHeight(x,z+2);
+		E[0] = (x+2) * m_p_data->m_vSampleWidth;
+		E[2] = z * m_p_data->m_vSampleDepth;
+		E[1] = m_p_data->GetHeight(x+2,z);
+		F[0] = x * m_p_data->m_vSampleWidth;
+		F[2] = (z+2) * m_p_data->m_vSampleDepth;
+		F[1] = m_p_data->GetHeight(x,z+2);
 		dOP(AD,-,D,A);
 		dNormalize3(AD);
 		dOP(CE,-,E,C);
@@ -686,7 +707,9 @@ int dxHeightfield::dCollideHeightfieldUnit(int x, int z, dxGeom *o2, int numMaxC
 		//CD
 		dCROSS(Normal[2],=,CD,FB);
 		dNormalize3(Normal[2]);
+
 #endif
+
 		int nA[3],nB[3];
 		dContactGeom ContactA[3],ContactB[3];
 		dxRay rayBC(0,lBC);
@@ -715,38 +738,50 @@ int dxHeightfield::dCollideHeightfieldUnit(int x, int z, dxGeom *o2, int numMaxC
 				pContact->pos[0] = (ContactA[i].pos[0] + ContactB[i].pos[0])/2;
 				pContact->pos[1] = (ContactA[i].pos[1] + ContactB[i].pos[1])/2;
 				pContact->pos[2] = (ContactA[i].pos[2] + ContactB[i].pos[2])/2;
+
 #ifdef RECOMPUTE_RAYNORMAL
+
 				pContact->normal[0] = -Normal[i][0];
 				pContact->normal[1] = -Normal[i][1];
 				pContact->normal[2] = -Normal[i][2];
-#else
+
+#else // RECOMPUTE_RAYNORMAL
+
 				pContact->normal[0] = (ContactA[i].normal[0] + ContactB[i].normal[0])/2;	//0.f;
 				pContact->normal[1] = (ContactA[i].normal[1] + ContactB[i].normal[1])/2;	//0.f;
 				pContact->normal[2] = (ContactA[i].normal[2] + ContactB[i].normal[2])/2;	//-1.f;
 				dNormalize3(pContact->normal);
-#endif
+
+#endif // RECOMPUTE_RAYNORMAL
+
+
 #ifdef DO_RAYDEPTH
+
 				dxRay rayV(0,1000.f);
-				dGeomRaySet(&rayV,	pContact->pos[0],
+				dGeomRaySet( &rayV, pContact->pos[0],
 									pContact->pos[1],
 									pContact->pos[2],
 									-pContact->normal[0],
 									-pContact->normal[1],
-									-pContact->normal[2]);
+									-pContact->normal[2] );
 
 				dContactGeom ContactV;
-				if (CollideRayN(&rayV,o2,flags,&ContactV,sizeof(dContactGeom)))
+				if ( CollideRayN( &rayV, o2, flags, &ContactV, sizeof(dContactGeom) ) )
 				{
 					pContact->depth = ContactV.depth;
 					numContacts++;
 				}
-#else
-				pContact->depth =  GetDepth(o2,
-				pContact->pos[0],
-				pContact->pos[1],
-				pContact->pos[2]);
+
+#else // DO_RAYDEPTH
+
+				pContact->depth = GetDepth( o2, pContact->pos[0],
+												pContact->pos[1],
+												pContact->pos[2] );
+				
 				numContacts++;
-#endif
+
+#endif // DO_RAYDEPTH
+
 				if (numContacts == numMaxContacts)	return numContacts;
 
 			}
@@ -759,9 +794,9 @@ int dxHeightfield::dCollideHeightfieldUnit(int x, int z, dxGeom *o2, int numMaxC
 	dxPlane planeABC(0,Plane[0],Plane[1],Plane[2],Plane[3]);
 	numPlaneContacts = CollideNPlane(o2,&planeABC,flags,PlaneContact,sizeof(dContactGeom));
 
-	for (i=0;i<numPlaneContacts;i++)
+	for ( i = 0; i < numPlaneContacts; i++ )
 	{
-		if (Data->IsOnHeightfield(x,z,0,PlaneContact[i].pos))
+		if ( m_p_data->IsOnHeightfield( x, z, 0, PlaneContact[i].pos ) )
 		{
 			dContactGeom *pContact = CONTACT(contact,numContacts*skip);
 			pContact->pos[0] = PlaneContact[i].pos[0];
@@ -772,11 +807,10 @@ int dxHeightfield::dCollideHeightfieldUnit(int x, int z, dxGeom *o2, int numMaxC
 			pContact->normal[2] = -PlaneContact[i].normal[2];
 			pContact->depth = PlaneContact[i].depth;
 
-			//DMESS(0);
 			numContacts++;
 
-			if (numContacts == numMaxContacts)
-					return numContacts;
+			if ( numContacts == numMaxContacts )
+				return numContacts;
 		}
 	}
 
@@ -786,9 +820,9 @@ int dxHeightfield::dCollideHeightfieldUnit(int x, int z, dxGeom *o2, int numMaxC
 	dxPlane planeDCB(0,Plane[0],Plane[1],Plane[2],Plane[3]);
 	numPlaneContacts = CollideNPlane(o2,&planeDCB,flags,PlaneContact,sizeof(dContactGeom));
 
-	for (i=0;i<numPlaneContacts;i++)
+	for ( i = 0; i < numPlaneContacts; i++ )
 	{
-		if (Data->IsOnHeightfield(x,z,1,PlaneContact[i].pos))
+		if ( m_p_data->IsOnHeightfield( x, z, 1, PlaneContact[i].pos ) )
 		{
 			dContactGeom *pContact = CONTACT(contact,numContacts*skip);
 			pContact->pos[0] = PlaneContact[i].pos[0];
@@ -798,11 +832,11 @@ int dxHeightfield::dCollideHeightfieldUnit(int x, int z, dxGeom *o2, int numMaxC
 			pContact->normal[1] = -PlaneContact[i].normal[1];
 			pContact->normal[2] = -PlaneContact[i].normal[2];
 			pContact->depth = PlaneContact[i].depth;
-			//DMESS(1);
+
 			numContacts++;
 
-			if (numContacts == numMaxContacts)
-					return numContacts;
+			if ( numContacts == numMaxContacts )
+				return numContacts;
 		}
 	}
 
@@ -810,7 +844,7 @@ int dxHeightfield::dCollideHeightfieldUnit(int x, int z, dxGeom *o2, int numMaxC
 }
 
 
-int dCollideHeightfield(dxGeom *o1, dxGeom *o2, int flags, dContactGeom *contact, int skip)
+int dCollideHeightfield( dxGeom *o1, dxGeom *o2, int flags, dContactGeom *contact, int skip )
 {
 	dIASSERT (skip >= (int)sizeof(dContactGeom));
 	dIASSERT (o1->type == dHeightfieldClass);
@@ -845,20 +879,21 @@ int dCollideHeightfield(dxGeom *o1, dxGeom *o2, int flags, dContactGeom *contact
 		o2->computeAABB();
 	}
 
-	int nMinX	= int(floor(o2->aabb[0] / terrain->Data->m_vSampleWidth));
-	int nMaxX	= int(floor(o2->aabb[1] / terrain->Data->m_vSampleWidth)) + 1;
-	int nMinZ	= int(floor(o2->aabb[4] / terrain->Data->m_vSampleDepth));
-	int nMaxZ	= int(floor(o2->aabb[5] / terrain->Data->m_vSampleDepth)) + 1;
+	int nMinX	= int(floor(o2->aabb[0] / terrain->m_p_data->m_vSampleWidth));
+	int nMaxX	= int(floor(o2->aabb[1] / terrain->m_p_data->m_vSampleWidth)) + 1;
+	int nMinZ	= int(floor(o2->aabb[4] / terrain->m_p_data->m_vSampleDepth));
+	int nMaxZ	= int(floor(o2->aabb[5] / terrain->m_p_data->m_vSampleDepth)) + 1;
 
 
-	if (terrain->Data->m_nWrapMode == 0)
+	if ( terrain->m_p_data->m_nWrapMode == 0 )
 	{
-		nMinX = dMAX(nMinX,0);
-		nMaxX = dMIN(nMaxX,terrain->Data->m_nWidthSamples);
-		nMinZ = dMAX(nMinZ,0);
-		nMaxZ = dMIN(nMaxZ,terrain->Data->m_nDepthSamples);
+		nMinX = dMAX( nMinX, 0 );
+		nMaxX = dMIN( nMaxX, terrain->m_p_data->m_nWidthSamples );
+		nMinZ = dMAX( nMinZ, 0 );
+		nMaxZ = dMIN( nMaxZ, terrain->m_p_data->m_nDepthSamples );
 
-		if ((nMinX >= nMaxX) || (nMinZ >= nMaxZ))	goto dCollideHeightfieldExit;
+		if ((nMinX >= nMaxX) || (nMinZ >= nMaxZ))
+			goto dCollideHeightfieldExit;
 	}
 
 
@@ -868,7 +903,7 @@ int dCollideHeightfield(dxGeom *o1, dxGeom *o2, int flags, dContactGeom *contact
 	AabbTop[1] = o2->aabb[3];
 	if (o2->type != dRayClass)
 	{
-		dReal AabbTopDepth = terrain->Data->GetHeight(AabbTop[0],AabbTop[2]) - AabbTop[1];
+		dReal AabbTopDepth = terrain->m_p_data->GetHeight(AabbTop[0],AabbTop[2]) - AabbTop[1];
 		if (AabbTopDepth > 0.f)
 		{
 			contact->depth = AabbTopDepth;
@@ -906,14 +941,14 @@ int dCollideHeightfield(dxGeom *o1, dxGeom *o2, int flags, dContactGeom *contact
 
 dCollideHeightfieldExit:
 
-	if (terrain->gflags & GEOM_PLACEABLE)
+	if ( terrain->gflags & GEOM_PLACEABLE )
 	{
-		dVector3Copy(posbak,o2->final_posr->pos);
-		dMatrix3Copy(Rbak,o2->final_posr->R);
-		memcpy(o2->aabb,aabbbak,sizeof(dReal)*6);
+		dVector3Copy( posbak, o2->final_posr->pos );
+		dMatrix3Copy( Rbak, o2->final_posr->R );
+		memcpy( o2->aabb, aabbbak, sizeof(dReal)*6 );
 		o2->gflags = gflagsbak;
 
-		for (i=0; i<numTerrainContacts; i++)
+		for ( i = 0; i < numTerrainContacts; i++ )
 		{
 			dOPE(pos0,=,CONTACT(contact,i*skip)->pos);
 			dMULTIPLY0_331(CONTACT(contact,i*skip)->pos,terrain->final_posr->R,pos0);
