@@ -63,7 +63,7 @@ dReal points[]= // points for a cube
     -0.25f,0.25f,-0.25f,//  point 5
 
     0.25f,-0.25f,-0.25f,//  point 6
-    -0.25f,-0.25f,-0.25f,// point 7 
+    -0.25f,-0.25f,-0.25f,// point 7
   };
 const unsigned int pointcount=8;
 unsigned int polygons[] = //Polygons for a cube (6 squares)
@@ -71,7 +71,7 @@ unsigned int polygons[] = //Polygons for a cube (6 squares)
     4,0,2,6,4, // positive X
     4,1,0,4,5, // positive Y
     4,0,1,3,2, // positive Z
-    4,3,1,5,7, // negative X 
+    4,3,1,5,7, // negative X
     4,2,3,7,6, // negative Y
     4,5,4,6,7, // negative Z
   };
@@ -124,7 +124,7 @@ static int write_world = 0;
 #define HFIELD_DEPTH			REAL( 4.0 )
 
 #define HFIELD_WSAMP			( HFIELD_WIDTH / HFIELD_WSTEP )
-#define HFIELD_DSAMP			( HFIELD_DEPTH / HFIELD_DSTEP )			
+#define HFIELD_DSAMP			( HFIELD_DEPTH / HFIELD_DSTEP )
 
 
 dReal heightfield_callback( void* pUserData, int x, int z )
@@ -242,9 +242,9 @@ static void command (int cmd)
 
     dMatrix3 R;
     if (random_pos) {
-      dBodySetPosition (obj[i].body, 
-		  (dRandReal()-0.5)*HFIELD_WIDTH*0.75, 
-		  (dRandReal()-0.5)*HFIELD_DEPTH*0.75, 
+      dBodySetPosition (obj[i].body,
+		  (dRandReal()-0.5)*HFIELD_WIDTH*0.75,
+		  (dRandReal()-0.5)*HFIELD_DEPTH*0.75,
 		  dRandReal() + 2 );
       dRFromAxisAndAngle (R,dRandReal()*2.0-1.0,dRandReal()*2.0-1.0,
 			  dRandReal()*2.0-1.0,dRandReal()*10.0-5.0);
@@ -270,8 +270,8 @@ static void command (int cmd)
       dMassSetCapsule (&m,DENSITY,3,sides[0],sides[1]);
       obj[i].geom[0] = dCreateCapsule (space,sides[0],sides[1]);
     }
-    //<---- Convex Object    
-    else if (cmd == 'v') 
+    //<---- Convex Object
+    else if (cmd == 'v')
       {
 	dMassSetBox (&m,DENSITY,0.25,0.25,0.25);
 	obj[i].geom[0] = dCreateConvex (space,
@@ -385,7 +385,7 @@ static void command (int cmd)
 void drawGeom (dGeomID g, const dReal *pos, const dReal *R, int show_aabb)
 {
   int i;
-	
+
   if (!g) return;
   if (!pos) pos = dGeomGetPosition (g);
   if (!R) R = dGeomGetRotation (g);
@@ -405,7 +405,7 @@ void drawGeom (dGeomID g, const dReal *pos, const dReal *R, int show_aabb)
     dsDrawCapsule (pos,R,length,radius);
   }
   //<---- Convex Object
-  else if (type == dConvexClass) 
+  else if (type == dConvexClass)
     {
       //dVector3 sides={0.50,0.50,0.50};
       dsDrawConvex(pos,R,planes,
@@ -450,44 +450,6 @@ void drawGeom (dGeomID g, const dReal *pos, const dReal *R, int show_aabb)
 
 }
 
-
-// Heightfield Data structure
-struct dxHeightfieldData
-{
-	dReal m_vWidth;            // world space heightfield dimension on X axis
-	dReal m_vDepth;            // world space heightfield dimension on Z axis
-	dReal m_vMinHeight;        // min sample height value (scaled and offset)
-	dReal m_vMaxHeight;        // max sample height value (scaled and offset)
-	dReal m_vSampleWidth;      // sample spacing on X axis (== m_vWidth / m_nWidthSamples)
-	dReal m_vSampleDepth;      // sample spacing on Z axis (== m_vDepth / m_nDepthSamples)
-	dReal m_vThickness;        // surface thickness (currently only added to bottom AABB)
-	dReal m_vScale;            // sample value multiplier
-	dReal m_vOffset;           // vertical sample offset
-	int	m_nWidthSamples;       // number of samples on X axis
-	int	m_nDepthSamples;       // number of samples on Z axis
-	int m_bCopyHeightData;     // copy sample data flag
-	int	m_nWrapMode;           // heightfield wrapping mode (0=finite, 1=infinite)
-	int m_nGetHeightMode;      // getheight mode (0=callback, 1=byte, 2=short, 3=float)
-	void *m_pHeightData;       // sample data array
-	void *m_pUserData;         // callback user data
-
-	dHeightfieldGetHeight* m_pGetHeightCallback;
-
-	dxHeightfieldData();
-	~dxHeightfieldData();
-
-	void SetData( int nWidthSamples, int nDepthSamples,
-				  dReal vWidth, dReal vDepth,
-				  dReal vScale, dReal vOffset,
-				  int bFinite, dReal vThickness );
-
-	void ComputeHeightBounds();
-
-	bool IsOnHeightfield(int nx, int nz, int w, dReal *pos);
-	dReal GetHeight(int x, int z);
-	dReal GetHeight(dReal x, dReal z);
-};
-
 // simulation loop
 
 static void simLoop (int pause)
@@ -505,13 +467,13 @@ static void simLoop (int pause)
     }
     write_world = 0;
   }
-  
+
   // remove all contact joints
   dJointGroupEmpty (contactgroup);
 
 
 	//
-	// Draw Heightfield (slow and crappy)
+	// Draw Heightfield
 	//
 
 	{
@@ -534,15 +496,15 @@ static void simLoop (int pause)
 			c[ 0 ] = ( i ) * HFIELD_WSAMP;
 			c[ 1 ] = heightfield_callback( NULL, i, j + 1 );
 			c[ 2 ] = ( j + 1 ) * HFIELD_DSAMP;
-			
+
 			d[ 0 ] = ( i + 1 ) * HFIELD_WSAMP;
 			d[ 1 ] = heightfield_callback( NULL, i + 1, j + 1 );
 			d[ 2 ] = ( j + 1 ) * HFIELD_DSAMP;
 
-			dsDrawTriangle( dGeomGetPosition( gheight ), 
+			dsDrawTriangle( dGeomGetPosition( gheight ),
 							dGeomGetRotation( gheight ),
 							a, c, b, 1 );
-			dsDrawTriangle( dGeomGetPosition( gheight ), 
+			dsDrawTriangle( dGeomGetPosition( gheight ),
 							dGeomGetRotation( gheight ),
 							b, c, d, 1 );
 		}
@@ -621,8 +583,8 @@ int main (int argc, char **argv)
 	dHeightfieldDataID heightid = dGeomHeightfieldDataCreate();
 
 	// Create a single non repeating heightfield.
-	dGeomHeightfieldDataBuildCallback( heightid, NULL, heightfield_callback, 
-		HFIELD_WIDTH, HFIELD_DEPTH, HFIELD_WSTEP, HFIELD_DSTEP, 
+	dGeomHeightfieldDataBuildCallback( heightid, NULL, heightfield_callback,
+		HFIELD_WIDTH, HFIELD_DEPTH, HFIELD_WSTEP, HFIELD_DSTEP,
 		REAL( 1.0 ), REAL( 0.0 ), REAL( 10.0 ), 0 );
 
 	// Give some very bounds which, while conservative,

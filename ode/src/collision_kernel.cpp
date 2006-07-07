@@ -193,6 +193,7 @@ static void initColliders()
   setCollider (dCylinderClass,dSphereClass,&dCollideCylinderSphere);
   setCollider (dCylinderClass,dPlaneClass,&dCollideCylinderPlane);
   //setCollider (dCylinderClass,dCylinderClass,&dCollideCylinderCylinder);
+
 //--> Convex Collision
   setCollider (dConvexClass,dPlaneClass,&dCollideConvexPlane);
   setCollider (dSphereClass,dConvexClass,&dCollideSphereConvex);
@@ -207,6 +208,8 @@ static void initColliders()
   setCollider (dHeightfieldClass,dSphereClass,&dCollideHeightfield);
   setCollider (dHeightfieldClass,dBoxClass,&dCollideHeightfield);
   setCollider (dHeightfieldClass,dCapsuleClass,&dCollideHeightfield);
+  setCollider (dHeightfieldClass,dCylinderClass,&dCollideHeightfield);
+  setCollider (dHeightfieldClass,dConvexClass,&dCollideHeightfield);
 //<-- dHeightfield Collision
 
   setAllColliders (dGeomTransformClass,&dCollideTransform);
