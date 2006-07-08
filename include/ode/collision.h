@@ -847,11 +847,13 @@ ODE_API void dGeomHeightfieldDataDestroy( dHeightfieldDataID d );
  * the geom's local x axis.
  * @param depth Specifies the total 'depth' of the heightfield along
  * the geom's local z axis.
- * @param widthSamples Specifies the number of equal sized subdivisions
- * to make along the width of the heightfield. Each grid sample has a 
- * corresponding height value in the data which forms the overall shape.
- * @param depthSamples Specifies the number of equal sized subdivisions
- * to make along the depth of the heightfield.
+ *
+ * @param widthSamples Specifies the number of vertices to sample
+ * along the width of the heightfield. Each vertex has a corresponding
+ * height value which forms the overall shape.
+ * Naturally this value must be at least two or more.
+ * @param depthSamples Specifies the number of vertices to sample
+ * along the depth of the heightfield.
  *
  * @param scale A uniform scale applied to all raw height data.
  * @param offset An offset applied to the scaled height data.
@@ -893,11 +895,13 @@ ODE_API void dGeomHeightfieldDataBuildCallback( dHeightfieldDataID d,
  * the geom's local x axis.
  * @param depth Specifies the total 'depth' of the heightfield along
  * the geom's local z axis.
- * @param widthSamples Specifies the number of equal sized subdivisions
- * to make along the width of the heightfield. Each grid sample has a 
- * corresponding height value in the data which forms the overall shape.
- * @param depthSamples Specifies the number of equal sized subdivisions
- * to make along the depth of the heightfield.
+ *
+ * @param widthSamples Specifies the number of vertices to sample
+ * along the width of the heightfield. Each vertex has a corresponding
+ * height value which forms the overall shape.
+ * Naturally this value must be at least two or more.
+ * @param depthSamples Specifies the number of vertices to sample
+ * along the depth of the heightfield.
  *
  * @param scale A uniform scale applied to all raw height data.
  * @param offset An offset applied to the scaled height data.
@@ -939,11 +943,13 @@ ODE_API void dGeomHeightfieldDataBuildByte( dHeightfieldDataID d,
  * the geom's local x axis.
  * @param depth Specifies the total 'depth' of the heightfield along
  * the geom's local z axis.
- * @param widthSamples Specifies the number of equal sized subdivisions
- * to make along the width of the heightfield. Each grid sample has a 
- * corresponding height value in the data which forms the overall shape.
- * @param depthSamples Specifies the number of equal sized subdivisions
- * to make along the depth of the heightfield.
+ *
+ * @param widthSamples Specifies the number of vertices to sample
+ * along the width of the heightfield. Each vertex has a corresponding
+ * height value which forms the overall shape.
+ * Naturally this value must be at least two or more.
+ * @param depthSamples Specifies the number of vertices to sample
+ * along the depth of the heightfield.
  *
  * @param scale A uniform scale applied to all raw height data.
  * @param offset An offset applied to the scaled height data.
@@ -986,11 +992,13 @@ ODE_API void dGeomHeightfieldDataBuildShort( dHeightfieldDataID d,
  * the geom's local x axis.
  * @param depth Specifies the total 'depth' of the heightfield along
  * the geom's local z axis.
- * @param widthSamples Specifies the number of equal sized subdivisions
- * to make along the width of the heightfield. Each grid sample has a 
- * corresponding height value in the data which forms the overall shape.
- * @param depthSamples Specifies the number of equal sized subdivisions
- * to make along the depth of the heightfield.
+ *
+ * @param widthSamples Specifies the number of vertices to sample
+ * along the width of the heightfield. Each vertex has a corresponding
+ * height value which forms the overall shape.
+ * Naturally this value must be at least two or more.
+ * @param depthSamples Specifies the number of vertices to sample
+ * along the depth of the heightfield.
  *
  * @param scale A uniform scale applied to all raw height data.
  * @param offset An offset applied to the scaled height data.

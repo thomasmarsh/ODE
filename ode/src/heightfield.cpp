@@ -67,8 +67,8 @@ void dxHeightfieldData::SetData(int nWidthSamples, int nDepthSamples,
 	m_nWidthSamples = nWidthSamples;
 	m_nDepthSamples = nDepthSamples;
 
-	m_vSampleWidth = m_vWidth / m_nWidthSamples;
-	m_vSampleDepth = m_vDepth / m_nDepthSamples;
+	m_vSampleWidth = m_vWidth / ( m_nWidthSamples - 1 );
+	m_vSampleDepth = m_vDepth / ( m_nDepthSamples - 1 );
 
 	// infinite min height bounds
 	m_vThickness = vThickness;
@@ -185,22 +185,24 @@ dReal dxHeightfieldData::GetHeight( int x, int z )
 	static short *data_short;
 	static dReal *data_float;
 
-	if (m_nWrapMode == 0)
+	if ( m_nWrapMode == 0 )
 	{
-		if (x < 0) x = 0;
-		if (z < 0) z = 0;
-		if (x > m_nWidthSamples-1) x = m_nWidthSamples-1;
-		if (z > m_nDepthSamples-1) z = m_nDepthSamples-1;
+		// Finite
+		if ( x < 0 ) x = 0;
+		if ( z < 0 ) z = 0;
+		if ( x > m_nWidthSamples - 1 ) x = m_nWidthSamples - 1;
+		if ( z > m_nDepthSamples - 1 ) z = m_nDepthSamples - 1;
 	}
 	else
 	{
-		x %= m_nWidthSamples;
-		z %= m_nDepthSamples;
-		if (x < 0) x+=m_nWidthSamples;
-		if (z < 0) z+=m_nDepthSamples;
+		// Infinite
+		x %= m_nWidthSamples - 1;
+		z %= m_nDepthSamples - 1;
+		if ( x < 0 ) x += m_nWidthSamples - 1;
+		if ( z < 0 ) z += m_nDepthSamples - 1;
 	}
 
-	switch (m_nGetHeightMode)
+	switch ( m_nGetHeightMode )
 	{
 
 	// callback (dReal)
@@ -234,24 +236,30 @@ dReal dxHeightfieldData::GetHeight( int x, int z )
 // returns height at given coordinates
 dReal dxHeightfieldData::GetHeight( dReal x, dReal z )
 {
-	int nX	= int(floor(x / m_vSampleWidth));
-	int nZ	= int(floor(z / m_vSampleDepth));
-	dReal dx	= (x - (dReal(nX) * m_vSampleWidth)) / m_vSampleWidth;
-	dReal dz	= (z - (dReal(nZ) * m_vSampleDepth)) / m_vSampleDepth;
-	dIASSERT((dx >= 0.f) && (dx <= 1.f));
-	dIASSERT((dz >= 0.f) && (dz <= 1.f));
+	int nX	= int( floor( x / m_vSampleWidth ) );
+	int nZ	= int( floor( z / m_vSampleDepth ) );
+	
+	dReal dx = ( x - ( dReal( nX ) * m_vSampleWidth ) ) / m_vSampleWidth;
+	dReal dz = ( z - ( dReal( nZ ) * m_vSampleDepth ) ) / m_vSampleDepth;
+	
+	dIASSERT( ( dx >= 0.0f ) && ( dx <= 1.0f ) );
+	dIASSERT( ( dz >= 0.0f ) && ( dz <= 1.0f ) );
 
 	dReal y, y0;
 
-	if (dx + dz < 1.f)
+	if ( dx + dz < REAL( 1.0 ) )
 	{
-		y0	= GetHeight(nX,nZ);
-		y	= y0	+ (GetHeight(nX+1,nZ) - y0) * dx +
-			        (GetHeight(nX,nZ+1) - y0) * dz;
-	}	else	{
-		y0	= GetHeight(nX+1,nZ+1);
-		y	= y0	+ (GetHeight(nX+1,nZ) - y0) * (1.f - dz) +
-			        (GetHeight(nX,nZ+1) - y0) * (1.f - dx);
+		y0 = GetHeight( nX, nZ );
+
+		y = y0 + ( GetHeight( nX + 1, nZ ) - y0 ) * dx 
+			   + ( GetHeight( nX, nZ + 1 ) - y0 ) * dz;
+	}
+	else
+	{
+		y0 = GetHeight( nX + 1, nZ + 1 );
+
+		y = y0	+ ( GetHeight( nX + 1, nZ ) - y0 ) * ( 1.0f - dz ) +
+			      ( GetHeight( nX, nZ + 1 ) - y0 ) * ( 1.0f - dx );
 	}
 
 	return y;
@@ -261,9 +269,9 @@ dReal dxHeightfieldData::GetHeight( dReal x, dReal z )
 // dxHeightfieldData destructor
 dxHeightfieldData::~dxHeightfieldData()
 {
-	if (m_bCopyHeightData)
+	if ( m_bCopyHeightData )
 	{
-		dIASSERT(m_pHeightData);
+		dIASSERT( m_pHeightData );
 		delete [] m_pHeightData;
 	}
 }
@@ -385,6 +393,8 @@ void dGeomHeightfieldDataBuildCallback( dHeightfieldDataID d,
 {
 	dUASSERT( d, "argument not Heightfield data" );
 	dIASSERT( pCallback );
+	dIASSERT( widthSamples >= 2 );	// Ensure we're making something with at least one cell.
+	dIASSERT( depthSamples >= 2 );
 
 	// callback
 	d->m_nGetHeightMode = 0;
@@ -407,6 +417,8 @@ void dGeomHeightfieldDataBuildByte( dHeightfieldDataID d,
 {
 	dUASSERT( d, "Argument not Heightfield data" );
 	dIASSERT( pHeightData );
+	dIASSERT( widthSamples >= 2 );	// Ensure we're making something with at least one cell.
+	dIASSERT( depthSamples >= 2 );
 
 	// set info
 	d->SetData( widthSamples, depthSamples, width, depth, scale, offset, bWrap, thickness );
@@ -441,6 +453,8 @@ void dGeomHeightfieldDataBuildShort( dHeightfieldDataID d,
 {
 	dUASSERT( d, "Argument not Heightfield data" );
 	dIASSERT( pHeightData );
+	dIASSERT( widthSamples >= 2 );	// Ensure we're making something with at least one cell.
+	dIASSERT( depthSamples >= 2 );
 
 	// set info
 	d->SetData( widthSamples, depthSamples, width, depth, scale, offset, bWrap, thickness );
@@ -475,6 +489,8 @@ void dGeomHeightfieldDataBuildFloat( dHeightfieldDataID d,
 {
 	dUASSERT( d, "Argument not Heightfield data" );
 	dIASSERT( pHeightData );
+	dIASSERT( widthSamples >= 2 );	// Ensure we're making something with at least one cell.
+	dIASSERT( depthSamples >= 2 );
 
 	// set info
 	d->SetData( widthSamples, depthSamples, width, depth, scale, offset, bWrap, thickness );
@@ -728,11 +744,12 @@ int dxHeightfield::dCollideHeightfieldUnit( int x, int z, dxGeom* o2, int numMax
 		dGeomRaySet(&rayCD, D[0], D[1], D[2], -CD[0], -CD[1], -CD[2]);
 		nB[2] = CollideRayN(&rayCD,o2,flags,&ContactB[2],sizeof(dContactGeom));
 
-		for (i=0;i<3;i++)
+		for ( i = 0; i < 3; i++ )
 		{
-			if (nA[i] & nB[i])
+			if ( nA[i] & nB[i] )
 			{
-				dContactGeom *pContact = CONTACT(contact,numContacts*skip);
+				dContactGeom *pContact = CONTACT( contact,numContacts*skip );
+
 				pContact->pos[0] = (ContactA[i].pos[0] + ContactB[i].pos[0])/2;
 				pContact->pos[1] = (ContactA[i].pos[1] + ContactB[i].pos[1])/2;
 				pContact->pos[2] = (ContactA[i].pos[2] + ContactB[i].pos[2])/2;
@@ -745,9 +762,9 @@ int dxHeightfield::dCollideHeightfieldUnit( int x, int z, dxGeom* o2, int numMax
 
 #else // RECOMPUTE_RAYNORMAL
 
-				pContact->normal[0] = (ContactA[i].normal[0] + ContactB[i].normal[0])/2;	//0.f;
-				pContact->normal[1] = (ContactA[i].normal[1] + ContactB[i].normal[1])/2;	//0.f;
-				pContact->normal[2] = (ContactA[i].normal[2] + ContactB[i].normal[2])/2;	//-1.f;
+				pContact->normal[0] = (ContactA[i].normal[0] + ContactB[i].normal[0])/2;
+				pContact->normal[1] = (ContactA[i].normal[1] + ContactB[i].normal[1])/2;
+				pContact->normal[2] = (ContactA[i].normal[2] + ContactB[i].normal[2])/2;
 				dNormalize3(pContact->normal);
 
 #endif // RECOMPUTE_RAYNORMAL
@@ -889,9 +906,9 @@ int dCollideHeightfield( dxGeom *o1, dxGeom *o2, int flags, dContactGeom *contac
 	if ( terrain->m_p_data->m_nWrapMode == 0 )
 	{
 		nMinX = dMAX( nMinX, 0 );
-		nMaxX = dMIN( nMaxX, terrain->m_p_data->m_nWidthSamples );
+		nMaxX = dMIN( nMaxX, terrain->m_p_data->m_nWidthSamples - 1 );
 		nMinZ = dMAX( nMinZ, 0 );
-		nMaxZ = dMIN( nMaxZ, terrain->m_p_data->m_nDepthSamples );
+		nMaxZ = dMIN( nMaxZ, terrain->m_p_data->m_nDepthSamples - 1 );
 
 		if ((nMinX >= nMaxX) || (nMinZ >= nMaxZ))
 			goto dCollideHeightfieldExit;

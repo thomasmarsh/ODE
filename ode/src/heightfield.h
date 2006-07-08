@@ -12,24 +12,24 @@
 // Heightfield Data structure
 struct dxHeightfieldData
 {
-	dReal m_vWidth;            // world space heightfield dimension on X axis
-	dReal m_vDepth;            // world space heightfield dimension on Z axis
-	dReal m_vMinHeight;        // min sample height value (scaled and offset)
-	dReal m_vMaxHeight;        // max sample height value (scaled and offset)
-	dReal m_vSampleWidth;      // sample spacing on X axis (== m_vWidth / m_nWidthSamples)
-	dReal m_vSampleDepth;      // sample spacing on Z axis (== m_vDepth / m_nDepthSamples)
-	dReal m_vThickness;        // surface thickness (currently only added to bottom AABB)
-	dReal m_vScale;            // sample value multiplier
-	dReal m_vOffset;           // vertical sample offset
-	int	m_nWidthSamples;       // number of samples on X axis
-	int	m_nDepthSamples;       // number of samples on Z axis
-	int m_bCopyHeightData;     // copy sample data flag
-	int	m_nWrapMode;           // heightfield wrapping mode (0=finite, 1=infinite)
-	int m_nGetHeightMode;      // getheight mode (0=callback, 1=byte, 2=short, 3=float)
-	void *m_pHeightData;       // sample data array
-	void *m_pUserData;         // callback user data
+	dReal m_vWidth;            // World space heightfield dimension on X axis
+	dReal m_vDepth;            // World space heightfield dimension on Z axis
+	dReal m_vMinHeight;        // Min sample height value (scaled and offset)
+	dReal m_vMaxHeight;        // Max sample height value (scaled and offset)
+	dReal m_vSampleWidth;      // Vertex count on X axis edge (== m_vWidth / (m_nWidthSamples-1))
+	dReal m_vSampleDepth;      // Vertex count on Z axis edge (== m_vDepth / (m_nDepthSamples-1))
+	dReal m_vThickness;        // Surface thickness (added to bottom AABB)
+	dReal m_vScale;            // Sample value multiplier
+	dReal m_vOffset;           // Vertical sample offset
+	int	m_nWidthSamples;       // Vertex count on X axis edge (number of samples)
+	int	m_nDepthSamples;       // Vertex count on Z axis edge (number of samples)
+	int m_bCopyHeightData;     // Copy sample data flag
+	int	m_nWrapMode;           // Heightfield wrapping mode (0=finite, 1=infinite)
+	int m_nGetHeightMode;      // GetHeight mode ( 0=callback, 1=byte, 2=short, 3=float )
+	void* m_pHeightData;       // Sample data array
+	void* m_pUserData;         // Callback user data
 
-	dHeightfieldGetHeight* m_pGetHeightCallback;
+	dHeightfieldGetHeight* m_pGetHeightCallback;		// Callback pointer.
 
 	dxHeightfieldData();
 	~dxHeightfieldData();

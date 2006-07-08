@@ -499,7 +499,7 @@ int dCollideRayCylinder( dxGeom *o1, dxGeom *o2, int flags, dContactGeom *contac
 	//
 
 	dVector3 q, r;
-	dReal d, e, C, k;
+	dReal d, C, k;
 
 	// Vector 'r', line segment from C to R (ray start) ( r = R - C )
 	r[ 0 ] = ray->final_posr->pos[0] - cyl->final_posr->pos[0];
