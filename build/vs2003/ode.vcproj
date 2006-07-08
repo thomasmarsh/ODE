@@ -318,6 +318,9 @@
 					RelativePath="..\..\ode\src\collision_util.h">
 				</File>
 				<File
+					RelativePath="..\..\ode\src\heightfield.h">
+				</File>
+				<File
 					RelativePath="..\..\ode\src\joint.h">
 				</File>
 				<File
@@ -405,6 +408,9 @@
 					RelativePath="..\..\ode\src\collision_trimesh_distance.cpp">
 				</File>
 				<File
+					RelativePath="..\..\ode\src\collision_trimesh_plane.cpp">
+				</File>
+				<File
 					RelativePath="..\..\ode\src\collision_trimesh_ray.cpp">
 				</File>
 				<File
@@ -427,6 +433,9 @@
 				</File>
 				<File
 					RelativePath="..\..\ode\src\export-dif.cpp">
+				</File>
+				<File
+					RelativePath="..\..\ode\src\heightfield.cpp">
 				</File>
 				<File
 					RelativePath="..\..\ode\src\joint.cpp">

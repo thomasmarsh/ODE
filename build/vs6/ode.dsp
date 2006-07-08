@@ -213,6 +213,10 @@ SOURCE=../../ode/src/collision_util.h
 # End Source File
 # Begin Source File
 
+SOURCE=../../ode/src/heightfield.h
+# End Source File
+# Begin Source File
+
 SOURCE=../../ode/src/joint.h
 # End Source File
 # Begin Source File
@@ -329,6 +333,10 @@ SOURCE=../../ode/src/collision_trimesh_distance.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=../../ode/src/collision_trimesh_plane.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=../../ode/src/collision_trimesh_ray.cpp
 # End Source File
 # Begin Source File
@@ -358,6 +366,10 @@ SOURCE=../../ode/src/error.cpp
 # Begin Source File
 
 SOURCE=../../ode/src/export-dif.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=../../ode/src/heightfield.cpp
 # End Source File
 # Begin Source File
 
