@@ -78,17 +78,17 @@ package.objdir = "obj/ode"
 
 -- Build Flags
 
-	release_flags =
-	{
-		"optimize-speed",
-		"no-symbols",
-		"no-frame-pointer"
-	}
+	package.config["DebugLib"].buildflags   = { }
+	package.config["DebugDLL"].buildflags   = { }
+	
+	package.config["ReleaseDLL"].buildflags = { "optimize-speed", "no-symbols", "no-frame-pointer" }
+	package.config["ReleaseLib"].buildflags = { "optimize-speed", "no-symbols", "no-frame-pointer" }
 
-		package.config["Release"].buildflags = release_flags
-		package.config["ReleaseDLL"].buildflags = release_flags
-		package.config["ReleaseLib"].buildflags = release_flags
-
+	if (options.target == "vs6" or options.target == "vs2002" or options.target == "vs2003") then
+		table.insert(package.config.DebugLib.buildflags, "static-runtime")
+		table.insert(package.config.ReleaseLib.buildflags, "static-runtime")
+	end
+	
 
 -- Libraries
 
@@ -122,7 +122,7 @@ package.objdir = "obj/ode"
     "../../ode/src/collision_trimesh_distance.cpp",
     "../../ode/src/collision_trimesh_ray.cpp",
     "../../ode/src/collision_trimesh_sphere.cpp",
-    "../../ode/src/collision_trimesh_trimesh.cpp"
+    "../../ode/src/collision_trimesh_trimesh.cpp",
     "../../ode/src/collision_trimesh_plane.cpp"
   }
 

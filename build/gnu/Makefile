@@ -9,11 +9,11 @@ endif
 
 export CONFIG
 
-.PHONY: all clean ode drawstuff test_basket test_boxstack test_buggy test_chain1 test_chain2 test_collision test_crash test_friction test_hinge test_I test_joints test_ode test_slider test_space test_space_stress test_step test_cyl test_moving_trimesh test_trimesh tests
+.PHONY: all clean ode drawstuff test_basket test_boxstack test_buggy test_chain1 test_chain2 test_collision test_crash test_friction test_heightfield test_hinge test_I test_joints test_motor test_ode test_slider test_space test_space_stress test_step test_cyl test_cylvssphere test_moving_trimesh test_trimesh tests
 
-all: ode drawstuff test_basket test_boxstack test_buggy test_chain1 test_chain2 test_collision test_crash test_friction test_hinge test_I test_joints test_ode test_slider test_space test_space_stress test_step test_cyl test_moving_trimesh test_trimesh tests
+all: ode drawstuff test_basket test_boxstack test_buggy test_chain1 test_chain2 test_collision test_crash test_friction test_heightfield test_hinge test_I test_joints test_motor test_ode test_slider test_space test_space_stress test_step test_cyl test_cylvssphere test_moving_trimesh test_trimesh tests
 
-Makefile: ../premake.lua ../ode.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua
+Makefile: ../premake.lua ../ode.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua
 	@echo ==== Regenerating Makefiles ====
 	@premake --file $^ --usetargetpath --with-tests --clean --target gnu
 
@@ -57,6 +57,10 @@ test_friction: ode drawstuff
 	@echo ==== Building test_friction ====
 	@$(MAKE) --no-print-directory -C . -f test_friction.make
 
+test_heightfield: ode drawstuff
+	@echo ==== Building test_heightfield ====
+	@$(MAKE) --no-print-directory -C . -f test_heightfield.make
+
 test_hinge: ode drawstuff
 	@echo ==== Building test_hinge ====
 	@$(MAKE) --no-print-directory -C . -f test_hinge.make
@@ -68,6 +72,10 @@ test_I: ode drawstuff
 test_joints: ode drawstuff
 	@echo ==== Building test_joints ====
 	@$(MAKE) --no-print-directory -C . -f test_joints.make
+
+test_motor: ode drawstuff
+	@echo ==== Building test_motor ====
+	@$(MAKE) --no-print-directory -C . -f test_motor.make
 
 test_ode: ode drawstuff
 	@echo ==== Building test_ode ====
@@ -93,6 +101,10 @@ test_cyl: ode drawstuff
 	@echo ==== Building test_cyl ====
 	@$(MAKE) --no-print-directory -C . -f test_cyl.make
 
+test_cylvssphere: ode drawstuff
+	@echo ==== Building test_cylvssphere ====
+	@$(MAKE) --no-print-directory -C . -f test_cylvssphere.make
+
 test_moving_trimesh: ode drawstuff
 	@echo ==== Building test_moving_trimesh ====
 	@$(MAKE) --no-print-directory -C . -f test_moving_trimesh.make
@@ -116,15 +128,18 @@ clean:
 	@$(MAKE) --no-print-directory -C . -f test_collision.make clean
 	@$(MAKE) --no-print-directory -C . -f test_crash.make clean
 	@$(MAKE) --no-print-directory -C . -f test_friction.make clean
+	@$(MAKE) --no-print-directory -C . -f test_heightfield.make clean
 	@$(MAKE) --no-print-directory -C . -f test_hinge.make clean
 	@$(MAKE) --no-print-directory -C . -f test_I.make clean
 	@$(MAKE) --no-print-directory -C . -f test_joints.make clean
+	@$(MAKE) --no-print-directory -C . -f test_motor.make clean
 	@$(MAKE) --no-print-directory -C . -f test_ode.make clean
 	@$(MAKE) --no-print-directory -C . -f test_slider.make clean
 	@$(MAKE) --no-print-directory -C . -f test_space.make clean
 	@$(MAKE) --no-print-directory -C . -f test_space_stress.make clean
 	@$(MAKE) --no-print-directory -C . -f test_step.make clean
 	@$(MAKE) --no-print-directory -C . -f test_cyl.make clean
+	@$(MAKE) --no-print-directory -C . -f test_cylvssphere.make clean
 	@$(MAKE) --no-print-directory -C . -f test_moving_trimesh.make clean
 	@$(MAKE) --no-print-directory -C . -f test_trimesh.make clean
 	@$(MAKE) --no-print-directory -C . -f tests.make clean

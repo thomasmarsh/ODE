@@ -201,8 +201,8 @@ int main (int argc, char **argv)
   // run simulation
   dsSimulationLoop (argc,argv,352,288,&fn);
 
-  dWorldDestroy (world);
-  dSpaceDestroy (space);
   dJointGroupDestroy(contactgroup);
+  dSpaceDestroy (space);
+  dWorldDestroy (world);
   return 0;
 }

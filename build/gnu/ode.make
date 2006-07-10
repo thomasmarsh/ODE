@@ -81,8 +81,8 @@ OBJECTS := \
 	$(OBJDIR)/collision_trimesh_box.o \
 	$(OBJDIR)/collision_trimesh_ccylinder.o \
 	$(OBJDIR)/collision_trimesh_distance.o \
-	$(OBJDIR)/collision_trimesh_ray.o \
 	$(OBJDIR)/collision_trimesh_plane.o \
+	$(OBJDIR)/collision_trimesh_ray.o \
 	$(OBJDIR)/collision_trimesh_sphere.o \
 	$(OBJDIR)/collision_trimesh_trimesh.o \
 	$(OBJDIR)/collision_util.o \

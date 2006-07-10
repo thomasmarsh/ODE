@@ -15,6 +15,7 @@
     "hinge",
     "I",
     "joints",
+    "motor",
     "ode",
     "slider",
     "space",
@@ -24,6 +25,7 @@
 
   if (not options["no-cylinder"]) then
     table.insert(tests, "cyl")
+    table.insert(tests, "cylvssphere")
   end
 
   if (not options["no-trimesh"]) then
@@ -84,6 +86,11 @@
 
     package.includepaths = { "../../include" }
     package.defines = { "_CRT_SECURE_NO_DEPRECATE" }
+
+    if (options.target == "vs6" or options.target == "vs2002" or options.target == "vs2003") then
+      package.config.DebugLib.buildflags   = { "static-runtime" }
+      package.config.ReleaseLib.buildflags = { "static-runtime" }
+    end
 
     package.links = { "ode", "drawstuff" }
     if (windows) then

@@ -3,7 +3,7 @@
 	ProjectType="Visual C++"
 	Version="8.00"
 	Name="test_ode"
-	ProjectGUID="{0702D00A-462A-CF4A-884E-17CE28E031E1}"
+	ProjectGUID="{F3E6564A-5131-8C42-B288-031BB25156C3}"
 	RootNamespace="test_ode"
 	Keyword="Win32Proj"
 	>
