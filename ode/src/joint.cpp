@@ -535,7 +535,7 @@ int dxJointLimitMotor::addLimot (dxJoint *joint,
 	// a fudge factor.
 
 	dReal fm = fmax;
-	if (vel > 0) fm = -fm;
+	if ((vel > 0) || (vel==0 && limit==2)) fm = -fm;
 
 	// if we're powering away from the limit, apply the fudge factor
 	if ((limit==1 && vel > 0) || (limit==2 && vel < 0)) fm *= fudge_factor;
