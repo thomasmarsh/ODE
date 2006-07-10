@@ -3,7 +3,7 @@
 	ProjectType="Visual C++"
 	Version="8.00"
 	Name="test_slider"
-	ProjectGUID="{CDC00F6E-F53B-6041-93EF-8F9F38A182CE}"
+	ProjectGUID="{3B985E97-12C8-1C48-A50B-D5BB2E5F0854}"
 	RootNamespace="test_slider"
 	Keyword="Win32Proj"
 	>

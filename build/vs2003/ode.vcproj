@@ -3,7 +3,7 @@
 	ProjectType="Visual C++"
 	Version="7.10"
 	Name="ode"
-	ProjectGUID="{FB603612-D49E-0B48-B1BC-5B7D627796DC}"
+	ProjectGUID="{1D9EF75A-4D28-7A46-84AB-BADEF0BD91FD}"
 	Keyword="Win32Proj">
 	<Platforms>
 		<Platform
@@ -134,7 +134,7 @@
 				PreprocessorDefinitions="WIN32;ODE_LIB"
 				MinimalRebuild="TRUE"
 				BasicRuntimeChecks="3"
-				RuntimeLibrary="3"
+				RuntimeLibrary="1"
 				EnableFunctionLevelLinking="TRUE"
 				RuntimeTypeInfo="TRUE"
 				UsePrecompiledHeader="2"
@@ -181,7 +181,7 @@
 				AdditionalIncludeDirectories="../../include;../../OPCODE"
 				PreprocessorDefinitions="WIN32;ODE_LIB"
 				StringPooling="TRUE"
-				RuntimeLibrary="2"
+				RuntimeLibrary="0"
 				EnableFunctionLevelLinking="TRUE"
 				RuntimeTypeInfo="TRUE"
 				UsePrecompiledHeader="2"
