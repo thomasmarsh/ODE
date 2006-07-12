@@ -27,4 +27,6 @@ install-exec-hook:
 	ln -s $(prefix)/lib/@ODE_SONAME@.@ODE_REVISION@.@ODE_AGE@ \
 	$(prefix)/lib/@ODE_SONAME@.@ODE_REVISION@
 	/sbin/ldconfig
+else
+install-exec-hook:
 endif
