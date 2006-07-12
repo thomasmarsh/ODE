@@ -1329,7 +1329,7 @@ static void contactGetInfo1 (dxJointContact *j, dxJoint::Info1 *info)
 
 static void contactGetInfo2 (dxJointContact *j, dxJoint::Info2 *info)
 {
-  int i,s = info->rowskip;
+  int s = info->rowskip;
   int s2 = 2*s;
 
   // get normal, with sign adjusted for body1/body2 polarity
@@ -1348,7 +1348,9 @@ static void contactGetInfo2 (dxJointContact *j, dxJoint::Info2 *info)
 
   // c1,c2 = contact points with respect to body PORs
   dVector3 c1,c2;
-  for (i=0; i<3; i++) c1[i] = j->contact.geom.pos[i] - j->node[0].body->posr.pos[i];
+  c1[0] = j->contact.geom.pos[0] - j->node[0].body->posr.pos[0];
+  c1[1] = j->contact.geom.pos[1] - j->node[0].body->posr.pos[1];
+  c1[2] = j->contact.geom.pos[2] - j->node[0].body->posr.pos[2];
 
   // set jacobian for normal
   info->J1l[0] = normal[0];
@@ -1356,8 +1358,9 @@ static void contactGetInfo2 (dxJointContact *j, dxJoint::Info2 *info)
   info->J1l[2] = normal[2];
   dCROSS (info->J1a,=,c1,normal);
   if (j->node[1].body) {
-    for (i=0; i<3; i++) c2[i] = j->contact.geom.pos[i] -
-			  j->node[1].body->posr.pos[i];
+    c2[0] = j->contact.geom.pos[0] - j->node[1].body->posr.pos[0];
+    c2[1] = j->contact.geom.pos[1] - j->node[1].body->posr.pos[1];
+    c2[2] = j->contact.geom.pos[2] - j->node[1].body->posr.pos[2];
     info->J2l[0] = -normal[0];
     info->J2l[1] = -normal[1];
     info->J2l[2] = -normal[2];
