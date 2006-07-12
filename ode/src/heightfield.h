@@ -26,7 +26,7 @@ struct dxHeightfieldData
 	int m_bCopyHeightData;     // Copy sample data flag
 	int	m_nWrapMode;           // Heightfield wrapping mode (0=finite, 1=infinite)
 	int m_nGetHeightMode;      // GetHeight mode ( 0=callback, 1=byte, 2=short, 3=float )
-	void* m_pHeightData;       // Sample data array
+	const void* m_pHeightData; // Sample data array
 	void* m_pUserData;         // Callback user data
 
 	dHeightfieldGetHeight* m_pGetHeightCallback;		// Callback pointer.
@@ -57,7 +57,7 @@ struct dxHeightfield : public dxGeom
 
 	void computeAABB();
 
-	int dCollideHeightfieldUnit( int x, int z, dxGeom *o2, int numMaxContacts, 
+	int dCollideHeightfieldUnit( int x, int z, dxGeom *o2, int numMaxContacts,
 		int flags, dContactGeom *contact, int skip );
 };
 

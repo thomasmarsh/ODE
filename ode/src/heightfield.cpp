@@ -238,10 +238,10 @@ dReal dxHeightfieldData::GetHeight( dReal x, dReal z )
 {
 	int nX	= int( floor( x / m_vSampleWidth ) );
 	int nZ	= int( floor( z / m_vSampleDepth ) );
-	
+
 	dReal dx = ( x - ( dReal( nX ) * m_vSampleWidth ) ) / m_vSampleWidth;
 	dReal dz = ( z - ( dReal( nZ ) * m_vSampleDepth ) ) / m_vSampleDepth;
-	
+
 	dIASSERT( ( dx >= 0.0f ) && ( dx <= 1.0f ) );
 	dIASSERT( ( dz >= 0.0f ) && ( dz <= 1.0f ) );
 
@@ -251,7 +251,7 @@ dReal dxHeightfieldData::GetHeight( dReal x, dReal z )
 	{
 		y0 = GetHeight( nX, nZ );
 
-		y = y0 + ( GetHeight( nX + 1, nZ ) - y0 ) * dx 
+		y = y0 + ( GetHeight( nX + 1, nZ ) - y0 ) * dx
 			   + ( GetHeight( nX, nZ + 1 ) - y0 ) * dz;
 	}
 	else
@@ -411,7 +411,7 @@ void dGeomHeightfieldDataBuildCallback( dHeightfieldDataID d,
 
 
 void dGeomHeightfieldDataBuildByte( dHeightfieldDataID d,
-                                    unsigned char *pHeightData, int bCopyHeightData,
+                                    const unsigned char *pHeightData, int bCopyHeightData,
 									dReal width, dReal depth, int widthSamples, int depthSamples,
 									dReal scale, dReal offset, dReal thickness, int bWrap )
 {
@@ -435,9 +435,9 @@ void dGeomHeightfieldDataBuildByte( dHeightfieldDataID d,
 		// We own the height data, allocate storage
 		d->m_pHeightData = new unsigned char[ d->m_nWidthSamples * d->m_nDepthSamples ];
 		dIASSERT( d->m_pHeightData );
-		
+
 		// Copy data.
-		memcpy( d->m_pHeightData, pHeightData, 
+		memcpy( (void*)d->m_pHeightData, pHeightData,
 			sizeof( unsigned char ) * d->m_nWidthSamples * d->m_nDepthSamples );
 	}
 
@@ -447,7 +447,7 @@ void dGeomHeightfieldDataBuildByte( dHeightfieldDataID d,
 
 
 void dGeomHeightfieldDataBuildShort( dHeightfieldDataID d,
-									 short* pHeightData, int bCopyHeightData,
+									 const short* pHeightData, int bCopyHeightData,
 									 dReal width, dReal depth, int widthSamples, int depthSamples,
 									 dReal scale, dReal offset, dReal thickness, int bWrap )
 {
@@ -471,9 +471,9 @@ void dGeomHeightfieldDataBuildShort( dHeightfieldDataID d,
 		// We own the height data, allocate storage
 		d->m_pHeightData = new short[ d->m_nWidthSamples * d->m_nDepthSamples ];
 		dIASSERT( d->m_pHeightData );
-		
+
 		// Copy data.
-		memcpy( d->m_pHeightData, pHeightData, 
+		memcpy( (void*)d->m_pHeightData, pHeightData,
 			sizeof( short ) * d->m_nWidthSamples * d->m_nDepthSamples );
 	}
 
@@ -483,7 +483,7 @@ void dGeomHeightfieldDataBuildShort( dHeightfieldDataID d,
 
 
 void dGeomHeightfieldDataBuildFloat( dHeightfieldDataID d,
-                                     dReal *pHeightData, int bCopyHeightData,
+                                     const dReal *pHeightData, int bCopyHeightData,
 									 dReal width, dReal depth, int widthSamples, int depthSamples,
 									 dReal scale, dReal offset, dReal thickness, int bWrap )
 {
@@ -507,9 +507,9 @@ void dGeomHeightfieldDataBuildFloat( dHeightfieldDataID d,
 		// We own the height data, allocate storage
 		d->m_pHeightData = new dReal[ d->m_nWidthSamples * d->m_nDepthSamples ];
 		dIASSERT( d->m_pHeightData );
-		
+
 		// Copy data.
-		memcpy( d->m_pHeightData, pHeightData, 
+		memcpy( (void*)d->m_pHeightData, pHeightData,
 			sizeof( dReal ) * d->m_nWidthSamples * d->m_nDepthSamples );
 	}
 
@@ -777,7 +777,7 @@ int dxHeightfield::dCollideHeightfieldUnit( int x, int z, dxGeom* o2, int numMax
 
 				if ( GetDepth )
 				{
-					pContact->depth = GetDepth( o2, 
+					pContact->depth = GetDepth( o2,
 						pContact->pos[0], pContact->pos[1], pContact->pos[2] );
 
 					numContacts++;
@@ -785,7 +785,7 @@ int dxHeightfield::dCollideHeightfieldUnit( int x, int z, dxGeom* o2, int numMax
 				else
 				{
 					// We don't have a GetDepth function, so do a ray cast instead.
-					// NOTE: This isn't ideal, and a GetDepth function should be 
+					// NOTE: This isn't ideal, and a GetDepth function should be
 					// written for all geom classes.
 					dxRay rayV( 0, 1000.f );
 					dGeomRaySet( &rayV, pContact->pos[0], pContact->pos[1], pContact->pos[2],

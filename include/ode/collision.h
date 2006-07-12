@@ -34,15 +34,15 @@ extern "C" {
 /**
  * @defgroup collide Collision Detection
  *
- * ODE has two main components: a dynamics simulation engine and a collision 
- * detection engine. The collision engine is given information about the 
- * shape of each body. At each time step it figures out which bodies touch 
- * each other and passes the resulting contact point information to the user. 
+ * ODE has two main components: a dynamics simulation engine and a collision
+ * detection engine. The collision engine is given information about the
+ * shape of each body. At each time step it figures out which bodies touch
+ * each other and passes the resulting contact point information to the user.
  * The user in turn creates contact joints between bodies.
  *
- * Using ODE's collision detection is optional - an alternative collision 
- * detection system can be used as long as it can supply the right kinds of 
- * contact information. 
+ * Using ODE's collision detection is optional - an alternative collision
+ * detection system can be used as long as it can supply the right kinds of
+ * contact information.
  */
 
 
@@ -52,12 +52,12 @@ extern "C" {
 /**
  * @brief Destroy a geom, removing it from any space.
  *
- * Destroy a geom, removing it from any space it is in first. This one 
- * function destroys a geom of any type, but to create a geom you must call 
+ * Destroy a geom, removing it from any space it is in first. This one
+ * function destroys a geom of any type, but to create a geom you must call
  * a creation function for that type.
  *
- * When a space is destroyed, if its cleanup mode is 1 (the default) then all 
- * the geoms in that space are automatically destroyed as well. 
+ * When a space is destroyed, if its cleanup mode is 1 (the default) then all
+ * the geoms in that space are automatically destroyed as well.
  *
  * @param geom the geom to be destroyed.
  * @ingroup collide
@@ -85,18 +85,18 @@ ODE_API void *dGeomGetData (dGeomID geom);
 
 
 /**
- * @brief Set the body associated with a placeable geom. 
+ * @brief Set the body associated with a placeable geom.
  *
- * Setting a body on a geom automatically combines the position vector and 
- * rotation matrix of the body and geom, so that setting the position or 
- * orientation of one will set the value for both objects. Setting a body 
- * ID of zero gives the geom its own position and rotation, independent 
- * from any body. If the geom was previously connected to a body then its 
- * new independent position/rotation is set to the current position/rotation 
+ * Setting a body on a geom automatically combines the position vector and
+ * rotation matrix of the body and geom, so that setting the position or
+ * orientation of one will set the value for both objects. Setting a body
+ * ID of zero gives the geom its own position and rotation, independent
+ * from any body. If the geom was previously connected to a body then its
+ * new independent position/rotation is set to the current position/rotation
  * of the body.
  *
- * Calling these functions on a non-placeable geom results in a runtime 
- * error in the debug build of ODE. 
+ * Calling these functions on a non-placeable geom results in a runtime
+ * error in the debug build of ODE.
  *
  * @param geom the geom to connect
  * @param body the body to attach to the geom
@@ -106,7 +106,7 @@ ODE_API void dGeomSetBody (dGeomID geom, dBodyID body);
 
 
 /**
- * @brief Get the body associated with a placeable geom. 
+ * @brief Get the body associated with a placeable geom.
  * @param geom the geom to query.
  * @sa dGeomSetBody
  * @ingroup collide
@@ -118,8 +118,8 @@ ODE_API dBodyID dGeomGetBody (dGeomID geom);
  * @brief Set the position vector of a placeable geom.
  *
  * If the geom is attached to a body, the body's position will also be changed.
- * Calling this function on a non-placeable geom results in a runtime error in 
- * the debug build of ODE. 
+ * Calling this function on a non-placeable geom results in a runtime error in
+ * the debug build of ODE.
  *
  * @param geom the geom to set.
  * @param x the new X coordinate.
@@ -135,8 +135,8 @@ ODE_API void dGeomSetPosition (dGeomID geom, dReal x, dReal y, dReal z);
  * @brief Set the rotation matrix of a placeable geom.
  *
  * If the geom is attached to a body, the body's rotation will also be changed.
- * Calling this function on a non-placeable geom results in a runtime error in 
- * the debug build of ODE. 
+ * Calling this function on a non-placeable geom results in a runtime error in
+ * the debug build of ODE.
  *
  * @param geom the geom to set.
  * @param R the new rotation matrix.
@@ -151,8 +151,8 @@ ODE_API void dGeomSetRotation (dGeomID geom, const dMatrix3 R);
  *
  * If the geom is attached to a body, the body's rotation will also be changed.
  *
- * Calling this function on a non-placeable geom results in a runtime error in 
- * the debug build of ODE. 
+ * Calling this function on a non-placeable geom results in a runtime error in
+ * the debug build of ODE.
  *
  * @param geom the geom to set.
  * @param Q the new rotation.
@@ -167,8 +167,8 @@ ODE_API void dGeomSetQuaternion (dGeomID geom, const dQuaternion Q);
  *
  * If the geom is attached to a body, the body's position will be returned.
  *
- * Calling this function on a non-placeable geom results in a runtime error in 
- * the debug build of ODE. 
+ * Calling this function on a non-placeable geom results in a runtime error in
+ * the debug build of ODE.
  *
  * @param geom the geom to query.
  * @returns A pointer to the geom's position vector.
@@ -186,8 +186,8 @@ ODE_API const dReal * dGeomGetPosition (dGeomID geom);
  *
  * If the geom is attached to a body, the body's rotation will be returned.
  *
- * Calling this function on a non-placeable geom results in a runtime error in 
- * the debug build of ODE. 
+ * Calling this function on a non-placeable geom results in a runtime error in
+ * the debug build of ODE.
  *
  * @param geom the geom to query.
  * @returns A pointer to the geom's rotation matrix.
@@ -205,8 +205,8 @@ ODE_API const dReal * dGeomGetRotation (dGeomID geom);
  *
  * If the geom is attached to a body, the body's quaternion will be returned.
  *
- * Calling this function on a non-placeable geom results in a runtime error in 
- * the debug build of ODE. 
+ * Calling this function on a non-placeable geom results in a runtime error in
+ * the debug build of ODE.
  *
  * @param geom the geom to query.
  * @param result a copy of the rotation quaternion.
@@ -219,13 +219,13 @@ ODE_API void dGeomGetQuaternion (dGeomID geom, dQuaternion result);
 /**
  * @brief Return the axis-aligned bounding box.
  *
- * Return in aabb an axis aligned bounding box that surrounds the given geom. 
- * The aabb array has elements (minx, maxx, miny, maxy, minz, maxz). If the 
- * geom is a space, a bounding box that surrounds all contained geoms is 
+ * Return in aabb an axis aligned bounding box that surrounds the given geom.
+ * The aabb array has elements (minx, maxx, miny, maxy, minz, maxz). If the
+ * geom is a space, a bounding box that surrounds all contained geoms is
  * returned.
  *
- * This function may return a pre-computed cached bounding box, if it can 
- * determine that the geom has not moved since the last time the bounding 
+ * This function may return a pre-computed cached bounding box, if it can
+ * determine that the geom has not moved since the last time the bounding
  * box was computed.
  *
  * @param geom the geom to query
@@ -282,11 +282,11 @@ ODE_API int dGeomGetClass (dGeomID geom);
 
 
 /**
- * @brief Set the "category" bitfield for the given geom. 
+ * @brief Set the "category" bitfield for the given geom.
  *
- * The category bitfield is used by spaces to govern which geoms will 
- * interact with each other. The bitfield is guaranteed to be at least 
- * 32 bits wide. The default category values for newly created geoms 
+ * The category bitfield is used by spaces to govern which geoms will
+ * interact with each other. The bitfield is guaranteed to be at least
+ * 32 bits wide. The default category values for newly created geoms
  * have all bits set.
  *
  * @param geom the geom to set
@@ -297,11 +297,11 @@ ODE_API void dGeomSetCategoryBits (dGeomID geom, unsigned long bits);
 
 
 /**
- * @brief Set the "collide" bitfield for the given geom. 
+ * @brief Set the "collide" bitfield for the given geom.
  *
- * The collide bitfield is used by spaces to govern which geoms will 
- * interact with each other. The bitfield is guaranteed to be at least 
- * 32 bits wide. The default category values for newly created geoms 
+ * The collide bitfield is used by spaces to govern which geoms will
+ * interact with each other. The bitfield is guaranteed to be at least
+ * 32 bits wide. The default category values for newly created geoms
  * have all bits set.
  *
  * @param geom the geom to set
@@ -312,7 +312,7 @@ ODE_API void dGeomSetCollideBits (dGeomID geom, unsigned long bits);
 
 
 /**
- * @brief Get the "category" bitfield for the given geom. 
+ * @brief Get the "category" bitfield for the given geom.
  *
  * @param geom the geom to set
  * @param bits the new bitfield value
@@ -323,7 +323,7 @@ ODE_API unsigned long dGeomGetCategoryBits (dGeomID);
 
 
 /**
- * @brief Get the "collide" bitfield for the given geom. 
+ * @brief Get the "collide" bitfield for the given geom.
  *
  * @param geom the geom to set
  * @param bits the new bitfield value
@@ -334,11 +334,11 @@ ODE_API unsigned long dGeomGetCollideBits (dGeomID);
 
 
 /**
- * @brief Enable a geom. 
+ * @brief Enable a geom.
  *
  * Disabled geoms are completely ignored by dSpaceCollide and dSpaceCollide2,
- * although they can still be members of a space. New geoms are created in 
- * the enabled state. 
+ * although they can still be members of a space. New geoms are created in
+ * the enabled state.
  *
  * @param geom   the geom to enable
  * @sa dGeomDisable
@@ -349,11 +349,11 @@ ODE_API void dGeomEnable (dGeomID geom);
 
 
 /**
- * @brief Disable a geom. 
+ * @brief Disable a geom.
  *
  * Disabled geoms are completely ignored by dSpaceCollide and dSpaceCollide2,
- * although they can still be members of a space. New geoms are created in 
- * the enabled state. 
+ * although they can still be members of a space. New geoms are created in
+ * the enabled state.
  *
  * @param geom   the geom to disable
  * @sa dGeomDisable
@@ -367,8 +367,8 @@ ODE_API void dGeomDisable (dGeomID geom);
  * @brief Check to see if a geom is enabled.
  *
  * Disabled geoms are completely ignored by dSpaceCollide and dSpaceCollide2,
- * although they can still be members of a space. New geoms are created in 
- * the enabled state. 
+ * although they can still be members of a space. New geoms are created in
+ * the enabled state.
  *
  * @param geom   the geom to query
  * @returns Non-zero if the geom is enabled, zero otherwise.
@@ -567,46 +567,46 @@ ODE_API void dGeomGetOffsetQuaternion (dGeomID geom, dQuaternion result);
 
 /**
  *
- * @brief Given two geoms o1 and o2 that potentially intersect, 
- * generate contact information for them. 
+ * @brief Given two geoms o1 and o2 that potentially intersect,
+ * generate contact information for them.
  *
- * Internally, this just calls the correct class-specific collision 
- * functions for o1 and o2. 
+ * Internally, this just calls the correct class-specific collision
+ * functions for o1 and o2.
  *
  * @param o1 The first geom to test.
  * @param o2 The second geom to test.
  *
- * @param flags The flags specify how contacts should be generated if 
- * the geoms touch. The lower 16 bits of flags is an integer that 
- * specifies the maximum number of contact points to generate. Note 
- * that if this number is zero, this function just pretends that it is 
- * one -- in other words you can not ask for zero contacts. All other bits 
- * in flags must be zero. In the future the other bits may be used to 
+ * @param flags The flags specify how contacts should be generated if
+ * the geoms touch. The lower 16 bits of flags is an integer that
+ * specifies the maximum number of contact points to generate. Note
+ * that if this number is zero, this function just pretends that it is
+ * one -- in other words you can not ask for zero contacts. All other bits
+ * in flags must be zero. In the future the other bits may be used to
  * select from different contact generation strategies.
  *
- * @param contact Points to an array of dContactGeom structures. The array 
- * must be able to hold at least the maximum number of contacts. These 
- * dContactGeom structures may be embedded within larger structures in the 
- * array -- the skip parameter is the byte offset from one dContactGeom to 
- * the next in the array. If skip is sizeof(dContactGeom) then contact 
- * points to a normal (C-style) array. It is an error for skip to be smaller 
+ * @param contact Points to an array of dContactGeom structures. The array
+ * must be able to hold at least the maximum number of contacts. These
+ * dContactGeom structures may be embedded within larger structures in the
+ * array -- the skip parameter is the byte offset from one dContactGeom to
+ * the next in the array. If skip is sizeof(dContactGeom) then contact
+ * points to a normal (C-style) array. It is an error for skip to be smaller
  * than sizeof(dContactGeom).
  *
- * @returns If the geoms intersect, this function returns the number of contact 
- * points generated (and updates the contact array), otherwise it returns 0 
+ * @returns If the geoms intersect, this function returns the number of contact
+ * points generated (and updates the contact array), otherwise it returns 0
  * (and the contact array is not touched).
  *
- * @remarks If a space is passed as o1 or o2 then this function will collide 
- * all objects contained in o1 with all objects contained in o2, and return 
- * the resulting contact points. This method for colliding spaces with geoms 
- * (or spaces with spaces) provides no user control over the individual 
+ * @remarks If a space is passed as o1 or o2 then this function will collide
+ * all objects contained in o1 with all objects contained in o2, and return
+ * the resulting contact points. This method for colliding spaces with geoms
+ * (or spaces with spaces) provides no user control over the individual
  * collisions. To get that control, use dSpaceCollide or dSpaceCollide2 instead.
  *
- * @remarks If o1 and o2 are the same geom then this function will do nothing 
- * and return 0. Technically speaking an object intersects with itself, but it 
+ * @remarks If o1 and o2 are the same geom then this function will do nothing
+ * and return 0. Technically speaking an object intersects with itself, but it
  * is not useful to find contact points in this case.
  *
- * @remarks This function does not care if o1 and o2 are in the same space or not 
+ * @remarks This function does not care if o1 and o2 are in the same space or not
  * (or indeed if they are in any space at all).
  *
  * @ingroup collide
@@ -615,27 +615,27 @@ ODE_API int dCollide (dGeomID o1, dGeomID o2, int flags, dContactGeom *contact,
 	      int skip);
 
 /**
- * @brief Determines which pairs of geoms in a space may potentially intersect, 
- * and calls the callback function for each candidate pair. 
+ * @brief Determines which pairs of geoms in a space may potentially intersect,
+ * and calls the callback function for each candidate pair.
  *
  * @param space The space to test.
- * 
- * @param data Passed from dSpaceCollide directly to the callback 
- * function. Its meaning is user defined. The o1 and o2 arguments are the 
+ *
+ * @param data Passed from dSpaceCollide directly to the callback
+ * function. Its meaning is user defined. The o1 and o2 arguments are the
  * geoms that may be near each other.
  *
  * @param callback A callback function is of type @ref dNearCallback.
  *
- * @remarks Other spaces that are contained within the colliding space are 
- * not treated specially, i.e. they are not recursed into. The callback 
- * function may be passed these contained spaces as one or both geom 
+ * @remarks Other spaces that are contained within the colliding space are
+ * not treated specially, i.e. they are not recursed into. The callback
+ * function may be passed these contained spaces as one or both geom
  * arguments.
  *
- * @remarks dSpaceCollide() is guaranteed to pass all intersecting geom 
- * pairs to the callback function, but may also pass close but 
- * non-intersecting pairs. The number of these calls depends on the 
- * internal algorithms used by the space. Thus you should not expect 
- * that dCollide will return contacts for every pair passed to the 
+ * @remarks dSpaceCollide() is guaranteed to pass all intersecting geom
+ * pairs to the callback function, but may also pass close but
+ * non-intersecting pairs. The number of these calls depends on the
+ * internal algorithms used by the space. Thus you should not expect
+ * that dCollide will return contacts for every pair passed to the
  * callback.
  *
  * @ingroup collide
@@ -689,7 +689,7 @@ ODE_API dGeomID dCreateConvex (dSpaceID space,
 			       unsigned int _planecount,
 			       dReal *_points,
 			       unsigned int _pointcount,unsigned int *_polygons);
-  
+
 ODE_API void dGeomSetConvex (dGeomID g,
 			     dReal *_planes,
 			     unsigned int _count,
@@ -807,12 +807,12 @@ ODE_API dGeomID dCreateHeightfield( dSpaceID space,
 /**
  * @brief Creates a new empty dHeightfieldDataID.
  *
- * Allocates a new dHeightfieldDataID and returns it. You must call 
+ * Allocates a new dHeightfieldDataID and returns it. You must call
  * dGeomHeightfieldDataDestroy to destroy it after the geom has been removed.
  * The dHeightfieldDataID value is used when specifying a data format type.
  *
  * @return A dHeightfieldDataID for use with dGeomHeightfieldDataBuildCallback,
- * dGeomHeightfieldDataBuildByte, dGeomHeightfieldDataBuildShort or 
+ * dGeomHeightfieldDataBuildByte, dGeomHeightfieldDataBuildShort or
  * dGeomHeightfieldDataBuildFloat.
  * @ingroup collide
  */
@@ -832,17 +832,17 @@ ODE_API void dGeomHeightfieldDataDestroy( dHeightfieldDataID d );
 
 
 /**
- * @brief Configures a dHeightfieldDataID to use a callback to 
+ * @brief Configures a dHeightfieldDataID to use a callback to
  * retrieve height data.
  *
- * Before a dHeightfieldDataID can be used by a geom it must be 
+ * Before a dHeightfieldDataID can be used by a geom it must be
  * configured to specify the format of the height data.
  * This call specifies that the heightfield data is computed by
  * the user and it should use the given callback when determining
  * the height of a given element of it's shape.
  *
  * @param d A new dHeightfieldDataID created by dGeomHeightfieldDataCreate
- * 
+ *
  * @param width Specifies the total 'width' of the heightfield along
  * the geom's local x axis.
  * @param depth Specifies the total 'depth' of the heightfield along
@@ -860,7 +860,7 @@ ODE_API void dGeomHeightfieldDataDestroy( dHeightfieldDataID d );
  *
  * @param thickness A value subtracted from the lowest height
  * value which in effect adds an additional cuboid to the base of the
- * heightfield. This is used to prevent geoms from looping under the 
+ * heightfield. This is used to prevent geoms from looping under the
  * desired terrain and not registering as a collision. Note that the
  * thickness is not affected by the scale or offset parameters.
  *
@@ -879,13 +879,13 @@ ODE_API void dGeomHeightfieldDataBuildCallback( dHeightfieldDataID d,
 /**
  * @brief Configures a dHeightfieldDataID to use height data in byte format.
  *
- * Before a dHeightfieldDataID can be used by a geom it must be 
+ * Before a dHeightfieldDataID can be used by a geom it must be
  * configured to specify the format of the height data.
  * This call specifies that the heightfield data is stored as a rectangular
  * array of bytes (8 bit unsigned) representing the height at each sample point.
  *
  * @param d A new dHeightfieldDataID created by dGeomHeightfieldDataCreate
- * 
+ *
  * @param pHeightData A pointer to the height data.
  * @param bCopyHeightData When non-zero the height data is copied to an
  * internal store. When zero the height data is accessed by reference and
@@ -908,7 +908,7 @@ ODE_API void dGeomHeightfieldDataBuildCallback( dHeightfieldDataID d,
  *
  * @param thickness A value subtracted from the lowest height
  * value which in effect adds an additional cuboid to the base of the
- * heightfield. This is used to prevent geoms from looping under the 
+ * heightfield. This is used to prevent geoms from looping under the
  * desired terrain and not registering as a collision. Note that the
  * thickness is not affected by the scale or offset parameters.
  *
@@ -920,20 +920,20 @@ ODE_API void dGeomHeightfieldDataBuildCallback( dHeightfieldDataID d,
  * @ingroup collide
  */
 ODE_API void dGeomHeightfieldDataBuildByte( dHeightfieldDataID d,
-				unsigned char* pHeightData, int bCopyHeightData,
+				const unsigned char* pHeightData, int bCopyHeightData,
 				dReal width, dReal depth, int widthSamples, int depthSamples,
 				dReal scale, dReal offset, dReal thickness,	int bWrap );
 
 /**
  * @brief Configures a dHeightfieldDataID to use height data in short format.
  *
- * Before a dHeightfieldDataID can be used by a geom it must be 
+ * Before a dHeightfieldDataID can be used by a geom it must be
  * configured to specify the format of the height data.
  * This call specifies that the heightfield data is stored as a rectangular
  * array of shorts (16 bit signed) representing the height at each sample point.
  *
  * @param d A new dHeightfieldDataID created by dGeomHeightfieldDataCreate
- * 
+ *
  * @param pHeightData A pointer to the height data.
  * @param bCopyHeightData When non-zero the height data is copied to an
  * internal store. When zero the height data is accessed by reference and
@@ -956,7 +956,7 @@ ODE_API void dGeomHeightfieldDataBuildByte( dHeightfieldDataID d,
  *
  * @param thickness A value subtracted from the lowest height
  * value which in effect adds an additional cuboid to the base of the
- * heightfield. This is used to prevent geoms from looping under the 
+ * heightfield. This is used to prevent geoms from looping under the
  * desired terrain and not registering as a collision. Note that the
  * thickness is not affected by the scale or offset parameters.
  *
@@ -968,21 +968,21 @@ ODE_API void dGeomHeightfieldDataBuildByte( dHeightfieldDataID d,
  * @ingroup collide
  */
 ODE_API void dGeomHeightfieldDataBuildShort( dHeightfieldDataID d,
-				short* pHeightData, int bCopyHeightData,
+				const short* pHeightData, int bCopyHeightData,
 				dReal width, dReal depth, int widthSamples, int depthSamples,
 				dReal scale, dReal offset, dReal thickness, int bWrap );
 
 /**
  * @brief Configures a dHeightfieldDataID to use height data in floating point format.
  *
- * Before a dHeightfieldDataID can be used by a geom it must be 
+ * Before a dHeightfieldDataID can be used by a geom it must be
  * configured to specify the format of the height data.
  * This call specifies that the heightfield data is stored as a rectangular
- * array of 'dReal's (either single or double precision float) representing 
+ * array of 'dReal's (either single or double precision float) representing
  * the height at each sample point.
  *
  * @param d A new dHeightfieldDataID created by dGeomHeightfieldDataCreate
- * 
+ *
  * @param pHeightData A pointer to the height data.
  * @param bCopyHeightData When non-zero the height data is copied to an
  * internal store. When zero the height data is accessed by reference and
@@ -1005,7 +1005,7 @@ ODE_API void dGeomHeightfieldDataBuildShort( dHeightfieldDataID d,
  *
  * @param thickness A value subtracted from the lowest height
  * value which in effect adds an additional cuboid to the base of the
- * heightfield. This is used to prevent geoms from looping under the 
+ * heightfield. This is used to prevent geoms from looping under the
  * desired terrain and not registering as a collision. Note that the
  * thickness is not affected by the scale or offset parameters.
  *
@@ -1017,7 +1017,7 @@ ODE_API void dGeomHeightfieldDataBuildShort( dHeightfieldDataID d,
  * @ingroup collide
  */
 ODE_API void dGeomHeightfieldDataBuildFloat( dHeightfieldDataID d,
-				dReal* pHeightData, int bCopyHeightData,
+				const dReal* pHeightData, int bCopyHeightData,
 				dReal width, dReal depth, int widthSamples, int depthSamples,
 				dReal scale, dReal offset, dReal thickness, int bWrap );
 
