@@ -10,15 +10,11 @@
  *   dSINGLE/dDOUBLE   - force ODE to use single-precision (float)
  *                       or double-precision (double) for numbers
  *
- *   dCYLINDER_ENABLED - enable/disable cylinder support
- *
  *   dTRIMESH_ENABLED  - enable/disable trimesh support
  *
  ******************************************************************/
 
 #define {PRECISION} 1
-
-#define dCYLINDER_ENABLED {CYLINDER}
 
 #define dTRIMESH_ENABLED {TRIMESH}
 
