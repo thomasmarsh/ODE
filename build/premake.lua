@@ -10,7 +10,7 @@ project.name = "ode"
   if (options["target"] == "vs6" and not options["enable-static-only"]) then
     options["enable-shared-only"] = 1
   end
-  
+
   if (not options["enable-shared-only"] and not options["enable-static-only"]) then
     project.configs = { "DebugDLL", "ReleaseDLL", "DebugLib", "ReleaseLib" }
   end
@@ -20,11 +20,10 @@ project.name = "ode"
 
   addoption("with-doubles",  "Use double instead of float as base numeric type")
   addoption("with-tests",    "Builds the test applications and DrawStuff library")
-  addoption("no-cylinder",   "Disable cylinder collision geometry")
   addoption("no-dif",        "Exclude DIF (Dynamics Interchange Format) exports")
   addoption("no-trimesh",    "Exclude trimesh collision geometry")
-  
-  
+
+
 -- If the `--usetargetpath` flag is specified, each set of generated files
 -- be placed in a directory named for the target toolset. This flag is
 -- used by the `--makeall` command (see below).
@@ -51,7 +50,7 @@ project.name = "ode"
     project.config["ReleaseLib"].bindir = "../lib/ReleaseLib"
     project.config["ReleaseLib"].libdir = "../lib/ReleaseLib"
   end
-  
+
 
 -- Build packages
 
@@ -60,8 +59,8 @@ project.name = "ode"
   if (options["with-tests"]) then
     dopackage("tests.lua")
   end
-    
-	
+
+
 -- Remove all intermediate files
 
   function doclean(cmd, arg)
@@ -93,4 +92,3 @@ project.name = "ode"
     os.execute("premake --usetargetpath --with-tests --clean --target vs2005")
     os.execute("premake --usetargetpath --with-tests --clean --target gnu")
   end
-  

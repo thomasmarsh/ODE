@@ -23,12 +23,6 @@ package.objdir = "obj/ode"
     text = string.gsub(text, "{PRECISION}", "dSINGLE")
   end
 
-  if (options["no-cylinder"]) then
-    text = string.gsub(text, "{CYLINDER}", "0")
-  else
-    text = string.gsub(text, "{CYLINDER}", "1")
-  end
-
   if (options["no-trimesh"]) then
     text = string.gsub(text, "{TRIMESH}", "0")
   else
@@ -80,7 +74,7 @@ package.objdir = "obj/ode"
 
 	package.config["DebugLib"].buildflags   = { }
 	package.config["DebugDLL"].buildflags   = { }
-	
+
 	package.config["ReleaseDLL"].buildflags = { "optimize-speed", "no-symbols", "no-frame-pointer" }
 	package.config["ReleaseLib"].buildflags = { "optimize-speed", "no-symbols", "no-frame-pointer" }
 
@@ -88,7 +82,7 @@ package.objdir = "obj/ode"
 		table.insert(package.config.DebugLib.buildflags, "static-runtime")
 		table.insert(package.config.ReleaseLib.buildflags, "static-runtime")
 	end
-	
+
 
 -- Libraries
 
@@ -131,14 +125,6 @@ package.objdir = "obj/ode"
     matchrecursive("../../OPCODE/*.h", "../../OPCODE/*.cpp")
   }
 
-  cylinder_files =
-  {
-    "../../ode/src/collision_cylinder_box.cpp",
-    "../../ode/src/collision_cylinder_plane.cpp",
-    "../../ode/src/collision_cylinder_sphere.cpp",
-    "../../ode/src/collision_cylinder_trimesh.cpp",
-  }
-
   dif_files =
   {
     "../../ode/src/export-dif.cpp"
@@ -149,10 +135,6 @@ package.objdir = "obj/ode"
 
   if (options["no-dif"]) then
     table.insert(package.excludes, dif_files)
-  end
-
-  if (options["no-cylinder"]) then
-    table.insert(package.excludes, cylinder_files)
   end
 
   if (options["no-trimesh"]) then
