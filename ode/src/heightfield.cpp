@@ -85,7 +85,8 @@ void dxHeightfieldData::ComputeHeightBounds()
 	static dReal h;
 	static unsigned char *data_byte;
 	static short *data_short;
-	static dReal *data_float;
+	static float *data_float;
+	static double *data_double;
 
 	switch ( m_nGetHeightMode )
 	{
@@ -127,13 +128,28 @@ void dxHeightfieldData::ComputeHeightBounds()
 
 	// float
 	case 3:
-		data_float = (dReal*)m_pHeightData;
+		data_float = (float*)m_pHeightData;
 		m_vMinHeight = dInfinity;
 		m_vMaxHeight = -dInfinity;
 
 		for (i=0; i<m_nWidthSamples*m_nDepthSamples; i++)
 		{
 			h = data_float[i];
+			if (h < m_vMinHeight)	m_vMinHeight = h;
+			if (h > m_vMaxHeight)	m_vMaxHeight = h;
+		}
+
+		break;
+
+	// double
+	case 4:
+		data_double = (double*)m_pHeightData;
+		m_vMinHeight = dInfinity;
+		m_vMaxHeight = -dInfinity;
+
+		for (i=0; i<m_nWidthSamples*m_nDepthSamples; i++)
+		{
+			h = data_double[i];
 			if (h < m_vMinHeight)	m_vMinHeight = h;
 			if (h > m_vMaxHeight)	m_vMaxHeight = h;
 		}
@@ -183,7 +199,8 @@ dReal dxHeightfieldData::GetHeight( int x, int z )
 	static dReal h;
 	static unsigned char *data_byte;
 	static short *data_short;
-	static dReal *data_float;
+	static float *data_float;
+	static double *data_double;
 
 	if ( m_nWrapMode == 0 )
 	{
@@ -222,10 +239,16 @@ dReal dxHeightfieldData::GetHeight( int x, int z )
 		h = data_short[x+(z * m_nWidthSamples)];
 		break;
 
-	// dReal
+	// float
 	case 3:
-		data_float = (dReal*)m_pHeightData;
+		data_float = (float*)m_pHeightData;
 		h = data_float[x+(z * m_nWidthSamples)];
+		break;
+
+	// double
+	case 4:
+		data_double = (double*)m_pHeightData;
+		h = data_double[x+(z * m_nWidthSamples)];
 		break;
 	}
 
@@ -482,8 +505,8 @@ void dGeomHeightfieldDataBuildShort( dHeightfieldDataID d,
 }
 
 
-void dGeomHeightfieldDataBuildFloat( dHeightfieldDataID d,
-                                     const dReal *pHeightData, int bCopyHeightData,
+void dGeomHeightfieldDataBuildSingle( dHeightfieldDataID d,
+                                     const float *pHeightData, int bCopyHeightData,
 									 dReal width, dReal depth, int widthSamples, int depthSamples,
 									 dReal scale, dReal offset, dReal thickness, int bWrap )
 {
@@ -505,12 +528,47 @@ void dGeomHeightfieldDataBuildFloat( dHeightfieldDataID d,
 	else
 	{
 		// We own the height data, allocate storage
-		d->m_pHeightData = new dReal[ d->m_nWidthSamples * d->m_nDepthSamples ];
+		d->m_pHeightData = new float[ d->m_nWidthSamples * d->m_nDepthSamples ];
 		dIASSERT( d->m_pHeightData );
 
 		// Copy data.
 		memcpy( (void*)d->m_pHeightData, pHeightData,
-			sizeof( dReal ) * d->m_nWidthSamples * d->m_nDepthSamples );
+			sizeof( float ) * d->m_nWidthSamples * d->m_nDepthSamples );
+	}
+
+	// Find height bounds
+	d->ComputeHeightBounds();
+}
+
+void dGeomHeightfieldDataBuildDouble( dHeightfieldDataID d,
+                                     const double *pHeightData, int bCopyHeightData,
+									 dReal width, dReal depth, int widthSamples, int depthSamples,
+									 dReal scale, dReal offset, dReal thickness, int bWrap )
+{
+	dUASSERT( d, "Argument not Heightfield data" );
+	dIASSERT( pHeightData );
+	dIASSERT( widthSamples >= 2 );	// Ensure we're making something with at least one cell.
+	dIASSERT( depthSamples >= 2 );
+
+	// set info
+	d->SetData( widthSamples, depthSamples, width, depth, scale, offset, bWrap, thickness );
+	d->m_nGetHeightMode = 4;
+	d->m_bCopyHeightData = bCopyHeightData;
+
+	if ( d->m_bCopyHeightData == 0 )
+	{
+		// Data is referenced only.
+		d->m_pHeightData = pHeightData;
+	}
+	else
+	{
+		// We own the height data, allocate storage
+		d->m_pHeightData = new float[ d->m_nWidthSamples * d->m_nDepthSamples ];
+		dIASSERT( d->m_pHeightData );
+
+		// Copy data.
+		memcpy( (void*)d->m_pHeightData, pHeightData,
+			sizeof( float ) * d->m_nWidthSamples * d->m_nDepthSamples );
 	}
 
 	// Find height bounds

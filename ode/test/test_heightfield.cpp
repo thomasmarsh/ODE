@@ -485,6 +485,27 @@ static void simLoop (int pause)
   dJointGroupEmpty (contactgroup);
 
 
+
+	//
+	// Get Single Precision Rotation/Position
+	//
+
+	float p[ 3 ], R[ 12 ];
+
+	const dReal* pReal = dGeomGetPosition( gheight );
+
+	p[ 0 ] = pReal[ 0 ];
+	p[ 1 ] = pReal[ 1 ];
+	p[ 2 ] = pReal[ 2 ];
+
+	const dReal* RReal = dGeomGetRotation( gheight );
+
+	for ( int r = 0; r < 12; ++r )
+	{
+		R[ r ] = RReal[ r ];
+	}
+
+
 	//
 	// Draw Heightfield
 	//
@@ -498,7 +519,7 @@ static void simLoop (int pause)
 		for ( int i = 0; i < HFIELD_WSTEP - 1; ++i )
 		for ( int j = 0; j < HFIELD_DSTEP - 1; ++j )
 		{
-			dVector3 a, b, c, d;
+			float a[3], b[3], c[3], d[3];
 
 			a[ 0 ] = ( tx * HFIELD_WIDTH ) + ( i ) * HFIELD_WSAMP;
 			a[ 1 ] = heightfield_callback( NULL, i, j );
@@ -516,12 +537,8 @@ static void simLoop (int pause)
 			d[ 1 ] = heightfield_callback( NULL, i + 1, j + 1 );
 			d[ 2 ] = ( tz * HFIELD_DEPTH ) + ( j + 1 ) * HFIELD_DSAMP;
 
-			dsDrawTriangle( dGeomGetPosition( gheight ),
-							dGeomGetRotation( gheight ),
-							a, c, b, 1 );
-			dsDrawTriangle( dGeomGetPosition( gheight ),
-							dGeomGetRotation( gheight ),
-							b, c, d, 1 );
+			dsDrawTriangle( p, R, a, c, b, 1 );
+			dsDrawTriangle( p, R, b, c, d, 1 );
 		}
 	}
 
