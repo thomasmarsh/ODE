@@ -971,7 +971,7 @@ inline void AgarwalPD(dxConvex& cvx1,dxConvex& cvx2,dVector4 pd)
 }
 #endif
 
-inline void ComputeInterval(dxConvex& cvx,dVector3 axis,dReal& min,dReal& max)
+inline void ComputeInterval(dxConvex& cvx,dVector4 axis,dReal& min,dReal& max)
 {
   dVector3 point;
   dReal value;
@@ -988,7 +988,7 @@ inline void ComputeInterval(dxConvex& cvx,dVector3 axis,dReal& min,dReal& max)
       point[0]+=cvx.final_posr->pos[0];
       point[1]+=cvx.final_posr->pos[1];
       point[2]+=cvx.final_posr->pos[2];
-      value = dDOT(axis,point);
+      value = dDOT(axis,point)-axis[3]; // offset to the plane
       if(value<min) 
 	min=value;
       else if(value>max)
@@ -1006,48 +1006,66 @@ int TestConvexIntersection(dxConvex& cvx1,dxConvex& cvx2, int flags,
   dVector3 plane;
   dReal min1,max1,min2,max2,depth,max_depth=0;
   dVector3 e1,e2,t, axis;
-  int maxc = flags & NUMC_MASK;
+  //int maxc = flags & NUMC_MASK; // this is causing a segfault
+  int maxc = 3;
   int contacts=0;
+  unsigned int *pPoly;
   // Test faces of cvx1 for separation
   for(int i=0;i<cvx1.planecount;++i)
     {
+      pPoly=cvx1.polygons;
       // -- Apply Transforms --
       // Rotate
       dMULTIPLY0_331(plane,cvx1.final_posr->R,cvx1.planes+(i*4));
       // Translate
-//       plane[3]=
-// 	(cvx1.planes[(i*4)+3])+
-// 	((plane[0] * cvx1.final_posr->pos[0]) + 
-// 	 (plane[1] * cvx1.final_posr->pos[1]) + 
-// 	 (plane[2] * cvx1.final_posr->pos[2]));
+      plane[3]=
+	(cvx1.planes[(i*4)+3])+
+	((plane[0] * cvx1.final_posr->pos[0]) + 
+	 (plane[1] * cvx1.final_posr->pos[1]) + 
+	 (plane[2] * cvx1.final_posr->pos[2]));
       ComputeInterval(cvx1,plane,min1,max1);
       ComputeInterval(cvx2,plane,min2,max2);
-      if(max2<min1 || max1 < min2) return 0;
-      else if(contacts<maxc)
+      if(max2<min1 || max1<min2) return 0;
+      else if((contacts<maxc) && (min2<0))
 	{
-	  // This aint right
+// 	  fprintf(stdout,"CVX1 Max,Min\t%f\t%f\nCVX2 Max,Min\t%f\t%f\n",
+// 		  max1,min1,max2,min2);
 	  CONTACT(contact,skip*contacts)->normal[0] = plane[0];
 	  CONTACT(contact,skip*contacts)->normal[1] = plane[1];
 	  CONTACT(contact,skip*contacts)->normal[2] = plane[2];
-	  Support(plane,cvx1,CONTACT(contact,skip*contacts)->pos);
-	  if(max2>max1) CONTACT(contact,skip*contacts)->depth = max1-min2;
-	  else CONTACT(contact,skip*contacts)->depth = max2-min1;
- 	  CONTACT(contact,skip*contacts)->g1 = &cvx2;
+	  CONTACT(contact,skip*contacts)->pos[0]=cvx1.points[pPoly[1]*3+0];
+	  CONTACT(contact,skip*contacts)->pos[1]=cvx1.points[pPoly[1]*3+1];
+	  CONTACT(contact,skip*contacts)->pos[2]=cvx1.points[pPoly[1]*3+2];
+	  CONTACT(contact,skip*contacts)->depth = -min2;
+	  CONTACT(contact,skip*contacts)->g1 = &cvx2;
 	  CONTACT(contact,skip*contacts)->g2 = &cvx1;
 	  contacts++;
-	  fprintf(stdout,
-		  "Contact Info:\n"
-		  "Normal %f,%f,%f\n"
-		  "Position %f,%f,%f\n"
-		  "Depth %f\n",
-		  CONTACT(contact,skip*contacts)->normal[0],
-		  CONTACT(contact,skip*contacts)->normal[1],
-		  CONTACT(contact,skip*contacts)->normal[2],
-		  CONTACT(contact,skip*contacts)->pos[0],
-		  CONTACT(contact,skip*contacts)->pos[1],
-		  CONTACT(contact,skip*contacts)->pos[2],
-		  CONTACT(contact,skip*contacts)->depth);	  
+
+
+	  CONTACT(contact,skip*contacts)->normal[0] = plane[0];
+	  CONTACT(contact,skip*contacts)->normal[1] = plane[1];
+	  CONTACT(contact,skip*contacts)->normal[2] = plane[2];
+	  CONTACT(contact,skip*contacts)->pos[0]=cvx1.points[pPoly[2]*3+0];
+	  CONTACT(contact,skip*contacts)->pos[1]=cvx1.points[pPoly[2]*3+1];
+	  CONTACT(contact,skip*contacts)->pos[2]=cvx1.points[pPoly[2]*3+2];
+	  CONTACT(contact,skip*contacts)->depth = -min2;
+	  CONTACT(contact,skip*contacts)->g1 = &cvx2;
+	  CONTACT(contact,skip*contacts)->g2 = &cvx1;
+	  contacts++;
+
+
+	  CONTACT(contact,skip*contacts)->normal[0] = plane[0];
+	  CONTACT(contact,skip*contacts)->normal[1] = plane[1];
+	  CONTACT(contact,skip*contacts)->normal[2] = plane[2];
+	  CONTACT(contact,skip*contacts)->pos[0]=cvx1.points[pPoly[3]*3+0];
+	  CONTACT(contact,skip*contacts)->pos[1]=cvx1.points[pPoly[3]*3+1];
+	  CONTACT(contact,skip*contacts)->pos[2]=cvx1.points[pPoly[3]*3+2];
+	  CONTACT(contact,skip*contacts)->depth = -min2;
+	  CONTACT(contact,skip*contacts)->g1 = &cvx2;
+	  CONTACT(contact,skip*contacts)->g2 = &cvx1;
+	  contacts++;
 	}
+      pPoly+=pPoly[0]+1;
     }
   // Test faces of cvx2 for separation
   for(int i=0;i<cvx2.planecount;++i)
