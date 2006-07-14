@@ -226,7 +226,7 @@ static void command (int cmd)
 	if (pos[2] > maxheight) maxheight = pos[2];
       }
       dBodySetPosition (obj[i].body, 0,0,maxheight+1);
-      dRFromAxisAndAngle (R,0,0,1,dRandReal()*10.0-5.0);
+      dRFromAxisAndAngle (R,0,0,1,/*dRandReal()*10.0-5.0*/0);
     }
     dBodySetRotation (obj[i].body,R);
     dBodySetData (obj[i].body,(void*) i);

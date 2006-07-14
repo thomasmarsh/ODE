@@ -902,74 +902,6 @@ inline void Support(dVector3 dir,dxConvex& cvx,dVector3 out)
 	}
     }
 }
-#if 0
-/* \brief Finds the penetration depth of 2 colliding convex shapes.
-
-   This function is based on the following paper:
-   http://citeseer.ist.psu.edu/cache/papers/cs/15703/http:zSzzSzwww.cs.duke.eduzSz~sarielzSzpaperszSz00zSzpen.pdf/agarwal00computing.pdf
-
-   Since Seidel's Algorithm above is giving me bad results I am not sure 
-   whether this is properly implemented or not, also, checks for edge-edge
-   collision are absent since they are a LOT more complicated than 
-   vertex-face and face-vertex, my original idea is to get these working
-   and then worry about edge-edge collision.
-   For what is worth, I found a similar, but clearer approach to do the
-   edge-edge case on David Eberly's Physics book, but I have not found the time
-   to study that in detail.
-   
-   \param cvx1 Convex Object 1
-   \param cvx2 Convex Object 2
-   \param pd   Contains the plane of collision uppon returning
-*/
-inline void AgarwalPD(dxConvex& cvx1,dxConvex& cvx2,dVector4 pd)
-{
-  /*
-    HUGE WARNING!!!!
-    The algorithm presented here to obtain the
-    planes of the Minkowski Sum will only work 
-    for convex shapes
-   */
-  dVector4 plane;
-  dVector4 minkowskiplane;
-  unsigned int index;
-  pd[3]=dInfinity;
-  // dReal distance;
-  for(int i=0;i<cvx1.planecount;++i)
-    {
-      // Rotate
-      dMULTIPLY0_331(plane,cvx1.final_posr->R,cvx1.planes+(i*4));
-      // Translate
-      plane[3]=
-	(cvx1.planes[(i*4)+3])+
-	((plane[0] * cvx1.final_posr->pos[0]) + 
-	 (plane[1] * cvx1.final_posr->pos[1]) + 
-	 (plane[2] * cvx1.final_posr->pos[2]));
-      // 1 - Find the Support mapping of cvx2 
-      // in the direction of the current 
-      // plane normal of cvx1
-      index=Support(plane,cvx2);
-      // 2 - Compute the plane of the Minkowski sum
-      minkowskiplane[0]=plane[0];
-      minkowskiplane[1]=plane[1];
-      minkowskiplane[2]=plane[2];
-      minkowskiplane[3]=
-	(plane[3])+
-	((plane[0] * -cvx2.points[(index*3)+0]) + 
-	 (plane[1] * -cvx2.points[(index*3)+1]) + 
-	 (plane[2] * -cvx2.points[(index*3)+2]));
-      // 3 - Find the minimum distance to the plane from the origin
-      // and check against the last found minimum distance replacing
-      // the old one if needed.
-      if(dFabs(minkowskiplane[3])<dFabs(pd[3]))
-	{
-	  pd[0]=minkowskiplane[0];
-	  pd[1]=minkowskiplane[1];
-	  pd[2]=minkowskiplane[2];
-	  pd[3]=minkowskiplane[3];
-	}
-    }
-}
-#endif
 
 inline void ComputeInterval(dxConvex& cvx,dVector4 axis,dReal& min,dReal& max)
 {
@@ -988,14 +920,17 @@ inline void ComputeInterval(dxConvex& cvx,dVector4 axis,dReal& min,dReal& max)
       point[0]+=cvx.final_posr->pos[0];
       point[1]+=cvx.final_posr->pos[1];
       point[2]+=cvx.final_posr->pos[2];
-      value = dDOT(axis,point)-axis[3]; // offset to the plane
-      if(value<min) 
-	min=value;
+      value=dDOT(axis,point);
+      if(value<min)
+	{
+	  min=value;
+	}
       else if(value>max)
-	max=value;
+	{
+	  max=value;
+	}
     }
   //fprintf(stdout,"Compute Interval Min Max %f,%f\n",min,max);
-
 }
 
 /*! \brief Does an axis separation test between the 2 convex shapes
@@ -1003,20 +938,23 @@ inline void ComputeInterval(dxConvex& cvx,dVector4 axis,dReal& min,dReal& max)
 int TestConvexIntersection(dxConvex& cvx1,dxConvex& cvx2, int flags,
 			    dContactGeom *contact, int skip)
 {
-  dVector3 plane;
-  dReal min1,max1,min2,max2,depth,max_depth=0;
-  dVector3 e1,e2,t, axis;
+  dVector4 plane,normal;
+  dReal min1,max1,min2,max2,depth,min_depth=-dInfinity;
+  dVector3 e1,e2,t;
   //int maxc = flags & NUMC_MASK; // this is causing a segfault
   int maxc = 3;
   int contacts=0;
+  unsigned int *pFace;
+  dxConvex *g1,*g2;
   unsigned int *pPoly;
   // Test faces of cvx1 for separation
+  pPoly=cvx1.polygons;
   for(int i=0;i<cvx1.planecount;++i)
     {
-      pPoly=cvx1.polygons;
       // -- Apply Transforms --
       // Rotate
       dMULTIPLY0_331(plane,cvx1.final_posr->R,cvx1.planes+(i*4));
+      dNormalize3(plane);
       // Translate
       plane[3]=
 	(cvx1.planes[(i*4)+3])+
@@ -1025,70 +963,52 @@ int TestConvexIntersection(dxConvex& cvx1,dxConvex& cvx2, int flags,
 	 (plane[2] * cvx1.final_posr->pos[2]));
       ComputeInterval(cvx1,plane,min1,max1);
       ComputeInterval(cvx2,plane,min2,max2);
+      fprintf(stdout,"width %f\n",max1-min1);
       if(max2<min1 || max1<min2) return 0;
-      else if((contacts<maxc) && (min2<0))
+#if 1
+      else if ((max1>min2)&&(max1<max2))
 	{
-// 	  fprintf(stdout,"CVX1 Max,Min\t%f\t%f\nCVX2 Max,Min\t%f\t%f\n",
-// 		  max1,min1,max2,min2);
-	  CONTACT(contact,skip*contacts)->normal[0] = plane[0];
-	  CONTACT(contact,skip*contacts)->normal[1] = plane[1];
-	  CONTACT(contact,skip*contacts)->normal[2] = plane[2];
-	  CONTACT(contact,skip*contacts)->pos[0]=cvx1.points[pPoly[1]*3+0];
-	  CONTACT(contact,skip*contacts)->pos[1]=cvx1.points[pPoly[1]*3+1];
-	  CONTACT(contact,skip*contacts)->pos[2]=cvx1.points[pPoly[1]*3+2];
-	  CONTACT(contact,skip*contacts)->depth = -min2;
-	  CONTACT(contact,skip*contacts)->g1 = &cvx2;
-	  CONTACT(contact,skip*contacts)->g2 = &cvx1;
-	  contacts++;
-
-
-	  CONTACT(contact,skip*contacts)->normal[0] = plane[0];
-	  CONTACT(contact,skip*contacts)->normal[1] = plane[1];
-	  CONTACT(contact,skip*contacts)->normal[2] = plane[2];
-	  CONTACT(contact,skip*contacts)->pos[0]=cvx1.points[pPoly[2]*3+0];
-	  CONTACT(contact,skip*contacts)->pos[1]=cvx1.points[pPoly[2]*3+1];
-	  CONTACT(contact,skip*contacts)->pos[2]=cvx1.points[pPoly[2]*3+2];
-	  CONTACT(contact,skip*contacts)->depth = -min2;
-	  CONTACT(contact,skip*contacts)->g1 = &cvx2;
-	  CONTACT(contact,skip*contacts)->g2 = &cvx1;
-	  contacts++;
-
-
-	  CONTACT(contact,skip*contacts)->normal[0] = plane[0];
-	  CONTACT(contact,skip*contacts)->normal[1] = plane[1];
-	  CONTACT(contact,skip*contacts)->normal[2] = plane[2];
-	  CONTACT(contact,skip*contacts)->pos[0]=cvx1.points[pPoly[3]*3+0];
-	  CONTACT(contact,skip*contacts)->pos[1]=cvx1.points[pPoly[3]*3+1];
-	  CONTACT(contact,skip*contacts)->pos[2]=cvx1.points[pPoly[3]*3+2];
-	  CONTACT(contact,skip*contacts)->depth = -min2;
-	  CONTACT(contact,skip*contacts)->g1 = &cvx2;
-	  CONTACT(contact,skip*contacts)->g2 = &cvx1;
-	  contacts++;
+	  min_depth=max1-min2;
+	  normal[0]=plane[0];
+	  normal[1]=plane[1];
+	  normal[2]=plane[2];
+	  pFace=pPoly;
+	  g1=&cvx2;
+	  g2=&cvx1;
 	}
+#endif
       pPoly+=pPoly[0]+1;
     }
   // Test faces of cvx2 for separation
+  pPoly=cvx2.polygons;
   for(int i=0;i<cvx2.planecount;++i)
     {
       // -- Apply Transforms --
       // Rotate
       dMULTIPLY0_331(plane,cvx2.final_posr->R,cvx2.planes+(i*4));
       // Translate
-//       plane[3]=
-// 	(cvx2.planes[(i*4)+3])+
-// 	((plane[0] * cvx2.final_posr->pos[0]) + 
-// 	 (plane[1] * cvx2.final_posr->pos[1]) + 
-// 	 (plane[2] * cvx2.final_posr->pos[2]));
+      plane[3]=
+	(cvx2.planes[(i*4)+3])+
+	((plane[0] * cvx2.final_posr->pos[0]) + 
+	 (plane[1] * cvx2.final_posr->pos[1]) + 
+	 (plane[2] * cvx2.final_posr->pos[2]));
       ComputeInterval(cvx1,plane,min1,max1);
       ComputeInterval(cvx2,plane,min2,max2);
-      if(max2<min1 || max1 < min2) return 0;
-//       else if(max2>max1) depth= max1-min2;
-//       else depth=max2-min1;
-//       if(dFabs(depth)>dFabs(max_depth))
-// 	{
-// 	  max_depth=depth;
-// 	  fprintf(stdout,"Max Depth is %f on a Face in cvx2\n",max_depth);
-// 	}
+      if(max2<min1 || max1<min2) return 0;
+#if 0
+      else if ((min_depth<(-min1))&&(min1<0))
+	{
+	  fprintf(stdout,"Max2 %f should be zero\n",max2);
+	  min_depth=-min1;
+	  normal[0]=plane[0];
+	  normal[1]=plane[1];
+	  normal[2]=plane[2];
+	  pFace=pPoly;
+	  g1=&cvx1;
+	  g2=&cvx2;
+	}
+#endif
+      pPoly+=pPoly[0]+1;
     }
   // Test cross products of pairs of edges
   for(std::set<edge>::iterator i = cvx1.edges.begin();
@@ -1111,18 +1031,34 @@ int TestConvexIntersection(dxConvex& cvx1,dxConvex& cvx2, int flags,
 	  e2[0]-=t[0];
 	  e2[1]-=t[1];
 	  e2[2]-=t[2];
-	  dCROSS(axis,=,e1,e2);
-	  ComputeInterval(cvx1,axis,min1,max1);
-	  ComputeInterval(cvx2,axis,min2,max2);
+	  dCROSS(plane,=,e1,e2);
+	  plane[3]=0;
+	  ComputeInterval(cvx1,plane,min1,max1);
+	  ComputeInterval(cvx2,plane,min2,max2);
 	  if(max2<min1 || max1 < min2) return 0;
-// 	  else if(max2>max1) depth= max1-min2;
-// 	  else depth=max2-min1;
-// 	  if(dFabs(depth)>dFabs(max_depth))
-// 	    {
-// 	      max_depth=depth;
-// 	      fprintf(stdout,"Max Depth is %f on an Edge\n",max_depth);
-// 	    }
 	}      
+    }
+  // If we get here, there was a collision
+  for(contacts=0;(contacts<maxc)||(contacts<pFace[0]);++contacts)
+    {
+      CONTACT(contact,skip*contacts)->normal[0] = normal[0];
+      CONTACT(contact,skip*contacts)->normal[1] = normal[1];
+      CONTACT(contact,skip*contacts)->normal[2] = normal[2];
+      dMULTIPLY0_331 (CONTACT(contact,skip*contacts)->pos,
+		      g2->final_posr->R,
+		      g2->points+pFace[contacts+1]*3);
+      CONTACT(contact,skip*contacts)->pos[0]=
+	g2->final_posr->pos[0]+
+	CONTACT(contact,skip*contacts)->pos[0];
+      CONTACT(contact,skip*contacts)->pos[1]=
+	g2->final_posr->pos[1]+
+	CONTACT(contact,skip*contacts)->pos[1];
+      CONTACT(contact,skip*contacts)->pos[2]=
+	g2->final_posr->pos[2]+
+	CONTACT(contact,skip*contacts)->pos[2];
+      CONTACT(contact,skip*contacts)->depth = min_depth;
+      CONTACT(contact,skip*contacts)->g1 = g1;
+      CONTACT(contact,skip*contacts)->g2 = g2;
     }
   return contacts;
 }
