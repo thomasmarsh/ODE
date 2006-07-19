@@ -29,7 +29,7 @@
 #define sinf sin
 #define cosf cos
 #define acosf acos
-#define asinf sinf
+#define asinf asin
 #endif
 #endif
 
