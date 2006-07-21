@@ -283,7 +283,8 @@ inline bool IsPointInPolygon(dVector3 p,
   dReal d3;
   dReal d4;
   dReal vc;
-  for(size_t i=1;i<=pointcount;++i)
+  polygon++; // skip past pointcount
+  for(size_t i=0;i<pointcount;++i)
     {
       dMULTIPLY0_331 (a,convex->final_posr->R,&convex->points[(polygon[i]*3)]);
       a[0]=convex->final_posr->pos[0]+a[0];
