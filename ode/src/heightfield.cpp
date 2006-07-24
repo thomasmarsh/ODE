@@ -35,6 +35,16 @@
 #define dMAX3(A,B,C)	( (A)>(B) ? dMAX((A),(C)) : dMAX((B),(C)) )
 
 
+//////// Local Build Option ////////////////////////////////////////////////////
+
+// Uncomment this #define to use the (0,0) corner of the geom as the origin, 
+// rather than the centre. This was the way the original heightfield worked, 
+// but as it does not match the way all other geoms work, so for constancy it
+// was changed to work like this.
+
+// #define DHEIGHTFIELD_CORNER_ORIGIN
+
+
 //////// dxHeightfieldData /////////////////////////////////////////////////////////////
 
 // dxHeightfieldData constructor
@@ -45,36 +55,40 @@ dxHeightfieldData::dxHeightfieldData()
 
 
 // build Heightfield data
-void dxHeightfieldData::SetData(int nWidthSamples, int nDepthSamples,
-                                dReal vWidth, dReal vDepth,
-                                dReal vScale, dReal vOffset,
-                                int nWrapMode, dReal vThickness)
+void dxHeightfieldData::SetData( int nWidthSamples, int nDepthSamples,
+                                 dReal fWidth, dReal fDepth,
+                                 dReal fScale, dReal fOffset, dReal fThickness,
+								 int bWrapMode )
 {
-	dIASSERT(vWidth > 0.0f);
-	dIASSERT(vDepth > 0.0f);
-	dIASSERT(nWidthSamples > 0);
-	dIASSERT(nDepthSamples > 0);
+	dIASSERT( fWidth > REAL( 0.0 ) );
+	dIASSERT( fDepth > REAL( 0.0 ) );
+	dIASSERT( nWidthSamples > 0 );
+	dIASSERT( nDepthSamples > 0 );
 
 	// x,z bounds
-	m_vWidth = vWidth;
-	m_vDepth = vDepth;
+	m_fWidth = fWidth;
+	m_fDepth = fDepth;
+
+	// cache half x,z bounds
+	m_fHalfWidth = fWidth / REAL( 2.0 );
+	m_fHalfDepth = fDepth / REAL( 2.0 );
 
 	// scale and offset
-	m_vScale = vScale;
-	m_vOffset = vOffset;
+	m_fScale = fScale;
+	m_fOffset = fOffset;
+
+	// infinite min height bounds
+	m_fThickness = fThickness;
 
 	// number of vertices per side
 	m_nWidthSamples = nWidthSamples;
 	m_nDepthSamples = nDepthSamples;
 
-	m_vSampleWidth = m_vWidth / ( m_nWidthSamples - 1 );
-	m_vSampleDepth = m_vDepth / ( m_nDepthSamples - 1 );
+	m_fSampleWidth = m_fWidth / ( m_nWidthSamples - 1 );
+	m_fSampleDepth = m_fDepth / ( m_nDepthSamples - 1 );
 
-	// infinite min height bounds
-	m_vThickness = vThickness;
-
-	// finite or repeated terrain
-	m_nWrapMode = nWrapMode;
+	// finite or repeated terrain?
+	m_bWrapMode = bWrapMode;
 }
 
 
@@ -99,14 +113,14 @@ void dxHeightfieldData::ComputeHeightBounds()
 	// byte
 	case 1:
 		data_byte = (unsigned char*)m_pHeightData;
-		m_vMinHeight = dInfinity;
-		m_vMaxHeight = -dInfinity;
+		m_fMinHeight = dInfinity;
+		m_fMaxHeight = -dInfinity;
 
 		for (i=0; i<m_nWidthSamples*m_nDepthSamples; i++)
 		{
 			h = data_byte[i];
-			if (h < m_vMinHeight)	m_vMinHeight = h;
-			if (h > m_vMaxHeight)	m_vMaxHeight = h;
+			if (h < m_fMinHeight)	m_fMinHeight = h;
+			if (h > m_fMaxHeight)	m_fMaxHeight = h;
 		}
 
 		break;
@@ -114,14 +128,14 @@ void dxHeightfieldData::ComputeHeightBounds()
 	// short
 	case 2:
 		data_short = (short*)m_pHeightData;
-		m_vMinHeight = dInfinity;
-		m_vMaxHeight = -dInfinity;
+		m_fMinHeight = dInfinity;
+		m_fMaxHeight = -dInfinity;
 
 		for (i=0; i<m_nWidthSamples*m_nDepthSamples; i++)
 		{
 			h = data_short[i];
-			if (h < m_vMinHeight)	m_vMinHeight = h;
-			if (h > m_vMaxHeight)	m_vMaxHeight = h;
+			if (h < m_fMinHeight)	m_fMinHeight = h;
+			if (h > m_fMaxHeight)	m_fMaxHeight = h;
 		}
 
 		break;
@@ -129,14 +143,14 @@ void dxHeightfieldData::ComputeHeightBounds()
 	// float
 	case 3:
 		data_float = (float*)m_pHeightData;
-		m_vMinHeight = dInfinity;
-		m_vMaxHeight = -dInfinity;
+		m_fMinHeight = dInfinity;
+		m_fMaxHeight = -dInfinity;
 
 		for (i=0; i<m_nWidthSamples*m_nDepthSamples; i++)
 		{
 			h = data_float[i];
-			if (h < m_vMinHeight)	m_vMinHeight = h;
-			if (h > m_vMaxHeight)	m_vMaxHeight = h;
+			if (h < m_fMinHeight)	m_fMinHeight = h;
+			if (h > m_fMaxHeight)	m_fMaxHeight = h;
 		}
 
 		break;
@@ -144,14 +158,14 @@ void dxHeightfieldData::ComputeHeightBounds()
 	// double
 	case 4:
 		data_double = (double*)m_pHeightData;
-		m_vMinHeight = dInfinity;
-		m_vMaxHeight = -dInfinity;
+		m_fMinHeight = dInfinity;
+		m_fMaxHeight = -dInfinity;
 
 		for (i=0; i<m_nWidthSamples*m_nDepthSamples; i++)
 		{
-			h = data_double[i];
-			if (h < m_vMinHeight)	m_vMinHeight = h;
-			if (h > m_vMaxHeight)	m_vMaxHeight = h;
+			h = static_cast< dReal >( data_double[i] );
+			if (h < m_fMinHeight)	m_fMinHeight = h;
+			if (h > m_fMaxHeight)	m_fMaxHeight = h;
 		}
 
 		break;
@@ -159,13 +173,13 @@ void dxHeightfieldData::ComputeHeightBounds()
 	}
 
 	// scale and offset
-	m_vMinHeight *= m_vScale;
-	m_vMaxHeight *= m_vScale;
-	m_vMinHeight += m_vOffset;
-	m_vMaxHeight += m_vOffset;
+	m_fMinHeight *= m_fScale;
+	m_fMaxHeight *= m_fScale;
+	m_fMinHeight += m_fOffset;
+	m_fMaxHeight += m_fOffset;
 
 	// add thickness
-	m_vMinHeight -= m_vThickness;
+	m_fMinHeight -= m_fThickness;
 }
 
 
@@ -173,18 +187,18 @@ void dxHeightfieldData::ComputeHeightBounds()
 bool dxHeightfieldData::IsOnHeightfield( int nx, int nz, int w, dReal *pos )
 {
 	dVector3 Min,Max;
-	Min[0] = nx * m_vSampleWidth;
-	Min[2] = nz * m_vSampleDepth;
-	Max[0] = (nx+1) * m_vSampleWidth;
-	Max[2] = (nz+1) * m_vSampleDepth;
-	dReal TolX = m_vSampleWidth * TERRAINTOL;
-	dReal TolZ = m_vSampleDepth * TERRAINTOL;
+	Min[0] = nx * m_fSampleWidth;
+	Min[2] = nz * m_fSampleDepth;
+	Max[0] = (nx+1) * m_fSampleWidth;
+	Max[2] = (nz+1) * m_fSampleDepth;
+	dReal TolX = m_fSampleWidth * TERRAINTOL;
+	dReal TolZ = m_fSampleDepth * TERRAINTOL;
 
 	if ((pos[0]<Min[0]-TolX) || (pos[0]>Max[0]+TolX))	return false;
 	if ((pos[2]<Min[2]-TolZ) || (pos[2]>Max[2]+TolZ))	return false;
 
-	dReal dx	= (pos[0] - (dReal(nx) * m_vSampleWidth)) / m_vSampleWidth;
-	dReal dz	= (pos[2] - (dReal(nz) * m_vSampleDepth)) / m_vSampleDepth;
+	dReal dx = (pos[0] - (dReal(nx) * m_fSampleWidth)) / m_fSampleWidth;
+	dReal dz = (pos[2] - (dReal(nz) * m_fSampleDepth)) / m_fSampleDepth;
 
 	if ((w == 0) && (dx + dz > 1.f+TERRAINTOL))	return false;
 	if ((w == 1) && (dx + dz < 1.f-TERRAINTOL))	return false;
@@ -202,7 +216,7 @@ dReal dxHeightfieldData::GetHeight( int x, int z )
 	static float *data_float;
 	static double *data_double;
 
-	if ( m_nWrapMode == 0 )
+	if ( m_bWrapMode == 0 )
 	{
 		// Finite
 		if ( x < 0 ) x = 0;
@@ -248,22 +262,22 @@ dReal dxHeightfieldData::GetHeight( int x, int z )
 	// double
 	case 4:
 		data_double = (double*)m_pHeightData;
-		h = data_double[x+(z * m_nWidthSamples)];
+		h = static_cast< dReal >( data_double[x+(z * m_nWidthSamples)] );
 		break;
 	}
 
-	return (h * m_vScale) + m_vOffset;
+	return (h * m_fScale) + m_fOffset;
 }
 
 
 // returns height at given coordinates
 dReal dxHeightfieldData::GetHeight( dReal x, dReal z )
 {
-	int nX	= int( floor( x / m_vSampleWidth ) );
-	int nZ	= int( floor( z / m_vSampleDepth ) );
+	int nX	= int( floor( x / m_fSampleWidth ) );
+	int nZ	= int( floor( z / m_fSampleDepth ) );
 
-	dReal dx = ( x - ( dReal( nX ) * m_vSampleWidth ) ) / m_vSampleWidth;
-	dReal dz = ( z - ( dReal( nZ ) * m_vSampleDepth ) ) / m_vSampleDepth;
+	dReal dx = ( x - ( dReal( nX ) * m_fSampleWidth ) ) / m_fSampleWidth;
+	dReal dz = ( z - ( dReal( nZ ) * m_fSampleDepth ) ) / m_fSampleDepth;
 
 	dIASSERT( ( dx >= 0.0f ) && ( dx <= 1.0f ) );
 	dIASSERT( ( dz >= 0.0f ) && ( dz <= 1.0f ) );
@@ -294,8 +308,11 @@ dxHeightfieldData::~dxHeightfieldData()
 {
 	if ( m_bCopyHeightData )
 	{
+		// Cast from const void* to plain void* for MinGW warning.
+		void* p_nonconst = const_cast< void* >( m_pHeightData );
+
 		dIASSERT( m_pHeightData );
-		delete [] m_pHeightData;
+		delete [] p_nonconst;
 	}
 }
 
@@ -318,54 +335,88 @@ void dxHeightfield::computeAABB()
 {
 	const dxHeightfieldData *d = m_p_data;
 
-	if ( d->m_nWrapMode == 0 )
+	if ( d->m_bWrapMode == 0 )
 	{
 		// Finite
 		if ( gflags & GEOM_PLACEABLE )
 		{
-			dReal dx[3], dy[6], dz[3];
+			dReal dx[6], dy[6], dz[6];
 
-            dx[0] = ( final_posr->R[ 0] * d->m_vWidth );
-            dx[1] = ( final_posr->R[ 4] * d->m_vWidth );
-            dx[2] = ( final_posr->R[ 8] * d->m_vWidth );
+			// Y-axis
+			dy[0] = ( final_posr->R[ 1] * d->m_fMinHeight );
+			dy[1] = ( final_posr->R[ 5] * d->m_fMinHeight );
+			dy[2] = ( final_posr->R[ 9] * d->m_fMinHeight );
+			dy[3] = ( final_posr->R[ 1] * d->m_fMaxHeight );
+			dy[4] = ( final_posr->R[ 5] * d->m_fMaxHeight );
+			dy[5] = ( final_posr->R[ 9] * d->m_fMaxHeight );
 
-            dy[0] = ( final_posr->R[ 1] * d->m_vMinHeight );
-            dy[1] = ( final_posr->R[ 5] * d->m_vMinHeight );
-            dy[2] = ( final_posr->R[ 9] * d->m_vMinHeight );
-            dy[3] = ( final_posr->R[ 1] * d->m_vMaxHeight );
-            dy[4] = ( final_posr->R[ 5] * d->m_vMaxHeight );
-            dy[5] = ( final_posr->R[ 9] * d->m_vMaxHeight );
+#ifdef DHEIGHTFIELD_CORNER_ORIGIN
+			
+			// X-axis
+			dx[0] = 0;	dx[3] = ( final_posr->R[ 0] * d->m_fWidth );
+			dx[1] = 0;	dx[4] = ( final_posr->R[ 4] * d->m_fWidth );
+			dx[2] = 0;	dx[5] = ( final_posr->R[ 8] * d->m_fWidth );
 
-            dz[0] = ( final_posr->R[ 2] * d->m_vDepth );
-            dz[1] = ( final_posr->R[ 6] * d->m_vDepth );
-            dz[2] = ( final_posr->R[10] * d->m_vDepth );
+			// Z-axis
+			dz[0] = 0;	dz[3] = ( final_posr->R[ 2] * d->m_fDepth );
+			dz[1] = 0;	dz[4] = ( final_posr->R[ 6] * d->m_fDepth );
+			dz[2] = 0;	dz[5] = ( final_posr->R[10] * d->m_fDepth );
+
+#else // DHEIGHTFIELD_CORNER_ORIGIN
+
+			// X-axis
+			dx[0] = ( final_posr->R[ 0] * -d->m_fHalfWidth );
+			dx[1] = ( final_posr->R[ 4] * -d->m_fHalfWidth );
+			dx[2] = ( final_posr->R[ 8] * -d->m_fHalfWidth );
+			dx[3] = ( final_posr->R[ 0] * d->m_fHalfWidth );
+			dx[4] = ( final_posr->R[ 4] * d->m_fHalfWidth );
+			dx[5] = ( final_posr->R[ 8] * d->m_fHalfWidth );
+
+			// Z-axis
+			dz[0] = ( final_posr->R[ 2] * -d->m_fHalfDepth );
+			dz[1] = ( final_posr->R[ 6] * -d->m_fHalfDepth );
+			dz[2] = ( final_posr->R[10] * -d->m_fHalfDepth );
+			dz[3] = ( final_posr->R[ 2] * d->m_fHalfDepth );
+			dz[4] = ( final_posr->R[ 6] * d->m_fHalfDepth );
+			dz[5] = ( final_posr->R[10] * d->m_fHalfDepth );
+
+#endif // DHEIGHTFIELD_CORNER_ORIGIN
 
 			// X extents
 			aabb[0] = final_posr->pos[0] +
-				dMIN3( dMIN( REAL( 0.0 ), dx[0] ), dMIN( dy[0], dy[3] ), dMIN( REAL( 0.0 ), dz[0] ) );
+				dMIN3( dMIN( dx[0], dx[3] ), dMIN( dy[0], dy[3] ), dMIN( dz[0], dz[3] ) );
 			aabb[1] = final_posr->pos[0] +
-				dMAX3( dMAX( REAL( 0.0 ), dx[0] ), dMAX( dy[0], dy[3] ), dMAX( REAL( 0.0 ), dz[0] ) );
+				dMAX3( dMAX( dx[0], dx[3] ), dMAX( dy[0], dy[3] ), dMAX( dz[0], dz[3] ) );
 
 			// Y extents
 			aabb[2] = final_posr->pos[1] +
-				dMIN3( dMIN( REAL( 0.0 ), dx[1] ), dMIN( dy[1], dy[4] ), dMIN( REAL( 0.0 ), dz[1] ) );
+				dMIN3( dMIN( dx[1], dx[4] ), dMIN( dy[1], dy[4] ), dMIN( dz[1], dz[4] ) );
 			aabb[3] = final_posr->pos[1] +
-				dMAX3( dMAX( REAL( 0.0 ), dx[1] ), dMAX( dy[1], dy[4] ), dMAX( REAL( 0.0 ), dz[1] ) );
+				dMAX3( dMAX( dx[1], dx[4] ), dMAX( dy[1], dy[4] ), dMAX( dz[1], dz[4] ) );
 
 			// Z extents
 			aabb[4] = final_posr->pos[2] +
-				dMIN3( dMIN( REAL( 0.0 ), dx[2] ), dMIN( dy[2], dy[5] ), dMIN( REAL( 0.0 ), dz[2] ) );
+				dMIN3( dMIN( dx[2], dx[5] ), dMIN( dy[2], dy[5] ), dMIN( dz[2], dz[5] ) );
 			aabb[5] = final_posr->pos[2] +
-				dMAX3( dMAX( REAL( 0.0 ), dx[2] ), dMAX( dy[2], dy[5] ), dMAX( REAL( 0.0 ), dz[2] ) );
+				dMAX3( dMAX( dx[2], dx[5] ), dMAX( dy[2], dy[5] ), dMAX( dz[2], dz[5] ) );
 		}
 		else
 		{
-			aabb[0] = 0;
-			aabb[1] = d->m_vWidth;
-			aabb[2] = d->m_vMinHeight;
-			aabb[3] = d->m_vMaxHeight;
-			aabb[4] = 0;
-			aabb[5] = d->m_vDepth;
+
+#ifdef DHEIGHTFIELD_CORNER_ORIGIN
+
+			aabb[0] = 0;					aabb[1] = d->m_fWidth;
+			aabb[2] = d->m_fMinHeight;		aabb[3] = d->m_fMaxHeight;
+			aabb[4] = 0;					aabb[5] = d->m_fDepth;
+
+#else // DHEIGHTFIELD_CORNER_ORIGIN
+
+			aabb[0] = -d->m_fHalfWidth;		aabb[1] = +d->m_fHalfWidth;
+			aabb[2] = d->m_fMinHeight;		aabb[3] = d->m_fMaxHeight;
+			aabb[4] = -d->m_fHalfDepth;		aabb[5] = +d->m_fHalfDepth;
+
+#endif // DHEIGHTFIELD_CORNER_ORIGIN
+
 		}
 	}
 	else
@@ -373,23 +424,18 @@ void dxHeightfield::computeAABB()
 		// Infinite
 		if ( gflags & GEOM_PLACEABLE )
 		{
-			aabb[0] = -dInfinity;
-			aabb[1] = dInfinity;
-			aabb[2] = -dInfinity;
-			aabb[3] = dInfinity;
-			aabb[4] = -dInfinity;
-			aabb[5] = dInfinity;
+			aabb[0] = -dInfinity;			aabb[1] = +dInfinity;
+			aabb[2] = -dInfinity;			aabb[3] = +dInfinity;
+			aabb[4] = -dInfinity;			aabb[5] = +dInfinity;
 		}
 		else
 		{
-			aabb[0] = -dInfinity;
-			aabb[1] = dInfinity;
-			aabb[2] = d->m_vMinHeight;
-			aabb[3] = d->m_vMaxHeight;
-			aabb[4] = -dInfinity;
-			aabb[5] = dInfinity;
+			aabb[0] = -dInfinity;			aabb[1] = +dInfinity;
+			aabb[2] = d->m_fMinHeight;		aabb[3] = d->m_fMaxHeight;
+			aabb[4] = -dInfinity;			aabb[5] = +dInfinity;
 		}
 	}
+
 }
 
 
@@ -425,11 +471,11 @@ void dGeomHeightfieldDataBuildCallback( dHeightfieldDataID d,
 	d->m_pGetHeightCallback = pCallback;
 
 	// set info
-	d->SetData( widthSamples, depthSamples, width, depth, scale, offset, bWrap, thickness );
+	d->SetData( widthSamples, depthSamples, width, depth, scale, offset, thickness, bWrap );
 
 	// default bounds
-	d->m_vMinHeight = -dInfinity;
-	d->m_vMaxHeight = dInfinity;
+	d->m_fMinHeight = -dInfinity;
+	d->m_fMaxHeight = dInfinity;
 }
 
 
@@ -444,7 +490,7 @@ void dGeomHeightfieldDataBuildByte( dHeightfieldDataID d,
 	dIASSERT( depthSamples >= 2 );
 
 	// set info
-	d->SetData( widthSamples, depthSamples, width, depth, scale, offset, bWrap, thickness );
+	d->SetData( widthSamples, depthSamples, width, depth, scale, offset, thickness, bWrap );
 	d->m_nGetHeightMode = 1;
 	d->m_bCopyHeightData = bCopyHeightData;
 
@@ -480,7 +526,7 @@ void dGeomHeightfieldDataBuildShort( dHeightfieldDataID d,
 	dIASSERT( depthSamples >= 2 );
 
 	// set info
-	d->SetData( widthSamples, depthSamples, width, depth, scale, offset, bWrap, thickness );
+	d->SetData( widthSamples, depthSamples, width, depth, scale, offset, thickness, bWrap );
 	d->m_nGetHeightMode = 2;
 	d->m_bCopyHeightData = bCopyHeightData;
 
@@ -516,7 +562,7 @@ void dGeomHeightfieldDataBuildSingle( dHeightfieldDataID d,
 	dIASSERT( depthSamples >= 2 );
 
 	// set info
-	d->SetData( widthSamples, depthSamples, width, depth, scale, offset, bWrap, thickness );
+	d->SetData( widthSamples, depthSamples, width, depth, scale, offset, thickness, bWrap );
 	d->m_nGetHeightMode = 3;
 	d->m_bCopyHeightData = bCopyHeightData;
 
@@ -551,7 +597,7 @@ void dGeomHeightfieldDataBuildDouble( dHeightfieldDataID d,
 	dIASSERT( depthSamples >= 2 );
 
 	// set info
-	d->SetData( widthSamples, depthSamples, width, depth, scale, offset, bWrap, thickness );
+	d->SetData( widthSamples, depthSamples, width, depth, scale, offset, thickness, bWrap );
 	d->m_nGetHeightMode = 4;
 	d->m_bCopyHeightData = bCopyHeightData;
 
@@ -581,8 +627,8 @@ void dGeomHeightfieldDataBuildDouble( dHeightfieldDataID d,
 void dGeomHeightfieldDataSetBounds( dHeightfieldDataID d, dReal minHeight, dReal maxHeight )
 {
 	dUASSERT(d, "Argument not Heightfield data");
-	d->m_vMinHeight = ( minHeight * d->m_vScale ) + d->m_vOffset - d->m_vThickness;
-	d->m_vMaxHeight = ( maxHeight * d->m_vScale ) + d->m_vOffset;
+	d->m_fMinHeight = ( minHeight * d->m_fScale ) + d->m_fOffset - d->m_fThickness;
+	d->m_fMaxHeight = ( maxHeight * d->m_fScale ) + d->m_fOffset;
 }
 
 
@@ -614,16 +660,6 @@ dHeightfieldDataID dGeomHeightfieldGetHeightfieldData( dGeomID g )
 	dxHeightfield* geom = (dxHeightfield*) g;
 	return geom->m_p_data;
 }
-
-
-/* Disabled by David Walters, 7/7/2006 as this function
-// doesn't respect geom placement.
-dReal dGeomHeightfieldPointDepth( dGeomID g, dReal x, dReal y, dReal z )
-{
-	dUASSERT (g && g->type == dHeightfieldClass,"argument not a dHeightfield");
-	dxHeightfield *t = (dxHeightfield*) g;
-	return t->m_p_data->GetHeight( x, z ) - y;
-}*/
 
 //////// dxHeightfield /////////////////////////////////////////////////////////////////
 
@@ -713,20 +749,20 @@ int dxHeightfield::dCollideHeightfieldUnit( int x, int z, dxGeom* o2, int numMax
 
 	dReal Plane[4],lBD,lCD,lBC;
 	dVector3 A,B,C,D,BD,CD,BC,AB,AC;
-	A[0] = x * m_p_data->m_vSampleWidth;
-	A[2] = z * m_p_data->m_vSampleDepth;
+	A[0] = x * m_p_data->m_fSampleWidth;
+	A[2] = z * m_p_data->m_fSampleDepth;
 	A[1] = m_p_data->GetHeight(x,z);
 
-	B[0] = (x+1) * m_p_data->m_vSampleWidth;
-	B[2] = z * m_p_data->m_vSampleDepth;
+	B[0] = (x+1) * m_p_data->m_fSampleWidth;
+	B[2] = z * m_p_data->m_fSampleDepth;
 	B[1] = m_p_data->GetHeight(x+1,z);
 
-	C[0] = x * m_p_data->m_vSampleWidth;
-	C[2] = (z+1) * m_p_data->m_vSampleDepth;
+	C[0] = x * m_p_data->m_fSampleWidth;
+	C[2] = (z+1) * m_p_data->m_fSampleDepth;
 	C[1] = m_p_data->GetHeight(x,z+1);
 
-	D[0] = (x+1) * m_p_data->m_vSampleWidth;
-	D[2] = (z+1) * m_p_data->m_vSampleDepth;
+	D[0] = (x+1) * m_p_data->m_fSampleWidth;
+	D[2] = (z+1) * m_p_data->m_fSampleDepth;
 	D[1] = m_p_data->GetHeight(x+1,z+1);
 
 	dOP(BC,-,C,B);
@@ -755,11 +791,11 @@ int dxHeightfield::dCollideHeightfieldUnit( int x, int z, dxGeom* o2, int numMax
 		dVector3 E,F;
 		dVector3 CE,FB,AD;
 		dVector3 Normal[3];
-		E[0] = (x+2) * m_p_data->m_vSampleWidth;
-		E[2] = z * m_p_data->m_vSampleDepth;
+		E[0] = (x+2) * m_p_data->m_fSampleWidth;
+		E[2] = z * m_p_data->m_fSampleDepth;
 		E[1] = m_p_data->GetHeight(x+2,z);
-		F[0] = x * m_p_data->m_vSampleWidth;
-		F[2] = (z+2) * m_p_data->m_vSampleDepth;
+		F[0] = x * m_p_data->m_fSampleWidth;
+		F[2] = (z+2) * m_p_data->m_fSampleDepth;
 		F[1] = m_p_data->GetHeight(x,z+2);
 		dOP(AD,-,D,A);
 		dNormalize3(AD);
@@ -920,10 +956,10 @@ int dxHeightfield::dCollideHeightfieldUnit( int x, int z, dxGeom* o2, int numMax
 }
 
 
-int dCollideHeightfield( dxGeom *o1, dxGeom *o2, int flags, dContactGeom *contact, int skip )
+int dCollideHeightfield( dxGeom *o1, dxGeom *o2, int flags, dContactGeom* contact, int skip )
 {
-	dIASSERT (skip >= (int)sizeof(dContactGeom));
-	dIASSERT (o1->type == dHeightfieldClass);
+	dIASSERT( skip >= (int)sizeof(dContactGeom) );
+	dIASSERT( o1->type == dHeightfieldClass );
 	int i,j;
 
 	if ((flags & 0xffff) == 0)
@@ -936,32 +972,55 @@ int dCollideHeightfield( dxGeom *o1, dxGeom *o2, int flags, dContactGeom *contac
 	dMatrix3 Rbak;
 	dReal aabbbak[6];
 	int gflagsbak;
-
 	dVector3 pos0,pos1;
 	dMatrix3 R1;
+
 	int numTerrainContacts = 0;
 
-	if (terrain->gflags & GEOM_PLACEABLE)
+
+	//
+	// Transform O2 into Heightfield Space
+	//
+
+	// Backup original o2 position, rotation and AABB.
+	dVector3Copy( o2->final_posr->pos, posbak );
+	dMatrix3Copy( o2->final_posr->R, Rbak );
+	memcpy( aabbbak, o2->aabb, sizeof( dReal ) * 6 );
+	gflagsbak = o2->gflags;
+	
+	if ( terrain->gflags & GEOM_PLACEABLE )
 	{
-		dOP(pos0,-,o2->final_posr->pos,terrain->final_posr->pos);
-		dMULTIPLY1_331(pos1,terrain->final_posr->R,pos0);
-		dMULTIPLY1_333(R1,terrain->final_posr->R,o2->final_posr->R);
-		dVector3Copy(o2->final_posr->pos,posbak);
-		dMatrix3Copy(o2->final_posr->R,Rbak);
-		dVector3Copy(pos1,o2->final_posr->pos);
-		dMatrix3Copy(R1,o2->final_posr->R);
-		memcpy(aabbbak,o2->aabb,sizeof(dReal)*6);
-		gflagsbak = o2->gflags;
-		o2->computeAABB();
+		// Transform o2 into heightfield space.
+		dOP( pos0, -, o2->final_posr->pos, terrain->final_posr->pos );
+		dMULTIPLY1_331( pos1, terrain->final_posr->R, pos0 );
+		dMULTIPLY1_333( R1, terrain->final_posr->R, o2->final_posr->R );
+
+		// Update o2 with transformed position and rotation.
+		dVector3Copy( pos1, o2->final_posr->pos );
+		dMatrix3Copy( R1, o2->final_posr->R );
 	}
+	
+#ifndef DHEIGHTFIELD_CORNER_ORIGIN
+	o2->final_posr->pos[ 0 ] += terrain->m_p_data->m_fHalfWidth;
+	o2->final_posr->pos[ 2 ] += terrain->m_p_data->m_fHalfDepth;
+#endif // DHEIGHTFIELD_CORNER_ORIGIN
+	
+	// Rebuild AABB for O2
+	o2->computeAABB();
 
-	int nMinX	= int(floor(o2->aabb[0] / terrain->m_p_data->m_vSampleWidth));
-	int nMaxX	= int(floor(o2->aabb[1] / terrain->m_p_data->m_vSampleWidth)) + 1;
-	int nMinZ	= int(floor(o2->aabb[4] / terrain->m_p_data->m_vSampleDepth));
-	int nMaxZ	= int(floor(o2->aabb[5] / terrain->m_p_data->m_vSampleDepth)) + 1;
 
 
-	if ( terrain->m_p_data->m_nWrapMode == 0 )
+	//
+	// Collide
+	//
+
+	int nMinX = int(floor(o2->aabb[0] / terrain->m_p_data->m_fSampleWidth));
+	int nMaxX = int(floor(o2->aabb[1] / terrain->m_p_data->m_fSampleWidth)) + 1;
+	int nMinZ = int(floor(o2->aabb[4] / terrain->m_p_data->m_fSampleDepth));
+	int nMaxZ = int(floor(o2->aabb[5] / terrain->m_p_data->m_fSampleDepth)) + 1;
+
+
+	if ( terrain->m_p_data->m_bWrapMode == 0 )
 	{
 		nMinX = dMAX( nMinX, 0 );
 		nMaxX = dMIN( nMaxX, terrain->m_p_data->m_nWidthSamples - 1 );
@@ -977,9 +1036,10 @@ int dCollideHeightfield( dxGeom *o1, dxGeom *o2, int flags, dContactGeom *contac
 	AabbTop[0] = (o2->aabb[0]+o2->aabb[1]) / 2;
 	AabbTop[2] = (o2->aabb[4]+o2->aabb[5]) / 2;
 	AabbTop[1] = o2->aabb[3];
-	if (o2->type != dRayClass)
+	
+	if ( o2->type != dRayClass )
 	{
-		dReal AabbTopDepth = terrain->m_p_data->GetHeight(AabbTop[0],AabbTop[2]) - AabbTop[1];
+		dReal AabbTopDepth = terrain->m_p_data->GetHeight( AabbTop[0],AabbTop[2] ) - AabbTop[1];
 		if (AabbTopDepth > 0.f)
 		{
 			contact->depth = AabbTopDepth;
@@ -997,44 +1057,71 @@ int dCollideHeightfield( dxGeom *o1, dxGeom *o2, int flags, dContactGeom *contac
 		}
 	}
 
-	for (i=nMinX;i<nMaxX;i++)
+	// Collide against all potential collision cells.
+	for ( i = nMinX; i < nMaxX; ++i )
+	for ( j = nMinZ; j < nMaxZ; ++j )
 	{
-		for (j=nMinZ;j<nMaxZ;j++)
-		{
-			numTerrainContacts += terrain->dCollideHeightfieldUnit(
-				i,j,o2,numMaxTerrainContacts - numTerrainContacts,
-				flags,CONTACT(contact,numTerrainContacts*skip),skip	);
-		}
+		numTerrainContacts += terrain->dCollideHeightfieldUnit(
+			i,j,o2,numMaxTerrainContacts - numTerrainContacts,
+			flags,CONTACT(contact,numTerrainContacts*skip),skip	);
 	}
 
-	dIASSERT(numTerrainContacts <= numMaxTerrainContacts);
+	dIASSERT( numTerrainContacts <= numMaxTerrainContacts );
 
-	for (i=0; i<numTerrainContacts; i++)
+	for ( i = 0; i < numTerrainContacts; ++i )
 	{
 		CONTACT(contact,i*skip)->g1 = o1;
 		CONTACT(contact,i*skip)->g2 = o2;
 	}
 
+
+//------------------------------------------------------------------------------
+
 dCollideHeightfieldExit:
+
+
+	// Restore o2 position, rotation and AABB
+	dVector3Copy( posbak, o2->final_posr->pos );
+	dMatrix3Copy( Rbak, o2->final_posr->R );
+	memcpy( o2->aabb, aabbbak, sizeof(dReal)*6 );
+	o2->gflags = gflagsbak;
+
+
+	//
+	// Transform Contacts to World Space
+	//
 
 	if ( terrain->gflags & GEOM_PLACEABLE )
 	{
-		dVector3Copy( posbak, o2->final_posr->pos );
-		dMatrix3Copy( Rbak, o2->final_posr->R );
-		memcpy( o2->aabb, aabbbak, sizeof(dReal)*6 );
-		o2->gflags = gflagsbak;
-
-		for ( i = 0; i < numTerrainContacts; i++ )
+		for ( i = 0; i < numTerrainContacts; ++i )
 		{
-			dOPE(pos0,=,CONTACT(contact,i*skip)->pos);
-			dMULTIPLY0_331(CONTACT(contact,i*skip)->pos,terrain->final_posr->R,pos0);
-			dOP(CONTACT(contact,i*skip)->pos,+,CONTACT(contact,i*skip)->pos,terrain->final_posr->pos);
+			dOPE( pos0, =, CONTACT(contact,i*skip)->pos );
+			
+#ifndef DHEIGHTFIELD_CORNER_ORIGIN
+			pos0[ 0 ] -= terrain->m_p_data->m_fHalfWidth;
+			pos0[ 2 ] -= terrain->m_p_data->m_fHalfDepth;
+#endif // !DHEIGHTFIELD_CORNER_ORIGIN
 
-			dOPE(pos0,=,CONTACT(contact,i*skip)->normal);
-			dMULTIPLY0_331(CONTACT(contact,i*skip)->normal,terrain->final_posr->R,pos0);
+			dMULTIPLY0_331( CONTACT(contact,i*skip)->pos, terrain->final_posr->R, pos0 );
+			
+			dOP( CONTACT(contact,i*skip)->pos, +, CONTACT(contact,i*skip)->pos, terrain->final_posr->pos );
+			dOPE( pos0, =, CONTACT(contact,i*skip)->normal );
+			
+			dMULTIPLY0_331( CONTACT( contact, i*skip )->normal, terrain->final_posr->R, pos0 );
 		}
 	}
+#ifndef DHEIGHTFIELD_CORNER_ORIGIN
+	else
+	{
+		for ( i = 0; i < numTerrainContacts; ++i )
+		{
+			CONTACT(contact,i*skip)->pos[ 0 ] -= terrain->m_p_data->m_fHalfWidth;
+			CONTACT(contact,i*skip)->pos[ 2 ] -= terrain->m_p_data->m_fHalfDepth;
+		}
+	}
+#endif // !DHEIGHTFIELD_CORNER_ORIGIN
 
+	// Return contact count.
 	return numTerrainContacts;
 }
 

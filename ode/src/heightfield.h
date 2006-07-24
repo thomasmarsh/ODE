@@ -5,27 +5,38 @@
 
 #ifndef _DHEIGHTFIELD_H_
 #define _DHEIGHTFIELD_H_
+//------------------------------------------------------------------------------
 
 #include <ode/common.h>
 #include "collision_kernel.h"
 
+//
+// dxHeightfieldData
+//
 // Heightfield Data structure
+//
 struct dxHeightfieldData
 {
-	dReal m_vWidth;            // World space heightfield dimension on X axis
-	dReal m_vDepth;            // World space heightfield dimension on Z axis
-	dReal m_vMinHeight;        // Min sample height value (scaled and offset)
-	dReal m_vMaxHeight;        // Max sample height value (scaled and offset)
-	dReal m_vSampleWidth;      // Vertex count on X axis edge (== m_vWidth / (m_nWidthSamples-1))
-	dReal m_vSampleDepth;      // Vertex count on Z axis edge (== m_vDepth / (m_nDepthSamples-1))
-	dReal m_vThickness;        // Surface thickness (added to bottom AABB)
-	dReal m_vScale;            // Sample value multiplier
-	dReal m_vOffset;           // Vertical sample offset
+	dReal m_fWidth;				// World space heightfield dimension on X axis
+	dReal m_fDepth;				// World space heightfield dimension on Z axis
+	dReal m_fSampleWidth;		// Vertex count on X axis edge (== m_vWidth / (m_nWidthSamples-1))
+	dReal m_fSampleDepth;		// Vertex count on Z axis edge (== m_vDepth / (m_nDepthSamples-1))
+
+    dReal m_fHalfWidth;			// Cache of half of m_fWidth
+    dReal m_fHalfDepth;			// Cache of half of m_fDepth
+
+	dReal m_fMinHeight;        // Min sample height value (scaled and offset)
+	dReal m_fMaxHeight;        // Max sample height value (scaled and offset)
+	dReal m_fThickness;        // Surface thickness (added to bottom AABB)
+	dReal m_fScale;            // Sample value multiplier
+	dReal m_fOffset;           // Vertical sample offset
+	
 	int	m_nWidthSamples;       // Vertex count on X axis edge (number of samples)
 	int	m_nDepthSamples;       // Vertex count on Z axis edge (number of samples)
-	int m_bCopyHeightData;     // Copy sample data flag
-	int	m_nWrapMode;           // Heightfield wrapping mode (0=finite, 1=infinite)
+	int m_bCopyHeightData;     // Do we own the sample data?
+	int	m_bWrapMode;           // Heightfield wrapping mode (0=finite, 1=infinite)
 	int m_nGetHeightMode;      // GetHeight mode ( 0=callback, 1=byte, 2=short, 3=float )
+	
 	const void* m_pHeightData; // Sample data array
 	void* m_pUserData;         // Callback user data
 
@@ -35,9 +46,9 @@ struct dxHeightfieldData
 	~dxHeightfieldData();
 
 	void SetData( int nWidthSamples, int nDepthSamples,
-				  dReal vWidth, dReal vDepth,
-				  dReal vScale, dReal vOffset,
-				  int bFinite, dReal vThickness );
+				  dReal fWidth, dReal fDepth,
+				  dReal fScale, dReal fOffset,
+				  dReal fThickness, int bWrapMode );
 
 	void ComputeHeightBounds();
 
@@ -47,7 +58,11 @@ struct dxHeightfieldData
 };
 
 
+//
+// dxHeightfield
+//
 // Heightfield geom structure
+//
 struct dxHeightfield : public dxGeom
 {
 	dxHeightfieldData* m_p_data;
@@ -62,4 +77,5 @@ struct dxHeightfield : public dxGeom
 };
 
 
+//------------------------------------------------------------------------------
 #endif //_DHEIGHTFIELD_H_
