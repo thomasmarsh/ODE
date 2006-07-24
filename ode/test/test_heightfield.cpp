@@ -38,10 +38,10 @@ dGeomID gheight;
 // Heightfield dimensions
 
 #define HFIELD_WSTEP			15			// Vertex count along edge >= 2
-#define HFIELD_DSTEP			15
+#define HFIELD_DSTEP			31
 
 #define HFIELD_WIDTH			REAL( 4.0 )
-#define HFIELD_DEPTH			REAL( 4.0 )
+#define HFIELD_DEPTH			REAL( 8.0 )
 
 #define HFIELD_WSAMP			( HFIELD_WIDTH / ( HFIELD_WSTEP-1 ) )
 #define HFIELD_DSAMP			( HFIELD_DEPTH / ( HFIELD_DSTEP-1 ) )
@@ -145,7 +145,7 @@ dReal heightfield_callback( void* pUserData, int x, int z )
 	dReal fz = ( ((dReal)z) - ( HFIELD_DSTEP-1 )/2 ) / (dReal)( HFIELD_DSTEP-1 );
 
 	// Create an interesting 'hump' shape
-	dReal h = REAL( 1.0 ) + ( REAL( -2.0 ) * ( fx*fx + fz*fz ) );
+	dReal h = REAL( 1.0 ) + ( REAL( -16.0 ) * ( fx*fx*fx + fz*fz*fz ) );
 
 	return h;
 }
@@ -510,8 +510,12 @@ static void simLoop (int pause)
 	// Draw Heightfield
 	//
 
-	for ( int tx = -1; tx < 2; ++tx )
-	for ( int tz = -1; tz < 2; ++tz )
+	// Set ox and oz to zero for DHEIGHTFIELD_CORNER_ORIGIN mode.
+	int ox = ( -HFIELD_WIDTH/2 );
+	int oz = ( -HFIELD_DEPTH/2 );
+
+//	for ( int tx = -1; tx < 2; ++tx )
+//	for ( int tz = -1; tz < 2; ++tz )
 	{
 		dsSetColorAlpha (0.5,1,0.5,0.5);
 		dsSetTexture( DS_WOOD );
@@ -521,21 +525,21 @@ static void simLoop (int pause)
 		{
 			float a[3], b[3], c[3], d[3];
 
-			a[ 0 ] = ( tx * HFIELD_WIDTH ) + ( i ) * HFIELD_WSAMP;
+			a[ 0 ] = ox + ( i ) * HFIELD_WSAMP;
 			a[ 1 ] = heightfield_callback( NULL, i, j );
-			a[ 2 ] = ( tz * HFIELD_DEPTH ) + ( j ) * HFIELD_DSAMP;
+			a[ 2 ] = oz + ( j ) * HFIELD_DSAMP;
 
-			b[ 0 ] = ( tx * HFIELD_WIDTH ) + ( i + 1 ) * HFIELD_WSAMP;
+			b[ 0 ] = ox + ( i + 1 ) * HFIELD_WSAMP;
 			b[ 1 ] = heightfield_callback( NULL, i + 1, j );
-			b[ 2 ] = ( tz * HFIELD_DEPTH ) + ( j ) * HFIELD_DSAMP;
+			b[ 2 ] = oz + ( j ) * HFIELD_DSAMP;
 
-			c[ 0 ] = ( tx * HFIELD_WIDTH ) + ( i ) * HFIELD_WSAMP;
+			c[ 0 ] = ox + ( i ) * HFIELD_WSAMP;
 			c[ 1 ] = heightfield_callback( NULL, i, j + 1 );
-			c[ 2 ] = ( tz * HFIELD_DEPTH ) + ( j + 1 ) * HFIELD_DSAMP;
+			c[ 2 ] = oz + ( j + 1 ) * HFIELD_DSAMP;
 
-			d[ 0 ] = ( tx * HFIELD_WIDTH ) + ( i + 1 ) * HFIELD_WSAMP;
+			d[ 0 ] = ox + ( i + 1 ) * HFIELD_WSAMP;
 			d[ 1 ] = heightfield_callback( NULL, i + 1, j + 1 );
-			d[ 2 ] = ( tz * HFIELD_DEPTH ) + ( j + 1 ) * HFIELD_DSAMP;
+			d[ 2 ] = oz + ( j + 1 ) * HFIELD_DSAMP;
 
 			dsDrawTriangle( p, R, a, c, b, 1 );
 			dsDrawTriangle( p, R, b, c, d, 1 );
@@ -599,7 +603,7 @@ int main (int argc, char **argv)
 	world = dWorldCreate();
 	space = dHashSpaceCreate (0);
 	contactgroup = dJointGroupCreate (0);
-	dWorldSetGravity (world,0,0,-5);
+	dWorldSetGravity (world,0,0,-0.5);
 	dWorldSetCFM (world,1e-5);
 	dWorldSetAutoDisableFlag (world,1);
 	dWorldSetContactMaxCorrectingVel (world,0.1);
@@ -617,7 +621,7 @@ int main (int argc, char **argv)
 	// Create an infinite tiled heightfield.
 	dGeomHeightfieldDataBuildCallback( heightid, NULL, heightfield_callback,
 		HFIELD_WIDTH, HFIELD_DEPTH, HFIELD_WSTEP, HFIELD_DSTEP,
-		REAL( 1.0 ), REAL( 0.0 ), REAL( 10.0 ), 1 );
+		REAL( 1.0 ), REAL( 0.0 ), REAL( 10.0 ), 0 );
 
 	// Give some very bounds which, while conservative,
 	// makes AABB computation more accurate than +/-INF.
@@ -626,8 +630,8 @@ int main (int argc, char **argv)
 	gheight = dCreateHeightfield( space, heightid, 1 );
 
 	dVector3 pos;
-	pos[ 0 ] = -HFIELD_WIDTH / 2;
-	pos[ 1 ] = HFIELD_DEPTH / 2;
+	pos[ 0 ] = 0;
+	pos[ 1 ] = 0;
 	pos[ 2 ] = 0;
 
 	// Rotate so Z is up, not Y (which is the default orientation)
