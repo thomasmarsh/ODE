@@ -511,8 +511,8 @@ static void simLoop (int pause)
 	//
 
 	// Set ox and oz to zero for DHEIGHTFIELD_CORNER_ORIGIN mode.
-	int ox = ( -HFIELD_WIDTH/2 );
-	int oz = ( -HFIELD_DEPTH/2 );
+	int ox = (int) ( -HFIELD_WIDTH/2 );
+	int oz = (int) ( -HFIELD_DEPTH/2 );
 
 //	for ( int tx = -1; tx < 2; ++tx )
 //	for ( int tz = -1; tz < 2; ++tz )
