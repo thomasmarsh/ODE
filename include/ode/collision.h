@@ -642,8 +642,42 @@ ODE_API int dCollide (dGeomID o1, dGeomID o2, int flags, dContactGeom *contact,
  */
 ODE_API void dSpaceCollide (dSpaceID space, void *data, dNearCallback *callback);
 
-ODE_API void dSpaceCollide2 (dGeomID o1, dGeomID o2, void *data,
-		     dNearCallback *callback);
+
+/**
+ * @brief Determines which geoms from one space may potentially intersect with 
+ * geoms from another space, and calls the callback function for each candidate 
+ * pair. 
+ *
+ * @param space1 The first space to test.
+ *
+ * @param space2 The second space to test.
+ *
+ * @param data Passed from dSpaceCollide directly to the callback
+ * function. Its meaning is user defined. The o1 and o2 arguments are the
+ * geoms that may be near each other.
+ *
+ * @param callback A callback function is of type @ref dNearCallback.
+ *
+ * @remarks This function can also test a single non-space geom against a 
+ * space. This function is useful when there is a collision hierarchy, i.e. 
+ * when there are spaces that contain other spaces.
+ *
+ * @remarks Other spaces that are contained within the colliding space are
+ * not treated specially, i.e. they are not recursed into. The callback
+ * function may be passed these contained spaces as one or both geom
+ * arguments.
+ *
+ * @remarks dSpaceCollide2() is guaranteed to pass all intersecting geom
+ * pairs to the callback function, but may also pass close but
+ * non-intersecting pairs. The number of these calls depends on the
+ * internal algorithms used by the space. Thus you should not expect
+ * that dCollide will return contacts for every pair passed to the
+ * callback.
+ *
+ * @ingroup collide
+ */
+ODE_API void dSpaceCollide2 (dGeomID space1, dGeomID space2, void *data, dNearCallback *callback);
+
 
 /* ************************************************************************ */
 /* standard classes */
@@ -678,10 +712,58 @@ enum {
 };
 
 
+/**
+ * @brief Create a sphere geom of the given radius, and return its ID. 
+ *
+ * @param space   a space to contain the new geom. May be null.
+ * @param radius  the radius of the sphere.
+ *
+ * @returns A new sphere geom.
+ *
+ * @remarks The point of reference for a sphere is its center.
+ *
+ * @ingroup collide
+ */
 ODE_API dGeomID dCreateSphere (dSpaceID space, dReal radius);
+
+
+/**
+ * @brief Set the radius of a sphere geom.
+ *
+ * @param sphere  the sphere to set.
+ * @param radius  the new radius.
+ *
+ * @ingroup collide
+ */
 ODE_API void dGeomSphereSetRadius (dGeomID sphere, dReal radius);
+
+
+/**
+ * @brief Retrieves the radius of a sphere geom.
+ *
+ * @param sphere  the sphere to query.
+ *
+ * @ingroup collide
+ */
 ODE_API dReal dGeomSphereGetRadius (dGeomID sphere);
+
+
+/**
+ * @brief Calculate the depth of the a given point within a sphere.
+ *
+ * @param sphere  the sphere to query.
+ * @param x       the X coordinate of the point.
+ * @param y       the Y coordinate of the point.
+ * @param z       the Z coordinate of the point.
+ *
+ * @returns The depth of the point. Points inside the sphere will have a 
+ * positive depth, points outside it will have a negative depth, and points
+ * on the surface will have a depth of zero.
+ *
+ * @ingroup collide
+ */
 ODE_API dReal dGeomSpherePointDepth (dGeomID sphere, dReal x, dReal y, dReal z);
+
 
 //--> Convex Functions
 ODE_API dGeomID dCreateConvex (dSpaceID space,
