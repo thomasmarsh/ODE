@@ -135,7 +135,7 @@ static bool test_disc_isect()
   dVector3 poi, doi;
   dReal depth;
 
-  isect_disc_plane(discpos, discnorm, planepos, planenorm, radius, poi, doi, depth);
+  return isect_disc_plane(discpos, discnorm, planepos, planenorm, radius, poi, doi, depth);
 }
 //static bool dummy=test_disc_isect();
 
