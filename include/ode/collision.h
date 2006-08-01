@@ -638,6 +638,7 @@ ODE_API int dCollide (dGeomID o1, dGeomID o2, int flags, dContactGeom *contact,
  * that dCollide will return contacts for every pair passed to the
  * callback.
  *
+ * @sa dSpaceCollide2
  * @ingroup collide
  */
 ODE_API void dSpaceCollide (dSpaceID space, void *data, dNearCallback *callback);
@@ -674,6 +675,7 @@ ODE_API void dSpaceCollide (dSpaceID space, void *data, dNearCallback *callback)
  * that dCollide will return contacts for every pair passed to the
  * callback.
  *
+ * @sa dSpaceCollide
  * @ingroup collide
  */
 ODE_API void dSpaceCollide2 (dGeomID space1, dGeomID space2, void *data, dNearCallback *callback);
@@ -713,6 +715,11 @@ enum {
 
 
 /**
+ * @defgroup collide_sphere Sphere Class
+ * @ingroup collide
+ */
+
+/**
  * @brief Create a sphere geom of the given radius, and return its ID. 
  *
  * @param space   a space to contain the new geom. May be null.
@@ -722,7 +729,9 @@ enum {
  *
  * @remarks The point of reference for a sphere is its center.
  *
- * @ingroup collide
+ * @sa dGeomDestroy
+ * @sa dGeomSphereSetRadius
+ * @ingroup collide_sphere
  */
 ODE_API dGeomID dCreateSphere (dSpaceID space, dReal radius);
 
@@ -733,7 +742,8 @@ ODE_API dGeomID dCreateSphere (dSpaceID space, dReal radius);
  * @param sphere  the sphere to set.
  * @param radius  the new radius.
  *
- * @ingroup collide
+ * @sa dGeomSphereGetRadius
+ * @ingroup collide_sphere
  */
 ODE_API void dGeomSphereSetRadius (dGeomID sphere, dReal radius);
 
@@ -743,7 +753,8 @@ ODE_API void dGeomSphereSetRadius (dGeomID sphere, dReal radius);
  *
  * @param sphere  the sphere to query.
  *
- * @ingroup collide
+ * @sa dGeomSphereSetRadius
+ * @ingroup collide_sphere
  */
 ODE_API dReal dGeomSphereGetRadius (dGeomID sphere);
 
@@ -760,7 +771,7 @@ ODE_API dReal dGeomSphereGetRadius (dGeomID sphere);
  * positive depth, points outside it will have a negative depth, and points
  * on the surface will have a depth of zero.
  *
- * @ingroup collide
+ * @ingroup collide_sphere
  */
 ODE_API dReal dGeomSpherePointDepth (dGeomID sphere, dReal x, dReal y, dReal z);
 
@@ -779,8 +790,44 @@ ODE_API void dGeomSetConvex (dGeomID g,
 			     unsigned int _pointcount,unsigned int *_polygons);
 //<-- Convex Functions
 
+/**
+ * @defgroup collide_box Box Class
+ * @ingroup collide
+ */
+
+/**
+ * @brief Create a sphere geom of the given radius, and return its ID. 
+ *
+ * @param space   a space to contain the new geom. May be null.
+ * @param lx      the length of the box along the X axis
+ * @param ly      the length of the box along the Y axis
+ * @param lz      the length of the box along the Z axis
+ *
+ * @returns A new box geom.
+ *
+ * @remarks The point of reference for a box is its center.
+ *
+ * @sa dGeomDestroy
+ * @sa dGeomBoxSetLengths
+ * @ingroup collide_box
+ */
 ODE_API dGeomID dCreateBox (dSpaceID space, dReal lx, dReal ly, dReal lz);
+
+
+/**
+ * @brief Set the side lengths of the given box.
+ *
+ * @param box  the box to set
+ * @param lx      the length of the box along the X axis
+ * @param ly      the length of the box along the Y axis
+ * @param lz      the length of the box along the Z axis
+ *
+ * @sa dGeomBoxGetLengths
+ * @ingroup collide_box
+ */
 ODE_API void dGeomBoxSetLengths (dGeomID box, dReal lx, dReal ly, dReal lz);
+
+
 ODE_API void dGeomBoxGetLengths (dGeomID box, dVector3 result);
 ODE_API dReal dGeomBoxPointDepth (dGeomID box, dReal x, dReal y, dReal z);
 
