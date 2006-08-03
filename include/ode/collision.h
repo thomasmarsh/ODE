@@ -796,7 +796,7 @@ ODE_API void dGeomSetConvex (dGeomID g,
  */
 
 /**
- * @brief Create a sphere geom of the given radius, and return its ID. 
+ * @brief Create a box geom with the provided side lengths.
  *
  * @param space   a space to contain the new geom. May be null.
  * @param lx      the length of the box along the X axis
@@ -828,8 +828,32 @@ ODE_API dGeomID dCreateBox (dSpaceID space, dReal lx, dReal ly, dReal lz);
 ODE_API void dGeomBoxSetLengths (dGeomID box, dReal lx, dReal ly, dReal lz);
 
 
+/**
+ * @brief Get the side lengths of a box.
+ *
+ * @param box     the box to query
+ * @param result  the returned side lengths
+ *
+ * @sa dGeomBoxSetLengths
+ * @ingroup collide_box
+ */
 ODE_API void dGeomBoxGetLengths (dGeomID box, dVector3 result);
+
+
+/**
+ * @brief Return the depth of a point in a box.
+ * 
+ * @param box  the box to query
+ * @param x    the X coordinate of the point to test.
+ * @param y    the Y coordinate of the point to test.
+ * @param z    the Z coordinate of the point to test.
+ *
+ * @returns The depth of the point. Points inside the box will have a 
+ * positive depth, points outside it will have a negative depth, and points
+ * on the surface will have a depth of zero.
+ */
 ODE_API dReal dGeomBoxPointDepth (dGeomID box, dReal x, dReal y, dReal z);
+
 
 ODE_API dGeomID dCreatePlane (dSpaceID space, dReal a, dReal b, dReal c, dReal d);
 ODE_API void dGeomPlaneSetParams (dGeomID plane, dReal a, dReal b, dReal c, dReal d);
