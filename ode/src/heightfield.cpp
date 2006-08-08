@@ -306,13 +306,48 @@ dReal dxHeightfieldData::GetHeight( dReal x, dReal z )
 // dxHeightfieldData destructor
 dxHeightfieldData::~dxHeightfieldData()
 {
+	static unsigned char *data_byte;
+	static short *data_short;
+	static float *data_float;
+	static double *data_double;
+
+	dIASSERT( m_pHeightData );
+
 	if ( m_bCopyHeightData )
 	{
-		// Cast from const void* to plain void* for MinGW warning.
-		void* p_nonconst = const_cast< void* >( m_pHeightData );
+		switch ( m_nGetHeightMode )
+		{
 
-		dIASSERT( m_pHeightData );
-		delete [] p_nonconst;
+		// callback
+		case 0:
+			// do nothing
+			break;
+
+		// byte
+		case 1:
+			data_byte = (unsigned char*)m_pHeightData;
+			delete [] data_byte;
+			break;
+
+		// short
+		case 2:
+			data_short = (short*)m_pHeightData;
+			delete [] data_short;
+			break;
+
+		// float
+		case 3:
+			data_float = (float*)m_pHeightData;
+			delete [] data_float;
+			break;
+
+		// double
+		case 4:
+			data_double = (double*)m_pHeightData;
+			delete [] data_double;
+			break;
+
+		}
 	}
 }
 
@@ -609,12 +644,12 @@ void dGeomHeightfieldDataBuildDouble( dHeightfieldDataID d,
 	else
 	{
 		// We own the height data, allocate storage
-		d->m_pHeightData = new float[ d->m_nWidthSamples * d->m_nDepthSamples ];
+		d->m_pHeightData = new double[ d->m_nWidthSamples * d->m_nDepthSamples ];
 		dIASSERT( d->m_pHeightData );
 
 		// Copy data.
 		memcpy( (void*)d->m_pHeightData, pHeightData,
-			sizeof( float ) * d->m_nWidthSamples * d->m_nDepthSamples );
+			sizeof( double ) * d->m_nWidthSamples * d->m_nDepthSamples );
 	}
 
 	// Find height bounds
