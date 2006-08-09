@@ -279,6 +279,24 @@ Package=<4>
 
 ###############################################################################
 
+Project: "test_plane2d"=./test_plane2d.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name ode
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name drawstuff
+    End Project Dependency
+}}}
+
+###############################################################################
+
 Project: "test_slider"=./test_slider.dsp - Package Owner=<4>
 
 Package=<5>

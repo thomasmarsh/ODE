@@ -3,7 +3,7 @@
 	ProjectType="Visual C++"
 	Version="8.00"
 	Name="test_collision"
-	ProjectGUID="{7C6665A7-BB7D-9343-BDBF-1208DEDD8D39}"
+	ProjectGUID="{B9443D08-4E76-DB45-94AC-2FF534A57710}"
 	RootNamespace="test_collision"
 	Keyword="Win32Proj"
 	>

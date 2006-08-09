@@ -9,11 +9,11 @@ endif
 
 export CONFIG
 
-.PHONY: all clean ode drawstuff test_basket test_boxstack test_buggy test_chain1 test_chain2 test_collision test_crash test_friction test_heightfield test_hinge test_I test_joints test_motor test_ode test_slider test_space test_space_stress test_step test_cyl test_cylvssphere test_moving_trimesh test_trimesh tests
+.PHONY: all clean ode drawstuff test_basket test_boxstack test_buggy test_chain1 test_chain2 test_collision test_crash test_friction test_heightfield test_hinge test_I test_joints test_motor test_ode test_plane2d test_slider test_space test_space_stress test_step test_cyl test_cylvssphere test_moving_trimesh test_trimesh tests
 
-all: ode drawstuff test_basket test_boxstack test_buggy test_chain1 test_chain2 test_collision test_crash test_friction test_heightfield test_hinge test_I test_joints test_motor test_ode test_slider test_space test_space_stress test_step test_cyl test_cylvssphere test_moving_trimesh test_trimesh tests
+all: ode drawstuff test_basket test_boxstack test_buggy test_chain1 test_chain2 test_collision test_crash test_friction test_heightfield test_hinge test_I test_joints test_motor test_ode test_plane2d test_slider test_space test_space_stress test_step test_cyl test_cylvssphere test_moving_trimesh test_trimesh tests
 
-Makefile: ../premake.lua ../ode.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua
+Makefile: ../premake.lua ../ode.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua
 	@echo ==== Regenerating Makefiles ====
 	@premake --file $^ --usetargetpath --with-tests --clean --target gnu
 
@@ -81,6 +81,10 @@ test_ode: ode drawstuff
 	@echo ==== Building test_ode ====
 	@$(MAKE) --no-print-directory -C . -f test_ode.make
 
+test_plane2d: ode drawstuff
+	@echo ==== Building test_plane2d ====
+	@$(MAKE) --no-print-directory -C . -f test_plane2d.make
+
 test_slider: ode drawstuff
 	@echo ==== Building test_slider ====
 	@$(MAKE) --no-print-directory -C . -f test_slider.make
@@ -134,6 +138,7 @@ clean:
 	@$(MAKE) --no-print-directory -C . -f test_joints.make clean
 	@$(MAKE) --no-print-directory -C . -f test_motor.make clean
 	@$(MAKE) --no-print-directory -C . -f test_ode.make clean
+	@$(MAKE) --no-print-directory -C . -f test_plane2d.make clean
 	@$(MAKE) --no-print-directory -C . -f test_slider.make clean
 	@$(MAKE) --no-print-directory -C . -f test_space.make clean
 	@$(MAKE) --no-print-directory -C . -f test_space_stress.make clean
