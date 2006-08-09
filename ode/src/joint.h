@@ -253,8 +253,24 @@ struct dxJointLMotor : public dxJoint {
   dVector3 axis[3];
   dxJointLimitMotor limot[3];
 };
-  
+
 extern struct dxJoint::Vtable __dlmotor_vtable;
+
+
+// 2d joint, constrains to z == 0
+
+struct dxJointPlane2D : public dxJoint
+{
+    int                 row_motor_x;
+    int                 row_motor_y;
+    int                 row_motor_angle;
+    dxJointLimitMotor   motor_x;
+    dxJointLimitMotor   motor_y;
+    dxJointLimitMotor   motor_angle;
+};
+
+extern struct dxJoint::Vtable __dplane2d_vtable;
+
 
 // fixed
 
@@ -270,7 +286,6 @@ extern struct dxJoint::Vtable __dfixed_vtable;
 struct dxJointNull : public dxJoint {
 };
 extern struct dxJoint::Vtable __dnull_vtable;
-
 
 
 #endif

@@ -853,7 +853,7 @@ void dBodySetAutoDisableFlag (dBodyID b, int do_auto_disable)
 		b->adis.idle_steps = dWorldGetAutoDisableSteps(b->world);
 		b->adis.idle_time = dWorldGetAutoDisableTime(b->world);
 	}
-	else 
+	else
 	{
 		b->flags |= dxBodyAutoDisable;
 	}
@@ -979,6 +979,12 @@ dxJoint * dJointCreateLMotor (dWorldID w, dJointGroupID group)
 {
   dAASSERT (w);
   return createJoint (w,group,&__dlmotor_vtable);
+}
+
+dxJoint * dJointCreatePlane2D (dWorldID w, dJointGroupID group)
+{
+  dAASSERT (w);
+  return createJoint (w,group,&__dplane2d_vtable);
 }
 
 void dJointDestroy (dxJoint *j)
@@ -1147,7 +1153,7 @@ dJointID dConnectingJoint (dBodyID in_b1, dBodyID in_b2)
 		b1 = in_b1;
 		b2 = in_b2;
 	}
-		
+
     // look through b1's neighbour list for b2
     for (dxJointNode *n=b1->firstjoint; n; n=n->next) {
         if (n->body == b2) return n->joint;
@@ -1173,7 +1179,7 @@ int dConnectingJointList (dBodyID in_b1, dBodyID in_b2, dJointID* out_list)
 		b1 = in_b1;
 		b2 = in_b2;
 	}
-		
+
     // look through b1's neighbour list for b2
     int numConnectingJoints = 0;
     for (dxJointNode *n=b1->firstjoint; n; n=n->next) {

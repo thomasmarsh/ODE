@@ -17,6 +17,7 @@
     "joints",
     "motor",
     "ode",
+    "plane2d",
     "slider",
     "space",
     "space_stress",
