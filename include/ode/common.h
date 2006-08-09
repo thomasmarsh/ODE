@@ -138,7 +138,7 @@ typedef dReal dQuaternion[4];
 #elif defined(HAVE_ISNANF)
 #define dIsNan(x) (isnanf(x))
 #else
-  /* 
+  /*
      fall back to _isnan which is the VC way,
      this may seem redundant since we already checked
      for _isnan before, but if isnan is detected by
@@ -254,7 +254,8 @@ enum {
   dJointTypeFixed,
   dJointTypeNull,
   dJointTypeAMotor,
-  dJointTypeLMotor
+  dJointTypeLMotor,
+  dJointTypePlane2D
 };
 
 

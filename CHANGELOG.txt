@@ -9,6 +9,10 @@ the rules for this file:
 
 ------------------------------------------------------------------------------
 
+08/09/06 david
+
+	* Integrated plane2d joint type which constrains bodies to z == 0.
+
 07/06/06 david
 
 	* Added heightfield primitive collision code. Simple test available in

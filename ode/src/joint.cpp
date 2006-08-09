@@ -1187,7 +1187,7 @@ void dJointSetSliderAxisDelta (dJointID j, dReal x, dReal y, dReal z, dReal dx, 
   dUASSERT(joint,"bad joint argument");
   dUASSERT(joint->vtable == &__dslider_vtable,"joint is not a slider");
   setAxes (joint,x,y,z,joint->axis1,0);
-  
+
   // compute initial relative rotation body1 -> body2, or env -> body1
   // also compute center of body1 w.r.t body 2
   if (joint->node[1].body) {
@@ -2760,7 +2760,7 @@ static void lmotorComputeGlobalAxes (dxJointLMotor *joint, dVector3 ax[3])
     else if (joint->rel[i] == 2) {
       if (joint->node[1].body) {   // jds: don't assert, just ignore
         dMULTIPLY0_331 (ax[i],joint->node[1].body->posr.R,joint->axis[i]);
-      } 
+      }
     } else {
       ax[i][0] = joint->axis[i][0];
       ax[i][1] = joint->axis[i][1];
@@ -2769,7 +2769,7 @@ static void lmotorComputeGlobalAxes (dxJointLMotor *joint, dVector3 ax[3])
   }
 }
 
-static void lmotorGetInfo1 (dxJointLMotor *j, dxJoint::Info1 *info) 
+static void lmotorGetInfo1 (dxJointLMotor *j, dxJoint::Info1 *info)
 {
   info->m = 0;
   info->nub = 0;
@@ -2785,10 +2785,10 @@ static void lmotorGetInfo2 (dxJointLMotor *joint, dxJoint::Info2 *info)
   int row=0;
   dVector3 ax[3];
   lmotorComputeGlobalAxes(joint, ax);
- 
-  for (int i=0;i<joint->num;i++) {  	
+
+  for (int i=0;i<joint->num;i++) {
     row += joint->limot[i].addLimot(joint,info,row,ax[i], 0);
-  }	
+  }
 }
 
 void dJointSetLMotorAxis (dJointID j, int anum, int rel, dReal x, dReal y, dReal z)
@@ -2813,7 +2813,7 @@ void dJointSetLMotorAxis (dJointID j, int anum, int rel, dReal x, dReal y, dReal
     if (rel==1) {
       dMULTIPLY1_331 (joint->axis[anum],joint->node[0].body->posr.R,r);
 	} else {
-	  //second body has to exists thanks to ref 1 line	
+	  //second body has to exists thanks to ref 1 line
       dMULTIPLY1_331 (joint->axis[anum],joint->node[1].body->posr.R,r);
 	}
   } else {
@@ -2999,3 +2999,165 @@ dxJoint::Vtable __dnull_vtable = {
   (dxJoint::getInfo1_fn*) nullGetInfo1,
   (dxJoint::getInfo2_fn*) nullGetInfo2,
   dJointTypeNull};
+
+
+
+
+/*
+    This code is part of the Plane2D ODE joint
+    by psero@gmx.de
+    Wed Apr 23 18:53:43 CEST 2003
+
+    Add this code to the file: ode/src/joint.cpp
+*/
+
+
+# define        VoXYZ(v1, o1, x, y, z) \
+                    ( \
+                        (v1)[0] o1 (x), \
+                        (v1)[1] o1 (y), \
+                        (v1)[2] o1 (z)  \
+                    )
+
+static dReal   Midentity[3][3] =
+                {
+                    {   1,  0,  0   },
+                    {   0,  1,  0   },
+                    {   0,  0,  1,  }
+                };
+
+
+
+static void     plane2dInit (dxJointPlane2D *j)
+/*********************************************/
+{
+    /* MINFO ("plane2dInit ()"); */
+    j->motor_x.init (j->world);
+    j->motor_y.init (j->world);
+    j->motor_angle.init (j->world);
+}
+
+
+
+static void     plane2dGetInfo1 (dxJointPlane2D *j, dxJoint::Info1 *info)
+/***********************************************************************/
+{
+  /* MINFO ("plane2dGetInfo1 ()"); */
+
+  info->nub = 3;
+  info->m = 3;
+
+  if (j->motor_x.fmax > 0)
+      j->row_motor_x = info->m ++;
+  if (j->motor_y.fmax > 0)
+      j->row_motor_y = info->m ++;
+  if (j->motor_angle.fmax > 0)
+      j->row_motor_angle = info->m ++;
+}
+
+
+
+static void     plane2dGetInfo2 (dxJointPlane2D *joint, dxJoint::Info2 *info)
+/***************************************************************************/
+{
+    int         r0 = 0,
+                r1 = info->rowskip,
+                r2 = 2 * r1;
+    dReal       eps = info->fps * info->erp;
+
+    /* MINFO ("plane2dGetInfo2 ()"); */
+
+/*
+    v = v1, w = omega1
+    (v2, omega2 not important (== static environment))
+
+    constraint equations:
+        xz = 0
+        wx = 0
+        wy = 0
+
+    <=> ( 0 0 1 ) (vx)   ( 0 0 0 ) (wx)   ( 0 )
+        ( 0 0 0 ) (vy) + ( 1 0 0 ) (wy) = ( 0 )
+        ( 0 0 0 ) (vz)   ( 0 1 0 ) (wz)   ( 0 )
+        J1/J1l           Omega1/J1a
+*/
+
+    // fill in linear and angular coeff. for left hand side:
+
+    VoXYZ (&info->J1l[r0], =, 0, 0, 1);
+    VoXYZ (&info->J1l[r1], =, 0, 0, 0);
+    VoXYZ (&info->J1l[r2], =, 0, 0, 0);
+
+    VoXYZ (&info->J1a[r0], =, 0, 0, 0);
+    VoXYZ (&info->J1a[r1], =, 1, 0, 0);
+    VoXYZ (&info->J1a[r2], =, 0, 1, 0);
+
+    // error correction (against drift):
+
+    // a) linear vz, so that z (== pos[2]) == 0
+    info->c[0] = eps * -joint->node[0].body->posr.pos[2];
+
+# if 0
+    // b) angular correction? -> left to application !!!
+    dReal       *body_z_axis = &joint->node[0].body->R[8];
+    info->c[1] = eps * +atan2 (body_z_axis[1], body_z_axis[2]); // wx error
+    info->c[2] = eps * -atan2 (body_z_axis[0], body_z_axis[2]); // wy error
+# endif
+
+    // if the slider is powered, or has joint limits, add in the extra row:
+
+    if (joint->row_motor_x > 0)
+        joint->motor_x.addLimot (
+            joint, info, joint->row_motor_x, Midentity[0], 0);
+
+    if (joint->row_motor_y > 0)
+        joint->motor_y.addLimot (
+            joint, info, joint->row_motor_y, Midentity[1], 0);
+
+    if (joint->row_motor_angle > 0)
+        joint->motor_angle.addLimot (
+            joint, info, joint->row_motor_angle, Midentity[2], 1);
+}
+
+
+
+dxJoint::Vtable __dplane2d_vtable =
+{
+  sizeof (dxJointPlane2D),
+  (dxJoint::init_fn*) plane2dInit,
+  (dxJoint::getInfo1_fn*) plane2dGetInfo1,
+  (dxJoint::getInfo2_fn*) plane2dGetInfo2,
+  dJointTypePlane2D
+};
+
+
+void dJointSetPlane2DXParam (dxJoint *joint,
+                      int parameter, dReal value)
+{
+	dUASSERT (joint, "bad joint argument");
+	dUASSERT (joint->vtable == &__dplane2d_vtable, "joint is not a plane2d");
+	dxJointPlane2D* joint2d = (dxJointPlane2D*)( joint );
+	joint2d->motor_x.set (parameter, value);
+}
+
+
+void dJointSetPlane2DYParam (dxJoint *joint,
+                      int parameter, dReal value)
+{
+	dUASSERT (joint, "bad joint argument");
+	dUASSERT (joint->vtable == &__dplane2d_vtable, "joint is not a plane2d");
+	dxJointPlane2D* joint2d = (dxJointPlane2D*)( joint );
+	joint2d->motor_y.set (parameter, value);
+}
+
+
+
+void dJointSetPlane2DAngleParam (dxJoint *joint,
+                      int parameter, dReal value)
+{
+	dUASSERT (joint, "bad joint argument");
+	dUASSERT (joint->vtable == &__dplane2d_vtable, "joint is not a plane2d");
+	dxJointPlane2D* joint2d = (dxJointPlane2D*)( joint );
+	joint2d->motor_angle.set (parameter, value);
+}
+
