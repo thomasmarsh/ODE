@@ -17,6 +17,7 @@ noinst_PROGRAMS=test_collision \
 		test_chain2 \
                 test_cylvssphere \
 		test_ode \
+		test_plane2d \
 		test_heightfield
 if OPCODE
 noinst_PROGRAMS+= test_trimesh test_moving_trimesh test_basket test_cyl
@@ -39,6 +40,7 @@ test_motor_SOURCES= test_motor.cpp
 test_chain1_SOURCES= test_chain1.c
 test_chain2_SOURCES= test_chain2.cpp
 test_ode_SOURCES= test_ode.cpp
+test_plane2d_SOURCES= test_plane2d.cpp
 test_heightfield_SOURCES= test_heightfield.cpp
 test_collision_LDFLAGS= -L$(top_builddir)/drawstuff/src \
 		-L$(top_builddir)/ode/src @LDFLAGS@ 
@@ -75,6 +77,8 @@ test_chain1_LDFLAGS= -L$(top_builddir)/drawstuff/src \
 test_chain2_LDFLAGS= -L$(top_builddir)/drawstuff/src \
 		-L$(top_builddir)/ode/src @LDFLAGS@ 
 test_ode_LDFLAGS= -L$(top_builddir)/drawstuff/src \
+		-L$(top_builddir)/ode/src @LDFLAGS@ 
+test_plane2d_LDFLAGS= -L$(top_builddir)/drawstuff/src \
 		-L$(top_builddir)/ode/src @LDFLAGS@ 
 test_heightfield_LDFLAGS= -L$(top_builddir)/drawstuff/src \
 		-L$(top_builddir)/ode/src @LDFLAGS@ 
@@ -115,6 +119,8 @@ test_chain2_DEPENDENCIES=	$(top_builddir)/ode/src/libode.a \
 				$(top_builddir)/drawstuff/src/libdrawstuff.a
 test_ode_DEPENDENCIES=		$(top_builddir)/ode/src/libode.a \
 				$(top_builddir)/drawstuff/src/libdrawstuff.a
+test_plane2d_DEPENDENCIES=	$(top_builddir)/ode/src/libode.a \
+				$(top_builddir)/drawstuff/src/libdrawstuff.a
 test_heightfield_DEPENDENCIES=	$(top_builddir)/ode/src/libode.a \
 				$(top_builddir)/drawstuff/src/libdrawstuff.a
 
@@ -142,6 +148,7 @@ test_basket_DEPENDENCIES=		$(top_builddir)/ode/src/libode.a \
 endif
 
 test_ode_LDADD= -ldrawstuff $(top_builddir)/ode/src/libode.a @GL_LIBS@ @LIBS@
+test_plane2d_LDADD= -ldrawstuff $(top_builddir)/ode/src/libode.a @GL_LIBS@ @LIBS@
 test_heightfield_LDADD= -ldrawstuff $(top_builddir)/ode/src/libode.a @GL_LIBS@ @LIBS@
 test_chain2_LDADD= -ldrawstuff $(top_builddir)/ode/src/libode.a @GL_LIBS@ @LIBS@
 test_chain1_LDADD= -ldrawstuff $(top_builddir)/ode/src/libode.a @GL_LIBS@ @LIBS@
