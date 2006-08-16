@@ -210,6 +210,9 @@ static void initColliders()
   setCollider (dHeightfieldClass,dCapsuleClass,&dCollideHeightfield);
   setCollider (dHeightfieldClass,dCylinderClass,&dCollideHeightfield);
   setCollider (dHeightfieldClass,dConvexClass,&dCollideHeightfield);
+#ifdef dTRIMESH_ENABLED
+  setCollider (dHeightfieldClass,dTriMeshClass,&dCollideHeightfield);
+#endif
 //<-- dHeightfield Collision
 
   setAllColliders (dGeomTransformClass,&dCollideTransform);

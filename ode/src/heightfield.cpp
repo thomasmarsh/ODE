@@ -37,8 +37,8 @@
 
 //////// Local Build Option ////////////////////////////////////////////////////
 
-// Uncomment this #define to use the (0,0) corner of the geom as the origin, 
-// rather than the centre. This was the way the original heightfield worked, 
+// Uncomment this #define to use the (0,0) corner of the geom as the origin,
+// rather than the centre. This was the way the original heightfield worked,
 // but as it does not match the way all other geoms work, so for constancy it
 // was changed to work like this.
 
@@ -386,7 +386,7 @@ void dxHeightfield::computeAABB()
 			dy[5] = ( final_posr->R[ 9] * d->m_fMaxHeight );
 
 #ifdef DHEIGHTFIELD_CORNER_ORIGIN
-			
+
 			// X-axis
 			dx[0] = 0;	dx[3] = ( final_posr->R[ 0] * d->m_fWidth );
 			dx[1] = 0;	dx[4] = ( final_posr->R[ 4] * d->m_fWidth );
@@ -746,39 +746,52 @@ int dxHeightfield::dCollideHeightfieldUnit( int x, int z, dxGeom* o2, int numMax
 
 	switch (o2->type)
 	{
+
 	case dRayClass:
 		CollideRayN		= NULL;
 		CollideNPlane	= dCollideRayPlane;
 		GetDepth		= NULL;
 		break;
+
 	case dSphereClass:
 		CollideRayN		= dCollideRaySphere;
 		CollideNPlane	= dCollideSpherePlane;
 		GetDepth		= dGeomSpherePointDepth;
 		break;
+
 	case dBoxClass:
 		CollideRayN		= dCollideRayBox;
 		CollideNPlane	= dCollideBoxPlane;
 		GetDepth		= dGeomBoxPointDepth;
 		break;
+
 	case dCapsuleClass:
 		CollideRayN		= dCollideRayCapsule;
 		CollideNPlane	= dCollideCapsulePlane;
 		GetDepth		= dGeomCapsulePointDepth;
 		break;
+
 	case dCylinderClass:
 		CollideRayN		= dCollideRayCylinder;
 		CollideNPlane	= dCollideCylinderPlane;
 		GetDepth		= NULL;// TODO: dGeomCylinderPointDepth;
 		break;
+
 	case dConvexClass:
 		CollideRayN		= dCollideRayConvex;
 		CollideNPlane	= dCollideConvexPlane;
 		GetDepth		= NULL;// TODO: dGeomConvexPointDepth;
 		break;
 
+	case dTriMeshClass:
+		CollideRayN		= dCollideRayTrimesh;
+		CollideNPlane	= dCollideTrimeshPlane;
+		GetDepth		= NULL;// N/A?
+		break;
+
 	default:
-		dIASSERT(0);
+		dIASSERT(0);	// Shouldn't ever get here.
+		break;
 
 	}
 
@@ -1022,7 +1035,7 @@ int dCollideHeightfield( dxGeom *o1, dxGeom *o2, int flags, dContactGeom* contac
 	dMatrix3Copy( o2->final_posr->R, Rbak );
 	memcpy( aabbbak, o2->aabb, sizeof( dReal ) * 6 );
 	gflagsbak = o2->gflags;
-	
+
 	if ( terrain->gflags & GEOM_PLACEABLE )
 	{
 		// Transform o2 into heightfield space.
@@ -1034,12 +1047,12 @@ int dCollideHeightfield( dxGeom *o1, dxGeom *o2, int flags, dContactGeom* contac
 		dVector3Copy( pos1, o2->final_posr->pos );
 		dMatrix3Copy( R1, o2->final_posr->R );
 	}
-	
+
 #ifndef DHEIGHTFIELD_CORNER_ORIGIN
 	o2->final_posr->pos[ 0 ] += terrain->m_p_data->m_fHalfWidth;
 	o2->final_posr->pos[ 2 ] += terrain->m_p_data->m_fHalfDepth;
 #endif // DHEIGHTFIELD_CORNER_ORIGIN
-	
+
 	// Rebuild AABB for O2
 	o2->computeAABB();
 
@@ -1071,7 +1084,7 @@ int dCollideHeightfield( dxGeom *o1, dxGeom *o2, int flags, dContactGeom* contac
 	AabbTop[0] = (o2->aabb[0]+o2->aabb[1]) / 2;
 	AabbTop[2] = (o2->aabb[4]+o2->aabb[5]) / 2;
 	AabbTop[1] = o2->aabb[3];
-	
+
 	if ( o2->type != dRayClass )
 	{
 		dReal AabbTopDepth = terrain->m_p_data->GetHeight( AabbTop[0],AabbTop[2] ) - AabbTop[1];
@@ -1131,17 +1144,17 @@ dCollideHeightfieldExit:
 		for ( i = 0; i < numTerrainContacts; ++i )
 		{
 			dOPE( pos0, =, CONTACT(contact,i*skip)->pos );
-			
+
 #ifndef DHEIGHTFIELD_CORNER_ORIGIN
 			pos0[ 0 ] -= terrain->m_p_data->m_fHalfWidth;
 			pos0[ 2 ] -= terrain->m_p_data->m_fHalfDepth;
 #endif // !DHEIGHTFIELD_CORNER_ORIGIN
 
 			dMULTIPLY0_331( CONTACT(contact,i*skip)->pos, terrain->final_posr->R, pos0 );
-			
+
 			dOP( CONTACT(contact,i*skip)->pos, +, CONTACT(contact,i*skip)->pos, terrain->final_posr->pos );
 			dOPE( pos0, =, CONTACT(contact,i*skip)->normal );
-			
+
 			dMULTIPLY0_331( CONTACT( contact, i*skip )->normal, terrain->final_posr->R, pos0 );
 		}
 	}
