@@ -40,11 +40,10 @@
 /*
  * Macro to test for valid floating point values
  */
-#define dVALIDVEC3(v) (!(dIsNan(v[0]) | dIsNan(v[1]) | dIsNan(v[2])))
-#define dVALIDVEC4(v) (!(dIsNan(v[0]) | dIsNan(v[2]) | dIsNan(v[2]) | dIsNan(v[3])))
-#define dVALIDMAT(m) (!(dIsNan(m[0]) | dIsNan(m[2]) | dIsNan(m[2]) | dIsNan(m[3]) | dIsNan(m[4]) | dIsNan(m[5]) | dIsNan(m[6]) | dIsNan(m[7]) | dIsNan(m[8]) | dIsNan(m[9]) | dIsNan(m[10]) | dIsNan(m[11])))
-
-
+#define dVALIDVEC3(v) (!(dIsNan(v[0]) || dIsNan(v[1]) || dIsNan(v[2])))
+#define dVALIDVEC4(v) (!(dIsNan(v[0]) || dIsNan(v[2]) || dIsNan(v[2]) || dIsNan(v[3])))
+#define dVALIDMAT3(m) (!(dIsNan(m[0]) || dIsNan(m[1]) || dIsNan(m[2]) || dIsNan(m[3]) || dIsNan(m[4]) || dIsNan(m[5]) || dIsNan(m[6]) || dIsNan(m[7]) || dIsNan(m[8]) || dIsNan(m[9]) || dIsNan(m[10]) || dIsNan(m[11])))
+#define dVALIDMAT4(m) (!(dIsNan(m[0]) || dIsNan(m[1]) || dIsNan(m[2]) || dIsNan(m[3]) || dIsNan(m[4]) || dIsNan(m[5]) || dIsNan(m[6]) || dIsNan(m[7]) || dIsNan(m[8]) || dIsNan(m[9]) || dIsNan(m[10]) || dIsNan(m[11]) || dIsNan(m[12]) || dIsNan(m[13]) || dIsNan(m[14]) || dIsNan(m[15]) ))
 
 
 
