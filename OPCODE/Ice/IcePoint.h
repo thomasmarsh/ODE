@@ -32,9 +32,9 @@
 //		inline_					Point(float val) : x(val), y(val), z(val)					{}
 // Removed since it introduced the nasty "Point T = *Matrix4x4.GetTrans();" bug.......
 		//! Constructor from floats
-		inline_					Point(float _x, float _y, float _z) : x(_x), y(_y), z(_z)	{}
+		inline_					Point(float xx, float yy, float zz) : x(xx), y(yy), z(zz)	{}
 		//! Constructor from array
-		inline_					Point(const float f[3]) : x(f[_X]), y(f[_Y]), z(f[_Z])		{}
+		inline_					Point(const float f[3]) : x(f[X]), y(f[Y]), z(f[Z])		{}
 		//! Copy constructor
 		inline_					Point(const Point& p) : x(p.x), y(p.y), z(p.z)				{}
 		//! Destructor
@@ -54,27 +54,27 @@
 				Point&			UnitRandomVector();
 
 		//! Assignment from values
-		inline_	Point&			Set(float _x, float _y, float _z)		{ x  = _x;		y  = _y;	z  = _z;			return *this;	}
+		inline_	Point&			Set(float xx, float yy, float zz)		{ x  = xx;		y  = yy;	z  = zz;			return *this;	}
 		//! Assignment from array
-		inline_	Point&			Set(const float f[3])					{ x  = f[_X];	y  = f[_Y];	z  = f[_Z];			return *this;	}
+		inline_	Point&			Set(const float f[3])					{ x  = f[X];	y  = f[Y];	z  = f[Z];			return *this;	}
 		//! Assignment from another point
 		inline_	Point&			Set(const Point& src)					{ x  = src.x;	y  = src.y;	z  = src.z;			return *this;	}
 
 		//! Adds a vector
 		inline_	Point&			Add(const Point& p)						{ x += p.x;		y += p.y;	z += p.z;			return *this;	}
 		//! Adds a vector
-		inline_	Point&			Add(float _x, float _y, float _z)		{ x += _x;		y += _y;	z += _z;			return *this;	}
+		inline_	Point&			Add(float xx, float yy, float zz)		{ x += xx;		y += yy;	z += zz;			return *this;	}
 		//! Adds a vector
-		inline_	Point&			Add(const float f[3])					{ x += f[_X];	y += f[_Y];	z += f[_Z];			return *this;	}
+		inline_	Point&			Add(const float f[3])					{ x += f[X];	y += f[Y];	z += f[Z];			return *this;	}
 		//! Adds vectors
 		inline_	Point&			Add(const Point& p, const Point& q)		{ x = p.x+q.x;	y = p.y+q.y;	z = p.z+q.z;	return *this;	}
 
 		//! Subtracts a vector
 		inline_	Point&			Sub(const Point& p)						{ x -= p.x;		y -= p.y;	z -= p.z;			return *this;	}
 		//! Subtracts a vector
-		inline_	Point&			Sub(float _x, float _y, float _z)		{ x -= _x;		y -= _y;	z -= _z;			return *this;	}
+		inline_	Point&			Sub(float xx, float yy, float zz)		{ x -= xx;		y -= yy;	z -= zz;			return *this;	}
 		//! Subtracts a vector
-		inline_	Point&			Sub(const float f[3])					{ x -= f[_X];	y -= f[_Y];	z -= f[_Z];			return *this;	}
+		inline_	Point&			Sub(const float f[3])					{ x -= f[X];	y -= f[Y];	z -= f[Z];			return *this;	}
 		//! Subtracts vectors
 		inline_	Point&			Sub(const Point& p, const Point& q)		{ x = p.x-q.x;	y = p.y-q.y;	z = p.z-q.z;	return *this;	}
 
@@ -341,9 +341,9 @@
 		inline_	PointComponent	LargestAxis()						const
 								{
 									const float* Vals = &x;
-									PointComponent m = _X;
-									if(Vals[_Y] > Vals[m]) m = _Y;
-									if(Vals[_Z] > Vals[m]) m = _Z;
+									PointComponent m = X;
+									if(Vals[Y] > Vals[m]) m = Y;
+									if(Vals[Z] > Vals[m]) m = Z;
 									return m;
 								}
 
@@ -351,9 +351,9 @@
 		inline_	PointComponent	ClosestAxis()						const
 								{
 									const float* Vals = &x;
-									PointComponent m = _X;
-									if(AIR(Vals[_Y]) > AIR(Vals[m])) m = _Y;
-									if(AIR(Vals[_Z]) > AIR(Vals[m])) m = _Z;
+									PointComponent m = X;
+									if(AIR(Vals[Y]) > AIR(Vals[m])) m = Y;
+									if(AIR(Vals[Z]) > AIR(Vals[m])) m = Z;
 									return m;
 								}
 
@@ -361,9 +361,9 @@
 		inline_	PointComponent	SmallestAxis()						const
 								{
 									const float* Vals = &x;
-									PointComponent m = _X;
-									if(Vals[_Y] < Vals[m]) m = _Y;
-									if(Vals[_Z] < Vals[m]) m = _Z;
+									PointComponent m = X;
+									if(Vals[Y] < Vals[m]) m = Y;
+									if(Vals[Z] < Vals[m]) m = Z;
 									return m;
 								}
 

@@ -19,11 +19,11 @@
 		//! Empty constructor
 		inline_				HPoint()																		{}
 		//! Constructor from floats
-		inline_				HPoint(float _x, float _y, float _z, float _w=0.0f) : Point(_x, _y, _z), w(_w)	{}
+		inline_				HPoint(float xx, float yy, float zz, float ww=0.0f) : Point(xx, yy, zz), w(ww)	{}
 		//! Constructor from array
 		inline_				HPoint(const float f[4]) : Point(f), w(f[3])									{}
 		//! Constructor from a Point
-		inline_				HPoint(const Point& p, float _w=0.0f) : Point(p), w(_w)							{}
+		inline_				HPoint(const Point& p, float ww=0.0f) : Point(p), w(ww)							{}
 		//! Destructor
 		inline_				~HPoint()																		{}
 
@@ -31,21 +31,21 @@
 		inline_	HPoint&		Zero()											{ x =			y =			z =			w = 0.0f;		return *this;	}
 
 		//! Assignment from values
-		inline_	HPoint&		Set(float _x, float _y, float _z, float _w )	{ x  = _x;		y  = _y;	z  = _z;	w  = _w;		return *this;	}
+		inline_	HPoint&		Set(float xx, float yy, float zz, float ww )	{ x  = xx;		y  = yy;	z  = zz;	w  = ww;		return *this;	}
 		//! Assignment from array
-		inline_	HPoint&		Set(const float f[4])							{ x  = f[_X];	y  = f[_Y];	z  = f[_Z];	w  = f[_W];		return *this;	}
+		inline_	HPoint&		Set(const float f[4])							{ x  = f[X];	y  = f[Y];	z  = f[Z];	w  = f[W];		return *this;	}
 		//! Assignment from another h-point
 		inline_	HPoint&		Set(const HPoint& src)							{ x  = src.x;	y  = src.y;	z  = src.z;	w = src.w;		return *this;	}
 
 		//! Add a vector
-		inline_	HPoint&		Add(float _x, float _y, float _z, float _w )	{ x += _x;		y += _y;	z += _z;	w += _w;		return *this;	}
+		inline_	HPoint&		Add(float xx, float yy, float zz, float ww )	{ x += xx;		y += yy;	z += zz;	w += ww;		return *this;	}
 		//! Add a vector
-		inline_	HPoint&		Add(const float f[4])							{ x += f[_X];	y += f[_Y];	z += f[_Z];	w += f[_W];		return *this;	}
+		inline_	HPoint&		Add(const float f[4])							{ x += f[X];	y += f[Y];	z += f[Z];	w += f[W];		return *this;	}
 
 		//! Subtract a vector
-		inline_	HPoint&		Sub(float _x, float _y, float _z, float _w )	{ x -= _x;		y -= _y;	z -= _z;	w -= _w;		return *this;	}
+		inline_	HPoint&		Sub(float xx, float yy, float zz, float ww )	{ x -= xx;		y -= yy;	z -= zz;	w -= ww;		return *this;	}
 		//! Subtract a vector
-		inline_	HPoint&		Sub(const float f[4])							{ x -= f[_X];	y -= f[_Y];	z -= f[_Z];	w -= f[_W];		return *this;	}
+		inline_	HPoint&		Sub(const float f[4])							{ x -= f[X];	y -= f[Y];	z -= f[Z];	w -= f[W];		return *this;	}
 		
 		//! Multiplies by a scalar
 		inline_	HPoint&		Mul(float s)									{ x *= s;		y *= s;		z *= s;		w *= s;			return *this;	}

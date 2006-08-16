@@ -14,22 +14,22 @@
 
 	enum PointComponent
 	{
-		_X					= 0,
-		_Y					= 1,
-		_Z					= 2,
-		_W					= 3,
+		X					= 0,
+		Y					= 1,
+		Z					= 2,
+		W					= 3,
 
-		_FORCE_DWORD		= 0x7fffffff
+		FORCE_DWORD		= 0x7fffffff
 	};
 
 	enum AxisOrder
 	{
-		AXES_XYZ			= (_X)|(_Y<<2)|(_Z<<4),
-		AXES_XZY			= (_X)|(_Z<<2)|(_Y<<4),
-		AXES_YXZ			= (_Y)|(_X<<2)|(_Z<<4),
-		AXES_YZX			= (_Y)|(_Z<<2)|(_X<<4),
-		AXES_ZXY			= (_Z)|(_X<<2)|(_Y<<4),
-		AXES_ZYX			= (_Z)|(_Y<<2)|(_X<<4),
+		AXES_XYZ			= (X)|(Y<<2)|(Z<<4),
+		AXES_XZY			= (X)|(Z<<2)|(Y<<4),
+		AXES_YXZ			= (Y)|(X<<2)|(Z<<4),
+		AXES_YZX			= (Y)|(Z<<2)|(X<<4),
+		AXES_ZXY			= (Z)|(X<<2)|(Y<<4),
+		AXES_ZYX			= (Z)|(Y<<2)|(X<<4),
 
 		AXES_FORCE_DWORD	= 0x7fffffff
 	};
