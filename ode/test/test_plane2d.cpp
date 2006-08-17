@@ -168,12 +168,11 @@ static void     cb_sim_step (int pause)
             dsSetColor (1.0, 0.5, 1.0);
             else
             dsSetColor (0, 0.5, 1.0);
-            /* if (b == 0) */
-                /* dsDrawSphereD (dyn_bodies[b].getPosition(), */
-                        /* dyn_bodies[b].getRotation(), bodies_sides[b][0]); */
-            /* else */
-                dsDrawBox (dyn_bodies[b].getPosition(),
-                        dyn_bodies[b].getRotation(), bodies_sides[b]);
+#ifdef dDOUBLE
+            dsDrawBoxD (dyn_bodies[b].getPosition(), dyn_bodies[b].getRotation(), bodies_sides[b]);
+#else
+            dsDrawBox (dyn_bodies[b].getPosition(), dyn_bodies[b].getRotation(), bodies_sides[b]);
+#endif
         }
     }
 }

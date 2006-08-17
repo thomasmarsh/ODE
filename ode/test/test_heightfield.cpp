@@ -46,6 +46,14 @@ dGeomID gheight;
 #define HFIELD_WSAMP			( HFIELD_WIDTH / ( HFIELD_WSTEP-1 ) )
 #define HFIELD_DSAMP			( HFIELD_DEPTH / ( HFIELD_DSTEP-1 ) )
 
+#ifdef dDOUBLE
+#define dsDrawBox dsDrawBoxD
+#define dsDrawSphere dsDrawSphereD
+#define dsDrawCylinder dsDrawCylinderD
+#define dsDrawCapsule dsDrawCapsuleD
+#define dsDrawConvex dsDrawConvexD
+#define dsDrawTriangle dsDrawTriangleD
+#endif
 
 
 
@@ -1900,25 +1908,9 @@ static void simLoop (int pause)
 
 
 
-	//
-	// Get Single Precision Rotation/Position
-	//
-
-	float p[ 3 ], R[ 12 ];
-
 	const dReal* pReal = dGeomGetPosition( gheight );
 
-	p[ 0 ] = pReal[ 0 ];
-	p[ 1 ] = pReal[ 1 ];
-	p[ 2 ] = pReal[ 2 ];
-
 	const dReal* RReal = dGeomGetRotation( gheight );
-
-	for ( int r = 0; r < 12; ++r )
-	{
-		R[ r ] = RReal[ r ];
-	}
-
 
 	//
 	// Draw Heightfield
@@ -1937,7 +1929,7 @@ static void simLoop (int pause)
 		for ( int i = 0; i < HFIELD_WSTEP - 1; ++i )
 		for ( int j = 0; j < HFIELD_DSTEP - 1; ++j )
 		{
-			float a[3], b[3], c[3], d[3];
+			dReal a[3], b[3], c[3], d[3];
 
 			a[ 0 ] = ox + ( i ) * HFIELD_WSAMP;
 			a[ 1 ] = heightfield_callback( NULL, i, j );
@@ -1955,8 +1947,8 @@ static void simLoop (int pause)
 			d[ 1 ] = heightfield_callback( NULL, i + 1, j + 1 );
 			d[ 2 ] = oz + ( j + 1 ) * HFIELD_DSAMP;
 
-			dsDrawTriangle( p, R, a, c, b, 1 );
-			dsDrawTriangle( p, R, b, c, d, 1 );
+			dsDrawTriangle( pReal, RReal, a, c, b, 1 );
+			dsDrawTriangle( pReal, RReal, b, c, d, 1 );
 		}
 	}
 
