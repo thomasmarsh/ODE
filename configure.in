@@ -342,6 +342,16 @@ AC_DEFINE_UNQUOTED(SO_EXT,"$so_ext",[The extension for shared libraries.])
 AC_SUBST(so_ext)
 AC_SUBST(SHARED_LDFLAGS)
 
+dnl Check for AC_PATH_X variables
+if test "X$x_includes" != "XNONE"; then
+	CFLAGS="$CFLAGS -I$x_includes"
+	CXXFLAGS="$CXXFLAGS -I$x_includes"
+fi
+if test "X$x_libraries" != "XNONE"; then
+	CFLAGS="$CFLAGS -L$x_libraries"
+	CXXFLAGS="$CXXFLAGS -L$x_libraries"
+fi
+
 dnl Check for OpenGL
 if test "x$drawstuff" = "xOSX"; then
   AC_DEFINE([HAVE_APPLE_OPENGL_FRAMEWORK], [1],
