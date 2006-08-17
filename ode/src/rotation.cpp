@@ -78,12 +78,15 @@ void dRFromEulerAngles (dMatrix3 R, dReal phi, dReal theta, dReal psi)
   _R(0,0) = cpsi*ctheta;
   _R(0,1) = spsi*ctheta;
   _R(0,2) =-stheta;
+  _R(0,3) = REAL(0.0);
   _R(1,0) = cpsi*stheta*sphi - spsi*cphi;
   _R(1,1) = spsi*stheta*sphi + cpsi*cphi;
   _R(1,2) = ctheta*sphi;
+  _R(1,3) = REAL(0.0);
   _R(2,0) = cpsi*stheta*cphi + spsi*sphi;
   _R(2,1) = spsi*stheta*cphi - cpsi*sphi;
   _R(2,2) = ctheta*cphi;
+  _R(2,3) = REAL(0.0);
 }
 
 
@@ -123,6 +126,9 @@ void dRFrom2Axes (dMatrix3 R, dReal ax, dReal ay, dReal az,
   _R(0,2) = - by*az + ay*bz;
   _R(1,2) = - bz*ax + az*bx;
   _R(2,2) = - bx*ay + ax*by;
+  _R(0,3) = REAL(0.0);
+  _R(1,3) = REAL(0.0);
+  _R(2,3) = REAL(0.0);
 }
 
 
@@ -143,6 +149,9 @@ void dRFromZAxis (dMatrix3 R, dReal ax, dReal ay, dReal az)
   _R(0,2) = n[0];
   _R(1,2) = n[1];
   _R(2,2) = n[2];
+  _R(0,3) = REAL(0.0);
+  _R(1,3) = REAL(0.0);
+  _R(2,3) = REAL(0.0);
 }
 
 
@@ -233,12 +242,15 @@ void dRfromQ (dMatrix3 R, const dQuaternion q)
   _R(0,0) = 1 - qq2 - qq3;
   _R(0,1) = 2*(q[1]*q[2] - q[0]*q[3]);
   _R(0,2) = 2*(q[1]*q[3] + q[0]*q[2]);
+  _R(0,3) = REAL(0.0);
   _R(1,0) = 2*(q[1]*q[2] + q[0]*q[3]);
   _R(1,1) = 1 - qq1 - qq3;
   _R(1,2) = 2*(q[2]*q[3] - q[0]*q[1]);
+  _R(1,3) = REAL(0.0);
   _R(2,0) = 2*(q[1]*q[3] - q[0]*q[2]);
   _R(2,1) = 2*(q[2]*q[3] + q[0]*q[1]);
   _R(2,2) = 1 - qq1 - qq2;
+  _R(2,3) = REAL(0.0);
 }
 
 
