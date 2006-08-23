@@ -249,10 +249,6 @@ SOURCE=../../ode/src/step.h
 # End Source File
 # Begin Source File
 
-SOURCE=../../ode/src/testing.h
-# End Source File
-# Begin Source File
-
 SOURCE=../../ode/src/util.h
 # End Source File
 # Begin Source File
@@ -438,10 +434,6 @@ SOURCE=../../ode/src/step.cpp
 # Begin Source File
 
 SOURCE=../../ode/src/stepfast.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=../../ode/src/testing.cpp
 # End Source File
 # Begin Source File
 
