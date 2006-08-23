@@ -345,9 +345,6 @@
 					RelativePath="..\..\ode\src\step.h">
 				</File>
 				<File
-					RelativePath="..\..\ode\src\testing.h">
-				</File>
-				<File
 					RelativePath="..\..\ode\src\util.h">
 				</File>
 				<File
@@ -487,9 +484,6 @@
 				</File>
 				<File
 					RelativePath="..\..\ode\src\stepfast.cpp">
-				</File>
-				<File
-					RelativePath="..\..\ode\src\testing.cpp">
 				</File>
 				<File
 					RelativePath="..\..\ode\src\timer.cpp">
