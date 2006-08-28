@@ -279,8 +279,8 @@ dReal dxHeightfieldData::GetHeight( dReal x, dReal z )
 	dReal dx = ( x - ( dReal( nX ) * m_fSampleWidth ) ) / m_fSampleWidth;
 	dReal dz = ( z - ( dReal( nZ ) * m_fSampleDepth ) ) / m_fSampleDepth;
 
-	dIASSERT( ( dx >= 0.0f ) && ( dx <= 1.0f ) );
-	dIASSERT( ( dz >= 0.0f ) && ( dz <= 1.0f ) );
+	dIASSERT( ( dx + dEpsilon >= 0.0f ) && ( dx - dEpsilon <= 1.0f ) );
+	dIASSERT( ( dz + dEpsilon >= 0.0f ) && ( dz - dEpsilon <= 1.0f ) );
 
 	dReal y, y0;
 
