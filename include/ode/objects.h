@@ -574,8 +574,20 @@ ODE_API void dBodySetAngularVel (dBodyID, dReal x, dReal y, dReal z);
  * When getting, the returned values are pointers to internal data structures,
  * so the vectors are valid until any changes are made to the rigid body
  * system structure.
+ * @sa dBodyCopyPosition
  */
 ODE_API const dReal * dBodyGetPosition   (dBodyID);
+
+
+/**
+ * @brief Copy the position of a body into a vector.
+ * @ingroup bodies
+ * @param body      the body to query
+ * @param position  a copy of the body position
+ * @sa dBodyGetPosition
+ */
+ODE_API void dBodyCopyPosition (dBodyID body, dVector3 position);
+
 
 /**
  * @brief Get the rotation of a body.

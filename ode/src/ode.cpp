@@ -374,6 +374,16 @@ const dReal * dBodyGetPosition (dBodyID b)
 }
 
 
+void dBodyCopyPosition (dBodyID b, dVector3 position)
+{
+	dAASSERT (b);
+	dReal* pos = b->posr.pos;
+	position[0] = pos[0];
+	position[1] = pos[1];
+	position[2] = pos[2];
+}
+
+
 const dReal * dBodyGetRotation (dBodyID b)
 {
   dAASSERT (b);
