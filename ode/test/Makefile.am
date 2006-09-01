@@ -3,6 +3,7 @@ AM_CFLAGS = @ARCHFLAGS@ @CXXFLAGS@ -I$(top_srcdir)/include -I$(top_builddir)/inc
 
 noinst_PROGRAMS=test_collision \
 		test_slider \
+		test_feedback \
 		test_crash \
 		test_space \
 		test_I \
@@ -24,6 +25,7 @@ noinst_PROGRAMS+= test_trimesh test_moving_trimesh test_basket test_cyl
 endif
 test_collision_SOURCES= test_collision.cpp
 test_slider_SOURCES= test_slider.cpp 
+test_feedback_SOURCES= test_feedback.cpp 
 test_crash_SOURCES= test_crash.cpp
 test_space_SOURCES= test_space.cpp
 test_I_SOURCES= test_I.cpp
@@ -45,6 +47,8 @@ test_heightfield_SOURCES= test_heightfield.cpp
 test_collision_LDFLAGS= -L$(top_builddir)/drawstuff/src \
 		-L$(top_builddir)/ode/src @LDFLAGS@ 
 test_slider_LDFLAGS= -L$(top_builddir)/drawstuff/src \
+		-L$(top_builddir)/ode/src @LDFLAGS@  
+test_feedback_LDFLAGS= -L$(top_builddir)/drawstuff/src \
 		-L$(top_builddir)/ode/src @LDFLAGS@  
 test_crash_LDFLAGS= -L$(top_builddir)/drawstuff/src \
 		-L$(top_builddir)/ode/src @LDFLAGS@ 
@@ -86,6 +90,8 @@ test_heightfield_LDFLAGS= -L$(top_builddir)/drawstuff/src \
 test_collision_DEPENDENCIES=	$(top_builddir)/ode/src/libode.a \
 				$(top_builddir)/drawstuff/src/libdrawstuff.a
 test_slider_DEPENDENCIES=	$(top_builddir)/ode/src/libode.a \
+				$(top_builddir)/drawstuff/src/libdrawstuff.a
+test_feedback_DEPENDENCIES=	$(top_builddir)/ode/src/libode.a \
 				$(top_builddir)/drawstuff/src/libdrawstuff.a
 test_crash_DEPENDENCIES=	$(top_builddir)/ode/src/libode.a \
 				$(top_builddir)/drawstuff/src/libdrawstuff.a
@@ -166,6 +172,7 @@ test_I_LDADD= -ldrawstuff $(top_builddir)/ode/src/libode.a @GL_LIBS@ @LIBS@
 test_space_LDADD= -ldrawstuff $(top_builddir)/ode/src/libode.a @GL_LIBS@ @LIBS@
 test_crash_LDADD= -ldrawstuff $(top_builddir)/ode/src/libode.a @GL_LIBS@ @LIBS@
 test_slider_LDADD= -ldrawstuff $(top_builddir)/ode/src/libode.a @GL_LIBS@ @LIBS@
+test_feedback_LDADD= -ldrawstuff $(top_builddir)/ode/src/libode.a @GL_LIBS@ @LIBS@
 test_collision_LDADD= -ldrawstuff $(top_builddir)/ode/src/libode.a @GL_LIBS@ @LIBS@
 if OPCODE
 test_trimesh_LDADD= -ldrawstuff $(top_builddir)/ode/src/libode.a @GL_LIBS@ @LIBS@
@@ -195,6 +202,7 @@ test_I_LDADD+= resources.o
 test_space_LDADD+= resources.o
 test_crash_LDADD+= resources.o
 test_slider_LDADD+= resources.o
+test_feedback_LDADD+= resources.o
 test_collision_LDADD+= resources.o
 test_ode_DEPENDENCIES+= resources.o
 test_chain2_DEPENDENCIES+= resources.o
@@ -213,6 +221,7 @@ test_I_DEPENDENCIES+= resources.o
 test_space_DEPENDENCIES+= resources.o
 test_crash_DEPENDENCIES+= resources.o
 test_slider_DEPENDENCIES+= resources.o
+test_feedback_DEPENDENCIES+= resources.o
 test_collision_DEPENDENCIES+= resources.o
 if OPCODE
 test_trimesh_LDADD+= resources.o
