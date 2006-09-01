@@ -374,13 +374,13 @@ const dReal * dBodyGetPosition (dBodyID b)
 }
 
 
-void dBodyCopyPosition (dBodyID b, dVector3 position)
+void dBodyCopyPosition (dBodyID b, dVector3 pos)
 {
 	dAASSERT (b);
-	dReal* pos = b->posr.pos;
-	position[0] = pos[0];
-	position[1] = pos[1];
-	position[2] = pos[2];
+	dReal* src = b->posr.pos;
+	pos[0] = src[0];
+	pos[1] = src[1];
+	pos[2] = src[2];
 }
 
 
@@ -395,6 +395,17 @@ const dReal * dBodyGetQuaternion (dBodyID b)
 {
   dAASSERT (b);
   return b->q;
+}
+
+
+void dBodyCopyQuaternion (dBodyID b, dQuaternion quat)
+{
+	dAASSERT (b);
+	dReal* src = b->q;
+	quat[0] = src[0];
+	quat[1] = src[1];
+	quat[2] = src[2];
+	quat[3] = src[3];
 }
 
 
