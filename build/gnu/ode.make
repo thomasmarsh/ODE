@@ -407,6 +407,11 @@ $(OBJDIR)/stepfast.o: ../../ode/src/stepfast.cpp
 	@echo $(notdir $<)
 	@$(CXX) $(CXXFLAGS) -o $@ -c $<
 
+$(OBJDIR)/testing.o: ../../ode/src/testing.cpp
+	-@$(CMD_MKOBJDIR)
+	@echo $(notdir $<)
+	@$(CXX) $(CXXFLAGS) -o $@ -c $<
+
 $(OBJDIR)/timer.o: ../../ode/src/timer.cpp
 	-@$(CMD_MKOBJDIR)
 	@echo $(notdir $<)

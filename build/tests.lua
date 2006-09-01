@@ -10,6 +10,7 @@
     "chain2",
     "collision",
     "crash",
+    "feedback",
     "friction",
     "heightfield",
     "hinge",

@@ -3,7 +3,7 @@
 	ProjectType="Visual C++"
 	Version="7.00"
 	Name="test_space_stress"
-	ProjectGUID="{5F5726BF-2CD3-0E47-B9A6-2373E8D423A5}"
+	ProjectGUID="{E715239F-7BBC-4B4D-B2E3-90CF576E9348}"
 	Keyword="Win32Proj">
 	<Platforms>
 		<Platform

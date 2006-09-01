@@ -9,11 +9,11 @@ endif
 
 export CONFIG
 
-.PHONY: all clean ode drawstuff test_basket test_boxstack test_buggy test_chain1 test_chain2 test_collision test_crash test_friction test_heightfield test_hinge test_I test_joints test_motor test_ode test_plane2d test_slider test_space test_space_stress test_step test_cyl test_cylvssphere test_moving_trimesh test_trimesh tests
+.PHONY: all clean ode drawstuff test_basket test_boxstack test_buggy test_chain1 test_chain2 test_collision test_crash test_feedback test_friction test_heightfield test_hinge test_I test_joints test_motor test_ode test_plane2d test_slider test_space test_space_stress test_step test_cyl test_cylvssphere test_moving_trimesh test_trimesh tests
 
-all: ode drawstuff test_basket test_boxstack test_buggy test_chain1 test_chain2 test_collision test_crash test_friction test_heightfield test_hinge test_I test_joints test_motor test_ode test_plane2d test_slider test_space test_space_stress test_step test_cyl test_cylvssphere test_moving_trimesh test_trimesh tests
+all: ode drawstuff test_basket test_boxstack test_buggy test_chain1 test_chain2 test_collision test_crash test_feedback test_friction test_heightfield test_hinge test_I test_joints test_motor test_ode test_plane2d test_slider test_space test_space_stress test_step test_cyl test_cylvssphere test_moving_trimesh test_trimesh tests
 
-Makefile: ../premake.lua ../ode.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua
+Makefile: ../premake.lua ../ode.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua
 	@echo ==== Regenerating Makefiles ====
 	@premake --file $^ --usetargetpath --with-tests --clean --target gnu
 
@@ -52,6 +52,10 @@ test_collision: ode drawstuff
 test_crash: ode drawstuff
 	@echo ==== Building test_crash ====
 	@$(MAKE) --no-print-directory -C . -f test_crash.make
+
+test_feedback: ode drawstuff
+	@echo ==== Building test_feedback ====
+	@$(MAKE) --no-print-directory -C . -f test_feedback.make
 
 test_friction: ode drawstuff
 	@echo ==== Building test_friction ====
@@ -131,6 +135,7 @@ clean:
 	@$(MAKE) --no-print-directory -C . -f test_chain2.make clean
 	@$(MAKE) --no-print-directory -C . -f test_collision.make clean
 	@$(MAKE) --no-print-directory -C . -f test_crash.make clean
+	@$(MAKE) --no-print-directory -C . -f test_feedback.make clean
 	@$(MAKE) --no-print-directory -C . -f test_friction.make clean
 	@$(MAKE) --no-print-directory -C . -f test_heightfield.make clean
 	@$(MAKE) --no-print-directory -C . -f test_hinge.make clean
