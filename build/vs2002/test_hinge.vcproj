@@ -3,7 +3,7 @@
 	ProjectType="Visual C++"
 	Version="7.00"
 	Name="test_hinge"
-	ProjectGUID="{5CFF5041-85E1-0E4B-8EFB-6770092FE734}"
+	ProjectGUID="{427A7D61-B34D-994C-98CB-09A6492D6F0E}"
 	Keyword="Win32Proj">
 	<Platforms>
 		<Platform

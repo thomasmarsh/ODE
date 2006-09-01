@@ -3,7 +3,7 @@
 	ProjectType="Visual C++"
 	Version="8.00"
 	Name="test_plane2d"
-	ProjectGUID="{E7A7548F-B30F-3643-BB3C-21AFB38A430F}"
+	ProjectGUID="{B3B8F595-C552-4743-8706-379B23333ED6}"
 	RootNamespace="test_plane2d"
 	Keyword="Win32Proj"
 	>
@@ -353,25 +353,27 @@
 	<Files>
 		<Filter
 			Name="ode"
+			Filter=""
 			>
 			<Filter
 				Name="test"
+				Filter=""
 				>
 				<File
-					RelativePath="..\..\ode\test\test_plane2d.cpp"
-					>
+					RelativePath="..\..\ode\test\test_plane2d.cpp">
 				</File>
 			</Filter>
 		</Filter>
 		<Filter
 			Name="drawstuff"
+			Filter=""
 			>
 			<Filter
 				Name="src"
+				Filter=""
 				>
 				<File
-					RelativePath="..\..\drawstuff\src\resources.rc"
-					>
+					RelativePath="..\..\drawstuff\src\resources.rc">
 				</File>
 			</Filter>
 		</Filter>

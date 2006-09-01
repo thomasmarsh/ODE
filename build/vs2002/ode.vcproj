@@ -3,7 +3,7 @@
 	ProjectType="Visual C++"
 	Version="7.00"
 	Name="ode"
-	ProjectGUID="{BD48AA01-A7FA-E841-A24D-83F0A7338F08}"
+	ProjectGUID="{FFEB2263-57F1-2A47-B80A-AB79F4C62C14}"
 	Keyword="Win32Proj">
 	<Platforms>
 		<Platform
@@ -319,6 +319,9 @@
 					RelativePath="..\..\ode\src\step.h">
 				</File>
 				<File
+					RelativePath="..\..\ode\src\testing.h">
+				</File>
+				<File
 					RelativePath="..\..\ode\src\util.h">
 				</File>
 				<File
@@ -458,6 +461,9 @@
 				</File>
 				<File
 					RelativePath="..\..\ode\src\stepfast.cpp">
+				</File>
+				<File
+					RelativePath="..\..\ode\src\testing.cpp">
 				</File>
 				<File
 					RelativePath="..\..\ode\src\timer.cpp">

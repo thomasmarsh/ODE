@@ -2,9 +2,9 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="8.00"
-	Name="test_space_stress"
-	ProjectGUID="{FE33036B-2BEB-D34F-8F14-84D73CD39584}"
-	RootNamespace="test_space_stress"
+	Name="test_feedback"
+	ProjectGUID="{6F7B56B3-2CEE-5948-9D99-7B8BB7FEF3B4}"
+	RootNamespace="test_feedback"
 	Keyword="Win32Proj"
 	>
 	<Platforms>
@@ -18,7 +18,7 @@
 		<Configuration
 			Name="DebugDLL|Win32"
 			OutputDirectory="../../lib/DebugDLL"
-			IntermediateDirectory="obj/space_stress/DebugDLL"
+			IntermediateDirectory="obj/feedback/DebugDLL"
 			ConfigurationType="1"
 			CharacterSet="2"
 			>
@@ -64,11 +64,11 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="../../lib/DebugDLL/ode.lib ../../lib/DebugDLL/drawstuff.lib user32.lib winmm.lib gdi32.lib opengl32.lib glu32.lib"
-				OutputFile="$(OutDir)/test_space_stress.exe"
+				OutputFile="$(OutDir)/test_feedback.exe"
 				LinkIncremental="2"
 				AdditionalLibraryDirectories="../../lib/DebugDLL"
 				GenerateDebugInformation="true"
-				ProgramDatabaseFile="$(OutDir)/test_space_stress.pdb"
+				ProgramDatabaseFile="$(OutDir)/test_feedback.pdb"
 				SubSystem="1"
 				EntryPointSymbol="mainCRTStartup"
 				TargetMachine="1"
@@ -101,7 +101,7 @@
 		<Configuration
 			Name="ReleaseDLL|Win32"
 			OutputDirectory="../../lib/ReleaseDLL"
-			IntermediateDirectory="obj/space_stress/ReleaseDLL"
+			IntermediateDirectory="obj/feedback/ReleaseDLL"
 			ConfigurationType="1"
 			CharacterSet="2"
 			>
@@ -147,11 +147,11 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="../../lib/ReleaseDLL/ode.lib ../../lib/ReleaseDLL/drawstuff.lib user32.lib winmm.lib gdi32.lib opengl32.lib glu32.lib"
-				OutputFile="$(OutDir)/test_space_stress.exe"
+				OutputFile="$(OutDir)/test_feedback.exe"
 				LinkIncremental="2"
 				AdditionalLibraryDirectories="../../lib/ReleaseDLL"
 				GenerateDebugInformation="true"
-				ProgramDatabaseFile="$(OutDir)/test_space_stress.pdb"
+				ProgramDatabaseFile="$(OutDir)/test_feedback.pdb"
 				SubSystem="1"
 				EntryPointSymbol="mainCRTStartup"
 				TargetMachine="1"
@@ -184,7 +184,7 @@
 		<Configuration
 			Name="DebugLib|Win32"
 			OutputDirectory="../../lib/DebugLib"
-			IntermediateDirectory="obj/space_stress/DebugLib"
+			IntermediateDirectory="obj/feedback/DebugLib"
 			ConfigurationType="1"
 			CharacterSet="2"
 			>
@@ -230,11 +230,11 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="../../lib/DebugLib/ode.lib ../../lib/DebugLib/drawstuff.lib user32.lib winmm.lib gdi32.lib opengl32.lib glu32.lib"
-				OutputFile="$(OutDir)/test_space_stress.exe"
+				OutputFile="$(OutDir)/test_feedback.exe"
 				LinkIncremental="2"
 				AdditionalLibraryDirectories="../../lib/DebugLib"
 				GenerateDebugInformation="true"
-				ProgramDatabaseFile="$(OutDir)/test_space_stress.pdb"
+				ProgramDatabaseFile="$(OutDir)/test_feedback.pdb"
 				SubSystem="1"
 				EntryPointSymbol="mainCRTStartup"
 				TargetMachine="1"
@@ -267,7 +267,7 @@
 		<Configuration
 			Name="ReleaseLib|Win32"
 			OutputDirectory="../../lib/ReleaseLib"
-			IntermediateDirectory="obj/space_stress/ReleaseLib"
+			IntermediateDirectory="obj/feedback/ReleaseLib"
 			ConfigurationType="1"
 			CharacterSet="2"
 			>
@@ -313,11 +313,11 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="../../lib/ReleaseLib/ode.lib ../../lib/ReleaseLib/drawstuff.lib user32.lib winmm.lib gdi32.lib opengl32.lib glu32.lib"
-				OutputFile="$(OutDir)/test_space_stress.exe"
+				OutputFile="$(OutDir)/test_feedback.exe"
 				LinkIncremental="2"
 				AdditionalLibraryDirectories="../../lib/ReleaseLib"
 				GenerateDebugInformation="true"
-				ProgramDatabaseFile="$(OutDir)/test_space_stress.pdb"
+				ProgramDatabaseFile="$(OutDir)/test_feedback.pdb"
 				SubSystem="1"
 				EntryPointSymbol="mainCRTStartup"
 				TargetMachine="1"
@@ -360,7 +360,7 @@
 				Filter=""
 				>
 				<File
-					RelativePath="..\..\ode\test\test_space_stress.cpp">
+					RelativePath="..\..\ode\test\test_feedback.cpp">
 				</File>
 			</Filter>
 		</Filter>
