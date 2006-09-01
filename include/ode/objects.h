@@ -582,11 +582,11 @@ ODE_API const dReal * dBodyGetPosition   (dBodyID);
 /**
  * @brief Copy the position of a body into a vector.
  * @ingroup bodies
- * @param body      the body to query
- * @param position  a copy of the body position
+ * @param body  the body to query
+ * @param pos   a copy of the body position
  * @sa dBodyGetPosition
  */
-ODE_API void dBodyCopyPosition (dBodyID body, dVector3 position);
+ODE_API void dBodyCopyPosition (dBodyID body, dVector3 pos);
 
 
 /**
@@ -602,6 +602,17 @@ ODE_API const dReal * dBodyGetRotation   (dBodyID);
  * @return pointer to 4 scalars that represent the quaternion.
  */
 ODE_API const dReal * dBodyGetQuaternion (dBodyID);
+
+
+/**
+ * @brief Copy the orientation of a body into a quaternion.
+ * @ingroup bodies
+ * @param body  the body to query
+ * @param quat  a copy of the orientation quaternion
+ * @sa dBodyGetQuaternion
+ */
+ODE_API void dBodyCopyQuaternion(dBodyID body, dQuaternion quat);
+
 
 /**
  * @brief Get the linear velocity of a body.
