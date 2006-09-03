@@ -1,3 +1,20 @@
+RELEASE CHECKLIST
+---------------------------------------------
+
+( ) Create a release branch in SVN
+
+( ) Run msw-release.bat to create Windows binaries
+
+( ) Run src-release.sh to create source package
+    (Must run in Linux or Cygwin w/autotools)
+
+
+
+SANITY CHECK of release package
+---------------------------------------------
+
+* binaries exist
+
 * include/ode/config.h exists
 
 * configure script exists - if not: is autotools installed?
