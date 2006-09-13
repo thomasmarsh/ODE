@@ -298,11 +298,11 @@ dCollideTTL(dxGeom* g1, dxGeom* g2, int Flags, dContactGeom* Contacts, int Strid
                                 // Find the ELT of the coplanar point
                                 //
                                 dMultiply1(orig_pos, InvMatrix1, CoplanarPt, 4, 4, 1);
-                                dMultiply1(old_pos1, TriMesh1->Data->last_trans, orig_pos, 4, 4, 1);
+                                dMultiply1(old_pos1, ((dxTriMesh*)g1)->last_trans, orig_pos, 4, 4, 1);
                                 SUB(elt1, CoplanarPt, old_pos1);
                                 
                                 dMultiply1(orig_pos, InvMatrix2, CoplanarPt, 4, 4, 1);
-                                dMultiply1(old_pos2, TriMesh2->Data->last_trans, orig_pos, 4, 4, 1);
+                                dMultiply1(old_pos2, ((dxTriMesh*)g2)->last_trans, orig_pos, 4, 4, 1);
                                 SUB(elt2, CoplanarPt, old_pos2);
                                 
                                 SUB(elt_sum, elt1, elt2);  // net motion of the coplanar point
@@ -324,7 +324,7 @@ dCollideTTL(dxGeom* g1, dxGeom* g2, int Flags, dContactGeom* Contacts, int Strid
                                     
                                     // re-transform this vertex by last_trans (to get its old
                                     //  position)
-                                    dMultiply1(old_pos1, TriMesh1->Data->last_trans, orig_pos, 4, 4, 1);
+                                    dMultiply1(old_pos1, ((dxTriMesh*)g1)->last_trans, orig_pos, 4, 4, 1);
                                     
                                     // Then subtract this position from our current one to find
                                     //  the elapsed linear translation (ELT)
@@ -341,7 +341,7 @@ dCollideTTL(dxGeom* g1, dxGeom* g2, int Flags, dContactGeom* Contacts, int Strid
                                     // find the estimated linear translation (ELT) of the vertices
                                     //  on face 2, wrt to the center of face 1. 
                                     dMultiply1(orig_pos, InvMatrix2, v2[ii], 4, 4, 1);
-                                    dMultiply1(old_pos2, TriMesh2->Data->last_trans, orig_pos, 4, 4, 1);
+                                    dMultiply1(old_pos2, ((dxTriMesh*)g2)->last_trans, orig_pos, 4, 4, 1);
                                     for (int k=0; k<3; k++) {
                                         elt_f2[ii][k] = (v2[ii][k] - old_pos2[k]) - elt1[k];
                                     }
@@ -501,14 +501,14 @@ dCollideTTL(dxGeom* g1, dxGeom* g2, int Flags, dContactGeom* Contacts, int Strid
                                         //  point's ELT, then we've chosen the wrong face and should switch faces
                                         if (pen_v == v1) {
                                             dMultiply1(orig_pos, InvMatrix1, firstClippedTri.Points[j], 4, 4, 1);
-                                            dMultiply1(old_pos1, TriMesh1->Data->last_trans, orig_pos, 4, 4, 1);
+                                            dMultiply1(old_pos1, ((dxTriMesh*)g1)->last_trans, orig_pos, 4, 4, 1);
                                             for (int k=0; k<3; k++) {
                                                 firstClippedElt[j][k] = (firstClippedTri.Points[j][k] - old_pos1[k]) - elt2[k];
                                             }
                                         }
                                         else {
                                             dMultiply1(orig_pos, InvMatrix2, firstClippedTri.Points[j], 4, 4, 1);
-                                            dMultiply1(old_pos2, TriMesh2->Data->last_trans, orig_pos, 4, 4, 1);
+                                            dMultiply1(old_pos2, ((dxTriMesh*)g2)->last_trans, orig_pos, 4, 4, 1);
                                             for (int k=0; k<3; k++) {
                                                 firstClippedElt[j][k] = (firstClippedTri.Points[j][k] - old_pos2[k]) - elt1[k];
                                             }
@@ -600,14 +600,14 @@ dCollideTTL(dxGeom* g1, dxGeom* g2, int Flags, dContactGeom* Contacts, int Strid
                                         
                                         if (pen_v == v1) {
                                             dMultiply1(orig_pos, InvMatrix1, secondClippedTri.Points[j], 4, 4, 1);
-                                            dMultiply1(old_pos1, TriMesh1->Data->last_trans, orig_pos, 4, 4, 1);
+                                            dMultiply1(old_pos1, ((dxTriMesh*)g1)->last_trans, orig_pos, 4, 4, 1);
                                             for (int k=0; k<3; k++) {
                                                 secondClippedElt[j][k] = (secondClippedTri.Points[j][k] - old_pos1[k]) - elt2[k];
                                             }
                                         }
                                         else {
                                             dMultiply1(orig_pos, InvMatrix2, secondClippedTri.Points[j], 4, 4, 1);
-                                            dMultiply1(old_pos2, TriMesh2->Data->last_trans, orig_pos, 4, 4, 1);
+                                            dMultiply1(old_pos2, ((dxTriMesh*)g2)->last_trans, orig_pos, 4, 4, 1);
                                             for (int k=0; k<3; k++) {
                                                 secondClippedElt[j][k] = (secondClippedTri.Points[j][k] - old_pos2[k]) - elt1[k];
                                             }

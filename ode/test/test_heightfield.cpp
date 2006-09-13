@@ -2014,11 +2014,9 @@ static void simLoop (int pause)
 				// Flip to other matrix.
 				obj[i].last_matrix_index = !obj[i].last_matrix_index;
 
-				dTriMeshDataID TriMeshData = dGeomTriMeshGetTriMeshDataID( obj[i].geom[j] );
-
 				// Apply the 'other' matrix which is the oldest.
-				dGeomTriMeshDataSet( TriMeshData, TRIMESH_LAST_TRANSFORMATION,
-					(void *)( obj[i].matrix_dblbuff + ( obj[i].last_matrix_index * 16 ) ) );
+				dGeomTriMeshSetLastTransform( obj[i].geom[j], 
+					*(dMatrix4*)( obj[i].matrix_dblbuff + ( obj[i].last_matrix_index * 16 ) ) );
 
 			}
 			else
