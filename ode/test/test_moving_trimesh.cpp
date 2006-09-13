@@ -1738,18 +1738,19 @@ void drawGeom (dGeomID g, const dReal *pos, const dReal *R, int show_aabb)
 // set previous transformation matrix for trimesh
 void setCurrentTransform(dGeomID geom)
 {
- const dTriMeshDataID TriMeshData = static_cast<dTriMeshDataID>(dGeomGetData(geom));
  const dReal* Pos = dGeomGetPosition(geom);
  const dReal* Rot = dGeomGetRotation(geom);
 
- const double Transform[16] = 
+ const dReal Transform[16] = 
  {
    Rot[0], Rot[4], Rot[8],  0,
    Rot[1], Rot[5], Rot[9],  0,
    Rot[2], Rot[6], Rot[10], 0,
    Pos[0], Pos[1], Pos[2],  1
  };
- dGeomTriMeshDataSet(TriMeshData, TRIMESH_LAST_TRANSFORMATION, (void *)Transform);
+
+ dGeomTriMeshSetLastTransform( geom, *(dMatrix4*)(&Transform) );
+
 }
 
 
@@ -1836,14 +1837,10 @@ static void simLoop (int pause)
 
 		  // Flip to other matrix.
 		  obj[i].last_matrix_index = !obj[i].last_matrix_index;
-          
-          dTriMeshDataID TriMeshData = dGeomTriMeshGetTriMeshDataID( obj[i].geom[j] );
-          
-		  // Apply the 'other' matrix which is the oldest.
-		  dGeomTriMeshDataSet( TriMeshData, TRIMESH_LAST_TRANSFORMATION,
-				(void *)( obj[i].matrix_dblbuff + ( obj[i].last_matrix_index * 16 ) ) );
 
-
+		  dGeomTriMeshSetLastTransform( obj[i].geom[j], 
+			  *(dMatrix4*)( obj[i].matrix_dblbuff + obj[i].last_matrix_index * 16 ) );
+  
         } else {
           drawGeom (obj[i].geom[j],0,0,show_aabb);
         }

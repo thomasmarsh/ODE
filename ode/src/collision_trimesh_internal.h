@@ -74,10 +74,8 @@ struct dxTriMeshData  : public dBase
         dVector3 AABBCenter;
         dVector3 AABBExtents;
 
-    /* data for use in collison resolution */
+    // data for use in collision resolution
     const void* Normals;
-    //Matrix4x4   last_trans;
-    dMatrix4    last_trans;
 
     /* Array of flags for which edges and verts should be used on each triangle */
     enum UseFlags
@@ -109,6 +107,8 @@ struct dxTriMesh : public dxGeom{
 	// Data types
 	dxTriMeshData* Data;
 
+	// Instance data for last transform.
+    dMatrix4 last_trans;
 
 	// Colliders
 	static PlanesCollider _PlanesCollider;

@@ -114,9 +114,6 @@ dxTriMeshData::Build(const void* Vertices, int VertexStide, int VertexCount,
     AABBExtents[2] = AABBMax[2] - AABBCenter[2];
 
     // user data (not used by OPCODE)
-    for (int i=0; i<16; i++)
-        last_trans[i] = 0.0;
-
     Normals = (dReal *) in_Normals;
 
 	UseFlags = 0;
@@ -316,26 +313,45 @@ void dGeomTriMeshDataDestroy(dTriMeshDataID g){
     delete g;
 }
 
+
+
+
+void dGeomTriMeshSetLastTransform( dxGeom* g, dMatrix4 last_trans )
+{
+	dAASSERT(g)
+    dUASSERT(g->type == dTriMeshClass, "geom not trimesh");
+
+    for (int i=0; i<16; i++)
+        (((dxTriMesh*)g)->last_trans)[ i ] = last_trans[ i ];
+
+    return;
+}
+
+
+dReal* dGeomTriMeshGetLastTransform( dxGeom* g )
+{
+	dAASSERT(g)
+    dUASSERT(g->type == dTriMeshClass, "geom not trimesh");
+
+    return (dReal*)(((dxTriMesh*)g)->last_trans);
+}
+
+
+
+
 void dGeomTriMeshDataSet(dTriMeshDataID g, int data_id, void* in_data)
 {
     dUASSERT(g, "argument not trimesh data");
 
-    double *elem;
-    
-    switch (data_id) {
+    switch (data_id)
+	{
     case TRIMESH_FACE_NORMALS:
-	g->Normals = (dReal *) in_data;
-	break;
+		g->Normals = (dReal *) in_data;
+		break;
 
-    case TRIMESH_LAST_TRANSFORMATION:
-	elem = (double *) in_data;
-    for (int i=0; i<16; i++)
-        g->last_trans[i] = (dReal) elem[i];
-	
-	break;
     default:
-	dUASSERT(data_id, "invalid data type");
-	break;
+		dUASSERT(data_id, "invalid data type");
+		break;
     }
 
     return;
@@ -347,15 +363,13 @@ void*  dGeomTriMeshDataGet(dTriMeshDataID g, int data_id)
 {
     dUASSERT(g, "argument not trimesh data");
 
-    switch (data_id) {
+    switch (data_id)
+	{
     case TRIMESH_FACE_NORMALS:
         return (void *) g->Normals;
         break;
-        
-    case TRIMESH_LAST_TRANSFORMATION:
-        return (void *) g->last_trans;
-        break;
-    default:
+
+	default:
         dUASSERT(data_id, "invalid data type");
         break;
     }
@@ -504,6 +518,9 @@ dxTriMesh::dxTriMesh(dSpaceID Space, dTriMeshDataID Data) : dxGeom(Space, 1){
         dDebug (d_ERR_UASSERT, msg, " (%s:%d)", __FILE__,__LINE__);
 	_LSSCollider.SetPrimitiveTests(false);
 	_LSSCollider.SetFirstContact(false);
+
+    for (int i=0; i<16; i++)
+        last_trans[i] = REAL( 0.0 );
 }
 
 dxTriMesh::~dxTriMesh(){

@@ -51,12 +51,24 @@ typedef struct dxTriMeshData* dTriMeshDataID;
 ODE_API dTriMeshDataID dGeomTriMeshDataCreate(void);
 ODE_API void dGeomTriMeshDataDestroy(dTriMeshDataID g);
 
-enum { TRIMESH_FACE_NORMALS, TRIMESH_LAST_TRANSFORMATION };
+
+
+enum { TRIMESH_FACE_NORMALS };
 ODE_API void dGeomTriMeshDataSet(dTriMeshDataID g, int data_id, void* in_data);
 ODE_API void* dGeomTriMeshDataGet(dTriMeshDataID g, int data_id);
 
+
+
+/**
+ * We need to set the last transform after each time step for 
+ * accurate collision response. These functions get and set that transform.
+ * It is stored per geom instance, rather than per dTriMeshDataID.
+ */
+ODE_API void dGeomTriMeshSetLastTransform( dGeomID g, dMatrix4 last_trans );
+ODE_API dReal* dGeomTriMeshGetLastTransform( dGeomID g );
+
 /*
- * Build TriMesh data with single pricision used in vertex data .
+ * Build TriMesh data with single precision used in vertex data .
  */
 ODE_API void dGeomTriMeshDataBuildSingle(dTriMeshDataID g,
                                  const void* Vertices, int VertexStride, int VertexCount, 
