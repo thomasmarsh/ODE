@@ -1588,6 +1588,19 @@ ODE_API void dJointGetUniversalAxis2 (dJointID, dVector3 result);
 ODE_API dReal dJointGetUniversalParam (dJointID, int parameter);
 
 /**
+ * @brief Get both angles at the same time.
+ * @ingroup joints
+ *
+ * @param joint   The universal joint for which we want to calculate the angles
+ * @param angle1  The angle between the body1 and the axis 1
+ * @param angle2  The angle between the body2 and the axis 2
+ *
+ * @note This function combine getUniversalAngle1 and getUniversalAngle2 together
+ *       and try to avoid redundant calculation
+ */
+ODE_API void dJointGetUniversalAngles (dJointID, dReal *angle1, dReal *angle2);
+
+/**
  * @brief Get angle
  * @ingroup joints
  */
