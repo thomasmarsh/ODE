@@ -1034,7 +1034,7 @@ int dCollideCCTL(dxGeom *o1, dxGeom *o2, int flags, dContactGeom *contact, int s
 		// allocate buffer for local contacts on stack
 		gLocalContacts = (sLocalContactData*)dALLOCA16(sizeof(sLocalContactData)*(iFlags & NUMC_MASK));
 
-	    int ctContacts0 = ctContacts;
+	    unsigned int ctContacts0 = ctContacts;
 
 		uint8* UseFlags = TriMesh->Data->UseFlags;
 
