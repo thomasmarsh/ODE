@@ -1881,6 +1881,100 @@ static void getUniversalAxes(dxJointUniversal *joint, dVector3 ax1, dVector3 ax2
   }
 }
 
+static void getUniversalAngles(dxJointUniversal *joint, dReal *angle1, dReal *angle2)
+{
+  if (joint->node[0].body)
+  {
+    // length 1 joint axis in global coordinates, from each body
+    dVector3 ax1, ax2;
+    dMatrix3 R;
+    dQuaternion qcross, qq, qrel;
+
+    getUniversalAxes (joint,ax1,ax2);
+
+    // It should be possible to get both angles without explicitly
+    // constructing the rotation matrix of the cross.  Basically,
+    // orientation of the cross about axis1 comes from body 2,
+    // about axis 2 comes from body 1, and the perpendicular
+    // axis can come from the two bodies somehow.  (We don't really
+    // want to assume it's 90 degrees, because in general the
+    // constraints won't be perfectly satisfied, or even very well
+    // satisfied.)
+    //
+    // However, we'd need a version of getHingeAngleFromRElativeQuat()
+    // that CAN handle when its relative quat is rotated along a direction
+    // other than the given axis.  What I have here works,
+    // although it's probably much slower than need be.
+
+    dRFrom2Axes (R, ax1[0], ax1[1], ax1[2], ax2[0], ax2[1], ax2[2]);
+
+    dRtoQ (R, qcross);
+
+
+    // This code is essentialy the same as getHingeAngle(), see the comments
+    // there for details.
+
+    // get qrel = relative rotation between node[0] and the cross
+    dQMultiply1 (qq, joint->node[0].body->q, qcross);
+    dQMultiply2 (qrel, qq, joint->qrel1);
+
+    *angle1 = getHingeAngleFromRelativeQuat(qrel, joint->axis1);
+
+    // This is equivalent to
+    // dRFrom2Axes(R, ax2[0], ax2[1], ax2[2], ax1[0], ax1[1], ax1[2]);
+    // You see that the R is constructed from the same 2 axis as for angle1
+    // but the first and second axis are swapped.
+    // So we can take the first R and rapply a rotation to it.
+    // The rotation is around the axis between the 2 axes (ax1 and ax2).
+    // We do a rotation of 180deg.
+
+    dQuaternion qcross2;
+    // Find the vector between ax1 and ax2 (i.e. in the middle)
+    // We need to turn around this vector by 180deg
+
+    // The 2 axes should be normalize so to find the vector between the 2.
+    // Add and devide by 2 then normalize or simply normalize
+    //    ax2
+    //    ^
+    //    |
+    //    |
+    ///   *------------> ax1
+    //    We want the vector a 45deg
+    //
+    // N.B. We don't need to normalize the ax1 and ax2 since there are
+    //      normalized when we set them.
+
+    // We set the quaternion q = [cos(theta), dir*sin(theta)] = [w, x, y, Z]
+    qrel[0] = 0;                // equivalent to cos(Pi/2)
+    qrel[1] = ax1[0] + ax2[0];  // equivalent to x*sin(Pi/2); since sin(Pi/2) = 1
+    qrel[2] = ax1[1] + ax2[1];
+    qrel[3] = ax1[2] + ax2[2];
+
+    dReal l = dRecip(sqrt(qrel[1]*qrel[1] + qrel[2]*qrel[2] + qrel[3]*qrel[3]));
+    qrel[1] *= l;
+    qrel[2] *= l;
+    qrel[3] *= l;
+
+    dQMultiply0 (qcross2, qrel, qcross);
+
+    if (joint->node[1].body) {
+      dQMultiply1 (qq, joint->node[1].body->q, qcross2);
+      dQMultiply2 (qrel, qq, joint->qrel2);
+    }
+    else {
+      // pretend joint->node[1].body->q is the identity
+      dQMultiply2 (qrel, qcross2, joint->qrel2);
+    }
+
+    *angle2 = - getHingeAngleFromRelativeQuat(qrel, joint->axis2);
+
+  }
+  else
+  {
+    *angle1 = 0;
+    *angle2 = 0;
+  }
+}
 
 static dReal getUniversalAngle1(dxJointUniversal *joint)
 {
@@ -1982,8 +2076,7 @@ static void universalGetInfo1 (dxJointUniversal *j, dxJoint::Info1 *info)
   // records the result.
   if (limiting1 || limiting2) {
     dReal angle1, angle2;
-    angle1 = getUniversalAngle1(j);
-    angle2 = getUniversalAngle2(j);
+    getUniversalAngles (j, &angle1, &angle2);
     if (limiting1 && j->limot1.testRotationalLimit (angle1)) constraint1 = true;
     if (limiting2 && j->limot2.testRotationalLimit (angle2)) constraint2 = true;
   }
@@ -2199,6 +2292,17 @@ dReal dJointGetUniversalParam (dJointID j, int parameter)
   else {
     return joint->limot1.get (parameter);
   }
+}
+
+void dJointGetUniversalAngles (dJointID j, dReal *angle1, dReal *angle2)
+{
+  dxJointUniversal* joint = (dxJointUniversal*)j;
+  dUASSERT(joint,"bad joint argument");
+  dUASSERT(joint->vtable == &__duniversal_vtable,"joint is not a universal");
+  if (joint->flags & dJOINT_REVERSE)
+    return getUniversalAngles (joint, angle2, angle1);
+  else
+    return getUniversalAngles (joint, angle1, angle2);
 }
 
 

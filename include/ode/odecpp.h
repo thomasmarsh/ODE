@@ -457,6 +457,9 @@ public:
     { dJointGetUniversalAxis2 (_id, result); }
   dReal getParam (int parameter) const
     { return dJointGetUniversalParam (_id, parameter); }
+ void getAngles(dReal *angle1, dReal *angle2) const
+    { dJointGetUniversalAngles (_id, angle1, angle2); }
+
   dReal getAngle1() const
     { return dJointGetUniversalAngle1 (_id); }
   dReal getAngle1Rate() const
