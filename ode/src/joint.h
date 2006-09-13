@@ -193,6 +193,54 @@ struct dxJointUniversal : public dxJoint {
 extern struct dxJoint::Vtable __duniversal_vtable;
 
 
+/**
+ * The axisP must be perpendicalar to axis2
+ * <PRE>
+ *                                        +-------------+
+ *                                        |      x      |
+ *                                        +------------\+
+ * Prismatic articulation                   ..     ..
+ *                       |                ..     ..
+ *                      \/              ..      ..
+ * +--------------+    --|        __..      ..  anchor2
+ * |      x       | .....|.......(__)     ..
+ * +--------------+    --|         ^     <
+ *        |----------------------->|
+ *            Offset               |--- Rotoide articulation
+ * </PRE>
+ */
+struct dxJointRP : public dxJoint {
+
+  dVector3 anchor2;         ///< @brief Position of the rotoide articulation
+                            ///<        w.r.t second body.
+                            ///< @note Position of body 2 in world frame +
+                            ///< anchor2 in world frame give the position
+                            ///< of the rotoide articulation
+  dVector3 axisR1;          ///< axis of the rotoide articulation w.r.t first body.
+                            ///< @note This is considered as axis1 from the parameter
+                            ///< view.
+  dVector3 axisR2;          ///< axis of the rotoide articulation w.r.t second body.
+                            ///< @note This is considered also as axis1 from the
+                            ///< parameter view
+  dVector3 axisP1;          ///< axis for the prismatic articulation w.r.t first body.
+                            ///< @note This is considered as axis2 in from the parameter
+                            ///< view
+  dQuaternion qrel;         ///< initial relative rotation body1 -> body2.
+  dVector3 offset;          ///< @brief vector between the body1 and the rotoide
+                            ///< articulation.
+                            ///<
+                            ///< Going from the first to the second in the frame
+                            ///<  of body1.
+                            ///< That should be aligned with body1 center along axisP
+                            ///< This is calculated whe the axis are set.
+  dVector3 prev;            ///< Previous position in world frame of cm of body to w.r.t anchor2.
+  dxJointLimitMotor limotR; ///< limit and motor information for the rotoide articulation.
+  dxJointLimitMotor limotP; ///< limit and motor information for the prismatic articulation.
+};
+extern struct dxJoint::Vtable __dRP_vtable;
+
+
+
 // slider. if body2 is 0 then qrel is the absolute rotation of body1 and
 // offset is the position of body1 center along axis1.
 

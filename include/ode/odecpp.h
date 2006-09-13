@@ -522,6 +522,46 @@ public:
 };
 
 
+class dRPJoint : public dJoint {
+  dRPJoint (const dRPJoint &);
+  void operator = (const dRPJoint &);
+
+public:
+  dRPJoint() { }
+  dRPJoint (dWorldID world, dJointGroupID group=0)
+    { _id = dJointCreateRP (world, group); }
+
+  void create (dWorldID world, dJointGroupID group=0) {
+    if (_id) dJointDestroy (_id);
+    _id = dJointCreateRP (world, group);
+  }
+
+  void setAnchor (dReal x, dReal y, dReal z)
+    { dJointSetRPAnchor (_id, x, y, z); }
+  void setAxis1 (dReal x, dReal y, dReal z)
+    { dJointSetRPAxis1 (_id, x, y, z); }
+  void setAxis2 (dReal x, dReal y, dReal z)
+    { dJointSetRPAxis2 (_id, x, y, z); }
+
+  void getAnchor (dVector3 result) const
+    { dJointGetRPAnchor (_id, result); }
+  void getAxis1 (dVector3 result) const
+    { dJointGetRPAxis1 (_id, result); }
+  void getAxis2 (dVector3 result) const
+    { dJointGetRPAxis2 (_id, result); }
+
+  dReal getPosition() const
+    { return dJointGetRPPosition (_id); }
+  dReal getPositionRate() const
+    { return dJointGetRPPositionRate (_id); }
+
+  void setParam (int parameter, dReal value)
+    { dJointSetRPParam (_id, parameter, value); }
+  dReal getParam (int parameter) const
+    { return dJointGetRPParam (_id, parameter); }
+};
+
+
 class dFixedJoint : public dJoint {
   // intentionally undefined, don't use these
   dFixedJoint (const dFixedJoint &);
