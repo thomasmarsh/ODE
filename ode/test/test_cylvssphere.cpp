@@ -163,7 +163,6 @@ static void simLoop (int pause)
 int main (int argc, char **argv)
 {
   dMass m;
-//  dMatrix3 R;
 
   // setup pointers to drawstuff callback functions
   dsFunctions fn;
