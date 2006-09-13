@@ -91,7 +91,7 @@ unsigned int polygons[] = //Polygons for a cube (6 squares)
 #define DENSITY (5.0)		// density of all objects
 #define GPB 3			// maximum number of geometries per body
 #define MAX_CONTACTS 8		// maximum number of contact points per body
-
+#define USE_GEOM_OFFSET 1
 
 // dynamics and collision objects
 
@@ -111,7 +111,7 @@ static int show_aabb = 0;	// show geom AABBs?
 static int show_contacts = 0;	// show contact points?
 static int random_pos = 1;	// drop objects from random position?
 static int write_world = 0;
-
+static int show_body = 1;
 
 // this is called by dSpaceCollide when two objects in space are
 // potentially colliding.
@@ -188,10 +188,12 @@ static void command (int cmd)
   int j,k;
   dReal sides[3];
   dMass m;
-
+  int setBody;
+  
   cmd = locase (cmd);
   if (cmd == 'b' || cmd == 's' || cmd == 'c' || cmd == 'x' || cmd == 'y' || cmd == 'v')
   {
+    setBody = 0;
     if (num < NUM) {
       i = num;
       num++;
@@ -261,6 +263,59 @@ static void command (int cmd)
       dMassSetSphere (&m,DENSITY,sides[0]);
       obj[i].geom[0] = dCreateSphere (space,sides[0]);
     }
+    else if (cmd == 'x' && USE_GEOM_OFFSET) {
+      setBody = 1;
+      // start accumulating masses for the encapsulated geometries
+      dMass m2;
+      dMassSetZero (&m);
+
+      dReal dpos[GPB][3];	// delta-positions for encapsulated geometries
+      dMatrix3 drot[GPB];
+      
+      // set random delta positions
+      for (j=0; j<GPB; j++) {
+		for (k=0; k<3; k++) dpos[j][k] = dRandReal()*0.3-0.15;
+      }
+    
+      for (k=0; k<GPB; k++) {
+		if (k==0) {
+		  dReal radius = dRandReal()*0.25+0.05;
+		  obj[i].geom[k] = dCreateSphere (space,radius);
+		  dMassSetSphere (&m2,DENSITY,radius);
+		}
+		else if (k==1) {
+		  obj[i].geom[k] = dCreateBox (space,sides[0],sides[1],sides[2]);
+		  dMassSetBox (&m2,DENSITY,sides[0],sides[1],sides[2]);
+		}
+		else {
+		  dReal radius = dRandReal()*0.1+0.05;
+		  dReal length = dRandReal()*1.0+0.1;
+		  obj[i].geom[k] = dCreateCapsule (space,radius,length);
+		  dMassSetCapsule (&m2,DENSITY,3,radius,length);
+		}
+
+		dRFromAxisAndAngle (drot[k],dRandReal()*2.0-1.0,dRandReal()*2.0-1.0,
+					dRandReal()*2.0-1.0,dRandReal()*10.0-5.0);
+		dMassRotate (&m2,drot[k]);
+		
+		dMassTranslate (&m2,dpos[k][0],dpos[k][1],dpos[k][2]);
+
+		// add to the total mass
+		dMassAdd (&m,&m2);
+		
+	}
+      for (k=0; k<GPB; k++) {
+		dGeomSetBody (obj[i].geom[k],obj[i].body);
+		dGeomSetOffsetPosition (obj[i].geom[k],
+			  dpos[k][0]-m.c[0],
+			  dpos[k][1]-m.c[1],
+			  dpos[k][2]-m.c[2]);
+		dGeomSetOffsetRotation(obj[i].geom[k], drot[k]);
+      }
+      dMassTranslate (&m,-m.c[0],-m.c[1],-m.c[2]);
+	  dBodySetMass (obj[i].body,&m);
+		
+    }
     else if (cmd == 'x') {
       dGeomID g2[GPB];		// encapsulated geometries
       dReal dpos[GPB][3];	// delta-positions for encapsulated geometries
@@ -296,19 +351,21 @@ static void command (int cmd)
 
 	// set the transformation (adjust the mass too)
 	dGeomSetPosition (g2[k],dpos[k][0],dpos[k][1],dpos[k][2]);
-	dMassTranslate (&m2,dpos[k][0],dpos[k][1],dpos[k][2]);
 	dMatrix3 Rtx;
 	dRFromAxisAndAngle (Rtx,dRandReal()*2.0-1.0,dRandReal()*2.0-1.0,
 			    dRandReal()*2.0-1.0,dRandReal()*10.0-5.0);
 	dGeomSetRotation (g2[k],Rtx);
 	dMassRotate (&m2,Rtx);
 
+	// Translation *after* rotation
+	dMassTranslate (&m2,dpos[k][0],dpos[k][1],dpos[k][2]);
+
 	// add to the total mass
 	dMassAdd (&m,&m2);
       }
 
       // move all encapsulated objects so that the center of mass is (0,0,0)
-      for (k=0; k<2; k++) {
+      for (k=0; k<GPB; k++) {
 	dGeomSetPosition (g2[k],
 			  dpos[k][0]-m.c[0],
 			  dpos[k][1]-m.c[1],
@@ -317,9 +374,10 @@ static void command (int cmd)
       dMassTranslate (&m,-m.c[0],-m.c[1],-m.c[2]);
     }
 
-    for (k=0; k < GPB; k++) {
+    if (!setBody)
+     for (k=0; k < GPB; k++) {
       if (obj[i].geom[k]) dGeomSetBody (obj[i].geom[k],obj[i].body);
-    }
+     }
 
     dBodySetMass (obj[i].body,&m);
   }
@@ -403,7 +461,16 @@ void drawGeom (dGeomID g, const dReal *pos, const dReal *R, int show_aabb)
     dMULTIPLY0_333 (actual_R,R,R2);
     drawGeom (g2,actual_pos,actual_R,0);
   }
-
+  if (show_body) {
+    dBodyID body = dGeomGetBody(g);
+    if (body) {
+      const dReal *bodypos = dBodyGetPosition (body); 
+      const dReal *bodyr = dBodyGetRotation (body); 
+      dReal bodySides[3] = { 0.1, 0.1, 0.1 };
+      dsSetColorAlpha(0,1,0,1);
+      dsDrawBox(bodypos,bodyr,bodySides); 
+    }
+  }
   if (show_aabb) {
     // draw the bounding box for this geom
     dReal aabb[6];
