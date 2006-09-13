@@ -26,7 +26,7 @@ perform tests on all the joint types.
 this should be done using the double precision version of the library.
 
 usage:
-  test_joints [test_number] [g] [i] [e]
+  test_joints [-nXXX] [-g] [-i] [-e] [path_to_textures]
 
 if a test number is given then that specific test is performed, otherwise
 all the tests are performed. the tests are numbered `xxyy', where xx
@@ -36,15 +36,15 @@ number maps to an actual test.
 flags:
   i: the test is interactive.
   g: turn off graphical display (can't use this with `i').
-  e: turn on occasional error purturbations
-
+  e: turn on occasional error perturbations
+  n: performe test XXX
 some tests compute and display error values. these values are scaled so
 <1 is good and >1 is bad. other tests just show graphical results which
 you must verify visually.
 
 */
 
-
+#include <ctype.h>
 #include <ode/ode.h>
 #include <drawstuff/drawstuff.h>
 
@@ -75,6 +75,7 @@ static dJointID joint;
 static int cmd_test_num = -1;
 static int cmd_interactive = 0;
 static int cmd_graphics = 1;
+static char *cmd_path_to_textures = NULL;
 static int cmd_occasional_error = 0;	// perturb occasionally
 
 
@@ -960,9 +961,10 @@ void doTest (int argc, char **argv, int n, int fatal_if_bad_n)
   fn.step = &simLoop;
   fn.command = 0;
   fn.stop = 0;
+  if (cmd_path_to_textures)
+    fn.path_to_textures = cmd_path_to_textures;
+  else
   fn.path_to_textures = "../../drawstuff/textures";
-  if (argc>=2)
-    fn.path_to_textures = argv[1];
 
   // run simulation
   if (cmd_graphics) {
@@ -996,12 +998,16 @@ int main (int argc, char **argv)
   // process the command line args. anything that starts with `-' is assumed
   // to be a drawstuff argument.
   for (i=1; i<argc; i++) {
-    if (loCase (argv[i][0])=='i' && argv[i][1]==0) cmd_interactive = 1;
-    if (loCase (argv[i][0])=='g' && argv[i][1]==0) cmd_graphics = 0;
-    if (loCase (argv[i][0])=='e' && argv[i][1]==0) cmd_occasional_error = 1;
-    char *endptr;
-    long int n = strtol (argv[i],&endptr,10);
-    if (*endptr == 0) cmd_test_num = n;
+    if ( argv[i][0]=='-' && argv[i][1]=='i' && argv[i][2]==0) cmd_interactive = 1;
+    else if ( argv[i][0]=='-' && argv[i][1]=='g' && argv[i][2]==0) cmd_graphics = 0;
+    else if ( argv[i][0]=='-' && argv[i][1]=='e' && argv[i][2]==0) cmd_graphics = 0;
+    else if ( argv[i][0]=='-' && argv[i][1]=='n' && isdigit(argv[i][2]) ) {
+      char *endptr;
+      long int n = strtol (&(argv[i][2]),&endptr,10);
+			if (*endptr == 0) cmd_test_num = n;
+		}
+    else
+      cmd_path_to_textures = argv[i];
   }
 
   // do the tests
