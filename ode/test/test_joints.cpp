@@ -192,6 +192,17 @@ void addSpringForce (dReal ks)
   dBodyAddForce (body[1],ks*(p1[0]-p2[0]),ks*(p1[1]-p2[1]),ks*(p1[2]-p2[2]));
 }
 
+
+// add an oscillating Force to body 0
+
+void addOscillatingForce (dReal fscale)
+{
+  static dReal a=0;
+  dBodyAddForce (body[0],fscale*cos(2*a),fscale*cos(2.7183*a),
+		  fscale*cos(1.5708*a));
+  a += 0.01;
+}
+
 //****************************************************************************
 // stuff specific to the tests
 //
@@ -203,7 +214,7 @@ void addSpringForce (dReal ks)
 //   5xx : contact
 //   6xx : amotor
 //   7xx : universal joint
-
+//   8xx : RP joint (Rotoide and Prismatic)
 
 // setup for the given test. return 0 if there is no such test
 
@@ -454,6 +465,44 @@ int setupTest (int n)
     dJointSetUniversalAxis1 (joint,0,0,1);
     dJointSetUniversalAxis2 (joint, 1, -1,0);
     max_iterations = 100;
+    return 1;
+
+  // Joint RP (Rotoide and Prismatic)
+  case 800:     // 2 body
+  case 801:     // 2 bodies with spring force and prismatic fixed
+  case 802:     // 2 bodies with torque on body1 and prismatic fixed
+    constructWorldForTest (0, 2,
+                           -1.0, 0.0, 1.0,
+                           1.0, 0.0, 1.0,
+                           1,0,0, 1,0,0,
+                           0, 0);
+    joint = dJointCreateRP (world, 0);
+    dJointAttach (joint, body[0], body[1]);
+    dJointSetRPAnchor (joint,-0.5, 0.0, 1.0);
+    dJointSetRPAxis1 (joint, 0, 1, 0);
+    dJointSetRPAxis2 (joint, 1, 0, 0);
+    dJointSetRPParam (joint,dParamLoStop,-0.5);
+    dJointSetRPParam (joint,dParamHiStop,0.5);
+    dJointSetRPParam (joint,dParamLoStop2,0);
+    dJointSetRPParam (joint,dParamHiStop2,0);
+    return 1;
+  case 803:   // 2 bodies with spring force and prismatic NOT fixed
+  case 804:   // 2 bodies with torque force and prismatic NOT fixed
+  case 805:   // 2 bodies with force only on first body
+    constructWorldForTest (0, 2,
+                           -1.0, 0.0, 1.0,
+                           1.0, 0.0, 1.0,
+                           1,0,0, 1,0,0,
+                           0, 0);
+    joint = dJointCreateRP (world, 0);
+    dJointAttach (joint, body[0], body[1]);
+    dJointSetRPAnchor (joint,-0.5, 0.0, 1.0);
+    dJointSetRPAxis1 (joint, 0, 1, 0);
+    dJointSetRPAxis2 (joint, 1, 0, 0);
+    dJointSetRPParam (joint,dParamLoStop,-0.5);
+    dJointSetRPParam (joint,dParamHiStop,0.5);
+    dJointSetRPParam (joint,dParamLoStop2,-0.5);
+    dJointSetRPParam (joint,dParamHiStop2,0.5);
     return 1;
   }
   return 0;
@@ -860,7 +909,26 @@ dReal doStuffAndGetError (int n)
     last_angle = a;
     return fabs(r - er) * 1e4;
   }
-  }
+
+  // ********** slider joint
+  case 801:
+  case 803:
+    addSpringForce (0.25);
+    return dInfinity;
+
+	case 802:
+	case 804: {
+    static dReal a = 0;
+    dBodyAddTorque (body[0], 0, 0.01*cos(1.5708*a), 0);
+    a += 0.01;
+    return dInfinity;
+	}
+
+  case 805:
+    addOscillatingForce (0.1);
+    return dInfinity;
+	}
+
 
   return dInfinity;
 }
