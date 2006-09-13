@@ -1004,14 +1004,19 @@ void dInternalStepIsland_x2 (dxWorld *world, dxBody * const *body, int nb,
   // frame, and compute the rotational force and add it to the torque
   // accumulator. I and invI are vertically stacked 3x4 matrices, one per body.
   // @@@ check computation of rotational force.
+#ifdef dGYROSCOPIC  
   ALLOCA(dReal,I,3*nb*4*sizeof(dReal));
-#ifdef dUSE_MALLOC_FOR_ALLOCA
+# ifdef dUSE_MALLOC_FOR_ALLOCA
   if (I == NULL) {
     UNALLOCA(joint);
     dMemoryFlag = d_MEMORY_OUT_OF_MEMORY;
     return;
   }
-#endif
+# endif
+#else
+  dReal *I = NULL;
+#endif // for dGYROSCOPIC
+
   ALLOCA(dReal,invI,3*nb*4*sizeof(dReal));
 #ifdef dUSE_MALLOC_FOR_ALLOCA
   if (invI == NULL) {
@@ -1026,13 +1031,15 @@ void dInternalStepIsland_x2 (dxWorld *world, dxBody * const *body, int nb,
   //dSetZero (invI,3*nb*4);
   for (i=0; i<nb; i++) {
     dReal tmp[12];
-    // compute inertia tensor in global frame
-    dMULTIPLY2_333 (tmp,body[i]->mass.I,body[i]->posr.R);
-    dMULTIPLY0_333 (I+i*12,body[i]->posr.R,tmp);
+
     // compute inverse inertia tensor in global frame
     dMULTIPLY2_333 (tmp,body[i]->invI,body[i]->posr.R);
     dMULTIPLY0_333 (invI+i*12,body[i]->posr.R,tmp);
 #ifdef dGYROSCOPIC
+    // compute inertia tensor in global frame
+		dMULTIPLY2_333 (tmp,body[i]->mass.I,body[i]->posr.R);
+		dMULTIPLY0_333 (I+i*12,body[i]->posr.R,tmp);
+
     // compute rotational force
     dMULTIPLY0_331 (tmp,I+i*12,body[i]->avel);
     dCROSS (body[i]->tacc,-=,body[i]->avel,tmp);
