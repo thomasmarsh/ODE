@@ -1745,7 +1745,12 @@ extern "C" ODE_API void dTestSolveLCP()
 {
   int n = 100;
   int i,nskip = dPAD(n);
+#ifdef dDOUBLE
   const dReal tol = REAL(1e-9);
+#endif
+#ifdef dSINGLE
+  const dReal tol = REAL(1e-4);
+#endif
   printf ("dTestSolveLCP()\n");
 
   ALLOCA (dReal,A,n*nskip*sizeof(dReal));
