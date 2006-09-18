@@ -38,6 +38,9 @@
 #define TRIMESH_INTERNAL
 #include "collision_trimesh_internal.h"
 
+#if dTRIMESH_ENABLED
+
+
 static void
 GenerateContact(int in_Flags, dContactGeom* in_Contacts, int in_Stride,  
                 dxGeom* in_g1,  dxGeom* in_g2,
@@ -1311,3 +1314,5 @@ GenerateContact(int in_Flags, dContactGeom* in_Contacts, int in_Stride,
         OutTriCount++;
     }
 }
+
+#endif // dTRIMESH_ENABLED

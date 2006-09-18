@@ -59,6 +59,8 @@
 #define TRIMESH_INTERNAL
 #include "collision_trimesh_internal.h"
 
+#if dTRIMESH_ENABLED
+
 // largest number, double or float
 #if defined(dSINGLE)
 #define MAX_REAL	FLT_MAX
@@ -1067,3 +1069,4 @@ int dCollideCCTL(dxGeom *o1, dxGeom *o2, int flags, dContactGeom *contact, int s
 	return _ProcessLocalContacts();
 }
 
+#endif // dTRIMESH_ENABLED

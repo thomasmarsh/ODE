@@ -54,13 +54,17 @@ PURE_INLINE int dCollideRayTrimesh( dxGeom *ray, dxGeom *trimesh, int flags,
 
 #define BAN_OPCODE_AUTOLINK
 
+#if dTRIMESH_ENABLED
 #include "Opcode.h"
 using namespace Opcode;
+#endif // dTRIMESH_ENABLED
 
 struct dxTriMeshData  : public dBase 
 {
+#if dTRIMESH_ENABLED
 	Model BVTree;
 	MeshInterface Mesh;
+#endif // dTRIMESH_ENABLED
 
     dxTriMeshData();
     ~dxTriMeshData();
@@ -110,6 +114,8 @@ struct dxTriMesh : public dxGeom{
 	// Instance data for last transform.
     dMatrix4 last_trans;
 
+#if dTRIMESH_ENABLED
+
 	// Colliders
 	static PlanesCollider _PlanesCollider;
 	static SphereCollider _SphereCollider;
@@ -139,6 +145,8 @@ struct dxTriMesh : public dxGeom{
 	dArray<CapsuleTC> CapsuleTCCache;
 	static LSSCache defaultCapsuleCache;
 
+#endif // dTRIMESH_ENABLED
+
 	bool doSphereTC;
 	bool doBoxTC;
 	bool doCapsuleTC;
@@ -163,6 +171,7 @@ inline dContactGeom* SAFECONTACT(int Flags, dContactGeom* Contacts, int Index, i
 
 // Fetches a triangle
 inline void FetchTriangle(dxTriMesh* TriMesh, int Index, dVector3 Out[3]){
+#if dTRIMESH_ENABLED
 	VertexPointers VP;
 	TriMesh->Data->Mesh.GetTriangle(VP, Index);
 	for (int i = 0; i < 3; i++){
@@ -171,10 +180,12 @@ inline void FetchTriangle(dxTriMesh* TriMesh, int Index, dVector3 Out[3]){
 		Out[i][2] = VP.Vertex[i]->z;
 		Out[i][3] = 0;
 	}
+#endif // dTRIMESH_ENABLED
 }
 
 // Fetches a triangle
 inline void FetchTriangle(dxTriMesh* TriMesh, int Index, const dVector3 Position, const dMatrix3 Rotation, dVector3 Out[3]){
+#if dTRIMESH_ENABLED
 	VertexPointers VP;
 	TriMesh->Data->Mesh.GetTriangle(VP, Index);
 	for (int i = 0; i < 3; i++){
@@ -190,8 +201,10 @@ inline void FetchTriangle(dxTriMesh* TriMesh, int Index, const dVector3 Position
 		Out[i][2] += Position[2];
 		Out[i][3] = 0;
 	}
+#endif // dTRIMESH_ENABLED
 }
 
+#if dTRIMESH_ENABLED
 // Creates an OPCODE matrix from an ODE matrix
 inline Matrix4x4& MakeMatrix(const dVector3 Position, const dMatrix3 Rotation, Matrix4x4& Out){
 	Out.m[0][0] = (float) Rotation[0];
@@ -217,6 +230,7 @@ inline Matrix4x4& MakeMatrix(const dVector3 Position, const dMatrix3 Rotation, M
 
 	return Out;
 }
+#endif // dTRIMESH_ENABLED
 
 // Outputs a matrix to 3 vectors
 inline void Decompose(const dMatrix3 Matrix, dVector3 Right, dVector3 Up, dVector3 Direction){
@@ -239,12 +253,14 @@ inline void Decompose(const dMatrix3 Matrix, dVector3 Vectors[3]){
 	Decompose(Matrix, Vectors[0], Vectors[1], Vectors[2]);
 }
 
+#if dTRIMESH_ENABLED
 // Creates an OPCODE matrix from an ODE matrix
 inline Matrix4x4& MakeMatrix(dxGeom* g, Matrix4x4& Out){
 	const dVector3& Position = *(const dVector3*)dGeomGetPosition(g);
 	const dMatrix3& Rotation = *(const dMatrix3*)dGeomGetRotation(g);
 	return MakeMatrix(Position, Rotation, Out);
 }
+#endif // dTRIMESH_ENABLED
 
 // Finds barycentric
 inline void GetPointFromBarycentric(const dVector3 dv[3], dReal u, dReal v, dVector3 Out){
@@ -258,7 +274,7 @@ inline void GetPointFromBarycentric(const dVector3 dv[3], dReal u, dReal v, dVec
 
 // Performs a callback
 inline bool Callback(dxTriMesh* TriMesh, dxGeom* Object, int TriIndex){
-	if (TriMesh->Callback != null){
+	if (TriMesh->Callback != NULL){
 		return (TriMesh->Callback(TriMesh, Object, TriIndex)!=0);
 	}
 	else return true;
