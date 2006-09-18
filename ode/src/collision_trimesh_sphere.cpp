@@ -28,6 +28,8 @@
 #include <ode/odemath.h>
 #include "collision_util.h"
 
+#if dTRIMESH_ENABLED
+
 #define TRIMESH_INTERNAL
 #include "collision_trimesh_internal.h"
 
@@ -497,3 +499,5 @@ int dCollideSTL(dxGeom* g1, dxGeom* SphereGeom, int Flags, dContactGeom* Contact
 	}
 	else return 0;
 }
+
+#endif // dTRIMESH_ENABLED

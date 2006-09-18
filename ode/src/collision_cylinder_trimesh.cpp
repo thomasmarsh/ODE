@@ -463,7 +463,7 @@ bool _cldTestSeparatingAxes(sData& cData,
 	_CalculateAxis(v2 , vCp0 , cData.vCylinderAxis , vAxis);
 	if (!_cldTestAxis(cData, v0, v1, v2, vAxis, 13))
 	{ 
-		return FALSE; 
+		return false; 
 	}
 
 	// test cylinder axis
@@ -663,6 +663,7 @@ bool _cldClipCylinderEdgeToTriangle(sData& cData, const dVector3 &v0, const dVec
 
 void _cldClipCylinderToTriangle(sData& cData,const dVector3 &v0, const dVector3 &v1, const dVector3 &v2)
 {
+	int i = 0;
 	dVector3 avPoints[3];
 	dVector3 avTempArray1[nMAX_CYLINDER_TRIANGLE_CLIP_POINTS];
 	dVector3 avTempArray2[nMAX_CYLINDER_TRIANGLE_CLIP_POINTS];
@@ -700,7 +701,7 @@ void _cldClipCylinderToTriangle(sData& cData,const dVector3 &v0, const dVector3 
 	dVector3 vTemp;
 	dQuatInv(cData.qCylinderRot , cData.qInvCylinderRot);
 	// transform triangle points to space of cylinder circle
-	for(int i=0; i<3; i++) 
+	for(i=0; i<3; i++) 
 	{
 		dVector3Subtract(avPoints[i] , vCylinderCirclePos , vTemp);
 		dQuatTransform(cData.qInvCylinderRot,vTemp,avPoints[i]);
@@ -739,7 +740,6 @@ void _cldClipCylinderToTriangle(sData& cData,const dVector3 &v0, const dVector3 
 	dReal fTempDepth;
 	dVector3 vPoint;
 
-	int i = 0;
 	if (nCircleSegment %2)
 	{
 		for( i=0; i<iTmpCounter2; i++)
@@ -923,6 +923,7 @@ void _InitCylinderTrimeshData(sData& cData)
 	cData.fBestCenter = REAL(0.0);	
 }
 
+#if dTRIMESH_ENABLED
 // cylinder to mesh collider
 int dCollideCylinderTrimesh(dxGeom *o1, dxGeom *o2, int flags, dContactGeom *contact, int skip)
 {
@@ -1043,5 +1044,6 @@ int dCollideCylinderTrimesh(dxGeom *o1, dxGeom *o2, int flags, dContactGeom *con
 	return _ProcessLocalContacts(cData);
 }
 
+#endif // dTRIMESH_ENABLED
 
 

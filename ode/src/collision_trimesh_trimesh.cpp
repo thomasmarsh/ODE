@@ -31,6 +31,9 @@
 #include <ode/matrix.h>
 #include <ode/rotation.h>
 #include <ode/odemath.h>
+
+#if dTRIMESH_ENABLED
+
 #include "collision_util.h"
 
 #define TRIMESH_INTERNAL
@@ -1955,3 +1958,5 @@ GenerateContact(int in_Flags, dContactGeom* in_Contacts, int in_Stride,
 
 
 }
+
+#endif // dTRIMESH_ENABLED

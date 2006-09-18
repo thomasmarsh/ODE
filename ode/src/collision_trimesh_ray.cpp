@@ -26,6 +26,9 @@
 #include <ode/matrix.h>
 #include <ode/rotation.h>
 #include <ode/odemath.h>
+
+#if dTRIMESH_ENABLED
+
 #include "collision_util.h"
 
 #define TRIMESH_INTERNAL
@@ -124,3 +127,6 @@ int dCollideRTL(dxGeom* g1, dxGeom* RayGeom, int Flags, dContactGeom* Contacts, 
 	}
 	return OutTriCount;
 }
+
+#endif // dTRIMESH_ENABLED
+

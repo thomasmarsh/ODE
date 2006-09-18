@@ -26,6 +26,9 @@
 #include <ode/matrix.h>
 #include <ode/rotation.h>
 #include <ode/odemath.h>
+
+#if dTRIMESH_ENABLED
+
 #include "collision_util.h"
 #include "collision_std.h"
 
@@ -141,3 +144,6 @@ int dCollideTrimeshPlane( dxGeom *o1, dxGeom *o2, int flags, dContactGeom* conta
 	// Return contact count.
 	return contact_count;
 }
+
+#endif // dTRIMESH_ENABLED
+
