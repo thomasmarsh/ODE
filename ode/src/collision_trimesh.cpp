@@ -31,14 +31,17 @@
 #include "collision_trimesh_internal.h"
 
 // Trimesh data
-dxTriMeshData::dxTriMeshData(){
+dxTriMeshData::dxTriMeshData() : UseFlags( NULL )
+{
 #if !dTRIMESH_ENABLED
   dUASSERT(false, "dTRIMESH_ENABLED is not defined. Trimesh geoms will not work");
 #endif
 }
 
-dxTriMeshData::~dxTriMeshData(){
-    delete [] UseFlags;
+dxTriMeshData::~dxTriMeshData()
+{
+	if ( UseFlags )
+		delete [] UseFlags;
 }
 
 void 
