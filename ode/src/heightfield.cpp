@@ -14,7 +14,7 @@
 #include "collision_util.h"
 #include "heightfield.h"
 
-#ifdef dTRIMESH_ENABLED
+#if dTRIMESH_ENABLED
 #include "collision_trimesh_internal.h"
 #endif // dTRIMESH_ENABLED
 
@@ -783,11 +783,15 @@ int dxHeightfield::dCollideHeightfieldUnit( int x, int z, dxGeom* o2, int numMax
 		GetDepth		= NULL;// TODO: dGeomConvexPointDepth;
 		break;
 
+#if dTRIMESH_ENABLED
+
 	case dTriMeshClass:
 		CollideRayN		= dCollideRayTrimesh;
 		CollideNPlane	= dCollideTrimeshPlane;
 		GetDepth		= NULL;// N/A?
 		break;
+
+#endif // dTRIMESH_ENABLED
 
 	default:
 		dIASSERT(0);	// Shouldn't ever get here.

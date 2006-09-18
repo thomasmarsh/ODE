@@ -180,7 +180,7 @@ static void initColliders()
   setCollider (dRayClass,dCapsuleClass,&dCollideRayCapsule);
   setCollider (dRayClass,dPlaneClass,&dCollideRayPlane);
   setCollider (dRayClass,dCylinderClass,&dCollideRayCylinder);
-#ifdef dTRIMESH_ENABLED
+#if dTRIMESH_ENABLED
   setCollider (dTriMeshClass,dSphereClass,&dCollideSTL);
   setCollider (dTriMeshClass,dBoxClass,&dCollideBTL);
   setCollider (dTriMeshClass,dRayClass,&dCollideRTL);
@@ -210,7 +210,7 @@ static void initColliders()
   setCollider (dHeightfieldClass,dCapsuleClass,&dCollideHeightfield);
   setCollider (dHeightfieldClass,dCylinderClass,&dCollideHeightfield);
   setCollider (dHeightfieldClass,dConvexClass,&dCollideHeightfield);
-#ifdef dTRIMESH_ENABLED
+#if dTRIMESH_ENABLED
   setCollider (dHeightfieldClass,dTriMeshClass,&dCollideHeightfield);
 #endif
 //<-- dHeightfield Collision
