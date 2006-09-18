@@ -32,8 +32,8 @@
 
 // Trimesh data
 dxTriMeshData::dxTriMeshData(){
-#ifndef dTRIMESH_ENABLED
-  dUASSERT(g, "dTRIMESH_ENABLED is not defined. Trimesh geoms will not work");
+#if !dTRIMESH_ENABLED
+  dUASSERT(false, "dTRIMESH_ENABLED is not defined. Trimesh geoms will not work");
 #endif
 }
 
