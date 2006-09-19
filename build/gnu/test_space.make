@@ -13,8 +13,8 @@ ifeq ($(CONFIG),DebugDLL)
   CPPFLAGS := -MD -D "_CRT_SECURE_NO_DEPRECATE" -D "WIN32" -I "../../include"
   CFLAGS += $(CPPFLAGS) -g
   CXXFLAGS := $(CFLAGS)
-  LDFLAGS += -L$(BINDIR) -L$(LIBDIR) ../../lib/DebugDLL/ode.dll ../../lib/DebugDLL/drawstuff.lib -luser32 -lwinmm -lgdi32 -lopengl32 -lglu32
-  LDDEPS := ../../lib/DebugDLL/ode.dll ../../lib/DebugDLL/drawstuff.lib
+  LDFLAGS += -L$(BINDIR) -L$(LIBDIR) ../../lib/DebugDLL/ode.dll ../../lib/DebugDLL/drawstuff.dll -luser32 -lwinmm -lgdi32 -lopengl32 -lglu32
+  LDDEPS := ../../lib/DebugDLL/ode.dll ../../lib/DebugDLL/drawstuff.dll
   TARGET := test_space.exe
   BLDCMD = $(CXX) -o $(OUTDIR)/$(TARGET) $(OBJECTS) $(LDFLAGS) $(RESOURCES)
 endif
@@ -27,8 +27,8 @@ ifeq ($(CONFIG),ReleaseDLL)
   CPPFLAGS := -MD -D "_CRT_SECURE_NO_DEPRECATE" -D "WIN32" -I "../../include"
   CFLAGS += $(CPPFLAGS) -g
   CXXFLAGS := $(CFLAGS)
-  LDFLAGS += -L$(BINDIR) -L$(LIBDIR) ../../lib/ReleaseDLL/ode.dll ../../lib/ReleaseDLL/drawstuff.lib -luser32 -lwinmm -lgdi32 -lopengl32 -lglu32
-  LDDEPS := ../../lib/ReleaseDLL/ode.dll ../../lib/ReleaseDLL/drawstuff.lib
+  LDFLAGS += -L$(BINDIR) -L$(LIBDIR) ../../lib/ReleaseDLL/ode.dll ../../lib/ReleaseDLL/drawstuff.dll -luser32 -lwinmm -lgdi32 -lopengl32 -lglu32
+  LDDEPS := ../../lib/ReleaseDLL/ode.dll ../../lib/ReleaseDLL/drawstuff.dll
   TARGET := test_space.exe
   BLDCMD = $(CXX) -o $(OUTDIR)/$(TARGET) $(OBJECTS) $(LDFLAGS) $(RESOURCES)
 endif

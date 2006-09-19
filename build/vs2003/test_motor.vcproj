@@ -3,7 +3,7 @@
 	ProjectType="Visual C++"
 	Version="7.10"
 	Name="test_motor"
-	ProjectGUID="{8311A9C7-4210-194D-8DA6-253349F816D3}"
+	ProjectGUID="{ADA6AE3A-01D3-5641-90CE-C9A8138100CA}"
 	Keyword="Win32Proj">
 	<Platforms>
 		<Platform
