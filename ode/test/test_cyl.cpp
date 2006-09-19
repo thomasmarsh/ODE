@@ -44,7 +44,7 @@
 #define WMASS 0.2	// wheel mass
 #define WHEELW 0.2	// wheel width
 #define BOXSZ 0.4	// box size
-
+//#define CYL_GEOM_OFFSET // rotate cylinder using geom offset
 
 // dynamics and collision objects (chassis, 3 wheels, environment)
 
@@ -178,8 +178,8 @@ static void simLoop (int pause)
   ); // single precision
 #endif
 #ifdef CYL
-  const dReal *CPos = dBodyGetPosition(cylbody);
-  const dReal *CRot = dBodyGetRotation(cylbody);
+  const dReal *CPos = dGeomGetPosition(cylgeom);
+  const dReal *CRot = dGeomGetRotation(cylgeom);
   float cpos[3] = {CPos[0], CPos[1], CPos[2]};
   float crot[12] = { CRot[0], CRot[1], CRot[2], CRot[3], CRot[4], CRot[5], CRot[6], CRot[7], CRot[8], CRot[9], CRot[10], CRot[11] };
   dsDrawCylinder
@@ -283,6 +283,13 @@ int main (int argc, char **argv)
   dBodySetMass (cylbody,&m);
   cylgeom = dCreateCylinder(0, RADIUS, WHEELW);
   dGeomSetBody (cylgeom,cylbody);
+  
+  #if defined(CYL_GEOM_OFFSET)
+  dMatrix3 mat;
+  dRFromAxisAndAngle(mat,1.0f,0.0f,0.0f,M_PI/2.0);
+  dGeomSetOffsetRotation(cylgeom,mat);
+  #endif
+    
   dSpaceAdd (space, cylgeom);
 #endif
   reset_state();
