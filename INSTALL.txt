@@ -1,5 +1,5 @@
 As of version 0.6, ODE has two new build systems, one for Visual Studio
-and another just about everything else. 
+and another for just about everything else. 
 
 1. Building with Visual Studio
 2. Building with Autotools (Linux, OS X, etc.)

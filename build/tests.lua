@@ -45,37 +45,6 @@
   end
 
 
--- DrawStuff library
-
-  package.name = "drawstuff"
-  package.kind = "lib"
-  package.language = "c++"
-  package.path = packagepath
-
-  package.includepaths =
-  {
-    "../../include"
-  }
-
-  package.defines = { "_CRT_SECURE_NO_DEPRECATE" }
-
-  package.files =
-  {
-    matchfiles("../../include/drawstuff/*.h"),
-    "../../drawstuff/src/internal.h",
-    "../../drawstuff/src/drawstuff.cpp"
-  }
-
-  if (windows) then
-    table.insert(package.defines, "WIN32")
-    table.insert(package.files, "../../drawstuff/src/resource.h")
-    table.insert(package.files, "../../drawstuff/src/resources.rc")
-    table.insert(package.files, "../../drawstuff/src/windows.cpp")
-  else
-    table.insert(package.files, "../../drawstuff/src/x11.cpp")
-  end
-
-
 -- Factory function for test packages
 
   function maketest(index, name)

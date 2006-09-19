@@ -596,6 +596,17 @@ ODE_API void dBodyCopyPosition (dBodyID body, dVector3 pos);
  */
 ODE_API const dReal * dBodyGetRotation   (dBodyID);
 
+
+/**
+ * @brief Copy the rotation of a body.
+ * @ingroup bodies
+ * @param body   the body to query
+ * @param R      a copy of the rotation matrix
+ * @sa dBodyGetRotation
+ */
+ODE_API void dBodyCopyRotation (dBodyID, dMatrix3 R);
+
+
 /**
  * @brief Get the rotation of a body.
  * @ingroup bodies
@@ -1840,6 +1851,8 @@ ODE_API int dAreConnected (dBodyID, dBodyID);
  * @brief Utility function
  * @return 1 if the two bodies are connected together by
  * a joint that does not have type @arg{joint_type}, otherwise return 0.
+ * @param body1 A body to check.
+ * @param body2 A body to check.
  * @param joint_type is a dJointTypeXXX constant.
  * This is useful for deciding whether to add contact joints between two bodies:
  * if they are already connected by non-contact joints then it may not be
@@ -1847,7 +1860,7 @@ ODE_API int dAreConnected (dBodyID, dBodyID);
  * bodies that already have contacts.
  * @ingroup joints
  */
-ODE_API int dAreConnectedExcluding (dBodyID, dBodyID, int joint_type);
+ODE_API int dAreConnectedExcluding (dBodyID body1, dBodyID body2, int joint_type);
 
 
 #ifdef __cplusplus

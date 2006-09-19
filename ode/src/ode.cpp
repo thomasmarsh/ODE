@@ -391,6 +391,25 @@ const dReal * dBodyGetRotation (dBodyID b)
 }
 
 
+void dBodyCopyRotation (dBodyID b, dMatrix3 R)
+{
+	dAASSERT (b);
+	const dReal* src = b->posr.R;
+	R[0] = src[0];
+	R[1] = src[1];
+	R[2] = src[2];
+	R[3] = src[3];
+	R[4] = src[4];
+	R[5] = src[5];
+	R[6] = src[6];
+	R[7] = src[7];
+	R[8] = src[8];
+	R[9] = src[9];
+	R[10] = src[10];
+	R[11] = src[11];
+}
+
+
 const dReal * dBodyGetQuaternion (dBodyID b)
 {
   dAASSERT (b);

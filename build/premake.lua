@@ -57,6 +57,7 @@ project.name = "ode"
   dopackage("ode.lua")
 
   if (options["with-tests"]) then
+    dopackage("drawstuff.lua")
     dopackage("tests.lua")
   end
 
