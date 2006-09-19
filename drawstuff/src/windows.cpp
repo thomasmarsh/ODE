@@ -316,7 +316,8 @@ static void drawStuffStartup()
   static int startup_called = 0;
   if (startup_called) return;
   startup_called = 1;
-  ghInstance = GetModuleHandleA (NULL);
+  if (!ghInstance)
+    ghInstance = GetModuleHandleA (NULL);
   gnCmdShow = SW_SHOWNORMAL;		// @@@ fix this later
 
   // redirect standard I/O to a new console (except on cygwin)
@@ -482,6 +483,25 @@ extern "C" double dsElapsedTime()
 }
 
 
+// JPerkins: if running as a DLL, grab my module handle at load time so
+// I can find the accelerators table later
+
+BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpReserved)
+{
+  switch (fdwReason)
+  {
+  case DLL_PROCESS_ATTACH:
+    ghInstance = hinstDLL;
+    break;
+  }
+  return TRUE;
+}
+
+
+// JPerkins: the new build system can set the entry point of the tests to
+// main(); this code is no longer necessary
+/*
+
 //***************************************************************************
 // windows entry point
 //
@@ -499,3 +519,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
   drawStuffStartup();
   return main (0,0);	// @@@ should really pass cmd line arguments
 }
+
+*/
+

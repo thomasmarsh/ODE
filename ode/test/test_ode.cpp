@@ -1000,7 +1000,7 @@ static void myDebug (int num, const char *msg, va_list ap)
 }
 
 
-extern "C" ODE_API void dTestMatrixComparison()
+extern "C" void dTestMatrixComparison()
 {
   volatile int i;
   printf ("dTestMatrixComparison()\n");

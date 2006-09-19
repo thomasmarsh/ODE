@@ -182,6 +182,16 @@ ODE_API const dReal * dGeomGetPosition (dGeomID geom);
 
 
 /**
+ * @brief Copy the position of a geom into a vector.
+ * @ingroup collide
+ * @param geom  the geom to query
+ * @param pos   a copy of the geomposition
+ * @sa dGeomGetPosition
+ */
+ODE_API void dGeomCopyPosition (dGeomID geom, dVector3 pos);
+
+
+/**
  * @brief Get the rotation matrix of a placeable geom.
  *
  * If the geom is attached to a body, the body's rotation will be returned.

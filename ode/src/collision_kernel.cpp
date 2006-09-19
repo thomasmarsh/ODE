@@ -563,6 +563,18 @@ const dReal * dGeomGetPosition (dxGeom *g)
 }
 
 
+void dGeomCopyPosition(dxGeom *g, dVector3 pos)
+{
+  dAASSERT (g);
+  dUASSERT (g->gflags & GEOM_PLACEABLE,"geom must be placeable");
+  g->recomputePosr();
+  const dReal* src = g->final_posr->pos;
+  pos[0] = src[0];
+  pos[1] = src[1];
+  pos[2] = src[2];
+}
+
+
 const dReal * dGeomGetRotation (dxGeom *g)
 {
   dAASSERT (g);

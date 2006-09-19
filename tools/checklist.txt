@@ -3,7 +3,7 @@ RELEASE CHECKLIST
 
 ( ) Create a release branch in SVN
 
-( ) Run msw-release.bat to create Windows binaries
+( ) Run msw-release.bat in VS2003 command prompt
 
 ( ) Run src-release.sh to create source package
     (Must run in Linux or Cygwin w/autotools)
