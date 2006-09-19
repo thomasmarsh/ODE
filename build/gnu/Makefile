@@ -13,7 +13,7 @@ export CONFIG
 
 all: ode drawstuff test_basket test_boxstack test_buggy test_chain1 test_chain2 test_collision test_crash test_feedback test_friction test_heightfield test_hinge test_I test_joints test_motor test_ode test_plane2d test_slider test_space test_space_stress test_step test_cyl test_cylvssphere test_moving_trimesh test_trimesh tests
 
-Makefile: ../premake.lua ../ode.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua
+Makefile: ../premake.lua ../ode.lua ../drawstuff.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua
 	@echo ==== Regenerating Makefiles ====
 	@premake --file $^ --usetargetpath --with-tests --clean --target gnu
 

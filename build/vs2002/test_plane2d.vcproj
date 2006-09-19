@@ -3,7 +3,7 @@
 	ProjectType="Visual C++"
 	Version="7.00"
 	Name="test_plane2d"
-	ProjectGUID="{F48D74FF-BAF4-994E-BAEA-61E4BD4BF97E}"
+	ProjectGUID="{57ECE081-6AE7-1045-97F9-DCCD0E81CA24}"
 	Keyword="Win32Proj">
 	<Platforms>
 		<Platform
