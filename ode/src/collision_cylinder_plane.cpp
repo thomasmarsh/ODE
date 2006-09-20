@@ -31,7 +31,7 @@
  */
 
 #define PRTVEC3(A) \
-  fprintf(stderr, #A "%6.3f %6.3f %6.3f\n", A[0],A[1],A[2]);
+  fprintf(stderr, #A " %6.3f %6.3f %6.3f\n", A[0],A[1],A[2]);
 
 #include <ode/collision.h>
 #include <ode/matrix.h>
@@ -57,7 +57,7 @@ static bool isect_plane_plane
 )
 {
   dReal norms_dot = dDOT(nrm0,nrm1);
-  if (norms_dot >= (1.0-dEpsilon))
+  if (dFabs(norms_dot) >= (1.0-dEpsilon))
     return false; // planes are parallel
   dReal inv_det = dReal(1.0) / (dReal(1.0) - norms_dot*norms_dot);
 
@@ -91,6 +91,7 @@ static bool isect_disc_plane
   dReal rad,
   dVector3 &poi,		// point of intersection
   dVector3 &doi,		// direction of intersection
+  dVector3 &deepest,		// point on disc with deepest penetration of plane
   dReal &intersectiondepth
 )
 {
@@ -98,6 +99,8 @@ static bool isect_disc_plane
   bool planes_do_intersect = isect_plane_plane(discpos,discnorm,planepos,planenorm,org,dir);
   if (!planes_do_intersect)
     return false;
+
+  dIASSERT(dDOT(dir, planenorm)<dEpsilon);
 
   dVector3 tmp;
 
@@ -118,6 +121,10 @@ static bool isect_disc_plane
   intersectiondepth = rad - dist;
   dNormalize3(doi);
 
+  deepest[0] = discpos[0] + rad * doi[0];
+  deepest[1] = discpos[1] + rad * doi[1];
+  deepest[2] = discpos[2] + rad * doi[2];
+
 //  fprintf(stderr,"disc intersects plane with depth %f\n", intersectiondepth);
   return true;
 }
@@ -130,12 +137,13 @@ static bool test_disc_isect()
   dVector3 discnorm={0,1,0};
   dVector3 planepos={5,10,0};
   dVector3 planenorm={0,0,1};
+  dVector3 deepest={0,0,0};
   dReal    radius=4.0;
 
   dVector3 poi, doi;
   dReal depth;
 
-  return isect_disc_plane(discpos, discnorm, planepos, planenorm, radius, poi, doi, depth);
+  return isect_disc_plane(discpos, discnorm, planepos, planenorm, radius, poi, doi, deepest, depth);
 }
 //static bool dummy=test_disc_isect();
 
@@ -201,69 +209,82 @@ int dCollideCylinderPlane(dxGeom *cylgeom, dxGeom *planegeom, int flags, dContac
 
   // Discs and plane are parallel?
   // If so, the cyl may be resting on the plane, with one of its discs
-  dReal norms_dot = dFabs(dDOT(planenorm,axis));
-  bool coplanar = (norms_dot >= 0.999);
-  if (coplanar)
+
+  dReal norm_dot_top = dDOT(planenorm, disc_top_nrm);
+  dReal norm_dot_bot = dDOT(planenorm, disc_bot_nrm);
+
+  bool face_to_face_top = (norm_dot_top <= -0.999);
+  bool face_to_face_bot = (norm_dot_bot <= -0.999);
+
+  if (face_to_face_top || face_to_face_bot)
   {
     dReal dist_top = dPointPlaneDistance(disc_top_pos, planevec);
-    if (dist_top <= 0)
-    { 
-      dVector3 x;
-      minor_axis(axis, x);
-      dVector3 y;
-      dVector3Cross(axis, x, y);
-      dVector3 p;
-      dVector3Scale(x, radius); dVector3Scale(y, radius);
-      dContactGeom *Contact;
-
-      // Contact 1
-      Contact = SAFECONTACT(flags, contact, nContacts, skip);
-      dVector3Copy(disc_top_pos, p);
-      dVector3Add(p, x, Contact->pos);
-      Contact->g1 = planegeom;
-      Contact->g2 = cylgeom;
-      Contact->depth = dFabs(dist_top);
-      dVector3Copy(planenorm, Contact->normal);
-      nContacts++;
-
-      // Contact 2
-      Contact = SAFECONTACT(flags, contact, nContacts, skip);
-      dVector3Copy(disc_top_pos, p);
-      dVector3Add(p, y, Contact->pos);
-      Contact->g1 = planegeom;
-      Contact->g2 = cylgeom;
-      Contact->depth = dFabs(dist_top);
-      dVector3Copy(planenorm, Contact->normal);
-      nContacts++;
-
-      // Contact 3
-      Contact = SAFECONTACT(flags, contact, nContacts, skip);
-      dVector3Copy(disc_top_pos, p);
-      dVector3Subtract(p, x, Contact->pos);
-      Contact->g1 = planegeom;
-      Contact->g2 = cylgeom;
-      Contact->depth = dFabs(dist_top);
-      dVector3Copy(planenorm, Contact->normal);
-      nContacts++;
-
-      // Contact 4
-      Contact = SAFECONTACT(flags, contact, nContacts, skip);
-      dVector3Copy(disc_top_pos, p);
-      dVector3Subtract(p, y, Contact->pos);
-      Contact->g1 = planegeom;
-      Contact->g2 = cylgeom;
-      Contact->depth = dFabs(dist_top);
-      dVector3Copy(planenorm, Contact->normal);
-      nContacts++;
-      return nContacts;
-    }
-    dReal dist_bot = dPointPlaneDistance(disc_bot_pos, planevec);
-    if (dist_bot <= 0)
+    if (face_to_face_top && dist_top <= 0)
     {
       dVector3 x;
       minor_axis(axis, x);
       dVector3 y;
       dVector3Cross(axis, x, y);
+      dNormalize3(y);
+      // y and x are unit, so will their cross product be.
+      dVector3Cross(axis, y, x);
+
+      dVector3 p;
+      dVector3Scale(x, radius); dVector3Scale(y, radius);
+      dContactGeom *Contact;
+
+      // Contact 1
+      Contact = SAFECONTACT(flags, contact, nContacts, skip);
+      dVector3Copy(disc_top_pos, p);
+      dVector3Add(p, x, Contact->pos);
+      Contact->g1 = cylgeom;
+      Contact->g2 = planegeom;
+      Contact->depth = -dist_top;
+      dVector3Copy(planenorm, Contact->normal);
+      nContacts++;
+
+      // Contact 2
+      Contact = SAFECONTACT(flags, contact, nContacts, skip);
+      dVector3Copy(disc_top_pos, p);
+      dVector3Add(p, y, Contact->pos);
+      Contact->g1 = cylgeom;
+      Contact->g2 = planegeom;
+      Contact->depth = -dist_top;
+      dVector3Copy(planenorm, Contact->normal);
+      nContacts++;
+
+      // Contact 3
+      Contact = SAFECONTACT(flags, contact, nContacts, skip);
+      dVector3Copy(disc_top_pos, p);
+      dVector3Subtract(p, x, Contact->pos);
+      Contact->g1 = cylgeom;
+      Contact->g2 = planegeom;
+      Contact->depth = -dist_top;
+      dVector3Copy(planenorm, Contact->normal);
+      nContacts++;
+
+      // Contact 4
+      Contact = SAFECONTACT(flags, contact, nContacts, skip);
+      dVector3Copy(disc_top_pos, p);
+      dVector3Subtract(p, y, Contact->pos);
+      Contact->g1 = cylgeom;
+      Contact->g2 = planegeom;
+      Contact->depth = -dist_top;
+      dVector3Copy(planenorm, Contact->normal);
+      nContacts++;
+      return nContacts;
+    }
+    dReal dist_bot = dPointPlaneDistance(disc_bot_pos, planevec);
+    if (face_to_face_bot && dist_bot <= 0)
+    {
+      dVector3 x;
+      minor_axis(axis, x);
+      dVector3 y;
+      dVector3Cross(axis, x, y);
+      dNormalize3(y);
+      // y and x are unit, so will their cross product be.
+      dVector3Cross(axis, y, x);
+
       dVector3 p;
       dVector3Scale(x, radius); dVector3Scale(y, radius);
       dContactGeom *Contact;
@@ -274,7 +295,7 @@ int dCollideCylinderPlane(dxGeom *cylgeom, dxGeom *planegeom, int flags, dContac
       dVector3Add(p, x, Contact->pos);
       Contact->g1 = cylgeom;
       Contact->g2 = planegeom;
-      Contact->depth = dFabs(dist_bot);
+      Contact->depth = -dist_bot;
       dVector3Copy(planenorm, Contact->normal);
       nContacts++;
 
@@ -284,7 +305,7 @@ int dCollideCylinderPlane(dxGeom *cylgeom, dxGeom *planegeom, int flags, dContac
       dVector3Add(p, y, Contact->pos);
       Contact->g1 = cylgeom;
       Contact->g2 = planegeom;
-      Contact->depth = dFabs(dist_bot);
+      Contact->depth = -dist_bot;
       dVector3Copy(planenorm, Contact->normal);
       nContacts++;
 
@@ -294,7 +315,7 @@ int dCollideCylinderPlane(dxGeom *cylgeom, dxGeom *planegeom, int flags, dContac
       dVector3Subtract(p, x, Contact->pos);
       Contact->g1 = cylgeom;
       Contact->g2 = planegeom;
-      Contact->depth = dFabs(dist_bot);
+      Contact->depth = -dist_bot;
       dVector3Copy(planenorm, Contact->normal);
       nContacts++;
 
@@ -304,7 +325,7 @@ int dCollideCylinderPlane(dxGeom *cylgeom, dxGeom *planegeom, int flags, dContac
       dVector3Subtract(p, y, Contact->pos);
       Contact->g1 = cylgeom;
       Contact->g2 = planegeom;
-      Contact->depth = dFabs(dist_bot);
+      Contact->depth = -dist_bot;
       dVector3Copy(planenorm, Contact->normal);
       nContacts++;
       return nContacts;
@@ -316,40 +337,53 @@ int dCollideCylinderPlane(dxGeom *cylgeom, dxGeom *planegeom, int flags, dContac
 
   dVector3 poi_top, doi_top;
   dVector3 poi_bot, doi_bot;
+  dVector3 deepest_top, deepest_bot;
   dReal depth_top, depth_bot;
 
-  bool top_disc_does_intersect = isect_disc_plane(disc_top_pos, disc_top_nrm, planepos, planenorm, radius,  poi_top, doi_top, depth_top);
-  bool bot_disc_does_intersect = isect_disc_plane(disc_bot_pos, disc_bot_nrm, planepos, planenorm, radius,  poi_bot, doi_bot, depth_bot);
+  bool top_disc_does_intersect = isect_disc_plane(disc_top_pos, disc_top_nrm, planepos, planenorm, radius,  poi_top, doi_top, deepest_top, depth_top);
+  bool bot_disc_does_intersect = isect_disc_plane(disc_bot_pos, disc_bot_nrm, planepos, planenorm, radius,  poi_bot, doi_bot, deepest_bot, depth_bot);
 
   if (top_disc_does_intersect)
   {
     dContactGeom *Contact = SAFECONTACT(flags, contact, nContacts, skip);
-    dVector3 tmp;
-    dVector3Copy(doi_top, tmp);
-    dVector3Scale(tmp, radius);
-    dVector3Add(disc_top_pos, tmp, Contact->pos);
     // Note: ODE convention is: normal points *into* g1
     Contact->g1 = cylgeom;
     Contact->g2 = planegeom;
     dVector3Copy(planenorm, Contact->normal);
-    dReal d = depth_top * dDOT(planenorm, doi_top);
-    Contact->depth = dFabs(d);
+
+    if (dDOT(doi_top,planenorm)>0)
+    {
+      // Most of the disc is below plane
+      deepest_top[0] = disc_top_pos[0] - radius * doi_top[0];
+      deepest_top[1] = disc_top_pos[1] - radius * doi_top[1];
+      deepest_top[2] = disc_top_pos[2] - radius * doi_top[2];
+    }
+    dVector3Copy(deepest_top, Contact->pos);
+    Contact->depth = -dPointPlaneDistance(deepest_top, planevec);
+
+    dIASSERT(Contact->depth >= 0.0);
     nContacts++;
   }
 
   if (bot_disc_does_intersect)
   {
     dContactGeom *Contact = SAFECONTACT(flags, contact, nContacts, skip);
-    dVector3 tmp;
-    dVector3Copy(doi_bot, tmp);
-    dVector3Scale(tmp, radius);
-    dVector3Add(disc_bot_pos, tmp, Contact->pos);
     // Note: ODE convention is: normal points *into* g1
     Contact->g1 = cylgeom;
     Contact->g2 = planegeom;
     dVector3Copy(planenorm, Contact->normal);
-    dReal d = depth_bot * dDOT(planenorm, doi_bot);
-    Contact->depth = dFabs(d);
+
+    if (dDOT(doi_bot,planenorm)>0)
+    {
+      // Most of the disc is below plane
+      deepest_bot[0] = disc_bot_pos[0] - radius * doi_bot[0];
+      deepest_bot[1] = disc_bot_pos[1] - radius * doi_bot[1];
+      deepest_bot[2] = disc_bot_pos[2] - radius * doi_bot[2];
+    }
+    dVector3Copy(deepest_bot, Contact->pos);
+    Contact->depth = -dPointPlaneDistance(deepest_bot, planevec);
+
+    dIASSERT(Contact->depth >= 0.0);
     nContacts++;
   }
 
