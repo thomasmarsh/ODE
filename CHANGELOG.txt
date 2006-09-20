@@ -9,11 +9,14 @@ the rules for this file:
 
 ------------------------------------------------------------------------------
 
+09/20/06 bram
+
+	* Fixed two bugs in cyl/plane collision test.
+
 09/13/06 remi
 
 	* New Rotoide - Prismatic joint type
 	* dJointGetUniversalAngles for efficient angle retrieval.
-
 
 08/09/06 david
 
