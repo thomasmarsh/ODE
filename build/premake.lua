@@ -1,15 +1,13 @@
 project.name = "ode"
 
-
--- Define the build configurations. VC6 doesn't support different output types
--- within a project, so I must limit the configuration to just a DLL or just a
--- static library. You can also use these flags `--enable-shared-only` and
--- `--enable-static-only` if you want to call these packages from within your
--- own Premake-enabled project.
-
-  if (options["target"] == "vs6" and not options["enable-static-only"]) then
-    options["enable-shared-only"] = 1
+  if (options["target"] == "vs6") then
+    error("Visual Studio 6 is no longer supported; please upgrade to Visual Studio 2005 C++ Express.")
   end
+  
+
+-- Define the build configurations. You can also use the flags 
+-- `--enable-shared-only` and `--enable-static-only` if you want to 
+-- call these packages from within your own Premake-enabled project.
 
   if (not options["enable-shared-only"] and not options["enable-static-only"]) then
     project.configs = { "DebugDLL", "ReleaseDLL", "DebugLib", "ReleaseLib" }
@@ -77,7 +75,6 @@ project.name = "ode"
     os.rmdir("../lib/ReleaseDLL")
     os.rmdir("../lib/ReleaseLib")
     os.rmdir("gnu/obj")
-    os.rmdir("vs6/obj")
     os.rmdir("vs2002/obj")
     os.rmdir("vs2003/obj")
     os.rmdir("vs2005/obj")
@@ -87,7 +84,6 @@ project.name = "ode"
 -- Generate all toolsets in one go
 
   function domakeall(cmd, arg)
-    os.execute("premake --usetargetpath --with-tests --clean --target vs6")
     os.execute("premake --usetargetpath --with-tests --clean --target vs2002")
     os.execute("premake --usetargetpath --with-tests --clean --target vs2003")
     os.execute("premake --usetargetpath --with-tests --clean --target vs2005")
