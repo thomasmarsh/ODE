@@ -85,7 +85,7 @@ and another for just about everything else.
  
 3. Building with Code::Blocks
 
- Because so Code::Blocks supports so many different platforms, we do not
+ Because Code::Blocks supports so many different platforms, we do not
  provide workspaces. Instead, use Premake (http://www.premake.sourceforge.net/)
  to create a workspace tailored for your platform and project.
  
