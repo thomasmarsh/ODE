@@ -40,7 +40,7 @@ Jason Perkins (starkos@gmail.com)
  USAGE
 --------------------------------------------------------------------- 
 
- I have tried to keep things as close to original C API as possible,
+ I have tried to keep things as close to the original C API as I can,
  rather than forcing a class structure on everyone. Everything is
  contained within the `Ode.NET` namespace inside a static class
  named `d`. All ODE IDs are replaced with IntPtrs. A quick example:
