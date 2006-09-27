@@ -209,6 +209,12 @@ namespace Ode.NET
 		[DllImport("ode", EntryPoint = "dBodySetPosition")]
 		public static extern void BodySetPosition(IntPtr body, dReal x, dReal y, dReal z);
 
+		[DllImport("ode", EntryPoint = "dBodySetQuaternion")]
+		public static extern void BodySetQuaternion(IntPtr body, ref Quaternion q);
+
+		[DllImport("ode", EntryPoint = "dBodySetQuaternion")]
+		public static extern void BodySetQuaternion(IntPtr body, ref dReal w);
+
 		[DllImport("ode", EntryPoint = "dBodySetRotation")]
 		public static extern void BodySetRotation(IntPtr body, ref Matrix3 R);
 
@@ -233,6 +239,12 @@ namespace Ode.NET
 		[DllImport("ode", EntryPoint = "dGeomBoxGetLengths")]
 		public static extern void GeomBoxGetLengths(IntPtr geom, out Vector3 len);
 
+		[DllImport("ode", EntryPoint = "dGeomBoxSetLengths")]
+		public static extern void GeomBoxSetLengths(IntPtr geom, dReal x, dReal y, dReal z);
+
+		[DllImport("ode", EntryPoint = "dGeomBoxGetLengths")]
+		public static extern void GeomBoxGetLengths(IntPtr geom, out dReal x);
+
 		[DllImport("ode", EntryPoint = "dGeomCapsuleGetParams")]
 		public static extern void GeomCapsuleGetParams(IntPtr geom, out dReal radius, out dReal length);
 
@@ -250,6 +262,15 @@ namespace Ode.NET
 
 		[DllImport("ode", EntryPoint = "dGeomSetBody")]
 		public static extern void GeomSetBody(IntPtr geom, IntPtr body);
+
+		[DllImport("ode", EntryPoint = "dGeomSetPosition")]
+		public static extern void GeomSetPosition(IntPtr geom, dReal x, dReal y, dReal z);
+
+		[DllImport("ode", EntryPoint = "dGeomSetQuaternion")]
+		public static extern void GeomSetQuaternion(IntPtr geom, ref Quaternion quat);
+
+		[DllImport("ode", EntryPoint = "dGeomSetQuaternion")]
+		public static extern void GeomSetQuaternion(IntPtr geom, ref dReal w);
 
 		[DllImport("ode", EntryPoint = "dHashSpaceCreate")]
 		public static extern IntPtr HashSpaceCreate(IntPtr space);
@@ -280,6 +301,12 @@ namespace Ode.NET
 
 		[DllImport("ode", EntryPoint = "dRFromAxisAndAngle")]
 		public static extern void RFromAxisAndAngle(out Matrix3 R, dReal x, dReal y, dReal z, dReal angle);
+
+		[DllImport("ode", EntryPoint = "dSimpleSpaceCreate")]
+		public static extern IntPtr SimpleSpaceCreate(IntPtr space);
+
+		[DllImport("ode", EntryPoint = "dSpaceAdd")]
+		public static extern void SpaceAdd(IntPtr space, IntPtr geom);
 
 		[DllImport("ode", EntryPoint = "dSpaceCollide")]
 		public static extern void SpaceCollide(IntPtr space, IntPtr data, NearCallback callback);
@@ -312,4 +339,3 @@ namespace Ode.NET
 		public static extern void WorldSetGravity(IntPtr world, dReal x, dReal y, dReal z);
 	}
 }
-
