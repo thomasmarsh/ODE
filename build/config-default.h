@@ -8,16 +8,22 @@
  *   ODE to modify the behavior of the library.
  *
  *   dSINGLE/dDOUBLE   - force ODE to use single-precision (float)
- *                       or double-precision (double) for numbers
+ *                       or double-precision (double) for numbers.
+ *                       Only one should be uncommented.
  *
  *   dTRIMESH_ENABLED  - enable/disable trimesh support
  *
+ *   dUSE_MALLOC_FOR_ALLOCA  - use malloc() instead of alloca(). 
+ *                       Slower, but allows for larger systems and
+ *                       more graceful out-of-memory handling.
  ******************************************************************/
 
 #define dSINGLE 1
+/* #define dDOUBLE 1 */
 
 #define dTRIMESH_ENABLED 1
 
+/* #define dUSE_MALLOC_FOR_ALLOCA */
 
 
 /******************************************************************
