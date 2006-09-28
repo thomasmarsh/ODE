@@ -108,7 +108,7 @@ void start()
 			  points,
 			  pointcount,
 			  polygons);
-  dGeomSetPosition (geoms[1],0.25,0.25,0.5);
+  dGeomSetPosition (geoms[1],0.25,0.25,0.70);
   
 }
 

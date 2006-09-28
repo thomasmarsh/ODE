@@ -938,15 +938,15 @@ inline void ComputeInterval(dxConvex& cvx,dVector4 axis,dReal& min,dReal& max)
 int TestConvexIntersection(dxConvex& cvx1,dxConvex& cvx2, int flags,
 			    dContactGeom *contact, int skip)
 {
-  dVector4 plane,normal;
+  dVector4 plane,savedplane;
   dReal min1,max1,min2,max2,depth,min_depth=-dInfinity;
   dVector3 e1,e2,t;
   int maxc = flags & NUMC_MASK; // this is causing a segfault
   //int maxc = 3;
   int contacts=0;
-  unsigned int *pFace;
   dxConvex *g1,*g2;
   unsigned int *pPoly;
+  dVector3 v;
   // Test faces of cvx1 for separation
   pPoly=cvx1.polygons;
   for(int i=0;i<cvx1.planecount;++i)
@@ -965,17 +965,17 @@ int TestConvexIntersection(dxConvex& cvx1,dxConvex& cvx2, int flags,
       ComputeInterval(cvx2,plane,min2,max2);
       //fprintf(stdout,"width %f\n",max1-min1);
       if(max2<min1 || max1<min2) return 0;
-#if 0
+#if 1
       // this one ON works
       else if ((max1>min2)&&(max1<max2))
 	{
 	  min_depth=max1-min2;
-	  normal[0]=-plane[0];
-	  normal[1]=-plane[1];
-	  normal[2]=-plane[2];
-	  pFace=pPoly;
-	  g1=&cvx1;
-	  g2=&cvx2;
+	  savedplane[0]=plane[0];
+	  savedplane[1]=plane[1];
+	  savedplane[2]=plane[2];
+	  savedplane[3]=plane[3];
+	  g1=&cvx2; // cvx2 moves
+	  g2=&cvx1;
 	}
 #endif
       pPoly+=pPoly[0]+1;
@@ -1006,19 +1006,12 @@ int TestConvexIntersection(dxConvex& cvx1,dxConvex& cvx2, int flags,
       else if ((max1>min2)&&(max1<max2))
 	{
 	  min_depth=max1-min2;
-	  normal[0]=-plane[0];
-	  normal[1]=-plane[1];
-	  normal[2]=-plane[2];
-	  pFace=pPoly;
-	  g1=&cvx2;
-	  g2=&cvx1;
-// 	  fprintf(stdout,"NORMAL %f %f %f PLANE %f %f %f \n",
-// 		  normal[0],
-// 		  normal[1],
-// 		  normal[2],
-// 		  cvx2.planes[(i*4)+0],
-// 		  cvx2.planes[(i*4)+1],
-// 		  cvx2.planes[(i*4)+2]);
+	  savedplane[0]=plane[0];
+	  savedplane[1]=plane[1];
+	  savedplane[2]=plane[2];
+	  savedplane[3]=plane[3];
+	  g1=&cvx1; // cvx1 moves
+	  g2=&cvx2;
 	}
 #endif
       pPoly+=pPoly[0]+1;
@@ -1051,36 +1044,47 @@ int TestConvexIntersection(dxConvex& cvx1,dxConvex& cvx2, int flags,
 	  if(max2<min1 || max1 < min2) return 0;
 	}      
     }
-	  fprintf(stdout,"NORMAL %f %f %f ",
-		  normal[0],
-		  normal[1],
-		  normal[2]);
-	  for(int j=0;j<pFace[0];++j)
-	    fprintf(stdout,"%d ",pFace[j+1]);
-	  fprintf(stdout,"\n");
-
   // If we get here, there was a collision
-  for(contacts=0;(contacts<maxc)&&(contacts<pFace[0]);++contacts)
+  static int  cvxhit=0;
+  contacts=0;
+  if(cvxhit<2)
+  fprintf(stdout,"Plane: %f,%f,%f,%f\n",
+	  savedplane[0],
+	  savedplane[1],
+	  savedplane[2],
+	  savedplane[3]);
+  for(unsigned int i=0;i<g1->pointcount;++i)
     {
-      CONTACT(contact,skip*contacts)->normal[0] = normal[0];
-      CONTACT(contact,skip*contacts)->normal[1] = normal[1];
-      CONTACT(contact,skip*contacts)->normal[2] = normal[2];
-      dMULTIPLY0_331 (CONTACT(contact,skip*contacts)->pos,
-		      g1->final_posr->R,
-		      g1->points+pFace[contacts+1]*3);
-      CONTACT(contact,skip*contacts)->pos[0]=
-	g1->final_posr->pos[0]+
-	CONTACT(contact,skip*contacts)->pos[0];
-      CONTACT(contact,skip*contacts)->pos[1]=
-	g1->final_posr->pos[1]+
-	CONTACT(contact,skip*contacts)->pos[1];
-      CONTACT(contact,skip*contacts)->pos[2]=
-	g1->final_posr->pos[2]+
-	CONTACT(contact,skip*contacts)->pos[2];
-      CONTACT(contact,skip*contacts)->depth = min_depth;
-      CONTACT(contact,skip*contacts)->g1 = g1;
-      CONTACT(contact,skip*contacts)->g2 = g2;
+      if(contacts==maxc) break;
+      dMULTIPLY0_331 (v,g1->final_posr->R,&g1->points[(i*3)]);
+      v[0]=g1->final_posr->pos[0]+v[0];
+      v[1]=g1->final_posr->pos[1]+v[1];
+      v[2]=g1->final_posr->pos[2]+v[2];
+      dReal distance = ((savedplane[0] * v[0])  + // Ax +
+			(savedplane[1] * v[1])  + // Bx +
+			(savedplane[2] * v[2])) - savedplane[3]; // Cz + D
+
+      if((contacts<maxc)&&(distance<0))
+	{
+	  CONTACT(contact,skip*contacts)->normal[0] = savedplane[0];
+	  CONTACT(contact,skip*contacts)->normal[1] = savedplane[1];
+	  CONTACT(contact,skip*contacts)->normal[2] = savedplane[2];
+	  CONTACT(contact,skip*contacts)->pos[0]=v[0];
+	  CONTACT(contact,skip*contacts)->pos[1]=v[1];
+	  CONTACT(contact,skip*contacts)->pos[2]=v[2];
+	  CONTACT(contact,skip*contacts)->depth = -distance;
+	  CONTACT(contact,skip*contacts)->g1 = g1;
+	  CONTACT(contact,skip*contacts)->g2 = g2;
+	  if(cvxhit<2)
+	  fprintf(stdout,"Contact: %f,%f,%f depth %f\n",
+		  CONTACT(contact,skip*contacts)->pos[0],
+		  CONTACT(contact,skip*contacts)->pos[1],
+		  CONTACT(contact,skip*contacts)->pos[2],
+		  CONTACT(contact,skip*contacts)->depth);
+	  contacts++;
+	}
     }
+  cvxhit++;
   return contacts;
 }
 

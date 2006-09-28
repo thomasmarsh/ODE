@@ -215,21 +215,25 @@ static void command (int cmd)
     for (k=0; k<3; k++) sides[k] = dRandReal()*0.5+0.1;
 
     dMatrix3 R;
-    if (random_pos) {
-      dBodySetPosition (obj[i].body,
-			dRandReal()*2-1,dRandReal()*2-1,dRandReal()+2);
-      dRFromAxisAndAngle (R,dRandReal()*2.0-1.0,dRandReal()*2.0-1.0,
-			  dRandReal()*2.0-1.0,dRandReal()*10.0-5.0);
-    }
-    else {
-      dReal maxheight = 0;
-      for (k=0; k<num; k++) {
-	const dReal *pos = dBodyGetPosition (obj[k].body);
-	if (pos[2] > maxheight) maxheight = pos[2];
+    if (random_pos) 
+      {
+	dBodySetPosition (obj[i].body,
+			  dRandReal()*2-1,dRandReal()*2-1,dRandReal()+2);
+	dRFromAxisAndAngle (R,dRandReal()*2.0-1.0,dRandReal()*2.0-1.0,
+			    dRandReal()*2.0-1.0,dRandReal()*10.0-5.0);
       }
-      dBodySetPosition (obj[i].body, 0,0,maxheight+1);
-      dRFromAxisAndAngle (R,0,0,1,/*dRandReal()*10.0-5.0*/0);
-    }
+    else 
+      {
+	dReal maxheight = 0;
+	for (k=0; k<num; k++) 
+	  {
+	    const dReal *pos = dBodyGetPosition (obj[k].body);
+	    if (pos[2] > maxheight) maxheight = pos[2];
+	  }
+	dBodySetPosition (obj[i].body, 0,0,maxheight+1);
+	dRSetIdentity (R);
+	//dRFromAxisAndAngle (R,0,0,1,/*dRandReal()*10.0-5.0*/0);
+      }
     dBodySetRotation (obj[i].body,R);
     dBodySetData (obj[i].body,(void*) i);
 
@@ -546,7 +550,7 @@ int main (int argc, char **argv)
   world = dWorldCreate();
   space = dHashSpaceCreate (0);
   contactgroup = dJointGroupCreate (0);
-  dWorldSetGravity (world,0,0,-0.25);
+  dWorldSetGravity (world,0,0,-0.5);
   dWorldSetCFM (world,1e-5);
   dWorldSetAutoDisableFlag (world,1);
   dWorldSetContactMaxCorrectingVel (world,0.1);
