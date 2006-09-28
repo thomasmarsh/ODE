@@ -1707,6 +1707,7 @@ static void command (int cmd)
 			dMassSetSphere (&m,DENSITY,sides[0]);
 			obj[i].geom[0] = dCreateSphere (space,sides[0]);
 		}
+#ifdef dTRIMESH_ENABLED
 		else if (cmd == 'm')
 		{
 			dTriMeshDataID new_tmdata = dGeomTriMeshDataCreate();
@@ -1719,6 +1720,7 @@ static void command (int cmd)
 
 			dMassSetBox (&m,DENSITY,sides[0],sides[1],sides[2]);
 		}
+#endif
 		else if (cmd == 'x')
 		{
 			dGeomID g2[GPB];		// encapsulated geometries
@@ -2015,9 +2017,10 @@ static void simLoop (int pause)
 				obj[i].last_matrix_index = !obj[i].last_matrix_index;
 
 				// Apply the 'other' matrix which is the oldest.
+#ifdef dTRIMESH_ENABLED
 				dGeomTriMeshSetLastTransform( obj[i].geom[j], 
 					*(dMatrix4*)( obj[i].matrix_dblbuff + ( obj[i].last_matrix_index * 16 ) ) );
-
+#endif
 			}
 			else
 			{

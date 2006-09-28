@@ -29,14 +29,14 @@
 
 
 //<---- Convex Object
-dReal planes[]= // planes for a cube
+dReal planes[]= // planes for a cube, these should coincide with the face array
   {
     1.0f ,0.0f ,0.0f ,0.25f,
     0.0f ,1.0f ,0.0f ,0.25f,
     0.0f ,0.0f ,1.0f ,0.25f,
-    0.0f ,0.0f ,-1.0f,0.25f,
+    -1.0f,0.0f ,0.0f ,0.25f,
     0.0f ,-1.0f,0.0f ,0.25f,
-    -1.0f,0.0f ,0.0f ,0.25f
+    0.0f ,0.0f ,-1.0f,0.25f
     /*
     1.0f ,0.0f ,0.0f ,2.0f,
     0.0f ,1.0f ,0.0f ,1.0f,
@@ -546,7 +546,7 @@ int main (int argc, char **argv)
   world = dWorldCreate();
   space = dHashSpaceCreate (0);
   contactgroup = dJointGroupCreate (0);
-  dWorldSetGravity (world,0,0,-0.5);
+  dWorldSetGravity (world,0,0,-0.25);
   dWorldSetCFM (world,1e-5);
   dWorldSetAutoDisableFlag (world,1);
   dWorldSetContactMaxCorrectingVel (world,0.1);
