@@ -20,6 +20,7 @@ project.name = "ode"
   addoption("with-tests",    "Builds the test applications and DrawStuff library")
   addoption("no-dif",        "Exclude DIF (Dynamics Interchange Format) exports")
   addoption("no-trimesh",    "Exclude trimesh collision geometry")
+  addoption("no-alloca",     "Use heap memory; slower but allows larger systems")
 
 
 -- If the `--usetargetpath` flag is specified, each set of generated files
