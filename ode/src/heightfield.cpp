@@ -782,7 +782,7 @@ int dxHeightfield::dCollideHeightfieldUnit( int x, int z, dxGeom* o2, int numMax
 		CollideNPlane	= dCollideConvexPlane;
 		GetDepth		= NULL;// TODO: dGeomConvexPointDepth;
 		break;
-
+#ifdef dTRIMESH_ENABLED
 #if dTRIMESH_ENABLED
 
 	case dTriMeshClass:
@@ -790,7 +790,7 @@ int dxHeightfield::dCollideHeightfieldUnit( int x, int z, dxGeom* o2, int numMax
 		CollideNPlane	= dCollideTrimeshPlane;
 		GetDepth		= NULL;// N/A?
 		break;
-
+#endif
 #endif // dTRIMESH_ENABLED
 
 	default:
@@ -798,7 +798,6 @@ int dxHeightfield::dCollideHeightfieldUnit( int x, int z, dxGeom* o2, int numMax
 		break;
 
 	}
-
 	dReal Plane[4],lBD,lCD,lBC;
 	dVector3 A,B,C,D,BD,CD,BC,AB,AC;
 	A[0] = x * m_p_data->m_fSampleWidth;

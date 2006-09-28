@@ -48,7 +48,6 @@ By Rodrigo Hernandez
 
 //****************************************************************************
 // Convex public API
-
 dxConvex::dxConvex (dSpaceID space,
 		    dReal *_planes,
 		    unsigned int _planecount,
@@ -942,8 +941,8 @@ int TestConvexIntersection(dxConvex& cvx1,dxConvex& cvx2, int flags,
   dVector4 plane,normal;
   dReal min1,max1,min2,max2,depth,min_depth=-dInfinity;
   dVector3 e1,e2,t;
-  //int maxc = flags & NUMC_MASK; // this is causing a segfault
-  int maxc = 3;
+  int maxc = flags & NUMC_MASK; // this is causing a segfault
+  //int maxc = 3;
   int contacts=0;
   unsigned int *pFace;
   dxConvex *g1,*g2;
@@ -964,18 +963,19 @@ int TestConvexIntersection(dxConvex& cvx1,dxConvex& cvx2, int flags,
 	 (plane[2] * cvx1.final_posr->pos[2]));
       ComputeInterval(cvx1,plane,min1,max1);
       ComputeInterval(cvx2,plane,min2,max2);
-      fprintf(stdout,"width %f\n",max1-min1);
+      //fprintf(stdout,"width %f\n",max1-min1);
       if(max2<min1 || max1<min2) return 0;
-#if 1
+#if 0
+      // this one ON works
       else if ((max1>min2)&&(max1<max2))
 	{
 	  min_depth=max1-min2;
-	  normal[0]=plane[0];
-	  normal[1]=plane[1];
-	  normal[2]=plane[2];
+	  normal[0]=-plane[0];
+	  normal[1]=-plane[1];
+	  normal[2]=-plane[2];
 	  pFace=pPoly;
-	  g1=&cvx2;
-	  g2=&cvx1;
+	  g1=&cvx1;
+	  g2=&cvx2;
 	}
 #endif
       pPoly+=pPoly[0]+1;
@@ -984,29 +984,41 @@ int TestConvexIntersection(dxConvex& cvx1,dxConvex& cvx2, int flags,
   pPoly=cvx2.polygons;
   for(int i=0;i<cvx2.planecount;++i)
     {
+//       fprintf(stdout,"Poly verts %d\n",pPoly[0]);
       // -- Apply Transforms --
       // Rotate
-      dMULTIPLY0_331(plane,cvx2.final_posr->R,cvx2.planes+(i*4));
+      dMULTIPLY0_331(plane,
+		     cvx2.final_posr->R,
+		     cvx2.planes+(i*4));
+      dNormalize3(plane);
       // Translate
       plane[3]=
 	(cvx2.planes[(i*4)+3])+
 	((plane[0] * cvx2.final_posr->pos[0]) + 
 	 (plane[1] * cvx2.final_posr->pos[1]) + 
 	 (plane[2] * cvx2.final_posr->pos[2]));
-      ComputeInterval(cvx1,plane,min1,max1);
-      ComputeInterval(cvx2,plane,min2,max2);
+      ComputeInterval(cvx2,plane,min1,max1);
+      ComputeInterval(cvx1,plane,min2,max2);
+      //fprintf(stdout,"width %f\n",max1-min1);
       if(max2<min1 || max1<min2) return 0;
-#if 0
-      else if ((min_depth<(-min1))&&(min1<0))
+#if 1
+      // this one ON does not work
+      else if ((max1>min2)&&(max1<max2))
 	{
-	  fprintf(stdout,"Max2 %f should be zero\n",max2);
-	  min_depth=-min1;
-	  normal[0]=plane[0];
-	  normal[1]=plane[1];
-	  normal[2]=plane[2];
+	  min_depth=max1-min2;
+	  normal[0]=-plane[0];
+	  normal[1]=-plane[1];
+	  normal[2]=-plane[2];
 	  pFace=pPoly;
-	  g1=&cvx1;
-	  g2=&cvx2;
+	  g1=&cvx2;
+	  g2=&cvx1;
+// 	  fprintf(stdout,"NORMAL %f %f %f PLANE %f %f %f \n",
+// 		  normal[0],
+// 		  normal[1],
+// 		  normal[2],
+// 		  cvx2.planes[(i*4)+0],
+// 		  cvx2.planes[(i*4)+1],
+// 		  cvx2.planes[(i*4)+2]);
 	}
 #endif
       pPoly+=pPoly[0]+1;
@@ -1039,23 +1051,31 @@ int TestConvexIntersection(dxConvex& cvx1,dxConvex& cvx2, int flags,
 	  if(max2<min1 || max1 < min2) return 0;
 	}      
     }
+	  fprintf(stdout,"NORMAL %f %f %f ",
+		  normal[0],
+		  normal[1],
+		  normal[2]);
+	  for(int j=0;j<pFace[0];++j)
+	    fprintf(stdout,"%d ",pFace[j+1]);
+	  fprintf(stdout,"\n");
+
   // If we get here, there was a collision
-  for(contacts=0;(contacts<maxc)||(contacts<pFace[0]);++contacts)
+  for(contacts=0;(contacts<maxc)&&(contacts<pFace[0]);++contacts)
     {
       CONTACT(contact,skip*contacts)->normal[0] = normal[0];
       CONTACT(contact,skip*contacts)->normal[1] = normal[1];
       CONTACT(contact,skip*contacts)->normal[2] = normal[2];
       dMULTIPLY0_331 (CONTACT(contact,skip*contacts)->pos,
-		      g2->final_posr->R,
-		      g2->points+pFace[contacts+1]*3);
+		      g1->final_posr->R,
+		      g1->points+pFace[contacts+1]*3);
       CONTACT(contact,skip*contacts)->pos[0]=
-	g2->final_posr->pos[0]+
+	g1->final_posr->pos[0]+
 	CONTACT(contact,skip*contacts)->pos[0];
       CONTACT(contact,skip*contacts)->pos[1]=
-	g2->final_posr->pos[1]+
+	g1->final_posr->pos[1]+
 	CONTACT(contact,skip*contacts)->pos[1];
       CONTACT(contact,skip*contacts)->pos[2]=
-	g2->final_posr->pos[2]+
+	g1->final_posr->pos[2]+
 	CONTACT(contact,skip*contacts)->pos[2];
       CONTACT(contact,skip*contacts)->depth = min_depth;
       CONTACT(contact,skip*contacts)->g1 = g1;
@@ -1079,35 +1099,6 @@ int dCollideConvexConvex (dxGeom *o1, dxGeom *o2, int flags,
       //fprintf(stdout,"We have a Hit!\n");
     }
   return contacts;
-#if 0
-  dVector4 out;
-  if(SeidelLP(*Convex1,*Convex2))
-    {
-      AgarwalPD(*Convex1,*Convex2,out);
-      if(!hit)
-	{
-	  fprintf(stdout,"Collided PD %f,%f,%f,%f\n",out[0],out[1],out[2],out[3]);
-	  fprintf(stdout,"POS %f,%f,%f %f,%f,%f\n",
-		  Convex1->final_posr->pos[0],Convex1->final_posr->pos[1],
-		  Convex1->final_posr->pos[2],Convex2->final_posr->pos[0],
-		  Convex2->final_posr->pos[1],Convex2->final_posr->pos[2]);
-	  
-	}
-      contact->normal[0] = out[0];
-      contact->normal[1] = out[1];
-      contact->normal[2] = out[2];
-      contact->depth = out[3];
-      contact->pos[0]=Convex1->final_posr->pos[0]+(out[0]*out[3]);
-      contact->pos[1]=Convex1->final_posr->pos[1]+(out[1]*out[3]);
-      contact->pos[2]=Convex1->final_posr->pos[2]+(out[2]*out[3]);
-      contact->g1 = Convex1;
-      contact->g2 = Convex2;
-      hit=true;
-      return 1;
-    }
-  hit=true;
-#endif
-  return 0;
 }
 
 #if 0
