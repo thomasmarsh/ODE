@@ -13,9 +13,10 @@
  *
  *   dTRIMESH_ENABLED  - enable/disable trimesh support
  *
- *   dUSE_MALLOC_FOR_ALLOCA  - use malloc() instead of alloca(). 
- *                       Slower, but allows for larger systems and
- *                       more graceful out-of-memory handling.
+ *   dUSE_MALLOC_FOR_ALLOCA (experimental)- 
+ *                       Use malloc() instead of alloca(). Slower, 
+ *                       but allows for larger systems and more 
+ *                       graceful out-of-memory handling.
  ******************************************************************/
 
 #define dSINGLE 1
