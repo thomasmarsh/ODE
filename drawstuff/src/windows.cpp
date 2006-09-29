@@ -321,7 +321,7 @@ static void drawStuffStartup()
   gnCmdShow = SW_SHOWNORMAL;		// @@@ fix this later
 
   // redirect standard I/O to a new console (except on cygwin)
-#ifndef CYGWIN
+#ifndef __CYGWIN__
   FreeConsole();
   if (AllocConsole()==0) dsError ("AllocConsole() failed");
   if (freopen ("CONIN$","rt",stdin)==0) dsError ("could not open stdin");
