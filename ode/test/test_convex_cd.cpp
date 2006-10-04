@@ -81,6 +81,7 @@ unsigned int polygons[] = //Polygons for a cube (6 squares)
 
 #ifdef dDOUBLE
 #define dsDrawConvex dsDrawConvexD
+#define dsDrawBox dsDrawBoxD
 #endif
 
 dGeomID geoms[2];
