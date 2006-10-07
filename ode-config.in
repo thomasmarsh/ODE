@@ -39,7 +39,7 @@ while test $# -gt 0; do
       echo @ODE_RELEASE@
       ;;
     --cflags)
-      echo  -I@includedir@/ode
+      echo  -I@includedir@
       ;;
     --libs)
       echo  -L@libdir@ -lode
