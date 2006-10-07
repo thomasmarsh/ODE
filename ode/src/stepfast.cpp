@@ -844,6 +844,7 @@ dInternalStepIslandFast (dxWorld * world, dxBody * const *bodies, int nb, dxJoin
 			dxJoint::Info1 i1 = info[j];
 			dxJoint::Info2 i2 = Jinfo[j];
                         const int r = dRandInt(j+1);
+			dIASSERT (r < nj);
 			joints[j] = joints[r];
 			info[j] = info[r];
 			Jinfo[j] = Jinfo[r];
