@@ -207,6 +207,32 @@ int dCollideCylinderPlane(dxGeom *cylgeom, dxGeom *planegeom, int flags, dContac
   dVector3 disc_top_nrm = {  axis[0],  axis[1],  axis[2] };
   dVector3 disc_bot_nrm = { -axis[0], -axis[1], -axis[2] };
 
+  // Test whether the center of discs is below the plane
+  dReal dist_top = -dGeomPlanePointDepth(planegeom, disc_top_pos[0], disc_top_pos[1], disc_top_pos[2]);
+  dReal dist_bot = -dGeomPlanePointDepth(planegeom, disc_bot_pos[0], disc_bot_pos[1], disc_bot_pos[2]);
+  if (dist_top < 0)
+  {
+    // Note: ODE convention is: normal points *into* g1
+    dContactGeom *Contact = SAFECONTACT(flags, contact, nContacts, skip);
+    Contact->g1 = cylgeom;
+    Contact->g2 = planegeom;
+    Contact->depth = -dist_top;
+    dVector3Copy(disc_top_pos, Contact->pos);
+    dVector3Copy(planenorm, Contact->normal);
+    nContacts++;
+  }
+  if (dist_bot < 0)
+  {
+    // Note: ODE convention is: normal points *into* g1
+    dContactGeom *Contact = SAFECONTACT(flags, contact, nContacts, skip);
+    Contact->g1 = cylgeom;
+    Contact->g2 = planegeom;
+    Contact->depth = -dist_bot;
+    dVector3Copy(disc_bot_pos, Contact->pos);
+    dVector3Copy(planenorm, Contact->normal);
+    nContacts++;
+  }
+
   // Discs and plane are parallel?
   // If so, the cyl may be resting on the plane, with one of its discs
 
@@ -218,7 +244,6 @@ int dCollideCylinderPlane(dxGeom *cylgeom, dxGeom *planegeom, int flags, dContac
 
   if (face_to_face_top || face_to_face_bot)
   {
-    dReal dist_top = -dGeomPlanePointDepth(planegeom, disc_top_pos[0], disc_top_pos[1], disc_top_pos[2]);
     if (face_to_face_top && dist_top <= 0)
     {
       dVector3 x;
@@ -274,7 +299,6 @@ int dCollideCylinderPlane(dxGeom *cylgeom, dxGeom *planegeom, int flags, dContac
       nContacts++;
       return nContacts;
     }
-    dReal dist_bot = -dGeomPlanePointDepth(planegeom, disc_bot_pos[0], disc_bot_pos[1], disc_bot_pos[2]);
     if (face_to_face_bot && dist_bot <= 0)
     {
       dVector3 x;
