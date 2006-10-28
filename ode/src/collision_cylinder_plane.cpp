@@ -233,6 +233,7 @@ int dCollideCylinderPlane(dxGeom *cylgeom, dxGeom *planegeom, int flags, dContac
     nContacts++;
   }
 
+
   // Discs and plane are parallel?
   // If so, the cyl may be resting on the plane, with one of its discs
 
@@ -254,50 +255,67 @@ int dCollideCylinderPlane(dxGeom *cylgeom, dxGeom *planegeom, int flags, dContac
       // y and x are unit, so will their cross product be.
       dVector3Cross(axis, y, x);
 
-      dVector3 p;
+      dVector3 p0,p1,p2,p3;
+      dReal d;
       dVector3Scale(x, radius); dVector3Scale(y, radius);
       dContactGeom *Contact;
 
-      // Contact 1
-      Contact = SAFECONTACT(flags, contact, nContacts, skip);
-      dVector3Copy(disc_top_pos, p);
-      dVector3Add(p, x, Contact->pos);
-      Contact->g1 = cylgeom;
-      Contact->g2 = planegeom;
-      Contact->depth = -dist_top;
-      dVector3Copy(planenorm, Contact->normal);
-      nContacts++;
+      // Potential Contact 0
+      dVector3Add(disc_top_pos, x, p0);
+      d = dGeomPlanePointDepth(planegeom, p0[0],p0[1],p0[2]);
+      if (d>0)
+      {
+        Contact = SAFECONTACT(flags, contact, nContacts, skip);
+        dVector3Copy(p0, Contact->pos);
+        Contact->g1 = cylgeom;
+        Contact->g2 = planegeom;
+        Contact->depth = d;
+        dVector3Copy(planenorm, Contact->normal);
+        nContacts++;
+      }
 
-      // Contact 2
-      Contact = SAFECONTACT(flags, contact, nContacts, skip);
-      dVector3Copy(disc_top_pos, p);
-      dVector3Add(p, y, Contact->pos);
-      Contact->g1 = cylgeom;
-      Contact->g2 = planegeom;
-      Contact->depth = -dist_top;
-      dVector3Copy(planenorm, Contact->normal);
-      nContacts++;
+      // Potential Contact 1
+      dVector3Add(disc_top_pos, y, p1);
+      d = dGeomPlanePointDepth(planegeom, p1[0],p1[1],p1[2]);
+      if (d>0)
+      {
+        Contact = SAFECONTACT(flags, contact, nContacts, skip);
+        dVector3Copy(p1, Contact->pos);
+        Contact->g1 = cylgeom;
+        Contact->g2 = planegeom;
+        Contact->depth = d;
+        dVector3Copy(planenorm, Contact->normal);
+        nContacts++;
+      }
 
-      // Contact 3
-      Contact = SAFECONTACT(flags, contact, nContacts, skip);
-      dVector3Copy(disc_top_pos, p);
-      dVector3Subtract(p, x, Contact->pos);
-      Contact->g1 = cylgeom;
-      Contact->g2 = planegeom;
-      Contact->depth = -dist_top;
-      dVector3Copy(planenorm, Contact->normal);
-      nContacts++;
+      // Potential Contact 2
+      dVector3Subtract(disc_top_pos, x, p2);
+      d = dGeomPlanePointDepth(planegeom, p2[0],p2[1],p2[2]);
+      if (d>0)
+      {
+        Contact = SAFECONTACT(flags, contact, nContacts, skip);
+        dVector3Copy(p2, Contact->pos);
+        Contact->g1 = cylgeom;
+        Contact->g2 = planegeom;
+        Contact->depth = d;
+        dVector3Copy(planenorm, Contact->normal);
+        nContacts++;
+      }
 
-      // Contact 4
-      Contact = SAFECONTACT(flags, contact, nContacts, skip);
-      dVector3Copy(disc_top_pos, p);
-      dVector3Subtract(p, y, Contact->pos);
-      Contact->g1 = cylgeom;
-      Contact->g2 = planegeom;
-      Contact->depth = -dist_top;
-      dVector3Copy(planenorm, Contact->normal);
-      nContacts++;
-      return nContacts;
+      // Potential Contact 3
+      dVector3Subtract(disc_top_pos, y, p3);
+      d = dGeomPlanePointDepth(planegeom, p3[0],p3[1],p3[2]);
+      if (d>0)
+      {
+        Contact = SAFECONTACT(flags, contact, nContacts, skip);
+        dVector3Copy(p3, Contact->pos);
+        Contact->g1 = cylgeom;
+        Contact->g2 = planegeom;
+        Contact->depth = d;
+        dVector3Copy(planenorm, Contact->normal);
+        nContacts++;
+        return nContacts;
+      }
     }
     if (face_to_face_bot && dist_bot <= 0)
     {
@@ -309,50 +327,67 @@ int dCollideCylinderPlane(dxGeom *cylgeom, dxGeom *planegeom, int flags, dContac
       // y and x are unit, so will their cross product be.
       dVector3Cross(axis, y, x);
 
-      dVector3 p;
+      dVector3 p0,p1,p2,p3;
+      dReal d;
       dVector3Scale(x, radius); dVector3Scale(y, radius);
       dContactGeom *Contact;
 
-      // Contact 1
-      Contact = SAFECONTACT(flags, contact, nContacts, skip);
-      dVector3Copy(disc_bot_pos, p);
-      dVector3Add(p, x, Contact->pos);
-      Contact->g1 = cylgeom;
-      Contact->g2 = planegeom;
-      Contact->depth = -dist_bot;
-      dVector3Copy(planenorm, Contact->normal);
-      nContacts++;
+      // Potential Contact 0
+      dVector3Add(disc_bot_pos, x, p0);
+      d = dGeomPlanePointDepth(planegeom, p0[0],p0[1],p0[2]);
+      if (d>0)
+      {
+        Contact = SAFECONTACT(flags, contact, nContacts, skip);
+        dVector3Copy(p0, Contact->pos);
+        Contact->g1 = cylgeom;
+        Contact->g2 = planegeom;
+        Contact->depth = d;
+        dVector3Copy(planenorm, Contact->normal);
+        nContacts++;
+      }
 
-      // Contact 2
-      Contact = SAFECONTACT(flags, contact, nContacts, skip);
-      dVector3Copy(disc_bot_pos, p);
-      dVector3Add(p, y, Contact->pos);
-      Contact->g1 = cylgeom;
-      Contact->g2 = planegeom;
-      Contact->depth = -dist_bot;
-      dVector3Copy(planenorm, Contact->normal);
-      nContacts++;
+      // Potential Contact 1
+      dVector3Add(disc_bot_pos, y, p1);
+      d = dGeomPlanePointDepth(planegeom, p1[0],p1[1],p1[2]);
+      if (d>0)
+      {
+        Contact = SAFECONTACT(flags, contact, nContacts, skip);
+        dVector3Copy(p1, Contact->pos);
+        Contact->g1 = cylgeom;
+        Contact->g2 = planegeom;
+        Contact->depth = d;
+        dVector3Copy(planenorm, Contact->normal);
+        nContacts++;
+      }
 
-      // Contact 3
-      Contact = SAFECONTACT(flags, contact, nContacts, skip);
-      dVector3Copy(disc_bot_pos, p);
-      dVector3Subtract(p, x, Contact->pos);
-      Contact->g1 = cylgeom;
-      Contact->g2 = planegeom;
-      Contact->depth = -dist_bot;
-      dVector3Copy(planenorm, Contact->normal);
-      nContacts++;
+      // Potential Contact 2
+      dVector3Subtract(disc_bot_pos, x, p2);
+      d = dGeomPlanePointDepth(planegeom, p2[0],p2[1],p2[2]);
+      if (d>0)
+      {
+        Contact = SAFECONTACT(flags, contact, nContacts, skip);
+        dVector3Copy(p2, Contact->pos);
+        Contact->g1 = cylgeom;
+        Contact->g2 = planegeom;
+        Contact->depth = d;
+        dVector3Copy(planenorm, Contact->normal);
+        nContacts++;
+      }
 
-      // Contact 4
-      Contact = SAFECONTACT(flags, contact, nContacts, skip);
-      dVector3Copy(disc_bot_pos, p);
-      dVector3Subtract(p, y, Contact->pos);
-      Contact->g1 = cylgeom;
-      Contact->g2 = planegeom;
-      Contact->depth = -dist_bot;
-      dVector3Copy(planenorm, Contact->normal);
-      nContacts++;
-      return nContacts;
+      // Potential Contact 3
+      dVector3Subtract(disc_bot_pos, y, p3);
+      d = dGeomPlanePointDepth(planegeom, p3[0],p3[1],p3[2]);
+      if (d>0)
+      {
+        Contact = SAFECONTACT(flags, contact, nContacts, skip);
+        dVector3Copy(p3, Contact->pos);
+        Contact->g1 = cylgeom;
+        Contact->g2 = planegeom;
+        Contact->depth = d;
+        dVector3Copy(planenorm, Contact->normal);
+        nContacts++;
+        return nContacts;
+      }
     }
     return 0;
   }
@@ -384,7 +419,6 @@ int dCollideCylinderPlane(dxGeom *cylgeom, dxGeom *planegeom, int flags, dContac
     }
     dVector3Copy(deepest_top, Contact->pos);
     Contact->depth = dGeomPlanePointDepth(planegeom, deepest_top[0], deepest_top[1], deepest_top[2]);
-
     dIASSERT(Contact->depth >= 0.0);
     nContacts++;
   }
