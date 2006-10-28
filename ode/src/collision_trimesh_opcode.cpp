@@ -30,6 +30,8 @@
 #define TRIMESH_INTERNAL
 #include "collision_trimesh_internal.h"
 
+#if dTRIMESH_ENABLED && dTRIMESH_OPCODE
+
 // Trimesh data
 dxTriMeshData::dxTriMeshData() : UseFlags( NULL )
 {
@@ -808,3 +810,5 @@ void dGeomTriMeshDataUpdate(dTriMeshDataID g) {
     dUASSERT(g, "argument not trimesh data");
     g->UpdateData();
 }
+
+#endif

@@ -189,6 +189,8 @@ extern int      main
     dsFunctions drawstuff_functions;
 
 
+	 dInitODE();
+
     // dynamic world
 
     dReal  cf_mixing;// = 1 / TIME_STEP * K_SPRING + K_DAMP;
@@ -261,5 +263,6 @@ extern int      main
         dsSimulationLoop (argc, argv, 352,288,&drawstuff_functions);
     }
 
+	 dCloseODE();
     return 0;
 }

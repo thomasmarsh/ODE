@@ -147,6 +147,7 @@ int main (int argc, char **argv)
   }
 
   // create world
+  dInitODE();
   contactgroup = dJointGroupCreate(0);
   world = dWorldCreate();
   space = dSimpleSpaceCreate(0);
@@ -204,5 +205,6 @@ int main (int argc, char **argv)
   dJointGroupDestroy(contactgroup);
   dSpaceDestroy (space);
   dWorldDestroy (world);
+  dCloseODE();
   return 0;
 }

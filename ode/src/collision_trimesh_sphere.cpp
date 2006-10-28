@@ -33,6 +33,7 @@
 #define TRIMESH_INTERNAL
 #include "collision_trimesh_internal.h"
 
+#if dTRIMESH_OPCODE
 #define MERGECONTACTS
 
 // Ripped from Opcode 1.1.
@@ -499,5 +500,61 @@ int dCollideSTL(dxGeom* g1, dxGeom* SphereGeom, int Flags, dContactGeom* Contact
 	}
 	else return 0;
 }
+#endif // dTRIMESH_OPCODE
+
+#if dTRIMESH_GIMPACT
+int dCollideSTL(dxGeom* g1, dxGeom* SphereGeom, int Flags, dContactGeom* Contacts, int Stride)
+{
+	dxTriMesh* TriMesh = (dxTriMesh*)g1;
+    dVector3& Position = *(dVector3*)dGeomGetPosition(SphereGeom);
+	dReal Radius = dGeomSphereGetRadius(SphereGeom);
+ //Create contact list
+    GDYNAMIC_ARRAY trimeshcontacts;
+    GIM_CREATE_CONTACT_LIST(trimeshcontacts);
+
+    //Collide trimeshes
+    gim_trimesh_sphere_collision(&TriMesh->m_collision_trimesh,Position,Radius,&trimeshcontacts);
+
+    if(trimeshcontacts.m_size == 0)
+    {
+        GIM_DYNARRAY_DESTROY(trimeshcontacts);
+        return 0;
+    }
+
+    GIM_CONTACT * ptrimeshcontacts = GIM_DYNARRAY_POINTER(GIM_CONTACT,trimeshcontacts);
+
+    dContactGeom* pcontact;
+	int contactcount = 0;
+	unsigned i;
+
+	for (i=0;i<trimeshcontacts.m_size;i++)
+	{
+	    if(contactcount < (Flags & 0xffff))
+        {
+            pcontact = SAFECONTACT(Flags, Contacts, contactcount, Stride);
+            contactcount++;
+            pcontact->pos[0] = ptrimeshcontacts->m_point[0];
+            pcontact->pos[1] = ptrimeshcontacts->m_point[1];
+            pcontact->pos[2] = ptrimeshcontacts->m_point[2];
+            pcontact->pos[3] = 1.0f;
+
+            pcontact->normal[0] = ptrimeshcontacts->m_normal[0];
+            pcontact->normal[1] = ptrimeshcontacts->m_normal[1];
+            pcontact->normal[2] = ptrimeshcontacts->m_normal[2];
+            pcontact->normal[3] = 0;
+
+            pcontact->depth = ptrimeshcontacts->m_depth;
+            pcontact->g1 = g1;
+            pcontact->g2 = SphereGeom;
+
+        }
+        ptrimeshcontacts++;
+	}
+
+	GIM_DYNARRAY_DESTROY(trimeshcontacts);
+
+    return contactcount;
+}
+#endif // dTRIMESH_GIMPACT
 
 #endif // dTRIMESH_ENABLED

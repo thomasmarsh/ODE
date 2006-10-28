@@ -152,7 +152,7 @@ static int ctContacts = 0;
 
 
 // Test normal of mesh face as separating axis for intersection
-static BOOL _cldTestNormal( dReal fp0, dReal fR, dVector3 vNormal, int iAxis ) 
+static bool _cldTestNormal( dReal fp0, dReal fR, dVector3 vNormal, int iAxis ) 
 {
   // calculate overlapping interval of box and triangle
   dReal fDepth = fR+fp0;
@@ -160,7 +160,7 @@ static BOOL _cldTestNormal( dReal fp0, dReal fR, dVector3 vNormal, int iAxis )
   // if we do not overlap
   if ( fDepth<0 ) { 
     // do nothing
-    return FALSE;
+    return false;
   }
 
   // calculate normal's length
@@ -184,14 +184,14 @@ static BOOL _cldTestNormal( dReal fp0, dReal fR, dVector3 vNormal, int iAxis )
 
   }
 
-  return TRUE;
+  return true;
 }
 
 
 
 
 // Test box axis as separating axis 
-static BOOL _cldTestFace( dReal fp0, dReal fp1, dReal fp2, dReal fR, dReal fD, 
+static bool _cldTestFace( dReal fp0, dReal fp1, dReal fp2, dReal fR, dReal fD, 
                           dVector3 vNormal, int iAxis ) 
 {
   dReal fMin, fMax;
@@ -233,7 +233,7 @@ static BOOL _cldTestFace( dReal fp0, dReal fp1, dReal fp2, dReal fR, dReal fD,
   // if we dont't have overlapping interval
   if ( fDepthMin < 0 || fDepthMax < 0 ) {
     // do nothing
-    return FALSE;
+    return false;
   }
 
   dReal fDepth = 0;
@@ -265,7 +265,7 @@ static BOOL _cldTestFace( dReal fp0, dReal fp1, dReal fp2, dReal fR, dReal fD,
     fBestDepth   = fDepth;
   }
 
-  return TRUE;
+  return true;
 }
 
 
@@ -273,7 +273,7 @@ static BOOL _cldTestFace( dReal fp0, dReal fp1, dReal fp2, dReal fR, dReal fD,
 
 
 // Test cross products of box axis and triangle edges as separating axis
-static BOOL _cldTestEdge( dReal fp0, dReal fp1, dReal fR, dReal fD, 
+static bool _cldTestEdge( dReal fp0, dReal fp1, dReal fR, dReal fD, 
                           dVector3 vNormal, int iAxis ) 
 {
   dReal fMin, fMax;
@@ -294,7 +294,7 @@ static BOOL _cldTestEdge( dReal fp0, dReal fp1, dReal fR, dReal fD,
   // if we don't overlapp
   if ( fDepthMin < 0 || fDepthMax < 0 ) {
     // do nothing
-    return FALSE;
+    return false;
   }
 
   dReal fDepth;
@@ -339,7 +339,7 @@ static BOOL _cldTestEdge( dReal fp0, dReal fp1, dReal fR, dReal fD,
     }
   }
 
-  return TRUE;
+  return true;
 }
 
 
@@ -396,7 +396,7 @@ static void _cldClipPolyToPlane( dVector3 avArrayIn[], int ctIn,
 
 
 
-static BOOL _cldTestSeparatingAxes(const dVector3 &v0, const dVector3 &v1, const dVector3 &v2) {
+static bool _cldTestSeparatingAxes(const dVector3 &v0, const dVector3 &v1, const dVector3 &v2) {
   // reset best axis
   iBestAxis = 0;
   iExitAxis = -1;
@@ -443,7 +443,7 @@ static BOOL _cldTestSeparatingAxes(const dVector3 &v0, const dVector3 &v1, const
 
   if( !_cldTestNormal( fp0, fR, vL, 1) ) { 
     iExitAxis=1;
-    return FALSE; 
+    return false; 
   } 
  
   // ************************************************
@@ -461,7 +461,7 @@ static BOOL _cldTestSeparatingAxes(const dVector3 &v0, const dVector3 &v1, const
 
   if( !_cldTestFace( fp0, fp1, fp2, fR, fD, vL, 2) ) { 
     iExitAxis=2;
-    return FALSE; 
+    return false; 
   }
   // ************************************************
 
@@ -477,7 +477,7 @@ static BOOL _cldTestSeparatingAxes(const dVector3 &v0, const dVector3 &v1, const
 
   if( !_cldTestFace( fp0, fp1, fp2, fR, fD, vL, 3) ) { 
     iExitAxis=3;
-    return FALSE; 
+    return false; 
   }
 
   // ************************************************
@@ -494,7 +494,7 @@ static BOOL _cldTestSeparatingAxes(const dVector3 &v0, const dVector3 &v1, const
 
   if( !_cldTestFace( fp0, fp1, fp2, fR, fD, vL, 4) ) { 
     iExitAxis=4;
-    return FALSE; 
+    return false; 
   }
 
   // ************************************************
@@ -512,7 +512,7 @@ static BOOL _cldTestSeparatingAxes(const dVector3 &v0, const dVector3 &v1, const
 
   if( !_cldTestEdge( fp1, fp2, fR, fD, vL, 5) ) { 
     iExitAxis=5;
-    return FALSE; 
+    return false; 
   }
   // ************************************************
 
@@ -528,7 +528,7 @@ static BOOL _cldTestSeparatingAxes(const dVector3 &v0, const dVector3 &v1, const
 
   if( !_cldTestEdge( fp0, fp1, fR, fD, vL, 6) ) { 
     iExitAxis=6;
-    return FALSE; 
+    return false; 
   }
   // ************************************************
 
@@ -544,7 +544,7 @@ static BOOL _cldTestSeparatingAxes(const dVector3 &v0, const dVector3 &v1, const
 
   if( !_cldTestEdge( fp0, fp1, fR, fD, vL, 7) ) { 
     iExitAxis=7;
-    return FALSE; 
+    return false; 
   }
 
   // ************************************************
@@ -561,7 +561,7 @@ static BOOL _cldTestSeparatingAxes(const dVector3 &v0, const dVector3 &v1, const
 
   if( !_cldTestEdge( fp0, fp2, fR, fD, vL, 8) ) { 
     iExitAxis=8;
-    return FALSE; 
+    return false; 
   }
 
   // ************************************************
@@ -578,7 +578,7 @@ static BOOL _cldTestSeparatingAxes(const dVector3 &v0, const dVector3 &v1, const
 
   if( !_cldTestEdge( fp0, fp1, fR, fD, vL, 9) ) { 
     iExitAxis=9;
-    return FALSE; 
+    return false; 
   }
 
   // ************************************************
@@ -595,7 +595,7 @@ static BOOL _cldTestSeparatingAxes(const dVector3 &v0, const dVector3 &v1, const
 
   if( !_cldTestEdge( fp0, fp1, fR, fD, vL, 10) ) { 
     iExitAxis=10;
-    return FALSE; 
+    return false; 
   }
 
   // ************************************************
@@ -612,7 +612,7 @@ static BOOL _cldTestSeparatingAxes(const dVector3 &v0, const dVector3 &v1, const
 
   if( !_cldTestEdge( fp0, fp2, fR, fD, vL, 11) ) { 
     iExitAxis=11;
-    return FALSE; 
+    return false; 
   }
   // ************************************************
 
@@ -628,7 +628,7 @@ static BOOL _cldTestSeparatingAxes(const dVector3 &v0, const dVector3 &v1, const
 
   if( !_cldTestEdge( fp0, fp1, fR, fD, vL, 12) ) { 
     iExitAxis=12;
-    return FALSE; 
+    return false; 
   }
   // ************************************************
 
@@ -644,11 +644,11 @@ static BOOL _cldTestSeparatingAxes(const dVector3 &v0, const dVector3 &v1, const
 
   if( !_cldTestEdge( fp0, fp1, fR, fD, vL, 13) ) { 
     iExitAxis=13;
-    return FALSE; 
+    return false; 
   }
  
   // ************************************************
-  return TRUE; 
+  return true; 
 }
 
 
@@ -656,7 +656,7 @@ static BOOL _cldTestSeparatingAxes(const dVector3 &v0, const dVector3 &v1, const
 
 
 // find two closest points on two lines
-static BOOL _cldClosestPointOnTwoLines( dVector3 vPoint1, dVector3 vLenVec1, 
+static bool _cldClosestPointOnTwoLines( dVector3 vPoint1, dVector3 vLenVec1, 
                                         dVector3 vPoint2, dVector3 vLenVec2, 
                                         dReal &fvalue1, dReal &fvalue2) 
 {
@@ -674,13 +674,13 @@ static BOOL _cldClosestPointOnTwoLines( dVector3 vPoint1, dVector3 vLenVec1,
     fd = 1.0f/fd;
     fvalue1 = (fq1 + fuaub*fq2)*fd;
     fvalue2 = (fuaub*fq1 + fq2)*fd;
-    return TRUE;
+    return true;
   // otherwise  
   } else {
     // lines are parallel
     fvalue1 = 0.0f;
     fvalue2 = 0.0f;
-    return FALSE;
+    return false;
   }
 
 }
@@ -1100,7 +1100,8 @@ static void _cldTestOneTriangle(const dVector3 &v0, const dVector3 &v1, const dV
 
 
 
-// box to mesh collider
+// OPCODE version of box to mesh collider
+#if dTRIMESH_OPCODE
 int dCollideBTL(dxGeom* g1, dxGeom* BoxGeom, int Flags, dContactGeom* Contacts, int Stride){
 
   dxTriMesh* TriMesh = (dxTriMesh*)g1;
@@ -1247,8 +1248,96 @@ int dCollideBTL(dxGeom* g1, dxGeom* BoxGeom, int Flags, dContactGeom* Contacts, 
 
   return ctContacts;
 }
+#endif
+
+// GIMPACT version of box to mesh collider
+#if dTRIMESH_GIMPACT
+int dCollideBTL(dxGeom* g1, dxGeom* BoxGeom, int Flags, dContactGeom* Contacts, int Stride)
+{
+
+  dxTriMesh* TriMesh = (dxTriMesh*)g1;
 
 
+  // get source hull position, orientation and half size
+  const dMatrix3& mRotBox=*(const dMatrix3*)dGeomGetRotation(BoxGeom);
+  const dVector3& vPosBox=*(const dVector3*)dGeomGetPosition(BoxGeom);
+
+  // to global
+  SETM(mHullBoxRot,mRotBox);
+  SET(vHullBoxPos,vPosBox);
+
+  dGeomBoxGetLengths(BoxGeom, vBoxHalfSize);
+  vBoxHalfSize[0] *= 0.5f;
+  vBoxHalfSize[1] *= 0.5f;
+  vBoxHalfSize[2] *= 0.5f;
+
+  // get destination hull position and orientation
+  /*const dMatrix3& mRotMesh=*(const dMatrix3*)dGeomGetRotation(TriMesh);
+  const dVector3& vPosMesh=*(const dVector3*)dGeomGetPosition(TriMesh);
+
+  // to global
+  SET(vHullDstPos,vPosMesh);*/
+
+  // global info for contact creation
+  ctContacts = 0;
+  iStride=Stride;
+  iFlags=Flags;
+  ContactGeoms=Contacts;
+  Geom1=TriMesh;
+  Geom2=BoxGeom;
+
+
+  // reset stuff
+  fBestDepth = MAXVALUE;
+  vBestNormal[0]=0;
+  vBestNormal[1]=0;
+  vBestNormal[2]=0;
+
+
+//*****at first , collide box aabb******//
+
+    GIM_TRIMESH * ptrimesh = &TriMesh->m_collision_trimesh;
+	aabb3f test_aabb;
+
+	test_aabb.minX = BoxGeom->aabb[0];
+	test_aabb.maxX = BoxGeom->aabb[1];
+	test_aabb.minY = BoxGeom->aabb[2];
+	test_aabb.maxY = BoxGeom->aabb[3];
+	test_aabb.minZ = BoxGeom->aabb[4];
+	test_aabb.maxZ = BoxGeom->aabb[5];
+
+	GDYNAMIC_ARRAY collision_result;
+	GIM_CREATE_BOXQUERY_LIST(collision_result);
+
+	gim_aabbset_box_collision(&test_aabb, &ptrimesh->m_aabbset , &collision_result);
+
+	if(collision_result.m_size==0)
+	{
+	    GIM_DYNARRAY_DESTROY(collision_result);
+	    return 0;
+	}
+//*****Set globals for box collision******//
+
+	//collide triangles
+
+	GUINT * boxesresult = GIM_DYNARRAY_POINTER(GUINT,collision_result);
+	gim_trimesh_locks_work_data(ptrimesh);
+
+	for(unsigned int i=0;i<collision_result.m_size;i++)
+	{
+		dVector3 dv[3];
+
+		gim_trimesh_get_triangle_vertices(ptrimesh, boxesresult[i],dv[0],dv[1],dv[2]);
+        // test this triangle
+        _cldTestOneTriangle(dv[0],dv[1],dv[2]);
+	}
+
+	gim_trimesh_unlocks_work_data(ptrimesh);
+	GIM_DYNARRAY_DESTROY(collision_result);
+
+	return ctContacts;
+}
+#endif
 
 
 // GenerateContact - Written by Jeff Smith (jeff@burri.to)

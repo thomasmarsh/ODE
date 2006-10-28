@@ -35,6 +35,7 @@
 #define TRIMESH_INTERNAL
 #include "collision_trimesh_internal.h"
 
+#if dTRIMESH_OPCODE
 int dCollideTrimeshPlane( dxGeom *o1, dxGeom *o2, int flags, dContactGeom* contacts, int skip )
 {
 	dIASSERT( skip >= (int)sizeof( dContactGeom ) );
@@ -144,6 +145,68 @@ int dCollideTrimeshPlane( dxGeom *o1, dxGeom *o2, int flags, dContactGeom* conta
 	// Return contact count.
 	return contact_count;
 }
+#endif // dTRIMESH_OPCODE
+
+#if dTRIMESH_GIMPACT
+int dCollideTrimeshPlane( dxGeom *o1, dxGeom *o2, int flags, dContactGeom* contacts, int skip )
+{
+	dIASSERT( skip >= (int)sizeof( dContactGeom ) );
+	dIASSERT( o1->type == dTriMeshClass );
+	dIASSERT( o2->type == dPlaneClass );
+
+	// Alias pointers to the plane and trimesh
+	dxTriMesh* trimesh = (dxTriMesh*)( o1 );
+	vec4f plane;
+	dGeomPlaneGetParams(o2, plane);
+
+	//Find collision
+
+	GDYNAMIC_ARRAY collision_result;
+	GIM_CREATE_TRIMESHPLANE_CONTACTS(collision_result);
+
+	gim_trimesh_plane_collision(&trimesh->m_collision_trimesh,plane,&collision_result);
+
+	if(collision_result.m_size == 0 )
+	{
+	    GIM_DYNARRAY_DESTROY(collision_result);
+	    return 0;
+	}
+
+
+	dContactGeom* pcontact;
+	int contactcount = 0;
+	vec4f * planecontact_results = GIM_DYNARRAY_POINTER(vec4f,collision_result);
+
+    for(unsigned int i = 0; i < collision_result.m_size; i++ )
+	{
+        if(contactcount < (flags & 0xffff))
+        {
+            pcontact = SAFECONTACT(flags, contacts, contactcount, skip);
+            contactcount++;
+            pcontact->pos[0] = (*planecontact_results)[0];
+            pcontact->pos[1] = (*planecontact_results)[1];
+            pcontact->pos[2] = (*planecontact_results)[2];
+            pcontact->pos[3] = 1.0f;
+
+            pcontact->normal[0] = plane[0];
+            pcontact->normal[1] = plane[1];
+            pcontact->normal[2] = plane[2];
+            pcontact->normal[3] = 0;
+
+            pcontact->depth = (*planecontact_results)[3];
+            pcontact->g1 = o1;
+            pcontact->g2 = o2;
+
+        }
+        planecontact_results++;
+	 }
+
+	 GIM_DYNARRAY_DESTROY(collision_result);
+
+	return contactcount;
+}
+#endif // dTRIMESH_GIMPACT
+
 
 #endif // dTRIMESH_ENABLED
 

@@ -132,6 +132,7 @@ int main (int argc, char **argv)
     }
 
   // create world
+  dInitODE();
   world = dWorldCreate();
 
   dMass m;
@@ -160,5 +161,6 @@ int main (int argc, char **argv)
   dsSimulationLoop (argc,argv,352,288,&fn);
 
   dWorldDestroy (world);
+  dCloseODE();
   return 0;
 }

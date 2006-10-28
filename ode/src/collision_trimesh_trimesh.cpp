@@ -39,6 +39,8 @@
 #define TRIMESH_INTERNAL
 #include "collision_trimesh_internal.h"
 
+#if dTRIMESH_OPCODE
+
 #define SMALL_ELT           2.5e-4
 #define EXPANDED_ELT_THRESH 1.0e-3
 #define DISTANCE_EPSILON    1.0e-8
@@ -1958,5 +1960,61 @@ GenerateContact(int in_Flags, dContactGeom* in_Contacts, int in_Stride,
 
 
 }
+#endif // dTRIMESH_OPCODE
+
+#if dTRIMESH_GIMPACT
+int dCollideTTL(dxGeom* g1, dxGeom* g2, int Flags, dContactGeom* Contacts, int Stride)
+{
+    dxTriMesh* TriMesh1 = (dxTriMesh*) g1;
+    dxTriMesh* TriMesh2 = (dxTriMesh*) g2;
+    //Create contact list
+    GDYNAMIC_ARRAY trimeshcontacts;
+    GIM_CREATE_CONTACT_LIST(trimeshcontacts);
+
+    //Collide trimeshes
+    gim_trimesh_trimesh_collision(&TriMesh1->m_collision_trimesh,&TriMesh2->m_collision_trimesh,&trimeshcontacts);
+
+    if(trimeshcontacts.m_size == 0)
+    {
+        GIM_DYNARRAY_DESTROY(trimeshcontacts);
+        return 0;
+    }
+
+    GIM_CONTACT * ptrimeshcontacts = GIM_DYNARRAY_POINTER(GIM_CONTACT,trimeshcontacts);
+
+
+    dContactGeom* pcontact;
+	int contactcount = 0;
+	unsigned i;
+
+	for (i=0;i<trimeshcontacts.m_size;i++)
+	{
+	    if(contactcount < (Flags & 0xffff))
+        {
+            pcontact = SAFECONTACT(Flags, Contacts, contactcount, Stride);
+            contactcount++;
+            pcontact->pos[0] = ptrimeshcontacts->m_point[0];
+            pcontact->pos[1] = ptrimeshcontacts->m_point[1];
+            pcontact->pos[2] = ptrimeshcontacts->m_point[2];
+            pcontact->pos[3] = 1.0f;
+
+            pcontact->normal[0] = ptrimeshcontacts->m_normal[0];
+            pcontact->normal[1] = ptrimeshcontacts->m_normal[1];
+            pcontact->normal[2] = ptrimeshcontacts->m_normal[2];
+            pcontact->normal[3] = 0;
+
+            pcontact->depth = ptrimeshcontacts->m_depth;
+            pcontact->g1 = g1;
+            pcontact->g2 = g2;
+
+        }
+        ptrimeshcontacts++;
+	}
+
+	GIM_DYNARRAY_DESTROY(trimeshcontacts);
+
+    return contactcount;
+}
+#endif // dTRIMESH_GIMPACT
 
 #endif // dTRIMESH_ENABLED

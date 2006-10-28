@@ -180,6 +180,7 @@ int main (int argc, char **argv)
         fn.path_to_textures = argv[1];
     }
 
+  dInitODE();
   dRandSetSeed (time(0));
   createTest();
 
@@ -187,5 +188,6 @@ int main (int argc, char **argv)
   dsSimulationLoop (argc,argv,352,288,&fn);
 
   dWorldDestroy (world);
+  dCloseODE();
   return 0;
 }

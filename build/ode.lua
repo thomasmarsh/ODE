@@ -26,6 +26,10 @@ package.objdir = "obj/ode"
     text = string.gsub(text, "#define dTRIMESH_ENABLED 1", "/* #define dTRIMESH_ENABLED 1 */")
   end
   
+  if (options["with-gimpact"]) then
+    text = string.gsub(text, "#define dTRIMESH_OPCODE 1", "#define dTRIMESH_GIMPACT 1")
+  end
+  
   if (options["no-alloca"]) then
     text = string.gsub(text, "/%* #define dUSE_MALLOC_FOR_ALLOCA %*/", "#define dUSE_MALLOC_FOR_ALLOCA")
   end
@@ -38,12 +42,17 @@ package.objdir = "obj/ode"
 -- Package Build Settings
 
   if (options["enable-shared-only"]) then
+  
     package.kind = "dll"
     table.insert(package.defines, "ODE_DLL")
+  
   elseif (options["enable-static-only"]) then
+  
     package.kind = "lib"
     table.insert(package.defines, "ODE_LIB")
+  
   else
+  
     package.config["DebugDLL"].kind = "dll"
     package.config["DebugLib"].kind = "lib"
     package.config["ReleaseDLL"].kind = "dll"
@@ -53,12 +62,14 @@ package.objdir = "obj/ode"
     table.insert(package.config["ReleaseDLL"].defines, "ODE_DLL")
     table.insert(package.config["DebugLib"].defines, "ODE_LIB")
     table.insert(package.config["ReleaseLib"].defines, "ODE_LIB")
+  
   end
 
   package.includepaths =
   {
     "../../include",
-    "../../OPCODE"
+    "../../OPCODE",
+    "../../GIMPACT/include"
   }
 
   if (windows) then
@@ -125,6 +136,11 @@ package.objdir = "obj/ode"
   {
     matchrecursive("../../OPCODE/*.h", "../../OPCODE/*.cpp")
   }
+  
+  gimpact_files =
+  {
+    matchrecursive("../../GIMPACT/*.h", "../../GIMPACT/*.cpp")
+  }
 
   dif_files =
   {
@@ -141,5 +157,9 @@ package.objdir = "obj/ode"
   if (options["no-trimesh"]) then
     table.insert(package.excludes, trimesh_files)
   else
-    table.insert(package.files, opcode_files)
+    if (options["with-gimpact"]) then
+      table.insert(package.files, gimpact_files)
+    else
+      table.insert(package.files, opcode_files)
+    end
   end

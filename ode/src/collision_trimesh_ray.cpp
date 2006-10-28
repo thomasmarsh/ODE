@@ -34,6 +34,7 @@
 #define TRIMESH_INTERNAL
 #include "collision_trimesh_internal.h"
 
+#if dTRIMESH_OPCODE
 int dCollideRTL(dxGeom* g1, dxGeom* RayGeom, int Flags, dContactGeom* Contacts, int Stride){
 	dxTriMesh* TriMesh = (dxTriMesh*)g1;
 
@@ -127,6 +128,65 @@ int dCollideRTL(dxGeom* g1, dxGeom* RayGeom, int Flags, dContactGeom* Contacts, 
 	}
 	return OutTriCount;
 }
+#endif // dTRIMESH_OPCODE
+
+#if dTRIMESH_GIMPACT
+int dCollideRTL(dxGeom* g1, dxGeom* RayGeom, int Flags, dContactGeom* Contacts, int Stride)
+{
+	dxTriMesh* TriMesh = (dxTriMesh*)g1;
+
+    dReal Length = dGeomRayGetLength(RayGeom);
+	int FirstContact, BackfaceCull;
+	dGeomRayGetParams(RayGeom, &FirstContact, &BackfaceCull);
+	int ClosestHit = dGeomRayGetClosestHit(RayGeom);
+	dVector3 Origin, Direction;
+	dGeomRayGet(RayGeom, Origin, Direction);
+
+    char intersect=0;
+    GIM_TRIANGLE_RAY_CONTACT_DATA contact_data;
+
+	if(ClosestHit)
+	{
+		intersect = gim_trimesh_ray_closest_collision(&TriMesh->m_collision_trimesh,Origin,Direction,Length,&contact_data);
+	}
+	else
+	{
+	    intersect = gim_trimesh_ray_collision(&TriMesh->m_collision_trimesh,Origin,Direction,Length,&contact_data);
+	}
+
+    if(intersect == 0)
+	{
+        return 0;
+    }
+
+	int OutTriCount = 0;
+
+	if(TriMesh->RayCallback)
+	{
+        if(TriMesh->RayCallback(TriMesh, RayGeom, contact_data.m_face_id,
+                                         contact_data.u , contact_data.v))
+        {
+            OutTriCount = 1;
+        }
+	}
+	else
+	{
+	    OutTriCount = 1;
+	}
+
+	if(OutTriCount>0)
+	{
+	    dContactGeom* Contact = SAFECONTACT(Flags, Contacts, (OutTriCount-1), Stride);
+        VEC_COPY(Contact->pos,contact_data.m_point);
+        VEC_COPY(Contact->normal,contact_data.m_normal);
+        Contact->depth = contact_data.tparam;
+        Contact->g1 = TriMesh;
+        Contact->g2 = RayGeom;
+	}
+
+	return OutTriCount;
+}
+#endif  // dTRIMESH_GIMPACT
 
 #endif // dTRIMESH_ENABLED
 

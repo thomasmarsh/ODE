@@ -38,6 +38,10 @@ for geometry objects
 #include "collision_transform.h"
 #include "collision_trimesh_internal.h"
 
+#if dTRIMESH_GIMPACT
+#include <GIMPACT/gimpact.h>
+#endif
+
 #ifdef _MSC_VER
 #pragma warning(disable:4291)  // for VC++, no complaints about "no matching operator delete found"
 #endif
@@ -992,12 +996,22 @@ void dGeomGetOffsetQuaternion (dxGeom *g, dQuaternion result)
 }
 
 //****************************************************************************
-// here is where we deallocate any memory that has been globally
-// allocated, or free other global resources.
+// initialization and shutdown routines - allocate and initialize data,
+// cleanup before exiting
+
+void dInitODE()
+{
+#if dTRIMESH_GIMPACT
+	gimpact_init();
+#endif
+}
 
 void dCloseODE()
 {
   colliders_initialized = 0;
   num_user_classes = 0;
   dClearPosrCache();
+#if dTRIMESH_GIMPACT
+  gimpact_terminate();
+#endif
 }

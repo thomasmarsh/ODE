@@ -176,6 +176,7 @@ int main (int argc, char **argv)
     fn.path_to_textures = argv[1];
 
   // create world
+  dInitODE();
   world = dWorldCreate();
   space = dHashSpaceCreate (0);
   contactgroup = dJointGroupCreate (0);
@@ -218,7 +219,7 @@ int main (int argc, char **argv)
 
   dSpaceDestroy (space);
   dWorldDestroy (world);
-
+  dCloseODE();
   return 0;
 }
 
