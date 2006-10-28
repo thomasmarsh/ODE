@@ -218,7 +218,7 @@ int dCollideCylinderPlane(dxGeom *cylgeom, dxGeom *planegeom, int flags, dContac
 
   if (face_to_face_top || face_to_face_bot)
   {
-    dReal dist_top = dPointPlaneDistance(disc_top_pos, planevec);
+    dReal dist_top = -dGeomPlanePointDepth(planegeom, disc_top_pos[0], disc_top_pos[1], disc_top_pos[2]);
     if (face_to_face_top && dist_top <= 0)
     {
       dVector3 x;
@@ -274,7 +274,7 @@ int dCollideCylinderPlane(dxGeom *cylgeom, dxGeom *planegeom, int flags, dContac
       nContacts++;
       return nContacts;
     }
-    dReal dist_bot = dPointPlaneDistance(disc_bot_pos, planevec);
+    dReal dist_bot = -dGeomPlanePointDepth(planegeom, disc_bot_pos[0], disc_bot_pos[1], disc_bot_pos[2]);
     if (face_to_face_bot && dist_bot <= 0)
     {
       dVector3 x;
@@ -359,7 +359,7 @@ int dCollideCylinderPlane(dxGeom *cylgeom, dxGeom *planegeom, int flags, dContac
       deepest_top[2] = disc_top_pos[2] - radius * doi_top[2];
     }
     dVector3Copy(deepest_top, Contact->pos);
-    Contact->depth = -dPointPlaneDistance(deepest_top, planevec);
+    Contact->depth = dGeomPlanePointDepth(planegeom, deepest_top[0], deepest_top[1], deepest_top[2]);
 
     dIASSERT(Contact->depth >= 0.0);
     nContacts++;
@@ -381,8 +381,7 @@ int dCollideCylinderPlane(dxGeom *cylgeom, dxGeom *planegeom, int flags, dContac
       deepest_bot[2] = disc_bot_pos[2] - radius * doi_bot[2];
     }
     dVector3Copy(deepest_bot, Contact->pos);
-    Contact->depth = -dPointPlaneDistance(deepest_bot, planevec);
-
+    Contact->depth = dGeomPlanePointDepth(planegeom, deepest_bot[0], deepest_bot[1], deepest_bot[2]);
     dIASSERT(Contact->depth >= 0.0);
     nContacts++;
   }
