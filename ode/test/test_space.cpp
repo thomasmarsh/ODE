@@ -207,6 +207,8 @@ int main (int argc, char **argv)
         fn.path_to_textures = argv[1];
     }
 
+  dInitODE();
+
   // test the simple space:
   // space = dSimpleSpaceCreate();
 
@@ -226,5 +228,6 @@ int main (int argc, char **argv)
   dsSimulationLoop (argc,argv,352,288,&fn);
 
   dSpaceDestroy (space);
+  dCloseODE();
   return 0;
 }

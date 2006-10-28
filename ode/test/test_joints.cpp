@@ -1062,6 +1062,7 @@ void doTest (int argc, char **argv, int n, int fatal_if_bad_n)
 int main (int argc, char **argv)
 {
   int i;
+  dInitODE();
 
   // process the command line args. anything that starts with `-' is assumed
   // to be a drawstuff argument.
@@ -1086,5 +1087,6 @@ int main (int argc, char **argv)
     doTest (argc,argv,cmd_test_num,1);
   }
 
+  dCloseODE();
   return 0;
 }

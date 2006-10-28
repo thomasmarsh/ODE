@@ -2062,7 +2062,7 @@ int main (int argc, char **argv)
 	}
 
 	// create world
-
+	dInitODE();
 	world = dWorldCreate();
 	space = dHashSpaceCreate (0);
 	contactgroup = dJointGroupCreate (0);
@@ -2115,6 +2115,6 @@ int main (int argc, char **argv)
 	dJointGroupDestroy (contactgroup);
 	dSpaceDestroy (space);
 	dWorldDestroy (world);
-
+	dCloseODE();
 	return 0;
 }

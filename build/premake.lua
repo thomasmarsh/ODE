@@ -18,9 +18,10 @@ project.name = "ode"
 
   addoption("with-doubles",  "Use double instead of float as base numeric type")
   addoption("with-tests",    "Builds the test applications and DrawStuff library")
+  addoption("with-gimpact",  "Use GIMPACT for trimesh collisions (experimental)")
   addoption("no-dif",        "Exclude DIF (Dynamics Interchange Format) exports")
   addoption("no-trimesh",    "Exclude trimesh collision geometry")
-  addoption("no-alloca",     "(experimental) Use heap memory instead of the stack")
+  addoption("no-alloca",     "Use heap memory instead of the stack (experimental)")
 
 
 -- If the `--usetargetpath` flag is specified, each set of generated files

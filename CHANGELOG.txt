@@ -9,6 +9,23 @@ the rules for this file:
 
 ------------------------------------------------------------------------------
 
+26/10/06 Francisco Leon
+
+	* Totally refactored trimesh collision system.
+	  Using GIMPACT instead of OPCODE. Now works correctly, and faster.
+	  Visit http://gimpact.sourceforge.net.
+	  
+	* Finally, test_moving_trimesh.exe works nicely.   
+	  
+	* Fixed autodisable system. Now is possible to set bigger sleeping 
+	  threshold values and objects won't be sleeping on the air. They will
+	  rest on the floor properly.
+	  	  
+	* dInitODE function added.
+	
+	* Is Obligatory to call dInitODE() at the beginning for initialize ODE, and calling 
+	  dCloseODE() when the program ends.
+
 09/20/06 bram
 
 	* Fixed two bugs in cyl/plane collision test.

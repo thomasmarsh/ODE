@@ -129,6 +129,7 @@ int main (int argc, char **argv)
     }
 
   // create world
+  dInitODE();
 
   int i;
   contactgroup.create (0);
@@ -159,5 +160,6 @@ int main (int argc, char **argv)
   // run simulation
   dsSimulationLoop (argc,argv,352,288,&fn);
 
+  dCloseODE();
   return 0;
 }

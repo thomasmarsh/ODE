@@ -1097,6 +1097,7 @@ extern "C" void dTestSolveLCP();
 
 int main()
 {
+  dInitODE();
   testRandomNumberGenerator();
   testInfinity();
   testPad();
@@ -1122,6 +1123,6 @@ int main()
   dTestMatrixComparison();
   dTestSolveLCP();
   // dTestDataStructures();
-
+  dCloseODE();
   return 0;
 }

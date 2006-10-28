@@ -1350,6 +1350,7 @@ int main (int argc, char **argv)
   // setup all tests
 
   memset (testslot,0,sizeof(testslot));
+  dInitODE();
 
   MAKE_TEST(1,test_sphere_point_depth);
   MAKE_TEST(2,test_box_point_depth);
@@ -1365,5 +1366,6 @@ int main (int argc, char **argv)
   MAKE_TEST(101,test_dBoxBox);
 
   do_tests (argc,argv);
+  dCloseODE();
   return 0;
 }
