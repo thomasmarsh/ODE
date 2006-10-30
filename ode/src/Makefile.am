@@ -139,12 +139,12 @@ libOPCODE_a_SOURCES=	@TOPDIR@/OPCODE/OPC_AABBCollider.cpp \
 libode_a_DEPENDENCIES+=libOPCODE.a
 
 libode_a_LIBADD+= $(libOPCODE_a_OBJECTS)
-AM_CXXFLAGS += -I@TOPDIR@/OPCODE -I@TOPDIR@/OPCODE/Ice -DdTRIMESH_ENABLED
-AM_CFLAGS += -I@TOPDIR@/OPCODE -I@TOPDIR@/OPCODE/Ice -DdTRIMESH_ENABLED
+AM_CXXFLAGS += -I@TOPDIR@/OPCODE -I@TOPDIR@/OPCODE/Ice -DdTRIMESH_ENABLED -DdTRIMESH_OPCODE
+AM_CFLAGS += -I@TOPDIR@/OPCODE -I@TOPDIR@/OPCODE/Ice -DdTRIMESH_ENABLED -DdTRIMESH_OPCODE
 libode_a_SOURCES+=	collision_trimesh_trimesh.cpp \
 			collision_trimesh_sphere.cpp \
 			collision_trimesh_ray.cpp \
-			collision_trimesh.cpp \
+			collision_trimesh_opcode.cpp \
 			collision_trimesh_box.cpp \
 			collision_trimesh_ccylinder.cpp \
 			collision_trimesh_distance.cpp \
