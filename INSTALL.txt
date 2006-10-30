@@ -59,7 +59,10 @@ and another for just about everything else.
  Some of the more popular options are
  
    --enable-double-precision enable double-precision math
-   --disable-opcode disables the OPCODE-based trimesh support
+   --with-trimesh=none disables the trimesh support
+   --with-trimesh=opcode use OPCODE for trimesh code
+   --with-trimesh=gimpact use GIMPACT for trimesh code
+
    --enable-release builds an optimized library
    --enabled-shared builds a shared library
     
