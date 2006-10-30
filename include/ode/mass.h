@@ -67,6 +67,10 @@ ODE_API void dMassSetBox (dMass *, dReal density,
 ODE_API void dMassSetBoxTotal (dMass *, dReal total_mass,
 		       dReal lx, dReal ly, dReal lz);
 
+#if dTRIMESH_ENABLED
+ODE_API void dMassSetTrimesh (dMass *, dReal density, dGeomID g);
+#endif // dTRIMESH_ENABLED
+
 ODE_API void dMassAdjust (dMass *, dReal newmass);
 
 ODE_API void dMassTranslate (dMass *, dReal x, dReal y, dReal z);
