@@ -21,10 +21,18 @@ if USE_SONAME
 libode_LDFLAGS+=-Wl,-soname,@ODE_SONAME@
 endif
 libode_LDADD=$(libode_a_OBJECTS) $(libfast_a_OBJECTS)
+
 if OPCODE
 libode_DEPENDENCIES+= libOPCODE.a
 libode_LDADD+=$(libOPCODE_a_OBJECTS)
 endif
+
+
+if GIMPACT
+libode_DEPENDENCIES+= libGIMPACT.a
+libode_LDADD+=$(libGIMPACT_a_OBJECTS)
+endif
+
 
 # convenience library to simulate per object cflags
 noinst_LIBRARIES= libfast.a
@@ -92,13 +100,60 @@ libode_a_SOURCES = 	objects.h \
 			heightfield.cpp \
 			heightfield.h
 
+
+
+###################################
+#   G I M P A C T    S T U F F
+###################################
+
+
+if GIMPACT
+noinst_LIBRARIES+= libGIMPACT.a
+libGIMPACT_a_CPPFLAGS= -O2 -fno-strict-aliasing -fPIC
+
+libode_a_SOURCES+= collision_trimesh_gimpact.cpp
+
+libGIMPACT_a_SOURCES = \
+  @TOPDIR@/GIMPACT/src/gim_boxpruning.cpp \
+  @TOPDIR@/GIMPACT/src/gim_contact.cpp \
+  @TOPDIR@/GIMPACT/src/gim_math.cpp \
+  @TOPDIR@/GIMPACT/src/gim_memory.cpp \
+  @TOPDIR@/GIMPACT/src/gim_tri_tri_overlap.cpp \
+  @TOPDIR@/GIMPACT/src/gim_trimesh.cpp \
+  @TOPDIR@/GIMPACT/src/gim_trimesh_capsule_collision.cpp \
+  @TOPDIR@/GIMPACT/src/gim_trimesh_ray_collision.cpp \
+  @TOPDIR@/GIMPACT/src/gim_trimesh_sphere_collision.cpp \
+  @TOPDIR@/GIMPACT/src/gim_trimesh_trimesh_collision.cpp \
+  @TOPDIR@/GIMPACT/src/gimpact.cpp
+
+libode_a_DEPENDENCIES+=libGIMPACT.a
+libode_a_LIBADD+= $(libGIMPACT_a_OBJECTS)
+AM_CXXFLAGS += -I@TOPDIR@/GIMPACT/include -DdTRIMESH_ENABLED -DdTRIMESH_GIMPACT
+AM_CFLAGS += -I@TOPDIR@/GIMPACT/include -DdTRIMESH_ENABLED -DdTRIMESH_GIMPACT
+
+libode_a_SOURCES+=	collision_trimesh_trimesh.cpp \
+			collision_trimesh_sphere.cpp \
+			collision_trimesh_ray.cpp \
+			collision_trimesh_opcode.cpp \
+			collision_trimesh_box.cpp \
+			collision_trimesh_ccylinder.cpp \
+			collision_trimesh_distance.cpp \
+			collision_trimesh_internal.h \
+                        collision_cylinder_trimesh.cpp \
+                        collision_trimesh_plane.cpp
+endif
+
+
+
+#################################
+#   O P C O D E    S T U F F
+#################################
+
+
 if OPCODE
 noinst_LIBRARIES+= libOPCODE.a
 libOPCODE_a_CPPFLAGS= -O2 -fno-strict-aliasing -fPIC
 
-if X86_64_SYSTEM
-libOPCODE_a_CPPFLAGS += -fPIC
-endif
 
 libOPCODE_a_SOURCES=	@TOPDIR@/OPCODE/OPC_AABBCollider.cpp \
 			@TOPDIR@/OPCODE/OPC_AABBTree.cpp \

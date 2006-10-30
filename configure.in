@@ -71,12 +71,26 @@ esac
 dnl check for required headers
 AC_CHECK_HEADERS( alloca.h ieeefp.h stdio.h stdlib.h math.h string.h stdarg.h malloc.h values.h float.h time.h sys/time.h )
 
-AC_MSG_CHECKING(if OPCODE support is requested)
-AC_ARG_ENABLE(opcode,AC_HELP_STRING([--disable-opcode],
-[Configure ODE to work without OPCODE (disables trimesh support)]),
-opcode=$enableval,opcode=yes)
-AC_MSG_RESULT($opcode)
-AM_CONDITIONAL(OPCODE, test x$opcode = xyes)
+
+opcode=no
+gimpact=no
+AC_ARG_WITH(trimesh,AC_HELP_STRING([--with-trimesh=[opcode|gimpact|none]],
+[use the specified system for trimesh support.]),
+trimesh=$withval,trimesh=opcode
+)
+if test "$trimesh" = opcode
+then
+  opcode=yes
+fi
+if test "$trimesh" = gimpact
+then
+  gimpact=yes
+fi
+
+AM_CONDITIONAL(OPCODE,  test $opcode  = yes)
+AM_CONDITIONAL(GIMPACT, test $gimpact = yes)
+AM_CONDITIONAL(TRIMESH, test $opcode = yes -o $gimpact = yes)
+
 
 AC_MSG_CHECKING(if gyroscopic term should be used)
 AC_ARG_ENABLE(gyroscopic,AC_HELP_STRING([--disable-gyroscopic],
@@ -533,6 +547,7 @@ echo "  Build  system type:      $build"
 echo "  Host   system type:      $host"
 echo "  Use double precision:    $precision"
 echo "  Use OPCODE:              $opcode"
+echo "  Use GIMPACT:             $gimpact"
 echo "  Use gyroscopic term:     $gyroscopic"
 echo "  Is this a Pentium:       $pentium"
 echo "  Is the CPU x86-64:       $cpu64"
