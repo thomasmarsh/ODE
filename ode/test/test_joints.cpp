@@ -214,7 +214,7 @@ void addOscillatingForce (dReal fscale)
 //   5xx : contact
 //   6xx : amotor
 //   7xx : universal joint
-//   8xx : RP joint (Rotoide and Prismatic)
+//   8xx : PR joint (Prismatic and Rotoide)
 
 // setup for the given test. return 0 if there is no such test
 
@@ -467,7 +467,7 @@ int setupTest (int n)
     max_iterations = 100;
     return 1;
 
-  // Joint RP (Rotoide and Prismatic)
+  // Joint PR (Prismatic and Rotoide)
   case 800:     // 2 body
   case 801:     // 2 bodies with spring force and prismatic fixed
   case 802:     // 2 bodies with torque on body1 and prismatic fixed
@@ -476,15 +476,15 @@ int setupTest (int n)
                            1.0, 0.0, 1.0,
                            1,0,0, 1,0,0,
                            0, 0);
-    joint = dJointCreateRP (world, 0);
+    joint = dJointCreatePR (world, 0);
     dJointAttach (joint, body[0], body[1]);
-    dJointSetRPAnchor (joint,-0.5, 0.0, 1.0);
-    dJointSetRPAxis1 (joint, 0, 1, 0);
-    dJointSetRPAxis2 (joint, 1, 0, 0);
-    dJointSetRPParam (joint,dParamLoStop,-0.5);
-    dJointSetRPParam (joint,dParamHiStop,0.5);
-    dJointSetRPParam (joint,dParamLoStop2,0);
-    dJointSetRPParam (joint,dParamHiStop2,0);
+    dJointSetPRAnchor (joint,-0.5, 0.0, 1.0);
+    dJointSetPRAxis1 (joint, 0, 1, 0);
+    dJointSetPRAxis2 (joint, 1, 0, 0);
+    dJointSetPRParam (joint,dParamLoStop,-0.5);
+    dJointSetPRParam (joint,dParamHiStop,0.5);
+    dJointSetPRParam (joint,dParamLoStop2,0);
+    dJointSetPRParam (joint,dParamHiStop2,0);
     return 1;
   case 803:   // 2 bodies with spring force and prismatic NOT fixed
   case 804:   // 2 bodies with torque force and prismatic NOT fixed
@@ -494,15 +494,15 @@ int setupTest (int n)
                            1.0, 0.0, 1.0,
                            1,0,0, 1,0,0,
                            0, 0);
-    joint = dJointCreateRP (world, 0);
+    joint = dJointCreatePR (world, 0);
     dJointAttach (joint, body[0], body[1]);
-    dJointSetRPAnchor (joint,-0.5, 0.0, 1.0);
-    dJointSetRPAxis1 (joint, 0, 1, 0);
-    dJointSetRPAxis2 (joint, 1, 0, 0);
-    dJointSetRPParam (joint,dParamLoStop,-0.5);
-    dJointSetRPParam (joint,dParamHiStop,0.5);
-    dJointSetRPParam (joint,dParamLoStop2,-0.5);
-    dJointSetRPParam (joint,dParamHiStop2,0.5);
+    dJointSetPRAnchor (joint,-0.5, 0.0, 1.0);
+    dJointSetPRAxis1 (joint, 0, 1, 0);
+    dJointSetPRAxis2 (joint, 1, 0, 0);
+    dJointSetPRParam (joint,dParamLoStop,-0.5);
+    dJointSetPRParam (joint,dParamHiStop,0.5);
+    dJointSetPRParam (joint,dParamLoStop2,-0.5);
+    dJointSetPRParam (joint,dParamHiStop2,0.5);
     return 1;
   }
   return 0;
