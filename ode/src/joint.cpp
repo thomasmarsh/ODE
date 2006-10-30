@@ -2413,9 +2413,9 @@ dxJoint::Vtable __duniversal_vtable = {
 
 
 //****************************************************************************
-// Rotoide and Prismatic
+// Prismatic and Rotoide
 
-static void RPInit (dxJointRP *j)
+static void PRInit (dxJointPR *j)
 {
   // Default Position
   // Z^
@@ -2445,11 +2445,11 @@ static void RPInit (dxJointRP *j)
 }
 
 
-dReal dJointGetRPPosition (dJointID j)
+dReal dJointGetPRPosition (dJointID j)
 {
-  dxJointRP* joint = (dxJointRP*)j;
+  dxJointPR* joint = (dxJointPR*)j;
   dUASSERT(joint,"bad joint argument");
-  dUASSERT(joint->vtable == &__dRP_vtable,"joint is not a Rotoide and Prismatic");
+  dUASSERT(joint->vtable == &__dPR_vtable,"joint is not a Rotoide and Prismatic");
 
   dVector3 q;
   // get the offset in global coordinates
@@ -2490,10 +2490,10 @@ dReal dJointGetRPPosition (dJointID j)
 }
 
 
-dReal dJointGetRPPositionRate (dJointID j)
+dReal dJointGetPRPositionRate (dJointID j)
 {
   // N.B. Not tested
-  dxJointRP* joint = (dxJointRP*)j;
+  dxJointPR* joint = (dxJointPR*)j;
   dUASSERT(joint,"bad joint argument");
   dUASSERT(joint->vtable == &__dslider_vtable,"joint is not a Rotoide and Prismatic");
 
@@ -2512,7 +2512,7 @@ dReal dJointGetRPPositionRate (dJointID j)
 
 
 
-static void RPGetInfo1 (dxJointRP *j, dxJoint::Info1 *info)
+static void PRGetInfo1 (dxJointPR *j, dxJoint::Info1 *info)
 {
   info->m = 4;
   info->nub = 4;
@@ -2532,7 +2532,7 @@ static void RPGetInfo1 (dxJointRP *j, dxJoint::Info1 *info)
   if ((j->limotP.lostop > -dInfinity || j->limotP.histop < dInfinity) &&
       j->limotP.lostop <= j->limotP.histop) {
     // measure joint position
-    dReal pos = dJointGetRPPosition (j);
+    dReal pos = dJointGetPRPosition (j);
     if (pos <= j->limotP.lostop) {
       j->limotP.limit = 1;
       j->limotP.limit_err = pos - j->limotP.lostop;
@@ -2552,7 +2552,7 @@ static void RPGetInfo1 (dxJointRP *j, dxJoint::Info1 *info)
 
 
 
-static void RPGetInfo2 (dxJointRP *joint, dxJoint::Info2 *info)
+static void PRGetInfo2 (dxJointPR *joint, dxJoint::Info2 *info)
 {
   int i;
   int s = info->rowskip;
@@ -2875,7 +2875,7 @@ static void RPGetInfo2 (dxJointRP *joint, dxJoint::Info2 *info)
 
 
 // compute initial relative rotation body1 -> body2, or env -> body1
-static void RPComputeInitialRelativeRotation (dxJointRP *joint)
+static void PRComputeInitialRelativeRotation (dxJointPR *joint)
 {
   if (joint->node[0].body) {
     if (joint->node[1].body) {
@@ -2890,15 +2890,15 @@ static void RPComputeInitialRelativeRotation (dxJointRP *joint)
   }
 }
 
-void dJointSetRPAnchor (dJointID j, dReal x, dReal y, dReal z)
+void dJointSetPRAnchor (dJointID j, dReal x, dReal y, dReal z)
 {
-  dxJointRP* joint = (dxJointRP*)j;
+  dxJointPR* joint = (dxJointPR*)j;
   dUASSERT(joint,"bad joint argument");
-  dUASSERT(joint->vtable == &__dRP_vtable,"joint is not a Rotoide and Prismatic");
+  dUASSERT(joint->vtable == &__dPR_vtable,"joint is not a Rotoide and Prismatic");
 
   dVector3 dummy;
   setAnchors (joint,x,y,z,dummy,joint->anchor2);
-  RPComputeInitialRelativeRotation (joint);
+  PRComputeInitialRelativeRotation (joint);
 
   if (joint->node[1].body)
     dMULTIPLY0_331 (joint->prev, joint->node[1].body->posr.R,joint->anchor2);
@@ -2911,25 +2911,25 @@ void dJointSetRPAnchor (dJointID j, dReal x, dReal y, dReal z)
 }
 
 
-void dJointSetRPAxis1 (dJointID j, dReal x, dReal y, dReal z)
+void dJointSetPRAxis1 (dJointID j, dReal x, dReal y, dReal z)
 {
-  dxJointRP* joint = (dxJointRP*)j;
+  dxJointPR* joint = (dxJointPR*)j;
   dUASSERT(joint,"bad joint argument");
-  dUASSERT(joint->vtable == &__dRP_vtable,"joint is not a Rotoide and Prismatic");
+  dUASSERT(joint->vtable == &__dPR_vtable,"joint is not a Rotoide and Prismatic");
   setAxes (joint,x,y,z,joint->axisR1,joint->axisR2);
-  RPComputeInitialRelativeRotation (joint);
+  PRComputeInitialRelativeRotation (joint);
 }
 
-void dJointSetRPAxis2 (dJointID j, dReal x, dReal y, dReal z)
+void dJointSetPRAxis2 (dJointID j, dReal x, dReal y, dReal z)
 {
-  dxJointRP* joint = (dxJointRP*)j;
+  dxJointPR* joint = (dxJointPR*)j;
   int i;
   dUASSERT(joint,"bad joint argument");
-  dUASSERT(joint->vtable == &__dRP_vtable,"joint is not a  Rotoide and Prismatic");
+  dUASSERT(joint->vtable == &__dPR_vtable,"joint is not a  Rotoide and Prismatic");
 
   setAxes (joint,x,y,z,joint->axisP1, 0);
 
-  RPComputeInitialRelativeRotation (joint);
+  PRComputeInitialRelativeRotation (joint);
 
   // compute initial relative rotation body1 -> body2, or env -> body1
   // also compute distance between anchor of body1 w.r.t center of body 2
@@ -2960,11 +2960,11 @@ void dJointSetRPAxis2 (dJointID j, dReal x, dReal y, dReal z)
   dMULTIPLY1_331 (joint->offset,joint->node[0].body->posr.R,c);
 }
 
-void dJointSetRPParam (dJointID j, int parameter, dReal value)
+void dJointSetPRParam (dJointID j, int parameter, dReal value)
 {
-  dxJointRP* joint = (dxJointRP*)j;
+  dxJointPR* joint = (dxJointPR*)j;
   dUASSERT(joint,"bad joint argument");
-  dUASSERT(joint->vtable == &__dRP_vtable,"joint is not a Rotoide and Prismatic");
+  dUASSERT(joint->vtable == &__dPR_vtable,"joint is not a Rotoide and Prismatic");
   if ((parameter & 0xff00) == 0x100) {
     joint->limotP.set (parameter & 0xff,value);
   }
@@ -2973,12 +2973,12 @@ void dJointSetRPParam (dJointID j, int parameter, dReal value)
   }
 }
 
-void dJointGetRPAnchor (dJointID j, dVector3 result)
+void dJointGetPRAnchor (dJointID j, dVector3 result)
 {
-  dxJointRP* joint = (dxJointRP*)j;
+  dxJointPR* joint = (dxJointPR*)j;
   dUASSERT(joint,"bad joint argument");
   dUASSERT(result,"bad result argument");
-  dUASSERT(joint->vtable == &__dRP_vtable,"joint is not a Rotoide and Prismatic");
+  dUASSERT(joint->vtable == &__dPR_vtable,"joint is not a Rotoide and Prismatic");
 
   if (joint->node[1].body)
     getAnchor2 (joint,result,joint->anchor2);
@@ -2991,41 +2991,41 @@ void dJointGetRPAnchor (dJointID j, dVector3 result)
 
 }
 
-void dJointGetRPAxis1 (dJointID j, dVector3 result)
+void dJointGetPRAxis1 (dJointID j, dVector3 result)
 {
-  dxJointRP* joint = (dxJointRP*)j;
+  dxJointPR* joint = (dxJointPR*)j;
   dUASSERT(joint,"bad joint argument");
   dUASSERT(result,"bad result argument");
-  dUASSERT(joint->vtable == &__dRP_vtable,"joint is not a Rotoide and Prismatic");
+  dUASSERT(joint->vtable == &__dPR_vtable,"joint is not a Rotoide and Prismatic");
   getAxis(joint, result, joint->axisR1);
 }
 
 void dJointGetRPAxis2 (dJointID j, dVector3 result)
 {
-  dxJointRP* joint = (dxJointRP*)j;
+  dxJointPR* joint = (dxJointPR*)j;
   dUASSERT(joint,"bad joint argument");
   dUASSERT(result,"bad result argument");
-  dUASSERT(joint->vtable == &__dRP_vtable,"joint is not a Rotoide and Prismatic");
+  dUASSERT(joint->vtable == &__dPR_vtable,"joint is not a Rotoide and Prismatic");
   getAxis(joint, result, joint->axisP1);
 }
 
-dReal dJointGetRPParam (dJointID j, int parameter)
+dReal dJointGetPRParam (dJointID j, int parameter)
 {
-  dxJointRP* joint = (dxJointRP*)j;
+  dxJointPR* joint = (dxJointPR*)j;
   dUASSERT(joint,"bad joint argument");
-  dUASSERT(joint->vtable == &__dRP_vtable,"joint is not Rotoide and Prismatic");
+  dUASSERT(joint->vtable == &__dPR_vtable,"joint is not Rotoide and Prismatic");
   if ((parameter & 0xff00) == 0x100) {
     return joint->limotP.get (parameter & 0xff);
   }
   return joint->limotR.get (parameter);
 }
 
-void dJointAddRPTorque (dJointID j, dReal torque)
+void dJointAddPRTorque (dJointID j, dReal torque)
 {
-  dxJointRP* joint = (dxJointRP*)j;
+  dxJointPR* joint = (dxJointPR*)j;
   dVector3 axis;
   dAASSERT(joint);
-  dUASSERT(joint->vtable == &__dRP_vtable,"joint is not a Rotoide and Prismatic");
+  dUASSERT(joint->vtable == &__dPR_vtable,"joint is not a Rotoide and Prismatic");
 
   if (joint->flags & dJOINT_REVERSE)
     torque = -torque;
@@ -3042,12 +3042,12 @@ void dJointAddRPTorque (dJointID j, dReal torque)
 }
 
 
-dxJoint::Vtable __dRP_vtable = {
-  sizeof(dxJointRP),
-  (dxJoint::init_fn*) RPInit,
-  (dxJoint::getInfo1_fn*) RPGetInfo1,
-  (dxJoint::getInfo2_fn*) RPGetInfo2,
-  dJointTypeRP
+dxJoint::Vtable __dPR_vtable = {
+  sizeof(dxJointPR),
+  (dxJoint::init_fn*) PRInit,
+  (dxJoint::getInfo1_fn*) PRGetInfo1,
+  (dxJoint::getInfo2_fn*) PRGetInfo2,
+  dJointTypePR
 };
 
 

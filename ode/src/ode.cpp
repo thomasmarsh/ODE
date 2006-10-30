@@ -994,10 +994,10 @@ dxJoint * dJointCreateUniversal (dWorldID w, dJointGroupID group)
   return createJoint (w,group,&__duniversal_vtable);
 }
 
-dxJoint * dJointCreateRP (dWorldID w, dJointGroupID group)
+dxJoint * dJointCreatePR (dWorldID w, dJointGroupID group)
 {
   dAASSERT (w);
-  return createJoint (w,group,&__dRP_vtable);
+  return createJoint (w,group,&__dPR_vtable);
 }
 
 dxJoint * dJointCreateFixed (dWorldID w, dJointGroupID group)

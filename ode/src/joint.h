@@ -194,7 +194,7 @@ extern struct dxJoint::Vtable __duniversal_vtable;
 
 
 /**
- * The axisP must be perpendicalar to axis2
+ * The axisP must be perpendicular to axis2
  * <PRE>
  *                                        +-------------+
  *                                        |      x      |
@@ -209,7 +209,7 @@ extern struct dxJoint::Vtable __duniversal_vtable;
  *            Offset               |--- Rotoide articulation
  * </PRE>
  */
-struct dxJointRP : public dxJoint {
+struct dxJointPR : public dxJoint {
 
   dVector3 anchor2;         ///< @brief Position of the rotoide articulation
                             ///<        w.r.t second body.
@@ -237,7 +237,7 @@ struct dxJointRP : public dxJoint {
   dxJointLimitMotor limotR; ///< limit and motor information for the rotoide articulation.
   dxJointLimitMotor limotP; ///< limit and motor information for the prismatic articulation.
 };
-extern struct dxJoint::Vtable __dRP_vtable;
+extern struct dxJoint::Vtable __dPR_vtable;
 
 
 

@@ -522,43 +522,43 @@ public:
 };
 
 
-class dRPJoint : public dJoint {
-  dRPJoint (const dRPJoint &);
-  void operator = (const dRPJoint &);
+class dPRJoint : public dJoint {
+  dPRJoint (const dPRJoint &);
+  void operator = (const dPRJoint &);
 
 public:
-  dRPJoint() { }
-  dRPJoint (dWorldID world, dJointGroupID group=0)
-    { _id = dJointCreateRP (world, group); }
+  dPRJoint() { }
+  dPRJoint (dWorldID world, dJointGroupID group=0)
+    { _id = dJointCreatePR (world, group); }
 
   void create (dWorldID world, dJointGroupID group=0) {
     if (_id) dJointDestroy (_id);
-    _id = dJointCreateRP (world, group);
+    _id = dJointCreatePR (world, group);
   }
 
   void setAnchor (dReal x, dReal y, dReal z)
-    { dJointSetRPAnchor (_id, x, y, z); }
+    { dJointSetPRAnchor (_id, x, y, z); }
   void setAxis1 (dReal x, dReal y, dReal z)
-    { dJointSetRPAxis1 (_id, x, y, z); }
+    { dJointSetPRAxis1 (_id, x, y, z); }
   void setAxis2 (dReal x, dReal y, dReal z)
-    { dJointSetRPAxis2 (_id, x, y, z); }
+    { dJointSetPRAxis2 (_id, x, y, z); }
 
   void getAnchor (dVector3 result) const
-    { dJointGetRPAnchor (_id, result); }
+    { dJointGetPRAnchor (_id, result); }
   void getAxis1 (dVector3 result) const
-    { dJointGetRPAxis1 (_id, result); }
+    { dJointGetPRAxis1 (_id, result); }
   void getAxis2 (dVector3 result) const
-    { dJointGetRPAxis2 (_id, result); }
+    { dJointGetPRAxis2 (_id, result); }
 
   dReal getPosition() const
-    { return dJointGetRPPosition (_id); }
+    { return dJointGetPRPosition (_id); }
   dReal getPositionRate() const
-    { return dJointGetRPPositionRate (_id); }
+    { return dJointGetPRPositionRate (_id); }
 
   void setParam (int parameter, dReal value)
-    { dJointSetRPParam (_id, parameter, value); }
+    { dJointSetPRParam (_id, parameter, value); }
   dReal getParam (int parameter) const
-    { return dJointGetRPParam (_id, parameter); }
+    { return dJointGetPRParam (_id, parameter); }
 };
 
 

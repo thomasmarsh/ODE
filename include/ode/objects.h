@@ -1035,12 +1035,12 @@ ODE_API dJointID dJointCreateHinge2 (dWorldID, dJointGroupID);
 ODE_API dJointID dJointCreateUniversal (dWorldID, dJointGroupID);
 
 /**
- * @brief Create a new joint of the RP (Rotoide and Prismatic) type.
+ * @brief Create a new joint of the PR (Prismatic and Rotoide) type.
  * @ingroup joints
  * @param dJointGroupID set to 0 to allocate the joint normally.
  * If it is nonzero the joint is allocated in the given joint group.
  */
-ODE_API dJointID dJointCreateRP (dWorldID, dJointGroupID);
+ODE_API dJointID dJointCreatePR (dWorldID, dJointGroupID);
 
 /**
  * @brief Create a new joint of the fixed type.
@@ -1322,35 +1322,35 @@ ODE_API void dJointAddUniversalTorques(dJointID joint, dReal torque1, dReal torq
  * @brief set anchor
  * @ingroup joints
  */
-ODE_API void dJointSetRPAnchor (dJointID, dReal x, dReal y, dReal z);
+ODE_API void dJointSetPRAnchor (dJointID, dReal x, dReal y, dReal z);
 
 /**
  * @brief set the axis for the rotoide articulation
  * @ingroup joints
  */
-ODE_API void dJointSetRPAxis1 (dJointID, dReal x, dReal y, dReal z);
+ODE_API void dJointSetPRAxis1 (dJointID, dReal x, dReal y, dReal z);
 
 /**
  * @brief set the axis for the prismatic articulation
  * @ingroup joints
  */
-ODE_API void dJointSetRPAxis2 (dJointID, dReal x, dReal y, dReal z);
+ODE_API void dJointSetPRAxis2 (dJointID, dReal x, dReal y, dReal z);
 
 /**
  * @brief set joint parameter
  * @ingroup joints
  */
-ODE_API void dJointSetRPParam (dJointID, int parameter, dReal value);
+ODE_API void dJointSetPRParam (dJointID, int parameter, dReal value);
 
 /**
- * @brief Applies the torque about the rotoide axis of the RP joint
+ * @brief Applies the torque about the rotoide axis of the PR joint
  *
  * That is, it applies a torque with specified magnitude in the direction 
  * of the rotoide axis, to body 1, and with the same magnitude but in opposite
  * direction to body 2. This function is just a wrapper for dBodyAddTorque()}
  * @ingroup joints
  */
-ODE_API void dJointAddRPTorque (dJointID j, dReal torque);
+ODE_API void dJointAddPRTorque (dJointID j, dReal torque);
 
 
 /**
@@ -1687,10 +1687,10 @@ ODE_API dReal dJointGetUniversalAngle2Rate (dJointID);
  * this will be the same as the point on body 2.
  * @ingroup joints
  */
-ODE_API void dJointGetRPAnchor (dJointID, dVector3 result);
+ODE_API void dJointGetPRAnchor (dJointID, dVector3 result);
 
 /**
- * @brief Get the RP linear position (i.e. the prismatic's extension)
+ * @brief Get the PR linear position (i.e. the prismatic's extension)
  *
  * When the axis is set, the current position of the attached bodies is
  * examined and that position will be the zero position.
@@ -1700,33 +1700,33 @@ ODE_API void dJointGetRPAnchor (dJointID, dVector3 result);
  *
  * @ingroup joints
  */
-ODE_API dReal dJointGetRPPosition (dJointID);
+ODE_API dReal dJointGetPRPosition (dJointID);
 
 /**
- * @brief Get the RP linear position's time derivative
+ * @brief Get the PR linear position's time derivative
  *
  * @ingroup joints
  */
-ODE_API dReal dJointGetRPPositionRate (dJointID);
+ODE_API dReal dJointGetPRPositionRate (dJointID);
 
 
 /**
  * @brief Get the Rotoide axis
  * @ingroup joints
  */
-ODE_API void dJointGetRPAxis1 (dJointID, dVector3 result);
+ODE_API void dJointGetPRAxis1 (dJointID, dVector3 result);
 
 /**
  * @brief Get the prismatic axis
  * @ingroup joints
  */
-ODE_API void dJointGetRPAxis2 (dJointID, dVector3 result);
+ODE_API void dJointGetPRAxis2 (dJointID, dVector3 result);
 
 /**
  * @brief get joint parameter
  * @ingroup joints
  */
-ODE_API dReal dJointGetRPParam (dJointID, int parameter);
+ODE_API dReal dJointGetPRParam (dJointID, int parameter);
 
 
 
