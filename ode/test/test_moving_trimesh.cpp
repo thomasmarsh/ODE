@@ -1585,9 +1585,10 @@ static void command (int cmd)
       obj[i].geom[0] = dCreateTriMesh(space, new_tmdata, 0, 0, 0);
 
       // remember the mesh's dTriMeshDataID on its userdata for convenience.
-      dGeomSetData(obj[i].geom[0], new_tmdata);      
+      dGeomSetData(obj[i].geom[0], new_tmdata);
 
-      dMassSetBox (&m,DENSITY,sides[0],sides[1],sides[2]);
+	  dMassSetTrimesh( &m, DENSITY, obj[i].geom[0] );
+//    dMassSetBox (&m,DENSITY,sides[0],sides[1],sides[2]);
     }
     else if (cmd == 'x') {
       dGeomID g2[GPB];		// encapsulated geometries
