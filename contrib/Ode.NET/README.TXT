@@ -17,8 +17,8 @@ Jason Perkins (starkos@gmail.com)
  
  The simplest way to build the bindings is probably to create a 
  new library assembly in your tool of choice and drop in the files
- `Ode.cs` and `AssemblyInfo.cs`. Define the symbol`dDOUBLE` if you 
- used double-precision math in your ode.dll. Build, done.
+ Ode/Ode.cs and Ode/AssemblyInfo.cs. Define the symbol`dDOUBLE` if 
+ you used double-precision math in your ode.dll. Build, done.
  
  For testing purposes, I have also created bindings for the 
  Drawstuff library and a C# version of the BoxStack demo. You can
@@ -35,6 +35,11 @@ Jason Perkins (starkos@gmail.com)
  
   premake --with-tests --target (toolset)
   
+ To build with Mono, you must add the --dotnet parameter to enable
+ support .NET 2.0:
+ 
+   premake --dotnet mono2 --target gnu
+   
 
 --------------------------------------------------------------------- 
  USAGE
@@ -50,7 +55,7 @@ Jason Perkins (starkos@gmail.com)
    IntPtr world = d.WorldCreate();
    IntPtr body = d.BodyCreate(world);
  
- Take a look at TestBoxStack.cs for a more complete example.
+ Take a look at Tests/BoxStack.cs for a more complete example.
  
  
 --------------------------------------------------------------------- 
@@ -61,8 +66,8 @@ Jason Perkins (starkos@gmail.com)
 
  It is not possible to implement dBodyGetPosition(), dBodyGetRotation(),
  etc. without resorting to unsafe code, which I was trying to avoid.
- This binding uses dBodyCopyPosition(), dBodyCopyRotation(), etc.
- instead.
+ This binding uses the .NET friendly dBodyCopyPosition(), 
+ dBodyCopyRotation(), etc. instead. 
   
  Collision response (contact joints) do not work when built under 
  Mono as double-precision. I have not tried to track down why.

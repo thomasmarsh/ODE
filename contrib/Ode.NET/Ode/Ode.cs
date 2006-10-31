@@ -79,6 +79,7 @@ namespace Ode.NET
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
 		public delegate void NearCallback(IntPtr data, IntPtr geom1, IntPtr geom2);
 
+
 		[StructLayout(LayoutKind.Sequential)]
 		public struct Contact
 		{
@@ -86,6 +87,7 @@ namespace Ode.NET
 			public ContactGeom geom;
 			public Vector3 fdir1;
 		}
+
 
 		[StructLayout(LayoutKind.Sequential)]
 		public struct ContactGeom
@@ -101,6 +103,7 @@ namespace Ode.NET
 			public int side2;
 		}
 
+
 		[StructLayout(LayoutKind.Sequential)]
 		public struct Mass
 		{
@@ -109,35 +112,31 @@ namespace Ode.NET
 			public Matrix3 I;
 		}
 
+
 		[StructLayout(LayoutKind.Sequential)]
 		public struct Matrix3
 		{
 			public Matrix3(dReal m00, dReal m10, dReal m20, dReal m01, dReal m11, dReal m21, dReal m02, dReal m12, dReal m22)
 			{
-				M00 = m00;
-				M10 = m10;
-				M20 = m20;
-				M30 = 0.0f;
-				M01 = m01;
-				M11 = m11;
-				M21 = m21;
-				M31 = 0.0f;
-				M02 = m02;
-				M12 = m12;
-				M22 = m22;
-				M32 = 0.0f;
+				M00 = m00;  M10 = m10;  M20 = m20;  _m30 = 0.0f;
+				M01 = m01;  M11 = m11;  M21 = m21;  _m31 = 0.0f;
+				M02 = m02;  M12 = m12;  M22 = m22;  _m32 = 0.0f;
 			}
-
-			public dReal M00, M10, M20, M30;
-			public dReal M01, M11, M21, M31;
-			public dReal M02, M12, M22, M32;
+			public dReal M00, M10, M20;
+			private dReal _m30;
+			public dReal M01, M11, M21;
+			private dReal _m31;
+			public dReal M02, M12, M22;
+			private dReal _m32;
 		}
+
 
 		[StructLayout(LayoutKind.Sequential)]
 		public struct Quaternion
 		{
 			public dReal W, X, Y, Z;
 		}
+
 
 		[StructLayout(LayoutKind.Sequential)]
 		public struct SurfaceParameters
@@ -155,32 +154,27 @@ namespace Ode.NET
 			public dReal slip2;
 		}
 
+
 		[StructLayout(LayoutKind.Sequential)]
 		public struct Vector3
 		{
-			public dReal X, Y, Z, W;
-
 			public Vector3(dReal x, dReal y, dReal z)
 			{
-				X = x;
-				Y = y;
-				Z = z;
-				W = 0.0f;
+				X = x;  Y = y;  Z = z;  _w = 0.0f;
 			}
+			public dReal X, Y, Z;
+			private dReal _w;
 		}
+
 
 		[StructLayout(LayoutKind.Sequential)]
 		public struct Vector4
 		{
-			public dReal X, Y, Z, W;
-
 			public Vector4(dReal x, dReal y, dReal z, dReal w)
 			{
-				X = x;
-				Y = y;
-				Z = z;
-				W = w;
+				X = x;  Y = y;  Z = z;  W = w;
 			}
+			public dReal X, Y, Z, W;
 		}
 
 		#endregion
