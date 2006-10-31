@@ -485,55 +485,32 @@ dGeomTriMeshGetTriMeshDataID(dGeomID g)
 }
 
 // Getting data
-void dGeomTriMeshGetTriangle(dGeomID g, int Index, dVector3* v0, dVector3* v1, dVector3* v2){
+void dGeomTriMeshGetTriangle(dGeomID g, int Index, dVector3* v0, dVector3* v1, dVector3* v2)
+{
     dUASSERT(g && g->type == dTriMeshClass, "argument not a trimesh");
 
     dxTriMesh* Geom = (dxTriMesh*)g;
-
-    const dVector3& Position = *(const dVector3*)dGeomGetPosition(g);
-    const dMatrix3& Rotation = *(const dMatrix3*)dGeomGetRotation(g);
-
-    dVector3 v[3];
-	FetchTriangle(Geom, Index, Position, Rotation, v);
-
-    if (v0){
-        (*v0)[0] = v[0][0];
-        (*v0)[1] = v[0][1];
-        (*v0)[2] = v[0][2];
-        (*v0)[3] = v[0][3];
-    }
-    if (v1){
-        (*v1)[0] = v[1][0];
-        (*v1)[1] = v[1][1];
-        (*v1)[2] = v[1][2];
-        (*v1)[3] = v[1][3];
-    }
-    if (v2){
-        (*v2)[0] = v[2][0];
-        (*v2)[1] = v[2][1];
-        (*v2)[2] = v[2][2];
-        (*v2)[3] = v[2][3];
-    }
+	gim_trimesh_locks_work_data(&Geom->m_collision_trimesh);	
+	gim_trimesh_get_triangle_vertices(&Geom->m_collision_trimesh, Index, (*v0),(*v1),(*v2));	
+	gim_trimesh_unlocks_work_data(&Geom->m_collision_trimesh);
+ 
 }
 
 void dGeomTriMeshGetPoint(dGeomID g, int Index, dReal u, dReal v, dVector3 Out){
     dUASSERT(g && g->type == dTriMeshClass, "argument not a trimesh");
 
     dxTriMesh* Geom = (dxTriMesh*)g;
-
-    const dVector3& Position = *(const dVector3*)dGeomGetPosition(g);
-    const dMatrix3& Rotation = *(const dMatrix3*)dGeomGetRotation(g);
-
     dVector3 dv[3];
-    FetchTriangle(Geom, Index, Position, Rotation, dv);
-
+	gim_trimesh_locks_work_data(&Geom->m_collision_trimesh);	
+	gim_trimesh_get_triangle_vertices(&Geom->m_collision_trimesh, Index, dv[0],dv[1],dv[2]);
     GetPointFromBarycentric(dv, u, v, Out);
+	gim_trimesh_unlocks_work_data(&Geom->m_collision_trimesh);
 }
 
 int dGeomTriMeshGetTriangleCount (dGeomID g)
 {
-    dxTriMesh* Geom = (dxTriMesh*)g;
-    return 0;
+    dxTriMesh* Geom = (dxTriMesh*)g;	
+	return gim_trimesh_get_triangle_count(&Geom->m_collision_trimesh);
 }
 
 void dGeomTriMeshDataUpdate(dTriMeshDataID g) {
