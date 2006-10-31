@@ -49,9 +49,18 @@ static dGeomID sphgeom;
 static dJointGroupID contactgroup;
 static dGeomID world_mesh;
 
+static bool show_contacts = true;
+
 #define CYLRADIUS    0.6
 #define CYLLENGTH    2.0
 #define SPHERERADIUS 0.5
+
+    
+#ifdef dDOUBLE
+#define dsDrawBox dsDrawBoxD
+#define dsDrawLine dsDrawLineD
+#endif
+
 
 
 // this is called by dSpaceCollide when two objects in space are
@@ -72,8 +81,6 @@ static void nearCallback (void *data, dGeomID o1, dGeomID o2)
     return;
   }
 
-//  fprintf(stderr,"testing geoms %p %p\n", o1, o2);
-
   const int N = 32;
   dContact contact[N];
   int n = dCollide (o1,o2,N,&(contact[0].geom),sizeof(dContact));
@@ -81,16 +88,24 @@ static void nearCallback (void *data, dGeomID o1, dGeomID o2)
   {
     for (int i=0; i<n; i++) 
     {
-      contact[i].surface.slip1 = 0.7;
-      contact[i].surface.slip2 = 0.7;
-      contact[i].surface.mode = dContactSoftERP | dContactSoftCFM | dContactApprox1 | dContactSlip1 | dContactSlip2;
+      contact[i].surface.mode = 0;
       contact[i].surface.mu = 50.0; // was: dInfinity
-      contact[i].surface.soft_erp = 0.99;
-      contact[i].surface.soft_cfm = 0.02;
       dJointID c = dJointCreateContact (world,contactgroup,&contact[i]);
-      dJointAttach (c,
-		    dGeomGetBody(contact[i].geom.g1),
-		    dGeomGetBody(contact[i].geom.g2));
+      dJointAttach (c, dGeomGetBody(contact[i].geom.g1), dGeomGetBody(contact[i].geom.g2));
+      if (show_contacts) 
+      {
+        dMatrix3 RI;
+        dRSetIdentity (RI);
+        const dReal ss[3] = {0.12,0.12,0.12};
+        dsSetColorAlpha (0,0,1,0.5);
+        dsDrawBox (contact[i].geom.pos,RI,ss);
+        dReal *pos  = contact[i].geom.pos;
+        dReal depth = contact[i].geom.depth;
+        dReal *norm = contact[i].geom.normal;
+        dReal endp[3] = {pos[0]+depth*norm[0], pos[1]+depth*norm[1], pos[2]+depth*norm[2]};
+        dsSetColorAlpha (1,1,1,1);
+        dsDrawLine (contact[i].geom.pos, endp);
+      }
     }
   }
 }
@@ -123,17 +138,14 @@ static void command (int cmd)
 
 static void simLoop (int pause)
 {
-  double simstep = 0.001; // 1ms simulation steps
-  double dt = dsElapsedTime();
-  int nrofsteps = (int) ceilf(dt/simstep);
-  for (int i=0; i<nrofsteps && !pause; i++)
+  dSpaceCollide (space,0,&nearCallback);
+  if (!pause)
   {
-    dSpaceCollide (space,0,&nearCallback);
-    dWorldQuickStep (world, simstep);
-    dJointGroupEmpty (contactgroup);
+    dWorldQuickStep (world, 0.01); // 100 Hz
   }
+  dJointGroupEmpty (contactgroup);
 
-  dsSetColor (1,1,1);
+  dsSetColorAlpha (1,1,0,0.5);
 
   const dReal *CPos = dBodyGetPosition(cylbody);
   const dReal *CRot = dBodyGetRotation(cylbody);
@@ -183,21 +195,22 @@ int main (int argc, char **argv)
   dWorldSetGravity (world,0,0,-9.8);
   dWorldSetQuickStepNumIterations (world, 32);
 
-  dCreatePlane (space,0,0,1,0);
+  dCreatePlane (space,0,0,1, 0.0);
 
   cylbody = dBodyCreate (world);
   dQuaternion q;
-#if 1
+#if 0
   dQFromAxisAndAngle (q,1,0,0,M_PI*0.5);
 #else
-  dQFromAxisAndAngle (q,1,0,0, M_PI * 1.0);
+//  dQFromAxisAndAngle (q,1,0,0, M_PI * 1.0);
+  dQFromAxisAndAngle (q,1,0,0, M_PI * -0.77);
 #endif
   dBodySetQuaternion (cylbody,q);
   dMassSetCylinder (&m,1.0,3,CYLRADIUS,CYLLENGTH);
   dBodySetMass (cylbody,&m);
   cylgeom = dCreateCylinder(0, CYLRADIUS, CYLLENGTH);
   dGeomSetBody (cylgeom,cylbody);
-  dBodySetPosition (cylbody, 0, 0, 2);
+  dBodySetPosition (cylbody, 0, 0, 3);
   dSpaceAdd (space, cylgeom);
 
   sphbody = dBodyCreate (world);
@@ -205,7 +218,7 @@ int main (int argc, char **argv)
   dBodySetMass (sphbody,&m);
   sphgeom = dCreateSphere(0, SPHERERADIUS);
   dGeomSetBody (sphgeom,sphbody);
-  dBodySetPosition (sphbody, 0, 0, 5);
+  dBodySetPosition (sphbody, 0, 0, 5.5);
   dSpaceAdd (space, sphgeom);
 
   // run simulation
