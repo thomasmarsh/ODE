@@ -1716,9 +1716,9 @@ static void command (int cmd)
 			obj[i].geom[0] = dCreateTriMesh(space, new_tmdata, 0, 0, 0);
 
 			// remember the mesh's dTriMeshDataID on its userdata for convenience.
-			dGeomSetData(obj[i].geom[0], new_tmdata);      
+			dGeomSetData(obj[i].geom[0], new_tmdata);
 
-			dMassSetBox (&m,DENSITY,sides[0],sides[1],sides[2]);
+			dMassSetTrimesh( &m, DENSITY, obj[i].geom[0] );
 		}
 #endif
 		else if (cmd == 'x')
@@ -1891,10 +1891,16 @@ void drawGeom (dGeomID g, const dReal *pos, const dReal *R, int show_aabb)
 
 static void simLoop (int pause)
 {
-  dsSetColor (0,0,2);
   int i,j;
+  
+  dsSetColor (0,0,2);
+  
   dSpaceCollide (space,0,&nearCallback);
-  if (!pause) dWorldQuickStep (world,0.02);
+  
+  //if (!pause) dWorldStep (world,0.05);
+  //if (!pause) dWorldQuickStep (world,0.05);
+  if (!pause) dWorldStepFast1 (world,0.05, 5);
+
 
   if (write_world) {
     FILE *f = fopen ("state.dif","wt");
