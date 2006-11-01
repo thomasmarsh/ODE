@@ -175,20 +175,20 @@ namespace Ode.NET
 			d.Matrix3 R;
 			d.BodyCopyRotation(body, out R);
 
-			d.GeomClass type = d.GeomGetClass(geom);
+			d.GeomClassID type = d.GeomGetClass(geom);
 			switch (type)
 			{
-			case d.GeomClass.BoxClass:
+			case d.GeomClassID.BoxClass:
 				d.Vector3 sides;
 				d.GeomBoxGetLengths(geom, out sides);
 				ds.DrawBox(ref pos, ref R, ref sides);
 				break;
-			case d.GeomClass.CapsuleClass:
+			case d.GeomClassID.CapsuleClass:
 				dReal radius, length;
 				d.GeomCapsuleGetParams(geom, out radius, out length);
 				ds.DrawCapsule(ref pos, ref R, length, radius);
 				break;
-			case d.GeomClass.ConvexClass:
+			case d.GeomClassID.ConvexClass:
 				ds.DrawConvex(ref pos, ref R, planes, planes.Length / 4, points, points.Length / 3, polygons);
 				break;
 			}

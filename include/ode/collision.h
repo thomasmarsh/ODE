@@ -185,7 +185,7 @@ ODE_API const dReal * dGeomGetPosition (dGeomID geom);
  * @brief Copy the position of a geom into a vector.
  * @ingroup collide
  * @param geom  the geom to query
- * @param pos   a copy of the geomposition
+ * @param pos   a copy of the geom position
  * @sa dGeomGetPosition
  */
 ODE_API void dGeomCopyPosition (dGeomID geom, dVector3 pos);
@@ -208,6 +208,22 @@ ODE_API void dGeomCopyPosition (dGeomID geom, dVector3 pos);
  * @ingroup collide
  */
 ODE_API const dReal * dGeomGetRotation (dGeomID geom);
+
+
+/**
+ * @brief Get the rotation matrix of a placeable geom.
+ *
+ * If the geom is attached to a body, the body's rotation will be returned.
+ *
+ * Calling this function on a non-placeable geom results in a runtime error in
+ * the debug build of ODE.
+ *
+ * @param geom   the geom to query.
+ * @param R      a copy of the geom rotation
+ * @sa dGeomGetRotation
+ * @ingroup collide
+ */
+ODE_API void dGeomCopyRotation(dGeomID geom, dMatrix3 R);
 
 
 /**
@@ -545,19 +561,47 @@ ODE_API const dReal * dGeomGetOffsetPosition (dGeomID geom);
 
 
 /**
- * @brief Get the offset position vector of a geom.
+ * @brief Copy the offset position vector of a geom.
  *
  * Returns the positional offset of the geom in local coordinates.
  * If the geom has no offset, this function returns the zero vector.
  *
+ * @param geom   the geom to query.
+ * @param pos    returns the offset position
+ * @ingroup collide
+ */
+ODE_API void dGeomCopyOffsetPosition (dGeomID geom, dVector3 pos);
+
+
+/**
+ * @brief Get the offset rotation matrix of a geom.
+ *
+ * Returns the rotational offset of the geom in local coordinates.
+ * If the geom has no offset, this function returns the identity
+ * matrix.
+ *
  * @param geom the geom to query.
- * @returns A pointer to the geom's offset vector.
+ * @returns A pointer to the geom's offset rotation matrix.
  * @remarks The returned value is a pointer to the geom's internal
  *          data structure. It is valid until any changes are made
  *          to the geom.
  * @ingroup collide
  */
 ODE_API const dReal * dGeomGetOffsetRotation (dGeomID geom);
+
+
+/**
+ * @brief Copy the offset rotation matrix of a geom.
+ *
+ * Returns the rotational offset of the geom in local coordinates.
+ * If the geom has no offset, this function returns the identity
+ * matrix.
+ *
+ * @param geom   the geom to query.
+ * @param R      returns the rotation matrix.
+ * @ingroup collide
+ */
+ODE_API void dGeomCopyOffsetRotation (dGeomID geom, dMatrix3 R);
 
 
 /**
@@ -571,6 +615,7 @@ ODE_API const dReal * dGeomGetOffsetRotation (dGeomID geom);
  * @ingroup collide
  */
 ODE_API void dGeomGetOffsetQuaternion (dGeomID geom, dQuaternion result);
+
 
 /* ************************************************************************ */
 /* collision detection */

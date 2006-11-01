@@ -588,6 +588,24 @@ const dReal * dGeomGetRotation (dxGeom *g)
 }
 
 
+void dGeomCopyRotation(dxGeom *g, dMatrix3 R)
+{
+  dAASSERT (g);
+  dUASSERT (g->gflags & GEOM_PLACEABLE,"geom must be placeable");
+  g->recomputePosr();
+  const dReal* src = g->final_posr->R;
+  R[0]  = src[0];
+  R[1]  = src[1];
+  R[2]  = src[2];
+  R[4]  = src[4];
+  R[5]  = src[5];
+  R[6]  = src[6];
+  R[8]  = src[8];
+  R[9]  = src[9];
+  R[10] = src[10];
+}
+
+
 void dGeomGetQuaternion (dxGeom *g, dQuaternion quat)
 {
   dAASSERT (g);
@@ -964,6 +982,24 @@ const dReal * dGeomGetOffsetPosition (dxGeom *g)
   return OFFSET_POSITION_ZERO;
 }
 
+void dGeomCopyOffsetPosition (dxGeom *g, dVector3 pos)
+{
+  dAASSERT (g);
+  if (g->offset_posr)
+  {
+    const dReal* src = g->offset_posr->pos;
+    pos[0] = src[0];
+	 pos[1] = src[1];
+	 pos[2] = src[2];
+  }
+  else
+  {
+    pos[0] = 0;
+	 pos[1] = 0;
+	 pos[2] = 0;
+  }
+}
+
 static const dMatrix3 OFFSET_ROTATION_ZERO = 
 { 
 	1.0f, 0.0f, 0.0f, 0.0f, 
@@ -979,6 +1015,36 @@ const dReal * dGeomGetOffsetRotation (dxGeom *g)
     return g->offset_posr->R;
   }
   return OFFSET_ROTATION_ZERO;
+}
+
+void dGeomCopyOffsetRotation (dxGeom *g, dMatrix3 R)
+{
+	dAASSERT (g);
+	if (g->offset_posr)
+	{
+		const dReal* src = g->final_posr->R;
+		R[0]  = src[0];
+		R[1]  = src[1];
+		R[2]  = src[2];
+		R[4]  = src[4];
+		R[5]  = src[5];
+		R[6]  = src[6];
+		R[8]  = src[8];
+		R[9]  = src[9];
+		R[10] = src[10];
+	}
+	else
+	{
+		R[0]  = OFFSET_ROTATION_ZERO[0];
+		R[1]  = OFFSET_ROTATION_ZERO[1];
+		R[2]  = OFFSET_ROTATION_ZERO[2];
+		R[4]  = OFFSET_ROTATION_ZERO[4];
+		R[5]  = OFFSET_ROTATION_ZERO[5];
+		R[6]  = OFFSET_ROTATION_ZERO[6];
+		R[8]  = OFFSET_ROTATION_ZERO[8];
+		R[9]  = OFFSET_ROTATION_ZERO[9];
+		R[10] = OFFSET_ROTATION_ZERO[10];
+	}
 }
 
 void dGeomGetOffsetQuaternion (dxGeom *g, dQuaternion result)
