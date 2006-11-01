@@ -34,6 +34,8 @@ void dInternalHandleAutoDisabling (dxWorld *world, dReal stepsize)
 {
 	dxBody *bb;
 	for (bb=world->firstbody; bb; bb=(dxBody*)bb->next) {
+                // don't freeze objects mid-air (patch 1586738)
+		if (bb->firstjoint==NULL) continue;
 		// nothing to do unless this body is currently enabled and has
 		// the auto-disable flag set
 		if ((bb->flags & (dxBodyAutoDisable|dxBodyDisabled)) != dxBodyAutoDisable) continue;
