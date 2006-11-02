@@ -11,6 +11,7 @@ project.name = "Ode.NET"
 
   addoption("with-doubles",  "Use double instead of float as base numeric type")
   addoption("with-tests",    "Builds the test applications and DrawStuff library")
+  addoption("no-unsafe",     "Exclude functions using unsafe code (dBodyGetPosition, etc.)")
 
 
 -- Build settings

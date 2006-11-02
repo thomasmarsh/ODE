@@ -109,7 +109,7 @@ namespace Ode.NET
 
 		#endregion
 
-		#region Type Definitions
+		#region Structs
 
 		[StructLayout(LayoutKind.Sequential)]
 		public struct AABB
@@ -151,6 +151,16 @@ namespace Ode.NET
 			public GetAABBFn aabb;
 			public AABBTestFn aabb_test;
 			public GeomDtorFn dtor;
+		}
+
+
+		[StructLayout(LayoutKind.Sequential)]
+		public struct JointFeedback 
+		{
+			public Vector3 f1;
+			public Vector3 t1;
+			public Vector3 f2;
+			public Vector3 t2;
 		}
 
 
@@ -247,8 +257,35 @@ namespace Ode.NET
 
 		#endregion
 
+		[DllImport("ode", EntryPoint = "dAreConnected"), SuppressUnmanagedCodeSecurity]
+		public static extern bool AreConnected(IntPtr b1, IntPtr b2);
+
 		[DllImport("ode", EntryPoint = "dAreConnectedExcluding"), SuppressUnmanagedCodeSecurity]
-		public static extern bool AreConnectedExcluding(IntPtr body0, IntPtr body1, JointType jointType);
+		public static extern bool AreConnectedExcluding(IntPtr b1, IntPtr b2, JointType joint_type);
+
+		[DllImport("ode", EntryPoint = "dBodyAddForce"), SuppressUnmanagedCodeSecurity]
+		public static extern void BodyAddForce(IntPtr body, dReal fx, dReal fy, dReal fz);
+
+		[DllImport("ode", EntryPoint = "dBodyAddForceAtPos"), SuppressUnmanagedCodeSecurity]
+		public static extern void BodyAddForceAtPos(IntPtr body, dReal fx, dReal fy, dReal fz, dReal px, dReal py, dReal pz);
+
+		[DllImport("ode", EntryPoint = "dBodyAddForceAtRelPos"), SuppressUnmanagedCodeSecurity]
+		public static extern void BodyAddForceAtRelPos(IntPtr body, dReal fx, dReal fy, dReal fz, dReal px, dReal py, dReal pz);
+
+		[DllImport("ode", EntryPoint = "dBodyAddRelForce"), SuppressUnmanagedCodeSecurity]
+		public static extern void BodyAddRelForce(IntPtr body, dReal fx, dReal fy, dReal fz);
+
+		[DllImport("ode", EntryPoint = "dBodyAddRelForceAtPos"), SuppressUnmanagedCodeSecurity]
+		public static extern void BodyAddRelForceAtPos(IntPtr body, dReal fx, dReal fy, dReal fz, dReal px, dReal py, dReal pz);
+
+		[DllImport("ode", EntryPoint = "dBodyAddRelForceAtRelPos"), SuppressUnmanagedCodeSecurity]
+		public static extern void BodyAddRelForceAtRelPos(IntPtr body, dReal fx, dReal fy, dReal fz, dReal px, dReal py, dReal pz);
+
+		[DllImport("ode", EntryPoint = "dBodyAddRelTorque"), SuppressUnmanagedCodeSecurity]
+		public static extern void BodyAddRelTorque(IntPtr body, dReal fx, dReal fy, dReal fz);
+
+		[DllImport("ode", EntryPoint = "dBodyAddTorque"), SuppressUnmanagedCodeSecurity]
+		public static extern void BodyAddTorque(IntPtr body, dReal fx, dReal fy, dReal fz);
 
 		[DllImport("ode", EntryPoint = "dBodyCopyPosition"), SuppressUnmanagedCodeSecurity]
 		public static extern void BodyCopyPosition(IntPtr body, out Vector3 pos);
@@ -274,6 +311,12 @@ namespace Ode.NET
 		[DllImport("ode", EntryPoint = "dBodyDestroy"), SuppressUnmanagedCodeSecurity]
 		public static extern void BodyDestroy(IntPtr body);
 
+		[DllImport("ode", EntryPoint = "dBodyDisable"), SuppressUnmanagedCodeSecurity]
+		public static extern void BodyDisable(IntPtr body);
+
+		[DllImport("ode", EntryPoint = "dBodyEnable"), SuppressUnmanagedCodeSecurity]
+		public static extern void BodyEnable(IntPtr body);
+
 		[DllImport("ode", EntryPoint = "dBodyGetAutoDisableAngularThreshold"), SuppressUnmanagedCodeSecurity]
 		public static extern dReal BodyGetAutoDisableAngularThreshold(IntPtr body);
 
@@ -289,8 +332,111 @@ namespace Ode.NET
 		[DllImport("ode", EntryPoint = "dBodyGetAutoDisableTime"), SuppressUnmanagedCodeSecurity]
 		public static extern dReal BodyGetAutoDisableTime(IntPtr body);
 
+#if !dNO_UNSAFE_CODE
+		[CLSCompliant(false)]
+		[DllImport("ode", EntryPoint = "dBodyGetAngularVel"), SuppressUnmanagedCodeSecurity]
+		public extern unsafe static Vector3* BodyGetAngularVelUnsafe(IntPtr body);
+		public static Vector3 BodyGetAngularVel(IntPtr body)
+		{
+			unsafe { return *(BodyGetAngularVelUnsafe(body)); }
+		}
+#endif
+
 		[DllImport("ode", EntryPoint = "dBodyGetData"), SuppressUnmanagedCodeSecurity]
 		public static extern IntPtr BodyGetData(IntPtr body);
+
+		[DllImport("ode", EntryPoint = "dBodyGetFiniteRotationMode"), SuppressUnmanagedCodeSecurity]
+		public static extern int BodyGetFiniteRotationMode(IntPtr body);
+
+		[DllImport("ode", EntryPoint = "dBodyGetFiniteRotationAxis"), SuppressUnmanagedCodeSecurity]
+		public static extern void BodyGetFiniteRotationAxis(IntPtr body, out Vector3 result);
+
+#if !dNO_UNSAFE_CODE
+		[CLSCompliant(false)]
+		[DllImport("ode", EntryPoint = "dBodyGetForce"), SuppressUnmanagedCodeSecurity]
+		public extern unsafe static Vector3* BodyGetForceUnsafe(IntPtr body);
+		public static Vector3 BodyGetForce(IntPtr body)
+		{
+			unsafe { return *(BodyGetForceUnsafe(body)); }
+		}
+#endif
+
+		[DllImport("ode", EntryPoint = "dBodyGetGravityMode"), SuppressUnmanagedCodeSecurity]
+		public static extern bool BodyGetGravityMode(IntPtr body);
+
+		[DllImport("ode", EntryPoint = "dBodyGetJoint"), SuppressUnmanagedCodeSecurity]
+		public static extern IntPtr BodyGetJoint(IntPtr body, int index);
+
+#if !dNO_UNSAFE_CODE
+		[CLSCompliant(false)]
+		[DllImport("ode", EntryPoint = "dBodyGetLinearVel"), SuppressUnmanagedCodeSecurity]
+		public extern unsafe static Vector3* BodyGetLinearVelUnsafe(IntPtr body);
+		public static Vector3 BodyGetLinearVel(IntPtr body)
+		{
+			unsafe { return *(BodyGetLinearVelUnsafe(body)); }
+		}
+#endif
+
+		[DllImport("ode", EntryPoint = "dBodyGetMass"), SuppressUnmanagedCodeSecurity]
+		public static extern void BodyGetMass(IntPtr body, out Mass mass);
+
+		[DllImport("ode", EntryPoint = "dBodyGetNumJoints"), SuppressUnmanagedCodeSecurity]
+		public static extern int BodyGetNumJoints(IntPtr body);
+
+		[DllImport("ode", EntryPoint = "dBodyGetPointVel"), SuppressUnmanagedCodeSecurity]
+		public static extern void BodyGetPointVel(IntPtr body, dReal px, dReal py, dReal pz, out Vector3 result);
+
+#if !dNO_UNSAFE_CODE
+		[CLSCompliant(false)]
+		[DllImport("ode", EntryPoint = "dBodyGetPosition"), SuppressUnmanagedCodeSecurity]
+		public extern unsafe static Vector3* BodyGetPositionUnsafe(IntPtr body);
+		public static Vector3 BodyGetPosition(IntPtr body)
+		{
+			unsafe { return *(BodyGetPositionUnsafe(body)); }
+		}
+#endif
+
+		[DllImport("ode", EntryPoint = "dBodyGetPosRelPoint"), SuppressUnmanagedCodeSecurity]
+		public static extern void BodyGetPosRelPoint(IntPtr body, dReal px, dReal py, dReal pz, out Vector3 result);
+
+#if !dNO_UNSAFE_CODE
+		[CLSCompliant(false)]
+		[DllImport("ode", EntryPoint = "dBodyGetQuaternion"), SuppressUnmanagedCodeSecurity]
+		public extern unsafe static Quaternion* BodyGetQuaternionUnsafe(IntPtr body);
+		public static Quaternion BodyGetQuaternion(IntPtr body)
+		{
+			unsafe { return *(BodyGetQuaternionUnsafe(body)); }
+		}
+#endif
+
+		[DllImport("ode", EntryPoint = "dBodyGetRelPointPos"), SuppressUnmanagedCodeSecurity]
+		public static extern void BodyGetRelPointPos(IntPtr body, dReal px, dReal py, dReal pz, out Vector3 result);
+
+		[DllImport("ode", EntryPoint = "dBodyGetRelPointVel"), SuppressUnmanagedCodeSecurity]
+		public static extern void BodyGetRelPointVel(IntPtr body, dReal px, dReal py, dReal pz, out Vector3 result);
+
+#if !dNO_UNSAFE_CODE
+		[CLSCompliant(false)]
+		[DllImport("ode", EntryPoint = "dBodyGetRotation"), SuppressUnmanagedCodeSecurity]
+		public extern unsafe static Matrix3* BodyGetRotationUnsafe(IntPtr body);
+		public static Matrix3 BodyGetRotation(IntPtr body)
+		{
+			unsafe { return *(BodyGetRotationUnsafe(body)); }
+		}
+#endif
+
+#if !dNO_UNSAFE_CODE
+		[CLSCompliant(false)]
+		[DllImport("ode", EntryPoint = "dBodyGetTorque"), SuppressUnmanagedCodeSecurity]
+		public extern unsafe static Vector3* BodyGetTorqueUnsafe(IntPtr body);
+		public static Vector3 BodyGetTorque(IntPtr body)
+		{
+			unsafe { return *(BodyGetTorqueUnsafe(body)); }
+		}
+#endif
+
+		[DllImport("ode", EntryPoint = "dBodyIsEnabled"), SuppressUnmanagedCodeSecurity]
+		public static extern bool BodyIsEnabled(IntPtr body);
 
 		[DllImport("ode", EntryPoint = "dBodySetAngularVel"), SuppressUnmanagedCodeSecurity]
 		public static extern void BodySetAngularVel(IntPtr body, dReal x, dReal y, dReal z);
@@ -316,6 +462,18 @@ namespace Ode.NET
 		[DllImport("ode", EntryPoint = "dBodySetData"), SuppressUnmanagedCodeSecurity]
 		public static extern void BodySetData(IntPtr body, IntPtr data);
 
+		[DllImport("ode", EntryPoint = "dBodySetFiniteRotationMode"), SuppressUnmanagedCodeSecurity]
+		public static extern void BodySetFiniteRotationMode(IntPtr body, int mode);
+
+		[DllImport("ode", EntryPoint = "dBodySetFiniteRotationModeAxis"), SuppressUnmanagedCodeSecurity]
+		public static extern void BodySetFiniteRotationModeAxis(IntPtr body, dReal x, dReal y, dReal z);
+
+		[DllImport("ode", EntryPoint = "dBodySetForce"), SuppressUnmanagedCodeSecurity]
+		public static extern void BodySetForce(IntPtr body, dReal x, dReal y, dReal z);
+
+		[DllImport("ode", EntryPoint = "dBodySetGravityMode"), SuppressUnmanagedCodeSecurity]
+		public static extern void BodySetGravityMode(IntPtr body, bool mode);
+
 		[DllImport("ode", EntryPoint = "dBodySetLinearVel"), SuppressUnmanagedCodeSecurity]
 		public static extern void BodySetLinearVel(IntPtr body, dReal x, dReal y, dReal z);
 
@@ -336,6 +494,15 @@ namespace Ode.NET
 
 		[DllImport("ode", EntryPoint = "dBodySetRotation"), SuppressUnmanagedCodeSecurity]
 		public static extern void BodySetRotation(IntPtr body, ref dReal M00);
+
+		[DllImport("ode", EntryPoint = "dBodySetTorque"), SuppressUnmanagedCodeSecurity]
+		public static extern void BodySetTorque(IntPtr body, dReal x, dReal y, dReal z);
+
+		[DllImport("ode", EntryPoint = "dBodyVectorFromWorld"), SuppressUnmanagedCodeSecurity]
+		public static extern void BodyVectorFromWorld(IntPtr body, dReal px, dReal py, dReal pz, out Vector3 result);
+
+		[DllImport("ode", EntryPoint = "dBodyVectorToWorld"), SuppressUnmanagedCodeSecurity]
+		public static extern void BodyVectorToWorld(IntPtr body, dReal px, dReal py, dReal pz, out Vector3 result);
 
 		[DllImport("ode", EntryPoint = "dBoxBox"), SuppressUnmanagedCodeSecurity]
 		public static extern void BoxBox(ref Vector3 p1, ref Matrix3 R1,
@@ -359,6 +526,9 @@ namespace Ode.NET
 
 		[DllImport("ode", EntryPoint = "dCollide"), SuppressUnmanagedCodeSecurity]
 		public static extern int Collide(IntPtr o1, IntPtr o2, int flags, [In, Out] ContactGeom[] contact, int skip);
+
+		[DllImport("ode", EntryPoint = "dConnectingJoint"), SuppressUnmanagedCodeSecurity]
+		public static extern IntPtr ConnectingJoint(IntPtr j1, IntPtr j2);
 
 		[DllImport("ode", EntryPoint = "dCreateBox"), SuppressUnmanagedCodeSecurity]
 		public static extern IntPtr CreateBox(IntPtr space, dReal lx, dReal ly, dReal lz);
@@ -445,12 +615,6 @@ namespace Ode.NET
 		[DllImport("ode", EntryPoint = "dGeomCopyPosition"), SuppressUnmanagedCodeSecurity]
 		public static extern void GeomCopyPosition(IntPtr geom, out dReal X);
 
-		[DllImport("ode", EntryPoint = "dGeomGetQuaternion"), SuppressUnmanagedCodeSecurity]
-		public static extern void GeomCopyQuaternion(IntPtr geom, out Quaternion q);
-
-		[DllImport("ode", EntryPoint = "dGeomGetQuaternion"), SuppressUnmanagedCodeSecurity]
-		public static extern void GeomCopyQuaternion(IntPtr geom, out dReal X);
-
 		[DllImport("ode", EntryPoint = "dGeomCopyRotation"), SuppressUnmanagedCodeSecurity]
 		public static extern void GeomCopyRotation(IntPtr geom, out Matrix3 R);
 
@@ -495,6 +659,52 @@ namespace Ode.NET
 
 		[DllImport("ode", EntryPoint = "dGeomGetData"), SuppressUnmanagedCodeSecurity]
 		public static extern IntPtr GeomGetData(IntPtr geom);
+
+#if !dNO_UNSAFE_CODE
+		[CLSCompliant(false)]
+		[DllImport("ode", EntryPoint = "dGeomGetOffsetPosition"), SuppressUnmanagedCodeSecurity]
+		public extern unsafe static Vector3* GeomGetOffsetPositionUnsafe(IntPtr geom);
+		public static Vector3 GeomGetOffsetPosition(IntPtr geom)
+		{
+			unsafe { return *(GeomGetOffsetPositionUnsafe(geom)); }
+		}
+#endif
+
+#if !dNO_UNSAFE_CODE
+		[CLSCompliant(false)]
+		[DllImport("ode", EntryPoint = "dGeomGetOffsetRotation"), SuppressUnmanagedCodeSecurity]
+		public extern unsafe static Matrix3* GeomGetOffsetRotationUnsafe(IntPtr geom);
+		public static Matrix3 GeomGetOffsetRotation(IntPtr geom)
+		{
+			unsafe { return *(GeomGetOffsetRotationUnsafe(geom)); }
+		}
+#endif
+
+#if !dNO_UNSAFE_CODE
+		[CLSCompliant(false)]
+		[DllImport("ode", EntryPoint = "dGeomGetPosition"), SuppressUnmanagedCodeSecurity]
+		public extern unsafe static Vector3* GeomGetPositionUnsafe(IntPtr geom);
+		public static Vector3 GeomGetPosition(IntPtr geom)
+		{
+			unsafe { return *(GeomGetPositionUnsafe(geom)); }
+		}
+#endif
+
+		[DllImport("ode", EntryPoint = "dGeomGetQuaternion"), SuppressUnmanagedCodeSecurity]
+		public static extern void GeomCopyQuaternion(IntPtr geom, out Quaternion q);
+
+		[DllImport("ode", EntryPoint = "dGeomGetQuaternion"), SuppressUnmanagedCodeSecurity]
+		public static extern void GeomCopyQuaternion(IntPtr geom, out dReal X);
+
+#if !dNO_UNSAFE_CODE
+		[CLSCompliant(false)]
+		[DllImport("ode", EntryPoint = "dGeomGetRotation"), SuppressUnmanagedCodeSecurity]
+		public extern unsafe static Matrix3* GeomGetRotationUnsafe(IntPtr geom);
+		public static Matrix3 GeomGetRotation(IntPtr geom)
+		{
+			unsafe { return *(GeomGetRotationUnsafe(geom)); }
+		}
+#endif
 
 		[DllImport("ode", EntryPoint = "dGeomGetSpace"), SuppressUnmanagedCodeSecurity]
 		public static extern IntPtr GeomGetSpace(IntPtr geom);
@@ -799,6 +1009,16 @@ namespace Ode.NET
 		[DllImport("ode", EntryPoint = "dGeomTriMeshGetData"), SuppressUnmanagedCodeSecurity]
 		public static extern IntPtr GeomTriMeshGetData(IntPtr g);
 
+#if !dNO_UNSAFE_CODE
+		[CLSCompliant(false)]
+		[DllImport("ode", EntryPoint = "dGeomTriMeshGetLastTransform"), SuppressUnmanagedCodeSecurity]
+		public extern unsafe static Matrix4* GeomTriMeshGetLastTransformUnsafe(IntPtr geom);
+		public static Matrix4 GeomTriMeshGetLastTransform(IntPtr geom)
+		{
+			unsafe { return *(GeomTriMeshGetLastTransformUnsafe(geom)); }
+		}
+#endif
+
 		[DllImport("ode", EntryPoint = "dGeomTriMeshGetPoint"), SuppressUnmanagedCodeSecurity]
 		public extern static void GeomTriMeshGetPoint(IntPtr g, int index, dReal u, dReal v, ref Vector3 outVec);
 
@@ -850,11 +1070,222 @@ namespace Ode.NET
 		[DllImport("ode", EntryPoint = "dInitODE"), SuppressUnmanagedCodeSecurity]
 		public static extern void InitODE();
 
+		[DllImport("ode", EntryPoint = "dJointAddAMotorTorques"), SuppressUnmanagedCodeSecurity]
+		public static extern void JointAddAMotorTorques(IntPtr joint, dReal torque1, dReal torque2, dReal torque3);
+
+		[DllImport("ode", EntryPoint = "dJointAddHingeTorque"), SuppressUnmanagedCodeSecurity]
+		public static extern void JointAddHingeTorque(IntPtr joint, dReal torque);
+
+		[DllImport("ode", EntryPoint = "dJointAddHinge2Torque"), SuppressUnmanagedCodeSecurity]
+		public static extern void JointAddHinge2Torques(IntPtr joint, dReal torque1, dReal torque2);
+
+		[DllImport("ode", EntryPoint = "dJointAddPRTorque"), SuppressUnmanagedCodeSecurity]
+		public static extern void JointAddPRTorque(IntPtr joint, dReal torque);
+
+		[DllImport("ode", EntryPoint = "dJointAddUniversalTorque"), SuppressUnmanagedCodeSecurity]
+		public static extern void JointAddUniversalTorques(IntPtr joint, dReal torque1, dReal torque2);
+
+		[DllImport("ode", EntryPoint = "dJointAddSliderForce"), SuppressUnmanagedCodeSecurity]
+		public static extern void JointAddSliderForce(IntPtr joint, dReal force);
+
 		[DllImport("ode", EntryPoint = "dJointAttach"), SuppressUnmanagedCodeSecurity]
 		public static extern void JointAttach(IntPtr joint, IntPtr body1, IntPtr body2);
 
+		[DllImport("ode", EntryPoint = "dJointCreateAMotor"), SuppressUnmanagedCodeSecurity]
+		public static extern IntPtr JointCreateAMotor(IntPtr world, IntPtr group);
+
+		[DllImport("ode", EntryPoint = "dJointCreateBall"), SuppressUnmanagedCodeSecurity]
+		public static extern IntPtr JointCreateBall(IntPtr world, IntPtr group);
+
 		[DllImport("ode", EntryPoint = "dJointCreateContact"), SuppressUnmanagedCodeSecurity]
 		public static extern IntPtr JointCreateContact(IntPtr world, IntPtr group, ref Contact contact);
+
+		[DllImport("ode", EntryPoint = "dJointCreateFixed"), SuppressUnmanagedCodeSecurity]
+		public static extern IntPtr JointCreateFixed(IntPtr world, IntPtr group);
+
+		[DllImport("ode", EntryPoint = "dJointCreateHinge"), SuppressUnmanagedCodeSecurity]
+		public static extern IntPtr JointCreateHinge(IntPtr world, IntPtr group);
+
+		[DllImport("ode", EntryPoint = "dJointCreateHinge2"), SuppressUnmanagedCodeSecurity]
+		public static extern IntPtr JointCreateHinge2(IntPtr world, IntPtr group);
+
+		[DllImport("ode", EntryPoint = "dJointCreateLMotor"), SuppressUnmanagedCodeSecurity]
+		public static extern IntPtr JointCreateLMotor(IntPtr world, IntPtr group);
+
+		[DllImport("ode", EntryPoint = "dJointCreateNull"), SuppressUnmanagedCodeSecurity]
+		public static extern IntPtr JointCreateNull(IntPtr world, IntPtr group);
+
+		[DllImport("ode", EntryPoint = "dJointCreatePR"), SuppressUnmanagedCodeSecurity]
+		public static extern IntPtr JointCreatePR(IntPtr world, IntPtr group);
+
+		[DllImport("ode", EntryPoint = "dJointCreatePlane2D"), SuppressUnmanagedCodeSecurity]
+		public static extern IntPtr JointCreatePlane2D(IntPtr world, IntPtr group);
+
+		[DllImport("ode", EntryPoint = "dJointCreateSlider"), SuppressUnmanagedCodeSecurity]
+		public static extern IntPtr JointCreateSlider(IntPtr world, IntPtr group);
+
+		[DllImport("ode", EntryPoint = "dJointCreateUniversal"), SuppressUnmanagedCodeSecurity]
+		public static extern IntPtr JointCreateUniversal(IntPtr world, IntPtr group);
+
+		[DllImport("ode", EntryPoint = "dJointDestroy"), SuppressUnmanagedCodeSecurity]
+		public static extern void JointDestroy(IntPtr j);
+
+		[DllImport("ode", EntryPoint = "dJointGetAMotorAngle"), SuppressUnmanagedCodeSecurity]
+		public static extern dReal JointGetAMotorAngle(IntPtr j, int anum);
+
+		[DllImport("ode", EntryPoint = "dJointGetAMotorAngleRate"), SuppressUnmanagedCodeSecurity]
+		public static extern dReal JointGetAMotorAngleRate(IntPtr j, int anum);
+
+		[DllImport("ode", EntryPoint = "dJointGetAMotorAxis"), SuppressUnmanagedCodeSecurity]
+		public static extern void JointGetAMotorAxis(IntPtr j, int anum, out Vector3 result);
+
+		[DllImport("ode", EntryPoint = "dJointGetAMotorAxisRel"), SuppressUnmanagedCodeSecurity]
+		public static extern int JointGetAMotorAxisRel(IntPtr j, int anum);
+
+		[DllImport("ode", EntryPoint = "dJointGetAMotorMode"), SuppressUnmanagedCodeSecurity]
+		public static extern int JointGetAMotorMode(IntPtr j);
+
+		[DllImport("ode", EntryPoint = "dJointGetAMotorNumAxes"), SuppressUnmanagedCodeSecurity]
+		public static extern int JointGetAMotorNumAxes(IntPtr j);
+
+		[DllImport("ode", EntryPoint = "dJointGetAMotorParam"), SuppressUnmanagedCodeSecurity]
+		public static extern dReal JointGetAMotorParam(IntPtr j, int parameter);
+
+		[DllImport("ode", EntryPoint = "dJointGetBallAnchor"), SuppressUnmanagedCodeSecurity]
+		public static extern void JointGetBallAnchor(IntPtr j, out Vector3 result);
+
+		[DllImport("ode", EntryPoint = "dJointGetBallAnchor2"), SuppressUnmanagedCodeSecurity]
+		public static extern void JointGetBallAnchor2(IntPtr j, out Vector3 result);
+
+		[DllImport("ode", EntryPoint = "dJointGetBody"), SuppressUnmanagedCodeSecurity]
+		public static extern IntPtr JointGetBody(IntPtr j);
+
+		[DllImport("ode", EntryPoint = "dJointGetData"), SuppressUnmanagedCodeSecurity]
+		public static extern IntPtr JointGetData(IntPtr j);
+
+#if !dNO_UNSAFE_CODE
+		[CLSCompliant(false)]
+		[DllImport("ode", EntryPoint = "dJointGetFeedback"), SuppressUnmanagedCodeSecurity]
+		public extern unsafe static JointFeedback* JointGetFeedbackUnsafe(IntPtr j);
+		public static JointFeedback JointGetFeedback(IntPtr j)
+		{
+			unsafe { return *(JointGetFeedbackUnsafe(j)); }
+		}
+#endif
+
+		[DllImport("ode", EntryPoint = "dJointGetHingeAnchor"), SuppressUnmanagedCodeSecurity]
+		public static extern void JointGetHingeAnchor(IntPtr j, out Vector3 result);
+
+		[DllImport("ode", EntryPoint = "dJointGetHingeAngle"), SuppressUnmanagedCodeSecurity]
+		public static extern dReal JointGetHingeAngle(IntPtr j);
+
+		[DllImport("ode", EntryPoint = "dJointGetHingeAngleRate"), SuppressUnmanagedCodeSecurity]
+		public static extern dReal JointGetHingeAngleRate(IntPtr j);
+
+		[DllImport("ode", EntryPoint = "dJointGetHingeAxis"), SuppressUnmanagedCodeSecurity]
+		public static extern void JointGetHingeAxis(IntPtr j, out Vector3 result);
+
+		[DllImport("ode", EntryPoint = "dJointGetHingeParam"), SuppressUnmanagedCodeSecurity]
+		public static extern dReal JointGetHingeParam(IntPtr j, int parameter);
+
+		[DllImport("ode", EntryPoint = "dJointGetHinge2Angle1"), SuppressUnmanagedCodeSecurity]
+		public static extern dReal JointGetHinge2Angle1(IntPtr j);
+
+		[DllImport("ode", EntryPoint = "dJointGetHinge2Angle1Rate"), SuppressUnmanagedCodeSecurity]
+		public static extern dReal JointGetHinge2Angle1Rate(IntPtr j);
+
+		[DllImport("ode", EntryPoint = "dJointGetHinge2Angle2Rate"), SuppressUnmanagedCodeSecurity]
+		public static extern dReal JointGetHinge2Angle2Rate(IntPtr j);
+
+		[DllImport("ode", EntryPoint = "dJointGetHingeAnchor2"), SuppressUnmanagedCodeSecurity]
+		public static extern void JointGetHingeAnchor2(IntPtr j, out Vector3 result);
+
+		[DllImport("ode", EntryPoint = "dJointGetHinge2Anchor"), SuppressUnmanagedCodeSecurity]
+		public static extern void JointGetHinge2Anchor(IntPtr j, out Vector3 result);
+
+		[DllImport("ode", EntryPoint = "dJointGetHinge2Anchor2"), SuppressUnmanagedCodeSecurity]
+		public static extern void JointGetHinge2Anchor2(IntPtr j, out Vector3 result);
+
+		[DllImport("ode", EntryPoint = "dJointGetHinge2Axis1"), SuppressUnmanagedCodeSecurity]
+		public static extern void JointGetHinge2Axis1(IntPtr j, out Vector3 result);
+
+		[DllImport("ode", EntryPoint = "dJointGetHinge2Axis2"), SuppressUnmanagedCodeSecurity]
+		public static extern void JointGetHinge2Axis2(IntPtr j, out Vector3 result);
+
+		[DllImport("ode", EntryPoint = "dJointGetHinge2Param"), SuppressUnmanagedCodeSecurity]
+		public static extern dReal JointGetHinge2Param(IntPtr j, int parameter);
+
+		[DllImport("ode", EntryPoint = "dJointGetLMotorAxis"), SuppressUnmanagedCodeSecurity]
+		public static extern void JointGetLMotorAxis(IntPtr j, int anum, out Vector3 result);
+
+		[DllImport("ode", EntryPoint = "dJointGetLMotorNumAxes"), SuppressUnmanagedCodeSecurity]
+		public static extern int JointGetLMotorNumAxes(IntPtr j);
+
+		[DllImport("ode", EntryPoint = "dJointGetLMotorParam"), SuppressUnmanagedCodeSecurity]
+		public static extern dReal JointGetLMotorParam(IntPtr j, int parameter);
+
+		[DllImport("ode", EntryPoint = "dJointGetPRAnchor"), SuppressUnmanagedCodeSecurity]
+		public static extern void JointGetPRAnchor(IntPtr j, out Vector3 result);
+
+		[DllImport("ode", EntryPoint = "dJointGetPRAxis1"), SuppressUnmanagedCodeSecurity]
+		public static extern void JointGetPRAxis1(IntPtr j, out Vector3 result);
+
+		[DllImport("ode", EntryPoint = "dJointGetPRAxis2"), SuppressUnmanagedCodeSecurity]
+		public static extern void JointGetPRAxis2(IntPtr j, out Vector3 result);
+
+		[DllImport("ode", EntryPoint = "dJointGetPRParam"), SuppressUnmanagedCodeSecurity]
+		public static extern dReal JointGetPRParam(IntPtr j, int parameter);
+
+		[DllImport("ode", EntryPoint = "dJointGetPRPosition"), SuppressUnmanagedCodeSecurity]
+		public static extern dReal JointGetPRPosition(IntPtr j);
+
+		[DllImport("ode", EntryPoint = "dJointGetPRPositionRate"), SuppressUnmanagedCodeSecurity]
+		public static extern dReal JointGetPRPositionRate(IntPtr j);
+
+		[DllImport("ode", EntryPoint = "dJointGetSliderAxis"), SuppressUnmanagedCodeSecurity]
+		public static extern void JointGetSliderAxis(IntPtr j, out Vector3 result);
+
+		[DllImport("ode", EntryPoint = "dJointGetSliderParam"), SuppressUnmanagedCodeSecurity]
+		public static extern dReal JointGetSliderParam(IntPtr j, int parameter);
+
+		[DllImport("ode", EntryPoint = "dJointGetSliderPosition"), SuppressUnmanagedCodeSecurity]
+		public static extern dReal JointGetSliderPosition(IntPtr j);
+
+		[DllImport("ode", EntryPoint = "dJointGetSliderPositionRate"), SuppressUnmanagedCodeSecurity]
+		public static extern dReal JointGetSliderPositionRate(IntPtr j);
+
+		[DllImport("ode", EntryPoint = "dJointGetType"), SuppressUnmanagedCodeSecurity]
+		public static extern JointType JointGetType(IntPtr j);
+
+		[DllImport("ode", EntryPoint = "dJointGetUniversalAnchor"), SuppressUnmanagedCodeSecurity]
+		public static extern void JointGetUniversalAnchor(IntPtr j, out Vector3 result);
+
+		[DllImport("ode", EntryPoint = "dJointGetUniversalAnchor2"), SuppressUnmanagedCodeSecurity]
+		public static extern void JointGetUniversalAnchor2(IntPtr j, out Vector3 result);
+
+		[DllImport("ode", EntryPoint = "dJointGetUniversalAngle1"), SuppressUnmanagedCodeSecurity]
+		public static extern dReal JointGetUniversalAngle1(IntPtr j);
+
+		[DllImport("ode", EntryPoint = "dJointGetUniversalAngle1Rate"), SuppressUnmanagedCodeSecurity]
+		public static extern dReal JointGetUniversalAngle1Rate(IntPtr j);
+
+		[DllImport("ode", EntryPoint = "dJointGetUniversalAngle2"), SuppressUnmanagedCodeSecurity]
+		public static extern dReal JointGetUniversalAngle2(IntPtr j);
+
+		[DllImport("ode", EntryPoint = "dJointGetUniversalAngle2Rate"), SuppressUnmanagedCodeSecurity]
+		public static extern dReal JointGetUniversalAngle2Rate(IntPtr j);
+
+		[DllImport("ode", EntryPoint = "dJointGetUniversalAngles"), SuppressUnmanagedCodeSecurity]
+		public static extern void JointGetUniversalAngles(IntPtr j, out dReal angle1, out dReal angle2);
+
+		[DllImport("ode", EntryPoint = "dJointGetUniversalAxis1"), SuppressUnmanagedCodeSecurity]
+		public static extern void JointGetUniversalAxis1(IntPtr j, out Vector3 result);
+
+		[DllImport("ode", EntryPoint = "dJointGetUniversalAxis2"), SuppressUnmanagedCodeSecurity]
+		public static extern void JointGetUniversalAxis2(IntPtr j, out Vector3 result);
+
+		[DllImport("ode", EntryPoint = "dJointGetUniversalParam"), SuppressUnmanagedCodeSecurity]
+		public static extern dReal JointGetUniversalParam(IntPtr j, int parameter);
 
 		[DllImport("ode", EntryPoint = "dJointGroupCreate"), SuppressUnmanagedCodeSecurity]
 		public static extern IntPtr JointGroupCreate(int max_size);
@@ -864,6 +1295,111 @@ namespace Ode.NET
 
 		[DllImport("ode", EntryPoint = "dJointGroupEmpty"), SuppressUnmanagedCodeSecurity]
 		public static extern void JointGroupEmpty(IntPtr group);
+
+		[DllImport("ode", EntryPoint = "dJointSetAMotorAngle"), SuppressUnmanagedCodeSecurity]
+		public static extern void JointSetAMotorAngle(IntPtr j, int anum, dReal angle);
+
+		[DllImport("ode", EntryPoint = "dJointSetAMotorAxis"), SuppressUnmanagedCodeSecurity]
+		public static extern void JointSetAMotorAxis(IntPtr j, int anum, int rel, dReal x, dReal y, dReal z);
+
+		[DllImport("ode", EntryPoint = "dJointSetAMotorMode"), SuppressUnmanagedCodeSecurity]
+		public static extern void JointSetAMotorMode(IntPtr j, int mode);
+
+		[DllImport("ode", EntryPoint = "dJointSetAMotorNumAxes"), SuppressUnmanagedCodeSecurity]
+		public static extern void JointSetAMotorNumAxes(IntPtr group, int num);
+
+		[DllImport("ode", EntryPoint = "dJointSetAMotorParam"), SuppressUnmanagedCodeSecurity]
+		public static extern void JointSetAMotorParam(IntPtr group, int parameter, dReal value);
+
+		[DllImport("ode", EntryPoint = "dJointSetBallAnchor"), SuppressUnmanagedCodeSecurity]
+		public static extern void JointSetBallAnchor(IntPtr j, dReal x, dReal y, dReal z);
+
+		[DllImport("ode", EntryPoint = "dJointSetBallAnchor2"), SuppressUnmanagedCodeSecurity]
+		public static extern void JointSetBallAnchor2(IntPtr j, dReal x, dReal y, dReal z);
+
+		[DllImport("ode", EntryPoint = "dJointSetData"), SuppressUnmanagedCodeSecurity]
+		public static extern void JointSetData(IntPtr j, IntPtr data);
+
+		[DllImport("ode", EntryPoint = "dJointSetFeedback"), SuppressUnmanagedCodeSecurity]
+		public static extern void JointSetFeedback(IntPtr j, out JointFeedback feedback);
+
+		[DllImport("ode", EntryPoint = "dJointSetFixed"), SuppressUnmanagedCodeSecurity]
+		public static extern void JointSetFixed(IntPtr j);
+
+		[DllImport("ode", EntryPoint = "dJointSetHingeAnchor"), SuppressUnmanagedCodeSecurity]
+		public static extern void JointSetHingeAnchor(IntPtr j, dReal x, dReal y, dReal z);
+
+		[DllImport("ode", EntryPoint = "dJointSetHingeAnchorDelta"), SuppressUnmanagedCodeSecurity]
+		public static extern void JointSetHingeAnchorDelta(IntPtr j, dReal x, dReal y, dReal z, dReal ax, dReal ay, dReal az);
+
+		[DllImport("ode", EntryPoint = "dJointSetHingeAxis"), SuppressUnmanagedCodeSecurity]
+		public static extern void JointSetHingeAxis(IntPtr j, dReal x, dReal y, dReal z);
+
+		[DllImport("ode", EntryPoint = "dJointSetHingeParam"), SuppressUnmanagedCodeSecurity]
+		public static extern void JointSetHingeParam(IntPtr j, int parameter, dReal value);
+
+		[DllImport("ode", EntryPoint = "dJointSetHinge2Anchor"), SuppressUnmanagedCodeSecurity]
+		public static extern void JointSetHinge2Anchor(IntPtr j, dReal x, dReal y, dReal z);
+
+		[DllImport("ode", EntryPoint = "dJointSetHinge2Axis1"), SuppressUnmanagedCodeSecurity]
+		public static extern void JointSetHinge2Axis1(IntPtr j, dReal x, dReal y, dReal z);
+
+		[DllImport("ode", EntryPoint = "dJointSetHinge2Axis2"), SuppressUnmanagedCodeSecurity]
+		public static extern void JointSetHinge2Axis2(IntPtr j, dReal x, dReal y, dReal z);
+
+		[DllImport("ode", EntryPoint = "dJointSetHinge2Param"), SuppressUnmanagedCodeSecurity]
+		public static extern void JointSetHinge2Param(IntPtr j, int parameter, dReal value);
+
+		[DllImport("ode", EntryPoint = "dJointSetLMotorAxis"), SuppressUnmanagedCodeSecurity]
+		public static extern void JointSetLMotorAxis(IntPtr j, int anum, int rel, dReal x, dReal y, dReal z);
+
+		[DllImport("ode", EntryPoint = "dJointSetLMotorNumAxes"), SuppressUnmanagedCodeSecurity]
+		public static extern void JointSetLMotorNumAxes(IntPtr j, int num);
+
+		[DllImport("ode", EntryPoint = "dJointSetLMotorParam"), SuppressUnmanagedCodeSecurity]
+		public static extern void JointSetLMotorParam(IntPtr j, int parameter, dReal value);
+
+		[DllImport("ode", EntryPoint = "dJointSetPlane2DAngleParam"), SuppressUnmanagedCodeSecurity]
+		public static extern void JointSetPlane2DAngleParam(IntPtr j, int parameter, dReal value);
+
+		[DllImport("ode", EntryPoint = "dJointSetPlane2DXParam"), SuppressUnmanagedCodeSecurity]
+		public static extern void JointSetPlane2DXParam(IntPtr j, int parameter, dReal value);
+
+		[DllImport("ode", EntryPoint = "dJointSetPlane2DYParam"), SuppressUnmanagedCodeSecurity]
+		public static extern void JointSetPlane2DYParam(IntPtr j, int parameter, dReal value);
+
+		[DllImport("ode", EntryPoint = "dJointSetPRAnchor"), SuppressUnmanagedCodeSecurity]
+		public static extern void JointSetPRAnchor(IntPtr j, dReal x, dReal y, dReal z);
+
+		[DllImport("ode", EntryPoint = "dJointSetPRAxis1"), SuppressUnmanagedCodeSecurity]
+		public static extern void JointSetPRAxis1(IntPtr j, dReal x, dReal y, dReal z);
+
+		[DllImport("ode", EntryPoint = "dJointSetPRAxis2"), SuppressUnmanagedCodeSecurity]
+		public static extern void JointSetPRAxis2(IntPtr j, dReal x, dReal y, dReal z);
+
+		[DllImport("ode", EntryPoint = "dJointSetPRParam"), SuppressUnmanagedCodeSecurity]
+		public static extern void JointSetPRParam(IntPtr j, int parameter, dReal value);
+
+		[DllImport("ode", EntryPoint = "dJointSetSliderAxis"), SuppressUnmanagedCodeSecurity]
+		public static extern void JointSetSliderAxis(IntPtr j, dReal x, dReal y, dReal z);
+
+		[DllImport("ode", EntryPoint = "dJointSetSliderAxisDelta"), SuppressUnmanagedCodeSecurity]
+		public static extern void JointSetSliderAxisDelta(IntPtr j, dReal x, dReal y, dReal z, dReal ax, dReal ay, dReal az);
+
+		[DllImport("ode", EntryPoint = "dJointSetSliderParam"), SuppressUnmanagedCodeSecurity]
+		public static extern void JointSetSliderParam(IntPtr j, int parameter, dReal value);
+
+		[DllImport("ode", EntryPoint = "dJointSetUniversalAnchor"), SuppressUnmanagedCodeSecurity]
+		public static extern void JointSetUniversalAnchor(IntPtr j, dReal x, dReal y, dReal z);
+
+		[DllImport("ode", EntryPoint = "dJointSetUniversalAxis1"), SuppressUnmanagedCodeSecurity]
+		public static extern void JointSetUniversalAxis1(IntPtr j, dReal x, dReal y, dReal z);
+
+		[DllImport("ode", EntryPoint = "dJointSetUniversalAxis2"), SuppressUnmanagedCodeSecurity]
+		public static extern void JointSetUniversalAxis2(IntPtr j, dReal x, dReal y, dReal z);
+
+		[DllImport("ode", EntryPoint = "dJointSetUniversalParam"), SuppressUnmanagedCodeSecurity]
+		public static extern void JointSetUniversalParam(IntPtr j, int parameter, dReal value);
 
 		[DllImport("ode", EntryPoint = "dMassAdd"), SuppressUnmanagedCodeSecurity]
 		public static extern void MassAdd(ref Mass a, ref Mass b);
