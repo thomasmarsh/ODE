@@ -24,7 +24,7 @@
 Code for Convex Collision Detection
 By Rodrigo Hernandez
 */
-#include <algorithm>
+//#include <algorithm>
 #include <ode/common.h>
 #include <ode/collision.h>
 #include <ode/matrix.h>
@@ -98,29 +98,29 @@ void dxConvex::computeAABB()
   the polygon array gets updated */
 void dxConvex::FillEdges()
 {
-  unsigned int *points_in_poly=polygons;
-  unsigned int *index=polygons+1;
-  for(unsigned int i=0;i<planecount;++i)
-    {
-      //fprintf(stdout,"Points in Poly: %d\n",*points_in_poly);
-      for(int j=0;j<*points_in_poly;++j)
+	unsigned int *points_in_poly=polygons;
+	unsigned int *index=polygons+1;
+	for(unsigned int i=0;i<planecount;++i)
 	{
-	  edges.insert(edge(dMIN(index[j],index[(j+1)%*points_in_poly]),
-			    dMAX(index[j],index[(j+1)%*points_in_poly])));
-	  //fprintf(stdout,"Insert %d-%d\n",index[j],index[(j+1)%*points_in_poly]);
+		//fprintf(stdout,"Points in Poly: %d\n",*points_in_poly);
+		for(unsigned int j=0;j<*points_in_poly;++j)
+		{
+			edges.insert(edge(dMIN(index[j],index[(j+1)%*points_in_poly]),
+				dMAX(index[j],index[(j+1)%*points_in_poly])));
+			//fprintf(stdout,"Insert %d-%d\n",index[j],index[(j+1)%*points_in_poly]);
+		}
+		points_in_poly+=(*points_in_poly+1);
+		index=points_in_poly+1;
 	}
-      points_in_poly+=(*points_in_poly+1);
-      index=points_in_poly+1;
-    }
-  /*
-    fprintf(stdout,"Edge Count: %d\n",edges.size());
-    for(std::set<edge>::iterator it=edges.begin();
-    it!=edges.end();
-    ++it)
-    {
-    fprintf(stdout,"Edge: %d-%d\n",it->first,it->second);
-    }
-  */
+	/*
+	fprintf(stdout,"Edge Count: %d\n",edges.size());
+	for(std::set<edge>::iterator it=edges.begin();
+	it!=edges.end();
+	++it)
+	{
+	fprintf(stdout,"Edge: %d-%d\n",it->first,it->second);
+	}
+	*/
 }
 
 dGeomID dCreateConvex (dSpaceID space,dReal *_planes,unsigned int _planecount,
@@ -346,76 +346,76 @@ inline bool IsPointInPolygon(dVector3 p,
 }
 
 int dCollideConvexPlane (dxGeom *o1, dxGeom *o2, int flags,
-			 dContactGeom *contact, int skip)
+						 dContactGeom *contact, int skip)
 {
-  dIASSERT (o1->type == dConvexClass);
-  dIASSERT (o2->type == dPlaneClass);
-  dxConvex *Convex = (dxConvex*) o1;
-  dxPlane *Plane = (dxPlane*) o2;
-  unsigned int contacts=0;
-  int maxc = flags & NUMC_MASK;
-  dVector3 v1;
-  dVector3 v2;
-  bool Hit=false;
+	dIASSERT (o1->type == dConvexClass);
+	dIASSERT (o2->type == dPlaneClass);
+	dxConvex *Convex = (dxConvex*) o1;
+	dxPlane *Plane = (dxPlane*) o2;
+	unsigned int contacts=0;
+	unsigned int maxc = flags & NUMC_MASK;
+	dVector3 v1;
+	dVector3 v2;
+	bool Hit=false;
 
-  dMULTIPLY0_331 (v1,Convex->final_posr->R,Convex->points);
-  v1[0]=Convex->final_posr->pos[0]+v1[0];
-  v1[1]=Convex->final_posr->pos[1]+v1[1];
-  v1[2]=Convex->final_posr->pos[2]+v1[2];
+	dMULTIPLY0_331 (v1,Convex->final_posr->R,Convex->points);
+	v1[0]=Convex->final_posr->pos[0]+v1[0];
+	v1[1]=Convex->final_posr->pos[1]+v1[1];
+	v1[2]=Convex->final_posr->pos[2]+v1[2];
 
-  dReal distance1 = ((Plane->p[0] * v1[0])   + // Ax +
-		     (Plane->p[1] * v1[1])   + // Bx +
-		     (Plane->p[2] * v1[2])) - Plane->p[3]; // Cz - D
-  if(distance1<=0)
-    {
-      CONTACT(contact,skip*contacts)->normal[0] = Plane->p[0];
-      CONTACT(contact,skip*contacts)->normal[1] = Plane->p[1];
-      CONTACT(contact,skip*contacts)->normal[2] = Plane->p[2];
-      CONTACT(contact,skip*contacts)->pos[0] = v1[0];
-      CONTACT(contact,skip*contacts)->pos[1] = v1[1];
-      CONTACT(contact,skip*contacts)->pos[2] = v1[2];
-      CONTACT(contact,skip*contacts)->depth = -distance1;
-      CONTACT(contact,skip*contacts)->g1 = Convex;
-      CONTACT(contact,skip*contacts)->g2 = Plane;
-      contacts++;
-    }
-  for(unsigned int i=1;i<Convex->pointcount;++i)
-    {
-      dMULTIPLY0_331 (v2,Convex->final_posr->R,&Convex->points[(i*3)]);
-      v2[0]=Convex->final_posr->pos[0]+v2[0];
-      v2[1]=Convex->final_posr->pos[1]+v2[1];
-      v2[2]=Convex->final_posr->pos[2]+v2[2];
-      dReal distance2 = ((Plane->p[0] * v2[0]) + // Ax +
-			 (Plane->p[1] * v2[1])  + // Bx +
-			 (Plane->p[2] * v2[2])) - Plane->p[3]; // Cz + D
-      if(!Hit) 
-	/* 
-	   Avoid multiplication 
-	   if we have already determined there is a hit 
-	*/
+	dReal distance1 = ((Plane->p[0] * v1[0])   + // Ax +
+		(Plane->p[1] * v1[1])   + // Bx +
+		(Plane->p[2] * v1[2])) - Plane->p[3]; // Cz - D
+	if(distance1<=0)
 	{
-	  if(distance1 * distance2 <= 0)
-	    {
-	      // there is a hit.
-	      Hit=true;
-	    }
+		CONTACT(contact,skip*contacts)->normal[0] = Plane->p[0];
+		CONTACT(contact,skip*contacts)->normal[1] = Plane->p[1];
+		CONTACT(contact,skip*contacts)->normal[2] = Plane->p[2];
+		CONTACT(contact,skip*contacts)->pos[0] = v1[0];
+		CONTACT(contact,skip*contacts)->pos[1] = v1[1];
+		CONTACT(contact,skip*contacts)->pos[2] = v1[2];
+		CONTACT(contact,skip*contacts)->depth = -distance1;
+		CONTACT(contact,skip*contacts)->g1 = Convex;
+		CONTACT(contact,skip*contacts)->g2 = Plane;
+		contacts++;
 	}
-      if((distance2<=0)&&(contacts<maxc))
+	for(unsigned int i=1;i<Convex->pointcount;++i)
 	{
-	  CONTACT(contact,skip*contacts)->normal[0] = Plane->p[0];
-	  CONTACT(contact,skip*contacts)->normal[1] = Plane->p[1];
-	  CONTACT(contact,skip*contacts)->normal[2] = Plane->p[2];
-	  CONTACT(contact,skip*contacts)->pos[0] = v2[0];
-	  CONTACT(contact,skip*contacts)->pos[1] = v2[1];
-	  CONTACT(contact,skip*contacts)->pos[2] = v2[2];
-	  CONTACT(contact,skip*contacts)->depth = -distance2;
-	  CONTACT(contact,skip*contacts)->g1 = Convex;
-	  CONTACT(contact,skip*contacts)->g2 = Plane;
-	  contacts++;
+		dMULTIPLY0_331 (v2,Convex->final_posr->R,&Convex->points[(i*3)]);
+		v2[0]=Convex->final_posr->pos[0]+v2[0];
+		v2[1]=Convex->final_posr->pos[1]+v2[1];
+		v2[2]=Convex->final_posr->pos[2]+v2[2];
+		dReal distance2 = ((Plane->p[0] * v2[0]) + // Ax +
+			(Plane->p[1] * v2[1])  + // Bx +
+			(Plane->p[2] * v2[2])) - Plane->p[3]; // Cz + D
+		if(!Hit) 
+			/* 
+			Avoid multiplication 
+			if we have already determined there is a hit 
+			*/
+		{
+			if(distance1 * distance2 <= 0)
+			{
+				// there is a hit.
+				Hit=true;
+			}
+		}
+		if((distance2<=0)&&(contacts<maxc))
+		{
+			CONTACT(contact,skip*contacts)->normal[0] = Plane->p[0];
+			CONTACT(contact,skip*contacts)->normal[1] = Plane->p[1];
+			CONTACT(contact,skip*contacts)->normal[2] = Plane->p[2];
+			CONTACT(contact,skip*contacts)->pos[0] = v2[0];
+			CONTACT(contact,skip*contacts)->pos[1] = v2[1];
+			CONTACT(contact,skip*contacts)->pos[2] = v2[2];
+			CONTACT(contact,skip*contacts)->depth = -distance2;
+			CONTACT(contact,skip*contacts)->g1 = Convex;
+			CONTACT(contact,skip*contacts)->g2 = Plane;
+			contacts++;
+		}
 	}
-    }
-  if(Hit) return contacts;
-  return 0;
+	if(Hit) return contacts;
+	return 0;
 }
 
 int dCollideSphereConvex (dxGeom *o1, dxGeom *o2, int flags,
@@ -592,20 +592,20 @@ inline dxConvex* GetPlaneIndex(dxConvex& c1,
 
 inline void dumpplanes(dxConvex& cvx)
 {
-  // This is just a dummy debug function
-  dVector4 plane;
-  fprintf(stdout,"DUMP PLANES\n");
-  for (int i=0;i<cvx.planecount;++i)
-    {
-      dMULTIPLY0_331(plane,cvx.final_posr->R,&cvx.planes[(i*4)]);      
-      // Translate
-      plane[3]=
-	(cvx.planes[(i*4)+3])+
-	((plane[0] * cvx.final_posr->pos[0]) + 
-	 (plane[1] * cvx.final_posr->pos[1]) + 
-	 (plane[2] * cvx.final_posr->pos[2]));
-      fprintf(stdout,"%f %f %f %f\n",plane[0],plane[1],plane[2],plane[3]);
-    }
+	// This is just a dummy debug function
+	dVector4 plane;
+	fprintf(stdout,"DUMP PLANES\n");
+	for (unsigned int i=0;i<cvx.planecount;++i)
+	{
+		dMULTIPLY0_331(plane,cvx.final_posr->R,&cvx.planes[(i*4)]);      
+		// Translate
+		plane[3]=
+			(cvx.planes[(i*4)+3])+
+			((plane[0] * cvx.final_posr->pos[0]) + 
+			(plane[1] * cvx.final_posr->pos[1]) + 
+			(plane[2] * cvx.final_posr->pos[2]));
+		fprintf(stdout,"%f %f %f %f\n",plane[0],plane[1],plane[2],plane[3]);
+	}
 }
 
 // this variable is for debuggin purpuses only, should go once everything works
@@ -638,236 +638,236 @@ static bool hit=false;
 */
 bool SeidelLP(dxConvex& cvx1,dxConvex& cvx2)
 {
-  dVector3 c={1,0,0}; // The Objective vector can be anything
-  dVector3 solution;    // We dont really need the solution so its local
-  dxConvex *cvx;
-  unsigned int index;
-  unsigned int planecount=cvx1.planecount+cvx2.planecount;
-  dReal sum,min,max,med;
-  dVector3 c1; // ,c2;
-  dVector4 aoveral,aoveram; // these will contain cached computations
-  unsigned int l,m,n; // l and m are the axes to the zerod dimensions, n is the axe for the last dimension
-  int i,j,k;
-  dVector4 eq1,eq2,eq3; // cached equations for 3d,2d and 1d respectivelly
-  // Get the support mapping for a HUGE bounding box in direction c
-  solution[0]= (c[0]>0) ? dInfinity : -dInfinity;
-  solution[1]= (c[1]>0) ? dInfinity : -dInfinity;
-  solution[2]= (c[2]>0) ? dInfinity : -dInfinity;
-  for( i=0;i<planecount;++i)
-    {
-      // Isolate plane equation
-      cvx=GetPlaneIndex(cvx1,cvx2,i,index);
-      // Rotate
-      dMULTIPLY0_331(eq1,cvx->final_posr->R,&cvx->planes[(index*4)]);
-      
-      // Translate
-      eq1[3]=(cvx->planes[(index*4)+3])+
-	((eq1[0] * cvx->final_posr->pos[0]) + 
-	 (eq1[1] * cvx->final_posr->pos[1]) + 
-	 (eq1[2] * cvx->final_posr->pos[2]));
-//       if(!hit)
-// 	{
-// 	  fprintf(stdout,"Plane I %d: %f %f %f %f\n",i,
-// 		  cvx->planes[(index*4)+0],
-// 		  cvx->planes[(index*4)+1],
-// 		  cvx->planes[(index*4)+2],
-// 		  cvx->planes[(index*4)+3]);
-// 	  fprintf(stdout,"Transformed Plane %d: %f %f %f %f\n",i,
-// 		  eq1[0],
-// 		  eq1[1],eq1[2],eq1[3]);
-// 	  fprintf(stdout,"POS %f,%f,%f\n",
-// 		  cvx->final_posr->pos[0],
-// 		  cvx->final_posr->pos[1],
-// 		  cvx->final_posr->pos[2]);
-// 	}
-      // find if the solution is behind the current plane
-      sum=
-	((eq1[0]*solution[0])+
-	 (eq1[1]*solution[1])+
-	 (eq1[2]*solution[2]))-eq1[3];
-      // if not we need to discard the current solution
-      if(sum>0)
+	dVector3 c={1,0,0}; // The Objective vector can be anything
+	dVector3 solution;    // We dont really need the solution so its local
+	dxConvex *cvx;
+	unsigned int index;
+	unsigned int planecount=cvx1.planecount+cvx2.planecount;
+	dReal sum,min,max,med;
+	dVector3 c1; // ,c2;
+	dVector4 aoveral,aoveram; // these will contain cached computations
+	unsigned int l,m,n; // l and m are the axes to the zerod dimensions, n is the axe for the last dimension
+	unsigned int i,j,k;
+	dVector4 eq1,eq2,eq3; // cached equations for 3d,2d and 1d respectivelly
+	// Get the support mapping for a HUGE bounding box in direction c
+	solution[0]= (c[0]>0) ? dInfinity : -dInfinity;
+	solution[1]= (c[1]>0) ? dInfinity : -dInfinity;
+	solution[2]= (c[2]>0) ? dInfinity : -dInfinity;
+	for( i=0;i<planecount;++i)
 	{
-	  // go down a dimension by eliminating a variable
-	  // first find l
-	  l=0;
-	  for( j=0;j<3;++j)
-	    {
-	      if(fabs(eq1[j])>fabs(eq1[l]))
-		{
-		  l=j;
-		}
-	    }
-	  if(eq1[l]==0)
-	    {
-	      if(!hit) 
-		{
-		  fprintf(stdout,"Plane %d: %f %f %f %f is invalid\n",i,
-			  eq1[0],eq1[1],eq1[2],eq1[3]);
-		}
-	      return false; 
-	    }
-	  // then compute a/a[l] c1 and solution
-	  aoveral[0]=eq1[0]/eq1[l];
-	  aoveral[1]=eq1[1]/eq1[l];
-	  aoveral[2]=eq1[2]/eq1[l];
-	  aoveral[3]=eq1[3]/eq1[l];
-	  c1[0]=c[0]-((c[l]/eq1[l])*eq1[0]);
-	  c1[1]=c[1]-((c[l]/eq1[l])*eq1[1]);
-	  c1[2]=c[2]-((c[l]/eq1[l])*eq1[2]);
-	  solution[0]=solution[0]-((solution[l]/eq1[l])*eq1[0]);
-	  solution[1]=solution[1]-((solution[l]/eq1[l])*eq1[1]);
-	  solution[2]=solution[2]-((solution[l]/eq1[l])*eq1[2]);
-	  // iterate a to get the new equations with the help of a/a[l]
-	  for( j=0;j<planecount;++j)
-	    {
-	      if(i!=j)
-		{
-		  cvx=GetPlaneIndex(cvx1,cvx2,j,index);
-		  // Rotate
-		  dMULTIPLY0_331(eq2,cvx->final_posr->R,&cvx->planes[(index*4)]);
-		  // Translate
-		  eq2[3]=(cvx->planes[(index*4)+3])+
-		    ((eq2[0] * cvx->final_posr->pos[0]) + 
-		     (eq2[1] * cvx->final_posr->pos[1]) + 
-		     (eq2[2] * cvx->final_posr->pos[2]));
+		// Isolate plane equation
+		cvx=GetPlaneIndex(cvx1,cvx2,i,index);
+		// Rotate
+		dMULTIPLY0_331(eq1,cvx->final_posr->R,&cvx->planes[(index*4)]);
 
-//       if(!hit)
-// 	{
-// 	  fprintf(stdout,"Plane J %d: %f %f %f %f\n",j,
-// 		  cvx->planes[(index*4)+0],
-// 		  cvx->planes[(index*4)+1],
-// 		  cvx->planes[(index*4)+2],
-// 		  cvx->planes[(index*4)+3]);
-// 	  fprintf(stdout,"Transformed Plane %d: %f %f %f %f\n",j,
-// 		  eq2[0],
-// 		  eq2[1],
-// 		  eq2[2],
-// 		  eq2[3]);
-// 	  fprintf(stdout,"POS %f,%f,%f\n",
-// 		  cvx->final_posr->pos[0],
-// 		  cvx->final_posr->pos[1],
-// 		  cvx->final_posr->pos[2]);
-// 	}
+		// Translate
+		eq1[3]=(cvx->planes[(index*4)+3])+
+			((eq1[0] * cvx->final_posr->pos[0]) + 
+			(eq1[1] * cvx->final_posr->pos[1]) + 
+			(eq1[2] * cvx->final_posr->pos[2]));
+		//       if(!hit)
+		// 	{
+		// 	  fprintf(stdout,"Plane I %d: %f %f %f %f\n",i,
+		// 		  cvx->planes[(index*4)+0],
+		// 		  cvx->planes[(index*4)+1],
+		// 		  cvx->planes[(index*4)+2],
+		// 		  cvx->planes[(index*4)+3]);
+		// 	  fprintf(stdout,"Transformed Plane %d: %f %f %f %f\n",i,
+		// 		  eq1[0],
+		// 		  eq1[1],eq1[2],eq1[3]);
+		// 	  fprintf(stdout,"POS %f,%f,%f\n",
+		// 		  cvx->final_posr->pos[0],
+		// 		  cvx->final_posr->pos[1],
+		// 		  cvx->final_posr->pos[2]);
+		// 	}
+		// find if the solution is behind the current plane
+		sum=
+			((eq1[0]*solution[0])+
+			(eq1[1]*solution[1])+
+			(eq1[2]*solution[2]))-eq1[3];
+		// if not we need to discard the current solution
+		if(sum>0)
+		{
+			// go down a dimension by eliminating a variable
+			// first find l
+			l=0;
+			for( j=0;j<3;++j)
+			{
+				if(fabs(eq1[j])>fabs(eq1[l]))
+				{
+					l=j;
+				}
+			}
+			if(eq1[l]==0)
+			{
+				if(!hit) 
+				{
+					fprintf(stdout,"Plane %d: %f %f %f %f is invalid\n",i,
+						eq1[0],eq1[1],eq1[2],eq1[3]);
+				}
+				return false; 
+			}
+			// then compute a/a[l] c1 and solution
+			aoveral[0]=eq1[0]/eq1[l];
+			aoveral[1]=eq1[1]/eq1[l];
+			aoveral[2]=eq1[2]/eq1[l];
+			aoveral[3]=eq1[3]/eq1[l];
+			c1[0]=c[0]-((c[l]/eq1[l])*eq1[0]);
+			c1[1]=c[1]-((c[l]/eq1[l])*eq1[1]);
+			c1[2]=c[2]-((c[l]/eq1[l])*eq1[2]);
+			solution[0]=solution[0]-((solution[l]/eq1[l])*eq1[0]);
+			solution[1]=solution[1]-((solution[l]/eq1[l])*eq1[1]);
+			solution[2]=solution[2]-((solution[l]/eq1[l])*eq1[2]);
+			// iterate a to get the new equations with the help of a/a[l]
+			for( j=0;j<planecount;++j)
+			{
+				if(i!=j)
+				{
+					cvx=GetPlaneIndex(cvx1,cvx2,j,index);
+					// Rotate
+					dMULTIPLY0_331(eq2,cvx->final_posr->R,&cvx->planes[(index*4)]);
+					// Translate
+					eq2[3]=(cvx->planes[(index*4)+3])+
+						((eq2[0] * cvx->final_posr->pos[0]) + 
+						(eq2[1] * cvx->final_posr->pos[1]) + 
+						(eq2[2] * cvx->final_posr->pos[2]));
 
-		  // Take The equation down a dimension
-		  eq2[0]-=(cvx->planes[(index*4)+l]*aoveral[0]);
-		  eq2[1]-=(cvx->planes[(index*4)+l]*aoveral[1]);
-		  eq2[2]-=(cvx->planes[(index*4)+l]*aoveral[2]);
-		  eq2[3]-=(cvx->planes[(index*4)+l]*aoveral[3]);
-		  sum=
-		    ((eq2[0]*solution[0])+
-		     (eq2[1]*solution[1])+
-		     (eq2[2]*solution[2]))-eq2[3];
-		  if(sum>0)
-		    {
-		      m=0;
-		      for( k=0;k<3;++k)
-			{
-			  if(fabs(eq2[k])>fabs(eq2[m]))
-			    {
-			      m=k;
-			    }
-			}
-		      if(eq2[m]==0)
-			{
-			  /* 
-			     if(!hit) fprintf(stdout,
-			     "Plane %d: %f %f %f %f is invalid\n",j,
-			     eq2[0],eq2[1],eq2[2],eq2[3]);
-			  */
-			  return false; 
-			}
-		      // then compute a/a[m] c1 and solution
-		      aoveram[0]=eq2[0]/eq2[m];
-		      aoveram[1]=eq2[1]/eq2[m];
-		      aoveram[2]=eq2[2]/eq2[m];
-		      aoveram[3]=eq2[3]/eq2[m];
-		      c1[0]=c[0]-((c[m]/eq2[m])*eq2[0]);
-		      c1[1]=c[1]-((c[m]/eq2[m])*eq2[1]);
-		      c1[2]=c[2]-((c[m]/eq2[m])*eq2[2]);
-		      solution[0]=solution[0]-((solution[m]/eq2[m])*eq2[0]);
-		      solution[1]=solution[1]-((solution[m]/eq2[m])*eq2[1]);
-		      solution[2]=solution[2]-((solution[m]/eq2[m])*eq2[2]);
-		      // figure out the value for n by elimination
-		      n = (l==0) ? ((m==1)? 2:1):((m==0)?((l==1)?2:1):0);
-		      // iterate a to get the new equations with the help of a/a[l]
-		      min=-dInfinity;
-		      max=med=dInfinity;
-		      for(k=0;k<planecount;++k)
-			{
-			  if((i!=k)&&(j!=k))
-			    {
-			      cvx=GetPlaneIndex(cvx1,cvx2,k,index);
-			      // Rotate
-			      dMULTIPLY0_331(eq3,cvx->final_posr->R,&cvx->planes[(index*4)]);
-			      // Translate
-			      eq3[3]=(cvx->planes[(index*4)+3])+
-				((eq3[0] * cvx->final_posr->pos[0]) + 
-				 (eq3[1] * cvx->final_posr->pos[1]) + 
-				 (eq3[2] * cvx->final_posr->pos[2]));
-//       if(!hit)
-// 	{
-// 	  fprintf(stdout,"Plane K %d: %f %f %f %f\n",k,
-// 		  cvx->planes[(index*4)+0],
-// 		  cvx->planes[(index*4)+1],
-// 		  cvx->planes[(index*4)+2],
-// 		  cvx->planes[(index*4)+3]);
-// 	  fprintf(stdout,"Transformed Plane %d: %f %f %f %f\n",k,
-// 		  eq3[0],
-// 		  eq3[1],
-// 		  eq3[2],
-// 		  eq3[3]);
-// 	  fprintf(stdout,"POS %f,%f,%f\n",
-// 		  cvx->final_posr->pos[0],
-// 		  cvx->final_posr->pos[1],
-// 		  cvx->final_posr->pos[2]);
-// 	}
+					//       if(!hit)
+					// 	{
+					// 	  fprintf(stdout,"Plane J %d: %f %f %f %f\n",j,
+					// 		  cvx->planes[(index*4)+0],
+					// 		  cvx->planes[(index*4)+1],
+					// 		  cvx->planes[(index*4)+2],
+					// 		  cvx->planes[(index*4)+3]);
+					// 	  fprintf(stdout,"Transformed Plane %d: %f %f %f %f\n",j,
+					// 		  eq2[0],
+					// 		  eq2[1],
+					// 		  eq2[2],
+					// 		  eq2[3]);
+					// 	  fprintf(stdout,"POS %f,%f,%f\n",
+					// 		  cvx->final_posr->pos[0],
+					// 		  cvx->final_posr->pos[1],
+					// 		  cvx->final_posr->pos[2]);
+					// 	}
 
-			      // Take the equation Down to 1D
-			      eq3[0]-=(cvx->planes[(index*4)+m]*aoveram[0]);
-			      eq3[1]-=(cvx->planes[(index*4)+m]*aoveram[1]);
-			      eq3[2]-=(cvx->planes[(index*4)+m]*aoveram[2]);
-			      eq3[3]-=(cvx->planes[(index*4)+m]*aoveram[3]);
-			      if(eq3[n]>0)
-				{
-				  max=dMIN(max,eq3[3]/eq3[n]);
+					// Take The equation down a dimension
+					eq2[0]-=(cvx->planes[(index*4)+l]*aoveral[0]);
+					eq2[1]-=(cvx->planes[(index*4)+l]*aoveral[1]);
+					eq2[2]-=(cvx->planes[(index*4)+l]*aoveral[2]);
+					eq2[3]-=(cvx->planes[(index*4)+l]*aoveral[3]);
+					sum=
+						((eq2[0]*solution[0])+
+						(eq2[1]*solution[1])+
+						(eq2[2]*solution[2]))-eq2[3];
+					if(sum>0)
+					{
+						m=0;
+						for( k=0;k<3;++k)
+						{
+							if(fabs(eq2[k])>fabs(eq2[m]))
+							{
+								m=k;
+							}
+						}
+						if(eq2[m]==0)
+						{
+							/* 
+							if(!hit) fprintf(stdout,
+							"Plane %d: %f %f %f %f is invalid\n",j,
+							eq2[0],eq2[1],eq2[2],eq2[3]);
+							*/
+							return false; 
+						}
+						// then compute a/a[m] c1 and solution
+						aoveram[0]=eq2[0]/eq2[m];
+						aoveram[1]=eq2[1]/eq2[m];
+						aoveram[2]=eq2[2]/eq2[m];
+						aoveram[3]=eq2[3]/eq2[m];
+						c1[0]=c[0]-((c[m]/eq2[m])*eq2[0]);
+						c1[1]=c[1]-((c[m]/eq2[m])*eq2[1]);
+						c1[2]=c[2]-((c[m]/eq2[m])*eq2[2]);
+						solution[0]=solution[0]-((solution[m]/eq2[m])*eq2[0]);
+						solution[1]=solution[1]-((solution[m]/eq2[m])*eq2[1]);
+						solution[2]=solution[2]-((solution[m]/eq2[m])*eq2[2]);
+						// figure out the value for n by elimination
+						n = (l==0) ? ((m==1)? 2:1):((m==0)?((l==1)?2:1):0);
+						// iterate a to get the new equations with the help of a/a[l]
+						min=-dInfinity;
+						max=med=dInfinity;
+						for(k=0;k<planecount;++k)
+						{
+							if((i!=k)&&(j!=k))
+							{
+								cvx=GetPlaneIndex(cvx1,cvx2,k,index);
+								// Rotate
+								dMULTIPLY0_331(eq3,cvx->final_posr->R,&cvx->planes[(index*4)]);
+								// Translate
+								eq3[3]=(cvx->planes[(index*4)+3])+
+									((eq3[0] * cvx->final_posr->pos[0]) + 
+									(eq3[1] * cvx->final_posr->pos[1]) + 
+									(eq3[2] * cvx->final_posr->pos[2]));
+								//       if(!hit)
+								// 	{
+								// 	  fprintf(stdout,"Plane K %d: %f %f %f %f\n",k,
+								// 		  cvx->planes[(index*4)+0],
+								// 		  cvx->planes[(index*4)+1],
+								// 		  cvx->planes[(index*4)+2],
+								// 		  cvx->planes[(index*4)+3]);
+								// 	  fprintf(stdout,"Transformed Plane %d: %f %f %f %f\n",k,
+								// 		  eq3[0],
+								// 		  eq3[1],
+								// 		  eq3[2],
+								// 		  eq3[3]);
+								// 	  fprintf(stdout,"POS %f,%f,%f\n",
+								// 		  cvx->final_posr->pos[0],
+								// 		  cvx->final_posr->pos[1],
+								// 		  cvx->final_posr->pos[2]);
+								// 	}
+
+								// Take the equation Down to 1D
+								eq3[0]-=(cvx->planes[(index*4)+m]*aoveram[0]);
+								eq3[1]-=(cvx->planes[(index*4)+m]*aoveram[1]);
+								eq3[2]-=(cvx->planes[(index*4)+m]*aoveram[2]);
+								eq3[3]-=(cvx->planes[(index*4)+m]*aoveram[3]);
+								if(eq3[n]>0)
+								{
+									max=dMIN(max,eq3[3]/eq3[n]);
+								}
+								else if(eq3[n]<0)
+								{
+									min=dMAX(min,eq3[3]/eq3[n]);
+								}
+								else
+								{
+									med=dMIN(med,eq3[3]);
+								}
+							}
+						}
+						if ((max<min)||(med<0)) 
+						{
+							// 			  if(!hit) fprintf(stdout,"((max<min)||(med<0)) ((%f<%f)||(%f<0))",max,min,med);
+							if(!hit)
+							{
+								dumpplanes(cvx1);
+								dumpplanes(cvx2);
+							}
+							//fprintf(stdout,"Planes %d %d\n",i,j);
+							return false;
+
+						}
+						// find the value for the solution in one dimension
+						solution[n] = (c1[n]>=0) ? max:min;
+						// lift to 2D
+						solution[m] = (eq2[3]-(eq2[n]*solution[n]))/eq2[m];
+						// lift to 3D
+						solution[l] = (eq1[3]-(eq1[m]*solution[m]+
+							eq1[n]*solution[n]))/eq1[l];
+					}
 				}
-			      else if(eq3[n]<0)
-				{
-				  min=dMAX(min,eq3[3]/eq3[n]);
-				}
-			      else
-				{
-				  med=dMIN(med,eq3[3]);
-				}
-			    }
 			}
-		      if ((max<min)||(med<0)) 
-			{
-// 			  if(!hit) fprintf(stdout,"((max<min)||(med<0)) ((%f<%f)||(%f<0))",max,min,med);
-			  if(!hit)
-			    {
-			      dumpplanes(cvx1);
-			      dumpplanes(cvx2);
-			    }
-			  //fprintf(stdout,"Planes %d %d\n",i,j);
-			  return false;
-			  
-			}
-		      // find the value for the solution in one dimension
-		      solution[n] = (c1[n]>=0) ? max:min;
-		      // lift to 2D
-		      solution[m] = (eq2[3]-(eq2[n]*solution[n]))/eq2[m];
-		      // lift to 3D
-		      solution[l] = (eq1[3]-(eq1[m]*solution[m]+
-					     eq1[n]*solution[n]))/eq1[l];
-		    }
 		}
-	    }
 	}
-    }
-  return true;
+	return true;
 }
 
 /*! \brief A Support mapping function for convex shapes
@@ -877,215 +877,215 @@ bool SeidelLP(dxConvex& cvx1,dxConvex& cvx2)
  */
 inline void Support(dVector3 dir,dxConvex& cvx,dVector3 out)
 {
-  unsigned int index = 0;
-  dVector3 point;
-  dMULTIPLY0_331 (point,cvx.final_posr->R,cvx.points);
-  point[0]+=cvx.final_posr->pos[0];
-  point[1]+=cvx.final_posr->pos[1];
-  point[2]+=cvx.final_posr->pos[2];
-  
-  dReal max = dDOT(point,dir);
-  dReal tmp;
-  for (int i = 1; i < cvx.pointcount; ++i) 
-    {
-      dMULTIPLY0_331 (point,cvx.final_posr->R,cvx.points+(i*3));
-      point[0]+=cvx.final_posr->pos[0];
-      point[1]+=cvx.final_posr->pos[1];
-      point[2]+=cvx.final_posr->pos[2];      
-      tmp = dDOT(point, dir);
-      if (tmp > max) 
-	{ 
-	  out[0]=point[0];
-	  out[1]=point[1];
-	  out[2]=point[2];
-	  max = tmp; 
+	unsigned int index = 0;
+	dVector3 point;
+	dMULTIPLY0_331 (point,cvx.final_posr->R,cvx.points);
+	point[0]+=cvx.final_posr->pos[0];
+	point[1]+=cvx.final_posr->pos[1];
+	point[2]+=cvx.final_posr->pos[2];
+
+	dReal max = dDOT(point,dir);
+	dReal tmp;
+	for (unsigned int i = 1; i < cvx.pointcount; ++i) 
+	{
+		dMULTIPLY0_331 (point,cvx.final_posr->R,cvx.points+(i*3));
+		point[0]+=cvx.final_posr->pos[0];
+		point[1]+=cvx.final_posr->pos[1];
+		point[2]+=cvx.final_posr->pos[2];      
+		tmp = dDOT(point, dir);
+		if (tmp > max) 
+		{ 
+			out[0]=point[0];
+			out[1]=point[1];
+			out[2]=point[2];
+			max = tmp; 
+		}
 	}
-    }
 }
 
 inline void ComputeInterval(dxConvex& cvx,dVector4 axis,dReal& min,dReal& max)
 {
-  dVector3 point;
-  dReal value;
-  //fprintf(stdout,"Compute Interval Axis %f,%f,%f\n",axis[0],axis[1],axis[2]);
-  dMULTIPLY0_331 (point,cvx.final_posr->R,cvx.points);
-  //fprintf(stdout,"initial point %f,%f,%f\n",point[0],point[1],point[2]);
-  point[0]+=cvx.final_posr->pos[0];
-  point[1]+=cvx.final_posr->pos[1];
-  point[2]+=cvx.final_posr->pos[2];
-  max = min = dDOT(axis,cvx.points);
-  for (int i = 1; i < cvx.pointcount; ++i) 
-    {
-      dMULTIPLY0_331 (point,cvx.final_posr->R,cvx.points+(i*3));
-      point[0]+=cvx.final_posr->pos[0];
-      point[1]+=cvx.final_posr->pos[1];
-      point[2]+=cvx.final_posr->pos[2];
-      value=dDOT(axis,point);
-      if(value<min)
+	dVector3 point;
+	dReal value;
+	//fprintf(stdout,"Compute Interval Axis %f,%f,%f\n",axis[0],axis[1],axis[2]);
+	dMULTIPLY0_331 (point,cvx.final_posr->R,cvx.points);
+	//fprintf(stdout,"initial point %f,%f,%f\n",point[0],point[1],point[2]);
+	point[0]+=cvx.final_posr->pos[0];
+	point[1]+=cvx.final_posr->pos[1];
+	point[2]+=cvx.final_posr->pos[2];
+	max = min = dDOT(axis,cvx.points);
+	for (unsigned int i = 1; i < cvx.pointcount; ++i) 
 	{
-	  min=value;
+		dMULTIPLY0_331 (point,cvx.final_posr->R,cvx.points+(i*3));
+		point[0]+=cvx.final_posr->pos[0];
+		point[1]+=cvx.final_posr->pos[1];
+		point[2]+=cvx.final_posr->pos[2];
+		value=dDOT(axis,point);
+		if(value<min)
+		{
+			min=value;
+		}
+		else if(value>max)
+		{
+			max=value;
+		}
 	}
-      else if(value>max)
-	{
-	  max=value;
-	}
-    }
-  //fprintf(stdout,"Compute Interval Min Max %f,%f\n",min,max);
+	//fprintf(stdout,"Compute Interval Min Max %f,%f\n",min,max);
 }
 
 /*! \brief Does an axis separation test between the 2 convex shapes
-  using faces and edges */
+using faces and edges */
 int TestConvexIntersection(dxConvex& cvx1,dxConvex& cvx2, int flags,
-			    dContactGeom *contact, int skip)
+						   dContactGeom *contact, int skip)
 {
-  dVector4 plane,savedplane;
-  dReal min1,max1,min2,max2,depth,min_depth=-dInfinity;
-  dVector3 e1,e2,t;
-  int maxc = flags & NUMC_MASK; // this is causing a segfault
-  //int maxc = 3;
-  int contacts=0;
-  dxConvex *g1,*g2;
-  unsigned int *pPoly;
-  dVector3 v;
-  // Test faces of cvx1 for separation
-  pPoly=cvx1.polygons;
-  for(int i=0;i<cvx1.planecount;++i)
-    {
-      // -- Apply Transforms --
-      // Rotate
-      dMULTIPLY0_331(plane,cvx1.final_posr->R,cvx1.planes+(i*4));
-      dNormalize3(plane);
-      // Translate
-      plane[3]=
-	(cvx1.planes[(i*4)+3])+
-	((plane[0] * cvx1.final_posr->pos[0]) + 
-	 (plane[1] * cvx1.final_posr->pos[1]) + 
-	 (plane[2] * cvx1.final_posr->pos[2]));
-      ComputeInterval(cvx1,plane,min1,max1);
-      ComputeInterval(cvx2,plane,min2,max2);
-      //fprintf(stdout,"width %f\n",max1-min1);
-      if(max2<min1 || max1<min2) return 0;
+	dVector4 plane,savedplane;
+	dReal min1,max1,min2,max2,min_depth=-dInfinity;
+	dVector3 e1,e2,t;
+	int maxc = flags & NUMC_MASK; // this is causing a segfault
+	//int maxc = 3;
+	int contacts=0;
+	dxConvex *g1,*g2;
+	unsigned int *pPoly;
+	dVector3 v;
+	// Test faces of cvx1 for separation
+	pPoly=cvx1.polygons;
+	for(unsigned int i=0;i<cvx1.planecount;++i)
+	{
+		// -- Apply Transforms --
+		// Rotate
+		dMULTIPLY0_331(plane,cvx1.final_posr->R,cvx1.planes+(i*4));
+		dNormalize3(plane);
+		// Translate
+		plane[3]=
+			(cvx1.planes[(i*4)+3])+
+			((plane[0] * cvx1.final_posr->pos[0]) + 
+			(plane[1] * cvx1.final_posr->pos[1]) + 
+			(plane[2] * cvx1.final_posr->pos[2]));
+		ComputeInterval(cvx1,plane,min1,max1);
+		ComputeInterval(cvx2,plane,min2,max2);
+		//fprintf(stdout,"width %f\n",max1-min1);
+		if(max2<min1 || max1<min2) return 0;
 #if 1
-      // this one ON works
-      else if ((max1>min2)&&(max1<max2))
-	{
-	  min_depth=max1-min2;
-	  savedplane[0]=plane[0];
-	  savedplane[1]=plane[1];
-	  savedplane[2]=plane[2];
-	  savedplane[3]=plane[3];
-	  g1=&cvx2; // cvx2 moves
-	  g2=&cvx1;
-	}
+		// this one ON works
+		else if ((max1>min2)&&(max1<max2))
+		{
+			min_depth=max1-min2;
+			savedplane[0]=plane[0];
+			savedplane[1]=plane[1];
+			savedplane[2]=plane[2];
+			savedplane[3]=plane[3];
+			g1=&cvx2; // cvx2 moves
+			g2=&cvx1;
+		}
 #endif
-      pPoly+=pPoly[0]+1;
-    }
-  // Test faces of cvx2 for separation
-  pPoly=cvx2.polygons;
-  for(int i=0;i<cvx2.planecount;++i)
-    {
-//       fprintf(stdout,"Poly verts %d\n",pPoly[0]);
-      // -- Apply Transforms --
-      // Rotate
-      dMULTIPLY0_331(plane,
-		     cvx2.final_posr->R,
-		     cvx2.planes+(i*4));
-      dNormalize3(plane);
-      // Translate
-      plane[3]=
-	(cvx2.planes[(i*4)+3])+
-	((plane[0] * cvx2.final_posr->pos[0]) + 
-	 (plane[1] * cvx2.final_posr->pos[1]) + 
-	 (plane[2] * cvx2.final_posr->pos[2]));
-      ComputeInterval(cvx2,plane,min1,max1);
-      ComputeInterval(cvx1,plane,min2,max2);
-      //fprintf(stdout,"width %f\n",max1-min1);
-      if(max2<min1 || max1<min2) return 0;
+		pPoly+=pPoly[0]+1;
+	}
+	// Test faces of cvx2 for separation
+	pPoly=cvx2.polygons;
+	for(unsigned int i=0;i<cvx2.planecount;++i)
+	{
+		//       fprintf(stdout,"Poly verts %d\n",pPoly[0]);
+		// -- Apply Transforms --
+		// Rotate
+		dMULTIPLY0_331(plane,
+			cvx2.final_posr->R,
+			cvx2.planes+(i*4));
+		dNormalize3(plane);
+		// Translate
+		plane[3]=
+			(cvx2.planes[(i*4)+3])+
+			((plane[0] * cvx2.final_posr->pos[0]) + 
+			(plane[1] * cvx2.final_posr->pos[1]) + 
+			(plane[2] * cvx2.final_posr->pos[2]));
+		ComputeInterval(cvx2,plane,min1,max1);
+		ComputeInterval(cvx1,plane,min2,max2);
+		//fprintf(stdout,"width %f\n",max1-min1);
+		if(max2<min1 || max1<min2) return 0;
 #if 1
-      // this one ON does not work
-      else if ((max1>min2)&&(max1<max2))
-	{
-	  min_depth=max1-min2;
-	  savedplane[0]=plane[0];
-	  savedplane[1]=plane[1];
-	  savedplane[2]=plane[2];
-	  savedplane[3]=plane[3];
-	  g1=&cvx1; // cvx1 moves
-	  g2=&cvx2;
-	}
+		// this one ON does not work
+		else if ((max1>min2)&&(max1<max2))
+		{
+			min_depth=max1-min2;
+			savedplane[0]=plane[0];
+			savedplane[1]=plane[1];
+			savedplane[2]=plane[2];
+			savedplane[3]=plane[3];
+			g1=&cvx1; // cvx1 moves
+			g2=&cvx2;
+		}
 #endif
-      pPoly+=pPoly[0]+1;
-    }
-  // Test cross products of pairs of edges
-  for(std::set<edge>::iterator i = cvx1.edges.begin();
-      i!= cvx1.edges.end();
-      ++i)
-    {
-      // we only need to apply rotation here
-      dMULTIPLY0_331 (t,cvx1.final_posr->R,cvx1.points+(i->first*3));
-      dMULTIPLY0_331 (e1,cvx1.final_posr->R,cvx1.points+(i->second*3));
-      e1[0]-=t[0];
-      e1[1]-=t[1];
-      e1[2]-=t[2];
-      for(std::set<edge>::iterator j = cvx2.edges.begin();
-	  j!= cvx2.edges.end();
-	  ++j)
+		pPoly+=pPoly[0]+1;
+	}
+	// Test cross products of pairs of edges
+	for(std::set<edge>::iterator i = cvx1.edges.begin();
+		i!= cvx1.edges.end();
+		++i)
 	{
-	  // we only need to apply rotation here
-	  dMULTIPLY0_331 (t,cvx2.final_posr->R,cvx2.points+(j->first*3));
-	  dMULTIPLY0_331 (e2,cvx2.final_posr->R,cvx2.points+(j->second*3));
-	  e2[0]-=t[0];
-	  e2[1]-=t[1];
-	  e2[2]-=t[2];
-	  dCROSS(plane,=,e1,e2);
-	  plane[3]=0;
-	  ComputeInterval(cvx1,plane,min1,max1);
-	  ComputeInterval(cvx2,plane,min2,max2);
-	  if(max2<min1 || max1 < min2) return 0;
-	}      
-    }
-  // If we get here, there was a collision
-  static int  cvxhit=0;
-  contacts=0;
-  if(cvxhit<2)
-  fprintf(stdout,"Plane: %f,%f,%f,%f\n",
-	  savedplane[0],
-	  savedplane[1],
-	  savedplane[2],
-	  savedplane[3]);
-  for(unsigned int i=0;i<g1->pointcount;++i)
-    {
-      if(contacts==maxc) break;
-      dMULTIPLY0_331 (v,g1->final_posr->R,&g1->points[(i*3)]);
-      v[0]=g1->final_posr->pos[0]+v[0];
-      v[1]=g1->final_posr->pos[1]+v[1];
-      v[2]=g1->final_posr->pos[2]+v[2];
-      dReal distance = ((savedplane[0] * v[0])  + // Ax +
+		// we only need to apply rotation here
+		dMULTIPLY0_331 (t,cvx1.final_posr->R,cvx1.points+(i->first*3));
+		dMULTIPLY0_331 (e1,cvx1.final_posr->R,cvx1.points+(i->second*3));
+		e1[0]-=t[0];
+		e1[1]-=t[1];
+		e1[2]-=t[2];
+		for(std::set<edge>::iterator j = cvx2.edges.begin();
+			j!= cvx2.edges.end();
+			++j)
+		{
+			// we only need to apply rotation here
+			dMULTIPLY0_331 (t,cvx2.final_posr->R,cvx2.points+(j->first*3));
+			dMULTIPLY0_331 (e2,cvx2.final_posr->R,cvx2.points+(j->second*3));
+			e2[0]-=t[0];
+			e2[1]-=t[1];
+			e2[2]-=t[2];
+			dCROSS(plane,=,e1,e2);
+			plane[3]=0;
+			ComputeInterval(cvx1,plane,min1,max1);
+			ComputeInterval(cvx2,plane,min2,max2);
+			if(max2<min1 || max1 < min2) return 0;
+		}      
+	}
+	// If we get here, there was a collision
+	static int  cvxhit=0;
+	contacts=0;
+	if(cvxhit<2)
+		fprintf(stdout,"Plane: %f,%f,%f,%f\n",
+		savedplane[0],
+		savedplane[1],
+		savedplane[2],
+		savedplane[3]);
+	for(unsigned int i=0;i<g1->pointcount;++i)
+	{
+		if(contacts==maxc) break;
+		dMULTIPLY0_331 (v,g1->final_posr->R,&g1->points[(i*3)]);
+		v[0]=g1->final_posr->pos[0]+v[0];
+		v[1]=g1->final_posr->pos[1]+v[1];
+		v[2]=g1->final_posr->pos[2]+v[2];
+		dReal distance = ((savedplane[0] * v[0])  + // Ax +
 			(savedplane[1] * v[1])  + // Bx +
 			(savedplane[2] * v[2])) - savedplane[3]; // Cz + D
 
-      if((contacts<maxc)&&(distance<0))
-	{
-	  CONTACT(contact,skip*contacts)->normal[0] = savedplane[0];
-	  CONTACT(contact,skip*contacts)->normal[1] = savedplane[1];
-	  CONTACT(contact,skip*contacts)->normal[2] = savedplane[2];
-	  CONTACT(contact,skip*contacts)->pos[0]=v[0];
-	  CONTACT(contact,skip*contacts)->pos[1]=v[1];
-	  CONTACT(contact,skip*contacts)->pos[2]=v[2];
-	  CONTACT(contact,skip*contacts)->depth = -distance;
-	  CONTACT(contact,skip*contacts)->g1 = g1;
-	  CONTACT(contact,skip*contacts)->g2 = g2;
-	  if(cvxhit<2)
-	  fprintf(stdout,"Contact: %f,%f,%f depth %f\n",
-		  CONTACT(contact,skip*contacts)->pos[0],
-		  CONTACT(contact,skip*contacts)->pos[1],
-		  CONTACT(contact,skip*contacts)->pos[2],
-		  CONTACT(contact,skip*contacts)->depth);
-	  contacts++;
+		if((contacts<maxc)&&(distance<0))
+		{
+			CONTACT(contact,skip*contacts)->normal[0] = savedplane[0];
+			CONTACT(contact,skip*contacts)->normal[1] = savedplane[1];
+			CONTACT(contact,skip*contacts)->normal[2] = savedplane[2];
+			CONTACT(contact,skip*contacts)->pos[0]=v[0];
+			CONTACT(contact,skip*contacts)->pos[1]=v[1];
+			CONTACT(contact,skip*contacts)->pos[2]=v[2];
+			CONTACT(contact,skip*contacts)->depth = -distance;
+			CONTACT(contact,skip*contacts)->g1 = g1;
+			CONTACT(contact,skip*contacts)->g2 = g2;
+			if(cvxhit<2)
+				fprintf(stdout,"Contact: %f,%f,%f depth %f\n",
+				CONTACT(contact,skip*contacts)->pos[0],
+				CONTACT(contact,skip*contacts)->pos[1],
+				CONTACT(contact,skip*contacts)->pos[2],
+				CONTACT(contact,skip*contacts)->depth);
+			contacts++;
+		}
 	}
-    }
-  cvxhit++;
-  return contacts;
+	cvxhit++;
+	return contacts;
 }
 
 int dCollideConvexConvex (dxGeom *o1, dxGeom *o2, int flags,
