@@ -2563,7 +2563,7 @@ static void PRGetInfo2 (dxJointPR *joint, dxJoint::Info2 *info)
   dReal k = info->fps * info->erp;
 
 
-  dVector3 p,q;  // plane space of axP and after that axR
+  dVector3 q;  // plane space of axP and after that axR
 
   // pull out pos and R for both bodies. also get the `connection'
   // vector pos2-pos1.
