@@ -53,18 +53,18 @@ END
 // TEXTINCLUDE
 //
 
-1 TEXTINCLUDE DISCARDABLE 
+1 TEXTINCLUDE DISCARDABLE
 BEGIN
     "resource.h\0"
 END
 
-2 TEXTINCLUDE DISCARDABLE 
+2 TEXTINCLUDE DISCARDABLE
 BEGIN
     //"#include ""afxres.h""\r\n"
     "\0"
 END
 
-3 TEXTINCLUDE DISCARDABLE 
+3 TEXTINCLUDE DISCARDABLE
 BEGIN
     "\r\n"
     "\0"
@@ -78,7 +78,7 @@ END
 // Menu
 //
 
-IDR_MENU1 MENU DISCARDABLE 
+IDR_MENU1 MENU DISCARDABLE
 BEGIN
     POPUP "&File"
     BEGIN
@@ -88,12 +88,12 @@ BEGIN
     BEGIN
         MENUITEM "&Pause\tCtrl+P",              IDM_PAUSE
         MENUITEM "Single Step\tCtrl+O",         IDM_SINGLE_STEP
-        MENUITEM "Performance &Monitor",        IDM_PERF_MONITOR
+        MENUITEM "Performance &Monitor",        IDM_PERF_MONITOR, GRAYED
         MENUITEM SEPARATOR
         MENUITEM "&Shadows\tCtrl+S",            IDM_SHADOWS, CHECKED
         MENUITEM "&Textures\tCtrl+T",           IDM_TEXTURES, CHECKED
         MENUITEM SEPARATOR
-        MENUITEM "S&ave Settings",              IDM_SAVE_SETTINGS
+        MENUITEM "S&ave Settings",              IDM_SAVE_SETTINGS, GRAYED
     END
     POPUP "&Help"
     BEGIN
@@ -108,7 +108,7 @@ END
 //
 
 #ifdef APSTUDIO_INVOKED
-GUIDELINES DESIGNINFO DISCARDABLE 
+GUIDELINES DESIGNINFO DISCARDABLE
 BEGIN
     IDD_ABOUT, DIALOG
     BEGIN
@@ -127,13 +127,14 @@ END
 // Accelerator
 //
 
-IDR_ACCELERATOR1 ACCELERATORS DISCARDABLE 
+IDR_ACCELERATOR1 ACCELERATORS DISCARDABLE
 BEGIN
     "O",            IDM_SINGLE_STEP,        VIRTKEY, CONTROL, NOINVERT
     "P",            IDM_PAUSE,              VIRTKEY, CONTROL, NOINVERT
     "S",            IDM_SHADOWS,            VIRTKEY, CONTROL, NOINVERT
     "T",            IDM_TEXTURES,           VIRTKEY, CONTROL, NOINVERT
     "X",            IDM_EXIT,               VIRTKEY, CONTROL, NOINVERT
+    VK_SPACE,       IDM_PAUSE,              VIRTKEY, NOINVERT
 END
 
 #endif    // English (U.S.) resources

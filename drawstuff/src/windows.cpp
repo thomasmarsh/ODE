@@ -251,7 +251,10 @@ static LRESULT CALLBACK mainWndProc (HWND hWnd, UINT msg, WPARAM wParam,
       break;
     }
     case IDM_SINGLE_STEP: {
-      renderer_ss = 1;
+		if (renderer_pause)
+			renderer_ss = 1;
+		else
+			SendMessage( hWnd, WM_COMMAND, IDM_PAUSE, 0 );
       break;
     }
     case IDM_PERF_MONITOR: {
