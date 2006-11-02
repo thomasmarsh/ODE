@@ -1325,13 +1325,13 @@ ODE_API void dJointAddUniversalTorques(dJointID joint, dReal torque1, dReal torq
 ODE_API void dJointSetPRAnchor (dJointID, dReal x, dReal y, dReal z);
 
 /**
- * @brief set the axis for the rotoide articulation
+ * @brief set the axis for the prismatic articulation
  * @ingroup joints
  */
 ODE_API void dJointSetPRAxis1 (dJointID, dReal x, dReal y, dReal z);
 
 /**
- * @brief set the axis for the prismatic articulation
+ * @brief set the axis for the rotoide articulation
  * @ingroup joints
  */
 ODE_API void dJointSetPRAxis2 (dJointID, dReal x, dReal y, dReal z);
@@ -1339,6 +1339,8 @@ ODE_API void dJointSetPRAxis2 (dJointID, dReal x, dReal y, dReal z);
 /**
  * @brief set joint parameter
  * @ingroup joints
+ *
+ * @note parameterX where X equal 2 refer to parameter for the rotoide articulation
  */
 ODE_API void dJointSetPRParam (dJointID, int parameter, dReal value);
 
@@ -1711,13 +1713,13 @@ ODE_API dReal dJointGetPRPositionRate (dJointID);
 
 
 /**
- * @brief Get the Rotoide axis
+ * @brief Get the prismatic axis
  * @ingroup joints
  */
 ODE_API void dJointGetPRAxis1 (dJointID, dVector3 result);
 
 /**
- * @brief Get the prismatic axis
+ * @brief Get the Rotoide axis
  * @ingroup joints
  */
 ODE_API void dJointGetPRAxis2 (dJointID, dVector3 result);
