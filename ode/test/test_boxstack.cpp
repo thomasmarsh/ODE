@@ -553,6 +553,14 @@ int main (int argc, char **argv)
   dWorldSetGravity (world,0,0,-0.5);
   dWorldSetCFM (world,1e-5);
   dWorldSetAutoDisableFlag (world,1);
+
+#if 1
+
+  dWorldSetAutoDisableAverageSamplesCount( world, 5 );
+
+#endif
+
+
   dWorldSetContactMaxCorrectingVel (world,0.1);
   dWorldSetContactSurfaceLayer (world,0.001);
   dCreatePlane (space,0,0,1,0);

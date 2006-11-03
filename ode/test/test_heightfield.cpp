@@ -2079,6 +2079,12 @@ int main (int argc, char **argv)
 	dWorldSetContactSurfaceLayer (world,0.001);
 	memset (obj,0,sizeof(obj));
 
+#if 1
+
+  dWorldSetAutoDisableAverageSamplesCount( world, 10 );
+
+#endif
+
 	// base plane to catch overspill
 	dCreatePlane( space, 0, 0, 1, 0 );
 

@@ -52,7 +52,72 @@ void dInternalHandleAutoDisabling (dxWorld *world, dReal stepsize)
 				idle = 0;	// turning fast - not idle
 			}
 		}
-	
+
+		if(idle && bb->adis.average_samples > 0) // if still idle and if average-test is "enabled"
+		{
+			if(bb->average_counter < 0 || bb->average_counter >= bb->adis.average_samples)
+			{
+				// here is something going wrong, reset the average-calculations
+				bb->average_ready = 0; // not ready for average calculation
+				bb->average_counter = 0; // reset the buffer index
+			}
+			// filling the current buffer-index
+			bb->average_lvel_buffer[bb->average_counter][0] = bb->lvel[0];
+			bb->average_lvel_buffer[bb->average_counter][1] = bb->lvel[1];
+			bb->average_lvel_buffer[bb->average_counter][2] = bb->lvel[2];
+			bb->average_avel_buffer[bb->average_counter][0] = bb->avel[0];
+			bb->average_avel_buffer[bb->average_counter][1] = bb->avel[1];
+			bb->average_avel_buffer[bb->average_counter][2] = bb->avel[2];
+			bb->average_counter++;
+			// buffer ready test
+			if(bb->average_counter >= bb->adis.average_samples)
+			{
+				bb->average_counter = 0; // fill the buffer from the beginning
+				bb->average_ready = 1; // this body is ready now for average calculation
+			}
+
+			if(bb->average_ready)
+			{
+				// the average-buffers are filled and ready for calculation
+				dVector3 average_lvel = {0, 0, 0};
+				dVector3 average_avel = {0, 0, 0};
+				// add all last velocities together
+				for(int i = 0;i < bb->adis.average_samples;i++)
+				{
+					average_lvel[0] += bb->average_lvel_buffer[i][0];
+					average_avel[0] += bb->average_avel_buffer[i][0];
+					average_lvel[1] += bb->average_lvel_buffer[i][1];
+					average_avel[1] += bb->average_avel_buffer[i][1];
+					average_lvel[2] += bb->average_lvel_buffer[i][2];
+					average_avel[2] += bb->average_avel_buffer[i][2];
+				}
+				// make average
+				dReal r1;
+				r1 = dReal(1.0) / dReal(bb->adis.average_samples);
+				average_lvel[0] *= r1;
+				average_avel[0] *= r1;
+				average_lvel[1] *= r1;
+				average_avel[1] *= r1;
+				average_lvel[1] *= r1;
+				average_avel[1] *= r1;
+				dReal av_lspeed, av_aspeed;
+				av_lspeed = average_lvel[0] * average_lvel[0] + average_lvel[1] * average_lvel[1] + average_lvel[2] * average_lvel[2];
+				if(av_lspeed > bb->adis.linear_average_threshold)
+					idle = 0; // average linear velocity is too high for idle
+				else
+				{
+					av_aspeed = average_avel[0] * average_avel[0] + average_avel[1] * average_avel[1] + average_avel[2] * average_avel[2];
+					if(av_aspeed > bb->adis.angular_average_threshold)
+						idle = 0; // average angular velocity is too high for idle
+				}
+			}
+			else
+			{
+				// not ready for average calculation, the buffer is yet not full
+				idle = 0; // idle only possible if average buffer is filled
+			}
+		}
+		
 		// if it's idle, accumulate steps and time.
 		// these counters won't overflow because this code doesn't run for disabled bodies.
 		if (idle) {
@@ -65,8 +130,17 @@ void dInternalHandleAutoDisabling (dxWorld *world, dReal stepsize)
 		}
 
 		// disable the body if it's idle for a long enough time
-		if (bb->adis_stepsleft < 0 && bb->adis_timeleft < 0) {
-			bb->flags |= dxBodyDisabled;
+		if (bb->adis_stepsleft <= 0 && bb->adis_timeleft <= 0)
+		{
+			bb->flags |= dxBodyDisabled; // set the disable flag
+			// disabling bodies should also include resetting the velocity
+			// maybe this prevents jittering in big "islands"
+			bb->lvel[0] = 0;
+			bb->lvel[1] = 0;
+			bb->lvel[2] = 0;
+			bb->avel[0] = 0;
+			bb->avel[1] = 0;
+			bb->avel[2] = 0;
 		}
 	}
 }
