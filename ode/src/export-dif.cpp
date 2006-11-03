@@ -445,8 +445,9 @@ void dWorldExportDIF (dWorldID w, FILE *file, const char *prefix)
 	c.print ("CFM",w->global_cfm);
 	c.print ("auto_disable = {");
 	c.indent++;
-	c.print ("linear_threshold",w->adis.linear_threshold);
-	c.print ("angular_threshold",w->adis.angular_threshold);
+	c.print ("linear_threshold",w->adis.linear_average_threshold);
+	c.print ("angular_threshold",w->adis.angular_average_threshold);
+	c.print ("average_samples",(int)w->adis.average_samples);
 	c.print ("idle_time",w->adis.idle_time);
 	c.print ("idle_steps",w->adis.idle_steps);
 	fprintf (file,"\t\t},\n\t},\n}\n");
@@ -482,8 +483,9 @@ void dWorldExportDIF (dWorldID w, FILE *file, const char *prefix)
 		if (b->flags & dxBodyAutoDisable) {
 			c.print ("auto_disable = {");
 			c.indent++;
-			c.print ("linear_threshold",b->adis.linear_threshold);
-			c.print ("angular_threshold",b->adis.angular_threshold);
+			c.print ("linear_threshold",b->adis.linear_average_threshold);
+			c.print ("angular_threshold",b->adis.angular_average_threshold);
+			c.print ("average_samples",(int)b->adis.average_samples);
 			c.print ("idle_time",b->adis.idle_time);
 			c.print ("idle_steps",b->adis.idle_steps);
 			c.print ("time_left",b->adis_timeleft);

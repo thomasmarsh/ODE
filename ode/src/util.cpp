@@ -33,66 +33,73 @@
 void dInternalHandleAutoDisabling (dxWorld *world, dReal stepsize)
 {
 	dxBody *bb;
-	for (bb=world->firstbody; bb; bb=(dxBody*)bb->next) {
-                // don't freeze objects mid-air (patch 1586738)
-		if (bb->firstjoint==NULL) continue;
+	for ( bb=world->firstbody; bb; bb=(dxBody*)bb->next )
+	{
+		// don't freeze objects mid-air (patch 1586738)
+		if ( bb->firstjoint == NULL ) continue;
+
 		// nothing to do unless this body is currently enabled and has
 		// the auto-disable flag set
-		if ((bb->flags & (dxBodyAutoDisable|dxBodyDisabled)) != dxBodyAutoDisable) continue;
+		if ( (bb->flags & (dxBodyAutoDisable|dxBodyDisabled)) != dxBodyAutoDisable ) continue;
 
+		// if sampling / threshold testing is disabled, we can never sleep.
+		if ( bb->adis.average_samples == 0 ) continue;
+
+		//
 		// see if the body is idle
-		int idle = 1;			// initial assumption
-		dReal lspeed2 = dDOT(bb->lvel,bb->lvel);
-		if (lspeed2 > bb->adis.linear_threshold) {
-			idle = 0;		// moving fast - not idle
-		}
-		else {
-			dReal aspeed = dDOT(bb->avel,bb->avel);
-			if (aspeed > bb->adis.angular_threshold) {
-				idle = 0;	// turning fast - not idle
-			}
-		}
-
-		if ( idle && bb->adis.average_samples > 0 ) // if still idle and if average-test is "enabled"
+		//
+		
+#ifndef dNODEBUG
+		// sanity check
+		if ( bb->average_counter >= bb->adis.average_samples )
 		{
-			if ( bb->average_counter < 0 || bb->average_counter >= bb->adis.average_samples )
-			{
-				// here is something going wrong, reset the average-calculations
-				bb->average_ready = 0; // not ready for average calculation
-				bb->average_counter = 0; // reset the buffer index
-			}
+			dUASSERT( bb->average_counter < bb->adis.average_samples, "buffer overflow" );
 
-			// filling the current buffer-index
-			bb->average_lvel_buffer[bb->average_counter][0] = bb->lvel[0];
-			bb->average_lvel_buffer[bb->average_counter][1] = bb->lvel[1];
-			bb->average_lvel_buffer[bb->average_counter][2] = bb->lvel[2];
-			bb->average_avel_buffer[bb->average_counter][0] = bb->avel[0];
-			bb->average_avel_buffer[bb->average_counter][1] = bb->avel[1];
-			bb->average_avel_buffer[bb->average_counter][2] = bb->avel[2];
-			bb->average_counter++;
+			// something is going wrong, reset the average-calculations
+			bb->average_ready = 0; // not ready for average calculation
+			bb->average_counter = 0; // reset the buffer index
+		}
+#endif // dNODEBUG
+
+		// sample the linear and angular velocity
+		bb->average_lvel_buffer[bb->average_counter][0] = bb->lvel[0];
+		bb->average_lvel_buffer[bb->average_counter][1] = bb->lvel[1];
+		bb->average_lvel_buffer[bb->average_counter][2] = bb->lvel[2];
+		bb->average_avel_buffer[bb->average_counter][0] = bb->avel[0];
+		bb->average_avel_buffer[bb->average_counter][1] = bb->avel[1];
+		bb->average_avel_buffer[bb->average_counter][2] = bb->avel[2];
+		bb->average_counter++;
+		
+		// buffer ready test
+		if ( bb->average_counter >= bb->adis.average_samples )
+		{
+			bb->average_counter = 0; // fill the buffer from the beginning
+			bb->average_ready = 1; // this body is ready now for average calculation
+		}
+
+		int idle = 0; // Assume it's in motion unless we have samples to disprove it.
+
+		// enough samples?
+		if ( bb->average_ready )
+		{
+			idle = 1; // Initial assumption: IDLE
+
+			// the sample buffers are filled and ready for calculation
+			dVector3 average_lvel, average_avel;
+
+			// Store first velocity samples
+			average_lvel[0] = bb->average_lvel_buffer[0][0];
+			average_avel[0] = bb->average_avel_buffer[0][0];
+			average_lvel[1] = bb->average_lvel_buffer[0][1];
+			average_avel[1] = bb->average_avel_buffer[0][1];
+			average_lvel[2] = bb->average_lvel_buffer[0][2];
+			average_avel[2] = bb->average_avel_buffer[0][2];
 			
-			// buffer ready test
-			if ( bb->average_counter >= bb->adis.average_samples )
+			// If we're not in "instantaneous mode"
+			if ( bb->adis.average_samples > 1 )
 			{
-				bb->average_counter = 0; // fill the buffer from the beginning
-				bb->average_ready = 1; // this body is ready now for average calculation
-			}
-
-			if ( bb->average_ready )
-			{
-				// the average-buffers are filled and ready for calculation
-				dVector3 average_lvel, average_avel;
-
-				// Store first velocity samples
-				average_lvel[0] = bb->average_lvel_buffer[0][0];
-				average_avel[0] = bb->average_avel_buffer[0][0];
-				average_lvel[1] = bb->average_lvel_buffer[0][1];
-				average_avel[1] = bb->average_avel_buffer[0][1];
-				average_lvel[2] = bb->average_lvel_buffer[0][2];
-				average_avel[2] = bb->average_avel_buffer[0][2];
-				
-				// add all remaining velocities together
-				for ( int i = 1; i < bb->adis.average_samples; ++i )
+				// add remaining velocities together
+				for ( unsigned int i = 1; i < bb->adis.average_samples; ++i )
 				{
 					average_lvel[0] += bb->average_lvel_buffer[i][0];
 					average_avel[0] += bb->average_avel_buffer[i][0];
@@ -111,29 +118,22 @@ void dInternalHandleAutoDisabling (dxWorld *world, dReal stepsize)
 				average_avel[1] *= r1;
 				average_lvel[2] *= r1;
 				average_avel[2] *= r1;
+			}
 
-				dReal av_lspeed, av_aspeed;
-
-				av_lspeed = dDOT( average_lvel, average_lvel );
-
-				if ( av_lspeed > bb->adis.linear_average_threshold )
-				{
-					idle = 0; // average linear velocity is too high for idle
-				}
-				else
-				{
-					av_aspeed = dDOT(average_avel,average_avel);
-
-					if ( av_aspeed > bb->adis.angular_average_threshold )
-					{
-						idle = 0; // average angular velocity is too high for idle
-					}
-				}
+			// threshold test
+			dReal av_lspeed, av_aspeed;
+			av_lspeed = dDOT( average_lvel, average_lvel );
+			if ( av_lspeed > bb->adis.linear_average_threshold )
+			{
+				idle = 0; // average linear velocity is too high for idle
 			}
 			else
 			{
-				// not ready for average calculation, the buffer is yet not full
-				idle = 0; // idle only possible if average buffer is filled
+				av_aspeed = dDOT( average_avel, average_avel );
+				if ( av_aspeed > bb->adis.angular_average_threshold )
+				{
+					idle = 0; // average angular velocity is too high for idle
+				}
 			}
 		}
 
@@ -144,16 +144,18 @@ void dInternalHandleAutoDisabling (dxWorld *world, dReal stepsize)
 			bb->adis_timeleft -= stepsize;
 		}
 		else {
+			// Reset countdowns
 			bb->adis_stepsleft = bb->adis.idle_steps;
 			bb->adis_timeleft = bb->adis.idle_time;
 		}
 
 		// disable the body if it's idle for a long enough time
-		if (bb->adis_stepsleft <= 0 && bb->adis_timeleft <= 0)
+		if ( bb->adis_stepsleft <= 0 && bb->adis_timeleft <= 0 )
 		{
 			bb->flags |= dxBodyDisabled; // set the disable flag
+
 			// disabling bodies should also include resetting the velocity
-			// maybe this prevents jittering in big "islands"
+			// should prevent jittering in big "islands"
 			bb->lvel[0] = 0;
 			bb->lvel[1] = 0;
 			bb->lvel[2] = 0;
