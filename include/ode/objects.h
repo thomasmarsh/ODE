@@ -287,12 +287,15 @@ ODE_API void dWorldStepFast1(dWorldID, dReal stepsize, int maxiterations);
  *   @li It has been idle for a given number of simulation steps.
  *   @li It has also been idle for a given amount of simulation time.
  *
- * A body is considered to be idle when the magnitudes of both its linear velocity
- * and angular velocity are below given thresholds.
+ * A body is considered to be idle
+ *     when the magnitudes of both its linear velocity and angular velocity are below given thresholds
+ *  and, if average is enabled (by setting AverageSamplesCount to a value bigger than 0),
+ *     when the magnitudes of both its linear average velocity and angular average velocity are below given thresholds.
  *
- * Thus, every body has five auto-disable parameters: an enabled flag, a idle step
- * count, an idle time, and linear/angular velocity thresholds. Newly created bodies
- * get these parameters from world.
+ * Thus, every body has eight auto-disable parameters: an enabled flag, a idle step
+ * count, an idle time, linear/angular velocity thresholds,
+ * linear/angular average velocity thresholds, and the average samples count.
+ * Newly created bodies get these parameters from world.
  */
 
 /**
@@ -334,6 +337,48 @@ ODE_API dReal dWorldGetAutoDisableAngularThreshold (dWorldID);
  * @ingroup disable
  */
 ODE_API void dWorldSetAutoDisableAngularThreshold (dWorldID, dReal angular_threshold);
+
+/**
+ * @brief Get auto disable linear average threshold for newly created bodies.
+ * @ingroup disable
+ * @return the threshold
+ */
+ODE_API dReal dWorldGetAutoDisableLinearAverageThreshold (dWorldID);
+
+/**
+ * @brief Set auto disable linear average threshold for newly created bodies.
+ * @param linear_average_threshold default is 0.01
+ * @ingroup disable
+ */
+ODE_API void  dWorldSetAutoDisableLinearAverageThreshold (dWorldID, dReal linear_average_threshold);
+
+/**
+ * @brief Get auto disable angular average threshold for newly created bodies.
+ * @ingroup disable
+ * @return the threshold
+ */
+ODE_API dReal dWorldGetAutoDisableAngularAverageThreshold (dWorldID);
+
+/**
+ * @brief Set auto disable angular average threshold for newly created bodies.
+ * @param linear_average_threshold default is 0.01
+ * @ingroup disable
+ */
+ODE_API void dWorldSetAutoDisableAngularAverageThreshold (dWorldID, dReal angular_average_threshold);
+
+/**
+ * @brief Get auto disable Average samples for newly created bodies.
+ * @ingroup disable
+ * @return nr of steps
+ */
+ODE_API int dWorldGetAutoDisableAverageSamplesCount (dWorldID);
+
+/**
+ * @brief Set auto disable average sample count for newly created bodies.
+ * @ingroup disable
+ * @param steps default is 0 = average sampling disabled
+ */
+ODE_API void dWorldSetAutoDisableAverageSamplesCount (dWorldID, int average_samples_count );
 
 /**
  * @brief Get auto disable steps for newly created bodies.
@@ -440,6 +485,49 @@ ODE_API dReal dBodyGetAutoDisableAngularThreshold (dBodyID);
  * @return the threshold
  */
 ODE_API void  dBodySetAutoDisableAngularThreshold (dBodyID, dReal angular_threshold);
+
+/**
+ * @brief Get auto disable linear average threshold.
+ * @ingroup bodies
+ * @return the threshold
+ */
+ODE_API dReal dBodyGetAutoDisableLinearAverageThreshold (dBodyID);
+
+/**
+ * @brief Set auto disable linear average threshold.
+ * @ingroup bodies
+ * @return the threshold
+ */
+ODE_API void  dBodySetAutoDisableLinearAverageThreshold (dBodyID, dReal linear_average_threshold);
+
+/**
+ * @brief Get auto disable angular average threshold.
+ * @ingroup bodies
+ * @return the threshold
+ */
+ODE_API dReal dBodyGetAutoDisableAngularAverageThreshold (dBodyID);
+
+/**
+ * @brief Set auto disable angular average threshold.
+ * @ingroup bodies
+ * @return the threshold
+ */
+ODE_API void  dBodySetAutoDisableAngularAverageThreshold (dBodyID, dReal angular_average_threshold);
+
+/**
+ * @brief Get auto disable average size (samples count).
+ * @ingroup bodies
+ * @return the nr of steps/size.
+ */
+ODE_API int dBodyGetAutoDisableAverageSamplesCount (dBodyID);
+
+/**
+ * @brief Set auto disable average buffer size (average steps).
+ * @ingroup bodies
+ * @param steps the nr of steps/size.
+ */
+ODE_API void dBodySetAutoDisableAverageSamplesCount (dBodyID, int average_samples_count);
+
 
 /**
  * @brief Get auto disable steps.

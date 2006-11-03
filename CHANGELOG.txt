@@ -9,7 +9,12 @@ the rules for this file:
 
 ------------------------------------------------------------------------------
 
-26/10/06 Francisco Leon
+11/03/06 david
+
+	* Integrated Christoph Beyer's average based sampling system for body
+	  disabling.
+
+10/26/06 Francisco Leon
 
 	* Totally refactored trimesh collision system.
 	  Using GIMPACT instead of OPCODE. Now works correctly, and faster.
@@ -23,8 +28,8 @@ the rules for this file:
 	  	  
 	* dInitODE function added.
 	
-	* Is Obligatory to call dInitODE() at the beginning for initialize ODE, and calling 
-	  dCloseODE() when the program ends.
+	* Is Obligatory to call dInitODE() at the beginning for initialize ODE,
+	  and calling dCloseODE() when the program ends.
 
 09/20/06 bram
 

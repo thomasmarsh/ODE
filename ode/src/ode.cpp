@@ -230,6 +230,8 @@ dxBody *dBodyCreate (dxWorld *w)
   b->firstjoint = 0;
   b->flags = 0;
   b->geom = 0;
+  b->average_lvel_buffer = 0;
+  b->average_avel_buffer = 0;
   dMassSetParameters (&b->mass,1,0,0,0,1,1,1,0,0,0);
   dSetZero (b->invI,4*3);
   b->invI[0] = 1;
@@ -252,6 +254,19 @@ dxBody *dBodyCreate (dxWorld *w)
   dBodySetAutoDisableDefaults (b);	// must do this after adding to world
   b->adis_stepsleft = b->adis.idle_steps;
   b->adis_timeleft = b->adis.idle_time;
+  b->average_counter = 0;
+  b->average_ready = 0; // average buffer not filled on the beginning
+  if(b->adis.average_samples > 0)
+  {
+    b->average_lvel_buffer = new dVector3[b->adis.average_samples];
+    b->average_avel_buffer = new dVector3[b->adis.average_samples];
+  }
+  else
+  {
+    // no average-processing
+    b->average_lvel_buffer = 0;
+    b->average_avel_buffer = 0;
+  }
 
   return b;
 }
@@ -284,6 +299,19 @@ void dBodyDestroy (dxBody *b)
   }
   removeObjectFromList (b);
   b->world->nb--;
+
+  // delete the average buffers
+  if(b->average_lvel_buffer)
+  {
+	  delete[] (b->average_lvel_buffer);
+	  b->average_lvel_buffer = 0;
+  }
+  if(b->average_avel_buffer)
+  {
+	  delete[] (b->average_avel_buffer);
+	  b->average_avel_buffer = 0;
+  }
+
   delete b;
 }
 
@@ -785,6 +813,7 @@ void dBodyEnable (dBodyID b)
   b->flags &= ~dxBodyDisabled;
   b->adis_stepsleft = b->adis.idle_steps;
   b->adis_timeleft = b->adis.idle_time;
+  // no code for average-processing needed here
 }
 
 
@@ -847,6 +876,72 @@ void dBodySetAutoDisableAngularThreshold (dBodyID b, dReal angular_threshold)
 }
 
 
+dReal dBodyGetAutoDisableLinearAverageThreshold (dBodyID b)
+{
+	dAASSERT(b);
+	return dSqrt (b->adis.linear_average_threshold);
+}
+
+
+void dBodySetAutoDisableLinearAverageThreshold (dBodyID b, dReal linear_average_threshold)
+{
+	dAASSERT(b);
+	b->adis.linear_average_threshold = linear_average_threshold * linear_average_threshold;
+}
+
+
+dReal dBodyGetAutoDisableAngularAverageThreshold (dBodyID b)
+{
+	dAASSERT(b);
+	return dSqrt (b->adis.angular_average_threshold);
+}
+
+
+void dBodySetAutoDisableAngularAverageThreshold (dBodyID b, dReal angular_average_threshold)
+{
+	dAASSERT(b);
+	b->adis.angular_average_threshold = angular_average_threshold * angular_average_threshold;
+}
+
+
+int dBodyGetAutoDisableAverageSamplesCount (dBodyID b)
+{
+	dAASSERT(b);
+	return b->adis.average_samples;
+}
+
+
+void dBodySetAutoDisableAverageSamplesCount (dBodyID b, int average_samples_count)
+{
+	dAASSERT(b);
+	b->adis.average_samples = average_samples_count;
+	// update the average buffers
+	if(b->average_lvel_buffer)
+	{
+		delete[] b->average_lvel_buffer;
+		b->average_lvel_buffer = 0;
+	}
+	if(b->average_avel_buffer)
+	{
+		delete[] b->average_avel_buffer;
+		b->average_avel_buffer = 0;
+	}
+	if(b->adis.average_samples > 0)
+	{
+		b->average_lvel_buffer = new dVector3[b->adis.average_samples];
+		b->average_avel_buffer = new dVector3[b->adis.average_samples];
+	}
+	else
+	{
+		b->average_lvel_buffer = 0;
+		b->average_avel_buffer = 0;
+	}
+	// new buffer is empty
+	b->average_counter = 0;
+	b->average_ready = 0;
+}
+
+
 int dBodyGetAutoDisableSteps (dBodyID b)
 {
 	dAASSERT(b);
@@ -892,6 +987,8 @@ void dBodySetAutoDisableFlag (dBodyID b, int do_auto_disable)
 		b->flags &= ~dxBodyDisabled;
 		b->adis.idle_steps = dWorldGetAutoDisableSteps(b->world);
 		b->adis.idle_time = dWorldGetAutoDisableTime(b->world);
+		// resetting the average calculations too
+		dBodySetAutoDisableAverageSamplesCount(b, dWorldGetAutoDisableAverageSamplesCount(b->world) );
 	}
 	else
 	{
@@ -1277,11 +1374,15 @@ dxWorld * dWorldCreate()
   #error dSINGLE or dDOUBLE must be defined
 #endif
 
-  w->adis.linear_threshold = REAL(0.001)*REAL(0.001);	// (magnitude squared)
-  w->adis.angular_threshold = REAL(0.001)*REAL(0.001);	// (magnitude squared)
+  w->adis.linear_threshold = REAL(0.01)*REAL(0.01);	// (magnitude squared)
+  w->adis.angular_threshold = REAL(0.01)*REAL(0.01);	// (magnitude squared)
   w->adis.idle_steps = 10;
   w->adis.idle_time = 0;
   w->adis_flag = 0;
+  // average calculations disabled by default
+  w->adis.angular_average_threshold = REAL(0.01)*REAL(0.01);	// (magnitude squared)
+  w->adis.linear_average_threshold = REAL(0.01)*REAL(0.01);	// (magnitude squared)
+  w->adis.average_samples = 0; // average disabled
 
   w->qs.num_iterations = 20;
   w->qs.w = REAL(1.3);
@@ -1300,7 +1401,17 @@ void dWorldDestroy (dxWorld *w)
   dxBody *nextb, *b = w->firstbody;
   while (b) {
     nextb = (dxBody*) b->next;
-    delete b;
+    if(b->average_lvel_buffer)
+    {
+      delete[] (b->average_lvel_buffer);
+      b->average_lvel_buffer = 0;
+    }
+    if(b->average_avel_buffer)
+    {
+      delete[] (b->average_avel_buffer);
+      b->average_avel_buffer = 0;
+    }
+    dBodyDestroy(b); // calling here dBodyDestroy for correct destroying! (i.e. the average buffers)
     b = nextb;
   }
   dxJoint *nextj, *j = w->firstjoint;
@@ -1426,6 +1537,48 @@ void dWorldSetAutoDisableAngularThreshold (dWorldID w, dReal angular_threshold)
 {
 	dAASSERT(w);
 	w->adis.angular_threshold = angular_threshold * angular_threshold;
+}
+
+
+dReal dWorldGetAutoDisableLinearAverageThreshold (dWorldID w)
+{
+	dAASSERT(w);
+	return dSqrt (w->adis.linear_average_threshold);
+}
+
+
+void dWorldSetAutoDisableLinearAverageThreshold (dWorldID w, dReal linear_average_threshold)
+{
+	dAASSERT(w);
+	w->adis.linear_average_threshold = linear_average_threshold * linear_average_threshold;
+}
+
+
+dReal dWorldGetAutoDisableAngularAverageThreshold (dWorldID w)
+{
+	dAASSERT(w);
+	return dSqrt (w->adis.angular_average_threshold);
+}
+
+
+void dWorldSetAutoDisableAngularAverageThreshold (dWorldID w, dReal angular_average_threshold)
+{
+	dAASSERT(w);
+	w->adis.angular_average_threshold = angular_average_threshold * angular_average_threshold;
+}
+
+
+int dWorldGetAutoDisableAverageSamplesCount (dWorldID w)
+{
+	dAASSERT(w);
+	return w->adis.average_samples;
+}
+
+
+void dWorldSetAutoDisableAverageSamplesCount (dWorldID w, int average_samples_count)
+{
+	dAASSERT(w);
+	w->adis.average_samples = average_samples_count;
 }
 
 
