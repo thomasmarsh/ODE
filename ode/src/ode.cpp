@@ -851,53 +851,25 @@ int dBodyGetGravityMode (dBodyID b)
 dReal dBodyGetAutoDisableLinearThreshold (dBodyID b)
 {
 	dAASSERT(b);
-	return dSqrt (b->adis.linear_threshold);
-}
-
-
-void dBodySetAutoDisableLinearThreshold (dBodyID b, dReal linear_threshold)
-{
-	dAASSERT(b);
-	b->adis.linear_threshold = linear_threshold * linear_threshold;
-}
-
-
-dReal dBodyGetAutoDisableAngularThreshold (dBodyID b)
-{
-	dAASSERT(b);
-	return dSqrt (b->adis.angular_threshold);
-}
-
-
-void dBodySetAutoDisableAngularThreshold (dBodyID b, dReal angular_threshold)
-{
-	dAASSERT(b);
-	b->adis.angular_threshold = angular_threshold * angular_threshold;
-}
-
-
-dReal dBodyGetAutoDisableLinearAverageThreshold (dBodyID b)
-{
-	dAASSERT(b);
 	return dSqrt (b->adis.linear_average_threshold);
 }
 
 
-void dBodySetAutoDisableLinearAverageThreshold (dBodyID b, dReal linear_average_threshold)
+void dBodySetAutoDisableLinearThreshold (dBodyID b, dReal linear_average_threshold)
 {
 	dAASSERT(b);
 	b->adis.linear_average_threshold = linear_average_threshold * linear_average_threshold;
 }
 
 
-dReal dBodyGetAutoDisableAngularAverageThreshold (dBodyID b)
+dReal dBodyGetAutoDisableAngularThreshold (dBodyID b)
 {
 	dAASSERT(b);
 	return dSqrt (b->adis.angular_average_threshold);
 }
 
 
-void dBodySetAutoDisableAngularAverageThreshold (dBodyID b, dReal angular_average_threshold)
+void dBodySetAutoDisableAngularThreshold (dBodyID b, dReal angular_average_threshold)
 {
 	dAASSERT(b);
 	b->adis.angular_average_threshold = angular_average_threshold * angular_average_threshold;
@@ -911,7 +883,7 @@ int dBodyGetAutoDisableAverageSamplesCount (dBodyID b)
 }
 
 
-void dBodySetAutoDisableAverageSamplesCount (dBodyID b, int average_samples_count)
+void dBodySetAutoDisableAverageSamplesCount (dBodyID b, unsigned int average_samples_count)
 {
 	dAASSERT(b);
 	b->adis.average_samples = average_samples_count;
@@ -1374,15 +1346,12 @@ dxWorld * dWorldCreate()
   #error dSINGLE or dDOUBLE must be defined
 #endif
 
-  w->adis.linear_threshold = REAL(0.01)*REAL(0.01);	// (magnitude squared)
-  w->adis.angular_threshold = REAL(0.01)*REAL(0.01);	// (magnitude squared)
   w->adis.idle_steps = 10;
   w->adis.idle_time = 0;
   w->adis_flag = 0;
-  // average calculations disabled by default
+  w->adis.average_samples = 1;		// Default is 1 sample => Instantaneous velocity
   w->adis.angular_average_threshold = REAL(0.01)*REAL(0.01);	// (magnitude squared)
-  w->adis.linear_average_threshold = REAL(0.01)*REAL(0.01);	// (magnitude squared)
-  w->adis.average_samples = 0; // average disabled
+  w->adis.linear_average_threshold = REAL(0.01)*REAL(0.01);		// (magnitude squared)
 
   w->qs.num_iterations = 20;
   w->qs.w = REAL(1.3);
@@ -1515,53 +1484,25 @@ void dWorldImpulseToForce (dWorldID w, dReal stepsize,
 dReal dWorldGetAutoDisableLinearThreshold (dWorldID w)
 {
 	dAASSERT(w);
-	return dSqrt (w->adis.linear_threshold);
-}
-
-
-void dWorldSetAutoDisableLinearThreshold (dWorldID w, dReal linear_threshold)
-{
-	dAASSERT(w);
-	w->adis.linear_threshold = linear_threshold * linear_threshold;
-}
-
-
-dReal dWorldGetAutoDisableAngularThreshold (dWorldID w)
-{
-	dAASSERT(w);
-	return dSqrt (w->adis.angular_threshold);
-}
-
-
-void dWorldSetAutoDisableAngularThreshold (dWorldID w, dReal angular_threshold)
-{
-	dAASSERT(w);
-	w->adis.angular_threshold = angular_threshold * angular_threshold;
-}
-
-
-dReal dWorldGetAutoDisableLinearAverageThreshold (dWorldID w)
-{
-	dAASSERT(w);
 	return dSqrt (w->adis.linear_average_threshold);
 }
 
 
-void dWorldSetAutoDisableLinearAverageThreshold (dWorldID w, dReal linear_average_threshold)
+void dWorldSetAutoDisableLinearThreshold (dWorldID w, dReal linear_average_threshold)
 {
 	dAASSERT(w);
 	w->adis.linear_average_threshold = linear_average_threshold * linear_average_threshold;
 }
 
 
-dReal dWorldGetAutoDisableAngularAverageThreshold (dWorldID w)
+dReal dWorldGetAutoDisableAngularThreshold (dWorldID w)
 {
 	dAASSERT(w);
 	return dSqrt (w->adis.angular_average_threshold);
 }
 
 
-void dWorldSetAutoDisableAngularAverageThreshold (dWorldID w, dReal angular_average_threshold)
+void dWorldSetAutoDisableAngularThreshold (dWorldID w, dReal angular_average_threshold)
 {
 	dAASSERT(w);
 	w->adis.angular_average_threshold = angular_average_threshold * angular_average_threshold;
@@ -1575,7 +1516,7 @@ int dWorldGetAutoDisableAverageSamplesCount (dWorldID w)
 }
 
 
-void dWorldSetAutoDisableAverageSamplesCount (dWorldID w, int average_samples_count)
+void dWorldSetAutoDisableAverageSamplesCount (dWorldID w, unsigned int average_samples_count)
 {
 	dAASSERT(w);
 	w->adis.average_samples = average_samples_count;

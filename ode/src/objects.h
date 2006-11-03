@@ -66,13 +66,11 @@ struct dObject : public dBase {
 
 // auto disable parameters
 struct dxAutoDisable {
-  dReal linear_threshold;	// linear (squared) velocity threshold
-  dReal angular_threshold;	// angular (squared) velocity threshold
   dReal idle_time;		// time the body needs to be idle to auto-disable it
   int idle_steps;		// steps the body needs to be idle to auto-disable it
   dReal linear_average_threshold;   // linear (squared) average velocity threshold
   dReal angular_average_threshold;  // angular (squared) average velocity threshold
-  int average_samples;                 // size of the average_lvel and average_avel buffers
+  unsigned int average_samples;     // size of the average_lvel and average_avel buffers
 };
 
 
@@ -118,7 +116,7 @@ struct dxBody : public dObject {
   int adis_stepsleft;		// steps left to be idle
   dVector3* average_lvel_buffer;      // buffer for the linear average velocity calculation
   dVector3* average_avel_buffer;      // buffer for the angular average velocity calculation
-  int average_counter;      // counter/index to fill the average-buffers
+  unsigned int average_counter;      // counter/index to fill the average-buffers
   int average_ready;        // indicates ( with = 1 ), if the Body's buffers are ready for average-calculations
 };
 

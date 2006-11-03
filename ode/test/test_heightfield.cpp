@@ -2072,7 +2072,7 @@ int main (int argc, char **argv)
 	world = dWorldCreate();
 	space = dHashSpaceCreate (0);
 	contactgroup = dJointGroupCreate (0);
-	dWorldSetGravity (world,0,0,-0.5);
+	dWorldSetGravity (world,0,0,-0.05);
 	dWorldSetCFM (world,1e-5);
 	dWorldSetAutoDisableFlag (world,1);
 	dWorldSetContactMaxCorrectingVel (world,0.1);
@@ -2081,7 +2081,7 @@ int main (int argc, char **argv)
 
 #if 1
 
-  dWorldSetAutoDisableAverageSamplesCount( world, 10 );
+  dWorldSetAutoDisableAverageSamplesCount( world, 1 );
 
 #endif
 

@@ -556,7 +556,7 @@ int main (int argc, char **argv)
 
 #if 1
 
-  dWorldSetAutoDisableAverageSamplesCount( world, 5 );
+  dWorldSetAutoDisableAverageSamplesCount( world, 10 );
 
 #endif
 
