@@ -9,9 +9,9 @@ endif
 
 export CONFIG
 
-.PHONY: all clean ode drawstuff test_basket test_boxstack test_buggy test_chain1 test_chain2 test_collision test_crash test_feedback test_friction test_heightfield test_hinge test_I test_joints test_motor test_ode test_plane2d test_slider test_space test_space_stress test_step test_cyl test_cylvssphere test_moving_trimesh test_trimesh tests
+.PHONY: all clean ode drawstuff test_boxstack test_buggy test_chain1 test_chain2 test_collision test_crash test_feedback test_friction test_heightfield test_hinge test_I test_joints test_motor test_ode test_plane2d test_slider test_space test_space_stress test_step test_basket test_cyl test_moving_trimesh test_trimesh test_cylvssphere tests
 
-all: ode drawstuff test_basket test_boxstack test_buggy test_chain1 test_chain2 test_collision test_crash test_feedback test_friction test_heightfield test_hinge test_I test_joints test_motor test_ode test_plane2d test_slider test_space test_space_stress test_step test_cyl test_cylvssphere test_moving_trimesh test_trimesh tests
+all: ode drawstuff test_boxstack test_buggy test_chain1 test_chain2 test_collision test_crash test_feedback test_friction test_heightfield test_hinge test_I test_joints test_motor test_ode test_plane2d test_slider test_space test_space_stress test_step test_basket test_cyl test_moving_trimesh test_trimesh test_cylvssphere tests
 
 Makefile: ../premake.lua ../ode.lua ../drawstuff.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua
 	@echo ==== Regenerating Makefiles ====
@@ -24,10 +24,6 @@ ode:
 drawstuff:
 	@echo ==== Building drawstuff ====
 	@$(MAKE) --no-print-directory -C . -f drawstuff.make
-
-test_basket: ode drawstuff
-	@echo ==== Building test_basket ====
-	@$(MAKE) --no-print-directory -C . -f test_basket.make
 
 test_boxstack: ode drawstuff
 	@echo ==== Building test_boxstack ====
@@ -105,13 +101,13 @@ test_step: ode drawstuff
 	@echo ==== Building test_step ====
 	@$(MAKE) --no-print-directory -C . -f test_step.make
 
+test_basket: ode drawstuff
+	@echo ==== Building test_basket ====
+	@$(MAKE) --no-print-directory -C . -f test_basket.make
+
 test_cyl: ode drawstuff
 	@echo ==== Building test_cyl ====
 	@$(MAKE) --no-print-directory -C . -f test_cyl.make
-
-test_cylvssphere: ode drawstuff
-	@echo ==== Building test_cylvssphere ====
-	@$(MAKE) --no-print-directory -C . -f test_cylvssphere.make
 
 test_moving_trimesh: ode drawstuff
 	@echo ==== Building test_moving_trimesh ====
@@ -121,6 +117,10 @@ test_trimesh: ode drawstuff
 	@echo ==== Building test_trimesh ====
 	@$(MAKE) --no-print-directory -C . -f test_trimesh.make
 
+test_cylvssphere: ode drawstuff
+	@echo ==== Building test_cylvssphere ====
+	@$(MAKE) --no-print-directory -C . -f test_cylvssphere.make
+
 tests: ode
 	@echo ==== Building tests ====
 	@$(MAKE) --no-print-directory -C . -f tests.make
@@ -128,7 +128,6 @@ tests: ode
 clean:
 	@$(MAKE) --no-print-directory -C . -f ode.make clean
 	@$(MAKE) --no-print-directory -C . -f drawstuff.make clean
-	@$(MAKE) --no-print-directory -C . -f test_basket.make clean
 	@$(MAKE) --no-print-directory -C . -f test_boxstack.make clean
 	@$(MAKE) --no-print-directory -C . -f test_buggy.make clean
 	@$(MAKE) --no-print-directory -C . -f test_chain1.make clean
@@ -148,8 +147,9 @@ clean:
 	@$(MAKE) --no-print-directory -C . -f test_space.make clean
 	@$(MAKE) --no-print-directory -C . -f test_space_stress.make clean
 	@$(MAKE) --no-print-directory -C . -f test_step.make clean
+	@$(MAKE) --no-print-directory -C . -f test_basket.make clean
 	@$(MAKE) --no-print-directory -C . -f test_cyl.make clean
-	@$(MAKE) --no-print-directory -C . -f test_cylvssphere.make clean
 	@$(MAKE) --no-print-directory -C . -f test_moving_trimesh.make clean
 	@$(MAKE) --no-print-directory -C . -f test_trimesh.make clean
+	@$(MAKE) --no-print-directory -C . -f test_cylvssphere.make clean
 	@$(MAKE) --no-print-directory -C . -f tests.make clean

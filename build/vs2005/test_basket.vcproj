@@ -3,7 +3,7 @@
 	ProjectType="Visual C++"
 	Version="8.00"
 	Name="test_basket"
-	ProjectGUID="{D34A8A37-2324-894E-94C1-911E682F19E2}"
+	ProjectGUID="{419AFC4C-284A-A241-9EA8-534CAD2C2135}"
 	RootNamespace="test_basket"
 	Keyword="Win32Proj"
 	>

@@ -3,7 +3,7 @@
 	ProjectType="Visual C++"
 	Version="8.00"
 	Name="test_heightfield"
-	ProjectGUID="{7C248E85-7EB3-F144-8857-4DBBA62ACC89}"
+	ProjectGUID="{DEC97539-2DD5-DF44-BBF8-2F4522EF82CB}"
 	RootNamespace="test_heightfield"
 	Keyword="Win32Proj"
 	>

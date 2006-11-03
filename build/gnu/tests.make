@@ -74,8 +74,15 @@ OBJECTS := \
 
 RESOURCES := \
 
+MKDIR_TYPE := msdos
 CMD := $(subst \,\\,$(ComSpec)$(COMSPEC))
 ifeq (,$(CMD))
+  MKDIR_TYPE := posix
+endif
+ifeq (/bin/sh.exe,$(SHELL))
+  MKDIR_TYPE := posix
+endif
+ifeq ($(MKDIR_TYPE),posix)
   CMD_MKBINDIR := mkdir -p $(BINDIR)
   CMD_MKLIBDIR := mkdir -p $(LIBDIR)
   CMD_MKOUTDIR := mkdir -p $(OUTDIR)
