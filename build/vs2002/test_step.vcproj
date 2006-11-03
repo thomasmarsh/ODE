@@ -3,7 +3,7 @@
 	ProjectType="Visual C++"
 	Version="7.00"
 	Name="test_step"
-	ProjectGUID="{0E7986CD-4133-5D4D-A92E-0C0D1EC3B6BE}"
+	ProjectGUID="{4252DAB7-B362-7F45-A258-AD8BD6DE019B}"
 	Keyword="Win32Proj">
 	<Platforms>
 		<Platform

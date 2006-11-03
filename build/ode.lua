@@ -121,7 +121,8 @@ package.objdir = "obj/ode"
   trimesh_files =
   {
     "../../ode/src/collision_trimesh_internal.h",
-    "../../ode/src/collision_trimesh.cpp",
+    "../../ode/src/collision_trimesh_opcode.cpp",
+    "../../ode/src/collision_trimesh_gimpact.cpp",
     "../../ode/src/collision_trimesh_box.cpp",
     "../../ode/src/collision_trimesh_ccylinder.cpp",
     "../../ode/src/collision_cylinder_trimesh.cpp",
@@ -157,9 +158,6 @@ package.objdir = "obj/ode"
   if (options["no-trimesh"]) then
     table.insert(package.excludes, trimesh_files)
   else
-    if (options["with-gimpact"]) then
-      table.insert(package.files, gimpact_files)
-    else
-      table.insert(package.files, opcode_files)
-    end
+    table.insert(package.files, gimpact_files)
+    table.insert(package.files, opcode_files)
   end

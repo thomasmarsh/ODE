@@ -3,7 +3,6 @@
 
   local tests =
   {
-    "basket",
     "boxstack",
     "buggy",
     "chain1",
@@ -25,14 +24,17 @@
     "step"
   }
 
-  if (not options["no-cylinder"]) then
-    table.insert(tests, "cyl")
-    table.insert(tests, "cylvssphere")
-  end
-
   if (not options["no-trimesh"]) then
+    table.insert(tests, "basket")
+    if (not options["no-cylinder"]) then
+      table.insert(tests, "cyl")
+    end
     table.insert(tests, "moving_trimesh")
     table.insert(tests, "trimesh")
+  end
+
+  if (not options["no-cylinder"]) then
+    table.insert(tests, "cylvssphere")
   end
 
 

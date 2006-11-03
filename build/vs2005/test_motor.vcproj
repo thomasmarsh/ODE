@@ -3,7 +3,7 @@
 	ProjectType="Visual C++"
 	Version="8.00"
 	Name="test_motor"
-	ProjectGUID="{B5126622-7F59-FA4C-BBCD-06E1913D772E}"
+	ProjectGUID="{0AC0D687-735C-BA4B-BF43-BAAC55ABC1DA}"
 	RootNamespace="test_motor"
 	Keyword="Win32Proj"
 	>

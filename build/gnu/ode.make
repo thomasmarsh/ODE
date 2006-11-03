@@ -10,7 +10,7 @@ ifeq ($(CONFIG),DebugDLL)
   LIBDIR := ../../lib/DebugDLL
   OBJDIR := obj/ode/DebugDLL
   OUTDIR := ../../lib/DebugDLL
-  CPPFLAGS := -MD -D "WIN32" -D "ODE_DLL" -I "../../include" -I "../../OPCODE"
+  CPPFLAGS := -MD -D "WIN32" -D "ODE_DLL" -I "../../include" -I "../../OPCODE" -I "../../GIMPACT/include"
   CFLAGS += $(CPPFLAGS) -g
   CXXFLAGS := $(CFLAGS)
   LDFLAGS += -L$(BINDIR) -L$(LIBDIR) -shared -luser32
@@ -24,7 +24,7 @@ ifeq ($(CONFIG),ReleaseDLL)
   LIBDIR := ../../lib/ReleaseDLL
   OBJDIR := obj/ode/ReleaseDLL
   OUTDIR := ../../lib/ReleaseDLL
-  CPPFLAGS := -MD -D "WIN32" -D "ODE_DLL" -I "../../include" -I "../../OPCODE"
+  CPPFLAGS := -MD -D "WIN32" -D "ODE_DLL" -I "../../include" -I "../../OPCODE" -I "../../GIMPACT/include"
   CFLAGS += $(CPPFLAGS) -O3 -fomit-frame-pointer
   CXXFLAGS := $(CFLAGS)
   LDFLAGS += -L$(BINDIR) -L$(LIBDIR) -shared -s -luser32
@@ -38,7 +38,7 @@ ifeq ($(CONFIG),DebugLib)
   LIBDIR := ../../lib/DebugLib
   OBJDIR := obj/ode/DebugLib
   OUTDIR := ../../lib/DebugLib
-  CPPFLAGS := -MD -D "WIN32" -D "ODE_LIB" -I "../../include" -I "../../OPCODE"
+  CPPFLAGS := -MD -D "WIN32" -D "ODE_LIB" -I "../../include" -I "../../OPCODE" -I "../../GIMPACT/include"
   CFLAGS += $(CPPFLAGS) -g
   CXXFLAGS := $(CFLAGS)
   LDFLAGS += -L$(BINDIR) -L$(LIBDIR) -luser32
@@ -52,7 +52,7 @@ ifeq ($(CONFIG),ReleaseLib)
   LIBDIR := ../../lib/ReleaseLib
   OBJDIR := obj/ode/ReleaseLib
   OUTDIR := ../../lib/ReleaseLib
-  CPPFLAGS := -MD -D "WIN32" -D "ODE_LIB" -I "../../include" -I "../../OPCODE"
+  CPPFLAGS := -MD -D "WIN32" -D "ODE_LIB" -I "../../include" -I "../../OPCODE" -I "../../GIMPACT/include"
   CFLAGS += $(CPPFLAGS) -O3 -fomit-frame-pointer
   CXXFLAGS := $(CFLAGS)
   LDFLAGS += -L$(BINDIR) -L$(LIBDIR) -s -luser32
@@ -77,10 +77,11 @@ OBJECTS := \
 	$(OBJDIR)/collision_quadtreespace.o \
 	$(OBJDIR)/collision_space.o \
 	$(OBJDIR)/collision_transform.o \
-	$(OBJDIR)/collision_trimesh.o \
 	$(OBJDIR)/collision_trimesh_box.o \
 	$(OBJDIR)/collision_trimesh_ccylinder.o \
 	$(OBJDIR)/collision_trimesh_distance.o \
+	$(OBJDIR)/collision_trimesh_gimpact.o \
+	$(OBJDIR)/collision_trimesh_opcode.o \
 	$(OBJDIR)/collision_trimesh_plane.o \
 	$(OBJDIR)/collision_trimesh_ray.o \
 	$(OBJDIR)/collision_trimesh_sphere.o \
@@ -111,6 +112,17 @@ OBJECTS := \
 	$(OBJDIR)/testing.o \
 	$(OBJDIR)/timer.o \
 	$(OBJDIR)/util.o \
+	$(OBJDIR)/gimpact.o \
+	$(OBJDIR)/gim_boxpruning.o \
+	$(OBJDIR)/gim_contact.o \
+	$(OBJDIR)/gim_math.o \
+	$(OBJDIR)/gim_memory.o \
+	$(OBJDIR)/gim_trimesh.o \
+	$(OBJDIR)/gim_trimesh_capsule_collision.o \
+	$(OBJDIR)/gim_trimesh_ray_collision.o \
+	$(OBJDIR)/gim_trimesh_sphere_collision.o \
+	$(OBJDIR)/gim_trimesh_trimesh_collision.o \
+	$(OBJDIR)/gim_tri_tri_overlap.o \
 	$(OBJDIR)/Opcode.o \
 	$(OBJDIR)/OPC_AABBCollider.o \
 	$(OBJDIR)/OPC_AABBTree.o \
@@ -151,8 +163,15 @@ OBJECTS := \
 
 RESOURCES := \
 
+MKDIR_TYPE := msdos
 CMD := $(subst \,\\,$(ComSpec)$(COMSPEC))
 ifeq (,$(CMD))
+  MKDIR_TYPE := posix
+endif
+ifeq (/bin/sh.exe,$(SHELL))
+  MKDIR_TYPE := posix
+endif
+ifeq ($(MKDIR_TYPE),posix)
   CMD_MKBINDIR := mkdir -p $(BINDIR)
   CMD_MKLIBDIR := mkdir -p $(LIBDIR)
   CMD_MKOUTDIR := mkdir -p $(OUTDIR)
@@ -252,11 +271,6 @@ $(OBJDIR)/collision_transform.o: ../../ode/src/collision_transform.cpp
 	@echo $(notdir $<)
 	@$(CXX) $(CXXFLAGS) -o $@ -c $<
 
-$(OBJDIR)/collision_trimesh.o: ../../ode/src/collision_trimesh.cpp
-	-@$(CMD_MKOBJDIR)
-	@echo $(notdir $<)
-	@$(CXX) $(CXXFLAGS) -o $@ -c $<
-
 $(OBJDIR)/collision_trimesh_box.o: ../../ode/src/collision_trimesh_box.cpp
 	-@$(CMD_MKOBJDIR)
 	@echo $(notdir $<)
@@ -268,6 +282,16 @@ $(OBJDIR)/collision_trimesh_ccylinder.o: ../../ode/src/collision_trimesh_ccylind
 	@$(CXX) $(CXXFLAGS) -o $@ -c $<
 
 $(OBJDIR)/collision_trimesh_distance.o: ../../ode/src/collision_trimesh_distance.cpp
+	-@$(CMD_MKOBJDIR)
+	@echo $(notdir $<)
+	@$(CXX) $(CXXFLAGS) -o $@ -c $<
+
+$(OBJDIR)/collision_trimesh_gimpact.o: ../../ode/src/collision_trimesh_gimpact.cpp
+	-@$(CMD_MKOBJDIR)
+	@echo $(notdir $<)
+	@$(CXX) $(CXXFLAGS) -o $@ -c $<
+
+$(OBJDIR)/collision_trimesh_opcode.o: ../../ode/src/collision_trimesh_opcode.cpp
 	-@$(CMD_MKOBJDIR)
 	@echo $(notdir $<)
 	@$(CXX) $(CXXFLAGS) -o $@ -c $<
@@ -418,6 +442,61 @@ $(OBJDIR)/timer.o: ../../ode/src/timer.cpp
 	@$(CXX) $(CXXFLAGS) -o $@ -c $<
 
 $(OBJDIR)/util.o: ../../ode/src/util.cpp
+	-@$(CMD_MKOBJDIR)
+	@echo $(notdir $<)
+	@$(CXX) $(CXXFLAGS) -o $@ -c $<
+
+$(OBJDIR)/gimpact.o: ../../GIMPACT/src/gimpact.cpp
+	-@$(CMD_MKOBJDIR)
+	@echo $(notdir $<)
+	@$(CXX) $(CXXFLAGS) -o $@ -c $<
+
+$(OBJDIR)/gim_boxpruning.o: ../../GIMPACT/src/gim_boxpruning.cpp
+	-@$(CMD_MKOBJDIR)
+	@echo $(notdir $<)
+	@$(CXX) $(CXXFLAGS) -o $@ -c $<
+
+$(OBJDIR)/gim_contact.o: ../../GIMPACT/src/gim_contact.cpp
+	-@$(CMD_MKOBJDIR)
+	@echo $(notdir $<)
+	@$(CXX) $(CXXFLAGS) -o $@ -c $<
+
+$(OBJDIR)/gim_math.o: ../../GIMPACT/src/gim_math.cpp
+	-@$(CMD_MKOBJDIR)
+	@echo $(notdir $<)
+	@$(CXX) $(CXXFLAGS) -o $@ -c $<
+
+$(OBJDIR)/gim_memory.o: ../../GIMPACT/src/gim_memory.cpp
+	-@$(CMD_MKOBJDIR)
+	@echo $(notdir $<)
+	@$(CXX) $(CXXFLAGS) -o $@ -c $<
+
+$(OBJDIR)/gim_trimesh.o: ../../GIMPACT/src/gim_trimesh.cpp
+	-@$(CMD_MKOBJDIR)
+	@echo $(notdir $<)
+	@$(CXX) $(CXXFLAGS) -o $@ -c $<
+
+$(OBJDIR)/gim_trimesh_capsule_collision.o: ../../GIMPACT/src/gim_trimesh_capsule_collision.cpp
+	-@$(CMD_MKOBJDIR)
+	@echo $(notdir $<)
+	@$(CXX) $(CXXFLAGS) -o $@ -c $<
+
+$(OBJDIR)/gim_trimesh_ray_collision.o: ../../GIMPACT/src/gim_trimesh_ray_collision.cpp
+	-@$(CMD_MKOBJDIR)
+	@echo $(notdir $<)
+	@$(CXX) $(CXXFLAGS) -o $@ -c $<
+
+$(OBJDIR)/gim_trimesh_sphere_collision.o: ../../GIMPACT/src/gim_trimesh_sphere_collision.cpp
+	-@$(CMD_MKOBJDIR)
+	@echo $(notdir $<)
+	@$(CXX) $(CXXFLAGS) -o $@ -c $<
+
+$(OBJDIR)/gim_trimesh_trimesh_collision.o: ../../GIMPACT/src/gim_trimesh_trimesh_collision.cpp
+	-@$(CMD_MKOBJDIR)
+	@echo $(notdir $<)
+	@$(CXX) $(CXXFLAGS) -o $@ -c $<
+
+$(OBJDIR)/gim_tri_tri_overlap.o: ../../GIMPACT/src/gim_tri_tri_overlap.cpp
 	-@$(CMD_MKOBJDIR)
 	@echo $(notdir $<)
 	@$(CXX) $(CXXFLAGS) -o $@ -c $<
