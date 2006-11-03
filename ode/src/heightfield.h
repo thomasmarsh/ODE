@@ -52,7 +52,8 @@ struct dxHeightfieldData
 
 	void ComputeHeightBounds();
 
-	bool IsOnHeightfield(int nx, int nz, int w, dReal *pos);
+    bool IsOnHeightfield  ( const dReal * const CellOrigin, const dReal * const pos,  const bool isABC) const;
+
 	dReal GetHeight(int x, int z);
 	dReal GetHeight(dReal x, dReal z);
 };
@@ -74,6 +75,13 @@ struct dxHeightfield : public dxGeom
 
 	int dCollideHeightfieldUnit( int x, int z, dxGeom *o2, int numMaxContacts,
 		int flags, dContactGeom *contact, int skip );
+
+    int dCollideHeightfieldZone( const int minX, const int maxX, const int minZ, const int maxZ,  
+        dxGeom *o2, const int numMaxContacts,
+        int flags, dContactGeom *contact, int skip );
+
+    dxPlane *sliding_plane;
+    
 };
 
 
