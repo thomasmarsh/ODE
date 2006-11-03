@@ -134,7 +134,6 @@ BEGIN
     "S",            IDM_SHADOWS,            VIRTKEY, CONTROL, NOINVERT
     "T",            IDM_TEXTURES,           VIRTKEY, CONTROL, NOINVERT
     "X",            IDM_EXIT,               VIRTKEY, CONTROL, NOINVERT
-    VK_SPACE,       IDM_PAUSE,              VIRTKEY, NOINVERT
 END
 
 #endif    // English (U.S.) resources
