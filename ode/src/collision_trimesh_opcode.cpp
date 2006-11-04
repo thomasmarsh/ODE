@@ -562,6 +562,21 @@ dxTriMesh::~dxTriMesh(){
     //
 }
 
+// Cleanup for allocations when shutting down ODE
+void opcode_collider_cleanup()
+{
+#if dTRIMESH_ENABLED
+	
+	// Clear TC caches
+	dxTriMesh::Faces.Empty();
+	dxTriMesh::defaultSphereCache.TouchedPrimitives.Empty();
+	dxTriMesh::defaultBoxCache.TouchedPrimitives.Empty();
+	dxTriMesh::defaultCapsuleCache.TouchedPrimitives.Empty();
+
+#endif // dTRIMESH_ENABLED
+}
+
+
 
 void dxTriMesh::ClearTCCache()
 {
