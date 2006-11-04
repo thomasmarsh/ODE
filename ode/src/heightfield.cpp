@@ -824,11 +824,8 @@ int dxHeightfield::dCollideHeightfieldZone( const int minX, const int maxX, cons
     int i;
     dContactGeom *pContact = 0;
 
-    //dContactGeom *PlaneContact = new dContactGeom[numMaxContacts];
-    //dContactGeom *PlaneContact = (dContactGeom*)new char[numMaxContacts*skip];
-    //flags = (flags & 0xffff0000) | numMaxContacts;
-
-    dContactGeom *PlaneContact = new dContactGeom[HEIGHTFIELDMAXCONTACTPERCELL];    
+	// Storage for local contacts in this zone
+    dContactGeom PlaneContact[HEIGHTFIELDMAXCONTACTPERCELL];    
     flags = (flags & 0xffff0000) | HEIGHTFIELDMAXCONTACTPERCELL;
 
     // localize and const for faster access
@@ -1218,7 +1215,6 @@ int dxHeightfield::dCollideHeightfieldZone( const int minX, const int maxX, cons
             break;
     }
     dGeomDisable (sliding_plane);
-    //delete [] PlaneContact;
     return numTerrainContacts;
 }
 /*
