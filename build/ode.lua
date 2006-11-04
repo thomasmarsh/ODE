@@ -18,8 +18,8 @@ package.objdir = "obj/ode"
   local text = io.read("*a")
 
   if (options["with-doubles"]) then
-    text = string.gsub(text, "#define dSINGLE 1", "/* #define dSINGLE 1 */")
-    text = string.gsub(text, "/%* #define dDOUBLE 1 %*/", "#define dDOUBLE 1")
+    text = string.gsub(text, "#define dSINGLE", "/* #define dSINGLE */")
+    text = string.gsub(text, "/%* #define dDOUBLE %*/", "#define dDOUBLE")
   end
 
   if (options["no-trimesh"]) then
