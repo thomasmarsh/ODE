@@ -1065,9 +1065,11 @@ void dGeomGetOffsetQuaternion (dxGeom *g, dQuaternion result)
 // initialization and shutdown routines - allocate and initialize data,
 // cleanup before exiting
 
+extern void opcode_collider_cleanup();
+
 void dInitODE()
 {
-#if dTRIMESH_GIMPACT
+#if dTRIMESH_ENABLED && dTRIMESH_GIMPACT
 	gimpact_init();
 #endif
 }
@@ -1077,7 +1079,13 @@ void dCloseODE()
   colliders_initialized = 0;
   num_user_classes = 0;
   dClearPosrCache();
-#if dTRIMESH_GIMPACT
+
+#if dTRIMESH_ENABLED && dTRIMESH_GIMPACT
   gimpact_terminate();
+#endif
+
+#if dTRIMESH_ENABLED && dTRIMESH_OPCODE
+  // Free up static allocations in opcode
+  opcode_collider_cleanup();
 #endif
 }
