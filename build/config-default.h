@@ -9,7 +9,7 @@
  *
  *   dSINGLE/dDOUBLE   - force ODE to use single-precision (float)
  *                       or double-precision (double) for numbers.
- *                       Only one should be uncommented.
+ *                       Only one should be defined.
  *
  *   dTRIMESH_ENABLED  - enable/disable trimesh support
  *   dTRIMESH_OPCODE   - use the OPCODE trimesh engine
@@ -21,8 +21,8 @@
  *                       graceful out-of-memory handling.
  ******************************************************************/
 
-#define dSINGLE 1
-/* #define dDOUBLE 1 */
+#define dSINGLE
+/* #define dDOUBLE */
 
 #define dTRIMESH_ENABLED 1
 #define dTRIMESH_OPCODE 1
@@ -111,7 +111,7 @@
 	#define ODE_INFINITY8 (__ode_huge_val.__d)
 #endif
 
-#if dSINGLE
+#ifdef dSINGLE
 	#define dInfinity ODE_INFINITY4
 	#define dEpsilon  FLT_EPSILON
 #else

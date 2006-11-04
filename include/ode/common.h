@@ -96,6 +96,9 @@ msg " in %s() File %s Line %d", __FUNCTION__, __FILE__,__LINE__);
 
 #if defined(dSINGLE)
 typedef float dReal;
+#ifdef dDOUBLE
+#error You can only #define dSINGLE or dDOUBLE, not both.
+#endif // dDOUBLE
 #elif defined(dDOUBLE)
 typedef double dReal;
 #else
