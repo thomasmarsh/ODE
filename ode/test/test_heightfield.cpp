@@ -119,7 +119,7 @@ unsigned int polygons[] = //Polygons for a cube (6 squares)
 #define NUM 100			// max number of objects
 #define DENSITY (5.0)		// density of all objects
 #define GPB 3			// maximum number of geometries per body
-#define MAX_CONTACTS 8		// maximum number of contact points per body
+#define MAX_CONTACTS 64		// maximum number of contact points per body
 
 
 // dynamics and collision objects
