@@ -2,7 +2,7 @@
 #define GIM_TRI_COLLISION_H_INCLUDED
 
 /*! \file gim_tri_collision.h
-\author Francisco León
+\author Francisco León Nájera
 */
 /*
 -----------------------------------------------------------------------------
@@ -10,7 +10,7 @@ This source file is part of GIMPACT Library.
 
 For the latest info, see http://gimpact.sourceforge.net/
 
-Copyright (c) 2006 Francisco Leon. C.C. 80087371.
+Copyright (c) 2006 Francisco Leon Najera. C.C. 80087371.
 email: projectileman@yahoo.com
 
  This library is free software; you can redistribute it and/or
@@ -102,6 +102,15 @@ struct GIM_TRIANGLE_DATA
 };
 //typedef struct _GIM_TRIANGLE_DATA GIM_TRIANGLE_DATA;
 
+//! tri_data is a GIM_TRIANGLE_DATA
+#define GIM_CALC_TRIANGLE_DATA_PLANES(tri_data)\
+{\
+        TRIANGLE_PLANE((tri_data).m_vertices[0],(tri_data).m_vertices[1],(tri_data).m_vertices[2],(tri_data).m_planes.m_planes[0]);\
+        EDGE_PLANE((tri_data).m_vertices[0],(tri_data).m_vertices[1],((tri_data).m_planes.m_planes[0]),((tri_data).m_planes.m_planes[1]));\
+        EDGE_PLANE((tri_data).m_vertices[1],(tri_data).m_vertices[2],((tri_data).m_planes.m_planes[0]),((tri_data).m_planes.m_planes[2]));\
+        EDGE_PLANE((tri_data).m_vertices[2],(tri_data).m_vertices[0],((tri_data).m_planes.m_planes[0]), ((tri_data).m_planes.m_planes[3]));\
+}\
+
 //Structure for collision
 
 struct GIM_TRIANGLE_CONTACT_DATA
@@ -128,6 +137,13 @@ struct GIM_TRIANGLE_RAY_CONTACT_DATA
 int gim_triangle_triangle_overlap(
 							GIM_TRIANGLE_DATA *tri1,
 							GIM_TRIANGLE_DATA *tri2);
+
+
+//! Fast but inacurate conservative Triangle Triangle overlapping test
+int gim_triangle_triangle_overlap_fast(
+							GIM_TRIANGLE_DATA *tri1,
+							GIM_TRIANGLE_DATA *tri2);
+
 
 //! Finds the contact points from a collision of two triangles
 /*!
@@ -219,7 +235,7 @@ if 0.0<= u+v <=1.0 then they are inside of triangle
 	RAY_PLANE_COLLISION(tri_plane,vDir,vOrigin,pout,tparam,does_intersect);\
 	if(does_intersect != 0)\
 	{\
-        if(tparam<-PLANEDIREPSILON||tparam>1.0f+PLANEDIREPSILON)\
+        if(tparam<-G_EPSILON||tparam>tmax+G_EPSILON)\
         {\
             does_intersect = 0;\
         }\
