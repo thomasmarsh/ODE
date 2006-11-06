@@ -475,6 +475,12 @@ void dBodySetMass (dBodyID b, const dMass *mass)
   dAASSERT (b && mass );
   dIASSERT(dMassCheck(mass));
 
+  // The centre of mass must be at the origin.
+  // Use dMassTranslate( mass, -mass->c[0], -mass->c[1], -mass->c[2] ) to correct it.
+  dUASSERT( fabs( mass->c[0] ) <= dEpsilon &&
+			fabs( mass->c[1] ) <= dEpsilon &&
+			fabs( mass->c[2] ) <= dEpsilon, "The centre of mass must be at the origin." )
+
   memcpy (&b->mass,mass,sizeof(dMass));
   if (dInvertPDMatrix (b->mass.I,b->invI,3)==0) {
     dDEBUGMSG ("inertia must be positive definite!");
