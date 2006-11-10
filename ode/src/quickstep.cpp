@@ -661,6 +661,7 @@ void dxQuickStepper (dxWorld *world, dxBody * const *body, int nb,
 		Jinfo.rowskip = 12;
 		Jinfo.fps = stepsize1;
 		Jinfo.erp = world->global_erp;
+		int mfb = 0; // number of rows of Jacobian we will have to save for joint feedback
 		for (i=0; i<nj; i++) {
 			Jinfo.J1l = J + ofs[i]*12;
 			Jinfo.J1a = Jinfo.J1l + 3;
@@ -676,30 +677,23 @@ void dxQuickStepper (dxWorld *world, dxBody * const *body, int nb,
 			for (j=0; j<info[i].m; j++) {
 				if (findex[ofs[i] + j] >= 0) findex[ofs[i] + j] += ofs[i];
 			}
+			if (joint[i]->feedback)
+				mfb += info[i].m;
 		}
 
-		// make a complete backup of Jacobian
-		// since (as mentioned bellow) it gets destroyed by SOR solver
-		dRealAllocaArray (Jcopy,m*12);
-		memcpy(Jcopy, J, m*12*sizeof(dReal));
-
+		// we need a copy of Jacobian for joint feedbacks
+		// because it gets destroyed by SOR solver
 		// instead of saving all Jacobian, we can save just rows
 		// for joints, that requested feedback (which is normaly much less)
-		// not implemented now to keep first debugging more transparent
-		/*int nfb = 0;
-		int mfb = 0;
-		for (i=0; i<nj; i++) 
-			if (joint[i]->feedback) {
-				nfb++;
-				mfb += info[i].m;
-			}
-		dRealAllocaArray (Jcopy,mfb*12);
-		mfb = 0;
-		for (i=0; i<nj; i++) 
-			if (joint[i]->feedback) {
-				memcpy(Jcopy+mfb*12, J+ofs[i]*12, info[i].m*12*sizeof(dReal));
-				mfb += info[i].m;
-			}*/
+		dRealAllocaArray (Jcopy,mfb*12); 
+		if (mfb > 0) {
+			mfb = 0;
+			for (i=0; i<nj; i++) 
+				if (joint[i]->feedback) {
+					memcpy(Jcopy+mfb*12, J+ofs[i]*12, info[i].m*12*sizeof(dReal));
+					mfb += info[i].m;
+				}
+		}
 
 
 		// create an array of body numbers for each joint row
@@ -804,29 +798,33 @@ void dxQuickStepper (dxWorld *world, dxBody * const *body, int nb,
 			}
 		}*/
 
-		// straightforward computation of joint contraint forces:
-		// multiply related lambas with respective J' block for joints
-		// where feedback was requested
-		for (i=0; i<nj; i++) {
-			if (joint[i]->feedback) {
-				dJointFeedback *fb = joint[i]->feedback;
-				dReal data[6];
-				Multiply1_12q1 (data, Jcopy+ofs[i]*12, lambda+ofs[i], info[i].m);
-				fb->f1[0] = data[0];
-				fb->f1[1] = data[1];
-				fb->f1[2] = data[2];
-				fb->t1[0] = data[3];
-				fb->t1[1] = data[4];
-				fb->t1[2] = data[5];
-				if (joint[i]->node[1].body)
-				{
-					Multiply1_12q1 (data, Jcopy+ofs[i]*12+6, lambda+ofs[i], info[i].m);
-					fb->f2[0] = data[0];
-					fb->f2[1] = data[1];
-					fb->f2[2] = data[2];
-					fb->t2[0] = data[3];
-					fb->t2[1] = data[4];
-					fb->t2[2] = data[5];
+		if (mfb > 0) {
+			// straightforward computation of joint constraint forces:
+			// multiply related lambdas with respective J' block for joints
+			// where feedback was requested
+			mfb = 0;
+			for (i=0; i<nj; i++) {
+				if (joint[i]->feedback) {
+					dJointFeedback *fb = joint[i]->feedback;
+					dReal data[6];
+					Multiply1_12q1 (data, Jcopy+mfb*12, lambda+ofs[i], info[i].m);
+					fb->f1[0] = data[0];
+					fb->f1[1] = data[1];
+					fb->f1[2] = data[2];
+					fb->t1[0] = data[3];
+					fb->t1[1] = data[4];
+					fb->t1[2] = data[5];
+					if (joint[i]->node[1].body)
+					{
+						Multiply1_12q1 (data, Jcopy+mfb*12+6, lambda+ofs[i], info[i].m);
+						fb->f2[0] = data[0];
+						fb->f2[1] = data[1];
+						fb->f2[2] = data[2];
+						fb->t2[0] = data[3];
+						fb->t2[1] = data[4];
+						fb->t2[2] = data[5];
+					}
+					mfb += info[i].m;
 				}
 			}
 		}
