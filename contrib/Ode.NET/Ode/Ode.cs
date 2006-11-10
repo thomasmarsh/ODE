@@ -567,6 +567,15 @@ namespace Ode.NET
 		public static extern IntPtr CreateTriMesh(IntPtr space, IntPtr data, 
 			TriCallback callback, TriArrayCallback arrayCallback, TriRayCallback rayCallback);
 
+		[DllImport("ode", EntryPoint = "dDot"), SuppressUnmanagedCodeSecurity]
+		public static extern dReal Dot(ref dReal X0, ref dReal X1, int n);
+
+		[DllImport("ode", EntryPoint = "dFactorCholesky"), SuppressUnmanagedCodeSecurity]
+		public static extern int FactorCholesky(ref dReal A00, int n);
+
+		[DllImport("ode", EntryPoint = "dFactorLDLT"), SuppressUnmanagedCodeSecurity]
+		public static extern void FactorLDLT(ref dReal A, out dReal d, int n, int nskip);
+
 		[DllImport("ode", EntryPoint = "dGeomBoxGetLengths"), SuppressUnmanagedCodeSecurity]
 		public static extern void GeomBoxGetLengths(IntPtr geom, out Vector3 len);
 
@@ -1070,6 +1079,12 @@ namespace Ode.NET
 		[DllImport("ode", EntryPoint = "dInitODE"), SuppressUnmanagedCodeSecurity]
 		public static extern void InitODE();
 
+		[DllImport("ode", EntryPoint = "dIsPositiveDefinite"), SuppressUnmanagedCodeSecurity]
+		public static extern int IsPositiveDefinite(ref dReal A, int n);
+
+		[DllImport("ode", EntryPoint = "dInvertPDMatrix"), SuppressUnmanagedCodeSecurity]
+		public static extern int InvertPDMatrix(ref dReal A, out dReal Ainv, int n);
+
 		[DllImport("ode", EntryPoint = "dJointAddAMotorTorques"), SuppressUnmanagedCodeSecurity]
 		public static extern void JointAddAMotorTorques(IntPtr joint, dReal torque1, dReal torque2, dReal torque3);
 
@@ -1401,6 +1416,9 @@ namespace Ode.NET
 		[DllImport("ode", EntryPoint = "dJointSetUniversalParam"), SuppressUnmanagedCodeSecurity]
 		public static extern void JointSetUniversalParam(IntPtr j, int parameter, dReal value);
 
+		[DllImport("ode", EntryPoint = "dLDLTAddTL"), SuppressUnmanagedCodeSecurity]
+		public static extern void LDLTAddTL(ref dReal L, ref dReal d, ref dReal a, int n, int nskip);
+
 		[DllImport("ode", EntryPoint = "dMassAdd"), SuppressUnmanagedCodeSecurity]
 		public static extern void MassAdd(ref Mass a, ref Mass b);
 
@@ -1455,6 +1473,15 @@ namespace Ode.NET
 		[DllImport("ode", EntryPoint = "dMassTranslate"), SuppressUnmanagedCodeSecurity]
 		public static extern void MassTranslate(out Mass mass, dReal x, dReal y, dReal z);
 
+		[DllImport("ode", EntryPoint = "dMultiply0"), SuppressUnmanagedCodeSecurity]
+		public static extern void Multiply0(out dReal A00, ref dReal B00, ref dReal C00, int p, int q, int r);
+
+		[DllImport("ode", EntryPoint = "dMultiply1"), SuppressUnmanagedCodeSecurity]
+		public static extern void Multiply1(out dReal A00, ref dReal B00, ref dReal C00, int p, int q, int r);
+
+		[DllImport("ode", EntryPoint = "dMultiply2"), SuppressUnmanagedCodeSecurity]
+		public static extern void Multiply2(out dReal A00, ref dReal B00, ref dReal C00, int p, int q, int r);
+
 		[DllImport("ode", EntryPoint = "dQuadTreeSpaceCreate"), SuppressUnmanagedCodeSecurity]
 		public static extern IntPtr QuadTreeSpaceCreate(IntPtr space, ref Vector3 center, ref Vector3 extents, int depth);
 
@@ -1475,6 +1502,18 @@ namespace Ode.NET
 
 		[DllImport("ode", EntryPoint = "dSimpleSpaceCreate"), SuppressUnmanagedCodeSecurity]
 		public static extern IntPtr SimpleSpaceCreate(IntPtr space);
+
+		[DllImport("ode", EntryPoint = "dSolveCholesky"), SuppressUnmanagedCodeSecurity]
+		public static extern void SolveCholesky(ref dReal L, out dReal b, int n);
+
+		[DllImport("ode", EntryPoint = "dSolveL1"), SuppressUnmanagedCodeSecurity]
+		public static extern void SolveL1(ref dReal L, out dReal b, int n, int nskip);
+
+		[DllImport("ode", EntryPoint = "dSolveL1T"), SuppressUnmanagedCodeSecurity]
+		public static extern void SolveL1T(ref dReal L, out dReal b, int n, int nskip);
+
+		[DllImport("ode", EntryPoint = "dSolveLDLT"), SuppressUnmanagedCodeSecurity]
+		public static extern void SolveLDLT(ref dReal L, ref dReal d, out dReal b, int n, int nskip);
 
 		[DllImport("ode", EntryPoint = "dSpaceAdd"), SuppressUnmanagedCodeSecurity]
 		public static extern void SpaceAdd(IntPtr space, IntPtr geom);
@@ -1508,6 +1547,9 @@ namespace Ode.NET
 
 		[DllImport("ode", EntryPoint = "dSpaceSetCleanup"), SuppressUnmanagedCodeSecurity]
 		public static extern void SpaceSetCleanup(IntPtr space, bool mode);
+
+		[DllImport("ode", EntryPoint = "dVectorScale"), SuppressUnmanagedCodeSecurity]
+		public static extern void VectorScale(out dReal a, ref dReal d, int n);
 
 		[DllImport("ode", EntryPoint = "dWorldCreate"), SuppressUnmanagedCodeSecurity]
 		public static extern IntPtr WorldCreate();
