@@ -251,22 +251,13 @@ dxBody *dBodyCreate (dxWorld *w)
   w->nb++;
 
   // set auto-disable parameters
+  b->average_avel_buffer = b->average_lvel_buffer = 0; // no buffer at beginnin
   dBodySetAutoDisableDefaults (b);	// must do this after adding to world
   b->adis_stepsleft = b->adis.idle_steps;
   b->adis_timeleft = b->adis.idle_time;
   b->average_counter = 0;
   b->average_ready = 0; // average buffer not filled on the beginning
-  if(b->adis.average_samples > 0)
-  {
-    b->average_lvel_buffer = new dVector3[b->adis.average_samples];
-    b->average_avel_buffer = new dVector3[b->adis.average_samples];
-  }
-  else
-  {
-    // no average-processing
-    b->average_lvel_buffer = 0;
-    b->average_avel_buffer = 0;
-  }
+  dBodySetAutoDisableAverageSamplesCount(b, b->adis.average_samples);
 
   return b;
 }
