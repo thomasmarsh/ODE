@@ -554,6 +554,13 @@ ODE_API void dBodySetAutoDisableFlag (dBodyID, int do_auto_disable);
 ODE_API void  dBodySetAutoDisableDefaults (dBodyID);
 
 
+/**
+ * @brief Retrives the world attached to te given body.
+ * @remarks
+ * 
+ * @ingroup bodies
+ */
+ODE_API dWorldID dBodyGetWorld (dBodyID);
 
 /**
  * @brief Create a body in given world.
