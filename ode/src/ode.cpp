@@ -221,6 +221,11 @@ void dWorldCheck (dxWorld *w)
 
 //****************************************************************************
 // body
+dxWorld* dBodyGetWorld (dxBody* b)
+{
+  dAASSERT (b);
+  return b->world;
+}
 
 dxBody *dBodyCreate (dxWorld *w)
 {
