@@ -1,21 +1,25 @@
 dnl Initial configure.in by Rodrigo Hernandez
 dnl Modified in 26/10/2005 by Rodrigo Hernandez
-AC_INIT(ODE,0.6.1,ode@q12.org)
 
+dnl AC_INIT does not take a macro as a version nr: set it seperately! - Bram
+AC_INIT(ODE,0.7.1-rc1,ode@q12.org)
+
+dnl When upgrading version nr, also change the AC_INIT line! - Bram
+ODE_CURRENT=0
+ODE_REVISION=7
+ODE_AGE=1-rc1
+ODE_RELEASE=[$ODE_CURRENT].[$ODE_REVISION].[$ODE_AGE]
 AC_CANONICAL_HOST
 AC_CANONICAL_TARGET
 
-AM_INIT_AUTOMAKE(ODE,0.6.1)
+AM_INIT_AUTOMAKE(ODE,[$ODE_RELEASE])
 AM_CONFIG_HEADER(include/ode/config.h)
 AC_C_BIGENDIAN
 AC_PATH_X
 AC_PATH_XTRA
 
-ODE_CURRENT=0
-ODE_REVISION=6
-ODE_AGE=1
 ODE_SONAME=libode.so.[$ODE_CURRENT]
-ODE_RELEASE=[$ODE_CURRENT].[$ODE_REVISION].[$ODE_AGE]
+
 AC_SUBST(ODE_CURRENT)
 AC_SUBST(ODE_REVISION)
 AC_SUBST(ODE_AGE)
