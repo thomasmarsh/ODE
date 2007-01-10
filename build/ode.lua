@@ -23,11 +23,14 @@ package.objdir = "obj/ode"
   end
 
   if (options["no-trimesh"]) then
+    
     text = string.gsub(text, "#define dTRIMESH_ENABLED 1", "/* #define dTRIMESH_ENABLED 1 */")
-  end
+    text = string.gsub(text, "#define dTRIMESH_OPCODE 1", "/* #define dTRIMESH_OPCODE 1 */")
   
-  if (options["with-gimpact"]) then
+  elseif (options["with-gimpact"]) then
+
     text = string.gsub(text, "#define dTRIMESH_OPCODE 1", "#define dTRIMESH_GIMPACT 1")
+  
   end
   
   if (options["no-alloca"]) then
