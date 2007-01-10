@@ -38,7 +38,13 @@
  ******************************************************************/
 
 /* Try to identify the platform */
-#if defined(_MSC_VER) || defined(__CYGWIN32__) || defined(__MINGW32__)
+#if defined(_XENON)
+  #define ODE_PLATFORM_XBOX360
+#elif defined(SN_TARGET_PSP_HW)
+  #define ODE_PLATFORM_PSP
+#elif defined(SN_TARGET_PS3)
+  #define ODE_PLATFORM_PS3
+#elif defined(_MSC_VER) || defined(__CYGWIN32__) || defined(__MINGW32__)
   #define ODE_PLATFORM_WINDOWS
 #elif defined(__linux__)
   #define ODE_PLATFORM_LINUX
@@ -80,10 +86,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdarg.h>
-#include <malloc.h>
 #include <math.h>
 #include <string.h>
 #include <float.h>
+
+#if !defined(ODE_PLATFORM_PS3)
+  #include <malloc.h>
+#endif
 
 #if !defined(ODE_PLATFORM_WINDOWS)
   #include <alloca.h>
