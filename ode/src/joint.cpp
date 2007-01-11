@@ -2492,22 +2492,67 @@ dReal dJointGetPRPosition (dJointID j)
 
 dReal dJointGetPRPositionRate (dJointID j)
 {
-  // N.B. Not tested
   dxJointPR* joint = (dxJointPR*)j;
   dUASSERT(joint,"bad joint argument");
-  dUASSERT(joint->vtable == &__dslider_vtable,"joint is not a Prismatic and Rotoide");
+  dUASSERT(joint->vtable == &__dPR_vtable,"joint is not a Prismatic and Rotoide");
 
-  // get axisR1 in global coordinates
-  dVector3 ax1;
-  dMULTIPLY0_331 (ax1,joint->node[0].body->posr.R,joint->axisR1);
+  if (joint->node[0].body) {
+		// We want to find the rate of change of the prismatic part of the joint
+		// We can find it by looking at the speed difference between body1 and the
+		// anchor point.
 
-  if (joint->node[1].body) {
-    return dDOT(ax1,joint->node[0].body->lvel) -
-      dDOT(ax1,joint->node[1].body->lvel);
-  }
-  else {
-    return dDOT(ax1,joint->node[0].body->lvel);
-  }
+		// r will be used to find the distance between body1 and the anchor point
+		dVector3 r;
+		if (joint->node[1].body) {
+			// Find joint->anchor2 in global coordinates
+			dVector3 anchor2;
+			dMULTIPLY0_331 (anchor2,joint->node[1].body->posr.R,joint->anchor2);
+
+			r[0] = joint->node[0].body->posr.pos[0] - anchor2[0];
+			r[1] = joint->node[0].body->posr.pos[1] - anchor2[1];
+			r[2] = joint->node[0].body->posr.pos[2] - anchor2[2];
+		}
+		else {
+			//N.B. When there is no body 2 the joint->anchor2 is already in
+			//     global coordinates
+			r[0] = joint->node[0].body->posr.pos[0] - joint->anchor2[0];
+			r[1] = joint->node[0].body->posr.pos[1] - joint->anchor2[1];
+			r[2] = joint->node[0].body->posr.pos[2] - joint->anchor2[2];
+		}
+
+		// The body1 can have velocity coming from the rotation of
+		// the rotoide axis. We need to remove this.
+
+		// Take only the angular rotation coming from the rotation
+		// of the rotoide articulation
+		// N.B. Body1 and Body2 should have the same rotation along axis
+		//      other than the rotoide axis.
+		dVector3 angular;
+		dMULTIPLY0_331 (angular,joint->node[0].body->posr.R,joint->axisR1);
+		dReal omega = dDOT(angular, joint->node[0].body->avel);
+		angular[0] *= omega;
+		angular[1] *= omega;
+		angular[2] *= omega;
+
+		// Find the contribution of the angular rotation to the linear speed
+		// N.B. We do vel = r X w instead of vel = w x r to have vel negative
+		//      since we want to remove it from the linear velocity of the body
+		dVector3 lvel1;
+		dCROSS(lvel1, =, r, angular);
+
+		lvel1[0] += joint->node[0].body->lvel[0];
+		lvel1[1] += joint->node[0].body->lvel[1];
+		lvel1[2] += joint->node[0].body->lvel[2];
+
+		// Since we want rate of change along the prismatic axis
+		// get axisP1 in global coordinates and get the component
+		// along this axis only
+		dVector3 axP1;
+		dMULTIPLY0_331 (axP1,joint->node[0].body->posr.R,joint->axisP1);
+		return dDOT(axP1, lvel1);
+	}
+
+	return 0.0;
 }
 
 
@@ -2693,30 +2738,38 @@ static void PRGetInfo2 (dxJointPR *joint, dxJoint::Info2 *info)
   // Coeff for 1er line of: J1a => dist x ax1, J2a => - anchor2 x ax1
   // Coeff for 2er line of: J1a => dist x q,   J2a => - anchor2 x q
 
-  dVector3 tmp;
 
-  dCROSS (tmp, = , dist, ax1);
-  for (i=0; i<3; i++) info->J1a[s2+i] = tmp[i];
+	dCROSS ((info->J1a)+s2, = , dist, ax1);
 
-  dCROSS (tmp, = , dist, q);
-  for (i=0; i<3; i++) info->J1a[s3+i] = tmp[i];
+	dCROSS ((info->J1a)+s3, = , dist, q);
 
-  for (i=0; i<3; i++) info->J1l[s2+i] = ax1[i];
-  for (i=0; i<3; i++) info->J1l[s3+i] = q[i];
+
+  info->J1l[s2+0] = ax1[0];
+	info->J1l[s2+1] = ax1[1];
+	info->J1l[s2+2] = ax1[2];
+
+  info->J1l[s3+0] = q[0];
+	info->J1l[s3+1] = q[1];
+	info->J1l[s3+2] = q[2];
 
   dVector3 anchor2;
   if (joint->node[1].body) {
     // Calculate anchor2 in world coordinate
     dMULTIPLY0_331 (anchor2, R2, joint->anchor2);
 
-    dCROSS (tmp, = , anchor2, ax2); // since ax1 == ax2
-    for (i=0; i<3; i++) info->J2a[s2+i] = -tmp[i];
+		// ax2 x anchor2 instead of anchor2 x ax2 since we want the negative value
+		dCROSS ((info->J2a)+s2, = , ax2, anchor2); // since ax1 == ax2
 
-    dCROSS (tmp, = , anchor2, q);
-    for (i=0; i<3; i++) info->J2a[s3+i] = -tmp[i];
+		// The cross product is in reverse order since we want the negative value
+		dCROSS ((info->J2a)+s3, = , q, anchor2);
 
-    for (i=0; i<3; i++) info->J2l[s2+i] = -ax1[i];
-    for (i=0; i<3; i++) info->J2l[s3+i] = -q[i];
+		info->J2l[s2+0] = -ax1[0];
+		info->J2l[s2+1] = -ax1[1];
+		info->J2l[s2+2] = -ax1[2];
+
+    info->J2l[s3+0] = -q[0];
+		info->J2l[s3+1] = -q[1];
+		info->J2l[s3+2] = -q[2];
   }
   else
   {
@@ -2727,7 +2780,9 @@ static void PRGetInfo2 (dxJointPR *joint, dxJoint::Info2 *info)
 
 
 
-
+	// We want to make correction for motion not in the line of the axisP
+	// We calculate the displacement w.r.t. the anchor pt.
+	//
   // compute the elements 2 and 3 of right hand side.
   // we want to align the offset point (in body 2's frame) with the center of body 1.
   // The position should be the same when we are not along the prismatic axis
@@ -2763,15 +2818,24 @@ static void PRGetInfo2 (dxJointPR *joint, dxJoint::Info2 *info)
     // extra tiny bit of computation) in doing this adjustment. note that we
     // only need to do this if the constraint connects two bodies.
 
-    dVector3 ltd[2];  // Linear Torque Decoupling vector (a torque)
+		dVector3 ltd;  // Linear Torque Decoupling vector (a torque)
     if (joint->node[1].body) {
-      dCROSS (ltd[0], = , dist, axP);
-      for (i=0; i<3; i++) info->J1a[s4+i] = ltd[0][i];
-    }
+			dVector3 c;
+      c[0]=REAL(0.5)*(joint->node[1].body->posr.pos[0]-joint->node[0].body->posr.pos[0]);
+      c[1]=REAL(0.5)*(joint->node[1].body->posr.pos[1]-joint->node[0].body->posr.pos[1]);
+      c[2]=REAL(0.5)*(joint->node[1].body->posr.pos[2]-joint->node[0].body->posr.pos[2]);
+			dReal val = dDOT(q, c);
+			c[0] -= val * c[0];
+			c[1] -= val * c[1];
+			c[2] -= val * c[2];
 
-    if (joint->node[1].body) {
-      dCROSS (ltd[1], = , anchor2, axP);
-      for (i=0; i<3; i++) info->J2a[s4+i] = -ltd[1][i];
+      dCROSS (ltd,=,c,axP);
+      info->J1a[s4+0] = ltd[0];
+      info->J1a[s4+1] = ltd[1];
+      info->J1a[s4+2] = ltd[2];
+      info->J2a[s4+0] = ltd[0];
+      info->J2a[s4+1] = ltd[1];
+      info->J2a[s4+2] = ltd[2];
     }
 
     // if we're limited low and high simultaneously, the joint motor is
@@ -2807,21 +2871,21 @@ static void PRGetInfo2 (dxJointPR *joint, dxJoint::Info2 *info)
           fm *= joint->limotP.fudge_factor;
 
 
-        dBodyAddForce (joint->node[0].body,-fm*ax1[0],-fm*ax1[1],-fm*ax1[2]);
-        dBodyAddTorque (joint->node[0].body,-fm*ltd[0][0],-fm*ltd[0][1],
-                        -fm*ltd[0][2]);
+        dBodyAddForce (joint->node[0].body,-fm*axP[0],-fm*axP[1],-fm*axP[2]);
 
-        if (joint->node[1].body) {
-          dBodyAddForce (joint->node[1].body,fm*ax1[0],fm*ax1[1],fm*ax1[2]);
+				if (joint->node[1].body) {
+					dBodyAddForce (joint->node[1].body,fm*axP[0],fm*axP[1],fm*axP[2]);
 
-          // linear limot torque decoupling step: refer to above discussion
-          dBodyAddTorque (joint->node[1].body,-fm*ltd[1][0],-fm*ltd[1][1],
-                          -fm*ltd[1][2]);
-        }
+					// linear limot torque decoupling step: refer to above discussion
+					dBodyAddTorque (joint->node[0].body,-fm*ltd[0],-fm*ltd[1],
+													-fm*ltd[2]);
+					dBodyAddTorque (joint->node[1].body,-fm*ltd[0],-fm*ltd[1],
+													-fm*ltd[2]);
+				}
       }
     }
 
-    if (joint->limotP.limit) {
+		if (joint->limotP.limit) {
       dReal k = info->fps * joint->limotP.stop_erp;
       info->c[row] = -k * joint->limotP.limit_err;
       info->cfm[row] = joint->limotP.stop_cfm;
@@ -2938,7 +3002,7 @@ void dJointSetPRAxis1 (dJointID j, dReal x, dReal y, dReal z)
     c[2] = ( joint->node[1].body->posr.pos[2] + anchor2[2] -
              joint->node[0].body->posr.pos[2] );
   }
-  else {
+  else if (joint->node[0].body) {
     // set joint->qrel to the transpose of the first body's q
     joint->qrel[0] = joint->node[0].body->q[0];
     for (i=1; i<4; i++) joint->qrel[i] = -joint->node[0].body->q[i];
@@ -2947,6 +3011,15 @@ void dJointSetPRAxis1 (dJointID j, dReal x, dReal y, dReal z)
     c[1] = joint->anchor2[1] - joint->node[0].body->posr.pos[1];
     c[2] = joint->anchor2[2] - joint->node[0].body->posr.pos[2];
   }
+	else
+	{
+    joint->offset[0] = joint->anchor2[0];
+		joint->offset[1] = joint->anchor2[1];
+		joint->offset[2] = joint->anchor2[2];
+
+		return;
+	}
+
 
   dMULTIPLY1_331 (joint->offset,joint->node[0].body->posr.R,c);
 }
@@ -3017,9 +3090,11 @@ dReal dJointGetPRParam (dJointID j, int parameter)
   dUASSERT(joint,"bad joint argument");
   dUASSERT(joint->vtable == &__dPR_vtable,"joint is not Prismatic and Rotoide");
   if ((parameter & 0xff00) == 0x100) {
-    return joint->limotP.get (parameter & 0xff);
+    return joint->limotR.get (parameter & 0xff);
   }
-  return joint->limotR.get (parameter);
+	else {
+		return joint->limotP.get (parameter);
+	}
 }
 
 void dJointAddPRTorque (dJointID j, dReal torque)
@@ -3907,4 +3982,5 @@ void dJointSetPlane2DAngleParam (dxJoint *joint,
 	dxJointPlane2D* joint2d = (dxJointPlane2D*)( joint );
 	joint2d->motor_angle.set (parameter, value);
 }
+
 

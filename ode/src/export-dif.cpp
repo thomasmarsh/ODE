@@ -187,7 +187,8 @@ static const char *getJointName (dxJoint *j)
 		case dJointTypeFixed: return "fixed";
 		case dJointTypeNull: return "null";
 		case dJointTypeAMotor: return "ODE_angular_motor";
-                case dJointTypeLMotor: return "ODE_linear_motor";
+		case dJointTypeLMotor: return "ODE_linear_motor";
+		case dJointTypePR: return "PR";
 	}
 	return "unknown";
 }
@@ -280,7 +281,7 @@ static void printHinge2 (PrintingContext &c, dxJoint *j)
 	printLimot (c,h->limot2,2);
 }
 
-static void printJointPR (PrintingContext &c, dxJoint *j)
+static void printPR (PrintingContext &c, dxJoint *j)
 {
 	dxJointPR *pr = (dxJointPR*) j;
 	c.print ("anchor2",pr->anchor2);
@@ -554,8 +555,8 @@ void dWorldExportDIF (dWorldID w, FILE *file, const char *prefix)
 			case dJointTypeFixed: printFixed (c,j); break;
 			case dJointTypeAMotor: printAMotor (c,j); break;
 			case dJointTypeLMotor: printLMotor (c,j); break;
-			case dJointTypePR: printJointPR (c,j); break;
-		}
+			case dJointTypePR: printPR (c,j); break;
+		}		
 		c.indent--;
 		c.print ("}");
 		num++;
