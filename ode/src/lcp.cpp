@@ -149,25 +149,9 @@ extern unsigned int dMemoryFlag;
 
 #endif
 
-//#define dDot myDot
 #define NUB_OPTIMIZATIONS
 
 //***************************************************************************
-
-// an alternative inline dot product, for speed comparisons
-
-static inline dReal myDot (dReal *a, dReal *b, int n)
-{
-  dReal sum=0;
-  while (n > 0) {
-    sum += (*a) * (*b);
-    a++;
-    b++;
-    n--;
-  }
-  return sum;
-}
-
 
 // swap row/column i1 with i2 in the n*n matrix A. the leading dimension of
 // A is nskip. this only references and swaps the lower triangle.
@@ -467,7 +451,7 @@ dLCP::dLCP (int _n, int _nub, dReal *_Adata, dReal *_x, dReal *_b, dReal *_w,
   int i,j;
   C.setSize (n);
   N.setSize (n);
-  for (int i=0; i<n; i++) {
+  for (i=0; i<n; i++) {
     C[i] = 0;
     N[i] = 0;
   }
