@@ -280,6 +280,19 @@ static void printHinge2 (PrintingContext &c, dxJoint *j)
 	printLimot (c,h->limot2,2);
 }
 
+static void printJointPR (PrintingContext &c, dxJoint *j)
+{
+	dxJointPR *pr = (dxJointPR*) j;
+	c.print ("anchor2",pr->anchor2);
+	c.print ("axisR1",pr->axisR1);
+	c.print ("axisR2",pr->axisR2);
+	c.print ("axisP1",pr->axisP1);
+	c.print ("qrel",pr->qrel,4);
+	c.print ("offset",pr->offset);
+	printLimot (c,pr->limotP,1);
+	printLimot (c,pr->limotR,2);
+}
+
 
 static void printFixed (PrintingContext &c, dxJoint *j)
 {
@@ -540,8 +553,9 @@ void dWorldExportDIF (dWorldID w, FILE *file, const char *prefix)
 			case dJointTypeHinge2: printHinge2 (c,j); break;
 			case dJointTypeFixed: printFixed (c,j); break;
 			case dJointTypeAMotor: printAMotor (c,j); break;
-                        case dJointTypeLMotor: printLMotor (c,j); break;
-		}		
+			case dJointTypeLMotor: printLMotor (c,j); break;
+			case dJointTypePR: printJointPR (c,j); break;
+		}
 		c.indent--;
 		c.print ("}");
 		num++;
