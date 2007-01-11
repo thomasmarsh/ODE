@@ -10,6 +10,10 @@
 #include <ode/common.h>
 #include "collision_kernel.h"
 
+
+#define HEIGHTFIELDMAXCONTACTPERCELL 10
+
+
 //
 // dxHeightfieldData
 //
@@ -17,48 +21,153 @@
 //
 struct dxHeightfieldData
 {
-	dReal m_fWidth;				// World space heightfield dimension on X axis
-	dReal m_fDepth;				// World space heightfield dimension on Z axis
-	dReal m_fSampleWidth;		// Vertex count on X axis edge (== m_vWidth / (m_nWidthSamples-1))
-	dReal m_fSampleDepth;		// Vertex count on Z axis edge (== m_vDepth / (m_nDepthSamples-1))
+    dReal m_fWidth;				// World space heightfield dimension on X axis
+    dReal m_fDepth;				// World space heightfield dimension on Z axis
+    dReal m_fSampleWidth;		// Vertex count on X axis edge (== m_vWidth / (m_nWidthSamples-1))
+    dReal m_fSampleDepth;		// Vertex count on Z axis edge (== m_vDepth / (m_nDepthSamples-1))
+    dReal m_fInvSampleWidth;		// Cache of inverse Vertex count on X axis edge (== m_vWidth / (m_nWidthSamples-1))
+    dReal m_fInvSampleDepth;		// Cache of inverse Vertex count on Z axis edge (== m_vDepth / (m_nDepthSamples-1))
 
     dReal m_fHalfWidth;			// Cache of half of m_fWidth
     dReal m_fHalfDepth;			// Cache of half of m_fDepth
 
-	dReal m_fMinHeight;        // Min sample height value (scaled and offset)
-	dReal m_fMaxHeight;        // Max sample height value (scaled and offset)
-	dReal m_fThickness;        // Surface thickness (added to bottom AABB)
-	dReal m_fScale;            // Sample value multiplier
-	dReal m_fOffset;           // Vertical sample offset
-	
-	int	m_nWidthSamples;       // Vertex count on X axis edge (number of samples)
-	int	m_nDepthSamples;       // Vertex count on Z axis edge (number of samples)
-	int m_bCopyHeightData;     // Do we own the sample data?
-	int	m_bWrapMode;           // Heightfield wrapping mode (0=finite, 1=infinite)
-	int m_nGetHeightMode;      // GetHeight mode ( 0=callback, 1=byte, 2=short, 3=float )
-	
-	const void* m_pHeightData; // Sample data array
-	void* m_pUserData;         // Callback user data
+    dReal m_fMinHeight;        // Min sample height value (scaled and offset)
+    dReal m_fMaxHeight;        // Max sample height value (scaled and offset)
+    dReal m_fThickness;        // Surface thickness (added to bottom AABB)
+    dReal m_fScale;            // Sample value multiplier
+    dReal m_fOffset;           // Vertical sample offset
 
-	dHeightfieldGetHeight* m_pGetHeightCallback;		// Callback pointer.
+    int	m_nWidthSamples;       // Vertex count on X axis edge (number of samples)
+    int	m_nDepthSamples;       // Vertex count on Z axis edge (number of samples)
+    int m_bCopyHeightData;     // Do we own the sample data?
+    int	m_bWrapMode;           // Heightfield wrapping mode (0=finite, 1=infinite)
+    int m_nGetHeightMode;      // GetHeight mode ( 0=callback, 1=byte, 2=short, 3=float )
 
-	dxHeightfieldData();
-	~dxHeightfieldData();
+    const void* m_pHeightData; // Sample data array
+    void* m_pUserData;         // Callback user data
 
-	void SetData( int nWidthSamples, int nDepthSamples,
-				  dReal fWidth, dReal fDepth,
-				  dReal fScale, dReal fOffset,
-				  dReal fThickness, int bWrapMode );
+    dContactGeom            m_contacts[HEIGHTFIELDMAXCONTACTPERCELL];
 
-	void ComputeHeightBounds();
+    dHeightfieldGetHeight* m_pGetHeightCallback;		// Callback pointer.
+
+    dxHeightfieldData();
+    ~dxHeightfieldData();
+
+    void SetData( int nWidthSamples, int nDepthSamples,
+        dReal fWidth, dReal fDepth,
+        dReal fScale, dReal fOffset,
+        dReal fThickness, int bWrapMode );
+
+    void ComputeHeightBounds();
 
     bool IsOnHeightfield  ( const dReal * const CellOrigin, const dReal * const pos,  const bool isABC) const;
+    bool IsOnHeightfield2  ( const dReal * const CellOrigin, const dReal * const pos,  const bool isABC) const;
 
-	dReal GetHeight(int x, int z);
-	dReal GetHeight(dReal x, dReal z);
+    dReal GetHeight(int x, int z);
+    dReal GetHeight(dReal x, dReal z);
+
 };
 
+class HeightFieldVertex;
+class HeightFieldEdge;
+class HeightFieldTriangle;
 
+class HeightFieldVertex
+{
+public:
+    HeightFieldVertex(){};
+
+    dVector3 vertex;
+    bool state;
+};
+
+class HeightFieldEdge
+{
+public:
+    HeightFieldEdge(){};
+
+    HeightFieldVertex   *vertices[2];
+};
+//
+// HeightFieldTriangle
+//
+// HeightFieldTriangle composing heightfield mesh
+//
+class HeightFieldTriangle
+{
+public:
+    HeightFieldTriangle(){};
+
+    inline void setMinMax()
+    {
+        maxAAAB = vertices[0]->vertex[1] > vertices[1]->vertex[1] ? vertices[0]->vertex[1] : vertices[1]->vertex[1];
+        maxAAAB = vertices[2]->vertex[1] > maxAAAB  ? vertices[2]->vertex[1] : maxAAAB;
+    };
+
+    HeightFieldVertex   *vertices[3];
+    dReal               planeDef[4];
+    dReal               maxAAAB;
+
+    bool                isUp;
+    bool                state;
+};
+//
+// HeightFieldTriangle
+//
+// HeightFieldPlane composing heightfield mesh
+//
+class HeightFieldPlane
+{
+public:
+    HeightFieldPlane():
+      trianglelist(0),
+      trianglelistReservedSize(0),
+      trianglelistCurrentSize(0)
+    {
+
+    };
+    ~HeightFieldPlane()
+    {
+        delete [] trianglelist;
+    };
+
+    inline void setMinMax()
+    {
+        const size_t asize = trianglelistCurrentSize;
+        if (asize > 0)
+        {  
+            maxAAAB = trianglelist[0]->maxAAAB;
+            for (size_t k = 1; asize > k; k++)
+            {   
+                if (trianglelist[k]->maxAAAB >  maxAAAB)
+                    maxAAAB = trianglelist[k]->maxAAAB;
+            }
+        }
+    };
+
+    void resetTriangleListSize(const size_t newSize)
+    {
+        if (trianglelistReservedSize < newSize)
+        {
+            delete [] trianglelist;
+            trianglelistReservedSize = newSize;
+            trianglelist = new HeightFieldTriangle *[newSize];
+        }
+        trianglelistCurrentSize = 0;
+    }
+
+    void addTriangle(HeightFieldTriangle *tri)
+    {
+        trianglelist[trianglelistCurrentSize++] = tri;
+    }
+
+    HeightFieldTriangle **trianglelist;
+    size_t              trianglelistReservedSize;
+    size_t              trianglelistCurrentSize;
+
+    dReal   maxAAAB;
+    dReal   planeDef[4];
+};
 //
 // dxHeightfield
 //
@@ -66,22 +175,31 @@ struct dxHeightfieldData
 //
 struct dxHeightfield : public dxGeom
 {
-	dxHeightfieldData* m_p_data;
+    dxHeightfieldData* m_p_data;
 
-	dxHeightfield( dSpaceID space, dHeightfieldDataID data, int bPlaceable );
-	~dxHeightfield();
+    dxHeightfield( dSpaceID space, dHeightfieldDataID data, int bPlaceable );
+    ~dxHeightfield();
 
-	void computeAABB();
-
-	int dCollideHeightfieldUnit( int x, int z, dxGeom *o2, int numMaxContacts,
-		int flags, dContactGeom *contact, int skip );
+    void computeAABB();
 
     int dCollideHeightfieldZone( const int minX, const int maxX, const int minZ, const int maxZ,  
         dxGeom *o2, const int numMaxContacts,
         int flags, dContactGeom *contact, int skip );
 
-    dxPlane *sliding_plane;
-    
+    void  resetHeightBuffer();
+
+    void  sortPlanes(const size_t numPlanes);
+
+    HeightFieldPlane    **tempPlaneBuffer;
+    size_t              tempPlaneBufferSize;
+
+    HeightFieldTriangle *tempTriangleBuffer;
+    size_t              tempTriangleBufferSize;
+
+    HeightFieldVertex   **tempHeightBuffer;
+    size_t              tempHeightBufferSizeX;
+    size_t              tempHeightBufferSizeZ;
+
 };
 
 
