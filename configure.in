@@ -560,3 +560,9 @@ echo "  Is this a debug build:   $debug"
 echo "  Using SONAME:		  $use_soname"
 echo "  Headers will be installed in $prefix/include/ode"
 echo "  Libraries will be installed in $prefix/lib"
+
+if test $gimpact = yes -a $precision = yes
+then
+  echo "WARNING! Double precision not yet supported for GIMPACT"
+fi
+
