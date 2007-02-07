@@ -1,7 +1,12 @@
 LIBTOOL_DEPS = @LIBTOOL_DEPS@
 libtool: $(LIBTOOL_DEPS)
 	$(SHELL) ./config.status --recheck
-SUBDIRS =   include drawstuff ode 
+
+if ENABLE_TESTS
+SUBDIRS = include drawstuff ode
+else
+SUBDIRS = include ode
+endif
 
 bin_SCRIPTS = ode-config
 
@@ -20,12 +25,12 @@ dist-zip: ${PACKAGE}-${VERSION}.tar.gz
 
 if USE_SONAME
 install-exec-hook:
-	ln -s $(prefix)/lib/@ODE_SONAME@.@ODE_REVISION@.@ODE_AGE@ \
-	$(prefix)/lib/libode.so
-	ln -s $(prefix)/lib/@ODE_SONAME@.@ODE_REVISION@.@ODE_AGE@ \
-	$(prefix)/lib/@ODE_SONAME@
-	ln -s $(prefix)/lib/@ODE_SONAME@.@ODE_REVISION@.@ODE_AGE@ \
-	$(prefix)/lib/@ODE_SONAME@.@ODE_REVISION@
+	ln -s $(libdir)/@ODE_SONAME@.@ODE_REVISION@.@ODE_AGE@ \
+	$(libdir)/libode.so
+	ln -s $(libdir)/@ODE_SONAME@.@ODE_REVISION@.@ODE_AGE@ \
+	$(libdir)/@ODE_SONAME@
+	ln -s $(libdir)/@ODE_SONAME@.@ODE_REVISION@.@ODE_AGE@ \
+	$(libdir)/@ODE_SONAME@.@ODE_REVISION@
 	/sbin/ldconfig
 else
 install-exec-hook:
