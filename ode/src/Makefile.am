@@ -4,14 +4,12 @@ AM_CFLAGS = @ARCHFLAGS@ -I$(top_srcdir)/include -I$(top_builddir)/include
 lib_LIBRARIES = libode.a
 libode_a_CPPFLAGS = -O2
 
-if X86_64_SYSTEM
 libode_a_CPPFLAGS += -fPIC
-endif
 
 # Fake an executable in order to get a shared library
 # Note the elegant and cunning way to trick Autotools to install a program
 # in a lib directory. --Rodrigo
-traplibdir=$(prefix)/lib
+traplibdir=$(libdir)
 EXEEXT=@so_ext@
 traplib_PROGRAMS=libode
 libode_SOURCES=
@@ -39,9 +37,7 @@ noinst_LIBRARIES= libfast.a
 libfast_a_CFLAGS= -O1
 libfast_a_SOURCES= fastldlt.c fastltsolve.c fastdot.c fastlsolve.c
 
-if X86_64_SYSTEM
 libfast_a_CFLAGS += -fPIC
-endif
 
 libode_a_DEPENDENCIES = libfast.a
 libode_a_LIBADD= $(libfast_a_OBJECTS)
