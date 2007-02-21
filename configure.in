@@ -546,6 +546,8 @@ AC_OUTPUT([
  drawstuff/src/Makefile
  drawstuff/dstest/Makefile
  ode/demo/Makefile
+ tests/Makefile
+ tests/CppTestHarness/Makefile
  ode-config
  ])
 
