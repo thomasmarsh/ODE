@@ -10,13 +10,14 @@ ifeq ($(CONFIG),DebugDLL)
   LIBDIR := ../../lib/DebugDLL
   OBJDIR := obj/drawstuff/DebugDLL
   OUTDIR := ../../lib/DebugDLL
-  CPPFLAGS := -MD -D "WIN32" -D "DS_DLL" -D "USRDLL" -I "../../include"
-  CFLAGS += $(CPPFLAGS) -g
+  CPPFLAGS := -MMD -D "WIN32" -D "DS_DLL" -D "USRDLL" -I "../../include"
+  CFLAGS += $(CPPFLAGS) $(TARGET_ARCH) -g
   CXXFLAGS := $(CFLAGS)
   LDFLAGS += -L$(BINDIR) -L$(LIBDIR) -shared -luser32 -lopengl32 -lglu32 -lwinmm -lgdi32
   LDDEPS :=
+  RESFLAGS := -D "WIN32" -D "DS_DLL" -D "USRDLL" -I "../../include"
   TARGET := drawstuff.dll
-  BLDCMD = $(CXX) -o $(OUTDIR)/$(TARGET) $(OBJECTS) $(LDFLAGS) $(RESOURCES)
+  BLDCMD = $(CXX) -o $(OUTDIR)/$(TARGET) $(OBJECTS) $(LDFLAGS) $(RESOURCES) $(TARGET_ARCH)
 endif
 
 ifeq ($(CONFIG),ReleaseDLL)
@@ -24,13 +25,14 @@ ifeq ($(CONFIG),ReleaseDLL)
   LIBDIR := ../../lib/ReleaseDLL
   OBJDIR := obj/drawstuff/ReleaseDLL
   OUTDIR := ../../lib/ReleaseDLL
-  CPPFLAGS := -MD -D "WIN32" -D "DS_DLL" -D "USRDLL" -I "../../include"
-  CFLAGS += $(CPPFLAGS) -O3 -fomit-frame-pointer
+  CPPFLAGS := -MMD -D "WIN32" -D "DS_DLL" -D "USRDLL" -I "../../include"
+  CFLAGS += $(CPPFLAGS) $(TARGET_ARCH) -O3 -fomit-frame-pointer
   CXXFLAGS := $(CFLAGS)
   LDFLAGS += -L$(BINDIR) -L$(LIBDIR) -shared -s -luser32 -lopengl32 -lglu32 -lwinmm -lgdi32
   LDDEPS :=
+  RESFLAGS := -D "WIN32" -D "DS_DLL" -D "USRDLL" -I "../../include"
   TARGET := drawstuff.dll
-  BLDCMD = $(CXX) -o $(OUTDIR)/$(TARGET) $(OBJECTS) $(LDFLAGS) $(RESOURCES)
+  BLDCMD = $(CXX) -o $(OUTDIR)/$(TARGET) $(OBJECTS) $(LDFLAGS) $(RESOURCES) $(TARGET_ARCH)
 endif
 
 ifeq ($(CONFIG),DebugLib)
@@ -38,13 +40,14 @@ ifeq ($(CONFIG),DebugLib)
   LIBDIR := ../../lib/DebugLib
   OBJDIR := obj/drawstuff/DebugLib
   OUTDIR := ../../lib/DebugLib
-  CPPFLAGS := -MD -D "WIN32" -D "DS_LIB" -I "../../include"
-  CFLAGS += $(CPPFLAGS) -g
+  CPPFLAGS := -MMD -D "WIN32" -D "DS_LIB" -I "../../include"
+  CFLAGS += $(CPPFLAGS) $(TARGET_ARCH) -g
   CXXFLAGS := $(CFLAGS)
   LDFLAGS += -L$(BINDIR) -L$(LIBDIR) -luser32 -lopengl32 -lglu32 -lwinmm -lgdi32
   LDDEPS :=
-  TARGET := drawstuff.lib
-  BLDCMD = ar -cr $(OUTDIR)/$(TARGET) $(OBJECTS); ranlib $(OUTDIR)/$(TARGET)
+  RESFLAGS := -D "WIN32" -D "DS_LIB" -I "../../include"
+  TARGET := libdrawstuff.a
+  BLDCMD = ar -rcs $(OUTDIR)/$(TARGET) $(OBJECTS) $(TARGET_ARCH)
 endif
 
 ifeq ($(CONFIG),ReleaseLib)
@@ -52,13 +55,14 @@ ifeq ($(CONFIG),ReleaseLib)
   LIBDIR := ../../lib/ReleaseLib
   OBJDIR := obj/drawstuff/ReleaseLib
   OUTDIR := ../../lib/ReleaseLib
-  CPPFLAGS := -MD -D "WIN32" -D "DS_LIB" -I "../../include"
-  CFLAGS += $(CPPFLAGS) -O3 -fomit-frame-pointer
+  CPPFLAGS := -MMD -D "WIN32" -D "DS_LIB" -I "../../include"
+  CFLAGS += $(CPPFLAGS) $(TARGET_ARCH) -O3 -fomit-frame-pointer
   CXXFLAGS := $(CFLAGS)
   LDFLAGS += -L$(BINDIR) -L$(LIBDIR) -s -luser32 -lopengl32 -lglu32 -lwinmm -lgdi32
   LDDEPS :=
-  TARGET := drawstuff.lib
-  BLDCMD = ar -cr $(OUTDIR)/$(TARGET) $(OBJECTS); ranlib $(OUTDIR)/$(TARGET)
+  RESFLAGS := -D "WIN32" -D "DS_LIB" -I "../../include"
+  TARGET := libdrawstuff.a
+  BLDCMD = ar -rcs $(OUTDIR)/$(TARGET) $(OBJECTS) $(TARGET_ARCH)
 endif
 
 OBJECTS := \
@@ -99,7 +103,13 @@ $(OUTDIR)/$(TARGET): $(OBJECTS) $(LDDEPS) $(RESOURCES)
 
 clean:
 	@echo Cleaning drawstuff
+ifeq ($(MKDIR_TYPE),posix)
 	-@rm -rf $(OUTDIR)/$(TARGET) $(OBJDIR)
+else
+	-@if exist $(subst /,\,$(OUTDIR)/$(TARGET)) del /q $(subst /,\,$(OUTDIR)/$(TARGET))
+	-@if exist $(subst /,\,$(OBJDIR)) del /q $(subst /,\,$(OBJDIR))
+	-@if exist $(subst /,\,$(OBJDIR)) rmdir /s /q $(subst /,\,$(OBJDIR))
+endif
 
 $(OBJDIR)/drawstuff.o: ../../drawstuff/src/drawstuff.cpp
 	-@$(CMD_MKOBJDIR)
@@ -114,7 +124,7 @@ $(OBJDIR)/windows.o: ../../drawstuff/src/windows.cpp
 $(OBJDIR)/resources.res: ../../drawstuff/src/resources.rc
 	-@$(CMD_MKOBJDIR)
 	@echo $(notdir $<)
-	@windres $< -O coff -o $@
+	@windres $< -O coff -o $@ $(RESFLAGS)
 
 -include $(OBJECTS:%.o=%.d)
 

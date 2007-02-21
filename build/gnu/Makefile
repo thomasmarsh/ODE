@@ -9,13 +9,13 @@ endif
 
 export CONFIG
 
-.PHONY: all clean ode drawstuff test_boxstack test_buggy test_chain1 test_chain2 test_collision test_crash test_feedback test_friction test_heightfield test_hinge test_I test_joints test_motor test_ode test_plane2d test_slider test_space test_space_stress test_step test_basket test_cyl test_moving_trimesh test_trimesh test_cylvssphere tests
+.PHONY: all clean ode drawstuff demo_boxstack demo_buggy demo_chain1 demo_chain2 demo_collision demo_crash demo_feedback demo_friction demo_heightfield demo_hinge demo_I demo_joints demo_motor demo_ode demo_plane2d demo_slider demo_space demo_space_stress demo_step demo_basket demo_cyl demo_moving_trimesh demo_trimesh demo_cylvssphere tests
 
-all: ode drawstuff test_boxstack test_buggy test_chain1 test_chain2 test_collision test_crash test_feedback test_friction test_heightfield test_hinge test_I test_joints test_motor test_ode test_plane2d test_slider test_space test_space_stress test_step test_basket test_cyl test_moving_trimesh test_trimesh test_cylvssphere tests
+all: ode drawstuff demo_boxstack demo_buggy demo_chain1 demo_chain2 demo_collision demo_crash demo_feedback demo_friction demo_heightfield demo_hinge demo_I demo_joints demo_motor demo_ode demo_plane2d demo_slider demo_space demo_space_stress demo_step demo_basket demo_cyl demo_moving_trimesh demo_trimesh demo_cylvssphere tests
 
-Makefile: ../premake.lua ../ode.lua ../drawstuff.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua ../tests.lua
+Makefile: ../premake.lua ../ode.lua ../drawstuff.lua ../demos.lua ../demos.lua ../demos.lua ../demos.lua ../demos.lua ../demos.lua ../demos.lua ../demos.lua ../demos.lua ../demos.lua ../demos.lua ../demos.lua ../demos.lua ../demos.lua ../demos.lua ../demos.lua ../demos.lua ../demos.lua ../demos.lua ../demos.lua ../demos.lua ../demos.lua ../demos.lua ../demos.lua ../tests.lua
 	@echo ==== Regenerating Makefiles ====
-	@premake --file $^ --usetargetpath --with-tests --clean --target gnu
+	@premake --file $^ --usetargetpath --with-demos --with-tests --clean --target gnu
 
 ode:
 	@echo ==== Building ode ====
@@ -25,101 +25,101 @@ drawstuff:
 	@echo ==== Building drawstuff ====
 	@$(MAKE) --no-print-directory -C . -f drawstuff.make
 
-test_boxstack: ode drawstuff
-	@echo ==== Building test_boxstack ====
-	@$(MAKE) --no-print-directory -C . -f test_boxstack.make
+demo_boxstack: ode drawstuff
+	@echo ==== Building demo_boxstack ====
+	@$(MAKE) --no-print-directory -C . -f demo_boxstack.make
 
-test_buggy: ode drawstuff
-	@echo ==== Building test_buggy ====
-	@$(MAKE) --no-print-directory -C . -f test_buggy.make
+demo_buggy: ode drawstuff
+	@echo ==== Building demo_buggy ====
+	@$(MAKE) --no-print-directory -C . -f demo_buggy.make
 
-test_chain1: ode drawstuff
-	@echo ==== Building test_chain1 ====
-	@$(MAKE) --no-print-directory -C . -f test_chain1.make
+demo_chain1: ode drawstuff
+	@echo ==== Building demo_chain1 ====
+	@$(MAKE) --no-print-directory -C . -f demo_chain1.make
 
-test_chain2: ode drawstuff
-	@echo ==== Building test_chain2 ====
-	@$(MAKE) --no-print-directory -C . -f test_chain2.make
+demo_chain2: ode drawstuff
+	@echo ==== Building demo_chain2 ====
+	@$(MAKE) --no-print-directory -C . -f demo_chain2.make
 
-test_collision: ode drawstuff
-	@echo ==== Building test_collision ====
-	@$(MAKE) --no-print-directory -C . -f test_collision.make
+demo_collision: ode drawstuff
+	@echo ==== Building demo_collision ====
+	@$(MAKE) --no-print-directory -C . -f demo_collision.make
 
-test_crash: ode drawstuff
-	@echo ==== Building test_crash ====
-	@$(MAKE) --no-print-directory -C . -f test_crash.make
+demo_crash: ode drawstuff
+	@echo ==== Building demo_crash ====
+	@$(MAKE) --no-print-directory -C . -f demo_crash.make
 
-test_feedback: ode drawstuff
-	@echo ==== Building test_feedback ====
-	@$(MAKE) --no-print-directory -C . -f test_feedback.make
+demo_feedback: ode drawstuff
+	@echo ==== Building demo_feedback ====
+	@$(MAKE) --no-print-directory -C . -f demo_feedback.make
 
-test_friction: ode drawstuff
-	@echo ==== Building test_friction ====
-	@$(MAKE) --no-print-directory -C . -f test_friction.make
+demo_friction: ode drawstuff
+	@echo ==== Building demo_friction ====
+	@$(MAKE) --no-print-directory -C . -f demo_friction.make
 
-test_heightfield: ode drawstuff
-	@echo ==== Building test_heightfield ====
-	@$(MAKE) --no-print-directory -C . -f test_heightfield.make
+demo_heightfield: ode drawstuff
+	@echo ==== Building demo_heightfield ====
+	@$(MAKE) --no-print-directory -C . -f demo_heightfield.make
 
-test_hinge: ode drawstuff
-	@echo ==== Building test_hinge ====
-	@$(MAKE) --no-print-directory -C . -f test_hinge.make
+demo_hinge: ode drawstuff
+	@echo ==== Building demo_hinge ====
+	@$(MAKE) --no-print-directory -C . -f demo_hinge.make
 
-test_I: ode drawstuff
-	@echo ==== Building test_I ====
-	@$(MAKE) --no-print-directory -C . -f test_I.make
+demo_I: ode drawstuff
+	@echo ==== Building demo_I ====
+	@$(MAKE) --no-print-directory -C . -f demo_I.make
 
-test_joints: ode drawstuff
-	@echo ==== Building test_joints ====
-	@$(MAKE) --no-print-directory -C . -f test_joints.make
+demo_joints: ode drawstuff
+	@echo ==== Building demo_joints ====
+	@$(MAKE) --no-print-directory -C . -f demo_joints.make
 
-test_motor: ode drawstuff
-	@echo ==== Building test_motor ====
-	@$(MAKE) --no-print-directory -C . -f test_motor.make
+demo_motor: ode drawstuff
+	@echo ==== Building demo_motor ====
+	@$(MAKE) --no-print-directory -C . -f demo_motor.make
 
-test_ode: ode drawstuff
-	@echo ==== Building test_ode ====
-	@$(MAKE) --no-print-directory -C . -f test_ode.make
+demo_ode: ode drawstuff
+	@echo ==== Building demo_ode ====
+	@$(MAKE) --no-print-directory -C . -f demo_ode.make
 
-test_plane2d: ode drawstuff
-	@echo ==== Building test_plane2d ====
-	@$(MAKE) --no-print-directory -C . -f test_plane2d.make
+demo_plane2d: ode drawstuff
+	@echo ==== Building demo_plane2d ====
+	@$(MAKE) --no-print-directory -C . -f demo_plane2d.make
 
-test_slider: ode drawstuff
-	@echo ==== Building test_slider ====
-	@$(MAKE) --no-print-directory -C . -f test_slider.make
+demo_slider: ode drawstuff
+	@echo ==== Building demo_slider ====
+	@$(MAKE) --no-print-directory -C . -f demo_slider.make
 
-test_space: ode drawstuff
-	@echo ==== Building test_space ====
-	@$(MAKE) --no-print-directory -C . -f test_space.make
+demo_space: ode drawstuff
+	@echo ==== Building demo_space ====
+	@$(MAKE) --no-print-directory -C . -f demo_space.make
 
-test_space_stress: ode drawstuff
-	@echo ==== Building test_space_stress ====
-	@$(MAKE) --no-print-directory -C . -f test_space_stress.make
+demo_space_stress: ode drawstuff
+	@echo ==== Building demo_space_stress ====
+	@$(MAKE) --no-print-directory -C . -f demo_space_stress.make
 
-test_step: ode drawstuff
-	@echo ==== Building test_step ====
-	@$(MAKE) --no-print-directory -C . -f test_step.make
+demo_step: ode drawstuff
+	@echo ==== Building demo_step ====
+	@$(MAKE) --no-print-directory -C . -f demo_step.make
 
-test_basket: ode drawstuff
-	@echo ==== Building test_basket ====
-	@$(MAKE) --no-print-directory -C . -f test_basket.make
+demo_basket: ode drawstuff
+	@echo ==== Building demo_basket ====
+	@$(MAKE) --no-print-directory -C . -f demo_basket.make
 
-test_cyl: ode drawstuff
-	@echo ==== Building test_cyl ====
-	@$(MAKE) --no-print-directory -C . -f test_cyl.make
+demo_cyl: ode drawstuff
+	@echo ==== Building demo_cyl ====
+	@$(MAKE) --no-print-directory -C . -f demo_cyl.make
 
-test_moving_trimesh: ode drawstuff
-	@echo ==== Building test_moving_trimesh ====
-	@$(MAKE) --no-print-directory -C . -f test_moving_trimesh.make
+demo_moving_trimesh: ode drawstuff
+	@echo ==== Building demo_moving_trimesh ====
+	@$(MAKE) --no-print-directory -C . -f demo_moving_trimesh.make
 
-test_trimesh: ode drawstuff
-	@echo ==== Building test_trimesh ====
-	@$(MAKE) --no-print-directory -C . -f test_trimesh.make
+demo_trimesh: ode drawstuff
+	@echo ==== Building demo_trimesh ====
+	@$(MAKE) --no-print-directory -C . -f demo_trimesh.make
 
-test_cylvssphere: ode drawstuff
-	@echo ==== Building test_cylvssphere ====
-	@$(MAKE) --no-print-directory -C . -f test_cylvssphere.make
+demo_cylvssphere: ode drawstuff
+	@echo ==== Building demo_cylvssphere ====
+	@$(MAKE) --no-print-directory -C . -f demo_cylvssphere.make
 
 tests: ode
 	@echo ==== Building tests ====
@@ -128,28 +128,28 @@ tests: ode
 clean:
 	@$(MAKE) --no-print-directory -C . -f ode.make clean
 	@$(MAKE) --no-print-directory -C . -f drawstuff.make clean
-	@$(MAKE) --no-print-directory -C . -f test_boxstack.make clean
-	@$(MAKE) --no-print-directory -C . -f test_buggy.make clean
-	@$(MAKE) --no-print-directory -C . -f test_chain1.make clean
-	@$(MAKE) --no-print-directory -C . -f test_chain2.make clean
-	@$(MAKE) --no-print-directory -C . -f test_collision.make clean
-	@$(MAKE) --no-print-directory -C . -f test_crash.make clean
-	@$(MAKE) --no-print-directory -C . -f test_feedback.make clean
-	@$(MAKE) --no-print-directory -C . -f test_friction.make clean
-	@$(MAKE) --no-print-directory -C . -f test_heightfield.make clean
-	@$(MAKE) --no-print-directory -C . -f test_hinge.make clean
-	@$(MAKE) --no-print-directory -C . -f test_I.make clean
-	@$(MAKE) --no-print-directory -C . -f test_joints.make clean
-	@$(MAKE) --no-print-directory -C . -f test_motor.make clean
-	@$(MAKE) --no-print-directory -C . -f test_ode.make clean
-	@$(MAKE) --no-print-directory -C . -f test_plane2d.make clean
-	@$(MAKE) --no-print-directory -C . -f test_slider.make clean
-	@$(MAKE) --no-print-directory -C . -f test_space.make clean
-	@$(MAKE) --no-print-directory -C . -f test_space_stress.make clean
-	@$(MAKE) --no-print-directory -C . -f test_step.make clean
-	@$(MAKE) --no-print-directory -C . -f test_basket.make clean
-	@$(MAKE) --no-print-directory -C . -f test_cyl.make clean
-	@$(MAKE) --no-print-directory -C . -f test_moving_trimesh.make clean
-	@$(MAKE) --no-print-directory -C . -f test_trimesh.make clean
-	@$(MAKE) --no-print-directory -C . -f test_cylvssphere.make clean
+	@$(MAKE) --no-print-directory -C . -f demo_boxstack.make clean
+	@$(MAKE) --no-print-directory -C . -f demo_buggy.make clean
+	@$(MAKE) --no-print-directory -C . -f demo_chain1.make clean
+	@$(MAKE) --no-print-directory -C . -f demo_chain2.make clean
+	@$(MAKE) --no-print-directory -C . -f demo_collision.make clean
+	@$(MAKE) --no-print-directory -C . -f demo_crash.make clean
+	@$(MAKE) --no-print-directory -C . -f demo_feedback.make clean
+	@$(MAKE) --no-print-directory -C . -f demo_friction.make clean
+	@$(MAKE) --no-print-directory -C . -f demo_heightfield.make clean
+	@$(MAKE) --no-print-directory -C . -f demo_hinge.make clean
+	@$(MAKE) --no-print-directory -C . -f demo_I.make clean
+	@$(MAKE) --no-print-directory -C . -f demo_joints.make clean
+	@$(MAKE) --no-print-directory -C . -f demo_motor.make clean
+	@$(MAKE) --no-print-directory -C . -f demo_ode.make clean
+	@$(MAKE) --no-print-directory -C . -f demo_plane2d.make clean
+	@$(MAKE) --no-print-directory -C . -f demo_slider.make clean
+	@$(MAKE) --no-print-directory -C . -f demo_space.make clean
+	@$(MAKE) --no-print-directory -C . -f demo_space_stress.make clean
+	@$(MAKE) --no-print-directory -C . -f demo_step.make clean
+	@$(MAKE) --no-print-directory -C . -f demo_basket.make clean
+	@$(MAKE) --no-print-directory -C . -f demo_cyl.make clean
+	@$(MAKE) --no-print-directory -C . -f demo_moving_trimesh.make clean
+	@$(MAKE) --no-print-directory -C . -f demo_trimesh.make clean
+	@$(MAKE) --no-print-directory -C . -f demo_cylvssphere.make clean
 	@$(MAKE) --no-print-directory -C . -f tests.make clean
