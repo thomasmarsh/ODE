@@ -2,7 +2,7 @@ LIBTOOL_DEPS = @LIBTOOL_DEPS@
 libtool: $(LIBTOOL_DEPS)
 	$(SHELL) ./config.status --recheck
 
-if ENABLE_TESTS
+if ENABLE_DEMOS
 SUBDIRS = include drawstuff ode
 else
 SUBDIRS = include ode

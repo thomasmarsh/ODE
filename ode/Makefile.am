@@ -1,4 +1,4 @@
 SUBDIRS = src
-if ENABLE_TESTS
-  SUBDIRS += test
+if ENABLE_DEMOS
+  SUBDIRS += demo
 endif

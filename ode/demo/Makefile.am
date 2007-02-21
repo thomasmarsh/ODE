@@ -1,254 +1,254 @@
 AM_CXXFLAGS = @ARCHFLAGS@ @CXXFLAGS@ -I$(top_srcdir)/include -I$(top_builddir)/include
 AM_CFLAGS = @ARCHFLAGS@ @CXXFLAGS@ -I$(top_srcdir)/include -I$(top_builddir)/include
 
-noinst_PROGRAMS=test_collision \
-		test_slider \
-		test_feedback \
-		test_crash \
-		test_space \
-		test_I \
-		test_friction \
-		test_space_stress \
-		test_boxstack test_hinge \
-		test_step \
-		test_buggy \
-		test_joints \
-		test_motor \
-		test_chain1 \
-		test_chain2 \
-                test_cylvssphere \
-		test_ode \
-		test_plane2d \
-		test_heightfield \
-		test_convex_cd \
-		test_jointPR
+noinst_PROGRAMS=demo_collision \
+		demo_slider \
+		demo_feedback \
+		demo_crash \
+		demo_space \
+		demo_I \
+		demo_friction \
+		demo_space_stress \
+		demo_boxstack demo_hinge \
+		demo_step \
+		demo_buggy \
+		demo_joints \
+		demo_motor \
+		demo_chain1 \
+		demo_chain2 \
+                demo_cylvssphere \
+		demo_ode \
+		demo_plane2d \
+		demo_heightfield \
+		demo_convex_cd \
+		demo_jointPR
 if TRIMESH
-noinst_PROGRAMS+= test_trimesh test_moving_trimesh test_basket test_cyl
+noinst_PROGRAMS+= demo_trimesh demo_moving_trimesh demo_basket demo_cyl
 endif
-test_collision_SOURCES= test_collision.cpp
-test_slider_SOURCES= test_slider.cpp 
-test_feedback_SOURCES= test_feedback.cpp 
-test_crash_SOURCES= test_crash.cpp
-test_space_SOURCES= test_space.cpp
-test_I_SOURCES= test_I.cpp
-test_friction_SOURCES= test_friction.cpp
-test_space_stress_SOURCES= test_space_stress.cpp
-test_boxstack_SOURCES= test_boxstack.cpp
-test_hinge_SOURCES= test_hinge.cpp
-test_step_SOURCES= test_step.cpp
-test_buggy_SOURCES= test_buggy.cpp
-test_cyl_SOURCES= test_cyl.cpp world_geom3.h
-test_cylvssphere_SOURCES= test_cylvssphere.cpp
-test_joints_SOURCES= test_joints.cpp
-test_jointPR_SOURCES= test_jointPR.cpp
-test_motor_SOURCES= test_motor.cpp
-test_chain1_SOURCES= test_chain1.c
-test_chain2_SOURCES= test_chain2.cpp
-test_ode_SOURCES= test_ode.cpp
-test_plane2d_SOURCES= test_plane2d.cpp
-test_heightfield_SOURCES= test_heightfield.cpp
-test_convex_cd_SOURCES= test_convex_cd.cpp
-test_collision_LDFLAGS= -L$(top_builddir)/drawstuff/src \
+demo_collision_SOURCES= demo_collision.cpp
+demo_slider_SOURCES= demo_slider.cpp 
+demo_feedback_SOURCES= demo_feedback.cpp 
+demo_crash_SOURCES= demo_crash.cpp
+demo_space_SOURCES= demo_space.cpp
+demo_I_SOURCES= demo_I.cpp
+demo_friction_SOURCES= demo_friction.cpp
+demo_space_stress_SOURCES= demo_space_stress.cpp
+demo_boxstack_SOURCES= demo_boxstack.cpp
+demo_hinge_SOURCES= demo_hinge.cpp
+demo_step_SOURCES= demo_step.cpp
+demo_buggy_SOURCES= demo_buggy.cpp
+demo_cyl_SOURCES= demo_cyl.cpp world_geom3.h
+demo_cylvssphere_SOURCES= demo_cylvssphere.cpp
+demo_joints_SOURCES= demo_joints.cpp
+demo_jointPR_SOURCES= demo_jointPR.cpp
+demo_motor_SOURCES= demo_motor.cpp
+demo_chain1_SOURCES= demo_chain1.c
+demo_chain2_SOURCES= demo_chain2.cpp
+demo_ode_SOURCES= demo_ode.cpp
+demo_plane2d_SOURCES= demo_plane2d.cpp
+demo_heightfield_SOURCES= demo_heightfield.cpp
+demo_convex_cd_SOURCES= demo_convex_cd.cpp
+demo_collision_LDFLAGS= -L$(top_builddir)/drawstuff/src \
 		-L$(top_builddir)/ode/src @LDFLAGS@ 
-test_slider_LDFLAGS= -L$(top_builddir)/drawstuff/src \
+demo_slider_LDFLAGS= -L$(top_builddir)/drawstuff/src \
 		-L$(top_builddir)/ode/src @LDFLAGS@  
-test_feedback_LDFLAGS= -L$(top_builddir)/drawstuff/src \
+demo_feedback_LDFLAGS= -L$(top_builddir)/drawstuff/src \
 		-L$(top_builddir)/ode/src @LDFLAGS@  
-test_crash_LDFLAGS= -L$(top_builddir)/drawstuff/src \
+demo_crash_LDFLAGS= -L$(top_builddir)/drawstuff/src \
 		-L$(top_builddir)/ode/src @LDFLAGS@ 
-test_space_LDFLAGS= -L$(top_builddir)/drawstuff/src \
+demo_space_LDFLAGS= -L$(top_builddir)/drawstuff/src \
 		-L$(top_builddir)/ode/src @LDFLAGS@ 
-test_I_LDFLAGS= -L$(top_builddir)/drawstuff/src \
+demo_I_LDFLAGS= -L$(top_builddir)/drawstuff/src \
 		-L$(top_builddir)/ode/src @LDFLAGS@ 
-test_friction_LDFLAGS= -L$(top_builddir)/drawstuff/src \
+demo_friction_LDFLAGS= -L$(top_builddir)/drawstuff/src \
 		-L$(top_builddir)/ode/src @LDFLAGS@ 
-test_space_stress_LDFLAGS= -L$(top_builddir)/drawstuff/src \
+demo_space_stress_LDFLAGS= -L$(top_builddir)/drawstuff/src \
 		-L$(top_builddir)/ode/src @LDFLAGS@ 
-test_boxstack_LDFLAGS= -L$(top_builddir)/drawstuff/src \
+demo_boxstack_LDFLAGS= -L$(top_builddir)/drawstuff/src \
 		-L$(top_builddir)/ode/src @LDFLAGS@ 
-test_hinge_LDFLAGS= -L$(top_builddir)/drawstuff/src \
+demo_hinge_LDFLAGS= -L$(top_builddir)/drawstuff/src \
 		-L$(top_builddir)/ode/src @LDFLAGS@ 
-test_step_LDFLAGS= -L$(top_builddir)/drawstuff/src \
+demo_step_LDFLAGS= -L$(top_builddir)/drawstuff/src \
 		-L$(top_builddir)/ode/src @LDFLAGS@ 
-test_buggy_LDFLAGS= -L$(top_builddir)/drawstuff/src \
+demo_buggy_LDFLAGS= -L$(top_builddir)/drawstuff/src \
 		-L$(top_builddir)/ode/src @LDFLAGS@ 
-test_cyl_LDFLAGS= -L$(top_builddir)/drawstuff/src \
+demo_cyl_LDFLAGS= -L$(top_builddir)/drawstuff/src \
 		-L$(top_builddir)/ode/src @LDFLAGS@ 
-test_cylvssphere_LDFLAGS= -L$(top_builddir)/drawstuff/src \
+demo_cylvssphere_LDFLAGS= -L$(top_builddir)/drawstuff/src \
 		-L$(top_builddir)/ode/src @LDFLAGS@ 
-test_joints_LDFLAGS= -L$(top_builddir)/drawstuff/src \
+demo_joints_LDFLAGS= -L$(top_builddir)/drawstuff/src \
 		-L$(top_builddir)/ode/src @LDFLAGS@ 
-test_jointPR_LDFLAGS= -L$(top_builddir)/drawstuff/src \
+demo_jointPR_LDFLAGS= -L$(top_builddir)/drawstuff/src \
 		-L$(top_builddir)/ode/src @LDFLAGS@ 
-test_motor_LDFLAGS= -L$(top_builddir)/drawstuff/src \
+demo_motor_LDFLAGS= -L$(top_builddir)/drawstuff/src \
 		-L$(top_builddir)/ode/src @LDFLAGS@ 
-test_chain1_LDFLAGS= -L$(top_builddir)/drawstuff/src \
+demo_chain1_LDFLAGS= -L$(top_builddir)/drawstuff/src \
 		-L$(top_builddir)/ode/src @LDFLAGS@ 
-test_chain2_LDFLAGS= -L$(top_builddir)/drawstuff/src \
+demo_chain2_LDFLAGS= -L$(top_builddir)/drawstuff/src \
 		-L$(top_builddir)/ode/src @LDFLAGS@ 
-test_ode_LDFLAGS= -L$(top_builddir)/drawstuff/src \
+demo_ode_LDFLAGS= -L$(top_builddir)/drawstuff/src \
 		-L$(top_builddir)/ode/src @LDFLAGS@ 
-test_plane2d_LDFLAGS= -L$(top_builddir)/drawstuff/src \
+demo_plane2d_LDFLAGS= -L$(top_builddir)/drawstuff/src \
 		-L$(top_builddir)/ode/src @LDFLAGS@ 
-test_heightfield_LDFLAGS= -L$(top_builddir)/drawstuff/src \
+demo_heightfield_LDFLAGS= -L$(top_builddir)/drawstuff/src \
 		-L$(top_builddir)/ode/src @LDFLAGS@ 
-test_convex_cd_LDFLAGS= -L$(top_builddir)/drawstuff/src \
+demo_convex_cd_LDFLAGS= -L$(top_builddir)/drawstuff/src \
 		-L$(top_builddir)/ode/src @LDFLAGS@ 
 
-test_collision_DEPENDENCIES=	$(top_builddir)/ode/src/libode.a \
+demo_collision_DEPENDENCIES=	$(top_builddir)/ode/src/libode.a \
 				$(top_builddir)/drawstuff/src/libdrawstuff.a
-test_slider_DEPENDENCIES=	$(top_builddir)/ode/src/libode.a \
+demo_slider_DEPENDENCIES=	$(top_builddir)/ode/src/libode.a \
 				$(top_builddir)/drawstuff/src/libdrawstuff.a
-test_feedback_DEPENDENCIES=	$(top_builddir)/ode/src/libode.a \
+demo_feedback_DEPENDENCIES=	$(top_builddir)/ode/src/libode.a \
 				$(top_builddir)/drawstuff/src/libdrawstuff.a
-test_crash_DEPENDENCIES=	$(top_builddir)/ode/src/libode.a \
+demo_crash_DEPENDENCIES=	$(top_builddir)/ode/src/libode.a \
 				$(top_builddir)/drawstuff/src/libdrawstuff.a
-test_space_DEPENDENCIES=	$(top_builddir)/ode/src/libode.a \
+demo_space_DEPENDENCIES=	$(top_builddir)/ode/src/libode.a \
 				$(top_builddir)/drawstuff/src/libdrawstuff.a
-test_I_DEPENDENCIES=		$(top_builddir)/ode/src/libode.a \
+demo_I_DEPENDENCIES=		$(top_builddir)/ode/src/libode.a \
 				$(top_builddir)/drawstuff/src/libdrawstuff.a
-test_friction_DEPENDENCIES=	$(top_builddir)/ode/src/libode.a \
+demo_friction_DEPENDENCIES=	$(top_builddir)/ode/src/libode.a \
 				$(top_builddir)/drawstuff/src/libdrawstuff.a
-test_space_stress_DEPENDENCIES=	$(top_builddir)/ode/src/libode.a \
+demo_space_stress_DEPENDENCIES=	$(top_builddir)/ode/src/libode.a \
 				$(top_builddir)/drawstuff/src/libdrawstuff.a
-test_boxstack_DEPENDENCIES=	$(top_builddir)/ode/src/libode.a \
+demo_boxstack_DEPENDENCIES=	$(top_builddir)/ode/src/libode.a \
 				$(top_builddir)/drawstuff/src/libdrawstuff.a
-test_hinge_DEPENDENCIES=	$(top_builddir)/ode/src/libode.a \
+demo_hinge_DEPENDENCIES=	$(top_builddir)/ode/src/libode.a \
 				$(top_builddir)/drawstuff/src/libdrawstuff.a
-test_step_DEPENDENCIES=		$(top_builddir)/ode/src/libode.a \
+demo_step_DEPENDENCIES=		$(top_builddir)/ode/src/libode.a \
 				$(top_builddir)/drawstuff/src/libdrawstuff.a
-test_buggy_DEPENDENCIES=	$(top_builddir)/ode/src/libode.a \
+demo_buggy_DEPENDENCIES=	$(top_builddir)/ode/src/libode.a \
 				$(top_builddir)/drawstuff/src/libdrawstuff.a
-test_cyl_DEPENDENCIES=		$(top_builddir)/ode/src/libode.a \
+demo_cyl_DEPENDENCIES=		$(top_builddir)/ode/src/libode.a \
 				$(top_builddir)/drawstuff/src/libdrawstuff.a
-test_cylvssphere_DEPENDENCIES=	$(top_builddir)/ode/src/libode.a \
+demo_cylvssphere_DEPENDENCIES=	$(top_builddir)/ode/src/libode.a \
 				$(top_builddir)/drawstuff/src/libdrawstuff.a
-test_joints_DEPENDENCIES=	$(top_builddir)/ode/src/libode.a \
+demo_joints_DEPENDENCIES=	$(top_builddir)/ode/src/libode.a \
 				$(top_builddir)/drawstuff/src/libdrawstuff.a
-test_jointPR_DEPENDENCIES=	$(top_builddir)/ode/src/libode.a \
+demo_jointPR_DEPENDENCIES=	$(top_builddir)/ode/src/libode.a \
 				$(top_builddir)/drawstuff/src/libdrawstuff.a
-test_motor_DEPENDENCIES=	$(top_builddir)/ode/src/libode.a \
+demo_motor_DEPENDENCIES=	$(top_builddir)/ode/src/libode.a \
 				$(top_builddir)/drawstuff/src/libdrawstuff.a
-test_chain1_DEPENDENCIES=	$(top_builddir)/ode/src/libode.a \
+demo_chain1_DEPENDENCIES=	$(top_builddir)/ode/src/libode.a \
 				$(top_builddir)/drawstuff/src/libdrawstuff.a
-test_chain2_DEPENDENCIES=	$(top_builddir)/ode/src/libode.a \
+demo_chain2_DEPENDENCIES=	$(top_builddir)/ode/src/libode.a \
 				$(top_builddir)/drawstuff/src/libdrawstuff.a
-test_ode_DEPENDENCIES=		$(top_builddir)/ode/src/libode.a \
+demo_ode_DEPENDENCIES=		$(top_builddir)/ode/src/libode.a \
 				$(top_builddir)/drawstuff/src/libdrawstuff.a
-test_plane2d_DEPENDENCIES=	$(top_builddir)/ode/src/libode.a \
+demo_plane2d_DEPENDENCIES=	$(top_builddir)/ode/src/libode.a \
 				$(top_builddir)/drawstuff/src/libdrawstuff.a
-test_heightfield_DEPENDENCIES=	$(top_builddir)/ode/src/libode.a \
+demo_heightfield_DEPENDENCIES=	$(top_builddir)/ode/src/libode.a \
 				$(top_builddir)/drawstuff/src/libdrawstuff.a
-test_convex_cd_DEPENDENCIES=	$(top_builddir)/ode/src/libode.a \
+demo_convex_cd_DEPENDENCIES=	$(top_builddir)/ode/src/libode.a \
 				$(top_builddir)/drawstuff/src/libdrawstuff.a
 
 if TRIMESH
-test_trimesh_SOURCES= 			test_trimesh.cpp
-test_moving_trimesh_SOURCES= 		test_moving_trimesh.cpp
-test_basket_SOURCES= 			test_basket.cpp
-test_trimesh_LDFLAGS= 			-L$(top_builddir)/drawstuff/src \
+demo_trimesh_SOURCES= 			demo_trimesh.cpp
+demo_moving_trimesh_SOURCES= 		demo_moving_trimesh.cpp
+demo_basket_SOURCES= 			demo_basket.cpp
+demo_trimesh_LDFLAGS= 			-L$(top_builddir)/drawstuff/src \
 					-L$(top_builddir)/ode/src @LDFLAGS@ \
 					@GL_LIBS@ @LIBS@
-test_moving_trimesh_LDFLAGS= 		-L$(top_builddir)/drawstuff/src \
+demo_moving_trimesh_LDFLAGS= 		-L$(top_builddir)/drawstuff/src \
 					-L$(top_builddir)/ode/src @LDFLAGS@ \
 					@GL_LIBS@ @LIBS@
-test_basket_LDFLAGS=          		-L$(top_builddir)/drawstuff/src \
+demo_basket_LDFLAGS=          		-L$(top_builddir)/drawstuff/src \
                                         -L$(top_builddir)/ode/src @LDFLAGS@ \
                                         @GL_LIBS@ @LIBS@
-test_trimesh_DEPENDENCIES=		$(top_builddir)/ode/src/libode.a \
+demo_trimesh_DEPENDENCIES=		$(top_builddir)/ode/src/libode.a \
 					$(top_builddir)/drawstuff/src/libdrawstuff.a
-test_moving_trimesh_DEPENDENCIES=	$(top_builddir)/ode/src/libode.a \
+demo_moving_trimesh_DEPENDENCIES=	$(top_builddir)/ode/src/libode.a \
 					$(top_builddir)/drawstuff/src/libdrawstuff.a
 
-test_basket_DEPENDENCIES=		$(top_builddir)/ode/src/libode.a \
+demo_basket_DEPENDENCIES=		$(top_builddir)/ode/src/libode.a \
 					$(top_builddir)/drawstuff/src/libdrawstuff.a
 
 endif
 
-test_ode_LDADD= -ldrawstuff $(top_builddir)/ode/src/libode.a @GL_LIBS@ @LIBS@
-test_plane2d_LDADD= -ldrawstuff $(top_builddir)/ode/src/libode.a @GL_LIBS@ @LIBS@
-test_heightfield_LDADD= -ldrawstuff $(top_builddir)/ode/src/libode.a @GL_LIBS@ @LIBS@
-test_chain2_LDADD= -ldrawstuff $(top_builddir)/ode/src/libode.a @GL_LIBS@ @LIBS@
-test_chain1_LDADD= -ldrawstuff $(top_builddir)/ode/src/libode.a @GL_LIBS@ @LIBS@
-test_joints_LDADD= -ldrawstuff $(top_builddir)/ode/src/libode.a @GL_LIBS@ @LIBS@
-test_jointPR_LDADD= -ldrawstuff $(top_builddir)/ode/src/libode.a @GL_LIBS@ @LIBS@
-test_motor_LDADD= -ldrawstuff $(top_builddir)/ode/src/libode.a @GL_LIBS@ @LIBS@
-test_buggy_LDADD= -ldrawstuff $(top_builddir)/ode/src/libode.a @GL_LIBS@ @LIBS@
-test_cyl_LDADD= -ldrawstuff $(top_builddir)/ode/src/libode.a @GL_LIBS@ @LIBS@
-test_cylvssphere_LDADD= -ldrawstuff $(top_builddir)/ode/src/libode.a @GL_LIBS@ @LIBS@
-test_step_LDADD= -ldrawstuff $(top_builddir)/ode/src/libode.a @GL_LIBS@ @LIBS@
-test_hinge_LDADD= -ldrawstuff $(top_builddir)/ode/src/libode.a @GL_LIBS@ @LIBS@
-test_boxstack_LDADD= -ldrawstuff $(top_builddir)/ode/src/libode.a @GL_LIBS@ @LIBS@
-test_space_stress_LDADD= -ldrawstuff $(top_builddir)/ode/src/libode.a @GL_LIBS@ @LIBS@
-test_friction_LDADD= -ldrawstuff $(top_builddir)/ode/src/libode.a @GL_LIBS@ @LIBS@
-test_I_LDADD= -ldrawstuff $(top_builddir)/ode/src/libode.a @GL_LIBS@ @LIBS@
-test_space_LDADD= -ldrawstuff $(top_builddir)/ode/src/libode.a @GL_LIBS@ @LIBS@
-test_crash_LDADD= -ldrawstuff $(top_builddir)/ode/src/libode.a @GL_LIBS@ @LIBS@
-test_slider_LDADD= -ldrawstuff $(top_builddir)/ode/src/libode.a @GL_LIBS@ @LIBS@
-test_feedback_LDADD= -ldrawstuff $(top_builddir)/ode/src/libode.a @GL_LIBS@ @LIBS@
-test_collision_LDADD= -ldrawstuff $(top_builddir)/ode/src/libode.a @GL_LIBS@ @LIBS@
-test_convex_cd_LDADD= -ldrawstuff $(top_builddir)/ode/src/libode.a @GL_LIBS@ @LIBS@
+demo_ode_LDADD= -ldrawstuff $(top_builddir)/ode/src/libode.a @GL_LIBS@ @LIBS@
+demo_plane2d_LDADD= -ldrawstuff $(top_builddir)/ode/src/libode.a @GL_LIBS@ @LIBS@
+demo_heightfield_LDADD= -ldrawstuff $(top_builddir)/ode/src/libode.a @GL_LIBS@ @LIBS@
+demo_chain2_LDADD= -ldrawstuff $(top_builddir)/ode/src/libode.a @GL_LIBS@ @LIBS@
+demo_chain1_LDADD= -ldrawstuff $(top_builddir)/ode/src/libode.a @GL_LIBS@ @LIBS@
+demo_joints_LDADD= -ldrawstuff $(top_builddir)/ode/src/libode.a @GL_LIBS@ @LIBS@
+demo_jointPR_LDADD= -ldrawstuff $(top_builddir)/ode/src/libode.a @GL_LIBS@ @LIBS@
+demo_motor_LDADD= -ldrawstuff $(top_builddir)/ode/src/libode.a @GL_LIBS@ @LIBS@
+demo_buggy_LDADD= -ldrawstuff $(top_builddir)/ode/src/libode.a @GL_LIBS@ @LIBS@
+demo_cyl_LDADD= -ldrawstuff $(top_builddir)/ode/src/libode.a @GL_LIBS@ @LIBS@
+demo_cylvssphere_LDADD= -ldrawstuff $(top_builddir)/ode/src/libode.a @GL_LIBS@ @LIBS@
+demo_step_LDADD= -ldrawstuff $(top_builddir)/ode/src/libode.a @GL_LIBS@ @LIBS@
+demo_hinge_LDADD= -ldrawstuff $(top_builddir)/ode/src/libode.a @GL_LIBS@ @LIBS@
+demo_boxstack_LDADD= -ldrawstuff $(top_builddir)/ode/src/libode.a @GL_LIBS@ @LIBS@
+demo_space_stress_LDADD= -ldrawstuff $(top_builddir)/ode/src/libode.a @GL_LIBS@ @LIBS@
+demo_friction_LDADD= -ldrawstuff $(top_builddir)/ode/src/libode.a @GL_LIBS@ @LIBS@
+demo_I_LDADD= -ldrawstuff $(top_builddir)/ode/src/libode.a @GL_LIBS@ @LIBS@
+demo_space_LDADD= -ldrawstuff $(top_builddir)/ode/src/libode.a @GL_LIBS@ @LIBS@
+demo_crash_LDADD= -ldrawstuff $(top_builddir)/ode/src/libode.a @GL_LIBS@ @LIBS@
+demo_slider_LDADD= -ldrawstuff $(top_builddir)/ode/src/libode.a @GL_LIBS@ @LIBS@
+demo_feedback_LDADD= -ldrawstuff $(top_builddir)/ode/src/libode.a @GL_LIBS@ @LIBS@
+demo_collision_LDADD= -ldrawstuff $(top_builddir)/ode/src/libode.a @GL_LIBS@ @LIBS@
+demo_convex_cd_LDADD= -ldrawstuff $(top_builddir)/ode/src/libode.a @GL_LIBS@ @LIBS@
 
 
 if TRIMESH
-test_trimesh_LDADD= -ldrawstuff $(top_builddir)/ode/src/libode.a @GL_LIBS@ @LIBS@
-test_moving_trimesh_LDADD= -ldrawstuff $(top_builddir)/ode/src/libode.a @GL_LIBS@ @LIBS@
-test_basket_LDADD= -ldrawstuff $(top_builddir)/ode/src/libode.a @GL_LIBS@ @LIBS@
+demo_trimesh_LDADD= -ldrawstuff $(top_builddir)/ode/src/libode.a @GL_LIBS@ @LIBS@
+demo_moving_trimesh_LDADD= -ldrawstuff $(top_builddir)/ode/src/libode.a @GL_LIBS@ @LIBS@
+demo_basket_LDADD= -ldrawstuff $(top_builddir)/ode/src/libode.a @GL_LIBS@ @LIBS@
 endif
 
 
 if WIN32
 resources.o: ../../drawstuff/src/resources.rc ../../drawstuff/src/resource.h
 	@WINDRES@ ../../drawstuff/src/resources.rc -o resources.o
-test_ode_LDADD+= resources.o
-test_heightfield_LDADD+= resources.o
-test_chain2_LDADD+= resources.o
-test_chain1_LDADD+= resources.o
-test_joints_LDADD+= resources.o
-test_jointPR_LDADD+= resources.o
-test_motor_LDADD+= resources.o
-test_buggy_LDADD+= resources.o
-test_cyl_LDADD+= resources.o
-test_cylvssphere_LDADD+= resources.o
-test_step_LDADD+= resources.o
-test_hinge_LDADD+= resources.o
-test_boxstack_LDADD+= resources.o
-test_space_stress_LDADD+= resources.o
-test_friction_LDADD+= resources.o
-test_I_LDADD+= resources.o
-test_space_LDADD+= resources.o
-test_crash_LDADD+= resources.o
-test_slider_LDADD+= resources.o
-test_feedback_LDADD+= resources.o
-test_collision_LDADD+= resources.o
-test_convex_cd_LDADD+= resources.o
-test_ode_DEPENDENCIES+= resources.o
-test_chain2_DEPENDENCIES+= resources.o
-test_chain1_DEPENDENCIES+= resources.o
-test_joints_DEPENDENCIES+= resources.o
-test_jointPR_DEPENDENCIES+= resources.o
-test_motor_DEPENDENCIES+= resources.o
-test_buggy_DEPENDENCIES+= resources.o
-test_cyl_DEPENDENCIES+= resources.o
-test_cylvssphere_DEPENDENCIES+= resources.o
-test_step_DEPENDENCIES+= resources.o
-test_hinge_DEPENDENCIES+= resources.o
-test_boxstack_DEPENDENCIES+= resources.o
-test_space_stress_DEPENDENCIES+= resources.o
-test_friction_DEPENDENCIES+= resources.o
-test_I_DEPENDENCIES+= resources.o
-test_space_DEPENDENCIES+= resources.o
-test_crash_DEPENDENCIES+= resources.o
-test_slider_DEPENDENCIES+= resources.o
-test_feedback_DEPENDENCIES+= resources.o
-test_collision_DEPENDENCIES+= resources.o
-test_convex_cd_DEPENDENCIES+= resources.o
+demo_ode_LDADD+= resources.o
+demo_heightfield_LDADD+= resources.o
+demo_chain2_LDADD+= resources.o
+demo_chain1_LDADD+= resources.o
+demo_joints_LDADD+= resources.o
+demo_jointPR_LDADD+= resources.o
+demo_motor_LDADD+= resources.o
+demo_buggy_LDADD+= resources.o
+demo_cyl_LDADD+= resources.o
+demo_cylvssphere_LDADD+= resources.o
+demo_step_LDADD+= resources.o
+demo_hinge_LDADD+= resources.o
+demo_boxstack_LDADD+= resources.o
+demo_space_stress_LDADD+= resources.o
+demo_friction_LDADD+= resources.o
+demo_I_LDADD+= resources.o
+demo_space_LDADD+= resources.o
+demo_crash_LDADD+= resources.o
+demo_slider_LDADD+= resources.o
+demo_feedback_LDADD+= resources.o
+demo_collision_LDADD+= resources.o
+demo_convex_cd_LDADD+= resources.o
+demo_ode_DEPENDENCIES+= resources.o
+demo_chain2_DEPENDENCIES+= resources.o
+demo_chain1_DEPENDENCIES+= resources.o
+demo_joints_DEPENDENCIES+= resources.o
+demo_jointPR_DEPENDENCIES+= resources.o
+demo_motor_DEPENDENCIES+= resources.o
+demo_buggy_DEPENDENCIES+= resources.o
+demo_cyl_DEPENDENCIES+= resources.o
+demo_cylvssphere_DEPENDENCIES+= resources.o
+demo_step_DEPENDENCIES+= resources.o
+demo_hinge_DEPENDENCIES+= resources.o
+demo_boxstack_DEPENDENCIES+= resources.o
+demo_space_stress_DEPENDENCIES+= resources.o
+demo_friction_DEPENDENCIES+= resources.o
+demo_I_DEPENDENCIES+= resources.o
+demo_space_DEPENDENCIES+= resources.o
+demo_crash_DEPENDENCIES+= resources.o
+demo_slider_DEPENDENCIES+= resources.o
+demo_feedback_DEPENDENCIES+= resources.o
+demo_collision_DEPENDENCIES+= resources.o
+demo_convex_cd_DEPENDENCIES+= resources.o
 
 if TRIMESH
-test_trimesh_LDADD+= resources.o
-test_moving_trimesh_LDADD+= resources.o
-test_trimesh_DEPENDENCIES+= resources.o
-test_moving_trimesh_DEPENDENCIES+= resources.o
-test_basket_DEPENDENCIES+= resources.o
+demo_trimesh_LDADD+= resources.o
+demo_moving_trimesh_LDADD+= resources.o
+demo_trimesh_DEPENDENCIES+= resources.o
+demo_moving_trimesh_DEPENDENCIES+= resources.o
+demo_basket_DEPENDENCIES+= resources.o
 endif
 endif
