@@ -3,7 +3,7 @@
 	ProjectType="Visual C++"
 	Version="8.00"
 	Name="tests"
-	ProjectGUID="{A31C32B9-7B35-6D4F-926A-76AFFEE5D759}"
+	ProjectGUID="{258484A7-A707-954B-903B-123A55B0A4F4}"
 	RootNamespace="tests"
 	Keyword="Win32Proj"
 	>
@@ -56,6 +56,7 @@
 			/>
 			<Tool
 				Name="VCResourceCompilerTool"
+				PreprocessorDefinitions="_CRT_SECURE_NO_DEPRECATE"
 				AdditionalIncludeDirectories="../../include;../../tests/CppTestHarness"
 			/>
 			<Tool
@@ -139,6 +140,7 @@
 			/>
 			<Tool
 				Name="VCResourceCompilerTool"
+				PreprocessorDefinitions="_CRT_SECURE_NO_DEPRECATE"
 				AdditionalIncludeDirectories="../../include;../../tests/CppTestHarness"
 			/>
 			<Tool
@@ -222,6 +224,7 @@
 			/>
 			<Tool
 				Name="VCResourceCompilerTool"
+				PreprocessorDefinitions="_CRT_SECURE_NO_DEPRECATE"
 				AdditionalIncludeDirectories="../../include;../../tests/CppTestHarness"
 			/>
 			<Tool
@@ -305,6 +308,7 @@
 			/>
 			<Tool
 				Name="VCResourceCompilerTool"
+				PreprocessorDefinitions="_CRT_SECURE_NO_DEPRECATE"
 				AdditionalIncludeDirectories="../../include;../../tests/CppTestHarness"
 			/>
 			<Tool

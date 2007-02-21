@@ -3,7 +3,7 @@
 	ProjectType="Visual C++"
 	Version="7.00"
 	Name="ode"
-	ProjectGUID="{22CAC240-7317-D54D-90D8-6D8CCB950F2A}"
+	ProjectGUID="{244DA63B-01D1-2242-842E-5B0730919AC7}"
 	Keyword="Win32Proj">
 	<Platforms>
 		<Platform
@@ -53,6 +53,7 @@
 				Name="VCPreLinkEventTool"/>
 			<Tool
 				Name="VCResourceCompilerTool"
+				PreprocessorDefinitions="WIN32;ODE_DLL"
 				AdditionalIncludeDirectories="../../include;../../OPCODE;../../GIMPACT/include"/>
 			<Tool
 				Name="VCWebServiceProxyGeneratorTool"/>
@@ -103,6 +104,7 @@
 				Name="VCPreLinkEventTool"/>
 			<Tool
 				Name="VCResourceCompilerTool"
+				PreprocessorDefinitions="WIN32;ODE_DLL"
 				AdditionalIncludeDirectories="../../include;../../OPCODE;../../GIMPACT/include"/>
 			<Tool
 				Name="VCWebServiceProxyGeneratorTool"/>
@@ -144,6 +146,7 @@
 				Name="VCPreLinkEventTool"/>
 			<Tool
 				Name="VCResourceCompilerTool"
+				PreprocessorDefinitions="WIN32;ODE_LIB"
 				AdditionalIncludeDirectories="../../include;../../OPCODE;../../GIMPACT/include"/>
 			<Tool
 				Name="VCWebServiceProxyGeneratorTool"/>
@@ -185,6 +188,7 @@
 				Name="VCPreLinkEventTool"/>
 			<Tool
 				Name="VCResourceCompilerTool"
+				PreprocessorDefinitions="WIN32;ODE_LIB"
 				AdditionalIncludeDirectories="../../include;../../OPCODE;../../GIMPACT/include"/>
 			<Tool
 				Name="VCWebServiceProxyGeneratorTool"/>

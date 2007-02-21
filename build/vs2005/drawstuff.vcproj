@@ -3,7 +3,7 @@
 	ProjectType="Visual C++"
 	Version="8.00"
 	Name="drawstuff"
-	ProjectGUID="{C70B0E8C-3A7A-E047-9C15-0F614476F771}"
+	ProjectGUID="{AA3254CD-75A2-BA42-A6FB-8AA6A91E742B}"
 	RootNamespace="drawstuff"
 	Keyword="Win32Proj"
 	>
@@ -56,6 +56,7 @@
 			/>
 			<Tool
 				Name="VCResourceCompilerTool"
+				PreprocessorDefinitions="_CRT_SECURE_NO_DEPRECATE;WIN32;DS_DLL;USRDLL"
 				AdditionalIncludeDirectories="../../include"
 			/>
 			<Tool
@@ -139,6 +140,7 @@
 			/>
 			<Tool
 				Name="VCResourceCompilerTool"
+				PreprocessorDefinitions="_CRT_SECURE_NO_DEPRECATE;WIN32;DS_DLL;USRDLL"
 				AdditionalIncludeDirectories="../../include"
 			/>
 			<Tool
@@ -223,6 +225,7 @@
 			/>
 			<Tool
 				Name="VCResourceCompilerTool"
+				PreprocessorDefinitions="_CRT_SECURE_NO_DEPRECATE;WIN32;DS_LIB"
 				AdditionalIncludeDirectories="../../include"
 			/>
 			<Tool
@@ -298,6 +301,7 @@
 			/>
 			<Tool
 				Name="VCResourceCompilerTool"
+				PreprocessorDefinitions="_CRT_SECURE_NO_DEPRECATE;WIN32;DS_LIB"
 				AdditionalIncludeDirectories="../../include"
 			/>
 			<Tool
