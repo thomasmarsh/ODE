@@ -2599,7 +2599,6 @@ static void PRGetInfo1 (dxJointPR *j, dxJoint::Info1 *info)
 
 static void PRGetInfo2 (dxJointPR *joint, dxJoint::Info2 *info)
 {
-  int i;
   int s = info->rowskip;
   int s2= 2*s;
   int s3= 3*s;
