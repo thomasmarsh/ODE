@@ -891,6 +891,7 @@ int dxHeightfield::dCollideHeightfieldZone( const int minX, const int maxX, cons
                                            int flags, dContactGeom* contact, 
                                            int skip )
 {
+	dContactGeom *pContact = 0;
     int  x, z;
     // check if not above or inside terrain first
     // while filling a heightmap partial temporary buffer
@@ -944,9 +945,26 @@ int dxHeightfield::dCollideHeightfieldZone( const int minX, const int maxX, cons
         }
         if (minO2Height - maxY > -dEpsilon )
         {
-            //above heightfield
+			//totally above heightfield
             return 0;
         }
+		if (minY - maxO2Height > -dEpsilon )
+		{
+			// totally under heightfield
+			pContact = CONTACT(contact, 0);
+
+			pContact->pos[0] = o2->final_posr->pos[0];
+			pContact->pos[1] = minY;
+			pContact->pos[2] = o2->final_posr->pos[2];
+
+			pContact->normal[0] = 0;
+			pContact->normal[1] = - 1;
+			pContact->normal[2] = 0;
+
+			pContact->depth =  minY - maxO2Height;
+
+			return 1;
+		}
     }
     int numTerrainContacts = 0;
     // get All Planes that could collide against.
@@ -1021,7 +1039,6 @@ int dxHeightfield::dCollideHeightfieldZone( const int minX, const int maxX, cons
     
     dxPlane myplane(0,0,0,0,0);
     dxPlane* sliding_plane = &myplane;
-    dContactGeom *pContact = 0;
     dContactGeom *PlaneContact = m_p_data->m_contacts;    
     flags = (flags & 0xffff0000) | HEIGHTFIELDMAXCONTACTPERCELL;
     dReal triplane[4];
@@ -1150,9 +1167,10 @@ int dxHeightfield::dCollideHeightfieldZone( const int minX, const int maxX, cons
 
     // if small heightfield triangle related to O2 colliding
     // or no Triangle colliding at all.
-    bool needFurtherPasses = o2->type == dTriMeshClass;
+    bool needFurtherPasses = (o2->type == dTriMeshClass);
     //compute Ratio between Triangle size and O2 aabb size
-    if (needFurtherPasses == false)
+	// no FurtherPasses are needed in ray class
+    if (o2->type != dRayClass  && needFurtherPasses == false)
     {
         const dReal xratio = (o2->aabb[1] - o2->aabb[0]) * m_p_data->m_fInvSampleWidth;
         if (xratio > 1.5)
@@ -1461,7 +1479,7 @@ int dxHeightfield::dCollideHeightfieldZone( const int minX, const int maxX, cons
                 {
                     depth = geomNDepthGetter( o2,
                         triVertex[0], triVertex[1], triVertex[2] );
-                    if (depth - dEpsilon> 0)
+                    if (depth + dEpsilon < 0)
                         vertexCollided = true;
                 }
                 else
@@ -1510,7 +1528,7 @@ int dxHeightfield::dCollideHeightfieldZone( const int minX, const int maxX, cons
 
         for (unsigned int k = 0; k < numTri; k++)
         {
-            const HeightFieldTriangle * const itTriangle = tempTriangleBuffer[k];
+            const HeightFieldTriangle * const itTriangle = &tempTriangleBuffer[k];
 
             if (itTriangle->state == true)
                 continue;// plane did already collide.
