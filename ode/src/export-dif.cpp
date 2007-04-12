@@ -541,10 +541,14 @@ void dWorldExportDIF (dWorldID w, FILE *file, const char *prefix)
 		fprintf (file,
 			"%sjoint[%d] = dynamics.%s_joint {\n"
 			"\tworld = %sworld,\n"
-			"\tbody = {%sbody[%d]"
-			,prefix,num,name,prefix,prefix,j->node[0].body->tag);
-		if (j->node[1].body) fprintf (file,",%sbody[%d]",prefix,j->node[1].body->tag);
-		fprintf (file,"},\n");
+			"\tbody = {"
+			,prefix,num,name,prefix);
+
+		if ( j->node[0].body )
+			fprintf (file,"%sbody[%d]",prefix,j->node[0].body->tag);
+		if ( j->node[1].body )
+			fprintf (file,",%sbody[%d]",prefix,j->node[1].body->tag);
+
 		switch (j->vtable->typenum) {
 			case dJointTypeBall: printBall (c,j); break;
 			case dJointTypeHinge: printHinge (c,j); break;
@@ -556,7 +560,7 @@ void dWorldExportDIF (dWorldID w, FILE *file, const char *prefix)
 			case dJointTypeAMotor: printAMotor (c,j); break;
 			case dJointTypeLMotor: printLMotor (c,j); break;
 			case dJointTypePR: printPR (c,j); break;
-		}		
+		}
 		c.indent--;
 		c.print ("}");
 		num++;
