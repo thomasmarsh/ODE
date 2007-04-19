@@ -7,7 +7,6 @@ libglitch_include_HEADERS = 	collision_trimesh.h \
 				odecpp_collision.h \
 				compatibility.h \
 				memory.h \
-				odecpp_old.h \
 				contact.h \
 				misc.h \
 				odemath.h \
