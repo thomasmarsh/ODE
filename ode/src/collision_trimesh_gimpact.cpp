@@ -20,118 +20,20 @@
  *                                                                       *
  *************************************************************************/
 
-// TriMesh code by Erwin de Vries.
-
 #include <ode/collision.h>
 #include <ode/matrix.h>
 #include <ode/rotation.h>
 #include <ode/odemath.h>
+
+#if dTRIMESH_ENABLED
+
 #include "collision_util.h"
 #define TRIMESH_INTERNAL
 #include "collision_trimesh_internal.h"
 
-#if dTRIMESH_ENABLED && dTRIMESH_GIMPACT
+#if dTRIMESH_GIMPACT
 
-void dxTriMeshData::Preprocess()
-{
-	// If this mesh has already been preprocessed, exit
-//	if (UseFlags)
-//		return;
-//
-//	udword numTris = Mesh.GetNbTriangles();
-//	udword numEdges = numTris * 3;
-//
-//	UseFlags = new uint8[numTris];
-//	memset(UseFlags, 0, sizeof(uint8) * numTris);
-//
-//	EdgeRecord* records = new EdgeRecord[numEdges];
-//
-//	// Make a list of every edge in the mesh
-//	const IndexedTriangle* tris = Mesh.GetTris();
-//    for (unsigned int i = 0; i < numTris; i++)
-//	{
-//		SetupEdge(&records[i*3],   0, i, tris->mVRef);
-//		SetupEdge(&records[i*3+1], 1, i, tris->mVRef);
-//		SetupEdge(&records[i*3+2], 2, i, tris->mVRef);
-//
-//		tris = (const IndexedTriangle*)(((uint8*)tris) + Mesh.GetTriStride());
-//	}
-//
-//	// Sort the edges, so the ones sharing the same verts are beside each other
-//	qsort(records, numEdges, sizeof(EdgeRecord), EdgeCompare);
-//
-//	// Go through the sorted list of edges and flag all the edges and vertices that we need to use
-//	for (unsigned int i = 0; i < numEdges; i++)
-//	{
-//		EdgeRecord* rec1 = &records[i];
-//		EdgeRecord* rec2 = 0;
-//		if (i < numEdges - 1)
-//			rec2 = &records[i+1];
-//
-//		if (rec2 &&
-//			rec1->VertIdx1 == rec2->VertIdx1 &&
-//			rec1->VertIdx2 == rec2->VertIdx2)
-//		{
-//			VertexPointers vp;
-//			Mesh.GetTriangle(vp, rec1->TriIdx);
-//
-//			// Get the normal of the first triangle
-//			Point triNorm = (*vp.Vertex[2] - *vp.Vertex[1]) ^ (*vp.Vertex[0] - *vp.Vertex[1]);
-//			triNorm.Normalize();
-//
-//			// Get the vert opposite this edge in the first triangle
-//			Point oppositeVert1 = GetOppositeVert(rec1, vp.Vertex);
-//
-//			// Get the vert opposite this edge in the second triangle
-//			Mesh.GetTriangle(vp, rec2->TriIdx);
-//			Point oppositeVert2 = GetOppositeVert(rec2, vp.Vertex);
-//
-//			float dot = triNorm.Dot((oppositeVert2 - oppositeVert1).Normalize());
-//
-//			// We let the dot threshold for concavity get slightly negative to allow for rounding errors
-//			static const float kConcaveThresh = -0.000001f;
-//
-//			// This is a concave edge, leave it for the next pass
-//			if (dot >= kConcaveThresh)
-//				rec1->Concave = true;
-//			// If this is a convex edge, mark its vertices and edge as used
-//			else
-//				UseFlags[rec1->TriIdx] |= rec1->Vert1Flags | rec1->Vert2Flags | rec1->EdgeFlags;
-//
-//			// Skip the second edge
-//			i++;
-//		}
-//		// This is a boundary edge
-//		else
-//		{
-//			UseFlags[rec1->TriIdx] |= rec1->Vert1Flags | rec1->Vert2Flags | rec1->EdgeFlags;
-//		}
-//	}
-//
-//	// Go through the list once more, and take any edge we marked as concave and
-//	// clear it's vertices flags in any triangles they're used in
-//	for (unsigned int i = 0; i < numEdges; i++)
-//	{
-//		EdgeRecord& er = records[i];
-//
-//		if (er.Concave)
-//		{
-//			for (unsigned int j = 0; j < numEdges; j++)
-//			{
-//				EdgeRecord& curER = records[j];
-//
-//				if (curER.VertIdx1 == er.VertIdx1 ||
-//					curER.VertIdx1 == er.VertIdx2)
-//					UseFlags[curER.TriIdx] &= ~curER.Vert1Flags;
-//
-//				if (curER.VertIdx2 == er.VertIdx1 ||
-//					curER.VertIdx2 == er.VertIdx2)
-//					UseFlags[curER.TriIdx] &= ~curER.Vert2Flags;
-//			}
-//		}
-//	}
-//
-//	delete [] records;
+void dxTriMeshData::Preprocess(){	// stub
 }
 
 dTriMeshDataID dGeomTriMeshDataCreate(){
@@ -142,77 +44,20 @@ void dGeomTriMeshDataDestroy(dTriMeshDataID g){
     delete g;
 }
 
-void dGeomTriMeshSetLastTransform( dxGeom* g, dMatrix4 last_trans )
-{
-//	dAASSERT(g)
-//    dUASSERT(g->type == dTriMeshClass, "geom not trimesh");
-
-//    for (int i=0; i<16; i++)
-//        (((dxTriMesh*)g)->last_trans)[ i ] = last_trans[ i ];
-
-//    return;
+void dGeomTriMeshSetLastTransform( dxGeom* g, dMatrix4 last_trans ) { //stub
 }
 
-
-//dReal* dGeomTriMeshGetLastTransform( dxGeom* g )
-//{
-//	dAASSERT(g)
-//    dUASSERT(g->type == dTriMeshClass, "geom not trimesh");
-//
-//    return (dReal*)(((dxTriMesh*)g)->last_trans);
-//}
-
-
-
-
-void dGeomTriMeshDataSet(dTriMeshDataID g, int data_id, void* in_data)
-{
-//    dUASSERT(g, "argument not trimesh data");
-//
-//    double *elem;
-//
-//    switch (data_id) {
-//    case TRIMESH_FACE_NORMALS:
-//	g->Normals = (dReal *) in_data;
-//	break;
-//
-//    case TRIMESH_LAST_TRANSFORMATION:
-//	elem = (double *) in_data;
-//    for (int i=0; i<16; i++)
-//        g->last_trans[i] = (dReal) elem[i];
-//
-//	break;
-//    default:
-//	dUASSERT(data_id, "invalid data type");
-//	break;
-//    }
-//
-//    return;
-
+dReal* dGeomTriMeshGetLastTransform( dxGeom* g ) {
+	return NULL; // stub
 }
 
+void dGeomTriMeshDataSet(dTriMeshDataID g, int data_id, void* in_data) { //stub
+}
 
-
-void*  dGeomTriMeshDataGet(dTriMeshDataID g, int data_id)
-{
+void*  dGeomTriMeshDataGet(dTriMeshDataID g, int data_id) {
     dUASSERT(g, "argument not trimesh data");
-
-//    switch (data_id) {
-//    case TRIMESH_FACE_NORMALS:
-//        return NULL;
-//        break;
-//
-//    case TRIMESH_LAST_TRANSFORMATION:
-//        return NULL;
-//        break;
-//    default:
-//        dUASSERT(data_id, "invalid data type");
-//        break;
-//    }
-
-    return NULL;
+	return NULL; // stub
 }
-
 
 void dGeomTriMeshDataBuildSingle1(dTriMeshDataID g,
                                   const void* Vertices, int VertexStride, int VertexCount,
@@ -518,4 +363,63 @@ void dGeomTriMeshDataUpdate(dTriMeshDataID g) {
     g->UpdateData();
 }
 
-#endif
+
+//
+// GIMPACT TRIMESH-TRIMESH COLLIDER
+//
+
+int dCollideTTL(dxGeom* g1, dxGeom* g2, int Flags, dContactGeom* Contacts, int Stride)
+{
+    dxTriMesh* TriMesh1 = (dxTriMesh*) g1;
+    dxTriMesh* TriMesh2 = (dxTriMesh*) g2;
+    //Create contact list
+    GDYNAMIC_ARRAY trimeshcontacts;
+    GIM_CREATE_CONTACT_LIST(trimeshcontacts);
+
+    //Collide trimeshes
+    gim_trimesh_trimesh_collision(&TriMesh1->m_collision_trimesh,&TriMesh2->m_collision_trimesh,&trimeshcontacts);
+
+    if(trimeshcontacts.m_size == 0)
+    {
+        GIM_DYNARRAY_DESTROY(trimeshcontacts);
+        return 0;
+    }
+
+    GIM_CONTACT * ptrimeshcontacts = GIM_DYNARRAY_POINTER(GIM_CONTACT,trimeshcontacts);
+
+
+    dContactGeom* pcontact;
+	int contactcount = 0;
+	unsigned i;
+
+	for (i=0;i<trimeshcontacts.m_size;i++)
+	{
+	    if(contactcount < (Flags & 0xffff))
+        {
+            pcontact = SAFECONTACT(Flags, Contacts, contactcount, Stride);
+            contactcount++;
+            pcontact->pos[0] = ptrimeshcontacts->m_point[0];
+            pcontact->pos[1] = ptrimeshcontacts->m_point[1];
+            pcontact->pos[2] = ptrimeshcontacts->m_point[2];
+            pcontact->pos[3] = 1.0f;
+
+            pcontact->normal[0] = ptrimeshcontacts->m_normal[0];
+            pcontact->normal[1] = ptrimeshcontacts->m_normal[1];
+            pcontact->normal[2] = ptrimeshcontacts->m_normal[2];
+            pcontact->normal[3] = 0;
+
+            pcontact->depth = ptrimeshcontacts->m_depth;
+            pcontact->g1 = g1;
+            pcontact->g2 = g2;
+
+        }
+        ptrimeshcontacts++;
+	}
+
+	GIM_DYNARRAY_DESTROY(trimeshcontacts);
+
+    return contactcount;
+}
+
+#endif // dTRIMESH_GIMPACT
+#endif // dTRIMESH_ENABLED

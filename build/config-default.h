@@ -14,11 +14,17 @@
  *   dTRIMESH_ENABLED  - enable/disable trimesh support
  *   dTRIMESH_OPCODE   - use the OPCODE trimesh engine
  *   dTRIMESH_GIMPACT  - use the GIMPACT trimesh engine
+ *                       Only one trimesh engine should be enabled.
  *
- *   dUSE_MALLOC_FOR_ALLOCA (experimental)- 
- *                       Use malloc() instead of alloca(). Slower, 
- *                       but allows for larger systems and more 
+ *   dUSE_MALLOC_FOR_ALLOCA (experimental)-
+ *                       Use malloc() instead of alloca(). Slower,
+ *                       but allows for larger systems and more
  *                       graceful out-of-memory handling.
+ *
+ *   dTRIMESH_OPCODE_USE_NEW_TRIMESH_TRIMESH_COLLIDER (experimental)-
+ *                       Use an alternative trimesh-trimesh collider
+ *                       which should yield better results.
+ *
  ******************************************************************/
 
 #define dSINGLE
@@ -26,6 +32,8 @@
 
 #define dTRIMESH_ENABLED 1
 #define dTRIMESH_OPCODE 1
+
+#define dTRIMESH_OPCODE_USE_NEW_TRIMESH_TRIMESH_COLLIDER 0
 
 /* #define dUSE_MALLOC_FOR_ALLOCA */
 
