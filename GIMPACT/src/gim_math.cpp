@@ -54,7 +54,7 @@ void gim_init_math()
 //! Generates an unit random
 GREAL gim_unit_random()
 {
-    GREAL rn = rand();
+    GREAL rn = static_cast< GREAL >( rand() );
     rn/=(GREAL)RAND_MAX;
     return rn;
 }
