@@ -105,6 +105,12 @@ typedef double dReal;
 #error You must #define dSINGLE or dDOUBLE
 #endif
 
+// Detect if we've got both trimesh engines enabled.
+#if dTRIMESH_ENABLED
+#if dTRIMESH_OPCODE && dTRIMESH_GIMPACT
+#error You can only #define dTRIMESH_OPCODE or dTRIMESH_GIMPACT, not both.
+#endif
+#endif // dTRIMESH_ENABLED
 
 /* round an integer up to a multiple of 4, except that 0 and 1 are unmodified
  * (used to compute matrix leading dimensions)
