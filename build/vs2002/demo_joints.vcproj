@@ -3,7 +3,7 @@
 	ProjectType="Visual C++"
 	Version="7.00"
 	Name="demo_joints"
-	ProjectGUID="{2552FA12-2178-AA46-989C-2E82E5E5DCA8}"
+	ProjectGUID="{9C43F96A-1793-5743-A767-2519C9FA48F8}"
 	Keyword="Win32Proj">
 	<Platforms>
 		<Platform

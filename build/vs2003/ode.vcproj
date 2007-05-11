@@ -3,7 +3,7 @@
 	ProjectType="Visual C++"
 	Version="7.10"
 	Name="ode"
-	ProjectGUID="{6C6C7D7E-3AF3-0B43-9F89-39518F03842D}"
+	ProjectGUID="{5F0953F1-B966-BA4E-A31A-C002A407FD47}"
 	Keyword="Win32Proj">
 	<Platforms>
 		<Platform
@@ -281,9 +281,6 @@
 					RelativePath="..\..\include\ode\odecpp_collision.h">
 				</File>
 				<File
-					RelativePath="..\..\include\ode\odecpp_old.h">
-				</File>
-				<File
 					RelativePath="..\..\include\ode\odemath.h">
 				</File>
 				<File
@@ -425,6 +422,9 @@
 				</File>
 				<File
 					RelativePath="..\..\ode\src\collision_trimesh_trimesh.cpp">
+				</File>
+				<File
+					RelativePath="..\..\ode\src\collision_trimesh_trimesh_new.cpp">
 				</File>
 				<File
 					RelativePath="..\..\ode\src\collision_util.cpp">
