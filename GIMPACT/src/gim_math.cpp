@@ -48,7 +48,7 @@ GREAL gim_sqrt(GREAL f)
 //!Initializes mathematical functions
 void gim_init_math()
 {
-    srand(time(0));
+    srand( static_cast< unsigned int >( time( 0 ) ) );
 }
 
 //! Generates an unit random
