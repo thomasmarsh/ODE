@@ -619,7 +619,7 @@ void dxHashSpace::collide2 (void *data, dxGeom *geom,
   
   // intersect bounding boxes
   for (dxGeom *g=first; g; g=g->next) {
-    collideAABBs (g,geom,data,callback);
+    if (GEOM_ENABLED(g)) collideAABBs (g,geom,data,callback);
   }
   
   lock_count--;
