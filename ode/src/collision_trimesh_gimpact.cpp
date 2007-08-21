@@ -158,7 +158,17 @@ dxTriMesh::dxTriMesh(dSpaceID Space, dTriMeshDataID Data) : dxGeom(Space, 1){
 
     //Create trimesh
 
-    gim_trimesh_create_from_data(&m_collision_trimesh,( vec3f *)(&Data->m_Vertices[0]), Data->m_VertexCount ,0, ( GUINT *)(&Data->m_Indices[0]), Data->m_TriangleCount*3,0,1);
+    gim_trimesh_create_from_data
+    (
+      &m_collision_trimesh,		// gimpact mesh
+      ( vec3f *)(&Data->m_Vertices[0]),	// vertices
+      Data->m_VertexCount,		// nr of verts
+      0,				// copy verts?
+      ( GUINT *)(&Data->m_Indices[0]),	// indices
+      Data->m_TriangleCount*3,		// nr of indices
+      0,				// copy indices?
+      1					// transformed reply
+    );
 
 
 	/* TC has speed/space 'issues' that don't make it a clear
