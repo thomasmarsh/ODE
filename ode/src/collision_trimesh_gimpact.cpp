@@ -271,6 +271,8 @@ void dGeomTriMeshSetData(dGeomID g, dTriMeshDataID Data)
 {
 	dUASSERT(g && g->type == dTriMeshClass, "argument not a trimesh");
 	((dxTriMesh*)g)->Data = Data;
+        // I changed my data -- I know nothing about my own AABB anymore.
+        ((dxTriMesh*)g)->gflags |= (GEOM_DIRTY|GEOM_AABB_BAD);
 }
 
 dTriMeshDataID dGeomTriMeshGetData(dGeomID g)
