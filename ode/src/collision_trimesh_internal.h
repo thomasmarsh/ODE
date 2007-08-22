@@ -123,13 +123,18 @@ struct dxTriMeshData  : public dBase
 		m_single = true;
 	}
 
-    void Build(const void* Vertices, int VertexStide, int VertexCount,
+    void Build(const void* Vertices, int VertexStride, int VertexCount,
 	       const void* Indices, int IndexCount, int TriStride,
 	       const void* Normals,
 	      bool Single)
 	{
+		dIASSERT(Vertices);
+		dIASSERT(Indices);
+ 		dIASSERT(VertexStride);
+ 		dIASSERT(TriStride);
+ 		dIASSERT(IndexCount);
 		m_Vertices=(const char *)Vertices;
-		m_VertexStride = VertexStide;
+		m_VertexStride = VertexStride;
 		m_VertexCount = VertexCount;
 		m_Indices = (const char *)Indices;
 		m_TriangleCount = IndexCount/3;

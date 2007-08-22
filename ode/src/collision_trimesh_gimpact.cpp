@@ -65,6 +65,8 @@ void dGeomTriMeshDataBuildSingle1(dTriMeshDataID g,
                                   const void* Normals)
 {
     dUASSERT(g, "argument not trimesh data");
+    dIASSERT(Vertices);
+    dIASSERT(Indices);
 
     g->Build(Vertices, VertexStride, VertexCount,
              Indices, IndexCount, TriStride,
