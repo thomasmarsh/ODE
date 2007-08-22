@@ -27,6 +27,7 @@ email: projectileman@yahoo.com
 */
 
 
+#include <assert.h>
 #include "GIMPACT/gim_trimesh.h"
 
 GUINT gim_trimesh_get_triangle_count(GIM_TRIMESH * trimesh)
@@ -45,6 +46,9 @@ GUINT gim_trimesh_get_triangle_count(GIM_TRIMESH * trimesh)
 */
 void gim_trimesh_create_from_arrays(GIM_TRIMESH * trimesh, GBUFFER_ARRAY * vertex_array, GBUFFER_ARRAY * triindex_array,char transformed_reply)
 {
+    assert(trimesh);
+    assert(vertex_array);
+    assert(triindex_array);
     gim_buffer_array_copy_ref(vertex_array,&trimesh->m_source_vertex_buffer);
     gim_buffer_array_copy_ref(triindex_array,&trimesh->m_tri_index_buffer);
 
@@ -174,8 +178,11 @@ void gim_trimesh_copy(GIM_TRIMESH * source_trimesh,GIM_TRIMESH * dest_trimesh, c
 */
 void gim_trimesh_locks_work_data(GIM_TRIMESH * trimesh)
 {
-    gim_buffer_array_lock(&trimesh->m_tri_index_buffer,G_MA_READ_ONLY);
-    gim_buffer_array_lock(&trimesh->m_transformed_vertex_buffer,G_MA_READ_ONLY);
+    GINT res;
+    res=gim_buffer_array_lock(&trimesh->m_tri_index_buffer,G_MA_READ_ONLY);
+    assert(res==G_BUFFER_OP_SUCCESS);
+    res=gim_buffer_array_lock(&trimesh->m_transformed_vertex_buffer,G_MA_READ_ONLY);
+    assert(res==G_BUFFER_OP_SUCCESS);
 }
 
 //! unlocks the trimesh
@@ -242,8 +249,10 @@ void gim_trimesh_update_vertices(GIM_TRIMESH * trimesh)
 void gim_trimesh_update_aabbset(GIM_TRIMESH * trimesh)
 {
     vec3f * transformed_vertices = GIM_BUFFER_ARRAY_POINTER(vec3f,trimesh->m_transformed_vertex_buffer,0);
+    assert(transformed_vertices);
 
     GUINT * triangle_indices = GIM_BUFFER_ARRAY_POINTER(GUINT,trimesh->m_tri_index_buffer,0);
+    assert(triangle_indices);
     // box set
     aabb3f * paabb = trimesh->m_aabbset.m_boxes;
     GUINT triangle_count = gim_trimesh_get_triangle_count(trimesh);
@@ -272,7 +281,6 @@ void gim_trimesh_update(GIM_TRIMESH * trimesh)
 {
     if(gim_trimesh_needs_update(trimesh)==0) return;
     gim_trimesh_update_vertices(trimesh);
-
     gim_trimesh_locks_work_data(trimesh);
     gim_trimesh_update_aabbset(trimesh);
     gim_trimesh_unlocks_work_data(trimesh);
