@@ -2442,8 +2442,6 @@ static void PRInit (dxJointPR *j)
   dSetZero (j->qrel,4);
   dSetZero (j->offset,4);
 
-  dSetZero (j->prev,4);
-
   j->limotR.init (j->world);
   j->limotP.init (j->world);
 }
@@ -2682,7 +2680,7 @@ static void PRGetInfo2 (dxJointPR *joint, dxJoint::Info2 *info)
 
 
   // Compute the right hand side of the constraint equation set. Relative
-  // body velocities along p and q to bring the hinge back into alignment.
+  // body velocities along p and q to bring the rotoide back into alignment.
   // ax1,ax2 are the unit length rotoide axes of body1 and body2 in world frame.
   // We need to rotate both bodies along the axis u = (ax1 x ax2).
   // if `theta' is the angle between ax1 and ax2, we need an angular velocity
@@ -2755,8 +2753,9 @@ static void PRGetInfo2 (dxJointPR *joint, dxJoint::Info2 *info)
 	info->J1l[s3+1] = q[1];
 	info->J1l[s3+2] = q[2];
 
-  dVector3 anchor2;
   if (joint->node[1].body) {
+    dVector3 anchor2;
+
     // Calculate anchor2 in world coordinate
     dMULTIPLY0_331 (anchor2, R2, joint->anchor2);
 
@@ -2774,18 +2773,11 @@ static void PRGetInfo2 (dxJointPR *joint, dxJoint::Info2 *info)
 		info->J2l[s3+1] = -q[1];
 		info->J2l[s3+2] = -q[2];
   }
-  else
-  {
-    anchor2[0] = joint->anchor2[0];
-    anchor2[1] = joint->anchor2[1];
-    anchor2[2] = joint->anchor2[2];
-  }
 
 
-
-	// We want to make correction for motion not in the line of the axisP
-	// We calculate the displacement w.r.t. the anchor pt.
-	//
+  // We want to make correction for motion not in the line of the axisP
+  // We calculate the displacement w.r.t. the anchor pt.
+  //
   // compute the elements 2 and 3 of right hand side.
   // we want to align the offset point (in body 2's frame) with the center of body 1.
   // The position should be the same when we are not along the prismatic axis
@@ -2965,16 +2957,6 @@ void dJointSetPRAnchor (dJointID j, dReal x, dReal y, dReal z)
 
   dVector3 dummy;
   setAnchors (joint,x,y,z,dummy,joint->anchor2);
-  PRComputeInitialRelativeRotation (joint);
-
-  if (joint->node[1].body)
-    dMULTIPLY0_331 (joint->prev, joint->node[1].body->posr.R,joint->anchor2);
-  else
-  {
-    joint->prev[0] = joint->anchor2[0];
-    joint->prev[1] = joint->anchor2[1];
-    joint->prev[2] = joint->anchor2[2];
-  }
 }
 
 
@@ -2993,8 +2975,6 @@ void dJointSetPRAxis1 (dJointID j, dReal x, dReal y, dReal z)
   // also compute distance between anchor of body1 w.r.t center of body 2
   dVector3 c;
   if (joint->node[1].body) {
-    dQMultiply1 (joint->qrel,joint->node[0].body->q,joint->node[1].body->q);
-
     dVector3 anchor2;
     dMULTIPLY0_331 (anchor2,joint->node[1].body->posr.R, joint->anchor2);
 
@@ -3006,10 +2986,6 @@ void dJointSetPRAxis1 (dJointID j, dReal x, dReal y, dReal z)
              joint->node[0].body->posr.pos[2] );
   }
   else if (joint->node[0].body) {
-    // set joint->qrel to the transpose of the first body's q
-    joint->qrel[0] = joint->node[0].body->q[0];
-    for (i=1; i<4; i++) joint->qrel[i] = -joint->node[0].body->q[i];
-
     c[0] = joint->anchor2[0] - joint->node[0].body->posr.pos[0];
     c[1] = joint->anchor2[1] - joint->node[0].body->posr.pos[1];
     c[2] = joint->anchor2[2] - joint->node[0].body->posr.pos[2];

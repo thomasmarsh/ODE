@@ -233,7 +233,6 @@ struct dxJointPR : public dxJoint {
                             ///<  of body1.
                             ///< That should be aligned with body1 center along axisP
                             ///< This is calculated whe the axis are set.
-  dVector3 prev;            ///< Previous position in world frame of cm of body to w.r.t anchor2.
   dxJointLimitMotor limotR; ///< limit and motor information for the rotoide articulation.
   dxJointLimitMotor limotP; ///< limit and motor information for the prismatic articulation.
 };

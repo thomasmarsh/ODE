@@ -35,7 +35,7 @@ The axisP is draw in red and the axisR is in green
 #include <math.h>
 
 
-#define DRAWSTUFF_TEXTURE_PATH "./drawstuff/textures"
+#define DRAWSTUFF_TEXTURE_PATH "../../drawstuff/textures"
 
 
 #ifdef _MSC_VER
