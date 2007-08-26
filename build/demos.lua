@@ -14,6 +14,7 @@
     "heightfield",
     "hinge",
     "I",
+    "jointsPR",
     "joints",
     "motor",
     "ode",
