@@ -158,6 +158,15 @@ dxTriMesh::dxTriMesh(dSpaceID Space, dTriMeshDataID Data) : dxGeom(Space, 1){
 
     this->Data = Data;
 
+    // GIMPACT only supports stride 12, so we need to catch the error early.
+    dUASSERT
+    (
+      Data->m_VertexStride == 3*sizeof(dReal) && Data->m_TriStride == 3*sizeof(int),
+      "Gimpact trimesh only supports a stride of 3 dReal/int\n"
+      "This means that you cannot use dGeomTriMeshDataBuildSimple() with Gimpact.\n"
+      "Change the stride, or use Opcode trimeshes instead.\n"
+    );
+
     //Create trimesh
 
     gim_trimesh_create_from_data
