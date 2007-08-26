@@ -230,6 +230,7 @@ int dCollide (dxGeom *o1, dxGeom *o2, int flags, dContactGeom *contact,
   dUASSERT(colliders_initialized,"colliders array not initialized");
   dUASSERT(o1->type >= 0 && o1->type < dGeomNumClasses,"bad o1 class number");
   dUASSERT(o2->type >= 0 && o2->type < dGeomNumClasses,"bad o2 class number");
+  dUASSERT((flags&0xffff) >= 1,"no contacts requested");
 
   // no contacts if both geoms are the same
   if (o1 == o2) return 0;

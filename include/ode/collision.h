@@ -633,11 +633,10 @@ ODE_API void dGeomGetOffsetQuaternion (dGeomID geom, dQuaternion result);
  *
  * @param flags The flags specify how contacts should be generated if
  * the geoms touch. The lower 16 bits of flags is an integer that
- * specifies the maximum number of contact points to generate. Note
- * that if this number is zero, this function just pretends that it is
- * one -- in other words you can not ask for zero contacts. All other bits
- * in flags must be zero. In the future the other bits may be used to
- * select from different contact generation strategies.
+ * specifies the maximum number of contact points to generate. You must
+ * ask for at least one contact. All other bits in flags must be zero.
+ * In the future the other bits may be used to select from different
+ * contact generation strategies.
  *
  * @param contact Points to an array of dContactGeom structures. The array
  * must be able to hold at least the maximum number of contacts. These
