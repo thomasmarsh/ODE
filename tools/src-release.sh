@@ -44,8 +44,8 @@ read line
 echo ""
 echo "RETRIEVING SOURCE CODE FROM REPOSITORY..."
 echo ""
-
-svn export https://svn.sourceforge.net/svnroot/opende/branches/$2 ode-$1
+f
+svn export https://opende.svn.sourceforge.net/svnroot/opende/branches/$2 ode-$1
 
 
 ###################################################################
