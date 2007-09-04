@@ -21,19 +21,16 @@ rem ***********************************************************
 echo. 
 echo STARTING PREBUILD CHECKLIST, PRESS ^^C TO ABORT.
 echo.
+echo Are you running at the VS2003 command prompt?
+pause
+echo.
 echo Is the version number "%1" correct?
 pause
 echo.
-echo Have you created a release branch named "%2" in SVN?
+echo Does the release branch "%2" exist in SVN?
 pause
 echo.
-echo Have you run all of the tests?
-pause
-echo.
-echo Is the Changelog up to date?
-pause
-echo.
-echo Is 'svn' and 'zip' on the path?
+echo Are 'svn', '7z', and 'doxygen' on the path?
 pause
 echo.
 echo Okay, ready to build the Windows binary packages for version %1!
@@ -48,7 +45,7 @@ echo.
 echo RETRIEVING SOURCE CODE FROM REPOSITORY...
 echo.
 
-svn export https://svn.sourceforge.net/svnroot/opende/branches/%2 ode-%1
+svn export https://opende.svn.sourceforge.net/svnroot/opende/branches/%2 ode-%1
 
 
 
@@ -88,9 +85,11 @@ rem ***********************************************************
 rem * Package things up
 rem ***********************************************************
 
-cd ..\..\..
-rename lib\ReleaseDLL\ode.lib lib\ReleaseDLL\ode-imports.lib
-zip -r9 ode-win32-%1.zip ode-%1\*.txt ode-%1\include\ode\*.h ode-%1\lib\* ode-%1\docs\*
+cd ..\..
+move lib\ReleaseDLL\ode.lib lib\ReleaseDLL\ode-imports.lib
+
+cd ..
+7z a -tzip ode-win32-%1.zip ode-%1\*.txt ode-%1\include\ode\*.h ode-%1\lib\* ode-%1\docs\*
 
 
 rem ***********************************************************
