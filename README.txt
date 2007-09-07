@@ -1,4 +1,4 @@
-The Open Dynamics Engine (ODE), Copyright (C) 2001-2006 Russell L. Smith.
+The Open Dynamics Engine (ODE), Copyright (C) 2001-2007 Russell L. Smith.
 -------------------------------------------------------------------------
 
 ODE is a free, industrial quality library for simulating articulated
@@ -30,3 +30,12 @@ LICENSE.TXT and LICENSE-BSD.TXT for more details.
 
  * API documentation is in the file ode/docs/index.html, or you
    can view it on the web at http://opende.sf.net/docs/index.html
+
+All contributions are copyright by their owners, but the owners
+automatically transfer unrestricted rights in those changes to the ODE
+project, which is released under the dual licenses as indicated. The
+owners can also use the contributions in other projects under other
+licenses if they want (including sell them), but they can't prevent
+anyone from releasing the contributions under the dual ODE licenses as
+part of an ODE release.
+
