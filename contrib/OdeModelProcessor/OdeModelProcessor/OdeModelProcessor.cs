@@ -26,16 +26,22 @@
  * 2) Create a triangle data.
  * 3) Load the model.
  * 4) Retreive the tag from the model.
- * 5) Build the triangle mesh with the tag.getTriangleMesh method,
- *    passing in the space and the empty triangle data.
+ * 6) Build the triangle mesh by calling d.GeomTriMeshDataBuildSimple.
  * 
  * Eg:
- * IntPtr odeSpace;
- * odeSpace = d.SimpleSpaceCreate(odeSpace);
- * IntPtr triData = d.GeomTriMeshDataCreate();
+ * IntPtr space = d.SimpleSpaceCreate(IntPtr.Zero);
+ * IntPtr triangleData = d.GeomTriMeshDataCreate();
  * Model obj = content.Load<Model>("Content\\mycube");
  * OdeTag tag = (OdeTag)obj.Tag;
- * IntPtr odeTri = tag.getTriangleMesh(odeSpace, triData);
+ * IntPtr vertexArray = tag.getVertices();
+ * IntPtr indexArray = tag.getIndices();
+ * d.GeomTriMeshDataBuildSimple
+ * (
+ *     triangleData,
+ *     vertexArray, tag.getVertexStride(), tag.getVertexCount(),
+ *     indexArray, tag.getIndexCount(), tag.getIndexStride()
+ * );
+ * IntPtr triangleMesh = d.CreateTriMesh(space, triangleData, null, null, null);
  * 
  * You can load multiple models and test for collisions with something
  * like this in the update method:
@@ -43,16 +49,16 @@
  * d.GeomSetPosition(odeTri1, obj1Position.X, obj1Position.Y, obj1Position.Z);
  * d.GeomSetPosition(odeTri2, obj2Position.X, obj2Position.Y, obj2Position.Z);
  * int numberOfContacts = d.Collide(odeTri1, odeTri2, ODE_CONTACTS,
- *                            contactGeom, d.ContactGeom.SizeOf);
+ *     contactGeom, d.ContactGeom.SizeOf);
  * 
  * Where odeTri1 and odeTri2 are triangle meshes you've created, obj1Position
  * and obj2Position are the positions of your rendered models in the scene,
  * ODE_CONTACTS is a constant defining the maximum number of contacts
  * to test for, contactGeom is a d.ContactGeom[] of length ODE_CONTACTS.
- *
+ * 
  * If numberOfContacts is greater than 0, you have a collision.
- *
- * Other ODE functions such as d.SpaceCollide() should also work.
+ * 
+ * Other ODE functions such as d.SpaceCollide() also work; see ODE.NET BoxTest.cs.
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the same terms as the ODE and ODE.Net libraries.
@@ -86,6 +92,7 @@ using Microsoft.Xna.Framework.Content.Pipeline.Graphics;
 using Microsoft.Xna.Framework.Content.Pipeline.Processors;
 using Microsoft.Xna.Framework.Content.Pipeline.Serialization.Compiler;
 using Ode.NET;
+using System.Runtime.InteropServices;
 
 namespace OdeModelProcessor
 {
@@ -95,6 +102,7 @@ namespace OdeModelProcessor
      */
     public class OdeTag
     {
+
         private float[] vertexData;
         private int[] indexData;
         private const int indexStride = (sizeof(int));
@@ -150,6 +158,25 @@ namespace OdeModelProcessor
             return this.indexData;
         }
 
+        /* Native data getters */
+        public IntPtr getVertices()
+        {
+            int count = getVertexData().Length;
+            int memsize = count * Marshal.SizeOf(getVertexData()[0].GetType());
+            IntPtr pointer = Marshal.AllocCoTaskMem(memsize);
+            Marshal.Copy(getVertexData(), 0, pointer, count);
+            return pointer;
+        }
+
+        public IntPtr getIndices()
+        {
+            int count = getIndexData().Length;
+            int memsize = count * Marshal.SizeOf(getIndexData()[0].GetType());
+            IntPtr pointer = Marshal.AllocCoTaskMem(memsize);
+            Marshal.Copy(getIndexData(), 0, pointer, count);
+            return pointer;
+        }
+
         /* Count getters */
         public int getVertexCount()
         {
@@ -177,17 +204,18 @@ namespace OdeModelProcessor
          * is passed in to allow the calling application to delete it afterwards.
          *
          * Be sure to destroy the returned TriangleMesh in the client application.
+         * 
+         * Can't destroy the index and vertex arrays here though, so best to handle
+         * this manually - only use this method if nothing else makes sense.
          */ 
         public IntPtr getTriangleMesh(IntPtr space, IntPtr triangleData)
         {
-            IntPtr triangleMesh;
             d.GeomTriMeshDataBuildSimple(
                 triangleData,
-                vertexData, getVertexStride(), getVertexCount(),
-                indexData, getIndexCount(), getIndexStride()
+                getVertices(), getVertexStride(), getVertexCount(),
+                getIndices(), getIndexCount(), getIndexStride()
             );
-            triangleMesh = d.CreateTriMesh(space, triangleData, null, null, null);
-            return triangleMesh;
+            return d.CreateTriMesh(space, triangleData, null, null, null);
         }
 
     }
