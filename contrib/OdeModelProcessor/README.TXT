@@ -15,7 +15,7 @@ insertion into the content pipeline. This is used to build ODE
 Triangle Meshes which are then used for collision detection that
 is more accurate than the default XNA bounding boxes or spheres.
 
-Usage is simple:
+Usage is fairly simple:
 Build the library and reference the DLL in your project.
 Add the DLL to the Content Pipeline
 Set the content processor for you .x models to OdeModelProcessor.
@@ -25,16 +25,22 @@ Create triangle meshes as follows:
 2) Create a triangle data.
 3) Load the model.
 4) Retreive the tag from the model.
-5) Build the triangle mesh with the tag.getTriangleMesh method,
-   passing in the space and the empty triangle data.
+6) Build the triangle mesh by calling d.GeomTriMeshDataBuildSimple.
 
 Eg:
-IntPtr odeSpace;
-odeSpace = d.SimpleSpaceCreate(odeSpace);
-IntPtr triData = d.GeomTriMeshDataCreate();
+IntPtr space = d.SimpleSpaceCreate(IntPtr.Zero);
+IntPtr triangleData = d.GeomTriMeshDataCreate();
 Model obj = content.Load<Model>("Content\\mycube");
 OdeTag tag = (OdeTag)obj.Tag;
-IntPtr odeTri = tag.getTriangleMesh(odeSpace, triData);
+IntPtr vertexArray = tag.getVertices();
+IntPtr indexArray = tag.getIndices();
+d.GeomTriMeshDataBuildSimple
+(
+	triangleData,
+	vertexArray, tag.getVertexStride(), tag.getVertexCount(),
+	indexArray, tag.getIndexCount(), tag.getIndexStride()
+);
+IntPtr triangleMesh = d.CreateTriMesh(space, triangleData, null, null, null);
 
 You can load multiple models and test for collisions with something
 like this in the update method:
@@ -51,7 +57,7 @@ to test for, contactGeom is a d.ContactGeom[] of length ODE_CONTACTS.
 
 If numberOfContacts is greater than 0, you have a collision.
 
-Other ODE functions such as d.SpaceCollide() should also work.
+Other ODE functions such as d.SpaceCollide() also work; see ODE.NET BoxTest.cs.
 
 This library is free software; you can redistribute it and/or
 modify it under the same terms as the ODE and ODE.Net libraries.
