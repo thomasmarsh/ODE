@@ -607,6 +607,9 @@ namespace Ode.NET
 		[DllImport("ode", EntryPoint = "dDot"), SuppressUnmanagedCodeSecurity]
 		public static extern dReal Dot(ref dReal X0, ref dReal X1, int n);
 
+		[DllImport("ode", EntryPoint = "dDQfromW"), SuppressUnmanagedCodeSecurity]
+		public static extern void DQfromW(dReal[] dq, ref Vector3 w, ref Quaternion q);
+
 		[DllImport("ode", EntryPoint = "dFactorCholesky"), SuppressUnmanagedCodeSecurity]
 		public static extern int FactorCholesky(ref dReal A00, int n);
 
@@ -1519,6 +1522,27 @@ namespace Ode.NET
 		[DllImport("ode", EntryPoint = "dMultiply2"), SuppressUnmanagedCodeSecurity]
 		public static extern void Multiply2(out dReal A00, ref dReal B00, ref dReal C00, int p, int q, int r);
 
+		[DllImport("ode", EntryPoint = "dQFromAxisAndAngle"), SuppressUnmanagedCodeSecurity]
+		public static extern void QFromAxisAndAngle(out Quaternion q, dReal ax, dReal ay, dReal az, dReal angle);
+
+		[DllImport("ode", EntryPoint = "dQfromR"), SuppressUnmanagedCodeSecurity]
+		public static extern void QfromR(out Quaternion q, ref Matrix3 R);
+
+		[DllImport("ode", EntryPoint = "dQMultiply0"), SuppressUnmanagedCodeSecurity]
+		public static extern void QMultiply0(out Quaternion qa, ref Quaternion qb, ref Quaternion qc);
+
+		[DllImport("ode", EntryPoint = "dQMultiply1"), SuppressUnmanagedCodeSecurity]
+		public static extern void QMultiply1(out Quaternion qa, ref Quaternion qb, ref Quaternion qc);
+
+		[DllImport("ode", EntryPoint = "dQMultiply2"), SuppressUnmanagedCodeSecurity]
+		public static extern void QMultiply2(out Quaternion qa, ref Quaternion qb, ref Quaternion qc);
+
+		[DllImport("ode", EntryPoint = "dQMultiply3"), SuppressUnmanagedCodeSecurity]
+		public static extern void QMultiply3(out Quaternion qa, ref Quaternion qb, ref Quaternion qc);
+
+		[DllImport("ode", EntryPoint = "dQSetIdentity"), SuppressUnmanagedCodeSecurity]
+		public static extern void QSetIdentity(out Quaternion q);
+
 		[DllImport("ode", EntryPoint = "dQuadTreeSpaceCreate"), SuppressUnmanagedCodeSecurity]
 		public static extern IntPtr QuadTreeSpaceCreate(IntPtr space, ref Vector3 center, ref Vector3 extents, int depth);
 
@@ -1528,8 +1552,23 @@ namespace Ode.NET
 		[DllImport("ode", EntryPoint = "dRandReal"), SuppressUnmanagedCodeSecurity]
 		public static extern dReal RandReal();
 
+		[DllImport("ode", EntryPoint = "dRFrom2Axes"), SuppressUnmanagedCodeSecurity]
+		public static extern void RFrom2Axes(out Matrix3 R, dReal ax, dReal ay, dReal az, dReal bx, dReal by, dReal bz);
+
 		[DllImport("ode", EntryPoint = "dRFromAxisAndAngle"), SuppressUnmanagedCodeSecurity]
 		public static extern void RFromAxisAndAngle(out Matrix3 R, dReal x, dReal y, dReal z, dReal angle);
+
+		[DllImport("ode", EntryPoint = "dRFromEulerAngles"), SuppressUnmanagedCodeSecurity]
+		public static extern void RFromEulerAngles(out Matrix3 R, dReal phi, dReal theta, dReal psi);
+
+		[DllImport("ode", EntryPoint = "dRfromQ"), SuppressUnmanagedCodeSecurity]
+		public static extern void RfromQ(out Matrix3 R, ref Quaternion q);
+
+		[DllImport("ode", EntryPoint = "dRFromZAxis"), SuppressUnmanagedCodeSecurity]
+		public static extern void RFromZAxis(out Matrix3 R, dReal ax, dReal ay, dReal az);
+
+		[DllImport("ode", EntryPoint = "dRSetIdentity"), SuppressUnmanagedCodeSecurity]
+		public static extern void RSetIdentity(out Matrix3 R);
 
 		[DllImport("ode", EntryPoint = "dSetValue"), SuppressUnmanagedCodeSecurity]
 		public static extern void SetValue(out dReal a, int n);
