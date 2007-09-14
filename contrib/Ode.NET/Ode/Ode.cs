@@ -73,6 +73,43 @@ namespace Ode.NET
 			Plane2D
 		}
 
+		public enum JointParam : int
+		{
+			LoStop,
+			HiStop,
+			Vel,
+			FMax,
+			FudgeFactor,
+			Bounce,
+			CFM,
+			StopERP,
+			StopCFM,
+			SuspensionERP,
+			SuspensionCFM,
+			LoStop2 = 256,
+			HiStop2,
+			Vel2,
+			FMax2,
+			FudgeFactor2,
+			Bounce2,
+			CFM2,
+			StopERP2,
+			StopCFM2,
+			SuspensionERP2,
+			SuspensionCFM2,
+			LoStop3 = 512,
+			HiStop3,
+			Vel3,
+			FMax3,
+			FudgeFactor3,
+			Bounce3,
+			CFM3,
+			StopERP3,
+			StopCFM3,
+			SuspensionERP3,
+			SuspensionCFM3
+		}
+
 		#endregion
 
 		#region Callbacks
