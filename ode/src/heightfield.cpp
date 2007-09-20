@@ -1680,14 +1680,14 @@ int dCollideHeightfield( dxGeom *o1, dxGeom *o2, int flags, dContactGeom* contac
     //check if inside boundaries
     // using O2 aabb
     //  aabb[6] is (minx, maxx, miny, maxy, minz, maxz) 
-    const bool notWrapped = terrain->m_p_data->m_bWrapMode == 0;
+    const bool wrapped = terrain->m_p_data->m_bWrapMode != 0;
 
     int nMinX;
     int nMaxX;
     int nMinZ;
     int nMaxZ;
 
-    if ( notWrapped )
+    if ( !wrapped )
     {
         if (    o2->aabb[0] > terrain->m_p_data->m_fWidth //MinX
             &&  o2->aabb[4] > terrain->m_p_data->m_fDepth)//MinZ
@@ -1704,7 +1704,7 @@ int dCollideHeightfield( dxGeom *o1, dxGeom *o2, int flags, dContactGeom* contac
     nMinZ = int(floor(o2->aabb[4] * terrain->m_p_data->m_fInvSampleDepth));
     nMaxZ = int(floor(o2->aabb[5] * terrain->m_p_data->m_fInvSampleDepth)) + 1;
 
-    if ( notWrapped )
+    if ( !wrapped )
     {
         nMinX = dMAX( nMinX, 0 );
         nMaxX = dMIN( nMaxX, terrain->m_p_data->m_nWidthSamples - 1 );
