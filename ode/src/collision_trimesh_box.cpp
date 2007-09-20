@@ -1381,56 +1381,78 @@ GenerateContact(int in_Flags, dContactGeom* in_Contacts, int in_Stride,
                 const dVector3 in_ContactPos, const dVector3 in_Normal, dReal in_Depth,
                 int& OutTriCount)
 {
-    //if (in_Depth < 0.0)
-    //return;
+	/*
+		NOTE by Oleh_Derevenko:
+		This function is called after maximal number of contacts has already been 
+		collected because it has a side effect of replacing penetration depth of
+		existing contact with larger penetration depth of another matching normal contact.
+		If this logic is not necessary any more, you can bail out on reach of contact
+		number maximum immediately in dCollideBTL().
+	*/
+	do 
+	{
+		dContactGeom* Contact;
+		dVector3 diff;
+		
+		bool duplicate = false;
+		for (int i=0; i<OutTriCount; i++)
+		{
+			Contact = SAFECONTACT(in_Flags, in_Contacts, i, in_Stride);
 
-    if (OutTriCount == (in_Flags & 0x0ffff))
-        return; // contacts are full!
+			// same position?
+			for (int j=0; j<3; j++)
+				diff[j] = in_ContactPos[j] - Contact->pos[j];
+			if (dDOT(diff, diff) < dEpsilon)
+			{
+				// same normal?
+				if (fabs(dDOT(in_Normal, Contact->normal)) > (dReal(1.0)-dEpsilon))
+				{
+					if (in_Depth > Contact->depth)
+						Contact->depth = in_Depth;
+					duplicate = true;
+					/*
+						NOTE by Oleh_Derevenko:
+						There may be a case when two normals are close to each other but not duplicate
+						while third normal is detected to be duplicate for both of them.
+						This is the only reason I can think of, there is no "break" statement.
+						Perhaps author considered it to be logical that the third normal would 
+						replace the depth in both of initial contacts. 
+						However, I consider it a questionable practice which should not
+						be applied without deep understanding of underlaying physics.
+						Even more, is this situation with close normal triplet acceptable at all?
+						Should not be two initial contacts reduced to one (replaced with the latter)?
+						If you know the answers for these questions, you may want to change this code.
+						See the same statement in GenerateContact() of collision_trimesh_trimesh.cpp
+					*/
+				}
+			}
+		}
+		if (duplicate || OutTriCount == (in_Flags & NUMC_MASK))
+		{
+			break;
+		}
 
-    dContactGeom* Contact;
-    dVector3 diff;
-    bool duplicate = false;
-    for (int i=0; i<OutTriCount; i++)
-    {
-        Contact = SAFECONTACT(in_Flags, in_Contacts, i, in_Stride);
+		// Add a new contact
+		Contact = SAFECONTACT(in_Flags, in_Contacts, OutTriCount, in_Stride);
 
-        // same position?
-        for (int j=0; j<3; j++)
-            diff[j] = in_ContactPos[j] - Contact->pos[j];
-        if (dDOT(diff, diff) < dEpsilon)
-        {
-            // same normal?
-	  if (fabs(dDOT(in_Normal, Contact->normal)) > (dReal(1.0)-dEpsilon))
-            {
-                if (in_Depth > Contact->depth)
-                    Contact->depth = in_Depth;
-                duplicate = true;
-            }
-        }
-    }
+		Contact->pos[0] = in_ContactPos[0];
+		Contact->pos[1] = in_ContactPos[1];
+		Contact->pos[2] = in_ContactPos[2];
+		Contact->pos[3] = 0.0;
 
-    if (!duplicate)
-    {
-        // Add a new contact
-        Contact = SAFECONTACT(in_Flags, in_Contacts, OutTriCount, in_Stride);
+		Contact->normal[0] = in_Normal[0];
+		Contact->normal[1] = in_Normal[1];
+		Contact->normal[2] = in_Normal[2];
+		Contact->normal[3] = 0.0;
 
-        Contact->pos[0] = in_ContactPos[0];
-        Contact->pos[1] = in_ContactPos[1];
-        Contact->pos[2] = in_ContactPos[2];
-        Contact->pos[3] = 0.0;
+		Contact->depth = in_Depth;
 
-        Contact->normal[0] = in_Normal[0];
-        Contact->normal[1] = in_Normal[1];
-        Contact->normal[2] = in_Normal[2];
-        Contact->normal[3] = 0.0;
+		Contact->g1 = in_g1;
+		Contact->g2 = in_g2;
 
-        Contact->depth = in_Depth;
-
-        Contact->g1 = in_g1;
-        Contact->g2 = in_g2;
-
-        OutTriCount++;
-    }
+		OutTriCount++;
+	}
+	while (false);
 }
 
 #endif // dTRIMESH_ENABLED
