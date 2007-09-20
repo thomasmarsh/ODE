@@ -161,20 +161,8 @@ int dCollideRTL(dxGeom* g1, dxGeom* RayGeom, int Flags, dContactGeom* Contacts, 
 
 	int OutTriCount = 0;
 
-	if(TriMesh->RayCallback)
-	{
-        if(TriMesh->RayCallback(TriMesh, RayGeom, contact_data.m_face_id,
-                                         contact_data.u , contact_data.v))
-        {
-            OutTriCount = 1;
-        }
-	}
-	else
-	{
-	    OutTriCount = 1;
-	}
-
-	if(OutTriCount>0)
+	if(!TriMesh->RayCallback || 
+		TriMesh->RayCallback(TriMesh, RayGeom, contact_data.m_face_id, contact_data.u , contact_data.v))
 	{
 	    dContactGeom* Contact = SAFECONTACT(Flags, Contacts, (OutTriCount-1), Stride);
         VEC_COPY(Contact->pos,contact_data.m_point);
@@ -182,6 +170,8 @@ int dCollideRTL(dxGeom* g1, dxGeom* RayGeom, int Flags, dContactGeom* Contacts, 
         Contact->depth = contact_data.tparam;
         Contact->g1 = TriMesh;
         Contact->g2 = RayGeom;
+		
+		OutTriCount = 1;
 	}
 
 	return OutTriCount;
