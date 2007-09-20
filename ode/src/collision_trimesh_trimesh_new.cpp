@@ -328,6 +328,12 @@ dContactGeom *  PushNewContact( dxGeom* g1, dxGeom* g2,
 			}
 			else
 			{
+				/*
+					Note by Oleh_Derevenko:
+					In this case contacts should annihilate each other 
+					and generating a dummy normal is not a correct approach.
+					Change this code!!!
+				*/
 				pcontact->normal[0] = 1.0f;
 				pcontact->normal[1] = 0.0f;
 				pcontact->normal[2] = 0.0f;
