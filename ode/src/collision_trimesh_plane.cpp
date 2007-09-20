@@ -50,7 +50,7 @@ int dCollideTrimeshPlane( dxGeom *o1, dxGeom *o2, int flags, dContactGeom* conta
 	int contact_count = 0;
 
 	// Cache the maximum contact count.
-	const int contact_max = ( flags & 0x0ffff );
+	const int contact_max = ( flags & NUMC_MASK );
 
 	// Cache trimesh position and rotation.
 	const dVector3& trimesh_pos = *(const dVector3*)dGeomGetPosition( trimesh );

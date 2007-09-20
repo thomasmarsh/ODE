@@ -171,7 +171,7 @@ int dCollideCylinderPlane(dxGeom *Cylinder, dxGeom *Plane, int flags, dContactGe
 			contact->g1 = Cylinder;
 			contact->g2 = Plane;
 			GeomCount++;
-			if( GeomCount >= (flags & 0x0ffff))
+			if( GeomCount >= (flags & NUMC_MASK))
 				return GeomCount; // enough contactgeoms
 			pContactData += skip;
 			contact = (dContactGeom*)pContactData;
@@ -190,7 +190,7 @@ int dCollideCylinderPlane(dxGeom *Cylinder, dxGeom *Plane, int flags, dContactGe
 			contact->g1 = Cylinder;
 			contact->g2 = Plane;
 			GeomCount++;
-			if( GeomCount >= (flags & 0x0ffff))
+			if( GeomCount >= (flags & NUMC_MASK))
 				return GeomCount; // enough contactgeoms
 			pContactData += skip;
 			contact = (dContactGeom*)pContactData;
@@ -209,7 +209,7 @@ int dCollideCylinderPlane(dxGeom *Cylinder, dxGeom *Plane, int flags, dContactGe
 			contact->g1 = Cylinder;
 			contact->g2 = Plane;
 			GeomCount++;
-			if( GeomCount >= (flags & 0x0ffff))
+			if( GeomCount >= (flags & NUMC_MASK))
 				return GeomCount; // enough contactgeoms
 			pContactData += skip;
 			contact = (dContactGeom*)pContactData;
@@ -228,7 +228,7 @@ int dCollideCylinderPlane(dxGeom *Cylinder, dxGeom *Plane, int flags, dContactGe
 			contact->g1 = Cylinder;
 			contact->g2 = Plane;
 			GeomCount++;
-			if( GeomCount >= (flags & 0x0ffff))
+			if( GeomCount >= (flags & NUMC_MASK))
 				return GeomCount; // enough contactgeoms
 			pContactData += skip;
 			contact = (dContactGeom*)pContactData;
@@ -262,7 +262,7 @@ int dCollideCylinderPlane(dxGeom *Cylinder, dxGeom *Plane, int flags, dContactGe
 			contact->g1 = Cylinder;
 			contact->g2 = Plane;
 			GeomCount++;
-			if( GeomCount >= (flags & 0x0ffff))
+			if( GeomCount >= (flags & NUMC_MASK))
 				return GeomCount; // enough contactgeoms
 			pContactData += skip;
 			contact = (dContactGeom*)pContactData;
@@ -285,7 +285,7 @@ int dCollideCylinderPlane(dxGeom *Cylinder, dxGeom *Plane, int flags, dContactGe
 			contact->g1 = Cylinder;
 			contact->g2 = Plane;
 			GeomCount++;
-			if( GeomCount >= (flags & 0x0ffff))
+			if( GeomCount >= (flags & NUMC_MASK))
 				return GeomCount; // enough contactgeoms
 			pContactData += skip;
 			contact = (dContactGeom*)pContactData;

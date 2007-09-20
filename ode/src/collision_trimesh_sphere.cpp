@@ -309,7 +309,7 @@ int dCollideSTL(dxGeom* g1, dxGeom* SphereGeom, int Flags, dContactGeom* Contact
 
 		int OutTriCount = 0;
 		for (int i = 0; i < TriCount; i++){
-			if (OutTriCount == (Flags & 0xffff)){
+			if (OutTriCount == (Flags & NUMC_MASK)){
 				break;
 			}
 

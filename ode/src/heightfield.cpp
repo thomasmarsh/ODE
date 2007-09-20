@@ -1645,7 +1645,7 @@ int dCollideHeightfield( dxGeom *o1, dxGeom *o2, int flags, dContactGeom* contac
     // if ((flags & NUMC_MASK) == 0) -- An assertion check is made on entry
 	//	{ flags = (flags & ~NUMC_MASK) | 1; dIASSERT((1 & ~NUMC_MASK) == 0); }
 
-    int numMaxTerrainContacts = (flags & 0xffff);
+    int numMaxTerrainContacts = (flags & NUMC_MASK);
     dxHeightfield *terrain = (dxHeightfield*) o1;
 
     dVector3 posbak;
