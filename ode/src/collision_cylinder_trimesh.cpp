@@ -950,17 +950,23 @@ int dCollideCylinderTrimesh(dxGeom *o1, dxGeom *o2, int flags, dContactGeom *con
 
 	Matrix3x3 obbRot;
 
-	obbRot[0][0] = (float)cData.mCylinderRot[0];
-	obbRot[1][0] = (float)cData.mCylinderRot[1];
-	obbRot[2][0] = (float)cData.mCylinderRot[2];
+	// It is a potential issue to explicitly cast to float 
+	// if custom width floating point type is introduced in OPCODE.
+	// It is necessary to make a typedef and cast to it
+	// (e.g. typedef float opc_float;)
+	// However I'm not sure in what header it should be added.
 
-	obbRot[0][1] = (float)cData.mCylinderRot[4];
-	obbRot[1][1] = (float)cData.mCylinderRot[5];
-	obbRot[2][1] = (float)cData.mCylinderRot[6];
-
-	obbRot[0][2] = (float)cData.mCylinderRot[8];
-	obbRot[1][2] = (float)cData.mCylinderRot[9];
-	obbRot[2][2] = (float)cData.mCylinderRot[10];
+	obbRot[0][0] = /*(float)*/cData.mCylinderRot[0];
+	obbRot[1][0] = /*(float)*/cData.mCylinderRot[1];
+	obbRot[2][0] = /*(float)*/cData.mCylinderRot[2];
+	
+	obbRot[0][1] = /*(float)*/cData.mCylinderRot[4];
+	obbRot[1][1] = /*(float)*/cData.mCylinderRot[5];
+	obbRot[2][1] = /*(float)*/cData.mCylinderRot[6];
+	
+	obbRot[0][2] = /*(float)*/cData.mCylinderRot[8];
+	obbRot[1][2] = /*(float)*/cData.mCylinderRot[9];
+	obbRot[2][2] = /*(float)*/cData.mCylinderRot[10];
 
 	OBB obbCapsule(cCenter,cExtents,obbRot);
 
