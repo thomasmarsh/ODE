@@ -41,6 +41,7 @@ int dCollideTrimeshPlane( dxGeom *o1, dxGeom *o2, int flags, dContactGeom* conta
 	dIASSERT( skip >= (int)sizeof( dContactGeom ) );
 	dIASSERT( o1->type == dTriMeshClass );
 	dIASSERT( o2->type == dPlaneClass );
+	dIASSERT ((flags & NUMC_MASK) >= 1);
 
 	// Alias pointers to the plane and trimesh
 	dxTriMesh* trimesh = (dxTriMesh*)( o1 );
@@ -50,10 +51,6 @@ int dCollideTrimeshPlane( dxGeom *o1, dxGeom *o2, int flags, dContactGeom* conta
 
 	// Cache the maximum contact count.
 	const int contact_max = ( flags & 0x0ffff );
-
-	// Degenerate case where there are no contact slots.
-	if ( contact_count >= contact_max )
-		return contact_count; // <=== STOP HERE
 
 	// Cache trimesh position and rotation.
 	const dVector3& trimesh_pos = *(const dVector3*)dGeomGetPosition( trimesh );
@@ -153,6 +150,7 @@ int dCollideTrimeshPlane( dxGeom *o1, dxGeom *o2, int flags, dContactGeom* conta
 	dIASSERT( skip >= (int)sizeof( dContactGeom ) );
 	dIASSERT( o1->type == dTriMeshClass );
 	dIASSERT( o2->type == dPlaneClass );
+	dIASSERT ((flags & NUMC_MASK) >= 1);
 
 	// Alias pointers to the plane and trimesh
 	dxTriMesh* trimesh = (dxTriMesh*)( o1 );

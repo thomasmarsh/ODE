@@ -240,6 +240,11 @@ static bool GetContactData(const dVector3& Center, dReal Radius, const dVector3 
 }
 
 int dCollideSTL(dxGeom* g1, dxGeom* SphereGeom, int Flags, dContactGeom* Contacts, int Stride){
+	dIASSERT (Stride >= (int)sizeof(dContactGeom));
+	dIASSERT (g1->type == dTriMeshClass);
+	dIASSERT (SphereGeom->type == dSphereClass);
+	dIASSERT ((Flags & NUMC_MASK) >= 1);
+
 	dxTriMesh* TriMesh = (dxTriMesh*)g1;
 
 	// Init
@@ -505,6 +510,11 @@ int dCollideSTL(dxGeom* g1, dxGeom* SphereGeom, int Flags, dContactGeom* Contact
 #if dTRIMESH_GIMPACT
 int dCollideSTL(dxGeom* g1, dxGeom* SphereGeom, int Flags, dContactGeom* Contacts, int Stride)
 {
+	dIASSERT (Stride >= (int)sizeof(dContactGeom));
+	dIASSERT (g1->type == dTriMeshClass);
+	dIASSERT (SphereGeom->type == dSphereClass);
+	dIASSERT ((Flags & NUMC_MASK) >= 1);
+	
 	dxTriMesh* TriMesh = (dxTriMesh*)g1;
     dVector3& Position = *(dVector3*)dGeomGetPosition(SphereGeom);
 	dReal Radius = dGeomSphereGetRadius(SphereGeom);

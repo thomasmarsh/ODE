@@ -771,7 +771,6 @@ static void _cldClipping(const dVector3 &v0, const dVector3 &v1, const dVector3 
 
     // generate contact point between two closest points
 #if 0 //#ifdef ORIG -- if to use conditional define, GenerateContact must be moved into #else
-    if (ctContacts < (iFlags & 0x0ffff)) {
     dContactGeom* Contact = SAFECONTACT(iFlags, ContactGeoms, ctContacts, iStride);
     Contact->depth = fBestDepth;
     SET(Contact->normal,vBestNormal);
@@ -779,11 +778,9 @@ static void _cldClipping(const dVector3 &v0, const dVector3 &v1, const dVector3 
     Contact->g1 = Geom1;
     Contact->g2 = Geom2;
     ctContacts++;
-    }
 #endif
     GenerateContact(iFlags, ContactGeoms, iStride,  Geom1, Geom2,
                     vPntTmp, vBestNormal, fBestDepth, ctContacts);
-
 
 
   // if triangle is the referent face then clip box to triangle face
@@ -946,7 +943,6 @@ static void _cldClipping(const dVector3 &v0, const dVector3 &v1, const dVector3 
       ADD(avTempArray2[i],v0,vPntTmp);
 
 #if 0 //#ifdef ORIG -- if to use conditional define, GenerateContact must be moved into #else
-    if (ctContacts < (iFlags & 0x0ffff)) {
           dContactGeom* Contact = SAFECONTACT(iFlags, ContactGeoms, ctContacts, iStride);
 
           Contact->depth = -fTempDepth;
@@ -955,7 +951,6 @@ static void _cldClipping(const dVector3 &v0, const dVector3 &v1, const dVector3 
           Contact->g1 = Geom1;
           Contact->g2 = Geom2;
           ctContacts++;
-    }
 #endif
     GenerateContact(iFlags, ContactGeoms, iStride,  Geom1, Geom2,
                     vPntTmp, vBestNormal, -fTempDepth, ctContacts);
@@ -1068,7 +1063,6 @@ static void _cldClipping(const dVector3 &v0, const dVector3 &v1, const dVector3 
       ADD(avTempArray1[i],vHullBoxPos,vPntTmp);
 
 #if 0 //#ifdef ORIG -- if to use conditional define, GenerateContact must be moved into #else
-      if (ctContacts < (iFlags & 0x0ffff)) {
           dContactGeom* Contact = SAFECONTACT(iFlags, ContactGeoms, ctContacts, iStride);
 
           Contact->depth = -fTempDepth;
@@ -1077,7 +1071,6 @@ static void _cldClipping(const dVector3 &v0, const dVector3 &v1, const dVector3 
           Contact->g1 = Geom1;
           Contact->g2 = Geom2;
           ctContacts++;
-      }
 #endif
       GenerateContact(iFlags, ContactGeoms, iStride,  Geom1, Geom2,
                       vPntTmp, vBestNormal, -fTempDepth, ctContacts);
@@ -1119,6 +1112,11 @@ static void _cldTestOneTriangle(const dVector3 &v0, const dVector3 &v1, const dV
 // OPCODE version of box to mesh collider
 #if dTRIMESH_OPCODE
 int dCollideBTL(dxGeom* g1, dxGeom* BoxGeom, int Flags, dContactGeom* Contacts, int Stride){
+  dIASSERT (Stride >= (int)sizeof(dContactGeom));
+  dIASSERT (g1->type == dTriMeshClass);
+  dIASSERT (BoxGeom->type == dBoxClass);
+  dIASSERT ((Flags & NUMC_MASK) >= 1);
+
 
   dxTriMesh* TriMesh = (dxTriMesh*)g1;
 
@@ -1276,7 +1274,12 @@ int dCollideBTL(dxGeom* g1, dxGeom* BoxGeom, int Flags, dContactGeom* Contacts, 
 #if dTRIMESH_GIMPACT
 int dCollideBTL(dxGeom* g1, dxGeom* BoxGeom, int Flags, dContactGeom* Contacts, int Stride)
 {
+  dIASSERT (Stride >= (int)sizeof(dContactGeom));
+  dIASSERT (g1->type == dTriMeshClass);
+  dIASSERT (BoxGeom->type == dBoxClass);
+  dIASSERT ((Flags & NUMC_MASK) >= 1);
 
+  
   dxTriMesh* TriMesh = (dxTriMesh*)g1;
 
 

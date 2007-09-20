@@ -1613,10 +1613,12 @@ int dCollideHeightfield( dxGeom *o1, dxGeom *o2, int flags, dContactGeom* contac
 {
     dIASSERT( skip >= (int)sizeof(dContactGeom) );
     dIASSERT( o1->type == dHeightfieldClass );
+	dIASSERT((flags & NUMC_MASK) >= 1);
+
     int i;
 
-    if ((flags & 0xffff) == 0)
-        flags = (flags & 0xffff0000) | 1;
+    // if ((flags & NUMC_MASK) == 0) -- An assertion check is made on entry
+	//	{ flags = (flags & ~NUMC_MASK) | 1; dIASSERT((1 & ~NUMC_MASK) == 0); }
 
     int numMaxTerrainContacts = (flags & 0xffff);
     dxHeightfield *terrain = (dxHeightfield*) o1;

@@ -40,7 +40,9 @@
 int dCollideCylinderPlane(dxGeom *Cylinder, dxGeom *Plane, int flags, dContactGeom *contact, int skip)
 {
 	dIASSERT (skip >= (int)sizeof(dContactGeom));
-	dIASSERT ((flags & 0xffff) >= 1);
+	dIASSERT (Cylinder->type == dCylinderClass);
+	dIASSERT (Plane->type == dPlaneClass);
+	dIASSERT ((flags & NUMC_MASK) >= 1);
 
 	unsigned char* pContactData = (unsigned char*)contact;
 	int GeomCount = 0; // count of used contactgeoms

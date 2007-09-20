@@ -36,6 +36,11 @@
 
 #if dTRIMESH_OPCODE
 int dCollideRTL(dxGeom* g1, dxGeom* RayGeom, int Flags, dContactGeom* Contacts, int Stride){
+	dIASSERT (Stride >= (int)sizeof(dContactGeom));
+	dIASSERT (g1->type == dTriMeshClass);
+	dIASSERT (RayGeom->type == dRayClass);
+	dIASSERT ((Flags & NUMC_MASK) >= 1);
+
 	dxTriMesh* TriMesh = (dxTriMesh*)g1;
 
 	const dVector3& TLPosition = *(const dVector3*)dGeomGetPosition(TriMesh);
@@ -81,9 +86,6 @@ int dCollideRTL(dxGeom* g1, dxGeom* RayGeom, int Flags, dContactGeom* Contacts, 
 
 	int OutTriCount = 0;
 	for (int i = 0; i < TriCount; i++) {
-		if (OutTriCount == (Flags & 0xffff)) {
-			break;
-		}
 		if (TriMesh->RayCallback == null ||
                     TriMesh->RayCallback(TriMesh, RayGeom, Faces[i].mFaceID,
                                          Faces[i].mU, Faces[i].mV)) {
@@ -124,6 +126,11 @@ int dCollideRTL(dxGeom* g1, dxGeom* RayGeom, int Flags, dContactGeom* Contacts, 
 			Contact->g2 = RayGeom;
 				
 			OutTriCount++;
+
+			// Putting "break" at the end of loop prevents unnecessary checks on first pass and "continue"
+			if (OutTriCount >= (Flags & NUMC_MASK)) {
+				break;
+			}
 		}
 	}
 	return OutTriCount;
@@ -133,6 +140,11 @@ int dCollideRTL(dxGeom* g1, dxGeom* RayGeom, int Flags, dContactGeom* Contacts, 
 #if dTRIMESH_GIMPACT
 int dCollideRTL(dxGeom* g1, dxGeom* RayGeom, int Flags, dContactGeom* Contacts, int Stride)
 {
+	dIASSERT (Stride >= (int)sizeof(dContactGeom));
+	dIASSERT (g1->type == dTriMeshClass);
+	dIASSERT (RayGeom->type == dRayClass);
+	dIASSERT ((Flags & NUMC_MASK) >= 1);
+	
 	dxTriMesh* TriMesh = (dxTriMesh*)g1;
 
     dReal Length = dGeomRayGetLength(RayGeom);

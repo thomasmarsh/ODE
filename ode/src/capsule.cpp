@@ -130,6 +130,8 @@ int dCollideCapsuleSphere (dxGeom *o1, dxGeom *o2, int flags,
   dIASSERT (skip >= (int)sizeof(dContactGeom));
   dIASSERT (o1->type == dCapsuleClass);
   dIASSERT (o2->type == dSphereClass);
+  dIASSERT ((flags & NUMC_MASK) >= 1);
+  
   dxCapsule *ccyl = (dxCapsule*) o1;
   dxSphere *sphere = (dxSphere*) o2;
 
@@ -160,6 +162,8 @@ int dCollideCapsuleBox (dxGeom *o1, dxGeom *o2, int flags,
   dIASSERT (skip >= (int)sizeof(dContactGeom));
   dIASSERT (o1->type == dCapsuleClass);
   dIASSERT (o2->type == dBoxClass);
+  dIASSERT ((flags & NUMC_MASK) >= 1);
+
   dxCapsule *cyl = (dxCapsule*) o1;
   dxBox *box = (dxBox*) o2;
 
@@ -194,12 +198,14 @@ int dCollideCapsuleBox (dxGeom *o1, dxGeom *o2, int flags,
 int dCollideCapsuleCapsule (dxGeom *o1, dxGeom *o2,
 				int flags, dContactGeom *contact, int skip)
 {
-  int i;
-  const dReal tolerance = REAL(1e-5);
-
   dIASSERT (skip >= (int)sizeof(dContactGeom));
   dIASSERT (o1->type == dCapsuleClass);
   dIASSERT (o2->type == dCapsuleClass);
+  dIASSERT ((flags & NUMC_MASK) >= 1);
+
+  int i;
+  const dReal tolerance = REAL(1e-5);
+
   dxCapsule *cyl1 = (dxCapsule*) o1;
   dxCapsule *cyl2 = (dxCapsule*) o2;
 
@@ -309,6 +315,8 @@ int dCollideCapsulePlane (dxGeom *o1, dxGeom *o2, int flags,
   dIASSERT (skip >= (int)sizeof(dContactGeom));
   dIASSERT (o1->type == dCapsuleClass);
   dIASSERT (o2->type == dPlaneClass);
+  dIASSERT ((flags & NUMC_MASK) >= 1);
+
   dxCapsule *ccyl = (dxCapsule*) o1;
   dxPlane *plane = (dxPlane*) o2;
 

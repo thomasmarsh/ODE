@@ -51,7 +51,9 @@ int dCollideCylinderSphere(dxGeom* Cylinder, dxGeom* Sphere,
                            int flags, dContactGeom *contact, int skip)
 {
 	dIASSERT (skip >= (int)sizeof(dContactGeom));
-	dIASSERT ((flags & 0xffff) >= 1);
+	dIASSERT (Cylinder->type == dCylinderClass);
+	dIASSERT (Sphere->type == dSphereClass);
+	dIASSERT ((flags & NUMC_MASK) >= 1);
 
 	unsigned char* pContactData = (unsigned char*)contact;
 	int GeomCount = 0; // count of used contacts

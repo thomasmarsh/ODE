@@ -374,6 +374,11 @@ dContactGeom *  PushNewContact( dxGeom* g1, dxGeom* g2,
 int
 dCollideTTL(dxGeom* g1, dxGeom* g2, int Flags, dContactGeom* Contacts, int Stride)
 {
+	dIASSERT (Stride >= (int)sizeof(dContactGeom));
+	dIASSERT (g1->type == dTriMeshClass);
+	dIASSERT (g2->type == dTriMeshClass);
+	dIASSERT ((Flags & NUMC_MASK) >= 1);
+	
     dxTriMesh* TriMesh1 = (dxTriMesh*) g1;
     dxTriMesh* TriMesh2 = (dxTriMesh*) g2;
 

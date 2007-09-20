@@ -223,6 +223,11 @@ static void initColliders()
 }
 
 
+/*
+ *	NOTE!
+ *	If it is necessary to add special processing mode without contact generation
+ *	use NULL contact parameter value as indicator, not zero in flags.
+ */
 int dCollide (dxGeom *o1, dxGeom *o2, int flags, dContactGeom *contact,
 	      int skip)
 {
@@ -230,8 +235,14 @@ int dCollide (dxGeom *o1, dxGeom *o2, int flags, dContactGeom *contact,
   dUASSERT(colliders_initialized,"colliders array not initialized");
   dUASSERT(o1->type >= 0 && o1->type < dGeomNumClasses,"bad o1 class number");
   dUASSERT(o2->type >= 0 && o2->type < dGeomNumClasses,"bad o2 class number");
-  dUASSERT((flags&0xffff) >= 1,"no contacts requested");
+  // Even though comparison for greater or equal to one is used in all the 
+  // other places, here it is more logical to check for greater than zero
+  // because function does not require any specific number of contact slots - 
+  // it must be just a positive.
+  dUASSERT((flags & NUMC_MASK) > 0, "no contacts requested"); 
 
+  // Extra precaution for zero contact count in parameters
+  if ((flags & NUMC_MASK) == 0) return 0;
   // no contacts if both geoms are the same
   if (o1 == o2) return 0;
 
