@@ -70,7 +70,7 @@ int dCollideTrimeshPlane( dxGeom *o1, dxGeom *o2, int flags, dContactGeom* conta
 	dReal alpha;
 	dVector3 vertex;
 
-#ifndef dSINGLE
+#if !defined(dSINGLE) || 1
 	dVector3 int_vertex;		// Intermediate vertex for double precision mode.
 #endif // dSINGLE
 
@@ -87,11 +87,11 @@ int dCollideTrimeshPlane( dxGeom *o1, dxGeom *o2, int flags, dContactGeom* conta
 			// Get Vertex
 			//
 
-#ifdef dSINGLE
+#if defined(dSINGLE) && 0 // Always assign via intermediate array as otherwise it is an incapsulation violation
 
 			dMULTIPLY0_331( vertex, trimesh_R, (float*)( VP.Vertex[ v ] ) );
 
-#else // dDOUBLE
+#else // dDOUBLE || 1
 
 			// OPCODE data is in single precision format.
 			int_vertex[ 0 ] = VP.Vertex[ v ]->x;
