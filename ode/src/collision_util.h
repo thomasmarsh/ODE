@@ -39,6 +39,15 @@ some useful collision utility stuff.
 // p + skip bytes.
 #define CONTACT(p,skip) ((dContactGeom*) (((char*)p) + (skip)))
 
+#if 1
+#include "collision_kernel.h"
+// Fetches a contact
+inline dContactGeom* SAFECONTACT(int Flags, dContactGeom* Contacts, int Index, int Stride){
+	dIASSERT(Index >= 0 && Index < (Flags & NUMC_MASK));
+	return ((dContactGeom*)(((char*)Contacts) + (Index * Stride)));
+}
+#endif
+
 
 // if the spheres (p1,r1) and (p2,r2) collide, set the contact `c' and
 // return 1, else return 0.
@@ -326,14 +335,6 @@ inline void dQuatInv(const dQuaternion& source, dQuaternion& dest)
 		dest[3] = REAL(0.0);
 	}
 }
-
-#if 1
-// Fetches a contact
-inline dContactGeom* SAFECONTACT(int Flags, dContactGeom* Contacts, int Index, int Stride){
-	dIASSERT(Index >= 0 && Index < (Flags & 0x0ffff));
-	return ((dContactGeom*)(((char*)Contacts) + (Index * Stride)));
-}
-#endif
 
 
 #endif
