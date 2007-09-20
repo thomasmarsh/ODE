@@ -409,6 +409,15 @@ void dMassSetTrimesh( dMass *m, dReal density, dGeomID g )
 # endif
 }
 
+
+void dMassSetTrimeshTotal( dMass *m, dReal total_mass, dGeomID g)
+{
+  dAASSERT( m );
+  dUASSERT( g && g->type == dTriMeshClass, "argument not a trimesh" );
+  dMassSetTrimesh( m, 1.0, g );
+  dMassAdjust( m, total_mass );
+}
+
 #endif // dTRIMESH_ENABLED
 
 
