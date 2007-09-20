@@ -1339,13 +1339,20 @@ int dCollideBTL(dxGeom* g1, dxGeom* BoxGeom, int Flags, dContactGeom* Contacts, 
 	GUINT * boxesresult = GIM_DYNARRAY_POINTER(GUINT,collision_result);
 	gim_trimesh_locks_work_data(ptrimesh);
 
+    int ctContacts0 = 0;
+	
 	for(unsigned int i=0;i<collision_result.m_size;i++)
 	{
 		dVector3 dv[3];
 
-		gim_trimesh_get_triangle_vertices(ptrimesh, boxesresult[i],dv[0],dv[1],dv[2]);
+		int Triint = boxesresult[i];
+		gim_trimesh_get_triangle_vertices(ptrimesh, Triint,dv[0],dv[1],dv[2]);
         // test this triangle
         _cldTestOneTriangle(dv[0],dv[1],dv[2]);
+		
+		// fill-in tri index for generated contacts
+		for (; ctContacts0<ctContacts; ctContacts0++)
+			SAFECONTACT(iFlags, ContactGeoms, ctContacts0, iStride)->side1 = Triint;
 	}
 
 	gim_trimesh_unlocks_work_data(ptrimesh);
