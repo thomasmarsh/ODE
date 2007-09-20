@@ -139,6 +139,7 @@ typedef dReal dQuaternion[4];
 #define dFabs(x) (fabsf(x))			/* absolute value */
 #define dAtan2(y,x) (atan2f(y,x))		/* arc tangent with 2 args */
 #define dFMod(a,b) (fmodf(a,b))		/* modulo */
+#define dFloor(x) floorf(x)			/* floor */
 
 #ifdef HAVE___ISNANF
 #define dIsNan(x) (__isnanf(x))
@@ -172,6 +173,8 @@ typedef dReal dQuaternion[4];
 #define dFabs(x) fabs(x)
 #define dAtan2(y,x) atan2((y),(x))
 #define dFMod(a,b) (fmod((a),(b)))
+#define dFloor(x) floor(x)
+
 #ifdef HAVE___ISNAN
 #define dIsNan(x) (__isnan(x))
 #elif defined(HAVE__ISNAN)
