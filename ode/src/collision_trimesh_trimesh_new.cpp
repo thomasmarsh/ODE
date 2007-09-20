@@ -298,7 +298,7 @@ dContactGeom *  PushNewContact( dxGeom* g1, dxGeom* g2,
 			Contacts, Stride,contactcount);
 	if(found)
 	{
-		if(pcontact->depth > depth + CONTACT_DIFF_EPSILON)
+		if(depth > pcontact->depth + CONTACT_DIFF_EPSILON)
 		{
 			pcontact->normal[0] = normal[0];
 			pcontact->normal[1] = normal[1];
@@ -309,7 +309,7 @@ dContactGeom *  PushNewContact( dxGeom* g1, dxGeom* g2,
 			pcontact->g1 = g1;
 			pcontact->g2 = g2;
 		}
-		else if(pcontact->depth >= depth - CONTACT_DIFF_EPSILON) ///average
+		else if(depth >= pcontact->depth - CONTACT_DIFF_EPSILON) ///average
 		{
 			if(pcontact->g1 == g2)
 			{
