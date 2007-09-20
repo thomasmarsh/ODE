@@ -368,12 +368,14 @@ dReal dxHeightfieldData::GetHeight( int x, int z )
 // returns height at given coordinates
 dReal dxHeightfieldData::GetHeight( dReal x, dReal z )
 {
-    int nX	= int( floor( x * m_fInvSampleWidth ) );
-    int nZ	= int( floor( z * m_fInvSampleDepth ) );
+	dReal dnX = dFloor( x * m_fInvSampleWidth );
+	dReal dnZ = dFloor( z * m_fInvSampleDepth );
 
-    dReal dx = ( x - ( dReal( nX ) * m_fSampleWidth ) ) * m_fInvSampleWidth;
-    dReal dz = ( z - ( dReal( nZ ) * m_fSampleDepth ) ) * m_fInvSampleDepth;
+    dReal dx = ( x - ( dnX * m_fSampleWidth ) ) * m_fInvSampleWidth;
+    dReal dz = ( z - ( dnZ * m_fSampleDepth ) ) * m_fInvSampleDepth;
 
+    int nX = int( dnX );
+    int nZ = int( dnZ );
 
     //dIASSERT( ( dx + dEpsilon >= 0.0f ) && ( dx - dEpsilon <= 1.0f ) );
     //dIASSERT( ( dz + dEpsilon >= 0.0f ) && ( dz - dEpsilon <= 1.0f ) );
