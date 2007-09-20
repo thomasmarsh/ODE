@@ -1175,21 +1175,27 @@ int dCollideBTL(dxGeom* g1, dxGeom* BoxGeom, int Flags, dContactGeom* Contacts, 
   Box.mCenter.z = vPosBox[2];
 
 
-  Box.mExtents.x = (float)vBoxHalfSize[0];
-  Box.mExtents.y = (float)vBoxHalfSize[1];
-  Box.mExtents.z = (float)vBoxHalfSize[2];
-
-  Box.mRot.m[0][0] = (float)mRotBox[0];
-  Box.mRot.m[1][0] = (float)mRotBox[1];
-  Box.mRot.m[2][0] = (float)mRotBox[2];
-
-  Box.mRot.m[0][1] = (float)mRotBox[4];
-  Box.mRot.m[1][1] = (float)mRotBox[5];
-  Box.mRot.m[2][1] = (float)mRotBox[6];
-
-  Box.mRot.m[0][2] = (float)mRotBox[8];
-  Box.mRot.m[1][2] = (float)mRotBox[9];
-  Box.mRot.m[2][2] = (float)mRotBox[10];
+  // It is a potential issue to explicitly cast to float 
+  // if custom width floating point type is introduced in OPCODE.
+  // It is necessary to make a typedef and cast to it
+  // (e.g. typedef float opc_float;)
+  // However I'm not sure in what header it should be added.
+  
+  Box.mExtents.x = /*(float)*/vBoxHalfSize[0];
+  Box.mExtents.y = /*(float)*/vBoxHalfSize[1];
+  Box.mExtents.z = /*(float)*/vBoxHalfSize[2];
+  
+  Box.mRot.m[0][0] = /*(float)*/mRotBox[0];
+  Box.mRot.m[1][0] = /*(float)*/mRotBox[1];
+  Box.mRot.m[2][0] = /*(float)*/mRotBox[2];
+  
+  Box.mRot.m[0][1] = /*(float)*/mRotBox[4];
+  Box.mRot.m[1][1] = /*(float)*/mRotBox[5];
+  Box.mRot.m[2][1] = /*(float)*/mRotBox[6];
+  
+  Box.mRot.m[0][2] = /*(float)*/mRotBox[8];
+  Box.mRot.m[1][2] = /*(float)*/mRotBox[9];
+  Box.mRot.m[2][2] = /*(float)*/mRotBox[10];
 
   Matrix4x4 amatrix;
   Matrix4x4 BoxMatrix = MakeMatrix(vPosBox, mRotBox, amatrix);

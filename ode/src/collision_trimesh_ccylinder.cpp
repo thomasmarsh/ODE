@@ -968,22 +968,28 @@ int dCollideCCTL(dxGeom *o1, dxGeom *o2, int flags, dContactGeom *contact, int s
 	// Will it better to use LSS here? -> confirm Pierre.
 	 OBBCollider& Collider = TriMesh->_OBBCollider;
 
-	 Point cCenter((float) vCapsulePosition[0],(float) vCapsulePosition[1],(float) vCapsulePosition[2]);
-	 Point cExtents((float) vCapsuleRadius,(float) vCapsuleRadius,(float) fCapsuleSize/2);
-
+	 // It is a potential issue to explicitly cast to float 
+	 // if custom width floating point type is introduced in OPCODE.
+	 // It is necessary to make a typedef and cast to it
+	 // (e.g. typedef float opc_float;)
+	 // However I'm not sure in what header it should be added.
+	 
+	 Point cCenter(/*(float)*/ vCapsulePosition[0], /*(float)*/ vCapsulePosition[1], /*(float)*/ vCapsulePosition[2]);
+	 Point cExtents(/*(float)*/ vCapsuleRadius, /*(float)*/ vCapsuleRadius,/*(float)*/ fCapsuleSize/2);
+	 
 	 Matrix3x3 obbRot;
-
-	 obbRot[0][0] = (float) mCapsuleRotation[0];
-	 obbRot[1][0] = (float) mCapsuleRotation[1];
-	 obbRot[2][0] = (float) mCapsuleRotation[2];
-
-	 obbRot[0][1] = (float) mCapsuleRotation[4];
-	 obbRot[1][1] = (float) mCapsuleRotation[5];
-	 obbRot[2][1] = (float) mCapsuleRotation[6];
-
-	 obbRot[0][2] = (float) mCapsuleRotation[8];
-	 obbRot[1][2] = (float) mCapsuleRotation[9];
-	 obbRot[2][2] = (float) mCapsuleRotation[10];
+	 
+	 obbRot[0][0] = /*(float)*/ mCapsuleRotation[0];
+	 obbRot[1][0] = /*(float)*/ mCapsuleRotation[1];
+	 obbRot[2][0] = /*(float)*/ mCapsuleRotation[2];
+	 
+	 obbRot[0][1] = /*(float)*/ mCapsuleRotation[4];
+	 obbRot[1][1] = /*(float)*/ mCapsuleRotation[5];
+	 obbRot[2][1] = /*(float)*/ mCapsuleRotation[6];
+	 
+	 obbRot[0][2] = /*(float)*/ mCapsuleRotation[8];
+	 obbRot[1][2] = /*(float)*/ mCapsuleRotation[9];
+	 obbRot[2][2] = /*(float)*/ mCapsuleRotation[10];
 
 	 OBB obbCapsule(cCenter,cExtents,obbRot);
 
