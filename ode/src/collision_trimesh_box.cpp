@@ -1244,7 +1244,7 @@ int dCollideBTL(dxGeom* g1, dxGeom* BoxGeom, int Flags, dContactGeom* Contacts, 
     for (int i = 0; i < TriCount; i++){
 
 
-        const int& Triint = Triangles[i];
+        const int Triint = Triangles[i];
         if (!Callback(TriMesh, BoxGeom, Triint)) continue;
 
 

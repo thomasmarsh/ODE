@@ -1026,7 +1026,7 @@ int dCollideCylinderTrimesh(dxGeom *o1, dxGeom *o2, int flags, dContactGeom *con
 				break;
 			}
 
-			const int& Triint = Triangles[i];
+			const int Triint = Triangles[i];
 			if (!Callback(cData.gTrimesh, cData.gCylinder, Triint)) continue;
 
 

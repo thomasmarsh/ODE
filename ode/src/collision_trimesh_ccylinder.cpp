@@ -1050,7 +1050,7 @@ int dCollideCCTL(dxGeom *o1, dxGeom *o2, int flags, dContactGeom *contact, int s
 				break;
 			}
 
-			const int& Triint = Triangles[i];
+			const int Triint = Triangles[i];
 			if (!Callback(TriMesh, gCylinder, Triint)) continue;
 
 
