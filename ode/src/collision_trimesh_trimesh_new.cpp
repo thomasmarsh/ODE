@@ -51,7 +51,12 @@
 
 struct LineContactSet
 {
-    dVector3 Points[8];
+	enum
+	{
+		MAX_POINTS = 8
+	};
+
+    dVector3 Points[MAX_POINTS];
     int      Count;
 };
 

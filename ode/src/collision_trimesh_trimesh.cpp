@@ -50,7 +50,12 @@
 
 struct LineContactSet
 {
-    dVector3 Points[8];
+	enum
+	{
+		MAX_POINTS = 8
+	};
+
+    dVector3 Points[MAX_POINTS];
     int      Count;
 };
 
@@ -183,8 +188,8 @@ dCollideTTL(dxGeom* g1, dxGeom* g2, int Flags, dContactGeom* Contacts, int Strid
                 dVector3        elt_f1[3], elt_f2[3];
                 dReal          contact_elt_length = SMALL_ELT;
                 LineContactSet  firstClippedTri, secondClippedTri;
-                dVector3       *firstClippedElt = NULL;
-                dVector3       *secondClippedElt = NULL;
+                dVector3       *firstClippedElt = new dVector3[LineContactSet::MAX_POINTS];
+                dVector3       *secondClippedElt = new dVector3[LineContactSet::MAX_POINTS];
                 
 
                 // only do these expensive inversions once
@@ -496,8 +501,6 @@ dCollideTTL(dxGeom* g1, dxGeom* g2, int Flags, dContactGeom* Contacts, int Strid
 
                                     FindTriSolidIntrsection(pen_v, SolidPlanes, 3, firstClippedTri);
 
-                                    firstClippedElt = new dVector3[firstClippedTri.Count];
-
                                     for (int j=0; j<firstClippedTri.Count; j++) {
                                         firstClippedTri.Points[j][3] = 1.0; // because we will be doing matrix mults
 
@@ -597,8 +600,6 @@ dCollideTTL(dxGeom* g1, dxGeom* g2, int Flags, dContactGeom* Contacts, int Strid
                                     
                                     FindTriSolidIntrsection(pen_v, SolidPlanes, 3, secondClippedTri);
                                     
-                                    secondClippedElt = new dVector3[secondClippedTri.Count];
-
                                     for (int j=0; j<secondClippedTri.Count; j++) {
                                         secondClippedTri.Points[j][3] = 1.0; // because we will be doing matrix mults
                                         
@@ -921,15 +922,12 @@ dCollideTTL(dxGeom* g1, dxGeom* g2, int Flags, dContactGeom* Contacts, int Strid
                                 
                             } // not coplanar (main loop)
                         } // TriTriIntersectWithIsectLine
-                
-                    // Free memory
-                    delete[] firstClippedElt;
-	            firstClippedElt = NULL;
-                    delete[] secondClippedElt;	
-        	    secondClippedElt = NULL;
-
                 } // if (OutTriCount < (Flags & 0xffff))
 
+				// Free memory
+				delete[] firstClippedElt;
+				delete[] secondClippedElt;	
+				
                 // Return the number of contacts
                 return OutTriCount; 
                 
