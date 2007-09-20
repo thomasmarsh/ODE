@@ -897,7 +897,7 @@ static void _cldTestOneTriangleVSCapsule( const dVector3 &v0,
 
 	// Cached contacts's data
 	// contact 0
-    if (ctContacts < (iFlags & NUMC_MASK)) {
+    dIASSERT(ctContacts < (iFlags & NUMC_MASK)); // Do not call function if there is no room to store result
 	gLocalContacts[ctContacts].fDepth = fDepth0;
 	SET(gLocalContacts[ctContacts].vNormal,vNormal);
 	SET(gLocalContacts[ctContacts].vPos,vCEdgePoint0);
@@ -912,7 +912,6 @@ static void _cldTestOneTriangleVSCapsule( const dVector3 &v0,
 	gLocalContacts[ctContacts].nFlags = 1;
 	ctContacts++;
         }
-    }
 
 }
 
@@ -920,6 +919,11 @@ static void _cldTestOneTriangleVSCapsule( const dVector3 &v0,
 // Ported by Nguyem Binh
 int dCollideCCTL(dxGeom *o1, dxGeom *o2, int flags, dContactGeom *contact, int skip)
 {
+	dIASSERT (skip >= (int)sizeof(dContactGeom));
+	dIASSERT (o1->type == dTriMeshClass);
+	dIASSERT (o2->type == dCapsuleClass);
+	dIASSERT ((flags & NUMC_MASK) >= 1);
+	
 	dxTriMesh* TriMesh = (dxTriMesh*)o1;
 	gCylinder = o2;
 	gTriMesh = o1;
@@ -1051,11 +1055,6 @@ int dCollideCCTL(dxGeom *o1, dxGeom *o2, int flags, dContactGeom *contact, int s
 		// loop through all intersecting triangles
 		for (int i = 0; i < TriCount; i++)
 		{
-			if(ctContacts>=(iFlags & NUMC_MASK)) 
-			{
-				break;
-			}
-
 			const int Triint = Triangles[i];
 			if (!Callback(TriMesh, gCylinder, Triint)) continue;
 
@@ -1071,6 +1070,12 @@ int dCollideCCTL(dxGeom *o1, dxGeom *o2, int flags, dContactGeom *contact, int s
 			// fill-in tri index for generated contacts
 			for (; ctContacts0<ctContacts; ctContacts0++)
 				gLocalContacts[ctContacts0].triIndex = Triint;
+
+			// Putting "break" at the end of loop prevents unnecessary checks on first pass and "continue"
+			if(ctContacts>=(iFlags & NUMC_MASK)) 
+			{
+				break;
+			}
 		}
 	 }
 
@@ -1084,6 +1089,11 @@ int dCollideCCTL(dxGeom *o1, dxGeom *o2, int flags, dContactGeom *contact, int s
 // capsule - trimesh  By francisco leon
 int dCollideCCTL(dxGeom *o1, dxGeom *o2, int flags, dContactGeom *contact, int skip)
 {
+	dIASSERT (skip >= (int)sizeof(dContactGeom));
+	dIASSERT (o1->type == dTriMeshClass);
+	dIASSERT (o2->type == dCapsuleClass);
+	dIASSERT ((flags & NUMC_MASK) >= 1);
+	
 	dxTriMesh* TriMesh = (dxTriMesh*)o1;
 	dxGeom*	   gCylinder = o2;
 

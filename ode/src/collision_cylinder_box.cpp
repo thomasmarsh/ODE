@@ -954,6 +954,11 @@ void _cldClipBoxToCylinder(sCylinderBoxData& cData )
 // Ported by Nguyen Binh
 int dCollideCylinderBox(dxGeom *o1, dxGeom *o2, int flags, dContactGeom *contact, int skip)
 {
+	dIASSERT (skip >= (int)sizeof(dContactGeom));
+	dIASSERT (o1->type == dCylinderClass);
+	dIASSERT (o2->type == dBoxClass);
+	dIASSERT ((flags & NUMC_MASK) >= 1);
+
 	sCylinderBoxData	cData;
 
 	// Assign ODE stuff

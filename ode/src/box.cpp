@@ -691,6 +691,8 @@ int dCollideBoxBox (dxGeom *o1, dxGeom *o2, int flags,
   dIASSERT (skip >= (int)sizeof(dContactGeom));
   dIASSERT (o1->type == dBoxClass);
   dIASSERT (o2->type == dBoxClass);
+  dIASSERT ((flags & NUMC_MASK) >= 1);
+
   dVector3 normal;
   dReal depth;
   int code;
@@ -715,6 +717,8 @@ int dCollideBoxPlane (dxGeom *o1, dxGeom *o2,
   dIASSERT (skip >= (int)sizeof(dContactGeom));
   dIASSERT (o1->type == dBoxClass);
   dIASSERT (o2->type == dPlaneClass);
+  dIASSERT ((flags & NUMC_MASK) >= 1);
+
   dxBox *box = (dxBox*) o1;
   dxPlane *plane = (dxPlane*) o2;
 
@@ -743,8 +747,8 @@ int dCollideBoxPlane (dxGeom *o1, dxGeom *o2,
 
   // find number of contacts requested
   int maxc = flags & NUMC_MASK;
-  if (maxc < 1) maxc = 1;
-  if (maxc > 3) maxc = 3;	// no more than 3 contacts per box allowed
+  // if (maxc < 1) maxc = 1; // an assertion is made on entry
+  if (maxc > 3) maxc = 3;	// not more than 3 contacts per box allowed
 
   // find deepest point
   dVector3 p;

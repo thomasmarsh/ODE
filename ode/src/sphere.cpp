@@ -110,6 +110,8 @@ int dCollideSphereSphere (dxGeom *o1, dxGeom *o2, int flags,
   dIASSERT (skip >= (int)sizeof(dContactGeom));
   dIASSERT (o1->type == dSphereClass);
   dIASSERT (o2->type == dSphereClass);
+  dIASSERT ((flags & NUMC_MASK) >= 1);
+  
   dxSphere *sphere1 = (dxSphere*) o1;
   dxSphere *sphere2 = (dxSphere*) o2;
 
@@ -124,6 +126,11 @@ int dCollideSphereSphere (dxGeom *o1, dxGeom *o2, int flags,
 int dCollideSphereBox (dxGeom *o1, dxGeom *o2, int flags,
 		       dContactGeom *contact, int skip)
 {
+  dIASSERT (skip >= (int)sizeof(dContactGeom));
+  dIASSERT (o1->type == dSphereClass);
+  dIASSERT (o2->type == dBoxClass);
+  dIASSERT ((flags & NUMC_MASK) >= 1);
+  
   // this is easy. get the sphere center `p' relative to the box, and then clip
   // that to the boundary of the box (call that point `q'). if q is on the
   // boundary of the box and |p-q| is <= sphere radius, they touch.
@@ -134,9 +141,6 @@ int dCollideSphereBox (dxGeom *o1, dxGeom *o2, int flags,
   dReal depth;
   int onborder = 0;
 
-  dIASSERT (skip >= (int)sizeof(dContactGeom));
-  dIASSERT (o1->type == dSphereClass);
-  dIASSERT (o2->type == dBoxClass);
   dxSphere *sphere = (dxSphere*) o1;
   dxBox *box = (dxBox*) o2;
 
@@ -214,6 +218,8 @@ int dCollideSpherePlane (dxGeom *o1, dxGeom *o2, int flags,
   dIASSERT (skip >= (int)sizeof(dContactGeom));
   dIASSERT (o1->type == dSphereClass);
   dIASSERT (o2->type == dPlaneClass);
+  dIASSERT ((flags & NUMC_MASK) >= 1);
+
   dxSphere *sphere = (dxSphere*) o1;
   dxPlane *plane = (dxPlane*) o2;
 

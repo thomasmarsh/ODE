@@ -348,8 +348,11 @@ inline bool IsPointInPolygon(dVector3 p,
 int dCollideConvexPlane (dxGeom *o1, dxGeom *o2, int flags,
 						 dContactGeom *contact, int skip)
 {
+	dIASSERT (skip >= (int)sizeof(dContactGeom));
 	dIASSERT (o1->type == dConvexClass);
 	dIASSERT (o2->type == dPlaneClass);
+	dIASSERT ((flags & NUMC_MASK) >= 1);
+	
 	dxConvex *Convex = (dxConvex*) o1;
 	dxPlane *Plane = (dxPlane*) o2;
 	unsigned int contacts=0;
@@ -403,8 +406,11 @@ int dCollideConvexPlane (dxGeom *o1, dxGeom *o2, int flags,
 int dCollideSphereConvex (dxGeom *o1, dxGeom *o2, int flags,
 			  dContactGeom *contact, int skip)
 {
+  dIASSERT (skip >= (int)sizeof(dContactGeom));
   dIASSERT (o1->type == dSphereClass);
   dIASSERT (o2->type == dConvexClass);
+  dIASSERT ((flags & NUMC_MASK) >= 1);
+
   dxSphere *Sphere = (dxSphere*) o1;
   dxConvex *Convex = (dxConvex*) o2;
   dReal dist,closestdist=dInfinity;
@@ -526,20 +532,28 @@ int dCollideSphereConvex (dxGeom *o1, dxGeom *o2, int flags,
 int dCollideConvexBox (dxGeom *o1, dxGeom *o2, int flags,
 		       dContactGeom *contact, int skip)
 {
+  dIASSERT (skip >= (int)sizeof(dContactGeom));
   dIASSERT (o1->type == dConvexClass);
   dIASSERT (o2->type == dBoxClass);
+  dIASSERT ((flags & NUMC_MASK) >= 1);
+  
   dxConvex *Convex = (dxConvex*) o1;
   dxBox *Box = (dxBox*) o2;
+  
   return 0;
 }
 
 int dCollideConvexCapsule (dxGeom *o1, dxGeom *o2,
 			     int flags, dContactGeom *contact, int skip)
 {
+  dIASSERT (skip >= (int)sizeof(dContactGeom));
   dIASSERT (o1->type == dConvexClass);
   dIASSERT (o2->type == dCapsuleClass);
+  dIASSERT ((flags & NUMC_MASK) >= 1);
+
   dxConvex *Convex = (dxConvex*) o1;
   dxCapsule *Capsule = (dxCapsule*) o2;
+  
   return 0;
 }
 
@@ -924,8 +938,7 @@ int TestConvexIntersection(dxConvex& cvx1,dxConvex& cvx2, int flags,
 	dReal min1,max1,min2,max2,min_depth=-dInfinity;
 	dVector3 e1,e2,t;
 	int maxc = flags & NUMC_MASK; // this is causing a segfault
-	//int maxc = 3;
-	int contacts=0;
+	dIASSERT(maxc != 0);
 	dxConvex *g1,*g2;
 	unsigned int *pPoly;
 	dVector3 v;
@@ -1026,7 +1039,6 @@ int TestConvexIntersection(dxConvex& cvx1,dxConvex& cvx2, int flags,
 			if(max2<min1 || max1 < min2) return 0;
 		}      
 	}
-	// If we get here, there was a collision
 /* -- uncomment if you are debugging
 	static int  cvxhit=0;
 	if(cvxhit<2)
@@ -1036,9 +1048,10 @@ int TestConvexIntersection(dxConvex& cvx1,dxConvex& cvx2, int flags,
 		(double)savedplane[2],
 		(double)savedplane[3]);
 */
+	// If we get here, there was a collision
+	int contacts=0;
 	for(unsigned int i=0;i<g1->pointcount;++i)
 	{
-		if(contacts==maxc) break;
 		dMULTIPLY0_331 (v,g1->final_posr->R,&g1->points[(i*3)]);
 		v[0]=g1->final_posr->pos[0]+v[0];
 		v[1]=g1->final_posr->pos[1]+v[1];
@@ -1047,7 +1060,7 @@ int TestConvexIntersection(dxConvex& cvx1,dxConvex& cvx2, int flags,
 			(savedplane[1] * v[1])  + // Bx +
 			(savedplane[2] * v[2])) - savedplane[3]; // Cz + D
 
-		if((contacts<maxc)&&(distance<0))
+		if(distance<0)
 		{
 			CONTACT(contact,skip*contacts)->normal[0] = savedplane[0];
 			CONTACT(contact,skip*contacts)->normal[1] = savedplane[1];
@@ -1067,19 +1080,24 @@ int TestConvexIntersection(dxConvex& cvx1,dxConvex& cvx2, int flags,
 				(double)(CONTACT(contact,skip*contacts)->depth));
 */
 			contacts++;
+			if (contacts==maxc) break;
 		}
 	}
 /* -- uncomment if you are debugging
 	cvxhit++;
 */
+
 	return contacts;
 }
 
 int dCollideConvexConvex (dxGeom *o1, dxGeom *o2, int flags,
 			  dContactGeom *contact, int skip)
 {
+  dIASSERT (skip >= (int)sizeof(dContactGeom));
   dIASSERT (o1->type == dConvexClass);
   dIASSERT (o2->type == dConvexClass);
+  dIASSERT ((flags & NUMC_MASK) >= 1);
+
 //   if(!hit) fprintf(stdout,"dCollideConvexConvex\n");
   dxConvex *Convex1 = (dxConvex*) o1;
   dxConvex *Convex2 = (dxConvex*) o2;
@@ -1097,8 +1115,11 @@ int dCollideConvexConvex (dxGeom *o1, dxGeom *o2, int flags,
 int dCollideRayConvex (dxGeom *o1, dxGeom *o2, int flags, 
 		       dContactGeom *contact, int skip)
 {
+  dIASSERT (skip >= (int)sizeof(dContactGeom));
   dIASSERT( o1->type == dRayClass );
   dIASSERT( o2->type == dConvexClass );
+  dIASSERT ((flags & NUMC_MASK) >= 1);
+
   dxRay* ray = (dxRay*) o1;
   dxConvex* convex = (dxConvex*) o2;
   dVector3 origin,destination,contactpoint,out;
@@ -1161,6 +1182,8 @@ int dCollideRayConvex( dxGeom *o1, dxGeom *o2,
 	dIASSERT( skip >= (int)sizeof(dContactGeom) );
 	dIASSERT( o1->type == dRayClass );
 	dIASSERT( o2->type == dConvexClass );
+	dIASSERT ((flags & NUMC_MASK) >= 1);
+
 	dxRay* ray = (dxRay*) o1;
 	dxConvex* convex = (dxConvex*) o2;
 

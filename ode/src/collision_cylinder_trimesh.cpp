@@ -928,6 +928,11 @@ void _InitCylinderTrimeshData(sData& cData)
 #if dTRIMESH_OPCODE
 int dCollideCylinderTrimesh(dxGeom *o1, dxGeom *o2, int flags, dContactGeom *contact, int skip)
 {
+	dIASSERT( skip >= (int)sizeof( dContactGeom ) );
+	dIASSERT( o1->type == dCylinderClass );
+	dIASSERT( o2->type == dTriMeshClass );
+	dIASSERT ((flags & NUMC_MASK) >= 1);
+
 	// Main data holder
 	sData cData;
 
@@ -1027,11 +1032,6 @@ int dCollideCylinderTrimesh(dxGeom *o1, dxGeom *o2, int flags, dContactGeom *con
 		// loop through all intersecting triangles
 		for (int i = 0; i < TriCount; i++)
 		{
-			if(cData.nContacts	>= (cData.iFlags & NUMC_MASK)) 
-			{
-				break;
-			}
-
 			const int Triint = Triangles[i];
 			if (!Callback(cData.gTrimesh, cData.gCylinder, Triint)) continue;
 
@@ -1045,6 +1045,12 @@ int dCollideCylinderTrimesh(dxGeom *o1, dxGeom *o2, int flags, dContactGeom *con
 			// fill-in tri index for generated contacts
 			for (; ctContacts0<cData.nContacts; ctContacts0++)
 				cData.gLocalContacts[ctContacts0].triIndex = Triint;
+
+			// Putting "break" at the end of loop prevents unnecessary checks on first pass and "continue"
+			if(cData.nContacts	>= (cData.iFlags & NUMC_MASK))
+			{
+				break;
+			}
 		}
 	}
 
@@ -1056,6 +1062,11 @@ int dCollideCylinderTrimesh(dxGeom *o1, dxGeom *o2, int flags, dContactGeom *con
 #if dTRIMESH_GIMPACT
 int dCollideCylinderTrimesh(dxGeom *o1, dxGeom *o2, int flags, dContactGeom *contact, int skip)
 {
+	dIASSERT( skip >= (int)sizeof( dContactGeom ) );
+	dIASSERT( o1->type == dCylinderClass );
+	dIASSERT( o2->type == dTriMeshClass );
+	dIASSERT ((flags & NUMC_MASK) >= 1);
+	
 	// Main data holder
 	sData cData;
 
@@ -1104,11 +1115,6 @@ int dCollideCylinderTrimesh(dxGeom *o1, dxGeom *o2, int flags, dContactGeom *con
 
 	for(unsigned int i=0;i<collision_result.m_size;i++)
 	{
-	    if(cData.nContacts	>= (cData.iFlags & NUMC_MASK))
-        {
-            break;
-        }
-
 		const int Triint = boxesresult[i];
 		
 		dVector3 dv[3];
@@ -1119,6 +1125,12 @@ int dCollideCylinderTrimesh(dxGeom *o1, dxGeom *o2, int flags, dContactGeom *con
         // fill-in triangle index for generated contacts
         for (; ctContacts0<cData.nContacts; ctContacts0++)
             cData.gLocalContacts[ctContacts0].triIndex =  Triint;
+
+		// Putting "break" at the end of loop prevents unnecessary checks on first pass and "continue"
+		if(cData.nContacts	>= (cData.iFlags & NUMC_MASK))
+        {
+            break;
+        }
 	}
 
 	gim_trimesh_unlocks_work_data(ptrimesh);
