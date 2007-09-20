@@ -198,8 +198,7 @@ dCollideTTL(dxGeom* g1, dxGeom* g2, int Flags, dContactGeom* Contacts, int Strid
                 dInvertMatrix4(B, InvMatrix2);
 
                 
-                for (int i = 0; i < TriCount; i++)
-                    if (OutTriCount < (Flags & 0xffff))  {
+                for (int i = 0; i < TriCount; i++) {
                         
                         id1 = CollidingPairs[i].id0;
                         id2 = CollidingPairs[i].id1;
