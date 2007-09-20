@@ -224,7 +224,7 @@ bool _cldTestAxis(sData& cData,
 	// calculate length of separating axis vector
 	dReal fL = dVector3Length(vAxis);
 	// if not long enough
-	if ( fL < 1e-5f )
+	if ( fL < REAL(1e-5) )
 	{
 		// do nothing
 		return true;
@@ -335,7 +335,7 @@ bool _cldTestCircleToEdgeAxis(sData& cData,
 	dReal fdot2 = dVector3Dot(vkl , vCylinderAxis1);
 
 	// if edge is perpendicular to cylinder axis
-	if(dFabs(fdot2)<1e-5f)
+	if(dFabs(fdot2)<REAL(1e-5))
 	{
 		// this can't be separating axis, because edge is parallel to circle plane
 		return true;
@@ -528,7 +528,7 @@ bool _cldClipCylinderEdgeToTriangle(sData& cData, const dVector3 &v0, const dVec
 	vN2[2] = cData.vContactNormal[2] - cData.vCylinderAxis[2]*fTemp;
 
 	fTemp = dVector3Length(vN2);
-	if (fTemp < 1e-5)
+	if (fTemp < REAL(1e-5))
 	{
 		return false;
 	}
@@ -578,9 +578,9 @@ bool _cldClipCylinderEdgeToTriangle(sData& cData, const dVector3 &v0, const dVec
 	}
 
 	// plane with edge 0
-	//plPlane = Plane4f( ( cData.vNormal cross cData.vE0 ), 1e-5f);
+	//plPlane = Plane4f( ( cData.vNormal cross cData.vE0 ), REAL(1e-5));
 	dVector3Cross(cData.vNormal,cData.vE0,vPlaneNormal);
-	dConstructPlane(vPlaneNormal,1e-5f,plPlane);
+	dConstructPlane(vPlaneNormal,REAL(1e-5),plPlane);
 	if(!dClipEdgeToPlane( vCEdgePoint0, vCEdgePoint1, plPlane )) 
 	{ 
 		return false; 
@@ -589,8 +589,8 @@ bool _cldClipCylinderEdgeToTriangle(sData& cData, const dVector3 &v0, const dVec
 	// plane with edge 1
 	//dVector3 vTemp = ( cData.vNormal cross cData.vE1 );
 	dVector3Cross(cData.vNormal,cData.vE1,vPlaneNormal);
-	fTemp = dVector3Dot(cData.vE0 , vPlaneNormal) - dReal(1e-5);
-	//plPlane = Plane4f( vTemp, -(( cData.vE0 dot vTemp )-1e-5f));
+	fTemp = dVector3Dot(cData.vE0 , vPlaneNormal) - REAL(1e-5);
+	//plPlane = Plane4f( vTemp, -(( cData.vE0 dot vTemp )-REAL(1e-5)));
 	dConstructPlane(vPlaneNormal,-fTemp,plPlane);
 	if(!dClipEdgeToPlane( vCEdgePoint0, vCEdgePoint1, plPlane )) 
 	{
@@ -598,9 +598,9 @@ bool _cldClipCylinderEdgeToTriangle(sData& cData, const dVector3 &v0, const dVec
 	}
 
 	// plane with edge 2
-	// plPlane = Plane4f( ( cData.vNormal cross cData.vE2 ), 1e-5f);
+	// plPlane = Plane4f( ( cData.vNormal cross cData.vE2 ), REAL(1e-5));
 	dVector3Cross(cData.vNormal,cData.vE2,vPlaneNormal);
-	dConstructPlane(vPlaneNormal,1e-5f,plPlane);
+	dConstructPlane(vPlaneNormal,REAL(1e-5),plPlane);
 	if(!dClipEdgeToPlane( vCEdgePoint0, vCEdgePoint1, plPlane )) 
 	{ 
 		return false; 
@@ -964,11 +964,11 @@ int dCollideCylinderTrimesh(dxGeom *o1, dxGeom *o2, int flags, dContactGeom *con
 	obbRot[0][0] = /*(float)*/cData.mCylinderRot[0];
 	obbRot[1][0] = /*(float)*/cData.mCylinderRot[1];
 	obbRot[2][0] = /*(float)*/cData.mCylinderRot[2];
-	
+
 	obbRot[0][1] = /*(float)*/cData.mCylinderRot[4];
 	obbRot[1][1] = /*(float)*/cData.mCylinderRot[5];
 	obbRot[2][1] = /*(float)*/cData.mCylinderRot[6];
-	
+
 	obbRot[0][2] = /*(float)*/cData.mCylinderRot[8];
 	obbRot[1][2] = /*(float)*/cData.mCylinderRot[9];
 	obbRot[2][2] = /*(float)*/cData.mCylinderRot[10];

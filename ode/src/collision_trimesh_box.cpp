@@ -772,13 +772,13 @@ static void _cldClipping(const dVector3 &v0, const dVector3 &v1, const dVector3 
 
     // generate contact point between two closest points
 #if 0 //#ifdef ORIG -- if to use conditional define, GenerateContact must be moved into #else
-    dContactGeom* Contact = SAFECONTACT(iFlags, ContactGeoms, ctContacts, iStride);
-    Contact->depth = fBestDepth;
-    SET(Contact->normal,vBestNormal);
-    SET(Contact->pos,vPntTmp);
-    Contact->g1 = Geom1;
-    Contact->g2 = Geom2;
-    ctContacts++;
+	dContactGeom* Contact = SAFECONTACT(iFlags, ContactGeoms, ctContacts, iStride);
+	Contact->depth = fBestDepth;
+	SET(Contact->normal,vBestNormal);
+	SET(Contact->pos,vPntTmp);
+	Contact->g1 = Geom1;
+	Contact->g2 = Geom2;
+	ctContacts++;
 #endif
     GenerateContact(iFlags, ContactGeoms, iStride,  Geom1, Geom2,
                     vPntTmp, vBestNormal, fBestDepth, ctContacts);
@@ -944,14 +944,14 @@ static void _cldClipping(const dVector3 &v0, const dVector3 &v1, const dVector3 
       ADD(avTempArray2[i],v0,vPntTmp);
 
 #if 0 //#ifdef ORIG -- if to use conditional define, GenerateContact must be moved into #else
-          dContactGeom* Contact = SAFECONTACT(iFlags, ContactGeoms, ctContacts, iStride);
-
-          Contact->depth = -fTempDepth;
-          SET(Contact->normal,vBestNormal);
-          SET(Contact->pos,vPntTmp);
-          Contact->g1 = Geom1;
-          Contact->g2 = Geom2;
-          ctContacts++;
+      dContactGeom* Contact = SAFECONTACT(iFlags, ContactGeoms, ctContacts, iStride);
+	  
+      Contact->depth = -fTempDepth;
+      SET(Contact->normal,vBestNormal);
+      SET(Contact->pos,vPntTmp);
+      Contact->g1 = Geom1;
+      Contact->g2 = Geom2;
+      ctContacts++;
 #endif
 		GenerateContact(iFlags, ContactGeoms, iStride,  Geom1, Geom2,
 						vPntTmp, vBestNormal, -fTempDepth, ctContacts);
@@ -1068,14 +1068,14 @@ static void _cldClipping(const dVector3 &v0, const dVector3 &v1, const dVector3 
       ADD(avTempArray1[i],vHullBoxPos,vPntTmp);
 
 #if 0 //#ifdef ORIG -- if to use conditional define, GenerateContact must be moved into #else
-          dContactGeom* Contact = SAFECONTACT(iFlags, ContactGeoms, ctContacts, iStride);
+      dContactGeom* Contact = SAFECONTACT(iFlags, ContactGeoms, ctContacts, iStride);
 
-          Contact->depth = -fTempDepth;
-          SET(Contact->normal,vBestNormal);
-          SET(Contact->pos,vPntTmp);
-          Contact->g1 = Geom1;
-          Contact->g2 = Geom2;
-          ctContacts++;
+      Contact->depth = -fTempDepth;
+      SET(Contact->normal,vBestNormal);
+      SET(Contact->pos,vPntTmp);
+      Contact->g1 = Geom1;
+      Contact->g2 = Geom2;
+      ctContacts++;
 #endif
 		GenerateContact(iFlags, ContactGeoms, iStride,  Geom1, Geom2,
 					  vPntTmp, vBestNormal, -fTempDepth, ctContacts);
@@ -1186,19 +1186,19 @@ int dCollideBTL(dxGeom* g1, dxGeom* BoxGeom, int Flags, dContactGeom* Contacts, 
   // It is necessary to make a typedef and cast to it
   // (e.g. typedef float opc_float;)
   // However I'm not sure in what header it should be added.
-  
+
   Box.mExtents.x = /*(float)*/vBoxHalfSize[0];
   Box.mExtents.y = /*(float)*/vBoxHalfSize[1];
   Box.mExtents.z = /*(float)*/vBoxHalfSize[2];
-  
+
   Box.mRot.m[0][0] = /*(float)*/mRotBox[0];
   Box.mRot.m[1][0] = /*(float)*/mRotBox[1];
   Box.mRot.m[2][0] = /*(float)*/mRotBox[2];
-  
+
   Box.mRot.m[0][1] = /*(float)*/mRotBox[4];
   Box.mRot.m[1][1] = /*(float)*/mRotBox[5];
   Box.mRot.m[2][1] = /*(float)*/mRotBox[6];
-  
+
   Box.mRot.m[0][2] = /*(float)*/mRotBox[8];
   Box.mRot.m[1][2] = /*(float)*/mRotBox[9];
   Box.mRot.m[2][2] = /*(float)*/mRotBox[10];
@@ -1439,7 +1439,7 @@ GenerateContact(int in_Flags, dContactGeom* in_Contacts, int in_Stride,
 				if (dDOT(diff, diff) < dEpsilon)
 				{
 					// same normal?
-					if (fabs(dDOT(in_Normal, Contact->normal)) > (dReal(1.0)-dEpsilon))
+					if (dFabs(dDOT(in_Normal, Contact->normal)) > (REAL(1.0)-dEpsilon))
 					{
 						if (in_Depth > Contact->depth)
 							Contact->depth = in_Depth;

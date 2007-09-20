@@ -38,6 +38,7 @@
 #include "collision_kernel.h"	// for dxGeom
 #include "collision_util.h"
 
+
 int dCollideCylinderPlane(dxGeom *Cylinder, dxGeom *Plane, int flags, dContactGeom *contact, int skip)
 {
 	dIASSERT (skip >= (int)sizeof(dContactGeom));
@@ -48,10 +49,10 @@ int dCollideCylinderPlane(dxGeom *Cylinder, dxGeom *Plane, int flags, dContactGe
 	int GeomCount = 0; // count of used contactgeoms
 
 #ifdef dSINGLE
-	const dReal toleranz = 0.0001f;
+	const dReal toleranz = REAL(0.0001);
 #endif
 #ifdef dDOUBLE
-	const dReal toleranz = 0.0000001;
+	const dReal toleranz = REAL(0.0000001);
 #endif
 
 	// Get the properties of the cylinder (length+radius)
@@ -70,7 +71,7 @@ int dCollideCylinderPlane(dxGeom *Cylinder, dxGeom *Plane, int flags, dContactGe
 	vDir1[2] = Cylinder->final_posr->R[10];
 
 	dReal s;
-	s = length * dReal(0.5);
+	s = length * REAL(0.5);
 	G1Pos2[0] = vDir1[0] * s + cylpos[0];
 	G1Pos2[1] = vDir1[1] * s + cylpos[1];
 	G1Pos2[2] = vDir1[2] * s + cylpos[2];
@@ -84,9 +85,9 @@ int dCollideCylinderPlane(dxGeom *Cylinder, dxGeom *Plane, int flags, dContactGe
 	// parallel-check
 	s = vDir1[0] * PlaneNormal[0] + vDir1[1] * PlaneNormal[1] + vDir1[2] * PlaneNormal[2];
 	if(s < 0)
-		s += dReal(1.0); // is ca. 0, if vDir1 and PlaneNormal are parallel
+		s += REAL(1.0); // is ca. 0, if vDir1 and PlaneNormal are parallel
 	else
-		s -= dReal(1.0); // is ca. 0, if vDir1 and PlaneNormal are parallel
+		s -= REAL(1.0); // is ca. 0, if vDir1 and PlaneNormal are parallel
 	if(s < toleranz && s > (-toleranz))
 	{
 		// discs are parallel to the plane
@@ -122,7 +123,7 @@ int dCollideCylinderPlane(dxGeom *Cylinder, dxGeom *Plane, int flags, dContactGe
 		if(vDir1[0] < toleranz && vDir1[0] > (-toleranz))
 		{
 			// not x-axis
-			V1[0] = vDir1[0] + dReal(1.0); // random value
+			V1[0] = vDir1[0] + REAL(1.0); // random value
 			V1[1] = vDir1[1];
 			V1[2] = vDir1[2];
 		}
@@ -130,7 +131,7 @@ int dCollideCylinderPlane(dxGeom *Cylinder, dxGeom *Plane, int flags, dContactGe
 		{
 			// maybe x-axis
 			V1[0] = vDir1[0];
-			V1[1] = vDir1[1] + dReal(1.0); // random value
+			V1[1] = vDir1[1] + REAL(1.0); // random value
 			V1[2] = vDir1[2];
 		}
 		// V1 is now another direction than vDir1

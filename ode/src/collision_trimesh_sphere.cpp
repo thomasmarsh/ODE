@@ -37,7 +37,7 @@
 #define MERGECONTACTS
 
 // Ripped from Opcode 1.1.
-static bool GetContactData(const dVector3& Center, dReal Radius, const dVector3 Origin, const dVector3 Edge0, const dVector3 Edge1, dReal& Dist, float& u, float& v){
+static bool GetContactData(const dVector3& Center, dReal Radius, const dVector3 Origin, const dVector3 Edge0, const dVector3 Edge1, dReal& Dist, dReal& u, dReal& v){
   
         // now onto the bulk of the collision...
 
@@ -47,16 +47,16 @@ static bool GetContactData(const dVector3& Center, dReal Radius, const dVector3 
 	Diff[2] = Origin[2] - Center[2];
 	Diff[3] = Origin[3] - Center[3];
 
-	float A00 = (float)dDOT(Edge0, Edge0);
-	float A01 = (float)dDOT(Edge0, Edge1);
-	float A11 = (float)dDOT(Edge1, Edge1);
+	dReal A00 = dDOT(Edge0, Edge0);
+	dReal A01 = dDOT(Edge0, Edge1);
+	dReal A11 = dDOT(Edge1, Edge1);
 
-	float B0 = (float)dDOT(Diff, Edge0);
-	float B1 = (float)dDOT(Diff, Edge1);
+	dReal B0 = dDOT(Diff, Edge0);
+	dReal B1 = dDOT(Diff, Edge1);
 
-	float C = (float)dDOT(Diff, Diff);
+	dReal C = dDOT(Diff, Diff);
 
-	float Det = (float)dFabs(A00 * A11 - A01 * A01);
+	dReal Det = dFabs(A00 * A11 - A01 * A01);
 	u = A01 * B1 - A11 * B0;
 	v = A01 * B0 - A00 * B1;
 
@@ -354,16 +354,16 @@ int dCollideSTL(dxGeom* g1, dxGeom* SphereGeom, int Flags, dContactGeom* Contact
 				* to be adjusted (penetration has occured anyway).
 				*/
 		  
-			float side = dDOT(Plane,Position) - Plane[3];
+			dReal side = dDOT(Plane,Position) - Plane[3];
 
-			if(side < 0.0f) {
+			if(side < REAL(0.0)) {
 				continue;
 			}
 
 			dReal Depth;
-			float u, v;
+			dReal u, v;
 			if (!GetContactData(Position, Radius, v0, vu, vv, Depth, u, v)){
-				continue;	// Sphere doesnt hit triangle
+				continue;	// Sphere doesn't hit triangle
 			}
 
 			if (Depth < REAL(0.0)){
@@ -542,7 +542,7 @@ int dCollideSTL(dxGeom* g1, dxGeom* SphereGeom, int Flags, dContactGeom* Contact
 
     dContactGeom* pcontact;
 	unsigned i;
-
+	
 	for (i=0;i<contactcount;i++)
 	{
         pcontact = SAFECONTACT(Flags, Contacts, i, Stride);
@@ -550,7 +550,7 @@ int dCollideSTL(dxGeom* g1, dxGeom* SphereGeom, int Flags, dContactGeom* Contact
         pcontact->pos[0] = ptrimeshcontacts->m_point[0];
         pcontact->pos[1] = ptrimeshcontacts->m_point[1];
         pcontact->pos[2] = ptrimeshcontacts->m_point[2];
-        pcontact->pos[3] = 1.0f;
+        pcontact->pos[3] = REAL(1.0);
 
         pcontact->normal[0] = ptrimeshcontacts->m_normal[0];
         pcontact->normal[1] = ptrimeshcontacts->m_normal[1];

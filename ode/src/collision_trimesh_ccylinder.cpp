@@ -375,7 +375,7 @@ static BOOL _cldTestAxis(const dVector3 &v0,
 	dReal fL = LENGTHOF(vAxis);
 	// if not long enough
 	// TODO : dReal epsilon please
-	if ( fL < 1e-5f ) 
+	if ( fL < REAL(1e-5) ) 
 	{
 		// do nothing
 		//iLastOutAxis = 0;
@@ -803,7 +803,7 @@ static void _cldTestOneTriangleVSCapsule( const dVector3 &v0,
 	if ( iBestAxis == 0 ) 
 	{
 		// this should not happen (we should already exit in that case)
-		ASSERT(FALSE);
+		dIASSERT(FALSE);
 		// do nothing
 		return;
 	}
@@ -850,21 +850,21 @@ static void _cldTestOneTriangleVSCapsule( const dVector3 &v0,
 	// plane with edge 0
 	dVector3 vTemp;
 	dCROSS(vTemp,=,vN,vE0);
-	CONSTRUCTPLANE(plPlane, vTemp, 1e-5f);
+	CONSTRUCTPLANE(plPlane, vTemp, REAL(1e-5));
 	if(!_cldClipEdgeToPlane( vCEdgePoint0, vCEdgePoint1, plPlane ))
 	{ 
 		return; 
 	}
 
 	dCROSS(vTemp,=,vN,vE1);
-	CONSTRUCTPLANE(plPlane, vTemp, -(dDOT(vE0,vTemp)-1e-5f));
+	CONSTRUCTPLANE(plPlane, vTemp, -(dDOT(vE0,vTemp)-REAL(1e-5)));
 	if(!_cldClipEdgeToPlane( vCEdgePoint0, vCEdgePoint1, plPlane )) 
 	{ 
 		return; 
 	}
 
 	dCROSS(vTemp,=,vN,vE2);
-	CONSTRUCTPLANE(plPlane, vTemp, 1e-5f);
+	CONSTRUCTPLANE(plPlane, vTemp, REAL(1e-5));
 	if(!_cldClipEdgeToPlane( vCEdgePoint0, vCEdgePoint1, plPlane )) { 
 		return; 
 	}
@@ -982,15 +982,15 @@ int dCollideCCTL(dxGeom *o1, dxGeom *o2, int flags, dContactGeom *contact, int s
 	 Point cExtents(/*(float)*/ vCapsuleRadius, /*(float)*/ vCapsuleRadius,/*(float)*/ fCapsuleSize/2);
 	 
 	 Matrix3x3 obbRot;
-	 
+
 	 obbRot[0][0] = /*(float)*/ mCapsuleRotation[0];
 	 obbRot[1][0] = /*(float)*/ mCapsuleRotation[1];
 	 obbRot[2][0] = /*(float)*/ mCapsuleRotation[2];
-	 
+
 	 obbRot[0][1] = /*(float)*/ mCapsuleRotation[4];
 	 obbRot[1][1] = /*(float)*/ mCapsuleRotation[5];
 	 obbRot[2][1] = /*(float)*/ mCapsuleRotation[6];
-	 
+
 	 obbRot[0][2] = /*(float)*/ mCapsuleRotation[8];
 	 obbRot[1][2] = /*(float)*/ mCapsuleRotation[9];
 	 obbRot[2][2] = /*(float)*/ mCapsuleRotation[10];
@@ -1076,6 +1076,7 @@ int dCollideCCTL(dxGeom *o1, dxGeom *o2, int flags, dContactGeom *contact, int s
 			{
 				break;
 			}
+			
 		}
 	 }
 
