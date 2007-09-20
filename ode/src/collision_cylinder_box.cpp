@@ -550,6 +550,7 @@ int _cldTestSeparatingAxes(sCylinderBoxData& cData)
 
 int _cldClipCylinderToBox(sCylinderBoxData& cData)
 {
+	dIASSERT(cData.nContacts != (cData.iFlags & NUMC_MASK));
 
 	// calculate that vector perpendicular to cylinder axis which closes lowest angle with collision normal
 	dVector3 vN;
@@ -671,14 +672,17 @@ int _cldClipCylinderToBox(sCylinderBoxData& cData)
 	dVector3Inv(Contact0->normal);
 	cData.nContacts++;
 	
-	dContactGeom* Contact1 = SAFECONTACT(cData.iFlags, cData.gContact, cData.nContacts, cData.iSkip);
-	Contact1->depth = cData.fDepth1;
-	dVector3Copy(cData.vNormal,Contact1->normal);
-	dVector3Copy(cData.vEp1,Contact1->pos);
-	Contact1->g1 = cData.gCylinder;
-	Contact1->g2 = cData.gBox;
-	dVector3Inv(Contact1->normal);
-	cData.nContacts++;
+	if (cData.nContacts != (cData.iFlags & NUMC_MASK))
+	{
+		dContactGeom* Contact1 = SAFECONTACT(cData.iFlags, cData.gContact, cData.nContacts, cData.iSkip);
+		Contact1->depth = cData.fDepth1;
+		dVector3Copy(cData.vNormal,Contact1->normal);
+		dVector3Copy(cData.vEp1,Contact1->pos);
+		Contact1->g1 = cData.gCylinder;
+		Contact1->g2 = cData.gBox;
+		dVector3Inv(Contact1->normal);
+		cData.nContacts++;
+	}
 
 	return 1;
 }
@@ -686,6 +690,8 @@ int _cldClipCylinderToBox(sCylinderBoxData& cData)
 
 void _cldClipBoxToCylinder(sCylinderBoxData& cData ) 
 {
+	dIASSERT(cData.nContacts != (cData.iFlags & NUMC_MASK));
+	
 	dVector3 vCylinderCirclePos, vCylinderCircleNormal_Rel;
 	// check which circle from cylinder we take for clipping
 	if ( dVector3Dot(cData.vCylinderAxis, cData.vNormal) > REAL(0.0) ) 
@@ -901,6 +907,11 @@ void _cldClipBoxToCylinder(sCylinderBoxData& cData )
 				Contact0->g2 = cData.gBox;
 				dVector3Inv(Contact0->normal);
 				cData.nContacts++;
+				
+				if (cData.nContacts == (cData.iFlags & NUMC_MASK))
+				{
+					break;
+				}
 			}
 		}
 	}
@@ -928,6 +939,11 @@ void _cldClipBoxToCylinder(sCylinderBoxData& cData )
 				Contact0->g2 = cData.gBox;
 				dVector3Inv(Contact0->normal);
 				cData.nContacts++;
+				
+				if (cData.nContacts == (cData.iFlags & NUMC_MASK))
+				{
+					break;
+				}
 			}
 		}
 	}
