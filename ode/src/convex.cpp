@@ -1045,14 +1045,15 @@ int TestConvexIntersection(dxConvex& cvx1,dxConvex& cvx2, int flags,
 		}      
 	}
 	// If we get here, there was a collision
+/* -- uncomment if you are debugging
 	static int  cvxhit=0;
-	contacts=0;
 	if(cvxhit<2)
 		fprintf(stdout,"Plane: %f,%f,%f,%f\n",
-		savedplane[0],
-		savedplane[1],
-		savedplane[2],
-		savedplane[3]);
+		(double)savedplane[0],
+		(double)savedplane[1],
+		(double)savedplane[2],
+		(double)savedplane[3]);
+*/
 	for(unsigned int i=0;i<g1->pointcount;++i)
 	{
 		if(contacts==maxc) break;
@@ -1075,16 +1076,20 @@ int TestConvexIntersection(dxConvex& cvx1,dxConvex& cvx2, int flags,
 			CONTACT(contact,skip*contacts)->depth = -distance;
 			CONTACT(contact,skip*contacts)->g1 = g1;
 			CONTACT(contact,skip*contacts)->g2 = g2;
+/* -- uncomment if you are debugging
 			if(cvxhit<2)
 				fprintf(stdout,"Contact: %f,%f,%f depth %f\n",
-				CONTACT(contact,skip*contacts)->pos[0],
-				CONTACT(contact,skip*contacts)->pos[1],
-				CONTACT(contact,skip*contacts)->pos[2],
-				CONTACT(contact,skip*contacts)->depth);
+				(double)(CONTACT(contact,skip*contacts)->pos[0]),
+				(double)(CONTACT(contact,skip*contacts)->pos[1]),
+				(double)(CONTACT(contact,skip*contacts)->pos[2]),
+				(double)(CONTACT(contact,skip*contacts)->depth));
+*/
 			contacts++;
 		}
 	}
+/* -- uncomment if you are debugging
 	cvxhit++;
+*/
 	return contacts;
 }
 
