@@ -770,7 +770,7 @@ static void _cldClipping(const dVector3 &v0, const dVector3 &v1, const dVector3 
     vPntTmp[2]*=0.5f;
 
     // generate contact point between two closest points
-#ifdef ORIG
+#if 0 //#ifdef ORIG -- if to use conditional define, GenerateContact must be moved into #else
     if (ctContacts < (iFlags & 0x0ffff)) {
     dContactGeom* Contact = SAFECONTACT(iFlags, ContactGeoms, ctContacts, iStride);
     Contact->depth = fBestDepth;
@@ -945,7 +945,7 @@ static void _cldClipping(const dVector3 &v0, const dVector3 &v1, const dVector3 
       dVector3 vPntTmp;
       ADD(avTempArray2[i],v0,vPntTmp);
 
-#ifdef ORIG
+#if 0 //#ifdef ORIG -- if to use conditional define, GenerateContact must be moved into #else
     if (ctContacts < (iFlags & 0x0ffff)) {
           dContactGeom* Contact = SAFECONTACT(iFlags, ContactGeoms, ctContacts, iStride);
 
@@ -1067,7 +1067,7 @@ static void _cldClipping(const dVector3 &v0, const dVector3 &v1, const dVector3 
       dVector3 vPntTmp;
       ADD(avTempArray1[i],vHullBoxPos,vPntTmp);
 
-#ifdef ORIG
+#if 0 //#ifdef ORIG -- if to use conditional define, GenerateContact must be moved into #else
       if (ctContacts < (iFlags & 0x0ffff)) {
           dContactGeom* Contact = SAFECONTACT(iFlags, ContactGeoms, ctContacts, iStride);
 
