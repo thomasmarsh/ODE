@@ -707,6 +707,7 @@ static bool _cldClosestPointOnTwoLines( dVector3 vPoint1, dVector3 vLenVec1,
 
 // clip and generate contacts
 static void _cldClipping(const dVector3 &v0, const dVector3 &v1, const dVector3 &v2) {
+  dIASSERT( !(iFlags & CONTACTS_UNIMPORTANT) || ctContacts < (iFlags & NUMC_MASK) ); // Do not call the function if there is no room to store results
 
   // if we have edge/edge intersection
   if ( iBestAxis > 4 ) {
@@ -952,8 +953,12 @@ static void _cldClipping(const dVector3 &v0, const dVector3 &v1, const dVector3 
           Contact->g2 = Geom2;
           ctContacts++;
 #endif
-    GenerateContact(iFlags, ContactGeoms, iStride,  Geom1, Geom2,
-                    vPntTmp, vBestNormal, -fTempDepth, ctContacts);
+		GenerateContact(iFlags, ContactGeoms, iStride,  Geom1, Geom2,
+						vPntTmp, vBestNormal, -fTempDepth, ctContacts);
+
+		if ((ctContacts | CONTACTS_UNIMPORTANT) == (iFlags & (NUMC_MASK | CONTACTS_UNIMPORTANT))) {
+			break;
+		}
     }
 
     //dAASSERT(ctContacts>0);
@@ -1072,8 +1077,12 @@ static void _cldClipping(const dVector3 &v0, const dVector3 &v1, const dVector3 
           Contact->g2 = Geom2;
           ctContacts++;
 #endif
-      GenerateContact(iFlags, ContactGeoms, iStride,  Geom1, Geom2,
-                      vPntTmp, vBestNormal, -fTempDepth, ctContacts);
+		GenerateContact(iFlags, ContactGeoms, iStride,  Geom1, Geom2,
+					  vPntTmp, vBestNormal, -fTempDepth, ctContacts);
+
+		if ((ctContacts | CONTACTS_UNIMPORTANT) == (iFlags & (NUMC_MASK | CONTACTS_UNIMPORTANT))) {
+			break;
+		}
     }
 
     //dAASSERT(ctContacts>0);
@@ -1172,7 +1181,6 @@ int dCollideBTL(dxGeom* g1, dxGeom* BoxGeom, int Flags, dContactGeom* Contacts, 
   Box.mCenter.y = vPosBox[1];
   Box.mCenter.z = vPosBox[2];
 
-
   // It is a potential issue to explicitly cast to float 
   // if custom width floating point type is introduced in OPCODE.
   // It is necessary to make a typedef and cast to it
@@ -1242,7 +1250,7 @@ int dCollideBTL(dxGeom* g1, dxGeom* BoxGeom, int Flags, dContactGeom* Contacts, 
          TriMesh->ArrayCallback(TriMesh, BoxGeom, Triangles, TriCount);
     }
 
-    int ctContacts0 = ctContacts;
+    int ctContacts0 = 0;
 
     // loop through all intersecting triangles
     for (int i = 0; i < TriCount; i++){
@@ -1262,6 +1270,16 @@ int dCollideBTL(dxGeom* g1, dxGeom* BoxGeom, int Flags, dContactGeom* Contacts, 
 		// fill-in tri index for generated contacts
 		for (; ctContacts0<ctContacts; ctContacts0++)
 			SAFECONTACT(iFlags, ContactGeoms, ctContacts0, iStride)->side1 = Triint;
+
+		/*
+			NOTE by Oleh_Derevenko:
+			The function continues checking triangles after maximal number 
+			of contacts is reached because it selects maximal penetration depths.
+			See also comments in GenerateContact()
+		*/
+		// Putting "break" at the end of loop prevents unnecessary checks on first pass and "continue"
+		if ((ctContacts | CONTACTS_UNIMPORTANT) == (iFlags & (NUMC_MASK | CONTACTS_UNIMPORTANT)))
+			break;
     }
   }
 
@@ -1362,6 +1380,16 @@ int dCollideBTL(dxGeom* g1, dxGeom* BoxGeom, int Flags, dContactGeom* Contacts, 
 		// fill-in tri index for generated contacts
 		for (; ctContacts0<ctContacts; ctContacts0++)
 			SAFECONTACT(iFlags, ContactGeoms, ctContacts0, iStride)->side1 = Triint;
+		
+		/*
+			NOTE by Oleh_Derevenko:
+			The function continues checking triangles after maximal number 
+			of contacts is reached because it selects maximal penetration depths.
+			See also comments in GenerateContact()
+		*/
+		// Putting "break" at the end of loop prevents unnecessary checks on first pass and "continue"
+		if ((ctContacts | CONTACTS_UNIMPORTANT) == (iFlags & (NUMC_MASK | CONTACTS_UNIMPORTANT)))
+			break;
 	}
 
 	gim_trimesh_unlocks_work_data(ptrimesh);
@@ -1390,49 +1418,57 @@ GenerateContact(int in_Flags, dContactGeom* in_Contacts, int in_Stride,
 		collected because it has a side effect of replacing penetration depth of
 		existing contact with larger penetration depth of another matching normal contact.
 		If this logic is not necessary any more, you can bail out on reach of contact
-		number maximum immediately in dCollideBTL().
+		number maximum immediately in dCollideBTL(). You will also need to correct 
+		conditional statements after invocations of GenerateContact() in _cldClipping().
 	*/
 	do 
 	{
 		dContactGeom* Contact;
 		dVector3 diff;
 		
-		bool duplicate = false;
-		for (int i=0; i<OutTriCount; i++)
+		if (!(in_Flags & CONTACTS_UNIMPORTANT))
 		{
-			Contact = SAFECONTACT(in_Flags, in_Contacts, i, in_Stride);
-
-			// same position?
-			for (int j=0; j<3; j++)
-				diff[j] = in_ContactPos[j] - Contact->pos[j];
-			if (dDOT(diff, diff) < dEpsilon)
+			bool duplicate = false;
+			for (int i=0; i<OutTriCount; i++)
 			{
-				// same normal?
-				if (fabs(dDOT(in_Normal, Contact->normal)) > (dReal(1.0)-dEpsilon))
+				Contact = SAFECONTACT(in_Flags, in_Contacts, i, in_Stride);
+
+				// same position?
+				for (int j=0; j<3; j++)
+					diff[j] = in_ContactPos[j] - Contact->pos[j];
+				if (dDOT(diff, diff) < dEpsilon)
 				{
-					if (in_Depth > Contact->depth)
-						Contact->depth = in_Depth;
-					duplicate = true;
-					/*
-						NOTE by Oleh_Derevenko:
-						There may be a case when two normals are close to each other but not duplicate
-						while third normal is detected to be duplicate for both of them.
-						This is the only reason I can think of, there is no "break" statement.
-						Perhaps author considered it to be logical that the third normal would 
-						replace the depth in both of initial contacts. 
-						However, I consider it a questionable practice which should not
-						be applied without deep understanding of underlaying physics.
-						Even more, is this situation with close normal triplet acceptable at all?
-						Should not be two initial contacts reduced to one (replaced with the latter)?
-						If you know the answers for these questions, you may want to change this code.
-						See the same statement in GenerateContact() of collision_trimesh_trimesh.cpp
-					*/
+					// same normal?
+					if (fabs(dDOT(in_Normal, Contact->normal)) > (dReal(1.0)-dEpsilon))
+					{
+						if (in_Depth > Contact->depth)
+							Contact->depth = in_Depth;
+						duplicate = true;
+						/*
+							NOTE by Oleh_Derevenko:
+							There may be a case when two normals are close to each other but not duplicate
+							while third normal is detected to be duplicate for both of them.
+							This is the only reason I can think of, there is no "break" statement.
+							Perhaps author considered it to be logical that the third normal would 
+							replace the depth in both of initial contacts. 
+							However, I consider it a questionable practice which should not
+							be applied without deep understanding of underlaying physics.
+							Even more, is this situation with close normal triplet acceptable at all?
+							Should not be two initial contacts reduced to one (replaced with the latter)?
+							If you know the answers for these questions, you may want to change this code.
+							See the same statement in GenerateContact() of collision_trimesh_trimesh.cpp
+						*/
+					}
 				}
 			}
+			if (duplicate || OutTriCount == (in_Flags & NUMC_MASK))
+			{
+				break;
+			}
 		}
-		if (duplicate || OutTriCount == (in_Flags & NUMC_MASK))
+		else
 		{
-			break;
+			dIASSERT(OutTriCount < (in_Flags & NUMC_MASK));
 		}
 
 		// Add a new contact

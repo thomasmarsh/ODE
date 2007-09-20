@@ -174,7 +174,7 @@ inline int	_ProcessLocalContacts(sData& cData)
 	}
 
 #ifdef OPTIMIZE_CONTACTS
-	if (cData.nContacts > 1)
+	if (cData.nContacts > 1 && !(cData.iFlags & CONTACTS_UNIMPORTANT))
 	{
 		// Can be optimized...
 		_OptimizeLocalContacts(cData);

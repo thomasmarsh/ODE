@@ -1284,6 +1284,12 @@ int dCollideRayConvex( dxGeom *o1, dxGeom *o2,
 
 				// Store depth
 				contact->depth = alpha;
+				
+				if ((flags & CONTACTS_UNIMPORTANT) && contact->depth <= ray->length )
+				{
+					// Break on any contact if contacts are not important
+					break; 
+				}
 			}
 		}
 	}

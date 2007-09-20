@@ -420,6 +420,10 @@ dCollideTTL(dxGeom* g1, dxGeom* g2, int Flags, dContactGeom* Contacts, int Strid
                                         GenerateContact(Flags, Contacts, Stride,  TriMesh1,  TriMesh2,
                                                         pen_v[j], n, depth, OutTriCount);
                                         badPen = false;
+
+										if ((OutTriCount | CONTACTS_UNIMPORTANT) == (Flags & (NUMC_MASK | CONTACTS_UNIMPORTANT))) {
+											break;
+										}
                                     }
                                 
 
@@ -432,6 +436,10 @@ dCollideTTL(dxGeom* g1, dxGeom* g2, int Flags, dContactGeom* Contacts, int Strid
                                             GenerateContact(Flags, Contacts, Stride,  TriMesh1,  TriMesh2,
                                                             pen_v[j], n, depth, OutTriCount);
                                             badPen = false;
+
+											if ((OutTriCount | CONTACTS_UNIMPORTANT) == (Flags & (NUMC_MASK | CONTACTS_UNIMPORTANT))) {
+												break;
+											}
                                     }
                                 }
 
@@ -527,9 +535,9 @@ dCollideTTL(dxGeom* g1, dxGeom* g2, int Flags, dContactGeom* Contacts, int Strid
                                             }
                                         }
 
-                                        contact_elt_length = fabs(dDOT(firstClippedElt[j], n));
-                                        
                                         if (dp >= 0.0) {
+                                            contact_elt_length = fabs(dDOT(firstClippedElt[j], n));
+                                        
                                             depth = dp;
                                             if (depth == 0.0)
                                                 depth = dMin(DISTANCE_EPSILON, contact_elt_length);
@@ -542,6 +550,10 @@ dCollideTTL(dxGeom* g1, dxGeom* g2, int Flags, dContactGeom* Contacts, int Strid
                                                 GenerateContact(Flags, Contacts, Stride,  TriMesh1,  TriMesh2,
                                                                 firstClippedTri.Points[j], n, depth, OutTriCount);
                                                 badPen = false;
+
+												if ((OutTriCount | CONTACTS_UNIMPORTANT) == (Flags & (NUMC_MASK | CONTACTS_UNIMPORTANT))) {
+													break;
+												}
                                             }
                                         }
 
@@ -625,9 +637,9 @@ dCollideTTL(dxGeom* g1, dxGeom* g2, int Flags, dContactGeom* Contacts, int Strid
                                         }
 
 
-                                        contact_elt_length = fabs(dDOT(secondClippedElt[j],n));
-                                        
                                         if (dp >= 0.0) {
+                                            contact_elt_length = fabs(dDOT(secondClippedElt[j],n));
+                                        
                                             depth = dp;
                                             if (depth == 0.0)
                                                 depth = dMin(DISTANCE_EPSILON, contact_elt_length);
@@ -640,6 +652,10 @@ dCollideTTL(dxGeom* g1, dxGeom* g2, int Flags, dContactGeom* Contacts, int Strid
                                                 GenerateContact(Flags, Contacts, Stride,  TriMesh1,  TriMesh2,
                                                                 secondClippedTri.Points[j], n, depth, OutTriCount);
                                                 badPen = false;
+
+												if ((OutTriCount | CONTACTS_UNIMPORTANT) == (Flags & (NUMC_MASK | CONTACTS_UNIMPORTANT))) {
+													break;
+												}
                                             }
                                         }
                                         
@@ -798,6 +814,10 @@ dCollideTTL(dxGeom* g1, dxGeom* g2, int Flags, dContactGeom* Contacts, int Strid
                                                     GenerateContact(Flags, Contacts, Stride,  TriMesh1,  TriMesh2,
                                                                     firstClippedTri.Points[j], esn, depth, OutTriCount);
                                                     badPen = false;
+
+													if ((OutTriCount | CONTACTS_UNIMPORTANT) == (Flags & (NUMC_MASK | CONTACTS_UNIMPORTANT))) {
+														break;
+													}
                                                 }    
                                             }
                                         }
@@ -822,6 +842,10 @@ dCollideTTL(dxGeom* g1, dxGeom* g2, int Flags, dContactGeom* Contacts, int Strid
                                                         GenerateContact(Flags, Contacts, Stride,  TriMesh1,  TriMesh2,
                                                                         secondClippedTri.Points[j], esn, depth, OutTriCount);
                                                         badPen = false;
+
+														if ((OutTriCount | CONTACTS_UNIMPORTANT) == (Flags & (NUMC_MASK | CONTACTS_UNIMPORTANT))) {
+															break;
+														}
                                                     }    
                                                 }
                                             }
@@ -850,6 +874,10 @@ dCollideTTL(dxGeom* g1, dxGeom* g2, int Flags, dContactGeom* Contacts, int Strid
                                                 GenerateContact(Flags, Contacts, Stride,  TriMesh1,  TriMesh2,
                                                                 pen_v[j], n, (dReal) dp, OutTriCount);
                                                 badPen = false;
+
+												if ((OutTriCount | CONTACTS_UNIMPORTANT) == (Flags & (NUMC_MASK | CONTACTS_UNIMPORTANT))) {
+													break;
+												}
                                             }
                                         }
                                         
@@ -868,6 +896,10 @@ dCollideTTL(dxGeom* g1, dxGeom* g2, int Flags, dContactGeom* Contacts, int Strid
                                                     GenerateContact(Flags, Contacts, Stride,  TriMesh1,  TriMesh2,
                                                                     pen_v[j], n, (dReal) dp, OutTriCount);
                                                     badPen = false;
+
+													if ((OutTriCount | CONTACTS_UNIMPORTANT) == (Flags & (NUMC_MASK | CONTACTS_UNIMPORTANT))) {
+														break;
+													}
                                                 }
                                             }
                                         }
@@ -926,7 +958,11 @@ dCollideTTL(dxGeom* g1, dxGeom* g2, int Flags, dContactGeom* Contacts, int Strid
                                 
                             } // not coplanar (main loop)
                         } // TriTriIntersectWithIsectLine
-                } // if (OutTriCount < (Flags & 0xffff))
+                
+						if ((OutTriCount | CONTACTS_UNIMPORTANT) == (Flags & (NUMC_MASK | CONTACTS_UNIMPORTANT))) {
+							break;
+						}
+                }
 
 				// Free memory
 				delete[] firstClippedElt;
@@ -1915,7 +1951,8 @@ GenerateContact(int in_Flags, dContactGeom* in_Contacts, int in_Stride,
 		collected because it has a side effect of replacing penetration depth of
 		existing contact with larger penetration depth of another matching normal contact.
 		If this logic is not necessary any more, you can bail out on reach of contact
-		number maximum immediately in dCollideTTL().
+		number maximum immediately in dCollideTTL(). You will also need to correct 
+		conditional statements after invocations of GenerateContact() in dCollideTTL().
 	*/
 	dIASSERT(in_Depth >= 0.0);
     //if (in_Depth < 0.0) -- the function is always called with depth >= 0
@@ -1926,46 +1963,53 @@ GenerateContact(int in_Flags, dContactGeom* in_Contacts, int in_Stride,
 		dContactGeom* Contact;
 		dVector3 diff;
 
-		bool duplicate = false;
-
-		for (int i=0; i<OutTriCount; i++) 
+		if (!(in_Flags & CONTACTS_UNIMPORTANT))
 		{
-			Contact = SAFECONTACT(in_Flags, in_Contacts, i, in_Stride);
+			bool duplicate = false;
 
-			// same position?
-			SUB(diff, in_ContactPos, Contact->pos);
-			if (dDOT(diff, diff) < dEpsilon) 
+			for (int i=0; i<OutTriCount; i++) 
 			{
-				// same normal?
-				if (fabs(dDOT(in_Normal, Contact->normal)) > (dReal(1.0)-dEpsilon))
+				Contact = SAFECONTACT(in_Flags, in_Contacts, i, in_Stride);
+
+				// same position?
+				SUB(diff, in_ContactPos, Contact->pos);
+				if (dDOT(diff, diff) < dEpsilon) 
 				{
-					if (in_Depth > Contact->depth) {
-						Contact->depth = in_Depth;
-						SMULT( Contact->normal, in_Normal, -1.0);
-						Contact->normal[3] = 0.0;
+					// same normal?
+					if (fabs(dDOT(in_Normal, Contact->normal)) > (dReal(1.0)-dEpsilon))
+					{
+						if (in_Depth > Contact->depth) {
+							Contact->depth = in_Depth;
+							SMULT( Contact->normal, in_Normal, -1.0);
+							Contact->normal[3] = 0.0;
+						}
+						duplicate = true;
+						/*
+							NOTE by Oleh_Derevenko:
+							There may be a case when two normals are close to each other but no duplicate
+							while third normal is detected to be duplicate for both of them.
+							This is the only reason I can think of, there is no "break" statement.
+							Perhaps author considered it to be logical that the third normal would 
+							replace the depth in both of initial contacts. 
+							However, I consider it a questionable practice which should not
+							be applied without deep understanding of underlaying physics.
+							Even more, is this situation with close normal triplet acceptable at all?
+							Should not be two initial contacts reduced to one (replaced with the latter)?
+							If you know the answers for these questions, you may want to change this code.
+							See the same statement in GenerateContact() of collision_trimesh_box.cpp
+						*/
 					}
-					duplicate = true;
-					/*
-						NOTE by Oleh_Derevenko:
-						There may be a case when two normals are close to each other but no duplicate
-						while third normal is detected to be duplicate for both of them.
-						This is the only reason I can think of, there is no "break" statement.
-						Perhaps author considered it to be logical that the third normal would 
-						replace the depth in both of initial contacts. 
-						However, I consider it a questionable practice which should not
-						be applied without deep understanding of underlaying physics.
-						Even more, is this situation with close normal triplet acceptable at all?
-						Should not be two initial contacts reduced to one (replaced with the latter)?
-						If you know the answers for these questions, you may want to change this code.
-						See the same statement in GenerateContact() of collision_trimesh_box.cpp
-					*/
 				}
 			}
-		}
 
-		if (duplicate || OutTriCount == (in_Flags & NUMC_MASK))
+			if (duplicate || OutTriCount == (in_Flags & NUMC_MASK))
+			{
+				break;
+			}
+		}
+		else 
 		{
-			break;
+			dIASSERT(OutTriCount < (in_Flags & NUMC_MASK));
 		}
     
 		// Add a new contact
