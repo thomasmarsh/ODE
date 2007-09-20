@@ -1103,14 +1103,16 @@ int dCollideCylinderTrimesh(dxGeom *o1, dxGeom *o2, int flags, dContactGeom *con
             break;
         }
 
+		const int Triint = boxesresult[i];
+		
 		dVector3 dv[3];
-		gim_trimesh_get_triangle_vertices(ptrimesh, boxesresult[i],dv[0],dv[1],dv[2]);
+		gim_trimesh_get_triangle_vertices(ptrimesh, Triint,dv[0],dv[1],dv[2]);
         // test this triangle
         TestOneTriangleVsCylinder(cData , dv[0],dv[1],dv[2], false);
 
-        // fill-in tri index for generated contacts
+        // fill-in triangle index for generated contacts
         for (; ctContacts0<cData.nContacts; ctContacts0++)
-            cData.gLocalContacts[ctContacts0].triIndex =  boxesresult[i];
+            cData.gLocalContacts[ctContacts0].triIndex =  Triint;
 	}
 
 	gim_trimesh_unlocks_work_data(ptrimesh);
