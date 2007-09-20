@@ -405,7 +405,7 @@ int dCollideSTL(dxGeom* g1, dxGeom* SphereGeom, int Flags, dContactGeom* Contact
 		if (OutTriCount != 0){
 			dContactGeom* Contact = SAFECONTACT(Flags, Contacts, 0, Stride);
 			
-			if (OutTriCount != 1){
+			if (OutTriCount != 1 && !(Flags & CONTACTS_UNIMPORTANT)){
 				Contact->normal[0] *= Contact->depth;
 				Contact->normal[1] *= Contact->depth;
 				Contact->normal[2] *= Contact->depth;
@@ -448,7 +448,7 @@ int dCollideSTL(dxGeom* g1, dxGeom* SphereGeom, int Flags, dContactGeom* Contact
 		else return 0;
 #elif defined MERGECONTACTNORMALS	// Merge all normals, and distribute between all contacts
 		if (OutTriCount != 0){
-			if (OutTriCount != 1){
+			if (OutTriCount != 1 && !(Flags & CONTACTS_UNIMPORTANT)){
 				dVector3& Normal = SAFECONTACT(Flags, Contacts, 0, Stride)->normal;
 				Normal[0] *= SAFECONTACT(Flags, Contacts, 0, Stride)->depth;
 				Normal[1] *= SAFECONTACT(Flags, Contacts, 0, Stride)->depth;

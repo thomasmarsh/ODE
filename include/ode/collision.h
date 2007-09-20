@@ -620,6 +620,11 @@ ODE_API void dGeomGetOffsetQuaternion (dGeomID geom, dQuaternion result);
 /* ************************************************************************ */
 /* collision detection */
 
+/*
+ *	Just generate any contacts (disables any contact refining).
+ */
+#define CONTACTS_UNIMPORTANT			0x80000000
+
 /**
  *
  * @brief Given two geoms o1 and o2 that potentially intersect,
@@ -634,9 +639,11 @@ ODE_API void dGeomGetOffsetQuaternion (dGeomID geom, dQuaternion result);
  * @param flags The flags specify how contacts should be generated if
  * the geoms touch. The lower 16 bits of flags is an integer that
  * specifies the maximum number of contact points to generate. You must
- * ask for at least one contact. All other bits in flags must be zero.
- * In the future the other bits may be used to select from different
- * contact generation strategies.
+ * ask for at least one contact. 
+ * Additionally, following bits may be set:
+ * CONTACTS_UNIMPORTANT -- just generate any contacts (skip contact refining).
+ * All other bits in flags must be set to zero. In the future the other bits 
+ * may be used to select from different contact generation strategies.
  *
  * @param contact Points to an array of dContactGeom structures. The array
  * must be able to hold at least the maximum number of contacts. These
@@ -1337,11 +1344,12 @@ ODE_API int dBoxTouchesBox (const dVector3 _p1, const dMatrix3 R1,
 		    const dVector3 side1, const dVector3 _p2,
 		    const dMatrix3 R2, const dVector3 side2);
 
+// The meaning of flags parameter is the same as in dCollide()
 ODE_API int dBoxBox (const dVector3 p1, const dMatrix3 R1,
 	     const dVector3 side1, const dVector3 p2,
 	     const dMatrix3 R2, const dVector3 side2,
 	     dVector3 normal, dReal *depth, int *return_code,
-	     int maxc, dContactGeom *contact, int skip);
+	     int flags, dContactGeom *contact, int skip);
 
 ODE_API void dInfiniteAABB (dGeomID geom, dReal aabb[6]);
 ODE_API void dInitODE(void);

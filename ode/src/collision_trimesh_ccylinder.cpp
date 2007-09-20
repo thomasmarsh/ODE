@@ -282,7 +282,7 @@ inline int	_ProcessLocalContacts()
 	}
 
 #ifdef OPTIMIZE_CONTACTS
-	if (ctContacts > 1)
+	if (ctContacts > 1 && !(iFlags & CONTACTS_UNIMPORTANT))
 	{
 		// Can be optimized...
 		_OptimizeLocalContacts();

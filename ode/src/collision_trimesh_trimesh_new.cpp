@@ -482,6 +482,14 @@ dCollideTTL(dxGeom* g1, dxGeom* g2, int Flags, dContactGeom* Contacts, int Strid
 					TriTriContacts(v1,v2,
 						  g1, g2, Flags,
 						 Contacts,Stride,OutTriCount);
+					
+					// Continue loop even after contacts are full 
+					// as existing contacts' normals/depths might be updated
+					// Break only if contacts are not important
+					if ((OutTriCount | CONTACTS_UNIMPORTANT) == (Flags & (NUMC_MASK | CONTACTS_UNIMPORTANT)))
+					{
+						break;
+					}
 				}
 
                 // Return the number of contacts
@@ -1206,6 +1214,14 @@ bool TriTriContacts(const dVector3 tr1[3],
 					contactpoints.Points[ccount],
 					normal, depth, Flags,
 					Contacts,Stride,contactcount);
+
+		// Continue loop even after contacts are full 
+		// as existing contacts' normals/depths might be updated
+		// Break only if contacts are not important
+		if ((contactcount | CONTACTS_UNIMPORTANT) == (Flags & (NUMC_MASK | CONTACTS_UNIMPORTANT)))
+		{
+			break;
+		}
 
 		ccount++;
 	}
