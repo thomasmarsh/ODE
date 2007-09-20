@@ -436,9 +436,7 @@ int dCollideSphereConvex (dxGeom *o1, dxGeom *o2, int flags,
       dMULTIPLY0_331(plane,Convex->final_posr->R,&Convex->planes[(i*4)]);
       plane[3]=(&Convex->planes[(i*4)])[3];
       // Get the distance from the sphere origin to the plane
-      dist = ((plane[0] * offsetpos[0]) + // Ax +
-	      (plane[1] * offsetpos[1])  + // Bx +
-	      (plane[2] * offsetpos[2])) - plane[3]; // Cz - D
+      dist = dVector3Dot(plane, offsetpos) - plane[3]; // Ax + By + Cz - D
       if(dist>0)
 	{
 	  // if we get here, we know the center of the sphere is
@@ -1053,31 +1051,24 @@ int TestConvexIntersection(dxConvex& cvx1,dxConvex& cvx2, int flags,
 	for(unsigned int i=0;i<g1->pointcount;++i)
 	{
 		dMULTIPLY0_331 (v,g1->final_posr->R,&g1->points[(i*3)]);
-		v[0]=g1->final_posr->pos[0]+v[0];
-		v[1]=g1->final_posr->pos[1]+v[1];
-		v[2]=g1->final_posr->pos[2]+v[2];
-		dReal distance = ((savedplane[0] * v[0])  + // Ax +
-			(savedplane[1] * v[1])  + // Bx +
-			(savedplane[2] * v[2])) - savedplane[3]; // Cz + D
+		dVector3Add(g1->final_posr->pos, v, v);
 
+		dReal distance = dVector3Dot(savedplane, v) - savedplane[3]; // Ax + By + Cz - D
 		if(distance<0)
 		{
-			CONTACT(contact,skip*contacts)->normal[0] = savedplane[0];
-			CONTACT(contact,skip*contacts)->normal[1] = savedplane[1];
-			CONTACT(contact,skip*contacts)->normal[2] = savedplane[2];
-			CONTACT(contact,skip*contacts)->pos[0]=v[0];
-			CONTACT(contact,skip*contacts)->pos[1]=v[1];
-			CONTACT(contact,skip*contacts)->pos[2]=v[2];
-			CONTACT(contact,skip*contacts)->depth = -distance;
-			CONTACT(contact,skip*contacts)->g1 = g1;
-			CONTACT(contact,skip*contacts)->g2 = g2;
+			dContactGeom *target = SAFECONTACT(flags, contact, contacts, skip);
+			dVector3Copy(savedplane, target->normal);
+			dVector3Copy(v, target->pos);
+			target->depth = -distance;
+			target->g1 = g1;
+			target->g2 = g2;
 /* -- uncomment if you are debugging
 			if(cvxhit<2)
 				fprintf(stdout,"Contact: %f,%f,%f depth %f\n",
-				(double)(CONTACT(contact,skip*contacts)->pos[0]),
-				(double)(CONTACT(contact,skip*contacts)->pos[1]),
-				(double)(CONTACT(contact,skip*contacts)->pos[2]),
-				(double)(CONTACT(contact,skip*contacts)->depth));
+				(double)target->pos[0],
+				(double)target->pos[1],
+				(double)target->pos[2],
+				(double)target->depth);
 */
 			contacts++;
 			if (contacts==maxc) break;
