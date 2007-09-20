@@ -646,7 +646,7 @@ int dBoxBox (const dVector3 p1, const dMatrix3 R1,
 
   // we can't generate more contacts than we actually have
   if (maxc > cnum) maxc = cnum;
-  if (maxc < 1) maxc = 1;
+  if (maxc < 1) maxc = 1;	// Even though max count must not be zero this check is kept for backward compatibility as this is a public function
 
   if (cnum <= maxc) {
     // we have less contacts than we need, so we use them all
