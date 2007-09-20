@@ -186,6 +186,11 @@ struct dxHeightfield : public dxGeom
         dxGeom *o2, const int numMaxContacts,
         int flags, dContactGeom *contact, int skip );
 
+	void  allocateTriangleBuffer(unsigned int numTriMax);
+	void  resetTriangleBuffer();
+	void  allocatePlaneBuffer(unsigned int numTri);
+	void  resetPlaneBuffer();
+	void  allocateHeightBuffer(unsigned int numX, unsigned int numZ);
     void  resetHeightBuffer();
 
     void  sortPlanes(const size_t numPlanes);
