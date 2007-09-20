@@ -354,68 +354,50 @@ int dCollideConvexPlane (dxGeom *o1, dxGeom *o2, int flags,
 	dxPlane *Plane = (dxPlane*) o2;
 	unsigned int contacts=0;
 	unsigned int maxc = flags & NUMC_MASK;
-	dVector3 v1;
 	dVector3 v2;
-	bool Hit=false;
 
-	dMULTIPLY0_331 (v1,Convex->final_posr->R,Convex->points);
-	v1[0]=Convex->final_posr->pos[0]+v1[0];
-	v1[1]=Convex->final_posr->pos[1]+v1[1];
-	v1[2]=Convex->final_posr->pos[2]+v1[2];
+#define LTEQ_ZERO	0x10000000
+#define GTEQ_ZERO	0x20000000
+#define BOTH_SIGNS	(LTEQ_ZERO | GTEQ_ZERO)
+	dIASSERT((BOTH_SIGNS & NUMC_MASK) == 0); // used in conditional operator later
 
-	dReal distance1 = ((Plane->p[0] * v1[0])   + // Ax +
-		(Plane->p[1] * v1[1])   + // Bx +
-		(Plane->p[2] * v1[2])) - Plane->p[3]; // Cz - D
-	if(distance1<=0)
-	{
-		CONTACT(contact,skip*contacts)->normal[0] = Plane->p[0];
-		CONTACT(contact,skip*contacts)->normal[1] = Plane->p[1];
-		CONTACT(contact,skip*contacts)->normal[2] = Plane->p[2];
-		CONTACT(contact,skip*contacts)->pos[0] = v1[0];
-		CONTACT(contact,skip*contacts)->pos[1] = v1[1];
-		CONTACT(contact,skip*contacts)->pos[2] = v1[2];
-		CONTACT(contact,skip*contacts)->depth = -distance1;
-		CONTACT(contact,skip*contacts)->g1 = Convex;
-		CONTACT(contact,skip*contacts)->g2 = Plane;
-		contacts++;
-	}
-	for(unsigned int i=1;i<Convex->pointcount;++i)
+	unsigned int totalsign = 0;
+	for(unsigned int i=0;i<Convex->pointcount;++i)
 	{
 		dMULTIPLY0_331 (v2,Convex->final_posr->R,&Convex->points[(i*3)]);
-		v2[0]=Convex->final_posr->pos[0]+v2[0];
-		v2[1]=Convex->final_posr->pos[1]+v2[1];
-		v2[2]=Convex->final_posr->pos[2]+v2[2];
-		dReal distance2 = ((Plane->p[0] * v2[0]) + // Ax +
-			(Plane->p[1] * v2[1])  + // Bx +
-			(Plane->p[2] * v2[2])) - Plane->p[3]; // Cz + D
-		if(!Hit) 
-			/* 
-			Avoid multiplication 
-			if we have already determined there is a hit 
-			*/
+		dVector3Add(Convex->final_posr->pos, v2, v2);
+		
+		unsigned int distance2sign = GTEQ_ZERO;
+		dReal distance2 = dVector3Dot(Plane->p, v2) - Plane->p[3]; // Ax + By + Cz - D
+		if((distance2 <= REAL(0.0)))
 		{
-			if(distance1 * distance2 <= 0)
+			distance2sign = distance2 != REAL(0.0) ? LTEQ_ZERO : BOTH_SIGNS;
+
+			if (contacts != maxc)
 			{
-				// there is a hit.
-				Hit=true;
+				dContactGeom *target = SAFECONTACT(flags, contact, contacts, skip);
+				dVector3Copy(Plane->p, target->normal);
+				dVector3Copy(v2, target->pos);
+				target->depth = -distance2;
+				target->g1 = Convex;
+				target->g2 = Plane;
+				contacts++;
 			}
 		}
-		if((distance2<=0)&&(contacts<maxc))
+
+		// Take new sign into account
+		totalsign |= distance2sign;
+		// Check if contacts are full and both signs have been already found
+		if ((contacts ^ maxc | totalsign) == BOTH_SIGNS) // harder to comprehend but requires one register less
 		{
-			CONTACT(contact,skip*contacts)->normal[0] = Plane->p[0];
-			CONTACT(contact,skip*contacts)->normal[1] = Plane->p[1];
-			CONTACT(contact,skip*contacts)->normal[2] = Plane->p[2];
-			CONTACT(contact,skip*contacts)->pos[0] = v2[0];
-			CONTACT(contact,skip*contacts)->pos[1] = v2[1];
-			CONTACT(contact,skip*contacts)->pos[2] = v2[2];
-			CONTACT(contact,skip*contacts)->depth = -distance2;
-			CONTACT(contact,skip*contacts)->g1 = Convex;
-			CONTACT(contact,skip*contacts)->g2 = Plane;
-			contacts++;
+			break; // Nothing can be changed any more
 		}
 	}
-	if(Hit) return contacts;
+	if (totalsign == BOTH_SIGNS) return contacts;
 	return 0;
+#undef BOTH_SIGNS
+#undef GTEQ_ZERO
+#undef LTEQ_ZERO
 }
 
 int dCollideSphereConvex (dxGeom *o1, dxGeom *o2, int flags,
