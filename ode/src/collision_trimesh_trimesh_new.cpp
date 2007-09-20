@@ -43,11 +43,11 @@
 
 #if dTRIMESH_OPCODE
 
-#define SMALL_ELT           2.5e-4
-#define EXPANDED_ELT_THRESH 1.0e-3
-#define DISTANCE_EPSILON    1.0e-8
-#define VELOCITY_EPSILON    1.0e-5
-#define TINY_PENETRATION    5.0e-6
+#define SMALL_ELT           REAL(2.5e-4)
+#define EXPANDED_ELT_THRESH REAL(1.0e-3)
+#define DISTANCE_EPSILON    REAL(1.0e-8)
+#define VELOCITY_EPSILON    REAL(1.0e-5)
+#define TINY_PENETRATION    REAL(5.0e-6)
 
 struct LineContactSet
 {
@@ -72,13 +72,13 @@ static int RayTriangleIntersect(const dVector3 orig, const dVector3 dir,
 
 
 ///returns the penetration depth
-static float MostDeepPoints(
+static dReal MostDeepPoints(
 							LineContactSet & points,
 							const dVector3 plane_normal,
-							float plane_dist,
+							dReal plane_dist,
 							LineContactSet & deep_points);
 ///returns the penetration depth
-static float FindMostDeepPointsInTetra(
+static dReal FindMostDeepPointsInTetra(
 							LineContactSet contact_points,
 							const dVector3 sourcetri[3],///triangle which contains contact_points
 							const dVector3 tetra[4],
@@ -98,8 +98,8 @@ static bool TriTriContacts(const dVector3 tr1[3],
 
 /* some math macros */
 #define CROSS(dest,v1,v2) { dest[0]=v1[1]*v2[2]-v1[2]*v2[1]; \
-                            dest[1]=v1[2]*v2[0]-v1[0]*v2[2]; \
-                            dest[2]=v1[0]*v2[1]-v1[1]*v2[0]; }
+	dest[1]=v1[2]*v2[0]-v1[0]*v2[2]; \
+	dest[2]=v1[0]*v2[1]-v1[1]*v2[0]; }
 
 #define DOT(v1,v2) (v1[0]*v2[0]+v1[1]*v2[1]+v1[2]*v2[2])
 
@@ -355,7 +355,7 @@ dContactGeom *  PushNewContact( dxGeom* g1, dxGeom* g2,
 			pcontact->normal[2] += normal[2];
 
 			dReal len = LENGTH(pcontact->normal);
-			if(len>0.0000001f)
+			if(len>REAL(0.0000001))
 			{
 				MULT(pcontact->normal,pcontact->normal,1.0f/len);
 			}
@@ -661,7 +661,7 @@ IntersectLineSegmentRay(dVector3 x1, dVector3 x2, dVector3 x3, dVector3 n,
 void PlaneClipSegment( dVector3  s1, dVector3  s2,
 					   dVector3  N, dReal C, dVector3  clipped)
 {
-	float dis1,dis2;
+	dReal dis1,dis2;
 	dis1 = DOT(s1,N)-C;
 	SUB(clipped,s2,s1);
 	dis2 = DOT(clipped,N);
@@ -683,7 +683,7 @@ ClipConvexPolygonAgainstPlane( dVector3 N, dReal C,
 	classif 0 : back, 1 : front
 	*/
 
-	float d;
+	dReal d;
 	dVector3 clipped[8];
 	int clippedcount =0;
 
@@ -697,7 +697,7 @@ ClipConvexPolygonAgainstPlane( dVector3 N, dReal C,
 
 		d = DOT(N,Contacts.Points[vi]) - C;
 		////classify point
-		if(d>1.0e-8f)	classif =  1;
+		if(d>REAL(1.0e-8))	classif =  1;
 		else  classif =  0;
 
 		if(classif == 0)//back
@@ -759,10 +759,10 @@ ClipConvexPolygonAgainstPlane( dVector3 N, dReal C,
 
 
 bool BuildPlane(const dVector3 s0, const dVector3 s1,const dVector3 s2,
-				dVector3 Normal, float & Dist)
+				dVector3 Normal, dReal & Dist)
 {
 	dVector3 e0,e1;
-	float len;
+	dReal len;
 	SUB(e0,s1,s0);
 	SUB(e1,s2,s0);
 
@@ -770,7 +770,7 @@ bool BuildPlane(const dVector3 s0, const dVector3 s1,const dVector3 s2,
 
 	len = LENGTH(Normal);
 
-	if(len<0.000001f) return false;
+	if(len<REAL(0.000001)) return false;
 	MULT(Normal,Normal,1.0f/len);
 
 	Dist = DOT(Normal,s0);
@@ -783,14 +783,14 @@ bool BuildEdgesDir(const dVector3 s0, const dVector3 s1,
 					dVector3 crossdir)
 {
 	dVector3 e0,e1;
-	float len;
+	dReal len;
 
 	SUB(e0,s1,s0);
 	SUB(e1,t1,t0);
 	CROSS(crossdir,e0,e1);
 
 	len = LENGTH(crossdir);
-	if(len<0.000001f) return false;
+	if(len<REAL(0.000001)) return false;
 	MULT(crossdir,crossdir,1.0f/len);
 	return true;
 }
@@ -801,17 +801,17 @@ bool BuildEdgePlane(
 					const dVector3 s0, const dVector3 s1,
 					const dVector3 normal,
 					dVector3 plane_normal,
-					float & plane_dist)
+					dReal & plane_dist)
 {
 	dVector3 e0;
-	float len;
+	dReal len;
 
 	SUB(e0,s1,s0);
 	CROSS(plane_normal,e0,normal);
 
 	len = LENGTH(plane_normal);
 
-	if(len<0.000001f) return false;
+	if(len<REAL(0.000001)) return false;
 
 	MULT(plane_normal,plane_normal,1.0/len);
 
@@ -829,8 +829,8 @@ bool BuildEdgePlane(
 Positive penetration
 Negative number: they are separated
 */
-float IntervalPenetration(float &vmin1,float &vmax1,
-						  float &vmin2,float &vmax2)
+dReal IntervalPenetration(dReal &vmin1,dReal &vmax1,
+						  dReal &vmin2,dReal &vmax2)
 {
 	if(vmax1<=vmin2)
 	{
@@ -858,10 +858,10 @@ float IntervalPenetration(float &vmin1,float &vmax1,
 
 void FindInterval(
 				  const dVector3 * vertices, int verticecount,
-				  dVector3 dir,float &vmin,float &vmax)
+				  dVector3 dir,dReal &vmin,dReal &vmax)
 {
 
-	float dist;
+	dReal dist;
 	int i;
 	vmin = DOT(vertices[0],dir);
 	vmax = vmin;
@@ -874,16 +874,16 @@ void FindInterval(
 }
 
 ///returns the penetration depth
-float MostDeepPoints(
+dReal MostDeepPoints(
 					LineContactSet & points,
 					const dVector3 plane_normal,
-					float plane_dist,
+					dReal plane_dist,
 					LineContactSet & deep_points)
 {
 	int i;
 	int max_candidates[8];
-	float maxdeep=-100000000.0f;
-	float dist;
+	dReal maxdeep=-dInfinity;
+	dReal dist;
 
 	deep_points.Count = 0;
 	for(i=0;i<points.Count;i++)
@@ -896,7 +896,7 @@ float MostDeepPoints(
 			deep_points.Count=1;
 			max_candidates[deep_points.Count-1] = i;
 		}
-		else if(dist+0.000001f>=maxdeep)
+		else if(dist+REAL(0.000001)>=maxdeep)
 		{
 			deep_points.Count++;
 			max_candidates[deep_points.Count-1] = i;
@@ -915,7 +915,7 @@ void ClipPointsByTri(
 					  const dVector3 * points, int pointcount,
 					  const dVector3 tri[3],
 					  dVector3 triplanenormal,
-					  float triplanedist,
+					  dReal triplanedist,
 					  LineContactSet & clipped_points,
 					  bool triplane_clips)
 {
@@ -948,16 +948,16 @@ void ClipPointsByTri(
 
 
 ///returns the penetration depth
-float FindTriangleTriangleCollision(
+dReal FindTriangleTriangleCollision(
 							const dVector3 tri1[3],
 							const dVector3 tri2[3],
 							dVector3 separating_normal,
 							LineContactSet & deep_points)
 {
-	float maxdeep=100000000.0f;
-	float dist;
+	dReal maxdeep=dInfinity;
+	dReal dist;
 	int mostdir=0,mostface = 0, currdir=0;
-//	float vmin1,vmax1,vmin2,vmax2;
+//	dReal vmin1,vmax1,vmin2,vmax2;
 //	dVector3 crossdir, pt1,pt2;
 	dVector4 tri1plane,tri2plane;
 	separating_normal[3] = 0.0f;
@@ -1109,7 +1109,7 @@ float FindTriangleTriangleCollision(
 		SUB(crossdir,pt2,pt1);
 
 		vmin1 = LENGTH(crossdir);
-		if(vmin1<0.000001)
+		if(vmin1<REAL(0.000001))
 		{
 
 			if(mostface==0)

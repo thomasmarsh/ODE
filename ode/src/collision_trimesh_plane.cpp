@@ -188,7 +188,7 @@ int dCollideTrimeshPlane( dxGeom *o1, dxGeom *o2, int flags, dContactGeom* conta
         pcontact->pos[0] = (*planecontact_results)[0];
         pcontact->pos[1] = (*planecontact_results)[1];
         pcontact->pos[2] = (*planecontact_results)[2];
-        pcontact->pos[3] = 1.0f;
+        pcontact->pos[3] = REAL(1.0);
 
         pcontact->normal[0] = plane[0];
         pcontact->normal[1] = plane[1];

@@ -193,7 +193,7 @@ int _cldTestAxis(sCylinderBoxData& cData, dVector3& vInputNormal, int iAxis )
 	// check length of input normal
 	dReal fL = dVector3Length(vInputNormal);
 	// if not long enough
-	if ( fL < 1e-5f ) 
+	if ( fL < REAL(1e-5) ) 
 	{
 		// do nothing
 		return 1;
@@ -278,7 +278,7 @@ int _cldTestEdgeCircleAxis( sCylinderBoxData& cData,
 	dReal fdot2 = dVector3Dot (vDirEdge,cData.vCylinderAxis);
 
 	// if edge is perpendicular to cylinder axis
-	if(dFabs(fdot2) < 1e-5f) 
+	if(dFabs(fdot2) < REAL(1e-5)) 
 	{
 		// this can't be separating axis, because edge is parallel to circle plane
 		return 1;
@@ -320,7 +320,7 @@ int _cldTestSeparatingAxes(sCylinderBoxData& cData)
 	dVector3  vAxis = {REAL(0.0),REAL(0.0),REAL(0.0),REAL(0.0)};
 
 	// Epsilon value for checking axis vector length 
-	const dReal fEpsilon = 1e-6f;
+	const dReal fEpsilon = REAL(1e-6);
 
 	// axis A0
 	dMat3GetCol(cData.mBoxRot, 0 , vAxis);
@@ -883,7 +883,7 @@ void _cldClipBoxToCylinder(sCylinderBoxData& cData )
 	dReal fTempDepth;
 	dVector3 vPoint;
 
-	if (nCircleSegment %2)
+	if (nCircleSegment % 2)
 	{
 		for( i=0; i<iTmpCounter2; i++)
 		{
