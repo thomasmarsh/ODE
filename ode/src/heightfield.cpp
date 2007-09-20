@@ -581,25 +581,69 @@ void dxHeightfield::computeAABB()
 // dxHeightfield destructor
 dxHeightfield::~dxHeightfield()
 {
-    delete [] tempTriangleBuffer;
+	resetTriangleBuffer();
+	resetPlaneBuffer();
+	resetHeightBuffer();
+}
 
-    for (unsigned int k = 0; k < tempPlaneBufferSize; k++)
-    {
-        delete tempPlaneBuffer[k];
-    }
-    delete [] tempPlaneBuffer;
+void dxHeightfield::allocateTriangleBuffer(unsigned int numTriMax)
+{
+	tempTriangleBufferSize = numTriMax;
+	tempTriangleBuffer = new HeightFieldTriangle[numTriMax];
+}
 
-    resetHeightBuffer();
+void dxHeightfield::resetTriangleBuffer()
+{
+	delete [] tempTriangleBuffer;
+}
+
+void dxHeightfield::allocatePlaneBuffer(unsigned int numTri)
+{
+	tempPlaneBufferSize = numTri;
+	tempPlaneBuffer = new HeightFieldPlane *[numTri];
+	
+	HeightFieldPlane *ptrPlaneMatrix = new HeightFieldPlane[numTri];
+	for (unsigned int k = 0; k < numTri; k++)
+	{
+		tempPlaneBuffer[k] = ptrPlaneMatrix;
+		ptrPlaneMatrix += 1;
+	}
+}
+
+void dxHeightfield::resetPlaneBuffer()
+{
+	if (tempPlaneBufferSize > 0)
+	{
+		// All the memory is allocated in one block
+		delete [] tempPlaneBuffer[0];
+	}
+	
+	delete [] tempPlaneBuffer;
+}
+
+void dxHeightfield::allocateHeightBuffer(unsigned int numX, unsigned int numZ)
+{
+	tempHeightBufferSizeX = numX;
+	tempHeightBufferSizeZ = numZ;
+	tempHeightBuffer = new HeightFieldVertex *[numX];
+	
+	HeightFieldVertex *ptrVerticesMatrix = new HeightFieldVertex [numX * numZ];
+	for ( unsigned int x_local = 0; x_local < numX; x_local++)
+	{
+		tempHeightBuffer[x_local] = ptrVerticesMatrix;
+		ptrVerticesMatrix += numZ;
+	}
 }
 
 void dxHeightfield::resetHeightBuffer()
 {
-    const size_t xSize = tempHeightBufferSizeX;
-    for (size_t x = 0; xSize < x; x++)
-    {
-        delete [] tempHeightBuffer[x];
-    }
-    delete [] tempHeightBuffer;
+	if (tempHeightBufferSizeX > 0)
+	{
+		// All the memory is allocated in one block
+		delete [] tempHeightBuffer[0];
+	}
+	
+	delete [] tempHeightBuffer;
 }
 //////// Heightfield data interface ////////////////////////////////////////////////////
 
@@ -909,13 +953,7 @@ int dxHeightfield::dCollideHeightfieldZone( const int minX, const int maxX, cons
         if (tempHeightBufferSizeX < numX || tempHeightBufferSizeZ < numZ)
         {
             resetHeightBuffer();
-            tempHeightBufferSizeX = numX;
-            tempHeightBufferSizeZ = numZ;
-            tempHeightBuffer = new HeightFieldVertex *[numX];
-            for ( x_local = 0; x_local < numX; x_local++)
-            {
-                tempHeightBuffer[x_local] = new HeightFieldVertex [numZ];     
-            }
+			allocateHeightBuffer(numX, numZ);
         }
 
         dReal Xpos, Ypos;
@@ -1146,9 +1184,8 @@ int dxHeightfield::dCollideHeightfieldZone( const int minX, const int maxX, cons
     const unsigned int numTriMax = (maxX - minX) * (maxZ - minZ) * 2;
     if (tempTriangleBufferSize < numTriMax)
     {
-        delete [] tempTriangleBuffer;
-        tempTriangleBufferSize = numTriMax;
-        tempTriangleBuffer = new HeightFieldTriangle[numTriMax];
+        resetTriangleBuffer();
+		allocateTriangleBuffer(numTriMax);
     }
     
     // Sorting triangle/plane  resulting from heightfield zone
@@ -1329,14 +1366,8 @@ int dxHeightfield::dCollideHeightfieldZone( const int minX, const int maxX, cons
         // group by Triangles by Planes sharing shame plane definition
         if (tempPlaneBufferSize  < numTri)
         {
-            delete [] tempPlaneBuffer;
-            tempPlaneBufferSize = numTri;
-            tempPlaneBuffer = new HeightFieldPlane *[numTri];
-
-            for (unsigned int k = 0; k < tempPlaneBufferSize; k++)
-            {
-                tempPlaneBuffer[k] = new HeightFieldPlane();
-            }
+            resetPlaneBuffer();
+			allocatePlaneBuffer(numTri);
         }
         unsigned int numPlanes = 0;
         for (unsigned int k = 0; k < numTri; k++)
