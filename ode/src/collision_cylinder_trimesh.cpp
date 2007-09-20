@@ -147,7 +147,7 @@ inline void	_OptimizeLocalContacts(sData& cData)
 		{
 			if (_IsNearContacts(cData.gLocalContacts[i],cData.gLocalContacts[j]))
 			{
-				// If they are seem to be the samed then filtered 
+				// If they are seem to be the same then filtered 
 				// out the least penetrate one
 				if (_IsBetter(cData.gLocalContacts[j],cData.gLocalContacts[i]))
 				{
