@@ -99,7 +99,11 @@ int dCollideRTL(dxGeom* g1, dxGeom* RayGeom, int Flags, dContactGeom* Contacts, 
 			dVector3 dv[3];
 			FetchTriangle(TriMesh, TriIndex, TLPosition, TLRotation, dv);
 
-			float T = Faces[i].mDistance;
+			// No sense to save on single type conversion in algorithm of this size.
+			// If there would be a custom typedef for distance type it could be used 
+			// instead of dReal. However using float directly is the loss of abstraction 
+			// and possible loss of precision in future.
+			/*float*/ dReal T = Faces[i].mDistance;
 			Contact->pos[0] = Origin[0] + (Direction[0] * T);
 			Contact->pos[1] = Origin[1] + (Direction[1] * T);
 			Contact->pos[2] = Origin[2] + (Direction[2] * T);
@@ -176,7 +180,7 @@ int dCollideRTL(dxGeom* g1, dxGeom* RayGeom, int Flags, dContactGeom* Contacts, 
 	if(!TriMesh->RayCallback || 
 		TriMesh->RayCallback(TriMesh, RayGeom, contact_data.m_face_id, contact_data.u , contact_data.v))
 	{
-	    dContactGeom* Contact = SAFECONTACT(Flags, Contacts, (OutTriCount-1), Stride);
+		dContactGeom* Contact = SAFECONTACT(Flags, Contacts, (OutTriCount-1), Stride);
         VEC_COPY(Contact->pos,contact_data.m_point);
         VEC_COPY(Contact->normal,contact_data.m_normal);
         Contact->depth = contact_data.tparam;
