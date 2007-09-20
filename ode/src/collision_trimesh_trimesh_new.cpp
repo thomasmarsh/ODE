@@ -146,63 +146,15 @@ SwapNormals(dVector3 *&pen_v, dVector3 *&col_v, dVector3* v1, dVector3* v2,
 
 ///////////////////////MECHANISM FOR AVOID CONTACT REDUNDANCE///////////////////////////////
 ////* Written by Francisco León (http://gimpact.sourceforge.net) *///
-#define CONTACT_DIFF_EPSILON 0.00001f
+#define CONTACT_DIFF_EPSILON REAL(0.00001)
+#define CONTACT_POS_HASH_QUOTIENT REAL(10000.0)
+#define dSQRT3	REAL(1.7320508075688773)
 
 struct CONTACT_KEY
 {
 	dContactGeom * m_contact;
 	unsigned int m_key;
 };
-
-
-void UPDATE_KEY(CONTACT_KEY & key)
-{
-	long coords;
-	unsigned int hash=0,uitmp;
-
-	coords = (long)(key.m_contact->pos[0]*10000.0f);
-	hash = ( hash << 4 ) + (coords>>16)&0xFF;
-	if( ( uitmp = hash & 0xF0000000 ) )	hash ^= ( uitmp >> 24 );
-	hash &= ~uitmp;
-
-	hash = ( hash << 4 ) + (coords>>8)&0xFF;
-	if( ( uitmp = hash & 0xF0000000 ) )	hash ^= ( uitmp >> 24 );
-	hash &= ~uitmp;
-
-	hash = ( hash << 4 ) + coords&0xFF;
-	if( ( uitmp = hash & 0xF0000000 ) )	hash ^= ( uitmp >> 24 );
-	hash &= ~uitmp;
-
-	coords = (long)(key.m_contact->pos[1]*10000.0f);
-	hash = ( hash << 4 ) + (coords>>16)&0xFF;
-	if( ( uitmp = hash & 0xF0000000 ) )	hash ^= ( uitmp >> 24 );
-	hash &= ~uitmp;
-
-	hash = ( hash << 4 ) + (coords>>8)&0xFF;
-	if( ( uitmp = hash & 0xF0000000 ) )	hash ^= ( uitmp >> 24 );
-	hash &= ~uitmp;
-
-	hash = ( hash << 4 ) + coords&0xFF;
-	if( ( uitmp = hash & 0xF0000000 ) )	hash ^= ( uitmp >> 24 );
-	hash &= ~uitmp;
-
-	coords = (long)(key.m_contact->pos[2]*10000.0f);
-	hash = ( hash << 4 ) + (coords>>16)&0xFF;
-	if( ( uitmp = hash & 0xF0000000 ) )	hash ^= ( uitmp >> 24 );
-	hash &= ~uitmp;
-
-	hash = ( hash << 4 ) + (coords>>8)&0xFF;
-	if( ( uitmp = hash & 0xF0000000 ) )	hash ^= ( uitmp >> 24 );
-	hash &= ~uitmp;
-
-	hash = ( hash << 4 ) + coords&0xFF;
-	if( ( uitmp = hash & 0xF0000000 ) )	hash ^= ( uitmp >> 24 );
-	hash &= ~uitmp;
-
-	key.m_key = hash;
-
-}
-
 
 #define MAXCONTACT_X_NODE 4
 struct CONTACT_KEY_HASH_NODE
@@ -211,36 +163,98 @@ struct CONTACT_KEY_HASH_NODE
 	char m_keycount;
 };
 
-static dContactGeom * g_contactfound;
+#define CONTACTS_HASHSIZE 256
+CONTACT_KEY_HASH_NODE g_hashcontactset[CONTACTS_HASHSIZE];
 
-//return true if found
-bool AddContactToNode(CONTACT_KEY * contactkey,CONTACT_KEY_HASH_NODE * node)
+
+
+void UpdateContactKey(CONTACT_KEY & key, dContactGeom * contact)
 {
-	g_contactfound = 0;
-	if(node->m_keycount>=MAXCONTACT_X_NODE)
+	key.m_contact = contact;
+
+	unsigned int hash=0;
+
+	int i = 0;
+
+	while (true)
 	{
-		g_contactfound = node->m_keyarray[MAXCONTACT_X_NODE-1].m_contact;
-		return true;
+		dReal coord = contact->pos[i];
+		coord = dFloor(coord * CONTACT_POS_HASH_QUOTIENT);
+
+		unsigned int hash_input = ((unsigned int *)&coord)[0];
+		if (sizeof(dReal) / sizeof(unsigned int) != 1)
+		{
+			dIASSERT(sizeof(dReal) / sizeof(unsigned int) == 2);
+			hash_input ^= ((unsigned int *)&coord)[1];
+		}
+
+		hash = (( hash << 4 ) + (hash_input >> 24)) ^ ( hash >> 28 );
+		hash = (( hash << 4 ) + ((hash_input >> 16) & 0xFF)) ^ ( hash >> 28 );
+		hash = (( hash << 4 ) + ((hash_input >> 8) & 0xFF)) ^ ( hash >> 28 );
+		hash = (( hash << 4 ) + (hash_input & 0xFF)) ^ ( hash >> 28 );
+
+		if (++i == 3)
+		{
+			break;
+		}
+
+		hash = (hash << 11) | (hash >> 21);
 	}
 
+	key.m_key = hash;
+}
+
+
+static inline unsigned int MakeContactIndex(unsigned int key)
+{
+	dIASSERT(CONTACTS_HASHSIZE == 256);
+
+	unsigned int index = key ^ (key >> 16);
+	index = (index ^ (index >> 8)) & 0xFF;
+	return index;
+}
+
+dContactGeom *AddContactToNode(const CONTACT_KEY * contactkey,CONTACT_KEY_HASH_NODE * node)
+{
 	for(int i=0;i<node->m_keycount;i++)
 	{
 		if(node->m_keyarray[i].m_key == contactkey->m_key)
 		{
-			g_contactfound = node->m_keyarray[i].m_contact;
-			return true;
+			dContactGeom *contactfound = node->m_keyarray[i].m_contact;
+			if (dDISTANCE(contactfound->pos, contactkey->m_contact->pos) < REAL(1.00001) /*for comp. errors*/ * dSQRT3 / CONTACT_POS_HASH_QUOTIENT /*cube diagonal*/)
+			{
+				return contactfound;
+			}
 		}
 	}
-	node->m_keyarray[node->m_keycount].m_contact = contactkey->m_contact;
-	node->m_keyarray[node->m_keycount].m_key = contactkey->m_key;
-	node->m_keycount++;
-	g_contactfound = contactkey->m_contact;
-	return false;
+
+	if (node->m_keycount < MAXCONTACT_X_NODE)
+	{
+		node->m_keyarray[node->m_keycount].m_contact = contactkey->m_contact;
+		node->m_keyarray[node->m_keycount].m_key = contactkey->m_key;
+		node->m_keycount++;
+	}
+	else
+	{
+		dDEBUGMSG("Trimesh-trimesh contach hash table bucket overflow - close contacts might not be culled");
+	}
+
+	return contactkey->m_contact;
 }
 
-#define CONTACTS_HASHSIZE 256
+void RemoveNewContactFromNode(const CONTACT_KEY * contactkey, CONTACT_KEY_HASH_NODE * node)
+{
+	dIASSERT(node->m_keycount > 0);
 
-CONTACT_KEY_HASH_NODE g_hashcontactset[CONTACTS_HASHSIZE];
+	if (node->m_keyarray[node->m_keycount - 1].m_contact == contactkey->m_contact)
+	{
+		node->m_keycount -= 1;
+	}
+	else
+	{
+		dIASSERT(node->m_keycount == MAXCONTACT_X_NODE);
+	}
+}
 
 void ClearContactSet()
 {
@@ -248,41 +262,58 @@ void ClearContactSet()
 }
 
 //return true if found
-bool InsertContactInSet(dContactGeom * contact)
+dContactGeom *InsertContactInSet(const CONTACT_KEY &newkey)
 {
-	static CONTACT_KEY newkey;
-	newkey.m_contact = contact;
-	UPDATE_KEY(newkey);
-	unsigned int index = newkey.m_key%CONTACTS_HASHSIZE;
+	unsigned int index = MakeContactIndex(newkey.m_key);
 
-	return AddContactToNode(&newkey,&g_hashcontactset[index]);
+	return AddContactToNode(&newkey, &g_hashcontactset[index]);
 }
 
+void RemoveNewContactFromSet(const CONTACT_KEY &newkey)
+{
+	unsigned int index = MakeContactIndex(newkey.m_key);
+	
+	RemoveNewContactFromNode(&newkey, &g_hashcontactset[index]);
+}
 
-dContactGeom * AllocNewContact(
-			const dVector3 newpoint, bool &found,
+bool AllocNewContact(
+			const dVector3 newpoint, dContactGeom *& out_pcontact,
 			int Flags, dContactGeom* Contacts,
 			int Stride,  int &contactcount)
 {
-	dContactGeom * pcontact = SAFECONTACT(Flags, Contacts, contactcount, Stride);
-	if(pcontact==NULL)
-	{
-		found = false;
-		return NULL;
-	}
+	bool allocated_new = false;
 
+	dContactGeom dLocalContact;
+
+	dContactGeom * pcontact = contactcount != (Flags & NUMC_MASK) ? 
+		SAFECONTACT(Flags, Contacts, contactcount, Stride) : &dLocalContact;
 
 	pcontact->pos[0] = newpoint[0];
 	pcontact->pos[1] = newpoint[1];
 	pcontact->pos[2] = newpoint[2];
 	pcontact->pos[3] = 1.0f;
 
-	found  = InsertContactInSet(pcontact);
-	if(found==false)
+	CONTACT_KEY newkey;
+	UpdateContactKey(newkey, pcontact);
+	
+	dContactGeom *pcontactfound = InsertContactInSet(newkey);
+	if (pcontactfound == pcontact)
 	{
-		contactcount++;
+		if (pcontactfound != &dLocalContact)
+		{
+			contactcount++;
+		}
+		else
+		{
+			RemoveNewContactFromSet(newkey);
+			pcontactfound = NULL;
+		}
+		
+		allocated_new = true;
 	}
-	return g_contactfound;
+
+	out_pcontact = pcontactfound;
+	return allocated_new;
 }
 
 
@@ -294,14 +325,11 @@ dContactGeom *  PushNewContact( dxGeom* g1, dxGeom* g2,
 							 dContactGeom* Contacts, int Stride,
 							 int &contactcount)
 {
+	dIASSERT(dFabs(dVector3Length((dVector3 &)*normal) - REAL(1.0)) < dEpsilon); // This assumption is used in the code
 
-	bool found=false;
 	dContactGeom * pcontact;
 
-	pcontact = AllocNewContact(
-			point,found,Flags,
-			Contacts, Stride,contactcount);
-	if(found)
+	if (!AllocNewContact(point,pcontact,Flags,Contacts,Stride,contactcount))
 	{
 		if(depth > pcontact->depth + CONTACT_DIFF_EPSILON)
 		{
@@ -348,7 +376,8 @@ dContactGeom *  PushNewContact( dxGeom* g1, dxGeom* g2,
 			pcontact->normal[3] = 0.0f;
 		}
 	}
-	else
+	// Contact can be not available if buffer is full
+	else if (pcontact)
 	{
 		pcontact->normal[0] = normal[0];
 		pcontact->normal[1] = normal[1];
@@ -361,8 +390,6 @@ dContactGeom *  PushNewContact( dxGeom* g1, dxGeom* g2,
 	}
 
 	return pcontact;
-
-
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////
@@ -439,27 +466,22 @@ dCollideTTL(dxGeom* g1, dxGeom* g2, int Flags, dContactGeom* Contacts, int Strid
 
                 for (int i = 0; i < TriCount; i++)
 				{
-                    if (OutTriCount < (Flags & 0xffff))
-					{
+                    id1 = CollidingPairs[i].id0;
+                    id2 = CollidingPairs[i].id1;
 
-                        id1 = CollidingPairs[i].id0;
-                        id2 = CollidingPairs[i].id1;
+                    // grab the colliding triangles
+                    FetchTriangle((dxTriMesh*) g1, id1, TLPosition1, TLRotation1, v1);
+                    FetchTriangle((dxTriMesh*) g2, id2, TLPosition2, TLRotation2, v2);
+                    // Since we'll be doing matrix transformations, we need to
+                    //  make sure that all vertices have four elements
+                    for (int j=0; j<3; j++) {
+                        v1[j][3] = 1.0;
+                        v2[j][3] = 1.0;
+                    }
 
-                        // grab the colliding triangles
-                        FetchTriangle((dxTriMesh*) g1, id1, TLPosition1, TLRotation1, v1);
-                        FetchTriangle((dxTriMesh*) g2, id2, TLPosition2, TLRotation2, v2);
-                        // Since we'll be doing matrix transfomrations, we need to
-                        //  make sure that all vertices have four elements
-                        for (int j=0; j<3; j++) {
-                            v1[j][3] = 1.0;
-                            v2[j][3] = 1.0;
-                        }
-
-						TriTriContacts(v1,v2,
-							  g1, g2, Flags,
-							 Contacts,Stride,OutTriCount);
-
-					} // if (OutTriCount < (Flags & 0xffff))
+					TriTriContacts(v1,v2,
+						  g1, g2, Flags,
+						 Contacts,Stride,OutTriCount);
 				}
 
                 // Return the number of contacts
@@ -1178,12 +1200,8 @@ bool TriTriContacts(const dVector3 tr1[3],
 	if(depth<0.0f) return false;
 
 	ccount = 0;
-	while(
-		    (ccount<contactpoints.Count)
-			&&(contactcount < (Flags & 0xffff))
-			)
+	while (ccount<contactpoints.Count)
 	{
-
 		PushNewContact( g1,  g2,
 					contactpoints.Points[ccount],
 					normal, depth, Flags,
