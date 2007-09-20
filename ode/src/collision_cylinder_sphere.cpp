@@ -46,6 +46,7 @@
 #include <ode/odemath.h>
 #include <ode/objects.h>
 #include "collision_kernel.h"	// for dxGeom
+#include "collision_util.h"
 
 int dCollideCylinderSphere(dxGeom* Cylinder, dxGeom* Sphere, 
                            int flags, dContactGeom *contact, int skip)
@@ -110,7 +111,7 @@ int dCollideCylinderSphere(dxGeom* Cylinder, dxGeom* Sphere,
 	C[1] = s * vDir1[1] + G1Pos1[1] - SpherePos[1];
 	C[2] = s * vDir1[2] + G1Pos1[2] - SpherePos[2];
 	// t is the distance from the Sphere-middle to the cylinder-axis!
-	t = dReal(sqrt(C[0] * C[0] + C[1] * C[1] + C[2] * C[2]) );
+	t = dVector3Length(C);
 	if(t > (radius + radius2) )
 	{
 		// Sphere is too far away from the cylinder axis!
