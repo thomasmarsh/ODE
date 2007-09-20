@@ -334,7 +334,7 @@ int dBoxBox (const dVector3 p1, const dMatrix3 R1,
   dVector3 p,pp,normalC;
   const dReal *normalR = 0;
   dReal A[3],B[3],R11,R12,R13,R21,R22,R23,R31,R32,R33,
-    Q11,Q12,Q13,Q21,Q22,Q23,Q31,Q32,Q33,s,s2,l;
+    Q11,Q12,Q13,Q21,Q22,Q23,Q31,Q32,Q33,s,s2,l,expr1_val;
   int i,j,invert_normal,code;
 
   // get vector from centers of box 1 to box 2, relative to box 1
@@ -371,12 +371,13 @@ int dBoxBox (const dVector3 p1, const dMatrix3 R1,
   // the normal should be flipped.
 
 #define TST(expr1,expr2,norm,cc) \
-  s2 = dFabs(expr1) - (expr2); \
+  expr1_val = (expr1); /* Avoid duplicate evaluation of expr1 */ \
+  s2 = dFabs(expr1_val) - (expr2); \
   if (s2 > 0) return 0; \
   if (s2 > s) { \
     s = s2; \
     normalR = norm; \
-    invert_normal = ((expr1) < 0); \
+    invert_normal = ((expr1_val) < 0); \
     code = (cc); \
   }
 
@@ -398,7 +399,8 @@ int dBoxBox (const dVector3 p1, const dMatrix3 R1,
   // normal (n1,n2,n3) is relative to box 1.
 #undef TST
 #define TST(expr1,expr2,n1,n2,n3,cc) \
-  s2 = dFabs(expr1) - (expr2); \
+  expr1_val = (expr1); /* Avoid duplicate evaluation of expr1 */ \
+  s2 = dFabs(expr1_val) - (expr2); \
   if (s2 > 0) return 0; \
   l = dSqrt ((n1)*(n1) + (n2)*(n2) + (n3)*(n3)); \
   if (l > 0) { \
@@ -407,7 +409,7 @@ int dBoxBox (const dVector3 p1, const dMatrix3 R1,
       s = s2; \
       normalR = 0; \
       normalC[0] = (n1)/l; normalC[1] = (n2)/l; normalC[2] = (n3)/l; \
-      invert_normal = ((expr1) < 0); \
+      invert_normal = ((expr1_val) < 0); \
       code = (cc); \
     } \
   }
