@@ -781,7 +781,7 @@ int dCollideBoxPlane (dxGeom *o1, dxGeom *o2,
 #define BAR(ctact,side,sideinc) \
   depth -= B ## sideinc; \
   if (depth < 0) goto done; \
-  if (A ## sideinc > 0) { FOO(ctact,side,+) } else { FOO(ctact,side,-) } \
+  if (A ## sideinc > 0) { FOO(ctact,side,+); } else { FOO(ctact,side,-); } \
   CONTACT(contact,ctact*skip)->depth = depth; \
   ret++;
 
