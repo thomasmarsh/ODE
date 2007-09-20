@@ -411,37 +411,40 @@ int dCollideTTL(dxGeom* g1, dxGeom* g2, int Flags, dContactGeom* Contacts, int S
     GIM_CONTACT * ptrimeshcontacts = GIM_DYNARRAY_POINTER(GIM_CONTACT,trimeshcontacts);
 
 
+	unsigned contactcount = trimeshcontacts.m_size;
+	unsigned maxcontacts = (unsigned)(Flags & NUMC_MASK);
+	if (contactcount > maxcontacts)
+	{
+		contactcount = maxcontacts;
+	}
+
     dContactGeom* pcontact;
-	int contactcount = 0;
 	unsigned i;
 
-	for (i=0;i<trimeshcontacts.m_size;i++)
+	for (i=0;i<contactcount;i++)
 	{
-	    if(contactcount < (Flags & 0xffff))
-        {
-            pcontact = SAFECONTACT(Flags, Contacts, contactcount, Stride);
-            contactcount++;
-            pcontact->pos[0] = ptrimeshcontacts->m_point[0];
-            pcontact->pos[1] = ptrimeshcontacts->m_point[1];
-            pcontact->pos[2] = ptrimeshcontacts->m_point[2];
-            pcontact->pos[3] = 1.0f;
+        pcontact = SAFECONTACT(Flags, Contacts, i, Stride);
 
-            pcontact->normal[0] = ptrimeshcontacts->m_normal[0];
-            pcontact->normal[1] = ptrimeshcontacts->m_normal[1];
-            pcontact->normal[2] = ptrimeshcontacts->m_normal[2];
-            pcontact->normal[3] = 0;
+        pcontact->pos[0] = ptrimeshcontacts->m_point[0];
+        pcontact->pos[1] = ptrimeshcontacts->m_point[1];
+        pcontact->pos[2] = ptrimeshcontacts->m_point[2];
+        pcontact->pos[3] = 1.0f;
 
-            pcontact->depth = ptrimeshcontacts->m_depth;
-            pcontact->g1 = g1;
-            pcontact->g2 = g2;
+        pcontact->normal[0] = ptrimeshcontacts->m_normal[0];
+        pcontact->normal[1] = ptrimeshcontacts->m_normal[1];
+        pcontact->normal[2] = ptrimeshcontacts->m_normal[2];
+        pcontact->normal[3] = 0;
 
-        }
+        pcontact->depth = ptrimeshcontacts->m_depth;
+        pcontact->g1 = g1;
+        pcontact->g2 = g2;
+
         ptrimeshcontacts++;
 	}
 
 	GIM_DYNARRAY_DESTROY(trimeshcontacts);
 
-    return contactcount;
+    return (int)contactcount;
 }
 
 #endif // dTRIMESH_GIMPACT

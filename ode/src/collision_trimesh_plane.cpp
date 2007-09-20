@@ -173,37 +173,40 @@ int dCollideTrimeshPlane( dxGeom *o1, dxGeom *o2, int flags, dContactGeom* conta
 	}
 
 
+	unsigned int contactcount = collision_result.m_size;
+	unsigned int contactmax = (unsigned int)(flags & NUMC_MASK);
+	if (contactcount > contactmax)
+	{
+		contactcount = contactmax;
+	}
+
 	dContactGeom* pcontact;
-	int contactcount = 0;
 	vec4f * planecontact_results = GIM_DYNARRAY_POINTER(vec4f,collision_result);
 
-    for(unsigned int i = 0; i < collision_result.m_size; i++ )
+    for(unsigned int i = 0; i < contactcount; i++ )
 	{
-        if(contactcount < (flags & 0xffff))
-        {
-            pcontact = SAFECONTACT(flags, contacts, contactcount, skip);
-            contactcount++;
-            pcontact->pos[0] = (*planecontact_results)[0];
-            pcontact->pos[1] = (*planecontact_results)[1];
-            pcontact->pos[2] = (*planecontact_results)[2];
-            pcontact->pos[3] = 1.0f;
+        pcontact = SAFECONTACT(flags, contacts, i, skip);
 
-            pcontact->normal[0] = plane[0];
-            pcontact->normal[1] = plane[1];
-            pcontact->normal[2] = plane[2];
-            pcontact->normal[3] = 0;
+        pcontact->pos[0] = (*planecontact_results)[0];
+        pcontact->pos[1] = (*planecontact_results)[1];
+        pcontact->pos[2] = (*planecontact_results)[2];
+        pcontact->pos[3] = 1.0f;
 
-            pcontact->depth = (*planecontact_results)[3];
-            pcontact->g1 = o1;
-            pcontact->g2 = o2;
+        pcontact->normal[0] = plane[0];
+        pcontact->normal[1] = plane[1];
+        pcontact->normal[2] = plane[2];
+        pcontact->normal[3] = 0;
 
-        }
+        pcontact->depth = (*planecontact_results)[3];
+        pcontact->g1 = o1;
+        pcontact->g2 = o2;
+
         planecontact_results++;
 	 }
 
 	 GIM_DYNARRAY_DESTROY(collision_result);
 
-	return contactcount;
+	return (int)contactcount;
 }
 #endif // dTRIMESH_GIMPACT
 
