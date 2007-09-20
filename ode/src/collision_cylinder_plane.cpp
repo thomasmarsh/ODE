@@ -45,7 +45,6 @@ int dCollideCylinderPlane(dxGeom *Cylinder, dxGeom *Plane, int flags, dContactGe
 	dIASSERT (Plane->type == dPlaneClass);
 	dIASSERT ((flags & NUMC_MASK) >= 1);
 
-	unsigned char* pContactData = (unsigned char*)contact;
 	int GeomCount = 0; // count of used contactgeoms
 
 #ifdef dSINGLE
@@ -160,8 +159,7 @@ int dCollideCylinderPlane(dxGeom *Cylinder, dxGeom *Plane, int flags, dContactGe
 			GeomCount++;
 			if( GeomCount >= (flags & NUMC_MASK))
 				return GeomCount; // enough contactgeoms
-			pContactData += skip;
-			contact = (dContactGeom*)pContactData;
+			contact = (dContactGeom *)((char *)contact + skip);
 		}
 
 		// Potential contact 2
@@ -175,8 +173,7 @@ int dCollideCylinderPlane(dxGeom *Cylinder, dxGeom *Plane, int flags, dContactGe
 			GeomCount++;
 			if( GeomCount >= (flags & NUMC_MASK))
 				return GeomCount; // enough contactgeoms
-			pContactData += skip;
-			contact = (dContactGeom*)pContactData;
+			contact = (dContactGeom *)((char *)contact + skip);
 		}
 
 		// Potential contact 3
@@ -190,8 +187,7 @@ int dCollideCylinderPlane(dxGeom *Cylinder, dxGeom *Plane, int flags, dContactGe
 			GeomCount++;
 			if( GeomCount >= (flags & NUMC_MASK))
 				return GeomCount; // enough contactgeoms
-			pContactData += skip;
-			contact = (dContactGeom*)pContactData;
+			contact = (dContactGeom *)((char *)contact + skip);
 		}
 
 		// Potential contact 4
@@ -205,8 +201,7 @@ int dCollideCylinderPlane(dxGeom *Cylinder, dxGeom *Plane, int flags, dContactGe
 			GeomCount++;
 			if( GeomCount >= (flags & NUMC_MASK))
 				return GeomCount; // enough contactgeoms
-			pContactData += skip;
-			contact = (dContactGeom*)pContactData;
+			contact = (dContactGeom *)((char *)contact + skip);
 		}
 	}
 	else
@@ -233,8 +228,7 @@ int dCollideCylinderPlane(dxGeom *Cylinder, dxGeom *Plane, int flags, dContactGe
 			GeomCount++;
 			if( GeomCount >= (flags & NUMC_MASK))
 				return GeomCount; // enough contactgeoms
-			pContactData += skip;
-			contact = (dContactGeom*)pContactData;
+			contact = (dContactGeom *)((char *)contact + skip);
 		}
 
 		// C is still computed
@@ -252,8 +246,7 @@ int dCollideCylinderPlane(dxGeom *Cylinder, dxGeom *Plane, int flags, dContactGe
 			GeomCount++;
 			if( GeomCount >= (flags & NUMC_MASK))
 				return GeomCount; // enough contactgeoms
-			pContactData += skip;
-			contact = (dContactGeom*)pContactData;
+			contact = (dContactGeom *)((char *)contact + skip);
 		}
 	}
 	return GeomCount;
