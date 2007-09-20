@@ -308,7 +308,7 @@ int dCollideSTL(dxGeom* g1, dxGeom* SphereGeom, int Flags, dContactGeom* Contact
 				break;
 			}
 
-			const int& TriIndex = Triangles[i];
+			const int TriIndex = Triangles[i];
 
 			dVector3 dv[3];
 			if (!Callback(TriMesh, SphereGeom, TriIndex))
