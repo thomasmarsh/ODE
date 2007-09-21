@@ -591,7 +591,7 @@ dxHeightfield::~dxHeightfield()
 void dxHeightfield::allocateTriangleBuffer(unsigned int numTriMax)
 {
 	tempTriangleBufferSize = numTriMax;
-	tempTriangleBuffer = new HeightFieldTriangle[numTriMax];
+	tempTriangleBuffer = numTriMax ? new HeightFieldTriangle[numTriMax] : NULL;
 }
 
 void dxHeightfield::resetTriangleBuffer()
@@ -602,9 +602,9 @@ void dxHeightfield::resetTriangleBuffer()
 void dxHeightfield::allocatePlaneBuffer(unsigned int numTri)
 {
 	tempPlaneBufferSize = numTri;
-	tempPlaneBuffer = new HeightFieldPlane *[numTri];
+	tempPlaneBuffer = numTri ? new HeightFieldPlane *[numTri] : NULL;
 	
-	HeightFieldPlane *ptrPlaneMatrix = new HeightFieldPlane[numTri];
+	HeightFieldPlane *ptrPlaneMatrix = numTri ? new HeightFieldPlane[numTri] : NULL;
 	for (unsigned int k = 0; k < numTri; k++)
 	{
 		tempPlaneBuffer[k] = ptrPlaneMatrix;
@@ -627,9 +627,10 @@ void dxHeightfield::allocateHeightBuffer(unsigned int numX, unsigned int numZ)
 {
 	tempHeightBufferSizeX = numX;
 	tempHeightBufferSizeZ = numZ;
-	tempHeightBuffer = new HeightFieldVertex *[numX];
+	tempHeightBuffer = numX ? new HeightFieldVertex *[numX] : NULL;
 	
-	HeightFieldVertex *ptrVerticesMatrix = new HeightFieldVertex [numX * numZ];
+	unsigned int numCells = numX * numZ;
+	HeightFieldVertex *ptrVerticesMatrix = numCells ? new HeightFieldVertex [numCells] : NULL;
 	for ( unsigned int x_local = 0; x_local < numX; x_local++)
 	{
 		tempHeightBuffer[x_local] = ptrVerticesMatrix;
