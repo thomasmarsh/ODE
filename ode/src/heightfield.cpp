@@ -459,10 +459,12 @@ dxHeightfield::dxHeightfield( dSpaceID space,
                              int bPlaceable )			:
     dxGeom( space, bPlaceable ),
     tempPlaneBuffer(0),
+	tempPlaneInstances(0),
     tempPlaneBufferSize(0),
     tempTriangleBuffer(0),
     tempTriangleBufferSize(0),
     tempHeightBuffer(0),
+	tempHeightInstances(0),
     tempHeightBufferSizeX(0),
     tempHeightBufferSizeZ(0)
 {
@@ -588,65 +590,61 @@ dxHeightfield::~dxHeightfield()
 	resetHeightBuffer();
 }
 
-void dxHeightfield::allocateTriangleBuffer(unsigned int numTriMax)
+void dxHeightfield::allocateTriangleBuffer(size_t numTri)
 {
-	tempTriangleBufferSize = numTriMax;
-	tempTriangleBuffer = numTriMax ? new HeightFieldTriangle[numTriMax] : NULL;
+	size_t alignedNumTri = AlignBufferSize(numTri, TEMP_TRIANGLE_BUFFER_ELEMENT_COUNT_ALIGNMENT);
+	tempTriangleBufferSize = alignedNumTri;
+	tempTriangleBuffer = new HeightFieldTriangle[alignedNumTri];
 }
 
 void dxHeightfield::resetTriangleBuffer()
 {
-	delete [] tempTriangleBuffer;
+	delete[] tempTriangleBuffer;
 }
 
-void dxHeightfield::allocatePlaneBuffer(unsigned int numTri)
+void dxHeightfield::allocatePlaneBuffer(size_t numTri)
 {
-	tempPlaneBufferSize = numTri;
-	tempPlaneBuffer = numTri ? new HeightFieldPlane *[numTri] : NULL;
-	
-	HeightFieldPlane *ptrPlaneMatrix = numTri ? new HeightFieldPlane[numTri] : NULL;
-	for (unsigned int k = 0; k < numTri; k++)
+	size_t alignedNumTri = AlignBufferSize(numTri, TEMP_PLANE_BUFFER_ELEMENT_COUNT_ALIGNMENT);
+	tempPlaneBufferSize = alignedNumTri;
+	tempPlaneBuffer = new HeightFieldPlane *[alignedNumTri];
+	tempPlaneInstances = new HeightFieldPlane[alignedNumTri];
+
+	HeightFieldPlane *ptrPlaneMatrix = tempPlaneInstances;
+	for (size_t indexTri = 0; indexTri != numTri; indexTri++)
 	{
-		tempPlaneBuffer[k] = ptrPlaneMatrix;
+		tempPlaneBuffer[indexTri] = ptrPlaneMatrix;
 		ptrPlaneMatrix += 1;
 	}
 }
 
 void dxHeightfield::resetPlaneBuffer()
 {
-	if (tempPlaneBufferSize > 0)
-	{
-		// All the memory is allocated in one block
-		delete [] tempPlaneBuffer[0];
-	}
-	
-    delete [] tempPlaneBuffer;
+	delete[] tempPlaneInstances;
+    delete[] tempPlaneBuffer;
 }
 
-void dxHeightfield::allocateHeightBuffer(unsigned int numX, unsigned int numZ)
+void dxHeightfield::allocateHeightBuffer(size_t numX, size_t numZ)
 {
-	tempHeightBufferSizeX = numX;
-	tempHeightBufferSizeZ = numZ;
-	tempHeightBuffer = numX ? new HeightFieldVertex *[numX] : NULL;
+	size_t alignedNumX = AlignBufferSize(numX, TEMP_HEIGHT_BUFFER_ELEMENT_COUNT_ALIGNMENT_X);
+	size_t alignedNumZ = AlignBufferSize(numZ, TEMP_HEIGHT_BUFFER_ELEMENT_COUNT_ALIGNMENT_Z);
+	tempHeightBufferSizeX = alignedNumX;
+	tempHeightBufferSizeZ = alignedNumZ;
+	tempHeightBuffer = new HeightFieldVertex *[alignedNumX];
+	size_t numCells = alignedNumX * alignedNumZ;
+	tempHeightInstances = new HeightFieldVertex [numCells];
 	
-	unsigned int numCells = numX * numZ;
-	HeightFieldVertex *ptrVerticesMatrix = numCells ? new HeightFieldVertex [numCells] : NULL;
-	for ( unsigned int x_local = 0; x_local < numX; x_local++)
+	HeightFieldVertex *ptrHeightMatrix = tempHeightInstances;
+	for (size_t indexX = 0; indexX != alignedNumX; indexX++)
 	{
-		tempHeightBuffer[x_local] = ptrVerticesMatrix;
-		ptrVerticesMatrix += numZ;
+		tempHeightBuffer[indexX] = ptrHeightMatrix;
+		ptrHeightMatrix += alignedNumZ;
 	}
 }
 
 void dxHeightfield::resetHeightBuffer()
 {
-	if (tempHeightBufferSizeX > 0)
-	{
-		// All the memory is allocated in one block
-		delete [] tempHeightBuffer[0];
-	}
-	
-    delete [] tempHeightBuffer;
+	delete[] tempHeightInstances;
+    delete[] tempHeightBuffer;
 }
 //////// Heightfield data interface ////////////////////////////////////////////////////
 
