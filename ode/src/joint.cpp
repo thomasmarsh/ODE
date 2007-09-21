@@ -2963,7 +2963,6 @@ void dJointSetPRAnchor (dJointID j, dReal x, dReal y, dReal z)
 void dJointSetPRAxis1 (dJointID j, dReal x, dReal y, dReal z)
 {
   dxJointPR* joint = (dxJointPR*)j;
-  int i;
   dUASSERT(joint,"bad joint argument");
   dUASSERT(joint->vtable == &__dPR_vtable,"joint is not a  Prismatic and Rotoide");
 
