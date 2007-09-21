@@ -72,7 +72,7 @@ static void nearCallback (void *data, dGeomID o1, dGeomID o2)
   dContact contact;
   contact.surface.mode = 0;
   contact.surface.mu = dInfinity;
-  if (dCollide (o1,o2,0,&contact.geom,sizeof(dContactGeom))) {
+  if (dCollide (o1,o2,1,&contact.geom,sizeof(dContactGeom))) {
     dJointID c = dJointCreateContact (world.id(),contactgroup.id(),&contact);
     dJointAttach (c,b1,b2);
   }
