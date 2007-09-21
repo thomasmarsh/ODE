@@ -158,6 +158,8 @@ public:
 
     void addTriangle(HeightFieldTriangle *tri)
     {
+		dIASSERT(trianglelistCurrentSize < trianglelistReservedSize);
+
         trianglelist[trianglelistCurrentSize++] = tri;
     }
 
