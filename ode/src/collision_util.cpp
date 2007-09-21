@@ -304,9 +304,9 @@ void dClosestLineBoxPoints (const dVector3 p1, const dVector3 p2,
   // denormal; this is for correctness. (Jon Watte on mailinglist)
 
 #if defined( dSINGLE )
-  const dReal tanchor_eps = 1e-19;
+  const dReal tanchor_eps = REAL(1e-19);
 #else
-  const dReal tanchor_eps = 1e-307;
+  const dReal tanchor_eps = REAL(1e-307);
 #endif
 
   // find the region and tanchor values for p1
