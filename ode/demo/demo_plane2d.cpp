@@ -61,7 +61,7 @@ static void     cb_near_collision (void *data, dGeomID o1, dGeomID o2)
     contact.surface.mode = 0;
     contact.surface.mu = 0; // frictionless
 
-    if (dCollide (o1, o2, 0, &contact.geom, sizeof (dContactGeom)))
+    if (dCollide (o1, o2, 1, &contact.geom, sizeof (dContactGeom)))
     {
         dJointID c = dJointCreateContact (dyn_world.id(),
                         coll_contacts.id (), &contact);

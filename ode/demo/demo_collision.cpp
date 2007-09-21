@@ -499,7 +499,7 @@ int test_ray_and_sphere()
   dRFromAxisAndAngle (R,dRandReal()*2-1,dRandReal()*2-1,
 		      dRandReal()*2-1,dRandReal()*10-5);
   dGeomSetRotation (ray,R);
-  if (dCollide (ray,sphere,0,&contact,sizeof(dContactGeom)) != 0) FAILED();
+  if (dCollide (ray,sphere,1,&contact,sizeof(dContactGeom)) != 0) FAILED();
 
   // ********** test zero length ray just outside that sphere
 
@@ -511,7 +511,7 @@ int test_ray_and_sphere()
   dRFromAxisAndAngle (R,dRandReal()*2-1,dRandReal()*2-1,
 		      dRandReal()*2-1,dRandReal()*10-5);
   dGeomSetRotation (ray,R);
-  if (dCollide (ray,sphere,0,&contact,sizeof(dContactGeom)) != 0) FAILED();
+  if (dCollide (ray,sphere,1,&contact,sizeof(dContactGeom)) != 0) FAILED();
 
   // ********** test finite length ray totally contained inside the sphere
 
@@ -527,7 +527,7 @@ int test_ray_and_sphere()
   dNormalize3 (n);
   dGeomRaySet (ray,q[0],q[1],q[2],n[0],n[1],n[2]);
   dGeomRaySetLength (ray,dDISTANCE (q,q2));
-  if (dCollide (ray,sphere,0,&contact,sizeof(dContactGeom)) != 0) FAILED();
+  if (dCollide (ray,sphere,1,&contact,sizeof(dContactGeom)) != 0) FAILED();
 
   // ********** test finite length ray totally outside the sphere
 
@@ -541,7 +541,7 @@ int test_ray_and_sphere()
   for (j=0; j<3; j++) q[j] = 1.01*r * q[j] + p[j];
   dGeomRaySet (ray,q[0],q[1],q[2],n[0],n[1],n[2]);
   dGeomRaySetLength (ray,100);
-  if (dCollide (ray,sphere,0,&contact,sizeof(dContactGeom)) != 0) FAILED();
+  if (dCollide (ray,sphere,1,&contact,sizeof(dContactGeom)) != 0) FAILED();
 
   // ********** test ray from outside to just above surface
 
@@ -551,12 +551,12 @@ int test_ray_and_sphere()
   for (j=0; j<3; j++) q2[j] = 2*r * q[j] + p[j];
   dGeomRaySet (ray,q2[0],q2[1],q2[2],n[0],n[1],n[2]);
   dGeomRaySetLength (ray,0.99*r);
-  if (dCollide (ray,sphere,0,&contact,sizeof(dContactGeom)) != 0) FAILED();
+  if (dCollide (ray,sphere,1,&contact,sizeof(dContactGeom)) != 0) FAILED();
 
   // ********** test ray from outside to just below surface
 
   dGeomRaySetLength (ray,1.01*r);
-  if (dCollide (ray,sphere,0,&contact,sizeof(dContactGeom)) != 1) FAILED();
+  if (dCollide (ray,sphere,1,&contact,sizeof(dContactGeom)) != 1) FAILED();
   for (j=0; j<3; j++) q2[j] = r * q[j] + p[j];
   if (dDISTANCE (contact.pos,q2) > tol) FAILED();
 
@@ -570,7 +570,7 @@ int test_ray_and_sphere()
   dNormalize3 (n);
   dGeomRaySet (ray,q[0],q[1],q[2],n[0],n[1],n[2]);
   dGeomRaySetLength (ray,100);
-  if (dCollide (ray,sphere,0,&contact,sizeof(dContactGeom))) {
+  if (dCollide (ray,sphere,1,&contact,sizeof(dContactGeom))) {
     k = dDISTANCE (contact.pos,dGeomGetPosition(sphere));
     if (dFabs(k - r) > tol) FAILED();
     // also check normal signs
@@ -592,7 +592,7 @@ int test_ray_and_sphere()
   for (j=0; j<3; j++) q[j] -= n[j];
   dGeomRaySet (ray,q[0],q[1],q[2],n[0],n[1],n[2]);
   dGeomRaySetLength (ray,2);
-  if (dCollide (ray,sphere,0,&contact,sizeof(dContactGeom)) != 0) FAILED();
+  if (dCollide (ray,sphere,1,&contact,sizeof(dContactGeom)) != 0) FAILED();
 
   // ********** test tangential grazing - hit
 
@@ -603,7 +603,7 @@ int test_ray_and_sphere()
   for (j=0; j<3; j++) q[j] -= n[j];
   dGeomRaySet (ray,q[0],q[1],q[2],n[0],n[1],n[2]);
   dGeomRaySetLength (ray,2);
-  if (dCollide (ray,sphere,0,&contact,sizeof(dContactGeom)) != 1) FAILED();
+  if (dCollide (ray,sphere,1,&contact,sizeof(dContactGeom)) != 1) FAILED();
 
   PASSED();
 }
@@ -645,7 +645,7 @@ int test_ray_and_box()
   dRFromAxisAndAngle (R,dRandReal()*2-1,dRandReal()*2-1,
 		      dRandReal()*2-1,dRandReal()*10-5);
   dGeomSetRotation (ray,R);
-  if (dCollide (ray,box,0,&contact,sizeof(dContactGeom)) != 0) FAILED();
+  if (dCollide (ray,box,1,&contact,sizeof(dContactGeom)) != 0) FAILED();
 
   // ********** test zero length ray just outside box
 
@@ -659,7 +659,7 @@ int test_ray_and_box()
   dRFromAxisAndAngle (R,dRandReal()*2-1,dRandReal()*2-1,
 		      dRandReal()*2-1,dRandReal()*10-5);
   dGeomSetRotation (ray,R);
-  if (dCollide (ray,box,0,&contact,sizeof(dContactGeom)) != 0) FAILED();
+  if (dCollide (ray,box,1,&contact,sizeof(dContactGeom)) != 0) FAILED();
 
   // ********** test finite length ray totally contained inside the box
 
@@ -673,7 +673,7 @@ int test_ray_and_box()
   dNormalize3 (n);
   dGeomRaySet (ray,q2[0],q2[1],q2[2],n[0],n[1],n[2]);
   dGeomRaySetLength (ray,dDISTANCE(q2,q4));
-  if (dCollide (ray,box,0,&contact,sizeof(dContactGeom)) != 0) FAILED();
+  if (dCollide (ray,box,1,&contact,sizeof(dContactGeom)) != 0) FAILED();
 
   // ********** test finite length ray totally outside the box
 
@@ -685,7 +685,7 @@ int test_ray_and_box()
   dNormalize3 (q2);
   dGeomRaySet (ray,q3[0],q3[1],q3[2],q2[0],q2[1],q2[2]);
   dGeomRaySetLength (ray,10);
-  if (dCollide (ray,box,0,&contact,sizeof(dContactGeom)) != 0) FAILED();
+  if (dCollide (ray,box,1,&contact,sizeof(dContactGeom)) != 0) FAILED();
 
   // ********** test ray from outside to just above surface
 
@@ -698,12 +698,12 @@ int test_ray_and_box()
   for (j=0; j<3; j++) q2[j] = -q2[j];
   dGeomRaySet (ray,q3[0],q3[1],q3[2],q2[0],q2[1],q2[2]);
   dGeomRaySetLength (ray,k*0.99);
-  if (dCollide (ray,box,0,&contact,sizeof(dContactGeom)) != 0) FAILED();
+  if (dCollide (ray,box,1,&contact,sizeof(dContactGeom)) != 0) FAILED();
 
   // ********** test ray from outside to just below surface
 
   dGeomRaySetLength (ray,k*1.01);
-  if (dCollide (ray,box,0,&contact,sizeof(dContactGeom)) != 1) FAILED();
+  if (dCollide (ray,box,1,&contact,sizeof(dContactGeom)) != 1) FAILED();
 
   // ********** test contact point position for random rays
 
@@ -714,7 +714,7 @@ int test_ray_and_box()
   dNormalize3 (q3);
   dGeomRaySet (ray,q2[0],q2[1],q2[2],q3[0],q3[1],q3[2]);
   dGeomRaySetLength (ray,10);
-  if (dCollide (ray,box,0,&contact,sizeof(dContactGeom))) {
+  if (dCollide (ray,box,1,&contact,sizeof(dContactGeom))) {
     // check depth of contact point
     if (dFabs (dGeomBoxPointDepth
 	       (box,contact.pos[0],contact.pos[1],contact.pos[2])) > tol)
@@ -776,7 +776,7 @@ int test_ray_and_ccylinder()
   for (j=0; j<3; j++) b[j] -= a[j];
   dNormalize3 (b);
   dGeomRaySet (ray,a[0],a[1],a[2],b[0],b[1],b[2]);
-  if (dCollide (ray,ccyl,0,&contact,sizeof(dContactGeom)) != 0) FAILED();
+  if (dCollide (ray,ccyl,1,&contact,sizeof(dContactGeom)) != 0) FAILED();
 
   // ********** test ray outside ccyl that just misses (between caps)
 
@@ -788,12 +788,12 @@ int test_ray_and_ccylinder()
   for (j=0; j<3; j++) b[j] = -a[j]*r*2 + k*R[j*4+2] + p[j];
   dGeomRaySet (ray,b[0],b[1],b[2],a[0],a[1],a[2]);
   dGeomRaySetLength (ray,r*0.99);
-  if (dCollide (ray,ccyl,0,&contact,sizeof(dContactGeom)) != 0) FAILED();
+  if (dCollide (ray,ccyl,1,&contact,sizeof(dContactGeom)) != 0) FAILED();
 
   // ********** test ray outside ccyl that just hits (between caps)
 
   dGeomRaySetLength (ray,r*1.01);
-  if (dCollide (ray,ccyl,0,&contact,sizeof(dContactGeom)) != 1) FAILED();
+  if (dCollide (ray,ccyl,1,&contact,sizeof(dContactGeom)) != 1) FAILED();
   // check depth of contact point
   if (dFabs (dGeomCapsulePointDepth
 	     (ccyl,contact.pos[0],contact.pos[1],contact.pos[2])) > tol)
@@ -811,12 +811,12 @@ int test_ray_and_ccylinder()
   }
   dGeomRaySet (ray,b[0],b[1],b[2],a[0],a[1],a[2]);
   dGeomRaySetLength (ray,r*0.99);
-  if (dCollide (ray,ccyl,0,&contact,sizeof(dContactGeom)) != 0) FAILED();
+  if (dCollide (ray,ccyl,1,&contact,sizeof(dContactGeom)) != 0) FAILED();
 
   // ********** test ray outside ccyl that just hits (caps)
 
   dGeomRaySetLength (ray,r*1.01);
-  if (dCollide (ray,ccyl,0,&contact,sizeof(dContactGeom)) != 1) FAILED();
+  if (dCollide (ray,ccyl,1,&contact,sizeof(dContactGeom)) != 1) FAILED();
   // check depth of contact point
   if (dFabs (dGeomCapsulePointDepth
 	     (ccyl,contact.pos[0],contact.pos[1],contact.pos[2])) > tol)
@@ -830,7 +830,7 @@ int test_ray_and_ccylinder()
   dGeomRaySet (ray,a[0],a[1],a[2],n[0],n[1],n[2]);
   dGeomRaySetLength (ray,10);
 
-  if (dCollide (ray,ccyl,0,&contact,sizeof(dContactGeom))) {
+  if (dCollide (ray,ccyl,1,&contact,sizeof(dContactGeom))) {
     // check depth of contact point
     if (dFabs (dGeomCapsulePointDepth
 	       (ccyl,contact.pos[0],contact.pos[1],contact.pos[2])) > tol)
@@ -879,7 +879,7 @@ int test_ray_and_plane()
   dRFromAxisAndAngle (R,dRandReal()*2-1,dRandReal()*2-1,
 		      dRandReal()*2-1,dRandReal()*10-5);
   dGeomSetRotation (ray,R);
-  if (dCollide (ray,plane,0,&contact,sizeof(dContactGeom)) != 0) FAILED();
+  if (dCollide (ray,plane,1,&contact,sizeof(dContactGeom)) != 0) FAILED();
 
   // ********** test finite length ray above plane
 
@@ -894,7 +894,7 @@ int test_ray_and_plane()
   dNormalize3 (h);
   dGeomRaySet (ray,b[0],b[1],b[2],h[0],h[1],h[2]);
   dGeomRaySetLength (ray,10);
-  if (dCollide (ray,plane,0,&contact,sizeof(dContactGeom)) != 0) FAILED();
+  if (dCollide (ray,plane,1,&contact,sizeof(dContactGeom)) != 0) FAILED();
 
   // ********** test finite length ray that intersects plane
 
@@ -909,7 +909,7 @@ int test_ray_and_plane()
   dNormalize3 (h);
   dGeomRaySet (ray,b[0],b[1],b[2],h[0],h[1],h[2]);
   dGeomRaySetLength (ray,10);
-  if (dCollide (ray,plane,0,&contact,sizeof(dContactGeom))) {
+  if (dCollide (ray,plane,1,&contact,sizeof(dContactGeom))) {
     // test that contact is on plane surface
     if (dFabs (dDOT(contact.pos,n) - d) > tol) FAILED();
     // also check normal signs
@@ -928,12 +928,12 @@ int test_ray_and_plane()
   for (j=0; j<3; j++) h[j] = -n[j];
   dGeomRaySet (ray,b[0],b[1],b[2],h[0],h[1],h[2]);
   dGeomRaySetLength (ray,0.99);
-  if (dCollide (ray,plane,0,&contact,sizeof(dContactGeom)) != 0) FAILED();
+  if (dCollide (ray,plane,1,&contact,sizeof(dContactGeom)) != 0) FAILED();
 
   // ********** test ray that just hits
 
   dGeomRaySetLength (ray,1.01);
-  if (dCollide (ray,plane,0,&contact,sizeof(dContactGeom)) != 1) FAILED();
+  if (dCollide (ray,plane,1,&contact,sizeof(dContactGeom)) != 1) FAILED();
 
   // ********** test polarity with typical ground plane
 
@@ -944,12 +944,12 @@ int test_ray_and_plane()
   b[2] = -1;
   dGeomRaySet (ray,a[0],a[1],a[2],b[0],b[1],b[2]);
   dGeomRaySetLength (ray,2);
-  if (dCollide (ray,plane,0,&contact,sizeof(dContactGeom)) != 1) FAILED();
+  if (dCollide (ray,plane,1,&contact,sizeof(dContactGeom)) != 1) FAILED();
   if (dFabs (contact.depth - 1) > tol) FAILED();
   a[2] = -1;
   b[2] = 1;
   dGeomRaySet (ray,a[0],a[1],a[2],b[0],b[1],b[2]);
-  if (dCollide (ray,plane,0,&contact,sizeof(dContactGeom)) != 1) FAILED();
+  if (dCollide (ray,plane,1,&contact,sizeof(dContactGeom)) != 1) FAILED();
   if (dFabs (contact.depth - 1) > tol) FAILED();
 
   PASSED();
