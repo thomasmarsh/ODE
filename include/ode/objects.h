@@ -1266,6 +1266,12 @@ ODE_API void dJointSetBallAnchor (dJointID, dReal x, dReal y, dReal z);
 ODE_API void dJointSetBallAnchor2 (dJointID, dReal x, dReal y, dReal z);
 
 /**
+ * @brief Param setting for Ball joints
+ * @ingroup joints
+ */
+ODE_API void dJointSetBallParam (dJointID, int parameter, dReal value);
+
+/**
  * @brief Set hinge anchor parameter.
  * @ingroup joints
  */
@@ -1432,6 +1438,13 @@ ODE_API void dJointAddPRTorque (dJointID j, dReal torque);
  */
 ODE_API void dJointSetFixed (dJointID);
 
+/*
+ * @brief Sets joint parameter
+ *
+ * @ingroup joints
+ */
+ODE_API void dJointSetFixedParam (dJointID, int parameter, dReal value);
+
 /**
  * @brief set the nr of axes
  * @param num 0..3
@@ -1540,6 +1553,12 @@ ODE_API void dJointGetBallAnchor (dJointID, dVector3 result);
  * dJointGetBallAnchor(), to see how far the joint has come apart.
  */
 ODE_API void dJointGetBallAnchor2 (dJointID, dVector3 result);
+
+/**
+ * @brief get joint parameter
+ * @ingroup joints
+ */
+ODE_API dReal dJointGetBallParam (dJointID, int parameter);
 
 /**
  * @brief Get the hinge anchor point, in world coordinates.
@@ -1898,6 +1917,12 @@ ODE_API void dJointGetLMotorAxis (dJointID, int anum, dVector3 result);
  * @ingroup joints
  */
 ODE_API dReal dJointGetLMotorParam (dJointID, int parameter);
+
+/**
+ * @brief get joint parameter
+ * @ingroup joints
+ */
+ODE_API dReal dJointGetFixedParam (dJointID, int parameter);
 
 
 /**

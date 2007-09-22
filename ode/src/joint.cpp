@@ -629,6 +629,8 @@ static void ballInit (dxJointBall *j)
 {
   dSetZero (j->anchor1,4);
   dSetZero (j->anchor2,4);
+  j->erp = j->world->global_erp;
+  j->cfm = j->world->global_cfm;
 }
 
 
@@ -641,6 +643,10 @@ static void ballGetInfo1 (dxJointBall *j, dxJoint::Info1 *info)
 
 static void ballGetInfo2 (dxJointBall *joint, dxJoint::Info2 *info)
 {
+  info->erp = joint->erp;
+  info->cfm[0] = joint->cfm;
+  info->cfm[1] = joint->cfm;
+  info->cfm[2] = joint->cfm;
   setBall (joint,info,joint->anchor1,joint->anchor2);
 }
 
@@ -689,6 +695,50 @@ void dJointGetBallAnchor2 (dJointID j, dVector3 result)
     getAnchor (joint,result,joint->anchor1);
   else
     getAnchor2 (joint,result,joint->anchor2);
+}
+
+
+void dxJointBall::set (int num, dReal value)
+{
+  switch (num) {
+  case dParamCFM:
+    cfm = value;
+    break;
+  case dParamERP:
+    erp = value;
+    break;
+  }
+}
+ 
+
+dReal dxJointBall::get (int num)
+{
+  switch (num) {
+  case dParamCFM:
+    return cfm;
+  case dParamERP:
+    return erp;
+  default:
+	return 0;
+  }
+}
+
+
+void dJointSetBallParam (dJointID j, int parameter, dReal value)
+{
+  dxJointBall* joint = (dxJointBall*)j;
+  dUASSERT(joint,"bad joint argument");
+  dUASSERT(joint->vtable == &__dball_vtable,"joint is not a ball joint");
+  joint->set (parameter,value);
+}
+
+
+dReal dJointGetBallParam (dJointID j, int parameter)
+{
+  dxJointBall* joint = (dxJointBall*)j;
+  dUASSERT(joint,"bad joint argument");
+  dUASSERT(joint->vtable == &__dball_vtable,"joint is not a ball joint");
+  return joint->get (parameter);
 }
 
 
@@ -3696,6 +3746,8 @@ static void fixedInit (dxJointFixed *j)
 {
   dSetZero (j->offset,4);
   dSetZero (j->qrel,4);
+  j->erp = j->world->global_erp;
+  j->cfm = j->world->global_cfm;
 }
 
 
@@ -3718,6 +3770,11 @@ static void fixedGetInfo2 (dxJointFixed *joint, dxJoint::Info2 *info)
   info->J1l[0] = 1;
   info->J1l[s+1] = 1;
   info->J1l[2*s+2] = 1;
+
+  info->erp = joint->erp;
+  info->cfm[0] = joint->cfm;
+  info->cfm[1] = joint->cfm;
+  info->cfm[2] = joint->cfm;
 
   dVector3 ofs;
   dMULTIPLY0_331 (ofs,joint->node[0].body->posr.R,joint->offset);
@@ -3767,6 +3824,49 @@ void dJointSetFixed (dJointID j)
       for (i=0; i<4; i++) joint->offset[i] = joint->node[0].body->posr.pos[i];
     }
   }
+}
+
+void dxJointFixed::set (int num, dReal value)
+{
+  switch (num) {
+  case dParamCFM:
+    cfm = value;
+    break;
+  case dParamERP:
+    erp = value;
+    break;
+  }
+}
+ 
+
+dReal dxJointFixed::get (int num)
+{
+  switch (num) {
+  case dParamCFM:
+    return cfm;
+  case dParamERP:
+    return erp;
+  default:
+	return 0;
+  }
+}
+
+
+void dJointSetFixedParam (dJointID j, int parameter, dReal value)
+{
+  dxJointFixed* joint = (dxJointFixed*)j;
+  dUASSERT(joint,"bad joint argument");
+  dUASSERT(joint->vtable == &__dfixed_vtable,"joint is not a fixed joint");
+  joint->set (parameter,value);
+}
+
+
+dReal dJointGetFixedParam (dJointID j, int parameter)
+{
+  dxJointFixed* joint = (dxJointFixed*)j;
+  dUASSERT(joint,"bad joint argument");
+  dUASSERT(joint->vtable == &__dfixed_vtable,"joint is not a fixed joint");
+  return joint->get (parameter);
 }
 
 

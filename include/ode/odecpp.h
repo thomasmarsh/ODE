@@ -343,6 +343,10 @@ public:
     { dJointGetBallAnchor (_id, result); }
   void getAnchor2 (dVector3 result) const
     { dJointGetBallAnchor2 (_id, result); }
+  void setParam (int parameter, dReal value)
+    { dJointSetBallParam (_id, parameter, value); }
+  dReal getParam (int parameter) const
+    { return dJointGetBallParam (_id, parameter); }
 } ;
 
 
@@ -579,6 +583,12 @@ public:
 
   void set()
     { dJointSetFixed (_id); }
+
+  void setParam (int parameter, dReal value)
+    { dJointSetFixedParam (_id, parameter, value); }
+
+  dReal getParam (int parameter) const
+    { return dJointGetFixedParam (_id, parameter); }
 };
 
 

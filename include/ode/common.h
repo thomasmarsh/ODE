@@ -318,7 +318,8 @@ enum {
   dParamStopCFM, \
   /* parameters for suspension */ \
   dParamSuspensionERP, \
-  dParamSuspensionCFM,
+  dParamSuspensionCFM, \
+  dParamERP, \
 
 #define D_ALL_PARAM_NAMES_X(start,x) \
   /* parameters for limits and motors */ \
@@ -333,7 +334,8 @@ enum {
   dParamStopCFM ## x, \
   /* parameters for suspension */ \
   dParamSuspensionERP ## x, \
-  dParamSuspensionCFM ## x,
+  dParamSuspensionCFM ## x, \
+  dParamERP ## x,
 
 enum {
   D_ALL_PARAM_NAMES(0)
