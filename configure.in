@@ -51,7 +51,7 @@ AM_CONDITIONAL(USE_SONAME, test x$use_soname = xyes)
 
 dnl Check if we want to build demos
 AC_MSG_CHECKING(if tests should be built)
-AC_ARG_ENABLE(tests,AC_HELP_STRING([--enable-demos], [build tests]), enable_demos=$enableval,enable_demos=yes)
+AC_ARG_ENABLE(demos,AC_HELP_STRING([--enable-demos], [build tests]), enable_demos=$enableval,enable_demos=yes)
 AC_MSG_RESULT($enable_demos)
 AM_CONDITIONAL(ENABLE_DEMOS, test x$enable_demos = xyes)
 
