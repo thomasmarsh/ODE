@@ -14,6 +14,9 @@ AC_CANONICAL_TARGET
 
 AM_INIT_AUTOMAKE(ODE,[$ODE_RELEASE])
 AM_CONFIG_HEADER(include/ode/config.h)
+dnl Set CFLAGS to zero, so that we avoid getting the gratis -g -O2
+CFLAGS=
+CXXFLAGS=
 AC_C_BIGENDIAN
 AC_PATH_X
 AC_PATH_XTRA
@@ -305,8 +308,8 @@ AC_MSG_RESULT($release)
 
 AC_MSG_CHECKING(if building a debug library)
 AC_ARG_ENABLE(debug,AC_HELP_STRING([--enable-debug],
-[build a debug library with -g]),
-debug=$enableval,debug=no)
+[Add debug symbols to the library with -g]),
+debug=$enableval,debug=yes)
 if test "x$debug" == xyes
 then
     CFLAGS="$CFLAGS -g"
@@ -565,8 +568,8 @@ echo "  Use gyroscopic term:     $gyroscopic"
 echo "  Is this a Pentium:       $pentium"
 echo "  Is the CPU x86-64:       $cpu64"
 echo "  Is this a release build: $release"
-echo "  Is this a debug build:   $debug"
-echo "  Using SONAME:		  $use_soname"
+echo "  Adding debug symbols:    $debug"
+echo "  Using SONAME:		 $use_soname"
 echo "  Headers will be installed in $prefix/include/ode"
 echo "  Libraries will be installed in $prefix/lib"
 
