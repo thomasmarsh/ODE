@@ -1584,8 +1584,10 @@ static void command (int cmd)
       // remember the mesh's dTriMeshDataID on its userdata for convenience.
       dGeomSetData(obj[i].geom[0], new_tmdata);
 
-	  dMassSetTrimesh( &m, DENSITY, obj[i].geom[0] );
-//    dMassSetBox (&m,DENSITY,sides[0],sides[1],sides[2]);
+      dMassSetTrimesh( &m, DENSITY, obj[i].geom[0] );
+      printf("mass at %f %f %f\n", m.c[0], m.c[1], m.c[2]);
+      dGeomSetPosition(obj[i].geom[0], -m.c[0], -m.c[1], -m.c[2]);
+      dMassTranslate(&m, -m.c[0], -m.c[1], -m.c[2]);
     }
     else if (cmd == 'x') {
       dGeomID g2[GPB];		// encapsulated geometries
