@@ -650,8 +650,7 @@ int dBoxBox (const dVector3 p1, const dMatrix3 R1,
     }
   }
   if (cnum < 1) { 
-	  dIASSERT(0);
-	  return 0;	// this should never happen
+	  return 0;	// this should not happen, yet does at times (demo_plane2d single precision).
   }
 
   // we can't generate more contacts than we actually have
