@@ -498,7 +498,7 @@ void dxHashSpace::collide (void *data, dNearCallback *callback)
   // have been intersection-tested against each other yet. this array can
   // grow large with high n, but oh well...
   int tested_rowsize = (n+7) >> 3;	// number of bytes needed for n bits
-  unsigned char *tested = (unsigned char *) alloca (n * tested_rowsize);
+  unsigned char *tested = (unsigned char *) ALLOCA (n * tested_rowsize);
   memset (tested,0,n * tested_rowsize);
 
   // create a hash table to store all AABBs. each AABB may take up to 8 cells.
@@ -525,7 +525,7 @@ void dxHashSpace::collide (void *data, dNearCallback *callback)
 	  // get the hash index
 	  unsigned long hi = getVirtualAddress (aabb->level,xi,yi,zi) % sz;
 	  // add a new node to the hash table
-	  Node *node = (Node*) alloca (sizeof (Node));
+	  Node *node = (Node*) ALLOCA (sizeof (Node));
 	  node->x = xi;
 	  node->y = yi;
 	  node->z = zi;
