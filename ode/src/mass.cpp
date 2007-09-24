@@ -404,6 +404,9 @@ void dMassSetTrimesh( dMass *m, dReal density, dGeomID g )
 	m->_I(2,0) = - density * TP[2];
 	m->_I(0,2) = - density * TP[2];
 
+	// Added to address SF bug 1729095
+	dMassTranslate( m, T1[0] / T0,  T1[1] / T0,  T1[2] / T0 );
+
 # ifndef dNODEBUG
 	dMassCheck (m);
 # endif
