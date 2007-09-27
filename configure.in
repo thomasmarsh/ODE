@@ -2,12 +2,12 @@ dnl Initial configure.in by Rodrigo Hernandez
 dnl Modified in 26/10/2005 by Rodrigo Hernandez
 
 dnl AC_INIT does not take a macro as a version nr: set it seperately! - Bram
-AC_INIT(ODE,0.8.1-rc1,ode@ode.org)
+AC_INIT(ODE,0.8.2-rc1,ode@ode.org)
 
 dnl When upgrading version nr, also change the AC_INIT line! - Bram
 ODE_CURRENT=0
 ODE_REVISION=8
-ODE_AGE=1-rc1
+ODE_AGE=2-rc1
 ODE_RELEASE=[$ODE_CURRENT].[$ODE_REVISION].[$ODE_AGE]
 AC_CANONICAL_HOST
 AC_CANONICAL_TARGET
