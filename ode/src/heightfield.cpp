@@ -610,7 +610,7 @@ void dxHeightfield::allocatePlaneBuffer(size_t numTri)
 	tempPlaneInstances = new HeightFieldPlane[alignedNumTri];
 
 	HeightFieldPlane *ptrPlaneMatrix = tempPlaneInstances;
-	for (size_t indexTri = 0; indexTri != numTri; indexTri++)
+	for (size_t indexTri = 0; indexTri != alignedNumTri; indexTri++)
 	{
 		tempPlaneBuffer[indexTri] = ptrPlaneMatrix;
 		ptrPlaneMatrix += 1;
