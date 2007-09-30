@@ -165,7 +165,7 @@ struct CONTACT_KEY
 struct CONTACT_KEY_HASH_NODE
 {
 	CONTACT_KEY m_keyarray[MAXCONTACT_X_NODE];
-	char m_keycount;
+	int m_keycount;
 };
 
 #define CONTACTS_HASHSIZE 256
@@ -261,6 +261,50 @@ void RemoveNewContactFromNode(const CONTACT_KEY * contactkey, CONTACT_KEY_HASH_N
 	}
 }
 
+void RemoveArbitraryContactFromNode(const CONTACT_KEY *contactkey, CONTACT_KEY_HASH_NODE *node)
+{
+	dIASSERT(node->m_keycount > 0);
+
+	int keyindex, lastkeyindex = node->m_keycount - 1;
+
+	// Do not check the last contact
+	for (keyindex = 0; keyindex < lastkeyindex; keyindex++)
+	{
+		if (node->m_keyarray[keyindex].m_contact == contactkey->m_contact)
+		{
+			node->m_keyarray[keyindex] = node->m_keyarray[lastkeyindex];
+			break;
+		}
+	}
+
+	dIASSERT(keyindex < lastkeyindex || 
+		node->m_keyarray[keyindex].m_contact == contactkey->m_contact); // It has been either the break from loop or last element should match
+
+	node->m_keycount = lastkeyindex;
+}
+
+void UpdateArbitraryContactInNode(const CONTACT_KEY *contactkey, CONTACT_KEY_HASH_NODE *node,
+	dContactGeom *pwithcontact)
+{
+	dIASSERT(node->m_keycount > 0);
+
+	int keyindex, lastkeyindex = node->m_keycount - 1;
+
+	// Do not check the last contact
+	for (keyindex = 0; keyindex < lastkeyindex; keyindex++)
+	{
+		if (node->m_keyarray[keyindex].m_contact == contactkey->m_contact)
+		{
+			break;
+		}
+	}
+
+	dIASSERT(keyindex < lastkeyindex || 
+		node->m_keyarray[keyindex].m_contact == contactkey->m_contact); // It has been either the break from loop or last element should match
+
+	node->m_keyarray[keyindex].m_contact = pwithcontact;
+}
+
 void ClearContactSet()
 {
 	memset(g_hashcontactset,0,sizeof(CONTACT_KEY_HASH_NODE)*CONTACTS_HASHSIZE);
@@ -274,11 +318,26 @@ dContactGeom *InsertContactInSet(const CONTACT_KEY &newkey)
 	return AddContactToNode(&newkey, &g_hashcontactset[index]);
 }
 
-void RemoveNewContactFromSet(const CONTACT_KEY &newkey)
+void RemoveNewContactFromSet(const CONTACT_KEY &contactkey)
 {
-	unsigned int index = MakeContactIndex(newkey.m_key);
+	unsigned int index = MakeContactIndex(contactkey.m_key);
 	
-	RemoveNewContactFromNode(&newkey, &g_hashcontactset[index]);
+	RemoveNewContactFromNode(&contactkey, &g_hashcontactset[index]);
+}
+
+void RemoveArbitraryContactFromSet(const CONTACT_KEY &contactkey)
+{
+	unsigned int index = MakeContactIndex(contactkey.m_key);
+
+	RemoveArbitraryContactFromNode(&contactkey, &g_hashcontactset[index]);
+}
+
+void UpdateArbitraryContactInSet(const CONTACT_KEY &contactkey, 
+	dContactGeom *pwithcontact)
+{
+	unsigned int index = MakeContactIndex(contactkey.m_key);
+
+	UpdateArbitraryContactInNode(&contactkey, &g_hashcontactset[index], pwithcontact);
 }
 
 bool AllocNewContact(
@@ -319,6 +378,31 @@ bool AllocNewContact(
 
 	out_pcontact = pcontactfound;
 	return allocated_new;
+}
+
+void FreeExistingContact(dContactGeom *pcontact,
+	int Flags, dContactGeom *Contacts, 
+	int Stride, int &contactcount)
+{
+	CONTACT_KEY contactKey;
+	UpdateContactKey(contactKey, pcontact);
+
+	RemoveArbitraryContactFromSet(contactKey);
+
+	int lastContactIndex = contactcount - 1;
+	dContactGeom *plastContact = SAFECONTACT(Flags, Contacts, lastContactIndex, Stride);
+
+	if (pcontact != plastContact)
+	{
+		*pcontact = *plastContact;
+
+		CONTACT_KEY lastContactKey;
+		UpdateContactKey(lastContactKey, plastContact);
+		
+		UpdateArbitraryContactInSet(lastContactKey, pcontact);
+	}
+
+	contactcount = lastContactIndex;
 }
 
 
@@ -367,16 +451,7 @@ dContactGeom *  PushNewContact( dxGeom* g1, dxGeom* g2,
 			}
 			else
 			{
-				/*
-					Note by Oleh_Derevenko:
-					In this case contacts should annihilate each other 
-					and generating a dummy normal is not a correct approach.
-					Change this code!!!
-				*/
-				pcontact->normal[0] = 1.0f;
-				pcontact->normal[1] = 0.0f;
-				pcontact->normal[2] = 0.0f;
-				pcontact->normal[3] = REAL(1.0); // used to store length of vector sum for averaging
+				FreeExistingContact(pcontact, Flags, Contacts, Stride, contactcount);
 			}
 		}
 	}
