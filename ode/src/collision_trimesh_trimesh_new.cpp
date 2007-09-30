@@ -147,6 +147,11 @@ SwapNormals(dVector3 *&pen_v, dVector3 *&col_v, dVector3* v1, dVector3* v2,
 ///////////////////////MECHANISM FOR AVOID CONTACT REDUNDANCE///////////////////////////////
 ////* Written by Francisco León (http://gimpact.sourceforge.net) *///
 #define CONTACT_DIFF_EPSILON REAL(0.00001)
+#if defined(dDOUBLE)
+#define CONTACT_NORMAL_ZERO REAL(0.0000001)
+#else // if defined(dSINGLE)
+#define CONTACT_NORMAL_ZERO REAL(0.00001)
+#endif
 #define CONTACT_POS_HASH_QUOTIENT REAL(10000.0)
 #define dSQRT3	REAL(1.7320508075688773)
 
@@ -329,35 +334,36 @@ dContactGeom *  PushNewContact( dxGeom* g1, dxGeom* g2,
 
 	dContactGeom * pcontact;
 
-	if (!AllocNewContact(point,pcontact,Flags,Contacts,Stride,contactcount))
+	if (!AllocNewContact(point, pcontact, Flags, Contacts, Stride, contactcount))
 	{
-		if(depth > pcontact->depth + CONTACT_DIFF_EPSILON)
+		const dReal depthDifference = depth - pcontact->depth;
+
+		if (depthDifference > CONTACT_DIFF_EPSILON)
 		{
 			pcontact->normal[0] = normal[0];
 			pcontact->normal[1] = normal[1];
 			pcontact->normal[2] = normal[2];
-			pcontact->normal[3] = 0.0f;
+			pcontact->normal[3] = REAL(1.0); // used to store length of vector sum for averaging
 			pcontact->depth = depth;
 
 			pcontact->g1 = g1;
 			pcontact->g2 = g2;
 		}
-		else if(depth >= pcontact->depth - CONTACT_DIFF_EPSILON) ///average
+		else if (depthDifference >= -CONTACT_DIFF_EPSILON) ///average
 		{
 			if(pcontact->g1 == g2)
 			{
-
-				MULT(normal,normal,-1.0f);
+				MULT(normal,normal, REAL(-1.0));
 			}
 
-			pcontact->normal[0] += normal[0];
-			pcontact->normal[1] += normal[1];
-			pcontact->normal[2] += normal[2];
+			const dReal oldLen = pcontact->normal[3];
+			COMBO(pcontact->normal, normal, oldLen, pcontact->normal);
 
-			dReal len = LENGTH(pcontact->normal);
-			if(len>REAL(0.0000001))
+			const dReal len = LENGTH(pcontact->normal);
+			if (len > CONTACT_NORMAL_ZERO)
 			{
-				MULT(pcontact->normal,pcontact->normal,1.0f/len);
+				MULT(pcontact->normal, pcontact->normal, REAL(1.0) / len);
+				pcontact->normal[3] = len;
 			}
 			else
 			{
@@ -370,10 +376,8 @@ dContactGeom *  PushNewContact( dxGeom* g1, dxGeom* g2,
 				pcontact->normal[0] = 1.0f;
 				pcontact->normal[1] = 0.0f;
 				pcontact->normal[2] = 0.0f;
+				pcontact->normal[3] = REAL(1.0); // used to store length of vector sum for averaging
 			}
-
-
-			pcontact->normal[3] = 0.0f;
 		}
 	}
 	// Contact can be not available if buffer is full
@@ -382,9 +386,8 @@ dContactGeom *  PushNewContact( dxGeom* g1, dxGeom* g2,
 		pcontact->normal[0] = normal[0];
 		pcontact->normal[1] = normal[1];
 		pcontact->normal[2] = normal[2];
-		pcontact->normal[3] = 0.0f;
+		pcontact->normal[3] = REAL(1.0); // used to store length of vector sum for averaging
 		pcontact->depth = depth;
-
 		pcontact->g1 = g1;
 		pcontact->g2 = g2;
 	}
