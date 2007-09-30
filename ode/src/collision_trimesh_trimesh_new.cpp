@@ -325,7 +325,7 @@ dContactGeom *  PushNewContact( dxGeom* g1, dxGeom* g2,
 							 dContactGeom* Contacts, int Stride,
 							 int &contactcount)
 {
-	dIASSERT(dFabs(dVector3Length((dVector3 &)*normal) - REAL(1.0)) < dEpsilon); // This assumption is used in the code
+	dIASSERT(dFabs(dVector3Length((dVector3 &)*normal) - REAL(1.0)) < REAL(1e-2)/*dEpsilon - precision is too poor for float*/); // This assumption is used in the code
 
 	dContactGeom * pcontact;
 
