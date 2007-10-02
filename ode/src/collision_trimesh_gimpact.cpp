@@ -156,31 +156,7 @@ void dGeomTriMeshDataSetBuffer(dTriMeshDataID g, unsigned char* buf)
 dxTriMesh::dxTriMesh(dSpaceID Space, dTriMeshDataID Data) : dxGeom(Space, 1){
     type = dTriMeshClass;
 
-    this->Data = Data;
-
-    // GIMPACT only supports stride 12, so we need to catch the error early.
-    dUASSERT
-    (
-      Data->m_VertexStride == 3*sizeof(dReal) && Data->m_TriStride == 3*sizeof(int),
-      "Gimpact trimesh only supports a stride of 3 dReal/int\n"
-      "This means that you cannot use dGeomTriMeshDataBuildSimple() with Gimpact.\n"
-      "Change the stride, or use Opcode trimeshes instead.\n"
-    );
-
-    //Create trimesh
-
-    gim_trimesh_create_from_data
-    (
-      &m_collision_trimesh,		// gimpact mesh
-      ( vec3f *)(&Data->m_Vertices[0]),	// vertices
-      Data->m_VertexCount,		// nr of verts
-      0,				// copy verts?
-      ( GUINT *)(&Data->m_Indices[0]),	// indices
-      Data->m_TriangleCount*3,		// nr of indices
-      0,				// copy indices?
-      1					// transformed reply
-    );
-
+    dGeomTriMeshSetData(this,Data);
 
 	/* TC has speed/space 'issues' that don't make it a clear
 	   win by default on spheres/boxes. */
@@ -281,9 +257,33 @@ dTriRayCallback* dGeomTriMeshGetRayCallback(dGeomID g)
 void dGeomTriMeshSetData(dGeomID g, dTriMeshDataID Data)
 {
 	dUASSERT(g && g->type == dTriMeshClass, "argument not a trimesh");
-	((dxTriMesh*)g)->Data = Data;
+	dxTriMesh* mesh = (dxTriMesh*) g;
+	mesh->Data = Data;
         // I changed my data -- I know nothing about my own AABB anymore.
         ((dxTriMesh*)g)->gflags |= (GEOM_DIRTY|GEOM_AABB_BAD);
+
+	// GIMPACT only supports stride 12, so we need to catch the error early.
+	dUASSERT
+	(
+	  Data->m_VertexStride == 3*sizeof(dReal) && Data->m_TriStride == 3*sizeof(int),
+          "Gimpact trimesh only supports a stride of 3 dReal/int\n"
+	  "This means that you cannot use dGeomTriMeshDataBuildSimple() with Gimpact.\n"
+	  "Change the stride, or use Opcode trimeshes instead.\n"
+	);
+
+	//Create trimesh
+	if ( Data->m_Vertices )
+	  gim_trimesh_create_from_data
+	  (
+	    &mesh->m_collision_trimesh,		// gimpact mesh
+	    ( vec3f *)(&Data->m_Vertices[0]),	// vertices
+	    Data->m_VertexCount,		// nr of verts
+	    0,					// copy verts?
+	    ( GUINT *)(&Data->m_Indices[0]),	// indices
+	    Data->m_TriangleCount*3,		// nr of indices
+	    0,					// copy indices?
+	    1					// transformed reply
+	  );
 }
 
 dTriMeshDataID dGeomTriMeshGetData(dGeomID g)
