@@ -41,7 +41,7 @@
 // scale the components by 1/l. this has been verified to work with vectors
 // containing the smallest representable numbers.
 
-void dNormalize3 (dVector3 a)
+int dNormalize3 (dVector3 a)
 {
   dReal a0,a1,a2,aa0,aa1,aa2,l;
   dAASSERT (a);
@@ -76,11 +76,11 @@ void dNormalize3 (dVector3 a)
     }
     else {		// aa0 is largest
       if (aa0 <= 0) {
-	// dDEBUGMSG ("vector has zero size"); ... this messace is annoying
+	// dDEBUGMSG ("vector has zero size"); ... this message is annoying
 	a[0] = 1;	// if all a's are zero, this is where we'll end up.
 	a[1] = 0;	// return a default unit length vector.
 	a[2] = 0;
-	return;
+	return 0;
       }
       a1 /= aa0;
       a2 /= aa0;
@@ -90,6 +90,7 @@ void dNormalize3 (dVector3 a)
       a[2] = a2*l;
     }
   }
+  return 1;
 }
 
 
@@ -114,7 +115,7 @@ void dNormalize3 (dVector3 a)
 */
 
 
-void dNormalize4 (dVector4 a)
+int dNormalize4 (dVector4 a)
 {
   dAASSERT (a);
   dReal l = dDOT(a,a)+a[3]*a[3];
@@ -124,6 +125,7 @@ void dNormalize4 (dVector4 a)
     a[1] *= l;
     a[2] *= l;
     a[3] *= l;
+	return 1;
   }
   else {
     dDEBUGMSG ("vector has zero size");
@@ -131,6 +133,7 @@ void dNormalize4 (dVector4 a)
     a[1] = 0;
     a[2] = 0;
     a[3] = 0;
+	return 0;
   }
 }
 

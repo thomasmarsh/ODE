@@ -287,8 +287,8 @@ extern "C" {
 /*
  * normalize 3x1 and 4x1 vectors (i.e. scale them to unit length)
  */
-ODE_API void dNormalize3 (dVector3 a);
-ODE_API void dNormalize4 (dVector4 a);
+ODE_API int dNormalize3 (dVector3 a);
+ODE_API int dNormalize4 (dVector4 a);
 
 
 /*
