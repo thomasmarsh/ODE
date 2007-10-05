@@ -217,7 +217,7 @@ extern int      main
 
         dyn_bodies[b].create (dyn_world);
         dyn_bodies[b].setPosition (x, y, z/2);
-        dyn_bodies[b].setData ((void*) b);
+        dyn_bodies[b].setData ((void*) (size_t)b);
         dBodySetLinearVel (dyn_bodies[b].id (),
             dReal( 3 * (drand48 () - 0.5) ), 
 			dReal( 3 * (drand48 () - 0.5) ), 0);
