@@ -65,7 +65,7 @@ static void GetTriangleGeometryCallback(udword, VertexPointers&, udword);
 inline void dMakeMatrix4(const dVector3 Position, const dMatrix3 Rotation, dMatrix4 &B);
 static void dInvertMatrix4( dMatrix4& B, dMatrix4& Binv );
 static int IntersectLineSegmentRay(dVector3, dVector3, dVector3, dVector3,  dVector3);
-static void ClipConvexPolygonAgainstPlane( dVector3, dReal, LineContactSet& );
+static void ClipConvexPolygonAgainstPlane( const dVector3, dReal, LineContactSet& );
 static int RayTriangleIntersect(const dVector3 orig, const dVector3 dir,
                                 const dVector3 vert0, const dVector3 vert1,const dVector3 vert2,
                                 dReal *t,dReal *u,dReal *v);
@@ -414,7 +414,7 @@ dContactGeom *  PushNewContact( dxGeom* g1, dxGeom* g2,
 							 dContactGeom* Contacts, int Stride,
 							 int &contactcount)
 {
-	dIASSERT(dFabs(dVector3Length((dVector3 &)*normal) - REAL(1.0)) < REAL(1e-2)/*dEpsilon - precision is too poor for float*/); // This assumption is used in the code
+	dIASSERT(dFabs(dVector3Length((const dVector3 &)(*normal)) - REAL(1.0)) < REAL(1e-6)); // This assumption is used in the code
 
 	dContactGeom * pcontact;
 
@@ -736,8 +736,8 @@ IntersectLineSegmentRay(dVector3 x1, dVector3 x2, dVector3 x3, dVector3 n,
 
 
 
-void PlaneClipSegment( dVector3  s1, dVector3  s2,
-					   dVector3  N, dReal C, dVector3  clipped)
+void PlaneClipSegment( const dVector3  s1, const dVector3  s2,
+					   const dVector3  N, dReal C, dVector3  clipped)
 {
 	dReal dis1,dis2;
 	dis1 = DOT(s1,N)-C;
@@ -753,7 +753,7 @@ void PlaneClipSegment( dVector3  s1, dVector3  s2,
   Note:  the input vertices are assumed to be in invcounterclockwise order.
    changed by Francisco Leon (http://gimpact.sourceforge.net) */
 static void
-ClipConvexPolygonAgainstPlane( dVector3 N, dReal C,
+ClipConvexPolygonAgainstPlane( const dVector3 N, dReal C,
                                LineContactSet& Contacts )
 {
     int  i, vi, prevclassif=32000, classif;
@@ -840,16 +840,15 @@ bool BuildPlane(const dVector3 s0, const dVector3 s1,const dVector3 s2,
 				dVector3 Normal, dReal & Dist)
 {
 	dVector3 e0,e1;
-	dReal len;
 	SUB(e0,s1,s0);
 	SUB(e1,s2,s0);
 
 	CROSS(Normal,e0,e1);
 
-	len = LENGTH(Normal);
-
-	if(len<REAL(0.000001)) return false;
-	MULT(Normal,Normal,1.0f/len);
+	if (!dNormalize3(Normal))
+	{
+		return false;
+	}
 
 	Dist = DOT(Normal,s0);
 	return true;
@@ -861,15 +860,15 @@ bool BuildEdgesDir(const dVector3 s0, const dVector3 s1,
 					dVector3 crossdir)
 {
 	dVector3 e0,e1;
-	dReal len;
 
 	SUB(e0,s1,s0);
 	SUB(e1,t1,t0);
 	CROSS(crossdir,e0,e1);
 
-	len = LENGTH(crossdir);
-	if(len<REAL(0.000001)) return false;
-	MULT(crossdir,crossdir,1.0f/len);
+	if (!dNormalize3(crossdir))
+	{
+		return false;
+	}
 	return true;
 }
 
@@ -882,22 +881,15 @@ bool BuildEdgePlane(
 					dReal & plane_dist)
 {
 	dVector3 e0;
-	dReal len;
 
 	SUB(e0,s1,s0);
 	CROSS(plane_normal,e0,normal);
-
-	len = LENGTH(plane_normal);
-
-	if(len<REAL(0.000001)) return false;
-
-	MULT(plane_normal,plane_normal,1.0/len);
-
+	if (!dNormalize3(plane_normal))
+	{
+		return false;
+	}
 	plane_dist = DOT(plane_normal,s0);
-
 	return true;
-
-
 }
 
 
@@ -992,7 +984,7 @@ dReal MostDeepPoints(
 void ClipPointsByTri(
 					  const dVector3 * points, int pointcount,
 					  const dVector3 tri[3],
-					  dVector3 triplanenormal,
+					  const dVector3 triplanenormal,
 					  dReal triplanedist,
 					  LineContactSet & clipped_points,
 					  bool triplane_clips)
@@ -1005,14 +997,15 @@ void ClipPointsByTri(
 	memcpy(&clipped_points.Points[0],&points[0],pointcount*sizeof(dVector3));
 	for(i=0;i<3;i++)
 	{
-		BuildEdgePlane(
+		if (BuildEdgePlane(
 			tri[i],tri[(i+1)%3],triplanenormal,
-			plane,plane[3]);
-
-		ClipConvexPolygonAgainstPlane(
-			plane,
-			plane[3],
-			clipped_points);
+			plane,plane[3]))
+		{
+			ClipConvexPolygonAgainstPlane(
+				plane,
+				plane[3],
+				clipped_points);
+		}
 	}
 
 	if(triplane_clips)
@@ -1309,5 +1302,3 @@ bool TriTriContacts(const dVector3 tr1[3],
 #endif // dTRIMESH_OPCODE
 #endif // dTRIMESH_USE_NEW_TRIMESH_TRIMESH_COLLIDER
 #endif // dTRIMESH_ENABLED
-
- 	  	 
