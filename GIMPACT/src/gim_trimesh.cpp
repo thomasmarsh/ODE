@@ -325,7 +325,7 @@ void gim_trimesh_get_triangle_data(GIM_TRIMESH * trimesh, GUINT triangle_index, 
     planes += triangle_index;
 
     //verify planes cache
-    char bit_eval;
+    GUINT bit_eval;
     GIM_BITSET_GET(trimesh->m_planes_cache_bitset,triangle_index,bit_eval);
     if(bit_eval == 0)// Needs to calc the planes
     {
