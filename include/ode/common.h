@@ -92,6 +92,9 @@ msg " in %s() File %s Line %d", __FUNCTION__, __FILE__,__LINE__);
 #endif
 #define dAASSERT(a) dUASSERT(a,"Bad argument(s)")
 
+// Macro used to suppress unused variable warning
+#define dVARIABLEUSED(a) ((void)a)
+
 /* floating point data type, vector, matrix and quaternion types */
 
 #if defined(dSINGLE)
