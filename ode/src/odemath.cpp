@@ -41,7 +41,7 @@
 // scale the components by 1/l. this has been verified to work with vectors
 // containing the smallest representable numbers.
 
-int dNormalize3 (dVector3 a)
+int dSafeNormalize3 (dVector3 a)
 {
   dReal a0,a1,a2,aa0,aa1,aa2,l;
   dAASSERT (a);
@@ -94,11 +94,57 @@ int dNormalize3 (dVector3 a)
 }
 
 
+void dNormalize3 (dVector3 a)
+{
+  dReal a0,a1,a2,aa0,aa1,aa2,l;
+  dAASSERT (a);
+  a0 = a[0];
+  a1 = a[1];
+  a2 = a[2];
+  aa0 = dFabs(a0);
+  aa1 = dFabs(a1);
+  aa2 = dFabs(a2);
+  if (aa1 > aa0) {
+    if (aa2 > aa1) {
+      goto aa2_largest;
+    }
+    else {		// aa1 is largest
+      a0 /= aa1;
+      a2 /= aa1;
+      l = dRecipSqrt (a0*a0 + a2*a2 + 1);
+      a[0] = a0*l;
+      a[1] = dCopySign(l,a1);
+      a[2] = a2*l;
+    }
+  }
+  else {
+    if (aa2 > aa0) {
+      aa2_largest:	// aa2 is largest
+      a0 /= aa2;
+      a1 /= aa2;
+      l = dRecipSqrt (a0*a0 + a1*a1 + 1);
+      a[0] = a0*l;
+      a[1] = a1*l;
+      a[2] = dCopySign(l,a2);
+    }
+    else {		// aa0 is largest
+      dIASSERT(aa0 > 0);
+      a1 /= aa0;
+      a2 /= aa0;
+      l = dRecipSqrt (a1*a1 + a2*a2 + 1);
+      a[0] = dCopySign(l,a0);
+      a[1] = a1*l;
+      a[2] = a2*l;
+    }
+  }
+}
+
+
 /* OLD VERSION */
 /*
 void dNormalize3 (dVector3 a)
 {
-  dASSERT (a);
+  dIASSERT (a);
   dReal l = dDOT(a,a);
   if (l > 0) {
     l = dRecipSqrt(l);
@@ -115,7 +161,7 @@ void dNormalize3 (dVector3 a)
 */
 
 
-int dNormalize4 (dVector4 a)
+int dSafeNormalize4 (dVector4 a)
 {
   dAASSERT (a);
   dReal l = dDOT(a,a)+a[3]*a[3];
@@ -133,8 +179,21 @@ int dNormalize4 (dVector4 a)
     a[1] = 0;
     a[2] = 0;
     a[3] = 0;
-	return 0;
+    return 0;
   }
+}
+
+
+void dNormalize4 (dVector4 a)
+{
+  dAASSERT (a);
+  dReal l = dDOT(a,a)+a[3]*a[3];
+  dIASSERT (l>0);
+  l = dRecipSqrt(l);
+  a[0] *= l;
+  a[1] *= l;
+  a[2] *= l;
+  a[3] *= l;
 }
 
 
