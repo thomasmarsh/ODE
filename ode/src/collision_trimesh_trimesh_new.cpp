@@ -845,7 +845,7 @@ bool BuildPlane(const dVector3 s0, const dVector3 s1,const dVector3 s2,
 
 	CROSS(Normal,e0,e1);
 
-	if (!dNormalize3(Normal))
+	if (!dSafeNormalize3(Normal))
 	{
 		return false;
 	}
@@ -865,7 +865,7 @@ bool BuildEdgesDir(const dVector3 s0, const dVector3 s1,
 	SUB(e1,t1,t0);
 	CROSS(crossdir,e0,e1);
 
-	if (!dNormalize3(crossdir))
+	if (!dSafeNormalize3(crossdir))
 	{
 		return false;
 	}
@@ -884,7 +884,7 @@ bool BuildEdgePlane(
 
 	SUB(e0,s1,s0);
 	CROSS(plane_normal,e0,normal);
-	if (!dNormalize3(plane_normal))
+	if (!dSafeNormalize3(plane_normal))
 	{
 		return false;
 	}
