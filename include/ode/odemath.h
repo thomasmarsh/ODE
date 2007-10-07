@@ -289,9 +289,29 @@ extern "C" {
  */
 ODE_API int  dSafeNormalize3 (dVector3 a);
 ODE_API int  dSafeNormalize4 (dVector4 a);
+
+// For some reason demo_chain1.c does not understand "inline" keyword.
+static __inline void _dNormalize3(dVector3 a)
+{
+	int bNormalizationResult = dSafeNormalize3(a);
+	dIASSERT(bNormalizationResult);
+	dVARIABLEUSED(bNormalizationResult);
+}
+
+static __inline void _dNormalize4(dVector4 a)
+{
+	int bNormalizationResult = dSafeNormalize4(a);
+	dIASSERT(bNormalizationResult);
+	dVARIABLEUSED(bNormalizationResult);
+}
+
+// For DLL export
 ODE_API void dNormalize3 (dVector3 a); // Potentially asserts on zero vec
 ODE_API void dNormalize4 (dVector4 a); // Potentially asserts on zero vec
 
+// For internal use
+#define dNormalize3(a) _dNormalize3(a)
+#define dNormalize4(a) _dNormalize4(a)
 
 /*
  * given a unit length "normal" vector n, generate vectors p and q vectors

@@ -32,6 +32,9 @@
 #endif				// added by andy for cygwin
 #endif
 
+#undef dNormalize3
+#undef dNormalize4
+
 
 // this may be called for vectors `a' with extremely small magnitude, for
 // example the result of a cross product on two nearly perpendicular vectors.
@@ -76,7 +79,6 @@ int dSafeNormalize3 (dVector3 a)
     }
     else {		// aa0 is largest
       if (aa0 <= 0) {
-	// dDEBUGMSG ("vector has zero size"); ... this message is annoying
 	a[0] = 1;	// if all a's are zero, this is where we'll end up.
 	a[1] = 0;	// return a default unit length vector.
 	a[2] = 0;
@@ -92,53 +94,6 @@ int dSafeNormalize3 (dVector3 a)
   }
   return 1;
 }
-
-
-void dNormalize3 (dVector3 a)
-{
-  dReal a0,a1,a2,aa0,aa1,aa2,l;
-  dAASSERT (a);
-  a0 = a[0];
-  a1 = a[1];
-  a2 = a[2];
-  aa0 = dFabs(a0);
-  aa1 = dFabs(a1);
-  aa2 = dFabs(a2);
-  if (aa1 > aa0) {
-    if (aa2 > aa1) {
-      goto aa2_largest;
-    }
-    else {		// aa1 is largest
-      a0 /= aa1;
-      a2 /= aa1;
-      l = dRecipSqrt (a0*a0 + a2*a2 + 1);
-      a[0] = a0*l;
-      a[1] = dCopySign(l,a1);
-      a[2] = a2*l;
-    }
-  }
-  else {
-    if (aa2 > aa0) {
-      aa2_largest:	// aa2 is largest
-      a0 /= aa2;
-      a1 /= aa2;
-      l = dRecipSqrt (a0*a0 + a1*a1 + 1);
-      a[0] = a0*l;
-      a[1] = a1*l;
-      a[2] = dCopySign(l,a2);
-    }
-    else {		// aa0 is largest
-      dIASSERT(aa0 > 0);
-      a1 /= aa0;
-      a2 /= aa0;
-      l = dRecipSqrt (a1*a1 + a2*a2 + 1);
-      a[0] = dCopySign(l,a0);
-      a[1] = a1*l;
-      a[2] = a2*l;
-    }
-  }
-}
-
 
 /* OLD VERSION */
 /*
@@ -160,6 +115,11 @@ void dNormalize3 (dVector3 a)
 }
 */
 
+void dNormalize3(dVector3 a)
+{
+	_dNormalize3(a);
+}
+
 
 int dSafeNormalize4 (dVector4 a)
 {
@@ -174,7 +134,6 @@ int dSafeNormalize4 (dVector4 a)
 	return 1;
   }
   else {
-    dDEBUGMSG ("vector has zero size");
     a[0] = 1;
     a[1] = 0;
     a[2] = 0;
@@ -183,17 +142,9 @@ int dSafeNormalize4 (dVector4 a)
   }
 }
 
-
-void dNormalize4 (dVector4 a)
+void dNormalize4(dVector4 a)
 {
-  dAASSERT (a);
-  dReal l = dDOT(a,a)+a[3]*a[3];
-  dIASSERT (l>0);
-  l = dRecipSqrt(l);
-  a[0] *= l;
-  a[1] *= l;
-  a[2] *= l;
-  a[3] *= l;
+	_dNormalize4(a);
 }
 
 
