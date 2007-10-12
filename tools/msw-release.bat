@@ -3,15 +3,18 @@ rem ***********************************************************
 rem * ODE Windows Binary Release Script
 rem * Originally written by Jason Perkins (starkos@gmail.com)
 rem *
+rem * See README.txt in this directory for complete release
+rem * instructions before running this script.
+rem *
 rem * Prerequisites:
 rem *  Command-line svn installed on path
-rem *  Command-line zip installed on path
-rem *  Run within Visual Studio 2003 command prompt
+rem *  Command-line 7z (7zip) installed on path
+rem *  Command-line doxygen installed on path
+rem *  Run from Visual Studio 2003 command prompt
 rem ***********************************************************
 
 rem * Check arguments
 if "%1"=="" goto show_usage
-if "%2"=="" goto show_usage
 
 
 rem ***********************************************************
@@ -27,7 +30,7 @@ echo.
 echo Is the version number "%1" correct?
 pause
 echo.
-echo Does the release branch "%2" exist in SVN?
+echo Does the release branch "%1" exist in SVN?
 pause
 echo.
 echo Are 'svn', '7z', and 'doxygen' on the path?
@@ -45,7 +48,7 @@ echo.
 echo RETRIEVING SOURCE CODE FROM REPOSITORY...
 echo.
 
-svn export https://opende.svn.sourceforge.net/svnroot/opende/branches/%2 ode-%1
+svn export https://opende.svn.sourceforge.net/svnroot/opende/branches/%1 ode-%1
 
 
 
@@ -54,7 +57,7 @@ rem * Prepare source code
 rem ***********************************************************
 
 echo.
-echo PREPARING SOURCE CODE FROM REPOSITORY...
+echo PREPARING SOURCE TREE...
 echo.
 
 cd ode-%1
@@ -71,7 +74,7 @@ rem * Build the binaries
 rem ***********************************************************
 
 echo.
-echo BUILDING RELEASE BINARIES...
+echo BUILDING RELEASE BINARIES (this will take a while)...
 echo.
 
 cd ode-%1\build\vs2003
@@ -110,7 +113,17 @@ rem ***********************************************************
 echo.
 echo Ready to upload package to SourceForce, press ^^C to abort.
 pause
-ftp -s:ftp_msw_script upload.sourceforge.net
+
+echo "anonymous" > ftp.txt
+echo "starkos" >> ftp.txt
+echo "cd incoming" >> ftp.txt
+echo "bin" >> ftp.txt
+echo "put ode-win32-%1.zip" >> ftp.txt
+echo "quit" >> ftp.txt
+
+ftp -s:ftp.txt upload.sourceforge.net
+erase ftp.txt
+
 goto done
 
 
@@ -119,7 +132,7 @@ rem * Error messages
 rem ***********************************************************
 
 :show_usage
-echo Usage: msw_release.bat version_number branch_name
+echo Usage: msw_release.bat version_number
 goto done
 
 :done
