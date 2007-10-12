@@ -35,7 +35,7 @@ echo "Have you created a release branch named '$1' in SVN?"
 read line
 echo ""
 echo Are 'svn', 'zip', and 'doxygen' on the path?
-pause
+read line
 echo ""
 echo "Okay, ready to build the source code package for version $1!"
 read line
@@ -108,8 +108,8 @@ if [ $line = "y" ]; then
 	echo "user anonymous starkos" > ftp.txt
 	echo "cd incoming" >> ftp.txt
 	echo "bin" >> ftp.txt
-	echo "put ode-src-$2.zip" >> ftp.txt
-	echo "quit" >> ftp.txtt
+	echo "put ode-src-$1.zip" >> ftp.txt
+	echo "quit" >> ftp.txt
 
 	ftp -n upload.sourceforge.net < ftp.txt
 
