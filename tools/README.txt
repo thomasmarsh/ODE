@@ -60,6 +60,10 @@ INSTRUCTIONS
   script. I've tried it under Linux, Mac OS X, and Windows with Cygwin.
 
 
+* Visit the project site on SourceForge (http://sf.net/projects/opende)
+  and create a new file release.
+  
+  
 SANITY CHECKING
 
 A few optional, but recommeded, checks to make sure that everything
