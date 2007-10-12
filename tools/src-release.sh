@@ -3,13 +3,20 @@
 # ODE Source Code Release Script
 # Originally written by Jason Perkins (starkos@gmail.com)
 #
+# See README.txt in this directory for complete release
+# instructions before running this script.
+#
 # Prerequisites:
-#  svn, zip
+#  Command-line svn installed on path
+#  Command-line zip installed on path
+#  Command-line doxygen installed on path
+#  Autotools support installed
+#  Run from a Posix-like shell (Linux, OS X, Cygwin)
 ###################################################################
 
 # Check arguments
-if [ $# -ne 2 ]; then
-  echo 1>&2 "Usage: $0 version_number branch_name"
+if [ $# -ne 1 ]; then
+  echo 1>&2 "Usage: $0 version_number"
   exit 1
 fi
 
@@ -19,19 +26,16 @@ fi
 ###################################################################
 
 echo "" 
-echo "STARTING PREBUILD CHECKLIST, PRESS ^^C TO ABORT."
+echo "STARTING PREBUILD CHECKLIST, PRESS ^C TO ABORT."
 echo ""
 echo "Is the version number '$1' correct?"
 read line
 echo ""
-echo "Have you created a release branch named '$2' in SVN?"
+echo "Have you created a release branch named '$1' in SVN?"
 read line
 echo ""
-echo "Have you run all of the tests?"
-read line
-echo ""
-echo "Is the Changelog up to date?"
-read line
+echo Are 'svn', 'zip', and 'doxygen' on the path?
+pause
 echo ""
 echo "Okay, ready to build the source code package for version $1!"
 read line
@@ -44,8 +48,8 @@ read line
 echo ""
 echo "RETRIEVING SOURCE CODE FROM REPOSITORY..."
 echo ""
-f
-svn export https://opende.svn.sourceforge.net/svnroot/opende/branches/$2 ode-$1
+
+svn export https://opende.svn.sourceforge.net/svnroot/opende/branches/$1 ode-$1
 
 
 ###################################################################
@@ -100,5 +104,14 @@ echo "Upload packages to SourceForge?"
 read line
 if [ $line = "y" ]; then
 	echo "Uploading to SourceForge..."
-	ftp -n upload.sourceforge.net < ftp_src_script
+
+	echo "user anonymous starkos" > ftp.txt
+	echo "cd incoming" >> ftp.txt
+	echo "bin" >> ftp.txt
+	echo "put ode-src-$2.zip" >> ftp.txt
+	echo "quit" >> ftp.txtt
+
+	ftp -n upload.sourceforge.net < ftp.txt
+
+	rm -f ftp.txt
 fi
