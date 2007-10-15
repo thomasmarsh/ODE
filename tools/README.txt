@@ -9,7 +9,8 @@ In order to build an OpenDE release you'll need:
 
 * A Windows system
 * A Posix-like system (Linux, Mac OS X, Cygwin)
-* Visual Studio 2003 or later
+* Visual Studio 2003 or later (for C++ release)
+* Visual Studio 2005 or later (for .NET release)
 * Subversion (command line version)
 * 7zip (command line version)
 * Doxygen
@@ -49,7 +50,17 @@ INSTRUCTIONS
   0.5, but am thinking about switching up to VS2005. The format of
   this command is:
 
-    > msw_release.bat 0.9.0-rc1
+    > msw-release.bat 0.9.0-rc1
+
+  The version argument supplied to the script must match the name of
+  the release branch in Subversion.
+
+
+* Run dotnet-release.bat to create the .NET bindings package. This
+  script must be run from a Visual Studio 2005 (or later) command
+  prompt. The format of the command is:
+
+    > dotnet-release.bat 0.9.0-rc1
 
   The version argument supplied to the script must match the name of
   the release branch in Subversion.
@@ -59,9 +70,14 @@ INSTRUCTIONS
   run from a Posix-like environment in order to prepare the configure
   script. I've tried it under Linux, Mac OS X, and Windows with Cygwin.
 
+    $ ./src-release.sh 0.9.0-rc1
+
+  The version argument supplied to the script must match the name of
+  the release branch in Subversion.
+
 
 * Visit the project site on SourceForge (http://sf.net/projects/opende)
-  and create a new file release.
+  and create a new file release including all of the files.
   
   
 SANITY CHECKING
