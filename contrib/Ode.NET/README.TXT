@@ -1,24 +1,22 @@
 Ode.NET - .NET bindings for ODE
-Jason Perkins (starkos@gmail.com)
-
- THIS IS A WORK IN PROGRESS! I'm not done yet!
+Jason Perkins (starkos@industriousone.com)
  
 
 --------------------------------------------------------------------- 
  INSTALLATION
 --------------------------------------------------------------------- 
 
- Note that this binding uses a C# 2.0 feature (the
- UnmanagedFunctionPointer attribute). You will need to use
- Visual Studio 2005 (C# Express is fine) or Mono's gmcs
- compiler.
+ This binding uses a C# 2.0 feature (the UnmanagedFunctionPointer 
+ attribute). You will need to use Visual Studio 2005 (C# Express is 
+ fine) or Mono's gmcs compiler.
  
  Start by getting or building ODE as a shared library (DLL).
  
  The simplest way to build the bindings is probably to create a 
  new library assembly in your tool of choice and drop in the files
- Ode/Ode.cs and Ode/AssemblyInfo.cs. Define the symbol`dDOUBLE` if 
- you used double-precision math in your ode.dll. Build, done.
+ Ode/Ode.cs and Ode/AssemblyInfo.cs (optional). Define the symbol 
+ `dDOUBLE` if you used double-precision math in your ode.dll. 
+ Build, done.
  
  For testing purposes, I have also created bindings for the 
  Drawstuff library and a C# version of the BoxStack demo. You can
@@ -62,12 +60,9 @@ Jason Perkins (starkos@gmail.com)
  KNOWN ISSUES
 --------------------------------------------------------------------- 
 
- I'm not done yet, so many functions are still missing.
+ While I managed to map most of the API, there may still be some bits
+ missing. If you find something, please submit a bug report or patch
+ the Tracker on SourceForge.
 
- It is not possible to implement dBodyGetPosition(), dBodyGetRotation(),
- etc. without resorting to unsafe code, which I was trying to avoid.
- This binding uses the .NET friendly dBodyCopyPosition(), 
- dBodyCopyRotation(), etc. instead. 
-  
  Collision response (contact joints) do not work when built under 
  Mono as double-precision. I have not tried to track down why.
