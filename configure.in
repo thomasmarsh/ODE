@@ -14,9 +14,6 @@ AC_CANONICAL_TARGET
 
 AM_INIT_AUTOMAKE(ODE,[$ODE_RELEASE])
 AM_CONFIG_HEADER(include/ode/config.h)
-dnl Set CFLAGS to zero, so that we avoid getting the gratis -g -O2
-CFLAGS=
-CXXFLAGS=
 AC_C_BIGENDIAN
 AC_PATH_X
 AC_PATH_XTRA
