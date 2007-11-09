@@ -548,6 +548,7 @@ void dWorldExportDIF (dWorldID w, FILE *file, const char *prefix)
 			fprintf (file,"%sbody[%d]",prefix,j->node[0].body->tag);
 		if ( j->node[1].body )
 			fprintf (file,",%sbody[%d]",prefix,j->node[1].body->tag);
+		fprintf (file,"}\n");
 
 		switch (j->vtable->typenum) {
 			case dJointTypeBall: printBall (c,j); break;
