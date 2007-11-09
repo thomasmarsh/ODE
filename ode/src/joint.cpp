@@ -2499,9 +2499,9 @@ static void PRInit (dxJointPR *j)
 
 dReal dJointGetPRPosition (dJointID j)
 {
-  dxJointPR* joint = (dxJointPR*)j;
-  dUASSERT(joint,"bad joint argument");
-  dUASSERT(joint->vtable == &__dPR_vtable,"joint is not a Prismatic and Rotoide");
+  dxJointPR* joint = (dxJointPR*) j;
+  dUASSERT (joint,"bad joint argument");
+  dUASSERT (joint->vtable == &__dPR_vtable,"joint is not a Prismatic and Rotoide");
 
   dVector3 q;
   // get the offset in global coordinates
@@ -2538,113 +2538,46 @@ dReal dJointGetPRPosition (dJointID j)
   // get prismatic axis in global coordinates
   dMULTIPLY0_331 (axP,joint->node[0].body->posr.R,joint->axisP1);
 
-  return dDOT(axP, q);
+  return dDOT (axP, q);
 }
-
 
 dReal dJointGetPRPositionRate (dJointID j)
 {
-  dxJointPR* joint = (dxJointPR*)j;
-  dUASSERT(joint,"bad joint argument");
-  dUASSERT(joint->vtable == &__dPR_vtable,"joint is not a Prismatic and Rotoide");
+  dxJointPR* joint = (dxJointPR*) j;
+  dUASSERT (joint,"bad joint argument");
+  dUASSERT (joint->vtable == &__dPR_vtable,"joint is not a PR");
+  // get axis1 in global coordinates
+  dVector3 ax1;
+  dMULTIPLY0_331 (ax1,joint->node[0].body->posr.R,joint->axisP1);
 
-  if (joint->node[0].body) {
-		// We want to find the rate of change of the prismatic part of the joint
-		// We can find it by looking at the speed difference between body1 and the
-		// anchor point.
-
-		// r will be used to find the distance between body1 and the anchor point
-		dVector3 r;
-		if (joint->node[1].body) {
-			// Find joint->anchor2 in global coordinates
-			dVector3 anchor2;
-			dMULTIPLY0_331 (anchor2,joint->node[1].body->posr.R,joint->anchor2);
-
-			r[0] = joint->node[0].body->posr.pos[0] - anchor2[0];
-			r[1] = joint->node[0].body->posr.pos[1] - anchor2[1];
-			r[2] = joint->node[0].body->posr.pos[2] - anchor2[2];
-		}
-		else {
-			//N.B. When there is no body 2 the joint->anchor2 is already in
-			//     global coordinates
-			r[0] = joint->node[0].body->posr.pos[0] - joint->anchor2[0];
-			r[1] = joint->node[0].body->posr.pos[1] - joint->anchor2[1];
-			r[2] = joint->node[0].body->posr.pos[2] - joint->anchor2[2];
-		}
-
-		// The body1 can have velocity coming from the rotation of
-		// the rotoide axis. We need to remove this.
-
-		// Take only the angular rotation coming from the rotation
-		// of the rotoide articulation
-		// N.B. Body1 and Body2 should have the same rotation along axis
-		//      other than the rotoide axis.
-		dVector3 angular;
-		dMULTIPLY0_331 (angular,joint->node[0].body->posr.R,joint->axisR1);
-		dReal omega = dDOT(angular, joint->node[0].body->avel);
-		angular[0] *= omega;
-		angular[1] *= omega;
-		angular[2] *= omega;
-
-		// Find the contribution of the angular rotation to the linear speed
-		// N.B. We do vel = r X w instead of vel = w x r to have vel negative
-		//      since we want to remove it from the linear velocity of the body
-		dVector3 lvel1;
-		dCROSS(lvel1, =, r, angular);
-
-		lvel1[0] += joint->node[0].body->lvel[0];
-		lvel1[1] += joint->node[0].body->lvel[1];
-		lvel1[2] += joint->node[0].body->lvel[2];
-
-		// Since we want rate of change along the prismatic axis
-		// get axisP1 in global coordinates and get the component
-		// along this axis only
-		dVector3 axP1;
-		dMULTIPLY0_331 (axP1,joint->node[0].body->posr.R,joint->axisP1);
-		return dDOT(axP1, lvel1);
-	}
-
-	return 0.0;
+  if (joint->node[1].body) {
+    dVector3 lv2;
+    dBodyGetRelPointVel (joint->node[1].body, joint->anchor2[0], joint->anchor2[1], joint->anchor2[2], lv2);
+    return dDOT (ax1, joint->node[0].body->lvel) - dDOT (ax1, lv2);
+  }
+  else
+    return dDOT (ax1,joint->node[0].body->lvel);
 }
 
 
 
 static void PRGetInfo1 (dxJointPR *j, dxJoint::Info1 *info)
 {
-  info->m = 4;
   info->nub = 4;
+  info->m = 4;
 
-  bool added = false;
-
-  added = false;
-  // see if the prismatic articulation is powered
-  if (j->limotP.fmax > 0)
-  {
-    added = true;
-    (info->m)++;  // powered needs an extra constraint row
-  }
 
   // see if we're at a joint limit.
   j->limotP.limit = 0;
-  if ((j->limotP.lostop > -dInfinity || j->limotP.histop < dInfinity) &&
-      j->limotP.lostop <= j->limotP.histop) {
+  if ( (j->limotP.lostop > -dInfinity || j->limotP.histop < dInfinity) &&
+       j->limotP.lostop <= j->limotP.histop) {
     // measure joint position
     dReal pos = dJointGetPRPosition (j);
-    if (pos <= j->limotP.lostop) {
-      j->limotP.limit = 1;
-      j->limotP.limit_err = pos - j->limotP.lostop;
-      if (!added)
-        (info->m)++;
-    }
-
-    if (pos >= j->limotP.histop) {
-      j->limotP.limit = 2;
-      j->limotP.limit_err = pos - j->limotP.histop;
-      if (!added)
-        (info->m)++;
-    }
+    j->limotP.testRotationalLimit (pos); // N.B. The function is ill named
   }
 
+  // powered needs an extra constraint row
+  if (j->limotP.limit || j->limotP.fmax > 0) info->m++;
 }
 
 
@@ -2672,8 +2605,8 @@ static void PRGetInfo2 (dxJointPR *joint, dxJoint::Info2 *info)
     R2 = joint->node[1].body->posr.R;
   }
   else {
-   //     pos2 = 0; // N.B. We can do that to be safe but it is no necessary
-   //     R2 = 0;   // N.B. We can do that to be safe but it is no necessary
+    //     pos2 = 0; // N.B. We can do that to be safe but it is no necessary
+    //     R2 = 0;   // N.B. We can do that to be safe but it is no necessary
   }
 
 
@@ -2682,14 +2615,14 @@ static void PRGetInfo2 (dxJointPR *joint, dxJoint::Info2 *info)
 
   // distance between the body1 and the anchor2 in global frame
   // Calculated in the same way as the offset
-  dVector3 dist;
+  dVector3 anchor2, dist;
 
-  if (joint->node[1].body)
-  {
-    dMULTIPLY0_331 (dist, R2, joint->anchor2);
-    dist[0] += pos2[0] - pos1[0];
-    dist[1] += pos2[1] - pos1[1];
-    dist[2] += pos2[2] - pos1[2];
+  if (joint->node[1].body) {
+    // Calculate anchor2 in world coordinate
+    dMULTIPLY0_331 (anchor2, R2, joint->anchor2);
+    dist[0] = anchor2[0] + pos2[0] - pos1[0];
+    dist[1] = anchor2[1] + pos2[1] - pos1[1];
+    dist[2] = anchor2[2] + pos2[2] - pos1[2];
   }
   else {
     dist[0] = joint->anchor2[0] - pos1[0];
@@ -2710,7 +2643,7 @@ static void PRGetInfo2 (dxJointPR *joint, dxJoint::Info2 *info)
   // are the angular velocity vectors of the two bodies.
   dVector3 ax1;
   dMULTIPLY0_331 (ax1, joint->node[0].body->posr.R, joint->axisR1);
-  dCROSS(q , =, ax1, axP);
+  dCROSS (q , =, ax1, axP);
 
   info->J1a[0] = axP[0];
   info->J1a[1] = axP[1];
@@ -2757,8 +2690,8 @@ static void PRGetInfo2 (dxJointPR *joint, dxJoint::Info2 *info)
 
   dVector3 b;
   dCROSS (b,=,ax1, ax2);
-  info->c[0] = k * dDOT(b, axP);
-  info->c[1] = k * dDOT(b, q);
+  info->c[0] = k * dDOT (b, axP);
+  info->c[1] = k * dDOT (b, q);
 
 
 
@@ -2790,38 +2723,33 @@ static void PRGetInfo2 (dxJointPR *joint, dxJoint::Info2 *info)
   // Coeff for 2er line of: J1a => dist x q,   J2a => - anchor2 x q
 
 
-	dCROSS ((info->J1a)+s2, = , dist, ax1);
+  dCROSS ( (info->J1a) +s2, = , dist, ax1);
 
-	dCROSS ((info->J1a)+s3, = , dist, q);
+  dCROSS ( (info->J1a) +s3, = , dist, q);
 
 
   info->J1l[s2+0] = ax1[0];
-	info->J1l[s2+1] = ax1[1];
-	info->J1l[s2+2] = ax1[2];
+  info->J1l[s2+1] = ax1[1];
+  info->J1l[s2+2] = ax1[2];
 
   info->J1l[s3+0] = q[0];
-	info->J1l[s3+1] = q[1];
-	info->J1l[s3+2] = q[2];
+  info->J1l[s3+1] = q[1];
+  info->J1l[s3+2] = q[2];
 
   if (joint->node[1].body) {
-    dVector3 anchor2;
+    // ax2 x anchor2 instead of anchor2 x ax2 since we want the negative value
+    dCROSS ( (info->J2a) +s2, = , ax2, anchor2); // since ax1 == ax2
 
-    // Calculate anchor2 in world coordinate
-    dMULTIPLY0_331 (anchor2, R2, joint->anchor2);
+    // The cross product is in reverse order since we want the negative value
+    dCROSS ( (info->J2a) +s3, = , q, anchor2);
 
-		// ax2 x anchor2 instead of anchor2 x ax2 since we want the negative value
-		dCROSS ((info->J2a)+s2, = , ax2, anchor2); // since ax1 == ax2
-
-		// The cross product is in reverse order since we want the negative value
-		dCROSS ((info->J2a)+s3, = , q, anchor2);
-
-		info->J2l[s2+0] = -ax1[0];
-		info->J2l[s2+1] = -ax1[1];
-		info->J2l[s2+2] = -ax1[2];
+    info->J2l[s2+0] = -ax1[0];
+    info->J2l[s2+1] = -ax1[1];
+    info->J2l[s2+2] = -ax1[2];
 
     info->J2l[s3+0] = -q[0];
-		info->J2l[s3+1] = -q[1];
-		info->J2l[s3+2] = -q[2];
+    info->J2l[s3+1] = -q[1];
+    info->J2l[s3+2] = -q[2];
   }
 
 
@@ -2833,153 +2761,13 @@ static void PRGetInfo2 (dxJointPR *joint, dxJoint::Info2 *info)
   // The position should be the same when we are not along the prismatic axis
   dVector3 err;
   dMULTIPLY0_331 (err, R1, joint->offset);
-  err[0] += dist[0];
-  err[1] += dist[1];
-  err[2] += dist[2];
-  info->c[2] = k * dDOT(ax1, err);
-  info->c[3] = k * dDOT(q, err);
+  err[0] = dist[0] - err[0];
+  err[1] = dist[1] - err[1];
+  err[2] = dist[2] - err[2];
+  info->c[2] = k * dDOT (ax1, err);
+  info->c[3] = k * dDOT (q, err);
 
-  // Here we can't use addLimot because of some assumption in the function
-  int powered = joint->limotP.fmax > 0;
-  if (powered || joint->limotP.limit) {
-    info->J1l[s4+0] = axP[0];
-    info->J1l[s4+1] = axP[1];
-    info->J1l[s4+2] = axP[2];
-    if (joint->node[1].body) {
-      info->J2l[s4+0] = -axP[0];
-      info->J2l[s4+1] = -axP[1];
-      info->J2l[s4+2] = -axP[2];
-    }
-    // linear limot torque decoupling step:
-    //
-    // if this is a linear limot (e.g. from a slider), we have to be careful
-    // that the linear constraint forces (+/- ax1) applied to the two bodies
-    // do not create a torque couple. in other words, the points that the
-    // constraint force is applied at must lie along the same ax1 axis.
-    // a torque couple will result in powered or limited slider-jointed free
-    // bodies from gaining angular momentum.
-    // the solution used here is to apply the constraint forces at the point
-    // halfway between the body centers. there is no penalty (other than an
-    // extra tiny bit of computation) in doing this adjustment. note that we
-    // only need to do this if the constraint connects two bodies.
-
-		dVector3 ltd;  // Linear Torque Decoupling vector (a torque)
-    if (joint->node[1].body) {
-			dVector3 c;
-      c[0]=REAL(0.5)*(joint->node[1].body->posr.pos[0]-joint->node[0].body->posr.pos[0]);
-      c[1]=REAL(0.5)*(joint->node[1].body->posr.pos[1]-joint->node[0].body->posr.pos[1]);
-      c[2]=REAL(0.5)*(joint->node[1].body->posr.pos[2]-joint->node[0].body->posr.pos[2]);
-			dReal val = dDOT(q, c);
-			c[0] -= val * c[0];
-			c[1] -= val * c[1];
-			c[2] -= val * c[2];
-
-      dCROSS (ltd,=,c,axP);
-      info->J1a[s4+0] = ltd[0];
-      info->J1a[s4+1] = ltd[1];
-      info->J1a[s4+2] = ltd[2];
-      info->J2a[s4+0] = ltd[0];
-      info->J2a[s4+1] = ltd[1];
-      info->J2a[s4+2] = ltd[2];
-    }
-
-    // if we're limited low and high simultaneously, the joint motor is
-    // ineffective
-    if (joint->limotP.limit && (joint->limotP.lostop == joint->limotP.histop))
-      powered = 0;
-
-    int row = 4;
-    if (powered) {
-      info->cfm[row] = joint->limotP.normal_cfm;
-      if (!joint->limotP.limit) {
-        info->c[row] = joint->limotP.vel;
-        info->lo[row] = -joint->limotP.fmax;
-        info->hi[row] = joint->limotP.fmax;
-      }
-      else {
-        // the joint is at a limit, AND is being powered. if the joint is
-        // being powered into the limit then we apply the maximum motor force
-        // in that direction, because the motor is working against the
-        // immovable limit. if the joint is being powered away from the limit
-        // then we have problems because actually we need *two* lcp
-        // constraints to handle this case. so we fake it and apply some
-        // fraction of the maximum force. the fraction to use can be set as
-        // a fudge factor.
-
-        dReal fm = joint->limotP.fmax;
-        dReal vel = joint->limotP.vel;
-        int limit = joint->limotP.limit;
-        if ((vel > 0) || (vel==0 && limit==2)) fm = -fm;
-
-        // if we're powering away from the limit, apply the fudge factor
-        if ((limit==1 && vel > 0) || (limit==2 && vel < 0))
-          fm *= joint->limotP.fudge_factor;
-
-
-        dBodyAddForce (joint->node[0].body,-fm*axP[0],-fm*axP[1],-fm*axP[2]);
-
-				if (joint->node[1].body) {
-					dBodyAddForce (joint->node[1].body,fm*axP[0],fm*axP[1],fm*axP[2]);
-
-					// linear limot torque decoupling step: refer to above discussion
-					dBodyAddTorque (joint->node[0].body,-fm*ltd[0],-fm*ltd[1],
-													-fm*ltd[2]);
-					dBodyAddTorque (joint->node[1].body,-fm*ltd[0],-fm*ltd[1],
-													-fm*ltd[2]);
-				}
-      }
-    }
-
-		if (joint->limotP.limit) {
-      dReal k = info->fps * joint->limotP.stop_erp;
-      info->c[row] = -k * joint->limotP.limit_err;
-      info->cfm[row] = joint->limotP.stop_cfm;
-
-      if (joint->limotP.lostop == joint->limotP.histop) {
-				// limited low and high simultaneously
-				info->lo[row] = -dInfinity;
-				info->hi[row] = dInfinity;
-      }
-      else {
-        if (joint->limotP.limit == 1) {
-					// low limit
-					info->lo[row] = 0;
-					info->hi[row] = dInfinity;
-				}
-				else {
-					// high limit
-					info->lo[row] = -dInfinity;
-					info->hi[row] = 0;
-				}
-
-				// deal with bounce
-        if (joint->limotP.bounce > 0) {
-					// calculate joint velocity
-          dReal vel;
-          vel = dDOT(joint->node[0].body->lvel, axP);
-          if (joint->node[1].body)
-            vel -= dDOT(joint->node[1].body->lvel, axP);
-
-					// only apply bounce if the velocity is incoming, and if the
-					// resulting c[] exceeds what we already have.
-          if (joint->limotP.limit == 1) {
-						// low limit
-						if (vel < 0) {
-              dReal newc = -joint->limotP.bounce * vel;
-							if (newc > info->c[row]) info->c[row] = newc;
-						}
-					}
-					else {
-						// high limit - all those computations are reversed
-						if (vel > 0) {
-              dReal newc = -joint->limotP.bounce * vel;
-							if (newc < info->c[row]) info->c[row] = newc;
-						}
-					}
-				}
-      }
-    }
-  }
+  joint->limotP.addLimot (joint, info, 4, axP, 0);
 }
 
 
@@ -3001,63 +2789,31 @@ static void PRComputeInitialRelativeRotation (dxJointPR *joint)
 
 void dJointSetPRAnchor (dJointID j, dReal x, dReal y, dReal z)
 {
-  dxJointPR* joint = (dxJointPR*)j;
-  dUASSERT(joint,"bad joint argument");
-  dUASSERT(joint->vtable == &__dPR_vtable,"joint is not a Prismatic and Rotoide");
+  dxJointPR* joint = (dxJointPR*) j;
+  dUASSERT (joint,"bad joint argument");
+  dUASSERT (joint->vtable == &__dPR_vtable,"joint is not a Prismatic and Rotoide");
 
-  dVector3 dummy;
-  setAnchors (joint,x,y,z,dummy,joint->anchor2);
+  setAnchors (joint,x,y,z,joint->offset,joint->anchor2);
 }
 
 
 void dJointSetPRAxis1 (dJointID j, dReal x, dReal y, dReal z)
 {
-  dxJointPR* joint = (dxJointPR*)j;
-  dUASSERT(joint,"bad joint argument");
-  dUASSERT(joint->vtable == &__dPR_vtable,"joint is not a  Prismatic and Rotoide");
+  dxJointPR* joint = (dxJointPR*) j;
+  dUASSERT (joint,"bad joint argument");
+  dUASSERT (joint->vtable == &__dPR_vtable,"joint is not a  Prismatic and Rotoide");
 
   setAxes (joint,x,y,z,joint->axisP1, 0);
 
   PRComputeInitialRelativeRotation (joint);
-
-  // compute initial relative rotation body1 -> body2, or env -> body1
-  // also compute distance between anchor of body1 w.r.t center of body 2
-  dVector3 c;
-  if (joint->node[1].body) {
-    dVector3 anchor2;
-    dMULTIPLY0_331 (anchor2,joint->node[1].body->posr.R, joint->anchor2);
-
-    c[0] = ( joint->node[1].body->posr.pos[0] + anchor2[0] -
-             joint->node[0].body->posr.pos[0] );
-    c[1] = ( joint->node[1].body->posr.pos[1] + anchor2[1] -
-             joint->node[0].body->posr.pos[1] );
-    c[2] = ( joint->node[1].body->posr.pos[2] + anchor2[2] -
-             joint->node[0].body->posr.pos[2] );
-  }
-  else if (joint->node[0].body) {
-    c[0] = joint->anchor2[0] - joint->node[0].body->posr.pos[0];
-    c[1] = joint->anchor2[1] - joint->node[0].body->posr.pos[1];
-    c[2] = joint->anchor2[2] - joint->node[0].body->posr.pos[2];
-  }
-	else
-	{
-    joint->offset[0] = joint->anchor2[0];
-		joint->offset[1] = joint->anchor2[1];
-		joint->offset[2] = joint->anchor2[2];
-
-		return;
-	}
-
-
-  dMULTIPLY1_331 (joint->offset,joint->node[0].body->posr.R,c);
 }
 
 
 void dJointSetPRAxis2 (dJointID j, dReal x, dReal y, dReal z)
 {
-  dxJointPR* joint = (dxJointPR*)j;
-  dUASSERT(joint,"bad joint argument");
-  dUASSERT(joint->vtable == &__dPR_vtable,"joint is not a Prismatic and Rotoide");
+  dxJointPR* joint = (dxJointPR*) j;
+  dUASSERT (joint,"bad joint argument");
+  dUASSERT (joint->vtable == &__dPR_vtable,"joint is not a Prismatic and Rotoide");
   setAxes (joint,x,y,z,joint->axisR1,joint->axisR2);
   PRComputeInitialRelativeRotation (joint);
 }
@@ -3065,28 +2821,27 @@ void dJointSetPRAxis2 (dJointID j, dReal x, dReal y, dReal z)
 
 void dJointSetPRParam (dJointID j, int parameter, dReal value)
 {
-  dxJointPR* joint = (dxJointPR*)j;
-  dUASSERT(joint,"bad joint argument");
-  dUASSERT(joint->vtable == &__dPR_vtable,"joint is not a Prismatic and Rotoide");
-  if ((parameter & 0xff00) == 0x100) {
-    joint->limotR.set (parameter,value);
-  }
+  dxJointPR* joint = (dxJointPR*) j;
+  dUASSERT (joint,"bad joint argument");
+  dUASSERT (joint->vtable == &__dPR_vtable,"joint is not a Prismatic and Rotoide");
+  if ( (parameter & 0xff00) == 0x100) {
+    joint->limotR.set (parameter & 0xff, value); // Take only lower part of the
+  }                                              // parameter alue
   else {
-    joint->limotP.set (parameter & 0xff,value);
+    joint->limotP.set (parameter, value);
   }
 }
 
 void dJointGetPRAnchor (dJointID j, dVector3 result)
 {
-  dxJointPR* joint = (dxJointPR*)j;
-  dUASSERT(joint,"bad joint argument");
-  dUASSERT(result,"bad result argument");
-  dUASSERT(joint->vtable == &__dPR_vtable,"joint is not a Prismatic and Rotoide");
+  dxJointPR* joint = (dxJointPR*) j;
+  dUASSERT (joint,"bad joint argument");
+  dUASSERT (result,"bad result argument");
+  dUASSERT (joint->vtable == &__dPR_vtable,"joint is not a Prismatic and Rotoide");
 
   if (joint->node[1].body)
     getAnchor2 (joint,result,joint->anchor2);
-  else
-  {
+  else {
     result[0] = joint->anchor2[0];
     result[1] = joint->anchor2[1];
     result[2] = joint->anchor2[2];
@@ -3096,41 +2851,41 @@ void dJointGetPRAnchor (dJointID j, dVector3 result)
 
 void dJointGetPRAxis1 (dJointID j, dVector3 result)
 {
-  dxJointPR* joint = (dxJointPR*)j;
-  dUASSERT(joint,"bad joint argument");
-  dUASSERT(result,"bad result argument");
-  dUASSERT(joint->vtable == &__dPR_vtable,"joint is not a Prismatic and Rotoide");
-  getAxis(joint, result, joint->axisP1);
+  dxJointPR* joint = (dxJointPR*) j;
+  dUASSERT (joint,"bad joint argument");
+  dUASSERT (result,"bad result argument");
+  dUASSERT (joint->vtable == &__dPR_vtable,"joint is not a Prismatic and Rotoide");
+  getAxis (joint, result, joint->axisP1);
 }
 
 void dJointGetPRAxis2 (dJointID j, dVector3 result)
 {
-  dxJointPR* joint = (dxJointPR*)j;
-  dUASSERT(joint,"bad joint argument");
-  dUASSERT(result,"bad result argument");
-  dUASSERT(joint->vtable == &__dPR_vtable,"joint is not a Prismatic and Rotoide");
-  getAxis(joint, result, joint->axisR1);
+  dxJointPR* joint = (dxJointPR*) j;
+  dUASSERT (joint,"bad joint argument");
+  dUASSERT (result,"bad result argument");
+  dUASSERT (joint->vtable == &__dPR_vtable,"joint is not a Prismatic and Rotoide");
+  getAxis (joint, result, joint->axisR1);
 }
 
 dReal dJointGetPRParam (dJointID j, int parameter)
 {
-  dxJointPR* joint = (dxJointPR*)j;
-  dUASSERT(joint,"bad joint argument");
-  dUASSERT(joint->vtable == &__dPR_vtable,"joint is not Prismatic and Rotoide");
-  if ((parameter & 0xff00) == 0x100) {
+  dxJointPR* joint = (dxJointPR*) j;
+  dUASSERT (joint,"bad joint argument");
+  dUASSERT (joint->vtable == &__dPR_vtable,"joint is not Prismatic and Rotoide");
+  if ( (parameter & 0xff00) == 0x100) {
     return joint->limotR.get (parameter & 0xff);
   }
-	else {
-		return joint->limotP.get (parameter);
-	}
+  else {
+    return joint->limotP.get (parameter);
+  }
 }
 
 void dJointAddPRTorque (dJointID j, dReal torque)
 {
-  dxJointPR* joint = (dxJointPR*)j;
+  dxJointPR* joint = (dxJointPR*) j;
   dVector3 axis;
-  dAASSERT(joint);
-  dUASSERT(joint->vtable == &__dPR_vtable,"joint is not a Prismatic and Rotoide");
+  dAASSERT (joint);
+  dUASSERT (joint->vtable == &__dPR_vtable,"joint is not a Prismatic and Rotoide");
 
   if (joint->flags & dJOINT_REVERSE)
     torque = -torque;
@@ -3143,7 +2898,7 @@ void dJointAddPRTorque (dJointID j, dReal torque)
   if (joint->node[0].body != 0)
     dBodyAddTorque (joint->node[0].body, axis[0], axis[1], axis[2]);
   if (joint->node[1].body != 0)
-    dBodyAddTorque(joint->node[1].body, -axis[0], -axis[1], -axis[2]);
+    dBodyAddTorque (joint->node[1].body, -axis[0], -axis[1], -axis[2]);
 }
 
 
@@ -4060,6 +3815,7 @@ void dJointSetPlane2DAngleParam (dxJoint *joint,
 	dxJointPlane2D* joint2d = (dxJointPlane2D*)( joint );
 	joint2d->motor_angle.set (parameter, value);
 }
+
 
 
 
