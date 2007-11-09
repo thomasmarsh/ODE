@@ -1211,15 +1211,17 @@ ODE_API void *dJointGetData (dJointID);
  * @brief Get the type of the joint
  * @ingroup joints
  * @return the type, being one of these:
- * \li JointTypeBall
- * \li JointTypeHinge
- * \li JointTypeSlider
- * \li JointTypeContact
- * \li JointTypeUniversal
- * \li JointTypeHinge2
- * \li JointTypeFixed
- * \li JointTypeAMotor
- * \li JointTypeLMotor
+ * \li dJointTypeBall
+ * \li dJointTypeHinge
+ * \li dJointTypeSlider
+ * \li dJointTypeContact
+ * \li dJointTypeUniversal
+ * \li dJointTypeHinge2
+ * \li dJointTypeFixed
+ * \li dJointTypeNull
+ * \li dJointTypeAMotor
+ * \li dJointTypeLMotor
+ * \li dJointTypePlane2D
  */
 ODE_API int dJointGetType (dJointID);
 
