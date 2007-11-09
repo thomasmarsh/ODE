@@ -236,7 +236,7 @@ struct dxJointPR : public dxJoint {
                             ///< Going from the first to the second in the frame
                             ///<  of body1.
                             ///< That should be aligned with body1 center along axisP
-                            ///< This is calculated whe the axis are set.
+                            ///< This is calculated when the axis are set.
   dxJointLimitMotor limotR; ///< limit and motor information for the rotoide articulation.
   dxJointLimitMotor limotP; ///< limit and motor information for the prismatic articulation.
 };

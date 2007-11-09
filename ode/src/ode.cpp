@@ -256,7 +256,7 @@ dxBody *dBodyCreate (dxWorld *w)
   w->nb++;
 
   // set auto-disable parameters
-  b->average_avel_buffer = b->average_lvel_buffer = 0; // no buffer at beginnin
+  b->average_avel_buffer = b->average_lvel_buffer = 0; // no buffer at beginning
   dBodySetAutoDisableDefaults (b);	// must do this after adding to world
   b->adis_stepsleft = b->adis.idle_steps;
   b->adis_timeleft = b->adis.idle_time;

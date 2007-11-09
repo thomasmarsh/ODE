@@ -555,7 +555,7 @@ ODE_API void  dBodySetAutoDisableDefaults (dBodyID);
 
 
 /**
- * @brief Retrives the world attached to te given body.
+ * @brief Retrieves the world attached to te given body.
  * @remarks
  * 
  * @ingroup bodies
