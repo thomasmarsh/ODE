@@ -250,7 +250,11 @@ void resetSimulation()
 	// recreate world
 	
 	world = dWorldCreate();
-	space = dHashSpaceCreate (0);
+
+//	space = dHashSpaceCreate( 0 );
+//	space = dSimpleSpaceCreate( 0 );
+	space = dSweepAndPruneSpaceCreate( 0, dSAP_AXES_XYZ );
+
 	contactgroup = dJointGroupCreate (0);
 	dWorldSetGravity (world,0,0,-1.5);
 	dWorldSetCFM (world, 1e-5);

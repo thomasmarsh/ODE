@@ -53,6 +53,20 @@ ODE_API dSpaceID dSimpleSpaceCreate (dSpaceID space);
 ODE_API dSpaceID dHashSpaceCreate (dSpaceID space);
 ODE_API dSpaceID dQuadTreeSpaceCreate (dSpaceID space, dVector3 Center, dVector3 Extents, int Depth);
 
+
+// SAP
+// Order XZY or ZXY usually works best, if your Y is up.
+#define dSAP_AXES_XYZ  ((0)|(1<<2)|(2<<4))
+#define dSAP_AXES_XZY  ((0)|(2<<2)|(1<<4))
+#define dSAP_AXES_YXZ  ((1)|(0<<2)|(2<<4))
+#define dSAP_AXES_YZX  ((1)|(2<<2)|(0<<4))
+#define dSAP_AXES_ZXY  ((2)|(0<<2)|(1<<4))
+#define dSAP_AXES_ZYX  ((2)|(1<<2)|(0<<4))
+
+ODE_API dSpaceID dSweepAndPruneSpaceCreate( dSpaceID space, int axisorder );
+
+
+
 ODE_API void dSpaceDestroy (dSpaceID);
 
 ODE_API void dHashSpaceSetLevels (dSpaceID space, int minlevel, int maxlevel);

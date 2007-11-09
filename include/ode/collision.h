@@ -766,6 +766,7 @@ enum {
   dFirstSpaceClass,
   dSimpleSpaceClass = dFirstSpaceClass,
   dHashSpaceClass,
+  dSweepAndPruneSpaceClass, // SAP
   dQuadTreeSpaceClass,
   dLastSpaceClass = dQuadTreeSpaceClass,
 
