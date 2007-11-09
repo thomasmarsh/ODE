@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="Windows-1252"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="7.10"
-	Name="drawstuff"
-	ProjectGUID="{026ECB0F-8B1C-764B-800D-8BD8829824ED}"
+	Version="7.00"
+	Name="demo_jointPR"
+	ProjectGUID="{2A03707A-F9BD-8F40-8B9E-1D0858852C12}"
 	Keyword="Win32Proj">
 	<Platforms>
 		<Platform
@@ -13,14 +13,14 @@
 		<Configuration
 			Name="DebugDLL|Win32"
 			OutputDirectory="../../lib/DebugDLL"
-			IntermediateDirectory="obj/drawstuff/DebugDLL"
-			ConfigurationType="2"
+			IntermediateDirectory="obj/jointPR/DebugDLL"
+			ConfigurationType="1"
 			CharacterSet="2">
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories="../../include"
-				PreprocessorDefinitions="WIN32;DS_DLL;USRDLL"
+				PreprocessorDefinitions="_CRT_SECURE_NO_DEPRECATE;WIN32"
 				MinimalRebuild="TRUE"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
@@ -34,14 +34,14 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="user32.lib opengl32.lib glu32.lib winmm.lib gdi32.lib"
-				OutputFile="$(OutDir)/drawstuff.dll"
+				AdditionalDependencies="../../lib/DebugDLL/ode.lib ../../lib/DebugDLL/drawstuff.lib user32.lib winmm.lib gdi32.lib opengl32.lib glu32.lib"
+				OutputFile="$(OutDir)/demo_jointPR.exe"
 				LinkIncremental="2"
 				AdditionalLibraryDirectories="../../lib/DebugDLL"
 				GenerateDebugInformation="TRUE"
-				ProgramDatabaseFile="$(OutDir)/drawstuff.pdb"
-				SubSystem="2"
-				ImportLibrary="../../lib/DebugDLL/drawstuff.lib"
+				ProgramDatabaseFile="$(OutDir)/demo_jointPR.pdb"
+				SubSystem="1"
+				EntryPointSymbol="mainCRTStartup"
 				TargetMachine="1"/>
 			<Tool
 				Name="VCMIDLTool"/>
@@ -53,87 +53,74 @@
 				Name="VCPreLinkEventTool"/>
 			<Tool
 				Name="VCResourceCompilerTool"
-				PreprocessorDefinitions="WIN32;DS_DLL;USRDLL"
+				PreprocessorDefinitions="_CRT_SECURE_NO_DEPRECATE;WIN32"
 				AdditionalIncludeDirectories="../../include"/>
 			<Tool
 				Name="VCWebServiceProxyGeneratorTool"/>
 			<Tool
-				Name="VCXMLDataGeneratorTool"/>
-			<Tool
 				Name="VCWebDeploymentTool"/>
-			<Tool
-				Name="VCManagedWrapperGeneratorTool"/>
-			<Tool
-				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
 		</Configuration>
 		<Configuration
 			Name="ReleaseDLL|Win32"
 			OutputDirectory="../../lib/ReleaseDLL"
-			IntermediateDirectory="obj/drawstuff/ReleaseDLL"
-			ConfigurationType="2"
-			CharacterSet="2">
-			<Tool
-				Name="VCCLCompilerTool"
-				Optimization="2"
-				OmitFramePointers="TRUE"
-				AdditionalIncludeDirectories="../../include"
-				PreprocessorDefinitions="WIN32;DS_DLL;USRDLL"
-				StringPooling="TRUE"
-				RuntimeLibrary="2"
-				EnableFunctionLevelLinking="TRUE"
-				RuntimeTypeInfo="TRUE"
-				UsePrecompiledHeader="2"
-				WarningLevel="3"
-				Detect64BitPortabilityProblems="TRUE"
-				DebugInformationFormat="0"/>
-			<Tool
-				Name="VCCustomBuildTool"/>
-			<Tool
-				Name="VCLinkerTool"
-				AdditionalDependencies="user32.lib opengl32.lib glu32.lib winmm.lib gdi32.lib"
-				OutputFile="$(OutDir)/drawstuff.dll"
-				LinkIncremental="1"
-				AdditionalLibraryDirectories="../../lib/ReleaseDLL"
-				GenerateDebugInformation="FALSE"
-				SubSystem="2"
-				OptimizeReferences="2"
-				EnableCOMDATFolding="2"
-				ImportLibrary="../../lib/ReleaseDLL/drawstuff.lib"
-				TargetMachine="1"/>
-			<Tool
-				Name="VCMIDLTool"/>
-			<Tool
-				Name="VCPostBuildEventTool"/>
-			<Tool
-				Name="VCPreBuildEventTool"/>
-			<Tool
-				Name="VCPreLinkEventTool"/>
-			<Tool
-				Name="VCResourceCompilerTool"
-				PreprocessorDefinitions="WIN32;DS_DLL;USRDLL"
-				AdditionalIncludeDirectories="../../include"/>
-			<Tool
-				Name="VCWebServiceProxyGeneratorTool"/>
-			<Tool
-				Name="VCXMLDataGeneratorTool"/>
-			<Tool
-				Name="VCWebDeploymentTool"/>
-			<Tool
-				Name="VCManagedWrapperGeneratorTool"/>
-			<Tool
-				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
-		</Configuration>
-		<Configuration
-			Name="DebugLib|Win32"
-			OutputDirectory="../../lib/DebugLib"
-			IntermediateDirectory="obj/drawstuff/DebugLib"
-			ConfigurationType="4"
+			IntermediateDirectory="obj/jointPR/ReleaseDLL"
+			ConfigurationType="1"
 			CharacterSet="2">
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories="../../include"
-				PreprocessorDefinitions="WIN32;DS_LIB"
+				PreprocessorDefinitions="_CRT_SECURE_NO_DEPRECATE;WIN32"
+				MinimalRebuild="TRUE"
+				BasicRuntimeChecks="3"
+				RuntimeLibrary="3"
+				EnableFunctionLevelLinking="TRUE"
+				RuntimeTypeInfo="TRUE"
+				UsePrecompiledHeader="2"
+				WarningLevel="3"
+				Detect64BitPortabilityProblems="TRUE"
+				DebugInformationFormat="4"/>
+			<Tool
+				Name="VCCustomBuildTool"/>
+			<Tool
+				Name="VCLinkerTool"
+				AdditionalDependencies="../../lib/ReleaseDLL/ode.lib ../../lib/ReleaseDLL/drawstuff.lib user32.lib winmm.lib gdi32.lib opengl32.lib glu32.lib"
+				OutputFile="$(OutDir)/demo_jointPR.exe"
+				LinkIncremental="2"
+				AdditionalLibraryDirectories="../../lib/ReleaseDLL"
+				GenerateDebugInformation="TRUE"
+				ProgramDatabaseFile="$(OutDir)/demo_jointPR.pdb"
+				SubSystem="1"
+				EntryPointSymbol="mainCRTStartup"
+				TargetMachine="1"/>
+			<Tool
+				Name="VCMIDLTool"/>
+			<Tool
+				Name="VCPostBuildEventTool"/>
+			<Tool
+				Name="VCPreBuildEventTool"/>
+			<Tool
+				Name="VCPreLinkEventTool"/>
+			<Tool
+				Name="VCResourceCompilerTool"
+				PreprocessorDefinitions="_CRT_SECURE_NO_DEPRECATE;WIN32"
+				AdditionalIncludeDirectories="../../include"/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"/>
+			<Tool
+				Name="VCWebDeploymentTool"/>
+		</Configuration>
+		<Configuration
+			Name="DebugLib|Win32"
+			OutputDirectory="../../lib/DebugLib"
+			IntermediateDirectory="obj/jointPR/DebugLib"
+			ConfigurationType="1"
+			CharacterSet="2">
+			<Tool
+				Name="VCCLCompilerTool"
+				Optimization="0"
+				AdditionalIncludeDirectories="../../include"
+				PreprocessorDefinitions="_CRT_SECURE_NO_DEPRECATE;WIN32"
 				MinimalRebuild="TRUE"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="1"
@@ -146,8 +133,16 @@
 			<Tool
 				Name="VCCustomBuildTool"/>
 			<Tool
-				Name="VCLibrarianTool"
-				OutputFile="$(OutDir)/drawstuff.lib"/>
+				Name="VCLinkerTool"
+				AdditionalDependencies="../../lib/DebugLib/ode.lib ../../lib/DebugLib/drawstuff.lib user32.lib winmm.lib gdi32.lib opengl32.lib glu32.lib"
+				OutputFile="$(OutDir)/demo_jointPR.exe"
+				LinkIncremental="2"
+				AdditionalLibraryDirectories="../../lib/DebugLib"
+				GenerateDebugInformation="TRUE"
+				ProgramDatabaseFile="$(OutDir)/demo_jointPR.pdb"
+				SubSystem="1"
+				EntryPointSymbol="mainCRTStartup"
+				TargetMachine="1"/>
 			<Tool
 				Name="VCMIDLTool"/>
 			<Tool
@@ -158,44 +153,46 @@
 				Name="VCPreLinkEventTool"/>
 			<Tool
 				Name="VCResourceCompilerTool"
-				PreprocessorDefinitions="WIN32;DS_LIB"
+				PreprocessorDefinitions="_CRT_SECURE_NO_DEPRECATE;WIN32"
 				AdditionalIncludeDirectories="../../include"/>
 			<Tool
 				Name="VCWebServiceProxyGeneratorTool"/>
 			<Tool
-				Name="VCXMLDataGeneratorTool"/>
-			<Tool
 				Name="VCWebDeploymentTool"/>
-			<Tool
-				Name="VCManagedWrapperGeneratorTool"/>
-			<Tool
-				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
 		</Configuration>
 		<Configuration
 			Name="ReleaseLib|Win32"
 			OutputDirectory="../../lib/ReleaseLib"
-			IntermediateDirectory="obj/drawstuff/ReleaseLib"
-			ConfigurationType="4"
+			IntermediateDirectory="obj/jointPR/ReleaseLib"
+			ConfigurationType="1"
 			CharacterSet="2">
 			<Tool
 				Name="VCCLCompilerTool"
-				Optimization="2"
-				OmitFramePointers="TRUE"
+				Optimization="0"
 				AdditionalIncludeDirectories="../../include"
-				PreprocessorDefinitions="WIN32;DS_LIB"
-				StringPooling="TRUE"
-				RuntimeLibrary="0"
+				PreprocessorDefinitions="_CRT_SECURE_NO_DEPRECATE;WIN32"
+				MinimalRebuild="TRUE"
+				BasicRuntimeChecks="3"
+				RuntimeLibrary="1"
 				EnableFunctionLevelLinking="TRUE"
 				RuntimeTypeInfo="TRUE"
 				UsePrecompiledHeader="2"
 				WarningLevel="3"
 				Detect64BitPortabilityProblems="TRUE"
-				DebugInformationFormat="0"/>
+				DebugInformationFormat="4"/>
 			<Tool
 				Name="VCCustomBuildTool"/>
 			<Tool
-				Name="VCLibrarianTool"
-				OutputFile="$(OutDir)/drawstuff.lib"/>
+				Name="VCLinkerTool"
+				AdditionalDependencies="../../lib/ReleaseLib/ode.lib ../../lib/ReleaseLib/drawstuff.lib user32.lib winmm.lib gdi32.lib opengl32.lib glu32.lib"
+				OutputFile="$(OutDir)/demo_jointPR.exe"
+				LinkIncremental="2"
+				AdditionalLibraryDirectories="../../lib/ReleaseLib"
+				GenerateDebugInformation="TRUE"
+				ProgramDatabaseFile="$(OutDir)/demo_jointPR.pdb"
+				SubSystem="1"
+				EntryPointSymbol="mainCRTStartup"
+				TargetMachine="1"/>
 			<Tool
 				Name="VCMIDLTool"/>
 			<Tool
@@ -206,34 +203,23 @@
 				Name="VCPreLinkEventTool"/>
 			<Tool
 				Name="VCResourceCompilerTool"
-				PreprocessorDefinitions="WIN32;DS_LIB"
+				PreprocessorDefinitions="_CRT_SECURE_NO_DEPRECATE;WIN32"
 				AdditionalIncludeDirectories="../../include"/>
 			<Tool
 				Name="VCWebServiceProxyGeneratorTool"/>
 			<Tool
-				Name="VCXMLDataGeneratorTool"/>
-			<Tool
 				Name="VCWebDeploymentTool"/>
-			<Tool
-				Name="VCManagedWrapperGeneratorTool"/>
-			<Tool
-				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
 		</Configuration>
 	</Configurations>
-	<References>
-	</References>
 	<Files>
 		<Filter
-			Name="include"
+			Name="ode"
 			Filter="">
 			<Filter
-				Name="drawstuff"
+				Name="demo"
 				Filter="">
 				<File
-					RelativePath="..\..\include\drawstuff\drawstuff.h">
-				</File>
-				<File
-					RelativePath="..\..\include\drawstuff\version.h">
+					RelativePath="..\..\ode\demo\demo_jointPR.cpp">
 				</File>
 			</Filter>
 		</Filter>
@@ -244,19 +230,7 @@
 				Name="src"
 				Filter="">
 				<File
-					RelativePath="..\..\drawstuff\src\internal.h">
-				</File>
-				<File
-					RelativePath="..\..\drawstuff\src\drawstuff.cpp">
-				</File>
-				<File
-					RelativePath="..\..\drawstuff\src\resource.h">
-				</File>
-				<File
 					RelativePath="..\..\drawstuff\src\resources.rc">
-				</File>
-				<File
-					RelativePath="..\..\drawstuff\src\windows.cpp">
 				</File>
 			</Filter>
 		</Filter>

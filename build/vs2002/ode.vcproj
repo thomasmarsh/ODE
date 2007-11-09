@@ -3,7 +3,7 @@
 	ProjectType="Visual C++"
 	Version="7.00"
 	Name="ode"
-	ProjectGUID="{7530658D-B5A8-6046-ACD2-C155B5A252A8}"
+	ProjectGUID="{60C6899B-65BD-7146-BE20-FDA1EA01960E}"
 	Keyword="Win32Proj">
 	<Platforms>
 		<Platform
@@ -363,6 +363,9 @@
 				</File>
 				<File
 					RelativePath="..\..\ode\src\collision_quadtreespace.cpp">
+				</File>
+				<File
+					RelativePath="..\..\ode\src\collision_sapspace.cpp">
 				</File>
 				<File
 					RelativePath="..\..\ode\src\collision_space.cpp">

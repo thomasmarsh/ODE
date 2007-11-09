@@ -13,7 +13,7 @@ ifeq ($(CONFIG),DebugDLL)
   CPPFLAGS := -MMD -D "_CRT_SECURE_NO_DEPRECATE" -I "../../include" -I "../../tests/CppTestHarness"
   CFLAGS += $(CPPFLAGS) $(TARGET_ARCH) -g
   CXXFLAGS := $(CFLAGS)
-  LDFLAGS += -L$(BINDIR) -L$(LIBDIR) ../../lib/DebugDLL/ode.dll
+  LDFLAGS += -L$(BINDIR) -L$(LIBDIR) -lode
   LDDEPS := ../../lib/DebugDLL/ode.dll
   RESFLAGS := -D "_CRT_SECURE_NO_DEPRECATE" -I "../../include" -I "../../tests/CppTestHarness"
   TARGET := tests.exe
@@ -28,7 +28,7 @@ ifeq ($(CONFIG),ReleaseDLL)
   CPPFLAGS := -MMD -D "_CRT_SECURE_NO_DEPRECATE" -I "../../include" -I "../../tests/CppTestHarness"
   CFLAGS += $(CPPFLAGS) $(TARGET_ARCH) -g
   CXXFLAGS := $(CFLAGS)
-  LDFLAGS += -L$(BINDIR) -L$(LIBDIR) ../../lib/ReleaseDLL/ode.dll
+  LDFLAGS += -L$(BINDIR) -L$(LIBDIR) -lode
   LDDEPS := ../../lib/ReleaseDLL/ode.dll
   RESFLAGS := -D "_CRT_SECURE_NO_DEPRECATE" -I "../../include" -I "../../tests/CppTestHarness"
   TARGET := tests.exe
@@ -43,7 +43,7 @@ ifeq ($(CONFIG),DebugLib)
   CPPFLAGS := -MMD -D "_CRT_SECURE_NO_DEPRECATE" -I "../../include" -I "../../tests/CppTestHarness"
   CFLAGS += $(CPPFLAGS) $(TARGET_ARCH) -g
   CXXFLAGS := $(CFLAGS)
-  LDFLAGS += -L$(BINDIR) -L$(LIBDIR) ../../lib/DebugLib/libode.a
+  LDFLAGS += -L$(BINDIR) -L$(LIBDIR) -lode
   LDDEPS := ../../lib/DebugLib/libode.a
   RESFLAGS := -D "_CRT_SECURE_NO_DEPRECATE" -I "../../include" -I "../../tests/CppTestHarness"
   TARGET := tests.exe
@@ -58,7 +58,7 @@ ifeq ($(CONFIG),ReleaseLib)
   CPPFLAGS := -MMD -D "_CRT_SECURE_NO_DEPRECATE" -I "../../include" -I "../../tests/CppTestHarness"
   CFLAGS += $(CPPFLAGS) $(TARGET_ARCH) -g
   CXXFLAGS := $(CFLAGS)
-  LDFLAGS += -L$(BINDIR) -L$(LIBDIR) ../../lib/ReleaseLib/libode.a
+  LDFLAGS += -L$(BINDIR) -L$(LIBDIR) -lode
   LDDEPS := ../../lib/ReleaseLib/libode.a
   RESFLAGS := -D "_CRT_SECURE_NO_DEPRECATE" -I "../../include" -I "../../tests/CppTestHarness"
   TARGET := tests.exe
@@ -110,7 +110,8 @@ $(OUTDIR)/$(TARGET): $(OBJECTS) $(LDDEPS) $(RESOURCES)
 clean:
 	@echo Cleaning tests
 ifeq ($(MKDIR_TYPE),posix)
-	-@rm -rf $(OUTDIR)/$(TARGET) $(OBJDIR)
+	-@rm -f $(OUTDIR)/$(TARGET)
+	-@rm -rf $(OBJDIR)
 else
 	-@if exist $(subst /,\,$(OUTDIR)/$(TARGET)) del /q $(subst /,\,$(OUTDIR)/$(TARGET))
 	-@if exist $(subst /,\,$(OBJDIR)) del /q $(subst /,\,$(OBJDIR))

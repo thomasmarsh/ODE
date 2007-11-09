@@ -13,7 +13,7 @@ ifeq ($(CONFIG),DebugDLL)
   CPPFLAGS := -MMD -D "WIN32" -D "DS_DLL" -D "USRDLL" -I "../../include"
   CFLAGS += $(CPPFLAGS) $(TARGET_ARCH) -g
   CXXFLAGS := $(CFLAGS)
-  LDFLAGS += -L$(BINDIR) -L$(LIBDIR) -shared -luser32 -lopengl32 -lglu32 -lwinmm -lgdi32
+  LDFLAGS += -L$(BINDIR) -L$(LIBDIR) -shared -Wl,--out-implib="../../lib/DebugDLL/libdrawstuff.a" -luser32 -lopengl32 -lglu32 -lwinmm -lgdi32
   LDDEPS :=
   RESFLAGS := -D "WIN32" -D "DS_DLL" -D "USRDLL" -I "../../include"
   TARGET := drawstuff.dll
@@ -28,7 +28,7 @@ ifeq ($(CONFIG),ReleaseDLL)
   CPPFLAGS := -MMD -D "WIN32" -D "DS_DLL" -D "USRDLL" -I "../../include"
   CFLAGS += $(CPPFLAGS) $(TARGET_ARCH) -O3 -fomit-frame-pointer
   CXXFLAGS := $(CFLAGS)
-  LDFLAGS += -L$(BINDIR) -L$(LIBDIR) -shared -s -luser32 -lopengl32 -lglu32 -lwinmm -lgdi32
+  LDFLAGS += -L$(BINDIR) -L$(LIBDIR) -shared -Wl,--out-implib="../../lib/ReleaseDLL/libdrawstuff.a" -s -luser32 -lopengl32 -lglu32 -lwinmm -lgdi32
   LDDEPS :=
   RESFLAGS := -D "WIN32" -D "DS_DLL" -D "USRDLL" -I "../../include"
   TARGET := drawstuff.dll
@@ -104,7 +104,8 @@ $(OUTDIR)/$(TARGET): $(OBJECTS) $(LDDEPS) $(RESOURCES)
 clean:
 	@echo Cleaning drawstuff
 ifeq ($(MKDIR_TYPE),posix)
-	-@rm -rf $(OUTDIR)/$(TARGET) $(OBJDIR)
+	-@rm -f $(OUTDIR)/$(TARGET)
+	-@rm -rf $(OBJDIR)
 else
 	-@if exist $(subst /,\,$(OUTDIR)/$(TARGET)) del /q $(subst /,\,$(OUTDIR)/$(TARGET))
 	-@if exist $(subst /,\,$(OBJDIR)) del /q $(subst /,\,$(OBJDIR))

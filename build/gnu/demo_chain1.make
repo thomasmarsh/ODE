@@ -13,7 +13,7 @@ ifeq ($(CONFIG),DebugDLL)
   CPPFLAGS := -MMD -D "_CRT_SECURE_NO_DEPRECATE" -D "WIN32" -I "../../include"
   CFLAGS += $(CPPFLAGS) $(TARGET_ARCH) -g
   CXXFLAGS := $(CFLAGS)
-  LDFLAGS += -L$(BINDIR) -L$(LIBDIR) ../../lib/DebugDLL/ode.dll ../../lib/DebugDLL/drawstuff.dll -luser32 -lwinmm -lgdi32 -lopengl32 -lglu32
+  LDFLAGS += -L$(BINDIR) -L$(LIBDIR) -lode -ldrawstuff -luser32 -lwinmm -lgdi32 -lopengl32 -lglu32
   LDDEPS := ../../lib/DebugDLL/ode.dll ../../lib/DebugDLL/drawstuff.dll
   RESFLAGS := -D "_CRT_SECURE_NO_DEPRECATE" -D "WIN32" -I "../../include"
   TARGET := demo_chain1.exe
@@ -28,7 +28,7 @@ ifeq ($(CONFIG),ReleaseDLL)
   CPPFLAGS := -MMD -D "_CRT_SECURE_NO_DEPRECATE" -D "WIN32" -I "../../include"
   CFLAGS += $(CPPFLAGS) $(TARGET_ARCH) -g
   CXXFLAGS := $(CFLAGS)
-  LDFLAGS += -L$(BINDIR) -L$(LIBDIR) ../../lib/ReleaseDLL/ode.dll ../../lib/ReleaseDLL/drawstuff.dll -luser32 -lwinmm -lgdi32 -lopengl32 -lglu32
+  LDFLAGS += -L$(BINDIR) -L$(LIBDIR) -lode -ldrawstuff -luser32 -lwinmm -lgdi32 -lopengl32 -lglu32
   LDDEPS := ../../lib/ReleaseDLL/ode.dll ../../lib/ReleaseDLL/drawstuff.dll
   RESFLAGS := -D "_CRT_SECURE_NO_DEPRECATE" -D "WIN32" -I "../../include"
   TARGET := demo_chain1.exe
@@ -43,7 +43,7 @@ ifeq ($(CONFIG),DebugLib)
   CPPFLAGS := -MMD -D "_CRT_SECURE_NO_DEPRECATE" -D "WIN32" -I "../../include"
   CFLAGS += $(CPPFLAGS) $(TARGET_ARCH) -g
   CXXFLAGS := $(CFLAGS)
-  LDFLAGS += -L$(BINDIR) -L$(LIBDIR) ../../lib/DebugLib/libode.a ../../lib/DebugLib/libdrawstuff.a -luser32 -lwinmm -lgdi32 -lopengl32 -lglu32
+  LDFLAGS += -L$(BINDIR) -L$(LIBDIR) -lode -ldrawstuff -luser32 -lwinmm -lgdi32 -lopengl32 -lglu32
   LDDEPS := ../../lib/DebugLib/libode.a ../../lib/DebugLib/libdrawstuff.a
   RESFLAGS := -D "_CRT_SECURE_NO_DEPRECATE" -D "WIN32" -I "../../include"
   TARGET := demo_chain1.exe
@@ -58,7 +58,7 @@ ifeq ($(CONFIG),ReleaseLib)
   CPPFLAGS := -MMD -D "_CRT_SECURE_NO_DEPRECATE" -D "WIN32" -I "../../include"
   CFLAGS += $(CPPFLAGS) $(TARGET_ARCH) -g
   CXXFLAGS := $(CFLAGS)
-  LDFLAGS += -L$(BINDIR) -L$(LIBDIR) ../../lib/ReleaseLib/libode.a ../../lib/ReleaseLib/libdrawstuff.a -luser32 -lwinmm -lgdi32 -lopengl32 -lglu32
+  LDFLAGS += -L$(BINDIR) -L$(LIBDIR) -lode -ldrawstuff -luser32 -lwinmm -lgdi32 -lopengl32 -lglu32
   LDDEPS := ../../lib/ReleaseLib/libode.a ../../lib/ReleaseLib/libdrawstuff.a
   RESFLAGS := -D "_CRT_SECURE_NO_DEPRECATE" -D "WIN32" -I "../../include"
   TARGET := demo_chain1.exe
@@ -103,7 +103,8 @@ $(OUTDIR)/$(TARGET): $(OBJECTS) $(LDDEPS) $(RESOURCES)
 clean:
 	@echo Cleaning demo_chain1
 ifeq ($(MKDIR_TYPE),posix)
-	-@rm -rf $(OUTDIR)/$(TARGET) $(OBJDIR)
+	-@rm -f $(OUTDIR)/$(TARGET)
+	-@rm -rf $(OBJDIR)
 else
 	-@if exist $(subst /,\,$(OUTDIR)/$(TARGET)) del /q $(subst /,\,$(OUTDIR)/$(TARGET))
 	-@if exist $(subst /,\,$(OBJDIR)) del /q $(subst /,\,$(OBJDIR))
