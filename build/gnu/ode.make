@@ -13,7 +13,7 @@ ifeq ($(CONFIG),DebugDLL)
   CPPFLAGS := -MMD -D "WIN32" -D "ODE_DLL" -I "../../include" -I "../../OPCODE" -I "../../GIMPACT/include"
   CFLAGS += $(CPPFLAGS) $(TARGET_ARCH) -g
   CXXFLAGS := $(CFLAGS)
-  LDFLAGS += -L$(BINDIR) -L$(LIBDIR) -shared -luser32
+  LDFLAGS += -L$(BINDIR) -L$(LIBDIR) -shared -Wl,--out-implib="../../lib/DebugDLL/libode.a" -luser32
   LDDEPS :=
   RESFLAGS := -D "WIN32" -D "ODE_DLL" -I "../../include" -I "../../OPCODE" -I "../../GIMPACT/include"
   TARGET := ode.dll
@@ -28,7 +28,7 @@ ifeq ($(CONFIG),ReleaseDLL)
   CPPFLAGS := -MMD -D "WIN32" -D "ODE_DLL" -I "../../include" -I "../../OPCODE" -I "../../GIMPACT/include"
   CFLAGS += $(CPPFLAGS) $(TARGET_ARCH) -O3 -fomit-frame-pointer
   CXXFLAGS := $(CFLAGS)
-  LDFLAGS += -L$(BINDIR) -L$(LIBDIR) -shared -s -luser32
+  LDFLAGS += -L$(BINDIR) -L$(LIBDIR) -shared -Wl,--out-implib="../../lib/ReleaseDLL/libode.a" -s -luser32
   LDDEPS :=
   RESFLAGS := -D "WIN32" -D "ODE_DLL" -I "../../include" -I "../../OPCODE" -I "../../GIMPACT/include"
   TARGET := ode.dll
@@ -79,6 +79,7 @@ OBJECTS := \
 	$(OBJDIR)/collision_cylinder_trimesh.o \
 	$(OBJDIR)/collision_kernel.o \
 	$(OBJDIR)/collision_quadtreespace.o \
+	$(OBJDIR)/collision_sapspace.o \
 	$(OBJDIR)/collision_space.o \
 	$(OBJDIR)/collision_transform.o \
 	$(OBJDIR)/collision_trimesh_box.o \
@@ -200,7 +201,8 @@ $(OUTDIR)/$(TARGET): $(OBJECTS) $(LDDEPS) $(RESOURCES)
 clean:
 	@echo Cleaning ode
 ifeq ($(MKDIR_TYPE),posix)
-	-@rm -rf $(OUTDIR)/$(TARGET) $(OBJDIR)
+	-@rm -f $(OUTDIR)/$(TARGET)
+	-@rm -rf $(OBJDIR)
 else
 	-@if exist $(subst /,\,$(OUTDIR)/$(TARGET)) del /q $(subst /,\,$(OUTDIR)/$(TARGET))
 	-@if exist $(subst /,\,$(OBJDIR)) del /q $(subst /,\,$(OBJDIR))
@@ -268,6 +270,11 @@ $(OBJDIR)/collision_kernel.o: ../../ode/src/collision_kernel.cpp
 	@$(CXX) $(CXXFLAGS) -o $@ -c $<
 
 $(OBJDIR)/collision_quadtreespace.o: ../../ode/src/collision_quadtreespace.cpp
+	-@$(CMD_MKOBJDIR)
+	@echo $(notdir $<)
+	@$(CXX) $(CXXFLAGS) -o $@ -c $<
+
+$(OBJDIR)/collision_sapspace.o: ../../ode/src/collision_sapspace.cpp
 	-@$(CMD_MKOBJDIR)
 	@echo $(notdir $<)
 	@$(CXX) $(CXXFLAGS) -o $@ -c $<

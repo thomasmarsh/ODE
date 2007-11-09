@@ -3,7 +3,7 @@
 	ProjectType="Visual C++"
 	Version="7.10"
 	Name="demo_chain1"
-	ProjectGUID="{DC6294E4-6A55-1D41-9846-53EC913D0DC3}"
+	ProjectGUID="{44EA083E-3258-5F4F-854C-10FF3C6C3E36}"
 	Keyword="Win32Proj">
 	<Platforms>
 		<Platform
