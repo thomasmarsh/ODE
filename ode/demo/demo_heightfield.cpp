@@ -1715,10 +1715,10 @@ static void command (int cmd)
 
 			obj[i].geom[0] = dCreateTriMesh(space, new_tmdata, 0, 0, 0);
 
-			// remember the mesh's dTriMeshDataID on its userdata for convenience.
-			dGeomSetData(obj[i].geom[0], new_tmdata);
-
 			dMassSetTrimesh( &m, DENSITY, obj[i].geom[0] );
+			printf("mass at %f %f %f\n", m.c[0], m.c[1], m.c[2]);
+			dGeomSetPosition(obj[i].geom[0], -m.c[0], -m.c[1], -m.c[2]);
+			dMassTranslate(&m, -m.c[0], -m.c[1], -m.c[2]);
 		}
 #endif
 		else if (cmd == 'x')
@@ -2120,13 +2120,16 @@ int main (int argc, char **argv)
 
 
 
-
 	// run simulation
 	dsSimulationLoop (argc,argv,352,288,&fn);
 
 	dJointGroupDestroy (contactgroup);
 	dSpaceDestroy (space);
 	dWorldDestroy (world);
+
+	// destroy heightfield data, because _we_ own it not ODE
+	dGeomHeightfieldDataDestroy( heightid );
+
 	dCloseODE();
 	return 0;
 }

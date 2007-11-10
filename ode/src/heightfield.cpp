@@ -73,11 +73,35 @@
 //////// dxHeightfieldData /////////////////////////////////////////////////////////////
 
 // dxHeightfieldData constructor
-dxHeightfieldData::dxHeightfieldData()
-{
-    //
-}
+dxHeightfieldData::dxHeightfieldData() :	m_fWidth( 0 ),
+											m_fDepth( 0 ),
+											m_fSampleWidth( 0 ),
+											m_fSampleDepth( 0 ),
+											m_fInvSampleWidth( 0 ),
+											m_fInvSampleDepth( 0 ),
+											
+											m_fHalfWidth( 0 ),
+											m_fHalfDepth( 0 ),
 
+											m_fMinHeight( 0 ),
+											m_fMaxHeight( 0 ),
+											m_fThickness( 0 ),
+											m_fScale( 0 ),
+											m_fOffset( 0 ),
+											
+											m_nWidthSamples( 0 ),
+											m_nDepthSamples( 0 ),
+											m_bCopyHeightData( 0 ),
+											m_bWrapMode( 0 ),
+											m_nGetHeightMode( 0 ),
+											
+											m_pHeightData( NULL ),
+											m_pUserData( NULL ),
+											
+											m_pGetHeightCallback( NULL )
+{
+	memset( m_contacts, 0, sizeof( m_contacts ) );
+}
 
 // build Heightfield data
 void dxHeightfieldData::SetData( int nWidthSamples, int nDepthSamples,
@@ -409,8 +433,6 @@ dxHeightfieldData::~dxHeightfieldData()
     static float *data_float;
     static double *data_double;
 
-    dIASSERT( m_pHeightData );
-
     if ( m_bCopyHeightData )
     {
         switch ( m_nGetHeightMode )
@@ -423,24 +445,28 @@ dxHeightfieldData::~dxHeightfieldData()
 
             // byte
         case 1:
+            dIASSERT( m_pHeightData );
             data_byte = (unsigned char*)m_pHeightData;
             delete [] data_byte;
             break;
 
             // short
         case 2:
+            dIASSERT( m_pHeightData );
             data_short = (short*)m_pHeightData;
             delete [] data_short;
             break;
 
             // float
         case 3:
+            dIASSERT( m_pHeightData );
             data_float = (float*)m_pHeightData;
             delete [] data_float;
             break;
 
             // double
         case 4:
+            dIASSERT( m_pHeightData );
             data_double = (double*)m_pHeightData;
             delete [] data_double;
             break;
