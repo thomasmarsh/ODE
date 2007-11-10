@@ -57,7 +57,7 @@ struct dxSAPSpace : public dxSpace
 	// Constructor / Destructor
 	dxSAPSpace( dSpaceID _space, int sortaxis );
 	~dxSAPSpace();
-	
+
 	// dxSpace
 	virtual dxGeom* getGeom(int i);
 	virtual void add(dxGeom* g);
@@ -85,8 +85,6 @@ private:
 		Pair( uint32 i0, uint32 i1 ) : id0( i0 ), id1( i1 ) {}
 	};
 
-	typedef dArray<dxGeom*> TGeomPtrArray;
-
 	//--------------------------------------------------------------------------
 	// Helpers
 	//--------------------------------------------------------------------------
@@ -102,12 +100,6 @@ private:
 	 */
 	void BoxPruning( int count, const dxGeom** geoms, dArray< Pair >& pairs );
 
-	// The pruning scratch pad is always growing as geoms are added.
-	void GrowScratchPad( int count );
-
-	// Reset pruning scratch pad
-	void ResetScratchPad();
-
 
 	//--------------------------------------------------------------------------
 	// Implementation Data
@@ -116,14 +108,14 @@ private:
 	// We have two lists (arrays of pointers) to dirty and clean
 	// geoms. Each geom knows it's index into the corresponding list
 	// (see macros above).
-	TGeomPtrArray DirtyList; // dirty geoms
-	TGeomPtrArray GeomList;	// clean geoms
+	dArray<dxGeom*> DirtyList; // dirty geoms
+	dArray<dxGeom*> GeomList;	// clean geoms
 
 	// For SAP, we ultimately separate "normal" geoms and the ones that have
 	// infinite AABBs. No point doing SAP on infinite ones (and it doesn't handle
 	// infinite geoms anyway).
-	TGeomPtrArray	TmpGeomList;	// temporary for normal geoms
-	TGeomPtrArray	TmpInfGeomList;	// temporary for geoms with infinite AABBs
+	dArray<dxGeom*> TmpGeomList;	// temporary for normal geoms
+	dArray<dxGeom*> TmpInfGeomList;	// temporary for geoms with infinite AABBs
 
 	// Our sorting axes. (X,Z,Y is often best). Stored *2 for minor speedup
 	// Axis indices into geom's aabb are: min=idx, max=idx+1
@@ -162,24 +154,24 @@ static void collideGeomsNoAABBs( dxGeom *g1, dxGeom *g2, void *data, dNearCallba
 {
 	dIASSERT( (g1->gflags & GEOM_AABB_BAD)==0 );
 	dIASSERT( (g2->gflags & GEOM_AABB_BAD)==0 );
-	
+
 	// no contacts if both geoms on the same body, and the body is not 0
 	if (g1->body == g2->body && g1->body) return;
-	
+
 	// test if the category and collide bitfields match
 	if ( ((g1->category_bits & g2->collide_bits) ||
 		  (g2->category_bits & g1->collide_bits)) == 0) {
 		return;
 	}
-	
+
 	dReal *bounds1 = g1->aabb;
 	dReal *bounds2 = g2->aabb;
-	
+
 	// check if either object is able to prove that it doesn't intersect the
 	// AABB of the other
 	if (g1->AABBTest (g2,bounds2) == 0) return;
 	if (g2->AABBTest (g1,bounds1) == 0) return;
-	
+
 	// the objects might actually intersect - call the space callback function
 	callback (data,g1,g2);
 };
@@ -201,7 +193,7 @@ dxSAPSpace::dxSAPSpace( dSpaceID _space, int axisorder ) : dxSpace( _space )
 	ax1idx = ( ( axisorder >> 2 ) & 3 ) << 1;
 	ax2idx = ( ( axisorder >> 4 ) & 3 ) << 1;
 
-	// We want the Radix sort to stick around. 
+	// We want the Radix sort to stick around.
 	RadixSortRef();
 }
 
@@ -218,7 +210,7 @@ dxSAPSpace::~dxSAPSpace()
 		for ( ; DirtyList.size(); remove( DirtyList[ 0 ] ) ) {}
 		for ( ; GeomList.size(); remove( GeomList[ 0 ] ) ) {}
 	}
-	
+
 	// We're done with the Radix sorter
 	RadixSortDeref();
 }
@@ -240,7 +232,7 @@ void dxSAPSpace::add( dxGeom* g )
 	dUASSERT(g->parent_space == 0 && g->next == 0, "geom is already in a space");
 
 	g->gflags |= GEOM_DIRTY | GEOM_AABB_BAD;
-	
+
 	// add to dirty list
 	GEOM_SET_DIRTY_IDX( g, DirtyList.size() );
 	GEOM_SET_GEOM_IDX( g, GEOM_INVALID_IDX );
@@ -257,7 +249,7 @@ void dxSAPSpace::remove( dxGeom* g )
 	CHECK_NOT_LOCKED(this);
 	dAASSERT(g);
 	dUASSERT(g->parent_space == this,"object is not in this space");
-	
+
 	// remove
 	int dirtyIdx = GEOM_GET_DIRTY_IDX(g);
 	int geomIdx = GEOM_GET_GEOM_IDX(g);
@@ -287,7 +279,7 @@ void dxSAPSpace::remove( dxGeom* g )
 
 	// safeguard
 	g->parent_space = 0;
-	
+
 	// the bounding box of this space (and that of all the parents) may have
 	// changed as a consequence of the removal.
 	dGeomMoved(this);
@@ -297,7 +289,7 @@ void dxSAPSpace::dirty( dxGeom* g )
 {
 	dAASSERT(g);
 	dUASSERT(g->parent_space == this,"object is not in this space");
-	
+
 	// check if already dirtied
 	int dirtyIdx = GEOM_GET_DIRTY_IDX(g);
 	if( dirtyIdx != GEOM_INVALID_IDX )
@@ -333,7 +325,7 @@ void dxSAPSpace::cleanGeoms()
 	// compute the AABBs of all dirty geoms, clear the dirty flags,
 	// remove from dirty list, place into geom list
 	lock_count++;
-	
+
 	int geomSize = GeomList.size();
 	GeomList.setSize( geomSize + dirtySize ); // ensure space in geom list
 
@@ -360,9 +352,9 @@ void dxSAPSpace::collide( void *data, dNearCallback *callback )
 	dAASSERT (callback);
 
 	lock_count++;
-	
+
 	cleanGeoms();
-	
+
 	// by now all geoms are in GeomList, and DirtyList must be empty
 	int geom_count = GeomList.size();
 	dUASSERT( geom_count == count, "geom counts messed up" );
@@ -411,20 +403,20 @@ void dxSAPSpace::collide( void *data, dNearCallback *callback )
 	for ( m = 0; m < infSize; ++m )
 	{
 		dxGeom* g1 = TmpInfGeomList[ m ];
-		
+
 		// collide infinite ones
 		for( n = m+1; n < infSize; ++n ) {
 			dxGeom* g2 = TmpInfGeomList[n];
 			collideGeomsNoAABBs( g1, g2, data, callback );
 		}
-		
+
 		// collide infinite ones with normal ones
 		for( n = 0; n < normSize; ++n ) {
 			dxGeom* g2 = TmpGeomList[n];
 			collideGeomsNoAABBs( g1, g2, data, callback );
 		}
 	}
-	
+
 	lock_count--;
 }
 
@@ -465,7 +457,7 @@ void dxSAPSpace::BoxPruning( int count, const dxGeom** geoms, dArray< Pair >& pa
 	// 3) Prune the list
 	const uint32* const LastSorted = Sorted + count;
 	const uint32* RunningAddress = Sorted;
-	
+
 	Pair IndexPair;
 	while ( RunningAddress < LastSorted && Sorted < LastSorted )
 	{
@@ -481,7 +473,7 @@ void dxSAPSpace::BoxPruning( int count, const dxGeom** geoms, dArray< Pair >& pa
 			const dReal idx0ax0max = geoms[IndexPair.id0]->aabb[ax0idx+1];
 			const dReal idx0ax1max = geoms[IndexPair.id0]->aabb[ax1idx+1];
 			const dReal idx0ax2max = geoms[IndexPair.id0]->aabb[ax2idx+1];
-			
+
 			while ( poslist[ IndexPair.id1 = *RunningAddress2++ ] <= idx0ax0max )
 			{
 				const dReal* aabb0 = geoms[ IndexPair.id0 ]->aabb;
@@ -537,7 +529,7 @@ static void RadixSortDeref()
 		// Release everything
 		if ( mRanks1 ) { delete[] mRanks1; mRanks1 = NULL; }
 		if ( mRanks2 ) { delete[] mRanks2; mRanks2 = NULL; }
-		
+
 		// Allow us to restart
 		mCurrentSize = 0;
 		INVALIDATE_RANKS;
@@ -603,83 +595,83 @@ static const uint32* RadixSort( const float* input2, uint32 nb )
 	// generation Pentiums....We can't make comparison on integer representations because, as Chris said, it just
 	// wouldn't work with mixed positive/negative values....
 	{
-		/* Clear counters/histograms */															
-		memset(mHistogram, 0, 256*4*sizeof(uint32));											
-																								
-		/* Prepare to count */																	
-		uint8* p = (uint8*)input;																
-		uint8* pe = &p[nb*4];																	
-		uint32* h0= &mHistogram[0];		/* Histogram for first pass (LSB)	*/					
-		uint32* h1= &mHistogram[256];	/* Histogram for second pass		*/					
-		uint32* h2= &mHistogram[512];	/* Histogram for third pass			*/					
-		uint32* h3= &mHistogram[768];	/* Histogram for last pass (MSB)	*/					
-																								
-		bool AlreadySorted = true;	/* Optimism... */											
-																								
-		if(INVALID_RANKS)																		
-		{																						
-			/* Prepare for temporal coherence */												
-			float* Running = (float*)input2;													
-			float PrevVal = *Running;															
-																								
-			while(p!=pe)																		
-			{																					
-				/* Read input input2 in previous sorted order */								
-				float Val = *Running++;															
-				/* Check whether already sorted or not */										
-				if(Val<PrevVal)	{ AlreadySorted = false; break; } /* Early out */				
-				/* Update for next iteration */													
-				PrevVal = Val;																	
-																								
-				/* Create histograms */															
-				h0[*p++]++;	h1[*p++]++;	h2[*p++]++;	h3[*p++]++;									
-			}																					
-																								
-			/* If all input values are already sorted, we just have to return and leave the */	
-			/* previous list unchanged. That way the routine may take advantage of temporal */	
-			/* coherence, for example when used to sort transparent faces.					*/	
-			if(AlreadySorted)																	
-			{																					
-				for(uint32 i=0;i<nb;i++)	mRanks1[i] = i;										
-				return mRanks1;																	
-			}																					
-		}																						
-		else																					
-		{																						
-			/* Prepare for temporal coherence */												
-			uint32* Indices = mRanks1;															
-			float PrevVal = (float)input2[*Indices];											
-																								
-			while(p!=pe)																		
-			{																					
-				/* Read input input2 in previous sorted order */								
-				float Val = (float)input2[*Indices++];											
-				/* Check whether already sorted or not */										
-				if(Val<PrevVal)	{ AlreadySorted = false; break; } /* Early out */				
-				/* Update for next iteration */													
-				PrevVal = Val;																	
-																								
-				/* Create histograms */															
-				h0[*p++]++;	h1[*p++]++;	h2[*p++]++;	h3[*p++]++;									
-			}																					
-																								
-			/* If all input values are already sorted, we just have to return and leave the */	
-			/* previous list unchanged. That way the routine may take advantage of temporal */	
-			/* coherence, for example when used to sort transparent faces.					*/	
-			if(AlreadySorted)	{ return mRanks1;	}											
-		}																						
-																								
-		/* Else there has been an early out and we must finish computing the histograms */		
-		while(p!=pe)																			
-		{																						
-			/* Create histograms without the previous overhead */								
-			h0[*p++]++;	h1[*p++]++;	h2[*p++]++;	h3[*p++]++;										
+		/* Clear counters/histograms */
+		memset(mHistogram, 0, 256*4*sizeof(uint32));
+
+		/* Prepare to count */
+		uint8* p = (uint8*)input;
+		uint8* pe = &p[nb*4];
+		uint32* h0= &mHistogram[0];		/* Histogram for first pass (LSB)	*/
+		uint32* h1= &mHistogram[256];	/* Histogram for second pass		*/
+		uint32* h2= &mHistogram[512];	/* Histogram for third pass			*/
+		uint32* h3= &mHistogram[768];	/* Histogram for last pass (MSB)	*/
+
+		bool AlreadySorted = true;	/* Optimism... */
+
+		if(INVALID_RANKS)
+		{
+			/* Prepare for temporal coherence */
+			float* Running = (float*)input2;
+			float PrevVal = *Running;
+
+			while(p!=pe)
+			{
+				/* Read input input2 in previous sorted order */
+				float Val = *Running++;
+				/* Check whether already sorted or not */
+				if(Val<PrevVal)	{ AlreadySorted = false; break; } /* Early out */
+				/* Update for next iteration */
+				PrevVal = Val;
+
+				/* Create histograms */
+				h0[*p++]++;	h1[*p++]++;	h2[*p++]++;	h3[*p++]++;
+			}
+
+			/* If all input values are already sorted, we just have to return and leave the */
+			/* previous list unchanged. That way the routine may take advantage of temporal */
+			/* coherence, for example when used to sort transparent faces.					*/
+			if(AlreadySorted)
+			{
+				for(uint32 i=0;i<nb;i++)	mRanks1[i] = i;
+				return mRanks1;
+			}
+		}
+		else
+		{
+			/* Prepare for temporal coherence */
+			uint32* Indices = mRanks1;
+			float PrevVal = (float)input2[*Indices];
+
+			while(p!=pe)
+			{
+				/* Read input input2 in previous sorted order */
+				float Val = (float)input2[*Indices++];
+				/* Check whether already sorted or not */
+				if(Val<PrevVal)	{ AlreadySorted = false; break; } /* Early out */
+				/* Update for next iteration */
+				PrevVal = Val;
+
+				/* Create histograms */
+				h0[*p++]++;	h1[*p++]++;	h2[*p++]++;	h3[*p++]++;
+			}
+
+			/* If all input values are already sorted, we just have to return and leave the */
+			/* previous list unchanged. That way the routine may take advantage of temporal */
+			/* coherence, for example when used to sort transparent faces.					*/
+			if(AlreadySorted)	{ return mRanks1;	}
+		}
+
+		/* Else there has been an early out and we must finish computing the histograms */
+		while(p!=pe)
+		{
+			/* Create histograms without the previous overhead */
+			h0[*p++]++;	h1[*p++]++;	h2[*p++]++;	h3[*p++]++;
 		}
 	}
 
 	// Compute #negative values involved if needed
 	uint32 NbNegativeValues = 0;
-	
+
 	// An efficient way to compute the number of negatives values we'll have to deal with is simply to sum the 128
 	// last values of the last histogram. Last histogram because that's the one for the Most Significant Byte,
 	// responsible for the sign. 128 last values because the 128 first ones are related to positive numbers.
