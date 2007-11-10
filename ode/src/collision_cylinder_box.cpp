@@ -210,17 +210,16 @@ int _cldTestAxis(sCylinderBoxData& cData, dVector3& vInputNormal, int iAxis )
 	if (fdot1 > REAL(1.0)) 
 	{
 		fdot1 = REAL(1.0);
-		frc = dFabs(cData.fCylinderSize*REAL(0.5));
+		frc = cData.fCylinderSize*REAL(0.5);
 	}
 
 	// project box and capsule on iAxis
 	frc = dFabs( fdot1 * (cData.fCylinderSize*REAL(0.5))) + cData.fCylinderRadius * dSqrt(REAL(1.0)-(fdot1*fdot1));
 
 	dVector3	vTemp1;
-	dReal frb = REAL(0.0);
 
 	dMat3GetCol(cData.mBoxRot,0,vTemp1);
-	frb = dFabs(dVector3Dot(vTemp1,vInputNormal))*cData.vBoxHalfSize[0];
+	dReal frb = dFabs(dVector3Dot(vTemp1,vInputNormal))*cData.vBoxHalfSize[0];
 
 	dMat3GetCol(cData.mBoxRot,1,vTemp1);
 	frb += dFabs(dVector3Dot(vTemp1,vInputNormal))*cData.vBoxHalfSize[1];
@@ -231,14 +230,18 @@ int _cldTestAxis(sCylinderBoxData& cData, dVector3& vInputNormal, int iAxis )
 	// project their distance on separating axis
 	dReal fd  = dVector3Dot(cData.vDiff,vInputNormal);
 
+	// get depth 
+
+	dReal fDepth = frc + frb;  // Calculate partial depth
+
 	// if they do not overlap exit, we have no intersection
-	if ( dFabs(fd) > frc+frb )
+	if ( dFabs(fd) > fDepth )
 	{ 
 		return 0; 
 	} 
 
-	// get depth
-	dReal fDepth = - dFabs(fd) + (frc+frb);
+	// Finalyze the depth calculation
+	fDepth -= dFabs(fd);
 
 	// get maximum depth
 	if ( fDepth < cData.fBestDepth ) 
@@ -1004,4 +1007,5 @@ int dCollideCylinderBox(dxGeom *o1, dxGeom *o2, int flags, dContactGeom *contact
 
 	return cData.nContacts;
 }
+
 
