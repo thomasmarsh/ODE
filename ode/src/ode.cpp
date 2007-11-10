@@ -1071,6 +1071,12 @@ dxJoint * dJointCreatePR (dWorldID w, dJointGroupID group)
   return createJoint (w,group,&__dPR_vtable);
 }
 
+dxJoint * dJointCreatePiston (dWorldID w, dJointGroupID group)
+{
+  dAASSERT (w);
+  return createJoint (w,group,&__dPiston_vtable);
+}
+
 dxJoint * dJointCreateFixed (dWorldID w, dJointGroupID group)
 {
   dAASSERT (w);

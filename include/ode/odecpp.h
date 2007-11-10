@@ -318,6 +318,10 @@ public:
     { dJointSetFeedback(_id, fb); }
   dJointFeedback *getFeedback() const
     { return dJointGetFeedback(_id); }
+
+  // If not implemented it will do nothing as describe in the doc
+  virtual void setParam (int, dReal) {};
+  virtual dReal getParam (int) const { return 0; }
 };
 
 
@@ -343,9 +347,9 @@ public:
     { dJointGetBallAnchor (_id, result); }
   void getAnchor2 (dVector3 result) const
     { dJointGetBallAnchor2 (_id, result); }
-  void setParam (int parameter, dReal value)
+  virtual void setParam (int parameter, dReal value)
     { dJointSetBallParam (_id, parameter, value); }
-  dReal getParam (int parameter) const
+  virtual dReal getParam (int parameter) const
     { return dJointGetBallParam (_id, parameter); }
 } ;
 
@@ -382,9 +386,9 @@ public:
   dReal getAngleRate() const
     { return dJointGetHingeAngleRate (_id); }
 
-  void setParam (int parameter, dReal value)
+  virtual void setParam (int parameter, dReal value)
     { dJointSetHingeParam (_id, parameter, value); }
-  dReal getParam (int parameter) const
+  virtual dReal getParam (int parameter) const
     { return dJointGetHingeParam (_id, parameter); }
 
   void addTorque (dReal torque)
@@ -417,9 +421,9 @@ public:
   dReal getPositionRate() const
     { return dJointGetSliderPositionRate (_id); }
 
-  void setParam (int parameter, dReal value)
+  virtual void setParam (int parameter, dReal value)
     { dJointSetSliderParam (_id, parameter, value); }
-  dReal getParam (int parameter) const
+  virtual dReal getParam (int parameter) const
     { return dJointGetSliderParam (_id, parameter); }
 
   void addForce (dReal force)
@@ -448,7 +452,7 @@ public:
     { dJointSetUniversalAxis1 (_id, x, y, z); }
   void setAxis2 (dReal x, dReal y, dReal z)
     { dJointSetUniversalAxis2 (_id, x, y, z); }
-  void setParam (int parameter, dReal value)
+  virtual void setParam (int parameter, dReal value)
     { dJointSetUniversalParam (_id, parameter, value); }
 
   void getAnchor (dVector3 result) const
@@ -459,9 +463,9 @@ public:
     { dJointGetUniversalAxis1 (_id, result); }
   void getAxis2 (dVector3 result) const
     { dJointGetUniversalAxis2 (_id, result); }
-  dReal getParam (int parameter) const
+  virtual dReal getParam (int parameter) const
     { return dJointGetUniversalParam (_id, parameter); }
- void getAngles(dReal *angle1, dReal *angle2) const
+  void getAngles(dReal *angle1, dReal *angle2) const
     { dJointGetUniversalAngles (_id, angle1, angle2); }
 
   dReal getAngle1() const
@@ -516,9 +520,9 @@ public:
   dReal getAngle2Rate() const
     { return dJointGetHinge2Angle2Rate (_id); }
 
-  void setParam (int parameter, dReal value)
+  virtual void setParam (int parameter, dReal value)
     { dJointSetHinge2Param (_id, parameter, value); }
-  dReal getParam (int parameter) const
+  virtual dReal getParam (int parameter) const
     { return dJointGetHinge2Param (_id, parameter); }
 
   void addTorques(dReal torque1, dReal torque2)
@@ -559,14 +563,65 @@ public:
   dReal getPositionRate() const
     { return dJointGetPRPositionRate (_id); }
 
-  void setParam (int parameter, dReal value)
+  virtual void setParam (int parameter, dReal value)
     { dJointSetPRParam (_id, parameter, value); }
-  dReal getParam (int parameter) const
+  virtual dReal getParam (int parameter) const
     { return dJointGetPRParam (_id, parameter); }
 };
 
 
-class dFixedJoint : public dJoint {
+
+
+
+
+
+class dPistonJoint : public dJoint
+{
+  // intentionally undefined, don't use these
+  dPistonJoint (const dPistonJoint &);
+  void operator = (const dPistonJoint &);
+
+public:
+  dPistonJoint() { }
+  dPistonJoint (dWorldID world, dJointGroupID group=0)
+  { _id = dJointCreatePiston (world, group); }
+
+  void create (dWorldID world, dJointGroupID group=0)
+  {
+    if (_id) dJointDestroy (_id);
+    _id = dJointCreatePiston (world, group);
+  }
+
+  void setAnchor (dReal x, dReal y, dReal z)
+    { dJointSetPistonAnchor (_id, x, y, z); }
+  void getAnchor (dVector3 result) const
+    { dJointGetPistonAnchor (_id, result); }
+  void getAnchor2 (dVector3 result) const
+    { dJointGetPistonAnchor2 (_id, result); }
+
+  void setAxis (dReal x, dReal y, dReal z)
+    { dJointSetPistonAxis (_id, x, y, z); }
+  void getAxis (dVector3 result) const
+    { dJointGetPistonAxis (_id, result); }
+
+  dReal getPosition() const
+    { return dJointGetPistonPosition (_id); }
+  dReal getPositionRate() const
+    { return dJointGetPistonPositionRate (_id); }
+
+  virtual void setParam (int parameter, dReal value)
+  { dJointSetPistonParam (_id, parameter, value); }
+  virtual dReal getParam (int parameter) const
+    { return dJointGetPistonParam (_id, parameter); }
+
+  void addForce (dReal force)
+  { dJointAddPistonForce (_id, force); }
+};
+
+
+
+class dFixedJoint : public dJoint
+{
   // intentionally undefined, don't use these
   dFixedJoint (const dFixedJoint &);
   void operator = (const dFixedJoint &);
@@ -584,10 +639,10 @@ public:
   void set()
     { dJointSetFixed (_id); }
 
-  void setParam (int parameter, dReal value)
+  virtual void setParam (int parameter, dReal value)
     { dJointSetFixedParam (_id, parameter, value); }
 
-  dReal getParam (int parameter) const
+  virtual dReal getParam (int parameter) const
     { return dJointGetFixedParam (_id, parameter); }
 };
 

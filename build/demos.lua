@@ -18,6 +18,7 @@
     "joints",
     "motor",
     "ode",
+    "piston",
     "plane2d",
     "slider",
     "space",

@@ -189,6 +189,7 @@ static const char *getJointName (dxJoint *j)
 		case dJointTypeAMotor: return "ODE_angular_motor";
 		case dJointTypeLMotor: return "ODE_linear_motor";
 		case dJointTypePR: return "PR";
+		case dJointTypePiston: return "piston";
 	}
 	return "unknown";
 }
@@ -294,6 +295,17 @@ static void printPR (PrintingContext &c, dxJoint *j)
 	printLimot (c,pr->limotR,2);
 }
 
+static void printPiston (PrintingContext &c, dxJoint *j)
+{
+	dxJointPiston *rap = (dxJointPiston*) j;
+	c.print ("anchor1",rap->anchor1);
+	c.print ("anchor2",rap->anchor2);
+	c.print ("axis1",rap->axis1);
+	c.print ("axis2",rap->axis2);
+	c.print ("qrel",rap->qrel,4);
+	printLimot (c,rap->limotP,1);
+	printLimot (c, rap->limotR, 2);
+}
 
 static void printFixed (PrintingContext &c, dxJoint *j)
 {
@@ -304,14 +316,14 @@ static void printFixed (PrintingContext &c, dxJoint *j)
 
 static void printLMotor (PrintingContext &c, dxJoint *j)
 {
-       dxJointLMotor *a = (dxJointLMotor*) j;
-       c.print("num", a->num);
-       c.printIndent();
-       fprintf (c.file,"rel = {%d,%d,%d},\n",a->rel[0],a->rel[1],a->rel[2]);
-       c.print ("axis1",a->axis[0]);
-       c.print ("axis2",a->axis[1]);
-       c.print ("axis3",a->axis[2]);
-       for (int i=0; i<3; i++) printLimot (c,a->limot[i],i+1);
+	dxJointLMotor *a = (dxJointLMotor*) j;
+	c.print("num", a->num);
+	c.printIndent();
+	fprintf (c.file,"rel = {%d,%d,%d},\n",a->rel[0],a->rel[1],a->rel[2]);
+	c.print ("axis1",a->axis[0]);
+	c.print ("axis2",a->axis[1]);
+	c.print ("axis3",a->axis[2]);
+	for (int i=0; i<3; i++) printLimot (c,a->limot[i],i+1);
 }
 
 
@@ -561,6 +573,7 @@ void dWorldExportDIF (dWorldID w, FILE *file, const char *prefix)
 			case dJointTypeAMotor: printAMotor (c,j); break;
 			case dJointTypeLMotor: printLMotor (c,j); break;
 			case dJointTypePR: printPR (c,j); break;
+			case dJointTypePiston: printPiston (c,j); break;
 		}
 		c.indent--;
 		c.print ("}");
