@@ -1112,6 +1112,15 @@ ODE_API dJointID dJointCreateUniversal (dWorldID, dJointGroupID);
 ODE_API dJointID dJointCreatePR (dWorldID, dJointGroupID);
 
 /**
+   * @brief Create a new joint of the Piston type.
+   * @ingroup joints
+   * @param dJointGroupID set to 0 to allocate the joint normally.
+   *                      If it is nonzero the joint is allocated in the given
+   *                      joint group.
+   */
+  ODE_API dJointID dJointCreatePiston (dWorldID, dJointGroupID);
+
+  /**
  * @brief Create a new joint of the fixed type.
  * @ingroup joints
  * @param dJointGroupID set to 0 to allocate the joint normally.
@@ -1222,6 +1231,8 @@ ODE_API void *dJointGetData (dJointID);
  * \li dJointTypeAMotor
  * \li dJointTypeLMotor
  * \li dJointTypePlane2D
+ * \li dJointTypePR
+ * \li dJointTypePiston
  */
 ODE_API int dJointGetType (dJointID);
 
@@ -1430,6 +1441,50 @@ ODE_API void dJointSetPRParam (dJointID, int parameter, dReal value);
  * @ingroup joints
  */
 ODE_API void dJointAddPRTorque (dJointID j, dReal torque);
+
+
+  /**
+   * @brief set the joint axis
+   * @ingroup joints
+   */
+  ODE_API void dJointSetPistonAnchor (dJointID, dReal x, dReal y, dReal z);
+
+  /**
+   * @brief set the joint axis
+   * @ingroup joints
+   */
+  ODE_API void dJointSetPistonAxis (dJointID, dReal x, dReal y, dReal z);
+
+  /**
+   * This function set prismatic axis of the joint and also set the position
+   * of the joint.
+   *
+   * @ingroup joints
+   * @param j The joint affected by this function
+   * @param x The x component of the axis
+   * @param y The y component of the axis
+   * @param z The z component of the axis
+   * @param dx The Initial position of the prismatic join in the x direction
+   * @param dy The Initial position of the prismatic join in the y direction
+   * @param dz The Initial position of the prismatic join in the z direction
+   */
+  ODE_API void dJointSetPistonAxisDelta (dJointID j, dReal x, dReal y, dReal z, dReal ax, dReal ay, dReal az);
+
+  /**
+   * @brief set joint parameter
+   * @ingroup joints
+   */
+  ODE_API void dJointSetPistonParam (dJointID, int parameter, dReal value);
+
+  /**
+   * @brief Applies the given force in the slider's direction.
+   *
+   * That is, it applies a force with specified magnitude, in the direction of
+   * prismatic's axis, to body1, and with the same magnitude but opposite
+   * direction to body2.  This function is just a wrapper for dBodyAddForce().
+   * @ingroup joints
+   */
+  ODE_API void dJointAddPistonForce (dJointID joint, dReal force);
 
 
 /**
@@ -1820,9 +1875,82 @@ ODE_API void dJointGetPRAxis2 (dJointID, dVector3 result);
  */
 ODE_API dReal dJointGetPRParam (dJointID, int parameter);
 
+    
+    
+
 
 
 /**
+   * @brief Get the Piston linear position (i.e. the piston's extension)
+   *
+   * When the axis is set, the current position of the attached bodies is
+   * examined and that position will be the zero position.
+   * @ingroup joints
+   */
+  ODE_API dReal dJointGetPistonPosition (dJointID);
+
+  /**
+   * @brief Get the piston linear position's time derivative.
+   * @ingroup joints
+   */
+  ODE_API dReal dJointGetPistonPositionRate (dJointID);
+
+/**
+   * @brief Get the Piston angular position (i.e. the  twist between the 2 bodies)
+   *
+   * When the axis is set, the current position of the attached bodies is
+   * examined and that position will be the zero position.
+   * @ingroup joints
+   */
+  ODE_API dReal dJointGetPistonAngle (dJointID);
+
+  /**
+   * @brief Get the piston angular position's time derivative.
+   * @ingroup joints
+   */
+  ODE_API dReal dJointGetPistonAngleRate (dJointID);
+
+
+  /**
+   * @brief Get the joint anchor
+   *
+   * This returns the point on body 1. If the joint is perfectly satisfied,
+   * this will be the same as the point on body 2 in direction perpendicular
+   * to the prismatic axis.
+   *
+   * @ingroup joints
+   */
+  ODE_API void dJointGetPistonAnchor (dJointID, dVector3 result);
+
+  /**
+   * @brief Get the joint anchor w.r.t. body 2
+   *
+   * This returns the point on body 2. You can think of a Piston
+   * joint as trying to keep the result of dJointGetPistonAnchor() and
+   * dJointGetPistonAnchor2() the same in the direction perpendicular to the
+   * pirsmatic axis. If the joint is perfectly satisfied,
+   * this function will return the same value as dJointGetPistonAnchor() to
+   * within roundoff errors. dJointGetPistonAnchor2() can be used, along with
+   * dJointGetPistonAnchor(), to see how far the joint has come apart.
+   *
+   * @ingroup joints
+   */
+  ODE_API void dJointGetPistonAnchor2 (dJointID, dVector3 result);
+
+  /**
+   * @brief Get the prismatic axis (This is also the rotoide axis.
+   * @ingroup joints
+   */
+  ODE_API void dJointGetPistonAxis (dJointID, dVector3 result);
+
+  /**
+   * @brief get joint parameter
+   * @ingroup joints
+   */
+  ODE_API dReal dJointGetPistonParam (dJointID, int parameter);
+
+
+  /**
  * @brief Get the number of angular axes that will be controlled by the
  * AMotor.
  * @param num can range from 0 (which effectively deactivates the

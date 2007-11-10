@@ -243,6 +243,72 @@ struct dxJointPR : public dxJoint {
 extern struct dxJoint::Vtable __dPR_vtable;
 
 
+////////////////////////////////////////////////////////////////////////////////
+/// Component of a Piston joint
+/// <PRE>
+///                              |- Anchor point
+///      Body_1                  |                       Body_2
+///      +---------------+       V                       +------------------+
+///     /               /|                             /                  /|
+///    /               / +       |--      ______      /                  / +
+///   /      x        /./........x.......(_____()..../         x        /.......> axis
+///  +---------------+ /         |--                +------------------+ /
+///  |               |/                             |                  |/
+///  +---------------+                              +------------------+
+///          |                                                 |
+///          |                                                 |
+///          |------------------> <----------------------------|
+///              anchor1                  anchor2
+///
+///
+/// </PRE>
+///
+/// When the prismatic joint as been elongated (i.e. dJointGetPistonPosition)
+/// return a value >  0
+/// <PRE>
+///                                   |- Anchor point
+///      Body_1                       |                       Body_2
+///      +---------------+            V                       +------------------+
+///     /               /|                                  /                  /|
+///    /               / +            |--      ______      /                  / +
+///   /      x        /./........_____x.......(_____()..../         x        /.......> axis
+///  +---------------+ /              |--                +------------------+ /
+///  |               |/                                  |                  |/
+///  +---------------+                                   +------------------+
+///          |                                                      |
+///          |                                                      |
+///          |------------------>      <----------------------------|
+///              anchor1         |----|         anchor2
+///                                ^
+///                                |-- This is what dJointGetPistonPosition will
+///                                    return
+/// </PRE>
+////////////////////////////////////////////////////////////////////////////////
+struct dxJointPiston : public dxJoint
+{
+  dVector3 axis1;          ///< Axis of the prismatic and rotoide w.r.t first body
+  dVector3 axis2;          ///< Axis of the prismatic and rotoide w.r.t second body
+
+
+  dQuaternion qrel;        ///< Initial relative rotation body1 -> body2
+
+  /// Anchor w.r.t first body.
+  /// This is the same as the offset for the Slider joint
+  /// @note To find the position of the anchor when the body 1 has moved
+  ///       you must add the position of the prismatic joint
+  ///       i.e anchor = R1 * anchor1 + dJointGetPistonPosition() * (R1 * axis1)
+  dVector3 anchor1;
+  dVector3 anchor2;        //< anchor w.r.t second body
+
+  /// limit and motor information for the prismatic
+  /// part of the joint
+  dxJointLimitMotor limotP;
+
+  /// limit and motor information for the rotoide
+  /// part of the joint
+  dxJointLimitMotor limotR;
+};
+extern struct dxJoint::Vtable __dPiston_vtable;
 
 // slider. if body2 is 0 then qrel is the absolute rotation of body1 and
 // offset is the position of body1 center along axis1.

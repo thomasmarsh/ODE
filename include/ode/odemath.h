@@ -68,6 +68,16 @@
     (a)[1] op (c); \
     (a)[2] op (c);
 
+/// Define an equation with operatos
+/// For example this function can be used to replace
+/// <PRE>
+/// for (int i=0; i<3; ++i)
+///   a[i] += b[i] + c[i];
+/// </PRE>
+#define dOPE2(a,op1,b,op2,c) \
+    (a)[0] op1 ((b)[0]) op2 ((c)[0]); \
+    (a)[1] op1 ((b)[1]) op2 ((c)[1]); \
+    (a)[2] op1 ((b)[2]) op2 ((c)[2]);
 
 /*
  * Length, and squared length helpers. dLENGTH returns the length of a dVector3.

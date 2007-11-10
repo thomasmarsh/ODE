@@ -271,7 +271,8 @@ enum {
   dJointTypeAMotor,
   dJointTypeLMotor,
   dJointTypePlane2D,
-  dJointTypePR
+  dJointTypePR,
+  dJointTypePiston
 };
 
 
@@ -324,7 +325,16 @@ enum {
   dParamSuspensionCFM, \
   dParamERP, \
 
+  //////////////////////////////////////////////////////////////////////////////
+  /// \enum  D_ALL_PARAM_NAMES_X
+  ///
+  /// \var dParamGroup This is the starting value of the different group
+  ///                  (i.e. dParamGroup1, dParamGroup2, dParamGroup3)
+  ///                  It also helps in the use of parameter
+  ///                  (dParamGroup2 | dParamFMax) == dParamFMax2
+  //////////////////////////////////////////////////////////////////////////////
 #define D_ALL_PARAM_NAMES_X(start,x) \
+  dParamGroup ## x = start, \
   /* parameters for limits and motors */ \
   dParamLoStop ## x = start, \
   dParamHiStop ## x, \
@@ -342,6 +352,8 @@ enum {
 
 enum {
   D_ALL_PARAM_NAMES(0)
+  dParamsInGroup,     ///< Number of parameter in a group
+  D_ALL_PARAM_NAMES_X(0x000,1)
   D_ALL_PARAM_NAMES_X(0x100,2)
   D_ALL_PARAM_NAMES_X(0x200,3)
 
