@@ -87,11 +87,7 @@ public:
 
     HeightFieldVertex   *vertices[2];
 };
-//
-// HeightFieldTriangle
-//
-// HeightFieldTriangle composing heightfield mesh
-//
+
 class HeightFieldTriangle
 {
 public:
@@ -110,11 +106,7 @@ public:
     bool                isUp;
     bool                state;
 };
-//
-// HeightFieldTriangle
-//
-// HeightFieldPlane composing heightfield mesh
-//
+
 class HeightFieldPlane
 {
 public:
@@ -169,6 +161,7 @@ public:
     dReal   maxAAAB;
     dReal   planeDef[4];
 };
+
 //
 // dxHeightfield
 //
