@@ -125,16 +125,15 @@ private:
 	TGeomPtrArray	TmpGeomList;	// temporary for normal geoms
 	TGeomPtrArray	TmpInfGeomList;	// temporary for geoms with infinite AABBs
 
-	// Our sorting axes. (X,Z,Y is often best). Store *2 for minor speedup
+	// Our sorting axes. (X,Z,Y is often best). Stored *2 for minor speedup
 	// Axis indices into geom's aabb are: min=idx, max=idx+1
 	uint32 ax0idx;
 	uint32 ax1idx;
 	uint32 ax2idx;
 
 	// pruning position array scratch pad
-	// NOTE: this is floats because of the OPCODE radix sorter
-	float* poslist;
-	int scratch_size;
+	// NOTE: this is float not dReal because of the OPCODE radix sorter
+	dArray< float > poslist;
 };
 
 // Creation
@@ -148,10 +147,10 @@ dSpaceID dSweepAndPruneSpaceCreate( dxSpace* space, int axisorder ) {
 #define GEOM_ENABLED(g) ((g)->gflags & GEOM_ENABLED)
 
 // HACK: We abuse 'next' and 'tome' members of dxGeom to store indices into dirty/geom lists.
-#define GEOM_SET_DIRTY_IDX(g,idx) { g->next = (dxGeom*)(idx); }
-#define GEOM_SET_GEOM_IDX(g,idx) { g->tome = (dxGeom**)(idx); }
-#define GEOM_GET_DIRTY_IDX(g) ((int)g->next)
-#define GEOM_GET_GEOM_IDX(g) ((int)g->tome)
+#define GEOM_SET_DIRTY_IDX(g,idx) { g->next = (dxGeom*)(size_t)(idx); }
+#define GEOM_SET_GEOM_IDX(g,idx) { g->tome = (dxGeom**)(size_t)(idx); }
+#define GEOM_GET_DIRTY_IDX(g) ((int)(size_t)g->next)
+#define GEOM_GET_GEOM_IDX(g) ((int)(size_t)g->tome)
 #define GEOM_INVALID_IDX (-1)
 
 
@@ -186,7 +185,7 @@ static void collideGeomsNoAABBs( dxGeom *g1, dxGeom *g2, void *data, dNearCallba
 };
 
 
-dxSAPSpace::dxSAPSpace( dSpaceID _space, int axisorder ) : dxSpace( _space ), poslist( NULL ), scratch_size( 0 )
+dxSAPSpace::dxSAPSpace( dSpaceID _space, int axisorder ) : dxSpace( _space )
 {
 	type = dSweepAndPruneSpaceClass;
 
@@ -220,31 +219,8 @@ dxSAPSpace::~dxSAPSpace()
 		for ( ; GeomList.size(); remove( GeomList[ 0 ] ) ) {}
 	}
 	
-	// Free scratch pad
-	ResetScratchPad();
-
 	// We're done with the Radix sorter
 	RadixSortDeref();
-}
-
-void dxSAPSpace::GrowScratchPad( int count )
-{	
-	if ( count > scratch_size )
-	{
-		if ( poslist )
-			delete[] poslist;
-
-		// Allocate the temporary data +1
-		poslist = new float[ count + 1 ];
-		scratch_size = count;
-	}
-}
-
-void dxSAPSpace::ResetScratchPad()
-{	
-	if ( poslist )
-		delete[] poslist;
-	scratch_size = 0;
 }
 
 dxGeom* dxSAPSpace::getGeom( int i )
@@ -411,7 +387,10 @@ void dxSAPSpace::collide( void *data, dNearCallback *callback )
 	int tmp_geom_count = TmpGeomList.size();
 	if ( tmp_geom_count > 0 )
 	{
-		GrowScratchPad( tmp_geom_count );
+		// Size the poslist (+1 for infinity end cap)
+		poslist.setSize( tmp_geom_count + 1 );
+
+		// Generate a list of overlapping boxes
 		BoxPruning( tmp_geom_count, (const dxGeom**)TmpGeomList.data(), overlapBoxes );
 	}
 
@@ -481,7 +460,7 @@ void dxSAPSpace::BoxPruning( int count, const dxGeom** geoms, dArray< Pair >& pa
 	poslist[ count++ ] = ODE_INFINITY4;
 
 	// 2) Sort the list
-	const uint32* Sorted = RadixSort( poslist, count );
+	const uint32* Sorted = RadixSort( poslist.data(), count );
 
 	// 3) Prune the list
 	const uint32* const LastSorted = Sorted + count;
