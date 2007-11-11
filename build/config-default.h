@@ -16,8 +16,8 @@
  *   dTRIMESH_GIMPACT  - use the GIMPACT trimesh engine
  *                       Only one trimesh engine should be enabled.
  *
- *   dTRIMESH_OPCODE_16BIT
- *                       Setup the OPCODE trimesh engine to use 16 bit
+ *   dTRIMESH_16BIT_INDICES (todo: opcode only)
+ *                       Setup the trimesh engine to use 16 bit
  *                       triangle indices. The default is to use
  *                       32 bit indices. Use the dTriIndex type to
  *                       detect the correct index size.
@@ -38,7 +38,7 @@
 
 #define dTRIMESH_ENABLED 1
 #define dTRIMESH_OPCODE 1
-#define dTRIMESH_OPCODE_16BIT 0
+#define dTRIMESH_16BIT_INDICES 0
 
 #define dTRIMESH_OPCODE_USE_NEW_TRIMESH_TRIMESH_COLLIDER 0
 
