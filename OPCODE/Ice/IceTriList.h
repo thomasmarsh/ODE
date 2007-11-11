@@ -49,7 +49,7 @@
 
 				void				AddTriangle(const IndexedTriangle& tri)
 									{
-										Add(tri.mVRef[0]).Add(tri.mVRef[1]).Add(tri.mVRef[2]);
+										Add((udword)tri.mVRef[0]).Add((udword)tri.mVRef[1]).Add((udword)tri.mVRef[2]);
 									}
 
 				void				AddTriangle(udword vref0, udword vref1, udword vref2)

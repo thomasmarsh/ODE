@@ -535,7 +535,7 @@ float Vertices[VertexCount * 3] = {
 	REAL(0.337656), REAL(0.131992), REAL(0.066374)
 };
 
-int Indices[IndexCount / 3][3] = {
+dTriIndex Indices[IndexCount / 3][3] = {
 	{126,134,133},
 	{342,138,134},
 	{133,134,138},
@@ -1577,7 +1577,8 @@ static void command (int cmd)
     }
     else if (cmd == 'm') {
       dTriMeshDataID new_tmdata = dGeomTriMeshDataCreate();
-      dGeomTriMeshDataBuildSingle(new_tmdata, &Vertices[0], 3 * sizeof(float), VertexCount, (int*)&Indices[0], IndexCount, 3 * sizeof(int));
+      dGeomTriMeshDataBuildSingle(new_tmdata, &Vertices[0], 3 * sizeof(float), VertexCount, 
+		  (dTriIndex*)&Indices[0], IndexCount, 3 * sizeof(dTriIndex));
 
       obj[i].geom[0] = dCreateTriMesh(space, new_tmdata, 0, 0, 0);
 
@@ -1801,7 +1802,7 @@ static void simLoop (int pause)
         }
       
         if (dGeomGetClass(obj[i].geom[j]) == dTriMeshClass) {
-          int* Indices = (int*)::Indices;
+          dTriIndex* Indices = (dTriIndex*)::Indices;
 
           // assume all trimeshes are drawn as bunnies
           const dReal* Pos = dGeomGetPosition(obj[i].geom[j]);
@@ -1846,7 +1847,7 @@ static void simLoop (int pause)
     }
   }
 
-  int* Indices = (int*)::Indices;
+  dTriIndex* Indices = (dTriIndex*)::Indices;
 
   {const dReal* Pos = dGeomGetPosition(TriMesh1);
   const dReal* Rot = dGeomGetRotation(TriMesh1);
@@ -1914,9 +1915,9 @@ int main (int argc, char **argv)
 
   // note: can't share tridata if intending to trimesh-trimesh collide
   TriData1 = dGeomTriMeshDataCreate();
-  dGeomTriMeshDataBuildSingle(TriData1, &Vertices[0], 3 * sizeof(float), VertexCount, (int*)&Indices[0], IndexCount, 3 * sizeof(int));
+  dGeomTriMeshDataBuildSingle(TriData1, &Vertices[0], 3 * sizeof(float), VertexCount, (dTriIndex*)&Indices[0], IndexCount, 3 * sizeof(dTriIndex));
   TriData2 = dGeomTriMeshDataCreate();
-  dGeomTriMeshDataBuildSingle(TriData2, &Vertices[0], 3 * sizeof(float), VertexCount, (int*)&Indices[0], IndexCount, 3 * sizeof(int));
+  dGeomTriMeshDataBuildSingle(TriData2, &Vertices[0], 3 * sizeof(float), VertexCount, (dTriIndex*)&Indices[0], IndexCount, 3 * sizeof(dTriIndex));
   
   TriMesh1 = dCreateTriMesh(space, TriData1, 0, 0, 0);
   TriMesh2 = dCreateTriMesh(space, TriData2, 0, 0, 0);

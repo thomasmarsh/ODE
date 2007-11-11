@@ -9,6 +9,12 @@ the rules for this file:
 
 ------------------------------------------------------------------------------
 
+11/10/07 david
+
+	* Added 'Sweep and Prune' collision space.
+	* New Piston joint type with demo, by Remi Ricard
+	* Added build option to use 16-bit indices for OPCODE trimesh
+
 11/03/06 david
 
 	* Integrated Christoph Beyer's average based sampling system for body

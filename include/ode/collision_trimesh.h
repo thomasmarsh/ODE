@@ -95,11 +95,11 @@ ODE_API void dGeomTriMeshDataBuildDouble1(dTriMeshDataID g,
  */
 ODE_API void dGeomTriMeshDataBuildSimple(dTriMeshDataID g,
                                  const dReal* Vertices, int VertexCount,
-                                 const int* Indices, int IndexCount);
+                                 const dTriIndex* Indices, int IndexCount);
 /* same again with a normals array (used as trimesh-trimesh optimization) */
 ODE_API void dGeomTriMeshDataBuildSimple1(dTriMeshDataID g,
                                   const dReal* Vertices, int VertexCount,
-                                  const int* Indices, int IndexCount,
+                                  const dTriIndex* Indices, int IndexCount,
                                   const int* Normals);
 
 /* Preprocess the trimesh data to remove mark unnecessary edges and vertices */

@@ -616,7 +616,7 @@ static float Vertices[VertexCount * 3] = {
 	REAL(0.337656), REAL(0.131992), REAL(0.066374)
 };
 
-int Indices[IndexCount / 3][3] = {
+static dTriIndex Indices[IndexCount / 3][3] = {
 	{126,134,133},
 	{342,138,134},
 	{133,134,138},
@@ -1711,7 +1711,7 @@ static void command (int cmd)
 		else if (cmd == 'm')
 		{
 			dTriMeshDataID new_tmdata = dGeomTriMeshDataCreate();
-			dGeomTriMeshDataBuildSingle(new_tmdata, &Vertices[0], 3 * sizeof(float), VertexCount, (int*)&Indices[0], IndexCount, 3 * sizeof(int));
+			dGeomTriMeshDataBuildSingle(new_tmdata, &Vertices[0], 3 * sizeof(float), VertexCount, (dTriIndex*)&Indices[0], IndexCount, 3 * sizeof(dTriIndex));
 
 			obj[i].geom[0] = dCreateTriMesh(space, new_tmdata, 0, 0, 0);
 
@@ -1986,7 +1986,7 @@ static void simLoop (int pause)
 
 			if ( obj[i].geom[j] && dGeomGetClass(obj[i].geom[j]) == dTriMeshClass )
 			{
-				int* Indices = (int*)::Indices;
+				dTriIndex* Indices = (dTriIndex*)::Indices;
 
 				// assume all trimeshes are drawn as bunnies
 				const dReal* Pos = dGeomGetPosition(obj[i].geom[j]);

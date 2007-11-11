@@ -72,7 +72,7 @@ static int random_pos = 1;	// drop objects from random position?
 
 static dVector3 Size;
 static dVector3 Vertices[VertexCount];
-static int Indices[IndexCount];
+static dTriIndex Indices[IndexCount];
 
 static dGeomID TriMesh;
 static dGeomID Ray;

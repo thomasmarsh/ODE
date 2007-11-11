@@ -73,12 +73,12 @@
 		#define OPCODE_API
 #endif
 
+	#include "OPC_Settings.h"
 	#include "OPC_IceHook.h"
 
 	namespace Opcode
 	{
 		// Bulk-of-the-work
-		#include "OPC_Settings.h"
 		#include "OPC_Common.h"
 		#include "OPC_MeshInterface.h"
 		// Builders
