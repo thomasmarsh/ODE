@@ -3,7 +3,7 @@
 	ProjectType="Visual C++"
 	Version="7.00"
 	Name="demo_feedback"
-	ProjectGUID="{0CB177B3-E984-5247-B148-EFFD17D964F0}"
+	ProjectGUID="{EC9E80B3-68E7-5B4C-BEA6-05EF0C1120B9}"
 	Keyword="Win32Proj">
 	<Platforms>
 		<Platform
