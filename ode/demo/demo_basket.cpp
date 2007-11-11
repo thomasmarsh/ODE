@@ -183,7 +183,7 @@ static void simLoop (int pause)
   //dIASSERT(dVALIDMAT3(Rot));
   float rot[12] = { Rot[0], Rot[1], Rot[2], Rot[3], Rot[4], Rot[5], Rot[6], Rot[7], Rot[8], Rot[9], Rot[10], Rot[11] };
 
-  int numi = sizeof(world_indices)  / sizeof(int);
+  int numi = sizeof(world_indices)  / sizeof(dTriIndex);
 
   for (int i=0; i<numi/3; i++)
   {
@@ -225,7 +225,7 @@ int main (int argc, char **argv)
 
   // Create a static world using a triangle mesh that we can collide with.
   int numv = sizeof(world_vertices)/(3*sizeof(float));
-  int numi = sizeof(world_indices)/ sizeof(int);
+  int numi = sizeof(world_indices)/ sizeof(dTriIndex);
   printf("numv=%d, numi=%d\n", numv, numi);
   dTriMeshDataID Data = dGeomTriMeshDataCreate();
 
@@ -239,7 +239,7 @@ int main (int argc, char **argv)
     numv, 
     world_indices, 
     numi, 
-    3 * sizeof(int)
+    3 * sizeof(dTriIndex)
   );
 
   world_mesh = dCreateTriMesh(space, Data, 0, 0, 0);

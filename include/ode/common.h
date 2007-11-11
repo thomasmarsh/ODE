@@ -115,6 +115,17 @@ typedef double dReal;
 #endif
 #endif // dTRIMESH_ENABLED
 
+#if dTRIMESH_GIMPACT
+typedef uint32 dTriIndex;
+#else // dTRIMESH_GIMPACT
+// Define a type for OPCODE indices, either 16 or 32 bit, based on build option
+#if dTRIMESH_OPCODE_16BIT
+typedef uint16 dTriIndex;
+#else // dTRIMESH_OPCODE_16BIT
+typedef uint32 dTriIndex;
+#endif // dTRIMESH_OPCODE_16BIT
+#endif // dTRIMESH_GIMPACT
+
 /* round an integer up to a multiple of 4, except that 0 and 1 are unmodified
  * (used to compute matrix leading dimensions)
  */

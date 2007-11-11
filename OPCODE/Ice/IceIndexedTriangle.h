@@ -7,6 +7,8 @@
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+#include "ode/common.h"
+
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Include Guard
 #ifndef __ICEINDEXEDTRIANGLE_H__
@@ -23,10 +25,11 @@
 	class ICEMATHS_API IndexedTriangle
 	{
 		public:
+
 		//! Constructor
 		inline_					IndexedTriangle()									{}
 		//! Constructor
-		inline_					IndexedTriangle(udword r0, udword r1, udword r2)	{ mVRef[0]=r0; mVRef[1]=r1; mVRef[2]=r2; }
+		inline_					IndexedTriangle(dTriIndex r0, dTriIndex r1, dTriIndex r2)	{ mVRef[0]=r0; mVRef[1]=r1; mVRef[2]=r2; }
 		//! Copy constructor
 		inline_					IndexedTriangle(const IndexedTriangle& triangle)
 								{
@@ -36,8 +39,9 @@
 								}
 		//! Destructor
 		inline_					~IndexedTriangle()									{}
+		
 		//! Vertex-references
-				udword			mVRef[3];
+				dTriIndex		mVRef[3];
 
 		// Methods
 				void			Flip();
@@ -52,17 +56,17 @@
 				bool			IsVisible(const Point* verts, const Point& source)					const;
 				bool			BackfaceCulling(const Point* verts, const Point& source)			const;
 				float			ComputeOcclusionPotential(const Point* verts, const Point& view)	const;
-				bool			ReplaceVertex(udword oldref, udword newref);
+				bool			ReplaceVertex(dTriIndex oldref, dTriIndex newref);
 				bool			IsDegenerate()														const;
-				bool			HasVertex(udword ref)												const;
-				bool			HasVertex(udword ref, udword* index)								const;
-				ubyte			FindEdge(udword vref0, udword vref1)								const;
-				udword			OppositeVertex(udword vref0, udword vref1)							const;
-		inline_	udword			OppositeVertex(ubyte edgenb)										const	{ return mVRef[2-edgenb];	}
-				void			GetVRefs(ubyte edgenb, udword& vref0, udword& vref1, udword& vref2)	const;
+				bool			HasVertex(dTriIndex ref)												const;
+				bool			HasVertex(dTriIndex ref, dTriIndex* index)								const;
+				ubyte			FindEdge(dTriIndex vref0, dTriIndex vref1)								const;
+				dTriIndex		OppositeVertex(dTriIndex vref0, dTriIndex vref1)							const;
+		inline_	dTriIndex		OppositeVertex(ubyte edgenb)										const	{ return mVRef[2-edgenb];	}
+				void			GetVRefs(ubyte edgenb, dTriIndex& vref0, dTriIndex& vref1, dTriIndex& vref2)	const;
 				float			MinEdgeLength(const Point* verts)									const;
 				float			MaxEdgeLength(const Point* verts)									const;
-				void			ComputePoint(const Point* verts, float u, float v, Point& pt, udword* nearvtx=null)	const;
+				void			ComputePoint(const Point* verts, float u, float v, Point& pt, dTriIndex* nearvtx=null)	const;
 				float			Angle(const IndexedTriangle& tri, const Point* verts)				const;
 		inline_	Plane			PlaneEquation(const Point* verts)									const	{ return Plane(verts[mVRef[0]], verts[mVRef[1]], verts[mVRef[2]]);	}
 				bool			Equal(const IndexedTriangle& tri)									const;

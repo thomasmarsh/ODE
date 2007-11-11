@@ -97,6 +97,7 @@
 	//! y ^= x;		/* y' = (y^(x^y)) = x */
 	//! x ^= y;		/* x' = (x^y)^x = y */
 	inline_ void	Swap(udword& x, udword& y)			{ x ^= y; y ^= x; x ^= y;					}
+	inline_ void	Swap(uword& x, uword& y)			{ x ^= y; y ^= x; x ^= y;					}
 
 	//! Little/Big endian (from Steve Baker's Cute Code Collection)
 	//!

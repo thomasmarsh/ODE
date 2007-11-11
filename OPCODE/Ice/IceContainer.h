@@ -54,6 +54,17 @@
 									return *this;
 								}
 
+		inline_	Container&		Add(const uword* entries, udword nb)
+								{
+									// Resize if needed
+									if(mCurNbEntries+nb>mMaxNbEntries)	Resize(nb);
+
+									// Add new entry
+									CopyMemory(&mEntries[mCurNbEntries], entries, nb*sizeof(uword));
+									mCurNbEntries+=nb;
+									return *this;
+								}
+
 		inline_	Container&		Add(const udword* entries, udword nb)
 								{
 									// Resize if needed

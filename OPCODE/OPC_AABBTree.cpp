@@ -415,7 +415,7 @@ bool AABBTree::Build(AABBTreeBuilder* builder)
 	builder->SetNbInvalidSplits(0);
 
 	// Initialize indices. This list will be modified during build.
-	mIndices = new udword[builder->mNbPrimitives];
+	mIndices = new dTriIndex[builder->mNbPrimitives];
 	CHECKALLOC(mIndices);
 	// Identity permutation
 	for(udword i=0;i<builder->mNbPrimitives;i++)	mIndices[i] = i;

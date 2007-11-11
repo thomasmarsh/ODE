@@ -108,12 +108,12 @@ void dGeomTriMeshDataBuildDouble(dTriMeshDataID g,
 
 void dGeomTriMeshDataBuildSimple1(dTriMeshDataID g,
                                   const dReal* Vertices, int VertexCount,
-                                 const int* Indices, int IndexCount,
+                                 const dTriIndex* Indices, int IndexCount,
                                  const int* Normals){
 #ifdef dSINGLE
     dGeomTriMeshDataBuildSingle1(g,
 				Vertices, 4 * sizeof(dReal), VertexCount,
-				Indices, IndexCount, 3 * sizeof(unsigned int),
+				Indices, IndexCount, 3 * sizeof(dTriIndex),
 				Normals);
 #else
     dGeomTriMeshDataBuildDouble1(g, Vertices, 4 * sizeof(dReal), VertexCount,
@@ -125,7 +125,7 @@ void dGeomTriMeshDataBuildSimple1(dTriMeshDataID g,
 
 void dGeomTriMeshDataBuildSimple(dTriMeshDataID g,
                                  const dReal* Vertices, int VertexCount,
-                                 const int* Indices, int IndexCount) {
+                                 const dTriIndex* Indices, int IndexCount) {
     dGeomTriMeshDataBuildSimple1(g,
                                  Vertices, VertexCount, Indices, IndexCount,
                                  (const int*)NULL);

@@ -154,7 +154,7 @@ static int EdgeCompare(const void* edge1, const void* edge2)
 		return e1->VertIdx1 - e2->VertIdx1;
 }
 
-void SetupEdge(EdgeRecord* edge, int edgeIdx, int triIdx, const unsigned int* vertIdxs)
+void SetupEdge(EdgeRecord* edge, int edgeIdx, int triIdx, const dTriIndex* vertIdxs)
 {
 	if (edgeIdx == 0)
 	{
@@ -446,16 +446,16 @@ void dGeomTriMeshDataBuildDouble(dTriMeshDataID g,
 
 void dGeomTriMeshDataBuildSimple1(dTriMeshDataID g,
                                   const dReal* Vertices, int VertexCount, 
-                                 const int* Indices, int IndexCount,
+                                 const dTriIndex* Indices, int IndexCount,
                                  const int* Normals){
 #ifdef dSINGLE
     dGeomTriMeshDataBuildSingle1(g,
 				Vertices, 4 * sizeof(dReal), VertexCount, 
-				Indices, IndexCount, 3 * sizeof(unsigned int),
+				Indices, IndexCount, 3 * sizeof(dTriIndex),
 				Normals);
 #else
     dGeomTriMeshDataBuildDouble1(g, Vertices, 4 * sizeof(dReal), VertexCount, 
-				Indices, IndexCount, 3 * sizeof(unsigned int),
+				Indices, IndexCount, 3 * sizeof(dTriIndex),
 				Normals);
 #endif
 }
@@ -463,7 +463,7 @@ void dGeomTriMeshDataBuildSimple1(dTriMeshDataID g,
 
 void dGeomTriMeshDataBuildSimple(dTriMeshDataID g,
                                  const dReal* Vertices, int VertexCount, 
-                                 const int* Indices, int IndexCount) {
+                                 const dTriIndex* Indices, int IndexCount) {
     dGeomTriMeshDataBuildSimple1(g,
                                  Vertices, VertexCount, Indices, IndexCount,
                                  (const int*)NULL);

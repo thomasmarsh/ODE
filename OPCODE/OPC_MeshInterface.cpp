@@ -266,7 +266,7 @@ bool MeshInterface::SetStrides(udword tri_stride, udword vertex_stride)
  *	\return		true if success
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-bool MeshInterface::RemapClient(udword nb_indices, const udword* permutation) const
+bool MeshInterface::RemapClient(udword nb_indices, const dTriIndex* permutation) const
 {
 	// Checkings
 	if(!nb_indices || !permutation)	return false;
