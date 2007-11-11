@@ -3,7 +3,7 @@
 	ProjectType="Visual C++"
 	Version="7.00"
 	Name="drawstuff"
-	ProjectGUID="{C677294D-60FB-5241-9588-22C397E2AE1F}"
+	ProjectGUID="{0B5C5963-DCC4-9C4D-B86F-108D342F686E}"
 	Keyword="Win32Proj">
 	<Platforms>
 		<Platform
