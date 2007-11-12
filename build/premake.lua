@@ -1,5 +1,8 @@
 project.name = "ode"
 
+
+-- We no longer support VC++ 6.0; too many incompatibilities
+
   if (options["target"] == "vs6") then
     error("Visual Studio 6 is no longer supported; please upgrade to Visual Studio 2005 C++ Express.")
   end
@@ -55,16 +58,16 @@ project.name = "ode"
 
 -- Build packages
 
-  dopackage("ode.lua")
-
   if (options["with-demos"]) then
-    dopackage("drawstuff.lua")
     dopackage("demos.lua")
+    dopackage("drawstuff.lua")
   end
 
   if (options["with-tests"]) then
     dopackage("tests.lua")
   end
+
+  dopackage("ode.lua")
   
 
 -- Remove all intermediate files

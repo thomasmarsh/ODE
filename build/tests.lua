@@ -1,26 +1,43 @@
-  package.name = "tests"
-  package.kind = "exe"
-  package.language = "c++"
-  package.path = packagepath
-  package.objdir = "obj/tests"
+-- Premake build scripts for ODE unit tests
 
-  package.includepaths =
-  {
-    "../../include",
-    "../../tests/CppTestHarness"
-  }
+package.name = "tests"
+package.kind = "exe"
+package.language = "c++"
+package.path = "custom"
+package.objdir = "obj/tests"
 
-  package.defines =
-  {
-    "_CRT_SECURE_NO_DEPRECATE"
-  }
+package.includepaths = 
+{
+  "../../include",
+  "../../tests/UnitTest++/src"
+}
 
-  package.links =
-  {
-    "ode"
-  }
+package.defines = 
+{
+  "_CRT_SECURE_NO_DEPRECATE"
+}
 
-  package.files =
-  {
-    matchrecursive("../../tests/*.h", "../../tests/*.cpp")
-  }
+package.files =
+{
+  matchfiles("../../tests/*.cpp"),
+  matchfiles("../../tests/UnitTest++/src/*")
+}
+
+if (windows) then
+  table.insert(package.files, matchfiles("../../tests/UnitTest++/src/Win32/*"))
+else
+  table.insert(package.files, matchfiles("../../tests/UnitTest++/src/Posix/*"))
+end
+
+package.links =
+{
+  "ode"
+}
+
+
+-- Separate distribution files into toolset subdirectories
+
+  if (options["usetargetpath"]) then
+    package.path = options["target"]
+  end
+

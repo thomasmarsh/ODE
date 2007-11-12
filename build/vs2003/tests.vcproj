@@ -3,7 +3,7 @@
 	ProjectType="Visual C++"
 	Version="7.10"
 	Name="tests"
-	ProjectGUID="{DFB6544D-EFF2-3C4E-A90A-F27670D64A64}"
+	ProjectGUID="{9E6C5152-199B-B147-BFF4-DCC9F5E71D1F}"
 	Keyword="Win32Proj">
 	<Platforms>
 		<Platform
@@ -19,7 +19,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="../../include;../../tests/CppTestHarness"
+				AdditionalIncludeDirectories="../../include;../../tests/UnitTest++/src"
 				PreprocessorDefinitions="_CRT_SECURE_NO_DEPRECATE"
 				MinimalRebuild="TRUE"
 				BasicRuntimeChecks="3"
@@ -54,7 +54,7 @@
 			<Tool
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="_CRT_SECURE_NO_DEPRECATE"
-				AdditionalIncludeDirectories="../../include;../../tests/CppTestHarness"/>
+				AdditionalIncludeDirectories="../../include;../../tests/UnitTest++/src"/>
 			<Tool
 				Name="VCWebServiceProxyGeneratorTool"/>
 			<Tool
@@ -75,7 +75,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="../../include;../../tests/CppTestHarness"
+				AdditionalIncludeDirectories="../../include;../../tests/UnitTest++/src"
 				PreprocessorDefinitions="_CRT_SECURE_NO_DEPRECATE"
 				MinimalRebuild="TRUE"
 				BasicRuntimeChecks="3"
@@ -110,7 +110,7 @@
 			<Tool
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="_CRT_SECURE_NO_DEPRECATE"
-				AdditionalIncludeDirectories="../../include;../../tests/CppTestHarness"/>
+				AdditionalIncludeDirectories="../../include;../../tests/UnitTest++/src"/>
 			<Tool
 				Name="VCWebServiceProxyGeneratorTool"/>
 			<Tool
@@ -131,7 +131,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="../../include;../../tests/CppTestHarness"
+				AdditionalIncludeDirectories="../../include;../../tests/UnitTest++/src"
 				PreprocessorDefinitions="_CRT_SECURE_NO_DEPRECATE"
 				MinimalRebuild="TRUE"
 				BasicRuntimeChecks="3"
@@ -166,7 +166,7 @@
 			<Tool
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="_CRT_SECURE_NO_DEPRECATE"
-				AdditionalIncludeDirectories="../../include;../../tests/CppTestHarness"/>
+				AdditionalIncludeDirectories="../../include;../../tests/UnitTest++/src"/>
 			<Tool
 				Name="VCWebServiceProxyGeneratorTool"/>
 			<Tool
@@ -187,7 +187,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="../../include;../../tests/CppTestHarness"
+				AdditionalIncludeDirectories="../../include;../../tests/UnitTest++/src"
 				PreprocessorDefinitions="_CRT_SECURE_NO_DEPRECATE"
 				MinimalRebuild="TRUE"
 				BasicRuntimeChecks="3"
@@ -222,7 +222,7 @@
 			<Tool
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="_CRT_SECURE_NO_DEPRECATE"
-				AdditionalIncludeDirectories="../../include;../../tests/CppTestHarness"/>
+				AdditionalIncludeDirectories="../../include;../../tests/UnitTest++/src"/>
 			<Tool
 				Name="VCWebServiceProxyGeneratorTool"/>
 			<Tool
@@ -242,78 +242,139 @@
 			Name="tests"
 			Filter="">
 			<Filter
-				Name="CppTestHarness"
+				Name="UnitTest++"
 				Filter="">
-				<File
-					RelativePath="..\..\tests\CppTestHarness\CheckMacros.h">
-				</File>
-				<File
-					RelativePath="..\..\tests\CppTestHarness\Checks.h">
-				</File>
-				<File
-					RelativePath="..\..\tests\CppTestHarness\CppTestHarness.h">
-				</File>
-				<File
-					RelativePath="..\..\tests\CppTestHarness\HTMLTestReporter.h">
-				</File>
-				<File
-					RelativePath="..\..\tests\CppTestHarness\PrintfTestReporter.h">
-				</File>
-				<File
-					RelativePath="..\..\tests\CppTestHarness\SignalTranslator.h">
-				</File>
-				<File
-					RelativePath="..\..\tests\CppTestHarness\Test.h">
-				</File>
-				<File
-					RelativePath="..\..\tests\CppTestHarness\TestLauncher.h">
-				</File>
-				<File
-					RelativePath="..\..\tests\CppTestHarness\TestMacros.h">
-				</File>
-				<File
-					RelativePath="..\..\tests\CppTestHarness\TestReporter.h">
-				</File>
-				<File
-					RelativePath="..\..\tests\CppTestHarness\TestResults.h">
-				</File>
-				<File
-					RelativePath="..\..\tests\CppTestHarness\TestRunner.h">
-				</File>
-				<File
-					RelativePath="..\..\tests\CppTestHarness\TypedTestLauncher.h">
-				</File>
-				<File
-					RelativePath="..\..\tests\CppTestHarness\HTMLTestReporter.cpp">
-				</File>
-				<File
-					RelativePath="..\..\tests\CppTestHarness\PrintfTestReporter.cpp">
-				</File>
-				<File
-					RelativePath="..\..\tests\CppTestHarness\Test.cpp">
-				</File>
-				<File
-					RelativePath="..\..\tests\CppTestHarness\TestLauncher.cpp">
-				</File>
-				<File
-					RelativePath="..\..\tests\CppTestHarness\TestReporter.cpp">
-				</File>
-				<File
-					RelativePath="..\..\tests\CppTestHarness\TestResults.cpp">
-				</File>
-				<File
-					RelativePath="..\..\tests\CppTestHarness\TestRunner.cpp">
-				</File>
-			</Filter>
-			<Filter
-				Name="colliders"
-				Filter="">
-				<File
-					RelativePath="..\..\tests\colliders\box_sphere.cpp">
-				</File>
+				<Filter
+					Name="src"
+					Filter="">
+					<Filter
+						Name="Win32"
+						Filter="">
+						<File
+							RelativePath="..\..\tests\UnitTest++\src\Win32\TimeHelpers.cpp">
+						</File>
+						<File
+							RelativePath="..\..\tests\UnitTest++\src\Win32\TimeHelpers.h">
+						</File>
+					</Filter>
+					<File
+						RelativePath="..\..\tests\UnitTest++\src\AssertException.cpp">
+					</File>
+					<File
+						RelativePath="..\..\tests\UnitTest++\src\AssertException.h">
+					</File>
+					<File
+						RelativePath="..\..\tests\UnitTest++\src\CheckMacros.h">
+					</File>
+					<File
+						RelativePath="..\..\tests\UnitTest++\src\Checks.cpp">
+					</File>
+					<File
+						RelativePath="..\..\tests\UnitTest++\src\Checks.h">
+					</File>
+					<File
+						RelativePath="..\..\tests\UnitTest++\src\Config.h">
+					</File>
+					<File
+						RelativePath="..\..\tests\UnitTest++\src\DeferredTestReporter.cpp">
+					</File>
+					<File
+						RelativePath="..\..\tests\UnitTest++\src\DeferredTestReporter.h">
+					</File>
+					<File
+						RelativePath="..\..\tests\UnitTest++\src\DeferredTestResult.cpp">
+					</File>
+					<File
+						RelativePath="..\..\tests\UnitTest++\src\DeferredTestResult.h">
+					</File>
+					<File
+						RelativePath="..\..\tests\UnitTest++\src\MemoryOutStream.cpp">
+					</File>
+					<File
+						RelativePath="..\..\tests\UnitTest++\src\MemoryOutStream.h">
+					</File>
+					<File
+						RelativePath="..\..\tests\UnitTest++\src\ReportAssert.cpp">
+					</File>
+					<File
+						RelativePath="..\..\tests\UnitTest++\src\ReportAssert.h">
+					</File>
+					<File
+						RelativePath="..\..\tests\UnitTest++\src\Test.cpp">
+					</File>
+					<File
+						RelativePath="..\..\tests\UnitTest++\src\Test.h">
+					</File>
+					<File
+						RelativePath="..\..\tests\UnitTest++\src\TestDetails.cpp">
+					</File>
+					<File
+						RelativePath="..\..\tests\UnitTest++\src\TestDetails.h">
+					</File>
+					<File
+						RelativePath="..\..\tests\UnitTest++\src\TestList.cpp">
+					</File>
+					<File
+						RelativePath="..\..\tests\UnitTest++\src\TestList.h">
+					</File>
+					<File
+						RelativePath="..\..\tests\UnitTest++\src\TestMacros.h">
+					</File>
+					<File
+						RelativePath="..\..\tests\UnitTest++\src\TestReporter.cpp">
+					</File>
+					<File
+						RelativePath="..\..\tests\UnitTest++\src\TestReporter.h">
+					</File>
+					<File
+						RelativePath="..\..\tests\UnitTest++\src\TestReporterStdout.cpp">
+					</File>
+					<File
+						RelativePath="..\..\tests\UnitTest++\src\TestReporterStdout.h">
+					</File>
+					<File
+						RelativePath="..\..\tests\UnitTest++\src\TestResults.cpp">
+					</File>
+					<File
+						RelativePath="..\..\tests\UnitTest++\src\TestResults.h">
+					</File>
+					<File
+						RelativePath="..\..\tests\UnitTest++\src\TestRunner.cpp">
+					</File>
+					<File
+						RelativePath="..\..\tests\UnitTest++\src\TestRunner.h">
+					</File>
+					<File
+						RelativePath="..\..\tests\UnitTest++\src\TestSuite.h">
+					</File>
+					<File
+						RelativePath="..\..\tests\UnitTest++\src\TimeConstraint.cpp">
+					</File>
+					<File
+						RelativePath="..\..\tests\UnitTest++\src\TimeConstraint.h">
+					</File>
+					<File
+						RelativePath="..\..\tests\UnitTest++\src\TimeHelpers.h">
+					</File>
+					<File
+						RelativePath="..\..\tests\UnitTest++\src\UnitTest++.h">
+					</File>
+					<File
+						RelativePath="..\..\tests\UnitTest++\src\XmlTestReporter.cpp">
+					</File>
+					<File
+						RelativePath="..\..\tests\UnitTest++\src\XmlTestReporter.h">
+					</File>
+				</Filter>
 			</Filter>
 			<File
+				RelativePath="..\..\tests\joint.cpp">
+			</File>
+			<File
 				RelativePath="..\..\tests\main.cpp">
+			</File>
+			<File
+				RelativePath="..\..\tests\odemath.cpp">
 			</File>
 		</Filter>
 	</Files>
