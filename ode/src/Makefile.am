@@ -58,6 +58,7 @@ libode_a_SOURCES = 	objects.h \
 			collision_kernel.h \
 			quickstep.h \
 			collision_quadtreespace.cpp \
+			collision_sapspace.cpp \
 			rotation.cpp \
 			collision_space.cpp \
 			collision_space_internal.h \

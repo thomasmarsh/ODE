@@ -449,7 +449,7 @@ void dxSAPSpace::BoxPruning( int count, const dxGeom** geoms, dArray< Pair >& pa
 	//  NOTE: uses floats instead of dReals because that's what radix sort wants
 	for( int i = 0; i < count; ++i )
 		poslist[ i ] = (float)TmpGeomList[i]->aabb[ ax0idx ];
-	poslist[ count++ ] = ODE_INFINITY4;
+	poslist[ count++ ] = FLT_MAX;
 
 	// 2) Sort the list
 	const uint32* Sorted = RadixSort( poslist.data(), count );
