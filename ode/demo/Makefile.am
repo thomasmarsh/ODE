@@ -14,6 +14,7 @@ noinst_PROGRAMS=demo_collision \
 		demo_buggy \
 		demo_joints \
 		demo_motor \
+		demo_piston \
 		demo_chain1 \
 		demo_chain2 \
                 demo_cylvssphere \
@@ -42,6 +43,7 @@ demo_cylvssphere_SOURCES= demo_cylvssphere.cpp
 demo_joints_SOURCES= demo_joints.cpp
 demo_jointPR_SOURCES= demo_jointPR.cpp
 demo_motor_SOURCES= demo_motor.cpp
+demo_piston_SOURCES = demo_piston.cpp
 demo_chain1_SOURCES= demo_chain1.c
 demo_chain2_SOURCES= demo_chain2.cpp
 demo_ode_SOURCES= demo_ode.cpp
@@ -81,6 +83,8 @@ demo_joints_LDFLAGS= -L$(top_builddir)/drawstuff/src \
 demo_jointPR_LDFLAGS= -L$(top_builddir)/drawstuff/src \
 		-L$(top_builddir)/ode/src @LDFLAGS@ 
 demo_motor_LDFLAGS= -L$(top_builddir)/drawstuff/src \
+		-L$(top_builddir)/ode/src @LDFLAGS@ 
+demo_piston_LDFLAGS= -L$(top_builddir)/drawstuff/src \
 		-L$(top_builddir)/ode/src @LDFLAGS@ 
 demo_chain1_LDFLAGS= -L$(top_builddir)/drawstuff/src \
 		-L$(top_builddir)/ode/src @LDFLAGS@ 
@@ -129,6 +133,8 @@ demo_jointPR_DEPENDENCIES=	$(top_builddir)/ode/src/libode.a \
 				$(top_builddir)/drawstuff/src/libdrawstuff.a
 demo_motor_DEPENDENCIES=	$(top_builddir)/ode/src/libode.a \
 				$(top_builddir)/drawstuff/src/libdrawstuff.a
+demo_piston_DEPENDENCIES=	$(top_builddir)/ode/src/libode.a \
+				$(top_builddir)/drawstuff/src/libdrawstuff.a
 demo_chain1_DEPENDENCIES=	$(top_builddir)/ode/src/libode.a \
 				$(top_builddir)/drawstuff/src/libdrawstuff.a
 demo_chain2_DEPENDENCIES=	$(top_builddir)/ode/src/libode.a \
@@ -173,6 +179,7 @@ demo_chain1_LDADD= -ldrawstuff $(top_builddir)/ode/src/libode.a @GL_LIBS@ @LIBS@
 demo_joints_LDADD= -ldrawstuff $(top_builddir)/ode/src/libode.a @GL_LIBS@ @LIBS@
 demo_jointPR_LDADD= -ldrawstuff $(top_builddir)/ode/src/libode.a @GL_LIBS@ @LIBS@
 demo_motor_LDADD= -ldrawstuff $(top_builddir)/ode/src/libode.a @GL_LIBS@ @LIBS@
+demo_piston_LDADD= -ldrawstuff $(top_builddir)/ode/src/libode.a @GL_LIBS@ @LIBS@
 demo_buggy_LDADD= -ldrawstuff $(top_builddir)/ode/src/libode.a @GL_LIBS@ @LIBS@
 demo_cyl_LDADD= -ldrawstuff $(top_builddir)/ode/src/libode.a @GL_LIBS@ @LIBS@
 demo_cylvssphere_LDADD= -ldrawstuff $(top_builddir)/ode/src/libode.a @GL_LIBS@ @LIBS@
@@ -207,6 +214,7 @@ demo_chain1_LDADD+= resources.o
 demo_joints_LDADD+= resources.o
 demo_jointPR_LDADD+= resources.o
 demo_motor_LDADD+= resources.o
+demo_piston_LDADD+= resources.o
 demo_buggy_LDADD+= resources.o
 demo_cyl_LDADD+= resources.o
 demo_cylvssphere_LDADD+= resources.o
@@ -228,6 +236,7 @@ demo_chain1_DEPENDENCIES+= resources.o
 demo_joints_DEPENDENCIES+= resources.o
 demo_jointPR_DEPENDENCIES+= resources.o
 demo_motor_DEPENDENCIES+= resources.o
+demo_piston_DEPENDENCIES+= resources.o
 demo_buggy_DEPENDENCIES+= resources.o
 demo_cyl_DEPENDENCIES+= resources.o
 demo_cylvssphere_DEPENDENCIES+= resources.o
