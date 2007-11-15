@@ -2161,6 +2161,9 @@ static void universalGetInfo2 (dxJointUniversal *joint, dxJoint::Info2 *info)
   dVector3 p;
   dReal k;
 
+  // Since axis1 and axis2 may not be perpendicular
+  // we find a axis2_tmp which is really perpendicular to axis1
+  // and in the plane of axis1 and axis2
   getUniversalAxes(joint, ax1, ax2);
   k = dDOT(ax1, ax2);
   ax2_temp[0] = ax2[0] - k*ax1[0];
@@ -4375,6 +4378,7 @@ void dJointSetPlane2DAngleParam (dxJoint *joint,
 	dxJointPlane2D* joint2d = (dxJointPlane2D*)( joint );
 	joint2d->motor_angle.set (parameter, value);
 }
+
 
 
 
