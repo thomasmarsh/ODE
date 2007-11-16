@@ -3,6 +3,15 @@ package.language = "c++"
 package.objdir = "obj/drawstuff"
 
 
+-- Append a "d" to the debug version of the libraries
+
+  for k,v in ipairs(project.configs) do
+    if (string.find(v, "Debug") ~= nil) then
+      package.config[v].target = "drawstuffd"
+    end
+  end
+  
+  
 -- Separate distribution files into toolset subdirectories
 
   if (options["usetargetpath"]) then

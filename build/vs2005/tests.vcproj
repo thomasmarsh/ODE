@@ -3,7 +3,7 @@
 	ProjectType="Visual C++"
 	Version="8.00"
 	Name="tests"
-	ProjectGUID="{E256803A-E8B0-274D-B8FE-677C1DEBBDA6}"
+	ProjectGUID="{00E1EED3-7A86-2643-B1CA-5ACF7E3C9088}"
 	RootNamespace="tests"
 	Keyword="Win32Proj"
 	>
@@ -64,7 +64,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="../../lib/DebugDLL/ode.lib"
+				AdditionalDependencies="../../lib/DebugDLL/oded.lib"
 				OutputFile="$(OutDir)/tests.exe"
 				LinkIncremental="2"
 				AdditionalLibraryDirectories="../../lib/DebugDLL"
@@ -232,7 +232,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="../../lib/DebugLib/ode.lib"
+				AdditionalDependencies="../../lib/DebugLib/oded.lib"
 				OutputFile="$(OutDir)/tests.exe"
 				LinkIncremental="2"
 				AdditionalLibraryDirectories="../../lib/DebugLib"

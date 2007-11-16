@@ -3,7 +3,7 @@
 	ProjectType="Visual C++"
 	Version="8.00"
 	Name="drawstuff"
-	ProjectGUID="{31874252-9DFE-6240-8968-E877D469BFBC}"
+	ProjectGUID="{723F8838-4ECE-2848-8455-71C1B8798776}"
 	RootNamespace="drawstuff"
 	Keyword="Win32Proj"
 	>
@@ -65,13 +65,13 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="user32.lib opengl32.lib glu32.lib winmm.lib gdi32.lib"
-				OutputFile="$(OutDir)/drawstuff.dll"
+				OutputFile="$(OutDir)/drawstuffd.dll"
 				LinkIncremental="2"
 				AdditionalLibraryDirectories="../../lib/DebugDLL"
 				GenerateDebugInformation="true"
-				ProgramDatabaseFile="$(OutDir)/drawstuff.pdb"
+				ProgramDatabaseFile="$(OutDir)/drawstuffd.pdb"
 				SubSystem="2"
-				ImportLibrary="../../lib/DebugDLL/drawstuff.lib"
+				ImportLibrary="../../lib/DebugDLL/drawstuffd.lib"
 				TargetMachine="1"
 			/>
 			<Tool
@@ -233,7 +233,7 @@
 			/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="$(OutDir)/drawstuff.lib"
+				OutputFile="$(OutDir)/drawstuffd.lib"
 			/>
 			<Tool
 				Name="VCALinkTool"

@@ -13,10 +13,10 @@ ifeq ($(CONFIG),DebugDLL)
   CPPFLAGS := -MMD -D "WIN32" -D "ODE_DLL" -I "../../include" -I "../../OPCODE" -I "../../GIMPACT/include"
   CFLAGS += $(CPPFLAGS) $(TARGET_ARCH) -g
   CXXFLAGS := $(CFLAGS)
-  LDFLAGS += -L$(BINDIR) -L$(LIBDIR) -shared -Wl,--out-implib="../../lib/DebugDLL/libode.a" -luser32
+  LDFLAGS += -L$(BINDIR) -L$(LIBDIR) -shared -Wl,--out-implib="../../lib/DebugDLL/liboded.a" -luser32
   LDDEPS :=
   RESFLAGS := -D "WIN32" -D "ODE_DLL" -I "../../include" -I "../../OPCODE" -I "../../GIMPACT/include"
-  TARGET := ode.dll
+  TARGET := oded.dll
   BLDCMD = $(CXX) -o $(OUTDIR)/$(TARGET) $(OBJECTS) $(LDFLAGS) $(RESOURCES) $(TARGET_ARCH)
 endif
 
@@ -46,7 +46,7 @@ ifeq ($(CONFIG),DebugLib)
   LDFLAGS += -L$(BINDIR) -L$(LIBDIR) -luser32
   LDDEPS :=
   RESFLAGS := -D "WIN32" -D "ODE_LIB" -I "../../include" -I "../../OPCODE" -I "../../GIMPACT/include"
-  TARGET := libode.a
+  TARGET := liboded.a
   BLDCMD = ar -rcs $(OUTDIR)/$(TARGET) $(OBJECTS) $(TARGET_ARCH)
 endif
 

@@ -13,8 +13,8 @@ ifeq ($(CONFIG),DebugDLL)
   CPPFLAGS := -MMD -D "_CRT_SECURE_NO_DEPRECATE" -I "../../include" -I "../../tests/UnitTest++/src"
   CFLAGS += $(CPPFLAGS) $(TARGET_ARCH) -g
   CXXFLAGS := $(CFLAGS)
-  LDFLAGS += -L$(BINDIR) -L$(LIBDIR) -lode
-  LDDEPS := ../../lib/DebugDLL/ode.dll
+  LDFLAGS += -L$(BINDIR) -L$(LIBDIR) -loded
+  LDDEPS := ../../lib/DebugDLL/oded.dll
   RESFLAGS := -D "_CRT_SECURE_NO_DEPRECATE" -I "../../include" -I "../../tests/UnitTest++/src"
   TARGET := tests.exe
   BLDCMD = $(CXX) -o $(OUTDIR)/$(TARGET) $(OBJECTS) $(LDFLAGS) $(RESOURCES) $(TARGET_ARCH)
@@ -43,8 +43,8 @@ ifeq ($(CONFIG),DebugLib)
   CPPFLAGS := -MMD -D "_CRT_SECURE_NO_DEPRECATE" -I "../../include" -I "../../tests/UnitTest++/src"
   CFLAGS += $(CPPFLAGS) $(TARGET_ARCH) -g
   CXXFLAGS := $(CFLAGS)
-  LDFLAGS += -L$(BINDIR) -L$(LIBDIR) -lode
-  LDDEPS := ../../lib/DebugLib/libode.a
+  LDFLAGS += -L$(BINDIR) -L$(LIBDIR) -loded
+  LDDEPS := ../../lib/DebugLib/liboded.a
   RESFLAGS := -D "_CRT_SECURE_NO_DEPRECATE" -I "../../include" -I "../../tests/UnitTest++/src"
   TARGET := tests.exe
   BLDCMD = $(CXX) -o $(OUTDIR)/$(TARGET) $(OBJECTS) $(LDFLAGS) $(RESOURCES) $(TARGET_ARCH)
