@@ -3,9 +3,9 @@ libtool: $(LIBTOOL_DEPS)
 	$(SHELL) ./config.status --recheck
 
 if ENABLE_DEMOS
-SUBDIRS = include drawstuff ode tests
+SUBDIRS = include drawstuff ode 
 else
-SUBDIRS = include ode tests
+SUBDIRS = include ode
 endif
 
 bin_SCRIPTS = ode-config
