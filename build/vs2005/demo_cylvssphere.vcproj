@@ -3,7 +3,7 @@
 	ProjectType="Visual C++"
 	Version="8.00"
 	Name="demo_cylvssphere"
-	ProjectGUID="{DF7443FA-21C4-2E48-B36C-38478A4A854A}"
+	ProjectGUID="{28CFC6A7-4A3C-FE4C-BC3A-EA08291ED30A}"
 	RootNamespace="demo_cylvssphere"
 	Keyword="Win32Proj"
 	>
@@ -64,7 +64,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="../../lib/DebugDLL/ode.lib ../../lib/DebugDLL/drawstuff.lib user32.lib winmm.lib gdi32.lib opengl32.lib glu32.lib"
+				AdditionalDependencies="../../lib/DebugDLL/oded.lib ../../lib/DebugDLL/drawstuffd.lib user32.lib winmm.lib gdi32.lib opengl32.lib glu32.lib"
 				OutputFile="$(OutDir)/demo_cylvssphere.exe"
 				LinkIncremental="2"
 				AdditionalLibraryDirectories="../../lib/DebugDLL"
@@ -232,7 +232,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="../../lib/DebugLib/ode.lib ../../lib/DebugLib/drawstuff.lib user32.lib winmm.lib gdi32.lib opengl32.lib glu32.lib"
+				AdditionalDependencies="../../lib/DebugLib/oded.lib ../../lib/DebugLib/drawstuffd.lib user32.lib winmm.lib gdi32.lib opengl32.lib glu32.lib"
 				OutputFile="$(OutDir)/demo_cylvssphere.exe"
 				LinkIncremental="2"
 				AdditionalLibraryDirectories="../../lib/DebugLib"

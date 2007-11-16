@@ -3,7 +3,7 @@
 	ProjectType="Visual C++"
 	Version="7.10"
 	Name="ode"
-	ProjectGUID="{A74FDD88-0D53-314F-863F-37CAF4AC1C59}"
+	ProjectGUID="{56A9F6E8-E8FB-3A42-B605-9FCCC5F6DA67}"
 	Keyword="Win32Proj">
 	<Platforms>
 		<Platform
@@ -35,13 +35,13 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="user32.lib"
-				OutputFile="$(OutDir)/ode.dll"
+				OutputFile="$(OutDir)/oded.dll"
 				LinkIncremental="2"
 				AdditionalLibraryDirectories="../../lib/DebugDLL"
 				GenerateDebugInformation="TRUE"
-				ProgramDatabaseFile="$(OutDir)/ode.pdb"
+				ProgramDatabaseFile="$(OutDir)/oded.pdb"
 				SubSystem="2"
-				ImportLibrary="../../lib/DebugDLL/ode.lib"
+				ImportLibrary="../../lib/DebugDLL/oded.lib"
 				TargetMachine="1"/>
 			<Tool
 				Name="VCMIDLTool"/>
@@ -147,7 +147,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="$(OutDir)/ode.lib"/>
+				OutputFile="$(OutDir)/oded.lib"/>
 			<Tool
 				Name="VCMIDLTool"/>
 			<Tool

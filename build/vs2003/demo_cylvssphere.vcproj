@@ -3,7 +3,7 @@
 	ProjectType="Visual C++"
 	Version="7.10"
 	Name="demo_cylvssphere"
-	ProjectGUID="{64019C59-E4FB-0C4C-A10A-7E977D937721}"
+	ProjectGUID="{1CF7F359-316F-0540-94CA-8CFAF146EBC3}"
 	Keyword="Win32Proj">
 	<Platforms>
 		<Platform
@@ -34,7 +34,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="../../lib/DebugDLL/ode.lib ../../lib/DebugDLL/drawstuff.lib user32.lib winmm.lib gdi32.lib opengl32.lib glu32.lib"
+				AdditionalDependencies="../../lib/DebugDLL/oded.lib ../../lib/DebugDLL/drawstuffd.lib user32.lib winmm.lib gdi32.lib opengl32.lib glu32.lib"
 				OutputFile="$(OutDir)/demo_cylvssphere.exe"
 				LinkIncremental="2"
 				AdditionalLibraryDirectories="../../lib/DebugDLL"
@@ -146,7 +146,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="../../lib/DebugLib/ode.lib ../../lib/DebugLib/drawstuff.lib user32.lib winmm.lib gdi32.lib opengl32.lib glu32.lib"
+				AdditionalDependencies="../../lib/DebugLib/oded.lib ../../lib/DebugLib/drawstuffd.lib user32.lib winmm.lib gdi32.lib opengl32.lib glu32.lib"
 				OutputFile="$(OutDir)/demo_cylvssphere.exe"
 				LinkIncremental="2"
 				AdditionalLibraryDirectories="../../lib/DebugLib"

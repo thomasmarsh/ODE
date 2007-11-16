@@ -3,7 +3,7 @@
 	ProjectType="Visual C++"
 	Version="7.10"
 	Name="drawstuff"
-	ProjectGUID="{031F4C78-57F7-2040-848A-8189C3458F3B}"
+	ProjectGUID="{59AA9D77-6657-1E4D-A24F-0525867E2B9F}"
 	Keyword="Win32Proj">
 	<Platforms>
 		<Platform
@@ -35,13 +35,13 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="user32.lib opengl32.lib glu32.lib winmm.lib gdi32.lib"
-				OutputFile="$(OutDir)/drawstuff.dll"
+				OutputFile="$(OutDir)/drawstuffd.dll"
 				LinkIncremental="2"
 				AdditionalLibraryDirectories="../../lib/DebugDLL"
 				GenerateDebugInformation="TRUE"
-				ProgramDatabaseFile="$(OutDir)/drawstuff.pdb"
+				ProgramDatabaseFile="$(OutDir)/drawstuffd.pdb"
 				SubSystem="2"
-				ImportLibrary="../../lib/DebugDLL/drawstuff.lib"
+				ImportLibrary="../../lib/DebugDLL/drawstuffd.lib"
 				TargetMachine="1"/>
 			<Tool
 				Name="VCMIDLTool"/>
@@ -147,7 +147,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="$(OutDir)/drawstuff.lib"/>
+				OutputFile="$(OutDir)/drawstuffd.lib"/>
 			<Tool
 				Name="VCMIDLTool"/>
 			<Tool

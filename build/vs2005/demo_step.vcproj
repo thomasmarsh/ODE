@@ -3,7 +3,7 @@
 	ProjectType="Visual C++"
 	Version="8.00"
 	Name="demo_step"
-	ProjectGUID="{FB839747-E730-5B4B-A7FC-8EF27B73551B}"
+	ProjectGUID="{9744D363-656A-9D45-AC28-F38D38AE93D0}"
 	RootNamespace="demo_step"
 	Keyword="Win32Proj"
 	>
@@ -64,7 +64,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="../../lib/DebugDLL/ode.lib ../../lib/DebugDLL/drawstuff.lib user32.lib winmm.lib gdi32.lib opengl32.lib glu32.lib"
+				AdditionalDependencies="../../lib/DebugDLL/oded.lib ../../lib/DebugDLL/drawstuffd.lib user32.lib winmm.lib gdi32.lib opengl32.lib glu32.lib"
 				OutputFile="$(OutDir)/demo_step.exe"
 				LinkIncremental="2"
 				AdditionalLibraryDirectories="../../lib/DebugDLL"
@@ -232,7 +232,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="../../lib/DebugLib/ode.lib ../../lib/DebugLib/drawstuff.lib user32.lib winmm.lib gdi32.lib opengl32.lib glu32.lib"
+				AdditionalDependencies="../../lib/DebugLib/oded.lib ../../lib/DebugLib/drawstuffd.lib user32.lib winmm.lib gdi32.lib opengl32.lib glu32.lib"
 				OutputFile="$(OutDir)/demo_step.exe"
 				LinkIncremental="2"
 				AdditionalLibraryDirectories="../../lib/DebugLib"

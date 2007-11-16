@@ -3,7 +3,7 @@
 	ProjectType="Visual C++"
 	Version="7.10"
 	Name="tests"
-	ProjectGUID="{9E6C5152-199B-B147-BFF4-DCC9F5E71D1F}"
+	ProjectGUID="{E75D4F8B-9A3B-1F47-B8B7-89DED7741C29}"
 	Keyword="Win32Proj">
 	<Platforms>
 		<Platform
@@ -34,7 +34,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="../../lib/DebugDLL/ode.lib"
+				AdditionalDependencies="../../lib/DebugDLL/oded.lib"
 				OutputFile="$(OutDir)/tests.exe"
 				LinkIncremental="2"
 				AdditionalLibraryDirectories="../../lib/DebugDLL"
@@ -146,7 +146,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="../../lib/DebugLib/ode.lib"
+				AdditionalDependencies="../../lib/DebugLib/oded.lib"
 				OutputFile="$(OutDir)/tests.exe"
 				LinkIncremental="2"
 				AdditionalLibraryDirectories="../../lib/DebugLib"

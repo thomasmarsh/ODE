@@ -13,8 +13,8 @@ ifeq ($(CONFIG),DebugDLL)
   CPPFLAGS := -MMD -D "_CRT_SECURE_NO_DEPRECATE" -D "WIN32" -I "../../include"
   CFLAGS += $(CPPFLAGS) $(TARGET_ARCH) -g
   CXXFLAGS := $(CFLAGS)
-  LDFLAGS += -L$(BINDIR) -L$(LIBDIR) -lode -ldrawstuff -luser32 -lwinmm -lgdi32 -lopengl32 -lglu32
-  LDDEPS := ../../lib/DebugDLL/ode.dll ../../lib/DebugDLL/drawstuff.dll
+  LDFLAGS += -L$(BINDIR) -L$(LIBDIR) -loded -ldrawstuffd -luser32 -lwinmm -lgdi32 -lopengl32 -lglu32
+  LDDEPS := ../../lib/DebugDLL/oded.dll ../../lib/DebugDLL/drawstuffd.dll
   RESFLAGS := -D "_CRT_SECURE_NO_DEPRECATE" -D "WIN32" -I "../../include"
   TARGET := demo_step.exe
   BLDCMD = $(CXX) -o $(OUTDIR)/$(TARGET) $(OBJECTS) $(LDFLAGS) $(RESOURCES) $(TARGET_ARCH)
@@ -43,8 +43,8 @@ ifeq ($(CONFIG),DebugLib)
   CPPFLAGS := -MMD -D "_CRT_SECURE_NO_DEPRECATE" -D "WIN32" -I "../../include"
   CFLAGS += $(CPPFLAGS) $(TARGET_ARCH) -g
   CXXFLAGS := $(CFLAGS)
-  LDFLAGS += -L$(BINDIR) -L$(LIBDIR) -lode -ldrawstuff -luser32 -lwinmm -lgdi32 -lopengl32 -lglu32
-  LDDEPS := ../../lib/DebugLib/libode.a ../../lib/DebugLib/libdrawstuff.a
+  LDFLAGS += -L$(BINDIR) -L$(LIBDIR) -loded -ldrawstuffd -luser32 -lwinmm -lgdi32 -lopengl32 -lglu32
+  LDDEPS := ../../lib/DebugLib/liboded.a ../../lib/DebugLib/libdrawstuffd.a
   RESFLAGS := -D "_CRT_SECURE_NO_DEPRECATE" -D "WIN32" -I "../../include"
   TARGET := demo_step.exe
   BLDCMD = $(CXX) -o $(OUTDIR)/$(TARGET) $(OBJECTS) $(LDFLAGS) $(RESOURCES) $(TARGET_ARCH)

@@ -13,10 +13,10 @@ ifeq ($(CONFIG),DebugDLL)
   CPPFLAGS := -MMD -D "WIN32" -D "DS_DLL" -D "USRDLL" -I "../../include"
   CFLAGS += $(CPPFLAGS) $(TARGET_ARCH) -g
   CXXFLAGS := $(CFLAGS)
-  LDFLAGS += -L$(BINDIR) -L$(LIBDIR) -shared -Wl,--out-implib="../../lib/DebugDLL/libdrawstuff.a" -luser32 -lopengl32 -lglu32 -lwinmm -lgdi32
+  LDFLAGS += -L$(BINDIR) -L$(LIBDIR) -shared -Wl,--out-implib="../../lib/DebugDLL/libdrawstuffd.a" -luser32 -lopengl32 -lglu32 -lwinmm -lgdi32
   LDDEPS :=
   RESFLAGS := -D "WIN32" -D "DS_DLL" -D "USRDLL" -I "../../include"
-  TARGET := drawstuff.dll
+  TARGET := drawstuffd.dll
   BLDCMD = $(CXX) -o $(OUTDIR)/$(TARGET) $(OBJECTS) $(LDFLAGS) $(RESOURCES) $(TARGET_ARCH)
 endif
 
@@ -46,7 +46,7 @@ ifeq ($(CONFIG),DebugLib)
   LDFLAGS += -L$(BINDIR) -L$(LIBDIR) -luser32 -lopengl32 -lglu32 -lwinmm -lgdi32
   LDDEPS :=
   RESFLAGS := -D "WIN32" -D "DS_LIB" -I "../../include"
-  TARGET := libdrawstuff.a
+  TARGET := libdrawstuffd.a
   BLDCMD = ar -rcs $(OUTDIR)/$(TARGET) $(OBJECTS) $(TARGET_ARCH)
 endif
 
