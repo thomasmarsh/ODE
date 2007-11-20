@@ -27,6 +27,7 @@ email: projectileman@yahoo.com
 */
 
 
+#include <assert.h>
 #include "GIMPACT/gim_memory.h"
 #include "stdlib.h"
 #include "malloc.h"
@@ -121,11 +122,7 @@ void * gim_alloc(size_t size)
    void * ptr = 0;
    ptr = malloc(size);
   /*if (g_allocfn) ptr = g_allocfn(size); else ptr = malloc(size);//_mm_malloc(size,0);*/
-  if(ptr==0)
-  {
-      float * fp = 0;
-      *fp = 0.0f;
-  }
+  assert(ptr);
   return ptr;
 }
 
