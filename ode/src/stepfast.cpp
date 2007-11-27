@@ -228,7 +228,7 @@ sinc (dReal x)
 		return dSin (x) / x;
 }
 
-
+#if 0 // this is just dxStepBody()
 // given a body b, apply its linear and angular rotation over the time
 // interval h, thereby adjusting its position and orientation.
 
@@ -314,6 +314,7 @@ moveAndRotateBody (dxBody * b, dReal h)
 	for (dxGeom * geom = b->geom; geom; geom = dGeomGetBodyNext (geom))
 		dGeomMoved (geom);
 }
+#endif
 
 //****************************************************************************
 //This is an implementation of the iterated/relaxation algorithm.
@@ -917,7 +918,7 @@ dInternalStepIslandFast (dxWorld * world, dxBody * const *bodies, int nb, dxJoin
 				body->lvel[i] += body->invMass * body->facc[i];
 
 			//move It!
-			moveAndRotateBody (body, ministep);
+			dxStepBody (body, ministep);
 		}
 	}
 	for (b = 0; b < nb; b++)

@@ -984,6 +984,43 @@ ODE_API void dBodySetGravityMode (dBodyID b, int mode);
  */
 ODE_API int dBodyGetGravityMode (dBodyID b);
 
+/**
+ * @brief Set the 'moved' callback of a body.
+ *
+ * Whenever a body has its position or rotation changed during the
+ * timestep, the callback will be called (with body as the argument).
+ * Use it to know which body may need an update in an external
+ * structure (like a 3D engine).
+ *
+ * @param b the body that needs to be watched.
+ * @param callback the callback to be invoked when the body moves. Set to zero
+ * to disable.
+ * @ingroup bodies
+ */
+ODE_API void dBodySetMovedCallback(dBodyID b, void (*callback)(dBodyID));
+
+
+/**
+ * @brief Return the first geom associated with the body.
+ * 
+ * You can traverse through the geoms by repeatedly calling
+ * dBodyGetNextGeom().
+ *
+ * @return the first geom attached to this body, or 0.
+ * @ingroup bodies
+ */
+ODE_API dGeomID dBodyGetFirstGeom(dBodyID b);
+
+
+/**
+ * @brief returns the next geom associated with the same body.
+ * @param g a geom attached to some body.
+ * @return the next geom attached to the same body, or 0.
+ * @sa dBodyGetFirstGeom
+ * @ingroup bodies
+ */
+ODE_API dGeomID dBodyGetNextGeom(dGeomID g);
+
 
 
 /**

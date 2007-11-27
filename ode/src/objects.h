@@ -118,6 +118,8 @@ struct dxBody : public dObject {
   dVector3* average_avel_buffer;      // buffer for the angular average velocity calculation
   unsigned int average_counter;      // counter/index to fill the average-buffers
   int average_ready;        // indicates ( with = 1 ), if the Body's buffers are ready for average-calculations
+
+  void (*moved_callback)(dxBody*); // let the user know the body moved
 };
 
 
