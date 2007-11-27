@@ -264,6 +264,8 @@ dxBody *dBodyCreate (dxWorld *w)
   b->average_ready = 0; // average buffer not filled on the beginning
   dBodySetAutoDisableAverageSamplesCount(b, b->adis.average_samples);
 
+  b->moved_callback = 0;
+
   return b;
 }
 
@@ -979,6 +981,28 @@ void dBodySetAutoDisableDefaults (dBodyID b)
 	b->adis = w->adis;
 	dBodySetAutoDisableFlag (b, w->adis_flag);
 }
+
+
+void dBodySetMovedCallback(dBodyID b, void (*callback)(dBodyID))
+{
+        dAASSERT(b);
+        b->moved_callback = callback;
+}
+
+
+dGeomID dBodyGetFirstGeom(dBodyID b)
+{
+        dAASSERT(b);
+        return b->geom;
+}
+
+
+dGeomID dBodyGetNextGeom(dGeomID geom)
+{
+        dAASSERT(geom);
+        return dGeomGetBodyNext(geom);
+}
+
 
 //****************************************************************************
 // joints

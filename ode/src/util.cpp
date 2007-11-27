@@ -258,6 +258,10 @@ void dxStepBody (dxBody *b, dReal h)
   // notify all attached geoms that this body has moved
   for (dxGeom *geom = b->geom; geom; geom = dGeomGetBodyNext (geom))
     dGeomMoved (geom);
+
+  // notify the user
+  if (b->moved_callback)
+          b->moved_callback(b);
 }
 
 //****************************************************************************
