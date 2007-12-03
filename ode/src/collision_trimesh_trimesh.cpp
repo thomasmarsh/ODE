@@ -321,6 +321,7 @@ dCollideTTL(dxGeom* g1, dxGeom* g2, int Flags, dContactGeom* Contacts, int Strid
                                 SUB(elt2, CoplanarPt, old_pos2);
                                 
                                 SUB(elt_sum, elt1, elt2);  // net motion of the coplanar point
+                                dReal elt_sum_len = LENGTH(elt_sum); // Could be calculated on demand but there is no good place...
                                 
                                 
                                 // Calculate how much the vertices of each face moved in the
@@ -679,7 +680,7 @@ dCollideTTL(dxGeom* g1, dxGeom* g2, int Flags, dContactGeom* Contacts, int Strid
                                         // If we reach this point, we have (close to) perpindicular
                                         //  faces, either resting on each other or sliding in a
                                         // direction orthogonal to both surface normals.
-                                        if (LENGTH(elt_sum) < DISTANCE_EPSILON) {
+                                        if (elt_sum_len < DISTANCE_EPSILON) {
                                             depth = dFabs(dDOT(n, elt_sum));
                                             
                                             if (depth > REAL(1e-12)) {
@@ -741,7 +742,7 @@ dCollideTTL(dxGeom* g1, dxGeom* g2, int Flags, dContactGeom* Contacts, int Strid
                                 }
                                 
 
-                                if (badPen) {
+                                if (badPen && elt_sum_len != 0.0) {
                                     // Use as the normal the direction of travel, rather than any particular
                                     //  face normal
                                     //
@@ -764,14 +765,14 @@ dCollideTTL(dxGeom* g1, dxGeom* g2, int Flags, dContactGeom* Contacts, int Strid
                                         for (int k=0; k<3; k++) {
                                             DEPTH(dp, col_v[k], pen_v[j], esn);
                                             if ( (ExamineContactPoint(col_v, esn, pen_v[j])) &&
-                                                 ( dFabs(dp) < dFabs(depth)) ) {
+                                                ( dFabs(dp) < dFabs(depth)) ) {
                                                 depth = dp;
                                                 SET( ContactPt, pen_v[j] );
                                                 contact_elt_length = dFabs(dDOT(pen_elt[j], esn));
                                             }
                                         }
                                     }
-                                    
+                                
                                     if ((depth > 0.0) && (depth <= contact_elt_length)) {
                                         GenerateContact(Flags, Contacts, Stride,  TriMesh1,  TriMesh2,
                                                         ContactPt, esn, depth, OutTriCount);
@@ -780,7 +781,7 @@ dCollideTTL(dxGeom* g1, dxGeom* g2, int Flags, dContactGeom* Contacts, int Strid
                                 }
 
                                 
-                                if (badPen) {
+                                if (badPen && elt_sum_len != 0.0) {
                                     // If the direction of motion is perpindicular to both normals
                                     if ( (dFabs(dDOT(n1, elt_sum)) < REAL(0.01)) && (dFabs(dDOT(n2, elt_sum)) < REAL(0.01)) ) {
                                         dVector3 esn;
@@ -859,7 +860,7 @@ dCollideTTL(dxGeom* g1, dxGeom* g2, int Flags, dContactGeom* Contacts, int Strid
                                     // if we have very little motion, we're dealing with resting contact
                                     //  and shouldn't reference the ELTs at all
                                     //
-                                    if (LENGTH(elt_sum) < VELOCITY_EPSILON) {
+                                    if (elt_sum_len < VELOCITY_EPSILON) {
                                         
                                         // instead of a "contact_elt_length" threshhold, we'll use an
                                         //  arbitrary, small one
