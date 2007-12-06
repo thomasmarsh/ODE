@@ -47,6 +47,7 @@ you must verify visually.
 #include <ctype.h>
 #include <ode/ode.h>
 #include <drawstuff/drawstuff.h>
+#include "texturepath.h"
 
 #ifdef _MSC_VER
 #pragma warning(disable:4244 4305)  // for VC++, no precision loss complaints
@@ -1032,7 +1033,7 @@ void doTest (int argc, char **argv, int n, int fatal_if_bad_n)
   if (cmd_path_to_textures)
     fn.path_to_textures = cmd_path_to_textures;
   else
-  fn.path_to_textures = "../../drawstuff/textures";
+  fn.path_to_textures = DRAWSTUFF_TEXTURE_PATH;
 
   // run simulation
   if (cmd_graphics) {

@@ -57,6 +57,7 @@
 #define dsDrawSphere dsDrawSphereD
 #endif
 
+
 const dReal VEL_INC = 0.01; // Velocity increment
 
 // physics parameters
@@ -448,7 +449,7 @@ static void simLoop (int pause)
 
 
   if (!pause) {
-    double simstep = 0.5; // 1ms simulation steps
+    double simstep = 0.01; // 1ms simulation steps
     double dt = dsElapsedTime();
 
     int nrofsteps = (int) ceilf (dt/simstep);
