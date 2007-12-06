@@ -3,7 +3,7 @@
 
 noinst_LTLIBRARIES = libdrawstuff.la
 libdrawstuff_la_SOURCES = drawstuff.cpp internal.h
-libdrawstuff_la_CPPFLAGS = -I$(top_srcdir)/include -I$(top_builddir)/include
+libdrawstuff_la_CPPFLAGS = -I@TOPDIR@/include -I@BUILDDIR@/include
 libdrawstuff_la_LIBADD = @LIBWINMM@ @LIBGDI32@
 
 if WIN32
