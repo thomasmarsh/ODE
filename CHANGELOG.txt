@@ -9,6 +9,14 @@ the rules for this file:
 
 ------------------------------------------------------------------------------
 
+12/06/07 Rodrigo
+
+	* Modified autotools to use libtool for
+	  library generation and administration
+	* Removed release and debug flags for configure.in
+	  CPPFLAGS, CFLAGS, CXXFLAGS should be set by the
+	  user to their liking, respecting autotools policies.
+
 11/10/07 david
 
 	* Added 'Sweep and Prune' collision space.

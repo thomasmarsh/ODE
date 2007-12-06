@@ -1,5 +1,4 @@
-AM_CXXFLAGS = @ARCHFLAGS@ @CXXFLAGS@ -I$(top_srcdir)/include -I$(top_builddir)/include
-AM_CFLAGS = @ARCHFLAGS@ @CXXFLAGS@ -I$(top_srcdir)/include -I$(top_builddir)/include
+AM_CPPFLAGS = @XINCLUDES@ -I$(top_srcdir)/include -I$(top_builddir)/include
 
 noinst_PROGRAMS=demo_collision \
 		demo_slider \
@@ -99,54 +98,54 @@ demo_heightfield_LDFLAGS= -L$(top_builddir)/drawstuff/src \
 demo_convex_cd_LDFLAGS= -L$(top_builddir)/drawstuff/src \
 		-L$(top_builddir)/ode/src @LDFLAGS@ 
 
-demo_collision_DEPENDENCIES=	$(top_builddir)/ode/src/libode.a \
-				$(top_builddir)/drawstuff/src/libdrawstuff.a
-demo_slider_DEPENDENCIES=	$(top_builddir)/ode/src/libode.a \
-				$(top_builddir)/drawstuff/src/libdrawstuff.a
-demo_feedback_DEPENDENCIES=	$(top_builddir)/ode/src/libode.a \
-				$(top_builddir)/drawstuff/src/libdrawstuff.a
-demo_crash_DEPENDENCIES=	$(top_builddir)/ode/src/libode.a \
-				$(top_builddir)/drawstuff/src/libdrawstuff.a
-demo_space_DEPENDENCIES=	$(top_builddir)/ode/src/libode.a \
-				$(top_builddir)/drawstuff/src/libdrawstuff.a
-demo_I_DEPENDENCIES=		$(top_builddir)/ode/src/libode.a \
-				$(top_builddir)/drawstuff/src/libdrawstuff.a
-demo_friction_DEPENDENCIES=	$(top_builddir)/ode/src/libode.a \
-				$(top_builddir)/drawstuff/src/libdrawstuff.a
-demo_space_stress_DEPENDENCIES=	$(top_builddir)/ode/src/libode.a \
-				$(top_builddir)/drawstuff/src/libdrawstuff.a
-demo_boxstack_DEPENDENCIES=	$(top_builddir)/ode/src/libode.a \
-				$(top_builddir)/drawstuff/src/libdrawstuff.a
-demo_hinge_DEPENDENCIES=	$(top_builddir)/ode/src/libode.a \
-				$(top_builddir)/drawstuff/src/libdrawstuff.a
-demo_step_DEPENDENCIES=		$(top_builddir)/ode/src/libode.a \
-				$(top_builddir)/drawstuff/src/libdrawstuff.a
-demo_buggy_DEPENDENCIES=	$(top_builddir)/ode/src/libode.a \
-				$(top_builddir)/drawstuff/src/libdrawstuff.a
-demo_cyl_DEPENDENCIES=		$(top_builddir)/ode/src/libode.a \
-				$(top_builddir)/drawstuff/src/libdrawstuff.a
-demo_cylvssphere_DEPENDENCIES=	$(top_builddir)/ode/src/libode.a \
-				$(top_builddir)/drawstuff/src/libdrawstuff.a
-demo_joints_DEPENDENCIES=	$(top_builddir)/ode/src/libode.a \
-				$(top_builddir)/drawstuff/src/libdrawstuff.a
-demo_jointPR_DEPENDENCIES=	$(top_builddir)/ode/src/libode.a \
-				$(top_builddir)/drawstuff/src/libdrawstuff.a
-demo_motor_DEPENDENCIES=	$(top_builddir)/ode/src/libode.a \
-				$(top_builddir)/drawstuff/src/libdrawstuff.a
-demo_piston_DEPENDENCIES=	$(top_builddir)/ode/src/libode.a \
-				$(top_builddir)/drawstuff/src/libdrawstuff.a
-demo_chain1_DEPENDENCIES=	$(top_builddir)/ode/src/libode.a \
-				$(top_builddir)/drawstuff/src/libdrawstuff.a
-demo_chain2_DEPENDENCIES=	$(top_builddir)/ode/src/libode.a \
-				$(top_builddir)/drawstuff/src/libdrawstuff.a
-demo_ode_DEPENDENCIES=		$(top_builddir)/ode/src/libode.a \
-				$(top_builddir)/drawstuff/src/libdrawstuff.a
-demo_plane2d_DEPENDENCIES=	$(top_builddir)/ode/src/libode.a \
-				$(top_builddir)/drawstuff/src/libdrawstuff.a
-demo_heightfield_DEPENDENCIES=	$(top_builddir)/ode/src/libode.a \
-				$(top_builddir)/drawstuff/src/libdrawstuff.a
-demo_convex_cd_DEPENDENCIES=	$(top_builddir)/ode/src/libode.a \
-				$(top_builddir)/drawstuff/src/libdrawstuff.a
+demo_collision_DEPENDENCIES=	$(top_builddir)/ode/src/libode.la \
+				$(top_builddir)/drawstuff/src/libdrawstuff.la
+demo_slider_DEPENDENCIES=	$(top_builddir)/ode/src/libode.la \
+				$(top_builddir)/drawstuff/src/libdrawstuff.la
+demo_feedback_DEPENDENCIES=	$(top_builddir)/ode/src/libode.la \
+				$(top_builddir)/drawstuff/src/libdrawstuff.la
+demo_crash_DEPENDENCIES=	$(top_builddir)/ode/src/libode.la \
+				$(top_builddir)/drawstuff/src/libdrawstuff.la
+demo_space_DEPENDENCIES=	$(top_builddir)/ode/src/libode.la \
+				$(top_builddir)/drawstuff/src/libdrawstuff.la
+demo_I_DEPENDENCIES=		$(top_builddir)/ode/src/libode.la \
+				$(top_builddir)/drawstuff/src/libdrawstuff.la
+demo_friction_DEPENDENCIES=	$(top_builddir)/ode/src/libode.la \
+				$(top_builddir)/drawstuff/src/libdrawstuff.la
+demo_space_stress_DEPENDENCIES=	$(top_builddir)/ode/src/libode.la \
+				$(top_builddir)/drawstuff/src/libdrawstuff.la
+demo_boxstack_DEPENDENCIES=	$(top_builddir)/ode/src/libode.la \
+				$(top_builddir)/drawstuff/src/libdrawstuff.la
+demo_hinge_DEPENDENCIES=	$(top_builddir)/ode/src/libode.la \
+				$(top_builddir)/drawstuff/src/libdrawstuff.la
+demo_step_DEPENDENCIES=		$(top_builddir)/ode/src/libode.la \
+				$(top_builddir)/drawstuff/src/libdrawstuff.la
+demo_buggy_DEPENDENCIES=	$(top_builddir)/ode/src/libode.la \
+				$(top_builddir)/drawstuff/src/libdrawstuff.la
+demo_cyl_DEPENDENCIES=		$(top_builddir)/ode/src/libode.la \
+				$(top_builddir)/drawstuff/src/libdrawstuff.la
+demo_cylvssphere_DEPENDENCIES=	$(top_builddir)/ode/src/libode.la \
+				$(top_builddir)/drawstuff/src/libdrawstuff.la
+demo_joints_DEPENDENCIES=	$(top_builddir)/ode/src/libode.la \
+				$(top_builddir)/drawstuff/src/libdrawstuff.la
+demo_jointPR_DEPENDENCIES=	$(top_builddir)/ode/src/libode.la \
+				$(top_builddir)/drawstuff/src/libdrawstuff.la
+demo_motor_DEPENDENCIES=	$(top_builddir)/ode/src/libode.la \
+				$(top_builddir)/drawstuff/src/libdrawstuff.la
+demo_piston_DEPENDENCIES=	$(top_builddir)/ode/src/libode.la \
+				$(top_builddir)/drawstuff/src/libdrawstuff.la
+demo_chain1_DEPENDENCIES=	$(top_builddir)/ode/src/libode.la \
+				$(top_builddir)/drawstuff/src/libdrawstuff.la
+demo_chain2_DEPENDENCIES=	$(top_builddir)/ode/src/libode.la \
+				$(top_builddir)/drawstuff/src/libdrawstuff.la
+demo_ode_DEPENDENCIES=		$(top_builddir)/ode/src/libode.la \
+				$(top_builddir)/drawstuff/src/libdrawstuff.la
+demo_plane2d_DEPENDENCIES=	$(top_builddir)/ode/src/libode.la \
+				$(top_builddir)/drawstuff/src/libdrawstuff.la
+demo_heightfield_DEPENDENCIES=	$(top_builddir)/ode/src/libode.la \
+				$(top_builddir)/drawstuff/src/libdrawstuff.la
+demo_convex_cd_DEPENDENCIES=	$(top_builddir)/ode/src/libode.la \
+				$(top_builddir)/drawstuff/src/libdrawstuff.la
 
 if TRIMESH
 demo_trimesh_SOURCES= 			demo_trimesh.cpp
@@ -154,53 +153,53 @@ demo_moving_trimesh_SOURCES= 		demo_moving_trimesh.cpp
 demo_basket_SOURCES= 			demo_basket.cpp
 demo_trimesh_LDFLAGS= 			-L$(top_builddir)/drawstuff/src \
 					-L$(top_builddir)/ode/src @LDFLAGS@ \
-					@GL_LIBS@ @LIBS@
+					@GL_LIBS@  @XLIBRARIES@ @LIBSTDCXX@
 demo_moving_trimesh_LDFLAGS= 		-L$(top_builddir)/drawstuff/src \
 					-L$(top_builddir)/ode/src @LDFLAGS@ \
-					@GL_LIBS@ @LIBS@
+					@GL_LIBS@  @XLIBRARIES@ @LIBSTDCXX@
 demo_basket_LDFLAGS=          		-L$(top_builddir)/drawstuff/src \
                                         -L$(top_builddir)/ode/src @LDFLAGS@ \
-                                        @GL_LIBS@ @LIBS@
-demo_trimesh_DEPENDENCIES=		$(top_builddir)/ode/src/libode.a \
-					$(top_builddir)/drawstuff/src/libdrawstuff.a
-demo_moving_trimesh_DEPENDENCIES=	$(top_builddir)/ode/src/libode.a \
-					$(top_builddir)/drawstuff/src/libdrawstuff.a
+                                        @GL_LIBS@  @XLIBRARIES@ @LIBSTDCXX@
+demo_trimesh_DEPENDENCIES=		$(top_builddir)/ode/src/libode.la \
+					$(top_builddir)/drawstuff/src/libdrawstuff.la
+demo_moving_trimesh_DEPENDENCIES=	$(top_builddir)/ode/src/libode.la \
+					$(top_builddir)/drawstuff/src/libdrawstuff.la
 
-demo_basket_DEPENDENCIES=		$(top_builddir)/ode/src/libode.a \
-					$(top_builddir)/drawstuff/src/libdrawstuff.a
+demo_basket_DEPENDENCIES=		$(top_builddir)/ode/src/libode.la \
+					$(top_builddir)/drawstuff/src/libdrawstuff.la
 
 endif
 
-demo_ode_LDADD= -ldrawstuff $(top_builddir)/ode/src/libode.a @GL_LIBS@ @LIBS@
-demo_plane2d_LDADD= -ldrawstuff $(top_builddir)/ode/src/libode.a @GL_LIBS@ @LIBS@
-demo_heightfield_LDADD= -ldrawstuff $(top_builddir)/ode/src/libode.a @GL_LIBS@ @LIBS@
-demo_chain2_LDADD= -ldrawstuff $(top_builddir)/ode/src/libode.a @GL_LIBS@ @LIBS@
-demo_chain1_LDADD= -ldrawstuff $(top_builddir)/ode/src/libode.a @GL_LIBS@ @LIBS@
-demo_joints_LDADD= -ldrawstuff $(top_builddir)/ode/src/libode.a @GL_LIBS@ @LIBS@
-demo_jointPR_LDADD= -ldrawstuff $(top_builddir)/ode/src/libode.a @GL_LIBS@ @LIBS@
-demo_motor_LDADD= -ldrawstuff $(top_builddir)/ode/src/libode.a @GL_LIBS@ @LIBS@
-demo_piston_LDADD= -ldrawstuff $(top_builddir)/ode/src/libode.a @GL_LIBS@ @LIBS@
-demo_buggy_LDADD= -ldrawstuff $(top_builddir)/ode/src/libode.a @GL_LIBS@ @LIBS@
-demo_cyl_LDADD= -ldrawstuff $(top_builddir)/ode/src/libode.a @GL_LIBS@ @LIBS@
-demo_cylvssphere_LDADD= -ldrawstuff $(top_builddir)/ode/src/libode.a @GL_LIBS@ @LIBS@
-demo_step_LDADD= -ldrawstuff $(top_builddir)/ode/src/libode.a @GL_LIBS@ @LIBS@
-demo_hinge_LDADD= -ldrawstuff $(top_builddir)/ode/src/libode.a @GL_LIBS@ @LIBS@
-demo_boxstack_LDADD= -ldrawstuff $(top_builddir)/ode/src/libode.a @GL_LIBS@ @LIBS@
-demo_space_stress_LDADD= -ldrawstuff $(top_builddir)/ode/src/libode.a @GL_LIBS@ @LIBS@
-demo_friction_LDADD= -ldrawstuff $(top_builddir)/ode/src/libode.a @GL_LIBS@ @LIBS@
-demo_I_LDADD= -ldrawstuff $(top_builddir)/ode/src/libode.a @GL_LIBS@ @LIBS@
-demo_space_LDADD= -ldrawstuff $(top_builddir)/ode/src/libode.a @GL_LIBS@ @LIBS@
-demo_crash_LDADD= -ldrawstuff $(top_builddir)/ode/src/libode.a @GL_LIBS@ @LIBS@
-demo_slider_LDADD= -ldrawstuff $(top_builddir)/ode/src/libode.a @GL_LIBS@ @LIBS@
-demo_feedback_LDADD= -ldrawstuff $(top_builddir)/ode/src/libode.a @GL_LIBS@ @LIBS@
-demo_collision_LDADD= -ldrawstuff $(top_builddir)/ode/src/libode.a @GL_LIBS@ @LIBS@
-demo_convex_cd_LDADD= -ldrawstuff $(top_builddir)/ode/src/libode.a @GL_LIBS@ @LIBS@
+demo_ode_LDADD= -ldrawstuff $(top_builddir)/ode/src/libode.la @GL_LIBS@  @XLIBRARIES@ @LIBSTDCXX@
+demo_plane2d_LDADD= -ldrawstuff $(top_builddir)/ode/src/libode.la @GL_LIBS@  @XLIBRARIES@ @LIBSTDCXX@
+demo_heightfield_LDADD= -ldrawstuff $(top_builddir)/ode/src/libode.la @GL_LIBS@  @XLIBRARIES@ @LIBSTDCXX@
+demo_chain2_LDADD= -ldrawstuff $(top_builddir)/ode/src/libode.la @GL_LIBS@  @XLIBRARIES@ @LIBSTDCXX@
+demo_chain1_LDADD= -ldrawstuff $(top_builddir)/ode/src/libode.la @GL_LIBS@  @XLIBRARIES@ @LIBSTDCXX@
+demo_joints_LDADD= -ldrawstuff $(top_builddir)/ode/src/libode.la @GL_LIBS@  @XLIBRARIES@ @LIBSTDCXX@
+demo_jointPR_LDADD= -ldrawstuff $(top_builddir)/ode/src/libode.la @GL_LIBS@  @XLIBRARIES@ @LIBSTDCXX@
+demo_motor_LDADD= -ldrawstuff $(top_builddir)/ode/src/libode.la @GL_LIBS@  @XLIBRARIES@ @LIBSTDCXX@
+demo_piston_LDADD= -ldrawstuff $(top_builddir)/ode/src/libode.la @GL_LIBS@  @XLIBRARIES@ @LIBSTDCXX@
+demo_buggy_LDADD= -ldrawstuff $(top_builddir)/ode/src/libode.la @GL_LIBS@  @XLIBRARIES@ @LIBSTDCXX@
+demo_cyl_LDADD= -ldrawstuff $(top_builddir)/ode/src/libode.la @GL_LIBS@  @XLIBRARIES@ @LIBSTDCXX@
+demo_cylvssphere_LDADD= -ldrawstuff $(top_builddir)/ode/src/libode.la @GL_LIBS@  @XLIBRARIES@ @LIBSTDCXX@
+demo_step_LDADD= -ldrawstuff $(top_builddir)/ode/src/libode.la @GL_LIBS@  @XLIBRARIES@ @LIBSTDCXX@
+demo_hinge_LDADD= -ldrawstuff $(top_builddir)/ode/src/libode.la @GL_LIBS@  @XLIBRARIES@ @LIBSTDCXX@
+demo_boxstack_LDADD= -ldrawstuff $(top_builddir)/ode/src/libode.la @GL_LIBS@  @XLIBRARIES@ @LIBSTDCXX@
+demo_space_stress_LDADD= -ldrawstuff $(top_builddir)/ode/src/libode.la @GL_LIBS@  @XLIBRARIES@ @LIBSTDCXX@
+demo_friction_LDADD= -ldrawstuff $(top_builddir)/ode/src/libode.la @GL_LIBS@  @XLIBRARIES@ @LIBSTDCXX@
+demo_I_LDADD= -ldrawstuff $(top_builddir)/ode/src/libode.la @GL_LIBS@  @XLIBRARIES@ @LIBSTDCXX@
+demo_space_LDADD= -ldrawstuff $(top_builddir)/ode/src/libode.la @GL_LIBS@  @XLIBRARIES@ @LIBSTDCXX@
+demo_crash_LDADD= -ldrawstuff $(top_builddir)/ode/src/libode.la @GL_LIBS@  @XLIBRARIES@ @LIBSTDCXX@
+demo_slider_LDADD= -ldrawstuff $(top_builddir)/ode/src/libode.la @GL_LIBS@  @XLIBRARIES@ @LIBSTDCXX@
+demo_feedback_LDADD= -ldrawstuff $(top_builddir)/ode/src/libode.la @GL_LIBS@  @XLIBRARIES@ @LIBSTDCXX@
+demo_collision_LDADD= -ldrawstuff $(top_builddir)/ode/src/libode.la @GL_LIBS@  @XLIBRARIES@ @LIBSTDCXX@
+demo_convex_cd_LDADD= -ldrawstuff $(top_builddir)/ode/src/libode.la @GL_LIBS@  @XLIBRARIES@ @LIBSTDCXX@
 
 
 if TRIMESH
-demo_trimesh_LDADD= -ldrawstuff $(top_builddir)/ode/src/libode.a @GL_LIBS@ @LIBS@
-demo_moving_trimesh_LDADD= -ldrawstuff $(top_builddir)/ode/src/libode.a @GL_LIBS@ @LIBS@
-demo_basket_LDADD= -ldrawstuff $(top_builddir)/ode/src/libode.a @GL_LIBS@ @LIBS@
+demo_trimesh_LDADD= -ldrawstuff $(top_builddir)/ode/src/libode.la @GL_LIBS@  @XLIBRARIES@ @LIBSTDCXX@
+demo_moving_trimesh_LDADD= -ldrawstuff $(top_builddir)/ode/src/libode.la @GL_LIBS@  @XLIBRARIES@ @LIBSTDCXX@
+demo_basket_LDADD= -ldrawstuff $(top_builddir)/ode/src/libode.la @GL_LIBS@ @XLIBRARIES@ @LIBSTDCXX@
 endif
 
 

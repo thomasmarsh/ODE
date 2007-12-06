@@ -1,48 +1,27 @@
-AM_CXXFLAGS = @ARCHFLAGS@ -I$(top_srcdir)/include -I$(top_builddir)/include
-AM_CPPFLAGS = @ARCHFLAGS@ -I$(top_srcdir)/include -I$(top_builddir)/include
-AM_CFLAGS = @ARCHFLAGS@ -I$(top_srcdir)/include -I$(top_builddir)/include
-lib_LIBRARIES = libode.a
-libode_a_CPPFLAGS = -O2
-
-libode_a_CPPFLAGS += -fPIC
-
-# Fake an executable in order to get a shared library
-# Note the elegant and cunning way to trick Autotools to install a program
-# in a lib directory. --Rodrigo
-traplibdir=$(libdir)
-EXEEXT=@so_ext@
-traplib_PROGRAMS=libode
-libode_SOURCES=
-libode_DEPENDENCIES = libfast.a libode.a
-libode_LDFLAGS= @SHARED_LDFLAGS@
-if USE_SONAME
-libode_LDFLAGS+=-Wl,-soname,@ODE_SONAME@
-endif
-libode_LDADD=$(libode_a_OBJECTS) $(libfast_a_OBJECTS)
+lib_LTLIBRARIES = libode.la
+libode_la_CPPFLAGS = -I$(top_srcdir)/include -I$(top_builddir)/include
+libode_la_LDFLAGS=@EXTRA_LIBTOOL_LDFLAGS@ -release @LIBTOOL_RELEASE@
+libode_la_DEPENDENCIES = libfast.la
+libode_la_LIBADD= $(libfast_la_OBJECTS)
 
 if OPCODE
-libode_DEPENDENCIES+= libOPCODE.a
-libode_LDADD+=$(libOPCODE_a_OBJECTS)
+libode_la_DEPENDENCIES+= libOPCODE.la
+libode_la_LIBADD+=$(libOPCODE_la_OBJECTS)
 endif
 
 
 if GIMPACT
-libode_DEPENDENCIES+= libGIMPACT.a
-libode_LDADD+=$(libGIMPACT_a_OBJECTS)
+libode_la_DEPENDENCIES+= libGIMPACT.la
+libode_la_LIBADD+=$(libGIMPACT_la_OBJECTS)
 endif
 
 
 # convenience library to simulate per object cflags
-noinst_LIBRARIES= libfast.a
-libfast_a_CFLAGS= -O1
-libfast_a_SOURCES= fastldlt.c fastltsolve.c fastdot.c fastlsolve.c
-
-libfast_a_CFLAGS += -fPIC
-
-libode_a_DEPENDENCIES = libfast.a
-libode_a_LIBADD= $(libfast_a_OBJECTS)
-
-libode_a_SOURCES = 	objects.h \
+noinst_LTLIBRARIES= libfast.la
+libfast_la_CPPFLAGS= -I$(top_srcdir)/include -I$(top_builddir)/include
+libfast_la_CFLAGS= -O1
+libfast_la_SOURCES= fastldlt.c fastltsolve.c fastdot.c fastlsolve.c
+libode_la_SOURCES = 	objects.h \
 			obstack.cpp \
 			collision_util.cpp \
 			obstack.h \
@@ -105,12 +84,12 @@ libode_a_SOURCES = 	objects.h \
 
 
 if GIMPACT
-noinst_LIBRARIES+= libGIMPACT.a
-libGIMPACT_a_CPPFLAGS= -O2 -fno-strict-aliasing -fPIC
+noinst_LTLIBRARIES+= libGIMPACT.la
+libGIMPACT_la_CPPFLAGS= -O2 -fno-strict-aliasing
 
-libode_a_SOURCES+= collision_trimesh_gimpact.cpp
+libode_la_SOURCES+= collision_trimesh_gimpact.cpp
 
-libGIMPACT_a_SOURCES = \
+libGIMPACT_la_SOURCES = \
   @TOPDIR@/GIMPACT/src/gim_boxpruning.cpp \
   @TOPDIR@/GIMPACT/src/gim_contact.cpp \
   @TOPDIR@/GIMPACT/src/gim_math.cpp \
@@ -123,12 +102,10 @@ libGIMPACT_a_SOURCES = \
   @TOPDIR@/GIMPACT/src/gim_trimesh_trimesh_collision.cpp \
   @TOPDIR@/GIMPACT/src/gimpact.cpp
 
-libode_a_DEPENDENCIES+=libGIMPACT.a
-libode_a_LIBADD+= $(libGIMPACT_a_OBJECTS)
-AM_CXXFLAGS += -I@TOPDIR@/GIMPACT/include -DdTRIMESH_ENABLED -DdTRIMESH_GIMPACT
-AM_CFLAGS += -I@TOPDIR@/GIMPACT/include -DdTRIMESH_ENABLED -DdTRIMESH_GIMPACT
-
-libode_a_SOURCES+=	collision_trimesh_trimesh.cpp \
+libode_la_DEPENDENCIES+=libGIMPACT.la
+libode_la_LIBADD+= $(libGIMPACT_la_OBJECTS)
+libode_la_CPPFLAGS+= -I@TOPDIR@/GIMPACT/include -DdTRIMESH_ENABLED -DdTRIMESH_GIMPACT
+libode_la_SOURCES+=	collision_trimesh_trimesh.cpp \
 			collision_trimesh_sphere.cpp \
 			collision_trimesh_ray.cpp \
 			collision_trimesh_opcode.cpp \
@@ -148,11 +125,11 @@ endif
 
 
 if OPCODE
-noinst_LIBRARIES+= libOPCODE.a
-libOPCODE_a_CPPFLAGS= -O2 -fno-strict-aliasing -fPIC
+noinst_LTLIBRARIES+= libOPCODE.la
+libOPCODE_la_CPPFLAGS= -O2 -fno-strict-aliasing
 
 
-libOPCODE_a_SOURCES=	@TOPDIR@/OPCODE/OPC_AABBCollider.cpp \
+libOPCODE_la_SOURCES=	@TOPDIR@/OPCODE/OPC_AABBCollider.cpp \
 			@TOPDIR@/OPCODE/OPC_AABBTree.cpp \
 			@TOPDIR@/OPCODE/OPC_BaseModel.cpp \
 			@TOPDIR@/OPCODE/OPC_BoxPruning.cpp \
@@ -188,12 +165,11 @@ libOPCODE_a_SOURCES=	@TOPDIR@/OPCODE/OPC_AABBCollider.cpp \
 			@TOPDIR@/OPCODE/Ice/IceSegment.cpp \
 			@TOPDIR@/OPCODE/Ice/IceTriangle.cpp \
 			@TOPDIR@/OPCODE/Ice/IceUtils.cpp
-libode_a_DEPENDENCIES+=libOPCODE.a
+libode_la_DEPENDENCIES+=libOPCODE.la
 
-libode_a_LIBADD+= $(libOPCODE_a_OBJECTS)
-AM_CXXFLAGS += -I@TOPDIR@/OPCODE -I@TOPDIR@/OPCODE/Ice -DdTRIMESH_ENABLED -DdTRIMESH_OPCODE
-AM_CFLAGS += -I@TOPDIR@/OPCODE -I@TOPDIR@/OPCODE/Ice -DdTRIMESH_ENABLED -DdTRIMESH_OPCODE
-libode_a_SOURCES+=	collision_trimesh_trimesh.cpp \
+libode_la_LIBADD+= $(libOPCODE_la_OBJECTS)
+libode_la_CPPFLAGS += -I@TOPDIR@/OPCODE -I@TOPDIR@/OPCODE/Ice -DdTRIMESH_ENABLED -DdTRIMESH_OPCODE
+libode_la_SOURCES+=	collision_trimesh_trimesh.cpp \
 			collision_trimesh_sphere.cpp \
 			collision_trimesh_ray.cpp \
 			collision_trimesh_opcode.cpp \

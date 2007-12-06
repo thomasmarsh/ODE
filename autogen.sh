@@ -30,6 +30,8 @@ echo "Warnings about underquoted definitions are harmless"
  
 echo "Running aclocal"
 aclocal -I . || exit 1
+echo "Running libtoolize"
+libtoolize --copy --force || exit 1
 echo "Running autoheader"
 autoheader || exit 1
 echo "Running automake"

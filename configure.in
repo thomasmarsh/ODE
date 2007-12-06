@@ -1,5 +1,6 @@
 dnl Initial configure.in by Rodrigo Hernandez
 dnl Modified in 26/10/2005 by Rodrigo Hernandez
+dnl Modified in 19/11/2007 by Rodrigo Hernandez
 
 dnl AC_INIT does not take a macro as a version nr: set it separately! - Bram
 AC_INIT(ODE,0.9.0,ode@ode.org)
@@ -9,6 +10,9 @@ ODE_CURRENT=0
 ODE_REVISION=9
 ODE_AGE=0
 ODE_RELEASE=[$ODE_CURRENT].[$ODE_REVISION].[$ODE_AGE]
+dnl Libtool release is an interface id, 
+dnl don't change unless the ode API is no longer backward compatible
+LIBTOOL_RELEASE=0
 AC_CANONICAL_HOST
 AC_CANONICAL_TARGET
 
@@ -18,13 +22,18 @@ AC_C_BIGENDIAN
 AC_PATH_X
 AC_PATH_XTRA
 
-ODE_SONAME=libode.so.[$ODE_CURRENT]
+
+AC_LIBTOOL_WIN32_DLL
+AM_PROG_LIBTOOL
+AC_SUBST(LIBTOOL_DEPS)
+AC_SUBST(LIBTOOL)
 
 AC_SUBST(ODE_CURRENT)
 AC_SUBST(ODE_REVISION)
 AC_SUBST(ODE_AGE)
 AC_SUBST(ODE_RELEASE)
 AC_SUBST(ODE_SONAME)
+AC_SUBST(LIBTOOL_RELEASE)
 
 dnl This is needed because we have subdirectories
 AC_PROG_MAKE_SET
@@ -36,35 +45,13 @@ AC_C_CONST
 AC_C_INLINE
 AC_C_VOLATILE
 AC_HEADER_STDBOOL
-AC_PROG_RANLIB
 AC_TYPE_SIZE_T
-
-dnl Check if using sonames is requested
-dnl THIS IS TEMPORARY!
-AC_MSG_CHECKING(if a soname should be set)
-AC_ARG_ENABLE(soname,AC_HELP_STRING([--enable-soname],
-[Configure ODE shared library to set the soname field on ELF files]),
-use_soname=$enableval,use_soname=no)
-AC_MSG_RESULT($use_soname)
-AM_CONDITIONAL(USE_SONAME, test x$use_soname = xyes)
-
 
 dnl Check if we want to build demos
 AC_MSG_CHECKING(if tests should be built)
 AC_ARG_ENABLE(demos,AC_HELP_STRING([--enable-demos], [build tests]), enable_demos=$enableval,enable_demos=yes)
 AC_MSG_RESULT($enable_demos)
 AM_CONDITIONAL(ENABLE_DEMOS, test x$enable_demos = xyes)
-
-
-AC_ARG_WITH(arch,AC_HELP_STRING([--with-arch=[arch]],
-[build for $arch, where arch is any of the -march flags passed to gcc, without the -march, for example --with-arch=pentium3]),
-arch=$withval,arch=no)
-ARCHFLAGS=""
-if test "x$arch" != xno
-then
-    ARCHFLAGS="-march=$arch"
-fi
-AC_SUBST(ARCHFLAGS)
 
 dnl Decide whether or not SSE is available
 dnl Why dont we compile and run programs like we do to find out if
@@ -290,32 +277,6 @@ fi
 AC_MSG_RESULT($cpu64)
 AM_CONDITIONAL(X86_64_SYSTEM, test x$cpu64 = xyes)
 
-AC_MSG_CHECKING(if building a release library)
-AC_ARG_ENABLE(release,AC_HELP_STRING([--enable-release],
-[build a release library with -fomit-frame-pointer and -ffast-math]),
-release=$enableval,release=no)
-if test "x$release" == xyes
-then
-    CFLAGS="$CFLAGS -fomit-frame-pointer -ffast-math"
-    CPPFLAGS="$CPPFLAGS -fomit-frame-pointer -ffast-math"
-    CXXFLAGS="$CXXFLAGS -fomit-frame-pointer -ffast-math"
-    AC_DEFINE(dNODEBUG,,[Disable debug output])
-fi
-AC_MSG_RESULT($release)
-
-AC_MSG_CHECKING(if building a debug library)
-AC_ARG_ENABLE(debug,AC_HELP_STRING([--enable-debug],
-[Add debug symbols to the library with -g]),
-debug=$enableval,debug=yes)
-if test "x$debug" == xyes
-then
-    CFLAGS="$CFLAGS -g"
-    CPPFLAGS="$CPPFLAGS -g"
-    CXXFLAGS="$CXXFLAGS -g"
-fi
-AC_MSG_RESULT($debug)
-
-
 dnl Check variable type sizes
 AC_CHECK_SIZEOF(char)
 AC_CHECK_SIZEOF(int)
@@ -324,12 +285,13 @@ AC_CHECK_SIZEOF(long int)
 AC_CHECK_SIZEOF(void*)
 
 dnl Set some Platform Specific Variables
+EXTRA_LIBTOOL_LDFLAGS=
 case "$host_os" in
   cygwin* | mingw*)
     so_ext=".dll"
-    DLLDEFINE="-DODE_DLL"
-    SHARED_LDFLAGS="-shared"
+    DLLDEFINE="-DODE_DLL"    
     drawstuff="Win32" # if in a Windows enviroment
+    EXTRA_LIBTOOL_LDFLAGS="-no-undefined"
     ;;
   *apple* | *darwin*) # For Mac OS X
     so_ext=".dylib"
@@ -352,6 +314,7 @@ case "$host_os" in
     SHARED_LDFLAGS="-shared"
     ;;
 esac
+AC_SUBST(EXTRA_LIBTOOL_LDFLAGS)
 dnl Set Conditionals
 AM_CONDITIONAL(WIN32, test x$drawstuff = xWin32)
 AM_CONDITIONAL(X11, test x$drawstuff = xX11)
@@ -368,14 +331,16 @@ AC_SUBST(so_ext)
 AC_SUBST(SHARED_LDFLAGS)
 
 dnl Check for AC_PATH_X variables
-if test "X$x_includes" != "XNONE"; then
-	CFLAGS="$CFLAGS -I$x_includes"
-	CXXFLAGS="$CXXFLAGS -I$x_includes"
+XINCLUDES=
+XLIBRARIES=
+if test "X$x_includes" != "XNONE" || "X$x_includes" != "X"; then
+	XINCLUDES="-I$x_includes"
 fi
-if test "X$x_libraries" != "XNONE"; then
-	CFLAGS="$CFLAGS -L$x_libraries"
-	CXXFLAGS="$CXXFLAGS -L$x_libraries"
+if test "X$x_libraries" != "XNONE" || "X$x_libraries" != "X"; then
+	XLIBRARIES="-L$x_libraries"
 fi
+AC_SUBST(XINCLUDES)
+AC_SUBST(XLIBRARIES)
 
 dnl Check for OpenGL
 if test "x$drawstuff" = "xOSX"; then
@@ -398,34 +363,36 @@ else
   LDFLAGS="$TEMP_LDFLAGS"
   AC_CHECK_LIB(opengl32, main,[GL_LIBS="$GL_LIBS -lopengl32"])
   AC_CHECK_LIB(glu32, main,[GL_LIBS="$GL_LIBS -lglu32"])
-  AC_CHECK_LIB(Xmu, main,[GL_LIBS="$GL_LIBS -lXmu"])
-  AC_CHECK_LIB(Xi, main,[GL_LIBS="$GL_LIBS -lXi"])
-  AC_CHECK_LIB(X, main,[GL_LIBS="$GL_LIBS -lX"])
-  AC_CHECK_LIB(X11, main,[GL_LIBS="$GL_LIBS -lX11"])
 fi
 AC_SUBST(GL_LIBS)
 
+dnl These libraries are checked for, but apparently not really needed
+AC_CHECK_LIB(Xmu,main,[LIBXMU="-lXmu"],[LIBXMU=])
+AC_SUBST(LIBXMU)
+AC_CHECK_LIB(Xi,main,[LIBXI="-lXi"],[LIBXI=])
+AC_SUBST(LIBXI)
+AC_CHECK_LIB(X, main,[LIBX="-lX"],[LIBX=])
+AC_SUBST(LIBX)
+AC_CHECK_LIB(X11, main,[LIBX11="-lX11"],[LIBX11=])
+AC_SUBST(LIBX11)
+
 dnl Add some Windows libraries if found
-AC_CHECK_LIB(comctl32,main,[LIBS="$LIBS -lcomctl32"])
-AC_CHECK_LIB(kernel32,main,[LIBS="$LIBS -lkernel32"])
-AC_CHECK_LIB(user32,main,[LIBS="$LIBS -luser32"])
-AC_CHECK_LIB(gdi32,main,[LIBS="$LIBS -lgdi32"])
-AC_CHECK_LIB(winmm,main,[LIBS="$LIBS -lwinmm"])
+AC_CHECK_LIB(gdi32,main,[LIBGDI32="-lgdi32"],[LIBGDI32=])
+AC_SUBST(LIBGDI32)
+AC_CHECK_LIB(winmm,main,[LIBWINMM="-lwinmm"],[LIBWINMM=])
+AC_SUBST(LIBWINMM)
 
-dnl Add math and standard c++ lib just in case
-AC_CHECK_LIB(stdc++,main,[LIBS="$LIBS -lstdc++"])
-AC_CHECK_LIB(m,main,[LIBS="$LIBS -lm"])
+dnl stdc++ is required when linking C programs against ode
+AC_CHECK_LIB(stdc++,main,[LIBSTDCXX="-lstdc++"],[LIBSTDCXX=])
+AC_SUBST(LIBSTDCXX)
 AC_CHECK_LIB(pthread,main,[LIBS="$LIBS -lpthread"])
-
 
 TOPDIR=`cd $srcdir;pwd`
 AC_SUBST(TOPDIR)
 
 dnl Check if the user wants to profile ODE using gprof
 AC_MSG_CHECKING(for gprof)
-AC_ARG_ENABLE(gprof,
-AC_HELP_STRING([--enable-gprof],[enable profiling with gprof]),
-gprof=$enableval,gprof=no)
+AC_ARG_ENABLE([gprof],[AC_HELP_STRING([--enable-gprof],[enable profiling with gprof])],gprof=$enableval,gprof=no)
 if test "$gprof" != no
 then
     CFLAGS="-pg $CFLAGS"
@@ -562,9 +529,6 @@ echo "  Use GIMPACT:             $gimpact"
 echo "  Use gyroscopic term:     $gyroscopic"
 echo "  Is this a Pentium:       $pentium"
 echo "  Is the CPU x86-64:       $cpu64"
-echo "  Is this a release build: $release"
-echo "  Adding debug symbols:    $debug"
-echo "  Using SONAME:		 $use_soname"
 echo "  Headers will be installed in $prefix/include/ode"
 echo "  Libraries will be installed in $prefix/lib"
 

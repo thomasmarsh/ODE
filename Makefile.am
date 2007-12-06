@@ -22,16 +22,3 @@ dist-zip: ${PACKAGE}-${VERSION}.tar.gz
 	tar -zxf ${PACKAGE}-${VERSION}.tar.gz && \
 	zip -r ${PACKAGE}-${VERSION}.zip ${PACKAGE}-${VERSION} && \
 	rm -rf ${PACKAGE}-${VERSION}
-
-if USE_SONAME
-install-exec-hook:
-	ln -s $(libdir)/@ODE_SONAME@.@ODE_REVISION@.@ODE_AGE@ \
-	$(libdir)/libode.so
-	ln -s $(libdir)/@ODE_SONAME@.@ODE_REVISION@.@ODE_AGE@ \
-	$(libdir)/@ODE_SONAME@
-	ln -s $(libdir)/@ODE_SONAME@.@ODE_REVISION@.@ODE_AGE@ \
-	$(libdir)/@ODE_SONAME@.@ODE_REVISION@
-	/sbin/ldconfig
-else
-install-exec-hook:
-endif

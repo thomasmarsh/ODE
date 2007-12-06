@@ -63,8 +63,20 @@ and another for just about everything else.
    --with-trimesh=opcode use OPCODE for trimesh code
    --with-trimesh=gimpact use GIMPACT for trimesh code
 
-   --enable-release builds an optimized library
-   --enabled-shared builds a shared library
+  --enabled-shared builds a shared library
+
+ To pass specific flags for an optimized build, you must do so
+ in the CPPFLAGS CFLAGS and CXXFLAGS enviroment variables, 
+ you can set these with the export command before running configure
+ or by defining them on the same call to configure, so for example
+ if you are building for an athlon xp processor and you want the
+ compiler to use SSE instructions you can run configure as follows:
+
+ $ CFLAGS="-msse -march=atlon-xp" CXXFLAGS="-msse -march=atlon-xp" ./configure
+
+ Note that you must set both CFLAGS and CXXFLAGS as ODE contains a mixture of C and C++ files.
+ For preprocessor flags such as -L and -I to define library and header paths 
+ respectively use CPPFLAGS.
     
  Once configure has run successfully, build and install ODE:
  
