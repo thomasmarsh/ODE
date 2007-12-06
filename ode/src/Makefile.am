@@ -4,21 +4,10 @@ libode_la_LDFLAGS=@EXTRA_LIBTOOL_LDFLAGS@ -release @LIBTOOL_RELEASE@
 libode_la_DEPENDENCIES = libfast.la
 libode_la_LIBADD= $(libfast_la_OBJECTS)
 
-if OPCODE
-libode_la_DEPENDENCIES+= libOPCODE.la
-libode_la_LIBADD+=$(libOPCODE_la_OBJECTS)
-endif
-
-
-if GIMPACT
-libode_la_DEPENDENCIES+= libGIMPACT.la
-libode_la_LIBADD+=$(libGIMPACT_la_OBJECTS)
-endif
-
 
 # convenience library to simulate per object cflags
 noinst_LTLIBRARIES= libfast.la
-libfast_la_CPPFLAGS= -I$(top_srcdir)/include -I$(top_builddir)/include
+libfast_la_CPPFLAGS= -I$(top_srcdir)/include -I$(top_srcdir)/include
 libfast_la_CFLAGS= -O1
 libfast_la_SOURCES= fastldlt.c fastltsolve.c fastdot.c fastlsolve.c
 libode_la_SOURCES = 	objects.h \
@@ -85,26 +74,26 @@ libode_la_SOURCES = 	objects.h \
 
 if GIMPACT
 noinst_LTLIBRARIES+= libGIMPACT.la
-libGIMPACT_la_CPPFLAGS= -O2 -fno-strict-aliasing
+libGIMPACT_la_CPPFLAGS= -O2 -fno-strict-aliasing -I$(top_srcdir)/GIMPACT/include
 
 libode_la_SOURCES+= collision_trimesh_gimpact.cpp
 
 libGIMPACT_la_SOURCES = \
-  @TOPDIR@/GIMPACT/src/gim_boxpruning.cpp \
-  @TOPDIR@/GIMPACT/src/gim_contact.cpp \
-  @TOPDIR@/GIMPACT/src/gim_math.cpp \
-  @TOPDIR@/GIMPACT/src/gim_memory.cpp \
-  @TOPDIR@/GIMPACT/src/gim_tri_tri_overlap.cpp \
-  @TOPDIR@/GIMPACT/src/gim_trimesh.cpp \
-  @TOPDIR@/GIMPACT/src/gim_trimesh_capsule_collision.cpp \
-  @TOPDIR@/GIMPACT/src/gim_trimesh_ray_collision.cpp \
-  @TOPDIR@/GIMPACT/src/gim_trimesh_sphere_collision.cpp \
-  @TOPDIR@/GIMPACT/src/gim_trimesh_trimesh_collision.cpp \
-  @TOPDIR@/GIMPACT/src/gimpact.cpp
+  $(top_srcdir)/GIMPACT/src/gim_boxpruning.cpp \
+  $(top_srcdir)/GIMPACT/src/gim_contact.cpp \
+  $(top_srcdir)/GIMPACT/src/gim_math.cpp \
+  $(top_srcdir)/GIMPACT/src/gim_memory.cpp \
+  $(top_srcdir)/GIMPACT/src/gim_tri_tri_overlap.cpp \
+  $(top_srcdir)/GIMPACT/src/gim_trimesh.cpp \
+  $(top_srcdir)/GIMPACT/src/gim_trimesh_capsule_collision.cpp \
+  $(top_srcdir)/GIMPACT/src/gim_trimesh_ray_collision.cpp \
+  $(top_srcdir)/GIMPACT/src/gim_trimesh_sphere_collision.cpp \
+  $(top_srcdir)/GIMPACT/src/gim_trimesh_trimesh_collision.cpp \
+  $(top_srcdir)/GIMPACT/src/gimpact.cpp
 
 libode_la_DEPENDENCIES+=libGIMPACT.la
 libode_la_LIBADD+= $(libGIMPACT_la_OBJECTS)
-libode_la_CPPFLAGS+= -I@TOPDIR@/GIMPACT/include -DdTRIMESH_ENABLED -DdTRIMESH_GIMPACT
+libode_la_CPPFLAGS+= -DdTRIMESH_ENABLED -DdTRIMESH_GIMPACT -I$(top_srcdir)/GIMPACT/include
 libode_la_SOURCES+=	collision_trimesh_trimesh.cpp \
 			collision_trimesh_sphere.cpp \
 			collision_trimesh_ray.cpp \
@@ -126,49 +115,48 @@ endif
 
 if OPCODE
 noinst_LTLIBRARIES+= libOPCODE.la
-libOPCODE_la_CPPFLAGS= -O2 -fno-strict-aliasing
+libOPCODE_la_CPPFLAGS= -O2 -fno-strict-aliasing -I$(top_srcdir)/OPCODE
 
-
-libOPCODE_la_SOURCES=	@TOPDIR@/OPCODE/OPC_AABBCollider.cpp \
-			@TOPDIR@/OPCODE/OPC_AABBTree.cpp \
-			@TOPDIR@/OPCODE/OPC_BaseModel.cpp \
-			@TOPDIR@/OPCODE/OPC_BoxPruning.cpp \
-			@TOPDIR@/OPCODE/OPC_Collider.cpp \
-			@TOPDIR@/OPCODE/OPC_Common.cpp \
-			@TOPDIR@/OPCODE/OPC_HybridModel.cpp \
-			@TOPDIR@/OPCODE/OPC_LSSCollider.cpp \
-			@TOPDIR@/OPCODE/OPC_MeshInterface.cpp \
-			@TOPDIR@/OPCODE/OPC_Model.cpp \
-			@TOPDIR@/OPCODE/OPC_OBBCollider.cpp \
-			@TOPDIR@/OPCODE/Opcode.cpp \
-			@TOPDIR@/OPCODE/OPC_OptimizedTree.cpp \
-			@TOPDIR@/OPCODE/OPC_Picking.cpp \
-			@TOPDIR@/OPCODE/OPC_PlanesCollider.cpp \
-			@TOPDIR@/OPCODE/OPC_RayCollider.cpp \
-			@TOPDIR@/OPCODE/OPC_SphereCollider.cpp \
-			@TOPDIR@/OPCODE/OPC_SweepAndPrune.cpp \
-			@TOPDIR@/OPCODE/OPC_TreeBuilders.cpp \
-			@TOPDIR@/OPCODE/OPC_TreeCollider.cpp \
-			@TOPDIR@/OPCODE/OPC_VolumeCollider.cpp \
-			@TOPDIR@/OPCODE/Ice/IceAABB.cpp \
-			@TOPDIR@/OPCODE/Ice/IceContainer.cpp \
-			@TOPDIR@/OPCODE/Ice/IceHPoint.cpp \
-			@TOPDIR@/OPCODE/Ice/IceIndexedTriangle.cpp \
-			@TOPDIR@/OPCODE/Ice/IceMatrix3x3.cpp \
-			@TOPDIR@/OPCODE/Ice/IceMatrix4x4.cpp \
-			@TOPDIR@/OPCODE/Ice/IceOBB.cpp \
-			@TOPDIR@/OPCODE/Ice/IcePlane.cpp \
-			@TOPDIR@/OPCODE/Ice/IcePoint.cpp \
-			@TOPDIR@/OPCODE/Ice/IceRandom.cpp \
-			@TOPDIR@/OPCODE/Ice/IceRay.cpp \
-			@TOPDIR@/OPCODE/Ice/IceRevisitedRadix.cpp \
-			@TOPDIR@/OPCODE/Ice/IceSegment.cpp \
-			@TOPDIR@/OPCODE/Ice/IceTriangle.cpp \
-			@TOPDIR@/OPCODE/Ice/IceUtils.cpp
+libOPCODE_la_SOURCES=	$(top_srcdir)/OPCODE/OPC_AABBCollider.cpp \
+			$(top_srcdir)/OPCODE/OPC_AABBTree.cpp \
+			$(top_srcdir)/OPCODE/OPC_BaseModel.cpp \
+			$(top_srcdir)/OPCODE/OPC_BoxPruning.cpp \
+			$(top_srcdir)/OPCODE/OPC_Collider.cpp \
+			$(top_srcdir)/OPCODE/OPC_Common.cpp \
+			$(top_srcdir)/OPCODE/OPC_HybridModel.cpp \
+			$(top_srcdir)/OPCODE/OPC_LSSCollider.cpp \
+			$(top_srcdir)/OPCODE/OPC_MeshInterface.cpp \
+			$(top_srcdir)/OPCODE/OPC_Model.cpp \
+			$(top_srcdir)/OPCODE/OPC_OBBCollider.cpp \
+			$(top_srcdir)/OPCODE/Opcode.cpp \
+			$(top_srcdir)/OPCODE/OPC_OptimizedTree.cpp \
+			$(top_srcdir)/OPCODE/OPC_Picking.cpp \
+			$(top_srcdir)/OPCODE/OPC_PlanesCollider.cpp \
+			$(top_srcdir)/OPCODE/OPC_RayCollider.cpp \
+			$(top_srcdir)/OPCODE/OPC_SphereCollider.cpp \
+			$(top_srcdir)/OPCODE/OPC_SweepAndPrune.cpp \
+			$(top_srcdir)/OPCODE/OPC_TreeBuilders.cpp \
+			$(top_srcdir)/OPCODE/OPC_TreeCollider.cpp \
+			$(top_srcdir)/OPCODE/OPC_VolumeCollider.cpp \
+			$(top_srcdir)/OPCODE/Ice/IceAABB.cpp \
+			$(top_srcdir)/OPCODE/Ice/IceContainer.cpp \
+			$(top_srcdir)/OPCODE/Ice/IceHPoint.cpp \
+			$(top_srcdir)/OPCODE/Ice/IceIndexedTriangle.cpp \
+			$(top_srcdir)/OPCODE/Ice/IceMatrix3x3.cpp \
+			$(top_srcdir)/OPCODE/Ice/IceMatrix4x4.cpp \
+			$(top_srcdir)/OPCODE/Ice/IceOBB.cpp \
+			$(top_srcdir)/OPCODE/Ice/IcePlane.cpp \
+			$(top_srcdir)/OPCODE/Ice/IcePoint.cpp \
+			$(top_srcdir)/OPCODE/Ice/IceRandom.cpp \
+			$(top_srcdir)/OPCODE/Ice/IceRay.cpp \
+			$(top_srcdir)/OPCODE/Ice/IceRevisitedRadix.cpp \
+			$(top_srcdir)/OPCODE/Ice/IceSegment.cpp \
+			$(top_srcdir)/OPCODE/Ice/IceTriangle.cpp \
+			$(top_srcdir)/OPCODE/Ice/IceUtils.cpp
 libode_la_DEPENDENCIES+=libOPCODE.la
 
 libode_la_LIBADD+= $(libOPCODE_la_OBJECTS)
-libode_la_CPPFLAGS += -I@TOPDIR@/OPCODE -I@TOPDIR@/OPCODE/Ice -DdTRIMESH_ENABLED -DdTRIMESH_OPCODE
+libode_la_CPPFLAGS += -I$(top_srcdir)/OPCODE -I$(top_srcdir)/OPCODE/Ice -DdTRIMESH_ENABLED -DdTRIMESH_OPCODE
 libode_la_SOURCES+=	collision_trimesh_trimesh.cpp \
 			collision_trimesh_sphere.cpp \
 			collision_trimesh_ray.cpp \

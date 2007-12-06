@@ -6,6 +6,8 @@
 # include       <math.h>
 # include       <ode/ode.h>
 # include       <drawstuff/drawstuff.h>
+#include "texturepath.h"
+
 
 #   define drand48()  ((double) (((double) rand()) / ((double) RAND_MAX)))
 
@@ -258,7 +260,7 @@ extern int      main
         drawstuff_functions.step = &cb_sim_step;
         drawstuff_functions.command = 0;
         drawstuff_functions.stop = 0;
-        drawstuff_functions.path_to_textures = "../../drawstuff/textures";
+        drawstuff_functions.path_to_textures = DRAWSTUFF_TEXTURE_PATH;
 
         dsSimulationLoop (argc, argv, 352,288,&drawstuff_functions);
     }

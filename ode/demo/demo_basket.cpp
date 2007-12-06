@@ -32,7 +32,7 @@
 #endif
 #include <ode/ode.h>
 #include <drawstuff/drawstuff.h>
-
+#include "texturepath.h"
 #include "basket_geom.h" // this is our world mesh
 
 #ifdef _MSC_VER
@@ -210,7 +210,7 @@ int main (int argc, char **argv)
   fn.step = &simLoop;
   fn.command = &command;
   fn.stop = 0;
-  fn.path_to_textures = "../../drawstuff/textures";
+  fn.path_to_textures = DRAWSTUFF_TEXTURE_PATH;
   if(argc==2)
     fn.path_to_textures = argv[1];
 

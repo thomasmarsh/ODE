@@ -33,9 +33,7 @@ The axisP is draw in red and the axisR is in green
 #include <drawstuff/drawstuff.h>
 #include <iostream>
 #include <math.h>
-
-
-#define DRAWSTUFF_TEXTURE_PATH "../../drawstuff/textures"
+#include "texturepath.h"
 
 
 #ifdef _MSC_VER
@@ -45,6 +43,7 @@ The axisP is draw in red and the axisR is in green
 #ifdef dDOUBLE
 #define dsDrawBox dsDrawBoxD
 #endif
+
 
 // physics parameters
 #define BOX1_LENGTH 2    // Size along the X axis 
