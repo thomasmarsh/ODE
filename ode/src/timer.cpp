@@ -285,7 +285,7 @@ static struct {
   double total_t;		// total clocks used in this slot.
   double total_p;		// total percentage points used in this slot.
   int count;			// number of times this slot has been updated.
-  char *description;		// pointer to static string
+  const char *description;		// pointer to static string
 } event[MAXNUM];
 
 
@@ -339,7 +339,7 @@ void dTimerEnd()
 //****************************************************************************
 // print report
 
-static void fprintDoubleWithPrefix (FILE *f, double a, char *fmt)
+static void fprintDoubleWithPrefix (FILE *f, double a, const char *fmt)
 {
   if (a >= 0.999999) {
     fprintf (f,fmt,a);

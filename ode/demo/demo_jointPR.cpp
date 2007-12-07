@@ -68,7 +68,6 @@ static float hpr[3] = {90.000f,-25.5000f,0.0000f};
 static dWorldID world;
 static dSpaceID space;
 static dSpaceID box1_space;
-static dSpaceID box2_space;
 static dBodyID box1_body[1];
 static dBodyID box2_body[1];
 static dJointID joint[1];

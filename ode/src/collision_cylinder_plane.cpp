@@ -63,7 +63,7 @@ int dCollideCylinderPlane(dxGeom *Cylinder, dxGeom *Plane, int flags, dContactGe
 	dVector4 planevec;
 	dGeomPlaneGetParams(Plane, planevec);
 	dVector3 PlaneNormal = {planevec[0],planevec[1],planevec[2]};
-	dVector3 PlanePos = {planevec[0] * planevec[3],planevec[1] * planevec[3],planevec[2] * planevec[3]};
+	//dVector3 PlanePos = {planevec[0] * planevec[3],planevec[1] * planevec[3],planevec[2] * planevec[3]};
 
 	dVector3 G1Pos1, G1Pos2, vDir1;
 	vDir1[0] = Cylinder->final_posr->R[2];

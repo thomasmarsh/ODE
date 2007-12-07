@@ -316,5 +316,6 @@ int main (int argc, char **argv)
   dWorldDestroy (world);
   dCloseODE();
   return 0;
+  (void)world_normals; // get rid of compiler warnings
 }
 

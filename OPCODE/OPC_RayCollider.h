@@ -188,6 +188,7 @@
 							void*			mUserData;			//!< User-defined data
 #else
 							CollisionFaces*	mStabbedFaces;		//!< List of stabbed faces
+							bool			mClosestHit;		//!< Report closest hit only
 #endif
 		// Stats
 							udword			mNbRayBVTests;		//!< Number of Ray-BV tests
@@ -199,9 +200,7 @@
 							Point			mExtentsCoeff;
 		// Settings
 							float			mMaxDist;			//!< Valid segment on the ray
-#ifndef OPC_RAYHIT_CALLBACK
-							bool			mClosestHit;		//!< Report closest hit only
-#endif
+
 							bool			mCulling;			//!< Stab culled faces or not
 		// Internal methods
 							void			_SegmentStab(const AABBCollisionNode* node);

@@ -9,6 +9,12 @@ the rules for this file:
 
 ------------------------------------------------------------------------------
 
+12/07/07 Daniel K. O.
+
+	* Removed most of the compiler warnings from Drawstuff, ODE and
+	  OPCODE
+	* Upgraded automake requirement to 1.10, and change some Makefile.am
+
 12/06/07 Rodrigo
 
 	* Modified autotools to use libtool for
@@ -16,6 +22,10 @@ the rules for this file:
 	* Removed release and debug flags for configure.in
 	  CPPFLAGS, CFLAGS, CXXFLAGS should be set by the
 	  user to their liking, respecting autotools policies.
+
+11/30/07 Daniel K. O.
+	* Applied patch 1813079 (moved callback)
+	* Replaced moveAndRotateBody by dxStepBody in stepfast.cpp
 
 11/10/07 david
 

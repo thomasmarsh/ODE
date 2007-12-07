@@ -58,8 +58,8 @@ AABBTreeNode::AABBTreeNode() :
 #ifndef OPC_NO_NEG_VANILLA_TREE
 	mNeg			(null),
 #endif
-	mNbPrimitives	(0),
-	mNodePrimitives	(null)
+	mNodePrimitives	(null),
+	mNbPrimitives	(0)
 {
 #ifdef OPC_USE_TREE_COHERENCE
 	mBitmask = 0;
@@ -75,8 +75,8 @@ AABBTreeNode::~AABBTreeNode()
 {
 	// Opcode 1.3:
 	const AABBTreeNode* Pos = GetPos();
-	const AABBTreeNode* Neg = GetNeg();
 #ifndef OPC_NO_NEG_VANILLA_TREE
+	const AABBTreeNode* Neg = GetNeg();
 	if(!(mPos&1))	DELETESINGLE(Pos);
 	if(!(mNeg&1))	DELETESINGLE(Neg);
 #else
@@ -370,7 +370,7 @@ void AABBTreeNode::_Refit(AABBTreeBuilder* builder)
  *	Constructor.
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-AABBTree::AABBTree() : mIndices(null), mTotalNbNodes(0), mPool(null)
+AABBTree::AABBTree() : mIndices(null), mPool(null), mTotalNbNodes(0)
 {
 }
 

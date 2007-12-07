@@ -347,7 +347,7 @@ void dInternalStepIsland_x1 (dxWorld *world, dxBody * const *body, int nb,
     ofs[i] = m;
     m += info[i].m;
   }
-  int nub = m;
+  //int nub = m;
   // the mixed unbounded + LCP constraints
   for (i=0; i<nj; i++) if (info[i].nub > 0 && info[i].nub < info[i].m) {
     ofs[i] = m;

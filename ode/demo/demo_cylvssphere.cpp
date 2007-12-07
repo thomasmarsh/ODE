@@ -48,7 +48,6 @@ static dBodyID sphbody;
 static dGeomID sphgeom;
 
 static dJointGroupID contactgroup;
-static dGeomID world_mesh;
 
 static bool show_contacts = true;
 

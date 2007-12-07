@@ -275,6 +275,7 @@ void OBB::ComputeLSS(LSS& lss) const
 			lss.mP0 = mCenter + Axis2 * (mExtents.z - lss.mRadius);
 			lss.mP1 = mCenter - Axis2 * (mExtents.z - lss.mRadius);
 			break;
+		default: {}
 	}
 }
 

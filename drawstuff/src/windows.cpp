@@ -40,7 +40,7 @@ static HWND main_window = 0;
 //***************************************************************************
 // error and message handling
 
-static void errorBox (char *title, char *msg, va_list ap)
+static void errorBox (const char *title, const char *msg, va_list ap)
 {
   char s[1000];
   vsprintf (s,msg,ap);
@@ -48,7 +48,7 @@ static void errorBox (char *title, char *msg, va_list ap)
 }
 
 
-static void dsWarning (char *msg, ...)
+static void dsWarning (const char *msg, ...)
 {
   va_list ap;
   va_start (ap,msg);
@@ -56,7 +56,7 @@ static void dsWarning (char *msg, ...)
 }
 
 
-extern "C" void dsError (char *msg, ...)
+extern "C" void dsError (const char *msg, ...)
 {
   va_list ap;
   va_start (ap,msg);
@@ -65,7 +65,7 @@ extern "C" void dsError (char *msg, ...)
 }
 
 
-extern "C" void dsDebug (char *msg, ...)
+extern "C" void dsDebug (const char *msg, ...)
 {
   va_list ap;
   va_start (ap,msg);
@@ -76,7 +76,7 @@ extern "C" void dsDebug (char *msg, ...)
 }
 
 
-extern "C" void dsPrint (char *msg, ...)
+extern "C" void dsPrint (const char *msg, ...)
 {
   va_list ap;
   va_start (ap,msg);

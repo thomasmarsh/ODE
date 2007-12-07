@@ -2590,7 +2590,7 @@ static void PRGetInfo2 (dxJointPR *joint, dxJoint::Info2 *info)
   int s = info->rowskip;
   int s2= 2*s;
   int s3= 3*s;
-  int s4= 4*s;
+  //int s4= 4*s;
 
   dReal k = info->fps * info->erp;
 
@@ -3085,7 +3085,7 @@ static void PistonGetInfo2 (dxJointPiston *joint, dxJoint::Info2 *info)
 {
   const int s0 = 0;
   const int s1 = info->rowskip;
-  const int s2=2*s1, s3=3*s1, s4=4*s1;
+  const int s2=2*s1, s3=3*s1 /*, s4=4*s1*/;
 
   const dReal k = info->fps * info->erp;
 
@@ -3836,7 +3836,7 @@ dReal dJointGetAMotorAngle (dJointID j, int anum)
 
 dReal dJointGetAMotorAngleRate (dJointID j, int anum)
 {
-  dxJointAMotor* joint = (dxJointAMotor*)j;
+  //dxJointAMotor* joint = (dxJointAMotor*)j;
   // @@@
   dDebug (0,"not yet implemented");
   return 0;

@@ -43,13 +43,13 @@ using namespace Opcode;
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 AABBTreeCollider::AABBTreeCollider() :
+	mIMesh0				(null),
+	mIMesh1				(null),
 	mNbBVBVTests		(0),
 	mNbPrimPrimTests	(0),
 	mNbBVPrimTests		(0),
 	mFullBoxBoxTest		(true),
-	mFullPrimBoxTest	(true),
-	mIMesh0				(null),
-	mIMesh1				(null)
+	mFullPrimBoxTest	(true)
 {
 }
 

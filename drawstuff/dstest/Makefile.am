@@ -1,13 +1,14 @@
 noinst_PROGRAMS= dstest
-dstest_CPPFLAGS = -I@TOPDIR@/drawstuff/src -I@TOPDIR@/include -I@BUILDDIR@
+dstest_CPPFLAGS = -I$(top_srcdir)/drawstuff/src -I$(top_srcdir)/include
 
 dstest_SOURCES= dstest.cpp
-dstest_DEPENDENCIES=@BUILDDIR@/drawstuff/src/libdrawstuff.la
-dstest_LDFLAGS = -L@BUILDDIR@/drawstuff/src
-dstest_LDADD=-ldrawstuff @LDFLAGS@ @GL_LIBS@ @LIBS@
+dstest_LDADD=$(top_builddir)/drawstuff/src/libdrawstuff.la
+LIBS = @GL_LIBS@
+
 if WIN32
-dstest_DEPENDENCIES+=resources.o
-resources.o: @TOPDIR@/drawstuff/src/resources.rc @TOPDIR@/drawstuff/src/resource.h
-	@WINDRES@ @TOPDIR@/drawstuff/src/resources.rc -o resources.o
+resources.o: $(top_srcdir)/drawstuff/src/resources.rc $(top_srcdir)/drawstuff/src/resource.h
+	@WINDRES@ $(top_srcdir)/drawstuff/src/resources.rc -o resources.o
+
 dstest_LDADD+= resources.o
 endif
+
