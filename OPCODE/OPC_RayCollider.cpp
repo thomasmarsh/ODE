@@ -203,18 +203,19 @@ using namespace Opcode;
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 RayCollider::RayCollider() :
-	mNbRayBVTests		(0),
-	mNbRayPrimTests		(0),
-	mNbIntersections	(0),
-	mCulling			(true),
 #ifdef OPC_RAYHIT_CALLBACK
 	mHitCallback		(null),
 	mUserData			(0),
 #else
-	mClosestHit			(false),
 	mStabbedFaces		(null),
+	mClosestHit			(false),
 #endif
-	mMaxDist			(MAX_FLOAT)
+	mNbRayBVTests		(0),
+	mNbRayPrimTests		(0),
+	mNbIntersections	(0),
+	mMaxDist			(MAX_FLOAT),
+	mCulling			(true)
+
 {
 }
 

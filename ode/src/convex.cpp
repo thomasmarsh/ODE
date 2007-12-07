@@ -535,8 +535,8 @@ int dCollideConvexBox (dxGeom *o1, dxGeom *o2, int flags,
   dIASSERT (o2->type == dBoxClass);
   dIASSERT ((flags & NUMC_MASK) >= 1);
   
-  dxConvex *Convex = (dxConvex*) o1;
-  dxBox *Box = (dxBox*) o2;
+  //dxConvex *Convex = (dxConvex*) o1;
+  //dxBox *Box = (dxBox*) o2;
   
   return 0;
 }
@@ -549,8 +549,8 @@ int dCollideConvexCapsule (dxGeom *o1, dxGeom *o2,
   dIASSERT (o2->type == dCapsuleClass);
   dIASSERT ((flags & NUMC_MASK) >= 1);
 
-  dxConvex *Convex = (dxConvex*) o1;
-  dxCapsule *Capsule = (dxCapsule*) o2;
+  //dxConvex *Convex = (dxConvex*) o1;
+  //dxCapsule *Capsule = (dxCapsule*) o2;
   
   return 0;
 }
@@ -871,7 +871,7 @@ bool SeidelLP(dxConvex& cvx1,dxConvex& cvx2)
  */
 inline void Support(dVector3 dir,dxConvex& cvx,dVector3 out)
 {
-	unsigned int index = 0;
+	//unsigned int index = 0;
 	dVector3 point;
 	dMULTIPLY0_331 (point,cvx.final_posr->R,cvx.points);
 	point[0]+=cvx.final_posr->pos[0];
@@ -1092,9 +1092,9 @@ int dCollideConvexConvex (dxGeom *o1, dxGeom *o2, int flags,
 //   if(!hit) fprintf(stdout,"dCollideConvexConvex\n");
   dxConvex *Convex1 = (dxConvex*) o1;
   dxConvex *Convex2 = (dxConvex*) o2;
-  int contacts;
-  if(contacts=TestConvexIntersection(*Convex1,*Convex2,flags,
-				     contact,skip))
+  int contacts = TestConvexIntersection(*Convex1,*Convex2,flags,
+				     contact,skip);
+  if (contacts)
     {
       //fprintf(stdout,"We have a Hit!\n");
     }

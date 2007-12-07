@@ -62,7 +62,7 @@ typedef int test_function_t();
 
 struct TestSlot {
   int number;			// number of test
-  char *name;			// name of test
+  const char *name;			// name of test
   int failcount;
   test_function_t *test_fn;
   int last_failed_line;

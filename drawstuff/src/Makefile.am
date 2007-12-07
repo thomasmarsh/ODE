@@ -3,11 +3,12 @@
 
 noinst_LTLIBRARIES = libdrawstuff.la
 libdrawstuff_la_SOURCES = drawstuff.cpp internal.h
-libdrawstuff_la_CPPFLAGS = -I@TOPDIR@/include -I@BUILDDIR@/include
+libdrawstuff_la_CPPFLAGS = -I$(top_srcdir)/include -I$(top_builddir)/include \
+        -DDEFAULT_PATH_TO_TEXTURES='"$(top_srcdir)/drawstuff/textures/"'
 libdrawstuff_la_LIBADD = @LIBWINMM@ @LIBGDI32@
 
 if WIN32
-libdrawstuff_la_SOURCES+= windows.cpp
+libdrawstuff_la_SOURCES+= windows.cpp resource.h resources.rc
 endif
 if X11
 libdrawstuff_la_SOURCES+= x11.cpp

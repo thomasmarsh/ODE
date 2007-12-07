@@ -251,7 +251,8 @@ int main (int argc, char **argv)
 
   dGeomSetRotation (world_mesh, R);
 
-  float sx=0.0, sy=3.40, sz=6.80;
+  //float sx=0.0, sy=3.40, sz=6.80;
+  (void)world_normals; // get rid of compiler warning
   sphbody = dBodyCreate (world);
   dMassSetSphere (&m,1,RADIUS);
   dBodySetMass (sphbody,&m);

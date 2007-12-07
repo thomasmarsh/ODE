@@ -173,7 +173,7 @@ static dReal      vCapsuleRadius;
 static dReal      fCapsuleSize;
 
 // mesh data
-static  dMatrix4  mHullDstPl;
+//static  dMatrix4  mHullDstPl;
 static   dMatrix3  mTriMeshRot;
 static dVector3   mTriMeshPos;
 static dVector3   vE0, vE1, vE2;

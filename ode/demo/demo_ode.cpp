@@ -592,7 +592,7 @@ void printMassParams (dMass *m)
 }
 
 
-void compareMassParams (dMass *m1, dMass *m2, char *msg)
+void compareMassParams (dMass *m1, dMass *m2, const char *msg)
 {
   int i,j,ok = 1;
   if (!(cmp(m1->mass,m2->mass) && cmp(m1->c[0],m2->c[0]) &&
@@ -860,7 +860,7 @@ public:
   dMatrixComparison();
   ~dMatrixComparison();
 
-  dReal nextMatrix (dReal *A, int n, int m, int lower_tri, char *name, ...);
+  dReal nextMatrix (dReal *A, int n, int m, int lower_tri, const char *name, ...);
   // add a new n*m matrix A to the sequence. the name of the matrix is given
   // by the printf-style arguments (name,...). if this is the first sequence
   // then this object will simply record the matrices and return 0.
@@ -903,7 +903,7 @@ dMatrixComparison::~dMatrixComparison()
 
 
 dReal dMatrixComparison::nextMatrix (dReal *A, int n, int m, int lower_tri,
-				     char *name, ...)
+				     const char *name, ...)
 {
   if (A==0 || n < 1 || m < 1 || name==0) dDebug (0,"bad args to nextMatrix");
   int num = n*dPAD(m);

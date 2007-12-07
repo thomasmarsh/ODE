@@ -160,7 +160,7 @@ typedef dReal dVector3R[3];
 
 dGeomID TriMesh1;
 dGeomID TriMesh2;
-static dTriMeshDataID TriData1, TriData2;  // reusable static trimesh data
+//static dTriMeshDataID TriData1, TriData2;  // reusable static trimesh data
 
 static float Vertices[VertexCount * 3] = {
 	REAL(-0.334392), REAL(0.133007), REAL(0.062259),

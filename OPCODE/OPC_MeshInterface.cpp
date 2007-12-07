@@ -128,6 +128,8 @@ Point MeshInterface::VertexCache[3];
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 MeshInterface::MeshInterface() :
+	mNbTris			(0),
+	mNbVerts		(0),
 #ifdef OPC_USE_CALLBACKS
 	mUserData		(null),
 	mObjCallback	(null),
@@ -139,9 +141,6 @@ MeshInterface::MeshInterface() :
 	mVertexStride	(sizeof(Point)),
 	#endif
 #endif
-	mNbTris			(0),
-	mNbVerts		(0),
-
 	Single(true)
 {
 }

@@ -16,7 +16,7 @@ LIBTOOL_RELEASE=0
 AC_CANONICAL_HOST
 AC_CANONICAL_TARGET
 
-AM_INIT_AUTOMAKE(ODE,[$ODE_RELEASE])
+AM_INIT_AUTOMAKE(1.10)
 AM_CONFIG_HEADER(include/ode/config.h)
 AC_C_BIGENDIAN
 AC_PATH_X
@@ -387,10 +387,6 @@ AC_CHECK_LIB(stdc++,main,[LIBSTDCXX="-lstdc++"],[LIBSTDCXX=])
 AC_SUBST(LIBSTDCXX)
 AC_CHECK_LIB(pthread,main,[LIBS="$LIBS -lpthread"])
 
-BUILDDIR=`pwd`
-AC_SUBST(BUILDDIR)
-TOPDIR=`cd $srcdir;pwd`
-AC_SUBST(TOPDIR)
 
 dnl Check if the user wants to profile ODE using gprof
 AC_MSG_CHECKING(for gprof)
@@ -509,6 +505,7 @@ AC_OUTPUT([
  Makefile
  include/Makefile
  include/ode/Makefile
+ include/drawstuff/Makefile
  ode/Makefile
  ode/src/Makefile
  drawstuff/Makefile

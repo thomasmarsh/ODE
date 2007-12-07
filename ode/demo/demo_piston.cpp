@@ -571,7 +571,7 @@ for (int i=0; i<NUM_PARTS; ++i)
 
   if (argc >= 2 ) {
     for (int i=1; i < argc; ++i) {
-      static int tata = 0;
+      //static int tata = 0;
 
       if (0) {
         if ( 0 == strcmp ("-h", argv[i]) || 0 == strcmp ("--help", argv[i]) )

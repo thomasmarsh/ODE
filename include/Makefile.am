@@ -1,1 +1,1 @@
-SUBDIRS = ode
+SUBDIRS = ode drawstuff

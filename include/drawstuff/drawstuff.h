@@ -80,7 +80,7 @@ typedef struct dsFunctions {
   void (*command) (int cmd);	/* called if a command key is pressed */
   void (*stop)();		/* called after sim loop exits */
   /* version 2 data */
-  char *path_to_textures;	/* if nonzero, path to texture files */
+  const char *path_to_textures;	/* if nonzero, path to texture files */
 } dsFunctions;
 
 
@@ -102,7 +102,7 @@ DS_API void dsSimulationLoop (int argc, char **argv,
  * This function displays an error message then exit.
  * @param msg format strin, like printf, without the newline character.
  */
-DS_API void dsError (char *msg, ...);
+DS_API void dsError (const char *msg, ...);
 
 /**
  * @brief exit with error message and core dump.
@@ -110,14 +110,14 @@ DS_API void dsError (char *msg, ...);
  * this functions tries to dump core or start the debugger.
  * @param msg format strin, like printf, without the newline character.
  */
-DS_API void dsDebug (char *msg, ...);
+DS_API void dsDebug (const char *msg, ...);
 
 /**
  * @brief print log message
  * @ingroup drawstuff
  * @param msg format string, like printf, without the \n.
  */
-DS_API void dsPrint (char *msg, ...);
+DS_API void dsPrint (const char *msg, ...);
 
 /**
  * @brief Sets the viewpoint

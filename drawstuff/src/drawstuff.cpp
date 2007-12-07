@@ -55,10 +55,12 @@ manage openGL state changes better
 //***************************************************************************
 // misc
 
+#ifndef DEFAULT_PATH_TO_TEXTURES
 #ifdef WIN32
 #define DEFAULT_PATH_TO_TEXTURES "..\\textures\\"
 #else
 #define DEFAULT_PATH_TO_TEXTURES "../textures/"
+#endif
 #endif
 
 #ifndef M_PI
@@ -890,7 +892,7 @@ static Texture *wood_texture = 0;
 
 void dsStartGraphics (int width, int height, dsFunctions *fn)
 {
-  char *prefix = DEFAULT_PATH_TO_TEXTURES;
+  const char *prefix = DEFAULT_PATH_TO_TEXTURES;
   if (fn->version >= 2 && fn->path_to_textures) prefix = fn->path_to_textures;
   char *s = (char*) alloca (strlen(prefix) + 20);
 

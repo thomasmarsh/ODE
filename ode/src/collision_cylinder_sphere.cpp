@@ -56,7 +56,7 @@ int dCollideCylinderSphere(dxGeom* Cylinder, dxGeom* Sphere,
 	dIASSERT (Sphere->type == dSphereClass);
 	dIASSERT ((flags & NUMC_MASK) >= 1);
 
-	unsigned char* pContactData = (unsigned char*)contact;
+	//unsigned char* pContactData = (unsigned char*)contact;
 	int GeomCount = 0; // count of used contacts
 
 #ifdef dSINGLE
@@ -70,7 +70,7 @@ int dCollideCylinderSphere(dxGeom* Cylinder, dxGeom* Sphere,
 	dReal radius, length;
 	dGeomCylinderGetParams(Cylinder, &radius, &length);
     dVector3 &cylpos = Cylinder->final_posr->pos;
-	const dReal* pfRot1 = dGeomGetRotation(Cylinder);
+	//const dReal* pfRot1 = dGeomGetRotation(Cylinder);
 
 	dReal radius2;
 	radius2 = dGeomSphereGetRadius(Sphere);

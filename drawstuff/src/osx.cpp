@@ -89,7 +89,7 @@ EventTypeSpec OSX_KEY_EVENT_TYPES[] = {
 //***************************************************************************
 // error handling for unix
 
-static void printMessage (char *msg1, char *msg2, va_list ap)
+static void printMessage (const char *msg1, const char *msg2, va_list ap)
 {
   fflush (stderr);
   fflush (stdout);
@@ -99,7 +99,7 @@ static void printMessage (char *msg1, char *msg2, va_list ap)
   fflush (stderr);
 }
 
-extern "C" void dsError (char *msg, ...)
+extern "C" void dsError (const char *msg, ...)
 {
   va_list ap;
   va_start (ap,msg);
@@ -108,7 +108,7 @@ extern "C" void dsError (char *msg, ...)
 }
 
 
-extern "C" void dsDebug (char *msg, ...)
+extern "C" void dsDebug (const char *msg, ...)
 {
   va_list ap;
   va_start (ap,msg);
@@ -117,7 +117,7 @@ extern "C" void dsDebug (char *msg, ...)
   abort();
 }
 
-extern "C" void dsPrint (char *msg, ...)
+extern "C" void dsPrint (const char *msg, ...)
 {
   va_list ap;
   va_start (ap,msg);
