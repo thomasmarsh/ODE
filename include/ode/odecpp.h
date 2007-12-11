@@ -70,29 +70,68 @@ public:
     { dWorldStepFast1 (_id,stepsize,maxiterations); }
   void setAutoEnableDepthSF1(dWorldID, int depth)
     { dWorldSetAutoEnableDepthSF1 (_id, depth); }
-  int getAutoEnableDepthSF1(dWorldID)
+  int getAutoEnableDepthSF1(dWorldID) const
     { return dWorldGetAutoEnableDepthSF1 (_id); }
+
+  void quickStep(dReal stepsize)
+    { dWorldQuickStep (_id, stepsize); }
+  void setQuickStepNumIterations(int num)
+    { dWorldSetQuickStepNumIterations (_id, num); }
+  int getQuickStepNumIterations() const
+    { return dWorldGetQuickStepNumIterations (_id); }
+  void setQuickStepW(dReal over_relaxation)
+    { dWorldSetQuickStepW (_id, over_relaxation); }
+  dReal getQuickStepW() const
+    { return dWorldGetQuickStepW (_id); }
 
   void  setAutoDisableLinearThreshold (dReal threshold) 
     { dWorldSetAutoDisableLinearThreshold (_id,threshold); }
-  dReal getAutoDisableLinearThreshold()
+  dReal getAutoDisableLinearThreshold() const
     { return dWorldGetAutoDisableLinearThreshold (_id); }
   void setAutoDisableAngularThreshold (dReal threshold)
     { dWorldSetAutoDisableAngularThreshold (_id,threshold); }
-  dReal getAutoDisableAngularThreshold()
+  dReal getAutoDisableAngularThreshold() const
     { return dWorldGetAutoDisableAngularThreshold (_id); }
   void setAutoDisableSteps (int steps)
     { dWorldSetAutoDisableSteps (_id,steps); }
-  int getAutoDisableSteps()
+  int getAutoDisableSteps() const
     { return dWorldGetAutoDisableSteps (_id); }
   void setAutoDisableTime (dReal time)
     { dWorldSetAutoDisableTime (_id,time); }
-  dReal getAutoDisableTime()
+  dReal getAutoDisableTime() const
     { return dWorldGetAutoDisableTime (_id); }
   void setAutoDisableFlag (int do_auto_disable)
     { dWorldSetAutoDisableFlag (_id,do_auto_disable); }
-  int getAutoDisableFlag()
+  int getAutoDisableFlag() const
     { return dWorldGetAutoDisableFlag (_id); }
+
+  dReal getLinearDampingThreshold() const
+    { return dWorldGetLinearDampingThreshold(_id); }
+  void setLinearDampingThreshold(dReal threshold)
+    { dWorldSetLinearDampingThreshold(_id, threshold); }
+  dReal getAngularDampingThreshold() const
+    { return dWorldGetAngularDampingThreshold(_id); }
+  void setAngularDampingThreshold(dReal threshold)
+    { dWorldSetAngularDampingThreshold(_id, threshold); }
+  dReal getLinearDamping() const
+    { return dWorldGetLinearDamping(_id); }
+  void setLinearDamping(dReal scale)
+    { dWorldSetLinearDamping(_id, scale); }
+  dReal getAngularDamping() const
+    { return dWorldGetAngularDamping(_id); }
+  void setAngularDamping(dReal scale)
+    { dWorldSetAngularDamping(_id, scale); }
+  void setDamping(dReal linear_scale, dReal angular_scale)
+    { dWorldSetDamping(_id, linear_scale, angular_scale); }
+  dReal getMaxAngularVel() const
+    { return dWorldGetMaxAngularVel(_id); }
+  void setMaxAngularVel(dReal max_velocity)
+    { dWorldSetMaxAngularVel(_id, max_velocity); }
+
+  void setContactSurfaceLayer(dReal depth)
+    { dWorldSetContactSurfaceLayer (_id, depth); }
+  dReal getContactSurfaceLayer() const
+    { return dWorldGetContactSurfaceLayer (_id); }
 
   void impulseToForce (dReal stepsize, dReal ix, dReal iy, dReal iz,
 		       dVector3 force)
@@ -232,24 +271,55 @@ public:
 
   void  setAutoDisableLinearThreshold (dReal threshold) 
     { dBodySetAutoDisableLinearThreshold (_id,threshold); }
-  dReal getAutoDisableLinearThreshold()
+  dReal getAutoDisableLinearThreshold() const
     { return dBodyGetAutoDisableLinearThreshold (_id); }
   void setAutoDisableAngularThreshold (dReal threshold)
     { dBodySetAutoDisableAngularThreshold (_id,threshold); }
-  dReal getAutoDisableAngularThreshold()
+  dReal getAutoDisableAngularThreshold() const
     { return dBodyGetAutoDisableAngularThreshold (_id); }
   void setAutoDisableSteps (int steps)
     { dBodySetAutoDisableSteps (_id,steps); }
-  int getAutoDisableSteps()
+  int getAutoDisableSteps() const
     { return dBodyGetAutoDisableSteps (_id); }
   void setAutoDisableTime (dReal time)
     { dBodySetAutoDisableTime (_id,time); }
-  dReal getAutoDisableTime()
+  dReal getAutoDisableTime() const
     { return dBodyGetAutoDisableTime (_id); }
   void setAutoDisableFlag (int do_auto_disable)
     { dBodySetAutoDisableFlag (_id,do_auto_disable); }
-  int getAutoDisableFlag()
+  int getAutoDisableFlag() const
     { return dBodyGetAutoDisableFlag (_id); }
+
+  dReal getLinearDamping() const
+    { return dBodyGetLinearDamping(_id); }
+  void setLinearDamping(dReal scale)
+    { dBodySetLinearDamping(_id, scale); }
+  dReal getAngularDamping() const
+    { return dBodyGetAngularDamping(_id); }
+  void setAngularDamping(dReal scale)
+    { dBodySetAngularDamping(_id, scale); }
+  void setDamping(dReal linear_scale, dReal angular_scale)
+    { dBodySetDamping(_id, linear_scale, angular_scale); }
+  void resetLinearDamping()
+    { dBodyResetLinearDamping(_id); }
+  void resetAngularDamping()
+    { dBodyResetAngularDamping(_id); }
+   dReal getLinearDampingThreshold() const
+    { return dBodyGetLinearDampingThreshold(_id); }
+   void setLinearDampingThreshold(dReal threshold) const
+    { dBodySetLinearDampingThreshold(_id, threshold); }
+   dReal getAngularDampingThreshold() const
+    { return dBodyGetAngularDampingThreshold(_id); }
+   void setAngularDampingThreshold(dReal threshold)
+    { dBodySetAngularDampingThreshold(_id, threshold); }
+
+   dReal getMaxAngularVel() const
+    { return dBodyGetMaxAngularVel(_id); }
+   void setMaxAngularVel(dReal max_velocity)
+    { dBodySetMaxAngularVel(_id, max_velocity); }
+   void resetMaxAngularVel()
+    { dBodyResetMaxAngularVel(_id); }
+
 };
 
 

@@ -9,6 +9,12 @@ the rules for this file:
 
 ------------------------------------------------------------------------------
 
+12/11/07 Daniel K. O.
+
+	* Added damping and MaxAngularVel() functions.
+	* Const-correctness: added const qualifier to some dWorldGet and dBodyGet functions.
+	* Updated the odecpp.h header.
+
 12/07/07 Daniel K. O.
 
 	* Removed most of the compiler warnings from Drawstuff, ODE and

@@ -188,6 +188,19 @@ static inline dReal sinc (dReal x)
 
 void dxStepBody (dxBody *b, dReal h)
 {
+  // cap the angular velocity
+  const dReal aspeed = dDOT( b->avel, b->avel );
+  const bool body_ang_max = b->flags & dxBodyMaxAngularVel;
+  const dReal max_ang_speed = body_ang_max ?
+                        b->dampingp.max_angular_vel :
+                        b->world->dampingp.max_angular_vel;
+  if (max_ang_speed != dInfinity && aspeed > max_ang_speed*max_ang_speed) {
+        const dReal coef = max_ang_speed/dSqrt(aspeed);
+        dOPEC(b->avel, *=, coef);
+  }
+  // end of angular velocity cap
+
+
   int j;
 
   // handle linear velocity
@@ -262,6 +275,32 @@ void dxStepBody (dxBody *b, dReal h)
   // notify the user
   if (b->moved_callback)
           b->moved_callback(b);
+
+  // damping
+  const dReal lspeed = dDOT( b->lvel, b->lvel );
+  const bool lin_damping = b->flags & dxBodyLinearDamping;
+  if ( lspeed >
+        ( lin_damping ?
+          b->adis.linear_average_threshold :
+          b->world->adis.linear_average_threshold )
+     ) {
+        const dReal scale = 1 - (lin_damping ?
+        b->dampingp.linear_scale :
+        b->world->dampingp.linear_scale);
+        dOPEC(b->lvel, *=, scale);
+  }
+  const bool ang_damping = b->flags & dxBodyAngularDamping;
+  if ( aspeed >
+        ( ang_damping ?
+          b->adis.angular_average_threshold :
+          b->world->adis.angular_average_threshold )
+     ) {
+        const dReal scale = 1 - (ang_damping ?
+        b->dampingp.angular_scale :
+        b->world->dampingp.angular_scale);
+        dOPEC(b->avel, *=, scale);
+  }
+
 }
 
 //****************************************************************************

@@ -39,7 +39,10 @@ enum {
   dxBodyFlagFiniteRotationAxis = 2,	// use finite rotations only along axis
   dxBodyDisabled = 4,			// body is disabled
   dxBodyNoGravity = 8,			// body is not influenced by gravity
-  dxBodyAutoDisable = 16		// enable auto-disable on body
+  dxBodyAutoDisable = 16,		// enable auto-disable on body
+  dxBodyLinearDamping = 64,             // using body's linear damping instead of world's
+  dxBodyAngularDamping = 32,            // using body's angular damping insatead of world's
+  dxBodyMaxAngularVel = 64,            // using body's maximum angular velocity
 };
 
 
@@ -71,6 +74,14 @@ struct dxAutoDisable {
   dReal linear_average_threshold;   // linear (squared) average velocity threshold
   dReal angular_average_threshold;  // angular (squared) average velocity threshold
   unsigned int average_samples;     // size of the average_lvel and average_avel buffers
+};
+
+
+// damping parameters
+struct dxDampingParameters {
+  dReal linear_scale;  // multiply the linear velocity by (1 - scale)
+  dReal angular_scale; // multiply the angular velocity by (1 - scale)
+  dReal max_angular_vel; // limit the angular velocity to this magnitude
 };
 
 
@@ -120,6 +131,7 @@ struct dxBody : public dObject {
   int average_ready;        // indicates ( with = 1 ), if the Body's buffers are ready for average-calculations
 
   void (*moved_callback)(dxBody*); // let the user know the body moved
+  dxDampingParameters dampingp; // damping parameters, depends on flags
 };
 
 
@@ -134,6 +146,7 @@ struct dxWorld : public dBase {
   int adis_flag;		// auto-disable flag for new bodies
   dxQuickStepParameters qs;
   dxContactParameters contactp;
+  dxDampingParameters dampingp; // damping parameters
 };
 
 

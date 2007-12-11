@@ -221,7 +221,7 @@ void dWorldCheck (dxWorld *w)
 
 //****************************************************************************
 // body
-dxWorld* dBodyGetWorld (dxBody* b)
+dxWorld* dBodyGetWorld (const dxBody* b)
 {
   dAASSERT (b);
   return b->world;
@@ -321,7 +321,7 @@ void dBodySetData (dBodyID b, void *data)
 }
 
 
-void *dBodyGetData (dBodyID b)
+void *dBodyGetData (const dBodyID b)
 {
   dAASSERT (b);
   return b->userdata;
@@ -393,7 +393,7 @@ void dBodySetAngularVel (dBodyID b, dReal x, dReal y, dReal z)
 }
 
 
-const dReal * dBodyGetPosition (dBodyID b)
+const dReal * dBodyGetPosition (const dBodyID b)
 {
   dAASSERT (b);
   return b->posr.pos;
@@ -410,7 +410,7 @@ void dBodyCopyPosition (dBodyID b, dVector3 pos)
 }
 
 
-const dReal * dBodyGetRotation (dBodyID b)
+const dReal * dBodyGetRotation (const dBodyID b)
 {
   dAASSERT (b);
   return b->posr.R;
@@ -436,7 +436,7 @@ void dBodyCopyRotation (dBodyID b, dMatrix3 R)
 }
 
 
-const dReal * dBodyGetQuaternion (dBodyID b)
+const dReal * dBodyGetQuaternion (const dBodyID b)
 {
   dAASSERT (b);
   return b->q;
@@ -454,14 +454,14 @@ void dBodyCopyQuaternion (dBodyID b, dQuaternion quat)
 }
 
 
-const dReal * dBodyGetLinearVel (dBodyID b)
+const dReal * dBodyGetLinearVel (const dBodyID b)
 {
   dAASSERT (b);
   return b->lvel;
 }
 
 
-const dReal * dBodyGetAngularVel (dBodyID b)
+const dReal * dBodyGetAngularVel (const dBodyID b)
 {
   dAASSERT (b);
   return b->avel;
@@ -488,7 +488,7 @@ void dBodySetMass (dBodyID b, const dMass *mass)
 }
 
 
-void dBodyGetMass (dBodyID b, dMass *mass)
+void dBodyGetMass (const dBodyID b, dMass *mass)
 {
   dAASSERT (b && mass);
   memcpy (mass,&b->mass,sizeof(dMass));
@@ -625,14 +625,14 @@ void dBodyAddRelForceAtRelPos (dBodyID b, dReal fx, dReal fy, dReal fz,
 }
 
 
-const dReal * dBodyGetForce (dBodyID b)
+const dReal * dBodyGetForce (const dBodyID b)
 {
   dAASSERT (b);
   return b->facc;
 }
 
 
-const dReal * dBodyGetTorque (dBodyID b)
+const dReal * dBodyGetTorque (const dBodyID b)
 {
   dAASSERT (b);
   return b->tacc;
@@ -657,7 +657,7 @@ void dBodySetTorque (dBodyID b, dReal x, dReal y, dReal z)
 }
 
 
-void dBodyGetRelPointPos (dBodyID b, dReal px, dReal py, dReal pz,
+void dBodyGetRelPointPos (const dBodyID b, dReal px, dReal py, dReal pz,
 			  dVector3 result)
 {
   dAASSERT (b);
@@ -673,7 +673,7 @@ void dBodyGetRelPointPos (dBodyID b, dReal px, dReal py, dReal pz,
 }
 
 
-void dBodyGetRelPointVel (dBodyID b, dReal px, dReal py, dReal pz,
+void dBodyGetRelPointVel (const dBodyID b, dReal px, dReal py, dReal pz,
 			  dVector3 result)
 {
   dAASSERT (b);
@@ -690,7 +690,7 @@ void dBodyGetRelPointVel (dBodyID b, dReal px, dReal py, dReal pz,
 }
 
 
-void dBodyGetPointVel (dBodyID b, dReal px, dReal py, dReal pz,
+void dBodyGetPointVel (const dBodyID b, dReal px, dReal py, dReal pz,
 		       dVector3 result)
 {
   dAASSERT (b);
@@ -706,7 +706,7 @@ void dBodyGetPointVel (dBodyID b, dReal px, dReal py, dReal pz,
 }
 
 
-void dBodyGetPosRelPoint (dBodyID b, dReal px, dReal py, dReal pz,
+void dBodyGetPosRelPoint (const dBodyID b, dReal px, dReal py, dReal pz,
 			  dVector3 result)
 {
   dAASSERT (b);
@@ -775,14 +775,14 @@ void dBodySetFiniteRotationAxis (dBodyID b, dReal x, dReal y, dReal z)
 }
 
 
-int dBodyGetFiniteRotationMode (dBodyID b)
+int dBodyGetFiniteRotationMode (const dBodyID b)
 {
   dAASSERT (b);
   return ((b->flags & dxBodyFlagFiniteRotation) != 0);
 }
 
 
-void dBodyGetFiniteRotationAxis (dBodyID b, dVector3 result)
+void dBodyGetFiniteRotationAxis (const dBodyID b, dVector3 result)
 {
   dAASSERT (b);
   result[0] = b->finite_rot_axis[0];
@@ -791,7 +791,7 @@ void dBodyGetFiniteRotationAxis (dBodyID b, dVector3 result)
 }
 
 
-int dBodyGetNumJoints (dBodyID b)
+int dBodyGetNumJoints (const dBodyID b)
 {
   dAASSERT (b);
   int count=0;
@@ -800,7 +800,7 @@ int dBodyGetNumJoints (dBodyID b)
 }
 
 
-dJointID dBodyGetJoint (dBodyID b, int index)
+dJointID dBodyGetJoint (const dBodyID b, int index)
 {
   dAASSERT (b);
   int i=0;
@@ -843,7 +843,7 @@ void dBodySetGravityMode (dBodyID b, int mode)
 }
 
 
-int dBodyGetGravityMode (dBodyID b)
+int dBodyGetGravityMode (const dBodyID b)
 {
   dAASSERT (b);
   return ((b->flags & dxBodyNoGravity) == 0);
@@ -852,7 +852,7 @@ int dBodyGetGravityMode (dBodyID b)
 
 // body auto-disable functions
 
-dReal dBodyGetAutoDisableLinearThreshold (dBodyID b)
+dReal dBodyGetAutoDisableLinearThreshold (const dBodyID b)
 {
 	dAASSERT(b);
 	return dSqrt (b->adis.linear_average_threshold);
@@ -866,7 +866,7 @@ void dBodySetAutoDisableLinearThreshold (dBodyID b, dReal linear_average_thresho
 }
 
 
-dReal dBodyGetAutoDisableAngularThreshold (dBodyID b)
+dReal dBodyGetAutoDisableAngularThreshold (const dBodyID b)
 {
 	dAASSERT(b);
 	return dSqrt (b->adis.angular_average_threshold);
@@ -880,7 +880,7 @@ void dBodySetAutoDisableAngularThreshold (dBodyID b, dReal angular_average_thres
 }
 
 
-int dBodyGetAutoDisableAverageSamplesCount (dBodyID b)
+int dBodyGetAutoDisableAverageSamplesCount (const dBodyID b)
 {
 	dAASSERT(b);
 	return b->adis.average_samples;
@@ -918,7 +918,7 @@ void dBodySetAutoDisableAverageSamplesCount (dBodyID b, unsigned int average_sam
 }
 
 
-int dBodyGetAutoDisableSteps (dBodyID b)
+int dBodyGetAutoDisableSteps (const dBodyID b)
 {
 	dAASSERT(b);
 	return b->adis.idle_steps;
@@ -932,7 +932,7 @@ void dBodySetAutoDisableSteps (dBodyID b, int steps)
 }
 
 
-dReal dBodyGetAutoDisableTime (dBodyID b)
+dReal dBodyGetAutoDisableTime (const dBodyID b)
 {
 	dAASSERT(b);
 	return b->adis.idle_time;
@@ -946,7 +946,7 @@ void dBodySetAutoDisableTime (dBodyID b, dReal time)
 }
 
 
-int dBodyGetAutoDisableFlag (dBodyID b)
+int dBodyGetAutoDisableFlag (const dBodyID b)
 {
 	dAASSERT(b);
 	return ((b->flags & dxBodyAutoDisable) != 0);
@@ -983,6 +983,104 @@ void dBodySetAutoDisableDefaults (dBodyID b)
 }
 
 
+// body damping functions
+
+dReal dBodyGetLinearDamping(const dBodyID b)
+{
+        dAASSERT(b);
+        return (b->flags & dxBodyLinearDamping) ?
+                b->dampingp.linear_scale :
+                b->world->dampingp.linear_scale;
+}
+
+void dBodySetLinearDamping(dBodyID b, dReal scale)
+{
+        dAASSERT(b);
+        b->flags |= dxBodyLinearDamping;
+        b->dampingp.linear_scale = scale;
+}
+
+dReal dBodyGetAngularDamping(const dBodyID b)
+{
+        dAASSERT(b);
+        return (b->flags & dxBodyAngularDamping) ?
+                b->dampingp.angular_scale :
+                b->world->dampingp.angular_scale;
+}
+
+void dBodySetAngularDamping(dBodyID b, dReal scale)
+{
+        dAASSERT(b);
+        b->flags |= dxBodyAngularDamping;
+        b->dampingp.angular_scale = scale;
+}
+
+void dBodySetDamping(dBodyID b, dReal linear_scale, dReal angular_scale)
+{
+        dAASSERT(b);
+        dBodySetLinearDamping(b, linear_scale);
+        dBodySetAngularDamping(b, angular_scale);
+}
+
+void dBodyResetLinearDamping(dBodyID b)
+{
+        dAASSERT(b);
+        b->flags &= ~dxBodyLinearDamping;
+}
+
+void dBodyResetAngularDamping(dBodyID b)
+{
+        dAASSERT(b);
+        b->flags &= ~dxBodyAngularDamping;
+}
+
+dReal dBodyGetLinearDampingThreshold(const dBodyID b)
+{
+        dAASSERT(b);
+        return dBodyGetAutoDisableLinearThreshold(b);
+}
+
+void dBodySetLinearDampingThreshold(dBodyID b, dReal threshold)
+{
+        dAASSERT(b);
+        dBodySetAutoDisableLinearThreshold(b, threshold);
+}
+
+
+dReal dBodyGetAngularDampingThreshold(const dBodyID b)
+{
+        dAASSERT(b);
+        return dBodyGetAutoDisableAngularThreshold(b);
+}
+
+void dBodySetAngularDampingThreshold(dBodyID b, dReal threshold)
+{
+        dAASSERT(b);
+        dBodySetAutoDisableAngularThreshold(b, threshold);
+}
+
+dReal dBodyGetMaxAngularVel(const dBodyID b)
+{
+        dAASSERT(b);
+        return (b->flags & dxBodyMaxAngularVel) ?
+                b->dampingp.max_angular_vel:
+                b->world->dampingp.max_angular_vel;
+}
+
+void dBodySetMaxAngularVel(dBodyID b, dReal max_velocity)
+{
+        dAASSERT(b);
+        b->flags |= dxBodyMaxAngularVel;
+        b->dampingp.max_angular_vel = max_velocity;
+}
+
+void dBodyResetMaxAngularVel(dBodyID b)
+{
+        dAASSERT(b);
+        b->flags &= ~dxBodyMaxAngularVel;
+}
+
+
 void dBodySetMovedCallback(dBodyID b, void (*callback)(dBodyID))
 {
         dAASSERT(b);
@@ -990,14 +1088,14 @@ void dBodySetMovedCallback(dBodyID b, void (*callback)(dBodyID))
 }
 
 
-dGeomID dBodyGetFirstGeom(dBodyID b)
+dGeomID dBodyGetFirstGeom(const dBodyID b)
 {
         dAASSERT(b);
         return b->geom;
 }
 
 
-dGeomID dBodyGetNextGeom(dGeomID geom)
+dGeomID dBodyGetNextGeom(const dGeomID geom)
 {
         dAASSERT(geom);
         return dGeomGetBodyNext(geom);
@@ -1391,6 +1489,10 @@ dxWorld * dWorldCreate()
   w->contactp.max_vel = dInfinity;
   w->contactp.min_depth = 0;
 
+  w->dampingp.linear_scale = 0;
+  w->dampingp.angular_scale = 0;
+  w->dampingp.max_angular_vel = dInfinity;
+
   return w;
 }
 
@@ -1445,7 +1547,7 @@ void dWorldSetGravity (dWorldID w, dReal x, dReal y, dReal z)
 }
 
 
-void dWorldGetGravity (dWorldID w, dVector3 g)
+void dWorldGetGravity (const dWorldID w, dVector3 g)
 {
   dAASSERT (w);
   g[0] = w->gravity[0];
@@ -1461,7 +1563,7 @@ void dWorldSetERP (dWorldID w, dReal erp)
 }
 
 
-dReal dWorldGetERP (dWorldID w)
+dReal dWorldGetERP (const dWorldID w)
 {
   dAASSERT (w);
   return w->global_erp;
@@ -1475,7 +1577,7 @@ void dWorldSetCFM (dWorldID w, dReal cfm)
 }
 
 
-dReal dWorldGetCFM (dWorldID w)
+dReal dWorldGetCFM (const dWorldID w)
 {
   dAASSERT (w);
   return w->global_cfm;
@@ -1513,7 +1615,7 @@ void dWorldImpulseToForce (dWorldID w, dReal stepsize,
 
 // world auto-disable functions
 
-dReal dWorldGetAutoDisableLinearThreshold (dWorldID w)
+dReal dWorldGetAutoDisableLinearThreshold (const dWorldID w)
 {
 	dAASSERT(w);
 	return dSqrt (w->adis.linear_average_threshold);
@@ -1527,7 +1629,7 @@ void dWorldSetAutoDisableLinearThreshold (dWorldID w, dReal linear_average_thres
 }
 
 
-dReal dWorldGetAutoDisableAngularThreshold (dWorldID w)
+dReal dWorldGetAutoDisableAngularThreshold (const dWorldID w)
 {
 	dAASSERT(w);
 	return dSqrt (w->adis.angular_average_threshold);
@@ -1541,7 +1643,7 @@ void dWorldSetAutoDisableAngularThreshold (dWorldID w, dReal angular_average_thr
 }
 
 
-int dWorldGetAutoDisableAverageSamplesCount (dWorldID w)
+int dWorldGetAutoDisableAverageSamplesCount (const dWorldID w)
 {
 	dAASSERT(w);
 	return w->adis.average_samples;
@@ -1555,7 +1657,7 @@ void dWorldSetAutoDisableAverageSamplesCount (dWorldID w, unsigned int average_s
 }
 
 
-int dWorldGetAutoDisableSteps (dWorldID w)
+int dWorldGetAutoDisableSteps (const dWorldID w)
 {
 	dAASSERT(w);
 	return w->adis.idle_steps;
@@ -1569,7 +1671,7 @@ void dWorldSetAutoDisableSteps (dWorldID w, int steps)
 }
 
 
-dReal dWorldGetAutoDisableTime (dWorldID w)
+dReal dWorldGetAutoDisableTime (const dWorldID w)
 {
 	dAASSERT(w);
 	return w->adis.idle_time;
@@ -1583,7 +1685,7 @@ void dWorldSetAutoDisableTime (dWorldID w, dReal time)
 }
 
 
-int dWorldGetAutoDisableFlag (dWorldID w)
+int dWorldGetAutoDisableFlag (const dWorldID w)
 {
 	dAASSERT(w);
 	return w->adis_flag;
@@ -1597,6 +1699,76 @@ void dWorldSetAutoDisableFlag (dWorldID w, int do_auto_disable)
 }
 
 
+// world damping functions
+
+dReal dWorldGetLinearDampingThreshold(const dWorldID w)
+{
+        dAASSERT(w);
+        return dWorldGetAutoDisableLinearThreshold(w);
+}
+
+void dWorldSetLinearDampingThreshold(dWorldID w, dReal threshold)
+{
+        dAASSERT(w);
+        dWorldSetAutoDisableLinearThreshold(w, threshold);
+}
+
+dReal dWorldGetAngularDampingThreshold(const dWorldID w)
+{
+        dAASSERT(w);
+        return dWorldGetAutoDisableAngularThreshold(w);
+}
+
+void dWorldSetAngularDampingThreshold(dWorldID w, dReal threshold)
+{
+        dAASSERT(w);
+        dWorldSetAutoDisableAngularThreshold(w, threshold);
+}
+
+dReal dWorldGetLinearDamping(const dWorldID w)
+{
+        dAASSERT(w);
+        return w->dampingp.linear_scale;
+}
+
+void dWorldSetLinearDamping(dWorldID w, dReal scale)
+{
+        dAASSERT(w);
+        w->dampingp.linear_scale = scale;
+}
+
+dReal dWorldGetAngularDamping(const dWorldID w)
+{
+        dAASSERT(w);
+        return w->dampingp.angular_scale;
+}
+
+void dWorldSetAngularDamping(dWorldID w, dReal scale)
+{
+        dAASSERT(w);
+        w->dampingp.angular_scale = scale;
+}
+
+void dWorldSetDamping(dWorldID w, dReal linear_scale, dReal angular_scale)
+{
+        dAASSERT(w);
+        dWorldSetLinearDamping(w, linear_scale);
+        dWorldSetAngularDamping(w, angular_scale);
+}
+
+dReal dWorldGetMaxAngularVel(const dWorldID w)
+{
+        dAASSERT(w);
+        return w->dampingp.max_angular_vel;
+}
+
+void dWorldSetMaxAngularVel(dWorldID w, dReal max_velocity)
+{
+        dAASSERT(w);
+        w->dampingp.max_angular_vel = max_velocity;
+}
+
+
 void dWorldSetQuickStepNumIterations (dWorldID w, int num)
 {
 	dAASSERT(w);
@@ -1604,7 +1776,7 @@ void dWorldSetQuickStepNumIterations (dWorldID w, int num)
 }
 
 
-int dWorldGetQuickStepNumIterations (dWorldID w)
+int dWorldGetQuickStepNumIterations (const dWorldID w)
 {
 	dAASSERT(w);
 	return w->qs.num_iterations;
@@ -1618,7 +1790,7 @@ void dWorldSetQuickStepW (dWorldID w, dReal param)
 }
 
 
-dReal dWorldGetQuickStepW (dWorldID w)
+dReal dWorldGetQuickStepW (const dWorldID w)
 {
 	dAASSERT(w);
 	return w->qs.w;
@@ -1632,7 +1804,7 @@ void dWorldSetContactMaxCorrectingVel (dWorldID w, dReal vel)
 }
 
 
-dReal dWorldGetContactMaxCorrectingVel (dWorldID w)
+dReal dWorldGetContactMaxCorrectingVel (const dWorldID w)
 {
 	dAASSERT(w);
 	return w->contactp.max_vel;
@@ -1646,7 +1818,7 @@ void dWorldSetContactSurfaceLayer (dWorldID w, dReal depth)
 }
 
 
-dReal dWorldGetContactSurfaceLayer (dWorldID w)
+dReal dWorldGetContactSurfaceLayer (const dWorldID w)
 {
 	dAASSERT(w);
 	return w->contactp.min_depth;
