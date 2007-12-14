@@ -297,7 +297,7 @@ Bitsets , based on \ref DYNAMIC_ARRAYS .
     {\
         if(array_data.m_size > array_data.m_reserve_size)\
         {\
-            GIM_DYNARRAY_RESERVE_SIZE(GUINT,array_data,array_data.m_size+G_ARRAY_GROW_SIZE);\
+            GIM_DYNARRAY_RESERVE_SIZE(GUINT,array_data,(array_data.m_size+G_ARRAY_GROW_SIZE));\
         }\
         GUINT * _pt = GIM_DYNARRAY_POINTER(GUINT,array_data);\
         memset(&_pt[_oldsize],0,sizeof(GUINT)*(array_data.m_size-_oldsize));\
