@@ -105,7 +105,7 @@
 #include <string.h>
 #include <float.h>
 
-#if !defined(ODE_PLATFORM_PS3)
+#if !defined(ODE_PLATFORM_OSX) && !defined(ODE_PLATFORM_PS3)
   #include <malloc.h>
 #endif
 
