@@ -85,47 +85,47 @@ mathematical functions
 //! Floating-point representation of an integer value.
 #define FR(x)					((GREAL&)(x))
 
-#define MAX(a,b) (a<b?b:a)
-#define MIN(a,b) (a>b?b:a)
+#define MAX(a,b) ((a)<(b)?(b):(a))
+#define MIN(a,b) ((a)>(b)?(b):(a))
 
 #define MAX3(a,b,c) MAX(a,MAX(b,c))
 #define MIN3(a,b,c) MIN(a,MIN(b,c))
 
-#define IS_ZERO(value) (value < G_EPSILON &&  value > -G_EPSILON)
+#define IS_ZERO(value) ((value) < G_EPSILON &&  (value) > -G_EPSILON)
 
-#define IS_NEGATIVE(value) (value <= -G_EPSILON)
+#define IS_NEGATIVE(value) ((value) <= -G_EPSILON)
 
-#define IS_POSISITVE(value) (value >= G_EPSILON)
+#define IS_POSISITVE(value) ((value) >= G_EPSILON)
 
 ///returns a clamped number
-#define CLAMP(number,minval,maxval) (number<minval?minval:(number>maxval?maxval:number))
+#define CLAMP(number,minval,maxval) ((number)<(minval)?(minval):((number)>(maxval)?(maxval):(number)))
 
 ///Swap numbers
 #define SWAP_NUMBERS(a,b){ \
-    a = a+b; \
-    b = a-b; \
-    a = a-b; \
+    (a) = (a)+(b); \
+    (b) = (a)-(b); \
+    (a) = (a)-(b); \
 }\
 
 #define GIM_INV_SQRT(va,isva)\
 {\
-    if(va<=0.0000001f)\
+    if((va)<=0.0000001f)\
     {\
-        isva = G_REAL_INFINITY;\
+        (isva) = G_REAL_INFINITY;\
     }\
     else\
     {\
-        GREAL _x = va * 0.5f;\
+        GREAL _x = (va) * 0.5f;\
         GUINT _y = 0x5f3759df - ( IR(va) >> 1);\
-        isva = FR(_y);\
-        isva  = isva * ( 1.5f - ( _x * isva * isva ) );\
+        (isva) = FR(_y);\
+        (isva) = (isva) * ( 1.5f - ( _x * (isva) * (isva) ) );\
     }\
 }\
 
 #define GIM_SQRT(va,sva)\
 {\
     GIM_INV_SQRT(va,sva);\
-    sva = 1.0f/sva;\
+    (sva) = 1.0f/(sva);\
 }\
 
 //! Computes 1.0f / sqrtf(x). Comes from Quake3. See http://www.magic-software.com/3DGEDInvSqrt.html
