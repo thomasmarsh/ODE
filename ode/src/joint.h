@@ -152,7 +152,7 @@ struct dxJointLimitMotor {
   dReal get (int num);
   int testRotationalLimit (dReal angle);
   int addLimot (dxJoint *joint, dxJoint::Info2 *info, int row,
-		dVector3 ax1, int rotational);
+		const dVector3 ax1, int rotational);
 };
 
 

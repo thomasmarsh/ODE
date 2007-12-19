@@ -466,7 +466,7 @@ int dxJointLimitMotor::testRotationalLimit (dReal angle)
 
 int dxJointLimitMotor::addLimot (dxJoint *joint,
 				 dxJoint::Info2 *info, int row,
-				 dVector3 ax1, int rotational)
+				 const dVector3 ax1, int rotational)
 {
   int srow = row * info->rowskip;
 
@@ -4237,7 +4237,7 @@ dxJoint::Vtable __dnull_vtable = {
                         (v1)[2] o1 (z)  \
                     )
 
-static dReal   Midentity[3][3] =
+static const dReal   Midentity[3][3] =
                 {
                     {   1,  0,  0   },
                     {   0,  1,  0   },
