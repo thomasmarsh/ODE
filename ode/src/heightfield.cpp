@@ -24,8 +24,8 @@
 
 #define TERRAINTOL REAL(0.0)
 
-#define dMIN(A,B)  ((A)>(B) ? B : A)
-#define dMAX(A,B)  ((A)>(B) ? A : B)
+#define dMIN(A,B)  ((A)>(B) ? (B) : (A))
+#define dMAX(A,B)  ((A)>(B) ? (A) : (B))
 
 
 // Three-way MIN and MAX
@@ -39,19 +39,19 @@
 
 #define dGeomRaySetNoNormalize(myRay, MyPoint, MyVector) {  \
     \
-    dVector3Copy (MyPoint, myRay.final_posr->pos);   \
-    myRay.final_posr->R[2] = MyVector[0];       \
-    myRay.final_posr->R[6] = MyVector[1];       \
-    myRay.final_posr->R[10] = MyVector[2];      \
+    dVector3Copy (MyPoint, (myRay).final_posr->pos);   \
+    (myRay).final_posr->R[2] = (MyVector)[0];       \
+    (myRay).final_posr->R[6] = (MyVector)[1];       \
+    (myRay).final_posr->R[10] = (MyVector)[2];      \
     dGeomMoved (&myRay);                        \
             }
 
 #define dGeomPlaneSetNoNormalize(MyPlane, MyPlaneDef) { \
     \
-    MyPlane->p[0] = MyPlaneDef[0];  \
-    MyPlane->p[1] = MyPlaneDef[1];  \
-    MyPlane->p[2] = MyPlaneDef[2];  \
-    MyPlane->p[3] = MyPlaneDef[3];  \
+    (MyPlane)->p[0] = (MyPlaneDef)[0];  \
+    (MyPlane)->p[1] = (MyPlaneDef)[1];  \
+    (MyPlane)->p[2] = (MyPlaneDef)[2];  \
+    (MyPlane)->p[3] = (MyPlaneDef)[3];  \
     dGeomMoved (MyPlane);           \
                     }
 //////// Local Build Option ////////////////////////////////////////////////////
@@ -896,7 +896,7 @@ typedef dReal dGetDepthFn( dGeomID g, dReal x, dReal y, dReal z );
 
 #define DMESS(A)	\
     dMessage(0,"Contact Plane (%d %d %d) %.5e %.5e (%.5e %.5e %.5e)(%.5e %.5e %.5e)).",	\
-    x,z,A,	\
+    x,z,(A),	\
     pContact->depth,	\
     dGeomSphereGetRadius(o2),		\
     pContact->pos[0],	\

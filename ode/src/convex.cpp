@@ -39,8 +39,8 @@ By Rodrigo Hernandez
 #endif
 
 #if _MSC_VER <= 1200
-#define dMIN(A,B)  ((A)>(B) ? B : A)
-#define dMAX(A,B)  ((A)>(B) ? A : B)
+#define dMIN(A,B)  ((A)>(B) ? (B) : (A))
+#define dMAX(A,B)  ((A)>(B) ? (A) : (B))
 #else
 #define dMIN(A,B)  std::min(A,B)
 #define dMAX(A,B)  std::max(A,B)
