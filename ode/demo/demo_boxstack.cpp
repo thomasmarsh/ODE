@@ -563,7 +563,7 @@ int main (int argc, char **argv)
 
   dWorldSetLinearDamping(world, 0.00001);
   dWorldSetAngularDamping(world, 0.005);
-  dWorldSetMaxAngularVel(world, 200);
+  dWorldSetMaxAngularSpeed(world, 200);
 
   dWorldSetContactMaxCorrectingVel (world,0.1);
   dWorldSetContactSurfaceLayer (world,0.001);

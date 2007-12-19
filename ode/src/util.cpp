@@ -189,14 +189,13 @@ static inline dReal sinc (dReal x)
 void dxStepBody (dxBody *b, dReal h)
 {
   // cap the angular velocity
-  const dReal aspeed = dDOT( b->avel, b->avel );
-  const bool body_ang_max = b->flags & dxBodyMaxAngularVel;
-  const dReal max_ang_speed = body_ang_max ?
-                        b->dampingp.max_angular_vel :
-                        b->world->dampingp.max_angular_vel;
-  if (max_ang_speed != dInfinity && aspeed > max_ang_speed*max_ang_speed) {
-        const dReal coef = max_ang_speed/dSqrt(aspeed);
-        dOPEC(b->avel, *=, coef);
+  if (b->flags & dxBodyMaxAngularSpeed) {
+        const dReal max_ang_speed = b->max_angular_speed;
+        const dReal aspeed = dDOT( b->avel, b->avel );
+        if (aspeed > max_ang_speed*max_ang_speed) {
+                const dReal coef = max_ang_speed/dSqrt(aspeed);
+                dOPEC(b->avel, *=, coef);
+        }
   }
   // end of angular velocity cap
 
@@ -276,29 +275,23 @@ void dxStepBody (dxBody *b, dReal h)
   if (b->moved_callback)
           b->moved_callback(b);
 
+
   // damping
-  const dReal lspeed = dDOT( b->lvel, b->lvel );
-  const bool lin_damping = b->flags & dxBodyLinearDamping;
-  if ( lspeed >
-        ( lin_damping ?
-          b->adis.linear_average_threshold :
-          b->world->adis.linear_average_threshold )
-     ) {
-        const dReal scale = 1 - (lin_damping ?
-        b->dampingp.linear_scale :
-        b->world->dampingp.linear_scale);
-        dOPEC(b->lvel, *=, scale);
+  if (b->flags & dxBodyLinearDamping) {
+        const dReal lin_threshold = b->dampingp.linear_threshold;
+        const dReal lin_speed = dDOT( b->lvel, b->lvel );
+        if ( lin_speed > lin_threshold) {
+                const dReal k = 1 - b->dampingp.linear_scale;
+                dOPEC(b->lvel, *=, k);
+        }
   }
-  const bool ang_damping = b->flags & dxBodyAngularDamping;
-  if ( aspeed >
-        ( ang_damping ?
-          b->adis.angular_average_threshold :
-          b->world->adis.angular_average_threshold )
-     ) {
-        const dReal scale = 1 - (ang_damping ?
-        b->dampingp.angular_scale :
-        b->world->dampingp.angular_scale);
-        dOPEC(b->avel, *=, scale);
+  if (b->flags & dxBodyAngularDamping) {
+        const dReal ang_threshold = b->dampingp.angular_threshold;
+        const dReal ang_speed = dDOT( b->avel, b->avel );
+        if ( ang_speed > ang_threshold) {
+                const dReal k = 1 - b->dampingp.angular_scale;
+                dOPEC(b->avel, *=, k);
+        }
   }
 
 }
