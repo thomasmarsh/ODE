@@ -603,7 +603,7 @@ inline void dumpplanes(dxConvex& cvx)
 }
 
 // this variable is for debuggin purpuses only, should go once everything works
-static bool hit=false;
+static const bool hit=false;
 
 /*
   \brief Tests whether 2 convex objects collide
