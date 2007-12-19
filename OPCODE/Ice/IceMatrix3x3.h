@@ -309,7 +309,7 @@
 		//! Compute a cofactor. Used for matrix inversion.
 				float			CoFactor(ubyte row, ubyte column)	const
 				{
-					static sdword gIndex[3+2] = { 0, 1, 2, 0, 1 };
+					static const sdword gIndex[3+2] = { 0, 1, 2, 0, 1 };
 					return	(m[gIndex[row+1]][gIndex[column+1]]*m[gIndex[row+2]][gIndex[column+2]] - m[gIndex[row+2]][gIndex[column+1]]*m[gIndex[row+1]][gIndex[column+2]]);
 				}
 */
