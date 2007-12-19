@@ -433,39 +433,28 @@ ODE_API void dWorldSetAutoDisableFlag (dWorldID, int do_auto_disable);
  * Damping serves two purposes: reduce simulation instability, and to allow
  * the bodies to come to rest (and possibly auto-disabling them).
  *
- * ODE's damping management works like this:
- *
- *  @li Bodies obbey the world's damping scales. Until having their linear
- *      or angular damping scales set (they work independently), they will
- *      be affected by the world's current damping scales.
- *  @li Setting the linear (or angular) scale will make the body follow its
- *      own linear (or angular) scale parameter. It can use the world's
- *      damping scale parameters again by calling the reset functions.
- *  @li After updating the world's damping scale, all bodies that did not
- *      have their scale set will use the new world scale.
- *
- * The thresholds are shared between the auto-disable functions. The damping
- * functions are meant to be used either alone or together with the auto-disable
- * functions, but not independently; you should use the damping to help
- * disabling the bodies. Damping is not a good substitute for proper 
- * (air) friction simulation.
+ * Bodies are constructed using the world's current damping parameters. Setting
+ * the scales to 0 disables the damping.
  *
  * Here is how it is done: after every time step linear and angular
  * velocities are tested against the corresponding thresholds. If they
- * are above, they are multiplied by (1 - scale). So a negative value
+ * are above, they are multiplied by (1 - scale). So a negative scale value
  * will actually increase the speed, and values greater than one will
  * make the object oscilate every step; both can make the simulation unstable.
  *
+ * To disable damping just set the damping scale to zero.
+ *
  * You can also limit the maximum angular velocity. In contrast to the damping
- * functions, the angular velocity is capped before the body is moved.
- * That means that it will introduce errors in joints that are forcing the body
+ * functions, the angular velocity is affected before the body is moved.
+ * This means that it will introduce errors in joints that are forcing the body
  * to rotate too fast. Some bodies have naturally high angular velocities
  * (like cars' wheels), so you may want to give them a very high (like the default,
  * dInfinity) limit.
  *
  * @note The velocities are damped after the stepper function has moved the
  * object. Otherwise the damping could introduce errors in joints. First the
- * joint constraints are processed by the stepper, then the damping is applied.
+ * joint constraints are processed by the stepper (moving the body), then
+ * the damping is applied.
  *
  * @note The damping happens right after the moved callback is called; this way 
  * it still possible use the exact velocities the body has acquired during the
@@ -473,15 +462,13 @@ ODE_API void dWorldSetAutoDisableFlag (dWorldID, int do_auto_disable);
  */
 
 /**
- * @brief Get the world's linear damping threshold. It just calls the
- * corresponding auto-disable function.
+ * @brief Get the world's linear damping threshold.
  * @ingroup damping
  */
 ODE_API dReal dWorldGetLinearDampingThreshold(const dWorldID w);
 
 /**
- * @brief Set the world's linear damping threshold. It just calls the
- * corresponding auto-disable function.
+ * @brief Set the world's linear damping threshold.
  * @param threshold The damping won't be applied if the linear speed is
  *        below this threshold. Default is 0.01.
  * @ingroup damping
@@ -489,15 +476,13 @@ ODE_API dReal dWorldGetLinearDampingThreshold(const dWorldID w);
 ODE_API void dWorldSetLinearDampingThreshold(dWorldID w, dReal threshold);
 
 /**
- * @brief Get the world's angular damping threshold. It just calls the
- * corresponding auto-disable function.
+ * @brief Get the world's angular damping threshold.
  * @ingroup damping
  */
 ODE_API dReal dWorldGetAngularDampingThreshold(const dWorldID w);
 
 /**
- * @brief Set the world's angular damping threshold. It just calls the
- * corresponding auto-disable function.
+ * @brief Set the world's angular damping threshold.
  * @param threshold The damping won't be applied if the angular speed is
  *        below this threshold. Default is 0.01.
  * @ingroup damping
@@ -543,22 +528,19 @@ ODE_API void dWorldSetDamping(dWorldID w,
                                 dReal angular_scale);
 
 /**
- * @brief Get the world's maximum angular velocity.
+ * @brief Get the default maximum angular speed.
  * @ingroup damping
- * Every body with no specific maximum angular velocity will use
- * this limit.
- * @sa dBodyGetMaxAngularVel()
+ * @sa dBodyGetMaxAngularSpeed()
  */
-ODE_API dReal dWorldGetMaxAngularVel(const dWorldID w);
+ODE_API dReal dWorldGetMaxAngularSpeed(const dWorldID w);
 
 
 /**
- * @brief Set the world's maximum angular velocity.
+ * @brief Set the default maximum angular speed for new bodies.
  * @ingroup damping
- * Each body can have its own maximum angular velocity set.
- * @sa dBodySetMaxAngularVel()
+ * @sa dBodySetMaxAngularSpeed()
  */
-ODE_API void dWorldSetMaxAngularVel(const dWorldID w, dReal max_velocity);
+ODE_API void dWorldSetMaxAngularSpeed(const dWorldID w, dReal max_speed);
 
 
 
@@ -1159,10 +1141,14 @@ ODE_API dGeomID dBodyGetNextGeom(const dGeomID g);
 
 
 /**
+ * @brief Resets the damping settings to the current world's settings.
+ * @ingroup bodies damping
+ */
+ODE_API void dBodySetDampingDefaults(dBodyID b);
+
+/**
  * @brief Get the body's linear damping scale.
  * @ingroup bodies damping
- * @remarks If the body's linear damping scale was not set, this function
- * returns the world's linear damping scale.
  */
 ODE_API dReal dBodyGetLinearDamping(const dBodyID b);
 
@@ -1195,7 +1181,7 @@ ODE_API dReal dBodyGetAngularDamping(const dBodyID b);
 ODE_API void dBodySetAngularDamping(dBodyID b, dReal scale);
 
 /**
- * @brief Convenience function tp set linear and angular scales at once.
+ * @brief Convenience function to set linear and angular scales at once.
  * @param linear_scale The linear damping scale. Should be in the interval [0, 1].
  * @param angular_scale The angular damping scale. Should be in the interval [0, 1].
  * @ingroup bodies damping
@@ -1204,78 +1190,49 @@ ODE_API void dBodySetAngularDamping(dBodyID b, dReal scale);
 ODE_API void dBodySetDamping(dBodyID b, dReal linear_scale, dReal angular_scale);
 
 /**
- * @brief Makes the body use the world's linear damping scale again.
- * @ingroup bodies damping
- */
-ODE_API void dBodyResetLinearDamping(dBodyID b);
-
-/**
- * @brief Makes the body use the world's angular damping scale again.
- * @ingroup bodies damping
- */
-ODE_API void dBodyResetAngularDamping(dBodyID b);
-
-/**
  * @brief Get the body's linear damping threshold.
  * @ingroup bodies damping
- * @sa dBodyGetAutoDisableLinearThreshold()
- * @remarks This just returns the auto-disable linear threshold.
  */
 ODE_API dReal dBodyGetLinearDampingThreshold(const dBodyID b);
 
 /**
  * @brief Set the body's linear damping threshold.
  * @param threshold The linear threshold to be used. Damping
- *        is only applied if the linear speed is above this limit.
+ *      is only applied if the linear speed is above this limit.
  * @ingroup bodies damping
- * @sa dBodySetAutoDisableLinearThreshold()
- * @remarks This just sets the auto-disable linear threshold.
  */
 ODE_API void dBodySetLinearDampingThreshold(dBodyID b, dReal threshold);
 
 /**
  * @brief Get the body's angular damping threshold.
  * @ingroup bodies damping
- * @sa dBodyGetAutoDisableAngularThreshold()
- * @remarks This just returns the auto-disable angular threshold.
  */
 ODE_API dReal dBodyGetAngularDampingThreshold(const dBodyID b);
 
 /**
  * @brief Set the body's angular damping threshold.
  * @param threshold The angular threshold to be used. Damping is
- *        only used if the angular speed is above this limit.
+ *      only used if the angular speed is above this limit.
  * @ingroup bodies damping
- * @sa dBodySetAutoDisableAngularThreshold()
- * @remarks This just sets the auto-disable angular threshold.
  */
 ODE_API void dBodySetAngularDampingThreshold(dBodyID b, dReal threshold);
 
 /**
- * @brief Get the body's maximum angular velocity.
+ * @brief Get the body's maximum angular speed.
  * @ingroup damping bodies
- * @sa dWorldGetMaxAngularVel()
+ * @sa dWorldGetMaxAngularSpeed()
  */
-ODE_API dReal dBodyGetMaxAngularVel(const dBodyID b);
-
+ODE_API dReal dBodyGetMaxAngularSpeed(const dBodyID b);
 
 /**
- * @brief Set the body's maximum angular velocity.
+ * @brief Set the body's maximum angular speed.
  * @ingroup damping bodies
- * @sa dWorldSetMaxAngularVel() dBodyResetMaxAngularVel()
+ * @sa dWorldSetMaxAngularSpeed() dBodyResetMaxAngularSpeed()
  * The default value is dInfinity, but it's a good idea to limit
  * it at less than 500 if you build ODE with the gyroscopic term
  * enabled.
  */
-ODE_API void dBodySetMaxAngularVel(dBodyID b, dReal max_velocity);
-
-
-/**
- * @brief Reset the body's maximum angular velocity to use the world's value
- * @ingroup damping bodies
- * @sa dBodySetMaxAngularVel()
- */
-ODE_API void dBodyResetMaxAngularVel(dBodyID b);
+ODE_API void dBodySetMaxAngularSpeed(dBodyID b, dReal max_speed);
 
 
 

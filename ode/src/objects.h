@@ -40,9 +40,9 @@ enum {
   dxBodyDisabled = 4,			// body is disabled
   dxBodyNoGravity = 8,			// body is not influenced by gravity
   dxBodyAutoDisable = 16,		// enable auto-disable on body
-  dxBodyLinearDamping = 64,             // using body's linear damping instead of world's
-  dxBodyAngularDamping = 32,            // using body's angular damping insatead of world's
-  dxBodyMaxAngularVel = 64,            // using body's maximum angular velocity
+  dxBodyLinearDamping = 32,             // using linear damping
+  dxBodyAngularDamping = 64,            // using angular damping
+  dxBodyMaxAngularSpeed = 128,          // using maximum angular speed
 };
 
 
@@ -81,7 +81,8 @@ struct dxAutoDisable {
 struct dxDampingParameters {
   dReal linear_scale;  // multiply the linear velocity by (1 - scale)
   dReal angular_scale; // multiply the angular velocity by (1 - scale)
-  dReal max_angular_vel; // limit the angular velocity to this magnitude
+  dReal linear_threshold;   // linear (squared) average speed threshold
+  dReal angular_threshold;  // angular (squared) average speed threshold
 };
 
 
@@ -128,10 +129,11 @@ struct dxBody : public dObject {
   dVector3* average_lvel_buffer;      // buffer for the linear average velocity calculation
   dVector3* average_avel_buffer;      // buffer for the angular average velocity calculation
   unsigned int average_counter;      // counter/index to fill the average-buffers
-  int average_ready;        // indicates ( with = 1 ), if the Body's buffers are ready for average-calculations
+  int average_ready;            // indicates ( with = 1 ), if the Body's buffers are ready for average-calculations
 
   void (*moved_callback)(dxBody*); // let the user know the body moved
   dxDampingParameters dampingp; // damping parameters, depends on flags
+  dReal max_angular_speed;      // limit the angular velocity to this magnitude
 };
 
 
@@ -143,10 +145,11 @@ struct dxWorld : public dBase {
   dReal global_erp;		// global error reduction parameter
   dReal global_cfm;		// global costraint force mixing parameter
   dxAutoDisable adis;		// auto-disable parameters
-  int adis_flag;		// auto-disable flag for new bodies
+  int body_flags;               // flags for new bodies
   dxQuickStepParameters qs;
   dxContactParameters contactp;
   dxDampingParameters dampingp; // damping parameters
+  dReal max_angular_speed;      // limit the angular velocity to this magnitude
 };
 
 

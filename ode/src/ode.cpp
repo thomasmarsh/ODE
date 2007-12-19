@@ -266,6 +266,11 @@ dxBody *dBodyCreate (dxWorld *w)
 
   b->moved_callback = 0;
 
+  dBodySetDampingDefaults(b);	// must do this after adding to world
+
+  b->flags |= w->body_flags & dxBodyMaxAngularSpeed;
+  b->max_angular_speed = w->max_angular_speed;
+
   return b;
 }
 
@@ -979,7 +984,7 @@ void dBodySetAutoDisableDefaults (dBodyID b)
 	dWorldID w = b->world;
 	dAASSERT(w);
 	b->adis = w->adis;
-	dBodySetAutoDisableFlag (b, w->adis_flag);
+	dBodySetAutoDisableFlag (b, w->body_flags & dxBodyAutoDisable);
 }
 
 
@@ -988,30 +993,32 @@ void dBodySetAutoDisableDefaults (dBodyID b)
 dReal dBodyGetLinearDamping(const dBodyID b)
 {
         dAASSERT(b);
-        return (b->flags & dxBodyLinearDamping) ?
-                b->dampingp.linear_scale :
-                b->world->dampingp.linear_scale;
+        return b->dampingp.linear_scale;
 }
 
 void dBodySetLinearDamping(dBodyID b, dReal scale)
 {
         dAASSERT(b);
-        b->flags |= dxBodyLinearDamping;
+        if (scale)
+                b->flags |= dxBodyLinearDamping;
+        else
+                b->flags &= ~dxBodyLinearDamping;
         b->dampingp.linear_scale = scale;
 }
 
 dReal dBodyGetAngularDamping(const dBodyID b)
 {
         dAASSERT(b);
-        return (b->flags & dxBodyAngularDamping) ?
-                b->dampingp.angular_scale :
-                b->world->dampingp.angular_scale;
+        return b->dampingp.angular_scale;
 }
 
 void dBodySetAngularDamping(dBodyID b, dReal scale)
 {
         dAASSERT(b);
-        b->flags |= dxBodyAngularDamping;
+        if (scale)
+                b->flags |= dxBodyAngularDamping;
+        else
+                b->flags &= ~dxBodyAngularDamping;
         b->dampingp.angular_scale = scale;
 }
 
@@ -1022,64 +1029,57 @@ void dBodySetDamping(dBodyID b, dReal linear_scale, dReal angular_scale)
         dBodySetAngularDamping(b, angular_scale);
 }
 
-void dBodyResetLinearDamping(dBodyID b)
-{
-        dAASSERT(b);
-        b->flags &= ~dxBodyLinearDamping;
-}
-
-void dBodyResetAngularDamping(dBodyID b)
-{
-        dAASSERT(b);
-        b->flags &= ~dxBodyAngularDamping;
-}
-
 dReal dBodyGetLinearDampingThreshold(const dBodyID b)
 {
         dAASSERT(b);
-        return dBodyGetAutoDisableLinearThreshold(b);
+        return dSqrt(b->dampingp.linear_threshold);
 }
 
 void dBodySetLinearDampingThreshold(dBodyID b, dReal threshold)
 {
         dAASSERT(b);
-        dBodySetAutoDisableLinearThreshold(b, threshold);
+        b->dampingp.linear_threshold = threshold*threshold;
 }
 
 
 dReal dBodyGetAngularDampingThreshold(const dBodyID b)
 {
         dAASSERT(b);
-        return dBodyGetAutoDisableAngularThreshold(b);
+        return dSqrt(b->dampingp.angular_threshold);
 }
 
 void dBodySetAngularDampingThreshold(dBodyID b, dReal threshold)
 {
         dAASSERT(b);
-        dBodySetAutoDisableAngularThreshold(b, threshold);
+        b->dampingp.angular_threshold = threshold*threshold;
 }
 
-dReal dBodyGetMaxAngularVel(const dBodyID b)
+void dBodySetDampingDefaults(dBodyID b)
 {
         dAASSERT(b);
-        return (b->flags & dxBodyMaxAngularVel) ?
-                b->dampingp.max_angular_vel:
-                b->world->dampingp.max_angular_vel;
+        dWorldID w = b->world;
+        dAASSERT(w);
+        b->dampingp = w->dampingp;
+        int mask = dxBodyLinearDamping | dxBodyAngularDamping;
+        b->flags &= ~mask; // zero them
+        b->flags |= w->body_flags & mask;
 }
 
-void dBodySetMaxAngularVel(dBodyID b, dReal max_velocity)
+dReal dBodyGetMaxAngularSpeed(const dBodyID b)
 {
         dAASSERT(b);
-        b->flags |= dxBodyMaxAngularVel;
-        b->dampingp.max_angular_vel = max_velocity;
+        return b->max_angular_speed;
 }
 
-void dBodyResetMaxAngularVel(dBodyID b)
+void dBodySetMaxAngularSpeed(dBodyID b, dReal max_speed)
 {
         dAASSERT(b);
-        b->flags &= ~dxBodyMaxAngularVel;
+        if (max_speed < dInfinity)
+                b->flags |= dxBodyMaxAngularSpeed;
+        else
+                b->flags &= ~dxBodyMaxAngularSpeed;
+        b->max_angular_speed = max_speed;
 }
-
 
 void dBodySetMovedCallback(dBodyID b, void (*callback)(dBodyID))
 {
@@ -1476,9 +1476,10 @@ dxWorld * dWorldCreate()
   #error dSINGLE or dDOUBLE must be defined
 #endif
 
+  w->body_flags = 0; // everything disabled
+
   w->adis.idle_steps = 10;
   w->adis.idle_time = 0;
-  w->adis_flag = 0;
   w->adis.average_samples = 1;		// Default is 1 sample => Instantaneous velocity
   w->adis.angular_average_threshold = REAL(0.01)*REAL(0.01);	// (magnitude squared)
   w->adis.linear_average_threshold = REAL(0.01)*REAL(0.01);		// (magnitude squared)
@@ -1491,7 +1492,9 @@ dxWorld * dWorldCreate()
 
   w->dampingp.linear_scale = 0;
   w->dampingp.angular_scale = 0;
-  w->dampingp.max_angular_vel = dInfinity;
+  w->dampingp.linear_threshold = 0.01 * 0.01;
+  w->dampingp.angular_threshold = 0.01 * 0.01;  
+  w->max_angular_speed = dInfinity;
 
   return w;
 }
@@ -1504,6 +1507,7 @@ void dWorldDestroy (dxWorld *w)
   dxBody *nextb, *b = w->firstbody;
   while (b) {
     nextb = (dxBody*) b->next;
+    // TODO: remove those 2 ifs
     if(b->average_lvel_buffer)
     {
       delete[] (b->average_lvel_buffer);
@@ -1688,14 +1692,17 @@ void dWorldSetAutoDisableTime (dWorldID w, dReal time)
 int dWorldGetAutoDisableFlag (const dWorldID w)
 {
 	dAASSERT(w);
-	return w->adis_flag;
+	return w->body_flags & dxBodyAutoDisable;
 }
 
 
 void dWorldSetAutoDisableFlag (dWorldID w, int do_auto_disable)
 {
 	dAASSERT(w);
-	w->adis_flag = (do_auto_disable != 0);
+	if (do_auto_disable)
+        	w->body_flags |= dxBodyAutoDisable;
+	else
+	        w->body_flags &= ~dxBodyAutoDisable;
 }
 
 
@@ -1704,25 +1711,25 @@ void dWorldSetAutoDisableFlag (dWorldID w, int do_auto_disable)
 dReal dWorldGetLinearDampingThreshold(const dWorldID w)
 {
         dAASSERT(w);
-        return dWorldGetAutoDisableLinearThreshold(w);
+        return dSqrt(w->dampingp.linear_threshold);
 }
 
 void dWorldSetLinearDampingThreshold(dWorldID w, dReal threshold)
 {
         dAASSERT(w);
-        dWorldSetAutoDisableLinearThreshold(w, threshold);
+        w->dampingp.linear_threshold = threshold*threshold;
 }
 
 dReal dWorldGetAngularDampingThreshold(const dWorldID w)
 {
         dAASSERT(w);
-        return dWorldGetAutoDisableAngularThreshold(w);
+        return dSqrt(w->dampingp.angular_threshold);
 }
 
 void dWorldSetAngularDampingThreshold(dWorldID w, dReal threshold)
 {
         dAASSERT(w);
-        dWorldSetAutoDisableAngularThreshold(w, threshold);
+        w->dampingp.angular_threshold = threshold*threshold;
 }
 
 dReal dWorldGetLinearDamping(const dWorldID w)
@@ -1734,6 +1741,10 @@ dReal dWorldGetLinearDamping(const dWorldID w)
 void dWorldSetLinearDamping(dWorldID w, dReal scale)
 {
         dAASSERT(w);
+        if (scale)
+                w->body_flags |= dxBodyLinearDamping;
+        else
+                w->body_flags &= ~dxBodyLinearDamping;
         w->dampingp.linear_scale = scale;
 }
 
@@ -1746,6 +1757,10 @@ dReal dWorldGetAngularDamping(const dWorldID w)
 void dWorldSetAngularDamping(dWorldID w, dReal scale)
 {
         dAASSERT(w);
+        if (scale)
+                w->body_flags |= dxBodyAngularDamping;
+        else
+                w->body_flags &= ~dxBodyAngularDamping;
         w->dampingp.angular_scale = scale;
 }
 
@@ -1756,16 +1771,20 @@ void dWorldSetDamping(dWorldID w, dReal linear_scale, dReal angular_scale)
         dWorldSetAngularDamping(w, angular_scale);
 }
 
-dReal dWorldGetMaxAngularVel(const dWorldID w)
+dReal dWorldGetMaxAngularSpeed(const dWorldID w)
 {
         dAASSERT(w);
-        return w->dampingp.max_angular_vel;
+        return w->max_angular_speed;
 }
 
-void dWorldSetMaxAngularVel(dWorldID w, dReal max_velocity)
+void dWorldSetMaxAngularSpeed(dWorldID w, dReal max_speed)
 {
         dAASSERT(w);
-        w->dampingp.max_angular_vel = max_velocity;
+        if (max_speed < dInfinity)
+                w->body_flags |= dxBodyMaxAngularSpeed;
+        else
+                w->body_flags &= ~dxBodyMaxAngularSpeed;
+        w->max_angular_speed = max_speed;
 }
 
 

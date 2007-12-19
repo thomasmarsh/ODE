@@ -123,10 +123,11 @@ public:
     { dWorldSetAngularDamping(_id, scale); }
   void setDamping(dReal linear_scale, dReal angular_scale)
     { dWorldSetDamping(_id, linear_scale, angular_scale); }
-  dReal getMaxAngularVel() const
-    { return dWorldGetMaxAngularVel(_id); }
-  void setMaxAngularVel(dReal max_velocity)
-    { dWorldSetMaxAngularVel(_id, max_velocity); }
+
+  dReal getMaxAngularSpeed() const
+    { return dWorldGetMaxAngularSpeed(_id); }
+  void setMaxAngularSpeed(dReal max_speed)
+    { dWorldSetMaxAngularSpeed(_id, max_speed); }
 
   void setContactSurfaceLayer(dReal depth)
     { dWorldSetContactSurfaceLayer (_id, depth); }
@@ -300,10 +301,6 @@ public:
     { dBodySetAngularDamping(_id, scale); }
   void setDamping(dReal linear_scale, dReal angular_scale)
     { dBodySetDamping(_id, linear_scale, angular_scale); }
-  void resetLinearDamping()
-    { dBodyResetLinearDamping(_id); }
-  void resetAngularDamping()
-    { dBodyResetAngularDamping(_id); }
    dReal getLinearDampingThreshold() const
     { return dBodyGetLinearDampingThreshold(_id); }
    void setLinearDampingThreshold(dReal threshold) const
@@ -312,13 +309,13 @@ public:
     { return dBodyGetAngularDampingThreshold(_id); }
    void setAngularDampingThreshold(dReal threshold)
     { dBodySetAngularDampingThreshold(_id, threshold); }
+   void setDampingDefaults()
+    { dBodySetDampingDefaults(_id); }
 
-   dReal getMaxAngularVel() const
-    { return dBodyGetMaxAngularVel(_id); }
-   void setMaxAngularVel(dReal max_velocity)
-    { dBodySetMaxAngularVel(_id, max_velocity); }
-   void resetMaxAngularVel()
-    { dBodyResetMaxAngularVel(_id); }
+   dReal getMaxAngularSpeed() const
+    { return dBodyGetMaxAngularSpeed(_id); }
+   void setMaxAngularSpeed(dReal max_speed)
+    { dBodySetMaxAngularSpeed(_id, max_speed); }
 
 };
 
