@@ -147,12 +147,12 @@ void dxHeightfieldData::SetData( int nWidthSamples, int nDepthSamples,
 // recomputes heights bounds
 void dxHeightfieldData::ComputeHeightBounds()
 {
-    static int i;
-    static dReal h;
-    static unsigned char *data_byte;
-    static short *data_short;
-    static float *data_float;
-    static double *data_double;
+    int i;
+    dReal h;
+    unsigned char *data_byte;
+    short *data_short;
+    float *data_float;
+    double *data_double;
 
     switch ( m_nGetHeightMode )
     {
@@ -329,11 +329,11 @@ bool dxHeightfieldData::IsOnHeightfield2  ( const dReal * const CellOrigin, cons
 // returns height at given sample coordinates
 dReal dxHeightfieldData::GetHeight( int x, int z )
 {
-    static dReal h;
-    static unsigned char *data_byte;
-    static short *data_short;
-    static float *data_float;
-    static double *data_double;
+    dReal h;
+    unsigned char *data_byte;
+    short *data_short;
+    float *data_float;
+    double *data_double;
 
     if ( m_bWrapMode == 0 )
     {
@@ -381,7 +381,7 @@ dReal dxHeightfieldData::GetHeight( int x, int z )
         // double
     case 4:
         data_double = (double*)m_pHeightData;
-        h = static_cast< dReal >( data_double[x+(z * m_nWidthSamples)] );
+        h = (dReal)( data_double[x+(z * m_nWidthSamples)] );
         break;
     }
 
@@ -428,10 +428,10 @@ dReal dxHeightfieldData::GetHeight( dReal x, dReal z )
 // dxHeightfieldData destructor
 dxHeightfieldData::~dxHeightfieldData()
 {
-    static unsigned char *data_byte;
-    static short *data_short;
-    static float *data_float;
-    static double *data_double;
+    unsigned char *data_byte;
+    short *data_short;
+    float *data_float;
+    double *data_double;
 
     if ( m_bCopyHeightData )
     {

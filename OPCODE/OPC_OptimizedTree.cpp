@@ -73,7 +73,7 @@ using namespace Opcode;
 //! Compilation flag:
 //! - true to fix quantized boxes (i.e. make sure they enclose the original ones)
 //! - false to see the effects of quantization errors (faster, but wrong results in some cases)
-static bool gFixQuantized = true;
+static const bool gFixQuantized = true;
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /**
