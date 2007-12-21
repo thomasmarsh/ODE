@@ -33,8 +33,12 @@ aclocal -I . || exit 1
 echo "Running libtoolize"
 # on Mac libtoolize is called glibtoolize
 LIBTOOLIZE=`which libtoolize`
-if [ "x$LIBTOOLIZE" == "x" ]; then
+if [ "$?" != "0" ]; then
     LIBTOOLIZE=`which glibtoolize`
+    if [ "$?" != "0" ]; then
+    echo "No libtoolize found in path."
+    exit 1
+    fi
 fi
 $LIBTOOLIZE --copy --force || exit 1
 echo "Running autoheader"
