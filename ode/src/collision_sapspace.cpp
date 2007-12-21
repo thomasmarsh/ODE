@@ -41,12 +41,81 @@
 #include "collision_kernel.h"
 #include "collision_space_internal.h"
 
-// OPCODE's Radix Sorting, returns a list of indices in sorted order
-static const uint32* RadixSort( const float* input2, uint32 nb );
 // Reference counting helper for radix sort global data.
 static void RadixSortRef();
 static void RadixSortDeref();
 
+
+// --------------------------------------------------------------------------
+//  Radix Sort Context
+// --------------------------------------------------------------------------
+
+struct RaixSortContext
+{
+public:
+	RaixSortContext(): mCurrentSize(0), mRanksValid(false), mRanks1(NULL), mRanks2(NULL) {}
+	~RaixSortContext() { FreeRanks(); }
+
+	// OPCODE's Radix Sorting, returns a list of indices in sorted order
+	const uint32* RadixSort( const float* input2, uint32 nb );
+
+private:
+	void FreeRanks();
+	void AllocateRanks(size_t nNewSize);
+
+	void ReallocateRanksIfNecessary(size_t nNewSize);
+
+private:
+	inline void SetCurrentSize(size_t nValue) { mCurrentSize = nValue; }
+	inline size_t GetCurrentSize() const { return mCurrentSize; }
+
+	inline bool AreRanksValid() const { return mRanksValid; }
+	inline void InvalidateRanks() { mRanksValid = false; }
+	inline void ValidateRanks() { mRanksValid = true; }
+
+private:
+	size_t mCurrentSize;						//!< Current size of the indices list
+	bool mRanksValid;
+	uint32* mRanks1;							//!< Two lists, swapped each pass
+	uint32* mRanks2;
+};
+
+void RaixSortContext::AllocateRanks(size_t nNewSize)
+{
+	dIASSERT(GetCurrentSize() == 0);
+
+	mRanks1 = new uint32[2 * nNewSize];
+	mRanks2	= mRanks1 + nNewSize;
+
+	SetCurrentSize(nNewSize);
+}
+
+void RaixSortContext::FreeRanks()
+{
+	SetCurrentSize(0);
+
+	delete[] mRanks1;
+	//delete[] mRanks2; -- mRanks2 points to the same buffer as mRanks1
+}
+
+void RaixSortContext::ReallocateRanksIfNecessary(size_t nNewSize)
+{
+	size_t nCurSize = GetCurrentSize();
+	
+	if (nNewSize != nCurSize)
+	{
+		if ( nNewSize > nCurSize )
+		{
+			// Free previously used ram
+			FreeRanks();
+
+			// Get some fresh one
+			AllocateRanks(nNewSize);
+		}
+
+		InvalidateRanks();
+	}
+}
 
 // --------------------------------------------------------------------------
 //  SAP space code
@@ -126,6 +195,7 @@ private:
 	// pruning position array scratch pad
 	// NOTE: this is float not dReal because of the OPCODE radix sorter
 	dArray< float > poslist;
+	RaixSortContext	sortContext;
 };
 
 // Creation
@@ -138,11 +208,11 @@ dSpaceID dSweepAndPruneSpaceCreate( dxSpace* space, int axisorder ) {
 
 #define GEOM_ENABLED(g) ((g)->gflags & GEOM_ENABLED)
 
-// HACK: We abuse 'next' and 'tome' members of dxGeom to store indices into dirty/geom lists.
-#define GEOM_SET_DIRTY_IDX(g,idx) { g->next = (dxGeom*)(size_t)(idx); }
-#define GEOM_SET_GEOM_IDX(g,idx) { g->tome = (dxGeom**)(size_t)(idx); }
-#define GEOM_GET_DIRTY_IDX(g) ((int)(size_t)g->next)
-#define GEOM_GET_GEOM_IDX(g) ((int)(size_t)g->tome)
+// HACK: We abuse 'next' and 'tome' members of dxGeom to store indice into dirty/geom lists.
+#define GEOM_SET_DIRTY_IDX(g,idx) { (g)->next = (dxGeom*)(size_t)(idx); }
+#define GEOM_SET_GEOM_IDX(g,idx) { (g)->tome = (dxGeom**)(size_t)(idx); }
+#define GEOM_GET_DIRTY_IDX(g) ((int)(size_t)(g)->next)
+#define GEOM_GET_GEOM_IDX(g) ((int)(size_t)(g)->tome)
 #define GEOM_INVALID_IDX (-1)
 
 
@@ -192,9 +262,6 @@ dxSAPSpace::dxSAPSpace( dSpaceID _space, int axisorder ) : dxSpace( _space )
 	ax0idx = ( ( axisorder ) & 3 ) << 1;
 	ax1idx = ( ( axisorder >> 2 ) & 3 ) << 1;
 	ax2idx = ( ( axisorder >> 4 ) & 3 ) << 1;
-
-	// We want the Radix sort to stick around.
-	RadixSortRef();
 }
 
 dxSAPSpace::~dxSAPSpace()
@@ -210,9 +277,6 @@ dxSAPSpace::~dxSAPSpace()
 		for ( ; DirtyList.size(); remove( DirtyList[ 0 ] ) ) {}
 		for ( ; GeomList.size(); remove( GeomList[ 0 ] ) ) {}
 	}
-
-	// We're done with the Radix sorter
-	RadixSortDeref();
 }
 
 dxGeom* dxSAPSpace::getGeom( int i )
@@ -452,7 +516,7 @@ void dxSAPSpace::BoxPruning( int count, const dxGeom** geoms, dArray< Pair >& pa
 	poslist[ count++ ] = FLT_MAX;
 
 	// 2) Sort the list
-	const uint32* Sorted = RadixSort( poslist.data(), count );
+	const uint32* Sorted = sortContext.RadixSort( poslist.data(), count );
 
 	// 3) Prune the list
 	const uint32* const LastSorted = Sorted + count;
@@ -498,43 +562,7 @@ void dxSAPSpace::BoxPruning( int count, const dxGeom** geoms, dArray< Pair >& pa
 // Radix Sort
 //------------------------------------------------------------------------------
 
-#define INVALIDATE_RANKS	mCurrentSize|=0x80000000
-#define VALIDATE_RANKS		mCurrentSize&=0x7fffffff
-#define CURRENT_SIZE		(mCurrentSize&0x7fffffff)
-#define INVALID_RANKS		(mCurrentSize&0x80000000)
 
-static int radixsort_ref = 0;					// Reference counter
-static uint32 mCurrentSize;						//!< Current size of the indices list
-static uint32* mRanks1;							//!< Two lists, swapped each pass
-static uint32* mRanks2;
-
-static void RadixSortRef()
-{
-	if ( radixsort_ref == 0 )
-	{
-		mRanks1 = NULL;
-		mRanks2 = NULL;
-		INVALIDATE_RANKS;
-	}
-
-	++radixsort_ref;
-}
-
-static void RadixSortDeref()
-{
-	--radixsort_ref;
-
-	if ( radixsort_ref == 0 )
-	{
-		// Release everything
-		if ( mRanks1 ) { delete[] mRanks1; mRanks1 = NULL; }
-		if ( mRanks2 ) { delete[] mRanks2; mRanks2 = NULL; }
-
-		// Allow us to restart
-		mCurrentSize = 0;
-		INVALIDATE_RANKS;
-	}
-}
 
 #define CHECK_PASS_VALIDITY(pass)															\
 	/* Shortcut to current counters */														\
@@ -558,29 +586,12 @@ static void RadixSortDeref()
 	if(CurCount[UniqueVal]==nb)	PerformPass=false;
 
 // WARNING ONLY SORTS IEEE FLOATING-POINT VALUES
-static const uint32* RadixSort( const float* input2, uint32 nb )
+const uint32* RaixSortContext::RadixSort( const float* input2, uint32 nb )
 {
 	uint32* input = (uint32*)input2;
 
 	// Resize lists if needed
-	uint32 CurSize = CURRENT_SIZE;
-	if ( nb != CurSize )
-	{
-		// Grow?
-		if ( nb > CurSize )
-		{
-			// Free previously used ram
-			delete[] mRanks2;
-			delete[] mRanks1;
-
-			// Get some fresh one
-			mRanks1 = new uint32[nb];
-			mRanks2	= new uint32[nb];
-		}
-
-		mCurrentSize = nb;
-		INVALIDATE_RANKS;
-	}
+	ReallocateRanksIfNecessary(nb);
 
 	// Allocate histograms & offsets on the stack
 	uint32 mHistogram[256*4];
@@ -608,7 +619,7 @@ static const uint32* RadixSort( const float* input2, uint32 nb )
 
 		bool AlreadySorted = true;	/* Optimism... */
 
-		if(INVALID_RANKS)
+		if (!AreRanksValid())
 		{
 			/* Prepare for temporal coherence */
 			float* Running = (float*)input2;
@@ -696,10 +707,14 @@ static const uint32* RadixSort( const float* input2, uint32 nb )
 				// Perform Radix Sort
 				uint8* InputBytes = (uint8*)input;
 				InputBytes += j;
-				if(INVALID_RANKS)
+				if (!AreRanksValid())
 				{
-					for(uint32 i=0;i<nb;i++)	*mLink[InputBytes[i<<2]]++ = i;
-					VALIDATE_RANKS;
+					for(uint32 i=0;i<nb;i++)
+					{
+						*mLink[InputBytes[i<<2]]++ = i;
+					}
+
+					ValidateRanks();
 				}
 				else
 				{
@@ -733,7 +748,7 @@ static const uint32* RadixSort( const float* input2, uint32 nb )
 				for(uint32 i=128;i<256;i++)	mLink[i] += CurCount[i];							// Fixing the wrong place for negative values
 
 				// Perform Radix Sort
-				if(INVALID_RANKS)
+				if (!AreRanksValid())
 				{
 					for(uint32 i=0;i<nb;i++)
 					{
@@ -742,7 +757,8 @@ static const uint32* RadixSort( const float* input2, uint32 nb )
 						if(Radix<128)		*mLink[Radix]++ = i;		// Number is positive, same as above
 						else				*(--mLink[Radix]) = i;		// Number is negative, flip the sorting order
 					}
-					VALIDATE_RANKS;
+
+					ValidateRanks();
 				}
 				else
 				{
@@ -762,11 +778,15 @@ static const uint32* RadixSort( const float* input2, uint32 nb )
 				// The pass is useless, yet we still have to reverse the order of current list if all values are negative.
 				if(UniqueVal>=128)
 				{
-					if(INVALID_RANKS)
+					if (!AreRanksValid())
 					{
 						// ###Possible?
-						for(uint32 i=0;i<nb;i++)	mRanks2[i] = nb-i-1;
-						VALIDATE_RANKS;
+						for(uint32 i=0;i<nb;i++)
+						{
+							mRanks2[i] = nb-i-1;
+						}
+
+						ValidateRanks();
 					}
 					else
 					{
