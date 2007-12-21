@@ -51,43 +51,54 @@ for geometry objects
 
 // this struct records the parameters passed to dCollideSpaceGeom()
 
+#if defined(dUSE_POSR_CACHING) 
+// This caching prevents from using collisions in multiple threads.
+// It should be re-implemented via atomic (interlocked) exchange.
+
 // Allocate and free posr - we cache a single posr to avoid thrashing
 static dxPosR* s_cachedPosR = 0;
+#endif
 
-dxPosR* dAllocPosr()
+static inline dxPosR* dAllocPosr()
 {
 	dxPosR* retPosR;
+#if defined(dUSE_POSR_CACHING)
 	if (s_cachedPosR)
 	{
 		retPosR = s_cachedPosR;
 		s_cachedPosR = 0;
 	}
 	else
+#endif
 	{
 		retPosR = (dxPosR*) dAlloc (sizeof(dxPosR));
 	}
 	return retPosR;
 }
 
-void dFreePosr(dxPosR* oldPosR)
+static inline void dFreePosr(dxPosR* oldPosR)
 {
-	if (oldPosR)
+#if defined(dUSE_POSR_CACHING)
+	if (!s_cachedPosR)
 	{
-		if (s_cachedPosR)
-		{
-			dFree(s_cachedPosR, sizeof(dxPosR));
-		}
 		s_cachedPosR = oldPosR;
+	}
+	else
+#endif
+	{
+		dFree(oldPosR, sizeof(dxPosR));
 	}
 }
 
 void dClearPosrCache(void)
 {
+#if defined(dUSE_POSR_CACHING)
 	if (s_cachedPosR)
 	{
 		dFree(s_cachedPosR, sizeof(dxPosR));
 		s_cachedPosR = 0;
 	}
+#endif
 }
 
 struct SpaceGeomColliderData {
