@@ -189,8 +189,8 @@ static inline void getClockCount (unsigned long cc[2])
 
 #else // macintosh
 
-#include <MacTypes.h>
-#include <Timer.h>
+#include <CoreServices/CoreServices.h>
+#include <ode/Timer.h>
 
 static inline void getClockCount (unsigned long cc[2])
 {
