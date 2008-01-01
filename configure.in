@@ -16,7 +16,7 @@ LIBTOOL_RELEASE=0
 AC_CANONICAL_HOST
 AC_CANONICAL_TARGET
 
-AM_INIT_AUTOMAKE(1.10)
+AM_INIT_AUTOMAKE(1.10 foreign)
 AM_CONFIG_HEADER(include/ode/config.h)
 AC_C_BIGENDIAN
 AC_PATH_X
@@ -24,7 +24,7 @@ AC_PATH_XTRA
 
 
 AC_LIBTOOL_WIN32_DLL
-AM_PROG_LIBTOOL
+AC_PROG_LIBTOOL
 AC_SUBST(LIBTOOL_DEPS)
 AC_SUBST(LIBTOOL)
 
@@ -512,6 +512,12 @@ AC_OUTPUT([
  drawstuff/src/Makefile
  drawstuff/dstest/Makefile
  ode/demo/Makefile
+ OPCODE/Makefile
+ OPCODE/Ice/Makefile
+ GIMPACT/Makefile
+ GIMPACT/include/Makefile
+ GIMPACT/include/GIMPACT/Makefile
+ GIMPACT/src/Makefile
  ode-config
  ])
 
