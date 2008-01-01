@@ -26,6 +26,7 @@
 #include <ode/matrix.h>
 #include <ode/rotation.h>
 #include <ode/odemath.h>
+#include "common-internal.h"
 #include "collision_util.h"
 #define TRIMESH_INTERNAL
 #include "collision_trimesh_internal.h"
@@ -136,9 +137,9 @@ struct EdgeRecord
 	int VertIdx2;
 	int TriIdx;		// Index into triangle array for triangle this edge belongs to
 
-	uint8 EdgeFlags;	
-	uint8 Vert1Flags;
-	uint8 Vert2Flags;
+	uint8_t EdgeFlags;	
+	uint8_t Vert1Flags;
+	uint8_t Vert2Flags;
 	bool Concave;
 };
 
@@ -188,7 +189,7 @@ void SetupEdge(EdgeRecord* edge, int edgeIdx, int triIdx, const dTriIndex* vertI
 		edge->VertIdx1 = edge->VertIdx2;
 		edge->VertIdx2 = tempIdx;
 
-		uint8 tempFlags = edge->Vert1Flags;
+		uint8_t tempFlags = edge->Vert1Flags;
 		edge->Vert1Flags = edge->Vert2Flags;
 		edge->Vert2Flags = tempFlags;
 	}
@@ -230,8 +231,8 @@ void dxTriMeshData::Preprocess()
 	udword numTris = Mesh.GetNbTriangles();
 	udword numEdges = numTris * 3;
 
-	UseFlags = new uint8[numTris];
-	memset(UseFlags, 0, sizeof(uint8) * numTris);
+	UseFlags = new uint8_t[numTris];
+	memset(UseFlags, 0, sizeof(uint8_t) * numTris);
 
 	EdgeRecord* records = new EdgeRecord[numEdges];
 
@@ -243,7 +244,7 @@ void dxTriMeshData::Preprocess()
 		SetupEdge(&records[i*3+1], 1, i, tris->mVRef);
 		SetupEdge(&records[i*3+2], 2, i, tris->mVRef);
 
-		tris = (const IndexedTriangle*)(((uint8*)tris) + Mesh.GetTriStride());
+		tris = (const IndexedTriangle*)(((uint8_t*)tris) + Mesh.GetTriStride());
 	}
 
 	// Sort the edges, so the ones sharing the same verts are beside each other

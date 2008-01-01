@@ -20,7 +20,7 @@
  *                                                                       *
  *************************************************************************/
 
-#include <ode/config.h>
+#include <odeconfig.h>
 #include <ode/mass.h>
 #include <ode/odemath.h>
 #include <ode/matrix.h>

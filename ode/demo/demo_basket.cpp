@@ -25,7 +25,10 @@
 // By Bram Stolk.
 // Press the spacebar to reset the position of the ball.
 
-#include <ode/config.h>
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
+
 #include <assert.h>
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
@@ -146,7 +149,7 @@ static void command (int cmd)
 
 static void simLoop (int pause)
 {
-  double simstep = 0.001; // 1ms simulation steps
+  double simstep = 0.0005; // 1ms simulation steps
   double dt = dsElapsedTime();
 
   int nrofsteps = (int) ceilf(dt/simstep);

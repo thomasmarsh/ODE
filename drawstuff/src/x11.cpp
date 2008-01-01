@@ -22,18 +22,25 @@
 
 // main window and event handling for X11
 
-#include <ode/config.h>
+#ifdef HAVE_CONFIG_H
+#  include "config.h"
+#endif
+
 #include <stdlib.h>
+#include <stdio.h>
 #include <string.h>
 #include <stdarg.h>
 #include <X11/Xlib.h>
 #include <X11/Xatom.h>
 #include <X11/keysym.h>
 #include <GL/glx.h>
+#include <float.h>
 
 #ifdef HAVE_SYS_TIME_H
 #include <sys/time.h>
 #endif
+
+#include "odeconfig.h"
 
 #include <drawstuff/drawstuff.h>
 #include <drawstuff/version.h>

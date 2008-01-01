@@ -27,6 +27,10 @@ for geometry objects
 
 */
 
+#ifdef HAVE_CONFIG_H
+#  include <config.h>
+#endif
+
 #include <ode/common.h>
 #include <ode/matrix.h>
 #include <ode/rotation.h>

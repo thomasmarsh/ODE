@@ -54,6 +54,7 @@
 #include <ode/matrix.h>
 #include <ode/rotation.h>
 #include <ode/odemath.h>
+#include "common-internal.h"
 #include "collision_util.h"
 
 #define TRIMESH_INTERNAL
@@ -473,7 +474,7 @@ inline void _CalculateAxis(const dVector3& v1,
 static BOOL _cldTestSeparatingAxesOfCapsule(const dVector3 &v0,
 											const dVector3 &v1,
 											const dVector3 &v2,
-											uint8 flags) 
+											uint8_t flags) 
 {
 	// calculate caps centers in absolute space
 	dVector3 vCp0;
@@ -748,7 +749,7 @@ static BOOL _cldTestSeparatingAxesOfCapsule(const dVector3 &v0,
 static void _cldTestOneTriangleVSCapsule( const dVector3 &v0, 
 											const dVector3 &v1, 
 											const dVector3 &v2,
-											uint8 flags)
+											uint8_t flags)
 {
 
 	// calculate edges
@@ -1050,7 +1051,7 @@ int dCollideCCTL(dxGeom *o1, dxGeom *o2, int flags, dContactGeom *contact, int s
 
 	    unsigned int ctContacts0 = ctContacts;
 
-		uint8* UseFlags = TriMesh->Data->UseFlags;
+		uint8_t* UseFlags = TriMesh->Data->UseFlags;
 
 		// loop through all intersecting triangles
 		for (int i = 0; i < TriCount; i++)
@@ -1062,7 +1063,7 @@ int dCollideCCTL(dxGeom *o1, dxGeom *o2, int flags, dContactGeom *contact, int s
 			dVector3 dv[3];
 			FetchTriangle(TriMesh, Triint, mTriMeshPos, mTriMeshRot, dv);
 
-			uint8 flags = UseFlags ? UseFlags[Triint] : dxTriMeshData::kUseAll;
+			uint8_t flags = UseFlags ? UseFlags[Triint] : dxTriMeshData::kUseAll;
 
 			// test this triangle
 			_cldTestOneTriangleVSCapsule(dv[0],dv[1],dv[2], flags);

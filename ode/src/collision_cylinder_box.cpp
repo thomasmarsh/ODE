@@ -25,6 +25,10 @@
  *  Ported to ODE by Nguyen Binh
  */
 
+#ifdef HAVE_CONFIG_H
+#  include <config.h>
+#endif
+
 #include <ode/collision.h>
 #include <ode/matrix.h>
 #include <ode/rotation.h>

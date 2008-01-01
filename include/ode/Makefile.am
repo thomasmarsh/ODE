@@ -17,7 +17,7 @@ libode_la_include_HEADERS = 	collision_trimesh.h \
 				collision_space.h \
 				export-dif.h \
 				ode.h  \
-				timer.h \
-				$(top_builddir)/include/ode/config.h
+				timer.h
 
-EXTRA_DIST = config.h.in
+EXTRA_DIST = config.h.in README
+

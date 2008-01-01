@@ -38,6 +38,7 @@
 #include <ode/collision_space.h>
 #include <ode/collision.h>
 
+#include "common-internal.h"
 #include "collision_kernel.h"
 #include "collision_space_internal.h"
 
@@ -57,7 +58,7 @@ public:
 	~RaixSortContext() { FreeRanks(); }
 
 	// OPCODE's Radix Sorting, returns a list of indices in sorted order
-	const uint32* RadixSort( const float* input2, uint32 nb );
+	const uint32_t* RadixSort( const float* input2, uint32_t nb );
 
 private:
 	void FreeRanks();
@@ -76,15 +77,15 @@ private:
 private:
 	size_t mCurrentSize;						//!< Current size of the indices list
 	bool mRanksValid;
-	uint32* mRanks1;							//!< Two lists, swapped each pass
-	uint32* mRanks2;
+	uint32_t* mRanks1;							//!< Two lists, swapped each pass
+	uint32_t* mRanks2;
 };
 
 void RaixSortContext::AllocateRanks(size_t nNewSize)
 {
 	dIASSERT(GetCurrentSize() == 0);
 
-	mRanks1 = new uint32[2 * nNewSize];
+	mRanks1 = new uint32_t[2 * nNewSize];
 	mRanks2	= mRanks1 + nNewSize;
 
 	SetCurrentSize(nNewSize);
@@ -146,12 +147,12 @@ private:
 	//! A generic couple structure
 	struct Pair
 	{
-		uint32 id0;	//!< First index of the pair
-		uint32 id1;	//!< Second index of the pair
+		uint32_t id0;	//!< First index of the pair
+		uint32_t id1;	//!< Second index of the pair
 
 		// Default and Value Constructor
 		Pair() {}
-		Pair( uint32 i0, uint32 i1 ) : id0( i0 ), id1( i1 ) {}
+		Pair( uint32_t i0, uint32_t i1 ) : id0( i0 ), id1( i1 ) {}
 	};
 
 	//--------------------------------------------------------------------------
@@ -188,9 +189,9 @@ private:
 
 	// Our sorting axes. (X,Z,Y is often best). Stored *2 for minor speedup
 	// Axis indices into geom's aabb are: min=idx, max=idx+1
-	uint32 ax0idx;
-	uint32 ax1idx;
-	uint32 ax2idx;
+	uint32_t ax0idx;
+	uint32_t ax1idx;
+	uint32_t ax2idx;
 
 	// pruning position array scratch pad
 	// NOTE: this is float not dReal because of the OPCODE radix sorter
@@ -516,11 +517,11 @@ void dxSAPSpace::BoxPruning( int count, const dxGeom** geoms, dArray< Pair >& pa
 	poslist[ count++ ] = FLT_MAX;
 
 	// 2) Sort the list
-	const uint32* Sorted = sortContext.RadixSort( poslist.data(), count );
+	const uint32_t* Sorted = sortContext.RadixSort( poslist.data(), count );
 
 	// 3) Prune the list
-	const uint32* const LastSorted = Sorted + count;
-	const uint32* RunningAddress = Sorted;
+	const uint32_t* const LastSorted = Sorted + count;
+	const uint32_t* RunningAddress = Sorted;
 
 	Pair IndexPair;
 	while ( RunningAddress < LastSorted && Sorted < LastSorted )
@@ -532,7 +533,7 @@ void dxSAPSpace::BoxPruning( int count, const dxGeom** geoms, dArray< Pair >& pa
 
 		if ( RunningAddress < LastSorted )
 		{
-			const uint32* RunningAddress2 = RunningAddress;
+			const uint32_t* RunningAddress2 = RunningAddress;
 
 			const dReal idx0ax0max = geoms[IndexPair.id0]->aabb[ax0idx+1];
 			const dReal idx0ax1max = geoms[IndexPair.id0]->aabb[ax1idx+1];
@@ -566,7 +567,7 @@ void dxSAPSpace::BoxPruning( int count, const dxGeom** geoms, dArray< Pair >& pa
 
 #define CHECK_PASS_VALIDITY(pass)															\
 	/* Shortcut to current counters */														\
-	uint32* CurCount = &mHistogram[pass<<8];												\
+	uint32_t* CurCount = &mHistogram[pass<<8];												\
 																							\
 	/* Reset flag. The sorting pass is supposed to be performed. (default) */				\
 	bool PerformPass = true;																\
@@ -580,22 +581,22 @@ void dxSAPSpace::BoxPruning( int count, const dxGeom** geoms, dArray< Pair >& pa
 	/* for words and O(n) for bytes. Running time for floats depends on actual values... */	\
 																							\
 	/* Get first byte */																	\
-	uint8 UniqueVal = *(((uint8*)input)+pass);												\
+	uint8_t UniqueVal = *(((uint8_t*)input)+pass);												\
 																							\
 	/* Check that byte's counter */															\
 	if(CurCount[UniqueVal]==nb)	PerformPass=false;
 
 // WARNING ONLY SORTS IEEE FLOATING-POINT VALUES
-const uint32* RaixSortContext::RadixSort( const float* input2, uint32 nb )
+const uint32_t* RaixSortContext::RadixSort( const float* input2, uint32_t nb )
 {
-	uint32* input = (uint32*)input2;
+	uint32_t* input = (uint32_t*)input2;
 
 	// Resize lists if needed
 	ReallocateRanksIfNecessary(nb);
 
 	// Allocate histograms & offsets on the stack
-	uint32 mHistogram[256*4];
-	uint32* mLink[256];
+	uint32_t mHistogram[256*4];
+	uint32_t* mLink[256];
 
 	// Create histograms (counters). Counters for all passes are created in one run.
 	// Pros:	read input buffer once instead of four times
@@ -607,15 +608,15 @@ const uint32* RaixSortContext::RadixSort( const float* input2, uint32 nb )
 	// wouldn't work with mixed positive/negative values....
 	{
 		/* Clear counters/histograms */
-		memset(mHistogram, 0, 256*4*sizeof(uint32));
+		memset(mHistogram, 0, 256*4*sizeof(uint32_t));
 
 		/* Prepare to count */
-		uint8* p = (uint8*)input;
-		uint8* pe = &p[nb*4];
-		uint32* h0= &mHistogram[0];		/* Histogram for first pass (LSB)	*/
-		uint32* h1= &mHistogram[256];	/* Histogram for second pass		*/
-		uint32* h2= &mHistogram[512];	/* Histogram for third pass			*/
-		uint32* h3= &mHistogram[768];	/* Histogram for last pass (MSB)	*/
+		uint8_t* p = (uint8_t*)input;
+		uint8_t* pe = &p[nb*4];
+		uint32_t* h0= &mHistogram[0];		/* Histogram for first pass (LSB)	*/
+		uint32_t* h1= &mHistogram[256];	/* Histogram for second pass		*/
+		uint32_t* h2= &mHistogram[512];	/* Histogram for third pass			*/
+		uint32_t* h3= &mHistogram[768];	/* Histogram for last pass (MSB)	*/
 
 		bool AlreadySorted = true;	/* Optimism... */
 
@@ -643,14 +644,14 @@ const uint32* RaixSortContext::RadixSort( const float* input2, uint32 nb )
 			/* coherence, for example when used to sort transparent faces.					*/
 			if(AlreadySorted)
 			{
-				for(uint32 i=0;i<nb;i++)	mRanks1[i] = i;
+				for(uint32_t i=0;i<nb;i++)	mRanks1[i] = i;
 				return mRanks1;
 			}
 		}
 		else
 		{
 			/* Prepare for temporal coherence */
-			uint32* Indices = mRanks1;
+			uint32_t* Indices = mRanks1;
 			float PrevVal = (float)input2[*Indices];
 
 			while(p!=pe)
@@ -681,16 +682,16 @@ const uint32* RaixSortContext::RadixSort( const float* input2, uint32 nb )
 	}
 
 	// Compute #negative values involved if needed
-	uint32 NbNegativeValues = 0;
+	uint32_t NbNegativeValues = 0;
 
 	// An efficient way to compute the number of negatives values we'll have to deal with is simply to sum the 128
 	// last values of the last histogram. Last histogram because that's the one for the Most Significant Byte,
 	// responsible for the sign. 128 last values because the 128 first ones are related to positive numbers.
-	uint32* h3= &mHistogram[768];
-	for(uint32 i=128;i<256;i++)	NbNegativeValues += h3[i];	// 768 for last histogram, 128 for negative part
+	uint32_t* h3= &mHistogram[768];
+	for(uint32_t i=128;i<256;i++)	NbNegativeValues += h3[i];	// 768 for last histogram, 128 for negative part
 
 	// Radix sort, j is the pass number (0=LSB, 3=MSB)
-	for(uint32 j=0;j<4;j++)
+	for(uint32_t j=0;j<4;j++)
 	{
 		// Should we care about negative values?
 		if(j!=3)
@@ -702,14 +703,14 @@ const uint32* RaixSortContext::RadixSort( const float* input2, uint32 nb )
 			{
 				// Create offsets
 				mLink[0] = mRanks2;
-				for(uint32 i=1;i<256;i++)		mLink[i] = mLink[i-1] + CurCount[i-1];
+				for(uint32_t i=1;i<256;i++)		mLink[i] = mLink[i-1] + CurCount[i-1];
 
 				// Perform Radix Sort
-				uint8* InputBytes = (uint8*)input;
+				uint8_t* InputBytes = (uint8_t*)input;
 				InputBytes += j;
 				if (!AreRanksValid())
 				{
-					for(uint32 i=0;i<nb;i++)
+					for(uint32_t i=0;i<nb;i++)
 					{
 						*mLink[InputBytes[i<<2]]++ = i;
 					}
@@ -718,17 +719,17 @@ const uint32* RaixSortContext::RadixSort( const float* input2, uint32 nb )
 				}
 				else
 				{
-					uint32* Indices		= mRanks1;
-					uint32* IndicesEnd	= &mRanks1[nb];
+					uint32_t* Indices		= mRanks1;
+					uint32_t* IndicesEnd	= &mRanks1[nb];
 					while(Indices!=IndicesEnd)
 					{
-						uint32 id = *Indices++;
+						uint32_t id = *Indices++;
 						*mLink[InputBytes[id<<2]]++ = id;
 					}
 				}
 
 				// Swap pointers for next pass. Valid indices - the most recent ones - are in mRanks after the swap.
-				uint32* Tmp	= mRanks1;	mRanks1 = mRanks2; mRanks2 = Tmp;
+				uint32_t* Tmp	= mRanks1;	mRanks1 = mRanks2; mRanks2 = Tmp;
 			}
 		}
 		else
@@ -740,19 +741,19 @@ const uint32* RaixSortContext::RadixSort( const float* input2, uint32 nb )
 			{
 				// Create biased offsets, in order for negative numbers to be sorted as well
 				mLink[0] = &mRanks2[NbNegativeValues];										// First positive number takes place after the negative ones
-				for(uint32 i=1;i<128;i++)		mLink[i] = mLink[i-1] + CurCount[i-1];		// 1 to 128 for positive numbers
+				for(uint32_t i=1;i<128;i++)		mLink[i] = mLink[i-1] + CurCount[i-1];		// 1 to 128 for positive numbers
 
 				// We must reverse the sorting order for negative numbers!
 				mLink[255] = mRanks2;
-				for(uint32 i=0;i<127;i++)	mLink[254-i] = mLink[255-i] + CurCount[255-i];		// Fixing the wrong order for negative values
-				for(uint32 i=128;i<256;i++)	mLink[i] += CurCount[i];							// Fixing the wrong place for negative values
+				for(uint32_t i=0;i<127;i++)	mLink[254-i] = mLink[255-i] + CurCount[255-i];		// Fixing the wrong order for negative values
+				for(uint32_t i=128;i<256;i++)	mLink[i] += CurCount[i];							// Fixing the wrong place for negative values
 
 				// Perform Radix Sort
 				if (!AreRanksValid())
 				{
-					for(uint32 i=0;i<nb;i++)
+					for(uint32_t i=0;i<nb;i++)
 					{
-						uint32 Radix = input[i]>>24;							// Radix byte, same as above. AND is useless here (uint32).
+						uint32_t Radix = input[i]>>24;							// Radix byte, same as above. AND is useless here (uint32_t).
 						// ### cmp to be killed. Not good. Later.
 						if(Radix<128)		*mLink[Radix]++ = i;		// Number is positive, same as above
 						else				*(--mLink[Radix]) = i;		// Number is negative, flip the sorting order
@@ -762,16 +763,16 @@ const uint32* RaixSortContext::RadixSort( const float* input2, uint32 nb )
 				}
 				else
 				{
-					for(uint32 i=0;i<nb;i++)
+					for(uint32_t i=0;i<nb;i++)
 					{
-						uint32 Radix = input[mRanks1[i]]>>24;							// Radix byte, same as above. AND is useless here (uint32).
+						uint32_t Radix = input[mRanks1[i]]>>24;							// Radix byte, same as above. AND is useless here (uint32_t).
 						// ### cmp to be killed. Not good. Later.
 						if(Radix<128)		*mLink[Radix]++ = mRanks1[i];		// Number is positive, same as above
 						else				*(--mLink[Radix]) = mRanks1[i];		// Number is negative, flip the sorting order
 					}
 				}
 				// Swap pointers for next pass. Valid indices - the most recent ones - are in mRanks after the swap.
-				uint32* Tmp	= mRanks1;	mRanks1 = mRanks2; mRanks2 = Tmp;
+				uint32_t* Tmp	= mRanks1;	mRanks1 = mRanks2; mRanks2 = Tmp;
 			}
 			else
 			{
@@ -781,7 +782,7 @@ const uint32* RaixSortContext::RadixSort( const float* input2, uint32 nb )
 					if (!AreRanksValid())
 					{
 						// ###Possible?
-						for(uint32 i=0;i<nb;i++)
+						for(uint32_t i=0;i<nb;i++)
 						{
 							mRanks2[i] = nb-i-1;
 						}
@@ -790,11 +791,11 @@ const uint32* RaixSortContext::RadixSort( const float* input2, uint32 nb )
 					}
 					else
 					{
-						for(uint32 i=0;i<nb;i++)	mRanks2[i] = mRanks1[nb-i-1];
+						for(uint32_t i=0;i<nb;i++)	mRanks2[i] = mRanks1[nb-i-1];
 					}
 
 					// Swap pointers for next pass. Valid indices - the most recent ones - are in mRanks after the swap.
-					uint32* Tmp	= mRanks1;	mRanks1 = mRanks2; mRanks2 = Tmp;
+					uint32_t* Tmp	= mRanks1;	mRanks1 = mRanks2; mRanks2 = Tmp;
 				}
 			}
 		}

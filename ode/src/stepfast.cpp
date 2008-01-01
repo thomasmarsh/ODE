@@ -30,7 +30,7 @@
 
 #include "objects.h"
 #include "joint.h"
-#include <ode/config.h>
+#include <odeconfig.h>
 #include <ode/objects.h>
 #include <ode/odemath.h>
 #include <ode/rotation.h>
@@ -38,6 +38,7 @@
 #include <ode/error.h>
 #include <ode/matrix.h>
 #include <ode/misc.h>
+#include "common-internal.h"
 #include "lcp.h"
 #include "step.h"
 #include "util.h"

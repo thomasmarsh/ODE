@@ -25,6 +25,7 @@
 #include <ode/ode.h>
 #include <drawstuff/drawstuff.h>
 #include "texturepath.h"
+#include <string.h>
 
 #ifdef _MSC_VER
 #pragma warning(disable:4244 4305)  // for VC++, no precision loss complaints
@@ -382,8 +383,8 @@ static void simLoop (int pause)
 {
   dsSetColor (0,0,2);
   dSpaceCollide (space,0,&nearCallback);
-  if (!pause) dWorldStep (world,0.05);
-  //if (!pause) dWorldStepFast (world,0.05, 1);
+  if (!pause) dWorldQuickStep (world,0.05);
+  //if (!pause) dWorldStepFast1 (world,0.05, 1);
 
   // remove all contact joints
   dJointGroupEmpty (contactgroup);

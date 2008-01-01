@@ -20,7 +20,7 @@
  *                                                                       *
  *************************************************************************/
 
-#include <ode/config.h>
+#include <odeconfig.h>
 #include <ode/memory.h>
 #include <ode/error.h>
 
