@@ -3,10 +3,12 @@ libtool: $(LIBTOOL_DEPS)
 	$(SHELL) ./config.status --recheck
 
 if ENABLE_DEMOS
-SUBDIRS = include drawstuff ode 
+SUBDIRS = include drawstuff ode
 else
 SUBDIRS = include ode
 endif
+
+SUBDIRS += OPCODE GIMPACT
 
 bin_SCRIPTS = ode-config
 
@@ -14,6 +16,6 @@ bin_SCRIPTS = ode-config
 release: dist dist-bz2 dist-zip
 	@echo Created release packages for ${PACKAGE}-${VERSION}.
 
-EXTRA_DIST = autogen.sh build contrib OPCODE GIMPACT \
+EXTRA_DIST = autogen.sh build \
         CHANGELOG.txt INSTALL.txt README.txt LICENSE.TXT
 

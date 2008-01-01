@@ -10,6 +10,7 @@ noinst_LTLIBRARIES= libfast.la
 libfast_la_CPPFLAGS= -I$(top_srcdir)/include -I$(top_builddir)/include
 libfast_la_CFLAGS= -O1
 libfast_la_SOURCES= fastldlt.c fastltsolve.c fastdot.c fastlsolve.c
+
 libode_la_SOURCES = 	objects.h \
 			obstack.cpp \
 			collision_util.cpp \
