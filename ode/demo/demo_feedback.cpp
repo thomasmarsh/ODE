@@ -22,7 +22,10 @@
 
 // Test for breaking joints, by Bram Stolk
 
-#include <ode/config.h>
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
+
 #include <assert.h>
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>

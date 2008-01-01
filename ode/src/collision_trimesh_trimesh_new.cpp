@@ -23,6 +23,10 @@
 // OPCODE TriMesh/TriMesh collision code
 // Written at 2006-10-28 by Francisco León (http://gimpact.sourceforge.net)
 
+#ifdef HAVE_CONFIG_H
+#  include <config.h>
+#endif
+
 #ifdef _MSC_VER
 #pragma warning(disable:4244 4305)  // for VC++, no precision loss complaints
 #endif

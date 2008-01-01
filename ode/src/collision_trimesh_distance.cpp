@@ -2,6 +2,10 @@
 // That code is available under a Free Source License Agreement
 // that can be found at http://www.magic-software.com/License/free.pdf
  
+ #ifdef HAVE_CONFIG_H
+#  include <config.h>
+#endif
+
 #include <ode/common.h>
 #include <ode/odemath.h>
 #include <ode/collision.h>

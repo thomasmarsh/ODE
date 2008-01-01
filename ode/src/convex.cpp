@@ -24,6 +24,10 @@
 Code for Convex Collision Detection
 By Rodrigo Hernandez
 */
+#ifdef HAVE_CONFIG_H
+#  include <config.h>
+#endif
+
 //#include <algorithm>
 #include <ode/common.h>
 #include <ode/collision.h>

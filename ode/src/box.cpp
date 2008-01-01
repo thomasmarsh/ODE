@@ -28,6 +28,9 @@ the rule is that only the low level primitive collision functions should set
 dContactGeom::g1 and dContactGeom::g2.
 
 */
+#ifdef HAVE_CONFIG_H
+#  include <config.h>
+#endif
 
 #include <ode/common.h>
 #include <ode/collision.h>

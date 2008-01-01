@@ -20,7 +20,10 @@
  *                                                                       *
  *************************************************************************/
 
-#include <ode/config.h>
+#ifdef HAVE_CONFIG_H
+#  include <config.h>
+#endif
+
 #include <ode/memory.h>
 #include <ode/error.h>
 #include "array.h"

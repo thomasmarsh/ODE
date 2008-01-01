@@ -25,11 +25,13 @@
 #ifndef _ODE_MEMORY_H_
 #define _ODE_MEMORY_H_
 
-#include "ode/config.h"
+#include <odeconfig.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+#include <stdlib.h> // for size_t
 
 /* function types to allocate and free memory */
 typedef void * dAllocFunction (size_t size);

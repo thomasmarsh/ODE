@@ -26,6 +26,10 @@
 #ifndef _ODE_COLLISION_TRIMESH_INTERNAL_H_
 #define _ODE_COLLISION_TRIMESH_INTERNAL_H_
 
+
+#include "common-internal.h"
+
+
 int dCollideCylinderTrimesh(dxGeom *o1, dxGeom *o2, int flags, dContactGeom *contact, int skip);
 int dCollideTrimeshPlane(dxGeom *o1, dxGeom *o2, int flags, dContactGeom *contact, int skip);
 
@@ -100,7 +104,7 @@ struct dxTriMeshData  : public dBase
 
     // data for use in collision resolution
     const void* Normals;
-    uint8* UseFlags;
+    uint8_t* UseFlags;
 #endif  // dTRIMESH_OPCODE
 
 #if dTRIMESH_GIMPACT

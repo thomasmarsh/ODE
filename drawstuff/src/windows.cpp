@@ -23,7 +23,7 @@
 #if defined(WIN32) || defined(__CYGWIN__)// this prevents warnings when dependencies built
 #include <windows.h>
 #endif
-#include <ode/config.h>
+#include <odeconfig.h>
 #include <GL/gl.h>
 
 #include "resource.h"

@@ -20,10 +20,11 @@
  *                                                                       *
  *************************************************************************/
 
-#include "ode/ode.h"
+#include <ode/ode.h>
 #include "objects.h"
 #include "joint.h"
 #include "util.h"
+#include "common-internal.h"
 
 #define ALLOCA dALLOCA16
 

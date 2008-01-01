@@ -20,9 +20,10 @@
  *                                                                       *
  *************************************************************************/
 
-#include <ode/config.h>
+#include "common-internal.h"
 #include <ode/error.h>
-
+#include <stdio.h>
+#include <stdlib.h>
 
 static dMessageFunction *error_function = 0;
 static dMessageFunction *debug_function = 0;

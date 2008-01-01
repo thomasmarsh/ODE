@@ -305,14 +305,14 @@ static __inline void _dNormalize3(dVector3 a)
 {
 	int bNormalizationResult = dSafeNormalize3(a);
 	dIASSERT(bNormalizationResult);
-	dVARIABLEUSED(bNormalizationResult);
+	(void)bNormalizationResult;
 }
 
 static __inline void _dNormalize4(dVector4 a)
 {
 	int bNormalizationResult = dSafeNormalize4(a);
 	dIASSERT(bNormalizationResult);
-	dVARIABLEUSED(bNormalizationResult);
+	(void)bNormalizationResult;
 }
 
 // For DLL export

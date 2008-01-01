@@ -22,6 +22,8 @@
 
 #include <ode/common.h>
 #include <ode/matrix.h>
+#include "common-internal.h"
+#include <string.h> // for memcpy, memmove
 
 // misc defines
 #define ALLOCA dALLOCA16

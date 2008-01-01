@@ -20,7 +20,7 @@
  *                                                                       *
  *************************************************************************/
 
-#include <ode/common.h>
+#include "common-internal.h"
 #include <ode/error.h>
 #include <ode/memory.h>
 #include "obstack.h"

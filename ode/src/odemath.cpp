@@ -20,7 +20,7 @@
  *                                                                       *
  *************************************************************************/
 
-#include <ode/common.h>
+#include "common-internal.h"
 #include <ode/odemath.h>
 
 // get some math functions under windows
