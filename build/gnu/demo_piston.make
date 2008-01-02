@@ -8,7 +8,7 @@ endif
 ifeq ($(CONFIG),DebugDLL)
   BINDIR := ../../lib/DebugDLL
   LIBDIR := ../../lib/DebugDLL
-  OBJDIR := obj/hinge/DebugDLL
+  OBJDIR := obj/piston/DebugDLL
   OUTDIR := ../../lib/DebugDLL
   CPPFLAGS := -MMD -D "_CRT_SECURE_NO_DEPRECATE" -D "WIN32" -I "../.." -I "../../include"
   CFLAGS += $(CPPFLAGS) $(TARGET_ARCH) -g
@@ -16,14 +16,14 @@ ifeq ($(CONFIG),DebugDLL)
   LDFLAGS += -L$(BINDIR) -L$(LIBDIR) -loded -ldrawstuffd -luser32 -lwinmm -lgdi32 -lopengl32 -lglu32
   LDDEPS := ../../lib/DebugDLL/oded.dll ../../lib/DebugDLL/drawstuffd.dll
   RESFLAGS := -D "_CRT_SECURE_NO_DEPRECATE" -D "WIN32" -I "../.." -I "../../include"
-  TARGET := demo_hinge.exe
+  TARGET := demo_piston.exe
   BLDCMD = $(CXX) -o $(OUTDIR)/$(TARGET) $(OBJECTS) $(LDFLAGS) $(RESOURCES) $(TARGET_ARCH)
 endif
 
 ifeq ($(CONFIG),ReleaseDLL)
   BINDIR := ../../lib/ReleaseDLL
   LIBDIR := ../../lib/ReleaseDLL
-  OBJDIR := obj/hinge/ReleaseDLL
+  OBJDIR := obj/piston/ReleaseDLL
   OUTDIR := ../../lib/ReleaseDLL
   CPPFLAGS := -MMD -D "_CRT_SECURE_NO_DEPRECATE" -D "WIN32" -I "../.." -I "../../include"
   CFLAGS += $(CPPFLAGS) $(TARGET_ARCH) -g
@@ -31,14 +31,14 @@ ifeq ($(CONFIG),ReleaseDLL)
   LDFLAGS += -L$(BINDIR) -L$(LIBDIR) -lode -ldrawstuff -luser32 -lwinmm -lgdi32 -lopengl32 -lglu32
   LDDEPS := ../../lib/ReleaseDLL/ode.dll ../../lib/ReleaseDLL/drawstuff.dll
   RESFLAGS := -D "_CRT_SECURE_NO_DEPRECATE" -D "WIN32" -I "../.." -I "../../include"
-  TARGET := demo_hinge.exe
+  TARGET := demo_piston.exe
   BLDCMD = $(CXX) -o $(OUTDIR)/$(TARGET) $(OBJECTS) $(LDFLAGS) $(RESOURCES) $(TARGET_ARCH)
 endif
 
 ifeq ($(CONFIG),DebugLib)
   BINDIR := ../../lib/DebugLib
   LIBDIR := ../../lib/DebugLib
-  OBJDIR := obj/hinge/DebugLib
+  OBJDIR := obj/piston/DebugLib
   OUTDIR := ../../lib/DebugLib
   CPPFLAGS := -MMD -D "_CRT_SECURE_NO_DEPRECATE" -D "WIN32" -I "../.." -I "../../include"
   CFLAGS += $(CPPFLAGS) $(TARGET_ARCH) -g
@@ -46,14 +46,14 @@ ifeq ($(CONFIG),DebugLib)
   LDFLAGS += -L$(BINDIR) -L$(LIBDIR) -loded -ldrawstuffd -luser32 -lwinmm -lgdi32 -lopengl32 -lglu32
   LDDEPS := ../../lib/DebugLib/liboded.a ../../lib/DebugLib/libdrawstuffd.a
   RESFLAGS := -D "_CRT_SECURE_NO_DEPRECATE" -D "WIN32" -I "../.." -I "../../include"
-  TARGET := demo_hinge.exe
+  TARGET := demo_piston.exe
   BLDCMD = $(CXX) -o $(OUTDIR)/$(TARGET) $(OBJECTS) $(LDFLAGS) $(RESOURCES) $(TARGET_ARCH)
 endif
 
 ifeq ($(CONFIG),ReleaseLib)
   BINDIR := ../../lib/ReleaseLib
   LIBDIR := ../../lib/ReleaseLib
-  OBJDIR := obj/hinge/ReleaseLib
+  OBJDIR := obj/piston/ReleaseLib
   OUTDIR := ../../lib/ReleaseLib
   CPPFLAGS := -MMD -D "_CRT_SECURE_NO_DEPRECATE" -D "WIN32" -I "../.." -I "../../include"
   CFLAGS += $(CPPFLAGS) $(TARGET_ARCH) -g
@@ -61,12 +61,12 @@ ifeq ($(CONFIG),ReleaseLib)
   LDFLAGS += -L$(BINDIR) -L$(LIBDIR) -lode -ldrawstuff -luser32 -lwinmm -lgdi32 -lopengl32 -lglu32
   LDDEPS := ../../lib/ReleaseLib/libode.a ../../lib/ReleaseLib/libdrawstuff.a
   RESFLAGS := -D "_CRT_SECURE_NO_DEPRECATE" -D "WIN32" -I "../.." -I "../../include"
-  TARGET := demo_hinge.exe
+  TARGET := demo_piston.exe
   BLDCMD = $(CXX) -o $(OUTDIR)/$(TARGET) $(OBJECTS) $(LDFLAGS) $(RESOURCES) $(TARGET_ARCH)
 endif
 
 OBJECTS := \
-	$(OBJDIR)/demo_hinge.o \
+	$(OBJDIR)/demo_piston.o \
 
 RESOURCES := \
 	$(OBJDIR)/resources.res \
@@ -94,14 +94,14 @@ endif
 .PHONY: clean
 
 $(OUTDIR)/$(TARGET): $(OBJECTS) $(LDDEPS) $(RESOURCES)
-	@echo Linking demo_hinge
+	@echo Linking demo_piston
 	-@$(CMD_MKBINDIR)
 	-@$(CMD_MKLIBDIR)
 	-@$(CMD_MKOUTDIR)
 	@$(BLDCMD)
 
 clean:
-	@echo Cleaning demo_hinge
+	@echo Cleaning demo_piston
 ifeq ($(MKDIR_TYPE),posix)
 	-@rm -f $(OUTDIR)/$(TARGET)
 	-@rm -rf $(OBJDIR)
@@ -111,7 +111,7 @@ else
 	-@if exist $(subst /,\,$(OBJDIR)) rmdir /s /q $(subst /,\,$(OBJDIR))
 endif
 
-$(OBJDIR)/demo_hinge.o: ../../ode/demo/demo_hinge.cpp
+$(OBJDIR)/demo_piston.o: ../../ode/demo/demo_piston.cpp
 	-@$(CMD_MKOBJDIR)
 	@echo $(notdir $<)
 	@$(CXX) $(CXXFLAGS) -o $@ -c $<

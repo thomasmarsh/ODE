@@ -9,13 +9,13 @@ endif
 
 export CONFIG
 
-.PHONY: all clean demo_boxstack demo_buggy demo_chain1 demo_chain2 demo_collision demo_crash demo_feedback demo_friction demo_heightfield demo_hinge demo_I demo_jointPR demo_joints demo_motor demo_ode demo_piston demo_plane2d demo_slider demo_space demo_space_stress demo_step demo_basket demo_cyl demo_moving_trimesh demo_trimesh demo_cylvssphere drawstuff tests ode
+.PHONY: all clean demo_boxstack demo_buggy demo_chain1 demo_chain2 demo_collision demo_crash demo_feedback demo_friction demo_heightfield demo_hinge demo_I demo_jointPR demo_joints demo_motor demo_ode demo_piston demo_plane2d demo_slider demo_space demo_space_stress demo_step demo_basket demo_cyl demo_moving_trimesh demo_trimesh demo_cylvssphere drawstuff ode
 
-all: demo_boxstack demo_buggy demo_chain1 demo_chain2 demo_collision demo_crash demo_feedback demo_friction demo_heightfield demo_hinge demo_I demo_jointPR demo_joints demo_motor demo_ode demo_piston demo_plane2d demo_slider demo_space demo_space_stress demo_step demo_basket demo_cyl demo_moving_trimesh demo_trimesh demo_cylvssphere drawstuff tests ode
+all: demo_boxstack demo_buggy demo_chain1 demo_chain2 demo_collision demo_crash demo_feedback demo_friction demo_heightfield demo_hinge demo_I demo_jointPR demo_joints demo_motor demo_ode demo_piston demo_plane2d demo_slider demo_space demo_space_stress demo_step demo_basket demo_cyl demo_moving_trimesh demo_trimesh demo_cylvssphere drawstuff ode
 
-Makefile: ../premake.lua ../demos.lua ../demos.lua ../demos.lua ../demos.lua ../demos.lua ../demos.lua ../demos.lua ../demos.lua ../demos.lua ../demos.lua ../demos.lua ../demos.lua ../demos.lua ../demos.lua ../demos.lua ../demos.lua ../demos.lua ../demos.lua ../demos.lua ../demos.lua ../demos.lua ../demos.lua ../demos.lua ../demos.lua ../demos.lua ../demos.lua ../drawstuff.lua ../tests.lua ../ode.lua
+Makefile: ../premake.lua ../demos.lua ../demos.lua ../demos.lua ../demos.lua ../demos.lua ../demos.lua ../demos.lua ../demos.lua ../demos.lua ../demos.lua ../demos.lua ../demos.lua ../demos.lua ../demos.lua ../demos.lua ../demos.lua ../demos.lua ../demos.lua ../demos.lua ../demos.lua ../demos.lua ../demos.lua ../demos.lua ../demos.lua ../demos.lua ../demos.lua ../drawstuff.lua ../ode.lua
 	@echo ==== Regenerating Makefiles ====
-	@premake --file $^ --usetargetpath --with-demos --with-tests --clean --target gnu
+	@premake --file $^ --usetargetpath --with-demos --clean --target gnu
 
 demo_boxstack: ode drawstuff
 	@echo ==== Building demo_boxstack ====
@@ -125,10 +125,6 @@ drawstuff:
 	@echo ==== Building drawstuff ====
 	@$(MAKE) --no-print-directory -C . -f drawstuff.make
 
-tests: ode
-	@echo ==== Building tests ====
-	@$(MAKE) --no-print-directory -C . -f tests.make
-
 ode:
 	@echo ==== Building ode ====
 	@$(MAKE) --no-print-directory -C . -f ode.make
@@ -161,5 +157,4 @@ clean:
 	@$(MAKE) --no-print-directory -C . -f demo_trimesh.make clean
 	@$(MAKE) --no-print-directory -C . -f demo_cylvssphere.make clean
 	@$(MAKE) --no-print-directory -C . -f drawstuff.make clean
-	@$(MAKE) --no-print-directory -C . -f tests.make clean
 	@$(MAKE) --no-print-directory -C . -f ode.make clean

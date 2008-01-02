@@ -28,28 +28,10 @@
 /* #define dDOUBLE */
 
 
-#ifdef dSINGLE
-typedef float dReal;
-#else
-typedef double dReal;
-#endif
-
 #define dTRIMESH_ENABLED 1
 #define dTRIMESH_OPCODE 1
 
 #define dTRIMESH_16BIT_INDICES 0
-
-// Define a type for indices, either 16 or 32 bit, based on build option
-// TODO: Currently GIMPACT only supports 32 bit indices.
-#if dTRIMESH_16BIT_INDICES
-#  ifdef dTRIMESH_GIMPACT
-    typedef unsigned dTriIndex;
-#  else // dTRIMESH_GIMPACT
-    typedef unsigned short dTriIndex;
-#  endif // dTRIMESH_GIMPACT
-#else // dTRIMESH_16BIT_INDICES
-typedef unsigned dTriIndex;
-#endif // dTRIMESH_16BIT_INDICES
 
 
 
@@ -105,6 +87,24 @@ typedef unsigned dTriIndex;
   #define ODE_API
 #endif
 
+
+#ifdef dSINGLE
+typedef float dReal;
+#else
+typedef double dReal;
+#endif
+
+// Define a type for indices, either 16 or 32 bit, based on build option
+// TODO: Currently GIMPACT only supports 32 bit indices.
+#if dTRIMESH_16BIT_INDICES
+#  ifdef dTRIMESH_GIMPACT
+    typedef unsigned dTriIndex;
+#  else // dTRIMESH_GIMPACT
+    typedef unsigned short dTriIndex;
+#  endif // dTRIMESH_GIMPACT
+#else // dTRIMESH_16BIT_INDICES
+typedef unsigned dTriIndex;
+#endif // dTRIMESH_16BIT_INDICES
 
 #include <float.h>
 

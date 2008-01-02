@@ -3,7 +3,7 @@
 	ProjectType="Visual C++"
 	Version="7.10"
 	Name="ode"
-	ProjectGUID="{56A9F6E8-E8FB-3A42-B605-9FCCC5F6DA67}"
+	ProjectGUID="{87C450B3-05BB-2341-B96B-FAF8DE6ED95E}"
 	Keyword="Win32Proj">
 	<Platforms>
 		<Platform
@@ -19,8 +19,8 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="../../include;../../OPCODE;../../GIMPACT/include"
-				PreprocessorDefinitions="WIN32;ODE_DLL"
+				AdditionalIncludeDirectories="../..;../../include;../../OPCODE;../../GIMPACT/include"
+				PreprocessorDefinitions="HAVE_CONFIG_H;WIN32;ODE_DLL"
 				MinimalRebuild="TRUE"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
@@ -53,8 +53,8 @@
 				Name="VCPreLinkEventTool"/>
 			<Tool
 				Name="VCResourceCompilerTool"
-				PreprocessorDefinitions="WIN32;ODE_DLL"
-				AdditionalIncludeDirectories="../../include;../../OPCODE;../../GIMPACT/include"/>
+				PreprocessorDefinitions="HAVE_CONFIG_H;WIN32;ODE_DLL"
+				AdditionalIncludeDirectories="../..;../../include;../../OPCODE;../../GIMPACT/include"/>
 			<Tool
 				Name="VCWebServiceProxyGeneratorTool"/>
 			<Tool
@@ -76,8 +76,8 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				OmitFramePointers="TRUE"
-				AdditionalIncludeDirectories="../../include;../../OPCODE;../../GIMPACT/include"
-				PreprocessorDefinitions="WIN32;ODE_DLL"
+				AdditionalIncludeDirectories="../..;../../include;../../OPCODE;../../GIMPACT/include"
+				PreprocessorDefinitions="HAVE_CONFIG_H;WIN32;ODE_DLL"
 				StringPooling="TRUE"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="TRUE"
@@ -110,8 +110,8 @@
 				Name="VCPreLinkEventTool"/>
 			<Tool
 				Name="VCResourceCompilerTool"
-				PreprocessorDefinitions="WIN32;ODE_DLL"
-				AdditionalIncludeDirectories="../../include;../../OPCODE;../../GIMPACT/include"/>
+				PreprocessorDefinitions="HAVE_CONFIG_H;WIN32;ODE_DLL"
+				AdditionalIncludeDirectories="../..;../../include;../../OPCODE;../../GIMPACT/include"/>
 			<Tool
 				Name="VCWebServiceProxyGeneratorTool"/>
 			<Tool
@@ -132,8 +132,8 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="../../include;../../OPCODE;../../GIMPACT/include"
-				PreprocessorDefinitions="WIN32;ODE_LIB"
+				AdditionalIncludeDirectories="../..;../../include;../../OPCODE;../../GIMPACT/include"
+				PreprocessorDefinitions="HAVE_CONFIG_H;WIN32;ODE_LIB"
 				MinimalRebuild="TRUE"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="1"
@@ -158,8 +158,8 @@
 				Name="VCPreLinkEventTool"/>
 			<Tool
 				Name="VCResourceCompilerTool"
-				PreprocessorDefinitions="WIN32;ODE_LIB"
-				AdditionalIncludeDirectories="../../include;../../OPCODE;../../GIMPACT/include"/>
+				PreprocessorDefinitions="HAVE_CONFIG_H;WIN32;ODE_LIB"
+				AdditionalIncludeDirectories="../..;../../include;../../OPCODE;../../GIMPACT/include"/>
 			<Tool
 				Name="VCWebServiceProxyGeneratorTool"/>
 			<Tool
@@ -181,8 +181,8 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				OmitFramePointers="TRUE"
-				AdditionalIncludeDirectories="../../include;../../OPCODE;../../GIMPACT/include"
-				PreprocessorDefinitions="WIN32;ODE_LIB"
+				AdditionalIncludeDirectories="../..;../../include;../../OPCODE;../../GIMPACT/include"
+				PreprocessorDefinitions="HAVE_CONFIG_H;WIN32;ODE_LIB"
 				StringPooling="TRUE"
 				RuntimeLibrary="0"
 				EnableFunctionLevelLinking="TRUE"
@@ -206,8 +206,8 @@
 				Name="VCPreLinkEventTool"/>
 			<Tool
 				Name="VCResourceCompilerTool"
-				PreprocessorDefinitions="WIN32;ODE_LIB"
-				AdditionalIncludeDirectories="../../include;../../OPCODE;../../GIMPACT/include"/>
+				PreprocessorDefinitions="HAVE_CONFIG_H;WIN32;ODE_LIB"
+				AdditionalIncludeDirectories="../..;../../include;../../OPCODE;../../GIMPACT/include"/>
 			<Tool
 				Name="VCWebServiceProxyGeneratorTool"/>
 			<Tool
@@ -243,9 +243,6 @@
 				</File>
 				<File
 					RelativePath="..\..\include\ode\compatibility.h">
-				</File>
-				<File
-					RelativePath="..\..\include\ode\config.h">
 				</File>
 				<File
 					RelativePath="..\..\include\ode\contact.h">
@@ -317,6 +314,9 @@
 				</File>
 				<File
 					RelativePath="..\..\ode\src\collision_util.h">
+				</File>
+				<File
+					RelativePath="..\..\ode\src\common-internal.h">
 				</File>
 				<File
 					RelativePath="..\..\ode\src\heightfield.h">
