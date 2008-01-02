@@ -11,6 +11,7 @@
 #include <ode/matrix.h>
 #include <ode/rotation.h>
 #include <ode/odemath.h>
+#include "common-internal.h"
 #include "collision_kernel.h"
 #include "collision_std.h"
 #include "collision_util.h"
@@ -18,7 +19,7 @@
 
 
 
-#if dTRIMESH_ENABLED
+#ifdef dTRIMESH_ENABLED
 #include "collision_trimesh_internal.h"
 #endif // dTRIMESH_ENABLED
 
@@ -1081,7 +1082,7 @@ int dxHeightfield::dCollideHeightfieldZone( const int minX, const int maxX, cons
         //max_collisionContact    = 3;
         break;
 
-#if dTRIMESH_ENABLED
+#ifdef dTRIMESH_ENABLED
 
     case dTriMeshClass:
         geomRayNCollider		= dCollideRayTrimesh;

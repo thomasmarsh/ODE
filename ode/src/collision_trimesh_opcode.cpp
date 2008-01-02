@@ -31,15 +31,12 @@
 #define TRIMESH_INTERNAL
 #include "collision_trimesh_internal.h"
 
-#if dTRIMESH_ENABLED
-#if dTRIMESH_OPCODE
+#ifdef dTRIMESH_ENABLED
+#ifdef dTRIMESH_OPCODE
 
 // Trimesh data
 dxTriMeshData::dxTriMeshData() : UseFlags( NULL )
 {
-#if !dTRIMESH_ENABLED
-  dUASSERT(false, "dTRIMESH_ENABLED is not defined. Trimesh geoms will not work");
-#endif
 }
 
 dxTriMeshData::~dxTriMeshData()
@@ -54,8 +51,6 @@ dxTriMeshData::Build(const void* Vertices, int VertexStide, int VertexCount,
 		     const void* in_Normals,
 		     bool Single)
 {
-#if dTRIMESH_ENABLED
-
     Mesh.SetNbTriangles(IndexCount / 3);
     Mesh.SetNbVertices(VertexCount);
     Mesh.SetPointers((IndexedTriangle*)Indices, (Point*)Vertices);
@@ -127,8 +122,6 @@ dxTriMeshData::Build(const void* Vertices, int VertexStide, int VertexCount,
     Normals = (dReal *) in_Normals;
 
 	UseFlags = 0;
-
-#endif // dTRIMESH_ENABLED
 }
 
 struct EdgeRecord
@@ -198,7 +191,7 @@ void SetupEdge(EdgeRecord* edge, int edgeIdx, int triIdx, const dTriIndex* vertI
 	edge->Concave = false;
 }
 
-#if dTRIMESH_ENABLED
+#ifdef dTRIMESH_ENABLED
 
 // Get the vertex opposite this edge in the triangle
 inline Point GetOppositeVert(EdgeRecord* edge, const Point* vertices[])
@@ -222,7 +215,7 @@ inline Point GetOppositeVert(EdgeRecord* edge, const Point* vertices[])
 void dxTriMeshData::Preprocess()
 {
 
-#if dTRIMESH_ENABLED
+#ifdef dTRIMESH_ENABLED
 
 	// If this mesh has already been preprocessed, exit
 	if (UseFlags)
@@ -479,7 +472,7 @@ void dGeomTriMeshDataPreprocess(dTriMeshDataID g)
 void dGeomTriMeshDataGetBuffer(dTriMeshDataID g, unsigned char** buf, int* bufLen)
 {
     dUASSERT(g, "argument not trimesh data");
-#if dTRIMESH_ENABLED
+#ifdef dTRIMESH_ENABLED
 	*buf = g->UseFlags;
 	*bufLen = g->Mesh.GetNbTriangles();
 #endif // dTRIMESH_ENABLED
@@ -492,7 +485,7 @@ void dGeomTriMeshDataSetBuffer(dTriMeshDataID g, unsigned char* buf)
 }
 
 
-#if dTRIMESH_ENABLED
+#ifdef dTRIMESH_ENABLED
 
 // Trimesh Class Statics
 PlanesCollider dxTriMesh::_PlanesCollider;
@@ -517,7 +510,7 @@ dxTriMesh::dxTriMesh(dSpaceID Space, dTriMeshDataID Data) : dxGeom(Space, 1)
 
     this->Data = Data;
 
-#if dTRIMESH_ENABLED
+#ifdef dTRIMESH_ENABLED
 
 	_RayCollider.SetDestination(&Faces);
 
@@ -546,7 +539,7 @@ dxTriMesh::dxTriMesh(dSpaceID Space, dTriMeshDataID Data) : dxGeom(Space, 1)
 	this->doBoxTC = false;
 	this->doCapsuleTC = false;
 
-#if dTRIMESH_ENABLED
+#ifdef dTRIMESH_ENABLED
 
     const char* msg;
     if ((msg =_AABBTreeCollider.ValidateSettings()))
@@ -567,7 +560,7 @@ dxTriMesh::~dxTriMesh(){
 // Cleanup for allocations when shutting down ODE
 void opcode_collider_cleanup()
 {
-#if dTRIMESH_ENABLED
+#ifdef dTRIMESH_ENABLED
 	
 	// Clear TC caches
 	dxTriMesh::Faces.Empty();
@@ -582,7 +575,7 @@ void opcode_collider_cleanup()
 
 void dxTriMesh::ClearTCCache()
 {
-#if dTRIMESH_ENABLED
+#ifdef dTRIMESH_ENABLED
   /* dxTriMesh::ClearTCCache uses dArray's setSize(0) to clear the caches -
      but the destructor isn't called when doing this, so we would leak.
      So, call the previous caches' containers' destructors by hand first. */
@@ -640,7 +633,7 @@ void dxTriMesh::computeAABB() {
 
 void dxTriMeshData::UpdateData()
 {
-#if  dTRIMESH_ENABLED
+#ifdef dTRIMESH_ENABLED
 	BVTree.Refit();
 #endif // dTRIMESH_ENABLED
 }
@@ -817,7 +810,7 @@ void dGeomTriMeshGetPoint(dGeomID g, int Index, dReal u, dReal v, dVector3 Out){
 
 int dGeomTriMeshGetTriangleCount (dGeomID g)	 	
 {	 	
-#if dTRIMESH_ENABLED
+#ifdef dTRIMESH_ENABLED
     dxTriMesh* Geom = (dxTriMesh*)g;	 	
     return Geom->Data->Mesh.GetNbTriangles();	 	
 #else

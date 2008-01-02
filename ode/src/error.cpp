@@ -20,8 +20,8 @@
  *                                                                       *
  *************************************************************************/
 
-#include "common-internal.h"
 #include <ode/error.h>
+#include "common-internal.h"
 #include <stdio.h>
 #include <stdlib.h>
 

@@ -25,14 +25,11 @@
  *   Ported to ODE by Nguyen Binh
  */
 
-#ifdef HAVE_CONFIG_H
-#  include <config.h>
-#endif
-
 #include <ode/collision.h>
 #include <ode/matrix.h>
 #include <ode/rotation.h>
 #include <ode/odemath.h>
+#include "common-internal.h"
 #include "collision_util.h"
 
 #define TRIMESH_INTERNAL
@@ -925,10 +922,10 @@ void _InitCylinderTrimeshData(sData& cData)
 	cData.fBestCenter = REAL(0.0);	
 }
 
-#if dTRIMESH_ENABLED
+#ifdef dTRIMESH_ENABLED
 
 // OPCODE version of cylinder to mesh collider
-#if dTRIMESH_OPCODE
+#ifdef dTRIMESH_OPCODE
 int dCollideCylinderTrimesh(dxGeom *o1, dxGeom *o2, int flags, dContactGeom *contact, int skip)
 {
 	dIASSERT( skip >= (int)sizeof( dContactGeom ) );
@@ -1062,7 +1059,7 @@ int dCollideCylinderTrimesh(dxGeom *o1, dxGeom *o2, int flags, dContactGeom *con
 #endif
 
 // GIMPACT version of cylinder to mesh collider
-#if dTRIMESH_GIMPACT
+#ifdef dTRIMESH_GIMPACT
 int dCollideCylinderTrimesh(dxGeom *o1, dxGeom *o2, int flags, dContactGeom *contact, int skip)
 {
 	dIASSERT( skip >= (int)sizeof( dContactGeom ) );

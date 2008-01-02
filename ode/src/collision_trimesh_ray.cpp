@@ -22,23 +22,21 @@
 
 // TriMesh code by Erwin de Vries.
 
-#ifdef HAVE_CONFIG_H
-#  include <config.h>
-#endif
-
 #include <ode/collision.h>
 #include <ode/matrix.h>
 #include <ode/rotation.h>
 #include <ode/odemath.h>
 
-#if dTRIMESH_ENABLED
+#include "common-internal.h"
+
+#ifdef dTRIMESH_ENABLED
 
 #include "collision_util.h"
 
 #define TRIMESH_INTERNAL
 #include "collision_trimesh_internal.h"
 
-#if dTRIMESH_OPCODE
+#ifdef dTRIMESH_OPCODE
 int dCollideRTL(dxGeom* g1, dxGeom* RayGeom, int Flags, dContactGeom* Contacts, int Stride){
 	dIASSERT (Stride >= (int)sizeof(dContactGeom));
 	dIASSERT (g1->type == dTriMeshClass);
@@ -145,7 +143,7 @@ int dCollideRTL(dxGeom* g1, dxGeom* RayGeom, int Flags, dContactGeom* Contacts, 
 }
 #endif // dTRIMESH_OPCODE
 
-#if dTRIMESH_GIMPACT
+#ifdef dTRIMESH_GIMPACT
 int dCollideRTL(dxGeom* g1, dxGeom* RayGeom, int Flags, dContactGeom* Contacts, int Stride)
 {
 	dIASSERT (Stride >= (int)sizeof(dContactGeom));

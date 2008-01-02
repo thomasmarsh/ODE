@@ -28,20 +28,17 @@
  *                                                                       *
  *************************************************************************/
 
-#ifdef HAVE_CONFIG_H
-#  include <config.h>
-#endif
-
 #include <ode/collision.h>
 #include <ode/matrix.h>
 #include <ode/rotation.h>
 #include <ode/odemath.h>
+#include "common-internal.h"
 #include "collision_util.h"
 
 #define TRIMESH_INTERNAL
 #include "collision_trimesh_internal.h"
 
-#if dTRIMESH_ENABLED
+#ifdef dTRIMESH_ENABLED
 
 
 static void
@@ -1122,7 +1119,7 @@ static void _cldTestOneTriangle(const dVector3 &v0, const dVector3 &v1, const dV
 
 
 // OPCODE version of box to mesh collider
-#if dTRIMESH_OPCODE
+#ifdef dTRIMESH_OPCODE
 int dCollideBTL(dxGeom* g1, dxGeom* BoxGeom, int Flags, dContactGeom* Contacts, int Stride){
   dIASSERT (Stride >= (int)sizeof(dContactGeom));
   dIASSERT (g1->type == dTriMeshClass);
@@ -1292,7 +1289,7 @@ int dCollideBTL(dxGeom* g1, dxGeom* BoxGeom, int Flags, dContactGeom* Contacts, 
 #endif
 
 // GIMPACT version of box to mesh collider
-#if dTRIMESH_GIMPACT
+#ifdef dTRIMESH_GIMPACT
 int dCollideBTL(dxGeom* g1, dxGeom* BoxGeom, int Flags, dContactGeom* Contacts, int Stride)
 {
   dIASSERT (Stride >= (int)sizeof(dContactGeom));

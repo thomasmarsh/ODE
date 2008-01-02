@@ -44,24 +44,9 @@
 
 
 
-/* floating point data type, vector, matrix and quaternion types */
-
-#if defined(dSINGLE)
-typedef float dReal;
-#ifdef dDOUBLE
-#error You can only #define dSINGLE or dDOUBLE, not both.
-#endif // dDOUBLE
-#elif defined(dDOUBLE)
-typedef double dReal;
-#else
-#error You must #define dSINGLE or dDOUBLE
-#endif
-
-
-
 // Detect if we've got both trimesh engines enabled.
-#if dTRIMESH_ENABLED
-#if dTRIMESH_OPCODE && dTRIMESH_GIMPACT
+#ifdef dTRIMESH_ENABLED
+#if defined(dTRIMESH_OPCODE) && defined(dTRIMESH_GIMPACT)
 #error You can only #define dTRIMESH_OPCODE or dTRIMESH_GIMPACT, not both.
 #endif
 #endif // dTRIMESH_ENABLED

@@ -20,22 +20,21 @@
  *                                                                       *
  *************************************************************************/
 
-#ifdef HAVE_CONFIG_H
-#  include <config.h>
-#endif
-
 #include <ode/collision.h>
 #include <ode/matrix.h>
 #include <ode/rotation.h>
 #include <ode/odemath.h>
 
-#if dTRIMESH_ENABLED
+#include "common-internal.h"
+
+
+#ifdef dTRIMESH_ENABLED
 
 #include "collision_util.h"
 #define TRIMESH_INTERNAL
 #include "collision_trimesh_internal.h"
 
-#if dTRIMESH_GIMPACT
+#ifdef dTRIMESH_GIMPACT
 
 void dxTriMeshData::Preprocess(){	// stub
 }

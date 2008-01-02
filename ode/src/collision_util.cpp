@@ -27,13 +27,10 @@ functions that are defined in the public header files.
 
 */
 
-#ifdef HAVE_CONFIG_H
-#  include <config.h>
-#endif
-
 #include <ode/common.h>
 #include <ode/collision.h>
 #include <ode/odemath.h>
+#include "common-internal.h"
 #include "collision_util.h"
 
 //****************************************************************************

@@ -29,15 +29,12 @@ dContactGeom::g1 and dContactGeom::g2.
 
 */
 
-#ifdef HAVE_CONFIG_H
-#  include <config.h>
-#endif
-
 #include <ode/common.h>
 #include <ode/collision.h>
 #include <ode/matrix.h>
 #include <ode/rotation.h>
 #include <ode/odemath.h>
+#include "common-internal.h"
 #include "collision_kernel.h"
 #include "collision_std.h"
 #include "collision_util.h"

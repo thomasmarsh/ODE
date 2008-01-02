@@ -22,10 +22,6 @@
 
 // OPCODE TriMesh/TriMesh collision code by Jeff Smith (c) 2004
 
-#ifdef HAVE_CONFIG_H
-#  include <config.h>
-#endif
-
 #ifdef _MSC_VER
 #pragma warning(disable:4244 4305)  // for VC++, no precision loss complaints
 #endif
@@ -34,17 +30,18 @@
 #include <ode/matrix.h>
 #include <ode/rotation.h>
 #include <ode/odemath.h>
+#include "common-internal.h"
 
 // Classic Implementation
 #if !dTRIMESH_OPCODE_USE_NEW_TRIMESH_TRIMESH_COLLIDER
 
-#if dTRIMESH_ENABLED
+#ifdef dTRIMESH_ENABLED
 
 #include "collision_util.h"
 #define TRIMESH_INTERNAL
 #include "collision_trimesh_internal.h"
 
-#if dTRIMESH_OPCODE
+#ifdef dTRIMESH_OPCODE
 
 #define SMALL_ELT           REAL(2.5e-4)
 #define EXPANDED_ELT_THRESH REAL(1.0e-3)
