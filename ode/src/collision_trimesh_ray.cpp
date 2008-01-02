@@ -165,11 +165,11 @@ int dCollideRTL(dxGeom* g1, dxGeom* RayGeom, int Flags, dContactGeom* Contacts, 
 
 	if(ClosestHit)
 	{
-		intersect = gim_trimesh_ray_closest_collision(&TriMesh->m_collision_trimesh,Origin,Direction,Length,&contact_data);
+		intersect = gim_trimesh_ray_closest_collisionODE(&TriMesh->m_collision_trimesh,Origin,Direction,Length,&contact_data);
 	}
 	else
 	{
-	    intersect = gim_trimesh_ray_collision(&TriMesh->m_collision_trimesh,Origin,Direction,Length,&contact_data);
+	    intersect = gim_trimesh_ray_collisionODE(&TriMesh->m_collision_trimesh,Origin,Direction,Length,&contact_data);
 	}
 
     if(intersect == 0)

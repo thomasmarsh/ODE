@@ -558,8 +558,4 @@ echo "  Is the CPU x86-64:       $cpu64"
 echo "  Headers will be installed in $prefix/include/ode"
 echo "  Libraries will be installed in $prefix/lib"
 echo "  Building in directory    $BUILDDIR"
-if test $gimpact = yes -a $precision = yes
-then
-  echo "WARNING! Double precision not yet supported for GIMPACT"
-fi
 

@@ -9,6 +9,13 @@ the rules for this file:
 
 ------------------------------------------------------------------------------
 
+01/02/08 Daniel K. O.
+
+	* Applied patch 1851394: support for GIMPACT with double precision,
+	  dCollide fix.
+	* Removed an opcode source from gimpact build.
+	
+
 01/01/08 Daniel K. O.
 
 	* Replaced ode/config.h by odeconfig.h and plain config.h. Public
