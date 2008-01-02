@@ -59,7 +59,7 @@
     package.path = packagepath
     package.objdir = "obj/"..name
 
-    package.includepaths = { "../../include" }
+    package.includepaths = { "../..", "../../include" }
     package.defines = { "_CRT_SECURE_NO_DEPRECATE" }
 
     if (options.target == "vs6" or options.target == "vs2002" or options.target == "vs2003") then

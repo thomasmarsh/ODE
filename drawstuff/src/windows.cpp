@@ -25,6 +25,7 @@
 #endif
 #include <odeconfig.h>
 #include <GL/gl.h>
+#include <stdio.h>
 
 #include "resource.h"
 #include "internal.h"
