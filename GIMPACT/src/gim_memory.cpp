@@ -31,6 +31,7 @@ email: projectileman@yahoo.com
 #include "GIMPACT/gim_memory.h"
 #include "stdlib.h"
 #include <odeconfig.h>
+#include "../../ode/src/common-internal.h"
 //#include "malloc.h"
 //#include "mm_malloc.h"
 

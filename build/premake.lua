@@ -97,5 +97,5 @@ project.name = "ode"
     os.execute("premake --usetargetpath --with-demos --with-tests --clean --target vs2002")
     os.execute("premake --usetargetpath --with-demos --with-tests --clean --target vs2003")
     os.execute("premake --usetargetpath --with-demos --with-tests --clean --target vs2005")
-    os.execute("premake --usetargetpath --with-demos --with-tests --clean --target gnu")
+    os.execute("premake --usetargetpath --with-demos --clean --target gnu")
   end

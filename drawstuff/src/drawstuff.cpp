@@ -40,18 +40,11 @@ manage openGL state changes better
 #include <windows.h>
 #endif
 
-#ifdef HAVE_CONFIG_H
-#  include "config.h"
-#endif
-
-
+#include "../../ode/src/common-internal.h"
 
 #include <math.h>
 #include <stdio.h>
 #include <string.h>
-#ifdef HAVE_ALLOCA_H
-#  include <alloca.h>
-#endif
 
 #include "odeconfig.h"
 

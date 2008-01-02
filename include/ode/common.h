@@ -107,6 +107,8 @@ typedef dReal dQuaternion[4];
 #endif
 
 
+
+
 /* internal object types (all prefixed with `dx') */
 
 struct dxWorld;		/* dynamics world */

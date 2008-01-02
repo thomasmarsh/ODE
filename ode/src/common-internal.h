@@ -11,7 +11,37 @@
 
 
 #include <math.h>
+
+
+#ifdef HAVE_STDINT_H
 #include <stdint.h>
+#else
+#ifdef HAVE_INTTYPES_H
+#include <inttypes.h>
+#else
+#ifdef _MSC_VER
+  typedef __int32         int32_t;
+  typedef __uint32        uint32_t;
+  typedef __int16         int16_t;
+  typedef __uint16        uint16_t;
+  typedef __int8          int8_t;
+  typedef __uint8         uint8_t;
+#else
+  typedef int             int32_t;
+  typedef unsigned        uint32_t;
+  typedef short           int16_t;
+  typedef unsigned short  uint16_t;
+  typedef signed char     int8_t;
+  typedef unsigned char   uint8_t;
+#endif
+#endif
+#endif
+
+
+#include <stdlib.h>
+/* An integer type that can be safely cast to a pointer. This definition
+ * should be safe even on 64-bit systems */
+typedef size_t intP;
 
 
 
@@ -26,8 +56,9 @@
  * a (very) small amount of memory. NOTE: this number must be a power of
  * two. this is set to 16 by default.
  */
+#ifndef EFFICIENT_ALIGNMENT
 #define EFFICIENT_ALIGNMENT 16
-
+#endif
 
 /* constants */
 
@@ -51,19 +82,7 @@
 #endif
 #endif // dTRIMESH_ENABLED
 
-#if 0
-// Define a type for indices, either 16 or 32 bit, based on build option
-// TODO: Currently GIMPACT only supports 32 bit indices.
-#if dTRIMESH_16BIT_INDICES
-#  if dTRIMESH_GIMPACT
-    typedef uint32_t dTriIndex;
-#  else // dTRIMESH_GIMPACT
-    typedef uint16_t dTriIndex;
-#  endif // dTRIMESH_GIMPACT
-#else // dTRIMESH_16BIT_INDICES
-typedef uint32_t dTriIndex;
-#endif // dTRIMESH_16BIT_INDICES
-#endif
+
 
 
 /* round an integer up to a multiple of 4, except that 0 and 1 are unmodified
@@ -135,8 +154,13 @@ typedef uint32_t dTriIndex;
 /* alloca aligned to the EFFICIENT_ALIGNMENT. note that this can waste
  * up to 15 bytes per allocation, depending on what alloca() returns.
  */
-#ifdef HAVE_ALLOCA
+#ifdef HAVE_ALLOCA_H
 #  include <alloca.h>
+#else
+#  include <malloc.h>
+#  if defined(_MSC_VER) && !defined(alloca)
+#    define alloca _alloca
+#  endif
 #endif
 
 #define dALLOCA16(n) \
@@ -158,17 +182,6 @@ enum {
 
 #endif
 
-
-
-#if SIZEOF_SHORT == SIZEOF_VOIDP
-typedef unsigned short intP;
-#elif SIZEOF_INT == SIZEOF_VOIDP
-typedef unsigned int intP;
-#elif SIZEOF_LONG_INT == SIZEOF_VOIDP
-typedef unsigned long int intP;
-#elif SIZEOF_LONG_LONG_INT == SIZEOF_VOIDP
-typedef unsigned long long int intP;
-#endif
 
 
 

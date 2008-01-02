@@ -41,6 +41,12 @@ change the random test conditions.
 #pragma warning(disable:4244 4305)  // for VC++, no precision loss complaints
 #endif
 
+#ifdef WIN32
+#  include <malloc.h>
+#else
+#  include <alloca.h>
+#endif
+
 // select correct drawing functions
 #ifdef dDOUBLE
 #define dsDrawSphere dsDrawSphereD
