@@ -77,8 +77,6 @@ if GIMPACT
 noinst_LTLIBRARIES+= libGIMPACT.la
 libGIMPACT_la_CPPFLAGS= -O2 -fno-strict-aliasing -I$(top_builddir)/include -I$(top_srcdir)/GIMPACT/include
 
-libode_la_SOURCES+= collision_trimesh_gimpact.cpp
-
 libGIMPACT_la_SOURCES = \
   $(top_srcdir)/GIMPACT/src/gim_boxpruning.cpp \
   $(top_srcdir)/GIMPACT/src/gim_contact.cpp \
@@ -98,7 +96,7 @@ libode_la_CPPFLAGS+= -I$(top_srcdir)/GIMPACT/include
 libode_la_SOURCES+=	collision_trimesh_trimesh.cpp \
 			collision_trimesh_sphere.cpp \
 			collision_trimesh_ray.cpp \
-			collision_trimesh_opcode.cpp \
+			collision_trimesh_gimpact.cpp \
 			collision_trimesh_box.cpp \
 			collision_trimesh_ccylinder.cpp \
 			collision_trimesh_distance.cpp \

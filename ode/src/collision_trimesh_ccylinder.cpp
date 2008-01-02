@@ -60,12 +60,12 @@
 #define TRIMESH_INTERNAL
 #include "collision_trimesh_internal.h"
 
-#if dTRIMESH_ENABLED
+#ifdef dTRIMESH_ENABLED
 
 // OPCODE version
-#if dTRIMESH_OPCODE
+#ifdef dTRIMESH_OPCODE
 // largest number, double or float
-#if defined(dSINGLE)
+#ifdef dSINGLE
 #define MAX_REAL	FLT_MAX
 #define MIN_REAL	(-FLT_MAX)
 #else
@@ -1086,7 +1086,7 @@ int dCollideCCTL(dxGeom *o1, dxGeom *o2, int flags, dContactGeom *contact, int s
 #endif
 
 // GIMPACT version
-#if dTRIMESH_GIMPACT
+#ifdef dTRIMESH_GIMPACT
 #define nCAPSULE_AXIS 2
 // capsule - trimesh  By francisco leon
 int dCollideCCTL(dxGeom *o1, dxGeom *o2, int flags, dContactGeom *contact, int skip)

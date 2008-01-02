@@ -33,6 +33,7 @@ transform is the identity.
 #include <ode/odemath.h>
 #include <ode/rotation.h>
 #include <ode/matrix.h>
+#include "common-internal.h"
 #include "joint.h"
 
 //****************************************************************************

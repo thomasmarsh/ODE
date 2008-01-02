@@ -20,8 +20,8 @@
  *                                                                       *
  *************************************************************************/
 
-#include "common-internal.h"
 #include <ode/odemath.h>
+#include "common-internal.h"
 
 // get some math functions under windows
 #ifdef WIN32

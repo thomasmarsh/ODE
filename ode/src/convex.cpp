@@ -24,9 +24,6 @@
 Code for Convex Collision Detection
 By Rodrigo Hernandez
 */
-#ifdef HAVE_CONFIG_H
-#  include <config.h>
-#endif
 
 //#include <algorithm>
 #include <ode/common.h>
@@ -34,6 +31,7 @@ By Rodrigo Hernandez
 #include <ode/matrix.h>
 #include <ode/rotation.h>
 #include <ode/odemath.h>
+#include "common-internal.h"
 #include "collision_kernel.h"
 #include "collision_std.h"
 #include "collision_util.h"

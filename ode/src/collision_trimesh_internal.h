@@ -56,13 +56,13 @@ PURE_INLINE int dCollideRayTrimesh( dxGeom *ray, dxGeom *trimesh, int flags,
 #include "collision_kernel.h"
 #include <ode/collision_trimesh.h>
 
-#if dTRIMESH_OPCODE
+#ifdef dTRIMESH_OPCODE
 #define BAN_OPCODE_AUTOLINK
 #include "Opcode.h"
 using namespace Opcode;
 #endif // dTRIMESH_OPCODE
 
-#if dTRIMESH_GIMPACT
+#ifdef dTRIMESH_GIMPACT
 #include <GIMPACT/gimpact.h>
 #endif
 
@@ -86,7 +86,7 @@ struct dxTriMeshData  : public dBase
     /* For when app changes the vertices */
     void UpdateData();
 
-#if dTRIMESH_OPCODE
+#ifdef dTRIMESH_OPCODE
 	Model BVTree;
 	MeshInterface Mesh;
 
@@ -107,7 +107,7 @@ struct dxTriMeshData  : public dBase
     uint8_t* UseFlags;
 #endif  // dTRIMESH_OPCODE
 
-#if dTRIMESH_GIMPACT
+#ifdef dTRIMESH_GIMPACT
 	const char* m_Vertices;
 	int m_VertexStride;
 	int m_VertexCount;
@@ -200,7 +200,7 @@ struct dxTriMesh : public dxGeom{
 	int AABBTest(dxGeom* g, dReal aabb[6]);
 	void computeAABB();
 
-#if dTRIMESH_OPCODE
+#ifdef dTRIMESH_OPCODE
 	// Instance data for last transform.
     dMatrix4 last_trans;
 
@@ -234,7 +234,7 @@ struct dxTriMesh : public dxGeom{
 	static LSSCache defaultCapsuleCache;
 #endif // dTRIMESH_OPCODE
 
-#if dTRIMESH_GIMPACT
+#ifdef dTRIMESH_GIMPACT
     GIM_TRIMESH  m_collision_trimesh;
 #endif  // dTRIMESH_GIMPACT
 };
@@ -248,7 +248,7 @@ inline dContactGeom* SAFECONTACT(int Flags, dContactGeom* Contacts, int Index, i
 }
 #endif
 
-#if dTRIMESH_OPCODE
+#ifdef dTRIMESH_OPCODE
 inline void FetchTriangle(dxTriMesh* TriMesh, int Index, dVector3 Out[3]){
 	VertexPointers VP;
 	TriMesh->Data->Mesh.GetTriangle(VP, Index);
@@ -310,7 +310,7 @@ inline Matrix4x4& MakeMatrix(dxGeom* g, Matrix4x4& Out){
 }
 #endif // dTRIMESH_OPCODE
 
-#if dTRIMESH_GIMPACT
+#ifdef dTRIMESH_GIMPACT
 inline void FetchTriangle(dxTriMesh* TriMesh, int Index, const dVector3 Position, const dMatrix3 Rotation, dVector3 Out[3]){
 	// why is this not implemented?
 	dAASSERT(false);

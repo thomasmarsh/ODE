@@ -22,16 +22,13 @@
 
 // TriMesh - Plane collider by David Walters, July 2006
 
-#ifdef HAVE_CONFIG_H
-#  include <config.h>
-#endif
-
 #include <ode/collision.h>
 #include <ode/matrix.h>
 #include <ode/rotation.h>
 #include <ode/odemath.h>
+#include "common-internal.h"
 
-#if dTRIMESH_ENABLED
+#ifdef dTRIMESH_ENABLED
 
 #include "collision_util.h"
 #include "collision_std.h"
@@ -39,7 +36,7 @@
 #define TRIMESH_INTERNAL
 #include "collision_trimesh_internal.h"
 
-#if dTRIMESH_OPCODE
+#ifdef dTRIMESH_OPCODE
 int dCollideTrimeshPlane( dxGeom *o1, dxGeom *o2, int flags, dContactGeom* contacts, int skip )
 {
 	dIASSERT( skip >= (int)sizeof( dContactGeom ) );
@@ -148,13 +145,14 @@ int dCollideTrimeshPlane( dxGeom *o1, dxGeom *o2, int flags, dContactGeom* conta
 }
 #endif // dTRIMESH_OPCODE
 
-#if dTRIMESH_GIMPACT
+#ifdef dTRIMESH_GIMPACT
 int dCollideTrimeshPlane( dxGeom *o1, dxGeom *o2, int flags, dContactGeom* contacts, int skip )
 {
 	dIASSERT( skip >= (int)sizeof( dContactGeom ) );
 	dIASSERT( o1->type == dTriMeshClass );
 	dIASSERT( o2->type == dPlaneClass );
 	dIASSERT ((flags & NUMC_MASK) >= 1);
+
 
 	// Alias pointers to the plane and trimesh
 	dxTriMesh* trimesh = (dxTriMesh*)( o1 );
@@ -173,7 +171,6 @@ int dCollideTrimeshPlane( dxGeom *o1, dxGeom *o2, int flags, dContactGeom* conta
 	    GIM_DYNARRAY_DESTROY(collision_result);
 	    return 0;
 	}
-
 
 	unsigned int contactcount = collision_result.m_size;
 	unsigned int contactmax = (unsigned int)(flags & NUMC_MASK);

@@ -33,10 +33,11 @@
 //	* make sure ODE-specific parameters divided out
 
 
-#include "ode/ode.h"
+#include <ode/ode.h>
 #include "objects.h"
 #include "joint.h"
 #include "collision_kernel.h"
+#include "common-internal.h"
 
 //***************************************************************************
 // utility
