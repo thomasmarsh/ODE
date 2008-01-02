@@ -17,8 +17,7 @@ release: dist dist-bz2 dist-zip
 	@echo Created release packages for ${PACKAGE}-${VERSION}.
 
 EXTRA_DIST = autogen.sh build \
-        CHANGELOG.txt INSTALL.txt README.txt LICENSE.TXT \
-        config.h.win32 odeconfig.h.win32
+        CHANGELOG.txt INSTALL.txt README.txt LICENSE.TXT
 
 
 
