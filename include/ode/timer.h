@@ -23,13 +23,12 @@
 #ifndef _ODE_TIMER_H_
 #define _ODE_TIMER_H_
 
-#include <odeconfig.h>
+#include <ode/config.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-#include <stdio.h>
 
 /* stop watch objects */
 

@@ -3,7 +3,7 @@
 	ProjectType="Visual C++"
 	Version="7.00"
 	Name="tests"
-	ProjectGUID="{568389E2-309E-3C49-9667-5129B86BDF28}"
+	ProjectGUID="{3984521E-682A-FD49-9B48-46FF09D26A51}"
 	Keyword="Win32Proj">
 	<Platforms>
 		<Platform
@@ -19,7 +19,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="../..;../../include;../../tests/UnitTest++/src"
+				AdditionalIncludeDirectories="../../include;../../tests/UnitTest++/src"
 				PreprocessorDefinitions="_CRT_SECURE_NO_DEPRECATE"
 				MinimalRebuild="TRUE"
 				BasicRuntimeChecks="3"
@@ -54,7 +54,7 @@
 			<Tool
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="_CRT_SECURE_NO_DEPRECATE"
-				AdditionalIncludeDirectories="../..;../../include;../../tests/UnitTest++/src"/>
+				AdditionalIncludeDirectories="../../include;../../tests/UnitTest++/src"/>
 			<Tool
 				Name="VCWebServiceProxyGeneratorTool"/>
 			<Tool
@@ -69,7 +69,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="../..;../../include;../../tests/UnitTest++/src"
+				AdditionalIncludeDirectories="../../include;../../tests/UnitTest++/src"
 				PreprocessorDefinitions="_CRT_SECURE_NO_DEPRECATE"
 				MinimalRebuild="TRUE"
 				BasicRuntimeChecks="3"
@@ -104,7 +104,7 @@
 			<Tool
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="_CRT_SECURE_NO_DEPRECATE"
-				AdditionalIncludeDirectories="../..;../../include;../../tests/UnitTest++/src"/>
+				AdditionalIncludeDirectories="../../include;../../tests/UnitTest++/src"/>
 			<Tool
 				Name="VCWebServiceProxyGeneratorTool"/>
 			<Tool
@@ -119,7 +119,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="../..;../../include;../../tests/UnitTest++/src"
+				AdditionalIncludeDirectories="../../include;../../tests/UnitTest++/src"
 				PreprocessorDefinitions="_CRT_SECURE_NO_DEPRECATE"
 				MinimalRebuild="TRUE"
 				BasicRuntimeChecks="3"
@@ -154,7 +154,7 @@
 			<Tool
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="_CRT_SECURE_NO_DEPRECATE"
-				AdditionalIncludeDirectories="../..;../../include;../../tests/UnitTest++/src"/>
+				AdditionalIncludeDirectories="../../include;../../tests/UnitTest++/src"/>
 			<Tool
 				Name="VCWebServiceProxyGeneratorTool"/>
 			<Tool
@@ -169,7 +169,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="../..;../../include;../../tests/UnitTest++/src"
+				AdditionalIncludeDirectories="../../include;../../tests/UnitTest++/src"
 				PreprocessorDefinitions="_CRT_SECURE_NO_DEPRECATE"
 				MinimalRebuild="TRUE"
 				BasicRuntimeChecks="3"
@@ -204,7 +204,7 @@
 			<Tool
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="_CRT_SECURE_NO_DEPRECATE"
-				AdditionalIncludeDirectories="../..;../../include;../../tests/UnitTest++/src"/>
+				AdditionalIncludeDirectories="../../include;../../tests/UnitTest++/src"/>
 			<Tool
 				Name="VCWebServiceProxyGeneratorTool"/>
 			<Tool

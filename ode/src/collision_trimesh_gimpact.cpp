@@ -25,16 +25,13 @@
 #include <ode/rotation.h>
 #include <ode/odemath.h>
 
-#include "common-internal.h"
-
-
-#ifdef dTRIMESH_ENABLED
+#if dTRIMESH_ENABLED
 
 #include "collision_util.h"
 #define TRIMESH_INTERNAL
 #include "collision_trimesh_internal.h"
 
-#ifdef dTRIMESH_GIMPACT
+#if dTRIMESH_GIMPACT
 
 void dxTriMeshData::Preprocess(){	// stub
 }
@@ -197,7 +194,7 @@ void dxTriMesh::computeAABB()
     //Update trimesh boxes
     gim_trimesh_update(&m_collision_trimesh);
 
-	GIM_AABB_COPY( &m_collision_trimesh.m_aabbset.m_global_bound, aabb );
+    memcpy(aabb,&m_collision_trimesh.m_aabbset.m_global_bound,6*sizeof(GREAL));
 }
 
 
@@ -268,8 +265,8 @@ void dGeomTriMeshSetData(dGeomID g, dTriMeshDataID Data)
 	// GIMPACT only supports stride 12, so we need to catch the error early.
 	dUASSERT
 	(
-	  Data->m_VertexStride == 3*sizeof(float) && Data->m_TriStride == 3*sizeof(int),
-          "Gimpact trimesh only supports a stride of 3 float/int\n"
+	  Data->m_VertexStride == 3*sizeof(dReal) && Data->m_TriStride == 3*sizeof(int),
+          "Gimpact trimesh only supports a stride of 3 dReal/int\n"
 	  "This means that you cannot use dGeomTriMeshDataBuildSimple() with Gimpact.\n"
 	  "Change the stride, or use Opcode trimeshes instead.\n"
 	);
@@ -406,9 +403,6 @@ int dCollideTTL(dxGeom* g1, dxGeom* g2, int Flags, dContactGeom* Contacts, int S
     //Create contact list
     GDYNAMIC_ARRAY trimeshcontacts;
     GIM_CREATE_CONTACT_LIST(trimeshcontacts);
-
-	g1 -> recomputeAABB();
-	g2 -> recomputeAABB();
 
     //Collide trimeshes
     gim_trimesh_trimesh_collision(&TriMesh1->m_collision_trimesh,&TriMesh2->m_collision_trimesh,&trimeshcontacts);

@@ -30,18 +30,17 @@
 #include <ode/matrix.h>
 #include <ode/rotation.h>
 #include <ode/odemath.h>
-#include "common-internal.h"
 
 // Classic Implementation
 #if !dTRIMESH_OPCODE_USE_NEW_TRIMESH_TRIMESH_COLLIDER
 
-#ifdef dTRIMESH_ENABLED
+#if dTRIMESH_ENABLED
 
 #include "collision_util.h"
 #define TRIMESH_INTERNAL
 #include "collision_trimesh_internal.h"
 
-#ifdef dTRIMESH_OPCODE
+#if dTRIMESH_OPCODE
 
 #define SMALL_ELT           REAL(2.5e-4)
 #define EXPANDED_ELT_THRESH REAL(1.0e-3)

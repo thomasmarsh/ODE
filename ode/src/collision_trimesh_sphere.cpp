@@ -26,15 +26,14 @@
 #include <ode/matrix.h>
 #include <ode/rotation.h>
 #include <ode/odemath.h>
-#include "common-internal.h"
 #include "collision_util.h"
 
-#ifdef dTRIMESH_ENABLED
+#if dTRIMESH_ENABLED
 
 #define TRIMESH_INTERNAL
 #include "collision_trimesh_internal.h"
 
-#ifdef dTRIMESH_OPCODE
+#if dTRIMESH_OPCODE
 #define MERGECONTACTS
 
 // Ripped from Opcode 1.1.
@@ -508,7 +507,7 @@ int dCollideSTL(dxGeom* g1, dxGeom* SphereGeom, int Flags, dContactGeom* Contact
 }
 #endif // dTRIMESH_OPCODE
 
-#ifdef dTRIMESH_GIMPACT
+#if dTRIMESH_GIMPACT
 int dCollideSTL(dxGeom* g1, dxGeom* SphereGeom, int Flags, dContactGeom* Contacts, int Stride)
 {
 	dIASSERT (Stride >= (int)sizeof(dContactGeom));
@@ -523,11 +522,8 @@ int dCollideSTL(dxGeom* g1, dxGeom* SphereGeom, int Flags, dContactGeom* Contact
     GDYNAMIC_ARRAY trimeshcontacts;
     GIM_CREATE_CONTACT_LIST(trimeshcontacts);
 
-	g1 -> recomputeAABB();
-	SphereGeom -> recomputeAABB();
-
     //Collide trimeshes
-    gim_trimesh_sphere_collisionODE(&TriMesh->m_collision_trimesh,Position,Radius,&trimeshcontacts);
+    gim_trimesh_sphere_collision(&TriMesh->m_collision_trimesh,Position,Radius,&trimeshcontacts);
 
     if(trimeshcontacts.m_size == 0)
     {

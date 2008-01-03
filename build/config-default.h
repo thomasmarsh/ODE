@@ -7,6 +7,21 @@
  * CONFIGURATON SETTINGS - you can change these, and then rebuild
  *   ODE to modify the behavior of the library.
  *
+ *   dSINGLE/dDOUBLE   - force ODE to use single-precision (float)
+ *                       or double-precision (double) for numbers.
+ *                       Only one should be defined.
+ *
+ *   dTRIMESH_ENABLED  - enable/disable trimesh support
+ *   dTRIMESH_OPCODE   - use the OPCODE trimesh engine
+ *   dTRIMESH_GIMPACT  - use the GIMPACT trimesh engine
+ *                       Only one trimesh engine should be enabled.
+ *
+ *   dTRIMESH_16BIT_INDICES (todo: opcode only)
+ *                       Setup the trimesh engine to use 16 bit
+ *                       triangle indices. The default is to use
+ *                       32 bit indices. Use the dTriIndex type to
+ *                       detect the correct index size.
+ *
  *   dUSE_MALLOC_FOR_ALLOCA (experimental)-
  *                       Use malloc() instead of alloca(). Slower,
  *                       but allows for larger systems and more
@@ -18,8 +33,12 @@
  *
  ******************************************************************/
 
-#include "odeconfig.h"
+#define dSINGLE
+/* #define dDOUBLE */
 
+#define dTRIMESH_ENABLED 1
+#define dTRIMESH_OPCODE 1
+#define dTRIMESH_16BIT_INDICES 0
 
 #define dTRIMESH_OPCODE_USE_NEW_TRIMESH_TRIMESH_COLLIDER 0
 
@@ -102,6 +121,50 @@
 #endif
 
 
+/* Define a value for infinity */
+#if defined(HUGE_VALF)
+	#define ODE_INFINITY4 HUGE_VALF
+	#define ODE_INFINITY8 HUGE_VAL
+#elif defined(FLT_MAX)
+	#define ODE_INFINITY4 FLT_MAX
+	#define ODE_INFINITY8 DBL_MAX
+#else
+	static union { unsigned char __c[4]; float  __f; }  __ode_huge_valf = {{0,0,0x80,0x7f}};
+	static union { unsigned char __c[8]; double __d; }  __ode_huge_val  = {{0,0,0,0,0,0,0xf0,0x7f}};
+	#define ODE_INFINITY4 (__ode_huge_valf.__f)
+	#define ODE_INFINITY8 (__ode_huge_val.__d)
+#endif
+
+#ifdef dSINGLE
+	#define dInfinity ODE_INFINITY4
+	#define dEpsilon  FLT_EPSILON
+#else
+	#define dInfinity ODE_INFINITY8
+	#define dEpsilon  DBL_EPSILON
+#endif
+
+
+/* Well-defined common data types...need to define for 64 bit systems */
+#if defined(_M_IA64) || defined(__ia64__) || defined(_M_AMD64) || defined(__x86_64__)
+  #define X86_64_SYSTEM   1
+  typedef int             int32;
+  typedef unsigned int    uint32;
+  typedef short           int16;
+  typedef unsigned short  uint16;
+  typedef char            int8;
+  typedef unsigned char   uint8;
+#else
+  typedef int             int32;
+  typedef unsigned int    uint32;
+  typedef short           int16;
+  typedef unsigned short  uint16;
+  typedef char            int8;
+  typedef unsigned char   uint8;
+#endif
+
+/* An integer type that can be safely cast to a pointer. This definition
+ * should be safe even on 64-bit systems */
+typedef size_t intP;
 
 
 /* The efficient alignment. most platforms align data structures to some

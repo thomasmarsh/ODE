@@ -54,18 +54,17 @@
 #include <ode/matrix.h>
 #include <ode/rotation.h>
 #include <ode/odemath.h>
-#include "common-internal.h"
 #include "collision_util.h"
 
 #define TRIMESH_INTERNAL
 #include "collision_trimesh_internal.h"
 
-#ifdef dTRIMESH_ENABLED
+#if dTRIMESH_ENABLED
 
 // OPCODE version
-#ifdef dTRIMESH_OPCODE
+#if dTRIMESH_OPCODE
 // largest number, double or float
-#ifdef dSINGLE
+#if defined(dSINGLE)
 #define MAX_REAL	FLT_MAX
 #define MIN_REAL	(-FLT_MAX)
 #else
@@ -474,7 +473,7 @@ inline void _CalculateAxis(const dVector3& v1,
 static BOOL _cldTestSeparatingAxesOfCapsule(const dVector3 &v0,
 											const dVector3 &v1,
 											const dVector3 &v2,
-											uint8_t flags) 
+											uint8 flags) 
 {
 	// calculate caps centers in absolute space
 	dVector3 vCp0;
@@ -749,7 +748,7 @@ static BOOL _cldTestSeparatingAxesOfCapsule(const dVector3 &v0,
 static void _cldTestOneTriangleVSCapsule( const dVector3 &v0, 
 											const dVector3 &v1, 
 											const dVector3 &v2,
-											uint8_t flags)
+											uint8 flags)
 {
 
 	// calculate edges
@@ -1051,7 +1050,7 @@ int dCollideCCTL(dxGeom *o1, dxGeom *o2, int flags, dContactGeom *contact, int s
 
 	    unsigned int ctContacts0 = ctContacts;
 
-		uint8_t* UseFlags = TriMesh->Data->UseFlags;
+		uint8* UseFlags = TriMesh->Data->UseFlags;
 
 		// loop through all intersecting triangles
 		for (int i = 0; i < TriCount; i++)
@@ -1063,7 +1062,7 @@ int dCollideCCTL(dxGeom *o1, dxGeom *o2, int flags, dContactGeom *contact, int s
 			dVector3 dv[3];
 			FetchTriangle(TriMesh, Triint, mTriMeshPos, mTriMeshRot, dv);
 
-			uint8_t flags = UseFlags ? UseFlags[Triint] : dxTriMeshData::kUseAll;
+			uint8 flags = UseFlags ? UseFlags[Triint] : dxTriMeshData::kUseAll;
 
 			// test this triangle
 			_cldTestOneTriangleVSCapsule(dv[0],dv[1],dv[2], flags);
@@ -1086,7 +1085,7 @@ int dCollideCCTL(dxGeom *o1, dxGeom *o2, int flags, dContactGeom *contact, int s
 #endif
 
 // GIMPACT version
-#ifdef dTRIMESH_GIMPACT
+#if dTRIMESH_GIMPACT
 #define nCAPSULE_AXIS 2
 // capsule - trimesh  By francisco leon
 int dCollideCCTL(dxGeom *o1, dxGeom *o2, int flags, dContactGeom *contact, int skip)

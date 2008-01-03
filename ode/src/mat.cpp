@@ -20,13 +20,13 @@
  *                                                                       *
  *************************************************************************/
 
-#include <odeconfig.h>
+#include <ode/config.h>
 #include <ode/misc.h>
 #include <ode/matrix.h>
 #include <ode/error.h>
 #include <ode/memory.h>
 #include "mat.h"
-#include <string.h> // memcpy, memmove
+
 
 dMatrix::dMatrix()
 {

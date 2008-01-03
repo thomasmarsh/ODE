@@ -19,31 +19,3 @@ release: dist dist-bz2 dist-zip
 EXTRA_DIST = autogen.sh build \
         CHANGELOG.txt INSTALL.txt README.txt LICENSE.TXT
 
-
-
-
-
-configexecincludedir = $(libdir)/ode/include
-
-
-install-exec-local: odeconfig.h
-	$(mkinstalldirs) $(DESTDIR)$(configexecincludedir)
-	file=$(DESTDIR)$(configexecincludedir)/odeconfig.h; \
-	if test -r $$file && cmp -s odeconfig.h $$file; then :; \
-	else $(INSTALL_DATA) odeconfig.h $$file; fi
-
-uninstall-local:
-	rm -f $(DESTDIR)$(configexecincludedir)/odeconfig.h
-
-BUILT_SOURCES = stamp-gc-h #note: not odeconfig.h
-odeconfig.h: stamp-gc-h
-	@if test -f odeconfig.h; then :; \
-	else rm -f stamp-gc-h; $(MAKE) stamp-gc-h; fi
-stamp-gc-h: config.status
-	cd $(top_builddir) && $(SHELL) ./config.status odeconfig.h
-	echo timestamp > stamp-gc-h
-
-
-DISTCLEANFILES = odeconfig.h stamp-gc-h
-
-

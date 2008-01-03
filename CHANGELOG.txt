@@ -9,27 +9,10 @@ the rules for this file:
 
 ------------------------------------------------------------------------------
 
-01/02/08 Daniel K. O.
-
-	* Applied patch 1851394: support for GIMPACT with double precision,
-	  dCollide fix.
-	* Removed an opcode source from gimpact build.
-	
-
-01/01/08 Daniel K. O.
-
-	* Replaced ode/config.h by odeconfig.h and plain config.h. Public
-	  configuration options are now on odeconfig.h; config.h is now private.
-	  odeconfig.h is generated a similar way to glibconfig.h. It will be installed
-	  in a different place from the headers.
-	* Replaced uintXX by uintXX_t where needed.
-	* SAP space now seems to work on systems where it was previously crashing.
-
 12/11/07 Daniel K. O.
 
 	* Added damping and MaxAngularVel() functions.
-	* Const-correctness: added const qualifier to some dWorldGet and dBodyGet
-	  functions.
+	* Const-correctness: added const qualifier to some dWorldGet and dBodyGet functions.
 	* Updated the odecpp.h header.
 
 12/07/07 Daniel K. O.

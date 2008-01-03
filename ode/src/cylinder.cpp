@@ -34,7 +34,6 @@ dContactGeom::g1 and dContactGeom::g2.
 #include <ode/matrix.h>
 #include <ode/rotation.h>
 #include <ode/odemath.h>
-#include "common-internal.h"
 #include "collision_kernel.h"
 #include "collision_std.h"
 #include "collision_util.h"

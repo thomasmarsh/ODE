@@ -20,11 +20,10 @@
  *                                                                       *
  *************************************************************************/
 
-#include <odeconfig.h>
+#include <ode/config.h>
 #include <ode/mass.h>
 #include <ode/odemath.h>
 #include <ode/matrix.h>
-#include "common-internal.h"
 
 // Local dependencies
 #include "collision_kernel.h"
@@ -221,7 +220,7 @@ void dMassSetBoxTotal (dMass *m, dReal total_mass,
 
 
 
-#ifdef dTRIMESH_ENABLED
+#if dTRIMESH_ENABLED
 
 /*
  * dMassSetTrimesh, implementation by Gero Mueller.

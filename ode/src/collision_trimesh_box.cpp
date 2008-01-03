@@ -28,17 +28,17 @@
  *                                                                       *
  *************************************************************************/
 
+
 #include <ode/collision.h>
 #include <ode/matrix.h>
 #include <ode/rotation.h>
 #include <ode/odemath.h>
-#include "common-internal.h"
 #include "collision_util.h"
 
 #define TRIMESH_INTERNAL
 #include "collision_trimesh_internal.h"
 
-#ifdef dTRIMESH_ENABLED
+#if dTRIMESH_ENABLED
 
 
 static void
@@ -1119,7 +1119,7 @@ static void _cldTestOneTriangle(const dVector3 &v0, const dVector3 &v1, const dV
 
 
 // OPCODE version of box to mesh collider
-#ifdef dTRIMESH_OPCODE
+#if dTRIMESH_OPCODE
 int dCollideBTL(dxGeom* g1, dxGeom* BoxGeom, int Flags, dContactGeom* Contacts, int Stride){
   dIASSERT (Stride >= (int)sizeof(dContactGeom));
   dIASSERT (g1->type == dTriMeshClass);
@@ -1289,7 +1289,7 @@ int dCollideBTL(dxGeom* g1, dxGeom* BoxGeom, int Flags, dContactGeom* Contacts, 
 #endif
 
 // GIMPACT version of box to mesh collider
-#ifdef dTRIMESH_GIMPACT
+#if dTRIMESH_GIMPACT
 int dCollideBTL(dxGeom* g1, dxGeom* BoxGeom, int Flags, dContactGeom* Contacts, int Stride)
 {
   dIASSERT (Stride >= (int)sizeof(dContactGeom));
@@ -1299,9 +1299,6 @@ int dCollideBTL(dxGeom* g1, dxGeom* BoxGeom, int Flags, dContactGeom* Contacts, 
 
   
   dxTriMesh* TriMesh = (dxTriMesh*)g1;
-
-  g1 -> recomputeAABB();
-  BoxGeom -> recomputeAABB();
 
 
   // get source hull position, orientation and half size

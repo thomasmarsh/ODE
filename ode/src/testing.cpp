@@ -20,11 +20,10 @@
  *                                                                       *
  *************************************************************************/
 
-#include <odeconfig.h>
+#include <ode/config.h>
 #include <ode/misc.h>
 #include <ode/memory.h>
 #include "testing.h"
-#include "common-internal.h"
 
 #ifdef dDOUBLE
 static const dReal tol = 1.0e-9;

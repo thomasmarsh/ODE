@@ -26,10 +26,6 @@
 #ifndef _ODE_COLLISION_TRIMESH_INTERNAL_H_
 #define _ODE_COLLISION_TRIMESH_INTERNAL_H_
 
-
-#include "common-internal.h"
-
-
 int dCollideCylinderTrimesh(dxGeom *o1, dxGeom *o2, int flags, dContactGeom *contact, int skip);
 int dCollideTrimeshPlane(dxGeom *o1, dxGeom *o2, int flags, dContactGeom *contact, int skip);
 
@@ -56,13 +52,13 @@ PURE_INLINE int dCollideRayTrimesh( dxGeom *ray, dxGeom *trimesh, int flags,
 #include "collision_kernel.h"
 #include <ode/collision_trimesh.h>
 
-#ifdef dTRIMESH_OPCODE
+#if dTRIMESH_OPCODE
 #define BAN_OPCODE_AUTOLINK
 #include "Opcode.h"
 using namespace Opcode;
 #endif // dTRIMESH_OPCODE
 
-#ifdef dTRIMESH_GIMPACT
+#if dTRIMESH_GIMPACT
 #include <GIMPACT/gimpact.h>
 #endif
 
@@ -86,7 +82,7 @@ struct dxTriMeshData  : public dBase
     /* For when app changes the vertices */
     void UpdateData();
 
-#ifdef dTRIMESH_OPCODE
+#if dTRIMESH_OPCODE
 	Model BVTree;
 	MeshInterface Mesh;
 
@@ -104,10 +100,10 @@ struct dxTriMeshData  : public dBase
 
     // data for use in collision resolution
     const void* Normals;
-    uint8_t* UseFlags;
+    uint8* UseFlags;
 #endif  // dTRIMESH_OPCODE
 
-#ifdef dTRIMESH_GIMPACT
+#if dTRIMESH_GIMPACT
 	const char* m_Vertices;
 	int m_VertexStride;
 	int m_VertexCount;
@@ -200,7 +196,7 @@ struct dxTriMesh : public dxGeom{
 	int AABBTest(dxGeom* g, dReal aabb[6]);
 	void computeAABB();
 
-#ifdef dTRIMESH_OPCODE
+#if dTRIMESH_OPCODE
 	// Instance data for last transform.
     dMatrix4 last_trans;
 
@@ -234,7 +230,7 @@ struct dxTriMesh : public dxGeom{
 	static LSSCache defaultCapsuleCache;
 #endif // dTRIMESH_OPCODE
 
-#ifdef dTRIMESH_GIMPACT
+#if dTRIMESH_GIMPACT
     GIM_TRIMESH  m_collision_trimesh;
 #endif  // dTRIMESH_GIMPACT
 };
@@ -248,7 +244,7 @@ inline dContactGeom* SAFECONTACT(int Flags, dContactGeom* Contacts, int Index, i
 }
 #endif
 
-#ifdef dTRIMESH_OPCODE
+#if dTRIMESH_OPCODE
 inline void FetchTriangle(dxTriMesh* TriMesh, int Index, dVector3 Out[3]){
 	VertexPointers VP;
 	TriMesh->Data->Mesh.GetTriangle(VP, Index);
@@ -310,81 +306,7 @@ inline Matrix4x4& MakeMatrix(dxGeom* g, Matrix4x4& Out){
 }
 #endif // dTRIMESH_OPCODE
 
-#ifdef dTRIMESH_GIMPACT
-
-	#ifdef dDOUBLE
-		// To use GIMPACT with doubles, we need to patch a couple of the GIMPACT functions to 
-		// convert arguments to floats before sending them in
-
-
-		/// Convert an gimpact vec3f to a ODE dVector3d:   dVector3[i] = vec3f[i]
-		#define dVECTOR3_VEC3F_COPY(b,a) { 			\
-			(b)[0] = (a)[0];              \
-			(b)[1] = (a)[1];              \
-			(b)[2] = (a)[2];              \
-			(b)[3] = 0;                   \
-		}
-
-		inline void gim_trimesh_get_triangle_verticesODE(GIM_TRIMESH * trimesh, GUINT triangle_index, dVector3 v1, dVector3 v2, dVector3 v3) {   
-			vec3f * transformed_vertices = GIM_BUFFER_ARRAY_POINTER(vec3f,trimesh->m_transformed_vertex_buffer,0);
-    
-			GUINT * triangle_indices = GIM_BUFFER_ARRAY_POINTER(GUINT,trimesh->m_tri_index_buffer,triangle_index*3);
-    
-			dVECTOR3_VEC3F_COPY(v1, transformed_vertices[triangle_indices[0]]);
-			dVECTOR3_VEC3F_COPY(v2, transformed_vertices[triangle_indices[1]]);
-			dVECTOR3_VEC3F_COPY(v3, transformed_vertices[triangle_indices[2]]);
-		}
-
-		// Anything calling gim_trimesh_get_triangle_vertices from within ODE 
-		// should be patched through to the dDOUBLE version above
-
-		#define gim_trimesh_get_triangle_vertices gim_trimesh_get_triangle_verticesODE
-
-		inline int gim_trimesh_ray_closest_collisionODE( GIM_TRIMESH *mesh, dVector3 origin, dVector3 dir, GREAL tmax, GIM_TRIANGLE_RAY_CONTACT_DATA *contact ) {
-			vec3f dir_vec3f    = { dir[ 0 ],       dir[ 1 ],    dir[ 2 ] };
-			vec3f origin_vec3f = { origin[ 0 ], origin[ 1 ], origin[ 2 ] };
-
-			return gim_trimesh_ray_closest_collision( mesh, origin_vec3f, dir_vec3f, tmax, contact );
-		}
-
-		inline int gim_trimesh_ray_collisionODE( GIM_TRIMESH *mesh, dVector3 origin, dVector3 dir, GREAL tmax, GIM_TRIANGLE_RAY_CONTACT_DATA *contact ) {
-			vec3f dir_vec3f    = { dir[ 0 ],       dir[ 1 ],    dir[ 2 ] };
-			vec3f origin_vec3f = { origin[ 0 ], origin[ 1 ], origin[ 2 ] };
-
-			return gim_trimesh_ray_collision( mesh, origin_vec3f, dir_vec3f, tmax, contact );
-		}
-
-		#define gim_trimesh_sphere_collisionODE( mesh, Position, Radius, contact ) {	\
-			vec3f pos_vec3f = { Position[ 0 ], Position[ 1 ], Position[ 2 ] };			\
-			gim_trimesh_sphere_collision( mesh, pos_vec3f, Radius, contact );			\
-		}
-
-		#define gim_trimesh_plane_collisionODE( mesh, plane, contact ) { 			\
-			vec4f plane_vec4f = { plane[ 0 ], plane[ 1 ], plane[ 2 ], plane[ 3 ] }; \
-			gim_trimesh_plane_collision( mesh, plane_vec4f, contact );				\
-		}
-
-		#define GIM_AABB_COPY( src, dst ) {		\
-			dst[ 0 ]= (src) -> minX;			\
-			dst[ 1 ]= (src) -> maxX;			\
-			dst[ 2 ]= (src) -> minY;			\
-			dst[ 3 ]= (src) -> maxY;			\
-			dst[ 4 ]= (src) -> minZ;			\
-			dst[ 5 ]= (src) -> maxZ;			\
-		}
-
-	#else 
-		// With single precision, we can pass native ODE vectors directly to GIMPACT
-
-		#define gim_trimesh_ray_closest_collisionODE 	gim_trimesh_ray_closest_collision
-		#define gim_trimesh_ray_collisionODE 			gim_trimesh_ray_collision
-		#define gim_trimesh_sphere_collisionODE 		gim_trimesh_sphere_collision
-		#define gim_trimesh_plane_collisionODE 			gim_trimesh_plane_collision
-
-		#define GIM_AABB_COPY( src, dst ) 	memcpy( dst, src, 6 * sizeof( GREAL ) )
-
-	#endif // dDouble
-
+#if dTRIMESH_GIMPACT
 inline void FetchTriangle(dxTriMesh* TriMesh, int Index, const dVector3 Position, const dMatrix3 Rotation, dVector3 Out[3]){
 	// why is this not implemented?
 	dAASSERT(false);

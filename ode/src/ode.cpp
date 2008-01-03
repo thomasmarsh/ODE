@@ -37,9 +37,6 @@
 #include "util.h"
 #include <ode/memory.h>
 #include <ode/error.h>
-#include "common-internal.h"
-
-#include <string.h>
 
 // misc defines
 #define ALLOCA dALLOCA16
@@ -1495,8 +1492,8 @@ dxWorld * dWorldCreate()
 
   w->dampingp.linear_scale = 0;
   w->dampingp.angular_scale = 0;
-  w->dampingp.linear_threshold = REAL( 0.01 ) * REAL( 0.01 );
-  w->dampingp.angular_threshold = REAL( 0.01 ) * REAL( 0.01 );
+  w->dampingp.linear_threshold = 0.01 * 0.01;
+  w->dampingp.angular_threshold = 0.01 * 0.01;  
   w->max_angular_speed = dInfinity;
 
   return w;
