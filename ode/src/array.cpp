@@ -20,10 +20,10 @@
  *                                                                       *
  *************************************************************************/
 
+#include <ode/config.h>
 #include <ode/memory.h>
 #include <ode/error.h>
 #include "array.h"
-#include "common-internal.h"
 
 
 static inline int roundUpToPowerOfTwo (int x)

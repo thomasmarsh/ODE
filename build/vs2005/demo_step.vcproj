@@ -3,7 +3,7 @@
 	ProjectType="Visual C++"
 	Version="8.00"
 	Name="demo_step"
-	ProjectGUID="{405C574A-1119-FB4A-A701-CDED14186EF2}"
+	ProjectGUID="{9744D363-656A-9D45-AC28-F38D38AE93D0}"
 	RootNamespace="demo_step"
 	Keyword="Win32Proj"
 	>
@@ -40,7 +40,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="../..;../../include"
+				AdditionalIncludeDirectories="../../include"
 				PreprocessorDefinitions="_CRT_SECURE_NO_DEPRECATE;WIN32"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -57,7 +57,7 @@
 			<Tool
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="_CRT_SECURE_NO_DEPRECATE;WIN32"
-				AdditionalIncludeDirectories="../..;../../include"
+				AdditionalIncludeDirectories="../../include"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
@@ -124,7 +124,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="../..;../../include"
+				AdditionalIncludeDirectories="../../include"
 				PreprocessorDefinitions="_CRT_SECURE_NO_DEPRECATE;WIN32"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -141,7 +141,7 @@
 			<Tool
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="_CRT_SECURE_NO_DEPRECATE;WIN32"
-				AdditionalIncludeDirectories="../..;../../include"
+				AdditionalIncludeDirectories="../../include"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
@@ -208,7 +208,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="../..;../../include"
+				AdditionalIncludeDirectories="../../include"
 				PreprocessorDefinitions="_CRT_SECURE_NO_DEPRECATE;WIN32"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -225,7 +225,7 @@
 			<Tool
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="_CRT_SECURE_NO_DEPRECATE;WIN32"
-				AdditionalIncludeDirectories="../..;../../include"
+				AdditionalIncludeDirectories="../../include"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
@@ -292,7 +292,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="../..;../../include"
+				AdditionalIncludeDirectories="../../include"
 				PreprocessorDefinitions="_CRT_SECURE_NO_DEPRECATE;WIN32"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -309,7 +309,7 @@
 			<Tool
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="_CRT_SECURE_NO_DEPRECATE;WIN32"
-				AdditionalIncludeDirectories="../..;../../include"
+				AdditionalIncludeDirectories="../../include"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"

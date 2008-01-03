@@ -77,6 +77,8 @@ if GIMPACT
 noinst_LTLIBRARIES+= libGIMPACT.la
 libGIMPACT_la_CPPFLAGS= -O2 -fno-strict-aliasing -I$(top_builddir)/include -I$(top_srcdir)/GIMPACT/include
 
+libode_la_SOURCES+= collision_trimesh_gimpact.cpp
+
 libGIMPACT_la_SOURCES = \
   $(top_srcdir)/GIMPACT/src/gim_boxpruning.cpp \
   $(top_srcdir)/GIMPACT/src/gim_contact.cpp \
@@ -92,11 +94,11 @@ libGIMPACT_la_SOURCES = \
 
 libode_la_DEPENDENCIES+=libGIMPACT.la
 libode_la_LIBADD+= $(libGIMPACT_la_OBJECTS)
-libode_la_CPPFLAGS+= -I$(top_srcdir)/GIMPACT/include
+libode_la_CPPFLAGS+= -DdTRIMESH_ENABLED -DdTRIMESH_GIMPACT -I$(top_srcdir)/GIMPACT/include
 libode_la_SOURCES+=	collision_trimesh_trimesh.cpp \
 			collision_trimesh_sphere.cpp \
 			collision_trimesh_ray.cpp \
-			collision_trimesh_gimpact.cpp \
+			collision_trimesh_opcode.cpp \
 			collision_trimesh_box.cpp \
 			collision_trimesh_ccylinder.cpp \
 			collision_trimesh_distance.cpp \
@@ -212,7 +214,7 @@ libOPCODE_la_SOURCES=	$(top_srcdir)/OPCODE/OPC_AABBCollider.cpp \
 libode_la_DEPENDENCIES+=libOPCODE.la
 
 libode_la_LIBADD+= $(libOPCODE_la_OBJECTS)
-libode_la_CPPFLAGS += -I$(top_srcdir)/OPCODE -I$(top_srcdir)/OPCODE/Ice
+libode_la_CPPFLAGS += -I$(top_srcdir)/OPCODE -I$(top_srcdir)/OPCODE/Ice -DdTRIMESH_ENABLED -DdTRIMESH_OPCODE
 libode_la_SOURCES+=	collision_trimesh_trimesh.cpp \
 			collision_trimesh_sphere.cpp \
 			collision_trimesh_ray.cpp \

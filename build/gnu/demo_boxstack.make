@@ -10,12 +10,12 @@ ifeq ($(CONFIG),DebugDLL)
   LIBDIR := ../../lib/DebugDLL
   OBJDIR := obj/boxstack/DebugDLL
   OUTDIR := ../../lib/DebugDLL
-  CPPFLAGS := -MMD -D "_CRT_SECURE_NO_DEPRECATE" -D "WIN32" -I "../.." -I "../../include"
+  CPPFLAGS := -MMD -D "_CRT_SECURE_NO_DEPRECATE" -D "WIN32" -I "../../include"
   CFLAGS += $(CPPFLAGS) $(TARGET_ARCH) -g
   CXXFLAGS := $(CFLAGS)
   LDFLAGS += -L$(BINDIR) -L$(LIBDIR) -loded -ldrawstuffd -luser32 -lwinmm -lgdi32 -lopengl32 -lglu32
   LDDEPS := ../../lib/DebugDLL/oded.dll ../../lib/DebugDLL/drawstuffd.dll
-  RESFLAGS := -D "_CRT_SECURE_NO_DEPRECATE" -D "WIN32" -I "../.." -I "../../include"
+  RESFLAGS := -D "_CRT_SECURE_NO_DEPRECATE" -D "WIN32" -I "../../include"
   TARGET := demo_boxstack.exe
   BLDCMD = $(CXX) -o $(OUTDIR)/$(TARGET) $(OBJECTS) $(LDFLAGS) $(RESOURCES) $(TARGET_ARCH)
 endif
@@ -25,12 +25,12 @@ ifeq ($(CONFIG),ReleaseDLL)
   LIBDIR := ../../lib/ReleaseDLL
   OBJDIR := obj/boxstack/ReleaseDLL
   OUTDIR := ../../lib/ReleaseDLL
-  CPPFLAGS := -MMD -D "_CRT_SECURE_NO_DEPRECATE" -D "WIN32" -I "../.." -I "../../include"
+  CPPFLAGS := -MMD -D "_CRT_SECURE_NO_DEPRECATE" -D "WIN32" -I "../../include"
   CFLAGS += $(CPPFLAGS) $(TARGET_ARCH) -g
   CXXFLAGS := $(CFLAGS)
   LDFLAGS += -L$(BINDIR) -L$(LIBDIR) -lode -ldrawstuff -luser32 -lwinmm -lgdi32 -lopengl32 -lglu32
   LDDEPS := ../../lib/ReleaseDLL/ode.dll ../../lib/ReleaseDLL/drawstuff.dll
-  RESFLAGS := -D "_CRT_SECURE_NO_DEPRECATE" -D "WIN32" -I "../.." -I "../../include"
+  RESFLAGS := -D "_CRT_SECURE_NO_DEPRECATE" -D "WIN32" -I "../../include"
   TARGET := demo_boxstack.exe
   BLDCMD = $(CXX) -o $(OUTDIR)/$(TARGET) $(OBJECTS) $(LDFLAGS) $(RESOURCES) $(TARGET_ARCH)
 endif
@@ -40,12 +40,12 @@ ifeq ($(CONFIG),DebugLib)
   LIBDIR := ../../lib/DebugLib
   OBJDIR := obj/boxstack/DebugLib
   OUTDIR := ../../lib/DebugLib
-  CPPFLAGS := -MMD -D "_CRT_SECURE_NO_DEPRECATE" -D "WIN32" -I "../.." -I "../../include"
+  CPPFLAGS := -MMD -D "_CRT_SECURE_NO_DEPRECATE" -D "WIN32" -I "../../include"
   CFLAGS += $(CPPFLAGS) $(TARGET_ARCH) -g
   CXXFLAGS := $(CFLAGS)
   LDFLAGS += -L$(BINDIR) -L$(LIBDIR) -loded -ldrawstuffd -luser32 -lwinmm -lgdi32 -lopengl32 -lglu32
   LDDEPS := ../../lib/DebugLib/liboded.a ../../lib/DebugLib/libdrawstuffd.a
-  RESFLAGS := -D "_CRT_SECURE_NO_DEPRECATE" -D "WIN32" -I "../.." -I "../../include"
+  RESFLAGS := -D "_CRT_SECURE_NO_DEPRECATE" -D "WIN32" -I "../../include"
   TARGET := demo_boxstack.exe
   BLDCMD = $(CXX) -o $(OUTDIR)/$(TARGET) $(OBJECTS) $(LDFLAGS) $(RESOURCES) $(TARGET_ARCH)
 endif
@@ -55,12 +55,12 @@ ifeq ($(CONFIG),ReleaseLib)
   LIBDIR := ../../lib/ReleaseLib
   OBJDIR := obj/boxstack/ReleaseLib
   OUTDIR := ../../lib/ReleaseLib
-  CPPFLAGS := -MMD -D "_CRT_SECURE_NO_DEPRECATE" -D "WIN32" -I "../.." -I "../../include"
+  CPPFLAGS := -MMD -D "_CRT_SECURE_NO_DEPRECATE" -D "WIN32" -I "../../include"
   CFLAGS += $(CPPFLAGS) $(TARGET_ARCH) -g
   CXXFLAGS := $(CFLAGS)
   LDFLAGS += -L$(BINDIR) -L$(LIBDIR) -lode -ldrawstuff -luser32 -lwinmm -lgdi32 -lopengl32 -lglu32
   LDDEPS := ../../lib/ReleaseLib/libode.a ../../lib/ReleaseLib/libdrawstuff.a
-  RESFLAGS := -D "_CRT_SECURE_NO_DEPRECATE" -D "WIN32" -I "../.." -I "../../include"
+  RESFLAGS := -D "_CRT_SECURE_NO_DEPRECATE" -D "WIN32" -I "../../include"
   TARGET := demo_boxstack.exe
   BLDCMD = $(CXX) -o $(OUTDIR)/$(TARGET) $(OBJECTS) $(LDFLAGS) $(RESOURCES) $(TARGET_ARCH)
 endif

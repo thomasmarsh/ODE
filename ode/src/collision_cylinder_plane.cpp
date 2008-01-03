@@ -34,7 +34,7 @@
 #include <ode/rotation.h>
 #include <ode/odemath.h>
 #include <ode/objects.h>
-#include "common-internal.h"
+
 #include "collision_kernel.h"	// for dxGeom
 #include "collision_util.h"
 

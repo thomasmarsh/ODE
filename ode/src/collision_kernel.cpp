@@ -32,14 +32,13 @@ for geometry objects
 #include <ode/rotation.h>
 #include <ode/objects.h>
 #include <ode/odemath.h>
-#include "common-internal.h"
 #include "collision_kernel.h"
 #include "collision_util.h"
 #include "collision_std.h"
 #include "collision_transform.h"
 #include "collision_trimesh_internal.h"
 
-#ifdef dTRIMESH_GIMPACT
+#if dTRIMESH_GIMPACT
 #include <GIMPACT/gimpact.h>
 #endif
 
@@ -196,7 +195,7 @@ static void initColliders()
   setCollider (dRayClass,dCapsuleClass,&dCollideRayCapsule);
   setCollider (dRayClass,dPlaneClass,&dCollideRayPlane);
   setCollider (dRayClass,dCylinderClass,&dCollideRayCylinder);
-#ifdef dTRIMESH_ENABLED
+#if dTRIMESH_ENABLED
   setCollider (dTriMeshClass,dSphereClass,&dCollideSTL);
   setCollider (dTriMeshClass,dBoxClass,&dCollideBTL);
   setCollider (dTriMeshClass,dRayClass,&dCollideRTL);
@@ -226,7 +225,7 @@ static void initColliders()
   setCollider (dHeightfieldClass,dCapsuleClass,&dCollideHeightfield);
   setCollider (dHeightfieldClass,dCylinderClass,&dCollideHeightfield);
   setCollider (dHeightfieldClass,dConvexClass,&dCollideHeightfield);
-#ifdef dTRIMESH_ENABLED
+#if dTRIMESH_ENABLED
   setCollider (dHeightfieldClass,dTriMeshClass,&dCollideHeightfield);
 #endif
 //<-- dHeightfield Collision
@@ -1093,7 +1092,7 @@ extern void opcode_collider_cleanup();
 
 void dInitODE()
 {
-#if defined(dTRIMESH_ENABLED) && defined(dTRIMESH_GIMPACT)
+#if dTRIMESH_ENABLED && dTRIMESH_GIMPACT
 	gimpact_init();
 #endif
 }
@@ -1104,11 +1103,11 @@ void dCloseODE()
   num_user_classes = 0;
   dClearPosrCache();
 
-#if defined(dTRIMESH_ENABLED) && defined(dTRIMESH_GIMPACT)
+#if dTRIMESH_ENABLED && dTRIMESH_GIMPACT
   gimpact_terminate();
 #endif
 
-#if defined(dTRIMESH_ENABLED) && defined(dTRIMESH_OPCODE)
+#if dTRIMESH_ENABLED && dTRIMESH_OPCODE
   // Free up static allocations in opcode
   opcode_collider_cleanup();
 #endif

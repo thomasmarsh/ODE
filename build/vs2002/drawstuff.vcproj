@@ -3,7 +3,7 @@
 	ProjectType="Visual C++"
 	Version="7.00"
 	Name="drawstuff"
-	ProjectGUID="{F6931A3A-9B15-0340-9F00-58226CD1ADC4}"
+	ProjectGUID="{1E515489-E78F-1742-8A2C-8179D0599A39}"
 	Keyword="Win32Proj">
 	<Platforms>
 		<Platform
@@ -19,7 +19,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="../..;../../include"
+				AdditionalIncludeDirectories="../../include"
 				PreprocessorDefinitions="WIN32;DS_DLL;USRDLL"
 				MinimalRebuild="TRUE"
 				BasicRuntimeChecks="3"
@@ -54,7 +54,7 @@
 			<Tool
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="WIN32;DS_DLL;USRDLL"
-				AdditionalIncludeDirectories="../..;../../include"/>
+				AdditionalIncludeDirectories="../../include"/>
 			<Tool
 				Name="VCWebServiceProxyGeneratorTool"/>
 			<Tool
@@ -70,7 +70,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				OmitFramePointers="TRUE"
-				AdditionalIncludeDirectories="../..;../../include"
+				AdditionalIncludeDirectories="../../include"
 				PreprocessorDefinitions="WIN32;DS_DLL;USRDLL"
 				StringPooling="TRUE"
 				RuntimeLibrary="2"
@@ -105,7 +105,7 @@
 			<Tool
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="WIN32;DS_DLL;USRDLL"
-				AdditionalIncludeDirectories="../..;../../include"/>
+				AdditionalIncludeDirectories="../../include"/>
 			<Tool
 				Name="VCWebServiceProxyGeneratorTool"/>
 			<Tool
@@ -120,7 +120,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="../..;../../include"
+				AdditionalIncludeDirectories="../../include"
 				PreprocessorDefinitions="WIN32;DS_LIB"
 				MinimalRebuild="TRUE"
 				BasicRuntimeChecks="3"
@@ -147,7 +147,7 @@
 			<Tool
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="WIN32;DS_LIB"
-				AdditionalIncludeDirectories="../..;../../include"/>
+				AdditionalIncludeDirectories="../../include"/>
 			<Tool
 				Name="VCWebServiceProxyGeneratorTool"/>
 			<Tool
@@ -163,7 +163,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				OmitFramePointers="TRUE"
-				AdditionalIncludeDirectories="../..;../../include"
+				AdditionalIncludeDirectories="../../include"
 				PreprocessorDefinitions="WIN32;DS_LIB"
 				StringPooling="TRUE"
 				RuntimeLibrary="0"
@@ -189,7 +189,7 @@
 			<Tool
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="WIN32;DS_LIB"
-				AdditionalIncludeDirectories="../..;../../include"/>
+				AdditionalIncludeDirectories="../../include"/>
 			<Tool
 				Name="VCWebServiceProxyGeneratorTool"/>
 			<Tool

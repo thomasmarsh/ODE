@@ -27,16 +27,14 @@
 #include <ode/rotation.h>
 #include <ode/odemath.h>
 
-#include "common-internal.h"
-
-#ifdef dTRIMESH_ENABLED
+#if dTRIMESH_ENABLED
 
 #include "collision_util.h"
 
 #define TRIMESH_INTERNAL
 #include "collision_trimesh_internal.h"
 
-#ifdef dTRIMESH_OPCODE
+#if dTRIMESH_OPCODE
 int dCollideRTL(dxGeom* g1, dxGeom* RayGeom, int Flags, dContactGeom* Contacts, int Stride){
 	dIASSERT (Stride >= (int)sizeof(dContactGeom));
 	dIASSERT (g1->type == dTriMeshClass);
@@ -143,7 +141,7 @@ int dCollideRTL(dxGeom* g1, dxGeom* RayGeom, int Flags, dContactGeom* Contacts, 
 }
 #endif // dTRIMESH_OPCODE
 
-#ifdef dTRIMESH_GIMPACT
+#if dTRIMESH_GIMPACT
 int dCollideRTL(dxGeom* g1, dxGeom* RayGeom, int Flags, dContactGeom* Contacts, int Stride)
 {
 	dIASSERT (Stride >= (int)sizeof(dContactGeom));
@@ -165,11 +163,11 @@ int dCollideRTL(dxGeom* g1, dxGeom* RayGeom, int Flags, dContactGeom* Contacts, 
 
 	if(ClosestHit)
 	{
-		intersect = gim_trimesh_ray_closest_collisionODE(&TriMesh->m_collision_trimesh,Origin,Direction,Length,&contact_data);
+		intersect = gim_trimesh_ray_closest_collision(&TriMesh->m_collision_trimesh,Origin,Direction,Length,&contact_data);
 	}
 	else
 	{
-	    intersect = gim_trimesh_ray_collisionODE(&TriMesh->m_collision_trimesh,Origin,Direction,Length,&contact_data);
+	    intersect = gim_trimesh_ray_collision(&TriMesh->m_collision_trimesh,Origin,Direction,Length,&contact_data);
 	}
 
     if(intersect == 0)

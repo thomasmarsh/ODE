@@ -54,10 +54,9 @@ package.objdir = "obj/drawstuff"
 
   package.includepaths =
   {
-    "../..",
     "../../include"
   }
-  
+
   -- disable VS2005 CRT security warnings
   if (options["target"] == "vs2005") then
     table.insert(package.defines, "_CRT_SECURE_NO_DEPRECATE")

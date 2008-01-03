@@ -26,7 +26,7 @@
 // as reference.
 // Not thoroughly tested and is certain to contain deficiencies and bugs
 
-#include <odeconfig.h>
+#include <ode/config.h>
 #include <stdlib.h>
 #include <string.h>
 #include <stdarg.h>

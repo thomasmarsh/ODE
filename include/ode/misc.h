@@ -25,7 +25,6 @@
 #ifndef _ODE_MISC_H_
 #define _ODE_MISC_H_
 
-#include <stdio.h>
 #include <ode/common.h>
 
 

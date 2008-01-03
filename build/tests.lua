@@ -8,7 +8,6 @@ package.objdir = "obj/tests"
 
 package.includepaths = 
 {
-  "../..",
   "../../include",
   "../../tests/UnitTest++/src"
 }

@@ -25,7 +25,7 @@
 #ifndef _ODE_ERROR_H_
 #define _ODE_ERROR_H_
 
-#include <odeconfig.h>
+#include <ode/config.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -34,7 +34,6 @@ extern "C" {
 /* all user defined error functions have this type. error and debug functions
  * should not return.
  */
-#include <stdarg.h>
 typedef void dMessageFunction (int errnum, const char *msg, va_list ap);
 
 /* set a new error, debug or warning handler. if fn is 0, the default handlers

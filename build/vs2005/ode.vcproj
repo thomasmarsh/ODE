@@ -3,7 +3,7 @@
 	ProjectType="Visual C++"
 	Version="8.00"
 	Name="ode"
-	ProjectGUID="{81204731-8EB9-7C40-8E94-1D600C304FEF}"
+	ProjectGUID="{1EB55C04-A1DC-9D49-8D6F-0E5978980147}"
 	RootNamespace="ode"
 	Keyword="Win32Proj"
 	>
@@ -40,8 +40,8 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="../..;../../include;../../OPCODE;../../GIMPACT/include"
-				PreprocessorDefinitions="HAVE_CONFIG_H;WIN32;_CRT_SECURE_NO_DEPRECATE;ODE_DLL"
+				AdditionalIncludeDirectories="../../include;../../OPCODE;../../GIMPACT/include"
+				PreprocessorDefinitions="WIN32;_CRT_SECURE_NO_DEPRECATE;ODE_DLL"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
@@ -56,8 +56,8 @@
 			/>
 			<Tool
 				Name="VCResourceCompilerTool"
-				PreprocessorDefinitions="HAVE_CONFIG_H;WIN32;_CRT_SECURE_NO_DEPRECATE;ODE_DLL"
-				AdditionalIncludeDirectories="../..;../../include;../../OPCODE;../../GIMPACT/include"
+				PreprocessorDefinitions="WIN32;_CRT_SECURE_NO_DEPRECATE;ODE_DLL"
+				AdditionalIncludeDirectories="../../include;../../OPCODE;../../GIMPACT/include"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
@@ -125,8 +125,8 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				OmitFramePointers="true"
-				AdditionalIncludeDirectories="../..;../../include;../../OPCODE;../../GIMPACT/include"
-				PreprocessorDefinitions="HAVE_CONFIG_H;WIN32;_CRT_SECURE_NO_DEPRECATE;ODE_DLL"
+				AdditionalIncludeDirectories="../../include;../../OPCODE;../../GIMPACT/include"
+				PreprocessorDefinitions="WIN32;_CRT_SECURE_NO_DEPRECATE;ODE_DLL"
 				StringPooling="true"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
@@ -140,8 +140,8 @@
 			/>
 			<Tool
 				Name="VCResourceCompilerTool"
-				PreprocessorDefinitions="HAVE_CONFIG_H;WIN32;_CRT_SECURE_NO_DEPRECATE;ODE_DLL"
-				AdditionalIncludeDirectories="../..;../../include;../../OPCODE;../../GIMPACT/include"
+				PreprocessorDefinitions="WIN32;_CRT_SECURE_NO_DEPRECATE;ODE_DLL"
+				AdditionalIncludeDirectories="../../include;../../OPCODE;../../GIMPACT/include"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
@@ -209,8 +209,8 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="../..;../../include;../../OPCODE;../../GIMPACT/include"
-				PreprocessorDefinitions="HAVE_CONFIG_H;WIN32;_CRT_SECURE_NO_DEPRECATE;ODE_LIB"
+				AdditionalIncludeDirectories="../../include;../../OPCODE;../../GIMPACT/include"
+				PreprocessorDefinitions="WIN32;_CRT_SECURE_NO_DEPRECATE;ODE_LIB"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
@@ -225,8 +225,8 @@
 			/>
 			<Tool
 				Name="VCResourceCompilerTool"
-				PreprocessorDefinitions="HAVE_CONFIG_H;WIN32;_CRT_SECURE_NO_DEPRECATE;ODE_LIB"
-				AdditionalIncludeDirectories="../..;../../include;../../OPCODE;../../GIMPACT/include"
+				PreprocessorDefinitions="WIN32;_CRT_SECURE_NO_DEPRECATE;ODE_LIB"
+				AdditionalIncludeDirectories="../../include;../../OPCODE;../../GIMPACT/include"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
@@ -286,8 +286,8 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				OmitFramePointers="true"
-				AdditionalIncludeDirectories="../..;../../include;../../OPCODE;../../GIMPACT/include"
-				PreprocessorDefinitions="HAVE_CONFIG_H;WIN32;_CRT_SECURE_NO_DEPRECATE;ODE_LIB"
+				AdditionalIncludeDirectories="../../include;../../OPCODE;../../GIMPACT/include"
+				PreprocessorDefinitions="WIN32;_CRT_SECURE_NO_DEPRECATE;ODE_LIB"
 				StringPooling="true"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
@@ -301,8 +301,8 @@
 			/>
 			<Tool
 				Name="VCResourceCompilerTool"
-				PreprocessorDefinitions="HAVE_CONFIG_H;WIN32;_CRT_SECURE_NO_DEPRECATE;ODE_LIB"
-				AdditionalIncludeDirectories="../..;../../include;../../OPCODE;../../GIMPACT/include"
+				PreprocessorDefinitions="WIN32;_CRT_SECURE_NO_DEPRECATE;ODE_LIB"
+				AdditionalIncludeDirectories="../../include;../../OPCODE;../../GIMPACT/include"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
@@ -362,6 +362,9 @@
 				</File>
 				<File
 					RelativePath="..\..\include\ode\compatibility.h">
+				</File>
+				<File
+					RelativePath="..\..\include\ode\config.h">
 				</File>
 				<File
 					RelativePath="..\..\include\ode\contact.h">
@@ -435,9 +438,6 @@
 				</File>
 				<File
 					RelativePath="..\..\ode\src\collision_util.h">
-				</File>
-				<File
-					RelativePath="..\..\ode\src\common-internal.h">
 				</File>
 				<File
 					RelativePath="..\..\ode\src\heightfield.h">

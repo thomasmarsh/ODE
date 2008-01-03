@@ -3,7 +3,7 @@
 	ProjectType="Visual C++"
 	Version="7.10"
 	Name="demo_motor"
-	ProjectGUID="{4AE4F099-56E9-294B-88C4-B3735C1F315F}"
+	ProjectGUID="{A2C6418D-704F-2D47-8EAB-9FA6A7CB9B25}"
 	Keyword="Win32Proj">
 	<Platforms>
 		<Platform
@@ -19,7 +19,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="../..;../../include"
+				AdditionalIncludeDirectories="../../include"
 				PreprocessorDefinitions="_CRT_SECURE_NO_DEPRECATE;WIN32"
 				MinimalRebuild="TRUE"
 				BasicRuntimeChecks="3"
@@ -54,7 +54,7 @@
 			<Tool
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="_CRT_SECURE_NO_DEPRECATE;WIN32"
-				AdditionalIncludeDirectories="../..;../../include"/>
+				AdditionalIncludeDirectories="../../include"/>
 			<Tool
 				Name="VCWebServiceProxyGeneratorTool"/>
 			<Tool
@@ -75,7 +75,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="../..;../../include"
+				AdditionalIncludeDirectories="../../include"
 				PreprocessorDefinitions="_CRT_SECURE_NO_DEPRECATE;WIN32"
 				MinimalRebuild="TRUE"
 				BasicRuntimeChecks="3"
@@ -110,7 +110,7 @@
 			<Tool
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="_CRT_SECURE_NO_DEPRECATE;WIN32"
-				AdditionalIncludeDirectories="../..;../../include"/>
+				AdditionalIncludeDirectories="../../include"/>
 			<Tool
 				Name="VCWebServiceProxyGeneratorTool"/>
 			<Tool
@@ -131,7 +131,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="../..;../../include"
+				AdditionalIncludeDirectories="../../include"
 				PreprocessorDefinitions="_CRT_SECURE_NO_DEPRECATE;WIN32"
 				MinimalRebuild="TRUE"
 				BasicRuntimeChecks="3"
@@ -166,7 +166,7 @@
 			<Tool
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="_CRT_SECURE_NO_DEPRECATE;WIN32"
-				AdditionalIncludeDirectories="../..;../../include"/>
+				AdditionalIncludeDirectories="../../include"/>
 			<Tool
 				Name="VCWebServiceProxyGeneratorTool"/>
 			<Tool
@@ -187,7 +187,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="../..;../../include"
+				AdditionalIncludeDirectories="../../include"
 				PreprocessorDefinitions="_CRT_SECURE_NO_DEPRECATE;WIN32"
 				MinimalRebuild="TRUE"
 				BasicRuntimeChecks="3"
@@ -222,7 +222,7 @@
 			<Tool
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="_CRT_SECURE_NO_DEPRECATE;WIN32"
-				AdditionalIncludeDirectories="../..;../../include"/>
+				AdditionalIncludeDirectories="../../include"/>
 			<Tool
 				Name="VCWebServiceProxyGeneratorTool"/>
 			<Tool

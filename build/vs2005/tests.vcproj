@@ -3,7 +3,7 @@
 	ProjectType="Visual C++"
 	Version="8.00"
 	Name="tests"
-	ProjectGUID="{DFFCF9C9-BE8E-CC44-9E45-2A116B1220FD}"
+	ProjectGUID="{00E1EED3-7A86-2643-B1CA-5ACF7E3C9088}"
 	RootNamespace="tests"
 	Keyword="Win32Proj"
 	>
@@ -40,7 +40,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="../..;../../include;../../tests/UnitTest++/src"
+				AdditionalIncludeDirectories="../../include;../../tests/UnitTest++/src"
 				PreprocessorDefinitions="_CRT_SECURE_NO_DEPRECATE"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -57,7 +57,7 @@
 			<Tool
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="_CRT_SECURE_NO_DEPRECATE"
-				AdditionalIncludeDirectories="../..;../../include;../../tests/UnitTest++/src"
+				AdditionalIncludeDirectories="../../include;../../tests/UnitTest++/src"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
@@ -124,7 +124,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="../..;../../include;../../tests/UnitTest++/src"
+				AdditionalIncludeDirectories="../../include;../../tests/UnitTest++/src"
 				PreprocessorDefinitions="_CRT_SECURE_NO_DEPRECATE"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -141,7 +141,7 @@
 			<Tool
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="_CRT_SECURE_NO_DEPRECATE"
-				AdditionalIncludeDirectories="../..;../../include;../../tests/UnitTest++/src"
+				AdditionalIncludeDirectories="../../include;../../tests/UnitTest++/src"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
@@ -208,7 +208,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="../..;../../include;../../tests/UnitTest++/src"
+				AdditionalIncludeDirectories="../../include;../../tests/UnitTest++/src"
 				PreprocessorDefinitions="_CRT_SECURE_NO_DEPRECATE"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -225,7 +225,7 @@
 			<Tool
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="_CRT_SECURE_NO_DEPRECATE"
-				AdditionalIncludeDirectories="../..;../../include;../../tests/UnitTest++/src"
+				AdditionalIncludeDirectories="../../include;../../tests/UnitTest++/src"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
@@ -292,7 +292,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="../..;../../include;../../tests/UnitTest++/src"
+				AdditionalIncludeDirectories="../../include;../../tests/UnitTest++/src"
 				PreprocessorDefinitions="_CRT_SECURE_NO_DEPRECATE"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -309,7 +309,7 @@
 			<Tool
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="_CRT_SECURE_NO_DEPRECATE"
-				AdditionalIncludeDirectories="../..;../../include;../../tests/UnitTest++/src"
+				AdditionalIncludeDirectories="../../include;../../tests/UnitTest++/src"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"

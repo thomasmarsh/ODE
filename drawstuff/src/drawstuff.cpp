@@ -40,14 +40,7 @@ manage openGL state changes better
 #include <windows.h>
 #endif
 
-#include "../../ode/src/common-internal.h"
-
-#include <math.h>
-#include <stdio.h>
-#include <string.h>
-
-#include "odeconfig.h"
-
+#include <ode/config.h>
 #ifdef HAVE_APPLE_OPENGL_FRAMEWORK
 #include <OpenGL/gl.h>
 #include <OpenGL/glu.h>

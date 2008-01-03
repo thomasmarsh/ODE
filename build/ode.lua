@@ -2,6 +2,7 @@ package.name = "ode"
 package.language = "c++"
 package.objdir = "obj/ode"
 
+
 -- Append a "d" to the debug version of the libraries
 
   for k,v in ipairs(project.configs) do
@@ -21,22 +22,8 @@ package.objdir = "obj/ode"
 
 
 -- Write a custom <config.h> to include/ode, based on the specified flags
--- This is the private header
+
   io.input("config-default.h")
-  local text = io.read("*a")
-
-  if (options["no-alloca"]) then
-    text = string.gsub(text, "/%* #define dUSE_MALLOC_FOR_ALLOCA %*/", "#define dUSE_MALLOC_FOR_ALLOCA")
-  end
-  
-  io.output("../config.h")
-  io.write(text)
-  io.close()
-
-
-
--- And this is the public header, odeconfig.h
-  io.input("odeconfig-default.h")
   local text = io.read("*a")
 
   if (options["with-doubles"]) then
@@ -55,12 +42,13 @@ package.objdir = "obj/ode"
   
   end
   
-  io.output("../odeconfig.h")
+  if (options["no-alloca"]) then
+    text = string.gsub(text, "/%* #define dUSE_MALLOC_FOR_ALLOCA %*/", "#define dUSE_MALLOC_FOR_ALLOCA")
+  end
+
+  io.output("../include/ode/config.h")
   io.write(text)
   io.close()
-
-
-
 
 
 -- Package Build Settings
@@ -91,13 +79,10 @@ package.objdir = "obj/ode"
 
   package.includepaths =
   {
-    "../..",
     "../../include",
     "../../OPCODE",
     "../../GIMPACT/include"
   }
-
-  table.insert(package.defines, "HAVE_CONFIG_H")
 
   if (windows) then
     table.insert(package.defines, "WIN32")

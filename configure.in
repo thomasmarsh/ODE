@@ -4,7 +4,6 @@ dnl Modified in 19/11/2007 by Rodrigo Hernandez
 
 dnl AC_INIT does not take a macro as a version nr: set it separately! - Bram
 AC_INIT(ODE,0.9.0,ode@ode.org)
-AC_CONFIG_SRCDIR([ode/src/ode.cpp])
 
 dnl When upgrading version nr, also change the AC_INIT line! - Bram
 ODE_CURRENT=0
@@ -18,7 +17,11 @@ AC_CANONICAL_HOST
 AC_CANONICAL_TARGET
 
 AM_INIT_AUTOMAKE(1.10 foreign)
-AM_CONFIG_HEADER(config.h)
+AM_CONFIG_HEADER(include/ode/config.h)
+AC_C_BIGENDIAN
+AC_PATH_X
+AC_PATH_XTRA
+
 
 AC_LIBTOOL_WIN32_DLL
 AC_PROG_LIBTOOL
@@ -32,48 +35,17 @@ AC_SUBST(ODE_RELEASE)
 AC_SUBST(ODE_SONAME)
 AC_SUBST(LIBTOOL_RELEASE)
 
-# Checks for programs.
-AC_PROG_CXX
-AC_PROG_CC
-AC_PROG_CPP
-AC_PROG_AWK
-AC_PROG_INSTALL
-AC_PROG_LN_S
+dnl This is needed because we have subdirectories
 AC_PROG_MAKE_SET
-AC_PROG_MKDIR_P
+
+AC_PROG_CXX
+AC_PROG_INSTALL
 AC_CHECK_TOOLS([WINDRES], [windres])
-
-
-# Checks for header files.
-AC_PATH_X
-AC_PATH_XTRA
-AC_FUNC_ALLOCA
-AC_HEADER_STDC
-AC_CHECK_HEADERS([float.h malloc.h memory.h stdlib.h string.h sys/time.h unistd.h values.h stdint.h inttypes.h])
-
-
-# Checks for typedefs, structures, and compiler characteristics.
-AC_HEADER_STDBOOL
-AC_C_BIGENDIAN
-AC_C_CONST
+AC_C_CONST 
 AC_C_INLINE
-AC_FUNC_OBSTACK
-AC_TYPE_SIZE_T
-AC_HEADER_TIME
 AC_C_VOLATILE
-
-
-dnl checks for integer types
-dnl each define variables like ac_cv_c_int8_t or ac_cv_c_uint8_t
+AC_HEADER_STDBOOL
 AC_TYPE_SIZE_T
-AC_TYPE_INT8_T
-AC_TYPE_UINT8_T
-AC_TYPE_INT16_T
-AC_TYPE_UINT16_T
-AC_TYPE_INT32_T
-AC_TYPE_UINT32_T
-AC_TYPE_INT64_T
-AC_TYPE_UINT64_T
 
 dnl Check if we want to build demos
 AC_MSG_CHECKING(if tests should be built)
@@ -123,6 +95,10 @@ AC_ARG_ENABLE(gyroscopic,AC_HELP_STRING([--disable-gyroscopic],
 [Configure ODE to work without gyroscopic term (may improve stability)]),
 gyroscopic=$enableval,gyroscopic=yes)
 AC_MSG_RESULT($gyroscopic)
+if test x"$gyroscopic" = xyes
+then
+AC_DEFINE(dGYROSCOPIC,,[Use gyroscopic terms])
+fi
 
 dnl Check Precision, define the dInfinity constant--------------------------/
 AC_MSG_CHECKING(if double precision is requested)
@@ -132,6 +108,7 @@ precision=$enableval,precision=no)
 if test "$precision" != no
 then
 dnl DOUBLE was chosen
+AC_DEFINE(dDOUBLE,,[Use double precision])
 dnl Check from lest likelly to more likelly.
 if test "$build_os" == "$target_os"
 then
@@ -179,6 +156,7 @@ dinfinity=DBL_MAX
 fi
 else
 dnl default to SINGLE.
+AC_DEFINE(dSINGLE,,[Use single precision])
 dnl Check from lest likelly to more likelly.
 if test "$build_os" == "$target_os"
 then
@@ -225,6 +203,7 @@ dinfinity=FLT_MAX
 fi
 fi
 AC_MSG_RESULT($precision)
+AC_DEFINE_UNQUOTED(dInfinity,${dinfinity},[dInfinity Constant])
 AC_MSG_CHECKING(for appropriate dInfinity constant)
 AC_MSG_RESULT($dinfinity)
 dnl --------------------------------------------------------------------------/
@@ -248,6 +227,7 @@ else
 dEpsilon=1.19209290e-07f
 fi
 fi
+AC_DEFINE_UNQUOTED(dEpsilon,${dEpsilon},[dEpsilon Constant])
 AC_MSG_RESULT($dEpsilon)
 
 
@@ -434,24 +414,73 @@ AC_FUNC_SELECT_ARGTYPES
 AC_FUNC_VPRINTF
 fi
 
+dnl include found system headers into config.h
+AH_TOP([
+#ifndef ODE_CONFIG_H
+#define ODE_CONFIG_H
+])
+AH_BOTTOM([
 
-
-
-
-
-dnl this section will only be run if config.status is invoked with no
-dnl arguments, or with "odeconfig.h" as an argument.
-AC_CONFIG_COMMANDS([odeconfig.h],
-[
-	outfile=odeconfig.h-tmp
-	cat > $outfile <<\_______EOF
-/* odeconfig.h
- *
- * This is a generated file.  Please modify 'configure.in'
+#ifdef HAVE_ALLOCA_H
+#include <alloca.h>
+#endif
+#if defined(HAVE_IEEEFP_H) && !defined(__CYGWIN__)
+// This header creates conflicts with math.h in Cygwin.
+#include <ieeefp.h>
+#endif
+#ifdef HAVE_STDIO_H
+#include <stdio.h>
+#endif
+#ifdef HAVE_STDLIB_H
+#include <stdlib.h>
+#endif
+#ifdef HAVE_MATH_H
+#include <math.h>
+#endif
+#ifdef HAVE_STRING_H
+#include <string.h>
+#endif
+#ifdef HAVE_STDARG_H
+#include <stdarg.h>
+#endif
+#ifdef HAVE_MALLOC_H
+#include <malloc.h>
+#endif
+#ifdef HAVE_VALUES_H
+#include <values.h>
+#endif
+#ifdef HAVE_FLOAT_H
+#include <float.h>
+#endif
+#if SIZEOF_CHAR == 1
+typedef char int8;
+typedef unsigned char uint8;
+#else
+#error "expecting sizeof(char) == 1"
+#endif
+#if SIZEOF_SHORT == 2
+typedef short int16;
+typedef unsigned short uint16;
+#else
+#error "can not find 2 byte integer type"
+#endif
+/* integer types (we assume int >= 32 bits) */
+#if SIZEOF_INT == 4
+typedef short int32;
+typedef unsigned short uint32;
+#else
+#error "can not find 4 byte integer type"
+#endif
+/* an integer type that we can safely cast a pointer to and
+ * from without loss of bits.
  */
-
-#ifndef __ODE_LIBCONFIG_H__
-#define __ODE_LIBCONFIG_H__
+#if SIZEOF_SHORT == SIZEOF_VOIDP
+typedef unsigned short intP;
+#elif SIZEOF_INT == SIZEOF_VOIDP
+typedef unsigned int intP;
+#elif SIZEOF_LONG_INT == SIZEOF_VOIDP
+typedef unsigned long int intP;
+#endif
 
 /* 
 Handle Windows DLL odities
@@ -467,58 +496,8 @@ so only do it for MSVC
 #define ODE_API
 #endif
 
-
-#include <float.h>
-_______EOF
-
-if test x$trimesh = xopcode; then
-    echo '#define dTRIMESH_ENABLED 1' >> $outfile
-    echo '#define dTRIMESH_OPCODE 1' >> $outfile
-fi
-if test x$trimesh = xgimpact; then
-    echo '#define dTRIMESH_ENABLED 1' >> $outfile
-    echo '#define dTRIMESH_GIMPACT 1' >> $outfile
-fi
-
-if test x$precision = xyes; then
-    echo '#define dDOUBLE 1' >> $outfile
-    echo 'typedef double dReal;' >> $outfile
-else
-    echo '#define dSINGLE 1' >> $outfile
-    echo 'typedef float dReal;' >> $outfile
-fi
-echo "#define dEpsilon $dEpsilon" >> $outfile
-echo "#define dInfinity $dinfinity" >> $outfile
-if test x$gyroscopic = xyes; then
-    echo '#define dGYROSCOPIC 1' >> $outfile
-fi
-
-# TODO: make a test out of this
-echo 'typedef unsigned int dTriIndex;' >> $outfile
-
-
-cat >> $outfile <<\_______EOF
-
-#endif /* #define __ODE_LIBCONFIG_H__ */
-_______EOF
-if cmp -s $outfile odeconfig.h; then
-    AC_MSG_NOTICE([odeconfig.h is unchanged])
-    rm -f $outfile
-else
-    mv $outfile odeconfig.h
-fi
-
-],[
-    # copy variables to config.status
-    dinfinity=$dinfinity
-    dEpsilon=$dEpsilon
-    gyroscopic=$gyroscopic
-    precision=$precision
-    trimesh=$trimesh
+#endif /* #define ODE_CONFIG_H */
 ])
-
-
-AC_SUBST(odeconfigdir, "$libdir/ode/include")
 
 
 dnl Finally write our Makefiles
@@ -558,4 +537,8 @@ echo "  Is the CPU x86-64:       $cpu64"
 echo "  Headers will be installed in $prefix/include/ode"
 echo "  Libraries will be installed in $prefix/lib"
 echo "  Building in directory    $BUILDDIR"
+if test $gimpact = yes -a $precision = yes
+then
+  echo "WARNING! Double precision not yet supported for GIMPACT"
+fi
 

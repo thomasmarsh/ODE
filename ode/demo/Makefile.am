@@ -7,7 +7,7 @@ LDADD = $(top_builddir)/drawstuff/src/libdrawstuff.la $(top_builddir)/ode/src/li
 DEPENDENCIES = $(top_builddir)/drawstuff/src/libdrawstuff.la $(top_builddir)/ode/src/libode.la
 
 
-noinst_HEADERS = basket_geom.h bunny_geom.h texturepath.h world_geom3.h
+noinst_HEADERS = basket_geom.h texturepath.h world_geom3.h
 
 noinst_PROGRAMS=demo_collision \
 		demo_slider \

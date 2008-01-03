@@ -22,16 +22,15 @@
 
 #include "objects.h"
 #include "joint.h"
+#include <ode/config.h>
 #include <ode/odemath.h>
 #include <ode/rotation.h>
 #include <ode/timer.h>
 #include <ode/error.h>
 #include <ode/matrix.h>
 #include <ode/misc.h>
-#include "common-internal.h"
 #include "lcp.h"
 #include "util.h"
-#include <string.h>
 
 #define ALLOCA dALLOCA16
 

@@ -26,9 +26,8 @@
 #include <ode/matrix.h>
 #include <ode/rotation.h>
 #include <ode/odemath.h>
-#include "common-internal.h"
 
-#ifdef dTRIMESH_ENABLED
+#if dTRIMESH_ENABLED
 
 #include "collision_util.h"
 #include "collision_std.h"
@@ -36,7 +35,7 @@
 #define TRIMESH_INTERNAL
 #include "collision_trimesh_internal.h"
 
-#ifdef dTRIMESH_OPCODE
+#if dTRIMESH_OPCODE
 int dCollideTrimeshPlane( dxGeom *o1, dxGeom *o2, int flags, dContactGeom* contacts, int skip )
 {
 	dIASSERT( skip >= (int)sizeof( dContactGeom ) );
@@ -145,7 +144,7 @@ int dCollideTrimeshPlane( dxGeom *o1, dxGeom *o2, int flags, dContactGeom* conta
 }
 #endif // dTRIMESH_OPCODE
 
-#ifdef dTRIMESH_GIMPACT
+#if dTRIMESH_GIMPACT
 int dCollideTrimeshPlane( dxGeom *o1, dxGeom *o2, int flags, dContactGeom* contacts, int skip )
 {
 	dIASSERT( skip >= (int)sizeof( dContactGeom ) );
@@ -153,27 +152,24 @@ int dCollideTrimeshPlane( dxGeom *o1, dxGeom *o2, int flags, dContactGeom* conta
 	dIASSERT( o2->type == dPlaneClass );
 	dIASSERT ((flags & NUMC_MASK) >= 1);
 
-
 	// Alias pointers to the plane and trimesh
 	dxTriMesh* trimesh = (dxTriMesh*)( o1 );
-	dVector4 plane;
+	vec4f plane;
 	dGeomPlaneGetParams(o2, plane);
-
-	o1 -> recomputeAABB();
-	o2 -> recomputeAABB();
 
 	//Find collision
 
 	GDYNAMIC_ARRAY collision_result;
 	GIM_CREATE_TRIMESHPLANE_CONTACTS(collision_result);
 
-	gim_trimesh_plane_collisionODE(&trimesh->m_collision_trimesh,plane,&collision_result);
+	gim_trimesh_plane_collision(&trimesh->m_collision_trimesh,plane,&collision_result);
 
 	if(collision_result.m_size == 0 )
 	{
 	    GIM_DYNARRAY_DESTROY(collision_result);
 	    return 0;
 	}
+
 
 	unsigned int contactcount = collision_result.m_size;
 	unsigned int contactmax = (unsigned int)(flags & NUMC_MASK);

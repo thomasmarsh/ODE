@@ -35,16 +35,8 @@ change the random test conditions.
 #include <drawstuff/drawstuff.h>
 #include "texturepath.h"
 
-#include <string.h>
-
 #ifdef _MSC_VER
 #pragma warning(disable:4244 4305)  // for VC++, no precision loss complaints
-#endif
-
-#ifdef WIN32
-#  include <malloc.h>
-#else
-#  include <alloca.h>
 #endif
 
 // select correct drawing functions
@@ -990,7 +982,7 @@ static int edgeIntersectsRect (dVector3 v1, dVector3 v2,
   if (dFabs(dDOT(n,p3)+d) > 1e-8) dDebug (0,"bad n wrt p3");
   dReal alpha = -(d+dDOT(n,v1))/dDOT(n,tmp);
   for (k=0; k<3; k++) tmp[k] = v1[k]+alpha*(v2[k]-v1[k]);
-  if (dFabs(dDOT(n,tmp)+d) > 1e-6) dDebug (0,"bad tmp: %g", dFabs(dDOT(n,tmp)+d));
+  if (dFabs(dDOT(n,tmp)+d) > 1e-6) dDebug (0,"bad tmp");
   if (alpha < 0) return 0;
   if (alpha > 1) return 0;
   for (k=0; k<3; k++) tmp[k] -= p1[k];
