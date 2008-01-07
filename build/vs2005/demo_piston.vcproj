@@ -2,9 +2,9 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="8.00"
-	Name="demo_buggy"
-	ProjectGUID="{F918EBC8-C090-5946-A05D-54BB2B47C6F0}"
-	RootNamespace="demo_buggy"
+	Name="demo_piston"
+	ProjectGUID="{1E67473C-E518-E643-9375-CFF9F984029C}"
+	RootNamespace="demo_piston"
 	Keyword="Win32Proj"
 	>
 	<Platforms>
@@ -18,7 +18,7 @@
 		<Configuration
 			Name="DebugDLL|Win32"
 			OutputDirectory="../../lib/DebugDLL"
-			IntermediateDirectory="obj/buggy/DebugDLL"
+			IntermediateDirectory="obj/piston/DebugDLL"
 			ConfigurationType="1"
 			CharacterSet="2"
 			>
@@ -65,11 +65,11 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="../../lib/DebugDLL/oded.lib ../../lib/DebugDLL/drawstuffd.lib user32.lib winmm.lib gdi32.lib opengl32.lib glu32.lib"
-				OutputFile="$(OutDir)/demo_buggy.exe"
+				OutputFile="$(OutDir)/demo_piston.exe"
 				LinkIncremental="2"
 				AdditionalLibraryDirectories="../../lib/DebugDLL"
 				GenerateDebugInformation="true"
-				ProgramDatabaseFile="$(OutDir)/demo_buggy.pdb"
+				ProgramDatabaseFile="$(OutDir)/demo_piston.pdb"
 				SubSystem="1"
 				EntryPointSymbol="mainCRTStartup"
 				TargetMachine="1"
@@ -102,7 +102,7 @@
 		<Configuration
 			Name="ReleaseDLL|Win32"
 			OutputDirectory="../../lib/ReleaseDLL"
-			IntermediateDirectory="obj/buggy/ReleaseDLL"
+			IntermediateDirectory="obj/piston/ReleaseDLL"
 			ConfigurationType="1"
 			CharacterSet="2"
 			>
@@ -149,11 +149,11 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="../../lib/ReleaseDLL/ode.lib ../../lib/ReleaseDLL/drawstuff.lib user32.lib winmm.lib gdi32.lib opengl32.lib glu32.lib"
-				OutputFile="$(OutDir)/demo_buggy.exe"
+				OutputFile="$(OutDir)/demo_piston.exe"
 				LinkIncremental="2"
 				AdditionalLibraryDirectories="../../lib/ReleaseDLL"
 				GenerateDebugInformation="true"
-				ProgramDatabaseFile="$(OutDir)/demo_buggy.pdb"
+				ProgramDatabaseFile="$(OutDir)/demo_piston.pdb"
 				SubSystem="1"
 				EntryPointSymbol="mainCRTStartup"
 				TargetMachine="1"
@@ -186,7 +186,7 @@
 		<Configuration
 			Name="DebugLib|Win32"
 			OutputDirectory="../../lib/DebugLib"
-			IntermediateDirectory="obj/buggy/DebugLib"
+			IntermediateDirectory="obj/piston/DebugLib"
 			ConfigurationType="1"
 			CharacterSet="2"
 			>
@@ -233,11 +233,11 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="../../lib/DebugLib/oded.lib ../../lib/DebugLib/drawstuffd.lib user32.lib winmm.lib gdi32.lib opengl32.lib glu32.lib"
-				OutputFile="$(OutDir)/demo_buggy.exe"
+				OutputFile="$(OutDir)/demo_piston.exe"
 				LinkIncremental="2"
 				AdditionalLibraryDirectories="../../lib/DebugLib"
 				GenerateDebugInformation="true"
-				ProgramDatabaseFile="$(OutDir)/demo_buggy.pdb"
+				ProgramDatabaseFile="$(OutDir)/demo_piston.pdb"
 				SubSystem="1"
 				EntryPointSymbol="mainCRTStartup"
 				TargetMachine="1"
@@ -270,7 +270,7 @@
 		<Configuration
 			Name="ReleaseLib|Win32"
 			OutputDirectory="../../lib/ReleaseLib"
-			IntermediateDirectory="obj/buggy/ReleaseLib"
+			IntermediateDirectory="obj/piston/ReleaseLib"
 			ConfigurationType="1"
 			CharacterSet="2"
 			>
@@ -317,11 +317,11 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="../../lib/ReleaseLib/ode.lib ../../lib/ReleaseLib/drawstuff.lib user32.lib winmm.lib gdi32.lib opengl32.lib glu32.lib"
-				OutputFile="$(OutDir)/demo_buggy.exe"
+				OutputFile="$(OutDir)/demo_piston.exe"
 				LinkIncremental="2"
 				AdditionalLibraryDirectories="../../lib/ReleaseLib"
 				GenerateDebugInformation="true"
-				ProgramDatabaseFile="$(OutDir)/demo_buggy.pdb"
+				ProgramDatabaseFile="$(OutDir)/demo_piston.pdb"
 				SubSystem="1"
 				EntryPointSymbol="mainCRTStartup"
 				TargetMachine="1"
@@ -364,7 +364,7 @@
 				Filter=""
 				>
 				<File
-					RelativePath="..\..\ode\demo\demo_buggy.cpp">
+					RelativePath="..\..\ode\demo\demo_piston.cpp">
 				</File>
 			</Filter>
 		</Filter>
