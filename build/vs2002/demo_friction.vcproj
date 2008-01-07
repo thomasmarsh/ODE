@@ -3,7 +3,7 @@
 	ProjectType="Visual C++"
 	Version="7.00"
 	Name="demo_friction"
-	ProjectGUID="{7B9BDBBE-49C2-CD41-9EA8-5BCE07F42709}"
+	ProjectGUID="{5A5F699C-3641-004A-8238-3C29BB54D40E}"
 	Keyword="Win32Proj">
 	<Platforms>
 		<Platform

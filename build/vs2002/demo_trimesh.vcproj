@@ -3,7 +3,7 @@
 	ProjectType="Visual C++"
 	Version="7.00"
 	Name="demo_trimesh"
-	ProjectGUID="{ECF31BFB-E667-C440-876B-13634D212C2F}"
+	ProjectGUID="{3E5184F9-0886-7C44-99BE-7AAC786B02B0}"
 	Keyword="Win32Proj">
 	<Platforms>
 		<Platform

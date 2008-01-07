@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="Windows-1252"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="7.10"
-	Name="demo_boxstack"
-	ProjectGUID="{E63F8C55-5B3F-214C-825C-886231BE3390}"
+	Version="7.00"
+	Name="demo_piston"
+	ProjectGUID="{029E11AF-CC80-9941-AE3B-2063269B0C1F}"
 	Keyword="Win32Proj">
 	<Platforms>
 		<Platform
@@ -13,7 +13,7 @@
 		<Configuration
 			Name="DebugDLL|Win32"
 			OutputDirectory="../../lib/DebugDLL"
-			IntermediateDirectory="obj/boxstack/DebugDLL"
+			IntermediateDirectory="obj/piston/DebugDLL"
 			ConfigurationType="1"
 			CharacterSet="2">
 			<Tool
@@ -35,11 +35,11 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="../../lib/DebugDLL/oded.lib ../../lib/DebugDLL/drawstuffd.lib user32.lib winmm.lib gdi32.lib opengl32.lib glu32.lib"
-				OutputFile="$(OutDir)/demo_boxstack.exe"
+				OutputFile="$(OutDir)/demo_piston.exe"
 				LinkIncremental="2"
 				AdditionalLibraryDirectories="../../lib/DebugDLL"
 				GenerateDebugInformation="TRUE"
-				ProgramDatabaseFile="$(OutDir)/demo_boxstack.pdb"
+				ProgramDatabaseFile="$(OutDir)/demo_piston.pdb"
 				SubSystem="1"
 				EntryPointSymbol="mainCRTStartup"
 				TargetMachine="1"/>
@@ -58,18 +58,12 @@
 			<Tool
 				Name="VCWebServiceProxyGeneratorTool"/>
 			<Tool
-				Name="VCXMLDataGeneratorTool"/>
-			<Tool
 				Name="VCWebDeploymentTool"/>
-			<Tool
-				Name="VCManagedWrapperGeneratorTool"/>
-			<Tool
-				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
 		</Configuration>
 		<Configuration
 			Name="ReleaseDLL|Win32"
 			OutputDirectory="../../lib/ReleaseDLL"
-			IntermediateDirectory="obj/boxstack/ReleaseDLL"
+			IntermediateDirectory="obj/piston/ReleaseDLL"
 			ConfigurationType="1"
 			CharacterSet="2">
 			<Tool
@@ -91,11 +85,11 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="../../lib/ReleaseDLL/ode.lib ../../lib/ReleaseDLL/drawstuff.lib user32.lib winmm.lib gdi32.lib opengl32.lib glu32.lib"
-				OutputFile="$(OutDir)/demo_boxstack.exe"
+				OutputFile="$(OutDir)/demo_piston.exe"
 				LinkIncremental="2"
 				AdditionalLibraryDirectories="../../lib/ReleaseDLL"
 				GenerateDebugInformation="TRUE"
-				ProgramDatabaseFile="$(OutDir)/demo_boxstack.pdb"
+				ProgramDatabaseFile="$(OutDir)/demo_piston.pdb"
 				SubSystem="1"
 				EntryPointSymbol="mainCRTStartup"
 				TargetMachine="1"/>
@@ -114,18 +108,12 @@
 			<Tool
 				Name="VCWebServiceProxyGeneratorTool"/>
 			<Tool
-				Name="VCXMLDataGeneratorTool"/>
-			<Tool
 				Name="VCWebDeploymentTool"/>
-			<Tool
-				Name="VCManagedWrapperGeneratorTool"/>
-			<Tool
-				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
 		</Configuration>
 		<Configuration
 			Name="DebugLib|Win32"
 			OutputDirectory="../../lib/DebugLib"
-			IntermediateDirectory="obj/boxstack/DebugLib"
+			IntermediateDirectory="obj/piston/DebugLib"
 			ConfigurationType="1"
 			CharacterSet="2">
 			<Tool
@@ -147,11 +135,11 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="../../lib/DebugLib/oded.lib ../../lib/DebugLib/drawstuffd.lib user32.lib winmm.lib gdi32.lib opengl32.lib glu32.lib"
-				OutputFile="$(OutDir)/demo_boxstack.exe"
+				OutputFile="$(OutDir)/demo_piston.exe"
 				LinkIncremental="2"
 				AdditionalLibraryDirectories="../../lib/DebugLib"
 				GenerateDebugInformation="TRUE"
-				ProgramDatabaseFile="$(OutDir)/demo_boxstack.pdb"
+				ProgramDatabaseFile="$(OutDir)/demo_piston.pdb"
 				SubSystem="1"
 				EntryPointSymbol="mainCRTStartup"
 				TargetMachine="1"/>
@@ -170,18 +158,12 @@
 			<Tool
 				Name="VCWebServiceProxyGeneratorTool"/>
 			<Tool
-				Name="VCXMLDataGeneratorTool"/>
-			<Tool
 				Name="VCWebDeploymentTool"/>
-			<Tool
-				Name="VCManagedWrapperGeneratorTool"/>
-			<Tool
-				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
 		</Configuration>
 		<Configuration
 			Name="ReleaseLib|Win32"
 			OutputDirectory="../../lib/ReleaseLib"
-			IntermediateDirectory="obj/boxstack/ReleaseLib"
+			IntermediateDirectory="obj/piston/ReleaseLib"
 			ConfigurationType="1"
 			CharacterSet="2">
 			<Tool
@@ -203,11 +185,11 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="../../lib/ReleaseLib/ode.lib ../../lib/ReleaseLib/drawstuff.lib user32.lib winmm.lib gdi32.lib opengl32.lib glu32.lib"
-				OutputFile="$(OutDir)/demo_boxstack.exe"
+				OutputFile="$(OutDir)/demo_piston.exe"
 				LinkIncremental="2"
 				AdditionalLibraryDirectories="../../lib/ReleaseLib"
 				GenerateDebugInformation="TRUE"
-				ProgramDatabaseFile="$(OutDir)/demo_boxstack.pdb"
+				ProgramDatabaseFile="$(OutDir)/demo_piston.pdb"
 				SubSystem="1"
 				EntryPointSymbol="mainCRTStartup"
 				TargetMachine="1"/>
@@ -226,17 +208,9 @@
 			<Tool
 				Name="VCWebServiceProxyGeneratorTool"/>
 			<Tool
-				Name="VCXMLDataGeneratorTool"/>
-			<Tool
 				Name="VCWebDeploymentTool"/>
-			<Tool
-				Name="VCManagedWrapperGeneratorTool"/>
-			<Tool
-				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
 		</Configuration>
 	</Configurations>
-	<References>
-	</References>
 	<Files>
 		<Filter
 			Name="ode"
@@ -245,7 +219,7 @@
 				Name="demo"
 				Filter="">
 				<File
-					RelativePath="..\..\ode\demo\demo_boxstack.cpp">
+					RelativePath="..\..\ode\demo\demo_piston.cpp">
 				</File>
 			</Filter>
 		</Filter>
