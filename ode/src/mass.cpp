@@ -112,8 +112,8 @@ void dMassSetParameters (dMass *m, dReal themass,
 
 void dMassSetSphere (dMass *m, dReal density, dReal radius)
 {
-  dMassSetSphereTotal (m, (REAL(4.0)/REAL(3.0)) * M_PI *
-			  radius*radius*radius * density, radius);
+  dMassSetSphereTotal (m, (dReal) ((REAL(4.0)/REAL(3.0)) * M_PI *
+			  radius*radius*radius * density), radius);
 }
 
 
@@ -140,8 +140,8 @@ void dMassSetCapsule (dMass *m, dReal density, int direction,
   dAASSERT (m);
   dUASSERT (direction >= 1 && direction <= 3,"bad direction number");
   dMassSetZero (m);
-  M1 = M_PI*radius*radius*length*density;			// cylinder mass
-  M2 = (REAL(4.0)/REAL(3.0))*M_PI*radius*radius*radius*density;	// total cap mass
+  M1 = (dReal) (M_PI*radius*radius*length*density);			  // cylinder mass
+  M2 = (dReal) ((REAL(4.0)/REAL(3.0))*M_PI*radius*radius*radius*density); // total cap mass
   m->mass = M1+M2;
   Ia = M1*(REAL(0.25)*radius*radius + (REAL(1.0)/REAL(12.0))*length*length) +
     M2*(REAL(0.4)*radius*radius + REAL(0.375)*radius*length + REAL(0.25)*length*length);
@@ -168,7 +168,7 @@ void dMassSetCapsuleTotal (dMass *m, dReal total_mass, int direction,
 void dMassSetCylinder (dMass *m, dReal density, int direction,
 		       dReal radius, dReal length)
 {
-  dMassSetCylinderTotal (m, M_PI*radius*radius*length*density,
+  dMassSetCylinderTotal (m, (dReal) (M_PI*radius*radius*length*density),
 			    direction, radius, length);
 }
 
