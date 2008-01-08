@@ -902,7 +902,7 @@ void _InitCylinderTrimeshData(sData& cData)
 
 
 	// calculate basic angle for 8-gon
-	dReal fAngle = M_PI / nCYLINDER_CIRCLE_SEGMENTS;
+	dReal fAngle = (dReal) (M_PI / nCYLINDER_CIRCLE_SEGMENTS);
 	// calculate angle increment
 	dReal fAngleIncrement = fAngle*REAL(2.0); 
 

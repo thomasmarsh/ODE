@@ -339,7 +339,7 @@ static dReal getHingeAngleFromRelativeQuat (dQuaternion qrel, dVector3 axis)
 
   // the angle we get will be between 0..2*pi, but we want to return angles
   // between -pi..pi
-  if (theta > M_PI) theta -= 2*M_PI;
+  if (theta > M_PI) theta -= (dReal) (2*M_PI);
 
   // the angle we've just extracted has the wrong sign
   theta = -theta;

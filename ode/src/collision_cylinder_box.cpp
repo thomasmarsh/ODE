@@ -165,7 +165,7 @@ void _cldInitCylinderBox(sCylinderBoxData& cData)
 	cData.vNormal[2] = REAL(0.0);
 
 	// calculate basic angle for nCYLINDER_SEGMENT-gon
-	dReal fAngle = M_PI/nCYLINDER_SEGMENT;
+	dReal fAngle = (dReal) (M_PI/nCYLINDER_SEGMENT);
 
 	// calculate angle increment
 	dReal fAngleIncrement = fAngle * REAL(2.0); 
