@@ -274,6 +274,28 @@ public:
 };
 
 
+class dCylinder : public dGeom {
+  // intentionally undefined, don't use these
+  dCylinder (dCylinder &);
+  void operator= (dCylinder &);
+
+public:
+  dCylinder() { }
+  dCylinder (dSpaceID space, dReal radius, dReal length)
+    { _id = dCreateCylinder (space,radius,length); }
+
+  void create (dSpaceID space, dReal radius, dReal length) {
+    if (_id) dGeomDestroy (_id);
+    _id = dCreateCylinder (space,radius,length);
+  }
+
+  void setParams (dReal radius, dReal length)
+    { dGeomCylinderSetParams (_id, radius, length); }
+  void getParams (dReal *radius, dReal *length) const
+    { dGeomCylinderGetParams (_id,radius,length); }
+};
+
+
 class dRay : public dGeom {
   // intentionally undefined, don't use these
   dRay (dRay &);
