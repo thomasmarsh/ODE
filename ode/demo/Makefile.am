@@ -7,7 +7,7 @@ LDADD = $(top_builddir)/drawstuff/src/libdrawstuff.la $(top_builddir)/ode/src/li
 DEPENDENCIES = $(top_builddir)/drawstuff/src/libdrawstuff.la $(top_builddir)/ode/src/libode.la
 
 
-noinst_HEADERS = basket_geom.h texturepath.h world_geom3.h
+noinst_HEADERS = basket_geom.h texturepath.h world_geom3.h bunny_geom.h
 
 noinst_PROGRAMS=demo_collision \
 		demo_slider \
@@ -33,6 +33,7 @@ noinst_PROGRAMS=demo_collision \
 		demo_jointPR
 if TRIMESH
 noinst_PROGRAMS+= demo_trimesh demo_moving_trimesh demo_basket demo_cyl
+AM_CPPFLAGS+= -DdTRIMESH_ENABLED
 endif
 
 demo_collision_SOURCES= demo_collision.cpp

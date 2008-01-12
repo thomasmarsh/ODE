@@ -9,10 +9,18 @@ the rules for this file:
 
 ------------------------------------------------------------------------------
 
+01/12/08 Daniel K. O.
+	* Fixed a typedef bug in configure.in.
+	* Added dCylinder to the C++ wrappers.
+	* Applied patch 1851394: support for GIMPACT with double precision,
+	  dCollide fix.
+	* Moved bunny geometry to bunny_geom.h.
+
 12/11/07 Daniel K. O.
 
 	* Added damping and MaxAngularVel() functions.
-	* Const-correctness: added const qualifier to some dWorldGet and dBodyGet functions.
+	* Const-correctness: added const qualifier to some dWorldGet and dBodyGet
+	  functions.
 	* Updated the odecpp.h header.
 
 12/07/07 Daniel K. O.

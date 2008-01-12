@@ -1300,6 +1300,9 @@ int dCollideBTL(dxGeom* g1, dxGeom* BoxGeom, int Flags, dContactGeom* Contacts, 
   
   dxTriMesh* TriMesh = (dxTriMesh*)g1;
 
+  g1 -> recomputeAABB();
+  BoxGeom -> recomputeAABB();
+
 
   // get source hull position, orientation and half size
   const dMatrix3& mRotBox=*(const dMatrix3*)dGeomGetRotation(BoxGeom);

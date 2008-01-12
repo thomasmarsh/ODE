@@ -466,8 +466,8 @@ typedef unsigned short uint16;
 #endif
 /* integer types (we assume int >= 32 bits) */
 #if SIZEOF_INT == 4
-typedef short int32;
-typedef unsigned short uint32;
+typedef int int32;
+typedef unsigned uint32;
 #else
 #error "can not find 4 byte integer type"
 #endif
@@ -537,8 +537,4 @@ echo "  Is the CPU x86-64:       $cpu64"
 echo "  Headers will be installed in $prefix/include/ode"
 echo "  Libraries will be installed in $prefix/lib"
 echo "  Building in directory    $BUILDDIR"
-if test $gimpact = yes -a $precision = yes
-then
-  echo "WARNING! Double precision not yet supported for GIMPACT"
-fi
 

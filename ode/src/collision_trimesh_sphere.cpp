@@ -522,8 +522,11 @@ int dCollideSTL(dxGeom* g1, dxGeom* SphereGeom, int Flags, dContactGeom* Contact
     GDYNAMIC_ARRAY trimeshcontacts;
     GIM_CREATE_CONTACT_LIST(trimeshcontacts);
 
+	g1 -> recomputeAABB();
+	SphereGeom -> recomputeAABB();
+
     //Collide trimeshes
-    gim_trimesh_sphere_collision(&TriMesh->m_collision_trimesh,Position,Radius,&trimeshcontacts);
+    gim_trimesh_sphere_collisionODE(&TriMesh->m_collision_trimesh,Position,Radius,&trimeshcontacts);
 
     if(trimeshcontacts.m_size == 0)
     {

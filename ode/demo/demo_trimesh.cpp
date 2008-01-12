@@ -72,7 +72,7 @@ static int random_pos = 1;	// drop objects from random position?
 #define IndexCount 12
 
 static dVector3 Size;
-static dVector3 Vertices[VertexCount];
+static float Vertices[VertexCount][3];
 static dTriIndex Indices[IndexCount];
 
 static dGeomID TriMesh;
@@ -415,10 +415,13 @@ static void simLoop (int pause)
   const dReal* Rot = dGeomGetRotation(TriMesh);
 
   {for (int i = 0; i < IndexCount / 3; i++){
-    const dVector3& v0 = Vertices[Indices[i * 3 + 0]];
-	const dVector3& v1 = Vertices[Indices[i * 3 + 1]];
-	const dVector3& v2 = Vertices[Indices[i * 3 + 2]];
-	dsDrawTriangle(Pos, Rot, (dReal*)&v0, (dReal*)&v1, (dReal*)&v2, 0);
+    const float *p = Vertices[Indices[i * 3 + 0]];
+    const dVector3 v0 = { p[0], p[1], p[2] };
+    p = Vertices[Indices[i * 3 + 1]];
+    const dVector3 v1 = { p[0], p[1], p[2] };
+    p = Vertices[Indices[i * 3 + 2]];
+    const dVector3 v2 = { p[0], p[1], p[2] };
+    dsDrawTriangle(Pos, Rot, v0, v1, v2, 0);
   }}}
 
   if (Ray){
@@ -506,8 +509,9 @@ int main (int argc, char **argv)
 
   dTriMeshDataID Data = dGeomTriMeshDataCreate();
 
-  dGeomTriMeshDataBuildSimple(Data, (dReal*)Vertices, VertexCount, Indices, IndexCount);
-  
+  //dGeomTriMeshDataBuildSimple(Data, (dReal*)Vertices, VertexCount, Indices, IndexCount);
+  dGeomTriMeshDataBuildSingle(Data, Vertices[0], 3 * sizeof(float), VertexCount, &Indices[0], IndexCount, 3 * sizeof(dTriIndex));
+
   TriMesh = dCreateTriMesh(space, Data, 0, 0, 0);
 
   //dGeomSetPosition(TriMesh, 0, 0, 1.0);
