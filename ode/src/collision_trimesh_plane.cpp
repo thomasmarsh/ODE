@@ -154,15 +154,18 @@ int dCollideTrimeshPlane( dxGeom *o1, dxGeom *o2, int flags, dContactGeom* conta
 
 	// Alias pointers to the plane and trimesh
 	dxTriMesh* trimesh = (dxTriMesh*)( o1 );
-	vec4f plane;
+	dVector4 plane;
 	dGeomPlaneGetParams(o2, plane);
+
+	o1 -> recomputeAABB();
+	o2 -> recomputeAABB();
 
 	//Find collision
 
 	GDYNAMIC_ARRAY collision_result;
 	GIM_CREATE_TRIMESHPLANE_CONTACTS(collision_result);
 
-	gim_trimesh_plane_collision(&trimesh->m_collision_trimesh,plane,&collision_result);
+	gim_trimesh_plane_collisionODE(&trimesh->m_collision_trimesh,plane,&collision_result);
 
 	if(collision_result.m_size == 0 )
 	{
