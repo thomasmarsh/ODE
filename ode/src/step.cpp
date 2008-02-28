@@ -1599,28 +1599,29 @@ void dInternalStepIsland_x2 (dxWorld *world, dxBody * const *body, int nb,
       dJointFeedback *fb = joint[i]->feedback;
 
       if (fb) {
-	// the user has requested feedback on the amount of force that this
-	// joint is applying to the bodies. we use a slightly slower
-	// computation that splits out the force components and puts them
-	// in the feedback structure.
-	dReal data1[8],data2[8];
-	Multiply1_8q1 (data1, JJ, lambda+ofs[i], info[i].m);
-	dReal *cf1 = cforce + 8*b1->tag;
-	cf1[0] += (fb->f1[0] = data1[0]);
-	cf1[1] += (fb->f1[1] = data1[1]);
-	cf1[2] += (fb->f1[2] = data1[2]);
-	cf1[4] += (fb->t1[0] = data1[4]);
-	cf1[5] += (fb->t1[1] = data1[5]);
-	cf1[6] += (fb->t1[2] = data1[6]);
-	if (b2){
-	  Multiply1_8q1 (data2, JJ + 8*info[i].m, lambda+ofs[i], info[i].m);
-	  dReal *cf2 = cforce + 8*b2->tag;
-	  cf2[0] += (fb->f2[0] = data2[0]);
-	  cf2[1] += (fb->f2[1] = data2[1]);
-	  cf2[2] += (fb->f2[2] = data2[2]);
-	  cf2[4] += (fb->t2[0] = data2[4]);
-	  cf2[5] += (fb->t2[1] = data2[5]);
-	  cf2[6] += (fb->t2[2] = data2[6]);
+        // the user has requested feedback on the amount of force that this
+        // joint is applying to the bodies. we use a slightly slower
+        // computation that splits out the force components and puts them
+        // in the feedback structure.
+        dReal data[8];
+
+        Multiply1_8q1 (data, JJ, lambda+ofs[i], info[i].m);
+        dReal *cf1 = cforce + 8*b1->tag;
+        cf1[0] += (fb->f1[0] = data[0]);
+        cf1[1] += (fb->f1[1] = data[1]);
+        cf1[2] += (fb->f1[2] = data[2]);
+        cf1[4] += (fb->t1[0] = data[4]);
+        cf1[5] += (fb->t1[1] = data[5]);
+        cf1[6] += (fb->t1[2] = data[6]);
+        if (b2){
+          Multiply1_8q1 (data, JJ + 8*info[i].m, lambda+ofs[i], info[i].m);
+          dReal *cf2 = cforce + 8*b2->tag;
+          cf2[0] += (fb->f2[0] = data[0]);
+          cf2[1] += (fb->f2[1] = data[1]);
+          cf2[2] += (fb->f2[2] = data[2]);
+          cf2[4] += (fb->t2[0] = data[4]);
+          cf2[5] += (fb->t2[1] = data[5]);
+          cf2[6] += (fb->t2[2] = data[6]);
 	}
       }
       else {
