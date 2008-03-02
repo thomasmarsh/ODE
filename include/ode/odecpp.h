@@ -359,7 +359,7 @@ protected:
 public:
   dJoint()
     { _id = 0; }
-  ~dJoint()
+  virtual ~dJoint() // :( Destructor must be virtual to suppress compiler warning "class XXX has virtual functions but non-virtual destructor"
     { if (_id) dJointDestroy (_id); }
 
   dJointID id() const
