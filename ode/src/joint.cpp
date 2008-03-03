@@ -2198,7 +2198,7 @@ static void universalGetInfo2 (dxJointUniversal *joint, dxJoint::Info2 *info)
   // theta - Pi/2 ~= cos(theta), so
   //    |angular_velocity|  ~= (erp*fps) * (ax1 dot ax2)
 
-  info->c[3] = info->fps * info->erp * - dDOT(ax1, ax2);
+  info->c[3] = info->fps * info->erp * - k;
 
   // if the first angle is powered, or has joint limits, add in the stuff
   int row = 4 + joint->limot1.addLimot (joint,info,4,ax1,1);
