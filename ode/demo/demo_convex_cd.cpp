@@ -25,6 +25,8 @@
 #include <ode/ode.h>
 #include <drawstuff/drawstuff.h>
 #include "texturepath.h"
+#include <windows.h>
+#include <gl/gl.h>
 
 #ifdef _MSC_VER
 #pragma warning(disable:4244 4305)  // for VC++, no precision loss complaints
@@ -90,7 +92,19 @@ dGeomID geoms[2];
 dSpaceID space;
 dWorldID world;
 dJointGroupID contactgroup;
+/* 
+glRotate Matrix:
+( xx(1-c)+c	xy(1-c)-zs  xz(1-c)+ys	 0  )
+|					    |
+| yx(1-c)+zs	yy(1-c)+c   yz(1-c)-xs	 0  |
+| xz(1-c)-ys	yz(1-c)+xs  zz(1-c)+c	 0  |
+|					    |
+(	 0	     0		 0	 1  )
+Where	c = cos(angle),	s = sine(angle), and ||( x,y,z )|| = 1
+	  (if not, the GL will normalize this vector).
+*/
 
+#define USE_CONVEX 1
 void start()
 {
   // adjust the starting viewpoint a bit
@@ -98,31 +112,47 @@ void start()
   dsGetViewpoint (xyz,hpr);
   hpr[0] += 7;
   dsSetViewpoint (xyz,hpr);
+#if USE_CONVEX
   geoms[0]=dCreateConvex (space,
 			  planes,
 			  planecount,
 			  points,
 			  pointcount,
 			  polygons);
-  dGeomSetPosition (geoms[0],0,0,0.25);
   geoms[1]=dCreateConvex (space,
 			  planes,
 			  planecount,
 			  points,
 			  pointcount,
 			  polygons);
-  dGeomSetPosition (geoms[1],0.25,0.25,0.70);
-  
+#else
+  geoms[0]=dCreateBox(space,0.5,0.5,0.5);
+  geoms[1]=dCreateBox(space,0.5,0.5,0.5);
+#endif
+  dMatrix3 m1 = { 1,0,0,0,0,1,0,0,0,0,1,0 };
+  dMatrix3 m2 = { 1,0,0,0,0,1,0,0,0,0,1,0 };
+  dGeomSetPosition (geoms[0],0,0,0.25);
+  //dGeomSetPosition (geoms[1],0,0,0.70);
+  dGeomSetPosition (geoms[1],0.25,0.25,0.70);  
+  dGeomSetRotation (geoms[0],m1);
+  dGeomSetRotation (geoms[1],m2);
 }
 
 int dCollideConvexConvex (dxGeom *o1, dxGeom *o2, int flags,
 			  dContactGeom *contact, int skip);
+int dCollideBoxBox (dxGeom *o1, dxGeom *o2, int flags,
+			  dContactGeom *contact, int skip);
+
 void simLoop (int pause)
 {
   static bool DumpInfo=true;
   const dReal ss[3] = {0.02,0.02,0.02};
   dContactGeom contacts[8];
+#if USE_CONVEX
   int contactcount = dCollideConvexConvex(geoms[0],geoms[1],8,contacts,sizeof(dContactGeom));
+#else
+  int contactcount = dCollideBoxBox(geoms[0],geoms[1],8,contacts,sizeof(dContactGeom));
+#endif
   //fprintf(stdout,"Contact Count %d\n",contactcount);
   const dReal* pos;
   const dReal* R;
@@ -130,19 +160,23 @@ void simLoop (int pause)
   pos = dGeomGetPosition (geoms[0]);
   R = dGeomGetRotation (geoms[0]);
   dsSetColor (0.6f,0.6f,1);
+  glPolygonMode(GL_FRONT,GL_LINE);
   dsDrawConvex(pos,R,planes,
 	       planecount,
 	       points,
 	       pointcount,
 	       polygons);
+  glPolygonMode(GL_FRONT,GL_FILL);
   pos = dGeomGetPosition (geoms[1]);
   R = dGeomGetRotation (geoms[1]);
   dsSetColor (0.4f,1,1);
+  glPolygonMode(GL_FRONT,GL_LINE);
   dsDrawConvex(pos,R,planes,
 	       planecount,
 	       points,
 	       pointcount,
 	       polygons);
+    glPolygonMode(GL_FRONT,GL_FILL);
   /*if (show_contacts) */
   dMatrix3 RI;
   dRSetIdentity (RI);
