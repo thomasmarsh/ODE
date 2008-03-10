@@ -19,7 +19,6 @@
  * LICENSE.TXT and LICENSE-BSD.TXT for more details.                     *
  *                                                                       *
  *************************************************************************/
-
 /*
 Code for Convex Collision Detection
 By Rodrigo Hernandez
@@ -899,22 +898,23 @@ inline void Support(dVector3 dir,dxConvex& cvx,dVector3 out)
 
 inline void ComputeInterval(dxConvex& cvx,dVector4 axis,dReal& min,dReal& max)
 {
+	/* TODO: Use Support points here */
 	dVector3 point;
 	dReal value;
 	//fprintf(stdout,"Compute Interval Axis %f,%f,%f\n",axis[0],axis[1],axis[2]);
-	dMULTIPLY0_331 (point,cvx.final_posr->R,cvx.points);
+	dMULTIPLY0_331(point,cvx.final_posr->R,cvx.points);
 	//fprintf(stdout,"initial point %f,%f,%f\n",point[0],point[1],point[2]);
 	point[0]+=cvx.final_posr->pos[0];
 	point[1]+=cvx.final_posr->pos[1];
 	point[2]+=cvx.final_posr->pos[2];
-	max = min = dDOT(axis,cvx.points);
+	max = min = dDOT(point,axis);
 	for (unsigned int i = 1; i < cvx.pointcount; ++i) 
 	{
 		dMULTIPLY0_331 (point,cvx.final_posr->R,cvx.points+(i*3));
 		point[0]+=cvx.final_posr->pos[0];
 		point[1]+=cvx.final_posr->pos[1];
 		point[2]+=cvx.final_posr->pos[2];
-		value=dDOT(axis,point);
+		value=dDOT(point,axis);
 		if(value<min)
 		{
 			min=value;
@@ -927,19 +927,181 @@ inline void ComputeInterval(dxConvex& cvx,dVector4 axis,dReal& min,dReal& max)
 	//fprintf(stdout,"Compute Interval Min Max %f,%f\n",min,max);
 }
 
+bool CheckEdgeIntersection(dxConvex& cvx1,dxConvex& cvx2, int flags,int& curc,
+						   dContactGeom *contact, int skip)
+{
+	int maxc = flags & NUMC_MASK;
+	dIASSERT(maxc != 0);
+	dVector3 e1,e2,q;
+	dVector4 plane,depthplane;
+	dReal t;
+		for(std::set<edge>::iterator i = cvx1.edges.begin();
+		i!= cvx1.edges.end();
+		++i)
+	{
+		// Rotate
+		dMULTIPLY0_331(e1,cvx1.final_posr->R,cvx1.points+(i->first*3));
+		// translate
+		e1[0]+=cvx1.final_posr->pos[0];
+		e1[1]+=cvx1.final_posr->pos[1];
+		e1[2]+=cvx1.final_posr->pos[2];
+		// Rotate
+		dMULTIPLY0_331(e2,cvx1.final_posr->R,cvx1.points+(i->second*3));
+		// translate
+		e2[0]+=cvx1.final_posr->pos[0];
+		e2[1]+=cvx1.final_posr->pos[1];
+		e2[2]+=cvx1.final_posr->pos[2];
+		unsigned int* pPoly=cvx2.polygons;
+		for(size_t j=0;j<cvx2.planecount;++j)
+		{
+			// Rotate
+			dMULTIPLY0_331(plane,cvx2.final_posr->R,cvx2.planes+(j*4));
+			dNormalize3(plane);
+			// Translate
+			plane[3]=
+				(cvx2.planes[(j*4)+3])+
+				((plane[0] * cvx2.final_posr->pos[0]) + 
+				(plane[1] * cvx2.final_posr->pos[1]) + 
+				(plane[2] * cvx2.final_posr->pos[2]));
+			dContactGeom *target = SAFECONTACT(flags, contact, curc, skip);
+			target->g1=&cvx1; // g1 is the one pushed
+			target->g2=&cvx2;
+			if(IntersectSegmentPlane(e1,e2,plane,t,target->pos))
+			{
+				if(IsPointInPolygon(target->pos,pPoly,&cvx2,q))
+				{
+					target->depth = dInfinity;
+					for(size_t k=0;k<cvx2.planecount;++k)
+					{
+						if(k==j) continue; // we're already at 0 depth on this plane
+						// Rotate
+						dMULTIPLY0_331(depthplane,cvx2.final_posr->R,cvx2.planes+(k*4));
+						dNormalize3(depthplane);
+						// Translate
+						depthplane[3]=
+						(cvx2.planes[(k*4)+3])+
+						((plane[0] * cvx2.final_posr->pos[0]) + 
+						(plane[1] * cvx2.final_posr->pos[1]) + 
+						(plane[2] * cvx2.final_posr->pos[2]));
+						dReal depth = (dVector3Dot(depthplane, target->pos) - depthplane[3]); // Ax + By + Cz - D
+						if((fabs(depth)<fabs(target->depth))&&((depth<-dEpsilon)||(depth>dEpsilon)))
+						{
+							target->depth=depth;
+							dVector3Copy(depthplane,target->normal);
+						}
+					}
+					++curc;
+					if(curc==maxc)
+						return true;
+				}
+			}
+			pPoly+=pPoly[0]+1;
+		}
+	}
+		return false;
+}
+
+inline bool CheckSATConvexFaces(dxConvex& cvx1,dxConvex& cvx2,dReal& min_depth,int& side_index,dxConvex** g1,dxConvex** g2)
+{
+	dReal min,max,min1,max1,min2,max2,depth;
+	dVector4 plane;
+	for(unsigned int i=0;i<cvx1.planecount;++i)
+	{
+		// -- Apply Transforms --
+		// Rotate
+		dMULTIPLY0_331(plane,cvx1.final_posr->R,cvx1.planes+(i*4));
+		dNormalize3(plane);
+		// Translate
+		plane[3]=
+			(cvx1.planes[(i*4)+3])+
+			((plane[0] * cvx1.final_posr->pos[0]) + 
+			(plane[1] * cvx1.final_posr->pos[1]) + 
+			(plane[2] * cvx1.final_posr->pos[2]));
+		ComputeInterval(cvx1,plane,min1,max1);
+		ComputeInterval(cvx2,plane,min2,max2);
+		if(max2<min1 || max1<min2) return false;
+		min = std::max(min1, min2);
+		max = std::min(max1, max2);
+		depth = max-min;
+		if(dFabs(depth)<dFabs(min_depth))
+		{
+			min_depth=depth;
+			// This is wrong if there are 2 parallel sides
+			side_index=(int)i;
+			*g1=&cvx1;
+			*g2=&cvx2;
+		}
+	}
+	return true;
+}
+
+inline bool CheckSATConvexEdges(dxConvex& cvx1,dxConvex& cvx2,dReal& min_depth,int& side_index,dxConvex** g1,dxConvex** g2)
+{
+	// Test cross products of pairs of edges
+	dReal min1,max1,min2,max2;
+	dVector4 plane;
+	dVector3 e1,e2,t;
+	for(std::set<edge>::iterator i = cvx1.edges.begin();
+		i!= cvx1.edges.end();
+		++i)
+	{
+		// we only need to apply rotation here
+		dMULTIPLY0_331 (t,cvx1.final_posr->R,cvx1.points+(i->first*3));
+		dMULTIPLY0_331 (e1,cvx1.final_posr->R,cvx1.points+(i->second*3));
+		e1[0]-=t[0];
+		e1[1]-=t[1];
+		e1[2]-=t[2];
+		for(std::set<edge>::iterator j = cvx2.edges.begin();
+			j!= cvx2.edges.end();
+			++j)
+		{
+			// we only need to apply rotation here
+			dMULTIPLY0_331 (t,cvx2.final_posr->R,cvx2.points+(j->first*3));
+			dMULTIPLY0_331 (e2,cvx2.final_posr->R,cvx2.points+(j->second*3));
+			e2[0]-=t[0];
+			e2[1]-=t[1];
+			e2[2]-=t[2];
+			dCROSS(plane,=,e1,e2);
+			plane[3]=0;
+			ComputeInterval(cvx1,plane,min1,max1);
+			ComputeInterval(cvx2,plane,min2,max2);
+			if(max2<min1 || max1 < min2) return false;
+		}      
+	}
+	return true;
+}
 /*! \brief Does an axis separation test between the 2 convex shapes
 using faces and edges */
 int TestConvexIntersection(dxConvex& cvx1,dxConvex& cvx2, int flags,
 						   dContactGeom *contact, int skip)
 {
-	dVector4 plane,savedplane;
-	dReal min1,max1,min2,max2,min_depth=-dInfinity;
-	dVector3 e1,e2,t;
-	int maxc = flags & NUMC_MASK; // this is causing a segfault
+	int side_index = -1;
+	size_t convex_index = 0;
+	dReal min_depth=dInfinity;
+	int maxc = flags & NUMC_MASK;
 	dIASSERT(maxc != 0);
-	dxConvex *g1,*g2;
+	dxConvex *g1=NULL,*g2=NULL;
+#if 1
+#if 0
+	if(!CheckSATConvexFaces(cvx1,cvx2,min_depth,side_index,&g1,&g2))
+	{
+		return 0;
+	}
+#else
+	if(!CheckSATConvexFaces(cvx2,cvx1,min_depth,side_index,&g1,&g2))
+	{
+		return 0;
+	}
+#endif
+	if(!CheckSATConvexEdges(cvx2,cvx1,min_depth,side_index,&g1,&g2))
+	{
+		return 0;
+	}
+#else
+	dReal min,max,min1,max1,min2,max2,depth;
+	dVector3 e1,e2,t;
+	dVector4 plane;
 	unsigned int *pPoly;
-	dVector3 v;
 	// Test faces of cvx1 for separation
 	pPoly=cvx1.polygons;
 	for(unsigned int i=0;i<cvx1.planecount;++i)
@@ -958,22 +1120,20 @@ int TestConvexIntersection(dxConvex& cvx1,dxConvex& cvx2, int flags,
 		ComputeInterval(cvx2,plane,min2,max2);
 		//fprintf(stdout,"width %f\n",max1-min1);
 		if(max2<min1 || max1<min2) return 0;
-#if 1
-		// this one ON works
-		else if ((max1>min2)&&(max1<max2))
+		min = std::max(min1, min2);
+		max = std::min(max1, max2);
+		depth = max-min;
+		if(dFabs(depth)<dFabs(min_depth))
 		{
-			min_depth=max1-min2;
-			savedplane[0]=plane[0];
-			savedplane[1]=plane[1];
-			savedplane[2]=plane[2];
-			savedplane[3]=plane[3];
-			g1=&cvx2; // cvx2 moves
-			g2=&cvx1;
+			min_depth=depth;
+			side_index=i;
+			g1=&cvx1; // cvx2 moves
+			g2=&cvx2;
 		}
-#endif
 		pPoly+=pPoly[0]+1;
 	}
 	// Test faces of cvx2 for separation
+	//min_depth=dInfinity; // force min_depth to be in cvx2
 	pPoly=cvx2.polygons;
 	for(unsigned int i=0;i<cvx2.planecount;++i)
 	{
@@ -994,19 +1154,16 @@ int TestConvexIntersection(dxConvex& cvx1,dxConvex& cvx2, int flags,
 		ComputeInterval(cvx1,plane,min2,max2);
 		//fprintf(stdout,"width %f\n",max1-min1);
 		if(max2<min1 || max1<min2) return 0;
-#if 1
-		// this one ON does not work
-		else if ((max1>min2)&&(max1<max2))
+		min = std::max(min1, min2);
+		max = std::min(max1, max2);
+		depth = max-min;
+		if(dFabs(depth)<dFabs(min_depth))
 		{
-			min_depth=max1-min2;
-			savedplane[0]=plane[0];
-			savedplane[1]=plane[1];
-			savedplane[2]=plane[2];
-			savedplane[3]=plane[3];
-			g1=&cvx1; // cvx1 moves
-			g2=&cvx2;
+			min_depth=depth;
+			side_index=i;
+			g1=&cvx2; // cvx1 moves
+			g2=&cvx1;
 		}
-#endif
 		pPoly+=pPoly[0]+1;
 	}
 	// Test cross products of pairs of edges
@@ -1037,22 +1194,32 @@ int TestConvexIntersection(dxConvex& cvx1,dxConvex& cvx2, int flags,
 			if(max2<min1 || max1 < min2) return 0;
 		}      
 	}
-/* -- uncomment if you are debugging
-	static int  cvxhit=0;
-	if(cvxhit<2)
-		fprintf(stdout,"Plane: %f,%f,%f,%f\n",
-		(double)savedplane[0],
-		(double)savedplane[1],
-		(double)savedplane[2],
-		(double)savedplane[3]);
-*/
+#endif
 	// If we get here, there was a collision
 	int contacts=0;
-	for(unsigned int i=0;i<g1->pointcount;++i)
+#if 1
+	if(g1!=NULL)
+	{
+		// All points in face are potential contact joints
+		unsigned int* pPoly = g1->polygons;
+		for(int i=0;i<side_index;++i)
+		{
+			pPoly+=pPoly[0]+1;
+		}
+		for(unsigned int i=0;i<pPoly[0];++i)
+		{
+			dMULTIPLY0_331(SAFECONTACT(flags, contact, contacts, skip)->pos,g1->final_posr->R,&g1->points[(pPoly[i+1]*3)]);
+			dVector3Add(g1->final_posr->pos,SAFECONTACT(flags, contact, contacts, skip)->pos,SAFECONTACT(flags, contact, contacts, skip)->pos);
+			++contacts;
+			if (contacts==maxc) return contacts;
+		}
+	}
+#else
+	/* note here only g1 is being checked, this code has to go anyway */
+	for(size_t i=0;i<g1->pointcount;++i)
 	{
 		dMULTIPLY0_331 (v,g1->final_posr->R,&g1->points[(i*3)]);
 		dVector3Add(g1->final_posr->pos, v, v);
-
 		dReal distance = dVector3Dot(savedplane, v) - savedplane[3]; // Ax + By + Cz - D
 		if(distance<0)
 		{
@@ -1062,22 +1229,11 @@ int TestConvexIntersection(dxConvex& cvx1,dxConvex& cvx2, int flags,
 			target->depth = -distance;
 			target->g1 = g1;
 			target->g2 = g2;
-/* -- uncomment if you are debugging
-			if(cvxhit<2)
-				fprintf(stdout,"Contact: %f,%f,%f depth %f\n",
-				(double)target->pos[0],
-				(double)target->pos[1],
-				(double)target->pos[2],
-				(double)target->depth);
-*/
 			contacts++;
 			if (contacts==maxc) break;
 		}
 	}
-/* -- uncomment if you are debugging
-	cvxhit++;
-*/
-
+#endif
 	return contacts;
 }
 
@@ -1088,16 +1244,15 @@ int dCollideConvexConvex (dxGeom *o1, dxGeom *o2, int flags,
   dIASSERT (o1->type == dConvexClass);
   dIASSERT (o2->type == dConvexClass);
   dIASSERT ((flags & NUMC_MASK) >= 1);
-
-//   if(!hit) fprintf(stdout,"dCollideConvexConvex\n");
   dxConvex *Convex1 = (dxConvex*) o1;
   dxConvex *Convex2 = (dxConvex*) o2;
+#if 1
   int contacts = TestConvexIntersection(*Convex1,*Convex2,flags,
 				     contact,skip);
-  if (contacts)
-    {
-      //fprintf(stdout,"We have a Hit!\n");
-    }
+#else
+  int contacts = TestConvexConvex(*Convex1,*Convex2,flags,
+				     contact,skip);
+#endif
   return contacts;
 }
 
@@ -1284,11 +1439,9 @@ int dCollideRayConvex( dxGeom *o1, dxGeom *o2,
 			}
 		}
 	}
-
 	// Contact?
 	return ( contact->depth <= ray->length );
 }
 
 #endif
-
 //<-- Convex Collision
