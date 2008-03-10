@@ -25,8 +25,11 @@
 #include <ode/ode.h>
 #include <drawstuff/drawstuff.h>
 #include "texturepath.h"
+#if defined(WIN32) || defined(_WIN32)
 #include <windows.h>
-#include <gl/gl.h>
+#endif
+#include <GL/gl.h>
+
 
 #ifdef _MSC_VER
 #pragma warning(disable:4244 4305)  // for VC++, no precision loss complaints
