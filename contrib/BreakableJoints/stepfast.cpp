@@ -30,7 +30,7 @@
 
 #include "objects.h"
 #include "joint.h"
-#include <ode/config.h>
+#include <ode/odeconfig.h>
 #include <ode/objects.h>
 #include <ode/odemath.h>
 #include <ode/rotation.h>

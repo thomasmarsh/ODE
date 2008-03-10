@@ -59,7 +59,11 @@
     package.path = packagepath
     package.objdir = "obj/"..name
 
-    package.includepaths = { "../../include" }
+    package.includepaths = 
+    { 
+    "../../include",
+    "../../ode/src"
+    }
     package.defines = { "_CRT_SECURE_NO_DEPRECATE" }
 
     if (options.target == "vs6" or options.target == "vs2002" or options.target == "vs2003") then
@@ -83,7 +87,11 @@
     if (windows) then
       table.insert(package.defines, "WIN32")
       table.insert(package.files, "../../drawstuff/src/resources.rc")
-    end
+   end
+    table.insert(package.config["DebugDoubleDLL"].defines, "dDOUBLE")
+    table.insert(package.config["ReleaseDoubleDLL"].defines, "dDOUBLE")
+    table.insert(package.config["DebugDoubleLib"].defines, "dDOUBLE")
+    table.insert(package.config["ReleaseDoubleLib"].defines, "dDOUBLE")
   end
 
   table.foreach(demos, makedemo)

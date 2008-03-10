@@ -1299,6 +1299,8 @@ int dCollideBTL(dxGeom* g1, dxGeom* BoxGeom, int Flags, dContactGeom* Contacts, 
 
   
   dxTriMesh* TriMesh = (dxTriMesh*)g1;
+  g1 -> recomputeAABB();
+  BoxGeom -> recomputeAABB();
 
   g1 -> recomputeAABB();
   BoxGeom -> recomputeAABB();

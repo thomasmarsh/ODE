@@ -41,20 +41,36 @@ package.objdir = "obj/drawstuff"
     package.kind = "lib"
     table.insert(package.defines, lib_defines)
   else
-    package.config["DebugDLL"].kind = "dll"
-    package.config["DebugLib"].kind = "lib"
-    package.config["ReleaseDLL"].kind = "dll"
-    package.config["ReleaseLib"].kind = "lib"
+    package.config["DebugSingleDLL"].kind = "dll"
+    package.config["DebugSingleLib"].kind = "lib"
+    package.config["ReleaseSingleDLL"].kind = "dll"
+    package.config["ReleaseSingleLib"].kind = "lib"
 
-    table.insert(package.config["DebugDLL"].defines, dll_defines)
-    table.insert(package.config["ReleaseDLL"].defines, dll_defines)
-    table.insert(package.config["DebugLib"].defines, lib_defines)
-    table.insert(package.config["ReleaseLib"].defines, lib_defines)
+    table.insert(package.config["DebugSingleDLL"].defines, dll_defines)
+    table.insert(package.config["ReleaseSingleDLL"].defines, dll_defines)
+    table.insert(package.config["DebugSingleLib"].defines, lib_defines)
+    table.insert(package.config["ReleaseSingleLib"].defines, lib_defines)
+
+    package.config["DebugDoubleDLL"].kind = "dll"
+    package.config["DebugDoubleLib"].kind = "lib"
+    package.config["ReleaseDoubleDLL"].kind = "dll"
+    package.config["ReleaseDoubleLib"].kind = "lib"
+
+    table.insert(package.config["DebugDoubleDLL"].defines, dll_defines)
+    table.insert(package.config["ReleaseDoubleDLL"].defines, dll_defines)
+    table.insert(package.config["DebugDoubleLib"].defines, lib_defines)
+    table.insert(package.config["ReleaseDoubleLib"].defines, lib_defines)
+
+    table.insert(package.config["DebugDoubleDLL"].defines, "dDOUBLE")
+    table.insert(package.config["ReleaseDoubleDLL"].defines, "dDOUBLE")
+    table.insert(package.config["DebugDoubleLib"].defines, "dDOUBLE")
+    table.insert(package.config["ReleaseDoubleLib"].defines, "dDOUBLE")
   end
 
   package.includepaths =
   {
-    "../../include"
+    "../../include",
+    "../../ode/src"
   }
 
   -- disable VS2005 CRT security warnings
@@ -65,15 +81,24 @@ package.objdir = "obj/drawstuff"
 
 -- Build Flags
 
-	package.config["DebugLib"].buildflags   = { }
-	package.config["DebugDLL"].buildflags   = { }
+	package.config["DebugSingleLib"].buildflags   = { }
+	package.config["DebugSingleDLL"].buildflags   = { }
 
-	package.config["ReleaseDLL"].buildflags = { "optimize-speed", "no-symbols", "no-frame-pointer" }
-	package.config["ReleaseLib"].buildflags = { "optimize-speed", "no-symbols", "no-frame-pointer" }
+	package.config["ReleaseSingleDLL"].buildflags = { "optimize-speed", "no-symbols", "no-frame-pointer" }
+	package.config["ReleaseSingleLib"].buildflags = { "optimize-speed", "no-symbols", "no-frame-pointer" }
+
+	package.config["DebugDoubleLib"].buildflags   = { }
+	package.config["DebugDoubleDLL"].buildflags   = { }
+
+	package.config["ReleaseDoubleDLL"].buildflags = { "optimize-speed", "no-symbols", "no-frame-pointer" }
+	package.config["ReleaseDoubleLib"].buildflags = { "optimize-speed", "no-symbols", "no-frame-pointer" }
 
 	if (options.target == "vs6" or options.target == "vs2002" or options.target == "vs2003") then
-		table.insert(package.config.DebugLib.buildflags, "static-runtime")
-		table.insert(package.config.ReleaseLib.buildflags, "static-runtime")
+      for k,v in ipairs(project.configs) do
+        if (string.find(v, "Lib") ~= nil) then
+          table.insert(package.config[v].buildflags, "static-runtime")
+        end
+      end
 	end
 
 

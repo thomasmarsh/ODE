@@ -22,7 +22,7 @@
 
 // main window and event handling for Mac CFM Carbon
 
-#include <ode/config.h>
+#include <ode/odeconfig.h>
 #include <stdlib.h>
 #include <string.h>
 #include <stdarg.h>

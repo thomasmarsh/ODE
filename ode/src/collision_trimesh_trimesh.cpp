@@ -30,7 +30,7 @@
 #include <ode/matrix.h>
 #include <ode/rotation.h>
 #include <ode/odemath.h>
-
+#include "config.h"
 // Classic Implementation
 #if !dTRIMESH_OPCODE_USE_NEW_TRIMESH_TRIMESH_COLLIDER
 

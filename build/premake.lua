@@ -13,13 +13,13 @@ project.name = "ode"
 -- call these packages from within your own Premake-enabled project.
 
   if (not options["enable-shared-only"] and not options["enable-static-only"]) then
-    project.configs = { "DebugDLL", "ReleaseDLL", "DebugLib", "ReleaseLib" }
+    project.configs = { "DebugSingleDLL", "ReleaseSingleDLL", "DebugSingleLib", "ReleaseSingleLib", "DebugDoubleDLL", "ReleaseDoubleDLL", "DebugDoubleLib", "ReleaseDoubleLib" }
   end
 
 
 -- Project options
 
-  addoption("with-doubles",  "Use double instead of float as base numeric type")
+--  addoption("with-doubles",  "Use double instead of float as base numeric type")
   addoption("with-demos",    "Builds the demo applications and DrawStuff library")
   addoption("with-tests",    "Builds the unit test application")
   addoption("with-gimpact",  "Use GIMPACT for trimesh collisions (experimental)")
@@ -40,19 +40,32 @@ project.name = "ode"
 -- Set the output directories
 
   if (options["enable-shared-only"] or options["enable-static-only"]) then
-    project.config["Debug"].bindir   = "../lib/debug"
-    project.config["Debug"].libdir   = "../lib/debug"
-    project.config["Release"].bindir = "../lib/release"
-    project.config["Release"].bindir = "../lib/release"
+    project.config["DebugSingle"].bindir   = "../lib/debug"
+    project.config["DebugSingle"].libdir   = "../lib/debug"
+    project.config["ReleaseSingle"].bindir = "../lib/release"
+    project.config["ReleaseSingle"].libdir = "../lib/release"
+    project.config["DebugDouble"].bindir   = "../lib/debug"
+    project.config["DebugDouble"].libdir   = "../lib/debug"
+    project.config["ReleaseDouble"].bindir = "../lib/release"
+    project.config["ReleaseDouble"].libdir = "../lib/release"
   else
-    project.config["DebugDLL"].bindir   = "../lib/DebugDLL"
-    project.config["DebugDLL"].libdir   = "../lib/DebugDLL"
-    project.config["ReleaseDLL"].bindir = "../lib/ReleaseDLL"
-    project.config["ReleaseDLL"].libdir = "../lib/ReleaseDLL"
-    project.config["DebugLib"].bindir   = "../lib/DebugLib"
-    project.config["DebugLib"].libdir   = "../lib/DebugLib"
-    project.config["ReleaseLib"].bindir = "../lib/ReleaseLib"
-    project.config["ReleaseLib"].libdir = "../lib/ReleaseLib"
+    project.config["DebugSingleDLL"].bindir   = "../lib/DebugSingleDLL"
+    project.config["DebugSingleDLL"].libdir   = "../lib/DebugSingleDLL"
+    project.config["ReleaseSingleDLL"].bindir = "../lib/ReleaseSingleDLL"
+    project.config["ReleaseSingleDLL"].libdir = "../lib/ReleaseSingleDLL"
+    project.config["DebugSingleLib"].bindir   = "../lib/DebugSingleLib"
+    project.config["DebugSingleLib"].libdir   = "../lib/DebugSingleLib"
+    project.config["ReleaseSingleLib"].bindir = "../lib/ReleaseSingleLib"
+    project.config["ReleaseSingleLib"].libdir = "../lib/ReleaseSingleLib"
+
+    project.config["DebugDoubleDLL"].bindir   = "../lib/DebugDoubleDLL"
+    project.config["DebugDoubleDLL"].libdir   = "../lib/DebugDoubleDLL"
+    project.config["ReleaseDoubleDLL"].bindir = "../lib/ReleaseDoubleDLL"
+    project.config["ReleaseDoubleDLL"].libdir = "../lib/ReleaseDoubleDLL"
+    project.config["DebugDoubleLib"].bindir   = "../lib/DebugDoubleLib"
+    project.config["DebugDoubleLib"].libdir   = "../lib/DebugDoubleLib"
+    project.config["ReleaseDoubleLib"].bindir = "../lib/ReleaseDoubleLib"
+    project.config["ReleaseDoubleLib"].libdir = "../lib/ReleaseDoubleLib"
   end
 
 
@@ -75,15 +88,19 @@ project.name = "ode"
   function doclean(cmd, arg)
     docommand(cmd, arg)
     if (options["target"] == "") then
-      os.remove("../include/ode/config.h")
+      os.remove("../ode/src/config.h")
     end
     os.rmdir("custom")
     os.rmdir("../lib/debug")
     os.rmdir("../lib/release")
-    os.rmdir("../lib/DebugDLL")
-    os.rmdir("../lib/DebugLib")
-    os.rmdir("../lib/ReleaseDLL")
-    os.rmdir("../lib/ReleaseLib")
+    os.rmdir("../lib/DebugSingleDLL")
+    os.rmdir("../lib/DebugSingleLib")
+    os.rmdir("../lib/ReleaseSingleDLL")
+    os.rmdir("../lib/ReleaseSingleLib")
+    os.rmdir("../lib/DebugDoubleDLL")
+    os.rmdir("../lib/DebugDoubleLib")
+    os.rmdir("../lib/ReleaseDoubleDLL")
+    os.rmdir("../lib/ReleaseDoubleLib")
     os.rmdir("gnu/obj")
     os.rmdir("vs2002/obj")
     os.rmdir("vs2003/obj")

@@ -32,6 +32,7 @@ internal data structures and functions for collision detection.
 #include <ode/common.h>
 #include <ode/contact.h>
 #include <ode/collision.h>
+#include "config.h"
 #include "objects.h"
 
 //****************************************************************************

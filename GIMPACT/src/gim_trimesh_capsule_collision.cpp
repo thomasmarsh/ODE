@@ -40,8 +40,8 @@ email: projectileman@yahoo.com
 */
 void gim_closest_point_triangle_segment(GIM_TRIANGLE_DATA * triangle, vec3f s1,vec3f s2, GDYNAMIC_ARRAY * contacts)
 {
-    vec3f segment_points[4];
-    vec3f closest_points[2];
+    vec3f segment_points[4] = {{0}};
+    vec3f closest_points[2] = {{0}};
     GUINT intersection_type, out_edge= 10;
     GREAL dis, dis_temp,perpend;
     vec4f sdiff;

@@ -1,8 +1,21 @@
-EXTRA_DIST = \
-        gim_boxpruning.cpp                gim_contact.cpp \
-        gim_math.cpp                      gim_memory.cpp \
-        gimpact.cpp                       gim_trimesh_capsule_collision.cpp \
-        gim_trimesh.cpp                   gim_trimesh_ray_collision.cpp \
-        gim_trimesh_sphere_collision.cpp  gim_trimesh_trimesh_collision.cpp \
-        gim_tri_tri_overlap.cpp
+if GIMPACT
+
+noinst_LTLIBRARIES = libGIMPACT.la
+libGIMPACT_la_CPPFLAGS = -fno-strict-aliasing \
+                        -I$(top_srcdir)/include \
+                        -I$(top_srcdir)/GIMPACT/include
+
+libGIMPACT_la_SOURCES = gim_boxpruning.cpp \
+                        gim_contact.cpp \
+                        gim_math.cpp \
+                        gim_memory.cpp \
+                        gim_tri_tri_overlap.cpp \
+                        gim_trimesh.cpp \
+                        gim_trimesh_capsule_collision.cpp \
+                        gim_trimesh_ray_collision.cpp \
+                        gim_trimesh_sphere_collision.cpp \
+                        gim_trimesh_trimesh_collision.cpp \
+                        gimpact.cpp
+
+endif
 

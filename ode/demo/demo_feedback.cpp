@@ -22,7 +22,7 @@
 
 // Test for breaking joints, by Bram Stolk
 
-#include <ode/config.h>
+#include <ode/odeconfig.h>
 #include <assert.h>
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
@@ -312,4 +312,6 @@ int main (int argc, char **argv)
   dCloseODE();
   return 0;
 }
+
+
 

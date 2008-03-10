@@ -22,7 +22,7 @@
 
 #ifndef _ODE_COMMON_H_
 #define _ODE_COMMON_H_
-#include <ode/config.h>
+#include <ode/odeconfig.h>
 #include <ode/error.h>
 #include <math.h>
 
@@ -221,22 +221,6 @@ typedef dReal dQuaternion[4];
 
 #define dALLOCA16(n) \
   ((char*)dEFFICIENT_SIZE(((size_t)(alloca((n)+(EFFICIENT_ALIGNMENT-1))))))
-
-
-// Use the error-checking memory allocation system.  Because this system uses heap
-//  (malloc) instead of stack (alloca), it is slower.  However, it allows you to
-//  simulate larger scenes, as well as handle out-of-memory errors in a somewhat
-//  graceful manner
-
-// #define dUSE_MALLOC_FOR_ALLOCA
-
-#ifdef dUSE_MALLOC_FOR_ALLOCA
-enum {
-  d_MEMORY_OK = 0,		/* no memory errors */
-  d_MEMORY_OUT_OF_MEMORY	/* malloc failed due to out of memory error */
-};
-
-#endif
 
 
 
