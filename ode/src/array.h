@@ -39,7 +39,8 @@
 #ifndef _ODE_ARRAY_H_
 #define _ODE_ARRAY_H_
 
-#include <ode/config.h>
+#include <ode/odeconfig.h>
+#include "config.h"
 
 
 // this base class has no constructors or destructor, for your convenience.

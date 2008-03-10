@@ -2,12 +2,22 @@ package.name = "ode"
 package.language = "c++"
 package.objdir = "obj/ode"
 
+-- Differentiate between Single and Double precision
+
+  for k,v in ipairs(project.configs) do
+    if (string.find(v, "Single") ~= nil) then
+      package.config[v].target="ode_single"
+    end
+    if (string.find(v, "Double") ~= nil) then
+      package.config[v].target="ode_double"
+    end
+  end
 
 -- Append a "d" to the debug version of the libraries
 
   for k,v in ipairs(project.configs) do
     if (string.find(v, "Debug") ~= nil) then
-      package.config[v].target = "oded"
+      package.config[v].target=package.config[v].target.."d"
     end
   end
   
@@ -26,10 +36,10 @@ package.objdir = "obj/ode"
   io.input("config-default.h")
   local text = io.read("*a")
 
-  if (options["with-doubles"]) then
-    text = string.gsub(text, "#define dSINGLE", "/* #define dSINGLE */")
-    text = string.gsub(text, "/%* #define dDOUBLE %*/", "#define dDOUBLE")
-  end
+--  if (options["with-doubles"]) then
+--    text = string.gsub(text, "#define dSINGLE", "/* #define dSINGLE */")
+--    text = string.gsub(text, "/%* #define dDOUBLE %*/", "#define dDOUBLE")
+--  end
 
   if (options["no-trimesh"]) then
     
@@ -46,7 +56,7 @@ package.objdir = "obj/ode"
     text = string.gsub(text, "/%* #define dUSE_MALLOC_FOR_ALLOCA %*/", "#define dUSE_MALLOC_FOR_ALLOCA")
   end
 
-  io.output("../include/ode/config.h")
+  io.output("../ode/src/config.h")
   io.write(text)
   io.close()
 
@@ -65,20 +75,35 @@ package.objdir = "obj/ode"
   
   else
   
-    package.config["DebugDLL"].kind = "dll"
-    package.config["DebugLib"].kind = "lib"
-    package.config["ReleaseDLL"].kind = "dll"
-    package.config["ReleaseLib"].kind = "lib"
+    package.config["DebugSingleDLL"].kind = "dll"
+    package.config["DebugSingleLib"].kind = "lib"
+    package.config["ReleaseSingleDLL"].kind = "dll"
+    package.config["ReleaseSingleLib"].kind = "lib"
 
-    table.insert(package.config["DebugDLL"].defines, "ODE_DLL")
-    table.insert(package.config["ReleaseDLL"].defines, "ODE_DLL")
-    table.insert(package.config["DebugLib"].defines, "ODE_LIB")
-    table.insert(package.config["ReleaseLib"].defines, "ODE_LIB")
-  
+    table.insert(package.config["DebugSingleDLL"].defines, "ODE_DLL")
+    table.insert(package.config["ReleaseSingleDLL"].defines, "ODE_DLL")
+    table.insert(package.config["DebugSingleLib"].defines, "ODE_LIB")
+    table.insert(package.config["ReleaseSingleLib"].defines, "ODE_LIB")
+
+    package.config["DebugDoubleDLL"].kind = "dll"
+    package.config["DebugDoubleLib"].kind = "lib"
+    package.config["ReleaseDoubleDLL"].kind = "dll"
+    package.config["ReleaseDoubleLib"].kind = "lib"
+
+    table.insert(package.config["DebugDoubleDLL"].defines, "ODE_DLL")
+    table.insert(package.config["ReleaseDoubleDLL"].defines, "ODE_DLL")
+    table.insert(package.config["DebugDoubleLib"].defines, "ODE_LIB")
+    table.insert(package.config["ReleaseDoubleLib"].defines, "ODE_LIB")
+
+    table.insert(package.config["DebugDoubleDLL"].defines, "dDOUBLE")
+    table.insert(package.config["ReleaseDoubleDLL"].defines, "dDOUBLE")
+    table.insert(package.config["DebugDoubleLib"].defines, "dDOUBLE")
+    table.insert(package.config["ReleaseDoubleLib"].defines, "dDOUBLE")  
   end
 
   package.includepaths =
   {
+    "../../ode/src",
     "../../include",
     "../../OPCODE",
     "../../GIMPACT/include"
@@ -96,15 +121,24 @@ package.objdir = "obj/ode"
 
 -- Build Flags
 
-	package.config["DebugLib"].buildflags   = { }
-	package.config["DebugDLL"].buildflags   = { }
+	package.config["DebugSingleLib"].buildflags   = { }
+	package.config["DebugSingleDLL"].buildflags   = { }
 
-	package.config["ReleaseDLL"].buildflags = { "optimize-speed", "no-symbols", "no-frame-pointer" }
-	package.config["ReleaseLib"].buildflags = { "optimize-speed", "no-symbols", "no-frame-pointer" }
+	package.config["ReleaseSingleDLL"].buildflags = { "optimize-speed", "no-symbols", "no-frame-pointer" }
+	package.config["ReleaseSingleLib"].buildflags = { "optimize-speed", "no-symbols", "no-frame-pointer" }
+
+	package.config["DebugDoubleLib"].buildflags   = { }
+	package.config["DebugDoubleDLL"].buildflags   = { }
+
+	package.config["ReleaseDoubleDLL"].buildflags = { "optimize-speed", "no-symbols", "no-frame-pointer" }
+	package.config["ReleaseDoubleLib"].buildflags = { "optimize-speed", "no-symbols", "no-frame-pointer" }
 
 	if (options.target == "vs6" or options.target == "vs2002" or options.target == "vs2003") then
-		table.insert(package.config.DebugLib.buildflags, "static-runtime")
-		table.insert(package.config.ReleaseLib.buildflags, "static-runtime")
+      for k,v in ipairs(project.configs) do
+        if (string.find(v, "Lib") ~= nil) then
+          table.insert(package.config[v].buildflags, "static-runtime")
+        end
+      end
 	end
 
 
@@ -127,7 +161,7 @@ package.objdir = "obj/ode"
   {
     "../../ode/src/collision_std.cpp",
     "../../ode/src/scrapbook.cpp",
-    "../../ode/src/stack.cpp"
+    "../../ode/src/stack.cpp",
   }
 
   trimesh_files =

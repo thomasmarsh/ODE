@@ -23,7 +23,7 @@
 #ifndef _ODE_COMMON_H_
 #define _ODE_COMMON_H_
 
-#include <ode/config.h>
+#include <ode/odeconfig.h>
 #include <ode/error.h>
 
 #ifdef __cplusplus

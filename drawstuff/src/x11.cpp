@@ -22,7 +22,8 @@
 
 // main window and event handling for X11
 
-#include <ode/config.h>
+#include <ode/odeconfig.h>
+#include "config.h"
 #include <stdlib.h>
 #include <string.h>
 #include <stdarg.h>
@@ -415,4 +416,6 @@ extern "C" double dsElapsedTime()
   return 0.01666; // Assume 60 fps
 #endif
 }
+
+
 

@@ -31,12 +31,12 @@ CREATING CUSTOM PROJECT FILES
 
  To build the test applications and Drawstuff library, use the form:
  
-   premake --with-tests --target [toolset]
+   premake --with-demos --target [toolset]
    
  If you ever decide that you want to remove your custom project, you
  can just type:
 
-   premake --with-tests --clean
+   premake --with-demos --clean
 
  Feel free to direct any questions or comments to myself or the ODE
  mailing list.

@@ -1,4 +1,7 @@
-EXTRA_DIST = \
+AM_CPPFLAGS = -I $(top_srcdir)/OPCODE -I $(top_srcdir)/include
+
+noinst_LTLIBRARIES = libIce.la
+libIce_la_SOURCES = \
         IceAABB.cpp             IceAABB.h             IceAxes.h \
         IceBoundingSphere.h     IceContainer.cpp      IceContainer.h \
         IceFPU.h                IceHPoint.cpp         IceHPoint.h \

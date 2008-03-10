@@ -263,7 +263,11 @@ static void command (int cmd)
 	//
 
 	if ( cmd == 'b' || cmd == 's' || cmd == 'c' || 
-		 cmd == 'x' || cmd == 'y' || cmd == 'm' || cmd == 'v' )
+		 cmd == 'x' || cmd == 'y' || cmd == 'v' 
+                #if dTRIMESH_ENABLED
+		|| cmd == 'm' 
+                #endif
+		 )
 	{
 		if ( num < NUM )
 		{
