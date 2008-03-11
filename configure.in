@@ -81,7 +81,7 @@ AM_CONDITIONAL(X86_64_SYSTEM, test x$cpu64 = xyes)
 
 
 dnl check for required headers
-AC_CHECK_HEADERS( alloca.h stdio.h stdlib.h math.h string.h stdarg.h malloc.h float.h time.h sys/time.h )
+AC_CHECK_HEADERS( alloca.h stdio.h stdint.h stdlib.h math.h string.h stdarg.h malloc.h float.h time.h sys/time.h )
 
 
 opcode=no
@@ -275,11 +275,14 @@ AH_BOTTOM([
 #ifdef HAVE_MALLOC_H
 #include <malloc.h>
 #endif
+#ifdef HAVE_STDINT_H
+#include <stdint.h>
+#endif
 
 /* an integer type that we can safely cast a pointer to and
  * from without loss of bits.
  */
-typedef ptrdiff_t intP;
+typedef uintptr_t intP;
 
 
 // Use the error-checking memory allocation system.  Because this system uses heap
