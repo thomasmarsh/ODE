@@ -38,7 +38,6 @@
 #define dsDrawCapsule dsDrawCapsuleD
 #define dsDrawLine dsDrawLineD
 #define dsDrawTriangle dsDrawTriangleD
-#define dGeomTriMeshDataBuildSingle dGeomTriMeshDataBuildDouble
 #endif
 
 
@@ -214,7 +213,7 @@ static void command (int cmd)
     }
     else if (cmd == 'm') {
       dTriMeshDataID new_tmdata = dGeomTriMeshDataCreate();
-      dGeomTriMeshDataBuildSingle(new_tmdata, &Vertices[0], 3 * sizeof(dReal), VertexCount, 
+      dGeomTriMeshDataBuildSingle(new_tmdata, &Vertices[0], 3 * sizeof(float), VertexCount, 
 		  (dTriIndex*)&Indices[0], IndexCount, 3 * sizeof(dTriIndex));
 
       obj[i].geom[0] = dCreateTriMesh(space, new_tmdata, 0, 0, 0);
