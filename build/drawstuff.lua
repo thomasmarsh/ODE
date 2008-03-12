@@ -33,38 +33,37 @@ package.objdir = "obj/drawstuff"
   {
     "DS_LIB"
   }
-      
-  if (options["enable-shared-only"]) then
-    package.kind = "dll"
-    table.insert(package.defines, dll_defines)
-  elseif (options["enable-static-only"]) then
-    package.kind = "lib"
-    table.insert(package.defines, lib_defines)
-  else
-    package.config["DebugSingleDLL"].kind = "dll"
-    package.config["DebugSingleLib"].kind = "lib"
-    package.config["ReleaseSingleDLL"].kind = "dll"
-    package.config["ReleaseSingleLib"].kind = "lib"
 
-    table.insert(package.config["DebugSingleDLL"].defines, dll_defines)
-    table.insert(package.config["ReleaseSingleDLL"].defines, dll_defines)
+  if (not options["enable-shared-only"]) then
+
+    package.config["DebugSingleLib"].kind = "lib"
+    package.config["ReleaseSingleLib"].kind = "lib"
     table.insert(package.config["DebugSingleLib"].defines, lib_defines)
     table.insert(package.config["ReleaseSingleLib"].defines, lib_defines)
 
-    package.config["DebugDoubleDLL"].kind = "dll"
     package.config["DebugDoubleLib"].kind = "lib"
-    package.config["ReleaseDoubleDLL"].kind = "dll"
     package.config["ReleaseDoubleLib"].kind = "lib"
-
-    table.insert(package.config["DebugDoubleDLL"].defines, dll_defines)
-    table.insert(package.config["ReleaseDoubleDLL"].defines, dll_defines)
     table.insert(package.config["DebugDoubleLib"].defines, lib_defines)
     table.insert(package.config["ReleaseDoubleLib"].defines, lib_defines)
-
-    table.insert(package.config["DebugDoubleDLL"].defines, "dDOUBLE")
-    table.insert(package.config["ReleaseDoubleDLL"].defines, "dDOUBLE")
     table.insert(package.config["DebugDoubleLib"].defines, "dDOUBLE")
     table.insert(package.config["ReleaseDoubleLib"].defines, "dDOUBLE")
+
+  end
+
+  if (not options["enable-static-only"]) then
+
+    package.config["DebugSingleDLL"].kind = "dll"
+    package.config["ReleaseSingleDLL"].kind = "dll"
+    table.insert(package.config["DebugSingleDLL"].defines, dll_defines)
+    table.insert(package.config["ReleaseSingleDLL"].defines, dll_defines)
+
+    package.config["DebugDoubleDLL"].kind = "dll"
+    package.config["ReleaseDoubleDLL"].kind = "dll"
+    table.insert(package.config["DebugDoubleDLL"].defines, dll_defines)
+    table.insert(package.config["ReleaseDoubleDLL"].defines, dll_defines)
+    table.insert(package.config["DebugDoubleDLL"].defines, "dDOUBLE")
+    table.insert(package.config["ReleaseDoubleDLL"].defines, "dDOUBLE")
+
   end
 
   package.includepaths =
@@ -119,7 +118,7 @@ package.objdir = "obj/drawstuff"
     "GL",
     "GLU"
   }
-  
+
   if (windows) then
     table.insert(package.links, windows_libs)
   else
