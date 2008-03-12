@@ -68,7 +68,7 @@ ODE_API void dGeomTriMeshSetLastTransform( dGeomID g, dMatrix4 last_trans );
 ODE_API dReal* dGeomTriMeshGetLastTransform( dGeomID g );
 
 /*
- * Build TriMesh data with single precision used in vertex data .
+ * Build a TriMesh data object with single precision vertex data.
  */
 ODE_API void dGeomTriMeshDataBuildSingle(dTriMeshDataID g,
                                  const void* Vertices, int VertexStride, int VertexCount, 
@@ -79,7 +79,7 @@ ODE_API void dGeomTriMeshDataBuildSingle1(dTriMeshDataID g,
                                   const void* Indices, int IndexCount, int TriStride,
                                   const void* Normals);
 /*
-* Build TriMesh data with double pricision used in vertex data .
+* Build a TriMesh data object with double precision vertex data.
 */
 ODE_API void dGeomTriMeshDataBuildDouble(dTriMeshDataID g, 
                                  const void* Vertices,  int VertexStride, int VertexCount, 

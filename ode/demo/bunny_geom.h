@@ -3,7 +3,7 @@ const int VertexCount = 453;
 const int IndexCount = 902 * 3;
 
 
-float Vertices[VertexCount * 3] = {
+dReal Vertices[VertexCount * 3] = {
 	REAL(-0.334392), REAL(0.133007), REAL(0.062259),
 	REAL(-0.350189), REAL(0.150354), REAL(-0.147769),
 	REAL(-0.234201), REAL(0.343811), REAL(-0.174307),

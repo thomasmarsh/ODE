@@ -56,6 +56,7 @@ dGeomID gheight;
 #define dsDrawCapsule dsDrawCapsuleD
 #define dsDrawConvex dsDrawConvexD
 #define dsDrawTriangle dsDrawTriangleD
+#define dGeomTriMeshDataBuildSingle dGeomTriMeshDataBuildDouble
 #endif
 
 
@@ -263,11 +264,7 @@ static void command (int cmd)
 	//
 
 	if ( cmd == 'b' || cmd == 's' || cmd == 'c' || 
-		 cmd == 'x' || cmd == 'y' || cmd == 'v' 
-                #if dTRIMESH_ENABLED
-		|| cmd == 'm' 
-                #endif
-		 )
+		 cmd == 'x' || cmd == 'y' || cmd == 'v' || cmd == 'm' )
 	{
 		if ( num < NUM )
 		{
@@ -347,11 +344,11 @@ static void command (int cmd)
 			dMassSetSphere (&m,DENSITY,sides[0]);
 			obj[i].geom[0] = dCreateSphere (space,sides[0]);
 		}
-#ifdef dTRIMESH_ENABLED
 		else if (cmd == 'm')
 		{
 			dTriMeshDataID new_tmdata = dGeomTriMeshDataCreate();
-			dGeomTriMeshDataBuildSingle(new_tmdata, &Vertices[0], 3 * sizeof(float), VertexCount, &Indices[0], IndexCount, 3 * sizeof(dTriIndex));
+			dGeomTriMeshDataBuildSingle(new_tmdata, &Vertices[0], 3 * sizeof(dReal), VertexCount, 
+				&Indices[0], IndexCount, 3 * sizeof(dTriIndex));
 
 			obj[i].geom[0] = dCreateTriMesh(space, new_tmdata, 0, 0, 0);
 
@@ -360,7 +357,6 @@ static void command (int cmd)
 			dGeomSetPosition(obj[i].geom[0], -m.c[0], -m.c[1], -m.c[2]);
 			dMassTranslate(&m, -m.c[0], -m.c[1], -m.c[2]);
 		}
-#endif
 		else if (cmd == 'x')
 		{
 			dGeomID g2[GPB];		// encapsulated geometries
@@ -663,10 +659,8 @@ static void simLoop (int pause)
 				obj[i].last_matrix_index = !obj[i].last_matrix_index;
 
 				// Apply the 'other' matrix which is the oldest.
-#ifdef dTRIMESH_ENABLED
 				dGeomTriMeshSetLastTransform( obj[i].geom[j], 
 					*(dMatrix4*)( obj[i].matrix_dblbuff + ( obj[i].last_matrix_index * 16 ) ) );
-#endif
 			}
 			else
 			{
