@@ -26,12 +26,11 @@ project.name = "ode"
   addoption("with-demos",    		"Builds the demo applications and DrawStuff library")
   addoption("with-tests",    		"Builds the unit test application")
   addoption("with-gimpact",  		"Use GIMPACT for trimesh collisions (experimental)")
-  addoption("enable-static-only",	"Create ODE project for static library (.lib) only")
-  addoption("enable-shared-only",	"Create ODE project for shared library (.dll) only")
+  addoption("enable-static-only",	"Only create static library (.lib) project configurations")
+  addoption("enable-shared-only",	"Only create dynamic library (.dll) project configurations")
   addoption("no-dif",        		"Exclude DIF (Dynamics Interchange Format) exports")
   addoption("no-trimesh",    		"Exclude trimesh collision geometry")
   addoption("no-alloca",     		"Use heap memory instead of the stack (experimental)")
-  addoption("no-alloca",			"Use heap memory instead of the stack (experimental)")
 
 
 -- If the `--usetargetpath` flag is specified, each set of generated files
