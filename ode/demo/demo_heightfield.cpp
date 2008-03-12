@@ -49,16 +49,6 @@ dGeomID gheight;
 #define HFIELD_WSAMP			( HFIELD_WIDTH / ( HFIELD_WSTEP-1 ) )
 #define HFIELD_DSAMP			( HFIELD_DEPTH / ( HFIELD_DSTEP-1 ) )
 
-#ifdef dDOUBLE
-#define dsDrawBox dsDrawBoxD
-#define dsDrawSphere dsDrawSphereD
-#define dsDrawCylinder dsDrawCylinderD
-#define dsDrawCapsule dsDrawCapsuleD
-#define dsDrawConvex dsDrawConvexD
-#define dsDrawTriangle dsDrawTriangleD
-#define dGeomTriMeshDataBuildSingle dGeomTriMeshDataBuildDouble
-#endif
-
 
 
 //<---- Convex Object
@@ -115,6 +105,7 @@ unsigned int polygons[] = //Polygons for a cube (6 squares)
 #define dsDrawCylinder dsDrawCylinderD
 #define dsDrawCapsule dsDrawCapsuleD
 #define dsDrawConvex dsDrawConvexD
+#define dsDrawTriangle dsDrawTriangleD
 #endif
 
 
@@ -264,7 +255,10 @@ static void command (int cmd)
 	//
 
 	if ( cmd == 'b' || cmd == 's' || cmd == 'c' || 
-		 cmd == 'x' || cmd == 'y' || cmd == 'v' || cmd == 'm' )
+                #ifdef dTRIMESH_ENABLED
+		cmd == 'm' ||
+                #endif
+		cmd == 'x' || cmd == 'y' || cmd == 'v' )
 	{
 		if ( num < NUM )
 		{
@@ -344,10 +338,11 @@ static void command (int cmd)
 			dMassSetSphere (&m,DENSITY,sides[0]);
 			obj[i].geom[0] = dCreateSphere (space,sides[0]);
 		}
+		#ifdef dTRIMESH_ENABLED
 		else if (cmd == 'm')
 		{
 			dTriMeshDataID new_tmdata = dGeomTriMeshDataCreate();
-			dGeomTriMeshDataBuildSingle(new_tmdata, &Vertices[0], 3 * sizeof(dReal), VertexCount, 
+			dGeomTriMeshDataBuildSingle(new_tmdata, &Vertices[0], 3 * sizeof(float), VertexCount, 
 				&Indices[0], IndexCount, 3 * sizeof(dTriIndex));
 
 			obj[i].geom[0] = dCreateTriMesh(space, new_tmdata, 0, 0, 0);
@@ -357,6 +352,7 @@ static void command (int cmd)
 			dGeomSetPosition(obj[i].geom[0], -m.c[0], -m.c[1], -m.c[2]);
 			dMassTranslate(&m, -m.c[0], -m.c[1], -m.c[2]);
 		}
+		#endif
 		else if (cmd == 'x')
 		{
 			dGeomID g2[GPB];		// encapsulated geometries
@@ -619,7 +615,7 @@ static void simLoop (int pause)
 				dsSetColor (1,1,0);
 			}
 
-
+                        #ifdef dTRIMESH_ENABLED
 			if ( obj[i].geom[j] && dGeomGetClass(obj[i].geom[j]) == dTriMeshClass )
 			{
 				dTriIndex* Indices = (dTriIndex*)::Indices;
@@ -662,6 +658,9 @@ static void simLoop (int pause)
 				dGeomTriMeshSetLastTransform( obj[i].geom[j], 
 					*(dMatrix4*)( obj[i].matrix_dblbuff + ( obj[i].last_matrix_index * 16 ) ) );
 			}
+			#else
+			if (0) {}
+			#endif
 			else
 			{
 				drawGeom (obj[i].geom[j],0,0,show_aabb);
