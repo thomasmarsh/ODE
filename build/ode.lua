@@ -150,8 +150,9 @@ package.objdir = "obj/ode"
   excluded_files =
   {
     "../../ode/src/collision_std.cpp",
-    "../../ode/src/scrapbook.cpp",
-    "../../ode/src/stack.cpp",
+    "../../ode/src/scrapbook.cpp_deprecated",
+    "../../ode/src/stack.cpp_deprecated",
+    "../../ode/src/stack.h_deprecated",
   }
 
   trimesh_files =
