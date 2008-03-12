@@ -38,6 +38,7 @@
 #define dsDrawCapsule dsDrawCapsuleD
 #define dsDrawLine dsDrawLineD
 #define dsDrawTriangle dsDrawTriangleD
+#define dGeomTriMeshDataBuildSingle dGeomTriMeshDataBuildDouble
 #endif
 
 
@@ -213,7 +214,7 @@ static void command (int cmd)
     }
     else if (cmd == 'm') {
       dTriMeshDataID new_tmdata = dGeomTriMeshDataCreate();
-      dGeomTriMeshDataBuildSingle(new_tmdata, &Vertices[0], 3 * sizeof(float), VertexCount, 
+      dGeomTriMeshDataBuildSingle(new_tmdata, &Vertices[0], 3 * sizeof(dReal), VertexCount, 
 		  (dTriIndex*)&Indices[0], IndexCount, 3 * sizeof(dTriIndex));
 
       obj[i].geom[0] = dCreateTriMesh(space, new_tmdata, 0, 0, 0);
@@ -551,9 +552,9 @@ int main (int argc, char **argv)
 
   // note: can't share tridata if intending to trimesh-trimesh collide
   TriData1 = dGeomTriMeshDataCreate();
-  dGeomTriMeshDataBuildSingle(TriData1, &Vertices[0], 3 * sizeof(float), VertexCount, (dTriIndex*)&Indices[0], IndexCount, 3 * sizeof(dTriIndex));
+  dGeomTriMeshDataBuildSingle(TriData1, &Vertices[0], 3 * sizeof(dReal), VertexCount, (dTriIndex*)&Indices[0], IndexCount, 3 * sizeof(dTriIndex));
   TriData2 = dGeomTriMeshDataCreate();
-  dGeomTriMeshDataBuildSingle(TriData2, &Vertices[0], 3 * sizeof(float), VertexCount, (dTriIndex*)&Indices[0], IndexCount, 3 * sizeof(dTriIndex));
+  dGeomTriMeshDataBuildSingle(TriData2, &Vertices[0], 3 * sizeof(dReal), VertexCount, (dTriIndex*)&Indices[0], IndexCount, 3 * sizeof(dTriIndex));
   
   TriMesh1 = dCreateTriMesh(space, TriData1, 0, 0, 0);
   TriMesh2 = dCreateTriMesh(space, TriData2, 0, 0, 0);
