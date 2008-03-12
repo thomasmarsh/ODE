@@ -1598,3 +1598,16 @@ void dsSetCapsuleQuality (int n)
 {
   capped_cylinder_quality = n;
 }
+
+void dsSetDrawMode(int mode)
+{
+  switch(mode)
+    {
+    case DS_POLYFILL:
+      glPolygonMode(GL_FRONT,GL_FILL);
+      break;
+    case DS_WIREFRAME:
+      glPolygonMode(GL_FRONT,GL_LINE);
+      break;
+    }
+}

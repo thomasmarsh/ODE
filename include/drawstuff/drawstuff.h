@@ -66,6 +66,10 @@ extern "C" {
 #define DS_NONE   0	/* uses the current color instead of a texture */
 #define DS_WOOD   1
 
+/* draw modes */
+
+#define DS_POLYFILL  0
+#define DS_WIREFRAME 1
 
 /**
  * @struct dsFunctions
@@ -279,6 +283,13 @@ DS_API void dsDrawConvexD(const double pos[3], const double R[12],
  */
 DS_API void dsSetSphereQuality (int n);		/* default = 1 */
 DS_API void dsSetCapsuleQuality (int n);		/* default = 3 */
+
+/**
+ * @brief Set Drawmode 0=Polygon Fill,1=Wireframe).
+ * Use the DS_POLYFILL and DS_WIREFRAME macros.
+ * @ingroup drawstuff
+ */
+DS_API void dsSetDrawMode(int mode);
 
 // Backwards compatible API
 #define dsDrawCappedCylinder dsDrawCapsule

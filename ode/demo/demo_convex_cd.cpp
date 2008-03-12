@@ -25,11 +25,6 @@
 #include <ode/ode.h>
 #include <drawstuff/drawstuff.h>
 #include "texturepath.h"
-#if defined(WIN32) || defined(_WIN32)
-#include <windows.h>
-#endif
-#include <GL/gl.h>
-
 
 #ifdef _MSC_VER
 #pragma warning(disable:4244 4305)  // for VC++, no precision loss complaints
@@ -163,23 +158,23 @@ void simLoop (int pause)
   pos = dGeomGetPosition (geoms[0]);
   R = dGeomGetRotation (geoms[0]);
   dsSetColor (0.6f,0.6f,1);
-  glPolygonMode(GL_FRONT,GL_LINE);
+  dsSetDrawMode(DS_WIREFRAME);
   dsDrawConvex(pos,R,planes,
 	       planecount,
 	       points,
 	       pointcount,
 	       polygons);
-  glPolygonMode(GL_FRONT,GL_FILL);
+  dsSetDrawMode(DS_POLYFILL);
   pos = dGeomGetPosition (geoms[1]);
   R = dGeomGetRotation (geoms[1]);
   dsSetColor (0.4f,1,1);
-  glPolygonMode(GL_FRONT,GL_LINE);
+  dsSetDrawMode(DS_WIREFRAME);
   dsDrawConvex(pos,R,planes,
 	       planecount,
 	       points,
 	       pointcount,
 	       polygons);
-    glPolygonMode(GL_FRONT,GL_FILL);
+    dsSetDrawMode(DS_POLYFILL);
   /*if (show_contacts) */
   dMatrix3 RI;
   dRSetIdentity (RI);
