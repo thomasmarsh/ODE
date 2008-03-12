@@ -10,27 +10,25 @@ and another for just about everything else.
 1. BUILDING WITH VISUAL STUDIO (2002 and up)
 
  If you downloaded the source code from Subversion you must first copy 
- the file build/config-default.h to include/ode/config.h. If you 
+ the file build/config-default.h to ode/src/config.h. If you 
  downloaded a source code package from SourceForge this has already 
  been done for you.
  
  The directory ode/build contains project files for all supported versions
- of Visual Studio. Open the appropriate solution for your version, build,
- and go! 
+ of Visual Studio.  Note that Visual Studio 6 is no longer supported; 
+ please upgrade to Visual Studio 2005 C++ Express (it's free!).
+
+ Open the appropriate solution for your version, pick the build 
+ configuration you want, hit build, and go!
  
- Single-precision math is used by default. If you would like to switch to
- doubles instead, edit ode/include/ode/config.h and replace 
+ The build configuration choices are:
  
-   #define dSINGLE 1
-   
- with the line
+   Debug or Release
+   Single or Double precision
+   Static Library (Lib) or Shared Library (DLL)
  
-   #define dDOUBLE 1
-   
- and the rebuild everything.
- 
- Note that Visual Studio 6 is no longer supported; please upgrade to 
- Visual Studio 2005 C++ Express (it's free!).
+ For advanced users, if you want to create your own solution then grab a
+ copy of Premake and follow the instructions in section 3.
   
  
 2. BUILDING WITH AUTOTOOLS (Linux, OS X, etc.)

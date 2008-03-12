@@ -59,8 +59,8 @@
     package.path = packagepath
     package.objdir = "obj/"..name
 
-    package.includepaths = 
-    { 
+    package.includepaths =
+    {
     "../../include",
     "../../ode/src"
     }
@@ -88,10 +88,16 @@
       table.insert(package.defines, "WIN32")
       table.insert(package.files, "../../drawstuff/src/resources.rc")
    end
+
+   if (not options["enable-static-only"]) then
     table.insert(package.config["DebugDoubleDLL"].defines, "dDOUBLE")
     table.insert(package.config["ReleaseDoubleDLL"].defines, "dDOUBLE")
+   end
+   if (not options["enable-shared-only"]) then
     table.insert(package.config["DebugDoubleLib"].defines, "dDOUBLE")
     table.insert(package.config["ReleaseDoubleLib"].defines, "dDOUBLE")
+   end
+
   end
 
   table.foreach(demos, makedemo)

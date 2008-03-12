@@ -20,8 +20,8 @@ package.objdir = "obj/ode"
       package.config[v].target=package.config[v].target.."d"
     end
   end
-  
-  
+
+
 -- Separate distribution files into toolset subdirectories
 
   if (options["usetargetpath"]) then
@@ -31,27 +31,22 @@ package.objdir = "obj/ode"
   end
 
 
--- Write a custom <config.h> to include/ode, based on the specified flags
+-- Write a custom <config.h> to src/ode, based on the specified flags
 
   io.input("config-default.h")
   local text = io.read("*a")
 
---  if (options["with-doubles"]) then
---    text = string.gsub(text, "#define dSINGLE", "/* #define dSINGLE */")
---    text = string.gsub(text, "/%* #define dDOUBLE %*/", "#define dDOUBLE")
---  end
-
   if (options["no-trimesh"]) then
-    
+
     text = string.gsub(text, "#define dTRIMESH_ENABLED 1", "/* #define dTRIMESH_ENABLED 1 */")
     text = string.gsub(text, "#define dTRIMESH_OPCODE 1", "/* #define dTRIMESH_OPCODE 1 */")
-  
+
   elseif (options["with-gimpact"]) then
 
     text = string.gsub(text, "#define dTRIMESH_OPCODE 1", "#define dTRIMESH_GIMPACT 1")
-  
+
   end
-  
+
   if (options["no-alloca"]) then
     text = string.gsub(text, "/%* #define dUSE_MALLOC_FOR_ALLOCA %*/", "#define dUSE_MALLOC_FOR_ALLOCA")
   end
@@ -63,43 +58,38 @@ package.objdir = "obj/ode"
 
 -- Package Build Settings
 
-  if (options["enable-shared-only"]) then
-  
-    package.kind = "dll"
-    table.insert(package.defines, "ODE_DLL")
-  
-  elseif (options["enable-static-only"]) then
-  
-    package.kind = "lib"
-    table.insert(package.defines, "ODE_LIB")
-  
-  else
-  
-    package.config["DebugSingleDLL"].kind = "dll"
-    package.config["DebugSingleLib"].kind = "lib"
-    package.config["ReleaseSingleDLL"].kind = "dll"
-    package.config["ReleaseSingleLib"].kind = "lib"
+  if (not options["enable-shared-only"]) then
 
-    table.insert(package.config["DebugSingleDLL"].defines, "ODE_DLL")
-    table.insert(package.config["ReleaseSingleDLL"].defines, "ODE_DLL")
+    package.config["DebugSingleLib"].kind = "lib"
+    package.config["ReleaseSingleLib"].kind = "lib"
     table.insert(package.config["DebugSingleLib"].defines, "ODE_LIB")
     table.insert(package.config["ReleaseSingleLib"].defines, "ODE_LIB")
 
-    package.config["DebugDoubleDLL"].kind = "dll"
     package.config["DebugDoubleLib"].kind = "lib"
-    package.config["ReleaseDoubleDLL"].kind = "dll"
     package.config["ReleaseDoubleLib"].kind = "lib"
-
-    table.insert(package.config["DebugDoubleDLL"].defines, "ODE_DLL")
-    table.insert(package.config["ReleaseDoubleDLL"].defines, "ODE_DLL")
     table.insert(package.config["DebugDoubleLib"].defines, "ODE_LIB")
     table.insert(package.config["ReleaseDoubleLib"].defines, "ODE_LIB")
+    table.insert(package.config["DebugDoubleLib"].defines, "dDOUBLE")
+    table.insert(package.config["ReleaseDoubleLib"].defines, "dDOUBLE")
 
+  end
+
+  if (not options["enable-static-only"]) then
+
+    package.config["DebugSingleDLL"].kind = "dll"
+    package.config["ReleaseSingleDLL"].kind = "dll"
+    table.insert(package.config["DebugSingleDLL"].defines, "ODE_DLL")
+    table.insert(package.config["ReleaseSingleDLL"].defines, "ODE_DLL")
+
+    package.config["DebugDoubleDLL"].kind = "dll"
+    package.config["ReleaseDoubleDLL"].kind = "dll"
+    table.insert(package.config["DebugDoubleDLL"].defines, "ODE_DLL")
+    table.insert(package.config["ReleaseDoubleDLL"].defines, "ODE_DLL")
     table.insert(package.config["DebugDoubleDLL"].defines, "dDOUBLE")
     table.insert(package.config["ReleaseDoubleDLL"].defines, "dDOUBLE")
-    table.insert(package.config["DebugDoubleLib"].defines, "dDOUBLE")
-    table.insert(package.config["ReleaseDoubleLib"].defines, "dDOUBLE")  
+
   end
+
 
   package.includepaths =
   {
@@ -183,7 +173,7 @@ package.objdir = "obj/ode"
   {
     matchrecursive("../../OPCODE/*.h", "../../OPCODE/*.cpp")
   }
-  
+
   gimpact_files =
   {
     matchrecursive("../../GIMPACT/*.h", "../../GIMPACT/*.cpp")
