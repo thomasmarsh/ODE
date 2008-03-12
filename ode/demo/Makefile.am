@@ -4,7 +4,10 @@ AM_CPPFLAGS = -I$(abs_top_srcdir)/include \
 AM_LDFLAGS = \
         $(top_builddir)/drawstuff/src/libdrawstuff.la \
         $(top_builddir)/ode/src/libode.la \
-        @GL_LIBS@ $(X_PRE_LIBS) $(X_LIBS) $(X_EXTRA_LIBS)
+        @GL_LIBS@
+if X11
+AM_LDFLAGS+= $(X_PRE_LIBS) $(X_LIBS) $(X_EXTRA_LIBS)
+endif
 
 noinst_HEADERS = basket_geom.h texturepath.h world_geom3.h bunny_geom.h
 
