@@ -2,65 +2,125 @@
 # Don't edit this file! Instead edit `premake.lua` then rerun `make`
 
 ifndef CONFIG
-  CONFIG=DebugDLL
+  CONFIG=DebugSingleDLL
 endif
 
-ifeq ($(CONFIG),DebugDLL)
-  BINDIR := ../../lib/DebugDLL
-  LIBDIR := ../../lib/DebugDLL
-  OBJDIR := obj/ode/DebugDLL
-  OUTDIR := ../../lib/DebugDLL
-  CPPFLAGS := -MMD -D "_CRT_SECURE_NO_DEPRECATE" -D "WIN32" -I "../../include"
+ifeq ($(CONFIG),DebugSingleDLL)
+  BINDIR := ../../lib/DebugSingleDLL
+  LIBDIR := ../../lib/DebugSingleDLL
+  OBJDIR := obj/ode/DebugSingleDLL
+  OUTDIR := ../../lib/DebugSingleDLL
+  CPPFLAGS := -MMD -D "_CRT_SECURE_NO_DEPRECATE" -D "WIN32" -I "../../include" -I "../../ode/src"
   CFLAGS += $(CPPFLAGS) $(TARGET_ARCH) -g
   CXXFLAGS := $(CFLAGS)
-  LDFLAGS += -L$(BINDIR) -L$(LIBDIR) -loded -ldrawstuffd -luser32 -lwinmm -lgdi32 -lopengl32 -lglu32
-  LDDEPS := ../../lib/DebugDLL/oded.dll ../../lib/DebugDLL/drawstuffd.dll
-  RESFLAGS := -D "_CRT_SECURE_NO_DEPRECATE" -D "WIN32" -I "../../include"
+  LDFLAGS += -L$(BINDIR) -L$(LIBDIR) -lode_singled -ldrawstuffd -luser32 -lwinmm -lgdi32 -lopengl32 -lglu32
+  LDDEPS := ../../lib/DebugSingleDLL/ode_singled.dll ../../lib/DebugSingleDLL/drawstuffd.dll
+  RESFLAGS := -D "_CRT_SECURE_NO_DEPRECATE" -D "WIN32" -I "../../include" -I "../../ode/src"
   TARGET := demo_ode.exe
   BLDCMD = $(CXX) -o $(OUTDIR)/$(TARGET) $(OBJECTS) $(LDFLAGS) $(RESOURCES) $(TARGET_ARCH)
 endif
 
-ifeq ($(CONFIG),ReleaseDLL)
-  BINDIR := ../../lib/ReleaseDLL
-  LIBDIR := ../../lib/ReleaseDLL
-  OBJDIR := obj/ode/ReleaseDLL
-  OUTDIR := ../../lib/ReleaseDLL
-  CPPFLAGS := -MMD -D "_CRT_SECURE_NO_DEPRECATE" -D "WIN32" -I "../../include"
+ifeq ($(CONFIG),ReleaseSingleDLL)
+  BINDIR := ../../lib/ReleaseSingleDLL
+  LIBDIR := ../../lib/ReleaseSingleDLL
+  OBJDIR := obj/ode/ReleaseSingleDLL
+  OUTDIR := ../../lib/ReleaseSingleDLL
+  CPPFLAGS := -MMD -D "_CRT_SECURE_NO_DEPRECATE" -D "WIN32" -I "../../include" -I "../../ode/src"
   CFLAGS += $(CPPFLAGS) $(TARGET_ARCH) -g
   CXXFLAGS := $(CFLAGS)
-  LDFLAGS += -L$(BINDIR) -L$(LIBDIR) -lode -ldrawstuff -luser32 -lwinmm -lgdi32 -lopengl32 -lglu32
-  LDDEPS := ../../lib/ReleaseDLL/ode.dll ../../lib/ReleaseDLL/drawstuff.dll
-  RESFLAGS := -D "_CRT_SECURE_NO_DEPRECATE" -D "WIN32" -I "../../include"
+  LDFLAGS += -L$(BINDIR) -L$(LIBDIR) -lode_single -ldrawstuff -luser32 -lwinmm -lgdi32 -lopengl32 -lglu32
+  LDDEPS := ../../lib/ReleaseSingleDLL/ode_single.dll ../../lib/ReleaseSingleDLL/drawstuff.dll
+  RESFLAGS := -D "_CRT_SECURE_NO_DEPRECATE" -D "WIN32" -I "../../include" -I "../../ode/src"
   TARGET := demo_ode.exe
   BLDCMD = $(CXX) -o $(OUTDIR)/$(TARGET) $(OBJECTS) $(LDFLAGS) $(RESOURCES) $(TARGET_ARCH)
 endif
 
-ifeq ($(CONFIG),DebugLib)
-  BINDIR := ../../lib/DebugLib
-  LIBDIR := ../../lib/DebugLib
-  OBJDIR := obj/ode/DebugLib
-  OUTDIR := ../../lib/DebugLib
-  CPPFLAGS := -MMD -D "_CRT_SECURE_NO_DEPRECATE" -D "WIN32" -I "../../include"
+ifeq ($(CONFIG),DebugSingleLib)
+  BINDIR := ../../lib/DebugSingleLib
+  LIBDIR := ../../lib/DebugSingleLib
+  OBJDIR := obj/ode/DebugSingleLib
+  OUTDIR := ../../lib/DebugSingleLib
+  CPPFLAGS := -MMD -D "_CRT_SECURE_NO_DEPRECATE" -D "WIN32" -I "../../include" -I "../../ode/src"
   CFLAGS += $(CPPFLAGS) $(TARGET_ARCH) -g
   CXXFLAGS := $(CFLAGS)
-  LDFLAGS += -L$(BINDIR) -L$(LIBDIR) -loded -ldrawstuffd -luser32 -lwinmm -lgdi32 -lopengl32 -lglu32
-  LDDEPS := ../../lib/DebugLib/liboded.a ../../lib/DebugLib/libdrawstuffd.a
-  RESFLAGS := -D "_CRT_SECURE_NO_DEPRECATE" -D "WIN32" -I "../../include"
+  LDFLAGS += -L$(BINDIR) -L$(LIBDIR) -lode_singled -ldrawstuffd -luser32 -lwinmm -lgdi32 -lopengl32 -lglu32
+  LDDEPS := ../../lib/DebugSingleLib/libode_singled.a ../../lib/DebugSingleLib/libdrawstuffd.a
+  RESFLAGS := -D "_CRT_SECURE_NO_DEPRECATE" -D "WIN32" -I "../../include" -I "../../ode/src"
   TARGET := demo_ode.exe
   BLDCMD = $(CXX) -o $(OUTDIR)/$(TARGET) $(OBJECTS) $(LDFLAGS) $(RESOURCES) $(TARGET_ARCH)
 endif
 
-ifeq ($(CONFIG),ReleaseLib)
-  BINDIR := ../../lib/ReleaseLib
-  LIBDIR := ../../lib/ReleaseLib
-  OBJDIR := obj/ode/ReleaseLib
-  OUTDIR := ../../lib/ReleaseLib
-  CPPFLAGS := -MMD -D "_CRT_SECURE_NO_DEPRECATE" -D "WIN32" -I "../../include"
+ifeq ($(CONFIG),ReleaseSingleLib)
+  BINDIR := ../../lib/ReleaseSingleLib
+  LIBDIR := ../../lib/ReleaseSingleLib
+  OBJDIR := obj/ode/ReleaseSingleLib
+  OUTDIR := ../../lib/ReleaseSingleLib
+  CPPFLAGS := -MMD -D "_CRT_SECURE_NO_DEPRECATE" -D "WIN32" -I "../../include" -I "../../ode/src"
   CFLAGS += $(CPPFLAGS) $(TARGET_ARCH) -g
   CXXFLAGS := $(CFLAGS)
-  LDFLAGS += -L$(BINDIR) -L$(LIBDIR) -lode -ldrawstuff -luser32 -lwinmm -lgdi32 -lopengl32 -lglu32
-  LDDEPS := ../../lib/ReleaseLib/libode.a ../../lib/ReleaseLib/libdrawstuff.a
-  RESFLAGS := -D "_CRT_SECURE_NO_DEPRECATE" -D "WIN32" -I "../../include"
+  LDFLAGS += -L$(BINDIR) -L$(LIBDIR) -lode_single -ldrawstuff -luser32 -lwinmm -lgdi32 -lopengl32 -lglu32
+  LDDEPS := ../../lib/ReleaseSingleLib/libode_single.a ../../lib/ReleaseSingleLib/libdrawstuff.a
+  RESFLAGS := -D "_CRT_SECURE_NO_DEPRECATE" -D "WIN32" -I "../../include" -I "../../ode/src"
+  TARGET := demo_ode.exe
+  BLDCMD = $(CXX) -o $(OUTDIR)/$(TARGET) $(OBJECTS) $(LDFLAGS) $(RESOURCES) $(TARGET_ARCH)
+endif
+
+ifeq ($(CONFIG),DebugDoubleDLL)
+  BINDIR := ../../lib/DebugDoubleDLL
+  LIBDIR := ../../lib/DebugDoubleDLL
+  OBJDIR := obj/ode/DebugDoubleDLL
+  OUTDIR := ../../lib/DebugDoubleDLL
+  CPPFLAGS := -MMD -D "_CRT_SECURE_NO_DEPRECATE" -D "WIN32" -D "dDOUBLE" -I "../../include" -I "../../ode/src"
+  CFLAGS += $(CPPFLAGS) $(TARGET_ARCH) -g
+  CXXFLAGS := $(CFLAGS)
+  LDFLAGS += -L$(BINDIR) -L$(LIBDIR) -lode_doubled -ldrawstuffd -luser32 -lwinmm -lgdi32 -lopengl32 -lglu32
+  LDDEPS := ../../lib/DebugDoubleDLL/ode_doubled.dll ../../lib/DebugDoubleDLL/drawstuffd.dll
+  RESFLAGS := -D "_CRT_SECURE_NO_DEPRECATE" -D "WIN32" -D "dDOUBLE" -I "../../include" -I "../../ode/src"
+  TARGET := demo_ode.exe
+  BLDCMD = $(CXX) -o $(OUTDIR)/$(TARGET) $(OBJECTS) $(LDFLAGS) $(RESOURCES) $(TARGET_ARCH)
+endif
+
+ifeq ($(CONFIG),ReleaseDoubleDLL)
+  BINDIR := ../../lib/ReleaseDoubleDLL
+  LIBDIR := ../../lib/ReleaseDoubleDLL
+  OBJDIR := obj/ode/ReleaseDoubleDLL
+  OUTDIR := ../../lib/ReleaseDoubleDLL
+  CPPFLAGS := -MMD -D "_CRT_SECURE_NO_DEPRECATE" -D "WIN32" -D "dDOUBLE" -I "../../include" -I "../../ode/src"
+  CFLAGS += $(CPPFLAGS) $(TARGET_ARCH) -g
+  CXXFLAGS := $(CFLAGS)
+  LDFLAGS += -L$(BINDIR) -L$(LIBDIR) -lode_double -ldrawstuff -luser32 -lwinmm -lgdi32 -lopengl32 -lglu32
+  LDDEPS := ../../lib/ReleaseDoubleDLL/ode_double.dll ../../lib/ReleaseDoubleDLL/drawstuff.dll
+  RESFLAGS := -D "_CRT_SECURE_NO_DEPRECATE" -D "WIN32" -D "dDOUBLE" -I "../../include" -I "../../ode/src"
+  TARGET := demo_ode.exe
+  BLDCMD = $(CXX) -o $(OUTDIR)/$(TARGET) $(OBJECTS) $(LDFLAGS) $(RESOURCES) $(TARGET_ARCH)
+endif
+
+ifeq ($(CONFIG),DebugDoubleLib)
+  BINDIR := ../../lib/DebugDoubleLib
+  LIBDIR := ../../lib/DebugDoubleLib
+  OBJDIR := obj/ode/DebugDoubleLib
+  OUTDIR := ../../lib/DebugDoubleLib
+  CPPFLAGS := -MMD -D "_CRT_SECURE_NO_DEPRECATE" -D "WIN32" -D "dDOUBLE" -I "../../include" -I "../../ode/src"
+  CFLAGS += $(CPPFLAGS) $(TARGET_ARCH) -g
+  CXXFLAGS := $(CFLAGS)
+  LDFLAGS += -L$(BINDIR) -L$(LIBDIR) -lode_doubled -ldrawstuffd -luser32 -lwinmm -lgdi32 -lopengl32 -lglu32
+  LDDEPS := ../../lib/DebugDoubleLib/libode_doubled.a ../../lib/DebugDoubleLib/libdrawstuffd.a
+  RESFLAGS := -D "_CRT_SECURE_NO_DEPRECATE" -D "WIN32" -D "dDOUBLE" -I "../../include" -I "../../ode/src"
+  TARGET := demo_ode.exe
+  BLDCMD = $(CXX) -o $(OUTDIR)/$(TARGET) $(OBJECTS) $(LDFLAGS) $(RESOURCES) $(TARGET_ARCH)
+endif
+
+ifeq ($(CONFIG),ReleaseDoubleLib)
+  BINDIR := ../../lib/ReleaseDoubleLib
+  LIBDIR := ../../lib/ReleaseDoubleLib
+  OBJDIR := obj/ode/ReleaseDoubleLib
+  OUTDIR := ../../lib/ReleaseDoubleLib
+  CPPFLAGS := -MMD -D "_CRT_SECURE_NO_DEPRECATE" -D "WIN32" -D "dDOUBLE" -I "../../include" -I "../../ode/src"
+  CFLAGS += $(CPPFLAGS) $(TARGET_ARCH) -g
+  CXXFLAGS := $(CFLAGS)
+  LDFLAGS += -L$(BINDIR) -L$(LIBDIR) -lode_double -ldrawstuff -luser32 -lwinmm -lgdi32 -lopengl32 -lglu32
+  LDDEPS := ../../lib/ReleaseDoubleLib/libode_double.a ../../lib/ReleaseDoubleLib/libdrawstuff.a
+  RESFLAGS := -D "_CRT_SECURE_NO_DEPRECATE" -D "WIN32" -D "dDOUBLE" -I "../../include" -I "../../ode/src"
   TARGET := demo_ode.exe
   BLDCMD = $(CXX) -o $(OUTDIR)/$(TARGET) $(OBJECTS) $(LDFLAGS) $(RESOURCES) $(TARGET_ARCH)
 endif

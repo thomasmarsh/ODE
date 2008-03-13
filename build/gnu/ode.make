@@ -2,66 +2,126 @@
 # Don't edit this file! Instead edit `premake.lua` then rerun `make`
 
 ifndef CONFIG
-  CONFIG=DebugDLL
+  CONFIG=DebugSingleDLL
 endif
 
-ifeq ($(CONFIG),DebugDLL)
-  BINDIR := ../../lib/DebugDLL
-  LIBDIR := ../../lib/DebugDLL
-  OBJDIR := obj/ode/DebugDLL
-  OUTDIR := ../../lib/DebugDLL
-  CPPFLAGS := -MMD -D "WIN32" -D "ODE_DLL" -I "../../include" -I "../../OPCODE" -I "../../GIMPACT/include"
+ifeq ($(CONFIG),DebugSingleDLL)
+  BINDIR := ../../lib/DebugSingleDLL
+  LIBDIR := ../../lib/DebugSingleDLL
+  OBJDIR := obj/ode/DebugSingleDLL
+  OUTDIR := ../../lib/DebugSingleDLL
+  CPPFLAGS := -MMD -D "WIN32" -D "ODE_DLL" -I "../../ode/src" -I "../../include" -I "../../OPCODE" -I "../../GIMPACT/include"
   CFLAGS += $(CPPFLAGS) $(TARGET_ARCH) -g
   CXXFLAGS := $(CFLAGS)
-  LDFLAGS += -L$(BINDIR) -L$(LIBDIR) -shared -Wl,--out-implib="../../lib/DebugDLL/liboded.a" -luser32
+  LDFLAGS += -L$(BINDIR) -L$(LIBDIR) -shared -Wl,--out-implib="../../lib/DebugSingleDLL/libode_singled.a" -luser32
   LDDEPS :=
-  RESFLAGS := -D "WIN32" -D "ODE_DLL" -I "../../include" -I "../../OPCODE" -I "../../GIMPACT/include"
-  TARGET := oded.dll
+  RESFLAGS := -D "WIN32" -D "ODE_DLL" -I "../../ode/src" -I "../../include" -I "../../OPCODE" -I "../../GIMPACT/include"
+  TARGET := ode_singled.dll
   BLDCMD = $(CXX) -o $(OUTDIR)/$(TARGET) $(OBJECTS) $(LDFLAGS) $(RESOURCES) $(TARGET_ARCH)
 endif
 
-ifeq ($(CONFIG),ReleaseDLL)
-  BINDIR := ../../lib/ReleaseDLL
-  LIBDIR := ../../lib/ReleaseDLL
-  OBJDIR := obj/ode/ReleaseDLL
-  OUTDIR := ../../lib/ReleaseDLL
-  CPPFLAGS := -MMD -D "WIN32" -D "ODE_DLL" -I "../../include" -I "../../OPCODE" -I "../../GIMPACT/include"
+ifeq ($(CONFIG),ReleaseSingleDLL)
+  BINDIR := ../../lib/ReleaseSingleDLL
+  LIBDIR := ../../lib/ReleaseSingleDLL
+  OBJDIR := obj/ode/ReleaseSingleDLL
+  OUTDIR := ../../lib/ReleaseSingleDLL
+  CPPFLAGS := -MMD -D "WIN32" -D "ODE_DLL" -I "../../ode/src" -I "../../include" -I "../../OPCODE" -I "../../GIMPACT/include"
   CFLAGS += $(CPPFLAGS) $(TARGET_ARCH) -O3 -fomit-frame-pointer
   CXXFLAGS := $(CFLAGS)
-  LDFLAGS += -L$(BINDIR) -L$(LIBDIR) -shared -Wl,--out-implib="../../lib/ReleaseDLL/libode.a" -s -luser32
+  LDFLAGS += -L$(BINDIR) -L$(LIBDIR) -shared -Wl,--out-implib="../../lib/ReleaseSingleDLL/libode_single.a" -s -luser32
   LDDEPS :=
-  RESFLAGS := -D "WIN32" -D "ODE_DLL" -I "../../include" -I "../../OPCODE" -I "../../GIMPACT/include"
-  TARGET := ode.dll
+  RESFLAGS := -D "WIN32" -D "ODE_DLL" -I "../../ode/src" -I "../../include" -I "../../OPCODE" -I "../../GIMPACT/include"
+  TARGET := ode_single.dll
   BLDCMD = $(CXX) -o $(OUTDIR)/$(TARGET) $(OBJECTS) $(LDFLAGS) $(RESOURCES) $(TARGET_ARCH)
 endif
 
-ifeq ($(CONFIG),DebugLib)
-  BINDIR := ../../lib/DebugLib
-  LIBDIR := ../../lib/DebugLib
-  OBJDIR := obj/ode/DebugLib
-  OUTDIR := ../../lib/DebugLib
-  CPPFLAGS := -MMD -D "WIN32" -D "ODE_LIB" -I "../../include" -I "../../OPCODE" -I "../../GIMPACT/include"
+ifeq ($(CONFIG),DebugSingleLib)
+  BINDIR := ../../lib/DebugSingleLib
+  LIBDIR := ../../lib/DebugSingleLib
+  OBJDIR := obj/ode/DebugSingleLib
+  OUTDIR := ../../lib/DebugSingleLib
+  CPPFLAGS := -MMD -D "WIN32" -D "ODE_LIB" -I "../../ode/src" -I "../../include" -I "../../OPCODE" -I "../../GIMPACT/include"
   CFLAGS += $(CPPFLAGS) $(TARGET_ARCH) -g
   CXXFLAGS := $(CFLAGS)
   LDFLAGS += -L$(BINDIR) -L$(LIBDIR) -luser32
   LDDEPS :=
-  RESFLAGS := -D "WIN32" -D "ODE_LIB" -I "../../include" -I "../../OPCODE" -I "../../GIMPACT/include"
-  TARGET := liboded.a
+  RESFLAGS := -D "WIN32" -D "ODE_LIB" -I "../../ode/src" -I "../../include" -I "../../OPCODE" -I "../../GIMPACT/include"
+  TARGET := libode_singled.a
   BLDCMD = ar -rcs $(OUTDIR)/$(TARGET) $(OBJECTS) $(TARGET_ARCH)
 endif
 
-ifeq ($(CONFIG),ReleaseLib)
-  BINDIR := ../../lib/ReleaseLib
-  LIBDIR := ../../lib/ReleaseLib
-  OBJDIR := obj/ode/ReleaseLib
-  OUTDIR := ../../lib/ReleaseLib
-  CPPFLAGS := -MMD -D "WIN32" -D "ODE_LIB" -I "../../include" -I "../../OPCODE" -I "../../GIMPACT/include"
+ifeq ($(CONFIG),ReleaseSingleLib)
+  BINDIR := ../../lib/ReleaseSingleLib
+  LIBDIR := ../../lib/ReleaseSingleLib
+  OBJDIR := obj/ode/ReleaseSingleLib
+  OUTDIR := ../../lib/ReleaseSingleLib
+  CPPFLAGS := -MMD -D "WIN32" -D "ODE_LIB" -I "../../ode/src" -I "../../include" -I "../../OPCODE" -I "../../GIMPACT/include"
   CFLAGS += $(CPPFLAGS) $(TARGET_ARCH) -O3 -fomit-frame-pointer
   CXXFLAGS := $(CFLAGS)
   LDFLAGS += -L$(BINDIR) -L$(LIBDIR) -s -luser32
   LDDEPS :=
-  RESFLAGS := -D "WIN32" -D "ODE_LIB" -I "../../include" -I "../../OPCODE" -I "../../GIMPACT/include"
-  TARGET := libode.a
+  RESFLAGS := -D "WIN32" -D "ODE_LIB" -I "../../ode/src" -I "../../include" -I "../../OPCODE" -I "../../GIMPACT/include"
+  TARGET := libode_single.a
+  BLDCMD = ar -rcs $(OUTDIR)/$(TARGET) $(OBJECTS) $(TARGET_ARCH)
+endif
+
+ifeq ($(CONFIG),DebugDoubleDLL)
+  BINDIR := ../../lib/DebugDoubleDLL
+  LIBDIR := ../../lib/DebugDoubleDLL
+  OBJDIR := obj/ode/DebugDoubleDLL
+  OUTDIR := ../../lib/DebugDoubleDLL
+  CPPFLAGS := -MMD -D "WIN32" -D "ODE_DLL" -D "dDOUBLE" -I "../../ode/src" -I "../../include" -I "../../OPCODE" -I "../../GIMPACT/include"
+  CFLAGS += $(CPPFLAGS) $(TARGET_ARCH) -g
+  CXXFLAGS := $(CFLAGS)
+  LDFLAGS += -L$(BINDIR) -L$(LIBDIR) -shared -Wl,--out-implib="../../lib/DebugDoubleDLL/libode_doubled.a" -luser32
+  LDDEPS :=
+  RESFLAGS := -D "WIN32" -D "ODE_DLL" -D "dDOUBLE" -I "../../ode/src" -I "../../include" -I "../../OPCODE" -I "../../GIMPACT/include"
+  TARGET := ode_doubled.dll
+  BLDCMD = $(CXX) -o $(OUTDIR)/$(TARGET) $(OBJECTS) $(LDFLAGS) $(RESOURCES) $(TARGET_ARCH)
+endif
+
+ifeq ($(CONFIG),ReleaseDoubleDLL)
+  BINDIR := ../../lib/ReleaseDoubleDLL
+  LIBDIR := ../../lib/ReleaseDoubleDLL
+  OBJDIR := obj/ode/ReleaseDoubleDLL
+  OUTDIR := ../../lib/ReleaseDoubleDLL
+  CPPFLAGS := -MMD -D "WIN32" -D "ODE_DLL" -D "dDOUBLE" -I "../../ode/src" -I "../../include" -I "../../OPCODE" -I "../../GIMPACT/include"
+  CFLAGS += $(CPPFLAGS) $(TARGET_ARCH) -O3 -fomit-frame-pointer
+  CXXFLAGS := $(CFLAGS)
+  LDFLAGS += -L$(BINDIR) -L$(LIBDIR) -shared -Wl,--out-implib="../../lib/ReleaseDoubleDLL/libode_double.a" -s -luser32
+  LDDEPS :=
+  RESFLAGS := -D "WIN32" -D "ODE_DLL" -D "dDOUBLE" -I "../../ode/src" -I "../../include" -I "../../OPCODE" -I "../../GIMPACT/include"
+  TARGET := ode_double.dll
+  BLDCMD = $(CXX) -o $(OUTDIR)/$(TARGET) $(OBJECTS) $(LDFLAGS) $(RESOURCES) $(TARGET_ARCH)
+endif
+
+ifeq ($(CONFIG),DebugDoubleLib)
+  BINDIR := ../../lib/DebugDoubleLib
+  LIBDIR := ../../lib/DebugDoubleLib
+  OBJDIR := obj/ode/DebugDoubleLib
+  OUTDIR := ../../lib/DebugDoubleLib
+  CPPFLAGS := -MMD -D "WIN32" -D "ODE_LIB" -D "dDOUBLE" -I "../../ode/src" -I "../../include" -I "../../OPCODE" -I "../../GIMPACT/include"
+  CFLAGS += $(CPPFLAGS) $(TARGET_ARCH) -g
+  CXXFLAGS := $(CFLAGS)
+  LDFLAGS += -L$(BINDIR) -L$(LIBDIR) -luser32
+  LDDEPS :=
+  RESFLAGS := -D "WIN32" -D "ODE_LIB" -D "dDOUBLE" -I "../../ode/src" -I "../../include" -I "../../OPCODE" -I "../../GIMPACT/include"
+  TARGET := libode_doubled.a
+  BLDCMD = ar -rcs $(OUTDIR)/$(TARGET) $(OBJECTS) $(TARGET_ARCH)
+endif
+
+ifeq ($(CONFIG),ReleaseDoubleLib)
+  BINDIR := ../../lib/ReleaseDoubleLib
+  LIBDIR := ../../lib/ReleaseDoubleLib
+  OBJDIR := obj/ode/ReleaseDoubleLib
+  OUTDIR := ../../lib/ReleaseDoubleLib
+  CPPFLAGS := -MMD -D "WIN32" -D "ODE_LIB" -D "dDOUBLE" -I "../../ode/src" -I "../../include" -I "../../OPCODE" -I "../../GIMPACT/include"
+  CFLAGS += $(CPPFLAGS) $(TARGET_ARCH) -O3 -fomit-frame-pointer
+  CXXFLAGS := $(CFLAGS)
+  LDFLAGS += -L$(BINDIR) -L$(LIBDIR) -s -luser32
+  LDDEPS :=
+  RESFLAGS := -D "WIN32" -D "ODE_LIB" -D "dDOUBLE" -I "../../ode/src" -I "../../include" -I "../../OPCODE" -I "../../GIMPACT/include"
+  TARGET := libode_double.a
   BLDCMD = ar -rcs $(OUTDIR)/$(TARGET) $(OBJECTS) $(TARGET_ARCH)
 endif
 

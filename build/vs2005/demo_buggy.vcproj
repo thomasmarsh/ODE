@@ -3,7 +3,7 @@
 	ProjectType="Visual C++"
 	Version="8.00"
 	Name="demo_buggy"
-	ProjectGUID="{F918EBC8-C090-5946-A05D-54BB2B47C6F0}"
+	ProjectGUID="{9DD1B33E-F512-2B4C-8EEE-207ED4E915B7}"
 	RootNamespace="demo_buggy"
 	Keyword="Win32Proj"
 	>
@@ -16,9 +16,9 @@
 	</ToolFiles>
 	<Configurations>
 		<Configuration
-			Name="DebugDLL|Win32"
-			OutputDirectory="../../lib/DebugDLL"
-			IntermediateDirectory="obj/buggy/DebugDLL"
+			Name="DebugSingleDLL|Win32"
+			OutputDirectory="../../lib/DebugSingleDLL"
+			IntermediateDirectory="obj/buggy/DebugSingleDLL"
 			ConfigurationType="1"
 			CharacterSet="2"
 			>
@@ -40,7 +40,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="../../include"
+				AdditionalIncludeDirectories="../../include;../../ode/src"
 				PreprocessorDefinitions="_CRT_SECURE_NO_DEPRECATE;WIN32"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -57,17 +57,17 @@
 			<Tool
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="_CRT_SECURE_NO_DEPRECATE;WIN32"
-				AdditionalIncludeDirectories="../../include"
+				AdditionalIncludeDirectories="../../include;../../ode/src"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="../../lib/DebugDLL/oded.lib ../../lib/DebugDLL/drawstuffd.lib user32.lib winmm.lib gdi32.lib opengl32.lib glu32.lib"
+				AdditionalDependencies="../../lib/DebugSingleDLL/ode_singled.lib ../../lib/DebugSingleDLL/drawstuffd.lib user32.lib winmm.lib gdi32.lib opengl32.lib glu32.lib"
 				OutputFile="$(OutDir)/demo_buggy.exe"
 				LinkIncremental="2"
-				AdditionalLibraryDirectories="../../lib/DebugDLL"
+				AdditionalLibraryDirectories="../../lib/DebugSingleDLL"
 				GenerateDebugInformation="true"
 				ProgramDatabaseFile="$(OutDir)/demo_buggy.pdb"
 				SubSystem="1"
@@ -100,9 +100,9 @@
 			/>
 		</Configuration>
 		<Configuration
-			Name="ReleaseDLL|Win32"
-			OutputDirectory="../../lib/ReleaseDLL"
-			IntermediateDirectory="obj/buggy/ReleaseDLL"
+			Name="ReleaseSingleDLL|Win32"
+			OutputDirectory="../../lib/ReleaseSingleDLL"
+			IntermediateDirectory="obj/buggy/ReleaseSingleDLL"
 			ConfigurationType="1"
 			CharacterSet="2"
 			>
@@ -124,7 +124,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="../../include"
+				AdditionalIncludeDirectories="../../include;../../ode/src"
 				PreprocessorDefinitions="_CRT_SECURE_NO_DEPRECATE;WIN32"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -141,17 +141,17 @@
 			<Tool
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="_CRT_SECURE_NO_DEPRECATE;WIN32"
-				AdditionalIncludeDirectories="../../include"
+				AdditionalIncludeDirectories="../../include;../../ode/src"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="../../lib/ReleaseDLL/ode.lib ../../lib/ReleaseDLL/drawstuff.lib user32.lib winmm.lib gdi32.lib opengl32.lib glu32.lib"
+				AdditionalDependencies="../../lib/ReleaseSingleDLL/ode_single.lib ../../lib/ReleaseSingleDLL/drawstuff.lib user32.lib winmm.lib gdi32.lib opengl32.lib glu32.lib"
 				OutputFile="$(OutDir)/demo_buggy.exe"
 				LinkIncremental="2"
-				AdditionalLibraryDirectories="../../lib/ReleaseDLL"
+				AdditionalLibraryDirectories="../../lib/ReleaseSingleDLL"
 				GenerateDebugInformation="true"
 				ProgramDatabaseFile="$(OutDir)/demo_buggy.pdb"
 				SubSystem="1"
@@ -184,9 +184,9 @@
 			/>
 		</Configuration>
 		<Configuration
-			Name="DebugLib|Win32"
-			OutputDirectory="../../lib/DebugLib"
-			IntermediateDirectory="obj/buggy/DebugLib"
+			Name="DebugSingleLib|Win32"
+			OutputDirectory="../../lib/DebugSingleLib"
+			IntermediateDirectory="obj/buggy/DebugSingleLib"
 			ConfigurationType="1"
 			CharacterSet="2"
 			>
@@ -208,7 +208,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="../../include"
+				AdditionalIncludeDirectories="../../include;../../ode/src"
 				PreprocessorDefinitions="_CRT_SECURE_NO_DEPRECATE;WIN32"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -225,17 +225,17 @@
 			<Tool
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="_CRT_SECURE_NO_DEPRECATE;WIN32"
-				AdditionalIncludeDirectories="../../include"
+				AdditionalIncludeDirectories="../../include;../../ode/src"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="../../lib/DebugLib/oded.lib ../../lib/DebugLib/drawstuffd.lib user32.lib winmm.lib gdi32.lib opengl32.lib glu32.lib"
+				AdditionalDependencies="../../lib/DebugSingleLib/ode_singled.lib ../../lib/DebugSingleLib/drawstuffd.lib user32.lib winmm.lib gdi32.lib opengl32.lib glu32.lib"
 				OutputFile="$(OutDir)/demo_buggy.exe"
 				LinkIncremental="2"
-				AdditionalLibraryDirectories="../../lib/DebugLib"
+				AdditionalLibraryDirectories="../../lib/DebugSingleLib"
 				GenerateDebugInformation="true"
 				ProgramDatabaseFile="$(OutDir)/demo_buggy.pdb"
 				SubSystem="1"
@@ -268,9 +268,9 @@
 			/>
 		</Configuration>
 		<Configuration
-			Name="ReleaseLib|Win32"
-			OutputDirectory="../../lib/ReleaseLib"
-			IntermediateDirectory="obj/buggy/ReleaseLib"
+			Name="ReleaseSingleLib|Win32"
+			OutputDirectory="../../lib/ReleaseSingleLib"
+			IntermediateDirectory="obj/buggy/ReleaseSingleLib"
 			ConfigurationType="1"
 			CharacterSet="2"
 			>
@@ -292,7 +292,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="../../include"
+				AdditionalIncludeDirectories="../../include;../../ode/src"
 				PreprocessorDefinitions="_CRT_SECURE_NO_DEPRECATE;WIN32"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -309,17 +309,353 @@
 			<Tool
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="_CRT_SECURE_NO_DEPRECATE;WIN32"
-				AdditionalIncludeDirectories="../../include"
+				AdditionalIncludeDirectories="../../include;../../ode/src"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="../../lib/ReleaseLib/ode.lib ../../lib/ReleaseLib/drawstuff.lib user32.lib winmm.lib gdi32.lib opengl32.lib glu32.lib"
+				AdditionalDependencies="../../lib/ReleaseSingleLib/ode_single.lib ../../lib/ReleaseSingleLib/drawstuff.lib user32.lib winmm.lib gdi32.lib opengl32.lib glu32.lib"
 				OutputFile="$(OutDir)/demo_buggy.exe"
 				LinkIncremental="2"
-				AdditionalLibraryDirectories="../../lib/ReleaseLib"
+				AdditionalLibraryDirectories="../../lib/ReleaseSingleLib"
+				GenerateDebugInformation="true"
+				ProgramDatabaseFile="$(OutDir)/demo_buggy.pdb"
+				SubSystem="1"
+				EntryPointSymbol="mainCRTStartup"
+				TargetMachine="1"
+			/>
+			<Tool
+				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCManifestTool"
+			/>
+			<Tool
+				Name="VCXDCMakeTool"
+			/>
+			<Tool
+				Name="VCBscMakeTool"
+			/>
+			<Tool
+				Name="VCFxCopTool"
+			/>
+			<Tool
+				Name="VCAppVerifierTool"
+			/>
+			<Tool
+				Name="VCWebDeploymentTool"
+			/>
+			<Tool
+				Name="VCPostBuildEventTool"
+			/>
+		</Configuration>
+		<Configuration
+			Name="DebugDoubleDLL|Win32"
+			OutputDirectory="../../lib/DebugDoubleDLL"
+			IntermediateDirectory="obj/buggy/DebugDoubleDLL"
+			ConfigurationType="1"
+			CharacterSet="2"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+			/>
+			<Tool
+				Name="VCCLCompilerTool"
+				Optimization="0"
+				AdditionalIncludeDirectories="../../include;../../ode/src"
+				PreprocessorDefinitions="_CRT_SECURE_NO_DEPRECATE;WIN32;dDOUBLE"
+				MinimalRebuild="true"
+				BasicRuntimeChecks="3"
+				RuntimeLibrary="3"
+				EnableFunctionLevelLinking="true"
+				UsePrecompiledHeader="0"
+				WarningLevel="3"
+				Detect64BitPortabilityProblems="true"
+				DebugInformationFormat="4"
+			/>
+			<Tool
+				Name="VCManagedResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCResourceCompilerTool"
+				PreprocessorDefinitions="_CRT_SECURE_NO_DEPRECATE;WIN32;dDOUBLE"
+				AdditionalIncludeDirectories="../../include;../../ode/src"
+			/>
+			<Tool
+				Name="VCPreLinkEventTool"
+			/>
+			<Tool
+				Name="VCLinkerTool"
+				AdditionalDependencies="../../lib/DebugDoubleDLL/ode_doubled.lib ../../lib/DebugDoubleDLL/drawstuffd.lib user32.lib winmm.lib gdi32.lib opengl32.lib glu32.lib"
+				OutputFile="$(OutDir)/demo_buggy.exe"
+				LinkIncremental="2"
+				AdditionalLibraryDirectories="../../lib/DebugDoubleDLL"
+				GenerateDebugInformation="true"
+				ProgramDatabaseFile="$(OutDir)/demo_buggy.pdb"
+				SubSystem="1"
+				EntryPointSymbol="mainCRTStartup"
+				TargetMachine="1"
+			/>
+			<Tool
+				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCManifestTool"
+			/>
+			<Tool
+				Name="VCXDCMakeTool"
+			/>
+			<Tool
+				Name="VCBscMakeTool"
+			/>
+			<Tool
+				Name="VCFxCopTool"
+			/>
+			<Tool
+				Name="VCAppVerifierTool"
+			/>
+			<Tool
+				Name="VCWebDeploymentTool"
+			/>
+			<Tool
+				Name="VCPostBuildEventTool"
+			/>
+		</Configuration>
+		<Configuration
+			Name="ReleaseDoubleDLL|Win32"
+			OutputDirectory="../../lib/ReleaseDoubleDLL"
+			IntermediateDirectory="obj/buggy/ReleaseDoubleDLL"
+			ConfigurationType="1"
+			CharacterSet="2"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+			/>
+			<Tool
+				Name="VCCLCompilerTool"
+				Optimization="0"
+				AdditionalIncludeDirectories="../../include;../../ode/src"
+				PreprocessorDefinitions="_CRT_SECURE_NO_DEPRECATE;WIN32;dDOUBLE"
+				MinimalRebuild="true"
+				BasicRuntimeChecks="3"
+				RuntimeLibrary="3"
+				EnableFunctionLevelLinking="true"
+				UsePrecompiledHeader="0"
+				WarningLevel="3"
+				Detect64BitPortabilityProblems="true"
+				DebugInformationFormat="4"
+			/>
+			<Tool
+				Name="VCManagedResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCResourceCompilerTool"
+				PreprocessorDefinitions="_CRT_SECURE_NO_DEPRECATE;WIN32;dDOUBLE"
+				AdditionalIncludeDirectories="../../include;../../ode/src"
+			/>
+			<Tool
+				Name="VCPreLinkEventTool"
+			/>
+			<Tool
+				Name="VCLinkerTool"
+				AdditionalDependencies="../../lib/ReleaseDoubleDLL/ode_double.lib ../../lib/ReleaseDoubleDLL/drawstuff.lib user32.lib winmm.lib gdi32.lib opengl32.lib glu32.lib"
+				OutputFile="$(OutDir)/demo_buggy.exe"
+				LinkIncremental="2"
+				AdditionalLibraryDirectories="../../lib/ReleaseDoubleDLL"
+				GenerateDebugInformation="true"
+				ProgramDatabaseFile="$(OutDir)/demo_buggy.pdb"
+				SubSystem="1"
+				EntryPointSymbol="mainCRTStartup"
+				TargetMachine="1"
+			/>
+			<Tool
+				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCManifestTool"
+			/>
+			<Tool
+				Name="VCXDCMakeTool"
+			/>
+			<Tool
+				Name="VCBscMakeTool"
+			/>
+			<Tool
+				Name="VCFxCopTool"
+			/>
+			<Tool
+				Name="VCAppVerifierTool"
+			/>
+			<Tool
+				Name="VCWebDeploymentTool"
+			/>
+			<Tool
+				Name="VCPostBuildEventTool"
+			/>
+		</Configuration>
+		<Configuration
+			Name="DebugDoubleLib|Win32"
+			OutputDirectory="../../lib/DebugDoubleLib"
+			IntermediateDirectory="obj/buggy/DebugDoubleLib"
+			ConfigurationType="1"
+			CharacterSet="2"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+			/>
+			<Tool
+				Name="VCCLCompilerTool"
+				Optimization="0"
+				AdditionalIncludeDirectories="../../include;../../ode/src"
+				PreprocessorDefinitions="_CRT_SECURE_NO_DEPRECATE;WIN32;dDOUBLE"
+				MinimalRebuild="true"
+				BasicRuntimeChecks="3"
+				RuntimeLibrary="3"
+				EnableFunctionLevelLinking="true"
+				UsePrecompiledHeader="0"
+				WarningLevel="3"
+				Detect64BitPortabilityProblems="true"
+				DebugInformationFormat="4"
+			/>
+			<Tool
+				Name="VCManagedResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCResourceCompilerTool"
+				PreprocessorDefinitions="_CRT_SECURE_NO_DEPRECATE;WIN32;dDOUBLE"
+				AdditionalIncludeDirectories="../../include;../../ode/src"
+			/>
+			<Tool
+				Name="VCPreLinkEventTool"
+			/>
+			<Tool
+				Name="VCLinkerTool"
+				AdditionalDependencies="../../lib/DebugDoubleLib/ode_doubled.lib ../../lib/DebugDoubleLib/drawstuffd.lib user32.lib winmm.lib gdi32.lib opengl32.lib glu32.lib"
+				OutputFile="$(OutDir)/demo_buggy.exe"
+				LinkIncremental="2"
+				AdditionalLibraryDirectories="../../lib/DebugDoubleLib"
+				GenerateDebugInformation="true"
+				ProgramDatabaseFile="$(OutDir)/demo_buggy.pdb"
+				SubSystem="1"
+				EntryPointSymbol="mainCRTStartup"
+				TargetMachine="1"
+			/>
+			<Tool
+				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCManifestTool"
+			/>
+			<Tool
+				Name="VCXDCMakeTool"
+			/>
+			<Tool
+				Name="VCBscMakeTool"
+			/>
+			<Tool
+				Name="VCFxCopTool"
+			/>
+			<Tool
+				Name="VCAppVerifierTool"
+			/>
+			<Tool
+				Name="VCWebDeploymentTool"
+			/>
+			<Tool
+				Name="VCPostBuildEventTool"
+			/>
+		</Configuration>
+		<Configuration
+			Name="ReleaseDoubleLib|Win32"
+			OutputDirectory="../../lib/ReleaseDoubleLib"
+			IntermediateDirectory="obj/buggy/ReleaseDoubleLib"
+			ConfigurationType="1"
+			CharacterSet="2"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+			/>
+			<Tool
+				Name="VCCLCompilerTool"
+				Optimization="0"
+				AdditionalIncludeDirectories="../../include;../../ode/src"
+				PreprocessorDefinitions="_CRT_SECURE_NO_DEPRECATE;WIN32;dDOUBLE"
+				MinimalRebuild="true"
+				BasicRuntimeChecks="3"
+				RuntimeLibrary="3"
+				EnableFunctionLevelLinking="true"
+				UsePrecompiledHeader="0"
+				WarningLevel="3"
+				Detect64BitPortabilityProblems="true"
+				DebugInformationFormat="4"
+			/>
+			<Tool
+				Name="VCManagedResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCResourceCompilerTool"
+				PreprocessorDefinitions="_CRT_SECURE_NO_DEPRECATE;WIN32;dDOUBLE"
+				AdditionalIncludeDirectories="../../include;../../ode/src"
+			/>
+			<Tool
+				Name="VCPreLinkEventTool"
+			/>
+			<Tool
+				Name="VCLinkerTool"
+				AdditionalDependencies="../../lib/ReleaseDoubleLib/ode_double.lib ../../lib/ReleaseDoubleLib/drawstuff.lib user32.lib winmm.lib gdi32.lib opengl32.lib glu32.lib"
+				OutputFile="$(OutDir)/demo_buggy.exe"
+				LinkIncremental="2"
+				AdditionalLibraryDirectories="../../lib/ReleaseDoubleLib"
 				GenerateDebugInformation="true"
 				ProgramDatabaseFile="$(OutDir)/demo_buggy.pdb"
 				SubSystem="1"
