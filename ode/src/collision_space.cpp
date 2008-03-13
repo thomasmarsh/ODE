@@ -730,6 +730,13 @@ dGeomID dSpaceGetGeom (dxSpace *space, int i)
   return space->getGeom (i);
 }
 
+int dSpaceGetClass (dxSpace *space)
+{
+  dAASSERT (space);
+  dUASSERT (dGeomIsSpace(space),"argument not a space");
+  return space->type;
+}
+
 
 void dSpaceCollide (dxSpace *space, void *data, dNearCallback *callback)
 {
