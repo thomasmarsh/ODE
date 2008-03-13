@@ -38,10 +38,10 @@ struct dContactGeom;
  * @param o1   The first geom being tested.
  * @param o2   The second geom being test.
  *
- * @remarks The callback function can call dCollide on o1 and o2 to generate 
- * contact points between each pair. Then these contact points may be added 
- * to the simulation as contact joints. The user's callback function can of 
- * course chose not to call dCollide for any pair, e.g. if the user decides 
+ * @remarks The callback function can call dCollide on o1 and o2 to generate
+ * contact points between each pair. Then these contact points may be added
+ * to the simulation as contact joints. The user's callback function can of
+ * course chose not to call dCollide for any pair, e.g. if the user decides
  * that those pairs should not interact.
  *
  * @ingroup collide
@@ -82,6 +82,27 @@ ODE_API void dSpaceClean (dSpaceID);
 ODE_API int dSpaceGetNumGeoms (dSpaceID);
 ODE_API dGeomID dSpaceGetGeom (dSpaceID, int i);
 
+/**
+ * @brief Given a space, this returns its class.
+ *
+ * The ODE classes are:
+ *  @li dSimpleSpaceClass
+ *  @li dHashSpaceClass
+ *  @li dSweepAndPruneSpaceClass
+ *  @li dQuadTreeSpaceClass
+ *  @li dFirstUserClass
+ *  @li dLastUserClass
+ *
+ * The class id not defined by the user should be between
+ * dFirstSpaceClass and dLastSpaceClass.
+ *
+ * User-defined class will return their own number.
+ *
+ * @param space the space to query
+ * @returns The space class ID.
+ * @ingroup collide
+ */
+ODE_API int dSpaceGetClass(dSpaceID space);
 
 #ifdef __cplusplus
 }
