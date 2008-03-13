@@ -9,9 +9,9 @@
     "chain2",
     "collision",
     "crash",
+    "cylvssphere",
     "feedback",
     "friction",
-    "heightfield",
     "hinge",
     "I",
     "jointPR",
@@ -28,15 +28,10 @@
 
   if (not options["no-trimesh"]) then
     table.insert(demos, "basket")
-    if (not options["no-cylinder"]) then
-      table.insert(demos, "cyl")
-    end
+    table.insert(demos, "cyl")
+    table.insert(demos, "heightfield")
     table.insert(demos, "moving_trimesh")
     table.insert(demos, "trimesh")
-  end
-
-  if (not options["no-cylinder"]) then
-    table.insert(demos, "cylvssphere")
   end
 
 
