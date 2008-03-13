@@ -2,64 +2,124 @@
 # Don't edit this file! Instead edit `premake.lua` then rerun `make`
 
 ifndef CONFIG
-  CONFIG=DebugDLL
+  CONFIG=DebugSingleDLL
 endif
 
-ifeq ($(CONFIG),DebugDLL)
-  BINDIR := ../../lib/DebugDLL
-  LIBDIR := ../../lib/DebugDLL
-  OBJDIR := obj/tests/DebugDLL
-  OUTDIR := ../../lib/DebugDLL
+ifeq ($(CONFIG),DebugSingleDLL)
+  BINDIR := ../../lib/DebugSingleDLL
+  LIBDIR := ../../lib/DebugSingleDLL
+  OBJDIR := obj/tests/DebugSingleDLL
+  OUTDIR := ../../lib/DebugSingleDLL
   CPPFLAGS := -MMD -D "_CRT_SECURE_NO_DEPRECATE" -I "../../include" -I "../../tests/UnitTest++/src"
   CFLAGS += $(CPPFLAGS) $(TARGET_ARCH) -g
   CXXFLAGS := $(CFLAGS)
-  LDFLAGS += -L$(BINDIR) -L$(LIBDIR) -loded
-  LDDEPS := ../../lib/DebugDLL/oded.dll
+  LDFLAGS += -L$(BINDIR) -L$(LIBDIR) -lode_singled
+  LDDEPS := ../../lib/DebugSingleDLL/ode_singled.dll
   RESFLAGS := -D "_CRT_SECURE_NO_DEPRECATE" -I "../../include" -I "../../tests/UnitTest++/src"
   TARGET := tests.exe
   BLDCMD = $(CXX) -o $(OUTDIR)/$(TARGET) $(OBJECTS) $(LDFLAGS) $(RESOURCES) $(TARGET_ARCH)
 endif
 
-ifeq ($(CONFIG),ReleaseDLL)
-  BINDIR := ../../lib/ReleaseDLL
-  LIBDIR := ../../lib/ReleaseDLL
-  OBJDIR := obj/tests/ReleaseDLL
-  OUTDIR := ../../lib/ReleaseDLL
+ifeq ($(CONFIG),ReleaseSingleDLL)
+  BINDIR := ../../lib/ReleaseSingleDLL
+  LIBDIR := ../../lib/ReleaseSingleDLL
+  OBJDIR := obj/tests/ReleaseSingleDLL
+  OUTDIR := ../../lib/ReleaseSingleDLL
   CPPFLAGS := -MMD -D "_CRT_SECURE_NO_DEPRECATE" -I "../../include" -I "../../tests/UnitTest++/src"
   CFLAGS += $(CPPFLAGS) $(TARGET_ARCH) -g
   CXXFLAGS := $(CFLAGS)
-  LDFLAGS += -L$(BINDIR) -L$(LIBDIR) -lode
-  LDDEPS := ../../lib/ReleaseDLL/ode.dll
+  LDFLAGS += -L$(BINDIR) -L$(LIBDIR) -lode_single
+  LDDEPS := ../../lib/ReleaseSingleDLL/ode_single.dll
   RESFLAGS := -D "_CRT_SECURE_NO_DEPRECATE" -I "../../include" -I "../../tests/UnitTest++/src"
   TARGET := tests.exe
   BLDCMD = $(CXX) -o $(OUTDIR)/$(TARGET) $(OBJECTS) $(LDFLAGS) $(RESOURCES) $(TARGET_ARCH)
 endif
 
-ifeq ($(CONFIG),DebugLib)
-  BINDIR := ../../lib/DebugLib
-  LIBDIR := ../../lib/DebugLib
-  OBJDIR := obj/tests/DebugLib
-  OUTDIR := ../../lib/DebugLib
+ifeq ($(CONFIG),DebugSingleLib)
+  BINDIR := ../../lib/DebugSingleLib
+  LIBDIR := ../../lib/DebugSingleLib
+  OBJDIR := obj/tests/DebugSingleLib
+  OUTDIR := ../../lib/DebugSingleLib
   CPPFLAGS := -MMD -D "_CRT_SECURE_NO_DEPRECATE" -I "../../include" -I "../../tests/UnitTest++/src"
   CFLAGS += $(CPPFLAGS) $(TARGET_ARCH) -g
   CXXFLAGS := $(CFLAGS)
-  LDFLAGS += -L$(BINDIR) -L$(LIBDIR) -loded
-  LDDEPS := ../../lib/DebugLib/liboded.a
+  LDFLAGS += -L$(BINDIR) -L$(LIBDIR) -lode_singled
+  LDDEPS := ../../lib/DebugSingleLib/libode_singled.a
   RESFLAGS := -D "_CRT_SECURE_NO_DEPRECATE" -I "../../include" -I "../../tests/UnitTest++/src"
   TARGET := tests.exe
   BLDCMD = $(CXX) -o $(OUTDIR)/$(TARGET) $(OBJECTS) $(LDFLAGS) $(RESOURCES) $(TARGET_ARCH)
 endif
 
-ifeq ($(CONFIG),ReleaseLib)
-  BINDIR := ../../lib/ReleaseLib
-  LIBDIR := ../../lib/ReleaseLib
-  OBJDIR := obj/tests/ReleaseLib
-  OUTDIR := ../../lib/ReleaseLib
+ifeq ($(CONFIG),ReleaseSingleLib)
+  BINDIR := ../../lib/ReleaseSingleLib
+  LIBDIR := ../../lib/ReleaseSingleLib
+  OBJDIR := obj/tests/ReleaseSingleLib
+  OUTDIR := ../../lib/ReleaseSingleLib
   CPPFLAGS := -MMD -D "_CRT_SECURE_NO_DEPRECATE" -I "../../include" -I "../../tests/UnitTest++/src"
   CFLAGS += $(CPPFLAGS) $(TARGET_ARCH) -g
   CXXFLAGS := $(CFLAGS)
-  LDFLAGS += -L$(BINDIR) -L$(LIBDIR) -lode
-  LDDEPS := ../../lib/ReleaseLib/libode.a
+  LDFLAGS += -L$(BINDIR) -L$(LIBDIR) -lode_single
+  LDDEPS := ../../lib/ReleaseSingleLib/libode_single.a
+  RESFLAGS := -D "_CRT_SECURE_NO_DEPRECATE" -I "../../include" -I "../../tests/UnitTest++/src"
+  TARGET := tests.exe
+  BLDCMD = $(CXX) -o $(OUTDIR)/$(TARGET) $(OBJECTS) $(LDFLAGS) $(RESOURCES) $(TARGET_ARCH)
+endif
+
+ifeq ($(CONFIG),DebugDoubleDLL)
+  BINDIR := ../../lib/DebugDoubleDLL
+  LIBDIR := ../../lib/DebugDoubleDLL
+  OBJDIR := obj/tests/DebugDoubleDLL
+  OUTDIR := ../../lib/DebugDoubleDLL
+  CPPFLAGS := -MMD -D "_CRT_SECURE_NO_DEPRECATE" -I "../../include" -I "../../tests/UnitTest++/src"
+  CFLAGS += $(CPPFLAGS) $(TARGET_ARCH) -g
+  CXXFLAGS := $(CFLAGS)
+  LDFLAGS += -L$(BINDIR) -L$(LIBDIR) -lode_doubled
+  LDDEPS := ../../lib/DebugDoubleDLL/ode_doubled.dll
+  RESFLAGS := -D "_CRT_SECURE_NO_DEPRECATE" -I "../../include" -I "../../tests/UnitTest++/src"
+  TARGET := tests.exe
+  BLDCMD = $(CXX) -o $(OUTDIR)/$(TARGET) $(OBJECTS) $(LDFLAGS) $(RESOURCES) $(TARGET_ARCH)
+endif
+
+ifeq ($(CONFIG),ReleaseDoubleDLL)
+  BINDIR := ../../lib/ReleaseDoubleDLL
+  LIBDIR := ../../lib/ReleaseDoubleDLL
+  OBJDIR := obj/tests/ReleaseDoubleDLL
+  OUTDIR := ../../lib/ReleaseDoubleDLL
+  CPPFLAGS := -MMD -D "_CRT_SECURE_NO_DEPRECATE" -I "../../include" -I "../../tests/UnitTest++/src"
+  CFLAGS += $(CPPFLAGS) $(TARGET_ARCH) -g
+  CXXFLAGS := $(CFLAGS)
+  LDFLAGS += -L$(BINDIR) -L$(LIBDIR) -lode_double
+  LDDEPS := ../../lib/ReleaseDoubleDLL/ode_double.dll
+  RESFLAGS := -D "_CRT_SECURE_NO_DEPRECATE" -I "../../include" -I "../../tests/UnitTest++/src"
+  TARGET := tests.exe
+  BLDCMD = $(CXX) -o $(OUTDIR)/$(TARGET) $(OBJECTS) $(LDFLAGS) $(RESOURCES) $(TARGET_ARCH)
+endif
+
+ifeq ($(CONFIG),DebugDoubleLib)
+  BINDIR := ../../lib/DebugDoubleLib
+  LIBDIR := ../../lib/DebugDoubleLib
+  OBJDIR := obj/tests/DebugDoubleLib
+  OUTDIR := ../../lib/DebugDoubleLib
+  CPPFLAGS := -MMD -D "_CRT_SECURE_NO_DEPRECATE" -I "../../include" -I "../../tests/UnitTest++/src"
+  CFLAGS += $(CPPFLAGS) $(TARGET_ARCH) -g
+  CXXFLAGS := $(CFLAGS)
+  LDFLAGS += -L$(BINDIR) -L$(LIBDIR) -lode_doubled
+  LDDEPS := ../../lib/DebugDoubleLib/libode_doubled.a
+  RESFLAGS := -D "_CRT_SECURE_NO_DEPRECATE" -I "../../include" -I "../../tests/UnitTest++/src"
+  TARGET := tests.exe
+  BLDCMD = $(CXX) -o $(OUTDIR)/$(TARGET) $(OBJECTS) $(LDFLAGS) $(RESOURCES) $(TARGET_ARCH)
+endif
+
+ifeq ($(CONFIG),ReleaseDoubleLib)
+  BINDIR := ../../lib/ReleaseDoubleLib
+  LIBDIR := ../../lib/ReleaseDoubleLib
+  OBJDIR := obj/tests/ReleaseDoubleLib
+  OUTDIR := ../../lib/ReleaseDoubleLib
+  CPPFLAGS := -MMD -D "_CRT_SECURE_NO_DEPRECATE" -I "../../include" -I "../../tests/UnitTest++/src"
+  CFLAGS += $(CPPFLAGS) $(TARGET_ARCH) -g
+  CXXFLAGS := $(CFLAGS)
+  LDFLAGS += -L$(BINDIR) -L$(LIBDIR) -lode_double
+  LDDEPS := ../../lib/ReleaseDoubleLib/libode_double.a
   RESFLAGS := -D "_CRT_SECURE_NO_DEPRECATE" -I "../../include" -I "../../tests/UnitTest++/src"
   TARGET := tests.exe
   BLDCMD = $(CXX) -o $(OUTDIR)/$(TARGET) $(OBJECTS) $(LDFLAGS) $(RESOURCES) $(TARGET_ARCH)

@@ -3,7 +3,7 @@
 	ProjectType="Visual C++"
 	Version="8.00"
 	Name="ode"
-	ProjectGUID="{20177D0B-6F8D-0743-A716-6AAC8343161D}"
+	ProjectGUID="{74904451-ECF5-9543-9A70-8851F376CF42}"
 	RootNamespace="ode"
 	Keyword="Win32Proj"
 	>
@@ -16,9 +16,9 @@
 	</ToolFiles>
 	<Configurations>
 		<Configuration
-			Name="DebugDLL|Win32"
-			OutputDirectory="../../lib/DebugDLL"
-			IntermediateDirectory="obj/ode/DebugDLL"
+			Name="DebugSingleDLL|Win32"
+			OutputDirectory="../../lib/DebugSingleDLL"
+			IntermediateDirectory="obj/ode/DebugSingleDLL"
 			ConfigurationType="2"
 			CharacterSet="2"
 			>
@@ -40,7 +40,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="../../include;../../OPCODE;../../GIMPACT/include"
+				AdditionalIncludeDirectories="../../ode/src;../../include;../../OPCODE;../../GIMPACT/include"
 				PreprocessorDefinitions="WIN32;_CRT_SECURE_NO_DEPRECATE;ODE_DLL"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -57,7 +57,7 @@
 			<Tool
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="WIN32;_CRT_SECURE_NO_DEPRECATE;ODE_DLL"
-				AdditionalIncludeDirectories="../../include;../../OPCODE;../../GIMPACT/include"
+				AdditionalIncludeDirectories="../../ode/src;../../include;../../OPCODE;../../GIMPACT/include"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
@@ -65,13 +65,13 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="user32.lib"
-				OutputFile="$(OutDir)/oded.dll"
+				OutputFile="$(OutDir)/ode_singled.dll"
 				LinkIncremental="2"
-				AdditionalLibraryDirectories="../../lib/DebugDLL"
+				AdditionalLibraryDirectories="../../lib/DebugSingleDLL"
 				GenerateDebugInformation="true"
-				ProgramDatabaseFile="$(OutDir)/oded.pdb"
+				ProgramDatabaseFile="$(OutDir)/ode_singled.pdb"
 				SubSystem="2"
-				ImportLibrary="../../lib/DebugDLL/oded.lib"
+				ImportLibrary="../../lib/DebugSingleDLL/ode_singled.lib"
 				TargetMachine="1"
 			/>
 			<Tool
@@ -100,9 +100,9 @@
 			/>
 		</Configuration>
 		<Configuration
-			Name="ReleaseDLL|Win32"
-			OutputDirectory="../../lib/ReleaseDLL"
-			IntermediateDirectory="obj/ode/ReleaseDLL"
+			Name="ReleaseSingleDLL|Win32"
+			OutputDirectory="../../lib/ReleaseSingleDLL"
+			IntermediateDirectory="obj/ode/ReleaseSingleDLL"
 			ConfigurationType="2"
 			CharacterSet="2"
 			>
@@ -125,7 +125,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				OmitFramePointers="true"
-				AdditionalIncludeDirectories="../../include;../../OPCODE;../../GIMPACT/include"
+				AdditionalIncludeDirectories="../../ode/src;../../include;../../OPCODE;../../GIMPACT/include"
 				PreprocessorDefinitions="WIN32;_CRT_SECURE_NO_DEPRECATE;ODE_DLL"
 				StringPooling="true"
 				RuntimeLibrary="2"
@@ -141,7 +141,7 @@
 			<Tool
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="WIN32;_CRT_SECURE_NO_DEPRECATE;ODE_DLL"
-				AdditionalIncludeDirectories="../../include;../../OPCODE;../../GIMPACT/include"
+				AdditionalIncludeDirectories="../../ode/src;../../include;../../OPCODE;../../GIMPACT/include"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
@@ -149,14 +149,14 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="user32.lib"
-				OutputFile="$(OutDir)/ode.dll"
+				OutputFile="$(OutDir)/ode_single.dll"
 				LinkIncremental="1"
-				AdditionalLibraryDirectories="../../lib/ReleaseDLL"
+				AdditionalLibraryDirectories="../../lib/ReleaseSingleDLL"
 				GenerateDebugInformation="false"
 				SubSystem="2"
 				OptimizeReferences="2"
 				EnableCOMDATFolding="2"
-				ImportLibrary="../../lib/ReleaseDLL/ode.lib"
+				ImportLibrary="../../lib/ReleaseSingleDLL/ode_single.lib"
 				TargetMachine="1"
 			/>
 			<Tool
@@ -185,9 +185,9 @@
 			/>
 		</Configuration>
 		<Configuration
-			Name="DebugLib|Win32"
-			OutputDirectory="../../lib/DebugLib"
-			IntermediateDirectory="obj/ode/DebugLib"
+			Name="DebugSingleLib|Win32"
+			OutputDirectory="../../lib/DebugSingleLib"
+			IntermediateDirectory="obj/ode/DebugSingleLib"
 			ConfigurationType="4"
 			CharacterSet="2"
 			>
@@ -209,7 +209,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="../../include;../../OPCODE;../../GIMPACT/include"
+				AdditionalIncludeDirectories="../../ode/src;../../include;../../OPCODE;../../GIMPACT/include"
 				PreprocessorDefinitions="WIN32;_CRT_SECURE_NO_DEPRECATE;ODE_LIB"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -226,14 +226,14 @@
 			<Tool
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="WIN32;_CRT_SECURE_NO_DEPRECATE;ODE_LIB"
-				AdditionalIncludeDirectories="../../include;../../OPCODE;../../GIMPACT/include"
+				AdditionalIncludeDirectories="../../ode/src;../../include;../../OPCODE;../../GIMPACT/include"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
 			/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="$(OutDir)/oded.lib"
+				OutputFile="$(OutDir)/ode_singled.lib"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -261,9 +261,9 @@
 			/>
 		</Configuration>
 		<Configuration
-			Name="ReleaseLib|Win32"
-			OutputDirectory="../../lib/ReleaseLib"
-			IntermediateDirectory="obj/ode/ReleaseLib"
+			Name="ReleaseSingleLib|Win32"
+			OutputDirectory="../../lib/ReleaseSingleLib"
+			IntermediateDirectory="obj/ode/ReleaseSingleLib"
 			ConfigurationType="4"
 			CharacterSet="2"
 			>
@@ -286,7 +286,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				OmitFramePointers="true"
-				AdditionalIncludeDirectories="../../include;../../OPCODE;../../GIMPACT/include"
+				AdditionalIncludeDirectories="../../ode/src;../../include;../../OPCODE;../../GIMPACT/include"
 				PreprocessorDefinitions="WIN32;_CRT_SECURE_NO_DEPRECATE;ODE_LIB"
 				StringPooling="true"
 				RuntimeLibrary="2"
@@ -302,14 +302,335 @@
 			<Tool
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="WIN32;_CRT_SECURE_NO_DEPRECATE;ODE_LIB"
-				AdditionalIncludeDirectories="../../include;../../OPCODE;../../GIMPACT/include"
+				AdditionalIncludeDirectories="../../ode/src;../../include;../../OPCODE;../../GIMPACT/include"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
 			/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="$(OutDir)/ode.lib"
+				OutputFile="$(OutDir)/ode_single.lib"
+			/>
+			<Tool
+				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCManifestTool"
+			/>
+			<Tool
+				Name="VCXDCMakeTool"
+			/>
+			<Tool
+				Name="VCBscMakeTool"
+			/>
+			<Tool
+				Name="VCFxCopTool"
+			/>
+			<Tool
+				Name="VCAppVerifierTool"
+			/>
+			<Tool
+				Name="VCWebDeploymentTool"
+			/>
+			<Tool
+				Name="VCPostBuildEventTool"
+			/>
+		</Configuration>
+		<Configuration
+			Name="DebugDoubleDLL|Win32"
+			OutputDirectory="../../lib/DebugDoubleDLL"
+			IntermediateDirectory="obj/ode/DebugDoubleDLL"
+			ConfigurationType="2"
+			CharacterSet="2"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+			/>
+			<Tool
+				Name="VCCLCompilerTool"
+				Optimization="0"
+				AdditionalIncludeDirectories="../../ode/src;../../include;../../OPCODE;../../GIMPACT/include"
+				PreprocessorDefinitions="WIN32;_CRT_SECURE_NO_DEPRECATE;ODE_DLL;dDOUBLE"
+				MinimalRebuild="true"
+				BasicRuntimeChecks="3"
+				RuntimeLibrary="3"
+				EnableFunctionLevelLinking="true"
+				UsePrecompiledHeader="0"
+				WarningLevel="3"
+				Detect64BitPortabilityProblems="true"
+				DebugInformationFormat="4"
+			/>
+			<Tool
+				Name="VCManagedResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCResourceCompilerTool"
+				PreprocessorDefinitions="WIN32;_CRT_SECURE_NO_DEPRECATE;ODE_DLL;dDOUBLE"
+				AdditionalIncludeDirectories="../../ode/src;../../include;../../OPCODE;../../GIMPACT/include"
+			/>
+			<Tool
+				Name="VCPreLinkEventTool"
+			/>
+			<Tool
+				Name="VCLinkerTool"
+				AdditionalDependencies="user32.lib"
+				OutputFile="$(OutDir)/ode_doubled.dll"
+				LinkIncremental="2"
+				AdditionalLibraryDirectories="../../lib/DebugDoubleDLL"
+				GenerateDebugInformation="true"
+				ProgramDatabaseFile="$(OutDir)/ode_doubled.pdb"
+				SubSystem="2"
+				ImportLibrary="../../lib/DebugDoubleDLL/ode_doubled.lib"
+				TargetMachine="1"
+			/>
+			<Tool
+				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCManifestTool"
+			/>
+			<Tool
+				Name="VCXDCMakeTool"
+			/>
+			<Tool
+				Name="VCBscMakeTool"
+			/>
+			<Tool
+				Name="VCFxCopTool"
+			/>
+			<Tool
+				Name="VCAppVerifierTool"
+			/>
+			<Tool
+				Name="VCWebDeploymentTool"
+			/>
+			<Tool
+				Name="VCPostBuildEventTool"
+			/>
+		</Configuration>
+		<Configuration
+			Name="ReleaseDoubleDLL|Win32"
+			OutputDirectory="../../lib/ReleaseDoubleDLL"
+			IntermediateDirectory="obj/ode/ReleaseDoubleDLL"
+			ConfigurationType="2"
+			CharacterSet="2"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+			/>
+			<Tool
+				Name="VCCLCompilerTool"
+				Optimization="2"
+				OmitFramePointers="true"
+				AdditionalIncludeDirectories="../../ode/src;../../include;../../OPCODE;../../GIMPACT/include"
+				PreprocessorDefinitions="WIN32;_CRT_SECURE_NO_DEPRECATE;ODE_DLL;dDOUBLE"
+				StringPooling="true"
+				RuntimeLibrary="2"
+				EnableFunctionLevelLinking="true"
+				UsePrecompiledHeader="0"
+				WarningLevel="3"
+				Detect64BitPortabilityProblems="true"
+				DebugInformationFormat="0"
+			/>
+			<Tool
+				Name="VCManagedResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCResourceCompilerTool"
+				PreprocessorDefinitions="WIN32;_CRT_SECURE_NO_DEPRECATE;ODE_DLL;dDOUBLE"
+				AdditionalIncludeDirectories="../../ode/src;../../include;../../OPCODE;../../GIMPACT/include"
+			/>
+			<Tool
+				Name="VCPreLinkEventTool"
+			/>
+			<Tool
+				Name="VCLinkerTool"
+				AdditionalDependencies="user32.lib"
+				OutputFile="$(OutDir)/ode_double.dll"
+				LinkIncremental="1"
+				AdditionalLibraryDirectories="../../lib/ReleaseDoubleDLL"
+				GenerateDebugInformation="false"
+				SubSystem="2"
+				OptimizeReferences="2"
+				EnableCOMDATFolding="2"
+				ImportLibrary="../../lib/ReleaseDoubleDLL/ode_double.lib"
+				TargetMachine="1"
+			/>
+			<Tool
+				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCManifestTool"
+			/>
+			<Tool
+				Name="VCXDCMakeTool"
+			/>
+			<Tool
+				Name="VCBscMakeTool"
+			/>
+			<Tool
+				Name="VCFxCopTool"
+			/>
+			<Tool
+				Name="VCAppVerifierTool"
+			/>
+			<Tool
+				Name="VCWebDeploymentTool"
+			/>
+			<Tool
+				Name="VCPostBuildEventTool"
+			/>
+		</Configuration>
+		<Configuration
+			Name="DebugDoubleLib|Win32"
+			OutputDirectory="../../lib/DebugDoubleLib"
+			IntermediateDirectory="obj/ode/DebugDoubleLib"
+			ConfigurationType="4"
+			CharacterSet="2"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+			/>
+			<Tool
+				Name="VCCLCompilerTool"
+				Optimization="0"
+				AdditionalIncludeDirectories="../../ode/src;../../include;../../OPCODE;../../GIMPACT/include"
+				PreprocessorDefinitions="WIN32;_CRT_SECURE_NO_DEPRECATE;ODE_LIB;dDOUBLE"
+				MinimalRebuild="true"
+				BasicRuntimeChecks="3"
+				RuntimeLibrary="3"
+				EnableFunctionLevelLinking="true"
+				UsePrecompiledHeader="0"
+				WarningLevel="3"
+				Detect64BitPortabilityProblems="true"
+				DebugInformationFormat="4"
+			/>
+			<Tool
+				Name="VCManagedResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCResourceCompilerTool"
+				PreprocessorDefinitions="WIN32;_CRT_SECURE_NO_DEPRECATE;ODE_LIB;dDOUBLE"
+				AdditionalIncludeDirectories="../../ode/src;../../include;../../OPCODE;../../GIMPACT/include"
+			/>
+			<Tool
+				Name="VCPreLinkEventTool"
+			/>
+			<Tool
+				Name="VCLibrarianTool"
+				OutputFile="$(OutDir)/ode_doubled.lib"
+			/>
+			<Tool
+				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCManifestTool"
+			/>
+			<Tool
+				Name="VCXDCMakeTool"
+			/>
+			<Tool
+				Name="VCBscMakeTool"
+			/>
+			<Tool
+				Name="VCFxCopTool"
+			/>
+			<Tool
+				Name="VCAppVerifierTool"
+			/>
+			<Tool
+				Name="VCWebDeploymentTool"
+			/>
+			<Tool
+				Name="VCPostBuildEventTool"
+			/>
+		</Configuration>
+		<Configuration
+			Name="ReleaseDoubleLib|Win32"
+			OutputDirectory="../../lib/ReleaseDoubleLib"
+			IntermediateDirectory="obj/ode/ReleaseDoubleLib"
+			ConfigurationType="4"
+			CharacterSet="2"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+			/>
+			<Tool
+				Name="VCCLCompilerTool"
+				Optimization="2"
+				OmitFramePointers="true"
+				AdditionalIncludeDirectories="../../ode/src;../../include;../../OPCODE;../../GIMPACT/include"
+				PreprocessorDefinitions="WIN32;_CRT_SECURE_NO_DEPRECATE;ODE_LIB;dDOUBLE"
+				StringPooling="true"
+				RuntimeLibrary="2"
+				EnableFunctionLevelLinking="true"
+				UsePrecompiledHeader="0"
+				WarningLevel="3"
+				Detect64BitPortabilityProblems="true"
+				DebugInformationFormat="0"
+			/>
+			<Tool
+				Name="VCManagedResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCResourceCompilerTool"
+				PreprocessorDefinitions="WIN32;_CRT_SECURE_NO_DEPRECATE;ODE_LIB;dDOUBLE"
+				AdditionalIncludeDirectories="../../ode/src;../../include;../../OPCODE;../../GIMPACT/include"
+			/>
+			<Tool
+				Name="VCPreLinkEventTool"
+			/>
+			<Tool
+				Name="VCLibrarianTool"
+				OutputFile="$(OutDir)/ode_double.lib"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -364,9 +685,6 @@
 					RelativePath="..\..\include\ode\compatibility.h">
 				</File>
 				<File
-					RelativePath="..\..\include\ode\config.h">
-				</File>
-				<File
 					RelativePath="..\..\include\ode\contact.h">
 				</File>
 				<File
@@ -392,6 +710,9 @@
 				</File>
 				<File
 					RelativePath="..\..\include\ode\ode.h">
+				</File>
+				<File
+					RelativePath="..\..\include\ode\odeconfig.h">
 				</File>
 				<File
 					RelativePath="..\..\include\ode\odecpp.h">
@@ -440,6 +761,9 @@
 					RelativePath="..\..\ode\src\collision_util.h">
 				</File>
 				<File
+					RelativePath="..\..\ode\src\config.h">
+				</File>
+				<File
 					RelativePath="..\..\ode\src\heightfield.h">
 				</File>
 				<File
@@ -459,9 +783,6 @@
 				</File>
 				<File
 					RelativePath="..\..\ode\src\quickstep.h">
-				</File>
-				<File
-					RelativePath="..\..\ode\src\stack.h">
 				</File>
 				<File
 					RelativePath="..\..\ode\src\step.h">

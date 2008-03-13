@@ -3,7 +3,7 @@
 	ProjectType="Visual C++"
 	Version="7.10"
 	Name="drawstuff"
-	ProjectGUID="{ED3404C8-AD68-124D-A3A8-12C2E8115A91}"
+	ProjectGUID="{B4F47F0A-D9E7-4946-A93F-CF7A8530BE2A}"
 	Keyword="Win32Proj">
 	<Platforms>
 		<Platform
@@ -11,15 +11,15 @@
 	</Platforms>
 	<Configurations>
 		<Configuration
-			Name="DebugDLL|Win32"
-			OutputDirectory="../../lib/DebugDLL"
-			IntermediateDirectory="obj/drawstuff/DebugDLL"
+			Name="DebugSingleDLL|Win32"
+			OutputDirectory="../../lib/DebugSingleDLL"
+			IntermediateDirectory="obj/drawstuff/DebugSingleDLL"
 			ConfigurationType="2"
 			CharacterSet="2">
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="../../include"
+				AdditionalIncludeDirectories="../../include;../../ode/src"
 				PreprocessorDefinitions="WIN32;DS_DLL;USRDLL"
 				MinimalRebuild="TRUE"
 				BasicRuntimeChecks="3"
@@ -37,11 +37,11 @@
 				AdditionalDependencies="user32.lib opengl32.lib glu32.lib winmm.lib gdi32.lib"
 				OutputFile="$(OutDir)/drawstuffd.dll"
 				LinkIncremental="2"
-				AdditionalLibraryDirectories="../../lib/DebugDLL"
+				AdditionalLibraryDirectories="../../lib/DebugSingleDLL"
 				GenerateDebugInformation="TRUE"
 				ProgramDatabaseFile="$(OutDir)/drawstuffd.pdb"
 				SubSystem="2"
-				ImportLibrary="../../lib/DebugDLL/drawstuffd.lib"
+				ImportLibrary="../../lib/DebugSingleDLL/drawstuffd.lib"
 				TargetMachine="1"/>
 			<Tool
 				Name="VCMIDLTool"/>
@@ -54,7 +54,7 @@
 			<Tool
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="WIN32;DS_DLL;USRDLL"
-				AdditionalIncludeDirectories="../../include"/>
+				AdditionalIncludeDirectories="../../include;../../ode/src"/>
 			<Tool
 				Name="VCWebServiceProxyGeneratorTool"/>
 			<Tool
@@ -67,16 +67,16 @@
 				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
 		</Configuration>
 		<Configuration
-			Name="ReleaseDLL|Win32"
-			OutputDirectory="../../lib/ReleaseDLL"
-			IntermediateDirectory="obj/drawstuff/ReleaseDLL"
+			Name="ReleaseSingleDLL|Win32"
+			OutputDirectory="../../lib/ReleaseSingleDLL"
+			IntermediateDirectory="obj/drawstuff/ReleaseSingleDLL"
 			ConfigurationType="2"
 			CharacterSet="2">
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				OmitFramePointers="TRUE"
-				AdditionalIncludeDirectories="../../include"
+				AdditionalIncludeDirectories="../../include;../../ode/src"
 				PreprocessorDefinitions="WIN32;DS_DLL;USRDLL"
 				StringPooling="TRUE"
 				RuntimeLibrary="2"
@@ -93,12 +93,12 @@
 				AdditionalDependencies="user32.lib opengl32.lib glu32.lib winmm.lib gdi32.lib"
 				OutputFile="$(OutDir)/drawstuff.dll"
 				LinkIncremental="1"
-				AdditionalLibraryDirectories="../../lib/ReleaseDLL"
+				AdditionalLibraryDirectories="../../lib/ReleaseSingleDLL"
 				GenerateDebugInformation="FALSE"
 				SubSystem="2"
 				OptimizeReferences="2"
 				EnableCOMDATFolding="2"
-				ImportLibrary="../../lib/ReleaseDLL/drawstuff.lib"
+				ImportLibrary="../../lib/ReleaseSingleDLL/drawstuff.lib"
 				TargetMachine="1"/>
 			<Tool
 				Name="VCMIDLTool"/>
@@ -111,7 +111,7 @@
 			<Tool
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="WIN32;DS_DLL;USRDLL"
-				AdditionalIncludeDirectories="../../include"/>
+				AdditionalIncludeDirectories="../../include;../../ode/src"/>
 			<Tool
 				Name="VCWebServiceProxyGeneratorTool"/>
 			<Tool
@@ -124,15 +124,15 @@
 				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
 		</Configuration>
 		<Configuration
-			Name="DebugLib|Win32"
-			OutputDirectory="../../lib/DebugLib"
-			IntermediateDirectory="obj/drawstuff/DebugLib"
+			Name="DebugSingleLib|Win32"
+			OutputDirectory="../../lib/DebugSingleLib"
+			IntermediateDirectory="obj/drawstuff/DebugSingleLib"
 			ConfigurationType="4"
 			CharacterSet="2">
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="../../include"
+				AdditionalIncludeDirectories="../../include;../../ode/src"
 				PreprocessorDefinitions="WIN32;DS_LIB"
 				MinimalRebuild="TRUE"
 				BasicRuntimeChecks="3"
@@ -159,7 +159,7 @@
 			<Tool
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="WIN32;DS_LIB"
-				AdditionalIncludeDirectories="../../include"/>
+				AdditionalIncludeDirectories="../../include;../../ode/src"/>
 			<Tool
 				Name="VCWebServiceProxyGeneratorTool"/>
 			<Tool
@@ -172,16 +172,16 @@
 				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
 		</Configuration>
 		<Configuration
-			Name="ReleaseLib|Win32"
-			OutputDirectory="../../lib/ReleaseLib"
-			IntermediateDirectory="obj/drawstuff/ReleaseLib"
+			Name="ReleaseSingleLib|Win32"
+			OutputDirectory="../../lib/ReleaseSingleLib"
+			IntermediateDirectory="obj/drawstuff/ReleaseSingleLib"
 			ConfigurationType="4"
 			CharacterSet="2">
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				OmitFramePointers="TRUE"
-				AdditionalIncludeDirectories="../../include"
+				AdditionalIncludeDirectories="../../include;../../ode/src"
 				PreprocessorDefinitions="WIN32;DS_LIB"
 				StringPooling="TRUE"
 				RuntimeLibrary="0"
@@ -207,7 +207,216 @@
 			<Tool
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="WIN32;DS_LIB"
-				AdditionalIncludeDirectories="../../include"/>
+				AdditionalIncludeDirectories="../../include;../../ode/src"/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"/>
+			<Tool
+				Name="VCWebDeploymentTool"/>
+			<Tool
+				Name="VCManagedWrapperGeneratorTool"/>
+			<Tool
+				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
+		</Configuration>
+		<Configuration
+			Name="DebugDoubleDLL|Win32"
+			OutputDirectory="../../lib/DebugDoubleDLL"
+			IntermediateDirectory="obj/drawstuff/DebugDoubleDLL"
+			ConfigurationType="2"
+			CharacterSet="2">
+			<Tool
+				Name="VCCLCompilerTool"
+				Optimization="0"
+				AdditionalIncludeDirectories="../../include;../../ode/src"
+				PreprocessorDefinitions="WIN32;DS_DLL;USRDLL;dDOUBLE"
+				MinimalRebuild="TRUE"
+				BasicRuntimeChecks="3"
+				RuntimeLibrary="3"
+				EnableFunctionLevelLinking="TRUE"
+				RuntimeTypeInfo="TRUE"
+				UsePrecompiledHeader="2"
+				WarningLevel="3"
+				Detect64BitPortabilityProblems="TRUE"
+				DebugInformationFormat="4"/>
+			<Tool
+				Name="VCCustomBuildTool"/>
+			<Tool
+				Name="VCLinkerTool"
+				AdditionalDependencies="user32.lib opengl32.lib glu32.lib winmm.lib gdi32.lib"
+				OutputFile="$(OutDir)/drawstuffd.dll"
+				LinkIncremental="2"
+				AdditionalLibraryDirectories="../../lib/DebugDoubleDLL"
+				GenerateDebugInformation="TRUE"
+				ProgramDatabaseFile="$(OutDir)/drawstuffd.pdb"
+				SubSystem="2"
+				ImportLibrary="../../lib/DebugDoubleDLL/drawstuffd.lib"
+				TargetMachine="1"/>
+			<Tool
+				Name="VCMIDLTool"/>
+			<Tool
+				Name="VCPostBuildEventTool"/>
+			<Tool
+				Name="VCPreBuildEventTool"/>
+			<Tool
+				Name="VCPreLinkEventTool"/>
+			<Tool
+				Name="VCResourceCompilerTool"
+				PreprocessorDefinitions="WIN32;DS_DLL;USRDLL;dDOUBLE"
+				AdditionalIncludeDirectories="../../include;../../ode/src"/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"/>
+			<Tool
+				Name="VCWebDeploymentTool"/>
+			<Tool
+				Name="VCManagedWrapperGeneratorTool"/>
+			<Tool
+				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
+		</Configuration>
+		<Configuration
+			Name="ReleaseDoubleDLL|Win32"
+			OutputDirectory="../../lib/ReleaseDoubleDLL"
+			IntermediateDirectory="obj/drawstuff/ReleaseDoubleDLL"
+			ConfigurationType="2"
+			CharacterSet="2">
+			<Tool
+				Name="VCCLCompilerTool"
+				Optimization="2"
+				OmitFramePointers="TRUE"
+				AdditionalIncludeDirectories="../../include;../../ode/src"
+				PreprocessorDefinitions="WIN32;DS_DLL;USRDLL;dDOUBLE"
+				StringPooling="TRUE"
+				RuntimeLibrary="2"
+				EnableFunctionLevelLinking="TRUE"
+				RuntimeTypeInfo="TRUE"
+				UsePrecompiledHeader="2"
+				WarningLevel="3"
+				Detect64BitPortabilityProblems="TRUE"
+				DebugInformationFormat="0"/>
+			<Tool
+				Name="VCCustomBuildTool"/>
+			<Tool
+				Name="VCLinkerTool"
+				AdditionalDependencies="user32.lib opengl32.lib glu32.lib winmm.lib gdi32.lib"
+				OutputFile="$(OutDir)/drawstuff.dll"
+				LinkIncremental="1"
+				AdditionalLibraryDirectories="../../lib/ReleaseDoubleDLL"
+				GenerateDebugInformation="FALSE"
+				SubSystem="2"
+				OptimizeReferences="2"
+				EnableCOMDATFolding="2"
+				ImportLibrary="../../lib/ReleaseDoubleDLL/drawstuff.lib"
+				TargetMachine="1"/>
+			<Tool
+				Name="VCMIDLTool"/>
+			<Tool
+				Name="VCPostBuildEventTool"/>
+			<Tool
+				Name="VCPreBuildEventTool"/>
+			<Tool
+				Name="VCPreLinkEventTool"/>
+			<Tool
+				Name="VCResourceCompilerTool"
+				PreprocessorDefinitions="WIN32;DS_DLL;USRDLL;dDOUBLE"
+				AdditionalIncludeDirectories="../../include;../../ode/src"/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"/>
+			<Tool
+				Name="VCWebDeploymentTool"/>
+			<Tool
+				Name="VCManagedWrapperGeneratorTool"/>
+			<Tool
+				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
+		</Configuration>
+		<Configuration
+			Name="DebugDoubleLib|Win32"
+			OutputDirectory="../../lib/DebugDoubleLib"
+			IntermediateDirectory="obj/drawstuff/DebugDoubleLib"
+			ConfigurationType="4"
+			CharacterSet="2">
+			<Tool
+				Name="VCCLCompilerTool"
+				Optimization="0"
+				AdditionalIncludeDirectories="../../include;../../ode/src"
+				PreprocessorDefinitions="WIN32;DS_LIB;dDOUBLE"
+				MinimalRebuild="TRUE"
+				BasicRuntimeChecks="3"
+				RuntimeLibrary="1"
+				EnableFunctionLevelLinking="TRUE"
+				RuntimeTypeInfo="TRUE"
+				UsePrecompiledHeader="2"
+				WarningLevel="3"
+				Detect64BitPortabilityProblems="TRUE"
+				DebugInformationFormat="4"/>
+			<Tool
+				Name="VCCustomBuildTool"/>
+			<Tool
+				Name="VCLibrarianTool"
+				OutputFile="$(OutDir)/drawstuffd.lib"/>
+			<Tool
+				Name="VCMIDLTool"/>
+			<Tool
+				Name="VCPostBuildEventTool"/>
+			<Tool
+				Name="VCPreBuildEventTool"/>
+			<Tool
+				Name="VCPreLinkEventTool"/>
+			<Tool
+				Name="VCResourceCompilerTool"
+				PreprocessorDefinitions="WIN32;DS_LIB;dDOUBLE"
+				AdditionalIncludeDirectories="../../include;../../ode/src"/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"/>
+			<Tool
+				Name="VCWebDeploymentTool"/>
+			<Tool
+				Name="VCManagedWrapperGeneratorTool"/>
+			<Tool
+				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
+		</Configuration>
+		<Configuration
+			Name="ReleaseDoubleLib|Win32"
+			OutputDirectory="../../lib/ReleaseDoubleLib"
+			IntermediateDirectory="obj/drawstuff/ReleaseDoubleLib"
+			ConfigurationType="4"
+			CharacterSet="2">
+			<Tool
+				Name="VCCLCompilerTool"
+				Optimization="2"
+				OmitFramePointers="TRUE"
+				AdditionalIncludeDirectories="../../include;../../ode/src"
+				PreprocessorDefinitions="WIN32;DS_LIB;dDOUBLE"
+				StringPooling="TRUE"
+				RuntimeLibrary="0"
+				EnableFunctionLevelLinking="TRUE"
+				RuntimeTypeInfo="TRUE"
+				UsePrecompiledHeader="2"
+				WarningLevel="3"
+				Detect64BitPortabilityProblems="TRUE"
+				DebugInformationFormat="0"/>
+			<Tool
+				Name="VCCustomBuildTool"/>
+			<Tool
+				Name="VCLibrarianTool"
+				OutputFile="$(OutDir)/drawstuff.lib"/>
+			<Tool
+				Name="VCMIDLTool"/>
+			<Tool
+				Name="VCPostBuildEventTool"/>
+			<Tool
+				Name="VCPreBuildEventTool"/>
+			<Tool
+				Name="VCPreLinkEventTool"/>
+			<Tool
+				Name="VCResourceCompilerTool"
+				PreprocessorDefinitions="WIN32;DS_LIB;dDOUBLE"
+				AdditionalIncludeDirectories="../../include;../../ode/src"/>
 			<Tool
 				Name="VCWebServiceProxyGeneratorTool"/>
 			<Tool
