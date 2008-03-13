@@ -130,7 +130,6 @@ void start()
   dMatrix3 m1 = { 1,0,0,0,0,1,0,0,0,0,1,0 };
   dMatrix3 m2 = { 1,0,0,0,0,1,0,0,0,0,1,0 };
   dGeomSetPosition (geoms[0],0,0,0.25);
-  //dGeomSetPosition (geoms[1],0,0,0.70);
   dGeomSetPosition (geoms[1],0.25,0.25,0.70);  
   dGeomSetRotation (geoms[0],m1);
   dGeomSetRotation (geoms[1],m2);
@@ -147,7 +146,7 @@ void simLoop (int pause)
   const dReal ss[3] = {0.02,0.02,0.02};
   dContactGeom contacts[8];
 #if USE_CONVEX
-  int contactcount = dCollideConvexConvex(geoms[0],geoms[1],8,contacts,sizeof(dContactGeom));
+  int contactcount = dCollideConvexConvex(geoms[1],geoms[0],8,contacts,sizeof(dContactGeom));
 #else
   int contactcount = dCollideBoxBox(geoms[0],geoms[1],8,contacts,sizeof(dContactGeom));
 #endif
