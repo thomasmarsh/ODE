@@ -1444,6 +1444,12 @@ ODE_API void dJointGroupDestroy (dJointGroupID);
 ODE_API void dJointGroupEmpty (dJointGroupID);
 
 /**
+ * @brief Return the number of bodies attached to the joint
+ * @ingroup joints
+ */
+ODE_API int dJointGetNumBodies(dJointID);
+
+/**
  * @brief Attach the joint to some new bodies.
  * @ingroup joints
  *
