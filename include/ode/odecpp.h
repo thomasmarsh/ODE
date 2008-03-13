@@ -367,6 +367,9 @@ public:
   operator dJointID() const
     { return _id; }
 
+  int getNumBodies() const
+    { return dJointGetNumBodies(_id); }
+
   void attach (dBodyID body1, dBodyID body2)
     { dJointAttach (_id, body1, body2); }
 

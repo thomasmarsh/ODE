@@ -1287,6 +1287,19 @@ void dJointGroupEmpty (dJointGroupID group)
   group->stack.freeAll();
 }
 
+int dJointGetNumBodies(dxJoint *joint)
+{
+  // check arguments
+  dUASSERT (joint,"bad joint argument");
+
+  if ( !joint->node[0].body )
+    return 0;
+  else if ( !joint->node[1].body )
+    return 1;
+  else
+    return 2;
+}
+
 
 void dJointAttach (dxJoint *joint, dxBody *body1, dxBody *body2)
 {
