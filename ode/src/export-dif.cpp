@@ -364,12 +364,20 @@ static void printBox (PrintingContext &c, dxGeom *g)
 }
 
 
-
 static void printCapsule (PrintingContext &c, dxGeom *g)
 {
 	dReal radius,length;
 	dGeomCapsuleGetParams (g,&radius,&length);
 	c.print ("type","capsule");
+	c.print ("radius",radius);
+	c.print ("length",length);
+}
+
+
+static void printCylinder (PrintingContext &c, dxGeom *g)
+{
+	dReal radius,length;
+	dGeomCylinderGetParams (g,&radius,&length);
 	c.print ("radius",radius);
 	c.print ("length",length);
 }
@@ -385,7 +393,6 @@ static void printPlane (PrintingContext &c, dxGeom *g)
 }
 
 
-
 static void printRay (PrintingContext &c, dxGeom *g)
 {
 	dReal length = dGeomRayGetLength (g);
@@ -393,6 +400,12 @@ static void printRay (PrintingContext &c, dxGeom *g)
 	c.print ("length",length);
 }
 
+
+static void printConvex (PrintingContext &c, dxGeom *g)
+{
+	c.print ("type","convex");
+	///@todo Print information about convex hull
+}
 
 
 static void printGeomTransform (PrintingContext &c, dxGeom *g)
@@ -412,7 +425,6 @@ static void printGeomTransform (PrintingContext &c, dxGeom *g)
 }
 
 
-
 static void printTriMesh (PrintingContext &c, dxGeom *g)
 {
 	c.print ("type","trimesh");
@@ -420,6 +432,13 @@ static void printTriMesh (PrintingContext &c, dxGeom *g)
 	//    sufficient to read out all the triangle data, and anyway we
 	//    should have a method of not duplicating trimesh data that is
 	//    shared.
+}
+
+
+static void printHeightfieldClass (PrintingContext &c, dxGeom *g)
+{
+	c.print ("type","heightfield");
+	///@todo Print information about heightfield
 }
 
 
@@ -442,10 +461,13 @@ static void printGeom (PrintingContext &c, dxGeom *g)
 		case dSphereClass: printSphere (c,g); break;
 		case dBoxClass: printBox (c,g); break;
 		case dCapsuleClass: printCapsule (c,g); break;
+		case dCylinderClass: printCylinder (c,g); break;
 		case dPlaneClass: printPlane (c,g); break;
 		case dRayClass: printRay (c,g); break;
+		case dConvexClass: printConvex (c,g); break;
 		case dGeomTransformClass: printGeomTransform (c,g); break;
 		case dTriMeshClass: printTriMesh (c,g); break;
+		case dHeightfieldClass: printHeightfieldClass (c,g); break;
 	}
 }
 
