@@ -254,11 +254,8 @@ static void command (int cmd)
 	// Geom Creation
 	//
 
-	if ( cmd == 'b' || cmd == 's' || cmd == 'c' || 
-                #ifdef dTRIMESH_ENABLED
-		cmd == 'm' ||
-                #endif
-		cmd == 'x' || cmd == 'y' || cmd == 'v' )
+	if ( cmd == 'b' || cmd == 's' || cmd == 'c' || cmd == 'm' ||
+		 cmd == 'x' || cmd == 'y' || cmd == 'v' )
 	{
 		if ( num < NUM )
 		{
@@ -338,7 +335,6 @@ static void command (int cmd)
 			dMassSetSphere (&m,DENSITY,sides[0]);
 			obj[i].geom[0] = dCreateSphere (space,sides[0]);
 		}
-		#ifdef dTRIMESH_ENABLED
 		else if (cmd == 'm')
 		{
 			dTriMeshDataID new_tmdata = dGeomTriMeshDataCreate();
@@ -352,7 +348,6 @@ static void command (int cmd)
 			dGeomSetPosition(obj[i].geom[0], -m.c[0], -m.c[1], -m.c[2]);
 			dMassTranslate(&m, -m.c[0], -m.c[1], -m.c[2]);
 		}
-		#endif
 		else if (cmd == 'x')
 		{
 			dGeomID g2[GPB];		// encapsulated geometries
@@ -615,7 +610,6 @@ static void simLoop (int pause)
 				dsSetColor (1,1,0);
 			}
 
-                        #ifdef dTRIMESH_ENABLED
 			if ( obj[i].geom[j] && dGeomGetClass(obj[i].geom[j]) == dTriMeshClass )
 			{
 				dTriIndex* Indices = (dTriIndex*)::Indices;
@@ -658,9 +652,6 @@ static void simLoop (int pause)
 				dGeomTriMeshSetLastTransform( obj[i].geom[j], 
 					*(dMatrix4*)( obj[i].matrix_dblbuff + ( obj[i].last_matrix_index * 16 ) ) );
 			}
-			#else
-			if (0) {}
-			#endif
 			else
 			{
 				drawGeom (obj[i].geom[j],0,0,show_aabb);
