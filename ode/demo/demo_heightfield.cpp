@@ -32,6 +32,7 @@
 
 #define	DEGTORAD			0.01745329251994329577f				//!< PI / 180.0, convert degrees to radians
 
+bool g_allow_trimesh;
 
 // Our heightfield geom
 dGeomID gheight;
@@ -167,6 +168,38 @@ dReal heightfield_callback( void* pUserData, int x, int z )
 }
 
 
+// Helper to check for a feature of ODE
+bool isFeatureSupported( const char* feature )
+{
+	const char *start;
+	char *where, *terminator;
+
+	/* Feature names should not have spaces. */
+	where = (char*)strchr(feature, ' ');
+	if ( where || *feature == '\0')
+		return false;
+
+	const char* config = dGetConfiguration();
+
+	/* It takes a bit of care to be fool-proof. Don't be fooled by sub-strings, etc. */
+	start = config;
+	for (;;)
+	{
+		where = (char*)strstr((const char *) start, feature);
+		if (!where)
+			break;
+
+		terminator = where + strlen(feature);
+	
+		if (where == start || *(where - 1) == ' ')
+		if (*terminator == ' ' || *terminator == '\0')
+			return true;
+	
+		start = terminator;
+	}
+
+	return false;
+}
 
 
 
@@ -220,7 +253,8 @@ static void start()
   printf ("   y for cylinder.\n");
   printf ("   v for a convex object.\n");
   printf ("   x for a composite object.\n");
-  printf ("   m for a trimesh.\n");
+  if ( g_allow_trimesh )
+	printf ("   m for a trimesh.\n");
   printf ("To select an object, press space.\n");
   printf ("To disable the selected object, press d.\n");
   printf ("To enable the selected object, press e.\n");
@@ -254,7 +288,7 @@ static void command (int cmd)
 	// Geom Creation
 	//
 
-	if ( cmd == 'b' || cmd == 's' || cmd == 'c' || cmd == 'm' ||
+	if ( cmd == 'b' || cmd == 's' || cmd == 'c' || ( cmd == 'm' && g_allow_trimesh ) ||
 		 cmd == 'x' || cmd == 'y' || cmd == 'v' )
 	{
 		if ( num < NUM )
@@ -335,7 +369,7 @@ static void command (int cmd)
 			dMassSetSphere (&m,DENSITY,sides[0]);
 			obj[i].geom[0] = dCreateSphere (space,sides[0]);
 		}
-		else if (cmd == 'm')
+		else if (cmd == 'm' && g_allow_trimesh)
 		{
 			dTriMeshDataID new_tmdata = dGeomTriMeshDataCreate();
 			dGeomTriMeshDataBuildSingle(new_tmdata, &Vertices[0], 3 * sizeof(float), VertexCount, 
@@ -678,6 +712,9 @@ static void simLoop (int pause)
 
 int main (int argc, char **argv)
 {
+	// Is trimesh support built into this ODE?
+	g_allow_trimesh = isFeatureSupported( "ODE_EXT_trimesh" );
+
 	// setup pointers to drawstuff callback functions
 	dsFunctions fn;
 	fn.version = DS_VERSION;
