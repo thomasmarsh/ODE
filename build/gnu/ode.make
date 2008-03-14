@@ -144,6 +144,7 @@ OBJECTS := \
 	$(OBJDIR)/collision_transform.o \
 	$(OBJDIR)/collision_trimesh_box.o \
 	$(OBJDIR)/collision_trimesh_ccylinder.o \
+	$(OBJDIR)/collision_trimesh_disabled.o \
 	$(OBJDIR)/collision_trimesh_distance.o \
 	$(OBJDIR)/collision_trimesh_gimpact.o \
 	$(OBJDIR)/collision_trimesh_opcode.o \
@@ -355,6 +356,11 @@ $(OBJDIR)/collision_trimesh_box.o: ../../ode/src/collision_trimesh_box.cpp
 	@$(CXX) $(CXXFLAGS) -o $@ -c $<
 
 $(OBJDIR)/collision_trimesh_ccylinder.o: ../../ode/src/collision_trimesh_ccylinder.cpp
+	-@$(CMD_MKOBJDIR)
+	@echo $(notdir $<)
+	@$(CXX) $(CXXFLAGS) -o $@ -c $<
+
+$(OBJDIR)/collision_trimesh_disabled.o: ../../ode/src/collision_trimesh_disabled.cpp
 	-@$(CMD_MKOBJDIR)
 	@echo $(notdir $<)
 	@$(CXX) $(CXXFLAGS) -o $@ -c $<

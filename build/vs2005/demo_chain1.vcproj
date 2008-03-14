@@ -3,7 +3,7 @@
 	ProjectType="Visual C++"
 	Version="8.00"
 	Name="demo_chain1"
-	ProjectGUID="{BF47FEA4-28E5-A54A-8F71-D5817AA334EE}"
+	ProjectGUID="{73E49BE5-214E-8242-9BB0-BC06E6380FBE}"
 	RootNamespace="demo_chain1"
 	Keyword="Win32Proj"
 	>

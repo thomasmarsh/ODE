@@ -3,7 +3,7 @@
 	ProjectType="Visual C++"
 	Version="7.00"
 	Name="demo_piston"
-	ProjectGUID="{40A3FE54-3D69-CC48-AC8A-543E200F82ED}"
+	ProjectGUID="{535A8069-D073-2041-A493-D5D81C9B9598}"
 	Keyword="Win32Proj">
 	<Platforms>
 		<Platform

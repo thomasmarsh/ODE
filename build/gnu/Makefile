@@ -9,9 +9,9 @@ endif
 
 export CONFIG
 
-.PHONY: all clean demo_boxstack demo_buggy demo_chain1 demo_chain2 demo_collision demo_crash demo_feedback demo_friction demo_heightfield demo_hinge demo_I demo_jointPR demo_joints demo_motor demo_ode demo_piston demo_plane2d demo_slider demo_space demo_space_stress demo_step demo_basket demo_cyl demo_moving_trimesh demo_trimesh demo_cylvssphere drawstuff tests ode
+.PHONY: all clean demo_boxstack demo_buggy demo_chain1 demo_chain2 demo_collision demo_crash demo_cylvssphere demo_feedback demo_friction demo_hinge demo_I demo_jointPR demo_joints demo_motor demo_ode demo_piston demo_plane2d demo_slider demo_space demo_space_stress demo_step demo_basket demo_cyl demo_heightfield demo_moving_trimesh demo_trimesh drawstuff tests ode
 
-all: demo_boxstack demo_buggy demo_chain1 demo_chain2 demo_collision demo_crash demo_feedback demo_friction demo_heightfield demo_hinge demo_I demo_jointPR demo_joints demo_motor demo_ode demo_piston demo_plane2d demo_slider demo_space demo_space_stress demo_step demo_basket demo_cyl demo_moving_trimesh demo_trimesh demo_cylvssphere drawstuff tests ode
+all: demo_boxstack demo_buggy demo_chain1 demo_chain2 demo_collision demo_crash demo_cylvssphere demo_feedback demo_friction demo_hinge demo_I demo_jointPR demo_joints demo_motor demo_ode demo_piston demo_plane2d demo_slider demo_space demo_space_stress demo_step demo_basket demo_cyl demo_heightfield demo_moving_trimesh demo_trimesh drawstuff tests ode
 
 Makefile: ../premake.lua ../demos.lua ../demos.lua ../demos.lua ../demos.lua ../demos.lua ../demos.lua ../demos.lua ../demos.lua ../demos.lua ../demos.lua ../demos.lua ../demos.lua ../demos.lua ../demos.lua ../demos.lua ../demos.lua ../demos.lua ../demos.lua ../demos.lua ../demos.lua ../demos.lua ../demos.lua ../demos.lua ../demos.lua ../demos.lua ../demos.lua ../drawstuff.lua ../tests.lua ../ode.lua
 	@echo ==== Regenerating Makefiles ====
@@ -41,6 +41,10 @@ demo_crash: ode drawstuff
 	@echo ==== Building demo_crash ====
 	@$(MAKE) --no-print-directory -C . -f demo_crash.make
 
+demo_cylvssphere: ode drawstuff
+	@echo ==== Building demo_cylvssphere ====
+	@$(MAKE) --no-print-directory -C . -f demo_cylvssphere.make
+
 demo_feedback: ode drawstuff
 	@echo ==== Building demo_feedback ====
 	@$(MAKE) --no-print-directory -C . -f demo_feedback.make
@@ -48,10 +52,6 @@ demo_feedback: ode drawstuff
 demo_friction: ode drawstuff
 	@echo ==== Building demo_friction ====
 	@$(MAKE) --no-print-directory -C . -f demo_friction.make
-
-demo_heightfield: ode drawstuff
-	@echo ==== Building demo_heightfield ====
-	@$(MAKE) --no-print-directory -C . -f demo_heightfield.make
 
 demo_hinge: ode drawstuff
 	@echo ==== Building demo_hinge ====
@@ -109,6 +109,10 @@ demo_cyl: ode drawstuff
 	@echo ==== Building demo_cyl ====
 	@$(MAKE) --no-print-directory -C . -f demo_cyl.make
 
+demo_heightfield: ode drawstuff
+	@echo ==== Building demo_heightfield ====
+	@$(MAKE) --no-print-directory -C . -f demo_heightfield.make
+
 demo_moving_trimesh: ode drawstuff
 	@echo ==== Building demo_moving_trimesh ====
 	@$(MAKE) --no-print-directory -C . -f demo_moving_trimesh.make
@@ -116,10 +120,6 @@ demo_moving_trimesh: ode drawstuff
 demo_trimesh: ode drawstuff
 	@echo ==== Building demo_trimesh ====
 	@$(MAKE) --no-print-directory -C . -f demo_trimesh.make
-
-demo_cylvssphere: ode drawstuff
-	@echo ==== Building demo_cylvssphere ====
-	@$(MAKE) --no-print-directory -C . -f demo_cylvssphere.make
 
 drawstuff:
 	@echo ==== Building drawstuff ====
@@ -140,9 +140,9 @@ clean:
 	@$(MAKE) --no-print-directory -C . -f demo_chain2.make clean
 	@$(MAKE) --no-print-directory -C . -f demo_collision.make clean
 	@$(MAKE) --no-print-directory -C . -f demo_crash.make clean
+	@$(MAKE) --no-print-directory -C . -f demo_cylvssphere.make clean
 	@$(MAKE) --no-print-directory -C . -f demo_feedback.make clean
 	@$(MAKE) --no-print-directory -C . -f demo_friction.make clean
-	@$(MAKE) --no-print-directory -C . -f demo_heightfield.make clean
 	@$(MAKE) --no-print-directory -C . -f demo_hinge.make clean
 	@$(MAKE) --no-print-directory -C . -f demo_I.make clean
 	@$(MAKE) --no-print-directory -C . -f demo_jointPR.make clean
@@ -157,9 +157,9 @@ clean:
 	@$(MAKE) --no-print-directory -C . -f demo_step.make clean
 	@$(MAKE) --no-print-directory -C . -f demo_basket.make clean
 	@$(MAKE) --no-print-directory -C . -f demo_cyl.make clean
+	@$(MAKE) --no-print-directory -C . -f demo_heightfield.make clean
 	@$(MAKE) --no-print-directory -C . -f demo_moving_trimesh.make clean
 	@$(MAKE) --no-print-directory -C . -f demo_trimesh.make clean
-	@$(MAKE) --no-print-directory -C . -f demo_cylvssphere.make clean
 	@$(MAKE) --no-print-directory -C . -f drawstuff.make clean
 	@$(MAKE) --no-print-directory -C . -f tests.make clean
 	@$(MAKE) --no-print-directory -C . -f ode.make clean
