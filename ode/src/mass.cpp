@@ -221,8 +221,6 @@ void dMassSetBoxTotal (dMass *m, dReal total_mass,
 
 
 
-#if dTRIMESH_ENABLED
-
 /*
  * dMassSetTrimesh, implementation by Gero Mueller.
  * Based on Brian Mirtich, "Fast and Accurate Computation of
@@ -235,6 +233,8 @@ void dMassSetTrimesh( dMass *m, dReal density, dGeomID g )
 	dUASSERT(g && g->type == dTriMeshClass, "argument not a trimesh");
 
 	dMassSetZero (m);
+
+#if dTRIMESH_ENABLED
 
 	unsigned int triangles = dGeomTriMeshGetTriangleCount( g );
 
@@ -411,6 +411,8 @@ void dMassSetTrimesh( dMass *m, dReal density, dGeomID g )
 # ifndef dNODEBUG
 	dMassCheck (m);
 # endif
+
+#endif // dTRIMESH_ENABLED
 }
 
 
@@ -421,8 +423,6 @@ void dMassSetTrimeshTotal( dMass *m, dReal total_mass, dGeomID g)
   dMassSetTrimesh( m, 1.0, g );
   dMassAdjust( m, total_mass );
 }
-
-#endif // dTRIMESH_ENABLED
 
 
 
