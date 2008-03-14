@@ -3,7 +3,7 @@
 	ProjectType="Visual C++"
 	Version="7.00"
 	Name="demo_slider"
-	ProjectGUID="{A8F3565C-D579-F94B-AAA3-893203AD5867}"
+	ProjectGUID="{132E6550-D848-CA46-B028-EF8AC478DC88}"
 	Keyword="Win32Proj">
 	<Platforms>
 		<Platform

@@ -32,7 +32,7 @@
 
 #define	DEGTORAD			0.01745329251994329577f				//!< PI / 180.0, convert degrees to radians
 
-bool g_allow_trimesh;
+int g_allow_trimesh;
 
 // Our heightfield geom
 dGeomID gheight;
@@ -167,39 +167,6 @@ dReal heightfield_callback( void* pUserData, int x, int z )
 	return h;
 }
 
-
-// Helper to check for a feature of ODE
-bool isFeatureSupported( const char* feature )
-{
-	const char *start;
-	char *where, *terminator;
-
-	/* Feature names should not have spaces. */
-	where = (char*)strchr(feature, ' ');
-	if ( where || *feature == '\0')
-		return false;
-
-	const char* config = dGetConfiguration();
-
-	/* It takes a bit of care to be fool-proof. Don't be fooled by sub-strings, etc. */
-	start = config;
-	for (;;)
-	{
-		where = (char*)strstr((const char *) start, feature);
-		if (!where)
-			break;
-
-		terminator = where + strlen(feature);
-	
-		if (where == start || *(where - 1) == ' ')
-		if (*terminator == ' ' || *terminator == '\0')
-			return true;
-	
-		start = terminator;
-	}
-
-	return false;
-}
 
 
 
@@ -713,7 +680,7 @@ static void simLoop (int pause)
 int main (int argc, char **argv)
 {
 	// Is trimesh support built into this ODE?
-	g_allow_trimesh = isFeatureSupported( "ODE_EXT_trimesh" );
+	g_allow_trimesh = dCheckConfiguration( "ODE_EXT_trimesh" );
 
 	// setup pointers to drawstuff callback functions
 	dsFunctions fn;

@@ -3,7 +3,7 @@
 	ProjectType="Visual C++"
 	Version="8.00"
 	Name="demo_cyl"
-	ProjectGUID="{2B1E5AF9-1075-0946-83C5-25572540519E}"
+	ProjectGUID="{BCB77C42-A432-2648-8C69-A2A62E85FAB3}"
 	RootNamespace="demo_cyl"
 	Keyword="Win32Proj"
 	>

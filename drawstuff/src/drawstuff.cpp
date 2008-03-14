@@ -40,7 +40,7 @@ manage openGL state changes better
 #include <windows.h>
 #endif
 
-#include <ode/odeconfig.h>
+#include <ode/ode.h>
 #include "config.h"
 #ifdef HAVE_APPLE_OPENGL_FRAMEWORK
 #include <OpenGL/gl.h>
@@ -90,16 +90,6 @@ const float sky_height = 1.0f;		// sky height above viewpoint
 
 //***************************************************************************
 // misc mathematics stuff
-
-#define dCROSS(a,op,b,c) \
-  (a)[0] op ((b)[1]*(c)[2] - (b)[2]*(c)[1]); \
-  (a)[1] op ((b)[2]*(c)[0] - (b)[0]*(c)[2]); \
-  (a)[2] op ((b)[0]*(c)[1] - (b)[1]*(c)[0]);
-
-
-inline float dDOT (const float *a, const float *b)
-  { return ((a)[0]*(b)[0] + (a)[1]*(b)[1] + (a)[2]*(b)[2]); }
-
 
 static void normalizeVector3 (float v[3])
 {
@@ -893,6 +883,8 @@ static Texture *wood_texture = 0;
 
 void dsStartGraphics (int width, int height, dsFunctions *fn)
 {
+  dsPrint( "dGetConfiguration() = \"%s\"\n\n", dGetConfiguration() );
+
   const char *prefix = DEFAULT_PATH_TO_TEXTURES;
   if (fn->version >= 2 && fn->path_to_textures) prefix = fn->path_to_textures;
   char *s = (char*) alloca (strlen(prefix) + 20);
@@ -914,6 +906,8 @@ void dsStartGraphics (int width, int height, dsFunctions *fn)
 
 void dsStartGraphics (int width, int height, dsFunctions *fn)
 {
+   dsPrint( "dGetConfiguration() = %s\n\n", dGetConfiguration() );
+
    // All examples build into the same dir
    char *prefix = "::::drawstuff:textures";
    char *s = (char*) alloca (strlen(prefix) + 20);

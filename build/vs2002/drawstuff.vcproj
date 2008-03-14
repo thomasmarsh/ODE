@@ -3,7 +3,7 @@
 	ProjectType="Visual C++"
 	Version="7.00"
 	Name="drawstuff"
-	ProjectGUID="{F456DC2B-F57D-714A-BAC1-59CEFEFDA448}"
+	ProjectGUID="{4825D057-6AEA-BB47-9BC6-FADE77E65E49}"
 	Keyword="Win32Proj">
 	<Platforms>
 		<Platform
@@ -34,7 +34,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="user32.lib opengl32.lib glu32.lib winmm.lib gdi32.lib"
+				AdditionalDependencies="../../lib/DebugSingleDLL/ode_singled.lib user32.lib opengl32.lib glu32.lib winmm.lib gdi32.lib"
 				OutputFile="$(OutDir)/drawstuffd.dll"
 				LinkIncremental="2"
 				AdditionalLibraryDirectories="../../lib/DebugSingleDLL"
@@ -84,7 +84,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="user32.lib opengl32.lib glu32.lib winmm.lib gdi32.lib"
+				AdditionalDependencies="../../lib/ReleaseSingleDLL/ode_single.lib user32.lib opengl32.lib glu32.lib winmm.lib gdi32.lib"
 				OutputFile="$(OutDir)/drawstuff.dll"
 				LinkIncremental="1"
 				AdditionalLibraryDirectories="../../lib/ReleaseSingleDLL"
@@ -219,7 +219,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="user32.lib opengl32.lib glu32.lib winmm.lib gdi32.lib"
+				AdditionalDependencies="../../lib/DebugDoubleDLL/ode_doubled.lib user32.lib opengl32.lib glu32.lib winmm.lib gdi32.lib"
 				OutputFile="$(OutDir)/drawstuffd.dll"
 				LinkIncremental="2"
 				AdditionalLibraryDirectories="../../lib/DebugDoubleDLL"
@@ -269,7 +269,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="user32.lib opengl32.lib glu32.lib winmm.lib gdi32.lib"
+				AdditionalDependencies="../../lib/ReleaseDoubleDLL/ode_double.lib user32.lib opengl32.lib glu32.lib winmm.lib gdi32.lib"
 				OutputFile="$(OutDir)/drawstuff.dll"
 				LinkIncremental="1"
 				AdditionalLibraryDirectories="../../lib/ReleaseDoubleDLL"
