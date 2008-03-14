@@ -165,7 +165,6 @@ static void setAllColliders (int i, dColliderFn *fn)
   for (int j=0; j<dGeomNumClasses; j++) setCollider (i,j,fn);
 }
 
-
 static void initColliders()
 {
   int i,j;
@@ -232,6 +231,20 @@ static void initColliders()
 //<-- dHeightfield Collision
 
   setAllColliders (dGeomTransformClass,&dCollideTransform);
+}
+
+void dSetColliderOverride (int i, int j, dColliderFn *fn)
+{
+	dAASSERT( i < dGeomNumClasses );
+	dAASSERT( j < dGeomNumClasses );
+
+	// Ensure this has run first or it will wipe out any changes later.
+	initColliders();
+
+	colliders[i][j].fn = fn;
+	colliders[i][j].reverse = 0;
+	colliders[j][i].fn = fn;
+	colliders[j][i].reverse = 1;
 }
 
 
