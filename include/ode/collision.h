@@ -1378,6 +1378,17 @@ ODE_API int dCreateGeomClass (const dGeomClass *classptr);
 ODE_API void * dGeomGetClassData (dGeomID);
 ODE_API dGeomID dCreateGeom (int classnum);
 
+/**
+ * @brief Sets a custom collider function for two geom classes. 
+ *
+ * @param i The first geom class handled by this collider
+ * @param j The second geom class handled by this collider
+ * @param fn The collider function to use to determine collisions.
+ * @ingroup collide
+ */
+ODE_API void dSetColliderOverride (int i, int j, dColliderFn *fn);
+
+
 /* ************************************************************************ */
 
 #ifdef __cplusplus
