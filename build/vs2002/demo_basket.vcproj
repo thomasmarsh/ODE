@@ -3,7 +3,7 @@
 	ProjectType="Visual C++"
 	Version="7.00"
 	Name="demo_basket"
-	ProjectGUID="{E3C839AE-3DB6-DA4A-A4DA-A55F6AAF60CF}"
+	ProjectGUID="{1B5805E5-1743-C640-A2F2-C83A35DBFA81}"
 	Keyword="Win32Proj">
 	<Platforms>
 		<Platform

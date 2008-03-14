@@ -3,7 +3,7 @@
 	ProjectType="Visual C++"
 	Version="8.00"
 	Name="demo_boxstack"
-	ProjectGUID="{9446CE9F-EC31-1D4C-8F6B-9B42457A8E1D}"
+	ProjectGUID="{5D2CCE6D-F840-0A48-8D43-A0222868A8CD}"
 	RootNamespace="demo_boxstack"
 	Keyword="Win32Proj"
 	>

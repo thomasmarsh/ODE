@@ -3,7 +3,7 @@
 	ProjectType="Visual C++"
 	Version="8.00"
 	Name="ode"
-	ProjectGUID="{74904451-ECF5-9543-9A70-8851F376CF42}"
+	ProjectGUID="{86DC9AC8-3A4E-6243-81C8-44EBFCEBAB33}"
 	RootNamespace="ode"
 	Keyword="Win32Proj"
 	>
@@ -846,6 +846,9 @@
 				</File>
 				<File
 					RelativePath="..\..\ode\src\collision_trimesh_ccylinder.cpp">
+				</File>
+				<File
+					RelativePath="..\..\ode\src\collision_trimesh_disabled.cpp">
 				</File>
 				<File
 					RelativePath="..\..\ode\src\collision_trimesh_distance.cpp">
