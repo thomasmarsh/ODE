@@ -883,7 +883,6 @@ static Texture *wood_texture = 0;
 
 void dsStartGraphics (int width, int height, dsFunctions *fn)
 {
-  dsPrint( "dGetConfiguration() = \"%s\"\n\n", dGetConfiguration() );
 
   const char *prefix = DEFAULT_PATH_TO_TEXTURES;
   if (fn->version >= 2 && fn->path_to_textures) prefix = fn->path_to_textures;
@@ -906,7 +905,6 @@ void dsStartGraphics (int width, int height, dsFunctions *fn)
 
 void dsStartGraphics (int width, int height, dsFunctions *fn)
 {
-   dsPrint( "dGetConfiguration() = %s\n\n", dGetConfiguration() );
 
    // All examples build into the same dir
    char *prefix = "::::drawstuff:textures";
