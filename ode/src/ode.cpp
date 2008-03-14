@@ -2027,3 +2027,41 @@ const char* dGetConfiguration (void)
 {
 	return ode_configuration;
 }
+
+
+// Helper to check for a feature of ODE
+int dCheckConfiguration( const char* extension )
+{
+	const char *start;
+	char *where, *terminator;
+
+	/* Feature names should not have spaces. */
+	where = (char*)strchr(extension, ' ');
+	if ( where || *extension == '\0')
+		return 1;
+
+	const char* config = dGetConfiguration();
+
+	const size_t ext_length = strlen(extension);
+
+	/* It takes a bit of care to be fool-proof. Don't be fooled by sub-strings, etc. */
+	start = config;
+	for (  ; ;  )
+	{
+		where = (char*)strstr((const char *) start, extension);
+		if (!where)
+			break;
+
+		terminator = where + ext_length;
+	
+		if ( (where == start || *(where - 1) == ' ') && 
+			 (*terminator == ' ' || *terminator == '\0') )
+		{
+			return 1;
+		}
+		
+		start = terminator;
+	}
+
+	return 0;
+}

@@ -3,7 +3,7 @@
 	ProjectType="Visual C++"
 	Version="7.00"
 	Name="demo_buggy"
-	ProjectGUID="{49D76C2C-EEB4-9C46-A510-CA2030C889F9}"
+	ProjectGUID="{CA08810C-865D-4C46-8290-CF2004B77695}"
 	Keyword="Win32Proj">
 	<Platforms>
 		<Platform

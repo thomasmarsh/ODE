@@ -408,6 +408,15 @@ dGeomID dGeomGetBodyNext (dGeomID);
 */
 ODE_API const char* dGetConfiguration (void);
 
+/**
+ * Helper to check for a token in the ODE configuration string.
+ * Caution, this function is case sensitive.
+ *
+ * @param token A configuration token, see dGetConfiguration for details
+ *
+ * @return 1 if exact token is present, 0 if not present
+ */
+ODE_API int dCheckConfiguration( const char* token );
 
 #ifdef __cplusplus
 }

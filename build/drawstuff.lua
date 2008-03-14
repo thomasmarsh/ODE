@@ -1,6 +1,7 @@
 package.name = "drawstuff"
 package.language = "c++"
 package.objdir = "obj/drawstuff"
+package.links = { "ode" }
 
 
 -- Append a "d" to the debug version of the libraries

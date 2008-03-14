@@ -3,7 +3,7 @@
 	ProjectType="Visual C++"
 	Version="8.00"
 	Name="demo_piston"
-	ProjectGUID="{9DE2A21D-06B3-7B42-9ED6-2E385299AF54}"
+	ProjectGUID="{B38431C1-A53B-2147-8186-9EAB9DD117BA}"
 	RootNamespace="demo_piston"
 	Keyword="Win32Proj"
 	>
