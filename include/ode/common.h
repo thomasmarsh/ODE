@@ -388,6 +388,26 @@ typedef struct dJointFeedback {
 void dGeomMoved (dGeomID);
 dGeomID dGeomGetBodyNext (dGeomID);
 
+/**
+ * dGetConfiguration returns the specific ODE build configuration as
+ * a string of tokens. The string can be parsed in a similar way to
+ * the OpenGL extension mechanism, the naming convention should be
+ * familiar too. The following extensions are reported:
+ *
+ * ODE
+ * ODE_single_precision
+ * ODE_double_precision
+ * ODE_EXT_no_debug
+ * ODE_EXT_trimesh
+ * ODE_EXT_opcode
+ * ODE_EXT_gimpact
+ * ODE_EXT_malloc_not_alloca
+ * ODE_EXT_gyroscopic
+ * ODE_OPC_16bit_indices
+ * ODE_OPC_new_collider
+*/
+ODE_API const char* dGetConfiguration (void);
+
 
 #ifdef __cplusplus
 }

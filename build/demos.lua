@@ -12,6 +12,7 @@
     "cylvssphere",
     "feedback",
     "friction",
+    "heightfield",
     "hinge",
     "I",
     "jointPR",
@@ -29,7 +30,6 @@
   if (not options["no-trimesh"]) then
     table.insert(demos, "basket")
     table.insert(demos, "cyl")
-    table.insert(demos, "heightfield")
     table.insert(demos, "moving_trimesh")
     table.insert(demos, "trimesh")
   end

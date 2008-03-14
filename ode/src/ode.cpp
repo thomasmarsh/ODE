@@ -1964,3 +1964,66 @@ extern "C" void dTestDataStructures()
   dWorldDestroy (w);
   */
 }
+
+//****************************************************************************
+// configuration
+#define REGISTER_EXTENSION( __a )  #__a ## " "
+static const char ode_configuration[] = "ODE "
+
+// EXTENSION LIST BEGIN
+//**********************************
+
+#ifdef dNODEBUG
+REGISTER_EXTENSION( ODE_EXT_no_debug )
+#endif // dNODEBUG
+
+#ifdef dGYROSCOPIC
+REGISTER_EXTENSION( ODE_EXT_gyroscopic )
+#endif // dGYROSCOPIC
+
+#ifdef dUSE_MALLOC_FOR_ALLOCA
+REGISTER_EXTENSION( ODE_EXT_malloc_not_alloca )
+#endif // dGYROSCOPIC
+
+#if dTRIMESH_ENABLED
+REGISTER_EXTENSION( ODE_EXT_trimesh )
+
+	// tri-mesh extensions
+	#if dTRIMESH_OPCODE
+	REGISTER_EXTENSION( ODE_EXT_opcode )
+
+		// opcode extensions
+		#if dTRIMESH_16BIT_INDICES
+		REGISTER_EXTENSION( ODE_OPC_16bit_indices )
+		#endif
+
+		#if dTRIMESH_OPCODE_USE_NEW_TRIMESH_TRIMESH_COLLIDER
+		REGISTER_EXTENSION( ODE_OPC_new_collider )
+		#endif
+
+	#endif // dTRIMESH_OPCODE
+
+	#if dTRIMESH_GIMPACT
+	REGISTER_EXTENSION( ODE_EXT_gimpact )
+
+		// gimpact extensions
+	#endif
+
+#endif // dTRIMESH_ENABLED
+
+//**********************************
+// EXTENSION LIST END
+
+// These tokens are mutually exclusive, and always present
+#ifdef dSINGLE
+"ODE_single_precision"
+#else
+"ODE_double_precision"
+#endif // dDOUBLE
+
+; // END
+
+const char* dGetConfiguration (void)
+{
+	return ode_configuration;
+}
