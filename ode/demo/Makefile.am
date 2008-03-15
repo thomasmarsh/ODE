@@ -22,7 +22,6 @@ noinst_PROGRAMS = \
                 demo_cylvssphere \
                 demo_feedback \
                 demo_friction \
-                demo_heightfield \
                 demo_hinge \
                 demo_I \
                 demo_jointPR \
@@ -47,7 +46,6 @@ demo_crash_SOURCES = demo_crash.cpp
 demo_cylvssphere_SOURCES = demo_cylvssphere.cpp
 demo_feedback_SOURCES = demo_feedback.cpp
 demo_friction_SOURCES = demo_friction.cpp
-demo_heightfield_SOURCES = demo_heightfield.cpp
 demo_hinge_SOURCES = demo_hinge.cpp
 demo_I_SOURCES = demo_I.cpp
 demo_jointPR_SOURCES = demo_jointPR.cpp
@@ -69,12 +67,14 @@ noinst_PROGRAMS += \
                 demo_basket \
                 demo_cyl \
                 demo_moving_trimesh \
-                demo_trimesh
+                demo_trimesh \
+                demo_heightfield
 
 demo_basket_SOURCES = demo_basket.cpp
 demo_cyl_SOURCES = demo_cyl.cpp
 demo_moving_trimesh_SOURCES = demo_moving_trimesh.cpp
 demo_trimesh_SOURCES = demo_trimesh.cpp
+demo_heightfield_SOURCES = demo_heightfield.cpp
 
 AM_CPPFLAGS += -DdTRIMESH_ENABLED
 endif
