@@ -15,60 +15,47 @@ libode_la_LIBADD = libfast.la
 
 
 
-libode_la_SOURCES =     objects.h \
-                        obstack.cpp \
-                        collision_util.cpp \
-                        obstack.h \
-                        array.cpp \
-                        collision_util.h \
-                        ode.cpp \
-                        array.h \
-                        error.cpp \
-                        odemath.cpp \
-                        collision_kernel.cpp \
-                        export-dif.cpp \
-                        quickstep.cpp \
-                        collision_kernel.h \
-                        quickstep.h \
-                        collision_quadtreespace.cpp \
-                        collision_sapspace.cpp \
-                        rotation.cpp \
-                        collision_space.cpp \
-                        collision_space_internal.h \
-                        collision_cylinder_box.cpp \
-                        collision_cylinder_sphere.cpp \
-                        collision_cylinder_plane.cpp \
-                        sphere.cpp \
+libode_la_SOURCES =     array.cpp array.h \
                         box.cpp \
                         capsule.cpp \
-                        plane.cpp \
-                        ray.cpp \
-                        cylinder.cpp \
-                        convex.cpp \
-                        joint.cpp \
-                        stack.h \
+                        collision_cylinder_box.cpp \
+                        collision_cylinder_plane.cpp \
+                        collision_cylinder_sphere.cpp \
+                        collision_kernel.cpp collision_kernel.h \
+                        collision_quadtreespace.cpp \
+                        collision_sapspace.cpp \
+                        collision_space.cpp \
+                        collision_space_internal.h \
                         collision_std.h \
-                        joint.h \
-                        step.cpp \
-                        collision_transform.cpp \
-                        lcp.cpp \
-                        step.h \
-                        collision_transform.h \
-                        lcp.h \
-                        stepfast.cpp \
+                        collision_transform.cpp collision_transform.h \
+                        collision_util.cpp collision_util.h \
+                        convex.cpp \
+                        cylinder.cpp \
+                        error.cpp \
+                        export-dif.cpp \
+                        heightfield.cpp heightfield.h \
+                        joint.cpp joint.h \
+                        lcp.cpp lcp.h \
                         mass.cpp \
-                        testing.cpp \
-                        mat.cpp \
-                        testing.h \
-                        mat.h \
-                        timer.cpp \
+                        mat.cpp mat.h \
                         matrix.cpp \
-                        util.cpp \
                         memory.cpp \
-                        util.h \
                         misc.cpp \
-                        heightfield.cpp \
-                        heightfield.h
+                        objects.h \
+                        obstack.cpp obstack.h \
+                        ode.cpp \
+                        odemath.cpp \
+                        plane.cpp \
+                        quickstep.cpp quickstep.h \
+                        ray.cpp \
+                        rotation.cpp \
+                        sphere.cpp \
+                        step.cpp \
+                        stepfast.cpp \
+                        step.h \
+                        testing.cpp testing.h \
+                        timer.cpp \
+                        util.cpp util.h
 
 
 ###################################
