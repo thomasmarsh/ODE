@@ -28,6 +28,7 @@ libode_la_SOURCES =     array.cpp array.h \
                         collision_space_internal.h \
                         collision_std.h \
                         collision_transform.cpp collision_transform.h \
+                        collision_trimesh_disabled.cpp \
                         collision_util.cpp collision_util.h \
                         convex.cpp \
                         cylinder.cpp \
