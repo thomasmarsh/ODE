@@ -20,6 +20,8 @@
  *                                                                       *
  *************************************************************************/
 
+#define USE_CONVEX 1
+
 #include <stdio.h>
 #include <math.h>
 #include <ode/ode.h>
@@ -102,7 +104,6 @@ Where	c = cos(angle),	s = sine(angle), and ||( x,y,z )|| = 1
 	  (if not, the GL will normalize this vector).
 */
 
-#define USE_CONVEX 1
 void start()
 {
   // adjust the starting viewpoint a bit
@@ -183,12 +184,20 @@ void simLoop (int pause)
       if(DumpInfo)
 	{
 	  //DumpInfo=false;
-	  fprintf(stdout,"Contact %d Normal %f,%f,%f Depth %f\n",
+	  fprintf(stdout,"Contact %d Normal %f,%f,%f Depth %f ",
 		  i,
 		  contacts[i].normal[0],
 		  contacts[i].normal[1],
 		  contacts[i].normal[2],
 		  contacts[i].depth);
+	  if(contacts[i].g1==geoms[0])
+	    {
+	      fprintf(stdout,"Geoms 1 2\n");
+	    }
+	  else
+	    {
+	      fprintf(stdout,"Geoms 2 1\n");
+	    }
 	}
       dsDrawBox (contacts[i].pos,RI,ss);
     }

@@ -230,24 +230,49 @@ inline bool ClosestPointInRay(const dVector3 Origin1,
 inline bool IntersectPlanes(const dVector4 p1, const dVector4 p2, dVector3 p, dVector3 d)
 {
   // Compute direction of intersection line
-  //Cross(p1, p2,d);
-  dCROSS(d,=,p1,p2);
-  
+  dCROSS(d,=,p1,p2);  
   // If d is (near) zero, the planes are parallel (and separated)
   // or coincident, so they're not considered intersecting
   dReal denom = dDOT(d, d);
   if (denom < dEpsilon) return false;
-
   dVector3 n;
   n[0]=p1[3]*p2[0] - p2[3]*p1[0];
   n[1]=p1[3]*p2[1] - p2[3]*p1[1];
   n[2]=p1[3]*p2[2] - p2[3]*p1[2];
   // Compute point on intersection line
-  //Cross(n, d,p);
   dCROSS(p,=,n,d);
   p[0]/=denom;
   p[1]/=denom;
   p[2]/=denom;
+  return true;
+}
+
+/*! \brief Finds out if a point lies inside a convex
+  \param p Point to test
+  \param convex a pointer to convex to test against
+  \return true if the point lies inside the convex, false if not.
+*/
+inline bool IsPointInConvex(dVector3 p,
+			    dxConvex *convex)
+{
+  dVector3 lp;
+  // move point into convex space to avoid plane local to world calculations
+  lp[0] = p[0] - convex->final_posr->pos[0];
+  lp[1] = p[1] - convex->final_posr->pos[1];
+  lp[2] = p[2] - convex->final_posr->pos[2];
+  dMULTIPLY1_331 (lp,convex->final_posr->R,lp);
+  for(unsigned int i=0;i<convex->planecount;++i)
+    {
+      if((
+	  ((convex->planes+(i*4))[0]*lp[0])+
+	  ((convex->planes+(i*4))[1]*lp[1])+
+	  ((convex->planes+(i*4))[2]*lp[2])+
+	  -(convex->planes+(i*4))[3]
+	  )>0)
+	{
+	  return false;
+	}
+    }
   return true;
 }
 
@@ -428,7 +453,6 @@ int dCollideSphereConvex (dxGeom *o1, dxGeom *o2, int flags,
   offsetpos[0]=Sphere->final_posr->pos[0]-Convex->final_posr->pos[0];
   offsetpos[1]=Sphere->final_posr->pos[1]-Convex->final_posr->pos[1];
   offsetpos[2]=Sphere->final_posr->pos[2]-Convex->final_posr->pos[2];
-  //fprintf(stdout,"Begin Check\n");  
   for(unsigned int i=0;i<Convex->planecount;++i)
     {
       // apply rotation to the plane
@@ -555,9 +579,9 @@ int dCollideConvexCapsule (dxGeom *o1, dxGeom *o2,
 }
 
 /*! \brief A Support mapping function for convex shapes
-  \param dir direction to find the Support Point for
-  \param cvx convex object to find the support point for
-  \param out the support mapping in dir.
+  \param dir [IN] direction to find the Support Point for
+  \param cvx [IN] convex object to find the support point for
+  \param out [OUT] the support mapping in dir.
  */
 inline void Support(dVector3 dir,dxConvex& cvx,dVector3 out)
 {
@@ -692,6 +716,7 @@ bool CheckEdgeIntersection(dxConvex& cvx1,dxConvex& cvx2, int flags,int& curc,
     }
   return false;
 }
+
 /*! \brief Does an axis separation test using cvx1 planes on cvx1 and cvx2, returns true for a collision false for no collision 
   \param cvx1 [IN] First Convex object, its planes are used to do the tests
   \param cvx2 [IN] Second Convex object
@@ -729,11 +754,9 @@ inline bool CheckSATConvexFaces(dxConvex& cvx1,dxConvex& cvx2,dReal& min_depth,i
       if (((max2*min2)<0) && (dFabs(depth)<dFabs(min_depth)))
 	{
 	  min_depth=depth;
-	  // This is wrong if there are 2 parallel sides (Working on it)
 	  side_index=(int)i;
 	  *g1=&cvx1;
 	  *g2=&cvx2;
-	  //printf("Depth %f Min Max %f %f\n",depth,min2,max2);
 	}
     }
   return true;
@@ -796,9 +819,12 @@ int TestConvexIntersection(dxConvex& cvx1,dxConvex& cvx2, int flags,
   int side_index = -1;
   size_t convex_index = 0;
   dReal min_depth=dInfinity;
-  int maxc = flags & NUMC_MASK;
+  int maxc = flags & NUMC_MASK;  
   dIASSERT(maxc != 0);
   dxConvex *g1=NULL,*g2=NULL;
+  dVector3 p1,p2;
+  dVector4 plane;
+  dReal t;
   if(!CheckSATConvexFaces(cvx1,cvx2,min_depth,side_index,&g1,&g2))
     {
       return 0;
@@ -816,20 +842,104 @@ int TestConvexIntersection(dxConvex& cvx1,dxConvex& cvx2, int flags,
   if(g1!=NULL)
     {
       // All points in face are potential contact joints
-      unsigned int* pPoly = g1->polygons;
+      unsigned int* pPoly1 = g1->polygons;
+      unsigned int* pPoly2;
+      unsigned int* pPoints;
+      dVector4 sideplane;
+      // -- Apply Transforms --
+      // Rotate
+      dMULTIPLY0_331(sideplane,g1->final_posr->R,g1->planes+(side_index*4));
+      dNormalize3(sideplane);
+      // Translate
+      sideplane[3]=
+	(g1->planes[(side_index*4)+3])+
+	((sideplane[0] * g1->final_posr->pos[0]) + 
+	 (sideplane[1] * g1->final_posr->pos[1]) + 
+	 (sideplane[2] * g1->final_posr->pos[2]));      
+
       for(int i=0;i<side_index;++i)
 	{
-	  pPoly+=pPoly[0]+1;
+	  pPoly1+=pPoly1[0]+1;
 	}
-      for(unsigned int i=0;i<pPoly[0];++i)
+      pPoints = pPoly1+1;
+      for(unsigned int i=0;i<pPoly1[0];++i)
 	{
-	  dMULTIPLY0_331(SAFECONTACT(flags, contact, contacts, skip)->pos,g1->final_posr->R,&g1->points[(pPoly[i+1]*3)]);
-	  dVector3Add(g1->final_posr->pos,SAFECONTACT(flags, contact, contacts, skip)->pos,SAFECONTACT(flags, contact, contacts, skip)->pos);
-	  ++contacts;	  
-	  if (contacts==maxc) return contacts;
+	  // find each segment contact position
+	  dMULTIPLY0_331(p1,g1->final_posr->R,&g1->points[(pPoints[i]*3)]);
+	  dVector3Add(g1->final_posr->pos,p1,p1);
+	  dMULTIPLY0_331(p2,g1->final_posr->R,&g1->points[(pPoints[(i+1)%pPoly1[0]]*3)]);
+	  dVector3Add(g1->final_posr->pos,p2,p2);
+	  // Check if the first point is inside the second convex
+	  if(IsPointInConvex(p1,g2))
+	    {
+	      dVector3Copy(p1,SAFECONTACT(flags, contact, contacts, skip)->pos);
+	      dVector3Copy(sideplane,SAFECONTACT(flags, contact, contacts, skip)->normal);
+	      SAFECONTACT(flags, contact, contacts, skip)->g1=g2;
+	      SAFECONTACT(flags, contact, contacts, skip)->g2=g1;
+	      SAFECONTACT(flags, contact, contacts, skip)->depth=min_depth;
+	      ++contacts;
+	      if (contacts==maxc) return contacts;
+	    }
+	  // Check side edges against second convex faces
+	  pPoly2 = g2->polygons;
+	  for(unsigned int j=0;j<g2->planecount;++j)
+	    {
+	      // -- Apply Transforms --
+	      // Rotate
+	      dMULTIPLY0_331(plane,g2->final_posr->R,g2->planes+(j*4));
+	      dNormalize3(plane);
+	      // Translate
+	      plane[3]=
+		(g2->planes[(j*4)+3])+
+		((plane[0] * g2->final_posr->pos[0]) + 
+		 (plane[1] * g2->final_posr->pos[1]) + 
+		 (plane[2] * g2->final_posr->pos[2]));
+	      if(IntersectSegmentPlane(p1,p2,plane,t,
+					SAFECONTACT(flags, contact, contacts, skip)->pos))
+		{
+		  if(IsPointInPolygon(SAFECONTACT(flags, contact, contacts, skip)->pos,
+				      pPoly2,
+				      g2,
+				      SAFECONTACT(flags, contact, contacts, skip)->pos))
+		    {		      
+		      dVector3Copy(sideplane,SAFECONTACT(flags, contact, contacts, skip)->normal);
+		      SAFECONTACT(flags, contact, contacts, skip)->g1=g2;
+		      SAFECONTACT(flags, contact, contacts, skip)->g2=g1;
+		      SAFECONTACT(flags, contact, contacts, skip)->depth=min_depth;     
+		      ++contacts;
+		      if (contacts==maxc) return contacts;
+		    }
+		}
+	      pPoly2+=pPoly2[0]+1;
+	    }
 	}
+      // Check each of the second convex edges against the first's face
+      for(std::set<edge>::iterator it=g2->edges.begin();
+	  it!=g2->edges.end();
+	  ++it)
+	{
+	  dMULTIPLY0_331(p1,g2->final_posr->R,&g2->points[(it->first*3)]);
+	  dVector3Add(g2->final_posr->pos,p1,p1);
+	  dMULTIPLY0_331(p2,g2->final_posr->R,&g2->points[(it->second*3)]);
+	  dVector3Add(g2->final_posr->pos,p2,p2);
+	  if(IntersectSegmentPlane(p1,p2,sideplane,t,
+				   SAFECONTACT(flags, contact, contacts, skip)->pos))
+	    {
+	      if(IsPointInPolygon(SAFECONTACT(flags, contact, contacts, skip)->pos,
+				  pPoly1,
+				  g1,
+				  SAFECONTACT(flags, contact, contacts, skip)->pos))
+		{
+		  dVector3Copy(sideplane,SAFECONTACT(flags, contact, contacts, skip)->normal);
+		  SAFECONTACT(flags, contact, contacts, skip)->g1=g2;
+		  SAFECONTACT(flags, contact, contacts, skip)->g2=g1;
+		  SAFECONTACT(flags, contact, contacts, skip)->depth=min_depth;
+		  ++contacts;
+		  if (contacts==maxc) return contacts;
+		}
+	    }	  
+	}      
     }
-  // NOTE: normals are not being set yet
   return contacts;
 }
 
