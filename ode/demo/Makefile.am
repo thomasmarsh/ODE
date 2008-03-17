@@ -43,6 +43,7 @@ demo_chain1_LDADD = $(LDADD) -lstdc++
 demo_chain2_SOURCES = demo_chain2.cpp
 demo_collision_SOURCES = demo_collision.cpp
 demo_convex_cd_SOURCES = demo_convex_cd.cpp
+demo_convex_cd_DEPENDENCIES = $(top_builddir)/ode/src/libode.la
 demo_crash_SOURCES = demo_crash.cpp
 demo_cylvssphere_SOURCES = demo_cylvssphere.cpp
 demo_feedback_SOURCES = demo_feedback.cpp
