@@ -129,9 +129,11 @@ void start()
   geoms[1]=dCreateBox(space,0.5,0.5,0.5);
 #endif
   dMatrix3 m1 = { 1,0,0,0,0,1,0,0,0,0,1,0 };
-  dMatrix3 m2 = { 1,0,0,0,0,1,0,0,0,0,1,0 };
+  dMatrix3 m2 = { 0.70668,-0.23576,0.66709, 0,
+		  -0.50034,0.50010,0.70678, 0,
+		  -0.50025,-0.83325,0.23545, 0 };
   dGeomSetPosition (geoms[0],0,0,0.25);
-  dGeomSetPosition (geoms[1],0.25,0.25,0.70);  
+  dGeomSetPosition (geoms[1],0.0,0.25,0.70);  
   dGeomSetRotation (geoms[0],m1);
   dGeomSetRotation (geoms[1],m2);
 }
