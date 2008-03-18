@@ -288,10 +288,10 @@ static LRESULT CALLBACK mainWndProc (HWND hWnd, UINT msg, WPARAM wParam,
     }
     break;
 
-  case WM_CLOSE:
+  case WM_CLOSE:    
     PostQuitMessage (0);
     break;
-
+    
   default:
     return (DefWindowProc (hWnd, msg, wParam, lParam));
   }

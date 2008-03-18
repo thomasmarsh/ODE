@@ -118,6 +118,14 @@ inline void dVector3Copy(const dVector3& a,dVector3& c)
 	c[2] = a[2];
 }
 
+inline void dVector4Copy(const dVector4& a,dVector4& c)
+{
+	c[0] = a[0];
+	c[1] = a[1];
+	c[2] = a[2];
+	c[3] = a[3];
+}
+
 inline void dVector3Cross(const dVector3& a,const dVector3& b,dVector3& c)
 {
 	dCROSS(c,=,a,b);
