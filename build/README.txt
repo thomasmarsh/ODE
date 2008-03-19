@@ -2,14 +2,10 @@ Premake-based Windows Build System
 Contributed by Jason Perkins (jason379@users.sourceforge.net)
 -------------------------------------------------------------------
 
- SVN USERS: Before using these project files you must copy
- config-default.h to ode/src/config.h (or run Premake to
- generate a new set of project files, see below). 
-
 
 ABOUT THESE FILES
 
- These project files are automatically generated using a tool called
+ This folder contains an automatic project generation tool called
  Premake, available from http://premake.sourceforge.net/. The scripts
  used to build them have the ".lua" file extension. To regenerate the
  stock project files for inclusion in a new release, type:
@@ -29,7 +25,7 @@ CREATING CUSTOM PROJECT FILES
 
    premake --no-trimesh --target vs2005
 
- To build the test applications and Drawstuff library, use the form:
+ To build the demo applications and Drawstuff library, use the form:
  
    premake --with-demos --target [toolset]
    
