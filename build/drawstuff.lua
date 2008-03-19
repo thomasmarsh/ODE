@@ -11,15 +11,10 @@ package.links = { "ode" }
       package.config[v].target = "drawstuffd"
     end
   end
-  
-  
--- Separate distribution files into toolset subdirectories
 
-  if (options["usetargetpath"]) then
-    package.path = options["target"]
-  else
-    package.path = "custom"
-  end
+
+  -- Output is placed in a directory named for the target toolset.
+  package.path = options["target"]
 
 
 -- Package Build Settings

@@ -35,13 +35,8 @@
   end
 
 
--- Separate distribution files into toolset subdirectories
-
-  if (options["usetargetpath"]) then
-    packagepath = options["target"]
-  else
-    packagepath = "custom"
-  end
+  -- Output is placed in a directory named for the target toolset.
+  packagepath = options["target"]
 
 
 -- Factory function for demo packages

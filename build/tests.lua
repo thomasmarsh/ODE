@@ -35,11 +35,8 @@ package.links =
 }
 
 
--- Separate distribution files into toolset subdirectories
-
-  if (options["usetargetpath"]) then
-    package.path = options["target"]
-  end
+  -- Output is placed in a directory named for the target toolset.
+  package.path = options["target"]
 
 
 if (not options["enable-static-only"]) then
