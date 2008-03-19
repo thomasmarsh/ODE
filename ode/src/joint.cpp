@@ -3051,7 +3051,7 @@ static void PistonGetInfo1 (dxJointPiston *j, dxJoint::Info1 *info)
 
   info->m = 4; // Default number of constraint row
 
-  // see if1 we're at a joint limit.
+  // see if we're at a joint limit.
   j->limotP.limit = 0;
   if ( (j->limotP.lostop > -dInfinity || j->limotP.histop < dInfinity) &&
        j->limotP.lostop <= j->limotP.histop) {
@@ -3119,7 +3119,7 @@ static void PistonGetInfo2 (dxJointPiston *joint, dxJoint::Info2 *info)
   }
 
   // ======================================================================
-  // Work on the angular party (i.e. row 0, 1)
+  // Work on the angular part (i.e. row 0, 1)
   // Set the two orientation rows. The rotoide axis should be the only
   // unconstrained rotational axis, the angular velocity of the two bodies
   // perpendicular to the rotoide axis should be equal.
