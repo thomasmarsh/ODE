@@ -376,10 +376,11 @@ static void printCapsule (PrintingContext &c, dxGeom *g)
 
 static void printCylinder (PrintingContext &c, dxGeom *g)
 {
-	dReal radius,length;
-	dGeomCylinderGetParams (g,&radius,&length);
-	c.print ("radius",radius);
-	c.print ("length",length);
+  dReal radius,length;
+  dGeomCylinderGetParams (g,&radius,&length);
+  c.print ("type","cylinder");
+  c.print ("radius",radius);
+  c.print ("length",length);
 }
 
 
