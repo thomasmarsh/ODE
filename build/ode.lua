@@ -22,13 +22,8 @@ package.objdir = "obj/ode"
   end
 
 
--- Separate distribution files into toolset subdirectories
-
-  if (options["usetargetpath"]) then
-    package.path = options["target"]
-  else
-    package.path = "custom"
-  end
+  -- Output is placed in a directory named for the target toolset.
+  package.path = options["target"]
 
 
 -- Write a custom <config.h> to src/ode, based on the specified flags
