@@ -1,7 +1,7 @@
 package.name = "drawstuff"
 package.language = "c++"
 package.objdir = "obj/drawstuff"
-package.links = { "ode" }
+package.links = {}
 
 
 -- Append a "d" to the debug version of the libraries
@@ -24,8 +24,8 @@ package.links = { "ode" }
     "DS_DLL",
     "USRDLL"
   }
-  
-  local lib_defines = 
+
+  local lib_defines =
   {
     "DS_LIB"
   }
