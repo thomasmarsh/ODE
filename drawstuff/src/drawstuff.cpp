@@ -877,6 +877,10 @@ static int use_shadows=1;		// 1 if shadows to be drawn
 static Texture *sky_texture = 0;
 static Texture *ground_texture = 0;
 static Texture *wood_texture = 0;
+static Texture *checkered_texture = 0;
+
+static Texture *texture[4+1]; // +1 since index 0 is not used
+
 
 
 #ifndef macintosh
@@ -890,15 +894,19 @@ void dsStartGraphics (int width, int height, dsFunctions *fn)
 
   strcpy (s,prefix);
   strcat (s,"/sky.ppm");
-  sky_texture = new Texture (s);
+  texture[DS_SKY] = sky_texture = new Texture (s);
 
   strcpy (s,prefix);
   strcat (s,"/ground.ppm");
-  ground_texture = new Texture (s);
+  texture[DS_GROUND] = ground_texture = new Texture (s);
 
   strcpy (s,prefix);
   strcat (s,"/wood.ppm");
-  wood_texture = new Texture (s);
+  texture[DS_WOOD] = wood_texture = new Texture (s);
+
+  strcpy (s,prefix);
+  strcat (s,"/checkered.ppm");
+  texture[DS_CHECKERED] = checkered_texture = new Texture (s);
 }
 
 #else // macintosh
@@ -1193,7 +1201,7 @@ static void setupDrawingMode()
   if (tnum) {
     if (use_textures) {
       glEnable (GL_TEXTURE_2D);
-      wood_texture->bind (1);
+      texture[tnum]->bind (1);
       glEnable (GL_TEXTURE_GEN_S);
       glEnable (GL_TEXTURE_GEN_T);
       glTexGeni (GL_S,GL_TEXTURE_GEN_MODE,GL_OBJECT_LINEAR);

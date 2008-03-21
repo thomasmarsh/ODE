@@ -1365,7 +1365,15 @@ ODE_API dJointID dJointCreateUniversal (dWorldID, dJointGroupID);
  */
 ODE_API dJointID dJointCreatePR (dWorldID, dJointGroupID);
 
-/**
+  /**
+   * @brief Create a new joint of the PU (Prismatic and Universal) type.
+   * @ingroup joints
+   * @param dJointGroupID set to 0 to allocate the joint normally.
+   * If it is nonzero the joint is allocated in the given joint group.
+   */
+  ODE_API dJointID dJointCreatePU (dWorldID, dJointGroupID);
+
+  /**
    * @brief Create a new joint of the Piston type.
    * @ingroup joints
    * @param dJointGroupID set to 0 to allocate the joint normally.
@@ -1374,7 +1382,7 @@ ODE_API dJointID dJointCreatePR (dWorldID, dJointGroupID);
    */
   ODE_API dJointID dJointCreatePiston (dWorldID, dJointGroupID);
 
-  /**
+/**
  * @brief Create a new joint of the fixed type.
  * @ingroup joints
  * @param dJointGroupID set to 0 to allocate the joint normally.
@@ -1492,6 +1500,7 @@ ODE_API void *dJointGetData (dJointID);
  * \li dJointTypeLMotor
  * \li dJointTypePlane2D
  * \li dJointTypePR
+ * \li dJointTypePU
  * \li dJointTypePiston
  */
 ODE_API int dJointGetType (dJointID);
@@ -1701,6 +1710,71 @@ ODE_API void dJointSetPRParam (dJointID, int parameter, dReal value);
  * @ingroup joints
  */
 ODE_API void dJointAddPRTorque (dJointID j, dReal torque);
+
+
+  /**
+  * @brief set anchor
+  * @ingroup joints
+  */
+  ODE_API void dJointSetPUAnchor (dJointID, dReal x, dReal y, dReal z);
+
+  /**
+   * @brief set anchor
+   * @ingroup joints
+   */
+  ODE_API void dJointSetPUAnchorDelta (dJointID, dReal x, dReal y, dReal z,
+                                       dReal dx, dReal dy, dReal dz);
+
+  /**
+   * @brief set the axis for the first axis or the universal articulation
+   * @ingroup joints
+   */
+  ODE_API void dJointSetPUAxis1 (dJointID, dReal x, dReal y, dReal z);
+
+  /**
+   * @brief set the axis for the second axis or the universal articulation
+   * @ingroup joints
+   */
+  ODE_API void dJointSetPUAxis2 (dJointID, dReal x, dReal y, dReal z);
+
+  /**
+   * @brief set the axis for the prismatic articulation
+   * @ingroup joints
+   */
+  ODE_API void dJointSetPUAxis3 (dJointID, dReal x, dReal y, dReal z);
+
+  /**
+   * @brief set the axis for the prismatic articulation
+   * @ingroup joints
+   * @note This function was added for convenience it is the same as
+   *       dJointSetPUAxis3
+   */
+  ODE_API void dJointSetPUAxisP (dJointID id, dReal x, dReal y, dReal z);
+
+
+
+  /**
+   * @brief set joint parameter
+   * @ingroup joints
+   *
+   * @note parameterX where X equal 2 refer to parameter for second axis of the
+   *       universal articulation
+   * @note parameterX where X equal 3 refer to parameter for prismatic
+   *       articulation
+   */
+  ODE_API void dJointSetPUParam (dJointID, int parameter, dReal value);
+
+  /**
+   * @brief Applies the torque about the rotoide axis of the PU joint
+   *
+   * That is, it applies a torque with specified magnitude in the direction
+   * of the rotoide axis, to body 1, and with the same magnitude but in opposite
+   * direction to body 2. This function is just a wrapper for dBodyAddTorque()}
+   * @ingroup joints
+   */
+  ODE_API void dJointAddPUTorque (dJointID j, dReal torque);
+
+
 
 
   /**
@@ -2137,6 +2211,111 @@ ODE_API dReal dJointGetPRParam (dJointID, int parameter);
 
     
     
+  /**
+   * @brief Get the joint anchor point, in world coordinates.
+   * @return the point on body 1. If the joint is perfectly satisfied,
+   * this will be the same as the point on body 2.
+   * @ingroup joints
+   */
+  ODE_API void dJointGetPUAnchor (dJointID, dVector3 result);
+
+  /**
+   * @brief Get the PU linear position (i.e. the prismatic's extension)
+   *
+   * When the axis is set, the current position of the attached bodies is
+   * examined and that position will be the zero position.
+   *
+   * The position is the "oriented" length between the
+   * position = (Prismatic axis) dot_product [(body1 + offset) - (body2 + anchor2)]
+   *
+   * @ingroup joints
+   */
+  ODE_API dReal dJointGetPUPosition (dJointID);
+
+  /**
+   * @brief Get the PR linear position's time derivative
+   *
+   * @ingroup joints
+   */
+  ODE_API dReal dJointGetPUPositionRate (dJointID);
+
+  /**
+   * @brief Get the first axis of the universal component of the joint
+   * @ingroup joints
+   */
+  ODE_API void dJointGetPUAxis1 (dJointID, dVector3 result);
+
+  /**
+   * @brief Get the second axis of the Universal component of the joint
+   * @ingroup joints
+   */
+  ODE_API void dJointGetPUAxis2 (dJointID, dVector3 result);
+
+  /**
+   * @brief Get the prismatic axis
+   * @ingroup joints
+   */
+  ODE_API void dJointGetPUAxis3 (dJointID, dVector3 result);
+
+  /**
+   * @brief Get the prismatic axis
+   * @ingroup joints
+   *
+   * @note This function was added for convenience it is the same as
+   *       dJointGetPUAxis3
+   */
+  ODE_API void dJointGetPUAxisP (dJointID id, dVector3 result);
+
+
+
+
+  /**
+   * @brief Get both angles at the same time.
+   * @ingroup joints
+   *
+   * @param joint   The Prismatic universal joint for which we want to calculate the angles
+   * @param angle1  The angle between the body1 and the axis 1
+   * @param angle2  The angle between the body2 and the axis 2
+   *
+   * @note This function combine dJointGetPUAngle1 and dJointGetPUAngle2 together
+   *       and try to avoid redundant calculation
+   */
+  ODE_API void dJointGetPUAngles (dJointID, dReal *angle1, dReal *angle2);
+
+  /**
+   * @brief Get angle
+   * @ingroup joints
+   */
+  ODE_API dReal dJointGetPUAngle1 (dJointID);
+
+  /**
+   * @brief * @brief Get time derivative of angle1
+   *
+   * @ingroup joints
+   */
+  ODE_API dReal dJointGetPUAngle1Rate (dJointID);
+
+
+  /**
+   * @brief Get angle
+   * @ingroup joints
+   */
+  ODE_API dReal dJointGetPUAngle2 (dJointID);
+
+  /**
+   * @brief * @brief Get time derivative of angle2
+   *
+   * @ingroup joints
+   */
+  ODE_API dReal dJointGetPUAngle2Rate (dJointID);
+
+  /**
+   * @brief get joint parameter
+   * @ingroup joints
+   */
+  ODE_API dReal dJointGetPUParam (dJointID, int parameter);
+
+
 
 
 

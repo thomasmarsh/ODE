@@ -16,6 +16,7 @@
     "hinge",
     "I",
     "jointPR",
+    "jointPU",
     "joints",
     "motor",
     "ode",
