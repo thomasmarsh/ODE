@@ -641,6 +641,64 @@ public:
 
 
 
+class dPUJoint : public dJoint
+{
+  dPUJoint (const dPUJoint &);
+  void operator = (const dPUJoint &);
+
+public:
+  dPUJoint() { }
+  dPUJoint (dWorldID world, dJointGroupID group=0)
+  { _id = dJointCreatePU (world, group); }
+
+  void create (dWorldID world, dJointGroupID group=0)
+  {
+    if (_id) dJointDestroy (_id);
+    _id = dJointCreatePU (world, group);
+  }
+
+  void setAnchor (dReal x, dReal y, dReal z)
+{ dJointSetPUAnchor (_id, x, y, z); }
+  void setAxis1 (dReal x, dReal y, dReal z)
+  { dJointSetPUAxis1 (_id, x, y, z); }
+  void setAxis2 (dReal x, dReal y, dReal z)
+  { dJointSetPUAxis2 (_id, x, y, z); }
+  void setAxis3 (dReal x, dReal y, dReal z)
+  { dJointSetPUAxis3 (_id, x, y, z); }
+  void setAxisP (dReal x, dReal y, dReal z)
+  { dJointSetPUAxis3 (_id, x, y, z); }
+
+  virtual void getAnchor (dVector3 result) const
+    { dJointGetPUAnchor (_id, result); }
+  void getAxis1 (dVector3 result) const
+    { dJointGetPUAxis1 (_id, result); }
+  void getAxis2 (dVector3 result) const
+    { dJointGetPUAxis2 (_id, result); }
+  void getAxis3 (dVector3 result) const
+    { dJointGetPUAxis3 (_id, result); }
+  void getAxisP (dVector3 result) const
+    { dJointGetPUAxis3 (_id, result); }
+
+  dReal getAngle1() const
+    { return dJointGetPUAngle1 (_id); }
+  dReal getAngle1Rate() const
+    { return dJointGetPUAngle1Rate (_id); }
+  dReal getAngle2() const
+    { return dJointGetPUAngle2 (_id); }
+  dReal getAngle2Rate() const
+    { return dJointGetPUAngle2Rate (_id); }
+
+  dReal getPosition() const
+    { return dJointGetPUPosition (_id); }
+  dReal getPositionRate() const
+    { return dJointGetPUPositionRate (_id); }
+
+  virtual void setParam (int parameter, dReal value)
+  { dJointSetPUParam (_id, parameter, value); }
+  virtual dReal getParam (int parameter) const
+    { return dJointGetPUParam (_id, parameter); }
+};
+
 
 
 

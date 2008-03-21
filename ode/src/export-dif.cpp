@@ -189,6 +189,7 @@ static const char *getJointName (dxJoint *j)
 		case dJointTypeAMotor: return "ODE_angular_motor";
 		case dJointTypeLMotor: return "ODE_linear_motor";
 		case dJointTypePR: return "PR";
+    case dJointTypePU: return "PU";
 		case dJointTypePiston: return "piston";
 	}
 	return "unknown";
@@ -293,6 +294,21 @@ static void printPR (PrintingContext &c, dxJoint *j)
 	c.print ("offset",pr->offset);
 	printLimot (c,pr->limotP,1);
 	printLimot (c,pr->limotR,2);
+}
+
+static void printPU (PrintingContext &c, dxJoint *j)
+{
+  dxJointPU *pu = (dxJointPU*) j;
+  c.print ("anchor1",pu->anchor1);
+  c.print ("anchor2",pu->anchor2);
+  c.print ("axis1",pu->axis1);
+  c.print ("axis2",pu->axis2);
+  c.print ("axisP",pu->axisP1);
+  c.print ("qrel1",pu->qrel1,4);
+  c.print ("qrel2",pu->qrel2,4);
+  printLimot (c,pu->limot1,1);
+  printLimot (c,pu->limot2,2);
+  printLimot (c,pu->limotP,3);
 }
 
 static void printPiston (PrintingContext &c, dxJoint *j)
@@ -596,6 +612,7 @@ void dWorldExportDIF (dWorldID w, FILE *file, const char *prefix)
 			case dJointTypeAMotor: printAMotor (c,j); break;
 			case dJointTypeLMotor: printLMotor (c,j); break;
 			case dJointTypePR: printPR (c,j); break;
+			case dJointTypePU: printPU (c,j); break;
 			case dJointTypePiston: printPiston (c,j); break;
 		}
 		c.indent--;

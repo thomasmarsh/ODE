@@ -63,8 +63,14 @@ extern "C" {
 
 
 /* texture numbers */
-#define DS_NONE   0	/* uses the current color instead of a texture */
-#define DS_WOOD   1
+  enum DS_TEXTURE_NUMBER
+  {
+    DS_NONE = 0,       /* uses the current color instead of a texture */
+    DS_WOOD,
+    DS_CHECKERED,
+    DS_GROUND,
+    DS_SKY,
+  };
 
 /* draw modes */
 

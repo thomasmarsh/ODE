@@ -243,6 +243,47 @@ struct dxJointPR : public dxJoint {
 extern struct dxJoint::Vtable __dPR_vtable;
 
 
+/**
+ * Component of a Prismatic -- Universal joint.
+ * The axisP must be perpendicular to axis1.
+ * The second axis of the universal joint is perpendicular to axis1.
+ *
+ * Since the PU joint is derived from the Universal joint. Some variable
+ * are reused.
+ *
+ * anchor1: Vector from body1 to the anchor point
+ *          This vector is calculated when the body are attached or
+ *          when the anchor point is set. It is like the offset of the Slider
+ *          joint. Since their is a prismatic between the anchor and the body1
+ *          the distance might change as the simulation goes on.
+ * anchor2: Vector from body2 to the anchor point.
+ * <PRE>
+ *                                                 Body 2
+ *                                                 +-------------+
+ *                                                 |      x      |
+ *                                                 +------------\+
+ *          Prismatic articulation                   ..     ..
+ *                                |                ..     ..
+ *          Body 1                v             ..      ..
+ *          +--------------+    --|        __..      ..  anchor2
+ * <--------|      x       | .....|.......(__)     ..
+ * axisP    +--------------+    --|         ^     <
+ *                 |----------------------->|
+ *                     anchor1              |--- Universal articulation
+ *                                               axis1 going out of the plane
+ *                                               axis2 is perpendicular to axis1
+ *                                               (i.e. 2 rotoides)
+ * </PRE>
+ */
+struct dxJointPU : public dxJointUniversal
+{
+  dVector3 axisP1;          ///< @brief Axis for the prismatic articulation w.r.t first body.
+  ///< @note This is considered as axis2 from the parameter
+  ///< view
+  dxJointLimitMotor limotP; ///< limit and motor information for the prismatic articulation.
+};
+extern struct dxJoint::Vtable __dPU_vtable;
+
 ////////////////////////////////////////////////////////////////////////////////
 /// Component of a Piston joint
 /// <PRE>

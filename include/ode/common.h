@@ -268,6 +268,7 @@ enum {
   dJointTypeLMotor,
   dJointTypePlane2D,
   dJointTypePR,
+  dJointTypePU,
   dJointTypePiston
 };
 
