@@ -27,6 +27,7 @@ noinst_PROGRAMS = \
                 demo_I \
                 demo_jointPR \
                 demo_joints \
+                demo_jointPU \
                 demo_motor \
                 demo_ode \
                 demo_piston \
@@ -53,6 +54,7 @@ demo_hinge_SOURCES = demo_hinge.cpp
 demo_I_SOURCES = demo_I.cpp
 demo_jointPR_SOURCES = demo_jointPR.cpp
 demo_joints_SOURCES = demo_joints.cpp
+demo_jointPU_SOURCES = demo_jointPU.cpp
 demo_motor_SOURCES = demo_motor.cpp
 demo_ode_SOURCES = demo_ode.cpp
 demo_piston_SOURCES = demo_piston.cpp
