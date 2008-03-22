@@ -746,6 +746,18 @@ void dSpaceCollide (dxSpace *space, void *data, dNearCallback *callback)
 }
 
 
+struct DataCallback {
+        void *data;
+        dNearCallback *callback;
+};
+// Invokes the callback with arguments swapped
+static void swap_callback(void *data, dxGeom *g1, dxGeom *g2)
+{
+        DataCallback *dc = (DataCallback*)data;
+        dc->callback(dc->data, g2, g1);
+}
+
+
 void dSpaceCollide2 (dxGeom *g1, dxGeom *g2, void *data,
 		     dNearCallback *callback)
 {
@@ -768,8 +780,9 @@ void dSpaceCollide2 (dxGeom *g1, dxGeom *g2, void *data,
 	// iterate through the space that has the fewest geoms, calling
 	// collide2 in the other space for each one.
 	if (s1->count < s2->count) {
+          DataCallback dc = {data, callback};
 	  for (dxGeom *g = s1->first; g; g=g->next) {
-	    s2->collide2 (data,g,callback);
+	    s2->collide2 (&dc,g,swap_callback);
 	  }
 	}
 	else {
@@ -787,11 +800,12 @@ void dSpaceCollide2 (dxGeom *g1, dxGeom *g2, void *data,
   else {
     if (s2) {
       // g1 is a geom, g2 is a space
-      s2->collide2 (data,g1,callback);
+      DataCallback dc = {data, callback};
+      s2->collide2 (&dc,g1,swap_callback);
     }
     else {
-      // g1 and g2 are geoms, call the callback directly
-      callback (data,g1,g2);
+      // g1 and g2 are geoms
+      collideAABBs(g1,g2, data, callback);
     }
   }
 }

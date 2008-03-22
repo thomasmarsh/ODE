@@ -9,7 +9,42 @@ the rules for this file:
 
 ------------------------------------------------------------------------------
 
+03/27/08 remi
+
+        * Added a new Joint: Prismatic Universal (patch #1828454).
+
+         Daniel K. O.
+
+        * Fixed bug #1841309: collide2() method buggy.
+
+03/18/08 Rodrigo
+
+        * New function: dVector4Copy.
+
+03/14/08 david
+
+        * Added stub calls for trimesh functions.
+        * Applied patch #1914232: dGetConfiguration.
+        * Applied patch #1655333: Optimize the function dNormalize3.
+        * New function: dSetColliderOverride.
+        * New function: dCheckConfiguration.
+        
+         Daniel K. O.
+
+        * Disabled building shared library by default with autotools.
+
+03/13/08 david
+
+        * New function: dJointGetNumBodies (patch #1901550).
+        * New function: dSpaceGetClass (patch #1901637).
+        * Applied patch #1901649: Add missing function in the export
+
+03/12/08 Rodrigo
+
+        * Fixed drawstuff build issues on OSX.
+
 01/12/08 Daniel K. O.
+
 	* Fixed a typedef bug in configure.in.
 	* Added dCylinder to the C++ wrappers.
 	* Applied patch 1851394: support for GIMPACT with double precision,
