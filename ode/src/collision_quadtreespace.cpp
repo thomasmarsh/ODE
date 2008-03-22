@@ -56,9 +56,9 @@ public:
 	void Create(const dVector3 Center, const dVector3 Extents, Block* Parent, int Depth, Block*& Blocks);
 
 	void Collide(void* UserData, dNearCallback* Callback);
-	void Collide(dGeomID Object, dGeomID g, void* UserData, dNearCallback* Callback);
+	void Collide(dGeomID g1, dGeomID g2, void* UserData, dNearCallback* Callback);
 
-	void CollideLocal(dGeomID Object, void* UserData, dNearCallback* Callback);
+	void CollideLocal(dGeomID g2, void* UserData, dNearCallback* Callback);
 	
 	void AddObject(dGeomID Object);
 	void DelObject(dGeomID Object);
@@ -189,6 +189,7 @@ void Block::Collide(void* UserData, dNearCallback* Callback){
 	}
 }
 
+// Note: g2 is assumed to be in this Block
 void Block::Collide(dxGeom* g1, dxGeom* g2, void* UserData, dNearCallback* Callback){
 #ifdef DRAWBLOCKS
 	DrawBlock(this);
@@ -225,14 +226,14 @@ void Block::Collide(dxGeom* g1, dxGeom* g2, void* UserData, dNearCallback* Callb
 	}
 }
 
-void Block::CollideLocal(dxGeom* g1, void* UserData, dNearCallback* Callback){
+void Block::CollideLocal(dxGeom* g2, void* UserData, dNearCallback* Callback){
 	// Collide against local list
-	dxGeom* g2 = First;
-	while (g2){
+	dxGeom* g1 = First;
+	while (g1){
 		if (GEOM_ENABLED(g2)){
 			collideAABBs (g1, g2, UserData, Callback);
 		}
-		g2 = g2->next;
+		g1 = g1->next;
 	}
 }
 
@@ -350,6 +351,7 @@ dxQuadTreeSpace::dxQuadTreeSpace(dSpaceID _space, dVector3 Center, dVector3 Exte
 	type = dQuadTreeSpaceClass;
 
 	int BlockCount = 0;
+	// TODO: should be just BlockCount = (4^(n+1) - 1)/3
 	for (int i = 0; i <= Depth; i++){
 		BlockCount += (int)pow((dReal)SPLITS, i);
 	}
@@ -551,30 +553,43 @@ void dxQuadTreeSpace::collide(void* UserData, dNearCallback* Callback){
   lock_count--;
 }
 
-void dxQuadTreeSpace::collide2(void* UserData, dxGeom* g1, dNearCallback* Callback){
-  dAASSERT(g1 && Callback);
+
+struct DataCallback {
+        void *data;
+        dNearCallback *callback;
+};
+// Invokes the callback with arguments swapped
+static void swap_callback(void *data, dxGeom *g1, dxGeom *g2)
+{
+        DataCallback *dc = (DataCallback*)data;
+        dc->callback(dc->data, g2, g1);
+}
+
+
+void dxQuadTreeSpace::collide2(void* UserData, dxGeom* g2, dNearCallback* Callback){
+  dAASSERT(g2 && Callback);
 
   lock_count++;
   cleanGeoms();
-  g1->recomputeAABB();
+  g2->recomputeAABB();
 
-  if (g1->parent_space == this){
+  if (g2->parent_space == this){
 	  // The block the geom is in
-	  Block* CurrentBlock = (Block*)g1->tome;
+	  Block* CurrentBlock = (Block*)g2->tome;
 	  
 	  // Collide against block and its children
-	  CurrentBlock->Collide(g1, CurrentBlock->First, UserData, Callback);
+	  DataCallback dc = {UserData, Callback};
+	  CurrentBlock->Collide(g2, CurrentBlock->First, &dc, swap_callback);
 	  
 	  // Collide against parents
-	  while (true){
-		  CurrentBlock = CurrentBlock->Parent;
-		  if (!CurrentBlock){
-			  break;
-		  }
-		  CurrentBlock->CollideLocal(g1, UserData, Callback);
-	  }
+	  while ((CurrentBlock = CurrentBlock->Parent))
+		  CurrentBlock->CollideLocal(g2, UserData, Callback);
+
   }
-  else Blocks[0].Collide(g1, Blocks[0].First, UserData, Callback);
+  else {
+        DataCallback dc = {UserData, Callback};
+        Blocks[0].Collide(g2, Blocks[0].First, &dc, swap_callback);
+  }
 
   lock_count--;
 }
