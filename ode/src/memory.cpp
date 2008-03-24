@@ -30,7 +30,14 @@ static dAllocFunction *allocfn = 0;
 static dReallocFunction *reallocfn = 0;
 static dFreeFunction *freefn = 0;
 
-
+#ifdef __MINGW32__
+/* 
+   this is a guard against AC_FUNC_MALLOC and AC_FUNC_REALLOC
+   which break cross compilation, no issues in native MSYS.
+*/
+#undef malloc
+#undef realloc
+#endif
 
 void dSetAllocHandler (dAllocFunction *fn)
 {
