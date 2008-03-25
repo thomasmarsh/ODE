@@ -104,6 +104,9 @@ Where	c = cos(angle),	s = sine(angle), and ||( x,y,z )|| = 1
 	  (if not, the GL will normalize this vector).
 */
 
+dVector3 geom1pos={0.0,0.50,0.65};
+bool DumpInfo=true;
+
 void start()
 {
   // adjust the starting viewpoint a bit
@@ -133,7 +136,10 @@ void start()
 		  -0.50034,0.50010,0.70678, 0,
 		  -0.50025,-0.83325,0.23545, 0 };
   dGeomSetPosition (geoms[0],0,0,0.25);
-  dGeomSetPosition (geoms[1],0.0,0.25,0.70);  
+  dGeomSetPosition (geoms[1],
+		    geom1pos[0],
+		    geom1pos[1],
+		    geom1pos[2]);  
   dGeomSetRotation (geoms[0],m1);
   dGeomSetRotation (geoms[1],m2);
 }
@@ -145,7 +151,6 @@ int dCollideBoxBox (dxGeom *o1, dxGeom *o2, int flags,
 
 void simLoop (int pause)
 {
-  static bool DumpInfo=true;
   const dReal ss[3] = {0.02,0.02,0.02};
   dContactGeom contacts[8];
 #if USE_CONVEX
@@ -211,7 +216,28 @@ void simLoop (int pause)
 
 void command (int cmd)
 {
-  dsPrint ("received command %d (`%c')\n",cmd,cmd);
+  switch(cmd)
+    {
+    case 119: //(w)
+      geom1pos[0]+=0.05;
+      break;
+    case 97: //(a)
+      geom1pos[1]-=0.05;
+      break;
+    case 115: //(s)
+      geom1pos[0]-=0.05;
+      break;
+    case 100: //(d)
+      geom1pos[1]-=0.05;
+      break;
+    default:
+      dsPrint ("received command %d (`%c')\n",cmd,cmd);     
+    }
+  dGeomSetPosition (geoms[1],
+		    geom1pos[0],
+		    geom1pos[1],
+		    geom1pos[2]);
+  DumpInfo=true;
 }
 
 

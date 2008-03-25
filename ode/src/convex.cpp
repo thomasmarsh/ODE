@@ -729,6 +729,7 @@ struct ConvexConvexSATOutput
   int side_index;
   dxConvex* g1;
   dxConvex* g2;
+  dVector3 e1a,e1b,e2a,e2b;
 };
 
 /*! \brief Does an axis separation test using cvx1 planes on cvx1 and cvx2, returns true for a collision false for no collision 
@@ -784,7 +785,7 @@ inline bool CheckSATConvexFaces(dxConvex& cvx1,
 	  ccso.side_index=(int)i;
 	  ccso.g1=&cvx1;
 	  ccso.g2=&cvx2;
-	  ccso.depth_type = 1; // 1 = face-face
+	  ccso.depth_type = 1; // 1 = face-something
 	}
     }
   return true;
@@ -813,27 +814,27 @@ inline bool CheckSATConvexEdges(dxConvex& cvx1,
   // Test cross products of pairs of edges
   dReal depth,min,max,min1,max1,min2,max2;
   dVector4 plane;
-  dVector3 e1,e2,t;
+  dVector3 e1,e2,e1a,e1b,e2a,e2b;
   for(std::set<edge>::iterator i = cvx1.edges.begin();
       i!= cvx1.edges.end();
       ++i)
     {
       // we only need to apply rotation here
-      dMULTIPLY0_331 (t,cvx1.final_posr->R,cvx1.points+(i->first*3));
-      dMULTIPLY0_331 (e1,cvx1.final_posr->R,cvx1.points+(i->second*3));
-      e1[0]-=t[0];
-      e1[1]-=t[1];
-      e1[2]-=t[2];
+      dMULTIPLY0_331 (e1a,cvx1.final_posr->R,cvx1.points+(i->first*3));
+      dMULTIPLY0_331 (e1b,cvx1.final_posr->R,cvx1.points+(i->second*3));
+      e1[0]=e1b[0]-e1a[0];
+      e1[1]=e1b[1]-e1a[1];
+      e1[2]=e1b[2]-e1a[2];
       for(std::set<edge>::iterator j = cvx2.edges.begin();
 	  j!= cvx2.edges.end();
 	  ++j)
 	{
 	  // we only need to apply rotation here
-	  dMULTIPLY0_331 (t,cvx2.final_posr->R,cvx2.points+(j->first*3));
-	  dMULTIPLY0_331 (e2,cvx2.final_posr->R,cvx2.points+(j->second*3));
-	  e2[0]-=t[0];
-	  e2[1]-=t[1];
-	  e2[2]-=t[2];
+	  dMULTIPLY0_331 (e2a,cvx2.final_posr->R,cvx2.points+(j->first*3));
+	  dMULTIPLY0_331 (e2b,cvx2.final_posr->R,cvx2.points+(j->second*3));
+	  e2[0]=e2b[0]-e2a[0];
+	  e2[1]=e2b[1]-e2a[1];
+	  e2[2]=e2b[2]-e2a[2];
 	  dCROSS(plane,=,e1,e2);
 	  plane[3]=0;
 	  ComputeInterval(cvx1,plane,min1,max1);
@@ -849,6 +850,23 @@ inline bool CheckSATConvexEdges(dxConvex& cvx1,
 	      ccso.g1=&cvx1;
 	      ccso.g2=&cvx2;
 	      ccso.depth_type = 2; // 2 = edge-edge
+	      // use cached values, add position
+	      dVector3Copy(e1a,ccso.e1a);
+	      dVector3Copy(e1b,ccso.e1b);
+	      ccso.e1a[0]+=cvx1.final_posr->pos[0];
+	      ccso.e1a[1]+=cvx1.final_posr->pos[1];
+	      ccso.e1a[2]+=cvx1.final_posr->pos[2];
+	      ccso.e1b[0]+=cvx1.final_posr->pos[0];
+	      ccso.e1b[1]+=cvx1.final_posr->pos[1];
+	      ccso.e1b[2]+=cvx1.final_posr->pos[2];
+	      dVector3Copy(e2a,ccso.e2a);	      
+	      dVector3Copy(e2b,ccso.e2b);	      
+	      ccso.e2a[0]+=cvx2.final_posr->pos[0];
+	      ccso.e2a[1]+=cvx2.final_posr->pos[1];
+	      ccso.e2a[2]+=cvx2.final_posr->pos[2];
+	      ccso.e2b[0]+=cvx2.final_posr->pos[0];
+	      ccso.e2b[1]+=cvx2.final_posr->pos[1];
+	      ccso.e2b[2]+=cvx2.final_posr->pos[2];
 	    }	  
 	}      
     }
@@ -974,7 +992,40 @@ int TestConvexIntersection(dxConvex& cvx1,dxConvex& cvx2, int flags,
 	}      
     }
   else if(ccso.depth_type==2) // edge-edge
-    {
+    {      
+      // for now return edge points
+      dVector3Copy(ccso.plane,SAFECONTACT(flags, contact, contacts, skip)->normal);
+      dVector3Copy(ccso.e1a,SAFECONTACT(flags, contact, contacts, skip)->pos);
+      
+      SAFECONTACT(flags, contact, contacts, skip)->g1=ccso.g1;
+      SAFECONTACT(flags, contact, contacts, skip)->g2=ccso.g2;
+      SAFECONTACT(flags, contact, contacts, skip)->depth=ccso.min_depth;
+      ++contacts;
+      if (contacts==maxc) return contacts;
+      dVector3Copy(ccso.plane,SAFECONTACT(flags, contact, contacts, skip)->normal);
+      dVector3Copy(ccso.e1b,SAFECONTACT(flags, contact, contacts, skip)->pos);
+      
+      SAFECONTACT(flags, contact, contacts, skip)->g1=ccso.g1;
+      SAFECONTACT(flags, contact, contacts, skip)->g2=ccso.g2;
+      SAFECONTACT(flags, contact, contacts, skip)->depth=ccso.min_depth;
+      ++contacts;
+      if (contacts==maxc) return contacts;      
+      dVector3Copy(ccso.plane,SAFECONTACT(flags, contact, contacts, skip)->normal);
+      dVector3Copy(ccso.e2a,SAFECONTACT(flags, contact, contacts, skip)->pos);
+      
+      SAFECONTACT(flags, contact, contacts, skip)->g1=ccso.g1;
+      SAFECONTACT(flags, contact, contacts, skip)->g2=ccso.g2;
+      SAFECONTACT(flags, contact, contacts, skip)->depth=ccso.min_depth;
+      ++contacts;
+      if (contacts==maxc) return contacts;
+      dVector3Copy(ccso.plane,SAFECONTACT(flags, contact, contacts, skip)->normal);
+      dVector3Copy(ccso.e2b,SAFECONTACT(flags, contact, contacts, skip)->pos);
+      
+      SAFECONTACT(flags, contact, contacts, skip)->g1=ccso.g1;
+      SAFECONTACT(flags, contact, contacts, skip)->g2=ccso.g2;
+      SAFECONTACT(flags, contact, contacts, skip)->depth=ccso.min_depth;
+      ++contacts;
+      if (contacts==maxc) return contacts;
       
     }
   return contacts;
