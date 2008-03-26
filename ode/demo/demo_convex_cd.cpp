@@ -105,6 +105,7 @@ Where	c = cos(angle),	s = sine(angle), and ||( x,y,z )|| = 1
 */
 
 dVector3 geom1pos={0.0,0.50,0.65};
+dQuaternion geom1quat={1,0,0,0};
 bool DumpInfo=true;
 
 void start()
@@ -132,15 +133,13 @@ void start()
   geoms[1]=dCreateBox(space,0.5,0.5,0.5);
 #endif
   dMatrix3 m1 = { 1,0,0,0,0,1,0,0,0,0,1,0 };
-  dMatrix3 m2 = { 0.70668,-0.23576,0.66709, 0,
-		  -0.50034,0.50010,0.70678, 0,
-		  -0.50025,-0.83325,0.23545, 0 };
-  dGeomSetPosition (geoms[0],0,0,0.25);
+  dMatrix3 m2 = { 1,0,0,0,0,1,0,0,0,0,1,0 };
   dGeomSetPosition (geoms[1],
 		    geom1pos[0],
 		    geom1pos[1],
-		    geom1pos[2]);  
+		    geom1pos[2]);
   dGeomSetRotation (geoms[0],m1);
+  dQtoR (geom1quat, m2);
   dGeomSetRotation (geoms[1],m2);
 }
 
@@ -216,19 +215,38 @@ void simLoop (int pause)
 
 void command (int cmd)
 {
+  // note: 0.0174532925 radians = 1 degree
+  dQuaternion q;
+  dMatrix3 m;
   switch(cmd)
     {
-    case 119: //(w)
+    case 'w':
       geom1pos[0]+=0.05;
       break;
-    case 97: //(a)
+    case 'a':
       geom1pos[1]-=0.05;
       break;
-    case 115: //(s)
+    case 's':
       geom1pos[0]-=0.05;
       break;
-    case 100: //(d)
-      geom1pos[1]-=0.05;
+    case 'd':
+      geom1pos[1]+=0.05;
+      break;
+    case 'i':
+      dQFromAxisAndAngle (q, 0, 0, 1,0.0174532925);
+      dQMultiply0(geom1quat,geom1quat,q);
+      break;
+    case 'j':
+      dQFromAxisAndAngle (q, 1, 0, 0,0.0174532925);
+      dQMultiply0(geom1quat,geom1quat,q);
+      break;
+    case 'k':
+      dQFromAxisAndAngle (q, 0, 0, 1,-0.0174532925);
+      dQMultiply0(geom1quat,geom1quat,q);
+      break;
+    case 'l':
+      dQFromAxisAndAngle (q, 1, 0, 0,-0.0174532925);
+      dQMultiply0(geom1quat,geom1quat,q);
       break;
     default:
       dsPrint ("received command %d (`%c')\n",cmd,cmd);     
@@ -237,6 +255,8 @@ void command (int cmd)
 		    geom1pos[0],
 		    geom1pos[1],
 		    geom1pos[2]);
+  dQtoR (geom1quat, m);
+  dGeomSetRotation (geoms[1],m);
   DumpInfo=true;
 }
 
