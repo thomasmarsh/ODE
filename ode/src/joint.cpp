@@ -1582,13 +1582,13 @@ static void hinge2GetInfo1 (dxJointHinge2 *j, dxJoint::Info1 *info)
   info->nub = 4;
 
   // see if we're powered or at a joint limit for axis 1
-  int atlimit=0;
+  j->limot1.limit = 0;
   if ((j->limot1.lostop >= -M_PI || j->limot1.histop <= M_PI) &&
       j->limot1.lostop <= j->limot1.histop) {
     dReal angle = measureHinge2Angle (j);
-    if (j->limot1.testRotationalLimit (angle)) atlimit = 1;
+    j->limot1.testRotationalLimit (angle);
   }
-  if (atlimit || j->limot1.fmax > 0) info->m++;
+  if (j->limot1.limit || j->limot1.fmax > 0) info->m++;
 
   // see if we're powering axis 2 (we currently never limit this axis)
   j->limot2.limit = 0;
@@ -2117,10 +2117,6 @@ static void universalGetInfo1 (dxJointUniversal *j, dxJoint::Info1 *info)
   info->nub = 4;
   info->m = 4;
 
-  // see if we're powered or at a joint limit.
-  bool constraint1 = j->limot1.fmax > 0;
-  bool constraint2 = j->limot2.fmax > 0;
-
   bool limiting1 = (j->limot1.lostop >= -M_PI || j->limot1.histop <= M_PI) &&
        j->limot1.lostop <= j->limot1.histop;
   bool limiting2 = (j->limot2.lostop >= -M_PI || j->limot2.histop <= M_PI) &&
@@ -2128,16 +2124,20 @@ static void universalGetInfo1 (dxJointUniversal *j, dxJoint::Info1 *info)
 
   // We need to call testRotationLimit() even if we're motored, since it
   // records the result.
+  j->limot1.limit = 0;
+  j->limot2.limit = 0;
+
   if (limiting1 || limiting2) {
     dReal angle1, angle2;
     getUniversalAngles (j, &angle1, &angle2);
-    if (limiting1 && j->limot1.testRotationalLimit (angle1)) constraint1 = true;
-    if (limiting2 && j->limot2.testRotationalLimit (angle2)) constraint2 = true;
+    if (limiting1)
+      j->limot1.testRotationalLimit (angle1);
+    if (limiting2)
+      j->limot2.testRotationalLimit (angle2);
   }
-  if (constraint1)
-    info->m++;
-  if (constraint2)
-    info->m++;
+
+  if (j->limot1.limit || j->limot1.fmax > 0) info->m++;
+  if (j->limot2.limit || j->limot2.fmax > 0) info->m++;
 }
 
 
