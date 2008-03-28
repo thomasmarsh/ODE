@@ -221,7 +221,10 @@ void dWorldCheck (dxWorld *w)
 
 //****************************************************************************
 // body
-dxWorld* dBodyGetWorld (const dxBody* b)
+
+// In the file objects.h we have dBodyGetWorld (const dBodyID)
+// This is equivalent to const pointer and non-const data
+dxWorld* dBodyGetWorld (dxBody *const b)
 {
   dAASSERT (b);
   return b->world;
