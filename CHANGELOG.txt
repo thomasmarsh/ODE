@@ -8,8 +8,11 @@ the rules for this file:
   * keep the format consistent (79 char width, M/D/Y date format).
 
 ------------------------------------------------------------------------------
+03/28/08 Remi
+	* Fix a bug in dJointXXXGetInfo. The value in limot.limit was not
+          always updated. (Ex: If hi and lo limit were changed). 
 
-03/27/08 remi
+03/27/08 Remi
 
         * Added a new Joint: Prismatic Universal (patch #1828454).
 
@@ -108,7 +111,7 @@ the rules for this file:
 
 	* Fixed two bugs in cyl/plane collision test.
 
-09/13/06 remi
+09/13/06 Remi
 
 	* New Rotoide - Prismatic joint type
 	* dJointGetUniversalAngles for efficient angle retrieval.
