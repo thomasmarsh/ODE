@@ -679,6 +679,8 @@ static void simLoop (int pause)
 
 int main (int argc, char **argv)
 {
+        printf("ODE configuration: %s\n", dGetConfiguration());
+        
 	// Is trimesh support built into this ODE?
 	g_allow_trimesh = dCheckConfiguration( "ODE_EXT_trimesh" );
 

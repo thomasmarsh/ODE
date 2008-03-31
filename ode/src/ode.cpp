@@ -1976,8 +1976,8 @@ extern "C" void dTestDataStructures()
 
 //****************************************************************************
 // configuration
-#if 0
-#define REGISTER_EXTENSION( __a )  #__a ## " "
+#if 1
+#define REGISTER_EXTENSION( __a )  #__a " "
 #else
 #define REGISTER_EXTENSION( __a )  "__a "
 #endif
