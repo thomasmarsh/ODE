@@ -79,7 +79,7 @@ ODE_API void dWorldSetGravity (dWorldID, dReal x, dReal y, dReal z);
  * @brief Get the gravity vector for a given world.
  * @ingroup world
  */
-ODE_API void dWorldGetGravity (const dWorldID, dVector3 gravity);
+ODE_API void dWorldGetGravity (dWorldID, dVector3 gravity);
 
 
 /**
@@ -96,7 +96,7 @@ ODE_API void dWorldSetERP (dWorldID, dReal erp);
  * @ingroup world
  * @return ERP value
  */
-ODE_API dReal dWorldGetERP (const dWorldID);
+ODE_API dReal dWorldGetERP (dWorldID);
 
 
 /**
@@ -113,7 +113,7 @@ ODE_API void dWorldSetCFM (dWorldID, dReal cfm);
  * @ingroup world
  * @return CFM value
  */
-ODE_API dReal dWorldGetCFM (const dWorldID);
+ODE_API dReal dWorldGetCFM (dWorldID);
 
 
 /**
@@ -202,21 +202,21 @@ ODE_API void dWorldSetQuickStepNumIterations (dWorldID, int num);
  * @ingroup world
  * @return nr of iterations
  */
-ODE_API int dWorldGetQuickStepNumIterations (const dWorldID);
+ODE_API int dWorldGetQuickStepNumIterations (dWorldID);
 
 /**
  * @brief Set the SOR over-relaxation parameter
  * @ingroup world
  * @param over_relaxation value to use by SOR
  */
-ODE_API void dWorldSetQuickStepW (const dWorldID, dReal over_relaxation);
+ODE_API void dWorldSetQuickStepW (dWorldID, dReal over_relaxation);
 
 /**
  * @brief Get the SOR over-relaxation parameter
  * @ingroup world
  * @returns the over-relaxation setting
  */
-ODE_API dReal dWorldGetQuickStepW (const dWorldID);
+ODE_API dReal dWorldGetQuickStepW (dWorldID);
 
 /* World contact parameter functions */
 
@@ -235,7 +235,7 @@ ODE_API void dWorldSetContactMaxCorrectingVel (dWorldID, dReal vel);
  * to generated.
  * @ingroup world
  */
-ODE_API dReal dWorldGetContactMaxCorrectingVel (const dWorldID);
+ODE_API dReal dWorldGetContactMaxCorrectingVel (dWorldID);
 
 /**
  * @brief Set the depth of the surface layer around all geometry objects.
@@ -255,7 +255,7 @@ ODE_API void dWorldSetContactSurfaceLayer (dWorldID, dReal depth);
  * @ingroup world
  * @returns the depth
  */
-ODE_API dReal dWorldGetContactSurfaceLayer (const dWorldID);
+ODE_API dReal dWorldGetContactSurfaceLayer (dWorldID);
 
 /* StepFast1 functions */
 
@@ -310,14 +310,14 @@ ODE_API void dWorldSetAutoEnableDepthSF1(dWorldID, int autoEnableDepth);
  * @brief Get the AutoEnableDepth parameter used by the StepFast1 algorithm.
  * @ingroup disable
  */
-ODE_API int dWorldGetAutoEnableDepthSF1(const dWorldID);
+ODE_API int dWorldGetAutoEnableDepthSF1(dWorldID);
 
 /**
  * @brief Get auto disable linear threshold for newly created bodies.
  * @ingroup disable
  * @return the threshold
  */
-ODE_API dReal dWorldGetAutoDisableLinearThreshold (const dWorldID);
+ODE_API dReal dWorldGetAutoDisableLinearThreshold (dWorldID);
 
 /**
  * @brief Set auto disable linear threshold for newly created bodies.
@@ -331,7 +331,7 @@ ODE_API void  dWorldSetAutoDisableLinearThreshold (dWorldID, dReal linear_thresh
  * @ingroup disable
  * @return the threshold
  */
-ODE_API dReal dWorldGetAutoDisableAngularThreshold (const dWorldID);
+ODE_API dReal dWorldGetAutoDisableAngularThreshold (dWorldID);
 
 /**
  * @brief Set auto disable angular threshold for newly created bodies.
@@ -345,7 +345,7 @@ ODE_API void dWorldSetAutoDisableAngularThreshold (dWorldID, dReal angular_thres
  * @ingroup disable
  * @return the threshold
  */
-ODE_API dReal dWorldGetAutoDisableLinearAverageThreshold (const dWorldID);
+ODE_API dReal dWorldGetAutoDisableLinearAverageThreshold (dWorldID);
 
 /**
  * @brief Set auto disable linear average threshold for newly created bodies.
@@ -359,7 +359,7 @@ ODE_API void  dWorldSetAutoDisableLinearAverageThreshold (dWorldID, dReal linear
  * @ingroup disable
  * @return the threshold
  */
-ODE_API dReal dWorldGetAutoDisableAngularAverageThreshold (const dWorldID);
+ODE_API dReal dWorldGetAutoDisableAngularAverageThreshold (dWorldID);
 
 /**
  * @brief Set auto disable angular average threshold for newly created bodies.
@@ -373,7 +373,7 @@ ODE_API void dWorldSetAutoDisableAngularAverageThreshold (dWorldID, dReal angula
  * @ingroup disable
  * @return number of samples used
  */
-ODE_API int dWorldGetAutoDisableAverageSamplesCount (const dWorldID);
+ODE_API int dWorldGetAutoDisableAverageSamplesCount (dWorldID);
 
 /**
  * @brief Set auto disable average sample count for newly created bodies.
@@ -388,7 +388,7 @@ ODE_API void dWorldSetAutoDisableAverageSamplesCount (dWorldID, unsigned int ave
  * @ingroup disable
  * @return nr of steps
  */
-ODE_API int dWorldGetAutoDisableSteps (const dWorldID);
+ODE_API int dWorldGetAutoDisableSteps (dWorldID);
 
 /**
  * @brief Set auto disable steps for newly created bodies.
@@ -402,7 +402,7 @@ ODE_API void dWorldSetAutoDisableSteps (dWorldID, int steps);
  * @ingroup disable
  * @return nr of seconds
  */
-ODE_API dReal dWorldGetAutoDisableTime (const dWorldID);
+ODE_API dReal dWorldGetAutoDisableTime (dWorldID);
 
 /**
  * @brief Set auto disable time for newly created bodies.
@@ -416,7 +416,7 @@ ODE_API void dWorldSetAutoDisableTime (dWorldID, dReal time);
  * @ingroup disable
  * @return 0 or 1
  */
-ODE_API int dWorldGetAutoDisableFlag (const dWorldID);
+ODE_API int dWorldGetAutoDisableFlag (dWorldID);
 
 /**
  * @brief Set auto disable flag for newly created bodies.
@@ -465,7 +465,7 @@ ODE_API void dWorldSetAutoDisableFlag (dWorldID, int do_auto_disable);
  * @brief Get the world's linear damping threshold.
  * @ingroup damping
  */
-ODE_API dReal dWorldGetLinearDampingThreshold(const dWorldID w);
+ODE_API dReal dWorldGetLinearDampingThreshold(dWorldID w);
 
 /**
  * @brief Set the world's linear damping threshold.
@@ -479,7 +479,7 @@ ODE_API void dWorldSetLinearDampingThreshold(dWorldID w, dReal threshold);
  * @brief Get the world's angular damping threshold.
  * @ingroup damping
  */
-ODE_API dReal dWorldGetAngularDampingThreshold(const dWorldID w);
+ODE_API dReal dWorldGetAngularDampingThreshold(dWorldID w);
 
 /**
  * @brief Set the world's angular damping threshold.
@@ -493,7 +493,7 @@ ODE_API void dWorldSetAngularDampingThreshold(dWorldID w, dReal threshold);
  * @brief Get the world's linear damping scale.
  * @ingroup damping
  */
-ODE_API dReal dWorldGetLinearDamping(const dWorldID w);
+ODE_API dReal dWorldGetLinearDamping(dWorldID w);
 
 /**
  * @brief Set the world's linear damping scale.
@@ -507,7 +507,7 @@ ODE_API void dWorldSetLinearDamping(dWorldID w, dReal scale);
  * @brief Get the world's angular damping scale.
  * @ingroup damping
  */
-ODE_API dReal dWorldGetAngularDamping(const dWorldID w);
+ODE_API dReal dWorldGetAngularDamping(dWorldID w);
 
 /**
  * @brief Set the world's angular damping scale.
@@ -532,7 +532,7 @@ ODE_API void dWorldSetDamping(dWorldID w,
  * @ingroup damping
  * @sa dBodyGetMaxAngularSpeed()
  */
-ODE_API dReal dWorldGetMaxAngularSpeed(const dWorldID w);
+ODE_API dReal dWorldGetMaxAngularSpeed(dWorldID w);
 
 
 /**
@@ -540,7 +540,7 @@ ODE_API dReal dWorldGetMaxAngularSpeed(const dWorldID w);
  * @ingroup damping
  * @sa dBodySetMaxAngularSpeed()
  */
-ODE_API void dWorldSetMaxAngularSpeed(const dWorldID w, dReal max_speed);
+ODE_API void dWorldSetMaxAngularSpeed(dWorldID w, dReal max_speed);
 
 
 
@@ -583,7 +583,7 @@ ODE_API void dWorldSetMaxAngularSpeed(const dWorldID w, dReal max_speed);
  * @ingroup bodies disable
  * @return the threshold
  */
-ODE_API dReal dBodyGetAutoDisableLinearThreshold (const dBodyID);
+ODE_API dReal dBodyGetAutoDisableLinearThreshold (dBodyID);
 
 /**
  * @brief Set auto disable linear average threshold.
@@ -597,7 +597,7 @@ ODE_API void  dBodySetAutoDisableLinearThreshold (dBodyID, dReal linear_average_
  * @ingroup bodies disable
  * @return the threshold
  */
-ODE_API dReal dBodyGetAutoDisableAngularThreshold (const dBodyID);
+ODE_API dReal dBodyGetAutoDisableAngularThreshold (dBodyID);
 
 /**
  * @brief Set auto disable angular average threshold.
@@ -611,7 +611,7 @@ ODE_API void  dBodySetAutoDisableAngularThreshold (dBodyID, dReal angular_averag
  * @ingroup bodies disable
  * @return the nr of steps/size.
  */
-ODE_API int dBodyGetAutoDisableAverageSamplesCount (const dBodyID);
+ODE_API int dBodyGetAutoDisableAverageSamplesCount (dBodyID);
 
 /**
  * @brief Set auto disable average buffer size (average steps).
@@ -626,7 +626,7 @@ ODE_API void dBodySetAutoDisableAverageSamplesCount (dBodyID, unsigned int avera
  * @ingroup bodies disable
  * @return the nr of steps
  */
-ODE_API int dBodyGetAutoDisableSteps (const dBodyID);
+ODE_API int dBodyGetAutoDisableSteps (dBodyID);
 
 /**
  * @brief Set auto disable steps.
@@ -640,7 +640,7 @@ ODE_API void dBodySetAutoDisableSteps (dBodyID, int steps);
  * @ingroup bodies disable
  * @return nr of seconds
  */
-ODE_API dReal dBodyGetAutoDisableTime (const dBodyID);
+ODE_API dReal dBodyGetAutoDisableTime (dBodyID);
 
 /**
  * @brief Set auto disable time.
@@ -654,7 +654,7 @@ ODE_API void  dBodySetAutoDisableTime (dBodyID, dReal time);
  * @ingroup bodies disable
  * @return 0 or 1
  */
-ODE_API int dBodyGetAutoDisableFlag (const dBodyID);
+ODE_API int dBodyGetAutoDisableFlag (dBodyID);
 
 /**
  * @brief Set auto disable flag.
@@ -678,7 +678,7 @@ ODE_API void  dBodySetAutoDisableDefaults (dBodyID);
  * 
  * @ingroup bodies
  */
-ODE_API dWorldID dBodyGetWorld (const dBodyID);
+ODE_API dWorldID dBodyGetWorld (dBodyID);
 
 /**
  * @brief Create a body in given world.
@@ -710,7 +710,7 @@ ODE_API void  dBodySetData (dBodyID, void *data);
  * @ingroup bodies
  * @return a pointer to the user's data.
  */
-ODE_API void *dBodyGetData (const dBodyID);
+ODE_API void *dBodyGetData (dBodyID);
 
 /**
  * @brief Set position of a body.
@@ -763,7 +763,7 @@ ODE_API void dBodySetAngularVel (dBodyID, dReal x, dReal y, dReal z);
  * system structure.
  * @sa dBodyCopyPosition
  */
-ODE_API const dReal * dBodyGetPosition   (const dBodyID);
+ODE_API const dReal * dBodyGetPosition   (dBodyID);
 
 
 /**
@@ -781,7 +781,7 @@ ODE_API void dBodyCopyPosition (dBodyID body, dVector3 pos);
  * @ingroup bodies
  * @return pointer to a 4x3 rotation matrix.
  */
-ODE_API const dReal * dBodyGetRotation   (const dBodyID);
+ODE_API const dReal * dBodyGetRotation   (dBodyID);
 
 
 /**
@@ -799,7 +799,7 @@ ODE_API void dBodyCopyRotation (dBodyID, dMatrix3 R);
  * @ingroup bodies
  * @return pointer to 4 scalars that represent the quaternion.
  */
-ODE_API const dReal * dBodyGetQuaternion (const dBodyID);
+ODE_API const dReal * dBodyGetQuaternion (dBodyID);
 
 
 /**
@@ -816,13 +816,13 @@ ODE_API void dBodyCopyQuaternion(dBodyID body, dQuaternion quat);
  * @brief Get the linear velocity of a body.
  * @ingroup bodies
  */
-ODE_API const dReal * dBodyGetLinearVel  (const dBodyID);
+ODE_API const dReal * dBodyGetLinearVel  (dBodyID);
 
 /**
  * @brief Get the angular velocity of a body.
  * @ingroup bodies
  */
-ODE_API const dReal * dBodyGetAngularVel (const dBodyID);
+ODE_API const dReal * dBodyGetAngularVel (dBodyID);
 
 /**
  * @brief Set the mass of a body.
@@ -834,7 +834,7 @@ ODE_API void dBodySetMass (dBodyID, const dMass *mass);
  * @brief Get the mass of a body.
  * @ingroup bodies
  */
-ODE_API void dBodyGetMass (const dBodyID, dMass *mass);
+ODE_API void dBodyGetMass (dBodyID, dMass *mass);
 
 /**
  * @brief Add force at centre of mass of body in absolute coordinates.
@@ -894,7 +894,7 @@ ODE_API void dBodyAddRelForceAtRelPos (dBodyID, dReal fx, dReal fy, dReal fz,
  * body system.
  * @ingroup bodies
  */
-ODE_API const dReal * dBodyGetForce   (const dBodyID);
+ODE_API const dReal * dBodyGetForce   (dBodyID);
 
 /**
  * @brief Return the current accumulated torque vector.
@@ -905,7 +905,7 @@ ODE_API const dReal * dBodyGetForce   (const dBodyID);
  * body system.
  * @ingroup bodies
  */
-ODE_API const dReal * dBodyGetTorque  (const dBodyID);
+ODE_API const dReal * dBodyGetTorque  (dBodyID);
 
 /**
  * @brief Set the body force accumulation vector.
@@ -934,7 +934,7 @@ ODE_API void dBodySetTorque (dBodyID b, dReal x, dReal y, dReal z);
  */
 ODE_API void dBodyGetRelPointPos
 (
-  const dBodyID, dReal px, dReal py, dReal pz,
+  dBodyID, dReal px, dReal py, dReal pz,
   dVector3 result
 );
 
@@ -945,7 +945,7 @@ ODE_API void dBodyGetRelPointPos
  */
 ODE_API void dBodyGetRelPointVel
 (
-  const dBodyID, dReal px, dReal py, dReal pz,
+  dBodyID, dReal px, dReal py, dReal pz,
   dVector3 result
 );
 
@@ -957,7 +957,7 @@ ODE_API void dBodyGetRelPointVel
  */
 ODE_API void dBodyGetPointVel
 (
-  const dBodyID, dReal px, dReal py, dReal pz,
+  dBodyID, dReal px, dReal py, dReal pz,
   dVector3 result
 );
 
@@ -971,7 +971,7 @@ ODE_API void dBodyGetPointVel
  */
 ODE_API void dBodyGetPosRelPoint
 (
-  const dBodyID, dReal px, dReal py, dReal pz,
+  dBodyID, dReal px, dReal py, dReal pz,
   dVector3 result
 );
 
@@ -1039,21 +1039,21 @@ ODE_API void dBodySetFiniteRotationAxis (dBodyID, dReal x, dReal y, dReal z);
  * @ingroup bodies
  * @return the mode 0 (infitesimal) or 1 (finite).
  */
-ODE_API int dBodyGetFiniteRotationMode (const dBodyID);
+ODE_API int dBodyGetFiniteRotationMode (dBodyID);
 
 /**
  * @brief Get the finite rotation axis.
  * @param result will contain the axis.
  * @ingroup bodies
  */
-ODE_API void dBodyGetFiniteRotationAxis (const dBodyID, dVector3 result);
+ODE_API void dBodyGetFiniteRotationAxis (dBodyID, dVector3 result);
 
 /**
  * @brief Get the number of joints that are attached to this body.
  * @ingroup bodies
  * @return nr of joints
  */
-ODE_API int dBodyGetNumJoints (const dBodyID b);
+ODE_API int dBodyGetNumJoints (dBodyID b);
 
 /**
  * @brief Return a joint attached to this body, given by index.
@@ -1061,7 +1061,7 @@ ODE_API int dBodyGetNumJoints (const dBodyID b);
  * @param index valid range is  0 to n-1 where n is the value returned by
  * dBodyGetNumJoints().
  */
-ODE_API dJointID dBodyGetJoint (const dBodyID, int index);
+ODE_API dJointID dBodyGetJoint (dBodyID, int index);
 
 /**
  * @brief Manually enable a body.
@@ -1100,7 +1100,7 @@ ODE_API void dBodySetGravityMode (dBodyID b, int mode);
  * @ingroup bodies
  * @return nonzero means gravity affects this body.
  */
-ODE_API int dBodyGetGravityMode (const dBodyID b);
+ODE_API int dBodyGetGravityMode (dBodyID b);
 
 /**
  * @brief Set the 'moved' callback of a body.
@@ -1127,7 +1127,7 @@ ODE_API void dBodySetMovedCallback(dBodyID b, void (*callback)(dBodyID));
  * @return the first geom attached to this body, or 0.
  * @ingroup bodies
  */
-ODE_API dGeomID dBodyGetFirstGeom(const dBodyID b);
+ODE_API dGeomID dBodyGetFirstGeom(dBodyID b);
 
 
 /**
@@ -1137,7 +1137,7 @@ ODE_API dGeomID dBodyGetFirstGeom(const dBodyID b);
  * @sa dBodyGetFirstGeom
  * @ingroup bodies
  */
-ODE_API dGeomID dBodyGetNextGeom(const dGeomID g);
+ODE_API dGeomID dBodyGetNextGeom(dGeomID g);
 
 
 /**
@@ -1150,7 +1150,7 @@ ODE_API void dBodySetDampingDefaults(dBodyID b);
  * @brief Get the body's linear damping scale.
  * @ingroup bodies damping
  */
-ODE_API dReal dBodyGetLinearDamping(const dBodyID b);
+ODE_API dReal dBodyGetLinearDamping(dBodyID b);
 
 /**
  * @brief Set the body's linear damping scale.
@@ -1168,7 +1168,7 @@ ODE_API void dBodySetLinearDamping(dBodyID b, dReal scale);
  * @remarks If the body's angular damping scale was not set, this function
  * returns the world's angular damping scale.
  */
-ODE_API dReal dBodyGetAngularDamping(const dBodyID b);
+ODE_API dReal dBodyGetAngularDamping(dBodyID b);
 
 /**
  * @brief Set the body's angular damping scale.
@@ -1193,7 +1193,7 @@ ODE_API void dBodySetDamping(dBodyID b, dReal linear_scale, dReal angular_scale)
  * @brief Get the body's linear damping threshold.
  * @ingroup bodies damping
  */
-ODE_API dReal dBodyGetLinearDampingThreshold(const dBodyID b);
+ODE_API dReal dBodyGetLinearDampingThreshold(dBodyID b);
 
 /**
  * @brief Set the body's linear damping threshold.
@@ -1207,7 +1207,7 @@ ODE_API void dBodySetLinearDampingThreshold(dBodyID b, dReal threshold);
  * @brief Get the body's angular damping threshold.
  * @ingroup bodies damping
  */
-ODE_API dReal dBodyGetAngularDampingThreshold(const dBodyID b);
+ODE_API dReal dBodyGetAngularDampingThreshold(dBodyID b);
 
 /**
  * @brief Set the body's angular damping threshold.
@@ -1222,7 +1222,7 @@ ODE_API void dBodySetAngularDampingThreshold(dBodyID b, dReal threshold);
  * @ingroup damping bodies
  * @sa dWorldGetMaxAngularSpeed()
  */
-ODE_API dReal dBodyGetMaxAngularSpeed(const dBodyID b);
+ODE_API dReal dBodyGetMaxAngularSpeed(dBodyID b);
 
 /**
  * @brief Set the body's maximum angular speed.
