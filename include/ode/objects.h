@@ -440,7 +440,7 @@ ODE_API void dWorldSetAutoDisableFlag (dWorldID, int do_auto_disable);
  * velocities are tested against the corresponding thresholds. If they
  * are above, they are multiplied by (1 - scale). So a negative scale value
  * will actually increase the speed, and values greater than one will
- * make the object oscilate every step; both can make the simulation unstable.
+ * make the object oscillate every step; both can make the simulation unstable.
  *
  * To disable damping just set the damping scale to zero.
  *
@@ -465,7 +465,7 @@ ODE_API void dWorldSetAutoDisableFlag (dWorldID, int do_auto_disable);
  * @brief Get the world's linear damping threshold.
  * @ingroup damping
  */
-ODE_API dReal dWorldGetLinearDampingThreshold(dWorldID w);
+ODE_API dReal dWorldGetLinearDampingThreshold (dWorldID w);
 
 /**
  * @brief Set the world's linear damping threshold.
@@ -479,7 +479,7 @@ ODE_API void dWorldSetLinearDampingThreshold(dWorldID w, dReal threshold);
  * @brief Get the world's angular damping threshold.
  * @ingroup damping
  */
-ODE_API dReal dWorldGetAngularDampingThreshold(dWorldID w);
+ODE_API dReal dWorldGetAngularDampingThreshold (dWorldID w);
 
 /**
  * @brief Set the world's angular damping threshold.
@@ -493,7 +493,7 @@ ODE_API void dWorldSetAngularDampingThreshold(dWorldID w, dReal threshold);
  * @brief Get the world's linear damping scale.
  * @ingroup damping
  */
-ODE_API dReal dWorldGetLinearDamping(dWorldID w);
+ODE_API dReal dWorldGetLinearDamping (dWorldID w);
 
 /**
  * @brief Set the world's linear damping scale.
@@ -501,13 +501,13 @@ ODE_API dReal dWorldGetLinearDamping(dWorldID w);
  * Default is 0 (no damping). Should be in the interval [0, 1].
  * @ingroup damping
  */
-ODE_API void dWorldSetLinearDamping(dWorldID w, dReal scale);
+ODE_API void dWorldSetLinearDamping (dWorldID w, dReal scale);
 
 /**
  * @brief Get the world's angular damping scale.
  * @ingroup damping
  */
-ODE_API dReal dWorldGetAngularDamping(dWorldID w);
+ODE_API dReal dWorldGetAngularDamping (dWorldID w);
 
 /**
  * @brief Set the world's angular damping scale.
@@ -532,7 +532,7 @@ ODE_API void dWorldSetDamping(dWorldID w,
  * @ingroup damping
  * @sa dBodyGetMaxAngularSpeed()
  */
-ODE_API dReal dWorldGetMaxAngularSpeed(dWorldID w);
+ODE_API dReal dWorldGetMaxAngularSpeed (dWorldID w);
 
 
 /**
@@ -540,7 +540,7 @@ ODE_API dReal dWorldGetMaxAngularSpeed(dWorldID w);
  * @ingroup damping
  * @sa dBodySetMaxAngularSpeed()
  */
-ODE_API void dWorldSetMaxAngularSpeed(dWorldID w, dReal max_speed);
+ODE_API void dWorldSetMaxAngularSpeed (dWorldID w, dReal max_speed);
 
 
 
@@ -763,7 +763,7 @@ ODE_API void dBodySetAngularVel (dBodyID, dReal x, dReal y, dReal z);
  * system structure.
  * @sa dBodyCopyPosition
  */
-ODE_API const dReal * dBodyGetPosition   (dBodyID);
+ODE_API const dReal * dBodyGetPosition (dBodyID);
 
 
 /**
@@ -781,7 +781,7 @@ ODE_API void dBodyCopyPosition (dBodyID body, dVector3 pos);
  * @ingroup bodies
  * @return pointer to a 4x3 rotation matrix.
  */
-ODE_API const dReal * dBodyGetRotation   (dBodyID);
+ODE_API const dReal * dBodyGetRotation (dBodyID);
 
 
 /**
@@ -816,7 +816,7 @@ ODE_API void dBodyCopyQuaternion(dBodyID body, dQuaternion quat);
  * @brief Get the linear velocity of a body.
  * @ingroup bodies
  */
-ODE_API const dReal * dBodyGetLinearVel  (dBodyID);
+ODE_API const dReal * dBodyGetLinearVel (dBodyID);
 
 /**
  * @brief Get the angular velocity of a body.
@@ -894,7 +894,7 @@ ODE_API void dBodyAddRelForceAtRelPos (dBodyID, dReal fx, dReal fy, dReal fz,
  * body system.
  * @ingroup bodies
  */
-ODE_API const dReal * dBodyGetForce   (dBodyID);
+ODE_API const dReal * dBodyGetForce (dBodyID);
 
 /**
  * @brief Return the current accumulated torque vector.
@@ -905,7 +905,7 @@ ODE_API const dReal * dBodyGetForce   (dBodyID);
  * body system.
  * @ingroup bodies
  */
-ODE_API const dReal * dBodyGetTorque  (dBodyID);
+ODE_API const dReal * dBodyGetTorque (dBodyID);
 
 /**
  * @brief Set the body force accumulation vector.
@@ -1127,7 +1127,7 @@ ODE_API void dBodySetMovedCallback(dBodyID b, void (*callback)(dBodyID));
  * @return the first geom attached to this body, or 0.
  * @ingroup bodies
  */
-ODE_API dGeomID dBodyGetFirstGeom(dBodyID b);
+ODE_API dGeomID dBodyGetFirstGeom (dBodyID b);
 
 
 /**
@@ -1137,7 +1137,7 @@ ODE_API dGeomID dBodyGetFirstGeom(dBodyID b);
  * @sa dBodyGetFirstGeom
  * @ingroup bodies
  */
-ODE_API dGeomID dBodyGetNextGeom(dGeomID g);
+ODE_API dGeomID dBodyGetNextGeom (dGeomID g);
 
 
 /**
@@ -1150,15 +1150,15 @@ ODE_API void dBodySetDampingDefaults(dBodyID b);
  * @brief Get the body's linear damping scale.
  * @ingroup bodies damping
  */
-ODE_API dReal dBodyGetLinearDamping(dBodyID b);
+ODE_API dReal dBodyGetLinearDamping (dBodyID b);
 
 /**
  * @brief Set the body's linear damping scale.
  * @param scale The linear damping scale. Should be in the interval [0, 1].
  * @ingroup bodies damping
  * @remarks From now on the body will not use the world's linear damping
- * scale until dBodyResetLinearDamping() is called.
- * @sa dBodyResetLinearDamping()
+ * scale until dBodySetDampingDefaults() is called.
+ * @sa dBodySetDampingDefaults()
  */
 ODE_API void dBodySetLinearDamping(dBodyID b, dReal scale);
 
@@ -1168,7 +1168,7 @@ ODE_API void dBodySetLinearDamping(dBodyID b, dReal scale);
  * @remarks If the body's angular damping scale was not set, this function
  * returns the world's angular damping scale.
  */
-ODE_API dReal dBodyGetAngularDamping(dBodyID b);
+ODE_API dReal dBodyGetAngularDamping (dBodyID b);
 
 /**
  * @brief Set the body's angular damping scale.
@@ -1193,7 +1193,7 @@ ODE_API void dBodySetDamping(dBodyID b, dReal linear_scale, dReal angular_scale)
  * @brief Get the body's linear damping threshold.
  * @ingroup bodies damping
  */
-ODE_API dReal dBodyGetLinearDampingThreshold(dBodyID b);
+ODE_API dReal dBodyGetLinearDampingThreshold (dBodyID b);
 
 /**
  * @brief Set the body's linear damping threshold.
@@ -1207,7 +1207,7 @@ ODE_API void dBodySetLinearDampingThreshold(dBodyID b, dReal threshold);
  * @brief Get the body's angular damping threshold.
  * @ingroup bodies damping
  */
-ODE_API dReal dBodyGetAngularDampingThreshold(dBodyID b);
+ODE_API dReal dBodyGetAngularDampingThreshold (dBodyID b);
 
 /**
  * @brief Set the body's angular damping threshold.
@@ -1222,7 +1222,7 @@ ODE_API void dBodySetAngularDampingThreshold(dBodyID b, dReal threshold);
  * @ingroup damping bodies
  * @sa dWorldGetMaxAngularSpeed()
  */
-ODE_API dReal dBodyGetMaxAngularSpeed(dBodyID b);
+ODE_API dReal dBodyGetMaxAngularSpeed (dBodyID b);
 
 /**
  * @brief Set the body's maximum angular speed.
