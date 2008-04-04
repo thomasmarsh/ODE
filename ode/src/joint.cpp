@@ -3902,7 +3902,7 @@ static void PistonGetInfo2 (dxJointPiston *joint, dxJoint::Info2 *info)
   // We want to make correction for motion not in the line of the axis
   // We calculate the displacement w.r.t. the "anchor" pt.
   // i.e. Find the difference between the current position and the initial
-  //      position along the contrained axies (i.e. axis p and q).
+  //      position along the constrained axies (i.e. axis p and q).
   // The bodies can move w.r.t each other only along the prismatic axis
   //
   // Compute the RHS of rows 2 and 3
