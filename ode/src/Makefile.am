@@ -70,6 +70,7 @@ libode_la_SOURCES+= collision_trimesh_gimpact.cpp
 libode_la_LIBADD += $(top_builddir)/GIMPACT/src/libGIMPACT.la
 libode_la_CPPFLAGS += -DdTRIMESH_ENABLED -DdTRIMESH_GIMPACT -I$(top_srcdir)/GIMPACT/include
 libode_la_SOURCES +=    collision_trimesh_trimesh.cpp \
+                        collision_trimesh_trimesh_new.cpp \
                         collision_trimesh_sphere.cpp \
                         collision_trimesh_ray.cpp \
                         collision_trimesh_opcode.cpp \
@@ -95,6 +96,7 @@ libode_la_LIBADD += $(top_builddir)/OPCODE/libOPCODE.la \
 
 libode_la_CPPFLAGS += -I$(top_srcdir)/OPCODE -I$(top_srcdir)/OPCODE/Ice -DdTRIMESH_ENABLED -DdTRIMESH_OPCODE
 libode_la_SOURCES+=     collision_trimesh_trimesh.cpp \
+                        collision_trimesh_trimesh_new.cpp \
                         collision_trimesh_sphere.cpp \
                         collision_trimesh_ray.cpp \
                         collision_trimesh_opcode.cpp \
