@@ -230,7 +230,7 @@ void Block::CollideLocal(dxGeom* g2, void* UserData, dNearCallback* Callback){
 	// Collide against local list
 	dxGeom* g1 = First;
 	while (g1){
-		if (GEOM_ENABLED(g2)){
+		if (GEOM_ENABLED(g1)){
 			collideAABBs (g1, g2, UserData, Callback);
 		}
 		g1 = g1->next;
