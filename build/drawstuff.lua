@@ -36,6 +36,8 @@ package.links = {}
     package.config["ReleaseSingleLib"].kind = "lib"
     table.insert(package.config["DebugSingleLib"].defines, lib_defines)
     table.insert(package.config["ReleaseSingleLib"].defines, lib_defines)
+    table.insert(package.config["DebugSingleLib"].defines, "dSINGLE")
+    table.insert(package.config["ReleaseSingleLib"].defines, "dSINGLE")
 
     package.config["DebugDoubleLib"].kind = "lib"
     package.config["ReleaseDoubleLib"].kind = "lib"
@@ -52,6 +54,8 @@ package.links = {}
     package.config["ReleaseSingleDLL"].kind = "dll"
     table.insert(package.config["DebugSingleDLL"].defines, dll_defines)
     table.insert(package.config["ReleaseSingleDLL"].defines, dll_defines)
+    table.insert(package.config["DebugSingleDLL"].defines, "dSINGLE")
+    table.insert(package.config["ReleaseSingleDLL"].defines, "dSINGLE")
 
     package.config["DebugDoubleDLL"].kind = "dll"
     package.config["ReleaseDoubleDLL"].kind = "dll"

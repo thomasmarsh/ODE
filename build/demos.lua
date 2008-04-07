@@ -81,10 +81,14 @@
    end
 
    if (not options["enable-static-only"]) then
+    table.insert(package.config["DebugSingleDLL"].defines, "dSINGLE")
+    table.insert(package.config["ReleaseSingleDLL"].defines, "dSINGLE")
     table.insert(package.config["DebugDoubleDLL"].defines, "dDOUBLE")
     table.insert(package.config["ReleaseDoubleDLL"].defines, "dDOUBLE")
    end
    if (not options["enable-shared-only"]) then
+    table.insert(package.config["DebugSingleLib"].defines, "dSINGLE")
+    table.insert(package.config["ReleaseSingleLib"].defines, "dSINGLE")
     table.insert(package.config["DebugDoubleLib"].defines, "dDOUBLE")
     table.insert(package.config["ReleaseDoubleLib"].defines, "dDOUBLE")
    end

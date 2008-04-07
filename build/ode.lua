@@ -59,6 +59,8 @@ package.objdir = "obj/ode"
     package.config["ReleaseSingleLib"].kind = "lib"
     table.insert(package.config["DebugSingleLib"].defines, "ODE_LIB")
     table.insert(package.config["ReleaseSingleLib"].defines, "ODE_LIB")
+    table.insert(package.config["DebugSingleLib"].defines, "dSINGLE")
+    table.insert(package.config["ReleaseSingleLib"].defines, "dSINGLE")
 
     package.config["DebugDoubleLib"].kind = "lib"
     package.config["ReleaseDoubleLib"].kind = "lib"
@@ -75,6 +77,8 @@ package.objdir = "obj/ode"
     package.config["ReleaseSingleDLL"].kind = "dll"
     table.insert(package.config["DebugSingleDLL"].defines, "ODE_DLL")
     table.insert(package.config["ReleaseSingleDLL"].defines, "ODE_DLL")
+    table.insert(package.config["DebugSingleDLL"].defines, "dSINGLE")
+    table.insert(package.config["ReleaseSingleDLL"].defines, "dSINGLE")
 
     package.config["DebugDoubleDLL"].kind = "dll"
     package.config["ReleaseDoubleDLL"].kind = "dll"
