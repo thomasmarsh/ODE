@@ -244,16 +244,29 @@ inline dContactGeom* SAFECONTACT(int Flags, dContactGeom* Contacts, int Index, i
 }
 #endif
 
+inline bool IsValidTriangle(const dVector3 Points[3]) {
+	int j = 2;
+	do {
+		int k = j - 1;
+		do {
+			if (Points[j][0] == Points[k][0] && Points[j][1] == Points[k][1] && Points[j][2] == Points[k][2]) {
+				break;
+			}
+			--k;
+		} while (k >= 0);
+		if (k >= 0) {
+			break;
+		}
+		--j;
+	} while (j > 0);
+	return j <= 0;
+}
+
 #if dTRIMESH_OPCODE
-inline void FetchTriangle(dxTriMesh* TriMesh, int Index, dVector3 Out[3]){
-	VertexPointers VP;
-	TriMesh->Data->Mesh.GetTriangle(VP, Index);
-	for (int i = 0; i < 3; i++){
-		Out[i][0] = VP.Vertex[i]->x;
-		Out[i][1] = VP.Vertex[i]->y;
-		Out[i][2] = VP.Vertex[i]->z;
-		Out[i][3] = 0;
-	}
+
+inline unsigned FetchTriangleCount(dxTriMesh* TriMesh)
+{
+	return TriMesh->Data->Mesh.GetNbTriangles();
 }
 
 inline void FetchTriangle(dxTriMesh* TriMesh, int Index, const dVector3 Position, const dMatrix3 Rotation, dVector3 Out[3]){
@@ -272,6 +285,21 @@ inline void FetchTriangle(dxTriMesh* TriMesh, int Index, const dVector3 Position
 		Out[i][2] += Position[2];
 		Out[i][3] = 0;
 	}
+}
+
+inline bool FetchTriangleEx(dxTriMesh* TriMesh, int Index, const dVector3 Position, const dMatrix3 Rotation, dVector3 Out[3]){
+	FetchTriangle(TriMesh, Index, Position, Rotation, Out);
+	// Even though all triangles might be initially valid, 
+	// a triangle may degenerate into a segment after applying 
+	// space transformation.
+	bool bResult = IsValidTriangle(Out);
+	return bResult;
+}
+
+inline bool FetchTransformedTriangleEx(dxTriMesh* TriMesh, int Index, dVector3 Out[3]){
+	const dVector3& Position = *(const dVector3*)dGeomGetPosition(TriMesh);
+	const dMatrix3& Rotation = *(const dMatrix3*)dGeomGetRotation(TriMesh);
+	return FetchTriangleEx(TriMesh, Index, Position, Rotation, Out);
 }
 
 inline Matrix4x4& MakeMatrix(const dVector3 Position, const dMatrix3 Rotation, Matrix4x4& Out){
@@ -322,13 +350,12 @@ inline Matrix4x4& MakeMatrix(dxGeom* g, Matrix4x4& Out){
 		}
 
 		inline void gim_trimesh_get_triangle_verticesODE(GIM_TRIMESH * trimesh, GUINT triangle_index, dVector3 v1, dVector3 v2, dVector3 v3) {   
-			vec3f * transformed_vertices = GIM_BUFFER_ARRAY_POINTER(vec3f,trimesh->m_transformed_vertex_buffer,0);
-    
-			GUINT * triangle_indices = GIM_BUFFER_ARRAY_POINTER(GUINT,trimesh->m_tri_index_buffer,triangle_index*3);
-    
-			dVECTOR3_VEC3F_COPY(v1, transformed_vertices[triangle_indices[0]]);
-			dVECTOR3_VEC3F_COPY(v2, transformed_vertices[triangle_indices[1]]);
-			dVECTOR3_VEC3F_COPY(v3, transformed_vertices[triangle_indices[2]]);
+			vec3f src1, src2, src3;
+			gim_trimesh_get_triangle_vertices(trimesh, triangle_index, src1, src2, src3);
+
+			dVECTOR3_VEC3F_COPY(v1, src1);
+			dVECTOR3_VEC3F_COPY(v2, src2);
+			dVECTOR3_VEC3F_COPY(v3, src3);
 		}
 
 		// Anything calling gim_trimesh_get_triangle_vertices from within ODE 
@@ -381,9 +408,33 @@ inline Matrix4x4& MakeMatrix(dxGeom* g, Matrix4x4& Out){
 
 	#endif // dDouble
 
-inline void FetchTriangle(dxTriMesh* TriMesh, int Index, const dVector3 Position, const dMatrix3 Rotation, dVector3 Out[3]){
-	// why is this not implemented?
-	dAASSERT(false);
+inline bool gim_trimesh_get_triangle_vertices_ex(GIM_TRIMESH * trimesh, GUINT triangle_index, dVector3 v[3]) {
+	gim_trimesh_get_triangle_vertices(trimesh, triangle_index, v[0], v[1], v[2]);
+	// Even though all triangles might be initially valid, 
+	// a triangle may degenerate into a segment after applying 
+	// space transformation.
+	bool bResult = IsValidTriangle(v);
+	return bResult;
+}
+
+inline unsigned FetchTriangleCount(dxTriMesh* TriMesh)
+{
+	return gim_trimesh_get_triangle_count(&TriMesh->m_collision_trimesh);
+}
+
+inline void FetchTransformedTriangle(dxTriMesh* TriMesh, int Index, dVector3 Out[3]){
+	gim_trimesh_locks_work_data(&TriMesh->m_collision_trimesh);	
+	gim_trimesh_get_triangle_vertices(&TriMesh->m_collision_trimesh, (GUINT)Index, Out[0], Out[1], Out[2]);
+	gim_trimesh_unlocks_work_data(&TriMesh->m_collision_trimesh);
+}
+
+inline bool FetchTransformedTriangleEx(dxTriMesh* TriMesh, int Index, dVector3 Out[3]){
+	FetchTransformedTriangle(TriMesh, Index, Out);
+	// Even though all triangles might be initially valid, 
+	// a triangle may degenerate into a segment after applying 
+	// space transformation.
+	bool bResult = IsValidTriangle(Out);
+	return bResult;
 }
 
 inline void MakeMatrix(const dVector3 Position, const dMatrix3 Rotation, mat4f m)

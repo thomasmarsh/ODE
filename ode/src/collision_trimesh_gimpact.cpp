@@ -360,15 +360,28 @@ void dGeomTriMeshGetTriangle(dGeomID g, int Index, dVector3* v0, dVector3* v1, d
 
 	// Redirect null vectors to dummy storage
 	dVector3 v[3];
-	if (!v0) { v0 = v + 0; }
-	if (!v1) { v1 = v + 1; }
-	if (!v2) { v2 = v + 2; }
 
-    dxTriMesh* Geom = (dxTriMesh*)g;
-	gim_trimesh_locks_work_data(&Geom->m_collision_trimesh);	
-	gim_trimesh_get_triangle_vertices(&Geom->m_collision_trimesh, Index, (*v0),(*v1),(*v2));	
-	gim_trimesh_unlocks_work_data(&Geom->m_collision_trimesh);
- 
+	dxTriMesh* Geom = (dxTriMesh*)g;
+	FetchTransformedTriangle(Geom, Index, v);
+
+	if (v0){
+		(*v0)[0] = v[0][0];
+		(*v0)[1] = v[0][1];
+		(*v0)[2] = v[0][2];
+		(*v0)[3] = v[0][3];
+	}
+	if (v1){
+		(*v1)[0] = v[1][0];
+		(*v1)[1] = v[1][1];
+		(*v1)[2] = v[1][2];
+		(*v1)[3] = v[1][3];
+	}
+	if (v2){
+		(*v2)[0] = v[2][0];
+		(*v2)[1] = v[2][1];
+		(*v2)[2] = v[2][2];
+		(*v2)[3] = v[2][3];
+	}
 }
 
 void dGeomTriMeshGetPoint(dGeomID g, int Index, dReal u, dReal v, dVector3 Out){
@@ -385,7 +398,7 @@ void dGeomTriMeshGetPoint(dGeomID g, int Index, dReal u, dReal v, dVector3 Out){
 int dGeomTriMeshGetTriangleCount (dGeomID g)
 {
     dxTriMesh* Geom = (dxTriMesh*)g;	
-	return gim_trimesh_get_triangle_count(&Geom->m_collision_trimesh);
+	return FetchTriangleCount(Geom);
 }
 
 void dGeomTriMeshDataUpdate(dTriMeshDataID g) {

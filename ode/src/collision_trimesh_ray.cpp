@@ -98,43 +98,44 @@ int dCollideRTL(dxGeom* g1, dxGeom* RayGeom, int Flags, dContactGeom* Contacts, 
 			dContactGeom* Contact = SAFECONTACT(Flags, Contacts, OutTriCount, Stride);
 
 			dVector3 dv[3];
-			FetchTriangle(TriMesh, TriIndex, TLPosition, TLRotation, dv);
+			if (FetchTriangleEx(TriMesh, TriIndex, TLPosition, TLRotation, dv))
+			{
+				// No sense to save on single type conversion in algorithm of this size.
+				// If there would be a custom typedef for distance type it could be used 
+				// instead of dReal. However using float directly is the loss of abstraction 
+				// and possible loss of precision in future.
+				/*float*/ dReal T = Faces[i].mDistance;
+				Contact->pos[0] = Origin[0] + (Direction[0] * T);
+				Contact->pos[1] = Origin[1] + (Direction[1] * T);
+				Contact->pos[2] = Origin[2] + (Direction[2] * T);
+				Contact->pos[3] = REAL(0.0);
+					
+				dVector3 vu;
+				vu[0] = dv[1][0] - dv[0][0];
+				vu[1] = dv[1][1] - dv[0][1];
+				vu[2] = dv[1][2] - dv[0][2];
+				vu[3] = REAL(0.0);
+					
+				dVector3 vv;
+				vv[0] = dv[2][0] - dv[0][0];
+				vv[1] = dv[2][1] - dv[0][1];
+				vv[2] = dv[2][2] - dv[0][2];
+				vv[3] = REAL(0.0);
 
-			// No sense to save on single type conversion in algorithm of this size.
-			// If there would be a custom typedef for distance type it could be used 
-			// instead of dReal. However using float directly is the loss of abstraction 
-			// and possible loss of precision in future.
-			/*float*/ dReal T = Faces[i].mDistance;
-			Contact->pos[0] = Origin[0] + (Direction[0] * T);
-			Contact->pos[1] = Origin[1] + (Direction[1] * T);
-			Contact->pos[2] = Origin[2] + (Direction[2] * T);
-			Contact->pos[3] = REAL(0.0);
-				
-			dVector3 vu;
-			vu[0] = dv[1][0] - dv[0][0];
-			vu[1] = dv[1][1] - dv[0][1];
-			vu[2] = dv[1][2] - dv[0][2];
-			vu[3] = REAL(0.0);
-				
-			dVector3 vv;
-			vv[0] = dv[2][0] - dv[0][0];
-			vv[1] = dv[2][1] - dv[0][1];
-			vv[2] = dv[2][2] - dv[0][2];
-			vv[3] = REAL(0.0);
+				dCROSS(Contact->normal, =, vv, vu);	// Reversed
 
-			dCROSS(Contact->normal, =, vv, vu);	// Reversed
+				dNormalize3(Contact->normal);
 
-			dNormalize3(Contact->normal);
+				Contact->depth = T;
+				Contact->g1 = TriMesh;
+				Contact->g2 = RayGeom;
+					
+				OutTriCount++;
 
-			Contact->depth = T;
-			Contact->g1 = TriMesh;
-			Contact->g2 = RayGeom;
-				
-			OutTriCount++;
-
-			// Putting "break" at the end of loop prevents unnecessary checks on first pass and "continue"
-			if (OutTriCount >= (Flags & NUMC_MASK)) {
-				break;
+				// Putting "break" at the end of loop prevents unnecessary checks on first pass and "continue"
+				if (OutTriCount >= (Flags & NUMC_MASK)) {
+					break;
+				}
 			}
 		}
 	}
