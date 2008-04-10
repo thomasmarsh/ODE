@@ -358,6 +358,12 @@ void dGeomTriMeshGetTriangle(dGeomID g, int Index, dVector3* v0, dVector3* v1, d
 {
     dUASSERT(g && g->type == dTriMeshClass, "argument not a trimesh");
 
+	// Redirect null vectors to dummy storage
+	dVector3 v[3];
+	if (!v0) { v0 = v + 0; }
+	if (!v1) { v1 = v + 1; }
+	if (!v2) { v2 = v + 2; }
+
     dxTriMesh* Geom = (dxTriMesh*)g;
 	gim_trimesh_locks_work_data(&Geom->m_collision_trimesh);	
 	gim_trimesh_get_triangle_vertices(&Geom->m_collision_trimesh, Index, (*v0),(*v1),(*v2));	
