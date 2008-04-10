@@ -1037,19 +1037,20 @@ int dCollideCylinderTrimesh(dxGeom *o1, dxGeom *o2, int flags, dContactGeom *con
 
 
 			dVector3 dv[3];
-			FetchTriangle(cData.gTrimesh, Triint, cData.vTrimeshPos, cData.mTrimeshRot, dv);
-			
-			// test this triangle
-			TestOneTriangleVsCylinder(cData , dv[0],dv[1],dv[2], false);
-
-			// fill-in tri index for generated contacts
-			for (; ctContacts0<cData.nContacts; ctContacts0++)
-				cData.gLocalContacts[ctContacts0].triIndex = Triint;
-
-			// Putting "break" at the end of loop prevents unnecessary checks on first pass and "continue"
-			if(cData.nContacts	>= (cData.iFlags & NUMC_MASK))
+			if (FetchTriangleEx(cData.gTrimesh, Triint, cData.vTrimeshPos, cData.mTrimeshRot, dv))
 			{
-				break;
+				// test this triangle
+				TestOneTriangleVsCylinder(cData , dv[0],dv[1],dv[2], false);
+
+				// fill-in tri index for generated contacts
+				for (; ctContacts0<cData.nContacts; ctContacts0++)
+					cData.gLocalContacts[ctContacts0].triIndex = Triint;
+
+				// Putting "break" at the end of loop prevents unnecessary checks on first pass and "continue"
+				if(cData.nContacts	>= (cData.iFlags & NUMC_MASK))
+				{
+					break;
+				}
 			}
 		}
 	}
@@ -1118,19 +1119,21 @@ int dCollideCylinderTrimesh(dxGeom *o1, dxGeom *o2, int flags, dContactGeom *con
 		const int Triint = boxesresult[i];
 		
 		dVector3 dv[3];
-		gim_trimesh_get_triangle_vertices(ptrimesh, Triint,dv[0],dv[1],dv[2]);
-        // test this triangle
-        TestOneTriangleVsCylinder(cData , dv[0],dv[1],dv[2], false);
+		if (gim_trimesh_get_triangle_vertices_ex(ptrimesh, Triint,dv))
+		{
+			// test this triangle
+			TestOneTriangleVsCylinder(cData , dv[0],dv[1],dv[2], false);
 
-        // fill-in triangle index for generated contacts
-        for (; ctContacts0<cData.nContacts; ctContacts0++)
-            cData.gLocalContacts[ctContacts0].triIndex =  Triint;
+			// fill-in triangle index for generated contacts
+			for (; ctContacts0<cData.nContacts; ctContacts0++)
+				cData.gLocalContacts[ctContacts0].triIndex =  Triint;
 
-		// Putting "break" at the end of loop prevents unnecessary checks on first pass and "continue"
-		if(cData.nContacts	>= (cData.iFlags & NUMC_MASK))
-        {
-            break;
-        }
+			// Putting "break" at the end of loop prevents unnecessary checks on first pass and "continue"
+			if(cData.nContacts	>= (cData.iFlags & NUMC_MASK))
+			{
+				break;
+			}
+		}
 	}
 
 	gim_trimesh_unlocks_work_data(ptrimesh);

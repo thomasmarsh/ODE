@@ -62,7 +62,7 @@ struct LineContactSet
 };
 
 
-static void GetTriangleGeometryCallback(udword, VertexPointers&, udword);
+// static void GetTriangleGeometryCallback(udword, VertexPointers&, udword); -- not used
 inline void dMakeMatrix4(const dVector3 Position, const dMatrix3 Rotation, dMatrix4 &B);
 static void dInvertMatrix4( dMatrix4& B, dMatrix4& Binv );
 static int IntersectLineSegmentRay(dVector3, dVector3, dVector3, dVector3,  dVector3);
@@ -549,25 +549,27 @@ dCollideTTL(dxGeom* g1, dxGeom* g2, int Flags, dContactGeom* Contacts, int Strid
                     id2 = CollidingPairs[i].id1;
 
                     // grab the colliding triangles
-                    FetchTriangle((dxTriMesh*) g1, id1, TLPosition1, TLRotation1, v1);
-                    FetchTriangle((dxTriMesh*) g2, id2, TLPosition2, TLRotation2, v2);
-                    // Since we'll be doing matrix transformations, we need to
-                    //  make sure that all vertices have four elements
-                    for (int j=0; j<3; j++) {
-                        v1[j][3] = 1.0;
-                        v2[j][3] = 1.0;
-                    }
-
-					TriTriContacts(v1,v2,
-						  g1, g2, Flags,
-						 Contacts,Stride,OutTriCount);
-					
-					// Continue loop even after contacts are full 
-					// as existing contacts' normals/depths might be updated
-					// Break only if contacts are not important
-					if ((OutTriCount | CONTACTS_UNIMPORTANT) == (Flags & (NUMC_MASK | CONTACTS_UNIMPORTANT)))
+                    if (FetchTriangleEx((dxTriMesh*) g1, id1, TLPosition1, TLRotation1, v1)
+						&& FetchTriangleEx((dxTriMesh*) g2, id2, TLPosition2, TLRotation2, v2))
 					{
-						break;
+						// Since we'll be doing matrix transformations, we need to
+						//  make sure that all vertices have four elements
+						for (int j=0; j<3; j++) {
+							v1[j][3] = 1.0;
+							v2[j][3] = 1.0;
+						}
+
+						TriTriContacts(v1,v2,
+							  g1, g2, Flags,
+							 Contacts,Stride,OutTriCount);
+						
+						// Continue loop even after contacts are full 
+						// as existing contacts' normals/depths might be updated
+						// Break only if contacts are not important
+						if ((OutTriCount | CONTACTS_UNIMPORTANT) == (Flags & (NUMC_MASK | CONTACTS_UNIMPORTANT)))
+						{
+							break;
+						}
 					}
 				}
 
@@ -585,7 +587,7 @@ dCollideTTL(dxGeom* g1, dxGeom* g2, int Flags, dContactGeom* Contacts, int Strid
 }
 
 
-
+/* -- not used
 static void
 GetTriangleGeometryCallback(udword triangleindex, VertexPointers& triangle, udword user_data)
 {
@@ -596,7 +598,7 @@ GetTriangleGeometryCallback(udword triangleindex, VertexPointers& triangle, udwo
     for (int i = 0; i < 3; i++)
         triangle.Vertex[i] =  (const Point*) ((dReal*) Out[i]);
 }
-
+*/
 
 //
 //

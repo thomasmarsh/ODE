@@ -1261,26 +1261,26 @@ int dCollideBTL(dxGeom* g1, dxGeom* BoxGeom, int Flags, dContactGeom* Contacts, 
 
 
         dVector3 dv[3];
-        FetchTriangle(TriMesh, Triint, vPosMesh, mRotMesh, dv);
+        if (FetchTriangleEx(TriMesh, Triint, vPosMesh, mRotMesh, dv))
+		{
+			// test this triangle
+			_cldTestOneTriangle(dv[0],dv[1],dv[2]);
 
+			// fill-in tri index for generated contacts
+			for (; ctContacts0<ctContacts; ctContacts0++)
+				SAFECONTACT(iFlags, ContactGeoms, ctContacts0, iStride)->side1 = Triint;
 
-        // test this triangle
-        _cldTestOneTriangle(dv[0],dv[1],dv[2]);
-
-		// fill-in tri index for generated contacts
-		for (; ctContacts0<ctContacts; ctContacts0++)
-			SAFECONTACT(iFlags, ContactGeoms, ctContacts0, iStride)->side1 = Triint;
-
-		/*
-			NOTE by Oleh_Derevenko:
-			The function continues checking triangles after maximal number 
-			of contacts is reached because it selects maximal penetration depths.
-			See also comments in GenerateContact()
-		*/
-		// Putting "break" at the end of loop prevents unnecessary checks on first pass and "continue"
-		if ((ctContacts | CONTACTS_UNIMPORTANT) == (iFlags & (NUMC_MASK | CONTACTS_UNIMPORTANT)))
-			break;
-    }
+			/*
+				NOTE by Oleh_Derevenko:
+				The function continues checking triangles after maximal number 
+				of contacts is reached because it selects maximal penetration depths.
+				See also comments in GenerateContact()
+			*/
+			// Putting "break" at the end of loop prevents unnecessary checks on first pass and "continue"
+			if ((ctContacts | CONTACTS_UNIMPORTANT) == (iFlags & (NUMC_MASK | CONTACTS_UNIMPORTANT)))
+				break;
+		}
+	}
   }
 
 
@@ -1376,23 +1376,25 @@ int dCollideBTL(dxGeom* g1, dxGeom* BoxGeom, int Flags, dContactGeom* Contacts, 
 		dVector3 dv[3];
 
 		int Triint = boxesresult[i];
-		gim_trimesh_get_triangle_vertices(ptrimesh, Triint,dv[0],dv[1],dv[2]);
-        // test this triangle
-        _cldTestOneTriangle(dv[0],dv[1],dv[2]);
-		
-		// fill-in tri index for generated contacts
-		for (; ctContacts0<ctContacts; ctContacts0++)
-			SAFECONTACT(iFlags, ContactGeoms, ctContacts0, iStride)->side1 = Triint;
-		
-		/*
-			NOTE by Oleh_Derevenko:
-			The function continues checking triangles after maximal number 
-			of contacts is reached because it selects maximal penetration depths.
-			See also comments in GenerateContact()
-		*/
-		// Putting "break" at the end of loop prevents unnecessary checks on first pass and "continue"
-		if ((ctContacts | CONTACTS_UNIMPORTANT) == (iFlags & (NUMC_MASK | CONTACTS_UNIMPORTANT)))
-			break;
+		if (gim_trimesh_get_triangle_vertices_ex(ptrimesh, Triint, dv))
+		{
+			// test this triangle
+			_cldTestOneTriangle(dv[0],dv[1],dv[2]);
+			
+			// fill-in tri index for generated contacts
+			for (; ctContacts0<ctContacts; ctContacts0++)
+				SAFECONTACT(iFlags, ContactGeoms, ctContacts0, iStride)->side1 = Triint;
+			
+			/*
+				NOTE by Oleh_Derevenko:
+				The function continues checking triangles after maximal number 
+				of contacts is reached because it selects maximal penetration depths.
+				See also comments in GenerateContact()
+			*/
+			// Putting "break" at the end of loop prevents unnecessary checks on first pass and "continue"
+			if ((ctContacts | CONTACTS_UNIMPORTANT) == (iFlags & (NUMC_MASK | CONTACTS_UNIMPORTANT)))
+				break;
+		}
 	}
 
 	gim_trimesh_unlocks_work_data(ptrimesh);

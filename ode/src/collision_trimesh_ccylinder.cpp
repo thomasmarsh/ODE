@@ -1060,23 +1060,23 @@ int dCollideCCTL(dxGeom *o1, dxGeom *o2, int flags, dContactGeom *contact, int s
 
 
 			dVector3 dv[3];
-			FetchTriangle(TriMesh, Triint, mTriMeshPos, mTriMeshRot, dv);
-
-			uint8 flags = UseFlags ? UseFlags[Triint] : dxTriMeshData::kUseAll;
-
-			// test this triangle
-			_cldTestOneTriangleVSCapsule(dv[0],dv[1],dv[2], flags);
-			
-			// fill-in tri index for generated contacts
-			for (; ctContacts0<ctContacts; ctContacts0++)
-				gLocalContacts[ctContacts0].triIndex = Triint;
-
-			// Putting "break" at the end of loop prevents unnecessary checks on first pass and "continue"
-			if(ctContacts>=(iFlags & NUMC_MASK)) 
+			if (FetchTriangleEx(TriMesh, Triint, mTriMeshPos, mTriMeshRot, dv))
 			{
-				break;
-			}
-			
+				uint8 flags = UseFlags ? UseFlags[Triint] : dxTriMeshData::kUseAll;
+
+				// test this triangle
+				_cldTestOneTriangleVSCapsule(dv[0],dv[1],dv[2], flags);
+				
+				// fill-in tri index for generated contacts
+				for (; ctContacts0<ctContacts; ctContacts0++)
+					gLocalContacts[ctContacts0].triIndex = Triint;
+
+				// Putting "break" at the end of loop prevents unnecessary checks on first pass and "continue"
+				if(ctContacts>=(iFlags & NUMC_MASK)) 
+				{
+					break;
+				}
+			}			
 		}
 	 }
 
