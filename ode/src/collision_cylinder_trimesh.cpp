@@ -797,14 +797,19 @@ void TestOneTriangleVsCylinder(   sData& cData,
                                   const dVector3 &v2, 
                                   const bool bDoubleSided)
 {
-
 	// calculate triangle normal
 	dVector3Subtract( v2 , v1 ,cData.vE1);
 	dVector3 vTemp;
 	dVector3Subtract( v0 , v1 ,vTemp);
 	dVector3Cross(cData.vE1 , vTemp , cData.vNormal );
 
-	dNormalize3( cData.vNormal);
+	// Even though all triangles might be initially valid, 
+	// a triangle may degenerate into a segment after applying 
+	// space transformation.
+	if (!dSafeNormalize3( cData.vNormal))
+	{
+		return;
+	}
 
 	// create plane from triangle
 	//Plane4f plTrianglePlane = Plane4f( vPolyNormal, v0 ); 
@@ -872,7 +877,6 @@ void TestOneTriangleVsCylinder(   sData& cData,
 	{
 		_cldClipCylinderToTriangle(cData ,vPnt0, vPnt1, vPnt2);
 	}
-
 }
 
 void _InitCylinderTrimeshData(sData& cData)
@@ -1037,20 +1041,19 @@ int dCollideCylinderTrimesh(dxGeom *o1, dxGeom *o2, int flags, dContactGeom *con
 
 
 			dVector3 dv[3];
-			if (FetchTriangleEx(cData.gTrimesh, Triint, cData.vTrimeshPos, cData.mTrimeshRot, dv))
+			FetchTriangle(cData.gTrimesh, Triint, cData.vTrimeshPos, cData.mTrimeshRot, dv);
+
+			// test this triangle
+			TestOneTriangleVsCylinder(cData , dv[0],dv[1],dv[2], false);
+
+			// fill-in tri index for generated contacts
+			for (; ctContacts0<cData.nContacts; ctContacts0++)
+				cData.gLocalContacts[ctContacts0].triIndex = Triint;
+
+			// Putting "break" at the end of loop prevents unnecessary checks on first pass and "continue"
+			if(cData.nContacts	>= (cData.iFlags & NUMC_MASK))
 			{
-				// test this triangle
-				TestOneTriangleVsCylinder(cData , dv[0],dv[1],dv[2], false);
-
-				// fill-in tri index for generated contacts
-				for (; ctContacts0<cData.nContacts; ctContacts0++)
-					cData.gLocalContacts[ctContacts0].triIndex = Triint;
-
-				// Putting "break" at the end of loop prevents unnecessary checks on first pass and "continue"
-				if(cData.nContacts	>= (cData.iFlags & NUMC_MASK))
-				{
-					break;
-				}
+				break;
 			}
 		}
 	}
@@ -1119,20 +1122,19 @@ int dCollideCylinderTrimesh(dxGeom *o1, dxGeom *o2, int flags, dContactGeom *con
 		const int Triint = boxesresult[i];
 		
 		dVector3 dv[3];
-		if (gim_trimesh_get_triangle_vertices_ex(ptrimesh, Triint,dv))
+		gim_trimesh_get_triangle_vertices(ptrimesh, Triint, dv[0], dv[1], dv[2]);
+		
+		// test this triangle
+		TestOneTriangleVsCylinder(cData , dv[0],dv[1],dv[2], false);
+
+		// fill-in triangle index for generated contacts
+		for (; ctContacts0<cData.nContacts; ctContacts0++)
+			cData.gLocalContacts[ctContacts0].triIndex =  Triint;
+
+		// Putting "break" at the end of loop prevents unnecessary checks on first pass and "continue"
+		if(cData.nContacts	>= (cData.iFlags & NUMC_MASK))
 		{
-			// test this triangle
-			TestOneTriangleVsCylinder(cData , dv[0],dv[1],dv[2], false);
-
-			// fill-in triangle index for generated contacts
-			for (; ctContacts0<cData.nContacts; ctContacts0++)
-				cData.gLocalContacts[ctContacts0].triIndex =  Triint;
-
-			// Putting "break" at the end of loop prevents unnecessary checks on first pass and "continue"
-			if(cData.nContacts	>= (cData.iFlags & NUMC_MASK))
-			{
-				break;
-			}
+			break;
 		}
 	}
 

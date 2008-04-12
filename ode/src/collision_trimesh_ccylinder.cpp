@@ -750,7 +750,6 @@ static void _cldTestOneTriangleVSCapsule( const dVector3 &v0,
 											const dVector3 &v2,
 											uint8 flags)
 {
-
 	// calculate edges
 	SUBTRACT(v1,v0,vE0);
 	SUBTRACT(v2,v1,vE1);
@@ -761,7 +760,14 @@ static void _cldTestOneTriangleVSCapsule( const dVector3 &v0,
 
 	// calculate poly normal
 	dCROSS(vN,=,vE1,_minus_vE0);
-	dNormalize3(vN);
+	
+	// Even though all triangles might be initially valid, 
+	// a triangle may degenerate into a segment after applying 
+	// space transformation.
+	if (!dSafeNormalize3(vN))
+	{
+		return;
+	}
 	
 	// create plane from triangle
 	dReal plDistance = -dDOT(v0,vN);
@@ -1060,23 +1066,22 @@ int dCollideCCTL(dxGeom *o1, dxGeom *o2, int flags, dContactGeom *contact, int s
 
 
 			dVector3 dv[3];
-			if (FetchTriangleEx(TriMesh, Triint, mTriMeshPos, mTriMeshRot, dv))
+			FetchTriangle(TriMesh, Triint, mTriMeshPos, mTriMeshRot, dv);
+
+			uint8 flags = UseFlags ? UseFlags[Triint] : dxTriMeshData::kUseAll;
+
+			// test this triangle
+			_cldTestOneTriangleVSCapsule(dv[0],dv[1],dv[2], flags);
+
+			// fill-in tri index for generated contacts
+			for (; ctContacts0<ctContacts; ctContacts0++)
+				gLocalContacts[ctContacts0].triIndex = Triint;
+
+			// Putting "break" at the end of loop prevents unnecessary checks on first pass and "continue"
+			if(ctContacts>=(iFlags & NUMC_MASK)) 
 			{
-				uint8 flags = UseFlags ? UseFlags[Triint] : dxTriMeshData::kUseAll;
-
-				// test this triangle
-				_cldTestOneTriangleVSCapsule(dv[0],dv[1],dv[2], flags);
-				
-				// fill-in tri index for generated contacts
-				for (; ctContacts0<ctContacts; ctContacts0++)
-					gLocalContacts[ctContacts0].triIndex = Triint;
-
-				// Putting "break" at the end of loop prevents unnecessary checks on first pass and "continue"
-				if(ctContacts>=(iFlags & NUMC_MASK)) 
-				{
-					break;
-				}
-			}			
+				break;
+			}
 		}
 	 }
 

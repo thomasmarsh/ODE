@@ -98,7 +98,26 @@ int dCollideRTL(dxGeom* g1, dxGeom* RayGeom, int Flags, dContactGeom* Contacts, 
 			dContactGeom* Contact = SAFECONTACT(Flags, Contacts, OutTriCount, Stride);
 
 			dVector3 dv[3];
-			if (FetchTriangleEx(TriMesh, TriIndex, TLPosition, TLRotation, dv))
+			FetchTriangle(TriMesh, TriIndex, TLPosition, TLRotation, dv);
+
+			dVector3 vu;
+			vu[0] = dv[1][0] - dv[0][0];
+			vu[1] = dv[1][1] - dv[0][1];
+			vu[2] = dv[1][2] - dv[0][2];
+			vu[3] = REAL(0.0);
+				
+			dVector3 vv;
+			vv[0] = dv[2][0] - dv[0][0];
+			vv[1] = dv[2][1] - dv[0][1];
+			vv[2] = dv[2][2] - dv[0][2];
+			vv[3] = REAL(0.0);
+
+			dCROSS(Contact->normal, =, vv, vu);	// Reversed
+
+			// Even though all triangles might be initially valid, 
+			// a triangle may degenerate into a segment after applying 
+			// space transformation.
+			if (dSafeNormalize3(Contact->normal))
 			{
 				// No sense to save on single type conversion in algorithm of this size.
 				// If there would be a custom typedef for distance type it could be used 
@@ -109,22 +128,6 @@ int dCollideRTL(dxGeom* g1, dxGeom* RayGeom, int Flags, dContactGeom* Contacts, 
 				Contact->pos[1] = Origin[1] + (Direction[1] * T);
 				Contact->pos[2] = Origin[2] + (Direction[2] * T);
 				Contact->pos[3] = REAL(0.0);
-					
-				dVector3 vu;
-				vu[0] = dv[1][0] - dv[0][0];
-				vu[1] = dv[1][1] - dv[0][1];
-				vu[2] = dv[1][2] - dv[0][2];
-				vu[3] = REAL(0.0);
-					
-				dVector3 vv;
-				vv[0] = dv[2][0] - dv[0][0];
-				vv[1] = dv[2][1] - dv[0][1];
-				vv[2] = dv[2][2] - dv[0][2];
-				vv[3] = REAL(0.0);
-
-				dCROSS(Contact->normal, =, vv, vu);	// Reversed
-
-				dNormalize3(Contact->normal);
 
 				Contact->depth = T;
 				Contact->g1 = TriMesh;

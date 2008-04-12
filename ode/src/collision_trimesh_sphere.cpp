@@ -318,89 +318,89 @@ int dCollideSTL(dxGeom* g1, dxGeom* SphereGeom, int Flags, dContactGeom* Contact
 			dVector3 dv[3];
 			if (!Callback(TriMesh, SphereGeom, TriIndex))
 				continue;
-			if (FetchTriangleEx(TriMesh, TriIndex, TLPosition, TLRotation, dv))
-			{
-				dVector3& v0 = dv[0];
-				dVector3& v1 = dv[1];
-				dVector3& v2 = dv[2];
+			
+			FetchTriangle(TriMesh, TriIndex, TLPosition, TLRotation, dv);
 
-				dVector3 vu;
-				vu[0] = v1[0] - v0[0];
-				vu[1] = v1[1] - v0[1];
-				vu[2] = v1[2] - v0[2];
-				vu[3] = REAL(0.0);
+			dVector3& v0 = dv[0];
+			dVector3& v1 = dv[1];
+			dVector3& v2 = dv[2];
 
-				dVector3 vv;
-				vv[0] = v2[0] - v0[0];
-				vv[1] = v2[1] - v0[1];
-				vv[2] = v2[2] - v0[2];
-				vv[3] = REAL(0.0);
+			dVector3 vu;
+			vu[0] = v1[0] - v0[0];
+			vu[1] = v1[1] - v0[1];
+			vu[2] = v1[2] - v0[2];
+			vu[3] = REAL(0.0);
 
-				// Get plane coefficients
-				dVector4 Plane;
-				dCROSS(Plane, =, vu, vv);
+			dVector3 vv;
+			vv[0] = v2[0] - v0[0];
+			vv[1] = v2[1] - v0[1];
+			vv[2] = v2[2] - v0[2];
+			vv[3] = REAL(0.0);
 
-				dReal Area = dSqrt(dDOT(Plane, Plane));	// We can use this later
-				Plane[0] /= Area;
-				Plane[1] /= Area;
-				Plane[2] /= Area;
+			// Get plane coefficients
+			dVector4 Plane;
+			dCROSS(Plane, =, vu, vv);
 
-				Plane[3] = dDOT(Plane, v0);	
-
-				/* If the center of the sphere is within the positive halfspace of the
-					* triangle's plane, allow a contact to be generated.
-					* If the center of the sphere made it into the positive halfspace of a
-					* back-facing triangle, then the physics update and/or velocity needs
-					* to be adjusted (penetration has occured anyway).
-					*/
-			  
-				dReal side = dDOT(Plane,Position) - Plane[3];
-
-				if(side < REAL(0.0)) {
-					continue;
-				}
-
-				dReal Depth;
-				dReal u, v;
-				if (!GetContactData(Position, Radius, v0, vu, vv, Depth, u, v)){
-					continue;	// Sphere doesn't hit triangle
-				}
-
-				if (Depth < REAL(0.0)){
-					Depth = REAL(0.0);
-				}
-
-				dContactGeom* Contact = SAFECONTACT(Flags, Contacts, OutTriCount, Stride);
-
-				dReal w = REAL(1.0) - u - v;
-				Contact->pos[0] = (v0[0] * w) + (v1[0] * u) + (v2[0] * v);
-				Contact->pos[1] = (v0[1] * w) + (v1[1] * u) + (v2[1] * v);
-				Contact->pos[2] = (v0[2] * w) + (v1[2] * u) + (v2[2] * v);
-				Contact->pos[3] = REAL(0.0);
-
-				// Using normal as plane (reversed)
-				Contact->normal[0] = -Plane[0];
-				Contact->normal[1] = -Plane[1];
-				Contact->normal[2] = -Plane[2];
-				Contact->normal[3] = REAL(0.0);
-
-				// Depth returned from GetContactData is depth along 
-				// contact point - sphere center direction
-				// we'll project it to contact normal
-				dVector3 dir;
-				dir[0] = Position[0]-Contact->pos[0];
-				dir[1] = Position[1]-Contact->pos[1];
-				dir[2] = Position[2]-Contact->pos[2];
-				dReal dirProj = dDOT(dir, Plane) / dSqrt(dDOT(dir, dir));
-				Contact->depth = Depth * dirProj;
-				//Contact->depth = Radius - side; // (mg) penetration depth is distance along normal not shortest distance
-				Contact->side1 = TriIndex;
-
-				//Contact->g1 = TriMesh;
-				//Contact->g2 = SphereGeom;
-				
-				OutTriCount++;
+			// Even though all triangles might be initially valid, 
+			// a triangle may degenerate into a segment after applying 
+			// space transformation.
+			if (!dSafeNormalize3(Plane)) {
+				continue;
 			}
+
+			/* If the center of the sphere is within the positive halfspace of the
+				* triangle's plane, allow a contact to be generated.
+				* If the center of the sphere made it into the positive halfspace of a
+				* back-facing triangle, then the physics update and/or velocity needs
+				* to be adjusted (penetration has occured anyway).
+				*/
+		  
+			dReal side = dDOT(Plane,Position) - dDOT(Plane, v0);
+
+			if(side < REAL(0.0)) {
+				continue;
+			}
+
+			dReal Depth;
+			dReal u, v;
+			if (!GetContactData(Position, Radius, v0, vu, vv, Depth, u, v)){
+				continue;	// Sphere doesn't hit triangle
+			}
+
+			if (Depth < REAL(0.0)){
+				Depth = REAL(0.0);
+			}
+
+			dContactGeom* Contact = SAFECONTACT(Flags, Contacts, OutTriCount, Stride);
+
+			dReal w = REAL(1.0) - u - v;
+			Contact->pos[0] = (v0[0] * w) + (v1[0] * u) + (v2[0] * v);
+			Contact->pos[1] = (v0[1] * w) + (v1[1] * u) + (v2[1] * v);
+			Contact->pos[2] = (v0[2] * w) + (v1[2] * u) + (v2[2] * v);
+			Contact->pos[3] = REAL(0.0);
+
+			// Using normal as plane (reversed)
+			Contact->normal[0] = -Plane[0];
+			Contact->normal[1] = -Plane[1];
+			Contact->normal[2] = -Plane[2];
+			Contact->normal[3] = REAL(0.0);
+
+			// Depth returned from GetContactData is depth along 
+			// contact point - sphere center direction
+			// we'll project it to contact normal
+			dVector3 dir;
+			dir[0] = Position[0]-Contact->pos[0];
+			dir[1] = Position[1]-Contact->pos[1];
+			dir[2] = Position[2]-Contact->pos[2];
+			dReal dirProj = dDOT(dir, Plane) / dSqrt(dDOT(dir, dir));
+			Contact->depth = Depth * dirProj;
+			//Contact->depth = Radius - side; // (mg) penetration depth is distance along normal not shortest distance
+			Contact->side1 = TriIndex;
+
+			//Contact->g1 = TriMesh;
+			//Contact->g2 = SphereGeom;
+			
+			OutTriCount++;
 		}
 #ifdef MERGECONTACTS	// Merge all contacts into 1
 		if (OutTriCount != 0){
