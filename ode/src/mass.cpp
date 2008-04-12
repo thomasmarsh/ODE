@@ -260,21 +260,26 @@ void dMassSetTrimesh( dMass *m, dReal density, dGeomID g )
 	for( i = 0; i < triangles; i++ )	 	
 	{
 		dVector3 v[3];
-		if (FetchTransformedTriangleEx( TriMesh, i, v))
+		FetchTransformedTriangle( TriMesh, i, v);
+
+		dVector3 n, a, b;
+		dOP( a, -, v[1], v[0] ); 
+		dOP( b, -, v[2], v[0] ); 
+		dCROSS( n, =, b, a );
+		nx = fabs(n[0]);
+		ny = fabs(n[1]);
+		nz = fabs(n[2]);
+
+		if( nx > ny && nx > nz )
+			C = 0;
+		else
+			C = (ny > nz) ? 1 : 2;
+
+		// Even though all triangles might be initially valid, 
+		// a triangle may degenerate into a segment after applying 
+		// space transformation.
+		if (n[C] != REAL(0.0))
 		{
-			dVector3 n, a, b;
-			dOP( a, -, v[1], v[0] ); 
-			dOP( b, -, v[2], v[0] ); 
-			dCROSS( n, =, b, a );
-			nx = fabs(n[0]);
-			ny = fabs(n[1]);
-			nz = fabs(n[2]);
-
-			if( nx > ny && nx > nz )
-				C = 0;
-			else
-				C = (ny > nz) ? 1 : 2;
-
 			A = (C + 1) % 3;
 			B = (A + 1) % 3;
 
