@@ -1037,6 +1037,10 @@ dReal FindTriangleTriangleCollision(
 	bool bl;
 	LineContactSet clipped_points1,clipped_points2;
 	LineContactSet deep_points1,deep_points2;
+	// It is necessary to initialize the count because both conditional statements 
+	// might be skipped leading to uninitialized count being used for memcpy in if(mostdir==0)
+	deep_points1.Count = 0;
+
 	////find interval face1
 
 	bl = BuildPlane(tri1[0],tri1[1],tri1[2],
