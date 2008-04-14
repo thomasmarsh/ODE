@@ -8,8 +8,20 @@ the rules for this file:
   * keep the format consistent (79 char width, M/D/Y date format).
 
 ------------------------------------------------------------------------------
+14/04/08 Oleh_Derevenko
+
+        * Fixed possible memory corruption in new trimesh-trimesh collider
+          in case if two degenerated triangles are checked against each other.
+
+12/04/08 Oleh_Derevenko
+
+        * Fixed sporadic assertion failure on vector normalization caused
+          by small triangles degenerating into segments during space 
+          transformations.
+
 03/28/08 Remi
-	* Fix a bug in dJointXXXGetInfo. The value in limot.limit was not
+
+        * Fix a bug in dJointXXXGetInfo. The value in limot.limit was not
           always updated. (Ex: If hi and lo limit were changed). 
 
 03/27/08 Remi
