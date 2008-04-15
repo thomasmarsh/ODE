@@ -37,7 +37,7 @@ for geometry objects
 #include "collision_util.h"
 #include "collision_std.h"
 #include "collision_transform.h"
-#include "collision_trimesh_internal.h"
+#include "collision_trimesh_colliders.h"
 
 #if dTRIMESH_GIMPACT
 #include <GIMPACT/gimpact.h>

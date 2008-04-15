@@ -19,7 +19,7 @@
 
 
 #if dTRIMESH_ENABLED
-#include "collision_trimesh_internal.h"
+#include "collision_trimesh_colliders.h"
 #endif // dTRIMESH_ENABLED
 
 #define TERRAINTOL REAL(0.0)

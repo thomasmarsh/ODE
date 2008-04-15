@@ -32,8 +32,6 @@
 
 #include "collision_util.h"
 #include "collision_std.h"
-
-#define TRIMESH_INTERNAL
 #include "collision_trimesh_internal.h"
 
 #if dTRIMESH_OPCODE

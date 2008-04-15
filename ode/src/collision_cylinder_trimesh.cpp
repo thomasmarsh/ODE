@@ -31,8 +31,6 @@
 #include <ode/rotation.h>
 #include <ode/odemath.h>
 #include "collision_util.h"
-
-#define TRIMESH_INTERNAL
 #include "collision_trimesh_internal.h"
 
 #define MAX_REAL	dInfinity

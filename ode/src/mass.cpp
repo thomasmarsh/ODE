@@ -30,7 +30,6 @@
 #include "collision_kernel.h"
 
 #if dTRIMESH_ENABLED
-  #define TRIMESH_INTERNAL
   #include "collision_trimesh_internal.h"
 #endif // dTRIMESH_ENABLED
 
