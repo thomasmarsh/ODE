@@ -27,7 +27,6 @@
 #if !dTRIMESH_ENABLED
 
 #include "collision_util.h"
-#define TRIMESH_INTERNAL
 #include "collision_trimesh_internal.h"
 
 dxTriMesh::dxTriMesh(dSpaceID Space, dTriMeshDataID Data) : dxGeom(Space, 1){ type = dTriMeshClass; }

@@ -156,6 +156,7 @@ package.objdir = "obj/ode"
 
   trimesh_files =
   {
+    "../../ode/src/collision_trimesh_colliders.h",
     "../../ode/src/collision_trimesh_internal.h",
     "../../ode/src/collision_trimesh_opcode.cpp",
     "../../ode/src/collision_trimesh_gimpact.cpp",

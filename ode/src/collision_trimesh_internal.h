@@ -26,30 +26,12 @@
 #ifndef _ODE_COLLISION_TRIMESH_INTERNAL_H_
 #define _ODE_COLLISION_TRIMESH_INTERNAL_H_
 
-int dCollideCylinderTrimesh(dxGeom *o1, dxGeom *o2, int flags, dContactGeom *contact, int skip);
-int dCollideTrimeshPlane(dxGeom *o1, dxGeom *o2, int flags, dContactGeom *contact, int skip);
-
-int dCollideSTL(dxGeom *o1, dxGeom *o2, int flags, dContactGeom *contact, int skip);
-int dCollideBTL(dxGeom *o1, dxGeom *o2, int flags, dContactGeom *contact, int skip);
-int dCollideRTL(dxGeom *o1, dxGeom *o2, int flags, dContactGeom *contact, int skip);
-int dCollideTTL(dxGeom *o1, dxGeom *o2, int flags, dContactGeom *contact, int skip);
-int dCollideCCTL(dxGeom *o1, dxGeom *o2, int flags, dContactGeom *contact, int skip);
-
-PURE_INLINE int dCollideRayTrimesh( dxGeom *ray, dxGeom *trimesh, int flags,
-									dContactGeom *contact, int skip )
-{
-	// Swapped case, for code that needs it (heightfield initially)
-	// The other ray-geom colliders take geoms in a swapped order to the
-	// dCollideRTL function which is annoying when using function pointers.
-	return dCollideRTL( trimesh, ray, flags, contact, skip );
-}
-
 //****************************************************************************
 // dxTriMesh class
 
-#ifdef TRIMESH_INTERNAL
 
 #include "collision_kernel.h"
+#include "collision_trimesh_colliders.h"
 #include <ode/collision_trimesh.h>
 
 #if dTRIMESH_OPCODE
@@ -570,6 +552,5 @@ bool IntersectCapsuleTri( const dVector3 segOrigin, const dVector3 segEnd,
     return ( sqrDist <= (radius * radius) );
 }
 
-#endif	//TRIMESH_INTERNAL
 
 #endif	//_ODE_COLLISION_TRIMESH_INTERNAL_H_
