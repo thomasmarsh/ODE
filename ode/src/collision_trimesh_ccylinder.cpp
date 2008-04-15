@@ -160,44 +160,49 @@ typedef struct _sLocalContactData
 	int			nFlags; // 0 = filtered out, 1 = OK
 }sLocalContactData;
 
-static sLocalContactData   *gLocalContacts;
-static unsigned int			ctContacts = 0;
+typedef struct _sTrimeshCylinderColliderData
+{
+	_sTrimeshCylinderColliderData(): ctContacts(0) { memset(vN,0 , sizeof(dVector3)); }
 
-// capsule data
-// real time data
-static dMatrix3  mCapsuleRotation;
-static dVector3   vCapsulePosition;
-static dVector3   vCapsuleAxis;
-// static data
-static dReal      vCapsuleRadius;
-static dReal      fCapsuleSize;
+	sLocalContactData   *gLocalContacts;
+	unsigned int			ctContacts;
 
-// mesh data
-//static  dMatrix4  mHullDstPl;
-static   dMatrix3  mTriMeshRot;
-static dVector3   mTriMeshPos;
-static dVector3   vE0, vE1, vE2;
+	// capsule data
+	// real time data
+	dMatrix3  mCapsuleRotation;
+	dVector3   vCapsulePosition;
+	dVector3   vCapsuleAxis;
+	// static data
+	dReal      vCapsuleRadius;
+	dReal      fCapsuleSize;
 
-// Two geom
-dxGeom*	   gCylinder;
-dxGeom*	   gTriMesh;
+	// mesh data
+	// dMatrix4  mHullDstPl;
+	dMatrix3   mTriMeshRot;
+	dVector3   mTriMeshPos;
+	dVector3   vE0, vE1, vE2;
 
-// global collider data
-static dVector3 vNormal;
-static dReal    fBestDepth;
-static dReal    fBestCenter;
-static dReal    fBestrt;
-static int		iBestAxis;
-static dVector3 vN = {0,0,0,0};
+	// Two geom
+	dxGeom*	   gCylinder;
+	dxGeom*	   gTriMesh;
 
-static dVector3 vV0; 
-static dVector3 vV1;
-static dVector3 vV2;
+	// global collider data
+	dVector3 vNormal;
+	dReal    fBestDepth;
+	dReal    fBestCenter;
+	dReal    fBestrt;
+	int		iBestAxis;
+	dVector3 vN;
 
-// ODE contact's specific
-static unsigned int iFlags;
-static dContactGeom *ContactGeoms;
-static int iStride;
+	dVector3 vV0; 
+	dVector3 vV1;
+	dVector3 vV2;
+
+	// ODE contact's specific
+	unsigned int iFlags;
+	dContactGeom *ContactGeoms;
+	int iStride;
+} sTrimeshCylinderColliderData;
 
 // Capsule lie on axis number 3 = (Z axis)
 static const int nCAPSULE_AXIS = 2;
@@ -245,25 +250,25 @@ inline int _IsBetter(sLocalContactData& c1,sLocalContactData& c2)
 }
 
 // iterate through gLocalContacts and filtered out "near contact"
-inline void	_OptimizeLocalContacts()
+inline void	_OptimizeLocalContacts(sTrimeshCylinderColliderData &cdCollisionContext)
 {
-	int nContacts = ctContacts;
+	int nContacts = cdCollisionContext.ctContacts;
 		
 	for (int i = 0; i < nContacts-1; i++)
 	{
 		for (int j = i+1; j < nContacts; j++)
 		{
-			if (_IsNearContacts(gLocalContacts[i],gLocalContacts[j]))
+			if (_IsNearContacts(cdCollisionContext.gLocalContacts[i],cdCollisionContext.gLocalContacts[j]))
 			{
 				// If they are seem to be the samed then filtered 
 				// out the least penetrate one
-				if (_IsBetter(gLocalContacts[j],gLocalContacts[i]))
+				if (_IsBetter(cdCollisionContext.gLocalContacts[j],cdCollisionContext.gLocalContacts[i]))
 				{
-					gLocalContacts[i].nFlags = 0; // filtered 1st contact
+					cdCollisionContext.gLocalContacts[i].nFlags = 0; // filtered 1st contact
 				}
 				else
 				{
-					gLocalContacts[j].nFlags = 0; // filtered 2nd contact
+					cdCollisionContext.gLocalContacts[j].nFlags = 0; // filtered 2nd contact
 				}
 
 				// NOTE
@@ -274,18 +279,18 @@ inline void	_OptimizeLocalContacts()
 	}
 }
 
-inline int	_ProcessLocalContacts()
+inline int	_ProcessLocalContacts(sTrimeshCylinderColliderData &cdCollisionContext)
 {
-	if (ctContacts == 0)
+	if (cdCollisionContext.ctContacts == 0)
 	{
 		return 0;
 	}
 
 #ifdef OPTIMIZE_CONTACTS
-	if (ctContacts > 1 && !(iFlags & CONTACTS_UNIMPORTANT))
+	if (cdCollisionContext.ctContacts > 1 && !(cdCollisionContext.iFlags & CONTACTS_UNIMPORTANT))
 	{
 		// Can be optimized...
-		_OptimizeLocalContacts();
+		_OptimizeLocalContacts(cdCollisionContext);
 	}
 #endif		
 
@@ -294,31 +299,31 @@ inline int	_ProcessLocalContacts()
 
 	unsigned int nFinalContact = 0;
 
-	for (iContact = 0; iContact < ctContacts; iContact ++)
+	for (iContact = 0; iContact < cdCollisionContext.ctContacts; iContact ++)
 	{
         // Ensure that we haven't created too many contacts
-        if( nFinalContact >= (iFlags & NUMC_MASK)) 
+        if( nFinalContact >= (cdCollisionContext.iFlags & NUMC_MASK)) 
 		{
             break;
         }
 
-		if (1 == gLocalContacts[iContact].nFlags)
+		if (1 == cdCollisionContext.gLocalContacts[iContact].nFlags)
 		{
-				Contact =  SAFECONTACT(iFlags, ContactGeoms, nFinalContact, iStride);
-				Contact->depth = gLocalContacts[iContact].fDepth;
-				SET(Contact->normal,gLocalContacts[iContact].vNormal);
-				SET(Contact->pos,gLocalContacts[iContact].vPos);
-				Contact->g1 = gTriMesh;
-				Contact->g2 = gCylinder;
-				Contact->side2 = gLocalContacts[iContact].triIndex;
+				Contact =  SAFECONTACT(cdCollisionContext.iFlags, cdCollisionContext.ContactGeoms, nFinalContact, cdCollisionContext.iStride);
+				Contact->depth = cdCollisionContext.gLocalContacts[iContact].fDepth;
+				SET(Contact->normal,cdCollisionContext.gLocalContacts[iContact].vNormal);
+				SET(Contact->pos,cdCollisionContext.gLocalContacts[iContact].vPos);
+				Contact->g1 = cdCollisionContext.gTriMesh;
+				Contact->g2 = cdCollisionContext.gCylinder;
+				Contact->side2 = cdCollisionContext.gLocalContacts[iContact].triIndex;
 
 				nFinalContact++;
 		}
 	}
 	// debug
-	//if (nFinalContact != ctContacts)
+	//if (nFinalContact != cdCollisionContext.ctContacts)
 	//{
-	//	printf("[Info] %d contacts generated,%d  filtered.\n",ctContacts,ctContacts-nFinalContact);
+	//	printf("[Info] %d contacts generated,%d  filtered.\n",cdCollisionContext.ctContacts,cdCollisionContext.ctContacts-nFinalContact);
 	//}
 
 	return nFinalContact;
@@ -343,7 +348,6 @@ BOOL _cldClipEdgeToPlane( dVector3 &vEpnt0, dVector3 &vEpnt1, const dVector4& pl
 		// if we have edge/plane intersection
 	} else if ((fDistance0 > 0 && fDistance1 < 0) || ( fDistance0 < 0 && fDistance1 > 0)) 
 	{
-
 			// find intersection point of edge and plane
 			dVector3 vIntersectionPoint;
 			vIntersectionPoint[0]= vEpnt0[0]-(vEpnt0[0]-vEpnt1[0])*fDistance0/(fDistance0-fDistance1);
@@ -363,7 +367,8 @@ BOOL _cldClipEdgeToPlane( dVector3 &vEpnt0, dVector3 &vEpnt1, const dVector4& pl
 		return TRUE;
 }
 
-static BOOL _cldTestAxis(const dVector3 &v0,
+static BOOL _cldTestAxis(sTrimeshCylinderColliderData &cdCollisionContext,
+						 const dVector3 &v0,
 						 const dVector3 &v1,
 						 const dVector3 &v2, 
 						 dVector3 vAxis, 
@@ -386,13 +391,13 @@ static BOOL _cldTestAxis(const dVector3 &v0,
 	dNormalize3(vAxis);
 
 	// project capsule on vAxis
-	dReal frc = dFabs(dDOT(vCapsuleAxis,vAxis))*(fCapsuleSize*REAL(0.5)-vCapsuleRadius) + vCapsuleRadius;
+	dReal frc = dFabs(dDOT(cdCollisionContext.vCapsuleAxis,vAxis))*(cdCollisionContext.fCapsuleSize*REAL(0.5)-cdCollisionContext.vCapsuleRadius) + cdCollisionContext.vCapsuleRadius;
 
 	// project triangle on vAxis
 	dReal afv[3];
-	afv[0] = dDOT( vV0 , vAxis );
-	afv[1] = dDOT( vV1 , vAxis );
-	afv[2] = dDOT( vV2 , vAxis );
+	afv[0] = dDOT(cdCollisionContext.vV0, vAxis);
+	afv[1] = dDOT(cdCollisionContext.vV1, vAxis);
+	afv[2] = dDOT(cdCollisionContext.vV2, vAxis);
 
 	dReal fMin = MAX_REAL;
 	dReal fMax = MIN_REAL;
@@ -418,7 +423,7 @@ static BOOL _cldTestAxis(const dVector3 &v0,
 	dReal fTriangleRadius = (fMax-fMin)*REAL(0.5);
 
 	// if they do not overlap, 
-	if( dFabs(fCenter) > ( frc + fTriangleRadius ) ) 
+	if (dFabs(fCenter) > ( frc + fTriangleRadius ))
 	{ 
 		// exit, we have no intersection
 		return FALSE; 
@@ -428,27 +433,27 @@ static BOOL _cldTestAxis(const dVector3 &v0,
 	dReal fDepth = dFabs(fCenter) - (frc+fTriangleRadius);
 
 	// if greater then best found so far
-	if ( fDepth > fBestDepth ) 
+	if ( fDepth > cdCollisionContext.fBestDepth ) 
 	{
 		// remember depth
-		fBestDepth  = fDepth;
-		fBestCenter = fCenter;
-		fBestrt     = fTriangleRadius;
+		cdCollisionContext.fBestDepth  = fDepth;
+		cdCollisionContext.fBestCenter = fCenter;
+		cdCollisionContext.fBestrt     = fTriangleRadius;
 
-		vNormal[0]     = vAxis[0];
-		vNormal[1]     = vAxis[1];
-		vNormal[2]     = vAxis[2];
+		cdCollisionContext.vNormal[0]     = vAxis[0];
+		cdCollisionContext.vNormal[1]     = vAxis[1];
+		cdCollisionContext.vNormal[2]     = vAxis[2];
 
-		iBestAxis   = iAxis;
+		cdCollisionContext.iBestAxis   = iAxis;
 
 		// flip normal if interval is wrong faced
 		if (fCenter<0 && !bNoFlip) 
 		{ 
-			vNormal[0] = -vNormal[0];
-			vNormal[1] = -vNormal[1];
-			vNormal[2] = -vNormal[2];
+			cdCollisionContext.vNormal[0] = -cdCollisionContext.vNormal[0];
+			cdCollisionContext.vNormal[1] = -cdCollisionContext.vNormal[1];
+			cdCollisionContext.vNormal[2] = -cdCollisionContext.vNormal[2];
 
-			fBestCenter = -fCenter;
+			cdCollisionContext.fBestCenter = -fCenter;
 		}
 	}
 
@@ -470,26 +475,27 @@ inline void _CalculateAxis(const dVector3& v1,
 	dCROSS(r,=,t2,v4);
 }
 
-static BOOL _cldTestSeparatingAxesOfCapsule(const dVector3 &v0,
+static BOOL _cldTestSeparatingAxesOfCapsule(sTrimeshCylinderColliderData &cdCollisionContext,
+											const dVector3 &v0,
 											const dVector3 &v1,
 											const dVector3 &v2,
 											uint8 flags) 
 {
 	// calculate caps centers in absolute space
 	dVector3 vCp0;
-	vCp0[0] = vCapsulePosition[0] + vCapsuleAxis[0]*(fCapsuleSize*REAL(0.5)-vCapsuleRadius);
-	vCp0[1] = vCapsulePosition[1] + vCapsuleAxis[1]*(fCapsuleSize*REAL(0.5)-vCapsuleRadius);
-	vCp0[2] = vCapsulePosition[2] + vCapsuleAxis[2]*(fCapsuleSize*REAL(0.5)-vCapsuleRadius);
+	vCp0[0] = cdCollisionContext.vCapsulePosition[0] + cdCollisionContext.vCapsuleAxis[0]*(cdCollisionContext.fCapsuleSize*REAL(0.5)-cdCollisionContext.vCapsuleRadius);
+	vCp0[1] = cdCollisionContext.vCapsulePosition[1] + cdCollisionContext.vCapsuleAxis[1]*(cdCollisionContext.fCapsuleSize*REAL(0.5)-cdCollisionContext.vCapsuleRadius);
+	vCp0[2] = cdCollisionContext.vCapsulePosition[2] + cdCollisionContext.vCapsuleAxis[2]*(cdCollisionContext.fCapsuleSize*REAL(0.5)-cdCollisionContext.vCapsuleRadius);
 
 	dVector3 vCp1;
-	vCp1[0] = vCapsulePosition[0] - vCapsuleAxis[0]*(fCapsuleSize*REAL(0.5)-vCapsuleRadius);
-	vCp1[1] = vCapsulePosition[1] - vCapsuleAxis[1]*(fCapsuleSize*REAL(0.5)-vCapsuleRadius);
-	vCp1[2] = vCapsulePosition[2] - vCapsuleAxis[2]*(fCapsuleSize*REAL(0.5)-vCapsuleRadius);
+	vCp1[0] = cdCollisionContext.vCapsulePosition[0] - cdCollisionContext.vCapsuleAxis[0]*(cdCollisionContext.fCapsuleSize*REAL(0.5)-cdCollisionContext.vCapsuleRadius);
+	vCp1[1] = cdCollisionContext.vCapsulePosition[1] - cdCollisionContext.vCapsuleAxis[1]*(cdCollisionContext.fCapsuleSize*REAL(0.5)-cdCollisionContext.vCapsuleRadius);
+	vCp1[2] = cdCollisionContext.vCapsulePosition[2] - cdCollisionContext.vCapsuleAxis[2]*(cdCollisionContext.fCapsuleSize*REAL(0.5)-cdCollisionContext.vCapsuleRadius);
 
 	// reset best axis
-	iBestAxis = 0;
+	cdCollisionContext.iBestAxis = 0;
 	// reset best depth
-	fBestDepth  = -MAX_REAL;
+	cdCollisionContext.fBestDepth  = -MAX_REAL;
 	// reset separating axis vector
 	dVector3 vAxis = {REAL(0.0),REAL(0.0),REAL(0.0),REAL(0.0)};
 
@@ -497,22 +503,22 @@ static BOOL _cldTestSeparatingAxesOfCapsule(const dVector3 &v0,
 	const dReal fEpsilon = 1e-6f;
 
 	// Translate triangle to Cc cord.
-	SUBTRACT(v0 , vCapsulePosition, vV0);
-	SUBTRACT(v1 , vCapsulePosition, vV1);
-	SUBTRACT(v2 , vCapsulePosition, vV2);
-	
+	SUBTRACT(v0, cdCollisionContext.vCapsulePosition, cdCollisionContext.vV0);
+	SUBTRACT(v1, cdCollisionContext.vCapsulePosition, cdCollisionContext.vV1);
+	SUBTRACT(v2, cdCollisionContext.vCapsulePosition, cdCollisionContext.vV2);
+
 	// We begin to test for 19 separating axis now
 	// I wonder does it help if we employ the method like ISA-GJK???
 	// Or at least we should do experiment and find what axis will
 	// be most likely to be separating axis to check it first.
 
 	// Original
-	// axis vN
-	//vAxis = -vN;
-	vAxis[0] = - vN[0];
-	vAxis[1] = - vN[1];
-	vAxis[2] = - vN[2];
-	if (!_cldTestAxis( v0, v1, v2, vAxis, 1, TRUE)) 
+	// axis cdCollisionContext.vN
+	//vAxis = -cdCollisionContext.vN;
+	vAxis[0] = - cdCollisionContext.vN[0];
+	vAxis[1] = - cdCollisionContext.vN[1];
+	vAxis[2] = - cdCollisionContext.vN[2];
+	if (!_cldTestAxis(cdCollisionContext, v0, v1, v2, vAxis, 1, TRUE)) 
 	{ 
 		return FALSE; 
 	}
@@ -520,11 +526,11 @@ static BOOL _cldTestSeparatingAxesOfCapsule(const dVector3 &v0,
 	if (flags & dxTriMeshData::kEdge0)
 	{
 		// axis CxE0 - Edge 0
-		dCROSS(vAxis,=,vCapsuleAxis,vE0);
-		//vAxis = dCROSS( vCapsuleAxis cross vE0 );
-		if( _length2OfVector3( vAxis ) > fEpsilon ) {
-			if (!_cldTestAxis( v0, v1, v2, vAxis, 2)) { 
-				return FALSE; 
+		dCROSS(vAxis,=,cdCollisionContext.vCapsuleAxis,cdCollisionContext.vE0);
+		//vAxis = dCROSS( cdCollisionContext.vCapsuleAxis cross vE0 );
+		if (_length2OfVector3( vAxis ) > fEpsilon) {
+			if (!_cldTestAxis(cdCollisionContext, v0, v1, v2, vAxis, 2)) { 
+				return FALSE;
 			}
 		}
 	}
@@ -532,11 +538,11 @@ static BOOL _cldTestSeparatingAxesOfCapsule(const dVector3 &v0,
 	if (flags & dxTriMeshData::kEdge1)
 	{
 		// axis CxE1 - Edge 1
-		dCROSS(vAxis,=,vCapsuleAxis,vE1);
-		//vAxis = ( vCapsuleAxis cross vE1 );
-		if(_length2OfVector3( vAxis ) > fEpsilon ) {
-			if (!_cldTestAxis( v0, v1, v2, vAxis, 3)) { 
-				return FALSE; 
+		dCROSS(vAxis,=,cdCollisionContext.vCapsuleAxis,cdCollisionContext.vE1);
+		//vAxis = ( cdCollisionContext.vCapsuleAxis cross cdCollisionContext.vE1 );
+		if (_length2OfVector3( vAxis ) > fEpsilon) {
+			if (!_cldTestAxis(cdCollisionContext, v0, v1, v2, vAxis, 3)) {
+				return FALSE;
 			}
 		}
 	}
@@ -544,11 +550,11 @@ static BOOL _cldTestSeparatingAxesOfCapsule(const dVector3 &v0,
 	if (flags & dxTriMeshData::kEdge2)
 	{
 		// axis CxE2 - Edge 2
-		//vAxis = ( vCapsuleAxis cross vE2 );
-		dCROSS(vAxis,=,vCapsuleAxis,vE2);
-		if(_length2OfVector3( vAxis ) > fEpsilon ) {
-			if (!_cldTestAxis( v0, v1, v2, vAxis, 4)) { 
-				return FALSE; 
+		//vAxis = ( cdCollisionContext.vCapsuleAxis cross cdCollisionContext.vE2 );
+		dCROSS(vAxis,=,cdCollisionContext.vCapsuleAxis,cdCollisionContext.vE2);
+		if (_length2OfVector3( vAxis ) > fEpsilon) {
+			if (!_cldTestAxis(cdCollisionContext, v0, v1, v2, vAxis, 4)) {
+				return FALSE;
 			}
 		}
 	}
@@ -557,11 +563,11 @@ static BOOL _cldTestSeparatingAxesOfCapsule(const dVector3 &v0,
 	{
 		// first capsule point
 		// axis ((Cp0-V0) x E0) x E0
-		_CalculateAxis(vCp0,v0,vE0,vE0,vAxis);
+		_CalculateAxis(vCp0,v0,cdCollisionContext.vE0,cdCollisionContext.vE0,vAxis);
 	//	vAxis = ( ( vCp0-v0) cross vE0 ) cross vE0;
-		if(_length2OfVector3( vAxis ) > fEpsilon ) {
-			if (!_cldTestAxis( v0, v1, v2, vAxis, 5)) { 
-				return FALSE; 
+		if (_length2OfVector3( vAxis ) > fEpsilon) {
+			if (!_cldTestAxis(cdCollisionContext, v0, v1, v2, vAxis, 5)) {
+				return FALSE;
 			}
 		}
 	}
@@ -569,11 +575,11 @@ static BOOL _cldTestSeparatingAxesOfCapsule(const dVector3 &v0,
 	if (flags & dxTriMeshData::kEdge1)
 	{
 		// axis ((Cp0-V1) x E1) x E1
-		_CalculateAxis(vCp0,v1,vE1,vE1,vAxis);
+		_CalculateAxis(vCp0,v1,cdCollisionContext.vE1,cdCollisionContext.vE1,vAxis);
 		//vAxis = ( ( vCp0-v1) cross vE1 ) cross vE1;
-		if(_length2OfVector3( vAxis ) > fEpsilon ) {
-			if (!_cldTestAxis( v0, v1, v2, vAxis, 6)) { 
-				return FALSE; 
+		if (_length2OfVector3( vAxis ) > fEpsilon) {
+			if (!_cldTestAxis(cdCollisionContext, v0, v1, v2, vAxis, 6)) {
+				return FALSE;
 			}
 		}
 	}
@@ -581,11 +587,11 @@ static BOOL _cldTestSeparatingAxesOfCapsule(const dVector3 &v0,
 	if (flags & dxTriMeshData::kEdge2)
 	{
 		// axis ((Cp0-V2) x E2) x E2
-		_CalculateAxis(vCp0,v2,vE2,vE2,vAxis);
+		_CalculateAxis(vCp0,v2,cdCollisionContext.vE2,cdCollisionContext.vE2,vAxis);
 		//vAxis = ( ( vCp0-v2) cross vE2 ) cross vE2;
-		if(_length2OfVector3( vAxis ) > fEpsilon ) {
-			if (!_cldTestAxis( v0, v1, v2, vAxis, 7)) { 
-				return FALSE; 
+		if (_length2OfVector3( vAxis ) > fEpsilon) {
+			if (!_cldTestAxis(cdCollisionContext, v0, v1, v2, vAxis, 7)) {
+				return FALSE;
 			}
 		}
 	}
@@ -594,11 +600,11 @@ static BOOL _cldTestSeparatingAxesOfCapsule(const dVector3 &v0,
 	{
 		// second capsule point
 		// axis ((Cp1-V0) x E0) x E0
-		_CalculateAxis(vCp1,v0,vE0,vE0,vAxis);	
+		_CalculateAxis(vCp1,v0,cdCollisionContext.vE0,cdCollisionContext.vE0,vAxis);
 		//vAxis = ( ( vCp1-v0 ) cross vE0 ) cross vE0;
-		if(_length2OfVector3( vAxis ) > fEpsilon ) {
-			if (!_cldTestAxis( v0, v1, v2, vAxis, 8)) { 
-				return FALSE; 
+		if (_length2OfVector3( vAxis ) > fEpsilon) {
+			if (!_cldTestAxis(cdCollisionContext, v0, v1, v2, vAxis, 8)) {
+				return FALSE;
 			}
 		}
 	}
@@ -606,11 +612,11 @@ static BOOL _cldTestSeparatingAxesOfCapsule(const dVector3 &v0,
 	if (flags & dxTriMeshData::kEdge1)
 	{
 		// axis ((Cp1-V1) x E1) x E1
-		_CalculateAxis(vCp1,v1,vE1,vE1,vAxis);	
+		_CalculateAxis(vCp1,v1,cdCollisionContext.vE1,cdCollisionContext.vE1,vAxis);
 		//vAxis = ( ( vCp1-v1 ) cross vE1 ) cross vE1;
-		if(_length2OfVector3( vAxis ) > fEpsilon ) {
-			if (!_cldTestAxis( v0, v1, v2, vAxis, 9)) { 
-				return FALSE; 
+		if (_length2OfVector3( vAxis ) > fEpsilon) {
+			if (!_cldTestAxis(cdCollisionContext, v0, v1, v2, vAxis, 9)) {
+				return FALSE;
 			}
 		}
 	}
@@ -618,11 +624,11 @@ static BOOL _cldTestSeparatingAxesOfCapsule(const dVector3 &v0,
 	if (flags & dxTriMeshData::kEdge2)
 	{
 		// axis ((Cp1-V2) x E2) x E2
-		_CalculateAxis(vCp1,v2,vE2,vE2,vAxis);	
+		_CalculateAxis(vCp1,v2,cdCollisionContext.vE2,cdCollisionContext.vE2,vAxis);
 		//vAxis = ( ( vCp1-v2 ) cross vE2 ) cross vE2;
-		if(_length2OfVector3( vAxis ) > fEpsilon ) {
-			if (!_cldTestAxis( v0, v1, v2, vAxis, 10)) { 
-				return FALSE; 
+		if (_length2OfVector3( vAxis ) > fEpsilon) {
+			if (!_cldTestAxis(cdCollisionContext, v0, v1, v2, vAxis, 10)) {
+				return FALSE;
 			}
 		}
 	}
@@ -631,11 +637,11 @@ static BOOL _cldTestSeparatingAxesOfCapsule(const dVector3 &v0,
 	{
 		// first vertex on triangle
 		// axis ((V0-Cp0) x C) x C
-		_CalculateAxis(v0,vCp0,vCapsuleAxis,vCapsuleAxis,vAxis);	
-		//vAxis = ( ( v0-vCp0 ) cross vCapsuleAxis ) cross vCapsuleAxis;
-		if(_length2OfVector3( vAxis ) > fEpsilon ) {
-			if (!_cldTestAxis( v0, v1, v2, vAxis, 11)) { 
-				return FALSE; 
+		_CalculateAxis(v0,vCp0,cdCollisionContext.vCapsuleAxis,cdCollisionContext.vCapsuleAxis,vAxis);
+		//vAxis = ( ( v0-vCp0 ) cross cdCollisionContext.vCapsuleAxis ) cross cdCollisionContext.vCapsuleAxis;
+		if (_length2OfVector3( vAxis ) > fEpsilon) {
+			if (!_cldTestAxis(cdCollisionContext, v0, v1, v2, vAxis, 11)) {
+				return FALSE;
 			}
 		}
 	}
@@ -644,11 +650,11 @@ static BOOL _cldTestSeparatingAxesOfCapsule(const dVector3 &v0,
 	{
 		// second vertex on triangle
 		// axis ((V1-Cp0) x C) x C
-		_CalculateAxis(v1,vCp0,vCapsuleAxis,vCapsuleAxis,vAxis);	
+		_CalculateAxis(v1,vCp0,cdCollisionContext.vCapsuleAxis,cdCollisionContext.vCapsuleAxis,vAxis);	
 		//vAxis = ( ( v1-vCp0 ) cross vCapsuleAxis ) cross vCapsuleAxis;
-		if(_length2OfVector3( vAxis ) > fEpsilon ) {
-			if (!_cldTestAxis( v0, v1, v2, vAxis, 12)) { 
-				return FALSE; 
+		if (_length2OfVector3( vAxis ) > fEpsilon) {
+			if (!_cldTestAxis(cdCollisionContext, v0, v1, v2, vAxis, 12)) {
+				return FALSE;
 			}
 		}
 	}
@@ -657,11 +663,11 @@ static BOOL _cldTestSeparatingAxesOfCapsule(const dVector3 &v0,
 	{
 		// third vertex on triangle
 		// axis ((V2-Cp0) x C) x C
-		_CalculateAxis(v2,vCp0,vCapsuleAxis,vCapsuleAxis,vAxis);	
+		_CalculateAxis(v2,vCp0,cdCollisionContext.vCapsuleAxis,cdCollisionContext.vCapsuleAxis,vAxis);
 		//vAxis = ( ( v2-vCp0 ) cross vCapsuleAxis ) cross vCapsuleAxis;
-		if(_length2OfVector3( vAxis ) > fEpsilon ) {
-			if (!_cldTestAxis( v0, v1, v2, vAxis, 13)) { 
-				return FALSE; 
+		if (_length2OfVector3( vAxis ) > fEpsilon) {
+			if (!_cldTestAxis(cdCollisionContext, v0, v1, v2, vAxis, 13)) {
+				return FALSE;
 			}
 		}
 	}
@@ -674,9 +680,9 @@ static BOOL _cldTestSeparatingAxesOfCapsule(const dVector3 &v0,
 		// first triangle vertex and first capsule point
 		//vAxis = v0 - vCp0;
 		SUBTRACT(v0,vCp0,vAxis);
-		if(_length2OfVector3( vAxis ) > fEpsilon ) {
-			if (!_cldTestAxis( v0, v1, v2, vAxis, 14)) { 
-				return FALSE; 
+		if (_length2OfVector3( vAxis ) > fEpsilon) {
+			if (!_cldTestAxis(cdCollisionContext, v0, v1, v2, vAxis, 14)) {
+				return FALSE;
 			}
 		}
 	}
@@ -686,9 +692,9 @@ static BOOL _cldTestSeparatingAxesOfCapsule(const dVector3 &v0,
 		// second triangle vertex and first capsule point
 		//vAxis = v1 - vCp0;
 		SUBTRACT(v1,vCp0,vAxis);
-		if(_length2OfVector3( vAxis ) > fEpsilon ) {
-			if (!_cldTestAxis( v0, v1, v2, vAxis, 15)) { 
-				return FALSE; 
+		if (_length2OfVector3( vAxis ) > fEpsilon) {
+			if (!_cldTestAxis(cdCollisionContext, v0, v1, v2, vAxis, 15)) {
+				return FALSE;
 			}
 		}
 	}
@@ -698,9 +704,9 @@ static BOOL _cldTestSeparatingAxesOfCapsule(const dVector3 &v0,
 		// third triangle vertex and first capsule point
 		//vAxis = v2 - vCp0;
 		SUBTRACT(v2,vCp0,vAxis);
-		if(_length2OfVector3( vAxis ) > fEpsilon ) {
-			if (!_cldTestAxis( v0, v1, v2, vAxis, 16)) { 
-				return FALSE; 
+		if (_length2OfVector3( vAxis ) > fEpsilon) {
+			if (!_cldTestAxis(cdCollisionContext, v0, v1, v2, vAxis, 16)) {
+				return FALSE;
 			}
 		}
 	}
@@ -710,9 +716,9 @@ static BOOL _cldTestSeparatingAxesOfCapsule(const dVector3 &v0,
 		// first triangle vertex and second capsule point
 		//vAxis = v0 - vCp1;
 		SUBTRACT(v0,vCp1,vAxis);
-		if(_length2OfVector3( vAxis ) > fEpsilon ) {
-			if (!_cldTestAxis( v0, v1, v2, vAxis, 17)) { 
-				return FALSE; 
+		if (_length2OfVector3( vAxis ) > fEpsilon) {
+			if (!_cldTestAxis(cdCollisionContext, v0, v1, v2, vAxis, 17)) {
+				return FALSE;
 			}
 		}
 	}
@@ -722,9 +728,9 @@ static BOOL _cldTestSeparatingAxesOfCapsule(const dVector3 &v0,
 		// second triangle vertex and second capsule point
 		//vAxis = v1 - vCp1;
 		SUBTRACT(v1,vCp1,vAxis);
-		if(_length2OfVector3( vAxis ) > fEpsilon ) {
-			if (!_cldTestAxis( v0, v1, v2, vAxis, 18)) { 
-				return FALSE; 
+		if (_length2OfVector3( vAxis ) > fEpsilon) {
+			if (!_cldTestAxis(cdCollisionContext, v0, v1, v2, vAxis, 18)) {
+				return FALSE;
 			}
 		}
 	}
@@ -734,51 +740,50 @@ static BOOL _cldTestSeparatingAxesOfCapsule(const dVector3 &v0,
 		// third triangle vertex and second capsule point
 		//vAxis = v2 - vCp1;
 		SUBTRACT(v2,vCp1,vAxis);
-		if(_length2OfVector3( vAxis ) > fEpsilon ) {
-			if (!_cldTestAxis( v0, v1, v2, vAxis, 19)) { 
-				return FALSE; 
+		if (_length2OfVector3( vAxis ) > fEpsilon) {
+			if (!_cldTestAxis(cdCollisionContext, v0, v1, v2, vAxis, 19)) {
+				return FALSE;
 			}
-		}	
+		}
 	}
 
 	return TRUE;
 }
 
 // test one mesh triangle on intersection with capsule
-static void _cldTestOneTriangleVSCapsule( const dVector3 &v0, 
-											const dVector3 &v1, 
-											const dVector3 &v2,
-											uint8 flags)
+static void _cldTestOneTriangleVSCapsule(sTrimeshCylinderColliderData &cdCollisionContext,
+										 const dVector3 &v0, const dVector3 &v1, const dVector3 &v2,
+										 uint8 flags)
 {
 	// calculate edges
-	SUBTRACT(v1,v0,vE0);
-	SUBTRACT(v2,v1,vE1);
-	SUBTRACT(v0,v2,vE2);
+	SUBTRACT(v1,v0,cdCollisionContext.vE0);
+	SUBTRACT(v2,v1,cdCollisionContext.vE1);
+	SUBTRACT(v0,v2,cdCollisionContext.vE2);
 
 	dVector3	_minus_vE0;
 	SUBTRACT(v0,v1,_minus_vE0);
 
 	// calculate poly normal
-	dCROSS(vN,=,vE1,_minus_vE0);
-	
+	dCROSS(cdCollisionContext.vN,=,cdCollisionContext.vE1,_minus_vE0);
+
 	// Even though all triangles might be initially valid, 
 	// a triangle may degenerate into a segment after applying 
 	// space transformation.
-	if (!dSafeNormalize3(vN))
+	if (!dSafeNormalize3(cdCollisionContext.vN))
 	{
 		return;
 	}
-	
+
 	// create plane from triangle
-	dReal plDistance = -dDOT(v0,vN);
+	dReal plDistance = -dDOT(v0,cdCollisionContext.vN);
 	dVector4 plTrianglePlane;
-	CONSTRUCTPLANE(plTrianglePlane,vN,plDistance);
-	
+	CONSTRUCTPLANE(plTrianglePlane,cdCollisionContext.vN,plDistance);
+
 	// calculate capsule distance to plane
-	dReal fDistanceCapsuleCenterToPlane = POINTDISTANCE(plTrianglePlane,vCapsulePosition);
+	dReal fDistanceCapsuleCenterToPlane = POINTDISTANCE(plTrianglePlane,cdCollisionContext.vCapsulePosition);
 
 	// Capsule must be over positive side of triangle
-	if(fDistanceCapsuleCenterToPlane < 0 /* && !bDoubleSided*/) 
+	if (fDistanceCapsuleCenterToPlane < 0 /* && !bDoubleSided*/) 
 	{
 		// if not don't generate contacts
 		return;
@@ -799,14 +804,14 @@ static void _cldTestOneTriangleVSCapsule( const dVector3 &v0,
 	}
 
 	// do intersection test and find best separating axis
-	if(!_cldTestSeparatingAxesOfCapsule(vPnt0, vPnt1, vPnt2, flags) ) 
+	if (!_cldTestSeparatingAxesOfCapsule(cdCollisionContext, vPnt0, vPnt1, vPnt2, flags))
 	{
 		// if not found do nothing
 		return;
 	}
 
 	// if best separation axis is not found
-	if ( iBestAxis == 0 ) 
+	if (cdCollisionContext.iBestAxis == 0 ) 
 	{
 		// this should not happen (we should already exit in that case)
 		dIASSERT(FALSE);
@@ -816,19 +821,19 @@ static void _cldTestOneTriangleVSCapsule( const dVector3 &v0,
 
 	// calculate caps centers in absolute space
 	dVector3 vCposTrans;
-	vCposTrans[0] = vCapsulePosition[0] + vNormal[0]*vCapsuleRadius;
-	vCposTrans[1] = vCapsulePosition[1] + vNormal[1]*vCapsuleRadius;
-	vCposTrans[2] = vCapsulePosition[2] + vNormal[2]*vCapsuleRadius;
+	vCposTrans[0] = cdCollisionContext.vCapsulePosition[0] + cdCollisionContext.vNormal[0]*cdCollisionContext.vCapsuleRadius;
+	vCposTrans[1] = cdCollisionContext.vCapsulePosition[1] + cdCollisionContext.vNormal[1]*cdCollisionContext.vCapsuleRadius;
+	vCposTrans[2] = cdCollisionContext.vCapsulePosition[2] + cdCollisionContext.vNormal[2]*cdCollisionContext.vCapsuleRadius;
 
 	dVector3 vCEdgePoint0;
-	vCEdgePoint0[0]  = vCposTrans[0] + vCapsuleAxis[0]*(fCapsuleSize*REAL(0.5)-vCapsuleRadius);
-	vCEdgePoint0[1]  = vCposTrans[1] + vCapsuleAxis[1]*(fCapsuleSize*REAL(0.5)-vCapsuleRadius);
-	vCEdgePoint0[2]  = vCposTrans[2] + vCapsuleAxis[2]*(fCapsuleSize*REAL(0.5)-vCapsuleRadius);
+	vCEdgePoint0[0]  = vCposTrans[0] + cdCollisionContext.vCapsuleAxis[0]*(cdCollisionContext.fCapsuleSize*REAL(0.5)-cdCollisionContext.vCapsuleRadius);
+	vCEdgePoint0[1]  = vCposTrans[1] + cdCollisionContext.vCapsuleAxis[1]*(cdCollisionContext.fCapsuleSize*REAL(0.5)-cdCollisionContext.vCapsuleRadius);
+	vCEdgePoint0[2]  = vCposTrans[2] + cdCollisionContext.vCapsuleAxis[2]*(cdCollisionContext.fCapsuleSize*REAL(0.5)-cdCollisionContext.vCapsuleRadius);
     
 	dVector3 vCEdgePoint1;
-	vCEdgePoint1[0] = vCposTrans[0] - vCapsuleAxis[0]*(fCapsuleSize*REAL(0.5)-vCapsuleRadius);
-	vCEdgePoint1[1] = vCposTrans[1] - vCapsuleAxis[1]*(fCapsuleSize*REAL(0.5)-vCapsuleRadius);
-	vCEdgePoint1[2] = vCposTrans[2] - vCapsuleAxis[2]*(fCapsuleSize*REAL(0.5)-vCapsuleRadius);
+	vCEdgePoint1[0] = vCposTrans[0] - cdCollisionContext.vCapsuleAxis[0]*(cdCollisionContext.fCapsuleSize*REAL(0.5)-cdCollisionContext.vCapsuleRadius);
+	vCEdgePoint1[1] = vCposTrans[1] - cdCollisionContext.vCapsuleAxis[1]*(cdCollisionContext.fCapsuleSize*REAL(0.5)-cdCollisionContext.vCapsuleRadius);
+	vCEdgePoint1[2] = vCposTrans[2] - cdCollisionContext.vCapsuleAxis[2]*(cdCollisionContext.fCapsuleSize*REAL(0.5)-cdCollisionContext.vCapsuleRadius);
 
 	// transform capsule edge points into triangle space
 	vCEdgePoint0[0] -= vPnt0[0];
@@ -841,37 +846,37 @@ static void _cldTestOneTriangleVSCapsule( const dVector3 &v0,
 
 	dVector4 plPlane;
 	dVector3 _minus_vN;
-	_minus_vN[0] = -vN[0];
-	_minus_vN[1] = -vN[1];
-	_minus_vN[2] = -vN[2];
+	_minus_vN[0] = -cdCollisionContext.vN[0];
+	_minus_vN[1] = -cdCollisionContext.vN[1];
+	_minus_vN[2] = -cdCollisionContext.vN[2];
 	// triangle plane
 	CONSTRUCTPLANE(plPlane,_minus_vN,0);
-	//plPlane = Plane4f( -vN, 0);
+	//plPlane = Plane4f( -cdCollisionContext.vN, 0);
 
-	if(!_cldClipEdgeToPlane( vCEdgePoint0, vCEdgePoint1, plPlane )) 
+	if (!_cldClipEdgeToPlane( vCEdgePoint0, vCEdgePoint1, plPlane )) 
 	{ 
 		return; 
 	}
 
 	// plane with edge 0
 	dVector3 vTemp;
-	dCROSS(vTemp,=,vN,vE0);
+	dCROSS(vTemp,=,cdCollisionContext.vN,cdCollisionContext.vE0);
 	CONSTRUCTPLANE(plPlane, vTemp, REAL(1e-5));
-	if(!_cldClipEdgeToPlane( vCEdgePoint0, vCEdgePoint1, plPlane ))
+	if (!_cldClipEdgeToPlane( vCEdgePoint0, vCEdgePoint1, plPlane ))
 	{ 
 		return; 
 	}
 
-	dCROSS(vTemp,=,vN,vE1);
-	CONSTRUCTPLANE(plPlane, vTemp, -(dDOT(vE0,vTemp)-REAL(1e-5)));
-	if(!_cldClipEdgeToPlane( vCEdgePoint0, vCEdgePoint1, plPlane )) 
+	dCROSS(vTemp,=,cdCollisionContext.vN,cdCollisionContext.vE1);
+	CONSTRUCTPLANE(plPlane, vTemp, -(dDOT(cdCollisionContext.vE0,vTemp)-REAL(1e-5)));
+	if (!_cldClipEdgeToPlane( vCEdgePoint0, vCEdgePoint1, plPlane )) 
 	{ 
 		return; 
 	}
 
-	dCROSS(vTemp,=,vN,vE2);
+	dCROSS(vTemp,=,cdCollisionContext.vN,cdCollisionContext.vE2);
 	CONSTRUCTPLANE(plPlane, vTemp, REAL(1e-5));
-	if(!_cldClipEdgeToPlane( vCEdgePoint0, vCEdgePoint1, plPlane )) { 
+	if (!_cldClipEdgeToPlane( vCEdgePoint0, vCEdgePoint1, plPlane )) { 
 		return; 
 	}
 
@@ -885,40 +890,39 @@ static void _cldTestOneTriangleVSCapsule( const dVector3 &v0,
 	vCEdgePoint1[2] += vPnt0[2];
 
 	// calculate depths for both contact points
-	SUBTRACT(vCEdgePoint0,vCapsulePosition,vTemp);
-	dReal fDepth0 = dDOT(vTemp,vNormal) - (fBestCenter-fBestrt);
-	SUBTRACT(vCEdgePoint1,vCapsulePosition,vTemp);
-	dReal fDepth1 = dDOT(vTemp,vNormal) - (fBestCenter-fBestrt);
+	SUBTRACT(vCEdgePoint0,cdCollisionContext.vCapsulePosition,vTemp);
+	dReal fDepth0 = dDOT(vTemp,cdCollisionContext.vNormal) - (cdCollisionContext.fBestCenter-cdCollisionContext.fBestrt);
+	SUBTRACT(vCEdgePoint1,cdCollisionContext.vCapsulePosition,vTemp);
+	dReal fDepth1 = dDOT(vTemp,cdCollisionContext.vNormal) - (cdCollisionContext.fBestCenter-cdCollisionContext.fBestrt);
 
 	// clamp depths to zero
-	if(fDepth0 < 0) 
+	if (fDepth0 < 0) 
 	{
 		fDepth0 = 0.0f;
 	}
 
-	if(fDepth1 < 0 ) 
+	if (fDepth1 < 0 ) 
 	{
 		fDepth1 = 0.0f;
 	}
 
 	// Cached contacts's data
 	// contact 0
-    dIASSERT(ctContacts < (iFlags & NUMC_MASK)); // Do not call function if there is no room to store result
-	gLocalContacts[ctContacts].fDepth = fDepth0;
-	SET(gLocalContacts[ctContacts].vNormal,vNormal);
-	SET(gLocalContacts[ctContacts].vPos,vCEdgePoint0);
-	gLocalContacts[ctContacts].nFlags = 1;
-	ctContacts++;
+    dIASSERT(cdCollisionContext.ctContacts < (cdCollisionContext.iFlags & NUMC_MASK)); // Do not call function if there is no room to store result
+	cdCollisionContext.gLocalContacts[cdCollisionContext.ctContacts].fDepth = fDepth0;
+	SET(cdCollisionContext.gLocalContacts[cdCollisionContext.ctContacts].vNormal,cdCollisionContext.vNormal);
+	SET(cdCollisionContext.gLocalContacts[cdCollisionContext.ctContacts].vPos,vCEdgePoint0);
+	cdCollisionContext.gLocalContacts[cdCollisionContext.ctContacts].nFlags = 1;
+	cdCollisionContext.ctContacts++;
 
-        if (ctContacts < (iFlags & NUMC_MASK)) {
-	// contact 1
-	gLocalContacts[ctContacts].fDepth = fDepth1;
-	SET(gLocalContacts[ctContacts].vNormal,vNormal);
-	SET(gLocalContacts[ctContacts].vPos,vCEdgePoint1);
-	gLocalContacts[ctContacts].nFlags = 1;
-	ctContacts++;
-        }
-
+	if (cdCollisionContext.ctContacts < (cdCollisionContext.iFlags & NUMC_MASK)) {
+		// contact 1
+		cdCollisionContext.gLocalContacts[cdCollisionContext.ctContacts].fDepth = fDepth1;
+		SET(cdCollisionContext.gLocalContacts[cdCollisionContext.ctContacts].vNormal,cdCollisionContext.vNormal);
+		SET(cdCollisionContext.gLocalContacts[cdCollisionContext.ctContacts].vPos,vCEdgePoint1);
+		cdCollisionContext.gLocalContacts[cdCollisionContext.ctContacts].nFlags = 1;
+		cdCollisionContext.ctContacts++;
+    }
 }
 
 // capsule - trimesh by CroTeam
@@ -930,50 +934,49 @@ int dCollideCCTL(dxGeom *o1, dxGeom *o2, int flags, dContactGeom *contact, int s
 	dIASSERT (o2->type == dCapsuleClass);
 	dIASSERT ((flags & NUMC_MASK) >= 1);
 	
+	sTrimeshCylinderColliderData cdCollisionContext;
+
 	dxTriMesh* TriMesh = (dxTriMesh*)o1;
-	gCylinder = o2;
-	gTriMesh = o1;
+	cdCollisionContext.gCylinder = o2;
+	cdCollisionContext.gTriMesh = o1;
 
-	const dMatrix3* pRot = (const dMatrix3*) dGeomGetRotation(gCylinder);
-	memcpy(mCapsuleRotation,pRot,sizeof(dMatrix3));
+	const dMatrix3* pRot = (const dMatrix3*)dGeomGetRotation(cdCollisionContext.gCylinder);
+	memcpy(cdCollisionContext.mCapsuleRotation, pRot, sizeof(dMatrix3));
 
-	const dVector3* pDst = (const dVector3*)dGeomGetPosition(gCylinder);
-	memcpy(vCapsulePosition,pDst,sizeof(dVector3));
+	const dVector3* pDst = (const dVector3*)dGeomGetPosition(cdCollisionContext.gCylinder);
+	memcpy(cdCollisionContext.vCapsulePosition, pDst, sizeof(dVector3));
 
-	vCapsuleAxis[0] = mCapsuleRotation[0*4 + nCAPSULE_AXIS]; 
-	vCapsuleAxis[1] = mCapsuleRotation[1*4 + nCAPSULE_AXIS];
-	vCapsuleAxis[2] = mCapsuleRotation[2*4 + nCAPSULE_AXIS];
+	cdCollisionContext.vCapsuleAxis[0] = cdCollisionContext.mCapsuleRotation[0*4 + nCAPSULE_AXIS];
+	cdCollisionContext.vCapsuleAxis[1] = cdCollisionContext.mCapsuleRotation[1*4 + nCAPSULE_AXIS];
+	cdCollisionContext.vCapsuleAxis[2] = cdCollisionContext.mCapsuleRotation[2*4 + nCAPSULE_AXIS];
 
 	// Get size of Capsule
-	dGeomCapsuleGetParams(gCylinder,&vCapsuleRadius,&fCapsuleSize);
-	fCapsuleSize += 2*vCapsuleRadius;
+	dGeomCapsuleGetParams(cdCollisionContext.gCylinder, &cdCollisionContext.vCapsuleRadius, &cdCollisionContext.fCapsuleSize);
+	cdCollisionContext.fCapsuleSize += 2*cdCollisionContext.vCapsuleRadius;
 
 	const dMatrix3* pTriRot = (const dMatrix3*)dGeomGetRotation(TriMesh);
-	memcpy(mTriMeshRot,pTriRot,sizeof(dMatrix3));
+	memcpy(cdCollisionContext.mTriMeshRot, pTriRot, sizeof(dMatrix3));
 
 	const dVector3* pTriPos = (const dVector3*)dGeomGetPosition(TriMesh);
-	memcpy(mTriMeshPos,pTriPos,sizeof(dVector3));	
+	memcpy(cdCollisionContext.mTriMeshPos, pTriPos, sizeof(dVector3));
 
 	// global info for contact creation
-	iStride			=skip;
-	iFlags			=flags;
-	ContactGeoms	=contact;
+	cdCollisionContext.iStride			=skip;
+	cdCollisionContext.iFlags			=flags;
+	cdCollisionContext.ContactGeoms		=contact;
 
 	// reset contact counter
-	ctContacts = 0;	
+	cdCollisionContext.ctContacts = 0;	
 
 	// reset best depth
-	fBestDepth  = - MAX_REAL;
-	fBestCenter = 0;
-	fBestrt     = 0;
-
-
-
+	cdCollisionContext.fBestDepth  = - MAX_REAL;
+	cdCollisionContext.fBestCenter = 0;
+	cdCollisionContext.fBestrt     = 0;
 
 	// reset collision normal
-	vNormal[0] = REAL(0.0);
-	vNormal[1] = REAL(0.0);
-	vNormal[2] = REAL(0.0);
+	cdCollisionContext.vNormal[0] = REAL(0.0);
+	cdCollisionContext.vNormal[1] = REAL(0.0);
+	cdCollisionContext.vNormal[2] = REAL(0.0);
 
 	// Will it better to use LSS here? -> confirm Pierre.
 	 OBBCollider& Collider = TriMesh->_OBBCollider;
@@ -984,36 +987,36 @@ int dCollideCCTL(dxGeom *o1, dxGeom *o2, int flags, dContactGeom *contact, int s
 	 // (e.g. typedef float opc_float;)
 	 // However I'm not sure in what header it should be added.
 	 
-	 Point cCenter(/*(float)*/ vCapsulePosition[0], /*(float)*/ vCapsulePosition[1], /*(float)*/ vCapsulePosition[2]);
-	 Point cExtents(/*(float)*/ vCapsuleRadius, /*(float)*/ vCapsuleRadius,/*(float)*/ fCapsuleSize/2);
-	 
+	 Point cCenter(/*(float)*/ cdCollisionContext.vCapsulePosition[0], /*(float)*/ cdCollisionContext.vCapsulePosition[1], /*(float)*/ cdCollisionContext.vCapsulePosition[2]);
+	 Point cExtents(/*(float)*/ cdCollisionContext.vCapsuleRadius, /*(float)*/ cdCollisionContext.vCapsuleRadius,/*(float)*/ cdCollisionContext.fCapsuleSize/2);
+
 	 Matrix3x3 obbRot;
 
-	 obbRot[0][0] = /*(float)*/ mCapsuleRotation[0];
-	 obbRot[1][0] = /*(float)*/ mCapsuleRotation[1];
-	 obbRot[2][0] = /*(float)*/ mCapsuleRotation[2];
+	 obbRot[0][0] = /*(float)*/ cdCollisionContext.mCapsuleRotation[0];
+	 obbRot[1][0] = /*(float)*/ cdCollisionContext.mCapsuleRotation[1];
+	 obbRot[2][0] = /*(float)*/ cdCollisionContext.mCapsuleRotation[2];
 
-	 obbRot[0][1] = /*(float)*/ mCapsuleRotation[4];
-	 obbRot[1][1] = /*(float)*/ mCapsuleRotation[5];
-	 obbRot[2][1] = /*(float)*/ mCapsuleRotation[6];
+	 obbRot[0][1] = /*(float)*/ cdCollisionContext.mCapsuleRotation[4];
+	 obbRot[1][1] = /*(float)*/ cdCollisionContext.mCapsuleRotation[5];
+	 obbRot[2][1] = /*(float)*/ cdCollisionContext.mCapsuleRotation[6];
 
-	 obbRot[0][2] = /*(float)*/ mCapsuleRotation[8];
-	 obbRot[1][2] = /*(float)*/ mCapsuleRotation[9];
-	 obbRot[2][2] = /*(float)*/ mCapsuleRotation[10];
+	 obbRot[0][2] = /*(float)*/ cdCollisionContext.mCapsuleRotation[8];
+	 obbRot[1][2] = /*(float)*/ cdCollisionContext.mCapsuleRotation[9];
+	 obbRot[2][2] = /*(float)*/ cdCollisionContext.mCapsuleRotation[10];
 
 	 OBB obbCapsule(cCenter,cExtents,obbRot);
 
 	 Matrix4x4 CapsuleMatrix;
-	 MakeMatrix(vCapsulePosition, mCapsuleRotation, CapsuleMatrix);
+	 MakeMatrix(cdCollisionContext.vCapsulePosition, cdCollisionContext.mCapsuleRotation, CapsuleMatrix);
 
 	 Matrix4x4 MeshMatrix;
-	 MakeMatrix(mTriMeshPos, mTriMeshRot, MeshMatrix);
+	 MakeMatrix(cdCollisionContext.mTriMeshPos, cdCollisionContext.mTriMeshRot, MeshMatrix);
 
 	 // TC results
 	 if (TriMesh->doBoxTC) {
 		 dxTriMesh::BoxTC* BoxTC = 0;
 		 for (int i = 0; i < TriMesh->BoxTCCache.size(); i++){
-			 if (TriMesh->BoxTCCache[i].Geom == gCylinder){
+			 if (TriMesh->BoxTCCache[i].Geom == cdCollisionContext.gCylinder){
 				 BoxTC = &TriMesh->BoxTCCache[i];
 				 break;
 			 }
@@ -1022,7 +1025,7 @@ int dCollideCCTL(dxGeom *o1, dxGeom *o2, int flags, dContactGeom *contact, int s
 			 TriMesh->BoxTCCache.push(dxTriMesh::BoxTC());
 
 			 BoxTC = &TriMesh->BoxTCCache[TriMesh->BoxTCCache.size() - 1];
-			 BoxTC->Geom = gCylinder;
+			 BoxTC->Geom = cdCollisionContext.gCylinder;
 			 BoxTC->FatCoeff = 1.0f;
 		 }
 
@@ -1034,7 +1037,7 @@ int dCollideCCTL(dxGeom *o1, dxGeom *o2, int flags, dContactGeom *contact, int s
 		 Collider.SetTemporalCoherence(false);
 		 Collider.Collide(dxTriMesh::defaultBoxCache, obbCapsule, TriMesh->Data->BVTree, null,&MeshMatrix);
 	 }
-	 
+
 	 if (! Collider.GetContactStatus()) {
 	 	// no collision occurred
 	 	return 0;
@@ -1048,13 +1051,13 @@ int dCollideCCTL(dxGeom *o1, dxGeom *o2, int flags, dContactGeom *contact, int s
 	 {
 		 if (TriMesh->ArrayCallback != null)
 		 {
-			 TriMesh->ArrayCallback(TriMesh, gCylinder, Triangles, TriCount);
+			 TriMesh->ArrayCallback(TriMesh, cdCollisionContext.gCylinder, Triangles, TriCount);
 		 }
 
 		// allocate buffer for local contacts on stack
-		gLocalContacts = (sLocalContactData*)dALLOCA16(sizeof(sLocalContactData)*(iFlags & NUMC_MASK));
+		cdCollisionContext.gLocalContacts = (sLocalContactData*)dALLOCA16(sizeof(sLocalContactData)*(cdCollisionContext.iFlags & NUMC_MASK));
 
-	    unsigned int ctContacts0 = ctContacts;
+	    unsigned int ctContacts0 = cdCollisionContext.ctContacts;
 
 		uint8* UseFlags = TriMesh->Data->UseFlags;
 
@@ -1062,30 +1065,29 @@ int dCollideCCTL(dxGeom *o1, dxGeom *o2, int flags, dContactGeom *contact, int s
 		for (int i = 0; i < TriCount; i++)
 		{
 			const int Triint = Triangles[i];
-			if (!Callback(TriMesh, gCylinder, Triint)) continue;
-
+			if (!Callback(TriMesh, cdCollisionContext.gCylinder, Triint)) continue;
 
 			dVector3 dv[3];
-			FetchTriangle(TriMesh, Triint, mTriMeshPos, mTriMeshRot, dv);
+			FetchTriangle(TriMesh, Triint, cdCollisionContext.mTriMeshPos, cdCollisionContext.mTriMeshRot, dv);
 
 			uint8 flags = UseFlags ? UseFlags[Triint] : dxTriMeshData::kUseAll;
 
 			// test this triangle
-			_cldTestOneTriangleVSCapsule(dv[0],dv[1],dv[2], flags);
+			_cldTestOneTriangleVSCapsule(cdCollisionContext, dv[0],dv[1],dv[2], flags);
 
 			// fill-in tri index for generated contacts
-			for (; ctContacts0<ctContacts; ctContacts0++)
-				gLocalContacts[ctContacts0].triIndex = Triint;
+			for (; ctContacts0 < cdCollisionContext.ctContacts; ctContacts0++)
+				cdCollisionContext.gLocalContacts[ctContacts0].triIndex = Triint;
 
 			// Putting "break" at the end of loop prevents unnecessary checks on first pass and "continue"
-			if(ctContacts>=(iFlags & NUMC_MASK)) 
+			if(cdCollisionContext.ctContacts>=(cdCollisionContext.iFlags & NUMC_MASK))
 			{
 				break;
 			}
 		}
 	 }
 
-	return _ProcessLocalContacts();
+	return _ProcessLocalContacts(cdCollisionContext);
 }
 #endif
 
