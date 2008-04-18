@@ -418,6 +418,9 @@ int dBoxBox (const dVector3 p1, const dMatrix3 R1,
 	  } \
 	}
 
+    // We only need to check 3 edges per box 
+    // since parallel edges are equivalent.
+
     // separating axis = u1 x (v1,v2,v3)
     TST(pp[2]*R21-pp[1]*R31,(A[1]*Q31+A[2]*Q21+B[1]*Q13+B[2]*Q12),0,-R31,R21,7);
     TST(pp[2]*R22-pp[1]*R32,(A[1]*Q32+A[2]*Q22+B[0]*Q13+B[2]*Q11),0,-R32,R22,8);
@@ -457,11 +460,13 @@ int dBoxBox (const dVector3 p1, const dMatrix3 R1,
   // compute contact point(s)
 
   if (code > 6) {
-    // an edge from box 1 touches an edge from box 2.
+    // An edge from box 1 touches an edge from box 2.
     // find a point pa on the intersecting edge of box 1
     dVector3 pa;
     dReal sign;
-    for (i=0; i<3; i++) pa[i] = p1[i];
+    // Copy p1 into pa
+    for (i=0; i<3; i++) pa[i] = p1[i]; // why no memcpy?
+    // Get world position of p2 into pa
     for (j=0; j<3; j++) {
       sign = (dDOT14(normal,R1+j) > 0) ? REAL(1.0) : REAL(-1.0);
       for (i=0; i<3; i++) pa[i] += sign * A[j] * R1[i*4+j];
@@ -469,21 +474,25 @@ int dBoxBox (const dVector3 p1, const dMatrix3 R1,
 
     // find a point pb on the intersecting edge of box 2
     dVector3 pb;
-    for (i=0; i<3; i++) pb[i] = p2[i];
+    // Copy p2 into pb
+    for (i=0; i<3; i++) pb[i] = p2[i]; // why no memcpy?
+    // Get world position of p2 into pb
     for (j=0; j<3; j++) {
       sign = (dDOT14(normal,R2+j) > 0) ? REAL(-1.0) : REAL(1.0);
       for (i=0; i<3; i++) pb[i] += sign * B[j] * R2[i*4+j];
     }
-
+    
     dReal alpha,beta;
     dVector3 ua,ub;
+    // Get direction of first edge
     for (i=0; i<3; i++) ua[i] = R1[((code)-7)/3 + i*4];
+    // Get direction of second edge
     for (i=0; i<3; i++) ub[i] = R2[((code)-7)%3 + i*4];
-
-    dLineClosestApproach (pa,ua,pb,ub,&alpha,&beta);
+    // Get closest points between edges (one at each)
+    dLineClosestApproach (pa,ua,pb,ub,&alpha,&beta);    
     for (i=0; i<3; i++) pa[i] += ua[i]*alpha;
     for (i=0; i<3; i++) pb[i] += ub[i]*beta;
-
+    // Set the contact point as halfway between the 2 closest points
     for (i=0; i<3; i++) contact[0].pos[i] = REAL(0.5)*(pa[i]+pb[i]);
     contact[0].depth = *depth;
     *return_code = code;
@@ -494,7 +503,6 @@ int dBoxBox (const dVector3 p1, const dMatrix3 R1,
   // axis is perpendicular to a face). define face 'a' to be the reference
   // face (i.e. the normal vector is perpendicular to this) and face 'b' to be
   // the incident face (the closest face of the other box).
-
   const dReal *Ra,*Rb,*pa,*pb,*Sa,*Sb;
   if (code <= 3) {
     Ra = R1;

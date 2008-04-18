@@ -134,6 +134,10 @@ void start()
 #endif
   dMatrix3 m1 = { 1,0,0,0,0,1,0,0,0,0,1,0 };
   dMatrix3 m2 = { 1,0,0,0,0,1,0,0,0,0,1,0 };
+  dGeomSetPosition (geoms[0],
+		    0.0,
+		    0.0,
+		    0.25);
   dGeomSetPosition (geoms[1],
 		    geom1pos[0],
 		    geom1pos[1],
