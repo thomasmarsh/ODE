@@ -15,6 +15,10 @@
 #include <string.h>
 #include <float.h>
 
+#if defined(ODE_DLL) || defined(ODE_LIB) || !defined(_MSC_VER)
+#define __ODE__
+#endif
+
 /* Define a DLL export symbol for those platforms that need it */
 #if defined(_MSC_VER)
   #if defined(ODE_DLL)

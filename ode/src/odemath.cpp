@@ -32,6 +32,8 @@
 #endif				// added by andy for cygwin
 #endif
 
+#undef dSafeNormalize3
+#undef dSafeNormalize4
 #undef dNormalize3
 #undef dNormalize4
 
@@ -44,7 +46,7 @@
 // scale the components by 1/l. this has been verified to work with vectors
 // containing the smallest representable numbers.
 
-int dSafeNormalize3 (dVector3 a)
+int _dSafeNormalize3 (dVector3 a)
 {
   dAASSERT (a);
 
@@ -110,13 +112,18 @@ void dNormalize3 (dVector3 a)
 }
 */
 
+int  dSafeNormalize3 (dVector3 a)
+{
+	return _dSafeNormalize3(a);
+}
+
 void dNormalize3(dVector3 a)
 {
 	_dNormalize3(a);
 }
 
 
-int dSafeNormalize4 (dVector4 a)
+int _dSafeNormalize4 (dVector4 a)
 {
   dAASSERT (a);
   dReal l = dDOT(a,a)+a[3]*a[3];
@@ -135,6 +142,11 @@ int dSafeNormalize4 (dVector4 a)
     a[3] = 0;
     return 0;
   }
+}
+
+int  dSafeNormalize4 (dVector4 a)
+{
+	return _dSafeNormalize4(a);
 }
 
 void dNormalize4(dVector4 a)
