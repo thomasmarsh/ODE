@@ -55,16 +55,19 @@
 		//	2) for(udword i=0;i<nb;i++)	dest[i] = value;
 		//
 #ifdef _MSC_VER
-		_asm push eax
-		_asm push ecx
-		_asm push edi
+// RTFM:
+// When using __asm to write assembly language in C/C++ functions, 
+// you don't need to preserve the EAX, EBX, ECX, EDX, ESI, or EDI registers.
+//		_asm push eax
+//		_asm push ecx
+//		_asm push edi
 		_asm mov edi, dest
 		_asm mov ecx, nb
 		_asm mov eax, value
 		_asm rep stosd
-		_asm pop edi
-		_asm pop ecx
-		_asm pop eax
+//		_asm pop edi
+//		_asm pop ecx
+//		_asm pop eax
 #else
 		while(nb--) *dest++ = value;
 #endif
