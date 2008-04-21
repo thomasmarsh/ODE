@@ -739,19 +739,9 @@ struct ConvexConvexSATOutput
   \param g1 [OUT] Pointer to the convex which should be used in the returned contact as g1
   \param g2 [OUT] Pointer to the convex which should be used in the returned contact as g2
  */
-#if 1
 inline bool CheckSATConvexFaces(dxConvex& cvx1,
 				dxConvex& cvx2,
 				ConvexConvexSATOutput& ccso)
-#else
-inline bool CheckSATConvexFaces(dxConvex& cvx1,
-				dxConvex& cvx2,
-				dReal& min_depth,
-				int& depth_type,
-				int& side_index,
-				dxConvex** g1,
-				dxConvex** g2)
-#endif
 {
   dReal min,max,min1,max1,min2,max2,depth;
   dVector4 plane;
@@ -776,9 +766,10 @@ inline bool CheckSATConvexFaces(dxConvex& cvx1,
       /* 
 	 Take only into account the faces that penetrate cvx1 to determine
 	 minimum depth
-	 ((max2*min2)<0) = different sign
+	 ((max2*min2)<=0) = different sign, or one is zero and thus
+	 cvx2 barelly touches cvx1
       */
-      if (((max2*min2)<0) && (dFabs(depth)<dFabs(ccso.min_depth)))
+      if (((max2*min2)<=0) && (dFabs(depth)<dFabs(ccso.min_depth)))
 	{
 	  dVector4Copy(plane,ccso.plane); // avoid recomputing later
 	  ccso.min_depth=depth;
@@ -797,19 +788,9 @@ inline bool CheckSATConvexFaces(dxConvex& cvx1,
   \param g1 [OUT] Pointer to the convex which should be used in the returned contact as g1
   \param g2 [OUT] Pointer to the convex which should be used in the returned contact as g2
  */
-#if 1
 inline bool CheckSATConvexEdges(dxConvex& cvx1,
 				dxConvex& cvx2,
 				ConvexConvexSATOutput& ccso)
-#else
-inline bool CheckSATConvexEdges(dxConvex& cvx1,
-				dxConvex& cvx2,
-				dReal& min_depth,
-				int& depth_type,
-				int& side_index,
-				dxConvex** g1,
-				dxConvex** g2)
-#endif
 {
   // Test cross products of pairs of edges
   dReal depth,min,max,min1,max1,min2,max2;
@@ -836,6 +817,8 @@ inline bool CheckSATConvexEdges(dxConvex& cvx1,
 	  e2[1]=e2b[1]-e2a[1];
 	  e2[2]=e2b[2]-e2a[2];
 	  dCROSS(plane,=,e1,e2);
+	  if(dDOT(plane,plane)<dEpsilon) /* edges are parallel */ continue;
+	  dNormalize3(plane);
 	  plane[3]=0;
 	  ComputeInterval(cvx1,plane,min1,max1);
 	  ComputeInterval(cvx2,plane,min2,max2);
@@ -843,7 +826,7 @@ inline bool CheckSATConvexEdges(dxConvex& cvx1,
 	  min = std::max(min1, min2);
 	  max = std::min(max1, max2);
 	  depth = max-min;
-	  if (((max2*min2)<0) && (dFabs(depth)<dFabs(ccso.min_depth)))
+	  if ((dFabs(depth)<dFabs(ccso.min_depth)))
 	    {
 	      dVector3Copy(plane,ccso.plane);
 	      ccso.min_depth=depth;
