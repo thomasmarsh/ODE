@@ -337,7 +337,7 @@ inline bool IsPointInPolygon(dVector3 p,
       ap[2] = p[2] - a[2];
       d1 = dDOT(ab,ap);
       d2 = dDOT(ac,ap);
-      if (d1 < 0.0 && d2 < 0.0)
+      if (d1 <= 0.0 && d2 <= 0.0)
 	{
 	  out[0]=a[0];
 	  out[1]=a[1];
@@ -349,7 +349,7 @@ inline bool IsPointInPolygon(dVector3 p,
       bp[2] = p[2] - b[2];
       d3 = dDOT(ab,bp);
       d4 = dDOT(ac,bp);
-      if (d3 > 0.0f && d4 < d3)
+      if (d3 >= 0.0f && d4 <= d3)
 	{
 	  out[0]=b[0];
 	  out[1]=b[1];
@@ -951,11 +951,11 @@ int TestConvexIntersection(dxConvex& cvx1,dxConvex& cvx2, int flags,
       for(std::set<edge>::iterator it=ccso.g2->edges.begin();
 	  it!=ccso.g2->edges.end();
 	  ++it)
-	{
+	{	  
 	  dMULTIPLY0_331(p1,ccso.g2->final_posr->R,&ccso.g2->points[(it->first*3)]);
 	  dVector3Add(ccso.g2->final_posr->pos,p1,p1);
 	  dMULTIPLY0_331(p2,ccso.g2->final_posr->R,&ccso.g2->points[(it->second*3)]);
-	  dVector3Add(ccso.g2->final_posr->pos,p2,p2);
+	  dVector3Add(ccso.g2->final_posr->pos,p2,p2);		 
 	  if(IntersectSegmentPlane(p1,p2,ccso.plane,t,
 				   SAFECONTACT(flags, contact, contacts, skip)->pos))
 	    {

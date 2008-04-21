@@ -194,12 +194,15 @@ void simLoop (int pause)
       if(DumpInfo)
 	{
 	  //DumpInfo=false;
-	  fprintf(stdout,"Contact %d Normal %f,%f,%f Depth %f ",
+	  fprintf(stdout,"Contact %d Normal %f,%f,%f Depth %f Pos %f %f %f ",
 		  i,
 		  contacts[i].normal[0],
 		  contacts[i].normal[1],
 		  contacts[i].normal[2],
-		  contacts[i].depth);
+		  contacts[i].depth,
+		  contacts[i].pos[0],
+		  contacts[i].pos[1],
+		  contacts[i].pos[2]);
 	  if(contacts[i].g1==geoms[0])
 	    {
 	      fprintf(stdout,"Geoms 1 2\n");
