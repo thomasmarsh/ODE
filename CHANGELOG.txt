@@ -8,6 +8,13 @@ the rules for this file:
   * keep the format consistent (79 char width, M/D/Y date format).
 
 ------------------------------------------------------------------------------
+27/04/08 Oleh_Derevenko
+
+        * Fixed incorrect memory copying which could lead to memory corruption
+          in GIMPACT (luckily, in unused code)
+        * Fixed possible memory read beyond the end of allocated buffer along
+          with unnecessary extra memory copying in GIMPACT.
+           
 14/04/08 Oleh_Derevenko
 
         * Fixed possible memory corruption in new trimesh-trimesh collider

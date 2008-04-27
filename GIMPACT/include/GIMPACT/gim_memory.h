@@ -176,11 +176,11 @@ struct GDYNAMIC_ARRAY
 } \
 
 //! Reserves memory for a dynamic array.
-#define GIM_DYNARRAY_RESERVE_SIZE(type, array_data, reserve_size) \
+#define GIM_DYNARRAY_RESERVE_SIZE(type, array_data, old_size, reserve_size) \
 { \
     if ((reserve_size) > (array_data).m_reserve_size) \
     { \
-        (array_data).m_pdata = (char *) gim_realloc((array_data).m_pdata, (array_data).m_size * sizeof(type), (reserve_size) * sizeof(type)); \
+        (array_data).m_pdata = (char *) gim_realloc((array_data).m_pdata, (old_size) * sizeof(type), (reserve_size) * sizeof(type)); \
         (array_data).m_reserve_size = (reserve_size); \
     } \
 } \
@@ -188,7 +188,7 @@ struct GDYNAMIC_ARRAY
 //! Set the size of the array
 #define GIM_DYNARRAY_SET_SIZE(type, array_data, size) \
 { \
-    GIM_DYNARRAY_RESERVE_SIZE(type, array_data, size); \
+    GIM_DYNARRAY_RESERVE_SIZE(type, array_data, (array_data).m_size, size); \
     (array_data).m_size = size; \
 } \
 
@@ -203,7 +203,7 @@ struct GDYNAMIC_ARRAY
 { \
     if ((array_data).m_reserve_size <= (array_data).m_size)\
     {\
-        GIM_DYNARRAY_RESERVE_SIZE(type, array_data, (array_data).m_size + G_ARRAY_GROW_SIZE); \
+        GIM_DYNARRAY_RESERVE_SIZE(type, array_data, (array_data).m_size, (array_data).m_size + G_ARRAY_GROW_SIZE); \
     }\
     type * _pt = GIM_DYNARRAY_POINTER(type, array_data); \
     memcpy(&_pt[(array_data).m_size], &(item), sizeof(type)); \
@@ -215,7 +215,7 @@ struct GDYNAMIC_ARRAY
 { \
     if ((array_data).m_reserve_size <= (array_data).m_size) \
     { \
-        GIM_DYNARRAY_RESERVE_SIZE(type, array_data, (array_data).m_size + G_ARRAY_GROW_SIZE); \
+        GIM_DYNARRAY_RESERVE_SIZE(type, array_data, (array_data).m_size, (array_data).m_size + G_ARRAY_GROW_SIZE); \
     } \
     (array_data).m_size++; \
 } \
@@ -225,12 +225,12 @@ struct GDYNAMIC_ARRAY
 { \
     if ((array_data).m_reserve_size <= (array_data).m_size) \
     { \
-        GIM_DYNARRAY_RESERVE_SIZE(type, array_data, (array_data).m_size + G_ARRAY_GROW_SIZE); \
+        GIM_DYNARRAY_RESERVE_SIZE(type, array_data, (array_data).m_size, (array_data).m_size + G_ARRAY_GROW_SIZE); \
     } \
     type * _pt = GIM_DYNARRAY_POINTER(type, array_data); \
     if ((index) < (array_data).m_size - 1) \
     { \
-        memcpy(&_pt[(index) + 1], &_pt[(index)], ((array_data).m_size - (index)) * sizeof(type)); \
+        memmove(&_pt[(index) + 1], &_pt[(index)], ((array_data).m_size - (index)) * sizeof(type)); \
     } \
     memcpy(&_pt[(index)], &(item), sizeof(type)); \
     array_data.m_size++; \
@@ -242,7 +242,7 @@ struct GDYNAMIC_ARRAY
     if ((index) < (array_data).m_size - 1) \
     { \
         type * _pt = GIM_DYNARRAY_POINTER(type, array_data);\
-        memcpy(&_pt[(index)], &_pt[(index) + 1], ((array_data).m_size - (index) - 1) * sizeof(type)); \
+        memmove(&_pt[(index)], &_pt[(index) + 1], ((array_data).m_size - (index) - 1) * sizeof(type)); \
     } \
     (array_data).m_size--; \
 } \
@@ -297,7 +297,7 @@ Bitsets , based on \ref DYNAMIC_ARRAYS .
     { \
         if ((array_data).m_size > (array_data).m_reserve_size) \
         { \
-            GIM_DYNARRAY_RESERVE_SIZE(GUINT, array_data, (array_data).m_size + G_ARRAY_GROW_SIZE); \
+            GIM_DYNARRAY_RESERVE_SIZE(GUINT, array_data, _oldsize, (array_data).m_size + G_ARRAY_GROW_SIZE); \
         } \
         GUINT * _pt = GIM_DYNARRAY_POINTER(GUINT, array_data); \
         memset(&_pt[_oldsize], 0, sizeof(GUINT) * ((array_data).m_size - _oldsize)); \
@@ -791,7 +791,7 @@ struct GBUFFER_ARRAY
     type * _pt = GIM_BUFFER_ARRAY_POINTER(type, array_data, 0); \
     if ((index) < (array_data)->m_element_count - 1) \
     { \
-        memcpy(&_pt[(index) + 1], &_pt[(index)], ((array_data).m_element_count - (index)) * sizeof(type)); \
+        memmove(&_pt[(index) + 1], &_pt[(index)], ((array_data).m_element_count - (index)) * sizeof(type)); \
     } \
     memcpy(&_pt[(index)], &(item), sizeof(type)); \
     gim_buffer_array_unlock(&(array_data)); \
@@ -808,7 +808,7 @@ struct GBUFFER_ARRAY
     { \
         gim_buffer_array_lock(&(array_data), G_MA_WRITE_ONLY); \
         type * _pt = GIM_BUFFER_ARRAY_POINTER(type, array_data, 0); \
-        memcpy(&_pt[(index)], &_pt[(index) + 1],((array_data).m_element_count - (index) - 1) * sizeof(type)); \
+        memmove(&_pt[(index)], &_pt[(index) + 1],((array_data).m_element_count - (index) - 1) * sizeof(type)); \
         gim_buffer_array_unlock(&(array_data)); \
     } \
     (array_data).m_element_count--; \
