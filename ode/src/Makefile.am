@@ -14,7 +14,7 @@ libode_la_LDFLAGS = @EXTRA_LIBTOOL_LDFLAGS@ -release @LIBTOOL_RELEASE@
 libode_la_LIBADD = libfast.la
 
 
-
+# please, let's keep the filenames sorted
 libode_la_SOURCES =     array.cpp array.h \
                         box.cpp \
                         capsule.cpp \
@@ -45,6 +45,7 @@ libode_la_SOURCES =     array.cpp array.h \
                         objects.h \
                         obstack.cpp obstack.h \
                         ode.cpp \
+                        odeinit.cpp odeinit.h \
                         odemath.cpp \
                         plane.cpp \
                         quickstep.cpp quickstep.h \
@@ -56,8 +57,7 @@ libode_la_SOURCES =     array.cpp array.h \
                         step.h \
                         testing.cpp testing.h \
                         timer.cpp \
-                        util.cpp util.h \
-                        odeinit.cpp odeinit.h
+                        util.cpp util.h
 
 
 ###################################
@@ -66,7 +66,6 @@ libode_la_SOURCES =     array.cpp array.h \
 
 
 if ENABLE_OU
-
 
 libode_la_LIBADD += $(top_builddir)/ou/src/ou/libou.a
 libode_la_CPPFLAGS += -I$(top_srcdir)/ou/include
