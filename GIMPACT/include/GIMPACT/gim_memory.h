@@ -279,8 +279,8 @@ Bitsets , based on \ref DYNAMIC_ARRAYS .
 //! Creates a bitset, with their bits set to 0.
 #define GIM_BITSET_CREATE_SIZED(array_data, bits_count) \
 { \
-    (array_data).m_size = (bits_count) / GUINT_BIT_COUNT + 1; \
-    GIM_DYNARRAY_CREATE(GUINT, array_data, (array_data).m_size); \
+    GUINT array_size = (bits_count) / GUINT_BIT_COUNT + 1; \
+    GIM_DYNARRAY_CREATE(GUINT, array_data, array_size); \
     GUINT * _pt = GIM_DYNARRAY_POINTER(GUINT, array_data); \
     memset(_pt, 0, sizeof(GUINT) * ((array_data).m_size)); \
 } \

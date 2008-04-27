@@ -14,6 +14,8 @@ the rules for this file:
           in GIMPACT (luckily, in unused code)
         * Fixed possible memory read beyond the end of allocated buffer along
           with unnecessary extra memory copying in GIMPACT.
+        * Fixed buffer reserve being incorrectly reset to zero for bitsets 
+          what resulted in unnecessary memory reallocations in GIMPACT.
            
 14/04/08 Oleh_Derevenko
 
