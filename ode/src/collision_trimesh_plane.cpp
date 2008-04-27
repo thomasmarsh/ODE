@@ -63,6 +63,7 @@ int dCollideTrimeshPlane( dxGeom *o1, dxGeom *o2, int flags, dContactGeom* conta
 	const int tri_count = trimesh->Data->Mesh.GetNbTriangles();
 
 	VertexPointers VP;
+	ConversionArea VC;
 	dReal alpha;
 	dVector3 vertex;
 
@@ -74,7 +75,7 @@ int dCollideTrimeshPlane( dxGeom *o1, dxGeom *o2, int flags, dContactGeom* conta
 	for ( int t = 0; t < tri_count; ++t )
 	{
 		// Get triangle, which should also use callback.
-		trimesh->Data->Mesh.GetTriangle( VP, t );
+		trimesh->Data->Mesh.GetTriangle( VP, t, VC);
 
 		// For each vertex.
 		for ( int v = 0; v < 3; ++v )

@@ -38,6 +38,8 @@
 		}
 	};
 
+	typedef			Point				ConversionArea[3];
+
 #ifdef OPC_USE_CALLBACKS
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	/**
@@ -105,6 +107,15 @@
 						bool				SetStrides(udword tri_stride=sizeof(IndexedTriangle), udword vertex_stride=sizeof(Point));
 		inline_			udword				GetTriStride()		const	{ return mTriStride;	}
 		inline_			udword				GetVertexStride()	const	{ return mVertexStride;	}
+
+		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+		/**
+		*	Single/Double control
+		*	\param		value		[in] Indicates if mesh data is provided as array of \c single values. If \c false, data is expected to contain \c double elements.
+		*/
+		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+		inline_			void				SetSingle(bool value) { mFetchTriangle = (value ? &MeshInterface::FetchTriangleFromSingles : &MeshInterface::FetchTriangleFromDoubles); }
+
 	#endif
 #endif
 
@@ -113,31 +124,20 @@
 		 *	Fetches a triangle given a triangle index.
 		 *	\param		vp		[out] required triangle's vertex pointers
 		 *	\param		index	[in] triangle index
+		 *	\param		vc      [in,out] storage required for data conversion (pass local variable with same scope as \a vp, as \a vp may point to this memory on return)
 		 */
 		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-		inline_			void				GetTriangle(VertexPointers& vp, udword index)	const
+		inline_			void				GetTriangle(VertexPointers& vp, udword index, ConversionArea vc)	const
 											{
 #ifdef OPC_USE_CALLBACKS
 												(mObjCallback)(index, vp, mUserData);
 #else
 	#ifdef OPC_USE_STRIDE
-												const IndexedTriangle* T = (const IndexedTriangle*)(((ubyte*)mTris) + index * mTriStride);
-
-												if (Single){
-													vp.Vertex[0] = (const Point*)(((ubyte*)mVerts) + T->mVRef[0] * mVertexStride);
-													vp.Vertex[1] = (const Point*)(((ubyte*)mVerts) + T->mVRef[1] * mVertexStride);
-													vp.Vertex[2] = (const Point*)(((ubyte*)mVerts) + T->mVRef[2] * mVertexStride);
-												}
-												else{
-													for (int i = 0; i < 3; i++){
-														const double* v = (const double*)(((ubyte*)mVerts) + T->mVRef[i] * mVertexStride);
-
-														VertexCache[i].x = (float)v[0];
-														VertexCache[i].y = (float)v[1];
-														VertexCache[i].z = (float)v[2];
-														vp.Vertex[i] = &VertexCache[i];
-													}
-												}
+												// Since there was conditional statement "if (Single)" which was unpredictable for compiler 
+												// and required both branches to be always generated what made inlining a questionable 
+												// benefit, I consider it better to introduce a forced call
+												// but get rig of branching and dead code injection.
+												((*this).*mFetchTriangle)(vp, index, vc);
 	#else
 												const IndexedTriangle* T = &mTris[index];
 												vp.Vertex[0] = &mVerts[T->mVRef[0]];
@@ -147,6 +147,15 @@
 #endif
 											}
 
+		private:
+#ifndef OPC_USE_CALLBACKS
+	#ifdef OPC_USE_STRIDE
+		void				FetchTriangleFromSingles(VertexPointers& vp, udword index, ConversionArea vc) const;
+		void				FetchTriangleFromDoubles(VertexPointers& vp, udword index, ConversionArea vc) const;
+	#endif
+#endif
+
+		public:
 		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		/**
 		 *	Remaps client's mesh according to a permutation.
@@ -183,16 +192,14 @@
 						RequestCallback		mObjCallback;		//!< Object callback
 #else
 		// User pointers
-				const	IndexedTriangle*	mTris;				//!< Array of indexed triangles
-				const	Point*				mVerts;				//!< Array of vertices
 	#ifdef OPC_USE_STRIDE
 						udword				mTriStride;			//!< Possible triangle stride in bytes [Opcode 1.3]
 						udword				mVertexStride;		//!< Possible vertex stride in bytes [Opcode 1.3]
+				typedef	void (MeshInterface:: *TriangleFetchProc)(VertexPointers& vp, udword index, ConversionArea vc) const;
+						TriangleFetchProc	mFetchTriangle;
 	#endif
-		public:
-						bool Single;							//!< Use single or double precision vertices
-		private:
-						static Point VertexCache[3];
+						const	IndexedTriangle*	mTris;				//!< Array of indexed triangles
+						const	Point*				mVerts;				//!< Array of vertices
 #endif
 	};
 

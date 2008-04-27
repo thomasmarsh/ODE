@@ -43,7 +43,7 @@ using namespace Opcode;
 //! Planes-triangle test
 #define PLANES_PRIM(prim_index, flag)		\
 	/* Request vertices from the app */		\
-	mIMesh->GetTriangle(mVP, prim_index);	\
+	mIMesh->GetTriangle(mVP, prim_index, mVC);	\
 	/* Perform triangle-box overlap test */	\
 	if(PlanesTriOverlap(clip_mask))			\
 	{										\

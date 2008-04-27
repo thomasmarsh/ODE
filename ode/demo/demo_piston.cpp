@@ -199,6 +199,8 @@ static void printKeyBoardShortCut()
 // start simulation - set viewpoint
 static void start()
 {
+	dAllocateODEDataForThread(dAllocateMaskAll);
+
 	dsSetViewpoint (xyz,hpr);
 	printf ("This program demonstrates how the Piston joint works.\n");
 	printf ("A Piston joint enables the sliding of a body with respect to another body\n");
@@ -550,6 +552,7 @@ void Help (char **argv)
 
 int main (int argc, char **argv)
 {
+  dInitODE2(0);
   bool fixed  = true;
 
 for (int i=0; i<NUM_PARTS; ++i)
@@ -723,6 +726,7 @@ world = dWorldCreate();
   dJointGroupDestroy (contactgroup);
   dSpaceDestroy (space);
   dWorldDestroy (world);
+  dCloseODE();
   return 0;
 }
 

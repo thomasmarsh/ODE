@@ -56,7 +56,24 @@ libode_la_SOURCES =     array.cpp array.h \
                         step.h \
                         testing.cpp testing.h \
                         timer.cpp \
-                        util.cpp util.h
+                        util.cpp util.h \
+                        odeinit.cpp odeinit.h
+
+
+###################################
+#       O U    S T U F F
+###################################
+
+
+if ENABLE_OU
+
+
+libode_la_LIBADD += $(top_builddir)/ou/src/ou/libou.a
+libode_la_CPPFLAGS += -I$(top_srcdir)/ou/include
+libode_la_SOURCES +=    odetls.cpp odetls.h \
+                        odeou.cpp odeou.h
+
+endif
 
 
 ###################################

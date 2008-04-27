@@ -22,7 +22,19 @@ package.objdir = "obj/ode"
   end
 
 
-  -- Output is placed in a directory named for the target toolset.
+-- Define _DEBUG/NDEBUG depending on build kind
+
+  for k,v in ipairs(project.configs) do
+    if (string.find(v, "Debug") ~= nil) then
+      table.insert(package.config[v].defines, "_DEBUG")
+    else
+-- Allow asserts to be included in release build by default
+--      table.insert(package.config[v].defines, "NDEBUG")
+    end
+  end
+
+
+-- Output is placed in a directory named for the target toolset.
   package.path = options["target"]
 
 
@@ -44,6 +56,12 @@ package.objdir = "obj/ode"
 
   if (options["no-alloca"]) then
     text = string.gsub(text, "/%* #define dUSE_MALLOC_FOR_ALLOCA %*/", "#define dUSE_MALLOC_FOR_ALLOCA")
+  end
+
+  if (options["enable-ou"]) then
+    text = string.gsub(text, "/%* #define dOU_ENABLED 1 %*/", "#define dOU_ENABLED 1")
+    text = string.gsub(text, "/%* #define dATOMICS_ENABLED 1 %*/", "#define dATOMICS_ENABLED 1")
+    text = string.gsub(text, "/%* #define dTLS_ENABLED 1 %*/", "#define dTLS_ENABLED 1")
   end
 
   io.output("../ode/src/config.h")
@@ -95,7 +113,8 @@ package.objdir = "obj/ode"
     "../../ode/src",
     "../../include",
     "../../OPCODE",
-    "../../GIMPACT/include"
+    "../../GIMPACT/include",
+    "../../ou/include"
   }
 
   if (windows) then
@@ -180,6 +199,11 @@ package.objdir = "obj/ode"
     matchrecursive("../../GIMPACT/*.h", "../../GIMPACT/*.cpp")
   }
 
+  ou_files =
+  {
+    matchrecursive("../../ou/*.h", "../../ou/*.cpp")
+  }
+
   dif_files =
   {
     "../../ode/src/export-dif.cpp"
@@ -197,4 +221,11 @@ package.objdir = "obj/ode"
   else
     table.insert(package.files, gimpact_files)
     table.insert(package.files, opcode_files)
+  end
+
+  if (options["enable-ou"]) then
+    table.insert(package.files, ou_files)
+-- Insert namespace redefinition in project options instead of config.h
+-- because OU library does not include that file itself.
+    table.insert(package.defines, "_OU_NAMESPACE=odeou")
   end

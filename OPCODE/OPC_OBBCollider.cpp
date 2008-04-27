@@ -43,7 +43,7 @@ using namespace Opcode;
 //! OBB-triangle test
 #define OBB_PRIM(prim_index, flag)												\
 	/* Request vertices from the app */											\
-	VertexPointers VP;	mIMesh->GetTriangle(VP, prim_index);					\
+	VertexPointers VP;	ConversionArea VC;	mIMesh->GetTriangle(VP, prim_index, VC); \
 	/* Transform them in a common space */										\
 	TransformPoint(mLeafVerts[0], *VP.Vertex[0], mRModelToBox, mTModelToBox);	\
 	TransformPoint(mLeafVerts[1], *VP.Vertex[1], mRModelToBox, mTModelToBox);	\

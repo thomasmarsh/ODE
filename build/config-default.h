@@ -27,6 +27,14 @@
  *                       Use an alternative trimesh-trimesh collider
  *                       which should yield better results.
  *
+ *   dOU_ENABLED (experimental)
+ *   dATOMICS_ENABLED (experimental)
+ *   dTLS_ENABLED (experimental)
+ *                       Use generic features of OU library, atomic
+ *                       API and TLS API respectively. Using TLS for
+ *                       global variables allows calling ODE from 
+ *                       multiple threads.
+ *
  ******************************************************************/
 
 #define dTRIMESH_ENABLED 1
@@ -36,6 +44,10 @@
 #define dTRIMESH_OPCODE_USE_NEW_TRIMESH_TRIMESH_COLLIDER 0
 
 /* #define dUSE_MALLOC_FOR_ALLOCA */
+
+/* #define dOU_ENABLED 1 */
+/* #define dATOMICS_ENABLED 1 */
+/* #define dTLS_ENABLED 1 */
 
 
 /******************************************************************
@@ -101,6 +113,13 @@ typedef size_t intP;
  * similar behavior. setting a larger alignment can waste a (very) small
  * amount of memory. NOTE: this number must be a power of two. */
 #define EFFICIENT_ALIGNMENT 16
+
+/* Basic OU functionality is required if either atomic API or TLS support
+ * is enabled. */
+#if dATOMICS_ENABLED || dTLS_ENABLED
+#undef dOU_ENABLED
+#define dOU_ENABLED 1
+#endif
 
 
 #endif

@@ -31,7 +31,7 @@ project.name = "ode"
   addoption("no-dif",        		"Exclude DIF (Dynamics Interchange Format) exports")
   addoption("no-trimesh",    		"Exclude trimesh collision geometry")
   addoption("no-alloca",     		"Use heap memory instead of the stack (experimental)")
-
+  addoption("enable-ou",            "Use TLS for global variables (experimental)")
 
   -- Output is placed in a directory named for the target toolset.
   project.path = options["target"]

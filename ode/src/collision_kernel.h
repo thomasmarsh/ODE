@@ -212,4 +212,14 @@ struct dxSpace : public dxGeom {
 };
 
 
+//****************************************************************************
+// Initialization and finalization functions
+
+void dInitColliders();
+void dFinitColliders();
+
+void dClearPosrCache(void);
+void dFinitUserClasses();
+
+
 #endif

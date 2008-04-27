@@ -109,6 +109,8 @@ static void nearCallback (void *data, dGeomID o1, dGeomID o2)
 // start simulation - set viewpoint
 static void start()
 {
+		dAllocateODEDataForThread(dAllocateMaskAll);
+
 		dsSetViewpoint (xyz,hpr);
 		printf ("Press 'd' to add force along positive x direction.\nPress 'a' to add force along negative x direction.\n");
 		printf ("Press 'w' to add force along positive y direction.\nPress 's' to add force along negative y direction.\n");
@@ -282,6 +284,8 @@ int main (int argc, char **argv)
     }
   }
   
+  dInitODE2(0);
+
   // create world
   world = dWorldCreate();
   space = dHashSpaceCreate (0);
@@ -370,6 +374,7 @@ int main (int argc, char **argv)
   dJointGroupDestroy (contactgroup);
   dSpaceDestroy (space);
   dWorldDestroy (world);
+  dCloseODE();
   return 0;
 }
 

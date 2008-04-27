@@ -39,6 +39,13 @@
 #include "collision_util.h"
 #include "collision_trimesh_internal.h"
 
+
+#if !dTLS_ENABLED
+// Have collider cache instance unconditionally of OPCODE or GIMPACT selection
+/*extern */TrimeshCollidersCache g_ccTrimeshCollidersCache;
+#endif
+
+
 #if dTRIMESH_OPCODE
 
 #define SMALL_ELT           REAL(2.5e-4)
@@ -157,9 +164,10 @@ dCollideTTL(dxGeom* g1, dxGeom* g2, int Flags, dContactGeom* Contacts, int Strid
 	// TLRotation2 = column-major order
 	const dMatrix3& TLRotation2 = *(const dMatrix3*) dGeomGetRotation(TriMesh2);
 
-	AABBTreeCollider& Collider = TriMesh1->_AABBTreeCollider;
+	TrimeshCollidersCache *pccColliderCache = GetTrimeshCollidersCache();
+	AABBTreeCollider& Collider = pccColliderCache->_AABBTreeCollider;
+	BVTCache &ColCache = pccColliderCache->ColCache;
 
-	static BVTCache ColCache;
 	ColCache.Model0 = &TriMesh1->Data->BVTree;
 	ColCache.Model1 = &TriMesh2->Data->BVTree;
 

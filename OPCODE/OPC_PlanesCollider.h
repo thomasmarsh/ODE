@@ -90,6 +90,7 @@
 							Plane*			mPlanes;
 		// Leaf description
 							VertexPointers	mVP;
+							ConversionArea	mVC;
 		// Internal methods
 							void			_Collide(const AABBCollisionNode* node, udword clip_mask);
 							void			_Collide(const AABBNoLeafNode* node, udword clip_mask);

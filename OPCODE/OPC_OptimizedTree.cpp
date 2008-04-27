@@ -384,6 +384,7 @@ bool AABBNoLeafTree::Refit(const MeshInterface* mesh_interface)
 
 	// Bottom-up update
 	VertexPointers VP;
+	ConversionArea VC;
 	Point Min,Max;
 	Point Min_,Max_;
 	udword Index = mNbNodes;
@@ -393,7 +394,7 @@ bool AABBNoLeafTree::Refit(const MeshInterface* mesh_interface)
 
 		if(Current.HasPosLeaf())
 		{
-			mesh_interface->GetTriangle(VP, Current.GetPosPrimitive());
+			mesh_interface->GetTriangle(VP, Current.GetPosPrimitive(), VC);
 			ComputeMinMax(Min, Max, VP);
 		}
 		else
@@ -405,7 +406,7 @@ bool AABBNoLeafTree::Refit(const MeshInterface* mesh_interface)
 
 		if(Current.HasNegLeaf())
 		{
-			mesh_interface->GetTriangle(VP, Current.GetNegPrimitive());
+			mesh_interface->GetTriangle(VP, Current.GetNegPrimitive(), VC);
 			ComputeMinMax(Min_, Max_, VP);
 		}
 		else

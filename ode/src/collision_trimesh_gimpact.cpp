@@ -156,6 +156,8 @@ void dGeomTriMeshDataSetBuffer(dTriMeshDataID g, unsigned char* buf)
 dxTriMesh::dxTriMesh(dSpaceID Space, dTriMeshDataID Data) : dxGeom(Space, 1){
     type = dTriMeshClass;
 
+	gim_init_buffer_managers(m_buffer_managers);
+
     dGeomTriMeshSetData(this,Data);
 
 	/* TC has speed/space 'issues' that don't make it a clear
@@ -170,6 +172,8 @@ dxTriMesh::~dxTriMesh(){
 
     //Terminate Trimesh
     gim_trimesh_destroy(&m_collision_trimesh);
+
+	gim_terminate_buffer_managers(m_buffer_managers);
 }
 
 
@@ -275,6 +279,7 @@ void dGeomTriMeshSetData(dGeomID g, dTriMeshDataID Data)
 	if ( Data->m_Vertices )
 	  gim_trimesh_create_from_data
 	  (
+        mesh->m_buffer_managers,
 	    &mesh->m_collision_trimesh,		// gimpact mesh
 	    ( vec3f *)(&Data->m_Vertices[0]),	// vertices
 	    Data->m_VertexCount,		// nr of verts

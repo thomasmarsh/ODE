@@ -104,6 +104,8 @@ static void nearCallback (void *data, dGeomID o1, dGeomID o2)
 
 static void start()
 {
+  dAllocateODEDataForThread(dAllocateMaskAll);
+
   static float xyz[3] = {-8,0,5};
   static float hpr[3] = {0.0f,-29.5000f,0.0000f};
   dsSetViewpoint (xyz,hpr);
@@ -214,7 +216,7 @@ int main (int argc, char **argv)
     fn.path_to_textures = argv[1];
 
   // create world
-  dInitODE();
+  dInitODE2(0);
   world = dWorldCreate();
   space = dHashSpaceCreate (0);
 

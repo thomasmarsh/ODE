@@ -113,7 +113,7 @@ Memory Function Handlers
   used. */
 //! @{
 void gim_set_alloc_handler (gim_alloc_function *fn);
-void gim_set_alloca_handler (gim_alloca_function *fn);
+// void gim_set_alloca_handler (gim_alloca_function *fn); -- a nonsense
 void gim_set_realloc_handler (gim_realloc_function *fn);
 void gim_set_free_handler (gim_free_function *fn);
 //! @}
@@ -124,7 +124,7 @@ get current memory management functions.
 */
 //! @{
 gim_alloc_function *gim_get_alloc_handler (void);
-gim_alloca_function *gim_get_alloca_handler(void);
+// gim_alloca_function *gim_get_alloca_handler(void); -- a nonsense
 gim_realloc_function *gim_get_realloc_handler (void);
 gim_free_function  *gim_get_free_handler (void);
 //! @}
@@ -134,7 +134,7 @@ Standar Memory functions
 */
 //! @{
 void * gim_alloc(size_t size);
-void * gim_alloca(size_t size);
+// void * gim_alloca(size_t size); -- a nonsense
 void * gim_realloc(void *ptr, size_t oldsize, size_t newsize);
 void gim_free(void *ptr, size_t size);
 //! @}
@@ -148,7 +148,8 @@ Dynamic Arrays. Allocated from system memory.
 </ul>
 */
 //! @{
-#define G_ARRAY_GROW_SIZE 100
+#define G_ARRAY_GROW_SIZE 64
+#define G_ARRAY_BUFFERMANAGER_INIT_SIZE 2
 
 //! Dynamic array handle.
 struct GDYNAMIC_ARRAY
@@ -402,9 +403,13 @@ Buffer manager identifiers
 \sa BUFFERS, BUFFER_MANAGERS
 */
 //! @{
-#define G_BUFFER_MANAGER_SYSTEM 0
-#define G_BUFFER_MANAGER_SHARED 1
-#define G_BUFFER_MANAGER_USER 2
+enum
+{
+	G_BUFFER_MANAGER_SYSTEM,
+	G_BUFFER_MANAGER_SHARED,
+
+	G_BUFFER_MANAGER__MAX,
+};
 //! @}
 
 /*! \defgroup BUFFERS
@@ -422,11 +427,13 @@ Buffer operations and structs.
 */
 //! @{
 
+struct GBUFFER_MANAGER_DATA;
+
 //! Buffer handle.
 struct GBUFFER_ID
 {
+	GBUFFER_MANAGER_DATA * m_bm_data;
     GUINT m_buffer_id;
-    GUINT m_buffer_manager_id;
 };
 //typedef  struct _GBUFFER_ID GBUFFER_ID;
 
@@ -516,20 +523,23 @@ struct GBUFFER_MANAGER_DATA
 {
     GDYNAMIC_ARRAY m_buffer_array;//!< Array of GBUFFER_DATA objects
     GDYNAMIC_ARRAY m_free_positions;//!< Array of GUINT elements. Free positions
-    GBUFFER_MANAGER_PROTOTYPE m_prototype;//! Prototype of functions
-    GUINT m_active; //!< 0 or 1
+	const GBUFFER_MANAGER_PROTOTYPE *m_prototype;//!< Prototype of functions
+	GUINT m_buffer_manager_id;//!< Buffer manager id
 };
 //typedef  struct _GBUFFER_MANAGER_DATA GBUFFER_MANAGER_DATA;
 
+//! Checks if buffer manager is used
+int gim_is_buffer_manager_active(GBUFFER_MANAGER_DATA buffer_managers[],
+	GUINT buffer_manager_id);
 //! Adds a buffer Manager to the Memory Singleton
-void gim_create_buffer_manager(GBUFFER_MANAGER_PROTOTYPE * prototype,GUINT buffer_manager_id);
-//! Gets buffer manager
-GUINT gim_get_buffer_manager_count();
+void gim_create_buffer_manager(GBUFFER_MANAGER_DATA buffer_managers[],
+	GUINT buffer_manager_id);
 //! Destroys a buffer manager
-void gim_destroy_buffer_manager(GUINT buffer_manager_id);
-void gim_get_buffer_manager_data(GUINT buffer_manager_id,GBUFFER_MANAGER_DATA ** pbm_data);
-void gim_init_buffer_managers();
-void gim_terminate_buffer_managers();
+void gim_destroy_buffer_manager(GBUFFER_MANAGER_DATA buffer_managers[], GUINT buffer_manager_id);
+void gim_get_buffer_manager_data(GBUFFER_MANAGER_DATA buffer_managers[], 
+	GUINT buffer_manager_id,GBUFFER_MANAGER_DATA ** pbm_data);
+void gim_init_buffer_managers(GBUFFER_MANAGER_DATA buffer_managers[]);
+void gim_terminate_buffer_managers(GBUFFER_MANAGER_DATA buffer_managers[]);
 
 //! @}
 
@@ -548,6 +558,7 @@ void gim_terminate_buffer_managers();
 \post m_refcount = 0
 */
 GUINT gim_create_buffer(
+	GBUFFER_MANAGER_DATA buffer_managers[],
     GUINT buffer_manager_id,
     GUINT buffer_size,
     int usage,
@@ -564,6 +575,7 @@ GUINT gim_create_buffer(
 \post m_refcount = 0
 */
 GUINT gim_create_buffer_from_data(
+	GBUFFER_MANAGER_DATA buffer_managers[],
     GUINT buffer_manager_id,
     const void * pdata,
     GUINT buffer_size,
@@ -571,12 +583,13 @@ GUINT gim_create_buffer_from_data(
     GBUFFER_ID * buffer_id);
 
 //!Allocates on the G_BUFFER_MANAGER_SYSTEM
-GUINT gim_create_common_buffer(GUINT buffer_size, GBUFFER_ID * buffer_id);
+GUINT gim_create_common_buffer(GBUFFER_MANAGER_DATA buffer_managers[],
+	GUINT buffer_size, GBUFFER_ID * buffer_id);
 //!Allocates on the G_BUFFER_MANAGER_SYSTEM, and copies the data
-GUINT gim_create_common_buffer_from_data(
+GUINT gim_create_common_buffer_from_data(GBUFFER_MANAGER_DATA buffer_managers[],
     const void * pdata, GUINT buffer_size, GBUFFER_ID * buffer_id);
 //!Creates a buffer with shared data
-GUINT gim_create_shared_buffer_from_data(
+GUINT gim_create_shared_buffer_from_data(GBUFFER_MANAGER_DATA buffer_managers[],
     const void * pdata, GUINT buffer_size, GBUFFER_ID * buffer_id);
 
 
@@ -863,7 +876,7 @@ m_buffer_data will be 0, for acces to the elements, you'd need to call lock_arra
 #define GIM_BUFFER_ARRAY_INIT_TYPE_OFFSET(type, array_data, buffer_id, element_count, offset) \
 { \
     (array_data).m_buffer_id.m_buffer_id = (buffer_id).m_buffer_id; \
-    (array_data).m_buffer_id.m_buffer_manager_id = (buffer_id).m_buffer_manager_id; \
+    (array_data).m_buffer_id.m_bm_data = (buffer_id).m_bm_data; \
     (array_data).m_buffer_data = 0; \
     (array_data).m_element_count = (element_count);\
     GIM_BUFFER_ARRAY_SET_STRIDE(type, array_data); \
@@ -913,7 +926,9 @@ void gim_buffer_array_copy_ref(GBUFFER_ARRAY * source_data,GBUFFER_ARRAY  * dest
 /*!
 \post A new buffer is created
 */
-void gim_buffer_array_copy_value(GBUFFER_ARRAY * source_data,GBUFFER_ARRAY  * dest_data, GUINT buffer_manager_id,int usage);
+void gim_buffer_array_copy_value(GBUFFER_ARRAY * source_data,
+	GBUFFER_MANAGER_DATA dest_buffer_managers[],GBUFFER_ARRAY  * dest_data, 
+	GUINT buffer_manager_id,int usage);
 
 //! Destroys an GBUFFER_ARRAY object
 /*!

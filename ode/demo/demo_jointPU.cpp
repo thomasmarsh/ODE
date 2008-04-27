@@ -200,6 +200,8 @@ static void printKeyBoardShortCut()
 // start simulation - set viewpoint
 static void start()
 {
+  dAllocateODEDataForThread(dAllocateMaskAll);
+
   dsSetViewpoint (xyz,hpr);
   printf ("This program demonstrates how the PU joint works.\n");
   printf ("A PU joint is a combination of a Universal joint and a Slider joint.\n");
@@ -585,6 +587,7 @@ int main (int argc, char **argv)
     }
   }
 
+  dInitODE2(0);
   // create world
   world = dWorldCreate();
   dWorldSetERP (world, 0.8);
@@ -734,6 +737,7 @@ int main (int argc, char **argv)
   dJointGroupDestroy (contactgroup);
   dSpaceDestroy (space);
   dWorldDestroy (world);
+  dCloseODE();
   return 0;
 }
 

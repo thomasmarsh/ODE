@@ -37,11 +37,9 @@ for geometry objects
 #include "collision_util.h"
 #include "collision_std.h"
 #include "collision_transform.h"
-#include "collision_trimesh_colliders.h"
+#include "collision_trimesh_internal.h"
+#include "odeou.h"
 
-#if dTRIMESH_GIMPACT
-#include <GIMPACT/gimpact.h>
-#endif
 
 #ifdef _MSC_VER
 #pragma warning(disable:4291)  // for VC++, no complaints about "no matching operator delete found"
@@ -52,51 +50,47 @@ for geometry objects
 
 // this struct records the parameters passed to dCollideSpaceGeom()
 
-#if defined(dUSE_POSR_CACHING) 
-// This caching prevents from using collisions in multiple threads.
-// It should be re-implemented via atomic (interlocked) exchange.
-
-// Allocate and free posr - we cache a single posr to avoid thrashing
-static dxPosR* s_cachedPosR = 0;
-#endif
+#if dATOMICS_ENABLED 
+static volatile atomicptr s_cachedPosR = 0; // dxPosR *
+#endif // dATOMICS_ENABLED
 
 static inline dxPosR* dAllocPosr()
 {
-	dxPosR* retPosR;
-#if defined(dUSE_POSR_CACHING)
-	if (s_cachedPosR)
-	{
-		retPosR = s_cachedPosR;
-		s_cachedPosR = 0;
-	}
-	else
+	dxPosR *retPosR;
+
+#if dATOMICS_ENABLED
+	retPosR = (dxPosR *)AtomicExchangePointer(&s_cachedPosR, NULL);
+
+	if (!retPosR)
 #endif
 	{
 		retPosR = (dxPosR*) dAlloc (sizeof(dxPosR));
 	}
+
 	return retPosR;
 }
 
-static inline void dFreePosr(dxPosR* oldPosR)
+static inline void dFreePosr(dxPosR *oldPosR)
 {
-#if defined(dUSE_POSR_CACHING)
-	if (!s_cachedPosR)
-	{
-		s_cachedPosR = oldPosR;
-	}
-	else
+#if dATOMICS_ENABLED
+	if (!AtomicCompareExchangePointer(&s_cachedPosR, NULL, (atomicptr)oldPosR))
 #endif
 	{
 		dFree(oldPosR, sizeof(dxPosR));
 	}
 }
 
-void dClearPosrCache(void)
+/*extern */void dClearPosrCache(void)
 {
-#if defined(dUSE_POSR_CACHING)
-	if (s_cachedPosR)
+#if dATOMICS_ENABLED
+	// No threads should be accessing ODE at this time already,
+	// hence variable may be read directly.
+	dxPosR *existingPosR = (dxPosR *)s_cachedPosR;
+
+	if (existingPosR)
 	{
-		dFree(s_cachedPosR, sizeof(dxPosR));
+		dFree(existingPosR, sizeof(dxPosR));
+
 		s_cachedPosR = 0;
 	}
 #endif
@@ -165,14 +159,14 @@ static void setAllColliders (int i, dColliderFn *fn)
   for (int j=0; j<dGeomNumClasses; j++) setCollider (i,j,fn);
 }
 
-static void initColliders()
+/*extern */void dInitColliders()
 {
-  int i,j;
-
-  if (colliders_initialized) return;
+  dIASSERT(!colliders_initialized);
   colliders_initialized = 1;
 
   memset (colliders,0,sizeof(colliders));
+
+  int i,j;
 
   // setup space colliders
   for (i=dFirstSpaceClass; i <= dLastSpaceClass; i++) {
@@ -233,20 +227,22 @@ static void initColliders()
   setAllColliders (dGeomTransformClass,&dCollideTransform);
 }
 
+/*extern */void dFinitColliders()
+{
+	colliders_initialized = 0;
+}
+
 void dSetColliderOverride (int i, int j, dColliderFn *fn)
 {
+	dIASSERT( colliders_initialized );
 	dAASSERT( i < dGeomNumClasses );
 	dAASSERT( j < dGeomNumClasses );
-
-	// Ensure this has run first or it will wipe out any changes later.
-	initColliders();
 
 	colliders[i][j].fn = fn;
 	colliders[i][j].reverse = 0;
 	colliders[j][i].fn = fn;
 	colliders[j][i].reverse = 1;
 }
-
 
 /*
  *	NOTE!
@@ -307,8 +303,6 @@ int dCollide (dxGeom *o1, dxGeom *o2, int flags, dContactGeom *contact,
 
 dxGeom::dxGeom (dSpaceID _space, int is_placeable)
 {
-  initColliders();
-
   // setup body vars. invalid type of -1 must be changed by the constructor.
   type = -1;
   gflags = GEOM_DIRTY | GEOM_AABB_BAD | GEOM_ENABLED;
@@ -835,13 +829,16 @@ int dCreateGeomClass (const dGeomClass *c)
   }
   user_classes[num_user_classes] = *c;
   int class_number = num_user_classes + dFirstUserClass;
-  initColliders();
   setAllColliders (class_number,&dCollideUserGeomWithGeom);
 
   num_user_classes++;
   return class_number;
 }
 
+/*extern */void dFinitUserClasses()
+{
+  num_user_classes = 0;
+}
 
 void * dGeomGetClassData (dxGeom *g)
 {
@@ -1098,31 +1095,4 @@ void dGeomGetOffsetQuaternion (dxGeom *g, dQuaternion result)
   }
 }
 
-//****************************************************************************
-// initialization and shutdown routines - allocate and initialize data,
-// cleanup before exiting
 
-extern void opcode_collider_cleanup();
-
-void dInitODE()
-{
-#if dTRIMESH_ENABLED && dTRIMESH_GIMPACT
-	gimpact_init();
-#endif
-}
-
-void dCloseODE()
-{
-  colliders_initialized = 0;
-  num_user_classes = 0;
-  dClearPosrCache();
-
-#if dTRIMESH_ENABLED && dTRIMESH_GIMPACT
-  gimpact_terminate();
-#endif
-
-#if dTRIMESH_ENABLED && dTRIMESH_OPCODE
-  // Free up static allocations in opcode
-  opcode_collider_cleanup();
-#endif
-}

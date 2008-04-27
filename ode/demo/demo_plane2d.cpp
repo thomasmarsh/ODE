@@ -33,6 +33,8 @@ static dJointGroup
 static void     cb_start ()
 /*************************/
 {
+	dAllocateODEDataForThread(dAllocateMaskAll);
+
     static float    xyz[3] = { 0.5f*STAGE_SIZE, 0.5f*STAGE_SIZE, 0.65f*STAGE_SIZE};
     static float    hpr[3] = { 90.0f, -90.0f, 0 };
 
@@ -191,7 +193,7 @@ extern int      main
     dsFunctions drawstuff_functions;
 
 
-	 dInitODE();
+	 dInitODE2(0);
 
     // dynamic world
 

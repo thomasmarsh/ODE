@@ -187,7 +187,8 @@ void gim_trimesh_post_update(GIM_TRIMESH * trimesh);
 \param transformed_reply If 1, then the m_transformed_vertices is a reply of the source vertices. Else it just be a reference to the original array.
 \post it copies the arrays by reference, and creates the auxiliary data (m_aabbset,m_planes_cache_buffer)
 */
-void gim_trimesh_create_from_arrays(GIM_TRIMESH * trimesh, GBUFFER_ARRAY * vertex_array, GBUFFER_ARRAY * triindex_array,char transformed_reply);
+void gim_trimesh_create_from_arrays(GBUFFER_MANAGER_DATA buffer_managers[],
+	GIM_TRIMESH * trimesh, GBUFFER_ARRAY * vertex_array, GBUFFER_ARRAY * triindex_array,char transformed_reply);
 
 
 
@@ -202,7 +203,9 @@ void gim_trimesh_create_from_arrays(GIM_TRIMESH * trimesh, GBUFFER_ARRAY * verte
 \param copy_indices If 1, it copies the source vertices in another buffer. Else (0) it constructs a reference to the data.
 \param transformed_reply If 1, then the m_transformed_vertices is a reply of the source vertices. Else it just be a reference to the original array. Use 1 if you will apply transformations to the trimesh. See \ref gim_trimesh_set_tranform().
 */
-void gim_trimesh_create_from_data(GIM_TRIMESH * trimesh, vec3f * vertex_array, GUINT vertex_count,char copy_vertices, GUINT * triindex_array, GUINT index_count,char copy_indices,char transformed_reply);
+void gim_trimesh_create_from_data(GBUFFER_MANAGER_DATA buffer_managers[],
+	GIM_TRIMESH * trimesh, vec3f * vertex_array, GUINT vertex_count,char copy_vertices, 
+	GUINT * triindex_array, GUINT index_count,char copy_indices,char transformed_reply);
 
 //! Clears auxiliary data and releases buffer arrays
 void gim_trimesh_destroy(GIM_TRIMESH * trimesh);
@@ -214,7 +217,9 @@ void gim_trimesh_destroy(GIM_TRIMESH * trimesh);
 \param copy_by_reference If 1, it attach a reference to the source vertices, else it copies the vertices
 \param transformed_reply If 1, transformed vertices are reply of source vertives. 1 Is recommended
 */
-void gim_trimesh_copy(GIM_TRIMESH * source_trimesh,GIM_TRIMESH * dest_trimesh, char copy_by_reference, char transformed_reply);
+void gim_trimesh_copy(GIM_TRIMESH * source_trimesh,
+	GBUFFER_MANAGER_DATA dest_buffer_managers[], GIM_TRIMESH * dest_trimesh, 
+	char copy_by_reference, char transformed_reply);
 
 
 //! Locks the trimesh for working with it
