@@ -125,6 +125,14 @@ static int listHasLoops (dObject *first)
 
 // check the validity of the world data structures
 
+static int g_world_check_tag_generator = 0;
+
+static inline int generateWorlgCheckTag()
+{
+	// Atomicity is not necessary here
+	return ++g_world_check_tag_generator;
+}
+
 static void checkWorld (dxWorld *w)
 {
   dxBody *b;
@@ -153,8 +161,7 @@ static void checkWorld (dxWorld *w)
   if (w->nj != n) dDebug (0,"joint count incorrect");
 
   // set all tag values to a known value
-  static int count = 0;
-  count++;
+  int count = generateWorlgCheckTag();
   for (b=w->firstbody; b; b=(dxBody*)b->next) b->tag = count;
   for (j=w->firstjoint; j; j=(dxJoint*)j->next) j->tag = count;
 
