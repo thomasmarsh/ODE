@@ -22,6 +22,8 @@
 
 // TriMesh code by Erwin de Vries.
 // Modified for FreeSOLID Compatibility by Rodrigo Hernandez
+// Trimesh caches separation by Oleh Derevenko
+
 
 #ifndef _ODE_COLLISION_TRIMESH_INTERNAL_H_
 #define _ODE_COLLISION_TRIMESH_INTERNAL_H_
@@ -43,6 +45,114 @@ using namespace Opcode;
 #if dTRIMESH_GIMPACT
 #include <GIMPACT/gimpact.h>
 #endif
+
+#if dTLS_ENABLED
+#include "odetls.h"
+#endif
+
+
+
+
+#if dTRIMESH_OPCODE
+#if dTRIMESH_OPCODE_USE_NEW_TRIMESH_TRIMESH_COLLIDER
+
+// New trimesh collider hash table types
+enum
+{
+	MAXCONTACT_X_NODE = 4,
+	CONTACTS_HASHSIZE = 256,
+};
+
+struct CONTACT_KEY
+{
+	dContactGeom * m_contact;
+	unsigned int m_key;
+};
+
+struct CONTACT_KEY_HASH_NODE
+{
+	CONTACT_KEY m_keyarray[MAXCONTACT_X_NODE];
+	int m_keycount;
+};
+
+struct CONTACT_KEY_HASH_TABLE
+{
+public:
+	CONTACT_KEY_HASH_NODE &operator[](unsigned int index) { return m_storage[index]; }
+
+private:
+	CONTACT_KEY_HASH_NODE m_storage[CONTACTS_HASHSIZE];
+};
+
+#endif // dTRIMESH_OPCODE_USE_NEW_TRIMESH_TRIMESH_COLLIDER
+#endif // dTRIMESH_OPCODE
+
+
+
+struct TrimeshCollidersCache
+{
+	TrimeshCollidersCache()
+	{
+#if dTRIMESH_OPCODE
+		InitOPCODECaches();
+#endif // dTRIMESH_OPCODE
+	}
+
+#if dTRIMESH_OPCODE
+
+	void InitOPCODECaches();
+
+
+	// Collider caches
+	BVTCache ColCache;
+
+#if dTRIMESH_OPCODE_USE_NEW_TRIMESH_TRIMESH_COLLIDER
+	CONTACT_KEY_HASH_TABLE _hashcontactset;
+#endif
+
+	// Colliders
+/* -- not used -- also uncomment in InitOPCODECaches()
+	PlanesCollider _PlanesCollider; -- not used 
+*/
+	SphereCollider _SphereCollider;
+	OBBCollider _OBBCollider;
+	RayCollider _RayCollider;
+	AABBTreeCollider _AABBTreeCollider;
+/* -- not used -- also uncomment in InitOPCODECaches()
+	LSSCollider _LSSCollider;
+*/
+	// Trimesh caches
+	CollisionFaces Faces;
+	SphereCache defaultSphereCache;
+	OBBCache defaultBoxCache;
+	LSSCache defaultCapsuleCache;
+
+#endif // dTRIMESH_OPCODE
+};
+
+#if dTLS_ENABLED
+
+inline TrimeshCollidersCache *GetTrimeshCollidersCache()
+{
+	return COdeTls::GetTrimeshCollidersCache();
+}
+
+
+#else // dTLS_ENABLED
+
+inline TrimeshCollidersCache *GetTrimeshCollidersCache()
+{
+	extern TrimeshCollidersCache g_ccTrimeshCollidersCache;
+
+	return &g_ccTrimeshCollidersCache;
+}
+
+
+#endif // dTLS_ENABLED
+
+
+
+
 
 struct dxTriMeshData  : public dBase 
 {
@@ -182,38 +292,27 @@ struct dxTriMesh : public dxGeom{
 	// Instance data for last transform.
     dMatrix4 last_trans;
 
-	// Colliders
-	static PlanesCollider _PlanesCollider;
-	static SphereCollider _SphereCollider;
-	static OBBCollider _OBBCollider;
-	static RayCollider _RayCollider;
-	static AABBTreeCollider _AABBTreeCollider;
-	static LSSCollider _LSSCollider;
-
 	// Some constants
-	static CollisionFaces Faces;
 	// Temporal coherence
 	struct SphereTC : public SphereCache{
 		dxGeom* Geom;
 	};
 	dArray<SphereTC> SphereTCCache;
-	static SphereCache defaultSphereCache;
 
 	struct BoxTC : public OBBCache{
 		dxGeom* Geom;
 	};
 	dArray<BoxTC> BoxTCCache;
-	static OBBCache defaultBoxCache;
 	
 	struct CapsuleTC : public LSSCache{
 		dxGeom* Geom;
 	};
 	dArray<CapsuleTC> CapsuleTCCache;
-	static LSSCache defaultCapsuleCache;
 #endif // dTRIMESH_OPCODE
 
 #if dTRIMESH_GIMPACT
     GIM_TRIMESH  m_collision_trimesh;
+	GBUFFER_MANAGER_DATA m_buffer_managers[G_BUFFER_MANAGER__MAX];
 #endif  // dTRIMESH_GIMPACT
 };
 
@@ -235,7 +334,8 @@ inline unsigned FetchTriangleCount(dxTriMesh* TriMesh)
 
 inline void FetchTriangle(dxTriMesh* TriMesh, int Index, const dVector3 Position, const dMatrix3 Rotation, dVector3 Out[3]){
 	VertexPointers VP;
-	TriMesh->Data->Mesh.GetTriangle(VP, Index);
+	ConversionArea VC;
+	TriMesh->Data->Mesh.GetTriangle(VP, Index, VC);
 	for (int i = 0; i < 3; i++){
 		dVector3 v;
 		v[0] = VP.Vertex[i]->x;

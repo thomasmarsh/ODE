@@ -120,8 +120,6 @@
 
 using namespace Opcode;
 
-Point MeshInterface::VertexCache[3];
-
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /**
  *	Constructor.
@@ -132,16 +130,16 @@ MeshInterface::MeshInterface() :
 	mNbVerts		(0),
 #ifdef OPC_USE_CALLBACKS
 	mUserData		(null),
-	mObjCallback	(null),
+	mObjCallback	(null)
 #else
-	mTris			(null),
-	mVerts			(null),
 	#ifdef OPC_USE_STRIDE
 	mTriStride		(sizeof(IndexedTriangle)),
 	mVertexStride	(sizeof(Point)),
+	mFetchTriangle	(&MeshInterface::FetchTriangleFromSingles),
 	#endif
+	mTris			(null),
+	mVerts			(null)
 #endif
-	Single(true)
 {
 }
 
@@ -187,12 +185,13 @@ udword MeshInterface::CheckTopology()	const
 	udword NbDegenerate = 0;
 
 	VertexPointers VP;
+	ConversionArea VC;
 
 	// Using callbacks, we don't have access to vertex indices. Nevertheless we still can check for
 	// redundant vertex pointers, which cover all possibilities (callbacks/pointers/strides).
 	for(udword i=0;i<mNbTris;i++)
 	{
-		GetTriangle(VP, i);
+		GetTriangle(VP, i, VC);
 
 		if(		(VP.Vertex[0]==VP.Vertex[1])
 			||	(VP.Vertex[1]==VP.Vertex[2])
@@ -256,6 +255,34 @@ bool MeshInterface::SetStrides(udword tri_stride, udword vertex_stride)
 }
 #endif
 #endif
+
+#ifndef OPC_USE_CALLBACKS
+#ifdef OPC_USE_STRIDE
+void MeshInterface::FetchTriangleFromSingles(VertexPointers& vp, udword index, ConversionArea vc) const
+{
+	const IndexedTriangle* T = (const IndexedTriangle*)(((ubyte*)mTris) + index * mTriStride);
+
+	vp.Vertex[0] = (const Point*)(((ubyte*)mVerts) + T->mVRef[0] * mVertexStride);
+	vp.Vertex[1] = (const Point*)(((ubyte*)mVerts) + T->mVRef[1] * mVertexStride);
+	vp.Vertex[2] = (const Point*)(((ubyte*)mVerts) + T->mVRef[2] * mVertexStride);
+}
+
+void MeshInterface::FetchTriangleFromDoubles(VertexPointers& vp, udword index, ConversionArea vc) const
+{
+	const IndexedTriangle* T = (const IndexedTriangle*)(((ubyte*)mTris) + index * mTriStride);
+
+	for (int i = 0; i < 3; i++){
+		const double* v = (const double*)(((ubyte*)mVerts) + T->mVRef[i] * mVertexStride);
+
+		vc[i].x = (float)v[0];
+		vc[i].y = (float)v[1];
+		vc[i].z = (float)v[2];
+		vp.Vertex[i] = &vc[i];
+	}
+}
+#endif
+#endif
+
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /**

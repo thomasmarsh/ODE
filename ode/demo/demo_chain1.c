@@ -89,6 +89,8 @@ static void start()
 {
   static float xyz[3] = {2.1640f,-1.3079f,1.7600f};
   static float hpr[3] = {125.5000f,-17.0000f,0.0000f};
+
+  dAllocateODEDataForThread(dAllocateMaskAll);
   dsSetViewpoint (xyz,hpr);
 }
 
@@ -137,7 +139,7 @@ int main (int argc, char **argv)
     }
 
   /* create world */
-  dInitODE();
+  dInitODE2(0);
   world = dWorldCreate();
   space = dHashSpaceCreate (0);
   contactgroup = dJointGroupCreate (1000000);

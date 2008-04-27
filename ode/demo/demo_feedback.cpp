@@ -107,6 +107,8 @@ static void nearCallback (void *data, dGeomID o1, dGeomID o2)
 
 static void start()
 {
+  dAllocateODEDataForThread(dAllocateMaskAll);
+
   static float xyz[3] = { -6, 8, 6};
   static float hpr[3] = { -65.0f, -27.0f, 0.0f};
   dsSetViewpoint (xyz,hpr);
@@ -232,7 +234,7 @@ int main (int argc, char **argv)
   }
 
   // create world
-  dInitODE();
+  dInitODE2(0);
   world = dWorldCreate();
   space = dHashSpaceCreate (0);
   contactgroup = dJointGroupCreate (0);

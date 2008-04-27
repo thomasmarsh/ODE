@@ -48,34 +48,22 @@ using namespace Opcode;
 // ### could be log(n) !
 // and maybe use cmp integers
 
-// InsertionSort has better coherence, RadixSort is better for one-shot queries.
-#define PRUNING_SORTER	RadixSort
-//#define PRUNING_SORTER	InsertionSort
+extern ThreadLocalDataProviderProc g_pfnThreadLocalDataProvider;
 
-// Static for coherence
-static PRUNING_SORTER* gCompletePruningSorter = null;
-static PRUNING_SORTER* gBipartitePruningSorter0 = null;
-static PRUNING_SORTER* gBipartitePruningSorter1 = null;
 inline_ PRUNING_SORTER* GetCompletePruningSorter()
 {
-	if(!gCompletePruningSorter)	gCompletePruningSorter = new PRUNING_SORTER;
-	return gCompletePruningSorter;
+	ThreadLocalData *pThreadLocalData = g_pfnThreadLocalDataProvider();
+	return pThreadLocalData->gCompletePruningSorter;
 }
 inline_ PRUNING_SORTER* GetBipartitePruningSorter0()
 {
-	if(!gBipartitePruningSorter0)	gBipartitePruningSorter0 = new PRUNING_SORTER;
-	return gBipartitePruningSorter0;
+	ThreadLocalData *pThreadLocalData = g_pfnThreadLocalDataProvider();
+	return pThreadLocalData->gBipartitePruningSorter0;
 }
 inline_ PRUNING_SORTER* GetBipartitePruningSorter1()
 {
-	if(!gBipartitePruningSorter1)	gBipartitePruningSorter1 = new PRUNING_SORTER;
-	return gBipartitePruningSorter1;
-}
-void ReleasePruningSorters()
-{
-	DELETESINGLE(gBipartitePruningSorter1);
-	DELETESINGLE(gBipartitePruningSorter0);
-	DELETESINGLE(gCompletePruningSorter);
+	ThreadLocalData *pThreadLocalData = g_pfnThreadLocalDataProvider();
+	return pThreadLocalData->gBipartitePruningSorter1;
 }
 
 

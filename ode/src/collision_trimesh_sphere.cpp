@@ -249,7 +249,8 @@ int dCollideSTL(dxGeom* g1, dxGeom* SphereGeom, int Flags, dContactGeom* Contact
 	const dVector3& TLPosition = *(const dVector3*)dGeomGetPosition(TriMesh);
 	const dMatrix3& TLRotation = *(const dMatrix3*)dGeomGetRotation(TriMesh);
 
-	SphereCollider& Collider = TriMesh->_SphereCollider;
+	TrimeshCollidersCache *pccColliderCache = GetTrimeshCollidersCache();
+	SphereCollider& Collider = pccColliderCache->_SphereCollider;
 
 	const dVector3& Position = *(const dVector3*)dGeomGetPosition(SphereGeom);
 	dReal Radius = dGeomSphereGetRadius(SphereGeom);
@@ -287,7 +288,7 @@ int dCollideSTL(dxGeom* g1, dxGeom* SphereGeom, int Flags, dContactGeom* Contact
 	}
 	else {
 		Collider.SetTemporalCoherence(false);
-		Collider.Collide(dxTriMesh::defaultSphereCache, Sphere, TriMesh->Data->BVTree, null, 
+		Collider.Collide(pccColliderCache->defaultSphereCache, Sphere, TriMesh->Data->BVTree, null, 
 						 &MakeMatrix(TLPosition, TLRotation, amatrix));
  	}
 

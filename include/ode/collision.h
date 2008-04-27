@@ -26,6 +26,9 @@
 #include <ode/common.h>
 #include <ode/collision_space.h>
 #include <ode/contact.h>
+// Include odeinit.h for backward compatibility as some of initialization APIs 
+// were initally declared in current header.
+#include <ode/odeinit.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -1353,8 +1356,7 @@ ODE_API int dBoxBox (const dVector3 p1, const dMatrix3 R1,
 	     int flags, dContactGeom *contact, int skip);
 
 ODE_API void dInfiniteAABB (dGeomID geom, dReal aabb[6]);
-ODE_API void dInitODE(void);
-ODE_API void dCloseODE(void);
+
 
 /* ************************************************************************ */
 /* custom classes */

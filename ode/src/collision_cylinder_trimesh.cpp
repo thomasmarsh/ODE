@@ -948,7 +948,8 @@ int dCollideCylinderTrimesh(dxGeom *o1, dxGeom *o2, int flags, dContactGeom *con
 
 	_InitCylinderTrimeshData(cData);
 
-	OBBCollider& Collider = cData.gTrimesh->_OBBCollider;
+	TrimeshCollidersCache *pccColliderCache = GetTrimeshCollidersCache();
+	OBBCollider& Collider = pccColliderCache->_OBBCollider;
 
 	Point cCenter(cData.vCylinderPos[0],cData.vCylinderPos[1],cData.vCylinderPos[2]);
 
@@ -1011,7 +1012,7 @@ int dCollideCylinderTrimesh(dxGeom *o1, dxGeom *o2, int flags, dContactGeom *con
 	else 
 	{
 		Collider.SetTemporalCoherence(false);
-		Collider.Collide(dxTriMesh::defaultBoxCache, obbCapsule, cData.gTrimesh->Data->BVTree, null,&MeshMatrix);
+		Collider.Collide(pccColliderCache->defaultBoxCache, obbCapsule, cData.gTrimesh->Data->BVTree, null,&MeshMatrix);
 	}
 
 	// Retrieve data

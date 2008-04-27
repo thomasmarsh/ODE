@@ -126,7 +126,8 @@ float min_dist, float max_dist, const Point& view_point, CullModeCallback callba
 				// Compute backface culling for current face
 
 				VertexPointers VP;
-				Data->IMesh->GetTriangle(VP, StabbedFaceIndex);
+				ConversionArea VC;
+				Data->IMesh->GetTriangle(VP, StabbedFaceIndex, VC);
 				if(VP.BackfaceCulling(Data->ViewPoint))
 				{
 					if(CM==CULLMODE_CW)		KeepIt = false;

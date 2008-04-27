@@ -352,6 +352,7 @@ bool HybridModel::Refit()
 
 	// Bottom-up update
 	VertexPointers VP;
+	ConversionArea VC;
 	Point Min,Max;
 	Point Min_,Max_;
 	udword Index = mTree->GetNbNodes();
@@ -378,7 +379,7 @@ bool HybridModel::Refit()
 				// Loop through triangles and test each of them
 				while(NbTris--)
 				{
-					mIMesh->GetTriangle(VP, *T++);
+					mIMesh->GetTriangle(VP, *T++, VC);
 					ComputeMinMax(TmpMin, TmpMax, VP);
 					Min.Min(TmpMin);
 					Max.Max(TmpMax);
@@ -391,7 +392,7 @@ bool HybridModel::Refit()
 				// Loop through triangles and test each of them
 				while(NbTris--)
 				{
-					mIMesh->GetTriangle(VP, BaseIndex++);
+					mIMesh->GetTriangle(VP, BaseIndex++, VC);
 					ComputeMinMax(TmpMin, TmpMax, VP);
 					Min.Min(TmpMin);
 					Max.Max(TmpMax);
@@ -423,7 +424,7 @@ bool HybridModel::Refit()
 				// Loop through triangles and test each of them
 				while(NbTris--)
 				{
-					mIMesh->GetTriangle(VP, *T++);
+					mIMesh->GetTriangle(VP, *T++, VC);
 					ComputeMinMax(TmpMin, TmpMax, VP);
 					Min_.Min(TmpMin);
 					Max_.Max(TmpMax);
@@ -436,7 +437,7 @@ bool HybridModel::Refit()
 				// Loop through triangles and test each of them
 				while(NbTris--)
 				{
-					mIMesh->GetTriangle(VP, BaseIndex++);
+					mIMesh->GetTriangle(VP, BaseIndex++, VC);
 					ComputeMinMax(TmpMin, TmpMax, VP);
 					Min_.Min(TmpMin);
 					Max_.Max(TmpMax);

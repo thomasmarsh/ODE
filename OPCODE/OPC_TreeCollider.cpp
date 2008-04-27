@@ -125,8 +125,8 @@ bool AABBTreeCollider::Collide(BVTCache& cache, const Matrix4x4* world0, const M
 
 			if(0)
 			{
-				static GJKEngine GJK;
-				static bool GJKInitDone=false;
+				static GJKEngine GJK; -- not thread safe, store in ThreadLocalData
+				static bool GJKInitDone=false; -- not thread safe, to be removed
 				if(!GJKInitDone)
 				{
 					GJK.Enable(GJK_BACKUP_PROCEDURE);
@@ -142,7 +142,7 @@ bool AABBTreeCollider::Collide(BVTCache& cache, const Matrix4x4* world0, const M
 			}
 			else
 			{
-				static SVEngine SVE;
+				static SVEngine SVE; -- not thread safe, store in ThreadLocalData
 				SVE.SetCallbackObj0(Local::SVCallback);
 				SVE.SetCallbackObj1(Local::SVCallback);
 				SVE.SetUserData0(udword(cache.Model0->GetHull()));
@@ -530,8 +530,10 @@ void AABBTreeCollider::PrimTest(udword id0, udword id1)
 	// Request vertices from the app
 	VertexPointers VP0;
 	VertexPointers VP1;
-	mIMesh0->GetTriangle(VP0, id0);
-	mIMesh1->GetTriangle(VP1, id1);
+	ConversionArea VC0;
+	ConversionArea VC1;
+	mIMesh0->GetTriangle(VP0, id0, VC0);
+	mIMesh1->GetTriangle(VP1, id1, VC1);
 
 	// Transform from space 1 to space 0
 	Point u0,u1,u2;
@@ -559,7 +561,8 @@ inline_ void AABBTreeCollider::PrimTestTriIndex(udword id1)
 {
 	// Request vertices from the app
 	VertexPointers VP;
-	mIMesh1->GetTriangle(VP, id1);
+	ConversionArea VC;
+	mIMesh1->GetTriangle(VP, id1, VC);
 
 	// Perform triangle-triangle overlap test
 	if(TriTriOverlap(mLeafVerts[0], mLeafVerts[1], mLeafVerts[2], *VP.Vertex[0], *VP.Vertex[1], *VP.Vertex[2]))
@@ -581,7 +584,8 @@ inline_ void AABBTreeCollider::PrimTestIndexTri(udword id0)
 {
 	// Request vertices from the app
 	VertexPointers VP;
-	mIMesh0->GetTriangle(VP, id0);
+	ConversionArea VC;
+	mIMesh0->GetTriangle(VP, id0, VC);
 
 	// Perform triangle-triangle overlap test
 	if(TriTriOverlap(mLeafVerts[0], mLeafVerts[1], mLeafVerts[2], *VP.Vertex[0], *VP.Vertex[1], *VP.Vertex[2]))
@@ -641,7 +645,7 @@ void AABBTreeCollider::_CollideBoxTri(const AABBNoLeafNode* b)
 #define FETCH_LEAF(prim_index, imesh, rot, trans)				\
 	mLeafIndex = prim_index;									\
 	/* Request vertices from the app */							\
-	VertexPointers VP;	imesh->GetTriangle(VP, prim_index);		\
+	VertexPointers VP;	ConversionArea VC;	imesh->GetTriangle(VP, prim_index, VC); \
 	/* Transform them in a common space */						\
 	TransformPoint(mLeafVerts[0], *VP.Vertex[0], rot, trans);	\
 	TransformPoint(mLeafVerts[1], *VP.Vertex[1], rot, trans);	\

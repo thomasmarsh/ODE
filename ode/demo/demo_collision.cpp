@@ -1226,6 +1226,8 @@ int space_pressed = 0;
 
 static void start()
 {
+  dAllocateODEDataForThread(dAllocateMaskAll);
+
   static float xyz[3] = {2.4807,-1.8023,2.7600};
   static float hpr[3] = {141.5000,-18.5000,0.0000};
   dsSetViewpoint (xyz,hpr);
@@ -1350,7 +1352,7 @@ int main (int argc, char **argv)
   // setup all tests
 
   memset (testslot,0,sizeof(testslot));
-  dInitODE();
+  dInitODE2(0);
 
   MAKE_TEST(1,test_sphere_point_depth);
   MAKE_TEST(2,test_box_point_depth);

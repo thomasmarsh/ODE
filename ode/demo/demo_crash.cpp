@@ -149,6 +149,8 @@ static void nearCallback (void *data, dGeomID o1, dGeomID o2)
 
 static void start()
 {
+	dAllocateODEDataForThread(dAllocateMaskAll);
+
 	static float xyz[3] = {3.8548f,9.0843f,7.5900f};
 	static float hpr[3] = {-145.5f,-22.5f,0.25f};
 	dsSetViewpoint (xyz,hpr);
@@ -620,7 +622,7 @@ int main (int argc, char **argv)
         fn.path_to_textures = argv[1];
     }
 	
-	dInitODE();
+	dInitODE2(0);
 
 	bodies = 0;
 	joints = 0;

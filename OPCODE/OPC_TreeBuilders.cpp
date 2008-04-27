@@ -115,10 +115,11 @@ bool AABBTreeOfTrianglesBuilder::ComputeGlobalBox(const dTriIndex* primitives, u
 
 	// Loop through triangles
 	VertexPointers VP;
+	ConversionArea VC;
 	while(nb_prims--)
 	{
 		// Get current triangle-vertices
-		mIMesh->GetTriangle(VP, *primitives++);
+		mIMesh->GetTriangle(VP, *primitives++, VC);
 		// Update global box
 		Min.Min(*VP.Vertex[0]).Min(*VP.Vertex[1]).Min(*VP.Vertex[2]);
 		Max.Max(*VP.Vertex[0]).Max(*VP.Vertex[1]).Max(*VP.Vertex[2]);
@@ -149,7 +150,8 @@ float AABBTreeOfTrianglesBuilder::GetSplittingValue(udword index, udword axis) c
 //			+mVerts[mTriList[index].mVRef[2]][axis])*INV3;
 
 	VertexPointers VP;
-	mIMesh->GetTriangle(VP, index);
+	ConversionArea VC;
+	mIMesh->GetTriangle(VP, index, VC);
 
 	// Compute correct component from center of triangle
 	return	((*VP.Vertex[0])[axis]
@@ -174,10 +176,11 @@ float AABBTreeOfTrianglesBuilder::GetSplittingValue(const dTriIndex* primitives,
 		// Loop through triangles
 		float SplitValue = 0.0f;
 		VertexPointers VP;
+		ConversionArea VC;
 		for(udword i=0;i<nb_prims;i++)
 		{
 			// Get current triangle-vertices
-			mIMesh->GetTriangle(VP, primitives[i]);
+			mIMesh->GetTriangle(VP, primitives[i], VC);
 			// Update split value
 			SplitValue += (*VP.Vertex[0])[axis];
 			SplitValue += (*VP.Vertex[1])[axis];

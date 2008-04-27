@@ -43,7 +43,7 @@ using namespace Opcode;
 //! LSS-triangle overlap test
 #define LSS_PRIM(prim_index, flag)										\
 	/* Request vertices from the app */									\
-	VertexPointers VP;	mIMesh->GetTriangle(VP, prim_index);			\
+	VertexPointers VP;	ConversionArea VC;	mIMesh->GetTriangle(VP, prim_index, VC); \
 																		\
 	/* Perform LSS-tri overlap test */									\
 	if(LSSTriOverlap(*VP.Vertex[0], *VP.Vertex[1], *VP.Vertex[2]))		\

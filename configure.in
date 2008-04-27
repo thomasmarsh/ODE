@@ -287,6 +287,9 @@ then
     AC_CONFIG_COMMANDS_POST([export OU_NAMESPACE=odeou])
     AC_CONFIG_SUBDIRS([ou])
     AC_DEFINE([_OU_NAMESPACE],[odeou],[libou namespace for ODE])
+    AC_DEFINE([dOU_ENABLED],[1],[Generic OU features are enabled])
+    AC_DEFINE([dATOMICS_ENABLED],[1],[Atomic API of OU is enabled])
+    AC_DEFINE([dTLS_ENABLED],[1],[Thread Local Storage API of OU is enabled])
 fi
 AM_CONDITIONAL(ENABLE_OU, test x$use_ou = xyes)
 

@@ -106,7 +106,10 @@
 		#include "OPC_BoxPruning.h"
 		#include "OPC_SweepAndPrune.h"
 
-		FUNCTION OPCODE_API bool InitOpcode();
+		#include "OPC_ThreadLocalData.h"
+
+
+		FUNCTION OPCODE_API bool InitOpcode(ThreadLocalDataProviderProc pfnThreadLocalDataProvider=NULL);
 		FUNCTION OPCODE_API bool CloseOpcode();
 	}
 

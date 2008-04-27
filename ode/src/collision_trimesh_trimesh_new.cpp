@@ -41,6 +41,13 @@
 #include "collision_util.h"
 #include "collision_trimesh_internal.h"
 
+
+#if !dTLS_ENABLED
+// Have collider cache instance unconditionally of OPCODE or GIMPACT selection
+/*extern */TrimeshCollidersCache g_ccTrimeshCollidersCache;
+#endif
+
+
 #if dTRIMESH_OPCODE
 
 #define SMALL_ELT           REAL(2.5e-4)
@@ -92,6 +99,7 @@ static bool ClipTriByTetra(const dVector3 tri[3],
 static bool TriTriContacts(const dVector3 tr1[3],
 							 const dVector3 tr2[3],
 							 dxGeom* g1, dxGeom* g2, int Flags,
+							 CONTACT_KEY_HASH_TABLE &hashcontactset,
 							 dContactGeom* Contacts, int Stride,
 							 int &contactcount);
 
@@ -154,22 +162,6 @@ SwapNormals(dVector3 *&pen_v, dVector3 *&col_v, dVector3* v1, dVector3* v2,
 #endif
 #define CONTACT_POS_HASH_QUOTIENT REAL(10000.0)
 #define dSQRT3	REAL(1.7320508075688773)
-
-struct CONTACT_KEY
-{
-	dContactGeom * m_contact;
-	unsigned int m_key;
-};
-
-#define MAXCONTACT_X_NODE 4
-struct CONTACT_KEY_HASH_NODE
-{
-	CONTACT_KEY m_keyarray[MAXCONTACT_X_NODE];
-	int m_keycount;
-};
-
-#define CONTACTS_HASHSIZE 256
-CONTACT_KEY_HASH_NODE g_hashcontactset[CONTACTS_HASHSIZE];
 
 
 
@@ -305,45 +297,45 @@ void UpdateArbitraryContactInNode(const CONTACT_KEY *contactkey, CONTACT_KEY_HAS
 	node->m_keyarray[keyindex].m_contact = pwithcontact;
 }
 
-void ClearContactSet()
+void ClearContactSet(CONTACT_KEY_HASH_TABLE &hashcontactset)
 {
-	memset(g_hashcontactset,0,sizeof(CONTACT_KEY_HASH_NODE)*CONTACTS_HASHSIZE);
+	memset(&hashcontactset, 0, sizeof(CONTACT_KEY_HASH_TABLE));
 }
 
 //return true if found
-dContactGeom *InsertContactInSet(const CONTACT_KEY &newkey)
+dContactGeom *InsertContactInSet(CONTACT_KEY_HASH_TABLE &hashcontactset, const CONTACT_KEY &newkey)
 {
 	unsigned int index = MakeContactIndex(newkey.m_key);
 
-	return AddContactToNode(&newkey, &g_hashcontactset[index]);
+	return AddContactToNode(&newkey, &hashcontactset[index]);
 }
 
-void RemoveNewContactFromSet(const CONTACT_KEY &contactkey)
+void RemoveNewContactFromSet(CONTACT_KEY_HASH_TABLE &hashcontactset, const CONTACT_KEY &contactkey)
 {
 	unsigned int index = MakeContactIndex(contactkey.m_key);
 	
-	RemoveNewContactFromNode(&contactkey, &g_hashcontactset[index]);
+	RemoveNewContactFromNode(&contactkey, &hashcontactset[index]);
 }
 
-void RemoveArbitraryContactFromSet(const CONTACT_KEY &contactkey)
+void RemoveArbitraryContactFromSet(CONTACT_KEY_HASH_TABLE &hashcontactset, const CONTACT_KEY &contactkey)
 {
 	unsigned int index = MakeContactIndex(contactkey.m_key);
 
-	RemoveArbitraryContactFromNode(&contactkey, &g_hashcontactset[index]);
+	RemoveArbitraryContactFromNode(&contactkey, &hashcontactset[index]);
 }
 
-void UpdateArbitraryContactInSet(const CONTACT_KEY &contactkey, 
+void UpdateArbitraryContactInSet(CONTACT_KEY_HASH_TABLE &hashcontactset, const CONTACT_KEY &contactkey, 
 	dContactGeom *pwithcontact)
 {
 	unsigned int index = MakeContactIndex(contactkey.m_key);
 
-	UpdateArbitraryContactInNode(&contactkey, &g_hashcontactset[index], pwithcontact);
+	UpdateArbitraryContactInNode(&contactkey, &hashcontactset[index], pwithcontact);
 }
 
 bool AllocNewContact(
 			const dVector3 newpoint, dContactGeom *& out_pcontact,
-			int Flags, dContactGeom* Contacts,
-			int Stride,  int &contactcount)
+			int Flags, CONTACT_KEY_HASH_TABLE &hashcontactset,
+			dContactGeom* Contacts, int Stride,  int &contactcount)
 {
 	bool allocated_new = false;
 
@@ -360,7 +352,7 @@ bool AllocNewContact(
 	CONTACT_KEY newkey;
 	UpdateContactKey(newkey, pcontact);
 	
-	dContactGeom *pcontactfound = InsertContactInSet(newkey);
+	dContactGeom *pcontactfound = InsertContactInSet(hashcontactset, newkey);
 	if (pcontactfound == pcontact)
 	{
 		if (pcontactfound != &dLocalContact)
@@ -369,10 +361,10 @@ bool AllocNewContact(
 		}
 		else
 		{
-			RemoveNewContactFromSet(newkey);
+			RemoveNewContactFromSet(hashcontactset, newkey);
 			pcontactfound = NULL;
 		}
-		
+
 		allocated_new = true;
 	}
 
@@ -381,13 +373,13 @@ bool AllocNewContact(
 }
 
 void FreeExistingContact(dContactGeom *pcontact,
-	int Flags, dContactGeom *Contacts, 
-	int Stride, int &contactcount)
+	int Flags, CONTACT_KEY_HASH_TABLE &hashcontactset, 
+	dContactGeom *Contacts, int Stride, int &contactcount)
 {
 	CONTACT_KEY contactKey;
 	UpdateContactKey(contactKey, pcontact);
 
-	RemoveArbitraryContactFromSet(contactKey);
+	RemoveArbitraryContactFromSet(hashcontactset, contactKey);
 
 	int lastContactIndex = contactcount - 1;
 	dContactGeom *plastContact = SAFECONTACT(Flags, Contacts, lastContactIndex, Stride);
@@ -399,7 +391,7 @@ void FreeExistingContact(dContactGeom *pcontact,
 		CONTACT_KEY lastContactKey;
 		UpdateContactKey(lastContactKey, plastContact);
 		
-		UpdateArbitraryContactInSet(lastContactKey, pcontact);
+		UpdateArbitraryContactInSet(hashcontactset, lastContactKey, pcontact);
 	}
 
 	contactcount = lastContactIndex;
@@ -410,7 +402,8 @@ dContactGeom *  PushNewContact( dxGeom* g1, dxGeom* g2,
 							   const dVector3 point,
 							   dVector3 normal,
 							   dReal  depth,
-							   int Flags,
+							   int Flags, 
+							   CONTACT_KEY_HASH_TABLE &hashcontactset,
 							 dContactGeom* Contacts, int Stride,
 							 int &contactcount)
 {
@@ -418,7 +411,7 @@ dContactGeom *  PushNewContact( dxGeom* g1, dxGeom* g2,
 
 	dContactGeom * pcontact;
 
-	if (!AllocNewContact(point, pcontact, Flags, Contacts, Stride, contactcount))
+	if (!AllocNewContact(point, pcontact, Flags, hashcontactset, Contacts, Stride, contactcount))
 	{
 		const dReal depthDifference = depth - pcontact->depth;
 
@@ -451,7 +444,7 @@ dContactGeom *  PushNewContact( dxGeom* g1, dxGeom* g2,
 			}
 			else
 			{
-				FreeExistingContact(pcontact, Flags, Contacts, Stride, contactcount);
+				FreeExistingContact(pcontact, Flags, hashcontactset, Contacts, Stride, contactcount);
 			}
 		}
 	}
@@ -498,15 +491,16 @@ dCollideTTL(dxGeom* g1, dxGeom* g2, int Flags, dContactGeom* Contacts, int Strid
     // TLRotation2 = column-major order
     const dMatrix3& TLRotation2 = *(const dMatrix3*) dGeomGetRotation(TriMesh2);
 
-    AABBTreeCollider& Collider = TriMesh1->_AABBTreeCollider;
+	TrimeshCollidersCache *pccColliderCache = GetTrimeshCollidersCache();
+    AABBTreeCollider& Collider = pccColliderCache->_AABBTreeCollider;
+	BVTCache &ColCache = pccColliderCache->ColCache;
+	CONTACT_KEY_HASH_TABLE &hashcontactset = pccColliderCache->_hashcontactset;
 
-
-    static BVTCache ColCache;
-    ColCache.Model0 = &TriMesh1->Data->BVTree;
+	ColCache.Model0 = &TriMesh1->Data->BVTree;
     ColCache.Model1 = &TriMesh2->Data->BVTree;
 
 	////Prepare contact list
-	ClearContactSet();
+	ClearContactSet(hashcontactset);
 
     // Collision query
     Matrix4x4 amatrix, bmatrix;
@@ -559,7 +553,7 @@ dCollideTTL(dxGeom* g1, dxGeom* g2, int Flags, dContactGeom* Contacts, int Strid
 					}
 
 					TriTriContacts(v1,v2,
-						  g1, g2, Flags,
+						  g1, g2, Flags, hashcontactset,
 						 Contacts,Stride,OutTriCount);
 					
 					// Continue loop even after contacts are full 
@@ -1255,7 +1249,8 @@ dReal FindTriangleTriangleCollision(
 ///SUPPORT UP TO 8 CONTACTS
 bool TriTriContacts(const dVector3 tr1[3],
 							 const dVector3 tr2[3],
-							  dxGeom* g1, dxGeom* g2, int Flags,
+							  dxGeom* g1, dxGeom* g2, int Flags, 
+							  CONTACT_KEY_HASH_TABLE &hashcontactset,
 							 dContactGeom* Contacts, int Stride,
 							 int &contactcount)
 {
@@ -1288,7 +1283,7 @@ bool TriTriContacts(const dVector3 tr1[3],
 	{
 		PushNewContact( g1,  g2,
 					contactpoints.Points[ccount],
-					normal, depth, Flags,
+					normal, depth, Flags, hashcontactset,
 					Contacts,Stride,contactcount);
 
 		// Continue loop even after contacts are full 

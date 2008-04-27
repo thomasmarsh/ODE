@@ -1132,7 +1132,8 @@ int dCollideBTL(dxGeom* g1, dxGeom* BoxGeom, int Flags, dContactGeom* Contacts, 
   cdCollisionContext.vBestNormal[1]=0;
   cdCollisionContext.vBestNormal[2]=0;
 
-  OBBCollider& Collider = TriMesh->_OBBCollider;
+  TrimeshCollidersCache *pccColliderCache = GetTrimeshCollidersCache();
+  OBBCollider& Collider = pccColliderCache->_OBBCollider;
 
   // Make OBB
   OBB Box;
@@ -1191,7 +1192,7 @@ int dCollideBTL(dxGeom* g1, dxGeom* BoxGeom, int Flags, dContactGeom* Contacts, 
   }
   else {
 		Collider.SetTemporalCoherence(false);
-		Collider.Collide(dxTriMesh::defaultBoxCache, Box, TriMesh->Data->BVTree, null,
+		Collider.Collide(pccColliderCache->defaultBoxCache, Box, TriMesh->Data->BVTree, null,
 						 &MakeMatrix(vPosMesh, mRotMesh, amatrix));
 	}
 

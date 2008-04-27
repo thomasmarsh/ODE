@@ -43,7 +43,7 @@ using namespace Opcode;
 //! AABB-triangle test
 #define AABB_PRIM(prim_index, flag)							\
 	/* Request vertices from the app */						\
-	VertexPointers VP;	mIMesh->GetTriangle(VP, prim_index);\
+	VertexPointers VP;	ConversionArea VC;	mIMesh->GetTriangle(VP, prim_index, VC); \
 	mLeafVerts[0] = *VP.Vertex[0];							\
 	mLeafVerts[1] = *VP.Vertex[1];							\
 	mLeafVerts[2] = *VP.Vertex[2];							\

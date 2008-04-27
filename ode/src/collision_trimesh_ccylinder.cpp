@@ -977,7 +977,8 @@ int dCollideCCTL(dxGeom *o1, dxGeom *o2, int flags, dContactGeom *contact, int s
 	cdCollisionContext.vNormal[2] = REAL(0.0);
 
 	// Will it better to use LSS here? -> confirm Pierre.
-	 OBBCollider& Collider = TriMesh->_OBBCollider;
+	TrimeshCollidersCache *pccColliderCache = GetTrimeshCollidersCache();
+	OBBCollider& Collider = pccColliderCache->_OBBCollider;
 
 	 // It is a potential issue to explicitly cast to float 
 	 // if custom width floating point type is introduced in OPCODE.
@@ -1033,7 +1034,7 @@ int dCollideCCTL(dxGeom *o1, dxGeom *o2, int flags, dContactGeom *contact, int s
 	 }
 	 else {
 		 Collider.SetTemporalCoherence(false);
-		 Collider.Collide(dxTriMesh::defaultBoxCache, obbCapsule, TriMesh->Data->BVTree, null,&MeshMatrix);
+		 Collider.Collide(pccColliderCache->defaultBoxCache, obbCapsule, TriMesh->Data->BVTree, null,&MeshMatrix);
 	 }
 
 	 if (! Collider.GetContactStatus()) {

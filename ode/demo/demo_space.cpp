@@ -142,6 +142,8 @@ static void nearCallback (void *data, dGeomID o1, dGeomID o2)
 
 static void start()
 {
+  dAllocateODEDataForThread(dAllocateMaskAll);
+
   static float xyz[3] = {2.1640f,-1.3079f,1.7600f};
   static float hpr[3] = {125.5000f,-17.0000f,0.0000f};
   dsSetViewpoint (xyz,hpr);
@@ -208,7 +210,7 @@ int main (int argc, char **argv)
         fn.path_to_textures = argv[1];
     }
 
-  dInitODE();
+  dInitODE2(0);
 
   // test the simple space:
   // space = dSimpleSpaceCreate();

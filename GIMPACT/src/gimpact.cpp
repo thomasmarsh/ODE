@@ -28,12 +28,13 @@ email: projectileman@yahoo.com
 
 #include "GIMPACT/gimpact.h"
 
+
+
 void gimpact_init()
 {
     gim_init_math();
-    gim_init_buffer_managers();
 }
+
 void gimpact_terminate()
 {
-    gim_terminate_buffer_managers();
 }
