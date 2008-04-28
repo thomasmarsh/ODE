@@ -8,6 +8,13 @@ the rules for this file:
   * keep the format consistent (79 char width, M/D/Y date format).
 
 ------------------------------------------------------------------------------
+28/04/08 Oleh_Derevenko
+
+        * Added possibility to collide a space of lower sublevel as a geometry
+          against another space of a higher level with dSpaceCollide2.
+          dSpaceSetSublevel/dSpaceGetSublevel are used for sublevel assignment/
+          retrieval.
+
 27/04/08 Oleh_Derevenko
 
         * Fixed incorrect memory copying which could lead to memory corruption

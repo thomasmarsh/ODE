@@ -75,6 +75,44 @@ ODE_API void dHashSpaceGetLevels (dSpaceID space, int *minlevel, int *maxlevel);
 ODE_API void dSpaceSetCleanup (dSpaceID space, int mode);
 ODE_API int dSpaceGetCleanup (dSpaceID space);
 
+/**
+* @brief Sets sublevel value for a space.
+*
+* Sublevel affects how the space is handled in dSpaceCollide2 when it is collided
+* with another space. If sublevels of both spaces match, the function iterates 
+* geometries of both spaces and collides them with each other. If sublevel of one
+* space is greater than the sublevel of another one, only the geometries of the 
+* space with greater sublevel are iterated, another space is passed into 
+* collision callback as a geometry itself. By default all the spaces are assigned
+* zero sublevel.
+*
+* @note
+* The space sublevel @e IS @e NOT automatically updated when one space is inserted
+* into another or removed from one. It is a client's responsibility to update sublevel
+* value if necessary.
+*
+* @param space the space to modify
+* @param sublevel the sublevel value to be assigned
+* @ingroup collide
+* @see dSpaceGetSublevel
+* @see dSpaceCollide2
+*/
+ODE_API void dSpaceSetSublevel (dSpaceID space, int sublevel);
+
+/**
+* @brief Gets sublevel value of a space.
+*
+* Sublevel affects how the space is handled in dSpaceCollide2 when it is collided
+* with another space. See @c dSpaceSetSublevel for more details.
+*
+* @param space the space to query
+* @returns the sublevel value of the space
+* @ingroup collide
+* @see dSpaceSetSublevel
+* @see dSpaceCollide2
+*/
+ODE_API int dSpaceGetSublevel (dSpaceID space);
+
 ODE_API void dSpaceAdd (dSpaceID, dGeomID);
 ODE_API void dSpaceRemove (dSpaceID, dGeomID);
 ODE_API int dSpaceQuery (dSpaceID, dGeomID);

@@ -176,6 +176,7 @@ struct dxSpace : public dxGeom {
   int count;			// number of geoms in this space
   dxGeom *first;		// first geom in list
   int cleanup;			// cleanup mode, 1=destroy geoms on exit
+  int sublevel;         // space sublevel (used in dSpaceCollide2). NOT TRACKED AUTOMATICALLY!!!
 
   // cached state for getGeom()
   int current_index;		// only valid if current_geom != 0
@@ -194,6 +195,8 @@ struct dxSpace : public dxGeom {
 
   void setCleanup (int mode);
   int getCleanup();
+  void setSublevel(int value);
+  int getSublevel() const;
   int query (dxGeom *geom);
   int getNumGeoms();
   virtual dxGeom *getGeom (int i);

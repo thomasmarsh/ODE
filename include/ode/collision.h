@@ -732,6 +732,11 @@ ODE_API void dSpaceCollide (dSpaceID space, void *data, dNearCallback *callback)
  * function may be passed these contained spaces as one or both geom
  * arguments.
  *
+ * @remarks Sublevel value of space affects how the spaces are iterated.
+ * Both spaces are recursed only if their sublevels match. Otherwise, only
+ * the space with greater sublevel is recursed and the one with lesser sublevel
+ * is used as a geom itself.
+ *
  * @remarks dSpaceCollide2() is guaranteed to pass all intersecting geom
  * pairs to the callback function, but may also pass close but
  * non-intersecting pairs. The number of these calls depends on the
@@ -740,6 +745,7 @@ ODE_API void dSpaceCollide (dSpaceID space, void *data, dNearCallback *callback)
  * callback.
  *
  * @sa dSpaceCollide
+ * @sa dSpaceSetSublevel
  * @ingroup collide
  */
 ODE_API void dSpaceCollide2 (dGeomID space1, dGeomID space2, void *data, dNearCallback *callback);
