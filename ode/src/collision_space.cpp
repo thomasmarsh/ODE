@@ -83,6 +83,7 @@ dxSpace::dxSpace (dSpaceID _space) : dxGeom (_space,0)
   count = 0;
   first = 0;
   cleanup = 1;
+  sublevel = 0;
   current_index = 0;
   current_geom = 0;
   lock_count = 0;
@@ -143,6 +144,18 @@ void dxSpace::setCleanup (int mode)
 int dxSpace::getCleanup()
 {
   return cleanup;
+}
+
+
+void dxSpace::setSublevel(int value)
+{
+  sublevel = value;
+}
+
+
+int dxSpace::getSublevel() const
+{
+  return sublevel;
 }
 
 
@@ -683,6 +696,22 @@ int dSpaceGetCleanup (dxSpace *space)
 }
 
 
+void dSpaceSetSublevel (dSpaceID space, int sublevel)
+{
+  dAASSERT (space);
+  dUASSERT (dGeomIsSpace(space),"argument not a space");
+  space->setSublevel (sublevel);
+}
+
+
+int dSpaceGetSublevel (dSpaceID space)
+{
+  dAASSERT (space);
+  dUASSERT (dGeomIsSpace(space),"argument not a space");
+  return space->getSublevel();
+}
+
+
 void dSpaceAdd (dxSpace *space, dxGeom *g)
 {
   dAASSERT (space);
@@ -759,53 +788,65 @@ static void swap_callback(void *data, dxGeom *g1, dxGeom *g2)
 
 
 void dSpaceCollide2 (dxGeom *g1, dxGeom *g2, void *data,
-		     dNearCallback *callback)
+					 dNearCallback *callback)
 {
-  dAASSERT (g1 && g2 && callback);
-  dxSpace *s1,*s2;
+	dAASSERT (g1 && g2 && callback);
+	dxSpace *s1,*s2;
 
-  // see if either geom is a space
-  if (IS_SPACE(g1)) s1 = (dxSpace*) g1; else s1 = 0;
-  if (IS_SPACE(g2)) s2 = (dxSpace*) g2; else s2 = 0;
+	// see if either geom is a space
+	if (IS_SPACE(g1)) s1 = (dxSpace*) g1; else s1 = 0;
+	if (IS_SPACE(g2)) s2 = (dxSpace*) g2; else s2 = 0;
 
-  // handle the four space/geom cases
-  if (s1) {
-    if (s2) {
-      // g1 and g2 are spaces.
-      if (s1==s2) {
-	// collide a space with itself --> interior collision
-	s1->collide (data,callback);
-      }
-      else {
-	// iterate through the space that has the fewest geoms, calling
-	// collide2 in the other space for each one.
-	if (s1->count < s2->count) {
-          DataCallback dc = {data, callback};
-	  for (dxGeom *g = s1->first; g; g=g->next) {
-	    s2->collide2 (&dc,g,swap_callback);
-	  }
+	if (s1 && s2) {
+		int l1 = s1->getSublevel();
+		int l2 = s2->getSublevel();
+		if (l1 != l2) {
+			if (l1 > l2) {
+				s2 = 0;
+			} else {
+				s1 = 0;
+			}
+		}
+	}
+
+	// handle the four space/geom cases
+	if (s1) {
+		if (s2) {
+			// g1 and g2 are spaces.
+			if (s1==s2) {
+				// collide a space with itself --> interior collision
+				s1->collide (data,callback);
+			}
+			else {
+				// iterate through the space that has the fewest geoms, calling
+				// collide2 in the other space for each one.
+				if (s1->count < s2->count) {
+					DataCallback dc = {data, callback};
+					for (dxGeom *g = s1->first; g; g=g->next) {
+						s2->collide2 (&dc,g,swap_callback);
+					}
+				}
+				else {
+					for (dxGeom *g = s2->first; g; g=g->next) {
+						s1->collide2 (data,g,callback);
+					}
+				}
+			}
+		}
+		else {
+			// g1 is a space, g2 is a geom
+			s1->collide2 (data,g2,callback);
+		}
 	}
 	else {
-	  for (dxGeom *g = s2->first; g; g=g->next) {
-	    s1->collide2 (data,g,callback);
-	  }
+		if (s2) {
+			// g1 is a geom, g2 is a space
+			DataCallback dc = {data, callback};
+			s2->collide2 (&dc,g1,swap_callback);
+		}
+		else {
+			// g1 and g2 are geoms
+			collideAABBs(g1,g2, data, callback);
+		}
 	}
-      }
-    }
-    else {
-      // g1 is a space, g2 is a geom
-      s1->collide2 (data,g2,callback);
-    }
-  }
-  else {
-    if (s2) {
-      // g1 is a geom, g2 is a space
-      DataCallback dc = {data, callback};
-      s2->collide2 (&dc,g1,swap_callback);
-    }
-    else {
-      // g1 and g2 are geoms
-      collideAABBs(g1,g2, data, callback);
-    }
-  }
 }
