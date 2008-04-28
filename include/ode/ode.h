@@ -28,6 +28,7 @@
 #include <ode/odeconfig.h>
 #include <ode/compatibility.h>
 #include <ode/common.h>
+#include <ode/odeinit.h>
 #include <ode/contact.h>
 #include <ode/error.h>
 #include <ode/memory.h>
