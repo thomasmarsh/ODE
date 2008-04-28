@@ -67,7 +67,7 @@ libode_la_SOURCES =     array.cpp array.h \
 
 if ENABLE_OU
 
-libode_la_LIBADD += $(top_builddir)/ou/src/ou/libou.a
+libode_la_LIBADD += $(top_builddir)/ou/src/ou/libou.la
 libode_la_CPPFLAGS += -I$(top_srcdir)/ou/include
 libode_la_SOURCES +=    odetls.cpp odetls.h \
                         odeou.cpp odeou.h
