@@ -386,7 +386,11 @@ void gim_aabbset_bipartite_intersections_brute_force(GIM_AABB_SET * aabbset1,GIM
     	}
     }
 
-    if(classified_count==0) return; // no pairs
+    if(classified_count==0)
+    {
+        gim_free(classified,0);
+        return; // no pairs
+    }
 
     //intesect set2
     count = aabbset2->m_count;

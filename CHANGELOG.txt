@@ -8,6 +8,10 @@ the rules for this file:
   * keep the format consistent (79 char width, M/D/Y date format).
 
 ------------------------------------------------------------------------------
+01/05/08 Oleh_Derevenko
+
+        * Memory leak in GIMPACT fixed (reported by Derek)
+
 28/04/08 Oleh_Derevenko
 
         * Added possibility to collide a space of lower sublevel as a geometry
