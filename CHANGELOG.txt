@@ -23,6 +23,8 @@ the rules for this file:
           with unnecessary extra memory copying in GIMPACT.
         * Fixed buffer reserve being incorrectly reset to zero for bitsets 
           what resulted in unnecessary memory reallocations in GIMPACT.
+        * Implemented support for ability to run collision detection from
+          multiple threads for separate spaces.
            
 14/04/08 Oleh_Derevenko
 
