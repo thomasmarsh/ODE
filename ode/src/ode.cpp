@@ -2029,6 +2029,10 @@ REGISTER_EXTENSION( ODE_EXT_trimesh )
 
 #endif // dTRIMESH_ENABLED
 
+#if dTLS_ENABLED
+REGISTER_EXTENSION( ODE_EXT_mt_collisions )
+#endif // dTLS_ENABLED
+
 //**********************************
 // EXTENSION LIST END
 
