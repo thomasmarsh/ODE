@@ -10,6 +10,7 @@ libode_la_include_HEADERS = 	collision_trimesh.h \
 				contact.h \
 				misc.h \
 				odemath.h \
+				odeinit.h \
 				collision.h \
 				error.h \
 				objects.h \
