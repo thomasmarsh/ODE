@@ -1,13 +1,13 @@
 AM_CPPFLAGS = -I$(abs_top_srcdir)/include \
         -DDRAWSTUFF_TEXTURE_PATH="\"$(abs_top_srcdir)/drawstuff/textures\""
 
-AM_LDFLAGS = \
-        $(top_builddir)/drawstuff/src/libdrawstuff.la \
-        $(top_builddir)/ode/src/libode.la \
-        @GL_LIBS@
+AM_LDFLAGS = @GL_LIBS@
 if X11
 AM_LDFLAGS+= $(X_PRE_LIBS) $(X_LIBS) $(X_EXTRA_LIBS)
 endif
+
+LDADD = $(top_builddir)/drawstuff/src/libdrawstuff.la \
+        $(top_builddir)/ode/src/libode.la
 
 noinst_HEADERS = basket_geom.h texturepath.h world_geom3.h bunny_geom.h
 
@@ -28,6 +28,7 @@ noinst_PROGRAMS = \
                 demo_jointPR \
                 demo_joints \
                 demo_jointPU \
+                demo_motion \
                 demo_motor \
                 demo_ode \
                 demo_piston \
@@ -55,6 +56,7 @@ demo_I_SOURCES = demo_I.cpp
 demo_jointPR_SOURCES = demo_jointPR.cpp
 demo_joints_SOURCES = demo_joints.cpp
 demo_jointPU_SOURCES = demo_jointPU.cpp
+demo_motion_SOURCES = demo_motion.cpp
 demo_motor_SOURCES = demo_motor.cpp
 demo_ode_SOURCES = demo_ode.cpp
 demo_piston_SOURCES = demo_piston.cpp
@@ -63,8 +65,6 @@ demo_slider_SOURCES = demo_slider.cpp
 demo_space_SOURCES = demo_space.cpp
 demo_space_stress_SOURCES = demo_space_stress.cpp
 demo_step_SOURCES = demo_step.cpp
-
-
 
 
 if TRIMESH
@@ -87,7 +87,7 @@ endif
 if WIN32
 resources.o: $(top_srcdir)/drawstuff/src/resources.rc $(top_srcdir)/drawstuff/src/resource.h
 	@WINDRES@ $(top_srcdir)/drawstuff/src/resources.rc -o resources.o
-LDADD = resources.o
+LDADD += resources.o
 endif
 
 

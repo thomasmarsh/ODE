@@ -8,18 +8,23 @@ the rules for this file:
   * keep the format consistent (79 char width, M/D/Y date format).
 
 ------------------------------------------------------------------------------
-01/05/08 Oleh_Derevenko
+05/09/08 Daniel K. O.
+
+        * Applied patch #1335202: Contact Joint Motion (with some corrections),
+          and added demo_motion.
+
+05/01/08 Oleh_Derevenko
 
         * Memory leak in GIMPACT fixed (reported by Derek)
 
-28/04/08 Oleh_Derevenko
+04/28/08 Oleh_Derevenko
 
         * Added possibility to collide a space of lower sublevel as a geometry
           against another space of a higher level with dSpaceCollide2.
           dSpaceSetSublevel/dSpaceGetSublevel are used for sublevel assignment/
           retrieval.
 
-27/04/08 Oleh_Derevenko
+04/27/08 Oleh_Derevenko
 
         * Fixed incorrect memory copying which could lead to memory corruption
           in GIMPACT (luckily, in unused code)
@@ -30,12 +35,12 @@ the rules for this file:
         * Implemented support for ability to run collision detection from
           multiple threads for separate spaces.
            
-14/04/08 Oleh_Derevenko
+04/14/08 Oleh_Derevenko
 
         * Fixed possible memory corruption in new trimesh-trimesh collider
           in case if two degenerated triangles are checked against each other.
 
-12/04/08 Oleh_Derevenko
+04/12/08 Oleh_Derevenko
 
         * Fixed sporadic assertion failure on vector normalization caused
           by small triangles degenerating into segments during space 

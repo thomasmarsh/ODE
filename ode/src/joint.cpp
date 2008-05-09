@@ -1425,13 +1425,16 @@ static void contactGetInfo2 (dxJointContact *j, dxJoint::Info2 *info)
   dReal depth = j->contact.geom.depth - j->world->contactp.min_depth;
   if (depth < 0) depth = 0;
 
-  const dReal maxvel = j->world->contactp.max_vel;
-  info->c[0] = k*depth;
-  if (info->c[0] > maxvel)
-    info->c[0] = maxvel;
-
   if (j->contact.surface.mode & dContactSoftCFM)
     info->cfm[0] = j->contact.surface.soft_cfm;
+
+
+  dReal motionN = 0;
+  if (j->contact.surface.mode & dContactMotionN)
+    motionN = j->contact.surface.motionN;
+
+  const dReal pushout = k*depth + motionN;
+  info->c[0] = pushout;
 
   // deal with bounce
   if (j->contact.surface.mode & dContactBounce) {
@@ -1440,16 +1443,21 @@ static void contactGetInfo2 (dxJointContact *j, dxJoint::Info2 *info)
       dDOT(info->J1a,j->node[0].body->avel);
     if (j->node[1].body) {
       outgoing += dDOT(info->J2l,j->node[1].body->lvel) +
-	dDOT(info->J2a,j->node[1].body->avel);
+          dDOT(info->J2a,j->node[1].body->avel);
     }
+    outgoing -= motionN;
     // only apply bounce if the outgoing velocity is greater than the
     // threshold, and if the resulting c[0] exceeds what we already have.
     if (j->contact.surface.bounce_vel >= 0 &&
 	(-outgoing) > j->contact.surface.bounce_vel) {
-      dReal newc = - j->contact.surface.bounce * outgoing;
+      dReal newc = - j->contact.surface.bounce * outgoing + motionN;
       if (newc > info->c[0]) info->c[0] = newc;
     }
   }
+  const dReal maxvel = j->world->contactp.max_vel;
+  if (info->c[0] > maxvel)
+    info->c[0] = maxvel;
+
 
   // set LCP limits for normal
   info->lo[0] = 0;

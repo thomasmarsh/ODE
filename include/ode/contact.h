@@ -38,8 +38,9 @@ enum {
   dContactSoftCFM	= 0x010,
   dContactMotion1	= 0x020,
   dContactMotion2	= 0x040,
-  dContactSlip1		= 0x080,
-  dContactSlip2		= 0x100,
+  dContactMotionN	= 0x080,
+  dContactSlip1		= 0x100,
+  dContactSlip2		= 0x200,
 
   dContactApprox0	= 0x0000,
   dContactApprox1_1	= 0x1000,
@@ -59,7 +60,7 @@ typedef struct dSurfaceParameters {
   dReal bounce_vel;
   dReal soft_erp;
   dReal soft_cfm;
-  dReal motion1,motion2;
+  dReal motion1,motion2,motionN;
   dReal slip1,slip2;
 } dSurfaceParameters;
 
