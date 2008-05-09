@@ -112,7 +112,7 @@ static int show_aabb = 0;	// show geom AABBs?
 static int show_contacts = 0;	// show contact points?
 static int random_pos = 1;	// drop objects from random position?
 static int write_world = 0;
-static int show_body = 1;
+static int show_body = 0;
 
 // this is called by dSpaceCollide when two objects in space are
 // potentially colliding.
