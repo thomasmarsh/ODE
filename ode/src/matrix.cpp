@@ -22,6 +22,7 @@
 
 #include <ode/common.h>
 #include <ode/matrix.h>
+#include "util.h"
 #include "config.h"
 
 // misc defines

@@ -33,18 +33,6 @@ extern "C" {
 
 /* configuration stuff */
 
-/* the efficient alignment. most platforms align data structures to some
- * number of bytes, but this is not always the most efficient alignment.
- * for example, many x86 compilers align to 4 bytes, but on a pentium it
- * is important to align doubles to 8 byte boundaries (for speed), and
- * the 4 floats in a SIMD register to 16 byte boundaries. many other
- * platforms have similar behavior. setting a larger alignment can waste
- * a (very) small amount of memory. NOTE: this number must be a power of
- * two. this is set to 16 by default.
- */
-#define EFFICIENT_ALIGNMENT 16
-
-
 /* constants */
 
 /* pi and 1/sqrt(2) are defined here if necessary because they don't get
@@ -205,24 +193,6 @@ typedef dReal dQuaternion[4];
 #else
 #error You must #define dSINGLE or dDOUBLE
 #endif
-
-
-/* utility */
-
-
-/* round something up to be a multiple of the EFFICIENT_ALIGNMENT */
-
-#define dEFFICIENT_SIZE(x) ((((x)-1)|(EFFICIENT_ALIGNMENT-1))+1)
-
-
-/* alloca aligned to the EFFICIENT_ALIGNMENT. note that this can waste
- * up to 15 bytes per allocation, depending on what alloca() returns.
- */
-
-#define dALLOCA16(n) \
-  ((char*)dEFFICIENT_SIZE(((size_t)(alloca((n)+(EFFICIENT_ALIGNMENT-1))))))
-
-
 
 /* internal object types (all prefixed with `dx') */
 
