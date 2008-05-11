@@ -56,6 +56,7 @@
 #include <ode/odemath.h>
 #include "collision_util.h"
 #include "collision_trimesh_internal.h"
+#include "util.h"
 
 #if dTRIMESH_ENABLED
 

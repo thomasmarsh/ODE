@@ -24,6 +24,7 @@
 #include <ode/error.h>
 #include <ode/memory.h>
 #include "obstack.h"
+#include "util.h"
 
 //****************************************************************************
 // macros and constants

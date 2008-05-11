@@ -32,6 +32,7 @@
 #include <ode/odemath.h>
 #include "collision_util.h"
 #include "collision_trimesh_internal.h"
+#include "util.h"
 
 #define MAX_REAL	dInfinity
 static const int	nCYLINDER_AXIS				= 2;

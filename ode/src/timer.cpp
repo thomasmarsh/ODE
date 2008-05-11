@@ -33,6 +33,7 @@ TODO
 #include <ode/common.h>
 #include <ode/timer.h>
 #include "config.h"
+#include "util.h"
 
 // misc defines
 #define ALLOCA dALLOCA16
