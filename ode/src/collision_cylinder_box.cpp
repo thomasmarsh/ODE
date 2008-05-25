@@ -40,112 +40,126 @@ static const int nCYLINDER_SEGMENT		 = 8;
 #define MAX_FLOAT	dInfinity
 
 // Data that passed through the collider's functions
-typedef struct _sCylinderBoxData
+struct sCylinderBoxData
 {
+	sCylinderBoxData(dxGeom *Cylinder, dxGeom *Box, int flags, dContactGeom *contact, int skip):
+		m_gBox(Box), m_gCylinder(Cylinder), m_gContact(contact), m_iFlags(flags), m_iSkip(skip), m_nContacts(0)
+	{
+	}
+
+	void _cldInitCylinderBox();
+	int _cldTestAxis( dVector3& vInputNormal, int iAxis );
+	int _cldTestEdgeCircleAxis( const dVector3 &vCenterPoint, 
+		const dVector3 &vVx0, const dVector3 &vVx1, int iAxis );
+	int _cldTestSeparatingAxes();
+	int _cldClipCylinderToBox();
+	void _cldClipBoxToCylinder();
+	int PerformCollisionChecking();
+
 	// cylinder parameters
-	dMatrix3			mCylinderRot;
-	dVector3			vCylinderPos;
-	dVector3			vCylinderAxis;
-	dReal				fCylinderRadius;
-	dReal				fCylinderSize;
-	dVector3			avCylinderNormals[nCYLINDER_SEGMENT];
+	dMatrix3			m_mCylinderRot;
+	dVector3			m_vCylinderPos;
+	dVector3			m_vCylinderAxis;
+	dReal				m_fCylinderRadius;
+	dReal				m_fCylinderSize;
+	dVector3			m_avCylinderNormals[nCYLINDER_SEGMENT];
 	
 	// box parameters
 
-	dMatrix3			mBoxRot;
-	dVector3			vBoxPos;
-	dVector3			vBoxHalfSize;
+	dMatrix3			m_mBoxRot;
+	dVector3			m_vBoxPos;
+	dVector3			m_vBoxHalfSize;
 	// box vertices array : 8 vertices
-	dVector3			avBoxVertices[8];
+	dVector3			m_avBoxVertices[8];
 
 	// global collider data
-	dVector3			vDiff;			
-	dVector3			vNormal;
-	dReal				fBestDepth;
-	dReal				fBestrb;
-	dReal				fBestrc;
-	int					iBestAxis;
+	dVector3			m_vDiff;			
+	dVector3			m_vNormal;
+	dReal				m_fBestDepth;
+	dReal				m_fBestrb;
+	dReal				m_fBestrc;
+	int					m_iBestAxis;
 
 	// contact data
-	dVector3			vEp0, vEp1;
-	dReal				fDepth0, fDepth1;
+	dVector3			m_vEp0, m_vEp1;
+	dReal				m_fDepth0, m_fDepth1;
 
 	// ODE stuff
-	dGeomID				gBox;
-	dGeomID				gCylinder;
-	dContactGeom*		gContact;
-	int					iFlags;
-	int					iSkip;
-	int					nContacts;
+	dGeomID				m_gBox;
+	dGeomID				m_gCylinder;
+	dContactGeom*		m_gContact;
+	int					m_iFlags;
+	int					m_iSkip;
+	int					m_nContacts;
 	
-} sCylinderBoxData;
+};
 
 
 // initialize collision data
-void _cldInitCylinderBox(sCylinderBoxData& cData) 
+void sCylinderBoxData::_cldInitCylinderBox() 
 {
 	// get cylinder position, orientation
-	const dReal* pRotCyc = dGeomGetRotation(cData.gCylinder); 
-	dMatrix3Copy(pRotCyc,cData.mCylinderRot);
+	const dReal* pRotCyc = dGeomGetRotation(m_gCylinder); 
+	dMatrix3Copy(pRotCyc,m_mCylinderRot);
 
-	const dVector3* pPosCyc = (const dVector3*)dGeomGetPosition(cData.gCylinder);
-	dVector3Copy(*pPosCyc,cData.vCylinderPos);
+	const dVector3* pPosCyc = (const dVector3*)dGeomGetPosition(m_gCylinder);
+	dVector3Copy(*pPosCyc,m_vCylinderPos);
 
-	dMat3GetCol(cData.mCylinderRot,nCYLINDER_AXIS,cData.vCylinderAxis);
+	dMat3GetCol(m_mCylinderRot,nCYLINDER_AXIS,m_vCylinderAxis);
 	
 	// get cylinder radius and size
-	dGeomCylinderGetParams(cData.gCylinder,&cData.fCylinderRadius,&cData.fCylinderSize);
+	dGeomCylinderGetParams(m_gCylinder,&m_fCylinderRadius,&m_fCylinderSize);
 
 	// get box position, orientation, size
-	const dReal* pRotBox = dGeomGetRotation(cData.gBox);
-	dMatrix3Copy(pRotBox,cData.mBoxRot);
-	const dVector3* pPosBox  = (const dVector3*)dGeomGetPosition(cData.gBox);
-	dVector3Copy(*pPosBox,cData.vBoxPos);
+	const dReal* pRotBox = dGeomGetRotation(m_gBox);
+	dMatrix3Copy(pRotBox,m_mBoxRot);
+	const dVector3* pPosBox  = (const dVector3*)dGeomGetPosition(m_gBox);
+	dVector3Copy(*pPosBox,m_vBoxPos);
 
-	dGeomBoxGetLengths(cData.gBox, cData.vBoxHalfSize);
-	cData.vBoxHalfSize[0] *= REAL(0.5);
-	cData.vBoxHalfSize[1] *= REAL(0.5);
-	cData.vBoxHalfSize[2] *= REAL(0.5);
+	dGeomBoxGetLengths(m_gBox, m_vBoxHalfSize);
+	m_vBoxHalfSize[0] *= REAL(0.5);
+	m_vBoxHalfSize[1] *= REAL(0.5);
+	m_vBoxHalfSize[2] *= REAL(0.5);
 
 	// vertex 0
-	cData.avBoxVertices[0][0] = -cData.vBoxHalfSize[0];
-	cData.avBoxVertices[0][1] =  cData.vBoxHalfSize[1];
-	cData.avBoxVertices[0][2] = -cData.vBoxHalfSize[2];
+	m_avBoxVertices[0][0] = -m_vBoxHalfSize[0];
+	m_avBoxVertices[0][1] =  m_vBoxHalfSize[1];
+	m_avBoxVertices[0][2] = -m_vBoxHalfSize[2];
 
 	// vertex 1
-	cData.avBoxVertices[1][0] =  cData.vBoxHalfSize[0];
-	cData.avBoxVertices[1][1] =  cData.vBoxHalfSize[1];
-	cData.avBoxVertices[1][2] = -cData.vBoxHalfSize[2];
+	m_avBoxVertices[1][0] =  m_vBoxHalfSize[0];
+	m_avBoxVertices[1][1] =  m_vBoxHalfSize[1];
+	m_avBoxVertices[1][2] = -m_vBoxHalfSize[2];
 
 	// vertex 2
-	cData.avBoxVertices[2][0] = -cData.vBoxHalfSize[0];
-	cData.avBoxVertices[2][1] = -cData.vBoxHalfSize[1];
-	cData.avBoxVertices[2][2] = -cData.vBoxHalfSize[2];
+	m_avBoxVertices[2][0] = -m_vBoxHalfSize[0];
+	m_avBoxVertices[2][1] = -m_vBoxHalfSize[1];
+	m_avBoxVertices[2][2] = -m_vBoxHalfSize[2];
 
 	// vertex 3
-	cData.avBoxVertices[3][0] =  cData.vBoxHalfSize[0];
-	cData.avBoxVertices[3][1] = -cData.vBoxHalfSize[1];
-	cData.avBoxVertices[3][2] = -cData.vBoxHalfSize[2];
+	m_avBoxVertices[3][0] =  m_vBoxHalfSize[0];
+	m_avBoxVertices[3][1] = -m_vBoxHalfSize[1];
+	m_avBoxVertices[3][2] = -m_vBoxHalfSize[2];
 
 	// vertex 4
-	cData.avBoxVertices[4][0] =  cData.vBoxHalfSize[0];
-	cData.avBoxVertices[4][1] =  cData.vBoxHalfSize[1];
-	cData.avBoxVertices[4][2] =  cData.vBoxHalfSize[2];
+	m_avBoxVertices[4][0] =  m_vBoxHalfSize[0];
+	m_avBoxVertices[4][1] =  m_vBoxHalfSize[1];
+	m_avBoxVertices[4][2] =  m_vBoxHalfSize[2];
 
 	// vertex 5
-	cData.avBoxVertices[5][0] =  cData.vBoxHalfSize[0];
-	cData.avBoxVertices[5][1] = -cData.vBoxHalfSize[1];
-	cData.avBoxVertices[5][2] =  cData.vBoxHalfSize[2];
+	m_avBoxVertices[5][0] =  m_vBoxHalfSize[0];
+	m_avBoxVertices[5][1] = -m_vBoxHalfSize[1];
+	m_avBoxVertices[5][2] =  m_vBoxHalfSize[2];
 
 	// vertex 6
-	cData.avBoxVertices[6][0] = -cData.vBoxHalfSize[0];
-	cData.avBoxVertices[6][1] = -cData.vBoxHalfSize[1];
-	cData.avBoxVertices[6][2] =  cData.vBoxHalfSize[2];
+	m_avBoxVertices[6][0] = -m_vBoxHalfSize[0];
+	m_avBoxVertices[6][1] = -m_vBoxHalfSize[1];
+	m_avBoxVertices[6][2] =  m_vBoxHalfSize[2];
 
 	// vertex 7
-	cData.avBoxVertices[7][0] = -cData.vBoxHalfSize[0];
-	cData.avBoxVertices[7][1] =  cData.vBoxHalfSize[1];
-	cData.avBoxVertices[7][2] =  cData.vBoxHalfSize[2];
+	m_avBoxVertices[7][0] = -m_vBoxHalfSize[0];
+	m_avBoxVertices[7][1] =  m_vBoxHalfSize[1];
+	m_avBoxVertices[7][2] =  m_vBoxHalfSize[2];
 
 	// temp index
 	int i = 0;
@@ -153,16 +167,16 @@ void _cldInitCylinderBox(sCylinderBoxData& cData)
 	// transform vertices in absolute space
 	for(i=0; i < 8; i++) 
 	{
-		dMultiplyMat3Vec3(cData.mBoxRot,cData.avBoxVertices[i], vTempBoxVertices[i]);
-		dVector3Add(vTempBoxVertices[i], cData.vBoxPos, cData.avBoxVertices[i]);
+		dMultiplyMat3Vec3(m_mBoxRot,m_avBoxVertices[i], vTempBoxVertices[i]);
+		dVector3Add(vTempBoxVertices[i], m_vBoxPos, m_avBoxVertices[i]);
 	}
 
 	// find relative position
-	dVector3Subtract(cData.vCylinderPos,cData.vBoxPos,cData.vDiff);
-	cData.fBestDepth = MAX_FLOAT;
-	cData.vNormal[0] = REAL(0.0);
-	cData.vNormal[1] = REAL(0.0);
-	cData.vNormal[2] = REAL(0.0);
+	dVector3Subtract(m_vCylinderPos,m_vBoxPos,m_vDiff);
+	m_fBestDepth = MAX_FLOAT;
+	m_vNormal[0] = REAL(0.0);
+	m_vNormal[1] = REAL(0.0);
+	m_vNormal[2] = REAL(0.0);
 
 	// calculate basic angle for nCYLINDER_SEGMENT-gon
 	dReal fAngle = (dReal) (M_PI/nCYLINDER_SEGMENT);
@@ -173,22 +187,22 @@ void _cldInitCylinderBox(sCylinderBoxData& cData)
 	// calculate nCYLINDER_SEGMENT-gon points
 	for(i = 0; i < nCYLINDER_SEGMENT; i++) 
 	{
-		cData.avCylinderNormals[i][0] = -dCos(fAngle);
-		cData.avCylinderNormals[i][1] = -dSin(fAngle);
-		cData.avCylinderNormals[i][2] = 0;
+		m_avCylinderNormals[i][0] = -dCos(fAngle);
+		m_avCylinderNormals[i][1] = -dSin(fAngle);
+		m_avCylinderNormals[i][2] = 0;
 
 		fAngle += fAngleIncrement;
 	}
 
-	cData.fBestrb		= 0;
-	cData.fBestrc		= 0;
-	cData.iBestAxis		= 0;
-	cData.nContacts		= 0;
+	m_fBestrb		= 0;
+	m_fBestrc		= 0;
+	m_iBestAxis		= 0;
+	m_nContacts		= 0;
 
 }
 
 // test for given separating axis
-int _cldTestAxis(sCylinderBoxData& cData, dVector3& vInputNormal, int iAxis ) 
+int sCylinderBoxData::_cldTestAxis( dVector3& vInputNormal, int iAxis ) 
 {
 	// check length of input normal
 	dReal fL = dVector3Length(vInputNormal);
@@ -203,32 +217,32 @@ int _cldTestAxis(sCylinderBoxData& cData, dVector3& vInputNormal, int iAxis )
 	dNormalize3(vInputNormal);
 
 	// project box and Cylinder on mAxis
-	dReal fdot1 = dVector3Dot(cData.vCylinderAxis, vInputNormal);
+	dReal fdot1 = dVector3Dot(m_vCylinderAxis, vInputNormal);
 
 	dReal frc;
 
 	if (fdot1 > REAL(1.0)) 
 	{
 		fdot1 = REAL(1.0);
-		frc = cData.fCylinderSize*REAL(0.5);
+		frc = m_fCylinderSize*REAL(0.5);
 	}
 
 	// project box and capsule on iAxis
-	frc = dFabs( fdot1 * (cData.fCylinderSize*REAL(0.5))) + cData.fCylinderRadius * dSqrt(REAL(1.0)-(fdot1*fdot1));
+	frc = dFabs( fdot1 * (m_fCylinderSize*REAL(0.5))) + m_fCylinderRadius * dSqrt(REAL(1.0)-(fdot1*fdot1));
 
 	dVector3	vTemp1;
 
-	dMat3GetCol(cData.mBoxRot,0,vTemp1);
-	dReal frb = dFabs(dVector3Dot(vTemp1,vInputNormal))*cData.vBoxHalfSize[0];
+	dMat3GetCol(m_mBoxRot,0,vTemp1);
+	dReal frb = dFabs(dVector3Dot(vTemp1,vInputNormal))*m_vBoxHalfSize[0];
 
-	dMat3GetCol(cData.mBoxRot,1,vTemp1);
-	frb += dFabs(dVector3Dot(vTemp1,vInputNormal))*cData.vBoxHalfSize[1];
+	dMat3GetCol(m_mBoxRot,1,vTemp1);
+	frb += dFabs(dVector3Dot(vTemp1,vInputNormal))*m_vBoxHalfSize[1];
 
-	dMat3GetCol(cData.mBoxRot,2,vTemp1);
-	frb += dFabs(dVector3Dot(vTemp1,vInputNormal))*cData.vBoxHalfSize[2];
+	dMat3GetCol(m_mBoxRot,2,vTemp1);
+	frb += dFabs(dVector3Dot(vTemp1,vInputNormal))*m_vBoxHalfSize[2];
 	
 	// project their distance on separating axis
-	dReal fd  = dVector3Dot(cData.vDiff,vInputNormal);
+	dReal fd  = dVector3Dot(m_vDiff,vInputNormal);
 
 	// get depth 
 
@@ -244,18 +258,18 @@ int _cldTestAxis(sCylinderBoxData& cData, dVector3& vInputNormal, int iAxis )
 	fDepth -= dFabs(fd);
 
 	// get maximum depth
-	if ( fDepth < cData.fBestDepth ) 
+	if ( fDepth < m_fBestDepth ) 
 	{
-		cData.fBestDepth = fDepth;
-		dVector3Copy(vInputNormal,cData.vNormal);
-		cData.iBestAxis  = iAxis;
-		cData.fBestrb    = frb;
-		cData.fBestrc    = frc;
+		m_fBestDepth = fDepth;
+		dVector3Copy(vInputNormal,m_vNormal);
+		m_iBestAxis  = iAxis;
+		m_fBestrb    = frb;
+		m_fBestrc    = frc;
 
 		// flip normal if interval is wrong faced
 		if (fd > 0) 
 		{ 
-			dVector3Inv(cData.vNormal);
+			dVector3Inv(m_vNormal);
 		}
 	}
 
@@ -264,7 +278,7 @@ int _cldTestAxis(sCylinderBoxData& cData, dVector3& vInputNormal, int iAxis )
 
 
 // check for separation between box edge and cylinder circle edge
-int _cldTestEdgeCircleAxis( sCylinderBoxData& cData,
+int sCylinderBoxData::_cldTestEdgeCircleAxis( 
 							const dVector3 &vCenterPoint, 
 							const dVector3 &vVx0, const dVector3 &vVx1, 
 							int iAxis ) 
@@ -278,7 +292,7 @@ int _cldTestEdgeCircleAxis( sCylinderBoxData& cData,
 	dVector3Copy(vVx0,vEStart);;
 
 	// calculate angle cosine between cylinder axis and edge
-	dReal fdot2 = dVector3Dot (vDirEdge,cData.vCylinderAxis);
+	dReal fdot2 = dVector3Dot (vDirEdge,m_vCylinderAxis);
 
 	// if edge is perpendicular to cylinder axis
 	if(dFabs(fdot2) < REAL(1e-5)) 
@@ -290,7 +304,7 @@ int _cldTestEdgeCircleAxis( sCylinderBoxData& cData,
 	// find point of intersection between edge line and circle plane
 	dVector3 vTemp1;
 	dVector3Subtract(vCenterPoint,vEStart,vTemp1);
-	dReal fdot1 = dVector3Dot(vTemp1,cData.vCylinderAxis);
+	dReal fdot1 = dVector3Dot(vTemp1,m_vCylinderAxis);
 	dVector3 vpnt;
 	vpnt[0]= vEStart[0] + vDirEdge[0] * (fdot1/fdot2);
 	vpnt[1]= vEStart[1] + vDirEdge[1] * (fdot1/fdot2);
@@ -300,25 +314,25 @@ int _cldTestEdgeCircleAxis( sCylinderBoxData& cData,
 	// touches point of intersection (vpnt)
 	dVector3 vTangent;
 	dVector3Subtract(vCenterPoint,vpnt,vTemp1);
-	dVector3Cross(vTemp1,cData.vCylinderAxis,vTangent);
+	dVector3Cross(vTemp1,m_vCylinderAxis,vTangent);
 	
 	// find vector orthogonal both to tangent and edge direction
 	dVector3 vAxis;
 	dVector3Cross(vTangent,vDirEdge,vAxis);
 
 	// use that vector as separating axis
-	return _cldTestAxis( cData, vAxis, iAxis );
+	return _cldTestAxis( vAxis, iAxis );
 }
 
 // Test separating axis for collision
-int _cldTestSeparatingAxes(sCylinderBoxData& cData) 
+int sCylinderBoxData::_cldTestSeparatingAxes() 
 {
 	// reset best axis
-	cData.fBestDepth = MAX_FLOAT;
-	cData.iBestAxis = 0;
-	cData.fBestrb = 0;
-	cData.fBestrc = 0;
-	cData.nContacts = 0;
+	m_fBestDepth = MAX_FLOAT;
+	m_iBestAxis = 0;
+	m_fBestrb = 0;
+	m_fBestrc = 0;
+	m_nContacts = 0;
 
 	dVector3  vAxis = {REAL(0.0),REAL(0.0),REAL(0.0),REAL(0.0)};
 
@@ -326,40 +340,40 @@ int _cldTestSeparatingAxes(sCylinderBoxData& cData)
 	const dReal fEpsilon = REAL(1e-6);
 
 	// axis A0
-	dMat3GetCol(cData.mBoxRot, 0 , vAxis);
-	if (!_cldTestAxis( cData, vAxis, 1 )) 
+	dMat3GetCol(m_mBoxRot, 0 , vAxis);
+	if (!_cldTestAxis( vAxis, 1 )) 
 	{
 		return 0;
 	}
 
 	// axis A1
-	dMat3GetCol(cData.mBoxRot, 1 , vAxis);
-	if (!_cldTestAxis( cData, vAxis, 2 )) 
+	dMat3GetCol(m_mBoxRot, 1 , vAxis);
+	if (!_cldTestAxis( vAxis, 2 )) 
 	{
 		return 0;
 	}
 
 	// axis A2
-	dMat3GetCol(cData.mBoxRot, 2 , vAxis);
-	if (!_cldTestAxis( cData, vAxis, 3 )) 
+	dMat3GetCol(m_mBoxRot, 2 , vAxis);
+	if (!_cldTestAxis( vAxis, 3 )) 
 	{
 		return 0;
 	}
 
 	// axis C - Cylinder Axis
 	//vAxis = vCylinderAxis;
-	dVector3Copy(cData.vCylinderAxis , vAxis);
-	if (!_cldTestAxis( cData, vAxis, 4 )) 
+	dVector3Copy(m_vCylinderAxis , vAxis);
+	if (!_cldTestAxis( vAxis, 4 )) 
 	{
 		return 0;
 	}
 
 	// axis CxA0
 	//vAxis = ( vCylinderAxis cross mthGetColM33f( mBoxRot, 0 ));
-	dVector3CrossMat3Col(cData.mBoxRot, 0 ,cData.vCylinderAxis, vAxis);
+	dVector3CrossMat3Col(m_mBoxRot, 0 ,m_vCylinderAxis, vAxis);
 	if(dVector3Length2( vAxis ) > fEpsilon ) 
 	{
-		if (!_cldTestAxis( cData, vAxis, 5 ))
+		if (!_cldTestAxis( vAxis, 5 ))
 		{
 			return 0;
 		}
@@ -367,10 +381,10 @@ int _cldTestSeparatingAxes(sCylinderBoxData& cData)
 
 	// axis CxA1
 	//vAxis = ( vCylinderAxis cross mthGetColM33f( mBoxRot, 1 ));
-	dVector3CrossMat3Col(cData.mBoxRot, 1 ,cData.vCylinderAxis, vAxis);
+	dVector3CrossMat3Col(m_mBoxRot, 1 ,m_vCylinderAxis, vAxis);
 	if(dVector3Length2( vAxis ) > fEpsilon ) 
 	{
-		if (!_cldTestAxis( cData, vAxis, 6 )) 
+		if (!_cldTestAxis( vAxis, 6 )) 
 		{
 			return 0;
 		}
@@ -378,10 +392,10 @@ int _cldTestSeparatingAxes(sCylinderBoxData& cData)
 
 	// axis CxA2
 	//vAxis = ( vCylinderAxis cross mthGetColM33f( mBoxRot, 2 ));
-	dVector3CrossMat3Col(cData.mBoxRot, 2 ,cData.vCylinderAxis, vAxis);
+	dVector3CrossMat3Col(m_mBoxRot, 2 ,m_vCylinderAxis, vAxis);
 	if(dVector3Length2( vAxis ) > fEpsilon ) 
 	{
-		if (!_cldTestAxis( cData, vAxis, 7 ))
+		if (!_cldTestAxis( vAxis, 7 ))
 		{
 			return 0;
 		}
@@ -393,14 +407,14 @@ int _cldTestSeparatingAxes(sCylinderBoxData& cData)
 	// here we check box's vertices axis
 	for(i=0; i< 8; i++) 
 	{
-		//vAxis = ( vCylinderAxis cross (cData.avBoxVertices[i] - vCylinderPos));
-		dVector3Subtract(cData.avBoxVertices[i],cData.vCylinderPos,vTemp1);
-		dVector3Cross(cData.vCylinderAxis,vTemp1,vTemp2);
+		//vAxis = ( vCylinderAxis cross (m_avBoxVertices[i] - vCylinderPos));
+		dVector3Subtract(m_avBoxVertices[i],m_vCylinderPos,vTemp1);
+		dVector3Cross(m_vCylinderAxis,vTemp1,vTemp2);
 		//vAxis = ( vCylinderAxis cross vAxis );
-		dVector3Cross(cData.vCylinderAxis,vTemp2,vAxis);
+		dVector3Cross(m_vCylinderAxis,vTemp2,vAxis);
 		if(dVector3Length2( vAxis ) > fEpsilon ) 
 		{
-			if (!_cldTestAxis( cData, vAxis, 8 + i ))
+			if (!_cldTestAxis( vAxis, 8 + i ))
 			{
 				return 0;
 			}
@@ -412,68 +426,68 @@ int _cldTestSeparatingAxes(sCylinderBoxData& cData)
 	// normal of plane that contains top circle of cylinder
 	// center of top circle of cylinder
 	dVector3 vcc;
-	vcc[0] = (cData.vCylinderPos)[0] + cData.vCylinderAxis[0]*(cData.fCylinderSize*REAL(0.5));
-	vcc[1] = (cData.vCylinderPos)[1] + cData.vCylinderAxis[1]*(cData.fCylinderSize*REAL(0.5));
-	vcc[2] = (cData.vCylinderPos)[2] + cData.vCylinderAxis[2]*(cData.fCylinderSize*REAL(0.5));
+	vcc[0] = (m_vCylinderPos)[0] + m_vCylinderAxis[0]*(m_fCylinderSize*REAL(0.5));
+	vcc[1] = (m_vCylinderPos)[1] + m_vCylinderAxis[1]*(m_fCylinderSize*REAL(0.5));
+	vcc[2] = (m_vCylinderPos)[2] + m_vCylinderAxis[2]*(m_fCylinderSize*REAL(0.5));
 	// ************************************
 
-	if (!_cldTestEdgeCircleAxis( cData, vcc, cData.avBoxVertices[1], cData.avBoxVertices[0], 16)) 
+	if (!_cldTestEdgeCircleAxis( vcc, m_avBoxVertices[1], m_avBoxVertices[0], 16)) 
 	{
 		return 0;
 	}
 
-	if (!_cldTestEdgeCircleAxis( cData, vcc, cData.avBoxVertices[1], cData.avBoxVertices[3], 17)) 
+	if (!_cldTestEdgeCircleAxis( vcc, m_avBoxVertices[1], m_avBoxVertices[3], 17)) 
 	{
 		return 0;
 	}
 
-	if (!_cldTestEdgeCircleAxis( cData, vcc, cData.avBoxVertices[2], cData.avBoxVertices[3], 18))
+	if (!_cldTestEdgeCircleAxis( vcc, m_avBoxVertices[2], m_avBoxVertices[3], 18))
 	{
 		return 0;
 	}
 
-	if (!_cldTestEdgeCircleAxis( cData, vcc, cData.avBoxVertices[2], cData.avBoxVertices[0], 19)) 
+	if (!_cldTestEdgeCircleAxis( vcc, m_avBoxVertices[2], m_avBoxVertices[0], 19)) 
 	{
 		return 0;
 	}
 
 
-	if (!_cldTestEdgeCircleAxis( cData, vcc, cData.avBoxVertices[4], cData.avBoxVertices[1], 20))
+	if (!_cldTestEdgeCircleAxis( vcc, m_avBoxVertices[4], m_avBoxVertices[1], 20))
 	{
 		return 0;
 	}
 
-	if (!_cldTestEdgeCircleAxis( cData, vcc, cData.avBoxVertices[4], cData.avBoxVertices[7], 21))
+	if (!_cldTestEdgeCircleAxis( vcc, m_avBoxVertices[4], m_avBoxVertices[7], 21))
 	{
 		return 0;
 	}
 
-	if (!_cldTestEdgeCircleAxis( cData, vcc, cData.avBoxVertices[0], cData.avBoxVertices[7], 22)) 
+	if (!_cldTestEdgeCircleAxis( vcc, m_avBoxVertices[0], m_avBoxVertices[7], 22)) 
 	{
 		return 0;
 	}
 
-	if (!_cldTestEdgeCircleAxis( cData, vcc, cData.avBoxVertices[5], cData.avBoxVertices[3], 23)) 
+	if (!_cldTestEdgeCircleAxis( vcc, m_avBoxVertices[5], m_avBoxVertices[3], 23)) 
 	{
 		return 0;
 	}
 
-	if (!_cldTestEdgeCircleAxis( cData, vcc, cData.avBoxVertices[5], cData.avBoxVertices[6], 24)) 
+	if (!_cldTestEdgeCircleAxis( vcc, m_avBoxVertices[5], m_avBoxVertices[6], 24)) 
 	{
 		return 0;
 	}
 
-	if (!_cldTestEdgeCircleAxis( cData, vcc, cData.avBoxVertices[2], cData.avBoxVertices[6], 25)) 
+	if (!_cldTestEdgeCircleAxis( vcc, m_avBoxVertices[2], m_avBoxVertices[6], 25)) 
 	{
 		return 0;
 	}
 
-	if (!_cldTestEdgeCircleAxis( cData, vcc, cData.avBoxVertices[4], cData.avBoxVertices[5], 26)) 
+	if (!_cldTestEdgeCircleAxis( vcc, m_avBoxVertices[4], m_avBoxVertices[5], 26)) 
 	{
 		return 0;
 	}
 
-	if (!_cldTestEdgeCircleAxis( cData, vcc, cData.avBoxVertices[6], cData.avBoxVertices[7], 27)) 
+	if (!_cldTestEdgeCircleAxis( vcc, m_avBoxVertices[6], m_avBoxVertices[7], 27)) 
 	{
 		return 0;
 	}
@@ -483,67 +497,67 @@ int _cldTestSeparatingAxes(sCylinderBoxData& cData)
 	// normal of plane that contains bottom circle of cylinder
 	// center of bottom circle of cylinder
 	//	vcc = vCylinderPos - vCylinderAxis*(fCylinderSize*REAL(0.5));
-	vcc[0] = (cData.vCylinderPos)[0] - cData.vCylinderAxis[0]*(cData.fCylinderSize*REAL(0.5));
-	vcc[1] = (cData.vCylinderPos)[1] - cData.vCylinderAxis[1]*(cData.fCylinderSize*REAL(0.5));
-	vcc[2] = (cData.vCylinderPos)[2] - cData.vCylinderAxis[2]*(cData.fCylinderSize*REAL(0.5));
+	vcc[0] = (m_vCylinderPos)[0] - m_vCylinderAxis[0]*(m_fCylinderSize*REAL(0.5));
+	vcc[1] = (m_vCylinderPos)[1] - m_vCylinderAxis[1]*(m_fCylinderSize*REAL(0.5));
+	vcc[2] = (m_vCylinderPos)[2] - m_vCylinderAxis[2]*(m_fCylinderSize*REAL(0.5));
 	// ************************************
 
-	if (!_cldTestEdgeCircleAxis( cData, vcc, cData.avBoxVertices[1], cData.avBoxVertices[0], 28)) 
+	if (!_cldTestEdgeCircleAxis( vcc, m_avBoxVertices[1], m_avBoxVertices[0], 28)) 
 	{
 		return 0;
 	}
 
-	if (!_cldTestEdgeCircleAxis( cData, vcc, cData.avBoxVertices[1], cData.avBoxVertices[3], 29)) 
+	if (!_cldTestEdgeCircleAxis( vcc, m_avBoxVertices[1], m_avBoxVertices[3], 29)) 
 	{
 		return 0;
 	}
 
-	if (!_cldTestEdgeCircleAxis( cData, vcc, cData.avBoxVertices[2], cData.avBoxVertices[3], 30)) 
+	if (!_cldTestEdgeCircleAxis( vcc, m_avBoxVertices[2], m_avBoxVertices[3], 30)) 
 	{
 		return 0;
 	}
 
-	if (!_cldTestEdgeCircleAxis( cData, vcc, cData.avBoxVertices[2], cData.avBoxVertices[0], 31)) 
+	if (!_cldTestEdgeCircleAxis( vcc, m_avBoxVertices[2], m_avBoxVertices[0], 31)) 
 	{
 		return 0;
 	}
 
-	if (!_cldTestEdgeCircleAxis( cData, vcc, cData.avBoxVertices[4], cData.avBoxVertices[1], 32)) 
+	if (!_cldTestEdgeCircleAxis( vcc, m_avBoxVertices[4], m_avBoxVertices[1], 32)) 
 	{
 		return 0;
 	}
 
-	if (!_cldTestEdgeCircleAxis( cData, vcc, cData.avBoxVertices[4], cData.avBoxVertices[7], 33)) 
+	if (!_cldTestEdgeCircleAxis( vcc, m_avBoxVertices[4], m_avBoxVertices[7], 33)) 
 	{
 		return 0;
 	}
 
-	if (!_cldTestEdgeCircleAxis( cData, vcc, cData.avBoxVertices[0], cData.avBoxVertices[7], 34)) 
+	if (!_cldTestEdgeCircleAxis( vcc, m_avBoxVertices[0], m_avBoxVertices[7], 34)) 
 	{
 		return 0;
 	}
 
-	if (!_cldTestEdgeCircleAxis( cData, vcc, cData.avBoxVertices[5], cData.avBoxVertices[3], 35)) 
+	if (!_cldTestEdgeCircleAxis( vcc, m_avBoxVertices[5], m_avBoxVertices[3], 35)) 
 	{
 		return 0;
 	}
 
-	if (!_cldTestEdgeCircleAxis( cData, vcc, cData.avBoxVertices[5], cData.avBoxVertices[6], 36)) 
+	if (!_cldTestEdgeCircleAxis( vcc, m_avBoxVertices[5], m_avBoxVertices[6], 36)) 
 	{
 		return 0;
 	}
 
-	if (!_cldTestEdgeCircleAxis( cData, vcc, cData.avBoxVertices[2], cData.avBoxVertices[6], 37)) 
+	if (!_cldTestEdgeCircleAxis( vcc, m_avBoxVertices[2], m_avBoxVertices[6], 37)) 
 	{
 		return 0;
 	}
 
-	if (!_cldTestEdgeCircleAxis( cData, vcc, cData.avBoxVertices[4], cData.avBoxVertices[5], 38)) 
+	if (!_cldTestEdgeCircleAxis( vcc, m_avBoxVertices[4], m_avBoxVertices[5], 38)) 
 	{
 		return 0;
 	}
 
-	if (!_cldTestEdgeCircleAxis( cData, vcc, cData.avBoxVertices[6], cData.avBoxVertices[7], 39)) 
+	if (!_cldTestEdgeCircleAxis( vcc, m_avBoxVertices[6], m_avBoxVertices[7], 39)) 
 	{
 		return 0;
 	}
@@ -551,158 +565,158 @@ int _cldTestSeparatingAxes(sCylinderBoxData& cData)
 	return 1;
 }
 
-int _cldClipCylinderToBox(sCylinderBoxData& cData)
+int sCylinderBoxData::_cldClipCylinderToBox()
 {
-	dIASSERT(cData.nContacts != (cData.iFlags & NUMC_MASK));
+	dIASSERT(m_nContacts != (m_iFlags & NUMC_MASK));
 
 	// calculate that vector perpendicular to cylinder axis which closes lowest angle with collision normal
 	dVector3 vN;
-	dReal fTemp1 = dVector3Dot(cData.vCylinderAxis,cData.vNormal);
-	vN[0]	=	cData.vNormal[0] - cData.vCylinderAxis[0]*fTemp1;
-	vN[1]	=	cData.vNormal[1] - cData.vCylinderAxis[1]*fTemp1;
-	vN[2]	=	cData.vNormal[2] - cData.vCylinderAxis[2]*fTemp1;
+	dReal fTemp1 = dVector3Dot(m_vCylinderAxis,m_vNormal);
+	vN[0]	=	m_vNormal[0] - m_vCylinderAxis[0]*fTemp1;
+	vN[1]	=	m_vNormal[1] - m_vCylinderAxis[1]*fTemp1;
+	vN[2]	=	m_vNormal[2] - m_vCylinderAxis[2]*fTemp1;
 
 	// normalize that vector
 	dNormalize3(vN);
 
 	// translate cylinder end points by the vector
 	dVector3 vCposTrans;
-	vCposTrans[0] = cData.vCylinderPos[0] + vN[0] * cData.fCylinderRadius;
-	vCposTrans[1] = cData.vCylinderPos[1] + vN[1] * cData.fCylinderRadius;
-	vCposTrans[2] = cData.vCylinderPos[2] + vN[2] * cData.fCylinderRadius;
+	vCposTrans[0] = m_vCylinderPos[0] + vN[0] * m_fCylinderRadius;
+	vCposTrans[1] = m_vCylinderPos[1] + vN[1] * m_fCylinderRadius;
+	vCposTrans[2] = m_vCylinderPos[2] + vN[2] * m_fCylinderRadius;
 
-	cData.vEp0[0]  = vCposTrans[0] + cData.vCylinderAxis[0]*(cData.fCylinderSize*REAL(0.5));
-	cData.vEp0[1]  = vCposTrans[1] + cData.vCylinderAxis[1]*(cData.fCylinderSize*REAL(0.5));
-	cData.vEp0[2]  = vCposTrans[2] + cData.vCylinderAxis[2]*(cData.fCylinderSize*REAL(0.5));
+	m_vEp0[0]  = vCposTrans[0] + m_vCylinderAxis[0]*(m_fCylinderSize*REAL(0.5));
+	m_vEp0[1]  = vCposTrans[1] + m_vCylinderAxis[1]*(m_fCylinderSize*REAL(0.5));
+	m_vEp0[2]  = vCposTrans[2] + m_vCylinderAxis[2]*(m_fCylinderSize*REAL(0.5));
 
-	cData.vEp1[0]  = vCposTrans[0] - cData.vCylinderAxis[0]*(cData.fCylinderSize*REAL(0.5));
-	cData.vEp1[1]  = vCposTrans[1] - cData.vCylinderAxis[1]*(cData.fCylinderSize*REAL(0.5));
-	cData.vEp1[2]  = vCposTrans[2] - cData.vCylinderAxis[2]*(cData.fCylinderSize*REAL(0.5));
+	m_vEp1[0]  = vCposTrans[0] - m_vCylinderAxis[0]*(m_fCylinderSize*REAL(0.5));
+	m_vEp1[1]  = vCposTrans[1] - m_vCylinderAxis[1]*(m_fCylinderSize*REAL(0.5));
+	m_vEp1[2]  = vCposTrans[2] - m_vCylinderAxis[2]*(m_fCylinderSize*REAL(0.5));
 
 	// transform edge points in box space
-	cData.vEp0[0] -= cData.vBoxPos[0];
-	cData.vEp0[1] -= cData.vBoxPos[1];
-	cData.vEp0[2] -= cData.vBoxPos[2];
+	m_vEp0[0] -= m_vBoxPos[0];
+	m_vEp0[1] -= m_vBoxPos[1];
+	m_vEp0[2] -= m_vBoxPos[2];
 
-	cData.vEp1[0] -= cData.vBoxPos[0];
-	cData.vEp1[1] -= cData.vBoxPos[1];
-	cData.vEp1[2] -= cData.vBoxPos[2];
+	m_vEp1[0] -= m_vBoxPos[0];
+	m_vEp1[1] -= m_vBoxPos[1];
+	m_vEp1[2] -= m_vBoxPos[2];
 
 	dVector3 vTemp1;
 	// clip the edge to box 
 	dVector4 plPlane;
 	// plane 0 +x
-	dMat3GetCol(cData.mBoxRot,0,vTemp1);
-	dConstructPlane(vTemp1,cData.vBoxHalfSize[0],plPlane);
-	if(!dClipEdgeToPlane( cData.vEp0, cData.vEp1, plPlane )) 
+	dMat3GetCol(m_mBoxRot,0,vTemp1);
+	dConstructPlane(vTemp1,m_vBoxHalfSize[0],plPlane);
+	if(!dClipEdgeToPlane( m_vEp0, m_vEp1, plPlane )) 
 	{ 
 		return 0; 
 	}
 
 	// plane 1 +y
-	dMat3GetCol(cData.mBoxRot,1,vTemp1);
-	dConstructPlane(vTemp1,cData.vBoxHalfSize[1],plPlane);
-	if(!dClipEdgeToPlane( cData.vEp0, cData.vEp1, plPlane )) 
+	dMat3GetCol(m_mBoxRot,1,vTemp1);
+	dConstructPlane(vTemp1,m_vBoxHalfSize[1],plPlane);
+	if(!dClipEdgeToPlane( m_vEp0, m_vEp1, plPlane )) 
 	{ 
 		return 0; 
 	}
 
 	// plane 2 +z
-	dMat3GetCol(cData.mBoxRot,2,vTemp1);
-	dConstructPlane(vTemp1,cData.vBoxHalfSize[2],plPlane);
-	if(!dClipEdgeToPlane( cData.vEp0, cData.vEp1, plPlane )) 
+	dMat3GetCol(m_mBoxRot,2,vTemp1);
+	dConstructPlane(vTemp1,m_vBoxHalfSize[2],plPlane);
+	if(!dClipEdgeToPlane( m_vEp0, m_vEp1, plPlane )) 
 	{ 
 		return 0; 
 	}
 
 	// plane 3 -x
-	dMat3GetCol(cData.mBoxRot,0,vTemp1);
+	dMat3GetCol(m_mBoxRot,0,vTemp1);
 	dVector3Inv(vTemp1);
-	dConstructPlane(vTemp1,cData.vBoxHalfSize[0],plPlane);
-	if(!dClipEdgeToPlane( cData.vEp0, cData.vEp1, plPlane )) 
+	dConstructPlane(vTemp1,m_vBoxHalfSize[0],plPlane);
+	if(!dClipEdgeToPlane( m_vEp0, m_vEp1, plPlane )) 
 	{ 
 		return 0; 
 	}
 
 	// plane 4 -y
-	dMat3GetCol(cData.mBoxRot,1,vTemp1);
+	dMat3GetCol(m_mBoxRot,1,vTemp1);
 	dVector3Inv(vTemp1);
-	dConstructPlane(vTemp1,cData.vBoxHalfSize[1],plPlane);
-	if(!dClipEdgeToPlane( cData.vEp0, cData.vEp1, plPlane )) 
+	dConstructPlane(vTemp1,m_vBoxHalfSize[1],plPlane);
+	if(!dClipEdgeToPlane( m_vEp0, m_vEp1, plPlane )) 
 	{ 
 		return 0; 
 	}
 
 	// plane 5 -z
-	dMat3GetCol(cData.mBoxRot,2,vTemp1);
+	dMat3GetCol(m_mBoxRot,2,vTemp1);
 	dVector3Inv(vTemp1);
-	dConstructPlane(vTemp1,cData.vBoxHalfSize[2],plPlane);
-	if(!dClipEdgeToPlane( cData.vEp0, cData.vEp1, plPlane )) 
+	dConstructPlane(vTemp1,m_vBoxHalfSize[2],plPlane);
+	if(!dClipEdgeToPlane( m_vEp0, m_vEp1, plPlane )) 
 	{ 
 		return 0; 
 	}
 
 	// calculate depths for both contact points
-	cData.fDepth0 = cData.fBestrb + dVector3Dot(cData.vEp0, cData.vNormal);
-	cData.fDepth1 = cData.fBestrb + dVector3Dot(cData.vEp1, cData.vNormal);
+	m_fDepth0 = m_fBestrb + dVector3Dot(m_vEp0, m_vNormal);
+	m_fDepth1 = m_fBestrb + dVector3Dot(m_vEp1, m_vNormal);
 
 	// clamp depths to 0
-	if(cData.fDepth0<0) 
+	if(m_fDepth0<0) 
 	{
-		cData.fDepth0 = REAL(0.0);
+		m_fDepth0 = REAL(0.0);
 	}
 
-	if(cData.fDepth1<0) 
+	if(m_fDepth1<0) 
 	{
-		cData.fDepth1 = REAL(0.0);
+		m_fDepth1 = REAL(0.0);
 	}
 
 	// back transform edge points from box to absolute space
-	cData.vEp0[0] += cData.vBoxPos[0];
-	cData.vEp0[1] += cData.vBoxPos[1];
-	cData.vEp0[2] += cData.vBoxPos[2];
+	m_vEp0[0] += m_vBoxPos[0];
+	m_vEp0[1] += m_vBoxPos[1];
+	m_vEp0[2] += m_vBoxPos[2];
 
-	cData.vEp1[0] += cData.vBoxPos[0];
-	cData.vEp1[1] += cData.vBoxPos[1];
-	cData.vEp1[2] += cData.vBoxPos[2];
+	m_vEp1[0] += m_vBoxPos[0];
+	m_vEp1[1] += m_vBoxPos[1];
+	m_vEp1[2] += m_vBoxPos[2];
 
-	dContactGeom* Contact0 = SAFECONTACT(cData.iFlags, cData.gContact, cData.nContacts, cData.iSkip);
-	Contact0->depth = cData.fDepth0;
-	dVector3Copy(cData.vNormal,Contact0->normal);
-	dVector3Copy(cData.vEp0,Contact0->pos);
-	Contact0->g1 = cData.gCylinder;
-	Contact0->g2 = cData.gBox;
+	dContactGeom* Contact0 = SAFECONTACT(m_iFlags, m_gContact, m_nContacts, m_iSkip);
+	Contact0->depth = m_fDepth0;
+	dVector3Copy(m_vNormal,Contact0->normal);
+	dVector3Copy(m_vEp0,Contact0->pos);
+	Contact0->g1 = m_gCylinder;
+	Contact0->g2 = m_gBox;
 	dVector3Inv(Contact0->normal);
-	cData.nContacts++;
+	m_nContacts++;
 	
-	if (cData.nContacts != (cData.iFlags & NUMC_MASK))
+	if (m_nContacts != (m_iFlags & NUMC_MASK))
 	{
-		dContactGeom* Contact1 = SAFECONTACT(cData.iFlags, cData.gContact, cData.nContacts, cData.iSkip);
-		Contact1->depth = cData.fDepth1;
-		dVector3Copy(cData.vNormal,Contact1->normal);
-		dVector3Copy(cData.vEp1,Contact1->pos);
-		Contact1->g1 = cData.gCylinder;
-		Contact1->g2 = cData.gBox;
+		dContactGeom* Contact1 = SAFECONTACT(m_iFlags, m_gContact, m_nContacts, m_iSkip);
+		Contact1->depth = m_fDepth1;
+		dVector3Copy(m_vNormal,Contact1->normal);
+		dVector3Copy(m_vEp1,Contact1->pos);
+		Contact1->g1 = m_gCylinder;
+		Contact1->g2 = m_gBox;
 		dVector3Inv(Contact1->normal);
-		cData.nContacts++;
+		m_nContacts++;
 	}
 
 	return 1;
 }
 
 
-void _cldClipBoxToCylinder(sCylinderBoxData& cData ) 
+void sCylinderBoxData::_cldClipBoxToCylinder() 
 {
-	dIASSERT(cData.nContacts != (cData.iFlags & NUMC_MASK));
+	dIASSERT(m_nContacts != (m_iFlags & NUMC_MASK));
 	
 	dVector3 vCylinderCirclePos, vCylinderCircleNormal_Rel;
 	// check which circle from cylinder we take for clipping
-	if ( dVector3Dot(cData.vCylinderAxis, cData.vNormal) > REAL(0.0) ) 
+	if ( dVector3Dot(m_vCylinderAxis, m_vNormal) > REAL(0.0) ) 
 	{
 		// get top circle
-		vCylinderCirclePos[0] = cData.vCylinderPos[0] + cData.vCylinderAxis[0]*(cData.fCylinderSize*REAL(0.5));
-		vCylinderCirclePos[1] = cData.vCylinderPos[1] + cData.vCylinderAxis[1]*(cData.fCylinderSize*REAL(0.5));
-		vCylinderCirclePos[2] = cData.vCylinderPos[2] + cData.vCylinderAxis[2]*(cData.fCylinderSize*REAL(0.5));
+		vCylinderCirclePos[0] = m_vCylinderPos[0] + m_vCylinderAxis[0]*(m_fCylinderSize*REAL(0.5));
+		vCylinderCirclePos[1] = m_vCylinderPos[1] + m_vCylinderAxis[1]*(m_fCylinderSize*REAL(0.5));
+		vCylinderCirclePos[2] = m_vCylinderPos[2] + m_vCylinderAxis[2]*(m_fCylinderSize*REAL(0.5));
 
 		vCylinderCircleNormal_Rel[0] = REAL(0.0);
 		vCylinderCircleNormal_Rel[1] = REAL(0.0);
@@ -712,9 +726,9 @@ void _cldClipBoxToCylinder(sCylinderBoxData& cData )
 	else 
 	{
 		// get bottom circle
-		vCylinderCirclePos[0] = cData.vCylinderPos[0] - cData.vCylinderAxis[0]*(cData.fCylinderSize*REAL(0.5));
-		vCylinderCirclePos[1] = cData.vCylinderPos[1] - cData.vCylinderAxis[1]*(cData.fCylinderSize*REAL(0.5));
-		vCylinderCirclePos[2] = cData.vCylinderPos[2] - cData.vCylinderAxis[2]*(cData.fCylinderSize*REAL(0.5));
+		vCylinderCirclePos[0] = m_vCylinderPos[0] - m_vCylinderAxis[0]*(m_fCylinderSize*REAL(0.5));
+		vCylinderCirclePos[1] = m_vCylinderPos[1] - m_vCylinderAxis[1]*(m_fCylinderSize*REAL(0.5));
+		vCylinderCirclePos[2] = m_vCylinderPos[2] - m_vCylinderAxis[2]*(m_fCylinderSize*REAL(0.5));
 
 		vCylinderCircleNormal_Rel[0] = REAL(0.0);
 		vCylinderCircleNormal_Rel[1] = REAL(0.0);
@@ -727,8 +741,8 @@ void _cldClipBoxToCylinder(sCylinderBoxData& cData )
 	dMatrix3 mBoxInv;
 
 	// Find a way to use quaternion
-	dMatrix3Inv(cData.mBoxRot,mBoxInv);
-	dMultiplyMat3Vec3(mBoxInv,cData.vNormal,vNr);
+	dMatrix3Inv(m_mBoxRot,mBoxInv);
+	dMultiplyMat3Vec3(mBoxInv,m_vNormal,vNr);
 
 	dVector3 vAbsNormal;
 
@@ -792,17 +806,17 @@ void _cldClipBoxToCylinder(sCylinderBoxData& cData )
 	dVector3 vTemp;
 	if (vNr[iB0] > 0) 
 	{
-		dMat3GetCol(cData.mBoxRot,iB0,vTemp);
-		vCenter[0] = cData.vBoxPos[0] - cData.vBoxHalfSize[iB0]*vTemp[0];
-		vCenter[1] = cData.vBoxPos[1] - cData.vBoxHalfSize[iB0]*vTemp[1];
-		vCenter[2] = cData.vBoxPos[2] - cData.vBoxHalfSize[iB0]*vTemp[2];
+		dMat3GetCol(m_mBoxRot,iB0,vTemp);
+		vCenter[0] = m_vBoxPos[0] - m_vBoxHalfSize[iB0]*vTemp[0];
+		vCenter[1] = m_vBoxPos[1] - m_vBoxHalfSize[iB0]*vTemp[1];
+		vCenter[2] = m_vBoxPos[2] - m_vBoxHalfSize[iB0]*vTemp[2];
 	}
 	else 
 	{
-		dMat3GetCol(cData.mBoxRot,iB0,vTemp);
-		vCenter[0] = cData.vBoxPos[0] + cData.vBoxHalfSize[iB0]*vTemp[0];
-		vCenter[1] = cData.vBoxPos[1] + cData.vBoxHalfSize[iB0]*vTemp[1];
-		vCenter[2] = cData.vBoxPos[2] + cData.vBoxHalfSize[iB0]*vTemp[2];
+		dMat3GetCol(m_mBoxRot,iB0,vTemp);
+		vCenter[0] = m_vBoxPos[0] + m_vBoxHalfSize[iB0]*vTemp[0];
+		vCenter[1] = m_vBoxPos[1] + m_vBoxHalfSize[iB0]*vTemp[1];
+		vCenter[2] = m_vBoxPos[2] + m_vBoxHalfSize[iB0]*vTemp[2];
 	}
 
 	// find the vertices of box polygon
@@ -824,28 +838,28 @@ void _cldClipBoxToCylinder(sCylinderBoxData& cData )
 
 	dVector3 vAxis1, vAxis2;
 
-	dMat3GetCol(cData.mBoxRot,iB1,vAxis1);
-	dMat3GetCol(cData.mBoxRot,iB2,vAxis2);
+	dMat3GetCol(m_mBoxRot,iB1,vAxis1);
+	dMat3GetCol(m_mBoxRot,iB2,vAxis2);
 
-	avPoints[0][0] = vCenter[0] + cData.vBoxHalfSize[iB1] * vAxis1[0] - cData.vBoxHalfSize[iB2] * vAxis2[0];
-	avPoints[0][1] = vCenter[1] + cData.vBoxHalfSize[iB1] * vAxis1[1] - cData.vBoxHalfSize[iB2] * vAxis2[1];
-	avPoints[0][2] = vCenter[2] + cData.vBoxHalfSize[iB1] * vAxis1[2] - cData.vBoxHalfSize[iB2] * vAxis2[2];
+	avPoints[0][0] = vCenter[0] + m_vBoxHalfSize[iB1] * vAxis1[0] - m_vBoxHalfSize[iB2] * vAxis2[0];
+	avPoints[0][1] = vCenter[1] + m_vBoxHalfSize[iB1] * vAxis1[1] - m_vBoxHalfSize[iB2] * vAxis2[1];
+	avPoints[0][2] = vCenter[2] + m_vBoxHalfSize[iB1] * vAxis1[2] - m_vBoxHalfSize[iB2] * vAxis2[2];
 
-	avPoints[1][0] = vCenter[0] - cData.vBoxHalfSize[iB1] * vAxis1[0] - cData.vBoxHalfSize[iB2] * vAxis2[0];
-	avPoints[1][1] = vCenter[1] - cData.vBoxHalfSize[iB1] * vAxis1[1] - cData.vBoxHalfSize[iB2] * vAxis2[1];
-	avPoints[1][2] = vCenter[2] - cData.vBoxHalfSize[iB1] * vAxis1[2] - cData.vBoxHalfSize[iB2] * vAxis2[2];
+	avPoints[1][0] = vCenter[0] - m_vBoxHalfSize[iB1] * vAxis1[0] - m_vBoxHalfSize[iB2] * vAxis2[0];
+	avPoints[1][1] = vCenter[1] - m_vBoxHalfSize[iB1] * vAxis1[1] - m_vBoxHalfSize[iB2] * vAxis2[1];
+	avPoints[1][2] = vCenter[2] - m_vBoxHalfSize[iB1] * vAxis1[2] - m_vBoxHalfSize[iB2] * vAxis2[2];
 
-	avPoints[2][0] = vCenter[0] - cData.vBoxHalfSize[iB1] * vAxis1[0] + cData.vBoxHalfSize[iB2] * vAxis2[0];
-	avPoints[2][1] = vCenter[1] - cData.vBoxHalfSize[iB1] * vAxis1[1] + cData.vBoxHalfSize[iB2] * vAxis2[1];
-	avPoints[2][2] = vCenter[2] - cData.vBoxHalfSize[iB1] * vAxis1[2] + cData.vBoxHalfSize[iB2] * vAxis2[2];
+	avPoints[2][0] = vCenter[0] - m_vBoxHalfSize[iB1] * vAxis1[0] + m_vBoxHalfSize[iB2] * vAxis2[0];
+	avPoints[2][1] = vCenter[1] - m_vBoxHalfSize[iB1] * vAxis1[1] + m_vBoxHalfSize[iB2] * vAxis2[1];
+	avPoints[2][2] = vCenter[2] - m_vBoxHalfSize[iB1] * vAxis1[2] + m_vBoxHalfSize[iB2] * vAxis2[2];
 
-	avPoints[3][0] = vCenter[0] + cData.vBoxHalfSize[iB1] * vAxis1[0] + cData.vBoxHalfSize[iB2] * vAxis2[0];
-	avPoints[3][1] = vCenter[1] + cData.vBoxHalfSize[iB1] * vAxis1[1] + cData.vBoxHalfSize[iB2] * vAxis2[1];
-	avPoints[3][2] = vCenter[2] + cData.vBoxHalfSize[iB1] * vAxis1[2] + cData.vBoxHalfSize[iB2] * vAxis2[2];
+	avPoints[3][0] = vCenter[0] + m_vBoxHalfSize[iB1] * vAxis1[0] + m_vBoxHalfSize[iB2] * vAxis2[0];
+	avPoints[3][1] = vCenter[1] + m_vBoxHalfSize[iB1] * vAxis1[1] + m_vBoxHalfSize[iB2] * vAxis2[1];
+	avPoints[3][2] = vCenter[2] + m_vBoxHalfSize[iB1] * vAxis1[2] + m_vBoxHalfSize[iB2] * vAxis2[2];
 
 	// transform box points to space of cylinder circle
 	dMatrix3 mCylinderInv;
-	dMatrix3Inv(cData.mCylinderRot,mCylinderInv);
+	dMatrix3Inv(m_mCylinderRot,mCylinderInv);
 
 	for(i=0; i<4; i++) 
 	{
@@ -866,7 +880,7 @@ void _cldClipBoxToCylinder(sCylinderBoxData& cData )
 	int nCircleSegment = 0;
 	for (nCircleSegment = 0; nCircleSegment < nCYLINDER_SEGMENT; nCircleSegment++)
 	{
-		dConstructPlane(cData.avCylinderNormals[nCircleSegment],cData.fCylinderRadius,plPlane);
+		dConstructPlane(m_avCylinderNormals[nCircleSegment],m_fCylinderRadius,plPlane);
 
 		if (0 == (nCircleSegment % 2))
 		{
@@ -890,28 +904,28 @@ void _cldClipBoxToCylinder(sCylinderBoxData& cData )
 	{
 		for( i=0; i<iTmpCounter2; i++)
 		{
-			dMULTIPLY0_331(vPoint,cData.mCylinderRot,avTempArray2[i]);
+			dMULTIPLY0_331(vPoint,m_mCylinderRot,avTempArray2[i]);
 			vPoint[0] += vCylinderCirclePos[0];
 			vPoint[1] += vCylinderCirclePos[1];
 			vPoint[2] += vCylinderCirclePos[2];
 
-			dVector3Subtract(vPoint,cData.vCylinderPos,vTemp);
-			ftmpdot	 = dVector3Dot(vTemp, cData.vNormal);
-			fTempDepth = cData.fBestrc - ftmpdot;
+			dVector3Subtract(vPoint,m_vCylinderPos,vTemp);
+			ftmpdot	 = dVector3Dot(vTemp, m_vNormal);
+			fTempDepth = m_fBestrc - ftmpdot;
 			// Depth must be positive
 			if (fTempDepth > REAL(0.0))
 			{
 				// generate contacts
-				dContactGeom* Contact0 = SAFECONTACT(cData.iFlags, cData.gContact, cData.nContacts, cData.iSkip);
+				dContactGeom* Contact0 = SAFECONTACT(m_iFlags, m_gContact, m_nContacts, m_iSkip);
 				Contact0->depth = fTempDepth;
-				dVector3Copy(cData.vNormal,Contact0->normal);
+				dVector3Copy(m_vNormal,Contact0->normal);
 				dVector3Copy(vPoint,Contact0->pos);
-				Contact0->g1 = cData.gCylinder;
-				Contact0->g2 = cData.gBox;
+				Contact0->g1 = m_gCylinder;
+				Contact0->g2 = m_gBox;
 				dVector3Inv(Contact0->normal);
-				cData.nContacts++;
+				m_nContacts++;
 				
-				if (cData.nContacts == (cData.iFlags & NUMC_MASK))
+				if (m_nContacts == (m_iFlags & NUMC_MASK))
 				{
 					break;
 				}
@@ -922,28 +936,28 @@ void _cldClipBoxToCylinder(sCylinderBoxData& cData )
 	{
 		for( i=0; i<iTmpCounter1; i++)
 		{
-			dMULTIPLY0_331(vPoint,cData.mCylinderRot,avTempArray1[i]);
+			dMULTIPLY0_331(vPoint,m_mCylinderRot,avTempArray1[i]);
 			vPoint[0] += vCylinderCirclePos[0];
 			vPoint[1] += vCylinderCirclePos[1];
 			vPoint[2] += vCylinderCirclePos[2];
 
-			dVector3Subtract(vPoint,cData.vCylinderPos,vTemp);
-			ftmpdot	 = dVector3Dot(vTemp, cData.vNormal);
-			fTempDepth = cData.fBestrc - ftmpdot;
+			dVector3Subtract(vPoint,m_vCylinderPos,vTemp);
+			ftmpdot	 = dVector3Dot(vTemp, m_vNormal);
+			fTempDepth = m_fBestrc - ftmpdot;
 			// Depth must be positive
 			if (fTempDepth > REAL(0.0))
 			{
 				// generate contacts
-				dContactGeom* Contact0 = SAFECONTACT(cData.iFlags, cData.gContact, cData.nContacts, cData.iSkip);
+				dContactGeom* Contact0 = SAFECONTACT(m_iFlags, m_gContact, m_nContacts, m_iSkip);
 				Contact0->depth = fTempDepth;
-				dVector3Copy(cData.vNormal,Contact0->normal);
+				dVector3Copy(m_vNormal,Contact0->normal);
 				dVector3Copy(vPoint,Contact0->pos);
-				Contact0->g1 = cData.gCylinder;
-				Contact0->g2 = cData.gBox;
+				Contact0->g1 = m_gCylinder;
+				Contact0->g2 = m_gBox;
 				dVector3Inv(Contact0->normal);
-				cData.nContacts++;
+				m_nContacts++;
 				
-				if (cData.nContacts == (cData.iFlags & NUMC_MASK))
+				if (m_nContacts == (m_iFlags & NUMC_MASK))
 				{
 					break;
 				}
@@ -952,6 +966,44 @@ void _cldClipBoxToCylinder(sCylinderBoxData& cData )
 	}
 }
 
+int sCylinderBoxData::PerformCollisionChecking()
+{
+	// initialize collider
+	_cldInitCylinderBox();
+
+	// do intersection test and find best separating axis
+	if ( !_cldTestSeparatingAxes() ) 
+	{
+		// if not found do nothing
+		return 0;
+	}
+
+	// if best separation axis is not found
+	if ( m_iBestAxis == 0 ) 
+	{
+		// this should not happen (we should already exit in that case)
+		dIASSERT(0);
+		// do nothing
+		return 0;
+	}
+
+	dReal fdot = dVector3Dot(m_vNormal,m_vCylinderAxis);
+	// choose which clipping method are we going to apply
+	if (dFabs(fdot) < REAL(0.9) ) 
+	{
+		// clip cylinder over box
+		if(!_cldClipCylinderToBox()) 
+		{
+			return 0;
+		}
+	} 
+	else 
+	{
+		_cldClipBoxToCylinder();  
+	}
+
+	return m_nContacts;
+}
 
 // Cylinder - Box by CroTeam
 // Ported by Nguyen Binh
@@ -962,50 +1014,9 @@ int dCollideCylinderBox(dxGeom *o1, dxGeom *o2, int flags, dContactGeom *contact
 	dIASSERT (o2->type == dBoxClass);
 	dIASSERT ((flags & NUMC_MASK) >= 1);
 
-	sCylinderBoxData	cData;
+	sCylinderBoxData cData(o1, o2, flags, contact, skip);
 
-	// Assign ODE stuff
-	cData.gCylinder = o1;
-	cData.gBox		= o2;
-	cData.iFlags	= flags;
-	cData.iSkip		= skip;
-	cData.gContact	= contact;
-
-	// initialize collider
-	_cldInitCylinderBox( cData );
-
-	// do intersection test and find best separating axis
-	if(!_cldTestSeparatingAxes( cData ) ) 
-	{
-		// if not found do nothing
-		return 0;
-	}
-
-	// if best separation axis is not found
-	if ( cData.iBestAxis == 0 ) 
-	{
-		// this should not happen (we should already exit in that case)
-		dIASSERT(0);
-		// do nothing
-		return 0;
-	}
-
-	dReal fdot = dVector3Dot(cData.vNormal,cData.vCylinderAxis);
-	// choose which clipping method are we going to apply
-	if (dFabs(fdot) < REAL(0.9) ) 
-	{
-		// clip cylinder over box
-		if(!_cldClipCylinderToBox(cData)) 
-		{
-			return 0;
-		}
-	} 
-	else 
-	{
-		_cldClipBoxToCylinder(cData);  
-	}
-
-	return cData.nContacts;
+	return cData.PerformCollisionChecking();
 }
 
 
