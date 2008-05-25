@@ -34,6 +34,8 @@
 #include "collision_trimesh_internal.h"
 #include "util.h"
 
+#if dTRIMESH_ENABLED
+
 #define MAX_REAL	dInfinity
 static const int	nCYLINDER_AXIS				= 2;
 static const int    nCYLINDER_CIRCLE_SEGMENTS	= 8;
@@ -51,48 +53,67 @@ typedef struct _sLocalContactData
 	int			nFlags; // 0 = filtered out, 1 = OK
 }sLocalContactData;
 
-typedef struct _sCylinderTrimeshColliderData
+struct sCylinderTrimeshColliderData
 {
+	sCylinderTrimeshColliderData(int flags, int skip): m_iFlags(flags), m_iSkip(skip), m_nContacts(0), m_gLocalContacts(NULL) {}
+
+#ifdef OPTIMIZE_CONTACTS
+	void _OptimizeLocalContacts();
+#endif
+	void _InitCylinderTrimeshData(dxGeom *Cylinder, dxTriMesh *Trimesh);
+	int	_ProcessLocalContacts(dContactGeom *contact, dxGeom *Cylinder, dxTriMesh *Trimesh);
+
+	bool _cldTestAxis(const dVector3 &v0, const dVector3 &v1, const dVector3 &v2, 
+		dVector3& vAxis, int iAxis, bool bNoFlip = false);
+	bool _cldTestCircleToEdgeAxis(
+		const dVector3 &v0, const dVector3 &v1, const dVector3 &v2,
+		const dVector3 &vCenterPoint, const dVector3 &vCylinderAxis1,
+		const dVector3 &vVx0, const dVector3 &vVx1, int iAxis);
+	bool _cldTestSeparatingAxes(const dVector3 &v0, const dVector3 &v1, const dVector3 &v2);
+	bool _cldClipCylinderEdgeToTriangle(const dVector3 &v0, const dVector3 &v1, const dVector3 &v2);
+	void _cldClipCylinderToTriangle(const dVector3 &v0, const dVector3 &v1, const dVector3 &v2);
+	void TestOneTriangleVsCylinder(const dVector3 &v0, const dVector3 &v1, const dVector3 &v2, 
+		const bool bDoubleSided);
+	int TestCollisionForSingleTriangle(int ctContacts0, int Triint, dVector3 dv[3], 
+		bool &bOutFinishSearching);
+
 	// cylinder data
-	dMatrix3	mCylinderRot;
-	dQuaternion	qCylinderRot;
-	dQuaternion	qInvCylinderRot;
-	dVector3	vCylinderPos;
-	dVector3	vCylinderAxis;
-	dReal		fCylinderRadius;
-	dReal		fCylinderSize;
-	dVector3	avCylinderNormals[nCYLINDER_CIRCLE_SEGMENTS];
+	dMatrix3	m_mCylinderRot;
+	dQuaternion	m_qCylinderRot;
+	dQuaternion	m_qInvCylinderRot;
+	dVector3	m_vCylinderPos;
+	dVector3	m_vCylinderAxis;
+	dReal		m_fCylinderRadius;
+	dReal		m_fCylinderSize;
+	dVector3	m_avCylinderNormals[nCYLINDER_CIRCLE_SEGMENTS];
 
 	// mesh data
-	dQuaternion	qTrimeshRot;
-	dQuaternion	qInvTrimeshRot;
-	dMatrix3	mTrimeshRot;
-	dVector3	vTrimeshPos;
+	dQuaternion	m_qTrimeshRot;
+	dQuaternion	m_qInvTrimeshRot;
+	dMatrix3	m_mTrimeshRot;
+	dVector3	m_vTrimeshPos;
 
 	// global collider data
-	dVector3	vBestPoint;
-	dReal		fBestDepth;
-	dReal		fBestCenter;
-	dReal		fBestrt;
-	int			iBestAxis;
-	dVector3	vContactNormal;
-	dVector3	vNormal;
-	dVector3	vE0;
-	dVector3	vE1;
-	dVector3	vE2;
+	dVector3	m_vBestPoint;
+	dReal		m_fBestDepth;
+	dReal		m_fBestCenter;
+	dReal		m_fBestrt;
+	int			m_iBestAxis;
+	dVector3	m_vContactNormal;
+	dVector3	m_vNormal;
+	dVector3	m_vE0;
+	dVector3	m_vE1;
+	dVector3	m_vE2;
 
 	// ODE stuff
-	dGeomID				gCylinder;
-	dxTriMesh*			gTrimesh;
-	dContactGeom*		gContact;
-	int					iFlags;
-	int					iSkip;
-	int					nContacts;// = 0;
-	sLocalContactData*	gLocalContacts;
-} sCylinderTrimeshColliderData;
+	int					m_iFlags;
+	int					m_iSkip;
+	int					m_nContacts;// = 0;
+	sLocalContactData*	m_gLocalContacts;
+};
 
-// Short type name
-typedef  sCylinderTrimeshColliderData sData;
+
+#ifdef OPTIMIZE_CONTACTS
 
 // Use to classify contacts to be "near" in position
 static const dReal fSameContactPositionEpsilon = REAL(0.0001); // 1e-4
@@ -136,25 +157,25 @@ inline int _IsBetter(sLocalContactData& c1,sLocalContactData& c2)
 }
 
 // iterate through gLocalContacts and filtered out "near contact"
-inline void	_OptimizeLocalContacts(sData& cData)
+void sCylinderTrimeshColliderData::_OptimizeLocalContacts()
 {
-	int nContacts = cData.nContacts;
+	int nContacts = m_nContacts;
 
 	for (int i = 0; i < nContacts-1; i++)
 	{
 		for (int j = i+1; j < nContacts; j++)
 		{
-			if (_IsNearContacts(cData.gLocalContacts[i],cData.gLocalContacts[j]))
+			if (_IsNearContacts(m_gLocalContacts[i],m_gLocalContacts[j]))
 			{
 				// If they are seem to be the same then filtered 
 				// out the least penetrate one
-				if (_IsBetter(cData.gLocalContacts[j],cData.gLocalContacts[i]))
+				if (_IsBetter(m_gLocalContacts[j],m_gLocalContacts[i]))
 				{
-					cData.gLocalContacts[i].nFlags = 0; // filtered 1st contact
+					m_gLocalContacts[i].nFlags = 0; // filtered 1st contact
 				}
 				else
 				{
-					cData.gLocalContacts[j].nFlags = 0; // filtered 2nd contact
+					m_gLocalContacts[j].nFlags = 0; // filtered 2nd contact
 				}
 
 				// NOTE
@@ -164,19 +185,16 @@ inline void	_OptimizeLocalContacts(sData& cData)
 		}
 	}
 }
+#endif // OPTIMIZE_CONTACTS
 
-inline int	_ProcessLocalContacts(sData& cData)
+int	sCylinderTrimeshColliderData::_ProcessLocalContacts(dContactGeom *contact, 
+	dxGeom *Cylinder, dxTriMesh *Trimesh)
 {
-	if (cData.nContacts == 0)
-	{
-		return 0;
-	}
-
 #ifdef OPTIMIZE_CONTACTS
-	if (cData.nContacts > 1 && !(cData.iFlags & CONTACTS_UNIMPORTANT))
+	if (m_nContacts > 1 && !(m_iFlags & CONTACTS_UNIMPORTANT))
 	{
 		// Can be optimized...
-		_OptimizeLocalContacts(cData);
+		_OptimizeLocalContacts();
 	}
 #endif		
 
@@ -185,39 +203,39 @@ inline int	_ProcessLocalContacts(sData& cData)
 
 	int nFinalContact = 0;
 
-	for (iContact = 0; iContact < cData.nContacts; iContact ++)
+	for (iContact = 0; iContact < m_nContacts; iContact ++)
 	{
-		if (1 == cData.gLocalContacts[iContact].nFlags)
+		if (1 == m_gLocalContacts[iContact].nFlags)
 		{
-			Contact = SAFECONTACT(cData.iFlags, cData.gContact, nFinalContact, cData.iSkip);
-			Contact->depth = cData.gLocalContacts[iContact].fDepth;
-			dVector3Copy(cData.gLocalContacts[iContact].vNormal,Contact->normal);
-			dVector3Copy(cData.gLocalContacts[iContact].vPos,Contact->pos);
-			Contact->g1 = cData.gCylinder;
-			Contact->g2 = cData.gTrimesh;
-			Contact->side2 = cData.gLocalContacts[iContact].triIndex;
+			Contact = SAFECONTACT(m_iFlags, contact, nFinalContact, m_iSkip);
+			Contact->depth = m_gLocalContacts[iContact].fDepth;
+			dVector3Copy(m_gLocalContacts[iContact].vNormal,Contact->normal);
+			dVector3Copy(m_gLocalContacts[iContact].vPos,Contact->pos);
+			Contact->g1 = Cylinder;
+			Contact->g2 = Trimesh;
+			Contact->side2 = m_gLocalContacts[iContact].triIndex;
 			dVector3Inv(Contact->normal);
 
 			nFinalContact++;
 		}
 	}
 	// debug
-	//if (nFinalContact != cData.nContacts)
+	//if (nFinalContact != m_nContacts)
 	//{
-	//	printf("[Info] %d contacts generated,%d  filtered.\n",cData.nContacts,cData.nContacts-nFinalContact);
+	//	printf("[Info] %d contacts generated,%d  filtered.\n",m_nContacts,m_nContacts-nFinalContact);
 	//}
 
 	return nFinalContact;
 }
 
 
-bool _cldTestAxis(sData& cData,
+bool sCylinderTrimeshColliderData::_cldTestAxis(
 				  const dVector3 &v0,
 				  const dVector3 &v1,
 				  const dVector3 &v2, 
                   dVector3& vAxis, 
 				  int iAxis,
-				  bool bNoFlip = false)
+				  bool bNoFlip/* = false*/)
 {
   
 	// calculate length of separating axis vector
@@ -234,27 +252,27 @@ bool _cldTestAxis(sData& cData,
 	vAxis[1] /= fL;
 	vAxis[2] /= fL;
 
-	dReal fdot1 = dVector3Dot(cData.vCylinderAxis,vAxis);
+	dReal fdot1 = dVector3Dot(m_vCylinderAxis,vAxis);
 	// project capsule on vAxis
 	dReal frc;
 
 	if (dFabs(fdot1) > REAL(1.0) ) 
 	{
 //		fdot1 = REAL(1.0);
-		frc = dFabs(cData.fCylinderSize* REAL(0.5));
+		frc = dFabs(m_fCylinderSize* REAL(0.5));
 	}
 	else
 	{
-		frc = dFabs((cData.fCylinderSize* REAL(0.5)) * fdot1)
-			+ cData.fCylinderRadius * dSqrt(REAL(1.0)-(fdot1*fdot1));
+		frc = dFabs((m_fCylinderSize* REAL(0.5)) * fdot1)
+			+ m_fCylinderRadius * dSqrt(REAL(1.0)-(fdot1*fdot1));
 	}
   
 	dVector3 vV0;
-	dVector3Subtract(v0,cData.vCylinderPos,vV0);
+	dVector3Subtract(v0,m_vCylinderPos,vV0);
 	dVector3 vV1;
-	dVector3Subtract(v1,cData.vCylinderPos,vV1);
+	dVector3Subtract(v1,m_vCylinderPos,vV1);
 	dVector3 vV2;
-	dVector3Subtract(v2,cData.vCylinderPos,vV2);
+	dVector3Subtract(v2,m_vCylinderPos,vV2);
 
 	// project triangle on vAxis
 	dReal afv[3];
@@ -296,20 +314,20 @@ bool _cldTestAxis(sData& cData,
 	dReal fDepth = -(dFabs(fCenter) - (frc + fTriangleRadius ) );
 
 	// if greater then best found so far
-	if ( fDepth < cData.fBestDepth ) 
+	if ( fDepth < m_fBestDepth ) 
 	{
 		// remember depth
-		cData.fBestDepth			= fDepth;
-		cData.fBestCenter		    = fCenter;
-		cData.fBestrt				= frc;
-		dVector3Copy(vAxis,cData.vContactNormal);
-		cData.iBestAxis				= iAxis;
+		m_fBestDepth			= fDepth;
+		m_fBestCenter		    = fCenter;
+		m_fBestrt				= frc;
+		dVector3Copy(vAxis,m_vContactNormal);
+		m_iBestAxis				= iAxis;
 	  
 		// flip normal if interval is wrong faced
 		if ( fCenter< REAL(0.0) && !bNoFlip) 
 		{ 
-			dVector3Inv(cData.vContactNormal);
-			cData.fBestCenter = -fCenter;
+			dVector3Inv(m_vContactNormal);
+			m_fBestCenter = -fCenter;
 		}
 	}
   
@@ -317,10 +335,10 @@ bool _cldTestAxis(sData& cData,
 }
 
 // intersection test between edge and circle
-bool _cldTestCircleToEdgeAxis(sData& cData,
-							  const dVector3 &v0, const dVector3 &v1, const dVector3 &v2,
-                              const dVector3 &vCenterPoint, const dVector3 &vCylinderAxis1,
-                              const dVector3 &vVx0, const dVector3 &vVx1, int iAxis) 
+bool sCylinderTrimeshColliderData::_cldTestCircleToEdgeAxis(
+	const dVector3 &v0, const dVector3 &v1, const dVector3 &v2,
+	const dVector3 &vCenterPoint, const dVector3 &vCylinderAxis1,
+	const dVector3 &vVx0, const dVector3 &vVx1, int iAxis) 
 {
 	// calculate direction of edge
 	dVector3 vkl;
@@ -359,7 +377,7 @@ bool _cldTestCircleToEdgeAxis(sData& cData,
 	dVector3Cross(vTangent,vkl,vAxis);
 
 	// use that vector as separating axis
-	return _cldTestAxis( cData ,v0, v1, v2, vAxis, iAxis );
+	return _cldTestAxis( v0, v1, v2, vAxis, iAxis );
 }
 
 // helper for less key strokes
@@ -377,139 +395,139 @@ inline void _CalculateAxis(const dVector3& v1,
 	dVector3Cross(t2,v3,r);
 }
 
-bool _cldTestSeparatingAxes(sData& cData,
+bool sCylinderTrimeshColliderData::_cldTestSeparatingAxes(
 							const dVector3 &v0,
 							const dVector3 &v1,
 							const dVector3 &v2) 
 {
 
 	// calculate edge vectors
-	dVector3Subtract(v1 ,v0 , cData.vE0);
-	// cData.vE1 has been calculated before -> so save some cycles here
-	dVector3Subtract(v0 ,v2 , cData.vE2);
+	dVector3Subtract(v1 ,v0 , m_vE0);
+	// m_vE1 has been calculated before -> so save some cycles here
+	dVector3Subtract(v0 ,v2 , m_vE2);
 
 	// calculate caps centers in absolute space
 	dVector3 vCp0;
-	vCp0[0] = cData.vCylinderPos[0] + cData.vCylinderAxis[0]*(cData.fCylinderSize* REAL(0.5));
-	vCp0[1] = cData.vCylinderPos[1] + cData.vCylinderAxis[1]*(cData.fCylinderSize* REAL(0.5));
-	vCp0[2] = cData.vCylinderPos[2] + cData.vCylinderAxis[2]*(cData.fCylinderSize* REAL(0.5));
+	vCp0[0] = m_vCylinderPos[0] + m_vCylinderAxis[0]*(m_fCylinderSize* REAL(0.5));
+	vCp0[1] = m_vCylinderPos[1] + m_vCylinderAxis[1]*(m_fCylinderSize* REAL(0.5));
+	vCp0[2] = m_vCylinderPos[2] + m_vCylinderAxis[2]*(m_fCylinderSize* REAL(0.5));
 
 	dVector3 vCp1;
-	vCp1[0] = cData.vCylinderPos[0] - cData.vCylinderAxis[0]*(cData.fCylinderSize* REAL(0.5));
-	vCp1[1] = cData.vCylinderPos[1] - cData.vCylinderAxis[1]*(cData.fCylinderSize* REAL(0.5));
-	vCp1[2] = cData.vCylinderPos[2] - cData.vCylinderAxis[2]*(cData.fCylinderSize* REAL(0.5));
+	vCp1[0] = m_vCylinderPos[0] - m_vCylinderAxis[0]*(m_fCylinderSize* REAL(0.5));
+	vCp1[1] = m_vCylinderPos[1] - m_vCylinderAxis[1]*(m_fCylinderSize* REAL(0.5));
+	vCp1[2] = m_vCylinderPos[2] - m_vCylinderAxis[2]*(m_fCylinderSize* REAL(0.5));
 
 	// reset best axis
-	cData.iBestAxis = 0;
+	m_iBestAxis = 0;
 	dVector3 vAxis;
 
-	// axis cData.vNormal
-	//vAxis = -cData.vNormal;
-	vAxis[0] = -cData.vNormal[0];
-	vAxis[1] = -cData.vNormal[1];
-	vAxis[2] = -cData.vNormal[2];
-	if (!_cldTestAxis(cData, v0, v1, v2, vAxis, 1, true)) 
+	// axis m_vNormal
+	//vAxis = -m_vNormal;
+	vAxis[0] = -m_vNormal[0];
+	vAxis[1] = -m_vNormal[1];
+	vAxis[2] = -m_vNormal[2];
+	if (!_cldTestAxis(v0, v1, v2, vAxis, 1, true)) 
 	{ 
 		return false; 
 	}
 
 	// axis CxE0
-	// vAxis = ( cData.vCylinderAxis cross cData.vE0 );
-	dVector3Cross(cData.vCylinderAxis, cData.vE0,vAxis);
-	if (!_cldTestAxis(cData, v0, v1, v2, vAxis, 2)) 
+	// vAxis = ( m_vCylinderAxis cross m_vE0 );
+	dVector3Cross(m_vCylinderAxis, m_vE0,vAxis);
+	if (!_cldTestAxis(v0, v1, v2, vAxis, 2)) 
 	{ 
 		return false; 
 	}
 
 	// axis CxE1
-	// vAxis = ( cData.vCylinderAxis cross cData.vE1 );
-	dVector3Cross(cData.vCylinderAxis, cData.vE1,vAxis);
-	if (!_cldTestAxis(cData, v0, v1, v2, vAxis, 3)) 
+	// vAxis = ( m_vCylinderAxis cross m_vE1 );
+	dVector3Cross(m_vCylinderAxis, m_vE1,vAxis);
+	if (!_cldTestAxis(v0, v1, v2, vAxis, 3)) 
 	{ 
 		return false; 
 	}
 
 	// axis CxE2
-	// vAxis = ( cData.vCylinderAxis cross cData.vE2 );
-	dVector3Cross(cData.vCylinderAxis, cData.vE2,vAxis);
-	if (!_cldTestAxis( cData ,v0, v1, v2, vAxis, 4)) 
+	// vAxis = ( m_vCylinderAxis cross m_vE2 );
+	dVector3Cross(m_vCylinderAxis, m_vE2,vAxis);
+	if (!_cldTestAxis(v0, v1, v2, vAxis, 4)) 
 	{ 
 		return false; 
 	}
 
 	// first vertex on triangle
 	// axis ((V0-Cp0) x C) x C
-	//vAxis = ( ( v0-vCp0 ) cross cData.vCylinderAxis ) cross cData.vCylinderAxis;
-	_CalculateAxis(v0 , vCp0 , cData.vCylinderAxis , vAxis);
-	if (!_cldTestAxis(cData, v0, v1, v2, vAxis, 11)) 
+	//vAxis = ( ( v0-vCp0 ) cross m_vCylinderAxis ) cross m_vCylinderAxis;
+	_CalculateAxis(v0 , vCp0 , m_vCylinderAxis , vAxis);
+	if (!_cldTestAxis(v0, v1, v2, vAxis, 11)) 
 	{ 
 		return false; 
 	}
 
 	// second vertex on triangle
 	// axis ((V1-Cp0) x C) x C
-	// vAxis = ( ( v1-vCp0 ) cross cData.vCylinderAxis ) cross cData.vCylinderAxis;
-	_CalculateAxis(v1 , vCp0 , cData.vCylinderAxis , vAxis);
-	if (!_cldTestAxis(cData, v0, v1, v2, vAxis, 12)) 
+	// vAxis = ( ( v1-vCp0 ) cross m_vCylinderAxis ) cross m_vCylinderAxis;
+	_CalculateAxis(v1 , vCp0 , m_vCylinderAxis , vAxis);
+	if (!_cldTestAxis(v0, v1, v2, vAxis, 12)) 
 	{ 
 		return false; 
 	}
 
 	// third vertex on triangle
 	// axis ((V2-Cp0) x C) x C
-	//vAxis = ( ( v2-vCp0 ) cross cData.vCylinderAxis ) cross cData.vCylinderAxis;
-	_CalculateAxis(v2 , vCp0 , cData.vCylinderAxis , vAxis);
-	if (!_cldTestAxis(cData, v0, v1, v2, vAxis, 13))
+	//vAxis = ( ( v2-vCp0 ) cross m_vCylinderAxis ) cross m_vCylinderAxis;
+	_CalculateAxis(v2 , vCp0 , m_vCylinderAxis , vAxis);
+	if (!_cldTestAxis(v0, v1, v2, vAxis, 13))
 	{ 
 		return false; 
 	}
 
 	// test cylinder axis
-	// vAxis = cData.vCylinderAxis;
-	dVector3Copy(cData.vCylinderAxis , vAxis);
-	if (!_cldTestAxis(cData , v0, v1, v2, vAxis, 14)) 
+	// vAxis = m_vCylinderAxis;
+	dVector3Copy(m_vCylinderAxis , vAxis);
+	if (!_cldTestAxis(v0, v1, v2, vAxis, 14)) 
 	{ 
 		return false; 
 	}
 
 	// Test top and bottom circle ring of cylinder for separation
 	dVector3 vccATop;
-	vccATop[0] = cData.vCylinderPos[0] + cData.vCylinderAxis[0]*(cData.fCylinderSize * REAL(0.5));
-	vccATop[1] = cData.vCylinderPos[1] + cData.vCylinderAxis[1]*(cData.fCylinderSize * REAL(0.5));
-	vccATop[2] = cData.vCylinderPos[2] + cData.vCylinderAxis[2]*(cData.fCylinderSize * REAL(0.5));
+	vccATop[0] = m_vCylinderPos[0] + m_vCylinderAxis[0]*(m_fCylinderSize * REAL(0.5));
+	vccATop[1] = m_vCylinderPos[1] + m_vCylinderAxis[1]*(m_fCylinderSize * REAL(0.5));
+	vccATop[2] = m_vCylinderPos[2] + m_vCylinderAxis[2]*(m_fCylinderSize * REAL(0.5));
 
 	dVector3 vccABottom;
-	vccABottom[0] = cData.vCylinderPos[0] - cData.vCylinderAxis[0]*(cData.fCylinderSize * REAL(0.5));
-	vccABottom[1] = cData.vCylinderPos[1] - cData.vCylinderAxis[1]*(cData.fCylinderSize * REAL(0.5));
-	vccABottom[2] = cData.vCylinderPos[2] - cData.vCylinderAxis[2]*(cData.fCylinderSize * REAL(0.5));
+	vccABottom[0] = m_vCylinderPos[0] - m_vCylinderAxis[0]*(m_fCylinderSize * REAL(0.5));
+	vccABottom[1] = m_vCylinderPos[1] - m_vCylinderAxis[1]*(m_fCylinderSize * REAL(0.5));
+	vccABottom[2] = m_vCylinderPos[2] - m_vCylinderAxis[2]*(m_fCylinderSize * REAL(0.5));
 
 
-  if (!_cldTestCircleToEdgeAxis(cData, v0, v1, v2, vccATop, cData.vCylinderAxis, v0, v1, 15)) 
+  if (!_cldTestCircleToEdgeAxis(v0, v1, v2, vccATop, m_vCylinderAxis, v0, v1, 15)) 
   {
     return false;
   }
 
-  if (!_cldTestCircleToEdgeAxis(cData, v0, v1, v2, vccATop, cData.vCylinderAxis, v1, v2, 16)) 
+  if (!_cldTestCircleToEdgeAxis(v0, v1, v2, vccATop, m_vCylinderAxis, v1, v2, 16)) 
   {
     return false;
   }
 
-  if (!_cldTestCircleToEdgeAxis(cData, v0, v1, v2, vccATop, cData.vCylinderAxis, v0, v2, 17)) 
+  if (!_cldTestCircleToEdgeAxis(v0, v1, v2, vccATop, m_vCylinderAxis, v0, v2, 17)) 
   {
     return false;
   }
 
-  if (!_cldTestCircleToEdgeAxis(cData, v0, v1, v2, vccABottom, cData.vCylinderAxis, v0, v1, 18)) 
+  if (!_cldTestCircleToEdgeAxis(v0, v1, v2, vccABottom, m_vCylinderAxis, v0, v1, 18)) 
   {
     return false;
   }
 
-  if (!_cldTestCircleToEdgeAxis(cData, v0, v1, v2, vccABottom, cData.vCylinderAxis, v1, v2, 19)) 
+  if (!_cldTestCircleToEdgeAxis(v0, v1, v2, vccABottom, m_vCylinderAxis, v1, v2, 19)) 
   {
     return false;
   }
 
-  if (!_cldTestCircleToEdgeAxis(cData, v0, v1, v2, vccABottom, cData.vCylinderAxis, v0, v2, 20)) 
+  if (!_cldTestCircleToEdgeAxis(v0, v1, v2, vccABottom, m_vCylinderAxis, v0, v2, 20)) 
   {
     return false;
   }
@@ -517,14 +535,15 @@ bool _cldTestSeparatingAxes(sData& cData,
   return true;
 }
 
-bool _cldClipCylinderEdgeToTriangle(sData& cData, const dVector3 &v0, const dVector3 &v1, const dVector3 &v2)
+bool sCylinderTrimeshColliderData::_cldClipCylinderEdgeToTriangle(
+	const dVector3 &v0, const dVector3 &v1, const dVector3 &v2)
 {
 	// translate cylinder
-	dReal fTemp = dVector3Dot(cData.vCylinderAxis , cData.vContactNormal);
+	dReal fTemp = dVector3Dot(m_vCylinderAxis , m_vContactNormal);
 	dVector3 vN2;
-	vN2[0] = cData.vContactNormal[0] - cData.vCylinderAxis[0]*fTemp;
-	vN2[1] = cData.vContactNormal[1] - cData.vCylinderAxis[1]*fTemp;
-	vN2[2] = cData.vContactNormal[2] - cData.vCylinderAxis[2]*fTemp;
+	vN2[0] = m_vContactNormal[0] - m_vCylinderAxis[0]*fTemp;
+	vN2[1] = m_vContactNormal[1] - m_vCylinderAxis[1]*fTemp;
+	vN2[2] = m_vContactNormal[2] - m_vCylinderAxis[2]*fTemp;
 
 	fTemp = dVector3Length(vN2);
 	if (fTemp < REAL(1e-5))
@@ -539,19 +558,19 @@ bool _cldClipCylinderEdgeToTriangle(sData& cData, const dVector3 &v0, const dVec
 
 	// calculate caps centers in absolute space
 	dVector3 vCposTrans;
-	vCposTrans[0] = cData.vCylinderPos[0] + vN2[0]*cData.fCylinderRadius;
-	vCposTrans[1] = cData.vCylinderPos[1] + vN2[1]*cData.fCylinderRadius;
-	vCposTrans[2] = cData.vCylinderPos[2] + vN2[2]*cData.fCylinderRadius;
+	vCposTrans[0] = m_vCylinderPos[0] + vN2[0]*m_fCylinderRadius;
+	vCposTrans[1] = m_vCylinderPos[1] + vN2[1]*m_fCylinderRadius;
+	vCposTrans[2] = m_vCylinderPos[2] + vN2[2]*m_fCylinderRadius;
 	  
 	dVector3 vCEdgePoint0;
-	vCEdgePoint0[0]  = vCposTrans[0] + cData.vCylinderAxis[0] * (cData.fCylinderSize* REAL(0.5));
-	vCEdgePoint0[1]  = vCposTrans[1] + cData.vCylinderAxis[1] * (cData.fCylinderSize* REAL(0.5));
-	vCEdgePoint0[2]  = vCposTrans[2] + cData.vCylinderAxis[2] * (cData.fCylinderSize* REAL(0.5));
+	vCEdgePoint0[0]  = vCposTrans[0] + m_vCylinderAxis[0] * (m_fCylinderSize* REAL(0.5));
+	vCEdgePoint0[1]  = vCposTrans[1] + m_vCylinderAxis[1] * (m_fCylinderSize* REAL(0.5));
+	vCEdgePoint0[2]  = vCposTrans[2] + m_vCylinderAxis[2] * (m_fCylinderSize* REAL(0.5));
 
 	dVector3 vCEdgePoint1;
-	vCEdgePoint1[0]  = vCposTrans[0] - cData.vCylinderAxis[0] * (cData.fCylinderSize* REAL(0.5));
-	vCEdgePoint1[1]  = vCposTrans[1] - cData.vCylinderAxis[1] * (cData.fCylinderSize* REAL(0.5));
-	vCEdgePoint1[2]  = vCposTrans[2] - cData.vCylinderAxis[2] * (cData.fCylinderSize* REAL(0.5));
+	vCEdgePoint1[0]  = vCposTrans[0] - m_vCylinderAxis[0] * (m_fCylinderSize* REAL(0.5));
+	vCEdgePoint1[1]  = vCposTrans[1] - m_vCylinderAxis[1] * (m_fCylinderSize* REAL(0.5));
+	vCEdgePoint1[2]  = vCposTrans[2] - m_vCylinderAxis[2] * (m_fCylinderSize* REAL(0.5));
 
 	// transform cylinder edge points into triangle space
 	vCEdgePoint0[0] -= v0[0];
@@ -566,10 +585,10 @@ bool _cldClipCylinderEdgeToTriangle(sData& cData, const dVector3 &v0, const dVec
 	dVector3 vPlaneNormal;
 
 	// triangle plane
-	//plPlane = Plane4f( -cData.vNormal, 0);
-	vPlaneNormal[0] = -cData.vNormal[0];
-	vPlaneNormal[1] = -cData.vNormal[1];
-	vPlaneNormal[2] = -cData.vNormal[2];
+	//plPlane = Plane4f( -m_vNormal, 0);
+	vPlaneNormal[0] = -m_vNormal[0];
+	vPlaneNormal[1] = -m_vNormal[1];
+	vPlaneNormal[2] = -m_vNormal[2];
 	dConstructPlane(vPlaneNormal,REAL(0.0),plPlane);
 	if(!dClipEdgeToPlane( vCEdgePoint0, vCEdgePoint1, plPlane )) 
 	{ 
@@ -577,8 +596,8 @@ bool _cldClipCylinderEdgeToTriangle(sData& cData, const dVector3 &v0, const dVec
 	}
 
 	// plane with edge 0
-	//plPlane = Plane4f( ( cData.vNormal cross cData.vE0 ), REAL(1e-5));
-	dVector3Cross(cData.vNormal,cData.vE0,vPlaneNormal);
+	//plPlane = Plane4f( ( m_vNormal cross m_vE0 ), REAL(1e-5));
+	dVector3Cross(m_vNormal,m_vE0,vPlaneNormal);
 	dConstructPlane(vPlaneNormal,REAL(1e-5),plPlane);
 	if(!dClipEdgeToPlane( vCEdgePoint0, vCEdgePoint1, plPlane )) 
 	{ 
@@ -586,10 +605,10 @@ bool _cldClipCylinderEdgeToTriangle(sData& cData, const dVector3 &v0, const dVec
 	}
   
 	// plane with edge 1
-	//dVector3 vTemp = ( cData.vNormal cross cData.vE1 );
-	dVector3Cross(cData.vNormal,cData.vE1,vPlaneNormal);
-	fTemp = dVector3Dot(cData.vE0 , vPlaneNormal) - REAL(1e-5);
-	//plPlane = Plane4f( vTemp, -(( cData.vE0 dot vTemp )-REAL(1e-5)));
+	//dVector3 vTemp = ( m_vNormal cross m_vE1 );
+	dVector3Cross(m_vNormal,m_vE1,vPlaneNormal);
+	fTemp = dVector3Dot(m_vE0 , vPlaneNormal) - REAL(1e-5);
+	//plPlane = Plane4f( vTemp, -(( m_vE0 dot vTemp )-REAL(1e-5)));
 	dConstructPlane(vPlaneNormal,-fTemp,plPlane);
 	if(!dClipEdgeToPlane( vCEdgePoint0, vCEdgePoint1, plPlane )) 
 	{
@@ -597,8 +616,8 @@ bool _cldClipCylinderEdgeToTriangle(sData& cData, const dVector3 &v0, const dVec
 	}
 
 	// plane with edge 2
-	// plPlane = Plane4f( ( cData.vNormal cross cData.vE2 ), REAL(1e-5));
-	dVector3Cross(cData.vNormal,cData.vE2,vPlaneNormal);
+	// plPlane = Plane4f( ( m_vNormal cross m_vE2 ), REAL(1e-5));
+	dVector3Cross(m_vNormal,m_vE2,vPlaneNormal);
 	dConstructPlane(vPlaneNormal,REAL(1e-5),plPlane);
 	if(!dClipEdgeToPlane( vCEdgePoint0, vCEdgePoint1, plPlane )) 
 	{ 
@@ -616,13 +635,13 @@ bool _cldClipCylinderEdgeToTriangle(sData& cData, const dVector3 &v0, const dVec
 
 	// calculate depths for both contact points
 	dVector3 vTemp;
-	dVector3Subtract(vCEdgePoint0,cData.vCylinderPos, vTemp);
-	dReal fRestDepth0 = -dVector3Dot(vTemp,cData.vContactNormal) + cData.fBestrt;
-	dVector3Subtract(vCEdgePoint1,cData.vCylinderPos, vTemp);
-	dReal fRestDepth1 = -dVector3Dot(vTemp,cData.vContactNormal) + cData.fBestrt;
+	dVector3Subtract(vCEdgePoint0,m_vCylinderPos, vTemp);
+	dReal fRestDepth0 = -dVector3Dot(vTemp,m_vContactNormal) + m_fBestrt;
+	dVector3Subtract(vCEdgePoint1,m_vCylinderPos, vTemp);
+	dReal fRestDepth1 = -dVector3Dot(vTemp,m_vContactNormal) + m_fBestrt;
 	
-	dReal fDepth0 = cData.fBestDepth - (fRestDepth0);
-	dReal fDepth1 = cData.fBestDepth - (fRestDepth1);
+	dReal fDepth0 = m_fBestDepth - (fRestDepth0);
+	dReal fDepth1 = m_fBestDepth - (fRestDepth1);
 		  
 	// clamp depths to zero
 	if(fDepth0 < REAL(0.0) ) 
@@ -637,29 +656,30 @@ bool _cldClipCylinderEdgeToTriangle(sData& cData, const dVector3 &v0, const dVec
 
 	// Generate contact 0
 	{
-		cData.gLocalContacts[cData.nContacts].fDepth = fDepth0;
-		dVector3Copy(cData.vContactNormal,cData.gLocalContacts[cData.nContacts].vNormal);
-		dVector3Copy(vCEdgePoint0,cData.gLocalContacts[cData.nContacts].vPos);
-		cData.gLocalContacts[cData.nContacts].nFlags = 1;
-		cData.nContacts++;
-		if(cData.nContacts >= (cData.iFlags & NUMC_MASK)) 
+		m_gLocalContacts[m_nContacts].fDepth = fDepth0;
+		dVector3Copy(m_vContactNormal,m_gLocalContacts[m_nContacts].vNormal);
+		dVector3Copy(vCEdgePoint0,m_gLocalContacts[m_nContacts].vPos);
+		m_gLocalContacts[m_nContacts].nFlags = 1;
+		m_nContacts++;
+		if(m_nContacts >= (m_iFlags & NUMC_MASK)) 
 			return true;
 	}
 
 	// Generate contact 1
 	{
 		// generate contacts
-		cData.gLocalContacts[cData.nContacts].fDepth = fDepth1;
-		dVector3Copy(cData.vContactNormal,cData.gLocalContacts[cData.nContacts].vNormal);
-		dVector3Copy(vCEdgePoint1,cData.gLocalContacts[cData.nContacts].vPos);
-		cData.gLocalContacts[cData.nContacts].nFlags = 1;
-		cData.nContacts++;		
+		m_gLocalContacts[m_nContacts].fDepth = fDepth1;
+		dVector3Copy(m_vContactNormal,m_gLocalContacts[m_nContacts].vNormal);
+		dVector3Copy(vCEdgePoint1,m_gLocalContacts[m_nContacts].vPos);
+		m_gLocalContacts[m_nContacts].nFlags = 1;
+		m_nContacts++;		
 	}
 
 	return true;
 }
 
-void _cldClipCylinderToTriangle(sData& cData,const dVector3 &v0, const dVector3 &v1, const dVector3 &v2)
+void sCylinderTrimeshColliderData::_cldClipCylinderToTriangle(
+	const dVector3 &v0, const dVector3 &v1, const dVector3 &v2)
 {
 	int i = 0;
 	dVector3 avPoints[3];
@@ -677,32 +697,32 @@ void _cldClipCylinderToTriangle(sData& cData,const dVector3 &v0, const dVector3 
 	dVector3 vCylinderCirclePos, vCylinderCircleNormal_Rel;
 	dSetZero(vCylinderCircleNormal_Rel,4);
 	// check which circle from cylinder we take for clipping
-	if ( dVector3Dot(cData.vCylinderAxis , cData.vContactNormal) > REAL(0.0)) 
+	if ( dVector3Dot(m_vCylinderAxis , m_vContactNormal) > REAL(0.0)) 
 	{
 		// get top circle
-		vCylinderCirclePos[0] = cData.vCylinderPos[0] + cData.vCylinderAxis[0]*(cData.fCylinderSize*REAL(0.5));
-		vCylinderCirclePos[1] = cData.vCylinderPos[1] + cData.vCylinderAxis[1]*(cData.fCylinderSize*REAL(0.5));
-		vCylinderCirclePos[2] = cData.vCylinderPos[2] + cData.vCylinderAxis[2]*(cData.fCylinderSize*REAL(0.5));
+		vCylinderCirclePos[0] = m_vCylinderPos[0] + m_vCylinderAxis[0]*(m_fCylinderSize*REAL(0.5));
+		vCylinderCirclePos[1] = m_vCylinderPos[1] + m_vCylinderAxis[1]*(m_fCylinderSize*REAL(0.5));
+		vCylinderCirclePos[2] = m_vCylinderPos[2] + m_vCylinderAxis[2]*(m_fCylinderSize*REAL(0.5));
 
 		vCylinderCircleNormal_Rel[nCYLINDER_AXIS] = REAL(-1.0);
 	} 
 	else 
 	{
 		// get bottom circle
-		vCylinderCirclePos[0] = cData.vCylinderPos[0] - cData.vCylinderAxis[0]*(cData.fCylinderSize*REAL(0.5));
-		vCylinderCirclePos[1] = cData.vCylinderPos[1] - cData.vCylinderAxis[1]*(cData.fCylinderSize*REAL(0.5));
-		vCylinderCirclePos[2] = cData.vCylinderPos[2] - cData.vCylinderAxis[2]*(cData.fCylinderSize*REAL(0.5));
+		vCylinderCirclePos[0] = m_vCylinderPos[0] - m_vCylinderAxis[0]*(m_fCylinderSize*REAL(0.5));
+		vCylinderCirclePos[1] = m_vCylinderPos[1] - m_vCylinderAxis[1]*(m_fCylinderSize*REAL(0.5));
+		vCylinderCirclePos[2] = m_vCylinderPos[2] - m_vCylinderAxis[2]*(m_fCylinderSize*REAL(0.5));
 
 		vCylinderCircleNormal_Rel[nCYLINDER_AXIS] = REAL(1.0);
 	}
 
 	dVector3 vTemp;
-	dQuatInv(cData.qCylinderRot , cData.qInvCylinderRot);
+	dQuatInv(m_qCylinderRot , m_qInvCylinderRot);
 	// transform triangle points to space of cylinder circle
 	for(i=0; i<3; i++) 
 	{
 		dVector3Subtract(avPoints[i] , vCylinderCirclePos , vTemp);
-		dQuatTransform(cData.qInvCylinderRot,vTemp,avPoints[i]);
+		dQuatTransform(m_qInvCylinderRot,vTemp,avPoints[i]);
 	}
 
 	int iTmpCounter1 = 0;
@@ -718,7 +738,7 @@ void _cldClipCylinderToTriangle(sData& cData,const dVector3 &v0, const dVector3 
 	int nCircleSegment = 0;
 	for (nCircleSegment = 0; nCircleSegment < nCYLINDER_CIRCLE_SEGMENTS; nCircleSegment++)
 	{
-		dConstructPlane(cData.avCylinderNormals[nCircleSegment],cData.fCylinderRadius,plPlane);
+		dConstructPlane(m_avCylinderNormals[nCircleSegment],m_fCylinderRadius,plPlane);
 
 		if (0 == (nCircleSegment % 2))
 		{
@@ -742,23 +762,23 @@ void _cldClipCylinderToTriangle(sData& cData,const dVector3 &v0, const dVector3 
 	{
 		for( i=0; i<iTmpCounter2; i++)
 		{
-			dQuatTransform(cData.qCylinderRot,avTempArray2[i], vPoint);
+			dQuatTransform(m_qCylinderRot,avTempArray2[i], vPoint);
 			vPoint[0] += vCylinderCirclePos[0];
 			vPoint[1] += vCylinderCirclePos[1];
 			vPoint[2] += vCylinderCirclePos[2];
 
-			dVector3Subtract(vPoint,cData.vCylinderPos,vTemp);
-			ftmpdot	 = dFabs(dVector3Dot(vTemp, cData.vContactNormal));
-			fTempDepth = cData.fBestrt - ftmpdot;
+			dVector3Subtract(vPoint,m_vCylinderPos,vTemp);
+			ftmpdot	 = dFabs(dVector3Dot(vTemp, m_vContactNormal));
+			fTempDepth = m_fBestrt - ftmpdot;
 			// Depth must be positive
 			if (fTempDepth > REAL(0.0))
 			{
-				cData.gLocalContacts[cData.nContacts].fDepth = fTempDepth;
-				dVector3Copy(cData.vContactNormal,cData.gLocalContacts[cData.nContacts].vNormal);
-				dVector3Copy(vPoint,cData.gLocalContacts[cData.nContacts].vPos);
-				cData.gLocalContacts[cData.nContacts].nFlags = 1;
-				cData.nContacts++;
-				if(cData.nContacts >= (cData.iFlags & NUMC_MASK)) 
+				m_gLocalContacts[m_nContacts].fDepth = fTempDepth;
+				dVector3Copy(m_vContactNormal,m_gLocalContacts[m_nContacts].vNormal);
+				dVector3Copy(vPoint,m_gLocalContacts[m_nContacts].vPos);
+				m_gLocalContacts[m_nContacts].nFlags = 1;
+				m_nContacts++;
+				if(m_nContacts >= (m_iFlags & NUMC_MASK)) 
 					return;;
 			}
 		}
@@ -767,57 +787,57 @@ void _cldClipCylinderToTriangle(sData& cData,const dVector3 &v0, const dVector3 
 	{
 		for( i=0; i<iTmpCounter1; i++)
 		{
-			dQuatTransform(cData.qCylinderRot,avTempArray1[i], vPoint);
+			dQuatTransform(m_qCylinderRot,avTempArray1[i], vPoint);
 			vPoint[0] += vCylinderCirclePos[0];
 			vPoint[1] += vCylinderCirclePos[1];
 			vPoint[2] += vCylinderCirclePos[2];
 
-			dVector3Subtract(vPoint,cData.vCylinderPos,vTemp);
-			ftmpdot	 = dFabs(dVector3Dot(vTemp, cData.vContactNormal));
-			fTempDepth = cData.fBestrt - ftmpdot;
+			dVector3Subtract(vPoint,m_vCylinderPos,vTemp);
+			ftmpdot	 = dFabs(dVector3Dot(vTemp, m_vContactNormal));
+			fTempDepth = m_fBestrt - ftmpdot;
 			// Depth must be positive
 			if (fTempDepth > REAL(0.0))
 			{
-				cData.gLocalContacts[cData.nContacts].fDepth = fTempDepth;
-				dVector3Copy(cData.vContactNormal,cData.gLocalContacts[cData.nContacts].vNormal);
-				dVector3Copy(vPoint,cData.gLocalContacts[cData.nContacts].vPos);
-				cData.gLocalContacts[cData.nContacts].nFlags = 1;
-				cData.nContacts++;
-				if(cData.nContacts >= (cData.iFlags & NUMC_MASK)) 
+				m_gLocalContacts[m_nContacts].fDepth = fTempDepth;
+				dVector3Copy(m_vContactNormal,m_gLocalContacts[m_nContacts].vNormal);
+				dVector3Copy(vPoint,m_gLocalContacts[m_nContacts].vPos);
+				m_gLocalContacts[m_nContacts].nFlags = 1;
+				m_nContacts++;
+				if(m_nContacts >= (m_iFlags & NUMC_MASK)) 
 					return;;
 			}
 		}
 	}
 }
 
-void TestOneTriangleVsCylinder(   sData& cData, 
+void sCylinderTrimeshColliderData::TestOneTriangleVsCylinder(
 								  const dVector3 &v0, 
                                   const dVector3 &v1, 
                                   const dVector3 &v2, 
                                   const bool bDoubleSided)
 {
 	// calculate triangle normal
-	dVector3Subtract( v2 , v1 ,cData.vE1);
+	dVector3Subtract( v2 , v1 , m_vE1);
 	dVector3 vTemp;
 	dVector3Subtract( v0 , v1 ,vTemp);
-	dVector3Cross(cData.vE1 , vTemp , cData.vNormal );
+	dVector3Cross(m_vE1 , vTemp , m_vNormal );
 
 	// Even though all triangles might be initially valid, 
 	// a triangle may degenerate into a segment after applying 
 	// space transformation.
-	if (!dSafeNormalize3( cData.vNormal))
+	if (!dSafeNormalize3( m_vNormal))
 	{
 		return;
 	}
 
 	// create plane from triangle
 	//Plane4f plTrianglePlane = Plane4f( vPolyNormal, v0 ); 
-	dReal plDistance = -dVector3Dot(v0, cData.vNormal);
+	dReal plDistance = -dVector3Dot(v0, m_vNormal);
 	dVector4 plTrianglePlane;
-	dConstructPlane( cData.vNormal,plDistance,plTrianglePlane);
+	dConstructPlane( m_vNormal,plDistance,plTrianglePlane);
 
 	 // calculate sphere distance to plane
-	dReal fDistanceCylinderCenterToPlane = dPointPlaneDistance(cData.vCylinderPos , plTrianglePlane);
+	dReal fDistanceCylinderCenterToPlane = dPointPlaneDistance(m_vCylinderPos , plTrianglePlane);
 
 	// Sphere must be over positive side of triangle
 	if(fDistanceCylinderCenterToPlane < 0 && !bDoubleSided) 
@@ -844,17 +864,17 @@ void TestOneTriangleVsCylinder(   sData& cData,
 		dVector3Copy(v2 , vPnt2);
 	}
 
-	cData.fBestDepth = MAX_REAL;
+	m_fBestDepth = MAX_REAL;
 
 	// do intersection test and find best separating axis
-	if(!_cldTestSeparatingAxes(cData , vPnt0, vPnt1, vPnt2) ) 
+	if(!_cldTestSeparatingAxes(vPnt0, vPnt1, vPnt2) ) 
 	{
 		// if not found do nothing
 		return;
 	}
 
 	// if best separation axis is not found
-	if ( cData.iBestAxis == 0 ) 
+	if ( m_iBestAxis == 0 ) 
 	{
 		// this should not happen (we should already exit in that case)
 		dIASSERT(false);
@@ -862,46 +882,46 @@ void TestOneTriangleVsCylinder(   sData& cData,
 		return;
 	}
 
-	dReal fdot = dVector3Dot( cData.vContactNormal , cData.vCylinderAxis );
+	dReal fdot = dVector3Dot( m_vContactNormal , m_vCylinderAxis );
 
 	// choose which clipping method are we going to apply
 	if (dFabs(fdot) < REAL(0.9) ) 
 	{
-		if (!_cldClipCylinderEdgeToTriangle(cData ,vPnt0, vPnt1, vPnt2)) 
+		if (!_cldClipCylinderEdgeToTriangle(vPnt0, vPnt1, vPnt2)) 
 		{
 			return;
 		}
 	}
 	else 
 	{
-		_cldClipCylinderToTriangle(cData ,vPnt0, vPnt1, vPnt2);
+		_cldClipCylinderToTriangle(vPnt0, vPnt1, vPnt2);
 	}
 }
 
-void _InitCylinderTrimeshData(sData& cData)
+void sCylinderTrimeshColliderData::_InitCylinderTrimeshData(dxGeom *Cylinder, dxTriMesh *Trimesh)
 {
 	// get cylinder information
 	// Rotation
-	const dReal* pRotCyc = dGeomGetRotation(cData.gCylinder); 
-	dMatrix3Copy(pRotCyc,cData.mCylinderRot);
-	dGeomGetQuaternion(cData.gCylinder,cData.qCylinderRot);
+	const dReal* pRotCyc = dGeomGetRotation(Cylinder); 
+	dMatrix3Copy(pRotCyc,m_mCylinderRot);
+	dGeomGetQuaternion(Cylinder,m_qCylinderRot);
 	
 	// Position
-	const dVector3* pPosCyc = (const dVector3*)dGeomGetPosition(cData.gCylinder);
-	dVector3Copy(*pPosCyc,cData.vCylinderPos);
+	const dVector3* pPosCyc = (const dVector3*)dGeomGetPosition(Cylinder);
+	dVector3Copy(*pPosCyc,m_vCylinderPos);
 	// Cylinder axis
-	dMat3GetCol(cData.mCylinderRot,nCYLINDER_AXIS,cData.vCylinderAxis);
+	dMat3GetCol(m_mCylinderRot,nCYLINDER_AXIS,m_vCylinderAxis);
 	// get cylinder radius and size
-	dGeomCylinderGetParams(cData.gCylinder,&cData.fCylinderRadius,&cData.fCylinderSize);
+	dGeomCylinderGetParams(Cylinder,&m_fCylinderRadius,&m_fCylinderSize);
 	
 	// get trimesh position and orientation
-	const dReal* pRotTris = dGeomGetRotation(cData.gTrimesh); 
-	dMatrix3Copy(pRotTris,cData.mTrimeshRot);
-	dGeomGetQuaternion(cData.gTrimesh,cData.qTrimeshRot);
+	const dReal* pRotTris = dGeomGetRotation(Trimesh); 
+	dMatrix3Copy(pRotTris,m_mTrimeshRot);
+	dGeomGetQuaternion(Trimesh,m_qTrimeshRot);
 	
 	// Position
-	const dVector3* pPosTris = (const dVector3*)dGeomGetPosition(cData.gTrimesh);
-	dVector3Copy(*pPosTris,cData.vTrimeshPos);
+	const dVector3* pPosTris = (const dVector3*)dGeomGetPosition(Trimesh);
+	dVector3Copy(*pPosTris,m_vTrimeshPos);
 
 
 	// calculate basic angle for 8-gon
@@ -913,51 +933,50 @@ void _InitCylinderTrimeshData(sData& cData)
 	// axis dependant code
 	for(int i=0; i<nCYLINDER_CIRCLE_SEGMENTS; i++) 
 	{
-		cData.avCylinderNormals[i][0] = -dCos(fAngle);
-		cData.avCylinderNormals[i][1] = -dSin(fAngle);
-		cData.avCylinderNormals[i][2] = REAL(0.0);
+		m_avCylinderNormals[i][0] = -dCos(fAngle);
+		m_avCylinderNormals[i][1] = -dSin(fAngle);
+		m_avCylinderNormals[i][2] = REAL(0.0);
 
 		fAngle += fAngleIncrement;
 	}
 
-	dSetZero(cData.vBestPoint,4);
+	dSetZero(m_vBestPoint,4);
 	// reset best depth
-	cData.fBestCenter = REAL(0.0);	
+	m_fBestCenter = REAL(0.0);	
 }
 
-#if dTRIMESH_ENABLED
+int sCylinderTrimeshColliderData::TestCollisionForSingleTriangle(int ctContacts0, 
+	int Triint, dVector3 dv[3], bool &bOutFinishSearching)
+{
+	// test this triangle
+	TestOneTriangleVsCylinder(dv[0],dv[1],dv[2], false);
+
+	// fill-in tri index for generated contacts
+	for (; ctContacts0<m_nContacts; ctContacts0++)
+		m_gLocalContacts[ctContacts0].triIndex = Triint;
+
+	// Putting "break" at the end of loop prevents unnecessary checks on first pass and "continue"
+	bOutFinishSearching = (m_nContacts >= (m_iFlags & NUMC_MASK));
+
+	return ctContacts0;
+}
 
 // OPCODE version of cylinder to mesh collider
 #if dTRIMESH_OPCODE
-int dCollideCylinderTrimesh(dxGeom *o1, dxGeom *o2, int flags, dContactGeom *contact, int skip)
+static void dQueryCTLPotentialCollisionTriangles(OBBCollider &Collider, 
+	sCylinderTrimeshColliderData &cData, dxGeom *Cylinder, dxTriMesh *Trimesh,
+	OBBCache &BoxCache)
 {
-	dIASSERT( skip >= (int)sizeof( dContactGeom ) );
-	dIASSERT( o1->type == dCylinderClass );
-	dIASSERT( o2->type == dTriMeshClass );
-	dIASSERT ((flags & NUMC_MASK) >= 1);
+	const dVector3 &vCylinderPos = cData.m_vCylinderPos;
 
-	// Main data holder
-	sData cData;
+	Point cCenter(vCylinderPos[0],vCylinderPos[1],vCylinderPos[2]);
 
-	// Assign ODE stuff
-	cData.gCylinder	 = o1;
-	cData.gTrimesh	 = (dxTriMesh*)o2;
-	cData.iFlags	 = flags;
-	cData.iSkip		 = skip;
-	cData.gContact	 = contact;
-	cData.nContacts  = 0;
-
-	_InitCylinderTrimeshData(cData);
-
-	TrimeshCollidersCache *pccColliderCache = GetTrimeshCollidersCache();
-	OBBCollider& Collider = pccColliderCache->_OBBCollider;
-
-	Point cCenter(cData.vCylinderPos[0],cData.vCylinderPos[1],cData.vCylinderPos[2]);
-
-	Point cExtents(cData.fCylinderRadius,cData.fCylinderRadius,cData.fCylinderRadius);
-	cExtents[nCYLINDER_AXIS] = cData.fCylinderSize * REAL(0.5);
+	Point cExtents(cData.m_fCylinderRadius,cData.m_fCylinderRadius,cData.m_fCylinderRadius);
+	cExtents[nCYLINDER_AXIS] = cData.m_fCylinderSize * REAL(0.5);
 
 	Matrix3x3 obbRot;
+
+	const dMatrix3 &mCylinderRot = cData.m_mCylinderRot;
 
 	// It is a potential issue to explicitly cast to float 
 	// if custom width floating point type is introduced in OPCODE.
@@ -965,71 +984,93 @@ int dCollideCylinderTrimesh(dxGeom *o1, dxGeom *o2, int flags, dContactGeom *con
 	// (e.g. typedef float opc_float;)
 	// However I'm not sure in what header it should be added.
 
-	obbRot[0][0] = /*(float)*/cData.mCylinderRot[0];
-	obbRot[1][0] = /*(float)*/cData.mCylinderRot[1];
-	obbRot[2][0] = /*(float)*/cData.mCylinderRot[2];
+	obbRot[0][0] = /*(float)*/mCylinderRot[0];
+	obbRot[1][0] = /*(float)*/mCylinderRot[1];
+	obbRot[2][0] = /*(float)*/mCylinderRot[2];
 
-	obbRot[0][1] = /*(float)*/cData.mCylinderRot[4];
-	obbRot[1][1] = /*(float)*/cData.mCylinderRot[5];
-	obbRot[2][1] = /*(float)*/cData.mCylinderRot[6];
+	obbRot[0][1] = /*(float)*/mCylinderRot[4];
+	obbRot[1][1] = /*(float)*/mCylinderRot[5];
+	obbRot[2][1] = /*(float)*/mCylinderRot[6];
 
-	obbRot[0][2] = /*(float)*/cData.mCylinderRot[8];
-	obbRot[1][2] = /*(float)*/cData.mCylinderRot[9];
-	obbRot[2][2] = /*(float)*/cData.mCylinderRot[10];
+	obbRot[0][2] = /*(float)*/mCylinderRot[8];
+	obbRot[1][2] = /*(float)*/mCylinderRot[9];
+	obbRot[2][2] = /*(float)*/mCylinderRot[10];
 
 	OBB obbCapsule(cCenter,cExtents,obbRot);
 
 	Matrix4x4 CapsuleMatrix;
-	MakeMatrix(cData.vCylinderPos, cData.mCylinderRot, CapsuleMatrix);
+	MakeMatrix(vCylinderPos, mCylinderRot, CapsuleMatrix);
 
 	Matrix4x4 MeshMatrix;
-	MakeMatrix(cData.vTrimeshPos, cData.mTrimeshRot, MeshMatrix);
+	MakeMatrix(cData.m_vTrimeshPos, cData.m_mTrimeshRot, MeshMatrix);
 
 	// TC results
-	if (cData.gTrimesh->doBoxTC) 
+	if (Trimesh->doBoxTC) 
 	{
 		dxTriMesh::BoxTC* BoxTC = 0;
-		for (int i = 0; i < cData.gTrimesh->BoxTCCache.size(); i++)
+		for (int i = 0; i < Trimesh->BoxTCCache.size(); i++)
 		{
-			if (cData.gTrimesh->BoxTCCache[i].Geom == cData.gCylinder)
+			if (Trimesh->BoxTCCache[i].Geom == Cylinder)
 			{
-				BoxTC = &cData.gTrimesh->BoxTCCache[i];
+				BoxTC = &Trimesh->BoxTCCache[i];
 				break;
 			}
 		}
 		if (!BoxTC)
 		{
-			cData.gTrimesh->BoxTCCache.push(dxTriMesh::BoxTC());
+			Trimesh->BoxTCCache.push(dxTriMesh::BoxTC());
 
-			BoxTC = &cData.gTrimesh->BoxTCCache[cData.gTrimesh->BoxTCCache.size() - 1];
-			BoxTC->Geom = cData.gCylinder;
+			BoxTC = &Trimesh->BoxTCCache[Trimesh->BoxTCCache.size() - 1];
+			BoxTC->Geom = Cylinder;
 			BoxTC->FatCoeff = REAL(1.0);
 		}
 
 		// Intersect
 		Collider.SetTemporalCoherence(true);
-		Collider.Collide(*BoxTC, obbCapsule, cData.gTrimesh->Data->BVTree, null, &MeshMatrix);
+		Collider.Collide(*BoxTC, obbCapsule, Trimesh->Data->BVTree, null, &MeshMatrix);
 	}
 	else 
 	{
 		Collider.SetTemporalCoherence(false);
-		Collider.Collide(pccColliderCache->defaultBoxCache, obbCapsule, cData.gTrimesh->Data->BVTree, null,&MeshMatrix);
+		Collider.Collide(BoxCache, obbCapsule, Trimesh->Data->BVTree, null,&MeshMatrix);
 	}
+}
+
+int dCollideCylinderTrimesh(dxGeom *o1, dxGeom *o2, int flags, dContactGeom *contact, int skip)
+{
+	dIASSERT( skip >= (int)sizeof( dContactGeom ) );
+	dIASSERT( o1->type == dCylinderClass );
+	dIASSERT( o2->type == dTriMeshClass );
+	dIASSERT ((flags & NUMC_MASK) >= 1);
+
+	int nContactCount = 0;
+
+	dxGeom *Cylinder = o1;
+	dxTriMesh *Trimesh = (dxTriMesh *)o2;
+
+	// Main data holder
+	sCylinderTrimeshColliderData cData(flags, skip);
+	cData._InitCylinderTrimeshData(Cylinder, Trimesh);
+
+	TrimeshCollidersCache *pccColliderCache = GetTrimeshCollidersCache();
+	OBBCollider& Collider = pccColliderCache->_OBBCollider;
+
+	dQueryCTLPotentialCollisionTriangles(Collider, cData, Cylinder, Trimesh, pccColliderCache->defaultBoxCache);
 
 	// Retrieve data
 	int TriCount = Collider.GetNbTouchedPrimitives();
-	const int* Triangles = (const int*)Collider.GetTouchedPrimitives();
-
 
 	if (TriCount != 0)
 	{
-		if (cData.gTrimesh->ArrayCallback != null)
+		const int* Triangles = (const int*)Collider.GetTouchedPrimitives();
+
+		if (Trimesh->ArrayCallback != null)
 		{
-			cData.gTrimesh->ArrayCallback(cData.gTrimesh, cData.gCylinder, Triangles, TriCount);
+			Trimesh->ArrayCallback(Trimesh, Cylinder, Triangles, TriCount);
 		}
 
 		// allocate buffer for local contacts on stack
-		cData.gLocalContacts = (sLocalContactData*)dALLOCA16(sizeof(sLocalContactData)*(cData.iFlags & NUMC_MASK));
+		cData.m_gLocalContacts = (sLocalContactData*)dALLOCA16(sizeof(sLocalContactData)*(cData.m_iFlags & NUMC_MASK));
 
 	    int ctContacts0 = 0;
 
@@ -1037,28 +1078,28 @@ int dCollideCylinderTrimesh(dxGeom *o1, dxGeom *o2, int flags, dContactGeom *con
 		for (int i = 0; i < TriCount; i++)
 		{
 			const int Triint = Triangles[i];
-			if (!Callback(cData.gTrimesh, cData.gCylinder, Triint)) continue;
+			if (!Callback(Trimesh, Cylinder, Triint)) continue;
 
 
 			dVector3 dv[3];
-			FetchTriangle(cData.gTrimesh, Triint, cData.vTrimeshPos, cData.mTrimeshRot, dv);
+			FetchTriangle(Trimesh, Triint, cData.m_vTrimeshPos, cData.m_mTrimeshRot, dv);
 
-			// test this triangle
-			TestOneTriangleVsCylinder(cData , dv[0],dv[1],dv[2], false);
+			bool bFinishSearching;
+			ctContacts0 = cData.TestCollisionForSingleTriangle(ctContacts0, Triint, dv, bFinishSearching);
 
-			// fill-in tri index for generated contacts
-			for (; ctContacts0<cData.nContacts; ctContacts0++)
-				cData.gLocalContacts[ctContacts0].triIndex = Triint;
-
-			// Putting "break" at the end of loop prevents unnecessary checks on first pass and "continue"
-			if(cData.nContacts	>= (cData.iFlags & NUMC_MASK))
+			if (bFinishSearching) 
 			{
 				break;
 			}
 		}
+
+		if (cData.m_nContacts != 0)
+		{
+			nContactCount = cData._ProcessLocalContacts(contact, Cylinder, Trimesh);
+		}
 	}
 
-	return _ProcessLocalContacts(cData);
+	return nContactCount;
 }
 #endif
 
@@ -1071,18 +1112,14 @@ int dCollideCylinderTrimesh(dxGeom *o1, dxGeom *o2, int flags, dContactGeom *con
 	dIASSERT( o2->type == dTriMeshClass );
 	dIASSERT ((flags & NUMC_MASK) >= 1);
 	
+	int nContactCount = 0;
+
+	dxGeom *Cylinder = o1;
+	dxTriMesh *Trimesh = (dxTriMesh *)o2;
+
 	// Main data holder
-	sData cData;
-
-	// Assign ODE stuff
-	cData.gCylinder	 = o1;
-	cData.gTrimesh	 = (dxTriMesh*)o2;
-	cData.iFlags	 = flags;
-	cData.iSkip		 = skip;
-	cData.gContact	 = contact;
-	cData.nContacts  = 0;
-
-	_InitCylinderTrimeshData(cData);
+	sCylinderTrimeshColliderData cData(flags, skip);
+	cData._InitCylinderTrimeshData(Cylinder, Trimesh);
 
 //*****at first , collide box aabb******//
 
@@ -1099,49 +1136,47 @@ int dCollideCylinderTrimesh(dxGeom *o1, dxGeom *o2, int flags, dContactGeom *con
 	GDYNAMIC_ARRAY collision_result;
 	GIM_CREATE_BOXQUERY_LIST(collision_result);
 
-	gim_aabbset_box_collision(&test_aabb, &cData.gTrimesh->m_collision_trimesh.m_aabbset , &collision_result);
+	gim_aabbset_box_collision(&test_aabb, &Trimesh->m_collision_trimesh.m_aabbset , &collision_result);
 
-	if(collision_result.m_size==0)
+	if (collision_result.m_size != 0)
 	{
-	    GIM_DYNARRAY_DESTROY(collision_result);
-	    return 0;
-	}
 //*****Set globals for box collision******//
 
-	int ctContacts0 = 0;
-	cData.gLocalContacts = (sLocalContactData*)dALLOCA16(sizeof(sLocalContactData)*(cData.iFlags & NUMC_MASK));
+		int ctContacts0 = 0;
+		cData.m_gLocalContacts = (sLocalContactData*)dALLOCA16(sizeof(sLocalContactData)*(cData.m_iFlags & NUMC_MASK));
 
-	GUINT * boxesresult = GIM_DYNARRAY_POINTER(GUINT,collision_result);
-	GIM_TRIMESH * ptrimesh = &cData.gTrimesh->m_collision_trimesh;
+		GUINT * boxesresult = GIM_DYNARRAY_POINTER(GUINT,collision_result);
+		GIM_TRIMESH * ptrimesh = &Trimesh->m_collision_trimesh;
 
-	gim_trimesh_locks_work_data(ptrimesh);
+		gim_trimesh_locks_work_data(ptrimesh);
 
-
-	for(unsigned int i=0;i<collision_result.m_size;i++)
-	{
-		const int Triint = boxesresult[i];
-		
-		dVector3 dv[3];
-		gim_trimesh_get_triangle_vertices(ptrimesh, Triint, dv[0], dv[1], dv[2]);
-		
-		// test this triangle
-		TestOneTriangleVsCylinder(cData , dv[0],dv[1],dv[2], false);
-
-		// fill-in triangle index for generated contacts
-		for (; ctContacts0<cData.nContacts; ctContacts0++)
-			cData.gLocalContacts[ctContacts0].triIndex =  Triint;
-
-		// Putting "break" at the end of loop prevents unnecessary checks on first pass and "continue"
-		if(cData.nContacts	>= (cData.iFlags & NUMC_MASK))
+		for(unsigned int i=0;i<collision_result.m_size;i++)
 		{
-			break;
+			const int Triint = boxesresult[i];
+			
+			dVector3 dv[3];
+			gim_trimesh_get_triangle_vertices(ptrimesh, Triint, dv[0], dv[1], dv[2]);
+			
+			bool bFinishSearching;
+			ctContacts0 = cData.TestCollisionForSingleTriangle(ctContacts0, Triint, dv, bFinishSearching);
+
+			if (bFinishSearching) 
+			{
+				break;
+			}
+		}
+
+		gim_trimesh_unlocks_work_data(ptrimesh);
+
+		if (cData.m_nContacts != 0)
+		{
+			nContactCount = cData._ProcessLocalContacts(contact, Cylinder, Trimesh);
 		}
 	}
 
-	gim_trimesh_unlocks_work_data(ptrimesh);
 	GIM_DYNARRAY_DESTROY(collision_result);
 
-	return _ProcessLocalContacts(cData);
+	return nContactCount;
 }
 #endif
 
