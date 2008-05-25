@@ -77,13 +77,13 @@ public:
 	static void SignalDataAllocationFlags(unsigned uFlagsMask)
 	{
 		unsigned uCurrentFlags = (unsigned)(size_t)CThreadLocalStorage::UnsafeGetStorageValue(m_htkStorageKey, OTI_DATA_ALLOCATION_FLAGS);
-		CThreadLocalStorage::UnsafeSetStorageValue(m_htkStorageKey, OTI_DATA_ALLOCATION_FLAGS, (tlsvaluetype)(uCurrentFlags | uFlagsMask));
+		CThreadLocalStorage::UnsafeSetStorageValue(m_htkStorageKey, OTI_DATA_ALLOCATION_FLAGS, (tlsvaluetype)(size_t)(uCurrentFlags | uFlagsMask));
 	}
 
 	static void DropDataAllocationFlags(unsigned uFlagsMask)
 	{
 		unsigned uCurrentFlags = (unsigned)(size_t)CThreadLocalStorage::UnsafeGetStorageValue(m_htkStorageKey, OTI_DATA_ALLOCATION_FLAGS);
-		CThreadLocalStorage::UnsafeSetStorageValue(m_htkStorageKey, OTI_DATA_ALLOCATION_FLAGS, (tlsvaluetype)(uCurrentFlags & ~uFlagsMask));
+		CThreadLocalStorage::UnsafeSetStorageValue(m_htkStorageKey, OTI_DATA_ALLOCATION_FLAGS, (tlsvaluetype)(size_t)(uCurrentFlags & ~uFlagsMask));
 	}
 
 	static TrimeshCollidersCache *GetTrimeshCollidersCache()
