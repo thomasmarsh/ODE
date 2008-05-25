@@ -37,7 +37,7 @@ By Rodrigo Hernandez
 #pragma warning(disable:4291)  // for VC++, no complaints about "no matching operator delete found"
 #endif
 
-#if _MSC_VER <= 1200
+#if 1
 #define dMIN(A,B)  ((A)>(B) ? (B) : (A))
 #define dMAX(A,B)  ((A)>(B) ? (A) : (B))
 #else
@@ -66,7 +66,9 @@ dxConvex::dxConvex (dSpaceID space,
   points = _points;
   pointcount = _pointcount;
   polygons=_polygons;
+  edges = NULL;
   FillEdges();
+  //CreateTree();
 }
 
 
@@ -99,28 +101,85 @@ void dxConvex::FillEdges()
 {
 	unsigned int *points_in_poly=polygons;
 	unsigned int *index=polygons+1;
+	if (edges!=NULL) delete[] edges;
+	edgecount = 0;
+	edge e;
+	bool isinset;
 	for(unsigned int i=0;i<planecount;++i)
 	{
-		//fprintf(stdout,"Points in Poly: %d\n",*points_in_poly);
 		for(unsigned int j=0;j<*points_in_poly;++j)
 		{
-			edges.insert(edge(dMIN(index[j],index[(j+1)%*points_in_poly]),
-				dMAX(index[j],index[(j+1)%*points_in_poly])));
-			//fprintf(stdout,"Insert %d-%d\n",index[j],index[(j+1)%*points_in_poly]);
+			e.first = dMIN(index[j],index[(j+1)%*points_in_poly]);
+			e.second = dMAX(index[j],index[(j+1)%*points_in_poly]);
+			isinset=false;
+			for(unsigned int k=0;k<edgecount;++k)
+			{
+				if((edges[k].first==e.first)&&(edges[k].second==e.second))
+				{
+					isinset=true;
+					break;
+				}
+			}
+			if(!isinset)
+			{
+				edge* tmp = new edge[edgecount+1];				
+				if(edgecount!=0)
+				{
+					memcpy(tmp,edges,(edgecount)*sizeof(edge));
+					delete[] edges;
+				}
+				tmp[edgecount].first=e.first;
+				tmp[edgecount].second=e.second;
+				edges = tmp;
+				++edgecount;
+			}
 		}
 		points_in_poly+=(*points_in_poly+1);
 		index=points_in_poly+1;
 	}
-	/*
-	fprintf(stdout,"Edge Count: %d\n",edges.size());
-	for(std::set<edge>::iterator it=edges.begin();
-	it!=edges.end();
-	++it)
-	{
-	fprintf(stdout,"Edge: %d-%d\n",it->first,it->second);
-	}
-	*/
 }
+#if 0
+dxConvex::BSPNode* dxConvex::CreateNode(std::vector<Arc> Arcs,std::vector<Polygon> Polygons)
+{
+#if 0	
+	dVector3 ea,eb,e;
+	dVector3Copy(points+((edges.begin()+Arcs[0].edge)first*3),ea);
+      dMULTIPLY0_331(e1b,cvx1.final_posr->R,cvx1.points+(i->second*3));
+
+	dVector3Copy(points[edges[Arcs[0].edge]
+#endif
+	return NULL;
+}
+
+void dxConvex::CreateTree()
+{
+	std::vector<Arc> A;
+	A.reserve(edgecount);
+	for(unsigned int i=0;i<edgecount;++i)
+	{
+		this->GetFacesSharedByEdge(i,A[i].normals);
+		A[i].edge = i;
+	}
+	std::vector<Polygon> S;
+	S.reserve(pointcount);
+	for(unsigned int i=0;i<pointcount;++i)
+	{
+		this->GetFacesSharedByVertex(i,S[i].normals);
+		S[i].vertex=i;
+	}
+	this->tree = CreateNode(A,S);
+}
+
+void dxConvex::GetFacesSharedByVertex(int i, std::vector<int> f)
+{
+}
+void dxConvex::GetFacesSharedByEdge(int i, int* f)
+{
+}
+void dxConvex::GetFaceNormal(int i, dVector3 normal)
+{
+}
+#endif
 
 dGeomID dCreateConvex (dSpaceID space,dReal *_planes,unsigned int _planecount,
 		    dReal *_points,
@@ -651,18 +710,16 @@ bool CheckEdgeIntersection(dxConvex& cvx1,dxConvex& cvx2, int flags,int& curc,
   dVector3 e1,e2,q;
   dVector4 plane,depthplane;
   dReal t;
-  for(std::set<edge>::iterator i = cvx1.edges.begin();
-      i!= cvx1.edges.end();
-      ++i)
+  for(unsigned int i = 0;i<cvx1.edgecount;++i)
     {
       // Rotate
-      dMULTIPLY0_331(e1,cvx1.final_posr->R,cvx1.points+(i->first*3));
+      dMULTIPLY0_331(e1,cvx1.final_posr->R,cvx1.points+(cvx1.edges[i].first*3));
       // translate
       e1[0]+=cvx1.final_posr->pos[0];
       e1[1]+=cvx1.final_posr->pos[1];
       e1[2]+=cvx1.final_posr->pos[2];
       // Rotate
-      dMULTIPLY0_331(e2,cvx1.final_posr->R,cvx1.points+(i->second*3));
+      dMULTIPLY0_331(e2,cvx1.final_posr->R,cvx1.points+(cvx1.edges[i].second*3));
       // translate
       e2[0]+=cvx1.final_posr->pos[0];
       e2[1]+=cvx1.final_posr->pos[1];
@@ -760,8 +817,8 @@ inline bool CheckSATConvexFaces(dxConvex& cvx1,
       ComputeInterval(cvx1,plane,min1,max1);
       ComputeInterval(cvx2,plane,min2,max2);
       if(max2<min1 || max1<min2) return false;
-      min = std::max(min1, min2);
-      max = std::min(max1, max2);
+      min = dMAX(min1, min2);
+      max = dMIN(max1, max2);
       depth = max-min;
       /* 
 	 Take only into account the faces that penetrate cvx1 to determine
@@ -796,23 +853,19 @@ inline bool CheckSATConvexEdges(dxConvex& cvx1,
   dReal depth,min,max,min1,max1,min2,max2;
   dVector4 plane;
   dVector3 e1,e2,e1a,e1b,e2a,e2b;
-  for(std::set<edge>::iterator i = cvx1.edges.begin();
-      i!= cvx1.edges.end();
-      ++i)
+  for(unsigned int i = 0;i<cvx1.edgecount;++i)
     {
       // we only need to apply rotation here
-      dMULTIPLY0_331 (e1a,cvx1.final_posr->R,cvx1.points+(i->first*3));
-      dMULTIPLY0_331 (e1b,cvx1.final_posr->R,cvx1.points+(i->second*3));
+		dMULTIPLY0_331(e1a,cvx1.final_posr->R,cvx1.points+(cvx1.edges[i].first*3));
+      dMULTIPLY0_331(e1b,cvx1.final_posr->R,cvx1.points+(cvx1.edges[i].second*3));
       e1[0]=e1b[0]-e1a[0];
       e1[1]=e1b[1]-e1a[1];
       e1[2]=e1b[2]-e1a[2];
-      for(std::set<edge>::iterator j = cvx2.edges.begin();
-	  j!= cvx2.edges.end();
-	  ++j)
+	  for(unsigned int j = 0;j<cvx2.edgecount;++j)
 	{
 	  // we only need to apply rotation here
-	  dMULTIPLY0_331 (e2a,cvx2.final_posr->R,cvx2.points+(j->first*3));
-	  dMULTIPLY0_331 (e2b,cvx2.final_posr->R,cvx2.points+(j->second*3));
+		dMULTIPLY0_331 (e2a,cvx2.final_posr->R,cvx2.points+(cvx2.edges[j].first*3));
+	  dMULTIPLY0_331 (e2b,cvx2.final_posr->R,cvx2.points+(cvx2.edges[j].second*3));
 	  e2[0]=e2b[0]-e2a[0];
 	  e2[1]=e2b[1]-e2a[1];
 	  e2[2]=e2b[2]-e2a[2];
@@ -823,8 +876,8 @@ inline bool CheckSATConvexEdges(dxConvex& cvx1,
 	  ComputeInterval(cvx1,plane,min1,max1);
 	  ComputeInterval(cvx2,plane,min2,max2);
 	  if(max2 < min1 || max1 < min2) return false;
-	  min = std::max(min1, min2);
-	  max = std::min(max1, max2);
+	  min = dMAX(min1, min2);
+	  max = dMIN(max1, max2);
 	  depth = max-min;
 	  if ((dFabs(depth)<dFabs(ccso.min_depth)))
 	    {
@@ -946,15 +999,13 @@ int TestConvexIntersection(dxConvex& cvx1,dxConvex& cvx2, int flags,
 		}
 	      pPoly2+=pPoly2[0]+1;
 	    }
-	}
+	  }
       // Check each of the second convex edges against the first's face
-      for(std::set<edge>::iterator it=ccso.g2->edges.begin();
-	  it!=ccso.g2->edges.end();
-	  ++it)
+	  for(unsigned int it=0;it<ccso.g2->edgecount;++it)
 	{	  
-	  dMULTIPLY0_331(p1,ccso.g2->final_posr->R,&ccso.g2->points[(it->first*3)]);
+	  dMULTIPLY0_331(p1,ccso.g2->final_posr->R,&ccso.g2->points[(ccso.g2->edges[it].first*3)]);
 	  dVector3Add(ccso.g2->final_posr->pos,p1,p1);
-	  dMULTIPLY0_331(p2,ccso.g2->final_posr->R,&ccso.g2->points[(it->second*3)]);
+	  dMULTIPLY0_331(p2,ccso.g2->final_posr->R,&ccso.g2->points[(ccso.g2->edges[it].second*3)]);
 	  dVector3Add(ccso.g2->final_posr->pos,p2,p2);		 
 	  if(IntersectSegmentPlane(p1,p2,ccso.plane,t,
 				   SAFECONTACT(flags, contact, contacts, skip)->pos))
