@@ -29,7 +29,6 @@ the standard ODE geometry primitives.
 #ifndef _ODE_COLLISION_STD_H_
 #define _ODE_COLLISION_STD_H_
 
-#include <set>
 #include <ode/common.h>
 #include "collision_kernel.h"
 
@@ -139,10 +138,10 @@ struct dxRay : public dxGeom {
   void computeAABB();
 };
 
-typedef std::pair<unsigned int,unsigned int> edge; /*!< Used to descrive a convex hull edge, an edge is a pair or indices into the hull's points */
+// typedef std::pair<unsigned int,unsigned int> edge; /*!< Used to descrive a convex hull edge, an edge is a pair or indices into the hull's points */
+
 struct dxConvex : public dxGeom 
-{
-  
+{  
   dReal *planes; /*!< An array of planes in the form:
 		   normal X, normal Y, normal Z,Distance
 		 */
@@ -150,8 +149,8 @@ struct dxConvex : public dxGeom
   unsigned int *polygons; /*! An array of indices to the points of each polygon, it should be the number of vertices followed by that amount of indices to "points" in counter clockwise order*/
   unsigned int planecount; /*!< Amount of planes in planes */
   unsigned int pointcount;/*!< Amount of points in points */
+  unsigned int edgecount;/*!< Amount of edges in convex */
   dReal saabb[6];/*!< Static AABB */
-  std::set<edge> edges;
   dxConvex(dSpaceID space,
 	   dReal *planes,
 	   unsigned int planecount,
@@ -163,9 +162,54 @@ struct dxConvex : public dxGeom
     //fprintf(stdout,"dxConvex Destroy\n");
   }
   void computeAABB();
-  private:
+  struct edge
+  {
+	unsigned int first;
+	unsigned int second;
+  };
+  //std::set<edge> edges;
+  edge* edges;
+
+ private:
   // For Internal Use Only
   void FillEdges();
+#if 0
+  /*
+  What this does is the same as the Support function by doing some preprocessing
+  for optimization. Not complete yet.
+  */
+  // Based on Eberly's Game Physics Book page 307
+  struct Arc
+  {
+	  // indices of polyhedron normals that form the spherical arc
+	  int normals[2];
+	  // index of edge shared by polyhedron faces
+	  int edge;
+  };
+  struct Polygon
+  {
+	  // indices of polyhedron normals that form the spherical polygon
+	  std::vector<int> normals;
+	  // index of extreme vertex corresponding to this polygon
+	  int vertex;
+  };
+  // This is for extrem feature query and not the usual level BSP structure (that comes later)
+  struct BSPNode
+  {
+	// Normal index (interior node), vertex index (leaf node)
+	int normal;
+	// if Dot (E,D)>=0, D gets propagated to this child
+	BSPNode* right;
+	// if Dot (E,D)<0, D gets propagated to this child
+	BSPNode* left;
+  };
+  void CreateTree();
+  BSPNode* CreateNode(std::vector<Arc> Arcs,std::vector<Polygon> Polygons);
+  void GetFacesSharedByVertex(int i, std::vector<int> f);
+  void GetFacesSharedByEdge(int i, int* f);
+  void GetFaceNormal(int i, dVector3 normal);
+  BSPNode* tree;
+#endif
 };
 
 
