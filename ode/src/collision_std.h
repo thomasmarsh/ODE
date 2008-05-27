@@ -138,8 +138,6 @@ struct dxRay : public dxGeom {
   void computeAABB();
 };
 
-// typedef std::pair<unsigned int,unsigned int> edge; /*!< Used to descrive a convex hull edge, an edge is a pair or indices into the hull's points */
-
 struct dxConvex : public dxGeom 
 {  
   dReal *planes; /*!< An array of planes in the form:
@@ -159,7 +157,7 @@ struct dxConvex : public dxGeom
 	   unsigned int *polygons);
   ~dxConvex()
   {
-    //fprintf(stdout,"dxConvex Destroy\n");
+	  if((edgecount!=0)&&(edges!=NULL)) delete[] edges;
   }
   void computeAABB();
   struct edge
@@ -167,11 +165,35 @@ struct dxConvex : public dxGeom
 	unsigned int first;
 	unsigned int second;
   };
-  //std::set<edge> edges;
   edge* edges;
+
+  /*! \brief A Support mapping function for convex shapes
+  \param dir [IN] direction to find the Support Point for
+  \return the index of the support vertex.
+ */
+	inline unsigned int SupportIndex(dVector3 dir)
+	{
+		dVector3 rdir;
+		unsigned int index=0;
+		dMULTIPLY1_331 (rdir,final_posr->R,dir);
+		dReal max = dDOT(points,rdir);
+		dReal tmp;
+		for (unsigned int i = 1; i < pointcount; ++i) 
+		{
+			tmp = dDOT(points+(i*3),rdir);
+			if (tmp > max) 
+			{
+				index=i;
+				max = tmp; 
+			}
+		}
+		return index;
+	}
 
  private:
   // For Internal Use Only
+/*! \brief Fills the edges dynamic array based on points and polygons.
+ */
   void FillEdges();
 #if 0
   /*

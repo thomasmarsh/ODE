@@ -637,38 +637,6 @@ int dCollideConvexCapsule (dxGeom *o1, dxGeom *o2,
   return 0;
 }
 
-/*! \brief A Support mapping function for convex shapes
-  \param dir [IN] direction to find the Support Point for
-  \param cvx [IN] convex object to find the support point for
-  \param out [OUT] the support mapping in dir.
- */
-inline void Support(dVector3 dir,dxConvex& cvx,dVector3 out)
-{
-	dVector3 point;
-	dMULTIPLY0_331 (point,cvx.final_posr->R,cvx.points);
-	point[0]+=cvx.final_posr->pos[0];
-	point[1]+=cvx.final_posr->pos[1];
-	point[2]+=cvx.final_posr->pos[2];
-
-	dReal max = dDOT(point,dir);
-	dReal tmp;
-	for (unsigned int i = 1; i < cvx.pointcount; ++i) 
-	{
-		dMULTIPLY0_331 (point,cvx.final_posr->R,cvx.points+(i*3));
-		point[0]+=cvx.final_posr->pos[0];
-		point[1]+=cvx.final_posr->pos[1];
-		point[2]+=cvx.final_posr->pos[2];      
-		tmp = dDOT(point, dir);
-		if (tmp > max) 
-		{ 
-			out[0]=point[0];
-			out[1]=point[1];
-			out[2]=point[2];
-			max = tmp; 
-		}
-	}
-}
-
 inline void ComputeInterval(dxConvex& cvx,dVector4 axis,dReal& min,dReal& max)
 {
   /* TODO: Use Support points here */
@@ -853,58 +821,70 @@ inline bool CheckSATConvexEdges(dxConvex& cvx1,
   dReal depth,min,max,min1,max1,min2,max2;
   dVector4 plane;
   dVector3 e1,e2,e1a,e1b,e2a,e2b;
+  dVector3 dist;
+  dist[0] = cvx2.final_posr->pos[0]-cvx1.final_posr->pos[0];
+  dist[1] = cvx2.final_posr->pos[1]-cvx1.final_posr->pos[1];
+  dist[2] = cvx2.final_posr->pos[2]-cvx1.final_posr->pos[2];
+  unsigned int s1 = cvx1.SupportIndex(dist);
+  // invert direction
+  dist[0]=-dist[0];dist[1]=-dist[1];dist[2]=-dist[2];
+  unsigned int s2 = cvx2.SupportIndex(dist);
   for(unsigned int i = 0;i<cvx1.edgecount;++i)
     {
+      // Skip edge if it doesn't contain the extremal vertex
+      if((cvx1.edges[i].first!=s1)&&(cvx1.edges[i].second!=s1)) continue;
       // we only need to apply rotation here
-		dMULTIPLY0_331(e1a,cvx1.final_posr->R,cvx1.points+(cvx1.edges[i].first*3));
+	  dMULTIPLY0_331(e1a,cvx1.final_posr->R,cvx1.points+(cvx1.edges[i].first*3));
       dMULTIPLY0_331(e1b,cvx1.final_posr->R,cvx1.points+(cvx1.edges[i].second*3));
       e1[0]=e1b[0]-e1a[0];
       e1[1]=e1b[1]-e1a[1];
       e1[2]=e1b[2]-e1a[2];
 	  for(unsigned int j = 0;j<cvx2.edgecount;++j)
-	{
-	  // we only need to apply rotation here
-		dMULTIPLY0_331 (e2a,cvx2.final_posr->R,cvx2.points+(cvx2.edges[j].first*3));
-	  dMULTIPLY0_331 (e2b,cvx2.final_posr->R,cvx2.points+(cvx2.edges[j].second*3));
-	  e2[0]=e2b[0]-e2a[0];
-	  e2[1]=e2b[1]-e2a[1];
-	  e2[2]=e2b[2]-e2a[2];
-	  dCROSS(plane,=,e1,e2);
-	  if(dDOT(plane,plane)<dEpsilon) /* edges are parallel */ continue;
-	  dNormalize3(plane);
-	  plane[3]=0;
-	  ComputeInterval(cvx1,plane,min1,max1);
-	  ComputeInterval(cvx2,plane,min2,max2);
-	  if(max2 < min1 || max1 < min2) return false;
-	  min = dMAX(min1, min2);
-	  max = dMIN(max1, max2);
-	  depth = max-min;
-	  if ((dFabs(depth)<dFabs(ccso.min_depth)))
-	    {
-	      dVector3Copy(plane,ccso.plane);
-	      ccso.min_depth=depth;
-	      ccso.g1=&cvx1;
-	      ccso.g2=&cvx2;
-	      ccso.depth_type = 2; // 2 = edge-edge
-	      // use cached values, add position
-	      dVector3Copy(e1a,ccso.e1a);
-	      dVector3Copy(e1b,ccso.e1b);
-	      ccso.e1a[0]+=cvx1.final_posr->pos[0];
-	      ccso.e1a[1]+=cvx1.final_posr->pos[1];
-	      ccso.e1a[2]+=cvx1.final_posr->pos[2];
-	      ccso.e1b[0]+=cvx1.final_posr->pos[0];
-	      ccso.e1b[1]+=cvx1.final_posr->pos[1];
-	      ccso.e1b[2]+=cvx1.final_posr->pos[2];
-	      dVector3Copy(e2a,ccso.e2a);	      
-	      dVector3Copy(e2b,ccso.e2b);	      
-	      ccso.e2a[0]+=cvx2.final_posr->pos[0];
-	      ccso.e2a[1]+=cvx2.final_posr->pos[1];
-	      ccso.e2a[2]+=cvx2.final_posr->pos[2];
-	      ccso.e2b[0]+=cvx2.final_posr->pos[0];
-	      ccso.e2b[1]+=cvx2.final_posr->pos[1];
-	      ccso.e2b[2]+=cvx2.final_posr->pos[2];
-	    }	  
-	}      
+		{
+		  // Skip edge if it doesn't contain the extremal vertex
+		  if((cvx2.edges[j].first!=s2)&&(cvx2.edges[j].second!=s2)) continue;
+		  // we only need to apply rotation here
+		  dMULTIPLY0_331 (e2a,cvx2.final_posr->R,cvx2.points+(cvx2.edges[j].first*3));
+		  dMULTIPLY0_331 (e2b,cvx2.final_posr->R,cvx2.points+(cvx2.edges[j].second*3));
+		  e2[0]=e2b[0]-e2a[0];
+		  e2[1]=e2b[1]-e2a[1];
+		  e2[2]=e2b[2]-e2a[2];
+		  dCROSS(plane,=,e1,e2);
+		  if(dDOT(plane,plane)<dEpsilon) /* edges are parallel */ continue;
+		  dNormalize3(plane);
+		  plane[3]=0;
+		  ComputeInterval(cvx1,plane,min1,max1);
+		  ComputeInterval(cvx2,plane,min2,max2);
+		  if(max2 < min1 || max1 < min2) return false;
+		  min = dMAX(min1, min2);
+		  max = dMIN(max1, max2);
+		  depth = max-min;
+		  if ((dFabs(depth)<dFabs(ccso.min_depth)))
+			{
+			  dVector3Copy(plane,ccso.plane);
+			  ccso.min_depth=depth;
+			  ccso.g1=&cvx1;
+			  ccso.g2=&cvx2;
+			  ccso.depth_type = 2; // 2 = edge-edge
+			  // use cached values, add position
+			  dVector3Copy(e1a,ccso.e1a);
+			  dVector3Copy(e1b,ccso.e1b);
+			  ccso.e1a[0]+=cvx1.final_posr->pos[0];
+			  ccso.e1a[1]+=cvx1.final_posr->pos[1];
+			  ccso.e1a[2]+=cvx1.final_posr->pos[2];
+			  ccso.e1b[0]+=cvx1.final_posr->pos[0];
+			  ccso.e1b[1]+=cvx1.final_posr->pos[1];
+			  ccso.e1b[2]+=cvx1.final_posr->pos[2];
+			  dVector3Copy(e2a,ccso.e2a);	      
+			  dVector3Copy(e2b,ccso.e2b);	      
+			  ccso.e2a[0]+=cvx2.final_posr->pos[0];
+			  ccso.e2a[1]+=cvx2.final_posr->pos[1];
+			  ccso.e2a[2]+=cvx2.final_posr->pos[2];
+			  ccso.e2b[0]+=cvx2.final_posr->pos[0];
+			  ccso.e2b[1]+=cvx2.final_posr->pos[1];
+			  ccso.e2b[2]+=cvx2.final_posr->pos[2];
+			}	  
+		}      
     }
   return true;
 }
