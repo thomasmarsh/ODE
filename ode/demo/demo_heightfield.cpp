@@ -750,8 +750,6 @@ int main (int argc, char **argv)
 	dGeomSetRotation( gheight, R );
 	dGeomSetPosition( gheight, pos[0], pos[1], pos[2] );
 
-
-
 	// run simulation
 	dsSimulationLoop (argc,argv,352,288,&fn);
 

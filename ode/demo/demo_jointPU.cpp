@@ -404,7 +404,7 @@ static void simLoop (int pause)
 
 
   if (!pause) {
-    double simstep = 0.5; // 1ms simulation steps
+    double simstep = 0.01; // 10ms simulation steps
     double dt = dsElapsedTime();
 
     int nrofsteps = (int) ceilf (dt/simstep);
