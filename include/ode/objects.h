@@ -1503,7 +1503,7 @@ ODE_API void *dJointGetData (dJointID);
  * \li dJointTypePU
  * \li dJointTypePiston
  */
-ODE_API int dJointGetType (dJointID);
+ODE_API dJointType dJointGetType (dJointID);
 
 /**
  * @brief Return the bodies that this joint connects.
