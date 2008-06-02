@@ -253,7 +253,7 @@ bool IntersectSegmentPlane(dVector3 a,
   \param Origin1 The origin of Ray 2
   \param Direction1 The direction of Ray 3
   \param t the time "t" in Ray 1 that gives us the closest point 
-  (closest_point=Origin1+(Direction*t).
+  (closest_point=Origin1+(Direction1*t).
   \return true if there is a closest point, false if the rays are paralell.
 */
 inline bool ClosestPointInRay(const dVector3 Origin1,
@@ -263,8 +263,8 @@ inline bool ClosestPointInRay(const dVector3 Origin1,
 			      dReal& t)
 {
   dVector3 w = {Origin1[0]-Origin2[0],
-		Origin1[1]-Origin2[1],
-		Origin1[2]-Origin2[2]};
+				Origin1[1]-Origin2[1],
+				Origin1[2]-Origin2[2]};
   dReal a = dDOT(Direction1 , Direction1);
   dReal b = dDOT(Direction1 , Direction2);
   dReal c = dDOT(Direction2 , Direction2);
@@ -863,8 +863,8 @@ inline bool CheckSATConvexEdges(dxConvex& cvx1,
 			{
 			  dVector3Copy(plane,ccso.plane);
 			  ccso.min_depth=depth;
-			  ccso.g1=&cvx1;
-			  ccso.g2=&cvx2;
+			  ccso.g1=&cvx2;
+			  ccso.g2=&cvx1;
 			  ccso.depth_type = 2; // 2 = edge-edge
 			  // use cached values, add position
 			  dVector3Copy(e1a,ccso.e1a);
@@ -905,6 +905,7 @@ int TestConvexIntersection(dxConvex& cvx1,dxConvex& cvx2, int flags,
   dVector4 plane;
   dReal t;
   int contacts=0;
+  unsigned int i;
   if(!CheckSATConvexFaces(cvx1,cvx2,ccso))
     {
       return 0;
@@ -1006,41 +1007,27 @@ int TestConvexIntersection(dxConvex& cvx1,dxConvex& cvx2, int flags,
 	}      
     }
   else if(ccso.depth_type==2) // edge-edge
-    {      
-      // for now return edge points
-      dVector3Copy(ccso.plane,SAFECONTACT(flags, contact, contacts, skip)->normal);
-      dVector3Copy(ccso.e1a,SAFECONTACT(flags, contact, contacts, skip)->pos);
-      
-      SAFECONTACT(flags, contact, contacts, skip)->g1=ccso.g1;
-      SAFECONTACT(flags, contact, contacts, skip)->g2=ccso.g2;
-      SAFECONTACT(flags, contact, contacts, skip)->depth=ccso.min_depth;
-      ++contacts;
-      if (contacts==maxc) return contacts;
-      dVector3Copy(ccso.plane,SAFECONTACT(flags, contact, contacts, skip)->normal);
-      dVector3Copy(ccso.e1b,SAFECONTACT(flags, contact, contacts, skip)->pos);
-      
-      SAFECONTACT(flags, contact, contacts, skip)->g1=ccso.g1;
-      SAFECONTACT(flags, contact, contacts, skip)->g2=ccso.g2;
-      SAFECONTACT(flags, contact, contacts, skip)->depth=ccso.min_depth;
-      ++contacts;
-      if (contacts==maxc) return contacts;      
-      dVector3Copy(ccso.plane,SAFECONTACT(flags, contact, contacts, skip)->normal);
-      dVector3Copy(ccso.e2a,SAFECONTACT(flags, contact, contacts, skip)->pos);
-      
-      SAFECONTACT(flags, contact, contacts, skip)->g1=ccso.g1;
-      SAFECONTACT(flags, contact, contacts, skip)->g2=ccso.g2;
-      SAFECONTACT(flags, contact, contacts, skip)->depth=ccso.min_depth;
-      ++contacts;
-      if (contacts==maxc) return contacts;
-      dVector3Copy(ccso.plane,SAFECONTACT(flags, contact, contacts, skip)->normal);
-      dVector3Copy(ccso.e2b,SAFECONTACT(flags, contact, contacts, skip)->pos);
-      
-      SAFECONTACT(flags, contact, contacts, skip)->g1=ccso.g1;
-      SAFECONTACT(flags, contact, contacts, skip)->g2=ccso.g2;
-      SAFECONTACT(flags, contact, contacts, skip)->depth=ccso.min_depth;
-      ++contacts;
-      if (contacts==maxc) return contacts;
-      
+    {
+		// Some parts borrowed from dBoxBox
+		dVector3 ua,ub,pa,pb;
+		dReal alpha,beta;
+	    // Get direction of first edge
+		for (i=0; i<3; i++) ua[i] = ccso.e1b[i]-ccso.e1a[i];
+		dNormalize3(ua); // normalization shouldn't be necesary but dLineClosestApproach requires it
+	    // Get direction of second edge
+		for (i=0; i<3; i++) ub[i] = ccso.e2b[i]-ccso.e2a[i];
+		dNormalize3(ub); // same as with ua normalization
+	    // Get closest points between edges (one at each)
+		dLineClosestApproach (ccso.e1a,ua,ccso.e2a,ub,&alpha,&beta);
+	    for (i=0; i<3; i++) pa[i] = ccso.e1a[i]+(ua[i]*alpha);
+	    for (i=0; i<3; i++) pb[i] = ccso.e2a[i]+(ub[i]*beta);
+	    // Set the contact point as halfway between the 2 closest points
+	    for (i=0; i<3; i++) SAFECONTACT(flags, contact, contacts, skip)->pos[i] = REAL(0.5)*(pa[i]+pb[i]);
+		SAFECONTACT(flags, contact, contacts, skip)->g1=ccso.g1;
+		SAFECONTACT(flags, contact, contacts, skip)->g2=ccso.g2;
+		dVector3Copy(ccso.plane,SAFECONTACT(flags, contact, contacts, skip)->normal);
+		SAFECONTACT(flags, contact, contacts, skip)->depth=ccso.min_depth;
+		++contacts;
     }
   return contacts;
 }

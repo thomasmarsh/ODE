@@ -239,6 +239,12 @@ void command (int cmd)
     case 'd':
       geom1pos[1]+=0.05;
       break;
+    case 'e':
+      geom1pos[2]-=0.05;
+      break;
+    case 'q':
+      geom1pos[2]+=0.05;
+      break;
     case 'i':
       dQFromAxisAndAngle (q, 0, 0, 1,0.0174532925);
       dQMultiply0(geom1quat,geom1quat,q);
