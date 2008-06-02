@@ -27,8 +27,9 @@
 #define _ODE_ODECPP_COLLISION_H_
 #ifdef __cplusplus
 
-#include <ode/error.h>
+//#include <ode/error.h>
 
+//namespace ode {
 
 class dGeom {
   // intentionally undefined, don't use these
@@ -363,6 +364,7 @@ public:
     { return dGeomTransformGetInfo (_id); }
 };
 
+//}
 
 #endif
 #endif

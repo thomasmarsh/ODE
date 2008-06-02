@@ -1377,10 +1377,10 @@ void *dJointGetData (dxJoint *joint)
 }
 
 
-int dJointGetType (dxJoint *joint)
+dJointType dJointGetType (dxJoint *joint)
 {
   dAASSERT (joint);
-  return joint->vtable->typenum;
+  return (dJointType)joint->vtable->typenum;
 }
 
 

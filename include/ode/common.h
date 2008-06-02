@@ -224,7 +224,7 @@ enum {
 
 /* joint type numbers */
 
-enum {
+typedef enum {
   dJointTypeNone = 0,		/* or "unknown" */
   dJointTypeBall,
   dJointTypeHinge,
@@ -240,7 +240,7 @@ enum {
   dJointTypePR,
   dJointTypePU,
   dJointTypePiston
-};
+} dJointType;
 
 
 /* an alternative way of setting joint parameters, using joint parameter
@@ -333,7 +333,7 @@ enum {
 
 /* angular motor mode numbers */
 
-enum{
+enum {
   dAMotorUser = 0,
   dAMotorEuler = 1
 };
