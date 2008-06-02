@@ -42,8 +42,8 @@
 #include "collision_space_internal.h"
 
 // Reference counting helper for radix sort global data.
-static void RadixSortRef();
-static void RadixSortDeref();
+//static void RadixSortRef();
+//static void RadixSortDeref();
 
 
 // --------------------------------------------------------------------------
