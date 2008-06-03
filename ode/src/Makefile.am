@@ -45,7 +45,7 @@ libode_la_SOURCES =     array.cpp array.h \
                         objects.h \
                         obstack.cpp obstack.h \
                         ode.cpp \
-                        odeinit.cpp odeinit.h \
+                        odeinit.cpp \
                         odemath.cpp \
                         plane.cpp \
                         quickstep.cpp quickstep.h \
