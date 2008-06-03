@@ -3,7 +3,7 @@
 
 noinst_LTLIBRARIES = libdrawstuff.la
 libdrawstuff_la_SOURCES = drawstuff.cpp internal.h
-libdrawstuff_la_CPPFLAGS = -I$(top_srcdir)/include \
+AM_CPPFLAGS = -I$(top_srcdir)/include \
         -DDEFAULT_PATH_TO_TEXTURES='"$(top_srcdir)/drawstuff/textures/"' \
         $(X_CFLAGS)
 

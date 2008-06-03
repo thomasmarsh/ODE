@@ -2,17 +2,28 @@ LIBTOOL_DEPS = @LIBTOOL_DEPS@
 libtool: $(LIBTOOL_DEPS)
 	$(SHELL) ./config.status --recheck
 
-SUBDIRS =
-
 if ENABLE_OU
-SUBDIRS += ou
+OU_DIR = ou
 endif
 
 if ENABLE_DEMOS
-SUBDIRS += include drawstuff GIMPACT OPCODE ode
-else
-SUBDIRS += include GIMPACT OPCODE ode
+DRAWSTUFF_DIR = drawstuff
 endif
+
+if GIMPACT
+GIMPACT_DIR = GIMPACT
+endif
+
+if OPCODE
+OPCODE_DIR = OPCODE
+endif
+
+SUBDIRS = include \
+          $(DRAWSTUFF_DIR) \
+          $(GIMPACT_DIR) \
+          $(OPCODE_DIR) \
+          $(OU_DIR) \
+          ode
 
 bin_SCRIPTS = ode-config
 

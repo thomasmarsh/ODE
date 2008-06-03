@@ -1,5 +1,5 @@
 noinst_PROGRAMS= dstest
-dstest_CPPFLAGS = -I$(top_srcdir)/drawstuff/src -I$(top_srcdir)/include
+AM_CPPFLAGS = -I$(top_srcdir)/drawstuff/src -I$(top_srcdir)/include
 
 dstest_SOURCES= dstest.cpp
 dstest_LDADD=$(top_builddir)/drawstuff/src/libdrawstuff.la \

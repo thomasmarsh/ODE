@@ -1,7 +1,5 @@
-if GIMPACT
-
 noinst_LTLIBRARIES = libGIMPACT.la
-libGIMPACT_la_CPPFLAGS = -fno-strict-aliasing \
+AM_CPPFLAGS = -fno-strict-aliasing \
                         -I$(top_srcdir)/include \
                         -I$(top_srcdir)/GIMPACT/include
 
@@ -16,6 +14,4 @@ libGIMPACT_la_SOURCES = gim_boxpruning.cpp \
                         gim_trimesh_sphere_collision.cpp \
                         gim_trimesh_trimesh_collision.cpp \
                         gimpact.cpp
-
-endif
 
