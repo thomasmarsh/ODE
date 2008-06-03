@@ -1,9 +1,7 @@
-if OPCODE
-
 SUBDIRS = Ice
 
 noinst_LTLIBRARIES = libOPCODE.la
-libOPCODE_la_CPPFLAGS= -fno-strict-aliasing -I$(top_srcdir)/include
+AM_CPPFLAGS= -fno-strict-aliasing -I$(top_srcdir)/include
 
 libOPCODE_la_SOURCES =  OPC_AABBCollider.cpp    OPC_AABBCollider.h \
                         OPC_AABBTree.cpp        OPC_AABBTree.h \
@@ -42,4 +40,3 @@ libOPCODE_la_SOURCES =  OPC_AABBCollider.cpp    OPC_AABBCollider.h \
                         OPC_LSSTriOverlap.h \
                         OPC_RayTriOverlap.h 
 
-endif
