@@ -274,7 +274,7 @@ public:
   void disable()
     { dBodyDisable (_id); }
   bool isEnabled() const
-    { return dBodyIsEnabled (_id); }
+    { return bool(dBodyIsEnabled (_id)); }
 
   void getRelPointPos (dReal px, dReal py, dReal pz, dVector3 result) const
     { dBodyGetRelPointPos (_id, px, py, pz, result); }
@@ -315,7 +315,7 @@ public:
     { setFiniteRotationAxis (a[0], a[1], a[2]); }
 
   bool getFiniteRotationMode() const
-    { return dBodyGetFiniteRotationMode (_id); }
+    { return bool(dBodyGetFiniteRotationMode (_id)); }
   void getFiniteRotationAxis (dVector3 result) const
     { dBodyGetFiniteRotationAxis (_id, result); }
 
@@ -327,10 +327,10 @@ public:
   void setGravityMode (bool mode)
     { dBodySetGravityMode (_id,mode); }
   bool getGravityMode() const
-    { return dBodyGetGravityMode (_id); }
+    { return bool(dBodyGetGravityMode (_id)); }
 
   bool isConnectedTo (dBodyID body) const
-    { return dAreConnected (_id, body); }
+    { return bool(dAreConnected (_id, body)); }
 
   void  setAutoDisableLinearThreshold (dReal threshold) 
     { dBodySetAutoDisableLinearThreshold (_id,threshold); }
@@ -351,7 +351,7 @@ public:
   void setAutoDisableFlag (bool do_auto_disable)
     { dBodySetAutoDisableFlag (_id,do_auto_disable); }
   bool getAutoDisableFlag() const
-    { return dBodyGetAutoDisableFlag (_id); }
+    { return bool(dBodyGetAutoDisableFlag (_id)); }
 
   dReal getLinearDamping() const
     { return dBodyGetLinearDamping(_id); }
