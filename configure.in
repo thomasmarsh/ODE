@@ -349,6 +349,7 @@ AC_OUTPUT([
  include/drawstuff/Makefile
  ode/Makefile
  ode/src/Makefile
+ ode/src/joints/Makefile
  drawstuff/Makefile
  drawstuff/src/Makefile
  drawstuff/dstest/Makefile

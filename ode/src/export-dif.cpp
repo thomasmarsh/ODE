@@ -35,7 +35,7 @@
 
 #include "ode/ode.h"
 #include "objects.h"
-#include "joint.h"
+#include "joints/joints.h"
 #include "collision_kernel.h"
 
 //***************************************************************************
@@ -177,7 +177,7 @@ static void printLimot (PrintingContext &c, dxJointLimitMotor &limot, int num)
 
 static const char *getJointName (dxJoint *j)
 {
-	switch (j->vtable->typenum) {
+	switch (j->type()) {
 		case dJointTypeBall: return "ball";
 		case dJointTypeHinge: return "hinge";
 		case dJointTypeSlider: return "slider";
@@ -601,7 +601,7 @@ void dWorldExportDIF (dWorldID w, FILE *file, const char *prefix)
 			fprintf (file,",%sbody[%d]",prefix,j->node[1].body->tag);
 		fprintf (file,"}\n");
 
-		switch (j->vtable->typenum) {
+		switch (j->type()) {
 			case dJointTypeBall: printBall (c,j); break;
 			case dJointTypeHinge: printHinge (c,j); break;
 			case dJointTypeSlider: printSlider (c,j); break;

@@ -1,3 +1,5 @@
+SUBDIRS = joints
+
 AM_CPPFLAGS = -I$(top_srcdir)/include
 
 # convenience library to simulate per object cflags
@@ -10,7 +12,7 @@ libfast_la_SOURCES = fastldlt.c fastltsolve.c fastdot.c fastlsolve.c
 lib_LTLIBRARIES = libode.la
 
 libode_la_LDFLAGS = @EXTRA_LIBTOOL_LDFLAGS@ -release @LIBTOOL_RELEASE@
-libode_la_LIBADD = libfast.la
+libode_la_LIBADD = libfast.la joints/libjoints.la
 
 
 # please, let's keep the filenames sorted
@@ -36,7 +38,6 @@ libode_la_SOURCES =     array.cpp array.h \
                         error.cpp \
                         export-dif.cpp \
                         heightfield.cpp heightfield.h \
-                        joint.cpp joint.h \
                         lcp.cpp lcp.h \
                         mass.cpp \
                         mat.cpp mat.h \
@@ -107,7 +108,6 @@ endif
 
 
 if OPCODE
-
 AM_CPPFLAGS += -I$(top_srcdir)/OPCODE -I$(top_srcdir)/OPCODE/Ice -DdTRIMESH_ENABLED -DdTRIMESH_OPCODE
 libode_la_LIBADD += $(top_builddir)/OPCODE/libOPCODE.la \
                     $(top_builddir)/OPCODE/Ice/libIce.la

@@ -21,7 +21,7 @@
  *************************************************************************/
 
 #include "objects.h"
-#include "joint.h"
+#include "joints/joint.h"
 #include <ode/odeconfig.h>
 #include "config.h"
 #include <ode/odemath.h>
@@ -335,7 +335,7 @@ void dInternalStepIsland_x1 (dxWorld *world, dxBody * const *body, int nb,
   ALLOCA(int,ofs,nj*sizeof(int));
 
   for (i=0, j=0; j<nj; j++) {	// i=dest, j=src
-    joint[j]->vtable->getInfo1 (joint[j],info+i);
+    joint[j]->getInfo1 (info+i);
     dIASSERT (info[i].m >= 0 && info[i].m <= 6 &&
 	      info[i].nub >= 0 && info[i].nub <= info[i].m);
     if (info[i].m > 0) {
@@ -442,7 +442,7 @@ void dInternalStepIsland_x1 (dxWorld *world, dxBody * const *body, int nb,
       Jinfo.lo = lo + ofs[i];
       Jinfo.hi = hi + ofs[i];
       Jinfo.findex = findex + ofs[i];
-      joint[i]->vtable->getInfo2 (joint[i],&Jinfo);
+      joint[i]->getInfo2 (&Jinfo);
       // adjust returned findex values for global index numbering
       for (j=0; j<info[i].m; j++) {
 	if (findex[ofs[i] + j] >= 0) findex[ofs[i] + j] += ofs[i];
@@ -682,7 +682,7 @@ void dInternalStepIsland_x2 (dxWorld *world, dxBody * const *body, int nb,
   ALLOCA(dxJoint::Info1,info,nj*sizeof(dxJoint::Info1));
   ALLOCA(int,ofs,nj*sizeof(int));
   for (i=0, j=0; j<nj; j++) {	// i=dest, j=src
-    joint[j]->vtable->getInfo1 (joint[j],info+i);
+    joint[j]->getInfo1 (info+i);
     dIASSERT (info[i].m >= 0 && info[i].m <= 6 &&
 	      info[i].nub >= 0 && info[i].nub <= info[i].m);
     if (info[i].m > 0) {
@@ -769,7 +769,7 @@ void dInternalStepIsland_x2 (dxWorld *world, dxBody * const *body, int nb,
       Jinfo.lo = lo + ofs[i];
       Jinfo.hi = hi + ofs[i];
       Jinfo.findex = findex + ofs[i];
-      joint[i]->vtable->getInfo2 (joint[i],&Jinfo);
+      joint[i]->getInfo2 (&Jinfo);
       // adjust returned findex values for global index numbering
       for (j=0; j<info[i].m; j++) {
 	if (findex[ofs[i] + j] >= 0) findex[ofs[i] + j] += ofs[i];

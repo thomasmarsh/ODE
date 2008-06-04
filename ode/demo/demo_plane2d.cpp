@@ -18,6 +18,7 @@
 # define        K_SPRING        10.0
 # define        K_DAMP          10.0
 
+//using namespace ode;
 
 static dWorld   dyn_world;
 static dBody    dyn_bodies[N_BODIES];

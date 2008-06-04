@@ -57,6 +57,7 @@
 #define dsDrawSphere dsDrawSphereD
 #endif
 
+//using namespace ode;
 
 const dReal VEL_INC = 0.01; // Velocity increment
 
@@ -105,10 +106,10 @@ static float hpr[3] = {90.000f,-25.5000f,0.0000f};
 
 
 //world,space,body & geom
-static dWorldID         world;
+static dWorld           world;
 static dSpaceID         space;
 static dJointGroupID    contactgroup;
-static dBodyID          body[NUM_PARTS];
+static dBody            body[NUM_PARTS];
 static dGeomID          geom[NUM_PARTS];
 
 // Default Positions and anchor of the 2 bodies
@@ -227,13 +228,13 @@ void setPositionBodies (int val)
   }
 
   if (body[BODY1]) {
-    dBodySetLinearVel (body[BODY1], 0,0,0);
-    dBodySetAngularVel (body[BODY1], 0,0,0);
+    body[BODY1].setLinearVel(0,0,0);
+    body[BODY1].setAngularVel(0,0,0);
   }
 
   if (body[BODY2]) {
-    dBodySetLinearVel (body[BODY2], 0,0,0);
-    dBodySetAngularVel (body[BODY2], 0,0,0);
+    body[BODY2].setLinearVel(0,0,0);
+    body[BODY2].setAngularVel(0,0,0);
   }
 
   switch (val) {
@@ -260,13 +261,13 @@ void setPositionBodies (int val)
                      };
 
   if (body[BODY1]) {
-    dBodySetPosition (body[BODY1], pos1[X], pos1[Y], pos1[Z]);
-    dBodySetRotation (body[BODY1], R);
+    body[BODY1].setPosition(pos1[X], pos1[Y], pos1[Z]);
+    body[BODY1].setRotation(R);
   }
 
   if (body[BODY2]) {
-    dBodySetPosition (body[BODY2], pos2[X], pos2[Y], pos2[Z]);
-    dBodySetRotation (body[BODY2], R);
+    body[BODY2].setPosition(pos2[X], pos2[Y], pos2[Z]);
+    body[BODY2].setRotation(R);
   }
 
 
@@ -555,9 +556,6 @@ int main (int argc, char **argv)
   dInitODE2(0);
   bool fixed  = true;
 
-for (int i=0; i<NUM_PARTS; ++i)
-    body[i] = NULL;
-
   // setup pointers to drawstuff callback functions
   dsFunctions fn;
   fn.version = DS_VERSION;
@@ -606,12 +604,10 @@ for (int i=0; i<NUM_PARTS; ++i)
 
       if (0 == strcmp ("-n", argv[i]) || 0 == strcmp ("--notFixed", argv[i]) )
         fixed = false;
+    }
   }
-}
 
-// create world
-world = dWorldCreate();
-  dWorldSetERP (world, 0.8);
+  world.setERP (0.8);
 
   space = dSimpleSpaceCreate (0);
   contactgroup = dJointGroupCreate (0);
@@ -639,23 +635,23 @@ world = dWorldCreate();
 
 
   // Create Body2 (Wiil be attached to the world)
-  body[BODY2] = dBodyCreate (world);
+  body[BODY2].create (world);
   // Main axis of cylinder is along X=1
-  dMassSetBox (&m, 1, BODY2_SIDES[0], BODY2_SIDES[1], BODY2_SIDES[2]);
-  dMassAdjust (&m, Mass1);
+  m.setBox (1, BODY2_SIDES[0], BODY2_SIDES[1], BODY2_SIDES[2]);
+  m.adjust (Mass1);
   geom[BODY2] = dCreateBox (space, BODY2_SIDES[0], BODY2_SIDES[1], BODY2_SIDES[2]);
   dGeomSetBody (geom[BODY2], body[BODY2]);
   dGeomSetOffsetRotation (geom[BODY2], R);
   dGeomSetCategoryBits (geom[BODY2], catBits[BODY2]);
   dGeomSetCollideBits (geom[BODY2], catBits[ALL] & (~catBits[BODY1]) );
-  dBodySetMass (body[BODY2], &m);
+  body[BODY2].setMass(&m);
 
 
   // Create Body 1 (Slider on the prismatic axis)
-  body[BODY1] = dBodyCreate (world);
+  body[BODY1].create (world);
   // Main axis of capsule is along X=1
-  dMassSetCapsule (&m, 1, 1, RADIUS, BODY1_LENGTH);
-  dMassAdjust (&m, Mass1);
+  m.setCapsule (1, 1, RADIUS, BODY1_LENGTH);
+  m.adjust(Mass1);
   geom[BODY1] = dCreateCapsule (space, RADIUS, BODY1_LENGTH);
   dGeomSetBody (geom[BODY1], body[BODY1]);
   dGeomSetOffsetRotation (geom[BODY1], R);
@@ -663,8 +659,9 @@ world = dWorldCreate();
   dGeomSetCollideBits (geom[BODY1], catBits[ALL] & ~catBits[BODY2] & ~catBits[RECT]);
 
   dMass mRect;
-  dMassSetBox (&mRect, 1, RECT_SIDES[0], RECT_SIDES[1], RECT_SIDES[2]);
-  dMassAdd (&m, &mRect);
+  mRect.setBox(1, RECT_SIDES[0], RECT_SIDES[1], RECT_SIDES[2]);
+  m.add(&mRect);
+  // TODO: translate m?
   geom[RECT] = dCreateBox (space, RECT_SIDES[0], RECT_SIDES[1], RECT_SIDES[2]);
   dGeomSetBody (geom[RECT], body[BODY1]);
   dGeomSetOffsetPosition (geom[RECT],
@@ -674,7 +671,7 @@ world = dWorldCreate();
   dGeomSetCategoryBits (geom[RECT], catBits[RECT]);
   dGeomSetCollideBits (geom[RECT], catBits[ALL] & (~catBits[BODY1]) );
 
-  dBodySetMass (body[BODY1], &m);
+  body[BODY1].setMass(&m);
 
 
 

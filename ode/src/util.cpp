@@ -22,7 +22,7 @@
 
 #include "ode/ode.h"
 #include "objects.h"
-#include "joint.h"
+#include "joints/joint.h"
 #include "util.h"
 
 #define ALLOCA dALLOCA16

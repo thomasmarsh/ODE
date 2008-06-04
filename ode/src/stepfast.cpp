@@ -29,7 +29,7 @@
 // eventually we should move the common code to a third file.
 
 #include "objects.h"
-#include "joint.h"
+#include "joints/joint.h"
 #include <ode/odeconfig.h>
 #include "config.h"
 #include <ode/objects.h>
@@ -684,7 +684,7 @@ dInternalStepIslandFast (dxWorld * world, dxBody * const *bodies, int nb, dxJoin
 	int *ofs = (int *) ALLOCA (nj * sizeof (int));
 	for (i = 0, j = 0; j < nj; j++)
 	{	// i=dest, j=src
-		joints[j]->vtable->getInfo1 (joints[j], info + i);
+		joints[j]->getInfo1 (info + i);
 		dIASSERT (info[i].m >= 0 && info[i].m <= 6 && info[i].nub >= 0 && info[i].nub <= info[i].m);
 		if (info[i].m > 0)
 		{
@@ -768,7 +768,7 @@ dInternalStepIslandFast (dxWorld * world, dxBody * const *bodies, int nb, dxJoin
 		Jinfo[i].lo = lo + ofs[i];
 		Jinfo[i].hi = hi + ofs[i];
 		Jinfo[i].findex = findex + ofs[i];
-		//joints[i]->vtable->getInfo2 (joints[i], Jinfo+i);
+		//joints[i]->getInfo2 (Jinfo+i);
 	}
 
 	}
@@ -886,7 +886,7 @@ dInternalStepIslandFast (dxWorld * world, dxBody * const *bodies, int nb, dxJoin
 				GinvIPair[1] = globalInvI + bodyPair[1]->tag * 12;
 			}
 
-			joints[j]->vtable->getInfo2 (joints[j], Jinfo + j);
+			joints[j]->getInfo2 (Jinfo + j);
 
 			//dInternalStepIslandFast is an exact copy of the old routine with one
 			//modification: the calculated forces are added back to the facc and tacc
