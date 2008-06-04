@@ -50,6 +50,7 @@ enum {
 
 struct dBase {
   void *operator new (size_t size) { return dAlloc (size); }
+  void *operator new (size_t size, void *p) { return p; }
   void operator delete (void *ptr, size_t size) { dFree (ptr,size); }
   void *operator new[] (size_t size) { return dAlloc (size); }
   void operator delete[] (void *ptr, size_t size) { dFree (ptr,size); }
@@ -62,8 +63,10 @@ struct dObject : public dBase {
   dxWorld *world;		// world this object is in
   dObject *next;		// next object of this type in list
   dObject **tome;		// pointer to previous object's next ptr
-  void *userdata;		// user settable data
   int tag;			// used by dynamics algorithms
+  void *userdata;		// user settable data
+  dObject(dxWorld *w);
+  virtual ~dObject() { }
 };
 
 
@@ -134,6 +137,8 @@ struct dxBody : public dObject {
   void (*moved_callback)(dxBody*); // let the user know the body moved
   dxDampingParameters dampingp; // damping parameters, depends on flags
   dReal max_angular_speed;      // limit the angular velocity to this magnitude
+
+  dxBody(dxWorld *w);
 };
 
 

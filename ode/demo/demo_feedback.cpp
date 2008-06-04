@@ -180,7 +180,7 @@ static void simLoop (int pause)
 {
   int i;
 
-  double simstep = 0.005; // 5ms simulation steps
+  double simstep = 0.002; // 2ms simulation steps
   double dt = dsElapsedTime();
   int nrofsteps = (int) ceilf(dt/simstep);
   for (i=0; i<nrofsteps && !pause; i++)

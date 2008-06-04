@@ -55,6 +55,7 @@ const dReal tol = 1e-8;		// tolerance used for numerical checks
 #define MAX_TESTS 1000		// maximum number of test slots
 #define Z_OFFSET 2		// z offset for drawing (to get above ground)
 
+//using namespace ode;
 
 // test function. returns 1 if the test passed or 0 if it failed
 typedef int test_function_t();

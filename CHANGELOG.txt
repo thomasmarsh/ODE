@@ -8,6 +8,11 @@ the rules for this file:
   * keep the format consistent (79 char width, M/D/Y date format).
 
 ------------------------------------------------------------------------------
+06/04/08 Daniel K. O.
+
+        * Moved joints to ode/src/joints, converted them to true virtual
+          methods.
+
 06/02/08 Daniel K. O.
 
         * Added an Auto<T> template to step.cpp to handle memory deallocation.

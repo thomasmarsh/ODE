@@ -111,6 +111,7 @@ package.objdir = "obj/ode"
   package.includepaths =
   {
     "../../ode/src",
+    "../../ode/src/joints",
     "../../include",
     "../../OPCODE",
     "../../GIMPACT/include",
@@ -162,6 +163,7 @@ package.objdir = "obj/ode"
   core_files =
   {
     matchfiles("../../include/ode/*.h"),
+    matchfiles ("../../ode/src/joints/*.h", "../../ode/src/joints/*.cpp"),
     matchfiles ("../../ode/src/*.h", "../../ode/src/*.c", "../../ode/src/*.cpp")
   }
 

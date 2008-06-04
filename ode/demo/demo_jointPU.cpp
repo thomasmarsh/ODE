@@ -53,6 +53,7 @@
 #define dsDrawCapsule dsDrawCapsuleD
 #endif
 
+//using namespace ode;
 
 enum IDX_CYL_DIM
 {
@@ -123,10 +124,10 @@ static float hpr[3] = {-180.000f,-25.5000f,0.0000f};
 
 
 //world,space,body & geom
-static dWorldID         world;
+static dWorld           world;
 static dSpaceID         space;
 static dJointGroupID    contactgroup;
-static dBodyID          body[NUM_PARTS];
+static dBody            body[NUM_PARTS];
 static dGeomID          geom[NUM_PARTS];
 
 static dJoint *joint;
@@ -240,46 +241,46 @@ case 'h' : case 'H' : case '?' :
 
       // Force
   case 'q' : case 'Q' :
-      dBodyAddForce (body[D],40,0,0);
+      body[D].addForce(40,0,0);
       break;
   case 'w' : case 'W' :
-      dBodyAddForce (body[D],-40,0,0);
+      body[D].addForce(-40,0,0);
       break;
 
   case 'a' : case 'A' :
-      dBodyAddForce (body[D],0,40,0);
+      body[D].addForce(0,40,0);
       break;
   case 's' : case 'S' :
-      dBodyAddForce (body[D],0,-40,0);
+      body[D].addForce(0,-40,0);
       break;
 
   case 'z' : case 'Z' :
-      dBodyAddForce (body[D],0,0,40);
+      body[D].addForce(0,0,40);
       break;
   case 'x' : case 'X' :
-      dBodyAddForce (body[D],0,0,-40);
+      body[D].addForce(0,0,-40);
       break;
 
       // Torque
   case 'e': case 'E':
-      dBodyAddTorque (body[D],0.1,0,0);
+      body[D].addTorque(0.1,0,0);
       break;
   case 'r': case 'R':
-      dBodyAddTorque (body[D],-0.1,0,0);
+      body[D].addTorque(-0.1,0,0);
       break;
 
   case 'd': case 'D':
-      dBodyAddTorque (body[D],0, 0.1,0);
+      body[D].addTorque(0, 0.1,0);
       break;
   case 'f': case 'F':
-      dBodyAddTorque (body[D],0,-0.1,0);
+      body[D].addTorque(0,-0.1,0);
       break;
 
   case 'c': case 'C':
-      dBodyAddTorque (body[D],0,0,0.1);
+      body[D].addTorque(0,0,0.1);
       break;
   case 'v': case 'V':
-      dBodyAddTorque (body[D],0,0,0.1);
+      body[D].addTorque(0,0,0.1);
       break;
 
       // Velocity of joint
@@ -340,11 +341,11 @@ case 'h' : case 'H' : case '?' :
 
   case 'g': case 'G' : {
       dVector3 g;
-      dWorldGetGravity (world, g);
+      world.getGravity(g);
       if (  g[2]< -0.1 )
-        dWorldSetGravity (world, 0, 0, 0);
+        world.setGravity(0, 0, 0);
       else
-        dWorldSetGravity (world, 0, 0, -0.5);
+        world.setGravity(0, 0, -0.5);
 
     }
 
@@ -555,9 +556,6 @@ void Help (char **argv)
 
 int main (int argc, char **argv)
 {
-  for (int i=0; i<NUM_PARTS; ++i)
-    body[i] = NULL;
-
   // setup pointers to drawstuff callback functions
   dsFunctions fn;
   fn.version = DS_VERSION;
@@ -588,9 +586,8 @@ int main (int argc, char **argv)
   }
 
   dInitODE2(0);
-  // create world
-  world = dWorldCreate();
-  dWorldSetERP (world, 0.8);
+
+  world.setERP (0.8);
 
   space = dSimpleSpaceCreate (0);
   contactgroup = dJointGroupCreate (0);
@@ -601,30 +598,30 @@ int main (int argc, char **argv)
   dMass m;
 
   // Create the body attached to the World
-  body[W] = dBodyCreate (world);
+  body[W].create (world);
   // Main axis of cylinder is along X=1
-  dMassSetBox (&m, 1, boxDim[X], boxDim[Y], boxDim[Z]);
-  dMassAdjust (&m, Mass1);
+  m.setBox (1, boxDim[X], boxDim[Y], boxDim[Z]);
+  m.adjust (Mass1);
   geom[W] = dCreateBox (space, boxDim[X], boxDim[Y], boxDim[Z]);
   dGeomSetBody (geom[W], body[W]);
   dGeomSetCategoryBits (geom[W], catBits[W]);
   dGeomSetCollideBits (geom[W], catBits[ALL] & (~catBits[W]) & (~catBits[JOINT]) );
-  dBodySetMass (body[W], &m);
+  body[W].setMass(m);
 
 
 
 
 
   // Create the dandling body
-  body[D] = dBodyCreate (world);
+  body[D].create(world);
   // Main axis of capsule is along X=1
-  dMassSetBox (&m, 1, boxDim[X], boxDim[Y], boxDim[Z]);
-  dMassAdjust (&m, Mass1);
+  m.setBox (1, boxDim[X], boxDim[Y], boxDim[Z]);
+  m.adjust (Mass1);
   geom[D] = dCreateBox (space, boxDim[X], boxDim[Y], boxDim[Z]);
   dGeomSetBody (geom[D], body[D]);
   dGeomSetCategoryBits (geom[D], catBits[D]);
   dGeomSetCollideBits (geom[D], catBits[ALL] & (~catBits[D]) & (~catBits[JOINT]) );
-  dBodySetMass (body[D], &m);
+  body[D].setMass(&m);
 
 
   // Create the external part of the slider joint
@@ -677,7 +674,7 @@ int main (int argc, char **argv)
 
 
   if (body[W]) {
-    dBodySetPosition (body[W], 0, 0, 5);
+    body[W].setPosition(0, 0, 5);
   }
 
 
@@ -699,7 +696,7 @@ int main (int argc, char **argv)
   }
 
   if (body[D]) {
-    dBodySetPosition (body[D], 0,0,1.5);
+    body[D].setPosition(0,0,1.5);
   }
 
 
