@@ -30,16 +30,12 @@ echo "Warnings about underquoted definitions are harmless"
  
 echo "Running aclocal"
 aclocal -I . || exit 1
-echo "Running libtoolize"
 # on Mac libtoolize is called glibtoolize
-LIBTOOLIZE=`which libtoolize`
-if [ "$?" != "0" ]; then
-    LIBTOOLIZE=`which glibtoolize`
-    if [ "$?" != "0" ]; then
-    echo "No libtoolize found in path."
-    exit 1
-    fi
+LIBTOOLIZE=libtoolize
+if [ `uname -s` = Darwin ]; then
+    LIBTOOLIZE=glibtoolize
 fi
+echo "Running $LIBTOOLIZE"
 $LIBTOOLIZE --copy --force --automake || exit 1
 echo "Running autoheader"
 autoheader || exit 1
