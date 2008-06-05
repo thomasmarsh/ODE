@@ -360,6 +360,11 @@ AC_OUTPUT([
  GIMPACT/include/Makefile
  GIMPACT/include/GIMPACT/Makefile
  GIMPACT/src/Makefile
+ tests/Makefile
+ tests/UnitTest++/Makefile
+ tests/UnitTest++/src/Makefile
+ tests/UnitTest++/src/Posix/Makefile
+ tests/UnitTest++/src/Win32/Makefile
  ode-config
  ])
 

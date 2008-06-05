@@ -23,7 +23,8 @@ SUBDIRS = include \
           $(GIMPACT_DIR) \
           $(OPCODE_DIR) \
           $(OU_DIR) \
-          ode
+          ode \
+          tests
 
 bin_SCRIPTS = ode-config
 
