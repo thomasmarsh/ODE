@@ -20,8 +20,6 @@
  *                                                                       *
  *************************************************************************/
 
-#define USE_CONVEX 0
-
 #include <stdio.h>
 #include <math.h>
 #include <ode/ode.h>
@@ -88,7 +86,9 @@ unsigned int polygons[] = //Polygons for a cube (6 squares)
 #define dsDrawBox dsDrawBoxD
 #endif
 
-dGeomID geoms[2];
+dGeomID* geoms;
+dGeomID boxes[2];
+dGeomID convex[2];
 dSpaceID space;
 dWorldID world;
 dJointGroupID contactgroup;
@@ -116,36 +116,49 @@ void start()
   dsGetViewpoint (xyz,hpr);
   hpr[0] += 7;
   dsSetViewpoint (xyz,hpr);
-#if USE_CONVEX
-  geoms[0]=dCreateConvex (space,
+  convex[0]=dCreateConvex (space,
 			  planes,
 			  planecount,
 			  points,
 			  pointcount,
 			  polygons);
-  geoms[1]=dCreateConvex (space,
+  convex[1]=dCreateConvex (space,
 			  planes,
 			  planecount,
 			  points,
 			  pointcount,
 			  polygons);
-#else
-  geoms[0]=dCreateBox(space,0.5,0.5,0.5);
-  geoms[1]=dCreateBox(space,0.5,0.5,0.5);
-#endif
+  boxes[0]=dCreateBox(space,0.5,0.5,0.5);
+  boxes[1]=dCreateBox(space,0.5,0.5,0.5);
+  geoms=convex;
+
   dMatrix3 m1 = { 1,0,0,0,0,1,0,0,0,0,1,0 };
   dMatrix3 m2 = { 1,0,0,0,0,1,0,0,0,0,1,0 };
-  dGeomSetPosition (geoms[0],
+  dGeomSetPosition (convex[0],
 		    0.0,
 		    0.0,
 		    0.25);
-  dGeomSetPosition (geoms[1],
+  dGeomSetPosition (convex[1],
 		    geom1pos[0],
 		    geom1pos[1],
 		    geom1pos[2]);
-  dGeomSetRotation (geoms[0],m1);
+  dGeomSetRotation (convex[0],m1);
   dQtoR (geom1quat, m2);
-  dGeomSetRotation (geoms[1],m2);
+  dGeomSetRotation (convex[1],m2);
+
+  dGeomSetPosition (boxes[0],
+		    0.0,
+		    0.0,
+		    0.25);
+  dGeomSetPosition (boxes[1],
+		    geom1pos[0],
+		    geom1pos[1],
+		    geom1pos[2]);
+  dGeomSetRotation (boxes[0],m1);
+  dQtoR (geom1quat, m2);
+  dGeomSetRotation (boxes[1],m2);
+
+
 }
 
 int dCollideConvexConvex (dxGeom *o1, dxGeom *o2, int flags,
@@ -155,13 +168,14 @@ int dCollideBoxBox (dxGeom *o1, dxGeom *o2, int flags,
 
 void simLoop (int pause)
 {
+  int contactcount;
   const dReal ss[3] = {0.02,0.02,0.02};
   dContactGeom contacts[8];
-#if USE_CONVEX
-  int contactcount = dCollideConvexConvex(geoms[1],geoms[0],8,contacts,sizeof(dContactGeom));
-#else
-  int contactcount = dCollideBoxBox(geoms[0],geoms[1],8,contacts,sizeof(dContactGeom));
-#endif
+if(geoms==convex)
+  contactcount = dCollideConvexConvex(geoms[1],geoms[0],8,contacts,sizeof(dContactGeom));
+else
+  contactcount = dCollideBoxBox(geoms[0],geoms[1],8,contacts,sizeof(dContactGeom));
+
   //fprintf(stdout,"Contact Count %d\n",contactcount);
   const dReal* pos;
   const dReal* R;
@@ -264,6 +278,9 @@ void command (int cmd)
       break;
     case 'm':
 		(drawmode!=DS_POLYFILL)? drawmode=DS_POLYFILL:drawmode=DS_WIREFRAME;
+      break;
+    case 'n':
+		(geoms!=convex)? geoms=convex:geoms=boxes;
       break;
     default:
       dsPrint ("received command %d (`%c')\n",cmd,cmd);     
