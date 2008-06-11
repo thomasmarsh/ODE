@@ -20,7 +20,7 @@
  *                                                                       *
  *************************************************************************/
 
-#define USE_CONVEX 1
+#define USE_CONVEX 0
 
 #include <stdio.h>
 #include <math.h>
@@ -107,6 +107,7 @@ Where	c = cos(angle),	s = sine(angle), and ||( x,y,z )|| = 1
 dVector3 geom1pos={0.0,0.50,0.65};
 dQuaternion geom1quat={1,0,0,0};
 bool DumpInfo=true;
+int drawmode = DS_WIREFRAME;
 
 void start()
 {
@@ -168,7 +169,7 @@ void simLoop (int pause)
   pos = dGeomGetPosition (geoms[0]);
   R = dGeomGetRotation (geoms[0]);
   dsSetColor (0.6f,0.6f,1);
-  dsSetDrawMode(DS_WIREFRAME);
+  dsSetDrawMode(drawmode);
   dsDrawConvex(pos,R,planes,
 	       planecount,
 	       points,
@@ -178,7 +179,7 @@ void simLoop (int pause)
   pos = dGeomGetPosition (geoms[1]);
   R = dGeomGetRotation (geoms[1]);
   dsSetColor (0.4f,1,1);
-  dsSetDrawMode(DS_WIREFRAME);
+  dsSetDrawMode(drawmode);
   dsDrawConvex(pos,R,planes,
 	       planecount,
 	       points,
@@ -260,6 +261,9 @@ void command (int cmd)
     case 'l':
       dQFromAxisAndAngle (q, 1, 0, 0,-0.0174532925);
       dQMultiply0(geom1quat,geom1quat,q);
+      break;
+    case 'm':
+		(drawmode!=DS_POLYFILL)? drawmode=DS_POLYFILL:drawmode=DS_WIREFRAME;
       break;
     default:
       dsPrint ("received command %d (`%c')\n",cmd,cmd);     
