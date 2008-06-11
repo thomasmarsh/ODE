@@ -226,7 +226,7 @@ int sCylinderBoxData::_cldTestAxis( dVector3& vInputNormal, int iAxis )
 		// assume fdot1 = 1
 		frc = m_fCylinderSize*REAL(0.5);
 	}
-	else if (fdot1 < REAL(1.0))
+	else if (fdot1 < REAL(-1.0))
 	{
 		// assume fdot1 = -1
 		frc = m_fCylinderSize*REAL(0.5);
