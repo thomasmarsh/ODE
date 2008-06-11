@@ -87,6 +87,7 @@ struct Auto {
     return p[i];
   }
 private:
+  // intentionally undefined, don't use this
   template<class U>
   Auto& operator=(const Auto<U>&) const;
 };
