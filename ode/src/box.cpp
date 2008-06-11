@@ -503,26 +503,31 @@ int dBoxBox (const dVector3 p1, const dMatrix3 R1,
   // axis is perpendicular to a face). define face 'a' to be the reference
   // face (i.e. the normal vector is perpendicular to this) and face 'b' to be
   // the incident face (the closest face of the other box).
+  // Note: Unmodified parameter values are being used here
   const dReal *Ra,*Rb,*pa,*pb,*Sa,*Sb;
-  if (code <= 3) {
-    Ra = R1;
-    Rb = R2;
-    pa = p1;
-    pb = p2;
-    Sa = A;
-    Sb = B;
+  if (code <= 3) { // One of the faces of box 1 is the reference face
+    Ra = R1; // Rotation of 'a'
+    Rb = R2; // Rotation of 'b'
+    pa = p1; // Center (location) of 'a'
+    pb = p2; // Center (location) of 'b'
+    Sa = A;  // Side Lenght of 'a'
+    Sb = B;  // Side Lenght of 'b'
   }
-  else {
-    Ra = R2;
-    Rb = R1;
-    pa = p2;
-    pb = p1;
-    Sa = B;
-    Sb = A;
+  else { // One of the faces of box 2 is the reference face
+    Ra = R2; // Rotation of 'a'
+    Rb = R1; // Rotation of 'b'
+    pa = p2; // Center (location) of 'a'
+    pb = p1; // Center (location) of 'b'
+    Sa = B;  // Side Lenght of 'a'
+    Sb = A;  // Side Lenght of 'b'
   }
 
   // nr = normal vector of reference face dotted with axes of incident box.
   // anr = absolute values of nr.
+  /*
+	The normal is flipped if necessary so it always points outward from box 1,
+	box 2 is thus always the incident box
+  */
   dVector3 normal2,nr,anr;
   if (code <= 3) {
     normal2[0] = normal[0];
@@ -534,13 +539,14 @@ int dBoxBox (const dVector3 p1, const dMatrix3 R1,
     normal2[1] = -normal[1];
     normal2[2] = -normal[2];
   }
+  // Rotate normal2 in incident box direction
   dMULTIPLY1_331 (nr,Rb,normal2);
   anr[0] = dFabs (nr[0]);
   anr[1] = dFabs (nr[1]);
   anr[2] = dFabs (nr[2]);
 
   // find the largest compontent of anr: this corresponds to the normal
-  // for the indident face. the other axis numbers of the indicent face
+  // for the incident face. the other axis numbers of the incident face
   // are stored in a1,a2.
   int lanr,a1,a2;
   if (anr[1] > anr[0]) {
