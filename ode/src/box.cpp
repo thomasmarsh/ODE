@@ -539,7 +539,7 @@ int dBoxBox (const dVector3 p1, const dMatrix3 R1,
     normal2[1] = -normal[1];
     normal2[2] = -normal[2];
   }
-  // Rotate normal2 in incident box direction
+  // Rotate normal2 in incident box opposite direction
   dMULTIPLY1_331 (nr,Rb,normal2);
   anr[0] = dFabs (nr[0]);
   anr[1] = dFabs (nr[1]);
