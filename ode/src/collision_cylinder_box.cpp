@@ -223,13 +223,20 @@ int sCylinderBoxData::_cldTestAxis( dVector3& vInputNormal, int iAxis )
 
 	if (fdot1 > REAL(1.0)) 
 	{
-		fdot1 = REAL(1.0);
+		// assume fdot1 = 1
 		frc = m_fCylinderSize*REAL(0.5);
 	}
-
-	// project box and capsule on iAxis
-	frc = dFabs( fdot1 * (m_fCylinderSize*REAL(0.5))) + m_fCylinderRadius * dSqrt(REAL(1.0)-(fdot1*fdot1));
-
+	else if (fdot1 < REAL(1.0))
+	{
+		// assume fdot1 = -1
+		frc = m_fCylinderSize*REAL(0.5);
+	}
+	else
+	{
+    	// project box and capsule on iAxis
+    	frc = dFabs( fdot1 * (m_fCylinderSize*REAL(0.5))) + m_fCylinderRadius * dSqrt(REAL(1.0)-(fdot1*fdot1));
+    }
+    
 	dVector3	vTemp1;
 
 	dMat3GetCol(m_mBoxRot,0,vTemp1);
