@@ -965,6 +965,13 @@ int TestConvexIntersection(dxConvex& cvx1,dxConvex& cvx2, int flags,
       pPoly1+=pPoly1[0]+1;
     }
     pPoints = pPoly1+1;
+    /*
+	Will be needing this matrix for parallel point projection:
+	[1-x^2	-x*y	-x*z ]
+	[-x*y	1-y^2	-y*z ]
+	[-x*z	-y*z	1-z^2]
+
+    */
     for(unsigned int i=0;i<pPoly1[0];++i)
     {
       // Get the edge p1-p2

@@ -525,8 +525,8 @@ int dBoxBox (const dVector3 p1, const dMatrix3 R1,
   // nr = normal vector of reference face dotted with axes of incident box.
   // anr = absolute values of nr.
   /*
-	The normal is flipped if necessary so it always points outward from box 1,
-	box 2 is thus always the incident box
+	The normal is flipped if necessary so it always points outward from box 'a',
+	box 'b' is thus always the incident box
   */
   dVector3 normal2,nr,anr;
   if (code <= 3) {
