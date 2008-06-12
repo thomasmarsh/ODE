@@ -13,7 +13,6 @@ ODE_RELEASE=[$ODE_CURRENT].[$ODE_REVISION].[$ODE_AGE]
 dnl Libtool release is an interface id, 
 dnl don't change unless the ode API is no longer backward compatible
 LIBTOOL_RELEASE=0
-AC_CANONICAL_TARGET
 AC_CANONICAL_HOST
 
 AM_INIT_AUTOMAKE(1.10 foreign)
@@ -377,7 +376,6 @@ dnl Print some useful information
 echo "Configuration:"
 echo "  Build  system type:      $build"
 echo "  Host   system type:      $host"
-echo "  Target system type:      $target"
 echo "  Use double precision:    $precision"
 echo "  Use OPCODE:              $opcode"
 echo "  Use GIMPACT:             $gimpact"
