@@ -935,7 +935,7 @@ int TestConvexIntersection(dxConvex& cvx1,dxConvex& cvx2, int flags,
   ccso.g1=ccso.g2=NULL;
   int maxc = flags & NUMC_MASK;  
   dIASSERT(maxc != 0);
-  dVector3 p1,p2;
+  dVector3 i1,i2,r1,r2; // edges of incident and reference faces respectively
   dVector4 plane;
   dReal t;
   int contacts=0;
@@ -956,42 +956,86 @@ int TestConvexIntersection(dxConvex& cvx1,dxConvex& cvx2, int flags,
   if(ccso.depth_type==1) // face-face
   {
 #if 1
+    unsigned int x,y; // 2d indices for orthogonal projected points
+    dVector3 an = {dFabs(ccso.plane[0]),dFabs(ccso.plane[1]),dFabs(ccso.plane[2])};
+    if(an[0]>an[1])
+    {
+      if(an[0]>an[2])
+      {
+        // X is largest
+        x=1;
+        y=2;
+      }
+      else
+      {
+        // Z is largest
+        x=0;
+        y=1;
+      }
+    }
+    else
+    {
+      if(an[1]>an[2])
+      {
+        // Y is largest
+        x=0;
+        y=2;
+      }
+      else
+      {
+        // Z is largest
+        x=0;
+        y=1;
+      }
+    }
+    // Get pointers to both reference and incident face
+    /* Incident */
     unsigned int incident_side = GetIncidentSide(ccso);
-    // All points in incident face are potential contact joints
-    unsigned int* pPoly1 = ccso.g2->polygons;
-    unsigned int* pPoints;
+    unsigned int* pIncidentPoly = ccso.g2->polygons;
+    unsigned int* pIncidentPoints;
     for(int i=0;i<incident_side;++i)
     {
-      pPoly1+=pPoly1[0]+1;
+      pIncidentPoly+=pIncidentPoly[0]+1;
     }
-    pPoints = pPoly1+1;
+    pIncidentPoints = pIncidentPoly+1;
+
+    /* Reference */
+    unsigned int* pReferencePoly = ccso.g1->polygons;
+    unsigned int* pReferencePoints;
+    for(int i=0;i<ccso.side_index;++i)
+    {
+      pReferencePoly+=pReferencePoly[0]+1;
+    }
+    pReferencePoints = pReferencePoly+1;
     /*
-	Will be needing this matrix for parallel point projection:
+	May be needing this matrix for parallel point projection:
 	[1-x^2	-x*y	-x*z ]
 	[-x*y	1-y^2	-y*z ]
 	[-x*z	-y*z	1-z^2]
-
     */
-    for(unsigned int i=0;i<pPoly1[0];++i)
+    for(unsigned int i=0;i<pIncidentPoly[0];++i)
     {
       // Get the edge p1-p2
-      dMULTIPLY0_331(p1,ccso.g2->final_posr->R,&ccso.g2->points[(pPoints[i]*3)]);
-  	  dVector3Add(ccso.g2->final_posr->pos,p1,p1);
-  	  dMULTIPLY0_331(p2,ccso.g2->final_posr->R,&ccso.g2->points[(pPoints[(i+1)%pPoly1[0]]*3)]);
-  	  dVector3Add(ccso.g1->final_posr->pos,p2,p2);
-  	  if(IsPointInConvex(p1,ccso.g1))
-	    {
-        SAFECONTACT(flags, contact, contacts, skip)->depth=dVector3Dot(ccso.plane, p1) - ccso.plane[3];
-        // Only use points with a zero or positive depth
-        if(SAFECONTACT(flags, contact, contacts, skip)->depth>=0)
-        {
-          dVector3Copy(p1,SAFECONTACT(flags, contact, contacts, skip)->pos);
-          dVector3Copy(ccso.plane,SAFECONTACT(flags, contact, contacts, skip)->normal);
-          SAFECONTACT(flags, contact, contacts, skip)->g1=ccso.g1;
-          SAFECONTACT(flags, contact, contacts, skip)->g2=ccso.g2;        
-          ++contacts;
-          if (contacts==maxc) return contacts;
-        }
+      dMULTIPLY0_331(i1,ccso.g2->final_posr->R,&ccso.g2->points[(pIncidentPoints[i]*3)]);
+  	  dVector3Add(ccso.g2->final_posr->pos,i1,i1);
+  	  dMULTIPLY0_331(i2,ccso.g2->final_posr->R,&ccso.g2->points[(pIncidentPoints[(i+1)%pIncidentPoly[0]]*3)]);
+  	  dVector3Add(ccso.g1->final_posr->pos,i2,i2);
+
+      dVector3Copy(i1,SAFECONTACT(flags, contact, contacts, skip)->pos);
+      dVector3Copy(ccso.plane,SAFECONTACT(flags, contact, contacts, skip)->normal);
+      SAFECONTACT(flags, contact, contacts, skip)->g1=ccso.g1;
+      SAFECONTACT(flags, contact, contacts, skip)->g2=ccso.g2;
+      SAFECONTACT(flags, contact, contacts, skip)->depth=ccso.min_depth;
+      ++contacts;
+      if (contacts==maxc) return contacts;
+      for(unsigned int j=0;j<pReferencePoly[0];++j)
+      {
+        dMULTIPLY0_331(r1,ccso.g1->final_posr->R,&ccso.g1->points[(pReferencePoints[j]*3)]);
+    	  dVector3Add(ccso.g1->final_posr->pos,r1,r1);
+  	    dMULTIPLY0_331(r2,ccso.g1->final_posr->R,&ccso.g1->points[(pReferencePoints[(j+1)%pReferencePoly[0]]*3)]);
+  	    dVector3Add(ccso.g1->final_posr->pos,r2,r2);
+        /* TODO: use x,y to project the points into an ortho plane, 
+        get the points for the intersection and project them back into the incident plane */
       }
     }
 #else
