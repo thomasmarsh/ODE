@@ -8,6 +8,10 @@ the rules for this file:
   * keep the format consistent (79 char width, M/D/Y date format).
 
 ------------------------------------------------------------------------------
+06/06/08 Remi Ricard (papaDoc)
+
+        * Add testunit for the dxJointFixed
+
 06/04/08 Daniel K. O.
 
         * Moved joints to ode/src/joints, converted them to true virtual

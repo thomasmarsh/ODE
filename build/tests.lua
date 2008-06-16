@@ -20,6 +20,7 @@ package.defines =
 package.files =
 {
   matchfiles("../../tests/*.cpp"),
+  matchfiles("../../tests/joints/*.cpp"),
   matchfiles("../../tests/UnitTest++/src/*")
 }
 
