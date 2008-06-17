@@ -936,8 +936,6 @@ int TestConvexIntersection(dxConvex& cvx1,dxConvex& cvx2, int flags,
   int maxc = flags & NUMC_MASK;  
   dIASSERT(maxc != 0);
   dVector3 i1,i2,r1,r2; // edges of incident and reference faces respectively
-  dVector4 plane;
-  dReal t;
   int contacts=0;
   unsigned int i;
   if(!CheckSATConvexFaces(cvx1,cvx2,ccso))
@@ -993,7 +991,7 @@ int TestConvexIntersection(dxConvex& cvx1,dxConvex& cvx2, int flags,
     unsigned int incident_side = GetIncidentSide(ccso);
     unsigned int* pIncidentPoly = ccso.g2->polygons;
     unsigned int* pIncidentPoints;
-    for(int i=0;i<incident_side;++i)
+    for(unsigned int i=0;i<incident_side;++i)
     {
       pIncidentPoly+=pIncidentPoly[0]+1;
     }
