@@ -34,14 +34,16 @@ struct dxJointFixed : public dxJoint
     dVector3 offset;    // relative offset between the bodies
     dReal erp;          // error reduction parameter
     dReal cfm;          // constraint force mix-in
-    void set( int num, dReal value );
-    dReal get( int num );
+    void  set ( int num, dReal value );
+    dReal get ( int num );
 
-    dxJointFixed( dxWorld *w );
-    virtual void getInfo1( Info1* info );
-    virtual void getInfo2( Info2* info );
+    dxJointFixed ( dxWorld *w );
+    virtual void getInfo1 ( Info1* info );
+    virtual void getInfo2 ( Info2* info );
     virtual dJointType type() const;
     virtual size_t size() const;
+
+    void computeInitialRelativeRotation();
 };
 
 

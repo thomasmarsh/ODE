@@ -29,18 +29,18 @@
 //****************************************************************************
 // fixed joint
 
-dxJointFixed::dxJointFixed( dxWorld *w ) :
-        dxJoint( w )
+dxJointFixed::dxJointFixed ( dxWorld *w ) :
+        dxJoint ( w )
 {
-    dSetZero( offset, 4 );
-    dSetZero( qrel, 4 );
+    dSetZero ( offset, 4 );
+    dSetZero ( qrel, 4 );
     erp = world->global_erp;
     cfm = world->global_cfm;
 }
 
 
 void
-dxJointFixed::getInfo1( dxJoint::Info1 *info )
+dxJointFixed::getInfo1 ( dxJoint::Info1 *info )
 {
     info->m = 6;
     info->nub = 6;
@@ -48,12 +48,12 @@ dxJointFixed::getInfo1( dxJoint::Info1 *info )
 
 
 void
-dxJointFixed::getInfo2( dxJoint::Info2 *info )
+dxJointFixed::getInfo2 ( dxJoint::Info2 *info )
 {
     int s = info->rowskip;
 
     // Three rows for orientation
-    setFixedOrientation( this, info, qrel, 3 );
+    setFixedOrientation ( this, info, qrel, 3 );
 
     // Three rows for position.
     // set jacobian
@@ -67,10 +67,10 @@ dxJointFixed::getInfo2( dxJoint::Info2 *info )
     info->cfm[2] = cfm;
 
     dVector3 ofs;
-    dMULTIPLY0_331( ofs, node[0].body->posr.R, offset );
+    dMULTIPLY0_331 ( ofs, node[0].body->posr.R, offset );
     if ( node[1].body )
     {
-        dCROSSMAT( info->J1a, ofs, s, + , - );
+        dCROSSMAT ( info->J1a, ofs, s, + , - );
         info->J2l[0] = -1;
         info->J2l[s+1] = -1;
         info->J2l[2*s+2] = -1;
@@ -93,37 +93,37 @@ dxJointFixed::getInfo2( dxJoint::Info2 *info )
 }
 
 
-void dJointSetFixed( dJointID j )
+void dJointSetFixed ( dJointID j )
 {
-    dxJointFixed* joint = ( dxJointFixed* )j;
-    dUASSERT( joint, "bad joint argument" );
-    checktype( joint, Fixed );
+    dxJointFixed* joint = ( dxJointFixed* ) j;
+    dUASSERT ( joint, "bad joint argument" );
+    checktype ( joint, Fixed );
     int i;
 
-    // This code is taken from sJointSetSliderAxis(), we should really put the
+    // This code is taken from dJointSetSliderAxis(), we should really put the
     // common code in its own function.
     // compute the offset between the bodies
     if ( joint->node[0].body )
     {
         if ( joint->node[1].body )
         {
-            dQMultiply1( joint->qrel, joint->node[0].body->q, joint->node[1].body->q );
             dReal ofs[4];
-            for ( i = 0; i < 4; i++ ) ofs[i] = joint->node[0].body->posr.pos[i];
-            for ( i = 0; i < 4; i++ ) ofs[i] -= joint->node[1].body->posr.pos[i];
-            dMULTIPLY1_331( joint->offset, joint->node[0].body->posr.R, ofs );
+            for ( i = 0; i < 4; i++ )
+                ofs[i] = joint->node[0].body->posr.pos[i] - joint->node[1].body->posr.pos[i];
+            dMULTIPLY1_331 ( joint->offset, joint->node[0].body->posr.R, ofs );
         }
         else
         {
-            // set joint->qrel to the transpose of the first body's q
-            joint->qrel[0] = joint->node[0].body->q[0];
-            for ( i = 1; i < 4; i++ ) joint->qrel[i] = -joint->node[0].body->q[i];
-            for ( i = 0; i < 4; i++ ) joint->offset[i] = joint->node[0].body->posr.pos[i];
+            joint->offset[0] = joint->node[0].body->posr.pos[0];
+            joint->offset[1] = joint->node[0].body->posr.pos[1];
+            joint->offset[2] = joint->node[0].body->posr.pos[2];
         }
     }
+
+    joint->computeInitialRelativeRotation();
 }
 
-void dxJointFixed::set( int num, dReal value )
+void dxJointFixed::set ( int num, dReal value )
 {
     switch ( num )
     {
@@ -137,7 +137,7 @@ void dxJointFixed::set( int num, dReal value )
 }
 
 
-dReal dxJointFixed::get( int num )
+dReal dxJointFixed::get ( int num )
 {
     switch ( num )
     {
@@ -151,21 +151,21 @@ dReal dxJointFixed::get( int num )
 }
 
 
-void dJointSetFixedParam( dJointID j, int parameter, dReal value )
+void dJointSetFixedParam ( dJointID j, int parameter, dReal value )
 {
-    dxJointFixed* joint = ( dxJointFixed* )j;
-    dUASSERT( joint, "bad joint argument" );
-    checktype( joint, Fixed );
-    joint->set( parameter, value );
+    dxJointFixed* joint = ( dxJointFixed* ) j;
+    dUASSERT ( joint, "bad joint argument" );
+    checktype ( joint, Fixed );
+    joint->set ( parameter, value );
 }
 
 
-dReal dJointGetFixedParam( dJointID j, int parameter )
+dReal dJointGetFixedParam ( dJointID j, int parameter )
 {
-    dxJointFixed* joint = ( dxJointFixed* )j;
-    dUASSERT( joint, "bad joint argument" );
-    checktype( joint, Fixed );
-    return joint->get( parameter );
+    dxJointFixed* joint = ( dxJointFixed* ) j;
+    dUASSERT ( joint, "bad joint argument" );
+    checktype ( joint, Fixed );
+    return joint->get ( parameter );
 }
 
 
@@ -179,7 +179,26 @@ dxJointFixed::type() const
 size_t
 dxJointFixed::size() const
 {
-    return sizeof( *this );
+    return sizeof ( *this );
 }
 
+void
+dxJointFixed::computeInitialRelativeRotation()
+{
+    if (node[0].body )
+    {
+        if (node[1].body )
+        {
+            dQMultiply1 (qrel, node[0].body->q, node[1].body->q );
+        }
+        else
+        {
+            // set qrel to the transpose of the first body q
+            qrel[0] =  node[0].body->q[0];
+            qrel[1] = -node[0].body->q[1];
+            qrel[2] = -node[0].body->q[2];
+            qrel[3] = -node[0].body->q[3];
+        }
+    }
+}
 
