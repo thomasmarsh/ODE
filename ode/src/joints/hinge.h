@@ -42,6 +42,8 @@ struct dxJointHinge : public dxJoint
     virtual void getInfo2( Info2* info );
     virtual dJointType type() const;
     virtual size_t size() const;
+
+    void computeInitialRelativeRotation();
 };
 
 

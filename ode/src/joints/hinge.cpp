@@ -141,25 +141,6 @@ dxJointHinge::getInfo2( dxJoint::Info2 *info )
 }
 
 
-// compute initial relative rotation body1 -> body2, or env -> body1
-
-static void hingeComputeInitialRelativeRotation( dxJointHinge *joint )
-{
-    if ( joint->node[0].body )
-    {
-        if ( joint->node[1].body )
-        {
-            dQMultiply1( joint->qrel, joint->node[0].body->q, joint->node[1].body->q );
-        }
-        else
-        {
-            // set joint->qrel to the transpose of the first body q
-            joint->qrel[0] = joint->node[0].body->q[0];
-            for ( int i = 1; i < 4; i++ ) joint->qrel[i] = -joint->node[0].body->q[i];
-        }
-    }
-}
-
 
 void dJointSetHingeAnchor( dJointID j, dReal x, dReal y, dReal z )
 {
@@ -167,7 +148,7 @@ void dJointSetHingeAnchor( dJointID j, dReal x, dReal y, dReal z )
     dUASSERT( joint, "bad joint argument" );
     checktype( joint, Hinge );
     setAnchors( joint, x, y, z, joint->anchor1, joint->anchor2 );
-    hingeComputeInitialRelativeRotation( joint );
+    joint->computeInitialRelativeRotation();
 }
 
 
@@ -206,7 +187,7 @@ void dJointSetHingeAnchorDelta( dJointID j, dReal x, dReal y, dReal z, dReal dx,
     joint->anchor1[3] = 0;
     joint->anchor2[3] = 0;
 
-    hingeComputeInitialRelativeRotation( joint );
+    joint->computeInitialRelativeRotation();
 }
 
 
@@ -217,7 +198,7 @@ void dJointSetHingeAxis( dJointID j, dReal x, dReal y, dReal z )
     dUASSERT( joint, "bad joint argument" );
     checktype( joint, Hinge );
     setAxes( joint, x, y, z, joint->axis1, joint->axis2 );
-    hingeComputeInitialRelativeRotation( joint );
+    joint->computeInitialRelativeRotation();
 }
 
 
@@ -349,4 +330,25 @@ dxJointHinge::size() const
     return sizeof( *this );
 }
 
+
+/// Compute initial relative rotation body1 -> body2, or env -> body1
+void
+dxJointHinge::computeInitialRelativeRotation()
+{
+    if ( node[0].body )
+    {
+        if ( node[1].body )
+        {
+            dQMultiply1( qrel, node[0].body->q, node[1].body->q );
+        }
+        else
+        {
+            // set qrel to the transpose of the first body q
+            qrel[0] =  node[0].body->q[0];
+            qrel[1] = -node[0].body->q[1];
+            qrel[2] = -node[0].body->q[2];
+            qrel[3] = -node[0].body->q[3];
+        }
+    }
+}
 
