@@ -37,11 +37,13 @@ struct dxJointSlider : public dxJoint
     // aligned with body1 center along axis1
     dxJointLimitMotor limot; // limit and motor information
 
-    dxJointSlider( dxWorld *w );
-    virtual void getInfo1( Info1* info );
-    virtual void getInfo2( Info2* info );
+    dxJointSlider ( dxWorld *w );
+    virtual void getInfo1 ( Info1* info );
+    virtual void getInfo2 ( Info2* info );
     virtual dJointType type() const;
     virtual size_t size() const;
+
+    void computeInitialRelativeRotation();
 };
 
 
