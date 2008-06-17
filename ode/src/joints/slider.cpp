@@ -29,31 +29,31 @@
 //****************************************************************************
 // slider
 
-dxJointSlider::dxJointSlider( dxWorld *w ) :
-        dxJoint( w )
+dxJointSlider::dxJointSlider ( dxWorld *w ) :
+        dxJoint ( w )
 {
-    dSetZero( axis1, 4 );
+    dSetZero ( axis1, 4 );
     axis1[0] = 1;
-    dSetZero( qrel, 4 );
-    dSetZero( offset, 4 );
-    limot.init( world );
+    dSetZero ( qrel, 4 );
+    dSetZero ( offset, 4 );
+    limot.init ( world );
 }
 
 
-dReal dJointGetSliderPosition( dJointID j )
+dReal dJointGetSliderPosition ( dJointID j )
 {
-    dxJointSlider* joint = ( dxJointSlider* )j;
-    dUASSERT( joint, "bad joint argument" );
-    checktype( joint, Slider );
+    dxJointSlider* joint = ( dxJointSlider* ) j;
+    dUASSERT ( joint, "bad joint argument" );
+    checktype ( joint, Slider );
 
     // get axis1 in global coordinates
     dVector3 ax1, q;
-    dMULTIPLY0_331( ax1, joint->node[0].body->posr.R, joint->axis1 );
+    dMULTIPLY0_331 ( ax1, joint->node[0].body->posr.R, joint->axis1 );
 
     if ( joint->node[1].body )
     {
         // get body2 + offset point in global coordinates
-        dMULTIPLY0_331( q, joint->node[1].body->posr.R, joint->offset );
+        dMULTIPLY0_331 ( q, joint->node[1].body->posr.R, joint->offset );
         for ( int i = 0; i < 3; i++ )
             q[i] = joint->node[0].body->posr.pos[i]
                    - q[i]
@@ -65,34 +65,34 @@ dReal dJointGetSliderPosition( dJointID j )
             q[i] = joint->node[0].body->posr.pos[i]
                    - joint->offset[i];
     }
-    return dDOT( ax1, q );
+    return dDOT ( ax1, q );
 }
 
 
-dReal dJointGetSliderPositionRate( dJointID j )
+dReal dJointGetSliderPositionRate ( dJointID j )
 {
-    dxJointSlider* joint = ( dxJointSlider* )j;
-    dUASSERT( joint, "bad joint argument" );
-    checktype( joint, Slider );
+    dxJointSlider* joint = ( dxJointSlider* ) j;
+    dUASSERT ( joint, "bad joint argument" );
+    checktype ( joint, Slider );
 
     // get axis1 in global coordinates
     dVector3 ax1;
-    dMULTIPLY0_331( ax1, joint->node[0].body->posr.R, joint->axis1 );
+    dMULTIPLY0_331 ( ax1, joint->node[0].body->posr.R, joint->axis1 );
 
     if ( joint->node[1].body )
     {
-        return dDOT( ax1, joint->node[0].body->lvel ) -
-               dDOT( ax1, joint->node[1].body->lvel );
+        return dDOT ( ax1, joint->node[0].body->lvel ) -
+               dDOT ( ax1, joint->node[1].body->lvel );
     }
     else
     {
-        return dDOT( ax1, joint->node[0].body->lvel );
+        return dDOT ( ax1, joint->node[0].body->lvel );
     }
 }
 
 
 void
-dxJointSlider::getInfo1( dxJoint::Info1 *info )
+dxJointSlider::getInfo1 ( dxJoint::Info1 *info )
 {
     info->nub = 5;
 
@@ -103,11 +103,11 @@ dxJointSlider::getInfo1( dxJoint::Info1 *info )
 
     // see if we're at a joint limit.
     limot.limit = 0;
-    if (( limot.lostop > -dInfinity || limot.histop < dInfinity ) &&
+    if ( ( limot.lostop > -dInfinity || limot.histop < dInfinity ) &&
             limot.lostop <= limot.histop )
     {
         // measure joint position
-        dReal pos = dJointGetSliderPosition( this );
+        dReal pos = dJointGetSliderPosition ( this );
         if ( pos <= limot.lostop )
         {
             limot.limit = 1;
@@ -125,7 +125,7 @@ dxJointSlider::getInfo1( dxJoint::Info1 *info )
 
 
 void
-dxJointSlider::getInfo2( dxJoint::Info2 *info )
+dxJointSlider::getInfo2 ( dxJoint::Info2 *info )
 {
     int i, s = info->rowskip;
     int s3 = 3 * s, s4 = 4 * s;
@@ -151,7 +151,7 @@ dxJointSlider::getInfo2( dxJoint::Info2 *info )
     }
 
     // 3 rows to make body rotations equal
-    setFixedOrientation( this, info, qrel, 0 );
+    setFixedOrientation ( this, info, qrel, 0 );
 
     // remaining two rows. we want: vel2 = vel1 + w1 x c ... but this would
     // result in three equations, so we project along the planespace vectors
@@ -160,15 +160,15 @@ dxJointSlider::getInfo2( dxJoint::Info2 *info )
 
     dVector3 ax1; // joint axis in global coordinates (unit length)
     dVector3 p, q; // plane space of ax1
-    dMULTIPLY0_331( ax1, R1, axis1 );
-    dPlaneSpace( ax1, p, q );
+    dMULTIPLY0_331 ( ax1, R1, axis1 );
+    dPlaneSpace ( ax1, p, q );
     if ( node[1].body )
     {
         dVector3 tmp;
-        dCROSS( tmp, = REAL( 0.5 ) * , c, p );
+        dCROSS ( tmp, = REAL ( 0.5 ) * , c, p );
         for ( i = 0; i < 3; i++ ) info->J1a[s3+i] = tmp[i];
         for ( i = 0; i < 3; i++ ) info->J2a[s3+i] = tmp[i];
-        dCROSS( tmp, = REAL( 0.5 ) * , c, q );
+        dCROSS ( tmp, = REAL ( 0.5 ) * , c, q );
         for ( i = 0; i < 3; i++ ) info->J1a[s4+i] = tmp[i];
         for ( i = 0; i < 3; i++ ) info->J2a[s4+i] = tmp[i];
         for ( i = 0; i < 3; i++ ) info->J2l[s3+i] = -p[i];
@@ -183,133 +183,126 @@ dxJointSlider::getInfo2( dxJoint::Info2 *info )
     if ( node[1].body )
     {
         dVector3 ofs;  // offset point in global coordinates
-        dMULTIPLY0_331( ofs, R2, offset );
+        dMULTIPLY0_331 ( ofs, R2, offset );
         for ( i = 0; i < 3; i++ ) c[i] += ofs[i];
-        info->c[3] = k * dDOT( p, c );
-        info->c[4] = k * dDOT( q, c );
+        info->c[3] = k * dDOT ( p, c );
+        info->c[4] = k * dDOT ( q, c );
     }
     else
     {
         dVector3 ofs;  // offset point in global coordinates
         for ( i = 0; i < 3; i++ ) ofs[i] = offset[i] - pos1[i];
-        info->c[3] = k * dDOT( p, ofs );
-        info->c[4] = k * dDOT( q, ofs );
+        info->c[3] = k * dDOT ( p, ofs );
+        info->c[4] = k * dDOT ( q, ofs );
     }
 
     // if the slider is powered, or has joint limits, add in the extra row
-    limot.addLimot( this, info, 5, ax1, 0 );
+    limot.addLimot ( this, info, 5, ax1, 0 );
 }
 
 
-void dJointSetSliderAxis( dJointID j, dReal x, dReal y, dReal z )
+void dJointSetSliderAxis ( dJointID j, dReal x, dReal y, dReal z )
 {
-    dxJointSlider* joint = ( dxJointSlider* )j;
+    dxJointSlider* joint = ( dxJointSlider* ) j;
     int i;
-    dUASSERT( joint, "bad joint argument" );
-    checktype( joint, Slider );
-    setAxes( joint, x, y, z, joint->axis1, 0 );
+    dUASSERT ( joint, "bad joint argument" );
+    checktype ( joint, Slider );
+    setAxes ( joint, x, y, z, joint->axis1, 0 );
 
     // compute initial relative rotation body1 -> body2, or env -> body1
     // also compute center of body1 w.r.t body 2
     if ( joint->node[1].body )
     {
-        dQMultiply1( joint->qrel, joint->node[0].body->q, joint->node[1].body->q );
         dVector3 c;
         for ( i = 0; i < 3; i++ )
             c[i] = joint->node[0].body->posr.pos[i] - joint->node[1].body->posr.pos[i];
-        dMULTIPLY1_331( joint->offset, joint->node[1].body->posr.R, c );
+        dMULTIPLY1_331 ( joint->offset, joint->node[1].body->posr.R, c );
     }
     else
     {
-        // set joint->qrel to the transpose of the first body's q
-        joint->qrel[0] = joint->node[0].body->q[0];
-        for ( i = 1; i < 4; i++ ) joint->qrel[i] = -joint->node[0].body->q[i];
         for ( i = 0; i < 3; i++ ) joint->offset[i] = joint->node[0].body->posr.pos[i];
     }
+
+    joint->computeInitialRelativeRotation();
 }
 
 
-void dJointSetSliderAxisDelta( dJointID j, dReal x, dReal y, dReal z, dReal dx, dReal dy, dReal dz )
+void dJointSetSliderAxisDelta ( dJointID j, dReal x, dReal y, dReal z, dReal dx, dReal dy, dReal dz )
 {
-    dxJointSlider* joint = ( dxJointSlider* )j;
+    dxJointSlider* joint = ( dxJointSlider* ) j;
     int i;
-    dUASSERT( joint, "bad joint argument" );
-    checktype( joint, Slider );
-    setAxes( joint, x, y, z, joint->axis1, 0 );
+    dUASSERT ( joint, "bad joint argument" );
+    checktype ( joint, Slider );
+    setAxes ( joint, x, y, z, joint->axis1, 0 );
 
     // compute initial relative rotation body1 -> body2, or env -> body1
     // also compute center of body1 w.r.t body 2
     if ( joint->node[1].body )
     {
-        dQMultiply1( joint->qrel, joint->node[0].body->q, joint->node[1].body->q );
         dVector3 c;
         for ( i = 0; i < 3; i++ )
             c[i] = joint->node[0].body->posr.pos[i] - joint->node[1].body->posr.pos[i];
-        dMULTIPLY1_331( joint->offset, joint->node[1].body->posr.R, c );
+        dMULTIPLY1_331 ( joint->offset, joint->node[1].body->posr.R, c );
     }
     else
     {
-        // set joint->qrel to the transpose of the first body's q
-        joint->qrel[0] = joint->node[0].body->q[0];
-
-        for ( i = 1; i < 4; i++ )
-            joint->qrel[i] = -joint->node[0].body->q[i];
-
         joint->offset[0] = joint->node[0].body->posr.pos[0] + dx;
         joint->offset[1] = joint->node[0].body->posr.pos[1] + dy;
         joint->offset[2] = joint->node[0].body->posr.pos[2] + dz;
     }
+
+    joint->computeInitialRelativeRotation();
 }
 
 
 
-void dJointGetSliderAxis( dJointID j, dVector3 result )
+void dJointGetSliderAxis ( dJointID j, dVector3 result )
 {
-    dxJointSlider* joint = ( dxJointSlider* )j;
-    dUASSERT( joint, "bad joint argument" );
-    dUASSERT( result, "bad result argument" );
-    checktype( joint, Slider );
-    getAxis( joint, result, joint->axis1 );
+    dxJointSlider* joint = ( dxJointSlider* ) j;
+    dUASSERT ( joint, "bad joint argument" );
+    dUASSERT ( result, "bad result argument" );
+    checktype ( joint, Slider );
+    getAxis ( joint, result, joint->axis1 );
 }
 
 
-void dJointSetSliderParam( dJointID j, int parameter, dReal value )
+void dJointSetSliderParam ( dJointID j, int parameter, dReal value )
 {
-    dxJointSlider* joint = ( dxJointSlider* )j;
-    dUASSERT( joint, "bad joint argument" );
-    checktype( joint, Slider );
-    joint->limot.set( parameter, value );
+    dxJointSlider* joint = ( dxJointSlider* ) j;
+    dUASSERT ( joint, "bad joint argument" );
+    checktype ( joint, Slider );
+    joint->limot.set ( parameter, value );
 }
 
 
-dReal dJointGetSliderParam( dJointID j, int parameter )
+dReal dJointGetSliderParam ( dJointID j, int parameter )
 {
-    dxJointSlider* joint = ( dxJointSlider* )j;
-    dUASSERT( joint, "bad joint argument" );
-    checktype( joint, Slider );
-    return joint->limot.get( parameter );
+    dxJointSlider* joint = ( dxJointSlider* ) j;
+    dUASSERT ( joint, "bad joint argument" );
+    checktype ( joint, Slider );
+    return joint->limot.get ( parameter );
 }
 
 
-void dJointAddSliderForce( dJointID j, dReal force )
+void dJointAddSliderForce ( dJointID j, dReal force )
 {
-    dxJointSlider* joint = ( dxJointSlider* )j;
+    dxJointSlider* joint = ( dxJointSlider* ) j;
     dVector3 axis;
-    dUASSERT( joint, "bad joint argument" );
-    checktype( joint, Slider );
+    dUASSERT ( joint, "bad joint argument" );
+    checktype ( joint, Slider );
 
     if ( joint->flags & dJOINT_REVERSE )
         force -= force;
 
-    getAxis( joint, axis, joint->axis1 );
+    getAxis ( joint, axis, joint->axis1 );
     axis[0] *= force;
     axis[1] *= force;
     axis[2] *= force;
 
     if ( joint->node[0].body != 0 )
-        dBodyAddForce( joint->node[0].body, axis[0], axis[1], axis[2] );
+        dBodyAddForce ( joint->node[0].body, axis[0], axis[1], axis[2] );
     if ( joint->node[1].body != 0 )
-        dBodyAddForce( joint->node[1].body, -axis[0], -axis[1], -axis[2] );
+        dBodyAddForce ( joint->node[1].body, -axis[0], -axis[1], -axis[2] );
 
     if ( joint->node[0].body != 0 && joint->node[1].body != 0 )
     {
@@ -320,13 +313,13 @@ void dJointAddSliderForce( dJointID j, dReal force )
         dVector3 ltd; // Linear Torque Decoupling vector (a torque)
 
         dVector3 c;
-        c[0] = REAL( 0.5 ) * ( joint->node[1].body->posr.pos[0] - joint->node[0].body->posr.pos[0] );
-        c[1] = REAL( 0.5 ) * ( joint->node[1].body->posr.pos[1] - joint->node[0].body->posr.pos[1] );
-        c[2] = REAL( 0.5 ) * ( joint->node[1].body->posr.pos[2] - joint->node[0].body->posr.pos[2] );
-        dCROSS( ltd, = , c, axis );
+        c[0] = REAL ( 0.5 ) * ( joint->node[1].body->posr.pos[0] - joint->node[0].body->posr.pos[0] );
+        c[1] = REAL ( 0.5 ) * ( joint->node[1].body->posr.pos[1] - joint->node[0].body->posr.pos[1] );
+        c[2] = REAL ( 0.5 ) * ( joint->node[1].body->posr.pos[2] - joint->node[0].body->posr.pos[2] );
+        dCROSS ( ltd, = , c, axis );
 
-        dBodyAddTorque( joint->node[0].body, ltd[0], ltd[1], ltd[2] );
-        dBodyAddTorque( joint->node[1].body, ltd[0], ltd[1], ltd[2] );
+        dBodyAddTorque ( joint->node[0].body, ltd[0], ltd[1], ltd[2] );
+        dBodyAddTorque ( joint->node[1].body, ltd[0], ltd[1], ltd[2] );
     }
 }
 
@@ -341,6 +334,29 @@ dxJointSlider::type() const
 size_t
 dxJointSlider::size() const
 {
-    return sizeof( *this );
+    return sizeof ( *this );
 }
 
+
+/// Compute initial relative rotation body1 -> body2, or env -> body1
+void
+dxJointSlider::computeInitialRelativeRotation()
+{
+    if ( node[0].body )
+    {
+        // compute initial relative rotation body1 -> body2, or env -> body1
+        // also compute center of body1 w.r.t body 2
+        if ( node[1].body )
+        {
+            dQMultiply1 ( qrel, node[0].body->q, node[1].body->q );
+        }
+        else
+        {
+            // set qrel to the transpose of the first body's q
+            qrel[0] =  node[0].body->q[0];
+            qrel[1] = -node[0].body->q[1];
+            qrel[2] = -node[0].body->q[2];
+            qrel[3] = -node[0].body->q[3];
+        }
+    }
+}

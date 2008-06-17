@@ -10,6 +10,12 @@ the rules for this file:
 ------------------------------------------------------------------------------
 06/17/08 Remi Ricard (papaDoc)
 
+        *  Move the computation of the Relative Rotation for the slider joint
+           into a function.
+        * Add unittest for to check qrel 
+
+06/17/08 Remi Ricard (papaDoc)
+
        * Remove unused variables. 
        * Remove a conversion warning between unsigned int and int
         
