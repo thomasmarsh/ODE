@@ -1,9 +1,8 @@
 AM_CPPFLAGS = -I$(abs_top_srcdir)/include \
         -DDRAWSTUFF_TEXTURE_PATH="\"$(abs_top_srcdir)/drawstuff/textures\""
 
-#AM_LDFLAGS = @GL_LIBS@
 if X11
-AM_LDFLAGS+= $(X_PRE_LIBS) $(X_LIBS) $(X_EXTRA_LIBS)
+AM_LDFLAGS = $(X_PRE_LIBS) $(X_LIBS) $(X_EXTRA_LIBS)
 endif
 
 # On Windows, GL_LIBS must go after libdrawstuff.la.
