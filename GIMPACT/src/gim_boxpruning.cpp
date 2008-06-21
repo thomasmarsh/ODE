@@ -173,7 +173,7 @@ void gim_aabbset_sort(GIM_AABB_SET * aabbset, char calc_global_bound)
     GUINT _i = test_count;\
     char _intersected;\
     GIM_RSORT_TOKEN * _psorted_tokens = sorted_tokens;\
-    while(max_coord_uint >= _psorted_tokens->m_key && _i>0)\
+    while(_i>0 && max_coord_uint >= _psorted_tokens->m_key)\
     {\
         AABBCOLLISION(_intersected,test_aabb,aabbarray[_psorted_tokens->m_value]);\
     	if(_intersected)\
