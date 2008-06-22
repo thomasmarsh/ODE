@@ -1,6 +1,7 @@
 /*
-    This demo shows how to use dContactMotionN in a lifting platform.
- */
+  This demo shows how to use dContactMotionN in a lifting platform.
+*/
+//#include <unistd.h> // for usleep()
 #include <ode/ode.h>
 #include <drawstuff/drawstuff.h>
 #include "texturepath.h"
@@ -32,8 +33,8 @@
 // dynamics and collision objects
 
 struct MyObject {
-  dBodyID body;			// the body
-  dGeomID geom[GPB];		// geometries representing this body
+    dBodyID body;			// the body
+    dGeomID geom[GPB];		// geometries representing this body
 };
 
 static int num=0;		// number of objects in simulation
@@ -49,9 +50,103 @@ static int write_world = 0;
 static int show_body = 0;
 
 static dGeomID platform, ground;
-static dReal platpos = 0;
-const dReal maxplatpos = 30;
-const dReal platspeed = 0.2;
+
+dVector3 platpos = {0, 0, 0};
+int mov_type = 2;
+dReal mov_time = 0;
+
+
+const dReal mov1_speed = 0.2;
+
+dVector3 mov2_vel = { 0.2, 0.1, 0.25};
+
+
+
+
+/****************************************************************
+ *  Movement 1: move platform up, reset every 80 units of time. *
+ *      This is the simplest case                               *
+ ****************************************************************/
+static void moveplat_1(dReal stepsize)
+{
+    mov_time += stepsize;
+    if (mov_time > 80)
+        mov_time = 0;
+
+    platpos[0] = platpos[1] = 0;
+    // the platform moves up (Z) at constant speed: mov1_speed
+    platpos[2] = mov1_speed * mov_time;
+}
+
+// Generate contact info for movement 1
+static void contactplat_1(dContact &contact)
+{
+    contact.surface.mode |= dContactMotionN;
+    contact.surface.motionN = mov1_speed;
+}
+
+
+
+/****************************************************************
+ *  Movement 2: move platform along direction mov2_vel, reset   *
+ *  every 80 units of time.                                     *
+ *      This is the most general case: the geom moves along     *
+ *      an arbitrary direction.                                 *
+ ****************************************************************/
+static void moveplat_2(dReal stepsize)
+{
+    mov_time += stepsize;
+    if (mov_time > 80)
+        mov_time = 0;
+
+    // the platform moves at constant speed: mov2_speed
+    platpos[0] = mov2_vel[0] * mov_time;
+    platpos[1] = mov2_vel[1] * mov_time;
+    platpos[2] = mov2_vel[2] * mov_time;
+}
+
+// Generate contact info for movement 1
+static void contactplat_2(dContact &contact)
+{
+    /*
+      For arbitrary contact directions we need to project the moving
+      geom's velocity against the contact normal and fdir1, fdir2
+      (obtained with dPlaneSpace()). Assuming moving geom=g2
+      (so the contact joint is in the moving geom's reference frame):
+      motion1 = dDOT(fdir1, vel);
+      motion2 = dDOT(fdir2, vel);
+      motionN = dDOT(normal, vel);
+
+      For geom=g1 just negate motionN and motion2. fdir1 is an arbitrary
+      vector, so there's no need to negate motion1.
+
+    */
+    contact.surface.mode |= 
+        dContactMotionN |                   // velocity along normal
+        dContactMotion1 | dContactMotion2 | // and along the contact plane
+        dContactFDir1;                      // don't forget to set the direction 1
+
+
+    // This is a convenience function: given a vector, it finds other 2 perpendicular vectors
+    dVector3 motiondir1, motiondir2;
+    dPlaneSpace(contact.geom.normal, motiondir1, motiondir2);
+    for (int i=0; i<3; ++i)
+        contact.fdir1[i] = motiondir1[i];
+    
+
+    dReal inv = 1;
+    if (contact.geom.g1 == platform)
+        inv = -1;
+    
+    contact.surface.motion1 = dDOT(mov2_vel, motiondir1);
+    contact.surface.motion2 = inv * dDOT(mov2_vel, motiondir2);
+    contact.surface.motionN = inv * dDOT(mov2_vel, contact.geom.normal);
+
+}
+
+
+
+
 
 static void nearCallback (void *data, dGeomID o1, dGeomID o2)
 {
@@ -60,7 +155,8 @@ static void nearCallback (void *data, dGeomID o1, dGeomID o2)
 
     dContact contact[MAX_CONTACTS];
     int numc = dCollide (o1, o2, MAX_CONTACTS,
-                        &contact[0].geom, sizeof(dContact));
+                         &contact[0].geom, sizeof(dContact));
+
     if (numc)
         dRSetIdentity(RI);
 
@@ -68,26 +164,19 @@ static void nearCallback (void *data, dGeomID o1, dGeomID o2)
 
     for (int i=0; i< numc; i++) {
         contact[i].surface.mode = dContactBounce;
-        contact[i].surface.mu = dInfinity;
-        contact[i].surface.bounce = 0.5;
-        contact[i].surface.bounce_vel = 0.0;
+        contact[i].surface.mu = 1;
+        contact[i].surface.bounce = 0.25;
+        contact[i].surface.bounce_vel = 0.01;
         
         if (isplatform) {
-            contact[i].surface.mode |= dContactMotionN;
-            contact[i].surface.motionN = platspeed;
-            /* Note: for arbitrary contact directions, you
-                need to project the bodyless geom's velocity against
-                the contact normal.
-                For example, assuming o1 is the platform:
-                    motionN = -dDOT(normal, platvel);
-                and for o2 = platform:
-                    motionN = dDOT(normal, platvel);
-                Where:
-                    normal = contac[i].geom.normal (always points into o1)
-                    platvel = velocity vector of the platform
-                Note that for arbitrary movement you will also have to
-                use dContactFDir1, dContactMotion1 and dContactMotion2.
-            */
+            switch (mov_type) {
+                case 1:
+                    contactplat_1(contact[i]);
+                    break;
+                case 2:
+                    contactplat_2(contact[i]);
+                    break;
+            }
         }
 
         dJointID c = dJointCreateContact (world,contactgroup,contact+i);
@@ -105,24 +194,26 @@ static float hpr[3] = {150.f,-13.5000f,0.0000f};
 
 static void start()
 {
-  //dAllocateODEDataForThread(dAllocateMaskAll);
-  dsSetViewpoint (xyz,hpr);
-  printf ("To drop another object, press:\n");
-  printf ("   b for box.\n");
-  printf ("   s for sphere.\n");
-  printf ("   c for capsule.\n");
-  printf ("   y for cylinder.\n");
-  printf ("To toggle showing the geom AABBs, press a.\n");
-  printf ("To toggle showing the contact points, press t.\n");
-  printf ("To toggle dropping from random position/orientation, press r.\n");
-  printf ("To save the current state to 'state.dif', press 1.\n");
+    //dAllocateODEDataForThread(dAllocateMaskAll);
+    dsSetViewpoint (xyz,hpr);
+    printf ("To drop another object, press:\n");
+    printf ("   b for box.\n");
+    printf ("   s for sphere.\n");
+    printf ("   c for capsule.\n");
+    printf ("   y for cylinder.\n");
+    printf ("Press m to change the movement type\n");
+    printf ("Press space to reset the platform\n");
+    printf ("To toggle showing the geom AABBs, press a.\n");
+    printf ("To toggle showing the contact points, press t.\n");
+    printf ("To toggle dropping from random position/orientation, press r.\n");
+    printf ("To save the current state to 'state.dif', press 1.\n");
 }
 
 
 char locase (char c)
 {
-  if (c >= 'A' && c <= 'Z') return c - ('a'-'A');
-  else return c;
+    if (c >= 'A' && c <= 'Z') return c - ('a'-'A');
+    else return c;
 }
 
 
@@ -130,99 +221,102 @@ char locase (char c)
 
 static void command (int cmd)
 {
-  size_t i;
-  int j,k;
-  dReal sides[3];
-  dMass m;
-  int setBody;
+    size_t i;
+    int k;
+    dReal sides[3];
+    dMass m;
+    int setBody;
   
-  cmd = locase (cmd);
-  if (cmd == 'b' || cmd == 's' || cmd == 'c' || cmd == 'y')
-  {
-    setBody = 0;
-    if (num < NUM) {
-      i = num;
-      num++;
-    }
-    else {
-      i = nextobj;
-      nextobj++;
-      if (nextobj >= num) nextobj = 0;
+    cmd = locase (cmd);
+    if (cmd == 'b' || cmd == 's' || cmd == 'c' || cmd == 'y')
+        {
+            setBody = 0;
+            if (num < NUM) {
+                i = num;
+                num++;
+            }
+            else {
+                i = nextobj;
+                nextobj++;
+                if (nextobj >= num) nextobj = 0;
 
-      // destroy the body and geoms for slot i
-      dBodyDestroy (obj[i].body);
-      for (k=0; k < GPB; k++) {
-	if (obj[i].geom[k]) dGeomDestroy (obj[i].geom[k]);
-      }
-      memset (&obj[i],0,sizeof(obj[i]));
-    }
+                // destroy the body and geoms for slot i
+                dBodyDestroy (obj[i].body);
+                for (k=0; k < GPB; k++) {
+                    if (obj[i].geom[k]) dGeomDestroy (obj[i].geom[k]);
+                }
+                memset (&obj[i],0,sizeof(obj[i]));
+            }
 
-    obj[i].body = dBodyCreate (world);
-    for (k=0; k<3; k++) sides[k] = dRandReal()*0.5+0.1;
+            obj[i].body = dBodyCreate (world);
+            for (k=0; k<3; k++) sides[k] = dRandReal()*0.5+0.1;
 
-    dMatrix3 R;
-    if (random_pos) 
-      {
-	dBodySetPosition (obj[i].body,
-			  dRandReal()*2-1,dRandReal()*2-1,dRandReal()+2 + platpos);
-	dRFromAxisAndAngle (R,dRandReal()*2.0-1.0,dRandReal()*2.0-1.0,
-			    dRandReal()*2.0-1.0,dRandReal()*10.0-5.0);
-      }
-    else 
-      {
-	dReal maxheight = 0;
-	for (k=0; k<num; k++) 
-	  {
-	    const dReal *pos = dBodyGetPosition (obj[k].body);
-	    if (pos[2] > maxheight) maxheight = pos[2];
-	  }
-	dBodySetPosition (obj[i].body, 0,0,maxheight+platpos + 2);
-	dRSetIdentity (R);
-      }
-    dBodySetRotation (obj[i].body,R);
-    dBodySetData (obj[i].body,(void*) i);
+            dMatrix3 R;
+            if (random_pos) 
+                {
+                    dBodySetPosition (obj[i].body,
+                                      dRandReal()*2-1 + platpos[0],
+                                      dRandReal()*2-1 + platpos[1],
+                                      dRandReal()+2 + platpos[2]);
+                    dRFromAxisAndAngle (R,dRandReal()*2.0-1.0,dRandReal()*2.0-1.0,
+                                        dRandReal()*2.0-1.0,dRandReal()*10.0-5.0);
+                }
+            else 
+                {
+                    dBodySetPosition (obj[i].body, 
+                                      platpos[0],
+                                      platpos[1],
+                                      platpos[2]+2);
+                    dRSetIdentity (R);
+                }
+            dBodySetRotation (obj[i].body,R);
+            dBodySetData (obj[i].body,(void*) i);
 
-    if (cmd == 'b') {
-      dMassSetBox (&m,DENSITY,sides[0],sides[1],sides[2]);
-      obj[i].geom[0] = dCreateBox (space,sides[0],sides[1],sides[2]);
-    }
-    else if (cmd == 'c') {
-      sides[0] *= 0.5;
-      dMassSetCapsule (&m,DENSITY,3,sides[0],sides[1]);
-      obj[i].geom[0] = dCreateCapsule (space,sides[0],sides[1]);
-    }
-    else if (cmd == 'y') {
-      dMassSetCylinder (&m,DENSITY,3,sides[0],sides[1]);
-      obj[i].geom[0] = dCreateCylinder (space,sides[0],sides[1]);
-    }
-    else if (cmd == 's') {
-      sides[0] *= 0.5;
-      dMassSetSphere (&m,DENSITY,sides[0]);
-      obj[i].geom[0] = dCreateSphere (space,sides[0]);
-    }
+            if (cmd == 'b') {
+                dMassSetBox (&m,DENSITY,sides[0],sides[1],sides[2]);
+                obj[i].geom[0] = dCreateBox (space,sides[0],sides[1],sides[2]);
+            }
+            else if (cmd == 'c') {
+                sides[0] *= 0.5;
+                dMassSetCapsule (&m,DENSITY,3,sides[0],sides[1]);
+                obj[i].geom[0] = dCreateCapsule (space,sides[0],sides[1]);
+            }
+            else if (cmd == 'y') {
+                dMassSetCylinder (&m,DENSITY,3,sides[0],sides[1]);
+                obj[i].geom[0] = dCreateCylinder (space,sides[0],sides[1]);
+            }
+            else if (cmd == 's') {
+                sides[0] *= 0.5;
+                dMassSetSphere (&m,DENSITY,sides[0]);
+                obj[i].geom[0] = dCreateSphere (space,sides[0]);
+            }
 
-    if (!setBody)
-     for (k=0; k < GPB; k++) {
-      if (obj[i].geom[k]) dGeomSetBody (obj[i].geom[k],obj[i].body);
-     }
+            if (!setBody)
+                for (k=0; k < GPB; k++) {
+                    if (obj[i].geom[k]) dGeomSetBody (obj[i].geom[k],obj[i].body);
+                }
 
-    dBodySetMass (obj[i].body,&m);
-  }
-  else if (cmd == 'a') {
-    show_aabb ^= 1;
-  }
-  else if (cmd == 't') {
-    show_contacts ^= 1;
-  }
-  else if (cmd == 'r') {
-    random_pos ^= 1;
-  }
-  else if (cmd == '1') {
-    write_world = 1;
-  }
-  else if (cmd == ' ') {
-    platpos = 0;
-  }
+            dBodySetMass (obj[i].body,&m);
+        }
+    else if (cmd == 'a') {
+        show_aabb ^= 1;
+    }
+    else if (cmd == 't') {
+        show_contacts ^= 1;
+    }
+    else if (cmd == 'r') {
+        random_pos ^= 1;
+    }
+    else if (cmd == '1') {
+        write_world = 1;
+    }
+    else if (cmd == ' ') {
+        mov_time = 0;
+    }
+    else if (cmd == 'm') {
+        mov_type = mov_type==1 ? 2 : 1;
+        mov_time = 0;
+    }
 }
 
 
@@ -230,67 +324,67 @@ static void command (int cmd)
 
 void drawGeom (dGeomID g, const dReal *pos, const dReal *R, int show_aabb)
 {
-  int i;
+    int i;
 	
-  if (!g) return;
-  if (!pos) pos = dGeomGetPosition (g);
-  if (!R) R = dGeomGetRotation (g);
+    if (!g) return;
+    if (!pos) pos = dGeomGetPosition (g);
+    if (!R) R = dGeomGetRotation (g);
 
-  int type = dGeomGetClass (g);
-  if (type == dBoxClass) {
-    dVector3 sides;
-    dGeomBoxGetLengths (g,sides);
-    dsDrawBox (pos,R,sides);
-  }
-  else if (type == dSphereClass) {
-    dsDrawSphere (pos,R,dGeomSphereGetRadius (g));
-  }
-  else if (type == dCapsuleClass) {
-    dReal radius,length;
-    dGeomCapsuleGetParams (g,&radius,&length);
-    dsDrawCapsule (pos,R,length,radius);
-  }
-  else if (type == dCylinderClass) {
-    dReal radius,length;
-    dGeomCylinderGetParams (g,&radius,&length);
-    dsDrawCylinder (pos,R,length,radius);
-  }
-  else if (type == dGeomTransformClass) {
-    dGeomID g2 = dGeomTransformGetGeom (g);
-    const dReal *pos2 = dGeomGetPosition (g2);
-    const dReal *R2 = dGeomGetRotation (g2);
-    dVector3 actual_pos;
-    dMatrix3 actual_R;
-    dMULTIPLY0_331 (actual_pos,R,pos2);
-    actual_pos[0] += pos[0];
-    actual_pos[1] += pos[1];
-    actual_pos[2] += pos[2];
-    dMULTIPLY0_333 (actual_R,R,R2);
-    drawGeom (g2,actual_pos,actual_R,0);
-  }
-  if (show_body) {
-    dBodyID body = dGeomGetBody(g);
-    if (body) {
-      const dReal *bodypos = dBodyGetPosition (body); 
-      const dReal *bodyr = dBodyGetRotation (body); 
-      dReal bodySides[3] = { 0.1, 0.1, 0.1 };
-      dsSetColorAlpha(0,1,0,1);
-      dsDrawBox(bodypos,bodyr,bodySides); 
+    int type = dGeomGetClass (g);
+    if (type == dBoxClass) {
+        dVector3 sides;
+        dGeomBoxGetLengths (g,sides);
+        dsDrawBox (pos,R,sides);
     }
-  }
-  if (show_aabb) {
-    // draw the bounding box for this geom
-    dReal aabb[6];
-    dGeomGetAABB (g,aabb);
-    dVector3 bbpos;
-    for (i=0; i<3; i++) bbpos[i] = 0.5*(aabb[i*2] + aabb[i*2+1]);
-    dVector3 bbsides;
-    for (i=0; i<3; i++) bbsides[i] = aabb[i*2+1] - aabb[i*2];
-    dMatrix3 RI;
-    dRSetIdentity (RI);
-    dsSetColorAlpha (1,0,0,0.5);
-    dsDrawBox (bbpos,RI,bbsides);
-  }
+    else if (type == dSphereClass) {
+        dsDrawSphere (pos,R,dGeomSphereGetRadius (g));
+    }
+    else if (type == dCapsuleClass) {
+        dReal radius,length;
+        dGeomCapsuleGetParams (g,&radius,&length);
+        dsDrawCapsule (pos,R,length,radius);
+    }
+    else if (type == dCylinderClass) {
+        dReal radius,length;
+        dGeomCylinderGetParams (g,&radius,&length);
+        dsDrawCylinder (pos,R,length,radius);
+    }
+    else if (type == dGeomTransformClass) {
+        dGeomID g2 = dGeomTransformGetGeom (g);
+        const dReal *pos2 = dGeomGetPosition (g2);
+        const dReal *R2 = dGeomGetRotation (g2);
+        dVector3 actual_pos;
+        dMatrix3 actual_R;
+        dMULTIPLY0_331 (actual_pos,R,pos2);
+        actual_pos[0] += pos[0];
+        actual_pos[1] += pos[1];
+        actual_pos[2] += pos[2];
+        dMULTIPLY0_333 (actual_R,R,R2);
+        drawGeom (g2,actual_pos,actual_R,0);
+    }
+    if (show_body) {
+        dBodyID body = dGeomGetBody(g);
+        if (body) {
+            const dReal *bodypos = dBodyGetPosition (body); 
+            const dReal *bodyr = dBodyGetRotation (body); 
+            dReal bodySides[3] = { 0.1, 0.1, 0.1 };
+            dsSetColorAlpha(0,1,0,1);
+            dsDrawBox(bodypos,bodyr,bodySides); 
+        }
+    }
+    if (show_aabb) {
+        // draw the bounding box for this geom
+        dReal aabb[6];
+        dGeomGetAABB (g,aabb);
+        dVector3 bbpos;
+        for (i=0; i<3; i++) bbpos[i] = 0.5*(aabb[i*2] + aabb[i*2+1]);
+        dVector3 bbsides;
+        for (i=0; i<3; i++) bbsides[i] = aabb[i*2+1] - aabb[i*2];
+        dMatrix3 RI;
+        dRSetIdentity (RI);
+        dsSetColorAlpha (1,0,0,0.5);
+        dsDrawBox (bbpos,RI,bbsides);
+    }
 }
 
 
@@ -298,101 +392,116 @@ void drawGeom (dGeomID g, const dReal *pos, const dReal *R, int show_aabb)
 
 static void updatecam()
 {
-    xyz[2] = 2 + platpos;
-    dsSetViewpoint (xyz,hpr);
+    xyz[0] = platpos[0] + 3.3;
+    xyz[1] = platpos[1] - 1.8;
+    xyz[2] = platpos[2] + 2;
+    dsSetViewpoint (xyz, hpr);
 }
 
 static void simLoop (int pause)
 {
     const dReal stepsize = 0.02;
 
-  dsSetColor (0,0,2);
-  dSpaceCollide (space,0,&nearCallback);
-  if (!pause) {
-    platpos += platspeed * stepsize;
-    if (platpos > maxplatpos)
-        platpos = 0;
-    dGeomSetPosition(platform, 0,0,platpos);
-    updatecam();
-    dWorldQuickStep (world,0.02);
-    //dWorldStep (world,0.02);
-  }
+    dsSetColor (0,0,2);
+    dSpaceCollide (space,0,&nearCallback);
+    if (!pause) {
+        
+        if (mov_type == 1)
+            moveplat_1(stepsize);
+        else
+            moveplat_2(stepsize);
 
-  if (write_world) {
-    FILE *f = fopen ("state.dif","wt");
-    if (f) {
-      dWorldExportDIF (world,f,"X");
-      fclose (f);
+        dGeomSetPosition(platform, platpos[0], platpos[1], platpos[2]);
+        updatecam();
+        dWorldQuickStep (world,stepsize);
+        //dWorldStep (world,stepsize);
     }
-    write_world = 0;
-  }
+
+    if (write_world) {
+        FILE *f = fopen ("state.dif","wt");
+        if (f) {
+            dWorldExportDIF (world,f,"X");
+            fclose (f);
+        }
+        write_world = 0;
+    }
   
-  // remove all contact joints
-  dJointGroupEmpty (contactgroup);
+    // remove all contact joints
+    dJointGroupEmpty (contactgroup);
 
-  dsSetColor (1,1,0);
-  dsSetTexture (DS_WOOD);
-  for (int i=0; i<num; i++) {
-    for (int j=0; j < GPB; j++) {
-      if (! dBodyIsEnabled (obj[i].body)) {
-	dsSetColor (1,0.8,0);
-      }
-      else {
-	dsSetColor (1,1,0);
-      }
-      drawGeom (obj[i].geom[j],0,0,show_aabb);
+    dsSetColor (1,1,0);
+    dsSetTexture (DS_WOOD);
+    for (int i=0; i<num; i++) {
+        for (int j=0; j < GPB; j++) {
+            if (! dBodyIsEnabled (obj[i].body)) {
+                dsSetColor (1,0.8,0);
+            }
+            else {
+                dsSetColor (1,1,0);
+            }
+            drawGeom (obj[i].geom[j],0,0,show_aabb);
+        }
     }
-  }
-  dsSetColor (1,0,0);
-  drawGeom (platform,0,0,show_aabb);
+    dsSetColor (1,0,0);
+    drawGeom (platform,0,0,show_aabb);
+    //usleep(5000);
 }
 
 
 int main (int argc, char **argv)
 {
-  // setup pointers to drawstuff callback functions
-  dsFunctions fn;
-  fn.version = DS_VERSION;
-  fn.start = &start;
-  fn.step = &simLoop;
-  fn.command = &command;
-  fn.stop = 0;
-  fn.path_to_textures = DRAWSTUFF_TEXTURE_PATH;
-  if(argc==2)
-    {
-        fn.path_to_textures = argv[1];
-    }
+    // setup pointers to drawstuff callback functions
+    dsFunctions fn;
+    fn.version = DS_VERSION;
+    fn.start = &start;
+    fn.step = &simLoop;
+    fn.command = &command;
+    fn.stop = 0;
+    fn.path_to_textures = DRAWSTUFF_TEXTURE_PATH;
+    if(argc==2)
+        {
+            fn.path_to_textures = argv[1];
+        }
 
-  // create world
-  dInitODE();
-  world = dWorldCreate();
-  space = dHashSpaceCreate (0);
-  contactgroup = dJointGroupCreate (0);
-  dWorldSetGravity (world,0,0,-0.5);
-  dWorldSetCFM (world,1e-5);
+    // create world
+    dInitODE();
+    world = dWorldCreate();
+    //space = dHashSpaceCreate (0);
+    dVector3 center = {0,0,0},
+        extents = { 100, 100, 100};
+        space = dQuadTreeSpaceCreate(0, center, extents, 5);
 
-  dWorldSetLinearDamping(world, 0.00001);
-  dWorldSetAngularDamping(world, 0.005);
-  dWorldSetMaxAngularSpeed(world, 200);
+        contactgroup = dJointGroupCreate (0);
+        dWorldSetGravity (world,0,0,-0.5);
+        dWorldSetCFM (world,1e-5);
 
-  dWorldSetContactSurfaceLayer (world,0.001);
-  ground = dCreatePlane (space,0,0,1,0);
-  memset (obj,0,sizeof(obj));
+        dWorldSetLinearDamping(world, 0.00001);
+        dWorldSetAngularDamping(world, 0.005);
+        dWorldSetMaxAngularSpeed(world, 200);
 
-    // create lift platform
-    platform = dCreateBox(space, 2, 2, 1);
+        dWorldSetContactSurfaceLayer (world,0.001);
+        ground = dCreatePlane (space,0,0,1,0);
+        memset (obj,0,sizeof(obj));
 
-    dGeomSetCategoryBits(ground, 1ul);
-    dGeomSetCategoryBits(platform, 2ul);
-    dGeomSetCollideBits(ground, ~2ul);
-    dGeomSetCollideBits(platform, ~1ul);
+        // create lift platform
+        platform = dCreateBox(space, 4, 4, 1);
 
-  // run simulation
-  dsSimulationLoop (argc,argv,352,288,&fn);
+        dGeomSetCategoryBits(ground, 1ul);
+        dGeomSetCategoryBits(platform, 2ul);
+        dGeomSetCollideBits(ground, ~2ul);
+        dGeomSetCollideBits(platform, ~1ul);
 
-  dJointGroupDestroy (contactgroup);
-  dSpaceDestroy (space);
-  dWorldDestroy (world);
-  dCloseODE();
-  return 0;
+        // run simulation
+        dsSimulationLoop (argc,argv,352,288,&fn);
+
+        dJointGroupDestroy (contactgroup);
+        dSpaceDestroy (space);
+        dWorldDestroy (world);
+        dCloseODE();
+        return 0;
 }
+
+
+// Local Variables:
+// c-basic-offset:4
+// End:
