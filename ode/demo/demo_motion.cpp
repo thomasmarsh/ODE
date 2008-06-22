@@ -467,38 +467,37 @@ int main (int argc, char **argv)
     dInitODE();
     world = dWorldCreate();
     //space = dHashSpaceCreate (0);
-    dVector3 center = {0,0,0},
-        extents = { 100, 100, 100};
-        space = dQuadTreeSpaceCreate(0, center, extents, 5);
+    dVector3 center = {0,0,0}, extents = { 100, 100, 100};
+    space = dQuadTreeSpaceCreate(0, center, extents, 5);
 
-        contactgroup = dJointGroupCreate (0);
-        dWorldSetGravity (world,0,0,-0.5);
-        dWorldSetCFM (world,1e-5);
+    contactgroup = dJointGroupCreate (0);
+    dWorldSetGravity (world,0,0,-0.5);
+    dWorldSetCFM (world,1e-5);
+    
+    dWorldSetLinearDamping(world, 0.00001);
+    dWorldSetAngularDamping(world, 0.005);
+    dWorldSetMaxAngularSpeed(world, 200);
 
-        dWorldSetLinearDamping(world, 0.00001);
-        dWorldSetAngularDamping(world, 0.005);
-        dWorldSetMaxAngularSpeed(world, 200);
+    dWorldSetContactSurfaceLayer (world,0.001);
+    ground = dCreatePlane (space,0,0,1,0);
+    memset (obj,0,sizeof(obj));
 
-        dWorldSetContactSurfaceLayer (world,0.001);
-        ground = dCreatePlane (space,0,0,1,0);
-        memset (obj,0,sizeof(obj));
+    // create lift platform
+    platform = dCreateBox(space, 4, 4, 1);
 
-        // create lift platform
-        platform = dCreateBox(space, 4, 4, 1);
+    dGeomSetCategoryBits(ground, 1ul);
+    dGeomSetCategoryBits(platform, 2ul);
+    dGeomSetCollideBits(ground, ~2ul);
+    dGeomSetCollideBits(platform, ~1ul);
 
-        dGeomSetCategoryBits(ground, 1ul);
-        dGeomSetCategoryBits(platform, 2ul);
-        dGeomSetCollideBits(ground, ~2ul);
-        dGeomSetCollideBits(platform, ~1ul);
+    // run simulation
+    dsSimulationLoop (argc,argv,352,288,&fn);
 
-        // run simulation
-        dsSimulationLoop (argc,argv,352,288,&fn);
-
-        dJointGroupDestroy (contactgroup);
-        dSpaceDestroy (space);
-        dWorldDestroy (world);
-        dCloseODE();
-        return 0;
+    dJointGroupDestroy (contactgroup);
+    dSpaceDestroy (space);
+    dWorldDestroy (world);
+    dCloseODE();
+    return 0;
 }
 
 

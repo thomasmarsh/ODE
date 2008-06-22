@@ -244,7 +244,6 @@ AC_ARG_ENABLE([gprof],[AC_HELP_STRING([--enable-gprof],[enable profiling with gp
 if test "$gprof" != no
 then
     CFLAGS="-pg $CFLAGS"
-    CPPFLAGS="-pg $CPPFLAGS"
     CXXFLAGS="-pg $CXXFLAGS"
     AC_MSG_RESULT(enabled)
     AC_CHECK_LIB(gmon, main,[LIBS="$LIBS -lgmon"])
@@ -293,6 +292,16 @@ then
 fi
 AC_CONFIG_SUBDIRS([ou])
 AM_CONDITIONAL(ENABLE_OU, test x$use_ou = xyes)
+
+
+AC_ARG_ENABLE([asserts],
+        AC_HELP_STRING([--disable-asserts],
+            [disables debug error checking]),
+        asserts=$enableval,asserts=yes)
+if test x$asserts = xno
+then
+    CPPFLAGS="$CPPFLAGS -DdNODEBUG"
+fi
 
 
 dnl include found system headers into config.h
@@ -384,7 +393,8 @@ echo "  Is target a Pentium:     $pentium"
 echo "  Is target x86-64:        $cpu64"
 echo "  Use new opcode trimesh collider: $new_trimesh"
 echo "  TLS for global data:     $use_ou"
-echo "  Headers will be installed in $prefix/include/ode"
-echo "  Libraries will be installed in $prefix/lib"
+echo "  Enable debug error check: $asserts"
+echo "  Headers will be installed in $includedir/ode"
+echo "  Libraries will be installed in $libdir"
 echo "  Building in directory    $BUILDDIR"
 
