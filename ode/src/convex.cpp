@@ -68,6 +68,31 @@ dxConvex::dxConvex (dSpaceID space,
   polygons=_polygons;
   edges = NULL;
   FillEdges();
+#ifndef dNODEBUG
+  // Check for properly build polygons by calculating the determinant
+  // of the 3x3 matrix composed of the first 3 points in the polygon.
+	unsigned int *points_in_poly=polygons;
+	unsigned int *index=polygons+1;
+  
+	for(unsigned int i=0;i<planecount;++i)
+	{
+    dAASSERT (*points_in_poly > 2 );
+    if((
+      points[(index[0]*3)+0]*points[(index[1]*3)+1]*points[(index[2]*3)+2] + 
+      points[(index[0]*3)+1]*points[(index[1]*3)+2]*points[(index[2]*3)+0] + 
+      points[(index[0]*3)+2]*points[(index[1]*3)+0]*points[(index[2]*3)+1] -
+      points[(index[0]*3)+2]*points[(index[1]*3)+1]*points[(index[2]*3)+0] - 
+      points[(index[0]*3)+1]*points[(index[1]*3)+0]*points[(index[2]*3)+2] - 
+      points[(index[0]*3)+0]*points[(index[1]*3)+2]*points[(index[2]*3)+1])<0)
+    {
+      fprintf(stdout,"WARNING: Polygon %d is not defined counterclockwise\n",i);
+    }
+		points_in_poly+=(*points_in_poly+1);
+		index=points_in_poly+1;
+    if(planes[(i*4)+3]<0) fprintf(stdout,"WARNING: Plane %d does not contain the origin\n",i);
+  }
+#endif
+
   //CreateTree();
 }
 
