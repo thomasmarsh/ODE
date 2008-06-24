@@ -179,7 +179,13 @@ int gim_triangle_capsule_collision(GIM_TRIANGLE_DATA * triangle, GIM_CAPSULE_DAT
 {
     GUINT old_contact_size = contacts->m_size;
     gim_closest_point_triangle_segment(triangle,capsule->m_point1,capsule->m_point2,contacts);
-    GIM_CONTACT * pcontact = GIM_DYNARRAY_POINTER(GIM_CONTACT ,(*contacts));
+    
+    if (contacts->m_size == old_contact_size)
+    {
+        return 0;
+    }
+
+	GIM_CONTACT * pcontact = GIM_DYNARRAY_POINTER(GIM_CONTACT ,(*contacts));
     pcontact+= old_contact_size;
 
     if(pcontact->m_depth > capsule->m_radius)
