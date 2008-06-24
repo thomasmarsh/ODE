@@ -25,7 +25,7 @@ SUBDIRS = include \
 bin_SCRIPTS = ode-config
 
 # Utility rule for making a release
-release: dist dist-gzip dist-bzip2 dist-zip
+release: dist-gzip dist-bzip2
 	@echo Created release packages for ${PACKAGE}-${VERSION}.
 
 EXTRA_DIST = autogen.sh build tools \
