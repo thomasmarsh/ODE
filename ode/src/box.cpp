@@ -52,6 +52,7 @@ dxBox::dxBox (dSpaceID space, dReal lx, dReal ly, dReal lz) : dxGeom (space,1)
   side[0] = lx;
   side[1] = ly;
   side[2] = lz;
+  updateZeroSizedFlag(!lx || !ly || !lz);
 }
 
 
@@ -84,11 +85,12 @@ dGeomID dCreateBox (dSpaceID space, dReal lx, dReal ly, dReal lz)
 void dGeomBoxSetLengths (dGeomID g, dReal lx, dReal ly, dReal lz)
 {
   dUASSERT (g && g->type == dBoxClass,"argument not a box");
-  dAASSERT (lx > 0 && ly > 0 && lz > 0);
+  dAASSERT (lx >= 0 && ly >= 0 && lz >= 0);
   dxBox *b = (dxBox*) g;
   b->side[0] = lx;
   b->side[1] = ly;
   b->side[2] = lz;
+  b->updateZeroSizedFlag(!lx || !ly || !lz);
   dGeomMoved (g);
 }
 

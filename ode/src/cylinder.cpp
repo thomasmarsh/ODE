@@ -47,10 +47,11 @@ dContactGeom::g1 and dContactGeom::g2.
 dxCylinder::dxCylinder (dSpaceID space, dReal _radius, dReal _length) :
 dxGeom (space,1)
 {
-	dAASSERT (_radius > 0 && _length > 0);
+	dAASSERT (_radius >= 0 && _length >= 0);
 	type = dCylinderClass;
 	radius = _radius;
 	lz = _length;
+	updateZeroSizedFlag(!_radius || !_length);
 }
 
 
@@ -82,10 +83,11 @@ dGeomID dCreateCylinder (dSpaceID space, dReal radius, dReal length)
 void dGeomCylinderSetParams (dGeomID cylinder, dReal radius, dReal length)
 {
 	dUASSERT (cylinder && cylinder->type == dCylinderClass,"argument not a ccylinder");
-	dAASSERT (radius > 0 && length > 0);
+	dAASSERT (radius >= 0 && length >= 0);
 	dxCylinder *c = (dxCylinder*) cylinder;
 	c->radius = radius;
 	c->lz = length;
+	c->updateZeroSizedFlag(!radius || !length);
 	dGeomMoved (cylinder);
 }
 

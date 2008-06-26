@@ -74,7 +74,7 @@ void dGeomMoved (dxGeom *geom)
   }
 }
 
-#define GEOM_ENABLED(g) ((g)->gflags & GEOM_ENABLED)
+#define GEOM_ENABLED(g) (((g)->gflags & GEOM_ENABLE_TEST_MASK) == GEOM_ENABLE_TEST_VALUE)
 
 //****************************************************************************
 // dxSpace
