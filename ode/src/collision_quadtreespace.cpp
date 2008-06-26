@@ -40,7 +40,7 @@
 const int SPLITAXIS = 2;
 const int SPLITS = SPLITAXIS * SPLITAXIS;
 
-#define GEOM_ENABLED(g) (g)->gflags & GEOM_ENABLED
+#define GEOM_ENABLED(g) (((g)->gflags & GEOM_ENABLE_TEST_MASK) == GEOM_ENABLE_TEST_VALUE)
 
 class Block{
 public:

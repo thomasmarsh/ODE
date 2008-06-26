@@ -65,11 +65,15 @@ internal data structures and functions for collision detection.
 //		GEOM_DIRTY|GEOM_AABB_BAD|GEOM_POSR_BAD
 
 enum {
-  GEOM_DIRTY	= 1,	// geom is 'dirty', i.e. position unknown
-  GEOM_POSR_BAD = 2,	// geom's final posr is not valid
-  GEOM_AABB_BAD	= 4,	// geom's AABB is not valid
-  GEOM_PLACEABLE = 8,	// geom is placeable
-  GEOM_ENABLED = 16,		// geom is enabled
+  GEOM_DIRTY	= 1,    // geom is 'dirty', i.e. position unknown
+  GEOM_POSR_BAD = 2,    // geom's final posr is not valid
+  GEOM_AABB_BAD	= 4,    // geom's AABB is not valid
+  GEOM_PLACEABLE = 8,   // geom is placeable
+  GEOM_ENABLED = 16,    // geom is enabled
+  GEOM_ZERO_SIZED = 32, // geom is zero sized
+
+  GEOM_ENABLE_TEST_MASK = GEOM_ENABLED | GEOM_ZERO_SIZED,
+  GEOM_ENABLE_TEST_VALUE = GEOM_ENABLED,
 
   // Ray specific
   RAY_FIRSTCONTACT = 0x10000,
@@ -102,6 +106,8 @@ struct dxGeom : public dBase {
   dxGeom (dSpaceID _space, int is_placeable);
   virtual ~dxGeom();
 
+  // Set or clear GEOM_ZERO_SIZED flag
+  void updateZeroSizedFlag(bool is_zero_sized) { gflags = is_zero_sized ? (gflags | GEOM_ZERO_SIZED) : (gflags & ~GEOM_ZERO_SIZED); }
 
   // calculate our new final position from our offset and body
   void computePosr();

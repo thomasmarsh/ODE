@@ -48,9 +48,10 @@ dContactGeom::g1 and dContactGeom::g2.
 
 dxSphere::dxSphere (dSpaceID space, dReal _radius) : dxGeom (space,1)
 {
-  dAASSERT (_radius > 0);
+  dAASSERT (_radius >= 0);
   type = dSphereClass;
   radius = _radius;
+  updateZeroSizedFlag(!_radius);
 }
 
 
@@ -74,9 +75,10 @@ dGeomID dCreateSphere (dSpaceID space, dReal radius)
 void dGeomSphereSetRadius (dGeomID g, dReal radius)
 {
   dUASSERT (g && g->type == dSphereClass,"argument not a sphere");
-  dAASSERT (radius > 0);
+  dAASSERT (radius >= 0);
   dxSphere *s = (dxSphere*) g;
   s->radius = radius;
+  s->updateZeroSizedFlag(!radius);
   dGeomMoved (g);
 }
 

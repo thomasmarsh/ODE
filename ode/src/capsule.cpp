@@ -48,10 +48,11 @@ dContactGeom::g1 and dContactGeom::g2.
 dxCapsule::dxCapsule (dSpaceID space, dReal _radius, dReal _length) :
   dxGeom (space,1)
 {
-  dAASSERT (_radius > 0 && _length > 0);
+  dAASSERT (_radius >= 0 && _length >= 0);
   type = dCapsuleClass;
   radius = _radius;
   lz = _length;
+  updateZeroSizedFlag(!_radius || !_length);
 }
 
 
@@ -81,10 +82,11 @@ dGeomID dCreateCapsule (dSpaceID space, dReal radius, dReal length)
 void dGeomCapsuleSetParams (dGeomID g, dReal radius, dReal length)
 {
   dUASSERT (g && g->type == dCapsuleClass,"argument not a ccylinder");
-  dAASSERT (radius > 0 && length > 0);
+  dAASSERT (radius >= 0 && length >= 0);
   dxCapsule *c = (dxCapsule*) g;
   c->radius = radius;
   c->lz = length;
+  c->updateZeroSizedFlag(!radius || !length);
   dGeomMoved (g);
 }
 
