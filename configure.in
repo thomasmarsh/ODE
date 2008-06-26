@@ -134,26 +134,38 @@ then
 fi
 
 
+AC_ARG_WITH([drawstuff],AS_HELP_STRING([--with-drawstuff=X11|Win32|OSX|none],[force a particular drawstuff implementation or disable it.]),
+        [drawstuff=$withval],[drawstuff=])
 
 dnl Set some Platform Specific Variables
 EXTRA_LIBTOOL_LDFLAGS=
 case "$host_os" in
   cygwin* | mingw*)
-    drawstuff="Win32" # if in a Windows enviroment
+    if test x"$drawstuff" = x
+    then
+       drawstuff="Win32" # if in a Windows enviroment
+    fi
     EXTRA_LIBTOOL_LDFLAGS="-no-undefined"
     ;;
   *apple* | *darwin*) # For Mac OS X
-    drawstuff="OSX"
+    if test x"$drawstuff" = x
+    then
+       drawstuff="OSX"
+    fi
     dnl We need to use C++ compilation and linking for ode on Mac
     dnl Might as well do it for all code.
     CC="$CXX"
     LINK="$CXXLINK"
     ;;
   *)
-   drawstuff="X11" # if anything else default to X11
+    if test x"$drawstuff" = x
+    then
+       drawstuff="X11" # if anything else default to X11
+    fi
     ;;
 esac
 AC_SUBST(EXTRA_LIBTOOL_LDFLAGS)
+AM_CONDITIONAL(ENABLE_DRAWSTUFF, test x$drawstuff != xnone)
 
 
 dnl Set Conditionals
@@ -164,9 +176,9 @@ dnl Set Drawstuff variables
 AC_MSG_CHECKING(which drawstuff lib to build)
 AC_MSG_RESULT($drawstuff)
 
-
+if test "x$drawstuff" = "xX11"; then
 AC_PATH_XTRA
-
+fi
 
 dnl Check for OpenGL
 if test "x$drawstuff" = "xOSX"; then
@@ -376,6 +388,7 @@ echo "Configuration:"
 echo "  Build  system type:      $build"
 echo "  Host   system type:      $host"
 echo "  Use double precision:    $precision"
+echo "  Use drawstuff:           $drawstuff"
 echo "  Use OPCODE:              $opcode"
 echo "  Use GIMPACT:             $gimpact"
 echo "  Use gyroscopic term:     $gyroscopic"
