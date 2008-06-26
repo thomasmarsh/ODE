@@ -1,3 +1,4 @@
+if ENABLE_DRAWSTUFF
 AM_CPPFLAGS = -I$(abs_top_srcdir)/include \
         -DDRAWSTUFF_TEXTURE_PATH="\"$(abs_top_srcdir)/drawstuff/textures\""
 
@@ -89,5 +90,4 @@ resources.o: $(top_srcdir)/drawstuff/src/resources.rc $(top_srcdir)/drawstuff/sr
 	@WINDRES@ $(top_srcdir)/drawstuff/src/resources.rc -o resources.o
 LDADD += resources.o
 endif
-
-
+endif
