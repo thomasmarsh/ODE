@@ -72,12 +72,12 @@ dReal points[]= // points for a cube
 const unsigned int pointcount=8;
 unsigned int polygons[] = //Polygons for a cube (6 squares)
   {
-    4,0,2,6,4, // positive X
-    4,1,0,4,5, // positive Y
-    4,0,1,3,2, // positive Z
-    4,3,1,5,7, // negative X 
-    4,2,3,7,6, // negative Y
-    4,5,4,6,7, // negative Z
+    4,0,2,6,4, // positive X Side 0
+    4,1,0,4,5, // positive Y Side 1
+    4,0,1,3,2, // positive Z Side 2
+    4,3,1,5,7, // negative X Side 3
+    4,2,3,7,6, // negative Y Side 4
+    4,5,4,6,7, // negative Z Side 5
   };
 //----> Convex Object
 
@@ -104,7 +104,7 @@ Where	c = cos(angle),	s = sine(angle), and ||( x,y,z )|| = 1
 	  (if not, the GL will normalize this vector).
 */
 
-dVector3 geom1pos={0.0,0.50,0.65};
+dVector3 geom1pos={0.0,0.250,0.50};
 dQuaternion geom1quat={1,0,0,0};
 bool DumpInfo=true;
 int drawmode = DS_WIREFRAME;
@@ -172,7 +172,7 @@ void simLoop (int pause)
   const dReal ss[3] = {0.02,0.02,0.02};
   dContactGeom contacts[8];
 if(geoms==convex)
-  contactcount = dCollideConvexConvex(geoms[1],geoms[0],8,contacts,sizeof(dContactGeom));
+  contactcount = dCollideConvexConvex(geoms[0],geoms[1],8,contacts,sizeof(dContactGeom));
 else
   contactcount = dCollideBoxBox(geoms[0],geoms[1],8,contacts,sizeof(dContactGeom));
 
