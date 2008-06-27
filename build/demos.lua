@@ -18,6 +18,7 @@
     "jointPR",
     "jointPU",
     "joints",
+    "motion",
     "motor",
     "ode",
     "piston",
