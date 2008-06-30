@@ -526,7 +526,7 @@ int dCollideSphereConvex (dxGeom *o1, dxGeom *o2, int flags,
   // dVector3 contactpoint;
   dVector3 offsetpos,out,temp;
   unsigned int *pPoly=Convex->polygons;
-  int closestplane;
+  int closestplane=-1;
   bool sphereinside=true;
   /* 
      Do a good old sphere vs plane check first,

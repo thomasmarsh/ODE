@@ -572,7 +572,7 @@ int dxJointLimitMotor::addLimot( dxJoint *joint,
         // extra tiny bit of computation) in doing this adjustment. note that we
         // only need to do this if the constraint connects two bodies.
 
-        dVector3 ltd; // Linear Torque Decoupling vector (a torque)
+        dVector3 ltd = {0,0,0}; // Linear Torque Decoupling vector (a torque)
         if ( !rotational && joint->node[1].body )
         {
             dVector3 c;

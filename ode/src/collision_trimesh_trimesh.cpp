@@ -74,7 +74,7 @@ static int TriTriIntersectWithIsectLine(dReal V0[3],dReal V1[3],dReal V2[3],
                                         dReal isectpt1[3],dReal isectpt2[3]);
 inline void dMakeMatrix4(const dVector3 Position, const dMatrix3 Rotation, dMatrix4 &B);
 static void dInvertMatrix4( dMatrix4& B, dMatrix4& Binv );
-static int IntersectLineSegmentRay(dVector3, dVector3, dVector3, dVector3,  dVector3);
+//static int IntersectLineSegmentRay(dVector3, dVector3, dVector3, dVector3,  dVector3);
 static bool FindTriSolidIntrsection(const dVector3 Tri[3], 
                                     const dVector4 Planes[6], int numSides,
                                     LineContactSet& ClippedPolygon );
@@ -1446,9 +1446,9 @@ static int TriTriIntersectWithIsectLine(dReal V0[3],dReal V1[3],dReal V2[3],
   dReal N1[3],N2[3],d1,d2;
   dReal du0,du1,du2,dv0,dv1,dv2;
   dReal D[3];
-  dReal isect1[2], isect2[2];
+  dReal isect1[2]={0,0}, isect2[2]={0,0};
   dReal isectpointA1[3],isectpointA2[3];
-  dReal isectpointB1[3],isectpointB2[3];
+  dReal isectpointB1[3]={0,0,0},isectpointB2[3]={0,0,0};
   dReal du0du1,du0du2,dv0dv1,dv0dv2;
   short index;
   dReal vp0,vp1,vp2;
@@ -1619,6 +1619,7 @@ static int TriTriIntersectWithIsectLine(dReal V0[3],dReal V1[3],dReal V2[3],
 //       c = x3 - x1
 // x1 and x2 are the edges of the triangle, and x3 is CoplanarPt
 //  and x4 is (CoplanarPt - n)
+#if 0 // not used anywhere
 static int
 IntersectLineSegmentRay(dVector3 x1, dVector3 x2, dVector3 x3, dVector3 n, 
                         dVector3 out_pt)
@@ -1660,7 +1661,7 @@ IntersectLineSegmentRay(dVector3 x1, dVector3 x2, dVector3 x3, dVector3 n,
     else
         return 0;
 }
-
+#endif
 
 // FindTriSolidIntersection - Clips the input trinagle TRI with the 
 //  sides of a convex bounding solid, described by PLANES, returning

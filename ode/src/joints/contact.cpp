@@ -85,7 +85,7 @@ dxJointContact::getInfo2( dxJoint::Info2 *info )
     normal[3] = 0; // @@@ hmmm
 
     // c1,c2 = contact points with respect to body PORs
-    dVector3 c1, c2;
+    dVector3 c1, c2 = {0,0,0};
     c1[0] = contact.geom.pos[0] - node[0].body->posr.pos[0];
     c1[1] = contact.geom.pos[1] - node[0].body->posr.pos[1];
     c1[2] = contact.geom.pos[2] - node[0].body->posr.pos[2];

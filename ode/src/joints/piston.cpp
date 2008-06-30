@@ -214,11 +214,11 @@ dxJointPiston::getInfo2( dxJoint::Info2 *info )
     // Pull out pos and R for both bodies. also get the `connection'
     // vector pos2-pos1.
 
-    dReal *pos1, *pos2, *R1, *R2;
+    dReal *pos1, *pos2, *R1, *R2=0;
     dVector3 dist; // Current position of body_1  w.r.t "anchor"
     // 2 bodies anchor is center of body 2
     // 1 bodies anchor is origin
-    dVector3 lanchor2;
+    dVector3 lanchor2={0,0,0};
 
     pos1 = node[0].body->posr.pos;
     R1   = node[0].body->posr.R;
@@ -457,7 +457,7 @@ void dJointSetPistonAxisDelta( dJointID j, dReal x, dReal y, dReal z,
 
     joint->computeInitialRelativeRotation();
 
-    dVector3 c;
+    dVector3 c = {0,0,0};
     if ( joint->node[1].body )
     {
         c[0] = ( joint->node[0].body->posr.pos[0] -

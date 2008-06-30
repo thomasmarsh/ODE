@@ -984,7 +984,7 @@ int sTrimeshCapsuleColliderData::TestCollisionForSingleTriangle(int ctContacts0,
 	_cldTestOneTriangleVSCapsule(dv[0],dv[1],dv[2], flags);
 
 	// fill-in tri index for generated contacts
-	for (; ctContacts0 < m_ctContacts; ctContacts0++)
+	for (; ctContacts0 < (int)m_ctContacts; ctContacts0++)
 		m_gLocalContacts[ctContacts0].triIndex = Triint;
 
 	// Putting "break" at the end of loop prevents unnecessary checks on first pass and "continue"

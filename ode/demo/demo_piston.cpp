@@ -400,6 +400,7 @@ case 'p' :case 'P' : {
           std::cout<<"Position ="<<rj->getPosition() <<"\n";
         }
         break;
+        default: {} // keep the compiler happy
       }
     }
     break;
@@ -437,7 +438,7 @@ static void simLoop (int pause)
 {
   const dReal *rot;
   dVector3 ax;
-  dReal l;
+  dReal l=0;
 
   switch (joint->getType() ) {
     case dJointTypeSlider :
@@ -448,6 +449,7 @@ static void simLoop (int pause)
       ( (dPistonJoint *) joint)->getAxis (ax);
       l = ( (dPistonJoint *) joint)->getPosition();
       break;
+    default: {} // keep the compiler happy
   }
 
 

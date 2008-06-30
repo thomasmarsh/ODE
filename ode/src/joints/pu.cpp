@@ -133,7 +133,7 @@ dReal dJointGetPUPositionRate( dJointID j )
 
         // r will be used to find the distance between body1 and the anchor point
         dVector3 r;
-        dVector3 anchor2;
+        dVector3 anchor2 = {0,0,0};
         if ( joint->node[1].body )
         {
             // Find joint->anchor2 in global coordinates
@@ -243,8 +243,6 @@ dxJointPU::getInfo2( dxJoint::Info2 *info )
     const int s0 = 0;
     const int s1 = info->rowskip;
     const int s2 = 2 * s1;
-    const int s3 = 3 * s1;
-    const int s4 = 4 * s1;
 
     const dReal k = info->fps * info->erp;
 
@@ -266,7 +264,7 @@ dxJointPU::getInfo2( dxJoint::Info2 *info )
     // distance between the body1 and the anchor2 in global frame
     // Calculated in the same way as the offset
     dVector3 dist;
-    dVector3 wanchor2;
+    dVector3 wanchor2 = {0,0,0};
     if ( node[1].body )
     {
         dMULTIPLY0_331( wanchor2, R2, anchor2 );

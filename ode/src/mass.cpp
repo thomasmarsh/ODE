@@ -289,8 +289,8 @@ void dMassSetTrimesh( dMass *m, dReal density, dGeomID g )
 
 				//compProjectionIntegrals(f);
 				{
-					dReal a0, a1, da;
-					dReal b0, b1, db;
+					dReal a0=0, a1=0, da;
+					dReal b0=0, b1=0, db;
 					dReal a0_2, a0_3, a0_4, b0_2, b0_3, b0_4;
 					dReal a1_2, a1_3, b1_2, b1_3;
 					dReal C1, Ca, Caa, Caaa, Cb, Cbb, Cbbb;

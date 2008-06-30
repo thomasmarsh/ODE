@@ -111,17 +111,15 @@ static void FreeThreadBasicDataOnFailureIfNecessary()
 #endif // #if dTLS_ENABLED
 }
 
+#if dTLS_ENABLED
 static bool AllocateThreadCollisionData()
 {
 	bool bResult = false;
 
-#if dTLS_ENABLED
 	bool bCollidersCacheAllocated = false, bCollisionLibraryDataAllocated = false;
-#endif
 
 	do
 	{
-#if dTLS_ENABLED
 		dIASSERT(!(COdeTls::GetDataAllocationFlags() & TLD_INTERNAL_COLLISIONDATA_ALLOCATED));
 
 #if dTRIMESH_ENABLED 
@@ -158,15 +156,12 @@ static bool AllocateThreadCollisionData()
 
 		COdeTls::SignalDataAllocationFlags(TLD_INTERNAL_COLLISIONDATA_ALLOCATED);
 
-#endif // dTLS_ENABLED
-
 		bResult = true;
 	}
 	while (false);
 
 	if (!bResult)
 	{
-#if dTLS_ENABLED
 		if (bCollisionLibraryDataAllocated)
 		{
 			COdeTls::DestroyTrimeshCollisionLibraryData();
@@ -176,11 +171,11 @@ static bool AllocateThreadCollisionData()
 		{
 			COdeTls::DestroyTrimeshCollidersCache();
 		}
-#endif // dTLS_ENABLED
 	}
 	
 	return bResult;
 }
+#endif // dTLS_ENABLED
 
 static bool AllocateThreadCollisionDataIfNecessary(bool &bOutDataAllocated)
 {

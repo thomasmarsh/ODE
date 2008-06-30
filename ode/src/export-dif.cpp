@@ -177,22 +177,22 @@ static void printLimot (PrintingContext &c, dxJointLimitMotor &limot, int num)
 
 static const char *getJointName (dxJoint *j)
 {
-	switch (j->type()) {
-		case dJointTypeBall: return "ball";
-		case dJointTypeHinge: return "hinge";
-		case dJointTypeSlider: return "slider";
-		case dJointTypeContact: return "contact";
-		case dJointTypeUniversal: return "universal";
-		case dJointTypeHinge2: return "ODE_hinge2";
-		case dJointTypeFixed: return "fixed";
-		case dJointTypeNull: return "null";
-		case dJointTypeAMotor: return "ODE_angular_motor";
-		case dJointTypeLMotor: return "ODE_linear_motor";
-		case dJointTypePR: return "PR";
+    switch (j->type()) {
+    case dJointTypeBall: return "ball";
+    case dJointTypeHinge: return "hinge";
+    case dJointTypeSlider: return "slider";
+    case dJointTypeContact: return "contact";
+    case dJointTypeUniversal: return "universal";
+    case dJointTypeHinge2: return "ODE_hinge2";
+    case dJointTypeFixed: return "fixed";
+    case dJointTypeNull: return "null";
+    case dJointTypeAMotor: return "ODE_angular_motor";
+    case dJointTypeLMotor: return "ODE_linear_motor";
+    case dJointTypePR: return "PR";
     case dJointTypePU: return "PU";
-		case dJointTypePiston: return "piston";
-	}
-	return "unknown";
+    case dJointTypePiston: return "piston";
+    default: return "unknown";
+    }
 }
 
 
@@ -614,6 +614,7 @@ void dWorldExportDIF (dWorldID w, FILE *file, const char *prefix)
 			case dJointTypePR: printPR (c,j); break;
 			case dJointTypePU: printPU (c,j); break;
 			case dJointTypePiston: printPiston (c,j); break;
+			default: c.print("unknown joint");
 		}
 		c.indent--;
 		c.print ("}");

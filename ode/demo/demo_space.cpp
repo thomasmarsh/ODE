@@ -128,11 +128,11 @@ static void nearCallback (void *data, dGeomID o1, dGeomID o2)
   i = (size_t) dGeomGetData (o1);
   j = (size_t) dGeomGetData (o2);
   if (i==j)
-    printf ("collision (%d,%d) is between the same object\n",i,j);
+    printf ("collision (%d,%d) is between the same object\n",(int)i,(int)j);
   if (!good_matrix[i][j] || !good_matrix[j][i])
-    printf ("collision (%d,%d) is incorrect\n",i,j);
+    printf ("collision (%d,%d) is incorrect\n",(int)i,(int)j);
   if (test_matrix[i][j] || test_matrix[j][i])
-    printf ("collision (%d,%d) reported more than once\n",i,j);
+    printf ("collision (%d,%d) reported more than once\n",(int)i,(int)j);
   test_matrix[i][j] = 1;
   test_matrix[j][i] = 1;
 }

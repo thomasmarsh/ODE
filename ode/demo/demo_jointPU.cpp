@@ -334,6 +334,7 @@ case 'h' : case 'H' : case '?' :
           pu->setParam (dParamHiStop3, lLimit);
         }
         break;
+        default: {} // keep the compiler happy
       }
     }
 
@@ -366,6 +367,7 @@ case 'p' :case 'P' : {
           std::cout<<"Angle2 Rate="<<pu->getAngle2Rate() <<"\n";
         }
         break;
+        default: {} // keep the compiler happy
       }
     }
     break;
@@ -490,7 +492,7 @@ static void simLoop (int pause)
     }
 
     if ( dJointTypePU == type && geom[AXIS2] ) {
-      dPUJoint *pu = dynamic_cast<dPUJoint *> (joint);
+      //dPUJoint *pu = dynamic_cast<dPUJoint *> (joint);
 
       dQuaternion q, qAng, qq, qq1;
       dGeomGetQuaternion (geom[AXIS2], q);
