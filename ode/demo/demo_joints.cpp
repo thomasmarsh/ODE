@@ -90,13 +90,6 @@ static dReal max_error = 0;
 //****************************************************************************
 // utility stuff
 
-static char loCase (char a)
-{
-  if (a >= 'A' && a <= 'Z') return a + ('a'-'A');
-  else return a;
-}
-
-
 static dReal length (dVector3 a)
 {
   return dSqrt (a[0]*a[0] + a[1]*a[1] + a[2]*a[2]);

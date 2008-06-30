@@ -410,7 +410,7 @@ void dTimerReport (FILE *fout, int average)
       t = total;
       p = 100.0;
     }
-    fprintf (fout,"%-*s %7.2fms %6.2f%%",maxl,event[i].description,
+    fprintf (fout,"%-*s %7.2fms %6.2f%%",(int)maxl,event[i].description,
 	     t*ccunit * 1000.0, p);
     if (average && i < (num-1)) {
       fprintf (fout,"  (avg %7.2fms %6.2f%%)",

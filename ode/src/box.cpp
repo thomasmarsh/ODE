@@ -334,7 +334,7 @@ int dBoxBox (const dVector3 p1, const dMatrix3 R1,
 	     int flags, dContactGeom *contact, int skip)
 {
   const dReal fudge_factor = REAL(1.05);
-  dVector3 p,pp,normalC;
+  dVector3 p,pp,normalC={0,0,0};
   const dReal *normalR = 0;
   dReal A[3],B[3],R11,R12,R13,R21,R22,R23,R31,R32,R33,
     Q11,Q12,Q13,Q21,Q22,Q23,Q31,Q32,Q33,s,s2,l,expr1_val;

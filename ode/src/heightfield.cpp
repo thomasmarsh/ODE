@@ -329,7 +329,7 @@ bool dxHeightfieldData::IsOnHeightfield2  ( const dReal * const CellOrigin, cons
 // returns height at given sample coordinates
 dReal dxHeightfieldData::GetHeight( int x, int z )
 {
-    dReal h;
+    dReal h=0;
     unsigned char *data_byte;
     short *data_short;
     float *data_float;
@@ -1032,9 +1032,9 @@ int dxHeightfield::dCollideHeightfieldZone( const int minX, const int maxX, cons
 		}
     }
     // get All Planes that could collide against.
-    dColliderFn *geomRayNCollider;
-    dColliderFn *geomNPlaneCollider;
-    dGetDepthFn *geomNDepthGetter;
+    dColliderFn *geomRayNCollider=0;
+    dColliderFn *geomNPlaneCollider=0;
+    dGetDepthFn *geomNDepthGetter=0;
 
     // int max_collisionContact = numMaxContactsPossible; -- not used
     switch (o2->type)

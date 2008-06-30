@@ -184,7 +184,7 @@ dxJointPR::getInfo2( dxJoint::Info2 *info )
 
     // distance between the body1 and the anchor2 in global frame
     // Calculated in the same way as the offset
-    dVector3 wanchor2, dist;
+    dVector3 wanchor2 = {0,0,0}, dist;
 
     if ( node[1].body )
     {
