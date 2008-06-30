@@ -255,6 +255,11 @@ do { \
 
 #define DECL template <class TA, class TB, class TC> PURE_INLINE void
 
+/* 
+Note: NEVER call any of these functions/macros with the same variable for A and C, 
+it is not equivalent to A*=B.
+*/
+
 DECL dMULTIPLY0_331(TA *A, const TB *B, const TC *C) { dMULTIPLYOP0_331(A,=,B,C); }
 DECL dMULTIPLY1_331(TA *A, const TB *B, const TC *C) { dMULTIPLYOP1_331(A,=,B,C); }
 DECL dMULTIPLY0_133(TA *A, const TB *B, const TC *C) { dMULTIPLYOP0_133(A,=,B,C); }

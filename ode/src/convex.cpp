@@ -331,6 +331,8 @@ inline bool IntersectPlanes(const dVector4 p1, const dVector4 p2, dVector3 p, dV
   return true;
 }
 
+
+#if 0
 /*! \brief Finds out if a point lies inside a convex
   \param p Point to test
   \param convex a pointer to convex to test against
@@ -339,12 +341,12 @@ inline bool IntersectPlanes(const dVector4 p1, const dVector4 p2, dVector3 p, dV
 inline bool IsPointInConvex(dVector3 p,
 			    dxConvex *convex)
 {
-  dVector3 lp;
+  dVector3 lp,tmp;
   // move point into convex space to avoid plane local to world calculations
-  lp[0] = p[0] - convex->final_posr->pos[0];
-  lp[1] = p[1] - convex->final_posr->pos[1];
-  lp[2] = p[2] - convex->final_posr->pos[2];
-  dMULTIPLY1_331 (lp,convex->final_posr->R,lp);
+  tmp[0] = p[0] - convex->final_posr->pos[0];
+  tmp[1] = p[1] - convex->final_posr->pos[1];
+  tmp[2] = p[2] - convex->final_posr->pos[2];
+  dMULTIPLY1_331 (lp,convex->final_posr->R,tmp);
   for(unsigned int i=0;i<convex->planecount;++i)
   {
     if((
@@ -359,6 +361,7 @@ inline bool IsPointInConvex(dVector3 p,
   }
   return true;
 }
+#endif
 
 /*! \brief Finds out if a point lies inside a 2D polygon
   \param p Point to test
@@ -932,7 +935,7 @@ inline unsigned int GetIncidentSide(ConvexConvexSATOutput& ccso)
   dReal SavedDot;
   dReal Dot;
   unsigned int incident_side=0;
-  // Rotate the plane normal into insident convex space 
+  // Rotate the plane normal into incident convex space 
   // (things like this should be done all over this file,
   //  will look into that)
   dMULTIPLY1_331(nis,ccso.g2->final_posr->R,ccso.plane);
@@ -952,14 +955,13 @@ inline unsigned int GetIncidentSide(ConvexConvexSATOutput& ccso)
 
 inline unsigned int GetSupportSide(dVector3& dir,dxConvex& cvx)
 {
-  dVector3 dics; // Direction in convex space
+  dVector3 dics,tmp; // Direction in convex space
   dReal SavedDot;
   dReal Dot;
   unsigned int side=0;
-  // Rotate the plane normal into insident convex space 
-  // (things like this should be done all over this file,
-  //  will look into that)
-  dMULTIPLY1_331(dics,cvx.final_posr->R,dir);
+  dVector3Copy(dir,tmp);
+  dNormalize3(tmp);
+  dMULTIPLY1_331(dics,cvx.final_posr->R,tmp);
   SavedDot = dDOT(dics,cvx.planes);
   for(unsigned int i=1;i<cvx.planecount;++i)
   {
@@ -1019,16 +1021,17 @@ int TestConvexIntersection(dxConvex& cvx1,dxConvex& cvx2, int flags,
     unsigned int* pReferencePoly;
     unsigned int* pReferencePoints;
     dVector4 plane,rplane,iplane;
+    dVector3 tmp;
     dVector3 dist,p;
     dReal t,d,d1,d2;
     bool outside,out;
     dVector3Copy(ccso.dist,dist);
     reference_side = GetSupportSide(dist,cvx1);
-    dist[0]=-cvx1.planes[(reference_side*4)+0];
-    dist[1]=-cvx1.planes[(reference_side*4)+1];
-    dist[2]=-cvx1.planes[(reference_side*4)+2];
+    dist[0]=-dist[0];
+    dist[1]=-dist[1];
+    dist[2]=-dist[2];
     incident_side = GetSupportSide(dist,cvx2);
-    
+
     pReferencePoly = cvx1.polygons;
     pIncidentPoly  = cvx2.polygons;
     // Get Reference plane (We may not have to apply transforms Optimization Oportunity)
@@ -1051,24 +1054,27 @@ int TestConvexIntersection(dxConvex& cvx1,dxConvex& cvx2, int flags,
       pIncidentPoly+=pIncidentPoly[0]+1;
     }
     pIncidentPoints = pIncidentPoly+1;
+#if 1
     // Get the first point of the incident face
     dMULTIPLY0_331(i2,cvx2.final_posr->R,&cvx2.points[(pIncidentPoints[0]*3)]);
- 	  dVector3Add(cvx2.final_posr->pos,i2,i2);
+ 	  dVector3Add(i2,cvx2.final_posr->pos,i2);
     // Get the same point in the reference convex space
     dVector3Copy(i2,r2);
     dVector3Subtract(r2,cvx1.final_posr->pos,r2);
-    dMULTIPLY1_331(r2,cvx1.final_posr->R,r2);
+    dVector3Copy(r2,tmp);
+    dMULTIPLY1_331(r2,cvx1.final_posr->R,tmp);
     for(unsigned int i=0;i<pIncidentPoly[0];++i)
     {
       // Move i2 to i1, r2 to r1
       dVector3Copy(i2,i1);
       dVector3Copy(r2,r1);
       dMULTIPLY0_331(i2,cvx2.final_posr->R,&cvx2.points[(pIncidentPoints[(i+1)%pIncidentPoly[0]]*3)]);
-  	  dVector3Add(cvx2.final_posr->pos,i2,i2);
+  	  dVector3Add(i2,cvx2.final_posr->pos,i2);
       // Get the same point in the reference convex space
       dVector3Copy(i2,r2);
       dVector3Subtract(r2,cvx1.final_posr->pos,r2);
-      dMULTIPLY1_331(r2,cvx1.final_posr->R,r2);
+      dVector3Copy(r2,tmp);
+      dMULTIPLY1_331(r2,cvx1.final_posr->R,tmp);
       outside=false;
       for(unsigned int j=0;j<cvx1.planecount;++j)
       {
@@ -1097,14 +1103,27 @@ int TestConvexIntersection(dxConvex& cvx1,dxConvex& cvx2, int flags,
             p[1]*cvx1.planes[(k*4)+1]+
             p[2]*cvx1.planes[(k*4)+2]-
             cvx1.planes[(k*4)+3];
-            if(d>0){out = true;break;};
+            if(d>0)
+            {
+              out = true;
+              break;
+            };
           }
           if(!out)
           {
+#if 0
             // Use t to move p into global space
             p[0] = i1[0]+((i2[0]-i1[0])*t);
             p[1] = i1[1]+((i2[1]-i1[1])*t);
             p[2] = i1[2]+((i2[2]-i1[2])*t);
+#else
+            // Apply reference convex transformations to p
+            // The commented out piece of code is likelly to
+            // produce less operations than this one, but
+            // this way we know we are getting the right data
+            dMULTIPLY0_331(tmp,cvx1.final_posr->R,p);
+  	        dVector3Add(tmp,cvx1.final_posr->pos,p);
+#endif
             // get p's distance to reference plane
             d = p[0]*rplane[0]+
             p[1]*rplane[1]+
@@ -1112,6 +1131,7 @@ int TestConvexIntersection(dxConvex& cvx1,dxConvex& cvx2, int flags,
             rplane[3];
             if(d>0)
             {
+#if 1
               dVector3Copy(p,SAFECONTACT(flags, contact, contacts, skip)->pos);
               dVector3Copy(rplane,SAFECONTACT(flags, contact, contacts, skip)->normal);
               SAFECONTACT(flags, contact, contacts, skip)->g1=&cvx1;
@@ -1119,6 +1139,7 @@ int TestConvexIntersection(dxConvex& cvx1,dxConvex& cvx2, int flags,
               SAFECONTACT(flags, contact, contacts, skip)->depth=d;
               ++contacts;
               if (contacts==maxc) return contacts;
+#endif
             }
           }
         }
@@ -1167,7 +1188,6 @@ int TestConvexIntersection(dxConvex& cvx1,dxConvex& cvx2, int flags,
     pReferencePoints = pReferencePoly+1;
     for(unsigned int i=0;i<pReferencePoly[0];++i)
     {
-      // Get the first point of the reference face
       dMULTIPLY0_331(i1,cvx1.final_posr->R,&cvx1.points[(pReferencePoints[i]*3)]);
  	    dVector3Add(cvx1.final_posr->pos,i1,i1);
       // Project onto Incident face plane      
@@ -1181,7 +1201,8 @@ int TestConvexIntersection(dxConvex& cvx1,dxConvex& cvx2, int flags,
       // Get the same point in the incident convex space
       dVector3Copy(i1,r1);
       dVector3Subtract(r1,cvx2.final_posr->pos,r1);
-      dMULTIPLY1_331(r1,cvx2.final_posr->R,r1);
+      dVector3Copy(r1,tmp);
+      dMULTIPLY1_331(r1,cvx2.final_posr->R,tmp);
       // Check if it is outside the incident convex
       out = false;
       for(unsigned int j=0;j<cvx2.planecount;++j)
@@ -1224,6 +1245,34 @@ int TestConvexIntersection(dxConvex& cvx1,dxConvex& cvx2, int flags,
         }
       }
     }
+#else
+    // Keeping this code just for debuging purposes
+    for(unsigned int i=0;i<pIncidentPoly[0];++i)
+    {
+      dMULTIPLY0_331(i2,cvx2.final_posr->R,&cvx2.points[(pIncidentPoints[i]*3)]);
+  	  dVector3Add(cvx2.final_posr->pos,i2,i2);
+      dVector3Copy(i2,SAFECONTACT(flags, contact, contacts, skip)->pos);
+      SAFECONTACT(flags, contact, contacts, skip)->g1=&cvx1;
+      SAFECONTACT(flags, contact, contacts, skip)->g2=&cvx2;
+      ++contacts;
+      if (contacts==maxc) return contacts;
+    }
+    for(unsigned int i=0;i<reference_side;++i)
+    {
+      pReferencePoly+=pReferencePoly[0]+1;
+    }
+    pReferencePoints = pReferencePoly+1;
+    for(unsigned int i=0;i<pReferencePoly[0];++i)
+    {
+      dMULTIPLY0_331(i1,cvx1.final_posr->R,&cvx1.points[(pReferencePoints[i]*3)]);
+ 	    dVector3Add(cvx1.final_posr->pos,i1,i1);
+      dVector3Copy(i1,SAFECONTACT(flags, contact, contacts, skip)->pos);
+      SAFECONTACT(flags, contact, contacts, skip)->g1=&cvx1;
+      SAFECONTACT(flags, contact, contacts, skip)->g2=&cvx2;
+      ++contacts;
+      if (contacts==maxc) return contacts;
+    }
+#endif
   }
   else if(ccso.depth_type==2) // edge-edge
   {

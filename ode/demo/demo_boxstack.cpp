@@ -169,6 +169,7 @@ static void start()
   printf ("To select an object, press space.\n");
   printf ("To disable the selected object, press d.\n");
   printf ("To enable the selected object, press e.\n");
+  printf ("To dump transformation data for the selected object, press p.\n");
   printf ("To toggle showing the geom AABBs, press a.\n");
   printf ("To toggle showing the contact points, press t.\n");
   printf ("To toggle dropping from random position/orientation, press r.\n");
@@ -411,6 +412,19 @@ static void command (int cmd)
   }
   else if (cmd == '1') {
     write_world = 1;
+  }
+  else if (cmd == 'p')
+  {
+    if(selected>=0)
+    {
+      const dReal* pos = dGeomGetPosition(obj[selected].geom[0]);
+      const dReal* rot = dGeomGetRotation(obj[selected].geom[0]);
+      printf("POSITION:\n\t[%f,%f,%f]\n\n",pos[0],pos[1],pos[2]);
+      printf("ROTATION:\n\t[%f,%f,%f,%f]\n\t[%f,%f,%f,%f]\n\t[%f,%f,%f,%f]\n\n",
+        rot[0],rot[1],rot[2],rot[3],
+        rot[4],rot[5],rot[6],rot[7],
+        rot[8],rot[9],rot[10],rot[11]);
+    }
   }
 }
 
