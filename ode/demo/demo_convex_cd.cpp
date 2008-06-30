@@ -106,8 +106,20 @@ Where	c = cos(angle),	s = sine(angle), and ||( x,y,z )|| = 1
 
 dVector3 geom1pos={0.0,0.250,0.50};
 dQuaternion geom1quat={1,0,0,0};
+dQuaternion geom0quat={0.7071,0,0.7071,0};
+
 bool DumpInfo=true;
 int drawmode = DS_WIREFRAME;
+
+const dReal fixed_pos_0[]={0.703704,-0.748281,0.249495};
+const dReal fixed_rot_0[]={0.996994,-0.001009,-0.077468,0.000000,
+                          -0.077468,-0.000117,-0.996995,0.000000,
+                           0.000996, 1.000000,-0.000195,0.000000};
+
+const dReal fixed_pos_1[]={0.894169,-0.372081,0.249432};
+const dReal fixed_rot_1[]={-0.999461, 0.032777,0.001829,0.000000,
+                           -0.032777,-0.999463,0.000033,0.000000,
+                            0.001829,-0.000027,0.999998,0.000000};
 
 void start()
 {
@@ -134,6 +146,7 @@ void start()
 
   dMatrix3 m1 = { 1,0,0,0,0,1,0,0,0,0,1,0 };
   dMatrix3 m2 = { 1,0,0,0,0,1,0,0,0,0,1,0 };
+#if 0
   dGeomSetPosition (convex[0],
 		    0.0,
 		    0.0,
@@ -142,6 +155,7 @@ void start()
 		    geom1pos[0],
 		    geom1pos[1],
 		    geom1pos[2]);
+  dQtoR (geom0quat, m1);
   dGeomSetRotation (convex[0],m1);
   dQtoR (geom1quat, m2);
   dGeomSetRotation (convex[1],m2);
@@ -154,10 +168,32 @@ void start()
 		    geom1pos[0],
 		    geom1pos[1],
 		    geom1pos[2]);
+  dQtoR (geom0quat, m1);
   dGeomSetRotation (boxes[0],m1);
   dQtoR (geom1quat, m2);
   dGeomSetRotation (boxes[1],m2);
-
+#else
+  dGeomSetPosition (convex[0],
+		    fixed_pos_0[0],
+		    fixed_pos_0[1],
+		    fixed_pos_0[2]);
+  dGeomSetPosition (convex[1],
+		    fixed_pos_1[0],
+		    fixed_pos_1[1],
+		    fixed_pos_1[2]);
+  dGeomSetRotation (convex[0],fixed_rot_0);
+  dGeomSetRotation (convex[1],fixed_rot_1);
+  dGeomSetPosition (boxes[0],
+		    fixed_pos_0[0],
+		    fixed_pos_0[1],
+		    fixed_pos_0[2]);
+  dGeomSetPosition (boxes[1],
+		    fixed_pos_1[0],
+		    fixed_pos_1[1],
+		    fixed_pos_1[2]);
+  dGeomSetRotation (boxes[0],fixed_rot_0);
+  dGeomSetRotation (boxes[1],fixed_rot_1);
+#endif
 
 }
 
@@ -285,12 +321,14 @@ void command (int cmd)
     default:
       dsPrint ("received command %d (`%c')\n",cmd,cmd);     
     }
+#if 0
   dGeomSetPosition (geoms[1],
 		    geom1pos[0],
 		    geom1pos[1],
 		    geom1pos[2]);
   dQtoR (geom1quat, m);
   dGeomSetRotation (geoms[1],m);
+#endif
   DumpInfo=true;
 }
 
