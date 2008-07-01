@@ -1,8 +1,8 @@
 dnl AC_INIT does not take a macro as a version nr: set it separately! - Bram
-AC_INIT(ODE,0.9.0,ode@ode.org)
+AC_INIT(ODE,0.10.0,ode@ode.org)
 
 dnl When upgrading version nr, also change the AC_INIT line! - Bram
-ODE_RELEASE=0.9.0
+ODE_RELEASE=0.10.0
 
 
 AC_CANONICAL_HOST
