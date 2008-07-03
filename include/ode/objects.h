@@ -1598,12 +1598,6 @@ ODE_API void dJointSetHingeAxis (dJointID, dReal x, dReal y, dReal z);
 ODE_API void dJointSetHingeAxisDelta (dJointID j, dReal x, dReal y, dReal z, dReal angle);
 
 /**
- * @brief Set hinge axis.
- * @ingroup joints
- */
-ODE_API void dJointSetHingeAxisDelta (dJointID, dReal x, dReal y, dReal z, dReal dangle);
-
-/**
  * @brief set joint parameter
  * @ingroup joints
  */
