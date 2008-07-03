@@ -1568,6 +1568,42 @@ ODE_API void dJointSetHingeAnchorDelta (dJointID, dReal x, dReal y, dReal z, dRe
 ODE_API void dJointSetHingeAxis (dJointID, dReal x, dReal y, dReal z);
 
 /**
+ * @brief Set the Hinge axis as if the 2 bodies were already at angle appart.
+ * @ingroup joints
+ *
+ * This function initialize the Axis and the relative orientation of each body
+ * as if body1 was rotated around the axis by the angle value. \br
+ * Ex:
+ * <PRE>
+ * dJointSetHingeAxis(jId, 1, 0, 0);
+ * // If you request the position you will have: dJointGetHingeAngle(jId) == 0
+ * dJointSetHingeAxisDelta(jId, 1, 0, 0, 0.23);
+ * // If you request the position you will have: dJointGetHingeAngle(jId) == 0.23
+ * </PRE>
+
+ * @param j The Hinge joint ID for which the axis will be set
+ * @param x The X component of the axis in world frame
+ * @param y The Y component of the axis in world frame
+ * @param z The Z component of the axis in world frame
+ * @param angle The angle for the offset of the relative orientation.
+ *              As if body1 was rotated by angle when the Axis was set (see below).
+ *              The rotation is around the new Hinge axis.
+ *
+ * @note Usually the function dJointSetHingeAxis set the current position of body1
+ *       and body2 as the zero angle position. This function set the current position
+ *       as the if the 2 bodies where \b angle appart.
+ * @warning Calling dJointSetHingeAnchor or dJointSetHingeAxis will reset the "zero"
+ *          angle position.
+ */
+ODE_API void dJointSetHingeAxisDelta (dJointID j, dReal x, dReal y, dReal z, dReal angle);
+
+/**
+ * @brief Set hinge axis.
+ * @ingroup joints
+ */
+ODE_API void dJointSetHingeAxisDelta (dJointID, dReal x, dReal y, dReal z, dReal dangle);
+
+/**
  * @brief set joint parameter
  * @ingroup joints
  */
@@ -1778,13 +1814,13 @@ ODE_API void dJointAddPRTorque (dJointID j, dReal torque);
 
 
   /**
-   * @brief set the joint axis
+   * @brief set the joint anchor
    * @ingroup joints
    */
   ODE_API void dJointSetPistonAnchor (dJointID, dReal x, dReal y, dReal z);
 
-  /**
-   * @brief set the joint axis
+    /**
+     * @brief set the joint axis
    * @ingroup joints
    */
   ODE_API void dJointSetPistonAxis (dJointID, dReal x, dReal y, dReal z);

@@ -202,6 +202,29 @@ void dJointSetHingeAxis( dJointID j, dReal x, dReal y, dReal z )
 }
 
 
+void dJointSetHingeAxisDelta( dJointID j, dReal x, dReal y, dReal z, dReal dangle )
+{
+    dxJointHinge* joint = ( dxJointHinge* )j;
+    dUASSERT( joint, "bad joint argument" );
+    checktype( joint, Hinge );
+    setAxes( joint, x, y, z, joint->axis1, joint->axis2 );
+    joint->computeInitialRelativeRotation();
+
+    if ( joint->flags & dJOINT_REVERSE ) dangle = -dangle;
+
+    dQuaternion qAngle, qDelta;
+    dQFromAxisAndAngle(qAngle, x, y, z, dangle);
+    dQMultiply3(qDelta, qAngle, joint->qrel);
+    joint->qrel[0] = qDelta[0];
+    joint->qrel[1] = qDelta[1];
+    joint->qrel[2] = qDelta[2];
+    joint->qrel[3] = qDelta[3];
+
+
+}
+
+
+
 void dJointGetHingeAnchor( dJointID j, dVector3 result )
 {
     dxJointHinge* joint = ( dxJointHinge* )j;
