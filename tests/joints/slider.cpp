@@ -144,4 +144,598 @@ SUITE (TestdxJointSlider)
         CHECK_CLOSE (joint->qrel[2], -0.65308047160141625, 1e-4);
         CHECK_CLOSE (joint->qrel[3],  0.65381489108282143, 1e-4);
     }
+
+
+
+  // The 2 bodies are positionned at (0, 0, 0), with no rotation
+  // The joint is a Slider Joint
+  // Axis is along the X axis
+  // Anchor at (0, 0, 0)
+  struct Fixture_dxJointSlider_B1_and_B2_At_Zero_Axis_Along_X
+  {
+    Fixture_dxJointSlider_B1_and_B2_At_Zero_Axis_Along_X()
+      {
+        wId = dWorldCreate();
+
+        bId1 = dBodyCreate (wId);
+        dBodySetPosition (bId1, 0, 0, 0);
+
+        bId2 = dBodyCreate (wId);
+        dBodySetPosition (bId2, 0, 0, 0);
+
+        jId   = dJointCreateSlider (wId, 0);
+        joint = (dxJointSlider*) jId;
+
+
+        dJointAttach (jId, bId1, bId2);
+
+        dJointSetSliderAxis(jId, axis[0], axis[1], axis[2]);
+      }
+
+    ~Fixture_dxJointSlider_B1_and_B2_At_Zero_Axis_Along_X()
+      {
+        dWorldDestroy (wId);
+      }
+
+    dWorldID wId;
+
+    dBodyID bId1;
+    dBodyID bId2;
+
+
+    dJointID jId;
+    dxJointSlider* joint;
+
+    static const dVector3 axis;
+
+    static const dReal offset;
+  };
+  const dVector3 Fixture_dxJointSlider_B1_and_B2_At_Zero_Axis_Along_X::axis = {1, 0, 0};
+  const dReal    Fixture_dxJointSlider_B1_and_B2_At_Zero_Axis_Along_X::offset = 3.1;
+
+  // Move 1st body offset unit in the X direction
+  //
+  //  X------->       X---------> Axis -->
+  //  B1          =>     B1
+  //  B2              B2
+  //
+  // Start with a Offset of offset unit
+  //
+  //  X------->       X---------> Axis -->
+  //     B1       =>  B1
+  //  B2              B2
+  TEST_FIXTURE (Fixture_dxJointSlider_B1_and_B2_At_Zero_Axis_Along_X,
+                test_dJointSetSliderAxisOffset_B1_3Unit)
+    {
+      CHECK_CLOSE (0.0, dJointGetSliderPosition(jId), 1e-4);
+
+      dBodySetPosition(bId1, offset, 0, 0);
+
+      CHECK_CLOSE (offset, dJointGetSliderPosition(jId), 1e-4);
+    }
+
+  // Move 1st body offset unit in the opposite X direction
+  //
+  //  X------->          X---------> Axis -->
+  //  B1          =>  B1
+  //  B2                 B2
+  //
+  // Start with a Offset of -offset unit
+  //
+  //      X------->      X---------> Axis -->
+  //  B1            =>   B1
+  //      B2             B2
+  TEST_FIXTURE (Fixture_dxJointSlider_B1_and_B2_At_Zero_Axis_Along_X,
+                test_dJointSetSliderAxisOffset_B1_Minus_3Unit)
+    {
+      CHECK_CLOSE (0.0, dJointGetSliderPosition(jId), 1e-4);
+
+      dBodySetPosition(bId1, -offset, 0, 0);
+
+      CHECK_CLOSE (-offset, dJointGetSliderPosition(jId), 1e-4);
+    }
+
+  // Move 2nd body offset unit in the X direction
+  //
+  //  X------->       X---------> Axis -->
+  //  B1          =>  B1
+  //  B2                 B2
+  //
+  // Start with a Offset of offset unit
+  //
+  //  X------->       X---------> Axis -->
+  //  B1          =>  B1
+  //     B2           B2
+  TEST_FIXTURE (Fixture_dxJointSlider_B1_and_B2_At_Zero_Axis_Along_X,
+                test_dJointSetSliderAxisOffset_B2_3Unit)
+    {
+      CHECK_CLOSE (0.0, dJointGetSliderPosition(jId), 1e-4);
+
+      dBodySetPosition(bId2, offset, 0, 0);
+
+      CHECK_CLOSE (-offset, dJointGetSliderPosition(jId), 1e-4);
+    }
+
+  // Move 2nd body offset unit in the opposite X direction
+  //
+  //  X------->          X---------> Axis -->
+  //  B1          =>     B1
+  //  B2              B2
+  //
+  // Start with a Offset of -offset unit
+  //
+  //     X------->    X---------> Axis -->
+  //     B1       =>  B1
+  //  B2              B2
+  TEST_FIXTURE (Fixture_dxJointSlider_B1_and_B2_At_Zero_Axis_Along_X,
+                test_dJointSetSliderAxisOffset_B2_Minus_3Unit)
+    {
+      CHECK_CLOSE (0.0, dJointGetSliderPosition(jId), 1e-4);
+
+      dBodySetPosition(bId2, -offset, 0, 0);
+
+      CHECK_CLOSE (offset, dJointGetSliderPosition(jId), 1e-4);
+    }
+
+
+
+  // The 2 bodies are positionned at (0, 0, 0), with no rotation
+  // The joint is a Slider Joint
+  // Axis is the opposite of the X axis
+  // Anchor at (0, 0, 0)
+  struct Fixture_dxJointSlider_B1_and_B2_At_Zero_Axis_Inverse_of_X
+  {
+    Fixture_dxJointSlider_B1_and_B2_At_Zero_Axis_Inverse_of_X()
+      {
+        wId = dWorldCreate();
+
+        bId1 = dBodyCreate (wId);
+        dBodySetPosition (bId1, 0, 0, 0);
+
+        bId2 = dBodyCreate (wId);
+        dBodySetPosition (bId2, 0, 0, 0);
+
+        jId   = dJointCreateSlider (wId, 0);
+        joint = (dxJointSlider*) jId;
+
+
+        dJointAttach (jId, bId1, bId2);
+
+
+        dJointSetSliderAxis(jId, axis[0], axis[1], axis[2]);
+      }
+
+    ~Fixture_dxJointSlider_B1_and_B2_At_Zero_Axis_Inverse_of_X()
+      {
+        dWorldDestroy (wId);
+      }
+
+    dWorldID wId;
+
+    dBodyID bId1;
+    dBodyID bId2;
+
+
+    dJointID jId;
+    dxJointSlider* joint;
+
+    static const dVector3 axis;
+    static const dReal offset;
+  };
+  const dVector3 Fixture_dxJointSlider_B1_and_B2_At_Zero_Axis_Inverse_of_X::axis = {-1, 0, 0};
+  const dReal    Fixture_dxJointSlider_B1_and_B2_At_Zero_Axis_Inverse_of_X::offset = 3.1;
+
+  // Move 1st body offset unit in the X direction
+  //
+  //  X------->       X--------->   <-- Axis
+  //  B1          =>     B1
+  //  B2              B2
+  //
+  // Start with a Offset of offset unit
+  //
+  //  X------->       X--------->  <-- Axis
+  //     B1       =>  B1
+  //  B2              B2
+  TEST_FIXTURE (Fixture_dxJointSlider_B1_and_B2_At_Zero_Axis_Inverse_of_X,
+                test_dJointSetSliderAxisOffset_B1_3Unit)
+    {
+      CHECK_CLOSE (0.0, dJointGetSliderPosition(jId), 1e-4);
+
+      dBodySetPosition(bId1, offset, 0, 0);
+
+      CHECK_CLOSE (-offset, dJointGetSliderPosition(jId), 1e-4);
+    }
+
+  // Move 1st body offset unit in the opposite X direction
+  //
+  //  X------->          X--------->  <-- Axis
+  //  B1          =>  B1
+  //  B2                 B2
+  //
+  // Start with a Offset of offset unit
+  //
+  //     X------->  X--------->      <-- Axis
+  //  B1       =>   B1
+  //     B2         B2
+  TEST_FIXTURE (Fixture_dxJointSlider_B1_and_B2_At_Zero_Axis_Inverse_of_X,
+                test_dJointSetSliderAxisOffset_B1_Minus_3Unit)
+    {
+      CHECK_CLOSE (0.0, dJointGetSliderPosition(jId), 1e-4);
+
+      dBodySetPosition(bId1, -offset, 0, 0);
+
+      CHECK_CLOSE (offset, dJointGetSliderPosition(jId), 1e-4);
+    }
+
+  // Move 2nd body offset unit in the X direction
+  //
+  //  X------->       X--------->  <-- Axis
+  //  B1          =>  B1
+  //  B2                 B2
+  //
+  // Start with a Offset of offset unit
+  //
+  //  X------->       X--------->  <-- Axis
+  //  B1          =>  B1
+  //     B2           B2
+  TEST_FIXTURE (Fixture_dxJointSlider_B1_and_B2_At_Zero_Axis_Inverse_of_X,
+                test_dJointSetSliderAxisOffset_B2_3Unit)
+    {
+      CHECK_CLOSE (0.0, dJointGetSliderPosition(jId), 1e-4);
+
+      dBodySetPosition(bId2, offset, 0, 0);
+
+      CHECK_CLOSE (offset, dJointGetSliderPosition(jId), 1e-4);
+    }
+
+  // Move 2nd body offset unit in the opposite X direction
+  //
+  //  X------->          X--------->  <-- Axis
+  //  B1          =>     B1
+  //  B2              B2
+  //
+  // Start with a Offset of -offset unit
+  //
+  //     X------->    X--------->     <-- Axis
+  //     B1       =>  B1
+  //  B2              B2
+  TEST_FIXTURE (Fixture_dxJointSlider_B1_and_B2_At_Zero_Axis_Inverse_of_X,
+                test_dJointSetSliderAxisOffset_B2_Minus_3Unit)
+    {
+      CHECK_CLOSE (0.0, dJointGetSliderPosition(jId), 1e-4);
+
+      dBodySetPosition(bId2, -offset, 0, 0);
+
+      CHECK_CLOSE (-offset, dJointGetSliderPosition(jId), 1e-4);
+    }
+
+
+  // Only body 1
+  // The body are positionned at (0, 0, 0), with no rotation
+  // The joint is a Slider Joint
+  // Axis is along the X axis
+  // Anchor at (0, 0, 0)
+  struct Fixture_dxJointSlider_B1_At_Zero_Axis_Along_X
+  {
+    Fixture_dxJointSlider_B1_At_Zero_Axis_Along_X()
+      {
+        wId = dWorldCreate();
+
+        bId1 = dBodyCreate (wId);
+        dBodySetPosition (bId1, 0, 0, 0);
+
+        jId   = dJointCreateSlider (wId, 0);
+        joint = (dxJointSlider*) jId;
+
+
+        dJointAttach (jId, bId1, NULL);
+
+        dJointSetSliderAxis(jId, axis[0], axis[1], axis[2]);
+      }
+
+    ~Fixture_dxJointSlider_B1_At_Zero_Axis_Along_X()
+      {
+        dWorldDestroy (wId);
+      }
+
+    dWorldID wId;
+
+    dBodyID bId1;
+
+    dJointID jId;
+    dxJointSlider* joint;
+
+    static const dVector3 axis;
+
+    static const dReal offset;
+  };
+  const dVector3 Fixture_dxJointSlider_B1_At_Zero_Axis_Along_X::axis = {1, 0, 0};
+  const dReal    Fixture_dxJointSlider_B1_At_Zero_Axis_Along_X::offset = 3.1;
+
+  // Move 1st body offset unit in the X direction
+  //
+  //  X------->       X---------> Axis -->
+  //  B1          =>     B1
+  //
+  // Start with a Offset of offset unit
+  //
+  //  X------->       X---------> Axis -->
+  //     B1       =>  B1
+  TEST_FIXTURE (Fixture_dxJointSlider_B1_At_Zero_Axis_Along_X,
+                test_dJointSetSliderAxisOffset_B1_OffsetUnit)
+    {
+      CHECK_CLOSE (0.0, dJointGetSliderPosition(jId), 1e-4);
+
+      dBodySetPosition(bId1, offset, 0, 0);
+
+      CHECK_CLOSE (offset, dJointGetSliderPosition(jId), 1e-4);
+    }
+
+  // Move 1st body offset unit in the opposite X direction
+  //
+  //  X------->          X---------> Axis -->
+  //  B1          =>  B1
+  //
+  // Start with a Offset of -offset unit
+  //
+  //      X------->      X---------> Axis -->
+  //  B1            =>   B1
+  TEST_FIXTURE (Fixture_dxJointSlider_B1_At_Zero_Axis_Along_X,
+                test_dJointSetSliderAxisOffset_B1_Minus_OffsetUnit)
+    {
+      CHECK_CLOSE (0.0, dJointGetSliderPosition(jId), 1e-4);
+
+      dBodySetPosition(bId1, -offset, 0, 0);
+
+      CHECK_CLOSE (-offset, dJointGetSliderPosition(jId), 1e-4);
+    }
+
+  // Only body 1
+  // The body are positionned at (0, 0, 0), with no rotation
+  // The joint is a Slider Joint
+  // Axis is in the oppsite X axis
+  // Anchor at (0, 0, 0)
+  struct Fixture_dxJointSlider_B1_At_Zero_Axis_Inverse_of_X
+  {
+    Fixture_dxJointSlider_B1_At_Zero_Axis_Inverse_of_X()
+      {
+        wId = dWorldCreate();
+
+        bId1 = dBodyCreate (wId);
+        dBodySetPosition (bId1, 0, 0, 0);
+
+        jId   = dJointCreateSlider (wId, 0);
+        joint = (dxJointSlider*) jId;
+
+
+        dJointAttach (jId, bId1, NULL);
+
+        dJointSetSliderAxis(jId, axis[0], axis[1], axis[2]);
+      }
+
+    ~Fixture_dxJointSlider_B1_At_Zero_Axis_Inverse_of_X()
+      {
+        dWorldDestroy (wId);
+      }
+
+    dWorldID wId;
+
+    dBodyID bId1;
+
+    dJointID jId;
+    dxJointSlider* joint;
+
+    static const dVector3 axis;
+
+    static const dReal offset;
+  };
+  const dVector3 Fixture_dxJointSlider_B1_At_Zero_Axis_Inverse_of_X::axis = {-1, 0, 0};
+  const dReal    Fixture_dxJointSlider_B1_At_Zero_Axis_Inverse_of_X::offset = 3.1;
+
+  // Move 1st body offset unit in the X direction
+  //
+  //  X------->       X--------->  <--- Axis
+  //  B1          =>     B1
+  //
+  // Start with a Offset of offset unit
+  //
+  //  X------->       X--------->  <--- Axis
+  //     B1       =>  B1
+  TEST_FIXTURE (Fixture_dxJointSlider_B1_At_Zero_Axis_Inverse_of_X,
+                test_dJointSetSliderAxisOffset_B1_OffsetUnit)
+    {
+      CHECK_CLOSE (0.0, dJointGetSliderPosition(jId), 1e-4);
+
+      dBodySetPosition(bId1, offset, 0, 0);
+
+      CHECK_CLOSE (-offset, dJointGetSliderPosition(jId), 1e-4);
+    }
+
+  // Move 1st body offset unit in the opposite X direction
+  //
+  //  X------->          X--------->   <--- Axis
+  //  B1          =>  B1
+  //
+  // Start with a Offset of -offset unit
+  //
+  //      X------->      X--------->   <--- Axis
+  //  B1            =>   B1
+  TEST_FIXTURE (Fixture_dxJointSlider_B1_At_Zero_Axis_Inverse_of_X,
+                test_dJointSetSliderAxisOffset_B1_Minus_OffsetUnit)
+    {
+      CHECK_CLOSE (0.0, dJointGetSliderPosition(jId), 1e-4);
+
+      dBodySetPosition(bId1, -offset, 0, 0);
+
+      CHECK_CLOSE (offset, dJointGetSliderPosition(jId), 1e-4);
+    }
+
+
+
+
+
+
+
+
+
+  // Only body 2
+  // The body are positionned at (0, 0, 0), with no rotation
+  // The joint is a Slider Joint
+  // Axis is along the X axis
+  // Anchor at (0, 0, 0)
+  struct Fixture_dxJointSlider_B2_At_Zero_Axis_Along_X
+  {
+    Fixture_dxJointSlider_B2_At_Zero_Axis_Along_X()
+      {
+        wId = dWorldCreate();
+
+        bId2 = dBodyCreate (wId);
+        dBodySetPosition (bId2, 0, 0, 0);
+
+        jId   = dJointCreateSlider (wId, 0);
+        joint = (dxJointSlider*) jId;
+
+
+        dJointAttach (jId, NULL, bId2);
+
+        dJointSetSliderAxis(jId, axis[0], axis[1], axis[2]);
+      }
+
+    ~Fixture_dxJointSlider_B2_At_Zero_Axis_Along_X()
+      {
+        dWorldDestroy (wId);
+      }
+
+    dWorldID wId;
+
+    dBodyID bId2;
+
+    dJointID jId;
+    dxJointSlider* joint;
+
+    static const dVector3 axis;
+
+    static const dReal offset;
+  };
+  const dVector3 Fixture_dxJointSlider_B2_At_Zero_Axis_Along_X::axis = {1, 0, 0};
+  const dReal    Fixture_dxJointSlider_B2_At_Zero_Axis_Along_X::offset = 3.1;
+
+  // Move 2nd body offset unit in the X direction
+  //
+  //  X------->       X---------> Axis -->
+  //  B2          =>     B2
+  //
+  // Start with a Offset of offset unit
+  //
+  //  X------->       X---------> Axis -->
+  //     B2       =>  B2
+  TEST_FIXTURE (Fixture_dxJointSlider_B2_At_Zero_Axis_Along_X,
+                test_dJointSetSliderAxisOffset_B2_OffsetUnit)
+    {
+      CHECK_CLOSE (0.0, dJointGetSliderPosition(jId), 1e-4);
+
+      dBodySetPosition(bId2, offset, 0, 0);
+
+      CHECK_CLOSE (offset, dJointGetSliderPosition(jId), 1e-4);
+    }
+
+  // Move 2nd body offset unit in the opposite X direction
+  //
+  //  X------->          X---------> Axis -->
+  //  B2          =>  B2
+  //
+  // Start with a Offset of -offset unit
+  //
+  //      X------->      X---------> Axis -->
+  //  B2            =>   B2
+  TEST_FIXTURE (Fixture_dxJointSlider_B2_At_Zero_Axis_Along_X,
+                test_dJointSetSliderAxisOffset_B2_Minus_OffsetUnit)
+    {
+      CHECK_CLOSE (0.0, dJointGetSliderPosition(jId), 1e-4);
+
+      dBodySetPosition(bId2, offset, 0, 0);
+
+      CHECK_CLOSE (offset, dJointGetSliderPosition(jId), 1e-4);
+    }
+
+  // Only body 2
+  // The body are positionned at (0, 0, 0), with no rotation
+  // The joint is a Slider Joint
+  // Axis is in the oppsite X axis
+  // Anchor at (0, 0, 0)
+  struct Fixture_dxJointSlider_B2_At_Zero_Axis_Inverse_of_X
+  {
+    Fixture_dxJointSlider_B2_At_Zero_Axis_Inverse_of_X()
+      {
+        wId = dWorldCreate();
+
+        bId2 = dBodyCreate (wId);
+        dBodySetPosition (bId2, 0, 0, 0);
+
+        jId   = dJointCreateSlider (wId, 0);
+        joint = (dxJointSlider*) jId;
+
+
+        dJointAttach (jId, NULL, bId2);
+
+        dJointSetSliderAxis(jId, axis[0], axis[1], axis[2]);
+      }
+
+    ~Fixture_dxJointSlider_B2_At_Zero_Axis_Inverse_of_X()
+      {
+        dWorldDestroy (wId);
+      }
+
+    dWorldID wId;
+
+    dBodyID bId2;
+
+    dJointID jId;
+    dxJointSlider* joint;
+
+    static const dVector3 axis;
+
+    static const dReal offset;
+  };
+  const dVector3 Fixture_dxJointSlider_B2_At_Zero_Axis_Inverse_of_X::axis = {-1, 0, 0};
+  const dReal    Fixture_dxJointSlider_B2_At_Zero_Axis_Inverse_of_X::offset = 3.1;
+
+  // Move 2nd body offset unit in the X direction
+  //
+  //  X------->       X--------->  <--- Axis
+  //  B2          =>     B2
+  //
+  // Start with a Offset of offset unit
+  //
+  //  X------->       X--------->  <--- Axis
+  //     B2       =>  B2
+  TEST_FIXTURE (Fixture_dxJointSlider_B2_At_Zero_Axis_Inverse_of_X,
+                test_dJointSetSliderAxisOffset_B2_OffsetUnit)
+    {
+      CHECK_CLOSE (0.0, dJointGetSliderPosition(jId), 1e-4);
+
+      dBodySetPosition(bId2, offset, 0, 0);
+
+      CHECK_CLOSE (-offset, dJointGetSliderPosition(jId), 1e-4);
+    }
+
+  // Move 2nd body offset unit in the opposite X direction
+  //
+  //  X------->          X--------->   <--- Axis
+  //  B2          =>  B2
+  //
+  // Start with a Offset of -offset unit
+  //
+  //      X------->      X--------->   <--- Axis
+  //  B2            =>   B2
+  TEST_FIXTURE (Fixture_dxJointSlider_B2_At_Zero_Axis_Inverse_of_X,
+                test_dJointSetSliderAxisOffset_B2_Minus_OffsetUnit)
+    {
+      CHECK_CLOSE (0.0, dJointGetSliderPosition(jId), 1e-4);
+
+      dBodySetPosition(bId2, -offset, 0, 0);
+
+      CHECK_CLOSE (offset, dJointGetSliderPosition(jId), 1e-4);
+    }
+
 } // End of SUITE TestdxJointSlider
