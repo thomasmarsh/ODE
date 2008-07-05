@@ -22,8 +22,6 @@
 #include "collision_trimesh_colliders.h"
 #endif // dTRIMESH_ENABLED
 
-#define TERRAINTOL REAL(0.0)
-
 #define dMIN(A,B)  ((A)>(B) ? (B) : (A))
 #define dMAX(A,B)  ((A)>(B) ? (A) : (B))
 
@@ -77,6 +75,7 @@ dxHeightfieldData::dxHeightfieldData() :	m_fWidth( 0 ),
 											m_fDepth( 0 ),
 											m_fSampleWidth( 0 ),
 											m_fSampleDepth( 0 ),
+                                            m_fSampleZXAspect( 0 ),
 											m_fInvSampleWidth( 0 ),
 											m_fInvSampleDepth( 0 ),
 											
@@ -133,11 +132,13 @@ void dxHeightfieldData::SetData( int nWidthSamples, int nDepthSamples,
     m_nWidthSamples = nWidthSamples;
     m_nDepthSamples = nDepthSamples;
 
-    m_fSampleWidth = m_fWidth / ( m_nWidthSamples - 1 );
-    m_fSampleDepth = m_fDepth / ( m_nDepthSamples - 1 );
+    m_fSampleWidth = m_fWidth / ( m_nWidthSamples - REAL( 1.0 ) );
+    m_fSampleDepth = m_fDepth / ( m_nDepthSamples - REAL( 1.0 ) );
 
-    m_fInvSampleWidth = 1 / m_fSampleWidth;
-    m_fInvSampleDepth = 1 / m_fSampleDepth;
+    m_fSampleZXAspect = m_fSampleDepth / m_fSampleWidth;
+
+    m_fInvSampleWidth = REAL( 1.0 ) / m_fSampleWidth;
+    m_fInvSampleDepth = REAL( 1.0 ) / m_fSampleDepth;
 
     // finite or repeated terrain?
     m_bWrapMode = bWrapMode;
@@ -236,93 +237,63 @@ void dxHeightfieldData::ComputeHeightBounds()
 
 
 // returns whether point is over terrain Cell triangle?
-bool dxHeightfieldData::IsOnHeightfield  ( const dReal * const CellOrigin, const dReal * const pos,  const bool isABC) const
+bool dxHeightfieldData::IsOnHeightfield2 ( const HeightFieldVertex * const CellCorner, 
+    const dReal * const pos,  const bool isABC) const
 {
-    {
-        const dReal MaxX = CellOrigin[0] + m_fSampleWidth;
-        const dReal TolX = m_fSampleWidth * TERRAINTOL;
-        if ((pos[0]<CellOrigin[0]-TolX) || (pos[0]>MaxX+TolX))	
-            return false;
-    }
+    // WARNING!!!
+    // This function must be written in the way to make sure that every point on
+    // XZ plane falls in one and only one triangle. Keep that in mind if you 
+    // intend to change the code.
+    // Also remember about computational errors and possible mismatches in 
+    // values if they are calculated differently in different places in the code.
+    // Currently both the implementation has been optimized and effects of 
+    // computational errors have been eliminated.
 
-    {
-        const dReal MaxZ = CellOrigin[2] + m_fSampleDepth;
-        const dReal TolZ = m_fSampleDepth * TERRAINTOL;
-        if ((pos[2]<CellOrigin[2]-TolZ) || (pos[2]>MaxZ+TolZ))	
-            return false;
-    }
-
-    // add X percentage position on cell and Z percentage position on cell
-    const dReal pctTotal = (pos[0] - CellOrigin[0]) * m_fInvSampleWidth 
-        + (pos[2] - CellOrigin[2]) * m_fInvSampleDepth;
-
-    if (isABC)
-    {
-        if (pctTotal >= REAL(1.0) + TERRAINTOL)	
-            return false;
-        else	
-            return true;
-    }
-    else if (pctTotal <= REAL(1.0) - TERRAINTOL)	
-    {
-        return false;
-    }
-    return true;
-}
-// returns whether point is over terrain Cell triangle?
-bool dxHeightfieldData::IsOnHeightfield2  ( const dReal * const CellOrigin, const dReal * const pos,  const bool isABC) const
-{
     dReal MaxX, MinX;
     dReal MaxZ, MinZ;
+
     if (isABC)
     {
         // point A
-        MinX = CellOrigin[0];
-        MaxX = CellOrigin[0] + m_fSampleWidth;
+        MinX = CellCorner->vertex[0];
+        if (pos[0] < MinX)
+            return false;
 
-        MinZ = CellOrigin[2];
-        MaxZ = CellOrigin[2] + m_fSampleDepth;
+        MaxX = (CellCorner->coords[0] + 1) * m_fSampleWidth;
+        if (pos[0] >= MaxX)
+            return false;
+
+        MinZ = CellCorner->vertex[2];
+        if (pos[2] < MinZ)
+            return false;
+
+        MaxZ = (CellCorner->coords[1] + 1) * m_fSampleDepth;
+        if (pos[2] >= MaxZ)
+            return false;
+
+        return (MaxZ - pos[2]) > (pos[0] - MinX) * m_fSampleZXAspect;
     }
     else
     {
         // point D
-        MinX = CellOrigin[0] - m_fSampleWidth;
-        MaxX = CellOrigin[0];
-
-        MinZ = CellOrigin[2] - m_fSampleDepth;
-        MaxZ = CellOrigin[2];
-    }
-
-    // check if inside CELL
-    {
-        const dReal TolX = m_fSampleWidth * TERRAINTOL;
-        if ((pos[0]<MinX-TolX) || (pos[0]>MaxX+TolX))	
+        MaxX = CellCorner->vertex[0];
+        if (pos[0] >= MaxX)
             return false;
-    }
 
-    {
-        const dReal TolZ = m_fSampleDepth * TERRAINTOL;
-        if ((pos[2]<MinZ-TolZ) || (pos[2]>MaxZ+TolZ))	
+        MinX = (CellCorner->coords[0] - 1) * m_fSampleWidth;
+        if (pos[0] < MinX)
             return false;
-    }
 
-    // Sum up X percentage position on cell and Z percentage position on cell
-    const dReal pctTotal = (pos[0] - MinX) * m_fInvSampleWidth 
-        + (pos[2] - MinZ) * m_fInvSampleDepth;
-
-    // check if inside respective Triangle of Cell
-    if (isABC)	
-    {
-        if (pctTotal >= REAL(1.0) + TERRAINTOL)	
+        MaxZ = CellCorner->vertex[2];
+        if (pos[2] >= MaxZ)
             return false;
-        else	
-            return true;
+
+        MinZ = (CellCorner->coords[1] - 1) * m_fSampleDepth;
+        if (pos[2] < MinZ)
+            return false;
+
+        return (MaxZ - pos[2]) <= (pos[0] - MinX) * m_fSampleZXAspect;
     }
-    else if (pctTotal <= REAL(1.0) - TERRAINTOL)	
-    {
-        return false;
-    }
-    return true;
 }
 
 
@@ -406,7 +377,7 @@ dReal dxHeightfieldData::GetHeight( dReal x, dReal z )
 
     dReal y, y0;
 
-    if ( dx + dz < REAL( 1.0 ) )
+    if ( dx + dz <= REAL( 1.0 ) ) // Use <= comparison to prefer simpler branch
     {
         y0 = GetHeight( nX, nZ );
 
@@ -984,29 +955,27 @@ int dxHeightfield::dCollideHeightfieldZone( const int minX, const int maxX, cons
         }
 
         dReal Xpos, Ypos;
-        Xpos = minX * cfSampleWidth;
-
 
         for ( x = minX, x_local = 0; x_local < numX; x++, x_local++)
         {
+            Xpos = x * cfSampleWidth; // Always calculate pos via multiplication to avoid computational error accumulation during multiple additions
+
             const dReal c_Xpos = Xpos;
             HeightFieldVertex *HeightFieldRow = tempHeightBuffer[x_local];
-            Ypos = minZ * cfSampleDepth;
             for ( z = minZ, z_local = 0; z_local < numZ; z++, z_local++)
             {
+                Ypos = z * cfSampleDepth; // Always calculate pos via multiplication to avoid computational error accumulation during multiple additions
+
                 const dReal h = m_p_data->GetHeight(x, z);
                 HeightFieldRow[z_local].vertex[0] = c_Xpos;
                 HeightFieldRow[z_local].vertex[1] = h;
                 HeightFieldRow[z_local].vertex[2] = Ypos;
-                
+                HeightFieldRow[z_local].coords[0] = x;
+                HeightFieldRow[z_local].coords[1] = z;
 
                 maxY = dMAX(maxY, h);
                 minY = dMIN(minY, h);
-
-
-                Ypos += cfSampleDepth;
             }
-            Xpos += cfSampleWidth;
         }
         if (minO2Height - maxY > -dEpsilon )
         {
@@ -1123,6 +1092,17 @@ int dxHeightfield::dCollideHeightfieldZone( const int minX, const int maxX, cons
         }
         return numTerrainContacts;
     }
+    
+    /* -- This block is invalid as per Martijn Buijs <buijs512@planet.nl>
+
+    The problem seems to be based on the erroneously assumption that if two of 
+    the four vertices of a 'grid' are at the same height, the entire grid can be
+    represented as a single plane. It works for an axis aligned slope, but fails
+    on all 4 grids of a 3x3 spike feature. Since the plane normal is constructed
+    from only 3 vertices (only one of the two triangles) this often results in 
+    discontinuities at the grid edges (causing small jumps when the contact 
+    point moves from one grid to another).
+
     // unique plane
     {
         // check for very simple plane heightfield
@@ -1188,7 +1168,7 @@ int dxHeightfield::dCollideHeightfieldZone( const int minX, const int maxX, cons
             return numTerrainContacts;
         }
     }
-
+    */
 
 	int numTerrainContacts = 0;
 	dContactGeom *PlaneContact = m_p_data->m_contacts;
@@ -1252,7 +1232,11 @@ int dxHeightfield::dCollideHeightfieldZone( const int minX, const int maxX, cons
          z
     */  
     // keep only triangle that does intersect geom
-    for ( x = minX, x_local = 0; x < maxX; x++, x_local++)
+    
+    const unsigned int maxX_local = maxX - minX;
+    const unsigned int maxZ_local = maxZ - minZ;
+
+    for ( x_local = 0; x_local < maxX_local; x_local++)
     {
         HeightFieldVertex *HeightFieldRow      = tempHeightBuffer[x_local];
         HeightFieldVertex *HeightFieldNextRow  = tempHeightBuffer[x_local + 1];
@@ -1261,7 +1245,8 @@ int dxHeightfield::dCollideHeightfieldZone( const int minX, const int maxX, cons
         C = &HeightFieldRow    [0];
         // First B
         D = &HeightFieldNextRow[0];
-        for ( z = minZ, z_local = 0; z < maxZ; z++, z_local++)
+
+        for ( z_local = 0; z_local < maxZ_local; z_local++)
         {
             A = C;
             B = D;
@@ -1469,7 +1454,7 @@ int dxHeightfield::dCollideHeightfieldZone( const int minX, const int maxX, cons
                 const dVector3 &pCPos = PlaneContact[i].pos;
                 for (size_t b = 0; planeTriListSize > b; b++)
                 {  
-                    if (m_p_data->IsOnHeightfield2 (itPlane->trianglelist[b]->vertices[0]->vertex, 
+                    if (m_p_data->IsOnHeightfield2 (itPlane->trianglelist[b]->vertices[0], 
                                                     pCPos, 
                                                     itPlane->trianglelist[b]->isUp))
                     {
@@ -1834,5 +1819,6 @@ dCollideHeightfieldExit:
         // Return contact count.
         return numTerrainContacts;
 }
+
 
 
