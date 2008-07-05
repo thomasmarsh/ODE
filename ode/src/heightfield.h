@@ -13,6 +13,11 @@
 
 #define HEIGHTFIELDMAXCONTACTPERCELL 10
 
+
+class HeightFieldVertex;
+class HeightFieldEdge;
+class HeightFieldTriangle;
+
 //
 // dxHeightfieldData
 //
@@ -22,8 +27,9 @@ struct dxHeightfieldData
 {
     dReal m_fWidth;				// World space heightfield dimension on X axis
     dReal m_fDepth;				// World space heightfield dimension on Z axis
-    dReal m_fSampleWidth;		// Vertex count on X axis edge (== m_vWidth / (m_nWidthSamples-1))
-    dReal m_fSampleDepth;		// Vertex count on Z axis edge (== m_vDepth / (m_nDepthSamples-1))
+    dReal m_fSampleWidth;		// Vertex spacing on X axis edge (== m_vWidth / (m_nWidthSamples-1))
+    dReal m_fSampleDepth;		// Vertex spacing on Z axis edge (== m_vDepth / (m_nDepthSamples-1))
+    dReal m_fSampleZXAspect;    // Relation of Z axis spacing to X axis spacing (== m_fSampleDepth / m_fSampleWidth)
     dReal m_fInvSampleWidth;		// Cache of inverse Vertex count on X axis edge (== m_vWidth / (m_nWidthSamples-1))
     dReal m_fInvSampleDepth;		// Cache of inverse Vertex count on Z axis edge (== m_vDepth / (m_nDepthSamples-1))
 
@@ -59,17 +65,15 @@ struct dxHeightfieldData
 
     void ComputeHeightBounds();
 
-    bool IsOnHeightfield  ( const dReal * const CellOrigin, const dReal * const pos,  const bool isABC) const;
-    bool IsOnHeightfield2  ( const dReal * const CellOrigin, const dReal * const pos,  const bool isABC) const;
+    bool IsOnHeightfield2  ( const HeightFieldVertex * const CellCorner, 
+        const dReal * const pos,  const bool isABC) const;
 
     dReal GetHeight(int x, int z);
     dReal GetHeight(dReal x, dReal z);
 
 };
 
-class HeightFieldVertex;
-class HeightFieldEdge;
-class HeightFieldTriangle;
+typedef int HeightFieldVertexCoords[2];
 
 class HeightFieldVertex
 {
@@ -77,6 +81,7 @@ public:
     HeightFieldVertex(){};
 
     dVector3 vertex;
+    HeightFieldVertexCoords coords;
     bool state;
 };
 
