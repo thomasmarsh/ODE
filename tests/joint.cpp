@@ -55,7 +55,7 @@ SUITE(JointHinge2)
 
       dJointAttach(jId, bId1, bId2);
 
-      dJointSetHinge2Anchor (jId, 0, 0, 0);
+      dJointSetHinge2Anchor (jId, REAL(0.0), REAL(0.0), REAL(0.0));
     }
 
     ~Hinge2GetInfo1_Fixture_1() {
@@ -119,7 +119,7 @@ TEST_FIXTURE(Hinge2GetInfo1_Fixture_1, test_hinge2GetInfo1)
   // Return to original position
   // Keep the limits
   dBodySetPosition (bId2, 0, 1, 0);
-  dRFromAxisAndAngle (R, 1, 0, 0, 0);
+  dRFromAxisAndAngle (R, 1, REAL(0.0), REAL(0.0), REAL(0.0));
   dBodySetRotation (bId2, R);
   joint->getInfo1(&info);
   CHECK_EQUAL(0, joint->limot1.limit);
@@ -139,7 +139,7 @@ TEST_FIXTURE(Hinge2GetInfo1_Fixture_1, test_hinge2GetInfo1)
   // Return to original position
   // and remove the limits
   dBodySetPosition (bId2, 0, 1, 0);
-  dRFromAxisAndAngle (R, 1, 0, 0, 0);
+  dRFromAxisAndAngle (R, 1, REAL(0.0), REAL(0.0), REAL(0.0));
   dBodySetRotation (bId2, R);
   dJointSetHinge2Param(jId, dParamLoStop, -2*M_PI);
   dJointSetHinge2Param(jId, dParamHiStop,  2*M_PI);
@@ -163,7 +163,7 @@ TEST_FIXTURE(Hinge2GetInfo1_Fixture_1, test_hinge2GetInfo1)
   // Return to original position
   // Keep the limits
   dBodySetPosition (bId2, 0, 1, 0);
-  dRFromAxisAndAngle (R, 1, 0, 0, 0);
+  dRFromAxisAndAngle (R, 1, REAL(0.0), REAL(0.0), REAL(0.0));
   dBodySetRotation (bId2, R);
   joint->getInfo1(&info);
   CHECK_EQUAL(0, joint->limot1.limit);
@@ -235,7 +235,7 @@ SUITE(JointUniversal)
 
       dJointAttach(jId, bId1, bId2);
 
-      dJointSetUniversalAnchor (jId, 0, 0, 0);
+      dJointSetUniversalAnchor (jId, REAL(0.0), REAL(0.0), REAL(0.0));
     }
 
     ~UniversalGetInfo1_Fixture_1() {
@@ -301,7 +301,7 @@ TEST_FIXTURE(UniversalGetInfo1_Fixture_1, test_hinge2GetInfo1_RotAroundX)
   // Return to original position
   // Keep the limits
   dBodySetPosition (bId2, 0, 1, 0);
-  dRFromAxisAndAngle (R, 1, 0, 0, 0);
+  dRFromAxisAndAngle (R, 1, REAL(0.0), REAL(0.0), REAL(0.0));
   dBodySetRotation (bId2, R);
   joint->getInfo1(&info);
   CHECK_EQUAL(0, joint->limot1.limit);
@@ -321,7 +321,7 @@ TEST_FIXTURE(UniversalGetInfo1_Fixture_1, test_hinge2GetInfo1_RotAroundX)
   // Return to original position
   // and remove the limits
   dBodySetPosition (bId2, 0, 1, 0);
-  dRFromAxisAndAngle (R, 1, 0, 0, 0);
+  dRFromAxisAndAngle (R, 1, REAL(0.0), REAL(0.0), REAL(0.0));
   dBodySetRotation (bId2, R);
   dJointSetUniversalParam(jId, dParamLoStop, -2*M_PI);
   dJointSetUniversalParam(jId, dParamHiStop,  2*M_PI);
@@ -345,7 +345,7 @@ TEST_FIXTURE(UniversalGetInfo1_Fixture_1, test_hinge2GetInfo1_RotAroundX)
   // Return to original position
   // Keep the limits
   dBodySetPosition (bId2, 0, 1, 0);
-  dRFromAxisAndAngle (R, 1, 0, 0, 0);
+  dRFromAxisAndAngle (R, 1, REAL(0.0), REAL(0.0), REAL(0.0));
   dBodySetRotation (bId2, R);
   joint->getInfo1(&info);
   CHECK_EQUAL(0, joint->limot1.limit);
@@ -557,7 +557,7 @@ SUITE(JointPR)
 
       dJointAttach(jId, bId1, bId2);
 
-      dJointSetPRAnchor (jId, 0, 0, 0);
+      dJointSetPRAnchor (jId, REAL(0.0), REAL(0.0), REAL(0.0));
     }
 
     ~PRGetInfo1_Fixture_1() {
@@ -704,7 +704,7 @@ SUITE(JointPR)
       joint = (dxJointPR*)jId;
 
       dJointAttach(jId, bId1, bId2);
-      dJointSetPRAnchor (jId, 0, 0, 0);
+      dJointSetPRAnchor (jId, REAL(0.0), REAL(0.0), REAL(0.0));
 
       joint->limotP.fmax = 1;
     }
@@ -924,13 +924,13 @@ SUITE(JointPR)
       joint = (dxJointPR*)jId;
 
       dJointAttach(jId, bId1, bId2);
-      dJointSetPRAnchor (jId, 0, 0, 0);
+      dJointSetPRAnchor (jId, REAL(0.0), REAL(0.0), REAL(0.0));
 
-      dBodySetLinearVel (bId1, 0, 0, 0);
-      dBodySetAngularVel(bId1, 0, 0, 0);
+      dBodySetLinearVel (bId1, REAL(0.0), REAL(0.0), REAL(0.0));
+      dBodySetAngularVel(bId1, REAL(0.0), REAL(0.0), REAL(0.0));
 
-      dBodySetLinearVel (bId2, 0, 0, 0);
-      dBodySetAngularVel(bId1, 0, 0, 0);
+      dBodySetLinearVel (bId2, REAL(0.0), REAL(0.0), REAL(0.0));
+      dBodySetAngularVel(bId1, REAL(0.0), REAL(0.0), REAL(0.0));
 
     }
 
@@ -961,40 +961,40 @@ SUITE(JointPR)
     {
       // They move with the same linear speed
       // Angular speed == 0
-      dBodySetLinearVel(bId1, 0, 3.33, 0);
-      dBodySetLinearVel(bId2, 0, 3.33, 0);
+      dBodySetLinearVel(bId1, REAL(0.0), REAL(3.33), REAL(0.0));
+      dBodySetLinearVel(bId2, REAL(0.0), REAL(3.33), REAL(0.0));
       CHECK_EQUAL(REAL(0.0), dJointGetPRPositionRate (jId) );
 
-      dBodySetLinearVel(bId1, 1.11, 3.33, 0);
-      dBodySetLinearVel(bId2, 1.11, 3.33, 0);
+      dBodySetLinearVel(bId1, REAL(1.11), REAL(3.33), REAL(0.0));
+      dBodySetLinearVel(bId2, REAL(1.11), REAL(3.33), REAL(0.0));
       CHECK_EQUAL(REAL(0.0), dJointGetPRPositionRate (jId) );
 
-      dBodySetLinearVel(bId1, 1.11, 3.33, 2.22);
-      dBodySetLinearVel(bId2, 1.11, 3.33, 2.22);
+      dBodySetLinearVel(bId1, REAL(1.11), REAL(3.33), REAL(2.22));
+      dBodySetLinearVel(bId2, REAL(1.11), REAL(3.33), REAL(2.22));
       CHECK_EQUAL(REAL(0.0), dJointGetPRPositionRate (jId) );
 
 
       // Reset for the next set of test.
-      dBodySetLinearVel(bId1, 0, 0, 0);
-      dBodySetAngularVel(bId1, 0, 0, 0);
+      dBodySetLinearVel(bId1, REAL(0.0), REAL(0.0), REAL(0.0));
+      dBodySetAngularVel(bId1, REAL(0.0), REAL(0.0), REAL(0.0));
 
-      dBodySetLinearVel(bId2, 0, 0, 0);
-      dBodySetAngularVel(bId1, 0, 0, 0);
+      dBodySetLinearVel(bId2, REAL(0.0), REAL(0.0), REAL(0.0));
+      dBodySetAngularVel(bId1, REAL(0.0), REAL(0.0), REAL(0.0));
 
 
       // They move with the same angular speed
       // linear speed == 0
 
-      dBodySetAngularVel(bId1, 1.22, 0.0, 0.0);
-      dBodySetAngularVel(bId2, 1.22, 0.0, 0.0);
+      dBodySetAngularVel(bId1, REAL(1.22), REAL(0.0), REAL(0.0));
+      dBodySetAngularVel(bId2, REAL(1.22), REAL(0.0), REAL(0.0));
       CHECK_EQUAL(REAL(0.0), dJointGetPRPositionRate (jId) );
 
-      dBodySetAngularVel(bId1, 1.22, 2.33, 0.0);
-      dBodySetAngularVel(bId2, 1.22, 2.33, 0.0);
+      dBodySetAngularVel(bId1, REAL(1.22), REAL(2.33), REAL(0.0));
+      dBodySetAngularVel(bId2, REAL(1.22), REAL(2.33), REAL(0.0));
       CHECK_EQUAL(REAL(0.0), dJointGetPRPositionRate (jId) );
 
-      dBodySetAngularVel(bId1, 1.22, 2.33, 3.44);
-      dBodySetAngularVel(bId2, 1.22, 2.33, 3.44);
+      dBodySetAngularVel(bId1, REAL(1.22), REAL(2.33), REAL(3.44));
+      dBodySetAngularVel(bId2, REAL(1.22), REAL(2.33), REAL(3.44));
       CHECK_EQUAL(REAL(0.0), dJointGetPRPositionRate (jId) );
     }
 
@@ -1009,24 +1009,24 @@ SUITE(JointPR)
 ////////////////////////////////////////////////////////////////////////////////
   TEST_FIXTURE(PRGetInfo1_Fixture_3, GetPRPositionRate_Bodies_in_line_B1_moves)
     {
-      dBodySetLinearVel(bId1, 3.33, 0.0, 0.0); // This is impossible but ...
+      dBodySetLinearVel(bId1, REAL(3.33), REAL(0.0), REAL(0.0)); // This is impossible but ...
       CHECK_EQUAL(REAL(0.0), dJointGetPRPositionRate (jId) );
 
-      dBodySetLinearVel(bId1, 0, 3.33, 0);
+      dBodySetLinearVel(bId1, REAL(0.0), REAL(3.33), REAL(0.0));
       CHECK_EQUAL(REAL(3.33), dJointGetPRPositionRate (jId) );
 
-      dBodySetLinearVel(bId1, 0, 0, 3.33);     // This is impossible but ...
+      dBodySetLinearVel(bId1, REAL(0.0), REAL(0.0), REAL(3.33));     // This is impossible but ...
       CHECK_EQUAL(REAL(0.0), dJointGetPRPositionRate (jId) );
 
 
       // Only the first body as angular velocity
-      dBodySetAngularVel(bId1, 1.22, 0.0, 0.0);
+      dBodySetAngularVel(bId1, REAL(1.22), REAL(0.0), REAL(0.0));
       CHECK_EQUAL(REAL(0.0), dJointGetPRPositionRate (jId) );
 
-      dBodySetAngularVel(bId1, 0.0, 2.33, 0.0);
+      dBodySetAngularVel(bId1, REAL(0.0), REAL(2.33), REAL(0.0));
       CHECK_EQUAL(REAL(0.0), dJointGetPRPositionRate (jId) );
 
-      dBodySetAngularVel(bId1, 0.0, 0.0, 5.55);
+      dBodySetAngularVel(bId1, REAL(0.0), REAL(0.0), REAL(5.55));
       CHECK_EQUAL(REAL(0.0), dJointGetPRPositionRate (jId) );
     }
 
@@ -1040,25 +1040,25 @@ SUITE(JointPR)
 ////////////////////////////////////////////////////////////////////////////////
   TEST_FIXTURE(PRGetInfo1_Fixture_3, GetPRPositionRate_Bodies_in_line_B2_moves)
     {
-      dBodySetLinearVel(bId2, 3.33, 0.0, 0.0); // This is impossible but ...
+      dBodySetLinearVel(bId2, REAL(3.33), REAL(0.0), REAL(0.0)); // This is impossible but ...
       CHECK_EQUAL(REAL(0.0), dJointGetPRPositionRate (jId) );
 
       // The length was at zero and this will give an negative length
-      dBodySetLinearVel(bId2, 0, 3.33, 0);
+      dBodySetLinearVel(bId2, REAL(0.0), REAL(3.33), REAL(0.0));
       CHECK_EQUAL(REAL(-3.33), dJointGetPRPositionRate (jId) );
 
-      dBodySetLinearVel(bId2, 0, 0, 3.33);     // This is impossible but ...
+      dBodySetLinearVel(bId2, REAL(0.0), REAL(0.0), REAL(3.33));     // This is impossible but ...
       CHECK_EQUAL(REAL(0.0), dJointGetPRPositionRate (jId) );
 
 
       // Only angular velocity
-      dBodySetAngularVel(bId2, 1.22, 0.0, 0.0);
+      dBodySetAngularVel(bId2, REAL(1.22), REAL(0.0), REAL(0.0));
       CHECK_EQUAL(REAL(0.0), dJointGetPRPositionRate (jId) );
 
-      dBodySetAngularVel(bId2, 0.0, 2.33, 0.0);
+      dBodySetAngularVel(bId2, REAL(0.0), REAL(2.33), REAL(0.0));
       CHECK_EQUAL(REAL(0.0), dJointGetPRPositionRate (jId) );
 
-      dBodySetAngularVel(bId2, 0.0, 0.0, 5.55);
+      dBodySetAngularVel(bId2, REAL(0.0), REAL(0.0), REAL(5.55));
       CHECK_EQUAL(REAL(0.0), dJointGetPRPositionRate (jId) );
     }
 
@@ -1108,13 +1108,13 @@ SUITE(JointPR)
       joint = (dxJointPR*)jId;
 
       dJointAttach(jId, bId1, bId2);
-      dJointSetPRAnchor (jId, 0, 0, 0);
+      dJointSetPRAnchor (jId, REAL(0.0), REAL(0.0), REAL(0.0));
 
-      dBodySetLinearVel(bId1, 0, 0, 0);
-      dBodySetAngularVel(bId1, 0, 0, 0);
+      dBodySetLinearVel(bId1, REAL(0.0), REAL(0.0), REAL(0.0));
+      dBodySetAngularVel(bId1, REAL(0.0), REAL(0.0), REAL(0.0));
 
-      dBodySetLinearVel(bId2, 0, 0, 0);
-      dBodySetAngularVel(bId1, 0, 0, 0);
+      dBodySetLinearVel(bId2, REAL(0.0), REAL(0.0), REAL(0.0));
+      dBodySetAngularVel(bId1, REAL(0.0), REAL(0.0), REAL(0.0));
 
     }
 
@@ -1144,25 +1144,25 @@ SUITE(JointPR)
 ////////////////////////////////////////////////////////////////////////////////
   TEST_FIXTURE(PRGetInfo1_Fixture_4, GetPRPositionRate_Bodies_at90deg_B1_moves)
     {
-      dBodySetLinearVel(bId1, 3.33, 0.0, 0.0); // This is impossible but ...
+      dBodySetLinearVel(bId1, REAL(3.33), REAL(0.0), REAL(0.0)); // This is impossible but ...
       CHECK_EQUAL(REAL(0.0), dJointGetPRPositionRate (jId) );
 
       // The length was at zero and this will give an negative length
-      dBodySetLinearVel(bId1, 0, 3.33, 0);
+      dBodySetLinearVel(bId1, REAL(0.0), REAL(3.33), REAL(0.0));
       CHECK_EQUAL(REAL(3.33), dJointGetPRPositionRate (jId) );
 
-      dBodySetLinearVel(bId1, 0, 0, 3.33);     // This is impossible but ...
+      dBodySetLinearVel(bId1, REAL(0.0), REAL(0.0), REAL(3.33));     // This is impossible but ...
       CHECK_EQUAL(REAL(0.0), dJointGetPRPositionRate (jId) );
 
 
       // Only angular velocity
-      dBodySetAngularVel(bId1, 1.22, 0.0, 0.0);
+      dBodySetAngularVel(bId1, REAL(1.22), REAL(0.0), REAL(0.0));
       CHECK_EQUAL(REAL(0.0), dJointGetPRPositionRate (jId) );
 
-      dBodySetAngularVel(bId1, 0.0, 2.33, 0.0);
+      dBodySetAngularVel(bId1, REAL(0.0), REAL(2.33), REAL(0.0));
       CHECK_EQUAL(REAL(0.0), dJointGetPRPositionRate (jId) );
 
-      dBodySetAngularVel(bId1, 0.0, 0.0, 5.55);
+      dBodySetAngularVel(bId1, REAL(0.0), REAL(0.0), REAL(5.55));
       CHECK_EQUAL(REAL(0.0), dJointGetPRPositionRate (jId) );
     }
 
@@ -1176,24 +1176,24 @@ SUITE(JointPR)
 ////////////////////////////////////////////////////////////////////////////////
   TEST_FIXTURE(PRGetInfo1_Fixture_4,  GetPRPositionRate_Bodies_at90deg_B2_moves)
     {
-      dBodySetLinearVel(bId2, 3.33, 0.0, 0.0); // This is impossible but ...
+      dBodySetLinearVel(bId2, REAL(3.33), REAL(0.0), REAL(0.0)); // This is impossible but ...
       CHECK_EQUAL(REAL(0.0), dJointGetPRPositionRate (jId) );
 
-      dBodySetLinearVel(bId2, 0, 3.33, 0);
+      dBodySetLinearVel(bId2, REAL(0.0), REAL(3.33), REAL(0.0));
       CHECK_EQUAL(REAL(-3.33), dJointGetPRPositionRate (jId) );
 
-      dBodySetLinearVel(bId2, 0, 0, 3.33);     // This is impossible but ...
+      dBodySetLinearVel(bId2, REAL(0.0), REAL(0.0), REAL(3.33));     // This is impossible but ...
       CHECK_EQUAL(REAL(0.0), dJointGetPRPositionRate (jId) );
 
 
       // Only angular velocity
-      dBodySetAngularVel(bId2, 1.22, 0.0, 0.0);
+      dBodySetAngularVel(bId2, REAL(1.22), REAL(0.0), REAL(0.0));
       CHECK_EQUAL(REAL(-1.0*1.22), dJointGetPRPositionRate (jId) );
 
-      dBodySetAngularVel(bId2, 0.0, 2.33, 0.0);
+      dBodySetAngularVel(bId2, REAL(0.0), REAL(2.33), REAL(0.0));
       CHECK_EQUAL(REAL(0.0), dJointGetPRPositionRate (jId) );
 
-      dBodySetAngularVel(bId2, 0.0, 0.0, 5.55);
+      dBodySetAngularVel(bId2, REAL(0.0), REAL(0.0), REAL(5.55));
       CHECK_EQUAL(REAL(0.0), dJointGetPRPositionRate (jId) );
     }
  
@@ -1307,7 +1307,7 @@ SUITE(JointPU)
       dJointSetPUParam(jId, dParamLoStop3, -10);
       dJointSetPUParam(jId, dParamHiStop3,  10);
 
-      dBodySetPosition(bId2, -100, 0, 0);
+      dBodySetPosition(bId2, REAL(-100.0), REAL(0.0), REAL(0.0));
 
       joint->getInfo1(&info);
 
@@ -1318,7 +1318,7 @@ SUITE(JointPU)
       CHECK_EQUAL(4, info.m);
 
 
-      dBodySetPosition(bId2, 100, 0, 0);
+      dBodySetPosition(bId2, REAL(100.0), REAL(0.0), REAL(0.0));
 
       joint->getInfo1(&info);
 
@@ -1405,7 +1405,7 @@ SUITE(JointPU)
       dJointSetPUParam(jId, dParamHiStop3,  10);
 
 
-      dBodySetPosition (bId1, 100, 0, 0);
+      dBodySetPosition (bId1, REAL(100.0), REAL(0.0), REAL(0.0));
 
       dMatrix3 R;
       dBodySetPosition (bId2, 0, 0, 1);
@@ -1540,7 +1540,7 @@ SUITE(JointPU)
       dJointSetPUParam(jId, dParamLoStop3, -10);
       dJointSetPUParam(jId, dParamHiStop3,  10);
 
-      dBodySetPosition(bId2, -100, 0, 0);
+      dBodySetPosition(bId2, REAL(-100.0), REAL(0.0), REAL(0.0));
 
       joint->getInfo1(&info);
 
@@ -1551,7 +1551,7 @@ SUITE(JointPU)
       CHECK_EQUAL(5, info.m);
 
 
-      dBodySetPosition(bId2, 100, 0, 0);
+      dBodySetPosition(bId2, REAL(100.0), REAL(0.0), REAL(0.0));
 
       joint->getInfo1(&info);
 
@@ -1638,7 +1638,7 @@ SUITE(JointPU)
       dJointSetPUParam(jId, dParamHiStop3,  10);
 
 
-      dBodySetPosition (bId1, 100, 0, 0);
+      dBodySetPosition (bId1, REAL(100.0), REAL(0.0), REAL(0.0));
 
       dMatrix3 R;
       dBodySetPosition (bId2, 0, 0, 1);
@@ -1782,11 +1782,11 @@ SUITE(JointPU)
       dJointAttach(jId, bId1, bId2);
       dJointSetPUAnchor (jId, 2, 0, 0);
 
-      dBodySetLinearVel (bId1, 0, 0, 0);
-      dBodySetAngularVel(bId1, 0, 0, 0);
+      dBodySetLinearVel (bId1, REAL(0.0), REAL(0.0), REAL(0.0));
+      dBodySetAngularVel(bId1, REAL(0.0), REAL(0.0), REAL(0.0));
 
-      dBodySetLinearVel (bId2, 0, 0, 0);
-      dBodySetAngularVel(bId1, 0, 0, 0);
+      dBodySetLinearVel (bId2, REAL(0.0), REAL(0.0), REAL(0.0));
+      dBodySetAngularVel(bId1, REAL(0.0), REAL(0.0), REAL(0.0));
 
     }
 
@@ -1818,40 +1818,40 @@ SUITE(JointPU)
     {
       // They move with the same linear speed
       // Angular speed == 0
-      dBodySetLinearVel(bId1, 0, 3.33, 0);
-      dBodySetLinearVel(bId2, 0, 3.33, 0);
+      dBodySetLinearVel(bId1, REAL(0.0), REAL(3.33), REAL(0.0));
+      dBodySetLinearVel(bId2, REAL(0.0), REAL(3.33), REAL(0.0));
       CHECK_EQUAL(REAL(0.0), dJointGetPUPositionRate (jId) );
 
-      dBodySetLinearVel(bId1, 1.11, 3.33, 0);
-      dBodySetLinearVel(bId2, 1.11, 3.33, 0);
+      dBodySetLinearVel(bId1, REAL(1.11), REAL(3.33), REAL(0.0));
+      dBodySetLinearVel(bId2, REAL(1.11), REAL(3.33), REAL(0.0));
       CHECK_EQUAL(REAL(0.0), dJointGetPUPositionRate (jId) );
 
-      dBodySetLinearVel(bId1, 1.11, 3.33, 2.22);
-      dBodySetLinearVel(bId2, 1.11, 3.33, 2.22);
+      dBodySetLinearVel(bId1, REAL(1.11), REAL(3.33), REAL(2.22));
+      dBodySetLinearVel(bId2, REAL(1.11), REAL(3.33), REAL(2.22));
       CHECK_EQUAL(REAL(0.0), dJointGetPUPositionRate (jId) );
 
 
       // Reset for the next set of test.
-      dBodySetLinearVel(bId1, 0, 0, 0);
-      dBodySetAngularVel(bId1, 0, 0, 0);
+      dBodySetLinearVel(bId1, REAL(0.0), REAL(0.0), REAL(0.0));
+      dBodySetAngularVel(bId1, REAL(0.0), REAL(0.0), REAL(0.0));
 
-      dBodySetLinearVel(bId2, 0, 0, 0);
-      dBodySetAngularVel(bId1, 0, 0, 0);
+      dBodySetLinearVel(bId2, REAL(0.0), REAL(0.0), REAL(0.0));
+      dBodySetAngularVel(bId1, REAL(0.0), REAL(0.0), REAL(0.0));
 
 
       // They move with the same angular speed
       // linear speed == 0
 
-      dBodySetAngularVel(bId1, 1.22, 0.0, 0.0);
-      dBodySetAngularVel(bId2, 1.22, 0.0, 0.0);
+      dBodySetAngularVel(bId1, REAL(1.22), REAL(0.0), REAL(0.0));
+      dBodySetAngularVel(bId2, REAL(1.22), REAL(0.0), REAL(0.0));
       CHECK_EQUAL(REAL(0.0), dJointGetPUPositionRate (jId) );
 
-      dBodySetAngularVel(bId1, 1.22, 2.33, 0.0);
-      dBodySetAngularVel(bId2, 1.22, 2.33, 0.0);
+      dBodySetAngularVel(bId1, REAL(1.22), REAL(2.33), REAL(0.0));
+      dBodySetAngularVel(bId2, REAL(1.22), REAL(2.33), REAL(0.0));
       CHECK_EQUAL(REAL(0.0), dJointGetPUPositionRate (jId) );
 
-      dBodySetAngularVel(bId1, 1.22, 2.33, 3.44);
-      dBodySetAngularVel(bId2, 1.22, 2.33, 3.44);
+      dBodySetAngularVel(bId1, REAL(1.22), REAL(2.33), REAL(3.44));
+      dBodySetAngularVel(bId2, REAL(1.22), REAL(2.33), REAL(3.44));
       CHECK_EQUAL(REAL(0.0), dJointGetPUPositionRate (jId) );
     }
 
@@ -1867,24 +1867,24 @@ SUITE(JointPU)
 ////////////////////////////////////////////////////////////////////////////////
   TEST_FIXTURE(PUGetInfo1_Fixture_3, GetPUPositionRate_Bodies_in_line_B1_moves)
     {
-      dBodySetLinearVel(bId1, 3.33, 0.0, 0.0); // This is impossible but ...
+      dBodySetLinearVel(bId1, REAL(3.33), REAL(0.0), REAL(0.0)); // This is impossible but ...
       CHECK_EQUAL(REAL(3.33), dJointGetPUPositionRate (jId) );
 
-      dBodySetLinearVel(bId1, 0, 3.33, 0);
+      dBodySetLinearVel(bId1, REAL(0.0), REAL(3.33), REAL(0.0));
       CHECK_EQUAL(REAL(0.0), dJointGetPUPositionRate (jId) );
 
-      dBodySetLinearVel(bId1, 0, 0, 3.33);     // This is impossible but ...
+      dBodySetLinearVel(bId1, REAL(0.0), REAL(0.0), REAL(3.33));     // This is impossible but ...
       CHECK_EQUAL(REAL(0.0), dJointGetPUPositionRate (jId) );
 
 
       // Only the first body as angular velocity
-      dBodySetAngularVel(bId1, 1.22, 0.0, 0.0);
+      dBodySetAngularVel(bId1, REAL(1.22), REAL(0.0), REAL(0.0));
       CHECK_EQUAL(REAL(0.0), dJointGetPUPositionRate (jId) );
 
-      dBodySetAngularVel(bId1, 0.0, 2.33, 0.0);
+      dBodySetAngularVel(bId1, REAL(0.0), REAL(2.33), REAL(0.0));
       CHECK_EQUAL(REAL(0.0), dJointGetPUPositionRate (jId) );
 
-      dBodySetAngularVel(bId1, 0.0, 0.0, 5.55);
+      dBodySetAngularVel(bId1, REAL(0.0), REAL(0.0), REAL(5.55));
       CHECK_EQUAL(REAL(0.0), dJointGetPUPositionRate (jId) );
     }
 
@@ -1900,24 +1900,24 @@ SUITE(JointPU)
   TEST_FIXTURE(PUGetInfo1_Fixture_3, GetPUPositionRate_Bodies_in_line_B2_moves)
     {
       // The length was at zero and this will give an negative length
-      dBodySetLinearVel(bId2, 3.33, 0.0, 0.0);
+      dBodySetLinearVel(bId2, REAL(3.33), REAL(0.0), REAL(0.0));
       CHECK_EQUAL(REAL(-3.33), dJointGetPUPositionRate (jId) );
 
-      dBodySetLinearVel(bId2, 0, 3.33, 0);      // This is impossible but ...
+      dBodySetLinearVel(bId2, REAL(0.0), REAL(3.33), REAL(0.0));      // This is impossible but ...
       CHECK_EQUAL(REAL(0.0), dJointGetPUPositionRate (jId) );
 
-      dBodySetLinearVel(bId2, 0, 0, 3.33);     // This is impossible but ...
+      dBodySetLinearVel(bId2, REAL(0.0), REAL(0.0), REAL(3.33));     // This is impossible but ...
       CHECK_EQUAL(REAL(0.0), dJointGetPUPositionRate (jId) );
 
 
       // Only angular velocity
-      dBodySetAngularVel(bId2, 1.22, 0.0, 0.0);
+      dBodySetAngularVel(bId2, REAL(1.22), REAL(0.0), REAL(0.0));
       CHECK_EQUAL(REAL(0.0), dJointGetPUPositionRate (jId) );
 
-      dBodySetAngularVel(bId2, 0.0, 2.33, 0.0);
+      dBodySetAngularVel(bId2, REAL(0.0), REAL(2.33), REAL(0.0));
       CHECK_EQUAL(REAL(0.0), dJointGetPUPositionRate (jId) );
 
-      dBodySetAngularVel(bId2, 0.0, 0.0, 5.55);
+      dBodySetAngularVel(bId2, REAL(0.0), REAL(0.0), REAL(5.55));
       CHECK_EQUAL(REAL(0.0), dJointGetPUPositionRate (jId) );
     }
 
@@ -1981,11 +1981,11 @@ SUITE(JointPU)
       dJointSetPUAxisP (jId, 1, 0, 0);
 
 
-      dBodySetLinearVel(bId1, 0, 0, 0);
-      dBodySetAngularVel(bId1, 0, 0, 0);
+      dBodySetLinearVel(bId1, REAL(0.0), REAL(0.0), REAL(0.0));
+      dBodySetAngularVel(bId1, REAL(0.0), REAL(0.0), REAL(0.0));
 
-      dBodySetLinearVel(bId2, 0, 0, 0);
-      dBodySetAngularVel(bId1, 0, 0, 0);
+      dBodySetLinearVel(bId2, REAL(0.0), REAL(0.0), REAL(0.0));
+      dBodySetAngularVel(bId1, REAL(0.0), REAL(0.0), REAL(0.0));
 
     }
 
@@ -2017,24 +2017,24 @@ SUITE(JointPU)
 ////////////////////////////////////////////////////////////////////////////////
   TEST_FIXTURE(PUGetInfo1_Fixture_4, GetPUPositionRate_Bodies_at90deg_B1_moves)
     {
-      dBodySetLinearVel(bId1, 3.33, 0.0, 0.0); // This is impossible but ...
+      dBodySetLinearVel(bId1, REAL(3.33), REAL(0.0), REAL(0.0)); // This is impossible but ...
       CHECK_EQUAL(REAL(3.33), dJointGetPUPositionRate (jId) );
 
-      dBodySetLinearVel(bId1, 0, 3.33, 0);
+      dBodySetLinearVel(bId1, REAL(0.0), REAL(3.33), REAL(0.0));
       CHECK_EQUAL(REAL(0.0), dJointGetPUPositionRate (jId) );
 
-      dBodySetLinearVel(bId1, 0, 0, 3.33);     // This is impossible but ...
+      dBodySetLinearVel(bId1, REAL(0.0), REAL(0.0), REAL(3.33));     // This is impossible but ...
       CHECK_EQUAL(REAL(0.0), dJointGetPUPositionRate (jId) );
 
 
       // Only angular velocity
-      dBodySetAngularVel(bId1, 1.22, 0.0, 0.0);
+      dBodySetAngularVel(bId1, REAL(1.22), REAL(0.0), REAL(0.0));
       CHECK_EQUAL(REAL(0.0), dJointGetPUPositionRate (jId) );
 
-      dBodySetAngularVel(bId1, 0.0, 2.33, 0.0);
+      dBodySetAngularVel(bId1, REAL(0.0), REAL(2.33), REAL(0.0));
       CHECK_EQUAL(REAL(0.0), dJointGetPUPositionRate (jId) );
 
-      dBodySetAngularVel(bId1, 0.0, 0.0, 5.55);
+      dBodySetAngularVel(bId1, REAL(0.0), REAL(0.0), REAL(5.55));
       CHECK_EQUAL(REAL(0.0), dJointGetPUPositionRate (jId) );
     }
 
@@ -2051,24 +2051,24 @@ SUITE(JointPU)
   TEST_FIXTURE(PUGetInfo1_Fixture_4,  GetPUPositionRate_Bodies_at90deg_B2_moves)
     {
       // The length was at zero and this will give an negative length
-      dBodySetLinearVel(bId2, 3.33, 0.0, 0.0);
+      dBodySetLinearVel(bId2, REAL(3.33), REAL(0.0), REAL(0.0));
       CHECK_EQUAL(REAL(-3.33), dJointGetPUPositionRate (jId) );
 
-      dBodySetLinearVel(bId2, 0, 3.33, 0);     // This is impossible but ...
+      dBodySetLinearVel(bId2, REAL(0.0), REAL(3.33), REAL(0.0));     // This is impossible but ...
       CHECK_EQUAL(REAL(0.0), dJointGetPUPositionRate (jId) );
 
-      dBodySetLinearVel(bId2, 0, 0, 3.33);     // This is impossible but ...
+      dBodySetLinearVel(bId2, REAL(0.0), REAL(0.0), REAL(3.33));     // This is impossible but ...
       CHECK_EQUAL(REAL(0.0), dJointGetPUPositionRate (jId) );
 
 
       // Only angular velocity
-      dBodySetAngularVel(bId2, 1.22, 0.0, 0.0);
+      dBodySetAngularVel(bId2, REAL(1.22), REAL(0.0), REAL(0.0));
       CHECK_EQUAL(REAL(0.0), dJointGetPUPositionRate (jId) );
 
-      dBodySetAngularVel(bId2, 0.0, 2.33, 0.0);
+      dBodySetAngularVel(bId2, REAL(0.0), REAL(2.33), REAL(0.0));
       CHECK_EQUAL(REAL(-1.0*2.330), dJointGetPUPositionRate (jId) );
 
-      dBodySetAngularVel(bId2, 0.0, 0.0, 5.55);
+      dBodySetAngularVel(bId2, REAL(0.0), REAL(0.0), REAL(5.55));
       CHECK_EQUAL(REAL(0.0), dJointGetPUPositionRate (jId) );
     }
  
@@ -2179,7 +2179,7 @@ SUITE(JointPiston)
       dJointSetPistonParam(jId, dParamLoStop1, -10);
       dJointSetPistonParam(jId, dParamHiStop1,  10);
 
-      dBodySetPosition(bId2, -100, 0, 0);
+      dBodySetPosition(bId2, REAL(-100.0), REAL(0.0), REAL(0.0));
 
       joint->getInfo1(&info);
 
@@ -2188,7 +2188,7 @@ SUITE(JointPiston)
       CHECK_EQUAL(5, info.m);
 
 
-      dBodySetPosition(bId2, 100, 0, 0);
+      dBodySetPosition(bId2, REAL(100.0), REAL(0.0), REAL(0.0));
 
       joint->getInfo1(&info);
 
@@ -2264,7 +2264,7 @@ SUITE(JointPiston)
       dJointSetPistonParam(jId, dParamHiStop2, M_PI/4.0);
 
 
-      dBodySetPosition (bId1, 100, 0, 0);
+      dBodySetPosition (bId1, REAL(100.0), REAL(0.0), REAL(0.0));
 
       dMatrix3 R;
       dRFromAxisAndAngle (R, 1, 0, 0, M_PI/2.0);
@@ -2392,7 +2392,7 @@ SUITE(JointPiston)
       dJointSetPistonParam(jId, dParamLoStop1, -10);
       dJointSetPistonParam(jId, dParamHiStop1,  10);
 
-      dBodySetPosition(bId2, -100, 0, 0);
+      dBodySetPosition(bId2, REAL(-100.0), REAL(0.0), REAL(0.0));
 
       joint->getInfo1(&info);
 
@@ -2401,7 +2401,7 @@ SUITE(JointPiston)
       CHECK_EQUAL(5, info.m);
 
 
-      dBodySetPosition(bId2, 100, 0, 0);
+      dBodySetPosition(bId2, REAL(100.0), REAL(0.0), REAL(0.0));
 
       joint->getInfo1(&info);
 
@@ -2477,7 +2477,7 @@ SUITE(JointPiston)
 
 
 
-      dBodySetPosition (bId1, 100, 0, 0);
+      dBodySetPosition (bId1, REAL(100.0), REAL(0.0), REAL(0.0));
 
       dMatrix3 R;
       dRFromAxisAndAngle (R, 1, 0, 0, M_PI/2.0);
@@ -2610,11 +2610,11 @@ SUITE(JointPiston)
       dJointAttach(jId, bId1, bId2);
       dJointSetPistonAnchor (jId, 2, 0, 0);
 
-      dBodySetLinearVel (bId1, 0, 0, 0);
-      dBodySetAngularVel(bId1, 0, 0, 0);
+      dBodySetLinearVel (bId1, REAL(0.0), REAL(0.0), REAL(0.0));
+      dBodySetAngularVel(bId1, REAL(0.0), REAL(0.0), REAL(0.0));
 
-      dBodySetLinearVel (bId2, 0, 0, 0);
-      dBodySetAngularVel(bId1, 0, 0, 0);
+      dBodySetLinearVel (bId2, REAL(0.0), REAL(0.0), REAL(0.0));
+      dBodySetAngularVel(bId1, REAL(0.0), REAL(0.0), REAL(0.0));
 
     }
 
@@ -2660,11 +2660,11 @@ SUITE(JointPiston)
 
 
       // Reset for the next set of test.
-      dBodySetLinearVel(bId1, 0, 0, 0);
-      dBodySetAngularVel(bId1, 0, 0, 0);
+      dBodySetLinearVel(bId1, REAL(0.0), REAL(0.0), REAL(0.0));
+      dBodySetAngularVel(bId1, REAL(0.0), REAL(0.0), REAL(0.0));
 
-      dBodySetLinearVel(bId2, 0, 0, 0);
-      dBodySetAngularVel(bId1, 0, 0, 0);
+      dBodySetLinearVel(bId2, REAL(0.0), REAL(0.0), REAL(0.0));
+      dBodySetAngularVel(bId1, REAL(0.0), REAL(0.0), REAL(0.0));
 
 
       // They move with the same angular speed
@@ -2826,11 +2826,11 @@ SUITE(JointPiston)
       dJointSetPistonAnchor (jId, 2, 0, 0);
 
 
-      dBodySetLinearVel(bId1, 0, 0, 0);
-      dBodySetAngularVel(bId1, 0, 0, 0);
+      dBodySetLinearVel(bId1, REAL(0.0), REAL(0.0), REAL(0.0));
+      dBodySetAngularVel(bId1, REAL(0.0), REAL(0.0), REAL(0.0));
 
-      dBodySetLinearVel(bId2, 0, 0, 0);
-      dBodySetAngularVel(bId1, 0, 0, 0);
+      dBodySetLinearVel(bId2, REAL(0.0), REAL(0.0), REAL(0.0));
+      dBodySetAngularVel(bId1, REAL(0.0), REAL(0.0), REAL(0.0));
 
     }
 
