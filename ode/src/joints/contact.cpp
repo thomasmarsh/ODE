@@ -125,6 +125,11 @@ dxJointContact::getInfo2( dxJoint::Info2 *info )
     const dReal pushout = k * depth + motionN;
     info->c[0] = pushout;
 
+    // note: this cap should not limit bounce velocity
+    const dReal maxvel = world->contactp.max_vel;
+    if ( info->c[0] > maxvel )
+        info->c[0] = maxvel;
+
     // deal with bounce
     if ( contact.surface.mode & dContactBounce )
     {
@@ -146,10 +151,6 @@ dxJointContact::getInfo2( dxJoint::Info2 *info )
             if ( newc > info->c[0] ) info->c[0] = newc;
         }
     }
-    const dReal maxvel = world->contactp.max_vel;
-    if ( info->c[0] > maxvel )
-        info->c[0] = maxvel;
-
 
     // set LCP limits for normal
     info->lo[0] = 0;
