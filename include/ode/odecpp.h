@@ -420,9 +420,10 @@ private:
 protected:
   dJointID _id;
 
-public:
-  dJoint()
+  dJoint() // don't let user construct pure dJoint objects
     { _id = 0; }
+
+public:
   virtual ~dJoint() // :( Destructor must be virtual to suppress compiler warning "class XXX has virtual functions but non-virtual destructor"
     { if (_id) dJointDestroy (_id); }
 

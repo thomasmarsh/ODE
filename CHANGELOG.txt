@@ -8,6 +8,9 @@ the rules for this file:
   * keep the format consistent (79 char width, M/D/Y date format).
 
 ------------------------------------------------------------------------------
+07/07/08 Daniel K. O.
+        * Max Correcting Vel doesn't affect bounciness, as before.
+
 07/03/08 Remi Ricard (papaDoc)
         * Add new function dJointSetHingeAxisDelta
         * Add unittest for this new function
