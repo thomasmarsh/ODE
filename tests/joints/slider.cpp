@@ -130,11 +130,11 @@ SUITE (TestdxJointSlider)
 
         // Rotate in a strange manner
         // Both bodies at origin
-        dRFromEulerAngles (R, 0.23, 3.1, -0.73);
+        dRFromEulerAngles (R, REAL(0.23), REAL(3.1), REAL(-0.73));
         dBodySetPosition (bId1, 0, 0, 0);
         dBodySetRotation (bId1, R);
 
-        dRFromEulerAngles (R, -0.57, 1.49, 0.81);
+        dRFromEulerAngles (R, REAL(-0.57), REAL(1.49), REAL(0.81));
         dBodySetPosition (bId2, 0, 0, 0);
         dBodySetRotation (bId2, R);
 
@@ -191,7 +191,7 @@ SUITE (TestdxJointSlider)
     static const dReal offset;
   };
   const dVector3 Fixture_dxJointSlider_B1_and_B2_At_Zero_Axis_Along_X::axis = {1, 0, 0};
-  const dReal    Fixture_dxJointSlider_B1_and_B2_At_Zero_Axis_Along_X::offset = 3.1;
+  const dReal    Fixture_dxJointSlider_B1_and_B2_At_Zero_Axis_Along_X::offset = REAL(3.1);
 
   // Move 1st body offset unit in the X direction
   //
@@ -323,7 +323,7 @@ SUITE (TestdxJointSlider)
     static const dReal offset;
   };
   const dVector3 Fixture_dxJointSlider_B1_and_B2_At_Zero_Axis_Inverse_of_X::axis = {-1, 0, 0};
-  const dReal    Fixture_dxJointSlider_B1_and_B2_At_Zero_Axis_Inverse_of_X::offset = 3.1;
+  const dReal    Fixture_dxJointSlider_B1_and_B2_At_Zero_Axis_Inverse_of_X::offset = REAL(3.1);
 
   // Move 1st body offset unit in the X direction
   //
@@ -450,7 +450,7 @@ SUITE (TestdxJointSlider)
     static const dReal offset;
   };
   const dVector3 Fixture_dxJointSlider_B1_At_Zero_Axis_Along_X::axis = {1, 0, 0};
-  const dReal    Fixture_dxJointSlider_B1_At_Zero_Axis_Along_X::offset = 3.1;
+  const dReal    Fixture_dxJointSlider_B1_At_Zero_Axis_Along_X::offset = REAL(3.1);
 
   // Move 1st body offset unit in the X direction
   //
@@ -530,7 +530,7 @@ SUITE (TestdxJointSlider)
     static const dReal offset;
   };
   const dVector3 Fixture_dxJointSlider_B1_At_Zero_Axis_Inverse_of_X::axis = {-1, 0, 0};
-  const dReal    Fixture_dxJointSlider_B1_At_Zero_Axis_Inverse_of_X::offset = 3.1;
+  const dReal    Fixture_dxJointSlider_B1_At_Zero_Axis_Inverse_of_X::offset = REAL(3.1);
 
   // Move 1st body offset unit in the X direction
   //
@@ -618,7 +618,7 @@ SUITE (TestdxJointSlider)
     static const dReal offset;
   };
   const dVector3 Fixture_dxJointSlider_B2_At_Zero_Axis_Along_X::axis = {1, 0, 0};
-  const dReal    Fixture_dxJointSlider_B2_At_Zero_Axis_Along_X::offset = 3.1;
+  const dReal    Fixture_dxJointSlider_B2_At_Zero_Axis_Along_X::offset = REAL(3.1);
 
   // Move 2nd body offset unit in the X direction
   //
@@ -636,7 +636,7 @@ SUITE (TestdxJointSlider)
 
       dBodySetPosition(bId2, offset, 0, 0);
 
-      CHECK_CLOSE (offset, dJointGetSliderPosition(jId), 1e-4);
+      CHECK_CLOSE (-offset, dJointGetSliderPosition(jId), 1e-4);
     }
 
   // Move 2nd body offset unit in the opposite X direction
@@ -655,7 +655,7 @@ SUITE (TestdxJointSlider)
 
       dBodySetPosition(bId2, -offset, 0, 0);
 
-      CHECK_CLOSE (-offset, dJointGetSliderPosition(jId), 1e-4);
+      CHECK_CLOSE (offset, dJointGetSliderPosition(jId), 1e-4);
     }
 
   // Only body 2
@@ -698,7 +698,7 @@ SUITE (TestdxJointSlider)
     static const dReal offset;
   };
   const dVector3 Fixture_dxJointSlider_B2_At_Zero_Axis_Inverse_of_X::axis = {-1, 0, 0};
-  const dReal    Fixture_dxJointSlider_B2_At_Zero_Axis_Inverse_of_X::offset = 3.1;
+  const dReal    Fixture_dxJointSlider_B2_At_Zero_Axis_Inverse_of_X::offset = REAL(3.1);
 
   // Move 2nd body offset unit in the X direction
   //
@@ -716,7 +716,7 @@ SUITE (TestdxJointSlider)
 
       dBodySetPosition(bId2, offset, 0, 0);
 
-      CHECK_CLOSE (-offset, dJointGetSliderPosition(jId), 1e-4);
+      CHECK_CLOSE (offset, dJointGetSliderPosition(jId), 1e-4);
     }
 
   // Move 2nd body offset unit in the opposite X direction
@@ -735,7 +735,284 @@ SUITE (TestdxJointSlider)
 
       dBodySetPosition(bId2, -offset, 0, 0);
 
-      CHECK_CLOSE (offset, dJointGetSliderPosition(jId), 1e-4);
+      CHECK_CLOSE (-offset, dJointGetSliderPosition(jId), 1e-4);
     }
+
+  // ==========================================================================
+  // Test Position Rate
+  // ==========================================================================
+
+
+  // Apply force on 1st body in the X direction also the Axis direction
+  //
+  //  X------->       X---------> Axis -->
+  //  B1  F->      =>     B1
+  //  B2              B2
+  TEST_FIXTURE (Fixture_dxJointSlider_B1_and_B2_At_Zero_Axis_Along_X,
+                test_dJointSetSliderPositionRate_Force_Along_Axis_on_B1)
+    {
+      CHECK_CLOSE (0.0, dJointGetSliderPosition(jId), 1e-4);
+      CHECK_CLOSE (0.0, dJointGetSliderPositionRate(jId), 1e-4);
+
+      dBodyAddForce(bId1, 1.0, 0, 0);
+      dWorldQuickStep (wId, 1.0);
+
+      CHECK_CLOSE (1, dJointGetSliderPositionRate(jId), 1e-4);
+    }
+
+  // Apply force on 1st body in the inverse X direction
+  //
+  //  X------->           X---------> Axis -->
+  //  B1  <-F      => B1
+  //  B2                  B2
+  TEST_FIXTURE (Fixture_dxJointSlider_B1_and_B2_At_Zero_Axis_Along_X,
+                test_dJointSetSliderPositionRate_Force_Inverse_of_Axis_on_B1)
+    {
+      CHECK_CLOSE (0.0, dJointGetSliderPosition(jId), 1e-4);
+      CHECK_CLOSE (0.0, dJointGetSliderPositionRate(jId), 1e-4);
+
+      dBodyAddForce(bId1, -1.0, 0, 0);
+      dWorldQuickStep (wId, 1.0);
+
+      CHECK_CLOSE (-1, dJointGetSliderPositionRate(jId), 1e-4);
+    }
+
+
+  // Apply force on 1st body in the X direction also the Axis direction
+  //
+  //  X------->       X---------> <-- Axis
+  //  B1  F->      =>     B1
+  //  B2              B2
+  TEST_FIXTURE (Fixture_dxJointSlider_B1_and_B2_At_Zero_Axis_Inverse_of_X,
+                test_dJointSetSliderPositionRate_Force_Inverse_Axis_on_B1)
+    {
+      CHECK_CLOSE (0.0, dJointGetSliderPosition(jId), 1e-4);
+      CHECK_CLOSE (0.0, dJointGetSliderPositionRate(jId), 1e-4);
+
+      dBodyAddForce(bId1, 1.0, 0, 0);
+      dWorldQuickStep (wId, 1.0);
+
+      CHECK_CLOSE (-1, dJointGetSliderPositionRate(jId), 1e-4);
+    }
+
+  // Apply force on 1st body in the inverse X direction
+  //
+  //  X------->           X---------> <-- Axis
+  //  B1  <-F      => B1
+  //  B2                  B2
+  TEST_FIXTURE (Fixture_dxJointSlider_B1_and_B2_At_Zero_Axis_Inverse_of_X,
+                test_dJointSetSliderPositionRate_Force_Along_of_Axis_on_B1)
+    {
+      CHECK_CLOSE (0.0, dJointGetSliderPosition(jId), 1e-4);
+      CHECK_CLOSE (0.0, dJointGetSliderPositionRate(jId), 1e-4);
+
+      dBodyAddForce(bId1, -1.0, 0, 0);
+      dWorldQuickStep (wId, 1.0);
+
+      CHECK_CLOSE (1, dJointGetSliderPositionRate(jId), 1e-4);
+    }
+
+  // Apply force on 1st body in the X direction also the Axis direction
+  //
+  //  X------->       X---------> Axis -->
+  //  B1          =>  B1
+  //  B2 F->             B2
+  TEST_FIXTURE (Fixture_dxJointSlider_B1_and_B2_At_Zero_Axis_Along_X,
+                test_dJointSetSliderPositionRate_Force_Along_Axis_on_B2)
+    {
+      CHECK_CLOSE (0.0, dJointGetSliderPosition(jId), 1e-4);
+      CHECK_CLOSE (0.0, dJointGetSliderPositionRate(jId), 1e-4);
+
+      dBodyAddForce(bId2, 1.0, 0, 0);
+      dWorldQuickStep (wId, 1.0);
+
+      CHECK_CLOSE (-1, dJointGetSliderPositionRate(jId), 1e-4);
+    }
+
+  // Apply force on 1st body in the inverse X direction
+  //
+  //  X------->           X---------> Axis -->
+  //  B1           =>     B1
+  //  B2  <-F          B2
+  TEST_FIXTURE (Fixture_dxJointSlider_B1_and_B2_At_Zero_Axis_Along_X,
+                test_dJointSetSliderPositionRate_Force_Inverse_of_Axis_on_B2)
+    {
+      CHECK_CLOSE (0.0, dJointGetSliderPosition(jId), 1e-4);
+      CHECK_CLOSE (0.0, dJointGetSliderPositionRate(jId), 1e-4);
+
+      dBodyAddForce(bId2, -1.0, 0, 0);
+      dWorldQuickStep (wId, 1.0);
+
+      CHECK_CLOSE (1, dJointGetSliderPositionRate(jId), 1e-4);
+    }
+
+
+  // Apply force on 1st body in the X direction also the Axis direction
+  //
+  //  X------->       X---------> <-- Axis
+  //  B1          =>  B1
+  //  B2 F->             B2
+  TEST_FIXTURE (Fixture_dxJointSlider_B1_and_B2_At_Zero_Axis_Inverse_of_X,
+                test_dJointSetSliderPositionRate_Force_Inverse_Axis_on_B2)
+    {
+      CHECK_CLOSE (0.0, dJointGetSliderPosition(jId), 1e-4);
+      CHECK_CLOSE (0.0, dJointGetSliderPositionRate(jId), 1e-4);
+
+      dBodyAddForce(bId2, 1.0, 0, 0);
+      dWorldQuickStep (wId, 1.0);
+
+      CHECK_CLOSE (1, dJointGetSliderPositionRate(jId), 1e-4);
+    }
+
+  // Apply force on 1st body in the inverse X direction
+  //
+  //  X------->           X---------> <-- Axis
+  //  B1          =>      B1
+  //  B2 <-F           B2
+  TEST_FIXTURE (Fixture_dxJointSlider_B1_and_B2_At_Zero_Axis_Inverse_of_X,
+                test_dJointSetSliderPositionRate_Force_Along_of_Axis_on_B2)
+    {
+      CHECK_CLOSE (0.0, dJointGetSliderPosition(jId), 1e-4);
+      CHECK_CLOSE (0.0, dJointGetSliderPositionRate(jId), 1e-4);
+
+      dBodyAddForce(bId2, -1.0, 0, 0);
+      dWorldQuickStep (wId, 1.0);
+
+      CHECK_CLOSE (-1, dJointGetSliderPositionRate(jId), 1e-4);
+    }
+
+
+
+  // Apply force on 1st body in the X direction also the Axis direction
+  //
+  //  X------->       X---------> Axis -->
+  //  B1  F->      =>     B1
+  TEST_FIXTURE (Fixture_dxJointSlider_B1_At_Zero_Axis_Along_X,
+                test_dJointSetSliderPositionRate_Force_Along_Axis_on_B1)
+    {
+      CHECK_CLOSE (0.0, dJointGetSliderPosition(jId), 1e-4);
+      CHECK_CLOSE (0.0, dJointGetSliderPositionRate(jId), 1e-4);
+
+      dBodyAddForce(bId1, 1.0, 0, 0);
+      dWorldQuickStep (wId, 1.0);
+
+      CHECK_CLOSE (1, dJointGetSliderPositionRate(jId), 1e-4);
+    }
+
+  // Apply force on 1st body in the inverse X direction
+  //
+  //  X------->           X---------> Axis -->
+  //  B1  <-F      => B1
+  TEST_FIXTURE (Fixture_dxJointSlider_B1_At_Zero_Axis_Along_X,
+                test_dJointSetSliderPositionRate_Force_Inverse_of_Axis_on_B1)
+    {
+      CHECK_CLOSE (0.0, dJointGetSliderPosition(jId), 1e-4);
+      CHECK_CLOSE (0.0, dJointGetSliderPositionRate(jId), 1e-4);
+
+      dBodyAddForce(bId1, -1.0, 0, 0);
+      dWorldQuickStep (wId, 1.0);
+
+      CHECK_CLOSE (-1, dJointGetSliderPositionRate(jId), 1e-4);
+    }
+
+
+  // Apply force on 1st body in the X direction also the Axis direction
+  //
+  //  X------->       X---------> <-- Axis
+  //  B1  F->      =>     B1
+  TEST_FIXTURE (Fixture_dxJointSlider_B1_At_Zero_Axis_Inverse_of_X,
+                test_dJointSetSliderPositionRate_Force_Inverse_Axis_on_B1)
+    {
+      CHECK_CLOSE (0.0, dJointGetSliderPosition(jId), 1e-4);
+      CHECK_CLOSE (0.0, dJointGetSliderPositionRate(jId), 1e-4);
+
+      dBodyAddForce(bId1, 1.0, 0, 0);
+      dWorldQuickStep (wId, 1.0);
+
+      CHECK_CLOSE (-1, dJointGetSliderPositionRate(jId), 1e-4);
+    }
+
+  // Apply force on 1st body in the inverse X direction
+  //
+  //  X------->           X---------> <-- Axis
+  //  B1  <-F      => B1
+  TEST_FIXTURE (Fixture_dxJointSlider_B1_At_Zero_Axis_Inverse_of_X,
+                test_dJointSetSliderPositionRate_Force_Along_of_Axis_on_B1)
+    {
+      CHECK_CLOSE (0.0, dJointGetSliderPosition(jId), 1e-4);
+      CHECK_CLOSE (0.0, dJointGetSliderPositionRate(jId), 1e-4);
+
+      dBodyAddForce(bId1, -1.0, 0, 0);
+      dWorldQuickStep (wId, 1.0);
+
+      CHECK_CLOSE (1, dJointGetSliderPositionRate(jId), 1e-4);
+    }
+
+
+  // Apply force on body 2 in the X direction also the Axis direction
+  //
+  //  X------->       X---------> Axis -->
+  //  B2 F->             B2
+  TEST_FIXTURE (Fixture_dxJointSlider_B2_At_Zero_Axis_Along_X,
+                test_dJointSetSliderPositionRate_Force_Along_Axis_on_B2)
+    {
+      CHECK_CLOSE (0.0, dJointGetSliderPosition(jId), 1e-4);
+      CHECK_CLOSE (0.0, dJointGetSliderPositionRate(jId), 1e-4);
+
+      dBodyAddForce(bId2, 1.0, 0, 0);
+      dWorldQuickStep (wId, 1.0);
+
+      CHECK_CLOSE (-1, dJointGetSliderPositionRate(jId), 1e-4);
+    }
+
+  // Apply force on body 2 in the inverse X direction
+  //
+  //  X------->           X---------> Axis -->
+  //  B2  <-F          B2
+  TEST_FIXTURE (Fixture_dxJointSlider_B2_At_Zero_Axis_Along_X,
+                test_dJointSetSliderPositionRate_Force_Inverse_of_Axis_on_B2)
+    {
+      CHECK_CLOSE (0.0, dJointGetSliderPosition(jId), 1e-4);
+      CHECK_CLOSE (0.0, dJointGetSliderPositionRate(jId), 1e-4);
+
+      dBodyAddForce(bId2, -1.0, 0, 0);
+      dWorldQuickStep (wId, 1.0);
+
+      CHECK_CLOSE (1, dJointGetSliderPositionRate(jId), 1e-4);
+    }
+
+
+  // Apply force on body 2 in the X direction also the Axis direction
+  //
+  //  X------->       X---------> <-- Axis
+  //  B2 F->             B2
+  TEST_FIXTURE (Fixture_dxJointSlider_B2_At_Zero_Axis_Inverse_of_X,
+                test_dJointSetSliderPositionRate_Force_Inverse_Axis_on_B2)
+    {
+      CHECK_CLOSE (0.0, dJointGetSliderPosition(jId), 1e-4);
+      CHECK_CLOSE (0.0, dJointGetSliderPositionRate(jId), 1e-4);
+
+      dBodyAddForce(bId2, 1.0, 0, 0);
+      dWorldQuickStep (wId, 1.0);
+
+      CHECK_CLOSE (1, dJointGetSliderPositionRate(jId), 1e-4);
+    }
+
+  // Apply force on body 2 in the inverse X direction
+  //
+  //  X------->           X---------> <-- Axis
+  //  B2 <-F           B2
+  TEST_FIXTURE (Fixture_dxJointSlider_B2_At_Zero_Axis_Inverse_of_X,
+                test_dJointSetSliderPositionRate_Force_Along_of_Axis_on_B2)
+    {
+      CHECK_CLOSE (0.0, dJointGetSliderPosition(jId), 1e-4);
+      CHECK_CLOSE (0.0, dJointGetSliderPositionRate(jId), 1e-4);
+
+      dBodyAddForce(bId2, -1.0, 0, 0);
+      dWorldQuickStep (wId, 1.0);
+
+      CHECK_CLOSE (-1, dJointGetSliderPositionRate(jId), 1e-4);
+    }
+
 
 } // End of SUITE TestdxJointSlider
