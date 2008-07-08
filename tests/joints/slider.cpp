@@ -653,9 +653,9 @@ SUITE (TestdxJointSlider)
     {
       CHECK_CLOSE (0.0, dJointGetSliderPosition(jId), 1e-4);
 
-      dBodySetPosition(bId2, offset, 0, 0);
+      dBodySetPosition(bId2, -offset, 0, 0);
 
-      CHECK_CLOSE (offset, dJointGetSliderPosition(jId), 1e-4);
+      CHECK_CLOSE (-offset, dJointGetSliderPosition(jId), 1e-4);
     }
 
   // Only body 2

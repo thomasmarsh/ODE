@@ -8,6 +8,14 @@ the rules for this file:
   * keep the format consistent (79 char width, M/D/Y date format).
 
 ------------------------------------------------------------------------------
+07/08/08 Remi Ricard (papaDoc)
+        * Update unittest for the slider.
+        * Rename the new function dJointSetHingeAxisDelta to 
+          dJointSetHingeAxisOffset. This remove will remove confusion with 
+          the old function dJointSetHingeAnchorDelta
+        * Update documentation for the Hinge unittest
+        * Remove warning by using REAL()
+
 07/07/08 Daniel K. O.
         * Max Correcting Vel doesn't affect bounciness, as before.
 

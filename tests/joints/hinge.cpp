@@ -100,7 +100,7 @@ SUITE (TestdxJointHinge)
   //   |           |   |
   //  B1  B2      B1   B2
   TEST_FIXTURE (dxJointHinge_Fixture_B1_and_B2_At_Zero_Axis_Along_X,
-                test_dJointSetHingeAxisDelta_B2_90deg) {
+                test_dJointSetHingeAxisOffset_B2_90deg) {
     dMatrix3 R;
 
     CHECK_CLOSE (dJointGetHingeAngle (jId), 0.0, 1e-4);
@@ -110,7 +110,7 @@ SUITE (TestdxJointHinge)
 
     CHECK_CLOSE (-M_PI/2.0, dJointGetHingeAngle (jId), 1e-4);
 
-    dJointSetHingeAxisDelta (jId, axis[0], axis[1], axis[2],  -M_PI/2.0);
+    dJointSetHingeAxisOffset (jId, axis[0], axis[1], axis[2],  -M_PI/2.0);
     CHECK_CLOSE (-M_PI/2.0, dJointGetHingeAngle (jId), 1e-4);
 
     dRFromAxisAndAngle (R, 1, 0, 0, 0);
@@ -133,7 +133,7 @@ SUITE (TestdxJointHinge)
   //   |           |   |
   //  B1  B2      B1   B2
   TEST_FIXTURE (dxJointHinge_Fixture_B1_and_B2_At_Zero_Axis_Along_X,
-                test_dJointSetHingeAxisDelta_B2_Minus90deg) {
+                test_dJointSetHingeAxisOffset_B2_Minus90deg) {
     dMatrix3 R;
 
     dJointSetHingeAxis (jId, axis[0], axis[1], axis[2]);
@@ -145,7 +145,7 @@ SUITE (TestdxJointHinge)
 
     CHECK_CLOSE (M_PI/2.0, dJointGetHingeAngle (jId), 1e-4);
 
-    dJointSetHingeAxisDelta (jId, axis[0], axis[1], axis[2],  M_PI/2.0);
+    dJointSetHingeAxisOffset (jId, axis[0], axis[1], axis[2],  M_PI/2.0);
     CHECK_CLOSE (M_PI/2.0, dJointGetHingeAngle (jId), 1e-4);
 
     dRFromAxisAndAngle (R, 1, 0, 0, 0);
@@ -168,20 +168,20 @@ SUITE (TestdxJointHinge)
   //   \  |        |   |
   //  B1  B2      B1   B2
   TEST_FIXTURE (dxJointHinge_Fixture_B1_and_B2_At_Zero_Axis_Along_X,
-                test_dJointSetHingeAxisDelta_B1_0_23rad) {
+                test_dJointSetHingeAxisOffset_B1_0_23rad) {
     dMatrix3 R;
 
     dJointSetHingeAxis (jId, axis[0], axis[1], axis[2]);
 
     CHECK_CLOSE (dJointGetHingeAngle (jId), 0.0, 1e-4);
 
-    dRFromAxisAndAngle (R, 1, 0, 0, 0.23);
+    dRFromAxisAndAngle (R, 1, 0, 0, REAL(0.23) );
     dBodySetRotation (bId1, R);
 
-    CHECK_CLOSE (0.23, dJointGetHingeAngle (jId), 1e-4);
+    CHECK_CLOSE (REAL(0.23), dJointGetHingeAngle (jId), 1e-4);
 
-    dJointSetHingeAxisDelta (jId, axis[0], axis[1], axis[2],  0.23);
-    CHECK_CLOSE (0.23, dJointGetHingeAngle (jId), 1e-4);
+    dJointSetHingeAxisOffset (jId, axis[0], axis[1], axis[2],  REAL(0.23));
+    CHECK_CLOSE (REAL(0.23), dJointGetHingeAngle (jId), 1e-4);
 
     dRFromAxisAndAngle (R, 1, 0, 0, 0);
     dBodySetRotation (bId1, R);
@@ -203,20 +203,20 @@ SUITE (TestdxJointHinge)
   //   /   |        |   |
   //  B1  B2      B1   B2
   TEST_FIXTURE (dxJointHinge_Fixture_B1_and_B2_At_Zero_Axis_Along_X,
-                test_dJointSetHingeAxisDelta_B1_Minus0_23rad) {
+                test_dJointSetHingeAxisOffset_B1_Minus0_23rad) {
     dMatrix3 R;
 
     dJointSetHingeAxis (jId, axis[0], axis[1], axis[2]);
 
     CHECK_CLOSE (dJointGetHingeAngle (jId), 0.0, 1e-4);
 
-    dRFromAxisAndAngle (R, 1, 0, 0, -0.23);
+    dRFromAxisAndAngle (R, 1, 0, 0, -REAL(0.23));
     dBodySetRotation (bId1, R);
 
-    CHECK_CLOSE (-0.23, dJointGetHingeAngle (jId), 1e-4);
+    CHECK_CLOSE (-REAL(0.23), dJointGetHingeAngle (jId), 1e-4);
 
-    dJointSetHingeAxisDelta (jId, axis[0], axis[1], axis[2],  -0.23);
-    CHECK_CLOSE (-0.23, dJointGetHingeAngle (jId), 1e-4);
+    dJointSetHingeAxisOffset (jId, axis[0], axis[1], axis[2],  -REAL(0.23));
+    CHECK_CLOSE (-REAL(0.23), dJointGetHingeAngle (jId), 1e-4);
 
     dRFromAxisAndAngle (R, 1, 0, 0, 0);
     dBodySetRotation (bId1, R);
@@ -289,7 +289,7 @@ SUITE (TestdxJointHinge)
   //   |           |   |
   //  B1  B2      B1   B2
   TEST_FIXTURE (dxJointHinge_Fixture_B1_and_B2_At_Zero_Axis_Inverse_of_X,
-                test_dJointSetHingeAxisDelta_B2_90Deg) {
+                test_dJointSetHingeAxisOffset_B2_90Deg) {
     dMatrix3 R;
 
     dJointSetHingeAxis (jId, axis[0], axis[1], axis[2]);
@@ -301,7 +301,7 @@ SUITE (TestdxJointHinge)
 
     CHECK_CLOSE (M_PI/2.0, dJointGetHingeAngle (jId), 1e-4);
 
-    dJointSetHingeAxisDelta (jId, axis[0], axis[1], axis[2],  M_PI/2.0);
+    dJointSetHingeAxisOffset (jId, axis[0], axis[1], axis[2],  M_PI/2.0);
     CHECK_CLOSE (M_PI/2.0, dJointGetHingeAngle (jId), 1e-4);
 
     dRFromAxisAndAngle (R, 1, 0, 0, 0);
@@ -324,7 +324,7 @@ SUITE (TestdxJointHinge)
   //   |           |   |
   //  B1  B2      B1   B2
   TEST_FIXTURE (dxJointHinge_Fixture_B1_and_B2_At_Zero_Axis_Inverse_of_X,
-                test_dJointSetHingeAxisDelta_B2_Minus90Deg) {
+                test_dJointSetHingeAxisOffset_B2_Minus90Deg) {
     dMatrix3 R;
 
     dJointSetHingeAxis (jId, axis[0], axis[1], axis[2]);
@@ -336,7 +336,7 @@ SUITE (TestdxJointHinge)
 
     CHECK_CLOSE (-M_PI/2.0, dJointGetHingeAngle (jId), 1e-4);
 
-    dJointSetHingeAxisDelta (jId, axis[0], axis[1], axis[2],  -M_PI/2.0);
+    dJointSetHingeAxisOffset (jId, axis[0], axis[1], axis[2],  -M_PI/2.0);
     CHECK_CLOSE (-M_PI/2.0, dJointGetHingeAngle (jId), 1e-4);
 
     dRFromAxisAndAngle (R, 1, 0, 0, 0);
@@ -359,20 +359,20 @@ SUITE (TestdxJointHinge)
   //   \  |        |   |
   //  B1  B2      B1   B2
   TEST_FIXTURE (dxJointHinge_Fixture_B1_and_B2_At_Zero_Axis_Inverse_of_X,
-                test_dJointSetHingeAxisDelta_B1_0_23rad) {
+                test_dJointSetHingeAxisOffset_B1_0_23rad) {
     dMatrix3 R;
 
     dJointSetHingeAxis (jId, axis[0], axis[1], axis[2]);
 
     CHECK_CLOSE (dJointGetHingeAngle (jId), 0.0, 1e-4);
 
-    dRFromAxisAndAngle (R, 1, 0, 0, 0.23);
+    dRFromAxisAndAngle (R, 1, 0, 0, REAL(0.23));
     dBodySetRotation (bId1, R);
 
-    CHECK_CLOSE (-0.23, dJointGetHingeAngle (jId), 1e-4);
+    CHECK_CLOSE (-REAL(0.23), dJointGetHingeAngle (jId), 1e-4);
 
-    dJointSetHingeAxisDelta (jId, axis[0], axis[1], axis[2],  -0.23);
-    CHECK_CLOSE (-0.23, dJointGetHingeAngle (jId), 1e-4);
+    dJointSetHingeAxisOffset (jId, axis[0], axis[1], axis[2],  -REAL(0.23));
+    CHECK_CLOSE (-REAL(0.23), dJointGetHingeAngle (jId), 1e-4);
 
     dRFromAxisAndAngle (R, 1, 0, 0, 0);
     dBodySetRotation (bId1, R);
@@ -394,20 +394,20 @@ SUITE (TestdxJointHinge)
   //   /   |        |   |
   //  B1  B2      B1   B2
   TEST_FIXTURE (dxJointHinge_Fixture_B1_and_B2_At_Zero_Axis_Inverse_of_X,
-                test_dJointSetHingeAxisDelta_B1_Minus0_23rad) {
+                test_dJointSetHingeAxisOffset_B1_Minus0_23rad) {
     dMatrix3 R;
 
     dJointSetHingeAxis (jId, axis[0], axis[1], axis[2]);
 
     CHECK_CLOSE (dJointGetHingeAngle (jId), 0.0, 1e-4);
 
-    dRFromAxisAndAngle (R, 1, 0, 0, -0.23);
+    dRFromAxisAndAngle (R, 1, 0, 0, -REAL(0.23));
     dBodySetRotation (bId1, R);
 
-    CHECK_CLOSE (0.23, dJointGetHingeAngle (jId), 1e-4);
+    CHECK_CLOSE (REAL(0.23), dJointGetHingeAngle (jId), 1e-4);
 
-    dJointSetHingeAxisDelta (jId, axis[0], axis[1], axis[2],  0.23);
-    CHECK_CLOSE (0.23, dJointGetHingeAngle (jId), 1e-4);
+    dJointSetHingeAxisOffset (jId, axis[0], axis[1], axis[2],  REAL(0.23));
+    CHECK_CLOSE (REAL(0.23), dJointGetHingeAngle (jId), 1e-4);
 
     dRFromAxisAndAngle (R, 1, 0, 0, 0);
     dBodySetRotation (bId1, R);
@@ -477,7 +477,7 @@ SUITE (TestdxJointHinge)
   //            |
   //   B1      B1
   TEST_FIXTURE (dxJointHinge_Fixture_B1_At_Zero_Axis_Along_X,
-                test_dJointSetHingeAxisDelta_1Body_B1_90Deg) {
+                test_dJointSetHingeAxisOffset_1Body_B1_90Deg) {
     dMatrix3 R;
 
     dJointSetHingeAxis (jId, axis[0], axis[1], axis[2]);
@@ -489,7 +489,7 @@ SUITE (TestdxJointHinge)
 
     CHECK_CLOSE (M_PI/2.0, dJointGetHingeAngle (jId), 1e-4);
 
-    dJointSetHingeAxisDelta (jId, axis[0], axis[1], axis[2],  M_PI/2.0);
+    dJointSetHingeAxisOffset (jId, axis[0], axis[1], axis[2],  M_PI/2.0);
     CHECK_CLOSE (M_PI/2.0, dJointGetHingeAngle (jId), 1e-4);
 
     dRFromAxisAndAngle (R, 1, 0, 0, 0);
@@ -498,7 +498,7 @@ SUITE (TestdxJointHinge)
     CHECK_CLOSE (0, dJointGetHingeAngle (jId), 1e-4);
   }
 
-  // Rotate B1 by 90deg around X then back to original position
+  // Rotate B1 by -0.23rad around X then back to original position
   //
   //   ^         ^
   //   |  =>    /
@@ -511,20 +511,20 @@ SUITE (TestdxJointHinge)
   //   /       |
   //   B1     B1
   TEST_FIXTURE (dxJointHinge_Fixture_B1_At_Zero_Axis_Along_X,
-                test_dJointSetHingeAxisDelta_1Body_B1_Minus0_23rad) {
+                test_dJointSetHingeAxisOffset_1Body_B1_Minus0_23rad) {
     dMatrix3 R;
 
     dJointSetHingeAxis (jId, axis[0], axis[1], axis[2]);
 
     CHECK_CLOSE (dJointGetHingeAngle (jId), 0.0, 1e-4);
 
-    dRFromAxisAndAngle (R, 1, 0, 0, -0.23);
+    dRFromAxisAndAngle (R, 1, 0, 0, -REAL(0.23));
     dBodySetRotation (bId1, R);
 
-    CHECK_CLOSE (-0.23, dJointGetHingeAngle (jId), 1e-4);
+    CHECK_CLOSE (-REAL(0.23), dJointGetHingeAngle (jId), 1e-4);
 
-    dJointSetHingeAxisDelta (jId, axis[0], axis[1], axis[2],  -0.23);
-    CHECK_CLOSE (-0.23, dJointGetHingeAngle (jId), 1e-4);
+    dJointSetHingeAxisOffset (jId, axis[0], axis[1], axis[2],  -REAL(0.23));
+    CHECK_CLOSE (-REAL(0.23), dJointGetHingeAngle (jId), 1e-4);
 
     dRFromAxisAndAngle (R, 1, 0, 0, 0);
     dBodySetRotation (bId1, R);
@@ -595,7 +595,7 @@ SUITE (TestdxJointHinge)
   //            |
   //   B1      B1
   TEST_FIXTURE (dxJointHinge_Fixture_B1_At_Zero_Axis_Inverse_of_X,
-                test_dJointSetHingeAxisDelta_1Body_B1_90Deg) {
+                test_dJointSetHingeAxisOffset_1Body_B1_90Deg) {
     dMatrix3 R;
 
     dJointSetHingeAxis (jId, axis[0], axis[1], axis[2]);
@@ -607,7 +607,7 @@ SUITE (TestdxJointHinge)
 
     CHECK_CLOSE (-M_PI/2.0, dJointGetHingeAngle (jId), 1e-4);
 
-    dJointSetHingeAxisDelta (jId, axis[0], axis[1], axis[2],  -M_PI/2.0);
+    dJointSetHingeAxisOffset (jId, axis[0], axis[1], axis[2],  -M_PI/2.0);
     CHECK_CLOSE (-M_PI/2.0, dJointGetHingeAngle (jId), 1e-4);
 
     dRFromAxisAndAngle (R, 1, 0, 0, 0);
@@ -616,7 +616,7 @@ SUITE (TestdxJointHinge)
     CHECK_CLOSE (0, dJointGetHingeAngle (jId), 1e-4);
   }
 
-  // Rotate B1 by 90deg around X then back to original position
+  // Rotate B1 by -0.23rad around X then back to original position
   //
   //   ^         ^
   //   |  =>    /
@@ -629,20 +629,20 @@ SUITE (TestdxJointHinge)
   //   /       |
   //   B1     B1
   TEST_FIXTURE (dxJointHinge_Fixture_B1_At_Zero_Axis_Inverse_of_X,
-                test_dJointSetHingeAxisDelta_1Body_B1_Minus0_23rad) {
+                test_dJointSetHingeAxisOffset_1Body_B1_Minus0_23rad) {
     dMatrix3 R;
 
     dJointSetHingeAxis (jId, axis[0], axis[1], axis[2]);
 
     CHECK_CLOSE (dJointGetHingeAngle (jId), 0.0, 1e-4);
 
-    dRFromAxisAndAngle (R, 1, 0, 0, -0.23);
+    dRFromAxisAndAngle (R, 1, 0, 0, -REAL(0.23));
     dBodySetRotation (bId1, R);
 
-    CHECK_CLOSE (0.23, dJointGetHingeAngle (jId), 1e-4);
+    CHECK_CLOSE (REAL(0.23), dJointGetHingeAngle (jId), 1e-4);
 
-    dJointSetHingeAxisDelta (jId, axis[0], axis[1], axis[2],  0.23);
-    CHECK_CLOSE (0.23, dJointGetHingeAngle (jId), 1e-4);
+    dJointSetHingeAxisOffset (jId, axis[0], axis[1], axis[2],  REAL(0.23));
+    CHECK_CLOSE (REAL(0.23), dJointGetHingeAngle (jId), 1e-4);
 
     dRFromAxisAndAngle (R, 1, 0, 0, 0);
     dBodySetRotation (bId1, R);
@@ -715,7 +715,7 @@ SUITE (TestdxJointHinge)
   //            |
   //   B2      B2
   TEST_FIXTURE (dxJointHinge_Fixture_B2_At_Zero_Axis_Along_X,
-                test_dJointSetHingeAxisDelta_1Body_B2_90Deg) {
+                test_dJointSetHingeAxisOffset_1Body_B2_90Deg) {
     dMatrix3 R;
 
     dJointSetHingeAxis (jId, axis[0], axis[1], axis[2]);
@@ -727,7 +727,7 @@ SUITE (TestdxJointHinge)
 
     CHECK_CLOSE (-M_PI/2.0, dJointGetHingeAngle (jId), 1e-4);
 
-    dJointSetHingeAxisDelta (jId, axis[0], axis[1], axis[2],  -M_PI/2.0);
+    dJointSetHingeAxisOffset (jId, axis[0], axis[1], axis[2],  -M_PI/2.0);
     CHECK_CLOSE (-M_PI/2.0, dJointGetHingeAngle (jId), 1e-4);
 
     dRFromAxisAndAngle (R, 1, 0, 0, 0);
@@ -736,7 +736,7 @@ SUITE (TestdxJointHinge)
     CHECK_CLOSE (0, dJointGetHingeAngle (jId), 1e-4);
   }
 
-  // Rotate B2 by 90deg around X then back to original position
+  // Rotate B2 by -0.23rad around X then back to original position
   //
   //   ^         ^
   //   |  =>    /
@@ -749,20 +749,20 @@ SUITE (TestdxJointHinge)
   //   /       |
   //   B2     B2
   TEST_FIXTURE (dxJointHinge_Fixture_B2_At_Zero_Axis_Along_X,
-                test_dJointSetHingeAxisDelta_1Body_B2_Minus0_23rad) {
+                test_dJointSetHingeAxisOffset_1Body_B2_Minus0_23rad) {
     dMatrix3 R;
 
     dJointSetHingeAxis (jId, axis[0], axis[1], axis[2]);
 
     CHECK_CLOSE (dJointGetHingeAngle (jId), 0.0, 1e-4);
 
-    dRFromAxisAndAngle (R, 1, 0, 0, -0.23);
+    dRFromAxisAndAngle (R, 1, 0, 0, -REAL(0.23));
     dBodySetRotation (bId2, R);
 
-    CHECK_CLOSE (0.23, dJointGetHingeAngle (jId), 1e-4);
+    CHECK_CLOSE (REAL(0.23), dJointGetHingeAngle (jId), 1e-4);
 
-    dJointSetHingeAxisDelta (jId, axis[0], axis[1], axis[2],  0.23);
-    CHECK_CLOSE (0.23, dJointGetHingeAngle (jId), 1e-4);
+    dJointSetHingeAxisOffset (jId, axis[0], axis[1], axis[2],  REAL(0.23));
+    CHECK_CLOSE (REAL(0.23), dJointGetHingeAngle (jId), 1e-4);
 
     dRFromAxisAndAngle (R, 1, 0, 0, 0);
     dBodySetRotation (bId2, R);
