@@ -30,7 +30,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 #include <UnitTest++.h>
-#include <ode/ode.h>
+#include <ode/ode.h>n
 
 #include "../../ode/src/joints/fixed.h"
 
@@ -129,11 +129,11 @@ SUITE (TestdxJointFixed)
 
         // Rotate in a strange manner
         // Both bodies at origin
-        dRFromEulerAngles (R, 0.23, 3.1, -0.73);
+        dRFromEulerAngles (R, REAL(0.23), REAL(3.1), REAL(-0.73));
         dBodySetPosition (bId1, 0, 0, 0);
         dBodySetRotation (bId1, R);
 
-        dRFromEulerAngles (R, -0.57, 1.49, 0.81);
+        dRFromEulerAngles (R, REAL(-0.57), REAL(1.49), REAL(0.81));
         dBodySetPosition (bId2, 0, 0, 0);
         dBodySetRotation (bId2, R);
 

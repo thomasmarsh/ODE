@@ -9,6 +9,13 @@ the rules for this file:
 
 ------------------------------------------------------------------------------
 07/08/08 Remi Ricard (papaDoc)
+        * Update the slider joint to have the same behavior as the other joint
+          when there is only a body2 attached to it.
+        * Update documentation for the slider joint.
+        * Remove warning by using REAL()
+        * Add new unittest for dJointGetSliderPositionRate
+
+07/08/08 Remi Ricard (papaDoc)
         * Update unittest for the slider.
         * Rename the new function dJointSetHingeAxisDelta to 
           dJointSetHingeAxisOffset. This remove will remove confusion with 

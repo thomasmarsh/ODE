@@ -61,10 +61,20 @@ dReal dJointGetSliderPosition ( dJointID j )
     }
     else
     {
-        for ( int i = 0; i < 3; i++ )
-            q[i] = joint->node[0].body->posr.pos[i]
-                   - joint->offset[i];
+        q[0] = joint->node[0].body->posr.pos[0] - joint->offset[0];
+        q[1] = joint->node[0].body->posr.pos[1] - joint->offset[1];
+        q[2] = joint->node[0].body->posr.pos[2] - joint->offset[2];
+
+        if ( joint->flags & dJOINT_REVERSE )
+        {   // N.B. it could have been simplier to only inverse the sign of
+            //      the dDot result but this case is exceptional and doing
+            //      it the check for all case can decrease the performance.
+            ax1[0] = -ax1[0];
+            ax1[1] = -ax1[1];
+            ax1[2] = -ax1[2];
+        }
     }
+
     return dDOT ( ax1, q );
 }
 
@@ -86,7 +96,9 @@ dReal dJointGetSliderPositionRate ( dJointID j )
     }
     else
     {
-        return dDOT ( ax1, joint->node[0].body->lvel );
+        dReal rate = dDOT ( ax1, joint->node[0].body->lvel );
+        if ( joint->flags & dJOINT_REVERSE ) rate = - rate;
+        return rate;
     }
 }
 
