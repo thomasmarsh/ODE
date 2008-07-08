@@ -202,7 +202,7 @@ void dJointSetHingeAxis( dJointID j, dReal x, dReal y, dReal z )
 }
 
 
-void dJointSetHingeAxisDelta( dJointID j, dReal x, dReal y, dReal z, dReal dangle )
+void dJointSetHingeAxisOffset( dJointID j, dReal x, dReal y, dReal z, dReal dangle )
 {
     dxJointHinge* joint = ( dxJointHinge* )j;
     dUASSERT( joint, "bad joint argument" );
@@ -212,15 +212,13 @@ void dJointSetHingeAxisDelta( dJointID j, dReal x, dReal y, dReal z, dReal dangl
 
     if ( joint->flags & dJOINT_REVERSE ) dangle = -dangle;
 
-    dQuaternion qAngle, qDelta;
+    dQuaternion qAngle, qOffset;
     dQFromAxisAndAngle(qAngle, x, y, z, dangle);
-    dQMultiply3(qDelta, qAngle, joint->qrel);
-    joint->qrel[0] = qDelta[0];
-    joint->qrel[1] = qDelta[1];
-    joint->qrel[2] = qDelta[2];
-    joint->qrel[3] = qDelta[3];
-
-
+    dQMultiply3(qOffset, qAngle, joint->qrel);
+    joint->qrel[0] = qOffset[0];
+    joint->qrel[1] = qOffset[1];
+    joint->qrel[2] = qOffset[2];
+    joint->qrel[3] = qOffset[3];
 }
 
 

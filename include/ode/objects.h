@@ -1595,7 +1595,7 @@ ODE_API void dJointSetHingeAxis (dJointID, dReal x, dReal y, dReal z);
  * @warning Calling dJointSetHingeAnchor or dJointSetHingeAxis will reset the "zero"
  *          angle position.
  */
-ODE_API void dJointSetHingeAxisDelta (dJointID j, dReal x, dReal y, dReal z, dReal angle);
+ODE_API void dJointSetHingeAxisOffset (dJointID j, dReal x, dReal y, dReal z, dReal angle);
 
 /**
  * @brief set joint parameter
@@ -2018,6 +2018,8 @@ ODE_API dReal dJointGetHingeParam (dJointID, int parameter);
  * The angle is measured between the two bodies, or between the body and
  * the static environment.
  * The angle will be between -pi..pi.
+ * Give the relative rotation with respect to the Hinge axis of Body 1 with
+ * respect to Body 2.
  * When the hinge anchor or axis is set, the current position of the attached
  * bodies is examined and that position will be the zero angle.
  * @ingroup joints
