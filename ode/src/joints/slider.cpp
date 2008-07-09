@@ -68,7 +68,7 @@ dReal dJointGetSliderPosition ( dJointID j )
         if ( joint->flags & dJOINT_REVERSE )
         {   // N.B. it could have been simplier to only inverse the sign of
             //      the dDot result but this case is exceptional and doing
-            //      it the check for all case can decrease the performance.
+            //      the check for all case can decrease the performance.
             ax1[0] = -ax1[0];
             ax1[1] = -ax1[1];
             ax1[2] = -ax1[2];
