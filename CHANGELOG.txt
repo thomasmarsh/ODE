@@ -8,6 +8,10 @@ the rules for this file:
   * keep the format consistent (79 char width, M/D/Y date format).
 
 ------------------------------------------------------------------------------
+07/09/08 Remi Ricard (papaDoc)
+        * Optimize function Multiply1_12q1 in quickstep
+          Patch proposed by Riemer v.d. Zee and modified by Patrick Baggett
+
 07/08/08 Remi Ricard (papaDoc)
         * Update the slider joint to have the same behavior as the other joint
           when there is only a body2 attached to it.

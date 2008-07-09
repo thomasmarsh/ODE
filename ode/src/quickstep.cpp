@@ -72,27 +72,36 @@ typedef dReal *dRealMutablePtr;
 // multiply block of B matrix (q x 6) with 12 dReal per row with C vektor (q)
 static void Multiply1_12q1 (dReal *A, dReal *B, dReal *C, int q)
 {
-  int k;
-  dReal sum;
+    int i, k;
   dIASSERT (q>0 && A && B && C);
-  sum = 0;
-  for (k=0; k<q; k++) sum += B[k*12] * C[k];
-  A[0] = sum;
-  sum = 0;
-  for (k=0; k<q; k++) sum += B[1+k*12] * C[k];
-  A[1] = sum;
-  sum = 0;
-  for (k=0; k<q; k++) sum += B[2+k*12] * C[k];
-  A[2] = sum;
-  sum = 0;
-  for (k=0; k<q; k++) sum += B[3+k*12] * C[k];
-  A[3] = sum;
-  sum = 0;
-  for (k=0; k<q; k++) sum += B[4+k*12] * C[k];
-  A[4] = sum;
-  sum = 0;
-  for (k=0; k<q; k++) sum += B[5+k*12] * C[k];
-  A[5] = sum;
+
+  dReal a = 0;
+  dReal b = 0;
+  dReal c = 0;
+  dReal d = 0;
+  dReal e = 0;
+  dReal f = 0;
+  dReal s;
+
+  for(i=0, k = 0; i<q; i++, k += 12)
+  {
+    s = C[i]; //C[i] and B[n+k] cannot overlap because its value has been read into a temporary.
+
+    //For the rest of the loop, the only memory dependency (array) is from B[]
+    a += B[  k] * s;
+    b += B[1+k] * s;
+    c += B[2+k] * s;
+    d += B[3+k] * s;
+    e += B[4+k] * s;
+    f += B[5+k] * s;
+  }
+
+  A[0] = a;
+  A[1] = b;
+  A[2] = c;
+  A[3] = d;
+  A[4] = e;
+  A[5] = f;
 }
 
 //***************************************************************************
