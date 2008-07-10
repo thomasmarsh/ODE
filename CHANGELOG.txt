@@ -8,6 +8,13 @@ the rules for this file:
   * keep the format consistent (79 char width, M/D/Y date format).
 
 ------------------------------------------------------------------------------
+09/10/08 Remi Ricard (papaDoc)
+        * Add new function dJointSetPistonAnchorOffset
+        * Add unittest for the piston joint
+        * Fix problem with dJointGetPistonPosition and 
+          dJointGetPistonPositionRate when the joint is attached to only
+          a body 2. The sign was inversed. 
+
 07/09/08 Remi Ricard (papaDoc)
         * Optimize function Multiply1_12q1 in quickstep
           Patch proposed by Riemer v.d. Zee and modified by Patrick Baggett
