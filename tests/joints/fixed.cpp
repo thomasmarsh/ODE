@@ -30,7 +30,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 #include <UnitTest++.h>
-#include <ode/ode.h>n
+#include <ode/ode.h>
 
 #include "../../ode/src/joints/fixed.h"
 
