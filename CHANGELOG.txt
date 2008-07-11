@@ -8,7 +8,11 @@ the rules for this file:
   * keep the format consistent (79 char width, M/D/Y date format).
 
 ------------------------------------------------------------------------------
-09/10/08 Remi Ricard (papaDoc)
+07/11/08 Daniel K. O.
+        * Bumped version for 0.10.1
+        * Added proper usage of libtool's version info.
+
+07/10/08 Remi Ricard (papaDoc)
         * Add new function dJointSetPistonAnchorOffset
         * Add unittest for the piston joint
         * Fix problem with dJointGetPistonPosition and 

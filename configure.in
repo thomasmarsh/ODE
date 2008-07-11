@@ -1,8 +1,44 @@
 dnl AC_INIT does not take a macro as a version nr: set it separately! - Bram
-AC_INIT(ODE,0.10.0,ode@ode.org)
+AC_INIT([ODE],[0.10.1],[ode@ode.org])
+ODE_RELEASE=0.10.1
+AC_SUBST(ODE_RELEASE)
 
-dnl When upgrading version nr, also change the AC_INIT line! - Bram
-ODE_RELEASE=0.10.0
+# Those are instructions from the Libtool manual:
+#  1. Start with version information of `0:0:0' for each libtool library.
+#
+#  2. Update the version information only immediately before a public
+#     release of your software.  More frequent updates are unnecessary,
+#     and only guarantee that the current interface number gets larger
+#     faster.
+#
+#  3. If the library source code has changed at all since the last
+#     update, then increment REVISION (`C:R:A' becomes `C:r+1:A').
+#
+#  4. If any interfaces have been added, removed, or changed since the
+#     last update, increment CURRENT, and set REVISION to 0.
+#
+#  5. If any interfaces have been added since the last public release,
+#     then increment AGE.
+#
+#  6. If any interfaces have been removed since the last public release,
+#     then set AGE to 0.
+CURRENT=1
+REVISION=0
+AGE=0
+
+AC_ARG_ENABLE(version-info,
+        AS_HELP_STRING([--disable-version-info],
+                [don't encode version information in the generated library]),
+        version_info=$enableval,
+        version_info=yes)
+if test x$version_info = xyes
+then
+    ODE_VERSION_INFO="-version-info $CURRENT:$REVISION:$AGE"
+else
+    ODE_VERSION_INFO="-avoid-version"
+fi
+AC_SUBST(ODE_VERSION_INFO)
+
 
 
 AC_CANONICAL_HOST
@@ -24,22 +60,6 @@ AC_DISABLE_SHARED
 AC_LIBTOOL_WIN32_DLL
 AC_PROG_LIBTOOL
 AC_CHECK_TOOLS([WINDRES], [windres])
-
-AC_SUBST(ODE_RELEASE)
-
-AC_ARG_ENABLE(release-info,
-        AS_HELP_STRING([--disable-release-info],
-                [don't encode release information in the generated library]),
-        release_info=$enableval,
-        release_info=yes)
-if test x$release_info = xyes
-then
-    ODE_RELEASE_INFO="-release $ODE_RELEASE"
-else
-    ODE_RELEASE_INFO="-avoid-version"
-fi
-AC_SUBST(ODE_RELEASE_INFO)
-
 
 AC_C_BIGENDIAN
 AC_C_INLINE
@@ -176,8 +196,9 @@ dnl Set Drawstuff variables
 AC_MSG_CHECKING(which drawstuff lib to build)
 AC_MSG_RESULT($drawstuff)
 
-if test "x$drawstuff" = "xX11"; then
-AC_PATH_XTRA
+if test "x$drawstuff" = "xX11"
+then
+    AC_PATH_XTRA
 fi
 
 dnl Check for OpenGL
@@ -351,9 +372,8 @@ enum {
 #endif /* #define ODE_CONFIG_H */
 ])
 
-
 dnl Finally write our Makefiles
-AC_OUTPUT([
+AC_CONFIG_FILES([
  Makefile
  include/Makefile
  include/ode/Makefile
@@ -378,6 +398,7 @@ AC_OUTPUT([
  tests/UnitTest++/src/Win32/Makefile
  ode-config
  ])
+AC_OUTPUT
 
 chmod +x ode-config
 

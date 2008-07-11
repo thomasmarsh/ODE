@@ -11,7 +11,7 @@ libfast_la_SOURCES = fastldlt.c fastltsolve.c fastdot.c fastlsolve.c
 
 lib_LTLIBRARIES = libode.la
 
-libode_la_LDFLAGS = @EXTRA_LIBTOOL_LDFLAGS@ @ODE_RELEASE_INFO@
+libode_la_LDFLAGS = @EXTRA_LIBTOOL_LDFLAGS@ @ODE_VERSION_INFO@
 libode_la_LIBADD = libfast.la joints/libjoints.la
 
 
