@@ -308,6 +308,43 @@ then
     AC_DEFINE([dOU_ENABLED],[1],[Generic OU features are enabled])
     AC_DEFINE([dATOMICS_ENABLED],[1],[Atomic API of OU is enabled])
     AC_DEFINE([dTLS_ENABLED],[1],[Thread Local Storage API of OU is enabled])
+
+    case "$host_os" in
+      cygwin* | mingw*)
+        targetos=_OU_TARGET_OS_WINDOWS
+        ;;
+      *qnx*)
+        targetos=_OU_TARGET_OS_QNX
+        ;;
+      *apple* | *darwin*)
+        targetos=_OU_TARGET_OS_MAC
+        ;;
+      *sunos*)
+        targetos=_OU_TARGET_OS_SUNOS
+        ;;
+      *aix*)
+        targetos=_OU_TARGET_OS_AIX
+        ;;
+      *)
+        targetos=_OU_TARGET_OS_GENUNIX
+        ;;
+    esac
+
+    if test $targetos = _OU_TARGET_OS_MAC
+    then
+        MAC_OS_X_VERSION=1000
+        AC_CHECK_FUNC([OSAtomicAdd32Barrier], [MAC_OS_X_VERSION=1040])
+        AC_CHECK_FUNC([OSAtomicAnd32OrigBarrier], [MAC_OS_X_VERSION=1050])
+        AC_DEFINE_UNQUOTED(MAC_OS_X_VERSION, $MAC_OS_X_VERSION, [Mac OS X version setting for OU Library])
+    fi
+    
+    if test $targetos = _OU_TARGET_OS_SUNOS
+    then
+        AC_CHECK_FUNC(atomic_inc_32_nv, [],
+            [targetos=_OU_TARGET_OS_GENUNIX])
+    fi
+    
+    AC_DEFINE_UNQUOTED(_OU_TARGET_OS, $targetos, [Target OS setting for OU Library])
 fi
 AC_CONFIG_SUBDIRS([ou])
 AM_CONDITIONAL(ENABLE_OU, test x$use_ou = xyes)
