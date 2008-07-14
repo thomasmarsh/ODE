@@ -588,8 +588,7 @@ void dxQuickStepper (dxWorld *world, dxBody * const *body, int nb,
 	// for all bodies, compute the inertia tensor and its inverse in the global
 	// frame, and compute the rotational force and add it to the torque
 	// accumulator. I and invI are a vertical stack of 3x4 matrices, one per body.
-	//dRealAllocaArray (I,3*4*nb);	// need to remember all I's for feedback purposes only
-	dRealAllocaArray (invI,3*4*nb);
+        dRealAllocaArray (invI,3*4*nb);
 	for (i=0; i<nb; i++) {
 		dMatrix3 tmp;
 
@@ -600,11 +599,9 @@ void dxQuickStepper (dxWorld *world, dxBody * const *body, int nb,
 		dMatrix3 I;
 		// compute inertia tensor in global frame
 		dMULTIPLY2_333 (tmp,body[i]->mass.I,body[i]->posr.R);
-		//dMULTIPLY0_333 (I+i*12,body[i]->posr.R,tmp);
-		dMULTIPLY0_333 (I,body[i]->posr.R,tmp);
+                dMULTIPLY0_333 (I,body[i]->posr.R,tmp);
 		// compute rotational force
-		//dMULTIPLY0_331 (tmp,I+i*12,body[i]->avel);
-		dMULTIPLY0_331 (tmp,I,body[i]->avel);
+                dMULTIPLY0_331 (tmp,I,body[i]->avel);
 		dCROSS (body[i]->tacc,-=,body[i]->avel,tmp);
 #endif
 	}
@@ -702,14 +699,15 @@ void dxQuickStepper (dxWorld *world, dxBody * const *body, int nb,
 		// because it gets destroyed by SOR solver
 		// instead of saving all Jacobian, we can save just rows
 		// for joints, that requested feedback (which is normaly much less)
-		dRealAllocaArray (Jcopy,mfb*12);
-		if (mfb > 0) {
-			mfb = 0;
-			for (i=0; i<nj; i++)
-				if (joint[i]->feedback) {
-					memcpy(Jcopy+mfb*12, J+ofs[i]*12, info[i].m*12*sizeof(dReal));
-					mfb += info[i].m;
-				}
+                dReal *Jcopy = NULL;
+                if (mfb > 0) {
+                  Jcopy = (dReal*) ALLOCA (mfb*12*sizeof(dReal));
+                  mfb = 0;
+                  for (i=0; i<nj; i++)
+                    if (joint[i]->feedback) {
+                      memcpy(Jcopy+mfb*12, J+ofs[i]*12, info[i].m*12*sizeof(dReal));
+                      mfb += info[i].m;
+                    }
 		}
 
 
@@ -777,43 +775,8 @@ void dxQuickStepper (dxWorld *world, dxBody * const *body, int nb,
 		for (i=0; i<nb; i++) {
 			for (j=0; j<3; j++) body[i]->lvel[j] += stepsize * cforce[i*6+j];
 			for (j=0; j<3; j++) body[i]->avel[j] += stepsize * cforce[i*6+3+j];
-		}
+                }
 
-		// if joint feedback is requested, compute the constraint force.
-		// BUT: cforce is inv(M)*J'*lambda, whereas we want just J'*lambda,
-		// so we must compute M*cforce.
-		// @@@ if any joint has a feedback request we compute the entire
-		//     adjusted cforce, which is not the most efficient way to do it.
-		/*for (j=0; j<nj; j++) {
-			if (joint[j]->feedback) {
-				// compute adjusted cforce
-				for (i=0; i<nb; i++) {
-					dReal k = body[i]->mass.mass;
-					cforce [i*6+0] *= k;
-					cforce [i*6+1] *= k;
-					cforce [i*6+2] *= k;
-					dVector3 tmp;
-					dMULTIPLY0_331 (tmp, I + 12*i, cforce + i*6 + 3);
-					cforce [i*6+3] = tmp[0];
-					cforce [i*6+4] = tmp[1];
-					cforce [i*6+5] = tmp[2];
-				}
-				// compute feedback for this and all remaining joints
-				for (; j<nj; j++) {
-					dJointFeedback *fb = joint[j]->feedback;
-					if (fb) {
-						int b1 = joint[j]->node[0].body->tag;
-						memcpy (fb->f1,cforce+b1*6,3*sizeof(dReal));
-						memcpy (fb->t1,cforce+b1*6+3,3*sizeof(dReal));
-						if (joint[j]->node[1].body) {
-							int b2 = joint[j]->node[1].body->tag;
-							memcpy (fb->f2,cforce+b2*6,3*sizeof(dReal));
-							memcpy (fb->t2,cforce+b2*6+3,3*sizeof(dReal));
-						}
-					}
-				}
-			}
-		}*/
 
 		if (mfb > 0) {
 			// straightforward computation of joint constraint forces:
@@ -839,7 +802,7 @@ void dxQuickStepper (dxWorld *world, dxBody * const *body, int nb,
 						fb->f2[2] = data[2];
 						fb->t2[0] = data[3];
 						fb->t2[1] = data[4];
-						fb->t2[2] = data[5];
+                                                fb->t2[2] = data[5];
 					}
 					mfb += info[i].m;
 				}

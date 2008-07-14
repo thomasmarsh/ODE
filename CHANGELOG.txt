@@ -8,6 +8,10 @@ the rules for this file:
   * keep the format consistent (79 char width, M/D/Y date format).
 
 ------------------------------------------------------------------------------
+07/14/08 Remi Ricard (papaDoc)
+        * Finish adding patch 1336066: Joint feedback in quickstep by jsinecky
+        * demo_boxstack.cpp can now print joint feedback
+
 07/11/08 Daniel K. O.
         * Bumped version for 0.10.1
         * Added proper usage of libtool's version info.
