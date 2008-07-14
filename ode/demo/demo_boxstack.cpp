@@ -91,7 +91,9 @@ unsigned int polygons[] = //Polygons for a cube (6 squares)
 #define NUM 100			// max number of objects
 #define DENSITY (5.0)		// density of all objects
 #define GPB 3			// maximum number of geometries per body
-#define MAX_CONTACTS 8		// maximum number of contact points per body
+#define MAX_CONTACTS 8          // maximum number of contact points per body
+#define MAX_FEEDBACKNUM 20
+#define GRAVITY         REAL(0.5)
 #define USE_GEOM_OFFSET 1
 
 // dynamics and collision objects
@@ -113,6 +115,14 @@ static int show_contacts = 0;	// show contact points?
 static int random_pos = 1;	// drop objects from random position?
 static int write_world = 0;
 static int show_body = 0;
+
+struct MyFeedback {
+  dJointFeedback fb;
+  bool first;
+};
+static int doFeedback=0;
+static MyFeedback feedbacks[MAX_FEEDBACKNUM];
+static int fbnum=0;
 
 // this is called by dSpaceCollide when two objects in space are
 // potentially colliding.
@@ -145,6 +155,16 @@ static void nearCallback (void *data, dGeomID o1, dGeomID o2)
       dJointID c = dJointCreateContact (world,contactgroup,contact+i);
       dJointAttach (c,b1,b2);
       if (show_contacts) dsDrawBox (contact[i].geom.pos,RI,ss);
+
+      if (doFeedback && (b1==obj[selected].body || b2==obj[selected].body))
+      {
+        if (fbnum<MAX_FEEDBACKNUM)
+        {
+          feedbacks[fbnum].first = b1==obj[selected].body;
+          dJointSetFeedback (c,&feedbacks[fbnum++].fb);
+        }
+        else fbnum++;
+      }
     }
   }
 }
@@ -174,6 +194,7 @@ static void start()
   printf ("To toggle showing the contact points, press t.\n");
   printf ("To toggle dropping from random position/orientation, press r.\n");
   printf ("To save the current state to 'state.dif', press 1.\n");
+  printf ("To show joint feedbacks of selected object, press f.\n");
 }
 
 
@@ -413,18 +434,19 @@ static void command (int cmd)
   else if (cmd == '1') {
     write_world = 1;
   }
-  else if (cmd == 'p')
+  else if (cmd == 'p'&& selected >= 0)
   {
-    if(selected>=0)
-    {
-      const dReal* pos = dGeomGetPosition(obj[selected].geom[0]);
-      const dReal* rot = dGeomGetRotation(obj[selected].geom[0]);
-      printf("POSITION:\n\t[%f,%f,%f]\n\n",pos[0],pos[1],pos[2]);
-      printf("ROTATION:\n\t[%f,%f,%f,%f]\n\t[%f,%f,%f,%f]\n\t[%f,%f,%f,%f]\n\n",
-        rot[0],rot[1],rot[2],rot[3],
-        rot[4],rot[5],rot[6],rot[7],
-        rot[8],rot[9],rot[10],rot[11]);
-    }
+    const dReal* pos = dGeomGetPosition(obj[selected].geom[0]);
+    const dReal* rot = dGeomGetRotation(obj[selected].geom[0]);
+    printf("POSITION:\n\t[%f,%f,%f]\n\n",pos[0],pos[1],pos[2]);
+    printf("ROTATION:\n\t[%f,%f,%f,%f]\n\t[%f,%f,%f,%f]\n\t[%f,%f,%f,%f]\n\n",
+           rot[0],rot[1],rot[2],rot[3],
+           rot[4],rot[5],rot[6],rot[7],
+           rot[8],rot[9],rot[10],rot[11]);
+  }
+  else if (cmd == 'f' && selected >= 0 && selected < num) {
+          if (dBodyIsEnabled(obj[selected].body))
+            doFeedback = 1;
   }
 }
 
@@ -524,7 +546,32 @@ static void simLoop (int pause)
     }
     write_world = 0;
   }
-  
+
+
+  if (doFeedback)
+  {
+    if (fbnum>MAX_FEEDBACKNUM)
+      printf("joint feedback buffer overflow!\n");
+    else
+    {
+      dVector3 sum = {0, 0, 0};
+      printf("\n");
+      for (int i=0; i<fbnum; i++) {
+        dReal* f = feedbacks[i].first?feedbacks[i].fb.f1:feedbacks[i].fb.f2;
+        printf("%f %f %f\n", f[0], f[1], f[2]);
+        sum[0] += f[0];
+        sum[1] += f[1];
+        sum[2] += f[2];
+      }
+      printf("Sum: %f %f %f\n", sum[0], sum[1], sum[2]);
+      dMass m;
+      dBodyGetMass(obj[selected].body, &m);
+      printf("Object G=%f\n", GRAVITY*m.mass);
+    }
+    doFeedback = 0;
+    fbnum = 0;
+  }
+
   // remove all contact joints
   dJointGroupEmpty (contactgroup);
 
@@ -567,7 +614,7 @@ int main (int argc, char **argv)
   world = dWorldCreate();
   space = dHashSpaceCreate (0);
   contactgroup = dJointGroupCreate (0);
-  dWorldSetGravity (world,0,0,-0.5);
+  dWorldSetGravity (world,0,0,-GRAVITY);
   dWorldSetCFM (world,1e-5);
   dWorldSetAutoDisableFlag (world,1);
 
