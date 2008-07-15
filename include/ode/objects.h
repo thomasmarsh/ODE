@@ -1,3 +1,5 @@
+
+
 /*************************************************************************
  *                                                                       *
  * Open Dynamics Engine, Copyright (C) 2001,2002 Russell L. Smith.       *
@@ -1864,7 +1866,7 @@ ODE_API void dJointAddPRTorque (dJointID j, dReal torque);
    * @param dy The Initial position of the prismatic join in the y direction
    * @param dz The Initial position of the prismatic join in the z direction
    */
-  ODE_API void dJointSetPistonAxisDelta (dJointID j, dReal x, dReal y, dReal z, dReal ax, dReal ay, dReal az);
+  ODE_API_DEPRECATED ODE_API void dJointSetPistonAxisDelta (dJointID j, dReal x, dReal y, dReal z, dReal ax, dReal ay, dReal az);
 
   /**
    * @brief set joint parameter
