@@ -32,6 +32,14 @@
   #define ODE_API
 #endif
 
+#if defined(_MSC_VER)
+#  define ODE_API_DEPRECATED __declspec(deprecated)
+#elif defined (__GNUC__) && ( (__GNUC__ > 3) || ((__GNUC__ == 3) && (__GNUC_MINOR__ >= 1)) )
+#  define ODE_API_DEPRECATED __attribute__((__deprecated__))
+#else
+#  define ODE_API_DEPRECATED
+#endif
+
 /* Well-defined common data types...need to define for 64 bit systems */
 #if defined(_M_IA64) || defined(__ia64__) || defined(_M_AMD64) || defined(__x86_64__)
   #define X86_64_SYSTEM   1
