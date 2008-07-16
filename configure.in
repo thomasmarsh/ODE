@@ -1,5 +1,6 @@
 dnl AC_INIT does not take a macro as a version nr: set it separately! - Bram
 AC_INIT([ODE],[0.10.1],[ode@ode.org])
+# AC_CONFIG_SRCDIR([ode/src/ode.cpp])
 ODE_RELEASE=0.10.1
 AC_SUBST(ODE_RELEASE)
 
@@ -447,6 +448,7 @@ echo "  Build  system type:      $build"
 echo "  Host   system type:      $host"
 echo "  Use double precision:    $precision"
 echo "  Use drawstuff:           $drawstuff"
+echo "  Demos enabled:           $enable_demos"
 echo "  Use OPCODE:              $opcode"
 echo "  Use GIMPACT:             $gimpact"
 echo "  Use gyroscopic term:     $gyroscopic"
