@@ -8,7 +8,11 @@ the rules for this file:
   * keep the format consistent (79 char width, M/D/Y date format).
 
 ------------------------------------------------------------------------------
-0715/08  Remi Ricard (papaDoc)
+07/24/08 Daniel K. O.
+        * New functions: dBodyGetGyroscopicMode and dBodySetGyroscopicMode
+          (patch #2019242).
+
+07/15/08  Remi Ricard (papaDoc)
         * Add a new define ODE_API_DEPRECATED to mark function as deprecated
           when necessary.
 

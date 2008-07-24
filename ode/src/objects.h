@@ -35,14 +35,15 @@
 // some body flags
 
 enum {
-  dxBodyFlagFiniteRotation = 1,		// use finite rotations
-  dxBodyFlagFiniteRotationAxis = 2,	// use finite rotations only along axis
-  dxBodyDisabled = 4,			// body is disabled
-  dxBodyNoGravity = 8,			// body is not influenced by gravity
-  dxBodyAutoDisable = 16,		// enable auto-disable on body
-  dxBodyLinearDamping = 32,             // using linear damping
-  dxBodyAngularDamping = 64,            // using angular damping
-  dxBodyMaxAngularSpeed = 128,          // using maximum angular speed
+  dxBodyFlagFiniteRotation =        1,  // use finite rotations
+  dxBodyFlagFiniteRotationAxis =    2,  // use finite rotations only along axis
+  dxBodyDisabled =                  4,  // body is disabled
+  dxBodyNoGravity =                 8,  // body is not influenced by gravity
+  dxBodyAutoDisable =               16, // enable auto-disable on body
+  dxBodyLinearDamping =             32, // use linear damping
+  dxBodyAngularDamping =            64, // use angular damping
+  dxBodyMaxAngularSpeed =           128,// use maximum angular speed
+  dxBodyGyroscopic =                256,// use gyroscopic term
 };
 
 
@@ -114,7 +115,7 @@ struct dxPosR {
 
 struct dxBody : public dObject {
   dxJointNode *firstjoint;	// list of attached joints
-  int flags;			// some dxBodyFlagXXX flags
+  unsigned flags;			// some dxBodyFlagXXX flags
   dGeomID geom;			// first collision geom associated with body
   dMass mass;			// mass parameters about POR
   dMatrix3 invI;		// inverse of mass.I

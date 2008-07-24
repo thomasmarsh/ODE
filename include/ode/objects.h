@@ -1231,13 +1231,35 @@ ODE_API dReal dBodyGetMaxAngularSpeed (dBodyID b);
  * @ingroup damping bodies
  * @sa dWorldSetMaxAngularSpeed() dBodyResetMaxAngularSpeed()
  * The default value is dInfinity, but it's a good idea to limit
- * it at less than 500 if you build ODE with the gyroscopic term
+ * it at less than 500 if the body has the gyroscopic term
  * enabled.
  */
 ODE_API void dBodySetMaxAngularSpeed(dBodyID b, dReal max_speed);
 
 
 
+/**
+ * @brief Get the body's gyroscopic state.
+ *
+ * @return nonzero if gyroscopic term computation is enabled (default),
+ * zero otherwise.
+ * @ingroup bodies
+ */
+ODE_API int dBodyGetGyroscopicMode(dBodyID b);
+
+
+/**
+ * @brief Enable/disable the body's gyroscopic term.
+ *
+ * Disabling the gyroscopic term of a body usually improves
+ * stability. It also helps turning spining objects, like cars'
+ * wheels.
+ *
+ * @param enabled   nonzero (default) to enable gyroscopic term, 0
+ * to disable.
+ * @ingroup bodies
+ */
+ODE_API void dBodySetGyroscopicMode(dBodyID b, int enabled);
 
 
 

@@ -79,9 +79,15 @@ ODE_API void dMassRotate (dMass *, const dMatrix3 R);
 
 ODE_API void dMassAdd (dMass *a, const dMass *b);
 
+
 // Backwards compatible API
-#define dMassSetCappedCylinder dMassSetCapsule
-#define dMassSetCappedCylinderTotal dMassSetCapsuleTotal
+ODE_API_DEPRECATED static void dMassSetCappedCylinder(
+    dMass *a, dReal b, int c, dReal d, dReal e)
+{   return dMassSetCapsule(a,b,c,d,e);  }
+
+ODE_API_DEPRECATED static void dMassSetCappedCylinderTotal(
+    dMass *a, dReal b, int c, dReal d, dReal e)
+{   return dMassSetCapsuleTotal(a,b,c,d,e); }
 
 
 struct dMass {
@@ -98,14 +104,32 @@ struct dMass {
 		      dReal I11, dReal I22, dReal I33,
 		      dReal I12, dReal I13, dReal I23)
     { dMassSetParameters (this,themass,cgx,cgy,cgz,I11,I22,I33,I12,I13,I23); }
+
   void setSphere (dReal density, dReal radius)
     { dMassSetSphere (this,density,radius); }
-  void setCapsule (dReal density, int direction, dReal a, dReal b)
-    { dMassSetCappedCylinder (this,density,direction,a,b); }
-  void setCappedCylinder (dReal density, int direction, dReal a, dReal b)
-    { setCapsule(density, direction, a, b); }
+  void setSphereTotal (dReal total, dReal radius)
+    { dMassSetSphereTotal (this,total,radius); }
+
+  void setCapsule (dReal density, int direction, dReal radius, dReal length)
+    { dMassSetCapsule (this,density,direction,radius,length); }
+  void setCapsuleTotal (dReal total, int direction, dReal radius, dReal length)
+    { dMassSetCapsule (this,total,direction,radius,length); }
+
+  void setCylinder(dReal density, int direction, dReal radius, dReal length)
+    { dMassSetCylinder (this,density,direction,radius,length); }
+  void setCylinderTotal(dReal total, int direction, dReal radius, dReal length)
+    { dMassSetCylinderTotal (this,total,direction,radius,length); }
+
   void setBox (dReal density, dReal lx, dReal ly, dReal lz)
     { dMassSetBox (this,density,lx,ly,lz); }
+  void setBoxTotal (dReal total, dReal lx, dReal ly, dReal lz)
+    { dMassSetBoxTotal (this,total,lx,ly,lz); }
+
+  void setTrimesh(dReal density, dGeomID g)
+    { dMassSetTrimesh (this, density, g); }
+  void setTrimeshTotal(dReal total, dGeomID g)
+    { dMassSetTrimeshTotal (this, total, g); }
+
   void adjust (dReal newmass)
     { dMassAdjust (this,newmass); }
   void translate (dReal x, dReal y, dReal z)

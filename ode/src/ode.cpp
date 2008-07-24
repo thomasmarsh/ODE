@@ -286,6 +286,8 @@ dxBody *dBodyCreate (dxWorld *w)
   b->flags |= w->body_flags & dxBodyMaxAngularSpeed;
   b->max_angular_speed = w->max_angular_speed;
 
+  b->flags |= dxBodyGyroscopic;
+
   return b;
 }
 
@@ -1075,7 +1077,7 @@ void dBodySetDampingDefaults(dBodyID b)
         dWorldID w = b->world;
         dAASSERT(w);
         b->dampingp = w->dampingp;
-        int mask = dxBodyLinearDamping | dxBodyAngularDamping;
+        const unsigned mask = dxBodyLinearDamping | dxBodyAngularDamping;
         b->flags &= ~mask; // zero them
         b->flags |= w->body_flags & mask;
 }
@@ -1115,6 +1117,23 @@ dGeomID dBodyGetNextGeom(dGeomID geom)
         dAASSERT(geom);
         return dGeomGetBodyNext(geom);
 }
+
+
+int dBodyGetGyroscopicMode(dBodyID b)
+{
+        dAASSERT(b);
+        return b->flags & dxBodyGyroscopic;
+}
+
+void dBodySetGyroscopicMode(dBodyID b, int enabled)
+{
+        dAASSERT(b);
+        if (enabled)
+                b->flags |= dxBodyGyroscopic;
+        else
+                b->flags &= ~dxBodyGyroscopic;
+}
+
 
 
 //****************************************************************************
@@ -1990,13 +2009,9 @@ static const char ode_configuration[] = "ODE "
 REGISTER_EXTENSION( ODE_EXT_no_debug )
 #endif // dNODEBUG
 
-#ifdef dGYROSCOPIC
-REGISTER_EXTENSION( ODE_EXT_gyroscopic )
-#endif // dGYROSCOPIC
-
 #ifdef dUSE_MALLOC_FOR_ALLOCA
 REGISTER_EXTENSION( ODE_EXT_malloc_not_alloca )
-#endif // dGYROSCOPIC
+#endif
 
 #if dTRIMESH_ENABLED
 REGISTER_EXTENSION( ODE_EXT_trimesh )
