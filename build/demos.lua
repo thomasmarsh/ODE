@@ -12,6 +12,7 @@
     "cylvssphere",
     "feedback",
     "friction",
+    "gyroscopic",
     "heightfield",
     "hinge",
     "I",

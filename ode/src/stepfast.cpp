@@ -812,11 +812,13 @@ dInternalStepIslandFast (dxWorld * world, dxBody * const *bodies, int nb, dxJoin
 
 			for (i = 0; i < 4; i++)
 				body->tacc[i] = saveTacc[b * 4 + i];
-#ifdef dGYROSCOPIC
-			// compute rotational force
-			dMULTIPLY0_331 (tmp, globalI + b * 12, body->avel);
-			dCROSS (body->tacc, -=, body->avel, tmp);
-#endif
+                
+            if (body->flags & dxBodyGyroscopic) {
+                // DanielKO: this doesn't look right/efficient, but anyways...
+    			// compute rotational force
+    			dMULTIPLY0_331 (tmp, globalI + b * 12, body->avel);
+        		dCROSS (body->tacc, -=, body->avel, tmp);
+            }
 
 			// add the gravity force to all bodies
 			if ((body->flags & dxBodyNoGravity) == 0)

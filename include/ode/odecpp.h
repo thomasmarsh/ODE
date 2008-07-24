@@ -363,21 +363,26 @@ public:
     { dBodySetAngularDamping(_id, scale); }
   void setDamping(dReal linear_scale, dReal angular_scale)
     { dBodySetDamping(_id, linear_scale, angular_scale); }
-   dReal getLinearDampingThreshold() const
+  dReal getLinearDampingThreshold() const
     { return dBodyGetLinearDampingThreshold(_id); }
-   void setLinearDampingThreshold(dReal threshold) const
+  void setLinearDampingThreshold(dReal threshold) const
     { dBodySetLinearDampingThreshold(_id, threshold); }
-   dReal getAngularDampingThreshold() const
+  dReal getAngularDampingThreshold() const
     { return dBodyGetAngularDampingThreshold(_id); }
-   void setAngularDampingThreshold(dReal threshold)
+  void setAngularDampingThreshold(dReal threshold)
     { dBodySetAngularDampingThreshold(_id, threshold); }
-   void setDampingDefaults()
+  void setDampingDefaults()
     { dBodySetDampingDefaults(_id); }
 
-   dReal getMaxAngularSpeed() const
+  dReal getMaxAngularSpeed() const
     { return dBodyGetMaxAngularSpeed(_id); }
-   void setMaxAngularSpeed(dReal max_speed)
+  void setMaxAngularSpeed(dReal max_speed)
     { dBodySetMaxAngularSpeed(_id, max_speed); }
+
+  bool getGyroscopicMode() const
+    { return dBodyGetGyroscopicMode(_id) != 0; }
+  void setGyroscopicMode(bool mode)
+    { dBodySetGyroscopicMode(_id, mode); }
 
 };
 

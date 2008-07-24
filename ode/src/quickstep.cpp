@@ -595,15 +595,16 @@ void dxQuickStepper (dxWorld *world, dxBody * const *body, int nb,
 		// compute inverse inertia tensor in global frame
 		dMULTIPLY2_333 (tmp,body[i]->invI,body[i]->posr.R);
 		dMULTIPLY0_333 (invI+i*12,body[i]->posr.R,tmp);
-#ifdef dGYROSCOPIC
-		dMatrix3 I;
-		// compute inertia tensor in global frame
-		dMULTIPLY2_333 (tmp,body[i]->mass.I,body[i]->posr.R);
-                dMULTIPLY0_333 (I,body[i]->posr.R,tmp);
-		// compute rotational force
-                dMULTIPLY0_331 (tmp,I,body[i]->avel);
-		dCROSS (body[i]->tacc,-=,body[i]->avel,tmp);
-#endif
+
+        if (body[i]->flags & dxBodyGyroscopic) {
+            dMatrix3 I;
+            // compute inertia tensor in global frame
+            dMULTIPLY2_333 (tmp,body[i]->mass.I,body[i]->posr.R);
+            dMULTIPLY0_333 (I,body[i]->posr.R,tmp);
+            // compute rotational force
+            dMULTIPLY0_331 (tmp,I,body[i]->avel);
+            dCROSS (body[i]->tacc,-=,body[i]->avel,tmp);
+        }
 	}
 
 	// add the gravity force to all bodies
