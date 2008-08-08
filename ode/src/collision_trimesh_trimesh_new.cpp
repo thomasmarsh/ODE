@@ -70,12 +70,9 @@ struct LineContactSet
 
 // static void GetTriangleGeometryCallback(udword, VertexPointers&, udword); -- not used
 inline void dMakeMatrix4(const dVector3 Position, const dMatrix3 Rotation, dMatrix4 &B);
-static void dInvertMatrix4( dMatrix4& B, dMatrix4& Binv );
-static int IntersectLineSegmentRay(dVector3, dVector3, dVector3, dVector3,  dVector3);
+//static void dInvertMatrix4( dMatrix4& B, dMatrix4& Binv );
+//static int IntersectLineSegmentRay(dVector3, dVector3, dVector3, dVector3,  dVector3);
 static void ClipConvexPolygonAgainstPlane( const dVector3, dReal, LineContactSet& );
-static int RayTriangleIntersect(const dVector3 orig, const dVector3 dir,
-                                const dVector3 vert0, const dVector3 vert1,const dVector3 vert2,
-                                dReal *t,dReal *u,dReal *v);
 
 
 ///returns the penetration depth
@@ -84,18 +81,7 @@ static dReal MostDeepPoints(
 							const dVector3 plane_normal,
 							dReal plane_dist,
 							LineContactSet & deep_points);
-///returns the penetration depth
-static dReal FindMostDeepPointsInTetra(
-							LineContactSet contact_points,
-							const dVector3 sourcetri[3],///triangle which contains contact_points
-							const dVector3 tetra[4],
-							const dVector4 tetraplanes[4],
-							dVector3 separating_normal,
-							LineContactSet deep_points);
 
-static bool ClipTriByTetra(const dVector3 tri[3],
-						   const dVector3 tetra[4],
-						   LineContactSet& Contacts);
 static bool TriTriContacts(const dVector3 tr1[3],
 							 const dVector3 tr2[3],
 							 dxGeom* g1, dxGeom* g2, int Flags,
@@ -163,8 +149,6 @@ SwapNormals(dVector3 *&pen_v, dVector3 *&col_v, dVector3* v1, dVector3* v2,
 #define CONTACT_POS_HASH_QUOTIENT REAL(10000.0)
 #define dSQRT3	REAL(1.7320508075688773)
 
-
-
 void UpdateContactKey(CONTACT_KEY & key, dContactGeom * contact)
 {
 	key.m_contact = contact;
@@ -178,12 +162,16 @@ void UpdateContactKey(CONTACT_KEY & key, dContactGeom * contact)
 		dReal coord = contact->pos[i];
 		coord = dFloor(coord * CONTACT_POS_HASH_QUOTIENT);
 
-		unsigned int hash_input = ((unsigned int *)&coord)[0];
-		if (sizeof(dReal) / sizeof(unsigned int) != 1)
-		{
-			dIASSERT(sizeof(dReal) / sizeof(unsigned int) == 2);
-			hash_input ^= ((unsigned int *)&coord)[1];
-		}
+        union {
+            dReal r;
+            struct {
+                unsigned u[ sizeof(dReal) / sizeof(unsigned) ];
+            };
+        } ru;
+        ru.r = coord;
+        unsigned hash_input = 0;
+        for (unsigned i=0; i<sizeof(dReal)/sizeof(unsigned); ++i)
+            hash_input ^= ru.u[i];
 
 		hash = (( hash << 4 ) + (hash_input >> 24)) ^ ( hash >> 28 );
 		hash = (( hash << 4 ) + ((hash_input >> 16) & 0xFF)) ^ ( hash >> 28 );
@@ -480,8 +468,8 @@ dCollideTTL(dxGeom* g1, dxGeom* g2, int Flags, dContactGeom* Contacts, int Strid
     dxTriMesh* TriMesh1 = (dxTriMesh*) g1;
     dxTriMesh* TriMesh2 = (dxTriMesh*) g2;
 
-    dReal * TriNormals1 = (dReal *) TriMesh1->Data->Normals;
-    dReal * TriNormals2 = (dReal *) TriMesh2->Data->Normals;
+    //dReal * TriNormals1 = (dReal *) TriMesh1->Data->Normals;
+    //dReal * TriNormals2 = (dReal *) TriMesh2->Data->Normals;
 
     const dVector3& TLPosition1 = *(const dVector3*) dGeomGetPosition(TriMesh1);
     // TLRotation1 = column-major order
@@ -639,7 +627,7 @@ dMakeMatrix4(const dVector3 Position, const dMatrix3 Rotation, dMatrix4 &B)
     B14 = 0.0;         B24 = 0.0;         B34 = 0.0;            B44 = 1.0;
 }
 
-
+#if 0
 static void
 dInvertMatrix4( dMatrix4& B, dMatrix4& Binv )
 {
@@ -671,7 +659,7 @@ dInvertMatrix4( dMatrix4& B, dMatrix4& Binv )
     Binv43 = (dReal) (det * (B41*(B13*B22 - B12*B23) + B42*(B11*B23 - B13*B21) + B43*(B12*B21 - B11*B22)));
     Binv44 = 1.0f;
 }
-
+#endif
 
 
 // Find the intersectiojn point between a coplanar line segement,
@@ -687,6 +675,7 @@ dInvertMatrix4( dMatrix4& B, dMatrix4& Binv )
 //       c = x3 - x1
 // x1 and x2 are the edges of the triangle, and x3 is CoplanarPt
 //  and x4 is (CoplanarPt - n)
+#if 0
 static int
 IntersectLineSegmentRay(dVector3 x1, dVector3 x2, dVector3 x3, dVector3 n,
                         dVector3 out_pt)
@@ -728,7 +717,7 @@ IntersectLineSegmentRay(dVector3 x1, dVector3 x2, dVector3 x3, dVector3 n,
     else
         return 0;
 }
-
+#endif
 
 
 void PlaneClipSegment( const dVector3  s1, const dVector3  s2,

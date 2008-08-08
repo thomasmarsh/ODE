@@ -8,6 +8,9 @@ the rules for this file:
   * keep the format consistent (79 char width, M/D/Y date format).
 
 ------------------------------------------------------------------------------
+08/07/08 Daniel K. O.
+        * Fixed strict aliasing issue that was breaking the new trimesh collider.
+
 07/24/08 Daniel K. O.
         * New functions: dBodyGetGyroscopicMode and dBodySetGyroscopicMode
           (patch #2019242).

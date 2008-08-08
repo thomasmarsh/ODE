@@ -399,7 +399,7 @@ static void simLoop (int pause)
   dSpaceCollide (space,0,&nearCallback);
 
 
-#if 0
+#if 1
   // What is this for??? - Bram
   if (!pause) 
   {
