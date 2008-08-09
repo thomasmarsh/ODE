@@ -162,16 +162,12 @@ void UpdateContactKey(CONTACT_KEY & key, dContactGeom * contact)
 		dReal coord = contact->pos[i];
 		coord = dFloor(coord * CONTACT_POS_HASH_QUOTIENT);
 
-        union {
-            dReal r;
-            struct {
-                unsigned u[ sizeof(dReal) / sizeof(unsigned) ];
-            };
-        } ru;
-        ru.r = coord;
-        unsigned hash_input = 0;
-        for (unsigned i=0; i<sizeof(dReal)/sizeof(unsigned); ++i)
-            hash_input ^= ru.u[i];
+        const int sz = sizeof(coord) / sizeof(unsigned);
+        unsigned hash_v[ sz ];
+        memcpy(hash_v, &coord, sizeof(coord));
+        for (int i=1; i<sz; ++i)
+            hash_v[0] ^= hash_v[i];
+        unsigned hash_input = hash_v[0];
 
 		hash = (( hash << 4 ) + (hash_input >> 24)) ^ ( hash >> 28 );
 		hash = (( hash << 4 ) + ((hash_input >> 16) & 0xFF)) ^ ( hash >> 28 );
