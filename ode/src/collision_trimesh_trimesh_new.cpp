@@ -163,11 +163,14 @@ void UpdateContactKey(CONTACT_KEY & key, dContactGeom * contact)
 		coord = dFloor(coord * CONTACT_POS_HASH_QUOTIENT);
 
         const int sz = sizeof(coord) / sizeof(unsigned);
+		dIASSERT(sizeof(coord) % sizeof(unsigned) == 0);
+
         unsigned hash_v[ sz ];
-        memcpy(hash_v, &coord, sizeof(coord));
+		memcpy(hash_v, &coord, sizeof(coord));
+
+		unsigned int hash_input = hash_v[0];
         for (int i=1; i<sz; ++i)
-            hash_v[0] ^= hash_v[i];
-        unsigned hash_input = hash_v[0];
+            hash_input ^= hash_v[i];
 
 		hash = (( hash << 4 ) + (hash_input >> 24)) ^ ( hash >> 28 );
 		hash = (( hash << 4 ) + ((hash_input >> 16) & 0xFF)) ^ ( hash >> 28 );
@@ -192,6 +195,7 @@ static inline unsigned int MakeContactIndex(unsigned int key)
 
 	unsigned int index = key ^ (key >> 16);
 	index = (index ^ (index >> 8)) & 0xFF;
+
 	return index;
 }
 
