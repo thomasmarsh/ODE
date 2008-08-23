@@ -31,3 +31,5 @@ release: dist-gzip dist-bzip2
 EXTRA_DIST = autogen.sh build tools \
         CHANGELOG.txt INSTALL.txt README.txt LICENSE.TXT
 
+pkgconfigdir = $(libdir)/pkgconfig
+pkgconfig_DATA = ode.pc
