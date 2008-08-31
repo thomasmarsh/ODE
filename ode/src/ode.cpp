@@ -366,14 +366,11 @@ void dBodySetPosition (dBodyID b, dReal x, dReal y, dReal z)
 void dBodySetRotation (dBodyID b, const dMatrix3 R)
 {
   dAASSERT (b && R);
-  dQuaternion q;
-  dRtoQ (R,q);
-  dNormalize4 (q);
-  b->q[0] = q[0];
-  b->q[1] = q[1];
-  b->q[2] = q[2];
-  b->q[3] = q[3];
-  dQtoR (b->q,b->posr.R);
+
+  memcpy(b->posr.R, R, sizeof(dMatrix3));
+  dOrthogonalizeR(b->posr.R);
+  dRtoQ (R, b->q);
+  dNormalize4 (b->q);
 
   // notify all attached geoms that this body has moved
   for (dxGeom *geom = b->geom; geom; geom = dGeomGetBodyNext (geom))

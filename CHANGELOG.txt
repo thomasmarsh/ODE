@@ -8,6 +8,10 @@ the rules for this file:
   * keep the format consistent (79 char width, M/D/Y date format).
 
 ------------------------------------------------------------------------------
+38/31/08 Daniel K. O.
+        * Applied patch 2080674: Improved dBodySetRotation; now exact rotation
+          matrices are preserved until the next simulation step.
+
 08/07/08 Daniel K. O.
         * Fixed strict aliasing issue that was breaking the new trimesh collider.
 

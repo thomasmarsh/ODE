@@ -25,6 +25,7 @@
 #include <UnitTest++.h>
 #include <ode/ode.h>
 #include "ode/odemath.h"
+#include "util.h" // internal header
 
 
 
@@ -138,4 +139,64 @@ TEST(test_dNormalization3)
   dSafeNormalize3(v);
   CHECK_EQUAL(dLENGTH(v), REAL(1.0));
 
+}
+
+
+TEST(test_dOrthogonalizeR)
+{
+    {
+        dMatrix3 r1 = { 1, 0, 0, 0,
+                        0, 1, 0, 0,
+                        0, 0, 1, 0 };
+        dMatrix3 r2;
+        memcpy(r2, r1, sizeof(dMatrix3));
+        dOrthogonalizeR(r2);
+        CHECK_ARRAY_EQUAL(r1, r2, 12);
+    }
+    {
+        dMatrix3 r1 = { 0, 1, 0, 0,
+                        0, 0, 1, 0,
+                        1, 0, 0, 0 };
+        dMatrix3 r2;
+        memcpy(r2, r1, sizeof(dMatrix3));
+        dOrthogonalizeR(r2);
+        CHECK_ARRAY_EQUAL(r1, r2, 12);
+    }
+    {
+        dMatrix3 r1 = { 0, 0, 1, 0,
+                        1, 0, 0, 0,
+                        0, 1, 0, 0 };
+        dMatrix3 r2;
+        memcpy(r2, r1, sizeof(dMatrix3));
+        dOrthogonalizeR(r2);
+        CHECK_ARRAY_EQUAL(r1, r2, 12);
+    }
+    {
+        dMatrix3 r1 = { -1, 0,  0, 0,
+                         0, 1,  0, 0,
+                         0, 0, -1, 0 };
+        dMatrix3 r2;
+        memcpy(r2, r1, sizeof(dMatrix3));
+        dOrthogonalizeR(r2);
+        CHECK_ARRAY_EQUAL(r1, r2, 12);
+    }
+    {
+        dMatrix3 r1 = { 0, -1, 0, 0,
+                        0,  0, 1, 0,
+                       -1,  0, 0, 0 };
+        dMatrix3 r2;
+        memcpy(r2, r1, sizeof(dMatrix3));
+        dOrthogonalizeR(r2);
+        CHECK_ARRAY_EQUAL(r1, r2, 12);
+    }
+    {
+        dMatrix3 r1 = { 0, 0, -1, 0,
+                        0, -1, 0, 0,
+                        -1, 0, 0, 0 };
+        dMatrix3 r2;
+        memcpy(r2, r1, sizeof(dMatrix3));
+        dOrthogonalizeR(r2);
+        CHECK_ARRAY_EQUAL(r1, r2, 12);
+    }
+    
 }
