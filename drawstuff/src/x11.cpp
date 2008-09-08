@@ -110,10 +110,12 @@ static void createMainWindow (int _width, int _height)
   screen = DefaultScreen(display);
 
   // get GL visual
-  static int attribList[] = {GLX_RGBA, GLX_DOUBLEBUFFER, GLX_DEPTH_SIZE,16,
-			     GLX_RED_SIZE,4, GLX_GREEN_SIZE,4,
-			     GLX_BLUE_SIZE,4, None};
-  visual = glXChooseVisual (display,screen,attribList);
+  static int attribListDblBuf[] = {GLX_RGBA, GLX_DOUBLEBUFFER, GLX_DEPTH_SIZE,16,
+			     GLX_RED_SIZE,4, GLX_GREEN_SIZE,4, GLX_BLUE_SIZE,4, None};
+  static int attribList[] = {GLX_RGBA, GLX_DEPTH_SIZE,16,
+			     GLX_RED_SIZE,4, GLX_GREEN_SIZE,4, GLX_BLUE_SIZE,4, None};
+  visual = glXChooseVisual (display,screen,attribListDblBuf);
+  if (!visual) visual = glXChooseVisual (display,screen,attribList);
   if (!visual) dsError ("no good X11 visual found for OpenGL");
 
   // create colormap
