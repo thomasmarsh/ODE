@@ -23,7 +23,6 @@
 Code for Convex Collision Detection
 By Rodrigo Hernandez
 */
-//#include <algorithm>
 #include <ode/common.h>
 #include <ode/collision.h>
 #include <ode/matrix.h>
@@ -52,7 +51,7 @@ dxConvex::dxConvex (dSpaceID space,
 		    unsigned int _planecount,
 		    dReal *_points,
 		    unsigned int _pointcount,
-		    unsigned int *_polygons) : 
+		    unsigned int *_polygons) :
   dxGeom (space,1)
 {
   dAASSERT (_planes != NULL);
@@ -73,16 +72,16 @@ dxConvex::dxConvex (dSpaceID space,
   // of the 3x3 matrix composed of the first 3 points in the polygon.
 	unsigned int *points_in_poly=polygons;
 	unsigned int *index=polygons+1;
-  
+
 	for(unsigned int i=0;i<planecount;++i)
 	{
     dAASSERT (*points_in_poly > 2 );
     if((
-      points[(index[0]*3)+0]*points[(index[1]*3)+1]*points[(index[2]*3)+2] + 
-      points[(index[0]*3)+1]*points[(index[1]*3)+2]*points[(index[2]*3)+0] + 
+      points[(index[0]*3)+0]*points[(index[1]*3)+1]*points[(index[2]*3)+2] +
+      points[(index[0]*3)+1]*points[(index[1]*3)+2]*points[(index[2]*3)+0] +
       points[(index[0]*3)+2]*points[(index[1]*3)+0]*points[(index[2]*3)+1] -
-      points[(index[0]*3)+2]*points[(index[1]*3)+1]*points[(index[2]*3)+0] - 
-      points[(index[0]*3)+1]*points[(index[1]*3)+0]*points[(index[2]*3)+2] - 
+      points[(index[0]*3)+2]*points[(index[1]*3)+1]*points[(index[2]*3)+0] -
+      points[(index[0]*3)+1]*points[(index[1]*3)+0]*points[(index[2]*3)+2] -
       points[(index[0]*3)+0]*points[(index[1]*3)+2]*points[(index[2]*3)+1])<0)
     {
       fprintf(stdout,"WARNING: Polygon %d is not defined counterclockwise\n",i);
@@ -147,7 +146,7 @@ void dxConvex::FillEdges()
 			}
 			if(!isinset)
 			{
-				edge* tmp = new edge[edgecount+1];				
+				edge* tmp = new edge[edgecount+1];
 				if(edgecount!=0)
 				{
 					memcpy(tmp,edges,(edgecount)*sizeof(edge));
@@ -166,7 +165,7 @@ void dxConvex::FillEdges()
 #if 0
 dxConvex::BSPNode* dxConvex::CreateNode(std::vector<Arc> Arcs,std::vector<Polygon> Polygons)
 {
-#if 0	
+#if 0
 	dVector3 ea,eb,e;
 	dVector3Copy(points+((edges.begin()+Arcs[0].edge)first*3),ea);
       dMULTIPLY0_331(e1b,cvx1.final_posr->R,cvx1.points+(i->second*3));
@@ -241,15 +240,15 @@ void dGeomSetConvex (dGeomID g,dReal *_planes,unsigned int _planecount,
   \param a origin of the segment
   \param b segment destination
   \param p plane to test for intersection
-  \param t returns the time "t" in the segment ray that gives us the intersecting 
+  \param t returns the time "t" in the segment ray that gives us the intersecting
   point
   \param q returns the intersection point
   \return true if there is an intersection, otherwise false.
 */
-bool IntersectSegmentPlane(dVector3 a, 
-			   dVector3 b, 
-			   dVector4 p, 
-			   dReal &t, 
+bool IntersectSegmentPlane(dVector3 a,
+			   dVector3 b,
+			   dVector4 p,
+			   dReal &t,
 			   dVector3 q)
 {
   // Compute the t value for the directed line ab intersecting the plane
@@ -257,11 +256,11 @@ bool IntersectSegmentPlane(dVector3 a,
   ab[0]= b[0] - a[0];
   ab[1]= b[1] - a[1];
   ab[2]= b[2] - a[2];
-  
+
   t = (p[3] - dDOT(p,a)) / dDOT(p,ab);
-  
+
   // If t in [0..1] compute and return intersection point
-  if (t >= 0.0 && t <= 1.0) 
+  if (t >= 0.0 && t <= 1.0)
     {
       q[0] = a[0] + t * ab[0];
       q[1] = a[1] + t * ab[1];
@@ -277,7 +276,7 @@ bool IntersectSegmentPlane(dVector3 a,
   \param Direction1 The direction of Ray 1
   \param Origin1 The origin of Ray 2
   \param Direction1 The direction of Ray 3
-  \param t the time "t" in Ray 1 that gives us the closest point 
+  \param t the time "t" in Ray 1 that gives us the closest point
   (closest_point=Origin1+(Direction1*t).
   \return true if there is a closest point, false if the rays are paralell.
 */
@@ -304,6 +303,143 @@ inline bool ClosestPointInRay(const dVector3 Origin1,
   return true;
 }
 
+/*! \brief Clamp n to lie within the range [min, max] */
+inline float Clamp(float n, float min, float max)
+{
+    if (n < min) return min;
+    if (n > max) return max;
+    return n;
+}
+/*! \brief Returns the Closest Points from Segment 1 to Segment 2
+  \param p1 start of segment 1
+  \param q1 end of segment 1
+  \param p2 start of segment 2
+  \param q2 end of segment 2
+  \param t the time "t" in Ray 1 that gives us the closest point
+  (closest_point=Origin1+(Direction1*t).
+  \return true if there is a closest point, false if the rays are paralell.
+  \note Adapted from Christer Ericson's Real Time Collision Detection Book.
+*/
+inline float ClosestPointBetweenSegments(dVector3& p1,
+                                         dVector3& q1,
+                                         dVector3& p2,
+                                         dVector3& q2,
+                                         float &s,
+                                         float &t,
+                                         dVector3& c1,
+                                         dVector3& c2)
+{
+    dVector3 d1 = {q1[0] - p1[0],
+                   q1[1] - p1[1],
+                   q1[2] - p1[2]};
+    dVector3 d2 = {q2[0] - p2[0],
+                   q2[1] - p2[1],
+                   q2[2] - p2[2]};
+    dVector3 r  = {p1[0] - p2[0],
+                   p1[1] - p2[1],
+                   p1[2] - p2[2]};
+    float a = dDOT(d1, d1);
+    float e = dDOT(d2, d2);
+    float f = dDOT(d2, r);
+    // Check if either or both segments degenerate into points
+    if (a <= dEpsilon && e <= dEpsilon)
+    {
+        // Both segments degenerate into points
+        s = t = 0.0f;
+        dVector3Copy(p1,c1);
+        dVector3Copy(p2,c2);
+        return (c1[0] - c2[0])*(c1[0] - c2[0])+
+               (c1[1] - c2[1])*(c1[1] - c2[1])+
+               (c1[2] - c2[2])*(c1[2] - c2[2]);
+    }
+    if (a <= dEpsilon)
+    {
+        // First segment degenerates into a point
+        s = 0.0f;
+        t = f / e; // s = 0 => t = (b*s + f) / e = f / e
+        t = Clamp(t, 0.0f, 1.0f);
+    }
+    else
+    {
+        float c = dDOT(d1, r);
+        if (e <= dEpsilon)
+        {
+            // Second segment degenerates into a point
+            t = 0.0f;
+            s = Clamp(-c / a, 0.0f, 1.0f); // t = 0 => s = (b*t - c) / a = -c / a
+        }
+        else
+        {
+            // The general non degenerate case starts here
+            float b = dDOT(d1, d2);
+            float denom = a*e-b*b; // Always nonnegative
+
+            // If segments not parallel, compute closest point on L1 to L2, and
+            // clamp to segment S1. Else pick arbitrary s (here 0)
+            if (denom != 0.0f)
+            {
+                s = Clamp((b*f - c*e) / denom, 0.0f, 1.0f);
+            }
+            else s = 0.0f;
+#if 0
+            // Compute point on L2 closest to S1(s) using
+            // t = Dot((P1+D1*s)-P2,D2) / Dot(D2,D2) = (b*s + f) / e
+            t = (b*s + f) / e;
+
+            // If t in [0,1] done. Else clamp t, recompute s for the new value
+            // of t using s = Dot((P2+D2*t)-P1,D1) / Dot(D1,D1)= (t*b - c) / a
+            // and clamp s to [0, 1]
+            if (t < 0.0f) {
+                t = 0.0f;
+                s = Clamp(-c / a, 0.0f, 1.0f);
+            } else if (t > 1.0f) {
+                t = 1.0f;
+                s = Clamp((b - c) / a, 0.0f, 1.0f);
+            }
+#else
+            float tnom = b*s + f;
+            if (tnom < 0.0f)
+            {
+                t = 0.0f;
+                s = Clamp(-c / a, 0.0f, 1.0f);
+            }
+            else if (tnom > e)
+            {
+                t = 1.0f;
+                s = Clamp((b - c) / a, 0.0f, 1.0f);
+            }
+            else
+            {
+                t = tnom / e;
+            }
+#endif
+        }
+    }
+
+    c1[0] = p1[0] + d1[0] * s;
+    c1[1] = p1[1] + d1[1] * s;
+    c1[2] = p1[2] + d1[2] * s;
+    c2[0] = p2[0] + d2[0] * t;
+    c2[1] = p2[1] + d2[1] * t;
+    c2[2] = p2[2] + d2[2] * t;
+    return (c1[0] - c2[0])*(c1[0] - c2[0])+
+           (c1[1] - c2[1])*(c1[1] - c2[1])+
+           (c1[2] - c2[2])*(c1[2] - c2[2]);
+}
+
+#if 0
+float tnom = b*s + f;
+if (tnom < 0.0f) {
+    t = 0.0f;
+    s = Clamp(-c / a, 0.0f, 1.0f);
+} else if (tnom > e) {
+    t = 1.0f;
+    s = Clamp((b - c) / a, 0.0f, 1.0f);
+} else {
+    t = tnom / e;
+}
+#endif
+
 /*! \brief Returns the Ray on which 2 planes intersect if they do.
   \param p1 Plane 1
   \param p2 Plane 2
@@ -314,7 +450,7 @@ inline bool ClosestPointInRay(const dVector3 Origin1,
 inline bool IntersectPlanes(const dVector4 p1, const dVector4 p2, dVector3 p, dVector3 d)
 {
   // Compute direction of intersection line
-  dCROSS(d,=,p1,p2);  
+  dCROSS(d,=,p1,p2);
   // If d is (near) zero, the planes are parallel (and separated)
   // or coincident, so they're not considered intersecting
   dReal denom = dDOT(d, d);
@@ -442,9 +578,9 @@ inline bool IsPointInPolygon(dVector3 p,
 	  out[1]=b[1];
 	  out[2]=b[2];
 	  return false;
-	}      
+	}
       vc = d1*d4 - d3*d2;
-      if (vc < 0.0 && d1 > 0.0 && d3 < 0.0) 
+      if (vc < 0.0 && d1 > 0.0 && d3 < 0.0)
 	{
 	  dReal v = d1 / (d1 - d3);
 	  out[0] = a[0] + (ab[0]*v);
@@ -463,7 +599,7 @@ int dCollideConvexPlane (dxGeom *o1, dxGeom *o2, int flags,
 	dIASSERT (o1->type == dConvexClass);
 	dIASSERT (o2->type == dPlaneClass);
 	dIASSERT ((flags & NUMC_MASK) >= 1);
-	
+
 	dxConvex *Convex = (dxConvex*) o1;
 	dxPlane *Plane = (dxPlane*) o2;
 	unsigned int contacts=0;
@@ -480,7 +616,7 @@ int dCollideConvexPlane (dxGeom *o1, dxGeom *o2, int flags,
 	{
 		dMULTIPLY0_331 (v2,Convex->final_posr->R,&Convex->points[(i*3)]);
 		dVector3Add(Convex->final_posr->pos, v2, v2);
-		
+
 		unsigned int distance2sign = GTEQ_ZERO;
 		dReal distance2 = dVector3Dot(Plane->p, v2) - Plane->p[3]; // Ax + By + Cz - D
 		if((distance2 <= REAL(0.0)))
@@ -531,7 +667,7 @@ int dCollideSphereConvex (dxGeom *o1, dxGeom *o2, int flags,
   unsigned int *pPoly=Convex->polygons;
   int closestplane=-1;
   bool sphereinside=true;
-  /* 
+  /*
      Do a good old sphere vs plane check first,
      if a collision is found then check if the contact point
      is within the polygon
@@ -559,7 +695,6 @@ int dCollideSphereConvex (dxGeom *o1, dxGeom *o2, int flags,
 		{
 		  // finally if we get here we know that the
 		  // sphere is directly touching the inside of the polyhedron
-		  //fprintf(stdout,"Contact! distance=%f\n",dist);
 		  contact->normal[0] = plane[0];
 		  contact->normal[1] = plane[1];
 		  contact->normal[2] = plane[2];
@@ -579,8 +714,8 @@ int dCollideSphereConvex (dxGeom *o1, dxGeom *o2, int flags,
 		  // the sphere may not be directly touching
 		  // the polyhedron, but it may be touching
 		  // a point or an edge, if the distance between
-		  // the closest point on the poly (out) and the 
-		  // center of the sphere is less than the sphere 
+		  // the closest point on the poly (out) and the
+		  // center of the sphere is less than the sphere
 		  // radius we have a hit.
 		  temp[0] = (Sphere->final_posr->pos[0]-out[0]);
 		  temp[1] = (Sphere->final_posr->pos[1]-out[1]);
@@ -621,7 +756,7 @@ int dCollideSphereConvex (dxGeom *o1, dxGeom *o2, int flags,
     }
     if(sphereinside)
       {
-	// if the center of the sphere is inside 
+	// if the center of the sphere is inside
 	// the Convex, we need to pop it out
 	dMULTIPLY0_331(contact->normal,
 		       Convex->final_posr->R,
@@ -644,10 +779,10 @@ int dCollideConvexBox (dxGeom *o1, dxGeom *o2, int flags,
   dIASSERT (o1->type == dConvexClass);
   dIASSERT (o2->type == dBoxClass);
   dIASSERT ((flags & NUMC_MASK) >= 1);
-  
+
   //dxConvex *Convex = (dxConvex*) o1;
   //dxBox *Box = (dxBox*) o2;
-  
+
   return 0;
 }
 
@@ -661,7 +796,7 @@ int dCollideConvexCapsule (dxGeom *o1, dxGeom *o2,
 
   //dxConvex *Convex = (dxConvex*) o1;
   //dxCapsule *Capsule = (dxCapsule*) o2;
-  
+
   return 0;
 }
 
@@ -677,7 +812,7 @@ inline void ComputeInterval(dxConvex& cvx,dVector4 axis,dReal& min,dReal& max)
     point[1]+=cvx.final_posr->pos[1];
     point[2]+=cvx.final_posr->pos[2];
     max = min = dDOT(point,axis)-axis[3];//(*)
-    for (unsigned int i = 1; i < cvx.pointcount; ++i) 
+    for (unsigned int i = 1; i < cvx.pointcount; ++i)
     {
         dMULTIPLY0_331(point,cvx.final_posr->R,cvx.points+(i*3));
         point[0]+=cvx.final_posr->pos[0];
@@ -729,8 +864,8 @@ bool CheckEdgeIntersection(dxConvex& cvx1,dxConvex& cvx2, int flags,int& curc,
 	  // Translate
 	  plane[3]=
 	    (cvx2.planes[(j*4)+3])+
-	    ((plane[0] * cvx2.final_posr->pos[0]) + 
-	     (plane[1] * cvx2.final_posr->pos[1]) + 
+	    ((plane[0] * cvx2.final_posr->pos[0]) +
+	     (plane[1] * cvx2.final_posr->pos[1]) +
 	     (plane[2] * cvx2.final_posr->pos[2]));
 	  dContactGeom *target = SAFECONTACT(flags, contact, curc, skip);
 	  target->g1=&cvx1; // g1 is the one pushed
@@ -749,8 +884,8 @@ bool CheckEdgeIntersection(dxConvex& cvx1,dxConvex& cvx2, int flags,int& curc,
 		      // Translate
 		      depthplane[3]=
 			(cvx2.planes[(k*4)+3])+
-			((plane[0] * cvx2.final_posr->pos[0]) + 
-			 (plane[1] * cvx2.final_posr->pos[1]) + 
+			((plane[0] * cvx2.final_posr->pos[0]) +
+			 (plane[1] * cvx2.final_posr->pos[1]) +
 			 (plane[2] * cvx2.final_posr->pos[2]));
 		      dReal depth = (dVector3Dot(depthplane, target->pos) - depthplane[3]); // Ax + By + Cz - D
 		      if((fabs(depth)<fabs(target->depth))&&((depth<-dEpsilon)||(depth>dEpsilon)))
@@ -773,20 +908,16 @@ bool CheckEdgeIntersection(dxConvex& cvx1,dxConvex& cvx2, int flags,int& curc,
 /*
 Helper struct
 */
-
 struct ConvexConvexSATOutput
 {
   dReal min_depth;
   int depth_type;
   dVector4 plane;
   dVector3 dist; // distance from center to center, from cvx1 to cvx2
-  //int side_index;
-  //dxConvex* g1;
-  //dxConvex* g2;
   dVector3 e1a,e1b,e2a,e2b;
 };
 
-/*! \brief Does an axis separation test using cvx1 planes on cvx1 and cvx2, returns true for a collision false for no collision 
+/*! \brief Does an axis separation test using cvx1 planes on cvx1 and cvx2, returns true for a collision false for no collision
   \param cvx1 [IN] First Convex object, its planes are used to do the tests
   \param cvx2 [IN] Second Convex object
   \param min_depth [IN/OUT] Used to input as well as output the minimum depth so far, must be set to a huge value such as dInfinity for initialization.
@@ -808,8 +939,8 @@ inline bool CheckSATConvexFaces(dxConvex& cvx1,
         // Translate
         plane[3]=
             (cvx1.planes[(i*4)+3])+
-            ((plane[0] * cvx1.final_posr->pos[0]) + 
-            (plane[1] * cvx1.final_posr->pos[1])  + 
+            ((plane[0] * cvx1.final_posr->pos[0]) +
+            (plane[1] * cvx1.final_posr->pos[1])  +
             (plane[2] * cvx1.final_posr->pos[2]));
         ComputeInterval(cvx1,plane,min1,max1);
         ComputeInterval(cvx2,plane,min2,max2);
@@ -817,7 +948,7 @@ inline bool CheckSATConvexFaces(dxConvex& cvx1,
         min = dMAX(min1, min2);
         max = dMIN(max1, max2);
         depth = max-min;
-        /* 
+        /*
         Take only into account the faces that penetrate cvx1 to determine
         minimum depth
         ((max2*min2)<=0) = different sign, or one is zero and thus
@@ -841,7 +972,7 @@ inline bool CheckSATConvexFaces(dxConvex& cvx1,
     }
   return true;
 }
-/*! \brief Does an axis separation test using cvx1 and cvx2 edges, returns true for a collision false for no collision 
+/*! \brief Does an axis separation test using cvx1 and cvx2 edges, returns true for a collision false for no collision
   \param cvx1 [IN] First Convex object
   \param cvx2 [IN] Second Convex object
   \param min_depth [IN/OUT] Used to input as well as output the minimum depth so far, must be set to a huge value such as dInfinity for initialization.
@@ -860,7 +991,7 @@ inline bool CheckSATConvexEdges(dxConvex& cvx1,
   dVector3Copy(ccso.dist,dist);
   unsigned int s1 = cvx1.SupportIndex(dist);
   // invert direction
-  dVector3Inv(dist);  
+  dVector3Inv(dist);
   unsigned int s2 = cvx2.SupportIndex(dist);
   for(unsigned int i = 0;i<cvx1.edgecount;++i)
   {
@@ -908,24 +1039,24 @@ inline bool CheckSATConvexEdges(dxConvex& cvx1,
         ccso.e1b[0]+=cvx1.final_posr->pos[0];
         ccso.e1b[1]+=cvx1.final_posr->pos[1];
         ccso.e1b[2]+=cvx1.final_posr->pos[2];
-        dVector3Copy(e2a,ccso.e2a);	      
-        dVector3Copy(e2b,ccso.e2b);	      
+        dVector3Copy(e2a,ccso.e2a);
+        dVector3Copy(e2b,ccso.e2b);
         ccso.e2a[0]+=cvx2.final_posr->pos[0];
         ccso.e2a[1]+=cvx2.final_posr->pos[1];
         ccso.e2a[2]+=cvx2.final_posr->pos[2];
         ccso.e2b[0]+=cvx2.final_posr->pos[0];
         ccso.e2b[1]+=cvx2.final_posr->pos[1];
         ccso.e2b[2]+=cvx2.final_posr->pos[2];
-      }	  
+      }
     }
   }
   return true;
 }
 
 #if 0
-/*! \brief Returns the index of the plane/side of the incident convex (ccso.g2) 
+/*! \brief Returns the index of the plane/side of the incident convex (ccso.g2)
       which is closer to the reference convex (ccso.g1) side
-      
+
       This function just looks for the incident face that is facing the reference face
       and is the closest to being parallel to it, which sometimes is.
 */
@@ -935,7 +1066,7 @@ inline unsigned int GetIncidentSide(ConvexConvexSATOutput& ccso)
   dReal SavedDot;
   dReal Dot;
   unsigned int incident_side=0;
-  // Rotate the plane normal into incident convex space 
+  // Rotate the plane normal into incident convex space
   // (things like this should be done all over this file,
   //  will look into that)
   dMULTIPLY1_331(nis,ccso.g2->final_posr->R,ccso.plane);
@@ -1013,7 +1144,7 @@ int TestConvexIntersection(dxConvex& cvx1,dxConvex& cvx2, int flags,
   if(ccso.depth_type==1) // face-face
   {
     // cvx1 MUST always be in contact->g1 and cvx2 in contact->g2
-    // This was learned the hard way :(    
+    // This was learned the hard way :(
     unsigned int incident_side;
     unsigned int* pIncidentPoly;
     unsigned int* pIncidentPoints;
@@ -1041,10 +1172,10 @@ int TestConvexIntersection(dxConvex& cvx1,dxConvex& cvx2, int flags,
     // Translate
     rplane[3]=
       (cvx1.planes[(reference_side*4)+3])+
-      ((rplane[0] * cvx1.final_posr->pos[0]) + 
-      (rplane[1] * cvx1.final_posr->pos[1]) + 
+      ((rplane[0] * cvx1.final_posr->pos[0]) +
+      (rplane[1] * cvx1.final_posr->pos[1]) +
       (rplane[2] * cvx1.final_posr->pos[2]));
-    // flip 
+    // flip
     rplane[0]=-rplane[0];
     rplane[1]=-rplane[1];
     rplane[2]=-rplane[2];
@@ -1164,7 +1295,7 @@ int TestConvexIntersection(dxConvex& cvx1,dxConvex& cvx2, int flags,
         if (contacts==maxc) return contacts;
       }
     }
-    // IF we get here, we got the easiest contacts to calculate, 
+    // IF we get here, we got the easiest contacts to calculate,
     // but there is still space in the contacts array for more.
     // So, project the Reference's face points onto the Incident face
     // plane and test them for inclusion in the reference plane as well.
@@ -1177,8 +1308,8 @@ int TestConvexIntersection(dxConvex& cvx1,dxConvex& cvx2, int flags,
     // Translate
     iplane[3]=
       (cvx2.planes[(incident_side*4)+3])+
-      ((iplane[0] * cvx2.final_posr->pos[0]) + 
-      (iplane[1] * cvx2.final_posr->pos[1]) + 
+      ((iplane[0] * cvx2.final_posr->pos[0]) +
+      (iplane[1] * cvx2.final_posr->pos[1]) +
       (iplane[2] * cvx2.final_posr->pos[2]));
     // get reference face
     for(unsigned int i=0;i<reference_side;++i)
@@ -1190,7 +1321,7 @@ int TestConvexIntersection(dxConvex& cvx1,dxConvex& cvx2, int flags,
     {
       dMULTIPLY0_331(i1,cvx1.final_posr->R,&cvx1.points[(pReferencePoints[i]*3)]);
  	    dVector3Add(cvx1.final_posr->pos,i1,i1);
-      // Project onto Incident face plane      
+      // Project onto Incident face plane
       t = -(i1[0]*iplane[0]+
           i1[1]*iplane[1]+
           i1[2]*iplane[2]-
@@ -1314,7 +1445,7 @@ int dCollideConvexConvex (dxGeom *o1, dxGeom *o2, int flags,
 }
 
 #if 0
-int dCollideRayConvex (dxGeom *o1, dxGeom *o2, int flags, 
+int dCollideRayConvex (dxGeom *o1, dxGeom *o2, int flags,
 		       dContactGeom *contact, int skip)
 {
   dIASSERT (skip >= (int)sizeof(dContactGeom));
@@ -1346,13 +1477,13 @@ int dCollideRayConvex (dxGeom *o1, dxGeom *o2, int flags,
       // Translate
       plane[3]=
 	(convex->planes[(i*4)+3])+
-	((plane[0] * convex->final_posr->pos[0]) + 
-	 (plane[1] * convex->final_posr->pos[1]) + 
+	((plane[0] * convex->final_posr->pos[0]) +
+	 (plane[1] * convex->final_posr->pos[1]) +
 	 (plane[2] * convex->final_posr->pos[2]));
-      if(IntersectSegmentPlane(origin, 
-			       destination, 
-			       plane, 
-			       depth, 
+      if(IntersectSegmentPlane(origin,
+			       destination,
+			       plane,
+			       depth,
 			       contactpoint))
 	{
 	  if(IsPointInPolygon(contactpoint,pPoly,convex,out))
@@ -1483,11 +1614,11 @@ int dCollideRayConvex( dxGeom *o1, dxGeom *o2,
 
 				// Store depth
 				contact->depth = alpha;
-				
+
 				if ((flags & CONTACTS_UNIMPORTANT) && contact->depth <= ray->length )
 				{
 					// Break on any contact if contacts are not important
-					break; 
+					break;
 				}
 			}
 		}
