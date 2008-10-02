@@ -324,11 +324,13 @@ inline float ClosestPointBetweenSegments(dVector3& p1,
                                          dVector3& q1,
                                          dVector3& p2,
                                          dVector3& q2,
-                                         float &s,
-                                         float &t,
                                          dVector3& c1,
                                          dVector3& c2)
 {
+    // s & t were originaly part of the output args, but since
+    // we don't really need them, we'll just declare them in here
+    float s;
+    float t;
     dVector3 d1 = {q1[0] - p1[0],
                    q1[1] - p1[1],
                    q1[2] - p1[2]};
@@ -914,7 +916,7 @@ struct ConvexConvexSATOutput
   int depth_type;
   dVector4 plane;
   dVector3 dist; // distance from center to center, from cvx1 to cvx2
-  dVector3 e1a,e1b,e2a,e2b;
+  dVector3 e1a,e1b,e2a,e2b; // e1a to e1b = edge in cvx1,e2a to e2b = edge in cvx2.
 };
 
 /*! \brief Does an axis separation test using cvx1 planes on cvx1 and cvx2, returns true for a collision false for no collision
@@ -1027,9 +1029,7 @@ inline bool CheckSATConvexEdges(dxConvex& cvx1,
       {
         dVector3Copy(plane,ccso.plane);
         ccso.min_depth=depth;
-        //ccso.g1=&cvx2;
-        //ccso.g2=&cvx1;
-        ccso.depth_type = 2; // 2 = edge-edge
+        ccso.depth_type = 2; // 2 means edge-edge
         // use cached values, add position
         dVector3Copy(e1a,ccso.e1a);
         dVector3Copy(e1b,ccso.e1b);
@@ -1112,10 +1112,8 @@ int TestConvexIntersection(dxConvex& cvx1,dxConvex& cvx2, int flags,
 			   dContactGeom *contact, int skip)
 {
   ConvexConvexSATOutput ccso;
-//  ccso.side_index = -1; // no side
   ccso.min_depth=dInfinity; // Min not min at all
   ccso.depth_type=0; // no type
-//  ccso.g1=ccso.g2=NULL;
   // precompute distance vector
   ccso.dist[0] = cvx2.final_posr->pos[0]-cvx1.final_posr->pos[0];
   ccso.dist[1] = cvx2.final_posr->pos[1]-cvx1.final_posr->pos[1];
@@ -1124,7 +1122,6 @@ int TestConvexIntersection(dxConvex& cvx1,dxConvex& cvx2, int flags,
   dIASSERT(maxc != 0);
   dVector3 i1,i2,r1,r2; // edges of incident and reference faces respectively
   int contacts=0;
-  unsigned int i;
   if(!CheckSATConvexFaces(cvx1,cvx2,ccso))
   {
     return 0;
@@ -1134,12 +1131,10 @@ int TestConvexIntersection(dxConvex& cvx1,dxConvex& cvx2, int flags,
   {
     return 0;
   }
-  /*
   else if(!CheckSATConvexEdges(cvx1,cvx2,ccso))
   {
     return 0;
   }
-  */
   // If we get here, there was a collision
   if(ccso.depth_type==1) // face-face
   {
@@ -1185,7 +1180,6 @@ int TestConvexIntersection(dxConvex& cvx1,dxConvex& cvx2, int flags,
       pIncidentPoly+=pIncidentPoly[0]+1;
     }
     pIncidentPoints = pIncidentPoly+1;
-#if 1
     // Get the first point of the incident face
     dMULTIPLY0_331(i2,cvx2.final_posr->R,&cvx2.points[(pIncidentPoints[0]*3)]);
  	  dVector3Add(i2,cvx2.final_posr->pos,i2);
@@ -1262,7 +1256,6 @@ int TestConvexIntersection(dxConvex& cvx1,dxConvex& cvx2, int flags,
             rplane[3];
             if(d>0)
             {
-#if 1
               dVector3Copy(p,SAFECONTACT(flags, contact, contacts, skip)->pos);
               dVector3Copy(rplane,SAFECONTACT(flags, contact, contacts, skip)->normal);
               SAFECONTACT(flags, contact, contacts, skip)->g1=&cvx1;
@@ -1270,7 +1263,6 @@ int TestConvexIntersection(dxConvex& cvx1,dxConvex& cvx2, int flags,
               SAFECONTACT(flags, contact, contacts, skip)->depth=d;
               ++contacts;
               if (contacts==maxc) return contacts;
-#endif
             }
           }
         }
@@ -1301,15 +1293,15 @@ int TestConvexIntersection(dxConvex& cvx1,dxConvex& cvx2, int flags,
     // plane and test them for inclusion in the reference plane as well.
     // We already have computed intersections so, skip those.
 
-    // Get Incident plane, we need it for projection
-    // Rotate
+    /* Get Incident plane, we need it for projection */
+    /* Rotate */
     dMULTIPLY0_331(iplane,cvx2.final_posr->R,cvx2.planes+(incident_side*4));
     dNormalize3(iplane);
-    // Translate
+    /* Translate */
     iplane[3]=
-      (cvx2.planes[(incident_side*4)+3])+
+      (cvx2.planes[(incident_side*4)+3])     +
       ((iplane[0] * cvx2.final_posr->pos[0]) +
-      (iplane[1] * cvx2.final_posr->pos[1]) +
+      (iplane[1] * cvx2.final_posr->pos[1])  +
       (iplane[2] * cvx2.final_posr->pos[2]));
     // get reference face
     for(unsigned int i=0;i<reference_side;++i)
@@ -1376,57 +1368,21 @@ int TestConvexIntersection(dxConvex& cvx1,dxConvex& cvx2, int flags,
         }
       }
     }
-#else
-    // Keeping this code just for debuging purposes
-    for(unsigned int i=0;i<pIncidentPoly[0];++i)
-    {
-      dMULTIPLY0_331(i2,cvx2.final_posr->R,&cvx2.points[(pIncidentPoints[i]*3)]);
-  	  dVector3Add(cvx2.final_posr->pos,i2,i2);
-      dVector3Copy(i2,SAFECONTACT(flags, contact, contacts, skip)->pos);
-      SAFECONTACT(flags, contact, contacts, skip)->g1=&cvx1;
-      SAFECONTACT(flags, contact, contacts, skip)->g2=&cvx2;
-      ++contacts;
-      if (contacts==maxc) return contacts;
-    }
-    for(unsigned int i=0;i<reference_side;++i)
-    {
-      pReferencePoly+=pReferencePoly[0]+1;
-    }
-    pReferencePoints = pReferencePoly+1;
-    for(unsigned int i=0;i<pReferencePoly[0];++i)
-    {
-      dMULTIPLY0_331(i1,cvx1.final_posr->R,&cvx1.points[(pReferencePoints[i]*3)]);
- 	    dVector3Add(cvx1.final_posr->pos,i1,i1);
-      dVector3Copy(i1,SAFECONTACT(flags, contact, contacts, skip)->pos);
-      SAFECONTACT(flags, contact, contacts, skip)->g1=&cvx1;
-      SAFECONTACT(flags, contact, contacts, skip)->g2=&cvx2;
-      ++contacts;
-      if (contacts==maxc) return contacts;
-    }
-#endif
   }
   else if(ccso.depth_type==2) // edge-edge
   {
-    // Some parts borrowed from dBoxBox
-  	dVector3 ua,ub,pa,pb;
-  	dReal alpha,beta;
-    // Get direction of first edge
-  	for (i=0; i<3; i++) ua[i] = ccso.e1b[i]-ccso.e1a[i];
-  	dNormalize3(ua); // normalization shouldn't be necesary but dLineClosestApproach requires it
-    // Get direction of second edge
-    for (i=0; i<3; i++) ub[i] = ccso.e2b[i]-ccso.e2a[i];
-    dNormalize3(ub); // same as with ua normalization
-    // Get closest points between edges (one at each)
-    dLineClosestApproach (ccso.e1a,ua,ccso.e2a,ub,&alpha,&beta);
-    for (i=0; i<3; i++) pa[i] = ccso.e1a[i]+(ua[i]*alpha);
-    for (i=0; i<3; i++) pb[i] = ccso.e2a[i]+(ub[i]*beta);
-    // Set the contact point as halfway between the 2 closest points
-    for (i=0; i<3; i++) SAFECONTACT(flags, contact, contacts, skip)->pos[i] = REAL(0.5)*(pa[i]+pb[i]);
+    dVector3 c1,c2;
+    //float s,t;
+    SAFECONTACT(flags, contact, contacts, skip)->depth = 
+      dSqrt(ClosestPointBetweenSegments(ccso.e1a,ccso.e1b,ccso.e2a,ccso.e2b,c1,c2));
     SAFECONTACT(flags, contact, contacts, skip)->g1=&cvx1;
     SAFECONTACT(flags, contact, contacts, skip)->g2=&cvx2;
-    dVector3Copy(ccso.plane,SAFECONTACT(flags, contact, contacts, skip)->normal);
-    SAFECONTACT(flags, contact, contacts, skip)->depth=ccso.min_depth;
-    ++contacts;
+    dVector3Copy(c1,SAFECONTACT(flags, contact, contacts, skip)->pos);
+    SAFECONTACT(flags, contact, contacts, skip)->normal[0] = c2[0]-c1[0];
+    SAFECONTACT(flags, contact, contacts, skip)->normal[1] = c2[1]-c1[1];
+    SAFECONTACT(flags, contact, contacts, skip)->normal[2] = c2[2]-c1[2];    
+    dNormalize3(SAFECONTACT(flags, contact, contacts, skip)->normal);
+    contacts++;
   }
   return contacts;
 }

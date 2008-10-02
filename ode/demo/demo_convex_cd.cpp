@@ -67,7 +67,7 @@ dReal points[]= // points for a cube
     -0.25f,0.25f,-0.25f,//  point 5
 
     0.25f,-0.25f,-0.25f,//  point 6
-    -0.25f,-0.25f,-0.25f,// point 7 
+    -0.25f,-0.25f,-0.25f,// point 7
   };
 const unsigned int pointcount=8;
 unsigned int polygons[] = //Polygons for a cube (6 squares)
@@ -92,7 +92,7 @@ dGeomID convex[2];
 dSpaceID space;
 dWorldID world;
 dJointGroupID contactgroup;
-/* 
+/*
 glRotate Matrix:
 ( xx(1-c)+c	xy(1-c)-zs  xz(1-c)+ys	 0  )
 |					    |
@@ -111,6 +111,7 @@ dQuaternion geom0quat={0.7071,0,0.7071,0};
 bool DumpInfo=true;
 int drawmode = DS_WIREFRAME;
 
+#if 0
 const dReal fixed_pos_0[]={0.703704,-0.748281,0.249495};
 const dReal fixed_rot_0[]={0.996994,-0.001009,-0.077468,0.000000,
                           -0.077468,-0.000117,-0.996995,0.000000,
@@ -121,6 +122,15 @@ const dReal fixed_rot_1[]={-0.999461, 0.032777,0.001829,0.000000,
                            -0.032777,-0.999463,0.000033,0.000000,
                             0.001829,-0.000027,0.999998,0.000000};
 
+#else
+// for EDGE-EDGE test
+const dReal fixed_pos_0[]={0.0,0.0,0.25};
+const dReal fixed_rot_0[]={ 1,0,0,0,0,1,0,0,0,0,1,0 };
+const dReal fixed_pos_1[]={0.000000,0.450000,0.600000};
+const dReal fixed_rot_1[]={0.708311,-0.705472,-0.000000,0.000000,
+                           0.516939,0.519297,-0.679785,0.000000,
+                           0.480067,0.481293,0.733034,0.000000};
+#endif
 void start()
 {
   // adjust the starting viewpoint a bit
@@ -276,58 +286,86 @@ void command (int cmd)
   // note: 0.0174532925 radians = 1 degree
   dQuaternion q;
   dMatrix3 m;
+  bool changed = false;
   switch(cmd)
     {
     case 'w':
       geom1pos[0]+=0.05;
+      changed = true;
       break;
     case 'a':
       geom1pos[1]-=0.05;
+      changed = true;
       break;
     case 's':
       geom1pos[0]-=0.05;
+      changed = true;
       break;
     case 'd':
       geom1pos[1]+=0.05;
+      changed = true;
       break;
     case 'e':
       geom1pos[2]-=0.05;
+      changed = true;
       break;
     case 'q':
       geom1pos[2]+=0.05;
+      changed = true;
       break;
     case 'i':
       dQFromAxisAndAngle (q, 0, 0, 1,0.0174532925);
       dQMultiply0(geom1quat,geom1quat,q);
+      changed = true;
       break;
     case 'j':
       dQFromAxisAndAngle (q, 1, 0, 0,0.0174532925);
       dQMultiply0(geom1quat,geom1quat,q);
+      changed = true;
       break;
     case 'k':
       dQFromAxisAndAngle (q, 0, 0, 1,-0.0174532925);
       dQMultiply0(geom1quat,geom1quat,q);
+      changed = true;
       break;
     case 'l':
       dQFromAxisAndAngle (q, 1, 0, 0,-0.0174532925);
       dQMultiply0(geom1quat,geom1quat,q);
+      changed = true;
       break;
     case 'm':
 		(drawmode!=DS_POLYFILL)? drawmode=DS_POLYFILL:drawmode=DS_WIREFRAME;
       break;
     case 'n':
 		(geoms!=convex)? geoms=convex:geoms=boxes;
+		if(geoms==convex)
+		{
+		    printf("CONVEX------------------------------------------------------>\n");
+		}
+		else
+		{
+		    printf("BOX--------------------------------------------------------->\n");
+		}
       break;
     default:
-      dsPrint ("received command %d (`%c')\n",cmd,cmd);     
+      dsPrint ("received command %d (`%c')\n",cmd,cmd);
     }
 #if 0
-  dGeomSetPosition (geoms[1],
+            dGeomSetPosition (geoms[1],
 		    geom1pos[0],
 		    geom1pos[1],
 		    geom1pos[2]);
-  dQtoR (geom1quat, m);
-  dGeomSetRotation (geoms[1],m);
+            dQtoR (geom1quat, m);
+            dGeomSetRotation(geoms[1],m);
+    if(changed)
+    {
+
+            printf("POS: %f,%f,%f\n",geom1pos[0],geom1pos[1],geom1pos[2]);
+            printf("ROT:\n%f,%f,%f,%f\n%f,%f,%f,%f\n%f,%f,%f,%f\n",
+            m[0],m[1],m[2],m[3],
+            m[4],m[5],m[6],m[7],
+            m[8],m[9],m[10],m[11]);
+    }
 #endif
   DumpInfo=true;
 }

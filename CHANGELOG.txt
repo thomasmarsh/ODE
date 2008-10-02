@@ -8,7 +8,10 @@ the rules for this file:
   * keep the format consistent (79 char width, M/D/Y date format).
 
 ------------------------------------------------------------------------------
-38/31/08 Daniel K. O.
+10/01/08 Rodrigo Hernandez (Kwizatz)
+	* Convex-Convex collision detection code is finally stable.
+
+08/31/08 Daniel K. O.
         * Applied patch 2080674: Improved dBodySetRotation; now exact rotation
           matrices are preserved until the next simulation step.
 

@@ -10,6 +10,7 @@
     "collision",
     "crash",
     "cylvssphere",
+    "convex_cd",
     "feedback",
     "friction",
     "gyroscopic",
