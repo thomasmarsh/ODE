@@ -8,6 +8,9 @@ the rules for this file:
   * keep the format consistent (79 char width, M/D/Y date format).
 
 ------------------------------------------------------------------------------
+10/03/08 Rodrigo Hernandez (Kwizatz)
+	* Added Blender script to create ODE convex geoms under tools.
+
 10/01/08 Rodrigo Hernandez (Kwizatz)
 	* Convex-Convex collision detection code is finally stable.
 
