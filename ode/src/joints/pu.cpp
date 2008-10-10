@@ -638,7 +638,10 @@ void dJointGetPUAxis1( dJointID j, dVector3 result )
     dUASSERT( joint, "bad joint argument" );
     dUASSERT( result, "bad result argument" );
     checktype( joint, PU );
-    getAxis( joint, result, joint->axis1 );
+    if ( joint->flags & dJOINT_REVERSE )
+        getAxis2( joint, result, joint->axis2 );
+    else
+        getAxis( joint, result, joint->axis1 );
 }
 
 void dJointGetPUAxis2( dJointID j, dVector3 result )
@@ -647,7 +650,10 @@ void dJointGetPUAxis2( dJointID j, dVector3 result )
     dUASSERT( joint, "bad joint argument" );
     dUASSERT( result, "bad result argument" );
     checktype( joint, PU );
-    getAxis( joint, result, joint->axis2 );
+    if ( joint->flags & dJOINT_REVERSE )
+        getAxis( joint, result, joint->axis1 );
+    else
+        getAxis2( joint, result, joint->axis2 );
 }
 
 /**

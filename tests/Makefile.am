@@ -12,5 +12,8 @@ check_PROGRAMS = tests
 TESTS = tests
 
 tests_SOURCES = main.cpp joint.cpp odemath.cpp \
-                joints/fixed.cpp joints/hinge.cpp joints/slider.cpp
+                joints/fixed.cpp \
+	        joints/hinge.cpp \
+	        joints/pu.cpp \
+	        joints/slider.cpp 
 
