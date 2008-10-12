@@ -26,8 +26,9 @@ namespace Ode.NET
 			SoftCFM = 0x010,
 			Motion1 = 0x020,
 			Motion2 = 0x040,
-			Slip1 = 0x080,
-			Slip2 = 0x100,
+			MotionN = 0x080,
+			Slip1 = 0x100,
+			Slip2 = 0x200,
 			Approx0 = 0x0000,
 			Approx1_1 = 0x1000,
 			Approx1_2 = 0x2000,
@@ -265,6 +266,7 @@ namespace Ode.NET
 			public dReal soft_cfm;
 			public dReal motion1;
 			public dReal motion2;
+			public dReal motionN;
 			public dReal slip1;
 			public dReal slip2;
 		}

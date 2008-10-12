@@ -215,6 +215,7 @@ namespace Ode.NET
 
 		static void Main(string[] args)
 		{
+			dInitODE();
 			// Setup pointers to drawstuff callback functions
 			ds.Functions fn;
 			fn.version = ds.VERSION;
