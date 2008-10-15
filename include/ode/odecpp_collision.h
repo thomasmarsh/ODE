@@ -338,7 +338,7 @@ class dRay : public dGeom {
 public:
   dRay() { }
   dRay (dReal length)
-    { _id = dCreateRay (length); }
+    { _id = dCreateRay (0,length); }
   dRay (dSpace &space, dReal length)
     { _id = dCreateRay (space.id(),length); }
   dRay (dSpaceID space, dReal length)
@@ -377,8 +377,6 @@ class dGeomTransform : public dGeom {
 
 public:
   dGeomTransform() { }
-  dGeomTransform ()
-    { _id = dCreateGeomTransform (0); }
   dGeomTransform (dSpace &space)
     { _id = dCreateGeomTransform (space.id()); }
   dGeomTransform (dSpaceID space)

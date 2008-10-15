@@ -916,7 +916,7 @@ public:
     if (_id) dJointDestroy (_id);
     _id = dJointCreateFixed (world, group);
   }
-  void create (dWorld& world, dJointGroup group=0)
+  void create (dWorld& world, dJointGroupID group=0)
     { create(world.id(), group); }
 
   void set()
