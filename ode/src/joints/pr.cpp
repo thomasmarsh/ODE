@@ -144,6 +144,22 @@ dxJointPR::getInfo1( dxJoint::Info1 *info )
 
     // powered needs an extra constraint row
     if ( limotP.limit || limotP.fmax > 0 ) info->m++;
+
+
+    // see if we're at a joint limit.
+    limotR.limit = 0;
+    if (( limotR.lostop >= -M_PI || limotR.histop <= M_PI ) &&
+            limotR.lostop <= limotR.histop )
+    {
+        dReal angle = getHingeAngle( node[0].body,
+                                     node[1].body,
+                                     axisR1, qrel );
+        limotR.testRotationalLimit( angle );
+    }
+
+    // powered morit or at limits needs an extra constraint row
+    if ( limotR.limit || limotR.fmax > 0 ) info->m++;
+
 }
 
 
@@ -342,7 +358,8 @@ dxJointPR::getInfo2( dxJoint::Info2 *info )
     info->c[2] = k * dDOT( ax1, err );
     info->c[3] = k * dDOT( q, err );
 
-    limotP.addLimot( this, info, 4, axP, 0 );
+    int row = 4 + limotP.addLimot( this, info, 4, axP, 0 );
+    limotR.addLimot ( this, info, row, ax1, 1 );
 }
 
 

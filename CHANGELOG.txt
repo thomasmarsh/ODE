@@ -9,6 +9,9 @@ the rules for this file:
 
 ------------------------------------------------------------------------------
 10/15/08 Remi Ricard (papaDoc)
+        * Enable the motor on the Rotoide part of the PR joint
+
+10/15/08 Remi Ricard (papaDoc)
         * Add unit test to check if using directly a joint
           or using after setting with default values is the same.
         * Add function setRelativeValues called in dJointAttach for
