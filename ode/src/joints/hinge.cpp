@@ -352,6 +352,19 @@ dxJointHinge::size() const
 }
 
 
+void
+dxJointHinge::setRelativeValues()
+{
+    dVector3 vec;
+    dJointGetHingeAnchor(this, vec);
+    setAnchors( this, vec[0], vec[1], vec[2], anchor1, anchor2 );
+
+    dJointGetHingeAxis(this, vec);
+    setAxes( this,  vec[0], vec[1], vec[2], axis1, axis2 );
+    computeInitialRelativeRotation();
+}
+
+
 /// Compute initial relative rotation body1 -> body2, or env -> body1
 void
 dxJointHinge::computeInitialRelativeRotation()

@@ -8,12 +8,18 @@ the rules for this file:
   * keep the format consistent (79 char width, M/D/Y date format).
 
 ------------------------------------------------------------------------------
+10/15/08 Remi Ricard (papaDoc)
+        * Add unit test to check if using directly a joint
+          or using after setting with default values is the same.
+        * Add function setRelativeValues called in dJointAttach for
+          all joints.
+
 10/10/08 Remi Ricard (papaDoc)
-         * Fix bug in dJointGetPUAxis2. The axis was not multiplier with the
-           the rotation matrix of the good body.
-         * Fix bug if there is only one body on the PU joint the axis returned
-           was not the right one.
-         * Add unit test to verify previous bug.
+        * Fix bug in dJointGetPUAxis2. The axis was not multiplier with the
+          the rotation matrix of the good body.
+        * Fix bug if there is only one body on the PU joint the axis returned
+          was not the right one.
+        * Add unit test to verify previous bug.
 
 10/03/08 Rodrigo Hernandez (Kwizatz)
 	* Added Blender script to create ODE convex geoms under tools.

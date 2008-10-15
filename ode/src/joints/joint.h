@@ -122,6 +122,10 @@ struct dxJoint : public dObject
     virtual void getInfo2( Info2* info ) = 0;
     virtual dJointType type() const = 0;
     virtual size_t size() const = 0;
+
+    /// Set values which are relative with respect to bodies.
+    /// Each dxJoint should redefined it if need be.
+    virtual void setRelativeValues() {};
 };
 
 

@@ -163,4 +163,13 @@ dxJointBall::size() const
     return sizeof( *this );
 }
 
+void
+dxJointBall::setRelativeValues()
+{
+    dVector3 anchor;
+    dJointGetBallAnchor(this, anchor);
+    setAnchors( this, anchor[0], anchor[1], anchor[2], anchor1, anchor2 );
+}
+
+
 

@@ -24,7 +24,7 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 // This file create unit test for some of the functions found in:
-// ode/src/joinst/pu.cpp
+// ode/src/joinst/pr.cpp
 //
 //
 ////////////////////////////////////////////////////////////////////////////////
@@ -32,18 +32,18 @@
 #include <UnitTest++.h>
 #include <ode/ode.h>
 
-#include "../../ode/src/joints/pu.h"
+#include "../../ode/src/joints/pr.h"
 
-SUITE (TestdxJointPU)
+SUITE (TestdxJointPR)
 {
     // The 2 bodies are positionned at (0, 0, 0),  and (0, 0, 0)
-    // The second body has a rotation of 27deg around X axis.
-    // The joint is a PU Joint
+    // The bodis have rotation of 27deg around some axis.
+    // The joint is a PR Joint
     // Axis is along the X axis
     // Anchor at (0, 0, 0)
-    struct Fixture_dxJointPU_B1_and_B2_At_Zero_Axis_Along_X
+    struct Fixture_dxJointPR_B1_and_B2_At_Zero_Axis_Along_X
     {
-        Fixture_dxJointPU_B1_and_B2_At_Zero_Axis_Along_X()
+        Fixture_dxJointPR_B1_and_B2_At_Zero_Axis_Along_X()
         {
             wId = dWorldCreate();
 
@@ -55,17 +55,33 @@ SUITE (TestdxJointPU)
 
             dMatrix3 R;
 
-            dRFromAxisAndAngle (R, 1, 0, 0, REAL(0.47123)); // 27deg
+            dVector3 axis; // Random axis
+
+            axis[0] = 0.53;
+            axis[1] = -0.71;
+            axis[2] = 0.43;
+            dNormalize3(axis);
+            dRFromAxisAndAngle (R, axis[0], axis[1], axis[2],
+                                REAL(0.47123)); // 27deg
+            dBodySetRotation (bId1, R);
+
+
+            axis[0] = 1.2;
+            axis[1] = 0.87;
+            axis[2] = -0.33;
+            dNormalize3(axis);
+            dRFromAxisAndAngle (R, axis[0], axis[1], axis[2],
+                                REAL(0.47123)); // 27deg
             dBodySetRotation (bId2, R);
 
-            jId   = dJointCreatePU (wId, 0);
-            joint = (dxJointPU*) jId;
+            jId   = dJointCreatePR (wId, 0);
+            joint = (dxJointPR*) jId;
 
 
             dJointAttach (jId, bId1, bId2);
         }
 
-        ~Fixture_dxJointPU_B1_and_B2_At_Zero_Axis_Along_X()
+        ~Fixture_dxJointPR_B1_and_B2_At_Zero_Axis_Along_X()
         {
             dWorldDestroy (wId);
         }
@@ -77,44 +93,37 @@ SUITE (TestdxJointPU)
 
 
         dJointID jId;
-        dxJointPU* joint;
+        dxJointPR* joint;
     };
 
-    // Test is dJointSetPUAxis and dJointGetPUAxis return same value
-    TEST_FIXTURE (Fixture_dxJointPU_B1_and_B2_At_Zero_Axis_Along_X,
-                  test_dJointSetGetPUAxis)
+    // Test is dJointSetPRAxis and dJointGetPRAxis return same value
+    TEST_FIXTURE (Fixture_dxJointPR_B1_and_B2_At_Zero_Axis_Along_X,
+                  test_dJointSetGetPRAxis)
     {
         dVector3 axisOrig, axis;
 
 
-        dJointGetPUAxis1 (jId, axisOrig);
-        dJointGetPUAxis1 (jId, axis);
-        dJointSetPUAxis1 (jId, axis[0], axis[1], axis[2]);
-        dJointGetPUAxis1 (jId, axis);
+        dJointGetPRAxis1 (jId, axisOrig);
+        dJointGetPRAxis1 (jId, axis);
+        dJointSetPRAxis1 (jId, axis[0], axis[1], axis[2]);
+        dJointGetPRAxis1 (jId, axis);
         CHECK_CLOSE (axis[0], axisOrig[0] , 1e-4);
         CHECK_CLOSE (axis[1], axisOrig[1] , 1e-4);
         CHECK_CLOSE (axis[2], axisOrig[2] , 1e-4);
 
 
-        dJointGetPUAxis2 (jId, axisOrig);
-        dJointGetPUAxis2(jId, axis);
-        dJointSetPUAxis2 (jId, axis[0], axis[1], axis[2]);
-        dJointGetPUAxis2 (jId, axis);
-        CHECK_CLOSE (axis[0], axisOrig[0] , 1e-4);
-        CHECK_CLOSE (axis[1], axisOrig[1] , 1e-4);
-        CHECK_CLOSE (axis[2], axisOrig[2] , 1e-4);
-
-
-        dJointGetPUAxis3 (jId, axisOrig);
-        dJointGetPUAxis3(jId, axis);
-        dJointSetPUAxis3 (jId, axis[0], axis[1], axis[2]);
-        dJointGetPUAxis3 (jId, axis);
+        dJointGetPRAxis2 (jId, axisOrig);
+        dJointGetPRAxis2(jId, axis);
+        dJointSetPRAxis2 (jId, axis[0], axis[1], axis[2]);
+        dJointGetPRAxis2 (jId, axis);
         CHECK_CLOSE (axis[0], axisOrig[0] , 1e-4);
         CHECK_CLOSE (axis[1], axisOrig[1] , 1e-4);
         CHECK_CLOSE (axis[2], axisOrig[2] , 1e-4);
     }
 
-  // Create 2 bodies attached by a PU joint
+
+
+  // Create 2 bodies attached by a PR joint
   // Axis is along the X axis (Default value
   // Anchor at (0, 0, 0)      (Default value)
   //
@@ -125,8 +134,8 @@ SUITE (TestdxJointPU)
   //       |
   // Body1 |
   // *     Z-------->
-  struct dxJointPU_Test_Initialization {
-    dxJointPU_Test_Initialization()
+  struct dxJointPR_Test_Initialization {
+    dxJointPR_Test_Initialization()
     {
       wId = dWorldCreate();
 
@@ -135,25 +144,39 @@ SUITE (TestdxJointPU)
 
       for (int j=0; j<2; ++j) {
         bId[j][0] = dBodyCreate (wId);
-        dBodySetPosition (bId[j][0], -1, 0, 0);
+        dBodySetPosition (bId[j][0], -1, -2, -3);
 
         bId[j][1] = dBodyCreate (wId);
-        dBodySetPosition (bId[j][1], 1, 0, 0);
+        dBodySetPosition (bId[j][1], 11, 22, 33);
+
 
         dMatrix3 R;
+        dVector3 axis; // Random axis
 
-        dRFromAxisAndAngle (R, 1, 0, 0, REAL(1.57));
+        axis[0] = 0.53;
+        axis[1] = -0.71;
+        axis[2] = 0.43;
+        dNormalize3(axis);
+        dRFromAxisAndAngle (R, axis[0], axis[1], axis[2],
+                            REAL(0.47123)); // 27deg
+        dBodySetRotation (bId[j][0], R);
+
+
+        axis[0] = 1.2;
+        axis[1] = 0.87;
+        axis[2] = -0.33;
+        dNormalize3(axis);
+        dRFromAxisAndAngle (R, axis[0], axis[1], axis[2],
+                            REAL(0.47123)); // 27deg
         dBodySetRotation (bId[j][1], R);
 
-        jId[j]   = dJointCreatePU (wId, 0);
+
+        jId[j]   = dJointCreatePR (wId, 0);
         dJointAttach (jId[j], bId[j][0], bId[j][1]);
-        dJointSetPUParam(jId[j], dParamLoStop, 1);
-        dJointSetPUParam(jId[j], dParamHiStop, 2);
-        dJointSetPUParam(jId[j], dParamFMax, 200);
       }
     }
 
-    ~dxJointPU_Test_Initialization()
+    ~dxJointPR_Test_Initialization()
     {
       dWorldDestroy (wId);
     }
@@ -168,38 +191,32 @@ SUITE (TestdxJointPU)
   };
 
 
-  // Test if setting a PU with its default values
-  // will behave the same as a default PU joint
-  TEST_FIXTURE (dxJointPU_Test_Initialization,
-                test_PU_Initialization) {
+  // Test if setting a PR with its default values
+  // will behave the same as a default PR joint
+  TEST_FIXTURE (dxJointPR_Test_Initialization,
+                test_PR_Initialization) {
     using namespace std;
 
     dVector3 axis;
-    dJointGetPUAxis1(jId[1], axis);
-    dJointSetPUAxis1(jId[1], axis[0], axis[1], axis[2]);
+    dJointGetPRAxis1(jId[1], axis);
+    dJointSetPRAxis1(jId[1], axis[0], axis[1], axis[2]);
 
-    dJointGetPUAxis2(jId[1], axis);
-    dJointSetPUAxis2(jId[1], axis[0], axis[1], axis[2]);
-
-    dJointGetPUAxis3(jId[1], axis);
-    dJointSetPUAxis3(jId[1], axis[0], axis[1], axis[2]);
-
-
+    dJointGetPRAxis2(jId[1], axis);
+    dJointSetPRAxis2(jId[1], axis[0], axis[1], axis[2]);
 
     dVector3 anchor;
-    dJointGetPUAnchor(jId[1], anchor);
-    dJointSetPUAnchor(jId[1], anchor[0], anchor[1], anchor[2]);
-
+    dJointGetPRAnchor(jId[1], anchor);
+    dJointSetPRAnchor(jId[1], anchor[0], anchor[1], anchor[2]);
 
     for (int b=0; b<2; ++b) {
       // Compare body b of the first joint with its equivalent on the
       // second joint
       const dReal *qA = dBodyGetQuaternion(bId[0][b]);
       const dReal *qB = dBodyGetQuaternion(bId[1][b]);
-      CHECK_CLOSE (qA[0], qB[0], 1e-6);
-      CHECK_CLOSE (qA[1], qB[1], 1e-6);
-      CHECK_CLOSE (qA[2], qB[2], 1e-6);
-      CHECK_CLOSE (qA[3], qB[3], 1e-6);
+      CHECK_CLOSE (qA[0], qB[0], 1e-4);
+      CHECK_CLOSE (qA[1], qB[1], 1e-4);
+      CHECK_CLOSE (qA[2], qB[2], 1e-4);
+      CHECK_CLOSE (qA[3], qB[3], 1e-4);
     }
 
     dWorldStep (wId,0.5);
@@ -212,21 +229,20 @@ SUITE (TestdxJointPU)
       // second joint
       const dReal *qA = dBodyGetQuaternion(bId[0][b]);
       const dReal *qB = dBodyGetQuaternion(bId[1][b]);
-      CHECK_CLOSE (qA[0], qB[0], 1e-6);
-      CHECK_CLOSE (qA[1], qB[1], 1e-6);
-      CHECK_CLOSE (qA[2], qB[2], 1e-6);
-      CHECK_CLOSE (qA[3], qB[3], 1e-6);
+      CHECK_CLOSE (qA[0], qB[0], 1e-4);
+      CHECK_CLOSE (qA[1], qB[1], 1e-4);
+      CHECK_CLOSE (qA[2], qB[2], 1e-4);
+      CHECK_CLOSE (qA[3], qB[3], 1e-4);
 
 
       const dReal *posA = dBodyGetPosition(bId[0][b]);
       const dReal *posB = dBodyGetPosition(bId[1][b]);
-      CHECK_CLOSE (posA[0], posB[0], 1e-6);
-      CHECK_CLOSE (posA[1], posB[1], 1e-6);
-      CHECK_CLOSE (posA[2], posB[2], 1e-6);
-      CHECK_CLOSE (posA[3], posB[3], 1e-6);
+      CHECK_CLOSE (posA[0], posB[0], 1e-4);
+      CHECK_CLOSE (posA[1], posB[1], 1e-4);
+      CHECK_CLOSE (posA[2], posB[2], 1e-4);
+      CHECK_CLOSE (posA[3], posB[3], 1e-4);
     }
-
   }
 
-} // End of SUITE TestdxJointPU
+} // End of SUITE TestdxJointPR
 

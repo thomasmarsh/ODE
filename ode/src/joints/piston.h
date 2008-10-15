@@ -91,15 +91,15 @@ struct dxJointPiston : public dxJoint
     /// part of the joint
     dxJointLimitMotor limotR;
 
-
-    void computeInitialRelativeRotation();
-
-
     dxJointPiston( dxWorld *w );
     virtual void getInfo1( Info1* info );
     virtual void getInfo2( Info2* info );
     virtual dJointType type() const;
     virtual size_t size() const;
+
+    virtual void setRelativeValues();
+
+    void computeInitialRelativeRotation();
 };
 
 

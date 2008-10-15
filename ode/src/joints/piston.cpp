@@ -227,9 +227,9 @@ dxJointPiston::getInfo2 ( dxJoint::Info2 *info )
     // 2 bodies anchor is center of body 2
     // 1 bodies anchor is origin
     dVector3 lanchor2=
-        {
-            0,0,0
-        };
+    {
+        0,0,0
+    };
 
     pos1 = node[0].body->posr.pos;
     R1   = node[0].body->posr.R;
@@ -385,26 +385,6 @@ dxJointPiston::getInfo2 ( dxJoint::Info2 *info )
 
     int row = 4 + limotP.addLimot ( this, info, 4, ax1, 0 );
     limotR.addLimot ( this, info, row, ax1, 1 );
-}
-
-void
-dxJointPiston::computeInitialRelativeRotation()
-{
-    if ( node[0].body )
-    {
-        if ( node[1].body )
-        {
-            dQMultiply1 ( qrel, node[0].body->q, node[1].body->q );
-        }
-        else
-        {
-            // set joint->qrel to the transpose of the first body q
-            qrel[0] = node[0].body->q[0];
-            for ( int i = 1; i < 4; i++ )
-                qrel[i] = -node[0].body->q[i];
-            // WARNING do we need the - in -joint->node[0].body->q[i]; or not
-        }
-    }
 }
 
 void dJointSetPistonAnchor ( dJointID j, dReal x, dReal y, dReal z )
@@ -664,3 +644,39 @@ dxJointPiston::size() const
 }
 
 
+
+void
+dxJointPiston::setRelativeValues()
+{
+    dVector3 vec;
+    dJointGetPistonAnchor(this, vec);
+    setAnchors( this, vec[0], vec[1], vec[2], anchor1, anchor2 );
+
+    dJointGetPistonAxis(this, vec);
+    setAxes( this,  vec[0], vec[1], vec[2], axis1, axis2 );
+
+    computeInitialRelativeRotation();
+}
+
+
+
+
+void
+dxJointPiston::computeInitialRelativeRotation()
+{
+    if ( node[0].body )
+    {
+        if ( node[1].body )
+        {
+            dQMultiply1 ( qrel, node[0].body->q, node[1].body->q );
+        }
+        else
+        {
+            // set joint->qrel to the transpose of the first body q
+            qrel[0] = node[0].body->q[0];
+            for ( int i = 1; i < 4; i++ )
+                qrel[i] = -node[0].body->q[i];
+            // WARNING do we need the - in -joint->node[0].body->q[i]; or not
+        }
+    }
+}
