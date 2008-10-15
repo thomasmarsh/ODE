@@ -136,7 +136,7 @@ int main (int argc, char **argv)
   dInitODE2(0);
 
   int i;
-  contactgroup.create (0);
+  contactgroup.create ();
   world.setGravity (0,0,-0.5);
   dWorldSetCFM (world.id(),1e-5);
   dPlane plane (space,0,0,1,0);

@@ -254,7 +254,7 @@ extern int      main
         dGeomSetBody (coll_box_id, dyn_bodies[b].id ());
     }
 
-    coll_contacts.create (0);
+    coll_contacts.create ();
 
     {
         // simulation loop (by drawstuff lib)
