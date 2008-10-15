@@ -680,8 +680,8 @@ SUITE(JointPR)
         joint->getInfo1(&info);
 
         CHECK_EQUAL(0, joint->limotP.limit);
-        CHECK_EQUAL(0, joint->limotR.limit);
-        CHECK_EQUAL(4, info.m);
+        CHECK_EQUAL(1, joint->limotR.limit);
+        CHECK_EQUAL(5, info.m);
 
         // Reset Position and test
         dBodySetPosition(bId2, 0, 1, 0);
@@ -839,8 +839,8 @@ SUITE(JointPR)
         joint->getInfo1(&info);
 
         CHECK_EQUAL(0, joint->limotP.limit);
-        CHECK_EQUAL(0, joint->limotR.limit);
-        CHECK_EQUAL(5, info.m);
+        CHECK_EQUAL(1, joint->limotR.limit);
+        CHECK_EQUAL(6, info.m);
 
         // Reset Position and test
         dBodySetPosition(bId2, 0, 1, 0);
