@@ -61,9 +61,11 @@
  */
 struct dxJointPU : public dxJointUniversal
 {
-    dVector3 axisP1;    ///< @brief Axis for the prismatic articulation w.r.t first body.
-                        ///< @note This is considered as axis2 from the parameter
-                        ///< view
+
+    /// @brief Axis for the prismatic articulation w.r.t first body.
+    /// @note This is considered as axis2 from the parameter view
+    dVector3 axisP1;
+
     dxJointLimitMotor limotP; ///< limit and motor information for the prismatic articulation.
 
 
@@ -72,6 +74,9 @@ struct dxJointPU : public dxJointUniversal
     virtual void getInfo2( Info2* info );
     virtual dJointType type() const;
     virtual size_t size() const;
+
+
+    virtual void setRelativeValues();
 };
 
 

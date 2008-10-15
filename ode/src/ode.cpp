@@ -1369,6 +1369,10 @@ void dJointAttach (dxJoint *joint, dxBody *body1, dxBody *body2)
   else {
     joint->node[0].next = 0;
   }
+
+  // Since the bodies are now set.
+  // Calculate the values depending on the bodies
+  joint->setRelativeValues();
 }
 
 

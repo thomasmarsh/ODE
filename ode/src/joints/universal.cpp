@@ -628,3 +628,29 @@ dxJointUniversal::size() const
 }
 
 
+
+void
+dxJointUniversal::setRelativeValues()
+{
+    dVector3 anchor;
+    dJointGetUniversalAnchor(this, anchor);
+    setAnchors( this, anchor[0], anchor[1], anchor[2], anchor1, anchor2 );
+
+    dVector3 ax1,ax2;
+    dJointGetUniversalAxis1(this, ax1);
+    dJointGetUniversalAxis2(this, ax2);
+
+    if ( flags & dJOINT_REVERSE )
+    {
+        setAxes( this, ax1[0],ax1[1],ax1[2], NULL, axis2 );
+        setAxes( this, ax2[0],ax2[1],ax2[2], axis1, NULL );
+    }
+    else
+    {
+        setAxes( this, ax1[0],ax1[1],ax1[2], axis1, NULL );
+        setAxes( this, ax2[0],ax2[1],ax2[2], NULL, axis2 );
+    }
+
+    computeInitialRelativeRotations();
+}
+

@@ -143,4 +143,6 @@ SUITE (TestdxJointFixed)
         CHECK_CLOSE (joint->qrel[2], -0.65308047160141625, 1e-4);
         CHECK_CLOSE (joint->qrel[3],  0.65381489108282143, 1e-4);
     }
+
+
 } // End of SUITE TestdxJointFixed

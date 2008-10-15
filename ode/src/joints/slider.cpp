@@ -66,7 +66,8 @@ dReal dJointGetSliderPosition ( dJointID j )
         q[2] = joint->node[0].body->posr.pos[2] - joint->offset[2];
 
         if ( joint->flags & dJOINT_REVERSE )
-        {   // N.B. it could have been simplier to only inverse the sign of
+        {
+            // N.B. it could have been simplier to only inverse the sign of
             //      the dDot result but this case is exceptional and doing
             //      the check for all case can decrease the performance.
             ax1[0] = -ax1[0];
@@ -221,19 +222,7 @@ void dJointSetSliderAxis ( dJointID j, dReal x, dReal y, dReal z )
     checktype ( joint, Slider );
     setAxes ( joint, x, y, z, joint->axis1, 0 );
 
-    // compute initial relative rotation body1 -> body2, or env -> body1
-    // also compute center of body1 w.r.t body 2
-    if ( joint->node[1].body )
-    {
-        dVector3 c;
-        for ( i = 0; i < 3; i++ )
-            c[i] = joint->node[0].body->posr.pos[i] - joint->node[1].body->posr.pos[i];
-        dMULTIPLY1_331 ( joint->offset, joint->node[1].body->posr.R, c );
-    }
-    else
-    {
-        for ( i = 0; i < 3; i++ ) joint->offset[i] = joint->node[0].body->posr.pos[i];
-    }
+    joint->computeOffset();
 
     joint->computeInitialRelativeRotation();
 }
@@ -247,20 +236,15 @@ void dJointSetSliderAxisDelta ( dJointID j, dReal x, dReal y, dReal z, dReal dx,
     checktype ( joint, Slider );
     setAxes ( joint, x, y, z, joint->axis1, 0 );
 
+    joint->computeOffset();
+
     // compute initial relative rotation body1 -> body2, or env -> body1
     // also compute center of body1 w.r.t body 2
-    if ( joint->node[1].body )
+    if ( !(joint->node[1].body) )
     {
-        dVector3 c;
-        for ( i = 0; i < 3; i++ )
-            c[i] = joint->node[0].body->posr.pos[i] - joint->node[1].body->posr.pos[i];
-        dMULTIPLY1_331 ( joint->offset, joint->node[1].body->posr.R, c );
-    }
-    else
-    {
-        joint->offset[0] = joint->node[0].body->posr.pos[0] + dx;
-        joint->offset[1] = joint->node[0].body->posr.pos[1] + dy;
-        joint->offset[2] = joint->node[0].body->posr.pos[2] + dz;
+        joint->offset[0] += dx;
+        joint->offset[1] += dy;
+        joint->offset[2] += dz;
     }
 
     joint->computeInitialRelativeRotation();
@@ -350,6 +334,15 @@ dxJointSlider::size() const
 }
 
 
+void
+dxJointSlider::setRelativeValues()
+{
+    computeOffset();
+    computeInitialRelativeRotation();
+}
+
+
+
 /// Compute initial relative rotation body1 -> body2, or env -> body1
 void
 dxJointSlider::computeInitialRelativeRotation()
@@ -370,5 +363,27 @@ dxJointSlider::computeInitialRelativeRotation()
             qrel[2] = -node[0].body->q[2];
             qrel[3] = -node[0].body->q[3];
         }
+    }
+}
+
+
+/// Compute center of body1 w.r.t body 2
+void
+dxJointSlider::computeOffset()
+{
+    if ( node[1].body )
+    {
+        dVector3 c;
+        c[0] = node[0].body->posr.pos[0] - node[1].body->posr.pos[0];
+        c[1] = node[0].body->posr.pos[1] - node[1].body->posr.pos[1];
+        c[2] = node[0].body->posr.pos[2] - node[1].body->posr.pos[2];
+
+        dMULTIPLY1_331 ( offset, node[1].body->posr.R, c );
+    }
+    else if ( node[0].body )
+    {
+        offset[0] = node[0].body->posr.pos[0];
+        offset[1] = node[0].body->posr.pos[1];
+        offset[2] = node[0].body->posr.pos[2];
     }
 }

@@ -5,5 +5,5 @@
 
 int main()
 {
-  return UnitTest::RunAllTests();
+    return UnitTest::RunAllTests();
 }

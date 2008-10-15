@@ -51,6 +51,8 @@ struct dxJointUniversal : public dxJoint
     virtual void getInfo2( Info2* info );
     virtual dJointType type() const;
     virtual size_t size() const;
+
+    virtual void setRelativeValues();
 };
 
 

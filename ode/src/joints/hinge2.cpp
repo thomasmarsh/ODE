@@ -91,19 +91,29 @@ dxJointHinge2::getInfo1( dxJoint::Info1 *info )
 }
 
 
-// macro that computes ax1,ax2 = axis 1 and 2 in global coordinates (they are
-// relative to body 1 and 2 initially) and then computes the constrained
-// rotational axis as the cross product of ax1 and ax2.
-// the sin and cos of the angle between axis 1 and 2 is computed, this comes
-// from dot and cross product rules.
-
-#define HINGE2_GET_AXIS_INFO(axis,sin_angle,cos_angle)                  \
-    dVector3 ax1,ax2;                                                   \
-    dMULTIPLY0_331 (ax1, joint->node[0].body->posr.R, joint->axis1);    \
-    dMULTIPLY0_331 (ax2, joint->node[1].body->posr.R, joint->axis2);    \
-    dCROSS (axis,=,ax1,ax2);                                            \
-    sin_angle = dSqrt (axis[0]*axis[0] + axis[1]*axis[1] + axis[2]*axis[2]); \
+////////////////////////////////////////////////////////////////////////////////
+/// Function that computes ax1,ax2 = axis 1 and 2 in global coordinates (they are
+/// relative to body 1 and 2 initially) and then computes the constrained
+/// rotational axis as the cross product of ax1 and ax2.
+/// the sin and cos of the angle between axis 1 and 2 is computed, this comes
+/// from dot and cross product rules.
+///
+/// @param ax1 Will contain the joint axis1 in world frame
+/// @param ax2 Will contain the joint axis2 in world frame
+/// @param axis Will contain the cross product of ax1 x ax2
+/// @param sin_angle
+/// @param cos_angle
+////////////////////////////////////////////////////////////////////////////////
+void
+dxJointHinge2::getAxisInfo(dVector3 ax1, dVector3 ax2, dVector3 axCross,
+                           dReal &sin_angle, dReal &cos_angle) const
+{
+    dMULTIPLY0_331 (ax1, node[0].body->posr.R, axis1);
+    dMULTIPLY0_331 (ax2, node[1].body->posr.R, axis2);
+    dCROSS (axCross,=,ax1,ax2);
+    sin_angle = dSqrt (axCross[0]*axCross[0] + axCross[1]*axCross[1] + axCross[2]*axCross[2]);
     cos_angle = dDOT (ax1,ax2);
+}
 
 
 void
@@ -113,7 +123,9 @@ dxJointHinge2::getInfo2( dxJoint::Info2 *info )
     dReal s, c;
     dVector3 q;
     const dxJointHinge2 *joint = this;
-    HINGE2_GET_AXIS_INFO( q, s, c );
+
+    dVector3 ax1, ax2;
+    joint->getAxisInfo( ax1, ax2, q, s, c );
     dNormalize3( q );   // @@@ quicker: divide q by s ?
 
     // set the three ball-and-socket rows (aligned to the suspension axis ax1)
@@ -208,18 +220,11 @@ void dJointSetHinge2Axis1( dJointID j, dReal x, dReal y, dReal z )
     checktype( joint, Hinge2 );
     if ( joint->node[0].body )
     {
-        dReal q[4];
-        q[0] = x;
-        q[1] = y;
-        q[2] = z;
-        q[3] = 0;
-        dNormalize3( q );
-        dMULTIPLY1_331( joint->axis1, joint->node[0].body->posr.R, q );
-        joint->axis1[3] = 0;
+        setAxes(joint, x, y, z, joint->axis1, NULL);
 
         // compute the sin and cos of the angle between axis 1 and axis 2
-        dVector3 ax;
-        HINGE2_GET_AXIS_INFO( ax, joint->s0, joint->c0 );
+        dVector3 ax1, ax2, ax;
+        joint->getAxisInfo( ax1, ax2, ax, joint->s0, joint->c0 );
     }
     joint->makeV1andV2();
 }
@@ -232,18 +237,12 @@ void dJointSetHinge2Axis2( dJointID j, dReal x, dReal y, dReal z )
     checktype( joint, Hinge2 );
     if ( joint->node[1].body )
     {
-        dReal q[4];
-        q[0] = x;
-        q[1] = y;
-        q[2] = z;
-        q[3] = 0;
-        dNormalize3( q );
-        dMULTIPLY1_331( joint->axis2, joint->node[1].body->posr.R, q );
-        joint->axis1[3] = 0;
+        setAxes(joint, x, y, z, NULL, joint->axis2);
+
 
         // compute the sin and cos of the angle between axis 1 and axis 2
-        dVector3 ax;
-        HINGE2_GET_AXIS_INFO( ax, joint->s0, joint->c0 );
+        dVector3 ax1, ax2, ax;;
+        joint->getAxisInfo( ax1, ax2, ax, joint->s0, joint->c0 );
     }
     joint->makeV1andV2();
 }
@@ -417,3 +416,29 @@ dxJointHinge2::size() const
 }
 
 
+void
+dxJointHinge2::setRelativeValues()
+{
+    dVector3 anchor;
+    dJointGetHinge2Anchor(this, anchor);
+    setAnchors( this, anchor[0], anchor[1], anchor[2], anchor1, anchor2 );
+
+    dVector3 axis;
+
+    if ( node[0].body )
+    {
+        dJointGetHinge2Axis1(this, axis);
+        setAxes( this, axis[0],axis[1],axis[2], axis1, NULL );
+    }
+
+    if ( node[0].body )
+    {
+        dJointGetHinge2Axis2(this, axis);
+        setAxes( this, axis[0],axis[1],axis[2], NULL, axis2 );
+    }
+
+    dVector3 ax1, ax2;
+    getAxisInfo( ax1, ax2, axis, s0, c0 );
+
+    makeV1andV2();
+}

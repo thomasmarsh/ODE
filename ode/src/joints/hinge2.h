@@ -43,13 +43,19 @@ struct dxJointHinge2 : public dxJoint
 
     dReal measureAngle() const;
     void makeV1andV2();
+    void getAxisInfo(dVector3 ax1, dVector3 ax2, dVector3 axis,
+                     dReal &sin_angle, dReal &cos_Angle) const;
+
 
 
     dxJointHinge2( dxWorld *w );
+
     virtual void getInfo1( Info1* info );
     virtual void getInfo2( Info2* info );
     virtual dJointType type() const;
     virtual size_t size() const;
+
+    virtual void setRelativeValues();
 };
 
 

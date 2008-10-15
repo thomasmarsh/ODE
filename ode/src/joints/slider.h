@@ -43,7 +43,11 @@ struct dxJointSlider : public dxJoint
     virtual dJointType type() const;
     virtual size_t size() const;
 
+    virtual void setRelativeValues();
+
     void computeInitialRelativeRotation();
+
+    void computeOffset();
 };
 
 

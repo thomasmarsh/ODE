@@ -771,6 +771,130 @@ SUITE (TestdxJointHinge)
   }
 
 
+
+  // Create 2 bodies attached by a Hinge joint
+  // Axis is along the X axis (Default value
+  // Anchor at (0, 0, 0)      (Default value)
+  //
+  //       ^Y
+  //       |
+  //       * Body2
+  //       |
+  //       |
+  // Body1 |
+  // *     Z-------->
+  struct dxJointHinge_Test_Initialization {
+    dxJointHinge_Test_Initialization()
+    {
+      wId = dWorldCreate();
+
+      // Remove gravity to have the only force be the force of the joint
+      dWorldSetGravity(wId, 0,0,0);
+
+      for (int j=0; j<2; ++j) {
+        bId[j][0] = dBodyCreate (wId);
+        dBodySetPosition (bId[j][0], -1, -2, -3);
+
+        bId[j][1] = dBodyCreate (wId);
+        dBodySetPosition (bId[j][1], 11, 22, 33);
+
+
+        dMatrix3 R;
+        dVector3 axis; // Random axis
+
+        axis[0] = 0.53;
+        axis[1] = -0.71;
+        axis[2] = 0.43;
+        dNormalize3(axis);
+        dRFromAxisAndAngle (R, axis[0], axis[1], axis[2],
+                            REAL(0.47123)); // 27deg
+        dBodySetRotation (bId[j][0], R);
+
+
+        axis[0] = 1.2;
+        axis[1] = 0.87;
+        axis[2] = -0.33;
+        dNormalize3(axis);
+        dRFromAxisAndAngle (R, axis[0], axis[1], axis[2],
+                            REAL(0.47123)); // 27deg
+        dBodySetRotation (bId[j][1], R);
+
+        jId[j]   = dJointCreateHinge (wId, 0);
+        dJointAttach (jId[j], bId[j][0], bId[j][1]);
+        //        dJointSetHingeParam(jId[j], dParamLoStop, 1);
+        //        dJointSetHingeParam(jId[j], dParamHiStop, 2);
+        //        dJointSetHingeParam(jId[j], dParamFMax, 200);
+      }
+    }
+
+    ~dxJointHinge_Test_Initialization()
+    {
+      dWorldDestroy (wId);
+    }
+
+    dWorldID wId;
+
+    dBodyID bId[2][2];
+
+
+    dJointID jId[2];
+
+  };
+
+
+  // Test if setting a Hinge with its default values
+  // will behave the same as a default Hinge joint
+  TEST_FIXTURE (dxJointHinge_Test_Initialization,
+                test_Hinge_Initialization) {
+    using namespace std;
+
+    dVector3 axis;
+    dJointGetHingeAxis(jId[1], axis);
+    dJointSetHingeAxis(jId[1], axis[0], axis[1], axis[2]);
+
+
+    dVector3 anchor;
+    dJointGetHingeAnchor(jId[1], anchor);
+    dJointSetHingeAnchor(jId[1], anchor[0], anchor[1], anchor[2]);
+
+
+    for (int b=0; b<2; ++b) {
+      // Compare body b of the first joint with its equivalent on the
+      // second joint
+      const dReal *qA = dBodyGetQuaternion(bId[0][b]);
+      const dReal *qB = dBodyGetQuaternion(bId[1][b]);
+      CHECK_CLOSE (qA[0], qB[0], 1e-6);
+      CHECK_CLOSE (qA[1], qB[1], 1e-6);
+      CHECK_CLOSE (qA[2], qB[2], 1e-6);
+      CHECK_CLOSE (qA[3], qB[3], 1e-6);
+    }
+
+    dWorldStep (wId,0.5);
+    dWorldStep (wId,0.5);
+    dWorldStep (wId,0.5);
+    dWorldStep (wId,0.5);
+
+    for (int b=0; b<2; ++b) {
+      // Compare body b of the first joint with its equivalent on the
+      // second joint
+      const dReal *qA = dBodyGetQuaternion(bId[0][b]);
+      const dReal *qB = dBodyGetQuaternion(bId[1][b]);
+      CHECK_CLOSE (qA[0], qB[0], 1e-6);
+      CHECK_CLOSE (qA[1], qB[1], 1e-6);
+      CHECK_CLOSE (qA[2], qB[2], 1e-6);
+      CHECK_CLOSE (qA[3], qB[3], 1e-6);
+
+
+      const dReal *posA = dBodyGetPosition(bId[0][b]);
+      const dReal *posB = dBodyGetPosition(bId[1][b]);
+      CHECK_CLOSE (posA[0], posB[0], 1e-6);
+      CHECK_CLOSE (posA[1], posB[1], 1e-6);
+      CHECK_CLOSE (posA[2], posB[2], 1e-6);
+      CHECK_CLOSE (posA[3], posB[3], 1e-6);
+    }
+  }
+
+
 } // End of SUITE TestdxJointHinge
 
 

@@ -498,6 +498,24 @@ dxJointPR::size() const
 }
 
 
+void
+dxJointPR::setRelativeValues()
+{
+    dVector3 anchor;
+    dJointGetPRAnchor(this, anchor);
+    setAnchors( this, anchor[0], anchor[1], anchor[2], offset, anchor2 );
+
+    dVector3 axis;
+    dJointGetPRAxis1(this, axis);
+    setAxes( this, axis[0], axis[1], axis[2], axisP1, 0 );
+
+    dJointGetPRAxis2(this, axis);
+    setAxes( this, axis[0], axis[1], axis[2], axisR1, axisR2 );
+
+    computeInitialRelativeRotation();
+}
+
+
 
 
 

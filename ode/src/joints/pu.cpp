@@ -715,3 +715,32 @@ dxJointPU::size() const
 }
 
 
+void
+dxJointPU::setRelativeValues()
+{
+    dVector3 anchor;
+    dJointGetPUAnchor(this, anchor);
+    setAnchors( this, anchor[0], anchor[1], anchor[2], anchor1, anchor2 );
+
+    dVector3 ax1, ax2, ax3;
+    dJointGetPUAxis1(this, ax1);
+    dJointGetPUAxis2(this, ax2);
+    dJointGetPUAxis3(this, ax3);
+
+    if ( flags & dJOINT_REVERSE )
+    {
+        setAxes( this, ax1[0], ax1[1], ax1[2], NULL, axis2 );
+        setAxes( this, ax2[0], ax2[1], ax2[2], axis1, NULL );
+    }
+    else
+    {
+        setAxes( this, ax1[0], ax1[1], ax1[2], axis1, NULL );
+        setAxes( this, ax2[0], ax2[1], ax2[2], NULL, axis2 );
+    }
+
+
+    setAxes( this, ax3[0], ax3[1], ax3[2], NULL, axisP1 );
+
+    computeInitialRelativeRotations();
+}
+
