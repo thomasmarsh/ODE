@@ -16,6 +16,24 @@ namespace Ode.NET
 
 		#region Flags and Enumerations
 
+#if !dNO_UNSAFE_CODE
+        [CLSCompliant(false)]
+        [Flags]
+        public enum AllocateODEDataFlags : uint
+        {
+            BasicData = 0,
+            CollisionData = 0x00000001,
+            All = ~0u
+        }
+
+        [CLSCompliant(false)]
+        [Flags]
+        public enum IniteODEFlags : uint
+        {
+            dInitFlagManualThreadCleanup = 0x00000001
+        }
+#endif
+
 		[Flags]
 		public enum ContactFlags : int
 		{
@@ -110,6 +128,16 @@ namespace Ode.NET
 			SuspensionERP3,
 			SuspensionCFM3
 		}
+
+        public enum dSweepAndPruneAxis : int
+        {
+            XYZ = ((0)|(1<<2)|(2<<4)),
+            XZY = ((0)|(2<<2)|(1<<4)),
+            YXZ = ((1)|(0<<2)|(2<<4)),
+            YZX = ((1)|(2<<2)|(0<<4)),
+            ZXY = ((2)|(0<<2)|(1<<4)),
+            ZYX = ((2)|(1<<2)|(0<<4))
+        }
 
 		#endregion
 
@@ -296,6 +324,12 @@ namespace Ode.NET
 
 		#endregion
 
+#if !dNO_UNSAFE_CODE
+        [CLSCompliant(false)]
+        [DllImport("ode", EntryPoint = "dAllocateODEDataForThread"), SuppressUnmanagedCodeSecurity]
+        public static extern int AllocateODEDataForThread(uint ODEInitFlags);
+#endif
+
 		[DllImport("ode", EntryPoint = "dAreConnected"), SuppressUnmanagedCodeSecurity]
 		public static extern bool AreConnected(IntPtr b1, IntPtr b2);
 
@@ -362,6 +396,9 @@ namespace Ode.NET
 		[DllImport("ode", EntryPoint = "dBodyGetAutoDisableFlag"), SuppressUnmanagedCodeSecurity]
 		public static extern bool BodyGetAutoDisableFlag(IntPtr body);
 
+        [DllImport("ode", EntryPoint = "dBodyGetAutoDisableDefaults"), SuppressUnmanagedCodeSecurity]
+        public static extern void BodyGetAutoDisableDefaults(IntPtr body);
+
 		[DllImport("ode", EntryPoint = "dBodyGetAutoDisableLinearThreshold"), SuppressUnmanagedCodeSecurity]
 		public static extern dReal BodyGetAutoDisableLinearThreshold(IntPtr body);
 
@@ -402,6 +439,9 @@ namespace Ode.NET
 
 		[DllImport("ode", EntryPoint = "dBodyGetGravityMode"), SuppressUnmanagedCodeSecurity]
 		public static extern bool BodyGetGravityMode(IntPtr body);
+
+        [DllImport("ode", EntryPoint = "dBodyGetGyroscopicMode"), SuppressUnmanagedCodeSecurity]
+        public static extern int BodyGetGyroscopicMode(IntPtr body);
 
 		[DllImport("ode", EntryPoint = "dBodyGetJoint"), SuppressUnmanagedCodeSecurity]
 		public static extern IntPtr BodyGetJoint(IntPtr body, int index);
@@ -474,6 +514,9 @@ namespace Ode.NET
 		}
 #endif
 
+        [DllImport("ode", EntryPoint = "dBodyGetWorld"), SuppressUnmanagedCodeSecurity]
+        public static extern IntPtr BodyGetWorld(IntPtr body);
+
 		[DllImport("ode", EntryPoint = "dBodyIsEnabled"), SuppressUnmanagedCodeSecurity]
 		public static extern bool BodyIsEnabled(IntPtr body);
 
@@ -504,14 +547,49 @@ namespace Ode.NET
 		[DllImport("ode", EntryPoint = "dBodySetFiniteRotationMode"), SuppressUnmanagedCodeSecurity]
 		public static extern void BodySetFiniteRotationMode(IntPtr body, int mode);
 
-		[DllImport("ode", EntryPoint = "dBodySetFiniteRotationModeAxis"), SuppressUnmanagedCodeSecurity]
-		public static extern void BodySetFiniteRotationModeAxis(IntPtr body, dReal x, dReal y, dReal z);
+		[DllImport("ode", EntryPoint = "dBodySetFiniteRotationAxis"), SuppressUnmanagedCodeSecurity]
+		public static extern void BodySetFiniteRotationAxis(IntPtr body, dReal x, dReal y, dReal z);
+
+        [DllImport("ode", EntryPoint = "dBodySetLinearDamping"), SuppressUnmanagedCodeSecurity]
+        public static extern void BodySetLinearDamping(IntPtr body, dReal scale);
+
+        [DllImport("ode", EntryPoint = "dBodySetAngularDamping"), SuppressUnmanagedCodeSecurity]
+        public static extern void BodySetAngularDamping(IntPtr body, dReal scale);
+
+        [DllImport("ode", EntryPoint = "dBodyGetLinearDamping"), SuppressUnmanagedCodeSecurity]
+        public static extern dReal BodyGetLinearDamping(IntPtr body);
+
+        [DllImport("ode", EntryPoint = "dBodyGetAngularDamping"), SuppressUnmanagedCodeSecurity]
+        public static extern dReal BodyGetAngularDamping(IntPtr body);
+
+        [DllImport("ode", EntryPoint = "dBodySetAngularDamping"), SuppressUnmanagedCodeSecurity]
+        public static extern void BodySetDamping(IntPtr body, dReal linear_scale, dReal angular_scale);
+
+        [DllImport("ode", EntryPoint = "dBodySetAngularDampingThreshold"), SuppressUnmanagedCodeSecurity]
+        public static extern void BodySetAngularDampingThreshold(IntPtr body, dReal threshold);
+
+        [DllImport("ode", EntryPoint = "dBodySetLinearDampingThreshold"), SuppressUnmanagedCodeSecurity]
+        public static extern void BodySetLinearDampingThreshold(IntPtr body, dReal threshold);
+
+        [DllImport("ode", EntryPoint = "dBodyGetLinearDampingThreshold"), SuppressUnmanagedCodeSecurity]
+        public static extern dReal BodyGetLinearDampingThreshold(IntPtr body);
+
+        [DllImport("ode", EntryPoint = "dBodyGetAngularDampingThreshold"), SuppressUnmanagedCodeSecurity]
+        public static extern dReal BodyGetAngularDampingThreshold(IntPtr body);
 
 		[DllImport("ode", EntryPoint = "dBodySetForce"), SuppressUnmanagedCodeSecurity]
 		public static extern void BodySetForce(IntPtr body, dReal x, dReal y, dReal z);
 
 		[DllImport("ode", EntryPoint = "dBodySetGravityMode"), SuppressUnmanagedCodeSecurity]
 		public static extern void BodySetGravityMode(IntPtr body, bool mode);
+
+        /// <summary>
+        /// Sets the Gyroscopic term status on the body specified.
+        /// </summary>
+        /// <param name="body">Pointer to body</param>
+        /// <param name="enabled">NonZero enabled, Zero disabled</param>
+        [DllImport("ode", EntryPoint = "dBodySetGyroscopicMode"), SuppressUnmanagedCodeSecurity]
+        public static extern void dBodySetGyroscopicMode(IntPtr body, int enabled);
 
 		[DllImport("ode", EntryPoint = "dBodySetLinearVel"), SuppressUnmanagedCodeSecurity]
 		public static extern void BodySetLinearVel(IntPtr body, dReal x, dReal y, dReal z);
@@ -555,6 +633,9 @@ namespace Ode.NET
 			ref Vector3 side1, ref Vector3 _p2,
 			ref Matrix3 R2, ref Vector3 side2);
 
+        [DllImport("ode", EntryPoint = "dCleanupODEAllDataForThread"), SuppressUnmanagedCodeSecurity]
+		public static extern void CleanupODEAllDataForThread();
+        
 		[DllImport("ode", EntryPoint = "dClosestLineSegmentPoints"), SuppressUnmanagedCodeSecurity]
 		public static extern void ClosestLineSegmentPoints(ref Vector3 a1, ref Vector3 a2, 
 			ref Vector3 b1, ref Vector3 b2, 
@@ -1121,6 +1202,11 @@ namespace Ode.NET
 		[DllImport("ode", EntryPoint = "dInitODE"), SuppressUnmanagedCodeSecurity]
 		public static extern void InitODE();
 
+#if !dNO_UNSAFE_CODE
+        [CLSCompliant(false)]
+        [DllImport("ode", EntryPoint = "dInitODE2"), SuppressUnmanagedCodeSecurity]
+        public static extern int InitODE2(uint ODEInitFlags);
+#endif
 		[DllImport("ode", EntryPoint = "dIsPositiveDefinite"), SuppressUnmanagedCodeSecurity]
 		public static extern int IsPositiveDefinite(ref dReal A, int n);
 
@@ -1617,6 +1703,9 @@ namespace Ode.NET
 		[DllImport("ode", EntryPoint = "dSpaceGetGeom"), SuppressUnmanagedCodeSecurity]
 		public static extern IntPtr SpaceGetGeom(IntPtr space, int i);
 
+        [DllImport("ode", EntryPoint = "dSpaceGetSublevel"), SuppressUnmanagedCodeSecurity]
+        public static extern int SpaceGetSublevel(IntPtr space);
+
 		[DllImport("ode", EntryPoint = "dSpaceQuery"), SuppressUnmanagedCodeSecurity]
 		public static extern bool SpaceQuery(IntPtr space, IntPtr geom);
 
@@ -1626,6 +1715,12 @@ namespace Ode.NET
 		[DllImport("ode", EntryPoint = "dSpaceSetCleanup"), SuppressUnmanagedCodeSecurity]
 		public static extern void SpaceSetCleanup(IntPtr space, bool mode);
 
+        [DllImport("ode", EntryPoint = "dSpaceSetSublevel"), SuppressUnmanagedCodeSecurity]
+        public static extern void SpaceSetSublevel(IntPtr space, int sublevel);
+
+        [DllImport("ode", EntryPoint = "dSweepAndPruneSpaceCreate"), SuppressUnmanagedCodeSecurity]
+        public static extern IntPtr SweepAndPruneSpaceCreate(IntPtr space, int AxisOrder);
+
 		[DllImport("ode", EntryPoint = "dVectorScale"), SuppressUnmanagedCodeSecurity]
 		public static extern void VectorScale(out dReal a, ref dReal d, int n);
 
@@ -1634,6 +1729,9 @@ namespace Ode.NET
 
 		[DllImport("ode", EntryPoint = "dWorldDestroy"), SuppressUnmanagedCodeSecurity]
 		public static extern void WorldDestroy(IntPtr world);
+
+        [DllImport("ode", EntryPoint = "dWorldGetAutoDisableAverageSamplesCount"), SuppressUnmanagedCodeSecurity]
+        public static extern int WorldGetAutoDisableAverageSamplesCount(IntPtr world);
 
 		[DllImport("ode", EntryPoint = "dWorldGetAutoDisableAngularThreshold"), SuppressUnmanagedCodeSecurity]
 		public static extern dReal WorldGetAutoDisableAngularThreshold(IntPtr world);
@@ -1671,11 +1769,26 @@ namespace Ode.NET
 		[DllImport("ode", EntryPoint = "dWorldGetContactSurfaceLayer"), SuppressUnmanagedCodeSecurity]
 		public static extern dReal WorldGetContactSurfaceLayer(IntPtr world);
 
+        [DllImport("ode", EntryPoint = "dWorldGetAngularDamping"), SuppressUnmanagedCodeSecurity]
+        public static extern dReal WorldGetAngularDamping(IntPtr world);
+
+        [DllImport("ode", EntryPoint = "dWorldGetAngularDampingThreshold"), SuppressUnmanagedCodeSecurity]
+        public static extern dReal WorldGetAngularDampingThreshold(IntPtr world);
+
+        [DllImport("ode", EntryPoint = "dWorldGetLinearDamping"), SuppressUnmanagedCodeSecurity]
+        public static extern dReal WorldGetLinearDamping(IntPtr world);
+
+        [DllImport("ode", EntryPoint = "dWorldGetLinearDampingThreshold"), SuppressUnmanagedCodeSecurity]
+        public static extern dReal WorldGetLinearDampingThreshold(IntPtr world);
+
 		[DllImport("ode", EntryPoint = "dWorldGetQuickStepNumIterations"), SuppressUnmanagedCodeSecurity]
 		public static extern int WorldGetQuickStepNumIterations(IntPtr world);
 
 		[DllImport("ode", EntryPoint = "dWorldGetQuickStepW"), SuppressUnmanagedCodeSecurity]
 		public static extern dReal WorldGetQuickStepW(IntPtr world);
+
+        [DllImport("ode", EntryPoint = "dWorldGetMaxAngularSpeed"), SuppressUnmanagedCodeSecurity]
+        public static extern dReal WorldGetMaxAngularSpeed(IntPtr world);
 
 		[DllImport("ode", EntryPoint = "dWorldImpulseToForce"), SuppressUnmanagedCodeSecurity]
 		public static extern void WorldImpulseToForce(IntPtr world, dReal stepsize, dReal ix, dReal iy, dReal iz, out Vector3 force);
@@ -1686,8 +1799,17 @@ namespace Ode.NET
 		[DllImport("ode", EntryPoint = "dWorldQuickStep"), SuppressUnmanagedCodeSecurity]
 		public static extern void WorldQuickStep(IntPtr world, dReal stepsize);
 
+        [DllImport("ode", EntryPoint = "dWorldSetAngularDamping"), SuppressUnmanagedCodeSecurity]
+        public static extern void WorldSetAngularDamping(IntPtr world, dReal scale);
+
+        [DllImport("ode", EntryPoint = "dWorldSetAngularDampingThreshold"), SuppressUnmanagedCodeSecurity]
+        public static extern void WorldSetAngularDampingThreshold(IntPtr world, dReal threshold);
+
 		[DllImport("ode", EntryPoint = "dWorldSetAutoDisableAngularThreshold"), SuppressUnmanagedCodeSecurity]
 		public static extern void WorldSetAutoDisableAngularThreshold(IntPtr world, dReal angular_threshold);
+
+        [DllImport("ode", EntryPoint = "dWorldSetAutoDisableAverageSamplesCount"), SuppressUnmanagedCodeSecurity]
+        public static extern void WorldSetAutoDisableAverageSamplesCount(IntPtr world, int average_samples_count);
 
 		[DllImport("ode", EntryPoint = "dWorldSetAutoDisableFlag"), SuppressUnmanagedCodeSecurity]
 		public static extern void WorldSetAutoDisableFlag(IntPtr world, bool do_auto_disable);
@@ -1713,11 +1835,20 @@ namespace Ode.NET
 		[DllImport("ode", EntryPoint = "dWorldSetContactSurfaceLayer"), SuppressUnmanagedCodeSecurity]
 		public static extern void WorldSetContactSurfaceLayer(IntPtr world, dReal depth);
 
+        [DllImport("ode", EntryPoint = "dWorldSetDamping"), SuppressUnmanagedCodeSecurity]
+        public static extern void WorldSetDamping(IntPtr world, dReal linear_scale, dReal angular_scale);
+
 		[DllImport("ode", EntryPoint = "dWorldSetERP"), SuppressUnmanagedCodeSecurity]
 		public static extern void WorldSetERP(IntPtr world, dReal erp);
 
 		[DllImport("ode", EntryPoint = "dWorldSetGravity"), SuppressUnmanagedCodeSecurity]
 		public static extern void WorldSetGravity(IntPtr world, dReal x, dReal y, dReal z);
+        
+        [DllImport("ode", EntryPoint = "dWorldSetLinearDamping"), SuppressUnmanagedCodeSecurity]
+        public static extern void WorldSetLinearDamping(IntPtr world, dReal scale);
+
+        [DllImport("ode", EntryPoint = "dWorldSetLinearDampingThreshold"), SuppressUnmanagedCodeSecurity]
+        public static extern void WorldSetLinearDampingThreshold(IntPtr world, dReal threshold);
 
 		[DllImport("ode", EntryPoint = "dWorldSetQuickStepNumIterations"), SuppressUnmanagedCodeSecurity]
 		public static extern void WorldSetQuickStepNumIterations(IntPtr world, int num);
@@ -1725,10 +1856,15 @@ namespace Ode.NET
 		[DllImport("ode", EntryPoint = "dWorldSetQuickStepW"), SuppressUnmanagedCodeSecurity]
 		public static extern void WorldSetQuickStepW(IntPtr world, dReal over_relaxation);
 
+        [DllImport("ode", EntryPoint = "dWorldSetMaxAngularSpeed"), SuppressUnmanagedCodeSecurity]
+        public static extern void WorldSetMaxAngularSpeed(IntPtr world, dReal max_speed);
+
 		[DllImport("ode", EntryPoint = "dWorldStep"), SuppressUnmanagedCodeSecurity]
 		public static extern void WorldStep(IntPtr world, dReal stepsize);
 
 		[DllImport("ode", EntryPoint = "dWorldStepFast1"), SuppressUnmanagedCodeSecurity]
 		public static extern void WorldStepFast1(IntPtr world, dReal stepsize, int maxiterations);
+
+
 	}
 }
