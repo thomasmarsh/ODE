@@ -404,7 +404,7 @@ inline Matrix4x4& MakeMatrix(dxGeom* g, Matrix4x4& Out){
 			(b)[3] = 0;                   \
 		}
 
-		inline void gim_trimesh_get_triangle_verticesODE(GIM_TRIMESH * trimesh, GUINT triangle_index, dVector3 v1, dVector3 v2, dVector3 v3) {   
+		inline void gim_trimesh_get_triangle_verticesODE(GIM_TRIMESH * trimesh, GUINT32 triangle_index, dVector3 v1, dVector3 v2, dVector3 v3) {   
 			vec3f src1, src2, src3;
 			gim_trimesh_get_triangle_vertices(trimesh, triangle_index, src1, src2, src3);
 
@@ -470,7 +470,7 @@ inline unsigned FetchTriangleCount(dxTriMesh* TriMesh)
 
 inline void FetchTransformedTriangle(dxTriMesh* TriMesh, int Index, dVector3 Out[3]){
 	gim_trimesh_locks_work_data(&TriMesh->m_collision_trimesh);	
-	gim_trimesh_get_triangle_vertices(&TriMesh->m_collision_trimesh, (GUINT)Index, Out[0], Out[1], Out[2]);
+	gim_trimesh_get_triangle_vertices(&TriMesh->m_collision_trimesh, (GUINT32)Index, Out[0], Out[1], Out[2]);
 	gim_trimesh_unlocks_work_data(&TriMesh->m_collision_trimesh);
 }
 

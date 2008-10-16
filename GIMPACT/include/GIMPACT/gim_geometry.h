@@ -41,11 +41,11 @@ Basic types and constants for geometry
 //! @{
 
 //! Integer vector 2D
-typedef GINT vec2i[2];
+typedef GINT32 vec2i[2];
 //! Integer vector 3D
-typedef GINT vec3i[3];
+typedef GINT32 vec3i[3];
 //! Integer vector 4D
-typedef GINT vec4i[4];
+typedef GINT32 vec4i[4];
 
 //! Float vector 2D
 typedef GREAL vec2f[2];
@@ -1582,7 +1582,7 @@ classify values:
 {\
 	GREAL _dis;\
 	outside = 0;\
-	GUINT _i = 0;\
+	GUINT32 _i = 0;\
 	do\
 	{\
 	    _dis = DISTANCE_PLANE_POINT(planes[_i],point);\

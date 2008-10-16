@@ -42,7 +42,7 @@ int gim_triangle_sphere_collision(
     contact_data->m_penetration_depth = dis;
 
     //Find the most edge
-    GUINT most_edge = 4;//no edge
+    GUINT32 most_edge = 4;//no edge
     GREAL max_dis = 0.0f;
     dis = DISTANCE_PLANE_POINT(tri->m_planes.m_planes[1],center);
     if(dis>radius) return 0;//Out of triangle
@@ -169,7 +169,7 @@ void gim_trimesh_sphere_collision(GIM_TRIMESH * trimesh,vec3f center,GREAL radiu
 
 	int cresult;
 	unsigned int i;
-	GUINT * boxesresult = GIM_DYNARRAY_POINTER(GUINT,collision_result);
+	GUINT32 * boxesresult = GIM_DYNARRAY_POINTER(GUINT32,collision_result);
 	GIM_TRIANGLE_CONTACT_DATA tri_contact_data;
 	GIM_TRIANGLE_DATA tri_data;
 

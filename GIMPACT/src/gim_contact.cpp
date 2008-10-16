@@ -33,12 +33,12 @@ void gim_merge_contacts(GDYNAMIC_ARRAY * source_contacts,
 {
     dest_contacts->m_size = 0;
 
-	GUINT source_count = source_contacts->m_size;
+	GUINT32 source_count = source_contacts->m_size;
 	GIM_CONTACT * psource_contacts	= GIM_DYNARRAY_POINTER(GIM_CONTACT,(*source_contacts));
 	//create keys
 	GIM_RSORT_TOKEN * keycontacts = (GIM_RSORT_TOKEN * )gim_alloc(sizeof(GIM_RSORT_TOKEN)*source_count);
 
-    GUINT i;
+    GUINT32 i;
 	for(i=0;i<source_count;i++)
 	{
 		keycontacts[i].m_value = i;
@@ -51,7 +51,7 @@ void gim_merge_contacts(GDYNAMIC_ARRAY * source_contacts,
 	// Merge contacts
 	GIM_CONTACT * pcontact = 0;
 	GIM_CONTACT * scontact = 0;
-	GUINT key,last_key=0;
+	GUINT32 key,last_key=0;
 
 	for(i=0;i<source_contacts->m_size;i++)
 	{
@@ -82,7 +82,7 @@ void gim_merge_contacts_unique(GDYNAMIC_ARRAY * source_contacts,
 {
     dest_contacts->m_size = 0;
     //Traverse the source contacts
-	GUINT source_count = source_contacts->m_size;
+	GUINT32 source_count = source_contacts->m_size;
 	if(source_count==0) return;
 
 	GIM_CONTACT * psource_contacts	= GIM_DYNARRAY_POINTER(GIM_CONTACT,(*source_contacts));
@@ -101,7 +101,7 @@ void gim_merge_contacts_unique(GDYNAMIC_ARRAY * source_contacts,
     psource_contacts++;
 
 	//Average the contacts
-    GUINT i;
+    GUINT32 i;
 	for(i=1;i<source_count;i++)
 	{
 	    VEC_SUM(pcontact->m_point,pcontact->m_point,psource_contacts->m_point);

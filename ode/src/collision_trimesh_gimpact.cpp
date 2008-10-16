@@ -284,7 +284,7 @@ void dGeomTriMeshSetData(dGeomID g, dTriMeshDataID Data)
 	    ( vec3f *)(&Data->m_Vertices[0]),	// vertices
 	    Data->m_VertexCount,		// nr of verts
 	    0,					// copy verts?
-	    ( GUINT *)(&Data->m_Indices[0]),	// indices
+	    ( GUINT32 *)(&Data->m_Indices[0]),	// indices
 	    Data->m_TriangleCount*3,		// nr of indices
 	    0,					// copy indices?
 	    1					// transformed reply

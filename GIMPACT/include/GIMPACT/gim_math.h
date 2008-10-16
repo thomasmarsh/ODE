@@ -31,9 +31,15 @@ email: projectileman@yahoo.com
 -----------------------------------------------------------------------------
 */
 
+#include "config.h"
 
 #include <math.h>
 #include <float.h>
+#if HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#else
+#error "GIMPACT: Must define int32_t and uint32_t"
+#endif
 
 
 /*! \defgroup BASIC_TYPES
@@ -45,11 +51,14 @@ Constants starting with G_
 //! @{
 /*! Types */
 #define GREAL float
-#define GINT long
-#define GUINT unsigned long
+#define GINT32 int32_t
+#define GUINT32 u_int32_t
+
+#define GPTR void*
+
 /*! Constants for integers*/
-#define GUINT_BIT_COUNT 32
-#define GUINT_EXPONENT 5
+#define GUINT32_BIT_COUNT 32
+#define GUINT32_EXPONENT 5
 
 #define G_FASTMATH 1
 #define G_PI 3.14159265358979f
@@ -74,10 +83,10 @@ mathematical functions
 #define G_RADTODEG(X) ((X)*180.0f/3.1415926f)
 
 //! Integer representation of a floating-point value.
-#define IR(x)					((GUINT&)(x))
+#define IR(x)					((GUINT32&)(x))
 
 //! Signed integer representation of a floating-point value.
-#define SIR(x)					((GINT&)(x))
+#define SIR(x)					((GINT32&)(x))
 
 //! Absolute integer representation of a floating-point value
 #define AIR(x)					(IR(x)&0x7fffffff)
@@ -116,7 +125,7 @@ mathematical functions
     else\
     {\
         GREAL _x = (va) * 0.5f;\
-        GUINT _y = 0x5f3759df - ( IR(va) >> 1);\
+        GUINT32 _y = 0x5f3759df - ( IR(va) >> 1);\
         (isva) = FR(_y);\
         (isva) = (isva) * ( 1.5f - ( _x * (isva) * (isva) ) );\
     }\

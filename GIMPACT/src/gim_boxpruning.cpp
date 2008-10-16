@@ -32,7 +32,7 @@ email: projectileman@yahoo.com
 
 
 //! Allocate memory for all aabb set.
-void gim_aabbset_alloc(GIM_AABB_SET * aabbset, GUINT count)
+void gim_aabbset_alloc(GIM_AABB_SET * aabbset, GUINT32 count)
 {
     aabbset->m_count = count;
     aabbset->m_boxes = (aabb3f *)gim_alloc(sizeof(aabb3f)*count);
@@ -44,7 +44,7 @@ void gim_aabbset_alloc(GIM_AABB_SET * aabbset, GUINT count)
     }
     else
     {
-        aabbset->m_maxcoords = (GUINT *)gim_alloc(sizeof(GUINT)*aabbset->m_count );
+        aabbset->m_maxcoords = (GUINT32 *)gim_alloc(sizeof(GUINT32)*aabbset->m_count );
         aabbset->m_sorted_mincoords = (GIM_RSORT_TOKEN *)gim_alloc(sizeof(GIM_RSORT_TOKEN)*aabbset->m_count);
     }
     aabbset->m_shared = 0;
@@ -72,7 +72,7 @@ void gim_aabbset_calc_global_bound(GIM_AABB_SET * aabbset)
     aabb3f * globalbox = &aabbset->m_global_bound;
     AABB_COPY((*globalbox),(*paabb));
 
-    GUINT count = aabbset->m_count-1;
+    GUINT32 count = aabbset->m_count-1;
     paabb++;
     while(count)
     {
@@ -97,13 +97,13 @@ void gim_aabbset_sort(GIM_AABB_SET * aabbset, char calc_global_bound)
 {
     if(aabbset->m_sorted_mincoords == 0)
     {//allocate
-        aabbset->m_maxcoords = (GUINT *)gim_alloc(sizeof(GUINT)*aabbset->m_count );
+        aabbset->m_maxcoords = (GUINT32 *)gim_alloc(sizeof(GUINT32)*aabbset->m_count );
         aabbset->m_sorted_mincoords = (GIM_RSORT_TOKEN *)gim_alloc(sizeof(GIM_RSORT_TOKEN)*aabbset->m_count);
     }
 
-    GUINT i, count = aabbset->m_count;
+    GUINT32 i, count = aabbset->m_count;
     aabb3f * paabb = aabbset->m_boxes;
-    GUINT * maxcoords = aabbset->m_maxcoords;
+    GUINT32 * maxcoords = aabbset->m_maxcoords;
     GIM_RSORT_TOKEN * sorted_tokens = aabbset->m_sorted_mincoords;
 
     if(count<860)//Calibrated on a Pentium IV
@@ -170,7 +170,7 @@ void gim_aabbset_sort(GIM_AABB_SET * aabbset, char calc_global_bound)
  pairset,\
  push_pair_macro)\
 {\
-    GUINT _i = test_count;\
+    GUINT32 _i = test_count;\
     char _intersected;\
     GIM_RSORT_TOKEN * _psorted_tokens = sorted_tokens;\
     while(_i>0 && max_coord_uint >= _psorted_tokens->m_key)\
@@ -194,16 +194,16 @@ void gim_aabbset_sort(GIM_AABB_SET * aabbset, char calc_global_bound)
 void gim_aabbset_self_intersections_sorted(GIM_AABB_SET * aabbset, GDYNAMIC_ARRAY * collision_pairs)
 {
     collision_pairs->m_size = 0;
-    GUINT count = aabbset->m_count;
+    GUINT32 count = aabbset->m_count;
     aabb3f * paabb = aabbset->m_boxes;
-    GUINT * maxcoords = aabbset->m_maxcoords;
+    GUINT32 * maxcoords = aabbset->m_maxcoords;
     GIM_RSORT_TOKEN * sorted_tokens = aabbset->m_sorted_mincoords;
     aabb3f test_aabb;
     while(count>1)
     {
         ///current cache variables
-        GUINT  curr_index = sorted_tokens->m_value;
-        GUINT max_coord_uint = maxcoords[curr_index];
+        GUINT32  curr_index = sorted_tokens->m_value;
+        GUINT32 max_coord_uint = maxcoords[curr_index];
         AABB_COPY(test_aabb,paabb[curr_index]);
 
         ///next pairs
@@ -222,8 +222,8 @@ void gim_aabbset_self_intersections_sorted(GIM_AABB_SET * aabbset, GDYNAMIC_ARRA
 void gim_aabbset_self_intersections_brute_force(GIM_AABB_SET * aabbset, GDYNAMIC_ARRAY * collision_pairs)
 {
     collision_pairs->m_size = 0;
-    GUINT i,j;
-    GUINT count = aabbset->m_count;
+    GUINT32 i,j;
+    GUINT32 count = aabbset->m_count;
     aabb3f * paabb = aabbset->m_boxes;
     char intersected;
     for (i=0;i< count-1 ;i++ )
@@ -254,19 +254,19 @@ void gim_aabbset_bipartite_intersections_sorted(GIM_AABB_SET * aabbset1, GIM_AAB
     AABBCOLLISION(intersected,aabbset1->m_global_bound,aabbset2->m_global_bound);
     if(intersected == 0) return;
 
-    GUINT count1 = aabbset1->m_count;
+    GUINT32 count1 = aabbset1->m_count;
     aabb3f * paabb1 = aabbset1->m_boxes;
-    GUINT * maxcoords1 = aabbset1->m_maxcoords;
+    GUINT32 * maxcoords1 = aabbset1->m_maxcoords;
     GIM_RSORT_TOKEN * sorted_tokens1 = aabbset1->m_sorted_mincoords;
 
-    GUINT count2 = aabbset2->m_count;
+    GUINT32 count2 = aabbset2->m_count;
     aabb3f * paabb2 = aabbset2->m_boxes;
-    GUINT * maxcoords2 = aabbset2->m_maxcoords;
+    GUINT32 * maxcoords2 = aabbset2->m_maxcoords;
     GIM_RSORT_TOKEN * sorted_tokens2 = aabbset2->m_sorted_mincoords;
 
-    GUINT  curr_index;
+    GUINT32  curr_index;
 
-    GUINT max_coord_uint;
+    GUINT32 max_coord_uint;
     aabb3f test_aabb;
 
     //Classify boxes
@@ -276,7 +276,7 @@ void gim_aabbset_bipartite_intersections_sorted(GIM_AABB_SET * aabbset1, GIM_AAB
 
     //Clasify set 1
     GIM_RSORT_TOKEN * classified_tokens1 = (GIM_RSORT_TOKEN *) gim_alloc(sizeof(GIM_RSORT_TOKEN)*count1);
-    GUINT i,classified_count1 = 0,classified_count2 = 0;
+    GUINT32 i,classified_count1 = 0,classified_count2 = 0;
 
 
     for (i=0;i<count1;i++ )
@@ -367,14 +367,14 @@ void gim_aabbset_bipartite_intersections_brute_force(GIM_AABB_SET * aabbset1,GIM
     //Find  Set intersection
     BOXINTERSECTION(aabbset1->m_global_bound,aabbset2->m_global_bound, int_abbb);
     //Clasify set 1
-    GUINT i,j;
-    GUINT classified_count = 0;
+    GUINT32 i,j;
+    GUINT32 classified_count = 0;
 
-    GUINT count = aabbset1->m_count;
+    GUINT32 count = aabbset1->m_count;
     aabb3f * paabb1 = aabbset1->m_boxes;
     aabb3f * paabb2 = aabbset2->m_boxes;
 
-    GUINT * classified = (GUINT *) gim_alloc(sizeof(GUINT)*count);
+    GUINT32 * classified = (GUINT32 *) gim_alloc(sizeof(GUINT32)*count);
 
     for (i=0;i<count;i++ )
     {
@@ -479,8 +479,8 @@ void gim_aabbset_box_collision(aabb3f *test_aabb, GIM_AABB_SET * aabbset, GDYNAM
     AABBCOLLISION(intersected,aabbset->m_global_bound,(*test_aabb));
     if(intersected == 0) return;
 
-    GUINT i;
-    GUINT count = aabbset->m_count;
+    GUINT32 i;
+    GUINT32 count = aabbset->m_count;
     aabb3f * paabb = aabbset->m_boxes;
     aabb3f _testaabb;
     AABB_COPY(_testaabb,*test_aabb);
@@ -490,7 +490,7 @@ void gim_aabbset_box_collision(aabb3f *test_aabb, GIM_AABB_SET * aabbset, GDYNAM
         AABBCOLLISION(intersected,paabb[i],_testaabb);
         if(intersected)
         {
-            GIM_DYNARRAY_PUSH_ITEM(GUINT,(*collided),i);
+            GIM_DYNARRAY_PUSH_ITEM(GUINT32,(*collided),i);
         }
     }
 }
@@ -503,8 +503,8 @@ void gim_aabbset_ray_collision(vec3f vorigin,vec3f vdir, GREAL tmax, GIM_AABB_SE
     BOX_INTERSECTS_RAY(aabbset->m_global_bound, vorigin, vdir, tparam, tmax,intersected);
     if(intersected==0) return;
 
-    GUINT i;
-    GUINT count = aabbset->m_count;
+    GUINT32 i;
+    GUINT32 count = aabbset->m_count;
     aabb3f * paabb = aabbset->m_boxes;
 
     for (i=0;i< count;i++ )
@@ -512,7 +512,7 @@ void gim_aabbset_ray_collision(vec3f vorigin,vec3f vdir, GREAL tmax, GIM_AABB_SE
         BOX_INTERSECTS_RAY(paabb[i], vorigin, vdir, tparam, tmax,intersected);
         if(intersected)
         {
-            GIM_DYNARRAY_PUSH_ITEM(GUINT,(*collided),i);
+            GIM_DYNARRAY_PUSH_ITEM(GUINT32,(*collided),i);
         }
     }
 }

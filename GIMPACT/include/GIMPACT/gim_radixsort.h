@@ -41,8 +41,8 @@ Macros for sorting.
 //! @{
 struct GIM_RSORT_TOKEN
 {
-    GUINT m_key;
-    GUINT m_value;
+    GUINT32 m_key;
+    GUINT32 m_value;
 };
 //typedef struct _GIM_RSORT_TOKEN GIM_RSORT_TOKEN;
 
@@ -61,9 +61,9 @@ struct GIM_RSORT_TOKEN
 //For the type of your array, you need to declare a macro for obtaining the key, like these:
 #define SIMPLE_GET_FLOAT32KEY(e,key) {key =(GREAL)(e);}
 
-#define SIMPLE_GET_INTKEY(e,key) {key =(GINT)(e);}
+#define SIMPLE_GET_INTKEY(e,key) {key =(GINT32)(e);}
 
-#define SIMPLE_GET_UINTKEY(e,key) {key =(GUINT)(e);}
+#define SIMPLE_GET_UINTKEY(e,key) {key =(GUINT32)(e);}
 
 //For the type of your array, you need to declare a macro for copy elements, like this:
 
@@ -75,16 +75,16 @@ struct GIM_RSORT_TOKEN
 
 #define GIM_RADIX_SORT_RTOKENS(array,sorted,element_count)\
 {\
-	GUINT i;\
-	GUINT b0[kHist * 3];\
-	GUINT *b1 = b0 + kHist;\
-	GUINT *b2 = b1 + kHist;\
+	GUINT32 i;\
+	GUINT32 b0[kHist * 3];\
+	GUINT32 *b1 = b0 + kHist;\
+	GUINT32 *b2 = b1 + kHist;\
 	for (i = 0; i < kHist * 3; i++)\
 	{\
 		b0[i] = 0;\
 	}\
-	GUINT fi;\
-	GUINT pos;\
+	GUINT32 fi;\
+	GUINT32 pos;\
 	for (i = 0; i < element_count; i++)\
 	{\
 	    fi = array[i].m_key;\
@@ -93,8 +93,8 @@ struct GIM_RSORT_TOKEN
 		b2[D11_2(fi)] ++;\
 	}\
 	{\
-		GUINT sum0 = 0, sum1 = 0, sum2 = 0;\
-		GUINT tsum;\
+		GUINT32 sum0 = 0, sum1 = 0, sum2 = 0;\
+		GUINT32 tsum;\
 		for (i = 0; i < kHist; i++)\
 		{\
 			tsum = b0[i] + sum0;\
@@ -138,7 +138,7 @@ struct GIM_RSORT_TOKEN
 #define GIM_RADIX_SORT_ARRAY_TOKENS(array, sorted_tokens, element_count, get_uintkey_macro)\
 {\
     GIM_RSORT_TOKEN * _unsorted = (GIM_RSORT_TOKEN *) gim_alloc(sizeof(GIM_RSORT_TOKEN )*element_count);\
-    GUINT _i;\
+    GUINT32 _i;\
     for (_i=0;_i<element_count;_i++)\
     {\
         get_uintkey_macro(array[_i],_unsorted[_i].m_key);\
@@ -155,7 +155,7 @@ struct GIM_RSORT_TOKEN
     GIM_RADIX_SORT_ARRAY_TOKENS(array,_sorted,element_count,get_uintkey_macro);\
     type * _original_array = (type *) gim_alloc(sizeof(type)*element_count); \
     memcpy(_original_array,array,sizeof(type)*element_count);\
-    GUINT _i;\
+    GUINT32 _i;\
     for (_i=0;_i<element_count;_i++)\
     {\
         copy_elements_macro(array[_i],_original_array[_sorted[_i].m_value]);\
@@ -167,9 +167,9 @@ struct GIM_RSORT_TOKEN
 /// Sorts array in place using quick sort
 #define GIM_QUICK_SORT_ARRAY(type, array, array_count, comp_macro, exchange_macro) \
 {\
-  GINT   _i_, _j_, _p_, _stack_index_, _start_, _end_;\
-  GINT   _start_stack_[64]; \
-  GINT   _end_stack_[64];\
+  GINT32   _i_, _j_, _p_, _stack_index_, _start_, _end_;\
+  GINT32   _start_stack_[64]; \
+  GINT32   _end_stack_[64];\
   _start_stack_[0] = 0;\
   _end_stack_[0] = (array_count);\
   _stack_index_ = 1;\
@@ -253,6 +253,6 @@ struct GIM_RSORT_TOKEN
     (_array)[(_j)]= _e_tmp_;\
 }\
 
-#define GIM_COMP_MACRO(x, y) ((GINT)((x) - (y)))
+#define GIM_COMP_MACRO(x, y) ((GINT32)((x) - (y)))
 //! @}
 #endif // GIM_RADIXSORT_H_INCLUDED
