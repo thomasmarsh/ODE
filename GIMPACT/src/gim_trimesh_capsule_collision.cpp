@@ -42,7 +42,7 @@ void gim_closest_point_triangle_segment(GIM_TRIANGLE_DATA * triangle, vec3f s1,v
 {
     vec3f segment_points[4] = {{0}};
     vec3f closest_points[2] = {{0}};
-    GUINT intersection_type, out_edge= 10;
+    GUINT32 intersection_type, out_edge= 10;
     GREAL dis, dis_temp,perpend;
     vec4f sdiff;
 
@@ -135,7 +135,7 @@ void gim_closest_point_triangle_segment(GIM_TRIANGLE_DATA * triangle, vec3f s1,v
     //Find closest edges
     out_edge = 10;
     dis = G_REAL_INFINITY;
-    GUINT i;
+    GUINT32 i;
     for(i=0;i<3;i++)
     {
         SEGMENT_COLLISION(s1,s2,triangle->m_vertices[i],triangle->m_vertices[(i+1)%3],segment_points[0],segment_points[1]);
@@ -177,7 +177,7 @@ void gim_closest_point_triangle_segment(GIM_TRIANGLE_DATA * triangle, vec3f s1,v
 */
 int gim_triangle_capsule_collision(GIM_TRIANGLE_DATA * triangle, GIM_CAPSULE_DATA * capsule, GDYNAMIC_ARRAY * contacts)
 {
-    GUINT old_contact_size = contacts->m_size;
+    GUINT32 old_contact_size = contacts->m_size;
     gim_closest_point_triangle_segment(triangle,capsule->m_point1,capsule->m_point2,contacts);
     
     if (contacts->m_size == old_contact_size)
@@ -247,9 +247,9 @@ void gim_trimesh_capsule_collision(GIM_TRIMESH * trimesh, GIM_CAPSULE_DATA * cap
 
 	int cresult;
 	unsigned int i;
-	GUINT * boxesresult = GIM_DYNARRAY_POINTER(GUINT,collision_result);
+	GUINT32 * boxesresult = GIM_DYNARRAY_POINTER(GUINT32,collision_result);
 	GIM_TRIANGLE_DATA tri_data;
-	GUINT old_contact_size;
+	GUINT32 old_contact_size;
 	GIM_CONTACT * pcontact;
 
 	for(i=0;i<collision_result.m_size;i++)

@@ -48,7 +48,7 @@ email: projectileman@yahoo.com
 #define MOST_DEEP_POINTS(plane,points,point_count,deep_points,deep_points_count,maxdeep)\
 {\
     maxdeep=-1000.0f;\
-    GUINT _k;\
+    GUINT32 _k;\
 	GREAL _dist;\
 	deep_points_count = 0;\
 	for(_k=0;_k<point_count;_k++)\
@@ -104,11 +104,11 @@ int _gim_triangle_triangle_collision(
 							GIM_TRIANGLE_CONTACT_DATA * contact_data)
 {
     //Cache variables for triangle intersection
-    GUINT _max_candidates[MAX_TRI_CLIPPING];
+    GUINT32 _max_candidates[MAX_TRI_CLIPPING];
     vec3f _temp_clip[MAX_TRI_CLIPPING];
-    GUINT _temp_clip_count = 0;
+    GUINT32 _temp_clip_count = 0;
     vec3f _temp_clip2[MAX_TRI_CLIPPING];
-    GUINT _temp_clip_count2 = 0;
+    GUINT32 _temp_clip_count2 = 0;
     vec3f clipped_points2[MAX_TRI_CLIPPING];
     vec3f deep_points2[MAX_TRI_CLIPPING];
     vec3f clipped_points1[MAX_TRI_CLIPPING];
@@ -117,8 +117,8 @@ int _gim_triangle_triangle_collision(
 
 
     //State variabnles
-	GUINT mostdir=0;
-	GUINT clipped2_count=0;
+	GUINT32 mostdir=0;
+	GUINT32 clipped2_count=0;
 
 	//Clip tri2 by tri1 edges
 
@@ -130,7 +130,7 @@ int _gim_triangle_triangle_collision(
 	}
 
 	//find most deep interval face1
-	GUINT deep2_count=0;
+	GUINT32 deep2_count=0;
 
 	GREAL maxdeep;
 
@@ -147,7 +147,7 @@ int _gim_triangle_triangle_collision(
 
 	//Clip tri1 by tri2 edges
 
-	GUINT clipped1_count=0;
+	GUINT32 clipped1_count=0;
 
 	CLIP_TRI_POINTS_BY_TRI_EDGE_PLANES(tri1->m_vertices,(&tri2->m_planes.m_planes[1]), clipped_points1, clipped1_count);
 
@@ -159,7 +159,7 @@ int _gim_triangle_triangle_collision(
 
 
 	//find interval face2
-	GUINT deep1_count=0;
+	GUINT32 deep1_count=0;
 
 	GREAL dist;
 
@@ -269,7 +269,7 @@ void gim_trimesh_trimesh_collision(GIM_TRIMESH * trimesh1, GIM_TRIMESH * trimesh
     GIM_TRIANGLE_DATA tri1data,tri2data;
 
 
-    GUINT i, ti1,ti2,ci;
+    GUINT32 i, ti1,ti2,ci;
     int colresult;
     for (i=0;i<collision_pairs.m_size; i++)
     {
@@ -327,7 +327,7 @@ void gim_trimesh_plane_collision(GIM_TRIMESH * trimesh,vec4f plane, GDYNAMIC_ARR
     //Locks mesh
     gim_trimesh_locks_work_data(trimesh);
     //Get vertices
-    GUINT i, vertcount = trimesh->m_transformed_vertex_buffer.m_element_count;
+    GUINT32 i, vertcount = trimesh->m_transformed_vertex_buffer.m_element_count;
     vec3f * vertices = GIM_BUFFER_ARRAY_POINTER(vec3f,trimesh->m_transformed_vertex_buffer,0);
 
     GREAL dist;

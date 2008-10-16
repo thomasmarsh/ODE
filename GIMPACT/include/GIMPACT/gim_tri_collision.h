@@ -42,7 +42,7 @@ email: projectileman@yahoo.com
 #define PLANE_CLIP_POLYGON(plane,polygon_points,polygon_point_count,clipped,clipped_count,max_clipped) \
 { \
     clipped_count = 0; \
-    GUINT  _i, _vi, _prevclassif=32000, _classif; \
+    GUINT32  _i, _vi, _prevclassif=32000, _classif; \
 	GREAL _d; \
 	for(_i=0;_i<=polygon_point_count;_i++) \
 	{ \
@@ -116,7 +116,7 @@ struct GIM_TRIANGLE_DATA
 struct GIM_TRIANGLE_CONTACT_DATA
 {
     GREAL m_penetration_depth;
-    GUINT m_point_count;
+    GUINT32 m_point_count;
     vec3f m_separating_normal;
     vec3f m_points[MAX_TRI_CLIPPING];
 };
@@ -127,7 +127,7 @@ struct GIM_TRIANGLE_RAY_CONTACT_DATA
     GREAL u;
     GREAL v;
     GREAL tparam;
-    GUINT m_face_id;
+    GUINT32 m_face_id;
     vec3f m_point;
     vec3f m_normal;
 };
@@ -190,7 +190,7 @@ if 0.0<= u+v <=1.0 then they are inside of triangle
 	VEC_DIFF(_axe1,vec2,vec1);\
 	VEC_DIFF(_axe2,vec3,vec1);\
 	VEC_DIFF(_vecproj,point,vec1);\
-	GUINT _i1,_i2;\
+	GUINT32 _i1,_i2;\
 	PLANE_MINOR_AXES(tri_plane, _i1, _i2);\
 	if(fabsf(_axe2[_i2])<G_EPSILON)\
 	{\

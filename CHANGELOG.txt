@@ -9,6 +9,14 @@ the rules for this file:
 
 ------------------------------------------------------------------------------
 10/15/08 Remi Ricard (papaDoc)
+        * Applying patch #2158425 64-bit GIMPACT provided by Mark
+          William. This patch enable make the GIMPACT works on 64-bit machine.
+
+
+10/15/08 Remi Ricard (papaDoc)
+        * Add function dJointGetPRAngle and dJointGetPRAngleRate
+
+10/15/08 Remi Ricard (papaDoc)
         * Enable the motor on the rotoide part of the PR joint
 
 10/15/08 Remi Ricard (papaDoc)

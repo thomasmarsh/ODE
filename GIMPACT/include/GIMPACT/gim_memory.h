@@ -60,7 +60,7 @@ Functions for manip packed arrays of numbers
 //! @{
 #define GIM_COPY_ARRAYS(dest_array, source_array, element_count)\
 {\
-    GUINT _i_;\
+    GUINT32 _i_;\
     for (_i_ = 0; _i_ < (element_count); _i_++)\
     {\
     	(dest_array)[_i_] = (source_array)[_i_];\
@@ -69,7 +69,7 @@ Functions for manip packed arrays of numbers
 
 #define GIM_COPY_ARRAYS_1(dest_array, source_array, element_count, copy_macro)\
 {\
-    GUINT _i_;\
+    GUINT32 _i_;\
     for (_i_=0; _i_ < (element_count); _i_++)\
     {\
     	copy_macro((dest_array)[_i_], (source_array)[_i_]);\
@@ -79,7 +79,7 @@ Functions for manip packed arrays of numbers
 
 #define GIM_ZERO_ARRAY(array, element_count)\
 {\
-    GUINT _i_;\
+    GUINT32 _i_;\
     for (_i_=0; _i_ < (element_count); _i_++)\
     {\
     	(array)[_i_] = 0;\
@@ -88,7 +88,7 @@ Functions for manip packed arrays of numbers
 
 #define GIM_CONSTANT_ARRAY(array, element_count, constant)\
 {\
-    GUINT _i_;\
+    GUINT32 _i_;\
     for (_i_ = 0; _i_ < (element_count); _i_++)\
     {\
     	(array)[_i_] = (constant);\
@@ -155,8 +155,8 @@ Dynamic Arrays. Allocated from system memory.
 struct GDYNAMIC_ARRAY
 {
     char * m_pdata;
-    GUINT m_size;
-    GUINT m_reserve_size;
+    GUINT32 m_size;
+    GUINT32 m_reserve_size;
 };
 //typedef  struct _GDYNAMIC_ARRAY GDYNAMIC_ARRAY;
 
@@ -275,46 +275,46 @@ Bitsets , based on \ref DYNAMIC_ARRAYS .
 //! @{
 
 //! Creates a bitset
-#define GIM_BITSET_CREATE(array_data) GIM_DYNARRAY_CREATE(GUINT, array_data, G_ARRAY_GROW_SIZE)
+#define GIM_BITSET_CREATE(array_data) GIM_DYNARRAY_CREATE(GUINT32, array_data, G_ARRAY_GROW_SIZE)
 
 //! Creates a bitset, with their bits set to 0.
 #define GIM_BITSET_CREATE_SIZED(array_data, bits_count) \
 { \
-    GUINT array_size = (bits_count) / GUINT_BIT_COUNT + 1; \
-    GIM_DYNARRAY_CREATE(GUINT, array_data, array_size); \
-    GUINT * _pt = GIM_DYNARRAY_POINTER(GUINT, array_data); \
-    memset(_pt, 0, sizeof(GUINT) * ((array_data).m_size)); \
+    GUINT32 array_size = (bits_count) / GUINT32_BIT_COUNT + 1; \
+    GIM_DYNARRAY_CREATE(GUINT32, array_data, array_size); \
+    GUINT32 * _pt = GIM_DYNARRAY_POINTER(GUINT32, array_data); \
+    memset(_pt, 0, sizeof(GUINT32) * ((array_data).m_size)); \
 } \
 
 //! Gets the bitset bit count.
-#define GIM_BITSET_SIZE(array_data) ((array_data).m_size * GUINT_BIT_COUNT)
+#define GIM_BITSET_SIZE(array_data) ((array_data).m_size * GUINT32_BIT_COUNT)
 
 //! Resizes a bitset, with their bits set to 0.
 #define GIM_BITSET_RESIZE(array_data, new_bits_count) \
 { \
-    GUINT _oldsize = (array_data).m_size; \
-    (array_data).m_size = (new_bits_count) / GUINT_BIT_COUNT + 1; \
+    GUINT32 _oldsize = (array_data).m_size; \
+    (array_data).m_size = (new_bits_count) / GUINT32_BIT_COUNT + 1; \
     if (_oldsize < (array_data).m_size) \
     { \
         if ((array_data).m_size > (array_data).m_reserve_size) \
         { \
-            GIM_DYNARRAY_RESERVE_SIZE(GUINT, array_data, _oldsize, (array_data).m_size + G_ARRAY_GROW_SIZE); \
+            GIM_DYNARRAY_RESERVE_SIZE(GUINT32, array_data, _oldsize, (array_data).m_size + G_ARRAY_GROW_SIZE); \
         } \
-        GUINT * _pt = GIM_DYNARRAY_POINTER(GUINT, array_data); \
-        memset(&_pt[_oldsize], 0, sizeof(GUINT) * ((array_data).m_size - _oldsize)); \
+        GUINT32 * _pt = GIM_DYNARRAY_POINTER(GUINT32, array_data); \
+        memset(&_pt[_oldsize], 0, sizeof(GUINT32) * ((array_data).m_size - _oldsize)); \
     } \
 } \
 
 //! Sets all bitset bit to 0.
 #define GIM_BITSET_CLEAR_ALL(array_data) \
 { \
-    memset((array_data).m_pdata, 0, sizeof(GUINT) * (array_data).m_size); \
+    memset((array_data).m_pdata, 0, sizeof(GUINT32) * (array_data).m_size); \
 } \
 
 //! Sets all bitset bit to 1.
 #define GIM_BITSET_SET_ALL(array_data) \
 { \
-    memset((array_data).m_pdata, 0xFF, sizeof(GUINT) * (array_data).m_size); \
+    memset((array_data).m_pdata, 0xFF, sizeof(GUINT32) * (array_data).m_size); \
 } \
 
 ///Sets the desired bit to 1
@@ -324,8 +324,8 @@ Bitsets , based on \ref DYNAMIC_ARRAYS .
 	{ \
 	    GIM_BITSET_RESIZE(array_data, bit_index); \
 	} \
-	GUINT * _pt = GIM_DYNARRAY_POINTER(GUINT, array_data); \
-	_pt[(bit_index) >> GUINT_EXPONENT] |= (1 << ((bit_index) & (GUINT_BIT_COUNT - 1))); \
+	GUINT32 * _pt = GIM_DYNARRAY_POINTER(GUINT32, array_data); \
+	_pt[(bit_index) >> GUINT32_EXPONENT] |= (1 << ((bit_index) & (GUINT32_BIT_COUNT - 1))); \
 } \
 
 ///Return 0 or 1
@@ -337,8 +337,8 @@ Bitsets , based on \ref DYNAMIC_ARRAYS .
 	} \
 	else \
 	{ \
-        GUINT * _pt = GIM_DYNARRAY_POINTER(GUINT, array_data); \
-        (get_value) = _pt[(bit_index) >> GUINT_EXPONENT] & (1 << ((bit_index) & (GUINT_BIT_COUNT - 1))); \
+        GUINT32 * _pt = GIM_DYNARRAY_POINTER(GUINT32, array_data); \
+        (get_value) = _pt[(bit_index) >> GUINT32_EXPONENT] & (1 << ((bit_index) & (GUINT32_BIT_COUNT - 1))); \
 	} \
 } \
 
@@ -347,8 +347,8 @@ Bitsets , based on \ref DYNAMIC_ARRAYS .
 { \
     if ((bit_index) < GIM_BITSET_SIZE(array_data)) \
 	{ \
-        GUINT * _pt = GIM_DYNARRAY_POINTER(GUINT, array_data); \
-        _pt[(bit_index) >> GUINT_EXPONENT] &= ~(1 << ((bit_index) & (GUINT_BIT_COUNT - 1))); \
+        GUINT32 * _pt = GIM_DYNARRAY_POINTER(GUINT32, array_data); \
+        _pt[(bit_index) >> GUINT32_EXPONENT] &= ~(1 << ((bit_index) & (GUINT32_BIT_COUNT - 1))); \
 	} \
 } \
 //! @}
@@ -432,22 +432,22 @@ struct GBUFFER_MANAGER_DATA;
 //! Buffer handle.
 struct GBUFFER_ID
 {
-	GBUFFER_MANAGER_DATA * m_bm_data;
-    GUINT m_buffer_id;
+    GBUFFER_MANAGER_DATA * m_bm_data;
+    GUINT32 m_buffer_id;
 };
 //typedef  struct _GBUFFER_ID GBUFFER_ID;
 
 //! Buffer internal data
 struct GBUFFER_DATA
 {
-    GUINT m_buffer_handle;//!< if 0, buffer doesn't exists
-    GUINT m_size;
-    GUINT m_usage;
-    GINT m_access;
-    GUINT m_lock_count;
+    GPTR m_buffer_handle;//!< if 0, buffer doesn't exists
+    GUINT32 m_size;
+    GUINT32 m_usage;
+    GINT32 m_access;
+    GUINT32 m_lock_count;
     char * m_mapped_pointer;
     GBUFFER_ID m_shadow_buffer;
-    GUINT m_refcount;//! Reference counting for safe garbage collection
+    GUINT32 m_refcount;//! Reference counting for safe garbage collection
 };
 //typedef  struct _GBUFFER_DATA GBUFFER_DATA;
 //! @}
@@ -460,41 +460,41 @@ Function prototypes to allocate and free memory for buffers
 //! @{
 
 //! Returns a Buffer handle
-typedef GUINT gim_buffer_alloc_function(GUINT size,int usage);
+typedef GPTR gim_buffer_alloc_function(GUINT32 size,int usage);
 
 //! Returns a Buffer handle, and copies the pdata to the buffer
-typedef GUINT gim_buffer_alloc_data_function(const void * pdata,GUINT size,int usage);
+typedef GPTR gim_buffer_alloc_data_function(const void * pdata,GUINT32 size,int usage);
 
 //! Changes the size of the buffer preserving the content, and returns the new buffer id
-typedef GUINT gim_buffer_realloc_function(GUINT buffer_handle,GUINT oldsize,int old_usage,GUINT newsize,int new_usage);
+typedef GPTR gim_buffer_realloc_function(GPTR buffer_handle,GUINT32 oldsize,int old_usage,GUINT32 newsize,int new_usage);
 
 //! It changes the m_buffer_handle member to 0/0
-typedef void gim_buffer_free_function(GUINT buffer_handle,GUINT size);
+typedef void gim_buffer_free_function(GPTR buffer_handle,GUINT32 size);
 
 //! It maps the m_mapped_pointer. Returns a pointer
-typedef char * gim_lock_buffer_function(GUINT buffer_handle,int access);
+typedef char * gim_lock_buffer_function(GPTR buffer_handle,int access);
 
 //! It sets the m_mapped_pointer to 0
-typedef void gim_unlock_buffer_function(GUINT buffer_handle);
+typedef void gim_unlock_buffer_function(GPTR buffer_handle);
 
 typedef void gim_download_from_buffer_function(
-        GUINT source_buffer_handle,
-		GUINT source_pos,
+        GPTR source_buffer_handle,
+		GUINT32 source_pos,
 		void * destdata,
-		GUINT copysize);
+		GUINT32 copysize);
 
 typedef void  gim_upload_to_buffer_function(
-        GUINT dest_buffer_handle,
-		GUINT dest_pos,
+        GPTR dest_buffer_handle,
+		GUINT32 dest_pos,
 		void * sourcedata,
-		GUINT copysize);
+		GUINT32 copysize);
 
 typedef void gim_copy_buffers_function(
-		GUINT source_buffer_handle,
-		GUINT source_pos,
-		GUINT dest_buffer_handle,
-		GUINT dest_pos,
-		GUINT copysize);
+		GPTR source_buffer_handle,
+		GUINT32 source_pos,
+		GPTR dest_buffer_handle,
+		GUINT32 dest_pos,
+		GUINT32 copysize);
 //! @}
 
 
@@ -524,20 +524,20 @@ struct GBUFFER_MANAGER_DATA
     GDYNAMIC_ARRAY m_buffer_array;//!< Array of GBUFFER_DATA objects
     GDYNAMIC_ARRAY m_free_positions;//!< Array of GUINT elements. Free positions
 	const GBUFFER_MANAGER_PROTOTYPE *m_prototype;//!< Prototype of functions
-	GUINT m_buffer_manager_id;//!< Buffer manager id
+	GUINT32 m_buffer_manager_id;//!< Buffer manager id
 };
 //typedef  struct _GBUFFER_MANAGER_DATA GBUFFER_MANAGER_DATA;
 
 //! Checks if buffer manager is used
 int gim_is_buffer_manager_active(GBUFFER_MANAGER_DATA buffer_managers[],
-	GUINT buffer_manager_id);
+	GUINT32 buffer_manager_id);
 //! Adds a buffer Manager to the Memory Singleton
 void gim_create_buffer_manager(GBUFFER_MANAGER_DATA buffer_managers[],
-	GUINT buffer_manager_id);
+	GUINT32 buffer_manager_id);
 //! Destroys a buffer manager
-void gim_destroy_buffer_manager(GBUFFER_MANAGER_DATA buffer_managers[], GUINT buffer_manager_id);
+void gim_destroy_buffer_manager(GBUFFER_MANAGER_DATA buffer_managers[], GUINT32 buffer_manager_id);
 void gim_get_buffer_manager_data(GBUFFER_MANAGER_DATA buffer_managers[], 
-	GUINT buffer_manager_id,GBUFFER_MANAGER_DATA ** pbm_data);
+	GUINT32 buffer_manager_id,GBUFFER_MANAGER_DATA ** pbm_data);
 void gim_init_buffer_managers(GBUFFER_MANAGER_DATA buffer_managers[]);
 void gim_terminate_buffer_managers(GBUFFER_MANAGER_DATA buffer_managers[]);
 
@@ -557,10 +557,10 @@ void gim_terminate_buffer_managers(GBUFFER_MANAGER_DATA buffer_managers[]);
 \return An error code. 0 if success.
 \post m_refcount = 0
 */
-GUINT gim_create_buffer(
+GUINT32 gim_create_buffer(
 	GBUFFER_MANAGER_DATA buffer_managers[],
-    GUINT buffer_manager_id,
-    GUINT buffer_size,
+    GUINT32 buffer_manager_id,
+    GUINT32 buffer_size,
     int usage,
     GBUFFER_ID * buffer_id);
 
@@ -574,27 +574,27 @@ GUINT gim_create_buffer(
 \return An error code. 0 if success.
 \post m_refcount = 0
 */
-GUINT gim_create_buffer_from_data(
+GUINT32 gim_create_buffer_from_data(
 	GBUFFER_MANAGER_DATA buffer_managers[],
-    GUINT buffer_manager_id,
+    GUINT32 buffer_manager_id,
     const void * pdata,
-    GUINT buffer_size,
+    GUINT32 buffer_size,
     int usage,
     GBUFFER_ID * buffer_id);
 
 //!Allocates on the G_BUFFER_MANAGER_SYSTEM
-GUINT gim_create_common_buffer(GBUFFER_MANAGER_DATA buffer_managers[],
-	GUINT buffer_size, GBUFFER_ID * buffer_id);
+GUINT32 gim_create_common_buffer(GBUFFER_MANAGER_DATA buffer_managers[],
+	GUINT32 buffer_size, GBUFFER_ID * buffer_id);
 //!Allocates on the G_BUFFER_MANAGER_SYSTEM, and copies the data
-GUINT gim_create_common_buffer_from_data(GBUFFER_MANAGER_DATA buffer_managers[],
-    const void * pdata, GUINT buffer_size, GBUFFER_ID * buffer_id);
+GUINT32 gim_create_common_buffer_from_data(GBUFFER_MANAGER_DATA buffer_managers[],
+    const void * pdata, GUINT32 buffer_size, GBUFFER_ID * buffer_id);
 //!Creates a buffer with shared data
-GUINT gim_create_shared_buffer_from_data(GBUFFER_MANAGER_DATA buffer_managers[],
-    const void * pdata, GUINT buffer_size, GBUFFER_ID * buffer_id);
+GUINT32 gim_create_shared_buffer_from_data(GBUFFER_MANAGER_DATA buffer_managers[],
+    const void * pdata, GUINT32 buffer_size, GBUFFER_ID * buffer_id);
 
 
 //! Add reference counting to buffer.
-GINT gim_buffer_add_ref(GBUFFER_ID * buffer_id);
+GINT32 gim_buffer_add_ref(GBUFFER_ID * buffer_id);
 
 //! Function for resize buffer, preserving the content
 /*!
@@ -603,13 +603,13 @@ GINT gim_buffer_add_ref(GBUFFER_ID * buffer_id);
 \return An error code. 0 if success.
 \post If m_refcount>0 then it decrements it.
 */
-GINT gim_buffer_realloc(GBUFFER_ID * buffer_id,GUINT newsize);
+GINT32 gim_buffer_realloc(GBUFFER_ID * buffer_id,GUINT32 newsize);
 
 //! Eliminates the buffer.
 /*!
 If the buffer reference counting is <= 1 and is unlocked, then it eliminates the buffer.
 */
-GINT gim_buffer_free(GBUFFER_ID * buffer_id);
+GINT32 gim_buffer_free(GBUFFER_ID * buffer_id);
 
 //! Locks the buffer for memory access.
 /*!
@@ -618,38 +618,38 @@ GINT gim_buffer_free(GBUFFER_ID * buffer_id);
 \param map_pointer Dest Pointer of the memory address from buffer.
 \post m_lock_count increases.
 */
-GINT gim_lock_buffer(GBUFFER_ID * buffer_id,int access,char ** map_pointer);
+GINT32 gim_lock_buffer(GBUFFER_ID * buffer_id,int access,char ** map_pointer);
 
 //! Unlocks the buffer for memory access.
-GINT gim_unlock_buffer(GBUFFER_ID * buffer_id);
+GINT32 gim_unlock_buffer(GBUFFER_ID * buffer_id);
 
 //! Gets the buffer size in bytes
-GINT gim_get_buffer_size(GBUFFER_ID * buffer_id,GUINT * buffer_size);
+GINT32 gim_get_buffer_size(GBUFFER_ID * buffer_id,GUINT32 * buffer_size);
 
 //! Determines if the buffer is locked
-GINT gim_get_buffer_is_locked(GBUFFER_ID * buffer_id,GUINT * lock_count);
+GINT32 gim_get_buffer_is_locked(GBUFFER_ID * buffer_id,GUINT32 * lock_count);
 
 //! Copies the content of the buffer to a dest pointer
-GINT gim_download_from_buffer(
+GINT32 gim_download_from_buffer(
         GBUFFER_ID * buffer_id,
-		GUINT source_pos,
+		GUINT32 source_pos,
 		void * destdata,
-		GUINT copysize);
+		GUINT32 copysize);
 
 //! Copies the content of a memory pointer to the buffer
-GINT  gim_upload_to_buffer(
+GINT32  gim_upload_to_buffer(
 		GBUFFER_ID * buffer_id,
-		GUINT dest_pos,
+		GUINT32 dest_pos,
 		void * sourcedata,
-		GUINT copysize);
+		GUINT32 copysize);
 
 //! Copies two buffers.
-GINT  gim_copy_buffers(
+GINT32  gim_copy_buffers(
 		GBUFFER_ID * source_buffer_id,
-		GUINT source_pos,
+		GUINT32 source_pos,
 		GBUFFER_ID * dest_buffer_id,
-		GUINT dest_pos,
-		GUINT copysize);
+		GUINT32 dest_pos,
+		GUINT32 copysize);
 //! @}
 
 
@@ -720,8 +720,8 @@ struct GBUFFER_ARRAY
   GBUFFER_ID m_buffer_id;
   char * m_buffer_data;
   char m_byte_stride;
-  GUINT m_byte_offset;
-  GUINT m_element_count;
+  GUINT32 m_byte_offset;
+  GUINT32 m_element_count;
 };
 //typedef  struct _GBUFFER_ARRAY GBUFFER_ARRAY;
 
@@ -758,7 +758,7 @@ struct GBUFFER_ARRAY
 { \
     if ((reserve_size) > (array_data).m_element_count) \
     { \
-        GUINT _buffer_size, _newarray_size; \
+        GUINT32 _buffer_size, _newarray_size; \
         gim_get_buffer_size(&(array_data).m_buffer_id, _buffer_size); \
         _newarray_size = (reserve_size) * (array_data).m_byte_stride; \
         if(_newarray_size > _buffer_size) \
@@ -906,14 +906,14 @@ Then, You'd need to call unlock_array when finish to using the array access.
 \param access A constant for access to the buffer. can be G_MA_READ_ONLY,G_MA_WRITE_ONLY or G_MA_READ_WRITE
 \return an Buffer error code
 */
-GINT gim_buffer_array_lock(GBUFFER_ARRAY * array_data, int access);
+GINT32 gim_buffer_array_lock(GBUFFER_ARRAY * array_data, int access);
 
 //! close the access to the array buffer through the m_buffer_data element
 /*!
 \param array_data Array structure to be locked
 \return an Buffer error code
 */
-GINT gim_buffer_array_unlock(GBUFFER_ARRAY * array_data);
+GINT32 gim_buffer_array_unlock(GBUFFER_ARRAY * array_data);
 
 //! Copy an array by reference
 /*!
@@ -928,7 +928,7 @@ void gim_buffer_array_copy_ref(GBUFFER_ARRAY * source_data,GBUFFER_ARRAY  * dest
 */
 void gim_buffer_array_copy_value(GBUFFER_ARRAY * source_data,
 	GBUFFER_MANAGER_DATA dest_buffer_managers[],GBUFFER_ARRAY  * dest_data, 
-	GUINT buffer_manager_id,int usage);
+	GUINT32 buffer_manager_id,int usage);
 
 //! Destroys an GBUFFER_ARRAY object
 /*!
@@ -951,7 +951,7 @@ void GIM_BUFFER_ARRAY_DESTROY(GBUFFER_ARRAY & array_data);
     } \
     else \
     { \
-        GUINT _k_, _ecount_= (array_data).m_element_count; \
+        GUINT32 _k_, _ecount_= (array_data).m_element_count; \
         type * _source_vert_; \
         type * _dest_vert_ = (dest_data); \
         gim_buffer_array_lock(&(array_data), G_MA_READ_ONLY); \
@@ -980,7 +980,7 @@ void GIM_BUFFER_ARRAY_DESTROY(GBUFFER_ARRAY & array_data);
     } \
     else \
     { \
-        GUINT _k_, _ecount_= (array_data).m_element_count; \
+        GUINT32 _k_, _ecount_= (array_data).m_element_count; \
         type * _source_vert_ = (source_data); \
         type * _dest_vert_; \
         gim_buffer_array_lock(&(array_data), G_MA_WRITE_ONLY); \
@@ -1022,7 +1022,7 @@ This macro executes a kernel macro or function for each element of the streams
     gim_buffer_array_lock(&(_src_array), G_MA_READ_ONLY); \
     gim_buffer_array_lock(&(_dst_array), G_MA_WRITE_ONLY); \
 \
-    GUINT _i_, _count_=(_src_array).m_element_count; \
+    GUINT32 _i_, _count_=(_src_array).m_element_count; \
 \
     _src_type * _source_vert_; \
     _dst_type * _dest_vert_; \

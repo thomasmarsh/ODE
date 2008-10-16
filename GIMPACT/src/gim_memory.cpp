@@ -174,46 +174,46 @@ void gim_free(void *ptr, size_t size)
 
 //!** Basic buffer prototype functions
 
-static GUINT _system_buffer_alloc_function(GUINT size,int usage)
+static GPTR _system_buffer_alloc_function(GUINT32 size,int usage)
 {
     void * newdata = gim_alloc(size);
     memset(newdata,0,size);
-    return (GUINT)(newdata);
+    return (GPTR)newdata;
 }
 
-static GUINT _system_buffer_alloc_data_function(const void * pdata,GUINT size,int usage)
+static GPTR _system_buffer_alloc_data_function(const void * pdata,GUINT32 size,int usage)
 {
     void * newdata = gim_alloc(size);
     memcpy(newdata,pdata,size);
-    return (GUINT)(newdata);
+    return (GPTR)(newdata);
 }
 
-static GUINT _system_buffer_realloc_function(GUINT buffer_handle,GUINT oldsize,int old_usage,GUINT newsize,int new_usage)
+static GPTR _system_buffer_realloc_function(GPTR buffer_handle,GUINT32 oldsize,int old_usage,GUINT32 newsize,int new_usage)
 {
-    void * newdata = gim_realloc((void *)buffer_handle,oldsize,newsize);
-    return (GUINT)(newdata);
+    void * newdata = gim_realloc(buffer_handle,oldsize,newsize);
+    return (GPTR)(newdata);
 }
 
-static void _system_buffer_free_function(GUINT buffer_handle,GUINT size)
+static void _system_buffer_free_function(GPTR buffer_handle,GUINT32 size)
 {
-    gim_free((void*)buffer_handle,size);
+    gim_free(buffer_handle,size);
 }
 
-static char * _system_lock_buffer_function(GUINT buffer_handle,int access)
+static char * _system_lock_buffer_function(GPTR buffer_handle,int access)
 {
     return (char * )(buffer_handle);
 }
 
 
-static void _system_unlock_buffer_function(GUINT buffer_handle)
+static void _system_unlock_buffer_function(GPTR buffer_handle)
 {
 }
 
 static void _system_download_from_buffer_function(
-        GUINT source_buffer_handle,
-		GUINT source_pos,
+        GPTR source_buffer_handle,
+		GUINT32 source_pos,
 		void * destdata,
-		GUINT copysize)
+		GUINT32 copysize)
 {
     char * pdata;
 	pdata = (char *)source_buffer_handle;
@@ -221,10 +221,10 @@ static void _system_download_from_buffer_function(
 }
 
 static void  _system_upload_to_buffer_function(
-        GUINT dest_buffer_handle,
-		GUINT dest_pos,
+        GPTR dest_buffer_handle,
+		GUINT32 dest_pos,
 		void * sourcedata,
-		GUINT copysize)
+		GUINT32 copysize)
 {
     char * pdata;
 	pdata = (char * )dest_buffer_handle;
@@ -232,11 +232,11 @@ static void  _system_upload_to_buffer_function(
 }
 
 static void  _system_copy_buffers_function(
-		GUINT source_buffer_handle,
-		GUINT source_pos,
-		GUINT dest_buffer_handle,
-		GUINT dest_pos,
-		GUINT copysize)
+		GPTR source_buffer_handle,
+		GUINT32 source_pos,
+		GPTR dest_buffer_handle,
+		GUINT32 dest_pos,
+		GUINT32 copysize)
 {
     char * pdata1,*pdata2;
 	pdata1 = (char *)source_buffer_handle;
@@ -244,22 +244,22 @@ static void  _system_copy_buffers_function(
 	memcpy(pdata2+dest_pos,pdata1+source_pos,copysize);
 }
 
-static GUINT _shared_buffer_alloc_function(GUINT size,int usage)
+static GPTR _shared_buffer_alloc_function(GUINT32 size,int usage)
 {
     return 0;
 }
 
-static GUINT _shared_buffer_alloc_data_function(const void * pdata,GUINT size,int usage)
+static GPTR _shared_buffer_alloc_data_function(const void * pdata,GUINT32 size,int usage)
 {
-    return (GUINT)pdata;
+    return (GPTR)pdata;
 }
 
-static GUINT _shared_buffer_realloc_function(GUINT buffer_handle,GUINT oldsize,int old_usage,GUINT newsize,int new_usage)
+static GPTR _shared_buffer_realloc_function(GPTR buffer_handle,GUINT32 oldsize,int old_usage,GUINT32 newsize,int new_usage)
 {
     return 0;
 }
 
-static void _shared_buffer_free_function(GUINT buffer_handle,GUINT size)
+static void _shared_buffer_free_function(GPTR buffer_handle,GUINT32 size)
 {
 }
 
@@ -301,7 +301,7 @@ static const GBUFFER_MANAGER_PROTOTYPE g_bm_prototypes[G_BUFFER_MANAGER__MAX] =
 };
 
 int gim_is_buffer_manager_active(GBUFFER_MANAGER_DATA buffer_managers[],
-	GUINT buffer_manager_id)
+	GUINT32 buffer_manager_id)
 {
 	GBUFFER_MANAGER_DATA * bm_data;
 	bm_data = &buffer_managers[buffer_manager_id];
@@ -310,7 +310,7 @@ int gim_is_buffer_manager_active(GBUFFER_MANAGER_DATA buffer_managers[],
 
 //!** Buffer manager operations
 void gim_create_buffer_manager(GBUFFER_MANAGER_DATA buffer_managers[],
-	GUINT buffer_manager_id)
+	GUINT32 buffer_manager_id)
 {
     GBUFFER_MANAGER_DATA * bm_data;
     bm_data = &buffer_managers[buffer_manager_id];
@@ -322,12 +322,12 @@ void gim_create_buffer_manager(GBUFFER_MANAGER_DATA buffer_managers[],
 
     //CREATE ARRAYS
     GIM_DYNARRAY_CREATE(GBUFFER_DATA,bm_data->m_buffer_array,G_ARRAY_BUFFERMANAGER_INIT_SIZE);
-    GIM_DYNARRAY_CREATE(GUINT,bm_data->m_free_positions,G_ARRAY_BUFFERMANAGER_INIT_SIZE);
+    GIM_DYNARRAY_CREATE(GUINT32,bm_data->m_free_positions,G_ARRAY_BUFFERMANAGER_INIT_SIZE);
 	bm_data->m_prototype = g_bm_prototypes + buffer_manager_id;
 	bm_data->m_buffer_manager_id = buffer_manager_id;
 }
 
-void gim_destroy_buffer_manager(GBUFFER_MANAGER_DATA buffer_managers[], GUINT buffer_manager_id)
+void gim_destroy_buffer_manager(GBUFFER_MANAGER_DATA buffer_managers[], GUINT32 buffer_manager_id)
 {
     GBUFFER_MANAGER_DATA * bm_data;
     gim_get_buffer_manager_data(buffer_managers,buffer_manager_id,&bm_data);
@@ -335,7 +335,7 @@ void gim_destroy_buffer_manager(GBUFFER_MANAGER_DATA buffer_managers[], GUINT bu
     //Destroy all buffers
 
     GBUFFER_DATA * buffers = GIM_DYNARRAY_POINTER(GBUFFER_DATA,bm_data->m_buffer_array);
-    GUINT i, buffer_count = bm_data->m_buffer_array.m_size;
+    GUINT32 i, buffer_count = bm_data->m_buffer_array.m_size;
     for (i=0;i<buffer_count ;i++ )
     {
 		GBUFFER_DATA * current_buffer = buffers + i;
@@ -352,7 +352,7 @@ void gim_destroy_buffer_manager(GBUFFER_MANAGER_DATA buffer_managers[], GUINT bu
     GIM_DYNARRAY_DESTROY(bm_data->m_free_positions);
 }
 void gim_get_buffer_manager_data(GBUFFER_MANAGER_DATA buffer_managers[], 
-	GUINT buffer_manager_id,GBUFFER_MANAGER_DATA ** pbm_data)
+	GUINT32 buffer_manager_id,GBUFFER_MANAGER_DATA ** pbm_data)
 {
 	GBUFFER_MANAGER_DATA * bm_data;
     bm_data = &buffer_managers[buffer_manager_id];
@@ -369,7 +369,7 @@ void gim_get_buffer_manager_data(GBUFFER_MANAGER_DATA buffer_managers[],
 
 void gim_init_buffer_managers(GBUFFER_MANAGER_DATA buffer_managers[])
 {
-    GUINT i;
+    GUINT32 i;
     for (i=0;i<G_BUFFER_MANAGER__MAX;i++)
     {
 		_init_buffer_manager_data(buffer_managers + i);
@@ -386,7 +386,7 @@ void gim_init_buffer_managers(GBUFFER_MANAGER_DATA buffer_managers[])
 
 void gim_terminate_buffer_managers(GBUFFER_MANAGER_DATA buffer_managers[])
 {
-    GUINT i;
+    GUINT32 i;
     for (i=0;i<G_BUFFER_MANAGER__MAX;i++)
     {
         gim_destroy_buffer_manager(buffer_managers,i);
@@ -395,11 +395,11 @@ void gim_terminate_buffer_managers(GBUFFER_MANAGER_DATA buffer_managers[])
 
 //!** Buffer operations
 
-void GET_AVALIABLE_BUFFER_ID(GBUFFER_MANAGER_DATA * buffer_manager, GUINT & buffer_id)
+void GET_AVALIABLE_BUFFER_ID(GBUFFER_MANAGER_DATA * buffer_manager, GUINT32 & buffer_id)
 {
     if(buffer_manager->m_free_positions.m_size>0)\
     {
-        GUINT * _pointer = GIM_DYNARRAY_POINTER(GUINT,buffer_manager->m_free_positions);
+        GUINT32 * _pointer = GIM_DYNARRAY_POINTER(GUINT32,buffer_manager->m_free_positions);
         buffer_id = _pointer[buffer_manager->m_free_positions.m_size-1];
         GIM_DYNARRAY_POP_ITEM(buffer_manager->m_free_positions);
     }
@@ -410,7 +410,7 @@ void GET_AVALIABLE_BUFFER_ID(GBUFFER_MANAGER_DATA * buffer_manager, GUINT & buff
     }
 }
 
-GINT _validate_buffer_id(GBUFFER_ID * buffer_id,GBUFFER_DATA ** ppbuffer,GBUFFER_MANAGER_DATA ** pbm_data)
+GINT32 _validate_buffer_id(GBUFFER_ID * buffer_id,GBUFFER_DATA ** ppbuffer,GBUFFER_MANAGER_DATA ** pbm_data)
 {
     VALIDATE_BUFFER_ID_PT(buffer_id)
     *ppbuffer = pbuffer;
@@ -418,16 +418,16 @@ GINT _validate_buffer_id(GBUFFER_ID * buffer_id,GBUFFER_DATA ** ppbuffer,GBUFFER
     return G_BUFFER_OP_SUCCESS;
 }
 
-GUINT gim_create_buffer(
+GUINT32 gim_create_buffer(
 	GBUFFER_MANAGER_DATA buffer_managers[],
-    GUINT buffer_manager_id,
-    GUINT buffer_size,
+    GUINT32 buffer_manager_id,
+    GUINT32 buffer_size,
     int usage,
     GBUFFER_ID * buffer_id)
 {
     VALIDATE_BUFFER_MANAGER(buffer_managers,buffer_manager_id)
 
-    GUINT newbufferhandle = bm_data->m_prototype->alloc_fn(buffer_size,usage);
+    GPTR newbufferhandle = bm_data->m_prototype->alloc_fn(buffer_size,usage);
     if(newbufferhandle==0) return G_BUFFER_OP_INVALID;
 
     GET_AVALIABLE_BUFFER_ID(bm_data,buffer_id->m_buffer_id);
@@ -459,17 +459,17 @@ GUINT gim_create_buffer(
 }
 
 
-GUINT gim_create_buffer_from_data(
+GUINT32 gim_create_buffer_from_data(
 	GBUFFER_MANAGER_DATA buffer_managers[],
-    GUINT buffer_manager_id,
+    GUINT32 buffer_manager_id,
     const void * pdata,
-    GUINT buffer_size,
+    GUINT32 buffer_size,
     int usage,
     GBUFFER_ID * buffer_id)
 {
     VALIDATE_BUFFER_MANAGER(buffer_managers,buffer_manager_id)
 
-    GUINT newbufferhandle = bm_data->m_prototype->alloc_data_fn(pdata,buffer_size,usage);
+    GPTR newbufferhandle = bm_data->m_prototype->alloc_data_fn(pdata,buffer_size,usage);
     if(newbufferhandle==0) return G_BUFFER_OP_INVALID;
 
     GET_AVALIABLE_BUFFER_ID(bm_data,buffer_id->m_buffer_id);
@@ -500,29 +500,29 @@ GUINT gim_create_buffer_from_data(
     return G_BUFFER_OP_SUCCESS;
 }
 
-GUINT gim_create_common_buffer(GBUFFER_MANAGER_DATA buffer_managers[],
-	GUINT buffer_size, GBUFFER_ID * buffer_id)
+GUINT32 gim_create_common_buffer(GBUFFER_MANAGER_DATA buffer_managers[],
+	GUINT32 buffer_size, GBUFFER_ID * buffer_id)
 {
     return gim_create_buffer(buffer_managers,G_BUFFER_MANAGER_SYSTEM,buffer_size,G_MU_DYNAMIC_READ_WRITE,buffer_id);
 }
 
-GUINT gim_create_common_buffer_from_data(GBUFFER_MANAGER_DATA buffer_managers[],
-    const void * pdata, GUINT buffer_size, GBUFFER_ID * buffer_id)
+GUINT32 gim_create_common_buffer_from_data(GBUFFER_MANAGER_DATA buffer_managers[],
+    const void * pdata, GUINT32 buffer_size, GBUFFER_ID * buffer_id)
 {
     return gim_create_buffer_from_data(buffer_managers,G_BUFFER_MANAGER_SYSTEM,pdata,buffer_size,G_MU_DYNAMIC_READ_WRITE,buffer_id);
 }
 
-GUINT gim_create_shared_buffer_from_data(GBUFFER_MANAGER_DATA buffer_managers[],
-    const void * pdata, GUINT buffer_size, GBUFFER_ID * buffer_id)
+GUINT32 gim_create_shared_buffer_from_data(GBUFFER_MANAGER_DATA buffer_managers[],
+    const void * pdata, GUINT32 buffer_size, GBUFFER_ID * buffer_id)
 {
     return gim_create_buffer_from_data(buffer_managers,G_BUFFER_MANAGER_SHARED,pdata,buffer_size,G_MU_DYNAMIC_READ_WRITE,buffer_id);
 }
 
-GINT gim_buffer_realloc(GBUFFER_ID * buffer_id,GUINT newsize)
+GINT32 gim_buffer_realloc(GBUFFER_ID * buffer_id,GUINT32 newsize)
 {
     VALIDATE_BUFFER_ID_PT(buffer_id)
     if(pbuffer->m_lock_count>0) return G_BUFFER_OP_INVALID;
-    GUINT newhandle = buffer_id->m_bm_data->m_prototype->realloc_fn(
+    GPTR newhandle = buffer_id->m_bm_data->m_prototype->realloc_fn(
 		pbuffer->m_buffer_handle,pbuffer->m_size,pbuffer->m_usage,newsize,pbuffer->m_usage);
     if(newhandle==0) return G_BUFFER_OP_INVALID;
     pbuffer->m_buffer_handle = newhandle;
@@ -531,14 +531,14 @@ GINT gim_buffer_realloc(GBUFFER_ID * buffer_id,GUINT newsize)
     return G_BUFFER_OP_SUCCESS;
 }
 
-GINT gim_buffer_add_ref(GBUFFER_ID * buffer_id)
+GINT32 gim_buffer_add_ref(GBUFFER_ID * buffer_id)
 {
     VALIDATE_BUFFER_ID_PT(buffer_id)
     pbuffer->m_refcount++;
     return G_BUFFER_OP_SUCCESS;
 }
 
-GINT gim_buffer_free(GBUFFER_ID * buffer_id)
+GINT32 gim_buffer_free(GBUFFER_ID * buffer_id)
 {
     VALIDATE_BUFFER_ID_PT(buffer_id)
     if(pbuffer->m_lock_count>0) return G_BUFFER_OP_INVALID;
@@ -550,7 +550,7 @@ GINT gim_buffer_free(GBUFFER_ID * buffer_id)
     //destroy shadow buffer if needed
     gim_buffer_free(&pbuffer->m_shadow_buffer);
     // Obtain a free slot index for a new buffer
-    GIM_DYNARRAY_PUSH_ITEM(GUINT,bm_data->m_free_positions,buffer_id->m_buffer_id);
+    GIM_DYNARRAY_PUSH_ITEM(GUINT32,bm_data->m_free_positions,buffer_id->m_buffer_id);
 	pbuffer->m_buffer_handle = 0;
 	pbuffer->m_size = 0;
 	pbuffer->m_shadow_buffer.m_bm_data = 0;
@@ -558,7 +558,7 @@ GINT gim_buffer_free(GBUFFER_ID * buffer_id)
     return G_BUFFER_OP_SUCCESS;
 }
 
-GINT gim_lock_buffer(GBUFFER_ID * buffer_id,int access,char ** map_pointer)
+GINT32 gim_lock_buffer(GBUFFER_ID * buffer_id,int access,char ** map_pointer)
 {
     VALIDATE_BUFFER_ID_PT(buffer_id)
     if(pbuffer->m_lock_count>0)
@@ -571,7 +571,7 @@ GINT gim_lock_buffer(GBUFFER_ID * buffer_id,int access,char ** map_pointer)
 
     pbuffer->m_access = access;
 
-    GUINT result;
+    GUINT32 result;
     if(pbuffer->m_usage==G_MU_STATIC_WRITE)
 	{
 		*map_pointer = 0;///no access
@@ -646,7 +646,7 @@ GINT gim_lock_buffer(GBUFFER_ID * buffer_id,int access,char ** map_pointer)
     return G_BUFFER_OP_SUCCESS;
 }
 
-GINT gim_unlock_buffer(GBUFFER_ID * buffer_id)
+GINT32 gim_unlock_buffer(GBUFFER_ID * buffer_id)
 {
     VALIDATE_BUFFER_ID_PT(buffer_id)
     if(pbuffer->m_lock_count==0) return G_BUFFER_OP_INVALID;
@@ -658,7 +658,7 @@ GINT gim_unlock_buffer(GBUFFER_ID * buffer_id)
     }
 
 
-    GUINT result;
+    GUINT32 result;
     if(pbuffer->m_usage==G_MU_STATIC_WRITE)
 	{
 		pbuffer->m_mapped_pointer = 0;
@@ -741,14 +741,14 @@ GINT gim_unlock_buffer(GBUFFER_ID * buffer_id)
 	return G_BUFFER_OP_SUCCESS;
 }
 
-GINT gim_get_buffer_size(GBUFFER_ID * buffer_id,GUINT * buffer_size)
+GINT32 gim_get_buffer_size(GBUFFER_ID * buffer_id,GUINT32 * buffer_size)
 {
     VALIDATE_BUFFER_ID_PT(buffer_id)
     *buffer_size =  pbuffer->m_size;
     return G_BUFFER_OP_SUCCESS;
 }
 
-GINT gim_get_buffer_is_locked(GBUFFER_ID * buffer_id,GUINT * lock_count)
+GINT32 gim_get_buffer_is_locked(GBUFFER_ID * buffer_id,GUINT32 * lock_count)
 {
     VALIDATE_BUFFER_ID_PT(buffer_id)
     *lock_count =  pbuffer->m_lock_count;
@@ -756,11 +756,11 @@ GINT gim_get_buffer_is_locked(GBUFFER_ID * buffer_id,GUINT * lock_count)
 }
 
 
-GINT gim_download_from_buffer(
+GINT32 gim_download_from_buffer(
         GBUFFER_ID * buffer_id,
-		GUINT source_pos,
+		GUINT32 source_pos,
 		void * destdata,
-		GUINT copysize)
+		GUINT32 copysize)
 {
     VALIDATE_BUFFER_ID_PT(buffer_id)
     buffer_id->m_bm_data->m_prototype->download_from_buffer_fn(
@@ -768,11 +768,11 @@ GINT gim_download_from_buffer(
     return G_BUFFER_OP_SUCCESS;
 }
 
-GINT  gim_upload_to_buffer(
+GINT32  gim_upload_to_buffer(
 		GBUFFER_ID * buffer_id,
-		GUINT dest_pos,
+		GUINT32 dest_pos,
 		void * sourcedata,
-		GUINT copysize)
+		GUINT32 copysize)
 {
     VALIDATE_BUFFER_ID_PT(buffer_id)
     buffer_id->m_bm_data->m_prototype->upload_to_buffer_fn(
@@ -780,12 +780,12 @@ GINT  gim_upload_to_buffer(
     return G_BUFFER_OP_SUCCESS;
 }
 
-GINT  gim_copy_buffers(
+GINT32  gim_copy_buffers(
 		GBUFFER_ID * source_buffer_id,
-		GUINT source_pos,
+		GUINT32 source_pos,
 		GBUFFER_ID * dest_buffer_id,
-		GUINT dest_pos,
-		GUINT copysize)
+		GUINT32 dest_pos,
+		GUINT32 copysize)
 {
     GBUFFER_MANAGER_DATA * bm_data1,* bm_data2;
     GBUFFER_DATA * pbuffer1, * pbuffer2;
@@ -828,19 +828,19 @@ GINT  gim_copy_buffers(
     return G_BUFFER_OP_SUCCESS;
 }
 
-GINT gim_buffer_array_lock(GBUFFER_ARRAY * array_data, int access)
+GINT32 gim_buffer_array_lock(GBUFFER_ARRAY * array_data, int access)
 {
     if(array_data->m_buffer_data != 0) return G_BUFFER_OP_SUCCESS;
-    GINT result = gim_lock_buffer(&array_data->m_buffer_id,access,&array_data->m_buffer_data);
+    GINT32 result = gim_lock_buffer(&array_data->m_buffer_id,access,&array_data->m_buffer_data);
     if(result!= G_BUFFER_OP_SUCCESS) return result;
     array_data->m_buffer_data += array_data->m_byte_offset;
     return result;
 }
 
-GINT gim_buffer_array_unlock(GBUFFER_ARRAY * array_data)
+GINT32 gim_buffer_array_unlock(GBUFFER_ARRAY * array_data)
 {
     if(array_data->m_buffer_data == 0) return G_BUFFER_OP_SUCCESS;
-    GINT result = gim_unlock_buffer(&array_data->m_buffer_id);
+    GINT32 result = gim_unlock_buffer(&array_data->m_buffer_id);
     if(result!= G_BUFFER_OP_SUCCESS) return result;
     array_data->m_buffer_data = 0;
     return result;
@@ -859,10 +859,10 @@ void gim_buffer_array_copy_ref(GBUFFER_ARRAY * source_data,GBUFFER_ARRAY  * dest
 
 void gim_buffer_array_copy_value(GBUFFER_ARRAY * source_data,
 	GBUFFER_MANAGER_DATA dest_buffer_managers[],GBUFFER_ARRAY  * dest_data, 
-	GUINT buffer_manager_id,int usage)
+	GUINT32 buffer_manager_id,int usage)
 {
     //Create new buffer
-    GUINT buffsize = source_data->m_element_count*source_data->m_byte_stride;
+    GUINT32 buffsize = source_data->m_element_count*source_data->m_byte_stride;
     gim_create_buffer(dest_buffer_managers,buffer_manager_id,buffsize,usage,&dest_data->m_buffer_id);
 
     //copy ref data

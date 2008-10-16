@@ -1337,7 +1337,7 @@ int dCollideBTL(dxGeom* g1, dxGeom* BoxGeom, int Flags, dContactGeom* Contacts, 
 
 	//collide triangles
 
-	GUINT * boxesresult = GIM_DYNARRAY_POINTER(GUINT,collision_result);
+	GUINT32 * boxesresult = GIM_DYNARRAY_POINTER(GUINT32,collision_result);
 	gim_trimesh_locks_work_data(ptrimesh);
 
     int ctContacts0 = 0;

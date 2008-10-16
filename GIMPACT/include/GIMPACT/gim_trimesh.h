@@ -162,7 +162,7 @@ struct GIM_TRIMESH
 
 /// Info about mesh
 //! Return the trimesh triangle count
-GUINT gim_trimesh_get_triangle_count(GIM_TRIMESH * trimesh);
+GUINT32 gim_trimesh_get_triangle_count(GIM_TRIMESH * trimesh);
 
 //! Returns 1 if the m_transformed_vertex_buffer is a reply of m_source_vertex_buffer
 char gim_trimesh_has_tranformed_reply(GIM_TRIMESH * trimesh);
@@ -204,8 +204,8 @@ void gim_trimesh_create_from_arrays(GBUFFER_MANAGER_DATA buffer_managers[],
 \param transformed_reply If 1, then the m_transformed_vertices is a reply of the source vertices. Else it just be a reference to the original array. Use 1 if you will apply transformations to the trimesh. See \ref gim_trimesh_set_tranform().
 */
 void gim_trimesh_create_from_data(GBUFFER_MANAGER_DATA buffer_managers[],
-	GIM_TRIMESH * trimesh, vec3f * vertex_array, GUINT vertex_count,char copy_vertices, 
-	GUINT * triindex_array, GUINT index_count,char copy_indices,char transformed_reply);
+	GIM_TRIMESH * trimesh, vec3f * vertex_array, GUINT32 vertex_count,char copy_vertices, 
+	GUINT32 * triindex_array, GUINT32 index_count,char copy_indices,char transformed_reply);
 
 //! Clears auxiliary data and releases buffer arrays
 void gim_trimesh_destroy(GIM_TRIMESH * trimesh);
@@ -265,13 +265,13 @@ void gim_trimesh_set_tranform(GIM_TRIMESH * trimesh, mat4f transform);
 /*!
 \pre gim_trimesh_locks_work_data must be called before
 */
-void gim_trimesh_get_triangle_data(GIM_TRIMESH * trimesh, GUINT triangle_index, GIM_TRIANGLE_DATA * tri_data);
+void gim_trimesh_get_triangle_data(GIM_TRIMESH * trimesh, GUINT32 triangle_index, GIM_TRIANGLE_DATA * tri_data);
 
 //! Fetch triangle vertices
 /*!
 \pre gim_trimesh_locks_work_data must be called before
 */
-void gim_trimesh_get_triangle_vertices(GIM_TRIMESH * trimesh, GUINT triangle_index, vec3f v1,vec3f v2,vec3f v3);
+void gim_trimesh_get_triangle_vertices(GIM_TRIMESH * trimesh, GUINT32 triangle_index, vec3f v1,vec3f v2,vec3f v3);
 
 //! Trimesh Trimesh Collisions
 /*!

@@ -51,7 +51,7 @@ int gim_trimesh_ray_collision(GIM_TRIMESH * trimesh,vec3f origin,vec3f dir, GREA
 
 	//collide triangles
 
-	GUINT * boxesresult = GIM_DYNARRAY_POINTER(GUINT,collision_result);
+	GUINT32 * boxesresult = GIM_DYNARRAY_POINTER(GUINT32,collision_result);
 	GIM_TRIANGLE_DATA  tridata;
 	vec3f pout;
 	GREAL tparam,u,v;
@@ -107,7 +107,7 @@ int gim_trimesh_ray_closest_collision(GIM_TRIMESH * trimesh,vec3f origin,vec3f d
 
 	//collide triangles
 
-	GUINT * boxesresult = GIM_DYNARRAY_POINTER(GUINT,collision_result);
+	GUINT32 * boxesresult = GIM_DYNARRAY_POINTER(GUINT32,collision_result);
 	GIM_TRIANGLE_DATA  tridata;
 	vec3f pout;
 	GREAL tparam,u,v;

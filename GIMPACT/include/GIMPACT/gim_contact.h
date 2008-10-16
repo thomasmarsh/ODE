@@ -54,8 +54,8 @@ struct GIM_CONTACT
     GREAL m_depth;//Positive value indicates interpenetration
     void * m_handle1;
     void * m_handle2;
-    GUINT m_feature1;//Face number
-    GUINT m_feature2;//Face number
+    GUINT32 m_feature1;//Face number
+    GUINT32 m_feature2;//Face number
 };
 //typedef struct _GIM_CONTACT GIM_CONTACT;
 
@@ -63,9 +63,9 @@ struct GIM_CONTACT
 
 #define GIM_CALC_KEY_CONTACT(pos,hash)\
 {\
-	GINT _coords[] = {(GINT)(pos[0]*1000.0f+1.0f),(GINT)(pos[1]*1333.0f),(GINT)(pos[2]*2133.0f+3.0f)};\
-	GUINT _hash=0;\
-	GUINT *_uitmp = (GUINT *)(&_coords[0]);\
+	GINT32 _coords[] = {(GINT32)(pos[0]*1000.0f+1.0f),(GINT32)(pos[1]*1333.0f),(GINT32)(pos[2]*2133.0f+3.0f)};\
+	GUINT32 _hash=0;\
+	GUINT32 *_uitmp = (GUINT32 *)(&_coords[0]);\
 	_hash = *_uitmp;\
 	_uitmp++;\
 	_hash += (*_uitmp)<<4;\
