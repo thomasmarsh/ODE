@@ -125,6 +125,47 @@ dReal dJointGetPRPositionRate( dJointID j )
 
 
 
+dReal dJointGetPRAngle( dJointID j )
+{
+    dxJointPR* joint = ( dxJointPR* )j;
+    dAASSERT( joint );
+    checktype( joint, PR );
+    if ( joint->node[0].body )
+    {
+        dReal ang = getHingeAngle( joint->node[0].body,
+                                   joint->node[1].body,
+                                   joint->axisR1,
+                                   joint->qrel );
+        if ( joint->flags & dJOINT_REVERSE )
+            return -ang;
+        else
+            return ang;
+    }
+    else return 0;
+}
+
+
+
+dReal dJointGetPRAngleRate( dJointID j )
+{
+    dxJointPR* joint = ( dxJointPR* )j;
+    dAASSERT( joint );
+    checktype( joint, PR );
+    if ( joint->node[0].body )
+    {
+        dVector3 axis;
+        dMULTIPLY0_331( axis, joint->node[0].body->posr.R, joint->axisR1 );
+        dReal rate = dDOT( axis, joint->node[0].body->avel );
+        if ( joint->node[1].body ) rate -= dDOT( axis, joint->node[1].body->avel );
+        if ( joint->flags & dJOINT_REVERSE ) rate = -rate;
+        return rate;
+    }
+    else return 0;
+}
+
+
+
+
 void
 dxJointPR::getInfo1( dxJoint::Info1 *info )
 {

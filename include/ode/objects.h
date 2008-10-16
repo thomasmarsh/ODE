@@ -2284,6 +2284,23 @@ ODE_API dReal dJointGetPRPositionRate (dJointID);
 
 
 /**
+   * @brief Get the PR angular position (i.e. the  twist between the 2 bodies)
+   *
+   * When the axis is set, the current position of the attached bodies is
+   * examined and that position will be the zero position.
+   * @ingroup joints
+   */
+ODE_API dReal dJointGetPRAngle (dJointID);
+
+/**
+ * @brief Get the PR angular position's time derivative
+ *
+ * @ingroup joints
+ */
+ODE_API dReal dJointGetPRAngleRate (dJointID);
+
+
+/**
  * @brief Get the prismatic axis
  * @ingroup joints
  */

@@ -122,6 +122,8 @@ static void start()
 
     printf("Press 'l' to add limits (-0.5 to 0.5rad) on the rotoide axis\n");
     printf("Press 'k' to remove the limits on the rotoide axis\n");
+
+    printf("Press 'i' to get joint info\n");
 }
 
 // function to update camera position at each step.
@@ -179,28 +181,42 @@ static void command (int cmd)
 
     case 'v':
     case 'V':
-      dJointSetPRParam(joint[0], dParamVel2, 2);
-      dJointSetPRParam(joint[0], dParamFMax2, 200);
-      break;
+        dJointSetPRParam(joint[0], dParamVel2, 2);
+        dJointSetPRParam(joint[0], dParamFMax2, 500);
+        break;
 
     case 'c':
     case 'C':
-      dJointSetPRParam(joint[0], dParamVel2, 0);
-      dJointSetPRParam(joint[0], dParamFMax2, 0);
-      break;
+        dJointSetPRParam(joint[0], dParamVel2, 0);
+        dJointSetPRParam(joint[0], dParamFMax2, 0);
+        break;
 
     case 'l':
     case 'L':
-      dJointSetPRParam(joint[0], dParamLoStop2, -0.5);
-      dJointSetPRParam(joint[0], dParamHiStop2,  0.5);
-      break;
+        dJointSetPRParam(joint[0], dParamLoStop2, -0.5);
+        dJointSetPRParam(joint[0], dParamHiStop2,  0.5);
+        break;
 
     case 'k':
     case 'K':
-      dJointSetPRParam(joint[0], dParamLoStop2, -dInfinity);
-      dJointSetPRParam(joint[0], dParamHiStop2,  dInfinity);
-      break;
+        dJointSetPRParam(joint[0], dParamLoStop2, -dInfinity);
+        dJointSetPRParam(joint[0], dParamHiStop2,  dInfinity);
+        break;
 
+    case 'i':
+    case 'I':
+        dVector3 anchor;
+        dJointGetPRAnchor(joint[0], anchor);
+        dReal angle = dJointGetPRAngle(joint[0]);
+        dReal w = dJointGetPRAngleRate(joint[0]);
+
+        dReal l = dJointGetPRPosition(joint[0]);
+        dReal v = dJointGetPRPositionRate(joint[0]);
+
+        printf("Anchor: [%6.4lf, %6.4lf, %6.4lf]\n", anchor[0], anchor[1], anchor[2]);
+        printf("Position: %7.4lf, Rate: %7.4lf\n", l, v);
+        printf("Angle: %7.4lf, Rate: %7.4lf\n", angle, w);
+        break;
     }
 }
 
