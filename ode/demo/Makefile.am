@@ -9,7 +9,7 @@ endif
 LDADD = $(top_builddir)/drawstuff/src/libdrawstuff.la \
         $(top_builddir)/ode/src/libode.la @GL_LIBS@
 
-noinst_HEADERS = basket_geom.h texturepath.h world_geom3.h bunny_geom.h
+noinst_HEADERS = basket_geom.h texturepath.h world_geom3.h bunny_geom.h convex_bunny_geom.h
 
 noinst_PROGRAMS = \
                 demo_boxstack \
@@ -74,11 +74,13 @@ noinst_PROGRAMS += \
                 demo_basket \
                 demo_cyl \
                 demo_moving_trimesh \
+                demo_moving_convex \
                 demo_trimesh
 
 demo_basket_SOURCES = demo_basket.cpp
 demo_cyl_SOURCES = demo_cyl.cpp
 demo_moving_trimesh_SOURCES = demo_moving_trimesh.cpp
+demo_moving_convex_SOURCES = demo_moving_convex.cpp
 demo_trimesh_SOURCES = demo_trimesh.cpp
 
 AM_CPPFLAGS += -DdTRIMESH_ENABLED
