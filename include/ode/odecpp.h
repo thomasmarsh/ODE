@@ -762,6 +762,11 @@ public:
   dReal getPositionRate() const
     { return dJointGetPRPositionRate (_id); }
 
+  dReal getAngle() const
+    { return dJointGetPRAngle (_id); }
+  dReal getAngleRate() const
+    { return dJointGetPRAngleRate (_id); }
+
   virtual void setParam (int parameter, dReal value)
     { dJointSetPRParam (_id, parameter, value); }
   virtual dReal getParam (int parameter) const
