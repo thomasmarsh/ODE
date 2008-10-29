@@ -25,7 +25,6 @@
 #include <UnitTest++.h>
 #include <ode/ode.h>
 #include "ode/odemath.h"
-#include "util.h" // internal header
 
 
 
