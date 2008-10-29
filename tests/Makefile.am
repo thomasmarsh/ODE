@@ -11,7 +11,7 @@ check_PROGRAMS = tests
 
 TESTS = tests
 
-tests_SOURCES = main.cpp joint.cpp odemath.cpp \
+tests_SOURCES = main.cpp joint.cpp odemath.cpp collision.cpp \
                 joints/ball.cpp \
                 joints/fixed.cpp \
                 joints/hinge.cpp \
