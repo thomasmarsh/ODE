@@ -366,16 +366,38 @@ int dCollideSTL(dxGeom* g1, dxGeom* SphereGeom, int Flags, dContactGeom* Contact
 				continue;	// Sphere doesn't hit triangle
 			}
 
-			if (Depth < REAL(0.0)){
-				Depth = REAL(0.0);
+			if (Depth <= REAL(0.0)){
+				continue; // Zero or negative depth does not produce a contact
+			}
+
+			dVector3 ContactPos;
+
+			dReal w = REAL(1.0) - u - v;
+			ContactPos[0] = (v0[0] * w) + (v1[0] * u) + (v2[0] * v);
+			ContactPos[1] = (v0[1] * w) + (v1[1] * u) + (v2[1] * v);
+			ContactPos[2] = (v0[2] * w) + (v1[2] * u) + (v2[2] * v);
+
+			// Depth returned from GetContactData is depth along 
+			// contact point - sphere center direction
+			// we'll project it to contact normal
+			dVector3 dir;
+			dir[0] = Position[0]-ContactPos[0];
+			dir[1] = Position[1]-ContactPos[1];
+			dir[2] = Position[2]-ContactPos[2];
+			dReal dirProj = dDOT(dir, Plane) / dSqrt(dDOT(dir, dir));
+			
+			// Since Depht already had a requirement to be positive,
+			// negative direction projections should not be allowed as well,
+			// as otherwise the multiplication will result in negative contact depth.
+			if (dirProj <= REAL(0.0)){
+				continue; // Zero contact depth could be ignored
 			}
 
 			dContactGeom* Contact = SAFECONTACT(Flags, Contacts, OutTriCount, Stride);
 
-			dReal w = REAL(1.0) - u - v;
-			Contact->pos[0] = (v0[0] * w) + (v1[0] * u) + (v2[0] * v);
-			Contact->pos[1] = (v0[1] * w) + (v1[1] * u) + (v2[1] * v);
-			Contact->pos[2] = (v0[2] * w) + (v1[2] * u) + (v2[2] * v);
+			Contact->pos[0] = ContactPos[0];
+			Contact->pos[1] = ContactPos[1];
+			Contact->pos[2] = ContactPos[2];
 			Contact->pos[3] = REAL(0.0);
 
 			// Using normal as plane (reversed)
@@ -384,14 +406,6 @@ int dCollideSTL(dxGeom* g1, dxGeom* SphereGeom, int Flags, dContactGeom* Contact
 			Contact->normal[2] = -Plane[2];
 			Contact->normal[3] = REAL(0.0);
 
-			// Depth returned from GetContactData is depth along 
-			// contact point - sphere center direction
-			// we'll project it to contact normal
-			dVector3 dir;
-			dir[0] = Position[0]-Contact->pos[0];
-			dir[1] = Position[1]-Contact->pos[1];
-			dir[2] = Position[2]-Contact->pos[2];
-			dReal dirProj = dDOT(dir, Plane) / dSqrt(dDOT(dir, dir));
 			Contact->depth = Depth * dirProj;
 			//Contact->depth = Radius - side; // (mg) penetration depth is distance along normal not shortest distance
 			Contact->side1 = TriIndex;
