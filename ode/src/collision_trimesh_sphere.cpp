@@ -366,8 +366,8 @@ int dCollideSTL(dxGeom* g1, dxGeom* SphereGeom, int Flags, dContactGeom* Contact
 				continue;	// Sphere doesn't hit triangle
 			}
 
-			if (Depth <= REAL(0.0)){
-				continue; // Zero or negative depth does not produce a contact
+			if (Depth < REAL(0.0)){
+				continue; // Negative depth does not produce a contact
 			}
 
 			dVector3 ContactPos;
@@ -386,10 +386,10 @@ int dCollideSTL(dxGeom* g1, dxGeom* SphereGeom, int Flags, dContactGeom* Contact
 			dir[2] = Position[2]-ContactPos[2];
 			dReal dirProj = dDOT(dir, Plane) / dSqrt(dDOT(dir, dir));
 			
-			// Since Depht already had a requirement to be positive,
+			// Since Depth already had a requirement to be non-negative,
 			// negative direction projections should not be allowed as well,
 			// as otherwise the multiplication will result in negative contact depth.
-			if (dirProj <= REAL(0.0)){
+			if (dirProj < REAL(0.0)){
 				continue; // Zero contact depth could be ignored
 			}
 
@@ -416,37 +416,33 @@ int dCollideSTL(dxGeom* g1, dxGeom* SphereGeom, int Flags, dContactGeom* Contact
 			OutTriCount++;
 		}
 #ifdef MERGECONTACTS	// Merge all contacts into 1
-		if (OutTriCount != 0){
+		if (OutTriCount > 0){
 			dContactGeom* Contact = SAFECONTACT(Flags, Contacts, 0, Stride);
-			
-			if (OutTriCount != 1 && !(Flags & CONTACTS_UNIMPORTANT)){
-				Contact->normal[0] *= Contact->depth;
-				Contact->normal[1] *= Contact->depth;
-				Contact->normal[2] *= Contact->depth;
-				Contact->normal[3] *= Contact->depth;
 
-				for (int i = 1; i < OutTriCount; i++){
+			if (OutTriCount > 1 && !(Flags & CONTACTS_UNIMPORTANT)){
+			    dVector3 normal = { 0,0,0 };
+			    dVector3 pos = { 0,0,0 };
+				for (int i = 0; i < OutTriCount; i++){
 					dContactGeom* TempContact = SAFECONTACT(Flags, Contacts, i, Stride);
 					
-					Contact->pos[0] += TempContact->pos[0];
-					Contact->pos[1] += TempContact->pos[1];
-					Contact->pos[2] += TempContact->pos[2];
-					Contact->pos[3] += TempContact->pos[3];
+					pos[0] += TempContact->pos[0];
+					pos[1] += TempContact->pos[1];
+					pos[2] += TempContact->pos[2];
 					
-					Contact->normal[0] += TempContact->normal[0] * TempContact->depth;
-					Contact->normal[1] += TempContact->normal[1] * TempContact->depth;
-					Contact->normal[2] += TempContact->normal[2] * TempContact->depth;
-					Contact->normal[3] += TempContact->normal[3] * TempContact->depth;
+					normal[0] += TempContact->normal[0] * TempContact->depth;
+					normal[1] += TempContact->normal[1] * TempContact->depth;
+					normal[2] += TempContact->normal[2] * TempContact->depth;
 				}
 			
-				Contact->pos[0] /= OutTriCount;
-				Contact->pos[1] /= OutTriCount;
-				Contact->pos[2] /= OutTriCount;
-				Contact->pos[3] /= OutTriCount;
+				Contact->pos[0] = pos[0] / OutTriCount;
+				Contact->pos[1] = pos[1] / OutTriCount;
+				Contact->pos[2] = pos[2] / OutTriCount;
 				
 				// Remember to divide in square space.
-				Contact->depth = dSqrt(dDOT(Contact->normal, Contact->normal) / OutTriCount);
+				Contact->depth = dSqrt(dDOT(normal, normal) / OutTriCount);
 
+                if (Contact->depth > dEpsilon) // otherwise the normal is too small
+                    dVector3Copy(Contact->normal, normal);
 				dNormalize3(Contact->normal);
 			}
 
