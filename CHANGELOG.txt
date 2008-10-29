@@ -8,6 +8,13 @@ the rules for this file:
   * keep the format consistent (79 char width, M/D/Y date format).
 
 ------------------------------------------------------------------------------
+10/29/08 Oleh_Derevenko
+
+        * Premake scripts changed to only include chosen collision library
+          sources in project on Windows. --all-collis-libs premake option 
+          added to allow inclusion of all collision library sources into the 
+          project
+
 10/15/08 Remi Ricard (papaDoc)
         * Applying patch #2158425 64-bit GIMPACT provided by Mark
           William. This patch enable GIMPACT to works on 64-bit machine.

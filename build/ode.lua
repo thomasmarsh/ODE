@@ -221,13 +221,11 @@ package.objdir = "obj/ode"
   if (options["no-trimesh"]) then
     table.insert(package.excludes, trimesh_files)
   else
-    if(options["all-trimesh"]) then
-       table.insert(package.files, gimpact_files)
-       table.insert(package.files, opcode_files)
-    elseif(options["with-gimpact"]) then
-       table.insert(package.files, gimpact_files)
-    else
-       table.insert(package.files, opcode_files)
+    if (options["all-collis-libs"] or options["with-gimpact"]) then
+      table.insert(package.files, gimpact_files)
+    end
+    if (options["all-collis-libs"] or not options["with-gimpact"]) then
+      table.insert(package.files, opcode_files)
     end
   end
 

@@ -26,6 +26,7 @@ project.name = "ode"
   addoption("with-demos",    		"Builds the demo applications and DrawStuff library")
   addoption("with-tests",    		"Builds the unit test application")
   addoption("with-gimpact",  		"Use GIMPACT for trimesh collisions (experimental)")
+  addoption("all-collis-libs",  	"Include sources of all collision libraries into the project")
   addoption("enable-static-only",	"Only create static library (.lib) project configurations")
   addoption("enable-shared-only",	"Only create dynamic library (.dll) project configurations")
   addoption("no-dif",        		"Exclude DIF (Dynamics Interchange Format) exports")
