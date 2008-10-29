@@ -221,8 +221,11 @@ package.objdir = "obj/ode"
   if (options["no-trimesh"]) then
     table.insert(package.excludes, trimesh_files)
   else
-    table.insert(package.files, gimpact_files)
-    table.insert(package.files, opcode_files)
+     if(options["with-gimpact"]) then
+	table.insert(package.files, gimpact_files)
+     else
+	table.insert(package.files, opcode_files)
+     end
   end
 
   if (options["enable-ou"]) then
