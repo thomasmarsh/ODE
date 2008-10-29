@@ -441,9 +441,10 @@ int dCollideSTL(dxGeom* g1, dxGeom* SphereGeom, int Flags, dContactGeom* Contact
 				// Remember to divide in square space.
 				Contact->depth = dSqrt(dDOT(normal, normal) / OutTriCount);
 
-                if (Contact->depth > dEpsilon) // otherwise the normal is too small
+				if (Contact->depth > dEpsilon) { // otherwise the normal is too small
                     dVector3Copy(Contact->normal, normal);
-				dNormalize3(Contact->normal);
+					dNormalize3(Contact->normal);
+				} // otherwise original Contact's normal would be used and it should be already normalized
 			}
 
 			Contact->g1 = TriMesh;
