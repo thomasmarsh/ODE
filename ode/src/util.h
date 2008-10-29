@@ -68,8 +68,4 @@ void dxProcessIslands (dxWorld *world, dReal stepsize, dstepper_fn_t stepper);
 
 
 
-/* Makes sure the matrix is a proper rotation */
-void dOrthogonalizeR(dMatrix3 m);
-
-
 #endif

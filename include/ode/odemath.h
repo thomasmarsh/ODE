@@ -349,6 +349,10 @@ ODE_API void dNormalize4 (dVector4 a); // Potentially asserts on zero vec
  */
 
 ODE_API void dPlaneSpace (const dVector3 n, dVector3 p, dVector3 q);
+/* Makes sure the matrix is a proper rotation */
+ODE_API void dOrthogonalizeR(dMatrix3 m);
+
+
 
 #ifdef __cplusplus
 }

@@ -411,34 +411,3 @@ void dxProcessIslands (dxWorld *world, dReal stepsize, dstepper_fn_t stepper)
 
 
 
-
-/*
- * This takes what is supposed to be a rotation matrix,
- * and make sure it is correct.
- * Note: this operates on rows, not columns, because for rotations
- * both ways give equivalent results.
- */
-void
-dOrthogonalizeR(dMatrix3 m)
-{
-    dReal n0 = dLENGTHSQUARED(m);
-    if (n0 != 1)
-        dSafeNormalize3(m);
-
-    // project row[0] on row[1], should be zero
-    dReal proj = dDOT(m, m+4);
-    if (proj != 0) {
-        // Gram-Schmidt step on row[1]
-        m[4] -= proj * m[0];
-        m[5] -= proj * m[1];
-        m[6] -= proj * m[2];
-    }
-    dReal n1 = dLENGTHSQUARED(m+4);
-    if (n1 != 1)
-        dSafeNormalize3(m+4);
-
-    /* just overwrite row[2], this makes sure the matrix is not
-       a reflection */
-    dCROSS(m+8, =, m, m+4);
-    m[3] = m[4+3] = m[8+3] = 0;
-}
