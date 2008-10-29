@@ -37,6 +37,11 @@ email: projectileman@yahoo.com
 #include <float.h>
 #if HAVE_SYS_TYPES_H
 #include <sys/types.h>
+#elif defined(_MSC_VER)
+typedef __int32 int32_t;
+typedef unsigned __int32 uint32_t;
+#elif defined(__GNUC__)
+#include <inttypes.h>
 #else
 #error "GIMPACT: Must define int32_t and uint32_t"
 #endif
@@ -52,7 +57,7 @@ Constants starting with G_
 /*! Types */
 #define GREAL float
 #define GINT32 int32_t
-#define GUINT32 u_int32_t
+#define GUINT32 uint32_t
 
 #define GPTR void*
 
