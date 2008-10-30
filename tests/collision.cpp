@@ -10,10 +10,10 @@ TEST(test_collision_trimesh_sphere)
         const int IndexCount = 2*3;
         // this is a square on the XY plane
         float vertices[VertexCount * 3] = {
-            0,0,0,
-            1,0,0,
+            -1,-1,0,
+            1,-1,0,
             1,1,0,
-            0,1,0
+            -1,1,0
         };
         dTriIndex indices[IndexCount] = {
             0,1,2,
