@@ -8,6 +8,14 @@ the rules for this file:
   * keep the format consistent (79 char width, M/D/Y date format).
 
 ------------------------------------------------------------------------------
+
+11/19/08 Remi Ricard (papaDoc)
+       * Fix bug: When a piston joint had only one body attached to position 2,
+         dJointAttach(jId, 0, bId). The body was not push in the right direction to
+         move back between the limits.
+       * Add more functionality to demo_piston.cpp
+       * Run astyle on modified files.
+
 11/19/08 Remi Ricard (papaDoc)
         * Fix bug: When a slider joint had only one body attached to position 2,
          dJointAttach(jId, 0, bId). The body was not push in the right direction to
@@ -77,7 +85,7 @@ the rules for this file:
         * Add unittest for the piston joint
         * Fix problem with dJointGetPistonPosition and 
           dJointGetPistonPositionRate when the joint is attached to only
-          a body 2. The sign was inversed. 
+          a body 2. The sign was inverted.
 
 07/09/08 Remi Ricard (papaDoc)
         * Optimize function Multiply1_12q1 in quickstep

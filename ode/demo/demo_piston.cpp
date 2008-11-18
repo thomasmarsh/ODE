@@ -75,18 +75,18 @@ const dReal AXIS_RADIUS = 0.01;
 
 enum INDEX
 {
-  BODY1 = 0,
-  BODY2,
-  RECT,
-  BOX,
-  OBS,
-  GROUND,
-  NUM_PARTS,
-  ALL = NUM_PARTS
+    BODY1 = 0,
+    BODY2,
+    RECT,
+    BOX,
+    OBS,
+    GROUND,
+    NUM_PARTS,
+    ALL = NUM_PARTS
 };
 
 const int catBits[NUM_PARTS+1] =
-  {
+{
     0x0001, ///< Ext Cylinder category
     0x0002, ///< Int Cylinder category
     0x0004, ///< Int_Rect Cylinder category
@@ -94,7 +94,7 @@ const int catBits[NUM_PARTS+1] =
     0x0010, ///< Obstacle category
     0x0020, ///< Ground category
     ~0L    ///< All categories
-  };
+};
 
 #define Mass1 10
 #define Mass2 8
@@ -135,148 +135,167 @@ int tc = 0; // The test case choice;
 //collision detection
 static void nearCallback (void *data, dGeomID o1, dGeomID o2)
 {
-  int i,n;
+    int i,n;
 
-  dBodyID b1 = dGeomGetBody (o1);
-  dBodyID b2 = dGeomGetBody (o2);
-  if (b1 && b2 && dAreConnectedExcluding (b1,b2,dJointTypeContact) ) return;
-  const int N = 10;
-  dContact contact[N];
-  n = dCollide (o1,o2,N,&contact[0].geom,sizeof (dContact) );
-  if (n > 0) {
-    for  (i=0; i<n; i++) {
-      contact[i].surface.mode = (dContactSlip1 | dContactSlip2 |
-                                 dContactSoftERP | dContactSoftCFM |
-                                 dContactApprox1);
-      contact[i].surface.mu = 0.1;
-      contact[i].surface.slip1 = 0.02;
-      contact[i].surface.slip2 = 0.02;
-      contact[i].surface.soft_erp = 0.1;
-      contact[i].surface.soft_cfm = 0.0001;
-      dJointID c = dJointCreateContact (world,contactgroup,&contact[i]);
-      dJointAttach (c,dGeomGetBody (contact[i].geom.g1),dGeomGetBody (contact[i].geom.g2) );
+    dBodyID b1 = dGeomGetBody (o1);
+    dBodyID b2 = dGeomGetBody (o2);
+    if (b1 && b2 && dAreConnectedExcluding (b1,b2,dJointTypeContact) ) return;
+    const int N = 10;
+    dContact contact[N];
+    n = dCollide (o1,o2,N,&contact[0].geom,sizeof (dContact) );
+    if (n > 0)
+    {
+        for  (i=0; i<n; i++)
+        {
+            contact[i].surface.mode = (dContactSlip1 | dContactSlip2 |
+                                       dContactSoftERP | dContactSoftCFM |
+                                       dContactApprox1);
+            contact[i].surface.mu = 0.1;
+            contact[i].surface.slip1 = 0.02;
+            contact[i].surface.slip2 = 0.02;
+            contact[i].surface.soft_erp = 0.1;
+            contact[i].surface.soft_cfm = 0.0001;
+            dJointID c = dJointCreateContact (world,contactgroup,&contact[i]);
+            dJointAttach (c,dGeomGetBody (contact[i].geom.g1),dGeomGetBody (contact[i].geom.g2) );
+        }
     }
-  }
 }
 
 static void printKeyBoardShortCut()
 {
-	printf ("Press 'h' for this help.\n");
-	printf ("Press 'q' to add force on BLUE body along positive x direction.\n");
-	printf ("Press 'w' to add force on BLUE body along negative x direction.\n");
+    printf ("Press 'h' for this help.\n");
+    printf ("Press 'q' to add force on BLUE body along positive x direction.\n");
+    printf ("Press 'w' to add force on BLUE body along negative x direction.\n");
 
-	printf ("Press 'a' to add force on BLUE body along positive y direction.\n");
-	printf ("Press 's' to add force on BLUE body along negative y direction.\n");
+    printf ("Press 'a' to add force on BLUE body along positive y direction.\n");
+    printf ("Press 's' to add force on BLUE body along negative y direction.\n");
 
-	printf ("Press 'z' to add force on BLUE body along positive z direction.\n");
-	printf ("Press 'x' to add force on BLUE body along negative z direction.\n");
+    printf ("Press 'z' to add force on BLUE body along positive z direction.\n");
+    printf ("Press 'x' to add force on BLUE body along negative z direction.\n");
 
-	printf ("Press 'e' to add torque on BLUE body around positive x direction \n");
-	printf ("Press 'r' to add torque on BLUE body around negative x direction \n");
+    printf ("Press 'e' to add torque on BLUE body around positive x direction \n");
+    printf ("Press 'r' to add torque on BLUE body around negative x direction \n");
 
-	printf ("Press 'd' to add torque on BLUE body around positive y direction \n");
-	printf ("Press 'f' to add torque on BLUE body around negative y direction \n");
+    printf ("Press 'd' to add torque on BLUE body around positive y direction \n");
+    printf ("Press 'f' to add torque on BLUE body around negative y direction \n");
 
-	printf ("Press 'c' to add torque on BLUE body around positive z direction \n");
-	printf ("Press 'v' to add torque on BLUE body around negative z direction \n");
+    printf ("Press 'c' to add torque on BLUE body around positive z direction \n");
+    printf ("Press 'v' to add torque on BLUE body around negative z direction \n");
 
-	printf ("Press 't' to add force on prismatic joint in the positive axis direction\n");
-	printf ("Press 'y' to add force on prismatic joint in the negative axis direction\n");
+    printf ("Press 't' to add force on prismatic joint in the positive axis direction\n");
+    printf ("Press 'y' to add force on prismatic joint in the negative axis direction\n");
 
-	printf ("Press 'k' to add limits on the rotoide joint (-45 to 45deg) \n");
-	printf ("Press 'l' to remove limits on the rotoide joint \n");
+    printf ("Press 'i' to add limits on the prismatic joint (0 to 0) \n");
+    printf ("Press 'o' to add limits on the rotoide joint (0 to 0)\n");
+    printf ("Press 'k' to add limits on the rotoide joint (-45 to 45deg) \n");
+    printf ("Press 'l' to remove limits on the rotoide joint \n");
 
 
-	printf ("Press '.' to increase joint velocity along the prismatic direction.\n");
-	printf ("Press ',' to decrease joint velocity along the prismatic direction.\n");
+    printf ("Press '.' to increase joint velocity along the prismatic direction.\n");
+    printf ("Press ',' to decrease joint velocity along the prismatic direction.\n");
 
-	printf ("Press 'p' to print the Position of the joint.\n");
+    printf ("Press 'p' to print the Position of the joint.\n");
 
-	printf ("Press '+' Go to the next test case.\n");
-	printf ("Press '-' Go to the previous test case.\n");
+    printf ("Press '+' Go to the next test case.\n");
+    printf ("Press '-' Go to the previous test case.\n");
+
+    printf ("Press '8' To remove one of the body. The blue body and the world will be\n");
+    printf ("          attached to the joint (blue body at position 1)\n");
+    printf ("Press '9' To remove one of the body. The blue body and the world will be\n");
+    printf ("          attached to the joint (body body at position 2)\n");
+
+
 }
 
 
 // start simulation - set viewpoint
 static void start()
 {
-	dAllocateODEDataForThread(dAllocateMaskAll);
+    dAllocateODEDataForThread(dAllocateMaskAll);
 
-	dsSetViewpoint (xyz,hpr);
-	printf ("This program demonstrates how the Piston joint works.\n");
-	printf ("A Piston joint enables the sliding of a body with respect to another body\n");
-	printf ("and the 2 bodies are free to rotate about the sliding axis.\n\n");
-	printf ("The yellow body is fixed to the world\n");
-	printf ("The yellow body and the blue body are attached by a Piston joint with\n");
-	printf ("the axis along the x direction.\n");
-	printf ("The purple object is a geometry obstacle.\n");
+    dsSetViewpoint (xyz,hpr);
+    printf ("This program demonstrates how the Piston joint works.\n");
+    printf ("A Piston joint enables the sliding of a body with respect to another body\n");
+    printf ("and the 2 bodies are free to rotate about the sliding axis.\n\n");
+    printf ("The yellow body is fixed to the world\n");
+    printf ("The yellow body and the blue body are attached by a Piston joint with\n");
+    printf ("the axis along the x direction.\n");
+    printf ("The purple object is a geometry obstacle.\n");
 
-	printKeyBoardShortCut();
+    printKeyBoardShortCut();
 }
 
 
 void setPositionBodies (int val)
 {
-  const dVector3 POS1 = {0,0,1.5,0};
-  const dVector3 POS2 = {0,0,1.5,0};
-  const dVector3 ANCHOR = {0,0,1.5,0};
+    const dVector3 POS1 = {0,0,1.5,0};
+    const dVector3 POS2 = {0,0,1.5,0};
+    const dVector3 ANCHOR = {0,0,1.5,0};
 
-  for (int i=0; i<3; ++i) {
-    pos1[i] = POS1[i];
-    pos2[i] = POS2[i];
-    anchor[i] = ANCHOR[i];
-  }
+    for (int i=0; i<3; ++i)
+    {
+        pos1[i] = POS1[i];
+        pos2[i] = POS2[i];
+        anchor[i] = ANCHOR[i];
+    }
 
-  if (body[BODY1]) {
-    body[BODY1].setLinearVel(0,0,0);
-    body[BODY1].setAngularVel(0,0,0);
-  }
+    if (body[BODY1])
+    {
+        body[BODY1].setLinearVel(0,0,0);
+        body[BODY1].setAngularVel(0,0,0);
+    }
 
-  if (body[BODY2]) {
-    body[BODY2].setLinearVel(0,0,0);
-    body[BODY2].setAngularVel(0,0,0);
-  }
+    if (body[BODY2])
+    {
+        body[BODY2].setLinearVel(0,0,0);
+        body[BODY2].setAngularVel(0,0,0);
+    }
 
-  switch (val) {
+    switch (val)
+    {
     case 3:
-      pos1[Z] += -0.5;
-      anchor[Z] -= 0.25;
-      break;
+        pos1[Z] += -0.5;
+        anchor[Z] -= 0.25;
+        break;
     case 2:
-      pos1[Z] -= 0.5;
-      anchor[Z] -= 0.5;
-      break;
+        pos1[Z] -= 0.5;
+        anchor[Z] -= 0.5;
+        break;
     case 1:
-      pos1[Z] += -0.5;
-      break;
+        pos1[Z] += -0.5;
+        break;
     default: // This is also case 0
-      // Nothing to be done
-      break;
-  }
+        // Nothing to be done
+        break;
+    }
 
-  const dMatrix3 R = {
-                       1,0,0,0,
-                       0,1,0,0,
-                       0,0,1,0
-                     };
+    const dMatrix3 R =
+    {
+        1,0,0,0,
+        0,1,0,0,
+        0,0,1,0
+    };
 
-  if (body[BODY1]) {
-    body[BODY1].setPosition(pos1[X], pos1[Y], pos1[Z]);
-    body[BODY1].setRotation(R);
-  }
+    if (body[BODY1])
+    {
+        body[BODY1].setPosition(pos1[X], pos1[Y], pos1[Z]);
+        body[BODY1].setRotation(R);
+    }
 
-  if (body[BODY2]) {
-    body[BODY2].setPosition(pos2[X], pos2[Y], pos2[Z]);
-    body[BODY2].setRotation(R);
-  }
+    if (body[BODY2])
+    {
+        body[BODY2].setPosition(pos2[X], pos2[Y], pos2[Z]);
+        body[BODY2].setRotation(R);
+    }
 
 
 
-  if (joint) {
-    joint->attach (body[BODY1], body[BODY2]);
-    if (joint->getType() == dJointTypePiston)
-      dJointSetPistonAnchor(joint->id(), anchor[X], anchor[Y], anchor[Z]);
-  }
+    if (joint)
+    {
+        joint->attach (body[BODY1], body[BODY2]);
+        if (joint->getType() == dJointTypePiston)
+            dJointSetPistonAnchor(joint->id(), anchor[X], anchor[Y], anchor[Z]);
+    }
 
 }
 
@@ -297,436 +316,496 @@ void update()
 // called when a key pressed
 static void command (int cmd)
 {
-  switch (cmd) {
-case 'h' : case 'H' : case '?' :
-      printKeyBoardShortCut();
-      break;
+    switch (cmd)
+    {
+    case 'h' :
+    case 'H' :
+    case '?' :
+        printKeyBoardShortCut();
+        break;
 
-      // Force
-  case 'q' : case 'Q' :
-      dBodyAddForce (body[BODY1],4,0,0);
-      break;
-  case 'w' : case 'W' :
-      dBodyAddForce (body[BODY1],-4,0,0);
-      break;
+        // Force
+    case 'q' :
+    case 'Q' :
+        dBodyAddForce (body[BODY1],4,0,0);
+        break;
+    case 'w' :
+    case 'W' :
+        dBodyAddForce (body[BODY1],-4,0,0);
+        break;
 
-  case 'a' : case 'A' :
-      dBodyAddForce (body[BODY1],0,40,0);
-      break;
-  case 's' : case 'S' :
-      dBodyAddForce (body[BODY1],0,-40,0);
-      break;
+    case 'a' :
+    case 'A' :
+        dBodyAddForce (body[BODY1],0,40,0);
+        break;
+    case 's' :
+    case 'S' :
+        dBodyAddForce (body[BODY1],0,-40,0);
+        break;
 
-  case 'z' : case 'Z' :
-      dBodyAddForce (body[BODY1],0,0,4);
-      break;
-  case 'x' : case 'X' :
-      dBodyAddForce (body[BODY1],0,0,-4);
-      break;
+    case 'z' :
+    case 'Z' :
+        dBodyAddForce (body[BODY1],0,0,4);
+        break;
+    case 'x' :
+    case 'X' :
+        dBodyAddForce (body[BODY1],0,0,-4);
+        break;
 
-      // Torque
-  case 'e': case 'E':
-      dBodyAddTorque (body[BODY1],0.1,0,0);
-      break;
-  case 'r': case 'R':
-      dBodyAddTorque (body[BODY1],-0.1,0,0);
-      break;
+        // Torque
+    case 'e':
+    case 'E':
+        dBodyAddTorque (body[BODY1],0.1,0,0);
+        break;
+    case 'r':
+    case 'R':
+        dBodyAddTorque (body[BODY1],-0.1,0,0);
+        break;
 
-  case 'd': case 'D':
-      dBodyAddTorque (body[BODY1],0, 0.1,0);
-      break;
-  case 'f': case 'F':
-      dBodyAddTorque (body[BODY1],0,-0.1,0);
-      break;
+    case 'd':
+    case 'D':
+        dBodyAddTorque (body[BODY1],0, 0.1,0);
+        break;
+    case 'f':
+    case 'F':
+        dBodyAddTorque (body[BODY1],0,-0.1,0);
+        break;
 
-  case 'c': case 'C':
-      dBodyAddTorque (body[BODY1],0.1,0,0);
-      break;
-  case 'v': case 'V':
-      dBodyAddTorque (body[BODY1],-0.1,0,0);
-      break;
+    case 'c':
+    case 'C':
+        dBodyAddTorque (body[BODY1],0.1,0,0);
+        break;
+    case 'v':
+    case 'V':
+        dBodyAddTorque (body[BODY1],-0.1,0,0);
+        break;
 
-  case 't': case 'T':
-      if (joint->getType() == dJointTypePiston)
-        dJointAddPistonForce (joint->id(),1);
-      else
-        dJointAddSliderForce (joint->id(),1);
-      break;
-  case 'y': case 'Y':
-      if (joint->getType() == dJointTypePiston)
-        dJointAddPistonForce (joint->id(),-1);
-      else
-        dJointAddSliderForce (joint->id(),-1);
-      break;
+    case 't':
+    case 'T':
+        if (joint->getType() == dJointTypePiston)
+            dJointAddPistonForce (joint->id(),1);
+        else
+            dJointAddSliderForce (joint->id(),1);
+        break;
+    case 'y':
+    case 'Y':
+        if (joint->getType() == dJointTypePiston)
+            dJointAddPistonForce (joint->id(),-1);
+        else
+            dJointAddSliderForce (joint->id(),-1);
+        break;
 
 
-  case 'k': case 'K':
-      if (joint->getType() == dJointTypePiston) {
-        dJointSetPistonParam (joint->id(),dParamLoStop2, -45.0*3.14159267/180.0);
-        dJointSetPistonParam (joint->id(),dParamHiStop2,  45.0*3.14159267/180.0);
-      }
-      break;
-  case 'l': case 'L':
-      if (joint->getType() == dJointTypePiston) {
-        dJointSetPistonParam (joint->id(),dParamLoStop2, -dInfinity);
-        dJointSetPistonParam (joint->id(),dParamHiStop2, dInfinity);
-      }
-      break;
+    case '8' :
+        dJointAttach(joint->id(), body[0], 0);
+        break;
+    case '9' :
+        dJointAttach(joint->id(), 0, body[0]);
+        break;
 
-      // Velocity of joint
-  case ',': case '<' : {
-      dReal vel = joint->getParam (dParamVel) - VEL_INC;
-      joint->setParam (dParamVel, vel);
-      std::cout<<"Velocity = "<<vel<<"  FMax = 2"<<'\n';
+    case 'i':
+    case 'I' :
+        joint->setParam (dParamLoStop, 0);
+        joint->setParam (dParamHiStop, 0);
+        break;
+
+    case 'o':
+    case 'O' :
+        joint->setParam (dParamLoStop2, 0);
+        joint->setParam (dParamHiStop2, 0);
+        break;
+
+    case 'k':
+    case 'K':
+        joint->setParam (dParamLoStop2, -45.0*3.14159267/180.0);
+        joint->setParam (dParamHiStop2,  45.0*3.14159267/180.0);
+        break;
+    case 'l':
+    case 'L':
+        joint->setParam (dParamLoStop2, -dInfinity);
+        joint->setParam (dParamHiStop2, dInfinity);
+        break;
+
+        // Velocity of joint
+    case ',':
+    case '<' :
+    {
+        dReal vel = joint->getParam (dParamVel) - VEL_INC;
+        joint->setParam (dParamVel, vel);
+        std::cout<<"Velocity = "<<vel<<"  FMax = 2"<<'\n';
     }
     break;
 
-  case '.': case '>' : {
-      dReal vel = joint->getParam (dParamVel) + VEL_INC;
-      joint->setParam (dParamVel, vel);
-      std::cout<<"Velocity = "<<vel<<"  FMax = 2"<<'\n';
+    case '.':
+    case '>' :
+    {
+        dReal vel = joint->getParam (dParamVel) + VEL_INC;
+        joint->setParam (dParamVel, vel);
+        std::cout<<"Velocity = "<<vel<<"  FMax = 2"<<'\n';
     }
     break;
 
-case 'p' :case 'P' : {
-      switch (joint->getType() ) {
-        case dJointTypeSlider : {
-          dSliderJoint *sj = reinterpret_cast<dSliderJoint *> (joint);
-          std::cout<<"Position ="<<sj->getPosition() <<"\n";
+    case 'p' :
+    case 'P' :
+    {
+        switch (joint->getType() )
+        {
+        case dJointTypeSlider :
+        {
+            dSliderJoint *sj = reinterpret_cast<dSliderJoint *> (joint);
+            std::cout<<"Position ="<<sj->getPosition() <<"\n";
         }
         break;
-        case dJointTypePiston : {
-          dPistonJoint *rj = reinterpret_cast<dPistonJoint *> (joint);
-          std::cout<<"Position ="<<rj->getPosition() <<"\n";
+        case dJointTypePiston :
+        {
+            dPistonJoint *rj = reinterpret_cast<dPistonJoint *> (joint);
+            std::cout<<"Position ="<<rj->getPosition() <<"\n";
         }
         break;
-        default: {} // keep the compiler happy
-      }
+        default:
+        {} // keep the compiler happy
+        }
     }
     break;
 
     case '+' :
-      (++tc) %= 4;
-      setPositionBodies (tc);
-      break;
+        (++tc) %= 4;
+        setPositionBodies (tc);
+        break;
     case '-' :
-      (--tc) %= 4;
-      setPositionBodies (tc);
-      break;
+        (--tc) %= 4;
+        setPositionBodies (tc);
+        break;
 
 
-  }
+    }
 }
 
 static void drawBox (dGeomID id, int R, int G, int B)
 {
-  if (!id)
-    return;
+    if (!id)
+        return;
 
-  const dReal *pos = dGeomGetPosition (id);
-  const dReal *rot = dGeomGetRotation (id);
-  dsSetColor (R,G,B);
+    const dReal *pos = dGeomGetPosition (id);
+    const dReal *rot = dGeomGetRotation (id);
+    dsSetColor (R,G,B);
 
-  dVector3 l;
-  dGeomBoxGetLengths (id, l);
-  dsDrawBox (pos, rot, l);
+    dVector3 l;
+    dGeomBoxGetLengths (id, l);
+    dsDrawBox (pos, rot, l);
 }
 
 
 // simulation loop
 static void simLoop (int pause)
 {
-  const dReal *rot;
-  dVector3 ax;
-  dReal l=0;
+    const dReal *rot;
+    dVector3 ax;
+    dReal l=0;
 
-  switch (joint->getType() ) {
+    switch (joint->getType() )
+    {
     case dJointTypeSlider :
-      ( (dSliderJoint *) joint)->getAxis (ax);
-      l = ( (dSliderJoint *) joint)->getPosition();
-      break;
+        ( (dSliderJoint *) joint)->getAxis (ax);
+        l = ( (dSliderJoint *) joint)->getPosition();
+        break;
     case dJointTypePiston :
-      ( (dPistonJoint *) joint)->getAxis (ax);
-      l = ( (dPistonJoint *) joint)->getPosition();
-      break;
-    default: {} // keep the compiler happy
-  }
-
-
-  if (!pause) {
-    double simstep = 0.01; // 1ms simulation steps
-    double dt = dsElapsedTime();
-
-    int nrofsteps = (int) ceilf (dt/simstep);
-    if (!nrofsteps)
-      nrofsteps = 1;
-
-    for (int i=0; i<nrofsteps && !pause; i++) {
-      dSpaceCollide (space,0,&nearCallback);
-      dWorldStep (world, simstep);
-
-      dJointGroupEmpty (contactgroup);
-    }
-
-    update();
-
-
-    dReal radius, length;
-
-    dsSetTexture (DS_WOOD);
-
-    drawBox (geom[BODY2], 1,1,0);
-
-    drawBox (geom[RECT], 0,0,1);
-
-    if ( geom[BODY1] ) {
-      const dReal *pos = dGeomGetPosition (geom[BODY1]);
-      rot = dGeomGetRotation (geom[BODY1]);
-      dsSetColor (0,0,1);
-
-      dGeomCapsuleGetParams (geom[BODY1], &radius, &length);
-      dsDrawCapsule (pos, rot, length, radius);
+        ( (dPistonJoint *) joint)->getAxis (ax);
+        l = ( (dPistonJoint *) joint)->getPosition();
+        break;
+    default:
+    {} // keep the compiler happy
     }
 
 
-    drawBox (geom[OBS], 1,0,1);
+    if (!pause)
+    {
+        double simstep = 0.01; // 1ms simulation steps
+        double dt = dsElapsedTime();
+
+        int nrofsteps = (int) ceilf (dt/simstep);
+        if (!nrofsteps)
+            nrofsteps = 1;
+
+        for (int i=0; i<nrofsteps && !pause; i++)
+        {
+            dSpaceCollide (space,0,&nearCallback);
+            dWorldStep (world, simstep);
+
+            dJointGroupEmpty (contactgroup);
+        }
+
+        update();
 
 
-    // Draw the prismatic axis
-    if ( geom[BODY1] ) {
-      const dReal *pos = dGeomGetPosition (geom[BODY1]);
-      rot = dGeomGetRotation (geom[BODY2]);
-      dVector3 p;
-      p[X] = pos[X] - l*ax[X];
-      p[Y] = pos[Y] - l*ax[Y];
-      p[Z] = pos[Z] - l*ax[Z];
-      dsSetColor (1,0,0);
-      dsDrawCylinder (p, rot, 3.75, 1.05*AXIS_RADIUS);
+        dReal radius, length;
+
+        dsSetTexture (DS_WOOD);
+
+        drawBox (geom[BODY2], 1,1,0);
+
+        drawBox (geom[RECT], 0,0,1);
+
+        if ( geom[BODY1] )
+        {
+            const dReal *pos = dGeomGetPosition (geom[BODY1]);
+            rot = dGeomGetRotation (geom[BODY1]);
+            dsSetColor (0,0,1);
+
+            dGeomCapsuleGetParams (geom[BODY1], &radius, &length);
+            dsDrawCapsule (pos, rot, length, radius);
+        }
+
+
+        drawBox (geom[OBS], 1,0,1);
+
+
+        // Draw the prismatic axis
+        if ( geom[BODY1] )
+        {
+            const dReal *pos = dGeomGetPosition (geom[BODY1]);
+            rot = dGeomGetRotation (geom[BODY2]);
+            dVector3 p;
+            p[X] = pos[X] - l*ax[X];
+            p[Y] = pos[Y] - l*ax[Y];
+            p[Z] = pos[Z] - l*ax[Z];
+            dsSetColor (1,0,0);
+            dsDrawCylinder (p, rot, 3.75, 1.05*AXIS_RADIUS);
+        }
+
+
+        if (joint->getType() == dJointTypePiston )
+        {
+            dVector3 anchor;
+            dJointGetPistonAnchor(joint->id(), anchor);
+
+            // Draw the rotoide axis
+            rot = dGeomGetRotation (geom[BODY2]);
+            dsSetColor (1,0.5,0);
+            dsDrawCylinder (anchor, rot, 4, AXIS_RADIUS);
+
+
+            dsSetColor (0,1,1);
+            rot = dGeomGetRotation (geom[BODY1]);
+            dsDrawSphere (anchor, rot, 1.5*RADIUS);
+        }
+
     }
-
-
-    if (joint->getType() == dJointTypePiston ) {
-      dVector3 anchor;
-      dJointGetPistonAnchor(joint->id(), anchor);
-
-      // Draw the rotoide axis
-      rot = dGeomGetRotation (geom[BODY2]);
-      dsSetColor (1,0.5,0);
-      dsDrawCylinder (anchor, rot, 4, AXIS_RADIUS);
-
-
-      dsSetColor (0,1,1);
-      rot = dGeomGetRotation (geom[BODY1]);
-      dsDrawSphere (anchor, rot, 1.5*RADIUS);
-    }
-
-  }
 }
 
 
 void Help (char **argv)
 {
-  printf ("%s ", argv[0]);
-  printf (" -h | --help   : print this help\n");
-  printf (" -s | --slider : Set the joint as a slider\n");
-  printf (" -p | --piston : Set the joint as a Piston. (Default joint)\n");
-  printf (" -1 | --offset1 : Create an offset between the 2 bodies\n");
-  printf ("                  Offset one of the body by z=-0.5 and keep the anchor\n");
-  printf ("                  point in the middle of the fixed body\n");
-  printf (" -2 | --offset2 : Create an offset between the 2 bodies\n");
-  printf ("                  Offset one of the body by z=-0.5 and set the anchor\n");
-  printf ("                  point in the middle of the movable body\n");
-  printf (" -3 | --offset3 : Create an offset between the 2 bodies\n");
-  printf ("                  Offset one of the body by z=-0.5 and set the anchor\n");
-  printf ("                  point in the middle of the 2 bodies\n");
-  printf (" -t | --texture-path path  : Path to the texture.\n");
-  printf ("                             Default = %s\n", DRAWSTUFF_TEXTURE_PATH);
-  printf (" -n | --notFixed : In free space with no gravity mode");
-  printf ("-notex          : Don't use texture\n");
-  printf ("-noshadow       : No shadow\n");
-  printf ("-noshadows      : No shadows\n");
-  printf ("-pause          : Initial pause\n");
-  printf ("--------------------------------------------------\n");
-  printf ("Hit any key to continue:");
-  getchar();
+    printf ("%s ", argv[0]);
+    printf (" -h | --help   : print this help\n");
+    printf (" -s | --slider : Set the joint as a slider\n");
+    printf (" -p | --piston : Set the joint as a Piston. (Default joint)\n");
+    printf (" -1 | --offset1 : Create an offset between the 2 bodies\n");
+    printf ("                  Offset one of the body by z=-0.5 and keep the anchor\n");
+    printf ("                  point in the middle of the fixed body\n");
+    printf (" -2 | --offset2 : Create an offset between the 2 bodies\n");
+    printf ("                  Offset one of the body by z=-0.5 and set the anchor\n");
+    printf ("                  point in the middle of the movable body\n");
+    printf (" -3 | --offset3 : Create an offset between the 2 bodies\n");
+    printf ("                  Offset one of the body by z=-0.5 and set the anchor\n");
+    printf ("                  point in the middle of the 2 bodies\n");
+    printf (" -t | --texture-path path  : Path to the texture.\n");
+    printf ("                             Default = %s\n", DRAWSTUFF_TEXTURE_PATH);
+    printf (" -n | --notFixed : In free space with no gravity mode");
+    printf ("-notex          : Don't use texture\n");
+    printf ("-noshadow       : No shadow\n");
+    printf ("-noshadows      : No shadows\n");
+    printf ("-pause          : Initial pause\n");
+    printf ("--------------------------------------------------\n");
+    printf ("Hit any key to continue:");
+    getchar();
 
-  exit (0);
+    exit (0);
 }
 
 int main (int argc, char **argv)
 {
-  dInitODE2(0);
-  bool fixed  = true;
+    dInitODE2(0);
+    bool fixed  = true;
 
-  // setup pointers to drawstuff callback functions
-  dsFunctions fn;
-  fn.version = DS_VERSION;
-  fn.start = &start;
-  fn.step = &simLoop;
-  fn.command = &command;
-  fn.stop = 0;
-  fn.path_to_textures = DRAWSTUFF_TEXTURE_PATH;
+    // setup pointers to drawstuff callback functions
+    dsFunctions fn;
+    fn.version = DS_VERSION;
+    fn.start = &start;
+    fn.step = &simLoop;
+    fn.command = &command;
+    fn.stop = 0;
+    fn.path_to_textures = DRAWSTUFF_TEXTURE_PATH;
 
-  dVector3 offset;
-  dSetZero (offset, 4);
+    dVector3 offset;
+    dSetZero (offset, 4);
 
-  // Default test case
+    // Default test case
 
-  if (argc >= 2 ) {
-    for (int i=1; i < argc; ++i) {
-      //static int tata = 0;
+    if (argc >= 2 )
+    {
+        for (int i=1; i < argc; ++i)
+        {
+            //static int tata = 0;
 
-      if (0) {
-        if ( 0 == strcmp ("-h", argv[i]) || 0 == strcmp ("--help", argv[i]) )
-          Help (argv);
+            if (1)
+            {
+                if ( 0 == strcmp ("-h", argv[i]) || 0 == strcmp ("--help", argv[i]) )
+                    Help (argv);
 
-        if ( 0 == strcmp ("-s", argv[i]) || 0 == strcmp ("--slider", argv[i]) )
-          type = dJointTypeSlider;
+                if ( 0 == strcmp ("-s", argv[i]) || 0 == strcmp ("--slider", argv[i]) )
+                    type = dJointTypeSlider;
 
-        if ( 0 == strcmp ("-t", argv[i]) || 0 == strcmp ("--texture-path", argv[i]) ) {
-          int j = i+1;
-          if ( j+1 > argc      ||  // Check if we have enough arguments
-               argv[j] == '\0' ||  // We should have a path here
-               argv[j][0] == '-' ) // We should have a path not a command line
-            Help (argv);
-          else
-            fn.path_to_textures = argv[++i]; // Increase i since we use this argument
+                if ( 0 == strcmp ("-t", argv[i]) || 0 == strcmp ("--texture-path", argv[i]) )
+                {
+                    int j = i+1;
+                    if ( j+1 > argc      ||  // Check if we have enough arguments
+                            argv[j] == '\0' ||  // We should have a path here
+                            argv[j][0] == '-' ) // We should have a path not a command line
+                        Help (argv);
+                    else
+                        fn.path_to_textures = argv[++i]; // Increase i since we use this argument
+                }
+            }
+
+
+            if ( 0 == strcmp ("-1", argv[i]) || 0 == strcmp ("--offset1", argv[i]) )
+                tc = 1;
+
+            if ( 0 == strcmp ("-2", argv[i]) || 0 == strcmp ("--offset2", argv[i]) )
+                tc = 2;
+
+            if ( 0 == strcmp ("-3", argv[i]) || 0 == strcmp ("--offset3", argv[i]) )
+                tc = 3;
+
+            if (0 == strcmp ("-n", argv[i]) || 0 == strcmp ("--notFixed", argv[i]) )
+                fixed = false;
         }
-      }
-
-
-      if ( 0 == strcmp ("-1", argv[i]) || 0 == strcmp ("--offset1", argv[i]) )
-        tc = 1;
-
-      if ( 0 == strcmp ("-2", argv[i]) || 0 == strcmp ("--offset2", argv[i]) )
-        tc = 2;
-
-      if ( 0 == strcmp ("-3", argv[i]) || 0 == strcmp ("--offset3", argv[i]) )
-        tc = 3;
-
-      if (0 == strcmp ("-n", argv[i]) || 0 == strcmp ("--notFixed", argv[i]) )
-        fixed = false;
     }
-  }
 
-  world.setERP (0.8);
+    world.setERP (0.8);
 
-  space = dSimpleSpaceCreate (0);
-  contactgroup = dJointGroupCreate (0);
-  geom[GROUND] = dCreatePlane (space, 0,0,1,0);
-  dGeomSetCategoryBits (geom[GROUND], catBits[GROUND]);
-  dGeomSetCollideBits (geom[GROUND], catBits[ALL]);
+    space = dSimpleSpaceCreate (0);
+    contactgroup = dJointGroupCreate (0);
+    geom[GROUND] = dCreatePlane (space, 0,0,1,0);
+    dGeomSetCategoryBits (geom[GROUND], catBits[GROUND]);
+    dGeomSetCollideBits (geom[GROUND], catBits[ALL]);
 
-  dMass m;
-  dMatrix3 R;
-
-
-  // Create the Obstacle
-  geom[OBS] = dCreateBox (space, OBS_SIDES[0], OBS_SIDES[1], OBS_SIDES[2]);
-  dGeomSetCategoryBits (geom[OBS], catBits[OBS]);
-  dGeomSetCollideBits (geom[OBS], catBits[ALL]);
-  //Rotation of 45deg around y
-  dRFromAxisAndAngle (R, 1,1,0, -0.25*PI);
-  dGeomSetRotation (geom[OBS], R);
-  dGeomSetPosition (geom[OBS], 1.95, -0.2, 0.5);
+    dMass m;
+    dMatrix3 R;
 
 
-  //Rotation of 90deg around y
-  // Will orient the Z axis along X
-  dRFromAxisAndAngle (R, 0,1,0, -0.5*PI);
+    // Create the Obstacle
+    geom[OBS] = dCreateBox (space, OBS_SIDES[0], OBS_SIDES[1], OBS_SIDES[2]);
+    dGeomSetCategoryBits (geom[OBS], catBits[OBS]);
+    dGeomSetCollideBits (geom[OBS], catBits[ALL]);
+    //Rotation of 45deg around y
+    dRFromAxisAndAngle (R, 1,1,0, -0.25*PI);
+    dGeomSetRotation (geom[OBS], R);
+    dGeomSetPosition (geom[OBS], 1.95, -0.2, 0.5);
 
 
-  // Create Body2 (Wiil be attached to the world)
-  body[BODY2].create (world);
-  // Main axis of cylinder is along X=1
-  m.setBox (1, BODY2_SIDES[0], BODY2_SIDES[1], BODY2_SIDES[2]);
-  m.adjust (Mass1);
-  geom[BODY2] = dCreateBox (space, BODY2_SIDES[0], BODY2_SIDES[1], BODY2_SIDES[2]);
-  dGeomSetBody (geom[BODY2], body[BODY2]);
-  dGeomSetOffsetRotation (geom[BODY2], R);
-  dGeomSetCategoryBits (geom[BODY2], catBits[BODY2]);
-  dGeomSetCollideBits (geom[BODY2], catBits[ALL] & (~catBits[BODY1]) );
-  body[BODY2].setMass(&m);
+    //Rotation of 90deg around y
+    // Will orient the Z axis along X
+    dRFromAxisAndAngle (R, 0,1,0, -0.5*PI);
 
 
-  // Create Body 1 (Slider on the prismatic axis)
-  body[BODY1].create (world);
-  // Main axis of capsule is along X=1
-  m.setCapsule (1, 1, RADIUS, BODY1_LENGTH);
-  m.adjust(Mass1);
-  geom[BODY1] = dCreateCapsule (space, RADIUS, BODY1_LENGTH);
-  dGeomSetBody (geom[BODY1], body[BODY1]);
-  dGeomSetOffsetRotation (geom[BODY1], R);
-  dGeomSetCategoryBits (geom[BODY1], catBits[BODY1]);
-  dGeomSetCollideBits (geom[BODY1], catBits[ALL] & ~catBits[BODY2] & ~catBits[RECT]);
-
-  dMass mRect;
-  mRect.setBox(1, RECT_SIDES[0], RECT_SIDES[1], RECT_SIDES[2]);
-  m.add(&mRect);
-  // TODO: translate m?
-  geom[RECT] = dCreateBox (space, RECT_SIDES[0], RECT_SIDES[1], RECT_SIDES[2]);
-  dGeomSetBody (geom[RECT], body[BODY1]);
-  dGeomSetOffsetPosition (geom[RECT],
-                          (BODY1_LENGTH-RECT_SIDES[0]) /2.0,
-                          0.0,
-                          -RADIUS -RECT_SIDES[2]/2.0);
-  dGeomSetCategoryBits (geom[RECT], catBits[RECT]);
-  dGeomSetCollideBits (geom[RECT], catBits[ALL] & (~catBits[BODY1]) );
-
-  body[BODY1].setMass(&m);
+    // Create Body2 (Wiil be attached to the world)
+    body[BODY2].create (world);
+    // Main axis of cylinder is along X=1
+    m.setBox (1, BODY2_SIDES[0], BODY2_SIDES[1], BODY2_SIDES[2]);
+    m.adjust (Mass1);
+    geom[BODY2] = dCreateBox (space, BODY2_SIDES[0], BODY2_SIDES[1], BODY2_SIDES[2]);
+    dGeomSetBody (geom[BODY2], body[BODY2]);
+    dGeomSetOffsetRotation (geom[BODY2], R);
+    dGeomSetCategoryBits (geom[BODY2], catBits[BODY2]);
+    dGeomSetCollideBits (geom[BODY2], catBits[ALL] & (~catBits[BODY1]) );
+    body[BODY2].setMass(&m);
 
 
+    // Create Body 1 (Slider on the prismatic axis)
+    body[BODY1].create (world);
+    // Main axis of capsule is along X=1
+    m.setCapsule (1, 1, RADIUS, BODY1_LENGTH);
+    m.adjust(Mass1);
+    geom[BODY1] = dCreateCapsule (space, RADIUS, BODY1_LENGTH);
+    dGeomSetBody (geom[BODY1], body[BODY1]);
+    dGeomSetOffsetRotation (geom[BODY1], R);
+    dGeomSetCategoryBits (geom[BODY1], catBits[BODY1]);
+    dGeomSetCollideBits (geom[BODY1], catBits[ALL] & ~catBits[BODY2] & ~catBits[RECT]);
 
-  setPositionBodies (tc);
+    dMass mRect;
+    mRect.setBox(1, RECT_SIDES[0], RECT_SIDES[1], RECT_SIDES[2]);
+    m.add(&mRect);
+    // TODO: translate m?
+    geom[RECT] = dCreateBox (space, RECT_SIDES[0], RECT_SIDES[1], RECT_SIDES[2]);
+    dGeomSetBody (geom[RECT], body[BODY1]);
+    dGeomSetOffsetPosition (geom[RECT],
+                            (BODY1_LENGTH-RECT_SIDES[0]) /2.0,
+                            0.0,
+                            -RADIUS -RECT_SIDES[2]/2.0);
+    dGeomSetCategoryBits (geom[RECT], catBits[RECT]);
+    dGeomSetCollideBits (geom[RECT], catBits[ALL] & (~catBits[BODY1]) );
+
+    body[BODY1].setMass(&m);
 
 
-  if ( fixed ) {
-      // Attache external cylinder to the world
-      dJointID fixed = dJointCreateFixed (world,0);
-      dJointAttach (fixed , NULL, body[BODY2]);
-      dJointSetFixed (fixed );
-      dWorldSetGravity (world,0,0,-0.8);
+
+    setPositionBodies (tc);
+
+
+    if ( fixed )
+    {
+        // Attache external cylinder to the world
+        dJointID fixed = dJointCreateFixed (world,0);
+        dJointAttach (fixed , NULL, body[BODY2]);
+        dJointSetFixed (fixed );
+        dWorldSetGravity (world,0,0,-0.8);
     }
-  else {
-    dWorldSetGravity (world,0,0,0);
-  }
+    else
+    {
+        dWorldSetGravity (world,0,0,0);
+    }
 
 
 
 
-  // The static is here only to help debugging
-  switch (type) {
-    case dJointTypeSlider : {
-      dSliderJoint *sj = new dSliderJoint (world, 0);
-      sj->attach (body[BODY1], body[BODY2]);
-      sj->setAxis (1, 0, 0);
-      joint = sj;
+    // The static is here only to help debugging
+    switch (type)
+    {
+    case dJointTypeSlider :
+    {
+        dSliderJoint *sj = new dSliderJoint (world, 0);
+        sj->attach (body[BODY1], body[BODY2]);
+        sj->setAxis (1, 0, 0);
+        joint = sj;
     }
     break;
 
     case dJointTypePiston : // fall through default
-    default: {
-      dPistonJoint *pj = new dPistonJoint (world, 0);
-      pj->attach (body[BODY1], body[BODY2]);
-      pj->setAxis (1, 0, 0);
+    default:
+    {
+        dPistonJoint *pj = new dPistonJoint (world, 0);
+        pj->attach (body[BODY1], body[BODY2]);
+        pj->setAxis (1, 0, 0);
 
-      dJointSetPistonAnchor(pj->id(), anchor[X], anchor[Y], anchor[Z]);
+        dJointSetPistonAnchor(pj->id(), anchor[X], anchor[Y], anchor[Z]);
 
-      joint = pj;
+        joint = pj;
     }
     break;
-  };
+    };
 
 
-  // run simulation
-  dsSimulationLoop (argc,argv,400,300,&fn);
+    // run simulation
+    dsSimulationLoop (argc,argv,400,300,&fn);
 
-  delete joint;
-  dJointGroupDestroy (contactgroup);
-  dSpaceDestroy (space);
-  dWorldDestroy (world);
-  dCloseODE();
-  return 0;
+    delete joint;
+    dJointGroupDestroy (contactgroup);
+    dSpaceDestroy (space);
+    dWorldDestroy (world);
+    dCloseODE();
+    return 0;
 }
 
 
