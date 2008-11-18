@@ -207,6 +207,9 @@ dxJointSlider::getInfo2 ( dxJoint::Info2 *info )
         for ( i = 0; i < 3; i++ ) ofs[i] = offset[i] - pos1[i];
         info->c[3] = k * dDOT ( p, ofs );
         info->c[4] = k * dDOT ( q, ofs );
+
+        if ( flags & dJOINT_REVERSE )
+            for ( i = 0; i < 3; ++i ) ax1[i] = -ax1[i];
     }
 
     // if the slider is powered, or has joint limits, add in the extra row
@@ -217,7 +220,6 @@ dxJointSlider::getInfo2 ( dxJoint::Info2 *info )
 void dJointSetSliderAxis ( dJointID j, dReal x, dReal y, dReal z )
 {
     dxJointSlider* joint = ( dxJointSlider* ) j;
-    int i;
     dUASSERT ( joint, "bad joint argument" );
     checktype ( joint, Slider );
     setAxes ( joint, x, y, z, joint->axis1, 0 );
@@ -231,7 +233,6 @@ void dJointSetSliderAxis ( dJointID j, dReal x, dReal y, dReal z )
 void dJointSetSliderAxisDelta ( dJointID j, dReal x, dReal y, dReal z, dReal dx, dReal dy, dReal dz )
 {
     dxJointSlider* joint = ( dxJointSlider* ) j;
-    int i;
     dUASSERT ( joint, "bad joint argument" );
     checktype ( joint, Slider );
     setAxes ( joint, x, y, z, joint->axis1, 0 );

@@ -457,10 +457,6 @@ SUITE (TestdxJointSlider)
   //  X------->       X---------> Axis -->
   //  B1          =>     B1
   //
-  // Start with a Offset of offset unit
-  //
-  //  X------->       X---------> Axis -->
-  //     B1       =>  B1
   TEST_FIXTURE (Fixture_dxJointSlider_B1_At_Zero_Axis_Along_X,
                 test_dJointSetSliderAxisOffset_B1_OffsetUnit)
     {
@@ -476,10 +472,6 @@ SUITE (TestdxJointSlider)
   //  X------->          X---------> Axis -->
   //  B1          =>  B1
   //
-  // Start with a Offset of -offset unit
-  //
-  //      X------->      X---------> Axis -->
-  //  B1            =>   B1
   TEST_FIXTURE (Fixture_dxJointSlider_B1_At_Zero_Axis_Along_X,
                 test_dJointSetSliderAxisOffset_B1_Minus_OffsetUnit)
     {
@@ -489,6 +481,7 @@ SUITE (TestdxJointSlider)
 
       CHECK_CLOSE (-offset, dJointGetSliderPosition(jId), 1e-4);
     }
+
 
   // Only body 1
   // The body are positionned at (0, 0, 0), with no rotation
@@ -537,10 +530,6 @@ SUITE (TestdxJointSlider)
   //  X------->       X--------->  <--- Axis
   //  B1          =>     B1
   //
-  // Start with a Offset of offset unit
-  //
-  //  X------->       X--------->  <--- Axis
-  //     B1       =>  B1
   TEST_FIXTURE (Fixture_dxJointSlider_B1_At_Zero_Axis_Inverse_of_X,
                 test_dJointSetSliderAxisOffset_B1_OffsetUnit)
     {
@@ -556,10 +545,6 @@ SUITE (TestdxJointSlider)
   //  X------->          X--------->   <--- Axis
   //  B1          =>  B1
   //
-  // Start with a Offset of -offset unit
-  //
-  //      X------->      X--------->   <--- Axis
-  //  B1            =>   B1
   TEST_FIXTURE (Fixture_dxJointSlider_B1_At_Zero_Axis_Inverse_of_X,
                 test_dJointSetSliderAxisOffset_B1_Minus_OffsetUnit)
     {
@@ -569,13 +554,6 @@ SUITE (TestdxJointSlider)
 
       CHECK_CLOSE (offset, dJointGetSliderPosition(jId), 1e-4);
     }
-
-
-
-
-
-
-
 
 
   // Only body 2
@@ -625,10 +603,6 @@ SUITE (TestdxJointSlider)
   //  X------->       X---------> Axis -->
   //  B2          =>     B2
   //
-  // Start with a Offset of offset unit
-  //
-  //  X------->       X---------> Axis -->
-  //     B2       =>  B2
   TEST_FIXTURE (Fixture_dxJointSlider_B2_At_Zero_Axis_Along_X,
                 test_dJointSetSliderAxisOffset_B2_OffsetUnit)
     {
@@ -644,10 +618,6 @@ SUITE (TestdxJointSlider)
   //  X------->          X---------> Axis -->
   //  B2          =>  B2
   //
-  // Start with a Offset of -offset unit
-  //
-  //      X------->      X---------> Axis -->
-  //  B2            =>   B2
   TEST_FIXTURE (Fixture_dxJointSlider_B2_At_Zero_Axis_Along_X,
                 test_dJointSetSliderAxisOffset_B2_Minus_OffsetUnit)
     {
@@ -705,10 +675,6 @@ SUITE (TestdxJointSlider)
   //  X------->       X--------->  <--- Axis
   //  B2          =>     B2
   //
-  // Start with a Offset of offset unit
-  //
-  //  X------->       X--------->  <--- Axis
-  //     B2       =>  B2
   TEST_FIXTURE (Fixture_dxJointSlider_B2_At_Zero_Axis_Inverse_of_X,
                 test_dJointSetSliderAxisOffset_B2_OffsetUnit)
     {
@@ -724,10 +690,6 @@ SUITE (TestdxJointSlider)
   //  X------->          X--------->   <--- Axis
   //  B2          =>  B2
   //
-  // Start with a Offset of -offset unit
-  //
-  //      X------->      X--------->   <--- Axis
-  //  B2            =>   B2
   TEST_FIXTURE (Fixture_dxJointSlider_B2_At_Zero_Axis_Inverse_of_X,
                 test_dJointSetSliderAxisOffset_B2_Minus_OffsetUnit)
     {
@@ -1137,6 +1099,228 @@ SUITE (TestdxJointSlider)
       CHECK_CLOSE (posA[3], posB[3], 1e-6);
     }
   }
+
+
+
+  // Compare Only body 1 to 2 bodies with one fixed.
+  //
+  // The body are positionned at (0, 0, 0), with no rotation
+  // The joint is a Slider Joint
+  // Axis is along the X axis
+  // Anchor at (0, 0, 0)
+  struct Fixture_dxJointSlider_Compare_Body_At_Zero_Axis_Along_X
+  {
+      Fixture_dxJointSlider_Compare_Body_At_Zero_Axis_Along_X()
+          {
+              wId = dWorldCreate();
+
+              bId1_12 = dBodyCreate (wId);
+              dBodySetPosition (bId1_12, 0, 0, 0);
+
+              bId2_12 = dBodyCreate (wId);
+              dBodySetPosition (bId2_12, 0, 0, 0);
+              // The force will be added in the function since it is not
+              // always on the same body
+
+              jId_12 = dJointCreateSlider (wId, 0);
+              dJointAttach(jId_12, bId1_12, bId2_12);
+
+              fixed = dJointCreateFixed (wId, 0);
+
+
+
+              bId = dBodyCreate (wId);
+              dBodySetPosition (bId, 0, 0, 0);
+
+              dBodyAddForce (bId, 4, 0, 0);
+
+              jId = dJointCreateSlider (wId, 0);
+          }
+
+      ~Fixture_dxJointSlider_Compare_Body_At_Zero_Axis_Along_X()
+          {
+              dWorldDestroy (wId);
+          }
+
+      dWorldID wId;
+
+      dBodyID bId1_12;
+      dBodyID bId2_12;
+
+      dJointID jId_12; // Joint with 2 bodies
+
+      dJointID fixed;
+
+
+
+      dBodyID  bId;
+      dJointID jId;    // Joint with one body
+  };
+
+  // This test compare the result of a slider with 2 bodies where body body 2 is
+  // fixed to the world to a slider with only one body at position 1.
+  //
+  // Test the limits [-1, 0.25] when only one body at is attached to the joint
+  // using dJointAttache(jId, bId, 0);
+  //
+  TEST_FIXTURE(Fixture_dxJointSlider_Compare_Body_At_Zero_Axis_Along_X,
+               test_Limit_minus1_025_One_Body_on_left)
+  {
+      dBodyAddForce (bId1_12, 4, 0, 0);
+
+      dJointAttach(jId_12, bId1_12, bId2_12);
+      dJointSetSliderParam(jId_12, dParamLoStop, -1);
+      dJointSetSliderParam(jId_12, dParamHiStop, 0.25);
+
+      dJointAttach(fixed, 0, bId2_12);
+      dJointSetFixed(fixed);
+
+      dJointAttach(jId, bId, 0);
+      dJointSetSliderParam(jId, dParamLoStop, -1);
+      dJointSetSliderParam(jId, dParamHiStop, 0.25);
+
+
+      for (int i=0; i<50; ++i)
+          dWorldStep(wId, 1.0);
+
+      const dReal *pos1_12 = dBodyGetPosition(bId1_12);
+
+      const dReal *pos = dBodyGetPosition(bId);
+
+
+      CHECK_CLOSE (pos[0], pos1_12[0], 1e-4);
+      CHECK_CLOSE (pos[1], pos1_12[1], 1e-4);
+      CHECK_CLOSE (pos[2], pos1_12[2], 1e-4);
+  }
+
+
+
+  // This test compare the result of a slider with 2 bodies where body body 1 is
+  // fixed to the world to a slider with only one body at position 2.
+  //
+  // Test the limits [-1, 0.25] when only one body at is attached to the joint
+  // using dJointAttache(jId, 0, bId);
+  //
+  TEST_FIXTURE(Fixture_dxJointSlider_Compare_Body_At_Zero_Axis_Along_X,
+               test_Limit_minus1_025_One_Body_on_right)
+  {
+      dBodyAddForce (bId2_12, 4, 0, 0);
+
+      dJointAttach(jId_12, bId1_12, bId2_12);
+      dJointSetSliderParam(jId_12, dParamLoStop, -1);
+      dJointSetSliderParam(jId_12, dParamHiStop, 0.25);
+
+      dJointAttach(fixed, bId1_12, 0);
+      dJointSetFixed(fixed);
+
+
+      dJointAttach(jId, 0, bId);
+      dJointSetSliderParam(jId, dParamLoStop, -1);
+      dJointSetSliderParam(jId, dParamHiStop, 0.25);
+
+      for (int i=0; i<50; ++i)
+      {
+          dWorldStep(wId, 1.0);
+      }
+
+      const dReal *pos2_12 = dBodyGetPosition(bId2_12);
+
+      const dReal *pos = dBodyGetPosition(bId);
+
+
+      CHECK_CLOSE (pos[0], pos2_12[0], 1e-4);
+      CHECK_CLOSE (pos[1], pos2_12[1], 1e-4);
+      CHECK_CLOSE (pos[2], pos2_12[2], 1e-4);
+  }
+
+
+
+  // This test compare the result of a slider with 2 bodies where body body 2 is
+  // fixed to the world to a slider with only one body at position 1.
+  //
+  // Test the limits [0, 0] when only one body at is attached to the joint
+  // using dJointAttache(jId, bId, 0);
+  //
+  // The body should not move since their is no room between the two limits
+  //
+  TEST_FIXTURE(Fixture_dxJointSlider_Compare_Body_At_Zero_Axis_Along_X,
+               test_Limit_0_0_One_Body_on_left)
+  {
+      dBodyAddForce (bId1_12, 4, 0, 0);
+
+      dJointAttach(jId_12, bId1_12, bId2_12);
+      dJointSetSliderParam(jId_12, dParamLoStop, 0);
+      dJointSetSliderParam(jId_12, dParamHiStop, 0);
+
+      dJointAttach(fixed, 0, bId2_12);
+      dJointSetFixed(fixed);
+
+
+      dJointAttach(jId, bId, 0);
+      dJointSetSliderParam(jId, dParamLoStop, 0);
+      dJointSetSliderParam(jId, dParamHiStop, 0);
+
+      for (int i=0; i<500; ++i)
+          dWorldStep(wId, 1.0);
+
+      const dReal *pos1_12 = dBodyGetPosition(bId1_12);
+
+      const dReal *pos = dBodyGetPosition(bId);
+
+
+      CHECK_CLOSE (pos[0], pos1_12[0], 1e-4);
+      CHECK_CLOSE (pos[1], pos1_12[1], 1e-4);
+      CHECK_CLOSE (pos[2], pos1_12[2], 1e-4);
+
+      CHECK_CLOSE (pos[0], 0, 1e-4);
+      CHECK_CLOSE (pos[1], 0, 1e-4);
+      CHECK_CLOSE (pos[2], 0, 1e-4);
+  }
+
+
+  // This test compare the result of a slider with 2 bodies where body body 1 is
+  // fixed to the world to a slider with only one body at position 2.
+  //
+  // Test the limits [0, 0] when only one body at is attached to the joint
+  // using dJointAttache(jId, 0, bId);
+  //
+  // The body should not move since their is no room between the two limits
+  //
+  TEST_FIXTURE(Fixture_dxJointSlider_Compare_Body_At_Zero_Axis_Along_X,
+               test_Limit_0_0_One_Body_on_right)
+  {
+      dBodyAddForce (bId2_12, 4, 0, 0);
+
+      dJointAttach(jId_12, bId1_12, bId2_12);
+      dJointSetSliderParam(jId_12, dParamLoStop, 0);
+      dJointSetSliderParam(jId_12, dParamHiStop, 0);
+
+      dJointAttach(fixed, bId1_12, 0);
+      dJointSetFixed(fixed);
+
+
+      dJointAttach(jId, 0, bId);
+      dJointSetSliderParam(jId, dParamLoStop, 0);
+      dJointSetSliderParam(jId, dParamHiStop, 0);
+
+      for (int i=0; i<500; ++i)
+          dWorldStep(wId, 1.0);
+
+      const dReal *pos2_12 = dBodyGetPosition(bId2_12);
+
+      const dReal *pos = dBodyGetPosition(bId);
+
+
+      CHECK_CLOSE (pos[0], pos2_12[0], 1e-4);
+      CHECK_CLOSE (pos[1], pos2_12[1], 1e-4);
+      CHECK_CLOSE (pos[2], pos2_12[2], 1e-4);
+
+      CHECK_CLOSE (pos[0], 0, 1e-4);
+      CHECK_CLOSE (pos[1], 0, 1e-4);
+      CHECK_CLOSE (pos[2], 0, 1e-4);
+  }
+
+
 
 
 } // End of SUITE TestdxJointSlider
