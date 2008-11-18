@@ -248,8 +248,18 @@ dxJointPiston::getInfo2 ( dxJoint::Info2 *info )
     {
         // pos2 = 0; // N.B. We can do that to be safe but it is no necessary
         // R2 = 0;   // N.B. We can do that to be safe but it is no necessary
-        // dist[i] = joint->anchor2[i] - pos1[ui];
-        dOPE2 ( dist, = , anchor2, -, pos1 );
+        if (flags & dJOINT_REVERSE )
+        {
+            dist[0] = pos1[0] - anchor2[0]; // Invert the value
+            dist[1] = pos1[1] - anchor2[1];
+            dist[2] = pos1[2] - anchor2[2];
+        }
+        else
+        {
+            dist[0] = anchor2[0] - pos1[0];
+            dist[1] = anchor2[1] - pos1[1];
+            dist[2] = anchor2[2] - pos1[2];
+        }
     }
 
     // ======================================================================
@@ -320,6 +330,7 @@ dxJointPiston::getInfo2 ( dxJoint::Info2 *info )
     info->c[0] = k * dDOT ( p, b );
     info->c[1] = k * dDOT ( q, b );
 
+
     // ======================================================================
     // Work on the linear part (i.e row 2,3)
     // p2 + R2 anchor2' = p1 + R1 dist'
@@ -383,7 +394,22 @@ dxJointPiston::getInfo2 ( dxJoint::Info2 *info )
     info->c[3] = k * dDOT ( q, err );
 
 
-    int row = 4 + limotP.addLimot ( this, info, 4, ax1, 0 );
+    int row = 4;
+    if (  node[1].body )
+    {
+        row += limotP.addLimot ( this, info, 4, ax1, 0 );
+    }
+    else if (flags & dJOINT_REVERSE )
+    {
+        dVector3 rAx1;
+        rAx1[0] = -ax1[0];
+        rAx1[1] = -ax1[1];
+        rAx1[2] = -ax1[2];
+        row += limotP.addLimot ( this, info, 4, rAx1, 0 );
+    }
+    else
+        row += limotP.addLimot ( this, info, 4, ax1, 0 );
+
     limotR.addLimot ( this, info, row, ax1, 1 );
 }
 
