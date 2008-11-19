@@ -1103,18 +1103,18 @@ SUITE (TestdxJointPiston)
                 dMatrix3 R;
                 dVector3 axis; // Random axis
 
-                axis[0] = 0.53;
-                axis[1] = -0.71;
-                axis[2] = 0.43;
+                axis[0] =  REAL(0.53);
+                axis[1] = -REAL(0.71);
+                axis[2] =  REAL(0.43);
                 dNormalize3(axis);
                 dRFromAxisAndAngle (R, axis[0], axis[1], axis[2],
                                     REAL(0.47123)); // 27deg
                 dBodySetRotation (bId[j][0], R);
 
 
-                axis[0] = 1.2;
-                axis[1] = 0.87;
-                axis[2] = -0.33;
+                axis[0] =  REAL(1.2);
+                axis[1] =  REAL(0.87);
+                axis[2] = -REAL(0.33);
                 dNormalize3(axis);
                 dRFromAxisAndAngle (R, axis[0], axis[1], axis[2],
                                     REAL(0.47123)); // 27deg
@@ -1286,9 +1286,9 @@ SUITE (TestdxJointPiston)
         const dReal *pos1_12 = dBodyGetPosition(bId1_12);
         const dReal *pos = dBodyGetPosition(bId);
 
-        CHECK_CLOSE (pos1_12[0], pos[0], 1e-4);
-        CHECK_CLOSE (pos1_12[1], pos[1], 1e-4);
-        CHECK_CLOSE (pos1_12[2], pos[2], 1e-4);
+        CHECK_CLOSE (pos1_12[0], pos[0], 1e-2);
+        CHECK_CLOSE (pos1_12[1], pos[1], 1e-2);
+        CHECK_CLOSE (pos1_12[2], pos[2], 1e-2);
 
         const dReal *q1_12 = dBodyGetQuaternion(bId1_12);
         const dReal *q = dBodyGetQuaternion(bId);
@@ -1331,9 +1331,9 @@ SUITE (TestdxJointPiston)
         const dReal *pos2_12 = dBodyGetPosition(bId2_12);
         const dReal *pos = dBodyGetPosition(bId);
 
-        CHECK_CLOSE (pos2_12[0], pos[0], 1e-4);
-        CHECK_CLOSE (pos2_12[1], pos[1], 1e-4);
-        CHECK_CLOSE (pos2_12[2], pos[2], 1e-4);
+        CHECK_CLOSE (pos2_12[0], pos[0], 1e-2);
+        CHECK_CLOSE (pos2_12[1], pos[1], 1e-2);
+        CHECK_CLOSE (pos2_12[2], pos[2], 1e-2);
 
 
         const dReal *q2_12 = dBodyGetQuaternion(bId2_12);

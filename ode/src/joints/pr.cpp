@@ -95,6 +95,12 @@ dReal dJointGetPRPosition( dJointID j )
         q[2] = (( joint->node[0].body->posr.pos[2] + q[2] ) -
                 ( joint->anchor2[2] ) );
 
+        if ( joint->flags & dJOINT_REVERSE )
+        {
+            q[0] = -q[0];
+            q[1] = -q[1];
+            q[2] = -q[2];
+        }
     }
 
     dVector3 axP;
@@ -120,7 +126,10 @@ dReal dJointGetPRPositionRate( dJointID j )
         return dDOT( ax1, joint->node[0].body->lvel ) - dDOT( ax1, lv2 );
     }
     else
-        return dDOT( ax1, joint->node[0].body->lvel );
+    {
+        dReal rate = dDOT( ax1, joint->node[0].body->lvel );
+        return ( (joint->flags & dJOINT_REVERSE) ? -rate : rate);
+    }
 }
 
 

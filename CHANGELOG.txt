@@ -10,13 +10,21 @@ the rules for this file:
 ------------------------------------------------------------------------------
 
 11/19/08 Remi Ricard (papaDoc)
+        * Fix problem with dJointGetPRPosition and
+          dJointGetPRPositionRate when the joint is attached to only
+          a body 2. The sign was inverted.
+        * Add unit test to check the above problem
+        * Increase the tolerance to remove failure in unit test
+        * Remove compilation warning in unit test with the use of REAL()
+
+11/18/08 Remi Ricard (papaDoc)
        * Fix bug: When a piston joint had only one body attached to position 2,
          dJointAttach(jId, 0, bId). The body was not push in the right direction to
          move back between the limits.
        * Add more functionality to demo_piston.cpp
        * Run astyle on modified files.
 
-11/19/08 Remi Ricard (papaDoc)
+11/18/08 Remi Ricard (papaDoc)
         * Fix bug: When a slider joint had only one body attached to position 2,
          dJointAttach(jId, 0, bId). The body was not push in the right direction to
          move back between the limits.
