@@ -8,6 +8,11 @@ the rules for this file:
   * keep the format consistent (79 char width, M/D/Y date format).
 
 ------------------------------------------------------------------------------
+11/19/08 Remi Ricard (papaDoc)
+       * Fix bug: When a pr joint had only one body attached to position 2,
+         dJointAttach(jId, 0, bId). The body was not push in the right direction to
+         move back between the limits.
+       * Add unit test to check the above problem
 
 11/19/08 Remi Ricard (papaDoc)
         * Fix problem with dJointGetPRPosition and

@@ -262,9 +262,18 @@ dxJointPR::getInfo2( dxJoint::Info2 *info )
     }
     else
     {
-        dist[0] = anchor2[0] - pos1[0];
-        dist[1] = anchor2[1] - pos1[1];
-        dist[2] = anchor2[2] - pos1[2];
+        if (flags & dJOINT_REVERSE )
+        {
+            dist[0] = pos1[0] - anchor2[0]; // Invert the value
+            dist[1] = pos1[1] - anchor2[1];
+            dist[2] = pos1[2] - anchor2[2];
+        }
+        else
+        {
+            dist[0] = anchor2[0] - pos1[0];
+            dist[1] = anchor2[1] - pos1[1];
+            dist[2] = anchor2[2] - pos1[2];
+        }
     }
 
 
@@ -408,7 +417,20 @@ dxJointPR::getInfo2( dxJoint::Info2 *info )
     info->c[2] = k * dDOT( ax1, err );
     info->c[3] = k * dDOT( q, err );
 
-    int row = 4 + limotP.addLimot( this, info, 4, axP, 0 );
+    int row = 4;
+    if (  node[1].body || !(flags & dJOINT_REVERSE) )
+    {
+        row += limotP.addLimot ( this, info, 4, axP, 0 );
+    }
+    else
+    {
+        dVector3 rAxP;
+        rAxP[0] = -axP[0];
+        rAxP[1] = -axP[1];
+        rAxP[2] = -axP[2];
+        row += limotP.addLimot ( this, info, 4, rAxP, 0 );
+    }
+
     limotR.addLimot ( this, info, row, ax1, 1 );
 }
 

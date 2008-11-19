@@ -428,9 +428,9 @@ SUITE (TestdxJointPR)
     // The joint is a PR Joint
     // Axis is along the X axis
     // Anchor at (0, 0, 0)
-    struct Fixture_dxJointPR_Compare_Body_At_Zero_Axis_Along_X
+    struct Fixture_dxJointPR_Compare_Body_At_Zero_AxisP_Along_Y
     {
-        Fixture_dxJointPR_Compare_Body_At_Zero_Axis_Along_X()
+        Fixture_dxJointPR_Compare_Body_At_Zero_AxisP_Along_Y()
         {
             wId = dWorldCreate();
 
@@ -461,7 +461,7 @@ SUITE (TestdxJointPR)
             dBodySetLinearVel (bId, 4*axis[0], 4*axis[1], 4*axis[2]);
         }
 
-        ~Fixture_dxJointPR_Compare_Body_At_Zero_Axis_Along_X()
+        ~Fixture_dxJointPR_Compare_Body_At_Zero_AxisP_Along_Y()
         {
             dWorldDestroy (wId);
         }
@@ -482,7 +482,7 @@ SUITE (TestdxJointPR)
     };
 
 
-    TEST_FIXTURE (Fixture_dxJointPR_Compare_Body_At_Zero_Axis_Along_X,
+    TEST_FIXTURE (Fixture_dxJointPR_Compare_Body_At_Zero_AxisP_Along_Y,
                   test_dJointSetPRPositionRate_Only_B1)
     {
         // Linear velocity along the prismatic axis;
@@ -503,7 +503,7 @@ SUITE (TestdxJointPR)
     }
 
 
-    TEST_FIXTURE (Fixture_dxJointPR_Compare_Body_At_Zero_Axis_Along_X,
+    TEST_FIXTURE (Fixture_dxJointPR_Compare_Body_At_Zero_AxisP_Along_Y,
                   test_dJointSetPRPositionRate_Only_B2)
     {
         // Linear velocity along the prismatic axis;
@@ -941,6 +941,218 @@ SUITE (TestdxJointPR)
             CHECK_CLOSE (posA[2], posB[2], 1e-4);
             CHECK_CLOSE (posA[3], posB[3], 1e-4);
         }
+    }
+
+
+
+
+
+
+    // This test compare the result of a slider with 2 bodies where body body 2 is
+    // fixed to the world to a slider with only one body at position 1.
+    //
+    // Test the limits [-1, 0.25] when only one body at is attached to the joint
+    // using dJointAttache(jId, bId, 0);
+    //
+    TEST_FIXTURE(Fixture_dxJointPR_Compare_Body_At_Zero_AxisP_Along_Y,
+                 test_Limit_minus1_025_One_Body_on_left)
+    {
+        // Linear velocity along the prismatic axis;
+        dVector3 axis;
+        dJointGetPRAxis1(jId_12, axis);
+        dBodySetLinearVel (bId1_12, 4*axis[0], 4*axis[1], 4*axis[2]);
+
+        dJointAttach(jId_12, bId1_12, bId2_12);
+        dJointSetPRParam(jId_12, dParamLoStop, -1);
+        dJointSetPRParam(jId_12, dParamHiStop, 0.25);
+
+        dJointAttach(fixed, 0, bId2_12);
+        dJointSetFixed(fixed);
+
+        dJointAttach(jId, bId, 0);
+        dJointSetPRParam(jId, dParamLoStop, -1);
+        dJointSetPRParam(jId, dParamHiStop, 0.25);
+
+
+        for (int i=0; i<50; ++i)
+            dWorldStep(wId, 1.0);
+
+
+        const dReal *pos1_12 = dBodyGetPosition(bId1_12);
+        const dReal *pos = dBodyGetPosition(bId);
+
+        CHECK_CLOSE (pos1_12[0], pos[0], 1e-2);
+        CHECK_CLOSE (pos1_12[1], pos[1], 1e-2);
+        CHECK_CLOSE (pos1_12[2], pos[2], 1e-2);
+
+        const dReal *q1_12 = dBodyGetQuaternion(bId1_12);
+        const dReal *q = dBodyGetQuaternion(bId);
+
+        CHECK_CLOSE (q1_12[0], q[0], 1e-4);
+        CHECK_CLOSE (q1_12[1], q[1], 1e-4);
+        CHECK_CLOSE (q1_12[2], q[2], 1e-4);
+        CHECK_CLOSE (q1_12[3], q[3], 1e-4);
+    }
+
+
+
+    // This test compare the result of a slider with 2 bodies where body body 1 is
+    // fixed to the world to a slider with only one body at position 2.
+    //
+    // Test the limits [-1, 0.25] when only one body at is attached to the joint
+    // using dJointAttache(jId, 0, bId);
+    //
+    TEST_FIXTURE(Fixture_dxJointPR_Compare_Body_At_Zero_AxisP_Along_Y,
+                 test_Limit_minus1_025_One_Body_on_right)
+    {
+        // Linear velocity along the prismatic axis;
+        dVector3 axis;
+        dJointGetPRAxis1(jId_12, axis);
+        dBodySetLinearVel (bId2_12, 4*axis[0], 4*axis[1], 4*axis[2]);
+
+        dJointAttach(jId_12, bId1_12, bId2_12);
+        dJointSetPRParam(jId_12, dParamLoStop, -1);
+        dJointSetPRParam(jId_12, dParamHiStop, 0.25);
+
+        dJointAttach(fixed, bId1_12, 0);
+        dJointSetFixed(fixed);
+
+
+        dJointAttach(jId, 0, bId);
+        dJointSetPRParam(jId, dParamLoStop, -1);
+        dJointSetPRParam(jId, dParamHiStop, 0.25);
+
+        for (int i=0; i<50; ++i)
+            dWorldStep(wId, 1.0);
+
+
+        const dReal *pos2_12 = dBodyGetPosition(bId2_12);
+        const dReal *pos = dBodyGetPosition(bId);
+
+        CHECK_CLOSE (pos2_12[0], pos[0], 1e-2);
+        CHECK_CLOSE (pos2_12[1], pos[1], 1e-2);
+        CHECK_CLOSE (pos2_12[2], pos[2], 1e-2);
+
+
+        const dReal *q2_12 = dBodyGetQuaternion(bId2_12);
+        const dReal *q = dBodyGetQuaternion(bId);
+
+        CHECK_CLOSE (q2_12[0], q[0], 1e-4);
+        CHECK_CLOSE (q2_12[1], q[1], 1e-4);
+        CHECK_CLOSE (q2_12[2], q[2], 1e-4);
+        CHECK_CLOSE (q2_12[3], q[3], 1e-4);
+    }
+
+
+
+    // This test compare the result of a slider with 2 bodies where body body 2 is
+    // fixed to the world to a slider with only one body at position 1.
+    //
+    // Test the limits [0, 0] when only one body at is attached to the joint
+    // using dJointAttache(jId, bId, 0);
+    //
+    // The body should not move since their is no room between the two limits
+    //
+    TEST_FIXTURE(Fixture_dxJointPR_Compare_Body_At_Zero_AxisP_Along_Y,
+                 test_Limit_0_0_One_Body_on_left)
+    {
+        // Linear velocity along the prismatic axis;
+        dVector3 axis;
+        dJointGetPRAxis1(jId_12, axis);
+        dBodySetLinearVel (bId1_12, 4*axis[0], 4*axis[1], 4*axis[2]);
+
+        dJointAttach(jId_12, bId1_12, bId2_12);
+        dJointSetPRParam(jId_12, dParamLoStop, 0);
+        dJointSetPRParam(jId_12, dParamHiStop, 0);
+
+        dJointAttach(fixed, 0, bId2_12);
+        dJointSetFixed(fixed);
+
+
+        dJointAttach(jId, bId, 0);
+        dJointSetPRParam(jId, dParamLoStop, 0);
+        dJointSetPRParam(jId, dParamHiStop, 0);
+
+        for (int i=0; i<50; ++i)
+            dWorldStep(wId, 1.0);
+
+
+
+        const dReal *pos1_12 = dBodyGetPosition(bId1_12);
+        const dReal *pos = dBodyGetPosition(bId);
+
+        CHECK_CLOSE (pos1_12[0], pos[0], 1e-4);
+        CHECK_CLOSE (pos1_12[1], pos[1], 1e-4);
+        CHECK_CLOSE (pos1_12[2], pos[2], 1e-4);
+
+        CHECK_CLOSE (0, pos[0], 1e-4);
+        CHECK_CLOSE (0, pos[1], 1e-4);
+        CHECK_CLOSE (0, pos[2], 1e-4);
+
+
+        const dReal *q1_12 = dBodyGetQuaternion(bId1_12);
+        const dReal *q = dBodyGetQuaternion(bId);
+
+        CHECK_CLOSE (q1_12[0], q[0], 1e-4);
+        CHECK_CLOSE (q1_12[1], q[1], 1e-4);
+        CHECK_CLOSE (q1_12[2], q[2], 1e-4);
+        CHECK_CLOSE (q1_12[3], q[3], 1e-4);
+    }
+
+
+    // This test compare the result of a slider with 2 bodies where body body 1 is
+    // fixed to the world to a slider with only one body at position 2.
+    //
+    // Test the limits [0, 0] when only one body at is attached to the joint
+    // using dJointAttache(jId, 0, bId);
+    //
+    // The body should not move since their is no room between the two limits
+    //
+    TEST_FIXTURE(Fixture_dxJointPR_Compare_Body_At_Zero_AxisP_Along_Y,
+                 test_Limit_0_0_One_Body_on_right)
+    {
+        // Linear velocity along the prismatic axis;
+        dVector3 axis;
+        dJointGetPRAxis1(jId_12, axis);
+        dBodySetLinearVel (bId2_12, 4*axis[0], 4*axis[1], 4*axis[2]);
+
+        dJointAttach(jId_12, bId1_12, bId2_12);
+        dJointSetPRParam(jId_12, dParamLoStop, 0);
+        dJointSetPRParam(jId_12, dParamHiStop, 0);
+
+        dJointAttach(fixed, bId1_12, 0);
+        dJointSetFixed(fixed);
+
+
+        dJointAttach(jId, 0, bId);
+        dJointSetPRParam(jId, dParamLoStop, 0);
+        dJointSetPRParam(jId, dParamHiStop, 0);
+
+        for (int i=0; i<50; ++i)
+        {
+            dWorldStep(wId, 1.0);
+        }
+
+
+        const dReal *pos2_12 = dBodyGetPosition(bId2_12);
+        const dReal *pos = dBodyGetPosition(bId);
+
+        CHECK_CLOSE (pos2_12[0], pos[0], 1e-4);
+        CHECK_CLOSE (pos2_12[1], pos[1], 1e-4);
+        CHECK_CLOSE (pos2_12[2], pos[2], 1e-4);
+
+        CHECK_CLOSE (0, pos[0], 1e-4);
+        CHECK_CLOSE (0, pos[1], 1e-4);
+        CHECK_CLOSE (0, pos[2], 1e-4);
+
+
+        const dReal *q2_12 = dBodyGetQuaternion(bId2_12);
+        const dReal *q = dBodyGetQuaternion(bId);
+
+        CHECK_CLOSE (q2_12[0], q[0], 1e-4);
+        CHECK_CLOSE (q2_12[1], q[1], 1e-4);
+        CHECK_CLOSE (q2_12[2], q[2], 1e-4);
+        CHECK_CLOSE (q2_12[3], q[3], 1e-4);
     }
 
 } // End of SUITE TestdxJointPR
