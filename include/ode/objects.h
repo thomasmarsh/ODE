@@ -1776,7 +1776,39 @@ ODE_API void dJointAddPRTorque (dJointID j, dReal torque);
    * @brief set anchor
    * @ingroup joints
    */
-  ODE_API void dJointSetPUAnchorDelta (dJointID, dReal x, dReal y, dReal z,
+  ODE_API_DEPRECATED ODE_API void dJointSetPUAnchorDelta (dJointID, dReal x, dReal y, dReal z,
+                                                          dReal dx, dReal dy, dReal dz);
+
+  /**
+   * @brief Set the PU anchor as if the 2 bodies were already at [dx, dy, dz] appart.
+   * @ingroup joints
+   *
+   * This function initialize the anchor and the relative position of each body
+   * as if the position between body1 and body2 was already the projection of [dx, dy, dz]
+   * along the Piston axis. (i.e as if the body1 was at its current position - [dx,dy,dy] when the
+   * axis is set).
+   * Ex:
+   * <PRE>
+   * dReal offset = 3;
+   * dVector3 axis;
+   * dJointGetPUAxis(jId, axis);
+   * dJointSetPUAnchor(jId, 0, 0, 0);
+   * // If you request the position you will have: dJointGetPUPosition(jId) == 0
+   * dJointSetPUAnchorOffset(jId, 0, 0, 0, axis[X]*offset, axis[Y]*offset, axis[Z]*offset);
+   * // If you request the position you will have: dJointGetPUPosition(jId) == offset
+   * </PRE>
+   * @param j The PU joint for which the anchor point will be set
+   * @param x The X position of the anchor point in world frame
+   * @param y The Y position of the anchor point in world frame
+   * @param z The Z position of the anchor point in world frame
+   * @param dx A delta to be substracted to the X position as if the anchor was set
+   *           when body1 was at current_position[X] - dx
+   * @param dx A delta to be substracted to the Y position as if the anchor was set
+   *           when body1 was at current_position[Y] - dy
+   * @param dx A delta to be substracted to the Z position as if the anchor was set
+   *           when body1 was at current_position[Z] - dz
+   */
+  ODE_API void dJointSetPUAnchorOffset (dJointID, dReal x, dReal y, dReal z,
                                        dReal dx, dReal dy, dReal dz);
 
   /**
