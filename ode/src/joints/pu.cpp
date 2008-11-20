@@ -109,6 +109,12 @@ dReal dJointGetPUPosition( dJointID j )
         q[2] = (( joint->node[0].body->posr.pos[2] + q[2] ) -
                 ( joint->anchor2[2] ) );
 
+        if ( joint->flags & dJOINT_REVERSE )
+        {
+            q[0] = -q[0];
+            q[1] = -q[1];
+            q[2] = -q[2];
+        }
     }
 
     dVector3 axP;
@@ -165,6 +171,12 @@ dReal dJointGetPUPositionRate( dJointID j )
         // lvel1 += joint->node[0].body->lvel;
         dOPE( lvel1, += , joint->node[0].body->lvel );
 
+        // Since we want rate of change along the prismatic axis
+        // get axisP1 in global coordinates and get the component
+        // along this axis only
+        dVector3 axP1;
+        dMULTIPLY0_331( axP1, joint->node[0].body->posr.R, joint->axisP1 );
+
         if ( joint->node[1].body )
         {
             // Find the contribution of the angular rotation to the linear speed
@@ -175,15 +187,14 @@ dReal dJointGetPUPositionRate( dJointID j )
 
             // lvel1 -=  lvel2 + joint->node[1].body->lvel;
             dOPE2( lvel1, -= , lvel2, + , joint->node[1].body->lvel );
+
+            return dDOT( axP1, lvel1 );
         }
-
-
-        // Since we want rate of change along the prismatic axis
-        // get axisP1 in global coordinates and get the component
-        // along this axis only
-        dVector3 axP1;
-        dMULTIPLY0_331( axP1, joint->node[0].body->posr.R, joint->axisP1 );
-        return dDOT( axP1, lvel1 );
+        else
+        {
+            dReal rate = dDOT( axP1, lvel1 );
+            return ( (joint->flags & dJOINT_REVERSE) ? -rate : rate);
+        }
     }
 
     return 0.0;
@@ -274,8 +285,19 @@ dxJointPU::getInfo2( dxJoint::Info2 *info )
     }
     else
     {
-        // dist[i] = joint->anchor2[i] - pos1[i];
-        dOPE2( dist, = , anchor2, -, pos1 );
+        if (flags & dJOINT_REVERSE )
+        {
+            // Invert the sign of dist
+            dist[0] = pos1[0] - anchor2[0];
+            dist[1] = pos1[1] - anchor2[1];
+            dist[2] = pos1[2] - anchor2[2];
+        }
+        else
+        {
+            dist[0] = anchor2[0] - pos1[0];
+            dist[1] = anchor2[1] - pos1[1];
+            dist[2] = anchor2[2] - pos1[2];
+        }
     }
 
     dVector3 q; // Temporary axis vector
@@ -401,8 +423,16 @@ dxJointPU::getInfo2( dxJoint::Info2 *info )
     info->c[2] = k * dDOT( q, err );
 
     int row = 3 + limot1.addLimot( this, info, 3, ax1, 1 );
-    row += limot2.addLimot( this, info, row, ax2, 1 );
-    limotP.addLimot( this, info, row, axP, 0 );
+
+    if (  node[1].body || !(flags & dJOINT_REVERSE) )
+        limotP.addLimot( this, info, row, axP, 0 );
+    else
+    {
+        axP[0] = -axP[0];
+        axP[1] = -axP[1];
+        axP[2] = -axP[2];
+        limotP.addLimot ( this, info, row, axP, 0 );
+    }
 }
 
 void dJointSetPUAnchor( dJointID j, dReal x, dReal y, dReal z )
@@ -465,6 +495,72 @@ void dJointSetPUAnchorDelta( dJointID j, dReal x, dReal y, dReal z,
 
     joint->computeInitialRelativeRotations();
 }
+
+/**
+ * \brief This function initialize the anchor and the relative position of each body
+ * such that dJointGetPUPosition will return the dot product of axis and [dx,dy,dy].
+ *
+ * The body 1 is moved to [-dx, -dy, -dx] then the anchor is set. This will be the
+ * position 0 for the prismatic part of the joint. Then the body 1 is moved to its
+ * original position.
+ *
+ * Ex:
+ * <PRE>
+ * dReal offset = 1;
+ * dVector3 dir;
+ * dJointGetPUAxis3(jId, dir);
+ * dJointSetPUAnchor(jId, 0, 0, 0);
+ * // If you request the position you will have: dJointGetPUPosition(jId) == 0
+ * dJointSetPUAnchorDelta(jId, 0, 0, 0, dir[X]*offset, dir[Y]*offset, dir[Z]*offset);
+ * // If you request the position you will have: dJointGetPUPosition(jId) == offset
+ * </PRE>
+
+ * @param j The PU joint for which the anchor point will be set
+ * @param x The X position of the anchor point in world frame
+ * @param y The Y position of the anchor point in world frame
+ * @param z The Z position of the anchor point in world frame
+ * @param dx A delta to be added to the X position as if the anchor was set
+ *           when body1 was at current_position[X] + dx
+ * @param dx A delta to be added to the Y position as if the anchor was set
+ *           when body1 was at current_position[Y] + dy
+ * @param dx A delta to be added to the Z position as if the anchor was set
+ *           when body1 was at current_position[Z] + dz
+ * @note Should have the same meaning as dJointSetSliderAxisDelta
+ */
+void dJointSetPUAnchorOffset( dJointID j, dReal x, dReal y, dReal z,
+                              dReal dx, dReal dy, dReal dz )
+{
+    dxJointPU* joint = ( dxJointPU* ) j;
+    dUASSERT( joint, "bad joint argument" );
+    checktype( joint, PU );
+
+    if (joint->flags & dJOINT_REVERSE)
+    {
+        dx = -dx;
+        dy = -dy;
+        dz = -dz;
+    }
+
+    if ( joint->node[0].body )
+    {
+        joint->node[0].body->posr.pos[0] -= dx;
+        joint->node[0].body->posr.pos[1] -= dy;
+        joint->node[0].body->posr.pos[2] -= dz;
+    }
+
+    setAnchors( joint, x, y, z, joint->anchor1, joint->anchor2 );
+
+    if ( joint->node[0].body )
+    {
+        joint->node[0].body->posr.pos[0] += dx;
+        joint->node[0].body->posr.pos[1] += dy;
+        joint->node[0].body->posr.pos[2] += dz;
+    }
+
+    joint->computeInitialRelativeRotations();
+}
+
+
 
 
 
