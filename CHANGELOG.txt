@@ -12,6 +12,8 @@ the rules for this file:
 
        * Applied a patch by Martijn Buijs to make GIMPACT trimesh-ray collisions to
          be consistent with those in OPCODE.
+       * Swapped geometries returned in contacts for OPCODE Trimesh-Plane collisions
+         as they were returned in unnatural order being different from that in GIMPACT
 
 11/20/08 Remi Ricard (papaDoc)
        * Fix problem with dJointGetPUPosition and
