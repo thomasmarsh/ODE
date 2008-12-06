@@ -8,6 +8,11 @@ the rules for this file:
   * keep the format consistent (79 char width, M/D/Y date format).
 
 ------------------------------------------------------------------------------
+12/06/08 Oleh Derevenko
+
+       * Applied a patch by Martijn Buijs to make GIMPACT trimesh-ray collisions to
+         be consistent with those in OPCODE.
+
 11/20/08 Remi Ricard (papaDoc)
        * Fix problem with dJointGetPUPosition and
          dJointGetPUPositionRate when the joint is attached to only
