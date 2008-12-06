@@ -122,9 +122,9 @@ int dCollideTrimeshPlane( dxGeom *o1, dxGeom *o2, int flags, dContactGeom* conta
 				contact->pos[ 1 ] = vertex[ 1 ];
 				contact->pos[ 2 ] = vertex[ 2 ];
 
-				contact->normal[ 0 ] = -plane->p[ 0 ];
-				contact->normal[ 1 ] = -plane->p[ 1 ];
-				contact->normal[ 2 ] = -plane->p[ 2 ];
+				contact->normal[ 0 ] = plane->p[ 0 ];
+				contact->normal[ 1 ] = plane->p[ 1 ];
+				contact->normal[ 2 ] = plane->p[ 2 ];
 
 				contact->depth = alpha;
 				contact->g1 = trimesh;
