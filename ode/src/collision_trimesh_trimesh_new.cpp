@@ -84,6 +84,7 @@ static dReal MostDeepPoints(
 
 static bool TriTriContacts(const dVector3 tr1[3],
 							 const dVector3 tr2[3],
+							 int TriIndex1, int TriIndex2,
 							 dxGeom* g1, dxGeom* g2, int Flags,
 							 CONTACT_KEY_HASH_TABLE &hashcontactset,
 							 dContactGeom* Contacts, int Stride,
@@ -386,7 +387,7 @@ void FreeExistingContact(dContactGeom *pcontact,
 }
 
 
-dContactGeom *  PushNewContact( dxGeom* g1, dxGeom* g2,
+dContactGeom *  PushNewContact( dxGeom* g1, dxGeom* g2, int TriIndex1, int TriIndex2,
 							   const dVector3 point,
 							   dVector3 normal,
 							   dReal  depth,
@@ -413,12 +414,19 @@ dContactGeom *  PushNewContact( dxGeom* g1, dxGeom* g2,
 
 			pcontact->g1 = g1;
 			pcontact->g2 = g2;
+			pcontact->side1 = TriIndex1;
+			pcontact->side2 = TriIndex2;
 		}
 		else if (depthDifference >= -CONTACT_DIFF_EPSILON) ///average
 		{
 			if(pcontact->g1 == g2)
 			{
 				MULT(normal,normal, REAL(-1.0));
+                int tempInt = TriIndex1; TriIndex1 = TriIndex2; TriIndex2 = tempInt;
+                // This should be discarded by optimizer as g1 and g2 are 
+                // not used any more but it's preferable to keep this line for 
+                // the sake of consistency in variable values.
+                dxGeom *tempGeom = g1; g1 = g2; g2 = tempGeom;
 			}
 
 			const dReal oldLen = pcontact->normal[3];
@@ -429,6 +437,9 @@ dContactGeom *  PushNewContact( dxGeom* g1, dxGeom* g2,
 			{
 				MULT(pcontact->normal, pcontact->normal, REAL(1.0) / len);
 				pcontact->normal[3] = len;
+
+                pcontact->side1 = ((dxTriMesh *)pcontact->g1)->TriMergeCallback ? ((dxTriMesh *)pcontact->g1)->TriMergeCallback((dxTriMesh *)pcontact->g1, pcontact->side1, TriIndex1) : -1;
+                pcontact->side2 = ((dxTriMesh *)pcontact->g2)->TriMergeCallback ? ((dxTriMesh *)pcontact->g2)->TriMergeCallback((dxTriMesh *)pcontact->g2, pcontact->side2, TriIndex2) : -1;
 			}
 			else
 			{
@@ -446,6 +457,8 @@ dContactGeom *  PushNewContact( dxGeom* g1, dxGeom* g2,
 		pcontact->depth = depth;
 		pcontact->g1 = g1;
 		pcontact->g2 = g2;
+		pcontact->side1 = TriIndex1;
+		pcontact->side2 = TriIndex2;
 	}
 
 	return pcontact;
@@ -540,7 +553,7 @@ dCollideTTL(dxGeom* g1, dxGeom* g2, int Flags, dContactGeom* Contacts, int Strid
 						v2[j][3] = 1.0;
 					}
 
-					TriTriContacts(v1,v2,
+					TriTriContacts(v1,v2, id1,id2,
 						  g1, g2, Flags, hashcontactset,
 						 Contacts,Stride,OutTriCount);
 					
@@ -1238,6 +1251,7 @@ dReal FindTriangleTriangleCollision(
 ///SUPPORT UP TO 8 CONTACTS
 bool TriTriContacts(const dVector3 tr1[3],
 							 const dVector3 tr2[3],
+							 int TriIndex1, int TriIndex2,
 							  dxGeom* g1, dxGeom* g2, int Flags, 
 							  CONTACT_KEY_HASH_TABLE &hashcontactset,
 							 dContactGeom* Contacts, int Stride,
@@ -1270,7 +1284,7 @@ bool TriTriContacts(const dVector3 tr1[3],
 	ccount = 0;
 	while (ccount<contactpoints.Count)
 	{
-		PushNewContact( g1,  g2,
+		PushNewContact( g1,  g2, TriIndex1, TriIndex2,
 					contactpoints.Points[ccount],
 					normal, depth, Flags, hashcontactset,
 					Contacts,Stride,contactcount);

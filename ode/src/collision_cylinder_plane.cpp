@@ -157,6 +157,8 @@ int dCollideCylinderPlane(dxGeom *Cylinder, dxGeom *Plane, int flags, dContactGe
 			dVector3Copy(PlaneNormal, contact->normal);
 			contact->g1 = Cylinder;
 			contact->g2 = Plane;
+			contact->side1 = -1;
+			contact->side2 = -1;
 			GeomCount++;
 			if( GeomCount >= (flags & NUMC_MASK))
 				return GeomCount; // enough contactgeoms
@@ -171,6 +173,8 @@ int dCollideCylinderPlane(dxGeom *Cylinder, dxGeom *Plane, int flags, dContactGe
 			dVector3Copy(PlaneNormal, contact->normal);
 			contact->g1 = Cylinder;
 			contact->g2 = Plane;
+			contact->side1 = -1;
+			contact->side2 = -1;
 			GeomCount++;
 			if( GeomCount >= (flags & NUMC_MASK))
 				return GeomCount; // enough contactgeoms
@@ -185,6 +189,8 @@ int dCollideCylinderPlane(dxGeom *Cylinder, dxGeom *Plane, int flags, dContactGe
 			dVector3Copy(PlaneNormal, contact->normal);
 			contact->g1 = Cylinder;
 			contact->g2 = Plane;
+			contact->side1 = -1;
+			contact->side2 = -1;
 			GeomCount++;
 			if( GeomCount >= (flags & NUMC_MASK))
 				return GeomCount; // enough contactgeoms
@@ -199,6 +205,8 @@ int dCollideCylinderPlane(dxGeom *Cylinder, dxGeom *Plane, int flags, dContactGe
 			dVector3Copy(PlaneNormal, contact->normal);
 			contact->g1 = Cylinder;
 			contact->g2 = Plane;
+			contact->side1 = -1;
+			contact->side2 = -1;
 			GeomCount++;
 			if( GeomCount >= (flags & NUMC_MASK))
 				return GeomCount; // enough contactgeoms
@@ -226,6 +234,8 @@ int dCollideCylinderPlane(dxGeom *Cylinder, dxGeom *Plane, int flags, dContactGe
 			dVector3Copy(PlaneNormal, contact->normal);
 			contact->g1 = Cylinder;
 			contact->g2 = Plane;
+			contact->side1 = -1;
+			contact->side2 = -1;
 			GeomCount++;
 			if( GeomCount >= (flags & NUMC_MASK))
 				return GeomCount; // enough contactgeoms
@@ -244,6 +254,8 @@ int dCollideCylinderPlane(dxGeom *Cylinder, dxGeom *Plane, int flags, dContactGe
 			dVector3Copy(PlaneNormal, contact->normal);
 			contact->g1 = Cylinder;
 			contact->g2 = Plane;
+			contact->side1 = -1;
+			contact->side2 = -1;
 			GeomCount++;
 			if( GeomCount >= (flags & NUMC_MASK))
 				return GeomCount; // enough contactgeoms

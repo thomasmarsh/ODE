@@ -129,6 +129,8 @@ int dCollideTrimeshPlane( dxGeom *o1, dxGeom *o2, int flags, dContactGeom* conta
 				contact->depth = alpha;
 				contact->g1 = trimesh;
 				contact->g2 = plane;
+				contact->side1 = t;
+				contact->side2 = -1;
 
 				++contact_count;
 
@@ -199,8 +201,10 @@ int dCollideTrimeshPlane( dxGeom *o1, dxGeom *o2, int flags, dContactGeom* conta
         pcontact->normal[3] = 0;
 
         pcontact->depth = (*planecontact_results)[3];
-        pcontact->g1 = o1;
-        pcontact->g2 = o2;
+        pcontact->g1 = o1; // trimesh geom
+        pcontact->g2 = o2; // plane geom
+        pcontact->side1 = -1; // note: don't have the triangle index, but OPCODE *does* do this properly
+        pcontact->side2 = -1;
 
         planecontact_results++;
 	 }

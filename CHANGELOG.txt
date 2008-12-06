@@ -14,6 +14,19 @@ the rules for this file:
          be consistent with those in OPCODE.
        * Swapped geometries returned in contacts for OPCODE Trimesh-Plane collisions
          as they were returned in unnatural order being different from that in GIMPACT
+       * Applied a patch by Martijn Buijs to make side1, side2 fields of contact 
+         structure be always initialized, either with -1 for non-trmesh geometries
+         or with triangle index for trimeshes. These fields were only assigned for
+         trimesh-trimesh collisions before.
+       * dGeomTriMeshSetTriMergeCallback/dGeomTriMeshGetTriMergeCallback API added
+         to set/get user defined callback procedure for trimeshes that would be 
+         invoked when contacts are merged to let user code accumulate attributes of
+         original contact triangles and generate a fake index by which it would 
+         later be able to determine those attributes. If the callback is not 
+         assigned (the default) -1 is generated as triangle index for merged 
+         contacts (there was an index of first of merged triangles before!!!).
+         The callback is currently used within OPCODE trimesh-sphere and OPCODE
+         new trimesh-trimesh collisions.
 
 11/20/08 Remi Ricard (papaDoc)
        * Fix problem with dJointGetPUPosition and

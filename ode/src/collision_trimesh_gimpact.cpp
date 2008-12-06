@@ -156,6 +156,11 @@ void dGeomTriMeshDataSetBuffer(dTriMeshDataID g, unsigned char* buf)
 dxTriMesh::dxTriMesh(dSpaceID Space, dTriMeshDataID Data) : dxGeom(Space, 1){
     type = dTriMeshClass;
 
+    Callback = NULL;
+    ArrayCallback = NULL;
+    RayCallback = NULL;
+    TriMergeCallback = NULL; // Not initialized in dCreateTriMesh
+
 	gim_init_buffer_managers(m_buffer_managers);
 
     dGeomTriMeshSetData(this,Data);
@@ -256,6 +261,18 @@ dTriRayCallback* dGeomTriMeshGetRayCallback(dGeomID g)
 {
 	dUASSERT(g && g->type == dTriMeshClass, "argument not a trimesh");
 	return ((dxTriMesh*)g)->RayCallback;
+}
+
+void dGeomTriMeshSetTriMergeCallback(dGeomID g, dTriTriMergeCallback* Callback)
+{
+    dUASSERT(g && g->type == dTriMeshClass, "argument not a trimesh");
+    ((dxTriMesh*)g)->TriMergeCallback = Callback;
+}
+
+dTriTriMergeCallback* dGeomTriMeshGetTriMergeCallback(dGeomID g)
+{
+    dUASSERT(g && g->type == dTriMeshClass, "argument not a trimesh");	
+    return ((dxTriMesh*)g)->TriMergeCallback;
 }
 
 void dGeomTriMeshSetData(dGeomID g, dTriMeshDataID Data)
@@ -470,6 +487,8 @@ int dCollideTTL(dxGeom* g1, dxGeom* g2, int Flags, dContactGeom* Contacts, int S
         pcontact->depth = ptrimeshcontacts->m_depth;
         pcontact->g1 = g1;
         pcontact->g2 = g2;
+        pcontact->side1 = ptrimeshcontacts->m_feature1;
+        pcontact->side2 = ptrimeshcontacts->m_feature2;
 
         ptrimeshcontacts++;
 	}

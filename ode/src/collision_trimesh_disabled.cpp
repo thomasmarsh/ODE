@@ -29,7 +29,7 @@
 #include "collision_util.h"
 #include "collision_trimesh_internal.h"
 
-dxTriMesh::dxTriMesh(dSpaceID Space, dTriMeshDataID Data) : dxGeom(Space, 1){ type = dTriMeshClass; }
+dxTriMesh::dxTriMesh(dSpaceID Space, dTriMeshDataID Data) : dxGeom(Space, 1) { type = dTriMeshClass; }
 dxTriMesh::~dxTriMesh(){}
 
 int dxTriMesh::AABBTest(dxGeom* g, dReal aabb[6]) { return 0; }
@@ -111,6 +111,8 @@ dTriArrayCallback* dGeomTriMeshGetArrayCallback(dGeomID g) { return 0; }
 void dGeomTriMeshSetRayCallback(dGeomID g, dTriRayCallback* Callback) { }
 dTriRayCallback* dGeomTriMeshGetRayCallback(dGeomID g) { return 0; }
 
+void dGeomTriMeshSetTriMergeCallback(dGeomID g, dTriTriMergeCallback* Callback) { }
+dTriTriMergeCallback* dGeomTriMeshGetTriMergeCallback(dGeomID g) { return 0; }
 
 void dGeomTriMeshEnableTC(dGeomID g, int geomClass, int enable) {}
 int dGeomTriMeshIsTCEnabled(dGeomID g, int geomClass) { return 0; }

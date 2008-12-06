@@ -119,6 +119,8 @@ int dCollideSphereSphere (dxGeom *o1, dxGeom *o2, int flags,
 
   contact->g1 = o1;
   contact->g2 = o2;
+  contact->side1 = -1;
+  contact->side2 = -1;
 
   return dCollideSpheres (o1->final_posr->pos,sphere1->radius,
 			  o2->final_posr->pos,sphere2->radius,contact);
@@ -148,6 +150,8 @@ int dCollideSphereBox (dxGeom *o1, dxGeom *o2, int flags,
 
   contact->g1 = o1;
   contact->g2 = o2;
+  contact->side1 = -1;
+  contact->side2 = -1;
 
   p[0] = o1->final_posr->pos[0] - o2->final_posr->pos[0];
   p[1] = o1->final_posr->pos[1] - o2->final_posr->pos[1];
@@ -227,6 +231,9 @@ int dCollideSpherePlane (dxGeom *o1, dxGeom *o2, int flags,
 
   contact->g1 = o1;
   contact->g2 = o2;
+  contact->side1 = -1;
+  contact->side2 = -1;
+  
   dReal k = dDOT (o1->final_posr->pos,plane->p);
   dReal depth = plane->p[3] - k + sphere->radius;
   if (depth >= 0) {

@@ -213,6 +213,7 @@ int	sCylinderTrimeshColliderData::_ProcessLocalContacts(dContactGeom *contact,
 			dVector3Copy(m_gLocalContacts[iContact].vPos,Contact->pos);
 			Contact->g1 = Cylinder;
 			Contact->g2 = Trimesh;
+			Contact->side1 = -1;
 			Contact->side2 = m_gLocalContacts[iContact].triIndex;
 			dVector3Inv(Contact->normal);
 

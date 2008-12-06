@@ -633,6 +633,8 @@ int dCollideConvexPlane (dxGeom *o1, dxGeom *o2, int flags,
 				target->depth = -distance2;
 				target->g1 = Convex;
 				target->g2 = Plane;
+				target->side1 = -1; // TODO: set plane index?
+				target->side2 = -1;
 				contacts++;
 			}
 		}
@@ -709,6 +711,8 @@ int dCollideSphereConvex (dxGeom *o1, dxGeom *o2, int flags,
 		  contact->depth = Sphere->radius-dist;
 		  contact->g1 = Sphere;
 		  contact->g2 = Convex;
+		  contact->side1 = -1;
+		  contact->side2 = -1; // TODO: set plane index?
 		  return 1;
 		}
 	      else
@@ -740,6 +744,8 @@ int dCollideSphereConvex (dxGeom *o1, dxGeom *o2, int flags,
 		      contact->depth = Sphere->radius-dist;
 		      contact->g1 = Sphere;
 		      contact->g2 = Convex;
+			  contact->side1 = -1;
+			  contact->side2 = -1; // TODO: set plane index?
 		      return 1;
 		    }
 		}
@@ -769,6 +775,8 @@ int dCollideSphereConvex (dxGeom *o1, dxGeom *o2, int flags,
 	contact->depth = closestdist+Sphere->radius;
 	contact->g1 = Sphere;
 	contact->g2 = Convex;
+	contact->side1 = -1;
+	contact->side2 = -1; // TODO: set plane index?
 	return 1;
       }
   return 0;
@@ -1453,6 +1461,8 @@ int dCollideRayConvex (dxGeom *o1, dxGeom *o2, int flags,
 	      contact->depth=depth;
 	      contact->g1 = ray;
 	      contact->g2 = convex;
+		  contact->side1 = -1;
+		  contact->side2 = -1; // TODO: set plane index?
 	      return 1;
 	    }
 	}
@@ -1475,6 +1485,8 @@ int dCollideRayConvex( dxGeom *o1, dxGeom *o2,
 
 	contact->g1 = ray;
 	contact->g2 = convex;
+	contact->side1 = -1;
+	contact->side2 = -1; // TODO: set plane index?
 
 	dReal alpha, beta, nsign;
 	int flag;
