@@ -1262,15 +1262,15 @@ int dxHeightfield::dCollideHeightfieldZone( const int minX, const int maxX, cons
             const dReal CHeight = C->vertex[1];
             const dReal DHeight = D->vertex[1];
 
-            const bool isACollide = 0 < AHeight - minO2Height;
-            const bool isBCollide = 0 < BHeight - minO2Height;
-            const bool isCCollide = 0 < CHeight - minO2Height;
-            const bool isDCollide = 0 < DHeight - minO2Height;
+            const bool isACollide = AHeight > minO2Height;
+            const bool isBCollide = BHeight > minO2Height;
+            const bool isCCollide = CHeight > minO2Height;
+            const bool isDCollide = DHeight > minO2Height;
 
             A->state = !(isACollide);
             B->state = !(isBCollide);
             C->state = !(isCCollide);
-            D->state = !(isCCollide);
+            D->state = !(isDCollide);
 
             if (isACollide || isBCollide || isCCollide)
             {
@@ -1309,10 +1309,10 @@ int dxHeightfield::dCollideHeightfieldZone( const int minX, const int maxX, cons
             if (needFurtherPasses &&
                 (isBCollide || isCCollide)
                 &&
-                (AHeight - CHeight > 0 &&
-                 AHeight - BHeight > 0 &&
-                 DHeight - CHeight > 0 &&
-                 DHeight - BHeight > 0))
+                (AHeight > CHeight &&
+                 AHeight > BHeight &&
+                 DHeight > CHeight &&
+                 DHeight > BHeight))
             {
                 // That means Edge BC is concave, therefore
                 // BC Edge and B and C vertices cannot collide
@@ -1369,6 +1369,7 @@ int dxHeightfield::dCollideHeightfieldZone( const int minX, const int maxX, cons
             resetPlaneBuffer();
 			allocatePlaneBuffer(numTri);
         }
+
         unsigned int numPlanes = 0;
         for (unsigned int k = 0; k < numTri; k++)
         {
