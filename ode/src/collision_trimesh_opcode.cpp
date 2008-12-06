@@ -530,6 +530,11 @@ dxTriMesh::dxTriMesh(dSpaceID Space, dTriMeshDataID Data) : dxGeom(Space, 1)
 {
     type = dTriMeshClass;
 
+    Callback = NULL;
+    ArrayCallback = NULL;
+    RayCallback = NULL;
+    TriMergeCallback = NULL; // Not initialized in dCreateTriMesh
+
     this->Data = Data;
 
 	/* TC has speed/space 'issues' that don't make it a clear
@@ -679,6 +684,18 @@ dTriRayCallback* dGeomTriMeshGetRayCallback(dGeomID g)
 {
 	dUASSERT(g && g->type == dTriMeshClass, "argument not a trimesh");	
 	return ((dxTriMesh*)g)->RayCallback;
+}
+
+void dGeomTriMeshSetTriMergeCallback(dGeomID g, dTriTriMergeCallback* Callback)
+{
+    dUASSERT(g && g->type == dTriMeshClass, "argument not a trimesh");
+    ((dxTriMesh*)g)->TriMergeCallback = Callback;
+}
+
+dTriTriMergeCallback* dGeomTriMeshGetTriMergeCallback(dGeomID g)
+{
+    dUASSERT(g && g->type == dTriMeshClass, "argument not a trimesh");	
+    return ((dxTriMesh*)g)->TriMergeCallback;
 }
 
 void dGeomTriMeshSetData(dGeomID g, dTriMeshDataID Data)

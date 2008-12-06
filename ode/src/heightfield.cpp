@@ -997,6 +997,9 @@ int dxHeightfield::dCollideHeightfieldZone( const int minX, const int maxX, cons
 
 			pContact->depth =  minY - maxO2Height;
 
+            pContact->side1 = -1;
+            pContact->side2 = -1;
+
 			return 1;
 		}
     }
@@ -1450,8 +1453,9 @@ int dxHeightfield::dCollideHeightfieldZone( const int minX, const int maxX, cons
 			const size_t planeTriListSize = itPlane->trianglelistCurrentSize;
             for (i = 0; i < numPlaneContacts; i++)
             {
+                dContactGeom *planeCurrContact = PlaneContact + i;
                 // Check if contact point found in plane is inside Triangle.
-                const dVector3 &pCPos = PlaneContact[i].pos;
+                const dVector3 &pCPos = planeCurrContact->pos;
                 for (size_t b = 0; planeTriListSize > b; b++)
                 {  
                     if (m_p_data->IsOnHeightfield2 (itPlane->trianglelist[b]->vertices[0], 
@@ -1461,7 +1465,9 @@ int dxHeightfield::dCollideHeightfieldZone( const int minX, const int maxX, cons
 						pContact = CONTACT(contact, numTerrainContacts*skip);
 						dVector3Copy(pCPos, pContact->pos);
 						dOPESIGN(pContact->normal, =, -, itPlane->planeDef);
-						pContact->depth = PlaneContact[i].depth;
+						pContact->depth = planeCurrContact->depth;
+                        pContact->side1 = planeCurrContact->side1;
+                        pContact->side2 = planeCurrContact->side2;
 						numTerrainContacts++;
 						if ( numTerrainContacts == numMaxContactsPossible )
 							return numTerrainContacts;
@@ -1563,6 +1569,8 @@ int dxHeightfield::dCollideHeightfieldZone( const int minX, const int maxX, cons
                     dOPESIGN(pContact->normal, =, -, itTriangle->planeDef);
 
                     pContact->depth = depth;
+                    pContact->side1 = -1;
+                    pContact->side2 = -1;
 
                     numTerrainContacts++;
                     if ( numTerrainContacts == numMaxContactsPossible ) 
@@ -1754,70 +1762,73 @@ int dCollideHeightfield( dxGeom *o1, dxGeom *o2, int flags, dContactGeom* contac
 
 
 
-    numTerrainContacts  += terrain->dCollideHeightfieldZone(
+    int numTerrainOrigContacts = numTerrainContacts;
+    numTerrainContacts += terrain->dCollideHeightfieldZone(
         nMinX,nMaxX,nMinZ,nMaxZ,o2,numMaxTerrainContacts - numTerrainContacts,
         flags,CONTACT(contact,numTerrainContacts*skip),skip	);
 
-        dIASSERT( numTerrainContacts <= numMaxTerrainContacts );
+    dIASSERT( numTerrainContacts <= numMaxTerrainContacts );
 
-        dContactGeom *pContact;
-        for ( i = 0; i < numTerrainContacts; ++i )
-        {
-            pContact = CONTACT(contact,i*skip);
-            pContact->g1 = o1;
-            pContact->g2 = o2;
-        }
+    dContactGeom *pContact;
+    for ( i = numTerrainOrigContacts; i != numTerrainContacts; ++i )
+    {
+        pContact = CONTACT(contact,i*skip);
+        pContact->g1 = o1;
+        pContact->g2 = o2;
+		// pContact->side1 = -1; -- Oleh_Derevenko: sides must not be erased here as they are set by respective colliders during ray/plane tests 
+		// pContact->side2 = -1;
+    }
 
 
-        //------------------------------------------------------------------------------
+    //------------------------------------------------------------------------------
 
 dCollideHeightfieldExit:
 
-        if (reComputeAABB)
+    if (reComputeAABB)
+    {
+        // Restore o2 position, rotation and AABB
+        dVector3Copy( posbak, o2->final_posr->pos );
+        dMatrix3Copy( Rbak, o2->final_posr->R );
+        memcpy( o2->aabb, aabbbak, sizeof(dReal)*6 );
+        o2->gflags = gflagsbak;
+
+        //
+        // Transform Contacts to World Space
+        //
+        if ( terrain->gflags & GEOM_PLACEABLE )
         {
-            // Restore o2 position, rotation and AABB
-            dVector3Copy( posbak, o2->final_posr->pos );
-            dMatrix3Copy( Rbak, o2->final_posr->R );
-            memcpy( o2->aabb, aabbbak, sizeof(dReal)*6 );
-            o2->gflags = gflagsbak;
-
-            //
-            // Transform Contacts to World Space
-            //
-            if ( terrain->gflags & GEOM_PLACEABLE )
+            for ( i = 0; i < numTerrainContacts; ++i )
             {
-                for ( i = 0; i < numTerrainContacts; ++i )
-                {
-                    pContact = CONTACT(contact,i*skip);
-                    dOPE( pos0, =, pContact->pos );
+                pContact = CONTACT(contact,i*skip);
+                dOPE( pos0, =, pContact->pos );
 
 #ifndef DHEIGHTFIELD_CORNER_ORIGIN
-                    pos0[ 0 ] -= terrain->m_p_data->m_fHalfWidth;
-                    pos0[ 2 ] -= terrain->m_p_data->m_fHalfDepth;
+                pos0[ 0 ] -= terrain->m_p_data->m_fHalfWidth;
+                pos0[ 2 ] -= terrain->m_p_data->m_fHalfDepth;
 #endif // !DHEIGHTFIELD_CORNER_ORIGIN
 
-                    dMULTIPLY0_331( pContact->pos, terrain->final_posr->R, pos0 );
+                dMULTIPLY0_331( pContact->pos, terrain->final_posr->R, pos0 );
 
-                    dOP( pContact->pos, +, pContact->pos, terrain->final_posr->pos );
-                    dOPE( pos0, =, pContact->normal );
+                dOP( pContact->pos, +, pContact->pos, terrain->final_posr->pos );
+                dOPE( pos0, =, pContact->normal );
 
-                    dMULTIPLY0_331( pContact->normal, terrain->final_posr->R, pos0 );
-                }
+                dMULTIPLY0_331( pContact->normal, terrain->final_posr->R, pos0 );
             }
-#ifndef DHEIGHTFIELD_CORNER_ORIGIN
-            else
-            {
-                for ( i = 0; i < numTerrainContacts; ++i )
-                {
-                    pContact = CONTACT(contact,i*skip);
-                    pContact->pos[ 0 ] -= terrain->m_p_data->m_fHalfWidth;
-                    pContact->pos[ 2 ] -= terrain->m_p_data->m_fHalfDepth;
-                }
-            }
-#endif // !DHEIGHTFIELD_CORNER_ORIGIN
         }
-        // Return contact count.
-        return numTerrainContacts;
+#ifndef DHEIGHTFIELD_CORNER_ORIGIN
+        else
+        {
+            for ( i = 0; i < numTerrainContacts; ++i )
+            {
+                pContact = CONTACT(contact,i*skip);
+                pContact->pos[ 0 ] -= terrain->m_p_data->m_fHalfWidth;
+                pContact->pos[ 2 ] -= terrain->m_p_data->m_fHalfDepth;
+            }
+        }
+#endif // !DHEIGHTFIELD_CORNER_ORIGIN
+    }
+    // Return contact count.
+    return numTerrainContacts;
 }
 
 

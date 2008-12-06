@@ -271,6 +271,7 @@ struct dxTriMesh : public dxGeom{
 	dTriCallback* Callback;
 	dTriArrayCallback* ArrayCallback;
 	dTriRayCallback* RayCallback;
+    dTriTriMergeCallback* TriMergeCallback;
 
 	// Data types
 	dxTriMeshData* Data;

@@ -243,6 +243,8 @@ int dCollideRaySphere (dxGeom *o1, dxGeom *o2, int flags,
   dxSphere *sphere = (dxSphere*) o2;
   contact->g1 = ray;
   contact->g2 = sphere;
+  contact->side1 = -1;
+  contact->side2 = -1;
   return ray_sphere_helper (ray,sphere->final_posr->pos,sphere->radius,contact,0);
 }
 
@@ -260,6 +262,8 @@ int dCollideRayBox (dxGeom *o1, dxGeom *o2, int flags,
 
   contact->g1 = ray;
   contact->g2 = box;
+  contact->side1 = -1;
+  contact->side2 = -1;
 
   int i;
 
@@ -357,6 +361,9 @@ int dCollideRayCapsule (dxGeom *o1, dxGeom *o2,
 
   contact->g1 = ray;
   contact->g2 = ccyl;
+  contact->side1 = -1;
+  contact->side2 = -1;
+  
   dReal lz2 = ccyl->lz * REAL(0.5);
 
   // compute some useful info
@@ -483,6 +490,8 @@ int dCollideRayPlane (dxGeom *o1, dxGeom *o2, int flags,
   contact->depth = alpha;
   contact->g1 = ray;
   contact->g2 = plane;
+  contact->side1 = -1;
+  contact->side2 = -1;
   return 1;
 }
 
@@ -500,6 +509,8 @@ int dCollideRayCylinder( dxGeom *o1, dxGeom *o2, int flags, dContactGeom *contac
 	// Fill in contact information.
 	contact->g1 = ray;
 	contact->g2 = cyl;
+	contact->side1 = -1;
+	contact->side2 = -1;
 
 	const dReal half_length = cyl->lz * REAL( 0.5 );
 

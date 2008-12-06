@@ -41,7 +41,7 @@
 
 static void
 GenerateContact(int in_Flags, dContactGeom* in_Contacts, int in_Stride,
-                dxGeom* in_g1,  dxGeom* in_g2,
+                dxGeom* in_g1,  dxGeom* in_g2, int TriIndex,
                 const dVector3 in_ContactPos, const dVector3 in_Normal, dReal in_Depth,
                 int& OutTriCount);
 
@@ -139,8 +139,8 @@ struct sTrimeshBoxColliderData
 	bool _cldTestEdge(dReal fp0, dReal fp1, dReal fR, dReal fD,
 		dVector3 vNormal, int iAxis);
 	bool _cldTestSeparatingAxes(const dVector3 &v0, const dVector3 &v1, const dVector3 &v2);
-	void _cldClipping(const dVector3 &v0, const dVector3 &v1, const dVector3 &v2);
-	void _cldTestOneTriangle(const dVector3 &v0, const dVector3 &v1, const dVector3 &v2);
+	void _cldClipping(const dVector3 &v0, const dVector3 &v1, const dVector3 &v2, int TriIndex);
+	void _cldTestOneTriangle(const dVector3 &v0, const dVector3 &v1, const dVector3 &v2, int TriIndex);
 
 	// box data
 	dMatrix3 m_mHullBoxRot;
@@ -702,7 +702,7 @@ static bool _cldClosestPointOnTwoLines( dVector3 vPoint1, dVector3 vLenVec1,
 
 
 // clip and generate contacts
-void sTrimeshBoxColliderData::_cldClipping(const dVector3 &v0, const dVector3 &v1, const dVector3 &v2) {
+void sTrimeshBoxColliderData::_cldClipping(const dVector3 &v0, const dVector3 &v1, const dVector3 &v2, int TriIndex) {
   dIASSERT( !(m_iFlags & CONTACTS_UNIMPORTANT) || m_ctContacts < (m_iFlags & NUMC_MASK) ); // Do not call the function if there is no room to store results
 
   // if we have edge/edge intersection
@@ -773,9 +773,11 @@ void sTrimeshBoxColliderData::_cldClipping(const dVector3 &v0, const dVector3 &v
 	SET(Contact->pos,vPntTmp);
 	Contact->g1 = Geom1;
 	Contact->g2 = Geom2;
+	Contact->side1 = TriIndex;
+	Contact->side2 = -1;
 	m_ctContacts++;
 #endif
-    GenerateContact(m_iFlags, m_ContactGeoms, m_iStride, m_Geom1, m_Geom2,
+    GenerateContact(m_iFlags, m_ContactGeoms, m_iStride, m_Geom1, m_Geom2, TriIndex,
                     vPntTmp, m_vBestNormal, m_fBestDepth, m_ctContacts);
 
 
@@ -939,9 +941,11 @@ void sTrimeshBoxColliderData::_cldClipping(const dVector3 &v0, const dVector3 &v
       SET(Contact->pos,vPntTmp);
       Contact->g1 = Geom1;
       Contact->g2 = Geom2;
+	  Contact->side1 = TriIndex;
+	  Contact->side2 = -1;
       m_ctContacts++;
 #endif
-		GenerateContact(m_iFlags, m_ContactGeoms, m_iStride,  m_Geom1, m_Geom2,
+		GenerateContact(m_iFlags, m_ContactGeoms, m_iStride,  m_Geom1, m_Geom2, TriIndex,
 						vPntTmp, m_vBestNormal, -fTempDepth, m_ctContacts);
 
 		if ((m_ctContacts | CONTACTS_UNIMPORTANT) == (m_iFlags & (NUMC_MASK | CONTACTS_UNIMPORTANT))) {
@@ -1061,9 +1065,11 @@ void sTrimeshBoxColliderData::_cldClipping(const dVector3 &v0, const dVector3 &v
       SET(Contact->pos,vPntTmp);
       Contact->g1 = Geom1;
       Contact->g2 = Geom2;
+	  Contact->side1 = TriIndex;
+	  Contact->side2 = -1;
       m_ctContacts++;
 #endif
-		GenerateContact(m_iFlags, m_ContactGeoms, m_iStride,  m_Geom1, m_Geom2,
+		GenerateContact(m_iFlags, m_ContactGeoms, m_iStride,  m_Geom1, m_Geom2, TriIndex,
 					  vPntTmp, m_vBestNormal, -fTempDepth, m_ctContacts);
 
 		if ((m_ctContacts | CONTACTS_UNIMPORTANT) == (m_iFlags & (NUMC_MASK | CONTACTS_UNIMPORTANT))) {
@@ -1080,7 +1086,7 @@ void sTrimeshBoxColliderData::_cldClipping(const dVector3 &v0, const dVector3 &v
 
 
 // test one mesh triangle on intersection with given box
-void sTrimeshBoxColliderData::_cldTestOneTriangle(const dVector3 &v0, const dVector3 &v1, const dVector3 &v2)//, void *pvUser)
+void sTrimeshBoxColliderData::_cldTestOneTriangle(const dVector3 &v0, const dVector3 &v1, const dVector3 &v2, int TriIndex)//, void *pvUser)
 {
   // do intersection test and find best separating axis
   if(!_cldTestSeparatingAxes(v0, v1, v2)) {
@@ -1096,7 +1102,7 @@ void sTrimeshBoxColliderData::_cldTestOneTriangle(const dVector3 &v0, const dVec
     return;
   }
 
-  _cldClipping(v0, v1, v2);
+  _cldClipping(v0, v1, v2, TriIndex);
 }
 
 
@@ -1141,11 +1147,14 @@ int sTrimeshBoxColliderData::TestCollisionForSingleTriangle(int ctContacts0, int
 	dVector3 dv[3], bool &bOutFinishSearching)
 {
 	// test this triangle
-	_cldTestOneTriangle(dv[0],dv[1],dv[2]);
+	_cldTestOneTriangle(dv[0],dv[1],dv[2],Triint);
 
 	// fill-in tri index for generated contacts
-	for (; ctContacts0 < m_ctContacts; ctContacts0++)
-		SAFECONTACT(m_iFlags, m_ContactGeoms, ctContacts0, m_iStride)->side1 = Triint;
+	for (; ctContacts0 < m_ctContacts; ctContacts0++) {
+		dContactGeom* pContact = SAFECONTACT(m_iFlags, m_ContactGeoms, ctContacts0, m_iStride);
+        pContact->side1 = Triint;
+		pContact->side2 = -1;
+    }
 
 	/*
 	NOTE by Oleh_Derevenko:
@@ -1374,7 +1383,7 @@ int dCollideBTL(dxGeom* g1, dxGeom* BoxGeom, int Flags, dContactGeom* Contacts, 
 //
 static void
 GenerateContact(int in_Flags, dContactGeom* in_Contacts, int in_Stride,
-                dxGeom* in_g1,  dxGeom* in_g2,
+                dxGeom* in_g1,  dxGeom* in_g2, int TriIndex,
                 const dVector3 in_ContactPos, const dVector3 in_Normal, dReal in_Depth,
                 int& OutTriCount)
 {
@@ -1454,6 +1463,9 @@ GenerateContact(int in_Flags, dContactGeom* in_Contacts, int in_Stride,
 
 		Contact->g1 = in_g1;
 		Contact->g2 = in_g2;
+  
+		Contact->side1 = TriIndex;
+		Contact->side2 = -1;
 
 		OutTriCount++;
 	}

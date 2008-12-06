@@ -728,11 +728,14 @@ int dCollideBoxBox (dxGeom *o1, dxGeom *o2, int flags,
   int num = dBoxBox (o1->final_posr->pos,o1->final_posr->R,b1->side, o2->final_posr->pos,o2->final_posr->R,b2->side,
 		     normal,&depth,&code,flags,contact,skip);
   for (int i=0; i<num; i++) {
-    CONTACT(contact,i*skip)->normal[0] = -normal[0];
-    CONTACT(contact,i*skip)->normal[1] = -normal[1];
-    CONTACT(contact,i*skip)->normal[2] = -normal[2];
-    CONTACT(contact,i*skip)->g1 = o1;
-    CONTACT(contact,i*skip)->g2 = o2;
+    dContactGeom *currContact = CONTACT(contact,i*skip);
+    currContact->normal[0] = -normal[0];
+    currContact->normal[1] = -normal[1];
+    currContact->normal[2] = -normal[2];
+    currContact->g1 = o1;
+    currContact->g2 = o2;
+	currContact->side1 = -1;
+    currContact->side2 = -1;
   }
   return num;
 }
@@ -751,6 +754,9 @@ int dCollideBoxPlane (dxGeom *o1, dxGeom *o2,
 
   contact->g1 = o1;
   contact->g2 = o2;
+  contact->side1 = -1;
+  contact->side2 = -1;
+  
   int ret = 0;
 
   //@@@ problem: using 4-vector (plane->p) as 3-vector (normal).
@@ -856,8 +862,11 @@ int dCollideBoxPlane (dxGeom *o1, dxGeom *o2,
 
  done:
   for (int i=0; i<ret; i++) {
-    CONTACT(contact,i*skip)->g1 = o1;
-    CONTACT(contact,i*skip)->g2 = o2;
+    dContactGeom *currContact = CONTACT(contact,i*skip);
+    currContact->g1 = o1;
+    currContact->g2 = o2;
+	currContact->side1 = -1;
+    currContact->side2 = -1;
   }
   return ret;
 }

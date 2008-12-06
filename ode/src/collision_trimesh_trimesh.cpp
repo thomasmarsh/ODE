@@ -68,6 +68,7 @@ struct LineContactSet
 
 // static void GetTriangleGeometryCallback(udword, VertexPointers&, udword); -- not used
 static void GenerateContact(int, dContactGeom*, int, dxTriMesh*,  dxTriMesh*, 
+							int TriIndex1, int TriIndex2,
                             const dVector3, const dVector3, dReal, int&);
 static int TriTriIntersectWithIsectLine(dReal V0[3],dReal V1[3],dReal V2[3],
                                         dReal U0[3],dReal U1[3],dReal U2[3],int *coplanar,
@@ -308,8 +309,8 @@ dCollideTTL(dxGeom* g1, dxGeom* g2, int Flags, dContactGeom* Contacts, int Strid
 									if (depth < 0)
 										depth *= -1.0;
 
-									GenerateContact(Flags, Contacts, Stride,  TriMesh1,  TriMesh2,
-										ContactPt, n, depth, OutTriCount);
+									GenerateContact(Flags, Contacts, Stride,  TriMesh1,  TriMesh2, id1, id2,
+												ContactPt, n, depth, OutTriCount);
 								}
 							}
 							else {
@@ -428,7 +429,7 @@ dCollideTTL(dxGeom* g1, dxGeom* g2, int Flags, dContactGeom* Contacts, int Strid
 
 								for (int j=0; j<3; j++) {
 									if (SimpleUnclippedTest(CoplanarPt, pen_v[j], pen_elt[j], n, col_v, depth)) {
-										GenerateContact(Flags, Contacts, Stride,  TriMesh1,  TriMesh2,
+										GenerateContact(Flags, Contacts, Stride,  TriMesh1,  TriMesh2, id1, id2,
 											pen_v[j], n, depth, OutTriCount);
 										badPen = false;
 
@@ -444,7 +445,7 @@ dCollideTTL(dxGeom* g1, dxGeom* g2, int Flags, dContactGeom* Contacts, int Strid
 
 									for (int j=0; j<3; j++)
 										if (SimpleUnclippedTest(CoplanarPt, pen_v[j], pen_elt[j], n, col_v, depth)) {
-											GenerateContact(Flags, Contacts, Stride,  TriMesh1,  TriMesh2,
+											GenerateContact(Flags, Contacts, Stride,  TriMesh1,  TriMesh2, id1, id2,
 												pen_v[j], n, depth, OutTriCount);
 											badPen = false;
 
@@ -558,7 +559,7 @@ dCollideTTL(dxGeom* g1, dxGeom* g2, int Flags, dContactGeom* Contacts, int Strid
 
 											if (depth <= contact_elt_length) {
 												// Add a contact
-												GenerateContact(Flags, Contacts, Stride,  TriMesh1,  TriMesh2,
+												GenerateContact(Flags, Contacts, Stride,  TriMesh1,  TriMesh2, id1, id2,
 													firstClippedTri.Points[j], n, depth, OutTriCount);
 												badPen = false;
 
@@ -660,7 +661,7 @@ dCollideTTL(dxGeom* g1, dxGeom* g2, int Flags, dContactGeom* Contacts, int Strid
 
 											if (depth <= contact_elt_length) {
 												// Add a contact
-												GenerateContact(Flags, Contacts, Stride,  TriMesh1,  TriMesh2,
+												GenerateContact(Flags, Contacts, Stride,  TriMesh1,  TriMesh2, id1, id2,
 													secondClippedTri.Points[j], n, depth, OutTriCount);
 												badPen = false;
 
@@ -695,7 +696,7 @@ dCollideTTL(dxGeom* g1, dxGeom* g2, int Flags, dContactGeom* Contacts, int Strid
 
 											if (depth > REAL(1e-12)) {
 												dNormalize3(n);
-												GenerateContact(Flags, Contacts, Stride,  TriMesh1,  TriMesh2,
+												GenerateContact(Flags, Contacts, Stride,  TriMesh1,  TriMesh2, id1, id2,
 													CoplanarPt, n, depth, OutTriCount);
 												badPen = false;
 											}
@@ -742,7 +743,7 @@ dCollideTTL(dxGeom* g1, dxGeom* g2, int Flags, dContactGeom* Contacts, int Strid
 											}
 
 											if ((depth > 0.0) && (depth <= contact_elt_length)) {
-												GenerateContact(Flags, Contacts, Stride,  TriMesh1,  TriMesh2,
+												GenerateContact(Flags, Contacts, Stride,  TriMesh1,  TriMesh2, id1, id2,
 													ContactPt, n, depth, OutTriCount);
 												badPen = false;
 											}
@@ -784,7 +785,7 @@ dCollideTTL(dxGeom* g1, dxGeom* g2, int Flags, dContactGeom* Contacts, int Strid
 									}
 
 									if ((depth > 0.0) && (depth <= contact_elt_length)) {
-										GenerateContact(Flags, Contacts, Stride,  TriMesh1,  TriMesh2,
+										GenerateContact(Flags, Contacts, Stride,  TriMesh1,  TriMesh2, id1, id2,
 											ContactPt, esn, depth, OutTriCount);
 										badPen = false;
 									}
@@ -822,7 +823,7 @@ dCollideTTL(dxGeom* g1, dxGeom* g2, int Flags, dContactGeom* Contacts, int Strid
 
 												if (depth <= contact_elt_length) {
 													// Add a contact
-													GenerateContact(Flags, Contacts, Stride,  TriMesh1,  TriMesh2,
+													GenerateContact(Flags, Contacts, Stride,  TriMesh1,  TriMesh2, id1, id2,
 														firstClippedTri.Points[j], esn, depth, OutTriCount);
 													badPen = false;
 
@@ -850,7 +851,7 @@ dCollideTTL(dxGeom* g1, dxGeom* g2, int Flags, dContactGeom* Contacts, int Strid
 
 													if (depth <= contact_elt_length) {
 														// Add a contact
-														GenerateContact(Flags, Contacts, Stride,  TriMesh1,  TriMesh2,
+														GenerateContact(Flags, Contacts, Stride,  TriMesh1,  TriMesh2, id1, id2,
 															secondClippedTri.Points[j], esn, depth, OutTriCount);
 														badPen = false;
 
@@ -882,7 +883,7 @@ dCollideTTL(dxGeom* g1, dxGeom* g2, int Flags, dContactGeom* Contacts, int Strid
 
 											if ( (dp > 0.0) && (dp <= SMALL_ELT)) {
 												// Add a contact
-												GenerateContact(Flags, Contacts, Stride,  TriMesh1,  TriMesh2,
+												GenerateContact(Flags, Contacts, Stride,  TriMesh1,  TriMesh2, id1, id2,
 													pen_v[j], n, dp, OutTriCount);
 												badPen = false;
 
@@ -904,7 +905,7 @@ dCollideTTL(dxGeom* g1, dxGeom* g2, int Flags, dContactGeom* Contacts, int Strid
 													dp = TINY_PENETRATION;
 
 												if ( (dp > 0.0) && (dp <= SMALL_ELT)) {
-													GenerateContact(Flags, Contacts, Stride,  TriMesh1,  TriMesh2,
+													GenerateContact(Flags, Contacts, Stride,  TriMesh1,  TriMesh2, id1, id2,
 														pen_v[j], n, dp, OutTriCount);
 													badPen = false;
 
@@ -945,7 +946,7 @@ dCollideTTL(dxGeom* g1, dxGeom* g2, int Flags, dContactGeom* Contacts, int Strid
 
 									if (depth > 0.0) {
 										// Add a tiny contact at the coplanar point
-										GenerateContact(Flags, Contacts, Stride,  TriMesh1,  TriMesh2,
+										GenerateContact(Flags, Contacts, Stride,  TriMesh1,  TriMesh2, id1, id2,
 											CoplanarPt, ContactNormal, depth, OutTriCount);
 										badPen = false;
 									}
@@ -961,7 +962,7 @@ dCollideTTL(dxGeom* g1, dxGeom* g2, int Flags, dContactGeom* Contacts, int Strid
 										SET(ContactNormal, n2);
 									}
 
-									GenerateContact(Flags, Contacts, Stride,  TriMesh1,  TriMesh2,
+									GenerateContact(Flags, Contacts, Stride,  TriMesh1,  TriMesh2, id1, id2,
 										CoplanarPt, ContactNormal, TINY_PENETRATION, OutTriCount);
 									badPen = false;
 								}
@@ -1977,6 +1978,7 @@ SimpleUnclippedTest(dVector3 in_CoplanarPt, dVector3 in_v, dVector3 in_elt,
 static void
 GenerateContact(int in_Flags, dContactGeom* in_Contacts, int in_Stride,  
                 dxTriMesh* in_TriMesh1,  dxTriMesh* in_TriMesh2,
+				int TriIndex1, int TriIndex2,
                 const dVector3 in_ContactPos, const dVector3 in_Normal, dReal in_Depth,
                 int& OutTriCount)
 {
@@ -2060,7 +2062,10 @@ GenerateContact(int in_Flags, dContactGeom* in_Contacts, int in_Stride,
 
 		Contact->g1 = in_TriMesh1;
 		Contact->g2 = in_TriMesh2;
-    
+
+		Contact->side1 = TriIndex1;
+		Contact->side2 = TriIndex2;
+
 		OutTriCount++;
 	}
 	while (false);

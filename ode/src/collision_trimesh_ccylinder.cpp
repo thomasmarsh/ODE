@@ -325,7 +325,8 @@ int	sTrimeshCapsuleColliderData::_ProcessLocalContacts(dContactGeom *contact,
 				SET(Contact->pos,m_gLocalContacts[iContact].vPos);
 				Contact->g1 = TriMesh;
 				Contact->g2 = Capsule;
-				Contact->side2 = m_gLocalContacts[iContact].triIndex;
+				Contact->side1 = m_gLocalContacts[iContact].triIndex;
+				Contact->side2 = -1;
 
 				nFinalContact++;
 		}
@@ -1220,7 +1221,9 @@ int dCollideCCTL(dxGeom *o1, dxGeom *o2, int flags, dContactGeom *contact, int s
         pcontact->depth = ptrimeshcontacts->m_depth;
         pcontact->g1 = TriMesh;
         pcontact->g2 = gCylinder;
-
+        pcontact->side1 = ptrimeshcontacts->m_feature1;
+        pcontact->side2 = -1;
+        
         ptrimeshcontacts++;
 	}
 

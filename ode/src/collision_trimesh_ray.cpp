@@ -131,6 +131,8 @@ int dCollideRTL(dxGeom* g1, dxGeom* RayGeom, int Flags, dContactGeom* Contacts, 
 				Contact->depth = T;
 				Contact->g1 = TriMesh;
 				Contact->g2 = RayGeom;
+				Contact->side1 = TriIndex;
+				Contact->side2 = -1;
 					
 				OutTriCount++;
 
@@ -189,7 +191,8 @@ int dCollideRTL(dxGeom* g1, dxGeom* RayGeom, int Flags, dContactGeom* Contacts, 
         Contact->depth = contact_data.tparam;
         Contact->g1 = TriMesh;
         Contact->g2 = RayGeom;
-		
+		Contact->side1 = contact_data.m_face_id;
+		Contact->side2 = -1;
 		return 1;
 	}
 

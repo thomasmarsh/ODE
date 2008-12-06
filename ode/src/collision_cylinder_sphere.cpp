@@ -139,6 +139,8 @@ int dCollideCylinderSphere(dxGeom* Cylinder, dxGeom* Sphere,
 			contact->normal[2] = (contact->pos[2] - SpherePos[2]) / (radius2 - contact->depth);
 			contact->g1 = Cylinder;
 			contact->g2 = Sphere;
+			contact->side1 = -1;
+			contact->side2 = -1;
 			GeomCount++;
 			return GeomCount;
 		}
@@ -159,6 +161,8 @@ int dCollideCylinderSphere(dxGeom* Cylinder, dxGeom* Sphere,
 			contact->normal[2] = (contact->pos[2] - SpherePos[2]) / (radius2 - contact->depth);
 			contact->g1 = Cylinder;
 			contact->g2 = Sphere;
+			contact->side1 = -1;
+			contact->side2 = -1;
 			GeomCount++;
 			return GeomCount;
 		}
@@ -188,6 +192,8 @@ int dCollideCylinderSphere(dxGeom* Cylinder, dxGeom* Sphere,
 				contact->normal[2] = C[2];
 				contact->g1 = Cylinder;
 				contact->g2 = Sphere;
+				contact->side1 = -1;
+				contact->side2 = -1;
 				GeomCount++;
 				return GeomCount;
 			}
@@ -211,6 +217,8 @@ int dCollideCylinderSphere(dxGeom* Cylinder, dxGeom* Sphere,
 				contact->normal[2] = C[2] / t;
 				contact->g1 = Cylinder;
 				contact->g2 = Sphere;
+				contact->side1 = -1;
+				contact->side2 = -1;
 				GeomCount++;
 				return GeomCount;
 			}
@@ -236,6 +244,8 @@ int dCollideCylinderSphere(dxGeom* Cylinder, dxGeom* Sphere,
 			contact->normal[2] = vDir1[2];
 			contact->g1 = Cylinder;
 			contact->g2 = Sphere;
+			contact->side1 = -1;
+			contact->side2 = -1;
 			GeomCount++;
 			return GeomCount;
 		}
@@ -256,6 +266,8 @@ int dCollideCylinderSphere(dxGeom* Cylinder, dxGeom* Sphere,
 			contact->normal[2] = -vDir1[2];
 			contact->g1 = Cylinder;
 			contact->g2 = Sphere;
+			contact->side1 = -1;
+			contact->side2 = -1;
 			GeomCount++;
 			return GeomCount;
 		}

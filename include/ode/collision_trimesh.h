@@ -136,6 +136,17 @@ ODE_API void dGeomTriMeshSetRayCallback(dGeomID g, dTriRayCallback* Callback);
 ODE_API dTriRayCallback* dGeomTriMeshGetRayCallback(dGeomID g);
 
 /*
+ * Triangle merging callback.
+ * Allows the user to generate a fake triangle index for a new contact generated
+ * from merging of two other contacts. That index could later be used by the 
+ * user to determine attributes of original triangles used as sources for a 
+ * merged contact.
+ */
+typedef int dTriTriMergeCallback(dGeomID TriMesh, int FirstTriangleIndex, int SecondTriangleIndex);
+ODE_API void dGeomTriMeshSetTriMergeCallback(dGeomID g, dTriTriMergeCallback* Callback);
+ODE_API dTriTriMergeCallback* dGeomTriMeshGetTriMergeCallback(dGeomID g);
+
+/*
  * Trimesh class
  * Construction. Callbacks are optional.
  */
