@@ -1676,6 +1676,7 @@ int dCollideHeightfield( dxGeom *o1, dxGeom *o2, int flags, dContactGeom* contac
     dMatrix3 R1;
 
     int numTerrainContacts = 0;
+    int numTerrainOrigContacts = 0;
 
     //@@ Should find a way to set reComputeAABB to false in default case
     // aka DHEIGHTFIELD_CORNER_ORIGIN not defined and terrain not PLACEABLE
@@ -1763,7 +1764,7 @@ int dCollideHeightfield( dxGeom *o1, dxGeom *o2, int flags, dContactGeom* contac
 
 
 
-    int numTerrainOrigContacts = numTerrainContacts;
+    numTerrainOrigContacts = numTerrainContacts;
     numTerrainContacts += terrain->dCollideHeightfieldZone(
         nMinX,nMaxX,nMinZ,nMaxZ,o2,numMaxTerrainContacts - numTerrainContacts,
         flags,CONTACT(contact,numTerrainContacts*skip),skip	);
