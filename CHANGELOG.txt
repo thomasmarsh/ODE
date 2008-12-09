@@ -8,6 +8,9 @@ the rules for this file:
   * keep the format consistent (79 char width, M/D/Y date format).
 
 ------------------------------------------------------------------------------
+12/09/08 Daniel K. O.
+        * Applied patch #2381592, which adds support for Kinematic Bodies.
+
 12/06/08 Oleh Derevenko
 
        * Applied a patch by Martijn Buijs to make GIMPACT trimesh-ray collisions to

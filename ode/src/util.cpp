@@ -273,7 +273,7 @@ void dxStepBody (dxBody *b, dReal h)
 
   // notify the user
   if (b->moved_callback)
-          b->moved_callback(b);
+    b->moved_callback(b);
 
 
   // damping
@@ -358,7 +358,7 @@ void dxProcessIslands (dxWorld *world, dReal stepsize, dstepper_fn_t stepper)
       // traverse and tag all body's joints, add untagged connected bodies
       // to stack
       for (dxJointNode *n=b->firstjoint; n; n=n->next) {
-	if (!n->joint->tag) {
+        if (!n->joint->tag && n->joint->isEnabled()) {
 	  n->joint->tag = 1;
 	  joint[jcount++] = n->joint;
 	  if (n->body && !n->body->tag) {
@@ -398,8 +398,10 @@ void dxProcessIslands (dxWorld *world, dReal stepsize, dstepper_fn_t stepper)
     }
   }
   for (j=world->firstjoint; j; j=(dxJoint*)j->next) {
-    if ((j->node[0].body && (j->node[0].body->flags & dxBodyDisabled)==0) ||
-	(j->node[1].body && (j->node[1].body->flags & dxBodyDisabled)==0)) {
+    if ( (( j->node[0].body && (j->node[0].body->flags & dxBodyDisabled)==0 ) ||
+          (j->node[1].body && (j->node[1].body->flags & dxBodyDisabled)==0) )
+         && 
+         j->isEnabled() ) {
       if (!j->tag) dDebug (0,"attached enabled joint not tagged");
     }
     else {

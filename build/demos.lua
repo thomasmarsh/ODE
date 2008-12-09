@@ -19,6 +19,7 @@
     "jointPR",
     "jointPU",
     "joints",
+    "kinematic",
     "motion",
     "motor",
     "ode",

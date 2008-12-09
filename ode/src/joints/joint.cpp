@@ -62,7 +62,11 @@ dxJoint::~dxJoint()
 { }
 
 
-
+bool dxJoint::isEnabled() const
+{
+    return ( node[0].body->invMass > 0 ||
+             (node[1].body && node[1].body->invMass > 0) );
+}
 
 //****************************************************************************
 // externs

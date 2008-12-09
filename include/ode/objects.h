@@ -1065,6 +1065,37 @@ ODE_API int dBodyGetNumJoints (dBodyID b);
  */
 ODE_API dJointID dBodyGetJoint (dBodyID, int index);
 
+
+
+
+/**
+ * @brief Set rigid body to dynamic state (default).
+ * @param dBodyID identification of body.
+ * @ingroup bodies
+ */
+ODE_API void dBodySetDynamic (dBodyID);
+
+/**
+ * @brief Set rigid body to kinematic state.
+ * When in kinematic state the body isn't simulated as a dynamic
+ * body (it's "unstoppable", doesn't respond to forces),
+ * but can still affect dynamic bodies (e.g. in joints).
+ * Kinematic bodies can be controlled by position and velocity.
+ * @note A kinematic body has infinite mass. If you set its mass
+ * to something else, it loses the kinematic state and behaves
+ * as a normal dynamic body.
+ * @param dBodyID identification of body.
+ * @ingroup bodies
+ */
+ODE_API void dBodySetKinematic (dBodyID);
+
+/**
+ * @brief Check wether a body is in kinematic state.
+ * @ingroup bodies
+ * @return 1 if a body is kinematic or 0 if it is dynamic.
+ */
+ODE_API int dBodyIsKinematic (dBodyID);
+
 /**
  * @brief Manually enable a body.
  * @param dBodyID identification of body.

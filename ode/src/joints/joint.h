@@ -126,6 +126,10 @@ struct dxJoint : public dObject
     /// Set values which are relative with respect to bodies.
     /// Each dxJoint should redefined it if need be.
     virtual void setRelativeValues() {};
+
+	//Test for connecting two kinematic bodies. In that case, we should consider
+	// the joint as disabled and not use it in simulation step.
+	bool isEnabled() const;
 };
 
 
