@@ -29,6 +29,7 @@ noinst_PROGRAMS = \
                 demo_jointPR \
                 demo_joints \
                 demo_jointPU \
+                demo_kinematic \
                 demo_motion \
                 demo_motor \
                 demo_ode \
@@ -58,6 +59,7 @@ demo_I_SOURCES = demo_I.cpp
 demo_jointPR_SOURCES = demo_jointPR.cpp
 demo_joints_SOURCES = demo_joints.cpp
 demo_jointPU_SOURCES = demo_jointPU.cpp
+demo_kinematic_SOURCES = demo_kinematic.cpp
 demo_motion_SOURCES = demo_motion.cpp
 demo_motor_SOURCES = demo_motor.cpp
 demo_ode_SOURCES = demo_ode.cpp

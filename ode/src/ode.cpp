@@ -829,6 +829,25 @@ dJointID dBodyGetJoint (dBodyID b, int index)
   return 0;
 }
 
+void dBodySetDynamic (dBodyID b)
+{
+  dAASSERT (b);
+  
+  dBodySetMass(b,&b->mass);
+}
+
+void dBodySetKinematic (dBodyID b)
+{
+  dAASSERT (b);
+  dSetZero (b->invI,4*3);
+  b->invMass = 0; 
+}
+
+int dBodyIsKinematic (dBodyID b)
+{
+  dAASSERT (b);
+  return b->invMass == 0;
+}
 
 void dBodyEnable (dBodyID b)
 {

@@ -269,6 +269,13 @@ public:
   void setTorque (const dVector3 t)
   { setTorque (t[0], t[1], t[2]); }
 
+  void setDynamic()
+    { dBodySetDynamic (_id); }
+  void setKinematic()
+    { dBodySetKinematic (_id); }
+  bool isKinematic() const
+    { return dBodyIsKinematic (_id) != 0; }
+
   void enable()
     { dBodyEnable (_id); }
   void disable()
