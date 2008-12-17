@@ -51,7 +51,7 @@ typedef void dNearCallback (void *data, dGeomID o1, dGeomID o2);
 
 ODE_API dSpaceID dSimpleSpaceCreate (dSpaceID space);
 ODE_API dSpaceID dHashSpaceCreate (dSpaceID space);
-ODE_API dSpaceID dQuadTreeSpaceCreate (dSpaceID space, dVector3 Center, dVector3 Extents, int Depth);
+ODE_API dSpaceID dQuadTreeSpaceCreate (dSpaceID space, const dVector3 Center, const dVector3 Extents, int Depth);
 
 
 // SAP
