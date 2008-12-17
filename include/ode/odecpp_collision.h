@@ -191,11 +191,11 @@ class dQuadTreeSpace : public dSpace {
   void operator= (dQuadTreeSpace &);
 
 public:
-  dQuadTreeSpace (dVector3 center, dVector3 extents, int depth)
+  dQuadTreeSpace (const dVector3 center, const dVector3 extents, int depth)
     { _id = (dGeomID) dQuadTreeSpaceCreate (0,center,extents,depth); }
-  dQuadTreeSpace (dSpace &space, dVector3 center, dVector3 extents, int depth)
+  dQuadTreeSpace (dSpace &space, const dVector3 center, const dVector3 extents, int depth)
     { _id = (dGeomID) dQuadTreeSpaceCreate (space.id(),center,extents,depth); }
-  dQuadTreeSpace (dSpaceID space, dVector3 center, dVector3 extents, int depth)
+  dQuadTreeSpace (dSpaceID space, const dVector3 center, const dVector3 extents, int depth)
     { _id = (dGeomID) dQuadTreeSpaceCreate (space,center,extents,depth); }
 };
 

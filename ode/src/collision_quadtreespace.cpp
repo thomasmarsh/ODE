@@ -324,7 +324,7 @@ struct dxQuadTreeSpace : public dxSpace{
 
 	dArray<dxGeom*> DirtyList;
 
-	dxQuadTreeSpace(dSpaceID _space, dVector3 Center, dVector3 Extents, int Depth);
+	dxQuadTreeSpace(dSpaceID _space, const dVector3 Center, const dVector3 Extents, int Depth);
 	~dxQuadTreeSpace();
 
 	dxGeom* getGeom(int i);
@@ -347,7 +347,7 @@ struct dxQuadTreeSpace : public dxSpace{
 	int CurrentIndex;
 };
 
-dxQuadTreeSpace::dxQuadTreeSpace(dSpaceID _space, dVector3 Center, dVector3 Extents, int Depth) : dxSpace(_space){
+dxQuadTreeSpace::dxQuadTreeSpace(dSpaceID _space, const dVector3 Center, const dVector3 Extents, int Depth) : dxSpace(_space){
 	type = dQuadTreeSpaceClass;
 
 	int BlockCount = 0;
@@ -594,6 +594,6 @@ void dxQuadTreeSpace::collide2(void* UserData, dxGeom* g2, dNearCallback* Callba
   lock_count--;
 }
 
-dSpaceID dQuadTreeSpaceCreate(dxSpace* space, dVector3 Center, dVector3 Extents, int Depth){
+dSpaceID dQuadTreeSpaceCreate(dxSpace* space, const dVector3 Center, const dVector3 Extents, int Depth){
 	return new dxQuadTreeSpace(space, Center, Extents, Depth);
 }
