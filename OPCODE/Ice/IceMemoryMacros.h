@@ -47,30 +47,7 @@
 	//!	\warning	writes nb*4 bytes !
 	inline_ void StoreDwords(udword* dest, udword nb, udword value)
 	{
-		// The asm code below **SHOULD** be equivalent to one of those C versions
-		// or the other if your compiled is good: (checked on VC++ 6.0)
-		//
-		//	1) while(nb--)	*dest++ = value;
-		//
-		//	2) for(udword i=0;i<nb;i++)	dest[i] = value;
-		//
-#ifdef _MSC_VER
-// RTFM:
-// When using __asm to write assembly language in C/C++ functions, 
-// you don't need to preserve the EAX, EBX, ECX, EDX, ESI, or EDI registers.
-//		_asm push eax
-//		_asm push ecx
-//		_asm push edi
-		_asm mov edi, dest
-		_asm mov ecx, nb
-		_asm mov eax, value
-		_asm rep stosd
-//		_asm pop edi
-//		_asm pop ecx
-//		_asm pop eax
-#else
 		while(nb--) *dest++ = value;
-#endif
 	}
 
 	//!	Copies a buffer.
