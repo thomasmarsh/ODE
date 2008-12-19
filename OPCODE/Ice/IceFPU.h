@@ -41,20 +41,7 @@
 	//! Fast square root for floating-point values.
 	inline_ float FastSqrt(float square)
 	{
-#ifdef _MSC_VER
-			float retval;
-
-			__asm {
-					mov             eax, square
-					sub             eax, 0x3F800000
-					sar             eax, 1
-					add             eax, 0x3F800000
-					mov             [retval], eax
-			}
-			return retval;
-#else
-			return sqrt(square);
-#endif
+		return sqrt(square);
 	}
 
 	//! Saturates positive to zero.
@@ -225,75 +212,25 @@
 	//! A global function to find MAX(a,b) using FCOMI/FCMOV
 	inline_ float FCMax2(float a, float b)
 	{
-#ifdef _MSC_VER
-		float Res;
-		_asm	fld		[a]
-		_asm	fld		[b]
-		FCOMI_ST1
-		FCMOVB_ST1
-		_asm	fstp	[Res]
-		_asm	fcomp
-		return Res;
-#else
 		return (a > b) ? a : b;
-#endif
 	}
 
 	//! A global function to find MIN(a,b) using FCOMI/FCMOV
 	inline_ float FCMin2(float a, float b)
 	{
-#ifdef _MSC_VER
-		float Res;
-		_asm	fld		[a]
-		_asm	fld		[b]
-		FCOMI_ST1
-		FCMOVNB_ST1
-		_asm	fstp	[Res]
-		_asm	fcomp
-		return Res;
-#else
 		return (a < b) ? a : b;
-#endif
 	}
 
 	//! A global function to find MAX(a,b,c) using FCOMI/FCMOV
 	inline_ float FCMax3(float a, float b, float c)
 	{
-#ifdef _MSC_VER
-		float Res;
-		_asm	fld		[a]
-		_asm	fld		[b]
-		_asm	fld		[c]
-		FCOMI_ST1
-		FCMOVB_ST1
-		FCOMI_ST2
-		FCMOVB_ST2
-		_asm	fstp	[Res]
-		_asm	fcompp
-		return Res;
-#else
 		return (a > b) ? ((a > c) ? a : c) : ((b > c) ? b : c);
-#endif
 	}
 
 	//! A global function to find MIN(a,b,c) using FCOMI/FCMOV
 	inline_ float FCMin3(float a, float b, float c)
 	{
-#ifdef _MSC_VER
-		float Res;
-		_asm	fld		[a]
-		_asm	fld		[b]
-		_asm	fld		[c]
-		FCOMI_ST1
-		FCMOVNB_ST1
-		FCOMI_ST2
-		FCMOVNB_ST2
-		_asm	fstp	[Res]
-		_asm	fcompp
-		return Res;
-#else
 		return (a < b) ? ((a < c) ? a : c) : ((b < c) ? b : c);
-#endif
 	}
 
 	inline_ int ConvertToSortable(float f)
