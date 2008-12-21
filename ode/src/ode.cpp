@@ -1394,6 +1394,23 @@ void dJointAttach (dxJoint *joint, dxBody *body1, dxBody *body2)
   joint->setRelativeValues();
 }
 
+void dJointEnable (dxJoint *joint)
+{
+  dAASSERT (joint);
+  joint->flags &= ~dJOINT_DISABLED;
+}
+
+void dJointDisable (dxJoint *joint)
+{
+  dAASSERT (joint);
+  joint->flags |= dJOINT_DISABLED;
+}
+
+int dJointIsEnabled (dxJoint *joint)
+{
+  dAASSERT (joint);
+  return (joint->flags & dJOINT_DISABLED) == 0;
+}
 
 void dJointSetData (dxJoint *joint, void *data)
 {

@@ -8,6 +8,10 @@ the rules for this file:
   * keep the format consistent (79 char width, M/D/Y date format).
 
 ------------------------------------------------------------------------------
+12/20/08 Daniel K. O.
+        * New functions: dJointEnable, dJointDisable, dJointIsEnabled
+          (patch #2454764).
+
 12/19/08 Daniel K. O.
         * Removed inline asm statements that break builds on 64-bit VC++.
 
