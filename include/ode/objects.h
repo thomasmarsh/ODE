@@ -1528,6 +1528,29 @@ ODE_API int dJointGetNumBodies(dJointID);
 ODE_API void dJointAttach (dJointID, dBodyID body1, dBodyID body2);
 
 /**
+ * @brief Manually enable a joint.
+ * @param dJointID identification of joint.
+ * @ingroup joints
+ */
+ODE_API void dJointEnable (dJointID);
+
+/**
+ * @brief Manually disable a joint.
+ * @ingroup joints
+ * @remarks
+ * A disabled joint will not affect the simulation, but will maintain the anchors and
+ * axes so it can be enabled later.
+ */
+ODE_API void dJointDisable (dJointID);
+
+/**
+ * @brief Check wether a joint is enabled.
+ * @ingroup joints
+ * @return 1 if a joint is currently enabled or 0 if it is disabled.
+ */
+ODE_API int dJointIsEnabled (dJointID);
+
+/**
  * @brief Set the user-data pointer
  * @ingroup joints
  */

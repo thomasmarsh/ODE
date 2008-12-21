@@ -452,6 +452,13 @@ public:
   void attach (dBody& body1, dBody& body2)
     { attach(body1.id(), body2.id()); }
 
+  void enable()
+    { dJointEnable (_id); }
+  void disable()
+    { dJointDisable (_id); }
+  bool isEnabled() const
+    { return dJointIsEnabled (_id) != 0; }
+
   void setData (void *data)
     { dJointSetData (_id, data); }
   void *getData() const
