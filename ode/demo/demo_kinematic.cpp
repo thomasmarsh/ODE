@@ -94,7 +94,7 @@ void nearCallback(void *data, dGeomID g1, dGeomID g2)
     dBodyID b1 = dGeomGetBody(g1);
     dBodyID b2 = dGeomGetBody(g2);
     
-    if (b1 and b2 and dAreConnectedExcluding(b1, b2, dJointTypeContact))
+    if (b1 && b2 && dAreConnectedExcluding(b1, b2, dJointTypeContact))
         return;
 
     const int MAX_CONTACTS = 10;
