@@ -253,7 +253,7 @@ int dCollide (dxGeom *o1, dxGeom *o2, int flags, dContactGeom *contact,
 	      int skip)
 {
   dAASSERT(o1 && o2 && contact);
-  dUASSERT(colliders_initialized,"colliders array not initialized");
+  dUASSERT(colliders_initialized,"Please call ODE initialization (dInitODE() or similar) before using the library");
   dUASSERT(o1->type >= 0 && o1->type < dGeomNumClasses,"bad o1 class number");
   dUASSERT(o2->type >= 0 && o2->type < dGeomNumClasses,"bad o2 class number");
   // Even though comparison for greater or equal to one is used in all the 
