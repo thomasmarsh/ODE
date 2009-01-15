@@ -103,8 +103,8 @@
 
   -- always clean all of the optional components
   if _ACTION == "clean" then
-    _OPTIONS["with-demos"] = true
-    _OPTIONS["with-tests"] = true
+    _OPTIONS["with-demos"] = ""
+    _OPTIONS["with-tests"] = ""
   end
   
   
