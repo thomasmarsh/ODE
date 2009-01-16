@@ -883,7 +883,7 @@ static Texture *texture[4+1]; // +1 since index 0 is not used
 
 
 
-#ifndef macintosh
+#if !defined(macintosh) || defined(ODE_PLATFORM_OSX)
 
 void dsStartGraphics (int width, int height, dsFunctions *fn)
 {
