@@ -312,7 +312,7 @@
         links   { "user32", "opengl32", "glu32", "winmm", "gdi32" }
 
       configuration { "not Windows" }
-        files   { "../drawstuff/src/x11/cpp" }
+        files   { "../drawstuff/src/x11.cpp" }
         links   { "X11", "GL", "GLU" }
 
   end
