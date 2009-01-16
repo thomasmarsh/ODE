@@ -46,7 +46,7 @@
   }
   
   if not _OPTIONS["no-trimesh"] then
-    table.join(demos, trimesh_demos)
+    demos = table.join(demos, trimesh_demos)
   end
 
 
@@ -101,10 +101,13 @@
     description = "Set the output location for the generated project files"
   }
 
-  -- always clean all of the optional components
+  -- always clean all of the optional components and toolsets
   if _ACTION == "clean" then
     _OPTIONS["with-demos"] = ""
     _OPTIONS["with-tests"] = ""
+    for action in pairs(premake.actions) do
+      os.rmdir(action)
+    end
   end
   
   
@@ -117,7 +120,7 @@
 
     language "C++"
     uuid     "4DA77C12-15E5-497B-B1BB-5100D5161E15"
-    location ( _OPTIONS["to"] )
+    location ( _OPTIONS["to"] or _ACTION )
 
     includedirs {
       "../include",
@@ -165,13 +168,41 @@
 
 
 ----------------------------------------------------------------------
+-- The demo projects, automated from list above. These go first so
+-- they will be selected as the active project automatically in IDEs
+----------------------------------------------------------------------
+
+  if _OPTIONS["with-demos"] then
+    for _, name in ipairs(demos) do
+    
+      project ( "demo_" .. name )
+      
+        kind      "ConsoleApp"
+        location  ( _OPTIONS["to"] or _ACTION )
+        links     { "ode", "drawstuff" }
+        
+        files     { "../ode/demo/demo_" .. name .. ".*" }
+        
+        configuration { "Windows" }
+          files   { "../drawstuff/src/resources.rc" }
+          links   { "user32", "winmm", "gdi32", "opengl32", "glu32" }
+
+        configuration { "not Windows" }
+          links   { "GL", "GLU" }
+        
+    end
+  end
+  
+
+
+----------------------------------------------------------------------
 -- The ODE library project
 ----------------------------------------------------------------------
 
   project "ode"
 
     kind     "StaticLib"
-    location ( _OPTIONS["to"] )
+    location ( _OPTIONS["to"] or _ACTION )
 
     includedirs {
       "../ode/src/joints",
@@ -288,7 +319,7 @@
 
     project "drawstuff"
 
-      location ( _OPTIONS["to"] )
+      location ( _OPTIONS["to"] or _ACTION )
 
       files {
         "../include/drawstuff/*.h",
@@ -320,33 +351,6 @@
 
 
 ----------------------------------------------------------------------
--- The demo projects, automated from list above
-----------------------------------------------------------------------
-
-  if _OPTIONS["with-demos"] then
-    for _, name in ipairs(demos) do
-    
-      project ( "demo_" .. name )
-      
-        kind      "ConsoleApp"
-        location  ( _OPTIONS["to"] )
-        links     { "ode", "drawstuff" }
-        
-        files     { "../ode/demo/demo_" .. name .. ".*" }
-        
-        configuration { "Windows" }
-          files   { "../drawstuff/src/resources.rc" }
-          links   { "user32", "winmm", "gdi32", "opengl32", "glu32" }
-
-        configuration { "not Windows" }
-          links   { "GL", "GLU" }
-        
-    end
-  end
-  
-
-
-----------------------------------------------------------------------
 -- The automated test application
 ----------------------------------------------------------------------
 
@@ -356,7 +360,7 @@
     project "tests"
   
       kind     "ConsoleApp"
-      location ( _OPTIONS["to"] )
+      location ( _OPTIONS["to"] or _ACTION )
 
       includedirs { 
         "../tests/UnitTest++/src" 
