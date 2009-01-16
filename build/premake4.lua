@@ -113,7 +113,7 @@
   
 
 ----------------------------------------------------------------------
--- The solution, andcd solution-wide settings
+-- The solution, and solution-wide settings
 ----------------------------------------------------------------------
 
   solution "ode"
@@ -135,11 +135,11 @@
       "DebugDoubleLib", "ReleaseDoubleLib"    
     }
     
-    configuration "Debug*"
+    configuration { "Debug*" }
       defines { "_DEBUG" }
       flags   { "Symbols" }
       
-    configuration "Release*"
+    configuration { "Release*" }
       flags   { "OptimizeSpeed", "NoFramePointer" }
 
     configuration { "*Single*" }
@@ -148,8 +148,11 @@
     configuration { "*Double*" }
       defines { "dDOUBLE" }
     
-    configuration "Windows"
+    configuration { "Windows" }
       defines { "WIN32" }
+
+    configuration { "MacOSX" }
+      linkoptions { "-framework Carbon" }
       
     -- give each configuration a unique output directory
     for _, name in ipairs(configurations()) do
@@ -179,15 +182,17 @@
       
         kind      "ConsoleApp"
         location  ( _OPTIONS["to"] or _ACTION )
-        links     { "ode", "drawstuff" }
-        
         files     { "../ode/demo/demo_" .. name .. ".*" }
+		links     { "ode", "drawstuff" }        
         
         configuration { "Windows" }
           files   { "../drawstuff/src/resources.rc" }
           links   { "user32", "winmm", "gdi32", "opengl32", "glu32" }
 
-        configuration { "not Windows" }
+        configuration { "MacOSX" }
+          linkoptions { "-framework Carbon -framework OpenGL -framework AGL" }
+
+        configuration { "not Windows", "not MacOSX" }
           links   { "GL", "GLU" }
         
     end
@@ -342,7 +347,12 @@
         files   { "../drawstuff/src/resource.h", "../drawstuff/src/resources.rc", "../drawstuff/src/windows.cpp" }
         links   { "user32", "opengl32", "glu32", "winmm", "gdi32" }
 
-      configuration { "not Windows" }
+      configuration { "MacOSX" }
+	    defines     { "HAVE_APPLE_OPENGL_FRAMEWORK" }
+        files       { "../drawstuff/src/osx.cpp" }
+        linkoptions { "-framework Carbon -framework OpenGL -framework AGL" }
+
+      configuration { "not Windows", "not MacOSX" }
         files   { "../drawstuff/src/x11.cpp" }
         links   { "X11", "GL", "GLU" }
 
