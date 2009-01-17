@@ -847,6 +847,9 @@ void dSpaceCollide2 (dxGeom *g1, dxGeom *g2, void *data,
 		}
 		else {
 			// g1 and g2 are geoms
+			// make sure they have valid AABBs
+			g1->recomputeAABB();
+			g2->recomputeAABB();
 			collideAABBs(g1,g2, data, callback);
 		}
 	}
