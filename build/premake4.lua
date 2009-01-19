@@ -390,5 +390,14 @@
       configuration { "not Windows" }
         files { "../tests/UnitTest++/src/Posix/*" }
 
+      -- add post-build step to automatically run test executable
+      local path_to_lib = path.getrelative(location(), "../lib")
+      local command = path.translate(path.join(path_to_lib, "%s/tests"))
+      
+      for _, name in ipairs(configurations()) do
+        configuration { name }
+          postbuildcommands { command:format(name) }
+      end
+
   end
 
