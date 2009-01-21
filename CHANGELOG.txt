@@ -8,6 +8,10 @@ the rules for this file:
   * keep the format consistent (79 char width, M/D/Y date format).
 
 ------------------------------------------------------------------------------
+01/21/09 Remi Ricard (papaDoc)
+         * Fix bug reported by Tilman: dxJointPU::getInfo1 was setting twice the
+           limit of limot1 to zero and not limot2
+
 01/17/09 Daniel K. O.
         * Fixed a bug in dSpaceCollide2: if both geoms are not in spaces they would
           not have valid AABBs.

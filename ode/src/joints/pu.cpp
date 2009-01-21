@@ -231,7 +231,7 @@ dxJointPU::getInfo1( dxJoint::Info1 *info )
     // We need to call testRotationLimit() even if we're motored, since it
     // records the result.
     limot1.limit = 0;
-    limot1.limit = 0;
+    limot2.limit = 0;
     if ( limiting1 || limiting2 )
     {
         dReal angle1, angle2;
