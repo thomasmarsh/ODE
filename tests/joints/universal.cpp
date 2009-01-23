@@ -19,8 +19,6 @@
   * LICENSE.TXT and LICENSE-BSD.TXT for more details.                     *
   *                                                                       *
   *************************************************************************/
-//234567890123456789012345678901234567890123456789012345678901234567890123456789
-//        1         2         3         4         5         6         7
 
 ////////////////////////////////////////////////////////////////////////////////
 // This file create unit test for some of the functions found in:
@@ -36,16 +34,68 @@
 
 #include "../../ode/src/joints/universal.h"
 
+dReal d2r(dReal degree)
+{
+    return degree * (dReal)(M_PI / 180.0);
+}
+dReal r2d(dReal degree)
+{
+    return degree * (dReal)(180.0/M_PI);
+}
+
 SUITE (TestdxJointUniversal)
 {
+    // The 2 bodies are positionned at (0, 0, 0)
+    // The bodis have no rotation.
+    // The joint is a Universal Joint
+    // Axis1 is along the X axis
+    // Axis2 is along the Y axis
+    // Anchor at (0, 0, 0)
+    struct Fixture_dxJointUniversal_B1_and_B2_At_Zero_Axis1_Along_X_Axis2_Along_Y
+    {
+        Fixture_dxJointUniversal_B1_and_B2_At_Zero_Axis1_Along_X_Axis2_Along_Y()
+        {
+
+            wId = dWorldCreate();
+
+            bId1 = dBodyCreate (wId);
+            dBodySetPosition (bId1, 0, 0, 0);
+
+            bId2 = dBodyCreate (wId);
+            dBodySetPosition (bId2, 0, 0, 0);
+
+
+            jId   = dJointCreateUniversal (wId, 0);
+            joint = (dxJointUniversal*) jId;
+
+
+            dJointAttach (jId, bId1, bId2);
+        }
+
+        ~Fixture_dxJointUniversal_B1_and_B2_At_Zero_Axis1_Along_X_Axis2_Along_Y()
+        {
+            dWorldDestroy (wId);
+        }
+
+        dWorldID wId;
+
+        dBodyID bId1;
+        dBodyID bId2;
+
+
+        dJointID jId;
+        dxJointUniversal* joint;
+    };
+
+
     // The 2 bodies are positionned at (-1, -2, -3),  and (11, 22, 33)
     // The bodis have rotation of 27deg around some axis.
     // The joint is a Universal Joint
     // Axis is along the X axis
     // Anchor at (0, 0, 0)
-    struct Fixture_dxJointUniversal_B1_and_B2_At_Zero_Axis_Along_X
+    struct Fixture_dxJointUniversal_B1_and_B2_At_Random_Axis_Along_X
     {
-        Fixture_dxJointUniversal_B1_and_B2_At_Zero_Axis_Along_X()
+        Fixture_dxJointUniversal_B1_and_B2_At_Random_Axis_Along_X()
         {
             wId = dWorldCreate();
 
@@ -57,7 +107,7 @@ SUITE (TestdxJointUniversal)
 
             dMatrix3 R;
 
-            dVector3 axis; // Random axis
+            dVector3 axis;
 
             axis[0] = 0.53;
             axis[1] = -0.71;
@@ -83,7 +133,7 @@ SUITE (TestdxJointUniversal)
             dJointAttach (jId, bId1, bId2);
         }
 
-        ~Fixture_dxJointUniversal_B1_and_B2_At_Zero_Axis_Along_X()
+        ~Fixture_dxJointUniversal_B1_and_B2_At_Random_Axis_Along_X()
         {
             dWorldDestroy (wId);
         }
@@ -98,8 +148,410 @@ SUITE (TestdxJointUniversal)
         dxJointUniversal* joint;
     };
 
+
+    // Only one body body1 at (0,0,0)
+    // The joint is an Universal Joint.
+    // Axis1 is along the X axis
+    // Axis2 is along the Y axis
+    // Anchor at (0, 0, 0)
+    //
+    //       ^Y
+    //       |
+    //       |
+    //       |
+    //       |
+    //       |
+    // Z <-- X
+    struct Fixture_dxJointUniversal_B1_At_Zero_Default_Axes
+    {
+        Fixture_dxJointUniversal_B1_At_Zero_Default_Axes()
+        {
+            wId = dWorldCreate();
+
+            bId1 = dBodyCreate (wId);
+            dBodySetPosition (bId1, 0, 0, 0);
+
+            jId   = dJointCreateUniversal (wId, 0);
+
+
+            dJointAttach (jId, bId1, NULL);
+            dJointSetUniversalAnchor (jId, 0, 0, 0);
+        }
+
+        ~Fixture_dxJointUniversal_B1_At_Zero_Default_Axes()
+        {
+            dWorldDestroy (wId);
+        }
+
+        dWorldID wId;
+
+        dBodyID bId1;
+
+
+        dJointID jId;
+    };
+
+
+
+    // Only one body body2 at (0,0,0)
+    // The joint is an Universal Joint.
+    // Axis1 is along the X axis.
+    // Axis2 is along the Y axis.
+    // Anchor at (0, 0, 0)
+    //
+    //       ^Y
+    //       |
+    //       |
+    //       |
+    //       |
+    //       |
+    // Z <-- X
+    struct Fixture_dxJointUniversal_B2_At_Zero_Default_Axes
+    {
+        Fixture_dxJointUniversal_B2_At_Zero_Default_Axes()
+        {
+            wId = dWorldCreate();
+
+            bId2 = dBodyCreate (wId);
+            dBodySetPosition (bId2, 0, 0, 0);
+
+            jId   = dJointCreateUniversal (wId, 0);
+
+
+            dJointAttach (jId, NULL, bId2);
+            dJointSetUniversalAnchor (jId, 0, 0, 0);
+        }
+
+        ~Fixture_dxJointUniversal_B2_At_Zero_Default_Axes()
+        {
+            dWorldDestroy (wId);
+        }
+
+        dWorldID wId;
+
+        dBodyID bId2;
+
+        dJointID jId;
+    };
+
+
+    // Test is dJointGetUniversalAngles versus
+    // dJointGetUniversalAngle1 and dJointGetUniversalAngle2 dJointGetUniversalAxis
+    TEST_FIXTURE (Fixture_dxJointUniversal_B1_and_B2_At_Zero_Axis1_Along_X_Axis2_Along_Y,
+                  test_dJointSetGetUniversalAngles_Versus_Angle1_and_Angle2)
+    {
+        CHECK_CLOSE (0, dJointGetUniversalAngle1 (jId), 1e-4);
+        CHECK_CLOSE (0, dJointGetUniversalAngle2 (jId), 1e-4);
+
+        dReal angle1, angle2;
+        dJointGetUniversalAngles(jId, &angle1, &angle2);
+        CHECK_CLOSE (0, angle1, 1e-4);
+        CHECK_CLOSE (0, angle2, 1e-4);
+
+        dMatrix3 R;
+        dReal ang1, ang2;
+
+
+        dVector3 axis1;
+        dJointGetUniversalAxis1 (jId, axis1);
+
+        dVector3 axis2;
+        dJointGetUniversalAxis2 (jId, axis2);
+
+        ang1 = d2r(REAL(23.0));
+        dRFromAxisAndAngle (R, axis1[0], axis1[1], axis1[2], ang1);
+        dBodySetRotation (bId1, R);
+
+        ang2 = d2r(REAL(17.0));
+        dRFromAxisAndAngle (R, axis2[0], axis2[1], axis2[2], ang2);
+        dBodySetRotation (bId2, R);
+
+        CHECK_CLOSE (ang1, dJointGetUniversalAngle1 (jId), 1e-4);
+        CHECK_CLOSE (-ang2, dJointGetUniversalAngle2 (jId), 1e-4);
+
+        dJointGetUniversalAngles(jId, &angle1, &angle2);
+        CHECK_CLOSE (ang1, angle1, 1e-4);
+        CHECK_CLOSE (-ang2, angle2, 1e-4);
+
+
+
+
+
+
+        // ax1 and ax2 are pseudo-random axis. N.B. They are NOT the axis of the joints.
+        dVector3 ax1;
+        ax1[0] = 0.2;
+        ax1[1] = -0.67;
+        ax1[2] = -0.81;
+        dNormalize3(ax1);
+
+        dVector3 ax2;
+        ax2[0] = 0.62;
+        ax2[1] = 0.31;
+        ax2[2] = 0.43;
+        dNormalize3(ax2);
+
+
+        ang1 = d2r(REAL(23.0));
+        dRFromAxisAndAngle (R, ax1[0], ax1[1], ax1[2], ang1);
+        dBodySetRotation (bId1, R);
+
+        ang2 = d2r(REAL(0.0));
+
+        dJointGetUniversalAngles(jId, &angle1, &angle2);
+        CHECK_CLOSE (angle1, dJointGetUniversalAngle1 (jId), 1e-4);
+        CHECK_CLOSE (angle2, dJointGetUniversalAngle2 (jId), 1e-4);
+
+
+
+        ang1 = d2r(REAL(0.0));
+
+        ang2 = d2r(REAL(23.0));
+        dRFromAxisAndAngle (R, ax2[0], ax2[1], ax2[2], ang2);
+        dBodySetRotation (bId1, R);
+
+        dJointGetUniversalAngles(jId, &angle1, &angle2);
+        CHECK_CLOSE (angle1, dJointGetUniversalAngle1 (jId), 1e-4);
+        CHECK_CLOSE (angle2, dJointGetUniversalAngle2 (jId), 1e-4);
+
+
+        ang1 = d2r(REAL(38.0));
+        dRFromAxisAndAngle (R, ax1[0], ax1[1], ax1[2], ang2);
+        dBodySetRotation (bId1, R);
+
+        ang2 = d2r(REAL(-43.0));
+        dRFromAxisAndAngle (R, ax2[0], ax2[1], ax2[2], ang2);
+        dBodySetRotation (bId1, R);
+
+        dJointGetUniversalAngles(jId, &angle1, &angle2);
+        CHECK_CLOSE (angle1, dJointGetUniversalAngle1 (jId), 1e-4);
+        CHECK_CLOSE (angle2, dJointGetUniversalAngle2 (jId), 1e-4);
+
+
+        // Try with random axis for the axis of the joints
+        dRSetIdentity(R);
+        dBodySetRotation (bId1, R);
+        dBodySetRotation (bId1, R);
+
+        axis1[0] = 0.32;
+        axis1[1] = -0.57;
+        axis1[2] = 0.71;
+        dNormalize3(axis1);
+
+        axis2[0] = 0.-26;
+        axis2[1] = -0.31;
+        axis2[2] = 0.69;
+        dNormalize3(axis2);
+
+        dVector3 cross;
+        dCROSS(cross, =, axis1, axis2);
+        dJointSetUniversalAxis1(jId, axis1[0], axis1[1], axis1[2]);
+        dJointSetUniversalAxis2(jId, cross[0], cross[1], cross[2]);
+
+
+        ang1 = d2r(REAL(23.0));
+        dRFromAxisAndAngle (R, ax1[0], ax1[1], ax1[2], ang1);
+        dBodySetRotation (bId1, R);
+
+        ang2 = d2r(REAL(0.0));
+
+        dJointGetUniversalAngles(jId, &angle1, &angle2);
+        CHECK_CLOSE (angle1, dJointGetUniversalAngle1 (jId), 1e-4);
+        CHECK_CLOSE (angle2, dJointGetUniversalAngle2 (jId), 1e-4);
+
+
+
+        ang1 = d2r(REAL(0.0));
+
+        ang2 = d2r(REAL(23.0));
+        dRFromAxisAndAngle (R, ax2[0], ax2[1], ax2[2], ang2);
+        dBodySetRotation (bId1, R);
+
+        dJointGetUniversalAngles(jId, &angle1, &angle2);
+        CHECK_CLOSE (angle1, dJointGetUniversalAngle1 (jId), 1e-4);
+        CHECK_CLOSE (angle2, dJointGetUniversalAngle2 (jId), 1e-4);
+
+
+        ang1 = d2r(REAL(38.0));
+        dRFromAxisAndAngle (R, ax1[0], ax1[1], ax1[2], ang2);
+        dBodySetRotation (bId1, R);
+
+        ang2 = d2r(REAL(-43.0));
+        dRFromAxisAndAngle (R, ax2[0], ax2[1], ax2[2], ang2);
+        dBodySetRotation (bId1, R);
+
+        dJointGetUniversalAngles(jId, &angle1, &angle2);
+        CHECK_CLOSE (angle1, dJointGetUniversalAngle1 (jId), 1e-4);
+        CHECK_CLOSE (angle2, dJointGetUniversalAngle2 (jId), 1e-4);
+    }
+
+
+    // =========================================================================
+    // Test ONE BODY behavior
+    // =========================================================================
+
+
+    // Test when there is only one body at position one on the joint
+    TEST_FIXTURE (Fixture_dxJointUniversal_B1_At_Zero_Default_Axes,
+                  test_dJointGetUniversalAngle1_1Body_B1)
+    {
+        CHECK_CLOSE (0, dJointGetUniversalAngle1 (jId), 1e-4);
+        CHECK_CLOSE (0, dJointGetUniversalAngle2 (jId), 1e-4);
+
+        dReal angle1, angle2;
+        dJointGetUniversalAngles(jId, &angle1, &angle2);
+        CHECK_CLOSE (0, angle1, 1e-4);
+        CHECK_CLOSE (0, angle2, 1e-4);
+
+        dVector3 axis1;
+        dJointGetUniversalAxis1 (jId, axis1);
+        dVector3 axis2;
+        dJointGetUniversalAxis2 (jId, axis2);
+
+        dMatrix3 R;
+
+        dReal ang1 = REAL(0.23);
+        dRFromAxisAndAngle (R, axis1[0], axis1[1], axis1[2], ang1);
+        dBodySetRotation (bId1, R);
+
+        dReal ang2 = REAL(0.0);
+
+
+        CHECK_CLOSE (ang1, dJointGetUniversalAngle1 (jId), 1e-4);
+        CHECK_CLOSE (-ang2, dJointGetUniversalAngle2 (jId), 1e-4);
+
+        dJointGetUniversalAngles(jId, &angle1, &angle2);
+        CHECK_CLOSE (ang1, angle1, 1e-4);
+        CHECK_CLOSE (-ang2, angle2, 1e-4);
+
+
+
+        dMatrix3 I;
+        dRSetIdentity(I); // Set the rotation of the body to be the Identity (i.e. zero)
+        dBodySetRotation (bId1, I);
+
+        CHECK_CLOSE (0, dJointGetUniversalAngle1 (jId), 1e-4);
+        CHECK_CLOSE (0, dJointGetUniversalAngle2 (jId), 1e-4);
+
+
+        // Test the same rotation, when axis1 is inverted
+        dJointSetUniversalAxis1 (jId, -axis1[0], -axis1[1], -axis1[2]);
+
+        dBodySetRotation (bId1, R);
+
+        CHECK_CLOSE (-ang1, dJointGetUniversalAngle1 (jId), 1e-4);
+        CHECK_CLOSE (-ang2, dJointGetUniversalAngle2 (jId), 1e-4);
+
+        dJointGetUniversalAngles(jId, &angle1, &angle2);
+        CHECK_CLOSE (-ang1, angle1, 1e-4);
+        CHECK_CLOSE (-ang2, angle2, 1e-4);
+
+
+        // Test the same rotation, when axis1 is default and axis2 is inverted
+        dBodySetRotation (bId1, I);
+
+        dJointSetUniversalAxis1 (jId, axis1[0], axis1[1], axis1[2]);
+        dJointSetUniversalAxis2 (jId, -axis2[0], -axis2[1], -axis2[2]);
+
+
+        dBodySetRotation (bId1, R);
+
+        CHECK_CLOSE (ang1, dJointGetUniversalAngle1 (jId), 1e-4);
+        CHECK_CLOSE (ang2, dJointGetUniversalAngle2 (jId), 1e-4);
+
+        dJointGetUniversalAngles(jId, &angle1, &angle2);
+        CHECK_CLOSE (ang1, angle1, 1e-4);
+        CHECK_CLOSE (ang2, angle2, 1e-4);
+    }
+
+
+
+
+    // Test when there is only one body at position two on the joint
+    TEST_FIXTURE (Fixture_dxJointUniversal_B2_At_Zero_Default_Axes,
+                  test_dJointGetUniversalAngle1_1Body_B2)
+    {
+        CHECK_CLOSE (0, dJointGetUniversalAngle1 (jId), 1e-4);
+        CHECK_CLOSE (0, dJointGetUniversalAngle2 (jId), 1e-4);
+
+        dReal angle1, angle2;
+        dJointGetUniversalAngles(jId, &angle1, &angle2);
+        CHECK_CLOSE (0, angle1, 1e-4);
+        CHECK_CLOSE (0, angle2, 1e-4);
+
+        dVector3 axis1;
+        dJointGetUniversalAxis1 (jId, axis1);
+
+        dVector3 axis2;
+        dJointGetUniversalAxis2 (jId, axis2);
+
+        dMatrix3 R;
+
+        dReal ang1 = REAL(0.0);
+
+        dReal ang2 = REAL(0.23);
+        dRFromAxisAndAngle (R, axis2[0], axis2[1], axis2[2], ang2);
+        dBodySetRotation (bId2, R);
+
+
+
+        CHECK_CLOSE (ang1, dJointGetUniversalAngle1 (jId), 1e-4);
+        CHECK_CLOSE (-ang2, dJointGetUniversalAngle2 (jId), 1e-4);
+
+        dJointGetUniversalAngles(jId, &angle1, &angle2);
+        CHECK_CLOSE (ang1, angle1, 1e-4);
+        CHECK_CLOSE (-ang2, angle2, 1e-4);
+
+
+
+        dMatrix3 I;
+        dRSetIdentity(I); // Set the rotation of the body to be the Identity (i.e. zero)
+        dBodySetRotation (bId2, I);
+
+        CHECK_CLOSE (0, dJointGetUniversalAngle1 (jId), 1e-4);
+        CHECK_CLOSE (0, dJointGetUniversalAngle2 (jId), 1e-4);
+
+
+        dJointSetUniversalAxis2 (jId, -axis2[0], -axis2[1], -axis2[2]);
+
+        dBodySetRotation (bId2, R);
+
+        CHECK_CLOSE (-ang1, dJointGetUniversalAngle1 (jId), 1e-4);
+        CHECK_CLOSE (ang2, dJointGetUniversalAngle2 (jId), 1e-4);
+
+        dJointGetUniversalAngles(jId, &angle1, &angle2);
+        CHECK_CLOSE (-ang1, angle1, 1e-4);
+        CHECK_CLOSE (ang2, angle2, 1e-4);
+
+        // Test the same rotation, when axis1 is inverted and axis2 is default
+        dBodySetRotation (bId2, I);
+
+        dJointSetUniversalAxis1 (jId, -axis1[0], -axis1[1], -axis1[2]);
+        dJointSetUniversalAxis2 (jId, axis2[0], axis2[1], axis2[2]);
+
+
+        dBodySetRotation (bId2, R);
+
+        CHECK_CLOSE (ang1, dJointGetUniversalAngle1 (jId), 1e-4);
+        CHECK_CLOSE (-ang2, dJointGetUniversalAngle2 (jId), 1e-4);
+
+        dJointGetUniversalAngles(jId, &angle1, &angle2);
+        CHECK_CLOSE (ang1, angle1, 1e-4);
+        CHECK_CLOSE (-ang2, angle2, 1e-4);
+    }
+
+
+
+
+
+
+    // =========================================================================
+    //
+    // =========================================================================
+
+
     // Test is dJointSetUniversalAxis and dJointGetUniversalAxis return same value
-    TEST_FIXTURE (Fixture_dxJointUniversal_B1_and_B2_At_Zero_Axis_Along_X,
+    TEST_FIXTURE (Fixture_dxJointUniversal_B1_and_B2_At_Random_Axis_Along_X,
                   test_dJointSetGetUniversalAxis)
     {
         dVector3 axisOrig, axis;
@@ -154,7 +606,8 @@ SUITE (TestdxJointUniversal)
   //       |
   // Body1 |
   // *     Z-------->
-  struct dxJointUniversal_Test_Initialization {
+    struct dxJointUniversal_Test_Initialization
+    {
     dxJointUniversal_Test_Initialization()
     {
       wId = dWorldCreate();
@@ -162,7 +615,8 @@ SUITE (TestdxJointUniversal)
       // Remove gravity to have the only force be the force of the joint
       dWorldSetGravity(wId, 0,0,0);
 
-      for (int j=0; j<2; ++j) {
+            for (int j=0; j<2; ++j)
+            {
         bId[j][0] = dBodyCreate (wId);
         dBodySetPosition (bId[j][0], -1, -2, -3);
 
@@ -216,7 +670,8 @@ SUITE (TestdxJointUniversal)
   // Test if setting a Universal with its default values
   // will behave the same as a default Universal joint
   TEST_FIXTURE (dxJointUniversal_Test_Initialization,
-                test_Universal_Initialization) {
+                  test_Universal_Initialization)
+    {
     using namespace std;
 
     dVector3 axis;
@@ -231,7 +686,8 @@ SUITE (TestdxJointUniversal)
     dJointSetUniversalAnchor(jId[1], anchor[0], anchor[1], anchor[2]);
 
 
-    for (int b=0; b<2; ++b) {
+        for (int b=0; b<2; ++b)
+        {
       // Compare body b of the first joint with its equivalent on the
       // second joint
       const dReal *qA = dBodyGetQuaternion(bId[0][b]);
@@ -247,7 +703,8 @@ SUITE (TestdxJointUniversal)
     dWorldStep (wId,0.5);
     dWorldStep (wId,0.5);
 
-    for (int b=0; b<2; ++b) {
+        for (int b=0; b<2; ++b)
+        {
       // Compare body b of the first joint with its equivalent on the
       // second joint
       const dReal *qA = dBodyGetQuaternion(bId[0][b]);

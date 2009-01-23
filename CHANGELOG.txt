@@ -8,6 +8,12 @@ the rules for this file:
   * keep the format consistent (79 char width, M/D/Y date format).
 
 ------------------------------------------------------------------------------
+
+01/23/09 Remi Ricard (papaDoc)
+         * Fix problem with dJointGetUniversalAngle2 when the joint is attached to
+           only a body 2. The sign was inverted.
+         * Add unit test to verify for this problem
+
 01/21/09 Remi Ricard (papaDoc)
          * Fix bug reported by Tilman: dxJointPU::getInfo1 was setting twice the
            limit of limot1 to zero and not limot2
