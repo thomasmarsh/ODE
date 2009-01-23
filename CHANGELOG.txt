@@ -10,6 +10,10 @@ the rules for this file:
 ------------------------------------------------------------------------------
 
 01/23/09 Remi Ricard (papaDoc)
+         * Add new function dJointSetUniversalAxis1Offset and dJointSetUniversalAxis2Offset
+         * Add unittest for those funcitons.
+
+01/23/09 Remi Ricard (papaDoc)
          * Fix problem with dJointGetUniversalAngle2 when the joint is attached to
            only a body 2. The sign was inverted.
          * Add unit test to verify for this problem

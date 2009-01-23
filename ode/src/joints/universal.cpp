@@ -407,6 +407,68 @@ void dJointSetUniversalAxis1( dJointID j, dReal x, dReal y, dReal z )
     joint->computeInitialRelativeRotations();
 }
 
+void dJointSetUniversalAxis1Offset( dJointID j, dReal x, dReal y, dReal z,
+                                    dReal offset1, dReal offset2 )
+{
+    dxJointUniversal* joint = ( dxJointUniversal* )j;
+    dUASSERT( joint, "bad joint argument" );
+    checktype( joint, Universal );
+    if ( joint->flags & dJOINT_REVERSE )
+    {
+        setAxes( joint, x, y, z, NULL, joint->axis2 );
+        offset1 = -offset1;
+        offset2 = -offset2;
+    }
+    else
+        setAxes( joint, x, y, z, joint->axis1, NULL );
+
+    joint->computeInitialRelativeRotations();
+
+
+    dVector3 ax2;
+    getAxis2( joint, ax2, joint->axis2 );
+
+    {
+        dVector3 ax1;
+        joint->getAxes(ax1, ax2);
+    }
+
+
+
+    dQuaternion qAngle;
+    dQFromAxisAndAngle(qAngle, x, y, z, offset1);
+
+    dMatrix3 R;
+    dRFrom2Axes( R, x, y, z, ax2[0], ax2[1], ax2[2] );
+
+    dQuaternion qcross;
+    dRtoQ( R, qcross );
+
+    dQuaternion qOffset;
+    dQMultiply0(qOffset, qAngle, qcross);
+
+    dQMultiply1( joint->qrel1, joint->node[0].body->q, qOffset );
+
+    // Calculating the second offset
+    dQFromAxisAndAngle(qAngle, ax2[0], ax2[1], ax2[2], offset2);
+
+    dRFrom2Axes( R, ax2[0], ax2[1], ax2[2], x, y, z );
+    dRtoQ( R, qcross );
+
+    dQMultiply1(qOffset, qAngle, qcross);
+    if ( joint->node[1].body )
+    {
+        dQMultiply1( joint->qrel2, joint->node[1].body->q, qOffset );
+    }
+    else
+    {
+        joint->qrel2[0] = qcross[0];
+        joint->qrel2[1] = qcross[1];
+        joint->qrel2[2] = qcross[2];
+        joint->qrel2[3] = qcross[3];
+    }
+}
+
 
 void dJointSetUniversalAxis2( dJointID j, dReal x, dReal y, dReal z )
 {
@@ -418,6 +480,71 @@ void dJointSetUniversalAxis2( dJointID j, dReal x, dReal y, dReal z )
     else
         setAxes( joint, x, y, z, NULL, joint->axis2 );
     joint->computeInitialRelativeRotations();
+}
+
+void dJointSetUniversalAxis2Offset( dJointID j, dReal x, dReal y, dReal z,
+                                    dReal offset1, dReal offset2 )
+{
+    dxJointUniversal* joint = ( dxJointUniversal* )j;
+    dUASSERT( joint, "bad joint argument" );
+    checktype( joint, Universal );
+
+    if ( joint->flags & dJOINT_REVERSE )
+    {
+        setAxes( joint, x, y, z, joint->axis1, NULL );
+        offset1 = -offset2;
+        offset2 = -offset1;
+    }
+    else
+        setAxes( joint, x, y, z, NULL, joint->axis2 );
+
+
+    joint->computeInitialRelativeRotations();
+
+    // It is easier to retreive the 2 axes here since
+    // when there is only one body B2 (the axes switch position)
+    // Doing this way eliminate the need to write the code differently
+    // for both case.
+    dVector3 ax1, ax2;
+    joint->getAxes(ax1, ax2 );
+
+
+
+    dQuaternion qAngle;
+    dQFromAxisAndAngle(qAngle, ax1[0], ax1[1], ax1[2], offset1);
+
+    dMatrix3 R;
+    dRFrom2Axes( R, ax1[0], ax1[1], ax1[2], ax2[0], ax2[1], ax2[2]);
+
+    dQuaternion qcross;
+    dRtoQ( R, qcross );
+
+    dQuaternion qOffset;
+    dQMultiply0(qOffset, qAngle, qcross);
+
+
+
+    dQMultiply1( joint->qrel1, joint->node[0].body->q, qOffset );
+
+
+    // Calculating the second offset
+    dQFromAxisAndAngle(qAngle, ax2[0], ax2[1], ax2[2], offset2);
+
+    dRFrom2Axes( R, ax2[0], ax2[1], ax2[2], ax1[0], ax1[1], ax1[2]);
+    dRtoQ( R, qcross );
+
+    dQMultiply1(qOffset, qAngle, qcross);
+    if ( joint->node[1].body )
+    {
+        dQMultiply1( joint->qrel2, joint->node[1].body->q, qOffset );
+    }
+    else
+    {
+        joint->qrel2[0] = qcross[0];
+        joint->qrel2[1] = qcross[1];
+        joint->qrel2[2] = qcross[2];
+        joint->qrel2[3] = qcross[3];
+    }
 }
 
 
