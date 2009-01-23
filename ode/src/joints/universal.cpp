@@ -510,7 +510,11 @@ void dJointGetUniversalAngles( dJointID j, dReal *angle1, dReal *angle2 )
     dUASSERT( joint, "bad joint argument" );
     checktype( joint, Universal );
     if ( joint->flags & dJOINT_REVERSE )
-        return joint->getAngles( angle2, angle1 );
+    {
+        joint->getAngles( angle2, angle1 );
+        *angle2 = -(*angle2);
+        return;
+    }
     else
         return joint->getAngles( angle1, angle2 );
 }
@@ -534,7 +538,7 @@ dReal dJointGetUniversalAngle2( dJointID j )
     dUASSERT( joint, "bad joint argument" );
     checktype( joint, Universal );
     if ( joint->flags & dJOINT_REVERSE )
-        return joint->getAngle1();
+        return -joint->getAngle1();
     else
         return joint->getAngle2();
 }
