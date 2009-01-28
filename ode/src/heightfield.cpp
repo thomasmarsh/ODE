@@ -1738,11 +1738,11 @@ int dCollideHeightfield( dxGeom *o1, dxGeom *o2, int flags, dContactGeom* contac
     if ( !wrapped )
     {
         if (    o2->aabb[0] > terrain->m_p_data->m_fWidth //MinX
-            &&  o2->aabb[4] > terrain->m_p_data->m_fDepth)//MinZ
+            ||  o2->aabb[4] > terrain->m_p_data->m_fDepth)//MinZ
             goto dCollideHeightfieldExit;
 
         if (    o2->aabb[1] < 0 //MaxX
-            &&  o2->aabb[5] < 0) //MaxZ
+            ||  o2->aabb[5] < 0) //MaxZ
             goto dCollideHeightfieldExit;
 
     }
@@ -1759,7 +1759,7 @@ int dCollideHeightfield( dxGeom *o1, dxGeom *o2, int flags, dContactGeom* contac
         nMinZ = dMAX( nMinZ, 0 );
         nMaxZ = dMIN( nMaxZ, terrain->m_p_data->m_nDepthSamples - 1 );
 
-        dIASSERT ((nMinX < nMaxX) || (nMinZ < nMaxZ))		
+        dIASSERT ((nMinX < nMaxX) && (nMinZ < nMaxZ))		
     }
 
 

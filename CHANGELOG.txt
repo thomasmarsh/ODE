@@ -9,6 +9,9 @@ the rules for this file:
 
 ------------------------------------------------------------------------------
 
+01/28/09 Daniel K. O.
+        * Applied patch #2538046: Heightfield AABB bounds patch.
+
 01/23/09 Remi Ricard (papaDoc)
          * Add new function dJointSetUniversalAxis1Offset and dJointSetUniversalAxis2Offset
          * Add unittest for those funcitons.
