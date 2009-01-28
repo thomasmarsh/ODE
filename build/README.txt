@@ -1,40 +1,12 @@
-Premake-based Windows Build System
-Contributed by Jason Perkins (jason379@users.sourceforge.net)
--------------------------------------------------------------------
 
-
-ABOUT THESE FILES
-
- This folder contains an automatic project generation tool called
- Premake, available from http://premake.sourceforge.net/. The scripts
- used to build them have the ".lua" file extension. To regenerate the
- stock project files for inclusion in a new release, type:
-
-   premake --makeall
-
-
-CREATING CUSTOM PROJECT FILES
-
- To create a set of custom project files, first type `premake --help`
- to see the options that you have available. Then generate the new
- project files using the form:
-
-   premake [options] --target [toolset]
-
- For instance:
-
-   premake --no-trimesh --target vs2005
-
- To build the demo applications and Drawstuff library, use the form:
+ Due to the wide variety of platforms, environments, and tools used 
+ by the ODE community, solutions for specific tools are not included
+ with the source code. Instead, a tool called Premake is used to
+ generate appropriately configured files for your toolset and project.
  
-   premake --with-demos --target [toolset]
-   
- If you ever decide that you want to remove your custom project, you
- can just type:
+ For more information and instructions, see the ODE User Manual, and
+ the "Install and Use" page in particular.
 
-   premake --with-demos --clean
 
- Feel free to direct any questions or comments to myself or the ODE
- mailing list.
-
+   http://opende.sourceforge.net/wiki/index.php/Manual
 
