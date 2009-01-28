@@ -646,7 +646,7 @@ void testMassFunctions()
   printf ("\t");
   dMassSetZero (&m);
   TRAP_MESSAGE (dMassSetParameters (&m,10, 0.1,0.2,0.15, 3,5,14, 3.1,3.2,4),
-		printf (" passed (2)\n") , printf (" FAILED (2)\n"));
+		printf ("passed (2)\n") , printf (" FAILED (2)\n"));
   if (m.mass==10 && m.c[0]==REAL(0.1) && m.c[1]==REAL(0.2) &&
       m.c[2]==REAL(0.15) && m._I(0,0)==3 && m._I(1,1)==5 && m._I(2,2)==14 &&
       m._I(0,1)==REAL(3.1) && m._I(0,2)==REAL(3.2) && m._I(1,2)==4 &&
@@ -667,8 +667,8 @@ void testMassFunctions()
   dMassSetCapsule (&m,1.3,1,0.76,1.53);
   if (cmp(m.mass,5.99961928996029) && m.c[0]==0 && m.c[1]==0 && m.c[2]==0 &&
       cmp(m._I(0,0),1.59461986077384) &&
-      cmp(m._I(1,1),4.57537403079093) &&
-      cmp(m._I(2,2),4.57537403079093) &&
+      cmp(m._I(1,1),4.21878433864904) &&
+      cmp(m._I(2,2),4.21878433864904) &&
       m._I(0,1)==0 && m._I(0,2)==0 && m._I(1,2)==0 &&
       m._I(1,0)==0 && m._I(2,0)==0 && m._I(2,1)==0)
     printf ("\tpassed (5)\n"); else printf ("\tFAILED (5)\n");
