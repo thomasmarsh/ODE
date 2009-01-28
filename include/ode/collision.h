@@ -1040,7 +1040,7 @@ ODE_API dGeomID dCreateHeightfield( dSpaceID space,
  * dGeomHeightfieldDataBuildFloat.
  * @ingroup collide
  */
-ODE_API dHeightfieldDataID dGeomHeightfieldDataCreate();
+ODE_API dHeightfieldDataID dGeomHeightfieldDataCreate(void);
 
 
 /**
