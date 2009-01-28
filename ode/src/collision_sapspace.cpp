@@ -53,7 +53,7 @@
 struct RaixSortContext
 {
 public:
-	RaixSortContext(): mCurrentSize(0), mRanksValid(false), mRanks1(NULL), mRanks2(NULL) {}
+	RaixSortContext(): mCurrentNoElts(0), mCurrentSize(0), mRanksValid(false), mBuffer(NULL), mRanks1(NULL), mRanks2(NULL) {}
 	~RaixSortContext() { FreeRanks(); }
 
 	// OPCODE's Radix Sorting, returns a list of indices in sorted order
@@ -68,14 +68,17 @@ private:
 private:
 	inline void SetCurrentSize(size_t nValue) { mCurrentSize = nValue; }
 	inline size_t GetCurrentSize() const { return mCurrentSize; }
-
+	inline void SetCurrentNoElts(size_t nValue) { mCurrentNoElts = nValue; }
+	inline size_t GetCurrentNoElts() const { return mCurrentNoElts; }
 	inline bool AreRanksValid() const { return mRanksValid; }
 	inline void InvalidateRanks() { mRanksValid = false; }
 	inline void ValidateRanks() { mRanksValid = true; }
 
 private:
 	size_t mCurrentSize;						//!< Current size of the indices list
+	size_t mCurrentNoElts;						//!< Current number of elements in array
 	bool mRanksValid;
+	uint32* mBuffer;
 	uint32* mRanks1;							//!< Two lists, swapped each pass
 	uint32* mRanks2;
 };
@@ -84,8 +87,10 @@ void RaixSortContext::AllocateRanks(size_t nNewSize)
 {
 	dIASSERT(GetCurrentSize() == 0);
 
-	mRanks1 = new uint32[2 * nNewSize];
-	mRanks2	= mRanks1 + nNewSize;
+	mBuffer = new uint32[2 * nNewSize];
+
+	mRanks1 = mBuffer;
+	mRanks2	= mBuffer + nNewSize;
 
 	SetCurrentSize(nNewSize);
 }
@@ -94,26 +99,26 @@ void RaixSortContext::FreeRanks()
 {
 	SetCurrentSize(0);
 
-	delete[] mRanks1;
-	//delete[] mRanks2; -- mRanks2 points to the same buffer as mRanks1
+	delete[] mBuffer;
 }
 
-void RaixSortContext::ReallocateRanksIfNecessary(size_t nNewSize)
+void RaixSortContext::ReallocateRanksIfNecessary(size_t nNewNoElts)
 {
 	size_t nCurSize = GetCurrentSize();
-	
-	if (nNewSize != nCurSize)
+	size_t nCurNoElts = GetCurrentNoElts();
+	if (nNewNoElts != nCurNoElts)
 	{
-		if ( nNewSize > nCurSize )
+		if ( nNewNoElts > nCurSize )
 		{
 			// Free previously used ram
 			FreeRanks();
 
 			// Get some fresh one
-			AllocateRanks(nNewSize);
+			AllocateRanks(nNewNoElts);
 		}
 
 		InvalidateRanks();
+		SetCurrentNoElts(nNewNoElts);
 	}
 }
 
