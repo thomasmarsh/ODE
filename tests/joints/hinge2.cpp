@@ -60,18 +60,18 @@ SUITE (TestdxJointHinge2)
         dMatrix3 R;
         dVector3 axis; // Random axis
 
-        axis[0] = 0.53;
-        axis[1] = -0.71;
-        axis[2] = 0.43;
+        axis[0] =  REAL(0.53);
+        axis[1] = -REAL(0.71);
+        axis[2] =  REAL(0.43);
         dNormalize3(axis);
         dRFromAxisAndAngle (R, axis[0], axis[1], axis[2],
                             REAL(0.47123)); // 27deg
         dBodySetRotation (bId[j][0], R);
 
 
-        axis[0] = 1.2;
-        axis[1] = 0.87;
-        axis[2] = -0.33;
+        axis[0] =  REAL(1.2);
+        axis[1] =  REAL(0.87);
+        axis[2] = -REAL(0.33);
         dNormalize3(axis);
         dRFromAxisAndAngle (R, axis[0], axis[1], axis[2],
                             REAL(0.47123)); // 27deg
