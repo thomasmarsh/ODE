@@ -9,6 +9,11 @@ the rules for this file:
 
 ------------------------------------------------------------------------------
 
+01/29/09 Remi Ricard (papaDoc)
+        * Fix bug: Fix problem when attaching no body to a joint. Before calling
+          setRelativeValues a check is made for bodies.
+        * Add unittest
+
 01/28/09 Daniel K. O.
         * Applied patch #2538046: Heightfield AABB bounds patch.
 
