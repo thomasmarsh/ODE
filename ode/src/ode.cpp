@@ -1390,8 +1390,10 @@ void dJointAttach (dxJoint *joint, dxBody *body1, dxBody *body2)
   }
 
   // Since the bodies are now set.
-  // Calculate the values depending on the bodies
-  joint->setRelativeValues();
+  // Calculate the values depending on the bodies.
+  // Only need to calculate relative value if a body exist
+  if (body1 || body2)
+    joint->setRelativeValues();
 }
 
 void dJointEnable (dxJoint *joint)
