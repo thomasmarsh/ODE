@@ -2975,4 +2975,73 @@ SUITE(JointPiston)
         CHECK_EQUAL(REAL(0.0), dJointGetPistonPositionRate (jId) );
     }
 
+
+
+    struct Fixture_Simple_Hinge
+    {
+        Fixture_Simple_Hinge ()
+        {
+            wId = dWorldCreate();
+
+            bId1 = dBodyCreate(wId);
+            dBodySetPosition(bId1, 0, -1, 0);
+
+            bId2 = dBodyCreate(wId);
+            dBodySetPosition(bId2, 0, 1, 0);
+
+
+            jId = dJointCreateHinge(wId, 0);
+
+            dJointAttach(jId, bId1, bId2);
+        }
+
+        ~Fixture_Simple_Hinge()
+        {
+            dWorldDestroy(wId);
+        }
+
+        dJointID jId;
+
+        dWorldID wId;
+
+        dBodyID bId1;
+        dBodyID bId2;
+    };
+
+    // Test that it is possible to have joint without a body
+    TEST_FIXTURE(Fixture_Simple_Hinge, test_dJointAttach)
+    {
+        bool only_body1_OK = true;
+        try {
+            dJointAttach(jId, bId1, 0);
+            dWorldStep (wId, 1);
+        }
+        catch (...) {
+            only_body1_OK = false;
+        }
+        CHECK_EQUAL(true, only_body1_OK);
+
+        bool only_body2_OK = true;
+        try {
+            dJointAttach(jId, 0, bId2);
+            dWorldStep (wId, 1);
+        }
+        catch (...) {
+            only_body2_OK = false;
+        }
+        CHECK_EQUAL(true, only_body2_OK);
+
+        bool no_body_OK = true;
+        try {
+            dJointAttach(jId, 0, 0);
+            dWorldStep (wId, 1);
+        }
+        catch (...) {
+            no_body_OK = false;
+        }
+        CHECK_EQUAL(true, no_body_OK);
+    }
+
+
+
 } // End of SUITE(JointPiston)
