@@ -109,18 +109,18 @@ SUITE (TestdxJointUniversal)
 
             dVector3 axis;
 
-            axis[0] = 0.53;
-            axis[1] = -0.71;
-            axis[2] = 0.43;
+            axis[0] =  REAL(0.53);
+            axis[1] = -REAL(0.71);
+            axis[2] =  REAL(0.43);
             dNormalize3(axis);
             dRFromAxisAndAngle (R, axis[0], axis[1], axis[2],
                                 REAL(0.47123)); // 27deg
             dBodySetRotation (bId1, R);
 
 
-            axis[0] = 1.2;
-            axis[1] = 0.87;
-            axis[2] = -0.33;
+            axis[0] =  REAL(1.2);
+            axis[1] =  REAL(0.87);
+            axis[2] = -REAL(0.33);
             dNormalize3(axis);
             dRFromAxisAndAngle (R, axis[0], axis[1], axis[2],
                                 REAL(0.47123)); // 27deg
@@ -280,15 +280,15 @@ SUITE (TestdxJointUniversal)
 
         // ax1 and ax2 are pseudo-random axis. N.B. They are NOT the axis of the joints.
         dVector3 ax1;
-        ax1[0] = 0.2;
-        ax1[1] = -0.67;
-        ax1[2] = -0.81;
+        ax1[0] =  REAL(0.2);
+        ax1[1] = -REAL(0.67);
+        ax1[2] = -REAL(0.81);
         dNormalize3(ax1);
 
         dVector3 ax2;
-        ax2[0] = 0.62;
-        ax2[1] = 0.31;
-        ax2[2] = 0.43;
+        ax2[0] = REAL(0.62);
+        ax2[1] = REAL(0.31);
+        ax2[2] = REAL(0.43);
         dNormalize3(ax2);
 
 
@@ -333,14 +333,14 @@ SUITE (TestdxJointUniversal)
         dBodySetRotation (bId1, R);
         dBodySetRotation (bId1, R);
 
-        axis1[0] = 0.32;
-        axis1[1] = -0.57;
-        axis1[2] = 0.71;
+        axis1[0] =  REAL(0.32);
+        axis1[1] = -REAL(0.57);
+        axis1[2] =  REAL(0.71);
         dNormalize3(axis1);
 
-        axis2[0] = 0.-26;
-        axis2[1] = -0.31;
-        axis2[2] = 0.69;
+        axis2[0] = -REAL(0.26);
+        axis2[1] = -REAL(0.31);
+        axis2[2] =  REAL(0.69);
         dNormalize3(axis2);
 
         dVector3 cross;
@@ -627,18 +627,18 @@ SUITE (TestdxJointUniversal)
                 dMatrix3 R;
                 dVector3 axis; // Random axis
 
-                axis[0] = 0.53;
-                axis[1] = -0.71;
-                axis[2] = 0.43;
+                axis[0] =  REAL(0.53);
+                axis[1] = -REAL(0.71);
+                axis[2] =  REAL(0.43);
                 dNormalize3(axis);
                 dRFromAxisAndAngle (R, axis[0], axis[1], axis[2],
                                     REAL(0.47123)); // 27deg
                 dBodySetRotation (bId[j][0], R);
 
 
-                axis[0] = 1.2;
-                axis[1] = 0.87;
-                axis[2] = -0.33;
+                axis[0] =  REAL(1.2);
+                axis[1] =  REAL(0.87);
+                axis[2] = -REAL(0.33);
                 dNormalize3(axis);
                 dRFromAxisAndAngle (R, axis[0], axis[1], axis[2],
                                     REAL(0.47123)); // 27deg
@@ -2020,15 +2020,15 @@ SUITE (TestdxJointUniversal)
             dJointAttach (jId, bId1, bId2);
 
             dVector3 axis1;
-            axis1[0] = 0.53;
-            axis1[1] = -0.71;
-            axis1[2] = 0.43;
+            axis1[0] =  REAL(0.53);
+            axis1[1] = -REAL(0.71);
+            axis1[2] =  REAL(0.43);
             dNormalize3(axis1);
 
             dVector3 axis;
-            axis[0] = 1.2;
-            axis[1] = 0.87;
-            axis[2] = -0.33;
+            axis[0] =  REAL(1.2);
+            axis[1] =  REAL(0.87);
+            axis[2] = -REAL(0.33);
 
             dVector3 axis2;
             dCROSS(axis2, =, axis1, axis);
