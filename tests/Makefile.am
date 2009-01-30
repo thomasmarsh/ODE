@@ -20,6 +20,5 @@ tests_SOURCES = main.cpp joint.cpp odemath.cpp collision.cpp \
                 joints/pr.cpp \
                 joints/pu.cpp \
                 joints/slider.cpp \
-                joints/universal.cpp \
-                mass.cpp
+                joints/universal.cpp
 
