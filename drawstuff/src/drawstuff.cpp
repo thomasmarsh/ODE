@@ -734,8 +734,6 @@ static void drawCapsule (float l, float r)
     start_nx = start_nx2;
     start_ny = start_ny2;
   }
-
-  glPopMatrix();
 }
 
 
