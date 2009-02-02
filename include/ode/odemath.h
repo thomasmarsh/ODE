@@ -51,22 +51,26 @@
  * General purpose vector operations with other vectors or constants.
  */
 
-#define dOP(a,op,b,c) \
+#define dOP(a,op,b,c) do { \
     (a)[0] = ((b)[0]) op ((c)[0]); \
     (a)[1] = ((b)[1]) op ((c)[1]); \
-    (a)[2] = ((b)[2]) op ((c)[2]);
-#define dOPC(a,op,b,c) \
+    (a)[2] = ((b)[2]) op ((c)[2]); \
+    } while (0)
+#define dOPC(a,op,b,c) do { \
     (a)[0] = ((b)[0]) op (c); \
     (a)[1] = ((b)[1]) op (c); \
-    (a)[2] = ((b)[2]) op (c);
-#define dOPE(a,op,b) \
+    (a)[2] = ((b)[2]) op (c); \
+    } while (0)
+#define dOPE(a,op,b) do {\
     (a)[0] op ((b)[0]); \
     (a)[1] op ((b)[1]); \
-    (a)[2] op ((b)[2]);
-#define dOPEC(a,op,c) \
+    (a)[2] op ((b)[2]); \
+    } while (0)
+#define dOPEC(a,op,c) do { \
     (a)[0] op (c); \
     (a)[1] op (c); \
-    (a)[2] op (c);
+    (a)[2] op (c); \
+    } while (0)
 
 /// Define an equation with operatos
 /// For example this function can be used to replace
@@ -74,10 +78,11 @@
 /// for (int i=0; i<3; ++i)
 ///   a[i] += b[i] + c[i];
 /// </PRE>
-#define dOPE2(a,op1,b,op2,c) \
+#define dOPE2(a,op1,b,op2,c) do { \
     (a)[0] op1 ((b)[0]) op2 ((c)[0]); \
     (a)[1] op1 ((b)[1]) op2 ((c)[1]); \
-    (a)[2] op1 ((b)[2]) op2 ((c)[2]);
+    (a)[2] op1 ((b)[2]) op2 ((c)[2]); \
+    } while (0)
 
 /*
  * Length, and squared length helpers. dLENGTH returns the length of a dVector3.
