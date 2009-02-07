@@ -8,6 +8,8 @@ the rules for this file:
   * keep the format consistent (79 char width, M/D/Y date format).
 
 ------------------------------------------------------------------------------
+02/07/09 Daniel K. O.
+        * New house of cards demo, which stresses the friction handling stability.
 
 01/29/09 Remi Ricard (papaDoc)
         * Fix bug: Fix problem when attaching no body to a joint. Before calling

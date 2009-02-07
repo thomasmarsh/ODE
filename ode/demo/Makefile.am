@@ -14,6 +14,7 @@ noinst_HEADERS = basket_geom.h texturepath.h world_geom3.h bunny_geom.h convex_b
 noinst_PROGRAMS = \
                 demo_boxstack \
                 demo_buggy \
+                demo_cards
                 demo_chain1 \
                 demo_chain2 \
                 demo_collision \
@@ -42,6 +43,7 @@ noinst_PROGRAMS = \
 
 demo_boxstack_SOURCES = demo_boxstack.cpp
 demo_buggy_SOURCES = demo_buggy.cpp
+demo_cards_SOURCES = demo_cards.cpp
 demo_chain1_SOURCES = demo_chain1.c
 demo_chain1_LDADD = $(LDADD) -lstdc++ 
 demo_chain2_SOURCES = demo_chain2.cpp

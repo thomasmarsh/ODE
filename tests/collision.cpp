@@ -9,6 +9,7 @@ TEST(test_collision_trimesh_sphere)
      */
 
     dInitODE();
+
     {
         const int VertexCount = 4;
         const int IndexCount = 2*3;
