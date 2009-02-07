@@ -12,6 +12,7 @@
   local demos = {
     "boxstack",
     "buggy",
+    "cards",
     "chain1",
     "chain2",
     "collision",
