@@ -14,7 +14,7 @@ noinst_HEADERS = basket_geom.h texturepath.h world_geom3.h bunny_geom.h convex_b
 noinst_PROGRAMS = \
                 demo_boxstack \
                 demo_buggy \
-                demo_cards
+                demo_cards \
                 demo_chain1 \
                 demo_chain2 \
                 demo_collision \
