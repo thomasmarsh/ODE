@@ -4,6 +4,13 @@ AM_CPPFLAGS = -I $(srcdir)/UnitTest++/src \
               -I $(top_srcdir)/include \
               -I $(top_srcdir)/ode/src
 
+if GIMPACT
+    AM_CPPFLAGS += -DdTRIMESH_ENABLED -DdTRIMESH_GIMPACT
+endif
+if OPCODE
+    AM_CPPFLAGS += -DdTRIMESH_ENABLED -DdTRIMESH_OPCODE
+endif
+
 LDADD = $(builddir)/UnitTest++/src/libunittestpp.la \
         $(top_builddir)/ode/src/libode.la
 
