@@ -53,7 +53,7 @@
 struct RaixSortContext
 {
 public:
-	RaixSortContext(): mCurrentSize(0), mCurrentUtilization(0), mRanksValid(false), mRanks1(NULL), mRanks2(NULL) {}
+	RaixSortContext(): mCurrentSize(0), mCurrentUtilization(0), mRanksValid(false), mRanksBuffer(NULL), mPrimaryRanks(NULL) {}
 	~RaixSortContext() { FreeRanks(); }
 
 	// OPCODE's Radix Sorting, returns a list of indices in sorted order
@@ -72,6 +72,10 @@ private:
     void SetCurrentUtilization(size_t nValue) { mCurrentUtilization = nValue; }
     size_t GetCurrentUtilization() const { return mCurrentUtilization; }
 
+	uint32 *GetRanks1() const { return mPrimaryRanks; }
+	uint32 *GetRanks2() const { return mRanksBuffer + ((mRanksBuffer + mCurrentSize) - mPrimaryRanks); }
+	void SwapRanks() { mPrimaryRanks = GetRanks2(); }
+
 	bool AreRanksValid() const { return mRanksValid; }
 	void InvalidateRanks() { mRanksValid = false; }
 	void ValidateRanks() { mRanksValid = true; }
@@ -80,16 +84,16 @@ private:
 	size_t mCurrentSize;						//!< Current size of the indices list
     size_t mCurrentUtilization;					//!< Current utilization of the indices list
 	bool mRanksValid;
-	uint32* mRanks1;							//!< Two lists, swapped each pass
-	uint32* mRanks2;
+	uint32* mRanksBuffer;						//!< Two lists allocated sequentially in a single block
+	uint32* mPrimaryRanks;
 };
 
 void RaixSortContext::AllocateRanks(size_t nNewSize)
 {
 	dIASSERT(GetCurrentSize() == 0);
 
-	mRanks1 = new uint32[2 * nNewSize];
-	mRanks2	= mRanks1 + nNewSize;
+	mRanksBuffer = new uint32[2 * nNewSize];
+	mPrimaryRanks = mRanksBuffer;
 
 	SetCurrentSize(nNewSize);
 }
@@ -98,8 +102,7 @@ void RaixSortContext::FreeRanks()
 {
 	SetCurrentSize(0);
 
-	delete[] mRanks1;
-	//delete[] mRanks2; -- mRanks2 points to the same buffer as mRanks1
+	delete[] mRanksBuffer;
 }
 
 void RaixSortContext::ReallocateRanksIfNecessary(size_t nNewSize)
@@ -650,14 +653,17 @@ const uint32* RaixSortContext::RadixSort( const float* input2, uint32 nb )
 			/* coherence, for example when used to sort transparent faces.					*/
 			if(AlreadySorted)
 			{
-				for(uint32 i=0;i<nb;i++)	mRanks1[i] = i;
-				return mRanks1;
+				uint32* const Ranks1 = GetRanks1();
+				for(uint32 i=0;i<nb;i++)	Ranks1[i] = i;
+				return Ranks1;
 			}
 		}
 		else
 		{
 			/* Prepare for temporal coherence */
-			uint32* Indices = mRanks1;
+			uint32* const Ranks1 = GetRanks1();
+
+			uint32* Indices = Ranks1;
 			float PrevVal = (float)input2[*Indices];
 
 			while(p!=pe)
@@ -676,7 +682,7 @@ const uint32* RaixSortContext::RadixSort( const float* input2, uint32 nb )
 			/* If all input values are already sorted, we just have to return and leave the */
 			/* previous list unchanged. That way the routine may take advantage of temporal */
 			/* coherence, for example when used to sort transparent faces.					*/
-			if(AlreadySorted)	{ return mRanks1;	}
+			if(AlreadySorted)	{ return Ranks1;	}
 		}
 
 		/* Else there has been an early out and we must finish computing the histograms */
@@ -707,8 +713,9 @@ const uint32* RaixSortContext::RadixSort( const float* input2, uint32 nb )
 
 			if(PerformPass)
 			{
+				uint32* const Ranks2 = GetRanks2();
 				// Create offsets
-				mLink[0] = mRanks2;
+				mLink[0] = Ranks2;
 				for(uint32 i=1;i<256;i++)		mLink[i] = mLink[i-1] + CurCount[i-1];
 
 				// Perform Radix Sort
@@ -725,8 +732,10 @@ const uint32* RaixSortContext::RadixSort( const float* input2, uint32 nb )
 				}
 				else
 				{
-					uint32* Indices		= mRanks1;
-					uint32* IndicesEnd	= &mRanks1[nb];
+					uint32* const Ranks1 = GetRanks1();
+
+					uint32* Indices				= Ranks1;
+					uint32* const IndicesEnd	= Ranks1 + nb;
 					while(Indices!=IndicesEnd)
 					{
 						uint32 id = *Indices++;
@@ -735,7 +744,7 @@ const uint32* RaixSortContext::RadixSort( const float* input2, uint32 nb )
 				}
 
 				// Swap pointers for next pass. Valid indices - the most recent ones - are in mRanks after the swap.
-				uint32* Tmp	= mRanks1;	mRanks1 = mRanks2; mRanks2 = Tmp;
+				SwapRanks();
 			}
 		}
 		else
@@ -745,12 +754,14 @@ const uint32* RaixSortContext::RadixSort( const float* input2, uint32 nb )
 
 			if(PerformPass)
 			{
+				uint32* const Ranks2 = GetRanks2();
+
 				// Create biased offsets, in order for negative numbers to be sorted as well
-				mLink[0] = &mRanks2[NbNegativeValues];										// First positive number takes place after the negative ones
+				mLink[0] = Ranks2 + NbNegativeValues;										// First positive number takes place after the negative ones
 				for(uint32 i=1;i<128;i++)		mLink[i] = mLink[i-1] + CurCount[i-1];		// 1 to 128 for positive numbers
 
 				// We must reverse the sorting order for negative numbers!
-				mLink[255] = mRanks2;
+				mLink[255] = Ranks2;
 				for(uint32 i=0;i<127;i++)	mLink[254-i] = mLink[255-i] + CurCount[255-i];		// Fixing the wrong order for negative values
 				for(uint32 i=128;i<256;i++)	mLink[i] += CurCount[i];							// Fixing the wrong place for negative values
 
@@ -769,16 +780,18 @@ const uint32* RaixSortContext::RadixSort( const float* input2, uint32 nb )
 				}
 				else
 				{
+					uint32* const Ranks1 = GetRanks1();
+
 					for(uint32 i=0;i<nb;i++)
 					{
-						uint32 Radix = input[mRanks1[i]]>>24;							// Radix byte, same as above. AND is useless here (uint32).
+						uint32 Radix = input[Ranks1[i]]>>24;							// Radix byte, same as above. AND is useless here (uint32).
 						// ### cmp to be killed. Not good. Later.
-						if(Radix<128)		*mLink[Radix]++ = mRanks1[i];		// Number is positive, same as above
-						else				*(--mLink[Radix]) = mRanks1[i];		// Number is negative, flip the sorting order
+						if(Radix<128)		*mLink[Radix]++ = Ranks1[i];		// Number is positive, same as above
+						else				*(--mLink[Radix]) = Ranks1[i];		// Number is negative, flip the sorting order
 					}
 				}
 				// Swap pointers for next pass. Valid indices - the most recent ones - are in mRanks after the swap.
-				uint32* Tmp	= mRanks1;	mRanks1 = mRanks2; mRanks2 = Tmp;
+				SwapRanks();
 			}
 			else
 			{
@@ -787,27 +800,31 @@ const uint32* RaixSortContext::RadixSort( const float* input2, uint32 nb )
 				{
 					if (!AreRanksValid())
 					{
+						uint32* const Ranks2 = GetRanks2();
 						// ###Possible?
 						for(uint32 i=0;i<nb;i++)
 						{
-							mRanks2[i] = nb-i-1;
+							Ranks2[i] = nb-i-1;
 						}
 
 						ValidateRanks();
 					}
 					else
 					{
-						for(uint32 i=0;i<nb;i++)	mRanks2[i] = mRanks1[nb-i-1];
+						uint32* const Ranks1 = GetRanks1();
+						uint32* const Ranks2 = GetRanks2();
+						for(uint32 i=0;i<nb;i++)	Ranks2[i] = Ranks1[nb-i-1];
 					}
 
 					// Swap pointers for next pass. Valid indices - the most recent ones - are in mRanks after the swap.
-					uint32* Tmp	= mRanks1;	mRanks1 = mRanks2; mRanks2 = Tmp;
+					SwapRanks();
 				}
 			}
 		}
 	}
 
 	// Return indices
-	return mRanks1;
+	uint32* const Ranks1 = GetRanks1();
+	return Ranks1;
 }
 
