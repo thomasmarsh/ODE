@@ -62,7 +62,7 @@ public:
 		MANUAL_DATA_CLEANUP = 0x00000001,
 	};
 
-	static bool Initialize(unsigned uFlags=0);
+	static bool Initialize(unsigned uiInitFlags=0);
 	static void Finalize();
 
 	static void CleanupForThread();
@@ -115,6 +115,7 @@ private:
 
 private:
 	static HTLSKEY				m_htkStorageKey;
+	static unsigned				m_uiInitFlags;
 };
 
 

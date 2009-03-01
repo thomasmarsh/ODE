@@ -44,21 +44,30 @@ ODE Thread Local Storage access stub implementation.
 // Class static fields
 
 HTLSKEY COdeTls::m_htkStorageKey = 0;
+unsigned COdeTls::m_uiInitFlags = 0;
 
 
 //////////////////////////////////////////////////////////////////////////
 // Initialization and finalization
 
-bool COdeTls::Initialize(unsigned uFlags/*=0*/)
+bool COdeTls::Initialize(unsigned uiInitFlags/*=0*/)
 {
+	bool bResult = false;
+
 	unsigned uOUFlags = 0;
 
-	if (uFlags & MANUAL_DATA_CLEANUP)
+	if (uiInitFlags & MANUAL_DATA_CLEANUP)
 	{
 		uOUFlags |= CTLSInitialization::SIF_MANUAL_CLEANUP_ON_THREAD_EXIT;
 	}
 
-	bool bResult = CTLSInitialization::InitializeTLSAPI(m_htkStorageKey, OTI__MAX, uOUFlags);
+	if (CTLSInitialization::InitializeTLSAPI(m_htkStorageKey, OTI__MAX, uOUFlags))
+	{
+		m_uiInitFlags = uiInitFlags;
+
+		bResult = true;
+	}
+
 	return bResult;
 }
 
@@ -66,13 +75,21 @@ void COdeTls::Finalize()
 {
 	CTLSInitialization::FinalizeTLSAPI();
 
+	m_uiInitFlags = 0;
 	m_htkStorageKey = 0;
 }
 
 
 void COdeTls::CleanupForThread()
 {
-	CTLSInitialization::CleanupOnThreadExit();
+	if (m_uiInitFlags & MANUAL_DATA_CLEANUP)
+	{
+		CTLSInitialization::CleanupOnThreadExit();
+	}
+	else
+	{
+		dIASSERT(false); // The class is not intended to be cleaned up manually
+	}
 }
 
 
