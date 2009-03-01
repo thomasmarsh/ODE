@@ -37,6 +37,13 @@ ODE initialization/finalization code
 
 
 //****************************************************************************
+// Initialization tracking variables
+
+static bool g_bODEInitialized = false;
+static unsigned g_uiODEInitFlags = 0;
+
+
+//****************************************************************************
 // Thread local data allocators and providers
 
 #if dTLS_ENABLED
@@ -100,12 +107,15 @@ static void FreeThreadBasicDataOnFailureIfNecessary()
 {
 #if dTLS_ENABLED
 
-	const unsigned uDataAllocationFlags = COdeTls::GetDataAllocationFlags();
-
-	if (uDataAllocationFlags == 0)
+	if (g_uiODEInitFlags & dInitFlagManualThreadCleanup)
 	{
-		// So far, only free TLS slot, if no subsystems have data allocated
-		COdeTls::CleanupForThread();
+		const unsigned uDataAllocationFlags = COdeTls::GetDataAllocationFlags();
+
+		if (uDataAllocationFlags == 0)
+		{
+			// So far, only free TLS slot, if no subsystems have data allocated
+			COdeTls::CleanupForThread();
+		}
 	}
 
 #endif // #if dTLS_ENABLED
@@ -224,8 +234,6 @@ static void FreeThreadCollisionData()
 // initialization and shutdown routines - allocate and initialize data,
 // cleanup before exiting
 
-static bool g_bODEInitialized = false;
-
 void dInitODE()
 {
 	int bInitResult = dInitODE2(0);
@@ -306,6 +314,7 @@ int dInitODE2(unsigned int uiInitFlags/*=0*/)
 
 		dInitColliders();
 
+		g_uiODEInitFlags = uiInitFlags;
 		g_bODEInitialized = true;
 		bResult = true;
 	}
@@ -394,6 +403,7 @@ void dCloseODE()
 	dIASSERT(g_bODEInitialized); // dCloseODE must not be called without dInitODEEx or if dInitODEEx fails
 
 	g_bODEInitialized = false;
+	g_uiODEInitFlags = 0;
 
 	dClearPosrCache();
 	dFinitUserClasses();
