@@ -102,14 +102,9 @@
 		#include "OPC_PlanesCollider.h"
 		// Usages
 		#include "OPC_Picking.h"
-		// Sweep-and-prune
-		#include "OPC_BoxPruning.h"
-		#include "OPC_SweepAndPrune.h"
-
-		#include "OPC_ThreadLocalData.h"
 
 
-		FUNCTION OPCODE_API bool InitOpcode(ThreadLocalDataProviderProc pfnThreadLocalDataProvider=NULL);
+		FUNCTION OPCODE_API bool InitOpcode();
 		FUNCTION OPCODE_API bool CloseOpcode();
 	}
 

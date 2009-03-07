@@ -43,31 +43,6 @@ static bool g_bODEInitialized = false;
 static unsigned g_uiODEInitFlags = 0;
 
 
-//****************************************************************************
-// Thread local data allocators and providers
-
-#if dTLS_ENABLED
-#if dTRIMESH_ENABLED 
-
-#if dTRIMESH_OPCODE
-
-static Opcode::ThreadLocalData *ProvideOpcodeThreadLocalData()
-{
-	Opcode::ThreadLocalData *pldOpcodeData = (Opcode::ThreadLocalData *)COdeTls::GetTrimeshCollisionLibraryData();
-	return pldOpcodeData;
-}
-
-#endif // dTRIMESH_OPCODE
-
-#if dTRIMESH_GIMPACT
-
-// No thread local data provider for GIMPACT
-
-#endif // dTRIMESH_GIMPACT
-
-#endif // dTRIMESH_ENABLED
-#endif // dTLS_ENABLED
-
 
 enum
 {
@@ -126,8 +101,6 @@ static bool AllocateThreadCollisionData()
 {
 	bool bResult = false;
 
-	bool bCollidersCacheAllocated = false, bCollisionLibraryDataAllocated = false;
-
 	do
 	{
 		dIASSERT(!(COdeTls::GetDataAllocationFlags() & TLD_INTERNAL_COLLISIONDATA_ALLOCATED));
@@ -141,27 +114,6 @@ static bool AllocateThreadCollisionData()
 			break;
 		}
 
-		bCollidersCacheAllocated = true;
-
-#if dTRIMESH_OPCODE
-
-		Opcode::ThreadLocalData *pldOpcodeData = new Opcode::ThreadLocalData();
-		if (!COdeTls::AssignTrimeshCollisionLibraryData((void *)pldOpcodeData))
-		{
-			delete pldOpcodeData;
-			break;
-		}
-
-#endif // dTRIMESH_OPCODE
-
-#if dTRIMESH_GIMPACT
-
-		// N thread local data for GIMPACT
-
-#endif // dTRIMESH_GIMPACT
-
-		bCollisionLibraryDataAllocated = true;
-
 #endif // dTRIMESH_ENABLED
 
 		COdeTls::SignalDataAllocationFlags(TLD_INTERNAL_COLLISIONDATA_ALLOCATED);
@@ -170,19 +122,6 @@ static bool AllocateThreadCollisionData()
 	}
 	while (false);
 
-	if (!bResult)
-	{
-		if (bCollisionLibraryDataAllocated)
-		{
-			COdeTls::DestroyTrimeshCollisionLibraryData();
-		}
-
-		if (bCollidersCacheAllocated)
-		{
-			COdeTls::DestroyTrimeshCollidersCache();
-		}
-	}
-	
 	return bResult;
 }
 #endif // dTLS_ENABLED
@@ -221,7 +160,6 @@ static void FreeThreadCollisionData()
 {
 #if dTLS_ENABLED
 
-	COdeTls::DestroyTrimeshCollisionLibraryData();
 	COdeTls::DestroyTrimeshCollidersCache();
 
 	COdeTls::DropDataAllocationFlags(TLD_INTERNAL_COLLISIONDATA_ALLOCATED);
@@ -296,13 +234,7 @@ int dInitODE2(unsigned int uiInitFlags/*=0*/)
 #endif
 		
 #if dTRIMESH_ENABLED && dTRIMESH_OPCODE
-		Opcode::ThreadLocalDataProviderProc pfnOpcodeDataProviderProc;
-#if dTLS_ENABLED
-		pfnOpcodeDataProviderProc = &ProvideOpcodeThreadLocalData;
-#else // dTLS_ENABLED
-		pfnOpcodeDataProviderProc = NULL;
-#endif // dTLS_ENABLED
-		if (!Opcode::InitOpcode(pfnOpcodeDataProviderProc))
+		if (!Opcode::InitOpcode())
 		{
 			break;
 		}

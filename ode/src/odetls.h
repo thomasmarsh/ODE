@@ -48,7 +48,6 @@ enum EODETLSITEM
 {
 	OTI_DATA_ALLOCATION_FLAGS,
 	OTI_TRIMESH_TRIMESH_COLLIDER_CACHE,
-	OTI_TRIMESH_COLLISION_LIBRARY_DATA,
 
 	OTI__MAX,
 };
@@ -91,27 +90,17 @@ public:
 		return (TrimeshCollidersCache *)CThreadLocalStorage::UnsafeGetStorageValue(m_htkStorageKey, OTI_TRIMESH_TRIMESH_COLLIDER_CACHE);
 	}
 
-	static void *GetTrimeshCollisionLibraryData()
-	{
-		return (void *)CThreadLocalStorage::UnsafeGetStorageValue(m_htkStorageKey, OTI_TRIMESH_COLLISION_LIBRARY_DATA);
-	}
-
 public:
 	static bool AssignDataAllocationFlags(unsigned uInitializationFlags);
 
 	static bool AssignTrimeshCollidersCache(TrimeshCollidersCache *pccInstance);
 	static void DestroyTrimeshCollidersCache();
 
-	static bool AssignTrimeshCollisionLibraryData(void *pv_DataInstance);
-	static void DestroyTrimeshCollisionLibraryData();
-
 private:
 	static void FreeTrimeshCollidersCache(TrimeshCollidersCache *pccCacheInstance);
-	static void FreeTrimeshCollisionLibraryData(void *pv_DataInstance);
 
 private:
 	static void _OU_CONVENTION_CALLBACK FreeTrimeshCollidersCache_Callback(tlsvaluetype vValueData);
-	static void _OU_CONVENTION_CALLBACK FreeTrimeshCollisionLibraryData_Callback(tlsvaluetype vValueData);
 
 private:
 	static HTLSKEY				m_htkStorageKey;

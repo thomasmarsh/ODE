@@ -8,6 +8,12 @@ the rules for this file:
   * keep the format consistent (79 char width, M/D/Y date format).
 
 ------------------------------------------------------------------------------
+03/07/09 Oleh Derevenko
+
+        * Thread local data has been cleaned up from OPCODE and OdeTls as it is
+          not used (OPC_SweepAndPrune.* and OPC_BoxPruning.* have been removed
+          - rebuilding project files is necessary).
+
 02/07/09 Daniel K. O.
         * New house of cards demo, which stresses the friction handling stability.
 
