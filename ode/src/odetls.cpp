@@ -124,60 +124,12 @@ void COdeTls::DestroyTrimeshCollidersCache()
 }
 
 
-bool COdeTls::AssignTrimeshCollisionLibraryData(void *pv_DataInstance)
-{
-#if dTRIMESH_ENABLED
-	dIASSERT(!CThreadLocalStorage::GetStorageValue(m_htkStorageKey, OTI_TRIMESH_COLLISION_LIBRARY_DATA));
-
-	bool bResult = CThreadLocalStorage::SetStorageValue(m_htkStorageKey, OTI_TRIMESH_COLLISION_LIBRARY_DATA, (tlsvaluetype)pv_DataInstance, &COdeTls::FreeTrimeshCollisionLibraryData_Callback);
-	return bResult;
-#else
-	dIASSERT(false); // Should only be called when trimesh is enabled
-	return false;
-#endif
-}
-
-void COdeTls::DestroyTrimeshCollisionLibraryData()
-{
-#if dTRIMESH_ENABLED
-	void *pv_DataInstance = (void *)CThreadLocalStorage::GetStorageValue(m_htkStorageKey, OTI_TRIMESH_COLLISION_LIBRARY_DATA);
-
-	if (pv_DataInstance)
-	{
-		FreeTrimeshCollisionLibraryData(pv_DataInstance);
-
-		CThreadLocalStorage::UnsafeSetStorageValue(m_htkStorageKey, OTI_TRIMESH_COLLISION_LIBRARY_DATA, (tlsvaluetype)NULL);
-	}
-#else
-	dIASSERT(false); // Should only be called when trimesh is enabled
-#endif
-}
-
-
 //////////////////////////////////////////////////////////////////////////
 // Value type destructors
 
 void COdeTls::FreeTrimeshCollidersCache(TrimeshCollidersCache *pccCacheInstance)
 {
 	delete pccCacheInstance;
-}
-
-void COdeTls::FreeTrimeshCollisionLibraryData(void *pv_DataInstance)
-{
-#if dTRIMESH_ENABLED
-
-#if dTRIMESH_OPCODE
-	Opcode::ThreadLocalData *pldOpcodeData = (Opcode::ThreadLocalData *)pv_DataInstance;
-	delete pldOpcodeData;
-#endif // dTRIMESH_OPCODE
-
-#if dTRIMESH_GIMPACT
-	dIASSERT(false); // There is no library specific data for GIMPACT
-#endif // dTRIMESH_GIMPACT
-
-#else
-	dIASSERT(false); // Should only be called when trimesh is enabled
-#endif
 }
 
 
@@ -188,16 +140,6 @@ void COdeTls::FreeTrimeshCollidersCache_Callback(tlsvaluetype vValueData)
 {
 	TrimeshCollidersCache *pccCacheInstance = (TrimeshCollidersCache *)vValueData;
 	FreeTrimeshCollidersCache(pccCacheInstance);
-}
-
-void COdeTls::FreeTrimeshCollisionLibraryData_Callback(tlsvaluetype vValueData)
-{
-#if dTRIMESH_ENABLED
-	void *pv_DataInstance = (void *)vValueData;
-	FreeTrimeshCollisionLibraryData(pv_DataInstance);
-#else
-	dIASSERT(false); // Should only be called when trimesh is enabled
-#endif
 }
 
 

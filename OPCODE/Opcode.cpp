@@ -37,51 +37,18 @@
 
 using namespace Opcode;
 
-struct ThreadLocalDataAsSingleton:
-	public ThreadLocalData
-{
-public:
-	ThreadLocalDataAsSingleton(): ThreadLocalData(false) {}
 
-	void Init() { ThreadLocalData::Init(); }
-	void Finit() { ThreadLocalData::Finit(); }
-};
-
-
-static ThreadLocalDataAsSingleton g_ThreadLocalDataSingleton;
-/*extern */ThreadLocalDataProviderProc g_pfnThreadLocalDataProvider = NULL;
-
-static ThreadLocalData *ProvideThreadLocalDataAsSingleton()
-{
-	return &g_ThreadLocalDataSingleton;
-}
-
-
-
-bool Opcode::InitOpcode(ThreadLocalDataProviderProc pfnThreadLocalDataProvider)
+bool Opcode::InitOpcode()
 {
 	//Log("// Initializing OPCODE\n\n");
 //	LogAPIInfo();
 	
-	if (pfnThreadLocalDataProvider)
-	{
-		g_pfnThreadLocalDataProvider = pfnThreadLocalDataProvider;
-	}
-	else
-	{
-		g_ThreadLocalDataSingleton.Init();
-		g_pfnThreadLocalDataProvider = &ProvideThreadLocalDataAsSingleton;
-	}
-
 	return true;
 }
 
 bool Opcode::CloseOpcode()
 {
 	//Log("// Closing OPCODE\n\n");
-
-	g_pfnThreadLocalDataProvider = NULL;
-	g_ThreadLocalDataSingleton.Finit(); // Finit can be safely called without init
 
 	return true;
 }
