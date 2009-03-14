@@ -492,7 +492,9 @@ dCollideTTL(dxGeom* g1, dxGeom* g2, int Flags, dContactGeom* Contacts, int Strid
     // TLRotation2 = column-major order
     const dMatrix3& TLRotation2 = *(const dMatrix3*) dGeomGetRotation(TriMesh2);
 
-	TrimeshCollidersCache *pccColliderCache = GetTrimeshCollidersCache();
+	const unsigned uiTLSKind = TriMesh1->getParentSpaceTLSKind();
+	dIASSERT(uiTLSKind == TriMesh2->getParentSpaceTLSKind()); // The colliding spaces must use matching cleanup method
+	TrimeshCollidersCache *pccColliderCache = GetTrimeshCollidersCache(uiTLSKind);
     AABBTreeCollider& Collider = pccColliderCache->_AABBTreeCollider;
 	BVTCache &ColCache = pccColliderCache->ColCache;
 	CONTACT_KEY_HASH_TABLE &hashcontactset = pccColliderCache->_hashcontactset;

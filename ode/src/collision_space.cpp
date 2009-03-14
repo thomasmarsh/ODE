@@ -85,6 +85,7 @@ dxSpace::dxSpace (dSpaceID _space) : dxGeom (_space,0)
   first = 0;
   cleanup = 1;
   sublevel = 0;
+  tls_kind = dSPACE_TLS_KIND_INIT_VALUE;
   current_index = 0;
   current_geom = 0;
   lock_count = 0;
@@ -133,43 +134,6 @@ void dxSpace::computeAABB()
   else {
     dSetZero (aabb,6);
   }
-}
-
-
-void dxSpace::setCleanup (int mode)
-{
-  cleanup = (mode != 0);
-}
-
-
-int dxSpace::getCleanup()
-{
-  return cleanup;
-}
-
-
-void dxSpace::setSublevel(int value)
-{
-  sublevel = value;
-}
-
-
-int dxSpace::getSublevel() const
-{
-  return sublevel;
-}
-
-
-int dxSpace::query (dxGeom *geom)
-{
-  dAASSERT (geom);
-  return (geom->parent_space == this);
-}
-
-
-int dxSpace::getNumGeoms()
-{
-  return count;
 }
 
 
@@ -712,6 +676,19 @@ int dSpaceGetSublevel (dSpaceID space)
   return space->getSublevel();
 }
 
+void dSpaceSetManualCleanup (dSpaceID space, int mode)
+{
+	dAASSERT (space);
+	dUASSERT (dGeomIsSpace(space),"argument not a space");
+	space->setManulCleanup(mode);
+}
+
+int dSpaceGetManualCleanup (dSpaceID space)
+{
+	dAASSERT (space);
+	dUASSERT (dGeomIsSpace(space),"argument not a space");
+	return space->getManualCleanup();
+}
 
 void dSpaceAdd (dxSpace *space, dxGeom *g)
 {

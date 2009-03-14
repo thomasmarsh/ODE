@@ -1254,7 +1254,9 @@ int dCollideBTL(dxGeom* g1, dxGeom* BoxGeom, int Flags, dContactGeom* Contacts, 
   sTrimeshBoxColliderData cData;
   cData.SetupInitialContext(TriMesh, BoxGeom, Flags, Contacts, Stride);
 
-  TrimeshCollidersCache *pccColliderCache = GetTrimeshCollidersCache();
+  const unsigned uiTLSKind = TriMesh->getParentSpaceTLSKind();
+  dIASSERT(uiTLSKind == BoxGeom->getParentSpaceTLSKind()); // The colliding spaces must use matching cleanup method
+  TrimeshCollidersCache *pccColliderCache = GetTrimeshCollidersCache(uiTLSKind);
   OBBCollider& Collider = pccColliderCache->_OBBCollider;
 
   dQueryBTLPotentialCollisionTriangles(Collider, cData, TriMesh, BoxGeom,

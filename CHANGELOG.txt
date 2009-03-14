@@ -8,6 +8,14 @@ the rules for this file:
   * keep the format consistent (79 char width, M/D/Y date format).
 
 ------------------------------------------------------------------------------
+03/14/09 Oleh Derevenko
+
+        * A possibility to initialize/close ODE multiple times recursively has 
+          been added.
+          Also, now a call to dSpaceSetManualCleanup() is required for each 
+          space right after creation if ODE has been initialized in thread data
+          manual cleanup mode.
+           
 03/07/09 Oleh Derevenko
 
         * Thread local data has been cleaned up from OPCODE and OdeTls as it is

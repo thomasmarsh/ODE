@@ -60,11 +60,16 @@ extern "C" {
  * operating systems resources are always released by the thread itself on its exit
  * or on library closure with @c dCloseODE.
  *
+ * With manual thread data cleanup mode every collision space object must be 
+ * explicitly switched to manual cleanup mode with @c dSpaceSetManualCleanup
+ * after creation. See description of the function for more details.
+ *
  * If @c dInitFlagManualThreadCleanup was not specified during initialization,
  * calls to @c dCleanupODEAllDataForThread are not allowed.
  *
  * @see dInitODE2
  * @see dAllocateODEDataForThread
+ * @see dSpaceSetManualCleanup
  * @see dCloseODE
  * @ingroup init
  */
@@ -101,8 +106,14 @@ ODE_API void dInitODE(void);
  * The @a uiInitFlags parameter specifies initialization options to be used. These
  * can be combination of zero or more @c dInitODEFlags flags.
  *
+ * @note
+ * If @c dInitFlagManualThreadCleanup flag is used for initialization, 
+ * @c dSpaceSetManualCleanup must be called to set manual cleanup mode for every
+ * space object right after creation. Failure to do so may lead to resource leaks.
+ *
  * @see dInitODEFlags
  * @see dCloseODE
+ * @see dSpaceSetManualCleanup
  * @ingroup init
  */
 ODE_API int dInitODE2(unsigned int uiInitFlags/*=0*/);

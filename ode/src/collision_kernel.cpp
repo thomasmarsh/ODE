@@ -342,6 +342,10 @@ dxGeom::~dxGeom()
    bodyRemove();
 }
 
+unsigned dxGeom::getParentSpaceTLSKind() const
+{
+  return parent_space ? parent_space->tls_kind : dSPACE_TLS_KIND_INIT_VALUE;
+}
 
 int dxGeom::AABBTest (dxGeom *o, dReal aabb[6])
 {

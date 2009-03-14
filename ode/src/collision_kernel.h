@@ -34,6 +34,7 @@ internal data structures and functions for collision detection.
 #include <ode/collision.h>
 #include "config.h"
 #include "objects.h"
+#include "odetls.h"
 
 //****************************************************************************
 // constants and macros
@@ -108,6 +109,8 @@ struct dxGeom : public dBase {
 
   // Set or clear GEOM_ZERO_SIZED flag
   void updateZeroSizedFlag(bool is_zero_sized) { gflags = is_zero_sized ? (gflags | GEOM_ZERO_SIZED) : (gflags & ~GEOM_ZERO_SIZED); }
+  // Get parent space TLS kind
+  unsigned getParentSpaceTLSKind() const;
 
   // calculate our new final position from our offset and body
   void computePosr();
@@ -178,11 +181,20 @@ struct dxGeom : public dBase {
 // their AABBs are may not be valid. the two types are distinguished by the
 // GEOM_DIRTY flag. all dirty geoms come *before* all clean geoms in the list.
 
+#if dTLS_ENABLED
+#define dSPACE_TLS_KIND_INIT_VALUE OTK__DEFAULT
+#define dSPACE_TLS_KIND_MANUAL_VALUE OTK_MANUALCLEANUP
+#else
+#define dSPACE_TLS_KIND_INIT_VALUE 0
+#define dSPACE_TLS_KIND_MANUAL_VALUE 0
+#endif
+
 struct dxSpace : public dxGeom {
   int count;			// number of geoms in this space
   dxGeom *first;		// first geom in list
   int cleanup;			// cleanup mode, 1=destroy geoms on exit
   int sublevel;         // space sublevel (used in dSpaceCollide2). NOT TRACKED AUTOMATICALLY!!!
+  unsigned tls_kind;	// space TLS kind to be used for global caches retrieval
 
   // cached state for getGeom()
   int current_index;		// only valid if current_geom != 0
@@ -199,12 +211,15 @@ struct dxSpace : public dxGeom {
 
   void computeAABB();
 
-  void setCleanup (int mode);
-  int getCleanup();
-  void setSublevel(int value);
-  int getSublevel() const;
-  int query (dxGeom *geom);
-  int getNumGeoms();
+  void setCleanup (int mode) { cleanup = (mode != 0); }
+  int getCleanup() const { return cleanup; }
+  void setSublevel(int value) { sublevel = value; }
+  int getSublevel() const { return sublevel; }
+  void setManulCleanup(int value) { tls_kind = (value ? dSPACE_TLS_KIND_MANUAL_VALUE : dSPACE_TLS_KIND_INIT_VALUE); }
+  int getManualCleanup() const { return (tls_kind == dSPACE_TLS_KIND_MANUAL_VALUE) ? 1 : 0; }
+  int query (dxGeom *geom) const { dAASSERT(geom); return (geom->parent_space == this); }
+  int getNumGeoms() const { return count; }
+
   virtual dxGeom *getGeom (int i);
 
   virtual void add (dxGeom *);
