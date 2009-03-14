@@ -1053,7 +1053,9 @@ int dCollideCylinderTrimesh(dxGeom *o1, dxGeom *o2, int flags, dContactGeom *con
 	sCylinderTrimeshColliderData cData(flags, skip);
 	cData._InitCylinderTrimeshData(Cylinder, Trimesh);
 
-	TrimeshCollidersCache *pccColliderCache = GetTrimeshCollidersCache();
+	const unsigned uiTLSKind = Trimesh->getParentSpaceTLSKind();
+	dIASSERT(uiTLSKind == Cylinder->getParentSpaceTLSKind()); // The colliding spaces must use matching cleanup method
+	TrimeshCollidersCache *pccColliderCache = GetTrimeshCollidersCache(uiTLSKind);
 	OBBCollider& Collider = pccColliderCache->_OBBCollider;
 
 	dQueryCTLPotentialCollisionTriangles(Collider, cData, Cylinder, Trimesh, pccColliderCache->defaultBoxCache);

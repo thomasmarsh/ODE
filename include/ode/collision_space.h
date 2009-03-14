@@ -113,6 +113,39 @@ ODE_API void dSpaceSetSublevel (dSpaceID space, int sublevel);
 */
 ODE_API int dSpaceGetSublevel (dSpaceID space);
 
+
+/**
+* @brief Sets manual cleanup flag for a space.
+*
+* Manual cleanup flag marks a space as eligible for manual thread data cleanup.
+* This function should be called for every space object right after creation in 
+* case if ODE has been initialized with @c dInitFlagManualThreadCleanup flag.
+* 
+* Failure to set manual cleanup flag for a space may lead to some resources 
+* remaining leaked until the program exit.
+*
+* @param space the space to modify
+* @param mode 1 for manual cleanup mode and 0 for default cleanup mode
+* @ingroup collide
+* @see dSpaceGetManualCleanup
+* @see dInitODE2
+*/
+ODE_API void dSpaceSetManualCleanup (dSpaceID space, int mode);
+
+/**
+* @brief Get manual cleanup flag of a space.
+*
+* Manual cleanup flag marks a space space as eligible for manual thread data cleanup.
+* See @c dSpaceSetManualCleanup for more details.
+* 
+* @param space the space to query
+* @returns 1 for manual cleanup mode and 0 for default cleanup mode of the space
+* @ingroup collide
+* @see dSpaceSetManualCleanup
+* @see dInitODE2
+*/
+ODE_API int dSpaceGetManualCleanup (dSpaceID space);
+
 ODE_API void dSpaceAdd (dSpaceID, dGeomID);
 ODE_API void dSpaceRemove (dSpaceID, dGeomID);
 ODE_API int dSpaceQuery (dSpaceID, dGeomID);

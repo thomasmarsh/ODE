@@ -132,15 +132,16 @@ struct TrimeshCollidersCache
 
 #if dTLS_ENABLED
 
-inline TrimeshCollidersCache *GetTrimeshCollidersCache()
+inline TrimeshCollidersCache *GetTrimeshCollidersCache(unsigned uiTLSKind)
 {
-	return COdeTls::GetTrimeshCollidersCache();
+	EODETLSKIND tkTLSKind = (EODETLSKIND)uiTLSKind;
+	return COdeTls::GetTrimeshCollidersCache(tkTLSKind);
 }
 
 
 #else // dTLS_ENABLED
 
-inline TrimeshCollidersCache *GetTrimeshCollidersCache()
+inline TrimeshCollidersCache *GetTrimeshCollidersCache(unsigned uiTLSKind)
 {
 	extern TrimeshCollidersCache g_ccTrimeshCollidersCache;
 

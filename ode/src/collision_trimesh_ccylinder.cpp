@@ -1078,10 +1078,12 @@ int dCollideCCTL(dxGeom *o1, dxGeom *o2, int flags, dContactGeom *contact, int s
 	sTrimeshCapsuleColliderData cData;
 	cData.SetupInitialContext(TriMesh, Capsule, flags, skip);
 
-	// Will it better to use LSS here? -> confirm Pierre.
-	TrimeshCollidersCache *pccColliderCache = GetTrimeshCollidersCache();
+	const unsigned uiTLSKind = TriMesh->getParentSpaceTLSKind();
+	dIASSERT(uiTLSKind == Capsule->getParentSpaceTLSKind()); // The colliding spaces must use matching cleanup method
+	TrimeshCollidersCache *pccColliderCache = GetTrimeshCollidersCache(uiTLSKind);
 	OBBCollider& Collider = pccColliderCache->_OBBCollider;
 
+	// Will it better to use LSS here? -> confirm Pierre.
 	dQueryCCTLPotentialCollisionTriangles(Collider, cData, 
 		TriMesh, Capsule, pccColliderCache->defaultBoxCache);
 

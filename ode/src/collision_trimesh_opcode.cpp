@@ -558,7 +558,7 @@ dxTriMesh::~dxTriMesh(){
 #if dTRIMESH_ENABLED
 
 	// Clear TC caches
-	TrimeshCollidersCache *pccColliderCache = GetTrimeshCollidersCache();
+	TrimeshCollidersCache *pccColliderCache = GetTrimeshCollidersCache(0);
 	pccColliderCache->Faces.Empty();
 	pccColliderCache->defaultSphereCache.TouchedPrimitives.Empty();
 	pccColliderCache->defaultBoxCache.TouchedPrimitives.Empty();
