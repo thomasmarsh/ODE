@@ -97,6 +97,16 @@
   }
 
   newoption {
+    trigger     = "16bit-indices",
+    description = "Use 16-bit indices for trimeshes (default is 32-bit)"
+  }
+
+  newoption {
+    trigger     = "new-trimesh",
+    description = "Use new OPCODE trimesh-trimesh collider (experimental)"
+  }
+  
+  newoption {
     trigger = "to",
     value   = "path",
     description = "Set the output location for the generated project files"
@@ -291,30 +301,39 @@
 -- Write a custom <config.h> to src/ode, based on the supplied flags
 ----------------------------------------------------------------------
 
-  io.input("config-default.h")
-  local text = io.read("*a")
+  if _ACTION then
+    io.input("config-default.h")
+    local text = io.read("*a")
 
-  if (_OPTIONS["no-trimesh"]) then
-    text = string.gsub(text, "#define dTRIMESH_ENABLED 1", "/* #define dTRIMESH_ENABLED 1 */")
-    text = string.gsub(text, "#define dTRIMESH_OPCODE 1", "/* #define dTRIMESH_OPCODE 1 */")
-  elseif (_OPTIONS["with-gimpact"]) then
-    text = string.gsub(text, "#define dTRIMESH_OPCODE 1", "#define dTRIMESH_GIMPACT 1")
+    if _OPTIONS["no-trimesh"] then
+      text = string.gsub(text, "#define dTRIMESH_ENABLED 1", "/* #define dTRIMESH_ENABLED 1 */")
+      text = string.gsub(text, "#define dTRIMESH_OPCODE 1", "/* #define dTRIMESH_OPCODE 1 */")
+    elseif (_OPTIONS["with-gimpact"]) then
+      text = string.gsub(text, "#define dTRIMESH_OPCODE 1", "#define dTRIMESH_GIMPACT 1")
+    end
+
+    if _OPTIONS["no-alloca"] then
+      text = string.gsub(text, "/%* #define dUSE_MALLOC_FOR_ALLOCA %*/", "#define dUSE_MALLOC_FOR_ALLOCA")
+    end
+
+    if _OPTIONS["enable-ou"] then
+      text = string.gsub(text, "/%* #define dOU_ENABLED 1 %*/", "#define dOU_ENABLED 1")
+      text = string.gsub(text, "/%* #define dATOMICS_ENABLED 1 %*/", "#define dATOMICS_ENABLED 1")
+      text = string.gsub(text, "/%* #define dTLS_ENABLED 1 %*/", "#define dTLS_ENABLED 1")
+    end
+
+    if _OPTIONS["16bit-indices"] then
+      text = string.gsub(text, "#define dTRIMESH_16BIT_INDICES 0", "#define dTRIMESH_16BIT_INDICES 1")
+    end
+  
+    if _OPTIONS["new-trimsh"] then
+      text = string.gsub(text, "#define dTRIMESH_OPCODE_USE_NEW_TRIMESH_TRIMESH_COLLIDER 0", "#define dTRIMESH_OPCODE_USE_NEW_TRIMESH_TRIMESH_COLLIDER 1")
+    end
+    
+    io.output("../ode/src/config.h")
+    io.write(text)
+    io.close()
   end
-
-  if (_OPTIONS["no-alloca"]) then
-    text = string.gsub(text, "/%* #define dUSE_MALLOC_FOR_ALLOCA %*/", "#define dUSE_MALLOC_FOR_ALLOCA")
-  end
-
-  if (_OPTIONS["enable-ou"]) then
-    text = string.gsub(text, "/%* #define dOU_ENABLED 1 %*/", "#define dOU_ENABLED 1")
-    text = string.gsub(text, "/%* #define dATOMICS_ENABLED 1 %*/", "#define dATOMICS_ENABLED 1")
-    text = string.gsub(text, "/%* #define dTLS_ENABLED 1 %*/", "#define dTLS_ENABLED 1")
-  end
-
-  io.output("../ode/src/config.h")
-  io.write(text)
-  io.close()
-
 
 
 ----------------------------------------------------------------------
