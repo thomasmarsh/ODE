@@ -326,7 +326,7 @@
       text = string.gsub(text, "#define dTRIMESH_16BIT_INDICES 0", "#define dTRIMESH_16BIT_INDICES 1")
     end
   
-    if _OPTIONS["new-trimsh"] then
+    if _OPTIONS["new-trimesh"] then
       text = string.gsub(text, "#define dTRIMESH_OPCODE_USE_NEW_TRIMESH_TRIMESH_COLLIDER 0", "#define dTRIMESH_OPCODE_USE_NEW_TRIMESH_TRIMESH_COLLIDER 1")
     end
     
