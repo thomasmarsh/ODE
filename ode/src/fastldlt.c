@@ -184,6 +184,7 @@ void dFactorLDLT (dReal *A, dReal *d, int n, int nskip1)
     Z22 = 0;
     ell = A+i*nskip1;
     dee = d;
+#ifdef USE_SSE
     for (j=i-6; j >= 0; j -= 6) {
       p1 = ell[0];
       p2 = ell[nskip1];
@@ -266,6 +267,90 @@ void dFactorLDLT (dReal *A, dReal *d, int n, int nskip1)
       ell += 6;
       dee += 6;
     }
+#else
+    for (j=i-6; j >= 0; j -= 6) {
+      p1 = ell[0];
+      p2 = ell[nskip1];
+      dd = dee[0];
+      q1 = p1*dd;
+      q2 = p2*dd;
+      ell[0] = q1;
+      ell[nskip1] = q2;
+      m11 = p1*q1;
+      m21 = p2*q1;
+      m22 = p2*q2;
+      Z11 += m11;
+      Z21 += m21;
+      Z22 += m22;
+      p1 = ell[1];
+      p2 = ell[1+nskip1];
+      dd = dee[1];
+      q1 = p1*dd;
+      q2 = p2*dd;
+      ell[1] = q1;
+      ell[1+nskip1] = q2;
+      m11 = p1*q1;
+      m21 = p2*q1;
+      m22 = p2*q2;
+      Z11 += m11;
+      Z21 += m21;
+      Z22 += m22;
+      p1 = ell[2];
+      p2 = ell[2+nskip1];
+      dd = dee[2];
+      q1 = p1*dd;
+      q2 = p2*dd;
+      ell[2] = q1;
+      ell[2+nskip1] = q2;
+      m11 = p1*q1;
+      m21 = p2*q1;
+      m22 = p2*q2;
+      Z11 += m11;
+      Z21 += m21;
+      Z22 += m22;
+      p1 = ell[3];
+      p2 = ell[3+nskip1];
+      dd = dee[3];
+      q1 = p1*dd;
+      q2 = p2*dd;
+      ell[3] = q1;
+      ell[3+nskip1] = q2;
+      m11 = p1*q1;
+      m21 = p2*q1;
+      m22 = p2*q2;
+      Z11 += m11;
+      Z21 += m21;
+      Z22 += m22;
+      p1 = ell[4];
+      p2 = ell[4+nskip1];
+      dd = dee[4];
+      q1 = p1*dd;
+      q2 = p2*dd;
+      ell[4] = q1;
+      ell[4+nskip1] = q2;
+      m11 = p1*q1;
+      m21 = p2*q1;
+      m22 = p2*q2;
+      Z11 += m11;
+      Z21 += m21;
+      Z22 += m22;
+      p1 = ell[5];
+      p2 = ell[5+nskip1];
+      dd = dee[5];
+      q1 = p1*dd;
+      q2 = p2*dd;
+      ell[5] = q1;
+      ell[5+nskip1] = q2;
+      m11 = p1*q1;
+      m21 = p2*q1;
+      m22 = p2*q2;
+      Z11 += m11;
+      Z21 += m21;
+      Z22 += m22;
+      ell += 6;
+      dee += 6;
+    }
+#endif
     /* compute left-over iterations */
     j += 6;
     for (; j > 0; j--) {
