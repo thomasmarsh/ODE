@@ -922,7 +922,6 @@ struct ConvexConvexSATOutput
 {
   dReal min_depth;
   int depth_type;
-  dVector4 plane;
   dVector3 dist; // distance from center to center, from cvx1 to cvx2
   dVector3 e1a,e1b,e2a,e2b; // e1a to e1b = edge in cvx1,e2a to e2b = edge in cvx2.
 };
@@ -966,17 +965,9 @@ inline bool CheckSATConvexFaces(dxConvex& cvx1,
         */
         if (((max2*min2)<=0) && (dFabs(depth)<dFabs(ccso.min_depth)))
         {
-            dVector4Copy(plane,ccso.plane); // avoid recomputing later
             // Flip plane because the contact normal must point INTO g1,
             // plus the integrator seems to like positive depths better than negative ones
-            //ccso.plane[0]=-ccso.plane[0];
-            //ccso.plane[1]=-ccso.plane[1];
-            //ccso.plane[2]=-ccso.plane[2];
-            //ccso.plane[3]=-ccso.plane[3];
             ccso.min_depth=-depth;
-            //ccso.side_index=(int)i;
-            //ccso.g1=&cvx1;
-            //ccso.g2=&cvx2;
             ccso.depth_type = 1; // 1 = face-something
         }
     }
@@ -1035,7 +1026,6 @@ inline bool CheckSATConvexEdges(dxConvex& cvx1,
       depth = max-min;
       if (((dFabs(depth)+dEpsilon)<dFabs(ccso.min_depth)))
       {
-        dVector3Copy(plane,ccso.plane);
         ccso.min_depth=depth;
         ccso.depth_type = 2; // 2 means edge-edge
         // use cached values, add position
