@@ -8,8 +8,10 @@ the rules for this file:
   * keep the format consistent (79 char width, M/D/Y date format).
 
 ------------------------------------------------------------------------------
-03/14/09 Oleh Derevenko
+04/07/09 Remi Ricard (papaDoc)
+        * Fix bug in collision categories in demo_jointPU, reported by Tilmann
 
+03/14/09 Oleh Derevenko
         * A possibility to initialize/close ODE multiple times recursively has 
           been added.
           Also, now a call to dSpaceSetManualCleanup() is required for each 
@@ -17,7 +19,6 @@ the rules for this file:
           manual cleanup mode.
            
 03/07/09 Oleh Derevenko
-
         * Thread local data has been cleaned up from OPCODE and OdeTls as it is
           not used (OPC_SweepAndPrune.* and OPC_BoxPruning.* have been removed
           - rebuilding project files is necessary).
