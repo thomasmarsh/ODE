@@ -107,7 +107,8 @@ const int catBits[LAST_INDEX_CNT] =
     0x0008, ///< INT slider category
     0x0010, ///< AXIS1 universal category
     0x0020, ///< AXIS2 universal category
-    0x0040, ///< Ground category
+    0x0040, ///< ANCHOR category
+    0x0080, ///< Ground category
     ~0L,    ///< All categories
     0x0004 | 0x0008 | 0x0010 | 0x0020 ///< JOINT category
   };
