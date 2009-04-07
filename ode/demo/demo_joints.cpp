@@ -630,8 +630,10 @@ dReal doStuffAndGetError (int n)
     dBodyAddForce (body[1],0,0,-0.1);
     if (iteration == 40) {
       dReal a = dJointGetSliderPosition (joint);
-      if (a > 0.2 && a < 0.5) return 0; else return 10;
-      return a;
+      if (a > 0.2 && a < 0.5)
+          return 0;
+      else
+          return 10; // Failed
     }
     return 0;
 
