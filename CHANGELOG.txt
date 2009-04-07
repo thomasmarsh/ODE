@@ -9,6 +9,9 @@ the rules for this file:
 
 ------------------------------------------------------------------------------
 04/07/09 Remi Ricard (papaDoc)
+        * Remove unused code in demo_joints.cpp, reported by Tilmann.
+
+04/07/09 Remi Ricard (papaDoc)
         * Fix bug in collision categories in demo_jointPU, reported by Tilmann
 
 03/14/09 Oleh Derevenko
