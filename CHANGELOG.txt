@@ -8,6 +8,10 @@ the rules for this file:
   * keep the format consistent (79 char width, M/D/Y date format).
 
 ------------------------------------------------------------------------------
+04/23/09 Daniel K. O.
+        * Fixed bug #2685170: use the C99 __func__ instead of __FUNCTION__ when
+          a C99 implementation is available.
+
 04/07/09 Remi Ricard (papaDoc)
         * Remove unused code in demo_joints.cpp, reported by Tilmann.
 

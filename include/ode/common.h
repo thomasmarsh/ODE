@@ -58,25 +58,28 @@ extern "C" {
  */
 
 #ifndef dNODEBUG
-#ifdef __GNUC__
-#define dIASSERT(a) if (!(a)) dDebug (d_ERR_IASSERT, \
-  "assertion \"" #a "\" failed in %s() [%s]",__FUNCTION__,__FILE__);
-#define dUASSERT(a,msg) if (!(a)) dDebug (d_ERR_UASSERT, \
-  msg " in %s()", __FUNCTION__);
-#define dDEBUGMSG(msg) dMessage (d_ERR_UASSERT,				\
-msg " in %s() File %s Line %d", __FUNCTION__, __FILE__,__LINE__);
+#  if defined(__STDC__) && __STDC_VERSION__ >= 199901L
+#    define __FUNCTION__ __func__
+#  endif
+#  ifdef __GNUC__
+#    define dIASSERT(a) if (!(a)) dDebug (d_ERR_IASSERT, \
+       "assertion \"" #a "\" failed in %s() [%s]",__FUNCTION__,__FILE__);
+#    define dUASSERT(a,msg) if (!(a)) dDebug (d_ERR_UASSERT, \
+       msg " in %s()", __FUNCTION__);
+#    define dDEBUGMSG(msg) dMessage (d_ERR_UASSERT,				\
+       msg " in %s() File %s Line %d", __FUNCTION__, __FILE__,__LINE__);
+#  else // not __GNUC__
+#    define dIASSERT(a) if (!(a)) dDebug (d_ERR_IASSERT, \
+       "assertion \"" #a "\" failed in %s:%d",__FILE__,__LINE__);
+#    define dUASSERT(a,msg) if (!(a)) dDebug (d_ERR_UASSERT, \
+       msg " (%s:%d)", __FILE__,__LINE__);
+#    define dDEBUGMSG(msg) dMessage (d_ERR_UASSERT, \
+       msg " (%s:%d)", __FILE__,__LINE__);
+#  endif
 #else
-#define dIASSERT(a) if (!(a)) dDebug (d_ERR_IASSERT, \
-  "assertion \"" #a "\" failed in %s:%d",__FILE__,__LINE__);
-#define dUASSERT(a,msg) if (!(a)) dDebug (d_ERR_UASSERT, \
-  msg " (%s:%d)", __FILE__,__LINE__);
-#define dDEBUGMSG(msg) dMessage (d_ERR_UASSERT, \
-  msg " (%s:%d)", __FILE__,__LINE__);
-#endif
-#else
-#define dIASSERT(a) ;
-#define dUASSERT(a,msg) ;
-#define dDEBUGMSG(msg) ;
+#  define dIASSERT(a) ;
+#  define dUASSERT(a,msg) ;
+#  define dDEBUGMSG(msg) ;
 #endif
 #define dAASSERT(a) dUASSERT(a,"Bad argument(s)")
 
