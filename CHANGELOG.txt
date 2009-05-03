@@ -8,6 +8,12 @@ the rules for this file:
   * keep the format consistent (79 char width, M/D/Y date format).
 
 ------------------------------------------------------------------------------
+05/03/09 Oleh Derevenko
+
+		* Incorrect parameter order fixed on contact merging in Sphere-Trimesh
+		  collisions. The bug resulted in merged contact remaining with normal 
+		  of first contact found. Thanks to Dimitris Papavasiliou for reporting.
+
 04/23/09 Daniel K. O.
         * Fixed bug #2685170: use the C99 __func__ instead of __FUNCTION__ when
           a C99 implementation is available.
