@@ -8,6 +8,11 @@ the rules for this file:
   * keep the format consistent (79 char width, M/D/Y date format).
 
 ------------------------------------------------------------------------------
+05/18/09 Oleh Derevenko
+
+		* Heightfield rotation fixed to avoid NaNs while rotating infinite 
+		  MIN/MAX heights.
+
 05/03/09 Oleh Derevenko
 
 		* Incorrect parameter order fixed on contact merging in Sphere-Trimesh

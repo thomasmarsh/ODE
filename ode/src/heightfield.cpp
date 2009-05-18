@@ -483,12 +483,29 @@ void dxHeightfield::computeAABB()
             dReal dx[6], dy[6], dz[6];
 
             // Y-axis
-            dy[0] = ( final_posr->R[ 1] * d->m_fMinHeight );
-            dy[1] = ( final_posr->R[ 5] * d->m_fMinHeight );
-            dy[2] = ( final_posr->R[ 9] * d->m_fMinHeight );
-            dy[3] = ( final_posr->R[ 1] * d->m_fMaxHeight );
-            dy[4] = ( final_posr->R[ 5] * d->m_fMaxHeight );
-            dy[5] = ( final_posr->R[ 9] * d->m_fMaxHeight );
+            if (d->m_fMinHeight != -dInfinity)
+            {
+                dIASSERT(d->m_fMinHeight != dInfinity);
+
+                dy[0] = ( final_posr->R[ 1] * d->m_fMinHeight );
+                dy[1] = ( final_posr->R[ 5] * d->m_fMinHeight );
+                dy[2] = ( final_posr->R[ 9] * d->m_fMinHeight );
+                dy[3] = ( final_posr->R[ 1] * d->m_fMaxHeight );
+                dy[4] = ( final_posr->R[ 5] * d->m_fMaxHeight );
+                dy[5] = ( final_posr->R[ 9] * d->m_fMaxHeight );
+            }
+            else
+            {
+                dIASSERT(d->m_fMinHeight == dInfinity);
+
+                // Multiplication is performed to obtain infinity of correct sign
+                dy[0] = ( final_posr->R[ 1] ? final_posr->R[ 1] * -dInfinity : REAL(0.0) );
+                dy[1] = ( final_posr->R[ 5] ? final_posr->R[ 5] * -dInfinity : REAL(0.0) );
+                dy[2] = ( final_posr->R[ 9] ? final_posr->R[ 9] * -dInfinity : REAL(0.0) );
+                dy[3] = ( final_posr->R[ 1] ? final_posr->R[ 1] * dInfinity : REAL(0.0) );
+                dy[4] = ( final_posr->R[ 5] ? final_posr->R[ 5] * dInfinity : REAL(0.0) );
+                dy[5] = ( final_posr->R[ 9] ? final_posr->R[ 9] * dInfinity : REAL(0.0) );
+            }
 
 #ifdef DHEIGHTFIELD_CORNER_ORIGIN
 
@@ -1657,7 +1674,7 @@ int dCollideHeightfield( dxGeom *o1, dxGeom *o2, int flags, dContactGeom* contac
 {
     dIASSERT( skip >= (int)sizeof(dContactGeom) );
     dIASSERT( o1->type == dHeightfieldClass );
-	dIASSERT((flags & NUMC_MASK) >= 1);
+    dIASSERT((flags & NUMC_MASK) >= 1);
 
     int i;
 
