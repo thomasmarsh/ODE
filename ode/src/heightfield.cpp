@@ -485,23 +485,26 @@ void dxHeightfield::computeAABB()
             // Y-axis
             if (d->m_fMinHeight != -dInfinity)
             {
-                dIASSERT(d->m_fMinHeight != dInfinity);
-
                 dy[0] = ( final_posr->R[ 1] * d->m_fMinHeight );
                 dy[1] = ( final_posr->R[ 5] * d->m_fMinHeight );
                 dy[2] = ( final_posr->R[ 9] * d->m_fMinHeight );
+            }
+            else
+            {
+                // Multiplication is performed to obtain infinity of correct sign
+                dy[0] = ( final_posr->R[ 1] ? final_posr->R[ 1] * -dInfinity : REAL(0.0) );
+                dy[1] = ( final_posr->R[ 5] ? final_posr->R[ 5] * -dInfinity : REAL(0.0) );
+                dy[2] = ( final_posr->R[ 9] ? final_posr->R[ 9] * -dInfinity : REAL(0.0) );
+            }
+
+            if (d->m_fMaxHeight != dInfinity)
+            {
                 dy[3] = ( final_posr->R[ 1] * d->m_fMaxHeight );
                 dy[4] = ( final_posr->R[ 5] * d->m_fMaxHeight );
                 dy[5] = ( final_posr->R[ 9] * d->m_fMaxHeight );
             }
             else
             {
-                dIASSERT(d->m_fMinHeight == dInfinity);
-
-                // Multiplication is performed to obtain infinity of correct sign
-                dy[0] = ( final_posr->R[ 1] ? final_posr->R[ 1] * -dInfinity : REAL(0.0) );
-                dy[1] = ( final_posr->R[ 5] ? final_posr->R[ 5] * -dInfinity : REAL(0.0) );
-                dy[2] = ( final_posr->R[ 9] ? final_posr->R[ 9] * -dInfinity : REAL(0.0) );
                 dy[3] = ( final_posr->R[ 1] ? final_posr->R[ 1] * dInfinity : REAL(0.0) );
                 dy[4] = ( final_posr->R[ 5] ? final_posr->R[ 5] * dInfinity : REAL(0.0) );
                 dy[5] = ( final_posr->R[ 9] ? final_posr->R[ 9] * dInfinity : REAL(0.0) );
