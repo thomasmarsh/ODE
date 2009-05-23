@@ -325,8 +325,10 @@ static void CG_LCP (int m, int nb, dRealMutablePtr J, int *jb, dxBody * const *b
 
 
 struct IndexError {
+#ifdef REORDER_CONSTRAINTS
 	dReal error;		// error to sort on
 	int findex;
+#endif
 	int index;		// row index
 };
 
