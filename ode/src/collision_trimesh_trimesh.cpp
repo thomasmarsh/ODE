@@ -32,7 +32,7 @@
 #include <ode/odemath.h>
 #include "config.h"
 // Classic Implementation
-#if !dTRIMESH_OPCODE_USE_NEW_TRIMESH_TRIMESH_COLLIDER
+#if dTRIMESH_OPCODE_USE_OLD_TRIMESH_TRIMESH_COLLIDER
 
 #if dTRIMESH_ENABLED
 
@@ -2074,5 +2074,5 @@ GenerateContact(int in_Flags, dContactGeom* in_Contacts, int in_Stride,
 }
 
 #endif // dTRIMESH_OPCODE
-#endif // !dTRIMESH_USE_NEW_TRIMESH_TRIMESH_COLLIDER
+#endif // dTRIMESH_USE_OLD_TRIMESH_TRIMESH_COLLIDER
 #endif // dTRIMESH_ENABLED

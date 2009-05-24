@@ -54,7 +54,7 @@ using namespace Opcode;
 
 
 #if dTRIMESH_OPCODE
-#if dTRIMESH_OPCODE_USE_NEW_TRIMESH_TRIMESH_COLLIDER
+#if !dTRIMESH_OPCODE_USE_OLD_TRIMESH_TRIMESH_COLLIDER
 
 // New trimesh collider hash table types
 enum
@@ -84,7 +84,7 @@ private:
 	CONTACT_KEY_HASH_NODE m_storage[CONTACTS_HASHSIZE];
 };
 
-#endif // dTRIMESH_OPCODE_USE_NEW_TRIMESH_TRIMESH_COLLIDER
+#endif // !dTRIMESH_OPCODE_USE_OLD_TRIMESH_TRIMESH_COLLIDER
 #endif // dTRIMESH_OPCODE
 
 
@@ -106,7 +106,7 @@ struct TrimeshCollidersCache
 	// Collider caches
 	BVTCache ColCache;
 
-#if dTRIMESH_OPCODE_USE_NEW_TRIMESH_TRIMESH_COLLIDER
+#if !dTRIMESH_OPCODE_USE_OLD_TRIMESH_TRIMESH_COLLIDER
 	CONTACT_KEY_HASH_TABLE _hashcontactset;
 #endif
 
