@@ -235,10 +235,6 @@ int main (int argc, char **argv)
   fn.command = &command;
   fn.stop = 0;
   fn.path_to_textures = DRAWSTUFF_TEXTURE_PATH;
-  if(argc==2)
-    {
-        fn.path_to_textures = argv[1];
-    }
 
   // create world
   dInitODE2(0);
