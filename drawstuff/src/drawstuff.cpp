@@ -25,9 +25,10 @@
 simple graphics.
 
 the following command line flags can be used (typically under unix)
-	-notex		Do not use any textures
-	-noshadow[s]	Do not draw any shadows
-	-pause		Start the simulation paused
+  -notex              Do not use any textures
+  -noshadow[s]        Do not draw any shadows
+  -pause              Start the simulation paused
+  -texturepath <path> Inform an alternative textures path
 
 TODO
 ----
@@ -57,7 +58,7 @@ manage openGL state changes better
 // misc
 
 #ifndef DEFAULT_PATH_TO_TEXTURES
-#ifdef WIN32
+#if 0
 #define DEFAULT_PATH_TO_TEXTURES "..\\textures\\"
 #else
 #define DEFAULT_PATH_TO_TEXTURES "../textures/"
@@ -1268,6 +1269,9 @@ extern "C" void dsSimulationLoop (int argc, char **argv,
     if (strcmp(argv[i],"-noshadow")==0) use_shadows = 0;
     if (strcmp(argv[i],"-noshadows")==0) use_shadows = 0;
     if (strcmp(argv[i],"-pause")==0) initial_pause = 1;
+    if (strcmp(argv[i],"-texturepath")==0)
+      if (++i < argc)
+        fn->path_to_textures = argv[i];
   }
 
   if (fn->version > DS_VERSION)

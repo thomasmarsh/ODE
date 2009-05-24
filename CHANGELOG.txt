@@ -11,6 +11,7 @@ the rules for this file:
 05/24/09 Daniel K. O.
 
 		* Made the new trimesh collider the default.
+		* Added a "-texturepath" option to drawstuff.
 
 05/18/09 Oleh Derevenko
 
