@@ -373,10 +373,6 @@ static void SOR_LCP (int m, int nb, dRealMutablePtr J, int *jb, dxBody * const *
 	dRealAllocaArray (last_lambda,m);
 #endif
 
-	// a copy of the 'hi' vector in case findex[] is being used
-	dRealAllocaArray (hicopy,m);
-	memcpy (hicopy,hi,m*sizeof(dReal));
-
 	// precompute iMJ = inv(M)*J'
 	dRealAllocaArray (iMJ,m*12);
 	compute_invM_JT (m,J,iMJ,jb,body,invI);
@@ -494,16 +490,20 @@ static void SOR_LCP (int m, int nb, dRealMutablePtr J, int *jb, dxBody * const *
 			J_ptr = J + index*12;
 			iMJ_ptr = iMJ + index*12;
 
-			// set the limits for this constraint. note that 'hicopy' is used.
+			// set the limits for this constraint. 
 			// this is the place where the QuickStep method differs from the
 			// direct LCP solving method, since that method only performs this
 			// limit adjustment once per time step, whereas this method performs
 			// once per iteration per constraint row.
 			// the constraints are ordered so that all lambda[] values needed have
 			// already been computed.
+			dReal hi_act, lo_act;
 			if (findex[index] >= 0) {
-				hi[index] = dFabs (hicopy[index] * lambda[findex[index]]);
-				lo[index] = -hi[index];
+				hi_act = dFabs (hi[index] * lambda[findex[index]]);
+				lo_act = -hi_act;
+			} else {
+				hi_act = hi[index];
+				lo_act = lo[index];
 			}
 
 			int b1 = jb[index*2];
@@ -528,13 +528,13 @@ static void SOR_LCP (int m, int nb, dRealMutablePtr J, int *jb, dxBody * const *
 			// @@@ potential optimization: does SSE have clamping instructions
 			//     to save test+jump penalties here?
 			dReal new_lambda = lambda[index] + delta;
-			if (new_lambda < lo[index]) {
-				delta = lo[index]-lambda[index];
-				lambda[index] = lo[index];
+			if (new_lambda < lo_act) {
+				delta = lo_act-lambda[index];
+				lambda[index] = lo_act;
 			}
-			else if (new_lambda > hi[index]) {
-				delta = hi[index]-lambda[index];
-				lambda[index] = hi[index];
+			else if (new_lambda > hi_act) {
+				delta = hi_act-lambda[index];
+				lambda[index] = hi_act;
 			}
 			else {
 				lambda[index] = new_lambda;

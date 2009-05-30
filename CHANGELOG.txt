@@ -8,6 +8,10 @@ the rules for this file:
   * keep the format consistent (79 char width, M/D/Y date format).
 
 ------------------------------------------------------------------------------
+05/30/09 Oleh Derevenko
+
+		* A minor memory usage optimization for QuickStep.
+
 05/24/09 Daniel K. O.
 
 		* Made the new trimesh collider the default.
