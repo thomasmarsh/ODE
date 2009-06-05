@@ -208,6 +208,7 @@ int main(int argc, char **argv)
     
     dJointGroupDestroy(contactgroup);
     dWorldDestroy(world);
+    dGeomDestroy(ground);
     dSpaceDestroy(space);
     
     dCloseODE();

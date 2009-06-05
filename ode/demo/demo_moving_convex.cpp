@@ -144,7 +144,7 @@ char locase( char c )
 // called when a key pressed
 static void command( int cmd )
 {
-	int i,j,k;
+	int i,k;
 	dReal sides[3];
 	dMass m;
 

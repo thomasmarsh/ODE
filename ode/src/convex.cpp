@@ -642,7 +642,7 @@ int dCollideConvexPlane (dxGeom *o1, dxGeom *o2, int flags,
 		// Take new sign into account
 		totalsign |= distance2sign;
 		// Check if contacts are full and both signs have been already found
-		if ((contacts ^ maxc | totalsign) == BOTH_SIGNS) // harder to comprehend but requires one register less
+		if (((contacts ^ maxc) | totalsign) == BOTH_SIGNS) // harder to comprehend but requires one register less
 		{
 			break; // Nothing can be changed any more
 		}
@@ -1110,6 +1110,9 @@ int TestConvexIntersection(dxConvex& cvx1,dxConvex& cvx2, int flags,
 			   dContactGeom *contact, int skip)
 {
   ConvexConvexSATOutput ccso;
+  #ifndef dNDEBUG
+  memset(&ccso, 0, sizeof(ccso)); // get rid of 'uninitialized values' warning
+  #endif
   ccso.min_depth=dInfinity; // Min not min at all
   ccso.depth_type=0; // no type
   // precompute distance vector

@@ -14,17 +14,26 @@
 
 	#define	SIGN_BITMASK			0x80000000
 
+	namespace {
+		union float_udword { float f; udword u; };
+		union float_sdword { float f; sdword s; };
+	}
+
+
 	//! Integer representation of a floating-point value.
-	#define IR(x)					((udword&)(x))
+	//#define IR(x)					((udword&)(x))
+	static inline udword IR(float x) { float_udword fu; fu.f = x; return fu.u; }
 
 	//! Signed integer representation of a floating-point value.
-	#define SIR(x)					((sdword&)(x))
+	//#define SIR(x)					((sdword&)(x))
+	static inline sdword SIR(float x) { float_sdword fs; fs.f = x; return fs.s; }
 
 	//! Absolute integer representation of a floating-point value
 	#define AIR(x)					(IR(x)&0x7fffffff)
 
 	//! Floating-point representation of an integer value.
-	#define FR(x)					((float&)(x))
+	//#define FR(x)					((float&)(x))
+	static inline float FR(unsigned x) { float_udword fu; fu.u = x; return fu.f; }
 
 	//! Integer-based comparison of a floating point value.
 	//! Don't use it blindly, it can be faster or slower than the FPU comparison, depends on the context.
@@ -47,26 +56,27 @@
 	//! Saturates positive to zero.
 	inline_ float fsat(float f)
 	{
-		udword y = (udword&)f & ~((sdword&)f >>31);
-		return (float&)y;
+		udword y = IR(f) & ~(SIR(f) >>31);
+		return FR(y);
 	}
 
 	//! Computes 1.0f / sqrtf(x).
 	inline_ float frsqrt(float f)
 	{
 		float x = f * 0.5f;
-		udword y = 0x5f3759df - ((udword&)f >> 1);
+		udword y = 0x5f3759df - (IR(f) >> 1);
 		// Iteration...
-		(float&)y  = (float&)y * ( 1.5f - ( x * (float&)y * (float&)y ) );
+		const float fy = FR(y);
+		const float result = fy * ( 1.5f - ( x * fy * fy ) );
 		// Result
-		return (float&)y;
+		return result;
 	}
 
 	//! Computes 1.0f / sqrtf(x). Comes from NVIDIA.
 	inline_ float InvSqrt(const float& x)
 	{
-		udword tmp = (udword(IEEE_1_0 << 1) + IEEE_1_0 - *(udword*)&x) >> 1;   
-		float y = *(float*)&tmp;                                             
+		const udword tmp = (udword(IEEE_1_0 << 1) + IEEE_1_0 - IR(x)) >> 1;      
+		const float y = FR(tmp);
 		return y * (1.47f - 0.47f * x * y * y);
 	}
 
@@ -74,15 +84,15 @@
 	//! See http://www.magic-software.com/3DGEDInvSqrt.html
 	inline_ float RSqrt(float number)
 	{
-		long i;
+		int i;
 		float x2, y;
 		const float threehalfs = 1.5f;
 
 		x2 = number * 0.5f;
 		y  = number;
-		i  = * (long *) &y;
+		i  = IR(y);
 		i  = 0x5f3759df - (i >> 1);
-		y  = * (float *) &i;
+		y  = FR(i);
 		y  = y * (threehalfs - (x2 * y * y));
 
 		return y;
@@ -91,21 +101,20 @@
 	//! TO BE DOCUMENTED
 	inline_ float fsqrt(float f)
 	{
-		udword y = ( ( (sdword&)f - 0x3f800000 ) >> 1 ) + 0x3f800000;
+		udword y = ( ( SIR(f) - 0x3f800000 ) >> 1 ) + 0x3f800000;
 		// Iteration...?
 		// (float&)y = (3.0f - ((float&)y * (float&)y) / f) * (float&)y * 0.5f;
 		// Result
-		return (float&)y;
+		return FR(y);
 	}
 
 	//! Returns the float ranged espilon value.
 	inline_ float fepsilon(float f)
 	{
-		udword b = (udword&)f & 0xff800000;
+		udword b = IR(f) & 0xff800000;
 		udword a = b | 0x00000001;
-		(float&)a -= (float&)b;
 		// Result
-		return (float&)a;
+		return FR(a) - FR(b);
 	}
 
 	//! Is the float valid ?
@@ -159,8 +168,7 @@
 	//! This function computes the slowest possible floating-point value (you can also directly use FLT_EPSILON)
 	inline_ float ComputeFloatEpsilon()
 	{
-		float f = 1.0f;
-		((udword&)f)^=1;
+		const float f = FR( IR(1.0f) ^ 1 );
 		return f - 1.0f;	// You can check it's the same as FLT_EPSILON
 	}
 
@@ -235,7 +243,7 @@
 
 	inline_ int ConvertToSortable(float f)
 	{
-		int& Fi = (int&)f;
+		int Fi = SIR(f);
 		int Fmask = (Fi>>31);
 		Fi ^= Fmask;
 		Fmask &= ~(1<<31);

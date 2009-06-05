@@ -223,12 +223,21 @@
 		//! Transposes the matrix.
 				void				Transpose()
 									{
+										#if 0 // don't play tricks on the compiler
 										IR(m[1][0]) ^= IR(m[0][1]);		IR(m[0][1]) ^= IR(m[1][0]);		IR(m[1][0]) ^= IR(m[0][1]);
 										IR(m[2][0]) ^= IR(m[0][2]);		IR(m[0][2]) ^= IR(m[2][0]);		IR(m[2][0]) ^= IR(m[0][2]);
 										IR(m[3][0]) ^= IR(m[0][3]);		IR(m[0][3]) ^= IR(m[3][0]);		IR(m[3][0]) ^= IR(m[0][3]);
 										IR(m[1][2]) ^= IR(m[2][1]);		IR(m[2][1]) ^= IR(m[1][2]);		IR(m[1][2]) ^= IR(m[2][1]);
 										IR(m[1][3]) ^= IR(m[3][1]);		IR(m[3][1]) ^= IR(m[1][3]);		IR(m[1][3]) ^= IR(m[3][1]);
 										IR(m[2][3]) ^= IR(m[3][2]);		IR(m[3][2]) ^= IR(m[2][3]);		IR(m[2][3]) ^= IR(m[3][2]);
+										#else
+										std::swap(m[1][0], m[0][1]);
+										std::swap(m[2][0], m[0][2]);
+										std::swap(m[3][0], m[0][3]);
+										std::swap(m[1][2], m[2][1]);
+										std::swap(m[1][3], m[3][1]);
+										std::swap(m[2][3], m[3][2]);
+										#endif
 									}
 
 		//! Computes a cofactor. Used for matrix inversion.

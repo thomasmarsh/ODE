@@ -428,13 +428,22 @@
 
 										// Compute new extents. FPU code & CPU code have been interleaved for improved performance.
 										Point Ex(mtx.m[0][0] * mExtents.x, mtx.m[0][1] * mExtents.x, mtx.m[0][2] * mExtents.x);
-										IR(Ex.x)&=0x7fffffff;	IR(Ex.y)&=0x7fffffff;	IR(Ex.z)&=0x7fffffff;
+										//IR(Ex.x)&=0x7fffffff;	IR(Ex.y)&=0x7fffffff;	IR(Ex.z)&=0x7fffffff;
+										Ex.x = FR( AIR(Ex.x) );
+										Ex.y = FR( AIR(Ex.y) );
+										Ex.z = FR( AIR(Ex.z) );
 
 										Point Ey(mtx.m[1][0] * mExtents.y, mtx.m[1][1] * mExtents.y, mtx.m[1][2] * mExtents.y);
-										IR(Ey.x)&=0x7fffffff;	IR(Ey.y)&=0x7fffffff;	IR(Ey.z)&=0x7fffffff;
+										//IR(Ey.x)&=0x7fffffff;	IR(Ey.y)&=0x7fffffff;	IR(Ey.z)&=0x7fffffff;
+										Ey.x = FR( AIR(Ey.x) );
+										Ey.y = FR( AIR(Ey.y) );
+										Ey.z = FR( AIR(Ey.z) );
 
 										Point Ez(mtx.m[2][0] * mExtents.z, mtx.m[2][1] * mExtents.z, mtx.m[2][2] * mExtents.z);
-										IR(Ez.x)&=0x7fffffff;	IR(Ez.y)&=0x7fffffff;	IR(Ez.z)&=0x7fffffff;
+										//IR(Ez.x)&=0x7fffffff;	IR(Ez.y)&=0x7fffffff;	IR(Ez.z)&=0x7fffffff;
+										Ez.x = FR( AIR(Ez.x) );
+										Ez.y = FR( AIR(Ez.y) );
+										Ez.z = FR( AIR(Ez.z) );
 
 										aabb.mExtents.x = Ex.x + Ey.x + Ez.x;
 										aabb.mExtents.y = Ex.y + Ey.y + Ez.y;

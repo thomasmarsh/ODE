@@ -154,9 +154,9 @@ void start()
   boxes[1]=dCreateBox(space,0.5,0.5,0.5);
   geoms=convex;
 
+#if 0
   dMatrix3 m1 = { 1,0,0,0,0,1,0,0,0,0,1,0 };
   dMatrix3 m2 = { 1,0,0,0,0,1,0,0,0,0,1,0 };
-#if 0
   dGeomSetPosition (convex[0],
 		    0.0,
 		    0.0,
@@ -285,7 +285,7 @@ void command (int cmd)
 {
   // note: 0.0174532925 radians = 1 degree
   dQuaternion q;
-  dMatrix3 m;
+  //dMatrix3 m;
   bool changed = false;
   switch(cmd)
     {

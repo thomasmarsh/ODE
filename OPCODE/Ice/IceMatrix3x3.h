@@ -286,9 +286,15 @@
 		//! Transpose the matrix.
 				void			Transpose()
 								{
+									#if 0 // don't play tricks on the compiler!
 									IR(m[1][0]) ^= IR(m[0][1]);	IR(m[0][1]) ^= IR(m[1][0]);	IR(m[1][0]) ^= IR(m[0][1]);
 									IR(m[2][0]) ^= IR(m[0][2]);	IR(m[0][2]) ^= IR(m[2][0]);	IR(m[2][0]) ^= IR(m[0][2]);
 									IR(m[2][1]) ^= IR(m[1][2]);	IR(m[1][2]) ^= IR(m[2][1]);	IR(m[2][1]) ^= IR(m[1][2]);
+									#else
+									std::swap(m[1][0], m[0][1]);
+									std::swap(m[2][0], m[0][2]);
+									std::swap(m[2][1], m[1][2]);
+									#endif
 								}
 
 		//! this = Transpose(a)

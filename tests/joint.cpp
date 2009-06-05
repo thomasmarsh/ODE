@@ -78,6 +78,7 @@ SUITE(JointHinge2)
 
     TEST_FIXTURE(Hinge2GetInfo1_Fixture_1, test_hinge2GetInfo1)
     {
+        /*
         //       ^Y
         //     |---|                             HiStop
         //     |   |                     ^Y         /
@@ -95,6 +96,7 @@ SUITE(JointHinge2)
         //
         //
         //
+        */
         dMatrix3 R;
 
         dJointSetHinge2Param(jId, dParamLoStop, -M_PI/4.0);
@@ -261,6 +263,7 @@ SUITE(JointUniversal)
 
     TEST_FIXTURE(UniversalGetInfo1_Fixture_1, test_hinge2GetInfo1_RotAroundX)
     {
+        /*
         //       ^Y
         //     |---|                             HiStop
         //     |   |                     ^Y         /
@@ -278,6 +281,7 @@ SUITE(JointUniversal)
         //
         //
         //
+        */
         dMatrix3 R;
 
         dJointSetUniversalParam(jId, dParamLoStop, -M_PI/4.0);
@@ -401,6 +405,7 @@ SUITE(JointUniversal)
 
     TEST_FIXTURE(UniversalGetInfo1_Fixture_1, test_hinge2GetInfo1_RotAroundY)
     {
+        /*
         //       ^Y
         //     |---|                             HiStop
         //     |   |                     ^Y         /
@@ -418,6 +423,7 @@ SUITE(JointUniversal)
         //
         //
         //
+        */
         dMatrix3 R;
 
         dJointSetUniversalParam(jId, dParamLoStop, -M_PI/4.0);
