@@ -8,6 +8,11 @@ the rules for this file:
   * keep the format consistent (79 char width, M/D/Y date format).
 
 ------------------------------------------------------------------------------
+06/05/09 Daniel K. O.
+
+		* Removed aliasing issues from OPCODE/Ice, plus some other warnings.
+		  Now it builds on gcc 4.3.2 with '-Wall -Werror -O3".
+
 05/30/09 Oleh Derevenko
 
 		* A minor memory usage optimization for QuickStep.

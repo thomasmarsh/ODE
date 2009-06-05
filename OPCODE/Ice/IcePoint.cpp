@@ -128,9 +128,7 @@ void Point::ProjectToScreen(float halfrenderwidth, float halfrenderheight, const
 void Point::SetNotUsed()
 {
 	// We use a particular integer pattern : 0xffffffff everywhere. This is a NAN.
-	IR(x) = 0xffffffff;
-	IR(y) = 0xffffffff;
-	IR(z) = 0xffffffff;
+	x = y = z = FR(0xffffffff);
 }
 
 BOOL Point::IsNotUsed()	const
