@@ -254,4 +254,7 @@
 		Compute2DCoords(u, v, i - (w * nbu_nbv), nbu);
 	}
 
+	template<typename T>
+	void swap(T& a, T& b) { T c = a; a = b; b = c; }
+
 #endif // __ICEUTILS_H__
