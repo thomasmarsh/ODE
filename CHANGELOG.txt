@@ -8,6 +8,12 @@ the rules for this file:
   * keep the format consistent (79 char width, M/D/Y date format).
 
 ------------------------------------------------------------------------------
+06/14/09 Oleh Derevenko
+		* dInitODE2() changed to automatically call 
+		  AllocateODEDataForThread(dAllocateFlagBasicData) after library 
+		  initialization as this is a required initialization minimum that
+		  must always be performed anyway.
+
 06/05/09 Daniel K. O.
 
 		* Removed aliasing issues from OPCODE/Ice, plus some other warnings.
