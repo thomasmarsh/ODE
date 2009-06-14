@@ -389,19 +389,9 @@ static void CloseODEForMode(EODEINITMODE imInitMode)
 
 
 //****************************************************************************
-// initialization and shutdown routines - allocate and initialize data,
-// cleanup before exiting
+// internal initialization and close routine implementations
 
-void dInitODE()
-{
-	int bInitResult = dInitODE2(0);
-	dIASSERT(bInitResult); dVARIABLEUSED(bInitResult);
-
-	int ibAllocResult = dAllocateODEDataForThread(dAllocateMaskAll);
-	dIASSERT(ibAllocResult); dVARIABLEUSED(ibAllocResult);
-}
-
-int dInitODE2(unsigned int uiInitFlags/*=0*/)
+static bool InternalInitODE(unsigned int uiInitFlags)
 {
 	bool bResult = false;
 
@@ -427,11 +417,24 @@ int dInitODE2(unsigned int uiInitFlags/*=0*/)
 	return bResult;
 }
 
-
-int dAllocateODEDataForThread(unsigned int uiAllocateFlags)
+static void InternalCloseODE()
 {
-	dIASSERT(g_uiODEInitCounter != 0); // Call dInitODE2 first
+	unsigned int uiCurrentMode = (--g_uiODEInitCounter == 0) ? OIM__MIN : OIM__MAX;
+	for (; uiCurrentMode != OIM__MAX; ++uiCurrentMode)
+	{
+		if (IsODEModeInitialized((EODEINITMODE)uiCurrentMode))
+		{
+			// Must be called before CloseODEForMode()
+			ResetODEModeInitialized((EODEINITMODE)uiCurrentMode);
 
+			// Must be called after ResetODEModeInitialized()
+			CloseODEForMode((EODEINITMODE)uiCurrentMode);
+		}
+	}
+}
+
+static bool InternalAllocateODEDataForThread(unsigned int uiAllocateFlags)
+{
 	bool bAnyFailure = false;
 
 	for (unsigned uiCurrentMode = OIM__MIN; uiCurrentMode != OIM__MAX; ++uiCurrentMode)
@@ -450,32 +453,83 @@ int dAllocateODEDataForThread(unsigned int uiAllocateFlags)
 	return bResult;
 }
 
-
-void dCleanupODEAllDataForThread()
+static void InternalCleanupODEAllDataForThread()
 {
-	dIASSERT(g_uiODEInitCounter != 0); // Call dInitODE2 first or delay dCloseODE until all threads exit
-
 #if dTLS_ENABLED
 	COdeTls::CleanupForThread();
 #endif
 }
 
+//****************************************************************************
+// initialization and shutdown routines - allocate and initialize data,
+// cleanup before exiting
+
+void dInitODE()
+{
+	int bInitResult = InternalInitODE(0);
+	dIASSERT(bInitResult); dVARIABLEUSED(bInitResult);
+
+	int ibAllocResult = InternalAllocateODEDataForThread(dAllocateMaskAll);
+	dIASSERT(ibAllocResult); dVARIABLEUSED(ibAllocResult);
+}
+
+int dInitODE2(unsigned int uiInitFlags/*=0*/)
+{
+	bool bResult = false;
+	
+	bool bODEInitialized = false;
+
+	do
+	{
+		if (!InternalInitODE(uiInitFlags))
+		{
+			break;
+		}
+
+		bODEInitialized = true;
+
+		if (!InternalAllocateODEDataForThread(dAllocateFlagBasicData))
+		{
+			break;
+		}
+	
+		bResult = true;
+	}
+	while (false);
+	
+	if (!bResult)
+	{
+		if (bODEInitialized)
+		{
+			InternalCloseODE();
+		}
+	}
+
+	return bResult;
+}
+
+
+int dAllocateODEDataForThread(unsigned int uiAllocateFlags)
+{
+	dUASSERT(g_uiODEInitCounter != 0, "Call dInitODE2 first");
+
+	bool bResult = InternalAllocateODEDataForThread(uiAllocateFlags);
+	return bResult;
+}
+
+
+void dCleanupODEAllDataForThread()
+{
+	dUASSERT(g_uiODEInitCounter != 0, "Call dInitODE2 first or delay dCloseODE until all threads exit");
+
+	InternalCleanupODEAllDataForThread();
+}
+
 
 void dCloseODE()
 {
-	dIASSERT(g_uiODEInitCounter != 0); // dCloseODE must not be called without dInitODE2 or if dInitODE2 fails
+	dUASSERT(g_uiODEInitCounter != 0, "dCloseODE must not be called without dInitODE2 or if dInitODE2 fails"); // dCloseODE must not be called without dInitODE2 or if dInitODE2 fails
 
-	unsigned int uiCurrentMode = (--g_uiODEInitCounter == 0) ? OIM__MIN : OIM__MAX;
-	for (; uiCurrentMode != OIM__MAX; ++uiCurrentMode)
-	{
-		if (IsODEModeInitialized((EODEINITMODE)uiCurrentMode))
-		{
-			// Must be called before CloseODEForMode()
-			ResetODEModeInitialized((EODEINITMODE)uiCurrentMode);
-
-			// Must be called after ResetODEModeInitialized()
-			CloseODEForMode((EODEINITMODE)uiCurrentMode);
-		}
-	}
+	InternalCloseODE();
 }
 
