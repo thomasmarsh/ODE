@@ -205,7 +205,9 @@
 	//! TO BE DOCUMENTED
 	#define OFFSET_OF(Class, Member)	(size_t)&(((Class*)0)->Member)
 	//! TO BE DOCUMENTED
+#ifndef ARRAYSIZE
 	#define ARRAYSIZE(p)				(sizeof(p)/sizeof((p)[0]))
+#endif // #ifndef ARRAYSIZE
 
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	/**
@@ -253,8 +255,5 @@
 		w = i / (nbu_nbv);
 		Compute2DCoords(u, v, i - (w * nbu_nbv), nbu);
 	}
-
-	template<typename T>
-	void swap(T& a, T& b) { T c = a; a = b; b = c; }
 
 #endif // __ICEUTILS_H__

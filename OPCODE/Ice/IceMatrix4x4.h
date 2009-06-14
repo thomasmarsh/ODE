@@ -223,21 +223,12 @@
 		//! Transposes the matrix.
 				void				Transpose()
 									{
-										#if 0 // don't play tricks on the compiler
-										IR(m[1][0]) ^= IR(m[0][1]);		IR(m[0][1]) ^= IR(m[1][0]);		IR(m[1][0]) ^= IR(m[0][1]);
-										IR(m[2][0]) ^= IR(m[0][2]);		IR(m[0][2]) ^= IR(m[2][0]);		IR(m[2][0]) ^= IR(m[0][2]);
-										IR(m[3][0]) ^= IR(m[0][3]);		IR(m[0][3]) ^= IR(m[3][0]);		IR(m[3][0]) ^= IR(m[0][3]);
-										IR(m[1][2]) ^= IR(m[2][1]);		IR(m[2][1]) ^= IR(m[1][2]);		IR(m[1][2]) ^= IR(m[2][1]);
-										IR(m[1][3]) ^= IR(m[3][1]);		IR(m[3][1]) ^= IR(m[1][3]);		IR(m[1][3]) ^= IR(m[3][1]);
-										IR(m[2][3]) ^= IR(m[3][2]);		IR(m[3][2]) ^= IR(m[2][3]);		IR(m[2][3]) ^= IR(m[3][2]);
-										#else
-										swap(m[1][0], m[0][1]);
-										swap(m[2][0], m[0][2]);
-										swap(m[3][0], m[0][3]);
-										swap(m[1][2], m[2][1]);
-										swap(m[1][3], m[3][1]);
-										swap(m[2][3], m[3][2]);
-										#endif
+										TSwap(m[1][0], m[0][1]);
+										TSwap(m[2][0], m[0][2]);
+										TSwap(m[3][0], m[0][3]);
+										TSwap(m[1][2], m[2][1]);
+										TSwap(m[1][3], m[3][1]);
+										TSwap(m[2][3], m[3][2]);
 									}
 
 		//! Computes a cofactor. Used for matrix inversion.
