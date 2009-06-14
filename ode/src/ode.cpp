@@ -1585,17 +1585,6 @@ void dWorldDestroy (dxWorld *w)
   dxBody *nextb, *b = w->firstbody;
   while (b) {
     nextb = (dxBody*) b->next;
-    // TODO: remove those 2 ifs
-    if(b->average_lvel_buffer)
-    {
-      delete[] (b->average_lvel_buffer);
-      b->average_lvel_buffer = 0;
-    }
-    if(b->average_avel_buffer)
-    {
-      delete[] (b->average_avel_buffer);
-      b->average_avel_buffer = 0;
-    }
     dBodyDestroy(b); // calling here dBodyDestroy for correct destroying! (i.e. the average buffers)
     b = nextb;
   }
@@ -1612,6 +1601,7 @@ void dWorldDestroy (dxWorld *w)
       dMessage (0,"warning: destroying world containing grouped joints");
     }
     else {
+        // TODO: shouldn't we call dJointDestroy()?
         size_t sz = j->size();
         j->~dxJoint();
         dFree (j,sz);
