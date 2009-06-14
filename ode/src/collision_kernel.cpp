@@ -38,6 +38,7 @@ for geometry objects
 #include "collision_std.h"
 #include "collision_transform.h"
 #include "collision_trimesh_internal.h"
+#include "collision_space_internal.h"
 #include "odeou.h"
 
 
@@ -360,8 +361,8 @@ void dxGeom::bodyRemove()
     dxGeom **last = &body->geom, *g = body->geom;
     while (g) {
       if (g == this) {
-	*last = g->body_next;
-	break;
+        *last = g->body_next;
+        break;
       }
       last = &g->body_next;
       g = g->body_next;
@@ -434,11 +435,6 @@ dxGeom *dGeomGetBodyNext (dxGeom *geom)
 
 //****************************************************************************
 // public API for geometry objects
-
-#define CHECK_NOT_LOCKED(space) \
-  dUASSERT (!(space && space->lock_count), \
-	    "invalid operation for geom in locked space");
-
 
 void dGeomDestroy (dxGeom *g)
 {

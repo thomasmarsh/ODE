@@ -241,9 +241,13 @@ static void command (int cmd)
                 if (nextobj >= num) nextobj = 0;
 
                 // destroy the body and geoms for slot i
-                dBodyDestroy (obj[i].body);
+                if (obj[i].body) {
+                  dBodyDestroy (obj[i].body);
+                }
                 for (k=0; k < GPB; k++) {
-                    if (obj[i].geom[k]) dGeomDestroy (obj[i].geom[k]);
+                    if (obj[i].geom[k]) {
+                      dGeomDestroy (obj[i].geom[k]);
+                    }
                 }
                 memset (&obj[i],0,sizeof(obj[i]));
             }
@@ -293,7 +297,9 @@ static void command (int cmd)
 
             if (!setBody)
                 for (k=0; k < GPB; k++) {
-                    if (obj[i].geom[k]) dGeomSetBody (obj[i].geom[k],obj[i].body);
+                    if (obj[i].geom[k]) {
+                      dGeomSetBody (obj[i].geom[k],obj[i].body);
+                    }
                 }
 
             dBodySetMass (obj[i].body,&m);
@@ -464,7 +470,9 @@ int main (int argc, char **argv)
     world = dWorldCreate();
     //space = dHashSpaceCreate (0);
     dVector3 center = {0,0,0}, extents = { 100, 100, 100};
-    space = dQuadTreeSpaceCreate(0, center, extents, 5);
+    //space = dQuadTreeSpaceCreate(0, center, extents, 5);
+    //space = dSimpleSpaceCreate(0);
+    space = dSweepAndPruneSpaceCreate (0, dSAP_AXES_XYZ);
 
     contactgroup = dJointGroupCreate (0);
     dWorldSetGravity (world,0,0,-0.5);
@@ -476,6 +484,7 @@ int main (int argc, char **argv)
 
     dWorldSetContactSurfaceLayer (world,0.001);
     ground = dCreatePlane (space,0,0,1,0);
+    
     memset (obj,0,sizeof(obj));
 
     // create lift platform
