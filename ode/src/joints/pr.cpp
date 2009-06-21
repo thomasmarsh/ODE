@@ -175,6 +175,14 @@ dReal dJointGetPRAngleRate( dJointID j )
 
 
 
+void 
+dxJointPR::getSureMaxInfo( SureMaxInfo* info )
+{
+    info->max_m = 6;
+}
+
+
+
 void
 dxJointPR::getInfo1( dxJoint::Info1 *info )
 {

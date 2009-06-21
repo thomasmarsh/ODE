@@ -35,6 +35,13 @@ dxJointContact::dxJointContact( dxWorld *w ) :
 }
 
 
+void 
+dxJointContact::getSureMaxInfo( SureMaxInfo* info )
+{
+    info->max_m = 3; // ...as the actual m is very likely to hit the maximum
+}
+
+
 void
 dxJointContact::getInfo1( dxJoint::Info1 *info )
 {

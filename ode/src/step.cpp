@@ -1066,8 +1066,9 @@ void dInternalStepIsland_x2 (dxWorld *world, dxBody * const *body, int nb,
 
 //****************************************************************************
 
-void dInternalStepIsland (dxWorld *world, dxBody * const *body, int nb,
-			  dxJoint * const *joint, int nj, dReal stepsize)
+void dInternalStepIsland (dxWorldProcessContext *context, 
+  dxWorld *world, dxBody * const *body, int nb,
+  dxJoint * const *joint, int nj, dReal stepsize)
 {
 
 #ifdef dUSE_MALLOC_FOR_ALLOCA
@@ -1123,7 +1124,9 @@ void dInternalStepIsland (dxWorld *world, dxBody * const *body, int nb,
 #endif
 }
 
+size_t dxEstimateStepMemoryRequirements (dxBody * const *body, int nb, dxJoint * const *_joint, int _nj)
+{
+  return 0; // Not implemented yet
+}
 
-// Local Variables:
-// c-basic-offset:2
-// End:
+

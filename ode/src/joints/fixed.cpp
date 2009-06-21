@@ -39,6 +39,13 @@ dxJointFixed::dxJointFixed ( dxWorld *w ) :
 }
 
 
+void 
+dxJointFixed::getSureMaxInfo( SureMaxInfo* info )
+{
+    info->max_m = 6;
+}
+
+
 void
 dxJointFixed::getInfo1 ( dxJoint::Info1 *info )
 {

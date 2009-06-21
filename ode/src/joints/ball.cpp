@@ -37,6 +37,13 @@ dxJointBall::dxJointBall( dxWorld *w ) :
 }
 
 
+void 
+dxJointBall::getSureMaxInfo( SureMaxInfo* info )
+{
+    info->max_m = 3;
+}
+
+
 void
 dxJointBall::getInfo1( dxJoint::Info1 *info )
 {

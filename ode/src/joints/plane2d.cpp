@@ -59,6 +59,12 @@ dxJointPlane2D::dxJointPlane2D( dxWorld *w ) :
 }
 
 
+void 
+dxJointPlane2D::getSureMaxInfo( SureMaxInfo* info )
+{
+    info->max_m = 6;
+}
+
 
 void
 dxJointPlane2D::getInfo1( dxJoint::Info1 *info )

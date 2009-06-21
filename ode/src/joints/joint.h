@@ -73,9 +73,16 @@ struct dxJoint : public dObject
     // i.e. that is the total number of rows in the jacobian. `nub' is the
     // number of unbounded variables (which have lo,hi = -/+ infinity).
 
+    struct SureMaxInfo
+    {
+      int8 max_m; // Zero or estimate of maximal `m'
+    };
+
     struct Info1
     {
-        int m, nub;
+        // Structure size should not exceed sizeof(pointer) bytes to have 
+        // to have good memory pattern in dxQuickStepper()
+        int8 m, nub;
     };
 
     // info returned by getInfo2 function
@@ -119,6 +126,9 @@ struct dxJoint : public dObject
 
     dxJoint( dxWorld *w );
     virtual ~dxJoint();
+
+    // This quickly!!! estimate minimum (zero or not) and maximum value of "m" that could be returned by getInfo1()
+    virtual void getSureMaxInfo( SureMaxInfo* info ) = 0;
 
     virtual void getInfo1( Info1* info ) = 0;
     virtual void getInfo2( Info2* info ) = 0;

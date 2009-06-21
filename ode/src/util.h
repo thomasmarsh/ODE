@@ -45,15 +45,16 @@
 
 /* round something up to be a multiple of the EFFICIENT_ALIGNMENT */
 
-#define dEFFICIENT_SIZE(x) ((((x)-1)|(EFFICIENT_ALIGNMENT-1))+1)
-
+#define dEFFICIENT_SIZE(x) (((x)+(EFFICIENT_ALIGNMENT-1)) & ~((size_t)(EFFICIENT_ALIGNMENT-1)))
+#define dEFFICIENT_PTR(p) ((void *)dEFFICIENT_SIZE((size_t)(p)))
+#define dOFFSET_EFFICIENTLY(p, b) ((void *)((size_t)(p) + dEFFICIENT_SIZE(b)))
 
 /* alloca aligned to the EFFICIENT_ALIGNMENT. note that this can waste
  * up to 15 bytes per allocation, depending on what alloca() returns.
  */
 
 #define dALLOCA16(n) \
-  ((char*)dEFFICIENT_SIZE(((size_t)(alloca((n)+(EFFICIENT_ALIGNMENT-1))))))
+  ((char*)dEFFICIENT_PTR(alloca((n)+(EFFICIENT_ALIGNMENT-1))))
 
 
 
@@ -61,11 +62,146 @@
 void dInternalHandleAutoDisabling (dxWorld *world, dReal stepsize);
 void dxStepBody (dxBody *b, dReal h);
 
-typedef void (*dstepper_fn_t) (dxWorld *world, dxBody * const *body, int nb,
-        dxJoint * const *_joint, int nj, dReal stepsize);
 
-void dxProcessIslands (dxWorld *world, dReal stepsize, dstepper_fn_t stepper);
+struct dxWorldProcessMemoryManager
+{
+  typedef void *(*alloc_block_fn_t)(size_t block_size);
+  typedef void *(*shrink_block_fn_t)(void *block_pointer, size_t block_current_size, size_t block_smaller_size);
+  typedef void (*free_block_fn_t)(void *block_pointer, size_t block_current_size);
+  
+  dxWorldProcessMemoryManager(alloc_block_fn_t fnAlloc, shrink_block_fn_t fnShrink, free_block_fn_t fnFree): 
+    m_fnAlloc(fnAlloc), m_fnShrink(fnShrink), m_fnFree(fnFree)
+  {
+  }
 
+  alloc_block_fn_t m_fnAlloc;
+  shrink_block_fn_t m_fnShrink;
+  free_block_fn_t m_fnFree;
+};
+
+extern dxWorldProcessMemoryManager g_WorldProcessMallocMemoryManager;
+
+struct dxWorldProcessMemoryReserveInfo
+{
+  dxWorldProcessMemoryReserveInfo(float fReserveFactor, unsigned uiReserveMinimum):
+    m_fReserveFactor(fReserveFactor), m_uiReserveMinimum(uiReserveMinimum)
+  {
+  }
+
+  float m_fReserveFactor; // Use float as precision does not matter here
+  unsigned m_uiReserveMinimum;
+};
+
+struct dxWorldProcessContext
+{
+#define BUFFER_TO_ARENA_EXTRA (EFFICIENT_ALIGNMENT + dEFFICIENT_SIZE(sizeof(dxWorldProcessContext)))
+  static bool IsArenaPossible(size_t nBufferSize)
+  {
+    return SIZE_MAX - BUFFER_TO_ARENA_EXTRA >= nBufferSize; // This ensures there will be no overflow
+  }
+
+  static size_t MakeBufferSize(size_t nArenaSize)
+  {
+    return nArenaSize - BUFFER_TO_ARENA_EXTRA;
+  }
+
+  static size_t MakeArenaSize(size_t nBufferSize)
+  {
+    return BUFFER_TO_ARENA_EXTRA + nBufferSize;
+  }
+#undef BUFFER_TO_ARENA_EXTRA
+
+  bool IsStructureValid() const
+  {
+    return !m_pPreallocationcContext && m_pAllocBegin && m_pAllocEnd && m_pAllocBegin <= m_pAllocEnd && m_pAllocCurrent == m_pAllocBegin && m_pArenaBegin && m_pArenaBegin <= m_pAllocBegin; 
+  }
+
+  size_t GetMemorySize() const
+  {
+    return (size_t)m_pAllocEnd - (size_t)m_pAllocBegin;
+  }
+
+  void *SaveState() const
+  {
+    return m_pAllocCurrent;
+  }
+
+  void RestoreState(void *state)
+  {
+    m_pAllocCurrent = state;
+  }
+
+  void ResetState()
+  {
+    m_pAllocCurrent = m_pAllocBegin;
+  }
+
+  void *AllocateBlock(size_t size)
+  {
+    void *block = m_pAllocCurrent;
+    m_pAllocCurrent = dOFFSET_EFFICIENTLY(block, size);
+    dIASSERT(m_pAllocCurrent <= m_pAllocEnd);
+    return block;
+  }
+
+  template<typename ElementType>
+  ElementType *AllocateArray(size_t count)
+  {
+    return (ElementType *)AllocateBlock(count * sizeof(ElementType));
+  }
+
+  template<typename ElementType>
+  void ShrinkArray(ElementType *arr, size_t oldcount, size_t newcount)
+  {
+    dIASSERT(newcount <= oldcount);
+    dIASSERT(dOFFSET_EFFICIENTLY(arr, oldcount * sizeof(ElementType)) == m_pAllocCurrent);
+    m_pAllocCurrent = dOFFSET_EFFICIENTLY(arr, newcount * sizeof(ElementType));
+  }
+
+
+  void CleanupContext();
+
+  void SavePreallocations(int islandcount, int const *islandsizes, dxBody *const *bodies, dxJoint *const *joints);
+  void RetrievePreallocations(int &islandcount, int const *&islandsizes, dxBody *const *&bodies, dxJoint *const *&joints);
+  void OffsetPreallocations(size_t stOffset);
+  void CopyPreallocations(const dxWorldProcessContext *othercontext);
+  void ClearPreallocations();
+
+  void FreePreallocationsContext();
+
+
+  void *m_pAllocBegin;
+  void *m_pAllocEnd;
+  void *m_pAllocCurrent;
+  void *m_pArenaBegin;
+
+  int m_IslandCount;
+  int const *m_pIslandSizes;
+  dxBody *const *m_pBodies;
+  dxJoint *const *m_pJoints;
+
+  const dxWorldProcessMemoryManager *m_pArenaMemMgr;
+  dxWorldProcessContext *m_pPreallocationcContext;
+};
+
+#define BEGIN_STATE_SAVE(context, state) void *state = context->SaveState();
+#define END_STATE_SAVE(context, state) context->RestoreState(state)
+
+typedef void (*dstepper_fn_t) (dxWorldProcessContext *context, 
+        dxWorld *world, dxBody * const *body, int nb,
+        dxJoint * const *_joint, int _nj, dReal stepsize);
+
+void dxProcessIslands (dxWorldProcessContext *context, 
+  dxWorld *world, dReal stepsize, dstepper_fn_t stepper);
+
+
+typedef size_t (*dmemestimate_fn_t) (dxBody * const *body, int nb, 
+  dxJoint * const *_joint, int _nj);
+
+dxWorldProcessContext *dxReallocateWorldProcessContext (dxWorldProcessContext *oldcontext, 
+  dxWorld *world, dReal stepsize, dmemestimate_fn_t stepperestimate, 
+  const dxWorldProcessMemoryManager *memmgr, const dxWorldProcessMemoryReserveInfo &reserveinfo);
+void dxFreeWorldProcessContext (dxWorldProcessContext *context);
 
 
 #endif

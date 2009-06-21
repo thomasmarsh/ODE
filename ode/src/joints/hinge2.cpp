@@ -69,6 +69,13 @@ dxJointHinge2::dxJointHinge2( dxWorld *w ) :
 }
 
 
+void 
+dxJointHinge2::getSureMaxInfo( SureMaxInfo* info )
+{
+    info->max_m = 6;
+}
+
+
 void
 dxJointHinge2::getInfo1( dxJoint::Info1 *info )
 {

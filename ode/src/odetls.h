@@ -43,6 +43,7 @@ ODE Thread Local Storage access stub interface.
 
 
 struct TrimeshCollidersCache;
+struct dxWorldProcessContext;
 
 enum EODETLSKIND
 {
@@ -60,6 +61,7 @@ enum EODETLSITEM
 {
 	OTI_DATA_ALLOCATION_FLAGS,
 	OTI_TRIMESH_TRIMESH_COLLIDER_CACHE,
+	OTI_WORLD_STEP_CONTEXT,
 
 	OTI__MAX,
 };
@@ -97,17 +99,32 @@ public:
 		return (TrimeshCollidersCache *)CThreadLocalStorage::UnsafeGetStorageValue(m_ahtkStorageKeys[tkTLSKind], OTI_TRIMESH_TRIMESH_COLLIDER_CACHE);
 	}
 
+	static void SetWorldStepProcessingContext(EODETLSKIND tkTLSKind, dxWorldProcessContext *ppcContextInstance)
+	{
+		CThreadLocalStorage::UnsafeSetStorageValue(m_ahtkStorageKeys[tkTLSKind], OTI_WORLD_STEP_CONTEXT, (tlsvaluetype)ppcContextInstance);
+	}
+
+	static dxWorldProcessContext *GetWorldStepProcessingContext(EODETLSKIND tkTLSKind)
+	{
+		return (dxWorldProcessContext *)CThreadLocalStorage::UnsafeGetStorageValue(m_ahtkStorageKeys[tkTLSKind], OTI_WORLD_STEP_CONTEXT);
+	}
+
 public:
 	static bool AssignDataAllocationFlags(EODETLSKIND tkTLSKind, unsigned uInitializationFlags);
 
 	static bool AssignTrimeshCollidersCache(EODETLSKIND tkTLSKind, TrimeshCollidersCache *pccInstance);
 	static void DestroyTrimeshCollidersCache(EODETLSKIND tkTLSKind);
 
+	static bool AssignWorldStepProcessingContext(EODETLSKIND tkTLSKind, dxWorldProcessContext *ppcInstance);
+	static void DestroyWorldStepProcessingContext(EODETLSKIND tkTLSKind);
+
 private:
 	static void FreeTrimeshCollidersCache(TrimeshCollidersCache *pccCacheInstance);
+	static void FreeWorldStepProcessingContext(dxWorldProcessContext *ppcContextInstance);
 
 private:
 	static void _OU_CONVENTION_CALLBACK FreeTrimeshCollidersCache_Callback(tlsvaluetype vValueData);
+	static void _OU_CONVENTION_CALLBACK FreeWorldStepProcessingContext_Callback(tlsvaluetype vValueData);
 
 private:
 	static HTLSKEY				m_ahtkStorageKeys[OTK__MAX];

@@ -253,6 +253,13 @@ dxJointUniversal::getAngle2()
 }
 
 
+void 
+dxJointUniversal::getSureMaxInfo( SureMaxInfo* info )
+{
+  info->max_m = 6;
+}
+
+
 void
 dxJointUniversal::getInfo1( dxJoint::Info1 *info )
 {

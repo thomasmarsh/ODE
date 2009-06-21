@@ -118,6 +118,34 @@ ODE_API void dWorldSetCFM (dWorldID, dReal cfm);
 ODE_API dReal dWorldGetCFM (dWorldID);
 
 
+#define dWORLDSTEP_RESERVEFACTOR_DEFAULT    1.2f
+#define dWORLDSTEP_RESERVESIZE_DEFAULT      65536U
+
+/**
+ * @struct dWorldStepReserveInfo
+ * @brief Memory reservation policy descriptor structure for world stepping functions.
+ *
+ * @c struct_size should be assigned the size of the structure.
+ *
+ * @c reserve_factor is a quotient that is multiplied by required memory size
+ *  to allocate extra reserve whenever reallocation is needed.
+ *
+ * @c reserve_minimum is a minimum size that is checked against whenever reallocation 
+ * is needed to allocate expected working memory minimum at once without extra 
+ * reallocations as number of bodies/joints grows.
+ *
+ * @ingroup world
+ * @see dWorldStep2ContextRealloc
+ * @see dWorldQuickStep2ContextRealloc
+ */
+typedef struct
+{
+  unsigned struct_size;
+  float reserve_factor; // Use float as precision does not matter here
+  unsigned reserve_minimum;
+
+} dWorldStepReserveInfo;
+
 /**
  * @brief Step the world.
  *
@@ -125,51 +153,63 @@ ODE_API dReal dWorldGetCFM (dWorldID);
  * and memory on the order of m^2, where m is the total number of constraint
  * rows. For large systems this will use a lot of memory and can be very slow,
  * but this is currently the most accurate method.
- * @ingroup world
+ *
+ * The function is internally implemented as invocation of @c dWorldStep2ContextRealloc
+ * and @c dWorldStep2 with context structure stored in static variable, default 
+ * memory reservation policy, default memory allocator and no threading. The same
+ * global context is shared for both @c dWorlsStep and @c dWorldQuickStep.
+ *
+ * If library is compiled with TLS support, internal context is stored in TLS and 
+ * the function can be called from multiple threads simultaneously.
+ *
+ * @c dWorldStepCleanup can be used to free memory allocated for internal context
+ * whenever the size of scene decreases dramatically.
+ *
+ * The function is provided for backward compatibility. Consider using @c dWorldStep2ContextRealloc,
+ * @c dWorldStep2 and @c dWorldStepContextFree instead.
+ *
+ * @param w The world to be stepped
  * @param stepsize The number of seconds that the simulation has to advance.
+ * @returns 1 for success and 0 for failure
+ *
+ * @ingroup world
+ * @see dWorldStepCleanup
+ * @see dWorldStep2ContextRealloc
+ * @see dWorldStep2
+ * @see dWorldStepContextFree
  */
-ODE_API void dWorldStep (dWorldID, dReal stepsize);
-
+ODE_API int dWorldStep (dWorldID, dReal stepsize);
 
 /**
- * @brief Converts an impulse to a force.
+ * @brief Free resources allocated internally to aid @c dWorldStep() execution.
+ *
+ * This function deletes global context that is stored internally to be used 
+ * with @c dWorldStep. If library is compiled with TLS support the @c dWorldStepCleanup
+ * call releases resources allocated for current thread only.
+ * 
  * @ingroup world
- * @remarks
- * If you want to apply a linear or angular impulse to a rigid body,
- * instead of a force or a torque, then you can use this function to convert
- * the desired impulse into a force/torque vector before calling the
- * BodyAdd... function.
- * The current algorithm simply scales the impulse by 1/stepsize,
- * where stepsize is the step size for the next step that will be taken.
- * This function is given a dWorldID because, in the future, the force
- * computation may depend on integrator parameters that are set as
- * properties of the world.
+ * @see dWorldStep
  */
-ODE_API void dWorldImpulseToForce
-(
-  dWorldID, dReal stepsize,
-  dReal ix, dReal iy, dReal iz, dVector3 force
-);
-
+ODE_API void dWorldStepCleanup ();
 
 /**
- * @brief Step the world.
- * @ingroup world
- * @remarks
+ * @brief Quick-step the world.
+ *
  * This uses an iterative method that takes time on the order of m*N
  * and memory on the order of m, where m is the total number of constraint
  * rows N is the number of iterations.
  * For large systems this is a lot faster than dWorldStep(),
  * but it is less accurate.
- * @remarks
+ *
  * QuickStep is great for stacks of objects especially when the
  * auto-disable feature is used as well.
  * However, it has poor accuracy for near-singular systems.
  * Near-singular systems can occur when using high-friction contacts, motors,
  * or certain articulated structures. For example, a robot with multiple legs
  * sitting on the ground may be near-singular.
- * @remarks
+ *
  * There are ways to help overcome QuickStep's inaccuracy problems:
+ *
  * \li Increase CFM.
  * \li Reduce the number of contacts in your system (e.g. use the minimum
  *     number of contacts for the feet of a robot or creature).
@@ -182,8 +222,259 @@ ODE_API void dWorldImpulseToForce
  *
  * Increasing the number of QuickStep iterations may help a little bit, but
  * it is not going to help much if your system is really near singular.
+ *
+ * The function is internally implemented as invocation of @c dWorldQuickStep2ContextRealloc
+ * and @c dWorldQuickStep2 with context structure stored in static variable, default 
+ * memory reservation policy, default memory allocator and no threading. The same
+ * global context is shared for both @c dWorlsStep and @c dWorldQuickStep.
+ *
+ * If library is compiled with TLS support, internal context is stored in TLS and 
+ * the function can be called from multiple threads simultaneously.
+ *
+ * @c dWorldQuickStepCleanup can be used to free memory allocated for internal context
+ * whenever the size of scene decreases dramatically.
+ *
+ * The function is provided for backward compatibility. Consider using @c dWorldQuickStep2ContextRealloc,
+ * @c dWorldQuickStep2 and @c dWorldStepContextFree instead.
+ *
+ * @param w The world to be stepped
+ * @param stepsize The number of seconds that the simulation has to advance.
+ * @returns 1 for success and 0 for failure
+ *
+ * @ingroup world
+ * @see dWorldQuickStepCleanup
+ * @see dWorldQuickStep2ContextRealloc
+ * @see dWorldQuickStep2
+ * @see dWorldStepContextFree
  */
-ODE_API void dWorldQuickStep (dWorldID w, dReal stepsize);
+ODE_API int dWorldQuickStep (dWorldID w, dReal stepsize);
+
+/**
+* @brief Free resources allocated internally to aid @c dWorldQuickStep() execution.
+*
+* This function deletes global context that is stored internally to be used 
+* with @c dWorldQuickStep. If library is compiled with TLS support the @c dWorldQuickStepCleanup
+* call releases resources allocated for current thread only.
+* 
+* @ingroup world
+* @see dWorldQuickStep
+*/
+ODE_API void dWorldQuickStepCleanup ();
+
+
+/**
+ * @brief Reallocate world stepping context for next world step call
+ *
+ * This checks the memory requirements for next @c dWorldStep2 call with given 
+ * world and step size and allocates memory resources if necessary. The function
+ * must be called before each invocation of @c dWorldStep2. The values of world and
+ * stepsize must match those that are going to be passed to @c dWorldStep2 (and the 
+ * world itself must remain unchanged) or memory corruption will occur.
+ *
+ * The function only increases memory size allocated for context but never decreases it.
+ * @c dWorldStepContextFree call should be used to release existing context and start
+ * with a new one whenever number of bodies/joints in world decreases significantly.
+ *
+ * Pass NULL for @c oldcontext the first time you are going to use world stepping,
+ * then pass the value returned from previous call.
+ *
+ * If allocation fails and function returns NULL-value, the original context has been
+ * already freed and must not be used with @c dWorldStepContextFree.
+ *
+ * @c reserveinfo optionally defines memory reservation policy for the call. If NULL
+ * is passed for parameter the defaults of @c dWORLDSTEP_RESERVEFACTOR_DEFAULT and 
+ * @c dWORLDSTEP_RESERVESIZE_DEFAULT are used.
+ *
+ * @c memmgr optionally specifies memory manager to be used with the call. If NULL
+ * is passed, default @c dAlloc based memory manager is used. Use @c dAllocateWorldStepMemoryManager
+ * to allocate custom memory manager if necessary. Each call to @c dWorldStep2ContextRealloc
+ * can be performed with a different memory manager. However, the memory manager
+ * must remain valid until a call to @c dWorldStep2 returns after
+ * the next invocation of @c dWorldStep2ContextRealloc with the new memory manager 
+ * or until context is freed with @c dWorldStepContextFree.
+ *
+ * The same context can be used for both @c dWorldStep2ContextRealloc and @c dWorldQuickStep2ContextRealloc.
+ * This way the memory can be saved if it is necessary to mix @c dWorldStep2 and 
+ * @c dWorldQuickStep2 calls for a single world. Also the same context can be
+ * used to step multiple worlds one after another provided that @c dWorldStep2ContextRealloc
+ * is still called before each call to @c dWorldStep2.
+ * 
+ * @param oldcontext existing context value or NULL on first invocation.
+ * @param w world object to be used with next call to @c dWorldStep2
+ * @param stepsize step size to be used with next call to @c dWorldStep2
+ * @param reserveinfo NULL or memory reserve policy descriptor structure
+ * @param memmgr NULL or memory manager object
+ * @returns New context value on success or NULL on failure
+ *
+ * @ingroup world
+ * @see dWorldStep2
+ * @see dWorldStepContextFree
+ * @see dWorldStepReserveInfo
+ * @see dAllocateWorldStepMemoryManager
+ */
+ODE_API dWorldStepContextID dWorldStep2ContextRealloc(dWorldStepContextID oldcontext/*=NULL*/, 
+  dWorldID w, dReal stepsize, const dWorldStepReserveInfo *reserveinfo/*=NULL*/, 
+  dWorldStepMemoryManagerID memmgr/*=NULL*/);
+
+/**
+* @brief Step the world.
+*
+* This uses a "big matrix" method that takes time on the order of m^3
+* and memory on the order of m^2, where m is the total number of constraint
+* rows. For large systems this will use a lot of memory and can be very slow,
+* but this is currently the most accurate method.
+*
+* The function must be preceded with a call to @c dWorldStep2ContextRealloc each time
+* to obtain updated world stepping context.
+*
+* @warning
+* Currently the function has been only partially ported to memory allocation from 
+* stepping context and still uses stack allocation internally.
+*
+* @param context The context value obtained from previous call to @c dWorldStep2ContextRealloc
+* @param w The world to be stepped
+* @param stepsize The number of seconds that the simulation has to advance.
+* @param reserved Reserved, pass NULL here.
+*
+* @ingroup world
+* @see dWorldStep2ContextRealloc
+* @see dWorldStepContextFree
+*/
+ODE_API void dWorldStep2(dWorldStepContextID context, dWorldID w, dReal stepsize, dWorldStepThreadingManagerID reserved/*=NULL*/);
+
+
+/**
+* @brief Reallocate world stepping context for next world quick-step call
+*
+* This checks the memory requirements for next @c dWorldQuickStep2 call with given 
+* world and step size and allocates memory resources if necessary. The function
+* must be called before each invocation of @c dWorldQuickStep2. The values of world and
+* stepsize must match those that are going to be passed to @c dWorldQuickStep2 (and the 
+* world itself must remain unchanged) or memory corruption will occur.
+*
+* The function only increases memory size allocated for context but never decreases it.
+* @c dWorldStepContextFree call should be used to release existing context and start
+* with a new one whenever number of bodies/joints in world decreases significantly.
+*
+* Pass NULL for @c oldcontext the first time you are going to use world stepping,
+* then pass the value returned from previous call.
+*
+* If allocation fails and function returns NULL-value, the original context has been
+* already freed and must not be used with @c dWorldStepContextFree.
+*
+* @c reserveinfo optionally defines memory reservation policy for the call. If NULL
+* is passed for parameter the defaults of @c dWORLDSTEP_RESERVEFACTOR_DEFAULT and 
+* @c dWORLDSTEP_RESERVESIZE_DEFAULT are used.
+*
+* @c memmgr optionally specifies memory manager to be used with the call. If NULL
+* is passed, default @c dAlloc based memory manager is used. Use @c dAllocateWorldStepMemoryManager
+* to allocate custom memory manager if necessary. Each call to @c dWorldQuickStep2ContextRealloc
+* can be performed with a different memory manager. However, the memory manager
+* must remain valid until a call to @c dWorldQuickStep2 returns after
+* the next invocation of @c dWorldQuickStep2ContextRealloc with the new memory manager 
+* or until context is freed with @c dWorldStepContextFree.
+*
+* The same context can be used for both @c dWorldStep2ContextRealloc and @c dWorldQuickStep2ContextRealloc.
+* This way the memory can be saved if it is necessary to mix @c dWorldStep2 and 
+* @c dWorldQuickStep2 calls for a single world. Also the same context can be
+* used to step multiple worlds one after another provided that @c dWorldQuickStep2ContextRealloc
+* is still called before each call to @c dWorldQuickStep2.
+* 
+* @param oldcontext existing context value or NULL on first invocation.
+* @param w world object to be used with next call to @c dWorldQuickStep2
+* @param stepsize step size to be used with next call to @c dWorldQuickStep2
+* @param reserveinfo NULL or memory reserve policy descriptor structure
+* @param memmgr NULL or memory manager object
+* @returns New context value on success or NULL on failure
+*
+* @ingroup world
+* @see dWorldQuickStep2
+* @see dWorldStepContextFree
+* @see dWorldStepReserveInfo
+* @see dAllocateWorldStepMemoryManager
+*/
+ODE_API dWorldStepContextID dWorldQuickStep2ContextRealloc(dWorldStepContextID oldcontext/*=NULL*/, 
+  dWorldID w, dReal stepsize, const dWorldStepReserveInfo *reserveinfo/*=NULL*/, 
+  dWorldStepMemoryManagerID memmgr/*=NULL*/);
+
+/**
+* @brief Quick-step the world.
+*
+* This uses an iterative method that takes time on the order of m*N
+* and memory on the order of m, where m is the total number of constraint
+* rows N is the number of iterations.
+* For large systems this is a lot faster than dWorldStep(),
+* but it is less accurate.
+*
+* QuickStep is great for stacks of objects especially when the
+* auto-disable feature is used as well.
+* However, it has poor accuracy for near-singular systems.
+* Near-singular systems can occur when using high-friction contacts, motors,
+* or certain articulated structures. For example, a robot with multiple legs
+* sitting on the ground may be near-singular.
+*
+* There are ways to help overcome QuickStep's inaccuracy problems:
+*
+* \li Increase CFM.
+* \li Reduce the number of contacts in your system (e.g. use the minimum
+*     number of contacts for the feet of a robot or creature).
+* \li Don't use excessive friction in the contacts.
+* \li Use contact slip if appropriate
+* \li Avoid kinematic loops (however, kinematic loops are inevitable in
+*     legged creatures).
+* \li Don't use excessive motor strength.
+* \liUse force-based motors instead of velocity-based motors.
+*
+* Increasing the number of QuickStep iterations may help a little bit, but
+* it is not going to help much if your system is really near singular.
+*
+* The function must be preceded with a call to @c dWorldQuickStep2ContextRealloc each time
+* to obtain updated world stepping context.
+*
+* @param context The context value obtained from previous call to @c dWorldQuickStep2ContextRealloc
+* @param w The world to be stepped
+* @param stepsize The number of seconds that the simulation has to advance.
+* @param reserved Reserved, pass NULL here.
+*
+* @ingroup world
+* @see dWorldQuickStep2ContextRealloc
+* @see dWorldStepContextFree
+*/
+ODE_API void dWorldQuickStep2(dWorldStepContextID context, dWorldID w, dReal stepsize, dWorldStepThreadingManagerID reserved/*=NULL*/);
+
+
+/**
+ * @brief Free world stepping context
+ *
+ * Use this function to delete world stepping context allocated with @c dWorldStep2ContextRealloc
+ * or @c dWorldQuickStep2ContextRealloc when the context is not necessary any more
+ * or number or bodies/joints in the world has been decreased significantly and
+ * memory needs to be saved.
+ *
+ * It is OK to call the function with NULL context.
+ */
+ODE_API void dWorldStepContextFree(dWorldStepContextID context);
+
+
+/**
+* @brief Converts an impulse to a force.
+* @ingroup world
+* @remarks
+* If you want to apply a linear or angular impulse to a rigid body,
+* instead of a force or a torque, then you can use this function to convert
+* the desired impulse into a force/torque vector before calling the
+* BodyAdd... function.
+* The current algorithm simply scales the impulse by 1/stepsize,
+* where stepsize is the step size for the next step that will be taken.
+* This function is given a dWorldID because, in the future, the force
+* computation may depend on integrator parameters that are set as
+* properties of the world.
+*/
+ODE_API void dWorldImpulseToForce
+(
+ dWorldID, dReal stepsize,
+ dReal ix, dReal iy, dReal iz, dVector3 force
+ );
 
 
 /**
