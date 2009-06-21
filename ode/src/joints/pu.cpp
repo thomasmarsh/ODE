@@ -202,6 +202,14 @@ dReal dJointGetPUPositionRate( dJointID j )
 
 
 
+void 
+dxJointPU::getSureMaxInfo( SureMaxInfo* info )
+{
+  info->max_m = 6;
+}
+
+
+
 void
 dxJointPU::getInfo1( dxJoint::Info1 *info )
 {

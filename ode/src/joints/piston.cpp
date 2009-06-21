@@ -170,6 +170,13 @@ dReal dJointGetPistonAngleRate ( dJointID j )
 }
 
 
+void 
+dxJointPiston::getSureMaxInfo( SureMaxInfo* info )
+{
+  info->max_m = 6;
+}
+
+
 void
 dxJointPiston::getInfo1 ( dxJoint::Info1 *info )
 {

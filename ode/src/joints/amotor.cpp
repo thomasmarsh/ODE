@@ -179,6 +179,12 @@ dxJointAMotor::setEulerReferenceVectors()
     }
 }
 
+void 
+dxJointAMotor::getSureMaxInfo( SureMaxInfo* info )
+{
+    info->max_m = num;
+}
+
 
 void
 dxJointAMotor::getInfo1( dxJoint::Info1 *info )
@@ -186,7 +192,7 @@ dxJointAMotor::getInfo1( dxJoint::Info1 *info )
     info->m = 0;
     info->nub = 0;
 
-    // compute the axes and angles, if in euler mode
+    // compute the axes and angles, if in Euler mode
     if ( mode == dAMotorEuler )
     {
         dVector3 ax[3];

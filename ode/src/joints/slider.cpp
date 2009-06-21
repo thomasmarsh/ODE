@@ -104,6 +104,13 @@ dReal dJointGetSliderPositionRate ( dJointID j )
 }
 
 
+void 
+dxJointSlider::getSureMaxInfo( SureMaxInfo* info )
+{
+  info->max_m = 6;
+}
+
+
 void
 dxJointSlider::getInfo1 ( dxJoint::Info1 *info )
 {

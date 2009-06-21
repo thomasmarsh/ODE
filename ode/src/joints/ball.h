@@ -37,6 +37,7 @@ struct dxJointBall : public dxJoint
     dReal get( int num );
 
     dxJointBall( dxWorld *w );
+    virtual void getSureMaxInfo( SureMaxInfo* info );
     virtual void getInfo1( Info1* info );
     virtual void getInfo2( Info2* info );
     virtual dJointType type() const;

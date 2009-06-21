@@ -33,6 +33,13 @@ dxJointNull::dxJointNull( dxWorld *w ) :
 {
 }
 
+void 
+dxJointNull::getSureMaxInfo( SureMaxInfo* info )
+{
+    info->max_m = 0;
+}
+
+
 void
 dxJointNull::getInfo1( dxJoint::Info1 *info )
 {

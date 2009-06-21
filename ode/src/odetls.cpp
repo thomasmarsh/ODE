@@ -36,6 +36,7 @@ ODE Thread Local Storage access stub implementation.
 #include "config.h"
 #include "odetls.h"
 #include "collision_trimesh_internal.h"
+#include "util.h"
 
 
 #if dTLS_ENABLED
@@ -122,12 +123,38 @@ void COdeTls::DestroyTrimeshCollidersCache(EODETLSKIND tkTLSKind)
 }
 
 
+bool COdeTls::AssignWorldStepProcessingContext(EODETLSKIND tkTLSKind, dxWorldProcessContext *ppcInstance)
+{
+	dIASSERT(!CThreadLocalStorage::GetStorageValue(m_ahtkStorageKeys[tkTLSKind], OTI_WORLD_STEP_CONTEXT));
+
+	bool bResult = CThreadLocalStorage::SetStorageValue(m_ahtkStorageKeys[tkTLSKind], OTI_WORLD_STEP_CONTEXT, (tlsvaluetype)ppcInstance, &COdeTls::FreeWorldStepProcessingContext_Callback);
+	return bResult;
+}
+
+void COdeTls::DestroyWorldStepProcessingContext(EODETLSKIND tkTLSKind)
+{
+	dxWorldProcessContext *ppcContextInstance = (dxWorldProcessContext *)CThreadLocalStorage::GetStorageValue(m_ahtkStorageKeys[tkTLSKind], OTI_WORLD_STEP_CONTEXT);
+
+	if (ppcContextInstance)
+	{
+		FreeWorldStepProcessingContext(ppcContextInstance);
+
+		CThreadLocalStorage::UnsafeSetStorageValue(m_ahtkStorageKeys[tkTLSKind], OTI_WORLD_STEP_CONTEXT, (tlsvaluetype)NULL);
+	}
+}
+
+
 //////////////////////////////////////////////////////////////////////////
 // Value type destructors
 
 void COdeTls::FreeTrimeshCollidersCache(TrimeshCollidersCache *pccCacheInstance)
 {
 	delete pccCacheInstance;
+}
+
+void COdeTls::FreeWorldStepProcessingContext(dxWorldProcessContext *ppcContextInstance)
+{
+	dxFreeWorldProcessContext(ppcContextInstance);
 }
 
 
@@ -138,6 +165,12 @@ void COdeTls::FreeTrimeshCollidersCache_Callback(tlsvaluetype vValueData)
 {
 	TrimeshCollidersCache *pccCacheInstance = (TrimeshCollidersCache *)vValueData;
 	FreeTrimeshCollidersCache(pccCacheInstance);
+}
+
+void COdeTls::FreeWorldStepProcessingContext_Callback(tlsvaluetype vValueData)
+{
+	dxWorldProcessContext *ppcContextInstance = (dxWorldProcessContext *)vValueData;
+	FreeWorldStepProcessingContext(ppcContextInstance);
 }
 
 

@@ -227,7 +227,67 @@ ODE_API void dCleanupODEAllDataForThread();
 ODE_API void dCloseODE(void);
 
 
+/**
+ * @struct dWorldStepMemoryFunctionsInfo
+ * @brief World stepping memory manager descriptor structure
+ *
+ * This structure is intended to define the functions of memory manager to be used
+ * with world stepping functions.
+ *
+ * @c struct_size should be assigned the size of the structure
+ *
+ * @c alloc_block is a function to allocate memory block of given size.
+ *
+ * @c shrink_block is a function to shrink existing memory block to a smaller size.
+ * It must preserve the contents of block head while shrinking. The new block size
+ * is guaranteed to be always less than the existing one.
+ *
+ * @c free_block is a function to delete existing memory block.
+ *
+ * @ingroup init
+ * @see dAllocateWorldStepMemoryManager
+ */
+typedef struct 
+{
+  unsigned struct_size;
+  void *(*alloc_block)(size_t block_size);
+  void *(*shrink_block)(void *block_pointer, size_t block_current_size, size_t block_smaller_size);
+  void (*free_block)(void *block_pointer, size_t block_current_size);
 
+} dWorldStepMemoryFunctionsInfo;
+
+/**
+ * @brief Allocates world stepping memory manager
+ *
+ * Use this function to allocate memory manager that can be used with @c dWorldStep2ContextRealloc,
+ * @c dWorldQuickStep2ContextRealloc and similar.
+ *
+ * The memory manager should be deleted with a call to @c dFreeWorldStepMemoryManager
+ * when it is not needed any more.
+ *
+ * The function copies content of @c pmfMemoryFunctions and it does not need to
+ * remain valid for the lifetime of the memory manager object.
+ *
+ * @param pmfMemoryFunctions Memory manager functions descriptor structure.
+ * @returns Memory manager object
+ * 
+ * @ingroup init
+ * @see dWorldStepMemoryFunctionsInfo
+ * @see dFreeWorldStepMemoryManager
+ */
+ODE_API dWorldStepMemoryManagerID dAllocateWorldStepMemoryManager(const dWorldStepMemoryFunctionsInfo *pmfMemoryFunctions);
+
+/**
+ * @brief Deletes world stepping memory manager
+ *
+ * Use this function to delete memory manager allocated with @c dAllocateWorldStepMemoryManager.
+ *
+ * @param mmManagerID The memory manager object to be deleted.
+ *
+ * @ingroup init
+ * @see dAllocateWorldStepMemoryManager
+ */
+ODE_API void dFreeWorldStepMemoryManager(dWorldStepMemoryManagerID mmManagerID);
 
 
 #ifdef __cplusplus

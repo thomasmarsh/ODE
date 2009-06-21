@@ -39,6 +39,7 @@ struct dxJointPlane2D : public dxJoint
 
 
     dxJointPlane2D( dxWorld *w );
+    virtual void getSureMaxInfo( SureMaxInfo* info );
     virtual void getInfo1( Info1* info );
     virtual void getInfo2( Info2* info );
     virtual dJointType type() const;
