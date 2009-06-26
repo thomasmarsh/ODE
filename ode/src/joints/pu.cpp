@@ -431,6 +431,7 @@ dxJointPU::getInfo2( dxJoint::Info2 *info )
     info->c[2] = k * dDOT( q, err );
 
     int row = 3 + limot1.addLimot( this, info, 3, ax1, 1 );
+    row += limot2.addLimot( this, info, row, ax2, 1 );
 
     if (  node[1].body || !(flags & dJOINT_REVERSE) )
         limotP.addLimot( this, info, row, axP, 0 );

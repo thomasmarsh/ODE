@@ -8,6 +8,10 @@ the rules for this file:
   * keep the format consistent (79 char width, M/D/Y date format).
 
 ------------------------------------------------------------------------------
+06/25/09 Remi Ricard (papaDoc)
+        * Add limit to the to the second axis of the universal joint
+         for the pu joint.
+
 06/14/09 Oleh Derevenko
 		* dWorldQuickStep re-implemented to avoid memory allocation on stack.
 		  Also several optimizations have been made to decrease memory 
@@ -37,28 +41,28 @@ the rules for this file:
 
 06/05/09 Daniel K. O.
 
-		* Removed aliasing issues from OPCODE/Ice, plus some other warnings.
-		  Now it builds on gcc 4.3.2 with '-Wall -Werror -O3".
+         * Removed aliasing issues from OPCODE/Ice, plus some other warnings.
+           Now it builds on gcc 4.3.2 with '-Wall -Werror -O3".
 
 05/30/09 Oleh Derevenko
 
-		* A minor memory usage optimization for QuickStep.
+         * A minor memory usage optimization for QuickStep.
 
 05/24/09 Daniel K. O.
 
-		* Made the new trimesh collider the default.
-		* Added a "-texturepath" option to drawstuff.
+         * Made the new trimesh collider the default.
+         * Added a "-texturepath" option to drawstuff.
 
 05/18/09 Oleh Derevenko
 
-		* Heightfield rotation fixed to avoid NaNs while rotating infinite 
-		  MIN/MAX heights.
+        * Heightfield rotation fixed to avoid NaNs while rotating infinite
+          MIN/MAX heights.
 
 05/03/09 Oleh Derevenko
 
-		* Incorrect parameter order fixed on contact merging in Sphere-Trimesh
-		  collisions. The bug resulted in merged contact remaining with normal 
-		  of first contact found. Thanks to Dimitris Papavasiliou for reporting.
+        * Incorrect parameter order fixed on contact merging in Sphere-Trimesh
+          collisions. The bug resulted in merged contact remaining with normal
+          of first contact found. Thanks to Dimitris Papavasiliou for reporting.
 
 04/23/09 Daniel K. O.
         * Fixed bug #2685170: use the C99 __func__ instead of __FUNCTION__ when
