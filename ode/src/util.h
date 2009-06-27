@@ -63,15 +63,23 @@ void dInternalHandleAutoDisabling (dxWorld *world, dReal stepsize);
 void dxStepBody (dxBody *b, dReal h);
 
 
-struct dxWorldProcessMemoryManager
+struct dxWorldProcessMemoryManager:
+  public dBase
 {
   typedef void *(*alloc_block_fn_t)(size_t block_size);
   typedef void *(*shrink_block_fn_t)(void *block_pointer, size_t block_current_size, size_t block_smaller_size);
   typedef void (*free_block_fn_t)(void *block_pointer, size_t block_current_size);
   
-  dxWorldProcessMemoryManager(alloc_block_fn_t fnAlloc, shrink_block_fn_t fnShrink, free_block_fn_t fnFree): 
-    m_fnAlloc(fnAlloc), m_fnShrink(fnShrink), m_fnFree(fnFree)
+  dxWorldProcessMemoryManager(alloc_block_fn_t fnAlloc, shrink_block_fn_t fnShrink, free_block_fn_t fnFree)
   {
+    Assign(fnAlloc, fnShrink, fnFree);
+  }
+
+  void Assign(alloc_block_fn_t fnAlloc, shrink_block_fn_t fnShrink, free_block_fn_t fnFree)
+  {
+    m_fnAlloc = fnAlloc;
+    m_fnShrink = fnShrink;
+    m_fnFree = fnFree;
   }
 
   alloc_block_fn_t m_fnAlloc;
@@ -81,16 +89,26 @@ struct dxWorldProcessMemoryManager
 
 extern dxWorldProcessMemoryManager g_WorldProcessMallocMemoryManager;
 
-struct dxWorldProcessMemoryReserveInfo
+struct dxWorldProcessMemoryReserveInfo:
+  public dBase
 {
-  dxWorldProcessMemoryReserveInfo(float fReserveFactor, unsigned uiReserveMinimum):
-    m_fReserveFactor(fReserveFactor), m_uiReserveMinimum(uiReserveMinimum)
+  dxWorldProcessMemoryReserveInfo(float fReserveFactor, unsigned uiReserveMinimum)
   {
+    Assign(fReserveFactor, uiReserveMinimum);
+  }
+
+  void Assign(float fReserveFactor, unsigned uiReserveMinimum)
+  {
+    m_fReserveFactor = fReserveFactor;
+    m_uiReserveMinimum = uiReserveMinimum;
   }
 
   float m_fReserveFactor; // Use float as precision does not matter here
   unsigned m_uiReserveMinimum;
 };
+
+extern dxWorldProcessMemoryReserveInfo g_WorldProcessDefaultReserveInfo;
+
 
 struct dxWorldProcessContext
 {
@@ -184,6 +202,8 @@ struct dxWorldProcessContext
   dxWorldProcessContext *m_pPreallocationcContext;
 };
 
+
+
 #define BEGIN_STATE_SAVE(context, state) void *state = context->SaveState();
 #define END_STATE_SAVE(context, state) context->RestoreState(state)
 
@@ -191,17 +211,109 @@ typedef void (*dstepper_fn_t) (dxWorldProcessContext *context,
         dxWorld *world, dxBody * const *body, int nb,
         dxJoint * const *_joint, int _nj, dReal stepsize);
 
-void dxProcessIslands (dxWorldProcessContext *context, 
-  dxWorld *world, dReal stepsize, dstepper_fn_t stepper);
+void dxProcessIslands (dxWorld *world, dReal stepsize, dstepper_fn_t stepper);
 
 
 typedef size_t (*dmemestimate_fn_t) (dxBody * const *body, int nb, 
   dxJoint * const *_joint, int _nj);
 
-dxWorldProcessContext *dxReallocateWorldProcessContext (dxWorldProcessContext *oldcontext, 
-  dxWorld *world, dReal stepsize, dmemestimate_fn_t stepperestimate, 
-  const dxWorldProcessMemoryManager *memmgr, const dxWorldProcessMemoryReserveInfo &reserveinfo);
+bool dxReallocateWorldProcessContext (dxWorld *world, 
+  dReal stepsize, dmemestimate_fn_t stepperestimate);
 void dxFreeWorldProcessContext (dxWorldProcessContext *context);
 
+
+
+
+// World stepping working memory object
+class dxStepWorkingMemory:
+  public dBase
+{
+public:
+  dxStepWorkingMemory(): m_uiRefCount(1), m_ppcProcessingContext(NULL), m_priReserveInfo(NULL), m_pmmMemoryManager(NULL) {}
+
+private:
+  ~dxStepWorkingMemory() // Use Release() instead
+  {
+    if (m_ppcProcessingContext) dxFreeWorldProcessContext(m_ppcProcessingContext);
+    delete m_priReserveInfo;
+    delete m_pmmMemoryManager;
+  }
+
+public:
+  void Addref()
+  {
+    dIASSERT(~m_uiRefCount != 0);
+    ++m_uiRefCount;
+  }
+
+  void Release()
+  {
+    dIASSERT(m_uiRefCount != 0);
+    if (--m_uiRefCount == 0)
+    {
+      delete this;
+    }
+  }
+
+public:
+  void CleanupMemory()
+  {
+    if (m_ppcProcessingContext)
+    {
+      dxFreeWorldProcessContext(m_ppcProcessingContext);
+      m_ppcProcessingContext = NULL;
+    }
+  }
+
+public: 
+  dxWorldProcessContext *GetWorldProcessingContext() const { return m_ppcProcessingContext; }
+  void SetWorldProcessingContext(dxWorldProcessContext *ppcInstance) { m_ppcProcessingContext = ppcInstance; }
+
+  const dxWorldProcessMemoryReserveInfo *GetMemoryReserveInfo() const { return m_priReserveInfo; }
+  const dxWorldProcessMemoryReserveInfo *SureGetMemoryReserveInfo() const { return m_priReserveInfo ? m_priReserveInfo : &g_WorldProcessDefaultReserveInfo; }
+  void SetMemoryReserveInfo(float fReserveFactor, unsigned uiReserveMinimum)
+  {
+    if (m_priReserveInfo) { m_priReserveInfo->Assign(fReserveFactor, uiReserveMinimum); }
+    else { m_priReserveInfo = new dxWorldProcessMemoryReserveInfo(fReserveFactor, uiReserveMinimum); }
+  }
+  void ResetMemoryReserveInfoToDefault()
+  {
+    if (m_priReserveInfo) { delete m_priReserveInfo; m_priReserveInfo = NULL; }
+  }
+
+  const dxWorldProcessMemoryManager *GetMemoryManager() const { return m_pmmMemoryManager; }
+  const dxWorldProcessMemoryManager *SureGetMemoryManager() const { return m_pmmMemoryManager ? m_pmmMemoryManager : &g_WorldProcessMallocMemoryManager; }
+  void SetMemoryManager(dxWorldProcessMemoryManager::alloc_block_fn_t fnAlloc, 
+    dxWorldProcessMemoryManager::shrink_block_fn_t fnShrink, 
+    dxWorldProcessMemoryManager::free_block_fn_t fnFree) 
+  {
+    if (m_pmmMemoryManager) { m_pmmMemoryManager->Assign(fnAlloc, fnShrink, fnFree); }
+    else { m_pmmMemoryManager = new dxWorldProcessMemoryManager(fnAlloc, fnShrink, fnFree); }
+  }
+  void ResetMemoryManagerToDefault()
+  {
+    if (m_pmmMemoryManager) { delete m_pmmMemoryManager; m_pmmMemoryManager = NULL; }
+  }
+
+private:
+  unsigned m_uiRefCount;
+  dxWorldProcessContext *m_ppcProcessingContext;
+  dxWorldProcessMemoryReserveInfo *m_priReserveInfo;
+  dxWorldProcessMemoryManager *m_pmmMemoryManager;
+};
+
+template<class ClassType>
+inline ClassType *AllocateOnDemand(ClassType *&pctStorage)
+{
+  ClassType *pctCurrentInstance = pctStorage;
+
+  if (!pctCurrentInstance)
+  {
+    pctCurrentInstance = new ClassType();
+    pctStorage = pctCurrentInstance;
+  }
+
+  return pctCurrentInstance;
+}
 
 #endif

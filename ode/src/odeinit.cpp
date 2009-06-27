@@ -87,7 +87,6 @@ static inline bool IsODEAnyModeInitialized()
 enum
 {
 	TLD_INTERNAL_COLLISIONDATA_ALLOCATED = 0x00000001,
-	TLD_INTERNAL_STEPCONTEXT_ALLOCATED   = 0x00000002,
 };
 
 static bool AllocateThreadBasicDataIfNecessary(EODEINITMODE imInitMode)
@@ -215,75 +214,6 @@ static void FreeThreadCollisionData(EODEINITMODE imInitMode)
 }
 
 
-#if dTLS_ENABLED
-static bool AllocateThreadWorldStepContext(EODETLSKIND tkTlsKind)
-{
-	bool bResult = false;
-
-	do
-	{
-		dIASSERT(!(COdeTls::GetDataAllocationFlags(tkTlsKind) & TLD_INTERNAL_STEPCONTEXT_ALLOCATED));
-
-		if (!COdeTls::AssignWorldStepProcessingContext(tkTlsKind, NULL))
-		{
-			break;
-		}
-
-		COdeTls::SignalDataAllocationFlags(tkTlsKind, TLD_INTERNAL_STEPCONTEXT_ALLOCATED);
-
-		bResult = true;
-	}
-	while (false);
-
-	return bResult;
-}
-#endif // dTLS_ENABLED
-
-static bool AllocateThreadWorldStepContextIfNecessary(EODEINITMODE imInitMode, bool &bOutContextAllocated)
-{
-	bool bResult = false;
-	bOutContextAllocated = false;
-
-	do 
-	{
-#if dTLS_ENABLED
-		EODETLSKIND tkTlsKind = g_atkTLSKindsByInitMode[imInitMode];
-
-		const unsigned uDataAllocationFlags = COdeTls::GetDataAllocationFlags(tkTlsKind);
-
-		if ((uDataAllocationFlags & TLD_INTERNAL_STEPCONTEXT_ALLOCATED) == 0)
-		{
-			if (!AllocateThreadWorldStepContext(tkTlsKind))
-			{
-				break;
-			}
-
-			bOutContextAllocated = true;
-		}
-
-#endif // #if dTLS_ENABLED
-
-		bResult = true;
-	}
-	while (false);
-
-	return bResult;
-}
-
-static void FreeThreadWorldStepContext(EODEINITMODE imInitMode)
-{
-#if dTLS_ENABLED
-
-	EODETLSKIND tkTlsKind = g_atkTLSKindsByInitMode[imInitMode];
-
-	COdeTls::DestroyWorldStepProcessingContext(tkTlsKind);
-
-	COdeTls::DropDataAllocationFlags(tkTlsKind, TLD_INTERNAL_STEPCONTEXT_ALLOCATED);
-
-#endif // dTLS_ENABLED
-}
-
-
 static bool InitODEForMode(EODEINITMODE imInitMode)
 {
 	bool bResult = false;
@@ -385,7 +315,7 @@ static bool AllocateODEDataForThreadForMode(EODEINITMODE imInitMode, unsigned in
 {
 	bool bResult = false;
 
-	bool bCollisionDataAllocated = false, bWorldStepContextAllocated = false;
+	bool bCollisionDataAllocated = false;
 
 	do
 	{
@@ -402,25 +332,12 @@ static bool AllocateODEDataForThreadForMode(EODEINITMODE imInitMode, unsigned in
 			}
 		}
 
-		// if -- always allocate as it is just a simple NULL assignment
-		{
-			if (!AllocateThreadWorldStepContextIfNecessary(imInitMode, bWorldStepContextAllocated))
-			{
-				break;
-			}
-		}
-
 		bResult = true;
 	}
 	while (false);
 
 	if (!bResult)
 	{
-		if (bWorldStepContextAllocated)
-		{
-			FreeThreadWorldStepContext(imInitMode);
-		}
-
 		if (bCollisionDataAllocated)
 		{
 			FreeThreadCollisionData(imInitMode);
@@ -439,8 +356,6 @@ static void CloseODEForMode(EODEINITMODE imInitMode)
 
 	if (!bAnyModeStillInitialized)
 	{
-		dWorldStepCleanup();
-		dWorldQuickStepCleanup();
 		dClearPosrCache();
 		dFinitUserClasses();
 		dFinitColliders();
@@ -619,27 +534,5 @@ void dCloseODE()
 	dUASSERT(g_uiODEInitCounter != 0, "dCloseODE must not be called without dInitODE2 or if dInitODE2 fails"); // dCloseODE must not be called without dInitODE2 or if dInitODE2 fails
 
 	InternalCloseODE();
-}
-
-
-//////////////////////////////////////////////////////////////////////////
-
-dWorldStepMemoryManagerID dAllocateWorldStepMemoryManager(const dWorldStepMemoryFunctionsInfo *pmfMemoryFunctions)
-{
-	if (!pmfMemoryFunctions || pmfMemoryFunctions->struct_size < sizeof(dWorldStepMemoryFunctionsInfo))
-	{
-		dUASSERT(pmfMemoryFunctions, "bad memory functions");
-		return 0;
-	}
-
-	dxWorldProcessMemoryManager *pmmMemoryManager = new dxWorldProcessMemoryManager(
-		pmfMemoryFunctions->alloc_block, pmfMemoryFunctions->shrink_block, pmfMemoryFunctions->free_block);
-	return (dWorldStepMemoryManagerID)pmmMemoryManager;
-}
-
-void dFreeWorldStepMemoryManager(dWorldStepMemoryManagerID mmManagerID)
-{
-	dxWorldProcessMemoryManager *pmmMemoryManager = (dxWorldProcessMemoryManager *)mmManagerID;
-	delete pmmMemoryManager;
 }
 

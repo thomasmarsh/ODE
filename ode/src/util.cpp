@@ -31,6 +31,7 @@ static void InternalFreeWorldProcessContext (dxWorldProcessContext *context);
 // Malloc based world stepping memory manager
 
 /*extern */dxWorldProcessMemoryManager g_WorldProcessMallocMemoryManager(dAlloc, dRealloc, dFree);
+/*extern */dxWorldProcessMemoryReserveInfo g_WorldProcessDefaultReserveInfo(dWORLDSTEP_RESERVEFACTOR_DEFAULT, dWORLDSTEP_RESERVESIZE_DEFAULT);
 
 
 //****************************************************************************
@@ -515,9 +516,14 @@ static size_t BuildIslandsAndEstimateStepperMemoryRequirements(dxWorldProcessCon
 // bodies will not be included in the simulation. disabled bodies are
 // re-enabled if they are found to be part of an active island.
 
-void dxProcessIslands (dxWorldProcessContext *context, dxWorld *world, dReal stepsize, dstepper_fn_t stepper)
+void dxProcessIslands (dxWorld *world, dReal stepsize, dstepper_fn_t stepper)
 {
   const int sizeelements = 2;
+
+  dxStepWorkingMemory *wmem = world->wmem;
+  dIASSERT(wmem != NULL);
+
+  dxWorldProcessContext *context = wmem->GetWorldProcessingContext(); 
 
   int islandcount;
   int const *islandsizes;
@@ -694,11 +700,17 @@ static void InternalFreeWorldProcessContext (dxWorldProcessContext *context)
 }
 
 
-dxWorldProcessContext *dxReallocateWorldProcessContext (dxWorldProcessContext *oldcontext, 
-  dxWorld *world, dReal stepsize, dmemestimate_fn_t stepperestimate, 
-  const dxWorldProcessMemoryManager *memmgr, const dxWorldProcessMemoryReserveInfo &reserveinfo)
+bool dxReallocateWorldProcessContext (dxWorld *world, 
+  dReal stepsize, dmemestimate_fn_t stepperestimate)
 {
-  dUASSERT (!oldcontext || oldcontext->IsStructureValid(), "invalid context structure");
+  dxStepWorkingMemory *wmem = AllocateOnDemand(world->wmem);
+  if (!wmem) return false;
+
+  dxWorldProcessContext *oldcontext = wmem->GetWorldProcessingContext();
+  dIASSERT (!oldcontext || oldcontext->IsStructureValid());
+
+  const dxWorldProcessMemoryReserveInfo *reserveinfo = wmem->SureGetMemoryReserveInfo();
+  const dxWorldProcessMemoryManager *memmgr = wmem->SureGetMemoryManager();
 
   dxWorldProcessContext *context = oldcontext;
 
@@ -708,7 +720,7 @@ dxWorldProcessContext *dxReallocateWorldProcessContext (dxWorldProcessContext *o
   dIASSERT(sesize == dEFFICIENT_SIZE(sesize));
 
   size_t stepperestimatereq = islandsreq + sesize;
-  context = InternalReallocateWorldProcessContext(context, stepperestimatereq, memmgr, 1.0f, reserveinfo.m_uiReserveMinimum);
+  context = InternalReallocateWorldProcessContext(context, stepperestimatereq, memmgr, 1.0f, reserveinfo->m_uiReserveMinimum);
   
   if (context)
   {
@@ -716,10 +728,11 @@ dxWorldProcessContext *dxReallocateWorldProcessContext (dxWorldProcessContext *o
     dIASSERT(stepperreq == dEFFICIENT_SIZE(stepperreq));
 
     size_t memreq = stepperreq + islandsreq;
-    context = InternalReallocateWorldProcessContext(context, memreq, memmgr, reserveinfo.m_fReserveFactor, reserveinfo.m_uiReserveMinimum);
+    context = InternalReallocateWorldProcessContext(context, memreq, memmgr, reserveinfo->m_fReserveFactor, reserveinfo->m_uiReserveMinimum);
   }
 
-  return context;
+  wmem->SetWorldProcessingContext(context);
+  return context != NULL;
 }
 
 void dxFreeWorldProcessContext (dxWorldProcessContext *context)
