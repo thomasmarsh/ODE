@@ -206,7 +206,6 @@ struct dxGeom;		/* geometry (collision object) */
 struct dxJoint;
 struct dxJointNode;
 struct dxJointGroup;
-struct dxWorldProcessMemoryManager;
 struct dxWorldProcessThreadingManager;
 struct dxWorldProcessContext;
 
@@ -216,7 +215,6 @@ typedef struct dxBody *dBodyID;
 typedef struct dxGeom *dGeomID;
 typedef struct dxJoint *dJointID;
 typedef struct dxJointGroup *dJointGroupID;
-typedef struct dxWorldProcessMemoryManager *dWorldStepMemoryManagerID;
 typedef struct dxWorldProcessThreadingManager *dWorldStepThreadingManagerID;
 typedef struct dxWorldProcessContext *dWorldStepContextID;
 

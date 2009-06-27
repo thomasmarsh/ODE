@@ -118,6 +118,67 @@ ODE_API void dWorldSetCFM (dWorldID, dReal cfm);
 ODE_API dReal dWorldGetCFM (dWorldID);
 
 
+/**
+ * @brief Set the world to use shared working memory along with another world.
+ *
+ * The worlds allocate working memory internally for simulation stepping. This
+ * memory is cached among the calls to @c dWordStep and @c dWorldQuickStep. 
+ * Similarly, several worlds can be set up to share this memory caches thus 
+ * reducing overall memory usage by cost of making worlds inappropriate for 
+ * simultaneous simulation in multiple threads.
+ *
+ * If null value is passed for @a from_world parameter the world is detached from 
+ * sharing and returns to defaults for working memory, reservation policy and 
+ * memory manager as if just created. This can also be used to enable use of shared 
+ * memory for a world that has already had working memory allocated privately.
+ * Normally using shared memory after a world has its private working memory allocated
+ * is prohibited.
+ *
+ * Allocation policy used can only increase world's internal reserved memory size
+ * and never decreases it. @c dWorldCleanupWorkingMemory can be used to release 
+ * working memory for a world in case if number of objects/joint decreases 
+ * significantly in it.
+ *
+ * With sharing working memory worlds also automatically share memory reservation 
+ * policy and memory manager. Thus, these parameters need to be customized for
+ * initial world to be used as sharing source only.
+ *
+ * Failure result status means a memory allocation failure.
+ *
+ * @param w The world to use the shared memory with.
+ * @param from_world Null or the world the shared memory is to be used from.
+ * @returns 1 for success and 0 for failure.
+ *
+ * @ingroup world
+ * @see dWorldCleanupWorkingMemory
+ * @see dWorldSetStepMemoryReservationPolicy
+ * @see dWorldSetStepMemoryManager
+ */
+ODE_API int dWorldUseSharedWorkingMemory(dWorldID w, dWorldID from_world/*=NULL*/);
+
+/**
+ * @brief Release internal working memory allocated for world
+ *
+ * The worlds allocate working memory internally for simulation stepping. This 
+ * function can be used to free world's internal memory cache in case if number of
+ * objects/joints in the world decreases significantly. By default, internal 
+ * allocation policy is used to only increase cache size as necessary and never 
+ * decrease it.
+ *
+ * If a world shares its working memory with other worlds the cache deletion 
+ * affects all the linked worlds. However the shared status itself remains intact.
+ *
+ * The function call does affect neither memory reservation policy nor memory manager.
+ *
+ * @param w The world to release working memory for.
+ *
+ * @ingroup world
+ * @see dWorldUseSharedWorkingMemory
+ * @see dWorldSetStepMemoryReservationPolicy
+ * @see dWorldSetStepMemoryManager
+ */
+ODE_API void dWorldCleanupWorkingMemory(dWorldID w);
+
 #define dWORLDSTEP_RESERVEFACTOR_DEFAULT    1.2f
 #define dWORLDSTEP_RESERVESIZE_DEFAULT      65536U
 
@@ -135,8 +196,7 @@ ODE_API dReal dWorldGetCFM (dWorldID);
  * reallocations as number of bodies/joints grows.
  *
  * @ingroup world
- * @see dWorldStep2ContextRealloc
- * @see dWorldQuickStep2ContextRealloc
+ * @see dWorldSetStepMemoryReservationPolicy
  */
 typedef struct
 {
@@ -147,6 +207,88 @@ typedef struct
 } dWorldStepReserveInfo;
 
 /**
+ * @brief Set memory reservation policy for world to be used with simulation stepping functions
+ *
+ * The function allows to customize reservation policy to be used for internal
+ * memory which is allocated to aid simulation for a world. By default, values
+ * of @c dWORLDSTEP_RESERVEFACTOR_DEFAULT and @c dWORLDSTEP_RESERVESIZE_DEFAULT
+ * are used.
+ *
+ * Passing @a policyinfo argument as NULL results in reservation policy being
+ * reset to defaults as if the world has been just created. The content of 
+ * @a policyinfo structure is copied internally and does not need to remain valid
+ * after the call returns.
+ *
+ * If the world uses working memory sharing, changing memory reservation policy
+ * affects all the worlds linked together.
+ *
+ * Failure result status means a memory allocation failure.
+ *
+ * @param w The world to change memory reservation policy for.
+ * @param policyinfo Null or a pointer to policy descriptor structure.
+ * @returns 1 for success and 0 for failure.
+ *
+ * @ingroup world
+ * @see dWorldUseSharedWorkingMemory
+ */
+ODE_API int dWorldSetStepMemoryReservationPolicy(dWorldID w, const dWorldStepReserveInfo *policyinfo/*=NULL*/);
+
+/**
+* @struct dWorldStepMemoryFunctionsInfo
+* @brief World stepping memory manager descriptor structure
+*
+* This structure is intended to define the functions of memory manager to be used
+* with world stepping functions.
+*
+* @c struct_size should be assigned the size of the structure
+*
+* @c alloc_block is a function to allocate memory block of given size.
+*
+* @c shrink_block is a function to shrink existing memory block to a smaller size.
+* It must preserve the contents of block head while shrinking. The new block size
+* is guaranteed to be always less than the existing one.
+*
+* @c free_block is a function to delete existing memory block.
+*
+* @ingroup init
+* @see dWorldSetStepMemoryManager
+*/
+typedef struct 
+{
+  unsigned struct_size;
+  void *(*alloc_block)(size_t block_size);
+  void *(*shrink_block)(void *block_pointer, size_t block_current_size, size_t block_smaller_size);
+  void (*free_block)(void *block_pointer, size_t block_current_size);
+
+} dWorldStepMemoryFunctionsInfo;
+
+/**
+* @brief Set memory manager for world to be used with simulation stepping functions
+*
+* The function allows to customize memory manager to be used for internal
+* memory allocation during simulation for a world. By default, @c dAlloc/@c dRealloc/@c dFree
+* based memory manager is used.
+*
+* Passing @a memfuncs argument as NULL results in memory manager being
+* reset to default one as if the world has been just created. The content of 
+* @a memfuncs structure is copied internally and does not need to remain valid
+* after the call returns.
+*
+* If the world uses working memory sharing, changing memory manager
+* affects all the worlds linked together. 
+*
+* Failure result status means a memory allocation failure.
+*
+* @param w The world to change memory reservation policy for.
+* @param memfuncs Null or a pointer to memory manager descriptor structure.
+* @returns 1 for success and 0 for failure.
+*
+* @ingroup world
+* @see dWorldUseSharedWorkingMemory
+*/
+ODE_API int dWorldSetStepMemoryManager(dWorldID w, const dWorldStepMemoryFunctionsInfo *memfuncs);
+
+/**
  * @brief Step the world.
  *
  * This uses a "big matrix" method that takes time on the order of m^3
@@ -154,43 +296,17 @@ typedef struct
  * rows. For large systems this will use a lot of memory and can be very slow,
  * but this is currently the most accurate method.
  *
- * The function is internally implemented as invocation of @c dWorldStep2ContextRealloc
- * and @c dWorldStep2 with context structure stored in static variable, default 
- * memory reservation policy, default memory allocator and no threading. The same
- * global context is shared for both @c dWorlsStep and @c dWorldQuickStep.
- *
- * If library is compiled with TLS support, internal context is stored in TLS and 
- * the function can be called from multiple threads simultaneously.
- *
- * @c dWorldStepCleanup can be used to free memory allocated for internal context
- * whenever the size of scene decreases dramatically.
- *
- * The function is provided for backward compatibility. Consider using @c dWorldStep2ContextRealloc,
- * @c dWorldStep2 and @c dWorldStepContextFree instead.
+ * Failure result status means that the memory allocation has failed for operation.
+ * In such a case all the objects remain in unchanged state and simulation can be
+ * retried as soon as more memory is available.
  *
  * @param w The world to be stepped
  * @param stepsize The number of seconds that the simulation has to advance.
  * @returns 1 for success and 0 for failure
  *
  * @ingroup world
- * @see dWorldStepCleanup
- * @see dWorldStep2ContextRealloc
- * @see dWorldStep2
- * @see dWorldStepContextFree
  */
-ODE_API int dWorldStep (dWorldID, dReal stepsize);
-
-/**
- * @brief Free resources allocated internally to aid @c dWorldStep() execution.
- *
- * This function deletes global context that is stored internally to be used 
- * with @c dWorldStep. If library is compiled with TLS support the @c dWorldStepCleanup
- * call releases resources allocated for current thread only.
- * 
- * @ingroup world
- * @see dWorldStep
- */
-ODE_API void dWorldStepCleanup ();
+ODE_API int dWorldStep (dWorldID w, dReal stepsize);
 
 /**
  * @brief Quick-step the world.
@@ -223,237 +339,17 @@ ODE_API void dWorldStepCleanup ();
  * Increasing the number of QuickStep iterations may help a little bit, but
  * it is not going to help much if your system is really near singular.
  *
- * The function is internally implemented as invocation of @c dWorldQuickStep2ContextRealloc
- * and @c dWorldQuickStep2 with context structure stored in static variable, default 
- * memory reservation policy, default memory allocator and no threading. The same
- * global context is shared for both @c dWorlsStep and @c dWorldQuickStep.
- *
- * If library is compiled with TLS support, internal context is stored in TLS and 
- * the function can be called from multiple threads simultaneously.
- *
- * @c dWorldQuickStepCleanup can be used to free memory allocated for internal context
- * whenever the size of scene decreases dramatically.
- *
- * The function is provided for backward compatibility. Consider using @c dWorldQuickStep2ContextRealloc,
- * @c dWorldQuickStep2 and @c dWorldStepContextFree instead.
+ * Failure result status means that the memory allocation has failed for operation.
+ * In such a case all the objects remain in unchanged state and simulation can be
+ * retried as soon as more memory is available.
  *
  * @param w The world to be stepped
  * @param stepsize The number of seconds that the simulation has to advance.
  * @returns 1 for success and 0 for failure
  *
  * @ingroup world
- * @see dWorldQuickStepCleanup
- * @see dWorldQuickStep2ContextRealloc
- * @see dWorldQuickStep2
- * @see dWorldStepContextFree
  */
 ODE_API int dWorldQuickStep (dWorldID w, dReal stepsize);
-
-/**
-* @brief Free resources allocated internally to aid @c dWorldQuickStep() execution.
-*
-* This function deletes global context that is stored internally to be used 
-* with @c dWorldQuickStep. If library is compiled with TLS support the @c dWorldQuickStepCleanup
-* call releases resources allocated for current thread only.
-* 
-* @ingroup world
-* @see dWorldQuickStep
-*/
-ODE_API void dWorldQuickStepCleanup ();
-
-
-/**
- * @brief Reallocate world stepping context for next world step call
- *
- * This checks the memory requirements for next @c dWorldStep2 call with given 
- * world and step size and allocates memory resources if necessary. The function
- * must be called before each invocation of @c dWorldStep2. The values of world and
- * stepsize must match those that are going to be passed to @c dWorldStep2 (and the 
- * world itself must remain unchanged) or memory corruption will occur.
- *
- * The function only increases memory size allocated for context but never decreases it.
- * @c dWorldStepContextFree call should be used to release existing context and start
- * with a new one whenever number of bodies/joints in world decreases significantly.
- *
- * Pass NULL for @c oldcontext the first time you are going to use world stepping,
- * then pass the value returned from previous call.
- *
- * If allocation fails and function returns NULL-value, the original context has been
- * already freed and must not be used with @c dWorldStepContextFree.
- *
- * @c reserveinfo optionally defines memory reservation policy for the call. If NULL
- * is passed for parameter the defaults of @c dWORLDSTEP_RESERVEFACTOR_DEFAULT and 
- * @c dWORLDSTEP_RESERVESIZE_DEFAULT are used.
- *
- * @c memmgr optionally specifies memory manager to be used with the call. If NULL
- * is passed, default @c dAlloc based memory manager is used. Use @c dAllocateWorldStepMemoryManager
- * to allocate custom memory manager if necessary. Each call to @c dWorldStep2ContextRealloc
- * can be performed with a different memory manager. However, the memory manager
- * must remain valid until a call to @c dWorldStep2 returns after
- * the next invocation of @c dWorldStep2ContextRealloc with the new memory manager 
- * or until context is freed with @c dWorldStepContextFree.
- *
- * The same context can be used for both @c dWorldStep2ContextRealloc and @c dWorldQuickStep2ContextRealloc.
- * This way the memory can be saved if it is necessary to mix @c dWorldStep2 and 
- * @c dWorldQuickStep2 calls for a single world. Also the same context can be
- * used to step multiple worlds one after another provided that @c dWorldStep2ContextRealloc
- * is still called before each call to @c dWorldStep2.
- * 
- * @param oldcontext existing context value or NULL on first invocation.
- * @param w world object to be used with next call to @c dWorldStep2
- * @param stepsize step size to be used with next call to @c dWorldStep2
- * @param reserveinfo NULL or memory reserve policy descriptor structure
- * @param memmgr NULL or memory manager object
- * @returns New context value on success or NULL on failure
- *
- * @ingroup world
- * @see dWorldStep2
- * @see dWorldStepContextFree
- * @see dWorldStepReserveInfo
- * @see dAllocateWorldStepMemoryManager
- */
-ODE_API dWorldStepContextID dWorldStep2ContextRealloc(dWorldStepContextID oldcontext/*=NULL*/, 
-  dWorldID w, dReal stepsize, const dWorldStepReserveInfo *reserveinfo/*=NULL*/, 
-  dWorldStepMemoryManagerID memmgr/*=NULL*/);
-
-/**
-* @brief Step the world.
-*
-* This uses a "big matrix" method that takes time on the order of m^3
-* and memory on the order of m^2, where m is the total number of constraint
-* rows. For large systems this will use a lot of memory and can be very slow,
-* but this is currently the most accurate method.
-*
-* The function must be preceded with a call to @c dWorldStep2ContextRealloc each time
-* to obtain updated world stepping context.
-*
-* @warning
-* Currently the function has been only partially ported to memory allocation from 
-* stepping context and still uses stack allocation internally.
-*
-* @param context The context value obtained from previous call to @c dWorldStep2ContextRealloc
-* @param w The world to be stepped
-* @param stepsize The number of seconds that the simulation has to advance.
-* @param reserved Reserved, pass NULL here.
-*
-* @ingroup world
-* @see dWorldStep2ContextRealloc
-* @see dWorldStepContextFree
-*/
-ODE_API void dWorldStep2(dWorldStepContextID context, dWorldID w, dReal stepsize, dWorldStepThreadingManagerID reserved/*=NULL*/);
-
-
-/**
-* @brief Reallocate world stepping context for next world quick-step call
-*
-* This checks the memory requirements for next @c dWorldQuickStep2 call with given 
-* world and step size and allocates memory resources if necessary. The function
-* must be called before each invocation of @c dWorldQuickStep2. The values of world and
-* stepsize must match those that are going to be passed to @c dWorldQuickStep2 (and the 
-* world itself must remain unchanged) or memory corruption will occur.
-*
-* The function only increases memory size allocated for context but never decreases it.
-* @c dWorldStepContextFree call should be used to release existing context and start
-* with a new one whenever number of bodies/joints in world decreases significantly.
-*
-* Pass NULL for @c oldcontext the first time you are going to use world stepping,
-* then pass the value returned from previous call.
-*
-* If allocation fails and function returns NULL-value, the original context has been
-* already freed and must not be used with @c dWorldStepContextFree.
-*
-* @c reserveinfo optionally defines memory reservation policy for the call. If NULL
-* is passed for parameter the defaults of @c dWORLDSTEP_RESERVEFACTOR_DEFAULT and 
-* @c dWORLDSTEP_RESERVESIZE_DEFAULT are used.
-*
-* @c memmgr optionally specifies memory manager to be used with the call. If NULL
-* is passed, default @c dAlloc based memory manager is used. Use @c dAllocateWorldStepMemoryManager
-* to allocate custom memory manager if necessary. Each call to @c dWorldQuickStep2ContextRealloc
-* can be performed with a different memory manager. However, the memory manager
-* must remain valid until a call to @c dWorldQuickStep2 returns after
-* the next invocation of @c dWorldQuickStep2ContextRealloc with the new memory manager 
-* or until context is freed with @c dWorldStepContextFree.
-*
-* The same context can be used for both @c dWorldStep2ContextRealloc and @c dWorldQuickStep2ContextRealloc.
-* This way the memory can be saved if it is necessary to mix @c dWorldStep2 and 
-* @c dWorldQuickStep2 calls for a single world. Also the same context can be
-* used to step multiple worlds one after another provided that @c dWorldQuickStep2ContextRealloc
-* is still called before each call to @c dWorldQuickStep2.
-* 
-* @param oldcontext existing context value or NULL on first invocation.
-* @param w world object to be used with next call to @c dWorldQuickStep2
-* @param stepsize step size to be used with next call to @c dWorldQuickStep2
-* @param reserveinfo NULL or memory reserve policy descriptor structure
-* @param memmgr NULL or memory manager object
-* @returns New context value on success or NULL on failure
-*
-* @ingroup world
-* @see dWorldQuickStep2
-* @see dWorldStepContextFree
-* @see dWorldStepReserveInfo
-* @see dAllocateWorldStepMemoryManager
-*/
-ODE_API dWorldStepContextID dWorldQuickStep2ContextRealloc(dWorldStepContextID oldcontext/*=NULL*/, 
-  dWorldID w, dReal stepsize, const dWorldStepReserveInfo *reserveinfo/*=NULL*/, 
-  dWorldStepMemoryManagerID memmgr/*=NULL*/);
-
-/**
-* @brief Quick-step the world.
-*
-* This uses an iterative method that takes time on the order of m*N
-* and memory on the order of m, where m is the total number of constraint
-* rows N is the number of iterations.
-* For large systems this is a lot faster than dWorldStep(),
-* but it is less accurate.
-*
-* QuickStep is great for stacks of objects especially when the
-* auto-disable feature is used as well.
-* However, it has poor accuracy for near-singular systems.
-* Near-singular systems can occur when using high-friction contacts, motors,
-* or certain articulated structures. For example, a robot with multiple legs
-* sitting on the ground may be near-singular.
-*
-* There are ways to help overcome QuickStep's inaccuracy problems:
-*
-* \li Increase CFM.
-* \li Reduce the number of contacts in your system (e.g. use the minimum
-*     number of contacts for the feet of a robot or creature).
-* \li Don't use excessive friction in the contacts.
-* \li Use contact slip if appropriate
-* \li Avoid kinematic loops (however, kinematic loops are inevitable in
-*     legged creatures).
-* \li Don't use excessive motor strength.
-* \liUse force-based motors instead of velocity-based motors.
-*
-* Increasing the number of QuickStep iterations may help a little bit, but
-* it is not going to help much if your system is really near singular.
-*
-* The function must be preceded with a call to @c dWorldQuickStep2ContextRealloc each time
-* to obtain updated world stepping context.
-*
-* @param context The context value obtained from previous call to @c dWorldQuickStep2ContextRealloc
-* @param w The world to be stepped
-* @param stepsize The number of seconds that the simulation has to advance.
-* @param reserved Reserved, pass NULL here.
-*
-* @ingroup world
-* @see dWorldQuickStep2ContextRealloc
-* @see dWorldStepContextFree
-*/
-ODE_API void dWorldQuickStep2(dWorldStepContextID context, dWorldID w, dReal stepsize, dWorldStepThreadingManagerID reserved/*=NULL*/);
-
-
-/**
- * @brief Free world stepping context
- *
- * Use this function to delete world stepping context allocated with @c dWorldStep2ContextRealloc
- * or @c dWorldQuickStep2ContextRealloc when the context is not necessary any more
- * or number or bodies/joints in the world has been decreased significantly and
- * memory needs to be saved.
- *
- * It is OK to call the function with NULL context.
- */
-ODE_API void dWorldStepContextFree(dWorldStepContextID context);
 
 
 /**

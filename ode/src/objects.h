@@ -31,6 +31,7 @@
 #include <ode/mass.h>
 #include "array.h"
 
+class dxStepWorkingMemory;
 
 // some body flags
 
@@ -103,11 +104,8 @@ struct dxContactParameters {
   dReal min_depth;		// thickness of 'surface layer'
 };
 
-
-
 // position vector and rotation matrix for geometry objects that are not
 // connected to bodies.
-
 struct dxPosR {
   dVector3 pos;
   dMatrix3 R;
@@ -149,9 +147,11 @@ struct dxWorld : public dBase {
   int nb,nj;			// number of bodies and joints in lists
   dVector3 gravity;		// gravity vector (m/s/s)
   dReal global_erp;		// global error reduction parameter
-  dReal global_cfm;		// global costraint force mixing parameter
+  dReal global_cfm;		// global constraint force mixing parameter
   dxAutoDisable adis;		// auto-disable parameters
   int body_flags;               // flags for new bodies
+  dxStepWorkingMemory *wmem; // Working memory object for dWorldStep/dWorldQuickStep
+
   dxQuickStepParameters qs;
   dxContactParameters contactp;
   dxDampingParameters dampingp; // damping parameters

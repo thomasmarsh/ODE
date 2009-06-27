@@ -1557,6 +1557,8 @@ dxWorld * dWorldCreate()
 
   w->body_flags = 0; // everything disabled
 
+  w->wmem = 0;
+
   w->adis.idle_steps = 10;
   w->adis.idle_time = 0;
   w->adis.average_samples = 1;		// Default is 1 sample => Instantaneous velocity
@@ -1609,6 +1611,11 @@ void dWorldDestroy (dxWorld *w)
     }
     j = nextj;
   }
+
+  if (w->wmem) {
+    w->wmem->Release();
+  }
+
   delete w;
 }
 
@@ -1659,56 +1666,121 @@ dReal dWorldGetCFM (dWorldID w)
 }
 
 
-#if dTLS_ENABLED
-
-static inline dxWorldProcessContext *GetWorldStepProcessingContext(/*unsigned uiTLSKind*/)
+int dWorldUseSharedWorkingMemory(dWorldID w, dWorldID from_world)
 {
-  /*
-  *	NOTE: Normally it should have been implemented that TLS kind is stored
-  *  in world object and passed as a parameter. But since this feature is only
-  *  implemented to backward-support function that is going to be deprecated
-  *  it's OK to just use default TLS kind for both cases to avoid unnecessary 
-  *  complexity in the API.
-  */
-  EODETLSKIND tkTLSKind = OTK__DEFAULT; // (EODETLSKIND)uiTLSKind;
-  return COdeTls::GetWorldStepProcessingContext(tkTLSKind);
+  dUASSERT (w,"bad world argument");
+
+  bool result = false;
+
+  if (from_world)
+  {
+    dUASSERT (!w->wmem, "world does already have working memory allocated"); // Prevent replacement of one memory object with another to avoid cases when smaller buffer replaces a larger one or memory manager changes.
+
+    dxStepWorkingMemory *wmem = AllocateOnDemand(from_world->wmem);
+
+    if (wmem)
+    {
+      // Even though there is an assertion check on entry still release existing
+      // memory object for extra safety.
+      if (w->wmem)
+      {
+        w->wmem->Release();
+        w->wmem = NULL;
+      }
+
+      wmem->Addref();
+      w->wmem = wmem;
+
+      result = true;
+    }
+  }
+  else
+  {
+    dxStepWorkingMemory *wmem = w->wmem;
+
+    if (wmem)
+    {
+      wmem->Release();
+      w->wmem = NULL;
+    }
+
+    result = true;
+  }
+
+  return result;
 }
 
-static inline void SetWorldStepProcessingContext(/*unsigned uiTLSKind, */dxWorldProcessContext *ppcContextInstance)
+void dWorldCleanupWorkingMemory(dWorldID w)
 {
-  /*
-  *	NOTE: Normally it should have been implemented that TLS kind is stored
-  *  in world object and passed as a parameter. But since this feature is only
-  *  implemented to backward-support function that is going to be deprecated
-  *  it's OK to just use default TLS kind for both cases to avoid unnecessary 
-  *  complexity in the API.
-  */
-  EODETLSKIND tkTLSKind = OTK__DEFAULT; // (EODETLSKIND)uiTLSKind;
-  COdeTls::SetWorldStepProcessingContext(tkTLSKind, ppcContextInstance);
+  dUASSERT (w,"bad world argument");
+
+  dxStepWorkingMemory *wmem = w->wmem;
+  
+  if (wmem)
+  {
+    wmem->CleanupMemory();
+  }
 }
 
-#else // #if !dTLS_ENABLED
-
-static dxWorldProcessContext *g_pWorldStepProcessingContext = NULL;
-
-static inline dxWorldProcessContext *GetWorldStepProcessingContext(/*unsigned uiTLSKind*/)
+int dWorldSetStepMemoryReservationPolicy(dWorldID w, const dWorldStepReserveInfo *policyinfo)
 {
-  return g_pWorldStepProcessingContext;
+  dUASSERT (w,"bad world argument");
+  dUASSERT (!policyinfo || (policyinfo->struct_size >= sizeof(*policyinfo) && policyinfo->reserve_factor >= 1.0f), "Bad policy info");
+
+  bool result = false;
+
+  dxStepWorkingMemory *wmem = policyinfo ? AllocateOnDemand(w->wmem) : w->wmem;
+
+  if (wmem)
+  {
+    if (policyinfo)
+    {
+      wmem->SetMemoryReserveInfo(policyinfo->reserve_factor, policyinfo->reserve_minimum);
+      result = wmem->GetMemoryReserveInfo() != NULL;
+    }
+    else
+    {
+      wmem->ResetMemoryReserveInfoToDefault();
+      result = true;
+    }
+  }
+  else if (!policyinfo)
+  {
+    result = true;
+  }
+
+  return result;
 }
 
-static inline void SetWorldStepProcessingContext(/*unsigned uiTLSKind, */dxWorldProcessContext *ppcContextInstance)
+int dWorldSetStepMemoryManager(dWorldID w, const dWorldStepMemoryFunctionsInfo *memfuncs)
 {
-  g_pWorldStepProcessingContext = ppcContextInstance;
+  dUASSERT (w,"bad world argument");
+  dUASSERT (!memfuncs || memfuncs->struct_size >= sizeof(*memfuncs), "Bad functions info");
+
+  bool result = false;
+
+  dxStepWorkingMemory *wmem = memfuncs ? AllocateOnDemand(w->wmem) : w->wmem;
+
+  if (wmem)
+  {
+    if (memfuncs)
+    {
+      wmem->SetMemoryManager(memfuncs->alloc_block, memfuncs->shrink_block, memfuncs->free_block);
+      result = wmem->GetMemoryManager() != NULL;
+    }
+    else
+    {
+      wmem->ResetMemoryManagerToDefault();
+      result = true;
+    }
+  }
+  else if (!memfuncs)
+  {
+    result = true;
+  }
+
+  return result;
 }
-
-#endif // #if !dTLS_ENABLED
-
-static const dWorldStepReserveInfo g_WorldStepDefaultReserve = 
-{
-  sizeof (dWorldStepReserveInfo), // struct_size;
-  dWORLDSTEP_RESERVEFACTOR_DEFAULT, // reserve_factor;
-  dWORLDSTEP_RESERVESIZE_DEFAULT, // reserve_minimum;
-};
 
 
 int dWorldStep (dWorldID w, dReal stepsize)
@@ -1716,35 +1788,16 @@ int dWorldStep (dWorldID w, dReal stepsize)
   dUASSERT (w,"bad world argument");
   dUASSERT (stepsize > 0,"stepsize must be > 0");
 
-  bool bResult = false;
-  dxWorldProcessContext *pWorldProcessingContext = GetWorldStepProcessingContext();
+  bool result = false;
 
-  const dWorldStepReserveInfo *reservetouse = &g_WorldStepDefaultReserve;
-  const dxWorldProcessMemoryReserveInfo riReserveInfo(reservetouse->reserve_factor, reservetouse->reserve_minimum);
-  dxWorldProcessMemoryManager *pmmMemMgrToUse = &g_WorldProcessMallocMemoryManager;
-
-  pWorldProcessingContext = dxReallocateWorldProcessContext (pWorldProcessingContext, 
-    w, stepsize, &dxEstimateStepMemoryRequirements, pmmMemMgrToUse, riReserveInfo);
-  if (pWorldProcessingContext)
+  if (dxReallocateWorldProcessContext (w, stepsize, &dxEstimateStepMemoryRequirements))
   {
-    dxProcessIslands (pWorldProcessingContext, w, stepsize, &dInternalStepIsland);
-    bResult = true;
+    dxProcessIslands (w, stepsize, &dInternalStepIsland);
+    
+    result = true;
   }
 
-  SetWorldStepProcessingContext(pWorldProcessingContext);
-  return bResult ? 1 : 0;
-}
-
-void dWorldStepCleanup ()
-{
-  dxWorldProcessContext *pWorldProcessingContext = GetWorldStepProcessingContext();
-
-  if (pWorldProcessingContext)
-  {
-    dWorldStepContextFree((dWorldStepContextID)pWorldProcessingContext);
-
-    SetWorldStepProcessingContext(NULL);
-  }
+  return result;
 }
 
 int dWorldQuickStep (dWorldID w, dReal stepsize)
@@ -1752,127 +1805,16 @@ int dWorldQuickStep (dWorldID w, dReal stepsize)
   dUASSERT (w,"bad world argument");
   dUASSERT (stepsize > 0,"stepsize must be > 0");
 
-  bool bResult = false;
-  dxWorldProcessContext *pWorldProcessingContext = GetWorldStepProcessingContext();
+  bool result = false;
 
-  const dWorldStepReserveInfo *reservetouse = &g_WorldStepDefaultReserve;
-  const dxWorldProcessMemoryReserveInfo riReserveInfo(reservetouse->reserve_factor, reservetouse->reserve_minimum);
-  dxWorldProcessMemoryManager *pmmMemMgrToUse = &g_WorldProcessMallocMemoryManager;
-
-  pWorldProcessingContext = dxReallocateWorldProcessContext (pWorldProcessingContext, 
-    w, stepsize, &dxEstimateQuickStepMemoryRequirements, pmmMemMgrToUse, riReserveInfo);
-  if (pWorldProcessingContext)
+  if (dxReallocateWorldProcessContext (w, stepsize, &dxEstimateQuickStepMemoryRequirements))
   {
-    dxProcessIslands (pWorldProcessingContext, w, stepsize, &dxQuickStepper);
-    bResult = true;
-  }
-
-  SetWorldStepProcessingContext(pWorldProcessingContext);
-  return bResult ? 1 : 0;
-}
-
-void dWorldQuickStepCleanup ()
-{
-  dxWorldProcessContext *pWorldProcessingContext = GetWorldStepProcessingContext();
-  
-  if (pWorldProcessingContext)
-  {
-    dWorldStepContextFree((dWorldStepContextID)pWorldProcessingContext);
+    dxProcessIslands (w, stepsize, &dxQuickStepper);
     
-    SetWorldStepProcessingContext(NULL);
-  }
-}
-
-
-dWorldStepContextID dWorldStep2ContextRealloc(dWorldStepContextID oldcontext/*=NULL*/, 
-  dWorldID w, dReal stepsize, const dWorldStepReserveInfo *reserveinfo/*=NULL*/, 
-  dWorldStepMemoryManagerID memmgr/*=NULL*/)
-{
-  // dUASSERT (oldcontext,"bad context argument"); -- can be NULL
-  dUASSERT (w,"bad world argument");
-
-  dxWorldProcessContext *pWorldProcessingContext = (dxWorldProcessContext *)oldcontext;
-
-  const dWorldStepReserveInfo *reservetouse = reserveinfo;
-  if (!reserveinfo)
-  {
-    reservetouse = &g_WorldStepDefaultReserve;
-  }
-  else if (reserveinfo->struct_size < sizeof(*reserveinfo) || reserveinfo->reserve_factor < 1.0f)
-  {
-    dUASSERT(reserveinfo, "bad reserve info contents");
-    reservetouse = &g_WorldStepDefaultReserve;
+    result = true;
   }
 
-  const dxWorldProcessMemoryReserveInfo riReserveInfo(reservetouse->reserve_factor, reservetouse->reserve_minimum);
-  dxWorldProcessMemoryManager *pmmMemMgrToUse = memmgr ? memmgr : &g_WorldProcessMallocMemoryManager;
-
-  pWorldProcessingContext = dxReallocateWorldProcessContext (pWorldProcessingContext, 
-    w, stepsize, &dxEstimateStepMemoryRequirements, pmmMemMgrToUse, riReserveInfo);
-  return (dWorldStepContextID)pWorldProcessingContext;
-}
-
-void dWorldStep2(dWorldStepContextID context, dWorldID w, dReal stepsize, dWorldStepThreadingManagerID reserved/*=NULL*/)
-{
-  dUASSERT (context,"bad context argument");
-  dUASSERT (w,"bad world argument");
-  dUASSERT (stepsize > 0,"stepsize must be > 0");
-
-  dxWorldProcessContext *pWorldProcessingContext = (dxWorldProcessContext *)context;
-
-  dxProcessIslands (pWorldProcessingContext, w, stepsize, &dInternalStepIsland);
-}
-
-
-dWorldStepContextID dWorldQuickStep2ContextRealloc(dWorldStepContextID oldcontext/*=NULL*/, 
-  dWorldID w, dReal stepsize, const dWorldStepReserveInfo *reserveinfo/*=NULL*/,
-  dWorldStepMemoryManagerID memmgr/*=NULL*/)
-{
-  // dUASSERT (oldcontext,"bad context argument"); -- can be NULL
-  dUASSERT (w,"bad world argument");
-
-  dxWorldProcessContext *pWorldProcessingContext = (dxWorldProcessContext *)oldcontext;
-  
-  const dWorldStepReserveInfo *reservetouse = reserveinfo;
-  if (!reserveinfo)
-  {
-    reservetouse = &g_WorldStepDefaultReserve;
-  }
-  else if (reserveinfo->struct_size < sizeof(*reserveinfo) || reserveinfo->reserve_factor < 1.0f)
-  {
-    dUASSERT(reserveinfo, "bad reserve info contents");
-    reservetouse = &g_WorldStepDefaultReserve;
-  }
-
-  const dxWorldProcessMemoryReserveInfo riReserveInfo(reservetouse->reserve_factor, reservetouse->reserve_minimum);
-  dxWorldProcessMemoryManager *pmmMemMgrToUse = memmgr ? memmgr : &g_WorldProcessMallocMemoryManager;
-
-  pWorldProcessingContext = dxReallocateWorldProcessContext (pWorldProcessingContext, 
-    w, stepsize, &dxEstimateQuickStepMemoryRequirements, pmmMemMgrToUse, riReserveInfo);
-  return (dWorldStepContextID)pWorldProcessingContext;
-}
-
-void dWorldQuickStep2(dWorldStepContextID context, dWorldID w, dReal stepsize, dWorldStepThreadingManagerID reserved/*=NULL*/)
-{
-  dUASSERT (context,"bad context argument");
-  dUASSERT (w,"bad world argument");
-  dUASSERT (stepsize > 0,"stepsize must be > 0");
-
-  dxWorldProcessContext *pWorldProcessingContext = (dxWorldProcessContext *)context;
-
-  dxProcessIslands (pWorldProcessingContext, w, stepsize, &dxQuickStepper);
-}
-
-
-
-void dWorldStepContextFree(dWorldStepContextID context)
-{
-  dxWorldProcessContext *pWorldProcessingContext = (dxWorldProcessContext *)context;
-
-  if (pWorldProcessingContext)
-  {
-    dxFreeWorldProcessContext (pWorldProcessingContext);
-  }
+  return result;
 }
 
 

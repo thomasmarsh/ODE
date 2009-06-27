@@ -8,6 +8,13 @@ the rules for this file:
   * keep the format consistent (79 char width, M/D/Y date format).
 
 ------------------------------------------------------------------------------
+06/27/09 Oleh Derevenko
+		* New functions have been added:
+		   - dWorldUseSharedWorkingMemory
+		   - dWorldCleanupWorkingMemory
+		   - dWorldSetStepMemoryReservationPolicy
+		   - dWorldSetStepMemoryManager
+		
 06/25/09 Remi Ricard (papaDoc)
         * Add limit to the to the second axis of the universal joint
          for the pu joint.
@@ -20,19 +27,6 @@ the rules for this file:
 		  mentioned below are fully functional for it.
 		  Both dWorldStep and dWorldQuickStep have been changed to return boolean
 		  success status.
-		  Both dWorldStep and dWorldQuickStep can now be used from multiple threads
-		  without serialization only if TLS is enabled for library with --enable-ou.
-		  New functions have been added:
-		   - dWorldStep2ContextRealloc
-		   - dWorldStep2
-		   - dWorldQuickStep2ContextRealloc
-		   - dWorldQuickStep2
-		   - dWorldStepContextFree
-		  Also dWorldStep and dWorldQuickStep have been changed to be wrapers for 
-		  these new APIs with an internal context stored statically in library. 
-		  dWorldStepCleanup and dWorldQuickStepCleanup functions have been added
-		  to free this internal context.
-		  From now on dWorldStep and dWorldQuickStep are to be considered obsolete.
 
 		* dInitODE2() changed to automatically call 
 		  AllocateODEDataForThread(dAllocateFlagBasicData) after library 
