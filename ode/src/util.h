@@ -57,7 +57,9 @@
   ((char*)dEFFICIENT_PTR(alloca((n)+(EFFICIENT_ALIGNMENT-1))))
 
 
-
+#ifndef SIZE_MAX
+#define SIZE_MAX  ((size_t)(-1))
+#endif
 
 void dInternalHandleAutoDisabling (dxWorld *world, dReal stepsize);
 void dxStepBody (dxBody *b, dReal h);
