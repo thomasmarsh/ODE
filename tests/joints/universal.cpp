@@ -585,12 +585,12 @@ SUITE (TestdxJointUniversal)
         dJointGetUniversalAnchor (jId, anchor1);
         dJointGetUniversalAnchor2 (jId, anchor2);
         CHECK_CLOSE (anchor1[0], anchorOrig1[0] , 1e-4);
-        CHECK_CLOSE (anchor1[0], anchorOrig1[0] , 1e-4);
-        CHECK_CLOSE (anchor1[0], anchorOrig1[0] , 1e-4);
+        CHECK_CLOSE (anchor1[1], anchorOrig1[1] , 1e-4);
+        CHECK_CLOSE (anchor1[2], anchorOrig1[2] , 1e-4);
 
         CHECK_CLOSE (anchor2[0], anchorOrig2[0] , 1e-4);
-        CHECK_CLOSE (anchor2[0], anchorOrig2[0] , 1e-4);
-        CHECK_CLOSE (anchor2[0], anchorOrig2[0] , 1e-4);
+        CHECK_CLOSE (anchor2[1], anchorOrig2[1] , 1e-4);
+        CHECK_CLOSE (anchor2[2], anchorOrig2[2] , 1e-4);
     }
 
 
