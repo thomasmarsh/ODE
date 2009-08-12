@@ -1,12 +1,6 @@
 #ifndef ODECONFIG_H
 #define ODECONFIG_H
 
-#ifndef dDOUBLE
-#ifndef dSINGLE
-#define dSINGLE
-#endif
-#endif
-
 /* Pull in the standard headers */
 #include <stdio.h>
 #include <stdlib.h>
