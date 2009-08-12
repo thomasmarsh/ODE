@@ -8,12 +8,16 @@ the rules for this file:
   * keep the format consistent (79 char width, M/D/Y date format).
 
 ------------------------------------------------------------------------------
+08/11/09 Daniel K. O.
+        * Made sure neither dSINGLE or dDOUBLE is defined by default; the user
+          should always explicitly specify the precision.
+
 06/27/09 Oleh Derevenko
-		* New functions have been added:
-		   - dWorldUseSharedWorkingMemory
-		   - dWorldCleanupWorkingMemory
-		   - dWorldSetStepMemoryReservationPolicy
-		   - dWorldSetStepMemoryManager
+        * New functions have been added:
+           - dWorldUseSharedWorkingMemory
+           - dWorldCleanupWorkingMemory
+           - dWorldSetStepMemoryReservationPolicy
+           - dWorldSetStepMemoryManager
 		
 06/25/09 Remi Ricard (papaDoc)
         * Add limit to the to the second axis of the universal joint
@@ -34,26 +38,21 @@ the rules for this file:
 		  must always be performed anyway.
 
 06/05/09 Daniel K. O.
-
          * Removed aliasing issues from OPCODE/Ice, plus some other warnings.
            Now it builds on gcc 4.3.2 with '-Wall -Werror -O3".
 
 05/30/09 Oleh Derevenko
-
          * A minor memory usage optimization for QuickStep.
 
 05/24/09 Daniel K. O.
-
          * Made the new trimesh collider the default.
          * Added a "-texturepath" option to drawstuff.
 
 05/18/09 Oleh Derevenko
-
         * Heightfield rotation fixed to avoid NaNs while rotating infinite
           MIN/MAX heights.
 
 05/03/09 Oleh Derevenko
-
         * Incorrect parameter order fixed on contact merging in Sphere-Trimesh
           collisions. The bug resulted in merged contact remaining with normal
           of first contact found. Thanks to Dimitris Papavasiliou for reporting.
