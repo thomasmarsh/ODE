@@ -8,6 +8,9 @@ the rules for this file:
   * keep the format consistent (79 char width, M/D/Y date format).
 
 ------------------------------------------------------------------------------
+08/12/09 Oleh Derevenko
+		* A typo fixed in dGeomCopyOffsetRotation() (final_posr was used instead 
+		of offset_posr). Reported by Tilmann.
 08/11/09 Daniel K. O.
         * Made sure neither dSINGLE or dDOUBLE is defined by default; the user
           should always explicitly specify the precision.
