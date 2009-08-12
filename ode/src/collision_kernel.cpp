@@ -1056,7 +1056,7 @@ void dGeomCopyOffsetRotation (dxGeom *g, dMatrix3 R)
 	dAASSERT (g);
 	if (g->offset_posr)
 	{
-		const dReal* src = g->final_posr->R;
+		const dReal* src = g->offset_posr->R;
 		R[0]  = src[0];
 		R[1]  = src[1];
 		R[2]  = src[2];
