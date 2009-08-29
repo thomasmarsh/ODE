@@ -1318,6 +1318,7 @@ void dSolveLCP (int n, dReal *A, dReal *x, dReal *b,
   // if all the variables are unbounded then we can just factor, solve,
   // and return
   if (nub >= n) {
+    dSetZero (w,n);
     dFactorLDLT (A,w,n,nskip);		// use w for d
     dSolveLDLT (A,w,b,n,nskip);
     memcpy (x,b,n*sizeof(dReal));
