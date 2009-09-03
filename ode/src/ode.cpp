@@ -1516,7 +1516,7 @@ int dConnectingJointList (dBodyID in_b1, dBodyID in_b2, dJointID* out_list)
 
 int dAreConnected (dBodyID b1, dBodyID b2)
 {
-  dAASSERT (b1 && b2);
+  dAASSERT (b1/* && b2*/); // b2 can be NULL to test for connection to environment
   // look through b1's neighbour list for b2
   for (dxJointNode *n=b1->firstjoint; n; n=n->next) {
     if (n->body == b2) return 1;
