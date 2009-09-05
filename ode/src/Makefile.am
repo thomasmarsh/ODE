@@ -57,7 +57,6 @@ libode_la_SOURCES =     array.cpp array.h \
                         rotation.cpp \
                         sphere.cpp \
                         step.cpp step.h \
-                        stepfast.cpp \
                         testing.cpp testing.h \
                         timer.cpp \
                         util.cpp util.h

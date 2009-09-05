@@ -415,7 +415,7 @@ static void simLoop (int pause)
 #endif
 
   //if (!pause) dWorldStep (world,0.05);
-  if (!pause) dWorldStepFast1 (world,0.05, 5);
+  if (!pause) dWorldStep (world,0.05);
 
   for (int j = 0; j < dSpaceGetNumGeoms(space); j++){
 	  dSpaceGetGeom(space, j);

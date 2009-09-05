@@ -529,7 +529,7 @@ static void simLoop (int pause)
   
   //if (!pause) dWorldStep (world,0.05);
   //if (!pause) dWorldQuickStep (world,0.05);
-  if (!pause) dWorldStepFast1 (world,0.05, 5);
+  if (!pause) dWorldStep (world,0.05);
 
 
   if (write_world) {

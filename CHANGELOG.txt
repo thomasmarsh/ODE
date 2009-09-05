@@ -8,6 +8,9 @@ the rules for this file:
   * keep the format consistent (79 char width, M/D/Y date format).
 
 ------------------------------------------------------------------------------
+09/05/09 Oleh Derevenko
+		* dWorldStepFast1 API removed along with dWorld[Get/Set]AutoEnableDepthSF1
+
 08/29/09 Oleh Derevenko
 		* Fixed uninitialized floating point array used in computations.
 

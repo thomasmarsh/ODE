@@ -23,6 +23,7 @@
 // This is a demo of the QuickStep and StepFast methods,
 // originally by David Whittaker.
 
+
 #include <ode/ode.h>
 #include <drawstuff/drawstuff.h>
 #include "texturepath.h"
@@ -40,10 +41,6 @@
 #define dsDrawCapsule dsDrawCapsuleD
 #endif
 
-
-// select the method you want to test here (only uncomment *one* line)
-#define QUICKSTEP 1
-//#define STEPFAST 1
 
 // some constants
 
@@ -165,8 +162,6 @@ static void start()
 			"\t'2' to lower the cannon.\n"
 			"\t'x' to shoot from the cannon.\n"
 			"\t'f' to toggle fast step mode.\n"
-			"\t'+' to increase AutoEnableDepth.\n"
-			"\t'-' to decrease AutoEnableDepth.\n"
 			"\t'r' to reset simulation.\n");
 }
 
@@ -451,12 +446,6 @@ static void command (int cmd)
 	case 'f': case 'F':
 		doFast = !doFast;
 		break;
-	case '+':
-		dWorldSetAutoEnableDepthSF1 (world, dWorldGetAutoEnableDepthSF1 (world) + 1);
-		break;
-	case '-':
-		dWorldSetAutoEnableDepthSF1 (world, dWorldGetAutoEnableDepthSF1 (world) - 1);
-		break;
 	case 'r': case 'R':
 		resetSimulation();
 		break;
@@ -515,11 +504,7 @@ static void simLoop (int pause)
 		if (doFast)
 		{
 			dSpaceCollide (space,0,&nearCallback);
-#if defined(QUICKSTEP)
 			dWorldQuickStep (world,0.05);
-#elif defined(STEPFAST)
-			dWorldStepFast1 (world,0.05,ITERS);
-#endif
 			dJointGroupEmpty (contactgroup);
 		}
 		else
