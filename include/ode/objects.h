@@ -446,16 +446,6 @@ ODE_API void dWorldSetContactSurfaceLayer (dWorldID, dReal depth);
  */
 ODE_API dReal dWorldGetContactSurfaceLayer (dWorldID);
 
-/* StepFast1 functions */
-
-/**
- * @brief Step the world using the StepFast1 algorithm.
- * @param stepsize the nr of seconds to advance the simulation.
- * @param maxiterations The number of iterations to perform.
- * @ingroup world
- */
-ODE_API void dWorldStepFast1(dWorldID, dReal stepsize, int maxiterations);
-
 
 /**
  * @defgroup disable Automatic Enabling and Disabling
@@ -488,18 +478,6 @@ ODE_API void dWorldStepFast1(dWorldID, dReal stepsize, int maxiterations);
  *
  * Newly created bodies get these parameters from world.
  */
-
-/**
- * @brief Set the AutoEnableDepth parameter used by the StepFast1 algorithm.
- * @ingroup disable
- */
-ODE_API void dWorldSetAutoEnableDepthSF1(dWorldID, int autoEnableDepth);
-
-/**
- * @brief Get the AutoEnableDepth parameter used by the StepFast1 algorithm.
- * @ingroup disable
- */
-ODE_API int dWorldGetAutoEnableDepthSF1(dWorldID);
 
 /**
  * @brief Get auto disable linear threshold for newly created bodies.

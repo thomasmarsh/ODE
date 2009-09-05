@@ -70,13 +70,6 @@ public:
   void step (dReal stepsize)
     { dWorldStep (_id,stepsize); }
 
-  void stepFast1 (dReal stepsize, int maxiterations)
-    { dWorldStepFast1 (_id,stepsize,maxiterations); }
-  void setAutoEnableDepthSF1(int depth)
-    { dWorldSetAutoEnableDepthSF1 (_id, depth); }
-  int getAutoEnableDepthSF1() const
-    { return dWorldGetAutoEnableDepthSF1 (_id); }
-
   void quickStep(dReal stepsize)
     { dWorldQuickStep (_id, stepsize); }
   void setQuickStepNumIterations(int num)
