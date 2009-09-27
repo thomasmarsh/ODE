@@ -308,27 +308,6 @@ extern "C" {
  * normalize 3x1 and 4x1 vectors (i.e. scale them to unit length)
  */
 
-#if defined(__ODE__)
-
-int  _dSafeNormalize3 (dVector3 a);
-int  _dSafeNormalize4 (dVector4 a);
-	
-static __inline void _dNormalize3(dVector3 a)
-{
-	int bNormalizationResult = _dSafeNormalize3(a);
-	dIASSERT(bNormalizationResult);
-	dVARIABLEUSED(bNormalizationResult);
-}
-
-static __inline void _dNormalize4(dVector4 a)
-{
-	int bNormalizationResult = _dSafeNormalize4(a);
-	dIASSERT(bNormalizationResult);
-	dVARIABLEUSED(bNormalizationResult);
-}
-
-#endif // defined(__ODE__)
-
 // For DLL export
 ODE_API int  dSafeNormalize3 (dVector3 a);
 ODE_API int  dSafeNormalize4 (dVector4 a);
@@ -336,6 +315,23 @@ ODE_API void dNormalize3 (dVector3 a); // Potentially asserts on zero vec
 ODE_API void dNormalize4 (dVector4 a); // Potentially asserts on zero vec
 
 #if defined(__ODE__)
+
+int  _dSafeNormalize3 (dVector3 a);
+int  _dSafeNormalize4 (dVector4 a);
+
+static __inline void _dNormalize3(dVector3 a)
+{
+  int bNormalizationResult = _dSafeNormalize3(a);
+  dIASSERT(bNormalizationResult);
+  dVARIABLEUSED(bNormalizationResult);
+}
+
+static __inline void _dNormalize4(dVector4 a)
+{
+  int bNormalizationResult = _dSafeNormalize4(a);
+  dIASSERT(bNormalizationResult);
+  dVARIABLEUSED(bNormalizationResult);
+}
 
 // For internal use
 #define dSafeNormalize3(a) _dSafeNormalize3(a)
