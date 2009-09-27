@@ -106,7 +106,7 @@ static void Multiply1_12q1 (dReal *A, const dReal *B, const dReal *C, int q)
 #ifdef TIMING
 #define IFTIMING(x) x
 #else
-#define IFTIMING(x) /* */
+#define IFTIMING(x) ((void)0)
 #endif
 
 //***************************************************************************
@@ -1056,10 +1056,11 @@ size_t dxEstimateQuickStepMemoryRequirements (
     for (dxJoint *const *_jcurr = _joint; _jcurr != _jend; _jcurr++) {	
       dxJoint *j = *_jcurr;
       j->getSureMaxInfo (&info);
-      if (info.max_m > 0) {
+      
+      int jm = info.max_m;
+      if (jm > 0) {
         njcurr++;
 
-        int jm = info.max_m;
         mcurr += jm;
         if (j->feedback)
           mfbcurr += jm;
@@ -1089,7 +1090,7 @@ size_t dxEstimateQuickStepMemoryRequirements (
     
           size_t sub3_res2 = 0;
 
-          sub2_res1 += (sub3_res1 > sub3_res2) ? sub3_res1 : sub3_res2;
+          sub2_res1 += (sub3_res1 >= sub3_res2) ? sub3_res1 : sub3_res2;
         }
 
         size_t sub2_res2 = dEFFICIENT_SIZE(sizeof(dReal) * m); // for lambda
@@ -1105,17 +1106,17 @@ size_t dxEstimateQuickStepMemoryRequirements (
 
             size_t sub4_res2 = 0;
 
-            sub3_res2 += (sub4_res1 > sub4_res2) ? sub4_res1 : sub4_res2;
+            sub3_res2 += (sub4_res1 >= sub4_res2) ? sub4_res1 : sub4_res2;
           }
 #endif
-          sub2_res2 += (sub3_res1 > sub3_res2) ? sub3_res1 : sub3_res2;
+          sub2_res2 += (sub3_res1 >= sub3_res2) ? sub3_res1 : sub3_res2;
         }
 
-        sub1_res2 += (sub2_res1 > sub2_res2) ? sub2_res1 : sub2_res2;
+        sub1_res2 += (sub2_res1 >= sub2_res2) ? sub2_res1 : sub2_res2;
       }
     }
     
-    res += (sub1_res1 > sub1_res2) ? sub1_res1 : sub1_res2;
+    res += (sub1_res1 >= sub1_res2) ? sub1_res1 : sub1_res2;
   }
 
   return res;
