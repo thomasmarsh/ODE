@@ -199,8 +199,8 @@ static int ray_sphere_helper (dxRay *ray, dVector3 sphere_pos, dReal radius,
   q[0] = ray->final_posr->pos[0] - sphere_pos[0];
   q[1] = ray->final_posr->pos[1] - sphere_pos[1];
   q[2] = ray->final_posr->pos[2] - sphere_pos[2];
-  dReal B = dDOT14(q,ray->final_posr->R+2);
-  dReal C = dDOT(q,q) - radius*radius;
+  dReal B = dCalcVectorDot3_14(q,ray->final_posr->R+2);
+  dReal C = dCalcVectorDot3(q,q) - radius*radius;
   // note: if C <= 0 then the start of the ray is inside the sphere
   dReal k = B*B - C;
   if (k < 0) return 0;
@@ -274,11 +274,11 @@ int dCollideRayBox (dxGeom *o1, dxGeom *o2, int flags,
   tmp[0] = ray->final_posr->pos[0] - box->final_posr->pos[0];
   tmp[1] = ray->final_posr->pos[1] - box->final_posr->pos[1];
   tmp[2] = ray->final_posr->pos[2] - box->final_posr->pos[2];
-  dMULTIPLY1_331 (s,box->final_posr->R,tmp);
+  dMultiply1_331 (s,box->final_posr->R,tmp);
   tmp[0] = ray->final_posr->R[0*4+2];
   tmp[1] = ray->final_posr->R[1*4+2];
   tmp[2] = ray->final_posr->R[2*4+2];
-  dMULTIPLY1_331 (v,box->final_posr->R,tmp);
+  dMultiply1_331 (v,box->final_posr->R,tmp);
 
   // mirror the line so that v has all components >= 0
   dVector3 sign;
@@ -372,11 +372,11 @@ int dCollideRayCapsule (dxGeom *o1, dxGeom *o2,
   cs[0] = ray->final_posr->pos[0] - ccyl->final_posr->pos[0];
   cs[1] = ray->final_posr->pos[1] - ccyl->final_posr->pos[1];
   cs[2] = ray->final_posr->pos[2] - ccyl->final_posr->pos[2];
-  k = dDOT41(ccyl->final_posr->R+2,cs);	// position of ray start along ccyl axis
+  k = dCalcVectorDot3_41(ccyl->final_posr->R+2,cs);	// position of ray start along ccyl axis
   q[0] = k*ccyl->final_posr->R[0*4+2] - cs[0];
   q[1] = k*ccyl->final_posr->R[1*4+2] - cs[1];
   q[2] = k*ccyl->final_posr->R[2*4+2] - cs[2];
-  C = dDOT(q,q) - ccyl->radius*ccyl->radius;
+  C = dCalcVectorDot3(q,q) - ccyl->radius*ccyl->radius;
   // if C < 0 then ray start position within infinite extension of cylinder
 
   // see if ray start position is inside the capped cylinder
@@ -402,12 +402,12 @@ int dCollideRayCapsule (dxGeom *o1, dxGeom *o2,
     if (k < 0) k = -lz2; else k = lz2;
   }
   else {
-    dReal uv = dDOT44(ccyl->final_posr->R+2,ray->final_posr->R+2);
+    dReal uv = dCalcVectorDot3_44(ccyl->final_posr->R+2,ray->final_posr->R+2);
     r[0] = uv*ccyl->final_posr->R[0*4+2] - ray->final_posr->R[0*4+2];
     r[1] = uv*ccyl->final_posr->R[1*4+2] - ray->final_posr->R[1*4+2];
     r[2] = uv*ccyl->final_posr->R[2*4+2] - ray->final_posr->R[2*4+2];
-    dReal A = dDOT(r,r);
-    dReal B = 2*dDOT(q,r);
+    dReal A = dCalcVectorDot3(r,r);
+    dReal B = 2*dCalcVectorDot3(q,r);
     k = B*B-4*A*C;
     if (k < 0) {
       // the ray does not intersect the infinite cylinder, but if the ray is
@@ -434,7 +434,7 @@ int dCollideRayCapsule (dxGeom *o1, dxGeom *o2,
       q[0] = contact->pos[0] - ccyl->final_posr->pos[0];
       q[1] = contact->pos[1] - ccyl->final_posr->pos[1];
       q[2] = contact->pos[2] - ccyl->final_posr->pos[2];
-      k = dDOT14(q,ccyl->final_posr->R+2);
+      k = dCalcVectorDot3_14(q,ccyl->final_posr->R+2);
       dReal nsign = inside_ccyl ? REAL(-1.0) : REAL(1.0);
       if (k >= -lz2 && k <= lz2) {
 	contact->normal[0] = nsign * (contact->pos[0] -
@@ -474,10 +474,10 @@ int dCollideRayPlane (dxGeom *o1, dxGeom *o2, int flags,
   dxRay *ray = (dxRay*) o1;
   dxPlane *plane = (dxPlane*) o2;
 
-  dReal alpha = plane->p[3] - dDOT (plane->p,ray->final_posr->pos);
+  dReal alpha = plane->p[3] - dCalcVectorDot3 (plane->p,ray->final_posr->pos);
   // note: if alpha > 0 the starting point is below the plane
   dReal nsign = (alpha > 0) ? REAL(-1.0) : REAL(1.0);
-  dReal k = dDOT14(plane->p,ray->final_posr->R+2);
+  dReal k = dCalcVectorDot3_14(plane->p,ray->final_posr->R+2);
   if (k==0) return 0;		// ray parallel to plane
   alpha /= k;
   if (alpha < 0 || alpha > ray->length) return 0;
@@ -527,7 +527,7 @@ int dCollideRayCylinder( dxGeom *o1, dxGeom *o2, int flags, dContactGeom *contac
 	r[ 2 ] = ray->final_posr->pos[2] - cyl->final_posr->pos[2];
 
 	// Distance that ray start is along cyl axis ( Z-axis direction )
-	d = dDOT41( cyl->final_posr->R + 2, r );
+	d = dCalcVectorDot3_41( cyl->final_posr->R + 2, r );
 
 	//
 	// Compute vector 'q' representing the shortest line from R to the cylinder z-axis (Cz).
@@ -548,10 +548,10 @@ int dCollideRayCylinder( dxGeom *o1, dxGeom *o2, int flags, dContactGeom *contac
 
 	// if C < 0 then ray start position is within infinite extension of cylinder
 
-	C = dDOT( q, q ) - ( cyl->radius * cyl->radius );
+	C = dCalcVectorDot3( q, q ) - ( cyl->radius * cyl->radius );
 
 	// Compute the projection of ray direction normal onto cylinder direction normal.
-	dReal uv = dDOT44( cyl->final_posr->R+2, ray->final_posr->R+2 );
+	dReal uv = dCalcVectorDot3_44( cyl->final_posr->R+2, ray->final_posr->R+2 );
 
 
 
@@ -572,8 +572,8 @@ int dCollideRayCylinder( dxGeom *o1, dxGeom *o2, int flags, dContactGeom *contac
 	// k = 0 : Tangent
 	// k > 0 : Intersection
 
-	dReal A = dDOT( r, r );
-	dReal B = 2 * dDOT( q, r );
+	dReal A = dCalcVectorDot3( r, r );
+	dReal B = 2 * dCalcVectorDot3( q, r );
 
 	k = B*B - 4*A*C;
 
@@ -668,7 +668,7 @@ int dCollideRayCylinder( dxGeom *o1, dxGeom *o2, int flags, dContactGeom *contac
 			q[2] = contact->pos[2] - cyl->final_posr->pos[2];
 
 			// Compute the distance along the cylinder axis of this contact point.
-			d = dDOT14( q, cyl->final_posr->R+2 );
+			d = dCalcVectorDot3_14( q, cyl->final_posr->R+2 );
 
 			// Check to see if the intersection point is between the flat end caps
 			if ( d >= -half_length && d <= +half_length )

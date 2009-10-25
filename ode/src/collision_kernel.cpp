@@ -391,9 +391,9 @@ void getBodyPosr(const dxPosR& offset_posr, const dxPosR& final_posr, dxPosR& bo
 	dMatrix3 inv_offset;
 	matrixInvert(offset_posr.R, inv_offset);
 
-	dMULTIPLY0_333(body_posr.R, final_posr.R, inv_offset);
+	dMultiply0_333(body_posr.R, final_posr.R, inv_offset);
 	dVector3 world_offset;
-	dMULTIPLY0_331(world_offset, body_posr.R, offset_posr.pos);
+	dMultiply0_331(world_offset, body_posr.R, offset_posr.pos);
 	body_posr.pos[0] = final_posr.pos[0] - world_offset[0];
 	body_posr.pos[1] = final_posr.pos[1] - world_offset[1];
 	body_posr.pos[2] = final_posr.pos[2] - world_offset[2];
@@ -404,12 +404,12 @@ void getWorldOffsetPosr(const dxPosR& body_posr, const dxPosR& world_posr, dxPos
 	dMatrix3 inv_body;
 	matrixInvert(body_posr.R, inv_body);
 
-	dMULTIPLY0_333(offset_posr.R, inv_body, world_posr.R);
+	dMultiply0_333(offset_posr.R, inv_body, world_posr.R);
 	dVector3 world_offset;
 	world_offset[0] = world_posr.pos[0] - body_posr.pos[0];
 	world_offset[1] = world_posr.pos[1] - body_posr.pos[1];
 	world_offset[2] = world_posr.pos[2] - body_posr.pos[2];
-	dMULTIPLY0_331(offset_posr.pos, inv_body, world_offset);
+	dMultiply0_331(offset_posr.pos, inv_body, world_offset);
 }
 
 void dxGeom::computePosr()
@@ -418,11 +418,11 @@ void dxGeom::computePosr()
   dIASSERT(offset_posr);  
   dIASSERT(body);
   
-  dMULTIPLY0_331 (final_posr->pos,body->posr.R,offset_posr->pos);
+  dMultiply0_331 (final_posr->pos,body->posr.R,offset_posr->pos);
   final_posr->pos[0] += body->posr.pos[0];
   final_posr->pos[1] += body->posr.pos[1];
   final_posr->pos[2] += body->posr.pos[2];
-  dMULTIPLY0_333 (final_posr->R,body->posr.R,offset_posr->R);
+  dMultiply0_333 (final_posr->R,body->posr.R,offset_posr->R);
 }
 
 //****************************************************************************
@@ -515,7 +515,7 @@ void dGeomSetPosition (dxGeom *g, dReal x, dReal y, dReal z)
   if (g->offset_posr) {
     // move body such that body+offset = position
 	dVector3 world_offset;
-	dMULTIPLY0_331(world_offset, g->body->posr.R, g->offset_posr->pos);
+	dMultiply0_331(world_offset, g->body->posr.R, g->offset_posr->pos);
 	dBodySetPosition(g->body,
 	    x - world_offset[0],
 	    y - world_offset[1],

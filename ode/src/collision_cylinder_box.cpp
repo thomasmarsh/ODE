@@ -378,7 +378,7 @@ int sCylinderBoxData::_cldTestSeparatingAxes()
 	// axis CxA0
 	//vAxis = ( vCylinderAxis cross mthGetColM33f( mBoxRot, 0 ));
 	dVector3CrossMat3Col(m_mBoxRot, 0 ,m_vCylinderAxis, vAxis);
-	if(dVector3Length2( vAxis ) > fEpsilon ) 
+	if(dVector3LengthSquare( vAxis ) > fEpsilon ) 
 	{
 		if (!_cldTestAxis( vAxis, 5 ))
 		{
@@ -389,7 +389,7 @@ int sCylinderBoxData::_cldTestSeparatingAxes()
 	// axis CxA1
 	//vAxis = ( vCylinderAxis cross mthGetColM33f( mBoxRot, 1 ));
 	dVector3CrossMat3Col(m_mBoxRot, 1 ,m_vCylinderAxis, vAxis);
-	if(dVector3Length2( vAxis ) > fEpsilon ) 
+	if(dVector3LengthSquare( vAxis ) > fEpsilon ) 
 	{
 		if (!_cldTestAxis( vAxis, 6 )) 
 		{
@@ -400,7 +400,7 @@ int sCylinderBoxData::_cldTestSeparatingAxes()
 	// axis CxA2
 	//vAxis = ( vCylinderAxis cross mthGetColM33f( mBoxRot, 2 ));
 	dVector3CrossMat3Col(m_mBoxRot, 2 ,m_vCylinderAxis, vAxis);
-	if(dVector3Length2( vAxis ) > fEpsilon ) 
+	if(dVector3LengthSquare( vAxis ) > fEpsilon ) 
 	{
 		if (!_cldTestAxis( vAxis, 7 ))
 		{
@@ -419,7 +419,7 @@ int sCylinderBoxData::_cldTestSeparatingAxes()
 		dVector3Cross(m_vCylinderAxis,vTemp1,vTemp2);
 		//vAxis = ( vCylinderAxis cross vAxis );
 		dVector3Cross(m_vCylinderAxis,vTemp2,vAxis);
-		if(dVector3Length2( vAxis ) > fEpsilon ) 
+		if(dVector3LengthSquare( vAxis ) > fEpsilon ) 
 		{
 			if (!_cldTestAxis( vAxis, 8 + i ))
 			{
@@ -915,7 +915,7 @@ void sCylinderBoxData::_cldClipBoxToCylinder()
 	{
 		for( i=0; i<iTmpCounter2; i++)
 		{
-			dMULTIPLY0_331(vPoint,m_mCylinderRot,avTempArray2[i]);
+			dMultiply0_331(vPoint,m_mCylinderRot,avTempArray2[i]);
 			vPoint[0] += vCylinderCirclePos[0];
 			vPoint[1] += vCylinderCirclePos[1];
 			vPoint[2] += vCylinderCirclePos[2];
@@ -949,7 +949,7 @@ void sCylinderBoxData::_cldClipBoxToCylinder()
 	{
 		for( i=0; i<iTmpCounter1; i++)
 		{
-			dMULTIPLY0_331(vPoint,m_mCylinderRot,avTempArray1[i]);
+			dMultiply0_331(vPoint,m_mCylinderRot,avTempArray1[i]);
 			vPoint[0] += vCylinderCirclePos[0];
 			vPoint[1] += vCylinderCirclePos[1];
 			vPoint[2] += vCylinderCirclePos[2];

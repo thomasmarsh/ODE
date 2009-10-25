@@ -113,7 +113,7 @@ int dCollideRTL(dxGeom* g1, dxGeom* RayGeom, int Flags, dContactGeom* Contacts, 
 			vv[2] = dv[2][2] - dv[0][2];
 			vv[3] = REAL(0.0);
 
-			dCROSS(Contact->normal, =, vv, vu);	// Reversed
+			dCalcVectorCross3(Contact->normal, vv, vu);	// Reversed
 
 			// Even though all triangles might be initially valid, 
 			// a triangle may degenerate into a segment after applying 

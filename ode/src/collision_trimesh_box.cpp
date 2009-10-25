@@ -56,72 +56,42 @@ GenerateContact(int in_Flags, dContactGeom* in_Contacts, int in_Stride,
 
 // dVector3
 // r=a-b
-#define SUBTRACT(a,b,r) do{ \
-  (r)[0]=(a)[0] - (b)[0]; \
-  (r)[1]=(a)[1] - (b)[1]; \
-  (r)[2]=(a)[2] - (b)[2]; }while(0)
+#define SUBTRACT(a,b,r) dSubtractVectors3(r, a, b)
 
 
 // dVector3
 // a=b
-#define SET(a,b) do{ \
-  (a)[0]=(b)[0]; \
-  (a)[1]=(b)[1]; \
-  (a)[2]=(b)[2]; }while(0)
+#define SET(a,b) dCopyVector3(a, b)
 
 
 // dMatrix3
 // a=b
-#define SETM(a,b) do{ \
-  (a)[0]=(b)[0]; \
-  (a)[1]=(b)[1]; \
-  (a)[2]=(b)[2]; \
-  (a)[3]=(b)[3]; \
-  (a)[4]=(b)[4]; \
-  (a)[5]=(b)[5]; \
-  (a)[6]=(b)[6]; \
-  (a)[7]=(b)[7]; \
-  (a)[8]=(b)[8]; \
-  (a)[9]=(b)[9]; \
-  (a)[10]=(b)[10]; \
-                     (a)[11]=(b)[11]; }while(0)
+#define SETM(a,b) dCopyMatrix4x4(a, b)
 
 
 // dVector3
 // r=a+b
-#define ADD(a,b,r) do{ \
-  (r)[0]=(a)[0] + (b)[0]; \
-  (r)[1]=(a)[1] + (b)[1]; \
-  (r)[2]=(a)[2] + (b)[2]; }while(0)
+#define ADD(a,b,r) dAddVectors3(r, a, b)
 
 
 // dMatrix3, int, dVector3
 // v=column a from m
-#define GETCOL(m,a,v) do{ \
-  (v)[0]=(m)[(a)+0]; \
-  (v)[1]=(m)[(a)+4]; \
-  (v)[2]=(m)[(a)+8]; }while(0)
+#define GETCOL(m,a,v) dGetMatrixColumn3(v, m, a)
 
 
 // dVector4, dVector3
 // distance between plane p and point v
-#define POINTDISTANCE(p,v) \
-  ( p[0]*v[0] + p[1]*v[1] + p[2]*v[2] + p[3] )
+#define POINTDISTANCE(p,v) dPointPlaneDistance(v, p)
 
 
 // dVector4, dVector3, dReal
 // construct plane from normal and d
-#define CONSTRUCTPLANE(plane,normal,d) do{ \
-  plane[0]=normal[0];\
-  plane[1]=normal[1];\
-  plane[2]=normal[2];\
-  plane[3]=d; }while(0)
+#define CONSTRUCTPLANE(plane,normal,d) dConstructPlane(normal, d, plane)
 
 
 // dVector3
 // length of vector a
-#define LENGTHOF(a) \
-  dSqrt(a[0]*a[0]+a[1]*a[1]+a[2]*a[2])
+#define LENGTHOF(a) dCalcVectorLength3(a)
 
 
 struct sTrimeshBoxColliderData
@@ -427,7 +397,7 @@ bool sTrimeshBoxColliderData::_cldTestSeparatingAxes(const dVector3 &v0, const d
   SUBTRACT(m_vE1,m_vE0,m_vE2);
 
   // calculate poly normal
-  dCROSS(m_vN,=,m_vE0,m_vE1);
+  dCalcVectorCross3(m_vN,m_vE0,m_vE1);
 
   // calculate length of face normal
   dReal fNLen = LENGTHOF(m_vN);
@@ -461,10 +431,10 @@ bool sTrimeshBoxColliderData::_cldTestSeparatingAxes(const dVector3 &v0, const d
   // ************************************************
   // Axis 1 - Triangle Normal
   SET(vL,m_vN);
-  fp0  = dDOT(vL,vD);
+  fp0  = dCalcVectorDot3(vL,vD);
   fp1  = fp0;
   fp2  = fp0;
-  fR=fa0*dFabs( dDOT(m_vN,vA0) ) + fa1 * dFabs( dDOT(m_vN,vA1) ) + fa2 * dFabs( dDOT(m_vN,vA2) );
+  fR=fa0*dFabs( dCalcVectorDot3(m_vN,vA0) ) + fa1 * dFabs( dCalcVectorDot3(m_vN,vA1) ) + fa2 * dFabs( dCalcVectorDot3(m_vN,vA2) );
 
   if (!_cldTestNormal(fp0, fR, vL, 1)) {
     m_iExitAxis=1;
@@ -477,10 +447,10 @@ bool sTrimeshBoxColliderData::_cldTestSeparatingAxes(const dVector3 &v0, const d
   // ************************************************
   // Axis 2 - Box X-Axis
   SET(vL,vA0);
-  fD  = dDOT(vL,m_vN)/fNLen;
-  fp0 = dDOT(vL,vD);
-  fp1 = fp0 + dDOT(vA0,m_vE0);
-  fp2 = fp0 + dDOT(vA0,m_vE1);
+  fD  = dCalcVectorDot3(vL,m_vN)/fNLen;
+  fp0 = dCalcVectorDot3(vL,vD);
+  fp1 = fp0 + dCalcVectorDot3(vA0,m_vE0);
+  fp2 = fp0 + dCalcVectorDot3(vA0,m_vE1);
   fR  = fa0;
 
   if (!_cldTestFace(fp0, fp1, fp2, fR, fD, vL, 2)) {
@@ -492,10 +462,10 @@ bool sTrimeshBoxColliderData::_cldTestSeparatingAxes(const dVector3 &v0, const d
   // ************************************************
   // Axis 3 - Box Y-Axis
   SET(vL,vA1);
-  fD = dDOT(vL,m_vN)/fNLen;
-  fp0 = dDOT(vL,vD);
-  fp1 = fp0 + dDOT(vA1,m_vE0);
-  fp2 = fp0 + dDOT(vA1,m_vE1);
+  fD = dCalcVectorDot3(vL,m_vN)/fNLen;
+  fp0 = dCalcVectorDot3(vL,vD);
+  fp1 = fp0 + dCalcVectorDot3(vA1,m_vE0);
+  fp2 = fp0 + dCalcVectorDot3(vA1,m_vE1);
   fR  = fa1;
 
   if (!_cldTestFace(fp0, fp1, fp2, fR, fD, vL, 3)) {
@@ -508,10 +478,10 @@ bool sTrimeshBoxColliderData::_cldTestSeparatingAxes(const dVector3 &v0, const d
   // ************************************************
   // Axis 4 - Box Z-Axis
   SET(vL,vA2);
-  fD = dDOT(vL,m_vN)/fNLen;
-  fp0 = dDOT(vL,vD);
-  fp1 = fp0 + dDOT(vA2,m_vE0);
-  fp2 = fp0 + dDOT(vA2,m_vE1);
+  fD = dCalcVectorDot3(vL,m_vN)/fNLen;
+  fp0 = dCalcVectorDot3(vL,vD);
+  fp1 = fp0 + dCalcVectorDot3(vA2,m_vE0);
+  fp2 = fp0 + dCalcVectorDot3(vA2,m_vE1);
   fR  = fa2;
 
   if (!_cldTestFace(fp0, fp1, fp2, fR, fD, vL, 4)) {
@@ -524,12 +494,12 @@ bool sTrimeshBoxColliderData::_cldTestSeparatingAxes(const dVector3 &v0, const d
   // Test Edges
   // ************************************************
   // Axis 5 - Box X-Axis cross Edge0
-  dCROSS(vL,=,vA0,m_vE0);
-  fD  = dDOT(vL,m_vN)/fNLen;
-  fp0 = dDOT(vL,vD);
+  dCalcVectorCross3(vL,vA0,m_vE0);
+  fD  = dCalcVectorDot3(vL,m_vN)/fNLen;
+  fp0 = dCalcVectorDot3(vL,vD);
   fp1 = fp0;
-  fp2 = fp0 + dDOT(vA0,m_vN);
-  fR  = fa1 * dFabs(dDOT(vA2,m_vE0)) + fa2 * dFabs(dDOT(vA1,m_vE0));
+  fp2 = fp0 + dCalcVectorDot3(vA0,m_vN);
+  fR  = fa1 * dFabs(dCalcVectorDot3(vA2,m_vE0)) + fa2 * dFabs(dCalcVectorDot3(vA1,m_vE0));
 
   if (!_cldTestEdge(fp1, fp2, fR, fD, vL, 5)) {
     m_iExitAxis=5;
@@ -539,12 +509,12 @@ bool sTrimeshBoxColliderData::_cldTestSeparatingAxes(const dVector3 &v0, const d
 
   // ************************************************
   // Axis 6 - Box X-Axis cross Edge1
-  dCROSS(vL,=,vA0,m_vE1);
-  fD  = dDOT(vL,m_vN)/fNLen;
-  fp0 = dDOT(vL,vD);
-  fp1 = fp0 - dDOT(vA0,m_vN);
+  dCalcVectorCross3(vL,vA0,m_vE1);
+  fD  = dCalcVectorDot3(vL,m_vN)/fNLen;
+  fp0 = dCalcVectorDot3(vL,vD);
+  fp1 = fp0 - dCalcVectorDot3(vA0,m_vN);
   fp2 = fp0;
-  fR  = fa1 * dFabs(dDOT(vA2,m_vE1)) + fa2 * dFabs(dDOT(vA1,m_vE1));
+  fR  = fa1 * dFabs(dCalcVectorDot3(vA2,m_vE1)) + fa2 * dFabs(dCalcVectorDot3(vA1,m_vE1));
 
   if (!_cldTestEdge(fp0, fp1, fR, fD, vL, 6)) {
     m_iExitAxis=6;
@@ -554,12 +524,12 @@ bool sTrimeshBoxColliderData::_cldTestSeparatingAxes(const dVector3 &v0, const d
 
   // ************************************************
   // Axis 7 - Box X-Axis cross Edge2
-  dCROSS(vL,=,vA0,m_vE2);
-  fD  = dDOT(vL,m_vN)/fNLen;
-  fp0 = dDOT(vL,vD);
-  fp1 = fp0 - dDOT(vA0,m_vN);
-  fp2 = fp0 - dDOT(vA0,m_vN);
-  fR  = fa1 * dFabs(dDOT(vA2,m_vE2)) + fa2 * dFabs(dDOT(vA1,m_vE2));
+  dCalcVectorCross3(vL,vA0,m_vE2);
+  fD  = dCalcVectorDot3(vL,m_vN)/fNLen;
+  fp0 = dCalcVectorDot3(vL,vD);
+  fp1 = fp0 - dCalcVectorDot3(vA0,m_vN);
+  fp2 = fp0 - dCalcVectorDot3(vA0,m_vN);
+  fR  = fa1 * dFabs(dCalcVectorDot3(vA2,m_vE2)) + fa2 * dFabs(dCalcVectorDot3(vA1,m_vE2));
 
   if (!_cldTestEdge(fp0, fp1, fR, fD, vL, 7)) {
     m_iExitAxis=7;
@@ -570,12 +540,12 @@ bool sTrimeshBoxColliderData::_cldTestSeparatingAxes(const dVector3 &v0, const d
 
   // ************************************************
   // Axis 8 - Box Y-Axis cross Edge0
-  dCROSS(vL,=,vA1,m_vE0);
-  fD  = dDOT(vL,m_vN)/fNLen;
-  fp0 = dDOT(vL,vD);
+  dCalcVectorCross3(vL,vA1,m_vE0);
+  fD  = dCalcVectorDot3(vL,m_vN)/fNLen;
+  fp0 = dCalcVectorDot3(vL,vD);
   fp1 = fp0;
-  fp2 = fp0 + dDOT(vA1,m_vN);
-  fR  = fa0 * dFabs(dDOT(vA2,m_vE0)) + fa2 * dFabs(dDOT(vA0,m_vE0));
+  fp2 = fp0 + dCalcVectorDot3(vA1,m_vN);
+  fR  = fa0 * dFabs(dCalcVectorDot3(vA2,m_vE0)) + fa2 * dFabs(dCalcVectorDot3(vA0,m_vE0));
 
   if (!_cldTestEdge(fp0, fp2, fR, fD, vL, 8)) {
     m_iExitAxis=8;
@@ -586,12 +556,12 @@ bool sTrimeshBoxColliderData::_cldTestSeparatingAxes(const dVector3 &v0, const d
 
   // ************************************************
   // Axis 9 - Box Y-Axis cross Edge1
-  dCROSS(vL,=,vA1,m_vE1);
-  fD  = dDOT(vL,m_vN)/fNLen;
-  fp0 = dDOT(vL,vD);
-  fp1 = fp0 - dDOT(vA1,m_vN);
+  dCalcVectorCross3(vL,vA1,m_vE1);
+  fD  = dCalcVectorDot3(vL,m_vN)/fNLen;
+  fp0 = dCalcVectorDot3(vL,vD);
+  fp1 = fp0 - dCalcVectorDot3(vA1,m_vN);
   fp2 = fp0;
-  fR  = fa0 * dFabs(dDOT(vA2,m_vE1)) + fa2 * dFabs(dDOT(vA0,m_vE1));
+  fR  = fa0 * dFabs(dCalcVectorDot3(vA2,m_vE1)) + fa2 * dFabs(dCalcVectorDot3(vA0,m_vE1));
 
   if (!_cldTestEdge(fp0, fp1, fR, fD, vL, 9)) {
     m_iExitAxis=9;
@@ -602,12 +572,12 @@ bool sTrimeshBoxColliderData::_cldTestSeparatingAxes(const dVector3 &v0, const d
 
   // ************************************************
   // Axis 10 - Box Y-Axis cross Edge2
-  dCROSS(vL,=,vA1,m_vE2);
-  fD  = dDOT(vL,m_vN)/fNLen;
-  fp0 = dDOT(vL,vD);
-  fp1 = fp0 - dDOT(vA1,m_vN);
-  fp2 = fp0 - dDOT(vA1,m_vN);
-  fR  = fa0 * dFabs(dDOT(vA2,m_vE2)) + fa2 * dFabs(dDOT(vA0,m_vE2));
+  dCalcVectorCross3(vL,vA1,m_vE2);
+  fD  = dCalcVectorDot3(vL,m_vN)/fNLen;
+  fp0 = dCalcVectorDot3(vL,vD);
+  fp1 = fp0 - dCalcVectorDot3(vA1,m_vN);
+  fp2 = fp0 - dCalcVectorDot3(vA1,m_vN);
+  fR  = fa0 * dFabs(dCalcVectorDot3(vA2,m_vE2)) + fa2 * dFabs(dCalcVectorDot3(vA0,m_vE2));
 
   if (!_cldTestEdge(fp0, fp1, fR, fD, vL, 10)) {
     m_iExitAxis=10;
@@ -618,12 +588,12 @@ bool sTrimeshBoxColliderData::_cldTestSeparatingAxes(const dVector3 &v0, const d
 
   // ************************************************
   // Axis 11 - Box Z-Axis cross Edge0
-  dCROSS(vL,=,vA2,m_vE0);
-  fD  = dDOT(vL,m_vN)/fNLen;
-  fp0 = dDOT(vL,vD);
+  dCalcVectorCross3(vL,vA2,m_vE0);
+  fD  = dCalcVectorDot3(vL,m_vN)/fNLen;
+  fp0 = dCalcVectorDot3(vL,vD);
   fp1 = fp0;
-  fp2 = fp0 + dDOT(vA2,m_vN);
-  fR  = fa0 * dFabs(dDOT(vA1,m_vE0)) + fa1 * dFabs(dDOT(vA0,m_vE0));
+  fp2 = fp0 + dCalcVectorDot3(vA2,m_vN);
+  fR  = fa0 * dFabs(dCalcVectorDot3(vA1,m_vE0)) + fa1 * dFabs(dCalcVectorDot3(vA0,m_vE0));
 
   if (!_cldTestEdge(fp0, fp2, fR, fD, vL, 11)) {
     m_iExitAxis=11;
@@ -633,12 +603,12 @@ bool sTrimeshBoxColliderData::_cldTestSeparatingAxes(const dVector3 &v0, const d
 
   // ************************************************
   // Axis 12 - Box Z-Axis cross Edge1
-  dCROSS(vL,=,vA2,m_vE1);
-  fD  = dDOT(vL,m_vN)/fNLen;
-  fp0 = dDOT(vL,vD);
-  fp1 = fp0 - dDOT(vA2,m_vN);
+  dCalcVectorCross3(vL,vA2,m_vE1);
+  fD  = dCalcVectorDot3(vL,m_vN)/fNLen;
+  fp0 = dCalcVectorDot3(vL,vD);
+  fp1 = fp0 - dCalcVectorDot3(vA2,m_vN);
   fp2 = fp0;
-  fR  = fa0 * dFabs(dDOT(vA1,m_vE1)) + fa1 * dFabs(dDOT(vA0,m_vE1));
+  fR  = fa0 * dFabs(dCalcVectorDot3(vA1,m_vE1)) + fa1 * dFabs(dCalcVectorDot3(vA0,m_vE1));
 
   if (!_cldTestEdge(fp0, fp1, fR, fD, vL, 12)) {
     m_iExitAxis=12;
@@ -648,12 +618,12 @@ bool sTrimeshBoxColliderData::_cldTestSeparatingAxes(const dVector3 &v0, const d
 
   // ************************************************
   // Axis 13 - Box Z-Axis cross Edge2
-  dCROSS(vL,=,vA2,m_vE2);
-  fD  = dDOT(vL,m_vN)/fNLen;
-  fp0 = dDOT(vL,vD);
-  fp1 = fp0 - dDOT(vA2,m_vN);
-  fp2 = fp0 - dDOT(vA2,m_vN);
-  fR  = fa0 * dFabs(dDOT(vA1,m_vE2)) + fa1 * dFabs(dDOT(vA0,m_vE2));
+  dCalcVectorCross3(vL,vA2,m_vE2);
+  fD  = dCalcVectorDot3(vL,m_vN)/fNLen;
+  fp0 = dCalcVectorDot3(vL,vD);
+  fp1 = fp0 - dCalcVectorDot3(vA2,m_vN);
+  fp2 = fp0 - dCalcVectorDot3(vA2,m_vN);
+  fR  = fa0 * dFabs(dCalcVectorDot3(vA1,m_vE2)) + fa1 * dFabs(dCalcVectorDot3(vA0,m_vE2));
 
   if (!_cldTestEdge(fp0, fp1, fR, fD, vL, 13)) {
     m_iExitAxis=13;
@@ -676,9 +646,9 @@ static bool _cldClosestPointOnTwoLines( dVector3 vPoint1, dVector3 vLenVec1,
   // calculate denominator
   dVector3 vp;
   SUBTRACT(vPoint2,vPoint1,vp);
-  dReal fuaub  = dDOT(vLenVec1,vLenVec2);
-  dReal fq1    = dDOT(vLenVec1,vp);
-  dReal fq2    = -dDOT(vLenVec2,vp);
+  dReal fuaub  = dCalcVectorDot3(vLenVec1,vLenVec2);
+  dReal fq1    = dCalcVectorDot3(vLenVec1,vp);
+  dReal fq2    = -dCalcVectorDot3(vLenVec2,vp);
   dReal fd     = 1.0f - fuaub * fuaub;
 
   // if denominator is positive
@@ -715,7 +685,7 @@ void sTrimeshBoxColliderData::_cldClipping(const dVector3 &v0, const dVector3 &v
     for( int i=0; i<3; i++) {
       dVector3 vRotCol;
       GETCOL(m_mHullBoxRot,i,vRotCol);
-      dReal fSign = dDOT(m_vBestNormal,vRotCol) > 0 ? 1.0f : -1.0f;
+      dReal fSign = dCalcVectorDot3(m_vBestNormal,vRotCol) > 0 ? 1.0f : -1.0f;
 
       vPa[0] += fSign * m_vBoxHalfSize[i] * vRotCol[0];
       vPa[1] += fSign * m_vBoxHalfSize[i] * vRotCol[1];
@@ -895,7 +865,7 @@ void sTrimeshBoxColliderData::_cldClipping(const dVector3 &v0, const dVector3 &v
     // Plane p0
     dVector3 vTemp2;
     SUBTRACT(v1,v0,vTemp2);
-    dCROSS(vTemp,=,m_vN,vTemp2);
+    dCalcVectorCross3(vTemp,m_vN,vTemp2);
     dNormalize3(vTemp);
     CONSTRUCTPLANE(plPlane,vTemp,0);
 
@@ -903,16 +873,16 @@ void sTrimeshBoxColliderData::_cldClipping(const dVector3 &v0, const dVector3 &v
 
     // Plane p1
     SUBTRACT(v2,v1,vTemp2);
-    dCROSS(vTemp,=,m_vN,vTemp2);
+    dCalcVectorCross3(vTemp,m_vN,vTemp2);
     dNormalize3(vTemp);
     SUBTRACT(v0,v2,vTemp2);
-    CONSTRUCTPLANE(plPlane,vTemp,dDOT(vTemp2,vTemp));
+    CONSTRUCTPLANE(plPlane,vTemp,dCalcVectorDot3(vTemp2,vTemp));
 
     _cldClipPolyToPlane( avTempArray2, iTempCnt2, avTempArray1, iTempCnt1, plPlane  );
 
     // Plane p2
     SUBTRACT(v0,v2,vTemp2);
-    dCROSS(vTemp,=,m_vN,vTemp2);
+    dCalcVectorCross3(vTemp,m_vN,vTemp2);
     dNormalize3(vTemp);
     CONSTRUCTPLANE(plPlane,vTemp,0);
 
@@ -923,7 +893,7 @@ void sTrimeshBoxColliderData::_cldClipping(const dVector3 &v0, const dVector3 &v
     // for each generated contact point
     for ( int i=0; i<iTempCnt2; i++ ) {
       // calculate depth
-      dReal fTempDepth = dDOT(vNormal2,avTempArray2[i]);
+      dReal fTempDepth = dCalcVectorDot3(vNormal2,avTempArray2[i]);
 
       // clamp depth to zero
       if (fTempDepth > 0) {
@@ -1046,7 +1016,7 @@ void sTrimeshBoxColliderData::_cldClipping(const dVector3 &v0, const dVector3 &v
     // for each generated contact point
     for ( int i=0; i<iTempCnt1; i++ ) {
       // calculate depth
-      dReal fTempDepth = dDOT(vNormal2,avTempArray1[i])-m_vBoxHalfSize[iA0];
+      dReal fTempDepth = dCalcVectorDot3(vNormal2,avTempArray1[i])-m_vBoxHalfSize[iA0];
 
       // clamp depth to zero
       if (fTempDepth > 0) {
@@ -1413,10 +1383,10 @@ GenerateContact(int in_Flags, dContactGeom* in_Contacts, int in_Stride,
 				// same position?
 				for (int j=0; j<3; j++)
 					diff[j] = in_ContactPos[j] - Contact->pos[j];
-				if (dDOT(diff, diff) < dEpsilon)
+				if (dCalcVectorDot3(diff, diff) < dEpsilon)
 				{
 					// same normal?
-					if (dFabs(dDOT(in_Normal, Contact->normal)) > (REAL(1.0)-dEpsilon))
+					if (dFabs(dCalcVectorDot3(in_Normal, Contact->normal)) > (REAL(1.0)-dEpsilon))
 					{
 						if (in_Depth > Contact->depth)
 							Contact->depth = in_Depth;

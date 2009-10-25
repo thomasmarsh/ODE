@@ -108,6 +108,17 @@ static void normalizeVector3 (float v[3])
   }
 }
 
+static void crossProduct3(float res[3], const float a[3], const float b[3])
+{
+  float res_0 = a[1]*b[2] - a[2]*b[1];
+  float res_1 = a[2]*b[0] - a[0]*b[2];
+  float res_2 = a[0]*b[1] - a[1]*b[0];
+  // Only assign after all the calculations are over to avoid incurring memory aliasing
+  res[0] = res_0;
+  res[1] = res_1;
+  res[2] = res_2;
+}
+
 //***************************************************************************
 // PPM image object
 
@@ -615,7 +626,7 @@ static void drawTriangle (const float *v0, const float *v1, const float *v2, int
   v[0] = v2[0] - v0[0];
   v[1] = v2[1] - v0[1];
   v[2] = v2[2] - v0[2];
-  dCROSS (normal,=,u,v);
+  crossProduct3(normal,u,v);
   normalizeVector3 (normal);
 
   glBegin(solid ? GL_TRIANGLES : GL_LINE_STRIP);
@@ -635,7 +646,7 @@ static void drawTriangleD (const double *v0, const double *v1, const double *v2,
   v[0] = float( v2[0] - v0[0] );
   v[1] = float( v2[1] - v0[1] );
   v[2] = float( v2[2] - v0[2] );
-  dCROSS (normal,=,u,v);
+  crossProduct3(normal,u,v);
   normalizeVector3 (normal);
 
   glBegin(solid ? GL_TRIANGLES : GL_LINE_STRIP);

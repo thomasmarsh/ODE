@@ -97,7 +97,7 @@ int _dSafeNormalize3 (dVector3 a)
 void dNormalize3 (dVector3 a)
 {
   dIASSERT (a);
-  dReal l = dDOT(a,a);
+  dReal l = dCalcVectorDot3(a,a);
   if (l > 0) {
     l = dRecipSqrt(l);
     a[0] *= l;
@@ -126,7 +126,7 @@ void dNormalize3(dVector3 a)
 int _dSafeNormalize4 (dVector4 a)
 {
   dAASSERT (a);
-  dReal l = dDOT(a,a)+a[3]*a[3];
+  dReal l = dCalcVectorDot3(a,a)+a[3]*a[3];
   if (l > 0) {
     l = dRecipSqrt(l);
     a[0] *= l;
@@ -193,24 +193,24 @@ void dPlaneSpace (const dVector3 n, dVector3 p, dVector3 q)
 */
 void dOrthogonalizeR(dMatrix3 m)
 {
-	dReal n0 = dLENGTHSQUARED(m);
+	dReal n0 = dCalcVectorLengthSquare3(m);
 	if (n0 != 1)
 		dSafeNormalize3(m);
 
 	// project row[0] on row[1], should be zero
-	dReal proj = dDOT(m, m+4);
+	dReal proj = dCalcVectorDot3(m, m+4);
 	if (proj != 0) {
 		// Gram-Schmidt step on row[1]
 		m[4] -= proj * m[0];
 		m[5] -= proj * m[1];
 		m[6] -= proj * m[2];
 	}
-	dReal n1 = dLENGTHSQUARED(m+4);
+	dReal n1 = dCalcVectorLengthSquare3(m+4);
 	if (n1 != 1)
 		dSafeNormalize3(m+4);
 
 	/* just overwrite row[2], this makes sure the matrix is not
 	a reflection */
-	dCROSS(m+8, =, m, m+4);
+	dCalcVectorCross3(m+8, m, m+4);
 	m[3] = m[4+3] = m[8+3] = 0;
 }

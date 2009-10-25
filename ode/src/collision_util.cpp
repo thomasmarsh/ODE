@@ -40,7 +40,7 @@ int dCollideSpheres (dVector3 p1, dReal r1,
   // printf ("d=%.2f  (%.2f %.2f %.2f) (%.2f %.2f %.2f) r1=%.2f r2=%.2f\n",
   //	  d,p1[0],p1[1],p1[2],p2[0],p2[1],p2[2],r1,r2);
 
-  dReal d = dDISTANCE (p1,p2);
+  dReal d = dCalcPointsDistance3(p1,p2);
   if (d > (r1 + r2)) return 0;
   if (d <= 0) {
     c->pos[0] = p1[0];
@@ -74,9 +74,9 @@ void dLineClosestApproach (const dVector3 pa, const dVector3 ua,
   p[0] = pb[0] - pa[0];
   p[1] = pb[1] - pa[1];
   p[2] = pb[2] - pa[2];
-  dReal uaub = dDOT(ua,ub);
-  dReal q1 =  dDOT(ua,p);
-  dReal q2 = -dDOT(ub,p);
+  dReal uaub = dCalcVectorDot3(ua,ub);
+  dReal q1 =  dCalcVectorDot3(ua,p);
+  dReal q2 = -dCalcVectorDot3(ub,p);
   dReal d = 1-uaub*uaub;
   if (d <= REAL(0.0001)) {
     // @@@ this needs to be made more robust
@@ -120,8 +120,8 @@ void dClosestLineSegmentPoints (const dVector3 a1, const dVector3 a2,
   SET3 (a1a2,a2,-,a1);
   SET3 (b1b2,b2,-,b1);
   SET3 (a1b1,b1,-,a1);
-  da1 = dDOT(a1a2,a1b1);
-  db1 = dDOT(b1b2,a1b1);
+  da1 = dCalcVectorDot3(a1a2,a1b1);
+  db1 = dCalcVectorDot3(b1b2,a1b1);
   if (da1 <= 0 && db1 >= 0) {
     SET2 (cp1,a1);
     SET2 (cp2,b1);
@@ -129,8 +129,8 @@ void dClosestLineSegmentPoints (const dVector3 a1, const dVector3 a2,
   }
 
   SET3 (a1b2,b2,-,a1);
-  da2 = dDOT(a1a2,a1b2);
-  db2 = dDOT(b1b2,a1b2);
+  da2 = dCalcVectorDot3(a1a2,a1b2);
+  db2 = dCalcVectorDot3(b1b2,a1b2);
   if (da2 <= 0 && db2 <= 0) {
     SET2 (cp1,a1);
     SET2 (cp2,b2);
@@ -138,8 +138,8 @@ void dClosestLineSegmentPoints (const dVector3 a1, const dVector3 a2,
   }
 
   SET3 (a2b1,b1,-,a2);
-  da3 = dDOT(a1a2,a2b1);
-  db3 = dDOT(b1b2,a2b1);
+  da3 = dCalcVectorDot3(a1a2,a2b1);
+  db3 = dCalcVectorDot3(b1b2,a2b1);
   if (da3 >= 0 && db3 >= 0) {
     SET2 (cp1,a2);
     SET2 (cp2,b1);
@@ -147,8 +147,8 @@ void dClosestLineSegmentPoints (const dVector3 a1, const dVector3 a2,
   }
 
   SET3 (a2b2,b2,-,a2);
-  da4 = dDOT(a1a2,a2b2);
-  db4 = dDOT(b1b2,a2b2);
+  da4 = dCalcVectorDot3(a1a2,a2b2);
+  db4 = dCalcVectorDot3(b1b2,a2b2);
   if (da4 >= 0 && db4 <= 0) {
     SET2 (cp1,a2);
     SET2 (cp2,b2);
@@ -159,11 +159,11 @@ void dClosestLineSegmentPoints (const dVector3 a1, const dVector3 a2,
   // if one or both of the lines has zero length, we will never get to here,
   // so we do not have to worry about the following divisions by zero.
 
-  la = dDOT(a1a2,a1a2);
+  la = dCalcVectorDot3(a1a2,a1a2);
   if (da1 >= 0 && da3 <= 0) {
     k = da1 / la;
     SET3 (n,a1b1,-,k*a1a2);
-    if (dDOT(b1b2,n) >= 0) {
+    if (dCalcVectorDot3(b1b2,n) >= 0) {
       SET3 (cp1,a1,+,k*a1a2);
       SET2 (cp2,b1);
       return;
@@ -173,18 +173,18 @@ void dClosestLineSegmentPoints (const dVector3 a1, const dVector3 a2,
   if (da2 >= 0 && da4 <= 0) {
     k = da2 / la;
     SET3 (n,a1b2,-,k*a1a2);
-    if (dDOT(b1b2,n) <= 0) {
+    if (dCalcVectorDot3(b1b2,n) <= 0) {
       SET3 (cp1,a1,+,k*a1a2);
       SET2 (cp2,b2);
       return;
     }
   }
 
-  lb = dDOT(b1b2,b1b2);
+  lb = dCalcVectorDot3(b1b2,b1b2);
   if (db1 <= 0 && db2 >= 0) {
     k = -db1 / lb;
     SET3 (n,-a1b1,-,k*b1b2);
-    if (dDOT(a1a2,n) >= 0) {
+    if (dCalcVectorDot3(a1a2,n) >= 0) {
       SET2 (cp1,a1);
       SET3 (cp2,b1,+,k*b1b2);
       return;
@@ -194,7 +194,7 @@ void dClosestLineSegmentPoints (const dVector3 a1, const dVector3 a2,
   if (db3 <= 0 && db4 >= 0) {
     k = -db3 / lb;
     SET3 (n,-a2b1,-,k*b1b2);
-    if (dDOT(a1a2,n) <= 0) {
+    if (dCalcVectorDot3(a1a2,n) <= 0) {
       SET2 (cp1,a2);
       SET3 (cp2,b1,+,k*b1b2);
       return;
@@ -203,7 +203,7 @@ void dClosestLineSegmentPoints (const dVector3 a1, const dVector3 a2,
 
   // it must be edge-edge
 
-  k = dDOT(a1a2,b1b2);
+  k = dCalcVectorDot3(a1a2,b1b2);
   det = la*lb - k*k;
   if (det <= 0) {
     // this should never happen, but just in case...
@@ -257,11 +257,11 @@ void dClosestLineBoxPoints (const dVector3 p1, const dVector3 p2,
   tmp[0] = p1[0] - c[0];
   tmp[1] = p1[1] - c[1];
   tmp[2] = p1[2] - c[2];
-  dMULTIPLY1_331 (s,R,tmp);
+  dMultiply1_331 (s,R,tmp);
   tmp[0] = p2[0] - p1[0];
   tmp[1] = p2[1] - p1[1];
   tmp[2] = p2[2] - p1[2];
-  dMULTIPLY1_331 (v,R,tmp);
+  dMultiply1_331 (v,R,tmp);
 
   // mirror the line so that v has all components >= 0
   dVector3 sign;
@@ -378,7 +378,7 @@ void dClosestLineBoxPoints (const dVector3 p1, const dVector3 p2,
     if (tmp[i] < -h[i]) tmp[i] = -h[i];
     else if (tmp[i] > h[i]) tmp[i] = h[i];
   }
-  dMULTIPLY0_331 (s,R,tmp);
+  dMultiply0_331 (s,R,tmp);
   for (i=0; i<3; i++) bret[i] = s[i] + c[i];
 }
 
@@ -406,7 +406,7 @@ int dBoxTouchesBox (const dVector3 p1, const dMatrix3 R1,
   p[0] = p2[0] - p1[0];
   p[1] = p2[1] - p1[1];
   p[2] = p2[2] - p1[2];
-  dMULTIPLY1_331 (pp,R1,p);		// get pp = p relative to body 1
+  dMultiply1_331 (pp,R1,p);		// get pp = p relative to body 1
 
   // get side lengths / 2
   A1 = side1[0]*REAL(0.5); A2 = side1[1]*REAL(0.5); A3 = side1[2]*REAL(0.5);
@@ -417,20 +417,20 @@ int dBoxTouchesBox (const dVector3 p1, const dMatrix3 R1,
   // notation: R1=[u1 u2 u3], R2=[v1 v2 v3]
 
   // separating axis = u1,u2,u3
-  R11 = dDOT44(R1+0,R2+0); R12 = dDOT44(R1+0,R2+1); R13 = dDOT44(R1+0,R2+2);
+  R11 = dCalcVectorDot3_44(R1+0,R2+0); R12 = dCalcVectorDot3_44(R1+0,R2+1); R13 = dCalcVectorDot3_44(R1+0,R2+2);
   Q11 = dFabs(R11); Q12 = dFabs(R12); Q13 = dFabs(R13);
   if (dFabs(pp[0]) > (A1 + B1*Q11 + B2*Q12 + B3*Q13)) return 0;
-  R21 = dDOT44(R1+1,R2+0); R22 = dDOT44(R1+1,R2+1); R23 = dDOT44(R1+1,R2+2);
+  R21 = dCalcVectorDot3_44(R1+1,R2+0); R22 = dCalcVectorDot3_44(R1+1,R2+1); R23 = dCalcVectorDot3_44(R1+1,R2+2);
   Q21 = dFabs(R21); Q22 = dFabs(R22); Q23 = dFabs(R23);
   if (dFabs(pp[1]) > (A2 + B1*Q21 + B2*Q22 + B3*Q23)) return 0;
-  R31 = dDOT44(R1+2,R2+0); R32 = dDOT44(R1+2,R2+1); R33 = dDOT44(R1+2,R2+2);
+  R31 = dCalcVectorDot3_44(R1+2,R2+0); R32 = dCalcVectorDot3_44(R1+2,R2+1); R33 = dCalcVectorDot3_44(R1+2,R2+2);
   Q31 = dFabs(R31); Q32 = dFabs(R32); Q33 = dFabs(R33);
   if (dFabs(pp[2]) > (A3 + B1*Q31 + B2*Q32 + B3*Q33)) return 0;
 
   // separating axis = v1,v2,v3
-  if (dFabs(dDOT41(R2+0,p)) > (A1*Q11 + A2*Q21 + A3*Q31 + B1)) return 0;
-  if (dFabs(dDOT41(R2+1,p)) > (A1*Q12 + A2*Q22 + A3*Q32 + B2)) return 0;
-  if (dFabs(dDOT41(R2+2,p)) > (A1*Q13 + A2*Q23 + A3*Q33 + B3)) return 0;
+  if (dFabs(dCalcVectorDot3_41(R2+0,p)) > (A1*Q11 + A2*Q21 + A3*Q31 + B1)) return 0;
+  if (dFabs(dCalcVectorDot3_41(R2+1,p)) > (A1*Q12 + A2*Q22 + A3*Q32 + B2)) return 0;
+  if (dFabs(dCalcVectorDot3_41(R2+2,p)) > (A1*Q13 + A2*Q23 + A3*Q33 + B3)) return 0;
 
   // separating axis = u1 x (v1,v2,v3)
   if (dFabs(pp[2]*R21-pp[1]*R31) > A2*Q31 + A3*Q21 + B2*Q13 + B3*Q12) return 0;
@@ -576,7 +576,7 @@ void		 dClipPolyToCircle(const dVector3 avArrayIn[], const int ctIn,
 		if( fDistance0 >= 0 ) 
 		{
 			// emit point
-			if (dVector3Length2(avArrayIn[i0]) <= fRadius*fRadius)
+			if (dVector3LengthSquare(avArrayIn[i0]) <= fRadius*fRadius)
 			{
 				avArrayOut[ctOut][0] = avArrayIn[i0][0];
 				avArrayOut[ctOut][1] = avArrayIn[i0][1];
@@ -599,7 +599,7 @@ void		 dClipPolyToCircle(const dVector3 avArrayIn[], const int ctIn,
 				(avArrayIn[i0][2]-avArrayIn[i1][2])*fDistance0/(fDistance0-fDistance1);
 
 			// emit intersection point
-			if (dVector3Length2(avArrayIn[i0]) <= fRadius*fRadius)
+			if (dVector3LengthSquare(avArrayIn[i0]) <= fRadius*fRadius)
 			{
 				avArrayOut[ctOut][0] = vIntersectionPoint[0];
 				avArrayOut[ctOut][1] = vIntersectionPoint[1];

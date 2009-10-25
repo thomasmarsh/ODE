@@ -25,11 +25,7 @@
 
 #include <ode/common.h>
 
-#ifdef __GNUC__
-#define PURE_INLINE extern inline
-#else
-#define PURE_INLINE inline
-#endif
+#define PURE_INLINE static __inline
 
 /*
  * macro to access elements i,j in an NxM matrix A, independent of the
@@ -47,122 +43,192 @@
 
 
 
+// Some vector math
+PURE_INLINE void dAddVectors3(dReal *res, const dReal *a, const dReal *b)
+{
+  dReal res_0, res_1, res_2;
+  res_0 = a[0] + b[0];
+  res_1 = a[1] + b[1];
+  res_2 = a[2] + b[2];
+  // Only assign after all the calculations are over to avoid incurring memory aliasing
+  res[0] = res_0; res[1] = res_1; res[2] = res_2;
+}
+
+PURE_INLINE void dSubtractVectors3(dReal *res, const dReal *a, const dReal *b)
+{
+  dReal res_0, res_1, res_2;
+  res_0 = a[0] - b[0];
+  res_1 = a[1] - b[1];
+  res_2 = a[2] - b[2];
+  // Only assign after all the calculations are over to avoid incurring memory aliasing
+  res[0] = res_0; res[1] = res_1; res[2] = res_2;
+}
+
+PURE_INLINE void dAddScaledVectors3(dReal *res, const dReal *a, const dReal *b, dReal a_scale, dReal b_scale)
+{
+  dReal res_0, res_1, res_2;
+  res_0 = a_scale * a[0] + b_scale * b[0];
+  res_1 = a_scale * a[1] + b_scale * b[1];
+  res_2 = a_scale * a[2] + b_scale * b[2];
+  // Only assign after all the calculations are over to avoid incurring memory aliasing
+  res[0] = res_0; res[1] = res_1; res[2] = res_2;
+}
+
+PURE_INLINE void dScaleVector3(dReal *res, dReal nScale)
+{
+  res[0] *= nScale ;
+  res[1] *= nScale ;
+  res[2] *= nScale ;
+}
+
+PURE_INLINE void dNegateVector3(dReal *res)
+{
+  res[0] = -res[0];
+  res[1] = -res[1];
+  res[2] = -res[2];
+}
+
+PURE_INLINE void dCopyVector3(dReal *res, const dReal *a)
+{
+  dReal res_0, res_1, res_2;
+  res_0 = a[0];
+  res_1 = a[1];
+  res_2 = a[2];
+  // Only assign after all the calculations are over to avoid incurring memory aliasing
+  res[0] = res_0; res[1] = res_1; res[2] = res_2;
+}
+
+PURE_INLINE void dCopyScaledVector3(dReal *res, const dReal *a, dReal nScale)
+{
+  dReal res_0, res_1, res_2;
+  res_0 = a[0] * nScale;
+  res_1 = a[1] * nScale;
+  res_2 = a[2] * nScale;
+  // Only assign after all the calculations are over to avoid incurring memory aliasing
+  res[0] = res_0; res[1] = res_1; res[2] = res_2;
+}
+
+PURE_INLINE void dCopyNegatedVector3(dReal *res, const dReal *a)
+{
+  dReal res_0, res_1, res_2;
+  res_0 = -a[0];
+  res_1 = -a[1];
+  res_2 = -a[2];
+  // Only assign after all the calculations are over to avoid incurring memory aliasing
+  res[0] = res_0; res[1] = res_1; res[2] = res_2;
+}
+
+PURE_INLINE void dCopyVector4(dReal *res, const dReal *a)
+{
+  dReal res_0, res_1, res_2, res_3;
+  res_0 = a[0];
+  res_1 = a[1];
+  res_2 = a[2];
+  res_3 = a[3];
+  // Only assign after all the calculations are over to avoid incurring memory aliasing
+  res[0] = res_0; res[1] = res_1; res[2] = res_2; res[3] = res_3;
+}
+
+PURE_INLINE void dCopyMatrix4x4(dReal *res, const dReal *a)
+{
+  dCopyVector4(res + 0, a + 0);
+  dCopyVector4(res + 4, a + 4);
+  dCopyVector4(res + 8, a + 8);
+}
+
+PURE_INLINE void dCopyMatrix4x3(dReal *res, const dReal *a)
+{
+  dCopyVector3(res + 0, a + 0);
+  dCopyVector3(res + 4, a + 4);
+  dCopyVector3(res + 8, a + 8);
+}
+
+PURE_INLINE void dGetMatrixColumn3(dReal *res, const dReal *a, unsigned n)
+{
+  dReal res_0, res_1, res_2;
+  res_0 = a[n + 0];
+  res_1 = a[n + 4];
+  res_2 = a[n + 8];
+  // Only assign after all the calculations are over to avoid incurring memory aliasing
+  res[0] = res_0; res[1] = res_1; res[2] = res_2;
+}
+
+PURE_INLINE dReal dCalcVectorLength3(const dReal *a)
+{
+  return dSqrt(a[0] * a[0] + a[1] * a[1] + a[2] * a[2]);
+}
+
+PURE_INLINE dReal dCalcVectorLengthSquare3(const dReal *a)
+{
+  return (a[0] * a[0] + a[1] * a[1] + a[2] * a[2]);
+}
+
+PURE_INLINE dReal dCalcPointDepth3(const dReal *test_p, const dReal *plane_p, const dReal *plane_n)
+{
+  return (plane_p[0] - test_p[0]) * plane_n[0] + (plane_p[1] - test_p[1]) * plane_n[1] + (plane_p[2] - test_p[2]) * plane_n[2];
+}
+
+
 /*
- * General purpose vector operations with other vectors or constants.
+* 3-way dot product. _dCalcVectorDot3 means that elements of `a' and `b' are spaced
+* step_a and step_b indexes apart respectively. dCalcVectorDot3() means dDot311.
+*/
+
+PURE_INLINE dReal _dCalcVectorDot3(const dReal *a, const dReal *b, unsigned step_a, unsigned step_b)
+{
+  return a[0] * b[0] + a[step_a] * b[step_b] + a[2 * step_a] * b[2 * step_b];
+}
+
+
+PURE_INLINE dReal dCalcVectorDot3    (const dReal *a, const dReal *b) { return _dCalcVectorDot3(a,b,1,1); }
+PURE_INLINE dReal dCalcVectorDot3_13 (const dReal *a, const dReal *b) { return _dCalcVectorDot3(a,b,1,3); }
+PURE_INLINE dReal dCalcVectorDot3_31 (const dReal *a, const dReal *b) { return _dCalcVectorDot3(a,b,3,1); }
+PURE_INLINE dReal dCalcVectorDot3_33 (const dReal *a, const dReal *b) { return _dCalcVectorDot3(a,b,3,3); }
+PURE_INLINE dReal dCalcVectorDot3_14 (const dReal *a, const dReal *b) { return _dCalcVectorDot3(a,b,1,4); }
+PURE_INLINE dReal dCalcVectorDot3_41 (const dReal *a, const dReal *b) { return _dCalcVectorDot3(a,b,4,1); }
+PURE_INLINE dReal dCalcVectorDot3_44 (const dReal *a, const dReal *b) { return _dCalcVectorDot3(a,b,4,4); }
+
+
+/*
+ * cross product, set res = a x b. _dCalcVectorCross3 means that elements of `res', `a'
+ * and `b' are spaced step_res, step_a and step_b indexes apart respectively.
+ * dCalcVectorCross3() means dCross3111. 
  */
 
-#define dOP(a,op,b,c) do { \
-    (a)[0] = ((b)[0]) op ((c)[0]); \
-    (a)[1] = ((b)[1]) op ((c)[1]); \
-    (a)[2] = ((b)[2]) op ((c)[2]); \
-    } while (0)
-#define dOPC(a,op,b,c) do { \
-    (a)[0] = ((b)[0]) op (c); \
-    (a)[1] = ((b)[1]) op (c); \
-    (a)[2] = ((b)[2]) op (c); \
-    } while (0)
-#define dOPE(a,op,b) do {\
-    (a)[0] op ((b)[0]); \
-    (a)[1] op ((b)[1]); \
-    (a)[2] op ((b)[2]); \
-    } while (0)
-#define dOPEC(a,op,c) do { \
-    (a)[0] op (c); \
-    (a)[1] op (c); \
-    (a)[2] op (c); \
-    } while (0)
+PURE_INLINE void _dCalcVectorCross3(dReal *res, const dReal *a, const dReal *b, unsigned step_res, unsigned step_a, unsigned step_b)
+{
+  dReal res_0, res_1, res_2;
+  res_0 = a[  step_a]*b[2*step_b] - a[2*step_a]*b[  step_b];
+  res_1 = a[2*step_a]*b[       0] - a[       0]*b[2*step_b];
+  res_2 = a[       0]*b[  step_b] - a[  step_a]*b[       0];
+  // Only assign after all the calculations are over to avoid incurring memory aliasing
+  res[         0] = res_0;
+  res[  step_res] = res_1;
+  res[2*step_res] = res_2;
+}
 
-/// Define an equation with operatos
-/// For example this function can be used to replace
-/// <PRE>
-/// for (int i=0; i<3; ++i)
-///   a[i] += b[i] + c[i];
-/// </PRE>
-#define dOPE2(a,op1,b,op2,c) do { \
-    (a)[0] op1 ((b)[0]) op2 ((c)[0]); \
-    (a)[1] op1 ((b)[1]) op2 ((c)[1]); \
-    (a)[2] op1 ((b)[2]) op2 ((c)[2]); \
-    } while (0)
+PURE_INLINE void dCalcVectorCross3    (dReal *res, const dReal *a, const dReal *b) { _dCalcVectorCross3(res, a, b, 1, 1, 1); }
+PURE_INLINE void dCalcVectorCross3_114(dReal *res, const dReal *a, const dReal *b) { _dCalcVectorCross3(res, a, b, 1, 1, 4); }
+PURE_INLINE void dCalcVectorCross3_141(dReal *res, const dReal *a, const dReal *b) { _dCalcVectorCross3(res, a, b, 1, 4, 1); }
+PURE_INLINE void dCalcVectorCross3_144(dReal *res, const dReal *a, const dReal *b) { _dCalcVectorCross3(res, a, b, 1, 4, 4); }
+PURE_INLINE void dCalcVectorCross3_411(dReal *res, const dReal *a, const dReal *b) { _dCalcVectorCross3(res, a, b, 4, 1, 1); }
+PURE_INLINE void dCalcVectorCross3_414(dReal *res, const dReal *a, const dReal *b) { _dCalcVectorCross3(res, a, b, 4, 1, 4); }
+PURE_INLINE void dCalcVectorCross3_441(dReal *res, const dReal *a, const dReal *b) { _dCalcVectorCross3(res, a, b, 4, 4, 1); }
+PURE_INLINE void dCalcVectorCross3_444(dReal *res, const dReal *a, const dReal *b) { _dCalcVectorCross3(res, a, b, 4, 4, 4); }
 
-/*
- * Length, and squared length helpers. dLENGTH returns the length of a dVector3.
- * dLENGTHSQUARED return the squared length of a dVector3.
- */
+PURE_INLINE void dAddVectorCross3(dReal *res, const dReal *a, const dReal *b)
+{
+  dReal tmp[3];
+  dCalcVectorCross3(tmp, a, b);
+  dAddVectors3(res, res, tmp);
+}
 
-#define dLENGTHSQUARED(a) (((a)[0])*((a)[0]) + ((a)[1])*((a)[1]) + ((a)[2])*((a)[2]))
-
-#ifdef __cplusplus
-
-PURE_INLINE dReal dLENGTH (const dReal *a) { return dSqrt(dLENGTHSQUARED(a)); }
-
-#else
-
-#define dLENGTH(a) ( dSqrt( ((a)[0])*((a)[0]) + ((a)[1])*((a)[1]) + ((a)[2])*((a)[2]) ) )
-
-#endif /* __cplusplus */
-
-
-
-
-
-/*
- * 3-way dot product. dDOTpq means that elements of `a' and `b' are spaced
- * p and q indexes apart respectively. dDOT() means dDOT11.
- * in C++ we could use function templates to get all the versions of these
- * functions - but on some compilers this will result in sub-optimal code.
- */
-
-#define dDOTpq(a,b,p,q) ((a)[0]*(b)[0] + (a)[p]*(b)[q] + (a)[2*(p)]*(b)[2*(q)])
-
-#ifdef __cplusplus
-
-PURE_INLINE dReal dDOT   (const dReal *a, const dReal *b) { return dDOTpq(a,b,1,1); }
-PURE_INLINE dReal dDOT13 (const dReal *a, const dReal *b) { return dDOTpq(a,b,1,3); }
-PURE_INLINE dReal dDOT31 (const dReal *a, const dReal *b) { return dDOTpq(a,b,3,1); }
-PURE_INLINE dReal dDOT33 (const dReal *a, const dReal *b) { return dDOTpq(a,b,3,3); }
-PURE_INLINE dReal dDOT14 (const dReal *a, const dReal *b) { return dDOTpq(a,b,1,4); }
-PURE_INLINE dReal dDOT41 (const dReal *a, const dReal *b) { return dDOTpq(a,b,4,1); }
-PURE_INLINE dReal dDOT44 (const dReal *a, const dReal *b) { return dDOTpq(a,b,4,4); }
-
-#else
-
-#define dDOT(a,b)   dDOTpq(a,b,1,1)
-#define dDOT13(a,b) dDOTpq(a,b,1,3)
-#define dDOT31(a,b) dDOTpq(a,b,3,1)
-#define dDOT33(a,b) dDOTpq(a,b,3,3)
-#define dDOT14(a,b) dDOTpq(a,b,1,4)
-#define dDOT41(a,b) dDOTpq(a,b,4,1)
-#define dDOT44(a,b) dDOTpq(a,b,4,4)
-
-#endif /* __cplusplus */
-
-
-/*
- * cross product, set a = b x c. dCROSSpqr means that elements of `a', `b'
- * and `c' are spaced p, q and r indexes apart respectively.
- * dCROSS() means dCROSS111. `op' is normally `=', but you can set it to
- * +=, -= etc to get other effects.
- */
-
-#define dCROSS(a,op,b,c) \
-do { \
-  (a)[0] op ((b)[1]*(c)[2] - (b)[2]*(c)[1]); \
-  (a)[1] op ((b)[2]*(c)[0] - (b)[0]*(c)[2]); \
-  (a)[2] op ((b)[0]*(c)[1] - (b)[1]*(c)[0]); \
-} while(0)
-#define dCROSSpqr(a,op,b,c,p,q,r) \
-do { \
-  (a)[  0] op ((b)[  q]*(c)[2*r] - (b)[2*q]*(c)[  r]); \
-  (a)[  p] op ((b)[2*q]*(c)[  0] - (b)[  0]*(c)[2*r]); \
-  (a)[2*p] op ((b)[  0]*(c)[  r] - (b)[  q]*(c)[  0]); \
-} while(0)
-#define dCROSS114(a,op,b,c) dCROSSpqr(a,op,b,c,1,1,4)
-#define dCROSS141(a,op,b,c) dCROSSpqr(a,op,b,c,1,4,1)
-#define dCROSS144(a,op,b,c) dCROSSpqr(a,op,b,c,1,4,4)
-#define dCROSS411(a,op,b,c) dCROSSpqr(a,op,b,c,4,1,1)
-#define dCROSS414(a,op,b,c) dCROSSpqr(a,op,b,c,4,1,4)
-#define dCROSS441(a,op,b,c) dCROSSpqr(a,op,b,c,4,4,1)
-#define dCROSS444(a,op,b,c) dCROSSpqr(a,op,b,c,4,4,4)
+PURE_INLINE void dSubtractVectorCross3(dReal *res, const dReal *a, const dReal *b)
+{
+  dReal tmp[3];
+  dCalcVectorCross3(tmp, a, b);
+  dSubtractVectors3(res, res, tmp);
+}
 
 
 /*
@@ -173,131 +239,179 @@ do { \
  * if (plus,minus) is (-,+) then a negative version will be written.
  */
 
-#define dCROSSMAT(A,a,skip,plus,minus) \
-do { \
-  (A)[1] = minus (a)[2]; \
-  (A)[2] = plus (a)[1]; \
-  (A)[(skip)+0] = plus (a)[2]; \
-  (A)[(skip)+2] = minus (a)[0]; \
-  (A)[2*(skip)+0] = minus (a)[1]; \
-  (A)[2*(skip)+1] = plus (a)[0]; \
-} while(0)
+PURE_INLINE void dSetCrossMatrixPlus(dReal *res, const dReal *a, unsigned skip)
+{
+  const dReal a_0 = a[0], a_1 = a[1], a_2 = a[2];
+  res[1] = -a_2;
+  res[2] = +a_1;
+  res[skip+0] = +a_2;
+  res[skip+2] = -a_0;
+  res[2*skip+0] = -a_1;
+  res[2*skip+1] = +a_0;
+}
+
+PURE_INLINE void dSetCrossMatrixMinus(dReal *res, const dReal *a, unsigned skip)
+{
+  const dReal a_0 = a[0], a_1 = a[1], a_2 = a[2];
+  res[1] = +a_2;
+  res[2] = -a_1;
+  res[skip+0] = -a_2;
+  res[skip+2] = +a_0;
+  res[2*skip+0] = +a_1;
+  res[2*skip+1] = -a_0;
+}
 
 
 /*
  * compute the distance between two 3D-vectors
  */
 
-#ifdef __cplusplus
-PURE_INLINE dReal dDISTANCE (const dVector3 a, const dVector3 b)
-	{ return dSqrt( (a[0]-b[0])*(a[0]-b[0]) + (a[1]-b[1])*(a[1]-b[1]) + (a[2]-b[2])*(a[2]-b[2]) ); }
-#else
-#define dDISTANCE(a,b) \
-	(dSqrt( ((a)[0]-(b)[0])*((a)[0]-(b)[0]) + ((a)[1]-(b)[1])*((a)[1]-(b)[1]) + ((a)[2]-(b)[2])*((a)[2]-(b)[2]) ))
-#endif
-
+PURE_INLINE dReal dCalcPointsDistance3(const dReal *a, const dReal *b)
+{
+  dReal res;
+  dReal tmp[3];
+  dSubtractVectors3(tmp, a, b);
+  res = dCalcVectorLength3(tmp);
+  return res;
+}
 
 /*
- * special case matrix multipication, with operator selection
+ * special case matrix multiplication, with operator selection
  */
 
-#define dMULTIPLYOP0_331(A,op,B,C) \
-do { \
-  (A)[0] op dDOT((B),(C)); \
-  (A)[1] op dDOT((B+4),(C)); \
-  (A)[2] op dDOT((B+8),(C)); \
-} while(0)
-#define dMULTIPLYOP1_331(A,op,B,C) \
-do { \
-  (A)[0] op dDOT41((B),(C)); \
-  (A)[1] op dDOT41((B+1),(C)); \
-  (A)[2] op dDOT41((B+2),(C)); \
-} while(0)
-#define dMULTIPLYOP0_133(A,op,B,C) \
-do { \
-  (A)[0] op dDOT14((B),(C)); \
-  (A)[1] op dDOT14((B),(C+1)); \
-  (A)[2] op dDOT14((B),(C+2)); \
-} while(0)
-#define dMULTIPLYOP0_333(A,op,B,C) \
-do { \
-  (A)[0] op dDOT14((B),(C)); \
-  (A)[1] op dDOT14((B),(C+1)); \
-  (A)[2] op dDOT14((B),(C+2)); \
-  (A)[4] op dDOT14((B+4),(C)); \
-  (A)[5] op dDOT14((B+4),(C+1)); \
-  (A)[6] op dDOT14((B+4),(C+2)); \
-  (A)[8] op dDOT14((B+8),(C)); \
-  (A)[9] op dDOT14((B+8),(C+1)); \
-  (A)[10] op dDOT14((B+8),(C+2)); \
-} while(0)
-#define dMULTIPLYOP1_333(A,op,B,C) \
-do { \
-  (A)[0] op dDOT44((B),(C)); \
-  (A)[1] op dDOT44((B),(C+1)); \
-  (A)[2] op dDOT44((B),(C+2)); \
-  (A)[4] op dDOT44((B+1),(C)); \
-  (A)[5] op dDOT44((B+1),(C+1)); \
-  (A)[6] op dDOT44((B+1),(C+2)); \
-  (A)[8] op dDOT44((B+2),(C)); \
-  (A)[9] op dDOT44((B+2),(C+1)); \
-  (A)[10] op dDOT44((B+2),(C+2)); \
-} while(0)
-#define dMULTIPLYOP2_333(A,op,B,C) \
-do { \
-  (A)[0] op dDOT((B),(C)); \
-  (A)[1] op dDOT((B),(C+4)); \
-  (A)[2] op dDOT((B),(C+8)); \
-  (A)[4] op dDOT((B+4),(C)); \
-  (A)[5] op dDOT((B+4),(C+4)); \
-  (A)[6] op dDOT((B+4),(C+8)); \
-  (A)[8] op dDOT((B+8),(C)); \
-  (A)[9] op dDOT((B+8),(C+4)); \
-  (A)[10] op dDOT((B+8),(C+8)); \
-} while(0)
+PURE_INLINE void dMultiplyHelper0_331(dReal *res, const dReal *a, const dReal *b)
+{
+  dReal res_0, res_1, res_2;
+  res_0 = dCalcVectorDot3(a, b);
+  res_1 = dCalcVectorDot3(a + 4, b);
+  res_2 = dCalcVectorDot3(a + 8, b);
+  // Only assign after all the calculations are over to avoid incurring memory aliasing
+  res[0] = res_0; res[1] = res_1; res[2] = res_2;
+}
 
-#ifdef __cplusplus
+PURE_INLINE void dMultiplyHelper1_331(dReal *res, const dReal *a, const dReal *b)
+{
+  dReal res_0, res_1, res_2;
+  res_0 = dCalcVectorDot3_41(a, b);
+  res_1 = dCalcVectorDot3_41(a + 1, b);
+  res_2 = dCalcVectorDot3_41(a + 2, b);
+  // Only assign after all the calculations are over to avoid incurring memory aliasing
+  res[0] = res_0; res[1] = res_1; res[2] = res_2;
+}
 
-#define DECL template <class TA, class TB, class TC> PURE_INLINE void
+PURE_INLINE void dMultiplyHelper0_133(dReal *res, const dReal *a, const dReal *b)
+{
+  dMultiplyHelper1_331(res, b, a);
+}
+
+PURE_INLINE void dMultiplyHelper1_133(dReal *res, const dReal *a, const dReal *b)
+{
+  dReal res_0, res_1, res_2;
+  res_0 = dCalcVectorDot3_44(a, b);
+  res_1 = dCalcVectorDot3_44(a + 1, b);
+  res_2 = dCalcVectorDot3_44(a + 2, b);
+  // Only assign after all the calculations are over to avoid incurring memory aliasing
+  res[0] = res_0; res[1] = res_1; res[2] = res_2;
+}
 
 /* 
 Note: NEVER call any of these functions/macros with the same variable for A and C, 
 it is not equivalent to A*=B.
 */
 
-DECL dMULTIPLY0_331(TA *A, const TB *B, const TC *C) { dMULTIPLYOP0_331(A,=,B,C); }
-DECL dMULTIPLY1_331(TA *A, const TB *B, const TC *C) { dMULTIPLYOP1_331(A,=,B,C); }
-DECL dMULTIPLY0_133(TA *A, const TB *B, const TC *C) { dMULTIPLYOP0_133(A,=,B,C); }
-DECL dMULTIPLY0_333(TA *A, const TB *B, const TC *C) { dMULTIPLYOP0_333(A,=,B,C); }
-DECL dMULTIPLY1_333(TA *A, const TB *B, const TC *C) { dMULTIPLYOP1_333(A,=,B,C); }
-DECL dMULTIPLY2_333(TA *A, const TB *B, const TC *C) { dMULTIPLYOP2_333(A,=,B,C); }
+PURE_INLINE void dMultiply0_331(dReal *res, const dReal *a, const dReal *b)
+{
+  dMultiplyHelper0_331(res, a, b);
+}
 
-DECL dMULTIPLYADD0_331(TA *A, const TB *B, const TC *C) { dMULTIPLYOP0_331(A,+=,B,C); }
-DECL dMULTIPLYADD1_331(TA *A, const TB *B, const TC *C) { dMULTIPLYOP1_331(A,+=,B,C); }
-DECL dMULTIPLYADD0_133(TA *A, const TB *B, const TC *C) { dMULTIPLYOP0_133(A,+=,B,C); }
-DECL dMULTIPLYADD0_333(TA *A, const TB *B, const TC *C) { dMULTIPLYOP0_333(A,+=,B,C); }
-DECL dMULTIPLYADD1_333(TA *A, const TB *B, const TC *C) { dMULTIPLYOP1_333(A,+=,B,C); }
-DECL dMULTIPLYADD2_333(TA *A, const TB *B, const TC *C) { dMULTIPLYOP2_333(A,+=,B,C); }
+PURE_INLINE void dMultiply1_331(dReal *res, const dReal *a, const dReal *b)
+{
+  dMultiplyHelper1_331(res, a, b);
+}
 
-#undef DECL
+PURE_INLINE void dMultiply0_133(dReal *res, const dReal *a, const dReal *b)
+{
+  dMultiplyHelper0_133(res, a, b);
+}
 
-#else
+PURE_INLINE void dMultiply0_333(dReal *res, const dReal *a, const dReal *b)
+{
+  dMultiplyHelper0_133(res + 0, a + 0, b);
+  dMultiplyHelper0_133(res + 4, a + 4, b);
+  dMultiplyHelper0_133(res + 8, a + 8, b);
+}
 
-#define dMULTIPLY0_331(A,B,C) dMULTIPLYOP0_331(A,=,B,C)
-#define dMULTIPLY1_331(A,B,C) dMULTIPLYOP1_331(A,=,B,C)
-#define dMULTIPLY0_133(A,B,C) dMULTIPLYOP0_133(A,=,B,C)
-#define dMULTIPLY0_333(A,B,C) dMULTIPLYOP0_333(A,=,B,C)
-#define dMULTIPLY1_333(A,B,C) dMULTIPLYOP1_333(A,=,B,C)
-#define dMULTIPLY2_333(A,B,C) dMULTIPLYOP2_333(A,=,B,C)
+PURE_INLINE void dMultiply1_333(dReal *res, const dReal *a, const dReal *b)
+{
+  dMultiplyHelper1_133(res + 0, b, a + 0);
+  dMultiplyHelper1_133(res + 4, b, a + 1);
+  dMultiplyHelper1_133(res + 8, b, a + 2);
+}
 
-#define dMULTIPLYADD0_331(A,B,C) dMULTIPLYOP0_331(A,+=,B,C)
-#define dMULTIPLYADD1_331(A,B,C) dMULTIPLYOP1_331(A,+=,B,C)
-#define dMULTIPLYADD0_133(A,B,C) dMULTIPLYOP0_133(A,+=,B,C)
-#define dMULTIPLYADD0_333(A,B,C) dMULTIPLYOP0_333(A,+=,B,C)
-#define dMULTIPLYADD1_333(A,B,C) dMULTIPLYOP1_333(A,+=,B,C)
-#define dMULTIPLYADD2_333(A,B,C) dMULTIPLYOP2_333(A,+=,B,C)
+PURE_INLINE void dMultiply2_333(dReal *res, const dReal *a, const dReal *b)
+{
+  dMultiplyHelper0_331(res + 0, b, a + 0);
+  dMultiplyHelper0_331(res + 4, b, a + 4);
+  dMultiplyHelper0_331(res + 8, b, a + 8);
+}
 
-#endif
+PURE_INLINE void dMultiplyAdd0_331(dReal *res, const dReal *a, const dReal *b)
+{
+  dReal tmp[3];
+  dMultiplyHelper0_331(tmp, a, b);
+  dAddVectors3(res, res, tmp);
+}
+
+PURE_INLINE void dMultiplyAdd1_331(dReal *res, const dReal *a, const dReal *b)
+{
+  dReal tmp[3];
+  dMultiplyHelper1_331(tmp, a, b);
+  dAddVectors3(res, res, tmp);
+}
+
+PURE_INLINE void dMultiplyAdd0_133(dReal *res, const dReal *a, const dReal *b)
+{
+  dReal tmp[3];
+  dMultiplyHelper0_133(tmp, a, b);
+  dAddVectors3(res, res, tmp);
+}
+
+PURE_INLINE void dMultiplyAdd0_333(dReal *res, const dReal *a, const dReal *b)
+{
+  dReal tmp[3];
+  dMultiplyHelper0_133(tmp, a + 0, b);
+  dAddVectors3(res+ 0, res + 0, tmp);
+  dMultiplyHelper0_133(tmp, a + 4, b);
+  dAddVectors3(res + 4, res + 4, tmp);
+  dMultiplyHelper0_133(tmp, a + 8, b);
+  dAddVectors3(res + 8, res + 8, tmp);
+}
+
+PURE_INLINE void dMultiplyAdd1_333(dReal *res, const dReal *a, const dReal *b)
+{
+  dReal tmp[3];
+  dMultiplyHelper1_133(tmp, b, a + 0);
+  dAddVectors3(res + 0, res + 0, tmp);
+  dMultiplyHelper1_133(tmp, b, a + 1);
+  dAddVectors3(res + 4, res + 4, tmp);
+  dMultiplyHelper1_133(tmp, b, a + 2);
+  dAddVectors3(res + 8, res + 8, tmp);
+}
+
+PURE_INLINE void dMultiplyAdd2_333(dReal *res, const dReal *a, const dReal *b)
+{
+  dReal tmp[3];
+  dMultiplyHelper0_331(tmp, b, a + 0);
+  dAddVectors3(res + 0, res + 0, tmp);
+  dMultiplyHelper0_331(tmp, b, a + 4);
+  dAddVectors3(res + 4, res + 4, tmp);
+  dMultiplyHelper0_331(tmp, b, a + 8);
+  dAddVectors3(res + 8, res + 8, tmp);
+}
+
+
+// Include legacy macros here
+#include <ode/odemath_legacy.h>
 
 
 #ifdef __cplusplus
@@ -319,14 +433,14 @@ ODE_API void dNormalize4 (dVector4 a); // Potentially asserts on zero vec
 int  _dSafeNormalize3 (dVector3 a);
 int  _dSafeNormalize4 (dVector4 a);
 
-static __inline void _dNormalize3(dVector3 a)
+PURE_INLINE void _dNormalize3(dVector3 a)
 {
   int bNormalizationResult = _dSafeNormalize3(a);
   dIASSERT(bNormalizationResult);
   dVARIABLEUSED(bNormalizationResult);
 }
 
-static __inline void _dNormalize4(dVector4 a)
+PURE_INLINE void _dNormalize4(dVector4 a)
 {
   int bNormalizationResult = _dSafeNormalize4(a);
   dIASSERT(bNormalizationResult);
@@ -358,5 +472,6 @@ ODE_API void dOrthogonalizeR(dMatrix3 m);
 #ifdef __cplusplus
 }
 #endif
+
 
 #endif

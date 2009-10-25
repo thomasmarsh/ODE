@@ -54,10 +54,10 @@ dxJointAMotor::computeGlobalAxes( dVector3 ax[3] )
     if ( mode == dAMotorEuler )
     {
         // special handling for euler mode
-        dMULTIPLY0_331( ax[0], node[0].body->posr.R, axis[0] );
+        dMultiply0_331( ax[0], node[0].body->posr.R, axis[0] );
         if ( node[1].body )
         {
-            dMULTIPLY0_331( ax[2], node[1].body->posr.R, axis[2] );
+            dMultiply0_331( ax[2], node[1].body->posr.R, axis[2] );
         }
         else
         {
@@ -65,7 +65,7 @@ dxJointAMotor::computeGlobalAxes( dVector3 ax[3] )
             ax[2][1] = axis[2][1];
             ax[2][2] = axis[2][2];
         }
-        dCROSS( ax[1], = , ax[2], ax[0] );
+        dCalcVectorCross3( ax[1], ax[2], ax[0] );
         dNormalize3( ax[1] );
     }
     else
@@ -75,14 +75,14 @@ dxJointAMotor::computeGlobalAxes( dVector3 ax[3] )
             if ( rel[i] == 1 )
             {
                 // relative to b1
-                dMULTIPLY0_331( ax[i], node[0].body->posr.R, axis[i] );
+                dMultiply0_331( ax[i], node[0].body->posr.R, axis[i] );
             }
             else if ( rel[i] == 2 )
             {
                 // relative to b2
                 if ( node[1].body )   // jds: don't assert, just ignore
                 {
-                    dMULTIPLY0_331( ax[i], node[1].body->posr.R, axis[i] );
+                    dMultiply0_331( ax[i], node[1].body->posr.R, axis[i] );
                 }
             }
             else
@@ -112,10 +112,10 @@ dxJointAMotor::computeEulerAngles( dVector3 ax[3] )
 
     // calculate references in global frame
     dVector3 ref1, ref2;
-    dMULTIPLY0_331( ref1, node[0].body->posr.R, reference1 );
+    dMultiply0_331( ref1, node[0].body->posr.R, reference1 );
     if ( node[1].body )
     {
-        dMULTIPLY0_331( ref2, node[1].body->posr.R, reference2 );
+        dMultiply0_331( ref2, node[1].body->posr.R, reference2 );
     }
     else
     {
@@ -126,16 +126,16 @@ dxJointAMotor::computeEulerAngles( dVector3 ax[3] )
 
     // get q perpendicular to both ax[0] and ref1, get first euler angle
     dVector3 q;
-    dCROSS( q, = , ax[0], ref1 );
-    angle[0] = -dAtan2( dDOT( ax[2], q ), dDOT( ax[2], ref1 ) );
+    dCalcVectorCross3( q, ax[0], ref1 );
+    angle[0] = -dAtan2( dCalcVectorDot3( ax[2], q ), dCalcVectorDot3( ax[2], ref1 ) );
 
     // get q perpendicular to both ax[0] and ax[1], get second euler angle
-    dCROSS( q, = , ax[0], ax[1] );
-    angle[1] = -dAtan2( dDOT( ax[2], ax[0] ), dDOT( ax[2], q ) );
+    dCalcVectorCross3( q, ax[0], ax[1] );
+    angle[1] = -dAtan2( dCalcVectorDot3( ax[2], ax[0] ), dCalcVectorDot3( ax[2], q ) );
 
     // get q perpendicular to both ax[1] and ax[2], get third euler angle
-    dCROSS( q, = , ax[1], ax[2] );
-    angle[2] = -dAtan2( dDOT( ref2, ax[1] ), dDOT( ref2, q ) );
+    dCalcVectorCross3( q, ax[1], ax[2] );
+    angle[2] = -dAtan2( dCalcVectorDot3( ref2, ax[1] ), dCalcVectorDot3( ref2, q ) );
 }
 
 
@@ -152,17 +152,17 @@ dxJointAMotor::setEulerReferenceVectors()
     if ( node[0].body && node[1].body )
     {
         dVector3 r;  // axis[2] and axis[0] in global coordinates
-        dMULTIPLY0_331( r, node[1].body->posr.R, axis[2] );
-        dMULTIPLY1_331( reference1, node[0].body->posr.R, r );
-        dMULTIPLY0_331( r, node[0].body->posr.R, axis[0] );
-        dMULTIPLY1_331( reference2, node[1].body->posr.R, r );
+        dMultiply0_331( r, node[1].body->posr.R, axis[2] );
+        dMultiply1_331( reference1, node[0].body->posr.R, r );
+        dMultiply0_331( r, node[0].body->posr.R, axis[0] );
+        dMultiply1_331( reference2, node[1].body->posr.R, r );
     }
 
     else     // jds
     {
         // else if (j->node[0].body) {
-        // dMULTIPLY1_331 (j->reference1,j->node[0].body->posr.R,j->axis[2]);
-        // dMULTIPLY0_331 (j->reference2,j->node[0].body->posr.R,j->axis[0]);
+        // dMultiply1_331 (j->reference1,j->node[0].body->posr.R,j->axis[2]);
+        // dMultiply0_331 (j->reference2,j->node[0].body->posr.R,j->axis[0]);
 
         // We want to handle angular motors attached to passive geoms
         dVector3 r;  // axis[2] and axis[0] in global coordinates
@@ -170,8 +170,8 @@ dxJointAMotor::setEulerReferenceVectors()
         r[1] = axis[2][1];
         r[2] = axis[2][2];
         r[3] = axis[2][3];
-        dMULTIPLY1_331( reference1, node[0].body->posr.R, r );
-        dMULTIPLY0_331( r, node[0].body->posr.R, axis[0] );
+        dMultiply1_331( reference1, node[0].body->posr.R, r );
+        dMultiply0_331( r, node[0].body->posr.R, axis[0] );
         reference2[0] += r[0];
         reference2[1] += r[1];
         reference2[2] += r[2];
@@ -245,9 +245,9 @@ dxJointAMotor::getInfo2( dxJoint::Info2 *info )
     dVector3 ax1_cross_ax2;
     if ( mode == dAMotorEuler )
     {
-        dCROSS( ax0_cross_ax1, = , ax[0], ax[1] );
+        dCalcVectorCross3( ax0_cross_ax1, ax[0], ax[1] );
         axptr[2] = &ax0_cross_ax1;
-        dCROSS( ax1_cross_ax2, = , ax[1], ax[2] );
+        dCalcVectorCross3( ax1_cross_ax2, ax[1], ax[2] );
         axptr[0] = &ax1_cross_ax2;
     }
 
@@ -303,14 +303,14 @@ void dJointSetAMotorAxis( dJointID j, int anum, int rel, dReal x, dReal y, dReal
     {
         if ( rel == 1 )
         {
-            dMULTIPLY1_331( joint->axis[anum], joint->node[0].body->posr.R, r );
+            dMultiply1_331( joint->axis[anum], joint->node[0].body->posr.R, r );
         }
         else
         {
             // don't assert; handle the case of attachment to a bodiless geom
             if ( joint->node[1].body )   // jds
             {
-                dMULTIPLY1_331( joint->axis[anum], joint->node[1].body->posr.R, r );
+                dMultiply1_331( joint->axis[anum], joint->node[1].body->posr.R, r );
             }
             else
             {
@@ -393,13 +393,13 @@ void dJointGetAMotorAxis( dJointID j, int anum, dVector3 result )
     {
         if ( joint->rel[anum] == 1 )
         {
-            dMULTIPLY0_331( result, joint->node[0].body->posr.R, joint->axis[anum] );
+            dMultiply0_331( result, joint->node[0].body->posr.R, joint->axis[anum] );
         }
         else
         {
             if ( joint->node[1].body )   // jds
             {
-                dMULTIPLY0_331( result, joint->node[1].body->posr.R, joint->axis[anum] );
+                dMultiply0_331( result, joint->node[1].body->posr.R, joint->axis[anum] );
             }
             else
             {

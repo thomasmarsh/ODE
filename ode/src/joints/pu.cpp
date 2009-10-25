@@ -81,14 +81,14 @@ dReal dJointGetPUPosition( dJointID j )
 
     dVector3 q;
     // get the offset in global coordinates
-    dMULTIPLY0_331( q, joint->node[0].body->posr.R, joint->anchor1 );
+    dMultiply0_331( q, joint->node[0].body->posr.R, joint->anchor1 );
 
     if ( joint->node[1].body )
     {
         dVector3 anchor2;
 
         // get the anchor2 in global coordinates
-        dMULTIPLY0_331( anchor2, joint->node[1].body->posr.R, joint->anchor2 );
+        dMultiply0_331( anchor2, joint->node[1].body->posr.R, joint->anchor2 );
 
         q[0] = (( joint->node[0].body->posr.pos[0] + q[0] ) -
                 ( joint->node[1].body->posr.pos[0] + anchor2[0] ) );
@@ -119,9 +119,9 @@ dReal dJointGetPUPosition( dJointID j )
 
     dVector3 axP;
     // get prismatic axis in global coordinates
-    dMULTIPLY0_331( axP, joint->node[0].body->posr.R, joint->axisP1 );
+    dMultiply0_331( axP, joint->node[0].body->posr.R, joint->axisP1 );
 
-    return dDOT( axP, q );
+    return dCalcVectorDot3( axP, q );
 }
 
 
@@ -143,7 +143,7 @@ dReal dJointGetPUPositionRate( dJointID j )
         if ( joint->node[1].body )
         {
             // Find joint->anchor2 in global coordinates
-            dMULTIPLY0_331( anchor2, joint->node[1].body->posr.R, joint->anchor2 );
+            dMultiply0_331( anchor2, joint->node[1].body->posr.R, joint->anchor2 );
 
             r[0] = ( joint->node[0].body->posr.pos[0] -
                      ( anchor2[0] + joint->node[1].body->posr.pos[0] ) );
@@ -157,7 +157,7 @@ dReal dJointGetPUPositionRate( dJointID j )
             //N.B. When there is no body 2 the joint->anchor2 is already in
             //     global coordinates
             // r = joint->node[0].body->posr.pos -  joint->anchor2;
-            dOP( r, -, joint->node[0].body->posr.pos, joint->anchor2 );
+            dSubtractVectors3( r, joint->node[0].body->posr.pos, joint->anchor2 );
         }
 
         // The body1 can have velocity coming from the rotation of
@@ -166,16 +166,16 @@ dReal dJointGetPUPositionRate( dJointID j )
         // N.B. We do vel = r X w instead of vel = w x r to have vel negative
         //      since we want to remove it from the linear velocity of the body
         dVector3 lvel1;
-        dCROSS( lvel1, = , r, joint->node[0].body->avel );
+        dCalcVectorCross3( lvel1, r, joint->node[0].body->avel );
 
         // lvel1 += joint->node[0].body->lvel;
-        dOPE( lvel1, += , joint->node[0].body->lvel );
+        dAddVectors3( lvel1, lvel1, joint->node[0].body->lvel );
 
         // Since we want rate of change along the prismatic axis
         // get axisP1 in global coordinates and get the component
         // along this axis only
         dVector3 axP1;
-        dMULTIPLY0_331( axP1, joint->node[0].body->posr.R, joint->axisP1 );
+        dMultiply0_331( axP1, joint->node[0].body->posr.R, joint->axisP1 );
 
         if ( joint->node[1].body )
         {
@@ -183,16 +183,18 @@ dReal dJointGetPUPositionRate( dJointID j )
             // N.B. We do vel = r X w instead of vel = w x r to have vel negative
             //      since we want to remove it from the linear velocity of the body
             dVector3 lvel2;
-            dCROSS( lvel2, = , anchor2, joint->node[1].body->avel );
+            dCalcVectorCross3( lvel2, anchor2, joint->node[1].body->avel );
 
             // lvel1 -=  lvel2 + joint->node[1].body->lvel;
-            dOPE2( lvel1, -= , lvel2, + , joint->node[1].body->lvel );
+            dVector3 tmp;
+            dAddVectors3( tmp, lvel2, joint->node[1].body->lvel );
+            dSubtractVectors3( lvel1, lvel1, tmp );
 
-            return dDOT( axP1, lvel1 );
+            return dCalcVectorDot3( axP1, lvel1 );
         }
         else
         {
-            dReal rate = dDOT( axP1, lvel1 );
+            dReal rate = dCalcVectorDot3( axP1, lvel1 );
             return ( (joint->flags & dJOINT_REVERSE) ? -rate : rate);
         }
     }
@@ -278,7 +280,7 @@ dxJointPU::getInfo2( dxJoint::Info2 *info )
     }
 
     dVector3 axP; // Axis of the prismatic joint in global frame
-    dMULTIPLY0_331( axP, R1, axisP1 );
+    dMultiply0_331( axP, R1, axisP1 );
 
     // distance between the body1 and the anchor2 in global frame
     // Calculated in the same way as the offset
@@ -286,7 +288,7 @@ dxJointPU::getInfo2( dxJoint::Info2 *info )
     dVector3 wanchor2 = {0,0,0};
     if ( node[1].body )
     {
-        dMULTIPLY0_331( wanchor2, R2, anchor2 );
+        dMultiply0_331( wanchor2, R2, anchor2 );
         dist[0] = wanchor2[0] + pos2[0] - pos1[0];
         dist[1] = wanchor2[1] + pos2[1] - pos1[1];
         dist[2] = wanchor2[2] + pos2[2] - pos1[2];
@@ -323,22 +325,22 @@ dxJointPU::getInfo2( dxJoint::Info2 *info )
     // and w1 and w2 are the angular velocity vectors of the two bodies.
     dVector3 ax1, ax2;
     getAxes( ax1, ax2 );
-    dReal val = dDOT( ax1, ax2 );
+    dReal val = dCalcVectorDot3( ax1, ax2 );
     q[0] = ax2[0] - val * ax1[0];
     q[1] = ax2[1] - val * ax1[1];
     q[2] = ax2[2] - val * ax1[2];
 
     dVector3 p;
-    dCROSS( p, = , ax1, q );
+    dCalcVectorCross3( p, ax1, q );
     dNormalize3( p );
 
     //   info->J1a[s0+i] = p[i];
-    dOPE(( info->J1a ) + s0, = , p );
+    dCopyVector3(( info->J1a ) + s0, p );
 
     if ( node[1].body )
     {
         //   info->J2a[s0+i] = -p[i];
-        dOPE(( info->J2a ) + s0, = -, p );
+        dCopyNegatedVector3(( info->J2a ) + s0, p );
     }
 
     // compute the right hand side of the constraint equation. Set relative
@@ -386,33 +388,33 @@ dxJointPU::getInfo2( dxJoint::Info2 *info )
     // e1 and e2 are perpendicular to axP
     // so e1 = ax1 and e2 = ax1 x axP
     // N.B. ax2 is not always perpendicular to axP since it is attached to body 2
-    dCROSS( q , = , ax1, axP );
+    dCalcVectorCross3( q , ax1, axP );
 
-    dMULTIPLY0_331( axP, R1, axisP1 );
+    dMultiply0_331( axP, R1, axisP1 );
 
-    dCROSS(( info->J1a ) + s1, = , dist, ax1 );
-    dCROSS(( info->J1a ) + s2, = , dist, q );
+    dCalcVectorCross3(( info->J1a ) + s1, dist, ax1 );
+    dCalcVectorCross3(( info->J1a ) + s2, dist, q );
 
     // info->J1l[s1+i] = ax[i];
-    dOPE(( info->J1l ) + s1, = , ax1 );
+    dCopyVector3(( info->J1l ) + s1, ax1 );
 
     // info->J1l[s2+i] = q[i];
-    dOPE(( info->J1l ) + s2, = , q );
+    dCopyVector3(( info->J1l ) + s2, q );
 
     if ( node[1].body )
     {
         // Calculate anchor2 in world coordinate
 
         // q x anchor2 instead of anchor2 x q since we want the negative value
-        dCROSS(( info->J2a ) + s1, = , ax1, wanchor2 );
+        dCalcVectorCross3(( info->J2a ) + s1, ax1, wanchor2 );
         // The cross product is in reverse order since we want the negative value
-        dCROSS(( info->J2a ) + s2, = , q, wanchor2 );
+        dCalcVectorCross3(( info->J2a ) + s2, q, wanchor2 );
 
 
         // info->J2l[s1+i] = -ax1[i];
-        dOPE(( info->J2l ) + s1, = -, ax1 );
+        dCopyNegatedVector3(( info->J2l ) + s1, ax1 );
         // info->J2l[s2+i] = -ax1[i];
-        dOPE(( info->J2l ) + s2, = -, q );
+        dCopyNegatedVector3(( info->J2l ) + s2, q );
 
     }
 
@@ -424,11 +426,11 @@ dxJointPU::getInfo2( dxJoint::Info2 *info )
     // We want to align the offset point (in body 2's frame) with the center of body 1.
     // The position should be the same when we are not along the prismatic axis
     dVector3 err;
-    dMULTIPLY0_331( err, R1, anchor1 );
+    dMultiply0_331( err, R1, anchor1 );
     // err[i] = dist[i] - err[i];
-    dOPE2( err, = , dist, -, err );
-    info->c[1] = k * dDOT( ax1, err );
-    info->c[2] = k * dDOT( q, err );
+    dSubtractVectors3( err, dist, err );
+    info->c[1] = k * dCalcVectorDot3( ax1, err );
+    info->c[2] = k * dCalcVectorDot3( q, err );
 
     int row = 3 + limot1.addLimot( this, info, 3, ax1, 1 );
     row += limot2.addLimot( this, info, row, ax2, 1 );
@@ -670,8 +672,8 @@ dReal dJointGetPUAngle1Rate( dJointID j )
         else
             getAxis( joint, axis, joint->axis1 );
 
-        dReal rate = dDOT( axis, joint->node[0].body->avel );
-        if ( joint->node[1].body ) rate -= dDOT( axis, joint->node[1].body->avel );
+        dReal rate = dCalcVectorDot3( axis, joint->node[0].body->avel );
+        if ( joint->node[1].body ) rate -= dCalcVectorDot3( axis, joint->node[1].body->avel );
         return rate;
     }
     return 0;
@@ -693,8 +695,8 @@ dReal dJointGetPUAngle2Rate( dJointID j )
         else
             getAxis2( joint, axis, joint->axis2 );
 
-        dReal rate = dDOT( axis, joint->node[0].body->avel );
-        if ( joint->node[1].body ) rate -= dDOT( axis, joint->node[1].body->avel );
+        dReal rate = dCalcVectorDot3( axis, joint->node[0].body->avel );
+        if ( joint->node[1].body ) rate -= dCalcVectorDot3( axis, joint->node[1].body->avel );
         return rate;
     }
     return 0;
@@ -733,7 +735,7 @@ void dJointGetPUAnchor( dJointID j, dVector3 result )
     else
     {
         // result[i] = joint->anchor2[i];
-        dOPE( result, = , joint->anchor2 );
+        dCopyVector3( result, joint->anchor2 );
     }
 }
 

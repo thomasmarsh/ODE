@@ -607,7 +607,7 @@ void dxTriMesh::computeAABB() {
     const dMatrix3& R = final_posr->R;
     const dVector3& pos = final_posr->pos;
     
-    dMULTIPLY0_331( c, R, d->AABBCenter );
+    dMultiply0_331( c, R, d->AABBCenter );
     
     dReal xrange = dFabs(R[0] * Data->AABBExtents[0]) +
         dFabs(R[1] * Data->AABBExtents[1]) + 

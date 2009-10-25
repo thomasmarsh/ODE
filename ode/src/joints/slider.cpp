@@ -48,12 +48,12 @@ dReal dJointGetSliderPosition ( dJointID j )
 
     // get axis1 in global coordinates
     dVector3 ax1, q;
-    dMULTIPLY0_331 ( ax1, joint->node[0].body->posr.R, joint->axis1 );
+    dMultiply0_331 ( ax1, joint->node[0].body->posr.R, joint->axis1 );
 
     if ( joint->node[1].body )
     {
         // get body2 + offset point in global coordinates
-        dMULTIPLY0_331 ( q, joint->node[1].body->posr.R, joint->offset );
+        dMultiply0_331 ( q, joint->node[1].body->posr.R, joint->offset );
         for ( int i = 0; i < 3; i++ )
             q[i] = joint->node[0].body->posr.pos[i]
                    - q[i]
@@ -68,7 +68,7 @@ dReal dJointGetSliderPosition ( dJointID j )
         if ( joint->flags & dJOINT_REVERSE )
         {
             // N.B. it could have been simplier to only inverse the sign of
-            //      the dDot result but this case is exceptional and doing
+            //      the dCalcVectorDot3 result but this case is exceptional and doing
             //      the check for all case can decrease the performance.
             ax1[0] = -ax1[0];
             ax1[1] = -ax1[1];
@@ -76,7 +76,7 @@ dReal dJointGetSliderPosition ( dJointID j )
         }
     }
 
-    return dDOT ( ax1, q );
+    return dCalcVectorDot3 ( ax1, q );
 }
 
 
@@ -88,16 +88,16 @@ dReal dJointGetSliderPositionRate ( dJointID j )
 
     // get axis1 in global coordinates
     dVector3 ax1;
-    dMULTIPLY0_331 ( ax1, joint->node[0].body->posr.R, joint->axis1 );
+    dMultiply0_331 ( ax1, joint->node[0].body->posr.R, joint->axis1 );
 
     if ( joint->node[1].body )
     {
-        return dDOT ( ax1, joint->node[0].body->lvel ) -
-               dDOT ( ax1, joint->node[1].body->lvel );
+        return dCalcVectorDot3 ( ax1, joint->node[0].body->lvel ) -
+               dCalcVectorDot3 ( ax1, joint->node[1].body->lvel );
     }
     else
     {
-        dReal rate = dDOT ( ax1, joint->node[0].body->lvel );
+        dReal rate = dCalcVectorDot3 ( ax1, joint->node[0].body->lvel );
         if ( joint->flags & dJOINT_REVERSE ) rate = - rate;
         return rate;
     }
@@ -180,15 +180,17 @@ dxJointSlider::getInfo2 ( dxJoint::Info2 *info )
 
     dVector3 ax1; // joint axis in global coordinates (unit length)
     dVector3 p, q; // plane space of ax1
-    dMULTIPLY0_331 ( ax1, R1, axis1 );
+    dMultiply0_331 ( ax1, R1, axis1 );
     dPlaneSpace ( ax1, p, q );
     if ( node[1].body )
     {
         dVector3 tmp;
-        dCROSS ( tmp, = REAL ( 0.5 ) * , c, p );
+        dCalcVectorCross3( tmp, c, p );
+        dScaleVector3( tmp, REAL( 0.5 ));
         for ( i = 0; i < 3; i++ ) info->J1a[s3+i] = tmp[i];
         for ( i = 0; i < 3; i++ ) info->J2a[s3+i] = tmp[i];
-        dCROSS ( tmp, = REAL ( 0.5 ) * , c, q );
+        dCalcVectorCross3( tmp, c, q );
+        dScaleVector3( tmp, REAL( 0.5 ));
         for ( i = 0; i < 3; i++ ) info->J1a[s4+i] = tmp[i];
         for ( i = 0; i < 3; i++ ) info->J2a[s4+i] = tmp[i];
         for ( i = 0; i < 3; i++ ) info->J2l[s3+i] = -p[i];
@@ -203,17 +205,17 @@ dxJointSlider::getInfo2 ( dxJoint::Info2 *info )
     if ( node[1].body )
     {
         dVector3 ofs;  // offset point in global coordinates
-        dMULTIPLY0_331 ( ofs, R2, offset );
+        dMultiply0_331 ( ofs, R2, offset );
         for ( i = 0; i < 3; i++ ) c[i] += ofs[i];
-        info->c[3] = k * dDOT ( p, c );
-        info->c[4] = k * dDOT ( q, c );
+        info->c[3] = k * dCalcVectorDot3 ( p, c );
+        info->c[4] = k * dCalcVectorDot3 ( q, c );
     }
     else
     {
         dVector3 ofs;  // offset point in global coordinates
         for ( i = 0; i < 3; i++ ) ofs[i] = offset[i] - pos1[i];
-        info->c[3] = k * dDOT ( p, ofs );
-        info->c[4] = k * dDOT ( q, ofs );
+        info->c[3] = k * dCalcVectorDot3 ( p, ofs );
+        info->c[4] = k * dCalcVectorDot3 ( q, ofs );
 
         if ( flags & dJOINT_REVERSE )
             for ( i = 0; i < 3; ++i ) ax1[i] = -ax1[i];
@@ -320,7 +322,7 @@ void dJointAddSliderForce ( dJointID j, dReal force )
         c[0] = REAL ( 0.5 ) * ( joint->node[1].body->posr.pos[0] - joint->node[0].body->posr.pos[0] );
         c[1] = REAL ( 0.5 ) * ( joint->node[1].body->posr.pos[1] - joint->node[0].body->posr.pos[1] );
         c[2] = REAL ( 0.5 ) * ( joint->node[1].body->posr.pos[2] - joint->node[0].body->posr.pos[2] );
-        dCROSS ( ltd, = , c, axis );
+        dCalcVectorCross3( ltd, c, axis );
 
         dBodyAddTorque ( joint->node[0].body, ltd[0], ltd[1], ltd[2] );
         dBodyAddTorque ( joint->node[1].body, ltd[0], ltd[1], ltd[2] );
@@ -386,7 +388,7 @@ dxJointSlider::computeOffset()
         c[1] = node[0].body->posr.pos[1] - node[1].body->posr.pos[1];
         c[2] = node[0].body->posr.pos[2] - node[1].body->posr.pos[2];
 
-        dMULTIPLY1_331 ( offset, node[1].body->posr.R, c );
+        dMultiply1_331 ( offset, node[1].body->posr.R, c );
     }
     else if ( node[0].body )
     {

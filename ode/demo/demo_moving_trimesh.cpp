@@ -348,11 +348,11 @@ void drawGeom (dGeomID g, const dReal *pos, const dReal *R, int show_aabb)
     const dReal *R2 = dGeomGetRotation (g2);
     dVector3 actual_pos;
     dMatrix3 actual_R;
-    dMULTIPLY0_331 (actual_pos,R,pos2);
+    dMultiply0_331 (actual_pos,R,pos2);
     actual_pos[0] += pos[0];
     actual_pos[1] += pos[1];
     actual_pos[2] += pos[2];
-    dMULTIPLY0_333 (actual_R,R,R2);
+    dMultiply0_333 (actual_R,R,R2);
     drawGeom (g2,actual_pos,actual_R,0);
   }
 

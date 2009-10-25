@@ -345,7 +345,7 @@ inline void FetchTriangle(dxTriMesh* TriMesh, int Index, const dVector3 Position
 		v[2] = VP.Vertex[i]->z;
 		v[3] = 0;
 
-		dMULTIPLY0_331(Out[i], Rotation, v);
+		dMultiply0_331(Out[i], Rotation, v);
 		Out[i][0] += Position[0];
 		Out[i][1] += Position[1];
 		Out[i][2] += Position[2];
@@ -614,7 +614,7 @@ void TransformVector3( const dVector3 in,
                        const dMatrix3 orientation, const dVector3 position, 
                        dVector3 out )
 {
-    dMULTIPLY0_331( out, orientation, in );
+    dMultiply0_331( out, orientation, in );
     out[0] += position[0];
     out[1] += position[1];
     out[2] += position[2];

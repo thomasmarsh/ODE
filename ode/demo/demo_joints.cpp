@@ -526,7 +526,7 @@ dReal doStuffAndGetError (int n)
     const dReal *p1 = dBodyGetPosition (body[0]);
     const dReal *p2 = dBodyGetPosition (body[1]);
     for (int i=0; i<3; i++) p[i] = p2[i] - p1[i];
-    dMULTIPLY1_331 (pp,R1,p);
+    dMultiply1_331 (pp,R1,p);
     pp[0] += 0.5;
     pp[1] += 0.5;
     return (err1 + length (pp)) * 300;
@@ -558,7 +558,7 @@ dReal doStuffAndGetError (int n)
     const dReal *p1 = dBodyGetPosition (body[0]);
     const dReal *p2 = dBodyGetPosition (body[1]);
     for (int i=0; i<3; i++) p[i] = p2[i] - p1[i];
-    dMULTIPLY1_331 (pp,R1,p);
+    dMultiply1_331 (pp,R1,p);
     pp[0] += 0.5;
     pp[1] += 0.5;
     return length(pp) * 300;
@@ -754,7 +754,7 @@ dReal doStuffAndGetError (int n)
     dampRotationalMotion (0.1);
     dJointGetUniversalAxis1(joint, ax1);
     dJointGetUniversalAxis2(joint, ax2);
-    return fabs(10*dDOT(ax1, ax2));
+    return fabs(10*dCalcVectorDot3(ax1, ax2));
   }
 
   case 701: {		// 2 body: angle 1 rate
@@ -793,7 +793,7 @@ dReal doStuffAndGetError (int n)
     dampRotationalMotion (0.1);
     dJointGetUniversalAxis1(joint, ax1);
     dJointGetUniversalAxis2(joint, ax2);
-    return fabs(10*dDOT(ax1, ax2));
+    return fabs(10*dCalcVectorDot3(ax1, ax2));
   }
 
   case 721: {		// universal transmit torque test: angle1 rate
@@ -830,7 +830,7 @@ dReal doStuffAndGetError (int n)
     dJointGetUniversalAxis2(joint, ax2);
     addOscillatingTorqueAbout (0.1, ax1[0], ax1[1], ax1[2]);
     dampRotationalMotion (0.1);
-    return fabs(10*dDOT(ax1, ax2));
+    return fabs(10*dCalcVectorDot3(ax1, ax2));
   }
 
   case 731:{
@@ -871,7 +871,7 @@ dReal doStuffAndGetError (int n)
     dJointGetUniversalAxis2(joint, ax2);
     addOscillatingTorqueAbout (0.1, ax2[0], ax2[1], ax2[2]);
     dampRotationalMotion (0.1);
-    return fabs(10*dDOT(ax1, ax2));
+    return fabs(10*dCalcVectorDot3(ax1, ax2));
   }
 
   case 741:{

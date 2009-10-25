@@ -113,7 +113,7 @@ dReal dGeomCapsulePointDepth (dGeomID g, dReal x, dReal y, dReal z)
   a[0] = x - pos[0];
   a[1] = y - pos[1];
   a[2] = z - pos[2];
-  dReal beta = dDOT14(a,R+2);
+  dReal beta = dCalcVectorDot3_14(a,R+2);
   dReal lz2 = c->lz*REAL(0.5);
   if (beta < -lz2) beta = -lz2;
   else if (beta > lz2) beta = lz2;
@@ -241,7 +241,7 @@ int dCollideCapsuleCapsule (dxGeom *o1, dxGeom *o2,
   // algorithm is robust in all casts, but it can return only one contact.
 
   dVector3 sphere1,sphere2;
-  dReal a1a2 = dDOT (axis1,axis2);
+  dReal a1a2 = dCalcVectorDot3 (axis1,axis2);
   dReal det = REAL(1.0)-a1a2*a1a2;
   if (det < tolerance) {
     // the cylinder axes (almost) parallel, so we will generate up to two
@@ -256,7 +256,7 @@ int dCollideCapsuleCapsule (dxGeom *o1, dxGeom *o2,
     }
     dReal q[3];
     for (i=0; i<3; i++) q[i] = pos1[i]-pos2[i];
-    dReal k = dDOT (axis1,q);
+    dReal k = dCalcVectorDot3 (axis1,q);
     dReal a1lo = -lz1;
     dReal a1hi = lz1;
     dReal a2lo = -lz2 - k;
@@ -331,13 +331,13 @@ int dCollideCapsulePlane (dxGeom *o1, dxGeom *o2, int flags,
   dxPlane *plane = (dxPlane*) o2;
 
   // collide the deepest capping sphere with the plane
-  dReal sign = (dDOT14 (plane->p,o1->final_posr->R+2) > 0) ? REAL(-1.0) : REAL(1.0);
+  dReal sign = (dCalcVectorDot3_14 (plane->p,o1->final_posr->R+2) > 0) ? REAL(-1.0) : REAL(1.0);
   dVector3 p;
   p[0] = o1->final_posr->pos[0] + o1->final_posr->R[2]  * ccyl->lz * REAL(0.5) * sign;
   p[1] = o1->final_posr->pos[1] + o1->final_posr->R[6]  * ccyl->lz * REAL(0.5) * sign;
   p[2] = o1->final_posr->pos[2] + o1->final_posr->R[10] * ccyl->lz * REAL(0.5) * sign;
 
-  dReal k = dDOT (p,plane->p);
+  dReal k = dCalcVectorDot3 (p,plane->p);
   dReal depth = plane->p[3] - k + ccyl->radius;
   if (depth < 0) return 0;
   contact->normal[0] = plane->p[0];
@@ -355,7 +355,7 @@ int dCollideCapsulePlane (dxGeom *o1, dxGeom *o2, int flags,
     p[1] = o1->final_posr->pos[1] - o1->final_posr->R[6]  * ccyl->lz * REAL(0.5) * sign;
     p[2] = o1->final_posr->pos[2] - o1->final_posr->R[10] * ccyl->lz * REAL(0.5) * sign;
 
-    k = dDOT (p,plane->p);
+    k = dCalcVectorDot3 (p,plane->p);
     depth = plane->p[3] - k + ccyl->radius;
     if (depth >= 0) {
       dContactGeom *c2 = CONTACT(contact,skip);

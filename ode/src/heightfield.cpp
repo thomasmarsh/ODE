@@ -1723,9 +1723,9 @@ int dCollideHeightfield( dxGeom *o1, dxGeom *o2, int flags, dContactGeom* contac
     if ( terrain->gflags & GEOM_PLACEABLE )
     {
         // Transform o2 into heightfield space.
-        dOP( pos0, -, o2->final_posr->pos, terrain->final_posr->pos );
-        dMULTIPLY1_331( pos1, terrain->final_posr->R, pos0 );
-        dMULTIPLY1_333( R1, terrain->final_posr->R, o2->final_posr->R );
+        dSubtractVectors3( pos0, o2->final_posr->pos, terrain->final_posr->pos );
+        dMultiply1_331( pos1, terrain->final_posr->R, pos0 );
+        dMultiply1_333( R1, terrain->final_posr->R, o2->final_posr->R );
 
         // Update o2 with transformed position and rotation.
         dVector3Copy( pos1, o2->final_posr->pos );
@@ -1822,19 +1822,19 @@ dCollideHeightfieldExit:
             for ( i = 0; i < numTerrainContacts; ++i )
             {
                 pContact = CONTACT(contact,i*skip);
-                dOPE( pos0, =, pContact->pos );
+                dCopyVector3( pos0, pContact->pos );
 
 #ifndef DHEIGHTFIELD_CORNER_ORIGIN
                 pos0[ 0 ] -= terrain->m_p_data->m_fHalfWidth;
                 pos0[ 2 ] -= terrain->m_p_data->m_fHalfDepth;
 #endif // !DHEIGHTFIELD_CORNER_ORIGIN
 
-                dMULTIPLY0_331( pContact->pos, terrain->final_posr->R, pos0 );
+                dMultiply0_331( pContact->pos, terrain->final_posr->R, pos0 );
 
-                dOP( pContact->pos, +, pContact->pos, terrain->final_posr->pos );
-                dOPE( pos0, =, pContact->normal );
+                dAddVectors3( pContact->pos, pContact->pos, terrain->final_posr->pos );
+                dCopyVector3( pos0, pContact->normal );
 
-                dMULTIPLY0_331( pContact->normal, terrain->final_posr->R, pos0 );
+                dMultiply0_331( pContact->normal, terrain->final_posr->R, pos0 );
             }
         }
 #ifndef DHEIGHTFIELD_CORNER_ORIGIN

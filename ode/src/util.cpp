@@ -188,14 +188,14 @@ void dInternalHandleAutoDisabling (dxWorld *world, dReal stepsize)
 
 			// threshold test
 			dReal av_lspeed, av_aspeed;
-			av_lspeed = dDOT( average_lvel, average_lvel );
+			av_lspeed = dCalcVectorDot3( average_lvel, average_lvel );
 			if ( av_lspeed > bb->adis.linear_average_threshold )
 			{
 				idle = 0; // average linear velocity is too high for idle
 			}
 			else
 			{
-				av_aspeed = dDOT( average_avel, average_avel );
+				av_aspeed = dCalcVectorDot3( average_avel, average_avel );
 				if ( av_aspeed > bb->adis.angular_average_threshold )
 				{
 					idle = 0; // average angular velocity is too high for idle
@@ -257,10 +257,10 @@ void dxStepBody (dxBody *b, dReal h)
   // cap the angular velocity
   if (b->flags & dxBodyMaxAngularSpeed) {
     const dReal max_ang_speed = b->max_angular_speed;
-    const dReal aspeed = dDOT( b->avel, b->avel );
+    const dReal aspeed = dCalcVectorDot3( b->avel, b->avel );
     if (aspeed > max_ang_speed*max_ang_speed) {
       const dReal coef = max_ang_speed/dSqrt(aspeed);
-      dOPEC(b->avel, *=, coef);
+      dScaleVector3(b->avel, coef);
     }
   }
   // end of angular velocity cap
@@ -277,7 +277,7 @@ void dxStepBody (dxBody *b, dReal h)
       // split the angular velocity vector into a component along the finite
       // rotation axis, and a component orthogonal to it.
       dVector3 frv;		// finite rotation vector
-      dReal k = dDOT (b->finite_rot_axis,b->avel);
+      dReal k = dCalcVectorDot3 (b->finite_rot_axis,b->avel);
       frv[0] = b->finite_rot_axis[0] * k;
       frv[1] = b->finite_rot_axis[1] * k;
       frv[2] = b->finite_rot_axis[2] * k;
@@ -343,18 +343,18 @@ void dxStepBody (dxBody *b, dReal h)
   // damping
   if (b->flags & dxBodyLinearDamping) {
     const dReal lin_threshold = b->dampingp.linear_threshold;
-    const dReal lin_speed = dDOT( b->lvel, b->lvel );
+    const dReal lin_speed = dCalcVectorDot3( b->lvel, b->lvel );
     if ( lin_speed > lin_threshold) {
       const dReal k = 1 - b->dampingp.linear_scale;
-      dOPEC(b->lvel, *=, k);
+      dScaleVector3(b->lvel, k);
     }
   }
   if (b->flags & dxBodyAngularDamping) {
     const dReal ang_threshold = b->dampingp.angular_threshold;
-    const dReal ang_speed = dDOT( b->avel, b->avel );
+    const dReal ang_speed = dCalcVectorDot3( b->avel, b->avel );
     if ( ang_speed > ang_threshold) {
       const dReal k = 1 - b->dampingp.angular_scale;
-      dOPEC(b->avel, *=, k);
+      dScaleVector3(b->avel, k);
     }
   }
 }
