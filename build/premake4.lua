@@ -87,11 +87,6 @@
   }
   
   newoption {
-    trigger     = "no-alloca",
-    description = "Use heap memory instead of the stack (experimental)"
-  }
-  
-  newoption {
     trigger     = "enable-ou",
     description = "Use TLS for global variables (experimental)"
   }
@@ -310,10 +305,6 @@
       text = string.gsub(text, "#define dTRIMESH_OPCODE 1", "/* #define dTRIMESH_OPCODE 1 */")
     elseif (_OPTIONS["with-gimpact"]) then
       text = string.gsub(text, "#define dTRIMESH_OPCODE 1", "#define dTRIMESH_GIMPACT 1")
-    end
-
-    if _OPTIONS["no-alloca"] then
-      text = string.gsub(text, "/%* #define dUSE_MALLOC_FOR_ALLOCA %*/", "#define dUSE_MALLOC_FOR_ALLOCA")
     end
 
     if _OPTIONS["enable-ou"] then

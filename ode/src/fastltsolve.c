@@ -10,7 +10,7 @@
  * this processes blocks of 4.
  */
 
-void dSolveL1T (const dReal *L, dReal *B, int n, int lskip1)
+void _dSolveL1T (const dReal *L, dReal *B, int n, int lskip1)
 {  
   /* declare variables - Z matrix, p and q vectors, etc */
   dReal Z11,m11,Z21,m21,Z31,m31,Z41,m41,p1,q1,p2,p3,p4,*ex;
@@ -197,3 +197,12 @@ void dSolveL1T (const dReal *L, dReal *B, int n, int lskip1)
     ex[0] = Z11;
   }
 }
+
+
+#undef dSolveL1T
+
+void dSolveL1T (const dReal *L, dReal *B, int n, int lskip1)
+{
+  _dSolveL1T (L, B, n, lskip1);
+}
+

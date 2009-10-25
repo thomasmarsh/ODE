@@ -16,6 +16,12 @@ the rules for this file:
 		  (absence of --enable-double-precision) in configure script. The script
 		  was not appending compiler defines correctly.
 
+		* dWorldStep implementation changed to remove allocation on stack. 
+		  dUSE_MALLOC_FOR_ALLOCA define has been removed as well as corresponding
+		  configuration parameter. Also dMemoryFlag public variable has been removed.
+		  (look for presence of ODE_EXT_malloc_not_alloca configuration string if
+		  your application is dependent on that variable).
+
 09/05/09 Oleh Derevenko
 		* dWorldStepFast1 API removed along with dWorld[Get/Set]AutoEnableDepthSF1
 

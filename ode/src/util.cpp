@@ -735,6 +735,27 @@ bool dxReallocateWorldProcessContext (dxWorld *world,
   return context != NULL;
 }
 
+dxWorldProcessContext *dxReallocateTemporayWorldProcessContext(dxWorldProcessContext *oldcontext, 
+  size_t memreq, const dxWorldProcessMemoryManager *memmgr/*=NULL*/, const dxWorldProcessMemoryReserveInfo *reserveinfo/*=NULL*/)
+{
+  dxWorldProcessContext *context = oldcontext;
+
+  if (context && context->GetMemorySize() < memreq) {
+    dIASSERT(!context->IsPreallocationsContextAssigned());
+
+    InternalFreeWorldProcessContext(context);
+    context = NULL;
+  }
+
+  if (context == NULL) {
+    const dxWorldProcessMemoryManager *surememmgr = memmgr ? memmgr : &g_WorldProcessMallocMemoryManager;
+    const dxWorldProcessMemoryReserveInfo *surereserveinfo = reserveinfo ? reserveinfo : &g_WorldProcessDefaultReserveInfo;
+    context = InternalReallocateWorldProcessContext(context, memreq, surememmgr, reserveinfo->m_fReserveFactor, reserveinfo->m_uiReserveMinimum);
+  }
+
+  return context;
+}
+
 void dxFreeWorldProcessContext (dxWorldProcessContext *context)
 {
   // Free old arena for the case if context is freed after reallocation without
