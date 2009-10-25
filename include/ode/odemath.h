@@ -25,8 +25,6 @@
 
 #include <ode/common.h>
 
-#define PURE_INLINE static __inline
-
 /*
  * macro to access elements i,j in an NxM matrix A, independent of the
  * matrix storage convention.
