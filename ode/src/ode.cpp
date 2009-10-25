@@ -541,7 +541,7 @@ void dBodyAddRelForce (dBodyID b, dReal fx, dReal fy, dReal fz)
   t1[1] = fy;
   t1[2] = fz;
   t1[3] = 0;
-  dMULTIPLY0_331 (t2,b->posr.R,t1);
+  dMultiply0_331 (t2,b->posr.R,t1);
   b->facc[0] += t2[0];
   b->facc[1] += t2[1];
   b->facc[2] += t2[2];
@@ -556,7 +556,7 @@ void dBodyAddRelTorque (dBodyID b, dReal fx, dReal fy, dReal fz)
   t1[1] = fy;
   t1[2] = fz;
   t1[3] = 0;
-  dMULTIPLY0_331 (t2,b->posr.R,t1);
+  dMultiply0_331 (t2,b->posr.R,t1);
   b->tacc[0] += t2[0];
   b->tacc[1] += t2[1];
   b->tacc[2] += t2[2];
@@ -577,7 +577,7 @@ void dBodyAddForceAtPos (dBodyID b, dReal fx, dReal fy, dReal fz,
   q[0] = px - b->posr.pos[0];
   q[1] = py - b->posr.pos[1];
   q[2] = pz - b->posr.pos[2];
-  dCROSS (b->tacc,+=,q,f);
+  dAddVectorCross3(b->tacc,q,f);
 }
 
 
@@ -594,11 +594,11 @@ void dBodyAddForceAtRelPos (dBodyID b, dReal fx, dReal fy, dReal fz,
   prel[1] = py;
   prel[2] = pz;
   prel[3] = 0;
-  dMULTIPLY0_331 (p,b->posr.R,prel);
+  dMultiply0_331 (p,b->posr.R,prel);
   b->facc[0] += f[0];
   b->facc[1] += f[1];
   b->facc[2] += f[2];
-  dCROSS (b->tacc,+=,p,f);
+  dAddVectorCross3(b->tacc,p,f);
 }
 
 
@@ -611,7 +611,7 @@ void dBodyAddRelForceAtPos (dBodyID b, dReal fx, dReal fy, dReal fz,
   frel[1] = fy;
   frel[2] = fz;
   frel[3] = 0;
-  dMULTIPLY0_331 (f,b->posr.R,frel);
+  dMultiply0_331 (f,b->posr.R,frel);
   b->facc[0] += f[0];
   b->facc[1] += f[1];
   b->facc[2] += f[2];
@@ -619,7 +619,7 @@ void dBodyAddRelForceAtPos (dBodyID b, dReal fx, dReal fy, dReal fz,
   q[0] = px - b->posr.pos[0];
   q[1] = py - b->posr.pos[1];
   q[2] = pz - b->posr.pos[2];
-  dCROSS (b->tacc,+=,q,f);
+  dAddVectorCross3(b->tacc,q,f);
 }
 
 
@@ -636,12 +636,12 @@ void dBodyAddRelForceAtRelPos (dBodyID b, dReal fx, dReal fy, dReal fz,
   prel[1] = py;
   prel[2] = pz;
   prel[3] = 0;
-  dMULTIPLY0_331 (f,b->posr.R,frel);
-  dMULTIPLY0_331 (p,b->posr.R,prel);
+  dMultiply0_331 (f,b->posr.R,frel);
+  dMultiply0_331 (p,b->posr.R,prel);
   b->facc[0] += f[0];
   b->facc[1] += f[1];
   b->facc[2] += f[2];
-  dCROSS (b->tacc,+=,p,f);
+  dAddVectorCross3(b->tacc,p,f);
 }
 
 
@@ -686,7 +686,7 @@ void dBodyGetRelPointPos (dBodyID b, dReal px, dReal py, dReal pz,
   prel[1] = py;
   prel[2] = pz;
   prel[3] = 0;
-  dMULTIPLY0_331 (p,b->posr.R,prel);
+  dMultiply0_331 (p,b->posr.R,prel);
   result[0] = p[0] + b->posr.pos[0];
   result[1] = p[1] + b->posr.pos[1];
   result[2] = p[2] + b->posr.pos[2];
@@ -702,11 +702,11 @@ void dBodyGetRelPointVel (dBodyID b, dReal px, dReal py, dReal pz,
   prel[1] = py;
   prel[2] = pz;
   prel[3] = 0;
-  dMULTIPLY0_331 (p,b->posr.R,prel);
+  dMultiply0_331 (p,b->posr.R,prel);
   result[0] = b->lvel[0];
   result[1] = b->lvel[1];
   result[2] = b->lvel[2];
-  dCROSS (result,+=,b->avel,p);
+  dAddVectorCross3(result,b->avel,p);
 }
 
 
@@ -722,7 +722,7 @@ void dBodyGetPointVel (dBodyID b, dReal px, dReal py, dReal pz,
   result[0] = b->lvel[0];
   result[1] = b->lvel[1];
   result[2] = b->lvel[2];
-  dCROSS (result,+=,b->avel,p);
+  dAddVectorCross3(result,b->avel,p);
 }
 
 
@@ -735,7 +735,7 @@ void dBodyGetPosRelPoint (dBodyID b, dReal px, dReal py, dReal pz,
   prel[1] = py - b->posr.pos[1];
   prel[2] = pz - b->posr.pos[2];
   prel[3] = 0;
-  dMULTIPLY1_331 (result,b->posr.R,prel);
+  dMultiply1_331 (result,b->posr.R,prel);
 }
 
 
@@ -748,7 +748,7 @@ void dBodyVectorToWorld (dBodyID b, dReal px, dReal py, dReal pz,
   p[1] = py;
   p[2] = pz;
   p[3] = 0;
-  dMULTIPLY0_331 (result,b->posr.R,p);
+  dMultiply0_331 (result,b->posr.R,p);
 }
 
 
@@ -761,7 +761,7 @@ void dBodyVectorFromWorld (dBodyID b, dReal px, dReal py, dReal pz,
   p[1] = py;
   p[2] = pz;
   p[3] = 0;
-  dMULTIPLY1_331 (result,b->posr.R,p);
+  dMultiply1_331 (result,b->posr.R,p);
 }
 
 

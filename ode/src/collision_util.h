@@ -42,7 +42,7 @@ some useful collision utility stuff.
 #if 1
 #include "collision_kernel.h"
 // Fetches a contact
-inline dContactGeom* SAFECONTACT(int Flags, dContactGeom* Contacts, int Index, int Stride){
+static inline dContactGeom* SAFECONTACT(int Flags, dContactGeom* Contacts, int Index, int Stride){
 	dIASSERT(Index >= 0 && Index < (Flags & NUMC_MASK));
 	return ((dContactGeom*)(((char*)Contacts) + (Index * Stride)));
 }
@@ -89,102 +89,82 @@ void dClipPolyToPlane(const dVector3 avArrayIn[], const int ctIn, dVector3 avArr
 void dClipPolyToCircle(const dVector3 avArrayIn[], const int ctIn, dVector3 avArrayOut[], int &ctOut, const dVector4 &plPlane ,dReal fRadius);
 
 // Some vector math
-inline void dVector3Subtract(const dVector3& a,const dVector3& b,dVector3& c)
+static inline void dVector3Subtract(const dVector3& a,const dVector3& b,dVector3& c)
 {
-	c[0] = a[0] - b[0];
-	c[1] = a[1] - b[1];
-	c[2] = a[2] - b[2];
+  dSubtractVectors3(c, a, b);
 }
 
-// Some vector math
-inline void dVector3Scale(dVector3& a,dReal nScale)
+static inline void dVector3Scale(dVector3& a,dReal nScale)
 {
-	a[0] *= nScale ;
-	a[1] *= nScale ;
-	a[2] *= nScale ;
+  dScaleVector3(a, nScale);
 }
 
-inline void dVector3Add(const dVector3& a,const dVector3& b,dVector3& c)
+static inline void dVector3Add(const dVector3& a,const dVector3& b,dVector3& c)
 {
-	c[0] = a[0] + b[0];
-	c[1] = a[1] + b[1];
-	c[2] = a[2] + b[2];
+  dAddVectors3(c, a, b);
 }
 
-inline void dVector3Copy(const dVector3& a,dVector3& c)
+static inline void dVector3Copy(const dVector3& a,dVector3& c)
 {
-	c[0] = a[0];
-	c[1] = a[1];
-	c[2] = a[2];
+  dCopyVector3(c, a);
 }
 
-inline void dVector4Copy(const dVector4& a,dVector4& c)
+static inline void dVector4Copy(const dVector4& a,dVector4& c)
 {
-	c[0] = a[0];
-	c[1] = a[1];
-	c[2] = a[2];
-	c[3] = a[3];
+  dCopyVector4(c, a);
 }
 
-inline void dVector3Cross(const dVector3& a,const dVector3& b,dVector3& c)
+static inline void dVector3Cross(const dVector3& a,const dVector3& b,dVector3& c)
 {
-	dCROSS(c,=,a,b);
+	dCalcVectorCross3(c, a, b);
 }
 
-inline dReal dVector3Length(const dVector3& a)
+static inline dReal dVector3Length(const dVector3& a)
 {
-	return dSqrt(a[0]*a[0]+a[1]*a[1]+a[2]*a[2]);
+	return dCalcVectorLength3(a);
 }
 
-inline dReal dVector3Dot(const dVector3& a,const dVector3& b)
+static inline dReal dVector3LengthSquare(const dVector3& a)
 {
-	return dDOT(a,b);
+  return dCalcVectorLengthSquare3(a);
 }
 
-inline void dVector3Inv(dVector3& a)
+static inline dReal dVector3Dot(const dVector3& a,const dVector3& b)
 {
-	a[0] = -a[0];
-	a[1] = -a[1];
-	a[2] = -a[2];
+	return dCalcVectorDot3(a, b);
 }
 
-inline dReal dVector3Length2(const dVector3& a)
+static inline void dVector3Inv(dVector3& a)
 {
-	return (a[0]*a[0]+a[1]*a[1]+a[2]*a[2]);
+  dNegateVector3(a);
 }
 
-inline void dMat3GetCol(const dMatrix3& m,const int col, dVector3& v)
+static inline void dMat3GetCol(const dMatrix3& m,const int col, dVector3& v)
 {
-	v[0] = m[col + 0];
-	v[1] = m[col + 4];
-	v[2] = m[col + 8];
+  dGetMatrixColumn3(v, m, col);
 }
 
-inline void dVector3CrossMat3Col(const dMatrix3& m,const int col,const dVector3& v,dVector3& r)
+static inline void dVector3CrossMat3Col(const dMatrix3& m,const int col,const dVector3& v,dVector3& r)
 {
-	r[0] =  v[1] * m[2*4 + col] - v[2] * m[1*4 + col]; 
-	r[1] =  v[2] * m[0*4 + col] - v[0] * m[2*4 + col]; 
-	r[2] =  v[0] * m[1*4 + col] - v[1] * m[0*4 + col];
+  dCalcVectorCross3_114(r, v, m + col);
 }
 
-inline void dMat3ColCrossVector3(const dMatrix3& m,const int col,const dVector3& v,dVector3& r)
+static inline void dMat3ColCrossVector3(const dMatrix3& m,const int col,const dVector3& v,dVector3& r)
 {
-	r[0] =   v[2] * m[1*4 + col] - v[1] * m[2*4 + col]; 
-	r[1] =   v[0] * m[2*4 + col] - v[2] * m[0*4 + col]; 
-	r[2] =   v[1] * m[0*4 + col] - v[0] * m[1*4 + col];
+  dCalcVectorCross3_141(r, m + col, v);
 }
 
-inline void dMultiplyMat3Vec3(const dMatrix3& m,const dVector3& v, dVector3& r)
+static inline void dMultiplyMat3Vec3(const dMatrix3& m,const dVector3& v, dVector3& r)
 {
-	dMULTIPLY0_331(r,m,v);
+	dMultiply0_331(r, m, v);
 }
 
-inline dReal dPointPlaneDistance(const dVector3& point,const dVector4& plane)
+static inline dReal dPointPlaneDistance(const dVector3& point,const dVector4& plane)
 {
 	return (plane[0]*point[0] + plane[1]*point[1] + plane[2]*point[2] + plane[3]);
 }
 
-inline void dConstructPlane(const dVector3& normal,const dReal& distance, dVector4& plane)
+static inline void dConstructPlane(const dVector3& normal,const dReal& distance, dVector4& plane)
 {
 	plane[0] = normal[0];
 	plane[1] = normal[1];
@@ -192,22 +172,12 @@ inline void dConstructPlane(const dVector3& normal,const dReal& distance, dVecto
 	plane[3] = distance;
 }
 
-inline void dMatrix3Copy(const dReal* source,dMatrix3& dest)
+static inline void dMatrix3Copy(const dReal* source,dMatrix3& dest)
 {
-	dest[0]	=	source[0];
-	dest[1]	=	source[1];
-	dest[2]	=	source[2];
-
-	dest[4]	=	source[4];
-	dest[5]	=	source[5];
-	dest[6]	=	source[6];
-
-	dest[8]	=	source[8];
-	dest[9]	=	source[9];
-	dest[10]=	source[10];
+  dCopyMatrix4x3(dest, source);
 }
 
-inline dReal dMatrix3Det( const dMatrix3& mat )
+static inline dReal dMatrix3Det( const dMatrix3& mat )
 {
 	dReal det;
 

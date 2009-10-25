@@ -229,11 +229,11 @@ int dCollideCB (const dxGeom *o1, const dxGeom *o2, int flags,
     dVector3 q1;
     dReal sign[3];
     for (i=0; i<3; i++) q1[i] = c[i];
-    sign[0] = (dDOT14(normal,R+0) > 0) ? REAL(1.0) : REAL(-1.0);
+    sign[0] = (dCalcVectorDot3_14(normal,R+0) > 0) ? REAL(1.0) : REAL(-1.0);
     for (i=0; i<3; i++) q1[i] += sign[0] * S0 * R[i*4];
-    sign[1] = (dDOT14(normal,R+1) > 0) ? REAL(1.0) : REAL(-1.0);
+    sign[1] = (dCalcVectorDot3_14(normal,R+1) > 0) ? REAL(1.0) : REAL(-1.0);
     for (i=0; i<3; i++) q1[i] += sign[1] * S1 * R[i*4+1];
-    sign[2] = (dDOT14(normal,R+2) > 0) ? REAL(1.0) : REAL(-1.0);
+    sign[2] = (dCalcVectorDot3_14(normal,R+2) > 0) ? REAL(1.0) : REAL(-1.0);
     for (i=0; i<3; i++) q1[i] += sign[2] * S2 * R[i*4+2];
 
     // find the other endpoint q2 of the intersecting edge
@@ -257,7 +257,7 @@ int dCollideCB (const dxGeom *o1, const dxGeom *o2, int flags,
     dVector3 gv;
     for (i=0; i<3; i++) gv[i] = p2[i] - p1[i];
 
-    if (dDOT (normal,gv) > 0) {
+    if (dCalcVectorDot3 (normal,gv) > 0) {
       for (i=0; i<3; i++)
 	contact[0].pos[i] = p1[i] + (depth*REAL(0.5)-radius)*normal[i];
     }
@@ -366,7 +366,7 @@ int dCollideCCylinderCCylinder (dxGeom *o1, dxGeom *o2,
       else {
 	// let alpha1 and alpha2 be free
 	// compute determinant of d(d^2)\d(alpha) jacobian
-	dReal a1a2 = dDOT (axis1,axis2);
+	dReal a1a2 = dCalcVectorDot3 (axis1,axis2);
 	dReal det = REAL(1.0)-a1a2*a1a2;
 	if (det < tolerance) {
 	  // the cylinder axes (almost) parallel, so we will generate up to two
@@ -382,7 +382,7 @@ int dCollideCCylinderCCylinder (dxGeom *o1, dxGeom *o2,
 	  }
 	  dReal q[3];
 	  for (i=0; i<3; i++) q[i] = pos1[i]-pos2[i];
-	  dReal k = dDOT (axis1,q);
+	  dReal k = dCalcVectorDot3 (axis1,q);
 	  dReal a1lo = -lz1;
 	  dReal a1hi = lz1;
 	  dReal a2lo = -lz2 - k;
@@ -426,8 +426,8 @@ int dCollideCCylinderCCylinder (dxGeom *o1, dxGeom *o2,
 	det = REAL(1.0)/det;
 	dReal delta[3];
 	for (i=0; i<3; i++) delta[i] = pos1[i] - pos2[i];
-	dReal q1 = dDOT (delta,axis1);
-	dReal q2 = dDOT (delta,axis2);
+	dReal q1 = dCalcVectorDot3 (delta,axis1);
+	dReal q2 = dCalcVectorDot3 (delta,axis2);
 	alpha1 = det*(a1a2*q2-q1);
 	alpha2 = det*(q2-a1a2*q1);
 	for (i=0; i<3; i++) sphere1[i] = pos1[i] + alpha1*axis1[i];
@@ -463,14 +463,14 @@ int dCollideCCylinderCCylinder (dxGeom *o1, dxGeom *o2,
     dReal tmp[3];
     for (i=0; i<3; i++) tmp[i] = sphere1[i] - sphere2[i];
     if (fix1) {
-      dReal gradient = dDOT (tmp,axis1);
+      dReal gradient = dCalcVectorDot3 (tmp,axis1);
       if ((fix1 > 0 && gradient > 0) || (fix1 < 0 && gradient < 0)) {
 	fix1 = 0;
 	continue;
       }
     }
     if (fix2) {
-      dReal gradient = -dDOT (tmp,axis2);
+      dReal gradient = -dCalcVectorDot3 (tmp,axis2);
       if ((fix2 > 0 && gradient > 0) || (fix2 < 0 && gradient < 0)) {
 	fix2 = 0;
 	continue;

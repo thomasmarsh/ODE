@@ -8,6 +8,10 @@ the rules for this file:
   * keep the format consistent (79 char width, M/D/Y date format).
 
 ------------------------------------------------------------------------------
+10/25/09 Oleh Derevenko
+		* Macros changed to static inline functions in odemath.h and related files.
+		  Some code duplication has been eliminated across the files.
+
 09/05/09 Oleh Derevenko
 		* dWorldStepFast1 API removed along with dWorld[Get/Set]AutoEnableDepthSF1
 

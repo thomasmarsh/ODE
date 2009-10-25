@@ -27,12 +27,12 @@ dReal SqrDistancePointTri( const dVector3 p, const dVector3 triOrigin,
 {
   dVector3 kDiff;
   Vector3Subtract( triOrigin, p, kDiff );
-  dReal fA00 = dDOT( triEdge0, triEdge0 );
-  dReal fA01 = dDOT( triEdge0, triEdge1 );
-  dReal fA11 = dDOT( triEdge1, triEdge1 );
-  dReal fB0 = dDOT( kDiff, triEdge0 );
-  dReal fB1 = dDOT( kDiff, triEdge1 );
-  dReal fC = dDOT( kDiff, kDiff );
+  dReal fA00 = dCalcVectorDot3( triEdge0, triEdge0 );
+  dReal fA01 = dCalcVectorDot3( triEdge0, triEdge1 );
+  dReal fA11 = dCalcVectorDot3( triEdge1, triEdge1 );
+  dReal fB0 = dCalcVectorDot3( kDiff, triEdge0 );
+  dReal fB1 = dCalcVectorDot3( kDiff, triEdge1 );
+  dReal fC = dCalcVectorDot3( kDiff, kDiff );
   dReal fDet = dReal(fabs(fA00*fA11-fA01*fA01));
   dReal fS = fA01*fB1-fA11*fB0;
   dReal fT = fA01*fB0-fA00*fB1;
@@ -283,19 +283,19 @@ dReal SqrDistanceSegments( const dVector3 seg1Origin, const dVector3 seg1Directi
   dVector3 kDiff, kNegDiff, seg1NegDirection;
   Vector3Subtract( seg1Origin, seg2Origin, kDiff );
   Vector3Negate( kDiff, kNegDiff );
-  dReal fA00 = dDOT( seg1Direction, seg1Direction );
+  dReal fA00 = dCalcVectorDot3( seg1Direction, seg1Direction );
   Vector3Negate( seg1Direction, seg1NegDirection );
-  dReal fA01 = dDOT( seg1NegDirection, seg2Direction );
-  dReal fA11 = dDOT( seg2Direction, seg2Direction );
-  dReal fB0 = dDOT( kDiff, seg1Direction );
-  dReal fC = dDOT( kDiff, kDiff );
+  dReal fA01 = dCalcVectorDot3( seg1NegDirection, seg2Direction );
+  dReal fA11 = dCalcVectorDot3( seg2Direction, seg2Direction );
+  dReal fB0 = dCalcVectorDot3( kDiff, seg1Direction );
+  dReal fC = dCalcVectorDot3( kDiff, kDiff );
   dReal fDet = dReal(fabs(fA00*fA11-fA01*fA01));
   dReal fB1, fS, fT, fSqrDist, fTmp;
 
   if ( fDet >= gs_fTolerance )
   {
     // line segments are not parallel
-    fB1 = dDOT( kNegDiff, seg2Direction );
+    fB1 = dCalcVectorDot3( kNegDiff, seg2Direction );
     fS = fA01*fB1-fA11*fB0;
     fT = fA01*fB0-fA00*fB1;
         
@@ -577,7 +577,7 @@ dReal SqrDistanceSegments( const dVector3 seg1Origin, const dVector3 seg1Directi
       else
       {
         //fB1 = -kDiff % seg2.m;
-        fB1 = dDOT( kNegDiff, seg2Direction );
+        fB1 = dCalcVectorDot3( kNegDiff, seg2Direction );
         fS = REAL(1.0);
         fTmp = fA00+fB0;
         if ( -fTmp >= fA01 )
@@ -609,7 +609,7 @@ dReal SqrDistanceSegments( const dVector3 seg1Origin, const dVector3 seg1Directi
       }
       else
       {
-        fB1 = dDOT( kNegDiff, seg2Direction );
+        fB1 = dCalcVectorDot3( kNegDiff, seg2Direction );
         fS = REAL(0.0);
         if ( fB0 >= -fA01 )
         {
@@ -664,15 +664,15 @@ dReal SqrDistanceSegTri( const dVector3 segOrigin, const dVector3 segEnd,
   Vector3Negate( segDirection, segNegDirection );
   Vector3Subtract( triOrigin, segOrigin, kDiff );
   Vector3Negate( kDiff, kNegDiff );
-  dReal fA00 = dDOT( segDirection, segDirection );
-  dReal fA01 = dDOT( segNegDirection, triEdge0 );
-  dReal fA02 = dDOT( segNegDirection, triEdge1 );
-  dReal fA11 = dDOT( triEdge0, triEdge0 );
-  dReal fA12 = dDOT( triEdge0, triEdge1 );
-  dReal fA22 = dDOT( triEdge1, triEdge1 );
-  dReal fB0  = dDOT( kNegDiff, segDirection );
-  dReal fB1  = dDOT( kDiff, triEdge0 );
-  dReal fB2  = dDOT( kDiff, triEdge1 );
+  dReal fA00 = dCalcVectorDot3( segDirection, segDirection );
+  dReal fA01 = dCalcVectorDot3( segNegDirection, triEdge0 );
+  dReal fA02 = dCalcVectorDot3( segNegDirection, triEdge1 );
+  dReal fA11 = dCalcVectorDot3( triEdge0, triEdge0 );
+  dReal fA12 = dCalcVectorDot3( triEdge0, triEdge1 );
+  dReal fA22 = dCalcVectorDot3( triEdge1, triEdge1 );
+  dReal fB0  = dCalcVectorDot3( kNegDiff, segDirection );
+  dReal fB1  = dCalcVectorDot3( kDiff, triEdge0 );
+  dReal fB2  = dCalcVectorDot3( kDiff, triEdge1 );
 
   dVector3 kTriSegOrigin, kTriSegDirection, kPt;
   dReal fSqrDist, fSqrDist0, fR, fS, fT, fR0, fS0, fT0;
@@ -680,9 +680,9 @@ dReal SqrDistanceSegTri( const dVector3 segOrigin, const dVector3 segEnd,
   // Set up for a relative error test on the angle between ray direction
   // and triangle normal to determine parallel/nonparallel status.
   dVector3 kN;
-  dCROSS( kN, =, triEdge0, triEdge1 );
-  dReal fNSqrLen = dDOT( kN, kN );
-  dReal fDot = dDOT( segDirection, kN );
+  dCalcVectorCross3( kN, triEdge0, triEdge1 );
+  dReal fNSqrLen = dCalcVectorDot3( kN, kN );
+  dReal fDot = dCalcVectorDot3( segDirection, kN );
   bool bNotParallel = (fDot*fDot >= gs_fTolerance*fA00*fNSqrLen);
 
   if ( bNotParallel )

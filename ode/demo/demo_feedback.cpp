@@ -154,8 +154,8 @@ static void inspectJoints(void)
     if (dJointGetBody(hinges[i], 0))
     {
       // This joint has not snapped already... inspect it.
-      dReal l0 = dLENGTH(jfeedbacks[i].f1);
-      dReal l1 = dLENGTH(jfeedbacks[i].f2);
+      dReal l0 = dCalcVectorLength3(jfeedbacks[i].f1);
+      dReal l1 = dCalcVectorLength3(jfeedbacks[i].f2);
       colours[i+0] = 0.95*colours[i+0] + 0.05 * l0/forcelimit;
       colours[i+1] = 0.95*colours[i+1] + 0.05 * l1/forcelimit;
       if (l0 > forcelimit || l1 > forcelimit)

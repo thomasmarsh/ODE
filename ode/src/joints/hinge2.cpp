@@ -34,10 +34,10 @@ dReal
 dxJointHinge2::measureAngle() const
 {
     dVector3 a1, a2;
-    dMULTIPLY0_331( a1, node[1].body->posr.R, axis2 );
-    dMULTIPLY1_331( a2, node[0].body->posr.R, a1 );
-    dReal x = dDOT( v1, a2 );
-    dReal y = dDOT( v2, a2 );
+    dMultiply0_331( a1, node[1].body->posr.R, axis2 );
+    dMultiply1_331( a2, node[0].body->posr.R, a1 );
+    dReal x = dCalcVectorDot3( v1, a2 );
+    dReal y = dCalcVectorDot3( v2, a2 );
     return -dAtan2( y, x );
 }
 
@@ -115,11 +115,11 @@ void
 dxJointHinge2::getAxisInfo(dVector3 ax1, dVector3 ax2, dVector3 axCross,
                            dReal &sin_angle, dReal &cos_angle) const
 {
-    dMULTIPLY0_331 (ax1, node[0].body->posr.R, axis1);
-    dMULTIPLY0_331 (ax2, node[1].body->posr.R, axis2);
-    dCROSS (axCross,=,ax1,ax2);
+    dMultiply0_331 (ax1, node[0].body->posr.R, axis1);
+    dMultiply0_331 (ax2, node[1].body->posr.R, axis2);
+    dCalcVectorCross3(axCross,ax1,ax2);
     sin_angle = dSqrt (axCross[0]*axCross[0] + axCross[1]*axCross[1] + axCross[2]*axCross[2]);
-    cos_angle = dDOT (ax1,ax2);
+    cos_angle = dCalcVectorDot3 (ax1,ax2);
 }
 
 
@@ -189,8 +189,8 @@ dxJointHinge2::makeV1andV2()
     {
         // get axis 1 and 2 in global coords
         dVector3 ax1, ax2, v;
-        dMULTIPLY0_331( ax1, node[0].body->posr.R, axis1 );
-        dMULTIPLY0_331( ax2, node[1].body->posr.R, axis2 );
+        dMultiply0_331( ax1, node[0].body->posr.R, axis1 );
+        dMultiply0_331( ax2, node[1].body->posr.R, axis2 );
 
         // don't do anything if the axis1 or axis2 vectors are zero or the same
         if (( ax1[0] == 0 && ax1[1] == 0 && ax1[2] == 0 ) ||
@@ -198,14 +198,14 @@ dxJointHinge2::makeV1andV2()
                 ( ax1[0] == ax2[0] && ax1[1] == ax2[1] && ax1[2] == ax2[2] ) ) return;
 
         // modify axis 2 so it's perpendicular to axis 1
-        dReal k = dDOT( ax1, ax2 );
+        dReal k = dCalcVectorDot3( ax1, ax2 );
         for ( int i = 0; i < 3; i++ ) ax2[i] -= k * ax1[i];
         dNormalize3( ax2 );
 
         // make v1 = modified axis2, v2 = axis1 x (modified axis2)
-        dCROSS( v, = , ax1, ax2 );
-        dMULTIPLY1_331( v1, node[0].body->posr.R, ax2 );
-        dMULTIPLY1_331( v2, node[0].body->posr.R, v );
+        dCalcVectorCross3( v, ax1, ax2 );
+        dMultiply1_331( v1, node[0].body->posr.R, ax2 );
+        dMultiply1_331( v2, node[0].body->posr.R, v );
     }
 }
 
@@ -307,7 +307,7 @@ void dJointGetHinge2Axis1( dJointID j, dVector3 result )
     checktype( joint, Hinge2 );
     if ( joint->node[0].body )
     {
-        dMULTIPLY0_331( result, joint->node[0].body->posr.R, joint->axis1 );
+        dMultiply0_331( result, joint->node[0].body->posr.R, joint->axis1 );
     }
 }
 
@@ -320,7 +320,7 @@ void dJointGetHinge2Axis2( dJointID j, dVector3 result )
     checktype( joint, Hinge2 );
     if ( joint->node[1].body )
     {
-        dMULTIPLY0_331( result, joint->node[1].body->posr.R, joint->axis2 );
+        dMultiply0_331( result, joint->node[1].body->posr.R, joint->axis2 );
     }
 }
 
@@ -361,10 +361,10 @@ dReal dJointGetHinge2Angle1Rate( dJointID j )
     if ( joint->node[0].body )
     {
         dVector3 axis;
-        dMULTIPLY0_331( axis, joint->node[0].body->posr.R, joint->axis1 );
-        dReal rate = dDOT( axis, joint->node[0].body->avel );
+        dMultiply0_331( axis, joint->node[0].body->posr.R, joint->axis1 );
+        dReal rate = dCalcVectorDot3( axis, joint->node[0].body->avel );
         if ( joint->node[1].body )
-            rate -= dDOT( axis, joint->node[1].body->avel );
+            rate -= dCalcVectorDot3( axis, joint->node[1].body->avel );
         return rate;
     }
     else return 0;
@@ -379,10 +379,10 @@ dReal dJointGetHinge2Angle2Rate( dJointID j )
     if ( joint->node[0].body && joint->node[1].body )
     {
         dVector3 axis;
-        dMULTIPLY0_331( axis, joint->node[1].body->posr.R, joint->axis2 );
-        dReal rate = dDOT( axis, joint->node[0].body->avel );
+        dMultiply0_331( axis, joint->node[1].body->posr.R, joint->axis2 );
+        dReal rate = dCalcVectorDot3( axis, joint->node[0].body->avel );
         if ( joint->node[1].body )
-            rate -= dDOT( axis, joint->node[1].body->avel );
+            rate -= dCalcVectorDot3( axis, joint->node[1].body->avel );
         return rate;
     }
     else return 0;
@@ -398,8 +398,8 @@ void dJointAddHinge2Torques( dJointID j, dReal torque1, dReal torque2 )
 
     if ( joint->node[0].body && joint->node[1].body )
     {
-        dMULTIPLY0_331( axis1, joint->node[0].body->posr.R, joint->axis1 );
-        dMULTIPLY0_331( axis2, joint->node[1].body->posr.R, joint->axis2 );
+        dMultiply0_331( axis1, joint->node[0].body->posr.R, joint->axis1 );
+        dMultiply0_331( axis2, joint->node[1].body->posr.R, joint->axis2 );
         axis1[0] = axis1[0] * torque1 + axis2[0] * torque2;
         axis1[1] = axis1[1] * torque1 + axis2[1] * torque2;
         axis1[2] = axis1[2] * torque1 + axis2[2] * torque2;

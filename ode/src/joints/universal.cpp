@@ -54,11 +54,11 @@ void
 dxJointUniversal::getAxes( dVector3 ax1, dVector3 ax2 )
 {
     // This says "ax1 = joint->node[0].body->posr.R * joint->axis1"
-    dMULTIPLY0_331( ax1, node[0].body->posr.R, axis1 );
+    dMultiply0_331( ax1, node[0].body->posr.R, axis1 );
 
     if ( node[1].body )
     {
-        dMULTIPLY0_331( ax2, node[1].body->posr.R, axis2 );
+        dMultiply0_331( ax2, node[1].body->posr.R, axis2 );
     }
     else
     {
@@ -316,11 +316,11 @@ dxJointUniversal::getInfo2( dxJoint::Info2 *info )
     // we find a axis2_tmp which is really perpendicular to axis1
     // and in the plane of axis1 and axis2
     getAxes( ax1, ax2 );
-    k = dDOT( ax1, ax2 );
+    k = dCalcVectorDot3( ax1, ax2 );
     ax2_temp[0] = ax2[0] - k * ax1[0];
     ax2_temp[1] = ax2[1] - k * ax1[1];
     ax2_temp[2] = ax2[2] - k * ax1[2];
-    dCROSS( p, = , ax1, ax2_temp );
+    dCalcVectorCross3( p, ax1, ax2_temp );
     dNormalize3( p );
 
     int s3 = 3 * info->rowskip;
@@ -693,9 +693,9 @@ dReal dJointGetUniversalAngle1Rate( dJointID j )
         else
             getAxis( joint, axis, joint->axis1 );
 
-        dReal rate = dDOT( axis, joint->node[0].body->avel );
+        dReal rate = dCalcVectorDot3( axis, joint->node[0].body->avel );
         if ( joint->node[1].body )
-            rate -= dDOT( axis, joint->node[1].body->avel );
+            rate -= dCalcVectorDot3( axis, joint->node[1].body->avel );
         return rate;
     }
     return 0;
@@ -717,8 +717,8 @@ dReal dJointGetUniversalAngle2Rate( dJointID j )
         else
             getAxis2( joint, axis, joint->axis2 );
 
-        dReal rate = dDOT( axis, joint->node[0].body->avel );
-        if ( joint->node[1].body ) rate -= dDOT( axis, joint->node[1].body->avel );
+        dReal rate = dCalcVectorDot3( axis, joint->node[0].body->avel );
+        if ( joint->node[1].body ) rate -= dCalcVectorDot3( axis, joint->node[1].body->avel );
         return rate;
     }
     return 0;

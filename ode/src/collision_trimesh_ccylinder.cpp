@@ -76,76 +76,47 @@
 
 // dVector3
 // r=a-b
-#define SUBTRACT(a,b,r) \
-	(r)[0]=(a)[0] - (b)[0]; \
-	(r)[1]=(a)[1] - (b)[1]; \
-	(r)[2]=(a)[2] - (b)[2]; 
+#define SUBTRACT(a,b,r) dSubtractVectors3(r, a, b)
 
 
 // dVector3
 // a=b
-#define SET(a,b) \
-	(a)[0]=(b)[0]; \
-	(a)[1]=(b)[1]; \
-	(a)[2]=(b)[2]; 
+#define SET(a,b) dCopyVector3(a, b)
 
 
 // dMatrix3
 // a=b
-#define SETM(a,b) \
-	(a)[0]=(b)[0]; \
-	(a)[1]=(b)[1]; \
-	(a)[2]=(b)[2]; \
-	(a)[3]=(b)[3]; \
-	(a)[4]=(b)[4]; \
-	(a)[5]=(b)[5]; \
-	(a)[6]=(b)[6]; \
-	(a)[7]=(b)[7]; \
-	(a)[8]=(b)[8]; \
-	(a)[9]=(b)[9]; \
-	(a)[10]=(b)[10]; \
-	(a)[11]=(b)[11];
+#define SETM(a,b) dCopyMatrix4x4(a, b)
 
 
 // dVector3
 // r=a+b
-#define ADD(a,b,r) \
-	(r)[0]=(a)[0] + (b)[0]; \
-	(r)[1]=(a)[1] + (b)[1]; \
-	(r)[2]=(a)[2] + (b)[2]; 
+#define ADD(a,b,r) dAddVectors3(r, a, b)
 
 
 // dMatrix3, int, dVector3
 // v=column a from m
-#define GETCOL(m,a,v) \
-	(v)[0]=(m)[(a)+0]; \
-	(v)[1]=(m)[(a)+4]; \
-	(v)[2]=(m)[(a)+8];
+#define GETCOL(m,a,v) dGetMatrixColumn3(v, m, a)
 
 
 // dVector4, dVector3
 // distance between plane p and point v
-#define POINTDISTANCE(p,v) \
-	( p[0]*v[0] + p[1]*v[1] + p[2]*v[2] + p[3] ); \
+#define POINTDISTANCE(p,v) dPointPlaneDistance(v, p)
 
 
 // dVector4, dVector3, dReal
 // construct plane from normal and d
-#define CONSTRUCTPLANE(plane,normal,d) \
-	plane[0]=normal[0];\
-	plane[1]=normal[1];\
-	plane[2]=normal[2];\
-	plane[3]=d;
+#define CONSTRUCTPLANE(plane,normal,d) dConstructPlane(normal, d, plane)
 
 
 // dVector3
 // length of vector a
-#define LENGTHOF(a) \
-	dSqrt(a[0]*a[0]+a[1]*a[1]+a[2]*a[2]);\
+#define LENGTHOF(a) dCalcVectorLength3(a)
 
-inline dReal _length2OfVector3(dVector3 v)
+
+static inline dReal _length2OfVector3(dVector3 v)
 {
-	return (v[0] * v[0] + v[1] * v[1] + v[2] * v[2] );
+	return dCalcVectorLengthSquare3(v);
 }
 
 
@@ -403,13 +374,13 @@ BOOL sTrimeshCapsuleColliderData::_cldTestAxis(
 	dNormalize3(vAxis);
 
 	// project capsule on vAxis
-	dReal frc = dFabs(dDOT(m_vCapsuleAxis,vAxis))*(m_fCapsuleSize*REAL(0.5)-m_vCapsuleRadius) + m_vCapsuleRadius;
+	dReal frc = dFabs(dCalcVectorDot3(m_vCapsuleAxis,vAxis))*(m_fCapsuleSize*REAL(0.5)-m_vCapsuleRadius) + m_vCapsuleRadius;
 
 	// project triangle on vAxis
 	dReal afv[3];
-	afv[0] = dDOT(m_vV0, vAxis);
-	afv[1] = dDOT(m_vV1, vAxis);
-	afv[2] = dDOT(m_vV2, vAxis);
+	afv[0] = dCalcVectorDot3(m_vV0, vAxis);
+	afv[1] = dCalcVectorDot3(m_vV1, vAxis);
+	afv[2] = dCalcVectorDot3(m_vV2, vAxis);
 
 	dReal fMin = MAX_REAL;
 	dReal fMax = MIN_REAL;
@@ -483,8 +454,8 @@ inline void _CalculateAxis(const dVector3& v1,
 	dVector3 t2;
 
 	SUBTRACT(v1,v2,t1);
-	dCROSS(t2,=,t1,v3);
-	dCROSS(r,=,t2,v4);
+	dCalcVectorCross3(t2,t1,v3);
+	dCalcVectorCross3(r,t2,v4);
 }
 
 BOOL sTrimeshCapsuleColliderData::_cldTestSeparatingAxesOfCapsule(
@@ -538,8 +509,8 @@ BOOL sTrimeshCapsuleColliderData::_cldTestSeparatingAxesOfCapsule(
 	if (flags & dxTriMeshData::kEdge0)
 	{
 		// axis CxE0 - Edge 0
-		dCROSS(vAxis,=,m_vCapsuleAxis,m_vE0);
-		//vAxis = dCROSS( m_vCapsuleAxis cross vE0 );
+		dCalcVectorCross3(vAxis,m_vCapsuleAxis,m_vE0);
+		//vAxis = dCalcVectorCross3( m_vCapsuleAxis cross vE0 );
 		if (_length2OfVector3( vAxis ) > fEpsilon) {
 			if (!_cldTestAxis(v0, v1, v2, vAxis, 2)) { 
 				return FALSE;
@@ -550,7 +521,7 @@ BOOL sTrimeshCapsuleColliderData::_cldTestSeparatingAxesOfCapsule(
 	if (flags & dxTriMeshData::kEdge1)
 	{
 		// axis CxE1 - Edge 1
-		dCROSS(vAxis,=,m_vCapsuleAxis,m_vE1);
+		dCalcVectorCross3(vAxis,m_vCapsuleAxis,m_vE1);
 		//vAxis = ( m_vCapsuleAxis cross m_vE1 );
 		if (_length2OfVector3( vAxis ) > fEpsilon) {
 			if (!_cldTestAxis(v0, v1, v2, vAxis, 3)) {
@@ -563,7 +534,7 @@ BOOL sTrimeshCapsuleColliderData::_cldTestSeparatingAxesOfCapsule(
 	{
 		// axis CxE2 - Edge 2
 		//vAxis = ( m_vCapsuleAxis cross m_vE2 );
-		dCROSS(vAxis,=,m_vCapsuleAxis,m_vE2);
+		dCalcVectorCross3(vAxis,m_vCapsuleAxis,m_vE2);
 		if (_length2OfVector3( vAxis ) > fEpsilon) {
 			if (!_cldTestAxis(v0, v1, v2, vAxis, 4)) {
 				return FALSE;
@@ -776,7 +747,7 @@ void sTrimeshCapsuleColliderData::_cldTestOneTriangleVSCapsule(
 	SUBTRACT(v0,v1,_minus_vE0);
 
 	// calculate poly normal
-	dCROSS(m_vN,=,m_vE1,_minus_vE0);
+	dCalcVectorCross3(m_vN,m_vE1,_minus_vE0);
 
 	// Even though all triangles might be initially valid, 
 	// a triangle may degenerate into a segment after applying 
@@ -787,7 +758,7 @@ void sTrimeshCapsuleColliderData::_cldTestOneTriangleVSCapsule(
 	}
 
 	// create plane from triangle
-	dReal plDistance = -dDOT(v0,m_vN);
+	dReal plDistance = -dCalcVectorDot3(v0,m_vN);
 	dVector4 plTrianglePlane;
 	CONSTRUCTPLANE(plTrianglePlane,m_vN,plDistance);
 
@@ -872,21 +843,21 @@ void sTrimeshCapsuleColliderData::_cldTestOneTriangleVSCapsule(
 
 	// plane with edge 0
 	dVector3 vTemp;
-	dCROSS(vTemp,=,m_vN,m_vE0);
+	dCalcVectorCross3(vTemp,m_vN,m_vE0);
 	CONSTRUCTPLANE(plPlane, vTemp, REAL(1e-5));
 	if (!_cldClipEdgeToPlane( vCEdgePoint0, vCEdgePoint1, plPlane ))
 	{ 
 		return; 
 	}
 
-	dCROSS(vTemp,=,m_vN,m_vE1);
-	CONSTRUCTPLANE(plPlane, vTemp, -(dDOT(m_vE0,vTemp)-REAL(1e-5)));
+	dCalcVectorCross3(vTemp,m_vN,m_vE1);
+	CONSTRUCTPLANE(plPlane, vTemp, -(dCalcVectorDot3(m_vE0,vTemp)-REAL(1e-5)));
 	if (!_cldClipEdgeToPlane( vCEdgePoint0, vCEdgePoint1, plPlane )) 
 	{ 
 		return; 
 	}
 
-	dCROSS(vTemp,=,m_vN,m_vE2);
+	dCalcVectorCross3(vTemp,m_vN,m_vE2);
 	CONSTRUCTPLANE(plPlane, vTemp, REAL(1e-5));
 	if (!_cldClipEdgeToPlane( vCEdgePoint0, vCEdgePoint1, plPlane )) { 
 		return; 
@@ -903,9 +874,9 @@ void sTrimeshCapsuleColliderData::_cldTestOneTriangleVSCapsule(
 
 	// calculate depths for both contact points
 	SUBTRACT(vCEdgePoint0,m_vCapsulePosition,vTemp);
-	dReal fDepth0 = dDOT(vTemp,m_vNormal) - (m_fBestCenter-m_fBestrt);
+	dReal fDepth0 = dCalcVectorDot3(vTemp,m_vNormal) - (m_fBestCenter-m_fBestrt);
 	SUBTRACT(vCEdgePoint1,m_vCapsulePosition,vTemp);
-	dReal fDepth1 = dDOT(vTemp,m_vNormal) - (m_fBestCenter-m_fBestrt);
+	dReal fDepth1 = dCalcVectorDot3(vTemp,m_vNormal) - (m_fBestCenter-m_fBestrt);
 
 	// clamp depths to zero
 	if (fDepth0 < 0) 

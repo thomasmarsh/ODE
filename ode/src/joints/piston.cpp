@@ -60,13 +60,13 @@ dReal dJointGetPistonPosition ( dJointID j )
     {
         dVector3 q;
         // get the anchor (or offset) in global coordinates
-        dMULTIPLY0_331 ( q, joint->node[0].body->posr.R, joint->anchor1 );
+        dMultiply0_331 ( q, joint->node[0].body->posr.R, joint->anchor1 );
 
         if ( joint->node[1].body )
         {
             dVector3 anchor2;
             // get the anchor2 in global coordinates
-            dMULTIPLY0_331 ( anchor2, joint->node[1].body->posr.R, joint->anchor2 );
+            dMultiply0_331 ( anchor2, joint->node[1].body->posr.R, joint->anchor2 );
 
             q[0] = ( ( joint->node[0].body->posr.pos[0] + q[0] ) -
                      ( joint->node[1].body->posr.pos[0] + anchor2[0] ) );
@@ -96,9 +96,9 @@ dReal dJointGetPistonPosition ( dJointID j )
 
         // get axis in global coordinates
         dVector3 ax;
-        dMULTIPLY0_331 ( ax, joint->node[0].body->posr.R, joint->axis1 );
+        dMultiply0_331 ( ax, joint->node[0].body->posr.R, joint->axis1 );
 
-        return dDOT ( ax, q );
+        return dCalcVectorDot3 ( ax, q );
     }
 
     dDEBUGMSG ( "The function always return 0 since no body are attached" );
@@ -114,19 +114,19 @@ dReal dJointGetPistonPositionRate ( dJointID j )
 
     // get axis in global coordinates
     dVector3 ax;
-    dMULTIPLY0_331 ( ax, joint->node[0].body->posr.R, joint->axis1 );
+    dMultiply0_331 ( ax, joint->node[0].body->posr.R, joint->axis1 );
 
     // The linear velocity created by the rotation can be discarded since
     // the rotation is along the prismatic axis and this rotation don't create
     // linear velocity in the direction of the prismatic axis.
     if ( joint->node[1].body )
     {
-        return ( dDOT ( ax, joint->node[0].body->lvel ) -
-                 dDOT ( ax, joint->node[1].body->lvel ) );
+        return ( dCalcVectorDot3 ( ax, joint->node[0].body->lvel ) -
+                 dCalcVectorDot3 ( ax, joint->node[1].body->lvel ) );
     }
     else
     {
-        dReal rate = dDOT ( ax, joint->node[0].body->lvel );
+        dReal rate = dCalcVectorDot3 ( ax, joint->node[0].body->lvel );
         return ( (joint->flags & dJOINT_REVERSE) ? -rate : rate);
     }
 }
@@ -160,9 +160,9 @@ dReal dJointGetPistonAngleRate ( dJointID j )
     if ( joint->node[0].body )
     {
         dVector3 axis;
-        dMULTIPLY0_331 ( axis, joint->node[0].body->posr.R, joint->axis1 );
-        dReal rate = dDOT ( axis, joint->node[0].body->avel );
-        if ( joint->node[1].body ) rate -= dDOT ( axis, joint->node[1].body->avel );
+        dMultiply0_331 ( axis, joint->node[0].body->posr.R, joint->axis1 );
+        dReal rate = dCalcVectorDot3 ( axis, joint->node[0].body->avel );
+        if ( joint->node[1].body ) rate -= dCalcVectorDot3 ( axis, joint->node[1].body->avel );
         if ( joint->flags & dJOINT_REVERSE ) rate = - rate;
         return rate;
     }
@@ -246,7 +246,7 @@ dxJointPiston::getInfo2 ( dxJoint::Info2 *info )
         pos2 = node[1].body->posr.pos;
         R2   = node[1].body->posr.R;
 
-        dMULTIPLY0_331 ( lanchor2, R2, anchor2 );
+        dMultiply0_331 ( lanchor2, R2, anchor2 );
         dist[0] = lanchor2[0] + pos2[0] - pos1[0];
         dist[1] = lanchor2[1] + pos2[1] - pos1[1];
         dist[2] = lanchor2[2] + pos2[2] - pos1[2];
@@ -304,38 +304,38 @@ dxJointPiston::getInfo2 ( dxJoint::Info2 *info )
     // only along p and q that we want the same angular velocity and need to reduce
     // the error
     dVector3 ax1, p, q;
-    dMULTIPLY0_331 ( ax1, node[0].body->posr.R, axis1 );
+    dMultiply0_331 ( ax1, node[0].body->posr.R, axis1 );
 
     // Find the 2 axis perpendicular to the rotoide axis.
     dPlaneSpace ( ax1, p, q );
 
     // LHS
-    dOPE ( ( info->J1a ) + s0, = , p );
-    dOPE ( ( info->J1a ) + s1, = , q );
+    dCopyVector3 ( ( info->J1a ) + s0, p );
+    dCopyVector3 ( ( info->J1a ) + s1, q );
 
     dVector3 b;
     if ( node[1].body )
     {
         // LHS
         //  info->J2a[s0+i] = -p[i]
-        dOPE ( ( info->J2a ) + s0, = -, p );
-        dOPE ( ( info->J2a ) + s1, = -, q );
+        dCopyNegatedVector3 ( ( info->J2a ) + s0, p );
+        dCopyNegatedVector3 ( ( info->J2a ) + s1, q );
 
 
         // Some math for the RHS
         dVector3 ax2;
-        dMULTIPLY0_331 ( ax2, R2, axis2 );
-        dCROSS ( b, = , ax1, ax2 );
+        dMultiply0_331 ( ax2, R2, axis2 );
+        dCalcVectorCross3( b, ax1, ax2 );
     }
     else
     {
         // Some math for the RHS
-        dCROSS ( b, = , ax1, axis2 );
+        dCalcVectorCross3( b, ax1, axis2 );
     }
 
     // RHS
-    info->c[0] = k * dDOT ( p, b );
-    info->c[1] = k * dDOT ( q, b );
+    info->c[0] = k * dCalcVectorDot3 ( p, b );
+    info->c[1] = k * dCalcVectorDot3 ( q, b );
 
 
     // ======================================================================
@@ -365,24 +365,24 @@ dxJointPiston::getInfo2 ( dxJoint::Info2 *info )
     // Coeff for 1er line of: J1a => dist x p, J2a => p x anchor2
     // Coeff for 2er line of: J1a => dist x q, J2a => q x anchor2
 
-    dCROSS ( ( info->J1a ) + s2, = , dist, p );
+    dCalcVectorCross3( ( info->J1a ) + s2, dist, p );
 
-    dCROSS ( ( info->J1a ) + s3, = , dist, q );
+    dCalcVectorCross3( ( info->J1a ) + s3, dist, q );
 
-    dOPE ( ( info->J1l ) + s2, = , p );
-    dOPE ( ( info->J1l ) + s3, = , q );
+    dCopyVector3 ( ( info->J1l ) + s2, p );
+    dCopyVector3 ( ( info->J1l ) + s3, q );
 
     if ( node[1].body )
     {
         // q x anchor2 instead of anchor2 x q since we want the negative value
-        dCROSS ( ( info->J2a ) + s2, = , p, lanchor2 );
+        dCalcVectorCross3( ( info->J2a ) + s2, p, lanchor2 );
 
         // The cross product is in reverse order since we want the negative value
-        dCROSS ( ( info->J2a ) + s3, = , q, lanchor2 );
+        dCalcVectorCross3( ( info->J2a ) + s3, q, lanchor2 );
 
         // info->J2l[s2+i] = -p[i];
-        dOPE ( ( info->J2l ) + s2, = -, p );
-        dOPE ( ( info->J2l ) + s3, = -, q );
+        dCopyNegatedVector3 ( ( info->J2l ) + s2, p );
+        dCopyNegatedVector3 ( ( info->J2l ) + s3, q );
     }
 
 
@@ -394,11 +394,11 @@ dxJointPiston::getInfo2 ( dxJoint::Info2 *info )
     //
     // Compute the RHS of rows 2 and 3
     dVector3 err;
-    dMULTIPLY0_331 ( err, R1, anchor1 );
-    dOPE2 ( err, = , dist, -,  err );
+    dMultiply0_331 ( err, R1, anchor1 );
+    dSubtractVectors3( err, dist, err );
 
-    info->c[2] = k * dDOT ( p, err );
-    info->c[3] = k * dDOT ( q, err );
+    info->c[2] = k * dCalcVectorDot3 ( p, err );
+    info->c[3] = k * dCalcVectorDot3 ( q, err );
 
 
     int row = 4;
@@ -533,7 +533,7 @@ void dJointSetPistonAxisDelta ( dJointID j, dReal x, dReal y, dReal z,
     }
 
     // Convert into frame of body 1
-    dMULTIPLY1_331 ( joint->anchor1, joint->node[0].body->posr.R, c );
+    dMultiply1_331 ( joint->anchor1, joint->node[0].body->posr.R, c );
 }
 
 
@@ -594,7 +594,7 @@ void dJointAddPistonForce ( dJointID j, dReal force )
     dVector3 axis;
     getAxis ( joint, axis, joint->axis1 );
     // axis[i] *= force
-    dOPEC ( axis, *= , force );
+    dScaleVector3( axis, force );
 
 
     if ( joint->node[0].body != 0 )
@@ -651,13 +651,13 @@ void dJointAddPistonForce ( dJointID j, dReal force )
         // d is the position of the prismatic joint (i.e. elongation)
         // Since axis1 x axis1 == 0
         // We can do the following.
-        dMULTIPLY0_331 ( c, joint->node[0].body->posr.R, joint->anchor1 );
-        dCROSS ( ltd, = , c, axis );
+        dMultiply0_331 ( c, joint->node[0].body->posr.R, joint->anchor1 );
+        dCalcVectorCross3( ltd, c, axis );
         dBodyAddTorque ( joint->node[0].body, ltd[0], ltd[1], ltd[2] );
 
 
-        dMULTIPLY0_331 ( c, joint->node[1].body->posr.R, joint->anchor2 );
-        dCROSS ( ltd, = , c, axis );
+        dMultiply0_331 ( c, joint->node[1].body->posr.R, joint->anchor2 );
+        dCalcVectorCross3( ltd, c, axis );
         dBodyAddTorque ( joint->node[1].body, ltd[0], ltd[1], ltd[2] );
     }
 }

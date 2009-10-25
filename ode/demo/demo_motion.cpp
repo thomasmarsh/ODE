@@ -113,9 +113,9 @@ static void contactplat_2(dContact &contact)
       geom's velocity against the contact normal and fdir1, fdir2
       (obtained with dPlaneSpace()). Assuming moving geom=g2
       (so the contact joint is in the moving geom's reference frame):
-      motion1 = dDOT(fdir1, vel);
-      motion2 = dDOT(fdir2, vel);
-      motionN = dDOT(normal, vel);
+      motion1 = dCalcVectorDot3(fdir1, vel);
+      motion2 = dCalcVectorDot3(fdir2, vel);
+      motionN = dCalcVectorDot3(normal, vel);
 
       For geom=g1 just negate motionN and motion2. fdir1 is an arbitrary
       vector, so there's no need to negate motion1.
@@ -138,9 +138,9 @@ static void contactplat_2(dContact &contact)
     if (contact.geom.g1 == platform)
         inv = -1;
     
-    contact.surface.motion1 = dDOT(mov2_vel, motiondir1);
-    contact.surface.motion2 = inv * dDOT(mov2_vel, motiondir2);
-    contact.surface.motionN = inv * dDOT(mov2_vel, contact.geom.normal);
+    contact.surface.motion1 = dCalcVectorDot3(mov2_vel, motiondir1);
+    contact.surface.motion2 = inv * dCalcVectorDot3(mov2_vel, motiondir2);
+    contact.surface.motionN = inv * dCalcVectorDot3(mov2_vel, contact.geom.normal);
 
 }
 
@@ -361,11 +361,11 @@ void drawGeom (dGeomID g, const dReal *pos, const dReal *R, int show_aabb)
         const dReal *R2 = dGeomGetRotation (g2);
         dVector3 actual_pos;
         dMatrix3 actual_R;
-        dMULTIPLY0_331 (actual_pos,R,pos2);
+        dMultiply0_331 (actual_pos,R,pos2);
         actual_pos[0] += pos[0];
         actual_pos[1] += pos[1];
         actual_pos[2] += pos[2];
-        dMULTIPLY0_333 (actual_R,R,R2);
+        dMultiply0_333 (actual_R,R,R2);
         drawGeom (g2,actual_pos,actual_R,0);
     }
     if (show_body) {

@@ -101,7 +101,7 @@ dxJointContact::getInfo2( dxJoint::Info2 *info )
     info->J1l[0] = normal[0];
     info->J1l[1] = normal[1];
     info->J1l[2] = normal[2];
-    dCROSS( info->J1a, = , c1, normal );
+    dCalcVectorCross3( info->J1a, c1, normal );
     if ( node[1].body )
     {
         c2[0] = contact.geom.pos[0] - node[1].body->posr.pos[0];
@@ -110,7 +110,8 @@ dxJointContact::getInfo2( dxJoint::Info2 *info )
         info->J2l[0] = -normal[0];
         info->J2l[1] = -normal[1];
         info->J2l[2] = -normal[2];
-        dCROSS( info->J2a, = -, c2, normal );
+        dCalcVectorCross3( info->J2a, c2, normal );
+        dNegateVector3( info->J2a );
     }
 
     // set right hand side and cfm value for normal
@@ -141,12 +142,12 @@ dxJointContact::getInfo2( dxJoint::Info2 *info )
     if ( contact.surface.mode & dContactBounce )
     {
         // calculate outgoing velocity (-ve for incoming contact)
-        dReal outgoing = dDOT( info->J1l, node[0].body->lvel )
-                         + dDOT( info->J1a, node[0].body->avel );
+        dReal outgoing = dCalcVectorDot3( info->J1l, node[0].body->lvel )
+                         + dCalcVectorDot3( info->J1a, node[0].body->avel );
         if ( node[1].body )
         {
-            outgoing += dDOT( info->J2l, node[1].body->lvel )
-                        + dDOT( info->J2a, node[1].body->avel );
+            outgoing += dCalcVectorDot3( info->J2l, node[1].body->lvel )
+                        + dCalcVectorDot3( info->J2a, node[1].body->avel );
         }
         outgoing -= motionN;
         // only apply bounce if the outgoing velocity is greater than the
@@ -174,7 +175,7 @@ dxJointContact::getInfo2( dxJoint::Info2 *info )
             t1[0] = contact.fdir1[0];
             t1[1] = contact.fdir1[1];
             t1[2] = contact.fdir1[2];
-            dCROSS( t2, = , normal, t1 );
+            dCalcVectorCross3( t2, normal, t1 );
         }
         else
         {
@@ -183,13 +184,15 @@ dxJointContact::getInfo2( dxJoint::Info2 *info )
         info->J1l[s+0] = t1[0];
         info->J1l[s+1] = t1[1];
         info->J1l[s+2] = t1[2];
-        dCROSS( info->J1a + s, = , c1, t1 );
+        dCalcVectorCross3( info->J1a + s, c1, t1 );
         if ( node[1].body )
         {
             info->J2l[s+0] = -t1[0];
             info->J2l[s+1] = -t1[1];
             info->J2l[s+2] = -t1[2];
-            dCROSS( info->J2a + s, = -, c2, t1 );
+            dReal *J2a_plus_s = info->J2a + s;
+            dCalcVectorCross3( J2a_plus_s, c2, t1 );
+            dNegateVector3( J2a_plus_s );
         }
         // set right hand side
         if ( contact.surface.mode & dContactMotion1 )
@@ -214,13 +217,15 @@ dxJointContact::getInfo2( dxJoint::Info2 *info )
         info->J1l[s2+0] = t2[0];
         info->J1l[s2+1] = t2[1];
         info->J1l[s2+2] = t2[2];
-        dCROSS( info->J1a + s2, = , c1, t2 );
+        dCalcVectorCross3( info->J1a + s2, c1, t2 );
         if ( node[1].body )
         {
             info->J2l[s2+0] = -t2[0];
             info->J2l[s2+1] = -t2[1];
             info->J2l[s2+2] = -t2[2];
-            dCROSS( info->J2a + s2, = -, c2, t2 );
+            dReal *J2a_plus_s2 = info->J2a + s2;
+            dCalcVectorCross3( J2a_plus_s2, c2, t2 );
+            dNegateVector3( J2a_plus_s2 );
         }
         // set right hand side
         if ( contact.surface.mode & dContactMotion2 )

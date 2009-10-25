@@ -41,21 +41,21 @@ TEST(test_dNormalization3)
     v[2] = REAL(0.0);
     dSafeNormalize3(v);
     CHECK_ARRAY_CLOSE(x, v, 3, 1e-6);
-    CHECK_EQUAL(dLENGTH(v), REAL(1.0));
+    CHECK_EQUAL(dCalcVectorLength3(v), REAL(1.0));
 
     v[0] = REAL(0.1);
     v[1] = REAL(0.0);
     v[2] = REAL(0.0);
     dSafeNormalize3(v);
     CHECK_ARRAY_CLOSE(x, v, 3, 1e-6);
-    CHECK_EQUAL(dLENGTH(v), REAL(1.0));
+    CHECK_EQUAL(dCalcVectorLength3(v), REAL(1.0));
 
     v[0] = REAL(1e-20);
     v[1] = REAL(0.0);
     v[2] = REAL(0.0);
     dSafeNormalize3(v);
     CHECK_ARRAY_CLOSE(x, v, 3, 1e-6);
-    CHECK_EQUAL(dLENGTH(v), REAL(1.0));
+    CHECK_EQUAL(dCalcVectorLength3(v), REAL(1.0));
 
 
     // Check when value in first component (i.e. [0])
@@ -64,21 +64,21 @@ TEST(test_dNormalization3)
     v[2] = REAL(0.0);
     dSafeNormalize3(v);
     CHECK_ARRAY_CLOSE(y, v, 3, 1e-6);
-    CHECK_EQUAL(dLENGTH(v), REAL(1.0));
+    CHECK_EQUAL(dCalcVectorLength3(v), REAL(1.0));
 
     v[0] = REAL(0.0);
     v[1] = REAL(0.1);
     v[2] = REAL(0.0);
     dSafeNormalize3(v);
     CHECK_ARRAY_CLOSE(y, v, 3, 1e-6);
-    CHECK_EQUAL(dLENGTH(v), REAL(1.0));
+    CHECK_EQUAL(dCalcVectorLength3(v), REAL(1.0));
 
     v[0] = REAL(0.0);
     v[1] = REAL(1e-20);
     v[2] = REAL(0.0);
     dSafeNormalize3(v);
     CHECK_ARRAY_CLOSE(y, v, 3, 1e-6);
-    CHECK_EQUAL(dLENGTH(v), REAL(1.0));
+    CHECK_EQUAL(dCalcVectorLength3(v), REAL(1.0));
 
 
     // Check when value in first component (i.e. [0])
@@ -87,21 +87,21 @@ TEST(test_dNormalization3)
     v[2] = REAL(1.0);
     dSafeNormalize3(v);
     CHECK_ARRAY_CLOSE(z, v, 3, 1e-6);
-    CHECK_EQUAL(dLENGTH(v), REAL(1.0));
+    CHECK_EQUAL(dCalcVectorLength3(v), REAL(1.0));
 
     v[0] = REAL(0.0);
     v[1] = REAL(0.0);
     v[2] = REAL(0.1);
     dSafeNormalize3(v);
     CHECK_ARRAY_CLOSE(z, v, 3, 1e-6);
-    CHECK_EQUAL(dLENGTH(v), REAL(1.0));
+    CHECK_EQUAL(dCalcVectorLength3(v), REAL(1.0));
 
     v[0] = REAL(0.0);
     v[1] = REAL(0.0);
     v[2] = REAL(1e-20);
     dSafeNormalize3(v);
     CHECK_ARRAY_CLOSE(z, v, 3, 1e-6);
-    CHECK_EQUAL(dLENGTH(v), REAL(1.0));
+    CHECK_EQUAL(dCalcVectorLength3(v), REAL(1.0));
 
 
     // Check negative
@@ -110,19 +110,19 @@ TEST(test_dNormalization3)
     v[1] = REAL(0.0);
     v[2] = REAL(0.0);
     dSafeNormalize3(v);
-    CHECK_EQUAL(dLENGTH(v), REAL(1.0));
+    CHECK_EQUAL(dCalcVectorLength3(v), REAL(1.0));
 
     v[0] = REAL(-0.1);
     v[1] = REAL(0.0);
     v[2] = REAL(0.0);
     dSafeNormalize3(v);
-    CHECK_EQUAL(dLENGTH(v), REAL(1.0));
+    CHECK_EQUAL(dCalcVectorLength3(v), REAL(1.0));
 
     v[0] = REAL(-1e-20);
     v[1] = REAL(0.0);
     v[2] = REAL(0.0);
     dSafeNormalize3(v);
-    CHECK_EQUAL(dLENGTH(v), REAL(1.0));
+    CHECK_EQUAL(dCalcVectorLength3(v), REAL(1.0));
 
 
     // Check when value in first component (i.e. [0])
@@ -130,19 +130,19 @@ TEST(test_dNormalization3)
     v[1] = REAL(-1.0);
     v[2] = REAL(0.0);
     dSafeNormalize3(v);
-    CHECK_EQUAL(dLENGTH(v), REAL(1.0));
+    CHECK_EQUAL(dCalcVectorLength3(v), REAL(1.0));
 
     v[0] = REAL(0.0);
     v[1] = REAL(-0.1);
     v[2] = REAL(0.0);
     dSafeNormalize3(v);
-    CHECK_EQUAL(dLENGTH(v), REAL(1.0));
+    CHECK_EQUAL(dCalcVectorLength3(v), REAL(1.0));
 
     v[0] = REAL(0.0);
     v[1] = REAL(-1e-20);
     v[2] = REAL(0.0);
     dSafeNormalize3(v);
-    CHECK_EQUAL(dLENGTH(v), REAL(1.0));
+    CHECK_EQUAL(dCalcVectorLength3(v), REAL(1.0));
 
 
     // Check when value in first component (i.e. [0])
@@ -150,33 +150,33 @@ TEST(test_dNormalization3)
     v[1] = REAL(0.0);
     v[2] = REAL(-1.0);
     dSafeNormalize3(v);
-    CHECK_EQUAL(dLENGTH(v), REAL(1.0));
+    CHECK_EQUAL(dCalcVectorLength3(v), REAL(1.0));
 
     v[0] = REAL(0.0);
     v[1] = REAL(0.0);
     v[2] = REAL(-0.1);
     dSafeNormalize3(v);
-    CHECK_EQUAL(dLENGTH(v), REAL(1.0));
+    CHECK_EQUAL(dCalcVectorLength3(v), REAL(1.0));
 
     v[0] = REAL(0.0);
     v[1] = REAL(0.0);
     v[2] = REAL(-1e-20);
     dSafeNormalize3(v);
-    CHECK_EQUAL(dLENGTH(v), REAL(1.0));
+    CHECK_EQUAL(dCalcVectorLength3(v), REAL(1.0));
 
 
     v[0] = REAL(9999999999.0);
     v[1] = REAL(0.0);
     v[2] = REAL(1e-20);
     dSafeNormalize3(v);
-    CHECK_EQUAL(dLENGTH(v), REAL(1.0));
+    CHECK_EQUAL(dCalcVectorLength3(v), REAL(1.0));
 
 
     v[0] = REAL(9999999999.0);
     v[1] = REAL(9999.0);
     v[2] = REAL(9.0);
     dSafeNormalize3(v);
-    CHECK_EQUAL(dLENGTH(v), REAL(1.0));
+    CHECK_EQUAL(dCalcVectorLength3(v), REAL(1.0));
 
 }
 

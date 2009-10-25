@@ -46,13 +46,13 @@ dxJointLMotor::computeGlobalAxes( dVector3 ax[3] )
     {
         if ( rel[i] == 1 )
         {
-            dMULTIPLY0_331( ax[i], node[0].body->posr.R, axis[i] );
+            dMultiply0_331( ax[i], node[0].body->posr.R, axis[i] );
         }
         else if ( rel[i] == 2 )
         {
             if ( node[1].body )   // jds: don't assert, just ignore
             {
-                dMULTIPLY0_331( ax[i], node[1].body->posr.R, axis[i] );
+                dMultiply0_331( ax[i], node[1].body->posr.R, axis[i] );
             }
         }
         else
@@ -120,12 +120,12 @@ void dJointSetLMotorAxis( dJointID j, int anum, int rel, dReal x, dReal y, dReal
     {
         if ( rel == 1 )
         {
-            dMULTIPLY1_331( joint->axis[anum], joint->node[0].body->posr.R, r );
+            dMultiply1_331( joint->axis[anum], joint->node[0].body->posr.R, r );
         }
         else
         {
             //second body has to exists thanks to ref 1 line
-            dMULTIPLY1_331( joint->axis[anum], joint->node[1].body->posr.R, r );
+            dMultiply1_331( joint->axis[anum], joint->node[1].body->posr.R, r );
         }
     }
     else

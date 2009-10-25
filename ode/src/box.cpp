@@ -124,7 +124,7 @@ dReal dGeomBoxPointDepth (dGeomID g, dReal x, dReal y, dReal z)
   // Rotate p into box's coordinate frame, so we can
   // treat the OBB as an AABB
 
-  dMULTIPLY1_331 (q,b->final_posr->R,p);
+  dMultiply1_331 (q,b->final_posr->R,p);
 
   // Record distance from point to each successive box side, and see
   // if the point is inside all six sides
@@ -344,7 +344,7 @@ int dBoxBox (const dVector3 p1, const dMatrix3 R1,
   p[0] = p2[0] - p1[0];
   p[1] = p2[1] - p1[1];
   p[2] = p2[2] - p1[2];
-  dMULTIPLY1_331 (pp,R1,p);		// get pp = p relative to body 1
+  dMultiply1_331 (pp,R1,p);		// get pp = p relative to body 1
 
   // get side lengths / 2
   A[0] = side1[0]*REAL(0.5);
@@ -355,9 +355,9 @@ int dBoxBox (const dVector3 p1, const dMatrix3 R1,
   B[2] = side2[2]*REAL(0.5);
 
   // Rij is R1'*R2, i.e. the relative rotation between R1 and R2
-  R11 = dDOT44(R1+0,R2+0); R12 = dDOT44(R1+0,R2+1); R13 = dDOT44(R1+0,R2+2);
-  R21 = dDOT44(R1+1,R2+0); R22 = dDOT44(R1+1,R2+1); R23 = dDOT44(R1+1,R2+2);
-  R31 = dDOT44(R1+2,R2+0); R32 = dDOT44(R1+2,R2+1); R33 = dDOT44(R1+2,R2+2);
+  R11 = dCalcVectorDot3_44(R1+0,R2+0); R12 = dCalcVectorDot3_44(R1+0,R2+1); R13 = dCalcVectorDot3_44(R1+0,R2+2);
+  R21 = dCalcVectorDot3_44(R1+1,R2+0); R22 = dCalcVectorDot3_44(R1+1,R2+1); R23 = dCalcVectorDot3_44(R1+1,R2+2);
+  R31 = dCalcVectorDot3_44(R1+2,R2+0); R32 = dCalcVectorDot3_44(R1+2,R2+1); R33 = dCalcVectorDot3_44(R1+2,R2+2);
 
   Q11 = dFabs(R11); Q12 = dFabs(R12); Q13 = dFabs(R13);
   Q21 = dFabs(R21); Q22 = dFabs(R22); Q23 = dFabs(R23);
@@ -396,9 +396,9 @@ int dBoxBox (const dVector3 p1, const dMatrix3 R1,
     TST (pp[2],(A[2] + B[0]*Q31 + B[1]*Q32 + B[2]*Q33),R1+2,3);
 
     // separating axis = v1,v2,v3
-    TST (dDOT41(R2+0,p),(A[0]*Q11 + A[1]*Q21 + A[2]*Q31 + B[0]),R2+0,4);
-    TST (dDOT41(R2+1,p),(A[0]*Q12 + A[1]*Q22 + A[2]*Q32 + B[1]),R2+1,5);
-    TST (dDOT41(R2+2,p),(A[0]*Q13 + A[1]*Q23 + A[2]*Q33 + B[2]),R2+2,6);
+    TST (dCalcVectorDot3_41(R2+0,p),(A[0]*Q11 + A[1]*Q21 + A[2]*Q31 + B[0]),R2+0,4);
+    TST (dCalcVectorDot3_41(R2+1,p),(A[0]*Q12 + A[1]*Q22 + A[2]*Q32 + B[1]),R2+1,5);
+    TST (dCalcVectorDot3_41(R2+2,p),(A[0]*Q13 + A[1]*Q23 + A[2]*Q33 + B[2]),R2+2,6);
 
     // note: cross product axes need to be scaled when s is computed.
     // normal (n1,n2,n3) is relative to box 1.
@@ -450,7 +450,7 @@ int dBoxBox (const dVector3 p1, const dMatrix3 R1,
     normal[2] = normalR[8];
   }
   else {
-    dMULTIPLY0_331 (normal,R1,normalC);
+    dMultiply0_331 (normal,R1,normalC);
   }
   if (invert_normal) {
     normal[0] = -normal[0];
@@ -470,7 +470,7 @@ int dBoxBox (const dVector3 p1, const dMatrix3 R1,
     for (i=0; i<3; i++) pa[i] = p1[i]; // why no memcpy?
     // Get world position of p2 into pa
     for (j=0; j<3; j++) {
-      sign = (dDOT14(normal,R1+j) > 0) ? REAL(1.0) : REAL(-1.0);
+      sign = (dCalcVectorDot3_14(normal,R1+j) > 0) ? REAL(1.0) : REAL(-1.0);
       for (i=0; i<3; i++) pa[i] += sign * A[j] * R1[i*4+j];
     }
 
@@ -480,7 +480,7 @@ int dBoxBox (const dVector3 p1, const dMatrix3 R1,
     for (i=0; i<3; i++) pb[i] = p2[i]; // why no memcpy?
     // Get world position of p2 into pb
     for (j=0; j<3; j++) {
-      sign = (dDOT14(normal,R2+j) > 0) ? REAL(-1.0) : REAL(1.0);
+      sign = (dCalcVectorDot3_14(normal,R2+j) > 0) ? REAL(-1.0) : REAL(1.0);
       for (i=0; i<3; i++) pb[i] += sign * B[j] * R2[i*4+j];
     }
     
@@ -542,7 +542,7 @@ int dBoxBox (const dVector3 p1, const dMatrix3 R1,
     normal2[2] = -normal[2];
   }
   // Rotate normal2 in incident box opposite direction
-  dMULTIPLY1_331 (nr,Rb,normal2);
+  dMultiply1_331 (nr,Rb,normal2);
   anr[0] = dFabs (nr[0]);
   anr[1] = dFabs (nr[1]);
   anr[2] = dFabs (nr[2]);
@@ -604,15 +604,15 @@ int dBoxBox (const dVector3 p1, const dMatrix3 R1,
   // find the four corners of the incident face, in reference-face coordinates
   dReal quad[8];	// 2D coordinate of incident face (x,y pairs)
   dReal c1,c2,m11,m12,m21,m22;
-  c1 = dDOT14 (center,Ra+code1);
-  c2 = dDOT14 (center,Ra+code2);
+  c1 = dCalcVectorDot3_14 (center,Ra+code1);
+  c2 = dCalcVectorDot3_14 (center,Ra+code2);
   // optimize this? - we have already computed this data above, but it is not
   // stored in an easy-to-index format. for now it's quicker just to recompute
   // the four dot products.
-  m11 = dDOT44 (Ra+code1,Rb+a1);
-  m12 = dDOT44 (Ra+code1,Rb+a2);
-  m21 = dDOT44 (Ra+code2,Rb+a1);
-  m22 = dDOT44 (Ra+code2,Rb+a2);
+  m11 = dCalcVectorDot3_44 (Ra+code1,Rb+a1);
+  m12 = dCalcVectorDot3_44 (Ra+code1,Rb+a2);
+  m21 = dCalcVectorDot3_44 (Ra+code2,Rb+a1);
+  m22 = dCalcVectorDot3_44 (Ra+code2,Rb+a2);
   {
     dReal k1 = m11*Sb[a1];
     dReal k2 = m21*Sb[a1];
@@ -655,7 +655,7 @@ int dBoxBox (const dVector3 p1, const dMatrix3 R1,
     dReal k2 = -m21*(ret[j*2]-c1) + m11*(ret[j*2+1]-c2);
     for (i=0; i<3; i++) point[cnum*3+i] =
 			  center[i] + k1*Rb[i*4+a1] + k2*Rb[i*4+a2];
-    dep[cnum] = Sa[codeN] - dDOT(normal2,point+cnum*3);
+    dep[cnum] = Sa[codeN] - dCalcVectorDot3(normal2,point+cnum*3);
     if (dep[cnum] >= 0) {
       ret[cnum*2] = ret[j*2];
       ret[cnum*2+1] = ret[j*2+1];
@@ -764,9 +764,9 @@ int dCollideBoxPlane (dxGeom *o1, dxGeom *o2,
   const dReal *n = plane->p;		// normal vector
 
   // project sides lengths along normal vector, get absolute values
-  dReal Q1 = dDOT14(n,R+0);
-  dReal Q2 = dDOT14(n,R+1);
-  dReal Q3 = dDOT14(n,R+2);
+  dReal Q1 = dCalcVectorDot3_14(n,R+0);
+  dReal Q2 = dCalcVectorDot3_14(n,R+1);
+  dReal Q3 = dCalcVectorDot3_14(n,R+2);
   dReal A1 = box->side[0] * Q1;
   dReal A2 = box->side[1] * Q2;
   dReal A3 = box->side[2] * Q3;
@@ -775,7 +775,7 @@ int dCollideBoxPlane (dxGeom *o1, dxGeom *o2,
   dReal B3 = dFabs(A3);
 
   // early exit test
-  dReal depth = plane->p[3] + REAL(0.5)*(B1+B2+B3) - dDOT(n,o1->final_posr->pos);
+  dReal depth = plane->p[3] + REAL(0.5)*(B1+B2+B3) - dCalcVectorDot3(n,o1->final_posr->pos);
   if (depth < 0) return 0;
 
   // find number of contacts requested

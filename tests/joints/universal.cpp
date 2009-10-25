@@ -344,7 +344,7 @@ SUITE (TestdxJointUniversal)
         dNormalize3(axis2);
 
         dVector3 cross;
-        dCROSS(cross, =, axis1, axis2);
+        dCalcVectorCross3(cross, axis1, axis2);
         dJointSetUniversalAxis1(jId, axis1[0], axis1[1], axis1[2]);
         dJointSetUniversalAxis2(jId, cross[0], cross[1], cross[2]);
 
@@ -2031,7 +2031,7 @@ SUITE (TestdxJointUniversal)
             axis[2] = -REAL(0.33);
 
             dVector3 axis2;
-            dCROSS(axis2, =, axis1, axis);
+            dCalcVectorCross3(axis2, axis1, axis);
 
             dJointSetUniversalAxis1(jId, axis1[0], axis1[1], axis1[2]);
             dJointSetUniversalAxis2(jId, axis2[0], axis2[1], axis2[2]);

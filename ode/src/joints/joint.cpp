@@ -93,15 +93,15 @@ void setBall( dxJoint *joint, dxJoint::Info2 *info,
     info->J1l[0] = 1;
     info->J1l[s+1] = 1;
     info->J1l[2*s+2] = 1;
-    dMULTIPLY0_331( a1, joint->node[0].body->posr.R, anchor1 );
-    dCROSSMAT( info->J1a, a1, s, -, + );
+    dMultiply0_331( a1, joint->node[0].body->posr.R, anchor1 );
+    dSetCrossMatrixMinus( info->J1a, a1, s );
     if ( joint->node[1].body )
     {
         info->J2l[0] = -1;
         info->J2l[s+1] = -1;
         info->J2l[2*s+2] = -1;
-        dMULTIPLY0_331( a2, joint->node[1].body->posr.R, anchor2 );
-        dCROSSMAT( info->J2a, a2, s, + , - );
+        dMultiply0_331( a2, joint->node[1].body->posr.R, anchor2 );
+        dSetCrossMatrixPlus( info->J2a, a2, s );
     }
 
     // set right hand side
@@ -148,19 +148,25 @@ void setBall2( dxJoint *joint, dxJoint::Info2 *info,
     for ( i = 0; i < 3; i++ ) info->J1l[i] = axis[i];
     for ( i = 0; i < 3; i++ ) info->J1l[s+i] = q1[i];
     for ( i = 0; i < 3; i++ ) info->J1l[2*s+i] = q2[i];
-    dMULTIPLY0_331( a1, joint->node[0].body->posr.R, anchor1 );
-    dCROSS( info->J1a, = , a1, axis );
-    dCROSS( info->J1a + s, = , a1, q1 );
-    dCROSS( info->J1a + 2*s, = , a1, q2 );
+    dMultiply0_331( a1, joint->node[0].body->posr.R, anchor1 );
+    dCalcVectorCross3( info->J1a, a1, axis );
+    dCalcVectorCross3( info->J1a + s, a1, q1 );
+    dCalcVectorCross3( info->J1a + 2*s, a1, q2 );
     if ( joint->node[1].body )
     {
         for ( i = 0; i < 3; i++ ) info->J2l[i] = -axis[i];
         for ( i = 0; i < 3; i++ ) info->J2l[s+i] = -q1[i];
         for ( i = 0; i < 3; i++ ) info->J2l[2*s+i] = -q2[i];
-        dMULTIPLY0_331( a2, joint->node[1].body->posr.R, anchor2 );
-        dCROSS( info->J2a, = -, a2, axis );
-        dCROSS( info->J2a + s, = -, a2, q1 );
-        dCROSS( info->J2a + 2*s, = -, a2, q2 );
+        dMultiply0_331( a2, joint->node[1].body->posr.R, anchor2 );
+        dReal *J2a = info->J2a;
+        dCalcVectorCross3( J2a, a2, axis );
+        dNegateVector3( J2a );
+        dReal *J2a_plus_s = J2a + s;
+        dCalcVectorCross3( J2a_plus_s, a2, q1 );
+        dNegateVector3( J2a_plus_s );
+        dReal *J2a_plus_2s = J2a_plus_s + s;
+        dCalcVectorCross3( J2a_plus_2s, a2, q2 );
+        dNegateVector3( J2a_plus_2s );
     }
 
     // set right hand side - measure error along (axis,q1,q2)
@@ -171,15 +177,15 @@ void setBall2( dxJoint *joint, dxJoint::Info2 *info,
     if ( joint->node[1].body )
     {
         for ( i = 0; i < 3; i++ ) a2[i] += joint->node[1].body->posr.pos[i];
-        info->c[0] = k1 * ( dDOT( axis, a2 ) - dDOT( axis, a1 ) );
-        info->c[1] = k * ( dDOT( q1, a2 ) - dDOT( q1, a1 ) );
-        info->c[2] = k * ( dDOT( q2, a2 ) - dDOT( q2, a1 ) );
+        info->c[0] = k1 * ( dCalcVectorDot3( axis, a2 ) - dCalcVectorDot3( axis, a1 ) );
+        info->c[1] = k * ( dCalcVectorDot3( q1, a2 ) - dCalcVectorDot3( q1, a1 ) );
+        info->c[2] = k * ( dCalcVectorDot3( q2, a2 ) - dCalcVectorDot3( q2, a1 ) );
     }
     else
     {
-        info->c[0] = k1 * ( dDOT( axis, anchor2 ) - dDOT( axis, a1 ) );
-        info->c[1] = k * ( dDOT( q1, anchor2 ) - dDOT( q1, a1 ) );
-        info->c[2] = k * ( dDOT( q2, anchor2 ) - dDOT( q2, a1 ) );
+        info->c[0] = k1 * ( dCalcVectorDot3( axis, anchor2 ) - dCalcVectorDot3( axis, a1 ) );
+        info->c[1] = k * ( dCalcVectorDot3( q1, anchor2 ) - dCalcVectorDot3( q1, a1 ) );
+        info->c[2] = k * ( dCalcVectorDot3( q2, anchor2 ) - dCalcVectorDot3( q2, a1 ) );
     }
 }
 
@@ -235,7 +241,7 @@ void setFixedOrientation( dxJoint *joint, dxJoint::Info2 *info, dQuaternion qrel
         qerr[2] = -qerr[2];
         qerr[3] = -qerr[3];
     }
-    dMULTIPLY0_331( e, joint->node[0].body->posr.R, qerr + 1 );  // @@@ bad SIMD padding!
+    dMultiply0_331( e, joint->node[0].body->posr.R, qerr + 1 );  // @@@ bad SIMD padding!
     dReal k = info->fps * info->erp;
     info->c[start_row] = 2 * k * e[0];
     info->c[start_row+1] = 2 * k * e[1];
@@ -255,14 +261,14 @@ void setAnchors( dxJoint *j, dReal x, dReal y, dReal z,
         q[1] = y - j->node[0].body->posr.pos[1];
         q[2] = z - j->node[0].body->posr.pos[2];
         q[3] = 0;
-        dMULTIPLY1_331( anchor1, j->node[0].body->posr.R, q );
+        dMultiply1_331( anchor1, j->node[0].body->posr.R, q );
         if ( j->node[1].body )
         {
             q[0] = x - j->node[1].body->posr.pos[0];
             q[1] = y - j->node[1].body->posr.pos[1];
             q[2] = z - j->node[1].body->posr.pos[2];
             q[3] = 0;
-            dMULTIPLY1_331( anchor2, j->node[1].body->posr.R, q );
+            dMultiply1_331( anchor2, j->node[1].body->posr.R, q );
         }
         else
         {
@@ -291,14 +297,14 @@ void setAxes( dxJoint *j, dReal x, dReal y, dReal z,
         dNormalize3( q );
         if ( axis1 )
         {
-            dMULTIPLY1_331( axis1, j->node[0].body->posr.R, q );
+            dMultiply1_331( axis1, j->node[0].body->posr.R, q );
             axis1[3] = 0;
         }
         if ( axis2 )
         {
             if ( j->node[1].body )
             {
-                dMULTIPLY1_331( axis2, j->node[1].body->posr.R, q );
+                dMultiply1_331( axis2, j->node[1].body->posr.R, q );
             }
             else
             {
@@ -316,7 +322,7 @@ void getAnchor( dxJoint *j, dVector3 result, dVector3 anchor1 )
 {
     if ( j->node[0].body )
     {
-        dMULTIPLY0_331( result, j->node[0].body->posr.R, anchor1 );
+        dMultiply0_331( result, j->node[0].body->posr.R, anchor1 );
         result[0] += j->node[0].body->posr.pos[0];
         result[1] += j->node[0].body->posr.pos[1];
         result[2] += j->node[0].body->posr.pos[2];
@@ -328,7 +334,7 @@ void getAnchor2( dxJoint *j, dVector3 result, dVector3 anchor2 )
 {
     if ( j->node[1].body )
     {
-        dMULTIPLY0_331( result, j->node[1].body->posr.R, anchor2 );
+        dMultiply0_331( result, j->node[1].body->posr.R, anchor2 );
         result[0] += j->node[1].body->posr.pos[0];
         result[1] += j->node[1].body->posr.pos[1];
         result[2] += j->node[1].body->posr.pos[2];
@@ -346,7 +352,7 @@ void getAxis( dxJoint *j, dVector3 result, dVector3 axis1 )
 {
     if ( j->node[0].body )
     {
-        dMULTIPLY0_331( result, j->node[0].body->posr.R, axis1 );
+        dMultiply0_331( result, j->node[0].body->posr.R, axis1 );
     }
 }
 
@@ -355,7 +361,7 @@ void getAxis2( dxJoint *j, dVector3 result, dVector3 axis2 )
 {
     if ( j->node[1].body )
     {
-        dMULTIPLY0_331( result, j->node[1].body->posr.R, axis2 );
+        dMultiply0_331( result, j->node[1].body->posr.R, axis2 );
     }
     else
     {
@@ -393,7 +399,7 @@ dReal getHingeAngleFromRelativeQuat( dQuaternion qrel, dVector3 axis )
     // sint2 = |sin(theta/2)|
     dReal cost2 = qrel[0];
     dReal sint2 = dSqrt( qrel[1] * qrel[1] + qrel[2] * qrel[2] + qrel[3] * qrel[3] );
-    dReal theta = ( dDOT( qrel + 1, axis ) >= 0 ) ? // @@@ padding assumptions
+    dReal theta = ( dCalcVectorDot3( qrel + 1, axis ) >= 0 ) ? // @@@ padding assumptions
                   ( 2 * dAtan2( sint2, cost2 ) ) :  // if u points in direction of axis
                   ( 2 * dAtan2( sint2, -cost2 ) );  // if u points in opposite direction
 
@@ -584,7 +590,7 @@ int dxJointLimitMotor::addLimot( dxJoint *joint,
             c[0] = REAL( 0.5 ) * ( joint->node[1].body->posr.pos[0] - joint->node[0].body->posr.pos[0] );
             c[1] = REAL( 0.5 ) * ( joint->node[1].body->posr.pos[1] - joint->node[0].body->posr.pos[1] );
             c[2] = REAL( 0.5 ) * ( joint->node[1].body->posr.pos[2] - joint->node[0].body->posr.pos[2] );
-            dCROSS( ltd, = , c, ax1 );
+            dCalcVectorCross3( ltd, c, ax1 );
             info->J1a[srow+0] = ltd[0];
             info->J1a[srow+1] = ltd[1];
             info->J1a[srow+2] = ltd[2];
@@ -681,15 +687,15 @@ int dxJointLimitMotor::addLimot( dxJoint *joint,
                     dReal vel;
                     if ( rotational )
                     {
-                        vel = dDOT( joint->node[0].body->avel, ax1 );
+                        vel = dCalcVectorDot3( joint->node[0].body->avel, ax1 );
                         if ( joint->node[1].body )
-                            vel -= dDOT( joint->node[1].body->avel, ax1 );
+                            vel -= dCalcVectorDot3( joint->node[1].body->avel, ax1 );
                     }
                     else
                     {
-                        vel = dDOT( joint->node[0].body->lvel, ax1 );
+                        vel = dCalcVectorDot3( joint->node[0].body->lvel, ax1 );
                         if ( joint->node[1].body )
-                            vel -= dDOT( joint->node[1].body->lvel, ax1 );
+                            vel -= dCalcVectorDot3( joint->node[1].body->lvel, ax1 );
                     }
 
                     // only apply bounce if the velocity is incoming, and if the

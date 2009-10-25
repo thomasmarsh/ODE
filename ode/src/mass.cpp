@@ -69,8 +69,8 @@ int dMassCheck (const dMass *m)
 
   dMatrix3 I2,chat;
   dSetZero (chat,12);
-  dCROSSMAT (chat,m->c,4,+,-);
-  dMULTIPLY0_333 (I2,chat,chat);
+  dSetCrossMatrixPlus (chat,m->c,4);
+  dMultiply0_333 (I2,chat,chat);
   for (i=0; i<3; i++) I2[i] = m->I[i] + m->mass*I2[i];
   for (i=4; i<7; i++) I2[i] = m->I[i] + m->mass*I2[i];
   for (i=8; i<11; i++) I2[i] = m->I[i] + m->mass*I2[i];
@@ -262,9 +262,9 @@ void dMassSetTrimesh( dMass *m, dReal density, dGeomID g )
 		FetchTransformedTriangle( TriMesh, i, v);
 
 		dVector3 n, a, b;
-		dOP( a, -, v[1], v[0] ); 
-		dOP( b, -, v[2], v[0] ); 
-		dCROSS( n, =, b, a );
+		dSubtractVectors3( a, v[1], v[0] ); 
+		dSubtractVectors3( b, v[2], v[0] ); 
+		dCalcVectorCross3( n, b, a );
 		nx = fabs(n[0]);
 		ny = fabs(n[1]);
 		nz = fabs(n[2]);
@@ -360,7 +360,7 @@ void dMassSetTrimesh( dMass *m, dReal density, dGeomID g )
 					Pabb /= -60.0;
 				}			
 
-				w = - dDOT(n, v[0]);
+				w = - dCalcVectorDot3(n, v[0]);
 
 				k1 = 1 / n[C]; k2 = k1 * k1; k3 = k2 * k1; k4 = k3 * k1;
 
@@ -468,14 +468,14 @@ void dMassTranslate (dMass *m, dReal x, dReal y, dReal z)
 
   // adjust inertia matrix
   dSetZero (chat,12);
-  dCROSSMAT (chat,m->c,4,+,-);
+  dSetCrossMatrixPlus (chat,m->c,4);
   a[0] = x + m->c[0];
   a[1] = y + m->c[1];
   a[2] = z + m->c[2];
   dSetZero (ahat,12);
-  dCROSSMAT (ahat,a,4,+,-);
-  dMULTIPLY0_333 (t1,ahat,ahat);
-  dMULTIPLY0_333 (t2,chat,chat);
+  dSetCrossMatrixPlus (ahat,a,4);
+  dMultiply0_333 (t1,ahat,ahat);
+  dMultiply0_333 (t2,chat,chat);
   for (i=0; i<3; i++) for (j=0; j<3; j++)
     m->_I(i,j) += m->mass * (t2[i*4+j]-t1[i*4+j]);
 
@@ -510,8 +510,8 @@ void dMassRotate (dMass *m, const dMatrix3 R)
   dAASSERT (m);
 
   // rotate inertia matrix
-  dMULTIPLY2_333 (t1,m->I,R);
-  dMULTIPLY0_333 (m->I,R,t1);
+  dMultiply2_333 (t1,m->I,R);
+  dMultiply0_333 (m->I,R,t1);
 
   // ensure perfect symmetry
   m->_I(1,0) = m->_I(0,1);
@@ -519,7 +519,7 @@ void dMassRotate (dMass *m, const dMatrix3 R)
   m->_I(2,1) = m->_I(1,2);
 
   // rotate center of mass
-  dMULTIPLY0_331 (t2,R,m->c);
+  dMultiply0_331 (t2,R,m->c);
   m->c[0] = t2[0];
   m->c[1] = t2[1];
   m->c[2] = t2[2];

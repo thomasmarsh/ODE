@@ -92,29 +92,29 @@ static bool TriTriContacts(const dVector3 tr1[3],
 
 
 /* some math macros */
-#define CROSS(dest,v1,v2) { dest[0]=v1[1]*v2[2]-v1[2]*v2[1]; \
-	dest[1]=v1[2]*v2[0]-v1[0]*v2[2]; \
-	dest[2]=v1[0]*v2[1]-v1[1]*v2[0]; }
+#define IS_ZERO(v) (!(v)[0] && !(v)[1] && !(v)[2])
 
-#define DOT(v1,v2) (v1[0]*v2[0]+v1[1]*v2[1]+v1[2]*v2[2])
+#define CROSS(dest,v1,v2) dCalcVectorCross3(dest, v1, v2)
 
-#define SUB(dest,v1,v2) { dest[0]=v1[0]-v2[0]; dest[1]=v1[1]-v2[1]; dest[2]=v1[2]-v2[2]; }
+#define DOT(v1,v2) dCalcVectorDot3(v1, v2)
 
-#define ADD(dest,v1,v2) { dest[0]=v1[0]+v2[0]; dest[1]=v1[1]+v2[1]; dest[2]=v1[2]+v2[2]; }
+#define SUB(dest,v1,v2) dSubtractVectors3(dest, v1, v2)
 
-#define MULT(dest,v,factor) { dest[0]=factor*v[0]; dest[1]=factor*v[1]; dest[2]=factor*v[2]; }
+#define ADD(dest,v1,v2) dAddVectors3(dest, v1, v2)
 
-#define SET(dest,src) { dest[0]=src[0]; dest[1]=src[1]; dest[2]=src[2]; }
+#define MULT(dest,v,factor) dCopyScaledVector3(dest, v, factor)
 
-#define SMULT(p,q,s) { p[0]=q[0]*s; p[1]=q[1]*s; p[2]=q[2]*s; }
+#define SET(dest,src) dCopyVector3(dest, src)
 
-#define COMBO(combo,p,t,q) { combo[0]=p[0]+t*q[0]; combo[1]=p[1]+t*q[1]; combo[2]=p[2]+t*q[2]; }
+#define SMULT(p,q,s) dCopyScaledVector3(p, q, s)
 
-#define LENGTH(x)  ((dReal) 1.0f/InvSqrt(dDOT(x, x)))
+#define COMBO(combo,p,t,q) dAddScaledVectors3(combo, p, q, REAL(1.0), t)
 
-#define DEPTH(d, p, q, n) d = (p[0] - q[0])*n[0] +  (p[1] - q[1])*n[1] +  (p[2] - q[2])*n[2];
+#define LENGTH(x) dCalcVectorLength3(x)
 
-inline const dReal dMin(const dReal x, const dReal y)
+#define DEPTH(d, p, q, n) d = dCalcPointDepth3(q, p, n)
+
+static inline const dReal dMin(const dReal x, const dReal y)
 {
     return x < y ? x : y;
 }
@@ -207,7 +207,7 @@ dContactGeom *AddContactToNode(const CONTACT_KEY * contactkey,CONTACT_KEY_HASH_N
 		if(node->m_keyarray[i].m_key == contactkey->m_key)
 		{
 			dContactGeom *contactfound = node->m_keyarray[i].m_contact;
-			if (dDISTANCE(contactfound->pos, contactkey->m_contact->pos) < REAL(1.00001) /*for comp. errors*/ * dSQRT3 / CONTACT_POS_HASH_QUOTIENT /*cube diagonal*/)
+			if (dCalcPointsDistance3(contactfound->pos, contactkey->m_contact->pos) < REAL(1.00001) /*for comp. errors*/ * dSQRT3 / CONTACT_POS_HASH_QUOTIENT /*cube diagonal*/)
 			{
 				return contactfound;
 			}
@@ -708,7 +708,7 @@ IntersectLineSegmentRay(dVector3 x1, dVector3 x2, dVector3 x3, dVector3 n,
     CROSS(tmp2, a, b);
 
     dReal num, denom;
-    num = dDOT(tmp1, tmp2);
+    num = dCalcVectorDot3(tmp1, tmp2);
     denom = LENGTH( tmp2 );
 
     dReal s;
@@ -719,7 +719,7 @@ IntersectLineSegmentRay(dVector3 x1, dVector3 x2, dVector3 x3, dVector3 n,
 
     // Test if this intersection is "behind" x3, w.r.t. n
     SUB(a, x3, out_pt);
-    if (dDOT(a, n) > 0.0)
+    if (dCalcVectorDot3(a, n) > 0.0)
         return 0;
 
     // Test if this intersection point is outside the edge limits,
@@ -727,7 +727,7 @@ IntersectLineSegmentRay(dVector3 x1, dVector3 x2, dVector3 x3, dVector3 n,
     //  else outside
     SUB(a, out_pt, x1);
     SUB(b, out_pt, x2);
-    if (dDOT(a,b) < 0.0)
+    if (dCalcVectorDot3(a,b) < 0.0)
         return 1;
     else
         return 0;

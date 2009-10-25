@@ -175,12 +175,12 @@ struct dxConvex : public dxGeom
 	{
 		dVector3 rdir;
 		unsigned int index=0;
-		dMULTIPLY1_331 (rdir,final_posr->R,dir);
-		dReal max = dDOT(points,rdir);
+		dMultiply1_331 (rdir,final_posr->R,dir);
+		dReal max = dCalcVectorDot3(points,rdir);
 		dReal tmp;
 		for (unsigned int i = 1; i < pointcount; ++i) 
 		{
-			tmp = dDOT(points+(i*3),rdir);
+			tmp = dCalcVectorDot3(points+(i*3),rdir);
 			if (tmp > max) 
 			{
 				index=i;

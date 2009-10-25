@@ -86,7 +86,7 @@ int dCollideTrimeshPlane( dxGeom *o1, dxGeom *o2, int flags, dContactGeom* conta
 
 #if defined(dSINGLE) && 0 // Always assign via intermediate array as otherwise it is an incapsulation violation
 
-			dMULTIPLY0_331( vertex, trimesh_R, (float*)( VP.Vertex[ v ] ) );
+			dMultiply0_331( vertex, trimesh_R, (float*)( VP.Vertex[ v ] ) );
 
 #else // dDOUBLE || 1
 
@@ -95,7 +95,7 @@ int dCollideTrimeshPlane( dxGeom *o1, dxGeom *o2, int flags, dContactGeom* conta
 			int_vertex[ 1 ] = VP.Vertex[ v ]->y;
 			int_vertex[ 2 ] = VP.Vertex[ v ]->z;
 
-			dMULTIPLY0_331( vertex, trimesh_R, int_vertex );
+			dMultiply0_331( vertex, trimesh_R, int_vertex );
 
 #endif // dSINGLE/dDOUBLE
 			
@@ -110,7 +110,7 @@ int dCollideTrimeshPlane( dxGeom *o1, dxGeom *o2, int flags, dContactGeom* conta
 
 			// If alpha < 0 then point is if front of plane. i.e. no contact
 			// If alpha = 0 then the point is on the plane
-			alpha = plane->p[ 3 ] - dDOT( plane->p, vertex );
+			alpha = plane->p[ 3 ] - dCalcVectorDot3( plane->p, vertex );
       
 			// If alpha > 0 the point is behind the plane. CONTACT!
 			if ( alpha > 0 )

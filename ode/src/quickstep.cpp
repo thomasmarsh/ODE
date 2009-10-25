@@ -125,12 +125,12 @@ static void compute_invM_JT (int m, dRealPtr J, dRealMutablePtr iMJ, int *jb,
     dReal k1 = body[b1]->invMass;
     for (int j=0; j<3; j++) iMJ_ptr[j] = k1*J_ptr[j];
     const dReal *invIrow1 = invI + 12*b1;
-    dMULTIPLY0_331 (iMJ_ptr + 3, invIrow1, J_ptr + 3);
+    dMultiply0_331 (iMJ_ptr + 3, invIrow1, J_ptr + 3);
     if (b2 >= 0) {
       dReal k2 = body[b2]->invMass;
       for (int j=0; j<3; j++) iMJ_ptr[j+6] = k2*J_ptr[j+6];
       const dReal *invIrow2 = invI + 12*b2;
-      dMULTIPLY0_331 (iMJ_ptr + 9, invIrow2, J_ptr + 9);
+      dMultiply0_331 (iMJ_ptr + 9, invIrow2, J_ptr + 9);
     }
   }
 }
@@ -615,17 +615,17 @@ void dxQuickStepper (dxWorldProcessContext *context,
       dxBody *b = *bodycurr;
 
       // compute inverse inertia tensor in global frame
-      dMULTIPLY2_333 (tmp,b->invI,b->posr.R);
-      dMULTIPLY0_333 (invIrow,b->posr.R,tmp);
+      dMultiply2_333 (tmp,b->invI,b->posr.R);
+      dMultiply0_333 (invIrow,b->posr.R,tmp);
 
       if (b->flags & dxBodyGyroscopic) {
         dMatrix3 I;
         // compute inertia tensor in global frame
-        dMULTIPLY2_333 (tmp,b->mass.I,b->posr.R);
-        dMULTIPLY0_333 (I,b->posr.R,tmp);
+        dMultiply2_333 (tmp,b->mass.I,b->posr.R);
+        dMultiply0_333 (I,b->posr.R,tmp);
         // compute rotational force
-        dMULTIPLY0_331 (tmp,I,b->avel);
-        dCROSS (b->tacc,-=,b->avel,tmp);
+        dMultiply0_331 (tmp,I,b->avel);
+        dSubtractVectorCross3(b->tacc,b->avel,tmp);
       }
     }
   }
@@ -841,7 +841,7 @@ void dxQuickStepper (dxWorldProcessContext *context,
           dxBody *b = *bodycurr;
           dReal body_invMass = b->invMass;
           for (int j=0; j<3; j++) tmp1curr[j] = b->facc[j] * body_invMass + b->lvel[j] * stepsize1;
-          dMULTIPLY0_331 (tmp1curr + 3,invIrow,b->tacc);
+          dMultiply0_331 (tmp1curr + 3,invIrow,b->tacc);
           for (int k=0; k<3; k++) tmp1curr[3+k] += b->avel[k] * stepsize1;
         }
 
@@ -970,7 +970,7 @@ void dxQuickStepper (dxWorldProcessContext *context,
         b->lvel[j] += body_invMass_mul_stepsize * b->facc[j];
         b->tacc[j] *= stepsize;
       }
-      dMULTIPLYADD0_331 (b->avel, invIrow, b->tacc);
+      dMultiplyAdd0_331 (b->avel, invIrow, b->tacc);
     }
   }
 

@@ -74,10 +74,10 @@ dxJointFixed::getInfo2 ( dxJoint::Info2 *info )
     info->cfm[2] = cfm;
 
     dVector3 ofs;
-    dMULTIPLY0_331 ( ofs, node[0].body->posr.R, offset );
+    dMultiply0_331 ( ofs, node[0].body->posr.R, offset );
     if ( node[1].body )
     {
-        dCROSSMAT ( info->J1a, ofs, s, + , - );
+        dSetCrossMatrixPlus( info->J1a, ofs, s );
         info->J2l[0] = -1;
         info->J2l[s+1] = -1;
         info->J2l[2*s+2] = -1;
@@ -117,7 +117,7 @@ void dJointSetFixed ( dJointID j )
             dReal ofs[4];
             for ( i = 0; i < 4; i++ )
                 ofs[i] = joint->node[0].body->posr.pos[i] - joint->node[1].body->posr.pos[i];
-            dMULTIPLY1_331 ( joint->offset, joint->node[0].body->posr.R, ofs );
+            dMultiply1_331 ( joint->offset, joint->node[0].body->posr.R, ofs );
         }
         else
         {

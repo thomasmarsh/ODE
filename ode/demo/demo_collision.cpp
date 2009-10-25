@@ -372,7 +372,7 @@ int test_ccylinder_point_depth()
 
   for (j=0; j<3; j++) a[j] = dRandReal()-0.5;
   dNormalize3 (a);
-  if (dDOT14(a,R+2) > 0) {
+  if (dCalcVectorDot3_14(a,R+2) > 0) {
     for (j=0; j<3; j++) a[j] = p[j] + a[j]*r + l*0.5*R[j*4+2];
   }
   else {
@@ -404,7 +404,7 @@ int test_ccylinder_point_depth()
   d = (dRandReal()*2-1) * r;
   for (j=0; j<3; j++) a[j] = dRandReal()-0.5;
   dNormalize3 (a);
-  if (dDOT14(a,R+2) > 0) {
+  if (dCalcVectorDot3_14(a,R+2) > 0) {
     for (j=0; j<3; j++) a[j] = p[j] + a[j]*(r-d) + l*0.5*R[j*4+2];
   }
   else {
@@ -527,7 +527,7 @@ int test_ray_and_sphere()
   for (j=0; j<3; j++) n[j] = q2[j] - q[j];
   dNormalize3 (n);
   dGeomRaySet (ray,q[0],q[1],q[2],n[0],n[1],n[2]);
-  dGeomRaySetLength (ray,dDISTANCE (q,q2));
+  dGeomRaySetLength (ray,dCalcPointsDistance3(q,q2));
   if (dCollide (ray,sphere,1,&contact,sizeof(dContactGeom)) != 0) FAILED();
 
   // ********** test finite length ray totally outside the sphere
@@ -538,7 +538,7 @@ int test_ray_and_sphere()
     dMakeRandomVector (n,3,1.0);
     dNormalize3 (n);
   }
-  while (dDOT(n,q) < 0);	// make sure normal goes away from sphere
+  while (dCalcVectorDot3(n,q) < 0);	// make sure normal goes away from sphere
   for (j=0; j<3; j++) q[j] = 1.01*r * q[j] + p[j];
   dGeomRaySet (ray,q[0],q[1],q[2],n[0],n[1],n[2]);
   dGeomRaySetLength (ray,100);
@@ -559,7 +559,7 @@ int test_ray_and_sphere()
   dGeomRaySetLength (ray,1.01*r);
   if (dCollide (ray,sphere,1,&contact,sizeof(dContactGeom)) != 1) FAILED();
   for (j=0; j<3; j++) q2[j] = r * q[j] + p[j];
-  if (dDISTANCE (contact.pos,q2) > tol) FAILED();
+  if (dCalcPointsDistance3 (contact.pos,q2) > tol) FAILED();
 
   // ********** test contact point distance for random rays
 
@@ -572,10 +572,10 @@ int test_ray_and_sphere()
   dGeomRaySet (ray,q[0],q[1],q[2],n[0],n[1],n[2]);
   dGeomRaySetLength (ray,100);
   if (dCollide (ray,sphere,1,&contact,sizeof(dContactGeom))) {
-    k = dDISTANCE (contact.pos,dGeomGetPosition(sphere));
+    k = dCalcPointsDistance3 (contact.pos,dGeomGetPosition(sphere));
     if (dFabs(k - r) > tol) FAILED();
     // also check normal signs
-    if (dDOT (n,contact.normal) > 0) FAILED();
+    if (dCalcVectorDot3 (n,contact.normal) > 0) FAILED();
     // also check depth of contact point
     if (dFabs (dGeomSpherePointDepth
 	       (sphere,contact.pos[0],contact.pos[1],contact.pos[2])) > tol)
@@ -673,7 +673,7 @@ int test_ray_and_box()
   for (j=0; j<3; j++) n[j] = q4[j] - q2[j];
   dNormalize3 (n);
   dGeomRaySet (ray,q2[0],q2[1],q2[2],n[0],n[1],n[2]);
-  dGeomRaySetLength (ray,dDISTANCE(q2,q4));
+  dGeomRaySetLength (ray,dCalcPointsDistance3(q2,q4));
   if (dCollide (ray,box,1,&contact,sizeof(dContactGeom)) != 0) FAILED();
 
   // ********** test finite length ray totally outside the box
@@ -729,7 +729,7 @@ int test_ray_and_box()
       FAILED();
     }
     // also check normal signs
-    if (dDOT (q3,contact.normal) > 0) FAILED();
+    if (dCalcVectorDot3 (q3,contact.normal) > 0) FAILED();
 
     draw_all_objects (space);
   }
@@ -773,7 +773,7 @@ int test_ray_and_ccylinder()
   dNormalize3 (b);
   k = (dRandReal()-0.5)*l;
   for (j=0; j<3; j++) b[j] = p[j] + r*0.99*b[j] + k*0.99*R[j*4+2];
-  dGeomRaySetLength (ray,dDISTANCE(a,b));
+  dGeomRaySetLength (ray,dCalcPointsDistance3(a,b));
   for (j=0; j<3; j++) b[j] -= a[j];
   dNormalize3 (b);
   dGeomRaySet (ray,a[0],a[1],a[2],b[0],b[1],b[2]);
@@ -804,7 +804,7 @@ int test_ray_and_ccylinder()
 
   for (j=0; j<3; j++) a[j] = dRandReal()-0.5;
   dNormalize3 (a);
-  if (dDOT14(a,R+2) < 0) {
+  if (dCalcVectorDot3_14(a,R+2) < 0) {
     for (j=0; j<3; j++) b[j] = p[j] - a[j]*2*r + l*0.5*R[j*4+2];
   }
   else {
@@ -838,7 +838,7 @@ int test_ray_and_ccylinder()
       FAILED();
 
     // check normal signs
-    if (dDOT (n,contact.normal) > 0) FAILED();
+    if (dCalcVectorDot3 (n,contact.normal) > 0) FAILED();
 
     draw_all_objects (space);
   }
@@ -912,9 +912,9 @@ int test_ray_and_plane()
   dGeomRaySetLength (ray,10);
   if (dCollide (ray,plane,1,&contact,sizeof(dContactGeom))) {
     // test that contact is on plane surface
-    if (dFabs (dDOT(contact.pos,n) - d) > tol) FAILED();
+    if (dFabs (dCalcVectorDot3(contact.pos,n) - d) > tol) FAILED();
     // also check normal signs
-    if (dDOT (h,contact.normal) > 0) FAILED();
+    if (dCalcVectorDot3 (h,contact.normal) > 0) FAILED();
     // also check contact point depth
     if (dFabs (dGeomPlanePointDepth
 	       (plane,contact.pos[0],contact.pos[1],contact.pos[2])) > tol)
@@ -969,25 +969,25 @@ static int edgeIntersectsRect (dVector3 v1, dVector3 v2,
   dVector3 u1,u2,n,tmp;
   for (k=0; k<3; k++) u1[k] = p3[k]-p1[k];
   for (k=0; k<3; k++) u2[k] = p2[k]-p1[k];
-  dReal d1 = dSqrt(dDOT(u1,u1));
-  dReal d2 = dSqrt(dDOT(u2,u2));
+  dReal d1 = dSqrt(dCalcVectorDot3(u1,u1));
+  dReal d2 = dSqrt(dCalcVectorDot3(u2,u2));
   dNormalize3 (u1);
   dNormalize3 (u2);
-  if (dFabs(dDOT(u1,u2)) > 1e-6) dDebug (0,"bad u1/u2");
-  dCROSS (n,=,u1,u2);
+  if (dFabs(dCalcVectorDot3(u1,u2)) > 1e-6) dDebug (0,"bad u1/u2");
+  dCalcVectorCross3(n,u1,u2);
   for (k=0; k<3; k++) tmp[k] = v2[k]-v1[k];
-  dReal d = -dDOT(n,p1);
-  if (dFabs(dDOT(n,p1)+d) > 1e-8) dDebug (0,"bad n wrt p1");
-  if (dFabs(dDOT(n,p2)+d) > 1e-8) dDebug (0,"bad n wrt p2");
-  if (dFabs(dDOT(n,p3)+d) > 1e-8) dDebug (0,"bad n wrt p3");
-  dReal alpha = -(d+dDOT(n,v1))/dDOT(n,tmp);
+  dReal d = -dCalcVectorDot3(n,p1);
+  if (dFabs(dCalcVectorDot3(n,p1)+d) > 1e-8) dDebug (0,"bad n wrt p1");
+  if (dFabs(dCalcVectorDot3(n,p2)+d) > 1e-8) dDebug (0,"bad n wrt p2");
+  if (dFabs(dCalcVectorDot3(n,p3)+d) > 1e-8) dDebug (0,"bad n wrt p3");
+  dReal alpha = -(d+dCalcVectorDot3(n,v1))/dCalcVectorDot3(n,tmp);
   for (k=0; k<3; k++) tmp[k] = v1[k]+alpha*(v2[k]-v1[k]);
-  if (dFabs(dDOT(n,tmp)+d) > 1e-6) dDebug (0,"bad tmp");
+  if (dFabs(dCalcVectorDot3(n,tmp)+d) > 1e-6) dDebug (0,"bad tmp");
   if (alpha < 0) return 0;
   if (alpha > 1) return 0;
   for (k=0; k<3; k++) tmp[k] -= p1[k];
-  dReal a1 = dDOT(u1,tmp);
-  dReal a2 = dDOT(u2,tmp);
+  dReal a1 = dCalcVectorDot3(u1,tmp);
+  dReal a2 = dCalcVectorDot3(u2,tmp);
   if (a1<0 || a2<0 || a1>d1 || a2>d2) return 0;
   return 1;
 }
@@ -1006,12 +1006,12 @@ static int box1inside2 (const dVector3 p1, const dMatrix3 R1,
 	v[0] = i*0.5*side1[0];
 	v[1] = j*0.5*side1[1];
 	v[2] = k*0.5*side1[2];
-	dMULTIPLY0_331 (vv,R1,v);
+	dMultiply0_331 (vv,R1,v);
 	vv[0] += p1[0] - p2[0];
 	vv[1] += p1[1] - p2[1];
 	vv[2] += p1[2] - p2[2];
 	for (int axis=0; axis < 3; axis++) {
-	  dReal z = dDOT14(vv,R2+axis);
+	  dReal z = dCalcVectorDot3_14(vv,R2+axis);
 	  if (z < (-side2[axis]*0.5) || z > (side2[axis]*0.5)) return 0;
 	}
       }
@@ -1050,7 +1050,7 @@ static int testBoxesTouch2 (const dVector3 p1, const dMatrix3 R1,
       }
       for (j=0; j<4; j++) {
 	for (k=0; k<3; k++) fp[j][k] *= 0.5*side2[k];
-	dMULTIPLY0_331 (tmp,R2,fp[j]);
+	dMultiply0_331 (tmp,R2,fp[j]);
 	for (k=0; k<3; k++) fp[j][k] = tmp[k] + p2[k];
       }
 
@@ -1067,8 +1067,8 @@ static int testBoxesTouch2 (const dVector3 p1, const dMatrix3 R1,
 		for (k=0; k<3; k++) vv1[k] = v1[k] * 0.5*side1[k];
 		for (k=0; k<3; k++) vv2[k] = (v1[k] + (k==ei)*2)*0.5*side1[k];
 		dVector3 vertex1,vertex2;
-		dMULTIPLY0_331 (vertex1,R1,vv1);
-		dMULTIPLY0_331 (vertex2,R1,vv2);
+		dMultiply0_331 (vertex1,R1,vv1);
+		dMultiply0_331 (vertex2,R1,vv2);
 		for (k=0; k<3; k++) vertex1[k] += p1[k];
 		for (k=0; k<3; k++) vertex2[k] += p1[k];
 

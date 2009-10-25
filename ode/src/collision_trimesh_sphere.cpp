@@ -46,14 +46,14 @@ static bool GetContactData(const dVector3& Center, dReal Radius, const dVector3 
 	Diff[2] = Origin[2] - Center[2];
 	Diff[3] = Origin[3] - Center[3];
 
-	dReal A00 = dDOT(Edge0, Edge0);
-	dReal A01 = dDOT(Edge0, Edge1);
-	dReal A11 = dDOT(Edge1, Edge1);
+	dReal A00 = dCalcVectorDot3(Edge0, Edge0);
+	dReal A01 = dCalcVectorDot3(Edge0, Edge1);
+	dReal A11 = dCalcVectorDot3(Edge1, Edge1);
 
-	dReal B0 = dDOT(Diff, Edge0);
-	dReal B1 = dDOT(Diff, Edge1);
+	dReal B0 = dCalcVectorDot3(Diff, Edge0);
+	dReal B1 = dCalcVectorDot3(Diff, Edge1);
 
-	dReal C = dDOT(Diff, Diff);
+	dReal C = dCalcVectorDot3(Diff, Diff);
 
 	dReal Det = dFabs(A00 * A11 - A01 * A01);
 	u = A01 * B1 - A11 * B0;
@@ -341,7 +341,7 @@ int dCollideSTL(dxGeom* g1, dxGeom* SphereGeom, int Flags, dContactGeom* Contact
 
 			// Get plane coefficients
 			dVector4 Plane;
-			dCROSS(Plane, =, vu, vv);
+			dCalcVectorCross3(Plane, vu, vv);
 
 			// Even though all triangles might be initially valid, 
 			// a triangle may degenerate into a segment after applying 
@@ -357,7 +357,7 @@ int dCollideSTL(dxGeom* g1, dxGeom* SphereGeom, int Flags, dContactGeom* Contact
 				* to be adjusted (penetration has occured anyway).
 				*/
 		  
-			dReal side = dDOT(Plane,Position) - dDOT(Plane, v0);
+			dReal side = dCalcVectorDot3(Plane,Position) - dCalcVectorDot3(Plane, v0);
 
 			if(side < REAL(0.0)) {
 				continue;
@@ -387,7 +387,7 @@ int dCollideSTL(dxGeom* g1, dxGeom* SphereGeom, int Flags, dContactGeom* Contact
 			dir[0] = Position[0]-ContactPos[0];
 			dir[1] = Position[1]-ContactPos[1];
 			dir[2] = Position[2]-ContactPos[2];
-			dReal dirProj = dDOT(dir, Plane) / dSqrt(dDOT(dir, dir));
+			dReal dirProj = dCalcVectorDot3(dir, Plane) / dSqrt(dCalcVectorDot3(dir, dir));
 			
 			// Since Depth already had a requirement to be non-negative,
 			// negative direction projections should not be allowed as well,
@@ -464,7 +464,7 @@ int dCollideSTL(dxGeom* g1, dxGeom* SphereGeom, int Flags, dContactGeom* Contact
 				Contact->pos[2] = pos[2] / OutTriCount;
 				
 				// Remember to divide in square space.
-				Contact->depth = dSqrt(dDOT(normal, normal) / OutTriCount);
+				Contact->depth = dSqrt(dCalcVectorDot3(normal, normal) / OutTriCount);
 
 				if (Contact->depth > dEpsilon) { // otherwise the normal is too small
                     dVector3Copy(normal, Contact->normal);

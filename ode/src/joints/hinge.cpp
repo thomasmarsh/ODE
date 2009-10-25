@@ -88,7 +88,7 @@ dxJointHinge::getInfo2( dxJoint::Info2 *info )
 
     dVector3 ax1;  // length 1 joint axis in global coordinates, from 1st body
     dVector3 p, q; // plane space vectors for ax1
-    dMULTIPLY0_331( ax1, node[0].body->posr.R, axis1 );
+    dMultiply0_331( ax1, node[0].body->posr.R, axis1 );
     dPlaneSpace( ax1, p, q );
 
     int s3 = 3 * info->rowskip;
@@ -130,7 +130,7 @@ dxJointHinge::getInfo2( dxJoint::Info2 *info )
     dVector3 ax2, b;
     if ( node[1].body )
     {
-        dMULTIPLY0_331( ax2, node[1].body->posr.R, axis2 );
+        dMultiply0_331( ax2, node[1].body->posr.R, axis2 );
     }
     else
     {
@@ -138,10 +138,10 @@ dxJointHinge::getInfo2( dxJoint::Info2 *info )
         ax2[1] = axis2[1];
         ax2[2] = axis2[2];
     }
-    dCROSS( b, = , ax1, ax2 );
+    dCalcVectorCross3( b, ax1, ax2 );
     dReal k = info->fps * info->erp;
-    info->c[3] = k * dDOT( b, p );
-    info->c[4] = k * dDOT( b, q );
+    info->c[3] = k * dCalcVectorDot3( b, p );
+    info->c[4] = k * dCalcVectorDot3( b, q );
 
     // if the hinge is powered, or has joint limits, add in the stuff
     limot.addLimot( this, info, 5, ax1, 1 );
@@ -172,7 +172,7 @@ void dJointSetHingeAnchorDelta( dJointID j, dReal x, dReal y, dReal z, dReal dx,
         q[1] = y - joint->node[0].body->posr.pos[1];
         q[2] = z - joint->node[0].body->posr.pos[2];
         q[3] = 0;
-        dMULTIPLY1_331( joint->anchor1, joint->node[0].body->posr.R, q );
+        dMultiply1_331( joint->anchor1, joint->node[0].body->posr.R, q );
 
         if ( joint->node[1].body )
         {
@@ -180,7 +180,7 @@ void dJointSetHingeAnchorDelta( dJointID j, dReal x, dReal y, dReal z, dReal dx,
             q[1] = y - joint->node[1].body->posr.pos[1];
             q[2] = z - joint->node[1].body->posr.pos[2];
             q[3] = 0;
-            dMULTIPLY1_331( joint->anchor2, joint->node[1].body->posr.R, q );
+            dMultiply1_331( joint->anchor2, joint->node[1].body->posr.R, q );
         }
         else
         {
@@ -312,9 +312,9 @@ dReal dJointGetHingeAngleRate( dJointID j )
     if ( joint->node[0].body )
     {
         dVector3 axis;
-        dMULTIPLY0_331( axis, joint->node[0].body->posr.R, joint->axis1 );
-        dReal rate = dDOT( axis, joint->node[0].body->avel );
-        if ( joint->node[1].body ) rate -= dDOT( axis, joint->node[1].body->avel );
+        dMultiply0_331( axis, joint->node[0].body->posr.R, joint->axis1 );
+        dReal rate = dCalcVectorDot3( axis, joint->node[0].body->avel );
+        if ( joint->node[1].body ) rate -= dCalcVectorDot3( axis, joint->node[1].body->avel );
         if ( joint->flags & dJOINT_REVERSE ) rate = - rate;
         return rate;
     }
