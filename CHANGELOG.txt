@@ -12,6 +12,10 @@ the rules for this file:
 		* Macros changed to static inline functions in odemath.h and related files.
 		  Some code duplication has been eliminated across the files.
 
+		* Fixed handling of --disable-asserts and --enable-double-precision 
+		  (absence of --enable-double-precision) in configure script. The script
+		  was not appending compiler defines correctly.
+
 09/05/09 Oleh Derevenko
 		* dWorldStepFast1 API removed along with dWorld[Get/Set]AutoEnableDepthSF1
 
