@@ -156,6 +156,11 @@ struct dxWorldProcessContext
     m_pAllocCurrent = m_pAllocBegin;
   }
 
+  void *PeekBufferRemainder() const
+  {
+    return m_pAllocCurrent;
+  }
+
   void *AllocateBlock(size_t size)
   {
     void *block = m_pAllocCurrent;
@@ -179,6 +184,7 @@ struct dxWorldProcessContext
   }
 
 
+
   void CleanupContext();
 
   void SavePreallocations(int islandcount, int const *islandsizes, dxBody *const *bodies, dxJoint *const *joints);
@@ -188,6 +194,7 @@ struct dxWorldProcessContext
   void ClearPreallocations();
 
   void FreePreallocationsContext();
+  bool IsPreallocationsContextAssigned() const { return m_pPreallocationcContext != NULL; }
 
 
   void *m_pAllocBegin;
@@ -221,6 +228,8 @@ typedef size_t (*dmemestimate_fn_t) (dxBody * const *body, int nb,
 
 bool dxReallocateWorldProcessContext (dxWorld *world, 
   dReal stepsize, dmemestimate_fn_t stepperestimate);
+dxWorldProcessContext *dxReallocateTemporayWorldProcessContext(dxWorldProcessContext *oldcontext, 
+  size_t memreq, const dxWorldProcessMemoryManager *memmgr/*=NULL*/, const dxWorldProcessMemoryReserveInfo *reserveinfo/*=NULL*/);
 void dxFreeWorldProcessContext (dxWorldProcessContext *context);
 
 

@@ -500,7 +500,7 @@ void dBodySetMass (dBodyID b, const dMass *mass)
 			fabs( mass->c[2] ) <= dEpsilon, "The centre of mass must be at the origin." )
 
   memcpy (&b->mass,mass,sizeof(dMass));
-  if (dInvertPDMatrix (b->mass.I,b->invI,3)==0) {
+  if (dInvertPDMatrix (b->mass.I,b->invI,3,NULL)==0) {
     dDEBUGMSG ("inertia must be positive definite!");
     dRSetIdentity (b->invI);
   }
@@ -2181,10 +2181,6 @@ static const char ode_configuration[] = "ODE "
 #ifdef dNODEBUG
 REGISTER_EXTENSION( ODE_EXT_no_debug )
 #endif // dNODEBUG
-
-#ifdef dUSE_MALLOC_FOR_ALLOCA
-REGISTER_EXTENSION( ODE_EXT_malloc_not_alloca )
-#endif
 
 #if dTRIMESH_ENABLED
 REGISTER_EXTENSION( ODE_EXT_trimesh )

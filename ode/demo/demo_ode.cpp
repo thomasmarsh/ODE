@@ -1093,7 +1093,7 @@ extern "C" void dTestMatrixComparison()
 // internal unit tests
 extern "C" void dTestDataStructures();
 extern "C" void dTestMatrixComparison();
-extern "C" void dTestSolveLCP();
+extern "C" int dTestSolveLCP();
 
 
 int main()

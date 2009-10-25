@@ -3,7 +3,7 @@
 #include "ode/matrix.h"
 
 
-dReal dDot (const dReal *a, const dReal *b, int n)
+dReal _dDot (const dReal *a, const dReal *b, int n)
 {  
   dReal p0,q0,m0,p1,q1,m1,sum;
   sum = 0;
@@ -28,3 +28,12 @@ dReal dDot (const dReal *a, const dReal *b, int n)
   }
   return sum;
 }
+
+
+#undef dDot
+
+dReal dDot (const dReal *a, const dReal *b, int n)
+{
+  return _dDot (a, b, n);
+}
+

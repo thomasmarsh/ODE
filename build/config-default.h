@@ -18,11 +18,6 @@
  *                       32 bit indices. Use the dTriIndex type to
  *                       detect the correct index size.
  *
- *   dUSE_MALLOC_FOR_ALLOCA (experimental)-
- *                       Use malloc() instead of alloca(). Slower,
- *                       but allows for larger systems and more
- *                       graceful out-of-memory handling.
- *
  *   dTRIMESH_OPCODE_USE_NEW_TRIMESH_TRIMESH_COLLIDER (experimental)-
  *                       Use an alternative trimesh-trimesh collider
  *                       which should yield better results.
@@ -42,8 +37,6 @@
 #define dTRIMESH_16BIT_INDICES 0
 
 #define dTRIMESH_OPCODE_USE_OLD_TRIMESH_TRIMESH_COLLIDER 0
-
-/* #define dUSE_MALLOC_FOR_ALLOCA */
 
 /* #define dOU_ENABLED 1 */
 /* #define dATOMICS_ENABLED 1 */
@@ -95,17 +88,6 @@
   #include <alloca.h>
 #endif
 
-// Use the error-checking memory allocation system.  Because this system uses heap
-//  (malloc) instead of stack (alloca), it is slower.  However, it allows you to
-//  simulate larger scenes, as well as handle out-of-memory errors in a somewhat
-//  graceful manner
-
-#ifdef dUSE_MALLOC_FOR_ALLOCA
-enum {
-  d_MEMORY_OK = 0,              /* no memory errors */
-  d_MEMORY_OUT_OF_MEMORY        /* malloc failed due to out of memory error */
-};
-#endif
 
 #ifdef dSINGLE
        #define dEpsilon  FLT_EPSILON

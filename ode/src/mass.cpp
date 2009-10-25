@@ -49,7 +49,7 @@ int dMassCheck (const dMass *m)
     dDEBUGMSG ("mass must be > 0");
     return 0;
   }
-  if (!dIsPositiveDefinite (m->I,3)) {
+  if (!dIsPositiveDefinite (m->I,3,NULL)) {
     dDEBUGMSG ("inertia must be positive definite");
     return 0;
   }
@@ -74,7 +74,7 @@ int dMassCheck (const dMass *m)
   for (i=0; i<3; i++) I2[i] = m->I[i] + m->mass*I2[i];
   for (i=4; i<7; i++) I2[i] = m->I[i] + m->mass*I2[i];
   for (i=8; i<11; i++) I2[i] = m->I[i] + m->mass*I2[i];
-  if (!dIsPositiveDefinite (I2,3)) {
+  if (!dIsPositiveDefinite (I2,3,NULL)) {
     dDEBUGMSG ("center of mass inconsistent with mass parameters");
     return 0;
   }

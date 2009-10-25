@@ -168,7 +168,7 @@ static void dSolveL1_2 (const dReal *L, dReal *B, int n, int lskip1)
 }
 
 
-void dFactorLDLT (dReal *A, dReal *d, int n, int nskip1)
+void _dFactorLDLT (dReal *A, dReal *d, int n, int nskip1)
 {  
   int i,j;
   dReal sum,*ell,*dee,dd,p1,p2,q1,q2,Z11,m11,Z21,m21,Z22,m22;
@@ -379,3 +379,12 @@ void dFactorLDLT (dReal *A, dReal *d, int n, int nskip1)
     default: *((char*)0)=0;  /* this should never happen! */
   }
 }
+
+
+#undef dFactorLDLT
+
+void dFactorLDLT (dReal *A, dReal *d, int n, int nskip1)
+{
+  _dFactorLDLT (A, d, n, nskip1);
+}
+
