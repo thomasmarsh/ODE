@@ -140,83 +140,25 @@
 
 
 
-/*
-* special case matrix multipication, with operator selection
-*/
-
-#define dMULTIPLYOP0_331(A,op,B,C) \
-  do { \
-  (A)[0] op dDOT((B),(C)); \
-  (A)[1] op dDOT((B+4),(C)); \
-  (A)[2] op dDOT((B+8),(C)); \
-  } while(0)
-#define dMULTIPLYOP1_331(A,op,B,C) \
-  do { \
-  (A)[0] op dDOT41((B),(C)); \
-  (A)[1] op dDOT41((B+1),(C)); \
-  (A)[2] op dDOT41((B+2),(C)); \
-  } while(0)
-#define dMULTIPLYOP0_133(A,op,B,C) \
-  do { \
-  (A)[0] op dDOT14((B),(C)); \
-  (A)[1] op dDOT14((B),(C+1)); \
-  (A)[2] op dDOT14((B),(C+2)); \
-  } while(0)
-#define dMULTIPLYOP0_333(A,op,B,C) \
-  do { \
-  (A)[0] op dDOT14((B),(C)); \
-  (A)[1] op dDOT14((B),(C+1)); \
-  (A)[2] op dDOT14((B),(C+2)); \
-  (A)[4] op dDOT14((B+4),(C)); \
-  (A)[5] op dDOT14((B+4),(C+1)); \
-  (A)[6] op dDOT14((B+4),(C+2)); \
-  (A)[8] op dDOT14((B+8),(C)); \
-  (A)[9] op dDOT14((B+8),(C+1)); \
-  (A)[10] op dDOT14((B+8),(C+2)); \
-  } while(0)
-#define dMULTIPLYOP1_333(A,op,B,C) \
-  do { \
-  (A)[0] op dDOT44((B),(C)); \
-  (A)[1] op dDOT44((B),(C+1)); \
-  (A)[2] op dDOT44((B),(C+2)); \
-  (A)[4] op dDOT44((B+1),(C)); \
-  (A)[5] op dDOT44((B+1),(C+1)); \
-  (A)[6] op dDOT44((B+1),(C+2)); \
-  (A)[8] op dDOT44((B+2),(C)); \
-  (A)[9] op dDOT44((B+2),(C+1)); \
-  (A)[10] op dDOT44((B+2),(C+2)); \
-  } while(0)
-#define dMULTIPLYOP2_333(A,op,B,C) \
-  do { \
-  (A)[0] op dDOT((B),(C)); \
-  (A)[1] op dDOT((B),(C+4)); \
-  (A)[2] op dDOT((B),(C+8)); \
-  (A)[4] op dDOT((B+4),(C)); \
-  (A)[5] op dDOT((B+4),(C+4)); \
-  (A)[6] op dDOT((B+4),(C+8)); \
-  (A)[8] op dDOT((B+8),(C)); \
-  (A)[9] op dDOT((B+8),(C+4)); \
-  (A)[10] op dDOT((B+8),(C+8)); \
-  } while(0)
 
 /* 
 Note: NEVER call any of these functions/macros with the same variable for A and C, 
 it is not equivalent to A*=B.
 */
 
-PURE_INLINE void dMULTIPLY0_331(dReal *A, const dReal *B, const dReal *C) { dMULTIPLYOP0_331(A,=,B,C); }
-PURE_INLINE void dMULTIPLY1_331(dReal *A, const dReal *B, const dReal *C) { dMULTIPLYOP1_331(A,=,B,C); }
-PURE_INLINE void dMULTIPLY0_133(dReal *A, const dReal *B, const dReal *C) { dMULTIPLYOP0_133(A,=,B,C); }
-PURE_INLINE void dMULTIPLY0_333(dReal *A, const dReal *B, const dReal *C) { dMULTIPLYOP0_333(A,=,B,C); }
-PURE_INLINE void dMULTIPLY1_333(dReal *A, const dReal *B, const dReal *C) { dMULTIPLYOP1_333(A,=,B,C); }
-PURE_INLINE void dMULTIPLY2_333(dReal *A, const dReal *B, const dReal *C) { dMULTIPLYOP2_333(A,=,B,C); }
+#define dMULTIPLY0_331(A, B, C) dMultiply0_331(A, B, C)
+#define dMULTIPLY1_331(A, B, C) dMultiply1_331(A, B, C)
+#define dMULTIPLY0_133(A, B, C) dMultiply0_133(A, B, C)
+#define dMULTIPLY0_333(A, B, C) dMultiply0_333(A, B, C)
+#define dMULTIPLY1_333(A, B, C) dMultiply1_333(A, B, C)
+#define dMULTIPLY2_333(A, B, C) dMultiply2_333(A, B, C)
 
-PURE_INLINE void dMULTIPLYADD0_331(dReal *A, const dReal *B, const dReal *C) { dMULTIPLYOP0_331(A,+=,B,C); }
-PURE_INLINE void dMULTIPLYADD1_331(dReal *A, const dReal *B, const dReal *C) { dMULTIPLYOP1_331(A,+=,B,C); }
-PURE_INLINE void dMULTIPLYADD0_133(dReal *A, const dReal *B, const dReal *C) { dMULTIPLYOP0_133(A,+=,B,C); }
-PURE_INLINE void dMULTIPLYADD0_333(dReal *A, const dReal *B, const dReal *C) { dMULTIPLYOP0_333(A,+=,B,C); }
-PURE_INLINE void dMULTIPLYADD1_333(dReal *A, const dReal *B, const dReal *C) { dMULTIPLYOP1_333(A,+=,B,C); }
-PURE_INLINE void dMULTIPLYADD2_333(dReal *A, const dReal *B, const dReal *C) { dMULTIPLYOP2_333(A,+=,B,C); }
+#define dMULTIPLYADD0_331(A, B, C) dMultiplyAdd0_331(A, B, C)
+#define dMULTIPLYADD1_331(A, B, C) dMultiplyAdd1_331(A, B, C)
+#define dMULTIPLYADD0_133(A, B, C) dMultiplyAdd0_133(A, B, C)
+#define dMULTIPLYADD0_333(A, B, C) dMultiplyAdd0_333(A, B, C)
+#define dMULTIPLYADD1_333(A, B, C) dMultiplyAdd1_333(A, B, C)
+#define dMULTIPLYADD2_333(A, B, C) dMultiplyAdd2_333(A, B, C)
 
 
 ///////////////////////////////////////////////////////////////////////////////
