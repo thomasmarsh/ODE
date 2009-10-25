@@ -31,6 +31,9 @@ extern "C" {
 #endif
 
 
+#define PURE_INLINE static __inline
+
+
 /* configuration stuff */
 
 /* constants */
