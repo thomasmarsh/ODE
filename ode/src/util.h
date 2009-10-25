@@ -243,6 +243,7 @@ public:
   dxStepWorkingMemory(): m_uiRefCount(1), m_ppcProcessingContext(NULL), m_priReserveInfo(NULL), m_pmmMemoryManager(NULL) {}
 
 private:
+  friend struct dBase; // To avoid GCC warning regarding private destructor
   ~dxStepWorkingMemory() // Use Release() instead
   {
     if (m_ppcProcessingContext) dxFreeWorldProcessContext(m_ppcProcessingContext);
