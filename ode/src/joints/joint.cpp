@@ -177,15 +177,20 @@ void setBall2( dxJoint *joint, dxJoint::Info2 *info,
     if ( joint->node[1].body )
     {
         for ( i = 0; i < 3; i++ ) a2[i] += joint->node[1].body->posr.pos[i];
-        info->c[0] = k1 * ( dCalcVectorDot3( axis, a2 ) - dCalcVectorDot3( axis, a1 ) );
-        info->c[1] = k * ( dCalcVectorDot3( q1, a2 ) - dCalcVectorDot3( q1, a1 ) );
-        info->c[2] = k * ( dCalcVectorDot3( q2, a2 ) - dCalcVectorDot3( q2, a1 ) );
+        
+        dVector3 a2_minus_a1;
+        dSubtractVectors3(a2_minus_a1, a2, a1);
+        info->c[0] = k1 * dCalcVectorDot3( axis, a2_minus_a1 );
+        info->c[1] = k * dCalcVectorDot3( q1, a2_minus_a1 );
+        info->c[2] = k * dCalcVectorDot3( q2, a2_minus_a1 );
     }
     else
     {
-        info->c[0] = k1 * ( dCalcVectorDot3( axis, anchor2 ) - dCalcVectorDot3( axis, a1 ) );
-        info->c[1] = k * ( dCalcVectorDot3( q1, anchor2 ) - dCalcVectorDot3( q1, a1 ) );
-        info->c[2] = k * ( dCalcVectorDot3( q2, anchor2 ) - dCalcVectorDot3( q2, a1 ) );
+        dVector3 anchor2_minus_a1;
+        dSubtractVectors3(anchor2_minus_a1, anchor2, a1);
+        info->c[0] = k1 * dCalcVectorDot3( axis, anchor2_minus_a1 );
+        info->c[1] = k * dCalcVectorDot3( q1, anchor2_minus_a1 );
+        info->c[2] = k * dCalcVectorDot3( q2, anchor2_minus_a1 );
     }
 }
 
