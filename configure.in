@@ -139,7 +139,8 @@ else
         ODE_PRECISION=-DdSINGLE
 fi
 
-CPPFLAGS+=" $ODE_PRECISION"
+CFLAGS="$CFLAGS $ODE_PRECISION"
+CXXFLAGS="$CXXFLAGS $ODE_PRECISION"
 AC_SUBST(ODE_PRECISION)
 
 
@@ -352,10 +353,12 @@ AC_ARG_ENABLE([asserts],
         asserts=$enableval,asserts=yes)
 if test x$asserts = xno
 then
-    CPPFLAGS="$CPPFLAGS -DdNODEBUG"
+    CFLAGS="$CFLAGS -DdNODEBUG"
+    CXXFLAGS="$CXXFLAGS -DdNODEBUG"
     if test x$use_ou = xyes
     then
-        CPPFLAGS="$CPPFLAGS -DNDEBUG"
+        CFLAGS="$CFLAGS -DNDEBUG"
+        CXXFLAGS="$CXXFLAGS -DNDEBUG"
     fi
 fi
 
