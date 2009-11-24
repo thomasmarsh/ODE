@@ -102,11 +102,31 @@
   }
   
   newoption {
-    trigger = "to",
-    value   = "path",
+    trigger     = "to",
+    value       = "path",
     description = "Set the output location for the generated project files"
   }
+  
+  newoption {
+    trigger     = "only-shared",
+	description = "Only build shared (DLL) version of the library"
+  }
+  
+  newoption {
+    trigger     = "only-static",
+	description = "Only build static versions of the library"
+  }
 
+  newoption {
+    trigger     = "only-single",
+	description = "Only use single-precision math"
+  }
+  
+  newoption {
+    trigger     = "only-double",
+	description = "Only use double-precision math"
+  }
+  
   -- always clean all of the optional components and toolsets
   if _ACTION == "clean" then
     _OPTIONS["with-demos"] = ""
@@ -116,8 +136,36 @@
     end
   end
   
-  
+  -- special validation for Xcode  
+  if _ACTION == "xcode3" and (not _OPTIONS["only-single"] and not _OPTIONS["only-double"]) then
+    error(
+	  "Xcode does not support different library types in a single project.\n" ..
+	  "Please use one of the flags: --only-static or --only-shared", 0)
+  end
 
+  -- build the list of configurations, based on the flags. Ends up
+  -- with configurations like "Debug", "DebugSingle" or "DebugSingleShared"
+  local configs = { "Debug", "Release" }
+  
+  local function addconfigs(...)
+	local newconfigs = { }
+	for _, root in ipairs(configs) do
+	  for _, suffix in ipairs(arg) do
+		table.insert(newconfigs, root .. suffix)
+	  end
+	end
+	configs = newconfigs
+  end
+  
+  if not _OPTIONS["only-single"] and not _OPTIONS["only-double"] then
+    addconfigs("Single", "Double")
+  end
+  
+  if not _OPTIONS["only-shared"] and not _OPTIONS["only-static"] then
+    addconfigs("DLL", "Lib")
+  end
+
+  
 ----------------------------------------------------------------------
 -- The solution, and solution-wide settings
 ----------------------------------------------------------------------
@@ -132,14 +180,11 @@
       "../include",
       "../ode/src"
     }
+    
+    flags { "NoManifest" }
       
-    -- define all the possible build configurations
-    configurations {
-      "DebugSingleDLL", "ReleaseSingleDLL", 
-      "DebugSingleLib", "ReleaseSingleLib", 
-      "DebugDoubleDLL", "ReleaseDoubleDLL", 
-      "DebugDoubleLib", "ReleaseDoubleLib"    
-    }
+    -- apply the configuration list built above
+    configurations (configs)
     
     configuration { "Debug*" }
       defines { "_DEBUG" }
@@ -148,10 +193,10 @@
     configuration { "Release*" }
       flags   { "OptimizeSpeed", "NoFramePointer" }
 
-    configuration { "*Single*" }
+    configuration { "only-single or *Single*" }
       defines { "dSINGLE" }
       
-    configuration { "*Double*" }
+    configuration { "only-double or *Double*" }
       defines { "dDOUBLE" }
     
     configuration { "Windows" }
@@ -212,7 +257,7 @@
 
   project "ode"
 
-    kind     "StaticLib"
+    -- kind     "StaticLib"
     location ( _OPTIONS["to"] or _ACTION )
 
     includedirs {
@@ -267,29 +312,31 @@
     configuration { "windows" }
       links   { "user32" }
             
-    configuration { "*Lib" }
+    configuration { "only-static or *Lib" }
       kind    "StaticLib"
       defines "ODE_LIB"
       
-    configuration { "*DLL" }
+    configuration { "only-shared or *DLL" }
       kind    "SharedLib"
       defines "ODE_DLL"
 
+    configuration { "Debug" }
+	  targetname "oded"
+	  
+	configuration { "Release" }
+	  targetname "ode"
+	  
     configuration { "DebugSingle*" }
       targetname "ode_singled"
-      defines    "dSINGLE"
       
     configuration { "ReleaseSingle*" }
       targetname "ode_single"
-      defines    "dSINGLE"
       
     configuration { "DebugDouble*" }
       targetname "ode_doubled"
-      defines    "dDOUBLE"
       
     configuration { "ReleaseDouble*" }
       targetname "ode_double"
-      defines    "dDOUBLE"
 
 
 ----------------------------------------------------------------------
@@ -342,15 +389,15 @@
         "../drawstuff/src/internal.h",
         "../drawstuff/src/drawstuff.cpp"
       }
-    
+      
       configuration { "Debug*" }
         targetname "drawstuffd"
             
-      configuration { "*Lib" }
+      configuration { "only-static or *Lib" }
         kind    "StaticLib"
         defines { "DS_LIB" }
       
-      configuration { "*DLL" }
+      configuration { "only-shared or *DLL" }
         kind    "SharedLib"
         defines { "DS_DLL", "USRDLL" }
       
