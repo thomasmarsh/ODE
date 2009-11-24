@@ -111,8 +111,8 @@
   if _ACTION == "clean" then
     _OPTIONS["with-demos"] = ""
     _OPTIONS["with-tests"] = ""
-    for action in pairs(premake.actions) do
-      os.rmdir(action)
+    for action in premake.action.each() do
+      os.rmdir(action.trigger)
     end
   end
   
