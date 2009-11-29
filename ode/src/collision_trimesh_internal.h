@@ -87,6 +87,50 @@ private:
 #endif // !dTRIMESH_OPCODE_USE_OLD_TRIMESH_TRIMESH_COLLIDER
 #endif // dTRIMESH_OPCODE
 
+struct VertexUseCache
+{
+public:
+	VertexUseCache(): m_VertexUseBits(NULL), m_VertexUseElements(0) {}
+	~VertexUseCache() { FreeVertexUSEDFlags();  }
+
+	bool ResizeAndResetVertexUSEDFlags(unsigned VertexCount)
+	{
+		bool Result = false;
+		size_t VertexNewElements = (VertexCount + 7) / 8;
+		if (VertexNewElements <= m_VertexUseElements || ReallocVertexUSEDFlags(VertexNewElements)) {
+			memset(m_VertexUseBits, 0, VertexNewElements);
+			Result = true;
+		}
+		return Result;
+	}
+	
+	bool GetVertexUSEDFlag(unsigned VertexIndex) const { return (m_VertexUseBits[VertexIndex / 8] & (1 << (VertexIndex % 8))) != 0; }
+	void SetVertexUSEDFlag(unsigned VertexIndex) { m_VertexUseBits[VertexIndex / 8] |= (1 << (VertexIndex % 8)); }
+
+private:
+	bool ReallocVertexUSEDFlags(size_t VertexNewElements)
+	{
+		bool Result = false;
+		uint8 *VertexNewBits = (uint8 *)dRealloc(m_VertexUseBits, m_VertexUseElements * sizeof(m_VertexUseBits[0]), VertexNewElements * sizeof(m_VertexUseBits[0]));
+		if (VertexNewBits) {
+			m_VertexUseBits = VertexNewBits;
+			m_VertexUseElements = VertexNewElements;
+			Result = true;
+		}
+		return Result;
+	}
+
+	void FreeVertexUSEDFlags()
+	{
+		dFree(m_VertexUseBits, m_VertexUseElements * sizeof(m_VertexUseBits[0]));
+		m_VertexUseBits = NULL;
+		m_VertexUseElements = 0;
+	}
+
+private:
+	uint8 *m_VertexUseBits;
+	size_t m_VertexUseElements;
+};
 
 
 struct TrimeshCollidersCache
@@ -126,6 +170,9 @@ struct TrimeshCollidersCache
 	SphereCache defaultSphereCache;
 	OBBCache defaultBoxCache;
 	LSSCache defaultCapsuleCache;
+
+	// Trimesh-plane collision vertex use cache
+	VertexUseCache VertexUses;
 
 #endif // dTRIMESH_OPCODE
 };
@@ -174,7 +221,7 @@ struct dxTriMeshData  : public dBase
     void Preprocess();
     /* For when app changes the vertices */
     void UpdateData();
-
+    
 #if dTRIMESH_OPCODE
 	Model BVTree;
 	MeshInterface Mesh;
@@ -182,18 +229,18 @@ struct dxTriMeshData  : public dBase
     dxTriMeshData();
     ~dxTriMeshData();
     
-    void Build(const void* Vertices, int VertexStide, int VertexCount, 
-	       const void* Indices, int IndexCount, int TriStride, 
-	       const void* Normals, 
-	       bool Single);
-    
-        /* aabb in model space */
-        dVector3 AABBCenter;
-        dVector3 AABBExtents;
+	void Build(const void* Vertices, int VertexStide, int VertexCount, 
+		const void* Indices, int IndexCount, int TriStride, 
+		const void* Normals, 
+		bool Single);
 
-    // data for use in collision resolution
-    const void* Normals;
-    uint8* UseFlags;
+	/* aabb in model space */
+	dVector3 AABBCenter;
+	dVector3 AABBExtents;
+
+	// data for use in collision resolution
+	const void* Normals;
+	uint8* UseFlags;
 #endif  // dTRIMESH_OPCODE
 
 #if dTRIMESH_GIMPACT

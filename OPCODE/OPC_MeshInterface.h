@@ -23,7 +23,7 @@
 	struct VertexPointers
 	{
 		const Point*	Vertex[3];
-
+		
 		bool BackfaceCulling(const Point& source)
 		{
 			const Point& p0 = *Vertex[0];
@@ -38,6 +38,12 @@
 		}
 	};
 
+	struct VertexPointersEx
+	{
+		VertexPointers	vp;
+		dTriIndex	Index[3];
+	};
+
 	typedef			Point				ConversionArea[3];
 
 #ifdef OPC_USE_CALLBACKS
@@ -50,6 +56,16 @@
 	 */
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	typedef void	(*RequestCallback)	(udword triangle_index, VertexPointers& triangle, void* user_data);
+
+	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	/**
+	*	User-callback, called by OPCODE to request vertex indices from the app.
+	*	\param		triangle_index	[in] face index for which the system is requesting the vertices
+	*	\param		triangle		[out] triangle's vertices with indices (must be provided by the user)
+	*	\param		user_data		[in] user-defined data from SetExCallback()
+	*/
+	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	typedef void	(*RequestExCallback)	(udword triangle_index, VertexPointersEx& triangle, void* user_data);
 #endif
 
 	class OPCODE_API MeshInterface
@@ -78,6 +94,18 @@
 						bool				SetCallback(RequestCallback callback, void* user_data);
 		inline_			void*				GetUserData()		const	{ return mUserData;		}
 		inline_			RequestCallback		GetCallback()		const	{ return mObjCallback;	}
+
+		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+		/**
+		*	Callback control: setups object callback. Must provide triangle-vertices for a given triangle index.
+		*	\param		callback	[in] user-defined callback
+		*	\param		user_data	[in] user-defined data
+		*	\return		true if success
+		*/
+		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+		bool				SetExCallback(RequestExCallback callback, void* user_data);
+		inline_			void*				GetExUserData()		const	{ return mExUserData;		}
+		inline_			RequestExCallback	GetExCallback()		const	{ return mObjExCallback;	}
 #else
 		// Pointers settings
 
@@ -114,8 +142,17 @@
 		*	\param		value		[in] Indicates if mesh data is provided as array of \c single values. If \c false, data is expected to contain \c double elements.
 		*/
 		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-		inline_			void				SetSingle(bool value) { mFetchTriangle = (value ? &MeshInterface::FetchTriangleFromSingles : &MeshInterface::FetchTriangleFromDoubles); }
+		inline_			void				SetSingle(bool value)
+											{
+												mFetchTriangle = (value ? &MeshInterface::FetchTriangleFromSingles : &MeshInterface::FetchTriangleFromDoubles);
+												mFetchExTriangle = (value ? &MeshInterface::FetchExTriangleFromSingles : &MeshInterface::FetchExTriangleFromDoubles);
+											}
 
+	#else
+		inline_			bool				SetStrides(udword tri_stride=sizeof(IndexedTriangle), udword vertex_stride=sizeof(Point)) { return true; }
+		inline_			void				SetSingle(bool value) {}
+		inline_			udword				GetTriStride()		const	{ return sizeof(IndexedTriangle);	}
+		inline_			udword				GetVertexStride()	const	{ return sizeof(Point);	}
 	#endif
 #endif
 
@@ -139,10 +176,41 @@
 												// but get rig of branching and dead code injection.
 												((*this).*mFetchTriangle)(vp, index, vc);
 	#else
+												const Point* Verts = GetVerts();
 												const IndexedTriangle* T = &mTris[index];
-												vp.Vertex[0] = &mVerts[T->mVRef[0]];
-												vp.Vertex[1] = &mVerts[T->mVRef[1]];
-												vp.Vertex[2] = &mVerts[T->mVRef[2]];
+												vp.Vertex[0] = &Verts[T->mVRef[0]];
+												vp.Vertex[1] = &Verts[T->mVRef[1]];
+												vp.Vertex[2] = &Verts[T->mVRef[2]];
+	#endif
+#endif
+											}
+
+		inline_			bool				GetExTriangle(VertexPointersEx& vpe, udword index, ConversionArea vc)	const
+											{
+#ifdef OPC_USE_CALLBACKS
+												if (mObjExCallback) { (mObjExCallback)(index, vpe, mUserData); return true; }
+												else { (mObjCallback)(index, vpe.vp, mUserData); return false; }
+#else
+	#ifdef OPC_USE_STRIDE
+												// Since there was conditional statement "if (Single)" which was unpredictable for compiler 
+												// and required both branches to be always generated what made inlining a questionable 
+												// benefit, I consider it better to introduce a forced call
+												// but get rig of branching and dead code injection.
+												((*this).*mFetchExTriangle)(vpe, index, vc);
+												return true;
+	#else
+												const Point* Verts = GetVerts();
+												const IndexedTriangle* T = &mTris[index];
+												dTriIndex VertIndex0 = T->mVRef[0];
+												vpe.Index[0] = VertIndex0;
+												vpe.vp.Vertex[0] = &Verts[VertIndex0];
+												dTriIndex VertIndex1 = T->mVRef[1];
+												vpe.Index[1] = VertIndex1;
+												vpe.vp.Vertex[1] = &Verts[VertIndex1];
+												dTriIndex VertIndex2 = T->mVRef[2];
+												vpe.Index[2] = VertIndex2;
+												vpe.vp.Vertex[2] = &Verts[VertIndex2];
+												return true;
 	#endif
 #endif
 											}
@@ -152,6 +220,8 @@
 	#ifdef OPC_USE_STRIDE
 		void				FetchTriangleFromSingles(VertexPointers& vp, udword index, ConversionArea vc) const;
 		void				FetchTriangleFromDoubles(VertexPointers& vp, udword index, ConversionArea vc) const;
+		void				FetchExTriangleFromSingles(VertexPointersEx& vpe, udword index, ConversionArea vc) const;
+		void				FetchExTriangleFromDoubles(VertexPointersEx& vpe, udword index, ConversionArea vc) const;
 	#endif
 #endif
 
@@ -190,6 +260,8 @@
 		// User callback
 						void*				mUserData;			//!< User-defined data sent to callback
 						RequestCallback		mObjCallback;		//!< Object callback
+						void*				mExUserData;		//!< User-defined data sent to ex-callback
+						RequestExCallback	mObjExCallback;		//!< Object ex-callback
 #else
 		// User pointers
 	#ifdef OPC_USE_STRIDE
@@ -197,6 +269,8 @@
 						udword				mVertexStride;		//!< Possible vertex stride in bytes [Opcode 1.3]
 				typedef	void (MeshInterface:: *TriangleFetchProc)(VertexPointers& vp, udword index, ConversionArea vc) const;
 						TriangleFetchProc	mFetchTriangle;
+				typedef	void (MeshInterface:: *ExTriangleFetchProc)(VertexPointersEx& vpe, udword index, ConversionArea vc) const;
+						ExTriangleFetchProc	mFetchExTriangle;
 	#endif
 						const	IndexedTriangle*	mTris;				//!< Array of indexed triangles
 						const	Point*				mVerts;				//!< Array of vertices

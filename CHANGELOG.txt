@@ -8,6 +8,11 @@ the rules for this file:
   * keep the format consistent (79 char width, M/D/Y date format).
 
 ------------------------------------------------------------------------------
+11/29/09 Oleh Derevenko
+		* Improvement for trimesh-plane collision (also used in trimesh-heightfield)
+		  to exclude mesh vertices that have already generated contacts from further
+		  examination and contact generation in other triangles (suggested by LR).
+
 10/25/09 Oleh Derevenko
 		* Macros changed to static inline functions in odemath.h and related files.
 		  Some code duplication has been eliminated across the files.
