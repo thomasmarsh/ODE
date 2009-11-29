@@ -59,27 +59,47 @@ int dCollideTrimeshPlane( dxGeom *o1, dxGeom *o2, int flags, dContactGeom* conta
 	// For all triangles.
 	//
 
-	// Cache the triangle count.
-	const int tri_count = trimesh->Data->Mesh.GetNbTriangles();
-
-	VertexPointers VP;
+	VertexPointersEx VPE;
+	VertexPointers &VP = VPE.vp;
 	ConversionArea VC;
 	dReal alpha;
 	dVector3 vertex;
-
+	
 #if !defined(dSINGLE) || 1
 	dVector3 int_vertex;		// Intermediate vertex for double precision mode.
 #endif // dSINGLE
+
+	const unsigned uiTLSKind = trimesh->getParentSpaceTLSKind();
+	dIASSERT(uiTLSKind == plane->getParentSpaceTLSKind()); // The colliding spaces must use matching cleanup method
+	TrimeshCollidersCache *pccColliderCache = GetTrimeshCollidersCache(uiTLSKind);
+	VertexUseCache &vertex_use_cache = pccColliderCache->VertexUses;
+
+	// Reallocate vertex use cache if necessary
+	const int vertex_count = trimesh->Data->Mesh.GetNbVertices();
+	const bool cache_status = vertex_use_cache.ResizeAndResetVertexUSEDFlags(vertex_count);
+
+	// Cache the triangle count.
+	const int tri_count = trimesh->Data->Mesh.GetNbTriangles();
 
 	// For each triangle
 	for ( int t = 0; t < tri_count; ++t )
 	{
 		// Get triangle, which should also use callback.
-		trimesh->Data->Mesh.GetTriangle( VP, t, VC);
-
+		bool ex_avail = trimesh->Data->Mesh.GetExTriangle( VPE, t, VC);
+		
 		// For each vertex.
 		for ( int v = 0; v < 3; ++v )
 		{
+			// point already used ?
+			if (cache_status && ex_avail)
+			{
+				unsigned VIndex = VPE.Index[v];
+				if (vertex_use_cache.GetVertexUSEDFlag(VIndex))
+					continue;
+				// mark this point as used
+				vertex_use_cache.SetVertexUSEDFlag(VIndex);
+			}
+		
 			//
 			// Get Vertex
 			//

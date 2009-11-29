@@ -130,12 +130,15 @@ MeshInterface::MeshInterface() :
 	mNbVerts		(0),
 #ifdef OPC_USE_CALLBACKS
 	mUserData		(null),
-	mObjCallback	(null)
+	mObjCallback	(null),
+	mExUserData		(null),
+	mObjExCallback	(null),
 #else
 	#ifdef OPC_USE_STRIDE
 	mTriStride		(sizeof(IndexedTriangle)),
 	mVertexStride	(sizeof(Point)),
 	mFetchTriangle	(&MeshInterface::FetchTriangleFromSingles),
+	mFetchExTriangle	(&MeshInterface::FetchExTriangleFromSingles),
 	#endif
 	mTris			(null),
 	mVerts			(null)
@@ -218,6 +221,23 @@ bool MeshInterface::SetCallback(RequestCallback callback, void* user_data)
 	mUserData		= user_data;
 	return true;
 }
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/**
+*	Callback control: setups object ex-callback. Must provide triangle-vertices and vertex indice for a given triangle index.
+*	\param		callback	[in] user-defined callback
+*	\param		user_data	[in] user-defined data
+*	\return		true if success
+*/
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+bool MeshInterface::SetExCallback(RequestExCallback callback, void* user_data)
+{
+//	if(!callback)	-- allow nulls
+
+	mObjExCallback	= callback;
+	mExUserData		= user_data;
+	return true;
+}
 #else
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /**
@@ -259,25 +279,69 @@ bool MeshInterface::SetStrides(udword tri_stride, udword vertex_stride)
 #ifndef OPC_USE_CALLBACKS
 #ifdef OPC_USE_STRIDE
 void MeshInterface::FetchTriangleFromSingles(VertexPointers& vp, udword index, ConversionArea vc) const
-{
+{	
 	const IndexedTriangle* T = (const IndexedTriangle*)(((ubyte*)mTris) + index * mTriStride);
 
-	vp.Vertex[0] = (const Point*)(((ubyte*)mVerts) + T->mVRef[0] * mVertexStride);
-	vp.Vertex[1] = (const Point*)(((ubyte*)mVerts) + T->mVRef[1] * mVertexStride);
-	vp.Vertex[2] = (const Point*)(((ubyte*)mVerts) + T->mVRef[2] * mVertexStride);
+	const Point* Verts = GetVerts();
+	udword VertexStride = GetVertexStride();
+	vp.Vertex[0] = (const Point*)(((ubyte*)Verts) + T->mVRef[0] * VertexStride);
+	vp.Vertex[1] = (const Point*)(((ubyte*)Verts) + T->mVRef[1] * VertexStride);
+	vp.Vertex[2] = (const Point*)(((ubyte*)Verts) + T->mVRef[2] * VertexStride);
 }
 
 void MeshInterface::FetchTriangleFromDoubles(VertexPointers& vp, udword index, ConversionArea vc) const
 {
 	const IndexedTriangle* T = (const IndexedTriangle*)(((ubyte*)mTris) + index * mTriStride);
+	
+	const Point* Verts = GetVerts();
+	udword VertexStride = GetVertexStride();
 
 	for (int i = 0; i < 3; i++){
-		const double* v = (const double*)(((ubyte*)mVerts) + T->mVRef[i] * mVertexStride);
+		const double* v = (const double*)(((ubyte*)Verts) + T->mVRef[i] * VertexStride);
 
 		vc[i].x = (float)v[0];
 		vc[i].y = (float)v[1];
 		vc[i].z = (float)v[2];
 		vp.Vertex[i] = &vc[i];
+	}
+}
+
+void MeshInterface::FetchExTriangleFromSingles(VertexPointersEx& vpe, udword index, ConversionArea vc) const
+{	
+	const IndexedTriangle* T = (const IndexedTriangle*)(((ubyte*)mTris) + index * mTriStride);
+
+	const Point* Verts = GetVerts();
+	udword VertexStride = GetVertexStride();
+
+	dTriIndex VertIndex0 = T->mVRef[0];
+	vpe.Index[0] = VertIndex0;
+	vpe.vp.Vertex[0] = (const Point*)(((ubyte*)Verts) + VertIndex0 * VertexStride);
+
+	dTriIndex VertIndex1 = T->mVRef[1];
+	vpe.Index[1] = VertIndex1;
+	vpe.vp.Vertex[1] = (const Point*)(((ubyte*)Verts) + VertIndex1 * VertexStride);
+
+	dTriIndex VertIndex2 = T->mVRef[2];
+	vpe.Index[2] = VertIndex2;
+	vpe.vp.Vertex[2] = (const Point*)(((ubyte*)Verts) + VertIndex2 * VertexStride);
+}
+
+void MeshInterface::FetchExTriangleFromDoubles(VertexPointersEx& vpe, udword index, ConversionArea vc) const
+{
+	const IndexedTriangle* T = (const IndexedTriangle*)(((ubyte*)mTris) + index * mTriStride);
+
+	const Point* Verts = GetVerts();
+	udword VertexStride = GetVertexStride();
+
+	for (int i = 0; i < 3; i++){
+		dTriIndex VertIndex = T->mVRef[i];
+		vpe.Index[i] = VertIndex;
+
+		const double* v = (const double*)(((ubyte*)Verts) + VertIndex * VertexStride);
+		vc[i].x = (float)v[0];
+		vc[i].y = (float)v[1];
+		vc[i].z = (float)v[2];
+		vpe.vp.Vertex[i] = &vc[i];
 	}
 }
 #endif
