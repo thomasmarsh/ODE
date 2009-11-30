@@ -73,11 +73,6 @@ struct dxJoint : public dObject
     // i.e. that is the total number of rows in the jacobian. `nub' is the
     // number of unbounded variables (which have lo,hi = -/+ infinity).
 
-    struct SureMaxInfo
-    {
-      int8 max_m; // Zero or estimate of maximal `m'
-    };
-
     struct Info1
     {
         // Structure size should not exceed sizeof(pointer) bytes to have 
@@ -117,6 +112,24 @@ struct dxJoint : public dObject
         int *findex;
     };
 
+    // info returned by getSureMaxInfo function. 
+    // The information is used for memory reservation in calculations.
+
+    struct SureMaxInfo
+    {
+      // The value of `max_m' must ALWAYS be not less than the value of `m'
+      // the getInfo1 call can generate in current joint state. Another 
+      // requirement is that the value should be provided very quickly, 
+      // without the excessive calculations.
+      // If it is hard/impossible to quickly predict the maximal value of `m'
+      // (which is the case for most joint types) the maximum for current 
+      // joint type in general should be returned. If it can be known the `m'
+      // will be smaller, it can save a bit of memory from being reserved 
+      // for calculations if that smaller value is returned.
+
+      int8 max_m; // Estimate of maximal `m' in Info1
+    };
+
 
     unsigned flags;             // dJOINT_xxx flags
     dxJointNode node[2];        // connections to bodies. node[1].body can be 0
@@ -127,11 +140,11 @@ struct dxJoint : public dObject
     dxJoint( dxWorld *w );
     virtual ~dxJoint();
 
-    // This quickly!!! estimate minimum (zero or not) and maximum value of "m" that could be returned by getInfo1()
-    virtual void getSureMaxInfo( SureMaxInfo* info ) = 0;
-
     virtual void getInfo1( Info1* info ) = 0;
     virtual void getInfo2( Info2* info ) = 0;
+    // This call quickly!!! estimates maximum value of "m" that could be returned by getInfo1()
+	// See comments at definition of SureMaxInfo for defails.
+    virtual void getSureMaxInfo( SureMaxInfo* info ) = 0;
     virtual dJointType type() const = 0;
     virtual size_t size() const = 0;
 
