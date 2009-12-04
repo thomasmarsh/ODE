@@ -36,10 +36,20 @@
 class dWorldSimpleIDContainer {
 protected:
 	dWorldID _id;
+
+	dWorldSimpleIDContainer(): _id(0) {}
+	~dWorldSimpleIDContainer() { destroy(); }
+
+	void destroy() { 
+		if (_id) {
+			dWorldDestroy(_id); 
+			_id = 0;
+		}
+	}
 };
 
 class dWorldDynamicIDContainer: public dWorldSimpleIDContainer {
-public:
+protected:
 	virtual ~dWorldDynamicIDContainer() {}
 };
 
@@ -52,8 +62,6 @@ class dWorldTemplate: public dWorldTemplateBase {
 public:
   dWorldTemplate()
     { _id = dWorldCreate(); }
-  ~dWorldTemplate()
-    { dWorldDestroy (_id); }
 
   dWorldID id() const
     { return _id; }
@@ -150,10 +158,20 @@ public:
 class dBodySimpleIDContainer {
 protected:
 	dBodyID _id;
+
+	dBodySimpleIDContainer(): _id(0) {}
+	~dBodySimpleIDContainer() { destroy(); }
+
+	void destroy() { 
+		if (_id) {
+			dBodyDestroy(_id); 
+			_id = 0;
+		}
+	}
 };
 
 class dBodyDynamicIDContainer: public dBodySimpleIDContainer {
-public:
+protected:
 	virtual ~dBodyDynamicIDContainer() {}
 };
 
@@ -165,16 +183,14 @@ class dBodyTemplate: public dBodyTemplateBase {
 
 public:
   dBodyTemplate()
-    { _id = 0; }
+    { }
   dBodyTemplate (dWorldID world)
     { _id = dBodyCreate (world); }
   dBodyTemplate (dWorldTemplate<dWorldTemplateBase>& world)
     { _id = dBodyCreate (world.id()); }
-  ~dBodyTemplate()
-    { if (_id) dBodyDestroy (_id); }
 
   void create (dWorldID world) {
-    if (_id) dBodyDestroy (_id);
+    destroy();
     _id = dBodyCreate (world);
   }
   void create (dWorldTemplate<dWorldTemplateBase>& world) {
@@ -410,10 +426,20 @@ public:
 class dJointGroupSimpleIDContainer {
 protected:
 	dJointGroupID _id;
+
+	dJointGroupSimpleIDContainer(): _id(0) {}
+	~dJointGroupSimpleIDContainer() { destroy(); }
+
+	void destroy() { 
+		if (_id) {
+			dJointGroupDestroy(_id); 
+			_id = 0;
+		}
+	}
 };
 
 class dJointGroupDynamicIDContainer: public dJointGroupSimpleIDContainer {
-public:
+protected:
 	virtual ~dJointGroupDynamicIDContainer() {}
 };
 
@@ -426,10 +452,9 @@ class dJointGroupTemplate: public dJointGroupTemplateBase {
 public:
   dJointGroupTemplate ()
     { _id = dJointGroupCreate (0); }
-  ~dJointGroupTemplate()
-    { dJointGroupDestroy (_id); }
+  
   void create () {
-    if (_id) dJointGroupDestroy (_id);
+    destroy();
     _id = dJointGroupCreate (0);
   }
 
@@ -448,10 +473,20 @@ public:
 class dJointSimpleIDContainer {
 protected:
 	dJointID _id;
+
+	dJointSimpleIDContainer(): _id(0) {}
+	~dJointSimpleIDContainer() { destroy(); }
+
+	void destroy() { 
+		if (_id) {
+			dJointDestroy (_id); 
+			_id = 0;
+		}
+	}
 };
 
 class dJointDynamicIDContainer: public dJointSimpleIDContainer {
-public:
+protected:
 	virtual ~dJointDynamicIDContainer() {}
 };
 
@@ -464,12 +499,9 @@ private:
 
 protected:
   dJointTemplate() // don't let user construct pure dJointTemplate objects
-    { _id = 0; }
+    { }
 
 public:
-  ~dJointTemplate() // Leave destructor not explicitly virtual even though it may result in compiler warning "class XXX has virtual functions but non-virtual destructor"
-    { if (_id) dJointDestroy (_id); }
-
   dJointID id() const
     { return _id; }
   operator dJointID() const
@@ -527,7 +559,7 @@ public:
     { _id = dJointCreateBall (world.id(), group); }
 
   void create (dWorldID world, dJointGroupID group=0) {
-    if (_id) dJointDestroy (_id);
+    destroy();
     _id = dJointCreateBall (world, group);
   }
   void create (dWorldTemplate<dWorldTemplateBase>& world, dJointGroupID group=0)
@@ -563,7 +595,7 @@ public:
     { _id = dJointCreateHinge (world.id(), group); }
 
   void create (dWorldID world, dJointGroupID group=0) {
-    if (_id) dJointDestroy (_id);
+    destroy();
     _id = dJointCreateHinge (world, group);
   }
   void create (dWorldTemplate<dWorldTemplateBase>& world, dJointGroupID group=0)
@@ -615,7 +647,7 @@ public:
     { _id = dJointCreateSlider (world.id(), group); }
 
   void create (dWorldID world, dJointGroupID group=0) {
-    if (_id) dJointDestroy (_id);
+    destroy();
     _id = dJointCreateSlider (world, group);
   }
   void create (dWorldTemplate<dWorldTemplateBase>& world, dJointGroupID group=0)
@@ -658,7 +690,7 @@ public:
     { _id = dJointCreateUniversal (world.id(), group); }
 
   void create (dWorldID world, dJointGroupID group=0) {
-    if (_id) dJointDestroy (_id);
+    destroy();
     _id = dJointCreateUniversal (world, group);
   }
   void create (dWorldTemplate<dWorldTemplateBase>& world, dJointGroupID group=0)
@@ -723,7 +755,7 @@ public:
     { _id = dJointCreateHinge2 (world.id(), group); }
 
   void create (dWorldID world, dJointGroupID group=0) {
-    if (_id) dJointDestroy (_id);
+    destroy();
     _id = dJointCreateHinge2 (world, group);
   }
   void create (dWorldTemplate<dWorldTemplateBase>& world, dJointGroupID group=0)
@@ -782,7 +814,7 @@ public:
     { _id = dJointCreatePR (world.id(), group); }
 
   void create (dWorldID world, dJointGroupID group=0) {
-    if (_id) dJointDestroy (_id);
+    destroy();
     _id = dJointCreatePR (world, group);
   }
   void create (dWorldTemplate<dWorldTemplateBase>& world, dJointGroupID group=0)
@@ -841,7 +873,7 @@ public:
 
   void create (dWorldID world, dJointGroupID group=0)
   {
-    if (_id) dJointDestroy (_id);
+    destroy();
     _id = dJointCreatePU (world, group);
   }
   void create (dWorldTemplate<dWorldTemplateBase>& world, dJointGroupID group=0)
@@ -918,7 +950,7 @@ public:
 
   void create (dWorldID world, dJointGroupID group=0)
   {
-    if (_id) dJointDestroy (_id);
+    destroy();
     _id = dJointCreatePiston (world, group);
   }
   void create (dWorldTemplate<dWorldTemplateBase>& world, dJointGroupID group=0)
@@ -972,7 +1004,7 @@ public:
     { _id = dJointCreateFixed (world, group); }
 
   void create (dWorldID world, dJointGroupID group=0) {
-    if (_id) dJointDestroy (_id);
+    destroy();
     _id = dJointCreateFixed (world, group);
   }
   void create (dWorldTemplate<dWorldTemplateBase>& world, dJointGroupID group=0)
@@ -1004,7 +1036,7 @@ public:
     { _id = dJointCreateContact (world.id(), group, contact); }
 
   void create (dWorldID world, dJointGroupID group, dContact *contact) {
-    if (_id) dJointDestroy (_id);
+    destroy();
     _id = dJointCreateContact (world, group, contact);
   }
   
@@ -1027,7 +1059,7 @@ public:
     { _id = dJointCreateNull (world.id(), group); }
 
   void create (dWorldID world, dJointGroupID group=0) {
-    if (_id) dJointDestroy (_id);
+    destroy();
     _id = dJointCreateNull (world, group);
   }
   void create (dWorldTemplate<dWorldTemplateBase>& world, dJointGroupID group=0)
@@ -1049,7 +1081,7 @@ public:
     { _id = dJointCreateAMotor (world.id(), group); }
 
   void create (dWorldID world, dJointGroupID group=0) {
-    if (_id) dJointDestroy (_id);
+    destroy();
     _id = dJointCreateAMotor (world, group);
   }
   void create (dWorldTemplate<dWorldTemplateBase>& world, dJointGroupID group=0)
@@ -1106,7 +1138,7 @@ public:
     { _id = dJointCreateLMotor (world.id(), group); }
 
   void create (dWorldID world, dJointGroupID group=0) {
-    if (_id) dJointDestroy (_id);
+    destroy();
     _id = dJointCreateLMotor (world, group);
   }
   void create (dWorldTemplate<dWorldTemplateBase>& world, dJointGroupID group=0)
