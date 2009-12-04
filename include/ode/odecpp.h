@@ -32,17 +32,27 @@
 
 //namespace ode {
 
-class dWorld {
-  dWorldID _id;
 
+class dWorldSimpleIDContainer {
+protected:
+	dWorldID _id;
+};
+
+class dWorldDynamicIDContainer: public dWorldSimpleIDContainer {
+public:
+	virtual ~dWorldDynamicIDContainer() {}
+};
+
+template <class dWorldTemplateBase>
+class dWorldTemplate: public dWorldTemplateBase {
   // intentionally undefined, don't use these
-  dWorld (const dWorld &);
-  void operator= (const dWorld &);
+  dWorldTemplate (const dWorldTemplate<dWorldTemplateBase> &);
+  void operator= (const dWorldTemplate<dWorldTemplateBase> &);
 
 public:
-  dWorld()
+  dWorldTemplate()
     { _id = dWorldCreate(); }
-  ~dWorld()
+  ~dWorldTemplate()
     { dWorldDestroy (_id); }
 
   dWorldID id() const
@@ -137,27 +147,37 @@ public:
 };
 
 
-class dBody {
-  dBodyID _id;
+class dBodySimpleIDContainer {
+protected:
+	dBodyID _id;
+};
+
+class dBodyDynamicIDContainer: public dBodySimpleIDContainer {
+public:
+	virtual ~dBodyDynamicIDContainer() {}
+};
+
+template <class dBodyTemplateBase, class dWorldTemplateBase>
+class dBodyTemplate: public dBodyTemplateBase {
   // intentionally undefined, don't use these
-  dBody (const dBody &);
-  void operator= (const dBody &);
+  dBodyTemplate (const dBodyTemplate<dBodyTemplateBase, dWorldTemplateBase> &);
+  void operator= (const dBodyTemplate<dBodyTemplateBase, dWorldTemplateBase> &);
 
 public:
-  dBody()
+  dBodyTemplate()
     { _id = 0; }
-  dBody (dWorldID world)
+  dBodyTemplate (dWorldID world)
     { _id = dBodyCreate (world); }
-  dBody (dWorld& world)
+  dBodyTemplate (dWorldTemplate<dWorldTemplateBase>& world)
     { _id = dBodyCreate (world.id()); }
-  ~dBody()
+  ~dBodyTemplate()
     { if (_id) dBodyDestroy (_id); }
 
   void create (dWorldID world) {
     if (_id) dBodyDestroy (_id);
     _id = dBodyCreate (world);
   }
-  void create (dWorld& world) {
+  void create (dWorldTemplate<dWorldTemplateBase>& world) {
     create(world.id());
   }
 
@@ -387,17 +407,26 @@ public:
 };
 
 
-class dJointGroup {
-  dJointGroupID _id;
+class dJointGroupSimpleIDContainer {
+protected:
+	dJointGroupID _id;
+};
 
+class dJointGroupDynamicIDContainer: public dJointGroupSimpleIDContainer {
+public:
+	virtual ~dJointGroupDynamicIDContainer() {}
+};
+
+template <class dJointGroupTemplateBase>
+class dJointGroupTemplate: public dJointGroupTemplateBase {
   // intentionally undefined, don't use these
-  dJointGroup (const dJointGroup &);
-  void operator= (const dJointGroup &);
+  dJointGroupTemplate (const dJointGroupTemplate<dJointGroupTemplateBase> &);
+  void operator= (const dJointGroupTemplate<dJointGroupTemplateBase> &);
 
 public:
-  dJointGroup ()
+  dJointGroupTemplate ()
     { _id = dJointGroupCreate (0); }
-  ~dJointGroup()
+  ~dJointGroupTemplate()
     { dJointGroupDestroy (_id); }
   void create () {
     if (_id) dJointGroupDestroy (_id);
@@ -416,20 +445,29 @@ public:
 };
 
 
-class dJoint {
+class dJointSimpleIDContainer {
+protected:
+	dJointID _id;
+};
+
+class dJointDynamicIDContainer: public dJointSimpleIDContainer {
+public:
+	virtual ~dJointDynamicIDContainer() {}
+};
+
+template <class dJointTemplateBase, class dWorldTemplateBase, class dBodyTemplateBase>
+class dJointTemplate: public dJointTemplateBase {
 private:
   // intentionally undefined, don't use these
-  dJoint (const dJoint &) ;
-  void operator= (const dJoint &);
+  dJointTemplate (const dJointTemplate<dJointTemplateBase, dWorldTemplateBase, dBodyTemplateBase> &) ;
+  void operator= (const dJointTemplate<dJointTemplateBase, dWorldTemplateBase, dBodyTemplateBase> &);
 
 protected:
-  dJointID _id;
-
-  dJoint() // don't let user construct pure dJoint objects
+  dJointTemplate() // don't let user construct pure dJointTemplate objects
     { _id = 0; }
 
 public:
-  virtual ~dJoint() // :( Destructor must be virtual to suppress compiler warning "class XXX has virtual functions but non-virtual destructor"
+  ~dJointTemplate() // Leave destructor not explicitly virtual even though it may result in compiler warning "class XXX has virtual functions but non-virtual destructor"
     { if (_id) dJointDestroy (_id); }
 
   dJointID id() const
@@ -442,7 +480,7 @@ public:
 
   void attach (dBodyID body1, dBodyID body2)
     { dJointAttach (_id, body1, body2); }
-  void attach (dBody& body1, dBody& body2)
+  void attach (dBodyTemplate<dBodyTemplateBase, dWorldTemplateBase>& body1, dBodyTemplate<dBodyTemplateBase, dWorldTemplateBase>& body2)
     { attach(body1.id(), body2.id()); }
 
   void enable()
@@ -474,24 +512,25 @@ public:
 };
 
 
-class dBallJoint : public dJoint {
+template <class dJointTemplateBase, class dWorldTemplateBase, class dBodyTemplateBase>
+class dBallJointTemplate : public dJointTemplate<dJointTemplateBase, dWorldTemplateBase, dBodyTemplateBase> {
 private:
   // intentionally undefined, don't use these
-  dBallJoint (const dBallJoint &);
-  void operator= (const dBallJoint &);
+  dBallJointTemplate (const dBallJointTemplate<dJointTemplateBase, dWorldTemplateBase, dBodyTemplateBase> &);
+  void operator= (const dBallJointTemplate<dJointTemplateBase, dWorldTemplateBase, dBodyTemplateBase> &);
 
 public:
-  dBallJoint() { }
-  dBallJoint (dWorldID world, dJointGroupID group=0)
+  dBallJointTemplate() { }
+  dBallJointTemplate (dWorldID world, dJointGroupID group=0)
     { _id = dJointCreateBall (world, group); }
-  dBallJoint (dWorld& world, dJointGroupID group=0)
+  dBallJointTemplate (dWorldTemplate<dWorldTemplateBase>& world, dJointGroupID group=0)
     { _id = dJointCreateBall (world.id(), group); }
 
   void create (dWorldID world, dJointGroupID group=0) {
     if (_id) dJointDestroy (_id);
     _id = dJointCreateBall (world, group);
   }
-  void create (dWorld& world, dJointGroupID group=0)
+  void create (dWorldTemplate<dWorldTemplateBase>& world, dJointGroupID group=0)
     { create(world.id(), group); }
 
   void setAnchor (dReal x, dReal y, dReal z)
@@ -510,23 +549,24 @@ public:
 } ;
 
 
-class dHingeJoint : public dJoint {
+template <class dJointTemplateBase, class dWorldTemplateBase, class dBodyTemplateBase>
+class dHingeJointTemplate : public dJointTemplate<dJointTemplateBase, dWorldTemplateBase, dBodyTemplateBase> {
   // intentionally undefined, don't use these
-  dHingeJoint (const dHingeJoint &);
-  void operator = (const dHingeJoint &);
+  dHingeJointTemplate (const dHingeJointTemplate<dJointTemplateBase, dWorldTemplateBase, dBodyTemplateBase> &);
+  void operator = (const dHingeJointTemplate<dJointTemplateBase, dWorldTemplateBase, dBodyTemplateBase> &);
 
 public:
-  dHingeJoint() { }
-  dHingeJoint (dWorldID world, dJointGroupID group=0)
+  dHingeJointTemplate() { }
+  dHingeJointTemplate (dWorldID world, dJointGroupID group=0)
     { _id = dJointCreateHinge (world, group); }
-  dHingeJoint (dWorld& world, dJointGroupID group=0)
+  dHingeJointTemplate (dWorldTemplate<dWorldTemplateBase>& world, dJointGroupID group=0)
     { _id = dJointCreateHinge (world.id(), group); }
 
   void create (dWorldID world, dJointGroupID group=0) {
     if (_id) dJointDestroy (_id);
     _id = dJointCreateHinge (world, group);
   }
-  void create (dWorld& world, dJointGroupID group=0)
+  void create (dWorldTemplate<dWorldTemplateBase>& world, dJointGroupID group=0)
     { create(world.id(), group); }
   
   void setAnchor (dReal x, dReal y, dReal z)
@@ -561,23 +601,24 @@ public:
 };
 
 
-class dSliderJoint : public dJoint {
+template <class dJointTemplateBase, class dWorldTemplateBase, class dBodyTemplateBase>
+class dSliderJointTemplate : public dJointTemplate<dJointTemplateBase, dWorldTemplateBase, dBodyTemplateBase> {
   // intentionally undefined, don't use these
-  dSliderJoint (const dSliderJoint &);
-  void operator = (const dSliderJoint &);
+  dSliderJointTemplate (const dSliderJointTemplate<dJointTemplateBase, dWorldTemplateBase, dBodyTemplateBase> &);
+  void operator = (const dSliderJointTemplate<dJointTemplateBase, dWorldTemplateBase, dBodyTemplateBase> &);
 
 public:
-  dSliderJoint() { }
-  dSliderJoint (dWorldID world, dJointGroupID group=0)
+  dSliderJointTemplate() { }
+  dSliderJointTemplate (dWorldID world, dJointGroupID group=0)
     { _id = dJointCreateSlider (world, group); }
-  dSliderJoint (dWorld& world, dJointGroupID group=0)
+  dSliderJointTemplate (dWorldTemplate<dWorldTemplateBase>& world, dJointGroupID group=0)
     { _id = dJointCreateSlider (world.id(), group); }
 
   void create (dWorldID world, dJointGroupID group=0) {
     if (_id) dJointDestroy (_id);
     _id = dJointCreateSlider (world, group);
   }
-  void create (dWorld& world, dJointGroupID group=0)
+  void create (dWorldTemplate<dWorldTemplateBase>& world, dJointGroupID group=0)
     { create(world.id(), group); }
 
   void setAxis (dReal x, dReal y, dReal z)
@@ -603,23 +644,24 @@ public:
 };
 
 
-class dUniversalJoint : public dJoint {
+template <class dJointTemplateBase, class dWorldTemplateBase, class dBodyTemplateBase>
+class dUniversalJointTemplate : public dJointTemplate<dJointTemplateBase, dWorldTemplateBase, dBodyTemplateBase> {
   // intentionally undefined, don't use these
-  dUniversalJoint (const dUniversalJoint &);
-  void operator = (const dUniversalJoint &);
+  dUniversalJointTemplate (const dUniversalJointTemplate<dJointTemplateBase, dWorldTemplateBase, dBodyTemplateBase> &);
+  void operator = (const dUniversalJointTemplate<dJointTemplateBase, dWorldTemplateBase, dBodyTemplateBase> &);
 
 public:
-  dUniversalJoint() { }
-  dUniversalJoint (dWorldID world, dJointGroupID group=0)
+  dUniversalJointTemplate() { }
+  dUniversalJointTemplate (dWorldID world, dJointGroupID group=0)
     { _id = dJointCreateUniversal (world, group); }
-  dUniversalJoint (dWorld& world, dJointGroupID group=0)
+  dUniversalJointTemplate (dWorldTemplate<dWorldTemplateBase>& world, dJointGroupID group=0)
     { _id = dJointCreateUniversal (world.id(), group); }
 
   void create (dWorldID world, dJointGroupID group=0) {
     if (_id) dJointDestroy (_id);
     _id = dJointCreateUniversal (world, group);
   }
-  void create (dWorld& world, dJointGroupID group=0)
+  void create (dWorldTemplate<dWorldTemplateBase>& world, dJointGroupID group=0)
     { create(world.id(), group); }
 
   void setAnchor (dReal x, dReal y, dReal z)
@@ -667,23 +709,24 @@ public:
 };
 
 
-class dHinge2Joint : public dJoint {
+template <class dJointTemplateBase, class dWorldTemplateBase, class dBodyTemplateBase>
+class dHinge2JointTemplate : public dJointTemplate<dJointTemplateBase, dWorldTemplateBase, dBodyTemplateBase> {
   // intentionally undefined, don't use these
-  dHinge2Joint (const dHinge2Joint &);
-  void operator = (const dHinge2Joint &);
+  dHinge2JointTemplate (const dHinge2JointTemplate<dJointTemplateBase, dWorldTemplateBase, dBodyTemplateBase> &);
+  void operator = (const dHinge2JointTemplate<dJointTemplateBase, dWorldTemplateBase, dBodyTemplateBase> &);
 
 public:
-  dHinge2Joint() { }
-  dHinge2Joint (dWorldID world, dJointGroupID group=0)
+  dHinge2JointTemplate() { }
+  dHinge2JointTemplate (dWorldID world, dJointGroupID group=0)
     { _id = dJointCreateHinge2 (world, group); }
-  dHinge2Joint (dWorld& world, dJointGroupID group=0)
+  dHinge2JointTemplate (dWorldTemplate<dWorldTemplateBase>& world, dJointGroupID group=0)
     { _id = dJointCreateHinge2 (world.id(), group); }
 
   void create (dWorldID world, dJointGroupID group=0) {
     if (_id) dJointDestroy (_id);
     _id = dJointCreateHinge2 (world, group);
   }
-  void create (dWorld& world, dJointGroupID group=0)
+  void create (dWorldTemplate<dWorldTemplateBase>& world, dJointGroupID group=0)
     { create(world.id(), group); }
 
   void setAnchor (dReal x, dReal y, dReal z)
@@ -726,22 +769,23 @@ public:
 };
 
 
-class dPRJoint : public dJoint {
-  dPRJoint (const dPRJoint &);
-  void operator = (const dPRJoint &);
+template <class dJointTemplateBase, class dWorldTemplateBase, class dBodyTemplateBase>
+class dPRJointTemplate : public dJointTemplate<dJointTemplateBase, dWorldTemplateBase, dBodyTemplateBase> {
+  dPRJointTemplate (const dPRJointTemplate<dJointTemplateBase, dWorldTemplateBase, dBodyTemplateBase> &);
+  void operator = (const dPRJointTemplate<dJointTemplateBase, dWorldTemplateBase, dBodyTemplateBase> &);
 
 public:
-  dPRJoint() { }
-  dPRJoint (dWorldID world, dJointGroupID group=0)
+  dPRJointTemplate() { }
+  dPRJointTemplate (dWorldID world, dJointGroupID group=0)
     { _id = dJointCreatePR (world, group); }
-  dPRJoint (dWorld& world, dJointGroupID group=0)
+  dPRJointTemplate (dWorldTemplate<dWorldTemplateBase>& world, dJointGroupID group=0)
     { _id = dJointCreatePR (world.id(), group); }
 
   void create (dWorldID world, dJointGroupID group=0) {
     if (_id) dJointDestroy (_id);
     _id = dJointCreatePR (world, group);
   }
-  void create (dWorld& world, dJointGroupID group=0)
+  void create (dWorldTemplate<dWorldTemplateBase>& world, dJointGroupID group=0)
     { create(world.id(), group); }
 
   void setAnchor (dReal x, dReal y, dReal z)
@@ -782,16 +826,17 @@ public:
 
 
 
-class dPUJoint : public dJoint
+template <class dJointTemplateBase, class dWorldTemplateBase, class dBodyTemplateBase>
+class dPUJointTemplate : public dJointTemplate<dJointTemplateBase, dWorldTemplateBase, dBodyTemplateBase>
 {
-  dPUJoint (const dPUJoint &);
-  void operator = (const dPUJoint &);
+  dPUJointTemplate (const dPUJointTemplate<dJointTemplateBase, dWorldTemplateBase, dBodyTemplateBase> &);
+  void operator = (const dPUJointTemplate<dJointTemplateBase, dWorldTemplateBase, dBodyTemplateBase> &);
 
 public:
-  dPUJoint() { }
-  dPUJoint (dWorldID world, dJointGroupID group=0)
+  dPUJointTemplate() { }
+  dPUJointTemplate (dWorldID world, dJointGroupID group=0)
     { _id = dJointCreatePU (world, group); }
-  dPUJoint (dWorld& world, dJointGroupID group=0)
+  dPUJointTemplate (dWorldTemplate<dWorldTemplateBase>& world, dJointGroupID group=0)
     { _id = dJointCreatePU (world.id(), group); }
 
   void create (dWorldID world, dJointGroupID group=0)
@@ -799,7 +844,7 @@ public:
     if (_id) dJointDestroy (_id);
     _id = dJointCreatePU (world, group);
   }
-  void create (dWorld& world, dJointGroupID group=0)
+  void create (dWorldTemplate<dWorldTemplateBase>& world, dJointGroupID group=0)
   { create(world.id(), group); }
 
   void setAnchor (dReal x, dReal y, dReal z)
@@ -857,17 +902,18 @@ public:
 
 
 
-class dPistonJoint : public dJoint
+template <class dJointTemplateBase, class dWorldTemplateBase, class dBodyTemplateBase>
+class dPistonJointTemplate : public dJointTemplate<dJointTemplateBase, dWorldTemplateBase, dBodyTemplateBase>
 {
   // intentionally undefined, don't use these
-  dPistonJoint (const dPistonJoint &);
-  void operator = (const dPistonJoint &);
+  dPistonJointTemplate (const dPistonJointTemplate<dJointTemplateBase, dWorldTemplateBase, dBodyTemplateBase> &);
+  void operator = (const dPistonJointTemplate<dJointTemplateBase, dWorldTemplateBase, dBodyTemplateBase> &);
 
 public:
-  dPistonJoint() { }
-  dPistonJoint (dWorldID world, dJointGroupID group=0)
+  dPistonJointTemplate() { }
+  dPistonJointTemplate (dWorldID world, dJointGroupID group=0)
     { _id = dJointCreatePiston (world, group); }
-  dPistonJoint (dWorld& world, dJointGroupID group=0)
+  dPistonJointTemplate (dWorldTemplate<dWorldTemplateBase>& world, dJointGroupID group=0)
     { _id = dJointCreatePiston (world, group); }
 
   void create (dWorldID world, dJointGroupID group=0)
@@ -875,7 +921,7 @@ public:
     if (_id) dJointDestroy (_id);
     _id = dJointCreatePiston (world, group);
   }
-  void create (dWorld& world, dJointGroupID group=0)
+  void create (dWorldTemplate<dWorldTemplateBase>& world, dJointGroupID group=0)
     { create(world.id(), group); }
 
   void setAnchor (dReal x, dReal y, dReal z)
@@ -911,24 +957,25 @@ public:
 
 
 
-class dFixedJoint : public dJoint
+template <class dJointTemplateBase, class dWorldTemplateBase, class dBodyTemplateBase>
+class dFixedJointTemplate : public dJointTemplate<dJointTemplateBase, dWorldTemplateBase, dBodyTemplateBase>
 {
   // intentionally undefined, don't use these
-  dFixedJoint (const dFixedJoint &);
-  void operator = (const dFixedJoint &);
+  dFixedJointTemplate (const dFixedJointTemplate<dJointTemplateBase, dWorldTemplateBase, dBodyTemplateBase> &);
+  void operator = (const dFixedJointTemplate<dJointTemplateBase, dWorldTemplateBase, dBodyTemplateBase> &);
 
 public:
-  dFixedJoint() { }
-  dFixedJoint (dWorldID world, dJointGroupID group=0)
+  dFixedJointTemplate() { }
+  dFixedJointTemplate (dWorldID world, dJointGroupID group=0)
     { _id = dJointCreateFixed (world, group); }
-  dFixedJoint (dWorld& world, dJointGroupID group=0)
+  dFixedJointTemplate (dWorldTemplate<dWorldTemplateBase>& world, dJointGroupID group=0)
     { _id = dJointCreateFixed (world, group); }
 
   void create (dWorldID world, dJointGroupID group=0) {
     if (_id) dJointDestroy (_id);
     _id = dJointCreateFixed (world, group);
   }
-  void create (dWorld& world, dJointGroupID group=0)
+  void create (dWorldTemplate<dWorldTemplateBase>& world, dJointGroupID group=0)
     { create(world.id(), group); }
 
   void set()
@@ -943,16 +990,17 @@ public:
 };
 
 
-class dContactJoint : public dJoint {
+template <class dJointTemplateBase, class dWorldTemplateBase, class dBodyTemplateBase>
+class dContactJointTemplate : public dJointTemplate<dJointTemplateBase, dWorldTemplateBase, dBodyTemplateBase> {
   // intentionally undefined, don't use these
-  dContactJoint (const dContactJoint &);
-  void operator = (const dContactJoint &);
+  dContactJointTemplate (const dContactJointTemplate<dJointTemplateBase, dWorldTemplateBase, dBodyTemplateBase> &);
+  void operator = (const dContactJointTemplate<dJointTemplateBase, dWorldTemplateBase, dBodyTemplateBase> &);
 
 public:
-  dContactJoint() { }
-  dContactJoint (dWorldID world, dJointGroupID group, dContact *contact)
+  dContactJointTemplate() { }
+  dContactJointTemplate (dWorldID world, dJointGroupID group, dContact *contact)
     { _id = dJointCreateContact (world, group, contact); }
-  dContactJoint (dWorld& world, dJointGroupID group, dContact *contact)
+  dContactJointTemplate (dWorldTemplate<dWorldTemplateBase>& world, dJointGroupID group, dContact *contact)
     { _id = dJointCreateContact (world.id(), group, contact); }
 
   void create (dWorldID world, dJointGroupID group, dContact *contact) {
@@ -960,49 +1008,51 @@ public:
     _id = dJointCreateContact (world, group, contact);
   }
   
-  void create (dWorld& world, dJointGroupID group, dContact *contact)
+  void create (dWorldTemplate<dWorldTemplateBase>& world, dJointGroupID group, dContact *contact)
     { create(world.id(), group, contact); }
 };
 
 
-class dNullJoint : public dJoint {
+template <class dJointTemplateBase, class dWorldTemplateBase, class dBodyTemplateBase>
+class dNullJointTemplate : public dJointTemplate<dJointTemplateBase, dWorldTemplateBase, dBodyTemplateBase> {
   // intentionally undefined, don't use these
-  dNullJoint (const dNullJoint &);
-  void operator = (const dNullJoint &);
+  dNullJointTemplate (const dNullJointTemplate<dJointTemplateBase, dWorldTemplateBase, dBodyTemplateBase> &);
+  void operator = (const dNullJointTemplate<dJointTemplateBase, dWorldTemplateBase, dBodyTemplateBase> &);
 
 public:
-  dNullJoint() { }
-  dNullJoint (dWorldID world, dJointGroupID group=0)
+  dNullJointTemplate() { }
+  dNullJointTemplate (dWorldID world, dJointGroupID group=0)
     { _id = dJointCreateNull (world, group); }
-  dNullJoint (dWorld& world, dJointGroupID group=0)
+  dNullJointTemplate (dWorldTemplate<dWorldTemplateBase>& world, dJointGroupID group=0)
     { _id = dJointCreateNull (world.id(), group); }
 
   void create (dWorldID world, dJointGroupID group=0) {
     if (_id) dJointDestroy (_id);
     _id = dJointCreateNull (world, group);
   }
-  void create (dWorld& world, dJointGroupID group=0)
+  void create (dWorldTemplate<dWorldTemplateBase>& world, dJointGroupID group=0)
     { create(world.id(), group); }
 };
 
 
-class dAMotorJoint : public dJoint {
+template <class dJointTemplateBase, class dWorldTemplateBase, class dBodyTemplateBase>
+class dAMotorJointTemplate : public dJointTemplate<dJointTemplateBase, dWorldTemplateBase, dBodyTemplateBase> {
   // intentionally undefined, don't use these
-  dAMotorJoint (const dAMotorJoint &);
-  void operator = (const dAMotorJoint &);
+  dAMotorJointTemplate (const dAMotorJointTemplate<dJointTemplateBase, dWorldTemplateBase, dBodyTemplateBase> &);
+  void operator = (const dAMotorJointTemplate<dJointTemplateBase, dWorldTemplateBase, dBodyTemplateBase> &);
 
 public:
-  dAMotorJoint() { }
-  dAMotorJoint (dWorldID world, dJointGroupID group=0)
+  dAMotorJointTemplate() { }
+  dAMotorJointTemplate (dWorldID world, dJointGroupID group=0)
     { _id = dJointCreateAMotor (world, group); }
-  dAMotorJoint (dWorld& world, dJointGroupID group=0)
+  dAMotorJointTemplate (dWorldTemplate<dWorldTemplateBase>& world, dJointGroupID group=0)
     { _id = dJointCreateAMotor (world.id(), group); }
 
   void create (dWorldID world, dJointGroupID group=0) {
     if (_id) dJointDestroy (_id);
     _id = dJointCreateAMotor (world, group);
   }
-  void create (dWorld& world, dJointGroupID group=0)
+  void create (dWorldTemplate<dWorldTemplateBase>& world, dJointGroupID group=0)
     { create(world.id(), group); }
 
   void setMode (int mode)
@@ -1042,23 +1092,24 @@ public:
 };
 
 
-class dLMotorJoint : public dJoint {
+template <class dJointTemplateBase, class dWorldTemplateBase, class dBodyTemplateBase>
+class dLMotorJointTemplate : public dJointTemplate<dJointTemplateBase, dWorldTemplateBase, dBodyTemplateBase> {
   // intentionally undefined, don't use these
-  dLMotorJoint (const dLMotorJoint &);
-  void operator = (const dLMotorJoint &);
+  dLMotorJointTemplate (const dLMotorJointTemplate<dJointTemplateBase, dWorldTemplateBase, dBodyTemplateBase> &);
+  void operator = (const dLMotorJointTemplate<dJointTemplateBase, dWorldTemplateBase, dBodyTemplateBase> &);
 
 public:
-  dLMotorJoint() { }
-  dLMotorJoint (dWorldID world, dJointGroupID group=0)
+  dLMotorJointTemplate() { }
+  dLMotorJointTemplate (dWorldID world, dJointGroupID group=0)
     { _id = dJointCreateLMotor (world, group); }
-  dLMotorJoint (dWorld& world, dJointGroupID group=0)
+  dLMotorJointTemplate (dWorldTemplate<dWorldTemplateBase>& world, dJointGroupID group=0)
     { _id = dJointCreateLMotor (world.id(), group); }
 
   void create (dWorldID world, dJointGroupID group=0) {
     if (_id) dJointDestroy (_id);
     _id = dJointCreateLMotor (world, group);
   }
-  void create (dWorld& world, dJointGroupID group=0)
+  void create (dWorldTemplate<dWorldTemplateBase>& world, dJointGroupID group=0)
     { create(world.id(), group); }
 
   void setNumAxes (int num)
@@ -1081,6 +1132,45 @@ public:
 };
 
 //}
+
+#if !defined(dODECPP_WORLD_TEMPLATE_BASE)
+
+#if defined(dODECPP_BODY_TEMPLATE_BASE) || defined(dODECPP_JOINTGROUP_TEMPLATE_BASE) || defined(dODECPP_JOINT_TEMPLATE_BASE)
+#error All the odecpp template bases must be defined or not defined together
+#endif
+
+#define dODECPP_WORLD_TEMPLATE_BASE dWorldDynamicIDContainer
+#define dODECPP_BODY_TEMPLATE_BASE dBodyDynamicIDContainer
+#define dODECPP_JOINTGROUP_TEMPLATE_BASE dJointGroupDynamicIDContainer
+#define dODECPP_JOINT_TEMPLATE_BASE dJointDynamicIDContainer
+
+#else // #if defined(dODECPP_WORLD_TEMPLATE_BASE)
+
+#if !defined(dODECPP_BODY_TEMPLATE_BASE) || !defined(dODECPP_JOINTGROUP_TEMPLATE_BASE) || !defined(dODECPP_JOINT_TEMPLATE_BASE)
+#error All the odecpp template bases must be defined or not defined together
+#endif
+
+#endif // #if defined(dODECPP_WORLD_TEMPLATE_BASE)
+
+
+typedef dWorldTemplate<dODECPP_WORLD_TEMPLATE_BASE> dWorld;
+typedef dBodyTemplate<dODECPP_BODY_TEMPLATE_BASE, dODECPP_WORLD_TEMPLATE_BASE> dBody;
+typedef dJointGroupTemplate<dODECPP_JOINTGROUP_TEMPLATE_BASE> dJointGroup;
+typedef dJointTemplate<dODECPP_JOINT_TEMPLATE_BASE, dODECPP_WORLD_TEMPLATE_BASE, dODECPP_BODY_TEMPLATE_BASE> dJoint;
+typedef dBallJointTemplate<dODECPP_JOINT_TEMPLATE_BASE, dODECPP_WORLD_TEMPLATE_BASE, dODECPP_BODY_TEMPLATE_BASE> dBallJoint;
+typedef dHingeJointTemplate<dODECPP_JOINT_TEMPLATE_BASE, dODECPP_WORLD_TEMPLATE_BASE, dODECPP_BODY_TEMPLATE_BASE> dHingeJoint;
+typedef dSliderJointTemplate<dODECPP_JOINT_TEMPLATE_BASE, dODECPP_WORLD_TEMPLATE_BASE, dODECPP_BODY_TEMPLATE_BASE> dSliderJoint;
+typedef dUniversalJointTemplate<dODECPP_JOINT_TEMPLATE_BASE, dODECPP_WORLD_TEMPLATE_BASE, dODECPP_BODY_TEMPLATE_BASE> dUniversalJoint;
+typedef dHinge2JointTemplate<dODECPP_JOINT_TEMPLATE_BASE, dODECPP_WORLD_TEMPLATE_BASE, dODECPP_BODY_TEMPLATE_BASE> dHinge2Joint;
+typedef dPRJointTemplate<dODECPP_JOINT_TEMPLATE_BASE, dODECPP_WORLD_TEMPLATE_BASE, dODECPP_BODY_TEMPLATE_BASE> dPRJoint;
+typedef dPUJointTemplate<dODECPP_JOINT_TEMPLATE_BASE, dODECPP_WORLD_TEMPLATE_BASE, dODECPP_BODY_TEMPLATE_BASE> dPUJoint;
+typedef dPistonJointTemplate<dODECPP_JOINT_TEMPLATE_BASE, dODECPP_WORLD_TEMPLATE_BASE, dODECPP_BODY_TEMPLATE_BASE> dPistonJoint;
+typedef dFixedJointTemplate<dODECPP_JOINT_TEMPLATE_BASE, dODECPP_WORLD_TEMPLATE_BASE, dODECPP_BODY_TEMPLATE_BASE> dFixedJoint;
+typedef dContactJointTemplate<dODECPP_JOINT_TEMPLATE_BASE, dODECPP_WORLD_TEMPLATE_BASE, dODECPP_BODY_TEMPLATE_BASE> dContactJoint;
+typedef dNullJointTemplate<dODECPP_JOINT_TEMPLATE_BASE, dODECPP_WORLD_TEMPLATE_BASE, dODECPP_BODY_TEMPLATE_BASE> dNullJoint;
+typedef dAMotorJointTemplate<dODECPP_JOINT_TEMPLATE_BASE, dODECPP_WORLD_TEMPLATE_BASE, dODECPP_BODY_TEMPLATE_BASE> dAMotorJoint;
+typedef dLMotorJointTemplate<dODECPP_JOINT_TEMPLATE_BASE, dODECPP_WORLD_TEMPLATE_BASE, dODECPP_BODY_TEMPLATE_BASE> dLMotorJoint;
+
 
 #endif
 #endif
