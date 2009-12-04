@@ -8,6 +8,9 @@ the rules for this file:
   * keep the format consistent (79 char width, M/D/Y date format).
 
 ------------------------------------------------------------------------------
+12/04/09 Oleh Derevenko
+		* odecpp classes changed to be inheritable and easily expandable
+
 11/29/09 Oleh Derevenko
 		* Improvement for trimesh-plane collision (also used in trimesh-heightfield)
 		  to exclude mesh vertices that have already generated contacts from further
