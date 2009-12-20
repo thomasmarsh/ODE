@@ -5,6 +5,7 @@
 #include <ode/common.h>
 #include <ode/odemath.h>
 #include <ode/collision.h>
+#include "config.h"
 #include "collision_trimesh_internal.h"
 
 //------------------------------------------------------------------------------

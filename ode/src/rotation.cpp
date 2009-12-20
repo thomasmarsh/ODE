@@ -29,6 +29,7 @@ quaternions have the format: (s,vx,vy,vz) where (vx,vy,vz) is the
 
 #include <ode/rotation.h>
 #include <ode/odemath.h>
+#include "config.h"
 
 
 #define _R(i,j) R[(i)*4+(j)]

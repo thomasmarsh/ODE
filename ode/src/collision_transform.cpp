@@ -30,6 +30,7 @@ geom transform
 #include <ode/matrix.h>
 #include <ode/rotation.h>
 #include <ode/odemath.h>
+#include "config.h"
 #include "collision_transform.h"
 #include "collision_util.h"
 

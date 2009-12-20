@@ -21,6 +21,7 @@
  *************************************************************************/
 
 
+#include "config.h"
 #include "ball.h"
 #include "joint_internal.h"
 

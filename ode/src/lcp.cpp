@@ -109,12 +109,12 @@ rows/columns and manipulate C.
 */
 
 #include <ode/common.h>
-#include "config.h"
-#include "lcp.h"
 #include <ode/matrix.h>
 #include <ode/misc.h>
-#include "mat.h"		// for testing
 #include <ode/timer.h>		// for testing
+#include "config.h"
+#include "lcp.h"
+#include "mat.h"		// for testing
 #include "util.h"
 
 //***************************************************************************

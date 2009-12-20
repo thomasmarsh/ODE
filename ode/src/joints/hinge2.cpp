@@ -21,6 +21,7 @@
  *************************************************************************/
 
 
+#include "config.h"
 #include "hinge2.h"
 #include "joint_internal.h"
 

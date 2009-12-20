@@ -30,10 +30,10 @@ spaces
 #include <ode/matrix.h>
 #include <ode/collision_space.h>
 #include <ode/collision.h>
-#include "util.h"
+#include "config.h"
 #include "collision_kernel.h"
-
 #include "collision_space_internal.h"
+#include "util.h"
 
 #ifdef _MSC_VER
 #pragma warning(disable:4291)  // for VC++, no complaints about "no matching operator delete found"

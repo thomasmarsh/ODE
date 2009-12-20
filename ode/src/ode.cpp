@@ -27,17 +27,18 @@
 // this source file is mostly concerned with the data structures, not the
 // numerics.
 
-#include "objects.h"
 #include <ode/ode.h>
+#include <ode/odemath.h>
+#include <ode/matrix.h>
+#include <ode/memory.h>
+#include <ode/error.h>
+#include "config.h"
+#include "objects.h"
 #include "joints/joints.h"
 #include "step.h"
 #include "quickstep.h"
 #include "util.h"
 #include "odetls.h"
-#include <ode/odemath.h>
-#include <ode/matrix.h>
-#include <ode/memory.h>
-#include <ode/error.h>
 
 // misc defines
 #define ALLOCA dALLOCA16

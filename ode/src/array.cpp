@@ -21,9 +21,9 @@
  *************************************************************************/
 
 #include <ode/odeconfig.h>
-#include "config.h"
 #include <ode/memory.h>
 #include <ode/error.h>
+#include "config.h"
 #include "array.h"
 
 

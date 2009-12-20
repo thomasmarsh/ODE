@@ -24,7 +24,6 @@
 #ifndef _ODE_JOINT_NTERNAL_H_
 #define _ODE_JOINT_INTERNAL_H_
 
-#include "config.h"
 
 #include <ode/matrix.h>
 #include <ode/odemath.h>

@@ -21,11 +21,11 @@
  *************************************************************************/
 
 #include <ode/odeconfig.h>
-#include "config.h"
 #include <ode/misc.h>
 #include <ode/matrix.h>
 #include <ode/error.h>
 #include <ode/memory.h>
+#include "config.h"
 #include "mat.h"
 
 

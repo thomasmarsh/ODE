@@ -21,6 +21,7 @@
  *************************************************************************/
 
 
+#include "config.h"
 #include "piston.h"
 #include "joint_internal.h"
 
