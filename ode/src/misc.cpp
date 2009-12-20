@@ -21,9 +21,9 @@
  *************************************************************************/
 
 #include <ode/odeconfig.h>
-#include "config.h"
 #include <ode/misc.h>
 #include <ode/matrix.h>
+#include "config.h"
 
 //****************************************************************************
 // random numbers

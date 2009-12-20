@@ -21,6 +21,7 @@
  *************************************************************************/
 
 
+#include "config.h"
 #include "contact.h"
 #include "joint_internal.h"
 

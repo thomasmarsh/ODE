@@ -22,8 +22,8 @@
 
 #include <ode/common.h>
 #include <ode/matrix.h>
-#include "util.h"
 #include "config.h"
+#include "util.h"
 
 // misc defines
 #define ALLOCA dALLOCA16

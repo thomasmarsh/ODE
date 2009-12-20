@@ -33,7 +33,8 @@
 //	* make sure ODE-specific parameters divided out
 
 
-#include "ode/ode.h"
+#include <ode/ode.h>
+#include "config.h"
 #include "objects.h"
 #include "joints/joints.h"
 #include "collision_kernel.h"

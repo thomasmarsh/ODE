@@ -21,6 +21,7 @@
  *************************************************************************/
 
 
+#include "config.h"
 #include "lmotor.h"
 #include "joint_internal.h"
 

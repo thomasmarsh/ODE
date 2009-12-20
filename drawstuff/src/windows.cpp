@@ -24,9 +24,9 @@
 #include <windows.h>
 #endif
 #include <ode/odeconfig.h>
-#include "config.h"
 #include <GL/gl.h>
 
+#include "config.h"
 #include "resource.h"
 #include "internal.h"
 

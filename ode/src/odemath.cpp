@@ -22,15 +22,8 @@
 
 #include <ode/common.h>
 #include <ode/odemath.h>
+#include "config.h"
 
-// get some math functions under windows
-#ifdef WIN32
-#include <float.h>
-#ifndef CYGWIN			// added by andy for cygwin
-#undef copysign
-#define copysign(a,b) ((dReal)_copysign(a,b))
-#endif				// added by andy for cygwin
-#endif
 
 #undef dSafeNormalize3
 #undef dSafeNormalize4

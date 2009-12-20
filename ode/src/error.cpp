@@ -21,8 +21,8 @@
  *************************************************************************/
 
 #include <ode/odeconfig.h>
-#include "config.h"
 #include <ode/error.h>
+#include "config.h"
 
 
 static dMessageFunction *error_function = 0;

@@ -21,6 +21,7 @@
  *************************************************************************/
 
 
+#include "config.h"
 #include "pr.h"
 #include "joint_internal.h"
 

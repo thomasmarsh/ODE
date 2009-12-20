@@ -29,6 +29,7 @@
 #include <ode/matrix.h>
 #include <ode/rotation.h>
 #include <ode/odemath.h>
+#include "config.h"
 #include "collision_util.h"
 
 static const int MAX_CYLBOX_CLIP_POINTS  = 16;
