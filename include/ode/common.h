@@ -153,13 +153,7 @@ typedef dReal dQuaternion[4];
 #define dNextAfter(x, y) nextafterf(x, y) /* next value after */
 
 #if defined(_ODE__NEXTAFTERF_REQUIRED)
-#if defined(__cplusplus)
-extern "C" {
-#endif
 float _nextafterf(float x, float y);
-#if defined(__cplusplus)
-};
-#endif
 #endif
 
 #ifdef HAVE___ISNANF

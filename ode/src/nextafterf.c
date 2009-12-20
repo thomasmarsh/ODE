@@ -43,7 +43,8 @@ do {								\
 } while (0)
 
 
-float nextafterf(float x, float y)
+#undef nextafterf
+float _nextafterf(float x, float y)
 {
 	int32 hx,hy,ix,iy;
 
