@@ -149,6 +149,18 @@ typedef dReal dQuaternion[4];
 #define dAtan2(y,x) (atan2f(y,x))		/* arc tangent with 2 args */
 #define dFMod(a,b) (fmodf(a,b))		/* modulo */
 #define dFloor(x) floorf(x)			/* floor */
+#define dCopySign(a,b) ((dReal)copysignf(a,b)) /* copy value sign */
+#define dNextAfter(x, y) nextafterf(x, y) /* next value after */
+
+#if defined(_ODE__NEXTAFTERF_REQUIRED)
+#if defined(__cplusplus)
+extern "C" {
+#endif
+float _nextafterf(float x, float y);
+#if defined(__cplusplus)
+};
+#endif
+#endif
 
 #ifdef HAVE___ISNANF
 #define dIsNan(x) (__isnanf(x))
@@ -169,8 +181,6 @@ typedef dReal dQuaternion[4];
 #define dIsNan(x) (_isnan(x))
 #endif
 
-#define dCopySign(a,b) ((dReal)copysignf(a,b))
-
 #elif defined(dDOUBLE)
 
 #define REAL(x) (x)
@@ -183,6 +193,10 @@ typedef dReal dQuaternion[4];
 #define dAtan2(y,x) atan2((y),(x))
 #define dFMod(a,b) (fmod((a),(b)))
 #define dFloor(x) floor(x)
+#define dCopySign(a,b) (copysign((a),(b)))
+#define dNextAfter(x, y) nextafter(x, y)
+
+#undef _ODE__NEXTAFTERF_REQUIRED
 
 #ifdef HAVE___ISNAN
 #define dIsNan(x) (__isnan(x))
@@ -193,8 +207,6 @@ typedef dReal dQuaternion[4];
 #else
 #define dIsNan(x) (_isnan(x))
 #endif
-
-#define dCopySign(a,b) (copysign((a),(b)))
 
 #else
 #error You must #define dSINGLE or dDOUBLE

@@ -8,6 +8,10 @@ the rules for this file:
   * keep the format consistent (79 char width, M/D/Y date format).
 
 ------------------------------------------------------------------------------
+12/20/09 Oleh Derevenko
+		* QuadTreeSpace implementation corrected to avoid object-block relation 
+		  ambiguity due to numeric errors.
+
 12/04/09 Oleh Derevenko
 		* odecpp classes changed to be inheritable and easily expandable
 

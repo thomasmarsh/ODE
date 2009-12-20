@@ -4,7 +4,7 @@ AM_CPPFLAGS = -I$(top_srcdir)/include
 
 # convenience library to simulate per object cflags
 noinst_LTLIBRARIES = libfast.la
-libfast_la_CFLAGS = -O1 -Wall
+libfast_la_CFLAGS = -O3 -Wall
 libfast_la_SOURCES = fastldlt.c fastltsolve.c fastdot.c fastlsolve.c
 
 
@@ -16,7 +16,8 @@ libode_la_LIBADD = libfast.la joints/libjoints.la
 
 
 # please, let's keep the filenames sorted
-libode_la_SOURCES =     array.cpp array.h \
+libode_la_SOURCES =     nextafterf.c \
+                        array.cpp array.h \
                         box.cpp \
                         capsule.cpp \
                         collision_cylinder_box.cpp \
