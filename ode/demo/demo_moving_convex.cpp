@@ -332,7 +332,7 @@ static void simLoop( int pause )
 	dsSetColor( 0,0,2 );
 	dSpaceCollide( space,0,&nearCallback );
 
-	if ( !pause ) dWorldStepFast1( world,0.05, 5 );
+	if ( !pause ) dWorldQuickStep( world,0.05 );
 
 	for ( int j = 0; j < dSpaceGetNumGeoms( space ); j++ )
 	{

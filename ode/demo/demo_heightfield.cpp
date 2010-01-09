@@ -528,8 +528,7 @@ static void simLoop (int pause)
   dSpaceCollide (space,0,&nearCallback);
   
   //if (!pause) dWorldStep (world,0.05);
-  //if (!pause) dWorldQuickStep (world,0.05);
-  if (!pause) dWorldStep (world,0.05);
+  if (!pause) dWorldQuickStep (world,0.05);
 
 
   if (write_world) {
