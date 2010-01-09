@@ -1,6 +1,6 @@
 /*************************************************************************
  *									 *
- * Open Dynamics Engine, Copyright (C) 2001,2002 Russell L. Smith.	 *
+ * Open Dynamics Engine, Copyright (C) 2001, 2002 Russell L. Smith.	 *
  * All rights reserved.  Email: russ@q12.org   Web: www.q12.org 	 *
  *									 *
  * This library is free software; you can redistribute it and/or	 *
@@ -13,7 +13,7 @@
  *   (2) The BSD-style license that is included with this library in	 *
  *	 the file LICENSE-BSD.TXT.					 *
  *									 *
- * This library is distributed in the hope that it will be useful,	 *
+ * This library is distributed in the hope that it will be useful, 	 *
  * but WITHOUT ANY WARRANTY; without even the implied warranty of	 *
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the files	 *
  * LICENSE.TXT and LICENSE-BSD.TXT for more details.			 *
@@ -59,99 +59,103 @@ class dWorldTemplate: public dWorldTemplateBase {
   dWorldTemplate (const dWorldTemplate<dWorldTemplateBase> &);
   void operator= (const dWorldTemplate<dWorldTemplateBase> &);
 
+protected:
+  dWorldID get_id() const { return dWorldTemplateBase::_id; }
+  void set_id(dWorldID value) { dWorldTemplateBase::_id = value; }
+
 public:
   dWorldTemplate()
-    { _id = dWorldCreate(); }
+    { set_id(dWorldCreate()); }
 
   dWorldID id() const
-    { return _id; }
+    { return get_id(); }
   operator dWorldID() const
-    { return _id; }
+    { return get_id(); }
 
   void setGravity (dReal x, dReal y, dReal z)
-    { dWorldSetGravity (_id,x,y,z); }
+    { dWorldSetGravity (get_id(), x, y, z); }
   void setGravity (const dVector3 g)
     { setGravity (g[0], g[1], g[2]); }
   void getGravity (dVector3 g) const
-    { dWorldGetGravity (_id,g); }
+    { dWorldGetGravity (get_id(), g); }
 
   void setERP (dReal erp)
-    { dWorldSetERP(_id, erp); }
+    { dWorldSetERP(get_id(), erp); }
   dReal getERP() const
-    { return dWorldGetERP(_id); }
+    { return dWorldGetERP(get_id()); }
 
   void setCFM (dReal cfm)
-    { dWorldSetCFM(_id, cfm); }
+    { dWorldSetCFM(get_id(), cfm); }
   dReal getCFM() const
-    { return dWorldGetCFM(_id); }
+    { return dWorldGetCFM(get_id()); }
 
   void step (dReal stepsize)
-    { dWorldStep (_id,stepsize); }
+    { dWorldStep (get_id(), stepsize); }
 
   void quickStep(dReal stepsize)
-    { dWorldQuickStep (_id, stepsize); }
+    { dWorldQuickStep (get_id(), stepsize); }
   void setQuickStepNumIterations(int num)
-    { dWorldSetQuickStepNumIterations (_id, num); }
+    { dWorldSetQuickStepNumIterations (get_id(), num); }
   int getQuickStepNumIterations() const
-    { return dWorldGetQuickStepNumIterations (_id); }
+    { return dWorldGetQuickStepNumIterations (get_id()); }
   void setQuickStepW(dReal over_relaxation)
-    { dWorldSetQuickStepW (_id, over_relaxation); }
+    { dWorldSetQuickStepW (get_id(), over_relaxation); }
   dReal getQuickStepW() const
-    { return dWorldGetQuickStepW (_id); }
+    { return dWorldGetQuickStepW (get_id()); }
 
   void  setAutoDisableLinearThreshold (dReal threshold) 
-    { dWorldSetAutoDisableLinearThreshold (_id,threshold); }
+    { dWorldSetAutoDisableLinearThreshold (get_id(), threshold); }
   dReal getAutoDisableLinearThreshold() const
-    { return dWorldGetAutoDisableLinearThreshold (_id); }
+    { return dWorldGetAutoDisableLinearThreshold (get_id()); }
   void setAutoDisableAngularThreshold (dReal threshold)
-    { dWorldSetAutoDisableAngularThreshold (_id,threshold); }
+    { dWorldSetAutoDisableAngularThreshold (get_id(), threshold); }
   dReal getAutoDisableAngularThreshold() const
-    { return dWorldGetAutoDisableAngularThreshold (_id); }
+    { return dWorldGetAutoDisableAngularThreshold (get_id()); }
   void setAutoDisableSteps (int steps)
-    { dWorldSetAutoDisableSteps (_id,steps); }
+    { dWorldSetAutoDisableSteps (get_id(), steps); }
   int getAutoDisableSteps() const
-    { return dWorldGetAutoDisableSteps (_id); }
+    { return dWorldGetAutoDisableSteps (get_id()); }
   void setAutoDisableTime (dReal time)
-    { dWorldSetAutoDisableTime (_id,time); }
+    { dWorldSetAutoDisableTime (get_id(), time); }
   dReal getAutoDisableTime() const
-    { return dWorldGetAutoDisableTime (_id); }
+    { return dWorldGetAutoDisableTime (get_id()); }
   void setAutoDisableFlag (int do_auto_disable)
-    { dWorldSetAutoDisableFlag (_id,do_auto_disable); }
+    { dWorldSetAutoDisableFlag (get_id(), do_auto_disable); }
   int getAutoDisableFlag() const
-    { return dWorldGetAutoDisableFlag (_id); }
+    { return dWorldGetAutoDisableFlag (get_id()); }
 
   dReal getLinearDampingThreshold() const
-    { return dWorldGetLinearDampingThreshold(_id); }
+    { return dWorldGetLinearDampingThreshold(get_id()); }
   void setLinearDampingThreshold(dReal threshold)
-    { dWorldSetLinearDampingThreshold(_id, threshold); }
+    { dWorldSetLinearDampingThreshold(get_id(), threshold); }
   dReal getAngularDampingThreshold() const
-    { return dWorldGetAngularDampingThreshold(_id); }
+    { return dWorldGetAngularDampingThreshold(get_id()); }
   void setAngularDampingThreshold(dReal threshold)
-    { dWorldSetAngularDampingThreshold(_id, threshold); }
+    { dWorldSetAngularDampingThreshold(get_id(), threshold); }
   dReal getLinearDamping() const
-    { return dWorldGetLinearDamping(_id); }
+    { return dWorldGetLinearDamping(get_id()); }
   void setLinearDamping(dReal scale)
-    { dWorldSetLinearDamping(_id, scale); }
+    { dWorldSetLinearDamping(get_id(), scale); }
   dReal getAngularDamping() const
-    { return dWorldGetAngularDamping(_id); }
+    { return dWorldGetAngularDamping(get_id()); }
   void setAngularDamping(dReal scale)
-    { dWorldSetAngularDamping(_id, scale); }
+    { dWorldSetAngularDamping(get_id(), scale); }
   void setDamping(dReal linear_scale, dReal angular_scale)
-    { dWorldSetDamping(_id, linear_scale, angular_scale); }
+    { dWorldSetDamping(get_id(), linear_scale, angular_scale); }
 
   dReal getMaxAngularSpeed() const
-    { return dWorldGetMaxAngularSpeed(_id); }
+    { return dWorldGetMaxAngularSpeed(get_id()); }
   void setMaxAngularSpeed(dReal max_speed)
-    { dWorldSetMaxAngularSpeed(_id, max_speed); }
+    { dWorldSetMaxAngularSpeed(get_id(), max_speed); }
 
   void setContactSurfaceLayer(dReal depth)
-    { dWorldSetContactSurfaceLayer (_id, depth); }
+    { dWorldSetContactSurfaceLayer (get_id(), depth); }
   dReal getContactSurfaceLayer() const
-    { return dWorldGetContactSurfaceLayer (_id); }
+    { return dWorldGetContactSurfaceLayer (get_id()); }
 
-  void impulseToForce (dReal stepsize, dReal ix, dReal iy, dReal iz,
+  void impulseToForce (dReal stepsize, dReal ix, dReal iy, dReal iz, 
 		       dVector3 force)
-    { dWorldImpulseToForce (_id,stepsize,ix,iy,iz,force); }
+    { dWorldImpulseToForce (get_id(), stepsize, ix, iy, iz, force); }
 };
 
 
@@ -181,244 +185,250 @@ class dBodyTemplate: public dBodyTemplateBase {
   dBodyTemplate (const dBodyTemplate<dBodyTemplateBase, dWorldTemplateBase> &);
   void operator= (const dBodyTemplate<dBodyTemplateBase, dWorldTemplateBase> &);
 
+protected:
+  dBodyID get_id() const { return dBodyTemplateBase::_id; }
+  void set_id(dBodyID value) { dBodyTemplateBase::_id = value; }
+
+  void destroy() { dBodyTemplateBase::destroy(); }
+
 public:
   dBodyTemplate()
     { }
   dBodyTemplate (dWorldID world)
-    { _id = dBodyCreate (world); }
+    { set_id(dBodyCreate(world)); }
   dBodyTemplate (dWorldTemplate<dWorldTemplateBase>& world)
-    { _id = dBodyCreate (world.id()); }
+    { set_id(dBodyCreate(world.id())); }
 
   void create (dWorldID world) {
     destroy();
-    _id = dBodyCreate (world);
+    set_id(dBodyCreate(world));
   }
   void create (dWorldTemplate<dWorldTemplateBase>& world) {
     create(world.id());
   }
 
   dBodyID id() const
-    { return _id; }
+    { return get_id(); }
   operator dBodyID() const
-    { return _id; }
+    { return get_id(); }
 
   void setData (void *data)
-    { dBodySetData (_id,data); }
+    { dBodySetData (get_id(), data); }
   void *getData() const
-    { return dBodyGetData (_id); }
+    { return dBodyGetData (get_id()); }
 
   void setPosition (dReal x, dReal y, dReal z)
-    { dBodySetPosition (_id,x,y,z); }
+    { dBodySetPosition (get_id(), x, y, z); }
   void setPosition (const dVector3 p)
     { setPosition(p[0], p[1], p[2]); }
 
   void setRotation (const dMatrix3 R)
-    { dBodySetRotation (_id,R); }
+    { dBodySetRotation (get_id(), R); }
   void setQuaternion (const dQuaternion q)
-    { dBodySetQuaternion (_id,q); }
+    { dBodySetQuaternion (get_id(), q); }
   void setLinearVel (dReal x, dReal y, dReal z)
-    { dBodySetLinearVel (_id,x,y,z); }
+    { dBodySetLinearVel (get_id(), x, y, z); }
   void setLinearVel (const dVector3 v)
     { setLinearVel(v[0], v[1], v[2]); }
   void setAngularVel (dReal x, dReal y, dReal z)
-    { dBodySetAngularVel (_id,x,y,z); }
+    { dBodySetAngularVel (get_id(), x, y, z); }
   void setAngularVel (const dVector3 v)
     { setAngularVel (v[0], v[1], v[2]); }
 
   const dReal * getPosition() const
-    { return dBodyGetPosition (_id); }
+    { return dBodyGetPosition (get_id()); }
   const dReal * getRotation() const
-    { return dBodyGetRotation (_id); }
+    { return dBodyGetRotation (get_id()); }
   const dReal * getQuaternion() const
-    { return dBodyGetQuaternion (_id); }
+    { return dBodyGetQuaternion (get_id()); }
   const dReal * getLinearVel() const
-    { return dBodyGetLinearVel (_id); }
+    { return dBodyGetLinearVel (get_id()); }
   const dReal * getAngularVel() const
-    { return dBodyGetAngularVel (_id); }
+    { return dBodyGetAngularVel (get_id()); }
 
   void setMass (const dMass *mass)
-    { dBodySetMass (_id,mass); }
+    { dBodySetMass (get_id(), mass); }
   void setMass (const dMass &mass)
     { setMass (&mass); }
   dMass getMass () const
-    { dMass mass; dBodyGetMass (_id,&mass); return mass; }
+    { dMass mass; dBodyGetMass (get_id(), &mass); return mass; }
 
   void addForce (dReal fx, dReal fy, dReal fz)
-    { dBodyAddForce (_id, fx, fy, fz); }
+    { dBodyAddForce (get_id(), fx, fy, fz); }
   void addForce (const dVector3 f)
     { addForce (f[0], f[1], f[2]); }
   void addTorque (dReal fx, dReal fy, dReal fz)
-    { dBodyAddTorque (_id, fx, fy, fz); }
+    { dBodyAddTorque (get_id(), fx, fy, fz); }
   void addTorque (const dVector3 t)
     { addTorque(t[0], t[1], t[2]); }
 
   void addRelForce (dReal fx, dReal fy, dReal fz)
-    { dBodyAddRelForce (_id, fx, fy, fz); }
+    { dBodyAddRelForce (get_id(), fx, fy, fz); }
   void addRelForce (const dVector3 f)
     { addRelForce (f[0], f[1], f[2]); }
   void addRelTorque (dReal fx, dReal fy, dReal fz)
-    { dBodyAddRelTorque (_id, fx, fy, fz); }
+    { dBodyAddRelTorque (get_id(), fx, fy, fz); }
   void addRelTorque (const dVector3 t)
     { addRelTorque (t[0], t[1], t[2]); }
 
-  void addForceAtPos (dReal fx, dReal fy, dReal fz,
+  void addForceAtPos (dReal fx, dReal fy, dReal fz, 
 		      dReal px, dReal py, dReal pz)
-    { dBodyAddForceAtPos (_id, fx, fy, fz, px, py, pz); }
+    { dBodyAddForceAtPos (get_id(), fx, fy, fz, px, py, pz); }
   void addForceAtPos (const dVector3 f, const dVector3 p)
     { addForceAtPos (f[0], f[1], f[2], p[0], p[1], p[2]); }
 
-  void addForceAtRelPos (dReal fx, dReal fy, dReal fz,
+  void addForceAtRelPos (dReal fx, dReal fy, dReal fz, 
                          dReal px, dReal py, dReal pz)
-    { dBodyAddForceAtRelPos (_id, fx, fy, fz, px, py, pz); }
+    { dBodyAddForceAtRelPos (get_id(), fx, fy, fz, px, py, pz); }
   void addForceAtRelPos (const dVector3 f, const dVector3 p)
     { addForceAtRelPos (f[0], f[1], f[2], p[0], p[1], p[2]); }
 
-  void addRelForceAtPos (dReal fx, dReal fy, dReal fz,
+  void addRelForceAtPos (dReal fx, dReal fy, dReal fz, 
 			 dReal px, dReal py, dReal pz)
-    { dBodyAddRelForceAtPos (_id, fx, fy, fz, px, py, pz); }
+    { dBodyAddRelForceAtPos (get_id(), fx, fy, fz, px, py, pz); }
   void addRelForceAtPos (const dVector3 f, const dVector3 p)
     { addRelForceAtPos (f[0], f[1], f[2], p[0], p[1], p[2]); }
 
-  void addRelForceAtRelPos (dReal fx, dReal fy, dReal fz,
+  void addRelForceAtRelPos (dReal fx, dReal fy, dReal fz, 
 			    dReal px, dReal py, dReal pz)
-    { dBodyAddRelForceAtRelPos (_id, fx, fy, fz, px, py, pz); }
+    { dBodyAddRelForceAtRelPos (get_id(), fx, fy, fz, px, py, pz); }
   void addRelForceAtRelPos (const dVector3 f, const dVector3 p)
     { addRelForceAtRelPos (f[0], f[1], f[2], p[0], p[1], p[2]); }
 
   const dReal * getForce() const
-    { return dBodyGetForce(_id); }
+    { return dBodyGetForce(get_id()); }
   const dReal * getTorque() const
-    { return dBodyGetTorque(_id); }
+    { return dBodyGetTorque(get_id()); }
   void setForce (dReal x, dReal y, dReal z)
-    { dBodySetForce (_id,x,y,z); }
+    { dBodySetForce (get_id(), x, y, z); }
   void setForce (const dVector3 f)
     { setForce (f[0], f[1], f[2]); }
   void setTorque (dReal x, dReal y, dReal z)
-    { dBodySetTorque (_id,x,y,z); }
+    { dBodySetTorque (get_id(), x, y, z); }
   void setTorque (const dVector3 t)
   { setTorque (t[0], t[1], t[2]); }
 
   void setDynamic()
-    { dBodySetDynamic (_id); }
+    { dBodySetDynamic (get_id()); }
   void setKinematic()
-    { dBodySetKinematic (_id); }
+    { dBodySetKinematic (get_id()); }
   bool isKinematic() const
-    { return dBodyIsKinematic (_id) != 0; }
+    { return dBodyIsKinematic (get_id()) != 0; }
 
   void enable()
-    { dBodyEnable (_id); }
+    { dBodyEnable (get_id()); }
   void disable()
-    { dBodyDisable (_id); }
+    { dBodyDisable (get_id()); }
   bool isEnabled() const
-    { return dBodyIsEnabled (_id) != 0; }
+    { return dBodyIsEnabled (get_id()) != 0; }
 
   void getRelPointPos (dReal px, dReal py, dReal pz, dVector3 result) const
-    { dBodyGetRelPointPos (_id, px, py, pz, result); }
+    { dBodyGetRelPointPos (get_id(), px, py, pz, result); }
   void getRelPointPos (const dVector3 p, dVector3 result) const
     { getRelPointPos (p[0], p[1], p[2], result); }
 
   void getRelPointVel (dReal px, dReal py, dReal pz, dVector3 result) const
-    { dBodyGetRelPointVel (_id, px, py, pz, result); }
+    { dBodyGetRelPointVel (get_id(), px, py, pz, result); }
   void getRelPointVel (const dVector3 p, dVector3 result) const
     { getRelPointVel (p[0], p[1], p[2], result); }
 
   void getPointVel (dReal px, dReal py, dReal pz, dVector3 result) const
-    { dBodyGetPointVel (_id, px, py, pz, result); }
+    { dBodyGetPointVel (get_id(), px, py, pz, result); }
   void getPointVel (const dVector3 p, dVector3 result) const
     { getPointVel (p[0], p[1], p[2], result); }
 
   void getPosRelPoint (dReal px, dReal py, dReal pz, dVector3 result) const
-    { dBodyGetPosRelPoint (_id, px, py, pz, result); }
+    { dBodyGetPosRelPoint (get_id(), px, py, pz, result); }
   void getPosRelPoint (const dVector3 p, dVector3 result) const
     { getPosRelPoint (p[0], p[1], p[2], result); }
 
   void vectorToWorld (dReal px, dReal py, dReal pz, dVector3 result) const
-    { dBodyVectorToWorld (_id, px, py, pz, result); }
+    { dBodyVectorToWorld (get_id(), px, py, pz, result); }
   void vectorToWorld (const dVector3 p, dVector3 result) const
     { vectorToWorld (p[0], p[1], p[2], result); }
 
   void vectorFromWorld (dReal px, dReal py, dReal pz, dVector3 result) const
-    { dBodyVectorFromWorld (_id,px,py,pz,result); }
+    { dBodyVectorFromWorld (get_id(), px, py, pz, result); }
   void vectorFromWorld (const dVector3 p, dVector3 result) const
     { vectorFromWorld (p[0], p[1], p[2], result); }
 
   void setFiniteRotationMode (bool mode)
-    { dBodySetFiniteRotationMode (_id, mode); }
+    { dBodySetFiniteRotationMode (get_id(), mode); }
 
   void setFiniteRotationAxis (dReal x, dReal y, dReal z)
-    { dBodySetFiniteRotationAxis (_id, x, y, z); }
+    { dBodySetFiniteRotationAxis (get_id(), x, y, z); }
   void setFiniteRotationAxis (const dVector3 a)
     { setFiniteRotationAxis (a[0], a[1], a[2]); }
 
   bool getFiniteRotationMode() const
-    { return dBodyGetFiniteRotationMode (_id) != 0; }
+    { return dBodyGetFiniteRotationMode (get_id()) != 0; }
   void getFiniteRotationAxis (dVector3 result) const
-    { dBodyGetFiniteRotationAxis (_id, result); }
+    { dBodyGetFiniteRotationAxis (get_id(), result); }
 
   int getNumJoints() const
-    { return dBodyGetNumJoints (_id); }
+    { return dBodyGetNumJoints (get_id()); }
   dJointID getJoint (int index) const
-    { return dBodyGetJoint (_id, index); }
+    { return dBodyGetJoint (get_id(), index); }
 
   void setGravityMode (bool mode)
-    { dBodySetGravityMode (_id,mode); }
+    { dBodySetGravityMode (get_id(), mode); }
   bool getGravityMode() const
-    { return dBodyGetGravityMode (_id) != 0; }
+    { return dBodyGetGravityMode (get_id()) != 0; }
 
   bool isConnectedTo (dBodyID body) const
-    { return dAreConnected (_id, body) != 0; }
+    { return dAreConnected (get_id(), body) != 0; }
 
   void  setAutoDisableLinearThreshold (dReal threshold) 
-    { dBodySetAutoDisableLinearThreshold (_id,threshold); }
+    { dBodySetAutoDisableLinearThreshold (get_id(), threshold); }
   dReal getAutoDisableLinearThreshold() const
-    { return dBodyGetAutoDisableLinearThreshold (_id); }
+    { return dBodyGetAutoDisableLinearThreshold (get_id()); }
   void setAutoDisableAngularThreshold (dReal threshold)
-    { dBodySetAutoDisableAngularThreshold (_id,threshold); }
+    { dBodySetAutoDisableAngularThreshold (get_id(), threshold); }
   dReal getAutoDisableAngularThreshold() const
-    { return dBodyGetAutoDisableAngularThreshold (_id); }
+    { return dBodyGetAutoDisableAngularThreshold (get_id()); }
   void setAutoDisableSteps (int steps)
-    { dBodySetAutoDisableSteps (_id,steps); }
+    { dBodySetAutoDisableSteps (get_id(), steps); }
   int getAutoDisableSteps() const
-    { return dBodyGetAutoDisableSteps (_id); }
+    { return dBodyGetAutoDisableSteps (get_id()); }
   void setAutoDisableTime (dReal time)
-    { dBodySetAutoDisableTime (_id,time); }
+    { dBodySetAutoDisableTime (get_id(), time); }
   dReal getAutoDisableTime() const
-    { return dBodyGetAutoDisableTime (_id); }
+    { return dBodyGetAutoDisableTime (get_id()); }
   void setAutoDisableFlag (bool do_auto_disable)
-    { dBodySetAutoDisableFlag (_id,do_auto_disable); }
+    { dBodySetAutoDisableFlag (get_id(), do_auto_disable); }
   bool getAutoDisableFlag() const
-    { return dBodyGetAutoDisableFlag (_id) != 0; }
+    { return dBodyGetAutoDisableFlag (get_id()) != 0; }
 
   dReal getLinearDamping() const
-    { return dBodyGetLinearDamping(_id); }
+    { return dBodyGetLinearDamping(get_id()); }
   void setLinearDamping(dReal scale)
-    { dBodySetLinearDamping(_id, scale); }
+    { dBodySetLinearDamping(get_id(), scale); }
   dReal getAngularDamping() const
-    { return dBodyGetAngularDamping(_id); }
+    { return dBodyGetAngularDamping(get_id()); }
   void setAngularDamping(dReal scale)
-    { dBodySetAngularDamping(_id, scale); }
+    { dBodySetAngularDamping(get_id(), scale); }
   void setDamping(dReal linear_scale, dReal angular_scale)
-    { dBodySetDamping(_id, linear_scale, angular_scale); }
+    { dBodySetDamping(get_id(), linear_scale, angular_scale); }
   dReal getLinearDampingThreshold() const
-    { return dBodyGetLinearDampingThreshold(_id); }
+    { return dBodyGetLinearDampingThreshold(get_id()); }
   void setLinearDampingThreshold(dReal threshold) const
-    { dBodySetLinearDampingThreshold(_id, threshold); }
+    { dBodySetLinearDampingThreshold(get_id(), threshold); }
   dReal getAngularDampingThreshold() const
-    { return dBodyGetAngularDampingThreshold(_id); }
+    { return dBodyGetAngularDampingThreshold(get_id()); }
   void setAngularDampingThreshold(dReal threshold)
-    { dBodySetAngularDampingThreshold(_id, threshold); }
+    { dBodySetAngularDampingThreshold(get_id(), threshold); }
   void setDampingDefaults()
-    { dBodySetDampingDefaults(_id); }
+    { dBodySetDampingDefaults(get_id()); }
 
   dReal getMaxAngularSpeed() const
-    { return dBodyGetMaxAngularSpeed(_id); }
+    { return dBodyGetMaxAngularSpeed(get_id()); }
   void setMaxAngularSpeed(dReal max_speed)
-    { dBodySetMaxAngularSpeed(_id, max_speed); }
+    { dBodySetMaxAngularSpeed(get_id(), max_speed); }
 
   bool getGyroscopicMode() const
-    { return dBodyGetGyroscopicMode(_id) != 0; }
+    { return dBodyGetGyroscopicMode(get_id()) != 0; }
   void setGyroscopicMode(bool mode)
-    { dBodySetGyroscopicMode(_id, mode); }
+    { dBodySetGyroscopicMode(get_id(), mode); }
 
 };
 
@@ -449,22 +459,28 @@ class dJointGroupTemplate: public dJointGroupTemplateBase {
   dJointGroupTemplate (const dJointGroupTemplate<dJointGroupTemplateBase> &);
   void operator= (const dJointGroupTemplate<dJointGroupTemplateBase> &);
 
+protected:
+  dJointGroupID get_id() const { return dJointGroupTemplateBase::_id; }
+  void set_id(dJointGroupID value) { dJointGroupTemplateBase::_id = value; }
+
+  void destroy() { dJointGroupTemplateBase::destroy(); }
+
 public:
   dJointGroupTemplate ()
-    { _id = dJointGroupCreate (0); }
+    { set_id(dJointGroupCreate(0)); }
   
   void create () {
     destroy();
-    _id = dJointGroupCreate (0);
+    set_id(dJointGroupCreate(0));
   }
 
   dJointGroupID id() const
-    { return _id; }
+    { return get_id(); }
   operator dJointGroupID() const
-    { return _id; }
+    { return get_id(); }
 
   void empty()
-    { dJointGroupEmpty (_id); }
+    { dJointGroupEmpty (get_id()); }
   void clear()
     { empty(); }
 };
@@ -498,45 +514,51 @@ private:
   void operator= (const dJointTemplate<dJointTemplateBase, dWorldTemplateBase, dBodyTemplateBase> &);
 
 protected:
+  dJointID get_id() const { return dJointTemplateBase::_id; }
+  void set_id(dJointID value) { dJointTemplateBase::_id = value; }
+
+  void destroy() { dJointTemplateBase::destroy(); }
+
+protected:
   dJointTemplate() // don't let user construct pure dJointTemplate objects
     { }
 
 public:
   dJointID id() const
-    { return _id; }
+    { return get_id(); }
   operator dJointID() const
-    { return _id; }
+    { return get_id(); }
 
   int getNumBodies() const
-    { return dJointGetNumBodies(_id); }
+    { return dJointGetNumBodies(get_id()); }
 
   void attach (dBodyID body1, dBodyID body2)
-    { dJointAttach (_id, body1, body2); }
+    { dJointAttach (get_id(), body1, body2); }
   void attach (dBodyTemplate<dBodyTemplateBase, dWorldTemplateBase>& body1, dBodyTemplate<dBodyTemplateBase, dWorldTemplateBase>& body2)
     { attach(body1.id(), body2.id()); }
 
   void enable()
-    { dJointEnable (_id); }
+    { dJointEnable (get_id()); }
   void disable()
-    { dJointDisable (_id); }
+    { dJointDisable (get_id()); }
   bool isEnabled() const
-    { return dJointIsEnabled (_id) != 0; }
+    { return dJointIsEnabled (get_id()) != 0; }
 
   void setData (void *data)
-    { dJointSetData (_id, data); }
+    { dJointSetData (get_id(), data); }
   void *getData() const
-    { return dJointGetData (_id); }
+    { return dJointGetData (get_id()); }
 
   dJointType getType() const
-    { return dJointGetType (_id); }
+    { return dJointGetType (get_id()); }
 
   dBodyID getBody (int index) const
-    { return dJointGetBody (_id, index); }
+    { return dJointGetBody (get_id(), index); }
 
   void setFeedback(dJointFeedback *fb)
-    { dJointSetFeedback(_id, fb); }
+    { dJointSetFeedback(get_id(), fb); }
   dJointFeedback *getFeedback() const
-    { return dJointGetFeedback(_id); }
+    { return dJointGetFeedback(get_id()); }
 
   // If not implemented it will do nothing as describe in the doc
   virtual void setParam (int, dReal) {};
@@ -551,309 +573,363 @@ private:
   dBallJointTemplate (const dBallJointTemplate<dJointTemplateBase, dWorldTemplateBase, dBodyTemplateBase> &);
   void operator= (const dBallJointTemplate<dJointTemplateBase, dWorldTemplateBase, dBodyTemplateBase> &);
 
+protected:
+  typedef dJointTemplate<dJointTemplateBase, dWorldTemplateBase, dBodyTemplateBase> dBaseTemplate;
+
+  dJointID get_id() const { return dBaseTemplate::get_id(); }
+  void set_id(dJointID value) { dBaseTemplate::set_id(value); }
+
+  void destroy() { dBaseTemplate::destroy(); }
+
 public:
   dBallJointTemplate() { }
   dBallJointTemplate (dWorldID world, dJointGroupID group=0)
-    { _id = dJointCreateBall (world, group); }
+    { set_id(dJointCreateBall(world, group)); }
   dBallJointTemplate (dWorldTemplate<dWorldTemplateBase>& world, dJointGroupID group=0)
-    { _id = dJointCreateBall (world.id(), group); }
+    { set_id(dJointCreateBall(world.id(), group)); }
 
   void create (dWorldID world, dJointGroupID group=0) {
     destroy();
-    _id = dJointCreateBall (world, group);
+    set_id(dJointCreateBall(world, group));
   }
   void create (dWorldTemplate<dWorldTemplateBase>& world, dJointGroupID group=0)
     { create(world.id(), group); }
 
   void setAnchor (dReal x, dReal y, dReal z)
-    { dJointSetBallAnchor (_id, x, y, z); }
+    { dJointSetBallAnchor (get_id(), x, y, z); }
   void setAnchor (const dVector3 a)
     { setAnchor (a[0], a[1], a[2]); }
   void getAnchor (dVector3 result) const
-    { dJointGetBallAnchor (_id, result); }
+    { dJointGetBallAnchor (get_id(), result); }
   void getAnchor2 (dVector3 result) const
-    { dJointGetBallAnchor2 (_id, result); }
+    { dJointGetBallAnchor2 (get_id(), result); }
   virtual void setParam (int parameter, dReal value)
-    { dJointSetBallParam (_id, parameter, value); }
+    { dJointSetBallParam (get_id(), parameter, value); }
   virtual dReal getParam (int parameter) const
-    { return dJointGetBallParam (_id, parameter); }
+    { return dJointGetBallParam (get_id(), parameter); }
   // TODO: expose params through methods
 } ;
 
 
 template <class dJointTemplateBase, class dWorldTemplateBase, class dBodyTemplateBase>
 class dHingeJointTemplate : public dJointTemplate<dJointTemplateBase, dWorldTemplateBase, dBodyTemplateBase> {
+private:
   // intentionally undefined, don't use these
   dHingeJointTemplate (const dHingeJointTemplate<dJointTemplateBase, dWorldTemplateBase, dBodyTemplateBase> &);
   void operator = (const dHingeJointTemplate<dJointTemplateBase, dWorldTemplateBase, dBodyTemplateBase> &);
 
+protected:
+  typedef dJointTemplate<dJointTemplateBase, dWorldTemplateBase, dBodyTemplateBase> dBaseTemplate;
+
+  dJointID get_id() const { return dBaseTemplate::get_id(); }
+  void set_id(dJointID value) { dBaseTemplate::set_id(value); }
+
+  void destroy() { dBaseTemplate::destroy(); }
+
 public:
   dHingeJointTemplate() { }
   dHingeJointTemplate (dWorldID world, dJointGroupID group=0)
-    { _id = dJointCreateHinge (world, group); }
+    { set_id(dJointCreateHinge(world, group)); }
   dHingeJointTemplate (dWorldTemplate<dWorldTemplateBase>& world, dJointGroupID group=0)
-    { _id = dJointCreateHinge (world.id(), group); }
+    { set_id(dJointCreateHinge(world.id(), group)); }
 
   void create (dWorldID world, dJointGroupID group=0) {
     destroy();
-    _id = dJointCreateHinge (world, group);
+    set_id(dJointCreateHinge (world, group));
   }
   void create (dWorldTemplate<dWorldTemplateBase>& world, dJointGroupID group=0)
     { create(world.id(), group); }
   
   void setAnchor (dReal x, dReal y, dReal z)
-    { dJointSetHingeAnchor (_id, x, y, z); }
+    { dJointSetHingeAnchor (get_id(), x, y, z); }
   void setAnchor (const dVector3 a)
     { setAnchor (a[0], a[1], a[2]); }
   void getAnchor (dVector3 result) const
-    { dJointGetHingeAnchor (_id, result); }
+    { dJointGetHingeAnchor (get_id(), result); }
   void getAnchor2 (dVector3 result) const
-    { dJointGetHingeAnchor2 (_id, result); }
+    { dJointGetHingeAnchor2 (get_id(), result); }
 
   void setAxis (dReal x, dReal y, dReal z)
-    { dJointSetHingeAxis (_id, x, y, z); }
+    { dJointSetHingeAxis (get_id(), x, y, z); }
   void setAxis (const dVector3 a)
     { setAxis(a[0], a[1], a[2]); }
   void getAxis (dVector3 result) const
-    { dJointGetHingeAxis (_id, result); }
+    { dJointGetHingeAxis (get_id(), result); }
 
   dReal getAngle() const
-    { return dJointGetHingeAngle (_id); }
+    { return dJointGetHingeAngle (get_id()); }
   dReal getAngleRate() const
-    { return dJointGetHingeAngleRate (_id); }
+    { return dJointGetHingeAngleRate (get_id()); }
 
   virtual void setParam (int parameter, dReal value)
-    { dJointSetHingeParam (_id, parameter, value); }
+    { dJointSetHingeParam (get_id(), parameter, value); }
   virtual dReal getParam (int parameter) const
-    { return dJointGetHingeParam (_id, parameter); }
+    { return dJointGetHingeParam (get_id(), parameter); }
   // TODO: expose params through methods
 
   void addTorque (dReal torque)
-	{ dJointAddHingeTorque(_id, torque); }
+	{ dJointAddHingeTorque(get_id(), torque); }
 };
 
 
 template <class dJointTemplateBase, class dWorldTemplateBase, class dBodyTemplateBase>
 class dSliderJointTemplate : public dJointTemplate<dJointTemplateBase, dWorldTemplateBase, dBodyTemplateBase> {
+private:
   // intentionally undefined, don't use these
   dSliderJointTemplate (const dSliderJointTemplate<dJointTemplateBase, dWorldTemplateBase, dBodyTemplateBase> &);
   void operator = (const dSliderJointTemplate<dJointTemplateBase, dWorldTemplateBase, dBodyTemplateBase> &);
 
+protected:
+  typedef dJointTemplate<dJointTemplateBase, dWorldTemplateBase, dBodyTemplateBase> dBaseTemplate;
+
+  dJointID get_id() const { return dBaseTemplate::get_id(); }
+  void set_id(dJointID value) { dBaseTemplate::set_id(value); }
+
+  void destroy() { dBaseTemplate::destroy(); }
+
 public:
   dSliderJointTemplate() { }
   dSliderJointTemplate (dWorldID world, dJointGroupID group=0)
-    { _id = dJointCreateSlider (world, group); }
+    { set_id(dJointCreateSlider(world, group)); }
   dSliderJointTemplate (dWorldTemplate<dWorldTemplateBase>& world, dJointGroupID group=0)
-    { _id = dJointCreateSlider (world.id(), group); }
+    { set_id(dJointCreateSlider(world.id(), group)); }
 
   void create (dWorldID world, dJointGroupID group=0) {
     destroy();
-    _id = dJointCreateSlider (world, group);
+    set_id(dJointCreateSlider(world, group));
   }
   void create (dWorldTemplate<dWorldTemplateBase>& world, dJointGroupID group=0)
     { create(world.id(), group); }
 
   void setAxis (dReal x, dReal y, dReal z)
-    { dJointSetSliderAxis (_id, x, y, z); }
+    { dJointSetSliderAxis (get_id(), x, y, z); }
   void setAxis (const dVector3 a)
     { setAxis (a[0], a[1], a[2]); }
   void getAxis (dVector3 result) const
-    { dJointGetSliderAxis (_id, result); }
+    { dJointGetSliderAxis (get_id(), result); }
 
   dReal getPosition() const
-    { return dJointGetSliderPosition (_id); }
+    { return dJointGetSliderPosition (get_id()); }
   dReal getPositionRate() const
-    { return dJointGetSliderPositionRate (_id); }
+    { return dJointGetSliderPositionRate (get_id()); }
 
   virtual void setParam (int parameter, dReal value)
-    { dJointSetSliderParam (_id, parameter, value); }
+    { dJointSetSliderParam (get_id(), parameter, value); }
   virtual dReal getParam (int parameter) const
-    { return dJointGetSliderParam (_id, parameter); }
+    { return dJointGetSliderParam (get_id(), parameter); }
   // TODO: expose params through methods
 
   void addForce (dReal force)
-	{ dJointAddSliderForce(_id, force); }
+	{ dJointAddSliderForce(get_id(), force); }
 };
 
 
 template <class dJointTemplateBase, class dWorldTemplateBase, class dBodyTemplateBase>
 class dUniversalJointTemplate : public dJointTemplate<dJointTemplateBase, dWorldTemplateBase, dBodyTemplateBase> {
+private:
   // intentionally undefined, don't use these
   dUniversalJointTemplate (const dUniversalJointTemplate<dJointTemplateBase, dWorldTemplateBase, dBodyTemplateBase> &);
   void operator = (const dUniversalJointTemplate<dJointTemplateBase, dWorldTemplateBase, dBodyTemplateBase> &);
 
+protected:
+  typedef dJointTemplate<dJointTemplateBase, dWorldTemplateBase, dBodyTemplateBase> dBaseTemplate;
+
+  dJointID get_id() const { return dBaseTemplate::get_id(); }
+  void set_id(dJointID value) { dBaseTemplate::set_id(value); }
+
+  void destroy() { dBaseTemplate::destroy(); }
+
 public:
   dUniversalJointTemplate() { }
   dUniversalJointTemplate (dWorldID world, dJointGroupID group=0)
-    { _id = dJointCreateUniversal (world, group); }
+    { set_id(dJointCreateUniversal(world, group)); }
   dUniversalJointTemplate (dWorldTemplate<dWorldTemplateBase>& world, dJointGroupID group=0)
-    { _id = dJointCreateUniversal (world.id(), group); }
+    { set_id(dJointCreateUniversal(world.id(), group)); }
 
   void create (dWorldID world, dJointGroupID group=0) {
     destroy();
-    _id = dJointCreateUniversal (world, group);
+    set_id(dJointCreateUniversal(world, group));
   }
   void create (dWorldTemplate<dWorldTemplateBase>& world, dJointGroupID group=0)
     { create(world.id(), group); }
 
   void setAnchor (dReal x, dReal y, dReal z)
-    { dJointSetUniversalAnchor (_id, x, y, z); }
+    { dJointSetUniversalAnchor (get_id(), x, y, z); }
   void setAnchor (const dVector3 a)
     { setAnchor(a[0], a[1], a[2]); }
   void setAxis1 (dReal x, dReal y, dReal z)
-    { dJointSetUniversalAxis1 (_id, x, y, z); }
+    { dJointSetUniversalAxis1 (get_id(), x, y, z); }
   void setAxis1 (const dVector3 a)
     { setAxis1 (a[0], a[1], a[2]); }
   void setAxis2 (dReal x, dReal y, dReal z)
-    { dJointSetUniversalAxis2 (_id, x, y, z); }
+    { dJointSetUniversalAxis2 (get_id(), x, y, z); }
   void setAxis2 (const dVector3 a)
     { setAxis2 (a[0], a[1], a[2]); }
 
   void getAnchor (dVector3 result) const
-    { dJointGetUniversalAnchor (_id, result); }
+    { dJointGetUniversalAnchor (get_id(), result); }
   void getAnchor2 (dVector3 result) const
-    { dJointGetUniversalAnchor2 (_id, result); }
+    { dJointGetUniversalAnchor2 (get_id(), result); }
   void getAxis1 (dVector3 result) const
-    { dJointGetUniversalAxis1 (_id, result); }
+    { dJointGetUniversalAxis1 (get_id(), result); }
   void getAxis2 (dVector3 result) const
-    { dJointGetUniversalAxis2 (_id, result); }
+    { dJointGetUniversalAxis2 (get_id(), result); }
 
   virtual void setParam (int parameter, dReal value)
-    { dJointSetUniversalParam (_id, parameter, value); }
+    { dJointSetUniversalParam (get_id(), parameter, value); }
   virtual dReal getParam (int parameter) const
-    { return dJointGetUniversalParam (_id, parameter); }
+    { return dJointGetUniversalParam (get_id(), parameter); }
   // TODO: expose params through methods
   
   void getAngles(dReal *angle1, dReal *angle2) const
-    { dJointGetUniversalAngles (_id, angle1, angle2); }
+    { dJointGetUniversalAngles (get_id(), angle1, angle2); }
 
   dReal getAngle1() const
-    { return dJointGetUniversalAngle1 (_id); }
+    { return dJointGetUniversalAngle1 (get_id()); }
   dReal getAngle1Rate() const
-    { return dJointGetUniversalAngle1Rate (_id); }
+    { return dJointGetUniversalAngle1Rate (get_id()); }
   dReal getAngle2() const
-    { return dJointGetUniversalAngle2 (_id); }
+    { return dJointGetUniversalAngle2 (get_id()); }
   dReal getAngle2Rate() const
-    { return dJointGetUniversalAngle2Rate (_id); }
+    { return dJointGetUniversalAngle2Rate (get_id()); }
 
   void addTorques (dReal torque1, dReal torque2)
-	{ dJointAddUniversalTorques(_id, torque1, torque2); }
+	{ dJointAddUniversalTorques(get_id(), torque1, torque2); }
 };
 
 
 template <class dJointTemplateBase, class dWorldTemplateBase, class dBodyTemplateBase>
 class dHinge2JointTemplate : public dJointTemplate<dJointTemplateBase, dWorldTemplateBase, dBodyTemplateBase> {
+private:
   // intentionally undefined, don't use these
   dHinge2JointTemplate (const dHinge2JointTemplate<dJointTemplateBase, dWorldTemplateBase, dBodyTemplateBase> &);
   void operator = (const dHinge2JointTemplate<dJointTemplateBase, dWorldTemplateBase, dBodyTemplateBase> &);
 
+protected:
+  typedef dJointTemplate<dJointTemplateBase, dWorldTemplateBase, dBodyTemplateBase> dBaseTemplate;
+
+  dJointID get_id() const { return dBaseTemplate::get_id(); }
+  void set_id(dJointID value) { dBaseTemplate::set_id(value); }
+
+  void destroy() { dBaseTemplate::destroy(); }
+
 public:
   dHinge2JointTemplate() { }
   dHinge2JointTemplate (dWorldID world, dJointGroupID group=0)
-    { _id = dJointCreateHinge2 (world, group); }
+    { set_id(dJointCreateHinge2(world, group)); }
   dHinge2JointTemplate (dWorldTemplate<dWorldTemplateBase>& world, dJointGroupID group=0)
-    { _id = dJointCreateHinge2 (world.id(), group); }
+    { set_id(dJointCreateHinge2(world.id(), group)); }
 
   void create (dWorldID world, dJointGroupID group=0) {
     destroy();
-    _id = dJointCreateHinge2 (world, group);
+    set_id(dJointCreateHinge2(world, group));
   }
   void create (dWorldTemplate<dWorldTemplateBase>& world, dJointGroupID group=0)
     { create(world.id(), group); }
 
   void setAnchor (dReal x, dReal y, dReal z)
-    { dJointSetHinge2Anchor (_id, x, y, z); }
+    { dJointSetHinge2Anchor (get_id(), x, y, z); }
   void setAnchor (const dVector3 a)
     { setAnchor(a[0], a[1], a[2]); }
   void setAxis1 (dReal x, dReal y, dReal z)
-    { dJointSetHinge2Axis1 (_id, x, y, z); }
+    { dJointSetHinge2Axis1 (get_id(), x, y, z); }
   void setAxis1 (const dVector3 a)
     { setAxis1 (a[0], a[1], a[2]); }
   void setAxis2 (dReal x, dReal y, dReal z)
-    { dJointSetHinge2Axis2 (_id, x, y, z); }
+    { dJointSetHinge2Axis2 (get_id(), x, y, z); }
   void setAxis2 (const dVector3 a)
     { setAxis2 (a[0], a[1], a[2]); }
     
   void getAnchor (dVector3 result) const
-    { dJointGetHinge2Anchor (_id, result); }
+    { dJointGetHinge2Anchor (get_id(), result); }
   void getAnchor2 (dVector3 result) const
-    { dJointGetHinge2Anchor2 (_id, result); }
+    { dJointGetHinge2Anchor2 (get_id(), result); }
   void getAxis1 (dVector3 result) const
-    { dJointGetHinge2Axis1 (_id, result); }
+    { dJointGetHinge2Axis1 (get_id(), result); }
   void getAxis2 (dVector3 result) const
-    { dJointGetHinge2Axis2 (_id, result); }
+    { dJointGetHinge2Axis2 (get_id(), result); }
 
   dReal getAngle1() const
-    { return dJointGetHinge2Angle1 (_id); }
+    { return dJointGetHinge2Angle1 (get_id()); }
   dReal getAngle1Rate() const
-    { return dJointGetHinge2Angle1Rate (_id); }
+    { return dJointGetHinge2Angle1Rate (get_id()); }
   dReal getAngle2Rate() const
-    { return dJointGetHinge2Angle2Rate (_id); }
+    { return dJointGetHinge2Angle2Rate (get_id()); }
 
   virtual void setParam (int parameter, dReal value)
-    { dJointSetHinge2Param (_id, parameter, value); }
+    { dJointSetHinge2Param (get_id(), parameter, value); }
   virtual dReal getParam (int parameter) const
-    { return dJointGetHinge2Param (_id, parameter); }
+    { return dJointGetHinge2Param (get_id(), parameter); }
   // TODO: expose params through methods
 
   void addTorques(dReal torque1, dReal torque2)
-	{ dJointAddHinge2Torques(_id, torque1, torque2); }
+	{ dJointAddHinge2Torques(get_id(), torque1, torque2); }
 };
 
 
 template <class dJointTemplateBase, class dWorldTemplateBase, class dBodyTemplateBase>
 class dPRJointTemplate : public dJointTemplate<dJointTemplateBase, dWorldTemplateBase, dBodyTemplateBase> {
+private:
+  // intentionally undefined, don't use these
   dPRJointTemplate (const dPRJointTemplate<dJointTemplateBase, dWorldTemplateBase, dBodyTemplateBase> &);
   void operator = (const dPRJointTemplate<dJointTemplateBase, dWorldTemplateBase, dBodyTemplateBase> &);
+
+protected:
+  typedef dJointTemplate<dJointTemplateBase, dWorldTemplateBase, dBodyTemplateBase> dBaseTemplate;
+
+  dJointID get_id() const { return dBaseTemplate::get_id(); }
+  void set_id(dJointID value) { dBaseTemplate::set_id(value); }
+
+  void destroy() { dBaseTemplate::destroy(); }
 
 public:
   dPRJointTemplate() { }
   dPRJointTemplate (dWorldID world, dJointGroupID group=0)
-    { _id = dJointCreatePR (world, group); }
+    { set_id(dJointCreatePR(world, group)); }
   dPRJointTemplate (dWorldTemplate<dWorldTemplateBase>& world, dJointGroupID group=0)
-    { _id = dJointCreatePR (world.id(), group); }
+    { set_id(dJointCreatePR(world.id(), group)); }
 
   void create (dWorldID world, dJointGroupID group=0) {
     destroy();
-    _id = dJointCreatePR (world, group);
+    set_id(dJointCreatePR(world, group));
   }
   void create (dWorldTemplate<dWorldTemplateBase>& world, dJointGroupID group=0)
     { create(world.id(), group); }
 
   void setAnchor (dReal x, dReal y, dReal z)
-    { dJointSetPRAnchor (_id, x, y, z); }
+    { dJointSetPRAnchor (get_id(), x, y, z); }
   void setAnchor (const dVector3 a)
     { setAnchor (a[0], a[1], a[2]); }
   void setAxis1 (dReal x, dReal y, dReal z)
-    { dJointSetPRAxis1 (_id, x, y, z); }
+    { dJointSetPRAxis1 (get_id(), x, y, z); }
   void setAxis1 (const dVector3 a)
     { setAxis1(a[0], a[1], a[2]); }
   void setAxis2 (dReal x, dReal y, dReal z)
-    { dJointSetPRAxis2 (_id, x, y, z); }
+    { dJointSetPRAxis2 (get_id(), x, y, z); }
   void setAxis2 (const dVector3 a)
     { setAxis2(a[0], a[1], a[2]); }
 
   void getAnchor (dVector3 result) const
-    { dJointGetPRAnchor (_id, result); }
+    { dJointGetPRAnchor (get_id(), result); }
   void getAxis1 (dVector3 result) const
-    { dJointGetPRAxis1 (_id, result); }
+    { dJointGetPRAxis1 (get_id(), result); }
   void getAxis2 (dVector3 result) const
-    { dJointGetPRAxis2 (_id, result); }
+    { dJointGetPRAxis2 (get_id(), result); }
 
   dReal getPosition() const
-    { return dJointGetPRPosition (_id); }
+    { return dJointGetPRPosition (get_id()); }
   dReal getPositionRate() const
-    { return dJointGetPRPositionRate (_id); }
+    { return dJointGetPRPositionRate (get_id()); }
 
   dReal getAngle() const
-    { return dJointGetPRAngle (_id); }
+    { return dJointGetPRAngle (get_id()); }
   dReal getAngleRate() const
-    { return dJointGetPRAngleRate (_id); }
+    { return dJointGetPRAngleRate (get_id()); }
 
   virtual void setParam (int parameter, dReal value)
-    { dJointSetPRParam (_id, parameter, value); }
+    { dJointSetPRParam (get_id(), parameter, value); }
   virtual dReal getParam (int parameter) const
-    { return dJointGetPRParam (_id, parameter); }
+    { return dJointGetPRParam (get_id(), parameter); }
 };
 
 
@@ -861,72 +937,82 @@ public:
 template <class dJointTemplateBase, class dWorldTemplateBase, class dBodyTemplateBase>
 class dPUJointTemplate : public dJointTemplate<dJointTemplateBase, dWorldTemplateBase, dBodyTemplateBase>
 {
+private:
+  // intentionally undefined, don't use these
   dPUJointTemplate (const dPUJointTemplate<dJointTemplateBase, dWorldTemplateBase, dBodyTemplateBase> &);
   void operator = (const dPUJointTemplate<dJointTemplateBase, dWorldTemplateBase, dBodyTemplateBase> &);
+
+protected:
+  typedef dJointTemplate<dJointTemplateBase, dWorldTemplateBase, dBodyTemplateBase> dBaseTemplate;
+
+  dJointID get_id() const { return dBaseTemplate::get_id(); }
+  void set_id(dJointID value) { dBaseTemplate::set_id(value); }
+
+  void destroy() { dBaseTemplate::destroy(); }
 
 public:
   dPUJointTemplate() { }
   dPUJointTemplate (dWorldID world, dJointGroupID group=0)
-    { _id = dJointCreatePU (world, group); }
+    { set_id(dJointCreatePU(world, group)); }
   dPUJointTemplate (dWorldTemplate<dWorldTemplateBase>& world, dJointGroupID group=0)
-    { _id = dJointCreatePU (world.id(), group); }
+    { set_id(dJointCreatePU(world.id(), group)); }
 
   void create (dWorldID world, dJointGroupID group=0)
   {
     destroy();
-    _id = dJointCreatePU (world, group);
+    set_id(dJointCreatePU(world, group));
   }
   void create (dWorldTemplate<dWorldTemplateBase>& world, dJointGroupID group=0)
   { create(world.id(), group); }
 
   void setAnchor (dReal x, dReal y, dReal z)
-    { dJointSetPUAnchor (_id, x, y, z); }
+    { dJointSetPUAnchor (get_id(), x, y, z); }
   void setAnchor (const dVector3 a)
     { setAnchor (a[0], a[1], a[2]); }
   void setAxis1 (dReal x, dReal y, dReal z)
-    { dJointSetPUAxis1 (_id, x, y, z); }
+    { dJointSetPUAxis1 (get_id(), x, y, z); }
   void setAxis1 (const dVector3 a)
     { setAxis1(a[0], a[1], a[2]); }
   void setAxis2 (dReal x, dReal y, dReal z)
-  { dJointSetPUAxis2 (_id, x, y, z); }
+  { dJointSetPUAxis2 (get_id(), x, y, z); }
   void setAxis3 (dReal x, dReal y, dReal z)
-  { dJointSetPUAxis3 (_id, x, y, z); }
+  { dJointSetPUAxis3 (get_id(), x, y, z); }
   void setAxis3 (const dVector3 a)
     { setAxis3(a[0], a[1], a[2]); }
   void setAxisP (dReal x, dReal y, dReal z)
-  { dJointSetPUAxis3 (_id, x, y, z); }
+  { dJointSetPUAxis3 (get_id(), x, y, z); }
   void setAxisP (const dVector3 a)
     { setAxisP(a[0], a[1], a[2]); }
 
   virtual void getAnchor (dVector3 result) const
-    { dJointGetPUAnchor (_id, result); }
+    { dJointGetPUAnchor (get_id(), result); }
   void getAxis1 (dVector3 result) const
-    { dJointGetPUAxis1 (_id, result); }
+    { dJointGetPUAxis1 (get_id(), result); }
   void getAxis2 (dVector3 result) const
-    { dJointGetPUAxis2 (_id, result); }
+    { dJointGetPUAxis2 (get_id(), result); }
   void getAxis3 (dVector3 result) const
-    { dJointGetPUAxis3 (_id, result); }
+    { dJointGetPUAxis3 (get_id(), result); }
   void getAxisP (dVector3 result) const
-    { dJointGetPUAxis3 (_id, result); }
+    { dJointGetPUAxis3 (get_id(), result); }
 
   dReal getAngle1() const
-    { return dJointGetPUAngle1 (_id); }
+    { return dJointGetPUAngle1 (get_id()); }
   dReal getAngle1Rate() const
-    { return dJointGetPUAngle1Rate (_id); }
+    { return dJointGetPUAngle1Rate (get_id()); }
   dReal getAngle2() const
-    { return dJointGetPUAngle2 (_id); }
+    { return dJointGetPUAngle2 (get_id()); }
   dReal getAngle2Rate() const
-    { return dJointGetPUAngle2Rate (_id); }
+    { return dJointGetPUAngle2Rate (get_id()); }
 
   dReal getPosition() const
-    { return dJointGetPUPosition (_id); }
+    { return dJointGetPUPosition (get_id()); }
   dReal getPositionRate() const
-    { return dJointGetPUPositionRate (_id); }
+    { return dJointGetPUPositionRate (get_id()); }
 
   virtual void setParam (int parameter, dReal value)
-  { dJointSetPUParam (_id, parameter, value); }
+  { dJointSetPUParam (get_id(), parameter, value); }
   virtual dReal getParam (int parameter) const
-    { return dJointGetPUParam (_id, parameter); }
+    { return dJointGetPUParam (get_id(), parameter); }
   // TODO: expose params through methods
 };
 
@@ -937,54 +1023,63 @@ public:
 template <class dJointTemplateBase, class dWorldTemplateBase, class dBodyTemplateBase>
 class dPistonJointTemplate : public dJointTemplate<dJointTemplateBase, dWorldTemplateBase, dBodyTemplateBase>
 {
+private:
   // intentionally undefined, don't use these
   dPistonJointTemplate (const dPistonJointTemplate<dJointTemplateBase, dWorldTemplateBase, dBodyTemplateBase> &);
   void operator = (const dPistonJointTemplate<dJointTemplateBase, dWorldTemplateBase, dBodyTemplateBase> &);
 
+protected:
+  typedef dJointTemplate<dJointTemplateBase, dWorldTemplateBase, dBodyTemplateBase> dBaseTemplate;
+
+  dJointID get_id() const { return dBaseTemplate::get_id(); }
+  void set_id(dJointID value) { dBaseTemplate::set_id(value); }
+
+  void destroy() { dBaseTemplate::destroy(); }
+
 public:
   dPistonJointTemplate() { }
   dPistonJointTemplate (dWorldID world, dJointGroupID group=0)
-    { _id = dJointCreatePiston (world, group); }
+    { set_id(dJointCreatePiston(world, group)); }
   dPistonJointTemplate (dWorldTemplate<dWorldTemplateBase>& world, dJointGroupID group=0)
-    { _id = dJointCreatePiston (world, group); }
+    { set_id(dJointCreatePiston(world, group)); }
 
   void create (dWorldID world, dJointGroupID group=0)
   {
     destroy();
-    _id = dJointCreatePiston (world, group);
+    set_id(dJointCreatePiston(world, group));
   }
   void create (dWorldTemplate<dWorldTemplateBase>& world, dJointGroupID group=0)
     { create(world.id(), group); }
 
   void setAnchor (dReal x, dReal y, dReal z)
-    { dJointSetPistonAnchor (_id, x, y, z); }
+    { dJointSetPistonAnchor (get_id(), x, y, z); }
   void setAnchor (const dVector3 a)
     { setAnchor (a[0], a[1], a[2]); }
   void getAnchor (dVector3 result) const
-    { dJointGetPistonAnchor (_id, result); }
+    { dJointGetPistonAnchor (get_id(), result); }
   void getAnchor2 (dVector3 result) const
-    { dJointGetPistonAnchor2 (_id, result); }
+    { dJointGetPistonAnchor2 (get_id(), result); }
 
   void setAxis (dReal x, dReal y, dReal z)
-    { dJointSetPistonAxis (_id, x, y, z); }
+    { dJointSetPistonAxis (get_id(), x, y, z); }
   void setAxis (const dVector3 a)
     { setAxis(a[0], a[1], a[2]); }
   void getAxis (dVector3 result) const
-    { dJointGetPistonAxis (_id, result); }
+    { dJointGetPistonAxis (get_id(), result); }
 
   dReal getPosition() const
-    { return dJointGetPistonPosition (_id); }
+    { return dJointGetPistonPosition (get_id()); }
   dReal getPositionRate() const
-    { return dJointGetPistonPositionRate (_id); }
+    { return dJointGetPistonPositionRate (get_id()); }
 
   virtual void setParam (int parameter, dReal value)
-  { dJointSetPistonParam (_id, parameter, value); }
+  { dJointSetPistonParam (get_id(), parameter, value); }
   virtual dReal getParam (int parameter) const
-    { return dJointGetPistonParam (_id, parameter); }
+    { return dJointGetPistonParam (get_id(), parameter); }
   // TODO: expose params through methods
 
   void addForce (dReal force)
-  { dJointAddPistonForce (_id, force); }
+  { dJointAddPistonForce (get_id(), force); }
 };
 
 
@@ -992,52 +1087,70 @@ public:
 template <class dJointTemplateBase, class dWorldTemplateBase, class dBodyTemplateBase>
 class dFixedJointTemplate : public dJointTemplate<dJointTemplateBase, dWorldTemplateBase, dBodyTemplateBase>
 {
+private:
   // intentionally undefined, don't use these
   dFixedJointTemplate (const dFixedJointTemplate<dJointTemplateBase, dWorldTemplateBase, dBodyTemplateBase> &);
   void operator = (const dFixedJointTemplate<dJointTemplateBase, dWorldTemplateBase, dBodyTemplateBase> &);
 
+protected:
+  typedef dJointTemplate<dJointTemplateBase, dWorldTemplateBase, dBodyTemplateBase> dBaseTemplate;
+
+  dJointID get_id() const { return dBaseTemplate::get_id(); }
+  void set_id(dJointID value) { dBaseTemplate::set_id(value); }
+
+  void destroy() { dBaseTemplate::destroy(); }
+
 public:
   dFixedJointTemplate() { }
   dFixedJointTemplate (dWorldID world, dJointGroupID group=0)
-    { _id = dJointCreateFixed (world, group); }
+    { set_id(dJointCreateFixed(world, group)); }
   dFixedJointTemplate (dWorldTemplate<dWorldTemplateBase>& world, dJointGroupID group=0)
-    { _id = dJointCreateFixed (world, group); }
+    { set_id(dJointCreateFixed(world, group)); }
 
   void create (dWorldID world, dJointGroupID group=0) {
     destroy();
-    _id = dJointCreateFixed (world, group);
+    set_id(dJointCreateFixed(world, group));
   }
   void create (dWorldTemplate<dWorldTemplateBase>& world, dJointGroupID group=0)
     { create(world.id(), group); }
 
   void set()
-    { dJointSetFixed (_id); }
+    { dJointSetFixed (get_id()); }
 
   virtual void setParam (int parameter, dReal value)
-    { dJointSetFixedParam (_id, parameter, value); }
+    { dJointSetFixedParam (get_id(), parameter, value); }
 
   virtual dReal getParam (int parameter) const
-    { return dJointGetFixedParam (_id, parameter); }
+    { return dJointGetFixedParam (get_id(), parameter); }
   // TODO: expose params through methods
 };
 
 
 template <class dJointTemplateBase, class dWorldTemplateBase, class dBodyTemplateBase>
 class dContactJointTemplate : public dJointTemplate<dJointTemplateBase, dWorldTemplateBase, dBodyTemplateBase> {
+private:
   // intentionally undefined, don't use these
   dContactJointTemplate (const dContactJointTemplate<dJointTemplateBase, dWorldTemplateBase, dBodyTemplateBase> &);
   void operator = (const dContactJointTemplate<dJointTemplateBase, dWorldTemplateBase, dBodyTemplateBase> &);
 
+protected:
+  typedef dJointTemplate<dJointTemplateBase, dWorldTemplateBase, dBodyTemplateBase> dBaseTemplate;
+
+  dJointID get_id() const { return dBaseTemplate::get_id(); }
+  void set_id(dJointID value) { dBaseTemplate::set_id(value); }
+
+  void destroy() { dBaseTemplate::destroy(); }
+
 public:
   dContactJointTemplate() { }
   dContactJointTemplate (dWorldID world, dJointGroupID group, dContact *contact)
-    { _id = dJointCreateContact (world, group, contact); }
+    { set_id(dJointCreateContact(world, group, contact)); }
   dContactJointTemplate (dWorldTemplate<dWorldTemplateBase>& world, dJointGroupID group, dContact *contact)
-    { _id = dJointCreateContact (world.id(), group, contact); }
+    { set_id(dJointCreateContact(world.id(), group, contact)); }
 
   void create (dWorldID world, dJointGroupID group, dContact *contact) {
     destroy();
-    _id = dJointCreateContact (world, group, contact);
+    set_id(dJointCreateContact(world, group, contact));
   }
   
   void create (dWorldTemplate<dWorldTemplateBase>& world, dJointGroupID group, dContact *contact)
@@ -1047,20 +1160,29 @@ public:
 
 template <class dJointTemplateBase, class dWorldTemplateBase, class dBodyTemplateBase>
 class dNullJointTemplate : public dJointTemplate<dJointTemplateBase, dWorldTemplateBase, dBodyTemplateBase> {
+private:
   // intentionally undefined, don't use these
   dNullJointTemplate (const dNullJointTemplate<dJointTemplateBase, dWorldTemplateBase, dBodyTemplateBase> &);
   void operator = (const dNullJointTemplate<dJointTemplateBase, dWorldTemplateBase, dBodyTemplateBase> &);
 
+protected:
+  typedef dJointTemplate<dJointTemplateBase, dWorldTemplateBase, dBodyTemplateBase> dBaseTemplate;
+
+  dJointID get_id() const { return dBaseTemplate::get_id(); }
+  void set_id(dJointID value) { dBaseTemplate::set_id(value); }
+
+  void destroy() { dBaseTemplate::destroy(); }
+
 public:
   dNullJointTemplate() { }
   dNullJointTemplate (dWorldID world, dJointGroupID group=0)
-    { _id = dJointCreateNull (world, group); }
+    { set_id(dJointCreateNull(world, group)); }
   dNullJointTemplate (dWorldTemplate<dWorldTemplateBase>& world, dJointGroupID group=0)
-    { _id = dJointCreateNull (world.id(), group); }
+    { set_id(dJointCreateNull (world.id(), group)); }
 
   void create (dWorldID world, dJointGroupID group=0) {
     destroy();
-    _id = dJointCreateNull (world, group);
+    set_id(dJointCreateNull(world, group));
   }
   void create (dWorldTemplate<dWorldTemplateBase>& world, dJointGroupID group=0)
     { create(world.id(), group); }
@@ -1069,97 +1191,115 @@ public:
 
 template <class dJointTemplateBase, class dWorldTemplateBase, class dBodyTemplateBase>
 class dAMotorJointTemplate : public dJointTemplate<dJointTemplateBase, dWorldTemplateBase, dBodyTemplateBase> {
+private:
   // intentionally undefined, don't use these
   dAMotorJointTemplate (const dAMotorJointTemplate<dJointTemplateBase, dWorldTemplateBase, dBodyTemplateBase> &);
   void operator = (const dAMotorJointTemplate<dJointTemplateBase, dWorldTemplateBase, dBodyTemplateBase> &);
 
+protected:
+  typedef dJointTemplate<dJointTemplateBase, dWorldTemplateBase, dBodyTemplateBase> dBaseTemplate;
+
+  dJointID get_id() const { return dBaseTemplate::get_id(); }
+  void set_id(dJointID value) { dBaseTemplate::set_id(value); }
+
+  void destroy() { dBaseTemplate::destroy(); }
+
 public:
   dAMotorJointTemplate() { }
   dAMotorJointTemplate (dWorldID world, dJointGroupID group=0)
-    { _id = dJointCreateAMotor (world, group); }
+    { set_id(dJointCreateAMotor(world, group)); }
   dAMotorJointTemplate (dWorldTemplate<dWorldTemplateBase>& world, dJointGroupID group=0)
-    { _id = dJointCreateAMotor (world.id(), group); }
+    { set_id(dJointCreateAMotor(world.id(), group)); }
 
   void create (dWorldID world, dJointGroupID group=0) {
     destroy();
-    _id = dJointCreateAMotor (world, group);
+    set_id(dJointCreateAMotor(world, group));
   }
   void create (dWorldTemplate<dWorldTemplateBase>& world, dJointGroupID group=0)
     { create(world.id(), group); }
 
   void setMode (int mode)
-    { dJointSetAMotorMode (_id, mode); }
+    { dJointSetAMotorMode (get_id(), mode); }
   int getMode() const
-    { return dJointGetAMotorMode (_id); }
+    { return dJointGetAMotorMode (get_id()); }
 
   void setNumAxes (int num)
-    { dJointSetAMotorNumAxes (_id, num); }
+    { dJointSetAMotorNumAxes (get_id(), num); }
   int getNumAxes() const
-    { return dJointGetAMotorNumAxes (_id); }
+    { return dJointGetAMotorNumAxes (get_id()); }
 
   void setAxis (int anum, int rel, dReal x, dReal y, dReal z)
-    { dJointSetAMotorAxis (_id, anum, rel, x, y, z); }
+    { dJointSetAMotorAxis (get_id(), anum, rel, x, y, z); }
   void setAxis (int anum, int rel, const dVector3 a)
     { setAxis(anum, rel, a[0], a[1], a[2]); }
   void getAxis (int anum, dVector3 result) const
-    { dJointGetAMotorAxis (_id, anum, result); }
+    { dJointGetAMotorAxis (get_id(), anum, result); }
   int getAxisRel (int anum) const
-    { return dJointGetAMotorAxisRel (_id, anum); }
+    { return dJointGetAMotorAxisRel (get_id(), anum); }
 
   void setAngle (int anum, dReal angle)
-    { dJointSetAMotorAngle (_id, anum, angle); }
+    { dJointSetAMotorAngle (get_id(), anum, angle); }
   dReal getAngle (int anum) const
-    { return dJointGetAMotorAngle (_id, anum); }
+    { return dJointGetAMotorAngle (get_id(), anum); }
   dReal getAngleRate (int anum)
-    { return dJointGetAMotorAngleRate (_id,anum); }
+    { return dJointGetAMotorAngleRate (get_id(), anum); }
 
   void setParam (int parameter, dReal value)
-    { dJointSetAMotorParam (_id, parameter, value); }
+    { dJointSetAMotorParam (get_id(), parameter, value); }
   dReal getParam (int parameter) const
-    { return dJointGetAMotorParam (_id, parameter); }
+    { return dJointGetAMotorParam (get_id(), parameter); }
   // TODO: expose params through methods
 
   void addTorques(dReal torque1, dReal torque2, dReal torque3)
-	{ dJointAddAMotorTorques(_id, torque1, torque2, torque3); }
+	{ dJointAddAMotorTorques(get_id(), torque1, torque2, torque3); }
 };
 
 
 template <class dJointTemplateBase, class dWorldTemplateBase, class dBodyTemplateBase>
 class dLMotorJointTemplate : public dJointTemplate<dJointTemplateBase, dWorldTemplateBase, dBodyTemplateBase> {
+private:
   // intentionally undefined, don't use these
   dLMotorJointTemplate (const dLMotorJointTemplate<dJointTemplateBase, dWorldTemplateBase, dBodyTemplateBase> &);
   void operator = (const dLMotorJointTemplate<dJointTemplateBase, dWorldTemplateBase, dBodyTemplateBase> &);
 
+protected:
+  typedef dJointTemplate<dJointTemplateBase, dWorldTemplateBase, dBodyTemplateBase> dBaseTemplate;
+
+  dJointID get_id() const { return dBaseTemplate::get_id(); }
+  void set_id(dJointID value) { dBaseTemplate::set_id(value); }
+
+  void destroy() { dBaseTemplate::destroy(); }
+
 public:
   dLMotorJointTemplate() { }
   dLMotorJointTemplate (dWorldID world, dJointGroupID group=0)
-    { _id = dJointCreateLMotor (world, group); }
+    { set_id(dJointCreateLMotor(world, group)); }
   dLMotorJointTemplate (dWorldTemplate<dWorldTemplateBase>& world, dJointGroupID group=0)
-    { _id = dJointCreateLMotor (world.id(), group); }
+    { set_id(dJointCreateLMotor(world.id(), group)); }
 
   void create (dWorldID world, dJointGroupID group=0) {
     destroy();
-    _id = dJointCreateLMotor (world, group);
+    set_id(dJointCreateLMotor(world, group));
   }
   void create (dWorldTemplate<dWorldTemplateBase>& world, dJointGroupID group=0)
     { create(world.id(), group); }
 
   void setNumAxes (int num)
-    { dJointSetLMotorNumAxes (_id, num); }
+    { dJointSetLMotorNumAxes (get_id(), num); }
   int getNumAxes() const
-    { return dJointGetLMotorNumAxes (_id); }
+    { return dJointGetLMotorNumAxes (get_id()); }
 
   void setAxis (int anum, int rel, dReal x, dReal y, dReal z)
-    { dJointSetLMotorAxis (_id, anum, rel, x, y, z); }
+    { dJointSetLMotorAxis (get_id(), anum, rel, x, y, z); }
   void setAxis (int anum, int rel, const dVector3 a)
     { setAxis(anum, rel, a[0], a[1], a[2]); }
   void getAxis (int anum, dVector3 result) const
-    { dJointGetLMotorAxis (_id, anum, result); }
+    { dJointGetLMotorAxis (get_id(), anum, result); }
 
   void setParam (int parameter, dReal value)
-    { dJointSetLMotorParam (_id, parameter, value); }
+    { dJointSetLMotorParam (get_id(), parameter, value); }
   dReal getParam (int parameter) const
-    { return dJointGetLMotorParam (_id, parameter); }
+    { return dJointGetLMotorParam (get_id(), parameter); }
   // TODO: expose params through methods
 };
 
