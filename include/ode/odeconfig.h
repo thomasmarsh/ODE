@@ -9,7 +9,7 @@
 #include <string.h>
 #include <float.h>
 
-#if defined(ODE_DLL) || defined(ODE_LIB) || !defined(_MSC_VER)
+#if defined(ODE_DLL) || defined(ODE_LIB)
 #define __ODE__
 #endif
 
