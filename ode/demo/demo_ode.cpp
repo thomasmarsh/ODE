@@ -846,14 +846,46 @@ void testRotationFunctions()
 
 //****************************************************************************
 
-#include "../src/array.h"
-#include "../src/array.cpp"
+#include <assert.h>
+
+template<class T>
+class simplevector
+{
+private:
+  int n;
+  int max;
+  T* data;
+
+public:
+  simplevector() { initialize(); }
+  ~simplevector() { finalize(); }
+  T& operator[](int i) { assert(i>=0 && i<n); return data[i]; }
+  const T& operator[](int i) const { assert(i>=0 && i<n); return data[i]; }
+  void push_back(const T& elem)
+  {
+    if (n == max)
+    {
+      max *= 2;
+      T* newdata = new T[max];
+      memcpy(newdata, data, sizeof(T)*n);
+      delete[] data;
+      data = newdata;
+    }
+    data[n++] = elem;
+  }
+  int size() const { return n; }
+  void clear() { finalize(); initialize(); }
+
+private:
+  void finalize() { delete[] data; }
+  void initialize() { data = new T[32]; max = 32; n = 0; }
+};
 
 // matrix header on the stack
 
 class dMatrixComparison {
   struct dMatInfo;
-  dArray<dMatInfo*> mat;
+  simplevector<dMatInfo*> mat;
   int afterfirst,index;
 
 public:
@@ -921,7 +953,7 @@ dReal dMatrixComparison::nextMatrix (dReal *A, int n, int m, int lower_tri,
     vsprintf (mi->name,name,ap);
     if (strlen(mi->name) >= sizeof (mi->name)) dDebug (0,"name too long");
 
-    mat.push (mi);
+    mat.push_back(mi);
     return 0;
   }
   else {
@@ -973,7 +1005,7 @@ void dMatrixComparison::reset()
     dFree (mat[i]->data,mat[i]->size);
     dFree (mat[i],sizeof(dMatInfo));
   }
-  mat.setSize (0);
+  mat.clear();
   afterfirst = 0;
   index = 0;
 }
