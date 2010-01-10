@@ -1,6 +1,6 @@
 SUBDIRS = joints
 
-AM_CPPFLAGS = -I$(top_srcdir)/include -DODE_LIB
+AM_CPPFLAGS = -I$(top_srcdir)/include -D__ODE__
 
 # convenience library to simulate per object cflags
 noinst_LTLIBRARIES = libfast.la
