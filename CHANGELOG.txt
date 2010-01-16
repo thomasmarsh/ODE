@@ -8,6 +8,9 @@ the rules for this file:
   * keep the format consistent (79 char width, M/D/Y date format).
 
 ------------------------------------------------------------------------------
+01/16/10 Oleh Derevenko
+		* Patches applied (by Eduardo Poyart) to make demos work for recent MacOS.
+
 12/20/09 Oleh Derevenko
 		* QuadTreeSpace implementation corrected to avoid object-block relation 
 		  ambiguity due to numeric errors.
