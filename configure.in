@@ -194,7 +194,7 @@ dnl Check for OpenGL
 if test "x$drawstuff" = "xOSX"; then
   AC_DEFINE([HAVE_APPLE_OPENGL_FRAMEWORK], [1],
             [Use the Apple OpenGL framework.])
-  GL_LIBS="-framework OpenGL -framework Carbon -framework AGL"
+  GL_LIBS="-framework OpenGL -framework GLUT"
 else
   have_gl_headers=yes
   AC_CHECK_HEADERS(GL/gl.h GL/glu.h GL/glext.h, ,

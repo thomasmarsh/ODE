@@ -40,52 +40,26 @@
 #include <drawstuff/version.h>
 #include "internal.h"
 
-#include <Carbon/Carbon.h>
-#include <AGL/agl.h>
+#include <OpenGL/gl.h>
+#include <GLUT/glut.h>
 
 // Global variables
 
-static bool running = true;			// 1 if simulation running
 static bool paused = false;			// 1 if in `pause' mode
 static bool singlestep = false;		// 1 if single step key pressed
 static bool writeframes = false;	// 1 if frame files to be written
 
 static int					   	windowWidth = -1;
 static int					   	windowHeight = -1;
-static UInt32 					modifierMask = 0;
 static int 						mouseButtonMode = 0;	
 static bool						mouseWithOption = false;	// Set if dragging the mouse with alt pressed
 static bool						mouseWithControl = false;	// Set if dragging the mouse with ctrl pressed
 
 static dsFunctions*			   	functions = NULL;
-static WindowRef               	windowReference;
-static AGLContext              	aglContext;
-
-static EventHandlerUPP         	mouseUPP = NULL;
-static EventHandlerUPP         	keyboardUPP = NULL;
-static EventHandlerUPP         	windowUPP = NULL;
-
-// Describes the window-events we are interested in
-EventTypeSpec OSX_WINDOW_EVENT_TYPES[] = {		
-	{ kEventClassWindow, kEventWindowBoundsChanged },
-	{ kEventClassWindow, kEventWindowClose },
-	{ kEventClassWindow, kEventWindowDrawContent }
-};
-
-// Describes the mouse-events we are interested in
-EventTypeSpec OSX_MOUSE_EVENT_TYPES[] = {		
-	{ kEventClassMouse, kEventMouseDown },
-	{ kEventClassMouse, kEventMouseUp },
-	{ kEventClassMouse, kEventMouseMoved },
-	{ kEventClassMouse, kEventMouseDragged }
-};
-
-// Describes the key-events we are interested in
-EventTypeSpec OSX_KEY_EVENT_TYPES[] = {		
-	{ kEventClassKeyboard, kEventRawKeyDown },
-//	{ kEventClassKeyboard, kEventRawKeyUp },
-	{ kEventClassKeyboard, kEventRawKeyModifiersChanged }
-};	
+static int                   	windowReference;
+static int                      frame = 1;
+static int                      prev_x = 0;
+static int                      prev_y = 0;
 
 //***************************************************************************
 // error handling for unix
@@ -143,9 +117,8 @@ static void captureFrame( int num ){
 	fclose (f);	
 }
 
-extern "C" void dsStop(){
-	
-  running = false;
+extern "C" void dsStop()
+{
 }
 
 extern "C" double dsElapsedTime()
@@ -168,309 +141,161 @@ extern "C" double dsElapsedTime()
 #endif
 }
 
-OSStatus osxKeyEventHandler( EventHandlerCallRef handlerCallRef, EventRef event, void *userData ){
-	
-	UInt32 keyCode;
-	UInt32 state = 0;
-	void* KCHR = NULL;
-	char charCode = 0;
-	char uppercase = 0;
-	
-    switch( GetEventKind( event ) ){
-        case kEventRawKeyDown:
-			if( GetEventParameter( event, kEventParamKeyCode, typeUInt32, NULL, sizeof( UInt32 ), NULL, &keyCode ) != noErr ){
-				break;														
-			}
-			KCHR = (void *)GetScriptVariable( smCurrentScript, smKCHRCache );
-			charCode = (char)KeyTranslate( KCHR, keyCode, &state );
-			uppercase = charCode;			
-			UppercaseText( &uppercase, 1, smSystemScript );
-			//printf( "Character %d [%c] [%c] modifiers [%d]\n", charCode, charCode, uppercase, modifierMask );
-			
-			if( modifierMask == 0 ){
-				if( charCode >= ' ' && charCode <= 126 && functions -> command ){
-					functions -> command( charCode );	
-				}
-			}
-			else if( ( modifierMask & controlKey ) ){
-				// ctrl+key was pressed
-				switch(uppercase ){
-					case 'T':
-						dsSetTextures( !dsGetTextures() );
-					break;
-					case 'S':
-						dsSetShadows( !dsGetShadows() );
-					break;
-					case 'X':
-						running = false;
-					break;
-					case 'P':
-						paused = !paused;
-						singlestep = false;
-					break;
-					case 'O':
-						if( paused ){
-							singlestep = true;
-						}
-					break;
-					case 'V': {
-						float xyz[3],hpr[3];
-						dsGetViewpoint( xyz,hpr );
-						printf( "Viewpoint = (%.4f,%.4f,%.4f,%.4f,%.4f,%.4f)\n", xyz[0], xyz[1], xyz[2], hpr[0], hpr[1], hpr[2] );
-					break;
-					}
-					case 'W':						
-						writeframes = !writeframes;
-						if( writeframes ){
-							printf( "Now writing frames to PPM files\n" );
-						}						 
-					break;
-				}
-				
-			}			
-		return noErr;
-        case kEventRawKeyModifiersChanged:
-			if( GetEventParameter( event, kEventParamKeyModifiers, typeUInt32, NULL, sizeof( UInt32 ), NULL, &modifierMask ) == noErr ){
-				if( ( mouseWithOption && !( modifierMask & optionKey ) ) || ( mouseWithControl && !( modifierMask & controlKey ) ) ){
-					// The mouse was being dragged using either the command-key or the option-key modifier to emulate 
-					// the right button or both left + right.
-					// Now the modifier-key has been released so the mouseButtonMode must be changed accordingly
-					// The following releases the right-button.
-					mouseButtonMode &= (~4);
-					mouseWithOption = false;
-					mouseWithControl = false;
-				}
-				return noErr;
-			}
-		break;		
-    }	
-    return eventNotHandledErr;
+int osxGetModifierMask()
+{
+    return glutGetModifiers() & ~GLUT_ACTIVE_SHIFT;
 }
 
-OSStatus osxMouseEventHandler( EventHandlerCallRef handlerCallRef, EventRef event, void *userData ){
-	
-	bool buttonDown = false;	
-	HIPoint mouseLocation;
+void osxKeyEventHandler( unsigned char key, int x, int y )
+{
+    unsigned char uppercase;
+    if (key >= 'a' && key <= 'z')
+        uppercase = key - ('a' - 'A');
+    else
+        uppercase = key;
+    
+    int modifierMask = osxGetModifierMask();    
+    if (modifierMask == 0)
+    {
+        if( key >= ' ' && key <= 126 && functions -> command )
+            functions -> command( key );
+    }
+    else if (modifierMask & GLUT_ACTIVE_CTRL)
+    {
+        // ctrl+key was pressed
+        uppercase += 'A' - 1;
+        switch(uppercase ){
+            case 'T':
+                dsSetTextures( !dsGetTextures() );
+                break;
+            case 'S':
+                dsSetShadows( !dsGetShadows() );
+                break;
+            case 'X':
+                exit(0);
+                break;
+            case 'P':
+                paused = !paused;
+                singlestep = false;
+                break;
+            case 'O':
+                if( paused ){
+                    singlestep = true;
+                }
+                break;
+            case 'V': {
+                float xyz[3],hpr[3];
+                dsGetViewpoint( xyz,hpr );
+                printf( "Viewpoint = (%.4f,%.4f,%.4f,%.4f,%.4f,%.4f)\n", xyz[0], xyz[1], xyz[2], hpr[0], hpr[1], hpr[2] );
+                break;
+            }
+            case 'W':						
+                writeframes = !writeframes;
+                if( writeframes ){
+                    printf( "Now writing frames to PPM files\n" );
+                }						 
+                break;
+        }
+    }
+}
 
-    switch( GetEventKind( event ) ){
-		
-        case kEventMouseDown:
+void osxMouseEventHandler(int button, int state, int x, int y)
+{
+    prev_x = x;
+    prev_y = y;
+	bool buttonDown = false;
+    switch( state ){
+        case GLUT_DOWN:
 			buttonDown = true;
-        case kEventMouseUp:
-			if( GetEventParameter( event, kEventParamWindowMouseLocation, typeHIPoint, NULL, sizeof( HIPoint ), NULL, &mouseLocation ) != noErr ){
-				break;			
-			}				
-			EventMouseButton button;
-			if( GetEventParameter( event, kEventParamMouseButton, typeMouseButton, NULL, sizeof( EventMouseButton ), NULL, &button ) == noErr ){
-				
-				if( button == kEventMouseButtonPrimary ){					
-					if( modifierMask & controlKey ){
-						// Ctrl+button == right
-						button = kEventMouseButtonSecondary;
-						mouseWithControl = true;
-					}	
-					else if( modifierMask & optionKey ){
-						// Alt+button == left+right
-						mouseButtonMode = 5;
-						mouseWithOption = true;
-						return noErr;
-					}
-				}
-				if( buttonDown ){
-					if( button == kEventMouseButtonPrimary ) mouseButtonMode |= 1;		// Left
-					if( button == kEventMouseButtonTertiary ) mouseButtonMode |= 2;	// Middle				
-					if( button == kEventMouseButtonSecondary ) mouseButtonMode |= 4;	// Right
-				}
-				else{
-					if( button == kEventMouseButtonPrimary ) mouseButtonMode &= (~1);	// Left
-					if( button == kEventMouseButtonTertiary ) mouseButtonMode &= (~2);	// Middle									
-					if( button == kEventMouseButtonSecondary ) mouseButtonMode &= (~4);// Right
-				}		
-				return noErr;
-			}
-		break;
-        case kEventMouseMoved:
-			// NO-OP
-			return noErr;
-        case kEventMouseDragged:
-			// Carbon provides mouse-position deltas, so we don't have to store the old state ourselves
-			if( GetEventParameter( event, kEventParamMouseDelta, typeHIPoint, NULL, sizeof( HIPoint ), NULL, &mouseLocation ) == noErr ){
-				//printf( "Mode %d\n", mouseButtonMode );
-				dsMotion( mouseButtonMode, (int)mouseLocation.x, (int)mouseLocation.y );
-				return noErr;
-			}
-        break;
-        case kEventMouseWheelMoved:
-			// NO-OP
-		break;
-    }	
-    return eventNotHandledErr;
+        case GLUT_UP:
+            if( button == GLUT_LEFT_BUTTON ){
+                int modifierMask = osxGetModifierMask();
+                if( modifierMask & GLUT_ACTIVE_CTRL ){
+                    // Ctrl+button == right
+                    button = GLUT_RIGHT_BUTTON;
+                    mouseWithControl = true;
+                }	
+                else if( modifierMask & GLUT_ACTIVE_ALT ){
+                    // Alt+button == left+right
+                    mouseButtonMode = 5;
+                    mouseWithOption = true;
+                    return;
+                }
+            }
+            if( buttonDown ){
+                if( button == GLUT_LEFT_BUTTON ) mouseButtonMode |= 1;		// Left
+                if( button == GLUT_MIDDLE_BUTTON ) mouseButtonMode |= 2;	// Middle				
+                if( button == GLUT_RIGHT_BUTTON ) mouseButtonMode |= 4;	    // Right
+            }
+            else{
+                if( button == GLUT_LEFT_BUTTON ) mouseButtonMode &= (~1);	// Left
+                if( button == GLUT_MIDDLE_BUTTON ) mouseButtonMode &= (~2);	// Middle									
+                if( button == GLUT_RIGHT_BUTTON ) mouseButtonMode &= (~4);  // Right
+            }		
+            return;
+    }
 }
 
-static void osxCloseMainWindow(){
-	
-	if( windowUPP != NULL ){
-		DisposeEventHandlerUPP( windowUPP );
-		windowUPP = NULL;
-	}
-	
-	if( aglContext != NULL ){
-		aglSetCurrentContext( NULL );
-		aglSetDrawable( aglContext, NULL );
-		aglDestroyContext( aglContext );
-		aglContext = NULL;
-	}
-	
-	if( windowReference != NULL ){
-		ReleaseWindow( windowReference );
-		windowReference = NULL;
-	}
+void osxMotionEventHandler(int x, int y)
+{
+    dsMotion( mouseButtonMode, x - prev_x, y - prev_y );
+    prev_x = x;
+    prev_y = y;
 }
 
-OSStatus osxWindowEventHandler( EventHandlerCallRef handlerCallRef, EventRef event, void *userData ){
-	
-	//printf( "WindowEvent\n" );
-	switch( GetEventKind(event) ){
-    	case kEventWindowBoundsChanged:
-      		WindowRef window;
-      		GetEventParameter( event, kEventParamDirectObject, typeWindowRef, NULL, sizeof(WindowRef), NULL, &window );
-      		Rect rect;
-      		GetWindowPortBounds( window, &rect );			
-			windowWidth = rect.right;
-			windowHeight = rect.bottom;
-			aglUpdateContext( aglContext );
-		break;			
-    	case kEventWindowClose:
-			osxCloseMainWindow();
-			exit( 0 );
-		return noErr;			
-    	case kEventWindowDrawContent:
-			// NO-OP
-		break;
-  	}
-	
-  	return eventNotHandledErr;
+void osxWindowReshapeEventHandler(int width, int height)
+{
+    windowWidth = width;
+    windowHeight = height;
 }
 
-static void osxCreateMainWindow( int width, int height ){
-	
-	int redbits = 4;
-	int greenbits = 4;
-	int bluebits = 4;
-	int alphabits = 4;
-	int depthbits = 16;
-	
-    OSStatus error;
-		
-    // create pixel format attribute list
-	
-    GLint pixelFormatAttributes[256];
-    int numAttrs = 0;
-	
-    pixelFormatAttributes[numAttrs++] = AGL_RGBA;
-    pixelFormatAttributes[numAttrs++] = AGL_DOUBLEBUFFER;
-
-    pixelFormatAttributes[numAttrs++] = AGL_RED_SIZE;
-	pixelFormatAttributes[numAttrs++] = redbits;
-    pixelFormatAttributes[numAttrs++] = AGL_GREEN_SIZE;
-	pixelFormatAttributes[numAttrs++] = greenbits;
-    pixelFormatAttributes[numAttrs++] = AGL_BLUE_SIZE;        
-	pixelFormatAttributes[numAttrs++] = bluebits;
-	pixelFormatAttributes[numAttrs++] = AGL_ALPHA_SIZE;       
-	pixelFormatAttributes[numAttrs++] = alphabits;
-	pixelFormatAttributes[numAttrs++] = AGL_DEPTH_SIZE;       
-	pixelFormatAttributes[numAttrs++] = depthbits;
-
-    pixelFormatAttributes[numAttrs++] = AGL_NONE;
-	
-    // create pixel format.
-	
-    AGLDevice mainMonitor = GetMainDevice();
-    AGLPixelFormat pixelFormat = aglChoosePixelFormat( &mainMonitor, 1, pixelFormatAttributes );
-    if( pixelFormat == NULL ){
-        return;
-    }
-		
-    aglContext = aglCreateContext( pixelFormat, NULL );
-	
-    aglDestroyPixelFormat( pixelFormat );
-	
-    if( aglContext == NULL ){
-        osxCloseMainWindow();
-		return;
-    }
-	
-    Rect windowContentBounds;
-    windowContentBounds.left = 0;
-    windowContentBounds.top = 0;
-    windowContentBounds.right = width;
-    windowContentBounds.bottom = height;
-	
-	int windowAttributes = kWindowCloseBoxAttribute  
-		| kWindowFullZoomAttribute
-		| kWindowCollapseBoxAttribute 
-	 	| kWindowResizableAttribute 
-	 	| kWindowStandardHandlerAttribute
-		| kWindowLiveResizeAttribute;
-	
-    error = CreateNewWindow( kDocumentWindowClass, windowAttributes, &windowContentBounds, &windowReference );
-    if( ( error != noErr ) || ( windowReference == NULL ) ){
-        osxCloseMainWindow();
-		return;
-    }
-	
-	windowUPP = NewEventHandlerUPP( osxWindowEventHandler );
-		
-	error = InstallWindowEventHandler( windowReference, windowUPP,GetEventTypeCount( OSX_WINDOW_EVENT_TYPES ), OSX_WINDOW_EVENT_TYPES, NULL, NULL );
-	if( error != noErr ){
-		osxCloseMainWindow();
-		return;
-	}
-	
-	// The process-type must be changed for a ForegroundApplication
-	// Unless it is a foreground-process, the application will not show in the dock or expose and the window
-	// will not behave properly.
-	ProcessSerialNumber currentProcess;
-	GetCurrentProcess( &currentProcess );
-	TransformProcessType( &currentProcess, kProcessTransformToForegroundApplication );
-	SetFrontProcess( &currentProcess );
-	
-    SetWindowTitleWithCFString( windowReference, CFSTR( "ODE - Drawstuff" ) );
-    RepositionWindow( windowReference, NULL, kWindowCenterOnMainScreen );
-	
-    ShowWindow( windowReference );
-	
-	if( !aglSetDrawable( aglContext, GetWindowPort( windowReference ) ) ){
-		osxCloseMainWindow();
-		return;
-	}
-	
-    if( !aglSetCurrentContext( aglContext ) ){
-        osxCloseMainWindow();
-    }	
-	
+static void osxCreateMainWindow( int width, int height )
+{
+    int argc = 1;
+    char* argv[2];
+    argv[0] = (char*)"";
+    argv[1] = NULL;
+    glutInit(&argc, argv);
+    glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE | GLUT_DEPTH);
+    windowReference = glutCreateWindow("ODE - Drawstuff");
 	windowWidth = width;
 	windowHeight = height;
 }
 
-int  osxInstallEventHandlers(){
-
-    OSStatus error;
-	
-    mouseUPP = NewEventHandlerUPP( osxMouseEventHandler );
-	
-    error = InstallEventHandler( GetApplicationEventTarget(), mouseUPP, GetEventTypeCount( OSX_MOUSE_EVENT_TYPES ), OSX_MOUSE_EVENT_TYPES, NULL, NULL );
-    if( error != noErr ){
-        return GL_FALSE;
+void osxRedisplayEventHandler()
+{
+    dsDrawFrame( windowWidth, windowHeight, functions, paused && !singlestep );
+    singlestep = false;
+    glutSwapBuffers();
+    
+    // capture frames if necessary
+    if( !paused && writeframes ){
+        captureFrame( frame );
+        frame++;
     }
+}
 
-    keyboardUPP = NewEventHandlerUPP( osxKeyEventHandler );
-	
-    error = InstallEventHandler( GetApplicationEventTarget(), keyboardUPP, GetEventTypeCount( OSX_KEY_EVENT_TYPES ), OSX_KEY_EVENT_TYPES, NULL, NULL );
-    if( error != noErr ){
-        return GL_FALSE;
-    }
-	
+void osxTimerEventHandler(int);
+
+void osxInstallTimerHandler()
+{
+    glutTimerFunc(1000/60, osxTimerEventHandler, 0);
+}
+
+void osxTimerEventHandler(int)
+{
+    glutPostRedisplay();
+    osxInstallTimerHandler();
+}
+
+int  osxInstallEventHandlers()
+{
+    glutKeyboardFunc(osxKeyEventHandler);
+    glutMouseFunc(osxMouseEventHandler);
+    glutMotionFunc(osxMotionEventHandler);
+    glutDisplayFunc(osxRedisplayEventHandler);
+    glutReshapeFunc(osxWindowReshapeEventHandler);
+    osxInstallTimerHandler();    
     return GL_TRUE;
 }
 
@@ -512,32 +337,5 @@ extern void dsPlatformSimLoop( int givenWindowWidth, int givenWindowHeight, dsFu
 	
 	if( fn -> start ) fn->start();
 	
-	int frame = 1;
-	running = true;
-	while( running ){
-		// read in and process all pending events for the main window
-		EventRef event;
-		EventTargetRef eventDispatcher = GetEventDispatcherTarget();		
-		while( ReceiveNextEvent( 0, NULL, 0.0, TRUE, &event ) == noErr ){
-			SendEventToEventTarget( event, eventDispatcher );
-			ReleaseEvent( event );
-		}
-				
-		dsDrawFrame( windowWidth, windowHeight, fn, paused && !singlestep );
-		singlestep = false;
-		
-		glFlush();
-		aglSwapBuffers( aglContext );
-
-		// capture frames if necessary
-		if( !paused && writeframes ){
-			captureFrame( frame );
-			frame++;
-		}
-	}
-	
-	if( fn->stop ) fn->stop();
-	dsStopGraphics();
-	
-	osxCloseMainWindow();
+    glutMainLoop();
 }
