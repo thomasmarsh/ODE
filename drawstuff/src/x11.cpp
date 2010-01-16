@@ -35,6 +35,9 @@
 #ifdef HAVE_SYS_TIME_H
 #include <sys/time.h>
 #endif
+#ifdef HAVE_UNISTD_H
+#include <unistd.h>
+#endif
 
 #include <drawstuff/drawstuff.h>
 #include <drawstuff/version.h>
@@ -97,7 +100,7 @@ static int width=0,height=0;		// window size
 static GLXContext glx_context=0;	// openGL rendering context
 static int last_key_pressed=0;		// last key pressed in the window
 static int run=1;			// 1 if simulation running
-static int pause=0;			// 1 if in `pause' mode
+static int pausemode=0;			// 1 if in `pause' mode
 static int singlestep=0;		// 1 if single step key pressed
 static int writeframes=0;		// 1 if frame files to be written
 
@@ -235,11 +238,11 @@ static void handleEvent (XEvent &event, dsFunctions *fn)
 	run = 0;
 	break;
       case 'p': case 'P':
-	pause ^= 1;
+	pausemode ^= 1;
 	singlestep = 0;
 	break;
       case 'o': case 'O':
-	if (pause) singlestep = 1;
+	if (pausemode) singlestep = 1;
 	break;
       case 'v': case 'V': {
 	float xyz[3],hpr[3];
@@ -325,11 +328,33 @@ static void captureFrame (int num)
   XDestroyImage (image);
 }
 
+void processDrawFrame(int *frame, dsFunctions *fn)
+{
+  dsDrawFrame (width,height,fn,pausemode && !singlestep);
+  singlestep = 0;
+
+  glFlush();
+  glXSwapBuffers (display,win);
+  XSync (display,0);
+
+  // capture frames if necessary
+  if (pausemode==0 && writeframes) {
+    captureFrame (*frame);
+    *frame++;
+  }
+}
+
+void microsleep(int usecs)
+{
+#ifdef HAVE_UNISTD_H
+  usleep(usecs);
+#endif
+}
 
 void dsPlatformSimLoop (int window_width, int window_height, dsFunctions *fn,
 			int initial_pause)
 {
-  pause = initial_pause;
+  pausemode = initial_pause;
   createMainWindow (window_width, window_height);
   glXMakeCurrent (display,win,glx_context);
 
@@ -362,6 +387,12 @@ void dsPlatformSimLoop (int window_width, int window_height, dsFunctions *fn,
 
   if (fn->start) fn->start();
 
+#if HAVE_GETTIMEOFDAY
+  timeval tv;
+  gettimeofday(&tv, 0);
+  double prev = tv.tv_sec + (double) tv.tv_usec / 1000000.0 ;
+#endif
+
   int frame = 1;
   run = 1;
   while (run) {
@@ -371,19 +402,20 @@ void dsPlatformSimLoop (int window_width, int window_height, dsFunctions *fn,
       XNextEvent (display,&event);
       handleEvent (event,fn);
     }
-
-    dsDrawFrame (width,height,fn,pause && !singlestep);
-    singlestep = 0;
-
-    glFlush();
-    glXSwapBuffers (display,win);
-    XSync (display,0);
-
-    // capture frames if necessary
-    if (pause==0 && writeframes) {
-      captureFrame (frame);
-      frame++;
+    
+#if HAVE_GETTIMEOFDAY
+    gettimeofday(&tv, 0);
+    double curr = tv.tv_sec + (double) tv.tv_usec / 1000000.0 ;
+    if (curr-prev >= 1.0/60.0)
+    {
+      prev = curr;
+      processDrawFrame(&frame, fn);
     }
+    else
+      microsleep(1000);
+#else
+    processDrawFrame(&frame, fn);
+#endif
   };
 
   if (fn->stop) fn->stop();
