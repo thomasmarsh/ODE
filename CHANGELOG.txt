@@ -9,7 +9,8 @@ the rules for this file:
 
 ------------------------------------------------------------------------------
 01/16/10 Oleh Derevenko
-		* Patches applied (by Eduardo Poyart) to make demos work for recent MacOS.
+		* Patch applied (#2931174) to make demos work for recent MacOS.
+		* Patch applied (#2931177) to fix the demos' framerate on X11.
 
 12/20/09 Oleh Derevenko
 		* QuadTreeSpace implementation corrected to avoid object-block relation 
