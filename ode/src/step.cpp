@@ -588,6 +588,7 @@ void dInternalStepIsland_x2 (dxWorldProcessContext *context,
 
               dxBody *jb0 = joint->node[0].body;
               for (dxJointNode *n0=jb0->firstjoint; n0; n0=n0->next) {
+                if (!n0->joint->isEnabled()) continue;
                 // if joint was tagged as -1 then it is an inactive (m=0)
                 // joint that should not be considered
                 int j0 = n0->joint->tag;
@@ -605,6 +606,7 @@ void dInternalStepIsland_x2 (dxWorldProcessContext *context,
               if (jb1)
               {
                 for (dxJointNode *n1=jb1->firstjoint; n1; n1=n1->next) {
+                  if (!n1->joint->isEnabled()) continue;
                   // if joint was tagged as -1 then it is an inactive (m=0)
                   // joint that should not be considered
                   int j1 = n1->joint->tag;

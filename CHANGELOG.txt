@@ -8,6 +8,9 @@ the rules for this file:
   * keep the format consistent (79 char width, M/D/Y date format).
 
 ------------------------------------------------------------------------------
+02/18/10 Daniel K. O.
+        * Fixed bug affecting disabled joints and dWorldStep.
+
 01/16/10 Oleh Derevenko
 		* Patch applied (#2931174) to make demos work for recent MacOS.
 		* Patch applied (#2931177) to fix the demos' framerate on X11.

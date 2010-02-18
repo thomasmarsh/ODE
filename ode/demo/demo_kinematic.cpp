@@ -33,7 +33,7 @@ struct Box {
         geom(*space, 0.2, 0.2, 0.2)
     {
         dMass mass;
-        mass.setBox(1, 0.2, 0.2, 0.2);
+        mass.setBox(10, 0.2, 0.2, 0.2);
         body.setMass(mass);
         geom.setData(this);
         geom.setBody(body);
@@ -57,7 +57,7 @@ void dropBox()
     
     dReal px = (rand() / float(RAND_MAX)) * 2 - 1;
     dReal py = (rand() / float(RAND_MAX)) * 2 - 1;
-    dReal pz = 3;
+    dReal pz = 2.5;
     box->body.setPosition(px, py, pz);
     
     boxes.insert(box);
@@ -113,7 +113,7 @@ void
 simLoop(int pause)
 {
     if (!pause) {
-        const dReal timestep = 0.005;
+        const dReal timestep = 0.02;
 
         // this does a hard-coded circular motion animation
         static float t=0;
