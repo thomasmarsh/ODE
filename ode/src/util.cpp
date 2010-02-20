@@ -417,59 +417,68 @@ static size_t BuildIslandsAndEstimateStepperMemoryRequirements(dxWorldProcessCon
     dxJoint **jointstart = joint;
     for (dxBody *bb=world->firstbody; bb; bb=(dxBody*)bb->next) {
       // get bb = the next enabled, untagged body, and tag it
-      if (bb->tag || (bb->flags & dxBodyDisabled)) continue;
-      bb->tag = 1;
+      if (!bb->tag) {
+        if (!(bb->flags & dxBodyDisabled)) {
+          bb->tag = 1;
 
-      dxBody **bodycurr = bodystart;
-      dxJoint **jointcurr = jointstart;
+          dxBody **bodycurr = bodystart;
+          dxJoint **jointcurr = jointstart;
 
-      // tag all bodies and joints starting from bb.
-      *bodycurr++ = bb;
+          // tag all bodies and joints starting from bb.
+          *bodycurr++ = bb;
 
-      int stacksize = 0;
-      dxBody *b = bb;
+          int stacksize = 0;
+          dxBody *b = bb;
 
-      while (true) {
-        // traverse and tag all body's joints, add untagged connected bodies
-        // to stack
-        for (dxJointNode *n=b->firstjoint; n; n=n->next) {
-          dxJoint *njoint = n->joint;
-          if (!njoint->tag && njoint->isEnabled()) {
-            njoint->tag = 1;
-            *jointcurr++ = njoint;
+          while (true) {
+            // traverse and tag all body's joints, add untagged connected bodies
+            // to stack
+            for (dxJointNode *n=b->firstjoint; n; n=n->next) {
+              dxJoint *njoint = n->joint;
+              if (!njoint->tag) {
+                if (njoint->isEnabled()) {
+                  njoint->tag = 1;
+                  *jointcurr++ = njoint;
 
-            dxBody *nbody = n->body;
-            // Body disabled flag is not checked here. This is how auto-enable works.
-            if (nbody && !nbody->tag) {
-              nbody->tag = 1;
-              // Make sure all bodies are in the enabled state.
-              nbody->flags &= ~dxBodyDisabled;
-              stack[stacksize++] = nbody;
+                  dxBody *nbody = n->body;
+                  // Body disabled flag is not checked here. This is how auto-enable works.
+                  if (nbody && nbody->tag <= 0) {
+                    nbody->tag = 1;
+                    // Make sure all bodies are in the enabled state.
+                    nbody->flags &= ~dxBodyDisabled;
+                    stack[stacksize++] = nbody;
+                  }
+                } else {
+                  njoint->tag = -1;
+                }
+              }
             }
+            dIASSERT(stacksize <= world->nb);
+            dIASSERT(stacksize <= world->nj);
+
+            if (stacksize == 0) {
+              break;
+            }
+
+            b = stack[--stacksize];	// pop body off stack
+            *bodycurr++ = b;	// put body on body list
           }
-        }
-        dIASSERT(stacksize <= world->nb);
-        dIASSERT(stacksize <= world->nj);
 
-        if (stacksize == 0) {
-          break;
-        }
+          int bcount = bodycurr - bodystart;
+          int jcount = jointcurr - jointstart;
+          sizescurr[0] = bcount;
+          sizescurr[1] = jcount;
+          sizescurr += sizeelements;
 
-        b = stack[--stacksize];	// pop body off stack
-        *bodycurr++ = b;	// put body on body list
+          size_t islandreq = stepperestimate(bodystart, bcount, jointstart, jcount);
+          maxreq = (maxreq > islandreq) ? maxreq : islandreq;
+
+          bodystart = bodycurr;
+          jointstart = jointcurr;
+        } else {
+          bb->tag = -1;
+        }
       }
-
-      int bcount = bodycurr - bodystart;
-      int jcount = jointcurr - jointstart;
-      sizescurr[0] = bcount;
-      sizescurr[1] = jcount;
-      sizescurr += sizeelements;
-
-      size_t islandreq = stepperestimate(bodystart, bcount, jointstart, jcount);
-      maxreq = (maxreq > islandreq) ? maxreq : islandreq;
-
-      bodystart = bodycurr;
-      jointstart = jointcurr;
     }
   } END_STATE_SAVE(context, stackstate);
 
@@ -480,10 +489,10 @@ static size_t BuildIslandsAndEstimateStepperMemoryRequirements(dxWorldProcessCon
   {
     for (dxBody *b=world->firstbody; b; b=(dxBody*)b->next) {
       if (b->flags & dxBodyDisabled) {
-        if (b->tag) dDebug (0,"disabled body tagged");
+        if (b->tag > 0) dDebug (0,"disabled body tagged");
       }
       else {
-        if (!b->tag) dDebug (0,"enabled body not tagged");
+        if (b->tag <= 0) dDebug (0,"enabled body not tagged");
       }
     }
     for (dxJoint *j=world->firstjoint; j; j=(dxJoint*)j->next) {
@@ -491,10 +500,10 @@ static size_t BuildIslandsAndEstimateStepperMemoryRequirements(dxWorldProcessCon
         (j->node[1].body && (j->node[1].body->flags & dxBodyDisabled)==0) )
         && 
         j->isEnabled() ) {
-          if (!j->tag) dDebug (0,"attached enabled joint not tagged");
+          if (j->tag <= 0) dDebug (0,"attached enabled joint not tagged");
       }
       else {
-        if (j->tag) dDebug (0,"unattached or disabled joint tagged");
+        if (j->tag > 0) dDebug (0,"unattached or disabled joint tagged");
       }
     }
   }
