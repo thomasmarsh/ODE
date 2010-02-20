@@ -588,17 +588,16 @@ void dInternalStepIsland_x2 (dxWorldProcessContext *context,
 
               dxBody *jb0 = joint->node[0].body;
               for (dxJointNode *n0=jb0->firstjoint; n0; n0=n0->next) {
-                if (!n0->joint->isEnabled()) continue;
-                // if joint was tagged as -1 then it is an inactive (m=0)
+                // if joint was tagged as -1 then it is an inactive (m=0 or disabled)
                 // joint that should not be considered
                 int j0 = n0->joint->tag;
-                if (j0==-1 || j0 >= i) continue;
-
-                const dJointWithInfo1 *jiother = jointiinfos + j0;
-                int ofsother = (jiother->joint->node[1].body == jb0) ? 8*jiother->info.m : 0;
-                // set block of A
-                MultiplyAdd2_p8r (Arow + ofs[j0], JinvMrow, 
-                  J + 2*8*ofs[j0] + ofsother, infom, jiother->info.m, mskip);
+                if (/*j0 != -1 && j0 < i*/ (unsigned)j0 < (unsigned)i) {
+                  const dJointWithInfo1 *jiother = jointiinfos + j0;
+                  int ofsother = (jiother->joint->node[1].body == jb0) ? 8*jiother->info.m : 0;
+                  // set block of A
+                  MultiplyAdd2_p8r (Arow + ofs[j0], JinvMrow, 
+                    J + 2*8*ofs[j0] + ofsother, infom, jiother->info.m, mskip);
+                }
               }
 
               dxBody *jb1 = joint->node[1].body;
@@ -606,17 +605,16 @@ void dInternalStepIsland_x2 (dxWorldProcessContext *context,
               if (jb1)
               {
                 for (dxJointNode *n1=jb1->firstjoint; n1; n1=n1->next) {
-                  if (!n1->joint->isEnabled()) continue;
-                  // if joint was tagged as -1 then it is an inactive (m=0)
+                  // if joint was tagged as -1 then it is an inactive (m=0 or disabled)
                   // joint that should not be considered
                   int j1 = n1->joint->tag;
-                  if (j1==-1 || j1 >= i) continue;
-
-                  const dJointWithInfo1 *jiother = jointiinfos + j1;
-                  int ofsother = (jiother->joint->node[1].body == jb1) ? 8*jiother->info.m : 0;
-                  // set block of A
-                  MultiplyAdd2_p8r (Arow + ofs[j1], JinvMrow + 8*infom, 
-                    J + 2*8*ofs[j1] + ofsother, infom, jiother->info.m, mskip);
+                  if (/*j1 != -1 && j1 < i*/ (unsigned)j1 < (unsigned)i) {
+                    const dJointWithInfo1 *jiother = jointiinfos + j1;
+                    int ofsother = (jiother->joint->node[1].body == jb1) ? 8*jiother->info.m : 0;
+                    // set block of A
+                    MultiplyAdd2_p8r (Arow + ofs[j1], JinvMrow + 8*infom, 
+                      J + 2*8*ofs[j1] + ofsother, infom, jiother->info.m, mskip);
+                  }
                 }
               }
 
