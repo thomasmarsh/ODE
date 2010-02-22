@@ -449,7 +449,7 @@ static size_t BuildIslandsAndEstimateStepperMemoryRequirements(dxWorldProcessCon
                     stack[stacksize++] = nbody;
                   }
                 } else {
-                  njoint->tag = -1;
+                  njoint->tag = -1; // Used in Step to prevent search over disabled joints (not needed for QuickStep so far)
                 }
               }
             }
@@ -476,7 +476,7 @@ static size_t BuildIslandsAndEstimateStepperMemoryRequirements(dxWorldProcessCon
           bodystart = bodycurr;
           jointstart = jointcurr;
         } else {
-          bb->tag = -1;
+          bb->tag = -1; // Not used so far (assigned to retain consistency with joints)
         }
       }
     }
