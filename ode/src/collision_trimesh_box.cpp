@@ -1387,7 +1387,7 @@ GenerateContact(int in_Flags, dContactGeom* in_Contacts, int in_Stride,
 				if (dCalcVectorDot3(diff, diff) < dEpsilon)
 				{
 					// same normal?
-					if (dFabs(dCalcVectorDot3(in_Normal, Contact->normal)) > (REAL(1.0)-dEpsilon))
+					if (REAL(1.0) - dFabs(dCalcVectorDot3(in_Normal, Contact->normal)) < dEpsilon)
 					{
 						if (in_Depth > Contact->depth)
 							Contact->depth = in_Depth;
