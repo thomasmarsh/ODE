@@ -407,6 +407,58 @@ ODE_API void dGeomDisable (dGeomID geom);
  */
 ODE_API int dGeomIsEnabled (dGeomID geom);
 
+
+enum
+{
+	dGeomCommonControlClass = 0,
+	dGeomColliderControlClass = 1,
+};
+
+enum
+{
+	dGeomCommonAnyControlCode = 0,
+
+	dGeomColliderSetMergeSphereContactsControlCode = 1,
+	dGeomColliderGetMergeSphereContactsControlCode = 2,
+};
+
+enum
+{
+	dGeomColliderMergeContactsValue__Default = 0, // Used with Set... to restore default value
+	dGeomColliderMergeContactsValue_None = 1,
+	dGeomColliderMergeContactsValue_Normals = 2,
+	dGeomColliderMergeContactsValue_Full = 3,
+};
+
+/**
+ * @brief Execute low level control operation for geometry.
+ *
+ * The variable the dataSize points to must be initialized before the call.
+ * If the size does not match the one expected for the control class/code function
+ * changes it to the size expected and returns failure. This implies the function 
+ * can be called with NULL data and zero size to test if control class/code is supported
+ * and obtain required data size for it.
+ *
+ * dGeomCommonAnyControlCode applies to any control class and returns success if 
+ * at least one control code is available for the given class with given geom.
+ *
+ * Currently there are the folliwing control classes supported:
+ *  @li dGeomColliderControlClass
+ *
+ * For dGeomColliderControlClass there are the following codes available:
+ *  @li dGeomColliderSetMergeSphereContactsControlCode (arg of type int, dGeomColliderMergeContactsValue_*)
+ *  @li dGeomColliderGetMergeSphereContactsControlCode (arg of type int, dGeomColliderMergeContactsValue_*)
+ *
+ * @param geom   the geom to control
+ * @param controlClass   the control class
+ * @param controlCode   the control code for the class
+ * @param dataValue   the control argument pointer
+ * @param dataSize   the control argument size provided or expected
+ * @returns Boolean execution status
+ * @ingroup collide
+ */
+ODE_API int dGeomLowLevelControl (dGeomID geom, int controlClass, int controlCode, void *dataValue, int *dataSize);
+
 /* ************************************************************************ */
 /* geom offset from body */
 

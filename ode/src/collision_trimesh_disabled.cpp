@@ -32,6 +32,11 @@
 dxTriMesh::dxTriMesh(dSpaceID Space, dTriMeshDataID Data) : dxGeom(Space, 1) { type = dTriMeshClass; }
 dxTriMesh::~dxTriMesh(){}
 
+bool dxTriMesh::controlGeometry(int controlClass, int controlCode, void *dataValue, int *dataSize)
+{
+	return dxGeom::controlGeometry(controlClass, controlCode, dataValue, dataSize);
+}
+
 int dxTriMesh::AABBTest(dxGeom* g, dReal aabb[6]) { return 0; }
 void dxTriMesh::computeAABB() { dSetZero (aabb,6); }
 

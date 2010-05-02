@@ -33,8 +33,6 @@
 #include "collision_trimesh_internal.h"
 
 #if dTRIMESH_OPCODE
-#define MERGECONTACTS
-//#define MERGECONTACTNORMALS
 
 // Ripped from Opcode 1.1.
 static bool GetContactData(const dVector3& Center, dReal Radius, const dVector3 Origin, const dVector3 Edge0, const dVector3 Edge1, dReal& Dist, dReal& u, dReal& v){
@@ -413,108 +411,107 @@ int dCollideSTL(dxGeom* g1, dxGeom* SphereGeom, int Flags, dContactGeom* Contact
 			Contact->depth = Depth * dirProj;
 			//Contact->depth = Radius - side; // (mg) penetration depth is distance along normal not shortest distance
 			
-#if !defined MERGECONTACTS	// Merge all contacts into 1
-            Contact->g1 = TriMesh;
-            Contact->g2 = SphereGeom;
+			if (TriMesh->SphereContactsMergeOption != MERGE_CONTACTS_FULLY) {
+				Contact->g1 = TriMesh;
+				Contact->g2 = SphereGeom;
 
-            Contact->side2 = -1;
-#endif // Otherwise assigned later
+				Contact->side2 = -1;
+			}
 
             Contact->side1 = TriIndex;
 
 			OutTriCount++;
 		}
-#if defined MERGECONTACTS	// Merge all contacts into 1
 		if (OutTriCount > 0){
-			dContactGeom* Contact = SAFECONTACT(Flags, Contacts, 0, Stride);
-            Contact->g1 = TriMesh;
-            Contact->g2 = SphereGeom;
-            Contact->side2 = -1;
+			if (TriMesh->SphereContactsMergeOption == MERGE_CONTACTS_FULLY) {
+				dContactGeom* Contact = SAFECONTACT(Flags, Contacts, 0, Stride);
+				Contact->g1 = TriMesh;
+				Contact->g2 = SphereGeom;
+				Contact->side2 = -1;
 
-			if (OutTriCount > 1 && !(Flags & CONTACTS_UNIMPORTANT)){
-			    dVector3 pos;
-                pos[0] = Contact->pos[0];
-                pos[1] = Contact->pos[1];
-                pos[2] = Contact->pos[2];
+				if (OutTriCount > 1 && !(Flags & CONTACTS_UNIMPORTANT)){
+					dVector3 pos;
+					pos[0] = Contact->pos[0];
+					pos[1] = Contact->pos[1];
+					pos[2] = Contact->pos[2];
 
-                dVector3 normal;
-                normal[0] = Contact->normal[0] * Contact->depth;
-                normal[1] = Contact->normal[1] * Contact->depth;
-                normal[2] = Contact->normal[2] * Contact->depth;
-                
-                int TriIndex = Contact->side1;
+					dVector3 normal;
+					normal[0] = Contact->normal[0] * Contact->depth;
+					normal[1] = Contact->normal[1] * Contact->depth;
+					normal[2] = Contact->normal[2] * Contact->depth;
+	                
+					int TriIndex = Contact->side1;
 
-				for (int i = 1; i < OutTriCount; i++){
-					dContactGeom* TempContact = SAFECONTACT(Flags, Contacts, i, Stride);
-					
-					pos[0] += TempContact->pos[0];
-					pos[1] += TempContact->pos[1];
-					pos[2] += TempContact->pos[2];
-					
-					normal[0] += TempContact->normal[0] * TempContact->depth;
-					normal[1] += TempContact->normal[1] * TempContact->depth;
-					normal[2] += TempContact->normal[2] * TempContact->depth;
+					for (int i = 1; i < OutTriCount; i++){
+						dContactGeom* TempContact = SAFECONTACT(Flags, Contacts, i, Stride);
+						
+						pos[0] += TempContact->pos[0];
+						pos[1] += TempContact->pos[1];
+						pos[2] += TempContact->pos[2];
+						
+						normal[0] += TempContact->normal[0] * TempContact->depth;
+						normal[1] += TempContact->normal[1] * TempContact->depth;
+						normal[2] += TempContact->normal[2] * TempContact->depth;
 
-                    TriIndex = (TriMesh->TriMergeCallback) ? TriMesh->TriMergeCallback(TriMesh, TriIndex, TempContact->side1) : -1;
-				}
-			
-                Contact->side1 = TriIndex;
-
-                Contact->pos[0] = pos[0] / OutTriCount;
-				Contact->pos[1] = pos[1] / OutTriCount;
-				Contact->pos[2] = pos[2] / OutTriCount;
+						TriIndex = (TriMesh->TriMergeCallback) ? TriMesh->TriMergeCallback(TriMesh, TriIndex, TempContact->side1) : -1;
+					}
 				
-				// Remember to divide in square space.
-				Contact->depth = dSqrt(dCalcVectorDot3(normal, normal) / OutTriCount);
+					Contact->side1 = TriIndex;
 
-				if (Contact->depth > dEpsilon) { // otherwise the normal is too small
-                    dVector3Copy(normal, Contact->normal);
-					dNormalize3(Contact->normal);
-				} // otherwise original Contact's normal would be used and it should be already normalized
-			}
+					Contact->pos[0] = pos[0] / OutTriCount;
+					Contact->pos[1] = pos[1] / OutTriCount;
+					Contact->pos[2] = pos[2] / OutTriCount;
+					
+					// Remember to divide in square space.
+					Contact->depth = dSqrt(dCalcVectorDot3(normal, normal) / OutTriCount);
 
-			return 1;
-		}
-		else return 0;
-#elif defined MERGECONTACTNORMALS	// Merge all normals, and distribute between all contacts
-		if (OutTriCount != 0){
-            if (OutTriCount != 1 && !(Flags & CONTACTS_UNIMPORTANT)){
-				dVector3 Normal;
-
-                dContactGeom* FirstContact = SAFECONTACT(Flags, Contacts, 0, Stride);
-				Normal[0] = FirstContact->normal[0] * FirstContact->depth;
-				Normal[1] = FirstContact->normal[1] * FirstContact->depth;
-				Normal[2] = FirstContact->normal[2] * FirstContact->depth;
-				Normal[3] = FirstContact->normal[3] * FirstContact->depth;
-
-				for (int i = 1; i < OutTriCount; i++){
-					dContactGeom* Contact = SAFECONTACT(Flags, Contacts, i, Stride);
-
-					Normal[0] += Contact->normal[0] * Contact->depth;
-					Normal[1] += Contact->normal[1] * Contact->depth;
-					Normal[2] += Contact->normal[2] * Contact->depth;
-					Normal[3] += Contact->normal[3] * Contact->depth;
+					if (Contact->depth > dEpsilon) { // otherwise the normal is too small
+						dVector3Copy(normal, Contact->normal);
+						dNormalize3(Contact->normal);
+					} // otherwise original Contact's normal would be used and it should be already normalized
 				}
 
-                dNormalize3(Normal);
-
-				for (int i = 0; i < OutTriCount; i++){
-					dContactGeom* Contact = SAFECONTACT(Flags, Contacts, i, Stride);
-
-					Contact->normal[0] = Normal[0];
-					Contact->normal[1] = Normal[1];
-					Contact->normal[2] = Normal[2];
-					Contact->normal[3] = Normal[3];
-				}
+				return 1;
 			}
+			else if (TriMesh->SphereContactsMergeOption == MERGE_CONTACT_NORMALS) {
+				if (OutTriCount != 1 && !(Flags & CONTACTS_UNIMPORTANT)){
+					dVector3 Normal;
 
-			return OutTriCount;
+					dContactGeom* FirstContact = SAFECONTACT(Flags, Contacts, 0, Stride);
+					Normal[0] = FirstContact->normal[0] * FirstContact->depth;
+					Normal[1] = FirstContact->normal[1] * FirstContact->depth;
+					Normal[2] = FirstContact->normal[2] * FirstContact->depth;
+					Normal[3] = FirstContact->normal[3] * FirstContact->depth;
+
+					for (int i = 1; i < OutTriCount; i++){
+						dContactGeom* Contact = SAFECONTACT(Flags, Contacts, i, Stride);
+
+						Normal[0] += Contact->normal[0] * Contact->depth;
+						Normal[1] += Contact->normal[1] * Contact->depth;
+						Normal[2] += Contact->normal[2] * Contact->depth;
+						Normal[3] += Contact->normal[3] * Contact->depth;
+					}
+
+					dNormalize3(Normal);
+
+					for (int i = 0; i < OutTriCount; i++){
+						dContactGeom* Contact = SAFECONTACT(Flags, Contacts, i, Stride);
+
+						Contact->normal[0] = Normal[0];
+						Contact->normal[1] = Normal[1];
+						Contact->normal[2] = Normal[2];
+						Contact->normal[3] = Normal[3];
+					}
+				}
+
+				return OutTriCount;
+			}
+			else {
+				dIASSERT(TriMesh->SphereContactsMergeOption == DONT_MERGE_CONTACTS);
+		        return OutTriCount;
+			}
 		}
 		else return 0;
-#else   // none of MERGECONTACTS and MERGECONTACTNORMALS // Just return
-
-        return OutTriCount;
-#endif	// MERGECONTACTS
 	}
 	else return 0;
 }

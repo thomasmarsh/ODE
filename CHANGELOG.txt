@@ -8,6 +8,10 @@ the rules for this file:
   * keep the format consistent (79 char width, M/D/Y date format).
 
 ------------------------------------------------------------------------------
+05/02/10 Oleh Derevenko
+		* dGeomLowLevelControl function added with ability to change/query OPCODE 
+		  trimesh-sphere contact merging behavior at runtime.
+
 02/18/10 Daniel K. O.
         * Fixed bug affecting disabled joints and dWorldStep.
 

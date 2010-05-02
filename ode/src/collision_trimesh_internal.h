@@ -313,7 +313,6 @@ struct dxTriMeshData  : public dBase
 #endif  // dTRIMESH_GIMPACT
 };
 
-
 struct dxTriMesh : public dxGeom{
 	// Callbacks
 	dTriCallback* Callback;
@@ -334,10 +333,21 @@ struct dxTriMesh : public dxGeom{
 
 	void ClearTCCache();
 
+	bool controlGeometry(int controlClass, int controlCode, void *dataValue, int *dataSize);
+
 	int AABBTest(dxGeom* g, dReal aabb[6]);
 	void computeAABB();
 
 #if dTRIMESH_OPCODE
+
+	enum {
+		MERGE_NORMALS__SPHERE_DEFAULT = MERGE_CONTACTS_FULLY,
+	};
+	bool controlGeometry_SetMergeSphereContacts(int dataValue);
+	bool controlGeometry_GetMergeSphereContacts(int &returnValue);
+
+	// Contact merging option
+	dxContactMergeOptions SphereContactsMergeOption;
 	// Instance data for last transform.
     dMatrix4 last_trans;
 
