@@ -425,6 +425,14 @@ void dxGeom::computePosr()
   dMultiply0_333 (final_posr->R,body->posr.R,offset_posr->R);
 }
 
+ bool dxGeom::controlGeometry(int controlClass, int controlCode, void *dataValue, int *dataSize)
+ {
+   dAASSERT(false && "Control class/code is not supported for current geom");
+
+   *dataSize = 0;
+   return false;
+ }
+
 //****************************************************************************
 // misc
 
@@ -733,6 +741,18 @@ int dGeomIsEnabled (dxGeom *g)
 	return (g->gflags & GEOM_ENABLED) != 0;
 }
 
+int dGeomLowLevelControl (dxGeom *g, int controlClass, int controlCode, void *dataValue, int *dataSize)
+{
+	dAASSERT (g);
+	dAASSERT (dataSize);
+
+	if (!dataSize) {
+		return false;
+	}
+
+	bool result = g->controlGeometry(controlClass, controlCode, dataValue, dataSize);
+	return result;
+}
 
 //****************************************************************************
 // C interface that lets the user make new classes. this interface is a lot

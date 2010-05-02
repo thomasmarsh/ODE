@@ -544,6 +544,8 @@ dxTriMesh::dxTriMesh(dSpaceID Space, dTriMeshDataID Data) : dxGeom(Space, 1)
 	this->doBoxTC = false;
 	this->doCapsuleTC = false;
 
+	SphereContactsMergeOption = (dxContactMergeOptions)MERGE_NORMALS__SPHERE_DEFAULT;
+
     for (int i=0; i<16; i++)
         last_trans[i] = REAL( 0.0 );
 }
@@ -596,6 +598,66 @@ void dxTriMesh::ClearTCCache()
 #endif // dTRIMESH_ENABLED
 }
 
+
+bool dxTriMesh::controlGeometry(int controlClass, int controlCode, void *dataValue, int *dataSize)
+{
+	if (controlClass == dGeomColliderControlClass) {
+		if (controlCode == dGeomCommonAnyControlCode) {
+			return checkControlValueSizeValidity(dataValue, dataSize, 0);
+		}
+		else if (controlCode == dGeomColliderSetMergeSphereContactsControlCode) {
+			return checkControlValueSizeValidity(dataValue, dataSize, sizeof(int)) 
+				&& controlGeometry_SetMergeSphereContacts(*(int *)dataValue);
+		}
+		else if (controlCode == dGeomColliderGetMergeSphereContactsControlCode) {
+			return checkControlValueSizeValidity(dataValue, dataSize, sizeof(int)) 
+				&& controlGeometry_GetMergeSphereContacts(*(int *)dataValue);
+		}
+	}
+
+	return dxGeom::controlGeometry(controlClass, controlCode, dataValue, dataSize);
+}
+
+bool dxTriMesh::controlGeometry_SetMergeSphereContacts(int dataValue)
+{
+	if (dataValue == dGeomColliderMergeContactsValue__Default) {
+		SphereContactsMergeOption = (dxContactMergeOptions)MERGE_NORMALS__SPHERE_DEFAULT;
+	}
+	else if (dataValue == dGeomColliderMergeContactsValue_None) {
+		SphereContactsMergeOption = DONT_MERGE_CONTACTS;
+	}
+	else if (dataValue == dGeomColliderMergeContactsValue_Normals) {
+		SphereContactsMergeOption = MERGE_CONTACT_NORMALS;
+	}
+	else if (dataValue == dGeomColliderMergeContactsValue_Full) {
+		SphereContactsMergeOption = MERGE_CONTACTS_FULLY;
+	}
+	else {
+		dAASSERT(false && "Invalid contact merge control value");
+		return false;
+	}
+
+	return true;
+}
+
+bool dxTriMesh::controlGeometry_GetMergeSphereContacts(int &returnValue)
+{
+	if (SphereContactsMergeOption = DONT_MERGE_CONTACTS) {
+		returnValue = dGeomColliderMergeContactsValue_None;
+	}
+	else if (SphereContactsMergeOption = MERGE_CONTACT_NORMALS) {
+		returnValue = dGeomColliderMergeContactsValue_Normals;
+	}
+	else if (SphereContactsMergeOption = MERGE_CONTACTS_FULLY) {
+		returnValue = dGeomColliderMergeContactsValue_Full;
+	}
+	else {
+		dIASSERT(false && "Internal error: unexpected contact merge option field value");
+		return false;
+	}
+
+	return true;
+}
 
 int dxTriMesh::AABBTest(dxGeom* g, dReal aabb[6]){
     return 1;

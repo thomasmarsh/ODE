@@ -187,6 +187,11 @@ void dxTriMesh::ClearTCCache(){
 }
 
 
+bool dxTriMesh::controlGeometry(int controlClass, int controlCode, void *dataValue, int *dataSize)
+{
+	return dxGeom::controlGeometry(controlClass, controlCode, dataValue, dataSize);
+}
+
 int dxTriMesh::AABBTest(dxGeom* g, dReal aabb[6]){
     return 1;
 }

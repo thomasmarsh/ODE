@@ -81,6 +81,12 @@ enum {
   RAY_CLOSEST_HIT  = 0x40000
 };
 
+enum dxContactMergeOptions {
+	DONT_MERGE_CONTACTS,
+	MERGE_CONTACT_NORMALS,
+	MERGE_CONTACTS_FULLY,
+};
+
 
 // geometry object base class. pos and R will either point to a separately
 // allocated buffer (if body is 0 - pos points to the dxPosR object) or to
@@ -122,6 +128,9 @@ struct dxGeom : public dBase {
       gflags &= ~GEOM_POSR_BAD;
     }
   }
+
+  bool checkControlValueSizeValidity(void *dataValue, int *dataSize, int iRequiresSize) { return (*dataSize == iRequiresSize && dataValue != 0) ? true : !(*dataSize = iRequiresSize); } // Here it is the intent to return true for 0 required size in any case
+  virtual bool controlGeometry(int controlClass, int controlCode, void *dataValue, int *dataSize);
 
   virtual void computeAABB()=0;
   // compute the AABB for this object and put it in aabb. this function
