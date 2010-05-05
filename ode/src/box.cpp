@@ -782,7 +782,7 @@ int dCollideBoxPlane (dxGeom *o1, dxGeom *o2,
   // find number of contacts requested
   int maxc = flags & NUMC_MASK;
   // if (maxc < 1) maxc = 1; // an assertion is made on entry
-  if (maxc > 3) maxc = 3;	// not more than 3 contacts per box allowed
+  if (maxc > 4) maxc = 4;	// not more than 4 contacts per box allowed
 
   // find deepest point
   dVector3 p;
@@ -804,9 +804,6 @@ int dCollideBoxPlane (dxGeom *o1, dxGeom *o2,
   contact->pos[0] = p[0];
   contact->pos[1] = p[1];
   contact->pos[2] = p[2];
-  contact->normal[0] = n[0];
-  contact->normal[1] = n[1];
-  contact->normal[2] = n[2];
   contact->depth = depth;
   ret = 1;		// ret is number of contact points found so far
   if (maxc == 1) goto done;
@@ -819,20 +816,10 @@ int dCollideBoxPlane (dxGeom *o1, dxGeom *o2,
   CONTACT(contact,i*skip)->pos[1] = p[1] op box->side[j] * R[4+j]; \
   CONTACT(contact,i*skip)->pos[2] = p[2] op box->side[j] * R[8+j];
 #define BAR(ctact,side,sideinc) \
-  depth -= B ## sideinc; \
-  if (depth < 0) goto done; \
+  if (depth - B ## sideinc < 0) goto done; \
   if (A ## sideinc > 0) { FOO(ctact,side,+); } else { FOO(ctact,side,-); } \
-  CONTACT(contact,ctact*skip)->depth = depth; \
+  CONTACT(contact,ctact*skip)->depth = depth - B ## sideinc; \
   ret++;
-
-  CONTACT(contact,skip)->normal[0] = n[0];
-  CONTACT(contact,skip)->normal[1] = n[1];
-  CONTACT(contact,skip)->normal[2] = n[2];
-  if (maxc == 3) {
-    CONTACT(contact,2*skip)->normal[0] = n[0];
-    CONTACT(contact,2*skip)->normal[1] = n[1];
-    CONTACT(contact,2*skip)->normal[2] = n[2];
-  }
 
   if (B1 < B2) {
     if (B3 < B1) goto use_side_3; else {
@@ -861,13 +848,31 @@ int dCollideBoxPlane (dxGeom *o1, dxGeom *o2,
 #undef FOO
 #undef BAR
 
- done:
+  done:
+
+  if (maxc == 4 && ret == 3) { // If user requested 4 contacts, and the first 3 were created...
+    // Combine contacts 2 and 3 (vectorial sum) and get the fourth one
+    // Result: if a box face is completely inside a plane, contacts are created for all the 4 vertices
+    dReal d4 = CONTACT(contact,1*skip)->depth + CONTACT(contact,2*skip)->depth - depth;  // depth is the depth for first contact
+    if (d4 > 0) {
+        CONTACT(contact,3*skip)->pos[0] = CONTACT(contact,1*skip)->pos[0] + CONTACT(contact,2*skip)->pos[0] - p[0]; // p is the position of first contact
+        CONTACT(contact,3*skip)->pos[1] = CONTACT(contact,1*skip)->pos[1] + CONTACT(contact,2*skip)->pos[1] - p[1];
+        CONTACT(contact,3*skip)->pos[2] = CONTACT(contact,1*skip)->pos[2] + CONTACT(contact,2*skip)->pos[2] - p[2];
+        CONTACT(contact,3*skip)->depth  = d4;
+        ret++;
+    }
+  }
+
   for (int i=0; i<ret; i++) {
     dContactGeom *currContact = CONTACT(contact,i*skip);
     currContact->g1 = o1;
     currContact->g2 = o2;
-	currContact->side1 = -1;
+    currContact->side1 = -1;
     currContact->side2 = -1;
+
+    currContact->normal[0] = n[0];
+    currContact->normal[1] = n[1];
+    currContact->normal[2] = n[2];
   }
   return ret;
 }
