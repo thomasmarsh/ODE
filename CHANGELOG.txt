@@ -9,6 +9,10 @@ the rules for this file:
 
 ------------------------------------------------------------------------------
 05/02/10 Oleh Derevenko
+		* Patch applied (#2995450) to generate up to four contacts for box-
+		plane collision test (by alexdu).
+
+05/02/10 Oleh Derevenko
 		* dGeomLowLevelControl function added with ability to change/query OPCODE 
 		  trimesh-sphere contact merging behavior at runtime.
 
