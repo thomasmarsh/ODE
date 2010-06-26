@@ -181,8 +181,6 @@
       "../ode/src"
     }
     
-    flags { "NoManifest" }
-      
     -- apply the configuration list built above
     configurations (configs)
     
