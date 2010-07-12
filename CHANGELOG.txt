@@ -9,6 +9,11 @@ the rules for this file:
 
 ------------------------------------------------------------------------------
 05/02/10 Oleh Derevenko
+		* Missing extern "C" wrapper has been added to include/ode/export-dif.h
+		(reported by Danny Price). The change affects dWorldExportDIF() public 
+		function.
+
+05/02/10 Oleh Derevenko
 		* Patch applied (#2995450) to generate up to four contacts for box-
 		plane collision test (by alexdu).
 
