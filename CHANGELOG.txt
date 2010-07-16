@@ -8,6 +8,9 @@ the rules for this file:
   * keep the format consistent (79 char width, M/D/Y date format).
 
 ------------------------------------------------------------------------------
+07/16/10 Daniel K. O.
+        * Fixed bug #2937076: don't try to build demos if drawstuff is disabled.
+
 05/02/10 Oleh Derevenko
 		* Missing extern "C" wrapper has been added to include/ode/export-dif.h
 		(reported by Danny Price). The change affects dWorldExportDIF() public 
