@@ -68,13 +68,6 @@ AC_C_VOLATILE
 AC_HEADER_STDBOOL
 AC_TYPE_SIZE_T
 
-dnl Check if we want to build demos
-AC_MSG_CHECKING(if demos should be built)
-AC_ARG_ENABLE(demos,
-        AS_HELP_STRING([--disable-demos], [don't build demos]),
-        enable_demos=$enableval,enable_demos=yes)
-AC_MSG_RESULT($enable_demos)
-
 
 
 dnl this may NOT be the machine on which the code is going to run in,
@@ -174,15 +167,10 @@ case "$host_os" in
     ;;
 esac
 AC_SUBST(EXTRA_LIBTOOL_LDFLAGS)
-AM_CONDITIONAL(ENABLE_DRAWSTUFF, test x$drawstuff != xnone)
 
 
-dnl Set Conditionals
-AM_CONDITIONAL(WIN32, test x$drawstuff = xWin32)
-AM_CONDITIONAL(X11, test x$drawstuff = xX11)
-AM_CONDITIONAL(OSX, test x$drawstuff = xOSX)
 dnl Set Drawstuff variables
-AC_MSG_CHECKING(which drawstuff lib to build)
+AC_MSG_CHECKING([which drawstuff lib to build])
 AC_MSG_RESULT($drawstuff)
 
 if test "x$drawstuff" = "xX11"
@@ -195,7 +183,7 @@ if test "x$drawstuff" = "xOSX"; then
   AC_DEFINE([HAVE_APPLE_OPENGL_FRAMEWORK], [1],
             [Use the Apple OpenGL framework.])
   GL_LIBS="-framework OpenGL -framework GLUT"
-else
+elif test "x$drawstuff" != "xnone"; then
   have_gl_headers=yes
   AC_CHECK_HEADERS(GL/gl.h GL/glu.h GL/glext.h, ,
         [have_gl_headers=no],
@@ -218,13 +206,29 @@ else
   AC_CHECK_LIB(glu32, main, [GL_LIBS="-lglu32 $GL_LIBS"; have_glu=yes], , -lopengl32)
   LDFLAGS="$TEMP_LDFLAGS"
   if test $have_gl = no -o $have_glu = no -o $have_gl_headers = no; then
-    if test x$enable_demos = xyes; then
-      AC_MSG_WARN([Demos will not be built because OpenGL doesn't seem to work. See `config.log' for details.])
-    fi
-    enable_demos=no
+    drawstuff="none"
   fi
 fi
 AC_SUBST(GL_LIBS)
+
+dnl Set Conditionals
+AM_CONDITIONAL(WIN32, test x$drawstuff = xWin32)
+AM_CONDITIONAL(X11, test x$drawstuff = xX11)
+AM_CONDITIONAL(OSX, test x$drawstuff = xOSX)
+AM_CONDITIONAL(ENABLE_DRAWSTUFF, test x$drawstuff != xnone)
+
+dnl Check if we want to build demos
+AC_MSG_CHECKING(if demos should be built)
+AC_ARG_ENABLE(demos,
+        AS_HELP_STRING([--disable-demos], [don't build demos]),
+        enable_demos=$enableval,enable_demos=yes)
+if test x$drawstuff = xnone -a x$enable_demos = xyes ; then
+    enable_demos=no
+    AC_MSG_RESULT($enable_demos)
+    AC_MSG_WARN([Demos will not be built because OpenGL doesn't seem to work. See `config.log' for details.])
+else
+    AC_MSG_RESULT($enable_demos)
+fi
 
 
 dnl stdc++ is required when linking C programs against ode
