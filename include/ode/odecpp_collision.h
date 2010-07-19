@@ -107,7 +107,27 @@ public:
     { dGeomDisable (_id); }
   int isEnabled()
     { return dGeomIsEnabled (_id); }
+  
+  void getRelPointPos (dReal px, dReal py, dReal pz, dVector3 result) const
+    { dGeomGetRelPointPos (_id, px, py, pz, result); }
+  void getRelPointPos (const dVector3 p, dVector3 result) const
+    { getRelPointPos (p[0], p[1], p[2], result); }
 
+  void getPosRelPoint (dReal px, dReal py, dReal pz, dVector3 result) const
+    { dGeomGetPosRelPoint (_id, px, py, pz, result); }
+  void getPosRelPoint (const dVector3 p, dVector3 result) const
+    { getPosRelPoint (p[0], p[1], p[2], result); }
+
+  void vectorToWorld (dReal px, dReal py, dReal pz, dVector3 result) const
+    { dGeomVectorToWorld (_id, px, py, pz, result); }
+  void vectorToWorld (const dVector3 p, dVector3 result) const
+    { vectorToWorld (p[0], p[1], p[2], result); }
+
+  void vectorFromWorld (dReal px, dReal py, dReal pz, dVector3 result) const
+    { dGeomVectorFromWorld (_id, px, py, pz, result); }
+  void vectorFromWorld (const dVector3 p, dVector3 result) const
+    { vectorFromWorld (p[0], p[1], p[2], result); }
+  
   void collide2 (dGeomID g, void *data, dNearCallback *callback)
     { dSpaceCollide2 (_id,g,data,callback); }
 };

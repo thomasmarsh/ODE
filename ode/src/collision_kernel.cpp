@@ -741,6 +741,100 @@ int dGeomIsEnabled (dxGeom *g)
 	return (g->gflags & GEOM_ENABLED) != 0;
 }
 
+
+void dGeomGetRelPointPos (dGeomID g, dReal px, dReal py, dReal pz,
+                          dVector3 result)
+{
+  dAASSERT (g);
+
+  if (g->gflags & GEOM_PLACEABLE == 0) {
+    result[0] = px;
+    result[1] = py;
+    result[2] = pz;
+    return;
+  }
+  
+  g->recomputePosr();
+  
+  dVector3 prel,p;
+  prel[0] = px;
+  prel[1] = py;
+  prel[2] = pz;
+  prel[3] = 0;
+  dMultiply0_331 (p,g->final_posr->R,prel);
+  result[0] = p[0] + g->final_posr->pos[0];
+  result[1] = p[1] + g->final_posr->pos[1];
+  result[2] = p[2] + g->final_posr->pos[2];
+}
+
+
+void dGeomGetPosRelPoint (dGeomID g, dReal px, dReal py, dReal pz,
+			  dVector3 result)
+{
+  dAASSERT (g);
+  if (g->gflags & GEOM_PLACEABLE == 0) {
+    result[0] = px;
+    result[1] = py;
+    result[2] = pz;
+    return;
+  }
+
+  g->recomputePosr();
+  
+  dVector3 prel;
+  prel[0] = px - g->final_posr->pos[0];
+  prel[1] = py - g->final_posr->pos[1];
+  prel[2] = pz - g->final_posr->pos[2];
+  prel[3] = 0;
+  dMultiply1_331 (result,g->final_posr->R,prel);
+}
+
+
+void dGeomVectorToWorld (dGeomID g, dReal px, dReal py, dReal pz,
+			 dVector3 result)
+{
+  dAASSERT (g);
+  if (g->gflags & GEOM_PLACEABLE == 0) {
+    result[0] = px;
+    result[1] = py;
+    result[2] = pz;
+    return;
+  }
+
+  g->recomputePosr();
+  
+  dVector3 p;
+  p[0] = px;
+  p[1] = py;
+  p[2] = pz;
+  p[3] = 0;
+  dMultiply0_331 (result,g->final_posr->R,p);
+}
+
+
+void dGeomVectorFromWorld (dGeomID g, dReal px, dReal py, dReal pz,
+			   dVector3 result)
+{
+  dAASSERT (g);
+  if (g->gflags & GEOM_PLACEABLE == 0) {
+    result[0] = px;
+    result[1] = py;
+    result[2] = pz;
+    return;
+  }
+
+  g->recomputePosr();
+  
+  dVector3 p;
+  p[0] = px;
+  p[1] = py;
+  p[2] = pz;
+  p[3] = 0;
+  dMultiply1_331 (result,g->final_posr->R,p);
+}
+
+
+
 int dGeomLowLevelControl (dxGeom *g, int controlClass, int controlCode, void *dataValue, int *dataSize)
 {
 	dAASSERT (g);
