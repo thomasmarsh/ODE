@@ -459,6 +459,71 @@ enum
  */
 ODE_API int dGeomLowLevelControl (dGeomID geom, int controlClass, int controlCode, void *dataValue, int *dataSize);
 
+
+/**
+ * @brief Get world position of a relative point on geom.
+ *
+ * Calling this function on a non-placeable geom results in the same point being
+ * returned.
+ *
+ * @ingroup collide
+ * @param result will contain the result.
+ */
+ODE_API void dGeomGetRelPointPos
+(
+  dGeomID geom, dReal px, dReal py, dReal pz,
+  dVector3 result
+);
+
+/**
+ * @brief takes a point in global coordinates and returns
+ * the point's position in geom-relative coordinates.
+ *
+ * Calling this function on a non-placeable geom results in the same point being
+ * returned.
+ *
+ * @remarks
+ * This is the inverse of dGeomGetRelPointPos()
+ * @ingroup collide
+ * @param result will contain the result.
+ */
+ODE_API void dGeomGetPosRelPoint
+(
+  dGeomID geom, dReal px, dReal py, dReal pz,
+  dVector3 result
+);
+
+/**
+ * @brief Convert from geom-local to world coordinates.
+ *
+ * Calling this function on a non-placeable geom results in the same vector being
+ * returned.
+ *
+ * @ingroup collide
+ * @param result will contain the result.
+ */
+ODE_API void dGeomVectorToWorld
+(
+  dGeomID geom, dReal px, dReal py, dReal pz,
+  dVector3 result
+);
+
+/**
+ * @brief Convert from world to geom-local coordinates.
+ *
+ * Calling this function on a non-placeable geom results in the same vector being
+ * returned.
+ *
+ * @ingroup collide
+ * @param result will contain the result.
+ */
+ODE_API void dGeomVectorFromWorld
+(
+  dGeomID geom, dReal px, dReal py, dReal pz,
+  dVector3 result
+);
+
+
 /* ************************************************************************ */
 /* geom offset from body */
 

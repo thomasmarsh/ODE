@@ -9,67 +9,71 @@ the rules for this file:
 
 ------------------------------------------------------------------------------
 07/19/10 Oleh Derevenko
-		* Patch applied (#3030783) to fix drawstuff dimensions being ignored
-		in OSX GLUT port (by Danny Price).
+        * Patch applied (#3030783) to fix drawstuff dimensions being ignored
+          in OSX GLUT port (by Danny Price).
+
+         Daniel K. O.
+        * Applied patch #2991622: dGeomGetRelPointPos, dGeomGetPosRelPoint,
+          dGeomVectorToWorld, and dGeomVectorFromWorld.
 
 07/16/10 Daniel K. O.
         * Fixed bug #2937076: don't try to build demos if drawstuff is disabled.
 
 05/02/10 Oleh Derevenko
-		* Missing extern "C" wrapper has been added to include/ode/export-dif.h
-		(reported by Danny Price). The change affects dWorldExportDIF() public 
-		function.
+        * Missing extern "C" wrapper has been added to include/ode/export-dif.h
+          (reported by Danny Price). The change affects dWorldExportDIF() public 
+          function.
 
 05/02/10 Oleh Derevenko
-		* Patch applied (#2995450) to generate up to four contacts for box-
-		plane collision test (by alexdu).
+        * Patch applied (#2995450) to generate up to four contacts for box-
+          plane collision test (by alexdu) and fix contact depths.
 
 05/02/10 Oleh Derevenko
-		* dGeomLowLevelControl function added with ability to change/query OPCODE 
-		  trimesh-sphere contact merging behavior at runtime.
+        * dGeomLowLevelControl function added with ability to change/query OPCODE 
+          trimesh-sphere contact merging behavior at runtime.
 
 02/18/10 Daniel K. O.
         * Fixed bug affecting disabled joints and dWorldStep.
 
 01/16/10 Oleh Derevenko
-		* Patch applied (#2931174) to make demos work for recent MacOS.
-		* Patch applied (#2931177) to fix the demos' framerate on X11.
+        * Patch applied (#2931174) to make demos work for recent MacOS.
+        * Patch applied (#2931177) to fix the demos' framerate on X11.
 
 12/20/09 Oleh Derevenko
-		* QuadTreeSpace implementation corrected to avoid object-block relation 
-		  ambiguity due to numeric errors.
+        * QuadTreeSpace implementation corrected to avoid object-block relation 
+          ambiguity due to numeric errors.
 
 12/04/09 Oleh Derevenko
-		* odecpp classes changed to be inheritable and easily expandable
+        * odecpp classes changed to be inheritable and easily expandable
 
 11/29/09 Oleh Derevenko
-		* Improvement for trimesh-plane collision (also used in trimesh-heightfield)
-		  to exclude mesh vertices that have already generated contacts from further
-		  examination and contact generation in other triangles (suggested by LR).
+        * Improvement for trimesh-plane collision (also used in trimesh-heightfield)
+          to exclude mesh vertices that have already generated contacts from further
+          examination and contact generation in other triangles (suggested by LR).
 
 10/25/09 Oleh Derevenko
-		* Macros changed to static inline functions in odemath.h and related files.
-		  Some code duplication has been eliminated across the files.
+        * Macros changed to static inline functions in odemath.h and related files.
+          Some code duplication has been eliminated across the files.
 
-		* Fixed handling of --disable-asserts and --enable-double-precision 
-		  (absence of --enable-double-precision) in configure script. The script
-		  was not appending compiler defines correctly.
+        * Fixed handling of --disable-asserts and --enable-double-precision 
+          (absence of --enable-double-precision) in configure script. The script
+          was not appending compiler defines correctly.
 
-		* dWorldStep implementation changed to remove allocation on stack. 
-		  dUSE_MALLOC_FOR_ALLOCA define has been removed as well as corresponding
-		  configuration parameter. Also dMemoryFlag public variable has been removed.
-		  (look for presence of ODE_EXT_malloc_not_alloca configuration string if
-		  your application is dependent on that variable).
+        * dWorldStep implementation changed to remove allocation on stack. 
+          dUSE_MALLOC_FOR_ALLOCA define has been removed as well as corresponding
+          configuration parameter. Also dMemoryFlag public variable has been removed.
+          (look for presence of ODE_EXT_malloc_not_alloca configuration string if
+          your application is dependent on that variable).
 
 09/05/09 Oleh Derevenko
-		* dWorldStepFast1 API removed along with dWorld[Get/Set]AutoEnableDepthSF1
+        * dWorldStepFast1 API removed along with dWorld[Get/Set]AutoEnableDepthSF1
 
 08/29/09 Oleh Derevenko
-		* Fixed uninitialized floating point array used in computations.
+        * Fixed uninitialized floating point array used in computations.
 
 08/12/09 Oleh Derevenko
-		* A typo fixed in dGeomCopyOffsetRotation() (final_posr was used instead 
-		of offset_posr). Reported by Tilmann.
+        * A typo fixed in dGeomCopyOffsetRotation() (final_posr was used instead 
+          of offset_posr). Reported by Tilmann.
 
 08/11/09 Daniel K. O.
         * Made sure neither dSINGLE or dDOUBLE is defined by default; the user
