@@ -257,6 +257,8 @@ static void osxCreateMainWindow( int width, int height )
     argv[1] = NULL;
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE | GLUT_DEPTH);
+	glutInitWindowSize(width, height);
+
     windowReference = glutCreateWindow("ODE - Drawstuff");
 	windowWidth = width;
 	windowHeight = height;

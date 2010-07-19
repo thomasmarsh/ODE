@@ -8,6 +8,10 @@ the rules for this file:
   * keep the format consistent (79 char width, M/D/Y date format).
 
 ------------------------------------------------------------------------------
+07/19/10 Oleh Derevenko
+		* Patch applied (#3030783) to fix drawstuff dimensions being ignored
+		in OSX GLUT port (by Danny Price).
+
 07/16/10 Daniel K. O.
         * Fixed bug #2937076: don't try to build demos if drawstuff is disabled.
 
