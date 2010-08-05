@@ -747,7 +747,7 @@ void dGeomGetRelPointPos (dGeomID g, dReal px, dReal py, dReal pz,
 {
   dAASSERT (g);
 
-  if (g->gflags & GEOM_PLACEABLE == 0) {
+  if ((g->gflags & GEOM_PLACEABLE) == 0) {
     result[0] = px;
     result[1] = py;
     result[2] = pz;
@@ -772,7 +772,7 @@ void dGeomGetPosRelPoint (dGeomID g, dReal px, dReal py, dReal pz,
 			  dVector3 result)
 {
   dAASSERT (g);
-  if (g->gflags & GEOM_PLACEABLE == 0) {
+  if ((g->gflags & GEOM_PLACEABLE) == 0) {
     result[0] = px;
     result[1] = py;
     result[2] = pz;
@@ -794,7 +794,7 @@ void dGeomVectorToWorld (dGeomID g, dReal px, dReal py, dReal pz,
 			 dVector3 result)
 {
   dAASSERT (g);
-  if (g->gflags & GEOM_PLACEABLE == 0) {
+  if ((g->gflags & GEOM_PLACEABLE) == 0) {
     result[0] = px;
     result[1] = py;
     result[2] = pz;
@@ -816,7 +816,7 @@ void dGeomVectorFromWorld (dGeomID g, dReal px, dReal py, dReal pz,
 			   dVector3 result)
 {
   dAASSERT (g);
-  if (g->gflags & GEOM_PLACEABLE == 0) {
+  if ((g->gflags & GEOM_PLACEABLE) == 0) {
     result[0] = px;
     result[1] = py;
     result[2] = pz;
