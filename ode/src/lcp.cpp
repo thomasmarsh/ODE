@@ -1150,88 +1150,91 @@ extern "C" ODE_API int dTestSolveLCP()
 
   double total_time = 0;
   for (int count=0; count < 1000; count++) {
+    BEGIN_STATE_SAVE(context, saveInner) {
 
-    // form (A,b) = a random positive definite LCP problem
-    dMakeRandomMatrix (A2,n,n,1.0);
-    dMultiply2 (A,A2,A2,n,n,n);
-    dMakeRandomMatrix (x,n,1,1.0);
-    dMultiply0 (b,A,x,n,n,1);
-    for (i=0; i<n; i++) b[i] += (dRandReal()*REAL(0.2))-REAL(0.1);
+      // form (A,b) = a random positive definite LCP problem
+      dMakeRandomMatrix (A2,n,n,1.0);
+      dMultiply2 (A,A2,A2,n,n,n);
+      dMakeRandomMatrix (x,n,1,1.0);
+      dMultiply0 (b,A,x,n,n,1);
+      for (i=0; i<n; i++) b[i] += (dRandReal()*REAL(0.2))-REAL(0.1);
 
-    // choose `nub' in the range 0..n-1
-    int nub = 50; //dRandInt (n);
+      // choose `nub' in the range 0..n-1
+      int nub = 50; //dRandInt (n);
 
-    // make limits
-    for (i=0; i<nub; i++) lo[i] = -dInfinity;
-    for (i=0; i<nub; i++) hi[i] = dInfinity;
-    //for (i=nub; i<n; i++) lo[i] = 0;
-    //for (i=nub; i<n; i++) hi[i] = dInfinity;
-    //for (i=nub; i<n; i++) lo[i] = -dInfinity;
-    //for (i=nub; i<n; i++) hi[i] = 0;
-    for (i=nub; i<n; i++) lo[i] = -(dRandReal()*REAL(1.0))-REAL(0.01);
-    for (i=nub; i<n; i++) hi[i] =  (dRandReal()*REAL(1.0))+REAL(0.01);
+      // make limits
+      for (i=0; i<nub; i++) lo[i] = -dInfinity;
+      for (i=0; i<nub; i++) hi[i] = dInfinity;
+      //for (i=nub; i<n; i++) lo[i] = 0;
+      //for (i=nub; i<n; i++) hi[i] = dInfinity;
+      //for (i=nub; i<n; i++) lo[i] = -dInfinity;
+      //for (i=nub; i<n; i++) hi[i] = 0;
+      for (i=nub; i<n; i++) lo[i] = -(dRandReal()*REAL(1.0))-REAL(0.01);
+      for (i=nub; i<n; i++) hi[i] =  (dRandReal()*REAL(1.0))+REAL(0.01);
 
-    // set a few limits to lo=hi=0
-    /*
-    for (i=0; i<10; i++) {
-    int j = dRandInt (n-nub) + nub;
-    lo[j] = 0;
-    hi[j] = 0;
-    }
-    */
-
-    // solve the LCP. we must make copy of A,b,lo,hi (A2,b2,lo2,hi2) for
-    // SolveLCP() to permute. also, we'll clear the upper triangle of A2 to
-    // ensure that it doesn't get referenced (if it does, the answer will be
-    // wrong).
-
-    memcpy (A2,A,n*nskip*sizeof(dReal));
-    dClearUpperTriangle (A2,n);
-    memcpy (b2,b,n*sizeof(dReal));
-    memcpy (lo2,lo,n*sizeof(dReal));
-    memcpy (hi2,hi,n*sizeof(dReal));
-    dSetZero (x,n);
-    dSetZero (w,n);
-
-    dStopwatch sw;
-    dStopwatchReset (&sw);
-    dStopwatchStart (&sw);
-
-    dSolveLCP (context,n,A2,x,b2,w,nub,lo2,hi2,0);
-
-    dStopwatchStop (&sw);
-    double time = dStopwatchTime(&sw);
-    total_time += time;
-    double average = total_time / double(count+1) * 1000.0;
-
-    // check the solution
-
-    dMultiply0 (tmp1,A,x,n,n,1);
-    for (i=0; i<n; i++) tmp2[i] = b[i] + w[i];
-    dReal diff = dMaxDifference (tmp1,tmp2,n,1);
-    // printf ("\tA*x = b+w, maximum difference = %.6e - %s (1)\n",diff,
-    //	    diff > tol ? "FAILED" : "passed");
-    if (diff > tol) dDebug (0,"A*x = b+w, maximum difference = %.6e",diff);
-    int n1=0,n2=0,n3=0;
-    for (i=0; i<n; i++) {
-      if (x[i]==lo[i] && w[i] >= 0) {
-        n1++;	// ok
+      // set a few limits to lo=hi=0
+      /*
+      for (i=0; i<10; i++) {
+      int j = dRandInt (n-nub) + nub;
+      lo[j] = 0;
+      hi[j] = 0;
       }
-      else if (x[i]==hi[i] && w[i] <= 0) {
-        n2++;	// ok
-      }
-      else if (x[i] >= lo[i] && x[i] <= hi[i] && w[i] == 0) {
-        n3++;	// ok
-      }
-      else {
-        dDebug (0,"FAILED: i=%d x=%.4e w=%.4e lo=%.4e hi=%.4e",i,
-          x[i],w[i],lo[i],hi[i]);
-      }
-    }
+      */
 
-    // pacifier
-    printf ("passed: NL=%3d NH=%3d C=%3d   ",n1,n2,n3);
-    printf ("time=%10.3f ms  avg=%10.4f\n",time * 1000.0,average);
+      // solve the LCP. we must make copy of A,b,lo,hi (A2,b2,lo2,hi2) for
+      // SolveLCP() to permute. also, we'll clear the upper triangle of A2 to
+      // ensure that it doesn't get referenced (if it does, the answer will be
+      // wrong).
+
+      memcpy (A2,A,n*nskip*sizeof(dReal));
+      dClearUpperTriangle (A2,n);
+      memcpy (b2,b,n*sizeof(dReal));
+      memcpy (lo2,lo,n*sizeof(dReal));
+      memcpy (hi2,hi,n*sizeof(dReal));
+      dSetZero (x,n);
+      dSetZero (w,n);
+
+      dStopwatch sw;
+      dStopwatchReset (&sw);
+      dStopwatchStart (&sw);
+
+      dSolveLCP (context,n,A2,x,b2,w,nub,lo2,hi2,0);
+
+      dStopwatchStop (&sw);
+      double time = dStopwatchTime(&sw);
+      total_time += time;
+      double average = total_time / double(count+1) * 1000.0;
+
+      // check the solution
+
+      dMultiply0 (tmp1,A,x,n,n,1);
+      for (i=0; i<n; i++) tmp2[i] = b[i] + w[i];
+      dReal diff = dMaxDifference (tmp1,tmp2,n,1);
+      // printf ("\tA*x = b+w, maximum difference = %.6e - %s (1)\n",diff,
+      //	    diff > tol ? "FAILED" : "passed");
+      if (diff > tol) dDebug (0,"A*x = b+w, maximum difference = %.6e",diff);
+      int n1=0,n2=0,n3=0;
+      for (i=0; i<n; i++) {
+        if (x[i]==lo[i] && w[i] >= 0) {
+          n1++;	// ok
+        }
+        else if (x[i]==hi[i] && w[i] <= 0) {
+          n2++;	// ok
+        }
+        else if (x[i] >= lo[i] && x[i] <= hi[i] && w[i] == 0) {
+          n3++;	// ok
+        }
+        else {
+          dDebug (0,"FAILED: i=%d x=%.4e w=%.4e lo=%.4e hi=%.4e",i,
+            x[i],w[i],lo[i],hi[i]);
+        }
+      }
+
+      // pacifier
+      printf ("passed: NL=%3d NH=%3d C=%3d   ",n1,n2,n3);
+      printf ("time=%10.3f ms  avg=%10.4f\n",time * 1000.0,average);
+    
+    } END_STATE_SAVE(context, saveInner);
   }
 
   dxFreeWorldProcessContext(context);
