@@ -760,7 +760,7 @@ dxWorldProcessContext *dxReallocateTemporayWorldProcessContext(dxWorldProcessCon
   if (context == NULL) {
     const dxWorldProcessMemoryManager *surememmgr = memmgr ? memmgr : &g_WorldProcessMallocMemoryManager;
     const dxWorldProcessMemoryReserveInfo *surereserveinfo = reserveinfo ? reserveinfo : &g_WorldProcessDefaultReserveInfo;
-    context = InternalReallocateWorldProcessContext(context, memreq, surememmgr, reserveinfo->m_fReserveFactor, reserveinfo->m_uiReserveMinimum);
+    context = InternalReallocateWorldProcessContext(context, memreq, surememmgr, surereserveinfo->m_fReserveFactor, surereserveinfo->m_uiReserveMinimum);
   }
 
   return context;
