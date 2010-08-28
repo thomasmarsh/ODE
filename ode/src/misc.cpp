@@ -32,7 +32,7 @@ static unsigned long seed = 0;
 
 unsigned long dRand()
 {
-  seed = (1664525L*seed + 1013904223L) & 0xffffffff;
+  seed = (1664525UL*seed + 1013904223UL) & 0xffffffff;
   return seed;
 }
 
@@ -67,22 +67,55 @@ int dRandInt (int n)
 {
   // seems good; xor-fold and modulus
   const unsigned long un = n;
-  unsigned long r = dRand();
+  // Since there is no memory barrier macro in ODE assign via volatile variable 
+  // to prevent compiler reusing seed as value of `r'
+  volatile unsigned long raw_r = dRand();
+  unsigned long r = raw_r;
   
   // note: probably more aggressive than it needs to be -- might be
   //       able to get away without one or two of the innermost branches.
-  if (un <= 0x00010000UL) {
-    r ^= (r >> 16);
-    if (un <= 0x00000100UL) {
+  // if (un <= 0x00010000UL) {
+  //   r ^= (r >> 16);
+  //   if (un <= 0x00000100UL) {
+  //     r ^= (r >> 8);
+  //     if (un <= 0x00000010UL) {
+  //       r ^= (r >> 4);
+  //       if (un <= 0x00000004UL) {
+  //         r ^= (r >> 2);
+  //         if (un <= 0x00000002UL) {
+  //           r ^= (r >> 1);
+  //         }
+  //       }
+  //     }
+  //   }
+  // }
+  // Optimized version of above
+  if (un <= 0x00000010UL) {
+    if (un <= 0x00000002UL) {
+      r ^= (r >> 16);
       r ^= (r >> 8);
-      if (un <= 0x00000010UL) {
+      r ^= (r >> 4);
+      r ^= (r >> 2);
+      r ^= (r >> 1);
+    } else {
+      if (un <= 0x00000004UL) {
+        r ^= (r >> 16);
+        r ^= (r >> 8);
         r ^= (r >> 4);
-        if (un <= 0x00000004UL) {
-          r ^= (r >> 2);
-          if (un <= 0x00000002UL) {
-            r ^= (r >> 1);
-          }
-        }
+        r ^= (r >> 2);
+      } else {
+        r ^= (r >> 16);
+        r ^= (r >> 8);
+        r ^= (r >> 4);
+      }
+    }
+  } else {
+    if (un <= 0x00000100UL) {
+      r ^= (r >> 16);
+      r ^= (r >> 8);
+    } else {
+      if (un <= 0x00010000UL) {
+        r ^= (r >> 16);
       }
     }
   }
