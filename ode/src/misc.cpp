@@ -91,22 +91,15 @@ int dRandInt (int n)
   // }
   // Optimized version of above
   if (un <= 0x00000010UL) {
+    r ^= (r >> 16);
+    r ^= (r >> 8);
+    r ^= (r >> 4);
     if (un <= 0x00000002UL) {
-      r ^= (r >> 16);
-      r ^= (r >> 8);
-      r ^= (r >> 4);
       r ^= (r >> 2);
       r ^= (r >> 1);
     } else {
       if (un <= 0x00000004UL) {
-        r ^= (r >> 16);
-        r ^= (r >> 8);
-        r ^= (r >> 4);
         r ^= (r >> 2);
-      } else {
-        r ^= (r >> 16);
-        r ^= (r >> 8);
-        r ^= (r >> 4);
       }
     }
   } else {
