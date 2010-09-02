@@ -894,6 +894,33 @@ SUITE (TestdxJointHinge)
     }
   }
 
+               
+  TEST_FIXTURE(dxJointHinge_Fixture_B1_and_B2_At_Zero_Axis_Along_X,
+               test_Hinge_dParamVel)
+      {
+          const dReal targetvel = 100;
+          const dReal tolerance = targetvel *
+#ifdef dSINGLE
+              1e-2
+#else
+              1e-6
+#endif
+              ;
+
+          dJointSetHingeParam(jId, dParamFMax, dInfinity);
+          dJointSetHingeParam(jId, dParamVel, targetvel);
+          
+          dWorldStep(wId, 0.001);
+          
+          const dReal *v1 = dBodyGetAngularVel(bId1);
+          const dReal *v2 = dBodyGetAngularVel(bId2);
+          dVector3 rvel = { v1[0]-v2[0], v1[1]-v2[1], v1[2]-v2[2] };
+          CHECK_CLOSE(rvel[0], targetvel, tolerance);
+          CHECK_CLOSE(rvel[1], 0, tolerance);
+          CHECK_CLOSE(rvel[2], 0, tolerance);
+      }
+  
+  
 
 } // End of SUITE TestdxJointHinge
 
