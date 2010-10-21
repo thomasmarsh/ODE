@@ -231,3 +231,4 @@ int dGeomTransformGetInfo (dGeomID g)
   dxGeomTransform *tr = (dxGeomTransform*) g;
   return tr->infomode;
 }
+
