@@ -411,7 +411,7 @@ ODE_API int dGeomIsEnabled (dGeomID geom);
 enum
 {
 	dGeomCommonControlClass = 0,
-	dGeomColliderControlClass = 1,
+	dGeomColliderControlClass = 1
 };
 
 enum
@@ -419,7 +419,7 @@ enum
 	dGeomCommonAnyControlCode = 0,
 
 	dGeomColliderSetMergeSphereContactsControlCode = 1,
-	dGeomColliderGetMergeSphereContactsControlCode = 2,
+	dGeomColliderGetMergeSphereContactsControlCode = 2
 };
 
 enum
@@ -427,7 +427,7 @@ enum
 	dGeomColliderMergeContactsValue__Default = 0, // Used with Set... to restore default value
 	dGeomColliderMergeContactsValue_None = 1,
 	dGeomColliderMergeContactsValue_Normals = 2,
-	dGeomColliderMergeContactsValue_Full = 3,
+	dGeomColliderMergeContactsValue_Full = 3
 };
 
 /**
