@@ -125,4 +125,14 @@ libode_la_SOURCES+=     collision_trimesh_trimesh.cpp \
 endif
 
 
+if LIBCCD
+AM_CPPFLAGS += -I$(top_srcdir)/libccd/src -I$(top_builddir)/libccd/src -DdLIBCCD_ENABLED
+libode_la_LIBADD += $(top_builddir)/libccd/src/libccd.la
 
+libode_la_SOURCES += collision_libccd.cpp collision_libccd.h
+
+if LIBCCD_CYL_CYL
+AM_CPPFLAGS += -DdLIBCCD_CYL_CYL
+endif
+
+endif

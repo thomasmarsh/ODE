@@ -41,6 +41,10 @@ for geometry objects
 #include "collision_space_internal.h"
 #include "odeou.h"
 
+#ifdef dLIBCCD_ENABLED
+# include "collision_libccd.h"
+#endif /* dLIBCCD_ENABLED */
+
 
 #ifdef _MSC_VER
 #pragma warning(disable:4291)  // for VC++, no complaints about "no matching operator delete found"
@@ -202,7 +206,10 @@ static void setAllColliders (int i, dColliderFn *fn)
   setCollider (dCylinderClass,dBoxClass,&dCollideCylinderBox);
   setCollider (dCylinderClass,dSphereClass,&dCollideCylinderSphere);
   setCollider (dCylinderClass,dPlaneClass,&dCollideCylinderPlane);
-  //setCollider (dCylinderClass,dCylinderClass,&dCollideCylinderCylinder);
+
+#ifdef dLIBCCD_CYL_CYL
+  setCollider (dCylinderClass, dCylinderClass, &dCollideCylinderCylinder);
+#endif
 
 //--> Convex Collision
   setCollider (dConvexClass,dPlaneClass,&dCollideConvexPlane);
