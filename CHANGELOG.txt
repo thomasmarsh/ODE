@@ -8,11 +8,15 @@ the rules for this file:
   * keep the format consistent (79 char width, M/D/Y date format).
 
 ------------------------------------------------------------------------------
+11/08/10 Daniel K. O.
+        * Applied patches from Daniel Fiser to incorporate libccd for
+          Cylinder-Cylinder collision tests.
+
 08/21/10 Oleh Derevenko
-		* Fix applied to dxReallocateTemporayWorldProcessContext() to remove typo 
-		  which caused segmentation fault (by Kyle McKay).
-		  dTestSolveLCP() fixed to avoid exceeding allocated memory pool 
-		  (by Kyle McKay).
+        * Fix applied to dxReallocateTemporayWorldProcessContext() to remove typo 
+          which caused segmentation fault (by Kyle McKay).
+          dTestSolveLCP() fixed to avoid exceeding allocated memory pool 
+          (by Kyle McKay).
 07/19/10 Oleh Derevenko
         * Patch applied (#3030783) to fix drawstuff dimensions being ignored
           in OSX GLUT port (by Danny Price).

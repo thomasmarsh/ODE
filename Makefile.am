@@ -2,6 +2,10 @@ if ENABLE_OU
 OU_DIR = ou
 endif
 
+if LIBCCD
+LIBCCD_DIR = libccd
+endif
+
 if ENABLE_DEMOS
 DRAWSTUFF_DIR = drawstuff
 endif
@@ -19,6 +23,7 @@ SUBDIRS = include \
           $(GIMPACT_DIR) \
           $(OPCODE_DIR) \
           $(OU_DIR) \
+          $(LIBCCD_DIR) \
           ode \
           tests
 

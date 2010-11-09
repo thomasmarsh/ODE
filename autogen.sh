@@ -49,4 +49,9 @@ echo "Running bootstrap in ou directory"
 
 #./configure $*
 
+if [ -d libccd ]; then
+    echo "Running bootstrap in libccd directory"
+    (cd libccd && ./bootstrap)
+fi;
+
 echo "Now you are ready to run ./configure"

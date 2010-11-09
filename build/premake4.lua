@@ -77,6 +77,11 @@
   }
   
   newoption {
+    trigger     = "with-libccd",
+    description = "Uses libccd for handling some collision tests absent in ODE."
+  }
+  
+  newoption {
     trigger     = "no-dif",
     description = "Exclude DIF (Dynamics Interchange Format) exports"
   }
@@ -192,10 +197,10 @@
       flags   { "OptimizeSpeed", "NoFramePointer" }
 
     configuration { "only-single or *Single*" }
-      defines { "dSINGLE" }
+      defines { "dSINGLE", "CCD_SINGLE" }
       
     configuration { "only-double or *Double*" }
-      defines { "dDOUBLE" }
+      defines { "dDOUBLE", "CCD_DOUBLE" }
     
     configuration { "Windows" }
       defines { "WIN32" }
@@ -262,7 +267,8 @@
       "../ode/src/joints",
       "../OPCODE",
       "../GIMPACT/include",
-      "../ou/include"
+      "../ou/include",
+      "../libccd/src"
     }
 
     files {
@@ -307,6 +313,14 @@
       files   { "../ou/**.h", "../ou/**.cpp" }
       defines { "_OU_NAMESPACE=odeou" }
       
+    configuration { "with-libccd" }
+      files   { "../libccd/src/ccd/*.h", "../libccd/src/*.c",
+              "../ode/src/collision_libccd.cpp", "../ode/src/collision_libccd.h" }
+      defines { "dLIBCCD_ENABLED", "dLIBCCD_CYL_CYL" }
+
+    configuration { "not with-libccd" }
+      excludes { "../ode/src/collision_libccd.cpp", "../ode/src/collision_libccd.h" }
+
     configuration { "windows" }
       links   { "user32" }
             
