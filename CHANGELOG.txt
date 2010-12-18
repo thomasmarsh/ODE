@@ -8,6 +8,9 @@ the rules for this file:
   * keep the format consistent (79 char width, M/D/Y date format).
 
 ------------------------------------------------------------------------------
+12/17/10 Daniel K. O.
+        * Applied patches from Daniel Fiser for new colliders based on libccd.
+
 11/08/10 Daniel K. O.
         * Applied patches from Daniel Fiser to incorporate libccd for
           Cylinder-Cylinder collision tests.

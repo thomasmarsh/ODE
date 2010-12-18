@@ -149,7 +149,7 @@ static void command( int cmd )
 	dMass m;
 
 	cmd = locase( cmd );
-	if ( cmd == 'v' || cmd == 'b' || cmd == 'c' || cmd == 's' )
+	if ( cmd == 'v' || cmd == 'b' || cmd == 'c' || cmd == 's' || cmd == 'y')
 	{
 		if ( num < NUM )
 		{
@@ -207,6 +207,10 @@ static void command( int cmd )
 			dMassSetCapsule( &m,DENSITY,3,sides[0],sides[1] );
 			obj[i].geom[0] = dCreateCapsule( space,sides[0],sides[1] );
 		}
+        else if (cmd == 'y') {
+            dMassSetCylinder (&m,DENSITY,3,sides[0],sides[1]);
+            obj[i].geom[0] = dCreateCylinder (space,sides[0],sides[1]);
+        }
 		else if ( cmd == 's' )
 		{
 			sides[0] *= 0.5;
@@ -293,6 +297,11 @@ void drawGeom( dGeomID g, const dReal *pos, const dReal *R, int show_aabb )
 	{
 		dsDrawSphere( pos,R,dGeomSphereGetRadius( g ) );
 	}
+    else if (type == dCylinderClass) {
+        dReal radius,length;
+        dGeomCylinderGetParams (g,&radius,&length);
+        dsDrawCylinder (pos,R,length,radius);
+    }
 	else if ( type == dCapsuleClass )
 	{
 		dReal radius,length;

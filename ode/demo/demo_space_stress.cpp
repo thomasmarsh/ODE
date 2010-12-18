@@ -366,6 +366,7 @@ static void simLoop (int pause)
   dsSetColor (0,0,2);
   dSpaceCollide (space,0,&nearCallback);
   //if (!pause) dWorldStep (world,0.05);
+  if (!pause) dWorldQuickStep (world,0.05);
   //if (!pause) dWorldStepFast (world,0.05, 1);
 
   // remove all contact joints
