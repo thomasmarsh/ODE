@@ -30,7 +30,8 @@
  * Marks inline function.
  */
 #ifdef __GNUC__
-# define _ccd_inline static inline __attribute__((always_inline))
+//# define _ccd_inline static inline __attribute__((always_inline))
+# define _ccd_inline static inline
 #else /* __GNUC__ */
 # define _ccd_inline static __inline
 #endif /* __GNUC__ */
