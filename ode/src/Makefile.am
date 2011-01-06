@@ -4,7 +4,6 @@ AM_CPPFLAGS = -I$(top_srcdir)/include -D__ODE__
 
 # convenience library to simulate per object cflags
 noinst_LTLIBRARIES = libfast.la
-libfast_la_CFLAGS = -O3 -Wall
 libfast_la_SOURCES = fastldlt.c fastltsolve.c fastdot.c fastlsolve.c
 
 
