@@ -8,6 +8,10 @@ the rules for this file:
   * keep the format consistent (79 char width, M/D/Y date format).
 
 ------------------------------------------------------------------------------
+01/06/11 Daniel K. O.
+        * Applied patch from Daniel Fiser, efficient libccd tests when using
+          CONTACTS_UNIMPORTANT.
+
 12/17/10 Daniel K. O.
         * Applied patches from Daniel Fiser for new colliders based on libccd.
 

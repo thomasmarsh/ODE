@@ -269,6 +269,14 @@ static int ccdCollide(dGeomID o1, dGeomID o2, int flags,
     ccd.mpr_tolerance = 1E-6;
 
 
+    if (flags & CONTACTS_UNIMPORTANT){
+        if (ccdMPRIntersect(obj1, obj2, &ccd)){
+            return 1;
+        }else{
+            return 0;
+        }
+    }
+
     res = ccdMPRPenetration(obj1, obj2, &ccd, &depth, &dir, &pos);
     if (res == 0){
         contact->g1 = o1;
