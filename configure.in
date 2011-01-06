@@ -1,6 +1,6 @@
 dnl AC_INIT does not take a macro as a version nr: set it separately! - Bram
 AC_INIT([ODE],[0.11.1],[ode@ode.org])
-# AC_CONFIG_SRCDIR([ode/src/ode.cpp])
+AC_CONFIG_SRCDIR([ode/src/ode.cpp])
 ODE_RELEASE=0.11.1
 AC_SUBST(ODE_RELEASE)
 
