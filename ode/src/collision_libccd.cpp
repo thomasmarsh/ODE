@@ -266,6 +266,7 @@ static int ccdCollide(dGeomID o1, dGeomID o2, int flags,
     ccd.support2 = supp2;
     ccd.center1  = cen1;
     ccd.center2  = cen2;
+    ccd.max_iterations = 500;
     ccd.mpr_tolerance = 1E-6;
 
 
