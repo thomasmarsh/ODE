@@ -203,7 +203,12 @@ static void setAllColliders (int i, dColliderFn *fn)
   setCollider (dTriMeshClass,dPlaneClass,&dCollideTrimeshPlane);
   setCollider (dCylinderClass,dTriMeshClass,&dCollideCylinderTrimesh);
 #endif
+
+#ifdef dLIBCCD_BOX_CYL
+  setCollider (dBoxClass,dCylinderClass,&dCollideBoxCylinderCCD);
+#else
   setCollider (dCylinderClass,dBoxClass,&dCollideCylinderBox);
+#endif
   setCollider (dCylinderClass,dSphereClass,&dCollideCylinderSphere);
   setCollider (dCylinderClass,dPlaneClass,&dCollideCylinderPlane);
 
