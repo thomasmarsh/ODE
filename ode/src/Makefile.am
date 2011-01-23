@@ -130,6 +130,10 @@ libode_la_LIBADD += $(top_builddir)/libccd/src/libccd.la
 
 libode_la_SOURCES += collision_libccd.cpp collision_libccd.h
 
+if LIBCCD_BOX_CYL
+AM_CPPFLAGS += -DdLIBCCD_BOX_CYL
+endif
+
 if LIBCCD_CYL_CYL
 AM_CPPFLAGS += -DdLIBCCD_CYL_CYL
 endif

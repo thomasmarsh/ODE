@@ -337,6 +337,7 @@ AM_CONDITIONAL(ENABLE_OU, test x$use_ou = xyes)
 
 
 col_cylinder_cylinder=none
+col_box_cylinder=default
 col_capsule_cylinder=none
 col_convex_box=none
 col_convex_capsule=none
@@ -348,7 +349,7 @@ col_convex_convex=default
 libccd=no
 libccd_all=no
 AC_ARG_ENABLE(libccd, AS_HELP_STRING([--enable-libccd],
-            [enable all libccd colliders]),
+            [enable all libccd colliders (except box-cylinder)]),
             libccd_all=$enableval)
 if test x$libccd_all = xyes
 then
@@ -365,6 +366,10 @@ fi
 
 AC_ARG_WITH([cylinder-cylinder], AS_HELP_STRING([--with-cylinder-cylinder=@<:@none,libccd@:>@], [use specific collider for cylinder-cylinder]),
             col_cylinder_cylinder=$withval)
+
+AC_ARG_WITH([box-cylinder],
+        AS_HELP_STRING([--with-box-cylinder=@<:@default,libccd@:>@], [use specific collider for box-cylinder]),
+            col_box_cylinder=$withval)
 
 AC_ARG_WITH([capsule-cylinder], AS_HELP_STRING([--with-capsule-cylinder=@<:@none,libccd@:>@], [use specific collider for capsule-cylinder]),
             col_capsule_cylinder=$withval)
@@ -385,6 +390,7 @@ AC_ARG_WITH([convex-convex], AS_HELP_STRING([--with-convex-convex=@<:@default,li
             col_convex_convex=$withval)
 
 if test x$col_cylinder_cylinder = xlibccd -o \
+    x$col_box_cylinder = xlibccd -o \
     x$col_capsule_cylinder = xlibccd -o \
     x$col_convex_box = xlibccd -o \
     x$col_convex_capsule = libccd -o \
@@ -398,6 +404,7 @@ fi
 AC_CONFIG_SUBDIRS([libccd])
 
 AM_CONDITIONAL(LIBCCD, test x$libccd != xno)
+AM_CONDITIONAL(LIBCCD_BOX_CYL,          test x$col_box_cylinder = xlibccd)
 AM_CONDITIONAL(LIBCCD_CYL_CYL,          test x$col_cylinder_cylinder = xlibccd)
 AM_CONDITIONAL(LIBCCD_CAP_CYL,          test x$col_capsule_cylinder = xlibccd)
 AM_CONDITIONAL(LIBCCD_CONVEX_BOX,       test x$col_convex_box = xlibccd)
@@ -502,6 +509,7 @@ echo "  Use OPCODE:              $opcode"
 echo "  Use GIMPACT:             $gimpact"
 echo "  Custom colliders:"
 echo "        cylinder-cylinder: $col_cylinder_cylinder"
+echo "        box-cylinder:      $col_box_cylinder"
 echo "        capsule-cylinder:  $col_capsule_cylinder"
 echo "        convex-box:        $col_convex_box"
 echo "        convex-capsule:    $col_convex_capsule"

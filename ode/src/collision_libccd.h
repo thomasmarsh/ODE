@@ -4,6 +4,9 @@
 int dCollideCylinderCylinder(dxGeom *o1, dxGeom *o2, int flags,
 			                 dContactGeom *contact, int skip);
 
+int dCollideBoxCylinderCCD(dxGeom *o1, dxGeom *o2, int flags,
+			               dContactGeom *contact, int skip);
+
 int dCollideCapsuleCylinder(dxGeom *o1, dxGeom *o2, int flags,
 			                dContactGeom *contact, int skip);
 
