@@ -1751,11 +1751,6 @@ int dCollideHeightfield( dxGeom *o1, dxGeom *o2, int flags, dContactGeom* contac
     //  aabb[6] is (minx, maxx, miny, maxy, minz, maxz) 
     const bool wrapped = terrain->m_p_data->m_bWrapMode != 0;
 
-    int nMinX;
-    int nMaxX;
-    int nMinZ;
-    int nMaxZ;
-
     if ( !wrapped )
     {
         if (    o2->aabb[0] > terrain->m_p_data->m_fWidth //MinX
@@ -1763,15 +1758,16 @@ int dCollideHeightfield( dxGeom *o1, dxGeom *o2, int flags, dContactGeom* contac
             goto dCollideHeightfieldExit;
 
         if (    o2->aabb[1] < 0 //MaxX
-            ||  o2->aabb[5] < 0) //MaxZ
+            ||  o2->aabb[5] < 0)//MaxZ
             goto dCollideHeightfieldExit;
-
     }
 
-    nMinX = int(dFloor(o2->aabb[0] * terrain->m_p_data->m_fInvSampleWidth));
-    nMaxX = int(dFloor(o2->aabb[1] * terrain->m_p_data->m_fInvSampleWidth)) + 1;
-    nMinZ = int(dFloor(o2->aabb[4] * terrain->m_p_data->m_fInvSampleDepth));
-    nMaxZ = int(dFloor(o2->aabb[5] * terrain->m_p_data->m_fInvSampleDepth)) + 1;
+	const dReal fInvSampleWidth = terrain->m_p_data->m_fInvSampleWidth;
+	int nMinX = (int)dFloor(dNextAfter(o2->aabb[0] * fInvSampleWidth, -dInfinity));
+	int nMaxX = (int)dCeil(dNextAfter(o2->aabb[1] * fInvSampleWidth, dInfinity));
+	const dReal fInvSampleDepth = terrain->m_p_data->m_fInvSampleDepth;
+    int nMinZ = (int)dFloor(dNextAfter(o2->aabb[4] * fInvSampleDepth, -dInfinity));
+    int nMaxZ = (int)dCeil(dNextAfter(o2->aabb[5] * fInvSampleDepth, dInfinity));
 
     if ( !wrapped )
     {
@@ -1780,7 +1776,7 @@ int dCollideHeightfield( dxGeom *o1, dxGeom *o2, int flags, dContactGeom* contac
         nMinZ = dMAX( nMinZ, 0 );
         nMaxZ = dMIN( nMaxZ, terrain->m_p_data->m_nDepthSamples - 1 );
 
-        dIASSERT ((nMinX < nMaxX) && (nMinZ < nMaxZ))		
+        dIASSERT ((nMinX < nMaxX) && (nMinZ < nMaxZ));
     }
 
 
