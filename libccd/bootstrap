@@ -1,6 +1,11 @@
 #!/bin/sh
 
-libtoolize -f -c
+# on Mac libtoolize is called glibtoolize
+LIBTOOLIZE=libtoolize
+if [ `uname -s` = Darwin ]; then
+    LIBTOOLIZE=glibtoolize
+fi
+$LIBTOOLIZE -f -c --automake
 aclocal
 autoheader -f
 autoconf
