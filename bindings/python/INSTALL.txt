@@ -1,0 +1,33 @@
+The following are required to build the bindings:
+1. Python 2.3* or higher (http://www.python.org/)
+2. Cython 0.14.1** or higher (http://cython.org/)
+
+* Not tested with Python versions other than 2.6
+** Not tested with Cython versions other than 0.14.1
+
+
+1a. BUILDING WITH Visual Studio (Windows)
+
+   $ python setup.py build_ext --inplace
+
+
+1b. BUILDING WITH MINGW (Windows)
+
+   $ python setup.py build_ext -c mingw32 --inplace
+
+
+1c. BUILDING WITH GCC/G++ (Linux, OS X, etc.)
+
+   $ python setup.py build_ext --inplace
+
+
+2. INSTALLATION
+
+NOTE: This is a bit of a workaround, setup.py still needs some work...
+
+First create a build\lib.<your platform> directory (e.g build\lib.win32-2.7), and copy the ode.pyd file into it, then run:
+   $ python setup.py install --skip-build
+
+
+For usage documentation, please refer to the PyODE API documentation and tutorials to be found at:
+   http://pyode.sourceforge.net
