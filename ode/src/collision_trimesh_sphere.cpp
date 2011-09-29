@@ -411,14 +411,12 @@ int dCollideSTL(dxGeom* g1, dxGeom* SphereGeom, int Flags, dContactGeom* Contact
 			Contact->depth = Depth * dirProj;
 			//Contact->depth = Radius - side; // (mg) penetration depth is distance along normal not shortest distance
 			
-			if (TriMesh->SphereContactsMergeOption != MERGE_CONTACTS_FULLY) {
-				Contact->g1 = TriMesh;
-				Contact->g2 = SphereGeom;
+			// We need to set these unconditionally, as the merging may fail! - Bram
+			Contact->g1 = TriMesh;
+			Contact->g2 = SphereGeom;
+			Contact->side2 = -1;
 
-				Contact->side2 = -1;
-			}
-
-            Contact->side1 = TriIndex;
+			Contact->side1 = TriIndex;
 
 			OutTriCount++;
 		}
@@ -439,7 +437,8 @@ int dCollideSTL(dxGeom* g1, dxGeom* SphereGeom, int Flags, dContactGeom* Contact
 					normal[0] = Contact->normal[0] * Contact->depth;
 					normal[1] = Contact->normal[1] * Contact->depth;
 					normal[2] = Contact->normal[2] * Contact->depth;
-	                
+					normal[3] = REAL(0.0);
+
 					int TriIndex = Contact->side1;
 
 					for (int i = 1; i < OutTriCount; i++){
@@ -461,14 +460,29 @@ int dCollideSTL(dxGeom* g1, dxGeom* SphereGeom, int Flags, dContactGeom* Contact
 					Contact->pos[0] = pos[0] / OutTriCount;
 					Contact->pos[1] = pos[1] / OutTriCount;
 					Contact->pos[2] = pos[2] / OutTriCount;
-					
-					// Remember to divide in square space.
-					Contact->depth = dSqrt(dCalcVectorDot3(normal, normal) / OutTriCount);
+                    
+					if ( !dSafeNormalize3(normal) )
+						return OutTriCount;	// Cannot merge in this pathological case
+                    
+					// Using a merged normal, means that for each intersection, this new normal will be less effective in solving the intersection.
+					// That is why we need to correct this by increasing the depth for each intersection.
+					// The maximum of the adjusted depths is our newly merged depth value - Bram.
 
-					if (Contact->depth > dEpsilon) { // otherwise the normal is too small
-						dVector3Copy(normal, Contact->normal);
-						dNormalize3(Contact->normal);
-					} // otherwise original Contact's normal would be used and it should be already normalized
+					dReal mergedDepth = REAL(0.0);
+					for ( int i = 0; i < OutTriCount; ++i )
+					{
+						dContactGeom* TempContact = SAFECONTACT(Flags, Contacts, i, Stride);
+						dReal effectiveness = dCalcVectorDot3(normal, TempContact->normal);
+						if ( effectiveness < dEpsilon )
+							return OutTriCount; // Cannot merge this pathological case
+						dReal adjusted = TempContact->depth / effectiveness;
+						mergedDepth = ( mergedDepth < adjusted ) ? adjusted : mergedDepth;
+					}
+					Contact->depth = mergedDepth;
+					Contact->normal[0] = normal[0];
+					Contact->normal[1] = normal[1];
+					Contact->normal[2] = normal[2];
+					Contact->normal[3] = normal[3];
 				}
 
 				return 1;
