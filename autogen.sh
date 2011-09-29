@@ -25,16 +25,17 @@
 #    fi
 #fi
 
-echo "Please make sure that you use automake 1.10 or later"
+echo "Please make sure that you use automake 1.11 or later"
+echo "On OSX, install latest libtool, as the OS provided glibtoolize will not work"
 echo "Warnings about underquoted definitions are harmless"
  
 echo "Running aclocal"
 aclocal -I . || exit 1
 # on Mac libtoolize is called glibtoolize
 LIBTOOLIZE=libtoolize
-if [ `uname -s` = Darwin ]; then
-    LIBTOOLIZE=glibtoolize
-fi
+#if [ `uname -s` = Darwin ]; then
+#    LIBTOOLIZE=glibtoolize
+#fi
 echo "Running $LIBTOOLIZE"
 $LIBTOOLIZE --copy --force --automake || exit 1
 echo "Running autoheader"
