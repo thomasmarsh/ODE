@@ -115,11 +115,7 @@ static void start()
 
 static void reset_ball(void)
 {
-  float sx=0.0f, sy=3.40f, sz=7.05;
-
-#if defined(_MSC_VER) && defined(dDOUBLE)
-  sy -= 0.01; // Cheat, to make it score under win32/double
-#endif
+  float sx=0.0f, sy=3.40f, sz=7.15;
 
   dQuaternion q;
   dQSetIdentity(q);
