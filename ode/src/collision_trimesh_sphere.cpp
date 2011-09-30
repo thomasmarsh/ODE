@@ -469,12 +469,15 @@ int dCollideSTL(dxGeom* g1, dxGeom* SphereGeom, int Flags, dContactGeom* Contact
 					// The maximum of the adjusted depths is our newly merged depth value - Bram.
 
 					dReal mergedDepth = REAL(0.0);
+					dReal minEffectiveness = REAL(0.5);
 					for ( int i = 0; i < OutTriCount; ++i )
 					{
 						dContactGeom* TempContact = SAFECONTACT(Flags, Contacts, i, Stride);
 						dReal effectiveness = dCalcVectorDot3(normal, TempContact->normal);
 						if ( effectiveness < dEpsilon )
 							return OutTriCount; // Cannot merge this pathological case
+						// Cap our adjustment for the new normal to a factor 2, meaning a 60 deg change in normal.
+						effectiveness = ( effectiveness < minEffectiveness ) ? minEffectiveness : effectiveness;
 						dReal adjusted = TempContact->depth / effectiveness;
 						mergedDepth = ( mergedDepth < adjusted ) ? adjusted : mergedDepth;
 					}
