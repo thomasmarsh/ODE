@@ -7,11 +7,8 @@ dstest_LDADD=$(top_builddir)/drawstuff/src/libdrawstuff.la \
 
 if WIN32
 resources.o: $(top_srcdir)/drawstuff/src/resources.rc $(top_srcdir)/drawstuff/src/resource.h
-	@WINDRES@ $(top_srcdir)/drawstuff/src/resources.rc -o resources.o
+	$(WINDRES) $(top_srcdir)/drawstuff/src/resources.rc -o resources.o
 
 dstest_LDADD += resources.o
 endif
 
-if X11
-dstest_LDADD+=$(X_PRE_LIBS) $(X_LIBS) $(X_EXTRA_LIBS)
-endif

@@ -8,14 +8,20 @@ the rules for this file:
   * keep the format consistent (79 char width, M/D/Y date format).
 
 ------------------------------------------------------------------------------
+10/17/11 Daniel K. O.
+        * Added python bindings, contributed by Gideon Klompje.
+        * Updated some build scripts.
+        * Changed spheres distribution in demo_space_stress.
+
 05/17/11 Oleh Derevenko
-		* A typo in step.cpp fixed (assignment operator in a conditional 
-		  instead of comparison) (reported by Bram Stolk)
+        * A typo in step.cpp fixed (assignment operator in a conditional 
+          instead of comparison) (reported by Bram Stolk)
 
 01/29/11 Oleh Derevenko
-		* Heightfield zone boundaries calculation code fixed to also consider
-		  whole next cell after the AABB if the AABB ends exactly at the cell
-		  boundary.
+        * Heightfield zone boundaries calculation code fixed to also consider
+          whole next cell after the AABB if the AABB ends exactly at the cell
+          boundary.
+
 01/23/11 Daniel K. O.
         * Applied patch from Daniel Fiser, add libccd collider for
           box-cylinder.
@@ -40,6 +46,7 @@ the rules for this file:
           which caused segmentation fault (by Kyle McKay).
           dTestSolveLCP() fixed to avoid exceeding allocated memory pool 
           (by Kyle McKay).
+
 07/19/10 Oleh Derevenko
         * Patch applied (#3030783) to fix drawstuff dimensions being ignored
           in OSX GLUT port (by Danny Price).
