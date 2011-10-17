@@ -58,8 +58,7 @@ AC_PROG_INSTALL
 AC_PROG_LN_S
 AC_PROG_MKDIR_P
 AC_DISABLE_SHARED
-AC_LIBTOOL_WIN32_DLL
-AC_PROG_LIBTOOL
+LT_INIT([disable-shared win32-dll])
 AC_CHECK_TOOLS([WINDRES], [windres])
 
 AC_C_BIGENDIAN
@@ -67,7 +66,7 @@ AC_C_INLINE
 AC_C_VOLATILE
 AC_HEADER_STDBOOL
 AC_TYPE_SIZE_T
-
+PKG_PROG_PKG_CONFIG
 
 
 dnl this may NOT be the machine on which the code is going to run in,
@@ -175,7 +174,10 @@ AC_MSG_RESULT($drawstuff)
 
 if test "x$drawstuff" = "xX11"
 then
-    AC_PATH_XTRA
+    # The built-in macro causes too many problems, these days everyone uses Xorg,
+    # so we can ask pkg-config to find it for us.
+    #AC_PATH_XTRA
+    PKG_CHECK_MODULES(X11, x11, [], [drawstuff="none"])
 fi
 
 dnl Check for OpenGL
