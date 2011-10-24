@@ -181,7 +181,7 @@ cdef class Mass:
         @type total_mass: float
         @type radius: float
         """
-        dMassSetSphere(&self._mass, total_mass, radius)
+        dMassSetSphereTotal(&self._mass, total_mass, radius)
 
     def setCapsule(self, density, direction, radius, length):
         """setCapsule(density, direction, radius, length)
