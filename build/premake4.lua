@@ -139,6 +139,7 @@
     for action in premake.action.each() do
       os.rmdir(action.trigger)
     end
+    os.remove("../ode/src/config.h")
   end
   
   -- special validation for Xcode  
@@ -352,10 +353,10 @@
 
 
 ----------------------------------------------------------------------
--- Write a custom <config.h> to src/ode, based on the supplied flags
+-- Write a custom <config.h> to build, based on the supplied flags
 ----------------------------------------------------------------------
 
-  if _ACTION then
+  if _ACTION and _ACTION ~= "clean" then
     io.input("config-default.h")
     local text = io.read("*a")
 

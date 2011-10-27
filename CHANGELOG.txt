@@ -8,6 +8,10 @@ the rules for this file:
   * keep the format consistent (79 char width, M/D/Y date format).
 
 ------------------------------------------------------------------------------
+10/27/11 Daniel K. O.
+        * Disabled merging of contacts for trimesh-sphere by default.
+        * Added new demo: demo_tracks.
+
 10/17/11 Daniel K. O.
         * Added python bindings, contributed by Gideon Klompje.
         * Updated some build scripts.
