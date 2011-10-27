@@ -340,7 +340,7 @@ void processDrawFrame(int *frame, dsFunctions *fn)
   // capture frames if necessary
   if (pausemode==0 && writeframes) {
     captureFrame (*frame);
-    *frame++;
+    (*frame)++;
   }
 }
 

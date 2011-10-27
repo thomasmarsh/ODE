@@ -40,7 +40,8 @@ noinst_PROGRAMS = \
                 demo_slider \
                 demo_space \
                 demo_space_stress \
-                demo_step
+                demo_step \
+                demo_tracks
 
 demo_boxstack_SOURCES = demo_boxstack.cpp
 demo_buggy_SOURCES = demo_buggy.cpp
@@ -72,6 +73,7 @@ demo_slider_SOURCES = demo_slider.cpp
 demo_space_SOURCES = demo_space.cpp
 demo_space_stress_SOURCES = demo_space_stress.cpp
 demo_step_SOURCES = demo_step.cpp
+demo_tracks_SOURCES = demo_tracks.cpp
 
 
 if TRIMESH

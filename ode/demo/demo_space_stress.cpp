@@ -411,15 +411,18 @@ int main (int argc, char **argv)
   dInitODE2(0);
   world = dWorldCreate();
 
-
+#if 0
   dVector3 Center = {0, 0, 0, 0};
   dVector3 Extents = {WORLD_SIZE * 0.55, WORLD_SIZE * 0.55, WORLD_SIZE * 0.55, 0};
-
-  //space = dSimpleSpaceCreate(0);
-  //space = dHashSpaceCreate (0);
-  //space = dQuadTreeSpaceCreate (0, Center, Extents, 6);
+  space = dQuadTreeSpaceCreate (0, Center, Extents, 6);
+#elif 1
+  space = dHashSpaceCreate (0);
+#elif 0
   space = dSweepAndPruneSpaceCreate (0, dSAP_AXES_XYZ);
-  
+#else
+  space = dSimpleSpaceCreate(0);
+#endif
+
   contactgroup = dJointGroupCreate (0);
   dWorldSetGravity (world,0,0,-0.5);
   dWorldSetCFM (world,1e-5);

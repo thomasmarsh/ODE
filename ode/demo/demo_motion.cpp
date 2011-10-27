@@ -468,11 +468,17 @@ int main (int argc, char **argv)
     // create world
     dInitODE();
     world = dWorldCreate();
-    //space = dHashSpaceCreate (0);
+
+#if 1
+    space = dHashSpaceCreate (0);
+#elif 0
     dVector3 center = {0,0,0}, extents = { 100, 100, 100};
-    //space = dQuadTreeSpaceCreate(0, center, extents, 5);
-    //space = dSimpleSpaceCreate(0);
+    space = dQuadTreeSpaceCreate(0, center, extents, 5);
+#elif 0
     space = dSweepAndPruneSpaceCreate (0, dSAP_AXES_XYZ);
+#else
+    space = dSimpleSpaceCreate(0);
+#endif
 
     contactgroup = dJointGroupCreate (0);
     dWorldSetGravity (world,0,0,-0.5);
