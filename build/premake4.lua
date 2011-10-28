@@ -44,6 +44,7 @@
     "cyl",
     "moving_trimesh",
     "trimesh",
+    "tracks"
   }
   
   if not _OPTIONS["no-trimesh"] then
