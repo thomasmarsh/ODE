@@ -113,19 +113,19 @@ void
 simLoop(int pause)
 {
     if (!pause) {
-        const dReal timestep = 0.02;
+        const dReal timestep = 0.04;
 
         // this does a hard-coded circular motion animation
         static float t=0;
         t += timestep/4;
         if (t > 2*M_PI)
             t = 0;
-        dReal px = cos(t);
-        dReal py = sin(t);
-        dReal vx = -sin(t)/4;
-        dReal vy = cos(t)/4;
-        kbody->setPosition(px, py, .5);
-        kbody->setLinearVel(vx, vy, 0);
+        dVector3 next_pos = { cos(t), sin(t), 0.5};
+        dVector3 vel;
+        // vel = (next_pos - cur_pos) / timestep
+        dSubtractVectors3(vel, next_pos, kbody->getPosition());
+        dScaleVector3(vel, 1/timestep);
+        kbody->setLinearVel(vel);
         // end of hard-coded animation
         
         space->collide(0, nearCallback);
