@@ -8,6 +8,9 @@ the rules for this file:
   * keep the format consistent (79 char width, M/D/Y date format).
 
 ------------------------------------------------------------------------------
+11/04/11 Daniel K. O.
+        * Applied patch #3429454 - fix compilation on some platforms.
+
 10/28/11 Daniel K. O.
         * Fixed a box-capsule bug: more reasonable normal for deep penetrations
           (contributed by Georg Martius.)
