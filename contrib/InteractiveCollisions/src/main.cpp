@@ -73,6 +73,7 @@ Color left_fill,
     right_fill,
     right_wire,
     contact_p,
+    contact_d,
     contact_n;
 
 
@@ -626,6 +627,31 @@ void TW_CALL reset_camera(void*)
     cam.right[2] = 0;
 }
 
+void TW_CALL reset_geoms(void*)
+{
+    choose_left_geom(Sphere);
+    choose_right_geom(Sphere);
+    left_x = -1;
+    left_y = 0;
+    left_z = 0;
+    right_x = 1;
+    right_y = 0;
+    right_z = 0;
+    left_quat[0] = 1;
+    left_quat[1] = 0;
+    left_quat[2] = 0;
+    left_quat[3] = 0;
+    right_quat[0] = 1;
+    right_quat[1] = 0;
+    right_quat[2] = 0;
+    right_quat[3] = 0;
+
+    left_update_position();
+    left_update_quat();
+    right_update_position();
+    right_update_quat();
+}
+
 
 
 
@@ -635,7 +661,7 @@ void init_ui()
     TwBar *bar = TwNewBar("Controls");
 
     TwAddButton(bar, "ResetCamera", reset_camera, 0, "label='Reset camera'");
-
+    TwAddButton(bar, "ResetGeoms", reset_geoms, 0, "label='Reset geoms'");
 
     TwType gtype = TwDefineEnumFromString("GeomType", "Sphere,Box,Capsule");
 
@@ -864,7 +890,7 @@ void draw_geom(dGeomID geom, Color fill, Color wire)
 }
 
 
-void draw_contact(const dContactGeom& c, Color p, Color d)
+void draw_contact(const dContactGeom& c, Color p, Color d, Color n)
 {
     glPointSize(5);
     glBegin(GL_POINTS);
@@ -874,11 +900,20 @@ void draw_contact(const dContactGeom& c, Color p, Color d)
 
     const float scale = c.depth;
     
-    glLineWidth(2);
+    glLineWidth(3);
     glBegin(GL_LINES);
     glColor4f(d.r, d.g, d.b, d.a);
     glVertex3f(c.pos[0], c.pos[1], c.pos[2]);
     glVertex3f(c.pos[0]+c.normal[0]*scale, c.pos[1]+c.normal[1]*scale, c.pos[2]+c.normal[2]*scale);
+    glEnd();
+
+    const float cscale = cam.dist() * 0.125;
+
+    glLineWidth(1);
+    glBegin(GL_LINES);
+    glColor4f(n.r, n.g, n.b, n.a);
+    glVertex3f(c.pos[0], c.pos[1], c.pos[2]);
+    glVertex3f(c.pos[0]+c.normal[0]*cscale, c.pos[1]+c.normal[1]*cscale, c.pos[2]+c.normal[2]*cscale);
     glEnd();
 }
 
@@ -893,7 +928,7 @@ void draw_contacts()
     
     int n = dCollide(left_geom, right_geom, max_contacts, &dg[0], sizeof(dContactGeom));
     for (int i=0; i<n; ++i)
-        draw_contact(dg[i], contact_p, contact_n);
+        draw_contact(dg[i], contact_p, contact_d, contact_n);
 }
 
 
@@ -923,15 +958,14 @@ int main(int argc, char **argv)
     init_ui();
 
     reset_camera(0);
-
-    choose_left_geom(Sphere);
-    choose_right_geom(Sphere);
+    reset_geoms(0);
 
     left_fill = Color(1, 0, 0, 0.125);
     left_wire = Color(1, 0, 0, 0.25);
     right_fill = Color(0, 1, 0, 0.125);
     right_wire = Color(0, 1, 0, 0.25);
     contact_p = Color(1, 1, 0, 1);
+    contact_d = Color(.5, .5, 0, 1);
     contact_n = Color(0, 0, 1, 1);
 
     dInitODE();
