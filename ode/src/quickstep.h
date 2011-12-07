@@ -26,11 +26,11 @@
 #include <ode/common.h>
 
 size_t dxEstimateQuickStepMemoryRequirements (
-  dxBody * const *body, int nb, dxJoint * const *_joint, int _nj);
+  dxBody * const *body, unsigned int nb, dxJoint * const *_joint, unsigned int _nj);
 
 void dxQuickStepper (dxWorldProcessContext *context,
-        dxWorld *world, dxBody * const *body, int nb,
-		    dxJoint * const *_joint, int _nj, dReal stepsize);
+        dxWorld *world, dxBody * const *body, unsigned int nb,
+		    dxJoint * const *_joint, unsigned int _nj, dReal stepsize);
 
 
 #endif

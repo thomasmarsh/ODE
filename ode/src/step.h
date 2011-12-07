@@ -26,11 +26,11 @@
 #include <ode/common.h>
 
 size_t dxEstimateStepMemoryRequirements (
-  dxBody * const *body, int nb, dxJoint * const *_joint, int _nj);
+  dxBody * const *body, unsigned int nb, dxJoint * const *_joint, unsigned int _nj);
 
 void dInternalStepIsland (dxWorldProcessContext *context, dxWorld *world,
-			  dxBody * const *body, int nb,
-			  dxJoint * const *joint, int nj,
+			  dxBody * const *body, unsigned int nb,
+			  dxJoint * const *joint, unsigned int nj,
 			  dReal stepsize);
 
 

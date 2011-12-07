@@ -187,8 +187,8 @@ struct dxWorldProcessContext
 
   void CleanupContext();
 
-  void SavePreallocations(int islandcount, int const *islandsizes, dxBody *const *bodies, dxJoint *const *joints);
-  void RetrievePreallocations(int &islandcount, int const *&islandsizes, dxBody *const *&bodies, dxJoint *const *&joints);
+  void SavePreallocations(size_t islandcount, unsigned int const *islandsizes, dxBody *const *bodies, dxJoint *const *joints);
+  void RetrievePreallocations(size_t &islandcount, unsigned int const *&islandsizes, dxBody *const *&bodies, dxJoint *const *&joints);
   void OffsetPreallocations(size_t stOffset);
   void CopyPreallocations(const dxWorldProcessContext *othercontext);
   void ClearPreallocations();
@@ -202,8 +202,8 @@ struct dxWorldProcessContext
   void *m_pAllocCurrent;
   void *m_pArenaBegin;
 
-  int m_IslandCount;
-  int const *m_pIslandSizes;
+  size_t m_IslandCount;
+  unsigned int const *m_pIslandSizes;
   dxBody *const *m_pBodies;
   dxJoint *const *m_pJoints;
 
@@ -217,14 +217,14 @@ struct dxWorldProcessContext
 #define END_STATE_SAVE(context, state) context->RestoreState(state)
 
 typedef void (*dstepper_fn_t) (dxWorldProcessContext *context, 
-        dxWorld *world, dxBody * const *body, int nb,
-        dxJoint * const *_joint, int _nj, dReal stepsize);
+        dxWorld *world, dxBody * const *body, unsigned int nb,
+        dxJoint * const *_joint, unsigned int _nj, dReal stepsize);
 
 void dxProcessIslands (dxWorld *world, dReal stepsize, dstepper_fn_t stepper);
 
 
-typedef size_t (*dmemestimate_fn_t) (dxBody * const *body, int nb, 
-  dxJoint * const *_joint, int _nj);
+typedef size_t (*dmemestimate_fn_t) (dxBody * const *body, unsigned int nb, 
+  dxJoint * const *_joint, unsigned int _nj);
 
 bool dxReallocateWorldProcessContext (dxWorld *world, 
   dReal stepsize, dmemestimate_fn_t stepperestimate);
