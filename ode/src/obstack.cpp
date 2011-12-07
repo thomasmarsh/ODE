@@ -61,9 +61,9 @@ dObStack::~dObStack()
 }
 
 
-void *dObStack::alloc (int num_bytes)
+void *dObStack::alloc (size_t num_bytes)
 {
-  if ((size_t)num_bytes > MAX_ALLOC_SIZE) dDebug (0,"num_bytes too large");
+  if (num_bytes > MAX_ALLOC_SIZE) dDebug (0,"num_bytes too large");
 
   // allocate or move to a new arena if necessary
   if (!first) {
@@ -116,7 +116,7 @@ void *dObStack::rewind()
 }
 
 
-void *dObStack::next (int num_bytes)
+void *dObStack::next (size_t num_bytes)
 {
   // this functions like alloc, except that no new storage is ever allocated
   if (!current_arena) return 0;

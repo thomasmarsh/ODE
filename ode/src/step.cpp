@@ -50,17 +50,15 @@
 // this assumes the 4th and 8th rows of B and C are zero.
 
 static void Multiply2_p8r (dReal *A, const dReal *B, const dReal *C,
-                           int p, int r, int Askip)
+                           unsigned int p, unsigned int r, int Askip)
 {
   dIASSERT (p>0 && r>0 && A && B && C);
   const int Askip_munus_r = Askip - r;
   dReal *aa = A;
   const dReal *bb = B;
-  int i;
-  for (i=p; i; --i) {
+  for (unsigned int i = p; i != 0; --i) {
     const dReal *cc = C;
-    int j;
-    for (j=r; j; --j) {
+    for (unsigned int j = r; j != 0; --j) {
       dReal sum;
       sum  = bb[0]*cc[0];
       sum += bb[1]*cc[1];
@@ -80,17 +78,16 @@ static void Multiply2_p8r (dReal *A, const dReal *B, const dReal *C,
 // this assumes the 4th and 8th rows of B and C are zero.
 
 static void MultiplyAdd2_p8r (dReal *A, const dReal *B, const dReal *C,
-                              int p, int r, int Askip)
+                              unsigned int p, unsigned int r, unsigned int Askip)
 {
   dIASSERT (p>0 && r>0 && A && B && C);
-  const int Askip_munus_r = Askip - r;
+  const unsigned int Askip_munus_r = Askip - r;
+  dIASSERT(Askip >= r);
   dReal *aa = A;
   const dReal *bb = B;
-  int i;
-  for (i=p; i; --i) {
+  for (unsigned int i = p; i != 0; --i) {
     const dReal *cc = C;
-    int j;
-    for (j=r; j; --j) {
+    for (unsigned int j = r; j != 0; --j) {
       dReal sum;
       sum  = bb[0]*cc[0];
       sum += bb[1]*cc[1];
@@ -109,13 +106,12 @@ static void MultiplyAdd2_p8r (dReal *A, const dReal *B, const dReal *C,
 
 // this assumes the 4th and 8th rows of B are zero.
 
-static void MultiplySub0_p81 (dReal *A, const dReal *B, const dReal *C, int p)
+static void MultiplySub0_p81 (dReal *A, const dReal *B, const dReal *C, unsigned int p)
 {
   dIASSERT (p>0 && A && B && C);
   dReal *aa = A;
   const dReal *bb = B;
-  int i;
-  for (i=p; i; --i) {
+  for (unsigned int i = p; i != 0; --i) {
     dReal sum;
     sum  = bb[0]*C[0];
     sum += bb[1]*C[1];
@@ -131,13 +127,12 @@ static void MultiplySub0_p81 (dReal *A, const dReal *B, const dReal *C, int p)
 
 // this assumes the 4th and 8th rows of B are zero.
 
-static void MultiplyAdd1_8q1 (dReal *A, const dReal *B, const dReal *C, int q)
+static void MultiplyAdd1_8q1 (dReal *A, const dReal *B, const dReal *C, unsigned int q)
 {
   dIASSERT (q>0 && A && B && C);
   const dReal *bb = B;
   dReal sum0 = 0, sum1 = 0, sum2 = 0, sum4=0, sum5 = 0, sum6 = 0;
-  int k;
-  for (k=0; k<q; ++k) {
+  for (unsigned int k = 0; k < q; ++k) {
     const dReal C_k = C[k];
     sum0 += bb[0] * C_k;
     sum1 += bb[1] * C_k;
@@ -158,12 +153,11 @@ static void MultiplyAdd1_8q1 (dReal *A, const dReal *B, const dReal *C, int q)
 
 // this assumes the 4th and 8th rows of B are zero.
 
-static void Multiply1_8q1 (dReal *A, const dReal *B, const dReal *C, int q)
+static void Multiply1_8q1 (dReal *A, const dReal *B, const dReal *C, unsigned int q)
 {
   const dReal *bb = B;
   dReal sum0 = 0, sum1 = 0, sum2 = 0, sum4=0, sum5 = 0, sum6 = 0;
-  int k;
-  for (k=0; k<q; ++k) {
+  for (unsigned int k = 0; k < q; ++k) {
     const dReal C_k = C[k];
     sum0 += bb[0] * C_k;
     sum1 += bb[1] * C_k;
@@ -190,9 +184,9 @@ struct dJointWithInfo1
   dxJoint::Info1 info;
 };
 
-void dInternalStepIsland_x2 (dxWorldProcessContext *context, 
-                             dxWorld *world, dxBody * const *body, int nb,
-                             dxJoint * const *_joint, int _nj, dReal stepsize)
+static void dInternalStepIsland_x2 (dxWorldProcessContext *context, 
+                             dxWorld *world, dxBody * const *body, unsigned int nb,
+                             dxJoint * const *_joint, unsigned int _nj, dReal stepsize)
 {
   IFTIMING(dTimerStart("preprocessing"));
 
@@ -200,7 +194,7 @@ void dInternalStepIsland_x2 (dxWorldProcessContext *context,
 
   {
     // number all bodies in the body list - set their tag values
-    int i;
+    unsigned int i;
     for (i=0; i<nb; ++i) body[i]->tag = i;
   }
 
@@ -209,7 +203,7 @@ void dInternalStepIsland_x2 (dxWorldProcessContext *context,
   // accumulator. invI are vertically stacked 3x4 matrices, one per body.
   // @@@ check computation of rotational force.
 
-  dReal *invI = context->AllocateArray<dReal> (3*4*nb);
+  dReal *invI = context->AllocateArray<dReal> (3*4*(size_t)nb);
 
   { // Identical to QuickStep
     dReal *invIrow = invI;
@@ -282,12 +276,13 @@ void dInternalStepIsland_x2 (dxWorldProcessContext *context,
 
   // Reserve twice as much memory and start from the middle so that regardless of 
   // what direction the array grows to there would be sufficient room available.
-  const size_t ji_reserve_count = 2 * _nj;
+  const size_t ji_reserve_count = 2 * (size_t)_nj;
   dJointWithInfo1 *jointiinfos = context->AllocateArray<dJointWithInfo1> (ji_reserve_count);
-  int nub, ji_start, ji_end;
+  unsigned int nub;
+  size_t ji_start, ji_end;
 
   {
-    int unb_start, mix_start, mix_end, lcp_end;
+    size_t unb_start, mix_start, mix_end, lcp_end;
     unb_start = mix_start = mix_end = lcp_end = _nj;
 
     dJointWithInfo1 *jicurr = jointiinfos + lcp_end;
@@ -401,24 +396,26 @@ void dInternalStepIsland_x2 (dxWorldProcessContext *context,
       }
     }
     
-    nub = mix_start - unb_start;
+    nub = (unsigned)(mix_start - unb_start);
+    dIASSERT((size_t)(mix_start - unb_start) <= (size_t)UINT_MAX);
     ji_start = unb_start;
     ji_end = lcp_end;
   }
 
   context->ShrinkArray<dJointWithInfo1>(jointiinfos, ji_reserve_count, ji_end);
   jointiinfos += ji_start;
-  int nj = ji_end - ji_start;
+  unsigned int nj = (unsigned int)(ji_end - ji_start);
+  dIASSERT((size_t)(ji_end - ji_start) <= (size_t)UINT_MAX);
 
-  int m = 0;
+  unsigned int m = 0;
 
   {
-    int mcurr = 0;
+    unsigned int mcurr = 0;
     const dJointWithInfo1 *jicurr = jointiinfos;
     const dJointWithInfo1 *const jiend = jicurr + nj;
-    for (int i = 0; jicurr != jiend; i++, ++jicurr) {
+    for (unsigned int i = 0; jicurr != jiend; i++, ++jicurr) {
       jicurr->joint->tag = i;
-      int jm = jicurr->info.m;
+      unsigned int jm = jicurr->info.m;
       mcurr += jm;
     }
 
@@ -426,8 +423,8 @@ void dInternalStepIsland_x2 (dxWorldProcessContext *context,
   }
 
   // this will be set to the force due to the constraints
-  dReal *cforce = context->AllocateArray<dReal> (nb*8);
-  dSetZero (cforce,nb*8);
+  dReal *cforce = context->AllocateArray<dReal> ((size_t)nb*8);
+  dSetZero (cforce,(size_t)nb*8);
 
   // if there are constraints, compute cforce
   if (m > 0) {
@@ -438,7 +435,7 @@ void dInternalStepIsland_x2 (dxWorldProcessContext *context,
     int *findex;
 
     {
-      int mlocal = m;
+      unsigned int mlocal = m;
 
       lo = context->AllocateArray<dReal> (mlocal);
       dSetValue (lo,mlocal,-dInfinity);
@@ -446,15 +443,15 @@ void dInternalStepIsland_x2 (dxWorldProcessContext *context,
       hi = context->AllocateArray<dReal> (mlocal);
       dSetValue (hi,mlocal, dInfinity);
 
-      J = context->AllocateArray<dReal> (2*8*mlocal);
-      dSetZero (J,2*8*mlocal);
+      J = context->AllocateArray<dReal> (2*8*(size_t)mlocal);
+      dSetZero (J,2*8*(size_t)mlocal);
 
       findex = context->AllocateArray<int> (mlocal);
-      for (int i=0; i<mlocal; ++i) findex[i] = -1;
+      for (unsigned int i=0; i<mlocal; ++i) findex[i] = -1;
 
-      int mskip = dPAD(mlocal);
-      A = context->AllocateArray<dReal> (mlocal*mskip);
-      dSetZero (A,mlocal*mskip);
+      unsigned int mskip = dPAD(mlocal);
+      A = context->AllocateArray<dReal> (mlocal*(size_t)mskip);
+      dSetZero (A,mlocal*(size_t)mskip);
 
       rhs = context->AllocateArray<dReal> (mlocal);
       dSetZero (rhs,mlocal);
@@ -467,8 +464,8 @@ void dInternalStepIsland_x2 (dxWorldProcessContext *context,
       dReal *cfm = context->AllocateArray<dReal> (m);
       dSetValue (cfm,m,world->global_cfm);
 
-      dReal *JinvM = context->AllocateArray<dReal> (2*8*m);
-      dSetZero (JinvM,2*8*m);
+      dReal *JinvM = context->AllocateArray<dReal> (2*8*(size_t)m);
+      dSetZero (JinvM,2*8*(size_t)m);
 
       {
         IFTIMING(dTimerNow ("create J"));
@@ -499,11 +496,11 @@ void dInternalStepIsland_x2 (dxWorldProcessContext *context,
         const dJointWithInfo1 *jicurr = jointiinfos;
         const dJointWithInfo1 *const jiend = jicurr + nj;
         for (; jicurr != jiend; ++jicurr) {
-          const int infom = jicurr->info.m;
-          dReal *const J1row = J + 2*8*ofsi;
+          const unsigned int infom = jicurr->info.m;
+          dReal *const J1row = J + 2*8*(size_t)ofsi;
           Jinfo.J1l = J1row;
           Jinfo.J1a = J1row + 4;
-          dReal *const J2row = J1row + 8*infom;
+          dReal *const J2row = J1row + 8*(size_t)infom;
           Jinfo.J2l = J2row;
           Jinfo.J2a = J2row + 4;
           Jinfo.c = c + ofsi;
@@ -517,9 +514,9 @@ void dInternalStepIsland_x2 (dxWorldProcessContext *context,
           
           // adjust returned findex values for global index numbering
           int *findex_ofsi = findex + ofsi;
-          for (int j=0; j<infom; ++j) {
+          for (unsigned int j=0; j<infom; ++j) {
             int fival = findex_ofsi[j];
-            if (fival >= 0) 
+            if (fival != -1) 
               findex_ofsi[j] = fival + ofsi;
           }
 
@@ -537,26 +534,28 @@ void dInternalStepIsland_x2 (dxWorldProcessContext *context,
           const dJointWithInfo1 *jicurr = jointiinfos;
           const dJointWithInfo1 *const jiend = jicurr + nj;
           for (; jicurr != jiend; ++jicurr) {
-            const int infom = jicurr->info.m;
+            const unsigned int infom = jicurr->info.m;
             dxJoint *joint = jicurr->joint;
-            int b0 = joint->node[0].body->tag;
+            unsigned int b0 = joint->node[0].body->tag;
             dReal body_invMass0 = body[b0]->invMass;
-            dReal *body_invI0 = invI + b0*12;
-            dReal *Jsrc = J + 2*8*ofsi;
-            dReal *Jdst = JinvM + 2*8*ofsi;
-            for (int j=infom-1; j>=0; --j) {
-              for (int k=0; k<3; ++k) Jdst[k] = Jsrc[k] * body_invMass0;
+            dReal *body_invI0 = invI + (size_t)b0*12;
+            dReal *Jsrc = J + 2*8*(size_t)ofsi;
+            dReal *Jdst = JinvM + 2*8*(size_t)ofsi;
+            for (unsigned int j=infom; j>0;) {
+              j -= 1;
+              for (unsigned int k=0; k<3; ++k) Jdst[k] = Jsrc[k] * body_invMass0;
               dMultiply0_133 (Jdst+4,Jsrc+4,body_invI0);
               Jsrc += 8;
               Jdst += 8;
             }
 
             if (joint->node[1].body) {
-              int b1 = joint->node[1].body->tag;
+              unsigned int b1 = joint->node[1].body->tag;
               dReal body_invMass1 = body[b1]->invMass;
-              dReal *body_invI1 = invI + b1*12;
-              for (int j=infom-1; j>=0; --j) {
-                for (int k=0; k<3; ++k) Jdst[k] = Jsrc[k] * body_invMass1;
+              dReal *body_invI1 = invI + (size_t)b1*12;
+              for (unsigned int j=infom; j>0; ) {
+                j -= 1;
+                for (unsigned int k=0; k<3; ++k) Jdst[k] = Jsrc[k] * body_invMass1;
                 dMultiply0_133 (Jdst+4,Jsrc+4,body_invI1);
                 Jsrc += 8;
                 Jdst += 8;
@@ -573,30 +572,30 @@ void dInternalStepIsland_x2 (dxWorldProcessContext *context,
           // if joints i and j have at least one body in common. 
 
           BEGIN_STATE_SAVE(context, ofsstate) {
-            int *ofs = context->AllocateArray<int> (m);
-            const int mskip = dPAD(m);
+            unsigned int *ofs = context->AllocateArray<unsigned int> (m);
+            const unsigned int mskip = dPAD(m);
 
             unsigned ofsi = 0;
             const dJointWithInfo1 *jicurr = jointiinfos;
             const dJointWithInfo1 *const jiend = jicurr + nj;
-            for (int i = 0; jicurr != jiend; i++, ++jicurr) {
-              const int infom = jicurr->info.m;
+            for (unsigned int i = 0; jicurr != jiend; i++, ++jicurr) {
+              const unsigned int infom = jicurr->info.m;
               dxJoint *joint = jicurr->joint;
 
-              dReal *Arow = A + mskip*ofsi;
-              dReal *JinvMrow = JinvM + 2*8*ofsi;
+              dReal *Arow = A + mskip*(size_t)ofsi;
+              dReal *JinvMrow = JinvM + 2*8*(size_t)ofsi;
 
               dxBody *jb0 = joint->node[0].body;
               for (dxJointNode *n0=jb0->firstjoint; n0; n0=n0->next) {
                 // if joint was tagged as -1 then it is an inactive (m=0 or disabled)
                 // joint that should not be considered
                 int j0 = n0->joint->tag;
-                if (/*j0 != -1 && j0 < i*/ (unsigned)j0 < (unsigned)i) {
+                if (j0 != -1 && (unsigned)j0 < i) {
                   const dJointWithInfo1 *jiother = jointiinfos + j0;
-                  int ofsother = (jiother->joint->node[1].body == jb0) ? 8*jiother->info.m : 0;
+                  size_t ofsother = (jiother->joint->node[1].body == jb0) ? 8*(size_t)jiother->info.m : 0;
                   // set block of A
                   MultiplyAdd2_p8r (Arow + ofs[j0], JinvMrow, 
-                    J + 2*8*ofs[j0] + ofsother, infom, jiother->info.m, mskip);
+                    J + 2*8*(size_t)ofs[j0] + ofsother, infom, jiother->info.m, mskip);
                 }
               }
 
@@ -608,12 +607,12 @@ void dInternalStepIsland_x2 (dxWorldProcessContext *context,
                   // if joint was tagged as -1 then it is an inactive (m=0 or disabled)
                   // joint that should not be considered
                   int j1 = n1->joint->tag;
-                  if (/*j1 != -1 && j1 < i*/ (unsigned)j1 < (unsigned)i) {
+                  if (j1 != -1 && (unsigned)j1 < i) {
                     const dJointWithInfo1 *jiother = jointiinfos + j1;
-                    int ofsother = (jiother->joint->node[1].body == jb1) ? 8*jiother->info.m : 0;
+                    size_t ofsother = (jiother->joint->node[1].body == jb1) ? 8*(size_t)jiother->info.m : 0;
                     // set block of A
-                    MultiplyAdd2_p8r (Arow + ofs[j1], JinvMrow + 8*infom, 
-                      J + 2*8*ofs[j1] + ofsother, infom, jiother->info.m, mskip);
+                    MultiplyAdd2_p8r (Arow + ofs[j1], JinvMrow + 8*(size_t)infom, 
+                      J + 2*8*(size_t)ofs[j1] + ofsother, infom, jiother->info.m, mskip);
                   }
                 }
               }
@@ -627,19 +626,19 @@ void dInternalStepIsland_x2 (dxWorldProcessContext *context,
 
         {
           // compute diagonal blocks of A
-          const int mskip = dPAD(m);
+          const unsigned int mskip = dPAD(m);
 
           unsigned ofsi = 0;
           const dJointWithInfo1 *jicurr = jointiinfos;
           const dJointWithInfo1 *const jiend = jicurr + nj;
           for (; jicurr != jiend; ++jicurr) {
-            const int infom = jicurr->info.m;
-            dReal *Arow = A + (mskip+1)*ofsi;
-            dReal *JinvMrow = JinvM + 2*8*ofsi;
-            dReal *Jrow = J + 2*8*ofsi;
+            const unsigned int infom = jicurr->info.m;
+            dReal *Arow = A + (mskip+1)*(size_t)ofsi;
+            dReal *JinvMrow = JinvM + 2*8*(size_t)ofsi;
+            dReal *Jrow = J + 2*8*(size_t)ofsi;
             Multiply2_p8r (Arow, JinvMrow, Jrow, infom, infom, mskip);
             if (jicurr->joint->node[1].body) {
-              MultiplyAdd2_p8r (Arow, JinvMrow + 8*infom, Jrow + 8*infom, infom, infom, mskip);
+              MultiplyAdd2_p8r (Arow, JinvMrow + 8*(size_t)infom, Jrow + 8*(size_t)infom, infom, infom, mskip);
             }
 
             ofsi += infom;
@@ -648,10 +647,10 @@ void dInternalStepIsland_x2 (dxWorldProcessContext *context,
 
         {
           // add cfm to the diagonal of A
-          const int mskip = dPAD(m);
+          const unsigned int mskip = dPAD(m);
 
           dReal *Arow = A;
-          for (int i=0; i<m; Arow += mskip, ++i) {
+          for (unsigned int i=0; i<m; Arow += mskip, ++i) {
             Arow[i] += cfm[i] * stepsizeRecip;
           }
         }
@@ -663,7 +662,7 @@ void dInternalStepIsland_x2 (dxWorldProcessContext *context,
       // compute the right hand side `rhs'
       IFTIMING(dTimerNow ("compute rhs"));
 
-      dReal *tmp1 = context->AllocateArray<dReal> (nb*8);
+      dReal *tmp1 = context->AllocateArray<dReal> ((size_t)nb*8);
       //dSetZero (tmp1,nb*8);
 
       {
@@ -673,16 +672,16 @@ void dInternalStepIsland_x2 (dxWorldProcessContext *context,
         dxBody *const *const bodyend = body + nb;
         for (dxBody *const *bodycurr = body; bodycurr != bodyend; tmp1curr+=8, invIrow+=12, ++bodycurr) {
           dxBody *b = *bodycurr;
-          for (int j=0; j<3; ++j) tmp1curr[j] = b->facc[j]*b->invMass + b->lvel[j]*stepsizeRecip;
+          for (unsigned int j=0; j<3; ++j) tmp1curr[j] = b->facc[j]*b->invMass + b->lvel[j]*stepsizeRecip;
           dMultiply0_331 (tmp1curr+4, invIrow, b->tacc);
-          for (int k=0; k<3; ++k) tmp1curr[4+k] += b->avel[k]*stepsizeRecip;
+          for (unsigned int k=0; k<3; ++k) tmp1curr[4+k] += b->avel[k]*stepsizeRecip;
         }
       }
 
       {
         // init rhs -- this erases 'c' as they reside in the same memory!!!
         rhs = c;
-        for (int i=0; i<m; ++i) rhs[i] = c[i]*stepsizeRecip;
+        for (unsigned int i=0; i<m; ++i) rhs[i] = c[i]*stepsizeRecip;
         c = NULL; // set 'c' to NULL to prevent unexpected access
       }
 
@@ -692,14 +691,14 @@ void dInternalStepIsland_x2 (dxWorldProcessContext *context,
         const dJointWithInfo1 *jicurr = jointiinfos;
         const dJointWithInfo1 *const jiend = jicurr + nj;
         for (; jicurr != jiend; ++jicurr) {
-          const int infom = jicurr->info.m;
+          const unsigned int infom = jicurr->info.m;
           dxJoint *joint = jicurr->joint;
 
           dReal *rhscurr = rhs+ofsi;
-          const dReal *Jrow = J + 2*8*ofsi;
-          MultiplySub0_p81 (rhscurr, Jrow, tmp1 + 8*joint->node[0].body->tag, infom);
+          const dReal *Jrow = J + 2*8*(size_t)ofsi;
+          MultiplySub0_p81 (rhscurr, Jrow, tmp1 + 8*(size_t)(unsigned)joint->node[0].body->tag, infom);
           if (joint->node[1].body) {
-            MultiplySub0_p81 (rhscurr, Jrow + 8*infom, tmp1 + 8*joint->node[1].body->tag, infom);
+            MultiplySub0_p81 (rhscurr, Jrow + 8*(size_t)infom, tmp1 + 8*(size_t)(unsigned)joint->node[1].body->tag, infom);
           }
 
           ofsi += infom;
@@ -727,10 +726,10 @@ void dInternalStepIsland_x2 (dxWorldProcessContext *context,
       const dJointWithInfo1 *jicurr = jointiinfos;
       const dJointWithInfo1 *const jiend = jicurr + nj;
       for (; jicurr != jiend; ++jicurr) {
-        const int infom = jicurr->info.m;
+        const unsigned int infom = jicurr->info.m;
         dxJoint *joint = jicurr->joint;
         
-        const dReal *JJ = J + 2*8*ofsi;
+        const dReal *JJ = J + 2*8*(size_t)ofsi;
         const dReal *lambdarow = lambda + ofsi;
 
         dJointFeedback *fb = joint->feedback;
@@ -744,7 +743,7 @@ void dInternalStepIsland_x2 (dxWorldProcessContext *context,
           Multiply1_8q1 (data, JJ, lambdarow, infom);
 
           dxBody* b1 = joint->node[0].body;
-          dReal *cf1 = cforce + 8*b1->tag;
+          dReal *cf1 = cforce + 8*(size_t)(unsigned)b1->tag;
           cf1[0] += (fb->f1[0] = data[0]);
           cf1[1] += (fb->f1[1] = data[1]);
           cf1[2] += (fb->f1[2] = data[2]);
@@ -754,9 +753,9 @@ void dInternalStepIsland_x2 (dxWorldProcessContext *context,
 
           dxBody* b2 = joint->node[1].body;
           if (b2){
-            Multiply1_8q1 (data, JJ + 8*infom, lambdarow, infom);
+            Multiply1_8q1 (data, JJ + 8*(size_t)infom, lambdarow, infom);
 
-            dReal *cf2 = cforce + 8*b2->tag;
+            dReal *cf2 = cforce + 8*(size_t)(unsigned)b2->tag;
             cf2[0] += (fb->f2[0] = data[0]);
             cf2[1] += (fb->f2[1] = data[1]);
             cf2[2] += (fb->f2[2] = data[2]);
@@ -768,13 +767,13 @@ void dInternalStepIsland_x2 (dxWorldProcessContext *context,
         else {
           // no feedback is required, let's compute cforce the faster way
           dxBody* b1 = joint->node[0].body;
-          dReal *cf1 = cforce + 8*b1->tag;
+          dReal *cf1 = cforce + 8*(size_t)(unsigned)b1->tag;
           MultiplyAdd1_8q1 (cf1, JJ, lambdarow, infom);
           
           dxBody* b2 = joint->node[1].body;
           if (b2) {
-            dReal *cf2 = cforce + 8*b2->tag;
-            MultiplyAdd1_8q1 (cf2, JJ + 8*infom, lambdarow, infom);
+            dReal *cf2 = cforce + 8*(size_t)(unsigned)b2->tag;
+            MultiplyAdd1_8q1 (cf2, JJ + 8*(size_t)infom, lambdarow, infom);
           }
         }
 
@@ -796,9 +795,9 @@ void dInternalStepIsland_x2 (dxWorldProcessContext *context,
       dxBody *b = *bodycurr;
 
       dReal body_invMass_mul_stepsize = stepsize * b->invMass;
-      for (int j=0; j<3; ++j) b->lvel[j] += (cforcecurr[j] + b->facc[j]) * body_invMass_mul_stepsize;
+      for (unsigned int j=0; j<3; ++j) b->lvel[j] += (cforcecurr[j] + b->facc[j]) * body_invMass_mul_stepsize;
 
-      for (int k=0; k<3; ++k) data[k] = (cforcecurr[4+k] + b->tacc[k]) * stepsize;
+      for (unsigned int k=0; k<3; ++k) data[k] = (cforcecurr[4+k] + b->tacc[k]) * stepsize;
       dMultiplyAdd0_331 (b->avel, invIrow, data);
     }
   }
@@ -840,25 +839,25 @@ void dInternalStepIsland_x2 (dxWorldProcessContext *context,
 //****************************************************************************
 
 void dInternalStepIsland (dxWorldProcessContext *context, 
-                          dxWorld *world, dxBody * const *body, int nb,
-                          dxJoint * const *joint, int nj, dReal stepsize)
+                          dxWorld *world, dxBody * const *body, unsigned int nb,
+                          dxJoint * const *joint, unsigned int nj, dReal stepsize)
 {
   dInternalStepIsland_x2 (context,world,body,nb,joint,nj,stepsize);
 }
 
-size_t dxEstimateStepMemoryRequirements (dxBody * const *body, int nb, dxJoint * const *_joint, int _nj)
+size_t dxEstimateStepMemoryRequirements (dxBody * const *body, unsigned int nb, dxJoint * const *_joint, unsigned int _nj)
 {
-  int nj, m;
+  unsigned int nj, m;
 
   {
-    int njcurr = 0, mcurr = 0;
+    unsigned int njcurr = 0, mcurr = 0;
     dxJoint::SureMaxInfo info;
     dxJoint *const *const _jend = _joint + _nj;
     for (dxJoint *const *_jcurr = _joint; _jcurr != _jend; ++_jcurr) {	
       dxJoint *j = *_jcurr;
       j->getSureMaxInfo (&info);
 
-      int jm = info.max_m;
+      unsigned int jm = info.max_m;
       if (jm > 0) {
         njcurr++;
 
@@ -870,25 +869,25 @@ size_t dxEstimateStepMemoryRequirements (dxBody * const *body, int nb, dxJoint *
 
   size_t res = 0;
 
-  res += dEFFICIENT_SIZE(sizeof(dReal) * 3 * 4 * nb); // for invI
+  res += dEFFICIENT_SIZE(sizeof(dReal) * 3 * 4 * (size_t)nb); // for invI
 
   {
-    size_t sub1_res1 = dEFFICIENT_SIZE(sizeof(dJointWithInfo1) * 2 * _nj); // for initial jointiinfos
+    size_t sub1_res1 = dEFFICIENT_SIZE(sizeof(dJointWithInfo1) * 2 * (size_t)_nj); // for initial jointiinfos
 
     // The array can't grow right more than by nj
-    size_t sub1_res2 = dEFFICIENT_SIZE(sizeof(dJointWithInfo1) * (_nj + nj)); // for shrunk jointiinfos
-    sub1_res2 += dEFFICIENT_SIZE(sizeof(dReal) * 8 * nb); // for cforce
+    size_t sub1_res2 = dEFFICIENT_SIZE(sizeof(dJointWithInfo1) * ((size_t)_nj + (size_t)nj)); // for shrunk jointiinfos
+    sub1_res2 += dEFFICIENT_SIZE(sizeof(dReal) * 8 * (size_t)nb); // for cforce
     if (m > 0) {
-      sub1_res2 += dEFFICIENT_SIZE(sizeof(dReal) * 2 * 8 * m); // for J
-      int mskip = dPAD(m);
-      sub1_res2 += dEFFICIENT_SIZE(sizeof(dReal) * mskip * m); // for A
-      sub1_res2 += 3 * dEFFICIENT_SIZE(sizeof(dReal) * m); // for lo, hi, rhs
-      sub1_res2 += dEFFICIENT_SIZE(sizeof(int) * m); // for findex
+      sub1_res2 += dEFFICIENT_SIZE(sizeof(dReal) * 2 * 8 * (size_t)m); // for J
+      unsigned int mskip = dPAD(m);
+      sub1_res2 += dEFFICIENT_SIZE(sizeof(dReal) * (size_t)mskip * (size_t)m); // for A
+      sub1_res2 += 3 * dEFFICIENT_SIZE(sizeof(dReal) * (size_t)m); // for lo, hi, rhs
+      sub1_res2 += dEFFICIENT_SIZE(sizeof(int) * (size_t)m); // for findex
       {
-        size_t sub2_res1 = dEFFICIENT_SIZE(sizeof(dReal) * m); // for cfm
-        sub2_res1 += dEFFICIENT_SIZE(sizeof(dReal) * 2 * 8 * m); // for JinvM
+        size_t sub2_res1 = dEFFICIENT_SIZE(sizeof(dReal) * (size_t)m); // for cfm
+        sub2_res1 += dEFFICIENT_SIZE(sizeof(dReal) * 2 * 8 * (size_t)m); // for JinvM
         {
-          size_t sub3_res1 = dEFFICIENT_SIZE(sizeof(int) * m); // for ofs
+          size_t sub3_res1 = dEFFICIENT_SIZE(sizeof(int) * (size_t)m); // for ofs
 
           size_t sub3_res2 = 0;
 
@@ -899,14 +898,14 @@ size_t dxEstimateStepMemoryRequirements (dxBody * const *body, int nb, dxJoint *
         {
           size_t sub3_res1 = 0;
           {
-            size_t sub4_res1 = dEFFICIENT_SIZE(sizeof(dReal) * 8 * nb); // for tmp1
+            size_t sub4_res1 = dEFFICIENT_SIZE(sizeof(dReal) * 8 * (size_t)nb); // for tmp1
 
             size_t sub4_res2 = 0;
 
             sub3_res1 += (sub4_res1 >= sub4_res2) ? sub4_res1 : sub4_res2;
           }
 
-          size_t sub3_res2 = dEFFICIENT_SIZE(sizeof(dReal) * m); // for lambda
+          size_t sub3_res2 = dEFFICIENT_SIZE(sizeof(dReal) * (size_t)m); // for lambda
           {
             size_t sub4_res1 = dEstimateSolveLCPMemoryReq(m, false);
 

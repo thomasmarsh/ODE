@@ -45,7 +45,7 @@ void dxWorldProcessContext::CleanupContext()
   FreePreallocationsContext();
 }
 
-void dxWorldProcessContext::SavePreallocations(int islandcount, int const *islandsizes, dxBody *const *bodies, dxJoint *const *joints)
+void dxWorldProcessContext::SavePreallocations(size_t islandcount, unsigned int const *islandsizes, dxBody *const *bodies, dxJoint *const *joints)
 {
   m_IslandCount = islandcount;
   m_pIslandSizes = islandsizes;
@@ -53,7 +53,7 @@ void dxWorldProcessContext::SavePreallocations(int islandcount, int const *islan
   m_pJoints = joints;
 }
 
-void dxWorldProcessContext::RetrievePreallocations(int &islandcount, int const *&islandsizes, dxBody *const *&bodies, dxJoint *const *&joints)
+void dxWorldProcessContext::RetrievePreallocations(size_t &islandcount, unsigned int const *&islandsizes, dxBody *const *&bodies, dxJoint *const *&joints)
 {
   islandcount = m_IslandCount;
   islandsizes = m_pIslandSizes;
@@ -64,7 +64,7 @@ void dxWorldProcessContext::RetrievePreallocations(int &islandcount, int const *
 void dxWorldProcessContext::OffsetPreallocations(size_t stOffset)
 {
   // m_IslandCount = -- no offset for count
-  m_pIslandSizes = m_pIslandSizes ? (int const *)((size_t)m_pIslandSizes + stOffset) : NULL;
+  m_pIslandSizes = m_pIslandSizes ? (unsigned int const *)((size_t)m_pIslandSizes + stOffset) : NULL;
   m_pBodies = m_pBodies ? (dxBody *const *)((size_t)m_pBodies + stOffset) : NULL;
   m_pJoints = m_pJoints ? (dxJoint *const *)((size_t)m_pJoints + stOffset) : NULL;
 }
@@ -268,7 +268,7 @@ void dxStepBody (dxBody *b, dReal h)
 
 
   // handle linear velocity
-  for (int j=0; j<3; j++) b->posr.pos[j] += h * b->lvel[j];
+  for (unsigned int j=0; j<3; j++) b->posr.pos[j] += h * b->lvel[j];
 
   if (b->flags & dxBodyFlagFiniteRotation) {
     dVector3 irv;	// infitesimal rotation vector
@@ -312,20 +312,20 @@ void dxStepBody (dxBody *b, dReal h)
     // do the finite rotation
     dQuaternion q2;
     dQMultiply0 (q2,q,b->q);
-    for (int j=0; j<4; j++) b->q[j] = q2[j];
+    for (unsigned int j=0; j<4; j++) b->q[j] = q2[j];
 
     // do the infitesimal rotation if required
     if (b->flags & dxBodyFlagFiniteRotationAxis) {
       dReal dq[4];
       dWtoDQ (irv,b->q,dq);
-      for (int j=0; j<4; j++) b->q[j] += h * dq[j];
+      for (unsigned int j=0; j<4; j++) b->q[j] += h * dq[j];
     }
   }
   else {
     // the normal way - do an infitesimal rotation
     dReal dq[4];
     dWtoDQ (b->avel,b->q,dq);
-    for (int j=0; j<4; j++) b->q[j] += h * dq[j];
+    for (unsigned int j=0; j<4; j++) b->q[j] += h * dq[j];
   }
 
   // normalize the quaternion and convert it to a rotation matrix
@@ -369,11 +369,11 @@ static size_t EstimateIslandsProcessingMemoryRequirements(dxWorld *world, size_t
 {
   size_t res = 0;
 
-  size_t islandcounts = dEFFICIENT_SIZE(world->nb * 2 * sizeof(int));
+  size_t islandcounts = dEFFICIENT_SIZE((size_t)(unsigned)world->nb * 2 * sizeof(int));
   res += islandcounts;
 
-  size_t bodiessize = dEFFICIENT_SIZE(world->nb * sizeof(dxBody*));
-  size_t jointssize = dEFFICIENT_SIZE(world->nj * sizeof(dxJoint*));
+  size_t bodiessize = dEFFICIENT_SIZE((size_t)(unsigned)world->nb * sizeof(dxBody*));
+  size_t jointssize = dEFFICIENT_SIZE((size_t)(unsigned)world->nj * sizeof(dxJoint*));
   res += bodiessize + jointssize;
 
   sesize = (bodiessize < jointssize) ? bodiessize : jointssize;
@@ -383,16 +383,16 @@ static size_t EstimateIslandsProcessingMemoryRequirements(dxWorld *world, size_t
 static size_t BuildIslandsAndEstimateStepperMemoryRequirements(dxWorldProcessContext *context, 
   dxWorld *world, dReal stepsize, dmemestimate_fn_t stepperestimate)
 {
-  const int sizeelements = 2;
+  const unsigned int sizeelements = 2;
   size_t maxreq = 0;
 
   // handle auto-disabling of bodies
   dInternalHandleAutoDisabling (world,stepsize);
 
-  int nb = world->nb, nj = world->nj;
+  unsigned int nb = world->nb, nj = world->nj;
   // Make array for island body/joint counts
-  int *islandsizes = context->AllocateArray<int>(2 * nb);
-  int *sizescurr;
+  unsigned int *islandsizes = context->AllocateArray<unsigned int>(2 * (size_t)nb);
+  unsigned int *sizescurr;
 
   // make arrays for body and joint lists (for a single island) to go into
   dxBody **body = context->AllocateArray<dxBody *>(nb);
@@ -403,7 +403,7 @@ static size_t BuildIslandsAndEstimateStepperMemoryRequirements(dxWorldProcessCon
     // the stack can be the lesser of the number of bodies or joints, because
     // new bodies are only ever added to the stack by going through untagged
     // joints. all the bodies in the stack must be tagged!
-    int stackalloc = (nj < nb) ? nj : nb;
+    unsigned int stackalloc = (nj < nb) ? nj : nb;
     dxBody **stack = context->AllocateArray<dxBody *>(stackalloc);
 
     {
@@ -427,7 +427,7 @@ static size_t BuildIslandsAndEstimateStepperMemoryRequirements(dxWorldProcessCon
           // tag all bodies and joints starting from bb.
           *bodycurr++ = bb;
 
-          int stacksize = 0;
+          unsigned int stacksize = 0;
           dxBody *b = bb;
 
           while (true) {
@@ -464,8 +464,11 @@ static size_t BuildIslandsAndEstimateStepperMemoryRequirements(dxWorldProcessCon
             *bodycurr++ = b;	// put body on body list
           }
 
-          int bcount = bodycurr - bodystart;
-          int jcount = jointcurr - jointstart;
+          unsigned int bcount = (unsigned int)(bodycurr - bodystart);
+          unsigned int jcount = (unsigned int)(jointcurr - jointstart);
+          dIASSERT((size_t)(bodycurr - bodystart) <= (size_t)UINT_MAX);
+          dIASSERT((size_t)(jointcurr - jointstart) <= (size_t)UINT_MAX);
+
           sizescurr[0] = bcount;
           sizescurr[1] = jcount;
           sizescurr += sizeelements;
@@ -509,7 +512,7 @@ static size_t BuildIslandsAndEstimateStepperMemoryRequirements(dxWorldProcessCon
   }
 # endif
 
-  int islandcount = (sizescurr - islandsizes) / sizeelements;
+  size_t islandcount = ((size_t)(sizescurr - islandsizes) / sizeelements);
   context->SavePreallocations(islandcount, islandsizes, body, joint);
 
   return maxreq;
@@ -528,15 +531,15 @@ static size_t BuildIslandsAndEstimateStepperMemoryRequirements(dxWorldProcessCon
 
 void dxProcessIslands (dxWorld *world, dReal stepsize, dstepper_fn_t stepper)
 {
-  const int sizeelements = 2;
+  const unsigned int sizeelements = 2;
 
   dxStepWorkingMemory *wmem = world->wmem;
   dIASSERT(wmem != NULL);
 
   dxWorldProcessContext *context = wmem->GetWorldProcessingContext(); 
 
-  int islandcount;
-  int const *islandsizes;
+  size_t islandcount;
+  unsigned int const *islandsizes;
   dxBody *const *body;
   dxJoint *const *joint;
   context->RetrievePreallocations(islandcount, islandsizes, body, joint);
@@ -544,10 +547,10 @@ void dxProcessIslands (dxWorld *world, dReal stepsize, dstepper_fn_t stepper)
   dxBody *const *bodystart = body;
   dxJoint *const *jointstart = joint;
 
-  int const *const sizesend = islandsizes + islandcount * sizeelements;
-  for (int const *sizescurr = islandsizes; sizescurr != sizesend; sizescurr += sizeelements) {
-    int bcount = sizescurr[0];
-    int jcount = sizescurr[1];
+  unsigned int const *const sizesend = islandsizes + islandcount * sizeelements;
+  for (unsigned int const *sizescurr = islandsizes; sizescurr != sizesend; sizescurr += sizeelements) {
+    unsigned int bcount = sizescurr[0];
+    unsigned int jcount = sizescurr[1];
 
     BEGIN_STATE_SAVE(context, stepperstate) {
       // now do something with body and joint lists

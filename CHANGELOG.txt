@@ -8,6 +8,10 @@ the rules for this file:
   * keep the format consistent (79 char width, M/D/Y date format).
 
 ------------------------------------------------------------------------------
+12/07/11 Oleh Derevenko
+	* Partially fixed size_t to integer conversion warnings
+	* Fixed type signedness and added casts to size_t wherever necessary 
+	  in Step/QuickStep
 11/04/11 Daniel K. O.
         * Applied patch #3429454 - fix compilation on some platforms.
 
