@@ -103,8 +103,6 @@ dVector3 track_verts[n_track_verts];
 dTriIndex track_faces[n_track_faces * 3];
 
 
-using namespace std;
-
 
 void resetBall(dBodyID b, unsigned idx)
 {
