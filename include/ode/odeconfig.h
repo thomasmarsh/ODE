@@ -58,7 +58,9 @@
   #define copysign(x, y) _copysign(x, y)
   #define nextafterf(x, y) _nextafterf(x, y)
   #define nextafter(x, y) _nextafter(x, y)
-  #define _ODE__NEXTAFTERF_REQUIRED
+  #if !defined(_WIN64)
+    #define _ODE__NEXTAFTERF_REQUIRED
+  #endif
 #endif
 
 
