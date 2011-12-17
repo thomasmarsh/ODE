@@ -453,8 +453,8 @@ static size_t BuildIslandsAndEstimateStepperMemoryRequirements(dxWorldProcessCon
                 }
               }
             }
-            dIASSERT(stacksize <= world->nb);
-            dIASSERT(stacksize <= world->nj);
+            dIASSERT(stacksize <= (unsigned int)world->nb);
+            dIASSERT(stacksize <= (unsigned int)world->nj);
 
             if (stacksize == 0) {
               break;
