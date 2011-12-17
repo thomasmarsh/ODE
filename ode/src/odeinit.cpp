@@ -470,10 +470,10 @@ static void InternalCleanupODEAllDataForThread()
 void dInitODE()
 {
 	int bInitResult = InternalInitODE(0);
-	dIASSERT(bInitResult); dVARIABLEUSED(bInitResult);
+	dIVERIFY(bInitResult);
 
 	int ibAllocResult = InternalAllocateODEDataForThread(dAllocateMaskAll);
-	dIASSERT(ibAllocResult); dVARIABLEUSED(ibAllocResult);
+	dIVERIFY(ibAllocResult);
 }
 
 int dInitODE2(unsigned int uiInitFlags/*=0*/)

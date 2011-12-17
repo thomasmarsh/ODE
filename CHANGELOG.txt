@@ -8,10 +8,21 @@ the rules for this file:
   * keep the format consistent (79 char width, M/D/Y date format).
 
 ------------------------------------------------------------------------------
+12/18/11 Oleh Derevenko
+        * dIVERIFY macro added (same as dIASSERT in debug mode but evaluates its
+          expression in release mode) to be used to assert variable value 
+          which is not used further in text while avoiding compiler warning.
+        * dICHECK macro added (same as dIASSERT but evaluates its expression and 
+          raises assertion fault regardless of compilation mode) to be used to
+          generate a fault in cases when error is very unlikely but must be 
+          handled and handling is very troublesome (e.g. failure to lock a mutex
+          due to lack of resources).
+
 12/07/11 Oleh Derevenko
-	* Partially fixed size_t to integer conversion warnings
-	* Fixed type signedness and added casts to size_t wherever necessary 
-	  in Step/QuickStep
+        * Partially fixed size_t to integer conversion warnings
+        * Fixed type signedness and added casts to size_t wherever necessary 
+          in Step/QuickStep
+
 11/04/11 Daniel K. O.
         * Applied patch #3429454 - fix compilation on some platforms.
 

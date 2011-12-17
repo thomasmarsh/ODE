@@ -434,15 +434,13 @@ int  _dSafeNormalize4 (dVector4 a);
 PURE_INLINE void _dNormalize3(dVector3 a)
 {
   int bNormalizationResult = _dSafeNormalize3(a);
-  dIASSERT(bNormalizationResult);
-  dVARIABLEUSED(bNormalizationResult);
+  dIVERIFY(bNormalizationResult);
 }
 
 PURE_INLINE void _dNormalize4(dVector4 a)
 {
   int bNormalizationResult = _dSafeNormalize4(a);
-  dIASSERT(bNormalizationResult);
-  dVARIABLEUSED(bNormalizationResult);
+  dIVERIFY(bNormalizationResult);
 }
 
 // For internal use

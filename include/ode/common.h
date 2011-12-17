@@ -60,34 +60,43 @@ extern "C" {
  *   DEBUGMSG just prints out a message
  */
 
-#ifndef dNODEBUG
 #  if defined(__STDC__) && __STDC_VERSION__ >= 199901L
 #    define __FUNCTION__ __func__
 #  endif
+#ifndef dNODEBUG
 #  ifdef __GNUC__
-#    define dIASSERT(a) if (!(a)) dDebug (d_ERR_IASSERT, \
-       "assertion \"" #a "\" failed in %s() [%s]",__FUNCTION__,__FILE__);
-#    define dUASSERT(a,msg) if (!(a)) dDebug (d_ERR_UASSERT, \
-       msg " in %s()", __FUNCTION__);
-#    define dDEBUGMSG(msg) dMessage (d_ERR_UASSERT,				\
-       msg " in %s() File %s Line %d", __FUNCTION__, __FILE__,__LINE__);
+#    define dIASSERT(a) { if (!(a)) { dDebug (d_ERR_IASSERT, \
+      "assertion \"" #a "\" failed in %s() [%s:%u]",__FUNCTION__,__FILE__,__LINE__); } }
+#    define dUASSERT(a,msg) { if (!(a)) { dDebug (d_ERR_UASSERT, \
+      msg " in %s()", __FUNCTION__); } }
+#    define dDEBUGMSG(msg) { dMessage (d_ERR_UASSERT,				\
+  msg " in %s() [%s:%u]", __FUNCTION__,__FILE__,__LINE__); }
 #  else // not __GNUC__
-#    define dIASSERT(a) if (!(a)) dDebug (d_ERR_IASSERT, \
-       "assertion \"" #a "\" failed in %s:%d",__FILE__,__LINE__);
-#    define dUASSERT(a,msg) if (!(a)) dDebug (d_ERR_UASSERT, \
-       msg " (%s:%d)", __FILE__,__LINE__);
-#    define dDEBUGMSG(msg) dMessage (d_ERR_UASSERT, \
-       msg " (%s:%d)", __FILE__,__LINE__);
+#    define dIASSERT(a) { if (!(a)) { dDebug (d_ERR_IASSERT, \
+      "assertion \"" #a "\" failed in %s:%u",__FILE__,__LINE__); } }
+#    define dUASSERT(a,msg) { if (!(a)) { dDebug (d_ERR_UASSERT, \
+      msg " (%s:%u)", __FILE__,__LINE__); } }
+#    define dDEBUGMSG(msg) { dMessage (d_ERR_UASSERT, \
+      msg " (%s:%u)", __FILE__,__LINE__); }
 #  endif
+#  define dIVERIFY(a) dIASSERT(a)
 #else
-#  define dIASSERT(a) ;
-#  define dUASSERT(a,msg) ;
-#  define dDEBUGMSG(msg) ;
+#  define dIASSERT(a) ((void)0)
+#  define dUASSERT(a,msg) ((void)0)
+#  define dDEBUGMSG(msg) ((void)0)
+#  define dIVERIFY(a) ((void)(a))
 #endif
-#define dAASSERT(a) dUASSERT(a,"Bad argument(s)")
 
-// Macro used to suppress unused variable warning
-#define dVARIABLEUSED(a) ((void)a)
+#  ifdef __GNUC__
+#    define dICHECK(a) { if (!(a)) { dDebug (d_ERR_IASSERT, \
+      "assertion \"" #a "\" failed in %s() [%s:%u]",__FUNCTION__,__FILE__,__LINE__); *(int *)0 = 0; } }
+#  else // not __GNUC__
+#    define dICHECK(a) { if (!(a)) { dDebug (d_ERR_IASSERT, \
+      "assertion \"" #a "\" failed in %s:%u",__FILE__,__LINE__); *(int *)0 = 0; } }
+#  endif
+
+// Argument assert is a special case of user assert
+#define dAASSERT(a) dUASSERT(a,"Bad argument(s)")
 
 /* floating point data type, vector, matrix and quaternion types */
 
