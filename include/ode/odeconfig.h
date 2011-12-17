@@ -8,6 +8,7 @@
 #include <math.h>
 #include <string.h>
 #include <float.h>
+#include <limits.h>
 
 #if defined(ODE_DLL) || defined(ODE_LIB)
 #define __ODE__
