@@ -30,11 +30,11 @@
 
 
 
-void _dSetZero (dReal *a, int n)
+void _dSetZero (dReal *a, size_t n)
 {
   dAASSERT (a && n >= 0);
   dReal *acurr = a;
-  int ncurr = n;
+  size_t ncurr = n;
   while (ncurr > 0) {
     *(acurr++) = 0;
     --ncurr;
@@ -42,11 +42,11 @@ void _dSetZero (dReal *a, int n)
 }
 
 
-void _dSetValue (dReal *a, int n, dReal value)
+void _dSetValue (dReal *a, size_t n, dReal value)
 {
   dAASSERT (a && n >= 0);
   dReal *acurr = a;
-  int ncurr = n;
+  size_t ncurr = n;
   while (ncurr > 0) {
     *(acurr++) = value;
     --ncurr;
