@@ -189,8 +189,8 @@ ODE_API void dRemoveRowCol (dReal *A, int n, int nskip, int r);
 
 #if defined(__ODE__)
 
-void _dSetZero (dReal *a, int n);
-void _dSetValue (dReal *a, int n, dReal value);
+void _dSetZero (dReal *a, size_t n);
+void _dSetValue (dReal *a, size_t n, dReal value);
 dReal _dDot (const dReal *a, const dReal *b, int n);
 void _dMultiply0 (dReal *A, const dReal *B, const dReal *C, int p,int q,int r);
 void _dMultiply1 (dReal *A, const dReal *B, const dReal *C, int p,int q,int r);
