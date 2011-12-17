@@ -38,6 +38,16 @@ extern "C" {
 #endif /* CCD_SINGLE */
 
 
+#if defined(_MSC_VER)
+// Define fmin, fmax, fminf, fmaxf which are missing from MSVC (up to VS2005 at least)
+static __inline double fmin(double x, double y) { return __min(x, y); }
+static __inline double fmax(double x, double y) { return __max(x, y); }
+static __inline float fminf(float x, float y) { return __min(x, y); }
+static __inline float fmaxf(float x, float y) { return __max(x, y); }
+
+#endif // #if defined(_MSC_VER)
+
+
 #ifdef CCD_SINGLE
 # ifdef CCD_DOUBLE
 #  error You can define either CCD_SINGLE or CCD_DOUBLE, not both!
