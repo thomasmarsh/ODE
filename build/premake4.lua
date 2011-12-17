@@ -316,8 +316,7 @@
       defines { "_OU_NAMESPACE=odeou" }
       
     configuration { "with-libccd" }
-      files   { "../libccd/src/ccd/*.h", "../libccd/src/*.c",
-              "../ode/src/collision_libccd.cpp", "../ode/src/collision_libccd.h" }
+      files   { "../libccd/src/ccd/*.h", "../libccd/src/*.c" }
       defines { "dLIBCCD_ENABLED", "dLIBCCD_CYL_CYL" }
 
     configuration { "not with-libccd" }

@@ -2,13 +2,15 @@
 #define ODECONFIG_H
 
 /* Pull in the standard headers */
+#include <stddef.h>
+#include <limits.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdarg.h>
 #include <math.h>
 #include <string.h>
 #include <float.h>
-#include <limits.h>
+
 
 #if defined(ODE_DLL) || defined(ODE_LIB)
 #define __ODE__

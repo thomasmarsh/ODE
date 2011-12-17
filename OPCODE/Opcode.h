@@ -20,8 +20,9 @@
 #ifndef __OPCODE_H__
 #define __OPCODE_H__
 
-// stdarg.h must be included before Opcode headers as it later
-// may not compile being not able to find std::va_list
+// stddef.h and stdarg.h must be included before Opcode headers 
+// as they latermay not compile being not able to find types in std::
+#include <stddef.h>
 #include <stdarg.h>
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
