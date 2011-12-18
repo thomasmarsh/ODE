@@ -127,7 +127,7 @@
 
 	#define ONE_OVER_RAND_MAX		(1.0f / float(RAND_MAX))	//!< Inverse of the max possible value returned by rand()
 
-	typedef int					(__stdcall* PROC)();			//!< A standard procedure call.
+	// typedef int					(__stdcall* PROC)();	-- Oleh Derevenko: Conflicts with Windows headers in x64 mode	//!< A standard procedure call. 
 	typedef bool				(*ENUMERATION)(udword value, udword param, udword context);	//!< ICE standard enumeration call
 	typedef	void**				VTABLE;							//!< A V-Table.
 
