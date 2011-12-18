@@ -1,3 +1,6 @@
+AUTOMAKE_OPTIONS = foreign
+ACLOCAL_AMFLAGS = -I m4 --install
+
 if ENABLE_OU
 OU_DIR = ou
 endif

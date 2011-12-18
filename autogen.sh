@@ -30,7 +30,7 @@ echo "On OSX, install latest libtool, as the OS provided glibtoolize will not wo
 echo "Warnings about underquoted definitions are harmless"
  
 echo "Running aclocal"
-aclocal -I . || exit 1
+aclocal -I m4 --install || exit 1
 # on Mac libtoolize is called glibtoolize
 LIBTOOLIZE=libtoolize
 #if [ `uname -s` = Darwin ]; then

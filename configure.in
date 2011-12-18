@@ -1,6 +1,5 @@
 dnl AC_INIT does not take a macro as a version nr: set it separately! - Bram
 AC_INIT([ODE],[0.11.1],[ode@ode.org])
-AC_CONFIG_SRCDIR([ode/src/ode.cpp])
 ODE_RELEASE=0.11.1
 AC_SUBST(ODE_RELEASE)
 
@@ -41,6 +40,8 @@ fi
 AC_SUBST(ODE_VERSION_INFO)
 
 
+AC_CONFIG_SRCDIR([ode/src/ode.cpp])
+AC_CONFIG_MACRO_DIR([m4])
 
 AC_CANONICAL_HOST
 
@@ -64,8 +65,6 @@ AC_CHECK_TOOLS([WINDRES], [windres])
 AC_C_BIGENDIAN
 AC_C_INLINE
 AC_C_VOLATILE
-AC_HEADER_STDBOOL
-AC_TYPE_SIZE_T
 PKG_PROG_PKG_CONFIG
 
 
@@ -94,7 +93,8 @@ AM_CONDITIONAL(X86_64_SYSTEM, test x$cpu64 = xyes)
 
 dnl check for required headers
 AC_CHECK_HEADERS( [alloca.h stdio.h inttypes.h stdint.h stdlib.h math.h \
-                  string.h stdarg.h malloc.h float.h time.h sys/time.h ])
+                  string.h stdarg.h malloc.h float.h time.h sys/time.h \
+                  limits.h stddef.h])
 
 
 opcode=no
@@ -135,21 +135,23 @@ CPPFLAGS="$CPPFLAGS $ODE_PRECISION"
 AC_SUBST(ODE_PRECISION)
 
 
-AC_ARG_WITH([drawstuff],AS_HELP_STRING([--with-drawstuff=X11|Win32|OSX|none],[force a particular drawstuff implementation or disable it.]),
-        [drawstuff=$withval],[drawstuff=])
+AC_ARG_WITH([drawstuff],
+    AS_HELP_STRING([--with-drawstuff=X11|Win32|OSX|none],
+        [force a particular drawstuff implementation or disable it.[default=autodetect]]),
+    [drawstuff=$withval],[drawstuff=])
 
 dnl Set some Platform Specific Variables
 EXTRA_LIBTOOL_LDFLAGS=
 case "$host_os" in
   cygwin* | mingw*)
-    if test x"$drawstuff" = x
+    if test "x$drawstuff" = x
     then
        drawstuff="Win32" # if in a Windows enviroment
     fi
     EXTRA_LIBTOOL_LDFLAGS="-no-undefined"
     ;;
   *apple* | *darwin*) # For Mac OS X
-    if test x"$drawstuff" = x
+    if test "x$drawstuff" = x
     then
        drawstuff="OSX"
     fi
@@ -159,7 +161,7 @@ case "$host_os" in
     LINK="$CXXLINK"
     ;;
   *)
-    if test x"$drawstuff" = x
+    if test "x$drawstuff" = x
     then
        drawstuff="X11" # if anything else default to X11
     fi
@@ -174,9 +176,8 @@ AC_MSG_RESULT($drawstuff)
 
 if test "x$drawstuff" = "xX11"
 then
-    # The built-in macro causes too many problems, these days everyone uses Xorg,
+    # The built-in macro, X_PATH, causes too many problems, these days everyone uses Xorg,
     # so we can ask pkg-config to find it for us.
-    #AC_PATH_XTRA
     PKG_CHECK_MODULES(X11, x11, [], [drawstuff="none"])
 fi
 
@@ -272,10 +273,18 @@ else
     AC_MSG_RESULT(no)
 fi
 
+# Checks for typedefs, structures, and compiler characteristics.
+AC_HEADER_STDBOOL
+AC_C_INLINE
+AC_TYPE_INT32_T
+AC_FUNC_OBSTACK
+AC_TYPE_SIZE_T
+AC_TYPE_UINT32_T
+
 dnl Check for autoscan sugested functions
 AC_CHECK_LIB(m, [main])
 AC_CHECK_LIB(sunmath, [main])
-AC_CHECK_FUNCS([floor memmove memset select sqrt sqrtf sinf cosf fabsf atan2f fmodf copysignf copysign snprintf vsnprintf gettimeofday isnan isnanf _isnan _isnanf __isnan __isnanf])
+AC_CHECK_FUNCS([floor memmove memset select sqrt sqrtf sinf cosf fabsf atan2f fmodf copysignf copysign snprintf vsnprintf gettimeofday isnan isnanf _isnan _isnanf __isnan __isnanf strchr strstr])
 AC_FUNC_ALLOCA 
 AC_FUNC_MALLOC
 AC_FUNC_OBSTACK 
