@@ -93,8 +93,8 @@
   }
   
   newoption {
-    trigger     = "enable-ou",
-    description = "Use TLS for global variables (experimental)"
+    trigger     = "with-ou",
+    description = "Use TLS for global caches (experimental)"
   }
 
   newoption {
@@ -311,7 +311,7 @@
     configuration { "not no-trimesh", "not with-gimpact" }
       files   { "../OPCODE/**.h", "../OPCODE/**.cpp" }
  
-    configuration { "enable-ou" }
+    configuration { "with-ou" }
       files   { "../ou/**.h", "../ou/**.cpp" }
       defines { "_OU_NAMESPACE=odeou" }
       
@@ -367,7 +367,7 @@
       text = string.gsub(text, "#define dTRIMESH_OPCODE 1", "#define dTRIMESH_GIMPACT 1")
     end
 
-    if _OPTIONS["enable-ou"] then
+    if _OPTIONS["with-ou"] then
       text = string.gsub(text, "/%* #define dOU_ENABLED 1 %*/", "#define dOU_ENABLED 1")
       text = string.gsub(text, "/%* #define dATOMICS_ENABLED 1 %*/", "#define dATOMICS_ENABLED 1")
       text = string.gsub(text, "/%* #define dTLS_ENABLED 1 %*/", "#define dTLS_ENABLED 1")
