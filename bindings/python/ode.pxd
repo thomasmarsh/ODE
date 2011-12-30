@@ -232,6 +232,10 @@ cdef extern from "ode/ode.h":
 
     void dJointDestroy (dJointID)
 
+    void dJointEnable (dJointID)
+    void dJointDisable (dJointID)
+    int dJointIsEnabled (dJointID)
+
     dJointGroupID dJointGroupCreate (int max_size)
     void dJointGroupDestroy (dJointGroupID)
     void dJointGroupEmpty (dJointGroupID)

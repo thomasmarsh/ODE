@@ -1826,6 +1826,36 @@ cdef class Joint:
         """
         self.jid = NULL
 
+    # enable
+    def enable(self):
+        """enable()
+
+        Enable the joint. Disabled joints are completely ignored during the
+        simulation. Disabled joints don't lose the already computed information
+        like anchors and axes.
+        """
+        dJointEnable(self.jid)
+
+    # disable
+    def disable(self):
+        """disable()
+
+        Disable the joint. Disabled joints are completely ignored during the
+        simulation. Disabled joints don't lose the already computed information
+        like anchors and axes.
+        """
+        dJointDisable(self.jid)
+
+    # isEnabled
+    def isEnabled(self):
+        """isEnabled() -> bool
+
+        Determine whether the joint is enabled. Disabled joints are completely
+        ignored during the simulation. Disabled joints don't lose the already
+        computed information like anchors and axes.
+        """
+        return dJointIsEnabled(self.jid)
+
     # attach
     def attach(self, Body body1, Body body2):
         """attach(body1, body2)
