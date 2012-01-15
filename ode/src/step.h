@@ -25,10 +25,13 @@
 
 #include <ode/common.h>
 
+class dxWorldProcessMemArena;
+
+
 size_t dxEstimateStepMemoryRequirements (
   dxBody * const *body, unsigned int nb, dxJoint * const *_joint, unsigned int _nj);
 
-void dInternalStepIsland (dxWorldProcessContext *context, dxWorld *world,
+void dInternalStepIsland (dxWorldProcessMemArena *memarena, dxWorld *world,
 			  dxBody * const *body, unsigned int nb,
 			  dxJoint * const *joint, unsigned int nj,
 			  dReal stepsize);

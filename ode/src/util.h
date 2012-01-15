@@ -112,9 +112,11 @@ struct dxWorldProcessMemoryReserveInfo:
 extern dxWorldProcessMemoryReserveInfo g_WorldProcessDefaultReserveInfo;
 
 
-struct dxWorldProcessContext
+class dxWorldProcessMemArena:
+    private dBase // new/delete must not be called for this class
 {
-#define BUFFER_TO_ARENA_EXTRA (EFFICIENT_ALIGNMENT + dEFFICIENT_SIZE(sizeof(dxWorldProcessContext)))
+public:
+#define BUFFER_TO_ARENA_EXTRA (EFFICIENT_ALIGNMENT + dEFFICIENT_SIZE(sizeof(dxWorldProcessMemArena)))
   static bool IsArenaPossible(size_t nBufferSize)
   {
     return SIZE_MAX - BUFFER_TO_ARENA_EXTRA >= nBufferSize; // This ensures there will be no overflow
@@ -133,7 +135,7 @@ struct dxWorldProcessContext
 
   bool IsStructureValid() const
   {
-    return !m_pPreallocationcContext && m_pAllocBegin && m_pAllocEnd && m_pAllocBegin <= m_pAllocEnd && m_pAllocCurrent == m_pAllocBegin && m_pArenaBegin && m_pArenaBegin <= m_pAllocBegin; 
+    return m_pAllocBegin && m_pAllocEnd && m_pAllocBegin <= m_pAllocEnd && m_pAllocCurrent == m_pAllocBegin && m_pArenaBegin && m_pArenaBegin <= m_pAllocBegin; 
   }
 
   size_t GetMemorySize() const
@@ -183,56 +185,111 @@ struct dxWorldProcessContext
     m_pAllocCurrent = dOFFSET_EFFICIENTLY(arr, newcount * sizeof(ElementType));
   }
 
+public:
+  static dxWorldProcessMemArena *ReallocateMemArena (
+    dxWorldProcessMemArena *oldarena, size_t memreq, 
+    const dxWorldProcessMemoryManager *memmgr, float rsrvfactor, unsigned rsrvminimum);
+  static void FreeMemArena (dxWorldProcessMemArena *arena);
 
+private:
+  static size_t AdjustArenaSizeForReserveRequirements(size_t arenareq, float rsrvfactor, unsigned rsrvminimum);
 
-  void CleanupContext();
-
-  void SavePreallocations(size_t islandcount, unsigned int const *islandsizes, dxBody *const *bodies, dxJoint *const *joints);
-  void RetrievePreallocations(size_t &islandcount, unsigned int const *&islandsizes, dxBody *const *&bodies, dxJoint *const *&joints);
-  void OffsetPreallocations(size_t stOffset);
-  void CopyPreallocations(const dxWorldProcessContext *othercontext);
-  void ClearPreallocations();
-
-  void FreePreallocationsContext();
-  bool IsPreallocationsContextAssigned() const { return m_pPreallocationcContext != NULL; }
-
-
+private:
   void *m_pAllocBegin;
   void *m_pAllocEnd;
   void *m_pAllocCurrent;
   void *m_pArenaBegin;
 
+  const dxWorldProcessMemoryManager *m_pArenaMemMgr;
+};
+
+class dxWorldProcessContext:
+  public dBase
+{
+public:
+  dxWorldProcessContext();
+  ~dxWorldProcessContext();
+
+  bool IsStructureValid() const;
+  void CleanupContext();
+
+  dxWorldProcessMemArena *GetIslandsMemArena() const { return m_pmaIslandsArena; }
+  dxWorldProcessMemArena *GetStepperMemArena() const { return m_pmaStepperArena; }
+
+  dxWorldProcessMemArena *ReallocateIslandsMemArena(size_t nMemoryRequirement, 
+    const dxWorldProcessMemoryManager *pmmMemortManager, float fReserveFactor, unsigned uiReserveMinimum);
+  dxWorldProcessMemArena *ReallocateStepperMemArena(size_t nMemoryRequirement, 
+    const dxWorldProcessMemoryManager *pmmMemortManager, float fReserveFactor, unsigned uiReserveMinimum);
+
+private:
+  void SetIslandsMemArena(dxWorldProcessMemArena *pmaInstance) { m_pmaIslandsArena = pmaInstance; }
+  void SetStepperMemArena(dxWorldProcessMemArena *pmaInstance) { m_pmaStepperArena = pmaInstance; }
+
+private:
+  dxWorldProcessMemArena  *m_pmaIslandsArena;
+  dxWorldProcessMemArena  *m_pmaStepperArena;
+};
+
+struct dxWorldProcessIslandsInfo
+{
+  void AssignInfo(size_t islandcount, unsigned int const *islandsizes, dxBody *const *bodies, dxJoint *const *joints)
+  {
+    m_IslandCount = islandcount;
+    m_pIslandSizes = islandsizes;
+    m_pBodies = bodies;
+    m_pJoints = joints;
+  }
+  
+  size_t GetIslandsCount() const { return m_IslandCount; }
+  unsigned int const *GetIslandSizes() const { return m_pIslandSizes; }
+  dxBody *const *GetBodiesArray() const { return m_pBodies; }
+  dxJoint *const *GetJointsArray() const { return m_pJoints; }
+
+private:
   size_t m_IslandCount;
   unsigned int const *m_pIslandSizes;
   dxBody *const *m_pBodies;
   dxJoint *const *m_pJoints;
-
-  const dxWorldProcessMemoryManager *m_pArenaMemMgr;
-  dxWorldProcessContext *m_pPreallocationcContext;
 };
 
 
 
-#define BEGIN_STATE_SAVE(context, state) void *state = context->SaveState();
-#define END_STATE_SAVE(context, state) context->RestoreState(state)
+#define BEGIN_STATE_SAVE(memarena, state) void *state = memarena->SaveState();
+#define END_STATE_SAVE(memarena, state) memarena->RestoreState(state)
 
-typedef void (*dstepper_fn_t) (dxWorldProcessContext *context, 
+typedef void (*dstepper_fn_t) (dxWorldProcessMemArena *memarena, 
         dxWorld *world, dxBody * const *body, unsigned int nb,
         dxJoint * const *_joint, unsigned int _nj, dReal stepsize);
 
-void dxProcessIslands (dxWorld *world, dReal stepsize, dstepper_fn_t stepper);
+void dxProcessIslands (dxWorld *world, const dxWorldProcessIslandsInfo &islandsinfo, dReal stepsize, dstepper_fn_t stepper);
 
 
 typedef size_t (*dmemestimate_fn_t) (dxBody * const *body, unsigned int nb, 
   dxJoint * const *_joint, unsigned int _nj);
 
-bool dxReallocateWorldProcessContext (dxWorld *world, 
+bool dxReallocateWorldProcessContext (dxWorld *world, dxWorldProcessIslandsInfo &islandsinfo, 
   dReal stepsize, dmemestimate_fn_t stepperestimate);
-dxWorldProcessContext *dxReallocateTemporayWorldProcessContext(dxWorldProcessContext *oldcontext, 
+void dxCleanupWorldProcessContext (dxWorld *world);
+
+dxWorldProcessMemArena *dxAllocateTemporaryWorldProcessMemArena(
   size_t memreq, const dxWorldProcessMemoryManager *memmgr/*=NULL*/, const dxWorldProcessMemoryReserveInfo *reserveinfo/*=NULL*/);
-void dxFreeWorldProcessContext (dxWorldProcessContext *context);
+void dxFreeTemporaryWorldProcessMemArena(dxWorldProcessMemArena *arena);
 
 
+
+template<class ClassType>
+inline ClassType *AllocateOnDemand(ClassType *&pctStorage)
+{
+  ClassType *pctCurrentInstance = pctStorage;
+
+  if (!pctCurrentInstance)
+  {
+    pctCurrentInstance = new ClassType();
+    pctStorage = pctCurrentInstance;
+  }
+
+  return pctCurrentInstance;
+}
 
 
 // World stepping working memory object
@@ -246,7 +303,7 @@ private:
   friend struct dBase; // To avoid GCC warning regarding private destructor
   ~dxStepWorkingMemory() // Use Release() instead
   {
-    if (m_ppcProcessingContext) dxFreeWorldProcessContext(m_ppcProcessingContext);
+    delete m_ppcProcessingContext;
     delete m_priReserveInfo;
     delete m_pmmMemoryManager;
   }
@@ -270,16 +327,13 @@ public:
 public:
   void CleanupMemory()
   {
-    if (m_ppcProcessingContext)
-    {
-      dxFreeWorldProcessContext(m_ppcProcessingContext);
-      m_ppcProcessingContext = NULL;
-    }
+    delete m_ppcProcessingContext;
+    m_ppcProcessingContext = NULL;
   }
 
 public: 
+  dxWorldProcessContext *SureGetWorldProcessingContext() { return AllocateOnDemand(m_ppcProcessingContext); }
   dxWorldProcessContext *GetWorldProcessingContext() const { return m_ppcProcessingContext; }
-  void SetWorldProcessingContext(dxWorldProcessContext *ppcInstance) { m_ppcProcessingContext = ppcInstance; }
 
   const dxWorldProcessMemoryReserveInfo *GetMemoryReserveInfo() const { return m_priReserveInfo; }
   const dxWorldProcessMemoryReserveInfo *SureGetMemoryReserveInfo() const { return m_priReserveInfo ? m_priReserveInfo : &g_WorldProcessDefaultReserveInfo; }
@@ -314,18 +368,5 @@ private:
   dxWorldProcessMemoryManager *m_pmmMemoryManager;
 };
 
-template<class ClassType>
-inline ClassType *AllocateOnDemand(ClassType *&pctStorage)
-{
-  ClassType *pctCurrentInstance = pctStorage;
-
-  if (!pctCurrentInstance)
-  {
-    pctCurrentInstance = new ClassType();
-    pctStorage = pctCurrentInstance;
-  }
-
-  return pctCurrentInstance;
-}
 
 #endif

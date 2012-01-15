@@ -184,7 +184,7 @@ struct dJointWithInfo1
   dxJoint::Info1 info;
 };
 
-static void dInternalStepIsland_x2 (dxWorldProcessContext *context, 
+static void dInternalStepIsland_x2 (dxWorldProcessMemArena *memarena, 
                              dxWorld *world, dxBody * const *body, unsigned int nb,
                              dxJoint * const *_joint, unsigned int _nj, dReal stepsize)
 {
@@ -203,7 +203,7 @@ static void dInternalStepIsland_x2 (dxWorldProcessContext *context,
   // accumulator. invI are vertically stacked 3x4 matrices, one per body.
   // @@@ check computation of rotational force.
 
-  dReal *invI = context->AllocateArray<dReal> (3*4*(size_t)nb);
+  dReal *invI = memarena->AllocateArray<dReal> (3*4*(size_t)nb);
 
   { // Identical to QuickStep
     dReal *invIrow = invI;
@@ -277,7 +277,7 @@ static void dInternalStepIsland_x2 (dxWorldProcessContext *context,
   // Reserve twice as much memory and start from the middle so that regardless of 
   // what direction the array grows to there would be sufficient room available.
   const size_t ji_reserve_count = 2 * (size_t)_nj;
-  dJointWithInfo1 *jointiinfos = context->AllocateArray<dJointWithInfo1> (ji_reserve_count);
+  dJointWithInfo1 *jointiinfos = memarena->AllocateArray<dJointWithInfo1> (ji_reserve_count);
   unsigned int nub;
   size_t ji_start, ji_end;
 
@@ -402,7 +402,7 @@ static void dInternalStepIsland_x2 (dxWorldProcessContext *context,
     ji_end = lcp_end;
   }
 
-  context->ShrinkArray<dJointWithInfo1>(jointiinfos, ji_reserve_count, ji_end);
+  memarena->ShrinkArray<dJointWithInfo1>(jointiinfos, ji_reserve_count, ji_end);
   jointiinfos += ji_start;
   unsigned int nj = (unsigned int)(ji_end - ji_start);
   dIASSERT((size_t)(ji_end - ji_start) <= (size_t)UINT_MAX);
@@ -423,7 +423,7 @@ static void dInternalStepIsland_x2 (dxWorldProcessContext *context,
   }
 
   // this will be set to the force due to the constraints
-  dReal *cforce = context->AllocateArray<dReal> ((size_t)nb*8);
+  dReal *cforce = memarena->AllocateArray<dReal> ((size_t)nb*8);
   dSetZero (cforce,(size_t)nb*8);
 
   // if there are constraints, compute cforce
@@ -437,34 +437,34 @@ static void dInternalStepIsland_x2 (dxWorldProcessContext *context,
     {
       unsigned int mlocal = m;
 
-      lo = context->AllocateArray<dReal> (mlocal);
+      lo = memarena->AllocateArray<dReal> (mlocal);
       dSetValue (lo,mlocal,-dInfinity);
 
-      hi = context->AllocateArray<dReal> (mlocal);
+      hi = memarena->AllocateArray<dReal> (mlocal);
       dSetValue (hi,mlocal, dInfinity);
 
-      J = context->AllocateArray<dReal> (2*8*(size_t)mlocal);
+      J = memarena->AllocateArray<dReal> (2*8*(size_t)mlocal);
       dSetZero (J,2*8*(size_t)mlocal);
 
-      findex = context->AllocateArray<int> (mlocal);
+      findex = memarena->AllocateArray<int> (mlocal);
       for (unsigned int i=0; i<mlocal; ++i) findex[i] = -1;
 
       unsigned int mskip = dPAD(mlocal);
-      A = context->AllocateArray<dReal> (mlocal*(size_t)mskip);
+      A = memarena->AllocateArray<dReal> (mlocal*(size_t)mskip);
       dSetZero (A,mlocal*(size_t)mskip);
 
-      rhs = context->AllocateArray<dReal> (mlocal);
+      rhs = memarena->AllocateArray<dReal> (mlocal);
       dSetZero (rhs,mlocal);
     }
 
     // Put 'c' in the same memory as 'rhs' as they transit into each other
     dReal *c = rhs; rhs = NULL; // erase rhs pointer for now as it is not to be used yet
 
-    BEGIN_STATE_SAVE(context, cfmstate) {
-      dReal *cfm = context->AllocateArray<dReal> (m);
+    BEGIN_STATE_SAVE(memarena, cfmstate) {
+      dReal *cfm = memarena->AllocateArray<dReal> (m);
       dSetValue (cfm,m,world->global_cfm);
 
-      dReal *JinvM = context->AllocateArray<dReal> (2*8*(size_t)m);
+      dReal *JinvM = memarena->AllocateArray<dReal> (2*8*(size_t)m);
       dSetZero (JinvM,2*8*(size_t)m);
 
       {
@@ -571,8 +571,8 @@ static void dInternalStepIsland_x2 (dxWorldProcessContext *context,
           // i.e. in the same way as the rows of J. block (i,j) of A is only nonzero
           // if joints i and j have at least one body in common. 
 
-          BEGIN_STATE_SAVE(context, ofsstate) {
-            unsigned int *ofs = context->AllocateArray<unsigned int> (m);
+          BEGIN_STATE_SAVE(memarena, ofsstate) {
+            unsigned int *ofs = memarena->AllocateArray<unsigned int> (m);
             const unsigned int mskip = dPAD(m);
 
             unsigned ofsi = 0;
@@ -621,7 +621,7 @@ static void dInternalStepIsland_x2 (dxWorldProcessContext *context,
               ofsi += infom;
             }
 
-          } END_STATE_SAVE(context, ofsstate);
+          } END_STATE_SAVE(memarena, ofsstate);
         }
 
         {
@@ -656,13 +656,13 @@ static void dInternalStepIsland_x2 (dxWorldProcessContext *context,
         }
        }
 
-    } END_STATE_SAVE(context, cfmstate);
+    } END_STATE_SAVE(memarena, cfmstate);
 
-    BEGIN_STATE_SAVE(context, tmp1state) {
+    BEGIN_STATE_SAVE(memarena, tmp1state) {
       // compute the right hand side `rhs'
       IFTIMING(dTimerNow ("compute rhs"));
 
-      dReal *tmp1 = context->AllocateArray<dReal> ((size_t)nb*8);
+      dReal *tmp1 = memarena->AllocateArray<dReal> ((size_t)nb*8);
       //dSetZero (tmp1,nb*8);
 
       {
@@ -704,18 +704,18 @@ static void dInternalStepIsland_x2 (dxWorldProcessContext *context,
           ofsi += infom;
         }
       }
-    } END_STATE_SAVE(context, tmp1state);
+    } END_STATE_SAVE(memarena, tmp1state);
 
-    dReal *lambda = context->AllocateArray<dReal> (m);
+    dReal *lambda = memarena->AllocateArray<dReal> (m);
 
-    BEGIN_STATE_SAVE(context, lcpstate) {
+    BEGIN_STATE_SAVE(memarena, lcpstate) {
       IFTIMING(dTimerNow ("solving LCP problem"));
 
       // solve the LCP problem and get lambda.
       // this will destroy A but that's OK
-      dSolveLCP (context, m, A, lambda, rhs, NULL, nub, lo, hi, findex);
+      dSolveLCP (memarena, m, A, lambda, rhs, NULL, nub, lo, hi, findex);
 
-    } END_STATE_SAVE(context, lcpstate);
+    } END_STATE_SAVE(memarena, lcpstate);
 
     {
       IFTIMING(dTimerNow ("compute constraint force"));
@@ -838,11 +838,11 @@ static void dInternalStepIsland_x2 (dxWorldProcessContext *context,
 
 //****************************************************************************
 
-void dInternalStepIsland (dxWorldProcessContext *context, 
+void dInternalStepIsland (dxWorldProcessMemArena *memarena, 
                           dxWorld *world, dxBody * const *body, unsigned int nb,
                           dxJoint * const *joint, unsigned int nj, dReal stepsize)
 {
-  dInternalStepIsland_x2 (context,world,body,nb,joint,nj,stepsize);
+  dInternalStepIsland_x2 (memarena,world,body,nb,joint,nj,stepsize);
 }
 
 size_t dxEstimateStepMemoryRequirements (dxBody * const *body, unsigned int nb, dxJoint * const *_joint, unsigned int _nj)

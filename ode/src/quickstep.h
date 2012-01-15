@@ -25,10 +25,13 @@
 
 #include <ode/common.h>
 
+class dxWorldProcessMemArena;
+
+
 size_t dxEstimateQuickStepMemoryRequirements (
   dxBody * const *body, unsigned int nb, dxJoint * const *_joint, unsigned int _nj);
 
-void dxQuickStepper (dxWorldProcessContext *context,
+void dxQuickStepper (dxWorldProcessMemArena *memarena,
         dxWorld *world, dxBody * const *body, unsigned int nb,
 		    dxJoint * const *_joint, unsigned int _nj, dReal stepsize);
 

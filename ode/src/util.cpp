@@ -1,24 +1,24 @@
 /*************************************************************************
- *                                                                       *
- * Open Dynamics Engine, Copyright (C) 2001,2002 Russell L. Smith.       *
- * All rights reserved.  Email: russ@q12.org   Web: www.q12.org          *
- *                                                                       *
- * This library is free software; you can redistribute it and/or         *
- * modify it under the terms of EITHER:                                  *
- *   (1) The GNU Lesser General Public License as published by the Free  *
- *       Software Foundation; either version 2.1 of the License, or (at  *
- *       your option) any later version. The text of the GNU Lesser      *
- *       General Public License is included with this library in the     *
- *       file LICENSE.TXT.                                               *
- *   (2) The BSD-style license that is included with this library in     *
- *       the file LICENSE-BSD.TXT.                                       *
- *                                                                       *
- * This library is distributed in the hope that it will be useful,       *
- * but WITHOUT ANY WARRANTY; without even the implied warranty of        *
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the files    *
- * LICENSE.TXT and LICENSE-BSD.TXT for more details.                     *
- *                                                                       *
- *************************************************************************/
+*                                                                       *
+* Open Dynamics Engine, Copyright (C) 2001,2002 Russell L. Smith.       *
+* All rights reserved.  Email: russ@q12.org   Web: www.q12.org          *
+*                                                                       *
+* This library is free software; you can redistribute it and/or         *
+* modify it under the terms of EITHER:                                  *
+*   (1) The GNU Lesser General Public License as published by the Free  *
+*       Software Foundation; either version 2.1 of the License, or (at  *
+*       your option) any later version. The text of the GNU Lesser      *
+*       General Public License is included with this library in the     *
+*       file LICENSE.TXT.                                               *
+*   (2) The BSD-style license that is included with this library in     *
+*       the file LICENSE-BSD.TXT.                                       *
+*                                                                       *
+* This library is distributed in the hope that it will be useful,       *
+* but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the files    *
+* LICENSE.TXT and LICENSE-BSD.TXT for more details.                     *
+*                                                                       *
+*************************************************************************/
 
 #include <ode/ode.h>
 #include "config.h"
@@ -26,7 +26,6 @@
 #include "joints/joint.h"
 #include "util.h"
 
-static void InternalFreeWorldProcessContext (dxWorldProcessContext *context);
 
 //****************************************************************************
 // Malloc based world stepping memory manager
@@ -36,201 +35,201 @@ static void InternalFreeWorldProcessContext (dxWorldProcessContext *context);
 
 
 //****************************************************************************
-// dxWorldProcessContext implementation
+// dxWorldProcessContext
 
-void dxWorldProcessContext::CleanupContext()
+dxWorldProcessContext::dxWorldProcessContext():
+  m_pmaIslandsArena(NULL),
+  m_pmaStepperArena(NULL)
 {
-  ResetState();
-  ClearPreallocations();
-  FreePreallocationsContext();
+  // Do nothing
 }
 
-void dxWorldProcessContext::SavePreallocations(size_t islandcount, unsigned int const *islandsizes, dxBody *const *bodies, dxJoint *const *joints)
+dxWorldProcessContext::~dxWorldProcessContext()
 {
-  m_IslandCount = islandcount;
-  m_pIslandSizes = islandsizes;
-  m_pBodies = bodies;
-  m_pJoints = joints;
-}
+  if (m_pmaIslandsArena)
+  {
+    dxWorldProcessMemArena::FreeMemArena(m_pmaIslandsArena);
+  }
 
-void dxWorldProcessContext::RetrievePreallocations(size_t &islandcount, unsigned int const *&islandsizes, dxBody *const *&bodies, dxJoint *const *&joints)
-{
-  islandcount = m_IslandCount;
-  islandsizes = m_pIslandSizes;
-  bodies = m_pBodies;
-  joints = m_pJoints;
-}
-
-void dxWorldProcessContext::OffsetPreallocations(size_t stOffset)
-{
-  // m_IslandCount = -- no offset for count
-  m_pIslandSizes = m_pIslandSizes ? (unsigned int const *)((size_t)m_pIslandSizes + stOffset) : NULL;
-  m_pBodies = m_pBodies ? (dxBody *const *)((size_t)m_pBodies + stOffset) : NULL;
-  m_pJoints = m_pJoints ? (dxJoint *const *)((size_t)m_pJoints + stOffset) : NULL;
-}
-
-void dxWorldProcessContext::CopyPreallocations(const dxWorldProcessContext *othercontext)
-{
-  m_IslandCount = othercontext->m_IslandCount;
-  m_pIslandSizes = othercontext->m_pIslandSizes;
-  m_pBodies = othercontext->m_pBodies;
-  m_pJoints = othercontext->m_pJoints;
-}
-
-void dxWorldProcessContext::ClearPreallocations()
-{
-  m_IslandCount = 0;
-  m_pIslandSizes = NULL;
-  m_pBodies = NULL;
-  m_pJoints = NULL;
-}
-
-void dxWorldProcessContext::FreePreallocationsContext()
-{
-  if (m_pPreallocationcContext) {
-    InternalFreeWorldProcessContext(m_pPreallocationcContext);
-    m_pPreallocationcContext = NULL;
+  if (m_pmaStepperArena)
+  {
+    dxWorldProcessMemArena::FreeMemArena(m_pmaStepperArena);
   }
 }
 
+bool dxWorldProcessContext::IsStructureValid() const
+{
+  return (!m_pmaIslandsArena || m_pmaIslandsArena->IsStructureValid()) && (!m_pmaStepperArena || m_pmaStepperArena->IsStructureValid()); 
+}
+
+void dxWorldProcessContext::CleanupContext()
+{
+  if (m_pmaIslandsArena)
+  {
+    m_pmaIslandsArena->ResetState();
+  }
+
+  if (m_pmaStepperArena)
+  {
+    m_pmaStepperArena->ResetState();
+  }
+}
+
+dxWorldProcessMemArena *dxWorldProcessContext::ReallocateIslandsMemArena(size_t nMemoryRequirement, 
+  const dxWorldProcessMemoryManager *pmmMemortManager, float fReserveFactor, unsigned uiReserveMinimum)
+{
+  dxWorldProcessMemArena *pmaExistingArena = GetIslandsMemArena();
+  dxWorldProcessMemArena *pmaNewMemArena = dxWorldProcessMemArena::ReallocateMemArena(pmaExistingArena, nMemoryRequirement, pmmMemortManager, fReserveFactor, uiReserveMinimum);
+  SetIslandsMemArena(pmaNewMemArena);
+  return pmaNewMemArena;
+}
+
+dxWorldProcessMemArena *dxWorldProcessContext::ReallocateStepperMemArena(size_t nMemoryRequirement, 
+  const dxWorldProcessMemoryManager *pmmMemortManager, float fReserveFactor, unsigned uiReserveMinimum)
+{
+  dxWorldProcessMemArena *pmaExistingArena = GetStepperMemArena();
+  dxWorldProcessMemArena *pmaNewMemArena = dxWorldProcessMemArena::ReallocateMemArena(pmaExistingArena, nMemoryRequirement, pmmMemortManager, fReserveFactor, uiReserveMinimum);
+  SetStepperMemArena(pmaNewMemArena);
+  return pmaNewMemArena;
+}
 
 //****************************************************************************
 // Auto disabling
 
 void dInternalHandleAutoDisabling (dxWorld *world, dReal stepsize)
 {
-	dxBody *bb;
-	for ( bb=world->firstbody; bb; bb=(dxBody*)bb->next )
-	{
-		// don't freeze objects mid-air (patch 1586738)
-		if ( bb->firstjoint == NULL ) continue;
+  dxBody *bb;
+  for ( bb=world->firstbody; bb; bb=(dxBody*)bb->next )
+  {
+    // don't freeze objects mid-air (patch 1586738)
+    if ( bb->firstjoint == NULL ) continue;
 
-		// nothing to do unless this body is currently enabled and has
-		// the auto-disable flag set
-		if ( (bb->flags & (dxBodyAutoDisable|dxBodyDisabled)) != dxBodyAutoDisable ) continue;
+    // nothing to do unless this body is currently enabled and has
+    // the auto-disable flag set
+    if ( (bb->flags & (dxBodyAutoDisable|dxBodyDisabled)) != dxBodyAutoDisable ) continue;
 
-		// if sampling / threshold testing is disabled, we can never sleep.
-		if ( bb->adis.average_samples == 0 ) continue;
+    // if sampling / threshold testing is disabled, we can never sleep.
+    if ( bb->adis.average_samples == 0 ) continue;
 
-		//
-		// see if the body is idle
-		//
-		
+    //
+    // see if the body is idle
+    //
+
 #ifndef dNODEBUG
-		// sanity check
-		if ( bb->average_counter >= bb->adis.average_samples )
-		{
-			dUASSERT( bb->average_counter < bb->adis.average_samples, "buffer overflow" );
+    // sanity check
+    if ( bb->average_counter >= bb->adis.average_samples )
+    {
+      dUASSERT( bb->average_counter < bb->adis.average_samples, "buffer overflow" );
 
-			// something is going wrong, reset the average-calculations
-			bb->average_ready = 0; // not ready for average calculation
-			bb->average_counter = 0; // reset the buffer index
-		}
+      // something is going wrong, reset the average-calculations
+      bb->average_ready = 0; // not ready for average calculation
+      bb->average_counter = 0; // reset the buffer index
+    }
 #endif // dNODEBUG
 
-		// sample the linear and angular velocity
-		bb->average_lvel_buffer[bb->average_counter][0] = bb->lvel[0];
-		bb->average_lvel_buffer[bb->average_counter][1] = bb->lvel[1];
-		bb->average_lvel_buffer[bb->average_counter][2] = bb->lvel[2];
-		bb->average_avel_buffer[bb->average_counter][0] = bb->avel[0];
-		bb->average_avel_buffer[bb->average_counter][1] = bb->avel[1];
-		bb->average_avel_buffer[bb->average_counter][2] = bb->avel[2];
-		bb->average_counter++;
+    // sample the linear and angular velocity
+    bb->average_lvel_buffer[bb->average_counter][0] = bb->lvel[0];
+    bb->average_lvel_buffer[bb->average_counter][1] = bb->lvel[1];
+    bb->average_lvel_buffer[bb->average_counter][2] = bb->lvel[2];
+    bb->average_avel_buffer[bb->average_counter][0] = bb->avel[0];
+    bb->average_avel_buffer[bb->average_counter][1] = bb->avel[1];
+    bb->average_avel_buffer[bb->average_counter][2] = bb->avel[2];
+    bb->average_counter++;
 
-		// buffer ready test
-		if ( bb->average_counter >= bb->adis.average_samples )
-		{
-			bb->average_counter = 0; // fill the buffer from the beginning
-			bb->average_ready = 1; // this body is ready now for average calculation
-		}
+    // buffer ready test
+    if ( bb->average_counter >= bb->adis.average_samples )
+    {
+      bb->average_counter = 0; // fill the buffer from the beginning
+      bb->average_ready = 1; // this body is ready now for average calculation
+    }
 
-		int idle = 0; // Assume it's in motion unless we have samples to disprove it.
+    int idle = 0; // Assume it's in motion unless we have samples to disprove it.
 
-		// enough samples?
-		if ( bb->average_ready )
-		{
-			idle = 1; // Initial assumption: IDLE
+    // enough samples?
+    if ( bb->average_ready )
+    {
+      idle = 1; // Initial assumption: IDLE
 
-			// the sample buffers are filled and ready for calculation
-			dVector3 average_lvel, average_avel;
+      // the sample buffers are filled and ready for calculation
+      dVector3 average_lvel, average_avel;
 
-			// Store first velocity samples
-			average_lvel[0] = bb->average_lvel_buffer[0][0];
-			average_avel[0] = bb->average_avel_buffer[0][0];
-			average_lvel[1] = bb->average_lvel_buffer[0][1];
-			average_avel[1] = bb->average_avel_buffer[0][1];
-			average_lvel[2] = bb->average_lvel_buffer[0][2];
-			average_avel[2] = bb->average_avel_buffer[0][2];
-			
-			// If we're not in "instantaneous mode"
-			if ( bb->adis.average_samples > 1 )
-			{
-				// add remaining velocities together
-				for ( unsigned int i = 1; i < bb->adis.average_samples; ++i )
-				{
-					average_lvel[0] += bb->average_lvel_buffer[i][0];
-					average_avel[0] += bb->average_avel_buffer[i][0];
-					average_lvel[1] += bb->average_lvel_buffer[i][1];
-					average_avel[1] += bb->average_avel_buffer[i][1];
-					average_lvel[2] += bb->average_lvel_buffer[i][2];
-					average_avel[2] += bb->average_avel_buffer[i][2];
-				}
+      // Store first velocity samples
+      average_lvel[0] = bb->average_lvel_buffer[0][0];
+      average_avel[0] = bb->average_avel_buffer[0][0];
+      average_lvel[1] = bb->average_lvel_buffer[0][1];
+      average_avel[1] = bb->average_avel_buffer[0][1];
+      average_lvel[2] = bb->average_lvel_buffer[0][2];
+      average_avel[2] = bb->average_avel_buffer[0][2];
 
-				// make average
-				dReal r1 = dReal( 1.0 ) / dReal( bb->adis.average_samples );
+      // If we're not in "instantaneous mode"
+      if ( bb->adis.average_samples > 1 )
+      {
+        // add remaining velocities together
+        for ( unsigned int i = 1; i < bb->adis.average_samples; ++i )
+        {
+          average_lvel[0] += bb->average_lvel_buffer[i][0];
+          average_avel[0] += bb->average_avel_buffer[i][0];
+          average_lvel[1] += bb->average_lvel_buffer[i][1];
+          average_avel[1] += bb->average_avel_buffer[i][1];
+          average_lvel[2] += bb->average_lvel_buffer[i][2];
+          average_avel[2] += bb->average_avel_buffer[i][2];
+        }
 
-				average_lvel[0] *= r1;
-				average_avel[0] *= r1;
-				average_lvel[1] *= r1;
-				average_avel[1] *= r1;
-				average_lvel[2] *= r1;
-				average_avel[2] *= r1;
-			}
+        // make average
+        dReal r1 = dReal( 1.0 ) / dReal( bb->adis.average_samples );
 
-			// threshold test
-			dReal av_lspeed, av_aspeed;
-			av_lspeed = dCalcVectorDot3( average_lvel, average_lvel );
-			if ( av_lspeed > bb->adis.linear_average_threshold )
-			{
-				idle = 0; // average linear velocity is too high for idle
-			}
-			else
-			{
-				av_aspeed = dCalcVectorDot3( average_avel, average_avel );
-				if ( av_aspeed > bb->adis.angular_average_threshold )
-				{
-					idle = 0; // average angular velocity is too high for idle
-				}
-			}
-		}
+        average_lvel[0] *= r1;
+        average_avel[0] *= r1;
+        average_lvel[1] *= r1;
+        average_avel[1] *= r1;
+        average_lvel[2] *= r1;
+        average_avel[2] *= r1;
+      }
 
-		// if it's idle, accumulate steps and time.
-		// these counters won't overflow because this code doesn't run for disabled bodies.
-		if (idle) {
-			bb->adis_stepsleft--;
-			bb->adis_timeleft -= stepsize;
-		}
-		else {
-			// Reset countdowns
-			bb->adis_stepsleft = bb->adis.idle_steps;
-			bb->adis_timeleft = bb->adis.idle_time;
-		}
+      // threshold test
+      dReal av_lspeed, av_aspeed;
+      av_lspeed = dCalcVectorDot3( average_lvel, average_lvel );
+      if ( av_lspeed > bb->adis.linear_average_threshold )
+      {
+        idle = 0; // average linear velocity is too high for idle
+      }
+      else
+      {
+        av_aspeed = dCalcVectorDot3( average_avel, average_avel );
+        if ( av_aspeed > bb->adis.angular_average_threshold )
+        {
+          idle = 0; // average angular velocity is too high for idle
+        }
+      }
+    }
 
-		// disable the body if it's idle for a long enough time
-		if ( bb->adis_stepsleft <= 0 && bb->adis_timeleft <= 0 )
-		{
-			bb->flags |= dxBodyDisabled; // set the disable flag
+    // if it's idle, accumulate steps and time.
+    // these counters won't overflow because this code doesn't run for disabled bodies.
+    if (idle) {
+      bb->adis_stepsleft--;
+      bb->adis_timeleft -= stepsize;
+    }
+    else {
+      // Reset countdowns
+      bb->adis_stepsleft = bb->adis.idle_steps;
+      bb->adis_timeleft = bb->adis.idle_time;
+    }
 
-			// disabling bodies should also include resetting the velocity
-			// should prevent jittering in big "islands"
-			bb->lvel[0] = 0;
-			bb->lvel[1] = 0;
-			bb->lvel[2] = 0;
-			bb->avel[0] = 0;
-			bb->avel[1] = 0;
-			bb->avel[2] = 0;
-		}
-	}
+    // disable the body if it's idle for a long enough time
+    if ( bb->adis_stepsleft <= 0 && bb->adis_timeleft <= 0 )
+    {
+      bb->flags |= dxBodyDisabled; // set the disable flag
+
+      // disabling bodies should also include resetting the velocity
+      // should prevent jittering in big "islands"
+      bb->lvel[0] = 0;
+      bb->lvel[1] = 0;
+      bb->lvel[2] = 0;
+      bb->avel[0] = 0;
+      bb->avel[1] = 0;
+      bb->avel[2] = 0;
+    }
+  }
 }
 
 
@@ -365,7 +364,7 @@ void dxStepBody (dxBody *b, dReal h)
 // island processing
 
 // This estimates dynamic memory requirements for dxProcessIslands
-static size_t EstimateIslandsProcessingMemoryRequirements(dxWorld *world, size_t &sesize)
+static size_t EstimateIslandsProcessingMemoryRequirements(dxWorld *world)
 {
   size_t res = 0;
 
@@ -376,11 +375,14 @@ static size_t EstimateIslandsProcessingMemoryRequirements(dxWorld *world, size_t
   size_t jointssize = dEFFICIENT_SIZE((size_t)(unsigned)world->nj * sizeof(dxJoint*));
   res += bodiessize + jointssize;
 
-  sesize = (bodiessize < jointssize) ? bodiessize : jointssize;
+  size_t sesize = (bodiessize < jointssize) ? bodiessize : jointssize;
+  res += sesize;
+
   return res;
 }
 
-static size_t BuildIslandsAndEstimateStepperMemoryRequirements(dxWorldProcessContext *context, 
+static size_t BuildIslandsAndEstimateStepperMemoryRequirements(
+  dxWorldProcessIslandsInfo &islandsinfo, dxWorldProcessMemArena *memarena, 
   dxWorld *world, dReal stepsize, dmemestimate_fn_t stepperestimate)
 {
   const unsigned int sizeelements = 2;
@@ -391,20 +393,20 @@ static size_t BuildIslandsAndEstimateStepperMemoryRequirements(dxWorldProcessCon
 
   unsigned int nb = world->nb, nj = world->nj;
   // Make array for island body/joint counts
-  unsigned int *islandsizes = context->AllocateArray<unsigned int>(2 * (size_t)nb);
+  unsigned int *islandsizes = memarena->AllocateArray<unsigned int>(2 * (size_t)nb);
   unsigned int *sizescurr;
 
   // make arrays for body and joint lists (for a single island) to go into
-  dxBody **body = context->AllocateArray<dxBody *>(nb);
-  dxJoint **joint = context->AllocateArray<dxJoint *>(nj);
+  dxBody **body = memarena->AllocateArray<dxBody *>(nb);
+  dxJoint **joint = memarena->AllocateArray<dxJoint *>(nj);
 
-  BEGIN_STATE_SAVE(context, stackstate) {
+  BEGIN_STATE_SAVE(memarena, stackstate) {
     // allocate a stack of unvisited bodies in the island. the maximum size of
     // the stack can be the lesser of the number of bodies or joints, because
     // new bodies are only ever added to the stack by going through untagged
     // joints. all the bodies in the stack must be tagged!
     unsigned int stackalloc = (nj < nb) ? nj : nb;
-    dxBody **stack = context->AllocateArray<dxBody *>(stackalloc);
+    dxBody **stack = memarena->AllocateArray<dxBody *>(stackalloc);
 
     {
       // set all body/joint tags to 0
@@ -483,7 +485,7 @@ static size_t BuildIslandsAndEstimateStepperMemoryRequirements(dxWorldProcessCon
         }
       }
     }
-  } END_STATE_SAVE(context, stackstate);
+  } END_STATE_SAVE(memarena, stackstate);
 
 # ifndef dNODEBUG
   // if debugging, check that all objects (except for disabled bodies,
@@ -513,7 +515,7 @@ static size_t BuildIslandsAndEstimateStepperMemoryRequirements(dxWorldProcessCon
 # endif
 
   size_t islandcount = ((size_t)(sizescurr - islandsizes) / sizeelements);
-  context->SavePreallocations(islandcount, islandsizes, body, joint);
+  islandsinfo.AssignInfo(islandcount, islandsizes, body, joint);
 
   return maxreq;
 }
@@ -529,7 +531,8 @@ static size_t BuildIslandsAndEstimateStepperMemoryRequirements(dxWorldProcessCon
 // bodies will not be included in the simulation. disabled bodies are
 // re-enabled if they are found to be part of an active island.
 
-void dxProcessIslands (dxWorld *world, dReal stepsize, dstepper_fn_t stepper)
+void dxProcessIslands (dxWorld *world, const dxWorldProcessIslandsInfo &islandsinfo, 
+  dReal stepsize, dstepper_fn_t stepper)
 {
   const unsigned int sizeelements = 2;
 
@@ -537,13 +540,15 @@ void dxProcessIslands (dxWorld *world, dReal stepsize, dstepper_fn_t stepper)
   dIASSERT(wmem != NULL);
 
   dxWorldProcessContext *context = wmem->GetWorldProcessingContext(); 
+  dIASSERT(context != NULL);
 
-  size_t islandcount;
-  unsigned int const *islandsizes;
-  dxBody *const *body;
-  dxJoint *const *joint;
-  context->RetrievePreallocations(islandcount, islandsizes, body, joint);
+  size_t islandcount = islandsinfo.GetIslandsCount();
+  unsigned int const *islandsizes = islandsinfo.GetIslandSizes();
+  dxBody *const *body = islandsinfo.GetBodiesArray();
+  dxJoint *const *joint = islandsinfo.GetJointsArray();
 
+  dxWorldProcessMemArena *stepperarena = context->GetStepperMemArena();
+  
   dxBody *const *bodystart = body;
   dxJoint *const *jointstart = joint;
 
@@ -552,23 +557,95 @@ void dxProcessIslands (dxWorld *world, dReal stepsize, dstepper_fn_t stepper)
     unsigned int bcount = sizescurr[0];
     unsigned int jcount = sizescurr[1];
 
-    BEGIN_STATE_SAVE(context, stepperstate) {
+    BEGIN_STATE_SAVE(stepperarena, stepperstate) {
       // now do something with body and joint lists
-      stepper (context,world,bodystart,bcount,jointstart,jcount,stepsize);
-    } END_STATE_SAVE(context, stepperstate);
+      stepper (stepperarena,world,bodystart,bcount,jointstart,jcount,stepsize);
+    } END_STATE_SAVE(stepperarena, stepperstate);
 
     bodystart += bcount;
     jointstart += jcount;
   }
-
-  context->CleanupContext();
-  dIASSERT(context->IsStructureValid());
 }
 
 //****************************************************************************
 // World processing context management
 
-static size_t AdjustArenaSizeForReserveRequirements(size_t arenareq, float rsrvfactor, unsigned rsrvminimum)
+dxWorldProcessMemArena *dxWorldProcessMemArena::ReallocateMemArena (
+  dxWorldProcessMemArena *oldarena, size_t memreq, 
+  const dxWorldProcessMemoryManager *memmgr, float rsrvfactor, unsigned rsrvminimum)
+{
+  dxWorldProcessMemArena *arena = oldarena;
+  bool allocsuccess = false;
+
+  size_t nOldArenaSize; 
+  void *pOldArenaBuffer;
+
+  do {
+    size_t oldmemsize = oldarena ? oldarena->GetMemorySize() : 0;
+    if (oldarena == NULL || oldmemsize < memreq) {
+      nOldArenaSize = oldarena ? dxWorldProcessMemArena::MakeArenaSize(oldmemsize) : 0;
+      pOldArenaBuffer = oldarena ? oldarena->m_pArenaBegin : NULL;
+
+      if (!dxWorldProcessMemArena::IsArenaPossible(memreq)) {
+        break;
+      }
+
+      size_t arenareq = dxWorldProcessMemArena::MakeArenaSize(memreq);
+      size_t arenareq_with_reserve = AdjustArenaSizeForReserveRequirements(arenareq, rsrvfactor, rsrvminimum);
+      size_t memreq_with_reserve = memreq + (arenareq_with_reserve - arenareq);
+
+      if (oldarena != NULL) {
+          oldarena->m_pArenaMemMgr->m_fnFree(pOldArenaBuffer, nOldArenaSize);
+          oldarena = NULL;
+
+          // Zero variables to avoid another freeing on exit
+          pOldArenaBuffer = NULL;
+          nOldArenaSize = 0;
+      }
+
+      // Allocate new arena
+      void *pNewArenaBuffer = memmgr->m_fnAlloc(arenareq_with_reserve);
+      if (pNewArenaBuffer == NULL) {
+        break;
+      }
+
+      arena = (dxWorldProcessMemArena *)dEFFICIENT_PTR(pNewArenaBuffer);
+
+      void *blockbegin = dEFFICIENT_PTR(arena + 1);
+      void *blockend = dOFFSET_EFFICIENTLY(blockbegin, memreq_with_reserve);
+
+      arena->m_pAllocBegin = blockbegin;
+      arena->m_pAllocEnd = blockend;
+      arena->m_pArenaBegin = pNewArenaBuffer;
+      arena->m_pAllocCurrent = blockbegin;
+      arena->m_pArenaMemMgr = memmgr;
+    }
+
+    allocsuccess = true;
+  } while (false);
+
+  if (!allocsuccess) {
+    if (pOldArenaBuffer != NULL) {
+      dIASSERT(oldarena != NULL);
+      oldarena->m_pArenaMemMgr->m_fnFree(pOldArenaBuffer, nOldArenaSize);
+    }
+    arena = NULL;
+  }
+
+  return arena;
+}
+
+void dxWorldProcessMemArena::FreeMemArena (dxWorldProcessMemArena *arena)
+{
+  size_t memsize = arena->GetMemorySize();
+  size_t arenasize = dxWorldProcessMemArena::MakeArenaSize(memsize);
+
+  void *pArenaBegin = arena->m_pArenaBegin;
+  arena->m_pArenaMemMgr->m_fnFree(pArenaBegin, arenasize);
+}
+
+
+size_t dxWorldProcessMemArena::AdjustArenaSizeForReserveRequirements(size_t arenareq, float rsrvfactor, unsigned rsrvminimum)
 {
   float scaledarena = arenareq * rsrvfactor;
   size_t adjustedarena = (scaledarena < SIZE_MAX) ? (size_t)scaledarena : SIZE_MAX;
@@ -576,211 +653,62 @@ static size_t AdjustArenaSizeForReserveRequirements(size_t arenareq, float rsrvf
   return dEFFICIENT_SIZE(boundedarena);
 }
 
-static dxWorldProcessContext *InternalReallocateWorldProcessContext (
-  dxWorldProcessContext *oldcontext, size_t memreq, 
-  const dxWorldProcessMemoryManager *memmgr, float rsrvfactor, unsigned rsrvminimum)
-{
-  dxWorldProcessContext *context = oldcontext;
-  bool allocsuccess = false;
 
-  size_t oldarenasize; 
-  void *pOldArena;
-
-  do {
-    size_t oldmemsize = oldcontext ? oldcontext->GetMemorySize() : 0;
-    if (!oldcontext || oldmemsize < memreq) {
-      oldarenasize = oldcontext ? dxWorldProcessContext::MakeArenaSize(oldmemsize) : 0;
-      pOldArena = oldcontext ? oldcontext->m_pArenaBegin : NULL;
-
-      if (!dxWorldProcessContext::IsArenaPossible(memreq)) {
-        break;
-      }
-
-      size_t arenareq = dxWorldProcessContext::MakeArenaSize(memreq);
-      size_t arenareq_with_reserve = AdjustArenaSizeForReserveRequirements(arenareq, rsrvfactor, rsrvminimum);
-      size_t memreq_with_reserve = memreq + (arenareq_with_reserve - arenareq);
-
-      if (oldcontext) {
-
-        if (oldcontext->m_pAllocCurrent != oldcontext->m_pAllocBegin) {
-
-          // Save old efficient offset and meaningful data size for the case if 
-          // reallocation throws the block at different efficient offset
-          size_t oldcontextofs = (size_t)oldcontext - (size_t)pOldArena;
-          size_t datasize = (size_t)oldcontext->m_pAllocCurrent - (size_t)oldcontext;
-          
-          // Extra EFFICIENT_ALIGNMENT bytes might be needed after re-allocation with different alignment
-          size_t shrunkarenasize = dEFFICIENT_SIZE(datasize + oldcontextofs) + EFFICIENT_ALIGNMENT;
-          if (shrunkarenasize < oldarenasize) {
-
-            void *pShrunkOldArena = oldcontext->m_pArenaMemMgr->m_fnShrink(pOldArena, oldarenasize, shrunkarenasize);
-            if (!pShrunkOldArena) {
-              break;
-            }
-
-            // In case if shrinking is not supported and memory manager had to allocate-copy-free
-            if (pShrunkOldArena != pOldArena) {
-              dxWorldProcessContext *shrunkcontext = (dxWorldProcessContext *)dEFFICIENT_PTR(pShrunkOldArena);
-
-              // Preform data shift in case if efficient alignment of new block
-              // does not match that of old block
-              size_t shrunkcontextofs = (size_t)shrunkcontext - (size_t)pShrunkOldArena;
-              size_t offsetdiff = oldcontextofs - shrunkcontextofs;
-              if (offsetdiff != 0) {
-                memmove(shrunkcontext, (void *)((size_t)shrunkcontext + offsetdiff), datasize);
-              }
-
-              // Make sure allocation pointers are valid - that is necessary to
-              // be able to calculate size and free old arena later
-              size_t shrunkdatasize = dxWorldProcessContext::MakeBufferSize(shrunkarenasize);
-              void *blockbegin = dEFFICIENT_PTR(shrunkcontext + 1);
-              void *blockend = dOFFSET_EFFICIENTLY(blockbegin, shrunkdatasize);
-              shrunkcontext->m_pAllocBegin = blockbegin;
-              shrunkcontext->m_pAllocEnd = blockend;
-              shrunkcontext->m_pAllocCurrent = blockend; // -- set to end to prevent possibility of further allocation
-              shrunkcontext->m_pArenaBegin = pShrunkOldArena;
-
-              size_t stOffset = ((size_t)pShrunkOldArena - (size_t)pOldArena) - offsetdiff;
-              shrunkcontext->OffsetPreallocations(stOffset);
-
-              oldcontext = shrunkcontext;
-
-              // Reassign to old arena variables for potential freeing at exit
-              pOldArena = pShrunkOldArena;
-            }
-
-            // Reassign to old arena variables for potential freeing at exit
-            oldarenasize = shrunkarenasize;
-          }
-
-        } else {
-          oldcontext->m_pArenaMemMgr->m_fnFree(pOldArena, oldarenasize);
-          oldcontext = NULL;
-          
-          // Zero variables to avoid another freeing on exit
-          pOldArena = NULL;
-          oldarenasize = 0;
-        }
-      }
-
-      // Allocate new arena
-      void *pNewArena = memmgr->m_fnAlloc(arenareq_with_reserve);
-      if (!pNewArena) {
-        break;
-      }
-
-      context = (dxWorldProcessContext *)dEFFICIENT_PTR(pNewArena);
-
-      void *blockbegin = dEFFICIENT_PTR(context + 1);
-      void *blockend = dOFFSET_EFFICIENTLY(blockbegin, memreq_with_reserve);
-
-      context->m_pAllocBegin = blockbegin;
-      context->m_pAllocEnd = blockend;
-      context->m_pArenaBegin = pNewArena;
-      context->m_pAllocCurrent = blockbegin;
-
-      if (oldcontext) {
-        context->CopyPreallocations(oldcontext);
-      } else {
-        context->ClearPreallocations();
-      }
-
-      context->m_pArenaMemMgr = memmgr;
-      context->m_pPreallocationcContext = oldcontext;
-    }
-
-    allocsuccess = true;
-  } while (false);
-
-  if (!allocsuccess) {
-    if (pOldArena) {
-      dIASSERT(oldcontext);
-      oldcontext->m_pArenaMemMgr->m_fnFree(pOldArena, oldarenasize);
-    }
-    context = NULL;
-  }
-
-  return context;
-}
-
-static void InternalFreeWorldProcessContext (dxWorldProcessContext *context)
-{
-  size_t memsize = context->GetMemorySize();
-  size_t arenasize = dxWorldProcessContext::MakeArenaSize(memsize);
-
-  void *pArenaBegin = context->m_pArenaBegin;
-  context->m_pArenaMemMgr->m_fnFree(pArenaBegin, arenasize);
-}
-
-
-bool dxReallocateWorldProcessContext (dxWorld *world, 
+bool dxReallocateWorldProcessContext (dxWorld *world, dxWorldProcessIslandsInfo &islandsinfo, 
   dReal stepsize, dmemestimate_fn_t stepperestimate)
 {
   dxStepWorkingMemory *wmem = AllocateOnDemand(world->wmem);
-  if (!wmem) return false;
+  if (wmem == NULL) return false;
 
-  dxWorldProcessContext *oldcontext = wmem->GetWorldProcessingContext();
-  dIASSERT (!oldcontext || oldcontext->IsStructureValid());
+  dxWorldProcessContext *context = wmem->SureGetWorldProcessingContext();
+  if (context == NULL) return false;
+  dIASSERT (context->IsStructureValid());
 
   const dxWorldProcessMemoryReserveInfo *reserveinfo = wmem->SureGetMemoryReserveInfo();
   const dxWorldProcessMemoryManager *memmgr = wmem->SureGetMemoryManager();
 
-  dxWorldProcessContext *context = oldcontext;
-
-  size_t sesize;
-  size_t islandsreq = EstimateIslandsProcessingMemoryRequirements(world, sesize);
+  size_t islandsreq = EstimateIslandsProcessingMemoryRequirements(world);
   dIASSERT(islandsreq == dEFFICIENT_SIZE(islandsreq));
-  dIASSERT(sesize == dEFFICIENT_SIZE(sesize));
 
-  size_t stepperestimatereq = islandsreq + sesize;
-  context = InternalReallocateWorldProcessContext(context, stepperestimatereq, memmgr, 1.0f, reserveinfo->m_uiReserveMinimum);
-  
-  if (context)
+  dxWorldProcessMemArena *stepperarena = NULL;
+  dxWorldProcessMemArena *islandsarena = context->ReallocateIslandsMemArena(islandsreq, memmgr, 1.0f, reserveinfo->m_uiReserveMinimum);
+
+  if (islandsarena != NULL)
   {
-    size_t stepperreq = BuildIslandsAndEstimateStepperMemoryRequirements(context, world, stepsize, stepperestimate);
+    size_t stepperreq = BuildIslandsAndEstimateStepperMemoryRequirements(islandsinfo, islandsarena, world, stepsize, stepperestimate);
     dIASSERT(stepperreq == dEFFICIENT_SIZE(stepperreq));
 
-    size_t memreq = stepperreq + islandsreq;
-    context = InternalReallocateWorldProcessContext(context, memreq, memmgr, reserveinfo->m_fReserveFactor, reserveinfo->m_uiReserveMinimum);
+    stepperarena = context->ReallocateStepperMemArena(stepperreq, memmgr, reserveinfo->m_fReserveFactor, reserveinfo->m_uiReserveMinimum);
   }
 
-  wmem->SetWorldProcessingContext(context);
-  return context != NULL;
+  return stepperarena != NULL;
 }
 
-dxWorldProcessContext *dxReallocateTemporayWorldProcessContext(dxWorldProcessContext *oldcontext, 
+void dxCleanupWorldProcessContext (dxWorld *world)
+{
+  dxStepWorkingMemory *wmem = world->wmem;
+  if (wmem != NULL)
+  {
+    dxWorldProcessContext *context = wmem->GetWorldProcessingContext();
+    if (context != NULL)
+    {
+      context->CleanupContext();
+      dIASSERT(context->IsStructureValid());
+    }
+  }
+}
+
+dxWorldProcessMemArena *dxAllocateTemporaryWorldProcessMemArena(
   size_t memreq, const dxWorldProcessMemoryManager *memmgr/*=NULL*/, const dxWorldProcessMemoryReserveInfo *reserveinfo/*=NULL*/)
 {
-  dxWorldProcessContext *context = oldcontext;
-
-  if (context && context->GetMemorySize() < memreq) {
-    dIASSERT(!context->IsPreallocationsContextAssigned());
-
-    InternalFreeWorldProcessContext(context);
-    context = NULL;
-  }
-
-  if (context == NULL) {
-    const dxWorldProcessMemoryManager *surememmgr = memmgr ? memmgr : &g_WorldProcessMallocMemoryManager;
-    const dxWorldProcessMemoryReserveInfo *surereserveinfo = reserveinfo ? reserveinfo : &g_WorldProcessDefaultReserveInfo;
-    context = InternalReallocateWorldProcessContext(context, memreq, surememmgr, surereserveinfo->m_fReserveFactor, surereserveinfo->m_uiReserveMinimum);
-  }
-
-  return context;
+  const dxWorldProcessMemoryManager *surememmgr = memmgr ? memmgr : &g_WorldProcessMallocMemoryManager;
+  const dxWorldProcessMemoryReserveInfo *surereserveinfo = reserveinfo ? reserveinfo : &g_WorldProcessDefaultReserveInfo;
+  dxWorldProcessMemArena *arena = dxWorldProcessMemArena::ReallocateMemArena(NULL, memreq, surememmgr, surereserveinfo->m_fReserveFactor, surereserveinfo->m_uiReserveMinimum);
+  return arena;
 }
 
-void dxFreeWorldProcessContext (dxWorldProcessContext *context)
+void dxFreeTemporaryWorldProcessMemArena(dxWorldProcessMemArena *arena)
 {
-  // Free old arena for the case if context is freed after reallocation without
-  // a call to world stepping function
-  context->FreePreallocationsContext();
-
-  // Assert validity after old arena is freed as validation includes checking for
-  // old arena to be absent
-  dUASSERT (context->IsStructureValid(), "invalid context structure");
-
-  InternalFreeWorldProcessContext(context);
+  dxWorldProcessMemArena::FreeMemArena(arena);
 }
-
-
 
