@@ -218,7 +218,7 @@ static inline void add (unsigned int n, dRealMutablePtr x, dRealPtr y, dRealPtr 
   for (unsigned int i=0; i<n; i++) x[i] = y[i] + z[i]*alpha;
 }
 
-static void CG_LCP (dxWorldProcessContext *context,
+static void CG_LCP (dxWorldProcessMemArena *memarena,
   unsigned int m, unsigned int nb, dRealMutablePtr J, int *jb, dxBody * const *body,
   dRealPtr invI, dRealMutablePtr lambda, dRealMutablePtr fc, dRealMutablePtr b,
   dRealMutablePtr lo, dRealMutablePtr hi, dRealPtr cfm, int *findex,
@@ -227,17 +227,17 @@ static void CG_LCP (dxWorldProcessContext *context,
   const unsigned int num_iterations = qs->num_iterations;
 
   // precompute iMJ = inv(M)*J'
-  dReal *iMJ = context->AllocateArray<dReal> ((size_t)m*12);
+  dReal *iMJ = memarena->AllocateArray<dReal> ((size_t)m*12);
   compute_invM_JT (m,J,iMJ,jb,body,invI);
 
   dReal last_rho = 0;
-  dReal *r = context->AllocateArray<dReal> (m);
-  dReal *z = context->AllocateArray<dReal> (m);
-  dReal *p = context->AllocateArray<dReal> (m);
-  dReal *q = context->AllocateArray<dReal> (m);
+  dReal *r = memarena->AllocateArray<dReal> (m);
+  dReal *z = memarena->AllocateArray<dReal> (m);
+  dReal *p = memarena->AllocateArray<dReal> (m);
+  dReal *q = memarena->AllocateArray<dReal> (m);
 
   // precompute 1 / diagonals of A
-  dReal *Ad = context->AllocateArray<dReal> (m);
+  dReal *Ad = memarena->AllocateArray<dReal> (m);
   dRealPtr iMJ_ptr = iMJ;
   dRealPtr J_ptr = J;
   for (unsigned int i=0; i<m; i++) {
@@ -339,7 +339,7 @@ static int compare_index_error (const void *a, const void *b)
 
 #endif
 
-static void SOR_LCP (dxWorldProcessContext *context,
+static void SOR_LCP (dxWorldProcessMemArena *memarena,
   const unsigned int m, const unsigned int nb, dRealMutablePtr J, int *jb, dxBody * const *body,
   dRealPtr invI, dRealMutablePtr lambda, dRealMutablePtr fc, dRealMutablePtr b,
   dRealPtr lo, dRealPtr hi, dRealPtr cfm, const int *findex,
@@ -356,7 +356,7 @@ static void SOR_LCP (dxWorldProcessContext *context,
 #endif
 
   // precompute iMJ = inv(M)*J'
-  dReal *iMJ = context->AllocateArray<dReal> ((size_t)m*12);
+  dReal *iMJ = memarena->AllocateArray<dReal> ((size_t)m*12);
   compute_invM_JT (m,J,iMJ,jb,body,invI);
 
   // compute fc=(inv(M)*J')*lambda. we will incrementally maintain fc
@@ -367,7 +367,7 @@ static void SOR_LCP (dxWorldProcessContext *context,
   dSetZero (fc,(size_t)nb*6);
 #endif
 
-  dReal *Ad = context->AllocateArray<dReal> (m);
+  dReal *Ad = memarena->AllocateArray<dReal> (m);
 
   {
     const dReal sor_w = qs->w;		// SOR over-relaxation parameter
@@ -403,7 +403,7 @@ static void SOR_LCP (dxWorldProcessContext *context,
 
 
   // order to solve constraint rows in
-  IndexError *order = context->AllocateArray<IndexError> (m);
+  IndexError *order = memarena->AllocateArray<IndexError> (m);
 
 #ifndef REORDER_CONSTRAINTS
   {
@@ -427,7 +427,7 @@ static void SOR_LCP (dxWorldProcessContext *context,
 #ifdef REORDER_CONSTRAINTS
   // the lambda computed at the previous iteration.
   // this is used to measure error for when we are reordering the indexes.
-  dReal *last_lambda = context->AllocateArray<dReal> (m);
+  dReal *last_lambda = memarena->AllocateArray<dReal> (m);
 #endif
 
   const unsigned int num_iterations = qs->num_iterations;
@@ -589,7 +589,7 @@ struct dJointWithInfo1
   dxJoint::Info1 info;
 };
 
-void dxQuickStepper (dxWorldProcessContext *context, 
+void dxQuickStepper (dxWorldProcessMemArena *memarena, 
   dxWorld *world, dxBody * const *body, unsigned int nb,
   dxJoint * const *_joint, unsigned int _nj, dReal stepsize)
 {
@@ -605,7 +605,7 @@ void dxQuickStepper (dxWorldProcessContext *context,
   // for all bodies, compute the inertia tensor and its inverse in the global
   // frame, and compute the rotational force and add it to the torque
   // accumulator. I and invI are a vertical stack of 3x4 matrices, one per body.
-  dReal *invI = context->AllocateArray<dReal> (3*4*(size_t)nb);
+  dReal *invI = memarena->AllocateArray<dReal> (3*4*(size_t)nb);
 
   {
     dReal *invIrow = invI;
@@ -667,7 +667,7 @@ void dxQuickStepper (dxWorldProcessContext *context,
   // get joint information (m = total constraint dimension, nub = number of unbounded variables).
   // joints with m=0 are inactive and are removed from the joints array
   // entirely, so that the code that follows does not consider them.
-  dJointWithInfo1 *const jointiinfos = context->AllocateArray<dJointWithInfo1> (_nj);
+  dJointWithInfo1 *const jointiinfos = memarena->AllocateArray<dJointWithInfo1> (_nj);
   size_t nj;
   
   {
@@ -685,7 +685,7 @@ void dxQuickStepper (dxWorldProcessContext *context,
     nj = jicurr - jointiinfos;
   }
 
-  context->ShrinkArray<dJointWithInfo1>(jointiinfos, _nj, nj);
+  memarena->ShrinkArray<dJointWithInfo1>(jointiinfos, _nj, nj);
 
   unsigned int m;
   unsigned int mfb; // number of rows of Jacobian we will have to save for joint feedback
@@ -716,34 +716,34 @@ void dxQuickStepper (dxWorldProcessContext *context,
       unsigned int mlocal = m;
 
       const size_t jelements = (size_t)mlocal*12;
-      J = context->AllocateArray<dReal> (jelements);
+      J = memarena->AllocateArray<dReal> (jelements);
       dSetZero (J,jelements);
 
       // create a constraint equation right hand side vector `c', a constraint
       // force mixing vector `cfm', and LCP low and high bound vectors, and an
       // 'findex' vector.
-      cfm = context->AllocateArray<dReal> (mlocal);
+      cfm = memarena->AllocateArray<dReal> (mlocal);
       dSetValue (cfm,mlocal,world->global_cfm);
 
-      lo = context->AllocateArray<dReal> (mlocal);
+      lo = memarena->AllocateArray<dReal> (mlocal);
       dSetValue (lo,mlocal,-dInfinity);
 
-      hi = context->AllocateArray<dReal> (mlocal);
+      hi = memarena->AllocateArray<dReal> (mlocal);
       dSetValue (hi,mlocal, dInfinity);
 
-      findex = context->AllocateArray<int> (mlocal);
+      findex = memarena->AllocateArray<int> (mlocal);
       for (unsigned int i=0; i<mlocal; i++) findex[i] = -1;
 
       const size_t jbelements = (size_t)mlocal*2;
-      jb = context->AllocateArray<int> (jbelements);
+      jb = memarena->AllocateArray<int> (jbelements);
 
-      rhs = context->AllocateArray<dReal> (mlocal);
+      rhs = memarena->AllocateArray<dReal> (mlocal);
 
-      Jcopy = context->AllocateArray<dReal> ((size_t)mfb*12);
+      Jcopy = memarena->AllocateArray<dReal> ((size_t)mfb*12);
     }
 
-    BEGIN_STATE_SAVE(context, cstate) {
-      dReal *c = context->AllocateArray<dReal> (m);
+    BEGIN_STATE_SAVE(memarena, cstate) {
+      dReal *c = memarena->AllocateArray<dReal> (m);
       dSetZero (c, m);
 
       {
@@ -829,10 +829,10 @@ void dxQuickStepper (dxWorldProcessContext *context,
         dIASSERT (jb_ptr == jb+2*(size_t)m);
       }
 
-      BEGIN_STATE_SAVE(context, tmp1state) {
+      BEGIN_STATE_SAVE(memarena, tmp1state) {
         IFTIMING (dTimerNow ("compute rhs"));
         // compute the right hand side `rhs'
-        dReal *tmp1 = context->AllocateArray<dReal> ((size_t)nb*6);
+        dReal *tmp1 = memarena->AllocateArray<dReal> ((size_t)nb*6);
         // put v/h + invM*fe into tmp1
         dReal *tmp1curr = tmp1;
         const dReal *invIrow = invI;
@@ -848,7 +848,7 @@ void dxQuickStepper (dxWorldProcessContext *context,
         // put J*tmp1 into rhs
         multiply_J (m,J,jb,tmp1,rhs);
       
-      } END_STATE_SAVE(context, tmp1state);
+      } END_STATE_SAVE(memarena, tmp1state);
 
       // complete rhs
       for (unsigned int i=0; i<m; i++) rhs[i] = c[i]*stepsize1 - rhs[i];
@@ -856,10 +856,10 @@ void dxQuickStepper (dxWorldProcessContext *context,
       // scale CFM
       for (unsigned int j=0; j<m; j++) cfm[j] *= stepsize1;
 
-    } END_STATE_SAVE(context, cstate);
+    } END_STATE_SAVE(memarena, cstate);
 
     // load lambda from the value saved on the previous iteration
-    dReal *lambda = context->AllocateArray<dReal> (m);
+    dReal *lambda = memarena->AllocateArray<dReal> (m);
 
 #ifdef WARM_STARTING
     {
@@ -874,14 +874,14 @@ void dxQuickStepper (dxWorldProcessContext *context,
     }
 #endif
 
-    dReal *cforce = context->AllocateArray<dReal> ((size_t)nb*6);
+    dReal *cforce = memarena->AllocateArray<dReal> ((size_t)nb*6);
 
-    BEGIN_STATE_SAVE(context, lcpstate) {
+    BEGIN_STATE_SAVE(memarena, lcpstate) {
       IFTIMING (dTimerNow ("solving LCP problem"));
       // solve the LCP problem and get lambda and invM*constraint_force
-      SOR_LCP (context,m,nb,J,jb,body,invI,lambda,cforce,rhs,lo,hi,cfm,findex,&world->qs);
+      SOR_LCP (memarena,m,nb,J,jb,body,invI,lambda,cforce,rhs,lo,hi,cfm,findex,&world->qs);
 
-    } END_STATE_SAVE(context, lcpstate);
+    } END_STATE_SAVE(memarena, lcpstate);
 
 #ifdef WARM_STARTING
     {
@@ -976,8 +976,8 @@ void dxQuickStepper (dxWorldProcessContext *context,
 
 #ifdef CHECK_VELOCITY_OBEYS_CONSTRAINT
   if (m > 0) {
-    BEGIN_STATE_SAVE(context, velstate) {
-      dReal *vel = context->AllocateArray<dReal>((size_t)nb*6);
+    BEGIN_STATE_SAVE(memarena, velstate) {
+      dReal *vel = memarena->AllocateArray<dReal>((size_t)nb*6);
 
       // check that the updated velocity obeys the constraint (this check needs unmodified J)
       dReal *velcurr = vel;
@@ -988,13 +988,13 @@ void dxQuickStepper (dxWorldProcessContext *context,
           velcurr[3+j] = bodycurr->avel[j];
         }
       }
-      dReal *tmp = context->AllocateArray<dReal> (m);
+      dReal *tmp = memarena->AllocateArray<dReal> (m);
       multiply_J (m,J,jb,vel,tmp);
       dReal error = 0;
       for (unsigned int i=0; i<m; i++) error += dFabs(tmp[i]);
       printf ("velocity error = %10.6e\n",error);
     
-    } END_STATE_SAVE(context, velstate)
+    } END_STATE_SAVE(memarena, velstate)
   }
 #endif
 

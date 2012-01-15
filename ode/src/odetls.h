@@ -43,7 +43,7 @@ ODE Thread Local Storage access stub interface.
 
 
 struct TrimeshCollidersCache;
-struct dxWorldProcessContext;
+
 
 enum EODETLSKIND
 {

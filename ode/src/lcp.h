@@ -50,9 +50,9 @@ to be implemented. the first `nub' variables are assumed to have findex < 0.
 #ifndef _ODE_LCP_H_
 #define _ODE_LCP_H_
 
-struct dxWorldProcessContext;
+class dxWorldProcessMemArena;
 
-void dSolveLCP (dxWorldProcessContext *context, 
+void dSolveLCP (dxWorldProcessMemArena *memarena, 
   int n, dReal *A, dReal *x, dReal *b, dReal *w,
 	int nub, dReal *lo, dReal *hi, int *findex);
 

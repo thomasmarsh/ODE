@@ -1791,12 +1791,15 @@ int dWorldStep (dWorldID w, dReal stepsize)
 
   bool result = false;
 
-  if (dxReallocateWorldProcessContext (w, stepsize, &dxEstimateStepMemoryRequirements))
+  dxWorldProcessIslandsInfo islandsinfo;
+  if (dxReallocateWorldProcessContext (w, islandsinfo, stepsize, &dxEstimateStepMemoryRequirements))
   {
-    dxProcessIslands (w, stepsize, &dInternalStepIsland);
+    dxProcessIslands (w, islandsinfo, stepsize, &dInternalStepIsland);
     
     result = true;
   }
+
+  dxCleanupWorldProcessContext (w);
 
   return result;
 }
@@ -1808,12 +1811,15 @@ int dWorldQuickStep (dWorldID w, dReal stepsize)
 
   bool result = false;
 
-  if (dxReallocateWorldProcessContext (w, stepsize, &dxEstimateQuickStepMemoryRequirements))
+  dxWorldProcessIslandsInfo islandsinfo;
+  if (dxReallocateWorldProcessContext (w, islandsinfo, stepsize, &dxEstimateQuickStepMemoryRequirements))
   {
-    dxProcessIslands (w, stepsize, &dxQuickStepper);
+    dxProcessIslands (w, islandsinfo, stepsize, &dxQuickStepper);
     
     result = true;
   }
+
+  dxCleanupWorldProcessContext (w);
 
   return result;
 }

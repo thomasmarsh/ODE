@@ -781,7 +781,7 @@ void dLCP::unpermute()
 //***************************************************************************
 // an optimized Dantzig LCP driver routine for the lo-hi LCP problem.
 
-void dSolveLCP (dxWorldProcessContext *context, int n, dReal *A, dReal *x, dReal *b,
+void dSolveLCP (dxWorldProcessMemArena *memarena, int n, dReal *A, dReal *x, dReal *b,
                 dReal *outer_w/*=NULL*/, int nub, dReal *lo, dReal *hi, int *findex)
 {
   dAASSERT (n>0 && A && x && b && lo && hi && nub >= 0 && nub <= n);
@@ -796,7 +796,7 @@ void dSolveLCP (dxWorldProcessContext *context, int n, dReal *A, dReal *x, dReal
   // if all the variables are unbounded then we can just factor, solve,
   // and return
   if (nub >= n) {
-    dReal *d = context->AllocateArray<dReal> (n);
+    dReal *d = memarena->AllocateArray<dReal> (n);
     dSetZero (d, n);
 
     int nskip = dPAD(n);
@@ -808,23 +808,23 @@ void dSolveLCP (dxWorldProcessContext *context, int n, dReal *A, dReal *x, dReal
   }
 
   const int nskip = dPAD(n);
-  dReal *L = context->AllocateArray<dReal> (n*nskip);
-  dReal *d = context->AllocateArray<dReal> (n);
-  dReal *w = outer_w ? outer_w : context->AllocateArray<dReal> (n);
-  dReal *delta_w = context->AllocateArray<dReal> (n);
-  dReal *delta_x = context->AllocateArray<dReal> (n);
-  dReal *Dell = context->AllocateArray<dReal> (n);
-  dReal *ell = context->AllocateArray<dReal> (n);
+  dReal *L = memarena->AllocateArray<dReal> (n*nskip);
+  dReal *d = memarena->AllocateArray<dReal> (n);
+  dReal *w = outer_w ? outer_w : memarena->AllocateArray<dReal> (n);
+  dReal *delta_w = memarena->AllocateArray<dReal> (n);
+  dReal *delta_x = memarena->AllocateArray<dReal> (n);
+  dReal *Dell = memarena->AllocateArray<dReal> (n);
+  dReal *ell = memarena->AllocateArray<dReal> (n);
 #ifdef ROWPTRS
-  dReal **Arows = context->AllocateArray<dReal *> (n);
+  dReal **Arows = memarena->AllocateArray<dReal *> (n);
 #else
   dReal **Arows = NULL;
 #endif
-  int *p = context->AllocateArray<int> (n);
-  int *C = context->AllocateArray<int> (n);
+  int *p = memarena->AllocateArray<int> (n);
+  int *C = memarena->AllocateArray<int> (n);
 
   // for i in N, state[i] is 0 if x(i)==lo(i) or 1 if x(i)==hi(i)
-  bool *state = context->AllocateArray<bool> (n);
+  bool *state = memarena->AllocateArray<bool> (n);
 
   // create LCP object. note that tmp is set to delta_w to save space, this
   // optimization relies on knowledge of how tmp is used, so be careful!
@@ -1049,13 +1049,13 @@ void dSolveLCP (dxWorldProcessContext *context, int n, dReal *A, dReal *x, dReal
         case 5:		// keep going
           x[si] = lo[si];
           state[si] = false;
-          tmpbuf = context->PeekBufferRemainder();
+          tmpbuf = memarena->PeekBufferRemainder();
           lcp.transfer_i_from_C_to_N (si, tmpbuf);
           break;
         case 6:		// keep going
           x[si] = hi[si];
           state[si] = true;
-          tmpbuf = context->PeekBufferRemainder();
+          tmpbuf = memarena->PeekBufferRemainder();
           lcp.transfer_i_from_C_to_N (si, tmpbuf);
           break;
         }
@@ -1119,8 +1119,8 @@ extern "C" ODE_API int dTestSolveLCP()
   const int n = 100;
 
   size_t memreq = EstimateTestSolveLCPMemoryReq(n);
-  dxWorldProcessContext *context = dxReallocateTemporayWorldProcessContext(NULL, memreq, NULL, NULL);
-  if (!context) {
+  dxWorldProcessMemArena *arena = dxAllocateTemporaryWorldProcessMemArena(memreq, NULL, NULL);
+  if (arena == NULL) {
     return 0;
   }
 
@@ -1133,24 +1133,24 @@ extern "C" ODE_API int dTestSolveLCP()
 #endif
   printf ("dTestSolveLCP()\n");
 
-  dReal *A = context->AllocateArray<dReal> (n*nskip);
-  dReal *x = context->AllocateArray<dReal> (n);
-  dReal *b = context->AllocateArray<dReal> (n);
-  dReal *w = context->AllocateArray<dReal> (n);
-  dReal *lo = context->AllocateArray<dReal> (n);
-  dReal *hi = context->AllocateArray<dReal> (n);
+  dReal *A = arena->AllocateArray<dReal> (n*nskip);
+  dReal *x = arena->AllocateArray<dReal> (n);
+  dReal *b = arena->AllocateArray<dReal> (n);
+  dReal *w = arena->AllocateArray<dReal> (n);
+  dReal *lo = arena->AllocateArray<dReal> (n);
+  dReal *hi = arena->AllocateArray<dReal> (n);
   
-  dReal *A2 = context->AllocateArray<dReal> (n*nskip);
-  dReal *b2 = context->AllocateArray<dReal> (n);
-  dReal *lo2 = context->AllocateArray<dReal> (n);
-  dReal *hi2 = context->AllocateArray<dReal> (n);
+  dReal *A2 = arena->AllocateArray<dReal> (n*nskip);
+  dReal *b2 = arena->AllocateArray<dReal> (n);
+  dReal *lo2 = arena->AllocateArray<dReal> (n);
+  dReal *hi2 = arena->AllocateArray<dReal> (n);
   
-  dReal *tmp1 = context->AllocateArray<dReal> (n);
-  dReal *tmp2 = context->AllocateArray<dReal> (n);
+  dReal *tmp1 = arena->AllocateArray<dReal> (n);
+  dReal *tmp2 = arena->AllocateArray<dReal> (n);
 
   double total_time = 0;
   for (int count=0; count < 1000; count++) {
-    BEGIN_STATE_SAVE(context, saveInner) {
+    BEGIN_STATE_SAVE(arena, saveInner) {
 
       // form (A,b) = a random positive definite LCP problem
       dMakeRandomMatrix (A2,n,n,1.0);
@@ -1198,7 +1198,7 @@ extern "C" ODE_API int dTestSolveLCP()
       dStopwatchReset (&sw);
       dStopwatchStart (&sw);
 
-      dSolveLCP (context,n,A2,x,b2,w,nub,lo2,hi2,0);
+      dSolveLCP (arena,n,A2,x,b2,w,nub,lo2,hi2,0);
 
       dStopwatchStop (&sw);
       double time = dStopwatchTime(&sw);
@@ -1234,9 +1234,9 @@ extern "C" ODE_API int dTestSolveLCP()
       printf ("passed: NL=%3d NH=%3d C=%3d   ",n1,n2,n3);
       printf ("time=%10.3f ms  avg=%10.4f\n",time * 1000.0,average);
     
-    } END_STATE_SAVE(context, saveInner);
+    } END_STATE_SAVE(arena, saveInner);
   }
 
-  dxFreeWorldProcessContext(context);
+  dxFreeTemporaryWorldProcessMemArena(arena);
   return 1;
 }

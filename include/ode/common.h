@@ -227,7 +227,6 @@ struct dxJoint;
 struct dxJointNode;
 struct dxJointGroup;
 struct dxWorldProcessThreadingManager;
-struct dxWorldProcessContext;
 
 typedef struct dxWorld *dWorldID;
 typedef struct dxSpace *dSpaceID;
@@ -236,7 +235,6 @@ typedef struct dxGeom *dGeomID;
 typedef struct dxJoint *dJointID;
 typedef struct dxJointGroup *dJointGroupID;
 typedef struct dxWorldProcessThreadingManager *dWorldStepThreadingManagerID;
-typedef struct dxWorldProcessContext *dWorldStepContextID;
 
 /* error numbers */
 
