@@ -1,20 +1,21 @@
-#!/usr/bin/env python
+#! /usr/bin/env python
 
-import os
+import os, sys
 
 from distutils.core import setup
 from distutils.extension import Extension
-from subprocess import check_output,CalledProcessError
+from subprocess import Popen, PIPE, CalledProcessError
 
 try:
     from Cython.Distutils import build_ext
 except ImportError:
     raise SystemExit("Requires Cython (http://cython.org/)")
 
+
 try:
-    ode_cflags = check_output(["pkg-config", "--cflags", "ode"]).split()
-    ode_libs = check_output(["pkg-config", "--libs", "ode"]).split()
-except CalledProcessError:
+    ode_cflags = Popen(["pkg-config", "--cflags", "ode"], stdout=PIPE).stdout.read().split()
+    ode_libs = Popen(["pkg-config", "--libs", "ode"], stdout=PIPE).stdout.read().split()
+except (OSError, CalledProcessError):
     raise SystemExit("Failed to find ODE with 'pkg-config'.  Please make sure that it is installed and available on your system path.")
 
 ode_ext = Extension("ode", ["ode.pyx"],
@@ -37,3 +38,4 @@ if __name__ == "__main__":
 #        platforms=[],
         license="BSD License, GNU Lesser General Public License (LGPL)",
         cmdclass={"build_ext": build_ext}, ext_modules=[ode_ext])
+
