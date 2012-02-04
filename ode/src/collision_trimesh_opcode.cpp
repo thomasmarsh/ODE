@@ -376,7 +376,7 @@ void dGeomTriMeshDataDestroy(dTriMeshDataID g){
 
 void dGeomTriMeshSetLastTransform( dxGeom* g, dMatrix4 last_trans )
 {
-	dAASSERT(g)
+	dAASSERT(g);
     dUASSERT(g->type == dTriMeshClass, "geom not trimesh");
 
     for (int i=0; i<16; i++)
@@ -388,7 +388,7 @@ void dGeomTriMeshSetLastTransform( dxGeom* g, dMatrix4 last_trans )
 
 dReal* dGeomTriMeshGetLastTransform( dxGeom* g )
 {
-	dAASSERT(g)
+	dAASSERT(g);
     dUASSERT(g->type == dTriMeshClass, "geom not trimesh");
 
     return (dReal*)(((dxTriMesh*)g)->last_trans);
