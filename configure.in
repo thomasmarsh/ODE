@@ -1,6 +1,6 @@
 dnl AC_INIT does not take a macro as a version nr: set it separately! - Bram
-AC_INIT([ODE],[0.11.1],[ode@ode.org])
-ODE_RELEASE=0.11.1
+AC_INIT([ODE],[0.12],[ode@ode.org])
+ODE_RELEASE=0.12
 AC_SUBST(ODE_RELEASE)
 
 # Those are instructions from the Libtool manual:
@@ -22,9 +22,9 @@ AC_SUBST(ODE_RELEASE)
 #
 #  6. If any interfaces have been removed since the last public release,
 #     then set AGE to 0.
-CURRENT=2
-REVISION=1
-AGE=1
+CURRENT=3
+REVISION=0
+AGE=0
 
 AC_ARG_ENABLE(version-info,
         AS_HELP_STRING([--disable-version-info],
