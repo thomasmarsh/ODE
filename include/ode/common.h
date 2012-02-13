@@ -158,7 +158,7 @@ typedef dReal dQuaternion[4];
 #define dAtan2(y,x) (atan2f(y,x))		/* arc tangent with 2 args */
 #define dFMod(a,b) (fmodf(a,b))		/* modulo */
 #define dFloor(x) floorf(x)			/* floor */
-#define dCeil(x) ceilf(x)			/* floor */
+#define dCeil(x) ceilf(x)			/* ceil */
 #define dCopySign(a,b) ((dReal)copysignf(a,b)) /* copy value sign */
 #define dNextAfter(x, y) nextafterf(x, y) /* next value after */
 
