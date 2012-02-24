@@ -88,12 +88,12 @@ just about everything else.
  provide workspaces. Instead, use Premake to create a workspace tailored
  for your platform and project. Like so:
  
-   $ cd ode/build
+   $ cd build
    $ premake4 --with-tests --with-demos codeblocks
    
  To see a complete list of options:
  
-   $ cd ode/build
+   $ cd build
    $ premake4 --help
    
    
