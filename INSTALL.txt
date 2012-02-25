@@ -97,7 +97,7 @@ just about everything else.
    $ premake4 --help
    
    
-4. BUILDING WITH SOMETHING EKSE
+4. BUILDING WITH SOMETHING ELSE
 
  ODE uses the Premake tool to provide support for several different toolsets.
  Premake adds support for new toolsets on a regular basis, so yours might be
