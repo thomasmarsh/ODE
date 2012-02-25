@@ -23,6 +23,7 @@
 #if defined(WIN32) || defined(__CYGWIN__)// this prevents warnings when dependencies built
 #include <windows.h>
 #endif
+#include <process.h>
 #include <ode/odeconfig.h>
 #include <GL/gl.h>
 
@@ -116,7 +117,7 @@ static void setupRendererGlobals()
 }
 
 
-static DWORD WINAPI renderingThread (LPVOID lpParam)
+static unsigned CALLBACK renderingThread (LPVOID lpParam)
 {
   // create openGL context and make it current
   HGLRC glc = wglCreateContext (renderer_dc);
@@ -425,14 +426,14 @@ void dsPlatformSimLoop (int window_width, int window_height,
   renderer_height = window_height;
   renderer_fn = fn;
 
-  DWORD threadId, thirdParam = 0;
+  unsigned threadId;
   HANDLE hThread;
 
-  hThread = CreateThread(
+  hThread = (HANDLE)_beginthreadex(
 	NULL,			     // no security attributes
 	0,			     // use default stack size
-	renderingThread,	     // thread function
-	&thirdParam,		     // argument to thread function
+	&renderingThread,	     // thread function
+	NULL,		     // argument to thread function
 	0,			     // use default creation flags
 	&threadId);		     // returns the thread identifier
 
