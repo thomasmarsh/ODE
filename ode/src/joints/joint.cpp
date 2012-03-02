@@ -70,6 +70,25 @@ bool dxJoint::isEnabled() const
              (node[1].body && node[1].body->invMass > 0)) );
 }
 
+
+size_t dxJointGroup::exportJoints(dxJoint **jlist)
+{
+  size_t i=0;
+  dxJoint *j = (dxJoint*) m_stack.rewind();
+  while (j != NULL) {
+    jlist[i++] = j;
+    j = (dxJoint*) (m_stack.next (j->size()));
+  }
+  return i;
+}
+
+void dxJointGroup::freeAll()
+{
+  m_num = 0;
+  m_stack.freeAll();
+}
+
+
 //****************************************************************************
 // externs
 

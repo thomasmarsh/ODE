@@ -20,54 +20,84 @@
  *                                                                       *
  *************************************************************************/
 
-#ifndef _ODE_OBSTACK_H_
-#define _ODE_OBSTACK_H_
-
-#include "objects.h" 
-
-// each obstack Arena pointer points to a block of this many bytes
-#define dOBSTACK_ARENA_SIZE 16384
+// Object, body, and world methods.
 
 
-struct dObStack : public dBase {
-  dObStack();
-  ~dObStack();
+#include <ode/common.h>
+#include <ode/objects.h>
+#include <ode/matrix.h>
+#include "config.h"
 
-  void *alloc (size_t num_bytes);
-  // allocate a block in the last arena, allocating a new arena if necessary.
-  // it is a runtime error if num_bytes is larger than the arena size.
-
-  void freeAll();
-  // free all blocks in all arenas. this does not deallocate the arenas
-  // themselves, so future alloc()s will reuse them.
-
-  void *rewind();
-  // rewind the obstack iterator, and return the address of the first
-  // allocated block. return 0 if there are no allocated blocks.
-
-  void *next (size_t num_bytes);
-  // return the address of the next allocated block. 'num_bytes' is the size
-  // of the previous block. this returns null if there are no more arenas.
-  // the sequence of 'num_bytes' parameters passed to next() during a
-  // traversal of the list must exactly match the parameters passed to alloc().
-
-private:
-  struct Arena {
-    Arena *m_next;	// next arena in linked list
-    size_t m_used;		// total number of bytes used in this arena, counting
-  };			//   this header
-
-private:
-  void *switch_to_arena(Arena *next_arena);
-
-private:
-  Arena *m_first;		// head of the arena linked list. 0 if no arenas yet
-  Arena *m_last;		// arena where blocks are currently being allocated
-
-  // used for iterator
-  Arena *m_current_arena;
-  size_t m_current_ofs;
-};
+#include "objects.h"
+#include "util.h"
 
 
+#define dWORLD_DEFAULT_GLOBAL_ERP REAL(0.2)
+
+#if defined(dSINGLE)
+#define dWORLD_DEFAULT_GLOBAL_CFM REAL(1e-5)
+#elif defined(dDOUBLE)
+#define dWORLD_DEFAULT_GLOBAL_CFM REAL(1e-10)
+#else
+#error dSINGLE or dDOUBLE must be defined
 #endif
+
+
+
+dxAutoDisable::dxAutoDisable(void *):
+  idle_time(REAL(0.0)),
+  idle_steps(10),
+  average_samples(1), // Default is 1 sample => Instantaneous velocity
+  linear_average_threshold(REAL(0.01)*REAL(0.01)), // (magnitude squared)
+  angular_average_threshold(REAL(0.01)*REAL(0.01)) // (magnitude squared)
+{
+}
+
+dxDampingParameters::dxDampingParameters(void *):
+  linear_scale(REAL(0.0)),
+  angular_scale(REAL(0.0)),
+  linear_threshold(REAL(0.01) * REAL(0.01)),
+  angular_threshold(REAL(0.01) * REAL(0.01))
+{
+}
+
+dxQuickStepParameters::dxQuickStepParameters(void *):
+  num_iterations(20),
+  w(REAL(1.3))
+{
+}
+
+dxContactParameters::dxContactParameters(void *):
+  max_vel(dInfinity),
+  min_depth(REAL(0.0))
+{
+}
+
+dxWorld::dxWorld():
+  dBase(),
+  firstbody(NULL),
+  firstjoint(NULL),
+  nb(0),
+  nj(0),
+  global_erp(dWORLD_DEFAULT_GLOBAL_ERP),
+  global_cfm(dWORLD_DEFAULT_GLOBAL_CFM),
+  adis(NULL),
+  body_flags(0),
+  wmem(NULL),
+  qs(NULL),
+  contactp(NULL),
+  dampingp(NULL),
+  max_angular_speed(dInfinity)
+{
+  dSetZero (gravity, 4);
+}
+
+dxWorld::~dxWorld()
+{
+  if (wmem)
+  {
+    wmem->Release();
+  }
+}
+
+
