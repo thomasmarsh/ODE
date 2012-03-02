@@ -44,7 +44,7 @@ libode_la_SOURCES =     nextafterf.c \
                         matrix.cpp \
                         memory.cpp \
                         misc.cpp \
-                        objects.h \
+                        objects.cpp objects.h \
                         obstack.cpp obstack.h \
                         ode.cpp \
                         odeinit.cpp \

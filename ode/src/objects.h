@@ -76,9 +76,12 @@ struct dObject : public dBase {
 struct dxAutoDisable {
   dReal idle_time;		// time the body needs to be idle to auto-disable it
   int idle_steps;		// steps the body needs to be idle to auto-disable it
+  unsigned int average_samples;     // size of the average_lvel and average_avel buffers
   dReal linear_average_threshold;   // linear (squared) average velocity threshold
   dReal angular_average_threshold;  // angular (squared) average velocity threshold
-  unsigned int average_samples;     // size of the average_lvel and average_avel buffers
+
+  dxAutoDisable() {}
+  explicit dxAutoDisable(void *);
 };
 
 
@@ -88,6 +91,9 @@ struct dxDampingParameters {
   dReal angular_scale; // multiply the angular velocity by (1 - scale)
   dReal linear_threshold;   // linear (squared) average speed threshold
   dReal angular_threshold;  // angular (squared) average speed threshold
+
+  dxDampingParameters() {}
+  explicit dxDampingParameters(void *);
 };
 
 
@@ -95,6 +101,9 @@ struct dxDampingParameters {
 struct dxQuickStepParameters {
   int num_iterations;		// number of SOR iterations to perform
   dReal w;			// the SOR over-relaxation parameter
+
+  dxQuickStepParameters() {}
+  explicit dxQuickStepParameters(void *);
 };
 
 
@@ -102,6 +111,9 @@ struct dxQuickStepParameters {
 struct dxContactParameters {
   dReal max_vel;		// maximum correcting velocity
   dReal min_depth;		// thickness of 'surface layer'
+
+  dxContactParameters() {}
+  explicit dxContactParameters(void *);
 };
 
 // position vector and rotation matrix for geometry objects that are not
@@ -156,6 +168,10 @@ struct dxWorld : public dBase {
   dxContactParameters contactp;
   dxDampingParameters dampingp; // damping parameters
   dReal max_angular_speed;      // limit the angular velocity to this magnitude
+
+
+  dxWorld();
+  ~dxWorld();
 };
 
 
