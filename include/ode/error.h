@@ -56,6 +56,57 @@ ODE_API void dDebug (int num, const char *msg, ...);
 ODE_API void dMessage (int num, const char *msg, ...);
 
 
+
+
+/* debugging:
+ *   IASSERT  is an internal assertion, i.e. a consistency check. if it fails
+ *            we want to know where.
+ *   UASSERT  is a user assertion, i.e. if it fails a nice error message
+ *            should be printed for the user.
+ *   AASSERT  is an arguments assertion, i.e. if it fails "bad argument(s)"
+ *            is printed.
+ *   DEBUGMSG just prints out a message
+ */
+
+#  if defined(__STDC__) && __STDC_VERSION__ >= 199901L
+#    define __FUNCTION__ __func__
+#  endif
+#ifndef dNODEBUG
+#  ifdef __GNUC__
+#    define dIASSERT(a) { if (!(a)) { dDebug (d_ERR_IASSERT, \
+      "assertion \"" #a "\" failed in %s() [%s:%u]",__FUNCTION__,__FILE__,__LINE__); } }
+#    define dUASSERT(a,msg) { if (!(a)) { dDebug (d_ERR_UASSERT, \
+      msg " in %s()", __FUNCTION__); } }
+#    define dDEBUGMSG(msg) { dMessage (d_ERR_UASSERT,				\
+  msg " in %s() [%s:%u]", __FUNCTION__,__FILE__,__LINE__); }
+#  else // not __GNUC__
+#    define dIASSERT(a) { if (!(a)) { dDebug (d_ERR_IASSERT, \
+      "assertion \"" #a "\" failed in %s:%u",__FILE__,__LINE__); } }
+#    define dUASSERT(a,msg) { if (!(a)) { dDebug (d_ERR_UASSERT, \
+      msg " (%s:%u)", __FILE__,__LINE__); } }
+#    define dDEBUGMSG(msg) { dMessage (d_ERR_UASSERT, \
+      msg " (%s:%u)", __FILE__,__LINE__); }
+#  endif
+#  define dIVERIFY(a) dIASSERT(a)
+#else
+#  define dIASSERT(a) ((void)0)
+#  define dUASSERT(a,msg) ((void)0)
+#  define dDEBUGMSG(msg) ((void)0)
+#  define dIVERIFY(a) ((void)(a))
+#endif
+
+#  ifdef __GNUC__
+#    define dICHECK(a) { if (!(a)) { dDebug (d_ERR_IASSERT, \
+      "assertion \"" #a "\" failed in %s() [%s:%u]",__FUNCTION__,__FILE__,__LINE__); *(int *)0 = 0; } }
+#  else // not __GNUC__
+#    define dICHECK(a) { if (!(a)) { dDebug (d_ERR_IASSERT, \
+      "assertion \"" #a "\" failed in %s:%u",__FILE__,__LINE__); *(int *)0 = 0; } }
+#  endif
+
+// Argument assert is a special case of user assert
+#define dAASSERT(a) dUASSERT(a,"Bad argument(s)")
+
+
 #ifdef __cplusplus
 }
 #endif

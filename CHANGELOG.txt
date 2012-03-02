@@ -8,6 +8,8 @@ the rules for this file:
   * keep the format consistent (79 char width, M/D/Y date format).
 
 ------------------------------------------------------------------------------
+02/03/12 Oleh Derevenko
+		* Assertion checking macros moved from common.h to error.h
 12/18/11 Oleh Derevenko
         * dIVERIFY macro added (same as dIASSERT in debug mode but evaluates its
           expression in release mode) to be used to assert variable value 
