@@ -414,6 +414,7 @@ cdef extern from "ode/ode.h":
     void dGeomGetQuaternion (dGeomID, dQuaternion result)
     void dGeomSetOffsetPosition (dGeomID, dReal x, dReal y, dReal z)
     void dGeomSetOffsetRotation (dGeomID, dMatrix3 R)
+    void dGeomClearOffset (dGeomID)
     dReal * dGeomGetOffsetPosition (dGeomID)
     dReal * dGeomGetOffsetRotation (dGeomID)
     void dGeomDestroy (dGeomID)

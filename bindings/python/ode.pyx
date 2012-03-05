@@ -3177,6 +3177,13 @@ cdef class GeomObject:
         m = <dReal*>dGeomGetOffsetRotation(self.gid)
         return [m[0],m[1],m[2],m[4],m[5],m[6],m[8],m[9],m[10]]
 
+    def clearOffset(self):
+        """clearOffset()
+
+        Disable the offset transform of the geom.
+        """
+        dGeomClearOffset(self.gid)
+
     def getAABB(self):
         """getAABB() -> 6-tuple
 
