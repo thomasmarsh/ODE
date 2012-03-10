@@ -47,16 +47,6 @@
 // utility
 
 
-dObject::dObject(dxWorld *w)
-{
-  world = w;
-  next = 0;
-  tome = 0;
-  userdata = 0;
-  tag = 0;
-}
-
-
 // add an object `obj' to the list who's head pointer is pointed to by `first'.
 
 void addObjectToList (dObject *obj, dObject **first)

@@ -44,6 +44,12 @@
 
 
 
+dObject::~dObject()
+{
+  // Do nothing - a virtual destructor
+}
+
+
 dxAutoDisable::dxAutoDisable(void *):
   idle_time(REAL(0.0)),
   idle_steps(10),
