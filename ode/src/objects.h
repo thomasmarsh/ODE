@@ -23,8 +23,8 @@
 // object, body, and world structs.
 
 
-#ifndef _ODE_OBJECT_H_
-#define _ODE_OBJECT_H_
+#ifndef _ODE__PRIVATE_OBJECTS_H_
+#define _ODE__PRIVATE_OBJECTS_H_
 
 #include <ode/common.h>
 #include <ode/memory.h>
@@ -67,8 +67,9 @@ struct dObject : public dBase {
   dObject **tome;		// pointer to previous object's next ptr
   int tag;			// used by dynamics algorithms
   void *userdata;		// user settable data
-  dObject(dxWorld *w);
-  virtual ~dObject() { }
+  
+  explicit dObject(dxWorld *w): world(w), next(NULL), tome(NULL), tag(0), userdata(NULL) {}
+  virtual ~dObject();
 };
 
 
