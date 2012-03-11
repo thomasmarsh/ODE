@@ -477,13 +477,13 @@ void dInitODE()
 }
 
 int dInitODE2(unsigned int uiInitFlags/*=0*/)
-	{
+{
 	bool bResult = false;
-	
+
 	bool bODEInitialized = false;
 
 	do
-		{
+	{
 		if (!InternalInitODE(uiInitFlags))
 		{
 			break;
@@ -495,17 +495,17 @@ int dInitODE2(unsigned int uiInitFlags/*=0*/)
 		{
 			break;
 		}
-	
+
 		bResult = true;
 	}
 	while (false);
-	
+
 	if (!bResult)
 	{
 		if (bODEInitialized)
 		{
 			InternalCloseODE();
-}
+		}
 	}
 
 	return bResult;
