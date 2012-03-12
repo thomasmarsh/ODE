@@ -21,6 +21,7 @@
  *************************************************************************/
 
 
+#include <ode/odeconfig.h>
 #include "config.h"
 #include "fixed.h"
 #include "joint_internal.h"

@@ -1,6 +1,8 @@
 /* _nextafterf() implementation for MSVC */
 
 #include <ode/common.h>
+#include "config.h"
+
 
 #if defined(_ODE__NEXTAFTERF_REQUIRED)
 

@@ -208,17 +208,17 @@ void _dLDLTAddTL (dReal *L, dReal *d, const dReal *a, int n, int nskip, void *tm
 void _dLDLTRemove (dReal **A, const int *p, dReal *L, dReal *d, int n1, int n2, int r, int nskip, void *tmpbuf);
 void _dRemoveRowCol (dReal *A, int n, int nskip, int r);
 
-PURE_INLINE size_t _dEstimateFactorCholeskyTmpbufSize(int n)
+ODE_PURE_INLINE size_t _dEstimateFactorCholeskyTmpbufSize(int n)
 {
   return dPAD(n) * sizeof(dReal);
 }
 
-PURE_INLINE size_t _dEstimateSolveCholeskyTmpbufSize(int n)
+ODE_PURE_INLINE size_t _dEstimateSolveCholeskyTmpbufSize(int n)
 {
   return dPAD(n) * sizeof(dReal);
 }
 
-PURE_INLINE size_t _dEstimateInvertPDMatrixTmpbufSize(int n)
+ODE_PURE_INLINE size_t _dEstimateInvertPDMatrixTmpbufSize(int n)
 {
   size_t FactorCholesky_size = _dEstimateFactorCholeskyTmpbufSize(n);
   size_t SolveCholesky_size = _dEstimateSolveCholeskyTmpbufSize(n);
@@ -226,17 +226,17 @@ PURE_INLINE size_t _dEstimateInvertPDMatrixTmpbufSize(int n)
   return dPAD(n) * (n + 1) * sizeof(dReal) + MaxCholesky_size;
 }
 
-PURE_INLINE size_t _dEstimateIsPositiveDefiniteTmpbufSize(int n)
+ODE_PURE_INLINE size_t _dEstimateIsPositiveDefiniteTmpbufSize(int n)
 {
   return dPAD(n) * n * sizeof(dReal) + _dEstimateFactorCholeskyTmpbufSize(n);
 }
 
-PURE_INLINE size_t _dEstimateLDLTAddTLTmpbufSize(int nskip)
+ODE_PURE_INLINE size_t _dEstimateLDLTAddTLTmpbufSize(int nskip)
 {
   return nskip * 2 * sizeof(dReal);
 }
 
-PURE_INLINE size_t _dEstimateLDLTRemoveTmpbufSize(int n2, int nskip)
+ODE_PURE_INLINE size_t _dEstimateLDLTRemoveTmpbufSize(int n2, int nskip)
 {
   return n2 * sizeof(dReal) + _dEstimateLDLTAddTLTmpbufSize(nskip);
 }

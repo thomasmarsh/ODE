@@ -33,7 +33,7 @@ int dCollideRTL(dxGeom *o1, dxGeom *o2, int flags, dContactGeom *contact, int sk
 int dCollideTTL(dxGeom *o1, dxGeom *o2, int flags, dContactGeom *contact, int skip);
 int dCollideCCTL(dxGeom *o1, dxGeom *o2, int flags, dContactGeom *contact, int skip);
 
-PURE_INLINE int dCollideRayTrimesh( dxGeom *ray, dxGeom *trimesh, int flags,
+ODE_PURE_INLINE int dCollideRayTrimesh( dxGeom *ray, dxGeom *trimesh, int flags,
 								   dContactGeom *contact, int skip )
 {
 	// Swapped case, for code that needs it (heightfield initially)

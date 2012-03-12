@@ -21,6 +21,7 @@
  *************************************************************************/
 
 
+#include <ode/odeconfig.h>
 #include "config.h"
 #include "plane2d.h"
 #include "joint_internal.h"

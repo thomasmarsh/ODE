@@ -21,6 +21,7 @@
  *************************************************************************/
 
 
+#include <ode/odeconfig.h>
 #include "config.h"
 #include "slider.h"
 #include "joint_internal.h"

@@ -37,6 +37,14 @@
 #  define ODE_API_DEPRECATED
 #endif
 
+#define ODE_PURE_INLINE static __inline
+
+#if defined(__cplusplus)
+  #define ODE_EXTERN_C extern "C"
+#else
+  #define ODE_EXTERN_C
+#endif
+
 /* Well-defined common data types...need to define for 64 bit systems */
 #if defined(_M_IA64) || defined(__ia64__) || defined(_M_AMD64) || defined(__x86_64__)
   #define X86_64_SYSTEM   1
@@ -54,18 +62,6 @@
   typedef signed char     int8;
   typedef unsigned char   uint8;
 #endif
-
-/* Visual C does not define these functions */
-#if defined(_MSC_VER)
-  #define copysignf(x, y) ((float)_copysign(x, y))
-  #define copysign(x, y) _copysign(x, y)
-  #define nextafterf(x, y) _nextafterf(x, y)
-  #define nextafter(x, y) _nextafter(x, y)
-  #if !defined(_WIN64)
-    #define _ODE__NEXTAFTERF_REQUIRED
-  #endif
-#endif
-
 
 
 /* Define the dInfinity macro */
