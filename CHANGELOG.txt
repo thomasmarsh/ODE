@@ -9,9 +9,10 @@ the rules for this file:
 
 ------------------------------------------------------------------------------
 03/12/12 Oleh Derevenko
-		* PURE_INLINE macro renamed to ODE_PURE_INLINE and definition of nextafter()
-		  moved into private headed. It's now a responsibility of client code to
-		  make sure nextafter()/nextafterf() are available if dNextAfter() is used.
+		* PURE_INLINE macro renamed to ODE_PURE_INLINE and definition of nextafter()/copysign()
+		  moved into private header. It's now a responsibility of client code to
+		  make sure nextafter()/nextafterf()/copysign()/copysignf() are available 
+		  if dNextAfter()/dCopySign() are used.
 
 02/03/12 Oleh Derevenko
 		* Assertion checking macros moved from common.h to error.h
