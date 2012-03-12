@@ -86,4 +86,22 @@
 #endif
 
 
+  /* Visual C does not define these functions */
+#if defined(_MSC_VER)
+  #define _ode_copysignf(x, y) ((float)_copysign(x, y))
+  #define _ode_copysign(x, y) _copysign(x, y)
+  #define _ode_nextafterf(x, y) _nextafterf(x, y)
+  #define _ode_nextafter(x, y) _nextafter(x, y)
+  #if !defined(_WIN64) && dSINGLE
+    #define _ODE__NEXTAFTERF_REQUIRED
+    ODE_EXTERN_C float _nextafterf(float x, float y);
+  #endif
+#else
+  #define _ode_copysignf(x, y) copysignf(x, y)
+  #define _ode_copysign(x, y) copysign(x, y)
+  #define _ode_nextafterf(x, y) nextafterf(x, y)
+  #define _ode_nextafter(x, y) nextafter(x, y)
+#endif
+
+
 #endif

@@ -109,8 +109,8 @@ typedef dReal dQuaternion[4];
 #define dFMod(a,b) (fmodf(a,b))		/* modulo */
 #define dFloor(x) floorf(x)			/* floor */
 #define dCeil(x) ceilf(x)			/* ceil */
-#define dCopySign(a,b) ((dReal)copysignf(a,b)) /* copy value sign */
-#define dNextAfter(x, y) nextafterf(x, y) /* next value after */
+#define dCopySign(a,b) _ode_copysignf(a, b) /* copy value sign */
+#define dNextAfter(x, y) _ode_nextafterf(x, y) /* next value after */
 
 #ifdef HAVE___ISNANF
 #define dIsNan(x) (__isnanf(x))
@@ -144,8 +144,8 @@ typedef dReal dQuaternion[4];
 #define dFMod(a,b) (fmod((a),(b)))
 #define dFloor(x) floor(x)
 #define dCeil(x) ceil(x)
-#define dCopySign(a,b) (copysign((a),(b)))
-#define dNextAfter(x, y) nextafter(x, y)
+#define dCopySign(a,b) _ode_copysign(a, b)
+#define dNextAfter(x, y) _ode_nextafter(x, y)
 
 #ifdef HAVE___ISNAN
 #define dIsNan(x) (__isnan(x))
