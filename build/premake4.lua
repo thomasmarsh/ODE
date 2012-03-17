@@ -94,7 +94,12 @@
   
   newoption {
     trigger     = "with-ou",
-    description = "Use TLS for global caches (experimental)"
+    description = "Use TLS for global caches (allows threaded collision checks for separated spaces)"
+  }
+
+  newoption {
+    trigger     = "with-builtin-threading-impl",
+    description = "Include built-in multithreaded threading implementation (still must be created and assigned to be used)."
   }
 
   newoption {
@@ -187,6 +192,8 @@
       "../include",
       "../ode/src"
     }
+    
+    defines { "_MT" }
     
     -- apply the configuration list built above
     configurations (configs)
@@ -286,6 +293,11 @@
       "../ode/src/collision_std.cpp",
     }
 
+--  Include OU files by default to enable atomics
+--  configuration { "with-ou" }
+      files   { "../ou/**.h", "../ou/**.cpp" }
+      defines { "_OU_NAMESPACE=odeou" }
+      
     configuration { "no-dif" }
       excludes { "../ode/src/export-dif.cpp" }
 
@@ -311,10 +323,6 @@
     configuration { "not no-trimesh", "not with-gimpact" }
       files   { "../OPCODE/**.h", "../OPCODE/**.cpp" }
  
-    configuration { "with-ou" }
-      files   { "../ou/**.h", "../ou/**.cpp" }
-      defines { "_OU_NAMESPACE=odeou" }
-      
     configuration { "with-libccd" }
       files   { "../libccd/src/ccd/*.h", "../libccd/src/*.c" }
       defines { "dLIBCCD_ENABLED", "dLIBCCD_CYL_CYL" }
@@ -332,6 +340,9 @@
     configuration { "only-shared or *DLL" }
       kind    "SharedLib"
       defines "ODE_DLL"
+
+    configuration { "*DLL" }
+      defines "_DLL"
 
     configuration { "Debug" }
 	  targetname "oded"
@@ -368,9 +379,11 @@
     end
 
     if _OPTIONS["with-ou"] then
-      text = string.gsub(text, "/%* #define dOU_ENABLED 1 %*/", "#define dOU_ENABLED 1")
-      text = string.gsub(text, "/%* #define dATOMICS_ENABLED 1 %*/", "#define dATOMICS_ENABLED 1")
       text = string.gsub(text, "/%* #define dTLS_ENABLED 1 %*/", "#define dTLS_ENABLED 1")
+    end
+
+    if _OPTIONS["with-builtin-threading-impl"] then
+      text = string.gsub(text, "/%* #define dBUILTIN_THREADING_IMPL_ENABLED 1 %*/", "#define dBUILTIN_THREADING_IMPL_ENABLED 1")
     end
 
     if _OPTIONS["16bit-indices"] then

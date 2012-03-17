@@ -24,12 +24,14 @@
 
 
 #include <ode/common.h>
+#include <ode/threading_impl.h>
 #include <ode/objects.h>
 #include <ode/matrix.h>
 #include "config.h"
 
 #include "objects.h"
 #include "util.h"
+#include "threading_impl.h"
 
 
 #define dWORLD_DEFAULT_GLOBAL_ERP REAL(0.2)
@@ -42,6 +44,8 @@
 #error dSINGLE or dDOUBLE must be defined
 #endif
 
+static dThreadingImplementationID g_world_default_threading_impl = NULL;
+static const dThreadingFunctionsInfo *g_world_default_threading_functions = NULL;
 
 
 dObject::~dObject()
@@ -81,6 +85,7 @@ dxContactParameters::dxContactParameters(void *):
 
 dxWorld::dxWorld():
   dBase(),
+  dxThreadingBase(),
   firstbody(NULL),
   firstjoint(NULL),
   nb(0),
@@ -89,12 +94,15 @@ dxWorld::dxWorld():
   global_cfm(dWORLD_DEFAULT_GLOBAL_CFM),
   adis(NULL),
   body_flags(0),
+  islands_max_threads(dWORLDSTEP_THREADCOUNT_UNLIMITED),
   wmem(NULL),
   qs(NULL),
   contactp(NULL),
   dampingp(NULL),
   max_angular_speed(dInfinity)
 {
+  dxThreadingBase::SetThreadingDefaultImplProvider(this);
+
   dSetZero (gravity, 4);
 }
 
@@ -102,8 +110,75 @@ dxWorld::~dxWorld()
 {
   if (wmem)
   {
+    wmem->CleanupWorldReferences(this);
     wmem->Release();
   }
 }
 
+bool dxWorld::InitializeDefaultThreading()
+{
+  dIASSERT(g_world_default_threading_impl == NULL);
+
+  bool init_result = false;
+  
+  dThreadingImplementationID threading_impl = dThreadingAllocateSelfThreadedImplementation();
+  
+  if (threading_impl != NULL)
+  {
+    g_world_default_threading_functions = dThreadingImplementationGetFunctions(threading_impl);
+    g_world_default_threading_impl = threading_impl;
+
+    init_result = true;
+  }
+
+  return init_result;
+}
+
+void dxWorld::FinalizeDefaultThreading()
+{
+  dThreadingImplementationID threading_impl = g_world_default_threading_impl;
+
+  if (threading_impl != NULL)
+  {
+    dThreadingFreeImplementation(threading_impl);
+
+    g_world_default_threading_functions = NULL;
+    g_world_default_threading_impl = NULL;
+  }
+}
+
+void dxWorld::AssignThreadingImpl(const dxThreadingFunctionsInfo *functions_info, dThreadingImplementationID threading_impl)
+{
+  if (wmem != NULL)
+  {
+    // Free objects allocated with old threading
+    wmem->CleanupWorldReferences(this);
+  }
+
+  dxThreadingBase::AssignThreadingImpl(functions_info, threading_impl);
+}
+
+unsigned dxWorld::GetThreadingIslandsMaxThreadsCount(unsigned *out_active_thread_count_ptr/*=NULL*/) const
+{
+  unsigned active_thread_count = RetrieveThreadingThreadCount();
+  if (out_active_thread_count_ptr != NULL)
+  {
+    *out_active_thread_count_ptr = active_thread_count;
+  }
+
+  return islands_max_threads == dWORLDSTEP_THREADCOUNT_UNLIMITED 
+    ? active_thread_count 
+    : (islands_max_threads < active_thread_count ? islands_max_threads : active_thread_count);
+}
+
+dxWorldProcessContext *dxWorld::UnsafeGetWorldProcessingContext() const
+{
+  return wmem->GetWorldProcessingContext();
+}
+
+const dxThreadingFunctionsInfo *dxWorld::RetrieveThreadingDefaultImpl(dThreadingImplementationID &out_default_impl)
+{
+  out_default_impl = g_world_default_threading_impl;
+  return g_world_default_threading_functions;
+}
 

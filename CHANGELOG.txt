@@ -8,6 +8,15 @@ the rules for this file:
   * keep the format consistent (79 char width, M/D/Y date format).
 
 ------------------------------------------------------------------------------
+03/17/12 Oleh Derevenko
+        * Threaded execution support interface added. Optional built-in threading
+          implementation added.
+          Internal threading implementation is excluded by default and to be used, 
+          it must be enabled with configure/premake.
+          At present, if threading interface is assigned to a world, island 
+          selection and stepping is performed in multiple threads (one thread per 
+          island).
+
 03/12/12 Oleh Derevenko
         * PURE_INLINE macro renamed to ODE_PURE_INLINE and definition of 
           dNextAfter()/dCopySign() corrected to avoid creating conflicts with 

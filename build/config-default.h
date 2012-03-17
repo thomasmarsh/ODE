@@ -18,17 +18,22 @@
  *                       32 bit indices. Use the dTriIndex type to
  *                       detect the correct index size.
  *
- *   dTRIMESH_OPCODE_USE_NEW_TRIMESH_TRIMESH_COLLIDER (experimental)-
- *                       Use an alternative trimesh-trimesh collider
- *                       which should yield better results.
+ *   dTRIMESH_OPCODE_USE_NEWOLD_TRIMESH_TRIMESH_COLLIDER
+ *                       Use old implementation of trimesh-trimesh collider
+ *                       (for backward compatibility only)
  *
- *   dOU_ENABLED (experimental)
- *   dATOMICS_ENABLED (experimental)
- *   dTLS_ENABLED (experimental)
+ *   dOU_ENABLED       - always enabled
+ *   dATOMICS_ENABLED  - always enabled
+ *   dTLS_ENABLED
  *                       Use generic features of OU library, atomic
  *                       API and TLS API respectively. Using TLS for
  *                       global variables allows calling ODE from 
  *                       multiple threads.
+ *
+ *   dBUILTIN_THREADING_IMPL_ENABLED
+ *                       Include built-in multithreaded threading 
+ *                       implementation (still must be created and assigned
+ *                       to be used).
  *
  ******************************************************************/
 
@@ -38,9 +43,11 @@
 
 #define dTRIMESH_OPCODE_USE_OLD_TRIMESH_TRIMESH_COLLIDER 0
 
-/* #define dOU_ENABLED 1 */
-/* #define dATOMICS_ENABLED 1 */
+#define dOU_ENABLED 1
+#define dATOMICS_ENABLED 1
 /* #define dTLS_ENABLED 1 */
+
+/* #define dBUILTIN_THREADING_IMPL_ENABLED 1 */
 
 
 /******************************************************************

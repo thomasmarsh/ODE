@@ -30,8 +30,11 @@
 #include <ode/memory.h>
 #include <ode/mass.h>
 #include "array.h"
+#include "threading_base.h"
+
 
 class dxStepWorkingMemory;
+class dxWorldProcessContext;
 
 // some body flags
 
@@ -154,7 +157,7 @@ struct dxBody : public dObject {
 };
 
 
-struct dxWorld : public dBase {
+struct dxWorld : public dBase, public dxThreadingBase, private dxIThreadingDefaultImplProvider {
   dxBody *firstbody;		// body linked list
   dxJoint *firstjoint;		// joint linked list
   int nb,nj;			// number of bodies and joints in lists
@@ -163,6 +166,7 @@ struct dxWorld : public dBase {
   dReal global_cfm;		// global constraint force mixing parameter
   dxAutoDisable adis;		// auto-disable parameters
   int body_flags;               // flags for new bodies
+  unsigned islands_max_threads; // maximum threads to allocate for island processing
   dxStepWorkingMemory *wmem; // Working memory object for dWorldStep/dWorldQuickStep
 
   dxQuickStepParameters qs;
@@ -172,8 +176,18 @@ struct dxWorld : public dBase {
 
 
   dxWorld();
-  ~dxWorld();
+  virtual ~dxWorld(); // Compilers emit warnings if a class with virtual methods does not have a virtual destructor :(
+
+  static bool InitializeDefaultThreading();
+  static void FinalizeDefaultThreading();
+
+  void AssignThreadingImpl(const dxThreadingFunctionsInfo *functions_info, dThreadingImplementationID threading_impl);
+  unsigned GetThreadingIslandsMaxThreadsCount(unsigned *out_active_thread_count_ptr=NULL) const;
+  dxWorldProcessContext *UnsafeGetWorldProcessingContext() const;
+
+private: // dxIThreadingDefaultImplProvider
+  virtual const dxThreadingFunctionsInfo *RetrieveThreadingDefaultImpl(dThreadingImplementationID &out_default_impl);
 };
 
 
-#endif
+#endif // #ifndef _ODE__PRIVATE_OBJECTS_H_

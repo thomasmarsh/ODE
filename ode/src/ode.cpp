@@ -1639,6 +1639,18 @@ dReal dWorldGetCFM (dWorldID w)
 }
 
 
+void dWorldSetStepIslandsProcessingMaxThreadCount(dWorldID w, unsigned count)
+{
+  dAASSERT (w);
+  w->islands_max_threads = count;
+}
+
+unsigned dWorldGetStepIslandsProcessingMaxThreadCount(dWorldID w)
+{
+  dAASSERT (w);
+  return w->islands_max_threads;
+}
+
 int dWorldUseSharedWorkingMemory(dWorldID w, dWorldID from_world)
 {
   dUASSERT (w,"bad world argument");
@@ -1728,7 +1740,7 @@ int dWorldSetStepMemoryReservationPolicy(dWorldID w, const dWorldStepReserveInfo
 int dWorldSetStepMemoryManager(dWorldID w, const dWorldStepMemoryFunctionsInfo *memfuncs)
 {
   dUASSERT (w,"bad world argument");
-  dUASSERT (!memfuncs || memfuncs->struct_size >= sizeof(*memfuncs), "Bad functions info");
+  dUASSERT (!memfuncs || memfuncs->struct_size >= sizeof(*memfuncs), "Bad memory functions info");
 
   bool result = false;
 
@@ -1755,6 +1767,15 @@ int dWorldSetStepMemoryManager(dWorldID w, const dWorldStepMemoryFunctionsInfo *
   return result;
 }
 
+void dWorldSetStepThreadingImplementation(dWorldID w, 
+                                          const dxThreadingFunctionsInfo *functions_info, dThreadingImplementationID threading_impl)
+{
+  dUASSERT (w,"bad world argument");
+  dUASSERT (!functions_info || functions_info->struct_size >= sizeof(*functions_info), "Bad threading functions info");
+
+  w->AssignThreadingImpl(functions_info, threading_impl);
+}
+
 
 int dWorldStep (dWorldID w, dReal stepsize)
 {
@@ -1766,12 +1787,11 @@ int dWorldStep (dWorldID w, dReal stepsize)
   dxWorldProcessIslandsInfo islandsinfo;
   if (dxReallocateWorldProcessContext (w, islandsinfo, stepsize, &dxEstimateStepMemoryRequirements))
   {
-    dxProcessIslands (w, islandsinfo, stepsize, &dInternalStepIsland);
-    
+    if (dxProcessIslands (w, islandsinfo, stepsize, &dInternalStepIsland))
+    {
       result = true;
     }
-
-  dxCleanupWorldProcessContext (w);
+  }
 
   return result;
 }
@@ -1786,12 +1806,11 @@ int dWorldQuickStep (dWorldID w, dReal stepsize)
   dxWorldProcessIslandsInfo islandsinfo;
   if (dxReallocateWorldProcessContext (w, islandsinfo, stepsize, &dxEstimateQuickStepMemoryRequirements))
   {
-    dxProcessIslands (w, islandsinfo, stepsize, &dxQuickStepper);
-    
+    if (dxProcessIslands (w, islandsinfo, stepsize, &dxQuickStepper))
+    {
       result = true;
     }
-
-  dxCleanupWorldProcessContext (w);
+  }
 
   return result;
 }
@@ -2190,6 +2209,12 @@ REGISTER_EXTENSION( ODE_EXT_gimpact )
 #if dTLS_ENABLED
 REGISTER_EXTENSION( ODE_EXT_mt_collisions )
 #endif // dTLS_ENABLED
+
+REGISTER_EXTENSION( ODE_EXT_threading )
+
+#if dBUILTIN_THREADING_IMPL_ENABLED
+REGISTER_EXTENSION( ODE_THR_builtin_impl )
+#endif // #if dBUILTIN_THREADING_IMPL_ENABLED
 
 //**********************************
 // EXTENSION LIST END

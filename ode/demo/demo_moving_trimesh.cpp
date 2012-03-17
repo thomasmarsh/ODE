@@ -568,8 +568,19 @@ int main (int argc, char **argv)
   dRFromAxisAndAngle(Rotation, 1, 0, 0, M_PI / 2);
   dGeomSetRotation(TriMesh2, Rotation);}
   
+  dThreadingImplementationID threading = dThreadingAllocateMultiThreadedImplementation();
+  dThreadingThreadPoolID pool = dThreadingAllocateThreadPool(4, 0, dAllocateFlagBasicData, NULL);
+  dThreadingThreadPoolServeMultiThreadedImplementation(pool, threading);
+  // dWorldSetStepIslandsProcessingMaxThreadCount(world, 1);
+  dWorldSetStepThreadingImplementation(world, dThreadingImplementationGetFunctions(threading), threading);
+
   // run simulation
   dsSimulationLoop (argc,argv,352,288,&fn);
+
+  dThreadingImplementationShutdownProcessing(threading);
+  dThreadingFreeThreadPool(pool);
+  dWorldSetStepThreadingImplementation(world, NULL, NULL);
+  dThreadingFreeImplementation(threading);
 
   dJointGroupDestroy (contactgroup);
   dSpaceDestroy (space);

@@ -1,7 +1,11 @@
 /*************************************************************************
  *                                                                       *
- * Open Dynamics Engine, Copyright (C) 2001,2002 Russell L. Smith.       *
+ * Open Dynamics Engine, Copyright (C) 2001-2003 Russell L. Smith.       *
  * All rights reserved.  Email: russ@q12.org   Web: www.q12.org          *
+ *                                                                       *
+ * Threading implementation private header file.                         *
+ * Copyright (C) 2011-2012 Oleh Derevenko. All rights reserved.          *
+ * e-mail: odar@eleks.com (change all "a" to "e")                        *
  *                                                                       *
  * This library is free software; you can redistribute it and/or         *
  * modify it under the terms of EITHER:                                  *
@@ -20,31 +24,39 @@
  *                                                                       *
  *************************************************************************/
 
-#ifndef _ODE_ODE_H_
-#define _ODE_ODE_H_
+/*
+ *  Threading implementation header for library private functions.
+ */
 
-/* include *everything* here */
 
-#include <ode/odeconfig.h>
-#include <ode/compatibility.h>
-#include <ode/common.h>
-#include <ode/odeinit.h>
-#include <ode/contact.h>
-#include <ode/error.h>
-#include <ode/memory.h>
-#include <ode/odemath.h>
-#include <ode/matrix.h>
-#include <ode/timer.h>
-#include <ode/rotation.h>
-#include <ode/mass.h>
-#include <ode/misc.h>
-#include <ode/objects.h>
-#include <ode/odecpp.h>
-#include <ode/collision_space.h>
-#include <ode/collision.h>
+#ifndef _ODE__PRIVATE_THREADING_IMPL_H_
+#define _ODE__PRIVATE_THREADING_IMPL_H_
+
+
 #include <ode/threading.h>
-#include <ode/threading_impl.h>
-#include <ode/odecpp_collision.h>
-#include <ode/export-dif.h>
 
-#endif
+
+// This function has been removed from public headers as there is no need for it
+// to be accessible to outer code at this time. In future it is possible 
+// it could be published back again.
+/**
+ * @brief Allocates built-in self-threaded threading implementation object.
+ *
+ * A self-threaded implementation is a type of implementation that performs 
+ * processing of posted calls by means of caller thread itself. This type of 
+ * implementation does not need thread pool to serve it.
+ * 
+ * The processing is arranged in a way to prevent call stack depth growth 
+ * as more and more nested calls are posted.
+ *
+ * @returns ID of object allocated or NULL on failure
+ * 
+ * @ingroup threading
+ * @see dThreadingAllocateMultiThreadedImplementation
+ * @see dThreadingFreeImplementation
+ */
+/*ODE_API */dThreadingImplementationID dThreadingAllocateSelfThreadedImplementation();
+
+
+
+#endif // #ifndef _ODE__PRIVATE_THREADING_IMPL_H_
