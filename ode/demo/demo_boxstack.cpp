@@ -648,8 +648,19 @@ int main (int argc, char **argv)
   dCreatePlane (space,0,0,1,0);
   memset (obj,0,sizeof(obj));
 
+  dThreadingImplementationID threading = dThreadingAllocateMultiThreadedImplementation();
+  dThreadingThreadPoolID pool = dThreadingAllocateThreadPool(4, 0, dAllocateFlagBasicData, NULL);
+  dThreadingThreadPoolServeMultiThreadedImplementation(pool, threading);
+  // dWorldSetStepIslandsProcessingMaxThreadCount(world, 1);
+  dWorldSetStepThreadingImplementation(world, dThreadingImplementationGetFunctions(threading), threading);
+
   // run simulation
   dsSimulationLoop (argc,argv,352,288,&fn);
+
+  dThreadingImplementationShutdownProcessing(threading);
+  dThreadingFreeThreadPool(pool);
+  dWorldSetStepThreadingImplementation(world, NULL, NULL);
+  dThreadingFreeImplementation(threading);
 
   dJointGroupDestroy (contactgroup);
   dSpaceDestroy (space);

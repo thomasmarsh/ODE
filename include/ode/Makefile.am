@@ -20,6 +20,8 @@ libode_la_include_HEADERS = 	collision_trimesh.h \
 				export-dif.h \
 				ode.h  \
 				timer.h \
+				threading.h \
+				threading_impl.h \
 				odeconfig.h
 
 EXTRA_DIST = README

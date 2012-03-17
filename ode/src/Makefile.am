@@ -58,6 +58,15 @@ libode_la_SOURCES =     nextafterf.c \
                         sphere.cpp \
                         step.cpp step.h \
                         timer.cpp \
+                        threading_atomics_provs.h \
+                        threading_fake_sync.h \
+                        threading_impl_templates.h \
+                        threading_impl_posix.h \
+                        threading_impl_win.h \
+                        threading_impl.cpp threading_impl.h \
+                        threading_pool_posix.cpp \
+                        threading_pool_win.cpp \
+                        threading_base.cpp threading_base.h \
                         util.cpp util.h
 
 

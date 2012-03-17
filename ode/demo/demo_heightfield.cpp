@@ -745,8 +745,19 @@ int main (int argc, char **argv)
 	dGeomSetRotation( gheight, R );
 	dGeomSetPosition( gheight, pos[0], pos[1], pos[2] );
 
+  dThreadingImplementationID threading = dThreadingAllocateMultiThreadedImplementation();
+  dThreadingThreadPoolID pool = dThreadingAllocateThreadPool(4, 0, dAllocateFlagBasicData, NULL);
+  dThreadingThreadPoolServeMultiThreadedImplementation(pool, threading);
+  // dWorldSetStepIslandsProcessingMaxThreadCount(world, 1);
+  dWorldSetStepThreadingImplementation(world, dThreadingImplementationGetFunctions(threading), threading);
+
 	// run simulation
 	dsSimulationLoop (argc,argv,352,288,&fn);
+
+  dThreadingImplementationShutdownProcessing(threading);
+  dThreadingFreeThreadPool(pool);
+  dWorldSetStepThreadingImplementation(world, NULL, NULL);
+  dThreadingFreeImplementation(threading);
 
 	dJointGroupDestroy (contactgroup);
 	dSpaceDestroy (space);
