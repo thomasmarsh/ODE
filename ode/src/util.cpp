@@ -44,281 +44,281 @@
 
 const char *const dxWorldProcessContext::m_aszContextMutexNames[dxPCM__MAX] = 
 {
-  "Stepper Arena Obtain Lock" , // dxPCM_STEPPER_ARENA_OBTAIN,
-  "Stepper StepBody Serialize Lock" , // dxPCM_STEPPER_STEPBODY_SERIALIZE,
+    "Stepper Arena Obtain Lock" , // dxPCM_STEPPER_ARENA_OBTAIN,
+    "Stepper StepBody Serialize Lock" , // dxPCM_STEPPER_STEPBODY_SERIALIZE,
 };
 
 dxWorldProcessContext::dxWorldProcessContext():
-  m_pmaIslandsArena(NULL),
-  m_pmaStepperArenas(NULL),
-  m_pswObjectsAllocWorld(NULL),
-  m_pmgStepperMutexGroup(NULL),
-  m_pcwIslandsSteppingWait(NULL)
+    m_pmaIslandsArena(NULL),
+    m_pmaStepperArenas(NULL),
+    m_pswObjectsAllocWorld(NULL),
+    m_pmgStepperMutexGroup(NULL),
+    m_pcwIslandsSteppingWait(NULL)
 {
-  // Do nothing
+    // Do nothing
 }
 
 dxWorldProcessContext::~dxWorldProcessContext()
 {
-  dIASSERT((m_pswObjectsAllocWorld != NULL) == (m_pmgStepperMutexGroup != NULL));
-  dIASSERT((m_pswObjectsAllocWorld != NULL) == (m_pcwIslandsSteppingWait != NULL));
+    dIASSERT((m_pswObjectsAllocWorld != NULL) == (m_pmgStepperMutexGroup != NULL));
+    dIASSERT((m_pswObjectsAllocWorld != NULL) == (m_pcwIslandsSteppingWait != NULL));
 
-  if (m_pswObjectsAllocWorld != NULL)
-  {
-     m_pswObjectsAllocWorld->FreeMutexGroup(m_pmgStepperMutexGroup);
-     m_pswObjectsAllocWorld->FreeThreadedCallWait(m_pcwIslandsSteppingWait);
-  }
+    if (m_pswObjectsAllocWorld != NULL)
+    {
+        m_pswObjectsAllocWorld->FreeMutexGroup(m_pmgStepperMutexGroup);
+        m_pswObjectsAllocWorld->FreeThreadedCallWait(m_pcwIslandsSteppingWait);
+    }
 
-  dxWorldProcessMemArena *pmaStepperArenas = m_pmaStepperArenas;
-  if (pmaStepperArenas != NULL)
-  {
-    FreeArenasList(pmaStepperArenas);
-  }
+    dxWorldProcessMemArena *pmaStepperArenas = m_pmaStepperArenas;
+    if (pmaStepperArenas != NULL)
+    {
+        FreeArenasList(pmaStepperArenas);
+    }
 
-  if (m_pmaIslandsArena != NULL)
-  {
-    dxWorldProcessMemArena::FreeMemArena(m_pmaIslandsArena);
-  }
+    if (m_pmaIslandsArena != NULL)
+    {
+        dxWorldProcessMemArena::FreeMemArena(m_pmaIslandsArena);
+    }
 }
 
 void dxWorldProcessContext::CleanupWorldReferences(dxWorld *pswWorldInstance)
 {
-  dIASSERT((m_pswObjectsAllocWorld != NULL) == (m_pmgStepperMutexGroup != NULL));
-  dIASSERT((m_pswObjectsAllocWorld != NULL) == (m_pcwIslandsSteppingWait != NULL));
+    dIASSERT((m_pswObjectsAllocWorld != NULL) == (m_pmgStepperMutexGroup != NULL));
+    dIASSERT((m_pswObjectsAllocWorld != NULL) == (m_pcwIslandsSteppingWait != NULL));
 
-  if (m_pswObjectsAllocWorld == pswWorldInstance)
-  {
-    m_pswObjectsAllocWorld->FreeMutexGroup(m_pmgStepperMutexGroup);
-    m_pswObjectsAllocWorld->FreeThreadedCallWait(m_pcwIslandsSteppingWait);
+    if (m_pswObjectsAllocWorld == pswWorldInstance)
+    {
+        m_pswObjectsAllocWorld->FreeMutexGroup(m_pmgStepperMutexGroup);
+        m_pswObjectsAllocWorld->FreeThreadedCallWait(m_pcwIslandsSteppingWait);
 
-    m_pswObjectsAllocWorld = NULL;
-    m_pmgStepperMutexGroup = NULL;
-    m_pcwIslandsSteppingWait = NULL;
-  }
+        m_pswObjectsAllocWorld = NULL;
+        m_pmgStepperMutexGroup = NULL;
+        m_pcwIslandsSteppingWait = NULL;
+    }
 }
 
 bool dxWorldProcessContext::EnsureStepperSyncObjectsAreAllocated(dxWorld *pswWorldInstance)
 {
-  dIASSERT((m_pswObjectsAllocWorld != NULL) == (m_pmgStepperMutexGroup != NULL));
-  dIASSERT((m_pswObjectsAllocWorld != NULL) == (m_pcwIslandsSteppingWait != NULL));
+    dIASSERT((m_pswObjectsAllocWorld != NULL) == (m_pmgStepperMutexGroup != NULL));
+    dIASSERT((m_pswObjectsAllocWorld != NULL) == (m_pcwIslandsSteppingWait != NULL));
 
-  bool bResult = false;
-  
-  dMutexGroupID pmbStepperMutexGroup = NULL;
-  bool bStepperMutexGroupAllocated = false;
+    bool bResult = false;
 
-  do
-  {
-    if (m_pswObjectsAllocWorld == NULL)
+    dMutexGroupID pmbStepperMutexGroup = NULL;
+    bool bStepperMutexGroupAllocated = false;
+
+    do
     {
-      pmbStepperMutexGroup = pswWorldInstance->AllocMutexGroup(dxPCM__MAX, m_aszContextMutexNames);
-      if (!pmbStepperMutexGroup)
-      {
-        break;
-      }
+        if (m_pswObjectsAllocWorld == NULL)
+        {
+            pmbStepperMutexGroup = pswWorldInstance->AllocMutexGroup(dxPCM__MAX, m_aszContextMutexNames);
+            if (!pmbStepperMutexGroup)
+            {
+                break;
+            }
 
-      bStepperMutexGroupAllocated = true;
+            bStepperMutexGroupAllocated = true;
 
-      dCallWaitID pcwIslandsSteppingWait = pswWorldInstance->AllocThreadedCallWait();
-      if (!pcwIslandsSteppingWait)
-      {
-        break;
-      }
+            dCallWaitID pcwIslandsSteppingWait = pswWorldInstance->AllocThreadedCallWait();
+            if (!pcwIslandsSteppingWait)
+            {
+                break;
+            }
 
-      m_pswObjectsAllocWorld = pswWorldInstance;
-      m_pmgStepperMutexGroup = pmbStepperMutexGroup;
-      m_pcwIslandsSteppingWait = pcwIslandsSteppingWait;
+            m_pswObjectsAllocWorld = pswWorldInstance;
+            m_pmgStepperMutexGroup = pmbStepperMutexGroup;
+            m_pcwIslandsSteppingWait = pcwIslandsSteppingWait;
+        }
+
+        bResult = true;
+    }
+    while (false);
+
+    if (!bResult)
+    {
+        if (bStepperMutexGroupAllocated)
+        {
+            pswWorldInstance->FreeMutexGroup(pmbStepperMutexGroup);
+        }
     }
 
-  	bResult = true;
-  }
-  while (false);
-
-  if (!bResult)
-  {
-    if (bStepperMutexGroupAllocated)
-    {
-      pswWorldInstance->FreeMutexGroup(pmbStepperMutexGroup);
-    }
-  }
-  
-  return bResult;
+    return bResult;
 }
 
 
 dxWorldProcessMemArena *dxWorldProcessContext::ObtainStepperMemArena()
 {
-  dxWorldProcessMemArena *pmaArenaInstance = NULL;
+    dxWorldProcessMemArena *pmaArenaInstance = NULL;
 
-  while (true)
-  {
-    dxWorldProcessMemArena *pmaRawArenasHead = GetStepperArenasHead();
-    if (pmaRawArenasHead == NULL)
+    while (true)
     {
-      break;
+        dxWorldProcessMemArena *pmaRawArenasHead = GetStepperArenasHead();
+        if (pmaRawArenasHead == NULL)
+        {
+            break;
+        }
+
+        // Extraction must be locked so that other thread does not "steal" head arena,
+        // use it and then reinsert back with a different "next"
+        dxMutexGroupLockHelper lhLockHelper(m_pswObjectsAllocWorld, m_pmgStepperMutexGroup, dxPCM_STEPPER_ARENA_OBTAIN);
+
+        dxWorldProcessMemArena *pmaArenasHead = GetStepperArenasHead(); // Arenas head must be re-extracted after mutex has been locked
+        bool bExchangeResult = pmaArenasHead != NULL && TryExtractingStepperArenasHead(pmaArenasHead);
+
+        lhLockHelper.UnlockMutex();
+
+        if (bExchangeResult)
+        {
+            pmaArenasHead->ResetState();
+            pmaArenaInstance = pmaArenasHead;
+            break;
+        }
     }
 
-    // Extraction must be locked so that other thread does not "steal" head arena,
-    // use it and then reinsert back with a different "next"
-    dxMutexGroupLockHelper lhLockHelper(m_pswObjectsAllocWorld, m_pmgStepperMutexGroup, dxPCM_STEPPER_ARENA_OBTAIN);
-
-    dxWorldProcessMemArena *pmaArenasHead = GetStepperArenasHead(); // Arenas head must be re-extracted after mutex has been locked
-    bool bExchangeResult = pmaArenasHead != NULL && TryExtractingStepperArenasHead(pmaArenasHead);
-
-    lhLockHelper.UnlockMutex();
-
-    if (bExchangeResult)
-    {
-      pmaArenasHead->ResetState();
-      pmaArenaInstance = pmaArenasHead;
-      break;
-    }
-  }
-
-  return pmaArenaInstance;
+    return pmaArenaInstance;
 }
 
 void dxWorldProcessContext::ReturnStepperMemArena(dxWorldProcessMemArena *pmaArenaInstance)
 {
-  while (true)
-  {
-    dxWorldProcessMemArena *pmaArenasHead = GetStepperArenasHead();
-    pmaArenaInstance->SetNextMemArena(pmaArenasHead);
-
-    if (TryInsertingStepperArenasHead(pmaArenaInstance, pmaArenasHead))
+    while (true)
     {
-      break;
+        dxWorldProcessMemArena *pmaArenasHead = GetStepperArenasHead();
+        pmaArenaInstance->SetNextMemArena(pmaArenasHead);
+
+        if (TryInsertingStepperArenasHead(pmaArenaInstance, pmaArenasHead))
+        {
+            break;
+        }
     }
-  }
 }
 
 
 dxWorldProcessMemArena *dxWorldProcessContext::ReallocateIslandsMemArena(size_t nMemoryRequirement, 
-  const dxWorldProcessMemoryManager *pmmMemortManager, float fReserveFactor, unsigned uiReserveMinimum)
+    const dxWorldProcessMemoryManager *pmmMemortManager, float fReserveFactor, unsigned uiReserveMinimum)
 {
-  dxWorldProcessMemArena *pmaExistingArena = GetIslandsMemArena();
-  dxWorldProcessMemArena *pmaNewMemArena = dxWorldProcessMemArena::ReallocateMemArena(pmaExistingArena, nMemoryRequirement, pmmMemortManager, fReserveFactor, uiReserveMinimum);
-  SetIslandsMemArena(pmaNewMemArena);
+    dxWorldProcessMemArena *pmaExistingArena = GetIslandsMemArena();
+    dxWorldProcessMemArena *pmaNewMemArena = dxWorldProcessMemArena::ReallocateMemArena(pmaExistingArena, nMemoryRequirement, pmmMemortManager, fReserveFactor, uiReserveMinimum);
+    SetIslandsMemArena(pmaNewMemArena);
 
-  pmaNewMemArena->ResetState();
+    pmaNewMemArena->ResetState();
 
-  return pmaNewMemArena;
+    return pmaNewMemArena;
 }
 
 bool dxWorldProcessContext::ReallocateStepperMemArenas(
-  dxWorld *world, unsigned nIslandThreadsCount, size_t nMemoryRequirement, 
-  const dxWorldProcessMemoryManager *pmmMemortManager, float fReserveFactor, unsigned uiReserveMinimum)
+    dxWorld *world, unsigned nIslandThreadsCount, size_t nMemoryRequirement, 
+    const dxWorldProcessMemoryManager *pmmMemortManager, float fReserveFactor, unsigned uiReserveMinimum)
 {
-  dxWorldProcessMemArena *pmaRebuiltArenasHead = NULL, *pmaRebuiltArenasTail = NULL;
-  dxWorldProcessMemArena *pmaExistingArenas = GetStepperArenasList();
-  unsigned nArenasToProcess = nIslandThreadsCount;
+    dxWorldProcessMemArena *pmaRebuiltArenasHead = NULL, *pmaRebuiltArenasTail = NULL;
+    dxWorldProcessMemArena *pmaExistingArenas = GetStepperArenasList();
+    unsigned nArenasToProcess = nIslandThreadsCount;
 
-  // NOTE!
-  // The list is reallocated in a way to assure the largest arenas are at end 
-  // and if number of threads decreases they will be freed first of all.
+    // NOTE!
+    // The list is reallocated in a way to assure the largest arenas are at end 
+    // and if number of threads decreases they will be freed first of all.
 
-  while (true)
-  {
-    if (nArenasToProcess == 0)
+    while (true)
     {
-      FreeArenasList(pmaExistingArenas);
-      break;
+        if (nArenasToProcess == 0)
+        {
+            FreeArenasList(pmaExistingArenas);
+            break;
+        }
+
+        dxWorldProcessMemArena *pmaOldMemArena = pmaExistingArenas;
+
+        if (pmaExistingArenas != NULL)
+        {
+            pmaExistingArenas = pmaExistingArenas->GetNextMemArena();
+        }
+        else
+        {
+            // If existing arenas ended, terminate and erase tail so that new arenas 
+            // would be appended to list head.
+            if (pmaRebuiltArenasTail != NULL)
+            {
+                pmaRebuiltArenasTail->SetNextMemArena(NULL);
+                pmaRebuiltArenasTail = NULL;
+            }
+        }
+
+        dxWorldProcessMemArena *pmaNewMemArena = dxWorldProcessMemArena::ReallocateMemArena(pmaOldMemArena, nMemoryRequirement, pmmMemortManager, fReserveFactor, uiReserveMinimum);
+
+        if (pmaNewMemArena != NULL)
+        {
+            // Append reallocated arenas to list tail while old arenas still exist...
+            if (pmaRebuiltArenasTail != NULL)
+            {
+                pmaRebuiltArenasTail->SetNextMemArena(pmaNewMemArena);
+                pmaRebuiltArenasTail = pmaNewMemArena;
+            }
+            else if (pmaRebuiltArenasHead == NULL)
+            {
+                pmaRebuiltArenasHead = pmaNewMemArena;
+                pmaRebuiltArenasTail = pmaNewMemArena;
+            }
+            // ...and append them to list head if those are additional arenas created
+            else
+            {
+                pmaNewMemArena->SetNextMemArena(pmaRebuiltArenasHead);
+                pmaRebuiltArenasHead = pmaNewMemArena;
+            }
+
+            --nArenasToProcess;
+        }
+        else if (pmaOldMemArena == NULL)
+        {
+            break;
+        }
     }
 
-    dxWorldProcessMemArena *pmaOldMemArena = pmaExistingArenas;
-
-    if (pmaExistingArenas != NULL)
+    if (pmaRebuiltArenasTail != NULL)
     {
-      pmaExistingArenas = pmaExistingArenas->GetNextMemArena();
-    }
-    else
-    {
-      // If existing arenas ended, terminate and erase tail so that new arenas 
-      // would be appended to list head.
-      if (pmaRebuiltArenasTail != NULL)
-      {
         pmaRebuiltArenasTail->SetNextMemArena(NULL);
-        pmaRebuiltArenasTail = NULL;
-      }
     }
 
-    dxWorldProcessMemArena *pmaNewMemArena = dxWorldProcessMemArena::ReallocateMemArena(pmaOldMemArena, nMemoryRequirement, pmmMemortManager, fReserveFactor, uiReserveMinimum);
+    SetStepperArenasList(pmaRebuiltArenasHead);
 
-    if (pmaNewMemArena != NULL)
-    {
-      // Append reallocated arenas to list tail while old arenas still exist...
-      if (pmaRebuiltArenasTail != NULL)
-      {
-        pmaRebuiltArenasTail->SetNextMemArena(pmaNewMemArena);
-        pmaRebuiltArenasTail = pmaNewMemArena;
-      }
-      else if (pmaRebuiltArenasHead == NULL)
-      {
-        pmaRebuiltArenasHead = pmaNewMemArena;
-        pmaRebuiltArenasTail = pmaNewMemArena;
-      }
-      // ...and append them to list head if those are additional arenas created
-      else
-      {
-        pmaNewMemArena->SetNextMemArena(pmaRebuiltArenasHead);
-        pmaRebuiltArenasHead = pmaNewMemArena;
-      }
-
-      --nArenasToProcess;
-    }
-    else if (pmaOldMemArena == NULL)
-    {
-      break;
-    }
-  }
-
-  if (pmaRebuiltArenasTail != NULL)
-  {
-    pmaRebuiltArenasTail->SetNextMemArena(NULL);
-  }
-
-  SetStepperArenasList(pmaRebuiltArenasHead);
-
-  bool bResult = nArenasToProcess == 0;
-  return bResult;
+    bool bResult = nArenasToProcess == 0;
+    return bResult;
 }
 
 void dxWorldProcessContext::FreeArenasList(dxWorldProcessMemArena *pmaExistingArenas)
 {
-  while (pmaExistingArenas != NULL)
-  {
-    dxWorldProcessMemArena *pmaCurrentMemArena = pmaExistingArenas;
-    pmaExistingArenas = pmaExistingArenas->GetNextMemArena();
+    while (pmaExistingArenas != NULL)
+    {
+        dxWorldProcessMemArena *pmaCurrentMemArena = pmaExistingArenas;
+        pmaExistingArenas = pmaExistingArenas->GetNextMemArena();
 
-    dxWorldProcessMemArena::FreeMemArena(pmaCurrentMemArena);
-  }
+        dxWorldProcessMemArena::FreeMemArena(pmaCurrentMemArena);
+    }
 }
 
 dxWorldProcessMemArena *dxWorldProcessContext::GetStepperArenasHead() const
 {
-  return m_pmaStepperArenas;
+    return m_pmaStepperArenas;
 }
 
 bool dxWorldProcessContext::TryExtractingStepperArenasHead(dxWorldProcessMemArena *pmaHeadInstance)
 {
-  dxWorldProcessMemArena *pmaNextInstance = pmaHeadInstance->GetNextMemArena();
-  return AtomicCompareExchangePointer((volatile atomicptr *)&m_pmaStepperArenas, pmaHeadInstance, pmaNextInstance);
+    dxWorldProcessMemArena *pmaNextInstance = pmaHeadInstance->GetNextMemArena();
+    return AtomicCompareExchangePointer((volatile atomicptr *)&m_pmaStepperArenas, pmaHeadInstance, pmaNextInstance);
 }
 
 bool dxWorldProcessContext::TryInsertingStepperArenasHead(dxWorldProcessMemArena *pmaArenaInstance, dxWorldProcessMemArena *pmaExistingHead)
 {
-  return AtomicCompareExchangePointer((volatile atomicptr *)&m_pmaStepperArenas, pmaExistingHead, pmaArenaInstance);
+    return AtomicCompareExchangePointer((volatile atomicptr *)&m_pmaStepperArenas, pmaExistingHead, pmaArenaInstance);
 }
 
 
 void dxWorldProcessContext::LockForStepbodySerialization()
 {
-  m_pswObjectsAllocWorld->LockMutexGroupMutex(m_pmgStepperMutexGroup, dxPCM_STEPPER_STEPBODY_SERIALIZE);
+    m_pswObjectsAllocWorld->LockMutexGroupMutex(m_pmgStepperMutexGroup, dxPCM_STEPPER_STEPBODY_SERIALIZE);
 }
 
 void dxWorldProcessContext::UnlockForStepbodySerialization()
 {
-  m_pswObjectsAllocWorld->UnlockMutexGroupMutex(m_pmgStepperMutexGroup, dxPCM_STEPPER_STEPBODY_SERIALIZE);
+    m_pswObjectsAllocWorld->UnlockMutexGroupMutex(m_pmgStepperMutexGroup, dxPCM_STEPPER_STEPBODY_SERIALIZE);
 }
 
 
@@ -329,66 +329,66 @@ struct dxStepperCallContext;
 
 struct dxIslandsProcessingCallContext
 {
-  dxIslandsProcessingCallContext(dxWorld *world, const dxWorldProcessIslandsInfo &islandsInfo, dReal stepSize, dstepper_fn_t stepper):
-    m_world(world), m_islandsInfo(islandsInfo), m_stepSize(stepSize), m_stepper(stepper),
-    m_groupReleasee(NULL), m_islandToProcessStorage(0)
-  {
-  }
+    dxIslandsProcessingCallContext(dxWorld *world, const dxWorldProcessIslandsInfo &islandsInfo, dReal stepSize, dstepper_fn_t stepper):
+        m_world(world), m_islandsInfo(islandsInfo), m_stepSize(stepSize), m_stepper(stepper),
+        m_groupReleasee(NULL), m_islandToProcessStorage(0)
+    {
+    }
 
-  void AssignGroupReleasee(dCallReleaseeID groupReleasee) { m_groupReleasee = groupReleasee; }
+    void AssignGroupReleasee(dCallReleaseeID groupReleasee) { m_groupReleasee = groupReleasee; }
 
-  static int ThreadedProcessGroup_Callback(void *callContext, dcallindex_t callInstanceIndex, dCallReleaseeID callThisReleasee);
-  bool ThreadedProcessGroup();
+    static int ThreadedProcessGroup_Callback(void *callContext, dcallindex_t callInstanceIndex, dCallReleaseeID callThisReleasee);
+    bool ThreadedProcessGroup();
 
-  static int ThreadedProcessJobStart_Callback(void *callContext, dcallindex_t callInstanceIndex, dCallReleaseeID callThisReleasee);
-  void ThreadedProcessJobStart();
+    static int ThreadedProcessJobStart_Callback(void *callContext, dcallindex_t callInstanceIndex, dCallReleaseeID callThisReleasee);
+    void ThreadedProcessJobStart();
 
-  static int ThreadedProcessIslandSearch_Callback(void *callContext, dcallindex_t callInstanceIndex, dCallReleaseeID callThisReleasee);
-  void ThreadedProcessIslandSearch(dxStepperCallContext *stepperCallContext);
+    static int ThreadedProcessIslandSearch_Callback(void *callContext, dcallindex_t callInstanceIndex, dCallReleaseeID callThisReleasee);
+    void ThreadedProcessIslandSearch(dxStepperCallContext *stepperCallContext);
 
-  static int ThreadedProcessIslandStepper_Callback(void *callContext, dcallindex_t callInstanceIndex, dCallReleaseeID callThisReleasee);
-  void ThreadedProcessIslandStepper(dxStepperCallContext *stepperCallContext);
+    static int ThreadedProcessIslandStepper_Callback(void *callContext, dcallindex_t callInstanceIndex, dCallReleaseeID callThisReleasee);
+    void ThreadedProcessIslandStepper(dxStepperCallContext *stepperCallContext);
 
-  size_t ObtainNextIslandToBeProcessed(size_t islandsCount);
+    size_t ObtainNextIslandToBeProcessed(size_t islandsCount);
 
-  dxWorld *const m_world;
-  const dxWorldProcessIslandsInfo &m_islandsInfo;
-  dReal const m_stepSize;
-  dstepper_fn_t const m_stepper;
-  dCallReleaseeID m_groupReleasee;
-  volatile size_t m_islandToProcessStorage;
+    dxWorld *const m_world;
+    const dxWorldProcessIslandsInfo &m_islandsInfo;
+    dReal const m_stepSize;
+    dstepper_fn_t const m_stepper;
+    dCallReleaseeID m_groupReleasee;
+    volatile size_t m_islandToProcessStorage;
 };
 
 struct dxStepperCallContext
 {
-  dxStepperCallContext(dxIslandsProcessingCallContext *islandsProcessingContext, dxWorldProcessMemArena *stepperArena, 
-    size_t islandIndex, dxBody *const *islandBodiesStart, dxJoint *const *islandJointsStart):
-    m_islandsProcessingContext(islandsProcessingContext), m_stepperArena(stepperArena),
-    m_islandIndex(islandIndex), m_islandBodiesStart(islandBodiesStart), m_islandJointsStart(islandJointsStart),
-    m_islandBodiesCount(0), m_islandJointsCount(0)
-  {
-  }
+    dxStepperCallContext(dxIslandsProcessingCallContext *islandsProcessingContext, dxWorldProcessMemArena *stepperArena, 
+        size_t islandIndex, dxBody *const *islandBodiesStart, dxJoint *const *islandJointsStart):
+        m_islandsProcessingContext(islandsProcessingContext), m_stepperArena(stepperArena),
+        m_islandIndex(islandIndex), m_islandBodiesStart(islandBodiesStart), m_islandJointsStart(islandJointsStart),
+        m_islandBodiesCount(0), m_islandJointsCount(0)
+    {
+    }
 
-  void AssignIslandSearchProgress(size_t islandIndex)
-  {
-    m_islandIndex = islandIndex; 
-  }
+    void AssignIslandSearchProgress(size_t islandIndex)
+    {
+        m_islandIndex = islandIndex; 
+    }
 
-  void AssignIslandSelection(dxBody *const *islandBodiesStart, dxJoint *const *islandJointsStart, unsigned islandBodiesCount, unsigned islandJointsCount)
-  {
-    m_islandBodiesStart = islandBodiesStart;
-    m_islandJointsStart = islandJointsStart;
-    m_islandBodiesCount = islandBodiesCount;
-    m_islandJointsCount = islandJointsCount;
-  }
+    void AssignIslandSelection(dxBody *const *islandBodiesStart, dxJoint *const *islandJointsStart, unsigned islandBodiesCount, unsigned islandJointsCount)
+    {
+        m_islandBodiesStart = islandBodiesStart;
+        m_islandJointsStart = islandJointsStart;
+        m_islandBodiesCount = islandBodiesCount;
+        m_islandJointsCount = islandJointsCount;
+    }
 
-  dxIslandsProcessingCallContext  *m_islandsProcessingContext;
-  dxWorldProcessMemArena          *m_stepperArena;
-  size_t                          m_islandIndex;
-  dxBody *const                   *m_islandBodiesStart;
-  dxJoint *const                  *m_islandJointsStart;
-  unsigned                        m_islandBodiesCount;
-  unsigned                        m_islandJointsCount;
+    dxIslandsProcessingCallContext  *m_islandsProcessingContext;
+    dxWorldProcessMemArena          *m_stepperArena;
+    size_t                          m_islandIndex;
+    dxBody *const                   *m_islandBodiesStart;
+    dxJoint *const                  *m_islandJointsStart;
+    unsigned                        m_islandBodiesCount;
+    unsigned                        m_islandJointsCount;
 };
 
 
@@ -398,138 +398,138 @@ struct dxStepperCallContext
 
 void dInternalHandleAutoDisabling (dxWorld *world, dReal stepsize)
 {
-  dxBody *bb;
-  for ( bb=world->firstbody; bb; bb=(dxBody*)bb->next )
-  {
-    // don't freeze objects mid-air (patch 1586738)
-    if ( bb->firstjoint == NULL ) continue;
+    dxBody *bb;
+    for ( bb=world->firstbody; bb; bb=(dxBody*)bb->next )
+    {
+        // don't freeze objects mid-air (patch 1586738)
+        if ( bb->firstjoint == NULL ) continue;
 
-    // nothing to do unless this body is currently enabled and has
-    // the auto-disable flag set
-    if ( (bb->flags & (dxBodyAutoDisable|dxBodyDisabled)) != dxBodyAutoDisable ) continue;
+        // nothing to do unless this body is currently enabled and has
+        // the auto-disable flag set
+        if ( (bb->flags & (dxBodyAutoDisable|dxBodyDisabled)) != dxBodyAutoDisable ) continue;
 
-    // if sampling / threshold testing is disabled, we can never sleep.
-    if ( bb->adis.average_samples == 0 ) continue;
+        // if sampling / threshold testing is disabled, we can never sleep.
+        if ( bb->adis.average_samples == 0 ) continue;
 
-    //
-    // see if the body is idle
-    //
+        //
+        // see if the body is idle
+        //
 
 #ifndef dNODEBUG
-    // sanity check
-    if ( bb->average_counter >= bb->adis.average_samples )
-    {
-      dUASSERT( bb->average_counter < bb->adis.average_samples, "buffer overflow" );
+        // sanity check
+        if ( bb->average_counter >= bb->adis.average_samples )
+        {
+            dUASSERT( bb->average_counter < bb->adis.average_samples, "buffer overflow" );
 
-      // something is going wrong, reset the average-calculations
-      bb->average_ready = 0; // not ready for average calculation
-      bb->average_counter = 0; // reset the buffer index
-    }
+            // something is going wrong, reset the average-calculations
+            bb->average_ready = 0; // not ready for average calculation
+            bb->average_counter = 0; // reset the buffer index
+        }
 #endif // dNODEBUG
 
-    // sample the linear and angular velocity
-    bb->average_lvel_buffer[bb->average_counter][0] = bb->lvel[0];
-    bb->average_lvel_buffer[bb->average_counter][1] = bb->lvel[1];
-    bb->average_lvel_buffer[bb->average_counter][2] = bb->lvel[2];
-    bb->average_avel_buffer[bb->average_counter][0] = bb->avel[0];
-    bb->average_avel_buffer[bb->average_counter][1] = bb->avel[1];
-    bb->average_avel_buffer[bb->average_counter][2] = bb->avel[2];
-    bb->average_counter++;
+        // sample the linear and angular velocity
+        bb->average_lvel_buffer[bb->average_counter][0] = bb->lvel[0];
+        bb->average_lvel_buffer[bb->average_counter][1] = bb->lvel[1];
+        bb->average_lvel_buffer[bb->average_counter][2] = bb->lvel[2];
+        bb->average_avel_buffer[bb->average_counter][0] = bb->avel[0];
+        bb->average_avel_buffer[bb->average_counter][1] = bb->avel[1];
+        bb->average_avel_buffer[bb->average_counter][2] = bb->avel[2];
+        bb->average_counter++;
 
-    // buffer ready test
-    if ( bb->average_counter >= bb->adis.average_samples )
-    {
-      bb->average_counter = 0; // fill the buffer from the beginning
-      bb->average_ready = 1; // this body is ready now for average calculation
-    }
-
-    int idle = 0; // Assume it's in motion unless we have samples to disprove it.
-
-    // enough samples?
-    if ( bb->average_ready )
-    {
-      idle = 1; // Initial assumption: IDLE
-
-      // the sample buffers are filled and ready for calculation
-      dVector3 average_lvel, average_avel;
-
-      // Store first velocity samples
-      average_lvel[0] = bb->average_lvel_buffer[0][0];
-      average_avel[0] = bb->average_avel_buffer[0][0];
-      average_lvel[1] = bb->average_lvel_buffer[0][1];
-      average_avel[1] = bb->average_avel_buffer[0][1];
-      average_lvel[2] = bb->average_lvel_buffer[0][2];
-      average_avel[2] = bb->average_avel_buffer[0][2];
-
-      // If we're not in "instantaneous mode"
-      if ( bb->adis.average_samples > 1 )
-      {
-        // add remaining velocities together
-        for ( unsigned int i = 1; i < bb->adis.average_samples; ++i )
+        // buffer ready test
+        if ( bb->average_counter >= bb->adis.average_samples )
         {
-          average_lvel[0] += bb->average_lvel_buffer[i][0];
-          average_avel[0] += bb->average_avel_buffer[i][0];
-          average_lvel[1] += bb->average_lvel_buffer[i][1];
-          average_avel[1] += bb->average_avel_buffer[i][1];
-          average_lvel[2] += bb->average_lvel_buffer[i][2];
-          average_avel[2] += bb->average_avel_buffer[i][2];
+            bb->average_counter = 0; // fill the buffer from the beginning
+            bb->average_ready = 1; // this body is ready now for average calculation
         }
 
-        // make average
-        dReal r1 = dReal( 1.0 ) / dReal( bb->adis.average_samples );
+        int idle = 0; // Assume it's in motion unless we have samples to disprove it.
 
-        average_lvel[0] *= r1;
-        average_avel[0] *= r1;
-        average_lvel[1] *= r1;
-        average_avel[1] *= r1;
-        average_lvel[2] *= r1;
-        average_avel[2] *= r1;
-      }
-
-      // threshold test
-      dReal av_lspeed, av_aspeed;
-      av_lspeed = dCalcVectorDot3( average_lvel, average_lvel );
-      if ( av_lspeed > bb->adis.linear_average_threshold )
-      {
-        idle = 0; // average linear velocity is too high for idle
-      }
-      else
-      {
-        av_aspeed = dCalcVectorDot3( average_avel, average_avel );
-        if ( av_aspeed > bb->adis.angular_average_threshold )
+        // enough samples?
+        if ( bb->average_ready )
         {
-          idle = 0; // average angular velocity is too high for idle
+            idle = 1; // Initial assumption: IDLE
+
+            // the sample buffers are filled and ready for calculation
+            dVector3 average_lvel, average_avel;
+
+            // Store first velocity samples
+            average_lvel[0] = bb->average_lvel_buffer[0][0];
+            average_avel[0] = bb->average_avel_buffer[0][0];
+            average_lvel[1] = bb->average_lvel_buffer[0][1];
+            average_avel[1] = bb->average_avel_buffer[0][1];
+            average_lvel[2] = bb->average_lvel_buffer[0][2];
+            average_avel[2] = bb->average_avel_buffer[0][2];
+
+            // If we're not in "instantaneous mode"
+            if ( bb->adis.average_samples > 1 )
+            {
+                // add remaining velocities together
+                for ( unsigned int i = 1; i < bb->adis.average_samples; ++i )
+                {
+                    average_lvel[0] += bb->average_lvel_buffer[i][0];
+                    average_avel[0] += bb->average_avel_buffer[i][0];
+                    average_lvel[1] += bb->average_lvel_buffer[i][1];
+                    average_avel[1] += bb->average_avel_buffer[i][1];
+                    average_lvel[2] += bb->average_lvel_buffer[i][2];
+                    average_avel[2] += bb->average_avel_buffer[i][2];
+                }
+
+                // make average
+                dReal r1 = dReal( 1.0 ) / dReal( bb->adis.average_samples );
+
+                average_lvel[0] *= r1;
+                average_avel[0] *= r1;
+                average_lvel[1] *= r1;
+                average_avel[1] *= r1;
+                average_lvel[2] *= r1;
+                average_avel[2] *= r1;
+            }
+
+            // threshold test
+            dReal av_lspeed, av_aspeed;
+            av_lspeed = dCalcVectorDot3( average_lvel, average_lvel );
+            if ( av_lspeed > bb->adis.linear_average_threshold )
+            {
+                idle = 0; // average linear velocity is too high for idle
+            }
+            else
+            {
+                av_aspeed = dCalcVectorDot3( average_avel, average_avel );
+                if ( av_aspeed > bb->adis.angular_average_threshold )
+                {
+                    idle = 0; // average angular velocity is too high for idle
+                }
+            }
         }
-      }
-    }
 
-    // if it's idle, accumulate steps and time.
-    // these counters won't overflow because this code doesn't run for disabled bodies.
-    if (idle) {
-      bb->adis_stepsleft--;
-      bb->adis_timeleft -= stepsize;
-    }
-    else {
-      // Reset countdowns
-      bb->adis_stepsleft = bb->adis.idle_steps;
-      bb->adis_timeleft = bb->adis.idle_time;
-    }
+        // if it's idle, accumulate steps and time.
+        // these counters won't overflow because this code doesn't run for disabled bodies.
+        if (idle) {
+            bb->adis_stepsleft--;
+            bb->adis_timeleft -= stepsize;
+        }
+        else {
+            // Reset countdowns
+            bb->adis_stepsleft = bb->adis.idle_steps;
+            bb->adis_timeleft = bb->adis.idle_time;
+        }
 
-    // disable the body if it's idle for a long enough time
-    if ( bb->adis_stepsleft <= 0 && bb->adis_timeleft <= 0 )
-    {
-      bb->flags |= dxBodyDisabled; // set the disable flag
+        // disable the body if it's idle for a long enough time
+        if ( bb->adis_stepsleft <= 0 && bb->adis_timeleft <= 0 )
+        {
+            bb->flags |= dxBodyDisabled; // set the disable flag
 
-      // disabling bodies should also include resetting the velocity
-      // should prevent jittering in big "islands"
-      bb->lvel[0] = 0;
-      bb->lvel[1] = 0;
-      bb->lvel[2] = 0;
-      bb->avel[0] = 0;
-      bb->avel[1] = 0;
-      bb->avel[2] = 0;
+            // disabling bodies should also include resetting the velocity
+            // should prevent jittering in big "islands"
+            bb->lvel[0] = 0;
+            bb->lvel[1] = 0;
+            bb->lvel[2] = 0;
+            bb->avel[0] = 0;
+            bb->avel[1] = 0;
+            bb->avel[2] = 0;
+        }
     }
-  }
 }
 
 
@@ -541,11 +541,11 @@ void dInternalHandleAutoDisabling (dxWorld *world, dReal stepsize)
 
 static inline dReal sinc (dReal x)
 {
-  // if |x| < 1e-4 then use a taylor series expansion. this two term expansion
-  // is actually accurate to one LS bit within this range if double precision
-  // is being used - so don't worry!
-  if (dFabs(x) < 1.0e-4) return REAL(1.0) - x*x*REAL(0.166666666666666666667);
-  else return dSin(x)/x;
+    // if |x| < 1e-4 then use a taylor series expansion. this two term expansion
+    // is actually accurate to one LS bit within this range if double precision
+    // is being used - so don't worry!
+    if (dFabs(x) < 1.0e-4) return REAL(1.0) - x*x*REAL(0.166666666666666666667);
+    else return dSin(x)/x;
 }
 
 
@@ -554,113 +554,113 @@ static inline dReal sinc (dReal x)
 
 void dxStepBody (dxBody *b, dReal h)
 {
-  // cap the angular velocity
-  if (b->flags & dxBodyMaxAngularSpeed) {
-    const dReal max_ang_speed = b->max_angular_speed;
-    const dReal aspeed = dCalcVectorDot3( b->avel, b->avel );
-    if (aspeed > max_ang_speed*max_ang_speed) {
-      const dReal coef = max_ang_speed/dSqrt(aspeed);
-      dScaleVector3(b->avel, coef);
+    // cap the angular velocity
+    if (b->flags & dxBodyMaxAngularSpeed) {
+        const dReal max_ang_speed = b->max_angular_speed;
+        const dReal aspeed = dCalcVectorDot3( b->avel, b->avel );
+        if (aspeed > max_ang_speed*max_ang_speed) {
+            const dReal coef = max_ang_speed/dSqrt(aspeed);
+            dScaleVector3(b->avel, coef);
+        }
     }
-  }
-  // end of angular velocity cap
+    // end of angular velocity cap
 
 
-  // handle linear velocity
-  for (unsigned int j=0; j<3; j++) b->posr.pos[j] += h * b->lvel[j];
+    // handle linear velocity
+    for (unsigned int j=0; j<3; j++) b->posr.pos[j] += h * b->lvel[j];
 
-  if (b->flags & dxBodyFlagFiniteRotation) {
-    dVector3 irv;	// infitesimal rotation vector
-    dQuaternion q;	// quaternion for finite rotation
+    if (b->flags & dxBodyFlagFiniteRotation) {
+        dVector3 irv;	// infitesimal rotation vector
+        dQuaternion q;	// quaternion for finite rotation
 
-    if (b->flags & dxBodyFlagFiniteRotationAxis) {
-      // split the angular velocity vector into a component along the finite
-      // rotation axis, and a component orthogonal to it.
-      dVector3 frv;		// finite rotation vector
-      dReal k = dCalcVectorDot3 (b->finite_rot_axis,b->avel);
-      frv[0] = b->finite_rot_axis[0] * k;
-      frv[1] = b->finite_rot_axis[1] * k;
-      frv[2] = b->finite_rot_axis[2] * k;
-      irv[0] = b->avel[0] - frv[0];
-      irv[1] = b->avel[1] - frv[1];
-      irv[2] = b->avel[2] - frv[2];
+        if (b->flags & dxBodyFlagFiniteRotationAxis) {
+            // split the angular velocity vector into a component along the finite
+            // rotation axis, and a component orthogonal to it.
+            dVector3 frv;		// finite rotation vector
+            dReal k = dCalcVectorDot3 (b->finite_rot_axis,b->avel);
+            frv[0] = b->finite_rot_axis[0] * k;
+            frv[1] = b->finite_rot_axis[1] * k;
+            frv[2] = b->finite_rot_axis[2] * k;
+            irv[0] = b->avel[0] - frv[0];
+            irv[1] = b->avel[1] - frv[1];
+            irv[2] = b->avel[2] - frv[2];
 
-      // make a rotation quaternion q that corresponds to frv * h.
-      // compare this with the full-finite-rotation case below.
-      h *= REAL(0.5);
-      dReal theta = k * h;
-      q[0] = dCos(theta);
-      dReal s = sinc(theta) * h;
-      q[1] = frv[0] * s;
-      q[2] = frv[1] * s;
-      q[3] = frv[2] * s;
+            // make a rotation quaternion q that corresponds to frv * h.
+            // compare this with the full-finite-rotation case below.
+            h *= REAL(0.5);
+            dReal theta = k * h;
+            q[0] = dCos(theta);
+            dReal s = sinc(theta) * h;
+            q[1] = frv[0] * s;
+            q[2] = frv[1] * s;
+            q[3] = frv[2] * s;
+        }
+        else {
+            // make a rotation quaternion q that corresponds to w * h
+            dReal wlen = dSqrt (b->avel[0]*b->avel[0] + b->avel[1]*b->avel[1] +
+                b->avel[2]*b->avel[2]);
+            h *= REAL(0.5);
+            dReal theta = wlen * h;
+            q[0] = dCos(theta);
+            dReal s = sinc(theta) * h;
+            q[1] = b->avel[0] * s;
+            q[2] = b->avel[1] * s;
+            q[3] = b->avel[2] * s;
+        }
+
+        // do the finite rotation
+        dQuaternion q2;
+        dQMultiply0 (q2,q,b->q);
+        for (unsigned int j=0; j<4; j++) b->q[j] = q2[j];
+
+        // do the infitesimal rotation if required
+        if (b->flags & dxBodyFlagFiniteRotationAxis) {
+            dReal dq[4];
+            dWtoDQ (irv,b->q,dq);
+            for (unsigned int j=0; j<4; j++) b->q[j] += h * dq[j];
+        }
     }
     else {
-      // make a rotation quaternion q that corresponds to w * h
-      dReal wlen = dSqrt (b->avel[0]*b->avel[0] + b->avel[1]*b->avel[1] +
-        b->avel[2]*b->avel[2]);
-      h *= REAL(0.5);
-      dReal theta = wlen * h;
-      q[0] = dCos(theta);
-      dReal s = sinc(theta) * h;
-      q[1] = b->avel[0] * s;
-      q[2] = b->avel[1] * s;
-      q[3] = b->avel[2] * s;
+        // the normal way - do an infitesimal rotation
+        dReal dq[4];
+        dWtoDQ (b->avel,b->q,dq);
+        for (unsigned int j=0; j<4; j++) b->q[j] += h * dq[j];
     }
 
-    // do the finite rotation
-    dQuaternion q2;
-    dQMultiply0 (q2,q,b->q);
-    for (unsigned int j=0; j<4; j++) b->q[j] = q2[j];
+    // normalize the quaternion and convert it to a rotation matrix
+    dNormalize4 (b->q);
+    dQtoR (b->q,b->posr.R);
 
-    // do the infitesimal rotation if required
-    if (b->flags & dxBodyFlagFiniteRotationAxis) {
-      dReal dq[4];
-      dWtoDQ (irv,b->q,dq);
-      for (unsigned int j=0; j<4; j++) b->q[j] += h * dq[j];
+    // notify all attached geoms that this body has moved
+    dxWorldProcessContext *world_process_context = b->world->UnsafeGetWorldProcessingContext(); 
+    for (dxGeom *geom = b->geom; geom; geom = dGeomGetBodyNext (geom)) {
+        world_process_context->LockForStepbodySerialization();
+        dGeomMoved (geom);
+        world_process_context->UnlockForStepbodySerialization();
     }
-  }
-  else {
-    // the normal way - do an infitesimal rotation
-    dReal dq[4];
-    dWtoDQ (b->avel,b->q,dq);
-    for (unsigned int j=0; j<4; j++) b->q[j] += h * dq[j];
-  }
 
-  // normalize the quaternion and convert it to a rotation matrix
-  dNormalize4 (b->q);
-  dQtoR (b->q,b->posr.R);
-
-  // notify all attached geoms that this body has moved
-  dxWorldProcessContext *world_process_context = b->world->UnsafeGetWorldProcessingContext(); 
-  for (dxGeom *geom = b->geom; geom; geom = dGeomGetBodyNext (geom)) {
-    world_process_context->LockForStepbodySerialization();
-    dGeomMoved (geom);
-    world_process_context->UnlockForStepbodySerialization();
-  }
-
-  // notify the user
-  if (b->moved_callback != NULL) {
-    b->moved_callback(b);
-  }
-
-  // damping
-  if (b->flags & dxBodyLinearDamping) {
-    const dReal lin_threshold = b->dampingp.linear_threshold;
-    const dReal lin_speed = dCalcVectorDot3( b->lvel, b->lvel );
-    if ( lin_speed > lin_threshold) {
-      const dReal k = 1 - b->dampingp.linear_scale;
-      dScaleVector3(b->lvel, k);
+    // notify the user
+    if (b->moved_callback != NULL) {
+        b->moved_callback(b);
     }
-  }
-  if (b->flags & dxBodyAngularDamping) {
-    const dReal ang_threshold = b->dampingp.angular_threshold;
-    const dReal ang_speed = dCalcVectorDot3( b->avel, b->avel );
-    if ( ang_speed > ang_threshold) {
-      const dReal k = 1 - b->dampingp.angular_scale;
-      dScaleVector3(b->avel, k);
+
+    // damping
+    if (b->flags & dxBodyLinearDamping) {
+        const dReal lin_threshold = b->dampingp.linear_threshold;
+        const dReal lin_speed = dCalcVectorDot3( b->lvel, b->lvel );
+        if ( lin_speed > lin_threshold) {
+            const dReal k = 1 - b->dampingp.linear_scale;
+            dScaleVector3(b->lvel, k);
+        }
     }
-  }
+    if (b->flags & dxBodyAngularDamping) {
+        const dReal ang_threshold = b->dampingp.angular_threshold;
+        const dReal ang_speed = dCalcVectorDot3( b->avel, b->avel );
+        if ( ang_speed > ang_threshold) {
+            const dReal k = 1 - b->dampingp.angular_scale;
+            dScaleVector3(b->avel, k);
+        }
+    }
 }
 
 
@@ -669,176 +669,176 @@ void dxStepBody (dxBody *b, dReal h)
 
 enum dxISLANDSIZESELEMENT
 {
-  dxISE_BODIES_COUNT,
-  dxISE_JOINTS_COUNT,
-  
-  dxISE__MAX,
+    dxISE_BODIES_COUNT,
+    dxISE_JOINTS_COUNT,
+
+    dxISE__MAX,
 };
 
 // This estimates dynamic memory requirements for dxProcessIslands
 static size_t EstimateIslandProcessingMemoryRequirements(dxWorld *world)
 {
-  size_t res = 0;
+    size_t res = 0;
 
-  size_t islandcounts = dEFFICIENT_SIZE((size_t)(unsigned)world->nb * 2 * sizeof(int));
-  res += islandcounts;
+    size_t islandcounts = dEFFICIENT_SIZE((size_t)(unsigned)world->nb * 2 * sizeof(int));
+    res += islandcounts;
 
-  size_t bodiessize = dEFFICIENT_SIZE((size_t)(unsigned)world->nb * sizeof(dxBody*));
-  size_t jointssize = dEFFICIENT_SIZE((size_t)(unsigned)world->nj * sizeof(dxJoint*));
-  res += bodiessize + jointssize;
+    size_t bodiessize = dEFFICIENT_SIZE((size_t)(unsigned)world->nb * sizeof(dxBody*));
+    size_t jointssize = dEFFICIENT_SIZE((size_t)(unsigned)world->nj * sizeof(dxJoint*));
+    res += bodiessize + jointssize;
 
-  size_t sesize = (bodiessize < jointssize) ? bodiessize : jointssize;
-  res += sesize;
+    size_t sesize = (bodiessize < jointssize) ? bodiessize : jointssize;
+    res += sesize;
 
-  return res;
+    return res;
 }
 
 static size_t BuildIslandsAndEstimateStepperMemoryRequirements(
-  dxWorldProcessIslandsInfo &islandsinfo, dxWorldProcessMemArena *memarena, 
-  dxWorld *world, dReal stepsize, dmemestimate_fn_t stepperestimate)
+    dxWorldProcessIslandsInfo &islandsinfo, dxWorldProcessMemArena *memarena, 
+    dxWorld *world, dReal stepsize, dmemestimate_fn_t stepperestimate)
 {
-  size_t maxreq = 0;
+    size_t maxreq = 0;
 
-  // handle auto-disabling of bodies
-  dInternalHandleAutoDisabling (world,stepsize);
+    // handle auto-disabling of bodies
+    dInternalHandleAutoDisabling (world,stepsize);
 
-  unsigned int nb = world->nb, nj = world->nj;
-  // Make array for island body/joint counts
-  unsigned int *islandsizes = memarena->AllocateArray<unsigned int>(2 * (size_t)nb);
-  unsigned int *sizescurr;
+    unsigned int nb = world->nb, nj = world->nj;
+    // Make array for island body/joint counts
+    unsigned int *islandsizes = memarena->AllocateArray<unsigned int>(2 * (size_t)nb);
+    unsigned int *sizescurr;
 
-  // make arrays for body and joint lists (for a single island) to go into
-  dxBody **body = memarena->AllocateArray<dxBody *>(nb);
-  dxJoint **joint = memarena->AllocateArray<dxJoint *>(nj);
+    // make arrays for body and joint lists (for a single island) to go into
+    dxBody **body = memarena->AllocateArray<dxBody *>(nb);
+    dxJoint **joint = memarena->AllocateArray<dxJoint *>(nj);
 
-  BEGIN_STATE_SAVE(memarena, stackstate) {
-    // allocate a stack of unvisited bodies in the island. the maximum size of
-    // the stack can be the lesser of the number of bodies or joints, because
-    // new bodies are only ever added to the stack by going through untagged
-    // joints. all the bodies in the stack must be tagged!
-    unsigned int stackalloc = (nj < nb) ? nj : nb;
-    dxBody **stack = memarena->AllocateArray<dxBody *>(stackalloc);
+    BEGIN_STATE_SAVE(memarena, stackstate) {
+        // allocate a stack of unvisited bodies in the island. the maximum size of
+        // the stack can be the lesser of the number of bodies or joints, because
+        // new bodies are only ever added to the stack by going through untagged
+        // joints. all the bodies in the stack must be tagged!
+        unsigned int stackalloc = (nj < nb) ? nj : nb;
+        dxBody **stack = memarena->AllocateArray<dxBody *>(stackalloc);
 
-    {
-      // set all body/joint tags to 0
-      for (dxBody *b=world->firstbody; b; b=(dxBody*)b->next) b->tag = 0;
-      for (dxJoint *j=world->firstjoint; j; j=(dxJoint*)j->next) j->tag = 0;
-    }
-
-    sizescurr = islandsizes;
-    dxBody **bodystart = body;
-    dxJoint **jointstart = joint;
-    for (dxBody *bb=world->firstbody; bb; bb=(dxBody*)bb->next) {
-      // get bb = the next enabled, untagged body, and tag it
-      if (!bb->tag) {
-        if (!(bb->flags & dxBodyDisabled)) {
-          bb->tag = 1;
-
-          dxBody **bodycurr = bodystart;
-          dxJoint **jointcurr = jointstart;
-
-          // tag all bodies and joints starting from bb.
-          *bodycurr++ = bb;
-
-          unsigned int stacksize = 0;
-          dxBody *b = bb;
-
-          while (true) {
-            // traverse and tag all body's joints, add untagged connected bodies
-            // to stack
-            for (dxJointNode *n=b->firstjoint; n; n=n->next) {
-              dxJoint *njoint = n->joint;
-              if (!njoint->tag) {
-                if (njoint->isEnabled()) {
-                  njoint->tag = 1;
-                  *jointcurr++ = njoint;
-
-                  dxBody *nbody = n->body;
-                  // Body disabled flag is not checked here. This is how auto-enable works.
-                  if (nbody && nbody->tag <= 0) {
-                    nbody->tag = 1;
-                    // Make sure all bodies are in the enabled state.
-                    nbody->flags &= ~dxBodyDisabled;
-                    stack[stacksize++] = nbody;
-                  }
-                } else {
-                  njoint->tag = -1; // Used in Step to prevent search over disabled joints (not needed for QuickStep so far)
-                }
-              }
-            }
-            dIASSERT(stacksize <= (unsigned int)world->nb);
-            dIASSERT(stacksize <= (unsigned int)world->nj);
-
-            if (stacksize == 0) {
-              break;
-            }
-
-            b = stack[--stacksize];	// pop body off stack
-            *bodycurr++ = b;	// put body on body list
-          }
-
-          unsigned int bcount = (unsigned int)(bodycurr - bodystart);
-          unsigned int jcount = (unsigned int)(jointcurr - jointstart);
-          dIASSERT((size_t)(bodycurr - bodystart) <= (size_t)UINT_MAX);
-          dIASSERT((size_t)(jointcurr - jointstart) <= (size_t)UINT_MAX);
-
-          sizescurr[dxISE_BODIES_COUNT] = bcount;
-          sizescurr[dxISE_JOINTS_COUNT] = jcount;
-          sizescurr += dxISE__MAX;
-
-          size_t islandreq = stepperestimate(bodystart, bcount, jointstart, jcount);
-          maxreq = (maxreq > islandreq) ? maxreq : islandreq;
-
-          bodystart = bodycurr;
-          jointstart = jointcurr;
-        } else {
-          bb->tag = -1; // Not used so far (assigned to retain consistency with joints)
+        {
+            // set all body/joint tags to 0
+            for (dxBody *b=world->firstbody; b; b=(dxBody*)b->next) b->tag = 0;
+            for (dxJoint *j=world->firstjoint; j; j=(dxJoint*)j->next) j->tag = 0;
         }
-      }
-    }
-  } END_STATE_SAVE(memarena, stackstate);
+
+        sizescurr = islandsizes;
+        dxBody **bodystart = body;
+        dxJoint **jointstart = joint;
+        for (dxBody *bb=world->firstbody; bb; bb=(dxBody*)bb->next) {
+            // get bb = the next enabled, untagged body, and tag it
+            if (!bb->tag) {
+                if (!(bb->flags & dxBodyDisabled)) {
+                    bb->tag = 1;
+
+                    dxBody **bodycurr = bodystart;
+                    dxJoint **jointcurr = jointstart;
+
+                    // tag all bodies and joints starting from bb.
+                    *bodycurr++ = bb;
+
+                    unsigned int stacksize = 0;
+                    dxBody *b = bb;
+
+                    while (true) {
+                        // traverse and tag all body's joints, add untagged connected bodies
+                        // to stack
+                        for (dxJointNode *n=b->firstjoint; n; n=n->next) {
+                            dxJoint *njoint = n->joint;
+                            if (!njoint->tag) {
+                                if (njoint->isEnabled()) {
+                                    njoint->tag = 1;
+                                    *jointcurr++ = njoint;
+
+                                    dxBody *nbody = n->body;
+                                    // Body disabled flag is not checked here. This is how auto-enable works.
+                                    if (nbody && nbody->tag <= 0) {
+                                        nbody->tag = 1;
+                                        // Make sure all bodies are in the enabled state.
+                                        nbody->flags &= ~dxBodyDisabled;
+                                        stack[stacksize++] = nbody;
+                                    }
+                                } else {
+                                    njoint->tag = -1; // Used in Step to prevent search over disabled joints (not needed for QuickStep so far)
+                                }
+                            }
+                        }
+                        dIASSERT(stacksize <= (unsigned int)world->nb);
+                        dIASSERT(stacksize <= (unsigned int)world->nj);
+
+                        if (stacksize == 0) {
+                            break;
+                        }
+
+                        b = stack[--stacksize];	// pop body off stack
+                        *bodycurr++ = b;	// put body on body list
+                    }
+
+                    unsigned int bcount = (unsigned int)(bodycurr - bodystart);
+                    unsigned int jcount = (unsigned int)(jointcurr - jointstart);
+                    dIASSERT((size_t)(bodycurr - bodystart) <= (size_t)UINT_MAX);
+                    dIASSERT((size_t)(jointcurr - jointstart) <= (size_t)UINT_MAX);
+
+                    sizescurr[dxISE_BODIES_COUNT] = bcount;
+                    sizescurr[dxISE_JOINTS_COUNT] = jcount;
+                    sizescurr += dxISE__MAX;
+
+                    size_t islandreq = stepperestimate(bodystart, bcount, jointstart, jcount);
+                    maxreq = (maxreq > islandreq) ? maxreq : islandreq;
+
+                    bodystart = bodycurr;
+                    jointstart = jointcurr;
+                } else {
+                    bb->tag = -1; // Not used so far (assigned to retain consistency with joints)
+                }
+            }
+        }
+    } END_STATE_SAVE(memarena, stackstate);
 
 # ifndef dNODEBUG
-  // if debugging, check that all objects (except for disabled bodies,
-  // unconnected joints, and joints that are connected to disabled bodies)
-  // were tagged.
-  {
-    for (dxBody *b=world->firstbody; b; b=(dxBody*)b->next) {
-      if (b->flags & dxBodyDisabled) {
-        if (b->tag > 0) dDebug (0,"disabled body tagged");
-      }
-      else {
-        if (b->tag <= 0) dDebug (0,"enabled body not tagged");
-      }
+    // if debugging, check that all objects (except for disabled bodies,
+    // unconnected joints, and joints that are connected to disabled bodies)
+    // were tagged.
+    {
+        for (dxBody *b=world->firstbody; b; b=(dxBody*)b->next) {
+            if (b->flags & dxBodyDisabled) {
+                if (b->tag > 0) dDebug (0,"disabled body tagged");
+            }
+            else {
+                if (b->tag <= 0) dDebug (0,"enabled body not tagged");
+            }
+        }
+        for (dxJoint *j=world->firstjoint; j; j=(dxJoint*)j->next) {
+            if ( (( j->node[0].body && (j->node[0].body->flags & dxBodyDisabled)==0 ) ||
+                (j->node[1].body && (j->node[1].body->flags & dxBodyDisabled)==0) )
+                && 
+                j->isEnabled() ) {
+                    if (j->tag <= 0) dDebug (0,"attached enabled joint not tagged");
+            }
+            else {
+                if (j->tag > 0) dDebug (0,"unattached or disabled joint tagged");
+            }
+        }
     }
-    for (dxJoint *j=world->firstjoint; j; j=(dxJoint*)j->next) {
-      if ( (( j->node[0].body && (j->node[0].body->flags & dxBodyDisabled)==0 ) ||
-        (j->node[1].body && (j->node[1].body->flags & dxBodyDisabled)==0) )
-        && 
-        j->isEnabled() ) {
-          if (j->tag <= 0) dDebug (0,"attached enabled joint not tagged");
-      }
-      else {
-        if (j->tag > 0) dDebug (0,"unattached or disabled joint tagged");
-      }
-    }
-  }
 # endif
 
-  size_t islandcount = ((size_t)(sizescurr - islandsizes) / dxISE__MAX);
-  islandsinfo.AssignInfo(islandcount, islandsizes, body, joint);
+    size_t islandcount = ((size_t)(sizescurr - islandsizes) / dxISE__MAX);
+    islandsinfo.AssignInfo(islandcount, islandsizes, body, joint);
 
-  return maxreq;
+    return maxreq;
 }
 
 static unsigned EstimateIslandProcessingSimultaneousCallsMaximumCount(unsigned allowedThreadCount, unsigned activeThreadCount)
 {
-  unsigned result = 
-    1 // ThreadedProcessGroup_Callback
-    + allowedThreadCount * (1 + 2) // ThreadedProcessIslandSearch_Callback + (ThreadedProcessIslandStepper_Callback && ThreadedProcessIslandSearch_Callback)
-    + dMIN(allowedThreadCount, (unsigned)(activeThreadCount - allowedThreadCount)) // ThreadedProcessJobStart_Callback
-    /*...the end*/;
-  return result;
+    unsigned result = 
+        1 // ThreadedProcessGroup_Callback
+        + allowedThreadCount * (1 + 2) // ThreadedProcessIslandSearch_Callback + (ThreadedProcessIslandStepper_Callback && ThreadedProcessIslandSearch_Callback)
+        + dMIN(allowedThreadCount, (unsigned)(activeThreadCount - allowedThreadCount)) // ThreadedProcessJobStart_Callback
+        /*...the end*/;
+    return result;
 }
 
 // this groups all joints and bodies in a world into islands. all objects
@@ -852,198 +852,198 @@ static unsigned EstimateIslandProcessingSimultaneousCallsMaximumCount(unsigned a
 // bodies will not be included in the simulation. disabled bodies are
 // re-enabled if they are found to be part of an active island.
 bool dxProcessIslands (dxWorld *world, const dxWorldProcessIslandsInfo &islandsInfo, 
-  dReal stepSize, dstepper_fn_t stepper)
+    dReal stepSize, dstepper_fn_t stepper)
 {
-  bool result = false;
+    bool result = false;
 
-  dxIslandsProcessingCallContext callContext(world, islandsInfo, stepSize, stepper);
+    dxIslandsProcessingCallContext callContext(world, islandsInfo, stepSize, stepper);
 
-  do {
-    dxStepWorkingMemory *wmem = world->wmem;
-    dIASSERT(wmem != NULL);
-    dxWorldProcessContext *context = wmem->GetWorldProcessingContext(); 
-    dIASSERT(context != NULL);
-    dCallWaitID pcwGroupCallWait = context->GetIslandsSteppingWait();
+    do {
+        dxStepWorkingMemory *wmem = world->wmem;
+        dIASSERT(wmem != NULL);
+        dxWorldProcessContext *context = wmem->GetWorldProcessingContext(); 
+        dIASSERT(context != NULL);
+        dCallWaitID pcwGroupCallWait = context->GetIslandsSteppingWait();
 
-    int summaryFault = 0;
+        int summaryFault = 0;
 
-    unsigned activeThreadCount;
-    const unsigned allowedThreadCount = world->GetThreadingIslandsMaxThreadsCount(&activeThreadCount);
-    dIASSERT(allowedThreadCount != 0);
-    dIASSERT(activeThreadCount >= allowedThreadCount);
+        unsigned activeThreadCount;
+        const unsigned allowedThreadCount = world->GetThreadingIslandsMaxThreadsCount(&activeThreadCount);
+        dIASSERT(allowedThreadCount != 0);
+        dIASSERT(activeThreadCount >= allowedThreadCount);
 
-    unsigned simultaneousCallsCount = EstimateIslandProcessingSimultaneousCallsMaximumCount(allowedThreadCount, activeThreadCount);
-    if (!world->PreallocateResourcesForThreadedCalls(simultaneousCallsCount)) {
-      break;
+        unsigned simultaneousCallsCount = EstimateIslandProcessingSimultaneousCallsMaximumCount(allowedThreadCount, activeThreadCount);
+        if (!world->PreallocateResourcesForThreadedCalls(simultaneousCallsCount)) {
+            break;
+        }
+
+        dCallReleaseeID groupReleasee;
+        // First post a group call with dependency count set to number of expected threads
+        world->PostThreadedCall(&summaryFault, &groupReleasee, allowedThreadCount, NULL, pcwGroupCallWait, 
+            &dxIslandsProcessingCallContext::ThreadedProcessGroup_Callback, (void *)&callContext, 0, "World Islands Stepping Group");
+
+        callContext.AssignGroupReleasee(groupReleasee);
+
+        // Summary fault flag may be omitted as any failures will automatically propagate to dependent releasee (i.e. to groupReleasee)
+        world->PostThreadedCallsGroup(NULL, allowedThreadCount, groupReleasee, 
+            &dxIslandsProcessingCallContext::ThreadedProcessJobStart_Callback, (void *)&callContext, "World Islands Stepping Start");
+
+        // Wait until group completes (since jobs were the dependencies of the group the group is going to complete only after all the jobs end)
+        world->WaitThreadedCallExclusively(NULL, pcwGroupCallWait, NULL, "World Islands Stepping Wait");
+
+        if (summaryFault != 0) {
+            break;
+        }
+
+        result = true;
     }
+    while (false);
 
-    dCallReleaseeID groupReleasee;
-    // First post a group call with dependency count set to number of expected threads
-    world->PostThreadedCall(&summaryFault, &groupReleasee, allowedThreadCount, NULL, pcwGroupCallWait, 
-        &dxIslandsProcessingCallContext::ThreadedProcessGroup_Callback, (void *)&callContext, 0, "World Islands Stepping Group");
-
-    callContext.AssignGroupReleasee(groupReleasee);
-
-    // Summary fault flag may be omitted as any failures will automatically propagate to dependent releasee (i.e. to groupReleasee)
-    world->PostThreadedCallsGroup(NULL, allowedThreadCount, groupReleasee, 
-      &dxIslandsProcessingCallContext::ThreadedProcessJobStart_Callback, (void *)&callContext, "World Islands Stepping Start");
-
-    // Wait until group completes (since jobs were the dependencies of the group the group is going to complete only after all the jobs end)
-    world->WaitThreadedCallExclusively(NULL, pcwGroupCallWait, NULL, "World Islands Stepping Wait");
-
-    if (summaryFault != 0) {
-      break;
-    }
-
-    result = true;
-  }
-  while (false);
-
-  return result;
+    return result;
 }
 
 
 int dxIslandsProcessingCallContext::ThreadedProcessGroup_Callback(void *callContext, dcallindex_t callInstanceIndex, dCallReleaseeID callThisReleasee)
 {
-  return static_cast<dxIslandsProcessingCallContext *>(callContext)->ThreadedProcessGroup();
+    return static_cast<dxIslandsProcessingCallContext *>(callContext)->ThreadedProcessGroup();
 }
 
 bool dxIslandsProcessingCallContext::ThreadedProcessGroup()
 {
-  // Do nothing - it's just a wrapper call
-  return true;
+    // Do nothing - it's just a wrapper call
+    return true;
 }
 
 int dxIslandsProcessingCallContext::ThreadedProcessJobStart_Callback(void *callContext, dcallindex_t callInstanceIndex, dCallReleaseeID callThisReleasee)
 {
-  static_cast<dxIslandsProcessingCallContext *>(callContext)->ThreadedProcessJobStart();
-  return true;
+    static_cast<dxIslandsProcessingCallContext *>(callContext)->ThreadedProcessJobStart();
+    return true;
 }
 
 void dxIslandsProcessingCallContext::ThreadedProcessJobStart()
 {
-  dxWorldProcessContext *context = m_world->UnsafeGetWorldProcessingContext(); 
+    dxWorldProcessContext *context = m_world->UnsafeGetWorldProcessingContext(); 
 
-  dxWorldProcessMemArena *stepperArena = context->ObtainStepperMemArena();
-  dIASSERT(stepperArena != NULL && stepperArena->IsStructureValid());
+    dxWorldProcessMemArena *stepperArena = context->ObtainStepperMemArena();
+    dIASSERT(stepperArena != NULL && stepperArena->IsStructureValid());
 
-  const dxWorldProcessIslandsInfo &islandsInfo = m_islandsInfo;
-  dxBody *const *islandBodiesStart = islandsInfo.GetBodiesArray();
-  dxJoint *const *islandJointsStart = islandsInfo.GetJointsArray();
+    const dxWorldProcessIslandsInfo &islandsInfo = m_islandsInfo;
+    dxBody *const *islandBodiesStart = islandsInfo.GetBodiesArray();
+    dxJoint *const *islandJointsStart = islandsInfo.GetJointsArray();
 
-  size_t islandIndex = 0;
+    size_t islandIndex = 0;
 
-  dxStepperCallContext *stepperCallContext = (dxStepperCallContext *)stepperArena->AllocateBlock(sizeof(dxStepperCallContext));
-  new(stepperCallContext) dxStepperCallContext(this, stepperArena, islandIndex, islandBodiesStart, islandJointsStart);
+    dxStepperCallContext *stepperCallContext = (dxStepperCallContext *)stepperArena->AllocateBlock(sizeof(dxStepperCallContext));
+    new(stepperCallContext) dxStepperCallContext(this, stepperArena, islandIndex, islandBodiesStart, islandJointsStart);
 
-  // Summary fault flag may be omitted as any failures will automatically propagate to dependent releasee (i.e. to m_groupReleasee)
-  m_world->PostThreadedCallForUnawareReleasee(NULL, NULL, 0, m_groupReleasee, NULL, 
-    &dxIslandsProcessingCallContext::ThreadedProcessIslandSearch_Callback, (void *)stepperCallContext, 0, "World Islands Stepping Selection");
+    // Summary fault flag may be omitted as any failures will automatically propagate to dependent releasee (i.e. to m_groupReleasee)
+    m_world->PostThreadedCallForUnawareReleasee(NULL, NULL, 0, m_groupReleasee, NULL, 
+        &dxIslandsProcessingCallContext::ThreadedProcessIslandSearch_Callback, (void *)stepperCallContext, 0, "World Islands Stepping Selection");
 }
 
 int dxIslandsProcessingCallContext::ThreadedProcessIslandSearch_Callback(void *callContext, dcallindex_t callInstanceIndex, dCallReleaseeID callThisReleasee)
 {
-  dxStepperCallContext *stepperCallContext = static_cast<dxStepperCallContext *>(callContext);
-  stepperCallContext->m_islandsProcessingContext->ThreadedProcessIslandSearch(stepperCallContext);
-  return true;
+    dxStepperCallContext *stepperCallContext = static_cast<dxStepperCallContext *>(callContext);
+    stepperCallContext->m_islandsProcessingContext->ThreadedProcessIslandSearch(stepperCallContext);
+    return true;
 }
 
 void dxIslandsProcessingCallContext::ThreadedProcessIslandSearch(dxStepperCallContext *stepperCallContext)
 {
-  bool finalizeJob = false;
+    bool finalizeJob = false;
 
-  const dxWorldProcessIslandsInfo &islandsInfo = m_islandsInfo;
-  unsigned int const *islandSizes = islandsInfo.GetIslandSizes();
+    const dxWorldProcessIslandsInfo &islandsInfo = m_islandsInfo;
+    unsigned int const *islandSizes = islandsInfo.GetIslandSizes();
 
-  const size_t islandsCount = islandsInfo.GetIslandsCount();
-  size_t islandToProcess = ObtainNextIslandToBeProcessed(islandsCount);
+    const size_t islandsCount = islandsInfo.GetIslandsCount();
+    size_t islandToProcess = ObtainNextIslandToBeProcessed(islandsCount);
 
-  if (islandToProcess != islandsCount) {
-    // First time, the counts are zeros and on next passes, adding counts will skip island that has just been processed by stepper
-    dxBody *const *islandBodiesStart = stepperCallContext->m_islandBodiesStart + stepperCallContext->m_islandBodiesCount;
-    dxJoint *const *islandJointsStart = stepperCallContext->m_islandJointsStart + stepperCallContext->m_islandJointsCount;
-    size_t islandIndex = stepperCallContext->m_islandIndex;
+    if (islandToProcess != islandsCount) {
+        // First time, the counts are zeros and on next passes, adding counts will skip island that has just been processed by stepper
+        dxBody *const *islandBodiesStart = stepperCallContext->m_islandBodiesStart + stepperCallContext->m_islandBodiesCount;
+        dxJoint *const *islandJointsStart = stepperCallContext->m_islandJointsStart + stepperCallContext->m_islandJointsCount;
+        size_t islandIndex = stepperCallContext->m_islandIndex;
 
-    for (; ; ++islandIndex) {
-      unsigned int bcount = islandSizes[islandIndex * dxISE__MAX + dxISE_BODIES_COUNT];
-      unsigned int jcount = islandSizes[islandIndex * dxISE__MAX + dxISE_JOINTS_COUNT];
+        for (; ; ++islandIndex) {
+            unsigned int bcount = islandSizes[islandIndex * dxISE__MAX + dxISE_BODIES_COUNT];
+            unsigned int jcount = islandSizes[islandIndex * dxISE__MAX + dxISE_JOINTS_COUNT];
 
-      if (islandIndex == islandToProcess) {
-        // Store selected island details
-        stepperCallContext->AssignIslandSelection(islandBodiesStart, islandJointsStart, bcount, jcount);
-      
-        // Store next island index to continue search from
-        ++islandIndex;
-        stepperCallContext->AssignIslandSearchProgress(islandIndex);
+            if (islandIndex == islandToProcess) {
+                // Store selected island details
+                stepperCallContext->AssignIslandSelection(islandBodiesStart, islandJointsStart, bcount, jcount);
 
-        dCallReleaseeID nextSearchReleasee;
+                // Store next island index to continue search from
+                ++islandIndex;
+                stepperCallContext->AssignIslandSearchProgress(islandIndex);
 
-        // Summary fault flag may be omitted as any failures will automatically propagate to dependent releasee (i.e. to m_groupReleasee)
-        m_world->PostThreadedCallForUnawareReleasee(NULL, &nextSearchReleasee, 1, m_groupReleasee, NULL, 
-          &dxIslandsProcessingCallContext::ThreadedProcessIslandSearch_Callback, (void *)stepperCallContext, 0, "World Islands Stepping Selection");
+                dCallReleaseeID nextSearchReleasee;
 
-        m_world->PostThreadedCall(NULL, NULL, 0, nextSearchReleasee, NULL, 
-          &dxIslandsProcessingCallContext::ThreadedProcessIslandStepper_Callback, (void *)stepperCallContext, 0, "Island Stepping Job Start");
+                // Summary fault flag may be omitted as any failures will automatically propagate to dependent releasee (i.e. to m_groupReleasee)
+                m_world->PostThreadedCallForUnawareReleasee(NULL, &nextSearchReleasee, 1, m_groupReleasee, NULL, 
+                    &dxIslandsProcessingCallContext::ThreadedProcessIslandSearch_Callback, (void *)stepperCallContext, 0, "World Islands Stepping Selection");
 
-        break;
-      }
+                m_world->PostThreadedCall(NULL, NULL, 0, nextSearchReleasee, NULL, 
+                    &dxIslandsProcessingCallContext::ThreadedProcessIslandStepper_Callback, (void *)stepperCallContext, 0, "Island Stepping Job Start");
 
-      islandBodiesStart += bcount;
-      islandJointsStart += jcount;
+                break;
+            }
+
+            islandBodiesStart += bcount;
+            islandJointsStart += jcount;
+        }
     }
-  }
-  else {
-    finalizeJob = true;
-  }
+    else {
+        finalizeJob = true;
+    }
 
-  if (finalizeJob) {
-    dxWorldProcessMemArena *stepperArena = stepperCallContext->m_stepperArena;
-    stepperCallContext->dxStepperCallContext::~dxStepperCallContext();
+    if (finalizeJob) {
+        dxWorldProcessMemArena *stepperArena = stepperCallContext->m_stepperArena;
+        stepperCallContext->dxStepperCallContext::~dxStepperCallContext();
 
-    dxWorldProcessContext *context = m_world->UnsafeGetWorldProcessingContext(); 
-    context->ReturnStepperMemArena(stepperArena);
-  }
+        dxWorldProcessContext *context = m_world->UnsafeGetWorldProcessingContext(); 
+        context->ReturnStepperMemArena(stepperArena);
+    }
 }
 
 int dxIslandsProcessingCallContext::ThreadedProcessIslandStepper_Callback(void *callContext, dcallindex_t callInstanceIndex, dCallReleaseeID callThisReleasee)
 {
-  dxStepperCallContext *stepperCallContext = static_cast<dxStepperCallContext *>(callContext);
-  stepperCallContext->m_islandsProcessingContext->ThreadedProcessIslandStepper(stepperCallContext);
-  return true;
+    dxStepperCallContext *stepperCallContext = static_cast<dxStepperCallContext *>(callContext);
+    stepperCallContext->m_islandsProcessingContext->ThreadedProcessIslandStepper(stepperCallContext);
+    return true;
 }
 
 void dxIslandsProcessingCallContext::ThreadedProcessIslandStepper(dxStepperCallContext *stepperCallContext)
 {
-  dxBody *const *islandBodiesStart = stepperCallContext->m_islandBodiesStart;
-  dxJoint *const *islandJointsStart = stepperCallContext->m_islandJointsStart;
-  unsigned islandBodiesCount = stepperCallContext->m_islandBodiesCount;
-  unsigned islandJointsCount = stepperCallContext->m_islandJointsCount;
+    dxBody *const *islandBodiesStart = stepperCallContext->m_islandBodiesStart;
+    dxJoint *const *islandJointsStart = stepperCallContext->m_islandJointsStart;
+    unsigned islandBodiesCount = stepperCallContext->m_islandBodiesCount;
+    unsigned islandJointsCount = stepperCallContext->m_islandJointsCount;
 
-  dxWorldProcessMemArena *stepperArena = stepperCallContext->m_stepperArena;
-  BEGIN_STATE_SAVE(stepperArena, stepperState) {
-    m_stepper(stepperArena, m_world, islandBodiesStart, islandBodiesCount, islandJointsStart, islandJointsCount, m_stepSize);
-  } END_STATE_SAVE(stepperArena, stepperState);
+    dxWorldProcessMemArena *stepperArena = stepperCallContext->m_stepperArena;
+    BEGIN_STATE_SAVE(stepperArena, stepperState) {
+        m_stepper(stepperArena, m_world, islandBodiesStart, islandBodiesCount, islandJointsStart, islandJointsCount, m_stepSize);
+    } END_STATE_SAVE(stepperArena, stepperState);
 }
 
 size_t dxIslandsProcessingCallContext::ObtainNextIslandToBeProcessed(size_t islandsCount)
 {
-  size_t islandToProcess;
+    size_t islandToProcess;
 
-  while (true)
-  {
-    islandToProcess = m_islandToProcessStorage;
-    if (islandToProcess == islandsCount)
+    while (true)
     {
-      break;
+        islandToProcess = m_islandToProcessStorage;
+        if (islandToProcess == islandsCount)
+        {
+            break;
+        }
+
+        if (AtomicCompareExchangePointer((volatile atomicptr *)&m_islandToProcessStorage, (atomicptr)islandToProcess, (atomicptr)(islandToProcess + 1)))
+        {
+            break;
+        }
     }
 
-    if (AtomicCompareExchangePointer((volatile atomicptr *)&m_islandToProcessStorage, (atomicptr)islandToProcess, (atomicptr)(islandToProcess + 1)))
-    {
-      break;
-    }
-  }
-
-  return islandToProcess;
+    return islandToProcess;
 }
 
 
@@ -1051,157 +1051,157 @@ size_t dxIslandsProcessingCallContext::ObtainNextIslandToBeProcessed(size_t isla
 // World processing context management
 
 dxWorldProcessMemArena *dxWorldProcessMemArena::ReallocateMemArena (
-  dxWorldProcessMemArena *oldarena, size_t memreq, 
-  const dxWorldProcessMemoryManager *memmgr, float rsrvfactor, unsigned rsrvminimum)
+    dxWorldProcessMemArena *oldarena, size_t memreq, 
+    const dxWorldProcessMemoryManager *memmgr, float rsrvfactor, unsigned rsrvminimum)
 {
-  dxWorldProcessMemArena *arena = oldarena;
-  bool allocsuccess = false;
+    dxWorldProcessMemArena *arena = oldarena;
+    bool allocsuccess = false;
 
-  size_t nOldArenaSize; 
-  void *pOldArenaBuffer;
+    size_t nOldArenaSize; 
+    void *pOldArenaBuffer;
 
-  do {
-    size_t oldmemsize = oldarena ? oldarena->GetMemorySize() : 0;
-    if (oldarena == NULL || oldmemsize < memreq) {
-      nOldArenaSize = oldarena ? dxWorldProcessMemArena::MakeArenaSize(oldmemsize) : 0;
-      pOldArenaBuffer = oldarena ? oldarena->m_pArenaBegin : NULL;
+    do {
+        size_t oldmemsize = oldarena ? oldarena->GetMemorySize() : 0;
+        if (oldarena == NULL || oldmemsize < memreq) {
+            nOldArenaSize = oldarena ? dxWorldProcessMemArena::MakeArenaSize(oldmemsize) : 0;
+            pOldArenaBuffer = oldarena ? oldarena->m_pArenaBegin : NULL;
 
-      if (!dxWorldProcessMemArena::IsArenaPossible(memreq)) {
-        break;
-      }
+            if (!dxWorldProcessMemArena::IsArenaPossible(memreq)) {
+                break;
+            }
 
-      size_t arenareq = dxWorldProcessMemArena::MakeArenaSize(memreq);
-      size_t arenareq_with_reserve = AdjustArenaSizeForReserveRequirements(arenareq, rsrvfactor, rsrvminimum);
-      size_t memreq_with_reserve = memreq + (arenareq_with_reserve - arenareq);
+            size_t arenareq = dxWorldProcessMemArena::MakeArenaSize(memreq);
+            size_t arenareq_with_reserve = AdjustArenaSizeForReserveRequirements(arenareq, rsrvfactor, rsrvminimum);
+            size_t memreq_with_reserve = memreq + (arenareq_with_reserve - arenareq);
 
-      if (oldarena != NULL) {
-          oldarena->m_pArenaMemMgr->m_fnFree(pOldArenaBuffer, nOldArenaSize);
-          oldarena = NULL;
+            if (oldarena != NULL) {
+                oldarena->m_pArenaMemMgr->m_fnFree(pOldArenaBuffer, nOldArenaSize);
+                oldarena = NULL;
 
-          // Zero variables to avoid another freeing on exit
-          pOldArenaBuffer = NULL;
-          nOldArenaSize = 0;
-      }
+                // Zero variables to avoid another freeing on exit
+                pOldArenaBuffer = NULL;
+                nOldArenaSize = 0;
+            }
 
-      // Allocate new arena
-      void *pNewArenaBuffer = memmgr->m_fnAlloc(arenareq_with_reserve);
-      if (pNewArenaBuffer == NULL) {
-        break;
-      }
+            // Allocate new arena
+            void *pNewArenaBuffer = memmgr->m_fnAlloc(arenareq_with_reserve);
+            if (pNewArenaBuffer == NULL) {
+                break;
+            }
 
-      arena = (dxWorldProcessMemArena *)dEFFICIENT_PTR(pNewArenaBuffer);
+            arena = (dxWorldProcessMemArena *)dEFFICIENT_PTR(pNewArenaBuffer);
 
-      void *blockbegin = dEFFICIENT_PTR(arena + 1);
-      void *blockend = dOFFSET_EFFICIENTLY(blockbegin, memreq_with_reserve);
+            void *blockbegin = dEFFICIENT_PTR(arena + 1);
+            void *blockend = dOFFSET_EFFICIENTLY(blockbegin, memreq_with_reserve);
 
-      arena->m_pAllocBegin = blockbegin;
-      arena->m_pAllocEnd = blockend;
-      arena->m_pArenaBegin = pNewArenaBuffer;
-      arena->m_pAllocCurrentOrNextArena = NULL;
-      arena->m_pArenaMemMgr = memmgr;
+            arena->m_pAllocBegin = blockbegin;
+            arena->m_pAllocEnd = blockend;
+            arena->m_pArenaBegin = pNewArenaBuffer;
+            arena->m_pAllocCurrentOrNextArena = NULL;
+            arena->m_pArenaMemMgr = memmgr;
+        }
+
+        allocsuccess = true;
+    }
+    while (false);
+
+    if (!allocsuccess) {
+        if (pOldArenaBuffer != NULL) {
+            dIASSERT(oldarena != NULL);
+            oldarena->m_pArenaMemMgr->m_fnFree(pOldArenaBuffer, nOldArenaSize);
+        }
+        arena = NULL;
     }
 
-    allocsuccess = true;
-  }
-  while (false);
-
-  if (!allocsuccess) {
-    if (pOldArenaBuffer != NULL) {
-      dIASSERT(oldarena != NULL);
-      oldarena->m_pArenaMemMgr->m_fnFree(pOldArenaBuffer, nOldArenaSize);
-    }
-    arena = NULL;
-  }
-
-  return arena;
+    return arena;
 }
 
 void dxWorldProcessMemArena::FreeMemArena (dxWorldProcessMemArena *arena)
 {
-  size_t memsize = arena->GetMemorySize();
-  size_t arenasize = dxWorldProcessMemArena::MakeArenaSize(memsize);
+    size_t memsize = arena->GetMemorySize();
+    size_t arenasize = dxWorldProcessMemArena::MakeArenaSize(memsize);
 
-  void *pArenaBegin = arena->m_pArenaBegin;
-  arena->m_pArenaMemMgr->m_fnFree(pArenaBegin, arenasize);
+    void *pArenaBegin = arena->m_pArenaBegin;
+    arena->m_pArenaMemMgr->m_fnFree(pArenaBegin, arenasize);
 }
 
 
 size_t dxWorldProcessMemArena::AdjustArenaSizeForReserveRequirements(size_t arenareq, float rsrvfactor, unsigned rsrvminimum)
 {
-  float scaledarena = arenareq * rsrvfactor;
-  size_t adjustedarena = (scaledarena < SIZE_MAX) ? (size_t)scaledarena : SIZE_MAX;
-  size_t boundedarena = (adjustedarena > rsrvminimum) ? adjustedarena : (size_t)rsrvminimum;
-  return dEFFICIENT_SIZE(boundedarena);
+    float scaledarena = arenareq * rsrvfactor;
+    size_t adjustedarena = (scaledarena < SIZE_MAX) ? (size_t)scaledarena : SIZE_MAX;
+    size_t boundedarena = (adjustedarena > rsrvminimum) ? adjustedarena : (size_t)rsrvminimum;
+    return dEFFICIENT_SIZE(boundedarena);
 }
 
 
 bool dxReallocateWorldProcessContext (dxWorld *world, dxWorldProcessIslandsInfo &islandsInfo, 
-  dReal stepSize, dmemestimate_fn_t stepperEstimate)
+    dReal stepSize, dmemestimate_fn_t stepperEstimate)
 {
-  bool result = false;
+    bool result = false;
 
-  do
-  {
-    dxStepWorkingMemory *wmem = AllocateOnDemand(world->wmem);
-    if (wmem == NULL)
+    do
     {
-      break;
+        dxStepWorkingMemory *wmem = AllocateOnDemand(world->wmem);
+        if (wmem == NULL)
+        {
+            break;
+        }
+
+        dxWorldProcessContext *context = wmem->SureGetWorldProcessingContext();
+        if (context == NULL)
+        {
+            break;
+        }
+
+        if (!context->EnsureStepperSyncObjectsAreAllocated(world))
+        {
+            break;
+        }
+
+        const dxWorldProcessMemoryReserveInfo *reserveInfo = wmem->SureGetMemoryReserveInfo();
+        const dxWorldProcessMemoryManager *memmgr = wmem->SureGetMemoryManager();
+
+        size_t islandsReq = EstimateIslandProcessingMemoryRequirements(world);
+        dIASSERT(islandsReq == dEFFICIENT_SIZE(islandsReq));
+
+        dxWorldProcessMemArena *islandsArena = context->ReallocateIslandsMemArena(islandsReq, memmgr, 1.0f, reserveInfo->m_uiReserveMinimum);
+        if (islandsArena == NULL)
+        {
+            break;
+        }
+        dIASSERT(islandsArena->IsStructureValid());
+
+        size_t stepperReq = BuildIslandsAndEstimateStepperMemoryRequirements(islandsInfo, islandsArena, world, stepSize, stepperEstimate);
+        dIASSERT(stepperReq == dEFFICIENT_SIZE(stepperReq));
+
+        size_t stepperReqWithCallContext = stepperReq + dEFFICIENT_SIZE(sizeof(dxStepperCallContext));
+
+        unsigned islandThreadsCount = world->GetThreadingIslandsMaxThreadsCount();
+        if (!context->ReallocateStepperMemArenas(world, islandThreadsCount, stepperReqWithCallContext, 
+            memmgr, reserveInfo->m_fReserveFactor, reserveInfo->m_uiReserveMinimum))
+        {
+            break;
+        }
+
+        result = true;
     }
+    while (false);
 
-    dxWorldProcessContext *context = wmem->SureGetWorldProcessingContext();
-    if (context == NULL)
-    {
-      break;
-    }
-    
-    if (!context->EnsureStepperSyncObjectsAreAllocated(world))
-    {
-      break;
-    }
-
-    const dxWorldProcessMemoryReserveInfo *reserveInfo = wmem->SureGetMemoryReserveInfo();
-    const dxWorldProcessMemoryManager *memmgr = wmem->SureGetMemoryManager();
-
-    size_t islandsReq = EstimateIslandProcessingMemoryRequirements(world);
-    dIASSERT(islandsReq == dEFFICIENT_SIZE(islandsReq));
-
-    dxWorldProcessMemArena *islandsArena = context->ReallocateIslandsMemArena(islandsReq, memmgr, 1.0f, reserveInfo->m_uiReserveMinimum);
-    if (islandsArena == NULL)
-    {
-      break;
-    }
-    dIASSERT(islandsArena->IsStructureValid());
-
-    size_t stepperReq = BuildIslandsAndEstimateStepperMemoryRequirements(islandsInfo, islandsArena, world, stepSize, stepperEstimate);
-    dIASSERT(stepperReq == dEFFICIENT_SIZE(stepperReq));
-
-    size_t stepperReqWithCallContext = stepperReq + dEFFICIENT_SIZE(sizeof(dxStepperCallContext));
-
-    unsigned islandThreadsCount = world->GetThreadingIslandsMaxThreadsCount();
-    if (!context->ReallocateStepperMemArenas(world, islandThreadsCount, stepperReqWithCallContext, 
-      memmgr, reserveInfo->m_fReserveFactor, reserveInfo->m_uiReserveMinimum))
-    {
-      break;
-    }
-
-    result = true;
-  }
-  while (false);
-
-  return result;
+    return result;
 }
 
 dxWorldProcessMemArena *dxAllocateTemporaryWorldProcessMemArena(
-  size_t memreq, const dxWorldProcessMemoryManager *memmgr/*=NULL*/, const dxWorldProcessMemoryReserveInfo *reserveinfo/*=NULL*/)
+    size_t memreq, const dxWorldProcessMemoryManager *memmgr/*=NULL*/, const dxWorldProcessMemoryReserveInfo *reserveinfo/*=NULL*/)
 {
-  const dxWorldProcessMemoryManager *surememmgr = memmgr ? memmgr : &g_WorldProcessMallocMemoryManager;
-  const dxWorldProcessMemoryReserveInfo *surereserveinfo = reserveinfo ? reserveinfo : &g_WorldProcessDefaultReserveInfo;
-  dxWorldProcessMemArena *arena = dxWorldProcessMemArena::ReallocateMemArena(NULL, memreq, surememmgr, surereserveinfo->m_fReserveFactor, surereserveinfo->m_uiReserveMinimum);
-  return arena;
+    const dxWorldProcessMemoryManager *surememmgr = memmgr ? memmgr : &g_WorldProcessMallocMemoryManager;
+    const dxWorldProcessMemoryReserveInfo *surereserveinfo = reserveinfo ? reserveinfo : &g_WorldProcessDefaultReserveInfo;
+    dxWorldProcessMemArena *arena = dxWorldProcessMemArena::ReallocateMemArena(NULL, memreq, surememmgr, surereserveinfo->m_fReserveFactor, surereserveinfo->m_uiReserveMinimum);
+    return arena;
 }
 
 void dxFreeTemporaryWorldProcessMemArena(dxWorldProcessMemArena *arena)
 {
-  dxWorldProcessMemArena::FreeMemArena(arena);
+    dxWorldProcessMemArena::FreeMemArena(arena);
 }
 

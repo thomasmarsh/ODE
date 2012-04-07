@@ -31,7 +31,7 @@
 //****************************************************************************
 // null joint
 dxJointNull::dxJointNull( dxWorld *w ) :
-        dxJoint( w )
+    dxJoint( w )
 {
 }
 

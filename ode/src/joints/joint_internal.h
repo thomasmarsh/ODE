@@ -31,24 +31,24 @@
 #include <ode/objects.h>
 
 #define checktype(j,t) dUASSERT(j->type() == dJointType##t, \
-                                "joint type is not " #t)
+    "joint type is not " #t)
 
 
 void setBall( dxJoint *joint, dxJoint::Info2 *info,
-              dVector3 anchor1, dVector3 anchor2 );
+             dVector3 anchor1, dVector3 anchor2 );
 void setBall2( dxJoint *joint, dxJoint::Info2 *info,
-               dVector3 anchor1, dVector3 anchor2,
-               dVector3 axis, dReal erp1 );
+              dVector3 anchor1, dVector3 anchor2,
+              dVector3 axis, dReal erp1 );
 
 
 void setAnchors( dxJoint *j, dReal x, dReal y, dReal z,
-                 dVector3 anchor1, dVector3 anchor2 );
+                dVector3 anchor1, dVector3 anchor2 );
 
 void getAnchor( dxJoint *j, dVector3 result, dVector3 anchor1 );
 void getAnchor2( dxJoint *j, dVector3 result, dVector3 anchor2 );
 
 void setAxes( dxJoint *j, dReal x, dReal y, dReal z,
-              dVector3 axis1, dVector3 axis2 );
+             dVector3 axis1, dVector3 axis2 );
 void getAxis( dxJoint *j, dVector3 result, dVector3 axis1 );
 void getAxis2( dxJoint *j, dVector3 result, dVector3 axis2 );
 

@@ -30,7 +30,7 @@
 // ball and socket
 
 dxJointBall::dxJointBall( dxWorld *w ) :
-        dxJoint( w )
+    dxJoint( w )
 {
     dSetZero( anchor1, 4 );
     dSetZero( anchor2, 4 );

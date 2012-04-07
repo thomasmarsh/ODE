@@ -40,7 +40,7 @@ transform is the identity.
 extern void addObjectToList( dObject *obj, dObject **first );
 
 dxJoint::dxJoint( dxWorld *w ) :
-        dObject( w )
+    dObject( w )
 {
     //printf("constructing %p\n", this);
     dIASSERT( w );
@@ -66,26 +66,26 @@ dxJoint::~dxJoint()
 bool dxJoint::isEnabled() const
 {
     return ( (flags & dJOINT_DISABLED) == 0 &&
-             (node[0].body->invMass > 0 ||
-             (node[1].body && node[1].body->invMass > 0)) );
+        (node[0].body->invMass > 0 ||
+        (node[1].body && node[1].body->invMass > 0)) );
 }
 
 
 size_t dxJointGroup::exportJoints(dxJoint **jlist)
 {
-  size_t i=0;
-  dxJoint *j = (dxJoint*) m_stack.rewind();
-  while (j != NULL) {
-    jlist[i++] = j;
-    j = (dxJoint*) (m_stack.next (j->size()));
-  }
-  return i;
+    size_t i=0;
+    dxJoint *j = (dxJoint*) m_stack.rewind();
+    while (j != NULL) {
+        jlist[i++] = j;
+        j = (dxJoint*) (m_stack.next (j->size()));
+    }
+    return i;
 }
 
 void dxJointGroup::freeAll()
 {
-  m_num = 0;
-  m_stack.freeAll();
+    m_num = 0;
+    m_stack.freeAll();
 }
 
 
@@ -102,7 +102,7 @@ void dxJointGroup::freeAll()
 // corresponding right hand side.
 
 void setBall( dxJoint *joint, dxJoint::Info2 *info,
-              dVector3 anchor1, dVector3 anchor2 )
+             dVector3 anchor1, dVector3 anchor2 )
 {
     // anchor points in global coordinates with respect to body PORs.
     dVector3 a1, a2;
@@ -131,7 +131,7 @@ void setBall( dxJoint *joint, dxJoint::Info2 *info,
         for ( int j = 0; j < 3; j++ )
         {
             info->c[j] = k * ( a2[j] + joint->node[1].body->posr.pos[j] -
-                               a1[j] - joint->node[0].body->posr.pos[j] );
+                a1[j] - joint->node[0].body->posr.pos[j] );
         }
     }
     else
@@ -139,7 +139,7 @@ void setBall( dxJoint *joint, dxJoint::Info2 *info,
         for ( int j = 0; j < 3; j++ )
         {
             info->c[j] = k * ( anchor2[j] - a1[j] -
-                               joint->node[0].body->posr.pos[j] );
+                joint->node[0].body->posr.pos[j] );
         }
     }
 }
@@ -151,8 +151,8 @@ void setBall( dxJoint *joint, dxJoint::Info2 *info,
 // `erp1' is the erp value to use along the axis.
 
 void setBall2( dxJoint *joint, dxJoint::Info2 *info,
-               dVector3 anchor1, dVector3 anchor2,
-               dVector3 axis, dReal erp1 )
+              dVector3 anchor1, dVector3 anchor2,
+              dVector3 axis, dReal erp1 )
 {
     // anchor points in global coordinates with respect to body PORs.
     dVector3 a1, a2;
@@ -197,7 +197,7 @@ void setBall2( dxJoint *joint, dxJoint::Info2 *info,
     if ( joint->node[1].body )
     {
         for ( i = 0; i < 3; i++ ) a2[i] += joint->node[1].body->posr.pos[i];
-        
+
         dVector3 a2_minus_a1;
         dSubtractVectors3(a2_minus_a1, a2, a1);
         info->c[0] = k1 * dCalcVectorDot3( axis, a2_minus_a1 );
@@ -277,7 +277,7 @@ void setFixedOrientation( dxJoint *joint, dxJoint::Info2 *info, dQuaternion qrel
 // compute anchor points relative to bodies
 
 void setAnchors( dxJoint *j, dReal x, dReal y, dReal z,
-                 dVector3 anchor1, dVector3 anchor2 )
+                dVector3 anchor1, dVector3 anchor2 )
 {
     if ( j->node[0].body )
     {
@@ -310,7 +310,7 @@ void setAnchors( dxJoint *j, dReal x, dReal y, dReal z,
 // compute axes relative to bodies. either axis1 or axis2 can be 0.
 
 void setAxes( dxJoint *j, dReal x, dReal y, dReal z,
-              dVector3 axis1, dVector3 axis2 )
+             dVector3 axis1, dVector3 axis2 )
 {
     if ( j->node[0].body )
     {
@@ -425,8 +425,8 @@ dReal getHingeAngleFromRelativeQuat( dQuaternion qrel, dVector3 axis )
     dReal cost2 = qrel[0];
     dReal sint2 = dSqrt( qrel[1] * qrel[1] + qrel[2] * qrel[2] + qrel[3] * qrel[3] );
     dReal theta = ( dCalcVectorDot3( qrel + 1, axis ) >= 0 ) ? // @@@ padding assumptions
-                  ( 2 * dAtan2( sint2, cost2 ) ) :  // if u points in direction of axis
-                  ( 2 * dAtan2( sint2, -cost2 ) );  // if u points in opposite direction
+        ( 2 * dAtan2( sint2, cost2 ) ) :  // if u points in direction of axis
+        ( 2 * dAtan2( sint2, -cost2 ) );  // if u points in opposite direction
 
     // the angle we get will be between 0..2*pi, but we want to return angles
     // between -pi..pi
@@ -449,7 +449,7 @@ dReal getHingeAngleFromRelativeQuat( dQuaternion qrel, dVector3 axis )
 // other than the given hinge axis.
 
 dReal getHingeAngle( dxBody *body1, dxBody *body2, dVector3 axis,
-                     dQuaternion q_initial )
+                    dQuaternion q_initial )
 {
     // get qrel = relative rotation between the two bodies
     dQuaternion qrel;
@@ -573,8 +573,8 @@ int dxJointLimitMotor::testRotationalLimit( dReal angle )
 
 
 int dxJointLimitMotor::addLimot( dxJoint *joint,
-                                 dxJoint::Info2 *info, int row,
-                                 const dVector3 ax1, int rotational )
+                                dxJoint::Info2 *info, int row,
+                                const dVector3 ax1, int rotational )
 {
     int srow = row * info->rowskip;
 
@@ -657,7 +657,7 @@ int dxJointLimitMotor::addLimot( dxJoint *joint,
                 if ( rotational )
                 {
                     dBodyAddTorque( joint->node[0].body, -fm*ax1[0], -fm*ax1[1],
-                                    -fm*ax1[2] );
+                        -fm*ax1[2] );
                     if ( joint->node[1].body )
                         dBodyAddTorque( joint->node[1].body, fm*ax1[0], fm*ax1[1], fm*ax1[2] );
                 }
@@ -670,9 +670,9 @@ int dxJointLimitMotor::addLimot( dxJoint *joint,
 
                         // linear limot torque decoupling step: refer to above discussion
                         dBodyAddTorque( joint->node[0].body, -fm*ltd[0], -fm*ltd[1],
-                                        -fm*ltd[2] );
+                            -fm*ltd[2] );
                         dBodyAddTorque( joint->node[1].body, -fm*ltd[0], -fm*ltd[1],
-                                        -fm*ltd[2] );
+                            -fm*ltd[2] );
                     }
                 }
             }

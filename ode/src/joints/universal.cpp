@@ -37,7 +37,7 @@
 // implementation (or, less likely, the hinge2 implementation).
 
 dxJointUniversal::dxJointUniversal( dxWorld *w ) :
-        dxJoint( w )
+    dxJoint( w )
 {
     dSetZero( anchor1, 4 );
     dSetZero( anchor2, 4 );
@@ -258,7 +258,7 @@ dxJointUniversal::getAngle2()
 void 
 dxJointUniversal::getSureMaxInfo( SureMaxInfo* info )
 {
-  info->max_m = 6;
+    info->max_m = 6;
 }
 
 
@@ -269,9 +269,9 @@ dxJointUniversal::getInfo1( dxJoint::Info1 *info )
     info->m = 4;
 
     bool limiting1 = ( limot1.lostop >= -M_PI || limot1.histop <= M_PI ) &&
-                     limot1.lostop <= limot1.histop;
+        limot1.lostop <= limot1.histop;
     bool limiting2 = ( limot2.lostop >= -M_PI || limot2.histop <= M_PI ) &&
-                     limot2.lostop <= limot2.histop;
+        limot2.lostop <= limot2.histop;
 
     // We need to call testRotationLimit() even if we're motored, since it
     // records the result.
@@ -417,7 +417,7 @@ void dJointSetUniversalAxis1( dJointID j, dReal x, dReal y, dReal z )
 }
 
 void dJointSetUniversalAxis1Offset( dJointID j, dReal x, dReal y, dReal z,
-                                    dReal offset1, dReal offset2 )
+                                   dReal offset1, dReal offset2 )
 {
     dxJointUniversal* joint = ( dxJointUniversal* )j;
     dUASSERT( joint, "bad joint argument" );
@@ -492,7 +492,7 @@ void dJointSetUniversalAxis2( dJointID j, dReal x, dReal y, dReal z )
 }
 
 void dJointSetUniversalAxis2Offset( dJointID j, dReal x, dReal y, dReal z,
-                                    dReal offset1, dReal offset2 )
+                                   dReal offset1, dReal offset2 )
 {
     dxJointUniversal* joint = ( dxJointUniversal* )j;
     dUASSERT( joint, "bad joint argument" );

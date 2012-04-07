@@ -32,8 +32,8 @@ static dFreeFunction *freefn = 0;
 
 #ifdef __MINGW32__
 /* 
-   this is a guard against AC_FUNC_MALLOC and AC_FUNC_REALLOC
-   which break cross compilation, no issues in native MSYS.
+this is a guard against AC_FUNC_MALLOC and AC_FUNC_REALLOC
+which break cross compilation, no issues in native MSYS.
 */
 #undef malloc
 #undef realloc
@@ -41,55 +41,55 @@ static dFreeFunction *freefn = 0;
 
 void dSetAllocHandler (dAllocFunction *fn)
 {
-  allocfn = fn;
+    allocfn = fn;
 }
 
 
 void dSetReallocHandler (dReallocFunction *fn)
 {
-  reallocfn = fn;
+    reallocfn = fn;
 }
 
 
 void dSetFreeHandler (dFreeFunction *fn)
 {
-  freefn = fn;
+    freefn = fn;
 }
 
 
 dAllocFunction *dGetAllocHandler()
 {
-  return allocfn;
+    return allocfn;
 }
 
 
 dReallocFunction *dGetReallocHandler()
 {
-  return reallocfn;
+    return reallocfn;
 }
 
 
 dFreeFunction *dGetFreeHandler()
 {
-  return freefn;
+    return freefn;
 }
 
 
 void * dAlloc (size_t size)
 {
-  if (allocfn) return allocfn (size); else return malloc (size);
+    if (allocfn) return allocfn (size); else return malloc (size);
 }
 
 
 void * dRealloc (void *ptr, size_t oldsize, size_t newsize)
 {
-  if (reallocfn) return reallocfn (ptr,oldsize,newsize);
-  else return realloc (ptr,newsize);
+    if (reallocfn) return reallocfn (ptr,oldsize,newsize);
+    else return realloc (ptr,newsize);
 }
 
 
 void dFree (void *ptr, size_t size)
 {
-  if (!ptr) return;
-  if (freefn) freefn (ptr,size); else free (ptr);
+    if (!ptr) return;
+    if (freefn) freefn (ptr,size); else free (ptr);
 }

@@ -31,7 +31,7 @@
 // hinge
 
 dxJointHinge::dxJointHinge( dxWorld *w ) :
-        dxJoint( w )
+    dxJoint( w )
 {
     dSetZero( anchor1, 4 );
     dSetZero( anchor2, 4 );
@@ -63,11 +63,11 @@ dxJointHinge::getInfo1( dxJoint::Info1 *info )
 
     // see if we're at a joint limit.
     if (( limot.lostop >= -M_PI || limot.histop <= M_PI ) &&
-            limot.lostop <= limot.histop )
+        limot.lostop <= limot.histop )
     {
         dReal angle = getHingeAngle( node[0].body,
-                                     node[1].body,
-                                     axis1, qrel );
+            node[1].body,
+            axis1, qrel );
         if ( limot.testRotationalLimit( angle ) )
             info->m = 6;
     }
@@ -294,9 +294,9 @@ dReal dJointGetHingeAngle( dJointID j )
     if ( joint->node[0].body )
     {
         dReal ang = getHingeAngle( joint->node[0].body,
-                                   joint->node[1].body,
-                                   joint->axis1,
-                                   joint->qrel );
+            joint->node[1].body,
+            joint->axis1,
+            joint->qrel );
         if ( joint->flags & dJOINT_REVERSE )
             return -ang;
         else

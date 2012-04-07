@@ -48,11 +48,11 @@ dContactGeom::g1 and dContactGeom::g2.
 dxCylinder::dxCylinder (dSpaceID space, dReal _radius, dReal _length) :
 dxGeom (space,1)
 {
-	dAASSERT (_radius >= 0 && _length >= 0);
-	type = dCylinderClass;
-	radius = _radius;
-	lz = _length;
-	updateZeroSizedFlag(!_radius || !_length);
+    dAASSERT (_radius >= 0 && _length >= 0);
+    type = dCylinderClass;
+    radius = _radius;
+    lz = _length;
+    updateZeroSizedFlag(!_radius || !_length);
 }
 
 
@@ -61,43 +61,43 @@ void dxCylinder::computeAABB()
     const dMatrix3& R = final_posr->R;
     const dVector3& pos = final_posr->pos;
 
-	dReal xrange = dFabs (R[0] * radius) +	 dFabs (R[1] * radius) + REAL(0.5)* dFabs (R[2] * 
-		lz);
-	dReal yrange = dFabs (R[4] * radius) +   dFabs (R[5] * radius) + REAL(0.5)* dFabs (R[6] * 
-		lz);
-	dReal zrange = dFabs (R[8] * radius) +	 dFabs (R[9] * radius) + REAL(0.5)* dFabs (R[10] * 
-		lz);
-	aabb[0] = pos[0] - xrange;
-	aabb[1] = pos[0] + xrange;
-	aabb[2] = pos[1] - yrange;
-	aabb[3] = pos[1] + yrange;
-	aabb[4] = pos[2] - zrange;
-	aabb[5] = pos[2] + zrange;
+    dReal xrange = dFabs (R[0] * radius) +	 dFabs (R[1] * radius) + REAL(0.5)* dFabs (R[2] * 
+        lz);
+    dReal yrange = dFabs (R[4] * radius) +   dFabs (R[5] * radius) + REAL(0.5)* dFabs (R[6] * 
+        lz);
+    dReal zrange = dFabs (R[8] * radius) +	 dFabs (R[9] * radius) + REAL(0.5)* dFabs (R[10] * 
+        lz);
+    aabb[0] = pos[0] - xrange;
+    aabb[1] = pos[0] + xrange;
+    aabb[2] = pos[1] - yrange;
+    aabb[3] = pos[1] + yrange;
+    aabb[4] = pos[2] - zrange;
+    aabb[5] = pos[2] + zrange;
 }
 
 
 dGeomID dCreateCylinder (dSpaceID space, dReal radius, dReal length)
 {
-	return new dxCylinder (space,radius,length);
+    return new dxCylinder (space,radius,length);
 }
 
 void dGeomCylinderSetParams (dGeomID cylinder, dReal radius, dReal length)
 {
-	dUASSERT (cylinder && cylinder->type == dCylinderClass,"argument not a ccylinder");
-	dAASSERT (radius >= 0 && length >= 0);
-	dxCylinder *c = (dxCylinder*) cylinder;
-	c->radius = radius;
-	c->lz = length;
-	c->updateZeroSizedFlag(!radius || !length);
-	dGeomMoved (cylinder);
+    dUASSERT (cylinder && cylinder->type == dCylinderClass,"argument not a ccylinder");
+    dAASSERT (radius >= 0 && length >= 0);
+    dxCylinder *c = (dxCylinder*) cylinder;
+    c->radius = radius;
+    c->lz = length;
+    c->updateZeroSizedFlag(!radius || !length);
+    dGeomMoved (cylinder);
 }
 
 void dGeomCylinderGetParams (dGeomID cylinder, dReal *radius, dReal *length)
 {
-	dUASSERT (cylinder && cylinder->type == dCylinderClass,"argument not a ccylinder");
-	dxCylinder *c = (dxCylinder*) cylinder;
-	*radius = c->radius;
-	*length = c->lz;
+    dUASSERT (cylinder && cylinder->type == dCylinderClass,"argument not a ccylinder");
+    dxCylinder *c = (dxCylinder*) cylinder;
+    *radius = c->radius;
+    *length = c->lz;
 }
 
 

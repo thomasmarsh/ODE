@@ -58,10 +58,10 @@
 
 struct LineContactSet
 {
-	enum
-	{
-		MAX_POINTS = 8
-	};
+    enum
+    {
+        MAX_POINTS = 8
+    };
 
     dVector3 Points[MAX_POINTS];
     int      Count;
@@ -77,18 +77,18 @@ static void ClipConvexPolygonAgainstPlane( const dVector3, dReal, LineContactSet
 
 ///returns the penetration depth
 static dReal MostDeepPoints(
-							LineContactSet & points,
-							const dVector3 plane_normal,
-							dReal plane_dist,
-							LineContactSet & deep_points);
+                            LineContactSet & points,
+                            const dVector3 plane_normal,
+                            dReal plane_dist,
+                            LineContactSet & deep_points);
 
 static bool TriTriContacts(const dVector3 tr1[3],
-							 const dVector3 tr2[3],
-							 int TriIndex1, int TriIndex2,
-							 dxGeom* g1, dxGeom* g2, int Flags,
-							 CONTACT_KEY_HASH_TABLE &hashcontactset,
-							 dContactGeom* Contacts, int Stride,
-							 int &contactcount);
+                           const dVector3 tr2[3],
+                           int TriIndex1, int TriIndex2,
+                           dxGeom* g1, dxGeom* g2, int Flags,
+                           CONTACT_KEY_HASH_TABLE &hashcontactset,
+                           dContactGeom* Contacts, int Stride,
+                           int &contactcount);
 
 
 /* some math macros */
@@ -152,316 +152,316 @@ SwapNormals(dVector3 *&pen_v, dVector3 *&col_v, dVector3* v1, dVector3* v2,
 
 void UpdateContactKey(CONTACT_KEY & key, dContactGeom * contact)
 {
-	key.m_contact = contact;
+    key.m_contact = contact;
 
-	unsigned int hash=0;
+    unsigned int hash=0;
 
-	int i = 0;
+    int i = 0;
 
-	while (true)
-	{
-		dReal coord = contact->pos[i];
-		coord = dFloor(coord * CONTACT_POS_HASH_QUOTIENT);
+    while (true)
+    {
+        dReal coord = contact->pos[i];
+        coord = dFloor(coord * CONTACT_POS_HASH_QUOTIENT);
 
         const int sz = sizeof(coord) / sizeof(unsigned);
-		dIASSERT(sizeof(coord) % sizeof(unsigned) == 0);
+        dIASSERT(sizeof(coord) % sizeof(unsigned) == 0);
 
         unsigned hash_v[ sz ];
-		memcpy(hash_v, &coord, sizeof(coord));
+        memcpy(hash_v, &coord, sizeof(coord));
 
-		unsigned int hash_input = hash_v[0];
+        unsigned int hash_input = hash_v[0];
         for (int i=1; i<sz; ++i)
             hash_input ^= hash_v[i];
 
-		hash = (( hash << 4 ) + (hash_input >> 24)) ^ ( hash >> 28 );
-		hash = (( hash << 4 ) + ((hash_input >> 16) & 0xFF)) ^ ( hash >> 28 );
-		hash = (( hash << 4 ) + ((hash_input >> 8) & 0xFF)) ^ ( hash >> 28 );
-		hash = (( hash << 4 ) + (hash_input & 0xFF)) ^ ( hash >> 28 );
+        hash = (( hash << 4 ) + (hash_input >> 24)) ^ ( hash >> 28 );
+        hash = (( hash << 4 ) + ((hash_input >> 16) & 0xFF)) ^ ( hash >> 28 );
+        hash = (( hash << 4 ) + ((hash_input >> 8) & 0xFF)) ^ ( hash >> 28 );
+        hash = (( hash << 4 ) + (hash_input & 0xFF)) ^ ( hash >> 28 );
 
-		if (++i == 3)
-		{
-			break;
-		}
+        if (++i == 3)
+        {
+            break;
+        }
 
-		hash = (hash << 11) | (hash >> 21);
-	}
+        hash = (hash << 11) | (hash >> 21);
+    }
 
-	key.m_key = hash;
+    key.m_key = hash;
 }
 
 
 static inline unsigned int MakeContactIndex(unsigned int key)
 {
-	dIASSERT(CONTACTS_HASHSIZE == 256);
+    dIASSERT(CONTACTS_HASHSIZE == 256);
 
-	unsigned int index = key ^ (key >> 16);
-	index = (index ^ (index >> 8)) & 0xFF;
+    unsigned int index = key ^ (key >> 16);
+    index = (index ^ (index >> 8)) & 0xFF;
 
-	return index;
+    return index;
 }
 
 dContactGeom *AddContactToNode(const CONTACT_KEY * contactkey,CONTACT_KEY_HASH_NODE * node)
 {
-	for(int i=0;i<node->m_keycount;i++)
-	{
-		if(node->m_keyarray[i].m_key == contactkey->m_key)
-		{
-			dContactGeom *contactfound = node->m_keyarray[i].m_contact;
-			if (dCalcPointsDistance3(contactfound->pos, contactkey->m_contact->pos) < REAL(1.00001) /*for comp. errors*/ * dSQRT3 / CONTACT_POS_HASH_QUOTIENT /*cube diagonal*/)
-			{
-				return contactfound;
-			}
-		}
-	}
+    for(int i=0;i<node->m_keycount;i++)
+    {
+        if(node->m_keyarray[i].m_key == contactkey->m_key)
+        {
+            dContactGeom *contactfound = node->m_keyarray[i].m_contact;
+            if (dCalcPointsDistance3(contactfound->pos, contactkey->m_contact->pos) < REAL(1.00001) /*for comp. errors*/ * dSQRT3 / CONTACT_POS_HASH_QUOTIENT /*cube diagonal*/)
+            {
+                return contactfound;
+            }
+        }
+    }
 
-	if (node->m_keycount < MAXCONTACT_X_NODE)
-	{
-		node->m_keyarray[node->m_keycount].m_contact = contactkey->m_contact;
-		node->m_keyarray[node->m_keycount].m_key = contactkey->m_key;
-		node->m_keycount++;
-	}
-	else
-	{
-		dDEBUGMSG("Trimesh-trimesh contach hash table bucket overflow - close contacts might not be culled");
-	}
+    if (node->m_keycount < MAXCONTACT_X_NODE)
+    {
+        node->m_keyarray[node->m_keycount].m_contact = contactkey->m_contact;
+        node->m_keyarray[node->m_keycount].m_key = contactkey->m_key;
+        node->m_keycount++;
+    }
+    else
+    {
+        dDEBUGMSG("Trimesh-trimesh contach hash table bucket overflow - close contacts might not be culled");
+    }
 
-	return contactkey->m_contact;
+    return contactkey->m_contact;
 }
 
 void RemoveNewContactFromNode(const CONTACT_KEY * contactkey, CONTACT_KEY_HASH_NODE * node)
 {
-	dIASSERT(node->m_keycount > 0);
+    dIASSERT(node->m_keycount > 0);
 
-	if (node->m_keyarray[node->m_keycount - 1].m_contact == contactkey->m_contact)
-	{
-		node->m_keycount -= 1;
-	}
-	else
-	{
-		dIASSERT(node->m_keycount == MAXCONTACT_X_NODE);
-	}
+    if (node->m_keyarray[node->m_keycount - 1].m_contact == contactkey->m_contact)
+    {
+        node->m_keycount -= 1;
+    }
+    else
+    {
+        dIASSERT(node->m_keycount == MAXCONTACT_X_NODE);
+    }
 }
 
 void RemoveArbitraryContactFromNode(const CONTACT_KEY *contactkey, CONTACT_KEY_HASH_NODE *node)
 {
-	dIASSERT(node->m_keycount > 0);
+    dIASSERT(node->m_keycount > 0);
 
-	int keyindex, lastkeyindex = node->m_keycount - 1;
+    int keyindex, lastkeyindex = node->m_keycount - 1;
 
-	// Do not check the last contact
-	for (keyindex = 0; keyindex < lastkeyindex; keyindex++)
-	{
-		if (node->m_keyarray[keyindex].m_contact == contactkey->m_contact)
-		{
-			node->m_keyarray[keyindex] = node->m_keyarray[lastkeyindex];
-			break;
-		}
-	}
+    // Do not check the last contact
+    for (keyindex = 0; keyindex < lastkeyindex; keyindex++)
+    {
+        if (node->m_keyarray[keyindex].m_contact == contactkey->m_contact)
+        {
+            node->m_keyarray[keyindex] = node->m_keyarray[lastkeyindex];
+            break;
+        }
+    }
 
-	dIASSERT(keyindex < lastkeyindex || 
-		node->m_keyarray[keyindex].m_contact == contactkey->m_contact); // It has been either the break from loop or last element should match
+    dIASSERT(keyindex < lastkeyindex || 
+        node->m_keyarray[keyindex].m_contact == contactkey->m_contact); // It has been either the break from loop or last element should match
 
-	node->m_keycount = lastkeyindex;
+    node->m_keycount = lastkeyindex;
 }
 
 void UpdateArbitraryContactInNode(const CONTACT_KEY *contactkey, CONTACT_KEY_HASH_NODE *node,
-	dContactGeom *pwithcontact)
+                                  dContactGeom *pwithcontact)
 {
-	dIASSERT(node->m_keycount > 0);
+    dIASSERT(node->m_keycount > 0);
 
-	int keyindex, lastkeyindex = node->m_keycount - 1;
+    int keyindex, lastkeyindex = node->m_keycount - 1;
 
-	// Do not check the last contact
-	for (keyindex = 0; keyindex < lastkeyindex; keyindex++)
-	{
-		if (node->m_keyarray[keyindex].m_contact == contactkey->m_contact)
-		{
-			break;
-		}
-	}
+    // Do not check the last contact
+    for (keyindex = 0; keyindex < lastkeyindex; keyindex++)
+    {
+        if (node->m_keyarray[keyindex].m_contact == contactkey->m_contact)
+        {
+            break;
+        }
+    }
 
-	dIASSERT(keyindex < lastkeyindex || 
-		node->m_keyarray[keyindex].m_contact == contactkey->m_contact); // It has been either the break from loop or last element should match
+    dIASSERT(keyindex < lastkeyindex || 
+        node->m_keyarray[keyindex].m_contact == contactkey->m_contact); // It has been either the break from loop or last element should match
 
-	node->m_keyarray[keyindex].m_contact = pwithcontact;
+    node->m_keyarray[keyindex].m_contact = pwithcontact;
 }
 
 void ClearContactSet(CONTACT_KEY_HASH_TABLE &hashcontactset)
 {
-	memset(&hashcontactset, 0, sizeof(CONTACT_KEY_HASH_TABLE));
+    memset(&hashcontactset, 0, sizeof(CONTACT_KEY_HASH_TABLE));
 }
 
 //return true if found
 dContactGeom *InsertContactInSet(CONTACT_KEY_HASH_TABLE &hashcontactset, const CONTACT_KEY &newkey)
 {
-	unsigned int index = MakeContactIndex(newkey.m_key);
+    unsigned int index = MakeContactIndex(newkey.m_key);
 
-	return AddContactToNode(&newkey, &hashcontactset[index]);
+    return AddContactToNode(&newkey, &hashcontactset[index]);
 }
 
 void RemoveNewContactFromSet(CONTACT_KEY_HASH_TABLE &hashcontactset, const CONTACT_KEY &contactkey)
 {
-	unsigned int index = MakeContactIndex(contactkey.m_key);
-	
-	RemoveNewContactFromNode(&contactkey, &hashcontactset[index]);
+    unsigned int index = MakeContactIndex(contactkey.m_key);
+
+    RemoveNewContactFromNode(&contactkey, &hashcontactset[index]);
 }
 
 void RemoveArbitraryContactFromSet(CONTACT_KEY_HASH_TABLE &hashcontactset, const CONTACT_KEY &contactkey)
 {
-	unsigned int index = MakeContactIndex(contactkey.m_key);
+    unsigned int index = MakeContactIndex(contactkey.m_key);
 
-	RemoveArbitraryContactFromNode(&contactkey, &hashcontactset[index]);
+    RemoveArbitraryContactFromNode(&contactkey, &hashcontactset[index]);
 }
 
 void UpdateArbitraryContactInSet(CONTACT_KEY_HASH_TABLE &hashcontactset, const CONTACT_KEY &contactkey, 
-	dContactGeom *pwithcontact)
+                                 dContactGeom *pwithcontact)
 {
-	unsigned int index = MakeContactIndex(contactkey.m_key);
+    unsigned int index = MakeContactIndex(contactkey.m_key);
 
-	UpdateArbitraryContactInNode(&contactkey, &hashcontactset[index], pwithcontact);
+    UpdateArbitraryContactInNode(&contactkey, &hashcontactset[index], pwithcontact);
 }
 
 bool AllocNewContact(
-			const dVector3 newpoint, dContactGeom *& out_pcontact,
-			int Flags, CONTACT_KEY_HASH_TABLE &hashcontactset,
-			dContactGeom* Contacts, int Stride,  int &contactcount)
+                     const dVector3 newpoint, dContactGeom *& out_pcontact,
+                     int Flags, CONTACT_KEY_HASH_TABLE &hashcontactset,
+                     dContactGeom* Contacts, int Stride,  int &contactcount)
 {
-	bool allocated_new = false;
+    bool allocated_new = false;
 
-	dContactGeom dLocalContact;
+    dContactGeom dLocalContact;
 
-	dContactGeom * pcontact = contactcount != (Flags & NUMC_MASK) ? 
-		SAFECONTACT(Flags, Contacts, contactcount, Stride) : &dLocalContact;
+    dContactGeom * pcontact = contactcount != (Flags & NUMC_MASK) ? 
+        SAFECONTACT(Flags, Contacts, contactcount, Stride) : &dLocalContact;
 
-	pcontact->pos[0] = newpoint[0];
-	pcontact->pos[1] = newpoint[1];
-	pcontact->pos[2] = newpoint[2];
-	pcontact->pos[3] = 1.0f;
+    pcontact->pos[0] = newpoint[0];
+    pcontact->pos[1] = newpoint[1];
+    pcontact->pos[2] = newpoint[2];
+    pcontact->pos[3] = 1.0f;
 
-	CONTACT_KEY newkey;
-	UpdateContactKey(newkey, pcontact);
-	
-	dContactGeom *pcontactfound = InsertContactInSet(hashcontactset, newkey);
-	if (pcontactfound == pcontact)
-	{
-		if (pcontactfound != &dLocalContact)
-		{
-			contactcount++;
-		}
-		else
-		{
-			RemoveNewContactFromSet(hashcontactset, newkey);
-			pcontactfound = NULL;
-		}
+    CONTACT_KEY newkey;
+    UpdateContactKey(newkey, pcontact);
 
-		allocated_new = true;
-	}
+    dContactGeom *pcontactfound = InsertContactInSet(hashcontactset, newkey);
+    if (pcontactfound == pcontact)
+    {
+        if (pcontactfound != &dLocalContact)
+        {
+            contactcount++;
+        }
+        else
+        {
+            RemoveNewContactFromSet(hashcontactset, newkey);
+            pcontactfound = NULL;
+        }
 
-	out_pcontact = pcontactfound;
-	return allocated_new;
+        allocated_new = true;
+    }
+
+    out_pcontact = pcontactfound;
+    return allocated_new;
 }
 
 void FreeExistingContact(dContactGeom *pcontact,
-	int Flags, CONTACT_KEY_HASH_TABLE &hashcontactset, 
-	dContactGeom *Contacts, int Stride, int &contactcount)
+                         int Flags, CONTACT_KEY_HASH_TABLE &hashcontactset, 
+                         dContactGeom *Contacts, int Stride, int &contactcount)
 {
-	CONTACT_KEY contactKey;
-	UpdateContactKey(contactKey, pcontact);
+    CONTACT_KEY contactKey;
+    UpdateContactKey(contactKey, pcontact);
 
-	RemoveArbitraryContactFromSet(hashcontactset, contactKey);
+    RemoveArbitraryContactFromSet(hashcontactset, contactKey);
 
-	int lastContactIndex = contactcount - 1;
-	dContactGeom *plastContact = SAFECONTACT(Flags, Contacts, lastContactIndex, Stride);
+    int lastContactIndex = contactcount - 1;
+    dContactGeom *plastContact = SAFECONTACT(Flags, Contacts, lastContactIndex, Stride);
 
-	if (pcontact != plastContact)
-	{
-		*pcontact = *plastContact;
+    if (pcontact != plastContact)
+    {
+        *pcontact = *plastContact;
 
-		CONTACT_KEY lastContactKey;
-		UpdateContactKey(lastContactKey, plastContact);
-		
-		UpdateArbitraryContactInSet(hashcontactset, lastContactKey, pcontact);
-	}
+        CONTACT_KEY lastContactKey;
+        UpdateContactKey(lastContactKey, plastContact);
 
-	contactcount = lastContactIndex;
+        UpdateArbitraryContactInSet(hashcontactset, lastContactKey, pcontact);
+    }
+
+    contactcount = lastContactIndex;
 }
 
 
 dContactGeom *  PushNewContact( dxGeom* g1, dxGeom* g2, int TriIndex1, int TriIndex2,
-							   const dVector3 point,
-							   dVector3 normal,
-							   dReal  depth,
-							   int Flags, 
-							   CONTACT_KEY_HASH_TABLE &hashcontactset,
-							 dContactGeom* Contacts, int Stride,
-							 int &contactcount)
+                               const dVector3 point,
+                               dVector3 normal,
+                               dReal  depth,
+                               int Flags, 
+                               CONTACT_KEY_HASH_TABLE &hashcontactset,
+                               dContactGeom* Contacts, int Stride,
+                               int &contactcount)
 {
-	dIASSERT(dFabs(dVector3Length((const dVector3 &)(*normal)) - REAL(1.0)) < REAL(1e-6)); // This assumption is used in the code
+    dIASSERT(dFabs(dVector3Length((const dVector3 &)(*normal)) - REAL(1.0)) < REAL(1e-6)); // This assumption is used in the code
 
-	dContactGeom * pcontact;
+    dContactGeom * pcontact;
 
-	if (!AllocNewContact(point, pcontact, Flags, hashcontactset, Contacts, Stride, contactcount))
-	{
-		const dReal depthDifference = depth - pcontact->depth;
+    if (!AllocNewContact(point, pcontact, Flags, hashcontactset, Contacts, Stride, contactcount))
+    {
+        const dReal depthDifference = depth - pcontact->depth;
 
-		if (depthDifference > CONTACT_DIFF_EPSILON)
-		{
-			pcontact->normal[0] = normal[0];
-			pcontact->normal[1] = normal[1];
-			pcontact->normal[2] = normal[2];
-			pcontact->normal[3] = REAL(1.0); // used to store length of vector sum for averaging
-			pcontact->depth = depth;
+        if (depthDifference > CONTACT_DIFF_EPSILON)
+        {
+            pcontact->normal[0] = normal[0];
+            pcontact->normal[1] = normal[1];
+            pcontact->normal[2] = normal[2];
+            pcontact->normal[3] = REAL(1.0); // used to store length of vector sum for averaging
+            pcontact->depth = depth;
 
-			pcontact->g1 = g1;
-			pcontact->g2 = g2;
-			pcontact->side1 = TriIndex1;
-			pcontact->side2 = TriIndex2;
-		}
-		else if (depthDifference >= -CONTACT_DIFF_EPSILON) ///average
-		{
-			if(pcontact->g1 == g2)
-			{
-				MULT(normal,normal, REAL(-1.0));
+            pcontact->g1 = g1;
+            pcontact->g2 = g2;
+            pcontact->side1 = TriIndex1;
+            pcontact->side2 = TriIndex2;
+        }
+        else if (depthDifference >= -CONTACT_DIFF_EPSILON) ///average
+        {
+            if(pcontact->g1 == g2)
+            {
+                MULT(normal,normal, REAL(-1.0));
                 int tempInt = TriIndex1; TriIndex1 = TriIndex2; TriIndex2 = tempInt;
                 // This should be discarded by optimizer as g1 and g2 are 
                 // not used any more but it's preferable to keep this line for 
                 // the sake of consistency in variable values.
                 dxGeom *tempGeom = g1; g1 = g2; g2 = tempGeom;
-			}
+            }
 
-			const dReal oldLen = pcontact->normal[3];
-			COMBO(pcontact->normal, normal, oldLen, pcontact->normal);
+            const dReal oldLen = pcontact->normal[3];
+            COMBO(pcontact->normal, normal, oldLen, pcontact->normal);
 
-			const dReal len = LENGTH(pcontact->normal);
-			if (len > CONTACT_NORMAL_ZERO)
-			{
-				MULT(pcontact->normal, pcontact->normal, REAL(1.0) / len);
-				pcontact->normal[3] = len;
+            const dReal len = LENGTH(pcontact->normal);
+            if (len > CONTACT_NORMAL_ZERO)
+            {
+                MULT(pcontact->normal, pcontact->normal, REAL(1.0) / len);
+                pcontact->normal[3] = len;
 
                 pcontact->side1 = ((dxTriMesh *)pcontact->g1)->TriMergeCallback ? ((dxTriMesh *)pcontact->g1)->TriMergeCallback((dxTriMesh *)pcontact->g1, pcontact->side1, TriIndex1) : -1;
                 pcontact->side2 = ((dxTriMesh *)pcontact->g2)->TriMergeCallback ? ((dxTriMesh *)pcontact->g2)->TriMergeCallback((dxTriMesh *)pcontact->g2, pcontact->side2, TriIndex2) : -1;
-			}
-			else
-			{
-				FreeExistingContact(pcontact, Flags, hashcontactset, Contacts, Stride, contactcount);
-			}
-		}
-	}
-	// Contact can be not available if buffer is full
-	else if (pcontact)
-	{
-		pcontact->normal[0] = normal[0];
-		pcontact->normal[1] = normal[1];
-		pcontact->normal[2] = normal[2];
-		pcontact->normal[3] = REAL(1.0); // used to store length of vector sum for averaging
-		pcontact->depth = depth;
-		pcontact->g1 = g1;
-		pcontact->g2 = g2;
-		pcontact->side1 = TriIndex1;
-		pcontact->side2 = TriIndex2;
-	}
+            }
+            else
+            {
+                FreeExistingContact(pcontact, Flags, hashcontactset, Contacts, Stride, contactcount);
+            }
+        }
+    }
+    // Contact can be not available if buffer is full
+    else if (pcontact)
+    {
+        pcontact->normal[0] = normal[0];
+        pcontact->normal[1] = normal[1];
+        pcontact->normal[2] = normal[2];
+        pcontact->normal[3] = REAL(1.0); // used to store length of vector sum for averaging
+        pcontact->depth = depth;
+        pcontact->g1 = g1;
+        pcontact->g2 = g2;
+        pcontact->side1 = TriIndex1;
+        pcontact->side2 = TriIndex2;
+    }
 
-	return pcontact;
+    return pcontact;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////
@@ -473,11 +473,11 @@ dContactGeom *  PushNewContact( dxGeom* g1, dxGeom* g2, int TriIndex1, int TriIn
 int
 dCollideTTL(dxGeom* g1, dxGeom* g2, int Flags, dContactGeom* Contacts, int Stride)
 {
-	dIASSERT (Stride >= (int)sizeof(dContactGeom));
-	dIASSERT (g1->type == dTriMeshClass);
-	dIASSERT (g2->type == dTriMeshClass);
-	dIASSERT ((Flags & NUMC_MASK) >= 1);
-	
+    dIASSERT (Stride >= (int)sizeof(dContactGeom));
+    dIASSERT (g1->type == dTriMeshClass);
+    dIASSERT (g2->type == dTriMeshClass);
+    dIASSERT ((Flags & NUMC_MASK) >= 1);
+
     dxTriMesh* TriMesh1 = (dxTriMesh*) g1;
     dxTriMesh* TriMesh2 = (dxTriMesh*) g2;
 
@@ -492,24 +492,24 @@ dCollideTTL(dxGeom* g1, dxGeom* g2, int Flags, dContactGeom* Contacts, int Strid
     // TLRotation2 = column-major order
     const dMatrix3& TLRotation2 = *(const dMatrix3*) dGeomGetRotation(TriMesh2);
 
-	const unsigned uiTLSKind = TriMesh1->getParentSpaceTLSKind();
-	dIASSERT(uiTLSKind == TriMesh2->getParentSpaceTLSKind()); // The colliding spaces must use matching cleanup method
-	TrimeshCollidersCache *pccColliderCache = GetTrimeshCollidersCache(uiTLSKind);
+    const unsigned uiTLSKind = TriMesh1->getParentSpaceTLSKind();
+    dIASSERT(uiTLSKind == TriMesh2->getParentSpaceTLSKind()); // The colliding spaces must use matching cleanup method
+    TrimeshCollidersCache *pccColliderCache = GetTrimeshCollidersCache(uiTLSKind);
     AABBTreeCollider& Collider = pccColliderCache->_AABBTreeCollider;
-	BVTCache &ColCache = pccColliderCache->ColCache;
-	CONTACT_KEY_HASH_TABLE &hashcontactset = pccColliderCache->_hashcontactset;
+    BVTCache &ColCache = pccColliderCache->ColCache;
+    CONTACT_KEY_HASH_TABLE &hashcontactset = pccColliderCache->_hashcontactset;
 
-	ColCache.Model0 = &TriMesh1->Data->BVTree;
+    ColCache.Model0 = &TriMesh1->Data->BVTree;
     ColCache.Model1 = &TriMesh2->Data->BVTree;
 
-	////Prepare contact list
-	ClearContactSet(hashcontactset);
+    ////Prepare contact list
+    ClearContactSet(hashcontactset);
 
     // Collision query
     Matrix4x4 amatrix, bmatrix;
     BOOL IsOk = Collider.Collide(ColCache,
-                                 &MakeMatrix(TLPosition1, TLRotation1, amatrix),
-                                 &MakeMatrix(TLPosition2, TLRotation2, bmatrix) );
+        &MakeMatrix(TLPosition1, TLRotation1, amatrix),
+        &MakeMatrix(TLPosition2, TLRotation2, bmatrix) );
 
 
     // Make "double" versions of these matrices, if appropriate
@@ -540,33 +540,33 @@ dCollideTTL(dxGeom* g1, dxGeom* g2, int Flags, dContactGeom* Contacts, int Strid
 
 
                 for (int i = 0; i < TriCount; i++)
-				{
+                {
                     id1 = CollidingPairs[i].id0;
                     id2 = CollidingPairs[i].id1;
 
                     // grab the colliding triangles
                     FetchTriangle((dxTriMesh*) g1, id1, TLPosition1, TLRotation1, v1);
-					FetchTriangle((dxTriMesh*) g2, id2, TLPosition2, TLRotation2, v2);
+                    FetchTriangle((dxTriMesh*) g2, id2, TLPosition2, TLRotation2, v2);
 
-					// Since we'll be doing matrix transformations, we need to
-					//  make sure that all vertices have four elements
-					for (int j=0; j<3; j++) {
-						v1[j][3] = 1.0;
-						v2[j][3] = 1.0;
-					}
+                    // Since we'll be doing matrix transformations, we need to
+                    //  make sure that all vertices have four elements
+                    for (int j=0; j<3; j++) {
+                        v1[j][3] = 1.0;
+                        v2[j][3] = 1.0;
+                    }
 
-					TriTriContacts(v1,v2, id1,id2,
-						  g1, g2, Flags, hashcontactset,
-						 Contacts,Stride,OutTriCount);
-					
-					// Continue loop even after contacts are full 
-					// as existing contacts' normals/depths might be updated
-					// Break only if contacts are not important
-					if ((OutTriCount | CONTACTS_UNIMPORTANT) == (Flags & (NUMC_MASK | CONTACTS_UNIMPORTANT)))
-					{
-						break;
-					}
-				}
+                    TriTriContacts(v1,v2, id1,id2,
+                        g1, g2, Flags, hashcontactset,
+                        Contacts,Stride,OutTriCount);
+
+                    // Continue loop even after contacts are full 
+                    // as existing contacts' normals/depths might be updated
+                    // Break only if contacts are not important
+                    if ((OutTriCount | CONTACTS_UNIMPORTANT) == (Flags & (NUMC_MASK | CONTACTS_UNIMPORTANT)))
+                    {
+                        break;
+                    }
+                }
 
                 // Return the number of contacts
                 return OutTriCount;
@@ -635,9 +635,9 @@ GetTriangleGeometryCallback(udword triangleindex, VertexPointers& triangle, udwo
 inline void
 dMakeMatrix4(const dVector3 Position, const dMatrix3 Rotation, dMatrix4 &B)
 {
-	B11 = Rotation[0]; B21 = Rotation[1]; B31 = Rotation[2];    B41 = Position[0];
-	B12 = Rotation[4]; B22 = Rotation[5]; B32 = Rotation[6];    B42 = Position[1];
-	B13 = Rotation[8]; B23 = Rotation[9]; B33 = Rotation[10];   B43 = Position[2];
+    B11 = Rotation[0]; B21 = Rotation[1]; B31 = Rotation[2];    B41 = Position[0];
+    B12 = Rotation[4]; B22 = Rotation[5]; B32 = Rotation[6];    B42 = Position[1];
+    B13 = Rotation[8]; B23 = Rotation[9]; B33 = Rotation[10];   B43 = Position[2];
 
     B14 = 0.0;         B24 = 0.0;         B34 = 0.0;            B44 = 1.0;
 }
@@ -736,159 +736,159 @@ IntersectLineSegmentRay(dVector3 x1, dVector3 x2, dVector3 x3, dVector3 n,
 
 
 void PlaneClipSegment( const dVector3  s1, const dVector3  s2,
-					   const dVector3  N, dReal C, dVector3  clipped)
+                      const dVector3  N, dReal C, dVector3  clipped)
 {
-	dReal dis1,dis2;
-	dis1 = DOT(s1,N)-C;
-	SUB(clipped,s2,s1);
-	dis2 = DOT(clipped,N);
-	MULT(clipped,clipped,-dis1/dis2);
-	ADD(clipped,clipped,s1);
-	clipped[3] = 1.0f;
+    dReal dis1,dis2;
+    dis1 = DOT(s1,N)-C;
+    SUB(clipped,s2,s1);
+    dis2 = DOT(clipped,N);
+    MULT(clipped,clipped,-dis1/dis2);
+    ADD(clipped,clipped,s1);
+    clipped[3] = 1.0f;
 }
 
 /* ClipConvexPolygonAgainstPlane - Clip a a convex polygon, described by
-  CONTACTS, with a plane (described by N and C distance from origin).
-  Note:  the input vertices are assumed to be in invcounterclockwise order.
-   changed by Francisco Leon (http://gimpact.sourceforge.net) */
+CONTACTS, with a plane (described by N and C distance from origin).
+Note:  the input vertices are assumed to be in invcounterclockwise order.
+changed by Francisco Leon (http://gimpact.sourceforge.net) */
 static void
 ClipConvexPolygonAgainstPlane( const dVector3 N, dReal C,
-                               LineContactSet& Contacts )
+                              LineContactSet& Contacts )
 {
     int  i, vi, prevclassif=32000, classif;
-	/*
-	classif 0 : back, 1 : front
-	*/
+    /*
+    classif 0 : back, 1 : front
+    */
 
-	dReal d;
-	dVector3 clipped[8];
-	int clippedcount =0;
+    dReal d;
+    dVector3 clipped[8];
+    int clippedcount =0;
 
-	if(Contacts.Count==0)
-	{
-		return;
-	}
-	for(i=0;i<=Contacts.Count;i++)
-	{
-		vi = i%Contacts.Count;
+    if(Contacts.Count==0)
+    {
+        return;
+    }
+    for(i=0;i<=Contacts.Count;i++)
+    {
+        vi = i%Contacts.Count;
 
-		d = DOT(N,Contacts.Points[vi]) - C;
-		////classify point
-		if(d>REAL(1.0e-8))	classif =  1;
-		else  classif =  0;
+        d = DOT(N,Contacts.Points[vi]) - C;
+        ////classify point
+        if(d>REAL(1.0e-8))	classif =  1;
+        else  classif =  0;
 
-		if(classif == 0)//back
-		{
-			if(i>0)
-			{
-				if(prevclassif==1)///in front
-				{
+        if(classif == 0)//back
+        {
+            if(i>0)
+            {
+                if(prevclassif==1)///in front
+                {
 
-					///add clipped point
-					if(clippedcount<8)
-					{
-						PlaneClipSegment(Contacts.Points[i-1],Contacts.Points[vi],
-						N,C,clipped[clippedcount]);
-						clippedcount++;
-					}
-				}
-			}
-			///add point
-			if(clippedcount<8&&i<Contacts.Count)
-			{
-				clipped[clippedcount][0] = Contacts.Points[vi][0];
-				clipped[clippedcount][1] = Contacts.Points[vi][1];
-				clipped[clippedcount][2] = Contacts.Points[vi][2];
-				clipped[clippedcount][3] = 1.0f;
-				clippedcount++;
-			}
-		}
-		else
-		{
+                    ///add clipped point
+                    if(clippedcount<8)
+                    {
+                        PlaneClipSegment(Contacts.Points[i-1],Contacts.Points[vi],
+                            N,C,clipped[clippedcount]);
+                        clippedcount++;
+                    }
+                }
+            }
+            ///add point
+            if(clippedcount<8&&i<Contacts.Count)
+            {
+                clipped[clippedcount][0] = Contacts.Points[vi][0];
+                clipped[clippedcount][1] = Contacts.Points[vi][1];
+                clipped[clippedcount][2] = Contacts.Points[vi][2];
+                clipped[clippedcount][3] = 1.0f;
+                clippedcount++;
+            }
+        }
+        else
+        {
 
-			if(i>0)
-			{
-				if(prevclassif==0)
-				{
-					///add point
-					if(clippedcount<8)
-					{
-						PlaneClipSegment(Contacts.Points[i-1],Contacts.Points[vi],
-						N,C,clipped[clippedcount]);
-						clippedcount++;
-					}
-				}
-			}
-		}
+            if(i>0)
+            {
+                if(prevclassif==0)
+                {
+                    ///add point
+                    if(clippedcount<8)
+                    {
+                        PlaneClipSegment(Contacts.Points[i-1],Contacts.Points[vi],
+                            N,C,clipped[clippedcount]);
+                        clippedcount++;
+                    }
+                }
+            }
+        }
 
-		prevclassif	= classif;
-	}
+        prevclassif	= classif;
+    }
 
-	if(clippedcount==0)
-	{
-		Contacts.Count = 0;
-		return;
-	}
-	Contacts.Count = clippedcount;
-	memcpy( Contacts.Points, clipped, clippedcount * sizeof(dVector3) );
-	return;
+    if(clippedcount==0)
+    {
+        Contacts.Count = 0;
+        return;
+    }
+    Contacts.Count = clippedcount;
+    memcpy( Contacts.Points, clipped, clippedcount * sizeof(dVector3) );
+    return;
 }
 
 
 bool BuildPlane(const dVector3 s0, const dVector3 s1,const dVector3 s2,
-				dVector3 Normal, dReal & Dist)
+                dVector3 Normal, dReal & Dist)
 {
-	dVector3 e0,e1;
-	SUB(e0,s1,s0);
-	SUB(e1,s2,s0);
+    dVector3 e0,e1;
+    SUB(e0,s1,s0);
+    SUB(e1,s2,s0);
 
-	CROSS(Normal,e0,e1);
+    CROSS(Normal,e0,e1);
 
-	if (!dSafeNormalize3(Normal))
-	{
-		return false;
-	}
+    if (!dSafeNormalize3(Normal))
+    {
+        return false;
+    }
 
-	Dist = DOT(Normal,s0);
-	return true;
+    Dist = DOT(Normal,s0);
+    return true;
 
 }
 
 bool BuildEdgesDir(const dVector3 s0, const dVector3 s1,
-					const dVector3 t0, const dVector3 t1,
-					dVector3 crossdir)
+                   const dVector3 t0, const dVector3 t1,
+                   dVector3 crossdir)
 {
-	dVector3 e0,e1;
+    dVector3 e0,e1;
 
-	SUB(e0,s1,s0);
-	SUB(e1,t1,t0);
-	CROSS(crossdir,e0,e1);
+    SUB(e0,s1,s0);
+    SUB(e1,t1,t0);
+    CROSS(crossdir,e0,e1);
 
-	if (!dSafeNormalize3(crossdir))
-	{
-		return false;
-	}
-	return true;
+    if (!dSafeNormalize3(crossdir))
+    {
+        return false;
+    }
+    return true;
 }
 
 
 
 bool BuildEdgePlane(
-					const dVector3 s0, const dVector3 s1,
-					const dVector3 normal,
-					dVector3 plane_normal,
-					dReal & plane_dist)
+                    const dVector3 s0, const dVector3 s1,
+                    const dVector3 normal,
+                    dVector3 plane_normal,
+                    dReal & plane_dist)
 {
-	dVector3 e0;
+    dVector3 e0;
 
-	SUB(e0,s1,s0);
-	CROSS(plane_normal,e0,normal);
-	if (!dSafeNormalize3(plane_normal))
-	{
-		return false;
-	}
-	plane_dist = DOT(plane_normal,s0);
-	return true;
+    SUB(e0,s1,s0);
+    CROSS(plane_normal,e0,normal);
+    if (!dSafeNormalize3(plane_normal))
+    {
+        return false;
+    }
+    plane_dist = DOT(plane_normal,s0);
+    return true;
 }
 
 
@@ -899,409 +899,409 @@ Positive penetration
 Negative number: they are separated
 */
 dReal IntervalPenetration(dReal &vmin1,dReal &vmax1,
-						  dReal &vmin2,dReal &vmax2)
+                          dReal &vmin2,dReal &vmax2)
 {
-	if(vmax1<=vmin2)
-	{
-		return -(vmin2-vmax1);
-	}
-	else
-	{
-		if(vmax2<=vmin1)
-		{
-			return -(vmin1-vmax2);
-		}
-		else
-		{
-			if(vmax1<=vmax2)
-			{
-				return vmax1-vmin2;
-			}
+    if(vmax1<=vmin2)
+    {
+        return -(vmin2-vmax1);
+    }
+    else
+    {
+        if(vmax2<=vmin1)
+        {
+            return -(vmin1-vmax2);
+        }
+        else
+        {
+            if(vmax1<=vmax2)
+            {
+                return vmax1-vmin2;
+            }
 
-			return vmax2-vmin1;
-		}
+            return vmax2-vmin1;
+        }
 
-	}
-	return 0;
+    }
+    return 0;
 }
 
 void FindInterval(
-				  const dVector3 * vertices, int verticecount,
-				  dVector3 dir,dReal &vmin,dReal &vmax)
+                  const dVector3 * vertices, int verticecount,
+                  dVector3 dir,dReal &vmin,dReal &vmax)
 {
 
-	dReal dist;
-	int i;
-	vmin = DOT(vertices[0],dir);
-	vmax = vmin;
-	for(i=1;i<verticecount;i++)
-	{
-		dist = DOT(vertices[i],dir);
-		if(vmin>dist) vmin=dist;
-		else if(vmax<dist) vmax=dist;
-	}
+    dReal dist;
+    int i;
+    vmin = DOT(vertices[0],dir);
+    vmax = vmin;
+    for(i=1;i<verticecount;i++)
+    {
+        dist = DOT(vertices[i],dir);
+        if(vmin>dist) vmin=dist;
+        else if(vmax<dist) vmax=dist;
+    }
 }
 
 ///returns the penetration depth
 dReal MostDeepPoints(
-					LineContactSet & points,
-					const dVector3 plane_normal,
-					dReal plane_dist,
-					LineContactSet & deep_points)
+                     LineContactSet & points,
+                     const dVector3 plane_normal,
+                     dReal plane_dist,
+                     LineContactSet & deep_points)
 {
-	int i;
-	int max_candidates[8];
-	dReal maxdeep=-dInfinity;
-	dReal dist;
+    int i;
+    int max_candidates[8];
+    dReal maxdeep=-dInfinity;
+    dReal dist;
 
-	deep_points.Count = 0;
-	for(i=0;i<points.Count;i++)
-	{
-		dist = DOT(plane_normal,points.Points[i]) - plane_dist;
-		dist *= -1.0f;
-		if(dist>maxdeep)
-		{
-			maxdeep = dist;
-			deep_points.Count=1;
-			max_candidates[deep_points.Count-1] = i;
-		}
-		else if(dist+REAL(0.000001)>=maxdeep)
-		{
-			deep_points.Count++;
-			max_candidates[deep_points.Count-1] = i;
-		}
-	}
+    deep_points.Count = 0;
+    for(i=0;i<points.Count;i++)
+    {
+        dist = DOT(plane_normal,points.Points[i]) - plane_dist;
+        dist *= -1.0f;
+        if(dist>maxdeep)
+        {
+            maxdeep = dist;
+            deep_points.Count=1;
+            max_candidates[deep_points.Count-1] = i;
+        }
+        else if(dist+REAL(0.000001)>=maxdeep)
+        {
+            deep_points.Count++;
+            max_candidates[deep_points.Count-1] = i;
+        }
+    }
 
-	for(i=0;i<deep_points.Count;i++)
-	{
-		SET(deep_points.Points[i],points.Points[max_candidates[i]]);
-	}
-	return maxdeep;
+    for(i=0;i<deep_points.Count;i++)
+    {
+        SET(deep_points.Points[i],points.Points[max_candidates[i]]);
+    }
+    return maxdeep;
 
 }
 
 void ClipPointsByTri(
-					  const dVector3 * points, int pointcount,
-					  const dVector3 tri[3],
-					  const dVector3 triplanenormal,
-					  dReal triplanedist,
-					  LineContactSet & clipped_points,
-					  bool triplane_clips)
+                     const dVector3 * points, int pointcount,
+                     const dVector3 tri[3],
+                     const dVector3 triplanenormal,
+                     dReal triplanedist,
+                     LineContactSet & clipped_points,
+                     bool triplane_clips)
 {
-	///build edges planes
-	int i;
-	dVector4 plane;
+    ///build edges planes
+    int i;
+    dVector4 plane;
 
-	clipped_points.Count = pointcount;
-	memcpy(&clipped_points.Points[0],&points[0],pointcount*sizeof(dVector3));
-	for(i=0;i<3;i++)
-	{
-		if (BuildEdgePlane(
-			tri[i],tri[(i+1)%3],triplanenormal,
-			plane,plane[3]))
-		{
-			ClipConvexPolygonAgainstPlane(
-				plane,
-				plane[3],
-				clipped_points);
-		}
-	}
+    clipped_points.Count = pointcount;
+    memcpy(&clipped_points.Points[0],&points[0],pointcount*sizeof(dVector3));
+    for(i=0;i<3;i++)
+    {
+        if (BuildEdgePlane(
+            tri[i],tri[(i+1)%3],triplanenormal,
+            plane,plane[3]))
+        {
+            ClipConvexPolygonAgainstPlane(
+                plane,
+                plane[3],
+                clipped_points);
+        }
+    }
 
-	if(triplane_clips)
-	{
-		ClipConvexPolygonAgainstPlane(
-			triplanenormal,
-			triplanedist,
-			clipped_points);
-	}
+    if(triplane_clips)
+    {
+        ClipConvexPolygonAgainstPlane(
+            triplanenormal,
+            triplanedist,
+            clipped_points);
+    }
 }
 
 
 ///returns the penetration depth
 dReal FindTriangleTriangleCollision(
-							const dVector3 tri1[3],
-							const dVector3 tri2[3],
-							dVector3 separating_normal,
-							LineContactSet & deep_points)
+                                    const dVector3 tri1[3],
+                                    const dVector3 tri2[3],
+                                    dVector3 separating_normal,
+                                    LineContactSet & deep_points)
 {
-	dReal maxdeep=dInfinity;
-	dReal dist;
-	int mostdir=0,mostface = 0, currdir=0;
-//	dReal vmin1,vmax1,vmin2,vmax2;
-//	dVector3 crossdir, pt1,pt2;
-	dVector4 tri1plane,tri2plane;
-	separating_normal[3] = 0.0f;
-	bool bl;
-	LineContactSet clipped_points1,clipped_points2;
-	LineContactSet deep_points1,deep_points2;
-	// It is necessary to initialize the count because both conditional statements 
-	// might be skipped leading to uninitialized count being used for memcpy in if(mostdir==0)
-	deep_points1.Count = 0;
+    dReal maxdeep=dInfinity;
+    dReal dist;
+    int mostdir=0,mostface = 0, currdir=0;
+    //	dReal vmin1,vmax1,vmin2,vmax2;
+    //	dVector3 crossdir, pt1,pt2;
+    dVector4 tri1plane,tri2plane;
+    separating_normal[3] = 0.0f;
+    bool bl;
+    LineContactSet clipped_points1,clipped_points2;
+    LineContactSet deep_points1,deep_points2;
+    // It is necessary to initialize the count because both conditional statements 
+    // might be skipped leading to uninitialized count being used for memcpy in if(mostdir==0)
+    deep_points1.Count = 0;
 
-	////find interval face1
+    ////find interval face1
 
-	bl = BuildPlane(tri1[0],tri1[1],tri1[2],
-		tri1plane,tri1plane[3]);
-	clipped_points1.Count = 0;
+    bl = BuildPlane(tri1[0],tri1[1],tri1[2],
+        tri1plane,tri1plane[3]);
+    clipped_points1.Count = 0;
 
-	if(bl)
-	{
-		ClipPointsByTri(
-					  tri2, 3,
-					  tri1,
-					  tri1plane,
-					  tri1plane[3],
-					  clipped_points1,false);
-
-
-
-		maxdeep = MostDeepPoints(
-					clipped_points1,
-					tri1plane,
-					tri1plane[3],
-					deep_points1);
-		SET(separating_normal,tri1plane);
-
-	}
-	currdir++;
-
-	////find interval face2
-
-	bl = BuildPlane(tri2[0],tri2[1],tri2[2],
-		tri2plane,tri2plane[3]);
-
-
-	clipped_points2.Count = 0;
-	if(bl)
-	{
-		ClipPointsByTri(
-					  tri1, 3,
-					  tri2,
-					  tri2plane,
-					  tri2plane[3],
-					  clipped_points2,false);
+    if(bl)
+    {
+        ClipPointsByTri(
+            tri2, 3,
+            tri1,
+            tri1plane,
+            tri1plane[3],
+            clipped_points1,false);
 
 
 
-		dist = MostDeepPoints(
-					clipped_points2,
-					tri2plane,
-					tri2plane[3],
-					deep_points2);
+        maxdeep = MostDeepPoints(
+            clipped_points1,
+            tri1plane,
+            tri1plane[3],
+            deep_points1);
+        SET(separating_normal,tri1plane);
+
+    }
+    currdir++;
+
+    ////find interval face2
+
+    bl = BuildPlane(tri2[0],tri2[1],tri2[2],
+        tri2plane,tri2plane[3]);
+
+
+    clipped_points2.Count = 0;
+    if(bl)
+    {
+        ClipPointsByTri(
+            tri1, 3,
+            tri2,
+            tri2plane,
+            tri2plane[3],
+            clipped_points2,false);
 
 
 
-		if(dist<maxdeep)
-		{
-			maxdeep = dist;
-			mostdir = currdir;
-			mostface = 1;
-			SET(separating_normal,tri2plane);
-		}
-	}
-	currdir++;
-
-
-	///find edge edge distances
-	///test each edge plane
-
-	/*for(i=0;i<3;i++)
-	{
-
-
-		for(j=0;j<3;j++)
-		{
-
-
-			bl = BuildEdgesDir(
-				tri1[i],tri1[(i+1)%3],
-				tri2[j],tri2[(j+1)%3],
-				crossdir);
-
-			////find plane distance
-
-			if(bl)
-			{
-				FindInterval(tri1,3,crossdir,vmin1,vmax1);
-				FindInterval(tri2,3,crossdir,vmin2,vmax2);
-
-				dist = IntervalPenetration(
-					vmin1,
-					vmax1,
-					vmin2,
-					vmax2);
-				if(dist<maxdeep)
-				{
-					maxdeep = dist;
-					mostdir = currdir;
-					SET(separating_normal,crossdir);
-				}
-			}
-			currdir++;
-		}
-	}*/
-
-
-	////check most dir for contacts
-	if(mostdir==0)
-	{
-		///find most deep points
-		deep_points.Count = deep_points1.Count;
-		memcpy(
-			&deep_points.Points[0],
-			&deep_points1.Points[0],
-			deep_points1.Count*sizeof(dVector3));
-
-		///invert normal for point to tri1
-		MULT(separating_normal,separating_normal,-1.0f);
-	}
-	else if(mostdir==1)
-	{
-		deep_points.Count = deep_points2.Count;
-		memcpy(
-			&deep_points.Points[0],
-			&deep_points2.Points[0],
-			deep_points2.Count*sizeof(dVector3));
-
-	}
-	/*else
-	{///edge separation
-		mostdir -= 2;
-
-		//edge 2
-		j = mostdir%3;
-		//edge 1
-		i = mostdir/3;
-
-		///find edge closest points
-		dClosestLineSegmentPoints(
-			tri1[i],tri1[(i+1)%3],
-			tri2[j],tri2[(j+1)%3],
-			pt1,pt2);
-		///find correct direction
-
-		SUB(crossdir,pt2,pt1);
-
-		vmin1 = LENGTH(crossdir);
-		if(vmin1<REAL(0.000001))
-		{
-
-			if(mostface==0)
-			{
-				vmin1 = DOT(separating_normal,tri1plane);
-				if(vmin1>0.0)
-				{
-					MULT(separating_normal,separating_normal,-1.0f);
-					deep_points.Count = 1;
-					SET(deep_points.Points[0],pt2);
-				}
-				else
-				{
-					deep_points.Count = 1;
-					SET(deep_points.Points[0],pt2);
-				}
-
-			}
-			else
-			{
-				vmin1 = DOT(separating_normal,tri2plane);
-				if(vmin1<0.0)
-				{
-					MULT(separating_normal,separating_normal,-1.0f);
-					deep_points.Count = 1;
-					SET(deep_points.Points[0],pt2);
-				}
-				else
-				{
-					deep_points.Count = 1;
-					SET(deep_points.Points[0],pt2);
-				}
-
-			}
+        dist = MostDeepPoints(
+            clipped_points2,
+            tri2plane,
+            tri2plane[3],
+            deep_points2);
 
 
 
-
-		}
-		else
-		{
-			MULT(separating_normal,crossdir,1.0f/vmin1);
-
-			vmin1 = DOT(separating_normal,tri1plane);
-			if(vmin1>0.0)
-			{
-				MULT(separating_normal,separating_normal,-1.0f);
-				deep_points.Count = 1;
-				SET(deep_points.Points[0],pt2);
-			}
-			else
-			{
-				deep_points.Count = 1;
-				SET(deep_points.Points[0],pt2);
-			}
+        if(dist<maxdeep)
+        {
+            maxdeep = dist;
+            mostdir = currdir;
+            mostface = 1;
+            SET(separating_normal,tri2plane);
+        }
+    }
+    currdir++;
 
 
-		}
+    ///find edge edge distances
+    ///test each edge plane
+
+    /*for(i=0;i<3;i++)
+    {
 
 
-	}*/
-	return maxdeep;
+    for(j=0;j<3;j++)
+    {
+
+
+    bl = BuildEdgesDir(
+    tri1[i],tri1[(i+1)%3],
+    tri2[j],tri2[(j+1)%3],
+    crossdir);
+
+    ////find plane distance
+
+    if(bl)
+    {
+    FindInterval(tri1,3,crossdir,vmin1,vmax1);
+    FindInterval(tri2,3,crossdir,vmin2,vmax2);
+
+    dist = IntervalPenetration(
+    vmin1,
+    vmax1,
+    vmin2,
+    vmax2);
+    if(dist<maxdeep)
+    {
+    maxdeep = dist;
+    mostdir = currdir;
+    SET(separating_normal,crossdir);
+    }
+    }
+    currdir++;
+    }
+    }*/
+
+
+    ////check most dir for contacts
+    if(mostdir==0)
+    {
+        ///find most deep points
+        deep_points.Count = deep_points1.Count;
+        memcpy(
+            &deep_points.Points[0],
+            &deep_points1.Points[0],
+            deep_points1.Count*sizeof(dVector3));
+
+        ///invert normal for point to tri1
+        MULT(separating_normal,separating_normal,-1.0f);
+    }
+    else if(mostdir==1)
+    {
+        deep_points.Count = deep_points2.Count;
+        memcpy(
+            &deep_points.Points[0],
+            &deep_points2.Points[0],
+            deep_points2.Count*sizeof(dVector3));
+
+    }
+    /*else
+    {///edge separation
+    mostdir -= 2;
+
+    //edge 2
+    j = mostdir%3;
+    //edge 1
+    i = mostdir/3;
+
+    ///find edge closest points
+    dClosestLineSegmentPoints(
+    tri1[i],tri1[(i+1)%3],
+    tri2[j],tri2[(j+1)%3],
+    pt1,pt2);
+    ///find correct direction
+
+    SUB(crossdir,pt2,pt1);
+
+    vmin1 = LENGTH(crossdir);
+    if(vmin1<REAL(0.000001))
+    {
+
+    if(mostface==0)
+    {
+    vmin1 = DOT(separating_normal,tri1plane);
+    if(vmin1>0.0)
+    {
+    MULT(separating_normal,separating_normal,-1.0f);
+    deep_points.Count = 1;
+    SET(deep_points.Points[0],pt2);
+    }
+    else
+    {
+    deep_points.Count = 1;
+    SET(deep_points.Points[0],pt2);
+    }
+
+    }
+    else
+    {
+    vmin1 = DOT(separating_normal,tri2plane);
+    if(vmin1<0.0)
+    {
+    MULT(separating_normal,separating_normal,-1.0f);
+    deep_points.Count = 1;
+    SET(deep_points.Points[0],pt2);
+    }
+    else
+    {
+    deep_points.Count = 1;
+    SET(deep_points.Points[0],pt2);
+    }
+
+    }
+
+
+
+
+    }
+    else
+    {
+    MULT(separating_normal,crossdir,1.0f/vmin1);
+
+    vmin1 = DOT(separating_normal,tri1plane);
+    if(vmin1>0.0)
+    {
+    MULT(separating_normal,separating_normal,-1.0f);
+    deep_points.Count = 1;
+    SET(deep_points.Points[0],pt2);
+    }
+    else
+    {
+    deep_points.Count = 1;
+    SET(deep_points.Points[0],pt2);
+    }
+
+
+    }
+
+
+    }*/
+    return maxdeep;
 }
 
 
 
 ///SUPPORT UP TO 8 CONTACTS
 bool TriTriContacts(const dVector3 tr1[3],
-							 const dVector3 tr2[3],
-							 int TriIndex1, int TriIndex2,
-							  dxGeom* g1, dxGeom* g2, int Flags, 
-							  CONTACT_KEY_HASH_TABLE &hashcontactset,
-							 dContactGeom* Contacts, int Stride,
-							 int &contactcount)
+                    const dVector3 tr2[3],
+                    int TriIndex1, int TriIndex2,
+                    dxGeom* g1, dxGeom* g2, int Flags, 
+                    CONTACT_KEY_HASH_TABLE &hashcontactset,
+                    dContactGeom* Contacts, int Stride,
+                    int &contactcount)
 {
 
 
-	dVector4 normal;
-	dReal depth;
-	///Test Tri Vs Tri
-//	dContactGeom* pcontact;
-	int ccount = 0;
-	LineContactSet contactpoints;
-	contactpoints.Count = 0;
+    dVector4 normal;
+    dReal depth;
+    ///Test Tri Vs Tri
+    //	dContactGeom* pcontact;
+    int ccount = 0;
+    LineContactSet contactpoints;
+    contactpoints.Count = 0;
 
 
 
-	///find best direction
+    ///find best direction
 
-	depth = FindTriangleTriangleCollision(
-							tr1,
-							tr2,
-							normal,
-							contactpoints);
+    depth = FindTriangleTriangleCollision(
+        tr1,
+        tr2,
+        normal,
+        contactpoints);
 
 
 
-	if(depth<0.0f) return false;
+    if(depth<0.0f) return false;
 
-	ccount = 0;
-	while (ccount<contactpoints.Count)
-	{
-		PushNewContact( g1,  g2, TriIndex1, TriIndex2,
-					contactpoints.Points[ccount],
-					normal, depth, Flags, hashcontactset,
-					Contacts,Stride,contactcount);
+    ccount = 0;
+    while (ccount<contactpoints.Count)
+    {
+        PushNewContact( g1,  g2, TriIndex1, TriIndex2,
+            contactpoints.Points[ccount],
+            normal, depth, Flags, hashcontactset,
+            Contacts,Stride,contactcount);
 
-		// Continue loop even after contacts are full 
-		// as existing contacts' normals/depths might be updated
-		// Break only if contacts are not important
-		if ((contactcount | CONTACTS_UNIMPORTANT) == (Flags & (NUMC_MASK | CONTACTS_UNIMPORTANT)))
-		{
-			break;
-		}
+        // Continue loop even after contacts are full 
+        // as existing contacts' normals/depths might be updated
+        // Break only if contacts are not important
+        if ((contactcount | CONTACTS_UNIMPORTANT) == (Flags & (NUMC_MASK | CONTACTS_UNIMPORTANT)))
+        {
+            break;
+        }
 
-		ccount++;
-	}
-	return true;
+        ccount++;
+    }
+    return true;
 }
 
 #endif // dTRIMESH_OPCODE

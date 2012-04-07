@@ -32,7 +32,7 @@
 // fixed joint
 
 dxJointFixed::dxJointFixed ( dxWorld *w ) :
-        dxJoint ( w )
+    dxJoint ( w )
 {
     dSetZero ( offset, 4 );
     dSetZero ( qrel, 4 );
@@ -91,8 +91,8 @@ dxJointFixed::getInfo2 ( dxJoint::Info2 *info )
     {
         for ( int j = 0; j < 3; j++ )
             info->c[j] = k * ( node[1].body->posr.pos[j]
-                               - node[0].body->posr.pos[j]
-                               + ofs[j] );
+                - node[0].body->posr.pos[j]
+                + ofs[j] );
     }
     else
     {

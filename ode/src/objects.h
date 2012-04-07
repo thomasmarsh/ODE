@@ -39,154 +39,154 @@ class dxWorldProcessContext;
 // some body flags
 
 enum {
-  dxBodyFlagFiniteRotation =        1,  // use finite rotations
-  dxBodyFlagFiniteRotationAxis =    2,  // use finite rotations only along axis
-  dxBodyDisabled =                  4,  // body is disabled
-  dxBodyNoGravity =                 8,  // body is not influenced by gravity
-  dxBodyAutoDisable =               16, // enable auto-disable on body
-  dxBodyLinearDamping =             32, // use linear damping
-  dxBodyAngularDamping =            64, // use angular damping
-  dxBodyMaxAngularSpeed =           128,// use maximum angular speed
-  dxBodyGyroscopic =                256,// use gyroscopic term
+    dxBodyFlagFiniteRotation =        1,  // use finite rotations
+    dxBodyFlagFiniteRotationAxis =    2,  // use finite rotations only along axis
+    dxBodyDisabled =                  4,  // body is disabled
+    dxBodyNoGravity =                 8,  // body is not influenced by gravity
+    dxBodyAutoDisable =               16, // enable auto-disable on body
+    dxBodyLinearDamping =             32, // use linear damping
+    dxBodyAngularDamping =            64, // use angular damping
+    dxBodyMaxAngularSpeed =           128,// use maximum angular speed
+    dxBodyGyroscopic =                256,// use gyroscopic term
 };
 
 
 // base class that does correct object allocation / deallocation
 
 struct dBase {
-  void *operator new (size_t size) { return dAlloc (size); }
-  void *operator new (size_t size, void *p) { return p; }
-  void operator delete (void *ptr, size_t size) { dFree (ptr,size); }
-  void *operator new[] (size_t size) { return dAlloc (size); }
-  void operator delete[] (void *ptr, size_t size) { dFree (ptr,size); }
+    void *operator new (size_t size) { return dAlloc (size); }
+    void *operator new (size_t size, void *p) { return p; }
+    void operator delete (void *ptr, size_t size) { dFree (ptr,size); }
+    void *operator new[] (size_t size) { return dAlloc (size); }
+    void operator delete[] (void *ptr, size_t size) { dFree (ptr,size); }
 };
 
 
 // base class for bodies and joints
 
 struct dObject : public dBase {
-  dxWorld *world;		// world this object is in
-  dObject *next;		// next object of this type in list
-  dObject **tome;		// pointer to previous object's next ptr
-  int tag;			// used by dynamics algorithms
-  void *userdata;		// user settable data
-  
-  explicit dObject(dxWorld *w): world(w), next(NULL), tome(NULL), tag(0), userdata(NULL) {}
-  virtual ~dObject();
+    dxWorld *world;		// world this object is in
+    dObject *next;		// next object of this type in list
+    dObject **tome;		// pointer to previous object's next ptr
+    int tag;			// used by dynamics algorithms
+    void *userdata;		// user settable data
+
+    explicit dObject(dxWorld *w): world(w), next(NULL), tome(NULL), tag(0), userdata(NULL) {}
+    virtual ~dObject();
 };
 
 
 // auto disable parameters
 struct dxAutoDisable {
-  dReal idle_time;		// time the body needs to be idle to auto-disable it
-  int idle_steps;		// steps the body needs to be idle to auto-disable it
-  unsigned int average_samples;     // size of the average_lvel and average_avel buffers
-  dReal linear_average_threshold;   // linear (squared) average velocity threshold
-  dReal angular_average_threshold;  // angular (squared) average velocity threshold
+    dReal idle_time;		// time the body needs to be idle to auto-disable it
+    int idle_steps;		// steps the body needs to be idle to auto-disable it
+    unsigned int average_samples;     // size of the average_lvel and average_avel buffers
+    dReal linear_average_threshold;   // linear (squared) average velocity threshold
+    dReal angular_average_threshold;  // angular (squared) average velocity threshold
 
-  dxAutoDisable() {}
-  explicit dxAutoDisable(void *);
+    dxAutoDisable() {}
+    explicit dxAutoDisable(void *);
 };
 
 
 // damping parameters
 struct dxDampingParameters {
-  dReal linear_scale;  // multiply the linear velocity by (1 - scale)
-  dReal angular_scale; // multiply the angular velocity by (1 - scale)
-  dReal linear_threshold;   // linear (squared) average speed threshold
-  dReal angular_threshold;  // angular (squared) average speed threshold
+    dReal linear_scale;  // multiply the linear velocity by (1 - scale)
+    dReal angular_scale; // multiply the angular velocity by (1 - scale)
+    dReal linear_threshold;   // linear (squared) average speed threshold
+    dReal angular_threshold;  // angular (squared) average speed threshold
 
-  dxDampingParameters() {}
-  explicit dxDampingParameters(void *);
+    dxDampingParameters() {}
+    explicit dxDampingParameters(void *);
 };
 
 
 // quick-step parameters
 struct dxQuickStepParameters {
-  int num_iterations;		// number of SOR iterations to perform
-  dReal w;			// the SOR over-relaxation parameter
+    int num_iterations;		// number of SOR iterations to perform
+    dReal w;			// the SOR over-relaxation parameter
 
-  dxQuickStepParameters() {}
-  explicit dxQuickStepParameters(void *);
+    dxQuickStepParameters() {}
+    explicit dxQuickStepParameters(void *);
 };
 
 
 // contact generation parameters
 struct dxContactParameters {
-  dReal max_vel;		// maximum correcting velocity
-  dReal min_depth;		// thickness of 'surface layer'
+    dReal max_vel;		// maximum correcting velocity
+    dReal min_depth;		// thickness of 'surface layer'
 
-  dxContactParameters() {}
-  explicit dxContactParameters(void *);
+    dxContactParameters() {}
+    explicit dxContactParameters(void *);
 };
 
 // position vector and rotation matrix for geometry objects that are not
 // connected to bodies.
 struct dxPosR {
-  dVector3 pos;
-  dMatrix3 R;
+    dVector3 pos;
+    dMatrix3 R;
 };
 
 struct dxBody : public dObject {
-  dxJointNode *firstjoint;	// list of attached joints
-  unsigned flags;			// some dxBodyFlagXXX flags
-  dGeomID geom;			// first collision geom associated with body
-  dMass mass;			// mass parameters about POR
-  dMatrix3 invI;		// inverse of mass.I
-  dReal invMass;		// 1 / mass.mass
-  dxPosR posr;			// position and orientation of point of reference
-  dQuaternion q;		// orientation quaternion
-  dVector3 lvel,avel;		// linear and angular velocity of POR
-  dVector3 facc,tacc;		// force and torque accumulators
-  dVector3 finite_rot_axis;	// finite rotation axis, unit length or 0=none
+    dxJointNode *firstjoint;	// list of attached joints
+    unsigned flags;			// some dxBodyFlagXXX flags
+    dGeomID geom;			// first collision geom associated with body
+    dMass mass;			// mass parameters about POR
+    dMatrix3 invI;		// inverse of mass.I
+    dReal invMass;		// 1 / mass.mass
+    dxPosR posr;			// position and orientation of point of reference
+    dQuaternion q;		// orientation quaternion
+    dVector3 lvel,avel;		// linear and angular velocity of POR
+    dVector3 facc,tacc;		// force and torque accumulators
+    dVector3 finite_rot_axis;	// finite rotation axis, unit length or 0=none
 
-  // auto-disable information
-  dxAutoDisable adis;		// auto-disable parameters
-  dReal adis_timeleft;		// time left to be idle
-  int adis_stepsleft;		// steps left to be idle
-  dVector3* average_lvel_buffer;      // buffer for the linear average velocity calculation
-  dVector3* average_avel_buffer;      // buffer for the angular average velocity calculation
-  unsigned int average_counter;      // counter/index to fill the average-buffers
-  int average_ready;            // indicates ( with = 1 ), if the Body's buffers are ready for average-calculations
+    // auto-disable information
+    dxAutoDisable adis;		// auto-disable parameters
+    dReal adis_timeleft;		// time left to be idle
+    int adis_stepsleft;		// steps left to be idle
+    dVector3* average_lvel_buffer;      // buffer for the linear average velocity calculation
+    dVector3* average_avel_buffer;      // buffer for the angular average velocity calculation
+    unsigned int average_counter;      // counter/index to fill the average-buffers
+    int average_ready;            // indicates ( with = 1 ), if the Body's buffers are ready for average-calculations
 
-  void (*moved_callback)(dxBody*); // let the user know the body moved
-  dxDampingParameters dampingp; // damping parameters, depends on flags
-  dReal max_angular_speed;      // limit the angular velocity to this magnitude
+    void (*moved_callback)(dxBody*); // let the user know the body moved
+    dxDampingParameters dampingp; // damping parameters, depends on flags
+    dReal max_angular_speed;      // limit the angular velocity to this magnitude
 
-  dxBody(dxWorld *w);
+    dxBody(dxWorld *w);
 };
 
 
 struct dxWorld : public dBase, public dxThreadingBase, private dxIThreadingDefaultImplProvider {
-  dxBody *firstbody;		// body linked list
-  dxJoint *firstjoint;		// joint linked list
-  int nb,nj;			// number of bodies and joints in lists
-  dVector3 gravity;		// gravity vector (m/s/s)
-  dReal global_erp;		// global error reduction parameter
-  dReal global_cfm;		// global constraint force mixing parameter
-  dxAutoDisable adis;		// auto-disable parameters
-  int body_flags;               // flags for new bodies
-  unsigned islands_max_threads; // maximum threads to allocate for island processing
-  dxStepWorkingMemory *wmem; // Working memory object for dWorldStep/dWorldQuickStep
+    dxBody *firstbody;		// body linked list
+    dxJoint *firstjoint;		// joint linked list
+    int nb,nj;			// number of bodies and joints in lists
+    dVector3 gravity;		// gravity vector (m/s/s)
+    dReal global_erp;		// global error reduction parameter
+    dReal global_cfm;		// global constraint force mixing parameter
+    dxAutoDisable adis;		// auto-disable parameters
+    int body_flags;               // flags for new bodies
+    unsigned islands_max_threads; // maximum threads to allocate for island processing
+    dxStepWorkingMemory *wmem; // Working memory object for dWorldStep/dWorldQuickStep
 
-  dxQuickStepParameters qs;
-  dxContactParameters contactp;
-  dxDampingParameters dampingp; // damping parameters
-  dReal max_angular_speed;      // limit the angular velocity to this magnitude
+    dxQuickStepParameters qs;
+    dxContactParameters contactp;
+    dxDampingParameters dampingp; // damping parameters
+    dReal max_angular_speed;      // limit the angular velocity to this magnitude
 
 
-  dxWorld();
-  virtual ~dxWorld(); // Compilers emit warnings if a class with virtual methods does not have a virtual destructor :(
+    dxWorld();
+    virtual ~dxWorld(); // Compilers emit warnings if a class with virtual methods does not have a virtual destructor :(
 
-  static bool InitializeDefaultThreading();
-  static void FinalizeDefaultThreading();
+    static bool InitializeDefaultThreading();
+    static void FinalizeDefaultThreading();
 
-  void AssignThreadingImpl(const dxThreadingFunctionsInfo *functions_info, dThreadingImplementationID threading_impl);
-  unsigned GetThreadingIslandsMaxThreadsCount(unsigned *out_active_thread_count_ptr=NULL) const;
-  dxWorldProcessContext *UnsafeGetWorldProcessingContext() const;
+    void AssignThreadingImpl(const dxThreadingFunctionsInfo *functions_info, dThreadingImplementationID threading_impl);
+    unsigned GetThreadingIslandsMaxThreadsCount(unsigned *out_active_thread_count_ptr=NULL) const;
+    dxWorldProcessContext *UnsafeGetWorldProcessingContext() const;
 
 private: // dxIThreadingDefaultImplProvider
-  virtual const dxThreadingFunctionsInfo *RetrieveThreadingDefaultImpl(dThreadingImplementationID &out_default_impl);
+    virtual const dxThreadingFunctionsInfo *RetrieveThreadingDefaultImpl(dThreadingImplementationID &out_default_impl);
 };
 
 

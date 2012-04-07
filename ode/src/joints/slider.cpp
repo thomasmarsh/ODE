@@ -32,7 +32,7 @@
 // slider
 
 dxJointSlider::dxJointSlider ( dxWorld *w ) :
-        dxJoint ( w )
+    dxJoint ( w )
 {
     dSetZero ( axis1, 4 );
     axis1[0] = 1;
@@ -58,8 +58,8 @@ dReal dJointGetSliderPosition ( dJointID j )
         dMultiply0_331 ( q, joint->node[1].body->posr.R, joint->offset );
         for ( int i = 0; i < 3; i++ )
             q[i] = joint->node[0].body->posr.pos[i]
-                   - q[i]
-                   - joint->node[1].body->posr.pos[i];
+                - q[i]
+                - joint->node[1].body->posr.pos[i];
     }
     else
     {
@@ -95,7 +95,7 @@ dReal dJointGetSliderPositionRate ( dJointID j )
     if ( joint->node[1].body )
     {
         return dCalcVectorDot3 ( ax1, joint->node[0].body->lvel ) -
-               dCalcVectorDot3 ( ax1, joint->node[1].body->lvel );
+            dCalcVectorDot3 ( ax1, joint->node[1].body->lvel );
     }
     else
     {
@@ -109,7 +109,7 @@ dReal dJointGetSliderPositionRate ( dJointID j )
 void 
 dxJointSlider::getSureMaxInfo( SureMaxInfo* info )
 {
-  info->max_m = 6;
+    info->max_m = 6;
 }
 
 
@@ -126,7 +126,7 @@ dxJointSlider::getInfo1 ( dxJoint::Info1 *info )
     // see if we're at a joint limit.
     limot.limit = 0;
     if ( ( limot.lostop > -dInfinity || limot.histop < dInfinity ) &&
-            limot.lostop <= limot.histop )
+        limot.lostop <= limot.histop )
     {
         // measure joint position
         dReal pos = dJointGetSliderPosition ( this );

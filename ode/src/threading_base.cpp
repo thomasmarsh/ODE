@@ -35,45 +35,47 @@
 #include "threading_base.h"
 
 
-void dxThreadingBase::PostThreadedCallsGroup(int *out_summary_fault/*=NULL*/, 
-  ddependencycount_t member_count, dCallReleaseeID dependent_releasee/*=NULL*/, 
-  dThreadedCallFunction *call_func, void *call_context, 
-  const char *call_name/*=NULL*/) const
+void dxThreadingBase::PostThreadedCallsGroup(
+    int *out_summary_fault/*=NULL*/, 
+    ddependencycount_t member_count, dCallReleaseeID dependent_releasee/*=NULL*/, 
+    dThreadedCallFunction *call_func, void *call_context, 
+    const char *call_name/*=NULL*/) const
 {
-  dThreadingImplementationID impl;
-  const dxThreadingFunctionsInfo *functions = FindThreadingImpl(impl);
+    dThreadingImplementationID impl;
+    const dxThreadingFunctionsInfo *functions = FindThreadingImpl(impl);
 
-  for (unsigned member_index = 0; member_index != member_count; ++member_index) {
-    // Post individual group member jobs
-    functions->post_call(impl, out_summary_fault, NULL, 0, dependent_releasee, NULL, call_func, call_context, member_index, call_name);
-  }
+    for (unsigned member_index = 0; member_index != member_count; ++member_index) {
+        // Post individual group member jobs
+        functions->post_call(impl, out_summary_fault, NULL, 0, dependent_releasee, NULL, call_func, call_context, member_index, call_name);
+    }
 }
 
-void dxThreadingBase::PostThreadedCallForUnawareReleasee(int *out_summary_fault/*=NULL*/, 
-  dCallReleaseeID *out_post_releasee/*=NULL*/, ddependencycount_t dependencies_count, dCallReleaseeID dependent_releasee/*=NULL*/, 
-  dCallWaitID call_wait/*=NULL*/, 
-  dThreadedCallFunction *call_func, void *call_context, dcallindex_t instance_index, 
-  const char *call_name/*=NULL*/) const
+void dxThreadingBase::PostThreadedCallForUnawareReleasee(
+    int *out_summary_fault/*=NULL*/, 
+    dCallReleaseeID *out_post_releasee/*=NULL*/, ddependencycount_t dependencies_count, dCallReleaseeID dependent_releasee/*=NULL*/, 
+    dCallWaitID call_wait/*=NULL*/, 
+    dThreadedCallFunction *call_func, void *call_context, dcallindex_t instance_index, 
+    const char *call_name/*=NULL*/) const
 {
-  dThreadingImplementationID impl;
-  const dxThreadingFunctionsInfo *functions = FindThreadingImpl(impl);
+    dThreadingImplementationID impl;
+    const dxThreadingFunctionsInfo *functions = FindThreadingImpl(impl);
 
-  functions->alter_call_dependencies_count(impl, dependent_releasee, 1);
-  functions->post_call(impl, out_summary_fault, out_post_releasee, dependencies_count, dependent_releasee, call_wait, call_func, call_context, instance_index, call_name);
+    functions->alter_call_dependencies_count(impl, dependent_releasee, 1);
+    functions->post_call(impl, out_summary_fault, out_post_releasee, dependencies_count, dependent_releasee, call_wait, call_func, call_context, instance_index, call_name);
 }
 
 const dxThreadingFunctionsInfo *dxThreadingBase::FindThreadingImpl(dThreadingImplementationID &out_impl_found) const
 {
-  const dxThreadingFunctionsInfo *functions_found = GetFunctionsInfo();
-  
-  if (functions_found != NULL)
-  {
-    out_impl_found = GetThreadingImpl();
-  }
-  else
-  {
-    functions_found = m_default_impl_provider->RetrieveThreadingDefaultImpl(out_impl_found);
-  }
+    const dxThreadingFunctionsInfo *functions_found = GetFunctionsInfo();
 
-  return functions_found;
+    if (functions_found != NULL)
+    {
+        out_impl_found = GetThreadingImpl();
+    }
+    else
+    {
+        functions_found = m_default_impl_provider->RetrieveThreadingDefaultImpl(out_impl_found);
+    }
+
+    return functions_found;
 }

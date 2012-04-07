@@ -62,12 +62,12 @@ using namespace _OU_NAMESPACE;
 class COdeOu
 {
 public:
-	static bool DoOUCustomizations();
-	static void UndoOUCustomizations();
+    static bool DoOUCustomizations();
+    static void UndoOUCustomizations();
 
 #if dATOMICS_ENABLED
-	static bool InitializeAtomics() { return InitializeAtomicAPI(); }
-	static void FinalizeAtomics() { FinalizeAtomicAPI(); }
+    static bool InitializeAtomics() { return InitializeAtomicAPI(); }
+    static void FinalizeAtomics() { FinalizeAtomicAPI(); }
 #endif
 };
 
