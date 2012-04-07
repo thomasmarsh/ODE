@@ -29,11 +29,12 @@ class dxWorldProcessMemArena;
 
 
 size_t dxEstimateQuickStepMemoryRequirements (
-  dxBody * const *body, unsigned int nb, dxJoint * const *_joint, unsigned int _nj);
+    dxBody * const *body, unsigned int nb, dxJoint * const *_joint, unsigned int _nj);
 
-void dxQuickStepper (dxWorldProcessMemArena *memarena,
-        dxWorld *world, dxBody * const *body, unsigned int nb,
-		    dxJoint * const *_joint, unsigned int _nj, dReal stepsize);
+void dxQuickStepper (
+    dxWorldProcessMemArena *memarena, dxWorld *world, 
+    dxBody * const *body, unsigned int nb, dxJoint * const *_joint, unsigned int _nj, 
+    dReal stepsize);
 
 
 #endif

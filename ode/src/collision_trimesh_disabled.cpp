@@ -34,17 +34,17 @@ dxTriMesh::~dxTriMesh(){}
 
 bool dxTriMesh::controlGeometry(int controlClass, int controlCode, void *dataValue, int *dataSize)
 {
-	return dxGeom::controlGeometry(controlClass, controlCode, dataValue, dataSize);
+    return dxGeom::controlGeometry(controlClass, controlCode, dataValue, dataSize);
 }
 
 int dxTriMesh::AABBTest(dxGeom* g, dReal aabb[6]) { return 0; }
 void dxTriMesh::computeAABB() { dSetZero (aabb,6); }
 
 static dMatrix4 identity = {
-	REAL( 0.0 ), REAL( 0.0 ), REAL( 0.0 ), REAL( 0.0 ),
-	REAL( 0.0 ), REAL( 0.0 ), REAL( 0.0 ), REAL( 0.0 ),
-	REAL( 0.0 ), REAL( 0.0 ), REAL( 0.0 ), REAL( 0.0 ),
-	REAL( 0.0 ), REAL( 0.0 ), REAL( 0.0 ), REAL( 0.0 ) };
+    REAL( 0.0 ), REAL( 0.0 ), REAL( 0.0 ), REAL( 0.0 ),
+    REAL( 0.0 ), REAL( 0.0 ), REAL( 0.0 ), REAL( 0.0 ),
+    REAL( 0.0 ), REAL( 0.0 ), REAL( 0.0 ), REAL( 0.0 ),
+    REAL( 0.0 ), REAL( 0.0 ), REAL( 0.0 ), REAL( 0.0 ) };
 
 // Stub functions for trimesh calls
 
@@ -58,10 +58,10 @@ ODE_API void dGeomTriMeshSetLastTransform( dGeomID g, dMatrix4 last_trans ) {}
 ODE_API dReal* dGeomTriMeshGetLastTransform( dGeomID g ) { return identity; }
 
 dGeomID dCreateTriMesh(dSpaceID space, 
-		       dTriMeshDataID Data,
-		       dTriCallback* Callback,
-		       dTriArrayCallback* ArrayCallback,
-		       dTriRayCallback* RayCallback)
+    dTriMeshDataID Data,
+    dTriCallback* Callback,
+    dTriArrayCallback* ArrayCallback,
+    dTriRayCallback* RayCallback)
 {
     dxTriMesh* Geom = new dxTriMesh(space, Data);
     Geom->Callback = Callback;
@@ -76,31 +76,31 @@ dTriMeshDataID dGeomTriMeshGetData(dGeomID g) { return 0; }
 
 
 void dGeomTriMeshDataBuildSingle(dTriMeshDataID g,
-                                 const void* Vertices, int VertexStride, int VertexCount, 
-                                 const void* Indices, int IndexCount, int TriStride) { }
+    const void* Vertices, int VertexStride, int VertexCount, 
+    const void* Indices, int IndexCount, int TriStride) { }
 
 void dGeomTriMeshDataBuildSingle1(dTriMeshDataID g,
-                                  const void* Vertices, int VertexStride, int VertexCount, 
-                                  const void* Indices, int IndexCount, int TriStride,
-                                  const void* Normals) { }
+    const void* Vertices, int VertexStride, int VertexCount, 
+    const void* Indices, int IndexCount, int TriStride,
+    const void* Normals) { }
 
 void dGeomTriMeshDataBuildDouble(dTriMeshDataID g, 
-                                 const void* Vertices,  int VertexStride, int VertexCount, 
-                                 const void* Indices, int IndexCount, int TriStride) { }
+    const void* Vertices,  int VertexStride, int VertexCount, 
+    const void* Indices, int IndexCount, int TriStride) { }
 
 void dGeomTriMeshDataBuildDouble1(dTriMeshDataID g, 
-                                  const void* Vertices,  int VertexStride, int VertexCount, 
-                                  const void* Indices, int IndexCount, int TriStride,
-								  const void* Normals) { }
+    const void* Vertices,  int VertexStride, int VertexCount, 
+    const void* Indices, int IndexCount, int TriStride,
+    const void* Normals) { }
 
 void dGeomTriMeshDataBuildSimple(dTriMeshDataID g,
-                                 const dReal* Vertices, int VertexCount,
-                                 const dTriIndex* Indices, int IndexCount) { }
+    const dReal* Vertices, int VertexCount,
+    const dTriIndex* Indices, int IndexCount) { }
 
 void dGeomTriMeshDataBuildSimple1(dTriMeshDataID g,
-                                  const dReal* Vertices, int VertexCount,
-                                  const dTriIndex* Indices, int IndexCount,
-                                  const int* Normals) { }
+    const dReal* Vertices, int VertexCount,
+    const dTriIndex* Indices, int IndexCount,
+    const int* Normals) { }
 
 void dGeomTriMeshDataPreprocess(dTriMeshDataID g) { }
 

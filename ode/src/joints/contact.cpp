@@ -32,7 +32,7 @@
 // contact
 
 dxJointContact::dxJointContact( dxWorld *w ) :
-        dxJoint( w )
+    dxJoint( w )
 {
 }
 
@@ -145,17 +145,17 @@ dxJointContact::getInfo2( dxJoint::Info2 *info )
     {
         // calculate outgoing velocity (-ve for incoming contact)
         dReal outgoing = dCalcVectorDot3( info->J1l, node[0].body->lvel )
-                         + dCalcVectorDot3( info->J1a, node[0].body->avel );
+            + dCalcVectorDot3( info->J1a, node[0].body->avel );
         if ( node[1].body )
         {
             outgoing += dCalcVectorDot3( info->J2l, node[1].body->lvel )
-                        + dCalcVectorDot3( info->J2a, node[1].body->avel );
+                + dCalcVectorDot3( info->J2a, node[1].body->avel );
         }
         outgoing -= motionN;
         // only apply bounce if the outgoing velocity is greater than the
         // threshold, and if the resulting c[0] exceeds what we already have.
         if ( contact.surface.bounce_vel >= 0 &&
-                ( -outgoing ) > contact.surface.bounce_vel )
+            ( -outgoing ) > contact.surface.bounce_vel )
         {
             dReal newc = - contact.surface.bounce * outgoing + motionN;
             if ( newc > info->c[0] ) info->c[0] = newc;

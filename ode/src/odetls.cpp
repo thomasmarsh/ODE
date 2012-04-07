@@ -52,43 +52,43 @@ HTLSKEY COdeTls::m_ahtkStorageKeys[OTK__MAX] = { 0 };
 
 bool COdeTls::Initialize(EODETLSKIND tkTLSKind)
 {
-	dIASSERT(!m_ahtkStorageKeys[tkTLSKind]);
+    dIASSERT(!m_ahtkStorageKeys[tkTLSKind]);
 
-	bool bResult = false;
+    bool bResult = false;
 
-	unsigned uOUFlags = 0;
+    unsigned uOUFlags = 0;
 
-	if (tkTLSKind == OTK_MANUALCLEANUP)
-	{
-		uOUFlags |= CTLSInitialization::SIF_MANUAL_CLEANUP_ON_THREAD_EXIT;
-	}
+    if (tkTLSKind == OTK_MANUALCLEANUP)
+    {
+        uOUFlags |= CTLSInitialization::SIF_MANUAL_CLEANUP_ON_THREAD_EXIT;
+    }
 
-	if (CTLSInitialization::InitializeTLSAPI(m_ahtkStorageKeys[tkTLSKind], OTI__MAX, uOUFlags))
-	{
-		bResult = true;
-	}
+    if (CTLSInitialization::InitializeTLSAPI(m_ahtkStorageKeys[tkTLSKind], OTI__MAX, uOUFlags))
+    {
+        bResult = true;
+    }
 
-	return bResult;
+    return bResult;
 }
 
 void COdeTls::Finalize(EODETLSKIND tkTLSKind)
 {
-	CTLSInitialization::FinalizeTLSAPI();
+    CTLSInitialization::FinalizeTLSAPI();
 
-	m_ahtkStorageKeys[tkTLSKind] = 0;
+    m_ahtkStorageKeys[tkTLSKind] = 0;
 }
 
 
 void COdeTls::CleanupForThread()
 {
-	if (m_ahtkStorageKeys[OTK_MANUALCLEANUP])
-	{
-		CTLSInitialization::CleanupOnThreadExit();
-	}
-	else
-	{
-		dIASSERT(false); // The class is not intended to be cleaned up manually
-	}
+    if (m_ahtkStorageKeys[OTK_MANUALCLEANUP])
+    {
+        CTLSInitialization::CleanupOnThreadExit();
+    }
+    else
+    {
+        dIASSERT(false); // The class is not intended to be cleaned up manually
+    }
 }
 
 
@@ -97,29 +97,29 @@ void COdeTls::CleanupForThread()
 
 bool COdeTls::AssignDataAllocationFlags(EODETLSKIND tkTLSKind, unsigned uInitializationFlags)
 {
-	bool bResult = CThreadLocalStorage::SetStorageValue(m_ahtkStorageKeys[tkTLSKind], OTI_DATA_ALLOCATION_FLAGS, (tlsvaluetype)(size_t)uInitializationFlags);
-	return bResult;
+    bool bResult = CThreadLocalStorage::SetStorageValue(m_ahtkStorageKeys[tkTLSKind], OTI_DATA_ALLOCATION_FLAGS, (tlsvaluetype)(size_t)uInitializationFlags);
+    return bResult;
 }
 
 
 bool COdeTls::AssignTrimeshCollidersCache(EODETLSKIND tkTLSKind, TrimeshCollidersCache *pccInstance)
 {
-	dIASSERT(!CThreadLocalStorage::GetStorageValue(m_ahtkStorageKeys[tkTLSKind], OTI_TRIMESH_TRIMESH_COLLIDER_CACHE));
+    dIASSERT(!CThreadLocalStorage::GetStorageValue(m_ahtkStorageKeys[tkTLSKind], OTI_TRIMESH_TRIMESH_COLLIDER_CACHE));
 
-	bool bResult = CThreadLocalStorage::SetStorageValue(m_ahtkStorageKeys[tkTLSKind], OTI_TRIMESH_TRIMESH_COLLIDER_CACHE, (tlsvaluetype)pccInstance, &COdeTls::FreeTrimeshCollidersCache_Callback);
-	return bResult;
+    bool bResult = CThreadLocalStorage::SetStorageValue(m_ahtkStorageKeys[tkTLSKind], OTI_TRIMESH_TRIMESH_COLLIDER_CACHE, (tlsvaluetype)pccInstance, &COdeTls::FreeTrimeshCollidersCache_Callback);
+    return bResult;
 }
 
 void COdeTls::DestroyTrimeshCollidersCache(EODETLSKIND tkTLSKind)
 {
-	TrimeshCollidersCache *pccCacheInstance = (TrimeshCollidersCache *)CThreadLocalStorage::GetStorageValue(m_ahtkStorageKeys[tkTLSKind], OTI_TRIMESH_TRIMESH_COLLIDER_CACHE);
+    TrimeshCollidersCache *pccCacheInstance = (TrimeshCollidersCache *)CThreadLocalStorage::GetStorageValue(m_ahtkStorageKeys[tkTLSKind], OTI_TRIMESH_TRIMESH_COLLIDER_CACHE);
 
-	if (pccCacheInstance)
-	{
-		FreeTrimeshCollidersCache(pccCacheInstance);
+    if (pccCacheInstance)
+    {
+        FreeTrimeshCollidersCache(pccCacheInstance);
 
-		CThreadLocalStorage::UnsafeSetStorageValue(m_ahtkStorageKeys[tkTLSKind], OTI_TRIMESH_TRIMESH_COLLIDER_CACHE, (tlsvaluetype)NULL);
-	}
+        CThreadLocalStorage::UnsafeSetStorageValue(m_ahtkStorageKeys[tkTLSKind], OTI_TRIMESH_TRIMESH_COLLIDER_CACHE, (tlsvaluetype)NULL);
+    }
 }
 
 
@@ -128,7 +128,7 @@ void COdeTls::DestroyTrimeshCollidersCache(EODETLSKIND tkTLSKind)
 
 void COdeTls::FreeTrimeshCollidersCache(TrimeshCollidersCache *pccCacheInstance)
 {
-	delete pccCacheInstance;
+    delete pccCacheInstance;
 }
 
 
@@ -137,8 +137,8 @@ void COdeTls::FreeTrimeshCollidersCache(TrimeshCollidersCache *pccCacheInstance)
 
 void COdeTls::FreeTrimeshCollidersCache_Callback(tlsvaluetype vValueData)
 {
-	TrimeshCollidersCache *pccCacheInstance = (TrimeshCollidersCache *)vValueData;
-	FreeTrimeshCollidersCache(pccCacheInstance);
+    TrimeshCollidersCache *pccCacheInstance = (TrimeshCollidersCache *)vValueData;
+    FreeTrimeshCollidersCache(pccCacheInstance);
 }
 
 

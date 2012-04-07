@@ -34,12 +34,12 @@ int dCollideTTL(dxGeom *o1, dxGeom *o2, int flags, dContactGeom *contact, int sk
 int dCollideCCTL(dxGeom *o1, dxGeom *o2, int flags, dContactGeom *contact, int skip);
 
 ODE_PURE_INLINE int dCollideRayTrimesh( dxGeom *ray, dxGeom *trimesh, int flags,
-								   dContactGeom *contact, int skip )
+                                       dContactGeom *contact, int skip )
 {
-	// Swapped case, for code that needs it (heightfield initially)
-	// The other ray-geom colliders take geoms in a swapped order to the
-	// dCollideRTL function which is annoying when using function pointers.
-	return dCollideRTL( trimesh, ray, flags, contact, skip );
+    // Swapped case, for code that needs it (heightfield initially)
+    // The other ray-geom colliders take geoms in a swapped order to the
+    // dCollideRTL function which is annoying when using function pointers.
+    return dCollideRTL( trimesh, ray, flags, contact, skip );
 }
 
 

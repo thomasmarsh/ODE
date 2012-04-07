@@ -50,135 +50,135 @@ static const dThreadingFunctionsInfo *g_world_default_threading_functions = NULL
 
 dObject::~dObject()
 {
-  // Do nothing - a virtual destructor
+    // Do nothing - a virtual destructor
 }
 
 
 dxAutoDisable::dxAutoDisable(void *):
-  idle_time(REAL(0.0)),
-  idle_steps(10),
-  average_samples(1), // Default is 1 sample => Instantaneous velocity
-  linear_average_threshold(REAL(0.01)*REAL(0.01)), // (magnitude squared)
-  angular_average_threshold(REAL(0.01)*REAL(0.01)) // (magnitude squared)
+    idle_time(REAL(0.0)),
+    idle_steps(10),
+    average_samples(1), // Default is 1 sample => Instantaneous velocity
+    linear_average_threshold(REAL(0.01)*REAL(0.01)), // (magnitude squared)
+    angular_average_threshold(REAL(0.01)*REAL(0.01)) // (magnitude squared)
 {
 }
 
 dxDampingParameters::dxDampingParameters(void *):
-  linear_scale(REAL(0.0)),
-  angular_scale(REAL(0.0)),
-  linear_threshold(REAL(0.01) * REAL(0.01)),
-  angular_threshold(REAL(0.01) * REAL(0.01))
+    linear_scale(REAL(0.0)),
+    angular_scale(REAL(0.0)),
+    linear_threshold(REAL(0.01) * REAL(0.01)),
+    angular_threshold(REAL(0.01) * REAL(0.01))
 {
 }
 
 dxQuickStepParameters::dxQuickStepParameters(void *):
-  num_iterations(20),
-  w(REAL(1.3))
+    num_iterations(20),
+    w(REAL(1.3))
 {
 }
 
 dxContactParameters::dxContactParameters(void *):
-  max_vel(dInfinity),
-  min_depth(REAL(0.0))
+    max_vel(dInfinity),
+    min_depth(REAL(0.0))
 {
 }
 
 dxWorld::dxWorld():
-  dBase(),
-  dxThreadingBase(),
-  firstbody(NULL),
-  firstjoint(NULL),
-  nb(0),
-  nj(0),
-  global_erp(dWORLD_DEFAULT_GLOBAL_ERP),
-  global_cfm(dWORLD_DEFAULT_GLOBAL_CFM),
-  adis(NULL),
-  body_flags(0),
-  islands_max_threads(dWORLDSTEP_THREADCOUNT_UNLIMITED),
-  wmem(NULL),
-  qs(NULL),
-  contactp(NULL),
-  dampingp(NULL),
-  max_angular_speed(dInfinity)
+    dBase(),
+    dxThreadingBase(),
+    firstbody(NULL),
+    firstjoint(NULL),
+    nb(0),
+    nj(0),
+    global_erp(dWORLD_DEFAULT_GLOBAL_ERP),
+    global_cfm(dWORLD_DEFAULT_GLOBAL_CFM),
+    adis(NULL),
+    body_flags(0),
+    islands_max_threads(dWORLDSTEP_THREADCOUNT_UNLIMITED),
+    wmem(NULL),
+    qs(NULL),
+    contactp(NULL),
+    dampingp(NULL),
+    max_angular_speed(dInfinity)
 {
-  dxThreadingBase::SetThreadingDefaultImplProvider(this);
+    dxThreadingBase::SetThreadingDefaultImplProvider(this);
 
-  dSetZero (gravity, 4);
+    dSetZero (gravity, 4);
 }
 
 dxWorld::~dxWorld()
 {
-  if (wmem)
-  {
-    wmem->CleanupWorldReferences(this);
-    wmem->Release();
-  }
+    if (wmem)
+    {
+        wmem->CleanupWorldReferences(this);
+        wmem->Release();
+    }
 }
 
 bool dxWorld::InitializeDefaultThreading()
 {
-  dIASSERT(g_world_default_threading_impl == NULL);
+    dIASSERT(g_world_default_threading_impl == NULL);
 
-  bool init_result = false;
-  
-  dThreadingImplementationID threading_impl = dThreadingAllocateSelfThreadedImplementation();
-  
-  if (threading_impl != NULL)
-  {
-    g_world_default_threading_functions = dThreadingImplementationGetFunctions(threading_impl);
-    g_world_default_threading_impl = threading_impl;
+    bool init_result = false;
 
-    init_result = true;
-  }
+    dThreadingImplementationID threading_impl = dThreadingAllocateSelfThreadedImplementation();
 
-  return init_result;
+    if (threading_impl != NULL)
+    {
+        g_world_default_threading_functions = dThreadingImplementationGetFunctions(threading_impl);
+        g_world_default_threading_impl = threading_impl;
+
+        init_result = true;
+    }
+
+    return init_result;
 }
 
 void dxWorld::FinalizeDefaultThreading()
 {
-  dThreadingImplementationID threading_impl = g_world_default_threading_impl;
+    dThreadingImplementationID threading_impl = g_world_default_threading_impl;
 
-  if (threading_impl != NULL)
-  {
-    dThreadingFreeImplementation(threading_impl);
+    if (threading_impl != NULL)
+    {
+        dThreadingFreeImplementation(threading_impl);
 
-    g_world_default_threading_functions = NULL;
-    g_world_default_threading_impl = NULL;
-  }
+        g_world_default_threading_functions = NULL;
+        g_world_default_threading_impl = NULL;
+    }
 }
 
 void dxWorld::AssignThreadingImpl(const dxThreadingFunctionsInfo *functions_info, dThreadingImplementationID threading_impl)
 {
-  if (wmem != NULL)
-  {
-    // Free objects allocated with old threading
-    wmem->CleanupWorldReferences(this);
-  }
+    if (wmem != NULL)
+    {
+        // Free objects allocated with old threading
+        wmem->CleanupWorldReferences(this);
+    }
 
-  dxThreadingBase::AssignThreadingImpl(functions_info, threading_impl);
+    dxThreadingBase::AssignThreadingImpl(functions_info, threading_impl);
 }
 
 unsigned dxWorld::GetThreadingIslandsMaxThreadsCount(unsigned *out_active_thread_count_ptr/*=NULL*/) const
 {
-  unsigned active_thread_count = RetrieveThreadingThreadCount();
-  if (out_active_thread_count_ptr != NULL)
-  {
-    *out_active_thread_count_ptr = active_thread_count;
-  }
+    unsigned active_thread_count = RetrieveThreadingThreadCount();
+    if (out_active_thread_count_ptr != NULL)
+    {
+        *out_active_thread_count_ptr = active_thread_count;
+    }
 
-  return islands_max_threads == dWORLDSTEP_THREADCOUNT_UNLIMITED 
-    ? active_thread_count 
-    : (islands_max_threads < active_thread_count ? islands_max_threads : active_thread_count);
+    return islands_max_threads == dWORLDSTEP_THREADCOUNT_UNLIMITED 
+        ? active_thread_count 
+        : (islands_max_threads < active_thread_count ? islands_max_threads : active_thread_count);
 }
 
 dxWorldProcessContext *dxWorld::UnsafeGetWorldProcessingContext() const
 {
-  return wmem->GetWorldProcessingContext();
+    return wmem->GetWorldProcessingContext();
 }
 
 const dxThreadingFunctionsInfo *dxWorld::RetrieveThreadingDefaultImpl(dThreadingImplementationID &out_default_impl)
 {
-  out_default_impl = g_world_default_threading_impl;
-  return g_world_default_threading_functions;
+    out_default_impl = g_world_default_threading_impl;
+    return g_world_default_threading_functions;
 }
 

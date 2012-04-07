@@ -30,43 +30,43 @@
 
 
 struct dObStack : public dBase {
-  dObStack();
-  ~dObStack();
+    dObStack();
+    ~dObStack();
 
-  void *alloc (size_t num_bytes);
-  // allocate a block in the last arena, allocating a new arena if necessary.
-  // it is a runtime error if num_bytes is larger than the arena size.
+    void *alloc (size_t num_bytes);
+    // allocate a block in the last arena, allocating a new arena if necessary.
+    // it is a runtime error if num_bytes is larger than the arena size.
 
-  void freeAll();
-  // free all blocks in all arenas. this does not deallocate the arenas
-  // themselves, so future alloc()s will reuse them.
+    void freeAll();
+    // free all blocks in all arenas. this does not deallocate the arenas
+    // themselves, so future alloc()s will reuse them.
 
-  void *rewind();
-  // rewind the obstack iterator, and return the address of the first
-  // allocated block. return 0 if there are no allocated blocks.
+    void *rewind();
+    // rewind the obstack iterator, and return the address of the first
+    // allocated block. return 0 if there are no allocated blocks.
 
-  void *next (size_t num_bytes);
-  // return the address of the next allocated block. 'num_bytes' is the size
-  // of the previous block. this returns null if there are no more arenas.
-  // the sequence of 'num_bytes' parameters passed to next() during a
-  // traversal of the list must exactly match the parameters passed to alloc().
-
-private:
-  struct Arena {
-    Arena *m_next;	// next arena in linked list
-    size_t m_used;		// total number of bytes used in this arena, counting
-  };			//   this header
+    void *next (size_t num_bytes);
+    // return the address of the next allocated block. 'num_bytes' is the size
+    // of the previous block. this returns null if there are no more arenas.
+    // the sequence of 'num_bytes' parameters passed to next() during a
+    // traversal of the list must exactly match the parameters passed to alloc().
 
 private:
-  void *switch_to_arena(Arena *next_arena);
+    struct Arena {
+        Arena *m_next;	// next arena in linked list
+        size_t m_used;		// total number of bytes used in this arena, counting
+    };			//   this header
 
 private:
-  Arena *m_first;		// head of the arena linked list. 0 if no arenas yet
-  Arena *m_last;		// arena where blocks are currently being allocated
+    void *switch_to_arena(Arena *next_arena);
 
-  // used for iterator
-  Arena *m_current_arena;
-  size_t m_current_ofs;
+private:
+    Arena *m_first;		// head of the arena linked list. 0 if no arenas yet
+    Arena *m_last;		// arena where blocks are currently being allocated
+
+    // used for iterator
+    Arena *m_current_arena;
+    size_t m_current_ofs;
 };
 
 

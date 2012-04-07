@@ -32,7 +32,7 @@
 // angular motor
 
 dxJointAMotor::dxJointAMotor( dxWorld *w ) :
-        dxJoint( w )
+    dxJoint( w )
 {
     int i;
     num = 0;
@@ -206,7 +206,7 @@ dxJointAMotor::getInfo1( dxJoint::Info1 *info )
     for ( int i = 0; i < num; i++ )
     {
         if ( limot[i].testRotationalLimit( angle[i] ) ||
-                limot[i].fmax > 0 )
+            limot[i].fmax > 0 )
         {
             info->m++;
         }

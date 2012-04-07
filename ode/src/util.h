@@ -53,7 +53,7 @@
  * up to 15 bytes per allocation, depending on what alloca() returns.
  */
 #define dALLOCA16(n) \
-  dEFFICIENT_PTR(alloca((n)+(EFFICIENT_ALIGNMENT)))
+    dEFFICIENT_PTR(alloca((n)+(EFFICIENT_ALIGNMENT)))
 
 
 #ifndef SIZE_MAX
@@ -65,47 +65,47 @@ void dxStepBody (dxBody *b, dReal h);
 
 
 struct dxWorldProcessMemoryManager:
-  public dBase
+    public dBase
 {
-  typedef void *(*alloc_block_fn_t)(size_t block_size);
-  typedef void *(*shrink_block_fn_t)(void *block_pointer, size_t block_current_size, size_t block_smaller_size);
-  typedef void (*free_block_fn_t)(void *block_pointer, size_t block_current_size);
-  
-  dxWorldProcessMemoryManager(alloc_block_fn_t fnAlloc, shrink_block_fn_t fnShrink, free_block_fn_t fnFree)
-  {
-    Assign(fnAlloc, fnShrink, fnFree);
-  }
+    typedef void *(*alloc_block_fn_t)(size_t block_size);
+    typedef void *(*shrink_block_fn_t)(void *block_pointer, size_t block_current_size, size_t block_smaller_size);
+    typedef void (*free_block_fn_t)(void *block_pointer, size_t block_current_size);
 
-  void Assign(alloc_block_fn_t fnAlloc, shrink_block_fn_t fnShrink, free_block_fn_t fnFree)
-  {
-    m_fnAlloc = fnAlloc;
-    m_fnShrink = fnShrink;
-    m_fnFree = fnFree;
-  }
+    dxWorldProcessMemoryManager(alloc_block_fn_t fnAlloc, shrink_block_fn_t fnShrink, free_block_fn_t fnFree)
+    {
+        Assign(fnAlloc, fnShrink, fnFree);
+    }
 
-  alloc_block_fn_t m_fnAlloc;
-  shrink_block_fn_t m_fnShrink;
-  free_block_fn_t m_fnFree;
+    void Assign(alloc_block_fn_t fnAlloc, shrink_block_fn_t fnShrink, free_block_fn_t fnFree)
+    {
+        m_fnAlloc = fnAlloc;
+        m_fnShrink = fnShrink;
+        m_fnFree = fnFree;
+    }
+
+    alloc_block_fn_t m_fnAlloc;
+    shrink_block_fn_t m_fnShrink;
+    free_block_fn_t m_fnFree;
 };
 
 extern dxWorldProcessMemoryManager g_WorldProcessMallocMemoryManager;
 
 struct dxWorldProcessMemoryReserveInfo:
-  public dBase
+    public dBase
 {
-  dxWorldProcessMemoryReserveInfo(float fReserveFactor, unsigned uiReserveMinimum)
-  {
-    Assign(fReserveFactor, uiReserveMinimum);
-  }
+    dxWorldProcessMemoryReserveInfo(float fReserveFactor, unsigned uiReserveMinimum)
+    {
+        Assign(fReserveFactor, uiReserveMinimum);
+    }
 
-  void Assign(float fReserveFactor, unsigned uiReserveMinimum)
-  {
-    m_fReserveFactor = fReserveFactor;
-    m_uiReserveMinimum = uiReserveMinimum;
-  }
+    void Assign(float fReserveFactor, unsigned uiReserveMinimum)
+    {
+        m_fReserveFactor = fReserveFactor;
+        m_uiReserveMinimum = uiReserveMinimum;
+    }
 
-  float m_fReserveFactor; // Use float as precision does not matter here
-  unsigned m_uiReserveMinimum;
+    float m_fReserveFactor; // Use float as precision does not matter here
+    unsigned m_uiReserveMinimum;
 };
 
 extern dxWorldProcessMemoryReserveInfo g_WorldProcessDefaultReserveInfo;
@@ -116,176 +116,176 @@ class dxWorldProcessMemArena:
 {
 public:
 #define BUFFER_TO_ARENA_EXTRA (EFFICIENT_ALIGNMENT + dEFFICIENT_SIZE(sizeof(dxWorldProcessMemArena)))
-  static bool IsArenaPossible(size_t nBufferSize)
-  {
-    return SIZE_MAX - BUFFER_TO_ARENA_EXTRA >= nBufferSize; // This ensures there will be no overflow
-  }
+    static bool IsArenaPossible(size_t nBufferSize)
+    {
+        return SIZE_MAX - BUFFER_TO_ARENA_EXTRA >= nBufferSize; // This ensures there will be no overflow
+    }
 
-  static size_t MakeBufferSize(size_t nArenaSize)
-  {
-    return nArenaSize - BUFFER_TO_ARENA_EXTRA;
-  }
+    static size_t MakeBufferSize(size_t nArenaSize)
+    {
+        return nArenaSize - BUFFER_TO_ARENA_EXTRA;
+    }
 
-  static size_t MakeArenaSize(size_t nBufferSize)
-  {
-    return BUFFER_TO_ARENA_EXTRA + nBufferSize;
-  }
+    static size_t MakeArenaSize(size_t nBufferSize)
+    {
+        return BUFFER_TO_ARENA_EXTRA + nBufferSize;
+    }
 #undef BUFFER_TO_ARENA_EXTRA
 
-  bool IsStructureValid() const
-  {
-    return m_pAllocBegin != NULL && m_pAllocEnd != NULL && m_pAllocBegin <= m_pAllocEnd 
-      && (m_pAllocCurrentOrNextArena == NULL || m_pAllocCurrentOrNextArena == m_pAllocBegin) 
-      && m_pArenaBegin != NULL && m_pArenaBegin <= m_pAllocBegin; 
-  }
+    bool IsStructureValid() const
+    {
+        return m_pAllocBegin != NULL && m_pAllocEnd != NULL && m_pAllocBegin <= m_pAllocEnd 
+            && (m_pAllocCurrentOrNextArena == NULL || m_pAllocCurrentOrNextArena == m_pAllocBegin) 
+            && m_pArenaBegin != NULL && m_pArenaBegin <= m_pAllocBegin; 
+    }
 
-  size_t GetMemorySize() const
-  {
-    return (size_t)m_pAllocEnd - (size_t)m_pAllocBegin;
-  }
+    size_t GetMemorySize() const
+    {
+        return (size_t)m_pAllocEnd - (size_t)m_pAllocBegin;
+    }
 
-  void *SaveState() const
-  {
-    return m_pAllocCurrentOrNextArena;
-  }
+    void *SaveState() const
+    {
+        return m_pAllocCurrentOrNextArena;
+    }
 
-  void RestoreState(void *state)
-  {
-    m_pAllocCurrentOrNextArena = state;
-  }
+    void RestoreState(void *state)
+    {
+        m_pAllocCurrentOrNextArena = state;
+    }
 
-  void ResetState()
-  {
-    m_pAllocCurrentOrNextArena = m_pAllocBegin;
-  }
+    void ResetState()
+    {
+        m_pAllocCurrentOrNextArena = m_pAllocBegin;
+    }
 
-  void *PeekBufferRemainder() const
-  {
-    return m_pAllocCurrentOrNextArena;
-  }
+    void *PeekBufferRemainder() const
+    {
+        return m_pAllocCurrentOrNextArena;
+    }
 
-  void *AllocateBlock(size_t size)
-  {
-    void *block = m_pAllocCurrentOrNextArena;
-    m_pAllocCurrentOrNextArena = dOFFSET_EFFICIENTLY(block, size);
-    dIASSERT(m_pAllocCurrentOrNextArena <= m_pAllocEnd);
-    return block;
-  }
+    void *AllocateBlock(size_t size)
+    {
+        void *block = m_pAllocCurrentOrNextArena;
+        m_pAllocCurrentOrNextArena = dOFFSET_EFFICIENTLY(block, size);
+        dIASSERT(m_pAllocCurrentOrNextArena <= m_pAllocEnd);
+        return block;
+    }
 
-  template<typename ElementType>
-  ElementType *AllocateArray(size_t count)
-  {
-    return (ElementType *)AllocateBlock(count * sizeof(ElementType));
-  }
+    template<typename ElementType>
+    ElementType *AllocateArray(size_t count)
+    {
+        return (ElementType *)AllocateBlock(count * sizeof(ElementType));
+    }
 
-  template<typename ElementType>
-  void ShrinkArray(ElementType *arr, size_t oldcount, size_t newcount)
-  {
-    dIASSERT(newcount <= oldcount);
-    dIASSERT(dOFFSET_EFFICIENTLY(arr, oldcount * sizeof(ElementType)) == m_pAllocCurrentOrNextArena);
-    m_pAllocCurrentOrNextArena = dOFFSET_EFFICIENTLY(arr, newcount * sizeof(ElementType));
-  }
+    template<typename ElementType>
+    void ShrinkArray(ElementType *arr, size_t oldcount, size_t newcount)
+    {
+        dIASSERT(newcount <= oldcount);
+        dIASSERT(dOFFSET_EFFICIENTLY(arr, oldcount * sizeof(ElementType)) == m_pAllocCurrentOrNextArena);
+        m_pAllocCurrentOrNextArena = dOFFSET_EFFICIENTLY(arr, newcount * sizeof(ElementType));
+    }
 
 public:
-  static dxWorldProcessMemArena *ReallocateMemArena (
-    dxWorldProcessMemArena *oldarena, size_t memreq, 
-    const dxWorldProcessMemoryManager *memmgr, float rsrvfactor, unsigned rsrvminimum);
-  static void FreeMemArena (dxWorldProcessMemArena *arena);
+    static dxWorldProcessMemArena *ReallocateMemArena (
+        dxWorldProcessMemArena *oldarena, size_t memreq, 
+        const dxWorldProcessMemoryManager *memmgr, float rsrvfactor, unsigned rsrvminimum);
+    static void FreeMemArena (dxWorldProcessMemArena *arena);
 
-  dxWorldProcessMemArena *GetNextMemArena() const { return (dxWorldProcessMemArena *)m_pAllocCurrentOrNextArena; }
-  void SetNextMemArena(dxWorldProcessMemArena *pArenaInstance) { m_pAllocCurrentOrNextArena = pArenaInstance; }
-
-private:
-  static size_t AdjustArenaSizeForReserveRequirements(size_t arenareq, float rsrvfactor, unsigned rsrvminimum);
+    dxWorldProcessMemArena *GetNextMemArena() const { return (dxWorldProcessMemArena *)m_pAllocCurrentOrNextArena; }
+    void SetNextMemArena(dxWorldProcessMemArena *pArenaInstance) { m_pAllocCurrentOrNextArena = pArenaInstance; }
 
 private:
-  void *m_pAllocCurrentOrNextArena;
-  void *m_pAllocBegin;
-  void *m_pAllocEnd;
-  void *m_pArenaBegin;
+    static size_t AdjustArenaSizeForReserveRequirements(size_t arenareq, float rsrvfactor, unsigned rsrvminimum);
 
-  const dxWorldProcessMemoryManager *m_pArenaMemMgr;
+private:
+    void *m_pAllocCurrentOrNextArena;
+    void *m_pAllocBegin;
+    void *m_pAllocEnd;
+    void *m_pArenaBegin;
+
+    const dxWorldProcessMemoryManager *m_pArenaMemMgr;
 };
 
 class dxWorldProcessContext:
-  public dBase
+    public dBase
 {
 public:
-  dxWorldProcessContext();
-  ~dxWorldProcessContext();
+    dxWorldProcessContext();
+    ~dxWorldProcessContext();
 
-  void CleanupWorldReferences(dxWorld *pswWorldInstance);
-
-public:
-  bool EnsureStepperSyncObjectsAreAllocated(dxWorld *pswWorldInstance);
-  dCallWaitID GetIslandsSteppingWait() const { return m_pcwIslandsSteppingWait; }
+    void CleanupWorldReferences(dxWorld *pswWorldInstance);
 
 public:
-  dxWorldProcessMemArena *ObtainStepperMemArena();
-  void ReturnStepperMemArena(dxWorldProcessMemArena *pmaArenaInstance);
-
-  dxWorldProcessMemArena *ReallocateIslandsMemArena(size_t nMemoryRequirement, 
-    const dxWorldProcessMemoryManager *pmmMemortManager, float fReserveFactor, unsigned uiReserveMinimum);
-  bool ReallocateStepperMemArenas(dxWorld *world, unsigned nIslandThreadsCount, size_t nMemoryRequirement, 
-    const dxWorldProcessMemoryManager *pmmMemortManager, float fReserveFactor, unsigned uiReserveMinimum);
-
-private:
-  static void FreeArenasList(dxWorldProcessMemArena *pmaExistingArenas);
-
-private:
-  void SetIslandsMemArena(dxWorldProcessMemArena *pmaInstance) { m_pmaIslandsArena = pmaInstance; }
-  dxWorldProcessMemArena *GetIslandsMemArena() const { return m_pmaIslandsArena; }
-
-  void SetStepperArenasList(dxWorldProcessMemArena *pmaInstance) { m_pmaStepperArenas = pmaInstance; }
-  dxWorldProcessMemArena *GetStepperArenasList() const { return m_pmaStepperArenas; }
-
-  inline dxWorldProcessMemArena *GetStepperArenasHead() const;
-  inline bool TryExtractingStepperArenasHead(dxWorldProcessMemArena *pmaHeadInstance);
-  inline bool TryInsertingStepperArenasHead(dxWorldProcessMemArena *pmaArenaInstance, dxWorldProcessMemArena *pmaExistingHead);
+    bool EnsureStepperSyncObjectsAreAllocated(dxWorld *pswWorldInstance);
+    dCallWaitID GetIslandsSteppingWait() const { return m_pcwIslandsSteppingWait; }
 
 public:
-  void LockForStepbodySerialization();
-  void UnlockForStepbodySerialization();
+    dxWorldProcessMemArena *ObtainStepperMemArena();
+    void ReturnStepperMemArena(dxWorldProcessMemArena *pmaArenaInstance);
+
+    dxWorldProcessMemArena *ReallocateIslandsMemArena(size_t nMemoryRequirement, 
+        const dxWorldProcessMemoryManager *pmmMemortManager, float fReserveFactor, unsigned uiReserveMinimum);
+    bool ReallocateStepperMemArenas(dxWorld *world, unsigned nIslandThreadsCount, size_t nMemoryRequirement, 
+        const dxWorldProcessMemoryManager *pmmMemortManager, float fReserveFactor, unsigned uiReserveMinimum);
 
 private:
-  enum dxProcessContextMutex
-  {
-    dxPCM_STEPPER_ARENA_OBTAIN,
-    dxPCM_STEPPER_STEPBODY_SERIALIZE,
-    
-    dxPCM__MAX,
-  };
-
-  static const char *const m_aszContextMutexNames[dxPCM__MAX];
+    static void FreeArenasList(dxWorldProcessMemArena *pmaExistingArenas);
 
 private:
-  dxWorldProcessMemArena  *m_pmaIslandsArena;
-  dxWorldProcessMemArena  *volatile m_pmaStepperArenas;
-  dxWorld                 *m_pswObjectsAllocWorld;
-  dMutexGroupID           m_pmgStepperMutexGroup;
-  dCallWaitID             m_pcwIslandsSteppingWait;
+    void SetIslandsMemArena(dxWorldProcessMemArena *pmaInstance) { m_pmaIslandsArena = pmaInstance; }
+    dxWorldProcessMemArena *GetIslandsMemArena() const { return m_pmaIslandsArena; }
+
+    void SetStepperArenasList(dxWorldProcessMemArena *pmaInstance) { m_pmaStepperArenas = pmaInstance; }
+    dxWorldProcessMemArena *GetStepperArenasList() const { return m_pmaStepperArenas; }
+
+    inline dxWorldProcessMemArena *GetStepperArenasHead() const;
+    inline bool TryExtractingStepperArenasHead(dxWorldProcessMemArena *pmaHeadInstance);
+    inline bool TryInsertingStepperArenasHead(dxWorldProcessMemArena *pmaArenaInstance, dxWorldProcessMemArena *pmaExistingHead);
+
+public:
+    void LockForStepbodySerialization();
+    void UnlockForStepbodySerialization();
+
+private:
+    enum dxProcessContextMutex
+    {
+        dxPCM_STEPPER_ARENA_OBTAIN,
+        dxPCM_STEPPER_STEPBODY_SERIALIZE,
+
+        dxPCM__MAX,
+    };
+
+    static const char *const m_aszContextMutexNames[dxPCM__MAX];
+
+private:
+    dxWorldProcessMemArena  *m_pmaIslandsArena;
+    dxWorldProcessMemArena  *volatile m_pmaStepperArenas;
+    dxWorld                 *m_pswObjectsAllocWorld;
+    dMutexGroupID           m_pmgStepperMutexGroup;
+    dCallWaitID             m_pcwIslandsSteppingWait;
 };
 
 struct dxWorldProcessIslandsInfo
 {
-  void AssignInfo(size_t islandcount, unsigned int const *islandsizes, dxBody *const *bodies, dxJoint *const *joints)
-  {
-    m_IslandCount = islandcount;
-    m_pIslandSizes = islandsizes;
-    m_pBodies = bodies;
-    m_pJoints = joints;
-  }
-  
-  size_t GetIslandsCount() const { return m_IslandCount; }
-  unsigned int const *GetIslandSizes() const { return m_pIslandSizes; }
-  dxBody *const *GetBodiesArray() const { return m_pBodies; }
-  dxJoint *const *GetJointsArray() const { return m_pJoints; }
+    void AssignInfo(size_t islandcount, unsigned int const *islandsizes, dxBody *const *bodies, dxJoint *const *joints)
+    {
+        m_IslandCount = islandcount;
+        m_pIslandSizes = islandsizes;
+        m_pBodies = bodies;
+        m_pJoints = joints;
+    }
+
+    size_t GetIslandsCount() const { return m_IslandCount; }
+    unsigned int const *GetIslandSizes() const { return m_pIslandSizes; }
+    dxBody *const *GetBodiesArray() const { return m_pBodies; }
+    dxJoint *const *GetJointsArray() const { return m_pJoints; }
 
 private:
-  size_t m_IslandCount;
-  unsigned int const *m_pIslandSizes;
-  dxBody *const *m_pBodies;
-  dxJoint *const *m_pJoints;
+    size_t m_IslandCount;
+    unsigned int const *m_pIslandSizes;
+    dxBody *const *m_pBodies;
+    dxJoint *const *m_pJoints;
 };
 
 
@@ -293,20 +293,20 @@ private:
 #define END_STATE_SAVE(memarena, state) memarena->RestoreState(state)
 
 typedef void (*dstepper_fn_t) (dxWorldProcessMemArena *memarena, 
-        dxWorld *world, dxBody * const *body, unsigned int nb,
-        dxJoint * const *_joint, unsigned int _nj, dReal stepsize);
+                               dxWorld *world, dxBody * const *body, unsigned int nb,
+                               dxJoint * const *_joint, unsigned int _nj, dReal stepsize);
 
 bool dxProcessIslands (dxWorld *world, const dxWorldProcessIslandsInfo &islandsInfo, dReal stepSize, dstepper_fn_t stepper);
 
 
 typedef size_t (*dmemestimate_fn_t) (dxBody * const *body, unsigned int nb, 
-  dxJoint * const *_joint, unsigned int _nj);
+                                     dxJoint * const *_joint, unsigned int _nj);
 
 bool dxReallocateWorldProcessContext (dxWorld *world, dxWorldProcessIslandsInfo &islandsinfo, 
-  dReal stepsize, dmemestimate_fn_t stepperestimate);
+                                      dReal stepsize, dmemestimate_fn_t stepperestimate);
 
 dxWorldProcessMemArena *dxAllocateTemporaryWorldProcessMemArena(
-  size_t memreq, const dxWorldProcessMemoryManager *memmgr/*=NULL*/, const dxWorldProcessMemoryReserveInfo *reserveinfo/*=NULL*/);
+    size_t memreq, const dxWorldProcessMemoryManager *memmgr/*=NULL*/, const dxWorldProcessMemoryReserveInfo *reserveinfo/*=NULL*/);
 void dxFreeTemporaryWorldProcessMemArena(dxWorldProcessMemArena *arena);
 
 
@@ -314,100 +314,100 @@ void dxFreeTemporaryWorldProcessMemArena(dxWorldProcessMemArena *arena);
 template<class ClassType>
 inline ClassType *AllocateOnDemand(ClassType *&pctStorage)
 {
-  ClassType *pctCurrentInstance = pctStorage;
+    ClassType *pctCurrentInstance = pctStorage;
 
-  if (!pctCurrentInstance)
-  {
-    pctCurrentInstance = new ClassType();
-    pctStorage = pctCurrentInstance;
-  }
+    if (!pctCurrentInstance)
+    {
+        pctCurrentInstance = new ClassType();
+        pctStorage = pctCurrentInstance;
+    }
 
-  return pctCurrentInstance;
+    return pctCurrentInstance;
 }
 
 
 // World stepping working memory object
 class dxStepWorkingMemory:
-  public dBase
+    public dBase
 {
 public:
-  dxStepWorkingMemory(): m_uiRefCount(1), m_ppcProcessingContext(NULL), m_priReserveInfo(NULL), m_pmmMemoryManager(NULL) {}
+    dxStepWorkingMemory(): m_uiRefCount(1), m_ppcProcessingContext(NULL), m_priReserveInfo(NULL), m_pmmMemoryManager(NULL) {}
 
 private:
-  friend struct dBase; // To avoid GCC warning regarding private destructor
-  ~dxStepWorkingMemory() // Use Release() instead
-  {
-    delete m_ppcProcessingContext;
-    delete m_priReserveInfo;
-    delete m_pmmMemoryManager;
-  }
+    friend struct dBase; // To avoid GCC warning regarding private destructor
+    ~dxStepWorkingMemory() // Use Release() instead
+    {
+        delete m_ppcProcessingContext;
+        delete m_priReserveInfo;
+        delete m_pmmMemoryManager;
+    }
 
 public:
-  void Addref()
-  {
-    dIASSERT(~m_uiRefCount != 0);
-    ++m_uiRefCount;
-  }
-
-  void Release()
-  {
-    dIASSERT(m_uiRefCount != 0);
-    if (--m_uiRefCount == 0)
+    void Addref()
     {
-      delete this;
+        dIASSERT(~m_uiRefCount != 0);
+        ++m_uiRefCount;
     }
-  }
+
+    void Release()
+    {
+        dIASSERT(m_uiRefCount != 0);
+        if (--m_uiRefCount == 0)
+        {
+            delete this;
+        }
+    }
 
 public:
-  void CleanupMemory()
-  {
-    delete m_ppcProcessingContext;
-    m_ppcProcessingContext = NULL;
-  }
-
-  void CleanupWorldReferences(dxWorld *world)
-  {
-    if (m_ppcProcessingContext != NULL)
+    void CleanupMemory()
     {
-      m_ppcProcessingContext->CleanupWorldReferences(world);
+        delete m_ppcProcessingContext;
+        m_ppcProcessingContext = NULL;
     }
-  }
+
+    void CleanupWorldReferences(dxWorld *world)
+    {
+        if (m_ppcProcessingContext != NULL)
+        {
+            m_ppcProcessingContext->CleanupWorldReferences(world);
+        }
+    }
 
 public: 
-  dxWorldProcessContext *SureGetWorldProcessingContext() { return AllocateOnDemand(m_ppcProcessingContext); }
-  dxWorldProcessContext *GetWorldProcessingContext() const { return m_ppcProcessingContext; }
+    dxWorldProcessContext *SureGetWorldProcessingContext() { return AllocateOnDemand(m_ppcProcessingContext); }
+    dxWorldProcessContext *GetWorldProcessingContext() const { return m_ppcProcessingContext; }
 
-  const dxWorldProcessMemoryReserveInfo *GetMemoryReserveInfo() const { return m_priReserveInfo; }
-  const dxWorldProcessMemoryReserveInfo *SureGetMemoryReserveInfo() const { return m_priReserveInfo ? m_priReserveInfo : &g_WorldProcessDefaultReserveInfo; }
-  void SetMemoryReserveInfo(float fReserveFactor, unsigned uiReserveMinimum)
-  {
-    if (m_priReserveInfo) { m_priReserveInfo->Assign(fReserveFactor, uiReserveMinimum); }
-    else { m_priReserveInfo = new dxWorldProcessMemoryReserveInfo(fReserveFactor, uiReserveMinimum); }
-  }
-  void ResetMemoryReserveInfoToDefault()
-  {
-    if (m_priReserveInfo) { delete m_priReserveInfo; m_priReserveInfo = NULL; }
-  }
+    const dxWorldProcessMemoryReserveInfo *GetMemoryReserveInfo() const { return m_priReserveInfo; }
+    const dxWorldProcessMemoryReserveInfo *SureGetMemoryReserveInfo() const { return m_priReserveInfo ? m_priReserveInfo : &g_WorldProcessDefaultReserveInfo; }
+    void SetMemoryReserveInfo(float fReserveFactor, unsigned uiReserveMinimum)
+    {
+        if (m_priReserveInfo) { m_priReserveInfo->Assign(fReserveFactor, uiReserveMinimum); }
+        else { m_priReserveInfo = new dxWorldProcessMemoryReserveInfo(fReserveFactor, uiReserveMinimum); }
+    }
+    void ResetMemoryReserveInfoToDefault()
+    {
+        if (m_priReserveInfo) { delete m_priReserveInfo; m_priReserveInfo = NULL; }
+    }
 
-  const dxWorldProcessMemoryManager *GetMemoryManager() const { return m_pmmMemoryManager; }
-  const dxWorldProcessMemoryManager *SureGetMemoryManager() const { return m_pmmMemoryManager ? m_pmmMemoryManager : &g_WorldProcessMallocMemoryManager; }
-  void SetMemoryManager(dxWorldProcessMemoryManager::alloc_block_fn_t fnAlloc, 
-    dxWorldProcessMemoryManager::shrink_block_fn_t fnShrink, 
-    dxWorldProcessMemoryManager::free_block_fn_t fnFree) 
-  {
-    if (m_pmmMemoryManager) { m_pmmMemoryManager->Assign(fnAlloc, fnShrink, fnFree); }
-    else { m_pmmMemoryManager = new dxWorldProcessMemoryManager(fnAlloc, fnShrink, fnFree); }
-  }
-  void ResetMemoryManagerToDefault()
-  {
-    if (m_pmmMemoryManager) { delete m_pmmMemoryManager; m_pmmMemoryManager = NULL; }
-  }
+    const dxWorldProcessMemoryManager *GetMemoryManager() const { return m_pmmMemoryManager; }
+    const dxWorldProcessMemoryManager *SureGetMemoryManager() const { return m_pmmMemoryManager ? m_pmmMemoryManager : &g_WorldProcessMallocMemoryManager; }
+    void SetMemoryManager(dxWorldProcessMemoryManager::alloc_block_fn_t fnAlloc, 
+        dxWorldProcessMemoryManager::shrink_block_fn_t fnShrink, 
+        dxWorldProcessMemoryManager::free_block_fn_t fnFree) 
+    {
+        if (m_pmmMemoryManager) { m_pmmMemoryManager->Assign(fnAlloc, fnShrink, fnFree); }
+        else { m_pmmMemoryManager = new dxWorldProcessMemoryManager(fnAlloc, fnShrink, fnFree); }
+    }
+    void ResetMemoryManagerToDefault()
+    {
+        if (m_pmmMemoryManager) { delete m_pmmMemoryManager; m_pmmMemoryManager = NULL; }
+    }
 
 private:
-  unsigned m_uiRefCount;
-  dxWorldProcessContext *m_ppcProcessingContext;
-  dxWorldProcessMemoryReserveInfo *m_priReserveInfo;
-  dxWorldProcessMemoryManager *m_pmmMemoryManager;
+    unsigned m_uiRefCount;
+    dxWorldProcessContext *m_ppcProcessingContext;
+    dxWorldProcessMemoryReserveInfo *m_priReserveInfo;
+    dxWorldProcessMemoryManager *m_pmmMemoryManager;
 };
 
 

@@ -48,41 +48,41 @@
 class dxSelfWakeup
 {
 public:
-  dxSelfWakeup():
-    m_wakeup_state(false),
-    m_state_is_permanent(false)
-  {
-  }
+    dxSelfWakeup():
+        m_wakeup_state(false),
+        m_state_is_permanent(false)
+    {
+    }
 
-  bool InitializeObject() { return true; }
+    bool InitializeObject() { return true; }
 
 public:
-  void ResetWakeup() { m_wakeup_state = false; m_state_is_permanent = false; }
-  void WakeupAThread() { dIASSERT(!m_state_is_permanent); m_wakeup_state = true; } // Wakeup should not be used after permanent signal
-  void WakeupAllThreads() { m_wakeup_state = true; m_state_is_permanent = true; }
+    void ResetWakeup() { m_wakeup_state = false; m_state_is_permanent = false; }
+    void WakeupAThread() { dIASSERT(!m_state_is_permanent); m_wakeup_state = true; } // Wakeup should not be used after permanent signal
+    void WakeupAllThreads() { m_wakeup_state = true; m_state_is_permanent = true; }
 
-  bool WaitWakeup(const dThreadedWaitTime *timeout_time_ptr);
+    bool WaitWakeup(const dThreadedWaitTime *timeout_time_ptr);
 
 private:
-  bool          m_wakeup_state;
-  bool          m_state_is_permanent;
+    bool          m_wakeup_state;
+    bool          m_state_is_permanent;
 };
 
 
 bool dxSelfWakeup::WaitWakeup(const dThreadedWaitTime *timeout_time_ptr)
 {
-  bool wait_result = m_wakeup_state;
+    bool wait_result = m_wakeup_state;
 
-  if (m_wakeup_state)
-  {
-    m_wakeup_state = m_state_is_permanent;
-  }
-  else
-  {
-    dICHECK(false); // Self-wakeup should only be used in cases when waiting is called after object is signaled
-  }
+    if (m_wakeup_state)
+    {
+        m_wakeup_state = m_state_is_permanent;
+    }
+    else
+    {
+        dICHECK(false); // Self-wakeup should only be used in cases when waiting is called after object is signaled
+    }
 
-  return wait_result;
+    return wait_result;
 }
 
 
@@ -93,14 +93,14 @@ bool dxSelfWakeup::WaitWakeup(const dThreadedWaitTime *timeout_time_ptr)
 class dxFakeMutex
 {
 public:
-  dxFakeMutex() {}
+    dxFakeMutex() {}
 
-  bool InitializeObject() { return true; }
+    bool InitializeObject() { return true; }
 
 public:
-  void LockMutex() { /* Do nothing */ }
-  bool TryLockMutex() { /* Do nothing */ return true; }
-  void UnlockMutex() { /* Do nothing */ }
+    void LockMutex() { /* Do nothing */ }
+    bool TryLockMutex() { /* Do nothing */ return true; }
+    void UnlockMutex() { /* Do nothing */ }
 };
 
 
@@ -111,16 +111,16 @@ public:
 class dxFakeLull
 {
 public:
-  dxFakeLull() {}
+    dxFakeLull() {}
 
-  bool InitializeObject() { return true; }
+    bool InitializeObject() { return true; }
 
 public:
-  void RegisterToLull() { /* Do nothing */ }
-  void WaitForLullAlarm() { dICHECK(false); } // Fake lull can't be waited
-  void UnregisterFromLull() { /* Do nothing */ }
+    void RegisterToLull() { /* Do nothing */ }
+    void WaitForLullAlarm() { dICHECK(false); } // Fake lull can't be waited
+    void UnregisterFromLull() { /* Do nothing */ }
 
-  void SignalLullAlarmIfAnyRegistrants() { /* Do nothing */ }
+    void SignalLullAlarmIfAnyRegistrants() { /* Do nothing */ }
 };
 
 

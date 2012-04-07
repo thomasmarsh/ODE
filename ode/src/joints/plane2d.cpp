@@ -31,17 +31,17 @@
 //****************************************************************************
 // Plane2D
 /*
-    This code is part of the Plane2D ODE joint
-    by psero@gmx.de
-    Wed Apr 23 18:53:43 CEST 2003
+This code is part of the Plane2D ODE joint
+by psero@gmx.de
+Wed Apr 23 18:53:43 CEST 2003
 */
 
 
 # define        VoXYZ(v1, o1, x, y, z) \
     ( \
-      (v1)[0] o1 (x), \
-      (v1)[1] o1 (y), \
-      (v1)[2] o1 (z)  \
+        (v1)[0] o1 (x), \
+        (v1)[1] o1 (y), \
+        (v1)[2] o1 (z)  \
     )
 
 static const dReal   Midentity[3][3] =
@@ -53,7 +53,7 @@ static const dReal   Midentity[3][3] =
 
 
 dxJointPlane2D::dxJointPlane2D( dxWorld *w ) :
-        dxJoint( w )
+    dxJoint( w )
 {
     motor_x.init( world );
     motor_y.init( world );
@@ -87,9 +87,9 @@ dxJointPlane2D::getInfo1( dxJoint::Info1 *info )
 void
 dxJointPlane2D::getInfo2( dxJoint::Info2 *info )
 {
-    int         r0 = 0,
-                     r1 = info->rowskip,
-                          r2 = 2 * r1;
+    int r0 = 0;
+    int r1 = info->rowskip;
+    int r2 = 2 * r1;
     dReal       eps = info->fps * info->erp;
 
     /*
@@ -158,7 +158,7 @@ dxJointPlane2D::size() const
 
 
 void dJointSetPlane2DXParam( dxJoint *joint,
-                             int parameter, dReal value )
+                            int parameter, dReal value )
 {
     dUASSERT( joint, "bad joint argument" );
     checktype( joint, Plane2D );
@@ -168,7 +168,7 @@ void dJointSetPlane2DXParam( dxJoint *joint,
 
 
 void dJointSetPlane2DYParam( dxJoint *joint,
-                             int parameter, dReal value )
+                            int parameter, dReal value )
 {
     dUASSERT( joint, "bad joint argument" );
     checktype( joint, Plane2D );
@@ -179,7 +179,7 @@ void dJointSetPlane2DYParam( dxJoint *joint,
 
 
 void dJointSetPlane2DAngleParam( dxJoint *joint,
-                                 int parameter, dReal value )
+                                int parameter, dReal value )
 {
     dUASSERT( joint, "bad joint argument" );
     checktype( joint, Plane2D );

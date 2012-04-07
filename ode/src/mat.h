@@ -30,41 +30,41 @@
 
 
 class dMatrix {
-  int n,m;		// matrix dimension, n,m >= 0
-  dReal *data;		// if nonzero, n*m elements allocated on the heap
+    int n,m;		// matrix dimension, n,m >= 0
+    dReal *data;		// if nonzero, n*m elements allocated on the heap
 
 public:
-  // constructors, destructors
-  dMatrix();				// make default 0x0 matrix
-  dMatrix (int rows, int cols);		// construct zero matrix of given size
-  dMatrix (const dMatrix &);		// construct copy of given matrix
-  // create copy of given data - element (i,j) is data[i*rowskip+j*colskip]
-  dMatrix (int rows, int cols, dReal *_data, int rowskip, int colskip);
-  ~dMatrix();				// destructor
+    // constructors, destructors
+    dMatrix();				// make default 0x0 matrix
+    dMatrix (int rows, int cols);		// construct zero matrix of given size
+    dMatrix (const dMatrix &);		// construct copy of given matrix
+    // create copy of given data - element (i,j) is data[i*rowskip+j*colskip]
+    dMatrix (int rows, int cols, dReal *_data, int rowskip, int colskip);
+    ~dMatrix();				// destructor
 
-  // data movement
-  dReal & operator () (int i, int j);	// reference an element
-  void operator= (const dMatrix &);	// matrix = matrix
-  void operator= (dReal);		// matrix = scalar
-  dMatrix transpose();			// return transposed matrix
-  // return a permuted submatrix of this matrix, made up of the rows in p
-  // and the columns in q. p has np elements, q has nq elements.
-  dMatrix select (int np, int *p, int nq, int *q);
+    // data movement
+    dReal & operator () (int i, int j);	// reference an element
+    void operator= (const dMatrix &);	// matrix = matrix
+    void operator= (dReal);		// matrix = scalar
+    dMatrix transpose();			// return transposed matrix
+    // return a permuted submatrix of this matrix, made up of the rows in p
+    // and the columns in q. p has np elements, q has nq elements.
+    dMatrix select (int np, int *p, int nq, int *q);
 
-  // operators
-  dMatrix operator + (const dMatrix &);
-  dMatrix operator - (const dMatrix &);
-  dMatrix operator - ();
-  dMatrix operator * (const dMatrix &);
-  void operator += (const dMatrix &);
-  void operator -= (const dMatrix &);
+    // operators
+    dMatrix operator + (const dMatrix &);
+    dMatrix operator - (const dMatrix &);
+    dMatrix operator - ();
+    dMatrix operator * (const dMatrix &);
+    void operator += (const dMatrix &);
+    void operator -= (const dMatrix &);
 
-  // utility
-  void clearUpperTriangle();
-  void clearLowerTriangle();
-  void makeRandom (dReal range);
-  void print (char *fmt = "%10.4f ", FILE *f=stdout);
-  dReal maxDifference (const dMatrix &);
+    // utility
+    void clearUpperTriangle();
+    void clearLowerTriangle();
+    void makeRandom (dReal range);
+    void print (char *fmt = "%10.4f ", FILE *f=stdout);
+    dReal maxDifference (const dMatrix &);
 };
 
 

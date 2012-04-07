@@ -36,34 +36,34 @@
 
 void TrimeshCollidersCache::InitOPCODECaches()
 {
-	_RayCollider.SetDestination(&Faces);
+    _RayCollider.SetDestination(&Faces);
 
-/* -- not used
-	_PlanesCollider.SetTemporalCoherence(true);
-*/
+    /* -- not used
+    _PlanesCollider.SetTemporalCoherence(true);
+    */
 
-	_SphereCollider.SetTemporalCoherence(true);
-	_SphereCollider.SetPrimitiveTests(false);
+    _SphereCollider.SetTemporalCoherence(true);
+    _SphereCollider.SetPrimitiveTests(false);
 
-	_OBBCollider.SetTemporalCoherence(true);
+    _OBBCollider.SetTemporalCoherence(true);
 
-	// no first-contact test (i.e. return full contact info)
-	_AABBTreeCollider.SetFirstContact( false );     
-	// temporal coherence only works with "first contact" tests
-	_AABBTreeCollider.SetTemporalCoherence(false);
-	// Perform full BV-BV tests (true) or SAT-lite tests (false)
-	_AABBTreeCollider.SetFullBoxBoxTest( true );
-	// Perform full Primitive-BV tests (true) or SAT-lite tests (false)
-	_AABBTreeCollider.SetFullPrimBoxTest( true );
-	const char* msg;
-	if ((msg =_AABBTreeCollider.ValidateSettings()))
-		dDebug (d_ERR_UASSERT, msg, " (%s:%d)", __FILE__,__LINE__);
+    // no first-contact test (i.e. return full contact info)
+    _AABBTreeCollider.SetFirstContact( false );     
+    // temporal coherence only works with "first contact" tests
+    _AABBTreeCollider.SetTemporalCoherence(false);
+    // Perform full BV-BV tests (true) or SAT-lite tests (false)
+    _AABBTreeCollider.SetFullBoxBoxTest( true );
+    // Perform full Primitive-BV tests (true) or SAT-lite tests (false)
+    _AABBTreeCollider.SetFullPrimBoxTest( true );
+    const char* msg;
+    if ((msg =_AABBTreeCollider.ValidateSettings()))
+        dDebug (d_ERR_UASSERT, msg, " (%s:%d)", __FILE__,__LINE__);
 
-/* -- not used
-	_LSSCollider.SetTemporalCoherence(false);
-	_LSSCollider.SetPrimitiveTests(false);
-	_LSSCollider.SetFirstContact(false);
-*/
+    /* -- not used
+    _LSSCollider.SetTemporalCoherence(false);
+    _LSSCollider.SetPrimitiveTests(false);
+    _LSSCollider.SetFirstContact(false);
+    */
 }
 
 
@@ -72,21 +72,21 @@ void TrimeshCollidersCache::InitOPCODECaches()
 dxTriMeshData::dxTriMeshData() : UseFlags( NULL )
 {
 #if !dTRIMESH_ENABLED
-  dUASSERT(false, "dTRIMESH_ENABLED is not defined. Trimesh geoms will not work");
+    dUASSERT(false, "dTRIMESH_ENABLED is not defined. Trimesh geoms will not work");
 #endif
 }
 
 dxTriMeshData::~dxTriMeshData()
 {
-	if ( UseFlags )
-		delete [] UseFlags;
+    if ( UseFlags )
+        delete [] UseFlags;
 }
 
 void 
 dxTriMeshData::Build(const void* Vertices, int VertexStide, int VertexCount,
-		     const void* Indices, int IndexCount, int TriStride,
-		     const void* in_Normals,
-		     bool Single)
+                     const void* Indices, int IndexCount, int TriStride,
+                     const void* in_Normals,
+                     bool Single)
 {
 #if dTRIMESH_ENABLED
 
@@ -95,7 +95,7 @@ dxTriMeshData::Build(const void* Vertices, int VertexStide, int VertexCount,
     Mesh.SetPointers((IndexedTriangle*)Indices, (Point*)Vertices);
     Mesh.SetStrides(TriStride, VertexStide);
     Mesh.SetSingle(Single);
-    
+
     // Build tree
     BuildSettings Settings;
     // recommended in Opcode User Manual
@@ -128,26 +128,26 @@ dxTriMeshData::Build(const void* Vertices, int VertexStide, int VertexCount,
     if( Single ) {
         const char* verts = (const char*)Vertices;
         for( int i = 0; i < VertexCount; ++i ) {
-        const float* v = (const float*)verts;
-        if( v[0] > AABBMax[0] ) AABBMax[0] = v[0];
-        if( v[1] > AABBMax[1] ) AABBMax[1] = v[1];
-        if( v[2] > AABBMax[2] ) AABBMax[2] = v[2];
-        if( v[0] < AABBMin[0] ) AABBMin[0] = v[0];
-        if( v[1] < AABBMin[1] ) AABBMin[1] = v[1];
-        if( v[2] < AABBMin[2] ) AABBMin[2] = v[2];
-        verts += VertexStide;
+            const float* v = (const float*)verts;
+            if( v[0] > AABBMax[0] ) AABBMax[0] = v[0];
+            if( v[1] > AABBMax[1] ) AABBMax[1] = v[1];
+            if( v[2] > AABBMax[2] ) AABBMax[2] = v[2];
+            if( v[0] < AABBMin[0] ) AABBMin[0] = v[0];
+            if( v[1] < AABBMin[1] ) AABBMin[1] = v[1];
+            if( v[2] < AABBMin[2] ) AABBMin[2] = v[2];
+            verts += VertexStide;
         }
     } else {
         const char* verts = (const char*)Vertices;
         for( int i = 0; i < VertexCount; ++i ) {
-        const double* v = (const double*)verts;
-        if( v[0] > AABBMax[0] ) AABBMax[0] = (dReal) v[0];
-        if( v[1] > AABBMax[1] ) AABBMax[1] = (dReal) v[1];
-        if( v[2] > AABBMax[2] ) AABBMax[2] = (dReal) v[2];
-        if( v[0] < AABBMin[0] ) AABBMin[0] = (dReal) v[0];
-        if( v[1] < AABBMin[1] ) AABBMin[1] = (dReal) v[1];
-        if( v[2] < AABBMin[2] ) AABBMin[2] = (dReal) v[2];
-        verts += VertexStide;
+            const double* v = (const double*)verts;
+            if( v[0] > AABBMax[0] ) AABBMax[0] = (dReal) v[0];
+            if( v[1] > AABBMax[1] ) AABBMax[1] = (dReal) v[1];
+            if( v[2] > AABBMax[2] ) AABBMax[2] = (dReal) v[2];
+            if( v[0] < AABBMin[0] ) AABBMin[0] = (dReal) v[0];
+            if( v[1] < AABBMin[1] ) AABBMin[1] = (dReal) v[1];
+            if( v[2] < AABBMin[2] ) AABBMin[2] = (dReal) v[2];
+            verts += VertexStide;
         }
     }
     AABBCenter[0] = (AABBMin[0] + AABBMax[0]) * REAL(0.5);
@@ -160,76 +160,76 @@ dxTriMeshData::Build(const void* Vertices, int VertexStide, int VertexCount,
     // user data (not used by OPCODE)
     Normals = (dReal *) in_Normals;
 
-	UseFlags = 0;
+    UseFlags = 0;
 
 #endif // dTRIMESH_ENABLED
 }
 
 struct EdgeRecord
 {
-	int VertIdx1;	// Index into vertex array for this edges vertices
-	int VertIdx2;
-	int TriIdx;		// Index into triangle array for triangle this edge belongs to
+    int VertIdx1;	// Index into vertex array for this edges vertices
+    int VertIdx2;
+    int TriIdx;		// Index into triangle array for triangle this edge belongs to
 
-	uint8 EdgeFlags;	
-	uint8 Vert1Flags;
-	uint8 Vert2Flags;
-	bool Concave;
+    uint8 EdgeFlags;	
+    uint8 Vert1Flags;
+    uint8 Vert2Flags;
+    bool Concave;
 };
 
 // Edge comparison function for qsort
 static int EdgeCompare(const void* edge1, const void* edge2)
 {
-	EdgeRecord* e1 = (EdgeRecord*)edge1;
-	EdgeRecord* e2 = (EdgeRecord*)edge2;
+    EdgeRecord* e1 = (EdgeRecord*)edge1;
+    EdgeRecord* e2 = (EdgeRecord*)edge2;
 
-	if (e1->VertIdx1 == e2->VertIdx1)
-		return e1->VertIdx2 - e2->VertIdx2;
-	else
-		return e1->VertIdx1 - e2->VertIdx1;
+    if (e1->VertIdx1 == e2->VertIdx1)
+        return e1->VertIdx2 - e2->VertIdx2;
+    else
+        return e1->VertIdx1 - e2->VertIdx1;
 }
 
 void SetupEdge(EdgeRecord* edge, int edgeIdx, int triIdx, const dTriIndex* vertIdxs)
 {
-	if (edgeIdx == 0)
-	{
-		edge->EdgeFlags  = dxTriMeshData::kEdge0;
-		edge->Vert1Flags = dxTriMeshData::kVert0;
-		edge->Vert2Flags = dxTriMeshData::kVert1;
-		edge->VertIdx1 = vertIdxs[0];
-		edge->VertIdx2 = vertIdxs[1];
-	}
-	else if (edgeIdx == 1)
-	{
-		edge->EdgeFlags  = dxTriMeshData::kEdge1;
-		edge->Vert1Flags = dxTriMeshData::kVert1;
-		edge->Vert2Flags = dxTriMeshData::kVert2;
-		edge->VertIdx1 = vertIdxs[1];
-		edge->VertIdx2 = vertIdxs[2];
-	}
-	else if (edgeIdx == 2)
-	{
-		edge->EdgeFlags  = dxTriMeshData::kEdge2;
-		edge->Vert1Flags = dxTriMeshData::kVert2;
-		edge->Vert2Flags = dxTriMeshData::kVert0;
-		edge->VertIdx1 = vertIdxs[2];
-		edge->VertIdx2 = vertIdxs[0];
-	}
+    if (edgeIdx == 0)
+    {
+        edge->EdgeFlags  = dxTriMeshData::kEdge0;
+        edge->Vert1Flags = dxTriMeshData::kVert0;
+        edge->Vert2Flags = dxTriMeshData::kVert1;
+        edge->VertIdx1 = vertIdxs[0];
+        edge->VertIdx2 = vertIdxs[1];
+    }
+    else if (edgeIdx == 1)
+    {
+        edge->EdgeFlags  = dxTriMeshData::kEdge1;
+        edge->Vert1Flags = dxTriMeshData::kVert1;
+        edge->Vert2Flags = dxTriMeshData::kVert2;
+        edge->VertIdx1 = vertIdxs[1];
+        edge->VertIdx2 = vertIdxs[2];
+    }
+    else if (edgeIdx == 2)
+    {
+        edge->EdgeFlags  = dxTriMeshData::kEdge2;
+        edge->Vert1Flags = dxTriMeshData::kVert2;
+        edge->Vert2Flags = dxTriMeshData::kVert0;
+        edge->VertIdx1 = vertIdxs[2];
+        edge->VertIdx2 = vertIdxs[0];
+    }
 
-	// Make sure vert index 1 is less than index 2 (for easier sorting)
-	if (edge->VertIdx1 > edge->VertIdx2)
-	{
-		unsigned int tempIdx = edge->VertIdx1;
-		edge->VertIdx1 = edge->VertIdx2;
-		edge->VertIdx2 = tempIdx;
+    // Make sure vert index 1 is less than index 2 (for easier sorting)
+    if (edge->VertIdx1 > edge->VertIdx2)
+    {
+        unsigned int tempIdx = edge->VertIdx1;
+        edge->VertIdx1 = edge->VertIdx2;
+        edge->VertIdx2 = tempIdx;
 
-		uint8 tempFlags = edge->Vert1Flags;
-		edge->Vert1Flags = edge->Vert2Flags;
-		edge->Vert2Flags = tempFlags;
-	}
+        uint8 tempFlags = edge->Vert1Flags;
+        edge->Vert1Flags = edge->Vert2Flags;
+        edge->Vert2Flags = tempFlags;
+    }
 
-	edge->TriIdx = triIdx;
-	edge->Concave = false;
+    edge->TriIdx = triIdx;
+    edge->Concave = false;
 }
 
 #if dTRIMESH_ENABLED
@@ -237,18 +237,18 @@ void SetupEdge(EdgeRecord* edge, int edgeIdx, int triIdx, const dTriIndex* vertI
 // Get the vertex opposite this edge in the triangle
 inline Point GetOppositeVert(EdgeRecord* edge, const Point* vertices[])
 {
-	if ((edge->Vert1Flags == dxTriMeshData::kVert0 && edge->Vert2Flags == dxTriMeshData::kVert1) ||
-		(edge->Vert1Flags == dxTriMeshData::kVert1 && edge->Vert2Flags == dxTriMeshData::kVert0))
-	{
-		return *vertices[2];
-	}
-	else if ((edge->Vert1Flags == dxTriMeshData::kVert1 && edge->Vert2Flags == dxTriMeshData::kVert2) ||
-		(edge->Vert1Flags == dxTriMeshData::kVert2 && edge->Vert2Flags == dxTriMeshData::kVert1))
-	{
-		return *vertices[0];
-	}
-	else
-		return *vertices[1];
+    if ((edge->Vert1Flags == dxTriMeshData::kVert0 && edge->Vert2Flags == dxTriMeshData::kVert1) ||
+        (edge->Vert1Flags == dxTriMeshData::kVert1 && edge->Vert2Flags == dxTriMeshData::kVert0))
+    {
+        return *vertices[2];
+    }
+    else if ((edge->Vert1Flags == dxTriMeshData::kVert1 && edge->Vert2Flags == dxTriMeshData::kVert2) ||
+        (edge->Vert1Flags == dxTriMeshData::kVert2 && edge->Vert2Flags == dxTriMeshData::kVert1))
+    {
+        return *vertices[0];
+    }
+    else
+        return *vertices[1];
 }
 
 #endif // dTRIMESH_ENABLED
@@ -258,106 +258,106 @@ void dxTriMeshData::Preprocess()
 
 #if dTRIMESH_ENABLED
 
-	// If this mesh has already been preprocessed, exit
-	if (UseFlags)
-		return;
+    // If this mesh has already been preprocessed, exit
+    if (UseFlags)
+        return;
 
-	udword numTris = Mesh.GetNbTriangles();
-	udword numEdges = numTris * 3;
+    udword numTris = Mesh.GetNbTriangles();
+    udword numEdges = numTris * 3;
 
-	UseFlags = new uint8[numTris];
-	memset(UseFlags, 0, sizeof(uint8) * numTris);
+    UseFlags = new uint8[numTris];
+    memset(UseFlags, 0, sizeof(uint8) * numTris);
 
-	EdgeRecord* records = new EdgeRecord[numEdges];
+    EdgeRecord* records = new EdgeRecord[numEdges];
 
-	// Make a list of every edge in the mesh
-	const IndexedTriangle* tris = Mesh.GetTris();
-	const unsigned tristride = Mesh.GetTriStride();
-	for (unsigned int i = 0; i < numTris; i++)
-	{
-		SetupEdge(&records[i*3],   0, i, tris->mVRef);
-		SetupEdge(&records[i*3+1], 1, i, tris->mVRef);
-		SetupEdge(&records[i*3+2], 2, i, tris->mVRef);
+    // Make a list of every edge in the mesh
+    const IndexedTriangle* tris = Mesh.GetTris();
+    const unsigned tristride = Mesh.GetTriStride();
+    for (unsigned int i = 0; i < numTris; i++)
+    {
+        SetupEdge(&records[i*3],   0, i, tris->mVRef);
+        SetupEdge(&records[i*3+1], 1, i, tris->mVRef);
+        SetupEdge(&records[i*3+2], 2, i, tris->mVRef);
 
-		tris = (const IndexedTriangle*)(((uint8*)tris) + tristride);
-	}
+        tris = (const IndexedTriangle*)(((uint8*)tris) + tristride);
+    }
 
-	// Sort the edges, so the ones sharing the same verts are beside each other
-	qsort(records, numEdges, sizeof(EdgeRecord), EdgeCompare);
+    // Sort the edges, so the ones sharing the same verts are beside each other
+    qsort(records, numEdges, sizeof(EdgeRecord), EdgeCompare);
 
-	// Go through the sorted list of edges and flag all the edges and vertices that we need to use
-	for (unsigned int i = 0; i < numEdges; i++)
-	{
-		EdgeRecord* rec1 = &records[i];
-		EdgeRecord* rec2 = 0;
-		if (i < numEdges - 1)
-			rec2 = &records[i+1];
+    // Go through the sorted list of edges and flag all the edges and vertices that we need to use
+    for (unsigned int i = 0; i < numEdges; i++)
+    {
+        EdgeRecord* rec1 = &records[i];
+        EdgeRecord* rec2 = 0;
+        if (i < numEdges - 1)
+            rec2 = &records[i+1];
 
-		if (rec2 &&
-			rec1->VertIdx1 == rec2->VertIdx1 &&
-			rec1->VertIdx2 == rec2->VertIdx2)
-		{
-			VertexPointers vp;
-			ConversionArea vc;
-			Mesh.GetTriangle(vp, rec1->TriIdx, vc);
+        if (rec2 &&
+            rec1->VertIdx1 == rec2->VertIdx1 &&
+            rec1->VertIdx2 == rec2->VertIdx2)
+        {
+            VertexPointers vp;
+            ConversionArea vc;
+            Mesh.GetTriangle(vp, rec1->TriIdx, vc);
 
-			// Get the normal of the first triangle
-			Point triNorm = (*vp.Vertex[2] - *vp.Vertex[1]) ^ (*vp.Vertex[0] - *vp.Vertex[1]);
-			triNorm.Normalize();
+            // Get the normal of the first triangle
+            Point triNorm = (*vp.Vertex[2] - *vp.Vertex[1]) ^ (*vp.Vertex[0] - *vp.Vertex[1]);
+            triNorm.Normalize();
 
-			// Get the vert opposite this edge in the first triangle
-			Point oppositeVert1 = GetOppositeVert(rec1, vp.Vertex);
+            // Get the vert opposite this edge in the first triangle
+            Point oppositeVert1 = GetOppositeVert(rec1, vp.Vertex);
 
-			// Get the vert opposite this edge in the second triangle
-			Mesh.GetTriangle(vp, rec2->TriIdx, vc);
-			Point oppositeVert2 = GetOppositeVert(rec2, vp.Vertex);
+            // Get the vert opposite this edge in the second triangle
+            Mesh.GetTriangle(vp, rec2->TriIdx, vc);
+            Point oppositeVert2 = GetOppositeVert(rec2, vp.Vertex);
 
-			float dot = triNorm.Dot((oppositeVert2 - oppositeVert1).Normalize());
+            float dot = triNorm.Dot((oppositeVert2 - oppositeVert1).Normalize());
 
-			// We let the dot threshold for concavity get slightly negative to allow for rounding errors
-			static const float kConcaveThresh = -0.000001f;
+            // We let the dot threshold for concavity get slightly negative to allow for rounding errors
+            static const float kConcaveThresh = -0.000001f;
 
-			// This is a concave edge, leave it for the next pass
-			if (dot >= kConcaveThresh)
-				rec1->Concave = true;
-			// If this is a convex edge, mark its vertices and edge as used
-			else
-				UseFlags[rec1->TriIdx] |= rec1->Vert1Flags | rec1->Vert2Flags | rec1->EdgeFlags;
+            // This is a concave edge, leave it for the next pass
+            if (dot >= kConcaveThresh)
+                rec1->Concave = true;
+            // If this is a convex edge, mark its vertices and edge as used
+            else
+                UseFlags[rec1->TriIdx] |= rec1->Vert1Flags | rec1->Vert2Flags | rec1->EdgeFlags;
 
-			// Skip the second edge
-			i++;
-		}
-		// This is a boundary edge
-		else
-		{
-			UseFlags[rec1->TriIdx] |= rec1->Vert1Flags | rec1->Vert2Flags | rec1->EdgeFlags;
-		}
-	}
+            // Skip the second edge
+            i++;
+        }
+        // This is a boundary edge
+        else
+        {
+            UseFlags[rec1->TriIdx] |= rec1->Vert1Flags | rec1->Vert2Flags | rec1->EdgeFlags;
+        }
+    }
 
-	// Go through the list once more, and take any edge we marked as concave and
-	// clear it's vertices flags in any triangles they're used in
-	for (unsigned int i = 0; i < numEdges; i++)
-	{
-		EdgeRecord& er = records[i];
+    // Go through the list once more, and take any edge we marked as concave and
+    // clear it's vertices flags in any triangles they're used in
+    for (unsigned int i = 0; i < numEdges; i++)
+    {
+        EdgeRecord& er = records[i];
 
-		if (er.Concave)
-		{
-			for (unsigned int j = 0; j < numEdges; j++)
-			{
-				EdgeRecord& curER = records[j];
+        if (er.Concave)
+        {
+            for (unsigned int j = 0; j < numEdges; j++)
+            {
+                EdgeRecord& curER = records[j];
 
-				if (curER.VertIdx1 == er.VertIdx1 ||
-					curER.VertIdx1 == er.VertIdx2)
-					UseFlags[curER.TriIdx] &= ~curER.Vert1Flags;
+                if (curER.VertIdx1 == er.VertIdx1 ||
+                    curER.VertIdx1 == er.VertIdx2)
+                    UseFlags[curER.TriIdx] &= ~curER.Vert1Flags;
 
-				if (curER.VertIdx2 == er.VertIdx1 ||
-					curER.VertIdx2 == er.VertIdx2)
-					UseFlags[curER.TriIdx] &= ~curER.Vert2Flags;
-			}
-		}
-	}
+                if (curER.VertIdx2 == er.VertIdx1 ||
+                    curER.VertIdx2 == er.VertIdx2)
+                    UseFlags[curER.TriIdx] &= ~curER.Vert2Flags;
+            }
+        }
+    }
 
-	delete [] records;
+    delete [] records;
 
 #endif // dTRIMESH_ENABLED
 
@@ -376,7 +376,7 @@ void dGeomTriMeshDataDestroy(dTriMeshDataID g){
 
 void dGeomTriMeshSetLastTransform( dxGeom* g, dMatrix4 last_trans )
 {
-	dAASSERT(g);
+    dAASSERT(g);
     dUASSERT(g->type == dTriMeshClass, "geom not trimesh");
 
     for (int i=0; i<16; i++)
@@ -388,7 +388,7 @@ void dGeomTriMeshSetLastTransform( dxGeom* g, dMatrix4 last_trans )
 
 dReal* dGeomTriMeshGetLastTransform( dxGeom* g )
 {
-	dAASSERT(g);
+    dAASSERT(g);
     dUASSERT(g->type == dTriMeshClass, "geom not trimesh");
 
     return (dReal*)(((dxTriMesh*)g)->last_trans);
@@ -402,14 +402,14 @@ void dGeomTriMeshDataSet(dTriMeshDataID g, int data_id, void* in_data)
     dUASSERT(g, "argument not trimesh data");
 
     switch (data_id)
-	{
+    {
     case TRIMESH_FACE_NORMALS:
-		g->Normals = (dReal *) in_data;
-		break;
+        g->Normals = (dReal *) in_data;
+        break;
 
     default:
-		dUASSERT(data_id, "invalid data type");
-		break;
+        dUASSERT(data_id, "invalid data type");
+        break;
     }
 
     return;
@@ -422,16 +422,16 @@ void*  dGeomTriMeshDataGet(dTriMeshDataID g, int data_id)
     dUASSERT(g, "argument not trimesh data");
 
     switch (data_id)
-	{
+    {
     case TRIMESH_FACE_NORMALS:
         return (void *) g->Normals;
         break;
 
-	default:
+    default:
         dUASSERT(data_id, "invalid data type");
         break;
     }
-    
+
     return NULL;
 }
 
@@ -442,11 +442,11 @@ void dGeomTriMeshDataBuildSingle1(dTriMeshDataID g,
                                   const void* Normals)
 {
     dUASSERT(g, "argument not trimesh data");
-    
+
     g->Build(Vertices, VertexStride, VertexCount, 
-             Indices, IndexCount, TriStride, 
-             Normals, 
-             true);
+        Indices, IndexCount, TriStride, 
+        Normals, 
+        true);
 }
 
 
@@ -455,76 +455,79 @@ void dGeomTriMeshDataBuildSingle(dTriMeshDataID g,
                                  const void* Indices, int IndexCount, int TriStride)
 {
     dGeomTriMeshDataBuildSingle1(g, Vertices, VertexStride, VertexCount,
-                                 Indices, IndexCount, TriStride, (void*)NULL);
+        Indices, IndexCount, TriStride, (void*)NULL);
 }
 
 
 void dGeomTriMeshDataBuildDouble1(dTriMeshDataID g,
                                   const void* Vertices, int VertexStride, int VertexCount, 
-                                 const void* Indices, int IndexCount, int TriStride,
-				 const void* Normals)
+                                  const void* Indices, int IndexCount, int TriStride,
+                                  const void* Normals)
 {
     dUASSERT(g, "argument not trimesh data");
-    
+
     g->Build(Vertices, VertexStride, VertexCount, 
-             Indices, IndexCount, TriStride, 
-             Normals, 
-             false);
+        Indices, IndexCount, TriStride, 
+        Normals, 
+        false);
 }
 
 
 void dGeomTriMeshDataBuildDouble(dTriMeshDataID g,
-				 const void* Vertices, int VertexStride, int VertexCount, 
-                                 const void* Indices, int IndexCount, int TriStride) {
+                                 const void* Vertices, int VertexStride, int VertexCount, 
+                                 const void* Indices, int IndexCount, int TriStride)
+{
     dGeomTriMeshDataBuildDouble1(g, Vertices, VertexStride, VertexCount,
-                                 Indices, IndexCount, TriStride, NULL);
+        Indices, IndexCount, TriStride, NULL);
 }
 
 
 void dGeomTriMeshDataBuildSimple1(dTriMeshDataID g,
                                   const dReal* Vertices, int VertexCount, 
-                                 const dTriIndex* Indices, int IndexCount,
-                                 const int* Normals){
+                                  const dTriIndex* Indices, int IndexCount,
+                                  const int* Normals)
+{
 #ifdef dSINGLE
     dGeomTriMeshDataBuildSingle1(g,
-				Vertices, 4 * sizeof(dReal), VertexCount, 
-				Indices, IndexCount, 3 * sizeof(dTriIndex),
-				Normals);
+        Vertices, 4 * sizeof(dReal), VertexCount, 
+        Indices, IndexCount, 3 * sizeof(dTriIndex),
+        Normals);
 #else
     dGeomTriMeshDataBuildDouble1(g, Vertices, 4 * sizeof(dReal), VertexCount, 
-				Indices, IndexCount, 3 * sizeof(dTriIndex),
-				Normals);
+        Indices, IndexCount, 3 * sizeof(dTriIndex),
+        Normals);
 #endif
 }
 
 
 void dGeomTriMeshDataBuildSimple(dTriMeshDataID g,
                                  const dReal* Vertices, int VertexCount, 
-                                 const dTriIndex* Indices, int IndexCount) {
+                                 const dTriIndex* Indices, int IndexCount)
+{
     dGeomTriMeshDataBuildSimple1(g,
-                                 Vertices, VertexCount, Indices, IndexCount,
-                                 (const int*)NULL);
+        Vertices, VertexCount, Indices, IndexCount,
+        (const int*)NULL);
 }
 
 void dGeomTriMeshDataPreprocess(dTriMeshDataID g)
 {
     dUASSERT(g, "argument not trimesh data");
-	g->Preprocess();
+    g->Preprocess();
 }
 
 void dGeomTriMeshDataGetBuffer(dTriMeshDataID g, unsigned char** buf, int* bufLen)
 {
     dUASSERT(g, "argument not trimesh data");
 #if dTRIMESH_ENABLED
-	*buf = g->UseFlags;
-	*bufLen = g->Mesh.GetNbTriangles();
+    *buf = g->UseFlags;
+    *bufLen = g->Mesh.GetNbTriangles();
 #endif // dTRIMESH_ENABLED
 }
 
 void dGeomTriMeshDataSetBuffer(dTriMeshDataID g, unsigned char* buf)
 {
     dUASSERT(g, "argument not trimesh data");
-	g->UseFlags = buf;
+    g->UseFlags = buf;
 }
 
 
@@ -539,13 +542,13 @@ dxTriMesh::dxTriMesh(dSpaceID Space, dTriMeshDataID Data) : dxGeom(Space, 1)
 
     this->Data = Data;
 
-	/* TC has speed/space 'issues' that don't make it a clear
-	   win by default on spheres/boxes. */
-	this->doSphereTC = false;
-	this->doBoxTC = false;
-	this->doCapsuleTC = false;
+    /* TC has speed/space 'issues' that don't make it a clear
+    win by default on spheres/boxes. */
+    this->doSphereTC = false;
+    this->doBoxTC = false;
+    this->doCapsuleTC = false;
 
-	SphereContactsMergeOption = (dxContactMergeOptions)MERGE_NORMALS__SPHERE_DEFAULT;
+    SphereContactsMergeOption = (dxContactMergeOptions)MERGE_NORMALS__SPHERE_DEFAULT;
 
     for (int i=0; i<16; i++)
         last_trans[i] = REAL( 0.0 );
@@ -561,12 +564,12 @@ dxTriMesh::~dxTriMesh(){
 #if !dTLS_ENABLED
 #if dTRIMESH_ENABLED
 
-	// Clear TC caches
-	TrimeshCollidersCache *pccColliderCache = GetTrimeshCollidersCache(0);
-	pccColliderCache->Faces.Empty();
-	pccColliderCache->defaultSphereCache.TouchedPrimitives.Empty();
-	pccColliderCache->defaultBoxCache.TouchedPrimitives.Empty();
-	pccColliderCache->defaultCapsuleCache.TouchedPrimitives.Empty();
+    // Clear TC caches
+    TrimeshCollidersCache *pccColliderCache = GetTrimeshCollidersCache(0);
+    pccColliderCache->Faces.Empty();
+    pccColliderCache->defaultSphereCache.TouchedPrimitives.Empty();
+    pccColliderCache->defaultBoxCache.TouchedPrimitives.Empty();
+    pccColliderCache->defaultCapsuleCache.TouchedPrimitives.Empty();
 
 #endif // dTRIMESH_ENABLED
 #endif // dTLS_ENABLED
@@ -577,9 +580,9 @@ dxTriMesh::~dxTriMesh(){
 void dxTriMesh::ClearTCCache()
 {
 #if dTRIMESH_ENABLED
-  /* dxTriMesh::ClearTCCache uses dArray's setSize(0) to clear the caches -
-     but the destructor isn't called when doing this, so we would leak.
-     So, call the previous caches' containers' destructors by hand first. */
+    /* dxTriMesh::ClearTCCache uses dArray's setSize(0) to clear the caches -
+    but the destructor isn't called when doing this, so we would leak.
+    So, call the previous caches' containers' destructors by hand first. */
     int i, n;
     n = SphereTCCache.size();
     for( i = 0; i < n; ++i ) {
@@ -591,54 +594,54 @@ void dxTriMesh::ClearTCCache()
         BoxTCCache[i].~BoxTC();
     }
     BoxTCCache.setSize(0);
-	n = CapsuleTCCache.size();
-	for( i = 0; i < n; ++i ) {
-	  CapsuleTCCache[i].~CapsuleTC();
-	}
-	CapsuleTCCache.setSize(0);
+    n = CapsuleTCCache.size();
+    for( i = 0; i < n; ++i ) {
+        CapsuleTCCache[i].~CapsuleTC();
+    }
+    CapsuleTCCache.setSize(0);
 #endif // dTRIMESH_ENABLED
 }
 
 
 bool dxTriMesh::controlGeometry(int controlClass, int controlCode, void *dataValue, int *dataSize)
 {
-	if (controlClass == dGeomColliderControlClass) {
-		if (controlCode == dGeomCommonAnyControlCode) {
-			return checkControlValueSizeValidity(dataValue, dataSize, 0);
-		}
-		else if (controlCode == dGeomColliderSetMergeSphereContactsControlCode) {
-			return checkControlValueSizeValidity(dataValue, dataSize, sizeof(int)) 
-				&& controlGeometry_SetMergeSphereContacts(*(int *)dataValue);
-		}
-		else if (controlCode == dGeomColliderGetMergeSphereContactsControlCode) {
-			return checkControlValueSizeValidity(dataValue, dataSize, sizeof(int)) 
-				&& controlGeometry_GetMergeSphereContacts(*(int *)dataValue);
-		}
-	}
+    if (controlClass == dGeomColliderControlClass) {
+        if (controlCode == dGeomCommonAnyControlCode) {
+            return checkControlValueSizeValidity(dataValue, dataSize, 0);
+        }
+        else if (controlCode == dGeomColliderSetMergeSphereContactsControlCode) {
+            return checkControlValueSizeValidity(dataValue, dataSize, sizeof(int)) 
+                && controlGeometry_SetMergeSphereContacts(*(int *)dataValue);
+        }
+        else if (controlCode == dGeomColliderGetMergeSphereContactsControlCode) {
+            return checkControlValueSizeValidity(dataValue, dataSize, sizeof(int)) 
+                && controlGeometry_GetMergeSphereContacts(*(int *)dataValue);
+        }
+    }
 
-	return dxGeom::controlGeometry(controlClass, controlCode, dataValue, dataSize);
+    return dxGeom::controlGeometry(controlClass, controlCode, dataValue, dataSize);
 }
 
 bool dxTriMesh::controlGeometry_SetMergeSphereContacts(int dataValue)
 {
-	if (dataValue == dGeomColliderMergeContactsValue__Default) {
-		SphereContactsMergeOption = (dxContactMergeOptions)MERGE_NORMALS__SPHERE_DEFAULT;
-	}
-	else if (dataValue == dGeomColliderMergeContactsValue_None) {
-		SphereContactsMergeOption = DONT_MERGE_CONTACTS;
-	}
-	else if (dataValue == dGeomColliderMergeContactsValue_Normals) {
-		SphereContactsMergeOption = MERGE_CONTACT_NORMALS;
-	}
-	else if (dataValue == dGeomColliderMergeContactsValue_Full) {
-		SphereContactsMergeOption = MERGE_CONTACTS_FULLY;
-	}
-	else {
-		dAASSERT(false && "Invalid contact merge control value");
-		return false;
-	}
+    if (dataValue == dGeomColliderMergeContactsValue__Default) {
+        SphereContactsMergeOption = (dxContactMergeOptions)MERGE_NORMALS__SPHERE_DEFAULT;
+    }
+    else if (dataValue == dGeomColliderMergeContactsValue_None) {
+        SphereContactsMergeOption = DONT_MERGE_CONTACTS;
+    }
+    else if (dataValue == dGeomColliderMergeContactsValue_Normals) {
+        SphereContactsMergeOption = MERGE_CONTACT_NORMALS;
+    }
+    else if (dataValue == dGeomColliderMergeContactsValue_Full) {
+        SphereContactsMergeOption = MERGE_CONTACTS_FULLY;
+    }
+    else {
+        dAASSERT(false && "Invalid contact merge control value");
+        return false;
+    }
 
-	return true;
+    return true;
 }
 
 bool dxTriMesh::controlGeometry_GetMergeSphereContacts(int &returnValue)
@@ -670,9 +673,9 @@ void dxTriMesh::computeAABB() {
     dVector3 c;
     const dMatrix3& R = final_posr->R;
     const dVector3& pos = final_posr->pos;
-    
+
     dMultiply0_331( c, R, d->AABBCenter );
-    
+
     dReal xrange = dFabs(R[0] * Data->AABBExtents[0]) +
         dFabs(R[1] * Data->AABBExtents[1]) + 
         dFabs(R[2] * Data->AABBExtents[2]);
@@ -695,16 +698,16 @@ void dxTriMesh::computeAABB() {
 void dxTriMeshData::UpdateData()
 {
 #if  dTRIMESH_ENABLED
-	BVTree.Refit();
+    BVTree.Refit();
 #endif // dTRIMESH_ENABLED
 }
 
 
 dGeomID dCreateTriMesh(dSpaceID space, 
-		       dTriMeshDataID Data,
-		       dTriCallback* Callback,
-		       dTriArrayCallback* ArrayCallback,
-		       dTriRayCallback* RayCallback)
+                       dTriMeshDataID Data,
+                       dTriCallback* Callback,
+                       dTriArrayCallback* ArrayCallback,
+                       dTriRayCallback* RayCallback)
 {
     dxTriMesh* Geom = new dxTriMesh(space, Data);
     Geom->Callback = Callback;
@@ -716,38 +719,38 @@ dGeomID dCreateTriMesh(dSpaceID space,
 
 void dGeomTriMeshSetCallback(dGeomID g, dTriCallback* Callback)
 {
-	dUASSERT(g && g->type == dTriMeshClass, "argument not a trimesh");
-	((dxTriMesh*)g)->Callback = Callback;
+    dUASSERT(g && g->type == dTriMeshClass, "argument not a trimesh");
+    ((dxTriMesh*)g)->Callback = Callback;
 }
 
 dTriCallback* dGeomTriMeshGetCallback(dGeomID g)
 {
-	dUASSERT(g && g->type == dTriMeshClass, "argument not a trimesh");
-	return ((dxTriMesh*)g)->Callback;
+    dUASSERT(g && g->type == dTriMeshClass, "argument not a trimesh");
+    return ((dxTriMesh*)g)->Callback;
 }
 
 void dGeomTriMeshSetArrayCallback(dGeomID g, dTriArrayCallback* ArrayCallback)
 {
-	dUASSERT(g && g->type == dTriMeshClass, "argument not a trimesh");
-	((dxTriMesh*)g)->ArrayCallback = ArrayCallback;
+    dUASSERT(g && g->type == dTriMeshClass, "argument not a trimesh");
+    ((dxTriMesh*)g)->ArrayCallback = ArrayCallback;
 }
 
 dTriArrayCallback* dGeomTriMeshGetArrayCallback(dGeomID g)
 {
-	dUASSERT(g && g->type == dTriMeshClass, "argument not a trimesh");
-	return ((dxTriMesh*)g)->ArrayCallback;
+    dUASSERT(g && g->type == dTriMeshClass, "argument not a trimesh");
+    return ((dxTriMesh*)g)->ArrayCallback;
 }
 
 void dGeomTriMeshSetRayCallback(dGeomID g, dTriRayCallback* Callback)
 {
-	dUASSERT(g && g->type == dTriMeshClass, "argument not a trimesh");
-	((dxTriMesh*)g)->RayCallback = Callback;
+    dUASSERT(g && g->type == dTriMeshClass, "argument not a trimesh");
+    ((dxTriMesh*)g)->RayCallback = Callback;
 }
 
 dTriRayCallback* dGeomTriMeshGetRayCallback(dGeomID g)
 {
-	dUASSERT(g && g->type == dTriMeshClass, "argument not a trimesh");	
-	return ((dxTriMesh*)g)->RayCallback;
+    dUASSERT(g && g->type == dTriMeshClass, "argument not a trimesh");	
+    return ((dxTriMesh*)g)->RayCallback;
 }
 
 void dGeomTriMeshSetTriMergeCallback(dGeomID g, dTriTriMergeCallback* Callback)
@@ -764,58 +767,58 @@ dTriTriMergeCallback* dGeomTriMeshGetTriMergeCallback(dGeomID g)
 
 void dGeomTriMeshSetData(dGeomID g, dTriMeshDataID Data)
 {
-	dUASSERT(g && g->type == dTriMeshClass, "argument not a trimesh");
-	((dxTriMesh*)g)->Data = Data;
-	// I changed my data -- I know nothing about my own AABB anymore.
-	((dxTriMesh*)g)->gflags |= (GEOM_DIRTY|GEOM_AABB_BAD);
+    dUASSERT(g && g->type == dTriMeshClass, "argument not a trimesh");
+    ((dxTriMesh*)g)->Data = Data;
+    // I changed my data -- I know nothing about my own AABB anymore.
+    ((dxTriMesh*)g)->gflags |= (GEOM_DIRTY|GEOM_AABB_BAD);
 }
 
 dTriMeshDataID dGeomTriMeshGetData(dGeomID g)
 {
-  dUASSERT(g && g->type == dTriMeshClass, "argument not a trimesh");
-  return ((dxTriMesh*)g)->Data;
+    dUASSERT(g && g->type == dTriMeshClass, "argument not a trimesh");
+    return ((dxTriMesh*)g)->Data;
 }
 
 
 
 void dGeomTriMeshEnableTC(dGeomID g, int geomClass, int enable)
 {
-	dUASSERT(g && g->type == dTriMeshClass, "argument not a trimesh");
-  
-	switch (geomClass)
-	{
-		case dSphereClass: 
-			((dxTriMesh*)g)->doSphereTC = (1 == enable);
-			break;
-		case dBoxClass:
-			((dxTriMesh*)g)->doBoxTC = (1 == enable);
-			break;
-		case dCapsuleClass:
-			((dxTriMesh*)g)->doCapsuleTC = (1 == enable);
-			break;
-	}
+    dUASSERT(g && g->type == dTriMeshClass, "argument not a trimesh");
+
+    switch (geomClass)
+    {
+    case dSphereClass: 
+        ((dxTriMesh*)g)->doSphereTC = (1 == enable);
+        break;
+    case dBoxClass:
+        ((dxTriMesh*)g)->doBoxTC = (1 == enable);
+        break;
+    case dCapsuleClass:
+        ((dxTriMesh*)g)->doCapsuleTC = (1 == enable);
+        break;
+    }
 }
 
 int dGeomTriMeshIsTCEnabled(dGeomID g, int geomClass)
 {
-	dUASSERT(g && g->type == dTriMeshClass, "argument not a trimesh");
-  
-	switch (geomClass)
-	{
-		case dSphereClass:
-			if (((dxTriMesh*)g)->doSphereTC)
-				return 1;
-			break;
-		case dBoxClass:
-			if (((dxTriMesh*)g)->doBoxTC)
-				return 1;
-			break;
-		case dCapsuleClass:
-			if (((dxTriMesh*)g)->doCapsuleTC)
-				return 1;
-			break;
-	}
-	return 0;
+    dUASSERT(g && g->type == dTriMeshClass, "argument not a trimesh");
+
+    switch (geomClass)
+    {
+    case dSphereClass:
+        if (((dxTriMesh*)g)->doSphereTC)
+            return 1;
+        break;
+    case dBoxClass:
+        if (((dxTriMesh*)g)->doBoxTC)
+            return 1;
+        break;
+    case dCapsuleClass:
+        if (((dxTriMesh*)g)->doCapsuleTC)
+            return 1;
+        break;
+    }
+    return 0;
 }
 
 void dGeomTriMeshClearTCCache(dGeomID g){
@@ -826,8 +829,8 @@ void dGeomTriMeshClearTCCache(dGeomID g){
 }
 
 /*
- * returns the TriMeshDataID
- */
+* returns the TriMeshDataID
+*/
 dTriMeshDataID
 dGeomTriMeshGetTriMeshDataID(dGeomID g)
 {
@@ -845,7 +848,7 @@ void dGeomTriMeshGetTriangle(dGeomID g, int Index, dVector3* v0, dVector3* v1, d
     const dMatrix3& Rotation = *(const dMatrix3*)dGeomGetRotation(g);
 
     dVector3 v[3];
-	FetchTriangle(Geom, Index, Position, Rotation, v);
+    FetchTriangle(Geom, Index, Position, Rotation, v);
 
     if (v0){
         (*v0)[0] = v[0][0];

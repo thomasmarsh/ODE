@@ -157,8 +157,8 @@ static void ccdSupportBox(const void *obj, const ccd_vec3_t *_dir, ccd_vec3_t *v
     ccdQuatRotVec(&dir, &o->o.rot_inv);
 
     ccdVec3Set(v, ccdSign(ccdVec3X(&dir)) * o->dim[0],
-                  ccdSign(ccdVec3Y(&dir)) * o->dim[1],
-                  ccdSign(ccdVec3Z(&dir)) * o->dim[2]);
+        ccdSign(ccdVec3Y(&dir)) * o->dim[1],
+        ccdSign(ccdVec3Z(&dir)) * o->dim[2]);
 
     // transform support vertex
     ccdQuatRotVec(v, &o->o.rot);
@@ -209,8 +209,8 @@ static void ccdSupportCyl(const void *obj, const ccd_vec3_t *_dir, ccd_vec3_t *v
         rad = cyl->radius / zdist;
 
         ccdVec3Set(v, rad * ccdVec3X(&dir),
-                      rad * ccdVec3Y(&dir),
-                      ccdSign(ccdVec3Z(&dir)) * cyl->height);
+            rad * ccdVec3Y(&dir),
+            ccdSign(ccdVec3Z(&dir)) * cyl->height);
     }
 
     // transform support vertex
@@ -269,10 +269,10 @@ static void ccdCenter(const void *obj, ccd_vec3_t *c)
     ccdVec3Copy(c, &o->pos);
 }
 
-static int ccdCollide(dGeomID o1, dGeomID o2, int flags,
-                      dContactGeom *contact, int skip,
-                      void *obj1, ccd_support_fn supp1, ccd_center_fn cen1,
-                      void *obj2, ccd_support_fn supp2, ccd_center_fn cen2)
+static int ccdCollide(
+    dGeomID o1, dGeomID o2, int flags, dContactGeom *contact, int skip,
+    void *obj1, ccd_support_fn supp1, ccd_center_fn cen1,
+    void *obj2, ccd_support_fn supp2, ccd_center_fn cen2)
 {
     ccd_t ccd;
     int res;
@@ -324,8 +324,7 @@ static int ccdCollide(dGeomID o1, dGeomID o2, int flags,
     return 0;
 }
 
-int dCollideCylinderCylinder(dxGeom *o1, dxGeom *o2, int flags,
-			                 dContactGeom *contact, int skip)
+int dCollideCylinderCylinder(dxGeom *o1, dxGeom *o2, int flags, dContactGeom *contact, int skip)
 {
     ccd_cyl_t cyl1, cyl2;
 
@@ -333,12 +332,11 @@ int dCollideCylinderCylinder(dxGeom *o1, dxGeom *o2, int flags,
     ccdGeomToCyl(o2, &cyl2);
 
     return ccdCollide(o1, o2, flags, contact, skip,
-                   &cyl1, ccdSupportCyl, ccdCenter,
-                   &cyl2, ccdSupportCyl, ccdCenter);
+        &cyl1, ccdSupportCyl, ccdCenter,
+        &cyl2, ccdSupportCyl, ccdCenter);
 }
 
-int dCollideBoxCylinderCCD(dxGeom *o1, dxGeom *o2, int flags,
-			               dContactGeom *contact, int skip)
+int dCollideBoxCylinderCCD(dxGeom *o1, dxGeom *o2, int flags, dContactGeom *contact, int skip)
 {
     ccd_cyl_t cyl;
     ccd_box_t box;
@@ -347,12 +345,11 @@ int dCollideBoxCylinderCCD(dxGeom *o1, dxGeom *o2, int flags,
     ccdGeomToCyl(o2, &cyl);
 
     return ccdCollide(o1, o2, flags, contact, skip,
-                   &box, ccdSupportBox, ccdCenter,
-                   &cyl, ccdSupportCyl, ccdCenter);
+        &box, ccdSupportBox, ccdCenter,
+        &cyl, ccdSupportCyl, ccdCenter);
 }
 
-int dCollideCapsuleCylinder(dxGeom *o1, dxGeom *o2, int flags,
-			                dContactGeom *contact, int skip)
+int dCollideCapsuleCylinder(dxGeom *o1, dxGeom *o2, int flags, dContactGeom *contact, int skip)
 {
     ccd_cap_t cap;
     ccd_cyl_t cyl;
@@ -361,12 +358,11 @@ int dCollideCapsuleCylinder(dxGeom *o1, dxGeom *o2, int flags,
     ccdGeomToCyl(o2, &cyl);
 
     return ccdCollide(o1, o2, flags, contact, skip,
-                      &cap, ccdSupportCap, ccdCenter,
-                      &cyl, ccdSupportCyl, ccdCenter);
+        &cap, ccdSupportCap, ccdCenter,
+        &cyl, ccdSupportCyl, ccdCenter);
 }
 
-int dCollideConvexBoxCCD(dxGeom *o1, dxGeom *o2, int flags,
-                         dContactGeom *contact, int skip)
+int dCollideConvexBoxCCD(dxGeom *o1, dxGeom *o2, int flags, dContactGeom *contact, int skip)
 {
     ccd_box_t box;
     ccd_convex_t conv;
@@ -375,12 +371,11 @@ int dCollideConvexBoxCCD(dxGeom *o1, dxGeom *o2, int flags,
     ccdGeomToBox(o2, &box);
 
     return ccdCollide(o1, o2, flags, contact, skip,
-                      &conv, ccdSupportConvex, ccdCenter,
-                      &box, ccdSupportBox, ccdCenter);
+        &conv, ccdSupportConvex, ccdCenter,
+        &box, ccdSupportBox, ccdCenter);
 }
 
-int dCollideConvexCapsuleCCD(dxGeom *o1, dxGeom *o2, int flags,
-                             dContactGeom *contact, int skip)
+int dCollideConvexCapsuleCCD(dxGeom *o1, dxGeom *o2, int flags, dContactGeom *contact, int skip)
 {
     ccd_cap_t cap;
     ccd_convex_t conv;
@@ -389,12 +384,11 @@ int dCollideConvexCapsuleCCD(dxGeom *o1, dxGeom *o2, int flags,
     ccdGeomToCap(o2, &cap);
 
     return ccdCollide(o1, o2, flags, contact, skip,
-                      &conv, ccdSupportConvex, ccdCenter,
-                      &cap, ccdSupportCap, ccdCenter);
+        &conv, ccdSupportConvex, ccdCenter,
+        &cap, ccdSupportCap, ccdCenter);
 }
 
-int dCollideConvexSphereCCD(dxGeom *o1, dxGeom *o2, int flags,
-                            dContactGeom *contact, int skip)
+int dCollideConvexSphereCCD(dxGeom *o1, dxGeom *o2, int flags, dContactGeom *contact, int skip)
 {
     ccd_sphere_t sphere;
     ccd_convex_t conv;
@@ -403,12 +397,11 @@ int dCollideConvexSphereCCD(dxGeom *o1, dxGeom *o2, int flags,
     ccdGeomToSphere(o2, &sphere);
 
     return ccdCollide(o1, o2, flags, contact, skip,
-                      &conv, ccdSupportConvex, ccdCenter,
-                      &sphere, ccdSupportSphere, ccdCenter);
+        &conv, ccdSupportConvex, ccdCenter,
+        &sphere, ccdSupportSphere, ccdCenter);
 }
 
-int dCollideConvexCylinderCCD(dxGeom *o1, dxGeom *o2, int flags,
-                              dContactGeom *contact, int skip)
+int dCollideConvexCylinderCCD(dxGeom *o1, dxGeom *o2, int flags, dContactGeom *contact, int skip)
 {
     ccd_cyl_t cyl;
     ccd_convex_t conv;
@@ -417,12 +410,11 @@ int dCollideConvexCylinderCCD(dxGeom *o1, dxGeom *o2, int flags,
     ccdGeomToCyl(o2, &cyl);
 
     return ccdCollide(o1, o2, flags, contact, skip,
-                      &conv, ccdSupportConvex, ccdCenter,
-                      &cyl, ccdSupportCyl, ccdCenter);
+        &conv, ccdSupportConvex, ccdCenter,
+        &cyl, ccdSupportCyl, ccdCenter);
 }
 
-int dCollideConvexConvexCCD(dxGeom *o1, dxGeom *o2, int flags,
-                            dContactGeom *contact, int skip)
+int dCollideConvexConvexCCD(dxGeom *o1, dxGeom *o2, int flags, dContactGeom *contact, int skip)
 {
     ccd_convex_t c1, c2;
 
@@ -430,6 +422,6 @@ int dCollideConvexConvexCCD(dxGeom *o1, dxGeom *o2, int flags,
     ccdGeomToConvex(o2, &c2);
 
     return ccdCollide(o1, o2, flags, contact, skip,
-                      &c1, ccdSupportConvex, ccdCenter,
-                      &c2, ccdSupportConvex, ccdCenter);
+        &c1, ccdSupportConvex, ccdCenter,
+        &c2, ccdSupportConvex, ccdCenter);
 }

@@ -48,64 +48,64 @@
 class dxFakeAtomicsProvider
 {
 public:
-  typedef unsigned long atomicord_t;
-  typedef void *atomicptr_t;
+    typedef unsigned long atomicord_t;
+    typedef void *atomicptr_t;
 
 public:
-  static void IncrementTargetNoRet(volatile atomicord_t *value_accumulator_ptr)
-  {
-    ++(*value_accumulator_ptr);
-  }
-
-  static void DecrementTargetNoRet(volatile atomicord_t *value_accumulator_ptr)
-  {
-    --(*value_accumulator_ptr);
-  }
-
-  static atomicord_t QueryTargetValue(volatile atomicord_t *value_storage_ptr)
-  {
-    return *value_storage_ptr;
-  }
-
-  template<unsigned type_size>
-  static size_t AddValueToTarget(volatile void *value_accumulator_ptr, ptrdiff_t value_addend);
-
-  static bool CompareExchangeTargetPtr(volatile atomicptr_t *pointer_storage_ptr, 
-    atomicptr_t comparand_value, atomicptr_t new_value)
-  {
-    bool exchange_result = false;
-
-    atomicptr_t original_value = *pointer_storage_ptr;
-
-    if (original_value == comparand_value)
+    static void IncrementTargetNoRet(volatile atomicord_t *value_accumulator_ptr)
     {
-      *pointer_storage_ptr = new_value;
-
-      exchange_result = true;
+        ++(*value_accumulator_ptr);
     }
-    
-    return exchange_result;
-  }
+
+    static void DecrementTargetNoRet(volatile atomicord_t *value_accumulator_ptr)
+    {
+        --(*value_accumulator_ptr);
+    }
+
+    static atomicord_t QueryTargetValue(volatile atomicord_t *value_storage_ptr)
+    {
+        return *value_storage_ptr;
+    }
+
+    template<unsigned type_size>
+    static size_t AddValueToTarget(volatile void *value_accumulator_ptr, ptrdiff_t value_addend);
+
+    static bool CompareExchangeTargetPtr(volatile atomicptr_t *pointer_storage_ptr, 
+        atomicptr_t comparand_value, atomicptr_t new_value)
+    {
+        bool exchange_result = false;
+
+        atomicptr_t original_value = *pointer_storage_ptr;
+
+        if (original_value == comparand_value)
+        {
+            *pointer_storage_ptr = new_value;
+
+            exchange_result = true;
+        }
+
+        return exchange_result;
+    }
 };
 
 template<>
 inline size_t dxFakeAtomicsProvider::AddValueToTarget<sizeof(dxFakeAtomicsProvider::atomicord_t)>(volatile void *value_accumulator_ptr, ptrdiff_t value_addend)
 {
-  atomicord_t original_value = *(volatile atomicord_t *)value_accumulator_ptr;
+    atomicord_t original_value = *(volatile atomicord_t *)value_accumulator_ptr;
 
-  *(volatile atomicord_t *)value_accumulator_ptr = original_value + (atomicord_t)value_addend;
+    *(volatile atomicord_t *)value_accumulator_ptr = original_value + (atomicord_t)value_addend;
 
-  return original_value;
+    return original_value;
 }
 
 template<>
 inline size_t dxFakeAtomicsProvider::AddValueToTarget<2 * sizeof(dxFakeAtomicsProvider::atomicord_t)>(volatile void *value_accumulator_ptr, ptrdiff_t value_addend)
 {
-  atomicptr_t original_value = *(volatile atomicptr_t *)value_accumulator_ptr;
+    atomicptr_t original_value = *(volatile atomicptr_t *)value_accumulator_ptr;
 
-  *(volatile atomicptr_t *)value_accumulator_ptr = (atomicptr_t)((size_t)original_value + (size_t)value_addend);
+    *(volatile atomicptr_t *)value_accumulator_ptr = (atomicptr_t)((size_t)original_value + (size_t)value_addend);
 
-  return (size_t)original_value;
+    return (size_t)original_value;
 }
 
 
@@ -125,66 +125,66 @@ inline size_t dxFakeAtomicsProvider::AddValueToTarget<2 * sizeof(dxFakeAtomicsPr
 class dxOUAtomicsProvider
 {
 public:
-  typedef _OU_NAMESPACE::atomicord32 atomicord_t;
-  typedef _OU_NAMESPACE::atomicptr atomicptr_t;
+    typedef _OU_NAMESPACE::atomicord32 atomicord_t;
+    typedef _OU_NAMESPACE::atomicptr atomicptr_t;
 
 public:
-  static void IncrementTargetNoRet(volatile atomicord_t *value_accumulator_ptr)
-  {
-    _OU_NAMESPACE::AtomicIncrementNoResult(value_accumulator_ptr);
-  }
-
-  static void DecrementTargetNoRet(volatile atomicord_t *value_accumulator_ptr)
-  {
-    _OU_NAMESPACE::AtomicDecrementNoResult(value_accumulator_ptr);
-  }
-
-  static atomicord_t QueryTargetValue(volatile atomicord_t *value_storage_ptr)
-  {
-    // Query value with memory barrier before
-    atomicord_t result_value = *value_storage_ptr;
-
-    if (!_OU_NAMESPACE::AtomicCompareExchange(value_storage_ptr, result_value, result_value))
+    static void IncrementTargetNoRet(volatile atomicord_t *value_accumulator_ptr)
     {
-      result_value = *value_storage_ptr;
+        _OU_NAMESPACE::AtomicIncrementNoResult(value_accumulator_ptr);
     }
 
-    return result_value;
-  }
+    static void DecrementTargetNoRet(volatile atomicord_t *value_accumulator_ptr)
+    {
+        _OU_NAMESPACE::AtomicDecrementNoResult(value_accumulator_ptr);
+    }
 
-  template<unsigned type_size>
-  static size_t AddValueToTarget(volatile void *value_accumulator_ptr, ptrdiff_t value_addend);
+    static atomicord_t QueryTargetValue(volatile atomicord_t *value_storage_ptr)
+    {
+        // Query value with memory barrier before
+        atomicord_t result_value = *value_storage_ptr;
 
-  static bool CompareExchangeTargetPtr(volatile atomicptr_t *pointer_storage_ptr, 
-    atomicptr_t comparand_value, atomicptr_t new_value)
-  {
-    return _OU_NAMESPACE::AtomicCompareExchangePointer(pointer_storage_ptr, comparand_value, new_value);
-  }
+        if (!_OU_NAMESPACE::AtomicCompareExchange(value_storage_ptr, result_value, result_value))
+        {
+            result_value = *value_storage_ptr;
+        }
+
+        return result_value;
+    }
+
+    template<unsigned type_size>
+    static size_t AddValueToTarget(volatile void *value_accumulator_ptr, ptrdiff_t value_addend);
+
+    static bool CompareExchangeTargetPtr(volatile atomicptr_t *pointer_storage_ptr, 
+        atomicptr_t comparand_value, atomicptr_t new_value)
+    {
+        return _OU_NAMESPACE::AtomicCompareExchangePointer(pointer_storage_ptr, comparand_value, new_value);
+    }
 };
 
 template<>
 inline size_t dxOUAtomicsProvider::AddValueToTarget<sizeof(dxOUAtomicsProvider::atomicord_t)>(volatile void *value_accumulator_ptr, ptrdiff_t value_addend)
 {
-  return _OU_NAMESPACE::AtomicExchangeAdd((volatile atomicord_t *)value_accumulator_ptr, (atomicord_t)value_addend);
+    return _OU_NAMESPACE::AtomicExchangeAdd((volatile atomicord_t *)value_accumulator_ptr, (atomicord_t)value_addend);
 }
 
 template<>
 inline size_t dxOUAtomicsProvider::AddValueToTarget<2 * sizeof(dxOUAtomicsProvider::atomicord_t)>(volatile void *value_accumulator_ptr, ptrdiff_t value_addend)
 {
-  atomicptr_t original_value;
+    atomicptr_t original_value;
 
-  while (true)
-  {
-    original_value = *(volatile atomicptr_t *)value_accumulator_ptr;
-
-    atomicptr_t new_value = (atomicptr_t)((size_t)original_value + (size_t)value_addend);
-    if (_OU_NAMESPACE::AtomicCompareExchangePointer((volatile atomicptr_t *)value_accumulator_ptr, original_value, new_value))
+    while (true)
     {
-      break;
-    }
-  }
+        original_value = *(volatile atomicptr_t *)value_accumulator_ptr;
 
-  return (size_t)original_value;
+        atomicptr_t new_value = (atomicptr_t)((size_t)original_value + (size_t)value_addend);
+        if (_OU_NAMESPACE::AtomicCompareExchangePointer((volatile atomicptr_t *)value_accumulator_ptr, original_value, new_value))
+        {
+            break;
+        }
+    }
+
+    return (size_t)original_value;
 }
 
 

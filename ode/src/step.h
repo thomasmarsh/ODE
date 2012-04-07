@@ -29,12 +29,12 @@ class dxWorldProcessMemArena;
 
 
 size_t dxEstimateStepMemoryRequirements (
-  dxBody * const *body, unsigned int nb, dxJoint * const *_joint, unsigned int _nj);
+    dxBody * const *body, unsigned int nb, dxJoint * const *_joint, unsigned int _nj);
 
-void dInternalStepIsland (dxWorldProcessMemArena *memarena, dxWorld *world,
-			  dxBody * const *body, unsigned int nb,
-			  dxJoint * const *joint, unsigned int nj,
-			  dReal stepsize);
+void dInternalStepIsland (
+    dxWorldProcessMemArena *memarena, dxWorld *world, 
+    dxBody * const *body, unsigned int nb, dxJoint * const *joint, unsigned int nj,
+    dReal stepsize);
 
 
 

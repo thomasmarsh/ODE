@@ -32,7 +32,7 @@
 // Prismatic and Rotoide
 
 dxJointPR::dxJointPR( dxWorld *w ) :
-        dxJoint( w )
+    dxJoint( w )
 {
     // Default Position
     // Z^
@@ -78,11 +78,11 @@ dReal dJointGetPRPosition( dJointID j )
         dMultiply0_331( anchor2, joint->node[1].body->posr.R, joint->anchor2 );
 
         q[0] = (( joint->node[0].body->posr.pos[0] + q[0] ) -
-                ( joint->node[1].body->posr.pos[0] + anchor2[0] ) );
+            ( joint->node[1].body->posr.pos[0] + anchor2[0] ) );
         q[1] = (( joint->node[0].body->posr.pos[1] + q[1] ) -
-                ( joint->node[1].body->posr.pos[1] + anchor2[1] ) );
+            ( joint->node[1].body->posr.pos[1] + anchor2[1] ) );
         q[2] = (( joint->node[0].body->posr.pos[2] + q[2] ) -
-                ( joint->node[1].body->posr.pos[2] + anchor2[2] ) );
+            ( joint->node[1].body->posr.pos[2] + anchor2[2] ) );
 
     }
     else
@@ -91,11 +91,11 @@ dReal dJointGetPRPosition( dJointID j )
         //     global coordinates
 
         q[0] = (( joint->node[0].body->posr.pos[0] + q[0] ) -
-                ( joint->anchor2[0] ) );
+            ( joint->anchor2[0] ) );
         q[1] = (( joint->node[0].body->posr.pos[1] + q[1] ) -
-                ( joint->anchor2[1] ) );
+            ( joint->anchor2[1] ) );
         q[2] = (( joint->node[0].body->posr.pos[2] + q[2] ) -
-                ( joint->anchor2[2] ) );
+            ( joint->anchor2[2] ) );
 
         if ( joint->flags & dJOINT_REVERSE )
         {
@@ -144,9 +144,9 @@ dReal dJointGetPRAngle( dJointID j )
     if ( joint->node[0].body )
     {
         dReal ang = getHingeAngle( joint->node[0].body,
-                                   joint->node[1].body,
-                                   joint->axisR1,
-                                   joint->qrel );
+            joint->node[1].body,
+            joint->axisR1,
+            joint->qrel );
         if ( joint->flags & dJOINT_REVERSE )
             return -ang;
         else
@@ -195,7 +195,7 @@ dxJointPR::getInfo1( dxJoint::Info1 *info )
     // see if we're at a joint limit.
     limotP.limit = 0;
     if (( limotP.lostop > -dInfinity || limotP.histop < dInfinity ) &&
-            limotP.lostop <= limotP.histop )
+        limotP.lostop <= limotP.histop )
     {
         // measure joint position
         dReal pos = dJointGetPRPosition( this );
@@ -209,11 +209,11 @@ dxJointPR::getInfo1( dxJoint::Info1 *info )
     // see if we're at a joint limit.
     limotR.limit = 0;
     if (( limotR.lostop >= -M_PI || limotR.histop <= M_PI ) &&
-            limotR.lostop <= limotR.histop )
+        limotR.lostop <= limotR.histop )
     {
         dReal angle = getHingeAngle( node[0].body,
-                                     node[1].body,
-                                     axisR1, qrel );
+            node[1].body,
+            axisR1, qrel );
         limotR.testRotationalLimit( angle );
     }
 

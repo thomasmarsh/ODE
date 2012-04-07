@@ -31,7 +31,7 @@
 // Prismatic and Universal
 
 dxJointPU::dxJointPU( dxWorld *w ) :
-        dxJointUniversal( w )
+    dxJointUniversal( w )
 {
     // Default Position
     //               Y                ^ Axis2
@@ -93,11 +93,11 @@ dReal dJointGetPUPosition( dJointID j )
         dMultiply0_331( anchor2, joint->node[1].body->posr.R, joint->anchor2 );
 
         q[0] = (( joint->node[0].body->posr.pos[0] + q[0] ) -
-                ( joint->node[1].body->posr.pos[0] + anchor2[0] ) );
+            ( joint->node[1].body->posr.pos[0] + anchor2[0] ) );
         q[1] = (( joint->node[0].body->posr.pos[1] + q[1] ) -
-                ( joint->node[1].body->posr.pos[1] + anchor2[1] ) );
+            ( joint->node[1].body->posr.pos[1] + anchor2[1] ) );
         q[2] = (( joint->node[0].body->posr.pos[2] + q[2] ) -
-                ( joint->node[1].body->posr.pos[2] + anchor2[2] ) );
+            ( joint->node[1].body->posr.pos[2] + anchor2[2] ) );
     }
     else
     {
@@ -105,11 +105,11 @@ dReal dJointGetPUPosition( dJointID j )
         //     global coordinates
 
         q[0] = (( joint->node[0].body->posr.pos[0] + q[0] ) -
-                ( joint->anchor2[0] ) );
+            ( joint->anchor2[0] ) );
         q[1] = (( joint->node[0].body->posr.pos[1] + q[1] ) -
-                ( joint->anchor2[1] ) );
+            ( joint->anchor2[1] ) );
         q[2] = (( joint->node[0].body->posr.pos[2] + q[2] ) -
-                ( joint->anchor2[2] ) );
+            ( joint->anchor2[2] ) );
 
         if ( joint->flags & dJOINT_REVERSE )
         {
@@ -148,11 +148,11 @@ dReal dJointGetPUPositionRate( dJointID j )
             dMultiply0_331( anchor2, joint->node[1].body->posr.R, joint->anchor2 );
 
             r[0] = ( joint->node[0].body->posr.pos[0] -
-                     ( anchor2[0] + joint->node[1].body->posr.pos[0] ) );
+                ( anchor2[0] + joint->node[1].body->posr.pos[0] ) );
             r[1] = ( joint->node[0].body->posr.pos[1] -
-                     ( anchor2[1] + joint->node[1].body->posr.pos[1] ) );
+                ( anchor2[1] + joint->node[1].body->posr.pos[1] ) );
             r[2] = ( joint->node[0].body->posr.pos[2] -
-                     ( anchor2[2] + joint->node[1].body->posr.pos[2] ) );
+                ( anchor2[2] + joint->node[1].body->posr.pos[2] ) );
         }
         else
         {
@@ -209,7 +209,7 @@ dReal dJointGetPUPositionRate( dJointID j )
 void 
 dxJointPU::getSureMaxInfo( SureMaxInfo* info )
 {
-  info->max_m = 6;
+    info->max_m = 6;
 }
 
 
@@ -225,7 +225,7 @@ dxJointPU::getInfo1( dxJoint::Info1 *info )
     // see if we're at a joint limit.
     limotP.limit = 0;
     if (( limotP.lostop > -dInfinity || limotP.histop < dInfinity ) &&
-            limotP.lostop <= limotP.histop )
+        limotP.lostop <= limotP.histop )
     {
         // measure joint position
         dReal pos = dJointGetPUPosition( this );
@@ -236,9 +236,9 @@ dxJointPU::getInfo1( dxJoint::Info1 *info )
 
 
     bool limiting1 = ( limot1.lostop >= -M_PI || limot1.histop <= M_PI ) &&
-                     limot1.lostop <= limot1.histop;
+        limot1.lostop <= limot1.histop;
     bool limiting2 = ( limot2.lostop >= -M_PI || limot2.histop <= M_PI ) &&
-                     limot2.lostop <= limot2.histop;
+        limot2.lostop <= limot2.histop;
 
     // We need to call testRotationLimit() even if we're motored, since it
     // records the result.
@@ -484,7 +484,7 @@ void dJointSetPUAnchor( dJointID j, dReal x, dReal y, dReal z )
  * @note Should have the same meaning as dJointSetSliderAxisDelta
  */
 void dJointSetPUAnchorDelta( dJointID j, dReal x, dReal y, dReal z,
-                             dReal dx, dReal dy, dReal dz )
+                            dReal dx, dReal dy, dReal dz )
 {
     dxJointPU* joint = ( dxJointPU* ) j;
     dUASSERT( joint, "bad joint argument" );
@@ -541,7 +541,7 @@ void dJointSetPUAnchorDelta( dJointID j, dReal x, dReal y, dReal z,
  * @note Should have the same meaning as dJointSetSliderAxisDelta
  */
 void dJointSetPUAnchorOffset( dJointID j, dReal x, dReal y, dReal z,
-                              dReal dx, dReal dy, dReal dz )
+                             dReal dx, dReal dy, dReal dz )
 {
     dxJointPU* joint = ( dxJointPU* ) j;
     dUASSERT( joint, "bad joint argument" );

@@ -33,7 +33,7 @@
 //
 
 dxJointPiston::dxJointPiston ( dxWorld *w ) :
-        dxJoint ( w )
+    dxJoint ( w )
 {
     dSetZero ( axis1, 4 );
     dSetZero ( axis2, 4 );
@@ -71,22 +71,22 @@ dReal dJointGetPistonPosition ( dJointID j )
             dMultiply0_331 ( anchor2, joint->node[1].body->posr.R, joint->anchor2 );
 
             q[0] = ( ( joint->node[0].body->posr.pos[0] + q[0] ) -
-                     ( joint->node[1].body->posr.pos[0] + anchor2[0] ) );
+                ( joint->node[1].body->posr.pos[0] + anchor2[0] ) );
             q[1] = ( ( joint->node[0].body->posr.pos[1] + q[1] ) -
-                     ( joint->node[1].body->posr.pos[1] + anchor2[1] ) );
+                ( joint->node[1].body->posr.pos[1] + anchor2[1] ) );
             q[2] = ( ( joint->node[0].body->posr.pos[2] + q[2] ) -
-                     ( joint->node[1].body->posr.pos[2] + anchor2[2] ) );
+                ( joint->node[1].body->posr.pos[2] + anchor2[2] ) );
         }
         else
         {
             // N.B. When there is no body 2 the joint->anchor2 is already in
             //      global coordinates
             q[0] = ( ( joint->node[0].body->posr.pos[0] + q[0] ) -
-                     ( joint->anchor2[0] ) );
+                ( joint->anchor2[0] ) );
             q[1] = ( ( joint->node[0].body->posr.pos[1] + q[1] ) -
-                     ( joint->anchor2[1] ) );
+                ( joint->anchor2[1] ) );
             q[2] = ( ( joint->node[0].body->posr.pos[2] + q[2] ) -
-                     ( joint->anchor2[2] ) );
+                ( joint->anchor2[2] ) );
 
             if ( joint->flags & dJOINT_REVERSE )
             {
@@ -124,7 +124,7 @@ dReal dJointGetPistonPositionRate ( dJointID j )
     if ( joint->node[1].body )
     {
         return ( dCalcVectorDot3 ( ax, joint->node[0].body->lvel ) -
-                 dCalcVectorDot3 ( ax, joint->node[1].body->lvel ) );
+            dCalcVectorDot3 ( ax, joint->node[1].body->lvel ) );
     }
     else
     {
@@ -143,7 +143,7 @@ dReal dJointGetPistonAngle ( dJointID j )
     if ( joint->node[0].body )
     {
         dReal ang = getHingeAngle ( joint->node[0].body, joint->node[1].body, joint->axis1,
-                                    joint->qrel );
+            joint->qrel );
         if ( joint->flags & dJOINT_REVERSE )
             return -ang;
         else
@@ -175,7 +175,7 @@ dReal dJointGetPistonAngleRate ( dJointID j )
 void 
 dxJointPiston::getSureMaxInfo( SureMaxInfo* info )
 {
-  info->max_m = 6;
+    info->max_m = 6;
 }
 
 
@@ -190,7 +190,7 @@ dxJointPiston::getInfo1 ( dxJoint::Info1 *info )
     // see if we're at a joint limit.
     limotP.limit = 0;
     if ( ( limotP.lostop > -dInfinity || limotP.histop < dInfinity ) &&
-            limotP.lostop <= limotP.histop )
+        limotP.lostop <= limotP.histop )
     {
         // measure joint position
         dReal pos = dJointGetPistonPosition ( this );
@@ -204,11 +204,11 @@ dxJointPiston::getInfo1 ( dxJoint::Info1 *info )
     // see if we're at a joint limit.
     limotR.limit = 0;
     if ( ( limotR.lostop > -dInfinity || limotR.histop < dInfinity ) &&
-            limotR.lostop <= limotR.histop )
+        limotR.lostop <= limotR.histop )
     {
         // measure joint position
         dReal angle = getHingeAngle ( node[0].body, node[1].body, axis1,
-                                      qrel );
+            qrel );
         limotR.testRotationalLimit ( angle );
     }
 
@@ -507,7 +507,7 @@ void dJointSetPistonAxis ( dJointID j, dReal x, dReal y, dReal z )
 
 
 void dJointSetPistonAxisDelta ( dJointID j, dReal x, dReal y, dReal z,
-                                dReal dx, dReal dy, dReal dz )
+                               dReal dx, dReal dy, dReal dz )
 {
     dxJointPiston* joint = ( dxJointPiston* ) j;
     dUASSERT ( joint, "bad joint argument" );
@@ -521,11 +521,11 @@ void dJointSetPistonAxisDelta ( dJointID j, dReal x, dReal y, dReal z,
     if ( joint->node[1].body )
     {
         c[0] = ( joint->node[0].body->posr.pos[0] -
-                 joint->node[1].body->posr.pos[0] - dx );
+            joint->node[1].body->posr.pos[0] - dx );
         c[1] = ( joint->node[0].body->posr.pos[1] -
-                 joint->node[1].body->posr.pos[1] - dy );
+            joint->node[1].body->posr.pos[1] - dy );
         c[2] = ( joint->node[0].body->posr.pos[2] -
-                 joint->node[1].body->posr.pos[2] - dz );
+            joint->node[1].body->posr.pos[2] - dz );
     }
     else if ( joint->node[0].body )
     {

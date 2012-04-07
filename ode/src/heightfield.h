@@ -138,16 +138,16 @@ class HeightFieldPlane
 {
 public:
     HeightFieldPlane():
-      trianglelist(0),
-      trianglelistReservedSize(0),
-      trianglelistCurrentSize(0)
+        trianglelist(0),
+        trianglelistReservedSize(0),
+        trianglelistCurrentSize(0)
     {
+    }
 
-    };
     ~HeightFieldPlane()
     {
         delete [] trianglelist;
-    };
+    }
 
     inline void setMinMax()
     {
@@ -176,7 +176,7 @@ public:
 
     void addTriangle(HeightFieldTriangle *tri)
     {
-		dIASSERT(trianglelistCurrentSize < trianglelistReservedSize);
+        dIASSERT(trianglelistCurrentSize < trianglelistReservedSize);
 
         trianglelist[trianglelistCurrentSize++] = tri;
     }
@@ -207,21 +207,21 @@ struct dxHeightfield : public dxGeom
         dxGeom *o2, const int numMaxContacts,
         int flags, dContactGeom *contact, int skip );
 
-	enum
-	{
-		TEMP_PLANE_BUFFER_ELEMENT_COUNT_ALIGNMENT = 4,
-		TEMP_HEIGHT_BUFFER_ELEMENT_COUNT_ALIGNMENT_X = 4,
-		TEMP_HEIGHT_BUFFER_ELEMENT_COUNT_ALIGNMENT_Z = 4,
-		TEMP_TRIANGLE_BUFFER_ELEMENT_COUNT_ALIGNMENT = 1, // Triangles are easy to reallocate and hard to predict
-	};
+    enum
+    {
+        TEMP_PLANE_BUFFER_ELEMENT_COUNT_ALIGNMENT = 4,
+        TEMP_HEIGHT_BUFFER_ELEMENT_COUNT_ALIGNMENT_X = 4,
+        TEMP_HEIGHT_BUFFER_ELEMENT_COUNT_ALIGNMENT_Z = 4,
+        TEMP_TRIANGLE_BUFFER_ELEMENT_COUNT_ALIGNMENT = 1, // Triangles are easy to reallocate and hard to predict
+    };
 
-	static inline size_t AlignBufferSize(size_t value, size_t alignment) { dIASSERT((alignment & (alignment - 1)) == 0); return (value + (alignment - 1)) & ~(alignment - 1); }
+    static inline size_t AlignBufferSize(size_t value, size_t alignment) { dIASSERT((alignment & (alignment - 1)) == 0); return (value + (alignment - 1)) & ~(alignment - 1); }
 
-	void  allocateTriangleBuffer(size_t numTri);
-	void  resetTriangleBuffer();
-	void  allocatePlaneBuffer(size_t numTri);
-	void  resetPlaneBuffer();
-	void  allocateHeightBuffer(size_t numX, size_t numZ);
+    void  allocateTriangleBuffer(size_t numTri);
+    void  resetTriangleBuffer();
+    void  allocatePlaneBuffer(size_t numTri);
+    void  resetPlaneBuffer();
+    void  allocateHeightBuffer(size_t numX, size_t numZ);
     void  resetHeightBuffer();
 
     void  sortPlanes(const size_t numPlanes);
@@ -234,7 +234,7 @@ struct dxHeightfield : public dxGeom
     size_t              tempTriangleBufferSize;
 
     HeightFieldVertex   **tempHeightBuffer;
-	HeightFieldVertex   *tempHeightInstances;
+    HeightFieldVertex   *tempHeightInstances;
     size_t              tempHeightBufferSizeX;
     size_t              tempHeightBufferSizeZ;
 

@@ -30,7 +30,7 @@
 //****************************************************************************
 // lmotor joint
 dxJointLMotor::dxJointLMotor( dxWorld *w ) :
-        dxJoint( w )
+    dxJoint( w )
 {
     int i;
     num = 0;
@@ -102,7 +102,7 @@ dxJointLMotor::getInfo2( dxJoint::Info2 *info )
 void dJointSetLMotorAxis( dJointID j, int anum, int rel, dReal x, dReal y, dReal z )
 {
     dxJointLMotor* joint = ( dxJointLMotor* )j;
-//for now we are ignoring rel!
+    //for now we are ignoring rel!
     dAASSERT( joint && anum >= 0 && anum <= 2 && rel >= 0 && rel <= 2 );
     checktype( joint, LMotor );
 
