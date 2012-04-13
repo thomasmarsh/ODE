@@ -16,8 +16,6 @@ TEST(test_collision_trimesh_sphere_exact)
     return;
     #endif
 
-    dInitODE();
-
     {
         const int VertexCount = 4;
         const int IndexCount = 2*3;
@@ -95,7 +93,6 @@ TEST(test_collision_trimesh_sphere_exact)
             CHECK_ARRAY_EQUAL(rtrinormal, cg[i].normal, 3);
         }
     }
-    dCloseODE();
 }
 
 
@@ -106,7 +103,6 @@ TEST(test_collision_heightfield_ray_fail)
      * This test demonstrated a bug in the AABB handling of the
      * heightfield.
      */
-    dInitODE();
     {
         // Create quick heightfield with dummy data
         dHeightfieldDataID heightfieldData = dGeomHeightfieldDataCreate();
@@ -127,6 +123,5 @@ TEST(test_collision_heightfield_ray_fail)
         dGeomDestroy(ray);
         dGeomHeightfieldDataDestroy(heightfieldData);
     }
-    dCloseODE();
 }
 
