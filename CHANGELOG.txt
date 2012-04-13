@@ -8,6 +8,11 @@ the rules for this file:
   * keep the format consistent (79 char width, M/D/Y date format).
 
 ------------------------------------------------------------------------------
+04/13/12 Daniel K. O.
+        * Applied patch from bug  #3431829 - better handling of capsule-box with
+          deep penetrations.
+        * Applied patch from Jon Watte - better handling of zero mu with mu2.
+
 03/17/12 Oleh Derevenko
         * Threaded execution support interface added. Optional built-in threading
           implementation added.
