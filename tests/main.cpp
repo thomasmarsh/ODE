@@ -2,8 +2,12 @@
 //
 
 #include <UnitTest++.h>
+#include <ode/ode.h>
 
 int main()
 {
-    return UnitTest::RunAllTests();
+    dInitODE();
+    int res = UnitTest::RunAllTests();
+    dCloseODE();
+    return res;
 }

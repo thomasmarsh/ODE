@@ -54,7 +54,7 @@ dxJointContact::getInfo1( dxJoint::Info1 *info )
     if ( contact.surface.mode & dContactMu2 )
     {
         if ( contact.surface.mu2 < 0 ) contact.surface.mu2 = 0;
-        if ( ( contact.surface.mu > 0 ) || ( contact.surface.mu2 > 0 ) ) m++;
+        if ( contact.surface.mu  > 0 ) m++;
         if ( contact.surface.mu2 > 0 ) m++;
         if ( contact.surface.mu  == dInfinity ) nub ++;
         if ( contact.surface.mu2 == dInfinity ) nub ++;
@@ -76,6 +76,9 @@ dxJointContact::getInfo2( dxJoint::Info2 *info )
 {
     int s = info->rowskip;
     int s2 = 2 * s;
+    const int rowNormal = 0;
+    const int rowFriction1 = 1;
+    int rowFriction2 = 2; // we might decrease it to 1, so no const
 
     // get normal, with sign adjusted for body1/body2 polarity
     dVector3 normal;
@@ -125,7 +128,7 @@ dxJointContact::getInfo2( dxJoint::Info2 *info )
     if ( depth < 0 ) depth = 0;
 
     if ( contact.surface.mode & dContactSoftCFM )
-        info->cfm[0] = contact.surface.soft_cfm;
+        info->cfm[rowNormal] = contact.surface.soft_cfm;
 
 
     dReal motionN = 0;
@@ -133,12 +136,12 @@ dxJointContact::getInfo2( dxJoint::Info2 *info )
         motionN = contact.surface.motionN;
 
     const dReal pushout = k * depth + motionN;
-    info->c[0] = pushout;
+    info->c[rowNormal] = pushout;
 
     // note: this cap should not limit bounce velocity
     const dReal maxvel = world->contactp.max_vel;
-    if ( info->c[0] > maxvel )
-        info->c[0] = maxvel;
+    if ( info->c[rowNormal] > maxvel )
+        info->c[rowNormal] = maxvel;
 
     // deal with bounce
     if ( contact.surface.mode & dContactBounce )
@@ -153,12 +156,12 @@ dxJointContact::getInfo2( dxJoint::Info2 *info )
         }
         outgoing -= motionN;
         // only apply bounce if the outgoing velocity is greater than the
-        // threshold, and if the resulting c[0] exceeds what we already have.
+        // threshold, and if the resulting c[rowNormal] exceeds what we already have.
         if ( contact.surface.bounce_vel >= 0 &&
             ( -outgoing ) > contact.surface.bounce_vel )
         {
-            dReal newc = - contact.surface.bounce * outgoing + motionN;
-            if ( newc > info->c[0] ) info->c[0] = newc;
+            const dReal newc = - contact.surface.bounce * outgoing + motionN;
+            if ( newc > info->c[rowNormal] ) info->c[rowNormal] = newc;
         }
     }
 
@@ -166,55 +169,67 @@ dxJointContact::getInfo2( dxJoint::Info2 *info )
     info->lo[0] = 0;
     info->hi[0] = dInfinity;
 
+    if ( the_m == 1 ) // no friction, there is nothing else to do
+        return;
+
     // now do jacobian for tangential forces
     dVector3 t1, t2; // two vectors tangential to normal
 
-    // first friction direction
-    if ( the_m >= 2 )
+    if ( contact.surface.mode & dContactFDir1 )   // use fdir1 ?
     {
-        if ( contact.surface.mode & dContactFDir1 )   // use fdir1 ?
-        {
-            t1[0] = contact.fdir1[0];
-            t1[1] = contact.fdir1[1];
-            t1[2] = contact.fdir1[2];
-            dCalcVectorCross3( t2, normal, t1 );
-        }
-        else
-        {
-            dPlaneSpace( normal, t1, t2 );
-        }
+        t1[0] = contact.fdir1[0];
+        t1[1] = contact.fdir1[1];
+        t1[2] = contact.fdir1[2];
+        dCalcVectorCross3( t2, normal, t1 );
+    }
+    else
+    {
+        dPlaneSpace( normal, t1, t2 );
+    }
+
+    // first friction direction
+
+    if ( contact.surface.mu > 0 )
+    {
         info->J1l[s+0] = t1[0];
         info->J1l[s+1] = t1[1];
         info->J1l[s+2] = t1[2];
         dCalcVectorCross3( info->J1a + s, c1, t1 );
         if ( node[1].body )
-        {
-            info->J2l[s+0] = -t1[0];
-            info->J2l[s+1] = -t1[1];
-            info->J2l[s+2] = -t1[2];
-            dReal *J2a_plus_s = info->J2a + s;
-            dCalcVectorCross3( J2a_plus_s, c2, t1 );
-            dNegateVector3( J2a_plus_s );
-        }
+            {
+                info->J2l[s+0] = -t1[0];
+                info->J2l[s+1] = -t1[1];
+                info->J2l[s+2] = -t1[2];
+                dReal *J2a_plus_s = info->J2a + s;
+                dCalcVectorCross3( J2a_plus_s, c2, t1 );
+                dNegateVector3( J2a_plus_s );
+            }
         // set right hand side
         if ( contact.surface.mode & dContactMotion1 )
-        {
-            info->c[1] = contact.surface.motion1;
-        }
+            {
+                info->c[rowFriction1] = contact.surface.motion1;
+            }
         // set LCP bounds and friction index. this depends on the approximation
         // mode
-        info->lo[1] = -contact.surface.mu;
-        info->hi[1] = contact.surface.mu;
+        info->lo[rowFriction1] = -contact.surface.mu;
+        info->hi[rowFriction1] = contact.surface.mu;
         if ( contact.surface.mode & dContactApprox1_1 )
-            info->findex[1] = 0;
+            info->findex[rowFriction1] = 0;
 
         // set slip (constraint force mixing)
         if ( contact.surface.mode & dContactSlip1 )
-            info->cfm[1] = contact.surface.slip1;
+            info->cfm[rowFriction1] = contact.surface.slip1;
+    } else {
+        // there was no friction for direction 1, so the second friction constraint
+        // has to be on this line instead
+        s2 = s;
+        rowFriction2 = rowFriction1;
     }
 
+    const dReal mu2 = contact.surface.mode & dContactMu2 ? contact.surface.mu2 : contact.surface.mu;
+
     // second friction direction
-    if ( the_m >= 3 )
+    if ( mu2 > 0 )
     {
         info->J1l[s2+0] = t2[0];
         info->J1l[s2+1] = t2[1];
@@ -232,26 +247,19 @@ dxJointContact::getInfo2( dxJoint::Info2 *info )
         // set right hand side
         if ( contact.surface.mode & dContactMotion2 )
         {
-            info->c[2] = contact.surface.motion2;
+            info->c[rowFriction2] = contact.surface.motion2;
         }
         // set LCP bounds and friction index. this depends on the approximation
         // mode
-        if ( contact.surface.mode & dContactMu2 )
-        {
-            info->lo[2] = -contact.surface.mu2;
-            info->hi[2] = contact.surface.mu2;
-        }
-        else
-        {
-            info->lo[2] = -contact.surface.mu;
-            info->hi[2] = contact.surface.mu;
-        }
+        info->lo[rowFriction2] = -mu2;
+        info->hi[rowFriction2] =  mu2;
+
         if ( contact.surface.mode & dContactApprox1_2 )
-            info->findex[2] = 0;
+            info->findex[rowFriction2] = 0;
 
         // set slip (constraint force mixing)
         if ( contact.surface.mode & dContactSlip2 )
-            info->cfm[2] = contact.surface.slip2;
+            info->cfm[rowFriction2] = contact.surface.slip2;
     }
 }
 
