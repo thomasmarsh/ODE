@@ -155,9 +155,6 @@ dGeomID TriMesh2;
 
 dReal heightfield_callback( void* pUserData, int x, int z )
 {
-	dIASSERT( x < HFIELD_WSTEP );
-	dIASSERT( z < HFIELD_DSTEP );
-
 	dReal fx = ( ((dReal)x) - ( HFIELD_WSTEP-1 )/2 ) / (dReal)( HFIELD_WSTEP-1 );
 	dReal fz = ( ((dReal)z) - ( HFIELD_DSTEP-1 )/2 ) / (dReal)( HFIELD_DSTEP-1 );
 

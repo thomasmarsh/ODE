@@ -21,8 +21,8 @@
  *************************************************************************/
 
 #include <ode/common.h>
-#include <ode/odemath.h>
 #include "config.h"
+#include "odemath.h"
 
 
 #undef dSafeNormalize3

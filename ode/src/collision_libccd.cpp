@@ -21,11 +21,13 @@
  *************************************************************************/
 
 #include <ode/collision.h>
-#include <ode/odemath.h>
 #include <ccd/ccd.h>
 #include <ccd/quat.h>
+#include "config.h"
+#include "odemath.h"
 #include "collision_libccd.h"
 #include "collision_std.h"
+
 
 struct _ccd_obj_t {
     ccd_vec3_t pos;

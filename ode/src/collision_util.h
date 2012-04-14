@@ -31,8 +31,8 @@ some useful collision utility stuff.
 
 #include <ode/common.h>
 #include <ode/contact.h>
-#include <ode/odemath.h>
 #include <ode/rotation.h>
+#include "odemath.h"
 
 
 // given a pointer `p' to a dContactGeom, return the dContactGeom at

@@ -21,13 +21,13 @@
  *************************************************************************/
 
 #include <ode/common.h>
-#include <ode/odemath.h>
 #include <ode/rotation.h>
 #include <ode/timer.h>
 #include <ode/error.h>
 #include <ode/matrix.h>
 #include <ode/misc.h>
 #include "config.h"
+#include "odemath.h"
 #include "objects.h"
 #include "joints/joint.h"
 #include "lcp.h"

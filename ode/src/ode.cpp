@@ -28,11 +28,11 @@
 // numerics.
 
 #include <ode/ode.h>
-#include <ode/odemath.h>
 #include <ode/matrix.h>
 #include <ode/memory.h>
 #include <ode/error.h>
 #include "config.h"
+#include "odemath.h"
 #include "objects.h"
 #include "joints/joints.h"
 #include "step.h"

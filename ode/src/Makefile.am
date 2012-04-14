@@ -35,7 +35,7 @@ libode_la_SOURCES =     nextafterf.c \
                         collision_util.cpp collision_util.h \
                         convex.cpp \
                         cylinder.cpp \
-                        error.cpp \
+                        error.cpp error.h \
                         export-dif.cpp \
                         heightfield.cpp heightfield.h \
                         lcp.cpp lcp.h \
@@ -48,7 +48,7 @@ libode_la_SOURCES =     nextafterf.c \
                         obstack.cpp obstack.h \
                         ode.cpp \
                         odeinit.cpp \
-                        odemath.cpp \
+                        odemath.cpp odemath.h \
                         odeou.h \
                         odetls.h \
                         plane.cpp \

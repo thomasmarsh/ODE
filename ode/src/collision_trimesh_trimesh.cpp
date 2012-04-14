@@ -29,8 +29,10 @@
 #include <ode/collision.h>
 #include <ode/matrix.h>
 #include <ode/rotation.h>
-#include <ode/odemath.h>
 #include "config.h"
+#include "odemath.h"
+
+
 // Classic Implementation
 #if dTRIMESH_OPCODE_USE_OLD_TRIMESH_TRIMESH_COLLIDER
 

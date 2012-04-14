@@ -29,6 +29,7 @@
 #include <ode/common.h>
 #include <ode/memory.h>
 #include <ode/mass.h>
+#include "error.h"
 #include "array.h"
 #include "threading_base.h"
 
