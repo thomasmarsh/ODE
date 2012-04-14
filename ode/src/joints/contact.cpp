@@ -196,19 +196,19 @@ dxJointContact::getInfo2( dxJoint::Info2 *info )
         info->J1l[s+2] = t1[2];
         dCalcVectorCross3( info->J1a + s, c1, t1 );
         if ( node[1].body )
-            {
-                info->J2l[s+0] = -t1[0];
-                info->J2l[s+1] = -t1[1];
-                info->J2l[s+2] = -t1[2];
-                dReal *J2a_plus_s = info->J2a + s;
-                dCalcVectorCross3( J2a_plus_s, c2, t1 );
-                dNegateVector3( J2a_plus_s );
-            }
+        {
+            info->J2l[s+0] = -t1[0];
+            info->J2l[s+1] = -t1[1];
+            info->J2l[s+2] = -t1[2];
+            dReal *J2a_plus_s = info->J2a + s;
+            dCalcVectorCross3( J2a_plus_s, c2, t1 );
+            dNegateVector3( J2a_plus_s );
+        }
         // set right hand side
         if ( contact.surface.mode & dContactMotion1 )
-            {
-                info->c[rowFriction1] = contact.surface.motion1;
-            }
+        {
+            info->c[rowFriction1] = contact.surface.motion1;
+        }
         // set LCP bounds and friction index. this depends on the approximation
         // mode
         info->lo[rowFriction1] = -contact.surface.mu;

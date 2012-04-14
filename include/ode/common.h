@@ -98,7 +98,7 @@ typedef dReal dQuaternion[4];
 
 #if defined(dSINGLE)
 
-#define REAL(x) (x ## f)					/* form a constant */
+#define REAL(x) (x##f)					/* form a constant */
 #define dRecip(x) ((1.0f/(x)))				/* reciprocal */
 #define dSqrt(x) (sqrtf(x))			/* square root */
 #define dRecipSqrt(x) ((1.0f/sqrtf(x)))		/* reciprocal square root */

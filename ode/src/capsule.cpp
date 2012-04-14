@@ -197,40 +197,41 @@ int dCollideCapsuleBox (dxGeom *o1, dxGeom *o2, int flags,
     dVector3 pl,pb;
     dClosestLineBoxPoints (p1,p2,c,R,side,pl,pb);
 
-  // if the capsule is penetrated further than radius 
-  //  then pl and pb are equal (up to mindist) -> unknown normal
-  // use normal vector of closest box surface
+    // if the capsule is penetrated further than radius 
+    //  then pl and pb are equal (up to mindist) -> unknown normal
+    // use normal vector of closest box surface
 #ifdef dSINGLE
-  dReal mindist = REAL(1e-6);
+    dReal mindist = REAL(1e-6);
 #else
-  dReal mindist = REAL(1e-15);
+    dReal mindist = REAL(1e-15);
 #endif
-  if (dCalcPointsDistance3(pl, pb)<mindist) {
-    dVector3 normal;
-    dReal depth;
-    int code;
-    // consider capsule as box
-    dReal rad2 = radius*REAL(2.0);
-    const dVector3 capboxside = {rad2, rad2, cyl->lz + rad2};
-    int num = dBoxBox (c, R, side, 
-                       o1->final_posr->pos, o1->final_posr->R, capboxside,
-                       normal, &depth, &code, flags, contact, skip);
+    if (dCalcPointsDistance3(pl, pb)<mindist) {
+        // consider capsule as box
+        dVector3 normal;
+        dReal depth;
+        int code;
+        // WARNING! rad2 is declared as #define in Microsoft headers (as well as psh2, chx2, grp2, frm2, rct2, ico2, stc2, lst2, cmb2, edt2, scr2). Avoid abbreviations!
+        /* dReal rad2 = radius*REAL(2.0); */ dReal radiusMul2 = radius * REAL(2.0);
+        const dVector3 capboxside = {radiusMul2, radiusMul2, cyl->lz + radiusMul2};
+        int num = dBoxBox (c, R, side, 
+            o1->final_posr->pos, o1->final_posr->R, capboxside,
+            normal, &depth, &code, flags, contact, skip);
 
-    for (int i=0; i<num; i++) {
-      dContactGeom *currContact = CONTACT(contact,i*skip);
-      currContact->normal[0] = normal[0];
-      currContact->normal[1] = normal[1];
-      currContact->normal[2] = normal[2];
-      currContact->g1 = o1;
-      currContact->g2 = o2;
-      currContact->side1 = -1;
-      currContact->side2 = -1;
+        for (int i=0; i<num; i++) {
+            dContactGeom *currContact = CONTACT(contact,i*skip);
+            currContact->normal[0] = normal[0];
+            currContact->normal[1] = normal[1];
+            currContact->normal[2] = normal[2];
+            currContact->g1 = o1;
+            currContact->g2 = o2;
+            currContact->side1 = -1;
+            currContact->side2 = -1;
+        }
+        return num;
+    } else {
+        // generate contact point
+        return dCollideSpheres (pl,radius,pb,0,contact);
     }
-    return num;
-  } else {
-    // generate contact point
-    return dCollideSpheres (pl,radius,pb,0,contact);
-  }
 }
 
 
