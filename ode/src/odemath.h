@@ -20,44 +20,33 @@
  *                                                                       *
  *************************************************************************/
 
-/* this comes from the `reuse' library. copy any changes back to the source */
+#ifndef _ODE__PRIVATE_ODEMATH_H_
+#define _ODE__PRIVATE_ODEMATH_H_
 
-#ifndef _ODE_ERROR_H_
-#define _ODE_ERROR_H_
-
-#include <ode/odeconfig.h>
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-/* all user defined error functions have this type. error and debug functions
- * should not return.
- */
-typedef void dMessageFunction (int errnum, const char *msg, va_list ap);
-
-/* set a new error, debug or warning handler. if fn is 0, the default handlers
- * are used.
- */
-ODE_API void dSetErrorHandler (dMessageFunction *fn);
-ODE_API void dSetDebugHandler (dMessageFunction *fn);
-ODE_API void dSetMessageHandler (dMessageFunction *fn);
-
-/* return the current error, debug or warning handler. if the return value is
- * 0, the default handlers are in place.
- */
-ODE_API dMessageFunction *dGetErrorHandler(void);
-ODE_API dMessageFunction *dGetDebugHandler(void);
-ODE_API dMessageFunction *dGetMessageHandler(void);
-
-/* generate a fatal error, debug trap or a message. */
-ODE_API void dError (int num, const char *msg, ...);
-ODE_API void dDebug (int num, const char *msg, ...);
-ODE_API void dMessage (int num, const char *msg, ...);
+#include <ode/odemath.h>
+#include "error.h"
 
 
-#ifdef __cplusplus
+int  _dSafeNormalize3 (dVector3 a);
+int  _dSafeNormalize4 (dVector4 a);
+
+ODE_PURE_INLINE void _dNormalize3(dVector3 a)
+{
+    int bNormalizationResult = _dSafeNormalize3(a);
+    dIVERIFY(bNormalizationResult);
 }
-#endif
+
+ODE_PURE_INLINE void _dNormalize4(dVector4 a)
+{
+    int bNormalizationResult = _dSafeNormalize4(a);
+    dIVERIFY(bNormalizationResult);
+}
+
+// For internal use
+#define dSafeNormalize3(a) _dSafeNormalize3(a)
+#define dSafeNormalize4(a) _dSafeNormalize4(a)
+#define dNormalize3(a) _dNormalize3(a)
+#define dNormalize4(a) _dNormalize4(a)
+
 
 #endif

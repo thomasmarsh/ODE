@@ -31,8 +31,8 @@ for geometry objects
 #include <ode/matrix.h>
 #include <ode/rotation.h>
 #include <ode/objects.h>
-#include <ode/odemath.h>
 #include "config.h"
+#include "odemath.h"
 #include "collision_kernel.h"
 #include "collision_util.h"
 #include "collision_std.h"

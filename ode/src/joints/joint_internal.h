@@ -26,9 +26,10 @@
 
 
 #include <ode/matrix.h>
-#include <ode/odemath.h>
 #include <ode/rotation.h>
 #include <ode/objects.h>
+#include "odemath.h"
+
 
 #define checktype(j,t) dUASSERT(j->type() == dJointType##t, \
     "joint type is not " #t)

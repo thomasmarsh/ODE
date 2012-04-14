@@ -27,8 +27,8 @@ By Rodrigo Hernandez
 #include <ode/collision.h>
 #include <ode/matrix.h>
 #include <ode/rotation.h>
-#include <ode/odemath.h>
 #include "config.h"
+#include "odemath.h"
 #include "collision_kernel.h"
 #include "collision_std.h"
 #include "collision_util.h"

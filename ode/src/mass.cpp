@@ -22,9 +22,9 @@
 
 #include <ode/odeconfig.h>
 #include <ode/mass.h>
-#include <ode/odemath.h>
 #include <ode/matrix.h>
 #include "config.h"
+#include "odemath.h"
 
 // Local dependencies
 #include "collision_kernel.h"

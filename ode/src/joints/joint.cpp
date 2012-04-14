@@ -30,10 +30,10 @@ transform is the identity.
 */
 
 #include <ode/ode.h>
-#include <ode/odemath.h>
 #include <ode/rotation.h>
 #include <ode/matrix.h>
 #include "config.h"
+#include "odemath.h"
 #include "joint.h"
 #include "joint_internal.h"
 

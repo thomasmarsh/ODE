@@ -8,6 +8,9 @@ the rules for this file:
   * keep the format consistent (79 char width, M/D/Y date format).
 
 ------------------------------------------------------------------------------
+04/14/12 Oleh Derevenko
+        * Assertion checking macros moved into library private headers.
+
 04/13/12 Daniel K. O.
         * Applied patch from bug  #3431829 - better handling of capsule-box with
           deep penetrations.
