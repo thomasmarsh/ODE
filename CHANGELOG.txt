@@ -8,6 +8,10 @@ the rules for this file:
   * keep the format consistent (79 char width, M/D/Y date format).
 
 ------------------------------------------------------------------------------
+04/22/12 Daniel K. O.
+        * Fixed plane2d joint: uninitialized variables (reported by Dimitris
+          Papavasiliou)
+
 04/14/12 Oleh Derevenko
         * Assertion checking macros moved into library private headers.
 
