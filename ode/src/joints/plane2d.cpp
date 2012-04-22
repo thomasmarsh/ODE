@@ -75,11 +75,19 @@ dxJointPlane2D::getInfo1( dxJoint::Info1 *info )
     info->m = 3;
 
     if ( motor_x.fmax > 0 )
-        row_motor_x = info->m ++;
+        row_motor_x = info->m++;
+    else
+        row_motor_x = 0;
+
     if ( motor_y.fmax > 0 )
-        row_motor_y = info->m ++;
+        row_motor_y = info->m++;
+    else
+        row_motor_y = 0;
+
     if ( motor_angle.fmax > 0 )
-        row_motor_angle = info->m ++;
+        row_motor_angle = info->m++;
+    else
+        row_motor_angle = 0;
 }
 
 
@@ -90,14 +98,14 @@ dxJointPlane2D::getInfo2( dxJoint::Info2 *info )
     int r0 = 0;
     int r1 = info->rowskip;
     int r2 = 2 * r1;
-    dReal       eps = info->fps * info->erp;
+    dReal eps = info->fps * info->erp;
 
     /*
         v = v1, w = omega1
         (v2, omega2 not important (== static environment))
 
         constraint equations:
-            xz = 0
+            vz = 0
             wx = 0
             wy = 0
 
