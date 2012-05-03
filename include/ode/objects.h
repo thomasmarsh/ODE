@@ -1695,6 +1695,23 @@ ODE_API dJointID dJointCreateLMotor (dWorldID, dJointGroupID);
 ODE_API dJointID dJointCreatePlane2D (dWorldID, dJointGroupID);
 
 /**
+ * @brief Create a new joint of the double ball type.
+ * @ingroup joints
+ * @param dJointGroupID set to 0 to allocate the joint normally.
+ * If it is nonzero the joint is allocated in the given joint group.
+ */
+ODE_API dJointID dJointCreateDBall (dWorldID, dJointGroupID);
+
+/**
+ * @brief Create a new joint of the double hinge type.
+ * @ingroup joints
+ * @param dJointGroupID set to 0 to allocate the joint normally.
+ * If it is nonzero the joint is allocated in the given joint group.
+ */
+ODE_API dJointID dJointCreateDHinge (dWorldID, dJointGroupID);
+
+
+/**
  * @brief Destroy a joint.
  * @ingroup joints
  *
@@ -2990,6 +3007,105 @@ ODE_API dReal dJointGetLMotorParam (dJointID, int parameter);
  * @ingroup joints
  */
 ODE_API dReal dJointGetFixedParam (dJointID, int parameter);
+
+
+/**
+ * @brief set anchor1 for double ball joint
+ * @ingroup joints
+ */
+ODE_API void dJointSetDBallAnchor1(dJointID, dReal x, dReal y, dReal z);
+
+/**
+ * @brief set anchor2 for double ball joint
+ * @ingroup joints
+ */
+ODE_API void dJointSetDBallAnchor2(dJointID, dReal x, dReal y, dReal z);
+
+/**
+ * @brief get anchor1 from double ball joint
+ * @ingroup joints
+ */
+ODE_API void dJointGetDBallAnchor1(dJointID, dVector3 result);
+
+/**
+ * @brief get anchor2 from double ball joint
+ * @ingroup joints
+ */
+ODE_API void dJointGetDBallAnchor2(dJointID, dVector3 result);
+
+/**
+ * @brief get the set distance from double ball joint
+ * @ingroup joints
+ */
+ODE_API dReal dJointGetDBallDistance(dJointID);
+
+/**
+ * @brief set double ball joint parameter
+ * @ingroup joints
+ */
+ODE_API void dJointSetDBallParam(dJointID, int parameter, dReal value);
+
+/**
+ * @brief get double ball joint parameter
+ * @ingroup joints
+ */
+ODE_API dReal dJointGetDBallParam(dJointID, int parameter);
+
+/**
+ * @brief set axis for double hinge joint
+ * @ingroup joints
+ */
+ODE_API void dJointSetDHingeAxis(dJointID, dReal x, dReal y, dReal z);
+
+/**
+ * @brief get axis for double hinge joint
+ * @ingroup joints
+ */
+ODE_API void dJointGetDHingeAxis(dJointID, dVector3 result);
+
+/**
+ * @brief set anchor1 for double hinge joint
+ * @ingroup joints
+ */
+ODE_API void dJointSetDHingeAnchor1(dJointID, dReal x, dReal y, dReal z);
+
+/**
+ * @brief set anchor2 for double hinge joint
+ * @ingroup joints
+ */
+ODE_API void dJointSetDHingeAnchor2(dJointID, dReal x, dReal y, dReal z);
+
+/**
+ * @brief get anchor1 from double hinge joint
+ * @ingroup joints
+ */
+ODE_API void dJointGetDHingeAnchor1(dJointID, dVector3 result);
+
+/**
+ * @brief get anchor2 from double hinge joint
+ * @ingroup joints
+ */
+ODE_API void dJointGetDHingeAnchor2(dJointID, dVector3 result);
+
+/**
+ * @brief get the set distance from double hinge joint
+ * @ingroup joints
+ */
+ODE_API dReal dJointGetDHingeDistance(dJointID);
+
+/**
+ * @brief set double hinge joint parameter
+ * @ingroup joints
+ */
+ODE_API void dJointSetDHingeParam(dJointID, int parameter, dReal value);
+
+/**
+ * @brief get double hinge joint parameter
+ * @ingroup joints
+ */
+ODE_API dReal dJointGetDHingeParam(dJointID, int parameter);
+
+
 
 
 /**

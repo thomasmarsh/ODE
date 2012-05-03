@@ -22,6 +22,8 @@ noinst_PROGRAMS = \
                 demo_convex_cd \
                 demo_crash \
                 demo_cylvssphere \
+                demo_dball \
+                demo_dhinge \
                 demo_feedback \
                 demo_friction \
                 demo_gyroscopic \
@@ -54,6 +56,8 @@ demo_convex_cd_SOURCES = demo_convex_cd.cpp
 demo_convex_cd_DEPENDENCIES = $(top_builddir)/ode/src/libode.la
 demo_crash_SOURCES = demo_crash.cpp
 demo_cylvssphere_SOURCES = demo_cylvssphere.cpp
+demo_dball_SOURCES = demo_dball.cpp
+demo_dhinge_SOURCES = demo_dhinge.cpp
 demo_feedback_SOURCES = demo_feedback.cpp
 demo_friction_SOURCES = demo_friction.cpp
 demo_gyroscopic_SOURCES = demo_gyroscopic.cpp
