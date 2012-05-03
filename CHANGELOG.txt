@@ -8,6 +8,9 @@ the rules for this file:
   * keep the format consistent (79 char width, M/D/Y date format).
 
 ------------------------------------------------------------------------------
+05/03/12 Daniel K. O.
+        * Added two new joints: Double Ball and Double Hinge.
+
 04/22/12 Daniel K. O.
         * Fixed plane2d joint: uninitialized variables (reported by Dimitris
           Papavasiliou)

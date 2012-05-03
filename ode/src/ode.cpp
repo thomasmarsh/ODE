@@ -1257,6 +1257,19 @@ dxJoint * dJointCreatePlane2D (dWorldID w, dJointGroupID group)
     return createJoint<dxJointPlane2D> (w,group);
 }
 
+dxJoint * dJointCreateDBall (dWorldID w, dJointGroupID group)
+{
+    dAASSERT (w);
+    return createJoint<dxJointDBall> (w,group);
+}
+
+dxJoint * dJointCreateDHinge (dWorldID w, dJointGroupID group)
+{
+    dAASSERT (w);
+    return createJoint<dxJointDHinge> (w,group);
+}
+
+
 static void FinalizeAndDestroyJointInstance(dxJoint *j, bool delete_it)
 {
     // if any group joints have their world pointer set to 0, their world was
