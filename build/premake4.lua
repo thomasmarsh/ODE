@@ -16,8 +16,11 @@
     "chain1",
     "chain2",
     "collision",
+    "convex",
     "crash",
     "cylvssphere",
+    "dball",
+    "dhinge",
     "feedback",
     "friction",
     "gyroscopic",
@@ -42,9 +45,10 @@
   local trimesh_demos = {
     "basket",
     "cyl",
+    "moving_convex",
     "moving_trimesh",
-    "trimesh",
-    "tracks"
+    "tracks",
+    "trimesh"
   }
   
   if not _OPTIONS["no-trimesh"] then
