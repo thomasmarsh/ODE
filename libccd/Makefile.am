@@ -1,5 +1,6 @@
 SUBDIRS = src
 
 EXTRA_DIST = \
-	BSD-LICENSE \
-	README
+    bootstrap \
+    BSD-LICENSE \
+    README
