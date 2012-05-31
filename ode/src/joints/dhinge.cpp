@@ -100,16 +100,48 @@ dxJointDHinge::getInfo2( dxJoint::Info2* info )
     info->c[2] = k * dCalcVectorDot3( u, q );
 
 
-    // linear constraint, along the axis
+
+
+    /*
+     * Constraint along the axis: translation along it should couple angular movement.
+     * This is just the ball-and-socket derivation, projected onto the hinge axis,
+     * producing a single constraint at the end.
+     *
+     * The choice of "ball" position can be arbitrary; we could place it at the center
+     * of one of the bodies, canceling out its rotational jacobian; or we could make
+     * everything symmetrical by just placing at the midpoint between the centers.
+     *
+     * I like symmetry, so I'll use the second approach here. I'll call the midpoint h.
+     *
+     * Of course, if the second body is NULL, the first body is pretty much locked
+     * along this axis, and the linear constraint is enough.
+     */
+
     info->J1l[row3+0] = globalAxis1[0];
     info->J1l[row3+1] = globalAxis1[1];
     info->J1l[row3+2] = globalAxis1[2];
+
     if ( node[1].body ) {
+
+        dVector3 h;
+        dAddScaledVectors3(h, node[0].body->posr.pos, node[1].body->posr.pos, -0.5, 0.5);
+
+        dVector3 omega;
+        dCalcVectorCross3(omega, h, globalAxis1);
+        info->J1a[row3+0] = omega[0];
+        info->J1a[row3+1] = omega[1];
+        info->J1a[row3+2] = omega[2];
+
         info->J2l[row3+0] = -globalAxis1[0];
         info->J2l[row3+1] = -globalAxis1[1];
         info->J2l[row3+2] = -globalAxis1[2];
+
+        info->J2a[row3+0] = omega[0];
+        info->J2a[row3+1] = omega[1];
+        info->J2a[row3+2] = omega[2];
     }
 
+    // error correction: both anchors should lie on the same plane perpendicular to the axis
     dVector3 globalA1, globalA2;
     dBodyGetRelPointPos(node[0].body, anchor1[0], anchor1[1], anchor1[2], globalA1);
     if ( node[1].body )
@@ -118,7 +150,7 @@ dxJointDHinge::getInfo2( dxJoint::Info2* info )
         dCopyVector3(globalA2, anchor2);
 
     dVector3 d;
-    dSubtractVectors3(d, globalA1, globalA2);
+    dSubtractVectors3(d, globalA1, globalA2); // displacement error
     info->c[3] = -k * dCalcVectorDot3(globalAxis1, d);
 }
 
@@ -144,7 +176,7 @@ void dJointGetDHingeAxis( dJointID j, dVector3 result )
     dxJointDHinge* joint = dynamic_cast<dxJointDHinge*>(j);
     dUASSERT( joint, "bad joint argument" );
 
-    dBodyVectorFromWorld(joint->node[0].body, joint->axis1[0], joint->axis1[1], joint->axis1[2], result);
+    dBodyVectorToWorld(joint->node[0].body, joint->axis1[0], joint->axis1[1], joint->axis1[2], result);
 }
 
 

@@ -8,6 +8,10 @@ the rules for this file:
   * keep the format consistent (79 char width, M/D/Y date format).
 
 ------------------------------------------------------------------------------
+05/30/12 Daniel K. O.
+        * Made drawstuff draw shadows for lines.
+        * Fixed dhinge's last constraint to properly handle rotations.
+
 05/03/12 Daniel K. O.
         * Added two new joints: Double Ball and Double Hinge.
 

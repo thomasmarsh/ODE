@@ -5,8 +5,8 @@ LIBTOOLIZE=libtoolize
 if [ `uname -s` = Darwin ]; then
     LIBTOOLIZE=glibtoolize
 fi
-$LIBTOOLIZE -f -c --automake
+$LIBTOOLIZE -c --automake
 aclocal
-autoheader -f
+autoheader
 autoconf
-automake -a --foreign -f -c
+automake -a --foreign -c

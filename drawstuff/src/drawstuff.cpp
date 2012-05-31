@@ -1495,10 +1495,8 @@ extern "C" void dsDrawCapsule (const float pos[3], const float R[12],
 }
 
 
-void dsDrawLine (const float pos1[3], const float pos2[3])
+static void drawLine(const float pos1[3], const float pos2[3])
 {
-  setupDrawingMode();
-  glColor3f (color[0],color[1],color[2]);
   glDisable (GL_LIGHTING);
   glLineWidth (2);
   glShadeModel (GL_FLAT);
@@ -1509,8 +1507,26 @@ void dsDrawLine (const float pos1[3], const float pos2[3])
 }
 
 
-void dsDrawBoxD (const double pos[3], const double R[12],
-		 const double sides[3])
+extern "C" void dsDrawLine (const float pos1[3], const float pos2[3])
+{
+  setupDrawingMode();
+  glColor4f(color[0], color[1], color[2], color[3]);
+  drawLine(pos1, pos2);
+
+  if (use_shadows) {
+    setShadowDrawingMode();
+    setShadowTransform();
+
+    drawLine(pos1, pos2);
+
+    glPopMatrix();
+    glDepthRange (0,1);
+  }
+}
+
+
+extern "C" void dsDrawBoxD (const double pos[3], const double R[12],
+                            const double sides[3])
 {
   int i;
   float pos2[3],R2[12],fsides[3];

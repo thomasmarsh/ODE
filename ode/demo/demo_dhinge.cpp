@@ -36,6 +36,7 @@ dSpaceID space;
 dBodyID body1;
 dBodyID body2;
 dJointID joint1, joint2;
+bool applyForce = false;
 
 void start()
 {
@@ -67,17 +68,28 @@ void start()
     dMassSetBox(&mass, 1, 0.2, 0.2, 1);
     dBodySetMass(body2, &mass);
 
+#if 1
     joint1 = dJointCreateDHinge(world, 0);
     dJointAttach(joint1, body1, 0);
     dJointSetDHingeAxis(joint1, 0, 1, 0);
     dJointSetDHingeAnchor1(joint1, 0, 0, 3.5);
     dJointSetDHingeAnchor2(joint1, 0, 0, 4.5);
+#endif
 
+#if 1
     joint2 = dJointCreateDHinge(world, 0);
     dJointAttach(joint2, body1, body2);
     dJointSetDHingeAxis(joint2, 1, 0, 0);
     dJointSetDHingeAnchor1(joint2, 0, 0, 2.5);
     dJointSetDHingeAnchor2(joint2, 0, 0, 1.5);
+#else
+    joint2 = dJointCreateDBall(world, 0);
+    dJointAttach(joint2, body1, body2);
+    dJointSetDBallAnchor1(joint2, 0, 0, 2.5);
+    dJointSetDBallAnchor2(joint2, 0, 0, 1.5);
+#endif
+
+    //dBodyAddForce(body1, 20, 0, 0);
 
 
     // initial camera position
@@ -101,15 +113,13 @@ void drawGeom(dGeomID g)
     const dReal *rot = dGeomGetRotation(g);
 
     switch (gclass) {
-        case dSphereClass:
-            dsSetColorAlpha(0, 0.75, 0.5, 1);
-            dsSetTexture (DS_CHECKERED);
-            dsDrawSphere(pos, rot, dGeomSphereGetRadius(g));
-            break;
         case dBoxClass:
         {
             dVector3 lengths;
-            dsSetColorAlpha(1, 1, 0, 1);
+            if (applyForce)
+                dsSetColor(1, .5, 0);
+            else
+                dsSetColor(1, 1, 0);
             dsSetTexture (DS_WOOD);
             dGeomBoxGetLengths(g, lengths);
             dsDrawBox(pos, rot, lengths);
@@ -121,6 +131,7 @@ void drawGeom(dGeomID g)
     }
 }
 
+
 void simLoop(int pause)
 {
     if (!pause) {
@@ -128,21 +139,27 @@ void simLoop(int pause)
         static dReal t = 0;
 
         const dReal step = 0.005;
-        const unsigned nsteps = 4;
+        const unsigned nsteps = 2;
 
         for (unsigned i=0; i<nsteps; ++i) {
 
-            dReal f = sin(t*1.2)*0.8;
-            dBodyAddForceAtRelPos(body1,
-                                  f, 0, 0, 
-                                  0, 0, -0.5); // at the lower end
+            applyForce = fmodf(t, 3.) > 2.;
 
-            dReal g = sin(t*0.7)*0.8;
-            dBodyAddForceAtRelPos(body2,
-                                  0, g, 0, 
-                                  0, 0, -0.5); // at the lower end
-
+            if (applyForce) {
+                dReal f = 0.3 * sin(t*1.2);
+                dBodyAddForceAtRelPos(body1,
+                                      f, 0, 0, 
+                                      0, 0, -0.5); // at the lower end
+                
+                dReal g = 0.3 * sin(t*0.7);
+                dBodyAddForceAtRelPos(body2,
+                                      0, g, 0, 
+                                      0, 0, -0.5); // at the lower end
+            }
+            
             t += step;
+            if (t > 20.)
+                t = 0.;
 
             dWorldQuickStep(world, step);
         }
@@ -156,15 +173,16 @@ void simLoop(int pause)
         drawGeom(g);
     }
 
-
+#if 1
     dVector3 a11, a12;
     dJointGetDHingeAnchor1(joint1, a11);
     dJointGetDHingeAnchor2(joint1, a12);
     dsSetColor(1, 0, 0);
     dsDrawLine(a11, a12);
-
     //printf("Error 1: %f\n", fabs(dJointGetDHingeDistance(joint1) - dCalcPointsDistance3(a11, a12)));
+#endif
 
+#if 1
     dVector3 a21, a22;
     dJointGetDHingeAnchor1(joint2, a21);
     dJointGetDHingeAnchor2(joint2, a22);
@@ -172,6 +190,7 @@ void simLoop(int pause)
     dsDrawLine(a21, a22);
 
     //printf("Error 2: %f\n", fabs(dJointGetDHingeDistance(joint2) - dCalcPointsDistance3(a21, a22)));
+#endif
 }
 
 
