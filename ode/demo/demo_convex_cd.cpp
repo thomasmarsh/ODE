@@ -350,6 +350,7 @@ void command (int cmd)
     default:
       dsPrint ("received command %d (`%c')\n",cmd,cmd);
     }
+  (void)changed;
 #if 0
             dGeomSetPosition (geoms[1],
 		    geom1pos[0],
@@ -359,7 +360,6 @@ void command (int cmd)
             dGeomSetRotation(geoms[1],m);
     if(changed)
     {
-
             printf("POS: %f,%f,%f\n",geom1pos[0],geom1pos[1],geom1pos[2]);
             printf("ROT:\n%f,%f,%f,%f\n%f,%f,%f,%f\n%f,%f,%f,%f\n",
             m[0],m[1],m[2],m[3],

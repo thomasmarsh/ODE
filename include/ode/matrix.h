@@ -241,7 +241,7 @@ ODE_PURE_INLINE size_t _dEstimateLDLTRemoveTmpbufSize(int n2, int nskip)
   return n2 * sizeof(dReal) + _dEstimateLDLTAddTLTmpbufSize(nskip);
 }
 
-// For internal use
+/* For internal use */
 #define dSetZero(a, n) _dSetZero(a, n)
 #define dSetValue(a, n, value) _dSetValue(a, n, value)
 #define dDot(a, b, n) _dDot(a, b, n)
@@ -270,7 +270,7 @@ ODE_PURE_INLINE size_t _dEstimateLDLTRemoveTmpbufSize(int n2, int nskip)
 #define dEstimateLDLTRemoveTmpbufSize(n2, nskip) _dEstimateLDLTRemoveTmpbufSize(n2, nskip)
 
 
-#endif // defined(__ODE__)
+#endif /* defined(__ODE__) */
 
 
 #ifdef __cplusplus

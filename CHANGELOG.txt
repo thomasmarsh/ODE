@@ -8,6 +8,11 @@ the rules for this file:
   * keep the format consistent (79 char width, M/D/Y date format).
 
 ------------------------------------------------------------------------------
+06/08/12 Daniel K. O.
+        * Removed the need for defining dSINGLE/dDOUBLE; this is stored now in
+          the generated ode/precision.h header.
+        * Some code cleanup to get rid of GCC warnings.
+
 05/30/12 Daniel K. O.
         * Made drawstuff draw shadows for lines.
         * Fixed dhinge's last constraint to properly handle rotations.

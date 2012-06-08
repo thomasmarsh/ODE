@@ -1,7 +1,8 @@
 SUBDIRS = Ice
 
 noinst_LTLIBRARIES = libOPCODE.la
-AM_CPPFLAGS= -fno-strict-aliasing -I$(top_srcdir)/include
+AM_CPPFLAGS= -I$(top_srcdir)/include \
+             -I$(top_builddir)/include
 
 libOPCODE_la_SOURCES =  OPC_AABBCollider.cpp    OPC_AABBCollider.h \
                         OPC_AABBTree.cpp        OPC_AABBTree.h \

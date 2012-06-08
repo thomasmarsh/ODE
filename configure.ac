@@ -1,7 +1,7 @@
 dnl AC_INIT does not take a macro as a version nr: set it separately! - Bram
 AC_INIT([ODE],[0.12],[ode@ode.org])
-ODE_RELEASE=0.12
-AC_SUBST(ODE_RELEASE)
+ODE_VERSION=0.12
+AC_SUBST(ODE_VERSION)
 
 # Those are instructions from the Libtool manual:
 #  1. Start with version information of `0:0:0' for each libtool library.
@@ -120,18 +120,15 @@ AM_CONDITIONAL(TRIMESH, test $opcode = yes -o $gimpact = yes)
 AC_MSG_CHECKING(if double precision is requested)
 AC_ARG_ENABLE(double-precision,
         AS_HELP_STRING([--enable-double-precision],
-        [Configure ODE to work with double precision, if not specified, single precision is used]
-        ),
-        precision=$enableval,precision=no)
-AC_MSG_RESULT([$precision])
-if test "$precision" = yes;
+        [Configure ODE to work with double precision, if not specified, single precision is used @<:@default=no@:>@]),
+        usedouble=$enableval,usedouble=no)
+AC_MSG_RESULT([$usedouble])
+if test "$usedouble" = yes;
 then
-        ODE_PRECISION=-DdDOUBLE
+        ODE_PRECISION=dDOUBLE
 else
-        ODE_PRECISION=-DdSINGLE
+        ODE_PRECISION=dSINGLE
 fi
-
-CPPFLAGS="$CPPFLAGS $ODE_PRECISION"
 AC_SUBST(ODE_PRECISION)
 
 
@@ -487,15 +484,16 @@ typedef uintptr_t intP;
 dnl Finally write our Makefiles
 AC_CONFIG_FILES([
  Makefile
- include/Makefile
- include/ode/Makefile
- include/drawstuff/Makefile
- ode/Makefile
- ode/src/Makefile
- ode/src/joints/Makefile
  drawstuff/Makefile
  drawstuff/src/Makefile
  drawstuff/dstest/Makefile
+ include/Makefile
+ include/drawstuff/Makefile
+ include/ode/Makefile
+ include/ode/precision.h
+ ode/Makefile
+ ode/src/Makefile
+ ode/src/joints/Makefile
  ode/demo/Makefile
  OPCODE/Makefile
  OPCODE/Ice/Makefile
@@ -521,7 +519,7 @@ dnl Print some useful information
 echo "Configuration:"
 echo "  Build  system type:      $build"
 echo "  Host   system type:      $host"
-echo "  Use double precision:    $precision"
+echo "  Use double precision:    $usedouble"
 echo "  Use drawstuff:           $drawstuff"
 echo "  Demos enabled:           $enable_demos"
 echo "  Use OPCODE:              $opcode"

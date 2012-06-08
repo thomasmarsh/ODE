@@ -20,6 +20,10 @@
 #include <ccd/polytope.h>
 #include <ccd/alloc.h>
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 _ccd_inline void _ccdPtNearestUpdate(ccd_pt_t *pt, ccd_pt_el_t *el)
 {
     if (ccdEq(pt->nearest_dist, el->dist)){

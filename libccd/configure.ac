@@ -4,7 +4,7 @@
 #AC_PREREQ([2.65])
 AC_INIT([libccd], [1.0], [danfis@danfis.cz])
 AC_CONFIG_SRCDIR([src/ccd.c])
-AC_CONFIG_HEADERS([src/ccd/config.h])
+AC_CONFIG_HEADERS([src/config.h])
 AM_INIT_AUTOMAKE
 
 # Checks for programs.
@@ -36,14 +36,15 @@ AC_ARG_ENABLE(double-precision,
               [use_double=$enableval])
 if test x$use_double = xno
 then
-        AC_DEFINE([CCD_SINGLE], [], [use single precision])
+        CCD_PRECISION=CCD_SINGLE
 else
-        AC_DEFINE([CCD_DOUBLE], [], [use double precision])
+        CCD_PRECISION=CCD_DOUBLE
 fi
-
+AC_SUBST(CCD_PRECISION)
 
 AC_CONFIG_FILES([Makefile
                  src/Makefile
+                 src/ccd/precision.h
                  src/testsuites/Makefile
                  src/testsuites/cu/Makefile])
 AC_OUTPUT

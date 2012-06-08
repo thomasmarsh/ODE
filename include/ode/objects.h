@@ -243,7 +243,7 @@ ODE_API void dWorldCleanupWorkingMemory(dWorldID w);
 typedef struct
 {
   unsigned struct_size;
-  float reserve_factor; // Use float as precision does not matter here
+  float reserve_factor; /* Use float as precision does not matter here*/
   unsigned reserve_minimum;
 
 } dWorldStepReserveInfo;

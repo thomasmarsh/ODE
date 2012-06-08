@@ -19,6 +19,10 @@
 #include <ccd/vec3.h>
 #include <ccd/dbg.h>
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 static CCD_VEC3(__ccd_vec3_origin, CCD_ZERO, CCD_ZERO, CCD_ZERO);
 ccd_vec3_t *ccd_vec3_origin = &__ccd_vec3_origin;
 

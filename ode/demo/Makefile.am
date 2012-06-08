@@ -1,4 +1,5 @@
-AM_CPPFLAGS = -I$(abs_top_srcdir)/include \
+AM_CPPFLAGS = -I$(top_srcdir)/include \
+        -I$(top_builddir)/include \
         -DDRAWSTUFF_TEXTURE_PATH="\"$(abs_top_srcdir)/drawstuff/textures\""
 
 if X11

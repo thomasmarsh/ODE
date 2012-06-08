@@ -21,10 +21,9 @@
 #include <math.h>
 #include <float.h>
 #include <stdlib.h>
+
+#include <ccd/precision.h>
 #include <ccd/compiler.h>
-#ifdef HAVE_CONFIG_H
-#include <ccd/config.h>
-#endif
 
 #ifdef __cplusplus
 extern "C" {
@@ -39,13 +38,13 @@ extern "C" {
 
 
 #if defined(_MSC_VER)
-// Define fmin, fmax, fminf, fmaxf which are missing from MSVC (up to VS2005 at least)
+/* Define fmin, fmax, fminf, fmaxf which are missing from MSVC (up to VS2005 at least) */
 static __inline double fmin(double x, double y) { return __min(x, y); }
 static __inline double fmax(double x, double y) { return __max(x, y); }
 static __inline float fminf(float x, float y) { return __min(x, y); }
 static __inline float fmaxf(float x, float y) { return __max(x, y); }
 
-#endif // #if defined(_MSC_VER)
+#endif /* #if defined(_MSC_VER) */
 
 
 #ifdef CCD_SINGLE
@@ -55,7 +54,7 @@ static __inline float fmaxf(float x, float y) { return __max(x, y); }
 
 typedef float ccd_real_t;
 
-//# define CCD_EPS 1E-6
+/*# define CCD_EPS 1E-6*/
 # define CCD_EPS FLT_EPSILON
 
 # define CCD_REAL_MAX FLT_MAX
@@ -70,7 +69,7 @@ typedef float ccd_real_t;
 #ifdef CCD_DOUBLE
 typedef double ccd_real_t;
 
-//# define CCD_EPS 1E-10
+/*# define CCD_EPS 1E-10*/
 # define CCD_EPS DBL_EPSILON
 
 # define CCD_REAL_MAX DBL_MAX

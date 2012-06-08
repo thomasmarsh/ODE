@@ -41,34 +41,31 @@
 
 
 
-// Some vector math
+/* Some vector math */
 ODE_PURE_INLINE void dAddVectors3(dReal *res, const dReal *a, const dReal *b)
 {
-  dReal res_0, res_1, res_2;
-  res_0 = a[0] + b[0];
-  res_1 = a[1] + b[1];
-  res_2 = a[2] + b[2];
-  // Only assign after all the calculations are over to avoid incurring memory aliasing
+  const dReal res_0 = a[0] + b[0];
+  const dReal res_1 = a[1] + b[1];
+  const dReal res_2 = a[2] + b[2];
+  /* Only assign after all the calculations are over to avoid incurring memory aliasing*/
   res[0] = res_0; res[1] = res_1; res[2] = res_2;
 }
 
 ODE_PURE_INLINE void dSubtractVectors3(dReal *res, const dReal *a, const dReal *b)
 {
-  dReal res_0, res_1, res_2;
-  res_0 = a[0] - b[0];
-  res_1 = a[1] - b[1];
-  res_2 = a[2] - b[2];
-  // Only assign after all the calculations are over to avoid incurring memory aliasing
+  const dReal res_0 = a[0] - b[0];
+  const dReal res_1 = a[1] - b[1];
+  const dReal res_2 = a[2] - b[2];
+  /* Only assign after all the calculations are over to avoid incurring memory aliasing*/
   res[0] = res_0; res[1] = res_1; res[2] = res_2;
 }
 
 ODE_PURE_INLINE void dAddScaledVectors3(dReal *res, const dReal *a, const dReal *b, dReal a_scale, dReal b_scale)
 {
-  dReal res_0, res_1, res_2;
-  res_0 = a_scale * a[0] + b_scale * b[0];
-  res_1 = a_scale * a[1] + b_scale * b[1];
-  res_2 = a_scale * a[2] + b_scale * b[2];
-  // Only assign after all the calculations are over to avoid incurring memory aliasing
+  const dReal res_0 = a_scale * a[0] + b_scale * b[0];
+  const dReal res_1 = a_scale * a[1] + b_scale * b[1];
+  const dReal res_2 = a_scale * a[2] + b_scale * b[2];
+  /* Only assign after all the calculations are over to avoid incurring memory aliasing*/
   res[0] = res_0; res[1] = res_1; res[2] = res_2;
 }
 
@@ -88,42 +85,38 @@ ODE_PURE_INLINE void dNegateVector3(dReal *res)
 
 ODE_PURE_INLINE void dCopyVector3(dReal *res, const dReal *a)
 {
-  dReal res_0, res_1, res_2;
-  res_0 = a[0];
-  res_1 = a[1];
-  res_2 = a[2];
-  // Only assign after all the calculations are over to avoid incurring memory aliasing
+  const dReal res_0 = a[0];
+  const dReal res_1 = a[1];
+  const dReal res_2 = a[2];
+  /* Only assign after all the calculations are over to avoid incurring memory aliasing*/
   res[0] = res_0; res[1] = res_1; res[2] = res_2;
 }
 
 ODE_PURE_INLINE void dCopyScaledVector3(dReal *res, const dReal *a, dReal nScale)
 {
-  dReal res_0, res_1, res_2;
-  res_0 = a[0] * nScale;
-  res_1 = a[1] * nScale;
-  res_2 = a[2] * nScale;
-  // Only assign after all the calculations are over to avoid incurring memory aliasing
+  const dReal res_0 = a[0] * nScale;
+  const dReal res_1 = a[1] * nScale;
+  const dReal res_2 = a[2] * nScale;
+  /* Only assign after all the calculations are over to avoid incurring memory aliasing*/
   res[0] = res_0; res[1] = res_1; res[2] = res_2;
 }
 
 ODE_PURE_INLINE void dCopyNegatedVector3(dReal *res, const dReal *a)
 {
-  dReal res_0, res_1, res_2;
-  res_0 = -a[0];
-  res_1 = -a[1];
-  res_2 = -a[2];
-  // Only assign after all the calculations are over to avoid incurring memory aliasing
+  const dReal res_0 = -a[0];
+  const dReal res_1 = -a[1];
+  const dReal res_2 = -a[2];
+  /* Only assign after all the calculations are over to avoid incurring memory aliasing*/
   res[0] = res_0; res[1] = res_1; res[2] = res_2;
 }
 
 ODE_PURE_INLINE void dCopyVector4(dReal *res, const dReal *a)
 {
-  dReal res_0, res_1, res_2, res_3;
-  res_0 = a[0];
-  res_1 = a[1];
-  res_2 = a[2];
-  res_3 = a[3];
-  // Only assign after all the calculations are over to avoid incurring memory aliasing
+  const dReal res_0 = a[0];
+  const dReal res_1 = a[1];
+  const dReal res_2 = a[2];
+  const dReal res_3 = a[3];
+  /* Only assign after all the calculations are over to avoid incurring memory aliasing*/
   res[0] = res_0; res[1] = res_1; res[2] = res_2; res[3] = res_3;
 }
 
@@ -143,11 +136,10 @@ ODE_PURE_INLINE void dCopyMatrix4x3(dReal *res, const dReal *a)
 
 ODE_PURE_INLINE void dGetMatrixColumn3(dReal *res, const dReal *a, unsigned n)
 {
-  dReal res_0, res_1, res_2;
-  res_0 = a[n + 0];
-  res_1 = a[n + 4];
-  res_2 = a[n + 8];
-  // Only assign after all the calculations are over to avoid incurring memory aliasing
+  const dReal res_0 = a[n + 0];
+  const dReal res_1 = a[n + 4];
+  const dReal res_2 = a[n + 8];
+  /* Only assign after all the calculations are over to avoid incurring memory aliasing*/
   res[0] = res_0; res[1] = res_1; res[2] = res_2;
 }
 
@@ -195,11 +187,10 @@ ODE_PURE_INLINE dReal dCalcVectorDot3_44 (const dReal *a, const dReal *b) { retu
 
 ODE_PURE_INLINE void _dCalcVectorCross3(dReal *res, const dReal *a, const dReal *b, unsigned step_res, unsigned step_a, unsigned step_b)
 {
-  dReal res_0, res_1, res_2;
-  res_0 = a[  step_a]*b[2*step_b] - a[2*step_a]*b[  step_b];
-  res_1 = a[2*step_a]*b[       0] - a[       0]*b[2*step_b];
-  res_2 = a[       0]*b[  step_b] - a[  step_a]*b[       0];
-  // Only assign after all the calculations are over to avoid incurring memory aliasing
+  const dReal res_0 = a[  step_a]*b[2*step_b] - a[2*step_a]*b[  step_b];
+  const dReal res_1 = a[2*step_a]*b[       0] - a[       0]*b[2*step_b];
+  const dReal res_2 = a[       0]*b[  step_b] - a[  step_a]*b[       0];
+  /* Only assign after all the calculations are over to avoid incurring memory aliasing*/
   res[         0] = res_0;
   res[  step_res] = res_1;
   res[2*step_res] = res_2;
@@ -279,21 +270,19 @@ ODE_PURE_INLINE dReal dCalcPointsDistance3(const dReal *a, const dReal *b)
 
 ODE_PURE_INLINE void dMultiplyHelper0_331(dReal *res, const dReal *a, const dReal *b)
 {
-  dReal res_0, res_1, res_2;
-  res_0 = dCalcVectorDot3(a, b);
-  res_1 = dCalcVectorDot3(a + 4, b);
-  res_2 = dCalcVectorDot3(a + 8, b);
-  // Only assign after all the calculations are over to avoid incurring memory aliasing
+  const dReal res_0 = dCalcVectorDot3(a, b);
+  const dReal res_1 = dCalcVectorDot3(a + 4, b);
+  const dReal res_2 = dCalcVectorDot3(a + 8, b);
+  /* Only assign after all the calculations are over to avoid incurring memory aliasing*/
   res[0] = res_0; res[1] = res_1; res[2] = res_2;
 }
 
 ODE_PURE_INLINE void dMultiplyHelper1_331(dReal *res, const dReal *a, const dReal *b)
 {
-  dReal res_0, res_1, res_2;
-  res_0 = dCalcVectorDot3_41(a, b);
-  res_1 = dCalcVectorDot3_41(a + 1, b);
-  res_2 = dCalcVectorDot3_41(a + 2, b);
-  // Only assign after all the calculations are over to avoid incurring memory aliasing
+  const dReal res_0 = dCalcVectorDot3_41(a, b);
+  const dReal res_1 = dCalcVectorDot3_41(a + 1, b);
+  const dReal res_2 = dCalcVectorDot3_41(a + 2, b);
+  /* Only assign after all the calculations are over to avoid incurring memory aliasing*/
   res[0] = res_0; res[1] = res_1; res[2] = res_2;
 }
 
@@ -304,11 +293,10 @@ ODE_PURE_INLINE void dMultiplyHelper0_133(dReal *res, const dReal *a, const dRea
 
 ODE_PURE_INLINE void dMultiplyHelper1_133(dReal *res, const dReal *a, const dReal *b)
 {
-  dReal res_0, res_1, res_2;
-  res_0 = dCalcVectorDot3_44(a, b);
-  res_1 = dCalcVectorDot3_44(a + 1, b);
-  res_2 = dCalcVectorDot3_44(a + 2, b);
-  // Only assign after all the calculations are over to avoid incurring memory aliasing
+  const dReal res_0 = dCalcVectorDot3_44(a, b);
+  const dReal res_1 = dCalcVectorDot3_44(a + 1, b);
+  const dReal res_2 = dCalcVectorDot3_44(a + 2, b);
+  /* Only assign after all the calculations are over to avoid incurring memory aliasing*/
   res[0] = res_0; res[1] = res_1; res[2] = res_2;
 }
 
@@ -408,7 +396,7 @@ ODE_PURE_INLINE void dMultiplyAdd2_333(dReal *res, const dReal *a, const dReal *
 }
 
 
-// Include legacy macros here
+/* Include legacy macros here */
 #include <ode/odemath_legacy.h>
 
 
@@ -420,11 +408,11 @@ extern "C" {
  * normalize 3x1 and 4x1 vectors (i.e. scale them to unit length)
  */
 
-// For DLL export
+/* For DLL export*/
 ODE_API int  dSafeNormalize3 (dVector3 a);
 ODE_API int  dSafeNormalize4 (dVector4 a);
-ODE_API void dNormalize3 (dVector3 a); // Potentially asserts on zero vec
-ODE_API void dNormalize4 (dVector4 a); // Potentially asserts on zero vec
+ODE_API void dNormalize3 (dVector3 a); /* Potentially asserts on zero vec*/
+ODE_API void dNormalize4 (dVector4 a); /* Potentially asserts on zero vec*/
 
 /*
  * given a unit length "normal" vector n, generate vectors p and q vectors

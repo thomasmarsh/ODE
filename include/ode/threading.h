@@ -118,7 +118,7 @@ typedef void dMutexGroupMutexLockFunction (dThreadingImplementationID impl, dMut
  * @see dMutexGroupMutexLockFunction
  * @see dMutexGroupMutexUnlockFunction
  */
-// typedef int dMutexGroupMutexTryLockFunction (dThreadingImplementationID impl, dMutexGroupID mutex_group, dmutexindex_t mutex_index);
+/* typedef int dMutexGroupMutexTryLockFunction (dThreadingImplementationID impl, dMutexGroupID mutex_group, dmutexindex_t mutex_index);*/
 
 /**
  * @brief Unlocks a mutex in a group of muteces.
@@ -402,4 +402,4 @@ typedef struct dxThreadingFunctionsInfo
 }
 #endif
 
-#endif // #ifndef _ODE_THREADING_H_
+#endif /* #ifndef _ODE_THREADING_H_ */

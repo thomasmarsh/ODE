@@ -156,7 +156,7 @@ ODE_API void dGeomTriMeshSetData(dGeomID g, dTriMeshDataID Data);
 ODE_API dTriMeshDataID dGeomTriMeshGetData(dGeomID g);
 
 
-// enable/disable/check temporal coherence
+/* enable/disable/check temporal coherence*/
 ODE_API void dGeomTriMeshEnableTC(dGeomID g, int geomClass, int enable);
 ODE_API int dGeomTriMeshIsTCEnabled(dGeomID g, int geomClass);
 
