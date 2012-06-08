@@ -17,6 +17,11 @@
 
 #include <ccd/support.h>
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+
 void __ccdSupport(const void *obj1, const void *obj2,
                   const ccd_vec3_t *_dir, const ccd_t *ccd,
                   ccd_support_t *supp)

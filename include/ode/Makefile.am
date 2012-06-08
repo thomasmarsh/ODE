@@ -24,4 +24,8 @@ libode_la_include_HEADERS = 	collision_trimesh.h \
 				threading_impl.h \
 				odeconfig.h
 
-EXTRA_DIST = README
+EXTRA_DIST = README precision.h.in
+
+dist_libode_la_include_HEADERS = precision.h
+
+

@@ -261,4 +261,4 @@ ODE_API void dThreadingFreeThreadPool(dThreadingThreadPoolID pool);
 }
 #endif
 
-#endif // #ifndef _ODE_THREADING_IMPL_H_
+#endif /* #ifndef _ODE_THREADING_IMPL_H_ */

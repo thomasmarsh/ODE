@@ -672,7 +672,7 @@ enum dxISLANDSIZESELEMENT
     dxISE_BODIES_COUNT,
     dxISE_JOINTS_COUNT,
 
-    dxISE__MAX,
+    dxISE__MAX
 };
 
 // This estimates dynamic memory requirements for dxProcessIslands

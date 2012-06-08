@@ -515,4 +515,5 @@ void gim_aabbset_ray_collision(vec3f vorigin,vec3f vdir, GREAL tmax, GIM_AABB_SE
             GIM_DYNARRAY_PUSH_ITEM(GUINT32,(*collided),i);
         }
     }
+    (void)tparam;
 }

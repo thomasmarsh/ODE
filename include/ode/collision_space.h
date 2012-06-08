@@ -54,8 +54,8 @@ ODE_API dSpaceID dHashSpaceCreate (dSpaceID space);
 ODE_API dSpaceID dQuadTreeSpaceCreate (dSpaceID space, const dVector3 Center, const dVector3 Extents, int Depth);
 
 
-// SAP
-// Order XZY or ZXY usually works best, if your Y is up.
+/* SAP */
+/* Order XZY or ZXY usually works best, if your Y is up. */
 #define dSAP_AXES_XYZ  ((0)|(1<<2)|(2<<4))
 #define dSAP_AXES_XZY  ((0)|(2<<2)|(1<<4))
 #define dSAP_AXES_YXZ  ((1)|(0<<2)|(2<<4))

@@ -80,11 +80,11 @@ typedef struct dSurfaceParameters {
  * @ingroup collide
  */
 typedef struct dContactGeom {
-  dVector3 pos;          ///< contact position
-  dVector3 normal;       ///< normal vector
-  dReal depth;           ///< penetration depth
-  dGeomID g1,g2;         ///< the colliding geoms
-  int side1,side2;       ///< (to be documented)
+    dVector3 pos;          /*< contact position*/
+    dVector3 normal;       /*< normal vector*/
+    dReal depth;           /*< penetration depth*/
+    dGeomID g1,g2;         /*< the colliding geoms*/
+    int side1,side2;       /*< (to be documented)*/
 } dContactGeom;
 
 

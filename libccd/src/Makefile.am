@@ -1,5 +1,7 @@
 SUBDIRS = . testsuites
 
+AM_CFLAGS = -std=c99
+
 noinst_LTLIBRARIES = libccd.la
 
 libccd_la_SOURCES = alloc.c ccd/alloc.h \
@@ -14,3 +16,6 @@ libccd_la_SOURCES = alloc.c ccd/alloc.h \
 		vec3.c ccd/vec3.h \
         mpr.c
 
+nodist_libccd_la_SOURCES = ccd/precision.h
+
+EXTRA_DIST = ccd/precision.h.in

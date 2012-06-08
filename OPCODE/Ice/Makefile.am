@@ -1,4 +1,6 @@
-AM_CPPFLAGS = -I $(top_srcdir)/OPCODE -I $(top_srcdir)/include
+AM_CPPFLAGS = -I$(top_srcdir)/OPCODE \
+              -I$(top_srcdir)/include \
+              -I$(top_builddir)/include
 
 noinst_LTLIBRARIES = libIce.la
 libIce_la_SOURCES = \

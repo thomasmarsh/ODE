@@ -74,7 +74,7 @@ extern "C" {
  * @ingroup init
  */
 enum dInitODEFlags {
-	dInitFlagManualThreadCleanup = 0x00000001 //@< Thread local data is to be cleared explicitly on @c dCleanupODEAllDataForThread function call
+    dInitFlagManualThreadCleanup = 0x00000001 /*@< Thread local data is to be cleared explicitly on @c dCleanupODEAllDataForThread function call*/
 };
 
 /**
@@ -144,11 +144,11 @@ ODE_API int dInitODE2(unsigned int uiInitFlags/*=0*/);
  * @ingroup init
  */
 enum dAllocateODEDataFlags {
-	dAllocateFlagBasicData = 0, //@< Allocate basic data required for library to operate
+    dAllocateFlagBasicData = 0, /*@< Allocate basic data required for library to operate*/
 
-	dAllocateFlagCollisionData = 0x00000001, //@< Allocate data for collision detection
+    dAllocateFlagCollisionData = 0x00000001, /*@< Allocate data for collision detection*/
 
-	dAllocateMaskAll = ~0U //@< Allocate all the possible data that is currently defined or will be defined in the future.
+    dAllocateMaskAll = ~0 /*@< Allocate all the possible data that is currently defined or will be defined in the future.*/
 };
 
 /**
@@ -229,8 +229,8 @@ ODE_API void dCloseODE(void);
 
 
 #ifdef __cplusplus
-} // extern "C"
+} /* extern "C" */
 #endif
 
 
-#endif // _ODE_ODEINIT_H_
+#endif /* _ODE_ODEINIT_H_ */

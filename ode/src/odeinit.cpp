@@ -53,7 +53,7 @@ enum EODEINITMODE
     OIM_AUTOTLSCLEANUP = OIM__MIN,
     OIM_MANUALTLSCLEANUP,
 
-    OIM__MAX,
+    OIM__MAX
 };
 
 #if dTLS_ENABLED
@@ -87,7 +87,7 @@ static inline bool IsODEAnyModeInitialized()
 
 enum
 {
-    TLD_INTERNAL_COLLISIONDATA_ALLOCATED = 0x00000001,
+    TLD_INTERNAL_COLLISIONDATA_ALLOCATED = 0x00000001
 };
 
 static bool AllocateThreadBasicDataIfNecessary(EODEINITMODE imInitMode)

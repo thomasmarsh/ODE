@@ -20,6 +20,10 @@
 #include <ccd/simplex.h>
 #include <ccd/dbg.h>
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 /** Finds origin (center) of Minkowski difference (actually it can be any
  *  interior point of Minkowski difference. */
 _ccd_inline void findOrigin(const void *obj1, const void *obj2, const ccd_t *ccd,

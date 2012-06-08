@@ -22,7 +22,7 @@ but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the files
 LICENSE.TXT and LICENSE-BSD.TXT for more details.
 
- * Installation instructions are in the INSTALL file
+ * Installation instructions are in the INSTALL.txt file
 
  * The ODE web pages are at http://ode.org/
 

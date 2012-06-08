@@ -36,10 +36,10 @@ while test $# -gt 0; do
       echo $exec_prefix
       ;;
     --version)
-      echo @ODE_RELEASE@
+      echo @ODE_VERSION@
       ;;
     --cflags)
-      echo  -I@includedir@ @ODE_PRECISION@
+      echo  -I@includedir@
       ;;
     --libs)
       echo  -L@libdir@ -lode

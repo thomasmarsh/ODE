@@ -253,7 +253,7 @@ private:
         dxPCM_STEPPER_ARENA_OBTAIN,
         dxPCM_STEPPER_STEPBODY_SERIALIZE,
 
-        dxPCM__MAX,
+        dxPCM__MAX
     };
 
     static const char *const m_aszContextMutexNames[dxPCM__MAX];

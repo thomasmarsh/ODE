@@ -18,6 +18,11 @@
 #include <stdio.h>
 #include <ccd/alloc.h>
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+
 void *ccdRealloc(void *ptr, size_t size)
 {
     void *ret = realloc(ptr, size);

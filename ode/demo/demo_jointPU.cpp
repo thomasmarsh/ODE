@@ -642,7 +642,6 @@ int main (int argc, char **argv)
 
 
   dMatrix3 R;
-  dGeomID id;
   // Create the first axis of the universal joi9nt
   geom[AXIS1] = dCreateGeomTransform (space);
   //Rotation of 90deg around y
@@ -651,7 +650,6 @@ int main (int argc, char **argv)
   dGeomSetCategoryBits (geom[AXIS1], catBits[AXIS1]);
   dGeomSetCollideBits (geom[AXIS1],
                        catBits[ALL]  & ~catBits[JOINT] & ~catBits[W] & ~catBits[D]);
-  id = geom[AXIS1];
   dGeomTransformSetGeom (geom[AXIS1],  dCreateCylinder (0, axDim[RADIUS], axDim[LENGTH]) );
 
 
@@ -663,7 +661,6 @@ int main (int argc, char **argv)
   dGeomSetCategoryBits (geom[AXIS2], catBits[AXIS2]);
   dGeomSetCollideBits (geom[AXIS2],
                        catBits[ALL]  & ~catBits[JOINT] & ~catBits[W] & ~catBits[D]);
-  id = geom[AXIS2];
   dGeomTransformSetGeom (geom[AXIS2],  dCreateCylinder (0, axDim[RADIUS], axDim[LENGTH]) );
 
 

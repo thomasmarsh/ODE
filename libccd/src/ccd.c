@@ -24,6 +24,10 @@
 #include <ccd/alloc.h>
 #include <ccd/dbg.h>
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 
 /** Performs GJK algorithm. Returns 0 if intersection was found and simplex
  *  is filled with resulting polytope. */
@@ -793,7 +797,7 @@ static void expandPolytope(ccd_pt_t *pt, ccd_pt_el_t *el,
                            const ccd_support_t *newv)
 {
     ccd_pt_vertex_t *v[5];
-    ccd_pt_edge_t *e[8];
+    ccd_pt_edge_t *e[8] = {0};
     ccd_pt_face_t *f[2];
 
 

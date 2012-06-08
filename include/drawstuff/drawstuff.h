@@ -69,7 +69,7 @@ extern "C" {
     DS_WOOD,
     DS_CHECKERED,
     DS_GROUND,
-    DS_SKY,
+    DS_SKY
   };
 
 /* draw modes */
@@ -297,7 +297,7 @@ DS_API void dsSetCapsuleQuality (int n);		/* default = 3 */
  */
 DS_API void dsSetDrawMode(int mode);
 
-// Backwards compatible API
+/* Backwards compatible API */
 #define dsDrawCappedCylinder dsDrawCapsule
 #define dsDrawCappedCylinderD dsDrawCapsuleD
 #define dsSetCappedCylinderQuality dsSetCapsuleQuality
