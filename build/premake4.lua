@@ -150,6 +150,8 @@
       os.rmdir(action.trigger)
     end
     os.remove("../ode/src/config.h")
+    os.remove("../include/ode/precision.h")
+    os.remove("../libccd/src/ccd/precision.h")
   end
   
   -- special validation for Xcode  
@@ -172,6 +174,7 @@
 	end
 	configs = newconfigs
   end
+  
   
   if not _OPTIONS["only-single"] and not _OPTIONS["only-double"] then
     addconfigs("Single", "Double")
@@ -209,11 +212,11 @@
     configuration { "Release*" }
       flags   { "OptimizeSpeed", "NoFramePointer" }
 
-    configuration { "only-single or *Single*" }
-      defines { "dSINGLE", "CCD_SINGLE" }
+--    configuration { "only-single or *Single*" }
+--      defines { "dSINGLE", "CCD_SINGLE" }
       
-    configuration { "only-double or *Double*" }
-      defines { "dDOUBLE", "CCD_DOUBLE" }
+--    configuration { "only-double or *Double*" }
+--      defines { "dDOUBLE", "CCD_DOUBLE" }
     
     configuration { "Windows" }
       defines { "WIN32" }
@@ -372,8 +375,8 @@
 ----------------------------------------------------------------------
 
   if _ACTION and _ACTION ~= "clean" then
-    io.input("config-default.h")
-    local text = io.read("*a")
+    local infile = io.open("config-default.h", "r")
+    local text = infile:read("*a")
 
     if _OPTIONS["no-trimesh"] then
       text = string.gsub(text, "#define dTRIMESH_ENABLED 1", "/* #define dTRIMESH_ENABLED 1 */")
@@ -398,11 +401,37 @@
       text = string.gsub(text, "#define dTRIMESH_OPCODE_USE_OLD_TRIMESH_TRIMESH_COLLIDER 0", "#define dTRIMESH_OPCODE_USE_OLD_TRIMESH_TRIMESH_COLLIDER 1")
     end
     
-    io.output("../ode/src/config.h")
-    io.write(text)
-    io.close()
+    local outfile = io.open("../ode/src/config.h", "w")
+    outfile:write(text)
+    outfile:close()
   end
 
+----------------------------
+-- Write precision headers
+----------------------------
+  
+  function generateheader(headerfile, placeholder, precstr)
+    local outfile = io.open(headerfile, "w")
+    for i in io.lines(headerfile .. ".in")
+    do
+      local j,_ = string.gsub(i, placeholder, precstr)
+      --print("writing " .. j .. " into " .. headerfile)
+      outfile:write(j .. "\n")
+    end
+    outfile:close()
+  end
+  
+  function generate(precstr)
+    generateheader("../include/ode/precision.h", "@ODE_PRECISION@", "d" .. precstr)
+    generateheader("../libccd/src/ccd/precision.h", "@CCD_PRECISION@", "CCD_" .. precstr)
+  end
+  
+  if _OPTIONS["only-single"] then
+    generate("SINGLE")
+  end
+  if _OPTIONS["only-double"] then
+    generate("DOUBLE")
+  end
 
 ----------------------------------------------------------------------
 -- The DrawStuff library project
@@ -445,7 +474,6 @@
         links   { "X11", "GL", "GLU" }
 
   end
-  
 
 
 ----------------------------------------------------------------------
