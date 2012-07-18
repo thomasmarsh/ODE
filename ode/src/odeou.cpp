@@ -41,12 +41,15 @@ ODE interface to OU library implementation.
 
 #if dOU_ENABLED
 
+BEGIN_NAMESPACE_OU();
 template<>
 const char *const CEnumUnsortedElementArray<EASSERTIONFAILURESEVERITY, AFS__MAX, const char *>::m_aetElementArray[] =
 {
     "assert", // AFS_ASSERT,
     "check", // AFS_CHECK,
 };
+END_NAMESPACE_OU();
+
 static const CEnumUnsortedElementArray<EASSERTIONFAILURESEVERITY, AFS__MAX, const char *> g_aszAssertionFailureSeverityNames;
 
 
