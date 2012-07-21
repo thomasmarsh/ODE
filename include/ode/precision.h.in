@@ -5,6 +5,12 @@
  * but never both!
  */
 
-#define @ODE_PRECISION@
+#if defined(dIDESINGLE)
+#define dSINGLE
+#elif defined(dIDEDOUBLE)
+#define dDOUBLE
+#else
+#@ODE_PRECISION_DEF@
+#endif
 
 #endif
