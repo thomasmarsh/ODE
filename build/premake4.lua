@@ -155,7 +155,7 @@
   end
   
   -- special validation for Xcode  
-  if _ACTION == "xcode3" and (not _OPTIONS["only-single"] and not _OPTIONS["only-double"]) then
+  if _ACTION == "xcode3" and (not _OPTIONS["only-static"] and not _OPTIONS["only-shared"]) then
     error(
 	  "Xcode does not support different library types in a single project.\n" ..
 	  "Please use one of the flags: --only-static or --only-shared", 0)
@@ -212,11 +212,11 @@
     configuration { "Release*" }
       flags   { "OptimizeSpeed", "NoFramePointer" }
 
---    configuration { "only-single or *Single*" }
---      defines { "dSINGLE", "CCD_SINGLE" }
+    configuration { "*Single*" }
+      defines { "dIDESINGLE", "CCD_IDESINGLE" }
       
---    configuration { "only-double or *Double*" }
---      defines { "dDOUBLE", "CCD_DOUBLE" }
+    configuration { "*Double*" }
+      defines { "dIDEDOUBLE", "CCD_IDEDOUBLE" }
     
     configuration { "Windows" }
       defines { "WIN32" }
@@ -421,16 +421,17 @@
     outfile:close()
   end
   
-  function generate(precstr)
-    generateheader("../include/ode/precision.h", "@ODE_PRECISION@", "d" .. precstr)
-    generateheader("../libccd/src/ccd/precision.h", "@CCD_PRECISION@", "CCD_" .. precstr)
+  function generate(directive, precstr)
+    generateheader("../include/ode/precision.h", "@ODE_PRECISION_DEF@", directive .. " d" .. precstr)
+    generateheader("../libccd/src/ccd/precision.h", "@CCD_PRECISION_DEF@", directive .. " CCD_" .. precstr)
   end
   
   if _OPTIONS["only-single"] then
-    generate("SINGLE")
-  end
-  if _OPTIONS["only-double"] then
-    generate("DOUBLE")
+    generate("define", "SINGLE")
+  elseif _OPTIONS["only-double"] then
+    generate("define", "DOUBLE")
+  else 
+    generate("error", "<PRECISION> is undefined")
   end
 
 ----------------------------------------------------------------------

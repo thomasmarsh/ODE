@@ -114,7 +114,7 @@
   #define _ode_copysign(x, y) _copysign(x, y)
   #define _ode_nextafterf(x, y) _nextafterf(x, y)
   #define _ode_nextafter(x, y) _nextafter(x, y)
-  #if !defined(_WIN64) && dSINGLE
+  #if !defined(_WIN64) && defined(dSINGLE)
     #define _ODE__NEXTAFTERF_REQUIRED
     ODE_EXTERN_C float _nextafterf(float x, float y);
   #endif

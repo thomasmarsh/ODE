@@ -3,6 +3,12 @@
 
 /* define either CCD_SINGLE or CCD_DOUBLE */
 
-#define @CCD_PRECISION@
+#if defined(CCD_IDESINGLE)
+#define CCD_SINGLE
+#elif defined(CCD_IDEDOUBLE)
+#define CCD_DOUBLE
+#else
+#@CCD_PRECISION_DEF@
+#endif
 
 #endif
