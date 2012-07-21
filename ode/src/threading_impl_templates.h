@@ -43,8 +43,6 @@
 
 #include <new>
 
-#include <inttypes.h>
-
 
 #define dMAKE_JOBINSTANCE_RELEASEE(job_instance) ((dCallReleaseeID)(job_instance))
 #define dMAKE_RELEASEE_JOBINSTANCE(releasee) ((dxThreadedJobInfo *)(releasee))
@@ -74,7 +72,7 @@ private:
     union
     {
         dmutexindex_t     m_mutex_count;
-        uint64_t m_reserved_for_allignment;
+        unsigned long     m_reserved_for_allignment[2];
 
     } m_un;
 
