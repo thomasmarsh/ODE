@@ -10,7 +10,7 @@
 #elif defined(dIDEDOUBLE)
 #define dDOUBLE
 #else
-#@ODE_PRECISION_DEF@
+#define @ODE_PRECISION@
 #endif
 
 #endif

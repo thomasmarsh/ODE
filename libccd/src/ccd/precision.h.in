@@ -8,7 +8,7 @@
 #elif defined(CCD_IDEDOUBLE)
 #define CCD_DOUBLE
 #else
-#@CCD_PRECISION_DEF@
+#define @CCD_PRECISION@
 #endif
 
 #endif
