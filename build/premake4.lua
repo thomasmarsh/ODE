@@ -421,17 +421,17 @@
     outfile:close()
   end
   
-  function generate(directive, precstr)
-    generateheader("../include/ode/precision.h", "@ODE_PRECISION_DEF@", directive .. " d" .. precstr)
-    generateheader("../libccd/src/ccd/precision.h", "@CCD_PRECISION_DEF@", directive .. " CCD_" .. precstr)
+  function generate(precstr)
+    generateheader("../include/ode/precision.h", "@ODE_PRECISION@", "d" .. precstr)
+    generateheader("../libccd/src/ccd/precision.h", "@CCD_PRECISION@", "CCD_" .. precstr)
   end
   
   if _OPTIONS["only-single"] then
-    generate("define", "SINGLE")
+    generate("SINGLE")
   elseif _OPTIONS["only-double"] then
-    generate("define", "DOUBLE")
+    generate("DOUBLE")
   else 
-    generate("error", "<PRECISION> is undefined")
+    generate("UNDEFINEDPRECISION")
   end
 
 ----------------------------------------------------------------------
