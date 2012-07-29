@@ -77,7 +77,7 @@ struct dxJoint : public dObject
     {
         // Structure size should not exceed sizeof(pointer) bytes to have 
         // to have good memory pattern in dxQuickStepper()
-        int8 m, nub;
+        uint8 m, nub;
     };
 
     // info returned by getInfo2 function
@@ -127,7 +127,7 @@ struct dxJoint : public dObject
         // will be smaller, it can save a bit of memory from being reserved 
         // for calculations if that smaller value is returned.
 
-        int8 max_m; // Estimate of maximal `m' in Info1
+        uint8 max_m; // Estimate of maximal `m' in Info1
     };
 
 

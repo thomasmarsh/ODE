@@ -421,7 +421,7 @@ enum
 
 enum
 {
-        dGeomColliderMergeContactsValue__Default = 0, /* Used with Set... to restore default value*/
+    dGeomColliderMergeContactsValue__Default = 0, /* Used with Set... to restore default value*/
 	dGeomColliderMergeContactsValue_None = 1,
 	dGeomColliderMergeContactsValue_Normals = 2,
 	dGeomColliderMergeContactsValue_Full = 3
