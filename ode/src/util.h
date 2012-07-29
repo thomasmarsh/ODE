@@ -282,19 +282,52 @@ struct dxWorldProcessIslandsInfo
     dxJoint *const *GetJointsArray() const { return m_pJoints; }
 
 private:
-    size_t m_IslandCount;
-    unsigned int const *m_pIslandSizes;
-    dxBody *const *m_pBodies;
-    dxJoint *const *m_pJoints;
+    size_t                  m_IslandCount;
+    unsigned int            const *m_pIslandSizes;
+    dxBody                  *const *m_pBodies;
+    dxJoint                 *const *m_pJoints;
 };
 
+struct dxStepperProcessingCallContext
+{
+    dxStepperProcessingCallContext(dxWorld *world, dReal stepSize, dxWorldProcessMemArena *stepperArena, 
+        dxBody *const *islandBodiesStart, dxJoint *const *islandJointsStart): 
+        m_world(world), m_stepSize(stepSize), m_stepperArena(stepperArena), m_finalReleasee(NULL), 
+        m_islandBodiesStart(islandBodiesStart), m_islandJointsStart(islandJointsStart), m_islandBodiesCount(0), m_islandJointsCount(0)
+    {
+    }
+
+    void AssignIslandSelection(dxBody *const *islandBodiesStart, dxJoint *const *islandJointsStart, 
+        unsigned islandBodiesCount, unsigned islandJointsCount)
+    {
+        m_islandBodiesStart = islandBodiesStart;
+        m_islandJointsStart = islandJointsStart;
+        m_islandBodiesCount = islandBodiesCount;
+        m_islandJointsCount = islandJointsCount;
+    }
+
+    dxBody *const *GetSelectedIslandBodiesEnd() const { return m_islandBodiesStart + m_islandBodiesCount; }
+    dxJoint *const *GetSelectedIslandJointsEnd() const { return m_islandJointsStart + m_islandJointsCount; }
+
+    void AssignStepperCallFinalReleasee(dCallReleaseeID finalReleasee)
+    {
+        m_finalReleasee = finalReleasee;
+    }
+
+    dxWorld                 *const m_world;
+    dReal                   const m_stepSize;
+    dxWorldProcessMemArena  *m_stepperArena;
+    dCallReleaseeID         m_finalReleasee;
+    dxBody                  *const *m_islandBodiesStart;
+    dxJoint                 *const *m_islandJointsStart;
+    unsigned                m_islandBodiesCount;
+    unsigned                m_islandJointsCount;
+};
 
 #define BEGIN_STATE_SAVE(memarena, state) void *state = memarena->SaveState();
 #define END_STATE_SAVE(memarena, state) memarena->RestoreState(state)
 
-typedef void (*dstepper_fn_t) (dxWorldProcessMemArena *memarena, 
-                               dxWorld *world, dxBody * const *body, unsigned int nb,
-                               dxJoint * const *_joint, unsigned int _nj, dReal stepsize);
+typedef void (*dstepper_fn_t) (dxStepperProcessingCallContext *callContext);
 
 bool dxProcessIslands (dxWorld *world, const dxWorldProcessIslandsInfo &islandsInfo, dReal stepSize, dstepper_fn_t stepper);
 

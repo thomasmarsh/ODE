@@ -589,13 +589,17 @@ struct dJointWithInfo1
     dxJoint::Info1 info;
 };
 
-void dxQuickStepper (dxWorldProcessMemArena *memarena, 
-                     dxWorld *world, dxBody * const *body, unsigned int nb,
-                     dxJoint * const *_joint, unsigned int _nj, dReal stepsize)
+void dxQuickStepIsland(dxStepperProcessingCallContext *callContext)
 {
     IFTIMING(dTimerStart("preprocessing"));
 
-    const dReal stepsize1 = dRecip(stepsize);
+    dxWorldProcessMemArena *memarena = callContext->m_stepperArena;
+    dxWorld *world = callContext->m_world;
+    dxBody * const *body = callContext->m_islandBodiesStart;
+    unsigned int nb = callContext->m_islandBodiesCount;
+    dxJoint * const *_joint = callContext->m_islandJointsStart;
+    unsigned int _nj = callContext->m_islandJointsCount;
+    dReal stepsize = callContext->m_stepSize;
 
     {
         // number all bodies in the body list - set their tag values
@@ -618,7 +622,7 @@ void dxQuickStepper (dxWorldProcessMemArena *memarena,
             dMultiply2_333 (tmp,b->invI,b->posr.R);
             dMultiply0_333 (invIrow,b->posr.R,tmp);
 
-            if (b->flags & dxBodyGyroscopic) {
+            if ((b->flags & dxBodyGyroscopic) != 0) {
                 dMatrix3 I;
                 // compute inertia tensor in global frame
                 dMultiply2_333 (tmp,b->mass.I,b->posr.R);
@@ -639,7 +643,7 @@ void dxQuickStepper (dxWorldProcessMemArena *memarena,
         if (gravity_x) {
             for (dxBody *const *bodycurr = body; bodycurr != bodyend; bodycurr++) {
                 dxBody *b = *bodycurr;
-                if ((b->flags & dxBodyNoGravity)==0) {
+                if ((b->flags & dxBodyNoGravity) == 0) {
                     b->facc[0] += b->mass.mass * gravity_x;
                 }
             }
@@ -648,7 +652,7 @@ void dxQuickStepper (dxWorldProcessMemArena *memarena,
         if (gravity_y) {
             for (dxBody *const *bodycurr = body; bodycurr != bodyend; bodycurr++) {
                 dxBody *b = *bodycurr;
-                if ((b->flags & dxBodyNoGravity)==0) {
+                if ((b->flags & dxBodyNoGravity) == 0) {
                     b->facc[1] += b->mass.mass * gravity_y;
                 }
             }
@@ -657,7 +661,7 @@ void dxQuickStepper (dxWorldProcessMemArena *memarena,
         if (gravity_z) {
             for (dxBody *const *bodycurr = body; bodycurr != bodyend; bodycurr++) {
                 dxBody *b = *bodycurr;
-                if ((b->flags & dxBodyNoGravity)==0) {
+                if ((b->flags & dxBodyNoGravity) == 0) {
                     b->facc[2] += b->mass.mass * gravity_z;
                 }
             }
@@ -669,41 +673,34 @@ void dxQuickStepper (dxWorldProcessMemArena *memarena,
     // entirely, so that the code that follows does not consider them.
     dJointWithInfo1 *const jointiinfos = memarena->AllocateArray<dJointWithInfo1> (_nj);
     size_t nj;
-
-    {
-        dJointWithInfo1 *jicurr = jointiinfos;
-        dxJoint *const *const _jend = _joint + _nj;
-        for (dxJoint *const *_jcurr = _joint; _jcurr != _jend; _jcurr++) {	// jicurr=dest, _jcurr=src
-            dxJoint *j = *_jcurr;
-            j->getInfo1 (&jicurr->info);
-            dIASSERT (jicurr->info.m >= 0 && jicurr->info.m <= 6 && jicurr->info.nub >= 0 && jicurr->info.nub <= jicurr->info.m);
-            if (jicurr->info.m > 0) {
-                jicurr->joint = j;
-                jicurr++;
-            }
-        }
-        nj = jicurr - jointiinfos;
-    }
-
-    memarena->ShrinkArray<dJointWithInfo1>(jointiinfos, _nj, nj);
-
     unsigned int m;
     unsigned int mfb; // number of rows of Jacobian we will have to save for joint feedback
 
     {
         unsigned int mcurr = 0, mfbcurr = 0;
-        const dJointWithInfo1 *jicurr = jointiinfos;
-        const dJointWithInfo1 *const jiend = jicurr + nj;
-        for (; jicurr != jiend; jicurr++) {
-            unsigned int jm = jicurr->info.m;
-            mcurr += jm;
-            if (jicurr->joint->feedback)
-                mfbcurr += jm;
-        }
+        dJointWithInfo1 *jicurr = jointiinfos;
+        dxJoint *const *const _jend = _joint + _nj;
+        for (dxJoint *const *_jcurr = _joint; _jcurr != _jend; _jcurr++) {	// jicurr=dest, _jcurr=src
+            dxJoint *j = *_jcurr;
+            j->getInfo1 (&jicurr->info);
+            dIASSERT (/*jicurr->info.m >= 0 && */jicurr->info.m <= 6 && /*jicurr->info.nub >= 0 && */jicurr->info.nub <= jicurr->info.m);
 
+            unsigned int jm = jicurr->info.m;
+            if (jm != 0) {
+                mcurr += jm;
+                if (j->feedback != NULL) {
+                    mfbcurr += jm;
+                }
+                jicurr->joint = j;
+                jicurr++;
+            }
+        }
+        nj = jicurr - jointiinfos;
         m = mcurr;
         mfb = mfbcurr;
     }
+
+    memarena->ShrinkArray<dJointWithInfo1>(jointiinfos, _nj, nj);
 
     // if there are constraints, compute the constraint force
     dReal *J = NULL;
@@ -746,6 +743,8 @@ void dxQuickStepper (dxWorldProcessMemArena *memarena,
             dReal *c = memarena->AllocateArray<dReal> (m);
             dSetZero (c, m);
 
+            const dReal stepsizeRecip = dRecip(stepsize);
+
             {
                 IFTIMING (dTimerNow ("create J"));
                 // get jacobian data from constraints. an m*12 matrix will be created
@@ -763,7 +762,7 @@ void dxQuickStepper (dxWorldProcessMemArena *memarena,
                 //
                 dxJoint::Info2 Jinfo;
                 Jinfo.rowskip = 12;
-                Jinfo.fps = stepsize1;
+                Jinfo.fps = stepsizeRecip;
                 Jinfo.erp = world->global_erp;
 
                 dReal *Jcopyrow = Jcopy;
@@ -840,9 +839,9 @@ void dxQuickStepper (dxWorldProcessMemArena *memarena,
                 for (dxBody *const *bodycurr = body; bodycurr != bodyend; tmp1curr+=6, invIrow+=12, bodycurr++) {
                     dxBody *b = *bodycurr;
                     dReal body_invMass = b->invMass;
-                    for (unsigned int j=0; j<3; j++) tmp1curr[j] = b->facc[j] * body_invMass + b->lvel[j] * stepsize1;
+                    for (unsigned int j=0; j<3; j++) tmp1curr[j] = b->facc[j] * body_invMass + b->lvel[j] * stepsizeRecip;
                     dMultiply0_331 (tmp1curr + 3,invIrow,b->tacc);
-                    for (unsigned int k=0; k<3; k++) tmp1curr[3+k] += b->avel[k] * stepsize1;
+                    for (unsigned int k=0; k<3; k++) tmp1curr[3+k] += b->avel[k] * stepsizeRecip;
                 }
 
                 // put J*tmp1 into rhs
@@ -851,10 +850,10 @@ void dxQuickStepper (dxWorldProcessMemArena *memarena,
             } END_STATE_SAVE(memarena, tmp1state);
 
             // complete rhs
-            for (unsigned int i=0; i<m; i++) rhs[i] = c[i]*stepsize1 - rhs[i];
+            for (unsigned int i=0; i<m; i++) rhs[i] = c[i]*stepsizeRecip - rhs[i];
 
             // scale CFM
-            for (unsigned int j=0; j<m; j++) cfm[j] *= stepsize1;
+            for (unsigned int j=0; j<m; j++) cfm[j] *= stepsizeRecip;
 
         } END_STATE_SAVE(memarena, cstate);
 

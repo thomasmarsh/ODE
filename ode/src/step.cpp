@@ -184,18 +184,22 @@ struct dJointWithInfo1
     dxJoint::Info1 info;
 };
 
-static void dInternalStepIsland_x2 (dxWorldProcessMemArena *memarena, 
-                                    dxWorld *world, dxBody * const *body, unsigned int nb,
-                                    dxJoint * const *_joint, unsigned int _nj, dReal stepsize)
+/*extern */
+void dxStepIsland(dxStepperProcessingCallContext *callContext)
 {
     IFTIMING(dTimerStart("preprocessing"));
 
-    const dReal stepsizeRecip = dRecip(stepsize);
+    dxWorldProcessMemArena *memarena = callContext->m_stepperArena;
+    dxWorld *world = callContext->m_world;
+    dxBody * const *body = callContext->m_islandBodiesStart;
+    unsigned int nb = callContext->m_islandBodiesCount;
+    dxJoint * const *_joint = callContext->m_islandJointsStart;
+    unsigned int _nj = callContext->m_islandJointsCount;
+    dReal stepsize = callContext->m_stepSize;
 
     {
         // number all bodies in the body list - set their tag values
-        unsigned int i;
-        for (i=0; i<nb; ++i) body[i]->tag = i;
+        for (unsigned int i=0; i<nb; ++i) body[i]->tag = i;
     }
 
     // for all bodies, compute the inertia tensor and its inverse in the global
@@ -216,7 +220,7 @@ static void dInternalStepIsland_x2 (dxWorldProcessMemArena *memarena,
             dMultiply2_333 (tmp,b->invI,b->posr.R);
             dMultiply0_333 (invIrow,b->posr.R,tmp);
 
-            if (b->flags & dxBodyGyroscopic) {
+            if ((b->flags & dxBodyGyroscopic) != 0) {
                 dMatrix3 I;
                 // compute inertia tensor in global frame
                 dMultiply2_333 (tmp,b->mass.I,b->posr.R);
@@ -237,7 +241,7 @@ static void dInternalStepIsland_x2 (dxWorldProcessMemArena *memarena,
         if (gravity_x) {
             for (dxBody *const *bodycurr = body; bodycurr != bodyend; ++bodycurr) {
                 dxBody *b = *bodycurr;
-                if ((b->flags & dxBodyNoGravity)==0) {
+                if ((b->flags & dxBodyNoGravity) == 0) {
                     b->facc[0] += b->mass.mass * gravity_x;
                 }
             }
@@ -246,7 +250,7 @@ static void dInternalStepIsland_x2 (dxWorldProcessMemArena *memarena,
         if (gravity_y) {
             for (dxBody *const *bodycurr = body; bodycurr != bodyend; ++bodycurr) {
                 dxBody *b = *bodycurr;
-                if ((b->flags & dxBodyNoGravity)==0) {
+                if ((b->flags & dxBodyNoGravity) == 0) {
                     b->facc[1] += b->mass.mass * gravity_y;
                 }
             }
@@ -255,7 +259,7 @@ static void dInternalStepIsland_x2 (dxWorldProcessMemArena *memarena,
         if (gravity_z) {
             for (dxBody *const *bodycurr = body; bodycurr != bodyend; ++bodycurr) {
                 dxBody *b = *bodycurr;
-                if ((b->flags & dxBodyNoGravity)==0) {
+                if ((b->flags & dxBodyNoGravity) == 0) {
                     b->facc[2] += b->mass.mass * gravity_z;
                 }
             }
@@ -280,8 +284,10 @@ static void dInternalStepIsland_x2 (dxWorldProcessMemArena *memarena,
     dJointWithInfo1 *jointiinfos = memarena->AllocateArray<dJointWithInfo1> (ji_reserve_count);
     unsigned int nub;
     size_t ji_start, ji_end;
+    unsigned int m = 0;
 
     {
+        unsigned int mcurr = 0;
         size_t unb_start, mix_start, mix_end, lcp_end;
         unb_start = mix_start = mix_end = lcp_end = _nj;
 
@@ -302,8 +308,9 @@ static void dInternalStepIsland_x2 (dxWorldProcessMemArena *memarena,
                     }
                     dxJoint *j = *_jcurr++;
                     j->getInfo1 (&jicurr->info);
-                    dIASSERT (jicurr->info.m >= 0 && jicurr->info.m <= 6 && jicurr->info.nub >= 0 && jicurr->info.nub <= jicurr->info.m);
-                    if (jicurr->info.m > 0) {
+                    dIASSERT (/*jicurr->info.m >= 0 && */jicurr->info.m <= 6 && /*jicurr->info.nub >= 0 && */jicurr->info.nub <= jicurr->info.m);
+                    if (jicurr->info.m != 0) {
+                        mcurr += jicurr->info.m;
                         if (jicurr->info.nub == 0) { // A lcp info - a correct guess!!!
                             jicurr->joint = j;
                             ++jicurr;
@@ -355,12 +362,13 @@ static void dInternalStepIsland_x2 (dxWorldProcessMemArena *memarena,
                     }
                     dxJoint *j = *_jcurr++;
                     j->getInfo1 (&jicurr->info);
-                    dIASSERT (jicurr->info.m >= 0 && jicurr->info.m <= 6 && jicurr->info.nub >= 0 && jicurr->info.nub <= jicurr->info.m);
-                    if (jicurr->info.m > 0) {
+                    dIASSERT (/*jicurr->info.m >= 0 && */jicurr->info.m <= 6 && /*jicurr->info.nub >= 0 && */jicurr->info.nub <= jicurr->info.m);
+                    if (jicurr->info.m != 0) {
+                        mcurr += jicurr->info.m;
                         if (jicurr->info.nub == jicurr->info.m) { // An unbounded info - a correct guess!!!
                             jicurr->joint = j;
                             --jicurr;
-                        } else if (jicurr->info.nub > 0) { // A mixed case
+                        } else if (jicurr->info.nub != 0) { // A mixed case
                             if (mix_end == lcp_end) { // no lcp infos yet - just move to opposite side of mixed-s
                                 dJointWithInfo1 *jimixend = jointiinfos + mix_end;
                                 lcp_end = mix_end = mix_end + 1;
@@ -400,6 +408,7 @@ static void dInternalStepIsland_x2 (dxWorldProcessMemArena *memarena,
         dIASSERT((size_t)(mix_start - unb_start) <= (size_t)UINT_MAX);
         ji_start = unb_start;
         ji_end = lcp_end;
+        m = mcurr;
     }
 
     memarena->ShrinkArray<dJointWithInfo1>(jointiinfos, ji_reserve_count, ji_end);
@@ -407,19 +416,12 @@ static void dInternalStepIsland_x2 (dxWorldProcessMemArena *memarena,
     unsigned int nj = (unsigned int)(ji_end - ji_start);
     dIASSERT((size_t)(ji_end - ji_start) <= (size_t)UINT_MAX);
 
-    unsigned int m = 0;
-
     {
-        unsigned int mcurr = 0;
         const dJointWithInfo1 *jicurr = jointiinfos;
         const dJointWithInfo1 *const jiend = jicurr + nj;
         for (unsigned int i = 0; jicurr != jiend; i++, ++jicurr) {
             jicurr->joint->tag = i;
-            unsigned int jm = jicurr->info.m;
-            mcurr += jm;
         }
-
-        m = mcurr;
     }
 
     // this will be set to the force due to the constraints
@@ -463,6 +465,8 @@ static void dInternalStepIsland_x2 (dxWorldProcessMemArena *memarena,
         BEGIN_STATE_SAVE(memarena, cfmstate) {
             dReal *cfm = memarena->AllocateArray<dReal> (m);
             dSetValue (cfm,m,world->global_cfm);
+
+            const dReal stepsizeRecip = dRecip(stepsize);
 
             dReal *JinvM = memarena->AllocateArray<dReal> (2*8*(size_t)m);
             dSetZero (JinvM,2*8*(size_t)m);
@@ -662,6 +666,8 @@ static void dInternalStepIsland_x2 (dxWorldProcessMemArena *memarena,
             // compute the right hand side `rhs'
             IFTIMING(dTimerNow ("compute rhs"));
 
+            const dReal stepsizeRecip = dRecip(stepsize);
+
             dReal *tmp1 = memarena->AllocateArray<dReal> ((size_t)nb*8);
             //dSetZero (tmp1,nb*8);
 
@@ -837,13 +843,6 @@ static void dInternalStepIsland_x2 (dxWorldProcessMemArena *memarena,
 }
 
 //****************************************************************************
-
-void dInternalStepIsland (dxWorldProcessMemArena *memarena, 
-                          dxWorld *world, dxBody * const *body, unsigned int nb,
-                          dxJoint * const *joint, unsigned int nj, dReal stepsize)
-{
-    dInternalStepIsland_x2 (memarena,world,body,nb,joint,nj,stepsize);
-}
 
 size_t dxEstimateStepMemoryRequirements (dxBody * const *body, unsigned int nb, dxJoint * const *_joint, unsigned int _nj)
 {
