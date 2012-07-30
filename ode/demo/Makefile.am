@@ -20,7 +20,6 @@ noinst_PROGRAMS = \
                 demo_chain1 \
                 demo_chain2 \
                 demo_collision \
-                demo_convex_cd \
                 demo_crash \
                 demo_cylvssphere \
                 demo_dball \
