@@ -1800,7 +1800,7 @@ int dWorldStep (dWorldID w, dReal stepsize)
     dxWorldProcessIslandsInfo islandsinfo;
     if (dxReallocateWorldProcessContext (w, islandsinfo, stepsize, &dxEstimateStepMemoryRequirements))
     {
-        if (dxProcessIslands (w, islandsinfo, stepsize, &dxStepIsland))
+        if (dxProcessIslands (w, islandsinfo, stepsize, &dxStepIsland, &dxEstimateStepMaxCallCount))
         {
             result = true;
         }
@@ -1819,7 +1819,7 @@ int dWorldQuickStep (dWorldID w, dReal stepsize)
     dxWorldProcessIslandsInfo islandsinfo;
     if (dxReallocateWorldProcessContext (w, islandsinfo, stepsize, &dxEstimateQuickStepMemoryRequirements))
     {
-        if (dxProcessIslands (w, islandsinfo, stepsize, &dxQuickStepIsland))
+        if (dxProcessIslands (w, islandsinfo, stepsize, &dxQuickStepIsland, &dxEstimateQuickStepMaxCallCount))
         {
             result = true;
         }

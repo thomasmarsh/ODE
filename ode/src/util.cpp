@@ -26,10 +26,12 @@
 #include "joints/joint.h"
 #include "util.h"
 #include "odeou.h"
+
 #include <new>
 
 
 #define dMIN(A,B)  ((A)>(B) ? (B) : (A))
+#define dMAX(A,B)  ((B)>(A) ? (B) : (A))
 
 
 //****************************************************************************
@@ -331,11 +333,12 @@ struct dxIslandsProcessingCallContext
 {
     dxIslandsProcessingCallContext(dxWorld *world, const dxWorldProcessIslandsInfo &islandsInfo, dReal stepSize, dstepper_fn_t stepper):
         m_world(world), m_islandsInfo(islandsInfo), m_stepSize(stepSize), m_stepper(stepper),
-        m_groupReleasee(NULL), m_islandToProcessStorage(0)
+        m_groupReleasee(NULL), m_islandToProcessStorage(0), m_stepperAllowedThreads(0)
     {
     }
 
     void AssignGroupReleasee(dCallReleaseeID groupReleasee) { m_groupReleasee = groupReleasee; }
+    void SetStepperAllowedThreads(unsigned allowedThreadsLimit) { m_stepperAllowedThreads = allowedThreadsLimit; }
 
     static int ThreadedProcessGroup_Callback(void *callContext, dcallindex_t callInstanceIndex, dCallReleaseeID callThisReleasee);
     bool ThreadedProcessGroup();
@@ -352,11 +355,12 @@ struct dxIslandsProcessingCallContext
     size_t ObtainNextIslandToBeProcessed(size_t islandsCount);
 
     dxWorld                         *const m_world;
-    dxWorldProcessIslandsInfo       const &m_islandsInfo;
+    dxWorldProcessIslandsInfo const &m_islandsInfo;
     dReal                           const m_stepSize;
     dstepper_fn_t                   const m_stepper;
     dCallReleaseeID                 m_groupReleasee;
     size_t                          volatile m_islandToProcessStorage;
+    unsigned                        m_stepperAllowedThreads;
 };
 
 
@@ -367,7 +371,7 @@ struct dxSingleIslandCallContext
         dxBody *const *islandBodiesStart, dxJoint *const *islandJointsStart):
         m_islandsProcessingContext(islandsProcessingContext), m_islandIndex(0), 
         m_stepperArena(stepperArena), m_arenaInitialState(arenaInitialState), 
-        m_stepperCallContext(islandsProcessingContext->m_world, islandsProcessingContext->m_stepSize, stepperArena, islandBodiesStart, islandJointsStart)
+        m_stepperCallContext(islandsProcessingContext->m_world, islandsProcessingContext->m_stepSize, islandsProcessingContext->m_stepperAllowedThreads, stepperArena, islandBodiesStart, islandJointsStart)
     {
     }
 
@@ -841,12 +845,16 @@ static size_t BuildIslandsAndEstimateStepperMemoryRequirements(
     return maxreq;
 }
 
-static unsigned EstimateIslandProcessingSimultaneousCallsMaximumCount(unsigned allowedThreadCount, unsigned activeThreadCount)
+static unsigned EstimateIslandProcessingSimultaneousCallsMaximumCount(unsigned activeThreadCount, unsigned islandsAllowedThreadCount, 
+    unsigned stepperAllowedThreadCount, dmaxcallcountestimate_fn_t maxCallCountEstimator)
 {
+    unsigned stepperCallsMaximum = maxCallCountEstimator(activeThreadCount, stepperAllowedThreadCount);
+    unsigned islandsIntermediateCallsMaximum = (1 + 2); // ThreadedProcessIslandSearch_Callback + (ThreadedProcessIslandStepper_Callback && ThreadedProcessIslandSearch_Callback)
+
     unsigned result = 
         1 // ThreadedProcessGroup_Callback
-        + allowedThreadCount * (1 + 2) // ThreadedProcessIslandSearch_Callback + (ThreadedProcessIslandStepper_Callback && ThreadedProcessIslandSearch_Callback)
-        + dMIN(allowedThreadCount, (unsigned)(activeThreadCount - allowedThreadCount)) // ThreadedProcessJobStart_Callback
+        + islandsAllowedThreadCount * dMAX(stepperCallsMaximum, islandsIntermediateCallsMaximum)
+        + dMIN(islandsAllowedThreadCount, (unsigned)(activeThreadCount - islandsAllowedThreadCount)) // ThreadedProcessJobStart_Callback
         /*...the end*/;
     return result;
 }
@@ -862,7 +870,7 @@ static unsigned EstimateIslandProcessingSimultaneousCallsMaximumCount(unsigned a
 // bodies will not be included in the simulation. disabled bodies are
 // re-enabled if they are found to be part of an active island.
 bool dxProcessIslands (dxWorld *world, const dxWorldProcessIslandsInfo &islandsInfo, 
-    dReal stepSize, dstepper_fn_t stepper)
+    dReal stepSize, dstepper_fn_t stepper, dmaxcallcountestimate_fn_t maxCallCountEstimator)
 {
     bool result = false;
 
@@ -878,24 +886,27 @@ bool dxProcessIslands (dxWorld *world, const dxWorldProcessIslandsInfo &islandsI
         int summaryFault = 0;
 
         unsigned activeThreadCount;
-        const unsigned allowedThreadCount = world->GetThreadingIslandsMaxThreadsCount(&activeThreadCount);
-        dIASSERT(allowedThreadCount != 0);
-        dIASSERT(activeThreadCount >= allowedThreadCount);
+        const unsigned islandsAllowedThreadCount = world->GetThreadingIslandsMaxThreadsCount(&activeThreadCount);
+        dIASSERT(islandsAllowedThreadCount != 0);
+        dIASSERT(activeThreadCount >= islandsAllowedThreadCount);
 
-        unsigned simultaneousCallsCount = EstimateIslandProcessingSimultaneousCallsMaximumCount(allowedThreadCount, activeThreadCount);
+        unsigned stepperAllowedThreadCount = islandsAllowedThreadCount; // For now, set stepper allowed threads equal to island stepping threads
+
+        unsigned simultaneousCallsCount = EstimateIslandProcessingSimultaneousCallsMaximumCount(activeThreadCount, islandsAllowedThreadCount, stepperAllowedThreadCount, maxCallCountEstimator);
         if (!world->PreallocateResourcesForThreadedCalls(simultaneousCallsCount)) {
             break;
         }
 
         dCallReleaseeID groupReleasee;
         // First post a group call with dependency count set to number of expected threads
-        world->PostThreadedCall(&summaryFault, &groupReleasee, allowedThreadCount, NULL, pcwGroupCallWait, 
+        world->PostThreadedCall(&summaryFault, &groupReleasee, islandsAllowedThreadCount, NULL, pcwGroupCallWait, 
             &dxIslandsProcessingCallContext::ThreadedProcessGroup_Callback, (void *)&callContext, 0, "World Islands Stepping Group");
 
         callContext.AssignGroupReleasee(groupReleasee);
+        callContext.SetStepperAllowedThreads(stepperAllowedThreadCount);
 
         // Summary fault flag may be omitted as any failures will automatically propagate to dependent releasee (i.e. to groupReleasee)
-        world->PostThreadedCallsGroup(NULL, allowedThreadCount, groupReleasee, 
+        world->PostThreadedCallsGroup(NULL, islandsAllowedThreadCount, groupReleasee, 
             &dxIslandsProcessingCallContext::ThreadedProcessJobStart_Callback, (void *)&callContext, "World Islands Stepping Start");
 
         // Wait until group completes (since jobs were the dependencies of the group the group is going to complete only after all the jobs end)
@@ -1034,23 +1045,7 @@ void dxIslandsProcessingCallContext::ThreadedProcessIslandStepper(dxSingleIsland
 
 size_t dxIslandsProcessingCallContext::ObtainNextIslandToBeProcessed(size_t islandsCount)
 {
-    size_t islandToProcess;
-
-    while (true)
-    {
-        islandToProcess = m_islandToProcessStorage;
-        if (islandToProcess == islandsCount)
-        {
-            break;
-        }
-
-        if (AtomicCompareExchangePointer((volatile atomicptr *)&m_islandToProcessStorage, (atomicptr)islandToProcess, (atomicptr)(islandToProcess + 1)))
-        {
-            break;
-        }
-    }
-
-    return islandToProcess;
+    return AtomicIncrementSizeUpToLimit(&m_islandToProcessStorage, islandsCount);
 }
 
 

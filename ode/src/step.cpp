@@ -31,6 +31,14 @@
 #include "joints/joint.h"
 #include "lcp.h"
 #include "util.h"
+#include "odeou.h"
+
+#include <new>
+
+
+#define dMIN(A,B)  ((A)>(B) ? (B) : (A))
+#define dMAX(A,B)  ((B)>(A) ? (B) : (A))
+
 
 //****************************************************************************
 // misc defines
@@ -43,6 +51,72 @@
 #else
 #define IFTIMING(x) ((void)0)
 #endif
+
+
+struct dJointWithInfo1
+{
+    dxJoint *joint;
+    dxJoint::Info1 info;
+};
+
+struct dxStepperStage0Outputs
+{
+    size_t                          ji_start;
+    size_t                          ji_end;
+    unsigned int                    m;
+    unsigned int                    nub;
+};
+
+struct dxStepperStage1CallContext
+{
+    dxStepperStage1CallContext(dxStepperProcessingCallContext *stepperCallContext, void *stageMemArenaState, dReal *invI, dJointWithInfo1 *jointinfos):
+        m_stepperCallContext(stepperCallContext), m_stageMemArenaState(stageMemArenaState), 
+        m_invI(invI), m_jointinfos(jointinfos)
+    {
+    }
+
+    dxStepperProcessingCallContext  *m_stepperCallContext;
+    void                            *m_stageMemArenaState;
+    dReal                           *m_invI;
+    dJointWithInfo1                 *m_jointinfos;
+    dxStepperStage0Outputs          m_stage0Outputs;
+};
+
+struct dxStepperStage0BodiesCallContext
+{
+    dxStepperStage0BodiesCallContext(dxStepperProcessingCallContext *stepperCallContext, dReal *invI):
+        m_stepperCallContext(stepperCallContext), m_invI(invI), 
+        m_tagsTaken(0), m_gravityTaken(0), m_inertiaBodyIndex(0)
+    {
+    }
+
+    dxStepperProcessingCallContext  *m_stepperCallContext;
+    dReal                           *m_invI;
+    atomicord32                     m_tagsTaken;
+    atomicord32                     m_gravityTaken;
+    unsigned int                    volatile m_inertiaBodyIndex;
+};
+
+struct dxStepperStage0JointsCallContext
+{
+    dxStepperStage0JointsCallContext(dxStepperProcessingCallContext *stepperCallContext, dJointWithInfo1 *jointinfos, dxStepperStage0Outputs *stage0Outputs):
+        m_stepperCallContext(stepperCallContext), m_jointinfos(jointinfos), m_stage0Outputs(stage0Outputs)
+    {
+    }
+
+    dxStepperProcessingCallContext  *m_stepperCallContext;
+    dJointWithInfo1                 *m_jointinfos;
+    dxStepperStage0Outputs          *m_stage0Outputs;
+};
+
+static int dxStepIsland_Stage0_Bodies_Callback(void *callContext, dcallindex_t callInstanceIndex, dCallReleaseeID callThisReleasee);
+static int dxStepIsland_Stage0_Joints_Callback(void *callContext, dcallindex_t callInstanceIndex, dCallReleaseeID callThisReleasee);
+static int dxStepIsland_Stage1_Callback(void *callContext, dcallindex_t callInstanceIndex, dCallReleaseeID callThisReleasee);
+
+static void dxStepIsland_Stage0_Bodies(dxStepperStage0BodiesCallContext *callContext);
+static void dxStepIsland_Stage0_Joints(dxStepperStage0JointsCallContext *callContext);
+static void dxStepIsland_Stage1(dxStepperStage1CallContext *callContext);
+
 
 //****************************************************************************
 // special matrix multipliers
@@ -176,13 +250,6 @@ static void Multiply1_8q1 (dReal *A, const dReal *B, const dReal *C, unsigned in
 }
 
 //****************************************************************************
-// an optimized version of dInternalStepIsland1()
-
-struct dJointWithInfo1
-{
-    dxJoint *joint;
-    dxJoint::Info1 info;
-};
 
 /*extern */
 void dxStepIsland(dxStepperProcessingCallContext *callContext)
@@ -191,48 +258,75 @@ void dxStepIsland(dxStepperProcessingCallContext *callContext)
 
     dxWorldProcessMemArena *memarena = callContext->m_stepperArena;
     dxWorld *world = callContext->m_world;
-    dxBody * const *body = callContext->m_islandBodiesStart;
     unsigned int nb = callContext->m_islandBodiesCount;
-    dxJoint * const *_joint = callContext->m_islandJointsStart;
     unsigned int _nj = callContext->m_islandJointsCount;
-    dReal stepsize = callContext->m_stepSize;
-
-    {
-        // number all bodies in the body list - set their tag values
-        for (unsigned int i=0; i<nb; ++i) body[i]->tag = i;
-    }
-
-    // for all bodies, compute the inertia tensor and its inverse in the global
-    // frame, and compute the rotational force and add it to the torque
-    // accumulator. invI are vertically stacked 3x4 matrices, one per body.
-    // @@@ check computation of rotational force.
 
     dReal *invI = memarena->AllocateArray<dReal> (3*4*(size_t)nb);
+    // Reserve twice as much memory and start from the middle so that regardless of 
+    // what direction the array grows to there would be sufficient room available.
+    const size_t ji_reserve_count = 2 * (size_t)_nj;
+    dJointWithInfo1 *const jointinfos = memarena->AllocateArray<dJointWithInfo1> (ji_reserve_count);
 
-    { // Identical to QuickStep
-        dReal *invIrow = invI;
-        dxBody *const *const bodyend = body + nb;
-        for (dxBody *const *bodycurr = body; bodycurr != bodyend; invIrow += 12, ++bodycurr) {
-            dMatrix3 tmp;
-            dxBody *b = *bodycurr;
+    const unsigned allowedThreads = callContext->m_stepperAllowedThreads;
+    dIASSERT(allowedThreads != 0);
 
-            // compute inverse inertia tensor in global frame
-            dMultiply2_333 (tmp,b->invI,b->posr.R);
-            dMultiply0_333 (invIrow,b->posr.R,tmp);
+    void *stagesMemArenaState = memarena->SaveState();
 
-            if ((b->flags & dxBodyGyroscopic) != 0) {
-                dMatrix3 I;
-                // compute inertia tensor in global frame
-                dMultiply2_333 (tmp,b->mass.I,b->posr.R);
-                dMultiply0_333 (I,b->posr.R,tmp);
-                // compute rotational force
-                dMultiply0_331 (tmp,I,b->avel);
-                dSubtractVectorCross3 (b->tacc,b->avel,tmp);
-            }
-        }
+    dxStepperStage1CallContext *stage1CallContext = (dxStepperStage1CallContext *)memarena->AllocateBlock(sizeof(dxStepperStage1CallContext));
+    new(stage1CallContext) dxStepperStage1CallContext(callContext, stagesMemArenaState, invI, jointinfos);
+
+    dxStepperStage0BodiesCallContext *stage0BodiesCallContext = (dxStepperStage0BodiesCallContext *)memarena->AllocateBlock(sizeof(dxStepperStage0BodiesCallContext));
+    new(stage0BodiesCallContext) dxStepperStage0BodiesCallContext(callContext, invI);
+    
+    dxStepperStage0JointsCallContext *stage0JointsCallContext = (dxStepperStage0JointsCallContext *)memarena->AllocateBlock(sizeof(dxStepperStage0JointsCallContext));
+    new(stage0JointsCallContext) dxStepperStage0JointsCallContext(callContext, jointinfos, &stage1CallContext->m_stage0Outputs);
+
+    if (allowedThreads == 1)
+    {
+        dxStepIsland_Stage0_Bodies(stage0BodiesCallContext);
+        dxStepIsland_Stage0_Joints(stage0JointsCallContext);
+        dxStepIsland_Stage1(stage1CallContext);
+    }
+    else
+    {
+        unsigned bodyThreads = allowedThreads;
+        unsigned jointThreads = 1;
+
+        dCallReleaseeID stage1CallReleasee;
+        world->PostThreadedCallForUnawareReleasee(NULL, &stage1CallReleasee, bodyThreads + jointThreads, callContext->m_finalReleasee, 
+            NULL, &dxStepIsland_Stage1_Callback, stage1CallContext, 0, "StepIsland Stage1");
+
+        world->PostThreadedCallsGroup(NULL, bodyThreads, stage1CallReleasee, &dxStepIsland_Stage0_Bodies_Callback, stage0BodiesCallContext, "StepIsland Stage0-Bodies");
+
+        world->PostThreadedCall(NULL, NULL, 0, stage1CallReleasee, NULL, &dxStepIsland_Stage0_Joints_Callback, stage0JointsCallContext, 0, "StepIsland Stage0-Joints");
+        dIASSERT(jointThreads == 1);
+    }
+}    
+
+static 
+int dxStepIsland_Stage0_Bodies_Callback(void *_callContext, dcallindex_t callInstanceIndex, dCallReleaseeID callThisReleasee)
+{
+    dxStepperStage0BodiesCallContext *callContext = (dxStepperStage0BodiesCallContext *)_callContext;
+    dxStepIsland_Stage0_Bodies(callContext);
+    return 1;
+}
+
+static 
+void dxStepIsland_Stage0_Bodies(dxStepperStage0BodiesCallContext *callContext)
+{
+    dxBody * const *body = callContext->m_stepperCallContext->m_islandBodiesStart;
+    unsigned int nb = callContext->m_stepperCallContext->m_islandBodiesCount;
+
+    if (AtomicExchange(&callContext->m_tagsTaken, 1) == 0)
+    {
+        // number all bodies in the body list - set their tag values
+        for (unsigned int i=0; i<nb; i++) body[i]->tag = i;
     }
 
-    { // Identical to QuickStep
+    if (AtomicExchange(&callContext->m_gravityTaken, 1) == 0)
+    {
+        dxWorld *world = callContext->m_stepperCallContext->m_world;
+
         // add the gravity force to all bodies
         // since gravity does normally have only one component it's more efficient
         // to run three loops for each individual component
@@ -266,6 +360,53 @@ void dxStepIsland(dxStepperProcessingCallContext *callContext)
         }
     }
 
+    // for all bodies, compute the inertia tensor and its inverse in the global
+    // frame, and compute the rotational force and add it to the torque
+    // accumulator. I and invI are a vertical stack of 3x4 matrices, one per body.
+    {
+        dReal *invIrow = callContext->m_invI;
+        unsigned int bodyIndex = AtomicIncrementIntUpToLimit(&callContext->m_inertiaBodyIndex, nb);
+
+        for (unsigned int i = 0; i != nb; invIrow += 12, ++i) {
+            if (i == bodyIndex) {
+                dMatrix3 tmp;
+                dxBody *b = body[i];
+
+                // compute inverse inertia tensor in global frame
+                dMultiply2_333 (tmp,b->invI,b->posr.R);
+                dMultiply0_333 (invIrow,b->posr.R,tmp);
+
+                if ((b->flags & dxBodyGyroscopic) != 0) {
+                    dMatrix3 I;
+                    // compute inertia tensor in global frame
+                    dMultiply2_333 (tmp,b->mass.I,b->posr.R);
+                    dMultiply0_333 (I,b->posr.R,tmp);
+                    // compute rotational force
+                    dMultiply0_331 (tmp,I,b->avel);
+                    dSubtractVectorCross3(b->tacc,b->avel,tmp);
+                }
+
+                bodyIndex = AtomicIncrementIntUpToLimit(&callContext->m_inertiaBodyIndex, nb);
+            }
+        }
+    }
+}
+
+static 
+int dxStepIsland_Stage0_Joints_Callback(void *_callContext, dcallindex_t callInstanceIndex, dCallReleaseeID callThisReleasee)
+{
+    dxStepperStage0JointsCallContext *callContext = (dxStepperStage0JointsCallContext *)_callContext;
+    dxStepIsland_Stage0_Joints(callContext);
+    return 1;
+}
+
+static 
+void dxStepIsland_Stage0_Joints(dxStepperStage0JointsCallContext *callContext)
+{
+    dxJoint * const *_joint = callContext->m_stepperCallContext->m_islandJointsStart;
+    dJointWithInfo1 *jointinfos = callContext->m_jointinfos;
+    unsigned int _nj = callContext->m_stepperCallContext->m_islandJointsCount;
+
     // get m = total constraint dimension, nub = number of unbounded variables.
     // create constraint offset array and number-of-rows array for all joints.
     // the constraints are re-ordered as follows: the purely unbounded
@@ -278,20 +419,13 @@ void dxStepIsland(dxStepperProcessingCallContext *callContext)
     // also number all active joints in the joint list (set their tag values).
     // inactive joints receive a tag value of -1.
 
-    // Reserve twice as much memory and start from the middle so that regardless of 
-    // what direction the array grows to there would be sufficient room available.
-    const size_t ji_reserve_count = 2 * (size_t)_nj;
-    dJointWithInfo1 *jointiinfos = memarena->AllocateArray<dJointWithInfo1> (ji_reserve_count);
-    unsigned int nub;
     size_t ji_start, ji_end;
-    unsigned int m = 0;
-
     {
         unsigned int mcurr = 0;
         size_t unb_start, mix_start, mix_end, lcp_end;
         unb_start = mix_start = mix_end = lcp_end = _nj;
 
-        dJointWithInfo1 *jicurr = jointiinfos + lcp_end;
+        dJointWithInfo1 *jicurr = jointinfos + lcp_end;
         dxJoint *const *const _jend = _joint + _nj;
         dxJoint *const *_jcurr = _joint;
         while (true) {
@@ -299,10 +433,10 @@ void dxStepIsland(dxStepperProcessingCallContext *callContext)
             // Switch to growing array forward
             {
                 bool fwd_end_reached = false;
-                dJointWithInfo1 *jimixend = jointiinfos + mix_end;
+                dJointWithInfo1 *jimixend = jointinfos + mix_end;
                 while (true) {	// jicurr=dest, _jcurr=src
                     if (_jcurr == _jend) {
-                        lcp_end = jicurr - jointiinfos;
+                        lcp_end = jicurr - jointinfos;
                         fwd_end_reached = true;
                         break;
                     }
@@ -317,7 +451,7 @@ void dxStepIsland(dxStepperProcessingCallContext *callContext)
                         } else if (jicurr->info.nub < jicurr->info.m) { // A mixed case
                             if (unb_start == mix_start) { // no unbounded infos yet - just move to opposite side of mixed-s
                                 unb_start = mix_start = mix_start - 1;
-                                dJointWithInfo1 *jimixstart = jointiinfos + mix_start;
+                                dJointWithInfo1 *jimixstart = jointinfos + mix_start;
                                 jimixstart->info = jicurr->info;
                                 jimixstart->joint = j;
                             } else if (jimixend != jicurr) { // have to swap to the tail of mixed-s
@@ -332,11 +466,11 @@ void dxStepIsland(dxStepperProcessingCallContext *callContext)
                             }
                         } else { // A purely unbounded case -- break out and proceed growing in opposite direction
                             unb_start = unb_start - 1;
-                            dJointWithInfo1 *jiunbstart = jointiinfos + unb_start;
+                            dJointWithInfo1 *jiunbstart = jointinfos + unb_start;
                             jiunbstart->info = jicurr->info;
                             jiunbstart->joint = j;
-                            lcp_end = jicurr - jointiinfos;
-                            mix_end = jimixend - jointiinfos;
+                            lcp_end = jicurr - jointinfos;
+                            mix_end = jimixend - jointinfos;
                             jicurr = jiunbstart - 1;
                             break;
                         }
@@ -352,11 +486,11 @@ void dxStepIsland(dxStepperProcessingCallContext *callContext)
             // Switch to growing array backward
             {
                 bool bkw_end_reached = false;
-                dJointWithInfo1 *jimixstart = jointiinfos + mix_start - 1;
+                dJointWithInfo1 *jimixstart = jointinfos + mix_start - 1;
                 while (true) {	// jicurr=dest, _jcurr=src
                     if (_jcurr == _jend) {
-                        unb_start = (jicurr + 1) - jointiinfos;
-                        mix_start = (jimixstart + 1) - jointiinfos;
+                        unb_start = (jicurr + 1) - jointinfos;
+                        mix_start = (jimixstart + 1) - jointinfos;
                         bkw_end_reached = true;
                         break;
                     }
@@ -370,7 +504,7 @@ void dxStepIsland(dxStepperProcessingCallContext *callContext)
                             --jicurr;
                         } else if (jicurr->info.nub != 0) { // A mixed case
                             if (mix_end == lcp_end) { // no lcp infos yet - just move to opposite side of mixed-s
-                                dJointWithInfo1 *jimixend = jointiinfos + mix_end;
+                                dJointWithInfo1 *jimixend = jointinfos + mix_end;
                                 lcp_end = mix_end = mix_end + 1;
                                 jimixend->info = jicurr->info;
                                 jimixend->joint = j;
@@ -385,12 +519,12 @@ void dxStepIsland(dxStepperProcessingCallContext *callContext)
                                 jimixstart = jicurr = jicurr - 1;
                             }
                         } else { // A purely lcp case -- break out and proceed growing in opposite direction
-                            dJointWithInfo1 *jilcpend = jointiinfos + lcp_end;
+                            dJointWithInfo1 *jilcpend = jointinfos + lcp_end;
                             lcp_end = lcp_end + 1;
                             jilcpend->info = jicurr->info;
                             jilcpend->joint = j;
-                            unb_start = (jicurr + 1) - jointiinfos;
-                            mix_start = (jimixstart + 1) - jointiinfos;
+                            unb_start = (jicurr + 1) - jointinfos;
+                            mix_start = (jimixstart + 1) - jointinfos;
                             jicurr = jilcpend + 1;
                             break;
                         }
@@ -404,25 +538,69 @@ void dxStepIsland(dxStepperProcessingCallContext *callContext)
             }
         }
 
-        nub = (unsigned)(mix_start - unb_start);
+        callContext->m_stage0Outputs->m = mcurr;
+        callContext->m_stage0Outputs->nub = (unsigned)(mix_start - unb_start);
         dIASSERT((size_t)(mix_start - unb_start) <= (size_t)UINT_MAX);
         ji_start = unb_start;
         ji_end = lcp_end;
-        m = mcurr;
     }
 
-    memarena->ShrinkArray<dJointWithInfo1>(jointiinfos, ji_reserve_count, ji_end);
-    jointiinfos += ji_start;
-    unsigned int nj = (unsigned int)(ji_end - ji_start);
-    dIASSERT((size_t)(ji_end - ji_start) <= (size_t)UINT_MAX);
-
     {
-        const dJointWithInfo1 *jicurr = jointiinfos;
-        const dJointWithInfo1 *const jiend = jicurr + nj;
+        const dJointWithInfo1 *jicurr = jointinfos + ji_start;
+        const dJointWithInfo1 *const jiend = jointinfos + ji_end;
         for (unsigned int i = 0; jicurr != jiend; i++, ++jicurr) {
             jicurr->joint->tag = i;
         }
     }
+
+    callContext->m_stage0Outputs->ji_start = ji_start;
+    callContext->m_stage0Outputs->ji_end = ji_end;
+}
+
+static 
+int dxStepIsland_Stage1_Callback(void *_stage1CallContext, dcallindex_t callInstanceIndex, dCallReleaseeID callThisReleasee)
+{
+    dxStepperStage1CallContext *stage1CallContext = (dxStepperStage1CallContext *)_stage1CallContext;
+    dxStepIsland_Stage1(stage1CallContext);
+    return 1;
+}
+
+static 
+void dxStepIsland_Stage1(dxStepperStage1CallContext *stage1CallContext)
+{
+    dxStepperProcessingCallContext *callContext;
+    dJointWithInfo1 *_jointinfos;
+    dReal *invI;
+    size_t ji_start, ji_end;
+    unsigned int m;
+    unsigned int nub;
+    {
+        callContext = stage1CallContext->m_stepperCallContext;
+        _jointinfos = stage1CallContext->m_jointinfos;
+        invI = stage1CallContext->m_invI;
+        ji_start = stage1CallContext->m_stage0Outputs.ji_start;
+        ji_end = stage1CallContext->m_stage0Outputs.ji_end;
+        m = stage1CallContext->m_stage0Outputs.m;
+        nub = stage1CallContext->m_stage0Outputs.nub;
+    }
+
+    dxWorldProcessMemArena *memarena = callContext->m_stepperArena;
+    {
+        memarena->RestoreState(stage1CallContext->m_stageMemArenaState);
+        stage1CallContext = NULL; // WARNING! _stage1CallContext is not valid after this point!
+        dIVERIFY(stage1CallContext == NULL); // To suppress compiler warnings about unused variable assignment
+
+        unsigned int _nj = callContext->m_islandJointsCount;
+        const size_t ji_reserve_count = 2 * (size_t)_nj;
+        memarena->ShrinkArray<dJointWithInfo1>(_jointinfos, ji_reserve_count, ji_end);
+    }
+
+    dxWorld *world = callContext->m_world;
+    dxBody * const *body = callContext->m_islandBodiesStart;
+    unsigned int nb = callContext->m_islandBodiesCount;
+    dJointWithInfo1 *jointinfos = _jointinfos + ji_start;
+    unsigned int nj = (unsigned int)(ji_end - ji_start);
+    dIASSERT((size_t)(ji_end - ji_start) <= (size_t)UINT_MAX);
 
     // this will be set to the force due to the constraints
     dReal *cforce = memarena->AllocateArray<dReal> ((size_t)nb*8);
@@ -466,7 +644,7 @@ void dxStepIsland(dxStepperProcessingCallContext *callContext)
             dReal *cfm = memarena->AllocateArray<dReal> (m);
             dSetValue (cfm,m,world->global_cfm);
 
-            const dReal stepsizeRecip = dRecip(stepsize);
+            const dReal stepsizeRecip = dRecip(callContext->m_stepSize);
 
             dReal *JinvM = memarena->AllocateArray<dReal> (2*8*(size_t)m);
             dSetZero (JinvM,2*8*(size_t)m);
@@ -497,7 +675,7 @@ void dxStepIsland(dxStepperProcessingCallContext *callContext)
                 Jinfo.erp = world->global_erp;
 
                 unsigned ofsi = 0;
-                const dJointWithInfo1 *jicurr = jointiinfos;
+                const dJointWithInfo1 *jicurr = jointinfos;
                 const dJointWithInfo1 *const jiend = jicurr + nj;
                 for (; jicurr != jiend; ++jicurr) {
                     const unsigned int infom = jicurr->info.m;
@@ -535,7 +713,7 @@ void dxStepIsland(dxStepperProcessingCallContext *callContext)
                     // format as J so we just go through the constraints in J multiplying by
                     // the appropriate scalars and matrices.
                     unsigned ofsi = 0;
-                    const dJointWithInfo1 *jicurr = jointiinfos;
+                    const dJointWithInfo1 *jicurr = jointinfos;
                     const dJointWithInfo1 *const jiend = jicurr + nj;
                     for (; jicurr != jiend; ++jicurr) {
                         const unsigned int infom = jicurr->info.m;
@@ -580,7 +758,7 @@ void dxStepIsland(dxStepperProcessingCallContext *callContext)
                         const unsigned int mskip = dPAD(m);
 
                         unsigned ofsi = 0;
-                        const dJointWithInfo1 *jicurr = jointiinfos;
+                        const dJointWithInfo1 *jicurr = jointinfos;
                         const dJointWithInfo1 *const jiend = jicurr + nj;
                         for (unsigned int i = 0; jicurr != jiend; i++, ++jicurr) {
                             const unsigned int infom = jicurr->info.m;
@@ -595,7 +773,7 @@ void dxStepIsland(dxStepperProcessingCallContext *callContext)
                                 // joint that should not be considered
                                 int j0 = n0->joint->tag;
                                 if (j0 != -1 && (unsigned)j0 < i) {
-                                    const dJointWithInfo1 *jiother = jointiinfos + j0;
+                                    const dJointWithInfo1 *jiother = jointinfos + j0;
                                     size_t ofsother = (jiother->joint->node[1].body == jb0) ? 8*(size_t)jiother->info.m : 0;
                                     // set block of A
                                     MultiplyAdd2_p8r (Arow + ofs[j0], JinvMrow, 
@@ -612,7 +790,7 @@ void dxStepIsland(dxStepperProcessingCallContext *callContext)
                                     // joint that should not be considered
                                     int j1 = n1->joint->tag;
                                     if (j1 != -1 && (unsigned)j1 < i) {
-                                        const dJointWithInfo1 *jiother = jointiinfos + j1;
+                                        const dJointWithInfo1 *jiother = jointinfos + j1;
                                         size_t ofsother = (jiother->joint->node[1].body == jb1) ? 8*(size_t)jiother->info.m : 0;
                                         // set block of A
                                         MultiplyAdd2_p8r (Arow + ofs[j1], JinvMrow + 8*(size_t)infom, 
@@ -633,7 +811,7 @@ void dxStepIsland(dxStepperProcessingCallContext *callContext)
                     const unsigned int mskip = dPAD(m);
 
                     unsigned ofsi = 0;
-                    const dJointWithInfo1 *jicurr = jointiinfos;
+                    const dJointWithInfo1 *jicurr = jointinfos;
                     const dJointWithInfo1 *const jiend = jicurr + nj;
                     for (; jicurr != jiend; ++jicurr) {
                         const unsigned int infom = jicurr->info.m;
@@ -666,7 +844,7 @@ void dxStepIsland(dxStepperProcessingCallContext *callContext)
             // compute the right hand side `rhs'
             IFTIMING(dTimerNow ("compute rhs"));
 
-            const dReal stepsizeRecip = dRecip(stepsize);
+            const dReal stepsizeRecip = dRecip(callContext->m_stepSize);
 
             dReal *tmp1 = memarena->AllocateArray<dReal> ((size_t)nb*8);
             //dSetZero (tmp1,nb*8);
@@ -694,7 +872,7 @@ void dxStepIsland(dxStepperProcessingCallContext *callContext)
             {
                 // put J*tmp1 into rhs
                 unsigned ofsi = 0;
-                const dJointWithInfo1 *jicurr = jointiinfos;
+                const dJointWithInfo1 *jicurr = jointinfos;
                 const dJointWithInfo1 *const jiend = jicurr + nj;
                 for (; jicurr != jiend; ++jicurr) {
                     const unsigned int infom = jicurr->info.m;
@@ -729,7 +907,7 @@ void dxStepIsland(dxStepperProcessingCallContext *callContext)
             // compute the constraint force `cforce'
             // compute cforce = J'*lambda
             unsigned ofsi = 0;
-            const dJointWithInfo1 *jicurr = jointiinfos;
+            const dJointWithInfo1 *jicurr = jointinfos;
             const dJointWithInfo1 *const jiend = jicurr + nj;
             for (; jicurr != jiend; ++jicurr) {
                 const unsigned int infom = jicurr->info.m;
@@ -792,6 +970,8 @@ void dxStepIsland(dxStepperProcessingCallContext *callContext)
         // compute the velocity update
         IFTIMING(dTimerNow ("compute velocity update"));
 
+        const dReal stepsize = callContext->m_stepSize;
+
         // add fe to cforce and multiply cforce by stepsize
         dReal data[4];
         const dReal *invIrow = invI;
@@ -812,10 +992,13 @@ void dxStepIsland(dxStepperProcessingCallContext *callContext)
         // update the position and orientation from the new linear/angular velocity
         // (over the given timestep)
         IFTIMING(dTimerNow ("update position"));
+
+        const dReal stepsize = callContext->m_stepSize;
+
         dxBody *const *const bodyend = body + nb;
         for (dxBody *const *bodycurr = body; bodycurr != bodyend; ++bodycurr) {
             dxBody *b = *bodycurr;
-            dxStepBody (b,stepsize);
+            dxStepBody (b, stepsize);
         }
     }
 
@@ -839,11 +1022,11 @@ void dxStepIsland(dxStepperProcessingCallContext *callContext)
 
     IFTIMING(dTimerEnd());
     if (m > 0) IFTIMING(dTimerReport (stdout,1));
-
 }
 
 //****************************************************************************
 
+/*extern */
 size_t dxEstimateStepMemoryRequirements (dxBody * const *body, unsigned int nb, dxJoint * const *_joint, unsigned int _nj)
 {
     unsigned int nj, m;
@@ -871,10 +1054,10 @@ size_t dxEstimateStepMemoryRequirements (dxBody * const *body, unsigned int nb, 
     res += dEFFICIENT_SIZE(sizeof(dReal) * 3 * 4 * (size_t)nb); // for invI
 
     {
-        size_t sub1_res1 = dEFFICIENT_SIZE(sizeof(dJointWithInfo1) * 2 * (size_t)_nj); // for initial jointiinfos
+        size_t sub1_res1 = dEFFICIENT_SIZE(sizeof(dJointWithInfo1) * 2 * (size_t)_nj); // for initial jointinfos
 
         // The array can't grow right more than by nj
-        size_t sub1_res2 = dEFFICIENT_SIZE(sizeof(dJointWithInfo1) * ((size_t)_nj + (size_t)nj)); // for shrunk jointiinfos
+        size_t sub1_res2 = dEFFICIENT_SIZE(sizeof(dJointWithInfo1) * ((size_t)_nj + (size_t)nj)); // for shrunk jointinfos
         sub1_res2 += dEFFICIENT_SIZE(sizeof(dReal) * 8 * (size_t)nb); // for cforce
         if (m > 0) {
             sub1_res2 += dEFFICIENT_SIZE(sizeof(dReal) * 2 * 8 * (size_t)m); // for J
@@ -890,7 +1073,7 @@ size_t dxEstimateStepMemoryRequirements (dxBody * const *body, unsigned int nb, 
 
                     size_t sub3_res2 = 0;
 
-                    sub2_res1 += (sub3_res1 >= sub3_res2) ? sub3_res1 : sub3_res2;
+                    sub2_res1 += dMAX(sub3_res1, sub3_res2);
                 }
 
                 size_t sub2_res2 = 0;
@@ -901,7 +1084,7 @@ size_t dxEstimateStepMemoryRequirements (dxBody * const *body, unsigned int nb, 
 
                         size_t sub4_res2 = 0;
 
-                        sub3_res1 += (sub4_res1 >= sub4_res2) ? sub4_res1 : sub4_res2;
+                        sub3_res1 += dMAX(sub4_res1, sub4_res2);
                     }
 
                     size_t sub3_res2 = dEFFICIENT_SIZE(sizeof(dReal) * (size_t)m); // for lambda
@@ -910,20 +1093,33 @@ size_t dxEstimateStepMemoryRequirements (dxBody * const *body, unsigned int nb, 
 
                         size_t sub4_res2 = 0;
 
-                        sub3_res2 += (sub4_res1 >= sub4_res2) ? sub4_res1 : sub4_res2;
+                        sub3_res2 += dMAX(sub4_res1, sub4_res2);
                     }
 
-                    sub2_res2 += (sub3_res1 >= sub3_res2) ? sub3_res1 : sub3_res2;
+                    sub2_res2 += dMAX(sub3_res1, sub3_res2);
                 }
 
-                sub1_res2 += (sub2_res1 >= sub2_res2) ? sub2_res1 : sub2_res2;
+                sub1_res2 += dMAX(sub2_res1, sub2_res2);
             }
         }
 
-        res += (sub1_res1 >= sub1_res2) ? sub1_res1 : sub1_res2;
+        size_t sub1_res12_max = dMAX(sub1_res1, sub1_res2);
+        size_t stage01_contexts = dEFFICIENT_SIZE(sizeof(dxStepperStage0BodiesCallContext))
+            + dEFFICIENT_SIZE(sizeof(dxStepperStage0JointsCallContext))
+            + dEFFICIENT_SIZE(sizeof(dxStepperStage1CallContext));
+        res += dMAX(sub1_res12_max, stage01_contexts);
     }
 
     return res;
 }
 
 
+/*extern */
+unsigned dxEstimateStepMaxCallCount(
+    unsigned activeThreadCount, unsigned allowedThreadCount)
+{
+    unsigned result = 1 // dxStepIsland itself
+        + (allowedThreadCount + 1) // allowedThreadCount * dxStepIsland_Stage0_Bodies + dxStepIsland_Stage0_Joints
+        + 1; // dxStepIsland_Stage1
+    return result;
+}
