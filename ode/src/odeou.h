@@ -72,6 +72,44 @@ public:
 };
 
 
+#if dATOMICS_ENABLED
+
+static inline 
+unsigned int AtomicIncrementIntUpToLimit(volatile unsigned int *storagePointer, unsigned int limitValue)
+{
+    unsigned int resultValue;
+    while (true) {
+        resultValue = *storagePointer;
+        if (resultValue == limitValue) {
+            break;
+        }
+        if (AtomicCompareExchange((volatile atomicord32 *)storagePointer, (atomicord32)resultValue, (atomicord32)(resultValue + 1))) {
+            break;
+        }
+    }
+    return resultValue;
+}
+
+static inline 
+size_t AtomicIncrementSizeUpToLimit(volatile size_t *storagePointer, size_t limitValue)
+{
+    size_t resultValue;
+    while (true) {
+        resultValue = *storagePointer;
+        if (resultValue == limitValue) {
+            break;
+        }
+        if (AtomicCompareExchangePointer((volatile atomicptr *)storagePointer, (atomicptr)resultValue, (atomicptr)(resultValue + 1))) {
+            break;
+        }
+    }
+    return resultValue;
+}
+
+
+#endif // #if dATOMICS_ENABLED
+
+
 #endif // dOU_ENABLED
 
 

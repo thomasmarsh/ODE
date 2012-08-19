@@ -283,17 +283,18 @@ struct dxWorldProcessIslandsInfo
 
 private:
     size_t                  m_IslandCount;
-    unsigned int            const *m_pIslandSizes;
-    dxBody                  *const *m_pBodies;
-    dxJoint                 *const *m_pJoints;
+    unsigned int const      *m_pIslandSizes;
+    dxBody *const           *m_pBodies;
+    dxJoint *const          *m_pJoints;
 };
 
 struct dxStepperProcessingCallContext
 {
-    dxStepperProcessingCallContext(dxWorld *world, dReal stepSize, dxWorldProcessMemArena *stepperArena, 
-        dxBody *const *islandBodiesStart, dxJoint *const *islandJointsStart): 
+    dxStepperProcessingCallContext(dxWorld *world, dReal stepSize, unsigned stepperAllowedThreads, 
+        dxWorldProcessMemArena *stepperArena, dxBody *const *islandBodiesStart, dxJoint *const *islandJointsStart): 
         m_world(world), m_stepSize(stepSize), m_stepperArena(stepperArena), m_finalReleasee(NULL), 
-        m_islandBodiesStart(islandBodiesStart), m_islandJointsStart(islandJointsStart), m_islandBodiesCount(0), m_islandJointsCount(0)
+        m_islandBodiesStart(islandBodiesStart), m_islandJointsStart(islandJointsStart), m_islandBodiesCount(0), m_islandJointsCount(0),
+        m_stepperAllowedThreads(stepperAllowedThreads)
     {
     }
 
@@ -318,18 +319,21 @@ struct dxStepperProcessingCallContext
     dReal                   const m_stepSize;
     dxWorldProcessMemArena  *m_stepperArena;
     dCallReleaseeID         m_finalReleasee;
-    dxBody                  *const *m_islandBodiesStart;
-    dxJoint                 *const *m_islandJointsStart;
+    dxBody *const           *m_islandBodiesStart;
+    dxJoint *const          *m_islandJointsStart;
     unsigned                m_islandBodiesCount;
     unsigned                m_islandJointsCount;
+    unsigned                m_stepperAllowedThreads;
 };
 
 #define BEGIN_STATE_SAVE(memarena, state) void *state = memarena->SaveState();
 #define END_STATE_SAVE(memarena, state) memarena->RestoreState(state)
 
 typedef void (*dstepper_fn_t) (dxStepperProcessingCallContext *callContext);
+typedef unsigned (*dmaxcallcountestimate_fn_t) (unsigned activeThreadCount, unsigned allowedThreadCount);
 
-bool dxProcessIslands (dxWorld *world, const dxWorldProcessIslandsInfo &islandsInfo, dReal stepSize, dstepper_fn_t stepper);
+bool dxProcessIslands (dxWorld *world, const dxWorldProcessIslandsInfo &islandsInfo, 
+                       dReal stepSize, dstepper_fn_t stepper, dmaxcallcountestimate_fn_t maxCallCountEstimator);
 
 
 typedef size_t (*dmemestimate_fn_t) (dxBody * const *body, unsigned int nb, 
@@ -341,7 +345,6 @@ bool dxReallocateWorldProcessContext (dxWorld *world, dxWorldProcessIslandsInfo 
 dxWorldProcessMemArena *dxAllocateTemporaryWorldProcessMemArena(
     size_t memreq, const dxWorldProcessMemoryManager *memmgr/*=NULL*/, const dxWorldProcessMemoryReserveInfo *reserveinfo/*=NULL*/);
 void dxFreeTemporaryWorldProcessMemArena(dxWorldProcessMemArena *arena);
-
 
 
 template<class ClassType>
