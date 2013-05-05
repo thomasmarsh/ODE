@@ -29,7 +29,7 @@ ode_ext = Extension("ode", ["ode.pyx"],
 if __name__ == "__main__":
     setup(
         name="Open Dynamics Engine",
-        version="0.1",
+        version="0.12",
         author="Gideon Klompje",
 #        author_email="",
 #        maintainer="",
