@@ -1,6 +1,4 @@
 #! /usr/bin/env python
-import os, sys
-
 from distutils.core import setup
 from distutils.extension import Extension
 from subprocess import Popen, PIPE, CalledProcessError
