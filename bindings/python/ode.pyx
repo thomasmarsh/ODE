@@ -153,7 +153,8 @@ cdef class Mass:
         @type I13: float
         @type I23: float
         """
-        dMassSetParameters(&self._mass, mass, cgx, cgy, cgz, I11, I22, I33, I12, I13, I23)
+        dMassSetParameters(&self._mass, mass, cgx, cgy, cgz,
+                           I11, I22, I33, I12, I13, I23)
 
     def setSphere(self, density, radius):
         """setSphere(density, radius)
@@ -223,7 +224,8 @@ cdef class Mass:
         @type radius: float
         @type length: float
         """
-        dMassSetCapsuleTotal(&self._mass, total_mass, direction, radius, length)
+        dMassSetCapsuleTotal(&self._mass, total_mass, direction,
+                             radius, length)
 
     def setCylinder(self, density, direction, r, h):
         """setCylinder(density, direction, r, h)
@@ -386,8 +388,16 @@ cdef class Mass:
         I12 = str(self._mass.I[1])
         I13 = str(self._mass.I[2])
         I23 = str(self._mass.I[6])
-        return "Mass=%s\nCg=(%s, %s, %s)\nI11=%s I22=%s I33=%s\nI12=%s I13=%s I23=%s"%(m,sc0,sc1,sc2,I11,I22,I33,I12,I13,I23)
-#        return "Mass=%s / Cg=(%s, %s, %s) / I11=%s I22=%s I33=%s I12=%s I13=%s I23=%s"%(m,sc0,sc1,sc2,I11,I22,I33,I12,I13,I23)
+        return ("Mass=%s\n"
+                "Cg=(%s, %s, %s)\n"
+                "I11=%s I22=%s I33=%s\n"
+                "I12=%s I13=%s I23=%s" %
+                (m, sc0, sc1, sc2, I11, I22, I33, I12, I13, I23))
+#        return ("Mass=%s / "
+#                "Cg=(%s, %s, %s) / "
+#                "I11=%s I22=%s I33=%s "
+#                "I12=%s I13=%s I23=%s" %
+#                (m, sc0, sc1, sc2, I11, I22, I33, I12, I13, I23))
 
 
 cdef class Contact:
@@ -634,7 +644,9 @@ cdef class Contact:
         Get the "first friction direction" vector that defines a direction
         along which frictional force is applied.
         """
-        return (self._contact.fdir1[0], self._contact.fdir1[1], self._contact.fdir1[2])
+        return (self._contact.fdir1[0],
+                self._contact.fdir1[1],
+                self._contact.fdir1[2])
 
     # setFDir1
     def setFDir1(self, fdir):
@@ -664,8 +676,12 @@ cdef class Contact:
         """
         cdef long id1, id2
 
-        pos = (self._contact.geom.pos[0], self._contact.geom.pos[1], self._contact.geom.pos[2])
-        normal = (self._contact.geom.normal[0], self._contact.geom.normal[1], self._contact.geom.normal[2])
+        pos = (self._contact.geom.pos[0],
+               self._contact.geom.pos[1],
+               self._contact.geom.pos[2])
+        normal = (self._contact.geom.normal[0],
+                  self._contact.geom.normal[1],
+                  self._contact.geom.normal[2])
         depth = self._contact.geom.depth
 
         id1 = <long>self._contact.geom.g1
@@ -1071,7 +1087,8 @@ cdef class World:
         @type impulse: 3-tuple of floats
         """
         cdef dVector3 force
-        dWorldImpulseToForce(self.wid, stepsize, impulse[0], impulse[1], impulse[2], force)
+        dWorldImpulseToForce(self.wid, stepsize,
+                             impulse[0], impulse[1], impulse[2], force)
         return force[0], force[1], force[2]
 
     # createBody
@@ -4168,7 +4185,8 @@ cdef class TriMeshData:
             fp = fp + 3
 
         # Pass the data to ODE
-        dGeomTriMeshDataBuildSimple(self.tmdid, self.vertex_buffer, numverts, self.face_buffer, numfaces * 3)
+        dGeomTriMeshDataBuildSimple(self.tmdid, self.vertex_buffer, numverts,
+                                    self.face_buffer, numfaces * 3)
 
 ######################################################################
 
@@ -4239,7 +4257,9 @@ cdef class GeomTriMesh(GeomObject):
         vp2 = <dVector3*>v2
 
         dGeomTriMeshGetTriangle(self.gid, idx, vp0, vp1, vp2)
-        return ((v0[0],v0[1],v0[2]), (v1[0],v1[1],v1[2]), (v2[0],v2[1],v2[2]))
+        return ((v0[0], v0[1], v0[2]),
+                (v1[0], v1[1], v1[2]),
+                (v2[0], v2[1], v2[2]))
         
     def getTriangleCount(self):
         """getTriangleCount() -> n
