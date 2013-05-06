@@ -46,29 +46,29 @@ ParamStopCFM       = 8
 ParamSuspensionERP = 9
 ParamSuspensionCFM = 10
 
-ParamLoStop2        = 256+0
-ParamHiStop2        = 256+1
-ParamVel2           = 256+2
-ParamFMax2          = 256+3
-ParamFudgeFactor2   = 256+4
-ParamBounce2        = 256+5
-ParamCFM2           = 256+6
-ParamStopERP2       = 256+7
-ParamStopCFM2       = 256+8
-ParamSuspensionERP2 = 256+9
-ParamSuspensionCFM2 = 256+10
+ParamLoStop2        = 256 + 0
+ParamHiStop2        = 256 + 1
+ParamVel2           = 256 + 2
+ParamFMax2          = 256 + 3
+ParamFudgeFactor2   = 256 + 4
+ParamBounce2        = 256 + 5
+ParamCFM2           = 256 + 6
+ParamStopERP2       = 256 + 7
+ParamStopCFM2       = 256 + 8
+ParamSuspensionERP2 = 256 + 9
+ParamSuspensionCFM2 = 256 + 10
 
-ParamLoStop3        = 512+0
-ParamHiStop3        = 512+1
-ParamVel3           = 512+2
-ParamFMax3          = 512+3
-ParamFudgeFactor3   = 512+4
-ParamBounce3        = 512+5
-ParamCFM3           = 512+6
-ParamStopERP3       = 512+7
-ParamStopCFM3       = 512+8
-ParamSuspensionERP3 = 512+9
-ParamSuspensionCFM3 = 512+10
+ParamLoStop3        = 512 + 0
+ParamHiStop3        = 512 + 1
+ParamVel3           = 512 + 2
+ParamFMax3          = 512 + 3
+ParamFudgeFactor3   = 512 + 4
+ParamBounce3        = 512 + 5
+ParamCFM3           = 512 + 6
+ParamStopERP3       = 512 + 7
+ParamStopCFM3       = 512 + 8
+ParamSuspensionERP3 = 512 + 9
+ParamSuspensionCFM3 = 512 + 10
 
 ParamGroup = 256
 
@@ -350,23 +350,23 @@ cdef class Mass:
         dMassAdd(&self._mass, &b._mass)
 
     def __getattr__(self, name):
-        if name=="mass":
+        if name == "mass":
             return self._mass.mass
-        elif name=="c":
-            return (self._mass.c[0], self._mass.c[1], self._mass.c[2])
-        elif name=="I":
-            return ((self._mass.I[0],self._mass.I[1],self._mass.I[2]),
-                    (self._mass.I[4],self._mass.I[5],self._mass.I[6]),
-                    (self._mass.I[8],self._mass.I[9],self._mass.I[10]))
+        elif name == "c":
+            return self._mass.c[0], self._mass.c[1], self._mass.c[2]
+        elif name == "I":
+            return ((self._mass.I[0], self._mass.I[1], self._mass.I[2]),
+                    (self._mass.I[4], self._mass.I[5], self._mass.I[6]),
+                    (self._mass.I[8], self._mass.I[9], self._mass.I[10]))
         else:
             raise AttributeError,"Mass object has no attribute '"+name+"'"
 
     def __setattr__(self, name, value):
-        if name=="mass":
+        if name == "mass":
             self.adjust(value)
-        elif name=="c":
+        elif name == "c":
             raise AttributeError,"Use the setParameter() method to change c"
-        elif name=="I":
+        elif name == "I":
             raise AttributeError,"Use the setParameter() method to change I"
         else:
             raise AttributeError,"Mass object has no attribute '"+name+"'"
@@ -376,7 +376,7 @@ cdef class Mass:
         return self
 
     def __str__(self):
-        m   = str(self._mass.mass)
+        m = str(self._mass.mass)
         sc0 = str(self._mass.c[0])
         sc1 = str(self._mass.c[1])
         sc2 = str(self._mass.c[2])
@@ -410,7 +410,7 @@ cdef class Contact:
 
     def __cinit__(self):
         self._contact.surface.mode = ContactBounce
-        self._contact.surface.mu   = dInfinity
+        self._contact.surface.mu = dInfinity
 
         self._contact.surface.bounce = 0.1
 
@@ -672,7 +672,7 @@ cdef class Contact:
         id2 = <long>self._contact.geom.g2
         g1 = _geom_c2py_lut[id1]
         g2 = _geom_c2py_lut[id2]
-        return (pos,normal,depth,g1,g2)
+        return pos, normal, depth, g1, g2
 
     # setContactGeomParams
     def setContactGeomParams(self, pos, normal, depth, g1=None, g2=None):
@@ -701,13 +701,13 @@ cdef class Contact:
         self._contact.geom.normal[1] = normal[1]
         self._contact.geom.normal[2] = normal[2]
         self._contact.geom.depth = depth
-        if g1!=None:
+        if g1 != None:
             id = g1._id()
             self._contact.geom.g1 = <dGeomID>id
         else:
             self._contact.geom.g1 = <dGeomID>0
             
-        if g2!=None:
+        if g2 != None:
             id = g2._id()
             self._contact.geom.g2 = <dGeomID>id
         else:
@@ -732,7 +732,7 @@ cdef class World:
         self.wid = dWorldCreate()
 
     def __dealloc__(self):
-        if self.wid!=NULL:
+        if self.wid != NULL:
             dWorldDestroy(self.wid)
 
     # setGravity
@@ -754,7 +754,7 @@ cdef class World:
         """
         cdef dVector3 g
         dWorldGetGravity(self.wid, g)
-        return (g[0],g[1],g[2])
+        return g[0], g[1], g[2]
 
     # setERP
     def setERP(self, erp):
@@ -1072,7 +1072,7 @@ cdef class World:
         """
         cdef dVector3 force
         dWorldImpulseToForce(self.wid, stepsize, impulse[0], impulse[1], impulse[2], force)
-        return (force[0], force[1], force[2])
+        return force[0], force[1], force[2]
 
     # createBody
 #    def createBody(self):
@@ -1140,7 +1140,7 @@ cdef class Body:
         self.userattribs = {}
 
     def __dealloc__(self):
-        if self.bid!=NULL:
+        if self.bid != NULL:
             dBodyDestroy(self.bid)
 
     def __getattr__(self, name):
@@ -1178,7 +1178,7 @@ cdef class Body:
         cdef dReal* p
         # The "const" in the original return value is cast away
         p = <dReal*>dBodyGetPosition(self.bid)
-        return (p[0],p[1],p[2])
+        return p[0], p[1], p[2]
 
     # setRotation
     def setRotation(self, R):
@@ -1216,7 +1216,7 @@ cdef class Body:
         cdef dReal* m
         # The "const" in the original return value is cast away
         m = <dReal*>dBodyGetRotation(self.bid)
-        return (m[0],m[1],m[2],m[4],m[5],m[6],m[8],m[9],m[10])
+        return m[0], m[1], m[2], m[4], m[5], m[6], m[8], m[9], m[10]
 
     # getQuaternion
     def getQuaternion(self):
@@ -1227,7 +1227,7 @@ cdef class Body:
         """
         cdef dReal* q
         q = <dReal*>dBodyGetQuaternion(self.bid)
-        return (q[0], q[1], q[2], q[3])
+        return q[0], q[1], q[2], q[3]
 
     # setQuaternion
     def setQuaternion(self, q):
@@ -1266,7 +1266,7 @@ cdef class Body:
         cdef dReal* p
         # The "const" in the original return value is cast away
         p = <dReal*>dBodyGetLinearVel(self.bid)
-        return (p[0],p[1],p[2])
+        return p[0], p[1], p[2]
 
     # setAngularVel
     def setAngularVel(self, vel):
@@ -1288,7 +1288,7 @@ cdef class Body:
         cdef dReal* p
         # The "const" in the original return value is cast away
         p = <dReal*>dBodyGetAngularVel(self.bid)
-        return (p[0],p[1],p[2])
+        return p[0], p[1], p[2]
     
     # setMass
     def setMass(self, Mass mass):
@@ -1309,7 +1309,7 @@ cdef class Body:
         Return the mass properties as a Mass object.
         """
         cdef Mass m
-        m=Mass()
+        m = Mass()
         dBodyGetMass(self.bid, &m._mass)
         return m
 
@@ -1426,7 +1426,7 @@ cdef class Body:
         cdef dReal* f
         # The "const" in the original return value is cast away
         f = <dReal*>dBodyGetForce(self.bid)
-        return (f[0],f[1],f[2])
+        return f[0], f[1], f[2]
 
     # getTorque
     def getTorque(self):
@@ -1437,7 +1437,7 @@ cdef class Body:
         cdef dReal* f
         # The "const" in the original return value is cast away
         f = <dReal*>dBodyGetTorque(self.bid)
-        return (f[0],f[1],f[2])
+        return f[0], f[1], f[2]
 
     # setForce
     def setForce(self, f):
@@ -1475,7 +1475,7 @@ cdef class Body:
 
         cdef dVector3 res
         dBodyGetRelPointPos(self.bid, p[0], p[1], p[2], res)
-        return (res[0], res[1], res[2])
+        return res[0], res[1], res[2]
 
     # getRelPointVel
     def getRelPointVel(self, p):
@@ -1490,7 +1490,7 @@ cdef class Body:
         """
         cdef dVector3 res
         dBodyGetRelPointVel(self.bid, p[0], p[1], p[2], res)
-        return (res[0], res[1], res[2])
+        return res[0], res[1], res[2]
 
     # getPointVel
     def getPointVel(self, p):
@@ -1505,7 +1505,7 @@ cdef class Body:
         """
         cdef dVector3 res
         dBodyGetPointVel(self.bid, p[0], p[1], p[2], res)
-        return (res[0], res[1], res[2])
+        return res[0], res[1], res[2]
 
     # getPosRelPoint
     def getPosRelPoint(self, p):
@@ -1520,7 +1520,7 @@ cdef class Body:
         """
         cdef dVector3 res
         dBodyGetPosRelPoint(self.bid, p[0], p[1], p[2], res)
-        return (res[0], res[1], res[2])
+        return res[0], res[1], res[2]
 
     # vectorToWorld
     def vectorToWorld(self, v):
@@ -1534,7 +1534,7 @@ cdef class Body:
         """
         cdef dVector3 res
         dBodyVectorToWorld(self.bid, v[0], v[1], v[2], res)
-        return (res[0], res[1], res[2])
+        return res[0], res[1], res[2]
 
     # vectorFromWorld
     def vectorFromWorld(self, v):
@@ -1548,7 +1548,7 @@ cdef class Body:
         """
         cdef dVector3 res
         dBodyVectorFromWorld(self.bid, v[0], v[1], v[2], res)
-        return (res[0], res[1], res[2])        
+        return res[0], res[1], res[2]
 
     # Enable
     def enable(self):
@@ -1631,7 +1631,7 @@ cdef class Body:
         cdef dVector3 p
         # The "const" in the original return value is cast away
         dBodyGetFiniteRotationAxis(self.bid, p)
-        return (p[0],p[1],p[2])
+        return p[0], p[1], p[2]
         
     # getNumJoints
     def getNumJoints(self):
@@ -1729,7 +1729,7 @@ cdef class JointGroup:
         self.jointlist = []
 
     def __dealloc__(self):
-        if self.gid!=NULL:
+        if self.gid != NULL:
             for j in self.jointlist:
                 j._destroyed()
             dJointGroupDestroy(self.gid)
@@ -1795,7 +1795,7 @@ cdef class Joint:
 
     def __dealloc__(self):
         self.setFeedback(False)
-        if self.jid!=NULL:
+        if self.jid != NULL:
             dJointDestroy(self.jid)
 
     def __getattr__(self, name):
@@ -1867,12 +1867,12 @@ cdef class Joint:
         """
         cdef dBodyID id1, id2
 
-        if body1==None:
+        if body1 == None:
             id1 = NULL
         else:
             id1 = body1.bid
             
-        if body2==None:
+        if body2 == None:
             id2 = NULL
         else:
             id2 = body2.bid
@@ -1895,9 +1895,9 @@ cdef class Joint:
         @type index: int
         """
         
-        if (index == 0):
+        if index == 0:
             return self.body1
-        elif (index == 1):
+        elif index == 1:
             return self.body2
         else:
             raise IndexError()
@@ -1917,15 +1917,15 @@ cdef class Joint:
         
         if flag:
             # Was there already a buffer allocated? then we're finished
-            if self.feedback!=NULL:
+            if self.feedback != NULL:
                 return
             # Allocate a buffer and pass it to ODE
             self.feedback = <dJointFeedback*>malloc(sizeof(dJointFeedback))
-            if self.feedback==NULL:
+            if self.feedback == NULL:
                 raise MemoryError("can't allocate feedback buffer")
             dJointSetFeedback(self.jid, self.feedback)
         else:
-            if self.feedback!=NULL:
+            if self.feedback != NULL:
                 # Free a previously allocated buffer
                 dJointSetFeedback(self.jid, NULL)
                 free(self.feedback)
@@ -1946,14 +1946,14 @@ cdef class Joint:
         cdef dJointFeedback* fb
         
         fb = dJointGetFeedback(self.jid)
-        if (fb==NULL):
+        if fb == NULL:
             return None
            
         f1 = (fb.f1[0], fb.f1[1], fb.f1[2])
         t1 = (fb.t1[0], fb.t1[1], fb.t1[2])
         f2 = (fb.f2[0], fb.f2[1], fb.f2[2])
         t2 = (fb.t2[0], fb.t2[1], fb.t2[2])
-        return (f1,t1,f2,t2)
+        return f1, t1, f2, t2
 
 ######################################################################
 
@@ -1971,15 +1971,15 @@ cdef class BallJoint(Joint):
         cdef JointGroup jg
         cdef dJointGroupID jgid
 
-        jgid=NULL
-        if jointgroup!=None:
-            jg=jointgroup
-            jgid=jg.gid
+        jgid = NULL
+        if jointgroup != None:
+            jg = jointgroup
+            jgid = jg.gid
         self.jid = dJointCreateBall(world.wid, jgid)
 
     def __init__(self, World world not None, jointgroup=None):
         self.world = world
-        if jointgroup!=None:
+        if jointgroup != None:
             jointgroup._addjoint(self)
             
     # setAnchor
@@ -2005,7 +2005,7 @@ cdef class BallJoint(Joint):
         
         cdef dVector3 p
         dJointGetBallAnchor(self.jid, p)
-        return (p[0],p[1],p[2])
+        return p[0], p[1], p[2]
 
     # getAnchor2
     def getAnchor2(self):
@@ -2018,7 +2018,7 @@ cdef class BallJoint(Joint):
 
         cdef dVector3 p
         dJointGetBallAnchor2(self.jid, p)
-        return (p[0],p[1],p[2])
+        return p[0], p[1], p[2]
 
     # setParam
     def setParam(self, param, value):
@@ -2042,15 +2042,15 @@ cdef class HingeJoint(Joint):
         cdef JointGroup jg
         cdef dJointGroupID jgid
         
-        jgid=NULL
-        if jointgroup!=None:
-            jg=jointgroup
-            jgid=jg.gid
+        jgid = NULL
+        if jointgroup != None:
+            jg = jointgroup
+            jgid = jg.gid
         self.jid = dJointCreateHinge(world.wid, jgid)
         
     def __init__(self, World world not None, jointgroup=None):
         self.world = world
-        if jointgroup!=None:
+        if jointgroup != None:
             jointgroup._addjoint(self)
 
     # setAnchor
@@ -2074,7 +2074,7 @@ cdef class HingeJoint(Joint):
         """
         cdef dVector3 p
         dJointGetHingeAnchor(self.jid, p)
-        return (p[0],p[1],p[2])
+        return p[0], p[1], p[2]
 
     # getAnchor2
     def getAnchor2(self):
@@ -2086,7 +2086,7 @@ cdef class HingeJoint(Joint):
         """
         cdef dVector3 p
         dJointGetHingeAnchor2(self.jid, p)
-        return (p[0],p[1],p[2])
+        return p[0], p[1], p[2]
 
     # setAxis
     def setAxis(self, axis):
@@ -2107,7 +2107,7 @@ cdef class HingeJoint(Joint):
         """
         cdef dVector3 a
         dJointGetHingeAxis(self.jid, a)
-        return (a[0],a[1],a[2])
+        return a[0], a[1], a[2]
 
     # getAngle
     def getAngle(self):
@@ -2196,15 +2196,15 @@ cdef class SliderJoint(Joint):
         cdef JointGroup jg
         cdef dJointGroupID jgid
 
-        jgid=NULL
-        if jointgroup!=None:
-            jg=jointgroup
-            jgid=jg.gid
+        jgid = NULL
+        if jointgroup != None:
+            jg = jointgroup
+            jgid = jg.gid
         self.jid = dJointCreateSlider(world.wid, jgid)
 
     def __init__(self, World world not None, jointgroup=None):
         self.world = world
-        if jointgroup!=None:
+        if jointgroup != None:
             jointgroup._addjoint(self)
           
     # setAxis
@@ -2226,7 +2226,7 @@ cdef class SliderJoint(Joint):
         """
         cdef dVector3 a
         dJointGetSliderAxis(self.jid, a)
-        return (a[0],a[1],a[2])
+        return a[0], a[1], a[2]
 
     # getPosition
     def getPosition(self):
@@ -2282,15 +2282,15 @@ cdef class UniversalJoint(Joint):
         cdef JointGroup jg
         cdef dJointGroupID jgid
 
-        jgid=NULL
-        if jointgroup!=None:
-            jg=jointgroup
-            jgid=jg.gid
+        jgid = NULL
+        if jointgroup != None:
+            jg = jointgroup
+            jgid = jg.gid
         self.jid = dJointCreateUniversal(world.wid, jgid)
 
     def __init__(self, World world not None, jointgroup=None):
         self.world = world
-        if jointgroup!=None:
+        if jointgroup != None:
             jointgroup._addjoint(self)
 
     # setAnchor
@@ -2315,7 +2315,7 @@ cdef class UniversalJoint(Joint):
         
         cdef dVector3 p
         dJointGetUniversalAnchor(self.jid, p)
-        return (p[0],p[1],p[2])
+        return p[0], p[1], p[2]
 
     # getAnchor2
     def getAnchor2(self):
@@ -2328,7 +2328,7 @@ cdef class UniversalJoint(Joint):
         
         cdef dVector3 p
         dJointGetUniversalAnchor2(self.jid, p)
-        return (p[0],p[1],p[2])
+        return p[0], p[1], p[2]
 
     # setAxis1
     def setAxis1(self, axis):
@@ -2350,7 +2350,7 @@ cdef class UniversalJoint(Joint):
         """
         cdef dVector3 a
         dJointGetUniversalAxis1(self.jid, a)
-        return (a[0],a[1],a[2])
+        return a[0], a[1], a[2]
 
     # setAxis2
     def setAxis2(self, axis):
@@ -2372,7 +2372,7 @@ cdef class UniversalJoint(Joint):
         """
         cdef dVector3 a
         dJointGetUniversalAxis2(self.jid, a)
-        return (a[0],a[1],a[2])
+        return a[0], a[1], a[2]
 
     # addTorques
     def addTorques(self, torque1, torque2):
@@ -2421,15 +2421,15 @@ cdef class Hinge2Joint(Joint):
         cdef JointGroup jg
         cdef dJointGroupID jgid
 
-        jgid=NULL
-        if jointgroup!=None:
-            jg=jointgroup
-            jgid=jg.gid
+        jgid = NULL
+        if jointgroup != None:
+            jg = jointgroup
+            jgid = jg.gid
         self.jid = dJointCreateHinge2(world.wid, jgid)
 
     def __init__(self, World world, jointgroup=None):
         self.world = world
-        if jointgroup!=None:
+        if jointgroup != None:
             jointgroup._addjoint(self)
 
     # setAnchor
@@ -2454,7 +2454,7 @@ cdef class Hinge2Joint(Joint):
         
         cdef dVector3 p
         dJointGetHinge2Anchor(self.jid, p)
-        return (p[0],p[1],p[2])
+        return p[0], p[1], p[2]
 
     # getAnchor2
     def getAnchor2(self):
@@ -2467,7 +2467,7 @@ cdef class Hinge2Joint(Joint):
         
         cdef dVector3 p
         dJointGetHinge2Anchor2(self.jid, p)
-        return (p[0],p[1],p[2])
+        return p[0], p[1], p[2]
 
     # setAxis1
     def setAxis1(self, axis):
@@ -2490,7 +2490,7 @@ cdef class Hinge2Joint(Joint):
         """
         cdef dVector3 a
         dJointGetHinge2Axis1(self.jid, a)
-        return (a[0],a[1],a[2])
+        return a[0], a[1], a[2]
 
     # setAxis2
     def setAxis2(self, axis):
@@ -2512,7 +2512,7 @@ cdef class Hinge2Joint(Joint):
         """
         cdef dVector3 a
         dJointGetHinge2Axis2(self.jid, a)
-        return (a[0],a[1],a[2])
+        return a[0], a[1], a[2]
 
     # getAngle
     def getAngle1(self):
@@ -2577,15 +2577,15 @@ cdef class FixedJoint(Joint):
         cdef JointGroup jg
         cdef dJointGroupID jgid
 
-        jgid=NULL
-        if jointgroup!=None:
-            jg=jointgroup
-            jgid=jg.gid
+        jgid = NULL
+        if jointgroup != None:
+            jg = jointgroup
+            jgid = jg.gid
         self.jid = dJointCreateFixed(world.wid, jgid)
 
     def __init__(self, World world not None, jointgroup=None):
         self.world = world
-        if jointgroup!=None:
+        if jointgroup != None:
             jointgroup._addjoint(self)
 
     # setFixed
@@ -2611,15 +2611,15 @@ cdef class ContactJoint(Joint):
     def __cinit__(self, World world not None, jointgroup, Contact contact):
         cdef JointGroup jg
         cdef dJointGroupID jgid
-        jgid=NULL
-        if jointgroup!=None:
-            jg=jointgroup
-            jgid=jg.gid
+        jgid = NULL
+        if jointgroup != None:
+            jg = jointgroup
+            jgid = jg.gid
         self.jid = dJointCreateContact(world.wid, jgid, &contact._contact)
 
     def __init__(self, World world not None, jointgroup, Contact contact):
         self.world = world
-        if jointgroup!=None:
+        if jointgroup != None:
             jointgroup._addjoint(self)
 
 # AMotor
@@ -2636,14 +2636,14 @@ cdef class AMotor(Joint):
         cdef dJointGroupID jgid
 
         jgid = NULL
-        if jointgroup!=None:
+        if jointgroup != None:
             jg = jointgroup
             jgid = jg.gid
         self.jid = dJointCreateAMotor(world.wid, jgid)
 
     def __init__(self, World world not None, jointgroup=None):
         self.world = world
-        if jointgroup!=None:
+        if jointgroup != None:
             jointgroup._addjoint(self)
             
     # setMode
@@ -2723,7 +2723,7 @@ cdef class AMotor(Joint):
         """
         cdef dVector3 a
         dJointGetAMotorAxis(self.jid, anum, a)
-        return (a[0],a[1],a[2])
+        return a[0], a[1], a[2]
 
     # getAxisRel
     def getAxisRel(self, int anum):
@@ -2809,14 +2809,14 @@ cdef class LMotor(Joint):
         cdef dJointGroupID jgid
 
         jgid = NULL
-        if jointgroup!=None:
+        if jointgroup != None:
             jg = jointgroup
             jgid = jg.gid
         self.jid = dJointCreateLMotor(world.wid, jgid)
 
     def __init__(self, World world not None, jointgroup=None):
         self.world = world
-        if jointgroup!=None:
+        if jointgroup != None:
             jointgroup._addjoint(self)
             
     # setNumAxes
@@ -2873,7 +2873,7 @@ cdef class LMotor(Joint):
         """
         cdef dVector3 a
         dJointGetLMotorAxis(self.jid, anum, a)
-        return (a[0],a[1],a[2])
+        return a[0], a[1], a[2]
 
     # setParam
     def setParam(self, param, value):
@@ -2897,15 +2897,15 @@ cdef class Plane2DJoint(Joint):
         cdef JointGroup jg
         cdef dJointGroupID jgid
 
-        jgid=NULL
-        if jointgroup!=None:
-            jg=jointgroup
-            jgid=jg.gid
+        jgid = NULL
+        if jointgroup != None:
+            jg = jointgroup
+            jgid = jg.gid
         self.jid = dJointCreatePlane2D(world.wid, jgid)
 
     def __init__(self, World world not None, jointgroup=None):
         self.world = world
-        if jointgroup!=None:
+        if jointgroup != None:
             jointgroup._addjoint(self)
             
     def setXParam(self, param, value):
@@ -2947,7 +2947,7 @@ cdef class GeomObject:
         raise NotImplementedError, "The GeomObject base class can't be used directly."
 
     def __dealloc__(self):
-        if self.gid!=NULL:
+        if self.gid != NULL:
             dGeomDestroy(self.gid)
             self.gid = NULL
 
@@ -2958,7 +2958,7 @@ cdef class GeomObject:
             raise AttributeError, "geom has no attribute '%s'."%name
 
     def __setattr__(self, name, val):
-        self.attribs[name]=val
+        self.attribs[name] = val
 
     def __delattr__(self, name):
         if name in self.attribs:
@@ -2997,7 +2997,7 @@ cdef class GeomObject:
         if not self.placeable():
             raise ValueError, "Non-placeable geoms cannot have a body associated to them."
         
-        if body==None:
+        if body == None:
             dGeomSetBody(self.gid, NULL)
         else:
             dGeomSetBody(self.gid, body.bid)
@@ -3037,7 +3037,7 @@ cdef class GeomObject:
 
         cdef dReal* p
         p = <dReal*>dGeomGetPosition(self.gid)
-        return (p[0],p[1],p[2])
+        return p[0], p[1], p[2]
 
     def setRotation(self, R):
         """setRotation(R)
@@ -3077,7 +3077,7 @@ cdef class GeomObject:
 
         cdef dReal* m
         m = <dReal*>dGeomGetRotation(self.gid)
-        return [m[0],m[1],m[2],m[4],m[5],m[6],m[8],m[9],m[10]]
+        return [m[0], m[1], m[2], m[4], m[5], m[6], m[8], m[9], m[10]]
 
     def getQuaternion(self):
         """getQuaternion() -> (w,x,y,z)
@@ -3090,7 +3090,7 @@ cdef class GeomObject:
 
         cdef dQuaternion q
         dGeomGetQuaternion(self.gid, q)
-        return (q[0],q[1],q[2],q[3])
+        return q[0], q[1], q[2], q[3]
 
     def setQuaternion(self, q):
         """setQuaternion(q)
@@ -3122,7 +3122,7 @@ cdef class GeomObject:
         @param pos: Position
         @type pos: 3-sequence of floats
         """
-        if self.body==None:
+        if self.body == None:
             raise ValueError, "Cannot set an offset position on a geom before calling setBody."
         dGeomSetOffsetPosition(self.gid, pos[0], pos[1], pos[2])
 
@@ -3146,7 +3146,7 @@ cdef class GeomObject:
         @param R: Rotation matrix
         @type R: 9-sequence of floats
         """
-        if self.body==None:
+        if self.body == None:
             raise ValueError, "Cannot set an offset rotation on a geom before calling setBody."
 
         cdef dMatrix3 m
@@ -3171,7 +3171,7 @@ cdef class GeomObject:
         """
         cdef dReal* m
         m = <dReal*>dGeomGetOffsetRotation(self.gid)
-        return [m[0],m[1],m[2],m[4],m[5],m[6],m[8],m[9],m[10]]
+        return [m[0], m[1], m[2], m[4], m[5], m[6], m[8], m[9], m[10]]
 
     def clearOffset(self):
         """clearOffset()
@@ -3189,7 +3189,7 @@ cdef class GeomObject:
         cdef dReal aabb[6]
         
         dGeomGetAABB(self.gid, aabb)
-        return (aabb[0], aabb[1], aabb[2], aabb[3], aabb[4], aabb[5])
+        return aabb[0], aabb[1], aabb[2], aabb[3], aabb[4], aabb[5]
 
     def isSpace(self):
         """isSpace() -> bool
@@ -3270,11 +3270,11 @@ class _SpaceIterator:
         return self
 
     def next(self):
-        if self.idx>=self.space.getNumGeoms():
+        if self.idx >= self.space.getNumGeoms():
             raise StopIteration
         else:
             res = self.space.getGeom(self.idx)
-            self.idx = self.idx+1
+            self.idx = self.idx + 1
             return res
 
 
@@ -3311,7 +3311,7 @@ cdef class SpaceBase(GeomObject):
         raise NotImplementedError, "The SpaceBase class can't be used directly."
 
     def __dealloc__(self):
-        if self.gid!=NULL:
+        if self.gid != NULL:
             dSpaceDestroy(self.sid)
             self.sid = NULL
             self.gid = NULL
@@ -3395,7 +3395,7 @@ cdef class SpaceBase(GeomObject):
         cdef dGeomID gid
 
         # Check the index
-        if idx<0 or idx>=dSpaceGetNumGeoms(self.sid):
+        if idx < 0 or idx >= dSpaceGetNumGeoms(self.sid):
             raise IndexError, "geom index out of range"
 
         gid = dSpaceGetGeom(self.sid, idx)
@@ -3449,9 +3449,9 @@ cdef void collide_callback(void* data, dGeomID o1, dGeomID o2):
     callback, arg = tup
     id1 = <long>o1
     id2 = <long>o2
-    g1=_geom_c2py_lut[id1]
-    g2=_geom_c2py_lut[id2]
-    callback(arg,g1,g2)
+    g1 = _geom_c2py_lut[id1]
+    g2 = _geom_c2py_lut[id2]
+    callback(arg, g1, g2)
 
 
 # SimpleSpace
@@ -3472,7 +3472,7 @@ cdef class SimpleSpace(SpaceBase):
         cdef dSpaceID parentid
 
         parentid = NULL
-        if space!=None:
+        if space != None:
             sp = space
             parentid = sp.sid
         
@@ -3482,7 +3482,7 @@ cdef class SimpleSpace(SpaceBase):
         self.gid = <dGeomID>self.sid
 
         dSpaceSetCleanup(self.sid, 0)
-        _geom_c2py_lut[<long>self.sid]=self
+        _geom_c2py_lut[<long>self.sid] = self
 
     def __init__(self, space=None):
         pass
@@ -3505,7 +3505,7 @@ cdef class HashSpace(SpaceBase):
         cdef dSpaceID parentid
 
         parentid = NULL
-        if space!=None:
+        if space != None:
             sp = space
             parentid = sp.sid
         
@@ -3515,7 +3515,7 @@ cdef class HashSpace(SpaceBase):
         self.gid = <dGeomID>self.sid
 
         dSpaceSetCleanup(self.sid, 0)
-        _geom_c2py_lut[<long>self.sid]=self
+        _geom_c2py_lut[<long>self.sid] = self
 
     def __init__(self, space=None):
         pass
@@ -3528,7 +3528,7 @@ cdef class HashSpace(SpaceBase):
         respectively.
         """
         
-        if minlevel>maxlevel:
+        if minlevel > maxlevel:
             raise ValueError, "minlevel (%d) must be less than or equal to maxlevel (%d)"%(minlevel, maxlevel)
             
         dHashSpaceSetLevels(self.sid, minlevel, maxlevel)
@@ -3544,7 +3544,7 @@ cdef class HashSpace(SpaceBase):
         cdef int minlevel
         cdef int maxlevel
         dHashSpaceGetLevels(self.sid, &minlevel, &maxlevel)
-        return (minlevel, maxlevel)
+        return minlevel, maxlevel
 
 
 # QuadTreeSpace
@@ -3566,7 +3566,7 @@ cdef class QuadTreeSpace(SpaceBase):
         cdef dVector3 e
 
         parentid = NULL
-        if space!=None:
+        if space != None:
             sp = space
             parentid = sp.sid
 
@@ -3582,7 +3582,7 @@ cdef class QuadTreeSpace(SpaceBase):
         self.gid = <dGeomID>self.sid
 
         dSpaceSetCleanup(self.sid, 0)
-        _geom_c2py_lut[<long>self.sid]=self
+        _geom_c2py_lut[<long>self.sid] = self
 
     def __init__(self, center, extents, depth, space=None):
         pass
@@ -3600,9 +3600,9 @@ def Space(space_type=0):
      >>> space = Space(space_type=0)   # Create a SimpleSpace
      >>> space = Space(space_type=1)   # Create a HashSpace
     """
-    if space_type==0:
+    if space_type == 0:
         return SimpleSpace()
-    elif space_type==1:
+    elif space_type == 1:
         return HashSpace()
     else:
         raise ValueError, "Unknown space type (%d)"%space_type
@@ -3623,15 +3623,15 @@ cdef class GeomSphere(GeomObject):
         cdef SpaceBase sp
         cdef dSpaceID sid
 
-        sid=NULL
-        if space!=None:
+        sid = NULL
+        if space != None:
             sp = space
             sid = sp.sid
         self.gid = dCreateSphere(sid, radius)
-#        if space!=None:
+#        if space != None:
 #            space._addgeom(self)
 
-        _geom_c2py_lut[<long>self.gid]=self
+        _geom_c2py_lut[<long>self.gid] = self
 
     def __init__(self, space=None, radius=1.0):
         self.space = space
@@ -3691,15 +3691,15 @@ cdef class GeomBox(GeomObject):
         cdef SpaceBase sp
         cdef dSpaceID sid
         
-        sid=NULL
-        if space!=None:
+        sid = NULL
+        if space != None:
             sp = space
             sid = sp.sid
-        self.gid = dCreateBox(sid, lengths[0],lengths[1],lengths[2])
-#        if space!=None:
+        self.gid = dCreateBox(sid, lengths[0], lengths[1], lengths[2])
+#        if space != None:
 #            space._addgeom(self)
 
-        _geom_c2py_lut[<long>self.gid]=self
+        _geom_c2py_lut[<long>self.gid] = self
 
     def __init__(self, space=None, lengths=(1.0, 1.0, 1.0)):
         self.space = space
@@ -3719,7 +3719,7 @@ cdef class GeomBox(GeomObject):
     def getLengths(self):
         cdef dVector3 res
         dGeomBoxGetLengths(self.gid, res)
-        return (res[0], res[1], res[2])
+        return res[0], res[1], res[2]
 
     def pointDepth(self, p):
         """pointDepth(p) -> float
@@ -3751,21 +3751,21 @@ cdef class GeomPlane(GeomObject):
 
     """
 
-    def __cinit__(self, space=None, normal=(0,0,1), dist=0):
+    def __cinit__(self, space=None, normal=(0, 0, 1), dist=0):
         cdef SpaceBase sp
         cdef dSpaceID sid
         
-        sid=NULL
-        if space!=None:
+        sid = NULL
+        if space != None:
             sp = space
             sid = sp.sid
         self.gid = dCreatePlane(sid, normal[0], normal[1], normal[2], dist)
-#        if space!=None:
+#        if space != None:
 #            space._addgeom(self)
 
-        _geom_c2py_lut[<long>self.gid]=self
+        _geom_c2py_lut[<long>self.gid] = self
 
-    def __init__(self, space=None, normal=(0,0,1), dist=0):
+    def __init__(self, space=None, normal=(0, 0, 1), dist=0):
         self.space = space
 
     def _id(self):
@@ -3813,15 +3813,15 @@ cdef class GeomCapsule(GeomObject):
         cdef SpaceBase sp
         cdef dSpaceID sid
         
-        sid=NULL
-        if space!=None:
+        sid = NULL
+        if space != None:
             sp = space
             sid = sp.sid
         self.gid = dCreateCapsule(sid, radius, length)
-#        if space!=None:
+#        if space != None:
 #            space._addgeom(self)
 
-        _geom_c2py_lut[<long>self.gid]=self
+        _geom_c2py_lut[<long>self.gid] = self
 
     def __init__(self, space=None, radius=0.5, length=1.0):
         self.space = space
@@ -3841,7 +3841,7 @@ cdef class GeomCapsule(GeomObject):
     def getParams(self):
         cdef dReal radius, length
         dGeomCapsuleGetParams(self.gid, &radius, &length)
-        return (radius, length)
+        return radius, length
 
     def pointDepth(self, p):
         """pointDepth(p) -> float
@@ -3875,15 +3875,15 @@ cdef class GeomCylinder(GeomObject):
         cdef SpaceBase sp
         cdef dSpaceID sid
         
-        sid=NULL
-        if space!=None:
+        sid = NULL
+        if space != None:
             sp = space
             sid = sp.sid
         self.gid = dCreateCylinder(sid, radius, length)
-#        if space!=None:
+#        if space != None:
 #            space._addgeom(self)
 
-        _geom_c2py_lut[<long>self.gid]=self
+        _geom_c2py_lut[<long>self.gid] = self
 
     def __init__(self, space=None, radius=0.5, length=1.0):
         self.space = space
@@ -3903,7 +3903,7 @@ cdef class GeomCylinder(GeomObject):
     def getParams(self):
         cdef dReal radius, length
         dGeomCylinderGetParams(self.gid, &radius, &length)
-        return (radius, length)
+        return radius, length
 
     ## dGeomCylinderPointDepth not implemented upstream in ODE 0.7
 
@@ -3927,15 +3927,15 @@ cdef class GeomRay(GeomObject):
         cdef SpaceBase sp
         cdef dSpaceID sid
         
-        sid=NULL
-        if space!=None:
+        sid = NULL
+        if space != None:
             sp = space
             sid = sp.sid
         self.gid = dCreateRay(sid, rlen)
-#        if space!=None:
+#        if space != None:
 #            space._addgeom(self)
 
-        _geom_c2py_lut[<long>self.gid]=self
+        _geom_c2py_lut[<long>self.gid] = self
 
     def __init__(self, space=None, rlen=1.0):
         self.space = space
@@ -3975,7 +3975,7 @@ cdef class GeomRay(GeomObject):
         @type p: 3-sequence of floats
         @param u: rotation
         @type u: 3-sequence of floats'''
-        dGeomRaySet(self.gid, p[0],p[1],p[2], u[0],u[1],u[2])
+        dGeomRaySet(self.gid, p[0], p[1], p[2], u[0], u[1], u[2])
 
     def get(self):
         '''get() -> ((p[0], p[1], p[2]), (u[0], u[1], u[2]))
@@ -3987,7 +3987,7 @@ cdef class GeomRay(GeomObject):
         cdef dVector3 start
         cdef dVector3 dir
         dGeomRayGet(self.gid, start, dir)
-        return ((start[0],start[1],start[2]), (dir[0],dir[1],dir[2]))
+        return (start[0], start[1], start[2]), (dir[0], dir[1], dir[2])
 
 
 # GeomTransform
@@ -4009,25 +4009,25 @@ cdef class GeomTransform(GeomObject):
         cdef SpaceBase sp
         cdef dSpaceID sid
         
-        sid=NULL
-        if space!=None:
+        sid = NULL
+        if space != None:
             sp = space
             sid = sp.sid
         self.gid = dCreateGeomTransform(sid)
         # Set cleanup mode to 0 as a contained geom will be deleted
         # by its Python wrapper class
         dGeomTransformSetCleanup(self.gid, 0)
-#        if space!=None:
+#        if space != None:
 #            space._addgeom(self)
 
-        _geom_c2py_lut[<long>self.gid]=self
+        _geom_c2py_lut[<long>self.gid] = self
 
     def __init__(self, space=None):
         self.space = space
         self.body = None
         self.geom = None
 
-        self.attribs={}
+        self.attribs = {}
 
     def placeable(self):
         return True
@@ -4052,9 +4052,9 @@ cdef class GeomTransform(GeomObject):
 
         if not geom.placeable():
             raise ValueError, "Only placeable geoms can be encapsulated by a GeomTransform"
-        if dGeomGetSpace(geom.gid)!=<dSpaceID>0:
+        if dGeomGetSpace(geom.gid) != <dSpaceID>0:
             raise ValueError, "The encapsulated geom was already inserted into a space."
-        if dGeomGetBody(geom.gid)!=<dBodyID>0:
+        if dGeomGetBody(geom.gid) != <dBodyID>0:
             raise ValueError, "The encapsulated geom is already associated with a body."
         
         id = geom._id()
@@ -4083,7 +4083,7 @@ cdef class GeomTransform(GeomObject):
         @param mode: Information mode (0 or 1)
         @type mode: int
         """
-        if mode<0 or mode>1:
+        if mode < 0 or mode > 1:
             raise ValueError, "Invalid information mode (%d). Must be either 0 or 1."%mode
         dGeomTransformSetInfo(self.gid, mode)
 
@@ -4118,11 +4118,11 @@ cdef class TriMeshData:
         self.face_buffer = NULL
 
     def __dealloc__(self):
-        if self.tmdid!=NULL:
+        if self.tmdid != NULL:
             dGeomTriMeshDataDestroy(self.tmdid)
-        if self.vertex_buffer!=NULL:
+        if self.vertex_buffer != NULL:
             free(self.vertex_buffer)
-        if self.face_buffer!=NULL:
+        if self.face_buffer != NULL:
             free(self.face_buffer)
     
     def build(self, verts, faces):
@@ -4137,13 +4137,13 @@ cdef class TriMeshData:
         cdef int numfaces
         cdef dReal* vp
         cdef int* fp
-        cdef int a,b,c
+        cdef int a, b, c
         
         numverts = len(verts)
         numfaces = len(faces)
         # Allocate the vertex and face buffer
-        self.vertex_buffer = <dReal*>malloc(numverts*4*sizeof(dReal))
-        self.face_buffer = <int*>malloc(numfaces*3*sizeof(int))
+        self.vertex_buffer = <dReal*>malloc(numverts * 4 * sizeof(dReal))
+        self.face_buffer = <int*>malloc(numfaces * 3 * sizeof(int))
 
         # Fill the vertex buffer
         vp = self.vertex_buffer
@@ -4152,7 +4152,7 @@ cdef class TriMeshData:
             vp[1] = v[1]
             vp[2] = v[2]
             vp[3] = 0
-            vp = vp+4
+            vp = vp + 4
 
         # Fill the face buffer
         fp = self.face_buffer
@@ -4160,15 +4160,15 @@ cdef class TriMeshData:
             a = f[0]
             b = f[1]
             c = f[2]
-            if a<0 or b<0 or c<0 or a>=numverts or b>=numverts or c>=numverts:
+            if (a < 0 or b < 0 or c < 0 or a >= numverts or b >= numverts or c >= numverts):
                 raise ValueError, "Vertex index out of range"
             fp[0] = a
             fp[1] = b
             fp[2] = c
-            fp = fp+3
+            fp = fp + 3
 
         # Pass the data to ODE
-        dGeomTriMeshDataBuildSimple(self.tmdid, self.vertex_buffer, numverts, self.face_buffer, numfaces*3)
+        dGeomTriMeshDataBuildSimple(self.tmdid, self.vertex_buffer, numverts, self.face_buffer, numfaces * 3)
 
 ######################################################################
 
@@ -4195,8 +4195,8 @@ cdef class GeomTriMesh(GeomObject):
 
         self.data = data
 
-        sid=NULL
-        if space!=None:
+        sid = NULL
+        if space != None:
             sp = space
             sid = sp.sid
         self.gid = dCreateTriMesh(sid, data.tmdid, NULL, NULL, NULL)
@@ -4289,12 +4289,12 @@ def collide(geom1, geom2):
 
     n = dCollide(<dGeomID>id1, <dGeomID>id2, 150, c, sizeof(dContactGeom))
     res = []
-    i=0
-    while i<n:
+    i = 0
+    while i < n:
         cont = Contact()
         cont._contact.geom = c[i]
         res.append(cont)
-        i=i+1
+        i = i + 1
 
     return res
 
@@ -4340,9 +4340,9 @@ def areConnected(Body body1, Body body2):
     @returns: True if the bodies are connected
     """
 
-    if (body1 is environment):
+    if body1 is environment:
         return False
-    if (body2 is environment):
+    if body2 is environment:
         return False
 
     return bool(dAreConnected(<dBodyID> body1.bid, <dBodyID> body2.bid))
