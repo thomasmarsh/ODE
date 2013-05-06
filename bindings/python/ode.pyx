@@ -361,17 +361,17 @@ cdef class Mass:
                     (self._mass.I[4], self._mass.I[5], self._mass.I[6]),
                     (self._mass.I[8], self._mass.I[9], self._mass.I[10]))
         else:
-            raise AttributeError,"Mass object has no attribute '"+name+"'"
+            raise AttributeError("Mass object has no attribute '%s'" % name)
 
     def __setattr__(self, name, value):
         if name == "mass":
             self.adjust(value)
         elif name == "c":
-            raise AttributeError,"Use the setParameter() method to change c"
+            raise AttributeError("Use the setParameter() method to change c")
         elif name == "I":
-            raise AttributeError,"Use the setParameter() method to change I"
+            raise AttributeError("Use the setParameter() method to change I")
         else:
-            raise AttributeError,"Mass object has no attribute '"+name+"'"
+            raise AttributeError("Mass object has no attribute '%s" % name)
 
     def __add__(self, Mass b):
         self.add(b)
@@ -1164,7 +1164,7 @@ cdef class Body:
         try:
             return self.userattribs[name]
         except:
-            raise AttributeError, "Body object has no attribute '%s'"%name
+            raise AttributeError("Body object has no attribute '%s'" % name)
             
     def __setattr__(self, name, value):
         self.userattribs[name] = value
@@ -1173,7 +1173,7 @@ cdef class Body:
         try:
             del self.userattribs[name]
         except:
-            raise AttributeError, "Body object has no attribute '%s'"%name
+            raise AttributeError("Body object has no attribute '%s'" % name)
 
     # setPosition
     def setPosition(self, pos):
@@ -1808,7 +1808,7 @@ cdef class Joint:
         self.userattribs = {}
 
     def __init__(self, *a, **kw):
-        raise NotImplementedError, "The Joint base class can't be used directly."
+        raise NotImplementedError("Joint base class can't be used directly")
 
     def __dealloc__(self):
         self.setFeedback(False)
@@ -1819,7 +1819,7 @@ cdef class Joint:
         try:
             return self.userattribs[name]
         except:
-            raise AttributeError, "Joint object has no attribute '%s'"%name
+            raise AttributeError("Joint object has no attribute '%s'" % name)
             
     def __setattr__(self, name, value):
         self.userattribs[name] = value
@@ -1828,7 +1828,7 @@ cdef class Joint:
         try:
             del self.userattribs[name]
         except:
-            raise AttributeError, "Joint object has no attribute '%s'"%name
+            raise AttributeError("Joint object has no attribute '%s'" % name)
 
     # _destroyed
     def _destroyed(self):
@@ -2961,7 +2961,8 @@ cdef class GeomObject:
         self.attribs = {}
 
     def __init__(self, *a, **kw):
-        raise NotImplementedError, "The GeomObject base class can't be used directly."
+        raise NotImplementedError(
+            "GeomObject base class can't be used directly")
 
     def __dealloc__(self):
         if self.gid != NULL:
@@ -2972,7 +2973,7 @@ cdef class GeomObject:
         if name in self.attribs:
             return self.attribs[name]
         else:
-            raise AttributeError, "geom has no attribute '%s'."%name
+            raise AttributeError("geom has no attribute '%s'" % name)
 
     def __setattr__(self, name, val):
         self.attribs[name] = val
@@ -2981,7 +2982,7 @@ cdef class GeomObject:
         if name in self.attribs:
             del self.attribs[name]
         else:
-            raise AttributeError, "geom has no attribute '%s'."%name
+            raise AttributeError("geom has no attribute '%s'" % name)
 
     def _id(self):
         """_id() -> int
@@ -2991,7 +2992,7 @@ cdef class GeomObject:
 
         This method has to be overwritten in derived methods.
         """
-        raise NotImplementedError, "Bug: The _id() method is not implemented."
+        raise NotImplementedError("Bug: The _id() method is not implemented")
 
     def placeable(self):
         """placeable() -> bool
@@ -3012,7 +3013,8 @@ cdef class GeomObject:
         """
 
         if not self.placeable():
-            raise ValueError, "Non-placeable geoms cannot have a body associated to them."
+            raise ValueError(
+                "Non-placeable geoms cannot have a body associated to them")
         
         if body == None:
             dGeomSetBody(self.gid, NULL)
@@ -3040,7 +3042,7 @@ cdef class GeomObject:
         @type pos: 3-sequence of floats
         """
         if not self.placeable():
-            raise ValueError, "Cannot set a position on non-placeable geoms."
+            raise ValueError("Cannot set a position on non-placeable geoms")
         dGeomSetPosition(self.gid, pos[0], pos[1], pos[2])
 
     def getPosition(self):
@@ -3050,7 +3052,7 @@ cdef class GeomObject:
         a body the returned value is the body's position.
         """
         if not self.placeable():
-            raise ValueError, "Non-placeable geoms do not have a position."
+            raise ValueError("Non-placeable geoms do not have a position")
 
         cdef dReal* p
         p = <dReal*>dGeomGetPosition(self.gid)
@@ -3066,7 +3068,7 @@ cdef class GeomObject:
         @type R: 9-sequence of floats
         """
         if not self.placeable():
-            raise ValueError, "Cannot set a rotation on non-placeable geoms."
+            raise ValueError("Cannot set a rotation on non-placeable geoms")
 
         cdef dMatrix3 m
         m[0] = R[0]
@@ -3090,7 +3092,7 @@ cdef class GeomObject:
         a body the returned value is the body's orientation.
         """
         if not self.placeable():
-            raise ValueError, "Non-placeable geoms do not have a rotation."
+            raise ValueError("Non-placeable geoms do not have a rotation")
 
         cdef dReal* m
         m = <dReal*>dGeomGetRotation(self.gid)
@@ -3103,7 +3105,7 @@ cdef class GeomObject:
         a body the returned value is the body's orientation.
         """
         if not self.placeable():
-            raise ValueError, "Non-placeable geoms do not have an orientation."
+            raise ValueError("Non-placeable geoms do not have an orientation")
 
         cdef dQuaternion q
         dGeomGetQuaternion(self.gid, q)
@@ -3119,7 +3121,7 @@ cdef class GeomObject:
         @type q: 4-sequence of floats
         """
         if not self.placeable():
-            raise ValueError, "Cannot set a quaternion on non-placeable geoms."
+            raise ValueError("Cannot set a quaternion on non-placeable geoms")
 
         cdef dQuaternion cq
         cq[0] = q[0]
@@ -3140,7 +3142,8 @@ cdef class GeomObject:
         @type pos: 3-sequence of floats
         """
         if self.body == None:
-            raise ValueError, "Cannot set an offset position on a geom before calling setBody."
+            raise ValueError("Cannot set an offset position on a geom before "
+                             "calling setBody")
         dGeomSetOffsetPosition(self.gid, pos[0], pos[1], pos[2])
 
     def getOffsetPosition(self):
@@ -3164,7 +3167,8 @@ cdef class GeomObject:
         @type R: 9-sequence of floats
         """
         if self.body == None:
-            raise ValueError, "Cannot set an offset rotation on a geom before calling setBody."
+            raise ValueError("Cannot set an offset rotation on a geom before "
+                             "calling setBody")
 
         cdef dMatrix3 m
         m[0] = R[0]
@@ -3325,7 +3329,7 @@ cdef class SpaceBase(GeomObject):
         pass
 
     def __init__(self, *a, **kw):
-        raise NotImplementedError, "The SpaceBase class can't be used directly."
+        raise NotImplementedError("The SpaceBase class can't be used directly")
 
     def __dealloc__(self):
         if self.gid != NULL:
@@ -3413,11 +3417,12 @@ cdef class SpaceBase(GeomObject):
 
         # Check the index
         if idx < 0 or idx >= dSpaceGetNumGeoms(self.sid):
-            raise IndexError, "geom index out of range"
+            raise IndexError("geom index out of range")
 
         gid = dSpaceGetGeom(self.sid, idx)
         if <long>gid not in _geom_c2py_lut:
-            raise RuntimeError, "geom id cannot be translated to a Python object"
+            raise RuntimeError(
+                "geom id cannot be translated to a Python object")
 
         return _geom_c2py_lut[<long>gid]
 
@@ -3546,7 +3551,9 @@ cdef class HashSpace(SpaceBase):
         """
         
         if minlevel > maxlevel:
-            raise ValueError, "minlevel (%d) must be less than or equal to maxlevel (%d)"%(minlevel, maxlevel)
+            raise ValueError(
+                "minlevel (%d) must be less than or equal to maxlevel (%d)" %
+                (minlevel, maxlevel))
             
         dHashSpaceSetLevels(self.sid, minlevel, maxlevel)
 
@@ -3622,7 +3629,7 @@ def Space(space_type=0):
     elif space_type == 1:
         return HashSpace()
     else:
-        raise ValueError, "Unknown space type (%d)"%space_type
+        raise ValueError("Unknown space type (%d)" % space_type)
 
 
 # GeomSphere
@@ -4068,11 +4075,14 @@ cdef class GeomTransform(GeomObject):
         cdef long id
 
         if not geom.placeable():
-            raise ValueError, "Only placeable geoms can be encapsulated by a GeomTransform"
+            raise ValueError(
+                "Only placeable geoms can be encapsulated by a GeomTransform")
         if dGeomGetSpace(geom.gid) != <dSpaceID>0:
-            raise ValueError, "The encapsulated geom was already inserted into a space."
+            raise ValueError(
+                "The encapsulated geom was already inserted into a space")
         if dGeomGetBody(geom.gid) != <dBodyID>0:
-            raise ValueError, "The encapsulated geom is already associated with a body."
+            raise ValueError(
+                "The encapsulated geom is already associated with a body")
         
         id = geom._id()
         dGeomTransformSetGeom(self.gid, <dGeomID>id)
@@ -4101,7 +4111,8 @@ cdef class GeomTransform(GeomObject):
         @type mode: int
         """
         if mode < 0 or mode > 1:
-            raise ValueError, "Invalid information mode (%d). Must be either 0 or 1."%mode
+            raise ValueError(
+                "Invalid information mode (%d). Must be either 0 or 1." % mode)
         dGeomTransformSetInfo(self.gid, mode)
 
     def getInfo(self):
@@ -4178,7 +4189,7 @@ cdef class TriMeshData:
             b = f[1]
             c = f[2]
             if (a < 0 or b < 0 or c < 0 or a >= numverts or b >= numverts or c >= numverts):
-                raise ValueError, "Vertex index out of range"
+                raise ValueError("Vertex index out of range")
             fp[0] = a
             fp[1] = b
             fp[2] = c
