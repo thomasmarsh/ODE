@@ -244,6 +244,8 @@ private:
     inline bool TryInsertingStepperArenasHead(dxWorldProcessMemArena *pmaArenaInstance, dxWorldProcessMemArena *pmaExistingHead);
 
 public:
+    void LockForAddLimotSerialization();
+    void UnlockForAddLimotSerialization();
     void LockForStepbodySerialization();
     void UnlockForStepbodySerialization();
 
@@ -251,6 +253,7 @@ private:
     enum dxProcessContextMutex
     {
         dxPCM_STEPPER_ARENA_OBTAIN,
+        dxPCM_STEPPER_ADDLIMOT_SERIALIZE,
         dxPCM_STEPPER_STEPBODY_SERIALIZE,
 
         dxPCM__MAX
@@ -329,7 +332,7 @@ struct dxStepperProcessingCallContext
 #define BEGIN_STATE_SAVE(memarena, state) void *state = memarena->SaveState();
 #define END_STATE_SAVE(memarena, state) memarena->RestoreState(state)
 
-typedef void (*dstepper_fn_t) (dxStepperProcessingCallContext *callContext);
+typedef void (*dstepper_fn_t) (const dxStepperProcessingCallContext *callContext);
 typedef unsigned (*dmaxcallcountestimate_fn_t) (unsigned activeThreadCount, unsigned allowedThreadCount);
 
 bool dxProcessIslands (dxWorld *world, const dxWorldProcessIslandsInfo &islandsInfo, 

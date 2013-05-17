@@ -33,7 +33,7 @@ size_t dxEstimateQuickStepMemoryRequirements(
 unsigned dxEstimateQuickStepMaxCallCount(
     unsigned activeThreadCount, unsigned allowedThreadCount);
 
-void dxQuickStepIsland(dxStepperProcessingCallContext *callContext);
+void dxQuickStepIsland(const dxStepperProcessingCallContext *callContext);
 
 
 #endif
