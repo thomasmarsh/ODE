@@ -102,7 +102,12 @@
 
   newoption {
     trigger     = "with-builtin-threading-impl",
-    description = "Include built-in multithreaded threading implementation (still must be created and assigned to be used)."
+    description = "Include built-in multithreaded threading implementation (still must be created and assigned to be used)"
+  }
+
+  newoption {
+    trigger     = "no-threading-intf",
+    description = "Disable threading interface support (external implementations may not be assigned; overrides with-builtin-threading-impl)"
   }
 
   newoption {
@@ -282,7 +287,6 @@
       "../ode/src/joints",
       "../OPCODE",
       "../GIMPACT/include",
-      "../ou/include",
       "../libccd/src"
     }
 
@@ -299,10 +303,12 @@
       "../ode/src/collision_std.cpp",
     }
 
---  Include OU files by default to enable atomics
---  configuration { "with-ou" }
+    if _OPTIONS["with-ou"] or not _OPTIONS["no-threading-intf"] then
+      includedirs { "../ou/include" }
       files   { "../ou/**.h", "../ou/**.cpp" }
       defines { "_OU_NAMESPACE=odeou" }
+    end
+
       
     configuration { "no-dif" }
       excludes { "../ode/src/export-dif.cpp" }
@@ -384,11 +390,18 @@
       text = string.gsub(text, "#define dTRIMESH_OPCODE 1", "#define dTRIMESH_GIMPACT 1")
     end
 
+    if _OPTIONS["with-ou"] or not _OPTIONS["no-threading-intf"] then
+      text = string.gsub(text, "/%* #define dOU_ENABLED 1 %*/", "#define dOU_ENABLED 1")
+      text = string.gsub(text, "/%* #define dATOMICS_ENABLED 1 %*/", "#define dATOMICS_ENABLED 1")
+    end
+
     if _OPTIONS["with-ou"] then
       text = string.gsub(text, "/%* #define dTLS_ENABLED 1 %*/", "#define dTLS_ENABLED 1")
     end
 
-    if _OPTIONS["with-builtin-threading-impl"] then
+    if _OPTIONS["no-threading-intf"] then
+      text = string.gsub(text, "/%* #define dTHREADING_INTF_DISABLED 1 %*/", "#define dTHREADING_INTF_DISABLED 1")
+    elseif _OPTIONS["with-builtin-threading-impl"] then
       text = string.gsub(text, "/%* #define dBUILTIN_THREADING_IMPL_ENABLED 1 %*/", "#define dBUILTIN_THREADING_IMPL_ENABLED 1")
     end
 

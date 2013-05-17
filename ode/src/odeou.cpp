@@ -41,6 +41,13 @@ ODE interface to OU library implementation.
 
 #if dOU_ENABLED
 
+
+using _OU_NAMESPACE::EASSERTIONFAILURESEVERITY;
+using _OU_NAMESPACE::AFS__MAX;
+using _OU_NAMESPACE::CMemoryManagerCustomization;
+using _OU_NAMESPACE::CAssertionCheckCustomization;
+
+
 BEGIN_NAMESPACE_OU();
 template<>
 const char *const CEnumUnsortedElementArray<EASSERTIONFAILURESEVERITY, AFS__MAX, const char *>::m_aetElementArray[] =

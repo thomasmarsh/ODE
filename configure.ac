@@ -284,12 +284,21 @@ AC_CHECK_LIB(sunmath, [main])
 AC_CHECK_FUNCS([floor memmove memset sqrt sqrtf sinf cosf fabsf atan2f fmodf copysignf copysign snprintf vsnprintf gettimeofday isnan isnanf _isnan _isnanf __isnan __isnanf strchr strstr pthread_attr_setstacklazy])
 AC_FUNC_ALLOCA 
 
-use_ou="yes"
+AC_ARG_ENABLE([threading-intf],
+        AS_HELP_STRING([--disable-threading-intf],
+            [disable threading interface support (external implementations may not be assigned; overrides --enable-builtin-threading-impl)]
+        ),
+        threading_intf=$enableval,threading_intf=yes)
 AC_ARG_ENABLE([ou],
         AS_HELP_STRING([--enable-ou],
-            [use TLS for global caches (allows threaded collision checks for separated spaces)]
+            [use TLS for global caches (allows threaded collision checks for isolated spaces)]
         ),
         use_ou_tls=$enableval,use_ou_tls=no)
+use_ou="no"
+if test x$use_ou_tls = xyes -o x$threading_intf = xyes
+then
+    use_ou="yes"
+fi
 if test x$use_ou = xyes
 then
     OU_NAMESPACE=odeou
@@ -342,14 +351,20 @@ fi
 AC_CONFIG_SUBDIRS([ou])
 AM_CONDITIONAL(ENABLE_OU, test x$use_ou = xyes)
 
-AC_ARG_ENABLE([builtin-threading-impl],
+if test x$threading_intf = xyes
+then
+    AC_ARG_ENABLE([builtin-threading-impl],
         AS_HELP_STRING([--enable-builtin-threading-impl],
             [include built-in multithreaded threading implementation (still must be created and assigned to be used)]
         ),
         use_builtin_threading_impl=$enableval,use_builtin_threading_impl=no)
-if test x$use_builtin_threading_impl = xyes
-then
-    AC_DEFINE([dBUILTIN_THREADING_IMPL_ENABLED],[1],[Built-in multithreaded threading implementation included])
+    if test x$use_builtin_threading_impl = xyes
+    then
+        AC_DEFINE([dBUILTIN_THREADING_IMPL_ENABLED],[1],[Built-in multithreaded threading implementation included])
+    fi
+else
+    AC_DEFINE([dTHREADING_INTF_DISABLED],[1],[Threading interface is disabled])
+    use_builtin_threading_impl=no
 fi
 
 col_cylinder_cylinder=none
@@ -537,6 +552,7 @@ echo "  Is target a Pentium:     $pentium"
 echo "  Is target x86-64:        $cpu64"
 echo "  Use old opcode trimesh collider: $old_trimesh"
 echo "  TLS for global caches:   $use_ou_tls"
+echo "  Threading intf enabled:  $threading_intf"
 echo "  Built-in threading included: $use_builtin_threading_impl"
 echo "  Enable debug error check: $asserts"
 echo "  Headers will be installed in $includedir/ode"
