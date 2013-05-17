@@ -892,7 +892,7 @@ dGeomID dCreateHeightfield( dSpaceID space, dHeightfieldDataID data, int bPlacea
 void dGeomHeightfieldSetHeightfieldData( dGeomID g, dHeightfieldDataID d )
 {
     dxHeightfield* geom = (dxHeightfield*) g;
-    geom->data = d;
+    geom->m_p_data = d;
 }
 
 
