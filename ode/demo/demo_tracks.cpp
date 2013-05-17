@@ -155,6 +155,8 @@ void resetSim()
 
 void start()
 {
+    dAllocateODEDataForThread(dAllocateMaskAll);
+
     world = dWorldCreate();
     dWorldSetGravity (world,0,0,-9.8);
 
