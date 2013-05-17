@@ -25,9 +25,9 @@
 #define _ODE_JOINT_INTERNAL_H_
 
 
-#include <ode/matrix.h>
 #include <ode/rotation.h>
 #include <ode/objects.h>
+#include "matrix.h"
 #include "odemath.h"
 
 

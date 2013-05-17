@@ -26,9 +26,8 @@
 #include <ode/common.h>
 #include <ode/threading_impl.h>
 #include <ode/objects.h>
-#include <ode/matrix.h>
 #include "config.h"
-
+#include "matrix.h"
 #include "objects.h"
 #include "util.h"
 #include "threading_impl.h"

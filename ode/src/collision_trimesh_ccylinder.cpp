@@ -51,9 +51,9 @@
 //problem we are looking forward to address soon.
 
 #include <ode/collision.h>
-#include <ode/matrix.h>
 #include <ode/rotation.h>
 #include "config.h"
+#include "matrix.h"
 #include "odemath.h"
 #include "collision_util.h"
 #include "collision_trimesh_internal.h"

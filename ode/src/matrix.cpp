@@ -21,8 +21,8 @@
  *************************************************************************/
 
 #include <ode/common.h>
-#include <ode/matrix.h>
 #include "config.h"
+#include "matrix.h"
 #include "util.h"
 
 // misc defines

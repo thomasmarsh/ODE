@@ -23,9 +23,9 @@
 // TriMesh - Plane collider by David Walters, July 2006
 
 #include <ode/collision.h>
-#include <ode/matrix.h>
 #include <ode/rotation.h>
 #include "config.h"
+#include "matrix.h"
 #include "odemath.h"
 
 #if dTRIMESH_ENABLED

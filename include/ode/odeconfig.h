@@ -60,6 +60,7 @@
 #endif
 
 #define ODE_PURE_INLINE static __inline
+#define ODE_INLINE __inline
 
 #if defined(__cplusplus)
   #define ODE_EXTERN_C extern "C"
