@@ -116,23 +116,26 @@ void setBall( dxJoint *joint, dReal fps, dReal erp, const dxJoint::Info2Descr *i
     info->J1l[2*s+2] = 1;
     dMultiply0_331( a1, joint->node[0].body->posr.R, anchor1 );
     dSetCrossMatrixMinus( info->J1a, a1, s );
-    if ( joint->node[1].body )
+
+    dxBody *b1 = joint->node[1].body;
+    if ( b1 )
     {
         info->J2l[0] = -1;
         info->J2l[s+1] = -1;
         info->J2l[2*s+2] = -1;
-        dMultiply0_331( a2, joint->node[1].body->posr.R, anchor2 );
+        dMultiply0_331( a2, b1->posr.R, anchor2 );
         dSetCrossMatrixPlus( info->J2a, a2, s );
     }
 
     // set right hand side
     dReal k = fps * erp;
-    if ( joint->node[1].body )
+    dxBody *b0 = joint->node[0].body;
+    if ( b1 )
     {
         for ( int j = 0; j < 3; j++ )
         {
-            info->c[j] = k * ( a2[j] + joint->node[1].body->posr.pos[j] -
-                a1[j] - joint->node[0].body->posr.pos[j] );
+            info->c[j] = k * ( a2[j] + b1->posr.pos[j] -
+                a1[j] - b0->posr.pos[j] );
         }
     }
     else
@@ -140,7 +143,7 @@ void setBall( dxJoint *joint, dReal fps, dReal erp, const dxJoint::Info2Descr *i
         for ( int j = 0; j < 3; j++ )
         {
             info->c[j] = k * ( anchor2[j] - a1[j] -
-                joint->node[0].body->posr.pos[j] );
+                b0->posr.pos[j] );
         }
     }
 }
@@ -173,12 +176,14 @@ void setBall2( dxJoint *joint, dReal fps, dReal erp, const dxJoint::Info2Descr *
     dCalcVectorCross3( info->J1a, a1, axis );
     dCalcVectorCross3( info->J1a + s, a1, q1 );
     dCalcVectorCross3( info->J1a + 2*s, a1, q2 );
-    if ( joint->node[1].body )
+
+    dxBody *b1 = joint->node[1].body;
+    if ( b1 )
     {
         for ( i = 0; i < 3; i++ ) info->J2l[i] = -axis[i];
         for ( i = 0; i < 3; i++ ) info->J2l[s+i] = -q1[i];
         for ( i = 0; i < 3; i++ ) info->J2l[2*s+i] = -q2[i];
-        dMultiply0_331( a2, joint->node[1].body->posr.R, anchor2 );
+        dMultiply0_331( a2, b1->posr.R, anchor2 );
         dReal *J2a = info->J2a;
         dCalcVectorCross3( J2a, a2, axis );
         dNegateVector3( J2a );
@@ -194,10 +199,18 @@ void setBall2( dxJoint *joint, dReal fps, dReal erp, const dxJoint::Info2Descr *
     dReal k1 = fps * erp1;
     dReal k = fps * erp;
 
-    for ( i = 0; i < 3; i++ ) a1[i] += joint->node[0].body->posr.pos[i];
-    if ( joint->node[1].body )
+    dxBody *b0 = joint->node[0].body;
+    for ( i = 0; i < 3; i++ )
     {
-        for ( i = 0; i < 3; i++ ) a2[i] += joint->node[1].body->posr.pos[i];
+        a1[i] += b0->posr.pos[i];
+    }
+
+    if ( b1 )
+    {
+        for ( i = 0; i < 3; i++ ) 
+        {
+            a2[i] += b1->posr.pos[i];
+        }
 
         dVector3 a2_minus_a1;
         dSubtractVectors3(a2_minus_a1, a2, a1);
@@ -228,7 +241,9 @@ void setFixedOrientation( dxJoint *joint, dReal fps, dReal erp, const dxJoint::I
     info->J1a[start_index] = 1;
     info->J1a[start_index + s + 1] = 1;
     info->J1a[start_index + s*2+2] = 1;
-    if ( joint->node[1].body )
+
+    dxBody *b1 = joint->node[1].body;
+    if ( b1 )
     {
         info->J2a[start_index] = -1;
         info->J2a[start_index + s+1] = -1;
@@ -251,15 +266,16 @@ void setFixedOrientation( dxJoint *joint, dReal fps, dReal erp, const dxJoint::I
 
     // get qerr = relative rotation (rotation error) between two bodies
     dQuaternion qerr, e;
-    if ( joint->node[1].body )
+    dxBody *b0 = joint->node[0].body;
+    if ( b1 )
     {
         dQuaternion qq;
-        dQMultiply1( qq, joint->node[0].body->q, joint->node[1].body->q );
+        dQMultiply1( qq, b0->q, b1->q );
         dQMultiply2( qerr, qq, qrel );
     }
     else
     {
-        dQMultiply3( qerr, joint->node[0].body->q, qrel );
+        dQMultiply3( qerr, b0->q, qrel );
     }
     if ( qerr[0] < 0 )
     {
@@ -267,7 +283,7 @@ void setFixedOrientation( dxJoint *joint, dReal fps, dReal erp, const dxJoint::I
         qerr[2] = -qerr[2];
         qerr[3] = -qerr[3];
     }
-    dMultiply0_331( e, joint->node[0].body->posr.R, qerr + 1 );  // @@@ bad SIMD padding!
+    dMultiply0_331( e, b0->posr.R, qerr + 1 );  // @@@ bad SIMD padding!
     dReal k = fps * erp;
     info->c[start_row] = 2 * k * e[0];
     info->c[start_row+1] = 2 * k * e[1];
@@ -280,21 +296,24 @@ void setFixedOrientation( dxJoint *joint, dReal fps, dReal erp, const dxJoint::I
 void setAnchors( dxJoint *j, dReal x, dReal y, dReal z,
                 dVector3 anchor1, dVector3 anchor2 )
 {
-    if ( j->node[0].body )
+    dxBody *b0 = j->node[0].body;
+    if ( b0 )
     {
         dReal q[4];
-        q[0] = x - j->node[0].body->posr.pos[0];
-        q[1] = y - j->node[0].body->posr.pos[1];
-        q[2] = z - j->node[0].body->posr.pos[2];
+        q[0] = x - b0->posr.pos[0];
+        q[1] = y - b0->posr.pos[1];
+        q[2] = z - b0->posr.pos[2];
         q[3] = 0;
-        dMultiply1_331( anchor1, j->node[0].body->posr.R, q );
-        if ( j->node[1].body )
+        dMultiply1_331( anchor1, b0->posr.R, q );
+
+        dxBody *b1 = j->node[1].body;
+        if ( b1 )
         {
-            q[0] = x - j->node[1].body->posr.pos[0];
-            q[1] = y - j->node[1].body->posr.pos[1];
-            q[2] = z - j->node[1].body->posr.pos[2];
+            q[0] = x - b1->posr.pos[0];
+            q[1] = y - b1->posr.pos[1];
+            q[2] = z - b1->posr.pos[2];
             q[3] = 0;
-            dMultiply1_331( anchor2, j->node[1].body->posr.R, q );
+            dMultiply1_331( anchor2, b1->posr.R, q );
         }
         else
         {
@@ -313,7 +332,8 @@ void setAnchors( dxJoint *j, dReal x, dReal y, dReal z,
 void setAxes( dxJoint *j, dReal x, dReal y, dReal z,
              dVector3 axis1, dVector3 axis2 )
 {
-    if ( j->node[0].body )
+    dxBody *b0 = j->node[0].body;
+    if ( b0 )
     {
         dReal q[4];
         q[0] = x;
@@ -321,16 +341,19 @@ void setAxes( dxJoint *j, dReal x, dReal y, dReal z,
         q[2] = z;
         q[3] = 0;
         dNormalize3( q );
+
         if ( axis1 )
         {
-            dMultiply1_331( axis1, j->node[0].body->posr.R, q );
+            dMultiply1_331( axis1, b0->posr.R, q );
             axis1[3] = 0;
         }
+
         if ( axis2 )
         {
-            if ( j->node[1].body )
+            dxBody *b1 = j->node[1].body;
+            if ( b1 )
             {
-                dMultiply1_331( axis2, j->node[1].body->posr.R, q );
+                dMultiply1_331( axis2, b1->posr.R, q );
             }
             else
             {
@@ -346,24 +369,26 @@ void setAxes( dxJoint *j, dReal x, dReal y, dReal z,
 
 void getAnchor( dxJoint *j, dVector3 result, dVector3 anchor1 )
 {
-    if ( j->node[0].body )
+    dxBody *b0 = j->node[0].body;
+    if ( b0 )
     {
-        dMultiply0_331( result, j->node[0].body->posr.R, anchor1 );
-        result[0] += j->node[0].body->posr.pos[0];
-        result[1] += j->node[0].body->posr.pos[1];
-        result[2] += j->node[0].body->posr.pos[2];
+        dMultiply0_331( result, b0->posr.R, anchor1 );
+        result[0] += b0->posr.pos[0];
+        result[1] += b0->posr.pos[1];
+        result[2] += b0->posr.pos[2];
     }
 }
 
 
 void getAnchor2( dxJoint *j, dVector3 result, dVector3 anchor2 )
 {
-    if ( j->node[1].body )
+    dxBody *b1 = j->node[1].body;
+    if ( b1 )
     {
-        dMultiply0_331( result, j->node[1].body->posr.R, anchor2 );
-        result[0] += j->node[1].body->posr.pos[0];
-        result[1] += j->node[1].body->posr.pos[1];
-        result[2] += j->node[1].body->posr.pos[2];
+        dMultiply0_331( result, b1->posr.R, anchor2 );
+        result[0] += b1->posr.pos[0];
+        result[1] += b1->posr.pos[1];
+        result[2] += b1->posr.pos[2];
     }
     else
     {
@@ -376,18 +401,20 @@ void getAnchor2( dxJoint *j, dVector3 result, dVector3 anchor2 )
 
 void getAxis( dxJoint *j, dVector3 result, dVector3 axis1 )
 {
-    if ( j->node[0].body )
+    dxBody *b0 = j->node[0].body;
+    if ( b0 )
     {
-        dMultiply0_331( result, j->node[0].body->posr.R, axis1 );
+        dMultiply0_331( result, b0->posr.R, axis1 );
     }
 }
 
 
 void getAxis2( dxJoint *j, dVector3 result, dVector3 axis2 )
 {
-    if ( j->node[1].body )
+    dxBody *b1 = j->node[1].body;
+    if ( b1 )
     {
-        dMultiply0_331( result, j->node[1].body->posr.R, axis2 );
+        dMultiply0_331( result, b1->posr.R, axis2 );
     }
     else
     {
@@ -589,7 +616,9 @@ int dxJointLimitMotor::addLimot( dxJoint *joint,
         J1[srow+0] = ax1[0];
         J1[srow+1] = ax1[1];
         J1[srow+2] = ax1[2];
-        if ( joint->node[1].body )
+
+        dxBody *b1 = joint->node[1].body;
+        if ( b1 )
         {
             J2[srow+0] = -ax1[0];
             J2[srow+1] = -ax1[1];
@@ -610,12 +639,13 @@ int dxJointLimitMotor::addLimot( dxJoint *joint,
         // only need to do this if the constraint connects two bodies.
 
         dVector3 ltd = {0,0,0}; // Linear Torque Decoupling vector (a torque)
-        if ( !rotational && joint->node[1].body )
+        if ( !rotational && b1 )
         {
+            dxBody *b0 = joint->node[0].body;
             dVector3 c;
-            c[0] = REAL( 0.5 ) * ( joint->node[1].body->posr.pos[0] - joint->node[0].body->posr.pos[0] );
-            c[1] = REAL( 0.5 ) * ( joint->node[1].body->posr.pos[1] - joint->node[0].body->posr.pos[1] );
-            c[2] = REAL( 0.5 ) * ( joint->node[1].body->posr.pos[2] - joint->node[0].body->posr.pos[2] );
+            c[0] = REAL( 0.5 ) * ( b1->posr.pos[0] - b0->posr.pos[0] );
+            c[1] = REAL( 0.5 ) * ( b1->posr.pos[1] - b0->posr.pos[1] );
+            c[2] = REAL( 0.5 ) * ( b1->posr.pos[2] - b0->posr.pos[2] );
             dCalcVectorCross3( ltd, c, ax1 );
             info->J1a[srow+0] = ltd[0];
             info->J1a[srow+1] = ltd[1];
