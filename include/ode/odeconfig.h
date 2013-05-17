@@ -42,7 +42,7 @@
 #endif
 
 /* Define a DLL export symbol for those platforms that need it */
-#if defined(_MSC_VER)
+#if defined(_MSC_VER) || (defined(__GNUC__) && defined(_WIN32))
   #if defined(ODE_DLL)
     #define ODE_API __declspec(dllexport)
   #elif !defined(ODE_LIB)
