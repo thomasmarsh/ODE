@@ -195,9 +195,19 @@ inline_ BOOL AABBTreeCollider::TriTriOverlap(const Point& V0, const Point& V1, c
 
 	// Coplanarity robustness check
 #ifdef OPC_TRITRI_EPSILON_TEST
-	if(fabsf(du0)<LOCAL_EPSILON) du0 = 0.0f;
-	if(fabsf(du1)<LOCAL_EPSILON) du1 = 0.0f;
-	if(fabsf(du2)<LOCAL_EPSILON) du2 = 0.0f;
+    float absd1 = FastFabs(d1), sqmagN1 = N1.SquareMagnitude();
+    if (absd1>=sqmagN1)
+    {
+		if(FastFabs(du0)<=LOCAL_EPSILON*absd1) du0 = 0.0f;
+		if(FastFabs(du1)<=LOCAL_EPSILON*absd1) du1 = 0.0f;
+		if(FastFabs(du2)<=LOCAL_EPSILON*absd1) du2 = 0.0f;
+	}
+	else
+	{
+		if(FastFabs(du0)<=LOCAL_EPSILON*FCMax2(absd1, FCMin2(sqmagN1, U0.SquareMagnitude()))) du0 = 0.0f;
+		if(FastFabs(du1)<=LOCAL_EPSILON*FCMax2(absd1, FCMin2(sqmagN1, U1.SquareMagnitude()))) du1 = 0.0f;
+		if(FastFabs(du2)<=LOCAL_EPSILON*FCMax2(absd1, FCMin2(sqmagN1, U2.SquareMagnitude()))) du2 = 0.0f;
+	}
 #endif
 	const float du0du1 = du0 * du1;
 	const float du0du2 = du0 * du2;
@@ -218,9 +228,19 @@ inline_ BOOL AABBTreeCollider::TriTriOverlap(const Point& V0, const Point& V1, c
 	float dv2 = (N2|V2) + d2;
 
 #ifdef OPC_TRITRI_EPSILON_TEST
-	if(fabsf(dv0)<LOCAL_EPSILON) dv0 = 0.0f;
-	if(fabsf(dv1)<LOCAL_EPSILON) dv1 = 0.0f;
-	if(fabsf(dv2)<LOCAL_EPSILON) dv2 = 0.0f;
+    float absd2 = FastFabs(d2), sqmagN2 = N2.SquareMagnitude();
+    if (absd2>=sqmagN2)
+    {
+		if(FastFabs(dv0)<=LOCAL_EPSILON*absd2) dv0 = 0.0f;
+		if(FastFabs(dv1)<=LOCAL_EPSILON*absd2) dv1 = 0.0f;
+		if(FastFabs(dv2)<=LOCAL_EPSILON*absd2) dv2 = 0.0f;
+	}
+	else
+	{
+		if(FastFabs(dv0)<=LOCAL_EPSILON*FCMax2(absd2, FCMin2(sqmagN2, V0.SquareMagnitude()))) dv0 = 0.0f;
+		if(FastFabs(dv1)<=LOCAL_EPSILON*FCMax2(absd2, FCMin2(sqmagN2, V1.SquareMagnitude()))) dv1 = 0.0f;
+		if(FastFabs(dv2)<=LOCAL_EPSILON*FCMax2(absd2, FCMin2(sqmagN2, V2.SquareMagnitude()))) dv2 = 0.0f;
+	}
 #endif
 
 	const float dv0dv1 = dv0 * dv1;
