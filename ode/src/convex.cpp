@@ -509,6 +509,7 @@ inline bool IsPointInConvex(dVector3 p,
 */
 inline bool IsPointInPolygon(dVector3 p,
                              unsigned int *polygon,
+			                 dReal *plane,
                              dxConvex *convex,
                              dVector3 out)
 {
@@ -518,79 +519,70 @@ inline bool IsPointInPolygon(dVector3 p,
     // number of vertices then that many indexes
     // out returns the closest point on the border of the
     // polygon if the point is not inside it.
-    size_t pointcount=polygon[0];
     dVector3 a;
     dVector3 b;
-    dVector3 c;
     dVector3 ab;
-    dVector3 ac;
     dVector3 ap;
-    dVector3 bp;
-    dReal d1;
-    dReal d2;
-    dReal d3;
-    dReal d4;
-    dReal vc;
-    polygon++; // skip past pointcount
-    for(size_t i=0;i<pointcount;++i)
-    {
-        dMultiply0_331 (a,convex->final_posr->R,&convex->points[(polygon[i]*3)]);
-        a[0]=convex->final_posr->pos[0]+a[0];
-        a[1]=convex->final_posr->pos[1]+a[1];
-        a[2]=convex->final_posr->pos[2]+a[2];
+    dVector3 v;
 
-        dMultiply0_331 (b,convex->final_posr->R,
-            &convex->points[(polygon[(i+1)%pointcount]*3)]);
+    unsigned pointcount=polygon[0];
+    dIASSERT(pointcount != 0);
+    polygon++; // skip past pointcount
+
+    dMultiply0_331 (b,convex->final_posr->R,
+        &convex->points[(polygon[pointcount-1]*3)]);
+    b[0]=convex->final_posr->pos[0]+b[0];
+    b[1]=convex->final_posr->pos[1]+b[1];
+    b[2]=convex->final_posr->pos[2]+b[2];
+    
+    for(unsigned i=0; i != pointcount; ++i)
+    {
+        a[0] = b[0];
+        a[1] = b[1];
+        a[2] = b[2];
+
+        dMultiply0_331 (b,convex->final_posr->R,&convex->points[(polygon[i]*3)]);
         b[0]=convex->final_posr->pos[0]+b[0];
         b[1]=convex->final_posr->pos[1]+b[1];
         b[2]=convex->final_posr->pos[2]+b[2];
 
-        dMultiply0_331 (c,convex->final_posr->R,
-            &convex->points[(polygon[(i+2)%pointcount]*3)]);
-        c[0]=convex->final_posr->pos[0]+c[0];
-        c[1]=convex->final_posr->pos[1]+c[1];
-        c[2]=convex->final_posr->pos[2]+c[2];
-
         ab[0] = b[0] - a[0];
         ab[1] = b[1] - a[1];
         ab[2] = b[2] - a[2];
-        ac[0] = c[0] - a[0];
-        ac[1] = c[1] - a[1];
-        ac[2] = c[2] - a[2];
         ap[0] = p[0] - a[0];
         ap[1] = p[1] - a[1];
         ap[2] = p[2] - a[2];
-        d1 = dCalcVectorDot3(ab,ap);
-        d2 = dCalcVectorDot3(ac,ap);
-        if (d1 <= 0.0 && d2 <= 0.0)
+
+        dCalcVectorCross3(v, ab, plane);
+
+        if (dCalcVectorDot3(ap, v) > REAL(0.0))
         {
-            out[0]=a[0];
-            out[1]=a[1];
-            out[2]=a[2];
-            return false;
-        }
-        bp[0] = p[0] - b[0];
-        bp[1] = p[1] - b[1];
-        bp[2] = p[2] - b[2];
-        d3 = dCalcVectorDot3(ab,bp);
-        d4 = dCalcVectorDot3(ac,bp);
-        if (d3 >= 0.0f && d4 <= d3)
-        {
-            out[0]=b[0];
-            out[1]=b[1];
-            out[2]=b[2];
-            return false;
-        }
-        vc = d1*d4 - d3*d2;
-        if (vc < 0.0 && d1 > 0.0 && d3 < 0.0)
-        {
-            dReal v = d1 / (d1 - d3);
-            out[0] = a[0] + (ab[0]*v);
-            out[1] = a[1] + (ab[1]*v);
-            out[2] = a[2] + (ab[2]*v);
+            dReal ab_m2 = dCalcVectorDot3(ab, ab);
+            dReal s = ab_m2 != REAL(0.0) ? dCalcVectorDot3(ab, ap) / ab_m2 : REAL(0.0);
+            
+            if (s <= REAL(0.0))
+            {
+                out[0] = a[0];
+                out[1] = a[1];
+                out[2] = a[2];
+            }
+            else if (s >= REAL(1.0)) 
+            {
+                out[0] = b[0];
+                out[1] = b[1];
+                out[2] = b[2];
+            }
+            else
+            {
+                out[0] = a[0] + ab[0] * s;
+                out[1] = a[1] + ab[1] * s;
+                out[2] = a[2] + ab[2] * s;
+            }
+
             return false;
         }
     }
+
     return true;
 }
 
@@ -695,7 +687,7 @@ int dCollideSphereConvex (dxGeom *o1, dxGeom *o2, int flags,
             {
                 // if we get here we know the sphere surface penetrates
                 // the plane
-                if(IsPointInPolygon(Sphere->final_posr->pos,pPoly,Convex,out))
+                if(IsPointInPolygon(Sphere->final_posr->pos,pPoly,plane,Convex,out))
                 {
                     // finally if we get here we know that the
                     // sphere is directly touching the inside of the polyhedron
@@ -882,7 +874,7 @@ bool CheckEdgeIntersection(dxConvex& cvx1,dxConvex& cvx2, int flags,int& curc,
             target->g2=&cvx2;
             if(IntersectSegmentPlane(e1,e2,plane,t,target->pos))
             {
-                if(IsPointInPolygon(target->pos,pPoly,&cvx2,q))
+                if(IsPointInPolygon(target->pos,pPoly,plane,&cvx2,q))
                 {
                     target->depth = dInfinity;
                     for(size_t k=0;k<cvx2.planecount;++k)
@@ -1443,7 +1435,7 @@ int dCollideRayConvex (dxGeom *o1, dxGeom *o2, int flags,
             depth,
             contactpoint))
         {
-            if(IsPointInPolygon(contactpoint,pPoly,convex,out))
+            if(IsPointInPolygon(contactpoint,pPoly,plane,convex,out))
             {
                 contact->pos[0]=contactpoint[0];
                 contact->pos[1]=contactpoint[1];
