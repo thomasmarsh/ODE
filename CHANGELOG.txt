@@ -8,6 +8,13 @@ the rules for this file:
   * keep the format consistent (79 char width, M/D/Y date format).
 
 ------------------------------------------------------------------------------
+02/03/13 Oleh_derevenko
+		* [u]int[8/16/32] renamed to contain "d" prefix so that global namespace
+		  was not polluted with these names unconditionally. 
+		  If your project depended on these types other than just for passing 
+		  parameters to ODE calls, add similar typedefs for yourself in some 
+		  of your project's global headers.
+
 01/02/13 Oleh_derevenko
         * Applied patch #183 by Joseph Cooper (complementary matrix 
           calculation fix).

@@ -74,12 +74,12 @@ typedef double dReal;
  */
 #if dTRIMESH_16BIT_INDICES
 #if dTRIMESH_GIMPACT
-typedef uint32 dTriIndex;
+typedef duint32 dTriIndex;
 #else /* dTRIMESH_GIMPACT */
-typedef uint16 dTriIndex;
+typedef duint16 dTriIndex;
 #endif /* dTRIMESH_GIMPACT */
 #else /* dTRIMESH_16BIT_INDICES */
-typedef uint32 dTriIndex;
+typedef duint32 dTriIndex;
 #endif /* dTRIMESH_16BIT_INDICES */
 
 /* round an integer up to a multiple of 4, except that 0 and 1 are unmodified

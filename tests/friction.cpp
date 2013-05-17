@@ -31,6 +31,7 @@
 #include <algorithm>
 #include <UnitTest++.h>
 #include <ode/ode.h>
+#include "../ode/src/config.h"
 #include "../ode/src/joints/joints.h"
 
 
@@ -69,7 +70,7 @@ SUITE(JointContact)
                  test_ZeroMu)
     {
         dxJoint::Info1 info1;
-        dxJoint::Info2 info2;
+        dxJoint::Info2Descr info2;
         dReal dummy_J[3][12] = {{0}};
         dReal dummy_c[3];
         dReal dummy_cfm[3];
@@ -77,8 +78,8 @@ SUITE(JointContact)
         dReal dummy_hi[3];
         int dummy_findex[3];
 
-        info2.fps = 100;
-        info2.erp = 0;
+        dReal info2_fps = 100;
+        dReal info2_erp = 0;
         info2.J1l = dummy_J[0];
         info2.J1a = dummy_J[0] + 3;
         info2.J2l = dummy_J[0] + 6;
@@ -137,7 +138,7 @@ SUITE(JointContact)
         joint->getInfo1(&info1);
         CHECK_EQUAL(2, (int)info1.m);
         ZERO_ALL;
-        joint->getInfo2(&info2);
+        joint->getInfo2(info2_fps, info2_erp, &info2);
         CHECK_CLOSE(0, dummy_J[1][0], 1e-6);
         CHECK_CLOSE(0, dummy_J[1][1], 1e-6);
         CHECK_CLOSE(-1, dummy_J[1][2], 1e-6);
@@ -166,7 +167,7 @@ SUITE(JointContact)
         joint->getInfo1(&info1);
         CHECK_EQUAL(2, (int)info1.m);
         ZERO_ALL;
-        joint->getInfo2(&info2);
+        joint->getInfo2(info2_fps, info2_erp, &info2);
         CHECK_CLOSE(0, dummy_J[1][0], 1e-6);
         CHECK_CLOSE(1, dummy_J[1][1], 1e-6);
         CHECK_CLOSE(0, dummy_J[1][2], 1e-6);
