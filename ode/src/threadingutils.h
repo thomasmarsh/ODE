@@ -32,7 +32,7 @@
 static inline 
 bool ThrsafeCompareExchange(volatile atomicord32 *paoDestination, atomicord32 aoComparand, atomicord32 aoExchange)
 {
-    return AtomicCompareExchange(paoDestination, aoComparand, aoExchange)
+    return AtomicCompareExchange(paoDestination, aoComparand, aoExchange);
 }
 
 static inline 
