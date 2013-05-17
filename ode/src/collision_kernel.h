@@ -105,6 +105,8 @@ struct dxGeom : public dBase {
     // information used by spaces
     dxGeom *next;		// next geom in linked list of geoms
     dxGeom **tome;	// linked list backpointer
+    dxGeom *next_ex;	// next geom in extra linked list of geoms (for higher level structures)
+    dxGeom **tome_ex;	// extra linked list backpointer (for higher level structures)
     dxSpace *parent_space;// the space this geom is contained in, 0 if none
     dReal aabb[6];	// cached AABB for this space
     unsigned long category_bits,collide_bits;

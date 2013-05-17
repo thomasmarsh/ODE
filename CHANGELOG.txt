@@ -9,8 +9,11 @@ the rules for this file:
 
 ------------------------------------------------------------------------------
 12/01/12 Oleh_Derevenko
-		* Applied patch #160 "IsPointInPolygon in convex.cpp returns wrong 
-		  results" (by Janis Rucis)
+        * Fixed issues reported in patches #151 and #22 (collisions with
+          SAPSpace and QuadTreeSpace might not work because geometries list
+          was misused in them).
+        * Applied patch #160 "IsPointInPolygon in convex.cpp returns wrong 
+          results" (by Janis Rucis)
 
 11/25/12 Oleh Derevenko
         * Configuration option --disable-threading-intf added 

@@ -361,6 +361,8 @@ dxGeom::dxGeom (dSpaceID _space, int is_placeable)
     // setup space vars
     next = 0;
     tome = 0;
+    next_ex = 0;
+    tome_ex = 0;
     parent_space = 0;
     dSetZero (aabb,6);
     category_bits = ~0;

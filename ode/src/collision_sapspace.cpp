@@ -219,11 +219,11 @@ dSpaceID dSweepAndPruneSpaceCreate( dxSpace* space, int axisorder ) {
 
 #define GEOM_ENABLED(g) (((g)->gflags & GEOM_ENABLE_TEST_MASK) == GEOM_ENABLE_TEST_VALUE)
 
-// HACK: We abuse 'next' and 'tome' members of dxGeom to store indice into dirty/geom lists.
-#define GEOM_SET_DIRTY_IDX(g,idx) { (g)->next = (dxGeom*)(size_t)(idx); }
-#define GEOM_SET_GEOM_IDX(g,idx) { (g)->tome = (dxGeom**)(size_t)(idx); }
-#define GEOM_GET_DIRTY_IDX(g) ((int)(size_t)(g)->next)
-#define GEOM_GET_GEOM_IDX(g) ((int)(size_t)(g)->tome)
+// HACK: We abuse 'next' and 'tome' members of dxGeom to store indices into dirty/geom lists.
+#define GEOM_SET_DIRTY_IDX(g,idx) { (g)->next_ex = (dxGeom*)(size_t)(idx); }
+#define GEOM_SET_GEOM_IDX(g,idx) { (g)->tome_ex = (dxGeom**)(size_t)(idx); }
+#define GEOM_GET_DIRTY_IDX(g) ((int)(size_t)(g)->next_ex)
+#define GEOM_GET_GEOM_IDX(g) ((int)(size_t)(g)->tome_ex)
 #define GEOM_INVALID_IDX (-1)
 
 
@@ -304,19 +304,15 @@ void dxSAPSpace::add( dxGeom* g )
 {
     CHECK_NOT_LOCKED (this);
     dAASSERT(g);
-    dUASSERT(g->parent_space == 0 && g->next == 0, "geom is already in a space");
+    dUASSERT(g->tome_ex == 0 && g->next_ex == 0, "geom is already in a space");
 
-    g->gflags |= GEOM_DIRTY | GEOM_AABB_BAD;
 
     // add to dirty list
     GEOM_SET_DIRTY_IDX( g, DirtyList.size() );
     GEOM_SET_GEOM_IDX( g, GEOM_INVALID_IDX );
     DirtyList.push( g );
 
-    g->parent_space = this;
-    this->count++;
-
-    dGeomMoved(this);
+    dxSpace::add(g);
 }
 
 void dxSAPSpace::remove( dxGeom* g )
@@ -350,14 +346,8 @@ void dxSAPSpace::remove( dxGeom* g )
         GEOM_SET_GEOM_IDX(g,GEOM_INVALID_IDX);
         GeomList.setSize( geomSize-1 );
     }
-    count--;
 
-    // safeguard
-    g->parent_space = 0;
-
-    // the bounding box of this space (and that of all the parents) may have
-    // changed as a consequence of the removal.
-    dGeomMoved(this);
+    dxSpace::remove(g);
 }
 
 void dxSAPSpace::dirty( dxGeom* g )

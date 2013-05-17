@@ -182,9 +182,9 @@ void Block::Collide(void* UserData, dNearCallback* Callback){
     dxGeom* g = mFirst;
     while (g){
         if (GEOM_ENABLED(g)){
-            Collide(g, g->next, UserData, Callback);
+            Collide(g, g->next_ex, UserData, Callback);
         }
-        g = g->next;
+        g = g->next_ex;
     }
 
     // Recurse for children
@@ -209,7 +209,7 @@ void Block::Collide(dxGeom* g1, dxGeom* g2, void* UserData, dNearCallback* Callb
         if (GEOM_ENABLED(g2)){
             collideAABBs (g1, g2, UserData, Callback);
         }
-        g2 = g2->next;
+        g2 = g2->next_ex;
     }
 
     // Collide against children
@@ -244,15 +244,15 @@ void Block::CollideLocal(dxGeom* g2, void* UserData, dNearCallback* Callback){
         if (GEOM_ENABLED(g1)){
             collideAABBs (g1, g2, UserData, Callback);
         }
-        g1 = g1->next;
+        g1 = g1->next_ex;
     }
 }
 
 void Block::AddObject(dGeomID Object){
     // Add the geom
-    Object->next = mFirst;
+    Object->next_ex = mFirst;
     mFirst = Object;
-    Object->tome = (dxGeom**)this;
+    Object->tome_ex = (dxGeom**)this;
 
     // Now traverse upwards to tell that we have a geom
     Block* Block = this;
@@ -270,17 +270,17 @@ void Block::DelObject(dGeomID Object){
     while (g){
         if (g == Object){
             if (Last){
-                Last->next = g->next;
+                Last->next_ex = g->next_ex;
             }
-            else mFirst = g->next;
+            else mFirst = g->next_ex;
 
             break;
         }
         Last = g;
-        g = g->next;
+        g = g->next_ex;
     }
 
-    Object->tome = 0;
+    Object->tome_ex = 0;
 
     // Now traverse upwards to tell that we have lost a geom
     Block* Block = this;
@@ -424,7 +424,7 @@ dxGeom* dxQuadTreeSpace::getGeom(int Index){
 CHILDRECURSE:
         if (CurrentObject){
             dGeomID g = CurrentObject;
-            CurrentObject = CurrentObject->next;
+            CurrentObject = CurrentObject->next_ex;
             CurrentIndex++;
 
 #ifdef DRAWBLOCKS
@@ -471,7 +471,7 @@ PARENTRECURSE:
 
 
     if (current_geom && current_index == Index - 1){
-        //current_geom = current_geom->next; // next
+        //current_geom = current_geom->next_ex; // next
         current_index = Index;
         return current_geom;
     }
@@ -486,20 +486,12 @@ PARENTRECURSE:
 void dxQuadTreeSpace::add(dxGeom* g){
     CHECK_NOT_LOCKED (this);
     dAASSERT(g);
-    dUASSERT(g->parent_space == 0 && g->next == 0, "geom is already in a space");
+    dUASSERT(g->tome_ex == 0 && g->next_ex == 0, "geom is already in a space");
 
-    g->gflags |= GEOM_DIRTY | GEOM_AABB_BAD;
     DirtyList.push(g);
-
-    // add
-    g->parent_space = this;
     Blocks[0].GetBlock(g->aabb)->AddObject(g);	// Add to best block
-    count++;
 
-    // enumerator has been invalidated
-    current_geom = 0;
-
-    dGeomMoved(this);
+    dxSpace::add(g);
 }
 
 void dxQuadTreeSpace::remove(dxGeom* g){
@@ -508,8 +500,7 @@ void dxQuadTreeSpace::remove(dxGeom* g){
     dUASSERT(g->parent_space == this,"object is not in this space");
 
     // remove
-    ((Block*)g->tome)->DelObject(g);
-    count--;
+    ((Block*)g->tome_ex)->DelObject(g);
 
     for (int i = 0; i < DirtyList.size(); i++){
         if (DirtyList[i] == g){
@@ -519,17 +510,7 @@ void dxQuadTreeSpace::remove(dxGeom* g){
         }
     }
 
-    // safeguard
-    g->next = 0;
-    g->tome = 0;
-    g->parent_space = 0;
-
-    // enumerator has been invalidated
-    current_geom = 0;
-
-    // the bounding box of this space (and that of all the parents) may have
-    // changed as a consequence of the removal.
-    dGeomMoved(this);
+    dxSpace::remove(g);
 }
 
 void dxQuadTreeSpace::dirty(dxGeom* g){
@@ -552,7 +533,7 @@ void dxQuadTreeSpace::cleanGeoms(){
         g->recomputeAABB();
         g->gflags &= (~(GEOM_DIRTY|GEOM_AABB_BAD));
 
-        ((Block*)g->tome)->Traverse(g);
+        ((Block*)g->tome_ex)->Traverse(g);
     }
     DirtyList.setSize(0);
 
@@ -592,7 +573,7 @@ void dxQuadTreeSpace::collide2(void* UserData, dxGeom* g2, dNearCallback* Callba
 
     if (g2->parent_space == this){
         // The block the geom is in
-        Block* CurrentBlock = (Block*)g2->tome;
+        Block* CurrentBlock = (Block*)g2->tome_ex;
 
         // Collide against block and its children
         DataCallback dc = {UserData, Callback};
