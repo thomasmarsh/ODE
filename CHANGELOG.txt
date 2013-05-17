@@ -8,6 +8,10 @@ the rules for this file:
   * keep the format consistent (79 char width, M/D/Y date format).
 
 ------------------------------------------------------------------------------
+11/05/12 Oleh Derevenko
+        * Fixed zero comparisons in OPCODE to use relative error instead of
+          absolute epsilon value (found by Bill Sellers)
+
 06/08/12 Daniel K. O.
         * Removed the need for defining dSINGLE/dDOUBLE; this is stored now in
           the generated ode/precision.h header.
