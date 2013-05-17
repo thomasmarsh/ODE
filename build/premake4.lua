@@ -214,6 +214,7 @@
       flags   { "Symbols" }
       
     configuration { "Release*" }
+      defines { "NDEBUG", "dNODEBUG" }
       flags   { "OptimizeSpeed", "NoFramePointer" }
 
     configuration { "*Single*" }
