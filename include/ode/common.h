@@ -23,8 +23,6 @@
 #ifndef _ODE_COMMON_H_
 #define _ODE_COMMON_H_
 
-#include <ode/precision.h>
-
 #include <ode/odeconfig.h>
 #include <ode/error.h>
 

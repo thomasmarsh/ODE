@@ -34,6 +34,9 @@
 #include <float.h>
 
 
+#include <ode/precision.h>
+
+
 #if defined(ODE_DLL) || defined(ODE_LIB)
 #define __ODE__
 #endif
@@ -89,7 +92,11 @@
 
 /* Define the dInfinity macro */
 #ifdef INFINITY
-  #define dInfinity INFINITY
+  #ifdef dSINGLE
+    #define dInfinity ((float)INFINITY)
+  #else
+    #define dInfinity INFINITY
+  #endif
 #elif defined(HUGE_VAL)
   #ifdef dSINGLE
     #ifdef HUGE_VALF
