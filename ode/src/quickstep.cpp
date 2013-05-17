@@ -933,10 +933,8 @@ void dxQuickStepIsland_Stage1(dxQuickStepperStage1CallContext *stage1CallContext
                 //   (lll) = linear jacobian data
                 //   (aaa) = angular jacobian data
                 //
-                dxJoint::Info2 Jinfo;
+                dxJoint::Info2Descr Jinfo;
                 Jinfo.rowskip = 12;
-                Jinfo.fps = stepsizeRecip;
-                Jinfo.erp = world->global_erp;
 
                 dReal *Jcopyrow = Jcopy;
                 unsigned ofsi = 0;
@@ -955,7 +953,7 @@ void dxQuickStepIsland_Stage1(dxQuickStepperStage1CallContext *stage1CallContext
                     Jinfo.findex = findex + ofsi;
 
                     dxJoint *joint = jicurr->joint;
-                    joint->getInfo2 (&Jinfo);
+                    joint->getInfo2 (stepsizeRecip, world->global_erp, &Jinfo);
 
                     const unsigned int infom = jicurr->info.m;
 

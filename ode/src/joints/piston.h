@@ -94,7 +94,7 @@ struct dxJointPiston : public dxJoint
     dxJointPiston( dxWorld *w );
     virtual void getSureMaxInfo( SureMaxInfo* info );
     virtual void getInfo1( Info1* info );
-    virtual void getInfo2( Info2* info );
+    virtual void getInfo2( dReal worldFPS, dReal worldERP, const Info2Descr* info );
     virtual dJointType type() const;
     virtual size_t size() const;
 

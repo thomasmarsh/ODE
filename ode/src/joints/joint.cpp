@@ -101,7 +101,7 @@ void dxJointGroup::freeAll()
 // set three "ball-and-socket" rows in the constraint equation, and the
 // corresponding right hand side.
 
-void setBall( dxJoint *joint, dxJoint::Info2 *info,
+void setBall( dxJoint *joint, dReal fps, dReal erp, const dxJoint::Info2Descr *info,
              dVector3 anchor1, dVector3 anchor2 )
 {
     // anchor points in global coordinates with respect to body PORs.
@@ -125,7 +125,7 @@ void setBall( dxJoint *joint, dxJoint::Info2 *info,
     }
 
     // set right hand side
-    dReal k = info->fps * info->erp;
+    dReal k = fps * erp;
     if ( joint->node[1].body )
     {
         for ( int j = 0; j < 3; j++ )
@@ -150,7 +150,7 @@ void setBall( dxJoint *joint, dxJoint::Info2 *info,
 // position row (the other two row vectors will be derived from this).
 // `erp1' is the erp value to use along the axis.
 
-void setBall2( dxJoint *joint, dxJoint::Info2 *info,
+void setBall2( dxJoint *joint, dReal fps, dReal erp, const dxJoint::Info2Descr *info,
               dVector3 anchor1, dVector3 anchor2,
               dVector3 axis, dReal erp1 )
 {
@@ -190,8 +190,8 @@ void setBall2( dxJoint *joint, dxJoint::Info2 *info,
     }
 
     // set right hand side - measure error along (axis,q1,q2)
-    dReal k1 = info->fps * erp1;
-    dReal k = info->fps * info->erp;
+    dReal k1 = fps * erp1;
+    dReal k = fps * erp;
 
     for ( i = 0; i < 3; i++ ) a1[i] += joint->node[0].body->posr.pos[i];
     if ( joint->node[1].body )
@@ -218,7 +218,7 @@ void setBall2( dxJoint *joint, dxJoint::Info2 *info,
 // set three orientation rows in the constraint equation, and the
 // corresponding right hand side.
 
-void setFixedOrientation( dxJoint *joint, dxJoint::Info2 *info, dQuaternion qrel, int start_row )
+void setFixedOrientation( dxJoint *joint, dReal fps, dReal erp, const dxJoint::Info2Descr *info, dQuaternion qrel, int start_row )
 {
     int s = info->rowskip;
     int start_index = start_row * s;
@@ -267,7 +267,7 @@ void setFixedOrientation( dxJoint *joint, dxJoint::Info2 *info, dQuaternion qrel
         qerr[3] = -qerr[3];
     }
     dMultiply0_331( e, joint->node[0].body->posr.R, qerr + 1 );  // @@@ bad SIMD padding!
-    dReal k = info->fps * info->erp;
+    dReal k = fps * erp;
     info->c[start_row] = 2 * k * e[0];
     info->c[start_row+1] = 2 * k * e[1];
     info->c[start_row+2] = 2 * k * e[2];
@@ -573,8 +573,8 @@ int dxJointLimitMotor::testRotationalLimit( dReal angle )
 
 
 int dxJointLimitMotor::addLimot( dxJoint *joint,
-                                dxJoint::Info2 *info, int row,
-                                const dVector3 ax1, int rotational )
+    dReal fps, const dxJoint::Info2Descr *info, int row,
+    const dVector3 ax1, int rotational )
 {
     int srow = row * info->rowskip;
 
@@ -680,7 +680,7 @@ int dxJointLimitMotor::addLimot( dxJoint *joint,
 
         if ( limit )
         {
-            dReal k = info->fps * stop_erp;
+            dReal k = fps * stop_erp;
             info->c[row] = -k * limit_err;
             info->cfm[row] = stop_cfm;
 

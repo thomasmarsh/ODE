@@ -93,12 +93,12 @@ dxJointPlane2D::getInfo1( dxJoint::Info1 *info )
 
 
 void
-dxJointPlane2D::getInfo2( dxJoint::Info2 *info )
+dxJointPlane2D::getInfo2( dReal worldFPS, dReal worldERP, const Info2Descr *info )
 {
     int r0 = 0;
     int r1 = info->rowskip;
     int r2 = 2 * r1;
-    dReal eps = info->fps * info->erp;
+    dReal eps = worldFPS * worldERP;
 
     /*
         v = v1, w = omega1
@@ -140,13 +140,13 @@ dxJointPlane2D::getInfo2( dxJoint::Info2 *info )
     // if the slider is powered, or has joint limits, add in the extra row:
 
     if ( row_motor_x > 0 )
-        motor_x.addLimot( this, info, row_motor_x, Midentity[0], 0 );
+        motor_x.addLimot( this, worldFPS, info, row_motor_x, Midentity[0], 0 );
 
     if ( row_motor_y > 0 )
-        motor_y.addLimot( this, info, row_motor_y, Midentity[1], 0 );
+        motor_y.addLimot( this, worldFPS, info, row_motor_y, Midentity[1], 0 );
 
     if ( row_motor_angle > 0 )
-        motor_angle.addLimot( this, info, row_motor_angle, Midentity[2], 1 );
+        motor_angle.addLimot( this, worldFPS, info, row_motor_angle, Midentity[2], 1 );
 }
 
 

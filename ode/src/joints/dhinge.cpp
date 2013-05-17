@@ -54,9 +54,9 @@ dxJointDHinge::getInfo1( dxJoint::Info1* info )
 
 
 void
-dxJointDHinge::getInfo2( dxJoint::Info2* info )
+dxJointDHinge::getInfo2( dReal worldFPS, dReal worldERP, const Info2Descr* info )
 {
-    dxJointDBall::getInfo2( info ); // sets row0
+    dxJointDBall::getInfo2( worldFPS, worldERP, info ); // sets row0
     
     const int skip = info->rowskip;
     const int row1 = skip;
@@ -94,7 +94,7 @@ dxJointDHinge::getInfo2( dxJoint::Info2* info )
     // similar to the hinge joint
     dVector3 u;
     dCalcVectorCross3(u, globalAxis1, globalAxis2);
-    const dReal k = info->fps * info->erp;
+    const dReal k = worldFPS * this->erp;
 
     info->c[1] = k * dCalcVectorDot3( u, p );
     info->c[2] = k * dCalcVectorDot3( u, q );

@@ -54,10 +54,9 @@ dxJointDBall::getInfo1( dxJoint::Info1 *info )
 }
 
 void
-dxJointDBall::getInfo2( dxJoint::Info2 *info )
+dxJointDBall::getInfo2( dReal worldFPS, dReal worldERP, const Info2Descr *info )
 {
-    info->erp = erp;
-    info->cfm[0] = cfm;
+    info->cfm[0] = this->cfm;
 
     dVector3 globalA1, globalA2;
     dBodyGetRelPointPos(node[0].body, anchor1[0], anchor1[1], anchor1[2], globalA1);
@@ -125,9 +124,8 @@ dxJointDBall::getInfo2( dxJoint::Info2 *info )
         dMultiply1_331(info->J2a, a2m, q);
     }
     
-    const dReal k = info->fps * info->erp;
+    const dReal k = worldFPS * this->erp;
     info->c[0] = k * (targetDistance - dCalcPointsDistance3(globalA1, globalA2));
-
 }
 
 
