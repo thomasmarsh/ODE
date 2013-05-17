@@ -589,6 +589,7 @@ static void SOR_LCP (dxWorldProcessMemArena *memarena,
 
     // order to solve constraint rows in
     IndexError *order = memarena->AllocateArray<IndexError>(m);
+    unsigned int head_size;
 
 #ifndef REORDER_CONSTRAINTS
     {
@@ -605,6 +606,7 @@ static void SOR_LCP (dxWorldProcessMemArena *memarena,
                 --ordertail;
             }
         }
+        head_size = (unsigned int)(orderhead - order);
         dIASSERT (orderhead-ordertail==1);
     }
 #endif
@@ -623,11 +625,14 @@ static void SOR_LCP (dxWorldProcessMemArena *memarena,
         if (iteration < 2) {
             // for the first two iterations, solve the constraints in
             // the given order
+            head_size = 0;
             IndexError *ordercurr = order;
             for (unsigned int i = 0; i != m; ordercurr++, i++) {
+                int findex_i = findex[i];
                 ordercurr->error = i;
-                ordercurr->findex = findex[i];
+                ordercurr->findex = findex_i;
                 ordercurr->index = i;
+                if (findex_i == -1) { ++head_size; }
             }
         }
         else {
@@ -644,8 +649,10 @@ static void SOR_LCP (dxWorldProcessMemArena *memarena,
                 else {
                     order[i].error = dInfinity;
                 }
-                order[i].findex = findex[i];
+                int findex_i = findex[i];
+                order[i].findex = findex_i;
                 order[i].index = i;
+                if (findex_i == -1) { ++head_size; }
             }
         }
         qsort (order,m,sizeof(IndexError),&compare_index_error);
@@ -657,11 +664,18 @@ static void SOR_LCP (dxWorldProcessMemArena *memarena,
 #endif
 #ifdef RANDOMLY_REORDER_CONSTRAINTS
         if ((iteration & 7) == 0) {
-            for (unsigned int i=1; i<m; i++) {
+            for (unsigned int i=1; i<head_size; i++) {
                 int swapi = dRandInt(i+1);
                 IndexError tmp = order[i];
                 order[i] = order[swapi];
                 order[swapi] = tmp;
+            }
+            unsigned int tail_size = m - head_size;
+            for (unsigned int j=1; j<tail_size; j++) {
+                int swapj = dRandInt(j+1);
+                IndexError tmp = order[head_size + j];
+                order[head_size + j] = order[head_size + swapj];
+                order[head_size + swapj] = tmp;
             }
         }
 #endif
