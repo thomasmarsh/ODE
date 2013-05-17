@@ -79,6 +79,7 @@ extern "C" void dsError (const char *msg, ...)
   va_list ap;
   va_start (ap,msg);
   printMessage ("Error",msg,ap);
+  va_end (ap);
   exit (1);
 }
 
@@ -88,6 +89,7 @@ extern "C" void dsDebug (const char *msg, ...)
   va_list ap;
   va_start (ap,msg);
   printMessage ("INTERNAL ERROR",msg,ap);
+  va_end (ap);
   // *((char *)0) = 0;	 ... commit SEGVicide ?
   abort();
 }
@@ -97,6 +99,7 @@ extern "C" void dsPrint (const char *msg, ...)
   va_list ap;
   va_start (ap,msg);
   vprintf (msg,ap);
+  va_end (ap);
 }
 
 static void captureFrame( int num ){
