@@ -32,6 +32,7 @@
 #include <UnitTest++.h>
 #include <ode/ode.h>
 
+#include "../../ode/src/config.h"
 #include "../../ode/src/joints/universal.h"
 
 dReal d2r(dReal degree)

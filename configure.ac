@@ -493,6 +493,9 @@ typedef uintptr_t intP;
 #endif
 
 
+#include "typedefs.h"
+
+
 #endif /* #define ODE_CONFIG_H */
 ])
 
