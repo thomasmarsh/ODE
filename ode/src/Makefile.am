@@ -69,7 +69,8 @@ libode_la_SOURCES =     nextafterf.c \
                         threading_pool_posix.cpp \
                         threading_pool_win.cpp \
                         threading_base.cpp threading_base.h \
-                        util.cpp util.h
+                        util.cpp util.h \
+                        threadingutils.h
 
 
 ###################################
