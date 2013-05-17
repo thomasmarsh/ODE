@@ -25,7 +25,7 @@
 #include "objects.h"
 #include "joints/joint.h"
 #include "util.h"
-#include "odeou.h"
+#include "threadingutils.h"
 
 #include <new>
 
@@ -304,12 +304,12 @@ dxWorldProcessMemArena *dxWorldProcessContext::GetStepperArenasHead() const
 bool dxWorldProcessContext::TryExtractingStepperArenasHead(dxWorldProcessMemArena *pmaHeadInstance)
 {
     dxWorldProcessMemArena *pmaNextInstance = pmaHeadInstance->GetNextMemArena();
-    return AtomicCompareExchangePointer((volatile atomicptr *)&m_pmaStepperArenas, (atomicptr)pmaHeadInstance, (atomicptr)pmaNextInstance);
+    return ThrsafeCompareExchangePointer((volatile atomicptr *)&m_pmaStepperArenas, (atomicptr)pmaHeadInstance, (atomicptr)pmaNextInstance);
 }
 
 bool dxWorldProcessContext::TryInsertingStepperArenasHead(dxWorldProcessMemArena *pmaArenaInstance, dxWorldProcessMemArena *pmaExistingHead)
 {
-    return AtomicCompareExchangePointer((volatile atomicptr *)&m_pmaStepperArenas, (atomicptr)pmaExistingHead, (atomicptr)pmaArenaInstance);
+    return ThrsafeCompareExchangePointer((volatile atomicptr *)&m_pmaStepperArenas, (atomicptr)pmaExistingHead, (atomicptr)pmaArenaInstance);
 }
 
 
@@ -1045,7 +1045,7 @@ void dxIslandsProcessingCallContext::ThreadedProcessIslandStepper(dxSingleIsland
 
 size_t dxIslandsProcessingCallContext::ObtainNextIslandToBeProcessed(size_t islandsCount)
 {
-    return AtomicIncrementSizeUpToLimit(&m_islandToProcessStorage, islandsCount);
+    return ThrsafeIncrementSizeUpToLimit(&m_islandToProcessStorage, islandsCount);
 }
 
 

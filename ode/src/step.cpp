@@ -31,7 +31,7 @@
 #include "joints/joint.h"
 #include "lcp.h"
 #include "util.h"
-#include "odeou.h"
+#include "threadingutils.h"
 
 #include <new>
 
@@ -317,13 +317,13 @@ void dxStepIsland_Stage0_Bodies(dxStepperStage0BodiesCallContext *callContext)
     dxBody * const *body = callContext->m_stepperCallContext->m_islandBodiesStart;
     unsigned int nb = callContext->m_stepperCallContext->m_islandBodiesCount;
 
-    if (AtomicExchange(&callContext->m_tagsTaken, 1) == 0)
+    if (ThrsafeExchange(&callContext->m_tagsTaken, 1) == 0)
     {
         // number all bodies in the body list - set their tag values
         for (unsigned int i=0; i<nb; i++) body[i]->tag = i;
     }
 
-    if (AtomicExchange(&callContext->m_gravityTaken, 1) == 0)
+    if (ThrsafeExchange(&callContext->m_gravityTaken, 1) == 0)
     {
         dxWorld *world = callContext->m_stepperCallContext->m_world;
 
@@ -365,7 +365,7 @@ void dxStepIsland_Stage0_Bodies(dxStepperStage0BodiesCallContext *callContext)
     // accumulator. I and invI are a vertical stack of 3x4 matrices, one per body.
     {
         dReal *invIrow = callContext->m_invI;
-        unsigned int bodyIndex = AtomicIncrementIntUpToLimit(&callContext->m_inertiaBodyIndex, nb);
+        unsigned int bodyIndex = ThrsafeIncrementIntUpToLimit(&callContext->m_inertiaBodyIndex, nb);
 
         for (unsigned int i = 0; i != nb; invIrow += 12, ++i) {
             if (i == bodyIndex) {
@@ -386,7 +386,7 @@ void dxStepIsland_Stage0_Bodies(dxStepperStage0BodiesCallContext *callContext)
                     dSubtractVectorCross3(b->tacc,b->avel,tmp);
                 }
 
-                bodyIndex = AtomicIncrementIntUpToLimit(&callContext->m_inertiaBodyIndex, nb);
+                bodyIndex = ThrsafeIncrementIntUpToLimit(&callContext->m_inertiaBodyIndex, nb);
             }
         }
     }
