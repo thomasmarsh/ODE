@@ -47,6 +47,7 @@
 const char *const dxWorldProcessContext::m_aszContextMutexNames[dxPCM__MAX] = 
 {
     "Stepper Arena Obtain Lock" , // dxPCM_STEPPER_ARENA_OBTAIN,
+    "Joint addLimot Serialize Lock" , // dxPCM_STEPPER_ADDLIMOT_SERIALIZE
     "Stepper StepBody Serialize Lock" , // dxPCM_STEPPER_STEPBODY_SERIALIZE,
 };
 
@@ -310,6 +311,17 @@ bool dxWorldProcessContext::TryExtractingStepperArenasHead(dxWorldProcessMemAren
 bool dxWorldProcessContext::TryInsertingStepperArenasHead(dxWorldProcessMemArena *pmaArenaInstance, dxWorldProcessMemArena *pmaExistingHead)
 {
     return ThrsafeCompareExchangePointer((volatile atomicptr *)&m_pmaStepperArenas, (atomicptr)pmaExistingHead, (atomicptr)pmaArenaInstance);
+}
+
+
+void dxWorldProcessContext::LockForAddLimotSerialization()
+{
+    m_pswObjectsAllocWorld->LockMutexGroupMutex(m_pmgStepperMutexGroup, dxPCM_STEPPER_ADDLIMOT_SERIALIZE);
+}
+
+void dxWorldProcessContext::UnlockForAddLimotSerialization()
+{
+    m_pswObjectsAllocWorld->UnlockMutexGroupMutex(m_pmgStepperMutexGroup, dxPCM_STEPPER_ADDLIMOT_SERIALIZE);
 }
 
 

@@ -36,6 +36,7 @@ transform is the identity.
 #include "odemath.h"
 #include "joint.h"
 #include "joint_internal.h"
+#include "util.h"
 
 extern void addObjectToList( dObject *obj, dObject **first );
 
@@ -654,27 +655,41 @@ int dxJointLimitMotor::addLimot( dxJoint *joint,
                 // if we're powering away from the limit, apply the fudge factor
                 if (( limit == 1 && vel > 0 ) || ( limit == 2 && vel < 0 ) ) fm *= fudge_factor;
 
+                
+                dReal fm_ax1_0 = fm*ax1[0], fm_ax1_1 = fm*ax1[1], fm_ax1_2 = fm*ax1[2];
+                
+                dxBody *b0 = joint->node[0].body;
+                dxWorldProcessContext *world_process_context = b0->world->UnsafeGetWorldProcessingContext(); 
+
+                world_process_context->LockForAddLimotSerialization();
+
                 if ( rotational )
                 {
-                    dBodyAddTorque( joint->node[0].body, -fm*ax1[0], -fm*ax1[1],
-                        -fm*ax1[2] );
-                    if ( joint->node[1].body )
-                        dBodyAddTorque( joint->node[1].body, fm*ax1[0], fm*ax1[1], fm*ax1[2] );
+                    dxBody *b1 = joint->node[1].body;
+                    if ( b1 != NULL ) 
+                    {
+                        dBodyAddTorque( b1, fm_ax1_0, fm_ax1_1, fm_ax1_2 );
+                    }
+
+                    dBodyAddTorque( b0, -fm_ax1_0, -fm_ax1_1, -fm_ax1_2 );
                 }
                 else
                 {
-                    dBodyAddForce( joint->node[0].body, -fm*ax1[0], -fm*ax1[1], -fm*ax1[2] );
-                    if ( joint->node[1].body )
+                    dxBody *b1 = joint->node[1].body;
+                    if ( b1 != NULL )
                     {
-                        dBodyAddForce( joint->node[1].body, fm*ax1[0], fm*ax1[1], fm*ax1[2] );
-
                         // linear limot torque decoupling step: refer to above discussion
-                        dBodyAddTorque( joint->node[0].body, -fm*ltd[0], -fm*ltd[1],
-                            -fm*ltd[2] );
-                        dBodyAddTorque( joint->node[1].body, -fm*ltd[0], -fm*ltd[1],
-                            -fm*ltd[2] );
+                        dReal neg_fm_ltd_0 = -fm*ltd[0], neg_fm_ltd_1 = -fm*ltd[1], neg_fm_ltd_2 = -fm*ltd[2];
+                        dBodyAddTorque( b0, neg_fm_ltd_0, neg_fm_ltd_1, neg_fm_ltd_2 );
+                        dBodyAddTorque( b1, neg_fm_ltd_0, neg_fm_ltd_1, neg_fm_ltd_2 );
+
+                        dBodyAddForce( b1, fm_ax1_0, fm_ax1_1, fm_ax1_2 );
                     }
+
+                    dBodyAddForce( b0, -fm_ax1_0, -fm_ax1_1, -fm_ax1_2 );
                 }
+
+                world_process_context->UnlockForAddLimotSerialization();
             }
         }
 

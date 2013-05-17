@@ -33,7 +33,7 @@ size_t dxEstimateStepMemoryRequirements(
 unsigned dxEstimateStepMaxCallCount(
     unsigned activeThreadCount, unsigned allowedThreadCount);
 
-void dxStepIsland(dxStepperProcessingCallContext *callContext);
+void dxStepIsland(const dxStepperProcessingCallContext *callContext);
 
 
 
