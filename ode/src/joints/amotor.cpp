@@ -215,7 +215,7 @@ dxJointAMotor::getInfo1( dxJoint::Info1 *info )
 
 
 void
-dxJointAMotor::getInfo2( dxJoint::Info2 *info )
+dxJointAMotor::getInfo2( dReal worldFPS, dReal worldERP, const Info2Descr* info )
 {
     int i;
 
@@ -256,7 +256,7 @@ dxJointAMotor::getInfo2( dxJoint::Info2 *info )
     int row = 0;
     for ( i = 0; i < num; i++ )
     {
-        row += limot[i].addLimot( this, info, row, *( axptr[i] ), 1 );
+        row += limot[i].addLimot( this, worldFPS, info, row, *( axptr[i] ), 1 );
     }
 }
 

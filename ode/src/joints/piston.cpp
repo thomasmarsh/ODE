@@ -219,13 +219,13 @@ dxJointPiston::getInfo1 ( dxJoint::Info1 *info )
 
 
 void
-dxJointPiston::getInfo2 ( dxJoint::Info2 *info )
+dxJointPiston::getInfo2 ( dReal worldFPS, dReal worldERP, const Info2Descr *info )
 {
     const int s0 = 0;
     const int s1 = info->rowskip;
     const int s2 = 2 * s1, s3 = 3 * s1 /*, s4=4*s1*/;
 
-    const dReal k = info->fps * info->erp;
+    const dReal k = worldFPS * worldERP;
 
 
     // Pull out pos and R for both bodies. also get the `connection'
@@ -406,7 +406,7 @@ dxJointPiston::getInfo2 ( dxJoint::Info2 *info )
     int row = 4;
     if (  node[1].body )
     {
-        row += limotP.addLimot ( this, info, 4, ax1, 0 );
+        row += limotP.addLimot ( this, worldFPS, info, 4, ax1, 0 );
     }
     else if (flags & dJOINT_REVERSE )
     {
@@ -414,12 +414,12 @@ dxJointPiston::getInfo2 ( dxJoint::Info2 *info )
         rAx1[0] = -ax1[0];
         rAx1[1] = -ax1[1];
         rAx1[2] = -ax1[2];
-        row += limotP.addLimot ( this, info, 4, rAx1, 0 );
+        row += limotP.addLimot ( this, worldFPS, info, 4, rAx1, 0 );
     }
     else
-        row += limotP.addLimot ( this, info, 4, ax1, 0 );
+        row += limotP.addLimot ( this, worldFPS, info, 4, ax1, 0 );
 
-    limotR.addLimot ( this, info, row, ax1, 1 );
+    limotR.addLimot ( this, worldFPS, info, row, ax1, 1 );
 }
 
 void dJointSetPistonAnchor ( dJointID j, dReal x, dReal y, dReal z )

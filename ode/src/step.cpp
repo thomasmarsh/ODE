@@ -669,10 +669,8 @@ void dxStepIsland_Stage1(dxStepperStage1CallContext *stage1CallContext)
                 //   (aaa) = angular jacobian data
                 //
 
-                dxJoint::Info2 Jinfo;
+                dxJoint::Info2Descr Jinfo;
                 Jinfo.rowskip = 8;
-                Jinfo.fps = stepsizeRecip;
-                Jinfo.erp = world->global_erp;
 
                 unsigned ofsi = 0;
                 const dJointWithInfo1 *jicurr = jointinfos;
@@ -692,7 +690,7 @@ void dxStepIsland_Stage1(dxStepperStage1CallContext *stage1CallContext)
                     Jinfo.findex = findex + ofsi;
 
                     dxJoint *joint = jicurr->joint;
-                    joint->getInfo2 (&Jinfo);
+                    joint->getInfo2 (stepsizeRecip, world->global_erp, &Jinfo);
 
                     // adjust returned findex values for global index numbering
                     int *findex_ofsi = findex + ofsi;

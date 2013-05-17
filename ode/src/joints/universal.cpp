@@ -294,10 +294,10 @@ dxJointUniversal::getInfo1( dxJoint::Info1 *info )
 
 
 void
-dxJointUniversal::getInfo2( dxJoint::Info2 *info )
+dxJointUniversal::getInfo2( dReal worldFPS, dReal worldERP, const Info2Descr *info )
 {
     // set the three ball-and-socket rows
-    setBall( this, info, anchor1, anchor2 );
+    setBall( this, worldFPS, worldERP, info, anchor1, anchor2 );
 
     // set the universal joint row. the angular velocity about an axis
     // perpendicular to both joint axes should be equal. thus the constraint
@@ -352,13 +352,13 @@ dxJointUniversal::getInfo2( dxJoint::Info2 *info )
     // theta - Pi/2 ~= cos(theta), so
     //    |angular_velocity|  ~= (erp*fps) * (ax1 dot ax2)
 
-    info->c[3] = info->fps * info->erp * - k;
+    info->c[3] = worldFPS * worldERP * - k;
 
     // if the first angle is powered, or has joint limits, add in the stuff
-    int row = 4 + limot1.addLimot( this, info, 4, ax1, 1 );
+    int row = 4 + limot1.addLimot( this, worldFPS, info, 4, ax1, 1 );
 
     // if the second angle is powered, or has joint limits, add in more stuff
-    limot2.addLimot( this, info, row, ax2, 1 );
+    limot2.addLimot( this, worldFPS, info, row, ax2, 1 );
 }
 
 

@@ -225,14 +225,14 @@ dxJointPR::getInfo1( dxJoint::Info1 *info )
 
 
 void
-dxJointPR::getInfo2( dxJoint::Info2 *info )
+dxJointPR::getInfo2( dReal worldFPS, dReal worldERP, const Info2Descr *info )
 {
     int s = info->rowskip;
     int s2 = 2 * s;
     int s3 = 3 * s;
     //int s4= 4*s;
 
-    dReal k = info->fps * info->erp;
+    dReal k = worldFPS * worldERP;
 
 
     dVector3 q;  // plane space of axP and after that axR
@@ -430,7 +430,7 @@ dxJointPR::getInfo2( dxJoint::Info2 *info )
     int row = 4;
     if (  node[1].body || !(flags & dJOINT_REVERSE) )
     {
-        row += limotP.addLimot ( this, info, 4, axP, 0 );
+        row += limotP.addLimot ( this, worldFPS, info, 4, axP, 0 );
     }
     else
     {
@@ -438,10 +438,10 @@ dxJointPR::getInfo2( dxJoint::Info2 *info )
         rAxP[0] = -axP[0];
         rAxP[1] = -axP[1];
         rAxP[2] = -axP[2];
-        row += limotP.addLimot ( this, info, 4, rAxP, 0 );
+        row += limotP.addLimot ( this, worldFPS, info, 4, rAxP, 0 );
     }
 
-    limotR.addLimot ( this, info, row, ax1, 1 );
+    limotR.addLimot ( this, worldFPS, info, row, ax1, 1 );
 }
 
 

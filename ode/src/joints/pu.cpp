@@ -261,13 +261,13 @@ dxJointPU::getInfo1( dxJoint::Info1 *info )
 
 
 void
-dxJointPU::getInfo2( dxJoint::Info2 *info )
+dxJointPU::getInfo2( dReal worldFPS, dReal worldERP, const Info2Descr *info )
 {
     const int s0 = 0;
     const int s1 = info->rowskip;
     const int s2 = 2 * s1;
 
-    const dReal k = info->fps * info->erp;
+    const dReal k = worldFPS * worldERP;
 
     // pull out pos and R for both bodies. also get the `connection'
     // vector pos2-pos1.
@@ -434,17 +434,17 @@ dxJointPU::getInfo2( dxJoint::Info2 *info )
     info->c[1] = k * dCalcVectorDot3( ax1, err );
     info->c[2] = k * dCalcVectorDot3( q, err );
 
-    int row = 3 + limot1.addLimot( this, info, 3, ax1, 1 );
-    row += limot2.addLimot( this, info, row, ax2, 1 );
+    int row = 3 + limot1.addLimot( this, worldFPS, info, 3, ax1, 1 );
+    row += limot2.addLimot( this, worldFPS, info, row, ax2, 1 );
 
     if (  node[1].body || !(flags & dJOINT_REVERSE) )
-        limotP.addLimot( this, info, row, axP, 0 );
+        limotP.addLimot( this, worldFPS, info, row, axP, 0 );
     else
     {
         axP[0] = -axP[0];
         axP[1] = -axP[1];
         axP[2] = -axP[2];
-        limotP.addLimot ( this, info, row, axP, 0 );
+        limotP.addLimot ( this, worldFPS, info, row, axP, 0 );
     }
 }
 

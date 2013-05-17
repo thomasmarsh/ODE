@@ -57,12 +57,12 @@ dxJointFixed::getInfo1 ( dxJoint::Info1 *info )
 
 
 void
-dxJointFixed::getInfo2 ( dxJoint::Info2 *info )
+dxJointFixed::getInfo2 ( dReal worldFPS, dReal worldERP, const Info2Descr *info )
 {
     int s = info->rowskip;
 
     // Three rows for orientation
-    setFixedOrientation ( this, info, qrel, 3 );
+    setFixedOrientation ( this, worldFPS, worldERP, info, qrel, 3 );
 
     // Three rows for position.
     // set jacobian
@@ -70,10 +70,9 @@ dxJointFixed::getInfo2 ( dxJoint::Info2 *info )
     info->J1l[s+1] = 1;
     info->J1l[2*s+2] = 1;
 
-    info->erp = erp;
-    info->cfm[0] = cfm;
-    info->cfm[1] = cfm;
-    info->cfm[2] = cfm;
+    info->cfm[0] = this->cfm;
+    info->cfm[1] = this->cfm;
+    info->cfm[2] = this->cfm;
 
     dVector3 ofs;
     dMultiply0_331 ( ofs, node[0].body->posr.R, offset );
@@ -86,7 +85,7 @@ dxJointFixed::getInfo2 ( dxJoint::Info2 *info )
     }
 
     // set right hand side for the first three rows (linear)
-    dReal k = info->fps * info->erp;
+    dReal k = worldFPS * this->erp;
     if ( node[1].body )
     {
         for ( int j = 0; j < 3; j++ )

@@ -35,9 +35,9 @@
     "joint type is not " #t)
 
 
-void setBall( dxJoint *joint, dxJoint::Info2 *info,
+void setBall( dxJoint *joint, dReal fps, dReal erp, const dxJoint::Info2Descr *info,
              dVector3 anchor1, dVector3 anchor2 );
-void setBall2( dxJoint *joint, dxJoint::Info2 *info,
+void setBall2( dxJoint *joint, dReal fps, dReal erp, const dxJoint::Info2Descr *info,
               dVector3 anchor1, dVector3 anchor2,
               dVector3 axis, dReal erp1 );
 
@@ -57,7 +57,7 @@ void getAxis2( dxJoint *j, dVector3 result, dVector3 axis2 );
 dReal getHingeAngle( dxBody *body1, dxBody *body2, dVector3 axis, dQuaternion q_initial );
 dReal getHingeAngleFromRelativeQuat( dQuaternion qrel, dVector3 axis );
 
-void setFixedOrientation( dxJoint *joint, dxJoint::Info2 *info, dQuaternion qrel, int start_row );
+void setFixedOrientation( dxJoint *joint, dReal fps, dReal erp, const dxJoint::Info2Descr *info, dQuaternion qrel, int start_row );
 
 #endif
 

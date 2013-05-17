@@ -72,7 +72,7 @@ dxJointContact::getInfo1( dxJoint::Info1 *info )
 
 
 void
-dxJointContact::getInfo2( dxJoint::Info2 *info )
+dxJointContact::getInfo2( dReal worldFPS, dReal worldERP, const Info2Descr *info )
 {
     int s = info->rowskip;
     int s2 = 2 * s;
@@ -120,10 +120,10 @@ dxJointContact::getInfo2( dxJoint::Info2 *info )
     }
 
     // set right hand side and cfm value for normal
-    dReal erp = info->erp;
+    dReal erp = worldERP;
     if ( contact.surface.mode & dContactSoftERP )
         erp = contact.surface.soft_erp;
-    dReal k = info->fps * erp;
+    dReal k = worldFPS * erp;
     dReal depth = contact.geom.depth - world->contactp.min_depth;
     if ( depth < 0 ) depth = 0;
 

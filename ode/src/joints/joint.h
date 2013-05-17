@@ -82,12 +82,8 @@ struct dxJoint : public dObject
 
     // info returned by getInfo2 function
 
-    struct Info2
+    struct Info2Descr
     {
-        // integrator parameters: frames per second (1/stepsize), default error
-        // reduction parameter (0..1).
-        dReal fps, erp;
-
         // for the first and second body, pointers to two (linear and angular)
         // n*3 jacobian sub matrices, stored by rows. these matrices will have
         // been initialized to 0 on entry. if the second body is zero then the
@@ -141,7 +137,9 @@ struct dxJoint : public dObject
     virtual ~dxJoint();
 
     virtual void getInfo1( Info1* info ) = 0;
-    virtual void getInfo2( Info2* info ) = 0;
+
+    // integrator parameters: fps=frames per second (1/stepsize), erp=default error reduction parameter (0..1).
+    virtual void getInfo2( dReal worldFPS, dReal worldERP, const Info2Descr* info ) = 0;
     // This call quickly!!! estimates maximum value of "m" that could be returned by getInfo1()
     // See comments at definition of SureMaxInfo for defails.
     virtual void getSureMaxInfo( SureMaxInfo* info ) = 0;
@@ -207,7 +205,7 @@ struct dxJointLimitMotor
     void set( int num, dReal value );
     dReal get( int num );
     int testRotationalLimit( dReal angle );
-    int addLimot( dxJoint *joint, dxJoint::Info2 *info, int row,
+    int addLimot( dxJoint *joint, dReal fps, const dxJoint::Info2Descr *info, int row,
         const dVector3 ax1, int rotational );
 };
 

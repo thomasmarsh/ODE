@@ -8,6 +8,11 @@ the rules for this file:
   * keep the format consistent (79 char width, M/D/Y date format).
 
 ------------------------------------------------------------------------------
+12/18/12 Oleh_Derevenko
+        * Fixed issue with some kinds of joints (Ball, DBall, DHinge, Fixed)
+          might overwrite world ERP value with their custom ERP during 
+          getInfo2() call and that inappropriate value would then be passed 
+          to subsequent joints in solver instead of world ERP.
 12/01/12 Oleh_Derevenko
         * Fixed issues reported in patches #151 and #22 (collisions with
           SAPSpace and QuadTreeSpace might not work because geometries list

@@ -74,11 +74,10 @@ dxJointHinge::getInfo1( dxJoint::Info1 *info )
 }
 
 
-void
-dxJointHinge::getInfo2( dxJoint::Info2 *info )
+void dxJointHinge::getInfo2( dReal worldFPS, dReal worldERP, const Info2Descr* info )
 {
     // set the three ball-and-socket rows
-    setBall( this, info, anchor1, anchor2 );
+    setBall( this, worldFPS, worldERP, info, anchor1, anchor2 );
 
     // set the two hinge rows. the hinge axis should be the only unconstrained
     // rotational axis, the angular velocity of the two bodies perpendicular to
@@ -141,12 +140,12 @@ dxJointHinge::getInfo2( dxJoint::Info2 *info )
         ax2[2] = axis2[2];
     }
     dCalcVectorCross3( b, ax1, ax2 );
-    dReal k = info->fps * info->erp;
+    dReal k = worldFPS * worldERP;
     info->c[3] = k * dCalcVectorDot3( b, p );
     info->c[4] = k * dCalcVectorDot3( b, q );
 
     // if the hinge is powered, or has joint limits, add in the stuff
-    limot.addLimot( this, info, 5, ax1, 1 );
+    limot.addLimot( this, worldFPS, info, 5, ax1, 1 );
 }
 
 

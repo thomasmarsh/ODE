@@ -126,7 +126,7 @@ dxJointHinge2::getAxisInfo(dVector3 ax1, dVector3 ax2, dVector3 axCross,
 
 
 void
-dxJointHinge2::getInfo2( dxJoint::Info2 *info )
+dxJointHinge2::getInfo2( dReal worldFPS, dReal worldERP, const Info2Descr *info )
 {
     // get information we need to set the hinge row
     dReal s, c;
@@ -138,7 +138,7 @@ dxJointHinge2::getInfo2( dxJoint::Info2 *info )
     dNormalize3( q );   // @@@ quicker: divide q by s ?
 
     // set the three ball-and-socket rows (aligned to the suspension axis ax1)
-    setBall2( this, info, anchor1, anchor2, ax1, susp_erp );
+    setBall2( this, worldFPS, worldERP, info, anchor1, anchor2, ax1, susp_erp );
 
     // set the hinge row
     int s3 = 3 * info->rowskip;
@@ -167,14 +167,14 @@ dxJointHinge2::getInfo2( dxJoint::Info2 *info )
     // where c = cos(theta), s = sin(theta)
     //       c0 = cos(theta0), s0 = sin(theta0)
 
-    dReal k = info->fps * info->erp;
+    dReal k = worldFPS * worldERP;
     info->c[3] = k * ( c0 * s - joint->s0 * c );
 
     // if the axis1 hinge is powered, or has joint limits, add in more stuff
-    int row = 4 + limot1.addLimot( this, info, 4, ax1, 1 );
+    int row = 4 + limot1.addLimot( this, worldFPS, info, 4, ax1, 1 );
 
     // if the axis2 hinge is powered, add in more stuff
-    limot2.addLimot( this, info, row, ax2, 1 );
+    limot2.addLimot( this, worldFPS, info, row, ax2, 1 );
 
     // set parameter for the suspension
     info->cfm[0] = susp_cfm;
