@@ -199,17 +199,19 @@ inline void dMatrix3Inv( const dMatrix3& ma, dMatrix3& dst )
         return;
     }
 
-    dst[0] =    ma[5]*ma[10] - ma[6]*ma[9]   / det;
-    dst[1] = -( ma[1]*ma[10] - ma[9]*ma[2] ) / det;
-    dst[2] =    ma[1]*ma[6]  - ma[5]*ma[2]   / det;
+    double detRecip = REAL(1.0) / det;
 
-    dst[4] = -( ma[4]*ma[10] - ma[6]*ma[8] ) / det;
-    dst[5] =    ma[0]*ma[10] - ma[8]*ma[2]   / det;
-    dst[6] = -( ma[0]*ma[6] - ma[4]*ma[2] ) / det;
+    dst[0] =  ( ma[5]*ma[10] - ma[6]*ma[9]  ) * detRecip;
+    dst[1] =  ( ma[9]*ma[2]  - ma[1]*ma[10] ) * detRecip;
+    dst[2] =  ( ma[1]*ma[6]  - ma[5]*ma[2]  ) * detRecip;
 
-    dst[8] =    ma[4]*ma[9] - ma[8]*ma[5]   / det;
-    dst[9] = -( ma[0]*ma[9] - ma[8]*ma[1] ) / det;
-    dst[10] =    ma[0]*ma[5] - ma[1]*ma[4]   / det;
+    dst[4] =  ( ma[6]*ma[8]  - ma[4]*ma[10] ) * detRecip;
+    dst[5] =  ( ma[0]*ma[10] - ma[8]*ma[2]  ) * detRecip;
+    dst[6] =  ( ma[4]*ma[2]  - ma[0]*ma[6]  ) * detRecip;
+
+    dst[8] =  ( ma[4]*ma[9]  - ma[8]*ma[5]  ) * detRecip;
+    dst[9] =  ( ma[8]*ma[1]  - ma[0]*ma[9]  ) * detRecip;
+    dst[10] = ( ma[0]*ma[5]  - ma[1]*ma[4]  ) * detRecip;
 }
 
 inline void dQuatTransform(const dQuaternion& quat,const dVector3& source,dVector3& dest)

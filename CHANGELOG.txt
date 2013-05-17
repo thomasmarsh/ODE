@@ -8,6 +8,10 @@ the rules for this file:
   * keep the format consistent (79 char width, M/D/Y date format).
 
 ------------------------------------------------------------------------------
+01/02/13 Oleh_derevenko
+        * Applied patch #183 by Joseph Cooper (complementary matrix 
+          calculation fix).
+
 12/28/12 Oleh_Derevenko
         * A bug with heightfield data assigned to a wrong field in 
           dGeomHeightfieldSetHeightfieldData fixed (bug report #88 by Luc).
