@@ -28,9 +28,9 @@
 #endif
 
 #include <ode/collision.h>
-#include <ode/matrix.h>
 #include <ode/rotation.h>
 #include "config.h"
+#include "matrix.h"
 #include "odemath.h"
 
 

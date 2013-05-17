@@ -21,8 +21,8 @@
  *************************************************************************/
 
 #include <ode/collision.h>
-#include <ode/matrix.h>
 #include "config.h"
+#include "matrix.h"
 
 #if !dTRIMESH_ENABLED
 

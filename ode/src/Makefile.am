@@ -43,7 +43,7 @@ libode_la_SOURCES =     nextafterf.c \
                         lcp.cpp lcp.h \
                         mass.cpp \
                         mat.cpp mat.h \
-                        matrix.cpp \
+                        matrix.cpp matrix.h \
                         memory.cpp \
                         misc.cpp \
                         objects.cpp objects.h \

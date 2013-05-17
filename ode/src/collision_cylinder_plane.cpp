@@ -30,10 +30,10 @@
  */
 
 #include <ode/collision.h>
-#include <ode/matrix.h>
 #include <ode/rotation.h>
 #include <ode/objects.h>
 #include "config.h"
+#include "matrix.h"
 #include "odemath.h"
 #include "collision_kernel.h"	// for dxGeom
 #include "collision_util.h"

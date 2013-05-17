@@ -28,10 +28,10 @@ for geometry objects
 */
 
 #include <ode/common.h>
-#include <ode/matrix.h>
 #include <ode/rotation.h>
 #include <ode/objects.h>
 #include "config.h"
+#include "matrix.h"
 #include "odemath.h"
 #include "collision_kernel.h"
 #include "collision_util.h"
