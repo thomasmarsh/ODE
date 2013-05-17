@@ -29,31 +29,6 @@
 #define ALLOCA dALLOCA16
 
 
-
-void _dSetZero (dReal *a, size_t n)
-{
-    dAASSERT (a && n >= 0);
-    dReal *acurr = a;
-    size_t ncurr = n;
-    while (ncurr > 0) {
-        *(acurr++) = 0;
-        --ncurr;
-    }
-}
-
-
-void _dSetValue (dReal *a, size_t n, dReal value)
-{
-    dAASSERT (a && n >= 0);
-    dReal *acurr = a;
-    size_t ncurr = n;
-    while (ncurr > 0) {
-        *(acurr++) = value;
-        --ncurr;
-    }
-}
-
-
 void _dMultiply0 (dReal *A, const dReal *B, const dReal *C, int p, int q, int r)
 {
     dAASSERT (A && B && C && p>0 && q>0 && r>0);
