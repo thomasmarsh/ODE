@@ -8,6 +8,11 @@ the rules for this file:
   * keep the format consistent (79 char width, M/D/Y date format).
 
 ------------------------------------------------------------------------------
+05/18/13 Oleh_Derevenko
+        * OU library has been included in ODE at revision #46 instead of  
+          being used as an external link due to difficulties using external 
+          references with new protocol used for storage at SF.
+
 03/03/13 Oleh_Derevenko
         * Fixed issue with "findex==-1" constraints being intermixed with 
           "findex!=-1" ones during constraints random reordering in QuickStep.
