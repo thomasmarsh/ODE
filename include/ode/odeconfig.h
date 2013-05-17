@@ -95,7 +95,7 @@
   #ifdef dSINGLE
     #define dInfinity ((float)INFINITY)
   #else
-    #define dInfinity INFINITY
+    #define dInfinity ((double)INFINITY)
   #endif
 #elif defined(HUGE_VAL)
   #ifdef dSINGLE
