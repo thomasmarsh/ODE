@@ -42,6 +42,11 @@ ODE Thread Local Storage access stub interface.
 #if dTLS_ENABLED
 
 
+using _OU_NAMESPACE::tlsvaluetype;
+using _OU_NAMESPACE::HTLSKEY;
+using _OU_NAMESPACE::CThreadLocalStorage;
+
+
 struct TrimeshCollidersCache;
 
 

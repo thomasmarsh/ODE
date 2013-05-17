@@ -22,13 +22,15 @@
  *                       Use old implementation of trimesh-trimesh collider
  *                       (for backward compatibility only)
  *
- *   dOU_ENABLED       - always enabled
- *   dATOMICS_ENABLED  - always enabled
+ *   dOU_ENABLED       
+ *   dATOMICS_ENABLED
  *   dTLS_ENABLED
- *                       Use generic features of OU library, atomic
- *                       API and TLS API respectively. Using TLS for
- *                       global variables allows calling ODE from 
- *                       multiple threads.
+ *                       Use generic features of OU library, atomic API
+ *                       and TLS API respectively.
+ *                       Generic features and atomic API are always enabled, 
+ *                       unless threading interface support is disabled.
+ *                       Using TLS for global variables allows calling ODE 
+ *                       collision detection functions from multiple threads.
  *
  *   dBUILTIN_THREADING_IMPL_ENABLED
  *                       Include built-in multithreaded threading 
@@ -43,10 +45,11 @@
 
 #define dTRIMESH_OPCODE_USE_OLD_TRIMESH_TRIMESH_COLLIDER 0
 
-#define dOU_ENABLED 1
-#define dATOMICS_ENABLED 1
+/* #define dOU_ENABLED 1 */
+/* #define dATOMICS_ENABLED 1 */
 /* #define dTLS_ENABLED 1 */
 
+/* #define dTHREADING_INTF_DISABLED 1 */
 /* #define dBUILTIN_THREADING_IMPL_ENABLED 1 */
 
 

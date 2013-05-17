@@ -41,6 +41,10 @@ ODE Thread Local Storage access stub implementation.
 
 #if dTLS_ENABLED
 
+
+using _OU_NAMESPACE::CTLSInitialization;
+
+
 //////////////////////////////////////////////////////////////////////////
 // Class static fields
 

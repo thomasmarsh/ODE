@@ -304,12 +304,12 @@ dxWorldProcessMemArena *dxWorldProcessContext::GetStepperArenasHead() const
 bool dxWorldProcessContext::TryExtractingStepperArenasHead(dxWorldProcessMemArena *pmaHeadInstance)
 {
     dxWorldProcessMemArena *pmaNextInstance = pmaHeadInstance->GetNextMemArena();
-    return AtomicCompareExchangePointer((volatile atomicptr *)&m_pmaStepperArenas, pmaHeadInstance, pmaNextInstance);
+    return AtomicCompareExchangePointer((volatile atomicptr *)&m_pmaStepperArenas, (atomicptr)pmaHeadInstance, (atomicptr)pmaNextInstance);
 }
 
 bool dxWorldProcessContext::TryInsertingStepperArenasHead(dxWorldProcessMemArena *pmaArenaInstance, dxWorldProcessMemArena *pmaExistingHead)
 {
-    return AtomicCompareExchangePointer((volatile atomicptr *)&m_pmaStepperArenas, pmaExistingHead, pmaArenaInstance);
+    return AtomicCompareExchangePointer((volatile atomicptr *)&m_pmaStepperArenas, (atomicptr)pmaExistingHead, (atomicptr)pmaArenaInstance);
 }
 
 

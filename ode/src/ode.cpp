@@ -1781,12 +1781,16 @@ int dWorldSetStepMemoryManager(dWorldID w, const dWorldStepMemoryFunctionsInfo *
 }
 
 void dWorldSetStepThreadingImplementation(dWorldID w, 
-                                          const dxThreadingFunctionsInfo *functions_info, dThreadingImplementationID threading_impl)
+    const dxThreadingFunctionsInfo *functions_info, dThreadingImplementationID threading_impl)
 {
     dUASSERT (w,"bad world argument");
     dUASSERT (!functions_info || functions_info->struct_size >= sizeof(*functions_info), "Bad threading functions info");
 
+#if dTHREADING_INTF_DISABLED
+    dUASSERT(functions_info == NULL && threading_impl == NULL, "Threading interface is not available");
+#else
     w->AssignThreadingImpl(functions_info, threading_impl);
+#endif
 }
 
 
@@ -2223,11 +2227,13 @@ REGISTER_EXTENSION( ODE_EXT_gimpact )
 REGISTER_EXTENSION( ODE_EXT_mt_collisions )
 #endif // dTLS_ENABLED
 
+#if !dTHREADING_INTF_DISABLED
 REGISTER_EXTENSION( ODE_EXT_threading )
 
 #if dBUILTIN_THREADING_IMPL_ENABLED
 REGISTER_EXTENSION( ODE_THR_builtin_impl )
 #endif // #if dBUILTIN_THREADING_IMPL_ENABLED
+#endif // #if !dTHREADING_INTF_DISABLED
 
 //**********************************
 // EXTENSION LIST END

@@ -8,6 +8,13 @@ the rules for this file:
   * keep the format consistent (79 char width, M/D/Y date format).
 
 ------------------------------------------------------------------------------
+11/25/12 Oleh Derevenko
+        * Configuration option --disable-threading-intf added 
+          (--no-threading-intf for Windows/Premake). This allows disabling
+          threading interface support (external implementations may not be 
+          assigned) but eliminates dependency on OU and use of atomics in 
+          steppers.
+
 11/05/12 Oleh Derevenko
         * Fixed zero comparisons in OPCODE to use relative error instead of
           absolute epsilon value (found by Bill Sellers)
