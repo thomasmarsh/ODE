@@ -8,6 +8,10 @@ the rules for this file:
   * keep the format consistent (79 char width, M/D/Y date format).
 
 ------------------------------------------------------------------------------
+12/01/12 Oleh_Derevenko
+		* Applied patch #160 "IsPointInPolygon in convex.cpp returns wrong 
+		  results" (by Janis Rucis)
+
 11/25/12 Oleh Derevenko
         * Configuration option --disable-threading-intf added 
           (--no-threading-intf for Windows/Premake). This allows disabling
