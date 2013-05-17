@@ -81,6 +81,8 @@
 
 static dWorldID world;
 static dSpaceID space;
+static dThreadingImplementationID threading;
+static dThreadingThreadPoolID pool;
 static dBodyID body[10000];
 static int bodies;
 static dJointID joint[100000];
@@ -229,19 +231,29 @@ void makeCar(dReal x, dReal y, int &bodyI, int &jointI, int &boxI, int &sphereI)
 	sphereI	+= 4;
 }
 
+static 
+void shutdownSimulation()
+{
+    // destroy world if it exists
+    if (bodies)
+    {
+        dThreadingImplementationShutdownProcessing(threading);
+        dThreadingFreeThreadPool(pool);
+        dWorldSetStepThreadingImplementation(world, NULL, NULL);
+        dThreadingFreeImplementation(threading);
 
-void resetSimulation()
+        dJointGroupDestroy (contactgroup);
+        dSpaceDestroy (space);
+        dWorldDestroy (world);
+
+        bodies = 0;
+    }
+}
+
+static 
+void setupSimulation()
 {
 	int i;
-	i = 0;
-	// destroy world if it exists
-	if (bodies)
-	{
-		dJointGroupDestroy (contactgroup);
-		dSpaceDestroy (space);
-		dWorldDestroy (world);
-	}
-	
 	for (i = 0; i < 1000; i++)
 		wb_stepsdis[i] = 0;
 
@@ -258,6 +270,14 @@ void resetSimulation()
 	dWorldSetCFM (world, 1e-5);
 	dWorldSetERP (world, 0.8);
 	dWorldSetQuickStepNumIterations (world,ITERS);
+
+    threading = dThreadingAllocateMultiThreadedImplementation();
+    pool = dThreadingAllocateThreadPool(4, 0, dAllocateFlagBasicData, NULL);
+    dThreadingThreadPoolServeMultiThreadedImplementation(pool, threading);
+    // dWorldSetStepIslandsProcessingMaxThreadCount(world, 1);
+    dWorldSetStepThreadingImplementation(world, dThreadingImplementationGetFunctions(threading), threading);
+
+
 	ground = dCreatePlane (space,0,0,1,0);
 	
 	bodies = 0;
@@ -447,7 +467,8 @@ static void command (int cmd)
 		doFast = !doFast;
 		break;
 	case 'r': case 'R':
-		resetSimulation();
+        shutdownSimulation();
+		setupSimulation();
 		break;
 	case '[':
 		cannon_angle += 0.1;
@@ -610,14 +631,12 @@ int main (int argc, char **argv)
 	boxes = 0;
 	spheres = 0;
 	
-	resetSimulation();
+	setupSimulation();
 	
 	// run simulation
 	dsSimulationLoop (argc,argv,352,288,&fn);
 	
-	dJointGroupDestroy (contactgroup);
-	dSpaceDestroy (space);
-	dWorldDestroy (world);
+	shutdownSimulation();
 	dCloseODE();
 	return 0;
 }
