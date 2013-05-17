@@ -44,6 +44,7 @@ change the random test conditions.
 #define dsDrawBox dsDrawBoxD
 #define dsDrawLine dsDrawLineD
 #define dsDrawCapsule dsDrawCapsuleD
+#define dsDrawCylinder dsDrawCylinderD
 #endif
 
 //****************************************************************************
@@ -188,6 +189,13 @@ void draw_all_objects (dSpaceID space)
       dReal radius,length;
       dGeomCapsuleGetParams (g,&radius,&length);
       dsDrawCapsule (pos,dGeomGetRotation(g),length,radius);
+      break;
+    }
+    case dCylinderClass: {
+      dsSetColorAlpha (0,1,0,0.8);
+      dReal radius,length;
+      dGeomCylinderGetParams (g,&radius,&length);
+      dsDrawCylinder (pos,dGeomGetRotation(g),length,radius);
       break;
     }
 
@@ -846,6 +854,68 @@ int test_ray_and_ccylinder()
   PASSED();
 }
 
+/*
+  Test rays within the cylinder
+  -completely inside
+  -exiting through side
+  -exiting through cap
+  -exiting through corner
+  Test rays outside the cylinder
+*/
+int test_ray_and_cylinder()
+{
+  int j;
+  dContactGeom contact;
+  dVector3 p,a,b,n;
+  dMatrix3 R;
+  dReal r,l,k,x,y;
+  const int positions = 5;
+  const int slices = 13;
+  const int pitch = 11;
+
+  dSimpleSpace space(0);
+  dGeomID ray = dCreateRay(space,4);
+  dGeomID cyl = dCreateCylinder(space,0.5,1);
+
+  // The first thing that happens is the ray is
+  // rotated into cylinder coordinates.  We'll trust that's
+  // done right.  The major axis is in the z-dir.
+
+
+  // Random tests
+  /*b[0]=4*dRandReal()-2;
+  b[1]=4*dRandReal()-2;
+  b[2]=4*dRandReal()-2;
+  a[0]=2*dRandReal()-1;
+  a[1]=2*dRandReal()-1;
+  a[2]=2*dRandReal()-1;*/
+  
+  // Inside out
+  b[0]=dRandReal()-0.5;
+  b[1]=dRandReal()-0.5;
+  b[2]=dRandReal()-0.5;
+  a[0]=2*dRandReal()-1;
+  a[1]=2*dRandReal()-1;
+  a[2]=2*dRandReal()-1;
+
+  // Outside in
+  /*b[0]=4*dRandReal()-2;
+  b[1]=4*dRandReal()-2;
+  b[2]=4*dRandReal()-2;
+  a[0]=-b[0];
+  a[1]=-b[1];
+  a[2]=-b[2];*/
+
+  
+  dGeomRaySet (ray,b[0],b[1],b[2],a[0],a[1],a[2]);
+  // This is just for visual inspection right now.
+  //if (dCollide (ray,cyl,1,&contact,sizeof(dContactGeom)) != 1) FAILED();
+
+  draw_all_objects (space);
+
+  PASSED();
+}
+
 
 int test_ray_and_plane()
 {
@@ -1364,6 +1434,7 @@ int main (int argc, char **argv)
   MAKE_TEST(11,test_ray_and_box);
   MAKE_TEST(12,test_ray_and_ccylinder);
   MAKE_TEST(13,test_ray_and_plane);
+  MAKE_TEST(14,test_ray_and_cylinder);
 
   MAKE_TEST(100,test_dBoxTouchesBox);
   MAKE_TEST(101,test_dBoxBox);
