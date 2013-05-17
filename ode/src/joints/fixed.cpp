@@ -74,9 +74,12 @@ dxJointFixed::getInfo2 ( dReal worldFPS, dReal worldERP, const Info2Descr *info 
     info->cfm[1] = this->cfm;
     info->cfm[2] = this->cfm;
 
+    dxBody *b0 = node[0].body, *b1 = node[1].body;
+
     dVector3 ofs;
-    dMultiply0_331 ( ofs, node[0].body->posr.R, offset );
-    if ( node[1].body )
+    dMultiply0_331 ( ofs, b0->posr.R, offset );
+
+    if ( b1 )
     {
         dSetCrossMatrixPlus( info->J1a, ofs, s );
         info->J2l[0] = -1;
@@ -86,17 +89,21 @@ dxJointFixed::getInfo2 ( dReal worldFPS, dReal worldERP, const Info2Descr *info 
 
     // set right hand side for the first three rows (linear)
     dReal k = worldFPS * this->erp;
-    if ( node[1].body )
+    if ( b1 )
     {
         for ( int j = 0; j < 3; j++ )
-            info->c[j] = k * ( node[1].body->posr.pos[j]
-                - node[0].body->posr.pos[j]
+        {
+            info->c[j] = k * ( b1->posr.pos[j]
+                - b0->posr.pos[j]
                 + ofs[j] );
+        }
     }
     else
     {
         for ( int j = 0; j < 3; j++ )
-            info->c[j] = k * ( offset[j] - node[0].body->posr.pos[j] );
+        {
+            info->c[j] = k * ( offset[j] - b0->posr.pos[j] );
+        }
     }
 }
 

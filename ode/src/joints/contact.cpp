@@ -98,20 +98,24 @@ dxJointContact::getInfo2( dReal worldFPS, dReal worldERP, const Info2Descr *info
 
     // c1,c2 = contact points with respect to body PORs
     dVector3 c1, c2 = {0,0,0};
-    c1[0] = contact.geom.pos[0] - node[0].body->posr.pos[0];
-    c1[1] = contact.geom.pos[1] - node[0].body->posr.pos[1];
-    c1[2] = contact.geom.pos[2] - node[0].body->posr.pos[2];
+
+    dxBody *b0 = node[0].body;
+    c1[0] = contact.geom.pos[0] - b0->posr.pos[0];
+    c1[1] = contact.geom.pos[1] - b0->posr.pos[1];
+    c1[2] = contact.geom.pos[2] - b0->posr.pos[2];
 
     // set jacobian for normal
     info->J1l[0] = normal[0];
     info->J1l[1] = normal[1];
     info->J1l[2] = normal[2];
     dCalcVectorCross3( info->J1a, c1, normal );
-    if ( node[1].body )
+
+    dxBody *b1 = node[1].body;
+    if ( b1 )
     {
-        c2[0] = contact.geom.pos[0] - node[1].body->posr.pos[0];
-        c2[1] = contact.geom.pos[1] - node[1].body->posr.pos[1];
-        c2[2] = contact.geom.pos[2] - node[1].body->posr.pos[2];
+        c2[0] = contact.geom.pos[0] - b1->posr.pos[0];
+        c2[1] = contact.geom.pos[1] - b1->posr.pos[1];
+        c2[2] = contact.geom.pos[2] - b1->posr.pos[2];
         info->J2l[0] = -normal[0];
         info->J2l[1] = -normal[1];
         info->J2l[2] = -normal[2];
@@ -195,6 +199,7 @@ dxJointContact::getInfo2( dReal worldFPS, dReal worldERP, const Info2Descr *info
         info->J1l[s+1] = t1[1];
         info->J1l[s+2] = t1[2];
         dCalcVectorCross3( info->J1a + s, c1, t1 );
+        
         if ( node[1].body )
         {
             info->J2l[s+0] = -t1[0];
@@ -204,6 +209,7 @@ dxJointContact::getInfo2( dReal worldFPS, dReal worldERP, const Info2Descr *info
             dCalcVectorCross3( J2a_plus_s, c2, t1 );
             dNegateVector3( J2a_plus_s );
         }
+
         // set right hand side
         if ( contact.surface.mode & dContactMotion1 )
         {
@@ -235,6 +241,7 @@ dxJointContact::getInfo2( dReal worldFPS, dReal worldERP, const Info2Descr *info
         info->J1l[s2+1] = t2[1];
         info->J1l[s2+2] = t2[2];
         dCalcVectorCross3( info->J1a + s2, c1, t2 );
+
         if ( node[1].body )
         {
             info->J2l[s2+0] = -t2[0];
@@ -244,11 +251,13 @@ dxJointContact::getInfo2( dReal worldFPS, dReal worldERP, const Info2Descr *info
             dCalcVectorCross3( J2a_plus_s2, c2, t2 );
             dNegateVector3( J2a_plus_s2 );
         }
+
         // set right hand side
         if ( contact.surface.mode & dContactMotion2 )
         {
             info->c[rowFriction2] = contact.surface.motion2;
         }
+
         // set LCP bounds and friction index. this depends on the approximation
         // mode
         info->lo[rowFriction2] = -mu2;
