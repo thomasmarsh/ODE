@@ -300,7 +300,7 @@ void dJointAddSliderForce ( dJointID j, dReal force )
     checktype ( joint, Slider );
 
     if ( joint->flags & dJOINT_REVERSE )
-        force -= force;
+        force = -force;
 
     getAxis ( joint, axis, joint->axis1 );
     axis[0] *= force;
