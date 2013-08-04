@@ -180,9 +180,7 @@ bool AABBTreeNode::Subdivide(AABBTreeBuilder* builder)
 		for(udword i=0;i<mNbPrimitives;i++)
 		{
 			udword Index = mNodePrimitives[i];
-			Means.x+=builder->GetSplittingValue(Index, 0);
-			Means.y+=builder->GetSplittingValue(Index, 1);
-			Means.z+=builder->GetSplittingValue(Index, 2);
+			Means += builder->GetSplittingValues(Index);
 		}
 		Means/=float(mNbPrimitives);
 
@@ -191,12 +189,9 @@ bool AABBTreeNode::Subdivide(AABBTreeBuilder* builder)
 		for(udword i=0;i<mNbPrimitives;i++)
 		{
 			udword Index = mNodePrimitives[i];
-			float Cx = builder->GetSplittingValue(Index, 0);
-			float Cy = builder->GetSplittingValue(Index, 1);
-			float Cz = builder->GetSplittingValue(Index, 2);
-			Vars.x += (Cx - Means.x)*(Cx - Means.x);
-			Vars.y += (Cy - Means.y)*(Cy - Means.y);
-			Vars.z += (Cz - Means.z)*(Cz - Means.z);
+			Point Center = builder->GetSplittingValues(Index);
+			Point Delta = Center - Means;
+			Vars += Delta * Delta;
 		}
 		Vars/=float(mNbPrimitives-1);
 
