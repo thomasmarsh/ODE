@@ -8,6 +8,9 @@ the rules for this file:
   * keep the format consistent (79 char width, M/D/Y date format).
 
 ------------------------------------------------------------------------------
+08/04/13 Oleh Derevenko
+        * Bugfix #89 by Luc applied (dJointAddSliderForce() adds a zero force
+          when the parent body is NULL) 
 05/18/13 Oleh_Derevenko
         * OU library has been included in ODE at revision #46 instead of  
           being used as an external link due to difficulties using external 
