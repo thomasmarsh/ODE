@@ -25,16 +25,27 @@
 #include "config.h"
 #include "matrix.h"
 #include "error.h"
+#include "odeou.h"
 
 //****************************************************************************
 // random numbers
 
-static unsigned long seed = 0;
+static volatile duint32 seed = 0;
 
 unsigned long dRand()
 {
-    seed = (1664525UL*seed + 1013904223UL) & 0xffffffff;
-    return seed;
+    duint32 origSeed, newseed;
+#if !dTHREADING_INTF_DISABLED
+    do {
+#endif
+        origSeed = seed;
+        newseed = ((duint32)1664525 * origSeed + (duint32)1013904223) & (duint32)0xffffffff;
+#if dTHREADING_INTF_DISABLED
+        seed = newseed;
+#else
+    } while (!AtomicCompareExchange((volatile atomicord32 *)&seed, origSeed, newseed));
+#endif
+    return newseed;
 }
 
 
@@ -130,7 +141,7 @@ int dRandInt (int n)
 
 dReal dRandReal()
 {
-    return ((dReal) dRand()) / ((dReal) 0xffffffff);
+    return (dReal)((double) dRand()) / ((double) 0xffffffff);
 }
 
 //****************************************************************************
