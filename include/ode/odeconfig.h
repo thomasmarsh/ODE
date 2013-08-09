@@ -74,6 +74,13 @@
 /* Well-defined common data types...need to define for 64 bit systems */
 #if defined(_M_IA64) || defined(__ia64__) || defined(_M_AMD64) || defined(__x86_64__)
   #define X86_64_SYSTEM   1
+#if defined(_MSC_VER)
+  typedef __int64         dint64;
+  typedef unsigned __int64 duint64;
+#else
+  typedef long long       dint64;
+  typedef unsigned long long duint64;
+#endif
   typedef int             dint32;
   typedef unsigned int    duint32;
   typedef short           dint16;
@@ -81,6 +88,13 @@
   typedef signed char     dint8;
   typedef unsigned char   duint8;
 #else
+#if defined(_MSC_VER)
+  typedef __int64         dint64;
+  typedef unsigned __int64 duint64;
+#else
+  typedef long long       dint64;
+  typedef unsigned long long duint64;
+#endif
   typedef int             dint32;
   typedef unsigned int    duint32;
   typedef short           dint16;

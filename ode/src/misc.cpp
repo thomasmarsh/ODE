@@ -24,6 +24,7 @@
 #include <ode/misc.h>
 #include "config.h"
 #include "matrix.h"
+#include "error.h"
 
 //****************************************************************************
 // random numbers
@@ -65,55 +66,15 @@ int dTestRand()
 // adam's all-int straightforward(?) dRandInt (0..n-1)
 int dRandInt (int n)
 {
-    // seems good; xor-fold and modulus
-    const unsigned long un = n;
     // Since there is no memory barrier macro in ODE assign via volatile variable 
     // to prevent compiler reusing seed as value of `r'
     volatile unsigned long raw_r = dRand();
-    unsigned long r = raw_r;
+    duint32 r = (duint32)raw_r;
+    
+    duint32 un = n;
+    dIASSERT(sizeof(n) == sizeof(un));
 
-    // note: probably more aggressive than it needs to be -- might be
-    //       able to get away without one or two of the innermost branches.
-    // if (un <= 0x00010000UL) {
-    //     r ^= (r >> 16);
-    //     if (un <= 0x00000100UL) {
-    //         r ^= (r >> 8);
-    //         if (un <= 0x00000010UL) {
-    //             r ^= (r >> 4);
-    //             if (un <= 0x00000004UL) {
-    //                 r ^= (r >> 2);
-    //                 if (un <= 0x00000002UL) {
-    //                     r ^= (r >> 1);
-    //                 }
-    //             }
-    //         }
-    //     }
-    // }
-    // Optimized version of above
-    if (un <= 0x00000010UL) {
-        r ^= (r >> 16);
-        r ^= (r >> 8);
-        r ^= (r >> 4);
-        if (un <= 0x00000002UL) {
-            r ^= (r >> 2);
-            r ^= (r >> 1);
-        } else {
-            if (un <= 0x00000004UL) {
-                r ^= (r >> 2);
-            }
-        }
-    } else {
-        if (un <= 0x00000100UL) {
-            r ^= (r >> 16);
-            r ^= (r >> 8);
-        } else {
-            if (un <= 0x00010000UL) {
-                r ^= (r >> 16);
-            }
-        }
-    }
-
-    return (int) (r % un);    
+    return (int)(((duint64)r * un) >> 32);
 }
 
 
