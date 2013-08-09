@@ -8,6 +8,10 @@ the rules for this file:
   * keep the format consistent (79 char width, M/D/Y date format).
 
 ------------------------------------------------------------------------------
+08/08/13 Oleh Derevenko
+        * Joint feedback forces application fixed in QuickStep implementation
+          (was broken since revision #1919 in old repository (#1927 in new one))
+
 08/04/13 Oleh Derevenko
         * Bugfix #89 by Luc applied (dJointAddSliderForce() adds a zero force
           when the parent body is NULL) 

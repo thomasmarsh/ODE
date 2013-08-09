@@ -1172,7 +1172,7 @@ void dxQuickStepIsland_Stage2a(dxQuickStepperStage2CallContext *stage2CallContex
             // for joints, that requested feedback (which is normally much less)
             unsigned mfbcurr = mindex[ji * 2 + 1], mfbnext = mindex[ji * 2 + 3];
             if (mfbcurr != mfbnext) {
-                dReal *Jcopyrow = Jcopy + mfbcurr;
+                dReal *Jcopyrow = Jcopy + mfbcurr * 12;
                 memcpy(Jcopyrow, Jrow, (mfbnext - mfbcurr) * 12 * sizeof(dReal));
             }
         }
