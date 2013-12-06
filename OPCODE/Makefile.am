@@ -1,3 +1,8 @@
+EXTRA_DIST = COPYING \
+             ReadMe.txt \
+             README-ODE.txt \
+             TemporalCoherence.txt
+
 SUBDIRS = Ice
 
 noinst_LTLIBRARIES = libOPCODE.la
