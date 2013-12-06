@@ -145,7 +145,7 @@ static void nearCallback (void *data, dGeomID o1, dGeomID o2)
 
   dBodyID b1 = dGeomGetBody (o1);
   dBodyID b2 = dGeomGetBody (o2);
-  if (b1 && b2 && dAreConnectedExcluding (b1,b2,dJointTypeContact) ) return;
+  //if (b1 && b2 && dAreConnectedExcluding (b1,b2,dJointTypeContact) ) return;
   const int N = 10;
   dContact contact[N];
   n = dCollide (o1,o2,N,&contact[0].geom,sizeof (dContact) );
@@ -286,6 +286,7 @@ case 'h' : case 'H' : case '?' :
   case ',': case '<' : {
       dReal vel = joint->getParam (dParamVel3) - VEL_INC;
       joint->setParam (dParamVel3, vel);
+	  joint->setParam (dParamFMax3, 2);
       std::cout<<"Velocity = "<<vel<<"  FMax = 2"<<'\n';
     }
     break;
@@ -293,6 +294,7 @@ case 'h' : case 'H' : case '?' :
   case '.': case '>' : {
       dReal vel = joint->getParam (dParamVel3) + VEL_INC;
       joint->setParam (dParamVel3, vel);
+	  joint->setParam (dParamFMax3, 2);
       std::cout<<"Velocity = "<<vel<<"  FMax = 2"<<'\n';
     }
     break;
@@ -627,13 +629,13 @@ int main (int argc, char **argv)
 
 
   // Create the external part of the slider joint
-  geom[EXT] = dCreateBox (space, extDim[X], extDim[Y], extDim[Z]);
+  geom[EXT] = dCreateBox (0, extDim[X], extDim[Y], extDim[Z]);
   dGeomSetCategoryBits (geom[EXT], catBits[EXT]);
   dGeomSetCollideBits (geom[EXT],
                        catBits[ALL] & (~catBits[JOINT]) & (~catBits[W]) & (~catBits[D]) );
 
   // Create the internal part of the slider joint
-  geom[INT] = dCreateBox (space, INT_EXT_RATIO*extDim[X],
+  geom[INT] = dCreateBox (0, INT_EXT_RATIO*extDim[X],
                           INT_EXT_RATIO*extDim[Y],
                           INT_EXT_RATIO*extDim[Z]);
   dGeomSetCategoryBits (geom[INT], catBits[INT]);
@@ -643,7 +645,7 @@ int main (int argc, char **argv)
 
   dMatrix3 R;
   // Create the first axis of the universal joi9nt
-  geom[AXIS1] = dCreateGeomTransform (space);
+  geom[AXIS1] = dCreateGeomTransform (0);
   //Rotation of 90deg around y
   dRFromAxisAndAngle (R, 0,1,0, 0.5*PI);
   dGeomSetRotation (geom[AXIS1], R);
@@ -654,7 +656,7 @@ int main (int argc, char **argv)
 
 
   // Create the second axis of the universal joint
-  geom[AXIS2] = dCreateGeomTransform (space);
+  geom[AXIS2] = dCreateGeomTransform (0);
   //Rotation of 90deg around y
   dRFromAxisAndAngle (R, 1,0,0, 0.5*PI);
   dGeomSetRotation (geom[AXIS2], R);
@@ -665,7 +667,7 @@ int main (int argc, char **argv)
 
 
   // Create the anchor
-  geom[ANCHOR] = dCreateBox (space, ancDim[X], ancDim[Y], ancDim[Z]);
+  geom[ANCHOR] = dCreateBox (0, ancDim[X], ancDim[Y], ancDim[Z]);
   dGeomSetCategoryBits (geom[ANCHOR], catBits[ANCHOR]);
   dGeomSetCollideBits (geom[ANCHOR],
                        catBits[ALL] & (~catBits[JOINT]) & (~catBits[W]) & (~catBits[D]) );

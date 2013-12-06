@@ -796,6 +796,154 @@ int dxJointLimitMotor::addLimot( dxJoint *joint,
     else return 0;
 }
 
+/**
+    This function generalizes the "linear limot torque decoupling"
+    in addLimot to use anchor points provided by the caller.
+
+    This makes it so that the appropriate torques are applied to
+    a body when it's being linearly motored or limited using anchor points
+    that aren't at the center of mass.
+
+    pt1 and pt2 are centered in body coordinates but use global directions.
+    I.e., they are conveniently found within joint code with:
+      getAxis(joint,pt1,anchor1);
+      getAxis2(joint,pt2,anchor2);
+*/
+int dxJointLimitMotor::addTwoPointLimot( dxJoint *joint, dReal fps,
+                                const dxJoint::Info2Descr *info, int row,
+                                const dVector3 ax1, const dVector3 pt1, const dVector3 pt2 )
+{
+    int srow = row * info->rowskip;
+
+    // if the joint is powered, or has joint limits, add in the extra row
+    int powered = fmax > 0;
+    if ( powered || limit )
+    {
+        // Set the linear portion
+        dCopyVector3(&(info->J1l[srow]),ax1);
+        // Set the angular portion (to move the linear constraint 
+        // away from the center of mass).  
+        dCalcVectorCross3(&(info->J1a[srow]),pt1,ax1);
+        // Set the constraints for the second body
+        if ( joint->node[1].body ) {
+            dCopyNegatedVector3(&(info->J2l[srow]), ax1);
+            dCalcVectorCross3(&(info->J2a[srow]),pt2,&(info->J2l[srow]));
+        }
+
+        // if we're limited low and high simultaneously, the joint motor is
+        // ineffective
+        if ( limit && ( lostop == histop ) ) powered = 0;
+
+        if ( powered )
+        {
+            info->cfm[row] = normal_cfm;
+            if ( ! limit )
+            {
+                info->c[row] = vel;
+                info->lo[row] = -fmax;
+                info->hi[row] = fmax;
+            }
+            else
+            {
+                // the joint is at a limit, AND is being powered. if the joint is
+                // being powered into the limit then we apply the maximum motor force
+                // in that direction, because the motor is working against the
+                // immovable limit. if the joint is being powered away from the limit
+                // then we have problems because actually we need *two* lcp
+                // constraints to handle this case. so we fake it and apply some
+                // fraction of the maximum force. the fraction to use can be set as
+                // a fudge factor.
+
+                dReal fm = fmax;
+                if (( vel > 0 ) || ( vel == 0 && limit == 2 ) ) fm = -fm;
+
+                // if we're powering away from the limit, apply the fudge factor
+                if (( limit == 1 && vel > 0 ) || ( limit == 2 && vel < 0 ) ) fm *= fudge_factor;
+
+               
+                const dReal* tAx1 = &(info->J1a[srow]);
+                dBodyAddForce( joint->node[0].body, -fm*ax1[0], -fm*ax1[1], -fm*ax1[2] );
+                dBodyAddTorque( joint->node[0].body, -fm*tAx1[0], -fm*tAx1[1],
+                        -fm*tAx1[2] );
+
+                if ( joint->node[1].body )
+                {
+                    const dReal* tAx2 = &(info->J2a[srow]);
+                    dBodyAddForce( joint->node[1].body, fm*ax1[0], fm*ax1[1], fm*ax1[2] );
+                    dBodyAddTorque( joint->node[1].body, -fm*tAx2[0], -fm*tAx2[1],
+                        -fm*tAx2[2] );
+                }
+                
+            }
+        }
+
+        if ( limit )
+        {
+            dReal k = fps * stop_erp;
+            info->c[row] = -k * limit_err;
+            info->cfm[row] = stop_cfm;
+
+            if ( lostop == histop )
+            {
+                // limited low and high simultaneously
+                info->lo[row] = -dInfinity;
+                info->hi[row] = dInfinity;
+            }
+            else
+            {
+                if ( limit == 1 )
+                {
+                    // low limit
+                    info->lo[row] = 0;
+                    info->hi[row] = dInfinity;
+                }
+                else
+                {
+                    // high limit
+                    info->lo[row] = -dInfinity;
+                    info->hi[row] = 0;
+                }
+
+                // deal with bounce
+                if ( bounce > 0 )
+                {
+                    // calculate relative velocity of the two anchor points
+                    dReal vel = 
+  	                    dCalcVectorDot3( joint->node[0].body->lvel, &(info->J1l[srow])) +
+  	                    dCalcVectorDot3( joint->node[0].body->avel, &(info->J1a[srow]));
+  	                if (joint->node[1].body) {
+  	                    vel +=
+  	                        dCalcVectorDot3( joint->node[1].body->lvel, &(info->J2l[srow])) +
+  	                        dCalcVectorDot3( joint->node[1].body->avel, &(info->J2a[srow]));
+  	                }
+
+                    // only apply bounce if the velocity is incoming, and if the
+                    // resulting c[] exceeds what we already have.
+                    if ( limit == 1 )
+                    {
+                        // low limit
+                        if ( vel < 0 )
+                        {
+                            dReal newc = -bounce * vel;
+                            if ( newc > info->c[row] ) info->c[row] = newc;
+                        }
+                    }
+                    else
+                    {
+                        // high limit - all those computations are reversed
+                        if ( vel > 0 )
+                        {
+                            dReal newc = -bounce * vel;
+                            if ( newc < info->c[row] ) info->c[row] = newc;
+                        }
+                    }
+                }
+            }
+        }
+        return 1;
+    }
+    else return 0;
+}
 
 
 // Local Variables:

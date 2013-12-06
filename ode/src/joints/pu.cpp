@@ -266,185 +266,78 @@ dxJointPU::getInfo2( dReal worldFPS, dReal worldERP, const Info2Descr *info )
     const int s0 = 0;
     const int s1 = info->rowskip;
     const int s2 = 2 * s1;
-
     const dReal k = worldFPS * worldERP;
 
-    // pull out pos and R for both bodies. also get the `connection'
-    // vector pos2-pos1.
-
-    dReal *pos1, *pos2 = 0, *R1, *R2 = 0;
-    pos1 = node[0].body->posr.pos;
-    R1 = node[0].body->posr.R;
-    if ( node[1].body )
-    {
-        pos2 = node[1].body->posr.pos;
-        R2 = node[1].body->posr.R;
-    }
-
-    dVector3 axP; // Axis of the prismatic joint in global frame
-    dMultiply0_331( axP, R1, axisP1 );
-
-    // distance between the body1 and the anchor2 in global frame
-    // Calculated in the same way as the offset
-    dVector3 dist;
-    dVector3 wanchor2 = {0,0,0};
-    if ( node[1].body )
-    {
-        dMultiply0_331( wanchor2, R2, anchor2 );
-        dist[0] = wanchor2[0] + pos2[0] - pos1[0];
-        dist[1] = wanchor2[1] + pos2[1] - pos1[1];
-        dist[2] = wanchor2[2] + pos2[2] - pos1[2];
-    }
-    else
-    {
-        if (flags & dJOINT_REVERSE )
-        {
-            // Invert the sign of dist
-            dist[0] = pos1[0] - anchor2[0];
-            dist[1] = pos1[1] - anchor2[1];
-            dist[2] = pos1[2] - anchor2[2];
-        }
-        else
-        {
-            dist[0] = anchor2[0] - pos1[0];
-            dist[1] = anchor2[1] - pos1[1];
-            dist[2] = anchor2[2] - pos1[2];
-        }
-    }
-
-    dVector3 q; // Temporary axis vector
-    // Will be used at 2 places with 2 different meaning
-
     // ======================================================================
-    // Work on the angular part (i.e. row 0)
+    // The angular constraint
     //
+    dVector3 ax1, ax2; // Global axes of rotation
+    getAxis(this, ax1, axis1);
+    getAxis2(this,ax2, axis2);
 
-    // The axis perpendicular to both axis1 and axis2 should be the only unconstrained
-    // rotational axis, the angular velocity of the two bodies perpendicular to
-    // the rotoide axes should be equal. Thus the constraint equations are
-    //    p*w1 - p*w2 = 0
-    // where p is a unit vector perpendicular to both axis1 and axis2
-    // and w1 and w2 are the angular velocity vectors of the two bodies.
-    dVector3 ax1, ax2;
-    getAxes( ax1, ax2 );
+    dVector3 uniPerp;  // Axis perpendicular to axes of rotation
+    dCalcVectorCross3(uniPerp,ax1,ax2);
+    dNormalize3( uniPerp );
+    dCopyVector3( info->J1a , uniPerp );
+    if ( node[1].body )
+    {
+        dCopyNegatedVector3( info->J2a , uniPerp );
+    }
+    // Corrective velocity attempting to keep uni axes perpendicular
     dReal val = dCalcVectorDot3( ax1, ax2 );
-    q[0] = ax2[0] - val * ax1[0];
-    q[1] = ax2[1] - val * ax1[1];
-    q[2] = ax2[2] - val * ax1[2];
-
-    dVector3 p;
-    dCalcVectorCross3( p, ax1, q );
-    dNormalize3( p );
-
-    //   info->J1a[s0+i] = p[i];
-    dCopyVector3(( info->J1a ) + s0, p );
-
-    if ( node[1].body )
-    {
-        //   info->J2a[s0+i] = -p[i];
-        dCopyNegatedVector3(( info->J2a ) + s0, p );
-    }
-
-    // compute the right hand side of the constraint equation. Set relative
-    // body velocities along p to bring the axes back to perpendicular.
-    // If ax1, ax2 are unit length joint axes as computed from body1 and
-    // body2, we need to rotate both bodies along the axis p.  If theta
-    // is the angle between ax1 and ax2, we need an angular velocity
-    // along p to cover the angle erp * (theta - Pi/2) in one step:
-    //
-    //   |angular_velocity| = angle/time = erp*(theta - Pi/2) / stepsize
-    //                      = (erp*fps) * (theta - Pi/2)
-    //
-    // if theta is close to Pi/2,
-    // theta - Pi/2 ~= cos(theta), so
-    //    |angular_velocity|  ~= (erp*fps) * (ax1 dot ax2)
-
-    info->c[0] = k * - val;
-
-
-
+    // Small angle approximation : 
+    // theta = asin(val)
+    // theta is approximately val when val is near zero.
+    info->c[0] = -k * val; 
+    
     // ==========================================================================
-    // Work on the linear part (i.e rows 1 and 2)
-    //
-    // We want: vel2 = vel1 + w1 x c ... but this would
-    // result in three equations, so we project along the planespace vectors
-    // so that sliding along the axisP is disregarded.
-    //
-    // p1 + R1 dist' = p2 + R2 anchor2'
-    // v1 + w1 x R1 dist' + v_p = v2 + w2 x R2 anchor2'
-    // v_p is speed of prismatic joint (i.e. elongation rate)
-    // Since the constraints are perpendicular to v_p we have:
-    // e1 dot v_p = 0 and e2 dot v_p = 0
-    // e1 dot ( v1 + w1 x dist = v2 + w2 x anchor2 )
-    // e2 dot ( v1 + w1 x dist = v2 + w2 x anchor2 )
-    // ==
-    // e1 . v1 + e1 . w1 x dist = e1 . v2 + e1 . w2 x anchor2
-    // since a . (b x c) = - b . (a x c) = - (a x c) . b
-    // and a x b = - b x a
-    // e1 . v1 - e1 x dist . w1 - e1 . v2 - (- e1 x anchor2 . w2) = 0
-    // e1 . v1 + dist x e1 . w1 - e1 . v2 - anchor2 x e1 . w2 = 0
-    // Coeff for 1er line of: J1l => e1, J2l => -e1
-    // Coeff for 2er line of: J1l => e2, J2l => -ax2
-    // Coeff for 1er line of: J1a => dist x e1, J2a => - anchor2 x e1
-    // Coeff for 2er line of: J1a => dist x e2, J2a => - anchor2 x e2
-    // e1 and e2 are perpendicular to axP
-    // so e1 = ax1 and e2 = ax1 x axP
-    // N.B. ax2 is not always perpendicular to axP since it is attached to body 2
-    dCalcVectorCross3( q , ax1, axP );
+    // Handle axes orthogonal to the prismatic 
+    dVector3 an1, an2; // Global anchor positions
+    dVector3 axP, sep; // Prismatic axis and separation vector
+    getAnchor(this,an1,anchor1);
+    getAnchor2(this,an2,anchor2);
+    if (flags & dJOINT_REVERSE) {
+        getAxis2(this, axP, axisP1);
+    } else {
+        getAxis(this, axP, axisP1);
+    }
+    dSubtractVectors3(sep,an2,an1);
 
-    dMultiply0_331( axP, R1, axisP1 );
+    dVector3 p,q;
+    dPlaneSpace(axP,p,q);
 
-    dCalcVectorCross3(( info->J1a ) + s1, dist, ax1 );
-    dCalcVectorCross3(( info->J1a ) + s2, dist, q );
-
-    // info->J1l[s1+i] = ax[i];
-    dCopyVector3(( info->J1l ) + s1, ax1 );
-
-    // info->J1l[s2+i] = q[i];
+    dCopyVector3(( info->J1l ) + s1, p );
     dCopyVector3(( info->J1l ) + s2, q );
+    // Make the anchors be body local
+    // Aliasing isn't a problem here.
+    dSubtractVectors3(an1,an1,node[0].body->posr.pos);
+    dCalcVectorCross3(( info->J1a ) + s1, an1, p );
+    dCalcVectorCross3(( info->J1a ) + s2, an1, q );
 
-    if ( node[1].body )
-    {
-        // Calculate anchor2 in world coordinate
-
-        // q x anchor2 instead of anchor2 x q since we want the negative value
-        dCalcVectorCross3(( info->J2a ) + s1, ax1, wanchor2 );
-        // The cross product is in reverse order since we want the negative value
-        dCalcVectorCross3(( info->J2a ) + s2, q, wanchor2 );
-
-
-        // info->J2l[s1+i] = -ax1[i];
-        dCopyNegatedVector3(( info->J2l ) + s1, ax1 );
-        // info->J2l[s2+i] = -ax1[i];
+    if (node[1].body) {
+        dCopyNegatedVector3(( info->J2l ) + s1, p );
         dCopyNegatedVector3(( info->J2l ) + s2, q );
-
+        dSubtractVectors3(an2,an2,node[1].body->posr.pos);
+        dCalcVectorCross3(( info->J2a ) + s1, p, an2 );
+        dCalcVectorCross3(( info->J2a ) + s2, q, an2 );
     }
 
-
-    // We want to make correction for motion not in the line of the axisP
-    // We calculate the displacement w.r.t. the anchor pt.
-    //
-    // compute the elements 1 and 2 of right hand side.
-    // We want to align the offset point (in body 2's frame) with the center of body 1.
-    // The position should be the same when we are not along the prismatic axis
-    dVector3 err;
-    dMultiply0_331( err, R1, anchor1 );
-    // err[i] = dist[i] - err[i];
-    dSubtractVectors3( err, dist, err );
-    info->c[1] = k * dCalcVectorDot3( ax1, err );
-    info->c[2] = k * dCalcVectorDot3( q, err );
-
+    info->c[1] = k * dCalcVectorDot3( p, sep );
+    info->c[2] = k * dCalcVectorDot3( q, sep );
+    
+    // ==========================================================================
+    // Handle the limits/motors
     int row = 3 + limot1.addLimot( this, worldFPS, info, 3, ax1, 1 );
     row += limot2.addLimot( this, worldFPS, info, row, ax2, 1 );
 
     if (  node[1].body || !(flags & dJOINT_REVERSE) )
-        limotP.addLimot( this, worldFPS, info, row, axP, 0 );
+        limotP.addTwoPointLimot( this, worldFPS, info, row, axP, an1, an2 );
     else
     {
         axP[0] = -axP[0];
         axP[1] = -axP[1];
         axP[2] = -axP[2];
-        limotP.addLimot ( this, worldFPS, info, row, axP, 0 );
+        limotP.addTwoPointLimot ( this, worldFPS, info, row, axP, an1, an2  );
     }
 }
 
@@ -848,7 +741,7 @@ dxJointPU::setRelativeValues()
     }
 
 
-    setAxes( this, ax3[0], ax3[1], ax3[2], NULL, axisP1 );
+    setAxes( this, ax3[0], ax3[1], ax3[2], axisP1, NULL );
 
     computeInitialRelativeRotations();
 }
