@@ -25,6 +25,7 @@ tests_SOURCES = \
                 joint.cpp \
                 main.cpp \
                 odemath.cpp \
+                joints/amotor.cpp \
                 joints/ball.cpp \
                 joints/fixed.cpp \
                 joints/hinge.cpp \

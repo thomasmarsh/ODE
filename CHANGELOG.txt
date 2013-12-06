@@ -8,6 +8,9 @@ the rules for this file:
   * keep the format consistent (79 char width, M/D/Y date format).
 
 ------------------------------------------------------------------------------
+12/06/13 Daniel K. O.
+        * Applied patch #181 to fix some bugs in AMotor.
+
 08/08/13 Oleh Derevenko
         * Joint feedback forces application fixed in QuickStep implementation
           (was broken since revision #1919 in old repository (#1927 in new one))
