@@ -207,6 +207,9 @@ struct dxJointLimitMotor
     int testRotationalLimit( dReal angle );
     int addLimot( dxJoint *joint, dReal fps, const dxJoint::Info2Descr *info, int row,
         const dVector3 ax1, int rotational );
+    int addTwoPointLimot( dxJoint *joint, dReal fps,
+        const dxJoint::Info2Descr *info, int row,
+        const dVector3 ax1, const dVector3 pt1, const dVector3 pt2 );
 };
 
 

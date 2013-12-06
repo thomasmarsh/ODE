@@ -85,7 +85,8 @@ dxJointAMotor::computeGlobalAxes( dVector3 ax[3] )
                 if ( node[1].body )   // jds: don't assert, just ignore
                 {
                     dMultiply0_331( ax[i], node[1].body->posr.R, axis[i] );
-                } else
+                }
+                else
                 {
                     // global - just copy it
                     ax[i][0] = axis[i][0];
