@@ -85,6 +85,12 @@ dxJointAMotor::computeGlobalAxes( dVector3 ax[3] )
                 if ( node[1].body )   // jds: don't assert, just ignore
                 {
                     dMultiply0_331( ax[i], node[1].body->posr.R, axis[i] );
+                } else
+                {
+                    // global - just copy it
+                    ax[i][0] = axis[i][0];
+                    ax[i][1] = axis[i][1];
+                    ax[i][2] = axis[i][2];
                 }
             }
             else
@@ -158,26 +164,16 @@ dxJointAMotor::setEulerReferenceVectors()
         dMultiply1_331( reference1, node[0].body->posr.R, r );
         dMultiply0_331( r, node[0].body->posr.R, axis[0] );
         dMultiply1_331( reference2, node[1].body->posr.R, r );
-    }
-
-    else     // jds
-    {
-        // else if (j->node[0].body) {
-        // dMultiply1_331 (j->reference1,j->node[0].body->posr.R,j->axis[2]);
-        // dMultiply0_331 (j->reference2,j->node[0].body->posr.R,j->axis[0]);
-
+    } else {
         // We want to handle angular motors attached to passive geoms
-        dVector3 r;  // axis[2] and axis[0] in global coordinates
-        r[0] = axis[2][0];
-        r[1] = axis[2][1];
-        r[2] = axis[2][2];
-        r[3] = axis[2][3];
-        dMultiply1_331( reference1, node[0].body->posr.R, r );
-        dMultiply0_331( r, node[0].body->posr.R, axis[0] );
-        reference2[0] += r[0];
-        reference2[1] += r[1];
-        reference2[2] += r[2];
-        reference2[3] += r[3];
+        // Replace missing node.R with identity
+        if (node[0].body) {
+          dMultiply1_331( reference1, node[0].body->posr.R, axis[2] );
+          dMultiply0_331( reference2, node[0].body->posr.R, axis[0] );
+        } else if (node[1].body) {
+          dMultiply0_331( reference1, node[1].body->posr.R, axis[2] );
+          dMultiply1_331( reference2, node[1].body->posr.R, axis[0] );
+        }
     }
 }
 
@@ -284,13 +280,13 @@ void dJointSetAMotorAxis( dJointID j, int anum, int rel, dReal x, dReal y, dReal
     dxJointAMotor* joint = ( dxJointAMotor* )j;
     dAASSERT( joint && anum >= 0 && anum <= 2 && rel >= 0 && rel <= 2 );
     checktype( joint, AMotor );
-    dUASSERT( !( !joint->node[1].body && ( joint->flags & dJOINT_REVERSE ) && rel == 1 ), "no first body, can't set axis rel=1" );
-    dUASSERT( !( !joint->node[1].body && !( joint->flags & dJOINT_REVERSE ) && rel == 2 ), "no second body, can't set axis rel=2" );
+
     if ( anum < 0 ) anum = 0;
     if ( anum > 2 ) anum = 2;
 
     // adjust rel to match the internal body order
-    if ( !joint->node[1].body && rel == 2 ) rel = 1;
+    if ( (joint->flags & dJOINT_REVERSE) && rel )
+        rel ^= 3; // turns 1 into 2, 2, into 1
 
     joint->rel[anum] = rel;
 
@@ -307,7 +303,7 @@ void dJointSetAMotorAxis( dJointID j, int anum, int rel, dReal x, dReal y, dReal
         {
             dMultiply1_331( joint->axis[anum], joint->node[0].body->posr.R, r );
         }
-        else
+        else // rel == 2
         {
             // don't assert; handle the case of attachment to a bodiless geom
             if ( joint->node[1].body )   // jds
@@ -316,6 +312,7 @@ void dJointSetAMotorAxis( dJointID j, int anum, int rel, dReal x, dReal y, dReal
             }
             else
             {
+                printf("AAAA\n");
                 joint->axis[anum][0] = r[0];
                 joint->axis[anum][1] = r[1];
                 joint->axis[anum][2] = r[2];
@@ -325,6 +322,7 @@ void dJointSetAMotorAxis( dJointID j, int anum, int rel, dReal x, dReal y, dReal
     }
     else
     {
+        printf("BBBB\n");
         joint->axis[anum][0] = r[0];
         joint->axis[anum][1] = r[1];
         joint->axis[anum][2] = r[2];
@@ -342,7 +340,7 @@ void dJointSetAMotorAngle( dJointID j, int anum, dReal angle )
     if ( joint->mode == dAMotorUser )
     {
         if ( anum < 0 ) anum = 0;
-        if ( anum > 3 ) anum = 3;
+        if ( anum > 2 ) anum = 2;
         joint->angle[anum] = angle;
     }
 }
@@ -391,8 +389,30 @@ void dJointGetAMotorAxis( dJointID j, int anum, dVector3 result )
     checktype( joint, AMotor );
     if ( anum < 0 ) anum = 0;
     if ( anum > 2 ) anum = 2;
-    if ( joint->rel[anum] > 0 )
-    {
+    
+    // If we're in Euler mode, joint->axis[1] doesn't
+    // have anything sensible in it.  So don't just return
+    // that, find the actual effective axis.
+    // Likewise, the actual axis of rotation for the
+    // the other axes is different from what's stored.
+    if ( joint->mode == dAMotorEuler  ) {
+      dVector3 axes[3];
+      joint->computeGlobalAxes(axes);
+      if (anum == 1) {
+        result[0]=axes[1][0];
+        result[1]=axes[1][1];
+        result[2]=axes[1][2];
+      } else if (anum == 0) {
+        // This won't be unit length in general,
+        // but it's what's used in getInfo2
+        // This may be why things freak out as
+        // the body-relative axes get close to each other.
+        dCalcVectorCross3( result, axes[1], axes[2] );
+      } else if (anum == 2) {
+        // Same problem as above.
+        dCalcVectorCross3( result, axes[0], axes[1] );
+      }
+    } else if ( joint->rel[anum] > 0 ) {
         if ( joint->rel[anum] == 1 )
         {
             dMultiply0_331( result, joint->node[0].body->posr.R, joint->axis[anum] );
@@ -428,7 +448,10 @@ int dJointGetAMotorAxisRel( dJointID j, int anum )
     checktype( joint, AMotor );
     if ( anum < 0 ) anum = 0;
     if ( anum > 2 ) anum = 2;
-    return joint->rel[anum];
+    int rel = joint->rel[anum];
+    if ( (joint->flags & dJOINT_REVERSE) && rel)
+         rel ^= 3; // turns 1 into 2, 2 into 1
+    return rel;
 }
 
 
@@ -438,16 +461,24 @@ dReal dJointGetAMotorAngle( dJointID j, int anum )
     dAASSERT( joint && anum >= 0 && anum < 3 );
     checktype( joint, AMotor );
     if ( anum < 0 ) anum = 0;
-    if ( anum > 3 ) anum = 3;
+    if ( anum > 2 ) anum = 2;
     return joint->angle[anum];
 }
 
 
 dReal dJointGetAMotorAngleRate( dJointID j, int anum )
 {
-    //dxJointAMotor* joint = (dxJointAMotor*)j;
-    // @@@
-    dDebug( 0, "not yet implemented" );
+    dxJointAMotor* joint = ( dxJointAMotor* )j;
+    dAASSERT( joint && anum >= 0 && anum < 3);
+    checktype( joint, AMotor );
+  
+    if (joint->node[0].body) {
+      dVector3 axis;
+      dJointGetAMotorAxis (joint, anum, axis);
+      dReal rate = dDOT(axis,joint->node[0].body->avel);
+      if (joint->node[1].body) rate -= dDOT(axis,joint->node[1].body->avel);
+      return rate;
+    }
     return 0;
 }
 
