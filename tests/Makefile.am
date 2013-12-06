@@ -1,8 +1,9 @@
 SUBDIRS = UnitTest++
 
-AM_CPPFLAGS = -I $(srcdir)/UnitTest++/src \
-              -I $(top_srcdir)/include \
-              -I $(top_srcdir)/ode/src
+AM_CPPFLAGS = -I$(srcdir)/UnitTest++/src \
+              -I$(top_srcdir)/include \
+              -I$(top_builddir)/include \
+              -I$(top_srcdir)/ode/src
 
 if GIMPACT
     AM_CPPFLAGS += -DdTRIMESH_ENABLED -DdTRIMESH_GIMPACT
