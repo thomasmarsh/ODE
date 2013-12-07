@@ -10,6 +10,7 @@ libjoints_la_SOURCES =  joints.h \
                         ball.h ball.cpp \
                         dball.h dball.cpp \
                         dhinge.h dhinge.cpp \
+                        transmission.h transmission.cpp \
                         hinge.h hinge.cpp \
                         slider.h slider.cpp \
                         contact.h contact.cpp \

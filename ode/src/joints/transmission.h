@@ -20,29 +20,29 @@
  *                                                                       *
  *************************************************************************/
 
-#ifndef _ODE_JOINTS_H_
-#define _ODE_JOINTS_H_
-
-#include <ode/common.h>
+#ifndef _ODE_JOINT_TRANSMISSION_
+#define _ODE_JOINT_TRANSMISSION_
 
 #include "joint.h"
 
-#include "ball.h"
-#include "dball.h"
-#include "dhinge.h"
-#include "transmission.h"
-#include "hinge.h"
-#include "slider.h"
-#include "contact.h"
-#include "universal.h"
-#include "hinge2.h"
-#include "fixed.h"
-#include "null.h"
-#include "amotor.h"
-#include "lmotor.h"
-#include "plane2d.h"
-#include "pu.h"
-#include "pr.h"
-#include "piston.h"
+struct dxJointTransmission : public dxJoint 
+{
+    int mode, update;
+    dVector3 contacts[2], axes[2], anchors[2];
+    dMatrix3 reference[2];
+    dReal phase[2], radii[2], backlash;
+    dReal ratio;        // transmission ratio
+    dReal erp;          // error reduction
+    dReal cfm;          // constraint force mix in
+    
+    dxJointTransmission(dxWorld *w);
+
+    virtual void getSureMaxInfo( SureMaxInfo* info );
+    virtual void getInfo1( Info1* info );
+    virtual void getInfo2( dReal worldFPS, dReal worldERP, const Info2Descr* info );
+    virtual dJointType type() const;
+    virtual size_t size() const;
+};
+
 
 #endif
