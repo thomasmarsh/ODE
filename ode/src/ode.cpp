@@ -1270,6 +1270,12 @@ dxJoint * dJointCreateDHinge (dWorldID w, dJointGroupID group)
 }
 
 
+dxJoint * dJointCreateTransmission (dWorldID w, dJointGroupID group)
+{
+    dAASSERT (w);
+    return createJoint<dxJointTransmission> (w,group);
+}
+
 static void FinalizeAndDestroyJointInstance(dxJoint *j, bool delete_it)
 {
     // if any group joints have their world pointer set to 0, their world was

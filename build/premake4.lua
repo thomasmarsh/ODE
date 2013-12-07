@@ -39,6 +39,7 @@
     "space",
     "space_stress",
     "step",
+    "transmission"
   }
 
   local trimesh_demos = {

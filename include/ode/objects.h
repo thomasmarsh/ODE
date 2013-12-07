@@ -44,7 +44,6 @@ extern "C" {
  * Most applications will only need one world.
  */
 
-
 /**
  * @brief Create a new, empty world and return its ID number.
  * @return an identifier
@@ -1710,6 +1709,14 @@ ODE_API dJointID dJointCreateDBall (dWorldID, dJointGroupID);
  */
 ODE_API dJointID dJointCreateDHinge (dWorldID, dJointGroupID);
 
+/**
+ * @brief Create a new joint of the Transmission type.
+ * @ingroup joints
+ * @param dJointGroupID set to 0 to allocate the joint normally.
+ * If it is nonzero the joint is allocated in the given joint group.
+ */
+ODE_API dJointID dJointCreateTransmission (dWorldID, dJointGroupID);
+
 
 /**
  * @brief Destroy a joint.
@@ -3008,6 +3015,222 @@ ODE_API dReal dJointGetLMotorParam (dJointID, int parameter);
  */
 ODE_API dReal dJointGetFixedParam (dJointID, int parameter);
 
+
+/**
+ * @brief get the contact point of the first wheel of the Transmission joint.
+ * @ingroup joints
+ */
+ODE_API void dJointGetTransmissionContactPoint1(dJointID, dVector3 result);
+
+/**
+ * @brief get contact point of the second wheel of the Transmission joint.
+ * @ingroup joints
+ */
+ODE_API void dJointGetTransmissionContactPoint2(dJointID, dVector3 result);
+ 
+/**
+ * @brief set the first axis for the Transmission joint
+ * @remarks This is the axis around which the first body is allowed to
+ * revolve and is attached to it.  It is given in global coordinates
+ * and can only be set explicitly in intersecting-axes mode.  For the
+ * parallel-axes and chain modes which share one common axis of
+ * revolution for both gears dJointSetTransmissionAxis should be used.
+ * @ingroup joints
+ */
+ODE_API void dJointSetTransmissionAxis1(dJointID, dReal x, dReal y, dReal z);
+
+/**
+ * @brief get first axis for the Transmission joint
+ * @remarks In parallel-axes and chain mode the common axis with
+ * respect to the first body is returned.  If the joint constraint is
+ * satisfied it should be the same as the axis return with
+ * dJointGetTransmissionAxis2 or dJointGetTransmissionAxis.
+ * @ingroup joints
+ */
+ODE_API void dJointGetTransmissionAxis1(dJointID, dVector3 result);
+ 
+/**
+ * @brief set second axis for the Transmission joint
+ * @remarks This is the axis around which the second body is allowed
+ * to revolve and is attached to it.  It is given in global
+ * coordinates and can only be set explicitly in intersecting-axes
+ * mode.  For the parallel-axes and chain modes which share one common
+ * axis of revolution for both gears dJointSetTransmissionAxis should
+ * be used.
+ * @ingroup joints
+ */
+ODE_API void dJointSetTransmissionAxis2(dJointID, dReal x, dReal y, dReal z);
+
+/**
+ * @brief get second axis for the Transmission joint
+ * @remarks In parallel-axes and chain mode the common axis with
+ * respect to the second body is returned.  If the joint constraint is
+ * satisfied it should be the same as the axis return with
+ * dJointGetTransmissionAxis1 or dJointGetTransmissionAxis.
+ * @ingroup joints
+ */
+ODE_API void dJointGetTransmissionAxis2(dJointID, dVector3 result);
+ 
+/**
+ * @brief set the first anchor for the Transmission joint
+ * @remarks This is the point of attachment of the wheel on the
+ * first body.  It is given in global coordinates.
+ * @ingroup joints
+ */
+ODE_API void dJointSetTransmissionAnchor1(dJointID, dReal x, dReal y, dReal z);
+
+/**
+ * @brief get the first anchor of the Transmission joint
+ * @ingroup joints
+ */
+ODE_API void dJointGetTransmissionAnchor1(dJointID, dVector3 result);
+ 
+/**
+ * @brief set the second anchor for the Transmission joint
+ * @remarks This is the point of attachment of the wheel on the
+ * second body.  It is given in global coordinates.
+ * @ingroup joints
+ */
+ODE_API void dJointSetTransmissionAnchor2(dJointID, dReal x, dReal y, dReal z);
+
+/**
+ * @brief get the second anchor for the Transmission joint
+ * @ingroup joints
+ */
+ODE_API void dJointGetTransmissionAnchor2(dJointID, dVector3 result);
+
+/**
+ * @brief set a Transmission joint parameter
+ * @ingroup joints
+ */
+ODE_API void dJointSetTransmissionParam(dJointID, int parameter, dReal value);
+
+/**
+ * @brief get a Transmission joint parameter
+ * @ingroup joints
+ */
+ODE_API dReal dJointGetTransmissionParam(dJointID, int parameter);
+
+/**
+ * @brief set the Transmission joint mode
+ * @remarks The mode can be one of dTransmissionParallelAxes,
+ * dTransmissionIntersectingAxes and dTransmissionChainDrive simulating a
+ * set of parallel-axes gears, intersecting-axes beveled gears or
+ * chain and sprockets respectively.
+ * @ingroup joints
+ */
+void dJointSetTransmissionMode( dJointID j, int mode );
+
+/**
+ * @brief get the Transmission joint mode
+ * @ingroup joints
+ */
+int dJointGetTransmissionMode( dJointID j );
+
+/**
+ * @brief set the Transmission ratio
+ * @remarks This is the ratio of the angular speed of the first gear
+ * to that of the second gear.  It can only be set explicitly in
+ * parallel-axes mode.  In intersecting-axes mode the ratio is defined
+ * implicitly by the initial configuration of the wheels and in chain
+ * mode it is defined implicitly be the wheel radii.
+ * @ingroup joints
+ */
+void dJointSetTransmissionRatio( dJointID j, dReal ratio );
+
+/**
+ * @brief get the Transmission joint ratio
+ * @ingroup joints
+ */
+dReal dJointGetTransmissionRatio( dJointID j );
+
+/**
+ * @brief set the common axis for both wheels of the Transmission joint
+ * @remarks This sets the common axis of revolution for both wheels
+ * and should only be used in parallel-axes or chain mode.  For
+ * intersecting-axes mode where each wheel axis needs to be specified
+ * individually dJointSetTransmissionAxis1 and
+ * dJointSetTransmissionAxis2 should be used.  The axis is given in
+ * global coordinates
+ * @ingroup joints
+ */
+void dJointSetTransmissionAxis( dJointID j, dReal x, dReal y, dReal z );
+
+/**
+ * @brief get the common axis for both wheels of the Transmission joint
+ * @ingroup joints
+ */
+void dJointGetTransmissionAxis( dJointID j, dVector3 result );
+
+/**
+ * @brief get the phase, that is the traversed angle for the first
+ * wheel of the Transmission joint
+ * @ingroup joints
+ */
+dReal dJointGetTransmissionAngle1( dJointID j );
+
+/**
+ * @brief get the phase, that is the traversed angle for the second
+ * wheel of the Transmission joint
+ * @ingroup joints
+ */
+dReal dJointGetTransmissionAngle2( dJointID j );
+
+/**
+ * @brief get the radius of the first wheel of the Transmission joint
+ * @ingroup joints
+ */
+dReal dJointGetTransmissionRadius1( dJointID j );
+
+/**
+ * @brief get the radius of the second wheel of the Transmission joint
+ * @ingroup joints
+ */
+dReal dJointGetTransmissionRadius2( dJointID j );
+
+/**
+ * @brief set the radius of the first wheel of the Transmission joint
+ * @remarks The wheel radii can only be set explicitly in chain mode.
+ * In the other modes they're defined implicitly by the initial
+ * configuration and ratio of the wheels.
+ * @ingroup joints
+ */
+void dJointSetTransmissionRadius1( dJointID j, dReal radius );
+
+/**
+ * @brief set the radius of the second wheel of the Transmission joint
+ * @remarks The wheel radii can only be set explicitly in chain mode.
+ * In the other modes they're defined implicitly by the initial
+ * configuration and ratio of the wheels.
+ * @ingroup joints
+ */
+void dJointSetTransmissionRadius2( dJointID j, dReal radius );
+
+/**
+ * @brief get the backlash of the Transmission joint
+ * @ingroup joints
+ */
+dReal dJointGetTransmissionBacklash( dJointID j );
+
+/**
+ * @brief set the backlash of the Transmission joint
+ * @remarks Backlash is the clearance in the mesh of the wheels of the
+ * transmission and is defined as the maximum distance that the
+ * geometric contact point can travel without any actual contact or
+ * transfer of power between the wheels.  This can be converted in
+ * degrees of revolution for each wheel by dividing by the wheel's
+ * radius.  To further illustrate this consider the situation where a
+ * wheel of radius r_1 is driving another wheel of radius r_2 and
+ * there is an amount of backlash equal to b in their mesh.  If the
+ * driving wheel were to instantaneously stop there would be no
+ * contact and hence the driven wheel would continue to turn for
+ * another b / r_2 radians until all the backlash in the mesh was take
+ * up and contact restored with the relationship of driving and driven
+ * wheel reversed.  The backlash is therefore given in untis of
+ * length.
+  * @ingroup joints
+ */
+void dJointSetTransmissionBacklash( dJointID j, dReal backlash );
 
 /**
  * @brief set anchor1 for double ball joint
