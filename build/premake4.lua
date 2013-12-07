@@ -35,6 +35,7 @@
     "ode",
     "piston",
     "plane2d",
+    "rfriction",
     "slider",
     "space",
     "space_stress",

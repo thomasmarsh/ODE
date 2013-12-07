@@ -9,9 +9,10 @@ the rules for this file:
 
 ------------------------------------------------------------------------------
 12/06/13 Daniel K. O.
-        * Applied patch #181 to fix some bugs in AMotor joint.
-        * Applied patch #186 to fix some bugs in PU joint.
+        * Applied patch #181: fix some bugs in AMotor joint.
+        * Applied patch #186: fix some bugs in PU joint.
         * Applied patch #182: Transmission joint.
+        * Applied patch #184: implement rolling friction for contacts.
 
 08/08/13 Oleh Derevenko
         * Joint feedback forces application fixed in QuickStep implementation
