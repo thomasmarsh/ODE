@@ -40,7 +40,8 @@ dxJointContact::dxJointContact( dxWorld *w ) :
 void 
 dxJointContact::getSureMaxInfo( SureMaxInfo* info )
 {
-    info->max_m = 3; // ...as the actual m is very likely to hit the maximum
+  // ...as the actual m is very likely to hit the maximum
+  info->max_m = (contact.surface.mode&dContactRolling)?6:3; 
 }
 
 
@@ -50,19 +51,40 @@ dxJointContact::getInfo1( dxJoint::Info1 *info )
     // make sure mu's >= 0, then calculate number of constraint rows and number
     // of unbounded rows.
     int m = 1, nub = 0;
+    int roll = (contact.surface.mode&dContactRolling)!=0;
+    
     if ( contact.surface.mu < 0 ) contact.surface.mu = 0;
-    if ( contact.surface.mode & dContactMu2 )
+
+    // Anisotropic sliding and rolling and spinning friction 
+    if ( contact.surface.mode & dContactAxisDep )
     {
         if ( contact.surface.mu2 < 0 ) contact.surface.mu2 = 0;
         if ( contact.surface.mu  > 0 ) m++;
         if ( contact.surface.mu2 > 0 ) m++;
         if ( contact.surface.mu  == dInfinity ) nub ++;
         if ( contact.surface.mu2 == dInfinity ) nub ++;
+        if (roll) {
+          if ( contact.surface.rho < 0 ) contact.surface.rho = 0;
+          else m++;
+          if ( contact.surface.rho2 < 0 ) contact.surface.rho2 = 0;
+          else m++;
+          if ( contact.surface.rhoN < 0 ) contact.surface.rhoN = 0;
+          else m++;
+
+          if ( contact.surface.rho  == dInfinity ) nub++;
+          if ( contact.surface.rho2 == dInfinity ) nub++;
+          if ( contact.surface.rhoN == dInfinity ) nub++;
+        }
     }
     else
     {
         if ( contact.surface.mu > 0 ) m += 2;
         if ( contact.surface.mu == dInfinity ) nub += 2;
+        if (roll) {
+          if ( contact.surface.rho < 0 ) contact.surface.rho = 0;
+          else m+=3;
+          if ( contact.surface.rho == dInfinity ) nub += 3;
+        }
     }
 
     the_m = m;
@@ -76,9 +98,11 @@ dxJointContact::getInfo2( dReal worldFPS, dReal worldERP, const Info2Descr *info
 {
     int s = info->rowskip;
     int s2 = 2 * s;
+
     const int rowNormal = 0;
     const int rowFriction1 = 1;
     int rowFriction2 = 2; // we might decrease it to 1, so no const
+    int rollRow=3;
 
     // get normal, with sign adjusted for body1/body2 polarity
     dVector3 normal;
@@ -153,7 +177,7 @@ dxJointContact::getInfo2( dReal worldFPS, dReal worldERP, const Info2Descr *info
         // calculate outgoing velocity (-ve for incoming contact)
         dReal outgoing = dCalcVectorDot3( info->J1l, node[0].body->lvel )
             + dCalcVectorDot3( info->J1a, node[0].body->avel );
-        if ( node[1].body )
+        if ( b1 )
         {
             outgoing += dCalcVectorDot3( info->J2l, node[1].body->lvel )
                 + dCalcVectorDot3( info->J2a, node[1].body->avel );
@@ -192,7 +216,6 @@ dxJointContact::getInfo2( dReal worldFPS, dReal worldERP, const Info2Descr *info
     }
 
     // first friction direction
-
     if ( contact.surface.mu > 0 )
     {
         info->J1l[s+0] = t1[0];
@@ -269,6 +292,49 @@ dxJointContact::getInfo2( dReal worldFPS, dReal worldERP, const Info2Descr *info
         // set slip (constraint force mixing)
         if ( contact.surface.mode & dContactSlip2 )
             info->cfm[rowFriction2] = contact.surface.slip2;
+        rollRow = rowFriction2+1;
+    } else {
+        rollRow = rowFriction2;
+    } 
+
+    // Handle rolling/spinning friction
+    if (contact.surface.mode&dContactRolling) {
+        dReal rho[3];
+        const dReal* ax[3];
+        int approx[3];
+  
+        // Get the coefficients
+        rho[0] = contact.surface.rho;
+        if (contact.surface.mode&dContactAxisDep) {
+            rho[1] = contact.surface.rho2;
+            rho[2] = contact.surface.rhoN;
+        } else {
+            rho[1] = rho[0];
+            rho[2] = rho[0];
+        }
+        ax[0] = t2; // Rolling around t2 creates movement parallel to t1
+        ax[1] = t1;
+        ax[2] = normal; // Spinning axis
+        // Should we use proportional force?
+        approx[0] = contact.surface.mode & dContactApprox1_1;
+        approx[1] = contact.surface.mode & dContactApprox1_2;
+        approx[2] = contact.surface.mode & dContactApprox1_N;
+
+        for (int ii=0;ii<3;++ii) {
+            if (rho[ii]>0) {
+              // Set the angular axis
+              dCopyVector3(&(info->J1a[ rollRow*s ]),ax[ii]);
+              if ( b1 ) {
+                dCopyNegatedVector3(&(info->J2a[ rollRow*s ]),ax[ii]);
+              }
+              // Set the lcp limits
+              info->lo[ rollRow ] = -rho[ii];
+              info->hi[ rollRow ] =  rho[ii];
+              // Make limits proportional to normal force
+              if (approx[ii]) info->findex[ rollRow ] = 0;
+              rollRow++;
+            }
+        }
     }
 }
 

@@ -40,6 +40,7 @@ noinst_PROGRAMS = \
                 demo_ode \
                 demo_piston \
                 demo_plane2d \
+                demo_rfriction \
                 demo_slider \
                 demo_space \
                 demo_space_stress \
@@ -53,8 +54,6 @@ demo_chain1_SOURCES = demo_chain1.c
 demo_chain1_LDADD = $(LDADD) -lstdc++ 
 demo_chain2_SOURCES = demo_chain2.cpp
 demo_collision_SOURCES = demo_collision.cpp
-demo_convex_cd_SOURCES = demo_convex_cd.cpp
-demo_convex_cd_DEPENDENCIES = $(top_builddir)/ode/src/libode.la
 demo_crash_SOURCES = demo_crash.cpp
 demo_cylvssphere_SOURCES = demo_cylvssphere.cpp
 demo_dball_SOURCES = demo_dball.cpp
@@ -79,6 +78,7 @@ demo_slider_SOURCES = demo_slider.cpp
 demo_space_SOURCES = demo_space.cpp
 demo_space_stress_SOURCES = demo_space_stress.cpp
 demo_step_SOURCES = demo_step.cpp
+demo_rfriction_SOURCES = demo_rfriction.cpp
 demo_tracks_SOURCES = demo_tracks.cpp
 
 
