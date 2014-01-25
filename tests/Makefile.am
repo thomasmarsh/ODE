@@ -1,4 +1,4 @@
-SUBDIRS = UnitTest++
+SUBDIRS = joints UnitTest++
 
 AM_CPPFLAGS = -I$(srcdir)/UnitTest++/src \
               -I$(top_srcdir)/include \
@@ -12,8 +12,6 @@ if OPCODE
     AM_CPPFLAGS += -DdTRIMESH_ENABLED -DdTRIMESH_OPCODE
 endif
 
-LDADD = $(builddir)/UnitTest++/src/libunittestpp.la \
-        $(top_builddir)/ode/src/libode.la
 
 check_PROGRAMS = tests
 
@@ -24,15 +22,9 @@ tests_SOURCES = \
                 friction.cpp \
                 joint.cpp \
                 main.cpp \
-                odemath.cpp \
-                joints/amotor.cpp \
-                joints/ball.cpp \
-                joints/fixed.cpp \
-                joints/hinge.cpp \
-                joints/hinge2.cpp \
-                joints/piston.cpp \
-                joints/pr.cpp \
-                joints/pu.cpp \
-                joints/slider.cpp \
-                joints/universal.cpp
+                odemath.cpp
 
+tests_LDADD = \
+    $(top_builddir)/ode/src/libode.la \
+    joints/libjoints.la \
+    UnitTest++/src/libunittestpp.la

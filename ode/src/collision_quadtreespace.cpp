@@ -359,14 +359,26 @@ struct dxQuadTreeSpace : public dxSpace{
     int CurrentIndex;
 };
 
+namespace {
+
+    inline
+    int numNodes(int depth) 
+    {
+        // A 4-ary tree has (4^(depth+1) - 1)/3 nodes
+        // Note: split up into multiple constant expressions for readability
+        const int k = depth+1;
+        const int fourToNthPlusOne = 1 << (2*k); // 4^k = 2^(2k)
+        return (fourToNthPlusOne - 1) / 3;
+    }
+
+}
+
+
+
 dxQuadTreeSpace::dxQuadTreeSpace(dSpaceID _space, const dVector3 Center, const dVector3 Extents, int Depth) : dxSpace(_space){
     type = dQuadTreeSpaceClass;
 
-    int BlockCount = 0;
-    // TODO: should be just BlockCount = (4^(n+1) - 1)/3
-    for (int i = 0; i <= Depth; i++){
-        BlockCount += (int)pow((dReal)SPLITS, i);
-    }
+    int BlockCount = numNodes(Depth);
 
     Blocks = (Block*)dAlloc(BlockCount * sizeof(Block));
     Block* Blocks = this->Blocks + 1;	// This pointer gets modified!
@@ -400,10 +412,7 @@ dxQuadTreeSpace::~dxQuadTreeSpace(){
         Current = Current->mChildren;
     }
 
-    int BlockCount = 0;
-    for (int i = 0; i < Depth; i++){
-        BlockCount += (int)pow((dReal)SPLITS, i);
-    }
+    int BlockCount = numNodes(Depth);
 
     dFree(Blocks, BlockCount * sizeof(Block));
     dFree(CurrentChild, (Depth + 1) * sizeof(int));
