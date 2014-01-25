@@ -20,6 +20,8 @@
  *                                                                       *
  *************************************************************************/
 
+#include <string>
+
 #include <ode/ode.h>
 #include <drawstuff/drawstuff.h>
 #include "texturepath.h"
@@ -58,7 +60,7 @@ struct MyObject {
 static int num=0;		// number of objects in simulation
 static int nextobj=0;		// next object to recycle if num==NUM
 static dWorldID world;
-static dSpaceID space;
+static dSpaceID space = 0;
 static MyObject obj[NUM];
 static dJointGroupID contactgroup;
 static int selected = -1;	// selected object
@@ -71,7 +73,7 @@ static int draw_geom = 1;
 // this is called by dSpaceCollide when two objects in space are
 // potentially colliding.
 
-static void nearCallback (void *data, dGeomID o1, dGeomID o2)
+static void nearCallback (void *, dGeomID o1, dGeomID o2)
 {
   int i;
   // if (o1->body && o2->body) return;
@@ -411,17 +413,29 @@ int main (int argc, char **argv)
   dInitODE2(0);
   world = dWorldCreate();
 
-#if 0
-  dVector3 Center = {0, 0, 0, 0};
-  dVector3 Extents = {WORLD_SIZE * 0.55, WORLD_SIZE * 0.55, WORLD_SIZE * 0.55, 0};
-  space = dQuadTreeSpaceCreate (0, Center, Extents, 6);
-#elif 1
-  space = dHashSpaceCreate (0);
-#elif 0
-  space = dSweepAndPruneSpaceCreate (0, dSAP_AXES_XYZ);
-#else
-  space = dSimpleSpaceCreate(0);
-#endif
+  for (int i=1; i<argc; ++i) {
+      if (argv[i] == std::string("quad")) {
+          dVector3 Center = {0, 0, 0, 0};
+          dVector3 Extents = {WORLD_SIZE * 0.55, WORLD_SIZE * 0.55, WORLD_SIZE * 0.55, 0};
+          puts(":::: Using dQuadTreeSpace");
+          space = dQuadTreeSpaceCreate (0, Center, Extents, 6);
+      } else if (argv[i] == std::string("hash")) {
+          puts(":::: Using dHashSpace");
+          space = dHashSpaceCreate (0);
+      } else if (argv[i] == std::string("sap")) {
+          puts(":::: Using dSweepAndPruneSpace");
+          space = dSweepAndPruneSpaceCreate (0, dSAP_AXES_XYZ);
+      } else if (argv[i] == std::string("simple")) {
+          puts(":::: Using dSimpleSpace");
+          space = dSimpleSpaceCreate(0);
+      }
+  }
+  if (!space) {
+      puts(":::: You can specify 'quad', 'hash', 'sap' or 'simple' in the");
+      puts(":::: command line to specify the type of space.");
+      puts(":::: Using SAP space by default.");
+      space = dSweepAndPruneSpaceCreate (0, dSAP_AXES_XYZ);
+  }
 
   contactgroup = dJointGroupCreate (0);
   dWorldSetGravity (world,0,0,-0.5);

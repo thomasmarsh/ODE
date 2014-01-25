@@ -520,6 +520,7 @@ AC_CONFIG_FILES([
  GIMPACT/include/GIMPACT/Makefile
  GIMPACT/src/Makefile
  tests/Makefile
+ tests/joints/Makefile
  tests/UnitTest++/Makefile
  tests/UnitTest++/src/Makefile
  tests/UnitTest++/src/Posix/Makefile
