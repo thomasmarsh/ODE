@@ -8,6 +8,9 @@ the rules for this file:
   * keep the format consistent (79 char width, M/D/Y date format).
 
 ------------------------------------------------------------------------------
+01/27/14 Daniel K. O.
+        * Fixed cylinder AABB computation.
+
 01/25/14 Daniel K. O.
         * Removed ALLOCA calls from dHashSpace; it should not depend
           on stack size limits anymore.

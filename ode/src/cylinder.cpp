@@ -29,6 +29,8 @@ dContactGeom::g1 and dContactGeom::g2.
 
 */
 
+#include <algorithm>
+
 #include <ode/common.h>
 #include <ode/collision.h>
 #include <ode/rotation.h>
@@ -61,12 +63,10 @@ void dxCylinder::computeAABB()
     const dMatrix3& R = final_posr->R;
     const dVector3& pos = final_posr->pos;
 
-    dReal xrange = dFabs (R[0] * radius) +	 dFabs (R[1] * radius) + REAL(0.5)* dFabs (R[2] * 
-        lz);
-    dReal yrange = dFabs (R[4] * radius) +   dFabs (R[5] * radius) + REAL(0.5)* dFabs (R[6] * 
-        lz);
-    dReal zrange = dFabs (R[8] * radius) +	 dFabs (R[9] * radius) + REAL(0.5)* dFabs (R[10] * 
-        lz);
+    dReal xrange = dFabs(R[2]*lz*REAL(0.5)) + radius * dSqrt(std::max<dReal>(0, 1 - R[2]*R[2]));
+    dReal yrange = dFabs(R[6]*lz*REAL(0.5)) + radius * dSqrt(std::max<dReal>(0, 1 - R[6]*R[6]));
+    dReal zrange = dFabs(R[10]*lz*REAL(0.5)) + radius * dSqrt(std::max<dReal>(0, 1 - R[10]*R[10]));
+
     aabb[0] = pos[0] - xrange;
     aabb[1] = pos[0] + xrange;
     aabb[2] = pos[1] - yrange;
