@@ -212,7 +212,7 @@ dxJointAMotor::getInfo1( dxJoint::Info1 *info )
 
 
 void
-dxJointAMotor::getInfo2( dReal worldFPS, dReal worldERP, const Info2Descr* info )
+dxJointAMotor::getInfo2( dReal worldFPS, dReal /*worldERP*/, const Info2Descr* info )
 {
     int i;
 

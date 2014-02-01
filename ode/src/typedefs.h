@@ -23,6 +23,7 @@
 #ifndef _ODE_TYPEDEFS_H_
 #define _ODE_TYPEDEFS_H_
 
+#include <ode/odeconfig.h>
 
 /*
  * Internal typedefs to map public types into more convenient private types

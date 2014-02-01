@@ -1,6 +1,8 @@
 noinst_LTLIBRARIES = libGIMPACT.la
 AM_CPPFLAGS = -fno-strict-aliasing \
                         -I$(top_srcdir)/include \
+                        -I$(top_builddir)/include \
+                        -I$(top_srcdir)/ode/src \
                         -I$(top_srcdir)/GIMPACT/include
 
 libGIMPACT_la_SOURCES = gim_boxpruning.cpp \

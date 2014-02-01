@@ -13,6 +13,8 @@ LDADD = $(top_builddir)/drawstuff/src/libdrawstuff.la \
 noinst_HEADERS = basket_geom.h texturepath.h world_geom3.h bunny_geom.h convex_bunny_geom.h \
                  icosahedron_geom.h
 
+AM_DEFAULT_SOURCE_EXT = .cpp
+
 noinst_PROGRAMS = \
                 demo_boxstack \
                 demo_buggy \
@@ -28,6 +30,7 @@ noinst_PROGRAMS = \
                 demo_feedback \
                 demo_friction \
                 demo_gyroscopic \
+                demo_gyro2 \
                 demo_heightfield \
                 demo_hinge \
                 demo_I \
@@ -47,39 +50,8 @@ noinst_PROGRAMS = \
                 demo_step \
                 demo_tracks
 
-demo_boxstack_SOURCES = demo_boxstack.cpp
-demo_buggy_SOURCES = demo_buggy.cpp
-demo_cards_SOURCES = demo_cards.cpp
 demo_chain1_SOURCES = demo_chain1.c
 demo_chain1_LDADD = $(LDADD) -lstdc++ 
-demo_chain2_SOURCES = demo_chain2.cpp
-demo_collision_SOURCES = demo_collision.cpp
-demo_crash_SOURCES = demo_crash.cpp
-demo_cylvssphere_SOURCES = demo_cylvssphere.cpp
-demo_dball_SOURCES = demo_dball.cpp
-demo_dhinge_SOURCES = demo_dhinge.cpp
-demo_transmission_SOURCES = demo_transmission.cpp
-demo_feedback_SOURCES = demo_feedback.cpp
-demo_friction_SOURCES = demo_friction.cpp
-demo_gyroscopic_SOURCES = demo_gyroscopic.cpp
-demo_heightfield_SOURCES = demo_heightfield.cpp
-demo_hinge_SOURCES = demo_hinge.cpp
-demo_I_SOURCES = demo_I.cpp
-demo_jointPR_SOURCES = demo_jointPR.cpp
-demo_joints_SOURCES = demo_joints.cpp
-demo_jointPU_SOURCES = demo_jointPU.cpp
-demo_kinematic_SOURCES = demo_kinematic.cpp
-demo_motion_SOURCES = demo_motion.cpp
-demo_motor_SOURCES = demo_motor.cpp
-demo_ode_SOURCES = demo_ode.cpp
-demo_piston_SOURCES = demo_piston.cpp
-demo_plane2d_SOURCES = demo_plane2d.cpp
-demo_slider_SOURCES = demo_slider.cpp
-demo_space_SOURCES = demo_space.cpp
-demo_space_stress_SOURCES = demo_space_stress.cpp
-demo_step_SOURCES = demo_step.cpp
-demo_rfriction_SOURCES = demo_rfriction.cpp
-demo_tracks_SOURCES = demo_tracks.cpp
 
 
 if TRIMESH
@@ -89,12 +61,6 @@ noinst_PROGRAMS += \
                 demo_moving_trimesh \
                 demo_moving_convex \
                 demo_trimesh
-
-demo_basket_SOURCES = demo_basket.cpp
-demo_cyl_SOURCES = demo_cyl.cpp
-demo_moving_trimesh_SOURCES = demo_moving_trimesh.cpp
-demo_moving_convex_SOURCES = demo_moving_convex.cpp
-demo_trimesh_SOURCES = demo_trimesh.cpp
 
 AM_CPPFLAGS += -DdTRIMESH_ENABLED
 endif

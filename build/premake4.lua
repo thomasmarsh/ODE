@@ -23,6 +23,7 @@
     "feedback",
     "friction",
     "gyroscopic",
+    "gyro2",
     "heightfield",
     "hinge",
     "I",
@@ -424,29 +425,30 @@
 ----------------------------
 -- Write precision headers
 ----------------------------
-  
-  function generateheader(headerfile, placeholder, precstr)
-    local outfile = io.open(headerfile, "w")
-    for i in io.lines(headerfile .. ".in")
-    do
-      local j,_ = string.gsub(i, placeholder, precstr)
-      --print("writing " .. j .. " into " .. headerfile)
-      outfile:write(j .. "\n")
+  if _ACTION and _ACTION ~= "clean" then
+    function generateheader(headerfile, placeholder, precstr)
+      local outfile = io.open(headerfile, "w")
+      for i in io.lines(headerfile .. ".in")
+      do
+        local j,_ = string.gsub(i, placeholder, precstr)
+        --print("writing " .. j .. " into " .. headerfile)
+        outfile:write(j .. "\n")
+      end
+      outfile:close()
     end
-    outfile:close()
-  end
-  
-  function generate(precstr)
-    generateheader("../include/ode/precision.h", "@ODE_PRECISION@", "d" .. precstr)
-    generateheader("../libccd/src/ccd/precision.h", "@CCD_PRECISION@", "CCD_" .. precstr)
-  end
-  
-  if _OPTIONS["only-single"] then
-    generate("SINGLE")
-  elseif _OPTIONS["only-double"] then
-    generate("DOUBLE")
-  else 
-    generate("UNDEFINEDPRECISION")
+    
+    function generate(precstr)
+      generateheader("../include/ode/precision.h", "@ODE_PRECISION@", "d" .. precstr)
+      generateheader("../libccd/src/ccd/precision.h", "@CCD_PRECISION@", "CCD_" .. precstr)
+    end
+    
+    if _OPTIONS["only-single"] then
+      generate("SINGLE")
+    elseif _OPTIONS["only-double"] then
+      generate("DOUBLE")
+    else 
+      generate("UNDEFINEDPRECISION")
+    end
   end
 
 ----------------------------------------------------------------------

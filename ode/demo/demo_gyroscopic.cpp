@@ -178,8 +178,8 @@ static void reset()
     top1->setPosition(0.8f, -2, 2);
     top2->setPosition(0.8f, 2, 2);
     
-    top1->setAngularVel(0,0,5);
-    top2->setAngularVel(0,0,5);
+    top1->setAngularVel(1,0,7);
+    top2->setAngularVel(1,0,7);
     
     top1->setLinearVel(0,0.2f,0);
     top2->setLinearVel(0,0.2f,0);
