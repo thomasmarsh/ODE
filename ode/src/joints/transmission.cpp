@@ -74,7 +74,7 @@ dxJointTransmission::getInfo1( dxJoint::Info1* info )
 
 void
 dxJointTransmission::getInfo2( dReal worldFPS, 
-                               dReal worldERP,
+                               dReal /*worldERP*/,
                                const Info2Descr* info )
  {
     dVector3 a[2], n[2], l[2], r[2], c[2], s, t, O, d, z, u, v;
@@ -406,9 +406,7 @@ void dJointSetTransmissionAxis1( dJointID j, dReal x, dReal y, dReal z )
 }
 
 void dJointSetTransmissionAxis2( dJointID j, dReal x, dReal y, dReal z )
-{
-    dVector3 a_0;
-    
+{    
     dxJointTransmission* joint = static_cast<dxJointTransmission*>(j);
     dUASSERT( joint, "bad joint argument" );
     dUASSERT(joint->mode = dTransmissionIntersectingAxes,

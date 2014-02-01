@@ -87,7 +87,7 @@ dxJointLMotor::getInfo1( dxJoint::Info1 *info )
 }
 
 void
-dxJointLMotor::getInfo2( dReal worldFPS, dReal worldERP, const Info2Descr *info )
+dxJointLMotor::getInfo2( dReal worldFPS, dReal /*worldERP*/, const Info2Descr *info )
 {
     int row = 0;
     dVector3 ax[3];

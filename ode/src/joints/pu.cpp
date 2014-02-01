@@ -263,7 +263,6 @@ dxJointPU::getInfo1( dxJoint::Info1 *info )
 void
 dxJointPU::getInfo2( dReal worldFPS, dReal worldERP, const Info2Descr *info )
 {
-    const int s0 = 0;
     const int s1 = info->rowskip;
     const int s2 = 2 * s1;
     const dReal k = worldFPS * worldERP;

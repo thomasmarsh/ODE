@@ -56,7 +56,7 @@ enum {
 
 struct dBase {
     void *operator new (size_t size) { return dAlloc (size); }
-    void *operator new (size_t size, void *p) { return p; }
+    void *operator new (size_t, void *p) { return p; }
     void operator delete (void *ptr, size_t size) { dFree (ptr,size); }
     void *operator new[] (size_t size) { return dAlloc (size); }
     void operator delete[] (void *ptr, size_t size) { dFree (ptr,size); }

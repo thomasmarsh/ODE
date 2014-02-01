@@ -467,14 +467,73 @@ void dxStepIsland_Stage0_Bodies(dxStepperStage0BodiesCallContext *callContext)
                 dMultiply2_333 (tmp,b->invI,b->posr.R);
                 dMultiply0_333 (invIrow,b->posr.R,tmp);
 
-                if ((b->flags & dxBodyGyroscopic) != 0) {
+                // Don't apply gyroscopic torques to bodies
+                // if not flagged or the body is kinematic
+                if ((b->flags & dxBodyGyroscopic)&& (b->invMass>0)) {
                     dMatrix3 I;
                     // compute inertia tensor in global frame
                     dMultiply2_333 (tmp,b->mass.I,b->posr.R);
                     dMultiply0_333 (I,b->posr.R,tmp);
                     // compute rotational force
+#if 0
+                    // Explicit computation
                     dMultiply0_331 (tmp,I,b->avel);
                     dSubtractVectorCross3(b->tacc,b->avel,tmp);
+#else
+                    // Do the implicit computation based on 
+                    //"Stabilizing Gyroscopic Forces in Rigid Multibody Simulations"
+                    // (Lacoursière 2006)
+                    dReal h = callContext->m_stepperCallContext->m_stepSize; // Step size
+                    dVector3 L; // Compute angular momentum
+                    dMultiply0_331(L,I,b->avel);
+                    
+                    // Compute a new effective 'inertia tensor'
+                    // for the implicit step: the cross-product 
+                    // matrix of the angular momentum plus the
+                    // old tensor scaled by the timestep.  
+                    // Itild may not be symmetric pos-definite, 
+                    // but we can still use it to compute implicit
+                    // gyroscopic torques.
+                    dMatrix3 Itild={0};  
+                    dSetCrossMatrixMinus(Itild,L,4);
+                    for (int ii=0;ii<12;++ii) {
+                      Itild[ii]=Itild[ii]*h+I[ii];
+                    }
+
+                    // Scale momentum by inverse time to get 
+                    // a sort of "torque"
+                    dScaleVector3(L,dRecip(h)); 
+                    // Invert the pseudo-tensor
+                    dMatrix3 itInv;
+                    // This is a closed-form inversion.
+                    // It's probably not numerically stable
+                    // when dealing with small masses with
+                    // a large asymmetry.
+                    // An LU decomposition might be better.
+                    if (dInvertMatrix3(itInv,Itild)!=0) {
+                        // "Divide" the original tensor
+                        // by the pseudo-tensor (on the right)
+                        dMultiply0_333(Itild,I,itInv);
+
+                        // This new inertia matrix
+                        // rotates the momentum and accumulated
+                        // torques to get a new set of torques
+                        // that will work correctly when applied
+                        // to the old inertia matrix as explicit
+                        // torques with a semi-implicit update
+                        // step.
+                        dVector3 tau0,tau1;
+                        dMultiply0_331(tau0,Itild,L);
+                        dMultiply0_331(tau1,Itild,b->tacc);
+
+                        dVector3 impTorq;
+                        dAddVectors3(impTorq,tau0,tau1);
+                        // Pull the initial momentum-torque out
+                        // of the equation and replace the
+                        // value in the torque accumulator
+                        dSubtractVectors3(b->tacc,impTorq,L);
+                    }
+#endif
                 }
 
                 bodyIndex = ThrsafeIncrementIntUpToLimit(&callContext->m_inertiaBodyIndex, nb);

@@ -395,6 +395,69 @@ ODE_PURE_INLINE void dMultiplyAdd2_333(dReal *res, const dReal *a, const dReal *
   dAddVectors3(res + 8, res + 8, tmp);
 }
 
+ODE_PURE_INLINE dReal dCalcMatrix3Det( const dReal* mat )
+{
+    dReal det;
+
+    det = mat[0] * ( mat[5]*mat[10] - mat[9]*mat[6] )
+        - mat[1] * ( mat[4]*mat[10] - mat[8]*mat[6] )
+        + mat[2] * ( mat[4]*mat[9]  - mat[8]*mat[5] );
+
+    return( det );
+}
+
+/**
+  Closed form matrix inversion, copied from 
+  collision_util.h for use in the stepper.
+
+  Returns the determinant.  
+  returns 0 and does nothing
+  if the matrix is singular.
+*/
+ODE_PURE_INLINE dReal dInvertMatrix3(dReal *dst, const dReal *ma)
+{
+    dReal det;  
+    dReal detRecip;
+
+    det = dCalcMatrix3Det( ma );
+    
+
+    /* Setting an arbitrary non-zero threshold 
+       for the determinant doesn't do anyone 
+       any favors.  The condition number is the
+       important thing.  If all the eigen-values 
+       of the matrix are small, so is the 
+       determinant, but it can still be well
+       conditioned.  
+       A single extremely large eigen-value could
+       push the determinant over threshold, but 
+       produce a very unstable result if the other
+       eigen-values are small.  So we just say that
+       the determinant must be non-zero and trust the
+       caller to provide well-conditioned matrices.
+       */
+    if ( det == 0 )
+    {
+        return 0;
+    }
+
+    detRecip = dRecip(det);    
+
+    dst[0] =  ( ma[5]*ma[10] - ma[6]*ma[9]  ) * detRecip;
+    dst[1] =  ( ma[9]*ma[2]  - ma[1]*ma[10] ) * detRecip;
+    dst[2] =  ( ma[1]*ma[6]  - ma[5]*ma[2]  ) * detRecip;
+
+    dst[4] =  ( ma[6]*ma[8]  - ma[4]*ma[10] ) * detRecip;
+    dst[5] =  ( ma[0]*ma[10] - ma[8]*ma[2]  ) * detRecip;
+    dst[6] =  ( ma[4]*ma[2]  - ma[0]*ma[6]  ) * detRecip;
+
+    dst[8] =  ( ma[4]*ma[9]  - ma[8]*ma[5]  ) * detRecip;
+    dst[9] =  ( ma[8]*ma[1]  - ma[0]*ma[9]  ) * detRecip;
+    dst[10] = ( ma[0]*ma[5]  - ma[1]*ma[4]  ) * detRecip;
+
+    return det;
+}
+
 
 /* Include legacy macros here */
 #include <ode/odemath_legacy.h>
