@@ -14,7 +14,7 @@ LIBTOOLIZE=libtoolize
 #    LIBTOOLIZE=glibtoolize
 #fi
 echo "Running $LIBTOOLIZE"
-$LIBTOOLIZE --copy --automake || exit 1
+$LIBTOOLIZE --copy --automake --install || exit 1
 echo "Running autoheader"
 autoheader || exit 1
 echo "Running automake"
