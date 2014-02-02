@@ -1629,7 +1629,7 @@ size_t dxEstimateQuickStepMemoryRequirements (
         if (m > 0) {
             sub1_res2 += dEFFICIENT_SIZE(sizeof(unsigned int) * 2 * (nj + 1)); // for mindex
             sub1_res2 += dEFFICIENT_SIZE(sizeof(dReal) * 12 * m); // for J
-            sub1_res2 += dEFFICIENT_SIZE(sizeof(int) * 12 * m); // for jb
+            sub1_res2 += dEFFICIENT_SIZE(sizeof(int) * 2 * m); // for jb
             sub1_res2 += 4 * dEFFICIENT_SIZE(sizeof(dReal) * m); // for cfm, lo, hi, rhs
             sub1_res2 += dEFFICIENT_SIZE(sizeof(int) * m); // for findex
             sub1_res2 += dEFFICIENT_SIZE(sizeof(dReal) * 12 * mfb); // for Jcopy
