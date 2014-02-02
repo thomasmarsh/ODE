@@ -242,6 +242,10 @@
     configuration { "vs*" }
       defines { "_CRT_SECURE_NO_DEPRECATE" }
 
+    -- enable M_* macros from math.h
+    configuration { "vs*" }
+      defines { "_USE_MATH_DEFINES" }
+
     -- don't remember why we had to do this	
     configuration { "vs2002 or vs2003", "*Lib" }
       flags  { "StaticRuntime" }
