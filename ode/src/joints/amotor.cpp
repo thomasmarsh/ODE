@@ -313,7 +313,6 @@ void dJointSetAMotorAxis( dJointID j, int anum, int rel, dReal x, dReal y, dReal
             }
             else
             {
-                printf("AAAA\n");
                 joint->axis[anum][0] = r[0];
                 joint->axis[anum][1] = r[1];
                 joint->axis[anum][2] = r[2];
@@ -323,7 +322,6 @@ void dJointSetAMotorAxis( dJointID j, int anum, int rel, dReal x, dReal y, dReal
     }
     else
     {
-        printf("BBBB\n");
         joint->axis[anum][0] = r[0];
         joint->axis[anum][1] = r[1];
         joint->axis[anum][2] = r[2];
