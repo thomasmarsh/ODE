@@ -1,6 +1,6 @@
 dnl AC_INIT does not take a macro as a version nr: set it separately! - Bram
-AC_INIT([ODE],[0.12],[ode@ode.org])
-ODE_VERSION=0.12
+AC_INIT([ODE],[0.13],[ode@ode.org])
+ODE_VERSION=0.13
 AC_SUBST(ODE_VERSION)
 
 # Those are instructions from the Libtool manual:
@@ -22,9 +22,9 @@ AC_SUBST(ODE_VERSION)
 #
 #  6. If any interfaces have been removed since the last public release,
 #     then set AGE to 0.
-CURRENT=3
+CURRENT=4
 REVISION=0
-AGE=0
+AGE=1
 
 AC_ARG_ENABLE(version-info,
         AS_HELP_STRING([--disable-version-info],
@@ -45,7 +45,7 @@ AC_CONFIG_MACRO_DIR([m4])
 
 AC_CANONICAL_HOST
 
-AM_INIT_AUTOMAKE(1.10 foreign)
+AM_INIT_AUTOMAKE([1.10 foreign])
 AC_CONFIG_HEADERS([ode/src/config.h])
 
 dnl This is needed because we have subdirectories
@@ -58,7 +58,6 @@ AC_PROG_AWK
 AC_PROG_INSTALL
 AC_PROG_LN_S
 AC_PROG_MKDIR_P
-AC_DISABLE_SHARED
 LT_INIT([disable-shared win32-dll])
 AC_CHECK_TOOLS([WINDRES], [windres])
 
