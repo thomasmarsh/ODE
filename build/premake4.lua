@@ -315,6 +315,10 @@
       includedirs { "../ou/include" }
       files   { "../ou/**.h", "../ou/**.cpp" }
       defines { "_OU_NAMESPACE=odeou" }
+
+      if _ACTION == "gmake" and ( os.get() == "linux" or os.get() == "bsd" ) then
+        links { pthread }
+      end
     end
 
       
