@@ -317,8 +317,16 @@
       defines { "_OU_NAMESPACE=odeou" }
 
       if _ACTION == "gmake" and ( os.get() == "linux" or os.get() == "bsd" ) then
-        links { pthread }
+        buildoptions { "-pthread" }
+        linkoptions { "-pthread" }
       end
+
+      if _ACTION == "gmake" and os.get() == "windows" then
+        buildoptions { "-mthreads" }
+        linkoptions { "-mthreads" }
+      end
+
+      -- TODO: MacOSX probably needs something too
     end
 
       
@@ -369,10 +377,10 @@
       defines "_DLL"
 
     configuration { "Debug" }
-	  targetname "oded"
+      targetname "oded"
 	  
-	configuration { "Release" }
-	  targetname "ode"
+    configuration { "Release" }
+      targetname "ode"
 	  
     configuration { "DebugSingle*" }
       targetname "ode_singled"
