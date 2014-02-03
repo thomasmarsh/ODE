@@ -141,7 +141,7 @@ int dRandInt (int n)
 
 dReal dRandReal()
 {
-    return (dReal)((double) dRand()) / ((double) 0xffffffff);
+    return (dReal)(((double) dRand()) / ((double) 0xffffffff));
 }
 
 //****************************************************************************

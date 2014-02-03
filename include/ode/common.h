@@ -43,6 +43,9 @@ extern "C" {
 #ifndef M_PI
 #define M_PI REAL(3.1415926535897932384626433832795029)
 #endif
+#ifndef M_PI_2
+#define M_PI_2 REAL(1.5707963267948966192313216916398)
+#endif
 #ifndef M_SQRT1_2
 #define M_SQRT1_2 REAL(0.7071067811865475244008443621048490)
 #endif
@@ -164,6 +167,10 @@ typedef dReal dQuaternion[4];
 #else
 #error You must #define dSINGLE or dDOUBLE
 #endif
+
+
+ODE_PURE_INLINE dReal dForceIntoRange(dReal xValue, dReal xMin, dReal xMax) { return xValue < xMin ? xMin : xValue > xMax ? xMax : xValue; }
+
 
 /* internal object types (all prefixed with `dx') */
 

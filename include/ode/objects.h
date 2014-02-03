@@ -3119,13 +3119,13 @@ ODE_API dReal dJointGetTransmissionParam(dJointID, int parameter);
  * chain and sprockets respectively.
  * @ingroup joints
  */
-void dJointSetTransmissionMode( dJointID j, int mode );
+ODE_API void dJointSetTransmissionMode( dJointID j, int mode );
 
 /**
  * @brief get the Transmission joint mode
  * @ingroup joints
  */
-int dJointGetTransmissionMode( dJointID j );
+ODE_API int dJointGetTransmissionMode( dJointID j );
 
 /**
  * @brief set the Transmission ratio
@@ -3136,13 +3136,13 @@ int dJointGetTransmissionMode( dJointID j );
  * mode it is defined implicitly be the wheel radii.
  * @ingroup joints
  */
-void dJointSetTransmissionRatio( dJointID j, dReal ratio );
+ODE_API void dJointSetTransmissionRatio( dJointID j, dReal ratio );
 
 /**
  * @brief get the Transmission joint ratio
  * @ingroup joints
  */
-dReal dJointGetTransmissionRatio( dJointID j );
+ODE_API dReal dJointGetTransmissionRatio( dJointID j );
 
 /**
  * @brief set the common axis for both wheels of the Transmission joint
@@ -3154,39 +3154,39 @@ dReal dJointGetTransmissionRatio( dJointID j );
  * global coordinates
  * @ingroup joints
  */
-void dJointSetTransmissionAxis( dJointID j, dReal x, dReal y, dReal z );
+ODE_API void dJointSetTransmissionAxis( dJointID j, dReal x, dReal y, dReal z );
 
 /**
  * @brief get the common axis for both wheels of the Transmission joint
  * @ingroup joints
  */
-void dJointGetTransmissionAxis( dJointID j, dVector3 result );
+ODE_API void dJointGetTransmissionAxis( dJointID j, dVector3 result );
 
 /**
  * @brief get the phase, that is the traversed angle for the first
  * wheel of the Transmission joint
  * @ingroup joints
  */
-dReal dJointGetTransmissionAngle1( dJointID j );
+ODE_API dReal dJointGetTransmissionAngle1( dJointID j );
 
 /**
  * @brief get the phase, that is the traversed angle for the second
  * wheel of the Transmission joint
  * @ingroup joints
  */
-dReal dJointGetTransmissionAngle2( dJointID j );
+ODE_API dReal dJointGetTransmissionAngle2( dJointID j );
 
 /**
  * @brief get the radius of the first wheel of the Transmission joint
  * @ingroup joints
  */
-dReal dJointGetTransmissionRadius1( dJointID j );
+ODE_API dReal dJointGetTransmissionRadius1( dJointID j );
 
 /**
  * @brief get the radius of the second wheel of the Transmission joint
  * @ingroup joints
  */
-dReal dJointGetTransmissionRadius2( dJointID j );
+ODE_API dReal dJointGetTransmissionRadius2( dJointID j );
 
 /**
  * @brief set the radius of the first wheel of the Transmission joint
@@ -3195,7 +3195,7 @@ dReal dJointGetTransmissionRadius2( dJointID j );
  * configuration and ratio of the wheels.
  * @ingroup joints
  */
-void dJointSetTransmissionRadius1( dJointID j, dReal radius );
+ODE_API void dJointSetTransmissionRadius1( dJointID j, dReal radius );
 
 /**
  * @brief set the radius of the second wheel of the Transmission joint
@@ -3204,13 +3204,13 @@ void dJointSetTransmissionRadius1( dJointID j, dReal radius );
  * configuration and ratio of the wheels.
  * @ingroup joints
  */
-void dJointSetTransmissionRadius2( dJointID j, dReal radius );
+ODE_API void dJointSetTransmissionRadius2( dJointID j, dReal radius );
 
 /**
  * @brief get the backlash of the Transmission joint
  * @ingroup joints
  */
-dReal dJointGetTransmissionBacklash( dJointID j );
+ODE_API dReal dJointGetTransmissionBacklash( dJointID j );
 
 /**
  * @brief set the backlash of the Transmission joint
@@ -3230,7 +3230,7 @@ dReal dJointGetTransmissionBacklash( dJointID j );
  * length.
   * @ingroup joints
  */
-void dJointSetTransmissionBacklash( dJointID j, dReal backlash );
+ODE_API void dJointSetTransmissionBacklash( dJointID j, dReal backlash );
 
 /**
  * @brief set anchor1 for double ball joint

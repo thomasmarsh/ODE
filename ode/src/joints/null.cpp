@@ -51,7 +51,7 @@ dxJointNull::getInfo1( dxJoint::Info1 *info )
 
 
 void
-dxJointNull::getInfo2( dReal /*worldFPS*/, dReal /*worldERP*/, const Info2Descr */*info*/ )
+dxJointNull::getInfo2( dReal /*worldFPS*/, dReal /*worldERP*/, const Info2Descr* /*info*/ )
 {
     dDebug( 0, "this should never get called" );
 }
