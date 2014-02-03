@@ -422,7 +422,6 @@ void dxHashSpace::collide (void *data, dNearCallback *callback)
 {
     dAASSERT(this && callback);
     dxGeom *geom;
-    dxAABB *aabb;
     int i,maxlevel;
 
     // 0 or 1 geoms can't collide with anything

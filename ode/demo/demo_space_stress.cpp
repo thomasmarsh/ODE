@@ -60,7 +60,7 @@ struct MyObject {
 static int num=0;		// number of objects in simulation
 static int nextobj=0;		// next object to recycle if num==NUM
 static dWorldID world;
-static dSpaceID space = 0;
+static dSpaceID space = NULL;
 static MyObject obj[NUM];
 static dJointGroupID contactgroup;
 static int selected = -1;	// selected object
