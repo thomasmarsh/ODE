@@ -169,9 +169,6 @@ typedef dReal dQuaternion[4];
 #endif
 
 
-ODE_PURE_INLINE dReal dForceIntoRange(dReal xValue, dReal xMin, dReal xMax) { return xValue < xMin ? xMin : xValue > xMax ? xMax : xValue; }
-
-
 /* internal object types (all prefixed with `dx') */
 
 struct dxWorld;		/* dynamics world */
