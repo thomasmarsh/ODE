@@ -26,6 +26,7 @@
 #include "transmission.h"
 #include "joint_internal.h"
 
+
 /*
  * Transmission joint
  */
@@ -166,8 +167,8 @@ dxJointTransmission::getInfo2( dReal worldFPS,
         // Caclulate the angle of the contact point relative to the
         // baseline.
 
-        cosphi = (radii[1] - radii[0]) / m;
-        sinphi = sqrt (1 - cosphi * cosphi);
+        cosphi = dForceIntoRange((radii[1] - radii[0]) / m, REAL(-1.0), REAL(1.0)); // Force into range to fix possible computation errors
+        sinphi = dSqrt (REAL(1.0) - cosphi * cosphi);
 
         dNormalize3(d);
 
@@ -258,22 +259,22 @@ dxJointTransmission::getInfo2( dReal worldFPS,
 
         if (phase_hat > M_PI_2) {
             if (theta < 0) {
-                theta += 2 * M_PI;
+                theta += (dReal)(2 * M_PI);
             }
 
-            theta += floor(phase_hat / (2 * M_PI)) * 2 * M_PI;
+            theta += (dReal)(floor(phase_hat / (2 * M_PI)) * (2 * M_PI));
         } else if (phase_hat < -M_PI_2) {
             if (theta > 0) {
-                theta -= 2 * M_PI;
+                theta -= (dReal)(2 * M_PI);
             }
 
-            theta += ceil(phase_hat / (2 * M_PI)) * 2 * M_PI;
+            theta += (dReal)(ceil(phase_hat / (2 * M_PI)) * (2 * M_PI));
         }
                 
         if (phase_hat - theta > M_PI) {
-            phase[i] = theta + 2 * M_PI;
+            phase[i] = theta + (dReal)(2 * M_PI);
         } else if (phase_hat - theta < -M_PI) {
-            phase[i] = theta - 2 * M_PI;
+            phase[i] = theta - (dReal)(2 * M_PI);
         } else {
             phase[i] = theta;
         }
