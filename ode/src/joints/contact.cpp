@@ -312,8 +312,8 @@ dxJointContact::getInfo2( dReal worldFPS, dReal worldERP, const Info2Descr *info
             rho[1] = rho[0];
             rho[2] = rho[0];
         }
-        ax[0] = t2; // Rolling around t2 creates movement parallel to t1
-        ax[1] = t1;
+        ax[0] = t1; // Rolling around t1 creates movement parallel to t2
+        ax[1] = t2;
         ax[2] = normal; // Spinning axis
         // Should we use proportional force?
         approx[0] = contact.surface.mode & dContactApprox1_1;
