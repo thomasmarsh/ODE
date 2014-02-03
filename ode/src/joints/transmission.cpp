@@ -26,6 +26,12 @@
 #include "transmission.h"
 #include "joint_internal.h"
 
+namespace {
+    inline dReal clamp(dReal x, dReal min, dReal max)
+    {
+        return x < min ? min : (x > max ? max : x);
+    }
+}
 
 /*
  * Transmission joint
@@ -167,7 +173,7 @@ dxJointTransmission::getInfo2( dReal worldFPS,
         // Caclulate the angle of the contact point relative to the
         // baseline.
 
-        cosphi = dForceIntoRange((radii[1] - radii[0]) / m, REAL(-1.0), REAL(1.0)); // Force into range to fix possible computation errors
+        cosphi = clamp((radii[1] - radii[0]) / m, REAL(-1.0), REAL(1.0)); // Force into range to fix possible computation errors
         sinphi = dSqrt (REAL(1.0) - cosphi * cosphi);
 
         dNormalize3(d);
