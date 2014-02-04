@@ -37,7 +37,7 @@ release: dist-gzip dist-bzip2
 	@echo Created release packages for ${PACKAGE}-${VERSION}.
 
 EXTRA_DIST = bootstrap build tools \
-        CHANGELOG.txt COPYING INSTALL.txt README.txt LICENSE.TXT \
+        CHANGELOG.txt COPYING INSTALL.txt README.md LICENSE.TXT \
         bindings
 
 pkgconfigdir = $(libdir)/pkgconfig
