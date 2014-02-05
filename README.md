@@ -1,7 +1,9 @@
-The Open Dynamics Engine (ODE), Copyright (C) 2001-2007 Russell L. Smith.
-=========================================================================
+The Open Dynamics Engine (ODE)
+==============================
 
 ![ODE logo](http://bitbucket.org/odedevs/ode/raw/default/web/ODElogo.png)
+
+Copyright (C) 2001-2007 Russell L. Smith.
 
 
 ODE is a free, industrial quality library for simulating articulated
