@@ -152,15 +152,8 @@ void dGeomRaySetParams (dxGeom *g, int FirstContact, int BackfaceCull)
 {
     dUASSERT (g && g->type == dRayClass,"argument not a ray");
 
-    if (FirstContact){
-        g->gflags |= RAY_FIRSTCONTACT;
-    }
-    else g->gflags &= ~RAY_FIRSTCONTACT;
-
-    if (BackfaceCull){
-        g->gflags |= RAY_BACKFACECULL;
-    }
-    else g->gflags &= ~RAY_BACKFACECULL;
+    dGeomRaySetFirstContact(g, FirstContact);
+    dGeomRaySetBackfaceCull(g, BackfaceCull);
 }
 
 
@@ -170,6 +163,45 @@ void dGeomRayGetParams (dxGeom *g, int *FirstContact, int *BackfaceCull)
 
     (*FirstContact) = ((g->gflags & RAY_FIRSTCONTACT) != 0);
     (*BackfaceCull) = ((g->gflags & RAY_BACKFACECULL) != 0);
+}
+
+
+// set/get backface culling flag
+void dGeomRaySetBackfaceCull (dxGeom *g, int backfaceCull) 
+{
+    
+    dUASSERT (g && g->type == dRayClass,"argument not a ray");
+    if (backfaceCull) {
+        g->gflags |= RAY_BACKFACECULL;
+    } else {
+        g->gflags &= ~RAY_BACKFACECULL;
+    }
+}
+
+
+int dGeomRayGetBackfaceCull (dxGeom *g)
+{
+    dUASSERT (g && g->type == dRayClass,"argument not a ray");
+    return ((g->gflags & RAY_BACKFACECULL) != 0);
+}
+
+
+// set/get first contact flag
+void dGeomRaySetFirstContact (dxGeom *g, int firstContact)
+{
+    dUASSERT (g && g->type == dRayClass,"argument not a ray");
+    if (firstContact) {
+        g->gflags |= RAY_FIRSTCONTACT;
+    } else {
+        g->gflags &= ~RAY_FIRSTCONTACT;
+    }
+}
+
+
+int dGeomRayGetFirstContact (dxGeom *g)
+{
+    dUASSERT (g && g->type == dRayClass,"argument not a ray");
+    return ((g->gflags & RAY_FIRSTCONTACT) != 0);
 }
 
 
