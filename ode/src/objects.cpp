@@ -98,7 +98,8 @@ dxWorld::dxWorld():
     qs(NULL),
     contactp(NULL),
     dampingp(NULL),
-    max_angular_speed(dInfinity)
+    max_angular_speed(dInfinity),
+    userdata(0)
 {
     dxThreadingBase::SetThreadingDefaultImplProvider(this);
 

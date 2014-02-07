@@ -1612,6 +1612,20 @@ void dWorldDestroy (dxWorld *w)
 }
 
 
+void dWorldSetData (dWorldID w, void *data)
+{
+    dAASSERT (w);
+    w->userdata = data;
+}
+
+
+void* dWorldGetData (dWorldID w)
+{
+    dAASSERT (w);
+    return w->userdata;
+}
+
+
 void dWorldSetGravity (dWorldID w, dReal x, dReal y, dReal z)
 {
     dAASSERT (w);
