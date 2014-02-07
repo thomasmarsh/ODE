@@ -132,7 +132,7 @@ int tc = 0; // The test case choice;
 
 
 //collision detection
-static void nearCallback (void *data, dGeomID o1, dGeomID o2)
+static void nearCallback (void *, dGeomID o1, dGeomID o2)
 {
     int i,n;
 

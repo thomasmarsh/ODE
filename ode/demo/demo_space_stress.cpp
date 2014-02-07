@@ -121,6 +121,7 @@ static void start()
   printf ("   s for sphere.\n");
   printf ("   c for cylinder.\n");
   printf ("   x for a composite object.\n");
+  printf ("   y for cylinder.\n");
   printf ("To select an object, press space.\n");
   printf ("To disable the selected object, press d.\n");
   printf ("To enable the selected object, press e.\n");
@@ -130,10 +131,10 @@ static void start()
 }
 
 
-char locase (char c)
+char locase(char c)
 {
-  if (c >= 'A' && c <= 'Z') return c - ('a'-'A');
-  else return c;
+    if (c >= 'A' && c <= 'Z') return c - ('a'-'A');
+    else return c;
 }
 
 
@@ -141,138 +142,143 @@ char locase (char c)
 
 static void command (int cmd)
 {
-  int i,j,k;
-  dReal sides[3];
-  dMass m;
+    int i,j,k;
+    dReal sides[3];
+    dMass m;
+    bool setBody = false;
 
-  cmd = locase (cmd);
-  if (cmd == 'b' || cmd == 's' || cmd == 'c' || cmd == 'x'
-      /* || cmd == 'l' */) {
-    if (num < NUM) {
-      i = num;
-      num++;
+    cmd = locase(cmd);
+    if (cmd == 'b' || cmd == 's' || cmd == 'c' || cmd == 'x' || cmd == 'y') {
+        if (num < NUM) {
+            // new object to be created
+            i = num;
+            num++;
+        } else {
+            // recycle existing object
+            i = nextobj++;
+            nextobj %= num; // wrap-around if needed
+
+            // destroy the body and geoms for slot i
+            dBodyDestroy (obj[i].body);
+            obj[i].body = 0;
+
+            for (k=0; k < GPB; k++)
+                if (obj[i].geom[k]) {
+                    dGeomDestroy(obj[i].geom[k]);
+                    obj[i].geom[k] = 0;
+                }
+        }
+
+        obj[i].body = dBodyCreate(world);
+
+        for (k=0; k<3; k++)
+            sides[k] = dRandReal()*0.5+0.1;
+
+        dMatrix3 R;
+        if (random_pos)  {
+            dBodySetPosition(obj[i].body,
+                             dRandReal()*2-1,dRandReal()*2-1,dRandReal()+2);
+            dRFromAxisAndAngle(R,dRandReal()*2.0-1.0,dRandReal()*2.0-1.0,
+                               dRandReal()*2.0-1.0,dRandReal()*10.0-5.0);
+        } else {
+            // higher than highest body position
+            dReal maxheight = 0;
+            for (k=0; k<num; k++) {
+                const dReal *pos = dBodyGetPosition(obj[k].body);
+                if (pos[2] > maxheight)
+                    maxheight = pos[2];
+            }
+            dBodySetPosition(obj[i].body, 0,0,maxheight+1);
+            dRSetIdentity(R);
+            //dRFromAxisAndAngle (R,0,0,1,/*dRandReal()*10.0-5.0*/0);
+        }
+
+        dBodySetRotation(obj[i].body,R);
+
+        if (cmd == 'b') {
+
+            dMassSetBox(&m,DENSITY,sides[0],sides[1],sides[2]);
+            obj[i].geom[0] = dCreateBox(space,sides[0],sides[1],sides[2]);
+
+        } else if (cmd == 'c') {
+
+            sides[0] *= 0.5;
+            dMassSetCapsule(&m,DENSITY,3,sides[0],sides[1]);
+            obj[i].geom[0] = dCreateCapsule (space,sides[0],sides[1]);
+
+        } else if (cmd == 'y') {
+
+            dMassSetCylinder(&m,DENSITY,3,sides[0],sides[1]);
+            obj[i].geom[0] = dCreateCylinder(space,sides[0],sides[1]);
+
+        } else if (cmd == 's') {
+
+            sides[0] *= 0.5;
+            dMassSetSphere (&m,DENSITY,sides[0]);
+            obj[i].geom[0] = dCreateSphere (space,sides[0]);
+
+        } else if (cmd == 'x') {
+
+            setBody = true;
+            // start accumulating masses for the composite geometries
+            dMass m2;
+            dMassSetZero (&m);
+
+            dReal dpos[GPB][3];	// delta-positions for composite geometries
+            dMatrix3 drot[GPB];
+      
+            // set random delta positions
+            for (j=0; j<GPB; j++)
+                for (k=0; k<3; k++)
+                    dpos[j][k] = dRandReal()*0.3-0.15;
+    
+            for (k=0; k<GPB; k++) {
+                if (k==0) {
+                    dReal radius = dRandReal()*0.25+0.05;
+                    obj[i].geom[k] = dCreateSphere (space,radius);
+                    dMassSetSphere (&m2,DENSITY,radius);
+                } else if (k==1) {
+                    obj[i].geom[k] = dCreateBox(space,sides[0],sides[1],sides[2]);
+                    dMassSetBox(&m2,DENSITY,sides[0],sides[1],sides[2]);
+                } else {
+                    dReal radius = dRandReal()*0.1+0.05;
+                    dReal length = dRandReal()*1.0+0.1;
+                    obj[i].geom[k] = dCreateCapsule(space,radius,length);
+                    dMassSetCapsule(&m2,DENSITY,3,radius,length);
+                }
+
+                dRFromAxisAndAngle(drot[k],dRandReal()*2.0-1.0,dRandReal()*2.0-1.0,
+                                   dRandReal()*2.0-1.0,dRandReal()*10.0-5.0);
+                dMassRotate(&m2,drot[k]);
+		
+                dMassTranslate(&m2,dpos[k][0],dpos[k][1],dpos[k][2]);
+
+                // add to the total mass
+                dMassAdd(&m,&m2);
+
+            }
+            for (k=0; k<GPB; k++) {
+                dGeomSetBody(obj[i].geom[k],obj[i].body);
+                dGeomSetOffsetPosition(obj[i].geom[k],
+                                       dpos[k][0]-m.c[0],
+                                       dpos[k][1]-m.c[1],
+                                       dpos[k][2]-m.c[2]);
+                dGeomSetOffsetRotation(obj[i].geom[k], drot[k]);
+            }
+            dMassTranslate(&m,-m.c[0],-m.c[1],-m.c[2]);
+            dBodySetMass(obj[i].body,&m);
+
+        }
+
+        if (!setBody) { // avoid calling for composite geometries
+            for (k=0; k < GPB; k++)
+                if (obj[i].geom[k])
+                    dGeomSetBody(obj[i].geom[k],obj[i].body);
+
+            dBodySetMass(obj[i].body,&m);
+        }
     }
-    else {
-      i = nextobj;
-      nextobj++;
-      if (nextobj >= num) nextobj = 0;
 
-      // destroy the body and geoms for slot i
-      dBodyDestroy (obj[i].body);
-      for (k=0; k < GPB; k++) {
-	if (obj[i].geom[k]) dGeomDestroy (obj[i].geom[k]);
-      }
-      memset (&obj[i],0,sizeof(obj[i]));
-    }
-
-    obj[i].body = dBodyCreate (world);
-    for (k=0; k<3; k++) sides[k] = dRandReal()*0.5+0.1;
-
-    dMatrix3 R;
-    if (random_pos) {
-      dBodySetPosition (obj[i].body,
-			dRandReal()*WORLD_SIZE-(WORLD_SIZE/2),
-			dRandReal()*WORLD_SIZE-(WORLD_SIZE/2),
-			dRandReal()*WORLD_HEIGHT+1);
-      dRFromAxisAndAngle (R,dRandReal()*2.0-1.0,dRandReal()*2.0-1.0,
-			  dRandReal()*2.0-1.0,dRandReal()*10.0-5.0);
-    }
-    else {
-      dReal maxheight = 0;
-      for (k=0; k<num; k++) {
-	const dReal *pos = dBodyGetPosition (obj[k].body);
-	if (pos[2] > maxheight) maxheight = pos[2];
-      }
-      dBodySetPosition (obj[i].body, 0,0,maxheight+1);
-      dRFromAxisAndAngle (R,0,0,1,dRandReal()*10.0-5.0);
-    }
-    dBodySetRotation (obj[i].body,R);
-    dBodySetData (obj[i].body,(void*)(size_t)i);
-
-    if (cmd == 'b') {
-      dMassSetBox (&m,DENSITY,sides[0],sides[1],sides[2]);
-      obj[i].geom[0] = dCreateBox (space,sides[0],sides[1],sides[2]);
-    }
-    else if (cmd == 'c') {
-      sides[0] *= 0.5;
-      dMassSetCapsule (&m,DENSITY,3,sides[0],sides[1]);
-      obj[i].geom[0] = dCreateCapsule (space,sides[0],sides[1]);
-    }
-/*
-    // cylinder option not yet implemented
-    else if (cmd == 'l') {
-      sides[1] *= 0.5;
-      dMassSetCapsule (&m,DENSITY,3,sides[0],sides[1]);
-      obj[i].geom[0] = dCreateCylinder (space,sides[0],sides[1]);
-    }
-*/
-    else if (cmd == 's') {
-      sides[0] *= 0.5;
-      dMassSetSphere (&m,DENSITY,sides[0]);
-      obj[i].geom[0] = dCreateSphere (space,sides[0]);
-    }
-    else if (cmd == 'x') {
-      dGeomID g2[GPB];		// encapsulated geometries
-      dReal dpos[GPB][3];	// delta-positions for encapsulated geometries
-
-      // start accumulating masses for the encapsulated geometries
-      dMass m2;
-      dMassSetZero (&m);
-
-      // set random delta positions
-      for (j=0; j<GPB; j++) {
-	for (k=0; k<3; k++) dpos[j][k] = dRandReal()*0.3-0.15;
-      }
-
-      for (k=0; k<GPB; k++) {
-	obj[i].geom[k] = dCreateGeomTransform (space);
-	dGeomTransformSetCleanup (obj[i].geom[k],1);
-	if (k==0) {
-	  dReal radius = dRandReal()*0.25+0.05;
-	  g2[k] = dCreateSphere (0,radius);
-	  dMassSetSphere (&m2,DENSITY,radius);
-	}
-	else if (k==1) {
-	  g2[k] = dCreateBox (0,sides[0],sides[1],sides[2]);
-	  dMassSetBox (&m2,DENSITY,sides[0],sides[1],sides[2]);
-	}
-	else {
-	  dReal radius = dRandReal()*0.1+0.05;
-	  dReal length = dRandReal()*1.0+0.1;
-	  g2[k] = dCreateCapsule (0,radius,length);
-	  dMassSetCapsule (&m2,DENSITY,3,radius,length);
-	}
-	dGeomTransformSetGeom (obj[i].geom[k],g2[k]);
-
-	// set the transformation (adjust the mass too)
-	dGeomSetPosition (g2[k],dpos[k][0],dpos[k][1],dpos[k][2]);
-	dMassTranslate (&m2,dpos[k][0],dpos[k][1],dpos[k][2]);
-	dMatrix3 Rtx;
-	dRFromAxisAndAngle (Rtx,dRandReal()*2.0-1.0,dRandReal()*2.0-1.0,
-			    dRandReal()*2.0-1.0,dRandReal()*10.0-5.0);
-	dGeomSetRotation (g2[k],Rtx);
-	dMassRotate (&m2,Rtx);
-
-	// add to the total mass
-	dMassAdd (&m,&m2);
-      }
-
-      // move all encapsulated objects so that the center of mass is (0,0,0)
-      for (k=0; k<2; k++) {
-	dGeomSetPosition (g2[k],
-			  dpos[k][0]-m.c[0],
-			  dpos[k][1]-m.c[1],
-			  dpos[k][2]-m.c[2]);
-      }
-      dMassTranslate (&m,-m.c[0],-m.c[1],-m.c[2]);
-    }
-
-    for (k=0; k < GPB; k++) {
-      if (obj[i].geom[k]) dGeomSetBody (obj[i].geom[k],obj[i].body);
-    }
-
-    dBodySetMass (obj[i].body,&m);
-  }
 
   if (cmd == ' ') {
     selected++;
@@ -304,63 +310,48 @@ static void command (int cmd)
 
 void drawGeom (dGeomID g, const dReal *pos, const dReal *R, int show_aabb)
 {
-	if (!draw_geom){
-		return;
-	}
+    if (!draw_geom){
+        return;
+    }
 
-  if (!g) return;
-  if (!pos) pos = dGeomGetPosition (g);
-  if (!R) R = dGeomGetRotation (g);
+    if (!g) return;
+    if (!pos) pos = dGeomGetPosition(g);
+    if (!R) R = dGeomGetRotation(g);
 
-  int type = dGeomGetClass (g);
-  if (type == dBoxClass) {
-    dVector3 sides;
-    dGeomBoxGetLengths (g,sides);
-    dsDrawBox (pos,R,sides);
-  }
-  else if (type == dSphereClass) {
-    dsDrawSphere (pos,R,dGeomSphereGetRadius (g));
-  }
-  else if (type == dCapsuleClass) {
-    dReal radius,length;
-    dGeomCapsuleGetParams (g,&radius,&length);
-    dsDrawCapsule (pos,R,length,radius);
-  }
-/*
-  // cylinder option not yet implemented
-  else if (type == dCylinderClass) {
-    dReal radius,length;
-    dGeomCylinderGetParams (g,&radius,&length);
-    dsDrawCylinder (pos,R,length,radius);
-  }
-*/
-  else if (type == dGeomTransformClass) {
-    dGeomID g2 = dGeomTransformGetGeom (g);
-    const dReal *pos2 = dGeomGetPosition (g2);
-    const dReal *R2 = dGeomGetRotation (g2);
-    dVector3 actual_pos;
-    dMatrix3 actual_R;
-    dMultiply0_331 (actual_pos,R,pos2);
-    actual_pos[0] += pos[0];
-    actual_pos[1] += pos[1];
-    actual_pos[2] += pos[2];
-    dMultiply0_333 (actual_R,R,R2);
-    drawGeom (g2,actual_pos,actual_R,0);
-  }
+    int type = dGeomGetClass (g);
+    if (type == dBoxClass) {
+        dVector3 sides;
+        dGeomBoxGetLengths(g,sides);
+        dsDrawBox(pos,R,sides);
+    }
+    else if (type == dSphereClass) {
+        dsDrawSphere(pos,R,dGeomSphereGetRadius (g));
+    }
+    else if (type == dCapsuleClass) {
+        dReal radius,length;
+        dGeomCapsuleGetParams(g,&radius,&length);
+        dsDrawCapsule (pos,R,length,radius);
+    } else if (type == dCylinderClass) {
+        dReal radius,length;
+        dGeomCylinderGetParams(g,&radius,&length);
+        dsDrawCylinder(pos,R,length,radius);
+    }
 
-  if (show_aabb) {
-    // draw the bounding box for this geom
-    dReal aabb[6];
-    dGeomGetAABB (g,aabb);
-    dVector3 bbpos;
-    for (int i=0; i<3; i++) bbpos[i] = 0.5*(aabb[i*2] + aabb[i*2+1]);
-    dVector3 bbsides;
-    for (int j=0; j<3; j++) bbsides[j] = aabb[j*2+1] - aabb[j*2];
-    dMatrix3 RI;
-    dRSetIdentity (RI);
-    dsSetColorAlpha (1,0,0,0.5);
-    dsDrawBox (bbpos,RI,bbsides);
-  }
+    if (show_aabb) {
+        // draw the bounding box for this geom
+        dReal aabb[6];
+        dGeomGetAABB(g,aabb);
+        dVector3 bbpos;
+        for (int i=0; i<3; i++)
+            bbpos[i] = 0.5*(aabb[i*2] + aabb[i*2+1]);
+        dVector3 bbsides;
+        for (int j=0; j<3; j++)
+            bbsides[j] = aabb[j*2+1] - aabb[j*2];
+        dMatrix3 RI;
+        dRSetIdentity(RI);
+        dsSetColorAlpha(1,0,0,0.5);
+        dsDrawBox(bbpos,RI,bbsides);
+    }
 }
 
 

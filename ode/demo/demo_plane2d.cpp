@@ -64,7 +64,7 @@ static void     cb_start ()
 
 
 
-static void     cb_near_collision (void *data, dGeomID o1, dGeomID o2)
+static void     cb_near_collision (void *, dGeomID o1, dGeomID o2)
 /********************************************************************/
 {
     dBodyID     b1 = dGeomGetBody (o1);

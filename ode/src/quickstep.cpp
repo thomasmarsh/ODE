@@ -345,6 +345,7 @@ static void multiplyAdd_J (volatile unsigned *mi_storage,
 }
 
 // Single threaded versionto be removed later
+#if defined(WARM_STARTING) || defined(CHECK_VELOCITY_OBEYS_CONSTRAINT)
 static void _multiply_J (unsigned int m, const dReal* J, int *jb,
                          const dReal* in, dReal* out)
 {
@@ -364,7 +365,7 @@ static void _multiply_J (unsigned int m, const dReal* J, int *jb,
         out[i] = sum;
     }
 }
-
+#endif
 
 // compute out = (J*inv(M)*J' + cfm)*in.
 // use z as an nb*6 temporary.
@@ -834,6 +835,8 @@ void dxQuickStepIsland(const dxStepperProcessingCallContext *callContext)
 static 
 int dxQuickStepIsland_Stage0_Bodies_Callback(void *_callContext, dcallindex_t callInstanceIndex, dCallReleaseeID callThisReleasee)
 {
+    (void)callInstanceIndex; // unused
+    (void)callThisReleasee; // unused
     dxQuickStepperStage0BodiesCallContext *callContext = (dxQuickStepperStage0BodiesCallContext *)_callContext;
     dxQuickStepIsland_Stage0_Bodies(callContext);
     return 1;
@@ -982,6 +985,8 @@ void dxQuickStepIsland_Stage0_Bodies(dxQuickStepperStage0BodiesCallContext *call
 static 
 int dxQuickStepIsland_Stage0_Joints_Callback(void *_callContext, dcallindex_t callInstanceIndex, dCallReleaseeID callThisReleasee)
 {
+    (void)callInstanceIndex; // unused
+    (void)callThisReleasee; // unused
     dxQuickStepperStage0JointsCallContext *callContext = (dxQuickStepperStage0JointsCallContext *)_callContext;
     dxQuickStepIsland_Stage0_Joints(callContext);
     return 1;
@@ -1024,6 +1029,8 @@ void dxQuickStepIsland_Stage0_Joints(dxQuickStepperStage0JointsCallContext *call
 static 
 int dxQuickStepIsland_Stage1_Callback(void *_stage1CallContext, dcallindex_t callInstanceIndex, dCallReleaseeID callThisReleasee)
 {
+    (void)callInstanceIndex; // unused
+    (void)callThisReleasee; // unused
     dxQuickStepperStage1CallContext *stage1CallContext = (dxQuickStepperStage1CallContext *)_stage1CallContext;
     dxQuickStepIsland_Stage1(stage1CallContext);
     return 1;
@@ -1050,7 +1057,7 @@ void dxQuickStepIsland_Stage1(dxQuickStepperStage1CallContext *stage1CallContext
     }
 
     dxWorld *world = callContext->m_world;
-    dxBody * const *body = callContext->m_islandBodiesStart;
+    //dxBody * const *body = callContext->m_islandBodiesStart;
     unsigned int nb = callContext->m_islandBodiesCount;
 
     unsigned int *mindex = NULL;
@@ -1140,6 +1147,8 @@ void dxQuickStepIsland_Stage1(dxQuickStepperStage1CallContext *stage1CallContext
 static 
 int dxQuickStepIsland_Stage2a_Callback(void *_stage2CallContext, dcallindex_t callInstanceIndex, dCallReleaseeID callThisReleasee)
 {
+    (void)callInstanceIndex; // unused
+    (void)callThisReleasee; // unused
     dxQuickStepperStage2CallContext *stage2CallContext = (dxQuickStepperStage2CallContext *)_stage2CallContext;
     dxQuickStepIsland_Stage2a(stage2CallContext);
     return 1;
@@ -1260,6 +1269,7 @@ void dxQuickStepIsland_Stage2a(dxQuickStepperStage2CallContext *stage2CallContex
 static 
 int dxQuickStepIsland_Stage2aSync_Callback(void *_stage2CallContext, dcallindex_t callInstanceIndex, dCallReleaseeID callThisReleasee)
 {
+    (void)callInstanceIndex; // unused
     dxQuickStepperStage2CallContext *stage2CallContext = (dxQuickStepperStage2CallContext *)_stage2CallContext;
     const dxStepperProcessingCallContext *callContext = stage2CallContext->m_stepperCallContext;
     dxWorld *world = callContext->m_world;
@@ -1274,6 +1284,8 @@ int dxQuickStepIsland_Stage2aSync_Callback(void *_stage2CallContext, dcallindex_
 static 
 int dxQuickStepIsland_Stage2b_Callback(void *_stage2CallContext, dcallindex_t callInstanceIndex, dCallReleaseeID callThisReleasee)
 {
+    (void)callInstanceIndex; // unused
+    (void)callThisReleasee; // unused
     dxQuickStepperStage2CallContext *stage2CallContext = (dxQuickStepperStage2CallContext *)_stage2CallContext;
     dxQuickStepIsland_Stage2b(stage2CallContext);
     return 1;
@@ -1318,6 +1330,7 @@ void dxQuickStepIsland_Stage2b(dxQuickStepperStage2CallContext *stage2CallContex
 static 
 int dxQuickStepIsland_Stage2bSync_Callback(void *_stage2CallContext, dcallindex_t callInstanceIndex, dCallReleaseeID callThisReleasee)
 {
+    (void)callInstanceIndex; // unused
     dxQuickStepperStage2CallContext *stage2CallContext = (dxQuickStepperStage2CallContext *)_stage2CallContext;
     const dxStepperProcessingCallContext *callContext = stage2CallContext->m_stepperCallContext;
     dxWorld *world = callContext->m_world;
@@ -1333,6 +1346,8 @@ int dxQuickStepIsland_Stage2bSync_Callback(void *_stage2CallContext, dcallindex_
 static 
 int dxQuickStepIsland_Stage2c_Callback(void *_stage2CallContext, dcallindex_t callInstanceIndex, dCallReleaseeID callThisReleasee)
 {
+    (void)callInstanceIndex; // unused
+    (void)callThisReleasee; // unused
     dxQuickStepperStage2CallContext *stage2CallContext = (dxQuickStepperStage2CallContext *)_stage2CallContext;
     dxQuickStepIsland_Stage2c(stage2CallContext);
     return 1;
@@ -1341,10 +1356,10 @@ int dxQuickStepIsland_Stage2c_Callback(void *_stage2CallContext, dcallindex_t ca
 static 
 void dxQuickStepIsland_Stage2c(dxQuickStepperStage2CallContext *stage2CallContext)
 {
-    const dxStepperProcessingCallContext *callContext = stage2CallContext->m_stepperCallContext;
+    //const dxStepperProcessingCallContext *callContext = stage2CallContext->m_stepperCallContext;
     const dxQuickStepperLocalContext *localContext = stage2CallContext->m_localContext;
 
-    const dReal stepsizeRecip = dRecip(callContext->m_stepSize);
+    //const dReal stepsizeRecip = dRecip(callContext->m_stepSize);
     {
         // Warning!!!
         // This code depends on rhs_tmp and therefore must be in different sub-stage 
@@ -1366,6 +1381,8 @@ void dxQuickStepIsland_Stage2c(dxQuickStepperStage2CallContext *stage2CallContex
 static 
 int dxQuickStepIsland_Stage3_Callback(void *_stage3CallContext, dcallindex_t callInstanceIndex, dCallReleaseeID callThisReleasee)
 {
+    (void)callInstanceIndex; // unused
+    (void)callThisReleasee; // unused
     dxQuickStepperStage3CallContext *stage3CallContext = (dxQuickStepperStage3CallContext *)_stage3CallContext;
     dxQuickStepIsland_Stage3(stage3CallContext);
     return 1;
@@ -1387,7 +1404,7 @@ void dxQuickStepIsland_Stage3(dxQuickStepperStage3CallContext *stage3CallContext
     unsigned int nj = localContext->m_nj;
     unsigned int m = localContext->m_m;
     unsigned int mfb = localContext->m_mfb;
-    const unsigned int *mindex = localContext->m_mindex;
+    //const unsigned int *mindex = localContext->m_mindex;
     const int *findex = localContext->m_findex;
     dReal *J = localContext->m_J;
     dReal *cfm = localContext->m_cfm;
@@ -1592,9 +1609,12 @@ static size_t EstimateSOR_LCPMemoryRequirements(unsigned int m)
 }
 
 /*extern */
-size_t dxEstimateQuickStepMemoryRequirements (
-    dxBody * const *body, unsigned int nb, dxJoint * const *_joint, unsigned int _nj)
+size_t dxEstimateQuickStepMemoryRequirements (dxBody * const *body,
+                                              unsigned int nb,
+                                              dxJoint * const *_joint,
+                                              unsigned int _nj)
 {
+    (void)body; // unused
     unsigned int nj, m, mfb;
 
     {
@@ -1675,9 +1695,9 @@ size_t dxEstimateQuickStepMemoryRequirements (
 }
 
 /*extern */
-unsigned dxEstimateQuickStepMaxCallCount(
-    unsigned activeThreadCount, unsigned allowedThreadCount)
+unsigned dxEstimateQuickStepMaxCallCount(unsigned activeThreadCount, unsigned allowedThreadCount)
 {
+    (void)activeThreadCount; // unused
     unsigned result = 1 // dxQuickStepIsland itself
         + (2 * allowedThreadCount + 2) // (dxQuickStepIsland_Stage2a + dxQuickStepIsland_Stage2b) * allowedThreadCount + 2 * dxStepIsland_Stage2?_Sync
         + 1; // dxStepIsland_Stage3

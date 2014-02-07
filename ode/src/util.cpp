@@ -216,6 +216,8 @@ bool dxWorldProcessContext::ReallocateStepperMemArenas(
     dxWorldProcessMemArena *pmaExistingArenas = GetStepperArenasList();
     unsigned nArenasToProcess = nIslandThreadsCount;
 
+    (void)world; // unused
+
     // NOTE!
     // The list is reallocated in a way to assure the largest arenas are at end 
     // and if number of threads decreases they will be freed first of all.
@@ -938,6 +940,8 @@ bool dxProcessIslands (dxWorld *world, const dxWorldProcessIslandsInfo &islandsI
 
 int dxIslandsProcessingCallContext::ThreadedProcessGroup_Callback(void *callContext, dcallindex_t callInstanceIndex, dCallReleaseeID callThisReleasee)
 {
+    (void)callInstanceIndex; // unused
+    (void)callThisReleasee; // unused
     return static_cast<dxIslandsProcessingCallContext *>(callContext)->ThreadedProcessGroup();
 }
 
@@ -949,6 +953,8 @@ bool dxIslandsProcessingCallContext::ThreadedProcessGroup()
 
 int dxIslandsProcessingCallContext::ThreadedProcessJobStart_Callback(void *callContext, dcallindex_t callInstanceIndex, dCallReleaseeID callThisReleasee)
 {
+    (void)callInstanceIndex; // unused
+    (void)callThisReleasee; // unused
     static_cast<dxIslandsProcessingCallContext *>(callContext)->ThreadedProcessJobStart();
     return true;
 }
@@ -976,6 +982,8 @@ void dxIslandsProcessingCallContext::ThreadedProcessJobStart()
 
 int dxIslandsProcessingCallContext::ThreadedProcessIslandSearch_Callback(void *callContext, dcallindex_t callInstanceIndex, dCallReleaseeID callThisReleasee)
 {
+    (void)callInstanceIndex; // unused
+    (void)callThisReleasee; // unused
     dxSingleIslandCallContext *stepperCallContext = static_cast<dxSingleIslandCallContext *>(callContext);
     stepperCallContext->m_islandsProcessingContext->ThreadedProcessIslandSearch(stepperCallContext);
     return true;
@@ -1045,6 +1053,8 @@ void dxIslandsProcessingCallContext::ThreadedProcessIslandSearch(dxSingleIslandC
 
 int dxIslandsProcessingCallContext::ThreadedProcessIslandStepper_Callback(void *callContext, dcallindex_t callInstanceIndex, dCallReleaseeID callThisReleasee)
 {
+    (void)callInstanceIndex; // unused
+    (void)callThisReleasee; // unused
     dxSingleIslandCallContext *stepperCallContext = static_cast<dxSingleIslandCallContext *>(callContext);
     stepperCallContext->m_islandsProcessingContext->ThreadedProcessIslandStepper(stepperCallContext);
     return true;

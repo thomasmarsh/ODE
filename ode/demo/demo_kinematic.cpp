@@ -102,7 +102,7 @@ void removeQueued()
 }
 
 
-void nearCallback(void *data, dGeomID g1, dGeomID g2)
+void nearCallback(void *, dGeomID g1, dGeomID g2)
 {
     if (g1 == ground->id()) {
         queueRemoval(g2);
@@ -142,7 +142,7 @@ simLoop(int pause)
         t += timestep/4;
         if (t > 2*M_PI)
             t = 0;
-        dVector3 next_pos = { cos(t), sin(t), 0.5};
+        dVector3 next_pos = { dCos(t), dSin(t), REAL(0.5)};
         dVector3 vel;
         // vel = (next_pos - cur_pos) / timestep
         dSubtractVectors3(vel, next_pos, kbody->getPosition());

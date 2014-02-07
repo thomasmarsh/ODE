@@ -396,7 +396,7 @@ static void setShadowTransform()
 
 static void drawConvex (float *_planes,unsigned int _planecount,
 			float *_points,
-			unsigned int _pointcount,
+			unsigned int /*_pointcount*/,
 			unsigned int *_polygons)
 {
   unsigned int polyindex=0;
@@ -421,7 +421,7 @@ static void drawConvex (float *_planes,unsigned int _planecount,
 
 static void drawConvexD (double *_planes,unsigned int _planecount,
 			 double *_points,
-			 unsigned int _pointcount,
+			 unsigned int /*_pointcount*/,
 			 unsigned int *_polygons)
 {
   unsigned int polyindex=0;
@@ -896,7 +896,7 @@ static Texture *texture[4+1]; // +1 since index 0 is not used
 
 #if !defined(macintosh) || defined(ODE_PLATFORM_OSX)
 
-void dsStartGraphics (int width, int height, dsFunctions *fn)
+void dsStartGraphics (int /*width*/, int /*height*/, dsFunctions *fn)
 {
 
   const char *prefix = DEFAULT_PATH_TO_TEXTURES;

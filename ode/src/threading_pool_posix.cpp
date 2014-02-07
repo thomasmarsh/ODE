@@ -778,6 +778,9 @@ void dxThreadingThreadPool::WaitIdleState()
     }
 #else
     dThreadingThreadPoolID thread_pool = NULL;
+    (void)stack_size; // unused
+    (void)ode_data_allocate_flags; // unused
+    (void)reserved; // unused
 #endif // #if dBUILTIN_THREADING_IMPL_ENABLED
 
     return (dThreadingThreadPoolID)thread_pool;
@@ -788,6 +791,9 @@ void dxThreadingThreadPool::WaitIdleState()
 #if dBUILTIN_THREADING_IMPL_ENABLED
     dxThreadingThreadPool *thread_pool = (dxThreadingThreadPool *)pool;
     thread_pool->ServeThreadingImplementation(impl);
+#else
+    (void)pool; // unused
+    (void)impl; // unused
 #endif // #if dBUILTIN_THREADING_IMPL_ENABLED
 }
 
@@ -796,6 +802,8 @@ void dxThreadingThreadPool::WaitIdleState()
 #if dBUILTIN_THREADING_IMPL_ENABLED
     dxThreadingThreadPool *thread_pool = (dxThreadingThreadPool *)pool;
     thread_pool->WaitIdleState();
+#else
+    (void)pool; // unused
 #endif // #if dBUILTIN_THREADING_IMPL_ENABLED
 }
 
@@ -804,6 +812,8 @@ void dxThreadingThreadPool::WaitIdleState()
 #if dBUILTIN_THREADING_IMPL_ENABLED
     dxThreadingThreadPool *thread_pool = (dxThreadingThreadPool *)pool;
     delete thread_pool;
+#else
+    (void)pool; // unused
 #endif // #if dBUILTIN_THREADING_IMPL_ENABLED
 }
 

@@ -419,31 +419,15 @@ static void printRay (PrintingContext &c, dxGeom *g)
 }
 
 
-static void printConvex (PrintingContext &c, dxGeom *g)
+static void printConvex (PrintingContext &c, dxGeom */*g*/)
 {
     c.print ("type","convex");
     ///@todo Print information about convex hull
 }
 
 
-static void printGeomTransform (PrintingContext &c, dxGeom *g)
-{
-    dxGeom *g2 = dGeomTransformGetGeom (g);
-    const dReal *pos = dGeomGetPosition (g2);
-    dQuaternion q;
-    dGeomGetQuaternion (g2,q);
-    c.print ("type","transform");
-    c.print ("pos",pos);
-    c.print ("q",q,4);
-    c.print ("geometry = {");
-    c.indent++;
-    printGeom (c,g2);
-    c.indent--;
-    c.print ("}");
-}
 
-
-static void printTriMesh (PrintingContext &c, dxGeom *g)
+static void printTriMesh (PrintingContext &c, dxGeom */*g*/)
 {
     c.print ("type","trimesh");
     //@@@ i don't think that the trimesh accessor functions are really
@@ -453,7 +437,7 @@ static void printTriMesh (PrintingContext &c, dxGeom *g)
 }
 
 
-static void printHeightfieldClass (PrintingContext &c, dxGeom *g)
+static void printHeightfieldClass (PrintingContext &c, dxGeom */*g*/)
 {
     c.print ("type","heightfield");
     ///@todo Print information about heightfield
@@ -483,7 +467,6 @@ static void printGeom (PrintingContext &c, dxGeom *g)
         case dPlaneClass: printPlane (c,g); break;
         case dRayClass: printRay (c,g); break;
         case dConvexClass: printConvex (c,g); break;
-        case dGeomTransformClass: printGeomTransform (c,g); break;
         case dTriMeshClass: printTriMesh (c,g); break;
         case dHeightfieldClass: printHeightfieldClass (c,g); break;
     }

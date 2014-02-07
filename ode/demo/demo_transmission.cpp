@@ -232,8 +232,6 @@ void simLoop(int pause)
 {
     if (!pause) {
 
-        static dReal t = 0;
-
         const dReal step = 0.003;
         const unsigned nsteps = 4;
 

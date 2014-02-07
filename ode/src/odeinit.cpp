@@ -110,7 +110,8 @@ static bool AllocateThreadBasicDataIfNecessary(EODEINITMODE imInitMode)
                 break;
             }
         }
-
+#else
+        (void)imInitMode; // unused
 #endif // #if dTLS_ENABLED
 
         bResult = true;
@@ -136,7 +137,8 @@ static void FreeThreadBasicDataOnFailureIfNecessary(EODEINITMODE imInitMode)
             COdeTls::CleanupForThread();
         }
     }
-
+#else
+    (void)imInitMode; // unused
 #endif // #if dTLS_ENABLED
 }
 
@@ -191,7 +193,8 @@ static bool AllocateThreadCollisionDataIfNecessary(EODEINITMODE imInitMode, bool
 
             bOutDataAllocated = true;
         }
-
+#else
+        (void)imInitMode; // unused
 #endif // #if dTLS_ENABLED
 
         bResult = true;
@@ -210,7 +213,8 @@ static void FreeThreadCollisionData(EODEINITMODE imInitMode)
     COdeTls::DestroyTrimeshCollidersCache(tkTlsKind);
 
     COdeTls::DropDataAllocationFlags(tkTlsKind, TLD_INTERNAL_COLLISIONDATA_ALLOCATED);
-
+#else
+    (void)imInitMode; // unused
 #endif // dTLS_ENABLED
 }
 
@@ -228,6 +232,8 @@ static bool InitODEForMode(EODEINITMODE imInitMode)
 #if dTLS_ENABLED
     EODETLSKIND tkTLSKindToInit = g_atkTLSKindsByInitMode[imInitMode];
     bool bTlsInitialized = false;
+#else
+    (void)imInitMode; // unused
 #endif
 
     bool bWorldThreadingInitialized = false;
@@ -393,6 +399,8 @@ static void CloseODEForMode(EODEINITMODE imInitMode)
 #if dTLS_ENABLED
     EODETLSKIND tkTLSKindToFinalize = g_atkTLSKindsByInitMode[imInitMode];
     COdeTls::Finalize(tkTLSKindToFinalize);
+#else
+    (void)imInitMode; // unused
 #endif
 
     if (!bAnyModeStillInitialized)
