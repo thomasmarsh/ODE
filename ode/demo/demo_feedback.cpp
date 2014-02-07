@@ -122,7 +122,6 @@ static void command (int)
 {}
 
 
-
 void drawGeom (dGeomID g)
 {
   const dReal *pos = dGeomGetPosition(g);
