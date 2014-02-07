@@ -52,8 +52,8 @@ int dCollideRTL(dxGeom* g1, dxGeom* RayGeom, int Flags, dContactGeom* Contacts, 
 
     dReal Length = dGeomRayGetLength(RayGeom);
 
-    int FirstContact, BackfaceCull;
-    dGeomRayGetParams(RayGeom, &FirstContact, &BackfaceCull);
+    int FirstContact = dGeomRayGetFirstContact(RayGeom);
+    int BackfaceCull = dGeomRayGetBackfaceCull(RayGeom);
     int ClosestHit = dGeomRayGetClosestHit(RayGeom);
 
     Collider.SetFirstContact(FirstContact != 0);

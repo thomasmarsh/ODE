@@ -1073,8 +1073,12 @@ ODE_API void dGeomRayGet (dGeomID ray, dVector3 start, dVector3 dir);
  * These flags are currently only noticed by the trimesh collider, because
  * they can make a major differences there.
  */
-ODE_API void dGeomRaySetParams (dGeomID g, int FirstContact, int BackfaceCull);
-ODE_API void dGeomRayGetParams (dGeomID g, int *FirstContact, int *BackfaceCull);
+ODE_API_DEPRECATED ODE_API void dGeomRaySetParams (dGeomID g, int FirstContact, int BackfaceCull);
+ODE_API_DEPRECATED ODE_API void dGeomRayGetParams (dGeomID g, int *FirstContact, int *BackfaceCull);
+ODE_API void dGeomRaySetFirstContact (dGeomID g, int firstContact);
+ODE_API int dGeomRayGetFirstContact (dGeomID g);
+ODE_API void dGeomRaySetBackfaceCull (dGeomID g, int backfaceCull);
+ODE_API int dGeomRayGetBackfaceCull (dGeomID g);
 ODE_API void dGeomRaySetClosestHit (dGeomID g, int closestHit);
 ODE_API int dGeomRayGetClosestHit (dGeomID g);
 
