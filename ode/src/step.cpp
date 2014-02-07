@@ -211,33 +211,6 @@ static void dxStepIsland_Stage3(dxStepperStage3CallContext *callContext);
 //****************************************************************************
 // special matrix multipliers
 
-// this assumes the 4th and 8th rows of B and C are zero.
-
-static void Multiply2_p8r (dReal *A, const dReal *B, const dReal *C,
-                           unsigned int p, unsigned int r, int Askip)
-{
-    dIASSERT (p>0 && r>0 && A && B && C);
-    const int Askip_munus_r = Askip - r;
-    dReal *aa = A;
-    const dReal *bb = B;
-    for (unsigned int i = p; i != 0; --i) {
-        const dReal *cc = C;
-        for (unsigned int j = r; j != 0; --j) {
-            dReal sum;
-            sum  = bb[0]*cc[0];
-            sum += bb[1]*cc[1];
-            sum += bb[2]*cc[2];
-            sum += bb[4]*cc[4];
-            sum += bb[5]*cc[5];
-            sum += bb[6]*cc[6];
-            *(aa++) = sum; 
-            cc += 8;
-        }
-        bb += 8;
-        aa += Askip_munus_r;
-    }
-}
-
 
 // this assumes the 4th and 8th rows of B and C are zero.
 
@@ -397,6 +370,8 @@ void dxStepIsland(const dxStepperProcessingCallContext *callContext)
 static 
 int dxStepIsland_Stage0_Bodies_Callback(void *_callContext, dcallindex_t callInstanceIndex, dCallReleaseeID callThisReleasee)
 {
+    (void)callInstanceIndex; // unused
+    (void)callThisReleasee; // unused
     dxStepperStage0BodiesCallContext *callContext = (dxStepperStage0BodiesCallContext *)_callContext;
     dxStepIsland_Stage0_Bodies(callContext);
     return 1;
@@ -545,6 +520,8 @@ void dxStepIsland_Stage0_Bodies(dxStepperStage0BodiesCallContext *callContext)
 static 
 int dxStepIsland_Stage0_Joints_Callback(void *_callContext, dcallindex_t callInstanceIndex, dCallReleaseeID callThisReleasee)
 {
+    (void)callInstanceIndex; // unused
+    (void)callThisReleasee; // unused
     dxStepperStage0JointsCallContext *callContext = (dxStepperStage0JointsCallContext *)_callContext;
     dxStepIsland_Stage0_Joints(callContext);
     return 1;
@@ -710,6 +687,8 @@ void dxStepIsland_Stage0_Joints(dxStepperStage0JointsCallContext *callContext)
 static 
 int dxStepIsland_Stage1_Callback(void *_stage1CallContext, dcallindex_t callInstanceIndex, dCallReleaseeID callThisReleasee)
 {
+    (void)callInstanceIndex; // unused
+    (void)callThisReleasee; // unused
     dxStepperStage1CallContext *stage1CallContext = (dxStepperStage1CallContext *)_stage1CallContext;
     dxStepIsland_Stage1(stage1CallContext);
     return 1;
@@ -757,7 +736,7 @@ void dxStepIsland_Stage1(dxStepperStage1CallContext *stage1CallContext)
 
             const dJointWithInfo1 *const jiend = jointinfos + nj;
             for (const dJointWithInfo1 *jicurr = jointinfos; jicurr != jiend; ++jicurr) {
-                dxJoint *joint = jicurr->joint;
+                //dxJoint *joint = jicurr->joint;
                 moffs += jicurr->info.m;
                 mcurr[0] = moffs;
                 mcurr += 1;
@@ -828,6 +807,8 @@ void dxStepIsland_Stage1(dxStepperStage1CallContext *stage1CallContext)
 static 
 int dxStepIsland_Stage2a_Callback(void *_stage2CallContext, dcallindex_t callInstanceIndex, dCallReleaseeID callThisReleasee)
 {
+    (void)callInstanceIndex; // unused
+    (void)callThisReleasee; // unused
     dxStepperStage2CallContext *stage2CallContext = (dxStepperStage2CallContext *)_stage2CallContext;
     dxStepIsland_Stage2a(stage2CallContext);
     return 1;
@@ -923,6 +904,7 @@ void dxStepIsland_Stage2a(dxStepperStage2CallContext *stage2CallContext)
 static 
 int dxStepIsland_Stage2aSync_Callback(void *_stage2CallContext, dcallindex_t callInstanceIndex, dCallReleaseeID callThisReleasee)
 {
+    (void)callInstanceIndex; // unused
     dxStepperStage2CallContext *stage2CallContext = (dxStepperStage2CallContext *)_stage2CallContext;
     const dxStepperProcessingCallContext *callContext = stage2CallContext->m_stepperCallContext;
     dxWorld *world = callContext->m_world;
@@ -937,6 +919,8 @@ int dxStepIsland_Stage2aSync_Callback(void *_stage2CallContext, dcallindex_t cal
 static 
 int dxStepIsland_Stage2b_Callback(void *_stage2CallContext, dcallindex_t callInstanceIndex, dCallReleaseeID callThisReleasee)
 {
+    (void)callInstanceIndex; // unused
+    (void)callThisReleasee; // unused
     dxStepperStage2CallContext *stage2CallContext = (dxStepperStage2CallContext *)_stage2CallContext;
     dxStepIsland_Stage2b(stage2CallContext);
     return 1;
@@ -1066,6 +1050,7 @@ void dxStepIsland_Stage2b(dxStepperStage2CallContext *stage2CallContext)
 static 
 int dxStepIsland_Stage2bSync_Callback(void *_stage2CallContext, dcallindex_t callInstanceIndex, dCallReleaseeID callThisReleasee)
 {
+    (void)callInstanceIndex; // unused
     dxStepperStage2CallContext *stage2CallContext = (dxStepperStage2CallContext *)_stage2CallContext;
     const dxStepperProcessingCallContext *callContext = stage2CallContext->m_stepperCallContext;
     dxWorld *world = callContext->m_world;
@@ -1081,6 +1066,8 @@ int dxStepIsland_Stage2bSync_Callback(void *_stage2CallContext, dcallindex_t cal
 static 
 int dxStepIsland_Stage2c_Callback(void *_stage2CallContext, dcallindex_t callInstanceIndex, dCallReleaseeID callThisReleasee)
 {
+    (void)callInstanceIndex; // unused
+    (void)callThisReleasee; // unused
     dxStepperStage2CallContext *stage2CallContext = (dxStepperStage2CallContext *)_stage2CallContext;
     dxStepIsland_Stage2c(stage2CallContext);
     return 1;
@@ -1089,7 +1076,7 @@ int dxStepIsland_Stage2c_Callback(void *_stage2CallContext, dcallindex_t callIns
 static 
 void dxStepIsland_Stage2c(dxStepperStage2CallContext *stage2CallContext)
 {
-    const dxStepperProcessingCallContext *callContext = stage2CallContext->m_stepperCallContext;
+    //const dxStepperProcessingCallContext *callContext = stage2CallContext->m_stepperCallContext;
     const dxStepperLocalContext *localContext = stage2CallContext->m_localContext;
     dJointWithInfo1 *jointinfos = localContext->m_jointinfos;
     unsigned int nj = localContext->m_nj;
@@ -1208,6 +1195,8 @@ void dxStepIsland_Stage2c(dxStepperStage2CallContext *stage2CallContext)
 static 
 int dxStepIsland_Stage3_Callback(void *_stage3CallContext, dcallindex_t callInstanceIndex, dCallReleaseeID callThisReleasee)
 {
+    (void)callInstanceIndex; // unused
+    (void)callThisReleasee; // unused
     dxStepperStage3CallContext *stage3CallContext = (dxStepperStage3CallContext *)_stage3CallContext;
     dxStepIsland_Stage3(stage3CallContext);
     return 1;
@@ -1229,7 +1218,7 @@ void dxStepIsland_Stage3(dxStepperStage3CallContext *stage3CallContext)
     unsigned int nj = localContext->m_nj;
     unsigned int m = localContext->m_m;
     unsigned int nub = localContext->m_nub;
-    const unsigned int *mindex = localContext->m_mindex;
+    //const unsigned int *mindex = localContext->m_mindex;
     int *findex = localContext->m_findex;
     dReal *lo = localContext->m_lo;
     dReal *hi = localContext->m_hi;
@@ -1237,7 +1226,7 @@ void dxStepIsland_Stage3(dxStepperStage3CallContext *stage3CallContext)
     dReal *A = localContext->m_A;
     dReal *rhs = localContext->m_rhs;
 
-    dxWorld *world = callContext->m_world;
+    //dxWorld *world = callContext->m_world;
     dxBody * const *body = callContext->m_islandBodiesStart;
     unsigned int nb = callContext->m_islandBodiesCount;
 
@@ -1389,6 +1378,7 @@ void dxStepIsland_Stage3(dxStepperStage3CallContext *stage3CallContext)
 /*extern */
 size_t dxEstimateStepMemoryRequirements (dxBody * const *body, unsigned int nb, dxJoint * const *_joint, unsigned int _nj)
 {
+    (void)body; // unused
     unsigned int nj, m;
 
     {
@@ -1462,7 +1452,7 @@ size_t dxEstimateStepMemoryRequirements (dxBody * const *body, unsigned int nb, 
 
 /*extern */
 unsigned dxEstimateStepMaxCallCount(
-    unsigned activeThreadCount, unsigned allowedThreadCount)
+    unsigned /*activeThreadCount*/, unsigned allowedThreadCount)
 {
     unsigned result = 1 // dxStepIsland itself
         + (2 * allowedThreadCount + 2) // (dxStepIsland_Stage2a + dxStepIsland_Stage2b) * allowedThreadCount + 2 * dxStepIsland_Stage2?_Sync

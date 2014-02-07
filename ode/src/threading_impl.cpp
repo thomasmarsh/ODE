@@ -196,6 +196,7 @@ static const dxThreadingFunctionsInfo g_builtin_threading_functions =
 
 static dMutexGroupID AllocMutexGroup(dThreadingImplementationID impl, dmutexindex_t Mutex_count, const char *const *Mutex_names_ptr/*=NULL*/)
 {
+    (void)Mutex_names_ptr; // unused
     dIMutexGroup *mutex_group = ((dxIThreadingImplementation *)impl)->AllocMutexGroup(Mutex_count);
     return (dMutexGroupID)mutex_group;
 }
@@ -246,6 +247,7 @@ static void PostThreadedCall(
     dThreadedCallFunction *call_func, void *call_context, dcallindex_t instance_index, 
     const char *call_name/*=NULL*/)
 {
+    (void)call_name; // unused
     ((dxIThreadingImplementation *)impl)->ScheduleNewJob(out_summary_fault, out_post_releasee, 
         dependencies_count, dependent_releasee, (dxICallWait *)call_wait, call_func, call_context, instance_index);
 }
@@ -262,6 +264,7 @@ static void WaitThreadedCall(
     dCallWaitID call_wait, const dThreadedWaitTime *timeout_time_ptr/*=NULL*/, 
     const char *wait_name/*=NULL*/)
 {
+    (void)wait_name; // unused
     ((dxIThreadingImplementation *)impl)->WaitJobCompletion(out_wait_status, (dxICallWait *)call_wait, timeout_time_ptr);
 }
 

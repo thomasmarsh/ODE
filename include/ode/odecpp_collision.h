@@ -390,7 +390,10 @@ public:
 };
 
 
-class dGeomTransform : public dGeom {
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+
+class ODE_API_DEPRECATED dGeomTransform : public dGeom {
   // intentionally undefined, don't use these
   dGeomTransform (dGeomTransform &);
   void operator= (dGeomTransform &);
@@ -422,6 +425,8 @@ public:
   int getInfo()
     { return dGeomTransformGetInfo (_id); }
 };
+
+#pragma GCC diagnostic pop
 
 //}
 

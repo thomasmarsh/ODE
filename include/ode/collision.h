@@ -1080,13 +1080,13 @@ ODE_API int dGeomRayGetClosestHit (dGeomID g);
 
 #include "collision_trimesh.h"
 
-ODE_API dGeomID dCreateGeomTransform (dSpaceID space);
-ODE_API void dGeomTransformSetGeom (dGeomID g, dGeomID obj);
-ODE_API dGeomID dGeomTransformGetGeom (dGeomID g);
-ODE_API void dGeomTransformSetCleanup (dGeomID g, int mode);
-ODE_API int dGeomTransformGetCleanup (dGeomID g);
-ODE_API void dGeomTransformSetInfo (dGeomID g, int mode);
-ODE_API int dGeomTransformGetInfo (dGeomID g);
+ODE_API_DEPRECATED ODE_API dGeomID dCreateGeomTransform (dSpaceID space);
+ODE_API_DEPRECATED ODE_API void dGeomTransformSetGeom (dGeomID g, dGeomID obj);
+ODE_API_DEPRECATED ODE_API dGeomID dGeomTransformGetGeom (dGeomID g);
+ODE_API_DEPRECATED ODE_API void dGeomTransformSetCleanup (dGeomID g, int mode);
+ODE_API_DEPRECATED ODE_API int dGeomTransformGetCleanup (dGeomID g);
+ODE_API_DEPRECATED ODE_API void dGeomTransformSetInfo (dGeomID g, int mode);
+ODE_API_DEPRECATED ODE_API int dGeomTransformGetInfo (dGeomID g);
 
 
 /* ************************************************************************ */

@@ -54,7 +54,7 @@ dxJointDBall::getInfo1( dxJoint::Info1 *info )
 }
 
 void
-dxJointDBall::getInfo2( dReal worldFPS, dReal worldERP, const Info2Descr *info )
+dxJointDBall::getInfo2( dReal worldFPS, dReal /*worldERP*/, const Info2Descr *info )
 {
     info->cfm[0] = this->cfm;
 

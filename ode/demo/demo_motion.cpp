@@ -170,7 +170,7 @@ static void contactplat_2(dContact &contact)
 
 
 
-static void nearCallback (void *data, dGeomID o1, dGeomID o2)
+static void nearCallback (void *, dGeomID o1, dGeomID o2)
 {
     dMatrix3 RI;
     static const dReal ss[3] = {0.02,0.02,0.02};
@@ -377,19 +377,7 @@ void drawGeom (dGeomID g, const dReal *pos, const dReal *R, int show_aabb)
         dGeomCylinderGetParams (g,&radius,&length);
         dsDrawCylinder (pos,R,length,radius);
     }
-    else if (type == dGeomTransformClass) {
-        dGeomID g2 = dGeomTransformGetGeom (g);
-        const dReal *pos2 = dGeomGetPosition (g2);
-        const dReal *R2 = dGeomGetRotation (g2);
-        dVector3 actual_pos;
-        dMatrix3 actual_R;
-        dMultiply0_331 (actual_pos,R,pos2);
-        actual_pos[0] += pos[0];
-        actual_pos[1] += pos[1];
-        actual_pos[2] += pos[2];
-        dMultiply0_333 (actual_R,R,R2);
-        drawGeom (g2,actual_pos,actual_R,0);
-    }
+
     if (show_body) {
         dBodyID body = dGeomGetBody(g);
         if (body) {

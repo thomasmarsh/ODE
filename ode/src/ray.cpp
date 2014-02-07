@@ -516,35 +516,35 @@ int dCollideRayCylinder( dxGeom *o1, dxGeom *o2, int flags, dContactGeom *contac
     const dReal half_length = cyl->lz * REAL( 0.5 );
 
 
-    // Possible collision cases:
-    //  Ray origin between/outside caps
-    //  Ray origin within/outside radius
-    //  Ray direction left/right/perpendicular
-    //  Ray direction parallel/perpendicular/other
-    // 
-    //  Ray origin cases (ignoring origin on surface)
-    //
-    //  A          B
-    //     /-\-----------\
-    //  C (   )    D      )
-    //     \_/___________/
-    //
-    //  Cases A and D can collide with caps or cylinder
-    //  Case C can only collide with the caps
-    //  Case B can only collide with the cylinder
-    //  Case D will produce inverted normals
-    //  If the ray is perpendicular, only check the cylinder
-    //  If the ray is parallel to cylinder axis,
-    //  we can only check caps
-    //  If the ray points right,
-    //    Case A,C Check left cap
-    //    Case  D  Check right cap
-    //  If the ray points left
-    //    Case A,C Check right cap
-    //    Case  D  Check left cap
-    //  Case B, check only first possible cylinder collision
-    //  Case D, check only second possible cylinder collision
-
+    /* Possible collision cases:
+     *  Ray origin between/outside caps
+     *  Ray origin within/outside radius
+     *  Ray direction left/right/perpendicular
+     *  Ray direction parallel/perpendicular/other
+     * 
+     *  Ray origin cases (ignoring origin on surface)
+     *
+     *  A          B
+     *     /-\-----------\
+     *  C (   )    D      )
+     *     \_/___________/
+     *
+     *  Cases A and D can collide with caps or cylinder
+     *  Case C can only collide with the caps
+     *  Case B can only collide with the cylinder
+     *  Case D will produce inverted normals
+     *  If the ray is perpendicular, only check the cylinder
+     *  If the ray is parallel to cylinder axis,
+     *  we can only check caps
+     *  If the ray points right,
+     *    Case A,C Check left cap
+     *    Case  D  Check right cap
+     *  If the ray points left
+     *    Case A,C Check right cap
+     *    Case  D  Check left cap
+     *  Case B, check only first possible cylinder collision
+     *  Case D, check only second possible cylinder collision
+     */
     // Find the ray in the cylinder coordinate frame:
     dVector3 tmp;
     dVector3 pos;  // Ray origin in cylinder frame
@@ -580,7 +580,7 @@ int dCollideRayCylinder( dxGeom *o1, dxGeom *o2, int flags, dContactGeom *contac
     int flipNormals = (inCaps&&inRadius);
 
     dReal tt=-dInfinity; // Depth to intersection
-    dVector3 tmpNorm;
+    dVector3 tmpNorm = {NAN, NAN, NAN}; // ensure we don't leak garbage
 
     if (checkCaps) {
         // Make it so we only need to check one cap

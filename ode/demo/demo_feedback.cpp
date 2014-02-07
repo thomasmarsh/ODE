@@ -118,9 +118,8 @@ static void start()
 
 // called when a key pressed
 
-static void command (int cmd)
-{
-}
+static void command (int)
+{}
 
 
 

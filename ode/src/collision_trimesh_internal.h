@@ -190,6 +190,8 @@ inline TrimeshCollidersCache *GetTrimeshCollidersCache(unsigned uiTLSKind)
 
 inline TrimeshCollidersCache *GetTrimeshCollidersCache(unsigned uiTLSKind)
 {
+    (void)uiTLSKind; // unused
+
     extern TrimeshCollidersCache g_ccTrimeshCollidersCache;
 
     return &g_ccTrimeshCollidersCache;
@@ -335,7 +337,6 @@ struct dxTriMesh : public dxGeom{
 
     bool controlGeometry(int controlClass, int controlCode, void *dataValue, int *dataSize);
 
-    int AABBTest(dxGeom* g, dReal aabb[6]);
     void computeAABB();
 
 #if dTRIMESH_OPCODE

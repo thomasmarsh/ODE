@@ -198,10 +198,6 @@ bool dxTriMesh::controlGeometry(int controlClass, int controlCode, void *dataVal
     return dxGeom::controlGeometry(controlClass, controlCode, dataValue, dataSize);
 }
 
-int dxTriMesh::AABBTest(dxGeom* g, dReal aabb[6]){
-    return 1;
-}
-
 
 void dxTriMesh::computeAABB()
 {

@@ -453,7 +453,7 @@ public:
     {
     }
 
-    ~dxtemplateThreadingImplementation()
+    virtual ~dxtemplateThreadingImplementation()
     {
         DoFinalizeObject();
     }
@@ -1051,6 +1051,8 @@ unsigned dxtemplateJobListSelfHandler<tThreadWakeup, tJobListContainer>::Retriev
 template<class tThreadWakeup, class tJobListContainer>
 void dxtemplateJobListSelfHandler<tThreadWakeup, tJobListContainer>::StickToJobsProcessing(dxThreadReadyToServeCallback *readiness_callback/*=NULL*/, void *callback_context/*=NULL*/)
 {
+    (void)readiness_callback; // unused
+    (void)callback_context; // unused
     dIASSERT(false); // This method is not expected to be called for Self-Handler
 }
 

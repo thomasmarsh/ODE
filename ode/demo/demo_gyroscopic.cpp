@@ -53,7 +53,7 @@ const dReal topmass = 1.0f;
 
 #define MAX_CONTACTS 4
 
-static void nearCallback (void *data, dGeomID o1, dGeomID o2)
+static void nearCallback (void *, dGeomID o1, dGeomID o2)
 {
     // for drawing the contact points
     dMatrix3 RI;
