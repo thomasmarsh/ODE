@@ -175,6 +175,7 @@ struct dxWorld : public dBase, public dxThreadingBase, private dxIThreadingDefau
     dxDampingParameters dampingp; // damping parameters
     dReal max_angular_speed;      // limit the angular velocity to this magnitude
 
+    void* userdata;
 
     dxWorld();
     virtual ~dxWorld(); // Compilers emit warnings if a class with virtual methods does not have a virtual destructor :(
