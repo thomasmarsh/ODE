@@ -15,7 +15,7 @@ AC_MSG_CHECKING([target OS])
 case "$host_os" in
   cygwin* | mingw*)
     targetos=_OU_TARGET_OS_WINDOWS
-    CXXFLAGS+="-mthreads $CXXFLAGS"
+    CXXFLAGS="-mthreads $CXXFLAGS"
     AC_MSG_RESULT([win32])
     ;;
   *qnx*)
