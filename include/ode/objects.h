@@ -2593,6 +2593,12 @@ ODE_API dReal dJointGetHinge2Param (dJointID, int parameter);
 ODE_API dReal dJointGetHinge2Angle1 (dJointID);
 
 /**
+ * @brief Get angle
+ * @ingroup joints
+ */
+ODE_API dReal dJointGetHinge2Angle2 (dJointID);
+
+/**
  * @brief Get time derivative of angle
  * @ingroup joints
  */
