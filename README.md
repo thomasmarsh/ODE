@@ -31,3 +31,4 @@ See the [COPYING](http://bitbucket.org/odedevs/ode/raw/default/COPYING) file for
    can view it on the web at [opende.sf.net/docs/index.html](http://opende.sf.net/docs/index.html).
 
 
+[![Build Status](https://drone.io/bitbucket.org/odedevs/ode/status.png)](https://drone.io/bitbucket.org/odedevs/ode/latest)
