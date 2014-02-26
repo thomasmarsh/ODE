@@ -363,11 +363,12 @@ dGeomID dGeomGetBodyNext (dGeomID);
  * ODE_EXT_trimesh
  * ODE_EXT_opcode
  * ODE_EXT_gimpact
- * ODE_EXT_malloc_not_alloca
- * ODE_EXT_gyroscopic
  * ODE_OPC_16bit_indices
  * ODE_OPC_new_collider
-*/
+ * ODE_EXT_mt_collisions
+ * ODE_EXT_threading
+ * ODE_THR_builtin_impl
+ */
 ODE_API const char* dGetConfiguration (void);
 
 /**
