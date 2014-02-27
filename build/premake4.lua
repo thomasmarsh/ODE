@@ -4,6 +4,8 @@
 -- For more information on Premake: http://industriousone.com/premake
 ----------------------------------------------------------------------
 
+  ode_version = "0.13"
+
 ----------------------------------------------------------------------
 -- Demo list: add/remove demos from here and the rest of the build
 -- should just work.
@@ -157,6 +159,7 @@
       os.rmdir(action.trigger)
     end
     os.remove("../ode/src/config.h")
+    os.remove("../include/ode/version.h")
     os.remove("../include/ode/precision.h")
     os.remove("../libccd/src/ccd/precision.h")
   end
@@ -465,7 +468,11 @@
     else 
       generate("UNDEFINEDPRECISION")
     end
+
+    generateheader("../include/ode/version.h", "@ODE_VERSION@", ode_version)
+
   end
+
 
 ----------------------------------------------------------------------
 -- The DrawStuff library project

@@ -44,6 +44,7 @@
 #include <ode/threading.h>
 #include <ode/threading_impl.h>
 #include <ode/export-dif.h>
+#include <ode/version.h>
 
 #ifdef __cplusplus
 # include <ode/odecpp.h>

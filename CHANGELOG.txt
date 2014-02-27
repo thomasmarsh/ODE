@@ -8,8 +8,11 @@ the rules for this file:
   * keep the format consistent (79 char width, M/D/Y date format).
 
 ------------------------------------------------------------------------------
+02/27/14 Daniel K. O.
+        * Added dODE_VERSION macro to public headers.
+
 02/11/14 Daniel K. O.
-         * Added dJointGetHinge2Angle2 (issue #12).
+        * Added dJointGetHinge2Angle2 (issue #12).
 
 01/31/14 Daniel K. O.
         * Applied patch #185: Stable, implicit gyroscopic forces.
