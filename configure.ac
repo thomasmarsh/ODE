@@ -507,6 +507,7 @@ AC_CONFIG_FILES([
  include/Makefile
  include/drawstuff/Makefile
  include/ode/Makefile
+ include/ode/version.h
  include/ode/precision.h
  ode/Makefile
  ode/src/Makefile
