@@ -33,6 +33,7 @@ test-driver
 ./m4/lt*.m4
 drawstuff/dstest/dstest
 include/ode/precision.h
+include/ode/version.h
 libccd/src/ccd/precision.h
 ou/test/outest
 tests/tests
