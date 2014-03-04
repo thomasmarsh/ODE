@@ -775,7 +775,7 @@ int dCollideSphereConvex (dxGeom *o1, dxGeom *o2, int flags,
 }
 
 int dCollideConvexBox (dxGeom *o1, dxGeom *o2, int flags,
-                       dContactGeom */*contact*/, int skip)
+                       dContactGeom * /*contact*/, int skip)
 {
     dIASSERT (skip >= (int)sizeof(dContactGeom));
     dIASSERT (o1->type == dConvexClass);
@@ -789,7 +789,7 @@ int dCollideConvexBox (dxGeom *o1, dxGeom *o2, int flags,
 }
 
 int dCollideConvexCapsule (dxGeom *o1, dxGeom *o2,
-                           int flags, dContactGeom */*contact*/, int skip)
+                           int flags, dContactGeom * /*contact*/, int skip)
 {
     dIASSERT (skip >= (int)sizeof(dContactGeom));
     dIASSERT (o1->type == dConvexClass);

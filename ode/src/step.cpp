@@ -489,24 +489,23 @@ void dxStepIsland_Stage0_Bodies(dxStepperStage0BodiesCallContext *callContext)
                         // "Divide" the original tensor
                         // by the pseudo-tensor (on the right)
                         dMultiply0_333(Itild,I,itInv);
+                        // Subtract an identity matrix
+                        Itild[0]-=1; Itild[5]-=1; Itild[10]-=1;
 
-                        // This new inertia matrix
-                        // rotates the momentum and accumulated
-                        // torques to get a new set of torques
+                        // This new inertia matrix rotates the 
+                        // momentum to get a new set of torques
                         // that will work correctly when applied
                         // to the old inertia matrix as explicit
                         // torques with a semi-implicit update
                         // step.
-                        dVector3 tau0,tau1;
+                        dVector3 tau0;
                         dMultiply0_331(tau0,Itild,L);
-                        dMultiply0_331(tau1,Itild,b->tacc);
-
-                        dVector3 impTorq;
-                        dAddVectors3(impTorq,tau0,tau1);
-                        // Pull the initial momentum-torque out
-                        // of the equation and replace the
-                        // value in the torque accumulator
-                        dSubtractVectors3(b->tacc,impTorq,L);
+                        
+                        // Add the gyro torques to the torque 
+                        // accumulator
+                        for (int ii=0;ii<3;++ii) {
+                          b->tacc[ii]+=tau0[ii];
+                        }
                     }
 #endif
                 }

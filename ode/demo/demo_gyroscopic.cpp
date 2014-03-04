@@ -88,6 +88,9 @@ static void start()
   static float xyz[3] = {4.777f, -2.084f, 2.18f};
   static float hpr[3] = {153.0f, -14.5f, 0.0f};
   dsSetViewpoint (xyz,hpr);
+  printf ("Orange top approximates conservation of angular momentum\n");
+  printf ("Green top uses conservation of angular velocity\n");
+  printf ("---\n");
   printf ("SPACE to reset\n");
   printf ("A to tilt the tops.\n");
   printf ("T to toggle showing the contact points.\n");
