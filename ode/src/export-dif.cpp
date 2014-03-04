@@ -419,7 +419,7 @@ static void printRay (PrintingContext &c, dxGeom *g)
 }
 
 
-static void printConvex (PrintingContext &c, dxGeom */*g*/)
+static void printConvex (PrintingContext &c, dxGeom * /*g*/)
 {
     c.print ("type","convex");
     ///@todo Print information about convex hull
@@ -427,7 +427,7 @@ static void printConvex (PrintingContext &c, dxGeom */*g*/)
 
 
 
-static void printTriMesh (PrintingContext &c, dxGeom */*g*/)
+static void printTriMesh (PrintingContext &c, dxGeom * /*g*/)
 {
     c.print ("type","trimesh");
     //@@@ i don't think that the trimesh accessor functions are really
@@ -437,7 +437,7 @@ static void printTriMesh (PrintingContext &c, dxGeom */*g*/)
 }
 
 
-static void printHeightfieldClass (PrintingContext &c, dxGeom */*g*/)
+static void printHeightfieldClass (PrintingContext &c, dxGeom * /*g*/)
 {
     c.print ("type","heightfield");
     ///@todo Print information about heightfield
