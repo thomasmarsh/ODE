@@ -65,10 +65,10 @@ static dGeomID sphere[NUM];
 
 static void nearCallback (void *data, dGeomID o1, dGeomID o2)
 {
-  (void)data; // unused
   /* exit without doing anything if the two bodies are connected by a joint */
   dBodyID b1,b2;
   dContact contact;
+  (void)data;
 
   b1 = dGeomGetBody(o1);
   b2 = dGeomGetBody(o2);

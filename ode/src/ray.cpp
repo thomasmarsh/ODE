@@ -612,8 +612,7 @@ int dCollideRayCylinder( dxGeom *o1, dxGeom *o2, int flags, dContactGeom *contac
     int flipNormals = (inCaps&&inRadius);
 
     dReal tt=-dInfinity; // Depth to intersection
-    // NAN isn't defined in the windows environment
-    dVector3 tmpNorm = {0, 0, 0}; // ensure we don't leak garbage
+    dVector3 tmpNorm = {dNaN, dNaN, dNaN}; // ensure we don't leak garbage
 
     if (checkCaps) {
         // Make it so we only need to check one cap
