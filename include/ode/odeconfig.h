@@ -129,6 +129,12 @@
   #endif
 #endif
 
+#ifdef dSINGLE
+  #define dNaN ((float)(dInfinity - dInfinity))
+#else
+  #define dNaN (dInfinity - dInfinity)
+#endif
+
 
   /* Visual C does not define these functions */
 #if defined(_MSC_VER)
