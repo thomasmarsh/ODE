@@ -129,10 +129,16 @@
   #endif
 #endif
 
-#ifdef dSINGLE
-  #define dNaN ((float)(dInfinity - dInfinity))
+
+/* Define the dNaN macro */
+#ifdef NAN
+  #define dNaN NAN
 #else
-  #define dNaN (dInfinity - dInfinity)
+  #ifdef dSINGLE
+    #define dNaN ((float)(dInfinity - dInfinity))
+  #else
+    #define dNaN (dInfinity - dInfinity)
+  #endif
 #endif
 
 
