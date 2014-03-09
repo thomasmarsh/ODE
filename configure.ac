@@ -66,6 +66,10 @@ AC_C_INLINE
 AC_C_VOLATILE
 PKG_PROG_PKG_CONFIG
 
+AC_ARG_VAR([DOXYGEN], [set to doxygen binary to generate doxygen docs])
+AC_CHECK_PROGS([DOXYGEN], [doxygen])
+AM_CONDITIONAL([HAVE_DOXYGEN], [test x$DOXYGEN = xdoxygen])
+
 
 dnl this may NOT be the machine on which the code is going to run in,
 dnl so allow users to compile programs for their target machine.
@@ -510,6 +514,8 @@ AC_CONFIG_FILES([
  include/ode/version.h
  include/ode/precision.h
  ode/Makefile
+ ode/doc/Doxyfile
+ ode/doc/Makefile
  ode/src/Makefile
  ode/src/joints/Makefile
  ode/demo/Makefile

@@ -40,8 +40,10 @@ tests/tests
 tests/tests.log
 tests/tests.trs
 tests/test-suite.log
+ode/doc/Doxyfile
 
 syntax: regexp
 # ignore all demo binaries, but not the sources
 ode/demo/demo_.+\.exe$
 ode/demo/demo_[^\.]+$
+ode/doc/html/.*
