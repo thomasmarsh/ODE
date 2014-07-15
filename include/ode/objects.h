@@ -65,6 +65,24 @@ ODE_API void dWorldDestroy (dWorldID world);
 
 
 /**
+ * @brief Set the user-data pointer
+ * @param world the world to set the data on
+ * @param data
+ * @ingroup world
+ */
+ODE_API void dWorldSetData (dWorldID world, void* data);
+
+
+/**
+ * @brief Get the user-data pointer
+ * @param world the world to set the data on
+ * @param data
+ * @ingroup world
+ */
+ODE_API void* dWorldGetData (dWorldID world);
+
+
+/**
  * @brief Set the world's global gravity vector.
  *
  * The units are m/s^2, so Earth's gravity vector would be (0,0,-9.81),
@@ -2573,6 +2591,12 @@ ODE_API dReal dJointGetHinge2Param (dJointID, int parameter);
  * @ingroup joints
  */
 ODE_API dReal dJointGetHinge2Angle1 (dJointID);
+
+/**
+ * @brief Get angle
+ * @ingroup joints
+ */
+ODE_API dReal dJointGetHinge2Angle2 (dJointID);
 
 /**
  * @brief Get time derivative of angle
