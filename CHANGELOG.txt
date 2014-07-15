@@ -8,6 +8,11 @@ the rules for this file:
   * keep the format consistent (79 char width, M/D/Y date format).
 
 ------------------------------------------------------------------------------
+07/16/2014 Oleh Derevenko
+        * Two fixes by Francesco Cat applied (fixes for mistakes made during
+          code style improvements in the past)
+        * Transmission joint function declarations corrected for MSVC compatibility
+		 
 02/27/14 Daniel K. O.
         * Added dODE_VERSION macro to public headers (issue #24).
 
