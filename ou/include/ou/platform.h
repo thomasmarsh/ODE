@@ -369,7 +369,7 @@
 
 #else // #if !defined(_DEBUG)
 
-#define _OU_ALWAYSINLINE _OU_ALWAYSINLINE__DEFINITION
+#define _OU_ALWAYSINLINE inline _OU_ALWAYSINLINE__DEFINITION
 
 #define _OU_INLINE inline
 
