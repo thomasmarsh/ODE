@@ -555,60 +555,32 @@ ODE_API dReal dWorldGetContactSurfaceLayer (dWorldID);
  */
 
 /**
- * @brief Get auto disable linear threshold for newly created bodies.
+ * @brief Get auto disable linear average threshold for newly created bodies.
  * @ingroup disable
  * @return the threshold
  */
 ODE_API dReal dWorldGetAutoDisableLinearThreshold (dWorldID);
 
 /**
- * @brief Set auto disable linear threshold for newly created bodies.
- * @param linear_threshold default is 0.01
- * @ingroup disable
- */
-ODE_API void  dWorldSetAutoDisableLinearThreshold (dWorldID, dReal linear_threshold);
-
-/**
- * @brief Get auto disable angular threshold for newly created bodies.
- * @ingroup disable
- * @return the threshold
- */
-ODE_API dReal dWorldGetAutoDisableAngularThreshold (dWorldID);
-
-/**
- * @brief Set auto disable angular threshold for newly created bodies.
- * @param linear_threshold default is 0.01
- * @ingroup disable
- */
-ODE_API void dWorldSetAutoDisableAngularThreshold (dWorldID, dReal angular_threshold);
-
-/**
- * @brief Get auto disable linear average threshold for newly created bodies.
- * @ingroup disable
- * @return the threshold
- */
-ODE_API dReal dWorldGetAutoDisableLinearAverageThreshold (dWorldID);
-
-/**
  * @brief Set auto disable linear average threshold for newly created bodies.
  * @param linear_average_threshold default is 0.01
  * @ingroup disable
  */
-ODE_API void  dWorldSetAutoDisableLinearAverageThreshold (dWorldID, dReal linear_average_threshold);
+ODE_API void  dWorldSetAutoDisableLinearThreshold (dWorldID, dReal linear_average_threshold);
 
 /**
  * @brief Get auto disable angular average threshold for newly created bodies.
  * @ingroup disable
  * @return the threshold
  */
-ODE_API dReal dWorldGetAutoDisableAngularAverageThreshold (dWorldID);
+ODE_API dReal dWorldGetAutoDisableAngularThreshold (dWorldID);
 
 /**
  * @brief Set auto disable angular average threshold for newly created bodies.
  * @param linear_average_threshold default is 0.01
  * @ingroup disable
  */
-ODE_API void dWorldSetAutoDisableAngularAverageThreshold (dWorldID, dReal angular_average_threshold);
+ODE_API void dWorldSetAutoDisableAngularThreshold (dWorldID, dReal angular_average_threshold);
 
 /**
  * @brief Get auto disable sample count for newly created bodies.
