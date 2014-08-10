@@ -8,6 +8,11 @@ the rules for this file:
   * keep the format consistent (79 char width, M/D/Y date format).
 
 ------------------------------------------------------------------------------
+08/10/2014 Oleh Derevenko
+        * Declarations of dWorld[Get/Set]AutoDisableLinearAverageThreshold and
+          dWorld[Get/Set]AutoDisableAngularAverageThreshold have been removed 
+          from public headers (were orphaned since rev.1052)
+
 07/16/2014 Oleh Derevenko
         * Two fixes by Francesco Cat applied (fixes for mistakes made during
           code style improvements in the past)
