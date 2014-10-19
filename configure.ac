@@ -284,7 +284,7 @@ AC_TYPE_UINT32_T
 dnl Check for autoscan sugested functions
 AC_CHECK_LIB(m, [main])
 AC_CHECK_LIB(sunmath, [main])
-AC_CHECK_FUNCS([floor memmove memset sqrt sqrtf sinf cosf fabsf atan2f fmodf copysignf copysign snprintf vsnprintf gettimeofday isnan isnanf _isnan _isnanf __isnan __isnanf strchr strstr pthread_attr_setstacklazy])
+AC_CHECK_FUNCS([floor memmove memset sqrt sqrtf sinf cosf fabsf atan2f fmodf copysignf copysign snprintf vsnprintf gettimeofday isnan isnanf _isnan _isnanf __isnan __isnanf strchr strstr pthread_attr_setstacklazy clock_gettime])
 AC_FUNC_ALLOCA 
 
 AC_ARG_ENABLE([threading-intf],

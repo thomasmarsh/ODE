@@ -8,6 +8,10 @@ the rules for this file:
   * keep the format consistent (79 char width, M/D/Y date format).
 
 ------------------------------------------------------------------------------
+10/19/2014 Oleh Derevenko
+        * Built-in threading implementation compilation fixed for OSX
+          (clock_gettime() is missing from the system - reported by Bram)
+
 08/10/2014 Oleh Derevenko
         * Declarations of dWorld[Get/Set]AutoDisableLinearAverageThreshold and
           dWorld[Get/Set]AutoDisableAngularAverageThreshold have been removed 
