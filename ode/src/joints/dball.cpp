@@ -209,6 +209,15 @@ dReal dJointGetDBallDistance(dJointID j)
     return joint->targetDistance;
 }
 
+void dJointSetDBallDistance(dJointID j, dReal dist)
+{
+    dxJointDBall* joint = static_cast<dxJointDBall*>(j);
+    dUASSERT( joint, "bad joint argument" );
+    dUASSERT( dist>=0, "target distance must be non-negative" );
+
+    joint->targetDistance = dist;
+}
+
 
 void dJointGetDBallAnchor1( dJointID j, dVector3 result )
 {

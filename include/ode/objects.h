@@ -3253,10 +3253,16 @@ ODE_API void dJointGetDBallAnchor1(dJointID, dVector3 result);
 ODE_API void dJointGetDBallAnchor2(dJointID, dVector3 result);
 
 /**
- * @brief get the set distance from double ball joint
+ * @brief get the target distance from double ball joint
  * @ingroup joints
  */
 ODE_API dReal dJointGetDBallDistance(dJointID);
+
+/**
+ * @brief set the target distance for the double ball joint
+ * @ingroup joints
+ */
+ODE_API void dJointSetDBallDistance(dJointID, dReal dist);
 
 /**
  * @brief set double ball joint parameter
