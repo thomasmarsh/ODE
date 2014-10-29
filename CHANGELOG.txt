@@ -8,6 +8,9 @@ the rules for this file:
   * keep the format consistent (79 char width, M/D/Y date format).
 
 ------------------------------------------------------------------------------
+10/29/2014 Daniel K. O.
+        * Added dJointSetDBallDistance
+
 10/19/2014 Oleh Derevenko
         * Built-in threading implementation compilation fixed for OSX
           (clock_gettime() is missing from the system - reported by Bram)
