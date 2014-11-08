@@ -1123,6 +1123,7 @@ extern "C" ODE_API int dTestSolveLCP()
     if (arena == NULL) {
         return 0;
     }
+    arena->ResetState();
 
     int i,nskip = dPAD(n);
 #ifdef dDOUBLE
