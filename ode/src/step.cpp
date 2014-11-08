@@ -93,7 +93,7 @@ struct dxStepperStage0BodiesCallContext
     dReal                           *m_invI;
     atomicord32                     m_tagsTaken;
     atomicord32                     m_gravityTaken;
-    unsigned int                    volatile m_inertiaBodyIndex;
+    volatile atomicord32            m_inertiaBodyIndex;
 };
 
 struct dxStepperStage0JointsCallContext
@@ -187,12 +187,12 @@ struct dxStepperStage2CallContext
     const dxStepperLocalContext     *m_localContext;
     dReal                           *m_JinvM;
     dReal                           *m_rhs_tmp_or_cfm;
-    volatile unsigned               m_ji_J;
-    volatile unsigned               m_ji_Ainit;
-    volatile unsigned               m_ji_JinvM;
-    volatile unsigned               m_ji_Aaddjb;
-    volatile unsigned               m_bi_rhs_tmp;
-    volatile unsigned               m_ji_rhs;
+    volatile atomicord32            m_ji_J;
+    volatile atomicord32            m_ji_Ainit;
+    volatile atomicord32            m_ji_JinvM;
+    volatile atomicord32            m_ji_Aaddjb;
+    volatile atomicord32            m_bi_rhs_tmp;
+    volatile atomicord32            m_ji_rhs;
 };
 
 static int dxStepIsland_Stage2a_Callback(void *callContext, dcallindex_t callInstanceIndex, dCallReleaseeID callThisReleasee);

@@ -8,6 +8,10 @@ the rules for this file:
   * keep the format consistent (79 char width, M/D/Y date format).
 
 ------------------------------------------------------------------------------
+11/08/2014 Oleh Derevenko
+        * Threading support has been extended to complete implementation 
+          of QuickStep
+
 10/29/2014 Daniel K. O.
         * Added dJointSetDBallDistance
 
