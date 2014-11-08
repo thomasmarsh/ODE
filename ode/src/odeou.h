@@ -65,6 +65,8 @@ using _OU_NAMESPACE::InitializeAtomicAPI;
 using _OU_NAMESPACE::FinalizeAtomicAPI;
 using _OU_NAMESPACE::AtomicCompareExchange;
 using _OU_NAMESPACE::AtomicExchange;
+using _OU_NAMESPACE::AtomicExchangeAddNoResult;
+using _OU_NAMESPACE::AtomicExchangeAdd;
 using _OU_NAMESPACE::AtomicCompareExchangePointer;
 using _OU_NAMESPACE::AtomicExchangePointer;
 #endif
