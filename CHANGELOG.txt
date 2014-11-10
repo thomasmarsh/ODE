@@ -8,6 +8,11 @@ the rules for this file:
   * keep the format consistent (79 char width, M/D/Y date format).
 
 ------------------------------------------------------------------------------
+11/10/2014 Oleh Derevenko
+        * Floating point division by zero in capsule-ray collision routine 
+          in case if the ray axis was parallel the cylinder and the ray started
+          from within it fixed (issue #26)
+
 11/08/2014 Oleh Derevenko
         * Threading support has been extended to complete implementation 
           of QuickStep
