@@ -138,8 +138,17 @@ endif
 
 
 if LIBCCD
-AM_CPPFLAGS += -I$(top_srcdir)/libccd/src -I$(top_builddir)/libccd/src -DdLIBCCD_ENABLED
+
+AM_CPPFLAGS += -DdLIBCCD_ENABLED
+
+if LIBCCD_INTERNAL
+AM_CPPFLAGS += -I$(top_srcdir)/libccd/src -I$(top_builddir)/libccd/src 
 libode_la_LIBADD += $(top_builddir)/libccd/src/libccd.la
+else
+AM_CPPFLAGS += $(CCD_CFLAGS)
+libode_la_LIBADD += $(CCD_LIBS)
+endif
+
 
 libode_la_SOURCES += collision_libccd.cpp collision_libccd.h
 

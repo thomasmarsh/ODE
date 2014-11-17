@@ -102,7 +102,7 @@ AC_CHECK_HEADERS( [alloca.h stdio.h inttypes.h stdint.h stdlib.h math.h \
 
 opcode=no
 gimpact=no
-AC_ARG_WITH(trimesh, AS_HELP_STRING([--with-trimesh=[opcode|gimpact|none]],
+AC_ARG_WITH(trimesh, AS_HELP_STRING([--with-trimesh=@<:@opcode|gimpact|none@:>@],
         [use the specified system for trimesh support @<:@default=opcode@:>@]),
         trimesh=$withval,trimesh=opcode
 )
@@ -380,7 +380,7 @@ col_convex_sphere=default
 col_convex_convex=default
 
 
-libccd=no
+use_libccd=no
 libccd_all=no
 AC_ARG_ENABLE(libccd, AS_HELP_STRING([--enable-libccd],
             [enable all libccd colliders (except box-cylinder)]),
@@ -394,7 +394,7 @@ then
     col_convex_cylinder=libccd
     col_convex_sphere=libccd
     col_convex_convex=libccd
-    libccd=yes
+    use_libccd=yes
 fi
 
 
@@ -432,12 +432,30 @@ if test x$col_cylinder_cylinder = xlibccd -o \
     x$col_convex_sphere = libccd -o \
     x$col_convex_convex = libccd
 then
-    libccd=yes
+    use_libccd=yes
+fi
+
+
+libccd_source=internal
+
+AC_ARG_WITH(libccd,
+        [AS_HELP_STRING([--with-libccd=@<:@internal|system@:>@],
+                [use the specified libccd @<:@default=internal@:>@])],
+        [libccd_source=$withval],
+        [libccd_source=system])
+
+if test x$use_libccd = xyes
+then
+    if test x$libccd_source = xsystem
+    then
+        PKG_CHECK_MODULES(CCD, ccd, ,[libccd_source=internal])
+    fi
 fi
 
 AC_CONFIG_SUBDIRS([libccd])
 
-AM_CONDITIONAL(LIBCCD, test x$libccd != xno)
+AM_CONDITIONAL(LIBCCD, test x$use_libccd != xno)
+AM_CONDITIONAL(LIBCCD_INTERNAL, test x$libccd_source = xinternal)
 AM_CONDITIONAL(LIBCCD_BOX_CYL,          test x$col_box_cylinder = xlibccd)
 AM_CONDITIONAL(LIBCCD_CYL_CYL,          test x$col_cylinder_cylinder = xlibccd)
 AM_CONDITIONAL(LIBCCD_CAP_CYL,          test x$col_capsule_cylinder = xlibccd)
@@ -549,6 +567,13 @@ echo "  Use drawstuff:           $drawstuff"
 echo "  Demos enabled:           $enable_demos"
 echo "  Use OPCODE:              $opcode"
 echo "  Use GIMPACT:             $gimpact"
+echo "  Use libccd:              $use_libccd"
+
+if test x$use_libccd = xyes
+then
+echo "  libccd source:           $libccd_source"
+fi
+
 echo "  Custom colliders:"
 echo "        cylinder-cylinder: $col_cylinder_cylinder"
 echo "        box-cylinder:      $col_box_cylinder"
