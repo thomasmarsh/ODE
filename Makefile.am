@@ -6,7 +6,9 @@ OU_DIR = ou
 endif
 
 if LIBCCD
+if LIBCCD_INTERNAL
 LIBCCD_DIR = libccd
+endif
 endif
 
 if ENABLE_DEMOS
