@@ -1612,8 +1612,8 @@ extern "C" void dsDrawTrianglesD (const double pos[3], const double R[12],
   setupDrawingMode();
   glShadeModel (GL_FLAT);
   setTransform (pos2,R2);
-  for (i = 0; i < n; ++i)
-      drawTriangleD (v + i*9, v + 3 + i*9, v + 6 + i*9, solid);
+  for (i = 0; i < n; ++i, v += 9)
+      drawTriangleD (v, v + 3, v + 6, solid);
   glPopMatrix();
 }
 
