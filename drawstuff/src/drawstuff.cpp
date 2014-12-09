@@ -1451,6 +1451,20 @@ extern "C" void dsDrawTriangle (const float pos[3], const float R[12],
 }
 
 
+extern "C" void dsDrawTriangles (const float pos[3], const float R[12],
+				const float *v, int n, int solid)
+{
+  if (current_state != 2) dsError ("drawing function called outside simulation loop");
+  setupDrawingMode();
+  glShadeModel (GL_FLAT);
+  setTransform (pos,R);
+  int i;
+  for (i = 0; i < n; ++i, v += 9)
+      drawTriangle (v, v + 3, v + 6, solid);
+  glPopMatrix();
+}
+
+
 extern "C" void dsDrawCylinder (const float pos[3], const float R[12],
 				float length, float radius)
 {
@@ -1582,6 +1596,24 @@ void dsDrawTriangleD (const double pos[3], const double R[12],
   glShadeModel (GL_FLAT);
   setTransform (pos2,R2);
   drawTriangleD (v0, v1, v2, solid);
+  glPopMatrix();
+}
+
+
+extern "C" void dsDrawTrianglesD (const double pos[3], const double R[12],
+				const double *v, int n, int solid)
+{
+  int i;
+  float pos2[3],R2[12];
+  for (i=0; i<3; i++) pos2[i]=(float)pos[i];
+  for (i=0; i<12; i++) R2[i]=(float)R[i];
+
+  if (current_state != 2) dsError ("drawing function called outside simulation loop");
+  setupDrawingMode();
+  glShadeModel (GL_FLAT);
+  setTransform (pos2,R2);
+  for (i = 0; i < n; ++i)
+      drawTriangleD (v + i*9, v + 3 + i*9, v + 6 + i*9, solid);
   glPopMatrix();
 }
 
