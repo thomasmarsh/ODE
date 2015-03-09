@@ -316,7 +316,7 @@
 
     if _OPTIONS["with-ou"] or not _OPTIONS["no-threading-intf"] then
       includedirs { "../ou/include" }
-      files   { "../ou/**.h", "../ou/**.cpp" }
+      files   { "../ou/include/**.h", "../ou/src/**.h", "../ou/src/**.cpp" }
       defines { "_OU_NAMESPACE=odeou" }
 
       if _ACTION == "gmake" and ( os.get() == "linux" or os.get() == "bsd" ) then
