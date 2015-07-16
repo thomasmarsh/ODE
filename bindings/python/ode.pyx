@@ -2935,6 +2935,95 @@ cdef class Plane2DJoint(Joint):
         dJointSetPlane2DAngleParam(self.jid, param, value)
 
 
+# PRJoint
+cdef class PRJoint(Joint):
+    """Prismatic and Rotoide Joint.
+
+    Constructor::
+
+      PRJoint(world, jointgroup=None)
+    """
+
+    def __cinit__(self, World world not None, jointgroup=None):
+        cdef JointGroup jg
+        cdef dJointGroupID jgid
+
+        jgid = NULL
+        if jointgroup != None:
+            jg = jointgroup
+            jgid = jg.gid
+        self.jid = dJointCreatePR(world.wid, jgid)
+
+    def __init__(self, World world not None, jointgroup=None):
+        self.world = world
+        if jointgroup != None:
+            jointgroup._addjoint(self)
+
+    def getPosition(self):
+        """getPosition()
+
+        Get a PRJoint's linear extension.  (i.e. the prismatic's extension)
+        """
+        return dJointGetPRPosition(self.jid)
+
+    def setAnchor(self, pos):
+        """setAnchor(pos)
+
+        Set a PRJoint anchor.
+
+        @param pos: Anchor position
+        @type pos: 3-sequence of floats
+        """
+        dJointSetPRAnchor(self.jid, pos[0], pos[1], pos[2])
+
+    def getAnchor(self):
+        """getAnchor()
+
+        Get a PRJoint anchor.
+        """
+        cdef dVector3 a
+        dJointGetPRAnchor(self.jid, a)
+        return a[0], a[1], a[2]
+
+    def setAxis1(self, axis):
+        """setAxis1(axis)
+
+        Set a PRJoint's prismatic axis.
+
+        @param axis: Axis
+        @type axis: 3-sequence of floats
+        """
+        dJointSetPRAxis1(self.jid, axis[0], axis[1], axis[2])
+
+    def getAxis1(self):
+        """getAxis1()
+
+        Get a PRJoint's prismatic axis.
+        """
+        cdef dVector3 a
+        dJointGetPRAxis1(self.jid, a)
+        return a[0], a[1], a[2]
+
+    def setAxis2(self, axis):
+        """setAxis2(axis)
+
+        Set a PRJoint's rotoide axis.
+
+        @param axis: Axis
+        @type axis: 3-sequence of floats
+        """
+        dJointSetPRAxis2(self.jid, axis[0], axis[1], axis[2])
+
+    def getAxis2(self):
+        """getAxis2()
+
+        Get a PRJoint's rotoide axis.
+        """
+        cdef dVector3 a
+        dJointGetPRAxis2(self.jid, a)
+        return a[0], a[1], a[2]
+
+
 # Geom base class
 cdef class GeomObject:
     """This is the abstract base class for all geom objects.
