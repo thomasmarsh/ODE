@@ -28,6 +28,7 @@
 #ifndef _ODE_COLLISION_TRIMESH_INTERNAL_H_
 #define _ODE_COLLISION_TRIMESH_INTERNAL_H_
 
+
 //****************************************************************************
 // dxTriMesh class
 
@@ -50,7 +51,11 @@ using namespace Opcode;
 #include "odetls.h"
 #endif
 
+#include "util.h"
 
+#ifndef ALLOCA
+#define ALLOCA(x) dALLOCA16(x)
+#endif
 
 
 #if dTRIMESH_OPCODE
@@ -179,7 +184,8 @@ struct TrimeshCollidersCache
 
 #if dTLS_ENABLED
 
-inline TrimeshCollidersCache *GetTrimeshCollidersCache(unsigned uiTLSKind)
+static inline 
+TrimeshCollidersCache *GetTrimeshCollidersCache(unsigned uiTLSKind)
 {
     EODETLSKIND tkTLSKind = (EODETLSKIND)uiTLSKind;
     return COdeTls::GetTrimeshCollidersCache(tkTLSKind);
@@ -188,7 +194,8 @@ inline TrimeshCollidersCache *GetTrimeshCollidersCache(unsigned uiTLSKind)
 
 #else // dTLS_ENABLED
 
-inline TrimeshCollidersCache *GetTrimeshCollidersCache(unsigned uiTLSKind)
+static inline 
+TrimeshCollidersCache *GetTrimeshCollidersCache(unsigned uiTLSKind)
 {
     (void)uiTLSKind; // unused
 
@@ -376,23 +383,17 @@ struct dxTriMesh : public dxGeom{
 #endif  // dTRIMESH_GIMPACT
 };
 
-#if 0
-#include "collision_kernel.h"
-// Fetches a contact
-inline dContactGeom* SAFECONTACT(int Flags, dContactGeom* Contacts, int Index, int Stride){
-    dIASSERT(Index >= 0 && Index < (Flags & NUMC_MASK));
-    return ((dContactGeom*)(((char*)Contacts) + (Index * Stride)));
-}
-#endif
 
 #if dTRIMESH_OPCODE
 
-inline unsigned FetchTriangleCount(dxTriMesh* TriMesh)
+static inline 
+unsigned FetchTriangleCount(dxTriMesh* TriMesh)
 {
     return TriMesh->Data->Mesh.GetNbTriangles();
 }
 
-inline void FetchTriangle(dxTriMesh* TriMesh, int Index, const dVector3 Position, const dMatrix3 Rotation, dVector3 Out[3]){
+static inline 
+void FetchTriangle(dxTriMesh* TriMesh, int Index, const dVector3 Position, const dMatrix3 Rotation, dVector3 Out[3]){
     VertexPointers VP;
     ConversionArea VC;
     TriMesh->Data->Mesh.GetTriangle(VP, Index, VC);
@@ -411,13 +412,15 @@ inline void FetchTriangle(dxTriMesh* TriMesh, int Index, const dVector3 Position
     }
 }
 
-inline void FetchTransformedTriangle(dxTriMesh* TriMesh, int Index, dVector3 Out[3]){
+static inline 
+void FetchTransformedTriangle(dxTriMesh* TriMesh, int Index, dVector3 Out[3]){
     const dVector3& Position = *(const dVector3*)dGeomGetPosition(TriMesh);
     const dMatrix3& Rotation = *(const dMatrix3*)dGeomGetRotation(TriMesh);
     FetchTriangle(TriMesh, Index, Position, Rotation, Out);
 }
 
-inline Matrix4x4& MakeMatrix(const dVector3 Position, const dMatrix3 Rotation, Matrix4x4& Out){
+static inline 
+Matrix4x4& MakeMatrix(const dVector3 Position, const dMatrix3 Rotation, Matrix4x4& Out){
     Out.m[0][0] = (float) Rotation[0];
     Out.m[1][0] = (float) Rotation[1];
     Out.m[2][0] = (float) Rotation[2];
@@ -442,12 +445,14 @@ inline Matrix4x4& MakeMatrix(const dVector3 Position, const dMatrix3 Rotation, M
     return Out;
 }
 
-inline Matrix4x4& MakeMatrix(dxGeom* g, Matrix4x4& Out){
+static inline 
+Matrix4x4& MakeMatrix(dxGeom* g, Matrix4x4& Out){
     const dVector3& Position = *(const dVector3*)dGeomGetPosition(g);
     const dMatrix3& Rotation = *(const dMatrix3*)dGeomGetRotation(g);
     return MakeMatrix(Position, Rotation, Out);
 }
 #endif // dTRIMESH_OPCODE
+
 
 #if dTRIMESH_GIMPACT
 
@@ -464,7 +469,8 @@ inline Matrix4x4& MakeMatrix(dxGeom* g, Matrix4x4& Out){
     (b)[3] = 0;                   \
 }
 
-inline void gim_trimesh_get_triangle_verticesODE(GIM_TRIMESH * trimesh, GUINT32 triangle_index, dVector3 v1, dVector3 v2, dVector3 v3) {   
+static inline 
+void gim_trimesh_get_triangle_verticesODE(GIM_TRIMESH * trimesh, GUINT32 triangle_index, dVector3 v1, dVector3 v2, dVector3 v3) {   
     vec3f src1, src2, src3;
     gim_trimesh_get_triangle_vertices(trimesh, triangle_index, src1, src2, src3);
 
@@ -478,14 +484,16 @@ inline void gim_trimesh_get_triangle_verticesODE(GIM_TRIMESH * trimesh, GUINT32 
 
 #define gim_trimesh_get_triangle_vertices gim_trimesh_get_triangle_verticesODE
 
-inline int gim_trimesh_ray_closest_collisionODE( GIM_TRIMESH *mesh, dVector3 origin, dVector3 dir, GREAL tmax, GIM_TRIANGLE_RAY_CONTACT_DATA *contact ) {
+static inline 
+int gim_trimesh_ray_closest_collisionODE( GIM_TRIMESH *mesh, dVector3 origin, dVector3 dir, GREAL tmax, GIM_TRIANGLE_RAY_CONTACT_DATA *contact ) {
     vec3f dir_vec3f    = { dir[ 0 ],       dir[ 1 ],    dir[ 2 ] };
     vec3f origin_vec3f = { origin[ 0 ], origin[ 1 ], origin[ 2 ] };
 
     return gim_trimesh_ray_closest_collision( mesh, origin_vec3f, dir_vec3f, tmax, contact );
 }
 
-inline int gim_trimesh_ray_collisionODE( GIM_TRIMESH *mesh, dVector3 origin, dVector3 dir, GREAL tmax, GIM_TRIANGLE_RAY_CONTACT_DATA *contact ) {
+static inline 
+int gim_trimesh_ray_collisionODE( GIM_TRIMESH *mesh, dVector3 origin, dVector3 dir, GREAL tmax, GIM_TRIANGLE_RAY_CONTACT_DATA *contact ) {
     vec3f dir_vec3f    = { dir[ 0 ],       dir[ 1 ],    dir[ 2 ] };
     vec3f origin_vec3f = { origin[ 0 ], origin[ 1 ], origin[ 2 ] };
 
@@ -523,18 +531,21 @@ inline int gim_trimesh_ray_collisionODE( GIM_TRIMESH *mesh, dVector3 origin, dVe
 
 #endif // dDouble
 
-inline unsigned FetchTriangleCount(dxTriMesh* TriMesh)
+static inline 
+unsigned FetchTriangleCount(dxTriMesh* TriMesh)
 {
     return gim_trimesh_get_triangle_count(&TriMesh->m_collision_trimesh);
 }
 
-inline void FetchTransformedTriangle(dxTriMesh* TriMesh, int Index, dVector3 Out[3]){
+static inline 
+void FetchTransformedTriangle(dxTriMesh* TriMesh, int Index, dVector3 Out[3]){
     gim_trimesh_locks_work_data(&TriMesh->m_collision_trimesh);	
     gim_trimesh_get_triangle_vertices(&TriMesh->m_collision_trimesh, (GUINT32)Index, Out[0], Out[1], Out[2]);
     gim_trimesh_unlocks_work_data(&TriMesh->m_collision_trimesh);
 }
 
-inline void MakeMatrix(const dVector3 Position, const dMatrix3 Rotation, mat4f m)
+static inline 
+void MakeMatrix(const dVector3 Position, const dMatrix3 Rotation, mat4f m)
 {
     m[0][0] = (float) Rotation[0];
     m[0][1] = (float) Rotation[1];
@@ -554,15 +565,261 @@ inline void MakeMatrix(const dVector3 Position, const dMatrix3 Rotation, mat4f m
 
 }
 
-inline void MakeMatrix(dxGeom* g, mat4f Out){
+static inline 
+void MakeMatrix(dxGeom* g, mat4f Out){
     const dVector3& Position = *(const dVector3*)dGeomGetPosition(g);
     const dMatrix3& Rotation = *(const dMatrix3*)dGeomGetRotation(g);
     MakeMatrix(Position, Rotation, Out);
 }
+
+
+struct dxGIMCContactAccessor
+{
+    dxGIMCContactAccessor(GIM_CONTACT *ptrimeshcontacts, dGeomID g1, dGeomID g2) : m_ptrimeshcontacts(ptrimeshcontacts), m_g1(g1), m_g2(g2), m_gotside2ovr(false), m_side2ovr() {}
+    dxGIMCContactAccessor(GIM_CONTACT *ptrimeshcontacts, dGeomID g1, dGeomID g2, int side2ovr) : m_ptrimeshcontacts(ptrimeshcontacts), m_g1(g1), m_g2(g2), m_gotside2ovr(true), m_side2ovr(side2ovr) {}
+
+    dReal RetrieveDepthByIndex(unsigned index) const { return m_ptrimeshcontacts[index].m_depth; }
+
+    void ExportContactGeomByIndex(dContactGeom *pcontact, unsigned index) const
+    {
+        const GIM_CONTACT *ptrimeshcontact = m_ptrimeshcontacts + index;
+        pcontact->pos[0] = ptrimeshcontact->m_point[0];
+        pcontact->pos[1] = ptrimeshcontact->m_point[1];
+        pcontact->pos[2] = ptrimeshcontact->m_point[2];
+        pcontact->pos[3] = REAL(1.0);
+
+        pcontact->normal[0] = ptrimeshcontact->m_normal[0];
+        pcontact->normal[1] = ptrimeshcontact->m_normal[1];
+        pcontact->normal[2] = ptrimeshcontact->m_normal[2];
+        pcontact->normal[3] = 0;
+
+        pcontact->depth = ptrimeshcontact->m_depth;
+        pcontact->g1 = m_g1;
+        pcontact->g2 = m_g2;
+        pcontact->side1 = ptrimeshcontact->m_feature1;
+        pcontact->side2 = !m_gotside2ovr ? ptrimeshcontact->m_feature2 : m_side2ovr;
+    }
+
+    const GIM_CONTACT *m_ptrimeshcontacts;
+    dGeomID         m_g1, m_g2;
+    bool            m_gotside2ovr;
+    int             m_side2ovr;
+};
+
+struct dxPlaneContactAccessor
+{
+    dxPlaneContactAccessor(const vec4f *planecontact_results, const dReal *plane, dGeomID g1, dGeomID g2) : m_planecontact_results(planecontact_results), m_plane(plane), m_g1(g1), m_g2(g2) {}
+
+    dReal RetrieveDepthByIndex(unsigned index) const { return m_planecontact_results[index][3]; }
+
+    void ExportContactGeomByIndex(dContactGeom *pcontact, unsigned index) const
+    {
+        const vec4f *planecontact = m_planecontact_results + index;
+
+        pcontact->pos[0] = (*planecontact)[0];
+        pcontact->pos[1] = (*planecontact)[1];
+        pcontact->pos[2] = (*planecontact)[2];
+        pcontact->pos[3] = REAL(1.0);
+
+        const dReal *plane = m_plane;
+        pcontact->normal[0] = plane[0];
+        pcontact->normal[1] = plane[1];
+        pcontact->normal[2] = plane[2];
+        pcontact->normal[3] = 0;
+
+        pcontact->depth = (*planecontact)[3];
+        pcontact->g1 = m_g1; // trimesh geom
+        pcontact->g2 = m_g2; // plane geom
+        pcontact->side1 = -1; // note: don't have the triangle index, but OPCODE *does* do this properly
+        pcontact->side2 = -1;
+    }
+
+    const vec4f     *m_planecontact_results;
+    const dReal     *m_plane;
+    dGeomID         m_g1, m_g2;
+};
+
+struct dxGImpactContactsExportHelper
+{
+public:
+    template<class dxGImpactContactAccessor>
+    static unsigned ExportMaxDepthGImpactContacts(dxGImpactContactAccessor &srccontacts, unsigned contactcount,
+        int Flags, dContactGeom* Contacts, int Stride)
+    {
+        unsigned result;
+
+        unsigned maxcontacts = (unsigned)(Flags & NUMC_MASK);
+        if (contactcount > maxcontacts)
+        {
+            ExportExcesssiveContacts(srccontacts, contactcount, Flags, Contacts, Stride);
+            result = maxcontacts;
+        }
+        else
+        {
+            ExportFitContacts(srccontacts, contactcount, Flags, Contacts, Stride);
+            result = contactcount;
+        }
+
+        return result;
+    }
+
+private:
+    template<class dxGImpactContactAccessor>
+    static void ExportExcesssiveContacts(dxGImpactContactAccessor &srccontacts, unsigned contactcount,
+        int Flags, dContactGeom* Contacts, int Stride)
+    {
+        unsigned maxcontacts = (unsigned)(Flags & NUMC_MASK);
+        dReal marginaldepth = FindContactsMarginalDepth(srccontacts, contactcount, maxcontacts);
+
+        unsigned contactshead = 0, contacttail = maxcontacts;
+        for (unsigned i = 0; i < contactcount; i++)
+        {
+            dReal depth = srccontacts.RetrieveDepthByIndex(i);
+
+            if (depth > marginaldepth)
+            {
+                dContactGeom *pcontact = SAFECONTACT(Flags, Contacts, contactshead, Stride);
+                srccontacts.ExportContactGeomByIndex(pcontact, i);
+
+                if (++contactshead == maxcontacts)
+                {
+                    break;
+                }
+            }
+            else if (depth == marginaldepth && contactshead < contacttail)
+            {
+                --contacttail;
+
+                dContactGeom *pcontact = SAFECONTACT(Flags, Contacts, contacttail, Stride);
+                srccontacts.ExportContactGeomByIndex(pcontact, i);
+            }
+        }
+    }
+
+    template<class dxGImpactContactAccessor>
+    static void ExportFitContacts(dxGImpactContactAccessor &srccontacts, unsigned contactcount,
+        int Flags, dContactGeom* Contacts, int Stride)
+    {
+        for (unsigned i = 0; i < contactcount; i++)
+        {
+            dContactGeom *pcontact = SAFECONTACT(Flags, Contacts, i, Stride);
+
+            srccontacts.ExportContactGeomByIndex(pcontact, i);
+        }
+    }
+
+    template<class dxGImpactContactAccessor>
+    static dReal FindContactsMarginalDepth(dxGImpactContactAccessor &srccontacts, unsigned contactcount, unsigned maxcontacts)
+    {
+        dReal *pdepths = (dReal *)ALLOCA(contactcount * sizeof(dReal));
+        unsigned marginindex = 0;
+        unsigned highindex = marginindex;
+
+        dReal firstdepth = srccontacts.RetrieveDepthByIndex(0);
+        dReal mindepth = firstdepth, maxdepth = firstdepth;
+        dIASSERT(contactcount > 1);
+
+        for (unsigned i = 1; i < contactcount; i++)
+        {
+            dReal depth = srccontacts.RetrieveDepthByIndex(i);
+
+            if (depth < firstdepth)
+            {
+                dReal temp = pdepths[marginindex]; pdepths[highindex++] = temp; pdepths[marginindex++] = depth;
+                if (depth < mindepth) { mindepth = depth; }
+            }
+            else if (depth > firstdepth)
+            {
+                pdepths[highindex++] = depth;
+                if (maxdepth < depth) { maxdepth = depth; }
+            }
+        }
+
+        unsigned countabove = highindex - marginindex;
+        if (maxcontacts < countabove)
+        {
+            return FindContactsMarginalDepth(pdepths + marginindex, countabove, maxcontacts, firstdepth, maxdepth);
+        }
+        else if (maxcontacts == countabove)
+        {
+            return dNextAfter(firstdepth, INFINITY);
+        }
+
+        unsigned countbelow = marginindex;
+        if (maxcontacts <= contactcount - countbelow)
+        {
+            return firstdepth;
+        }
+
+        return FindContactsMarginalDepth(pdepths, countbelow, maxcontacts - (contactcount - countbelow), mindepth, firstdepth);
+    }
+
+    static dReal FindContactsMarginalDepth(dReal *pdepths, unsigned contactcount, unsigned maxcontacts, dReal mindepth, dReal maxdepth)
+    {
+        dReal result;
+
+        while (true)
+        {
+            dReal firstdepth = 0.5 * (mindepth + maxdepth);
+            dReal lowdepth = maxdepth, highdepth = mindepth;
+
+            unsigned marginindex = 0;
+            unsigned highindex = marginindex;
+            dIASSERT(contactcount != 0);
+
+            for (unsigned i = 0; i < contactcount; i++)
+            {
+                dReal depth = pdepths[i];
+
+                if (depth < firstdepth)
+                {
+                    dReal temp = pdepths[marginindex]; pdepths[highindex++] = temp; pdepths[marginindex++] = depth;
+                    if (highdepth < depth) { highdepth = depth; }
+                }
+                else if (depth > firstdepth)
+                {
+                    pdepths[highindex++] = depth;
+                    if (depth < lowdepth) { lowdepth = depth; }
+                }
+            }
+
+            unsigned countabove = highindex - marginindex;
+            if (maxcontacts < countabove)
+            {
+                contactcount = countabove;
+                pdepths += marginindex;
+                mindepth = lowdepth;
+            }
+            else if (maxcontacts == countabove)
+            {
+                result = dNextAfter(firstdepth, INFINITY);
+                break;
+            }
+            else
+            {
+                unsigned countbelow = marginindex;
+                if (maxcontacts <= contactcount - countbelow)
+                {
+                    result = firstdepth;
+                    break;
+                }
+
+                maxcontacts -= contactcount - countbelow;
+                contactcount = countbelow;
+                maxdepth = highdepth;
+            }
+        }
+
+        return result;
+    }
+};
+
+
 #endif // dTRIMESH_GIMPACT
 
 // Outputs a matrix to 3 vectors
-inline void Decompose(const dMatrix3 Matrix, dVector3 Right, dVector3 Up, dVector3 Direction){
+static inline 
+void Decompose(const dMatrix3 Matrix, dVector3 Right, dVector3 Up, dVector3 Direction){
     Right[0] = Matrix[0 * 4 + 0];
     Right[1] = Matrix[1 * 4 + 0];
     Right[2] = Matrix[2 * 4 + 0];
@@ -578,12 +835,14 @@ inline void Decompose(const dMatrix3 Matrix, dVector3 Right, dVector3 Up, dVecto
 }
 
 // Outputs a matrix to 3 vectors
-inline void Decompose(const dMatrix3 Matrix, dVector3 Vectors[3]){
+static inline 
+void Decompose(const dMatrix3 Matrix, dVector3 Vectors[3]){
     Decompose(Matrix, Vectors[0], Vectors[1], Vectors[2]);
 }
 
 // Finds barycentric
-inline void GetPointFromBarycentric(const dVector3 dv[3], dReal u, dReal v, dVector3 Out){
+static inline 
+void GetPointFromBarycentric(const dVector3 dv[3], dReal u, dReal v, dVector3 Out){
     dReal w = REAL(1.0) - u - v;
 
     Out[0] = (dv[0][0] * w) + (dv[1][0] * u) + (dv[2][0] * v);
@@ -593,7 +852,8 @@ inline void GetPointFromBarycentric(const dVector3 dv[3], dReal u, dReal v, dVec
 }
 
 // Performs a callback
-inline bool Callback(dxTriMesh* TriMesh, dxGeom* Object, int TriIndex){
+static 
+bool Callback(dxTriMesh* TriMesh, dxGeom* Object, int TriIndex){
     if (TriMesh->Callback != NULL){
         return (TriMesh->Callback(TriMesh, Object, TriIndex)!=0);
     }
@@ -622,7 +882,7 @@ dReal SqrDistanceSegTri( const dVector3 segOrigin, const dVector3 segEnd,
                         const dVector3 triEdge1, const dVector3 triEdge2,
                         dReal* t = 0, dReal* u = 0, dReal* v = 0 );
 
-inline
+static inline
 void Vector3Subtract( const dVector3 left, const dVector3 right, dVector3 result )
 {
     result[0] = left[0] - right[0];
@@ -631,7 +891,7 @@ void Vector3Subtract( const dVector3 left, const dVector3 right, dVector3 result
     result[3] = REAL(0.0);
 }
 
-inline
+static inline
 void Vector3Add( const dVector3 left, const dVector3 right, dVector3 result )
 {
     result[0] = left[0] + right[0];
@@ -640,7 +900,7 @@ void Vector3Add( const dVector3 left, const dVector3 right, dVector3 result )
     result[3] = REAL(0.0);
 }
 
-inline
+static inline
 void Vector3Negate( const dVector3 in, dVector3 out )
 {
     out[0] = -in[0];
@@ -649,7 +909,7 @@ void Vector3Negate( const dVector3 in, dVector3 out )
     out[3] = REAL(0.0);
 }
 
-inline
+static inline
 void Vector3Copy( const dVector3 in, dVector3 out )
 {
     out[0] = in[0];
@@ -658,7 +918,7 @@ void Vector3Copy( const dVector3 in, dVector3 out )
     out[3] = REAL(0.0);
 }
 
-inline
+static inline
 void Vector3Multiply( const dVector3 in, dReal scalar, dVector3 out )
 {
     out[0] = in[0] * scalar;
@@ -667,7 +927,7 @@ void Vector3Multiply( const dVector3 in, dReal scalar, dVector3 out )
     out[3] = REAL(0.0);
 }
 
-inline
+static inline
 void TransformVector3( const dVector3 in, 
                       const dMatrix3 orientation, const dVector3 position, 
                       dVector3 out )
@@ -697,7 +957,7 @@ void TransformVector3( const dVector3 in,
   closest to the capsule (where the distance between the two shapes
   is the shortest).
 */
-inline
+static inline
 bool IntersectCapsuleTri( const dVector3 segOrigin, const dVector3 segEnd, 
                          const dReal radius, const dVector3 triOrigin, 
                          const dVector3 triEdge0, const dVector3 triEdge1,
