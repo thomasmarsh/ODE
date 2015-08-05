@@ -8,6 +8,11 @@ the rules for this file:
   * keep the format consistent (79 char width, M/D/Y date format).
 
 ------------------------------------------------------------------------------
+08/05/2015 Oleh Derevenko
+        * Implemented change to return highest depth contacts subset for GIMPACT 
+          in cases if contacts count exceeds requested maximum (as suggested in 
+          the issue #36 by Piotr Piastucki)
+
 11/17/2014 Daniel K. O.
         * Added support for using libccd from the system (if found via
           pkg-config)

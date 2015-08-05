@@ -196,38 +196,11 @@ int dCollideTrimeshPlane( dxGeom *o1, dxGeom *o2, int flags, dContactGeom* conta
     }
 
 
+    vec4f * planecontact_results = GIM_DYNARRAY_POINTER(vec4f, collision_result);
     unsigned int contactcount = collision_result.m_size;
-    unsigned int contactmax = (unsigned int)(flags & NUMC_MASK);
-    if (contactcount > contactmax)
-    {
-        contactcount = contactmax;
-    }
-
-    dContactGeom* pcontact;
-    vec4f * planecontact_results = GIM_DYNARRAY_POINTER(vec4f,collision_result);
-
-    for(unsigned int i = 0; i < contactcount; i++ )
-    {
-        pcontact = SAFECONTACT(flags, contacts, i, skip);
-
-        pcontact->pos[0] = (*planecontact_results)[0];
-        pcontact->pos[1] = (*planecontact_results)[1];
-        pcontact->pos[2] = (*planecontact_results)[2];
-        pcontact->pos[3] = REAL(1.0);
-
-        pcontact->normal[0] = plane[0];
-        pcontact->normal[1] = plane[1];
-        pcontact->normal[2] = plane[2];
-        pcontact->normal[3] = 0;
-
-        pcontact->depth = (*planecontact_results)[3];
-        pcontact->g1 = o1; // trimesh geom
-        pcontact->g2 = o2; // plane geom
-        pcontact->side1 = -1; // note: don't have the triangle index, but OPCODE *does* do this properly
-        pcontact->side2 = -1;
-
-        planecontact_results++;
-    }
+    
+    dxPlaneContactAccessor contactaccessor(planecontact_results, plane, o1, o2);
+    contactcount = dxGImpactContactsExportHelper::ExportMaxDepthGImpactContacts(contactaccessor, contactcount, flags, contacts, skip);
 
     GIM_DYNARRAY_DESTROY(collision_result);
 
