@@ -711,6 +711,8 @@ private:
     template<class dxGImpactContactAccessor>
     static dReal FindContactsMarginalDepth(dxGImpactContactAccessor &srccontacts, unsigned contactcount, unsigned maxcontacts)
     {
+        dReal result;
+
         dReal *pdepths = (dReal *)ALLOCA(contactcount * sizeof(dReal));
         unsigned marginindex = 0;
         unsigned highindex = marginindex;
@@ -738,20 +740,26 @@ private:
         unsigned countabove = highindex - marginindex;
         if (maxcontacts < countabove)
         {
-            return FindContactsMarginalDepth(pdepths + marginindex, countabove, maxcontacts, firstdepth, maxdepth);
+            result = FindContactsMarginalDepth(pdepths + marginindex, countabove, maxcontacts, firstdepth, maxdepth);
         }
         else if (maxcontacts == countabove)
         {
-            return dNextAfter(firstdepth, INFINITY);
+            result = dNextAfter(firstdepth, INFINITY);
         }
-
-        unsigned countbelow = marginindex;
-        if (maxcontacts <= contactcount - countbelow)
+        else
         {
-            return firstdepth;
+            unsigned countbelow = marginindex;
+            if (maxcontacts <= contactcount - countbelow)
+            {
+                result = firstdepth;
+            }
+            else
+            {
+                result = FindContactsMarginalDepth(pdepths, countbelow, maxcontacts - (contactcount - countbelow), mindepth, firstdepth);
+            }
         }
 
-        return FindContactsMarginalDepth(pdepths, countbelow, maxcontacts - (contactcount - countbelow), mindepth, firstdepth);
+        return result;
     }
 
     static dReal FindContactsMarginalDepth(dReal *pdepths, unsigned contactcount, unsigned maxcontacts, dReal mindepth, dReal maxdepth)
