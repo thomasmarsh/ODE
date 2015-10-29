@@ -1241,10 +1241,7 @@ static void dQueryBTLPotentialCollisionTriangles(OBBCollider &Collider,
     Box.mRot.m[2][2] = /*(float)*/mRotBox[10];
 
     Matrix4x4 amatrix;
-    Matrix4x4 BoxMatrix = MakeMatrix(vPosBox, mRotBox, amatrix);
-
-    Matrix4x4 InvBoxMatrix;
-    InvertPRMatrix(InvBoxMatrix, BoxMatrix);
+    /*Matrix4x4 BoxMatrix = */MakeMatrix(vPosBox, mRotBox, amatrix);
 
     // get destination hull position and orientation
     const dMatrix3& mRotMesh=*(const dMatrix3*)dGeomGetRotation(TriMesh);
