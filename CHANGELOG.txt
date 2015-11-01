@@ -8,6 +8,11 @@ the rules for this file:
   * keep the format consistent (79 char width, M/D/Y date format).
 
 ------------------------------------------------------------------------------
+11/01/2015 Oleh Derevenko
+        * OPCODE mesh colliders' input coordinates have been offset to  
+          mesh-relative frames to decrease potential computational errors
+          (suggested by luckytrashsc2@g***l.com)
+
 08/05/2015 Oleh Derevenko
         * Implemented change to return highest depth contacts subset for GIMPACT 
           in cases if contacts count exceeds requested maximum (as suggested in 

@@ -42,9 +42,6 @@ int dCollideRTL(dxGeom* g1, dxGeom* RayGeom, int Flags, dContactGeom* Contacts, 
 
     dxTriMesh* TriMesh = (dxTriMesh*)g1;
 
-    const dVector3& TLPosition = *(const dVector3*)dGeomGetPosition(TriMesh);
-    const dMatrix3& TLRotation = *(const dMatrix3*)dGeomGetRotation(TriMesh);
-
     const unsigned uiTLSKind = TriMesh->getParentSpaceTLSKind();
     dIASSERT(uiTLSKind == RayGeom->getParentSpaceTLSKind()); // The colliding spaces must use matching cleanup method
     TrimeshCollidersCache *pccColliderCache = GetTrimeshCollidersCache(uiTLSKind);
@@ -61,22 +58,27 @@ int dCollideRTL(dxGeom* g1, dxGeom* RayGeom, int Flags, dContactGeom* Contacts, 
     Collider.SetCulling(BackfaceCull != 0);
     Collider.SetMaxDist(Length);
 
+    const dVector3& TLPosition = *(const dVector3*)dGeomGetPosition(TriMesh);
+    const dMatrix3& TLRotation = *(const dMatrix3*)dGeomGetRotation(TriMesh);
+
+    Matrix4x4 MeshMatrix;
+    const dVector3 ZeroVector3 = { REAL(0.0), };
+    MakeMatrix(ZeroVector3, TLRotation, MeshMatrix);
+
     dVector3 Origin, Direction;
     dGeomRayGet(RayGeom, Origin, Direction);
 
+    dVector3 OffsetOrigin;
+    dSubtractVectors3(OffsetOrigin, Origin, TLPosition);
+
     /* Make Ray */
     Ray WorldRay;
-    WorldRay.mOrig.x = Origin[0];
-    WorldRay.mOrig.y = Origin[1];
-    WorldRay.mOrig.z = Origin[2];
-    WorldRay.mDir.x = Direction[0];
-    WorldRay.mDir.y = Direction[1];
-    WorldRay.mDir.z = Direction[2];
+    WorldRay.mOrig.Set(OffsetOrigin[0], OffsetOrigin[1], OffsetOrigin[2]);
+    WorldRay.mDir.Set(Direction[0], Direction[1], Direction[2]);
 
     /* Intersect */
-    Matrix4x4 amatrix;
     int TriCount = 0;
-    if (Collider.Collide(WorldRay, TriMesh->Data->BVTree, &MakeMatrix(TLPosition, TLRotation, amatrix))) {
+    if (Collider.Collide(WorldRay, TriMesh->Data->BVTree, &MeshMatrix)) {
         TriCount = pccColliderCache->Faces.GetNbFaces();
     }
 
