@@ -508,17 +508,12 @@ dCollideTTL(dxGeom* g1, dxGeom* g2, int Flags, dContactGeom* Contacts, int Strid
 
     // Collision query
     Matrix4x4 amatrix, bmatrix;
-    BOOL IsOk = Collider.Collide(ColCache,
-        &MakeMatrix(TLPosition1, TLRotation1, amatrix),
-        &MakeMatrix(TLPosition2, TLRotation2, bmatrix) );
-
-
-    // Make "double" versions of these matrices, if appropriate
-    dMatrix4 A, B;
-    dMakeMatrix4(TLPosition1, TLRotation1, A);
-    dMakeMatrix4(TLPosition2, TLRotation2, B);
-
-
+    dVector3 TLOffsetPosition1 = { REAL(0.0), };
+    dVector3 TLOffsetPosition2;
+    dSubtractVectors3(TLOffsetPosition2, TLPosition2, TLPosition1);
+    MakeMatrix(TLOffsetPosition1, TLRotation1, amatrix);
+    MakeMatrix(TLOffsetPosition2, TLRotation2, bmatrix);
+    bool IsOk = Collider.Collide(ColCache, &amatrix, &bmatrix);
 
 
     if (IsOk) {
@@ -533,12 +528,6 @@ dCollideTTL(dxGeom* g1, dxGeom* g2, int Flags, dContactGeom* Contacts, int Strid
                 int             id1, id2;
                 int             OutTriCount = 0;
                 dVector3        v1[3], v2[3];
-
-                // only do these expensive inversions once
-                /*dMatrix4 InvMatrix1, InvMatrix2;
-                dInvertMatrix4(A, InvMatrix1);
-                dInvertMatrix4(B, InvMatrix2);*/
-
 
                 for (int i = 0; i < TriCount; i++)
                 {

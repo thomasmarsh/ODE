@@ -174,9 +174,12 @@ dCollideTTL(dxGeom* g1, dxGeom* g2, int Flags, dContactGeom* Contacts, int Strid
 
     // Collision query
     Matrix4x4 amatrix, bmatrix;
-    BOOL IsOk = Collider.Collide(ColCache,
-        &MakeMatrix(TLPosition1, TLRotation1, amatrix),
-        &MakeMatrix(TLPosition2, TLRotation2, bmatrix) );
+    dVector3 TLOffsetPosition1 = { REAL(0.0), };
+    dVector3 TLOffsetPosition2;
+    dSubtractVectors3(TLOffsetPosition2, TLPosition2, TLPosition1);
+    MakeMatrix(TLOffsetPosition1, TLRotation1, amatrix);
+    MakeMatrix(TLOffsetPosition2, TLRotation2, bmatrix);
+    BOOL IsOk = Collider.Collide(ColCache, &amatrix, &bmatrix);
 
 
     // Make "double" versions of these matrices, if appropriate

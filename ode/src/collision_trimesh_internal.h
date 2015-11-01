@@ -421,28 +421,11 @@ void FetchTransformedTriangle(dxTriMesh* TriMesh, int Index, dVector3 Out[3]){
 
 static inline 
 Matrix4x4& MakeMatrix(const dVector3 Position, const dMatrix3 Rotation, Matrix4x4& Out){
-    Out.m[0][0] = (float) Rotation[0];
-    Out.m[1][0] = (float) Rotation[1];
-    Out.m[2][0] = (float) Rotation[2];
-
-    Out.m[0][1] = (float) Rotation[4];
-    Out.m[1][1] = (float) Rotation[5];
-    Out.m[2][1] = (float) Rotation[6];
-
-    Out.m[0][2] = (float) Rotation[8];
-    Out.m[1][2] = (float) Rotation[9];
-    Out.m[2][2] = (float) Rotation[10];
-
-    Out.m[3][0] = (float) Position[0];
-    Out.m[3][1] = (float) Position[1];
-    Out.m[3][2] = (float) Position[2];
-
-    Out.m[0][3] = 0.0f;
-    Out.m[1][3] = 0.0f;
-    Out.m[2][3] = 0.0f;
-    Out.m[3][3] = 1.0f;
-
-    return Out;
+    return Out.Set(
+        Rotation[0], Rotation[4], Rotation[8], 0.0f,
+        Rotation[1], Rotation[5], Rotation[9], 0.0f,
+        Rotation[2], Rotation[6], Rotation[10],0.0f,
+        Position[0], Position[1], Position[2], 1.0f);
 }
 
 static inline 

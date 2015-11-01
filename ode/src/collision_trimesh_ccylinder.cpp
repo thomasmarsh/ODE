@@ -167,7 +167,7 @@ struct sTrimeshCapsuleColliderData
     // mesh data
     // dMatrix4  mHullDstPl;
     dMatrix3   m_mTriMeshRot;
-    dVector3   m_mTriMeshPos;
+    dVector3   m_vTriMeshPos;
     dVector3   m_vE0, m_vE1, m_vE2;
 
     // global collider data
@@ -930,7 +930,7 @@ void sTrimeshCapsuleColliderData::SetupInitialContext(dxTriMesh *TriMesh, dxGeom
     memcpy(m_mTriMeshRot, pTriRot, sizeof(dMatrix3));
 
     const dVector3* pTriPos = (const dVector3*)dGeomGetPosition(TriMesh);
-    memcpy(m_mTriMeshPos, pTriPos, sizeof(dVector3));
+    memcpy(m_vTriMeshPos, pTriPos, sizeof(dVector3));
 
     // global info for contact creation
     m_iStride			=skip;
@@ -971,45 +971,34 @@ static void dQueryCCTLPotentialCollisionTriangles(OBBCollider &Collider,
                                                   const sTrimeshCapsuleColliderData &cData, dxTriMesh *TriMesh, dxGeom *Capsule,
                                                   OBBCache &BoxCache)
 {
-    // It is a potential issue to explicitly cast to float 
-    // if custom width floating point type is introduced in OPCODE.
-    // It is necessary to make a typedef and cast to it
-    // (e.g. typedef float opc_float;)
-    // However I'm not sure in what header it should be added.
-
-    const dVector3 &vCapsulePosition = cData.m_vCapsulePosition;
-
-    Point cCenter(/*(float)*/ vCapsulePosition[0], /*(float)*/ vCapsulePosition[1], /*(float)*/ vCapsulePosition[2]);
-    Point cExtents(/*(float)*/ cData.m_vCapsuleRadius, /*(float)*/ cData.m_vCapsuleRadius,/*(float)*/ cData.m_fCapsuleSize/2);
-
-    Matrix3x3 obbRot;
-
-    const dMatrix3 &mCapsuleRotation = cData.m_mCapsuleRotation;
-
-    obbRot[0][0] = /*(float)*/ mCapsuleRotation[0];
-    obbRot[1][0] = /*(float)*/ mCapsuleRotation[1];
-    obbRot[2][0] = /*(float)*/ mCapsuleRotation[2];
-
-    obbRot[0][1] = /*(float)*/ mCapsuleRotation[4];
-    obbRot[1][1] = /*(float)*/ mCapsuleRotation[5];
-    obbRot[2][1] = /*(float)*/ mCapsuleRotation[6];
-
-    obbRot[0][2] = /*(float)*/ mCapsuleRotation[8];
-    obbRot[1][2] = /*(float)*/ mCapsuleRotation[9];
-    obbRot[2][2] = /*(float)*/ mCapsuleRotation[10];
-
-    OBB obbCapsule(cCenter,cExtents,obbRot);
-
-    Matrix4x4 CapsuleMatrix;
-    MakeMatrix(vCapsulePosition, mCapsuleRotation, CapsuleMatrix);
-
     Matrix4x4 MeshMatrix;
-    MakeMatrix(cData.m_mTriMeshPos, cData.m_mTriMeshRot, MeshMatrix);
+    const dVector3 vZeroVector3 = { REAL(0.0), };
+    MakeMatrix(vZeroVector3, cData.m_mTriMeshRot, MeshMatrix);
+
+    const dVector3 &vCapsulePos = cData.m_vCapsulePosition;
+    const dMatrix3 &mCapsuleRot = cData.m_mCapsuleRotation;
+
+    dVector3 vCapsuleOffsetPos;
+    dSubtractVectors3(vCapsuleOffsetPos, vCapsulePos, cData.m_vTriMeshPos);
+
+    const dReal fCapsuleRadius = cData.m_vCapsuleRadius, fCapsuleHalfAxis = cData.m_fCapsuleSize * REAL(0.5);
+
+    OBB obbCapsule;
+    obbCapsule.mCenter.Set(vCapsuleOffsetPos[0], vCapsuleOffsetPos[1], vCapsuleOffsetPos[2]);
+    obbCapsule.mExtents.Set(
+        0 == nCAPSULE_AXIS ? fCapsuleHalfAxis : fCapsuleRadius,
+        1 == nCAPSULE_AXIS ? fCapsuleHalfAxis : fCapsuleRadius,
+        2 == nCAPSULE_AXIS ? fCapsuleHalfAxis : fCapsuleRadius);
+    obbCapsule.mRot.Set(
+        mCapsuleRot[0], mCapsuleRot[4], mCapsuleRot[8],
+        mCapsuleRot[1], mCapsuleRot[5], mCapsuleRot[9],
+        mCapsuleRot[2], mCapsuleRot[6], mCapsuleRot[10]);
 
     // TC results
     if (TriMesh->doBoxTC) {
         dxTriMesh::BoxTC* BoxTC = 0;
-        for (int i = 0; i < TriMesh->BoxTCCache.size(); i++){
+        const int iBoxCacheSize = TriMesh->BoxTCCache.size();
+        for (int i = 0; i != iBoxCacheSize; i++){
             if (TriMesh->BoxTCCache[i].Geom == Capsule){
                 BoxTC = &TriMesh->BoxTCCache[i];
                 break;
@@ -1029,7 +1018,7 @@ static void dQueryCCTLPotentialCollisionTriangles(OBBCollider &Collider,
     }
     else {
         Collider.SetTemporalCoherence(false);
-        Collider.Collide(BoxCache, obbCapsule, TriMesh->Data->BVTree, null,&MeshMatrix);
+        Collider.Collide(BoxCache, obbCapsule, TriMesh->Data->BVTree, null, &MeshMatrix);
     }
 }
 
@@ -1087,7 +1076,7 @@ int dCollideCCTL(dxGeom *o1, dxGeom *o2, int flags, dContactGeom *contact, int s
                 if (!Callback(TriMesh, Capsule, Triint)) continue;
 
                 dVector3 dv[3];
-                FetchTriangle(TriMesh, Triint, cData.m_mTriMeshPos, cData.m_mTriMeshRot, dv);
+                FetchTriangle(TriMesh, Triint, cData.m_vTriMeshPos, cData.m_mTriMeshRot, dv);
 
                 uint8 flags = UseFlags ? UseFlags[Triint] : (uint8)dxTriMeshData::kUseAll;
 

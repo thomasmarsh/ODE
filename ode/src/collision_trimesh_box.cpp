@@ -1208,49 +1208,35 @@ static void dQueryBTLPotentialCollisionTriangles(OBBCollider &Collider,
                                                  const sTrimeshBoxColliderData &cData, dxTriMesh *TriMesh, dxGeom *BoxGeom,
                                                  OBBCache &BoxCache)
 {
-    // get source hull position, orientation and half size
-    const dMatrix3& mRotBox=*(const dMatrix3*)dGeomGetRotation(BoxGeom);
-    const dVector3& vPosBox=*(const dVector3*)dGeomGetPosition(BoxGeom);
-
-    // Make OBB
-    OBB Box;
-    Box.mCenter.x = vPosBox[0];
-    Box.mCenter.y = vPosBox[1];
-    Box.mCenter.z = vPosBox[2];
-
-    // It is a potential issue to explicitly cast to float 
-    // if custom width floating point type is introduced in OPCODE.
-    // It is necessary to make a typedef and cast to it
-    // (e.g. typedef float opc_float;)
-    // However I'm not sure in what header it should be added.
-
-    Box.mExtents.x = /*(float)*/cData.m_vBoxHalfSize[0];
-    Box.mExtents.y = /*(float)*/cData.m_vBoxHalfSize[1];
-    Box.mExtents.z = /*(float)*/cData.m_vBoxHalfSize[2];
-
-    Box.mRot.m[0][0] = /*(float)*/mRotBox[0];
-    Box.mRot.m[1][0] = /*(float)*/mRotBox[1];
-    Box.mRot.m[2][0] = /*(float)*/mRotBox[2];
-
-    Box.mRot.m[0][1] = /*(float)*/mRotBox[4];
-    Box.mRot.m[1][1] = /*(float)*/mRotBox[5];
-    Box.mRot.m[2][1] = /*(float)*/mRotBox[6];
-
-    Box.mRot.m[0][2] = /*(float)*/mRotBox[8];
-    Box.mRot.m[1][2] = /*(float)*/mRotBox[9];
-    Box.mRot.m[2][2] = /*(float)*/mRotBox[10];
-
-    Matrix4x4 amatrix;
-    /*Matrix4x4 BoxMatrix = */MakeMatrix(vPosBox, mRotBox, amatrix);
-
     // get destination hull position and orientation
     const dMatrix3& mRotMesh=*(const dMatrix3*)dGeomGetRotation(TriMesh);
     const dVector3& vPosMesh=*(const dVector3*)dGeomGetPosition(TriMesh);
 
+    Matrix4x4 MeshMatrix;
+    const dVector3 vZeroVector3 = { REAL(0.0), };
+    MakeMatrix(vZeroVector3, mRotMesh, MeshMatrix);
+
+    // get source hull position, orientation and half size
+    const dMatrix3& mRotBox=*(const dMatrix3*)dGeomGetRotation(BoxGeom);
+    const dVector3& vPosBox=*(const dVector3*)dGeomGetPosition(BoxGeom);
+
+    dVector3 vOffsetPosBox;
+    dSubtractVectors3(vOffsetPosBox, vPosBox, vPosMesh);
+
+    // Make OBB
+    OBB Box;
+    Box.mCenter.Set(vOffsetPosBox[0], vOffsetPosBox[1], vOffsetPosBox[2]);
+    Box.mExtents.Set(cData.m_vBoxHalfSize[0], cData.m_vBoxHalfSize[1], cData.m_vBoxHalfSize[2]);
+    Box.mRot.Set(
+        mRotBox[0], mRotBox[4], mRotBox[8], 
+        mRotBox[1], mRotBox[5], mRotBox[9],
+        mRotBox[2], mRotBox[6], mRotBox[10]);
+
     // TC results
     if (TriMesh->doBoxTC) {
         dxTriMesh::BoxTC* BoxTC = 0;
-        for (int i = 0; i < TriMesh->BoxTCCache.size(); i++){
+        const int iBoxCacheSize = TriMesh->BoxTCCache.size();
+        for (int i = 0; i != iBoxCacheSize; i++){
             if (TriMesh->BoxTCCache[i].Geom == BoxGeom){
                 BoxTC = &TriMesh->BoxTCCache[i];
                 break;
@@ -1266,12 +1252,11 @@ static void dQueryBTLPotentialCollisionTriangles(OBBCollider &Collider,
 
         // Intersect
         Collider.SetTemporalCoherence(true);
-        Collider.Collide(*BoxTC, Box, TriMesh->Data->BVTree, null, &MakeMatrix(vPosMesh, mRotMesh, amatrix));
+        Collider.Collide(*BoxTC, Box, TriMesh->Data->BVTree, null, &MeshMatrix);
     }
     else {
         Collider.SetTemporalCoherence(false);
-        Collider.Collide(BoxCache, Box, TriMesh->Data->BVTree, null,
-            &MakeMatrix(vPosMesh, mRotMesh, amatrix));
+        Collider.Collide(BoxCache, Box, TriMesh->Data->BVTree, null, &MeshMatrix);
     }
 }
 

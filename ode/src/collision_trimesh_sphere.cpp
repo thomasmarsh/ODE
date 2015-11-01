@@ -249,38 +249,42 @@ int dCollideSTL(dxGeom* g1, dxGeom* SphereGeom, int Flags, dContactGeom* Contact
 
     dxTriMesh* TriMesh = (dxTriMesh*)g1;
 
-    // Init
-    const dVector3& TLPosition = *(const dVector3*)dGeomGetPosition(TriMesh);
-    const dMatrix3& TLRotation = *(const dMatrix3*)dGeomGetRotation(TriMesh);
-
     const unsigned uiTLSKind = TriMesh->getParentSpaceTLSKind();
     dIASSERT(uiTLSKind == SphereGeom->getParentSpaceTLSKind()); // The colliding spaces must use matching cleanup method
     TrimeshCollidersCache *pccColliderCache = GetTrimeshCollidersCache(uiTLSKind);
     SphereCollider& Collider = pccColliderCache->_SphereCollider;
 
+    const dVector3& TLPosition = *(const dVector3*)dGeomGetPosition(TriMesh);
+    const dMatrix3& TLRotation = *(const dMatrix3*)dGeomGetRotation(TriMesh);
+
+    Matrix4x4 MeshMatrix;
+    const dVector3 ZeroVector3 = { REAL(0.0), };
+    MakeMatrix(ZeroVector3, TLRotation, MeshMatrix);
+
     const dVector3& Position = *(const dVector3*)dGeomGetPosition(SphereGeom);
     dReal Radius = dGeomSphereGetRadius(SphereGeom);
 
+    dVector3 OffsetPosition;
+    dSubtractVectors3(OffsetPosition, Position, TLPosition);
+
     // Sphere
     Sphere Sphere;
-    Sphere.mCenter.x = Position[0];
-    Sphere.mCenter.y = Position[1];
-    Sphere.mCenter.z = Position[2];
+    Sphere.mCenter.Set(OffsetPosition[0], OffsetPosition[1], OffsetPosition[2]);
     Sphere.mRadius = Radius;
 
-    Matrix4x4 amatrix;
 
     // TC results
     if (TriMesh->doSphereTC) {
         dxTriMesh::SphereTC* sphereTC = 0;
-        for (int i = 0; i < TriMesh->SphereTCCache.size(); i++){
+        const int sphereCacheSize = TriMesh->SphereTCCache.size();
+        for (int i = 0; i != sphereCacheSize; i++){
             if (TriMesh->SphereTCCache[i].Geom == SphereGeom){
                 sphereTC = &TriMesh->SphereTCCache[i];
                 break;
             }
         }
 
-        if (!sphereTC){
+        if (!sphereTC) {
             TriMesh->SphereTCCache.push(dxTriMesh::SphereTC());
 
             sphereTC = &TriMesh->SphereTCCache[TriMesh->SphereTCCache.size() - 1];
@@ -289,13 +293,11 @@ int dCollideSTL(dxGeom* g1, dxGeom* SphereGeom, int Flags, dContactGeom* Contact
 
         // Intersect
         Collider.SetTemporalCoherence(true);
-        Collider.Collide(*sphereTC, Sphere, TriMesh->Data->BVTree, null, 
-            &MakeMatrix(TLPosition, TLRotation, amatrix));
+        Collider.Collide(*sphereTC, Sphere, TriMesh->Data->BVTree, null, &MeshMatrix);
     }
     else {
         Collider.SetTemporalCoherence(false);
-        Collider.Collide(pccColliderCache->defaultSphereCache, Sphere, TriMesh->Data->BVTree, null, 
-            &MakeMatrix(TLPosition, TLRotation, amatrix));
+        Collider.Collide(pccColliderCache->defaultSphereCache, Sphere, TriMesh->Data->BVTree, null, &MeshMatrix);
     }
 
     if (! Collider.GetContactStatus()) {
