@@ -394,10 +394,9 @@ static void setShadowTransform()
   glMultMatrixf (matrix);
 }
 
-static void drawConvex (float *_planes,unsigned int _planecount,
-			float *_points,
-			unsigned int /*_pointcount*/,
-			unsigned int *_polygons)
+static void drawConvex (const float *_planes, unsigned int _planecount,
+			const float *_points, unsigned int /*_pointcount*/,
+			const unsigned int *_polygons)
 {
   unsigned int polyindex=0;
   for(unsigned int i=0;i<_planecount;++i)
@@ -419,10 +418,9 @@ static void drawConvex (float *_planes,unsigned int _planecount,
     }
 }
 
-static void drawConvexD (double *_planes,unsigned int _planecount,
-			 double *_points,
-			 unsigned int /*_pointcount*/,
-			 unsigned int *_polygons)
+static void drawConvexD (const double *_planes, unsigned int _planecount,
+			 const double *_points, unsigned int /*_pointcount*/,
+			 const unsigned int *_polygons)
 {
   unsigned int polyindex=0;
   for(unsigned int i=0;i<_planecount;++i)
@@ -1379,10 +1377,9 @@ extern "C" void dsDrawBox (const float pos[3], const float R[12],
 }
 
 extern "C" void dsDrawConvex (const float pos[3], const float R[12],
-			      float *_planes,unsigned int _planecount,
-			      float *_points,
-			      unsigned int _pointcount,
-			      unsigned int *_polygons)
+			      const float *_planes,unsigned int _planecount,
+			      const float *_points, unsigned int _pointcount,
+			      const unsigned int *_polygons)
 {
   if (current_state != 2) dsError ("drawing function called outside simulation loop");
   setupDrawingMode();
@@ -1537,10 +1534,9 @@ extern "C" void dsDrawBoxD (const double pos[3], const double R[12],
 }
 
 extern "C" void dsDrawConvexD (const double pos[3], const double R[12],
-			       double *_planes,unsigned int _planecount,
-			       double *_points,
-			       unsigned int _pointcount,
-			       unsigned int *_polygons)
+			       const double *_planes, unsigned int _planecount,
+			       const double *_points, unsigned int _pointcount,
+			       const unsigned int *_polygons)
 {
   if (current_state != 2) dsError ("drawing function called outside simulation loop");
   setupDrawingMode();

@@ -48,11 +48,11 @@ By Rodrigo Hernandez
 //****************************************************************************
 // Convex public API
 dxConvex::dxConvex (dSpaceID space,
-                    dReal *_planes,
+                    const dReal *_planes,
                     unsigned int _planecount,
-                    dReal *_points,
+                    const dReal *_points,
                     unsigned int _pointcount,
-                    unsigned int *_polygons) :
+                    const unsigned int *_polygons) :
     dxGeom (space,1)
 {
     dAASSERT (_planes != NULL);
@@ -71,8 +71,8 @@ dxConvex::dxConvex (dSpaceID space,
 #ifndef dNODEBUG
     // Check for properly build polygons by calculating the determinant
     // of the 3x3 matrix composed of the first 3 points in the polygon.
-    unsigned int *points_in_poly=polygons;
-    unsigned int *index=polygons+1;
+    const unsigned int *points_in_poly=polygons;
+    const unsigned int *index=polygons+1;
 
     for(unsigned int i=0;i<planecount;++i)
     {
@@ -123,8 +123,8 @@ void dxConvex::computeAABB()
 /*! \brief Populates the edges set, should be called only once whenever the polygon array gets updated */
 void dxConvex::FillEdges()
 {
-    unsigned int *points_in_poly=polygons;
-    unsigned int *index=polygons+1;
+    const unsigned int *points_in_poly=polygons;
+    const unsigned int *index=polygons+1;
     if (edges!=NULL) delete[] edges;
     edgecount = 0;
     edge e;
@@ -205,10 +205,10 @@ void dxConvex::GetFaceNormal(int i, dVector3 normal)
 }
 #endif
 
-dGeomID dCreateConvex (dSpaceID space,dReal *_planes,unsigned int _planecount,
-                       dReal *_points,
+dGeomID dCreateConvex (dSpaceID space,const dReal *_planes,unsigned int _planecount,
+                       const dReal *_points,
                        unsigned int _pointcount,
-                       unsigned int *_polygons)
+                       const unsigned int *_polygons)
 {
     //fprintf(stdout,"dxConvex dCreateConvex\n");
     return new dxConvex(space,_planes, _planecount,
@@ -217,10 +217,10 @@ dGeomID dCreateConvex (dSpaceID space,dReal *_planes,unsigned int _planecount,
         _polygons);
 }
 
-void dGeomSetConvex (dGeomID g,dReal *_planes,unsigned int _planecount,
-                     dReal *_points,
+void dGeomSetConvex (dGeomID g,const dReal *_planes,unsigned int _planecount,
+                     const dReal *_points,
                      unsigned int _pointcount,
-                     unsigned int *_polygons)
+                     const unsigned int *_polygons)
 {
     //fprintf(stdout,"dxConvex dGeomSetConvex\n");
     dUASSERT (g && g->type == dConvexClass,"argument not a convex shape");
@@ -508,7 +508,7 @@ inline bool IsPointInConvex(dVector3 p,
   \return true if the point lies inside of the polygon, false if not.
 */
 inline bool IsPointInPolygon(dVector3 p,
-                             unsigned int *polygon,
+                             const unsigned int *polygon,
 			                 dReal *plane,
                              dxConvex *convex,
                              dVector3 out)
@@ -660,7 +660,7 @@ int dCollideSphereConvex (dxGeom *o1, dxGeom *o2, int flags,
     dVector4 plane;
     // dVector3 contactpoint;
     dVector3 offsetpos,out,temp;
-    unsigned int *pPoly=Convex->polygons;
+    const unsigned int *pPoly=Convex->polygons;
     int closestplane=-1;
     bool sphereinside=true;
     /*
@@ -857,7 +857,7 @@ bool CheckEdgeIntersection(dxConvex& cvx1,dxConvex& cvx2, int flags,int& curc,
         e2[0]+=cvx1.final_posr->pos[0];
         e2[1]+=cvx1.final_posr->pos[1];
         e2[2]+=cvx1.final_posr->pos[2];
-        unsigned int* pPoly=cvx2.polygons;
+        const unsigned int* pPoly=cvx2.polygons;
         for(size_t j=0;j<cvx2.planecount;++j)
         {
             // Rotate
@@ -1134,11 +1134,11 @@ int TestConvexIntersection(dxConvex& cvx1,dxConvex& cvx2, int flags,
             // cvx1 MUST always be in contact->g1 and cvx2 in contact->g2
             // This was learned the hard way :(
             unsigned int incident_side;
-            unsigned int* pIncidentPoly;
-            unsigned int* pIncidentPoints;
+            const unsigned int* pIncidentPoly;
+            const unsigned int* pIncidentPoints;
             unsigned int reference_side;
-            unsigned int* pReferencePoly;
-            unsigned int* pReferencePoints;
+            const unsigned int* pReferencePoly;
+            const unsigned int* pReferencePoints;
             dVector4 plane,rplane,iplane;
             dVector3 tmp;
             dVector3 dist,p;
@@ -1485,7 +1485,7 @@ int dCollideRayConvex( dxGeom *o1, dxGeom *o2,
     for ( unsigned int i = 0; i < convex->planecount; ++i )
     {
         // Alias this plane.
-        dReal* plane = convex->planes + ( i * 4 );
+        const dReal* plane = convex->planes + ( i * 4 );
 
         // If alpha >= 0 then start point is outside of plane.
         alpha = dCalcVectorDot3( plane, ray->final_posr->pos ) - plane[3];
@@ -1513,7 +1513,7 @@ int dCollideRayConvex( dxGeom *o1, dxGeom *o2,
     for ( unsigned int i = 0; i < convex->planecount; ++i )
     {
         // Alias this plane.
-        dReal* plane = convex->planes + ( i * 4 );
+        const dReal* plane = convex->planes + ( i * 4 );
 
         // If alpha >= 0 then point is outside of plane.
         alpha = nsign * ( dCalcVectorDot3( plane, ray->final_posr->pos ) - plane[3] );
@@ -1542,7 +1542,7 @@ int dCollideRayConvex( dxGeom *o1, dxGeom *o2,
                     continue;	// Skip self.
 
                 // Alias this plane.
-                dReal* planej = convex->planes + ( j * 4 );
+                const dReal* planej = convex->planes + ( j * 4 );
 
                 // If beta >= 0 then start is outside of plane.
                 beta = dCalcVectorDot3( planej, contact->pos ) - plane[3];

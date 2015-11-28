@@ -454,7 +454,7 @@ fi
 
 AC_CONFIG_SUBDIRS([libccd])
 
-AM_CONDITIONAL(LIBCCD, test x$use_libccd != xno)
+AM_CONDITIONAL(LIBCCD_ENABLED, test x$use_libccd != xno)
 AM_CONDITIONAL(LIBCCD_INTERNAL, test x$libccd_source = xinternal)
 AM_CONDITIONAL(LIBCCD_BOX_CYL,          test x$col_box_cylinder = xlibccd)
 AM_CONDITIONAL(LIBCCD_CYL_CYL,          test x$col_cylinder_cylinder = xlibccd)

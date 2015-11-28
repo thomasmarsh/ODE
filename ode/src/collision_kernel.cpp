@@ -201,6 +201,7 @@ static void setAllColliders (int i, dColliderFn *fn)
     setCollider (dTriMeshClass,dCapsuleClass,&dCollideCCTL);
     setCollider (dTriMeshClass,dPlaneClass,&dCollideTrimeshPlane);
     setCollider (dCylinderClass,dTriMeshClass,&dCollideCylinderTrimesh);
+    setCollider (dConvexClass,dTriMeshClass,&dCollideConvexTrimesh);
 #endif
 
 #ifdef dLIBCCD_BOX_CYL

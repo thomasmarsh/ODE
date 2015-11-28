@@ -37,7 +37,6 @@ bool dxTriMesh::controlGeometry(int controlClass, int controlCode, void *dataVal
     return dxGeom::controlGeometry(controlClass, controlCode, dataValue, dataSize);
 }
 
-int dxTriMesh::AABBTest(dxGeom* g, dReal aabb[6]) { return 0; }
 void dxTriMesh::computeAABB() { dSetZero (aabb,6); }
 
 static dMatrix4 identity = {
