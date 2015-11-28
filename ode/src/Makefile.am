@@ -108,7 +108,8 @@ libode_la_SOURCES +=    collision_trimesh_trimesh.cpp \
                         collision_trimesh_distance.cpp \
                         collision_trimesh_internal.h \
                         collision_cylinder_trimesh.cpp \
-                        collision_trimesh_plane.cpp
+                        collision_trimesh_plane.cpp \
+                        collision_convex_trimesh.cpp
 endif
 
 
@@ -133,7 +134,8 @@ libode_la_SOURCES+=     collision_trimesh_trimesh.cpp \
                         collision_trimesh_distance.cpp \
                         collision_trimesh_internal.h \
                         collision_cylinder_trimesh.cpp \
-                        collision_trimesh_plane.cpp
+                        collision_trimesh_plane.cpp \
+                        collision_convex_trimesh.cpp
 endif
 
 

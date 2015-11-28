@@ -27,6 +27,9 @@
 #include "odemath.h"
 #include "collision_libccd.h"
 #include "collision_std.h"
+#if dTRIMESH_ENABLED
+#include "collision_util.h"
+#endif
 
 
 struct _ccd_obj_t {
@@ -64,6 +67,12 @@ struct _ccd_convex_t {
     dxConvex *convex;
 };
 typedef struct _ccd_convex_t ccd_convex_t;
+
+struct _ccd_triangle_t {
+    ccd_obj_t o;
+    ccd_vec3_t vertices[3];
+};
+typedef struct _ccd_triangle_t ccd_triangle_t;
 
 /** Transforms geom to ccd struct */
 static void ccdGeomToObj(const dGeomID g, ccd_obj_t *);
@@ -243,7 +252,7 @@ static void ccdSupportConvex(const void *obj, const ccd_vec3_t *_dir, ccd_vec3_t
     ccd_vec3_t dir, p;
     ccd_real_t maxdot, dot;
     size_t i;
-    dReal *curp;
+    const dReal *curp;
 
     ccdVec3Copy(&dir, _dir);
     ccdQuatRotVec(&dir, &c->o.rot_inv);
@@ -427,3 +436,159 @@ int dCollideConvexConvexCCD(dxGeom *o1, dxGeom *o2, int flags, dContactGeom *con
         &c1, ccdSupportConvex, ccdCenter,
         &c2, ccdSupportConvex, ccdCenter);
 }
+
+
+#if dTRIMESH_ENABLED
+
+static 
+void ccdSupportTriangle(const void *obj, const ccd_vec3_t *_dir, ccd_vec3_t *v)
+{
+    const ccd_triangle_t* o = (ccd_triangle_t *) obj;
+    ccd_real_t maxdot, dot;
+    maxdot = -CCD_REAL_MAX;
+    for (int i = 0; i < 3; i++) {
+        dot = ccdVec3Dot(_dir, &o->vertices[i]);
+        if (dot > maxdot) {
+            ccdVec3Copy(v, &o->vertices[i]);
+            maxdot = dot;
+        }
+    }
+}
+
+const static float CONTACT_DEPTH_EPSILON = 0.0001f;
+const static float CONTACT_POS_EPSILON = 0.0001f;
+const static float CONTACT_PERTURBATION_ANGLE = 0.001f;
+
+static 
+int addUniqueContact(dContactGeom *contacts, dContactGeom *c, int contactcount, int maxcontacts, int flags, int skip)
+{
+    dReal minDepth = dInfinity;
+    int index = contactcount;
+    for (int k = 0; k < contactcount; k++) {
+        dContactGeom* pc = SAFECONTACT(flags, contacts, k, skip);
+        if (fabs(c->pos[0] - pc->pos[0]) < CONTACT_POS_EPSILON
+            && fabs(c->pos[1] - pc->pos[1]) < CONTACT_POS_EPSILON
+            && fabs(c->pos[2] - pc->pos[2]) < CONTACT_POS_EPSILON) {
+            index = pc->depth + CONTACT_DEPTH_EPSILON < c->depth ? k : maxcontacts;
+            break;
+        }
+        if (contactcount == maxcontacts && pc->depth < minDepth && pc->depth < c->depth) {
+            minDepth = pc->depth;
+            index = k;
+        }
+    }
+    if (index < maxcontacts) {
+        dContactGeom* contact = SAFECONTACT(flags, contacts, index, skip);
+        contact->g1 = c->g1;
+        contact->g2 = c->g2;
+        contact->depth = c->depth;
+        contact->side1 = c->side1;
+        contact->side2 = c->side2;
+        contact->pos[0] = c->pos[0];
+        contact->pos[1] = c->pos[1];
+        contact->pos[2] = c->pos[2];
+        contact->normal[0] = c->normal[0];
+        contact->normal[1] = c->normal[1];
+        contact->normal[2] = c->normal[2];
+        contactcount = index == contactcount ? contactcount + 1 : contactcount;
+    }
+    return contactcount;
+}
+
+static 
+int addPerturbedContacts(dxGeom* o1, dxGeom* o2, int flags, dContactGeom *contacts, int skip,
+        ccd_convex_t* c1, ccd_triangle_t* c2, dVector3* triangle, dContactGeom* contact, int contactcount)
+{
+    int maxcontacts = (flags & 0xffff);
+    dVector3 upAxis, cross;
+    dVector3 pos;
+    
+    pos[0] = contact->pos[0];
+    pos[1] = contact->pos[1];
+    pos[2] = contact->pos[2];
+
+    upAxis[0] = 0;
+    upAxis[1] = 1;
+    upAxis[2] = 0;
+    if (fabs(dVector3Dot(contact->normal, upAxis)) > 0.7) {
+        upAxis[0] = 0;
+        upAxis[1] = 0;
+        upAxis[2] = 1;
+    }
+
+    dVector3Cross(contact->normal, upAxis, cross);
+    if (dSafeNormalize3(cross)) {
+
+        dVector3Cross(cross, contact->normal, upAxis);
+        if (dSafeNormalize3(upAxis)) {
+
+            for (int k = 0; k < 4; k++) {
+                dContactGeom perturbedContact;
+                dQuaternion q1, q2, qr;
+                dQFromAxisAndAngle(q1, upAxis[0], upAxis[1], upAxis[2], k % 2 == 0 ? CONTACT_PERTURBATION_ANGLE : -CONTACT_PERTURBATION_ANGLE);
+                dQFromAxisAndAngle(q2, cross[0], cross[1], cross[2], k / 2 == 0 ? CONTACT_PERTURBATION_ANGLE : -CONTACT_PERTURBATION_ANGLE);
+                dQMultiply0(qr, q1, q2);
+                
+                for (int j = 0; j < 3; j++) {
+                    dVector3 p, perturbed;
+                    dVector3Subtract(triangle[j], pos, p);
+                    dQuatTransform(qr, p, perturbed);
+                    dVector3Add(perturbed, pos, perturbed);
+                    
+                    c2->vertices[j].v[0] = perturbed[0];
+                    c2->vertices[j].v[1] = perturbed[1];
+                    c2->vertices[j].v[2] = perturbed[2];
+                }
+
+                if (ccdCollide(o1, o2, flags, &perturbedContact, skip, c1, ccdSupportConvex, ccdCenter, c2, ccdSupportTriangle, ccdCenter) == 1) {
+                    perturbedContact.side2 = contact->side2;
+                    contactcount = addUniqueContact(contacts, &perturbedContact, contactcount, maxcontacts, flags, skip);
+                }
+            }
+        }
+    }
+
+    return contactcount;
+}
+
+/*extern */
+int dCollideConvexTrimeshTrianglesCCD(dxGeom *o1, dxGeom *o2, int* indices, int numindices, int flags, dContactGeom *contacts, int skip)
+{
+    ccd_convex_t c1;
+    ccd_triangle_t c2;
+    dVector3 triangle[3];
+    int maxcontacts = (flags & 0xffff);
+    int contactcount = 0;
+    ccdGeomToConvex(o1, &c1);
+    ccdGeomToObj(o2, (ccd_obj_t *)&c2);
+
+    for (int i = 0; i < numindices; i++) {
+        dContactGeom tempcontact;
+        dGeomTriMeshGetTriangle(o2, indices[i], &triangle[0], &triangle[1], &triangle[2]);
+
+        for (int j = 0; j < 3; j++) {
+            c2.vertices[j].v[0] = triangle[j][0];
+            c2.vertices[j].v[1] = triangle[j][1];
+            c2.vertices[j].v[2] = triangle[j][2];
+        }
+
+        if (ccdCollide(o1, o2, flags, &tempcontact, skip, &c1, ccdSupportConvex, ccdCenter, &c2, ccdSupportTriangle, ccdCenter) == 1) {
+            tempcontact.side2 = i;
+            contactcount = addUniqueContact(contacts, &tempcontact, contactcount, maxcontacts, flags, skip);
+
+            if ((flags & CONTACTS_UNIMPORTANT)) {
+                break;
+            }
+        }
+    }
+
+    if (contactcount == 1 && !(flags & CONTACTS_UNIMPORTANT)) {
+        dContactGeom* contact = SAFECONTACT(flags, contacts, 0, skip);
+        dGeomTriMeshGetTriangle(o2, contact->side2, &triangle[0], &triangle[1], &triangle[2]);
+        contactcount = addPerturbedContacts(o1, o2, flags, contacts, skip, &c1, &c2, triangle, contact, contactcount);
+    }
+
+    return contactcount;
+}
+
+#endif // dTRIMESH_ENABLED

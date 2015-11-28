@@ -39,4 +39,6 @@ int dCollideConvexSphereCCD(dxGeom *o1, dxGeom *o2, int flags, dContactGeom *con
 
 int dCollideConvexConvexCCD(dxGeom *o1, dxGeom *o2, int flags, dContactGeom *contact, int skip);
 
+int dCollideConvexTrimeshTrianglesCCD(dxGeom *o1, dxGeom *o2, int* indices, int numindices, int flags, dContactGeom *contact, int skip);
+
 #endif /* _LIBCCD_COLLISION_H_ */

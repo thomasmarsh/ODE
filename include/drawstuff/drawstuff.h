@@ -253,11 +253,11 @@ DS_API void dsDrawLine (const float pos1[3], const float pos2[3]);
  * @ingroup drawstuff
  */
 DS_API void dsDrawConvex(const float pos[3], const float R[12],
-		  float *_planes,
+		  const float *_planes,
 		  unsigned int _planecount,
-		  float *_points,
+		  const float *_points,
 		  unsigned int _pointcount,
-		  unsigned int *_polygons);
+		  const unsigned int *_polygons);
 
  /* these drawing functions are identical to the ones above, except they take
  * double arrays for `pos' and `R'.
@@ -274,11 +274,11 @@ DS_API void dsDrawCapsuleD (const double pos[3], const double R[12],
 		     float length, float radius);
 DS_API void dsDrawLineD (const double pos1[3], const double pos2[3]);
 DS_API void dsDrawConvexD(const double pos[3], const double R[12],
-		  double *_planes,
+		  const double *_planes,
 		  unsigned int _planecount,
-		  double *_points,
+		  const double *_points,
 		  unsigned int _pointcount,
-		  unsigned int *_polygons);
+		  const unsigned int *_polygons);
 
 /**
  * @brief Set the quality with which curved objects are rendered.

@@ -349,7 +349,8 @@
         "../ode/src/collision_trimesh_ray.cpp",
         "../ode/src/collision_trimesh_sphere.cpp",
         "../ode/src/collision_trimesh_trimesh.cpp",
-        "../ode/src/collision_trimesh_plane.cpp"
+        "../ode/src/collision_trimesh_plane.cpp",
+        "../ode/src/collision_convex_trimesh.cpp"
       }
 
     configuration { "not no-trimesh", "with-gimpact or all-collis-libs" }
@@ -360,7 +361,9 @@
  
     configuration { "with-libccd" }
       files   { "../libccd/src/ccd/*.h", "../libccd/src/*.c" }
-      defines { "dLIBCCD_ENABLED", "dLIBCCD_CYL_CYL" }
+      defines { "dLIBCCD_ENABLED", "dLIBCCD_INTERNAL", 
+        "dLIBCCD_BOX_CYL", "dLIBCCD_CYL_CYL", "dLIBCCD_CAP_CYL", "dLIBCCD_CONVEX_BOX",
+        "dLIBCCD_CONVEX_CAP", "dLIBCCD_CONVEX_CYL", "dLIBCCD_CONVEX_SPHERE", "dLIBCCD_CONVEX_CONVEX" }
 
     configuration { "not with-libccd" }
       excludes { "../ode/src/collision_libccd.cpp", "../ode/src/collision_libccd.h" }

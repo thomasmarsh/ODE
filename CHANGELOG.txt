@@ -8,6 +8,11 @@ the rules for this file:
   * keep the format consistent (79 char width, M/D/Y date format).
 
 ------------------------------------------------------------------------------
+11/28/2015 Oleh Derevenko
+        * Convex-Trimesh collider added (libccd+GIMPACT only)(by Piotr Piastucki)
+        * dCreateConvex() and dGeomSetConvex() public APIs changed to expect 
+          their parameter arrays as const pointers
+
 11/01/2015 Oleh Derevenko
         * OPCODE mesh colliders' input coordinates have been offset to  
           mesh-relative frames to decrease potential computational errors

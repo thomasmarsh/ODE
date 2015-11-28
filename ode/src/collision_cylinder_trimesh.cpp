@@ -1057,7 +1057,7 @@ int dCollideCylinderTrimesh(dxGeom *o1, dxGeom *o2, int flags, dContactGeom *con
     {
         const int* Triangles = (const int*)Collider.GetTouchedPrimitives();
 
-        if (Trimesh->ArrayCallback != null)
+        if (Trimesh->ArrayCallback != NULL)
         {
             Trimesh->ArrayCallback(Trimesh, Cylinder, Triangles, TriCount);
         }

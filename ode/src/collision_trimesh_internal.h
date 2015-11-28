@@ -35,6 +35,7 @@
 
 #include "collision_kernel.h"
 #include "collision_trimesh_colliders.h"
+#include "collision_util.h"
 #include <ode/collision_trimesh.h>
 
 #if dTRIMESH_OPCODE
@@ -727,7 +728,7 @@ private:
         }
         else if (maxcontacts == countabove)
         {
-            result = dNextAfter(firstdepth, INFINITY);
+            result = dNextAfter(firstdepth, dInfinity);
         }
         else
         {
@@ -783,7 +784,7 @@ private:
             }
             else if (maxcontacts == countabove)
             {
-                result = dNextAfter(firstdepth, INFINITY);
+                result = dNextAfter(firstdepth, dInfinity);
                 break;
             }
             else
