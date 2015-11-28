@@ -440,7 +440,7 @@ libccd_source=internal
 
 AC_ARG_WITH(libccd,
         [AS_HELP_STRING([--with-libccd=@<:@internal|system@:>@],
-                [use the specified libccd @<:@default=internal@:>@])],
+                [use the specified libccd @<:@default=system@:>@])],
         [libccd_source=$withval],
         [libccd_source=system])
 
@@ -452,7 +452,13 @@ then
     fi
 fi
 
-AC_CONFIG_SUBDIRS([libccd])
+if test x$use_libccd = xyes
+then
+     if test x$libccd_source = xinternal
+     then
+        AC_CONFIG_SUBDIRS([libccd])
+     fi
+fi
 
 AM_CONDITIONAL(LIBCCD, test x$use_libccd != xno)
 AM_CONDITIONAL(LIBCCD_INTERNAL, test x$libccd_source = xinternal)
