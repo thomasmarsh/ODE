@@ -5,7 +5,7 @@ if ENABLE_OU
 OU_DIR = ou
 endif
 
-if LIBCCD
+if LIBCCD_ENABLED
 if LIBCCD_INTERNAL
 LIBCCD_DIR = libccd
 endif
