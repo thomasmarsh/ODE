@@ -2408,39 +2408,38 @@ void dxQuickStepIsland_Stage4LCP_IterationStep(dxQuickStepperStage4CallContext *
 
     IndexError *order = stage4CallContext->m_order;
     unsigned int index = order[i].index;
+    size_t index_offset = (size_t)index*12;
 
     dReal *fc_ptr1;
-    dReal *fc_ptr2;
+    dReal *fc_ptr2 = NULL;
     dReal delta;
-
-    {
-        int *jb = localContext->m_jb;
-        int b1 = jb[(size_t)index*2];
-        int b2 = jb[(size_t)index*2+1];
-        dReal *fc = stage4CallContext->m_cforce;
-        fc_ptr1 = fc + 6*(size_t)(unsigned)b1;
-        fc_ptr2 = (b2 != -1) ? fc + 6*(size_t)(unsigned)b2 : NULL;
-    }
 
     dReal *lambda = stage4CallContext->m_lambda;
     dReal old_lambda = lambda[index];
-    size_t index_offset = (size_t)index*12;
 
     {
         dReal *rhs = localContext->m_rhs;
         dReal *Ad = stage4CallContext->m_Ad;
-        delta = rhs[index] - old_lambda*Ad[index];
+        delta = rhs[index] - old_lambda * Ad[index];
+
+        dReal *fc = stage4CallContext->m_cforce;
+
+        int *jb = localContext->m_jb;
+        int b2 = jb[(size_t)index*2+1];
+        int b1 = jb[(size_t)index*2];
 
         dReal *J = localContext->m_J;
         const dReal *J_ptr = J + index_offset;
         // @@@ potential optimization: SIMD-ize this and the b2 >= 0 case
-        delta -=fc_ptr1[0] * J_ptr[0] + fc_ptr1[1] * J_ptr[1] +
+        fc_ptr1 = fc + 6*(size_t)(unsigned)b1;
+        delta -= fc_ptr1[0] * J_ptr[0] + fc_ptr1[1] * J_ptr[1] +
             fc_ptr1[2] * J_ptr[2] + fc_ptr1[3] * J_ptr[3] +
             fc_ptr1[4] * J_ptr[4] + fc_ptr1[5] * J_ptr[5];
         // @@@ potential optimization: handle 1-body constraints in a separate
         //     loop to avoid the cost of test & jump?
-        if (fc_ptr2) {
-            delta -=fc_ptr2[0] * J_ptr[6] + fc_ptr2[1] * J_ptr[7] +
+        if (b2 != -1) {
+            fc_ptr2 = fc + 6*(size_t)(unsigned)b2;
+            delta -= fc_ptr2[0] * J_ptr[6] + fc_ptr2[1] * J_ptr[7] +
                 fc_ptr2[2] * J_ptr[8] + fc_ptr2[3] * J_ptr[9] +
                 fc_ptr2[4] * J_ptr[10] + fc_ptr2[5] * J_ptr[11];
         }
@@ -2473,11 +2472,11 @@ void dxQuickStepIsland_Stage4LCP_IterationStep(dxQuickStepperStage4CallContext *
         //     to save test+jump penalties here?
         dReal new_lambda = old_lambda + delta;
         if (new_lambda < lo_act) {
-            delta = lo_act-old_lambda;
+            delta = lo_act - old_lambda;
             lambda[index] = lo_act;
         }
         else if (new_lambda > hi_act) {
-            delta = hi_act-old_lambda;
+            delta = hi_act - old_lambda;
             lambda[index] = hi_act;
         }
         else {
