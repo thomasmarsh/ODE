@@ -22,9 +22,9 @@ AC_SUBST(ODE_VERSION)
 #
 #  6. If any interfaces have been removed since the last public release,
 #     then set AGE to 0.
-CURRENT=5
-REVISION=1
-AGE=1
+CURRENT=6
+REVISION=0
+AGE=0
 
 AC_ARG_ENABLE(version-info,
         AS_HELP_STRING([--disable-version-info],
