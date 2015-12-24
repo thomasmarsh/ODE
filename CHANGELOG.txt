@@ -8,6 +8,10 @@ the rules for this file:
   * keep the format consistent (79 char width, M/D/Y date format).
 
 ------------------------------------------------------------------------------
+12/25/2015 Oleh Derevenko
+        * Unexpected joint mode assignment (instead of comparison) fixed within
+          an dUASSERT in dJointSetTransmissionAxis2() of transmission joint
+
 11/28/2015 Oleh Derevenko
         * Convex-Trimesh collider added (libccd+GIMPACT only)(by Piotr Piastucki)
         * dCreateConvex() and dGeomSetConvex() public APIs changed to expect 

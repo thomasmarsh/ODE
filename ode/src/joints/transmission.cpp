@@ -416,7 +416,7 @@ void dJointSetTransmissionAxis2( dJointID j, dReal x, dReal y, dReal z )
 {    
     dxJointTransmission* joint = static_cast<dxJointTransmission*>(j);
     dUASSERT( joint, "bad joint argument" );
-    dUASSERT(joint->mode = dTransmissionIntersectingAxes,
+    dUASSERT(joint->mode == dTransmissionIntersectingAxes,
              "can't set individual axes in current mode" );
 
     if (joint->node[1].body) {
