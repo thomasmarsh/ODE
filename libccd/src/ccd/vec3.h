@@ -37,7 +37,7 @@ extern "C" {
 #endif /* CCD_SINGLE */
 
 
-#if defined(_MSC_VER)
+#if defined(_MSC_VER) && _MSC_VER < 1700
 /* Define fmin, fmax, fminf, fmaxf which are missing from MSVC (up to VS2005 at least) */
 static __inline double fmin(double x, double y) { return __min(x, y); }
 static __inline double fmax(double x, double y) { return __max(x, y); }
