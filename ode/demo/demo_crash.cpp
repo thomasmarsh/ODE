@@ -633,9 +633,20 @@ int main (int argc, char **argv)
 	
 	setupSimulation();
 	
+	dThreadingImplementationID threading = dThreadingAllocateMultiThreadedImplementation();
+	dThreadingThreadPoolID pool = dThreadingAllocateThreadPool(8, 0, dAllocateFlagBasicData, NULL);
+	dThreadingThreadPoolServeMultiThreadedImplementation(pool, threading);
+	// dWorldSetStepIslandsProcessingMaxThreadCount(world, 1);
+	dWorldSetStepThreadingImplementation(world, dThreadingImplementationGetFunctions(threading), threading);
+
 	// run simulation
 	dsSimulationLoop (argc,argv,352,288,&fn);
 	
+	dThreadingImplementationShutdownProcessing(threading);
+	dThreadingFreeThreadPool(pool);
+	dWorldSetStepThreadingImplementation(world, NULL, NULL);
+	dThreadingFreeImplementation(threading);
+
 	shutdownSimulation();
 	dCloseODE();
 	return 0;
