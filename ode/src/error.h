@@ -66,6 +66,22 @@
 #  define dIVERIFY(a) ((void)(a))
 #endif
 
+#ifdef __GNUC__
+#define dUNUSED(Name) Name __attribute__((unused))
+#else // not __GNUC__
+#define dUNUSED(Name) Name
+#endif
+
+#if __cplusplus >= 201103L 
+#define dSASSERT(e)  static_assert(e, #e)
+#define dSMSGASSERT(e, message)  static_assert(e, message)
+#else
+#define d_SASSERT_INNER_TOKENPASTE(x, y) x ## y
+#define d_SASSERT_TOKENPASTE(x, y) d_SASSERT_INNER_TOKENPASTE(x, y)
+#define dSASSERT(e) typedef char dUNUSED(d_SASSERT_TOKENPASTE(d_StaticAssertionFailed_, __LINE__)[(e)?1:-1])
+#define dSMSGASSERT(e, message)  dSASSERT(e)
+#endif
+
 #  ifdef __GNUC__
 #    define dICHECK(a) { if (!(a)) { dDebug (d_ERR_IASSERT, \
       "assertion \"" #a "\" failed in %s() [%s:%u]",__FUNCTION__,__FILE__,__LINE__); *(int *)0 = 0; } }
