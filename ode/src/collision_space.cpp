@@ -309,7 +309,7 @@ struct dxAABB {
     int level;		// the level this is stored in (cell size = 2^level)
     int dbounds[6];	// AABB bounds, discretized to cell size
     dxGeom *geom;		// corresponding geometry object (AABB stored here)
-    int index;		// index of this AABB, starting from 0
+    size_t index;		// index of this AABB, starting from 0
 };
 
 
@@ -469,7 +469,7 @@ void dxHashSpace::collide (void *data, dNearCallback *callback)
         }
     }
 
-    int n = hash_boxes.size(); // number of AABBs in main list
+    size_t n = hash_boxes.size(); // number of AABBs in main list
 
     // for `n' objects, an n*n array of bits is used to record if those objects
     // have been intersection-tested against each other yet. this array can
