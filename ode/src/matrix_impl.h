@@ -1,3 +1,5 @@
+
+
 /*************************************************************************
  *                                                                       *
  * Open Dynamics Engine, Copyright (C) 2001,2002 Russell L. Smith.       *
@@ -20,43 +22,33 @@
  *                                                                       *
  *************************************************************************/
 
-#ifndef _ODE_JOINT_AMOTOR_H_
-#define _ODE_JOINT_AMOTOR_H_
-
-#include "joint.h"
+#ifndef _ODE_MATRIX_IMPL_H_
+#define _ODE_MATRIX_IMPL_H_
 
 
-// angular motor
+#include "fastsolve_impl.h"
+#include "fastltsolve_impl.h"
 
-struct dxJointAMotor : public dxJoint
+
+template<unsigned a_stride, unsigned d_stride>
+void dxtVectorScale (dReal *a, const dReal *d, unsigned n)
 {
-    int num;                // number of axes (0..3)
-    int mode;               // a dAMotorXXX constant
-    int rel[3];             // what the axes are relative to (global,b1,b2)
-    dVector3 axis[3];       // three axes
-    dxJointLimitMotor limot[3]; // limit+motor info for axes
-    dReal angle[3];         // user-supplied angles for axes
-    // these vectors are used for calculating euler angles
-    dVector3 reference1;    // original axis[2], relative to body 1
-    dVector3 reference2;    // original axis[0], relative to body 2
+    dAASSERT (a && d && n >= 0);
+    const dReal *const d_end = d + (size_t)n * d_stride;
+    for (; d != d_end; a += a_stride, d += d_stride) {
+        *a *= *d;
+    }
+}
 
 
-    void computeGlobalAxes( dVector3 ax[3] );
-    void computeEulerAngles( dVector3 ax[3] );
-    void setEulerReferenceVectors();
-
-
-    dxJointAMotor( dxWorld *w );
-    virtual void getSureMaxInfo( SureMaxInfo* info );
-    virtual void getInfo1( Info1* info );
-    virtual void getInfo2( dReal worldFPS, dReal worldERP, 
-        int rowskip, dReal *J1, dReal *J2,
-        int pairskip, dReal *pairRhsCfm, dReal *pairLoHi, 
-        int *findex );
-    virtual dJointType type() const;
-    virtual size_t size() const;
-};
+template<unsigned d_stride, unsigned b_stride>
+void dxtSolveLDLT (const dReal *L, const dReal *d, dReal *b, unsigned n, unsigned nskip)
+{
+    dAASSERT (L && d && b && n > 0 && nskip >= n);
+    dxtSolveL1<b_stride> (L, b, n, nskip);
+    dxtVectorScale<b_stride, d_stride> (b, d, n);
+    dxtSolveL1T<b_stride> (L, b, n, nskip);
+}
 
 
 #endif
-

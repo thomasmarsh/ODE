@@ -4,16 +4,12 @@ AM_CPPFLAGS = -I$(top_srcdir)/include \
         -I$(top_builddir)/include \
         -D__ODE__
 
-# convenience library to simulate per object cflags
-noinst_LTLIBRARIES = libfast.la
-libfast_la_SOURCES = fastldlt.c fastltsolve.c fastdot.c fastlsolve.c
-
 
 
 lib_LTLIBRARIES = libode.la
 
 libode_la_LDFLAGS = @EXTRA_LIBTOOL_LDFLAGS@ @ODE_VERSION_INFO@
-libode_la_LIBADD = libfast.la joints/libjoints.la
+libode_la_LIBADD = joints/libjoints.la
 
 
 # please, let's keep the filenames sorted
@@ -43,7 +39,11 @@ libode_la_SOURCES =     nextafterf.c \
                         lcp.cpp lcp.h \
                         mass.cpp \
                         mat.cpp mat.h \
-                        matrix.cpp matrix.h \
+                        matrix.cpp matrix_impl.h matrix.h \
+                        fastldlt.cpp fastldlt_impl.h \
+                        fastlsolve.cpp fastlsolve_impl.h \
+                        fastltsolve.cpp fastltsolve_impl.h \
+                        fastdot.cpp fastdot_impl.h \
                         memory.cpp \
                         misc.cpp \
                         objects.cpp objects.h \

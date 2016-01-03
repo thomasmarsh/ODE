@@ -30,6 +30,41 @@
 #undef dNormalize3
 #undef dNormalize4
 
+#undef dPlaneSpace
+#undef dOrthogonalizeR
+
+
+int  dSafeNormalize3 (dVector3 a)
+{
+    return dxSafeNormalize3(a);
+}
+
+int dSafeNormalize4 (dVector4 a)
+{
+    return dxSafeNormalize4(a);
+}
+
+void dNormalize3(dVector3 a)
+{
+    dxNormalize3(a);
+}
+
+void dNormalize4(dVector4 a)
+{
+    dxNormalize4(a);
+}
+
+
+void dPlaneSpace(const dVector3 n, dVector3 p, dVector3 q)
+{
+    return dxPlaneSpace(n, p, q);
+}
+
+void dOrthogonalizeR(dMatrix3 m)
+{
+    dxOrthogonalizeR(m);
+}
+
 
 // this may be called for vectors `a' with extremely small magnitude, for
 // example the result of a cross product on two nearly perpendicular vectors.
@@ -39,7 +74,7 @@
 // scale the components by 1/l. this has been verified to work with vectors
 // containing the smallest representable numbers.
 
-int _dSafeNormalize3 (dVector3 a)
+int dxSafeNormalize3 (dVector3 a)
 {
     dAASSERT (a);
 
@@ -105,18 +140,7 @@ void dNormalize3 (dVector3 a)
 }
 */
 
-int  dSafeNormalize3 (dVector3 a)
-{
-    return _dSafeNormalize3(a);
-}
-
-void dNormalize3(dVector3 a)
-{
-    _dNormalize3(a);
-}
-
-
-int _dSafeNormalize4 (dVector4 a)
+int dxSafeNormalize4 (dVector4 a)
 {
     dAASSERT (a);
     dReal l = dCalcVectorDot3(a,a)+a[3]*a[3];
@@ -137,18 +161,8 @@ int _dSafeNormalize4 (dVector4 a)
     }
 }
 
-int  dSafeNormalize4 (dVector4 a)
-{
-    return _dSafeNormalize4(a);
-}
 
-void dNormalize4(dVector4 a)
-{
-    _dNormalize4(a);
-}
-
-
-void dPlaneSpace (const dVector3 n, dVector3 p, dVector3 q)
+void dxPlaneSpace (const dVector3 n, dVector3 p, dVector3 q)
 {
     dAASSERT (n && p && q);
     if (dFabs(n[2]) > M_SQRT1_2) {
@@ -184,7 +198,7 @@ void dPlaneSpace (const dVector3 n, dVector3 p, dVector3 q)
 * Note: this operates on rows, not columns, because for rotations
 * both ways give equivalent results.
 */
-void dOrthogonalizeR(dMatrix3 m)
+void dxOrthogonalizeR(dMatrix3 m)
 {
     dReal n0 = dCalcVectorLengthSquare3(m);
     if (n0 != 1)
