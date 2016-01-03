@@ -27,26 +27,32 @@
 #include "error.h"
 
 
-int  _dSafeNormalize3 (dVector3 a);
-int  _dSafeNormalize4 (dVector4 a);
+int  dxSafeNormalize3 (dVector3 a);
+int  dxSafeNormalize4 (dVector4 a);
 
-ODE_PURE_INLINE void _dNormalize3(dVector3 a)
+ODE_PURE_INLINE void dxNormalize3(dVector3 a)
 {
-    int bNormalizationResult = _dSafeNormalize3(a);
+    int bNormalizationResult = dxSafeNormalize3(a);
     dIVERIFY(bNormalizationResult);
 }
 
-ODE_PURE_INLINE void _dNormalize4(dVector4 a)
+ODE_PURE_INLINE void dxNormalize4(dVector4 a)
 {
-    int bNormalizationResult = _dSafeNormalize4(a);
+    int bNormalizationResult = dxSafeNormalize4(a);
     dIVERIFY(bNormalizationResult);
 }
+
+void dxPlaneSpace (const dVector3 n, dVector3 p, dVector3 q);
+void dxOrthogonalizeR(dMatrix3 m);
 
 // For internal use
-#define dSafeNormalize3(a) _dSafeNormalize3(a)
-#define dSafeNormalize4(a) _dSafeNormalize4(a)
-#define dNormalize3(a) _dNormalize3(a)
-#define dNormalize4(a) _dNormalize4(a)
+#define dSafeNormalize3(a) dxSafeNormalize3(a)
+#define dSafeNormalize4(a) dxSafeNormalize4(a)
+#define dNormalize3(a) dxNormalize3(a)
+#define dNormalize4(a) dxNormalize4(a)
+
+#define dPlaneSpace(n, p, q) dxPlaneSpace(n, p, q)
+#define dOrthogonalizeR(m) dxOrthogonalizeR(m)
 
 
 #endif

@@ -20,43 +20,27 @@
  *                                                                       *
  *************************************************************************/
 
-#ifndef _ODE_JOINT_AMOTOR_H_
-#define _ODE_JOINT_AMOTOR_H_
+/* generated code, do not edit. */
 
-#include "joint.h"
+#include <ode/common.h>
+#include "config.h"
+#include "matrix.h"
+
+#include "fastdot_impl.h"
 
 
-// angular motor
-
-struct dxJointAMotor : public dxJoint
+/*extern */
+dReal dxDot (const dReal *a, const dReal *b, unsigned n)
 {
-    int num;                // number of axes (0..3)
-    int mode;               // a dAMotorXXX constant
-    int rel[3];             // what the axes are relative to (global,b1,b2)
-    dVector3 axis[3];       // three axes
-    dxJointLimitMotor limot[3]; // limit+motor info for axes
-    dReal angle[3];         // user-supplied angles for axes
-    // these vectors are used for calculating euler angles
-    dVector3 reference1;    // original axis[2], relative to body 1
-    dVector3 reference2;    // original axis[0], relative to body 2
+    return dxtDot<1>(a, b, n);
+}
 
 
-    void computeGlobalAxes( dVector3 ax[3] );
-    void computeEulerAngles( dVector3 ax[3] );
-    void setEulerReferenceVectors();
+#undef dDot
 
-
-    dxJointAMotor( dxWorld *w );
-    virtual void getSureMaxInfo( SureMaxInfo* info );
-    virtual void getInfo1( Info1* info );
-    virtual void getInfo2( dReal worldFPS, dReal worldERP, 
-        int rowskip, dReal *J1, dReal *J2,
-        int pairskip, dReal *pairRhsCfm, dReal *pairLoHi, 
-        int *findex );
-    virtual dJointType type() const;
-    virtual size_t size() const;
-};
-
-
-#endif
+/*extern */
+dReal dDot (const dReal *a, const dReal *b, int n)
+{
+    return dxDot (a, b, n);
+}
 

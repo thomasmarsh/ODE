@@ -212,7 +212,10 @@ dxJointAMotor::getInfo1( dxJoint::Info1 *info )
 
 
 void
-dxJointAMotor::getInfo2( dReal worldFPS, dReal /*worldERP*/, const Info2Descr* info )
+dxJointAMotor::getInfo2( dReal worldFPS, dReal /*worldERP*/, 
+    int rowskip, dReal *J1, dReal *J2,
+    int pairskip, dReal *pairRhsCfm, dReal *pairLoHi, 
+    int *findex )
 {
     int i;
 
@@ -220,7 +223,7 @@ dxJointAMotor::getInfo2( dReal worldFPS, dReal /*worldERP*/, const Info2Descr* i
     dVector3 ax[3];
     computeGlobalAxes( ax );
 
-    // in euler angle mode we do not actually constrain the angular velocity
+    // in Euler angle mode we do not actually constrain the angular velocity
     // along the axes axis[0] and axis[2] (although we do use axis[1]) :
     //
     //    to get   constrain w2-w1 along  ...not
@@ -232,7 +235,7 @@ dxJointAMotor::getInfo2( dReal worldFPS, dReal /*worldERP*/, const Info2Descr* i
     // constraining w2-w1 along an axis 'a' means that a'*(w2-w1)=0.
     // to prove the result for angle[0], write the expression for angle[0] from
     // GetInfo1 then take the derivative. to prove this for angle[2] it is
-    // easier to take the euler rate expression for d(angle[2])/dt with respect
+    // easier to take the Euler rate expression for d(angle[2])/dt with respect
     // to the components of w and set that to 0.
 
     dVector3 *axptr[3];
@@ -242,18 +245,19 @@ dxJointAMotor::getInfo2( dReal worldFPS, dReal /*worldERP*/, const Info2Descr* i
 
     dVector3 ax0_cross_ax1;
     dVector3 ax1_cross_ax2;
-    if ( mode == dAMotorEuler )
-    {
+    if ( mode == dAMotorEuler ) {
         dCalcVectorCross3( ax0_cross_ax1, ax[0], ax[1] );
         axptr[2] = &ax0_cross_ax1;
         dCalcVectorCross3( ax1_cross_ax2, ax[1], ax[2] );
         axptr[0] = &ax1_cross_ax2;
     }
 
-    int row = 0;
-    for ( i = 0; i < num; i++ )
-    {
-        row += limot[i].addLimot( this, worldFPS, info, row, *( axptr[i] ), 1 );
+    size_t rowTotalSkip = 0, pairTotalSkip = 0;
+    for ( i = 0; i < num; i++ ) {
+        if (limot[i].addLimot( this, worldFPS, J1 + rowTotalSkip, J2 + rowTotalSkip, pairRhsCfm + pairTotalSkip, pairLoHi + pairTotalSkip, *( axptr[i] ), 1 )) {
+            rowTotalSkip += rowskip;
+            pairTotalSkip += pairskip;
+        }
     }
 }
 

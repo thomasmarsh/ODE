@@ -155,30 +155,29 @@ dxJointHinge2::getAxisInfo(dVector3 ax1, dVector3 ax2, dVector3 axCross,
 
 
 void
-dxJointHinge2::getInfo2( dReal worldFPS, dReal worldERP, const Info2Descr *info )
+dxJointHinge2::getInfo2( dReal worldFPS, dReal worldERP, 
+    int rowskip, dReal *J1, dReal *J2,
+    int pairskip, dReal *pairRhsCfm, dReal *pairLoHi, 
+    int *findex )
 {
     // get information we need to set the hinge row
     dReal s, c;
     dVector3 q;
-    const dxJointHinge2 *joint = this;
 
     dVector3 ax1, ax2;
-    joint->getAxisInfo( ax1, ax2, q, s, c );
+    getAxisInfo( ax1, ax2, q, s, c );
     dNormalize3( q );   // @@@ quicker: divide q by s ?
 
     // set the three ball-and-socket rows (aligned to the suspension axis ax1)
-    setBall2( this, worldFPS, worldERP, info, anchor1, anchor2, ax1, susp_erp );
+    setBall2( this, worldFPS, worldERP, rowskip, J1, J2, pairskip, pairRhsCfm, anchor1, anchor2, ax1, susp_erp );
+    // set parameter for the suspension
+    pairRhsCfm[GI2_CFM] = susp_cfm;
 
     // set the hinge row
-    int s3 = 3 * info->rowskip;
-    info->J1a[s3+0] = q[0];
-    info->J1a[s3+1] = q[1];
-    info->J1a[s3+2] = q[2];
-    if ( joint->node[1].body )
-    {
-        info->J2a[s3+0] = -q[0];
-        info->J2a[s3+1] = -q[1];
-        info->J2a[s3+2] = -q[2];
+    int currRowSkip = 3 * rowskip;
+    dCopyVector3(J1 + currRowSkip + GI2__JA_MIN, q);
+    if ( node[1].body ) {
+        dCopyNegatedVector3(J2 + currRowSkip + GI2__JA_MIN, q);
     }
 
     // compute the right hand side for the constrained rotational DOF.
@@ -197,16 +196,18 @@ dxJointHinge2::getInfo2( dReal worldFPS, dReal worldERP, const Info2Descr *info 
     //       c0 = cos(theta0), s0 = sin(theta0)
 
     dReal k = worldFPS * worldERP;
-    info->c[3] = k * ( c0 * s - joint->s0 * c );
 
+    int currPairSkip = 3 * pairskip;
+    pairRhsCfm[currPairSkip + GI2_RHS] = k * ( c0 * s - this->s0 * c );
+
+    currRowSkip += rowskip; currPairSkip += pairskip;
     // if the axis1 hinge is powered, or has joint limits, add in more stuff
-    int row = 4 + limot1.addLimot( this, worldFPS, info, 4, ax1, 1 );
+    if (limot1.addLimot( this, worldFPS, J1 + currRowSkip, J2 + currRowSkip, pairRhsCfm + currPairSkip, pairLoHi + currPairSkip, ax1, 1 )) {
+        currRowSkip += rowskip; currPairSkip += pairskip;
+    }
 
     // if the axis2 hinge is powered, add in more stuff
-    limot2.addLimot( this, worldFPS, info, row, ax2, 1 );
-
-    // set parameter for the suspension
-    info->cfm[0] = susp_cfm;
+    limot2.addLimot( this, worldFPS, J1 + currRowSkip, J2 + currRowSkip, pairRhsCfm + currPairSkip, pairLoHi + currPairSkip, ax2, 1 );
 }
 
 
