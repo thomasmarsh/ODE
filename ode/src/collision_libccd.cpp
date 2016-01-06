@@ -46,13 +46,19 @@ typedef struct _ccd_box_t ccd_box_t;
 
 struct _ccd_cap_t {
     ccd_obj_t o;
-    ccd_real_t radius, height;
+    ccd_real_t radius;
+    ccd_vec3_t axis;
+    ccd_vec3_t p1;
+    ccd_vec3_t p2;
 };
 typedef struct _ccd_cap_t ccd_cap_t;
 
 struct _ccd_cyl_t {
     ccd_obj_t o;
-    ccd_real_t radius, height;
+    ccd_real_t radius;
+    ccd_vec3_t axis;
+    ccd_vec3_t p1;
+    ccd_vec3_t p2;
 };
 typedef struct _ccd_cyl_t ccd_cyl_t;
 
@@ -133,7 +139,13 @@ static void ccdGeomToCap(const dGeomID g, ccd_cap_t *cap)
 
     dGeomCapsuleGetParams(g, &r, &h);
     cap->radius = r;
-    cap->height = h / 2.;
+    ccdVec3Set(&cap->axis, 0.0, 0.0, h / 2);
+    ccdQuatRotVec(&cap->axis, &cap->o.rot);
+    ccdVec3Copy(&cap->p1, &cap->axis);
+    ccdVec3Copy(&cap->p2, &cap->axis);
+    ccdVec3Scale(&cap->p2, -1.0);
+    ccdVec3Add(&cap->p1, &cap->o.pos);
+    ccdVec3Add(&cap->p2, &cap->o.pos);
 }
 
 static void ccdGeomToCyl(const dGeomID g, ccd_cyl_t *cyl)
@@ -143,7 +155,14 @@ static void ccdGeomToCyl(const dGeomID g, ccd_cyl_t *cyl)
 
     dGeomCylinderGetParams(g, &r, &h);
     cyl->radius = r;
-    cyl->height = h / 2.;
+    ccdVec3Set(&cyl->axis, 0.0, 0.0, h / 2);
+    ccdQuatRotVec(&cyl->axis, &cyl->o.rot);
+    ccdVec3Copy(&cyl->p1, &cyl->axis);
+    ccdVec3Copy(&cyl->p2, &cyl->axis);
+    ccdVec3Normalize(&cyl->axis);
+    ccdVec3Scale(&cyl->p2, -1.0);
+    ccdVec3Add(&cyl->p1, &cyl->o.pos);
+    ccdVec3Add(&cyl->p2, &cyl->o.pos);
 }
 
 static void ccdGeomToSphere(const dGeomID g, ccd_sphere_t *s)
@@ -179,70 +198,49 @@ static void ccdSupportBox(const void *obj, const ccd_vec3_t *_dir, ccd_vec3_t *v
 static void ccdSupportCap(const void *obj, const ccd_vec3_t *_dir, ccd_vec3_t *v)
 {
     const ccd_cap_t *o = (const ccd_cap_t *)obj;
-    ccd_vec3_t dir, pos1, pos2;
 
-    ccdVec3Copy(&dir, _dir);
-    ccdQuatRotVec(&dir, &o->o.rot_inv);
-
-    ccdVec3Set(&pos1, CCD_ZERO, CCD_ZERO, o->height);
-    ccdVec3Set(&pos2, CCD_ZERO, CCD_ZERO, -o->height);
-
-    ccdVec3Copy(v, &dir);
+    ccdVec3Copy(v, _dir);
     ccdVec3Scale(v, o->radius);
-    ccdVec3Add(&pos1, v);
-    ccdVec3Add(&pos2, v);
 
-    if (ccdVec3Dot(&dir, &pos1) > ccdVec3Dot(&dir, &pos2)){
-        ccdVec3Copy(v, &pos1);
+    if (ccdVec3Dot(_dir, &o->axis) > 0.0){
+        ccdVec3Add(v, &o->p1);
     }else{
-        ccdVec3Copy(v, &pos2);
+        ccdVec3Add(v, &o->p2);
     }
 
-    // transform support vertex
-    ccdQuatRotVec(v, &o->o.rot);
-    ccdVec3Add(v, &o->o.pos);
 }
 
 static void ccdSupportCyl(const void *obj, const ccd_vec3_t *_dir, ccd_vec3_t *v)
 {
     const ccd_cyl_t *cyl = (const ccd_cyl_t *)obj;
     ccd_vec3_t dir;
-    double zdist, rad;
+    double len;
 
-    ccdVec3Copy(&dir, _dir);
-    ccdQuatRotVec(&dir, &cyl->o.rot_inv);
-
-    zdist = dir.v[0] * dir.v[0] + dir.v[1] * dir.v[1];
-    zdist = sqrt(zdist);
-    if (ccdIsZero(zdist)){
-        ccdVec3Set(v, 0., 0., ccdSign(ccdVec3Z(&dir)) * cyl->height);
-    }else{
-        rad = cyl->radius / zdist;
-
-        ccdVec3Set(v, rad * ccdVec3X(&dir),
-            rad * ccdVec3Y(&dir),
-            ccdSign(ccdVec3Z(&dir)) * cyl->height);
+    double dot = ccdVec3Dot(_dir, &cyl->axis);
+    if (dot > 0.0){
+        ccdVec3Copy(v, &cyl->p1);
+    } else{
+        ccdVec3Copy(v, &cyl->p2);
+    }
+    ccdVec3Copy(&dir, &cyl->axis);
+    ccdVec3Scale(&dir, -dot);
+    ccdVec3Add(&dir, _dir);
+    len = CCD_SQRT(ccdVec3Len2(&dir));
+    if (!ccdIsZero(len)) {
+        // project dir onto cylinder's 'top'/'bottom' plane
+        ccdVec3Normalize(&dir);
+        ccdVec3Scale(&dir, cyl->radius);
+        ccdVec3Add(v, &dir);
     }
 
-    // transform support vertex
-    ccdQuatRotVec(v, &cyl->o.rot);
-    ccdVec3Add(v, &cyl->o.pos);
 }
 
 static void ccdSupportSphere(const void *obj, const ccd_vec3_t *_dir, ccd_vec3_t *v)
 {
     const ccd_sphere_t *s = (const ccd_sphere_t *)obj;
-    ccd_vec3_t dir;
 
-    ccdVec3Copy(&dir, _dir);
-    ccdQuatRotVec(&dir, &s->o.rot_inv);
-
-    ccdVec3Copy(v, &dir);
+    ccdVec3Copy(v, _dir);
     ccdVec3Scale(v, s->radius);
-    ccdVec3Scale(v, CCD_ONE / CCD_SQRT(ccdVec3Len2(&dir)));
-
-    // transform support vertex
-    ccdQuatRotVec(v, &s->o.rot);
     ccdVec3Add(v, &s->o.pos);
 }
 
