@@ -8,6 +8,10 @@ the rules for this file:
   * keep the format consistent (79 char width, M/D/Y date format).
 
 ------------------------------------------------------------------------------
+01/09/2016 Oleh Derevenko
+        * Hinge2 joint corected to avoid faulting asserts when the axes get 
+          temporarily invalid during assignments (suggested by David Mansolino)
+
 01/03/2016 Oleh Derevenko
         * An invalid memory access fixed in dxSAPSpace::BoxPruning() in case
           if there were NaN values in AABBs to be sorted.
