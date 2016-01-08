@@ -224,20 +224,16 @@ dxJointHinge2::makeV1andV2()
         dMultiply0_331( ax1, node[0].body->posr.R, axis1 );
         dMultiply0_331( ax2, node[1].body->posr.R, axis2 );
 
-        // don't do anything if the axis1 or axis2 vectors are zero or the same
-        if (( ax1[0] == 0 && ax1[1] == 0 && ax1[2] == 0 ) ||
-            ( ax2[0] == 0 && ax2[1] == 0 && ax2[2] == 0 ) ||
-            ( ax1[0] == ax2[0] && ax1[1] == ax2[1] && ax1[2] == ax2[2] ) ) return;
-
         // modify axis 2 so it's perpendicular to axis 1
         dReal k = dCalcVectorDot3( ax1, ax2 );
-        for ( int i = 0; i < 3; i++ ) ax2[i] -= k * ax1[i];
-        dNormalize3( ax2 );
-
-        // make v1 = modified axis2, v2 = axis1 x (modified axis2)
-        dCalcVectorCross3( v, ax1, ax2 );
-        dMultiply1_331( v1, node[0].body->posr.R, ax2 );
-        dMultiply1_331( v2, node[0].body->posr.R, v );
+        dAddScaledVectors3(ax2, ax2, ax1, REAL(1.0), -k);
+        
+        if (dxSafeNormalize3( ax2 )) {
+            // make v1 = modified axis2, v2 = axis1 x (modified axis2)
+            dCalcVectorCross3( v, ax1, ax2 );
+            dMultiply1_331( v1, node[0].body->posr.R, ax2 );
+            dMultiply1_331( v2, node[0].body->posr.R, v );
+        }
     }
 }
 
@@ -253,20 +249,16 @@ dxJointHinge2::makeW1andW2()
         dMultiply0_331( ax1, node[0].body->posr.R, axis1 );
         dMultiply0_331( ax2, node[1].body->posr.R, axis2 );
 
-        // don't do anything if the axis1 or axis2 vectors are zero or the same
-        if (( ax1[0] == 0 && ax1[1] == 0 && ax1[2] == 0 ) ||
-            ( ax2[0] == 0 && ax2[1] == 0 && ax2[2] == 0 ) ||
-            ( ax1[0] == ax2[0] && ax1[1] == ax2[1] && ax1[2] == ax2[2] ) ) return;
-
         // modify axis 1 so it's perpendicular to axis 2
         dReal k = dCalcVectorDot3( ax2, ax1 );
-        for ( int i = 0; i < 3; i++ ) ax1[i] -= k * ax2[i];
-        dNormalize3( ax1 );
-
-        // make w1 = modified axis1, w2 = axis2 x (modified axis1)
-        dCalcVectorCross3( w, ax2, ax1 );
-        dMultiply1_331( w1, node[1].body->posr.R, ax1 );
-        dMultiply1_331( w2, node[1].body->posr.R, w );
+        dAddScaledVectors3(ax1, ax1, ax2, REAL(1.0), -k);
+        
+        if (dxSafeNormalize3( ax1 )) {
+            // make w1 = modified axis1, w2 = axis2 x (modified axis1)
+            dCalcVectorCross3( w, ax2, ax1 );
+            dMultiply1_331( w1, node[1].body->posr.R, ax1 );
+            dMultiply1_331( w2, node[1].body->posr.R, w );
+        }
     }
 }
 
