@@ -241,6 +241,8 @@ static void ccdSupportSphere(const void *obj, const ccd_vec3_t *_dir, ccd_vec3_t
 
     ccdVec3Copy(v, _dir);
     ccdVec3Scale(v, s->radius);
+    dIASSERT(dFabs(CCD_SQRT(ccdVec3Len2(_dir)) - REAL(1.0)) < 1e-6); // ccdVec3Scale(v, CCD_ONE / CCD_SQRT(ccdVec3Len2(_dir)));
+
     ccdVec3Add(v, &s->o.pos);
 }
 
