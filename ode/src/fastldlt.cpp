@@ -26,6 +26,8 @@
 #include "config.h"
 #include "matrix.h"
 
+#include "fastldlt_impl.h"
+
 
 /*extern */
 void dxFactorLDLT (dReal *A, dReal *d, unsigned n, unsigned nskip1)
