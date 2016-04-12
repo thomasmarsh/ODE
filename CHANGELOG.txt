@@ -8,6 +8,11 @@ the rules for this file:
   * keep the format consistent (79 char width, M/D/Y date format).
 
 ------------------------------------------------------------------------------
+04/12/2016 Oleh Derevenko
+        * A function to create a self-threaded threading implementation object
+          has been moved back to public headers as there could be a use for it
+          while running several worlds in parallel threads.
+
 01/09/2016 Oleh Derevenko
         * Hinge2 joint corected to avoid faulting asserts when the axes get 
           temporarily invalid during assignments (suggested by David Mansolino)
