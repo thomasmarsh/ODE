@@ -519,6 +519,8 @@ int collideCylCyl(dxGeom *o1, dxGeom *o2, ccd_cyl_t* cyl1, ccd_cyl_t* cyl2, int 
                 // Case 2: Discs intersect
                 // Firstly, find intersections assuming the larger cylinder is placed at (0,0,0)
                 // http://math.stackexchange.com/questions/256100/how-can-i-find-the-points-at-which-two-circles-intersect
+                ccd_vec3_t proj2;
+                ccdVec3Copy(&proj2, &proj);
                 ccdQuatRotVec(&proj, &maxCyl->o.rot_inv);
                 dReal a1 = atan2(ccdVec3Y(&proj), ccdVec3X(&proj));
                 dReal a2 = atan2(-ccdVec3Y(&proj), -ccdVec3X(&proj));
@@ -542,6 +544,17 @@ int collideCylCyl(dxGeom *o1, dxGeom *o2, ccd_cyl_t* cyl1, ccd_cyl_t* cyl2, int 
                 }
                 dReal diffA = maxA - minA;
                 // Do the same for the smaller cylinder, but additionally translate the intersection points
+                ccdVec3Copy(&proj, &proj2);
+                ccdQuatRotVec(&proj, &minCyl->o.rot_inv);
+                a1 = atan2(ccdVec3Y(&proj), ccdVec3X(&proj));
+                a2 = atan2(-ccdVec3Y(&proj), -ccdVec3X(&proj));
+                d = dSqrt(ccdVec3X(&proj) * ccdVec3X(&proj) + ccdVec3Y(&proj) * ccdVec3Y(&proj));
+                l = (rmax * rmax - rmin * rmin + d * d) / (2 * d);
+                h = dSqrt(rmax * rmax - l * l);
+                x1 = l/d * ccdVec3X(&proj) + h/d * ccdVec3Y(&proj);
+                y1 = l/d * ccdVec3Y(&proj) - h/d * ccdVec3X(&proj);
+                x2 = l/d * ccdVec3X(&proj) - h/d * ccdVec3Y(&proj);
+                y2 = l/d * ccdVec3Y(&proj) + h/d * ccdVec3X(&proj);
                 dReal ar1 = atan2(y1 - ccdVec3Y(&proj), x1 - ccdVec3X(&proj));
                 dReal ar2 = atan2(y2 - ccdVec3Y(&proj), x2 - ccdVec3X(&proj));
                 dReal minB = fmin(ar1, ar2);
