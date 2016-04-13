@@ -519,6 +519,7 @@ int collideCylCyl(dxGeom *o1, dxGeom *o2, ccd_cyl_t* cyl1, ccd_cyl_t* cyl2, int 
                 // Case 2: Discs intersect
                 // Firstly, find intersections assuming the larger cylinder is placed at (0,0,0)
                 // http://math.stackexchange.com/questions/256100/how-can-i-find-the-points-at-which-two-circles-intersect
+                ccdQuatRotVec(&proj, &maxCyl->o.rot_inv);
                 dReal a1 = atan2(ccdVec3Y(&proj), ccdVec3X(&proj));
                 dReal a2 = atan2(-ccdVec3Y(&proj), -ccdVec3X(&proj));
                 d = dSqrt(ccdVec3X(&proj) * ccdVec3X(&proj) + ccdVec3Y(&proj) * ccdVec3Y(&proj));
