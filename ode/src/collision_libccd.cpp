@@ -522,8 +522,6 @@ int collideCylCyl(dxGeom *o1, dxGeom *o2, ccd_cyl_t* cyl1, ccd_cyl_t* cyl2, int 
                 ccd_vec3_t proj2;
                 ccdVec3Copy(&proj2, &proj);
                 ccdQuatRotVec(&proj, &maxCyl->o.rot_inv);
-                dReal a1 = atan2(ccdVec3Y(&proj), ccdVec3X(&proj));
-                dReal a2 = atan2(-ccdVec3Y(&proj), -ccdVec3X(&proj));
                 d = dSqrt(ccdVec3X(&proj) * ccdVec3X(&proj) + ccdVec3Y(&proj) * ccdVec3Y(&proj));
                 dReal l = (rmax * rmax - rmin * rmin + d * d) / (2 * d);
                 dReal h = dSqrt(rmax * rmax - l * l);
@@ -537,30 +535,30 @@ int collideCylCyl(dxGeom *o1, dxGeom *o2, ccd_cyl_t* cyl1, ccd_cyl_t* cyl2, int 
                 dReal minA = fmin(ap1, ap2);
                 dReal maxA = fmax(ap1, ap2);
                 // If the segment connecting cylinders' centers does not intersect the arc, change the angles
-                if (a1 < minA || a1 > maxA) {
-                    dReal a = maxA;
+                dReal a = atan2(ccdVec3Y(&proj), ccdVec3X(&proj));
+                if (a < minA || a > maxA) {
+                    a = maxA;
                     maxA = minA + M_PI * 2;
                     minA = a;
                 }
                 dReal diffA = maxA - minA;
-                // Do the same for the smaller cylinder, but additionally translate the intersection points
+                // Do the same for the smaller cylinder assuming it is placed at (0,0,0) now
                 ccdVec3Copy(&proj, &proj2);
+                ccdVec3Scale(&proj, -1);
                 ccdQuatRotVec(&proj, &minCyl->o.rot_inv);
-                a1 = atan2(ccdVec3Y(&proj), ccdVec3X(&proj));
-                a2 = atan2(-ccdVec3Y(&proj), -ccdVec3X(&proj));
-                d = dSqrt(ccdVec3X(&proj) * ccdVec3X(&proj) + ccdVec3Y(&proj) * ccdVec3Y(&proj));
-                l = (rmax * rmax - rmin * rmin + d * d) / (2 * d);
-                h = dSqrt(rmax * rmax - l * l);
+                l = (rmin * rmin - rmax * rmax + d * d) / (2 * d);
+                h = dSqrt(rmin * rmin - l * l);
                 x1 = l/d * ccdVec3X(&proj) + h/d * ccdVec3Y(&proj);
                 y1 = l/d * ccdVec3Y(&proj) - h/d * ccdVec3X(&proj);
                 x2 = l/d * ccdVec3X(&proj) - h/d * ccdVec3Y(&proj);
                 y2 = l/d * ccdVec3Y(&proj) + h/d * ccdVec3X(&proj);
-                dReal ar1 = atan2(y1 - ccdVec3Y(&proj), x1 - ccdVec3X(&proj));
-                dReal ar2 = atan2(y2 - ccdVec3Y(&proj), x2 - ccdVec3X(&proj));
-                dReal minB = fmin(ar1, ar2);
-                dReal maxB = fmax(ar1, ar2);
-                if (a2 < minB || a2 > maxB) {
-                    dReal a = maxB;
+                ap1 = atan2(y1, x1);
+                ap2 = atan2(y2, x2);
+                dReal minB = fmin(ap1, ap2);
+                dReal maxB = fmax(ap1, ap2);
+                a = atan2(ccdVec3Y(&proj), ccdVec3X(&proj));
+                if (a < minB || a > maxB) {
+                    a = maxB;
                     maxB = minB + M_PI * 2;
                     minB = a;
                 }
@@ -572,7 +570,7 @@ int collideCylCyl(dxGeom *o1, dxGeom *o2, ccd_cyl_t* cyl1, ccd_cyl_t* cyl2, int 
                 // Larger disc first, + additional point as the start/end points of arcs overlap
                 for (int i = 0; i < nMax + 1; i++) {
                     ccd_vec3_t p2;
-                    dReal a = minA + diffA  * i / nMax;
+                    a = minA + diffA  * i / nMax;
                     ccdVec3Set(&p, dCos(a) * rmax, dSin(a) * rmax, 0);
                     ccdQuatRotVec(&p, &maxCyl->o.rot);
                     ccdVec3Add(&p, &maxCyl->o.pos);
@@ -587,7 +585,7 @@ int collideCylCyl(dxGeom *o1, dxGeom *o2, ccd_cyl_t* cyl1, ccd_cyl_t* cyl2, int 
                 // Smaller disc second, skipping the overlapping point
                 for (int i = 1; i < nMin; i++) {
                     ccd_vec3_t p2;
-                    dReal a = minB + diffB  * i / nMin;
+                    a = minB + diffB  * i / nMin;
                     ccdVec3Set(&p, dCos(a) * rmin, dSin(a) * rmin, 0);
                     ccdQuatRotVec(&p, &minCyl->o.rot);
                     ccdVec3Add(&p, &minCyl->o.pos);
