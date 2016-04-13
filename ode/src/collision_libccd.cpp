@@ -448,6 +448,7 @@ int collideCylCyl(dxGeom *o1, dxGeom *o2, ccd_cyl_t* cyl1, ccd_cyl_t* cyl2, int 
     if (maxContacts == 0) {
         return 0;
     }
+    maxContacts = maxContacts > 8 ? 8 : maxContacts;
     dReal d = dFabs(ccdVec3Dot(&cyl1->axis, &cyl2->axis));
     // Check if cylinders' axes are in line
     if (1 - d < 1e-3f) {
