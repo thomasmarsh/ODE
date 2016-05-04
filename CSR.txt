@@ -65,7 +65,7 @@ described with its name.
 ----------------------------------------------------------------------------
 
 Parameters that are passed by value must not be modified*. All of them must
-be trated as if they have been implicitly declared with const modifier.
+be treated as if they have been implicitly declared with const modifier.
 
 * An exception could be the case when a value loses its meaning (e.g. a 
 pointer to an object being deleted).
@@ -91,10 +91,10 @@ performance measuring after result variable assignment.
 ----------------------------------------------------------------------------
 
 Parameters of simple types passed by reference must be copied to local 
-variables at the function entry and then assigned their final values at the 
-function exit.
-Output parameters must be initialized at the entry of the function and 
-assigned their final values immediately before function result variable 
+variables at function entry and then assigned their final values at function
+exit.
+Output parameters must be initialized at function entry and 
+assigned their final values immediately before the function result variable 
 assignment.
 
 
