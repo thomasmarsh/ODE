@@ -483,7 +483,7 @@ void dxHashSpace::collide (void *data, dNearCallback *callback)
 
     // compute hash table size sz to be a prime > 8*n
     for (i=0; i<NUM_PRIMES; i++) {
-        if (prime[i] >= (8*n)) break;
+        if ((size_t)prime[i] >= (8*n)) break;
     }
     if (i >= NUM_PRIMES)
         i = NUM_PRIMES-1;	// probably pointless
@@ -546,7 +546,7 @@ void dxHashSpace::collide (void *data, dNearCallback *callback)
                                         i = (node->aabb->index * tested_rowsize)+(aabb->index >> 3);
                                         mask = 1 << (aabb->index & 7);
                                     }
-                                    dIASSERT (i >= 0 && i < (tested_rowsize*n));
+                                    dIASSERT (i >= 0 && (size_t)i < (tested_rowsize*n));
                                     if ((tested[i] & mask)==0) {
                                         collideAABBs (aabb->geom,node->aabb->geom,data,callback);
                                     }
