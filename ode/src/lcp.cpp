@@ -397,11 +397,11 @@ struct dLCP {
     template<unsigned q_stride>
     dReal AiN_times_qN (unsigned i, dReal *q) const { return dxtDot<q_stride> (AROW(i) + m_nC, q + (size_t)m_nC * q_stride, m_nN); }
     void pN_equals_ANC_times_qC (dReal *p, dReal *q);
-    void pN_plusequals_ANi (dReal *p, unsigned i, int sign=1);
+    void pN_plusequals_ANi (dReal *p, unsigned i, bool dir_positive);
     template<unsigned p_stride>
     void pC_plusequals_s_times_qC (dReal *p, dReal s, dReal *q);
     void pN_plusequals_s_times_qN (dReal *p, dReal s, dReal *q);
-    void solve1 (dReal *a, unsigned i, int dir=1, int only_transfer=0);
+    void solve1 (dReal *a, unsigned i, bool dir_positive, int only_transfer=0);
     void unpermute_X();
     void unpermute_W();
 };
@@ -671,12 +671,12 @@ void dLCP::pN_equals_ANC_times_qC (dReal *p, dReal *q)
 }
 
 
-void dLCP::pN_plusequals_ANi (dReal *p, unsigned i, int sign)
+void dLCP::pN_plusequals_ANi (dReal *p, unsigned i, bool dir_positive)
 {
     const unsigned nC = m_nC;
     dReal *aptr = AROW(i) + nC;
     dReal *ptgt = p + nC;
-    if (sign > 0) {
+    if (dir_positive) {
         const unsigned nN = m_nN;
         for (unsigned j=0; j < nN; ++j) ptgt[j] += aptr[j];
     }
@@ -706,7 +706,7 @@ void dLCP::pN_plusequals_s_times_qN (dReal *p, dReal s, dReal *q)
     }
 }
 
-void dLCP::solve1 (dReal *a, unsigned i, int dir, int only_transfer)
+void dLCP::solve1 (dReal *a, unsigned i, bool dir_positive, int only_transfer)
 {
     // the `Dell' and `ell' that are computed here are saved. if index i is
     // later added to the factorization then they can be reused.
@@ -742,7 +742,7 @@ void dLCP::solve1 (dReal *a, unsigned i, int dir, int only_transfer)
                 for (unsigned j = 0; j < nC; ++j) tmp[j] = ell[j];
             }
             dxSolveL1T (m_L, tmp, nC, m_nskip);
-            if (dir > 0) {
+            if (dir_positive) {
                 unsigned *C = m_C;
                 dReal *tmp = m_tmp;
                 for (unsigned j = 0; j < nC; ++j) a[C[j]] = -tmp[j];
@@ -950,35 +950,28 @@ void dxSolveLCP_Generic (dxWorldProcessMemArena *memarena, unsigned n, dReal *A,
             // and similarly that hi > 0. this means that the line segment
             // corresponding to set C is at least finite in extent, and we are on it.
             // NOTE: we must call lcp.solve1() before lcp.transfer_i_to_C()
-            lcp.solve1 (delta_x, i, 0, 1);
+            lcp.solve1 (delta_x, i, false, 1);
 
             lcp.transfer_i_to_C (i);
         }
         else {
             // we must push x(i) and w(i)
             for (;;) {
-                int dir;
-                dReal dirf;
                 // find direction to push on x(i)
-                if (w[i] <= 0) {
-                    dir = 1;
-                    dirf = REAL(1.0);
-                }
-                else {
-                    dir = -1;
-                    dirf = REAL(-1.0);
-                }
+                bool dir_positive = (w[i] <= 0);
 
                 // compute: delta_x(C) = -dir*A(C,C)\A(C,i)
-                lcp.solve1 (delta_x, i, dir);
+                lcp.solve1 (delta_x, i, dir_positive);
 
-                // note that delta_x[i] = dirf, but we wont bother to set it
+                // note that delta_x[i] = (dir_positive ? 1 : -1), but we wont bother to set it
 
                 // compute: delta_w = A*delta_x ... note we only care about
                 // delta_w(N) and delta_w(i), the rest is ignored
                 lcp.pN_equals_ANC_times_qC (delta_w, delta_x);
-                lcp.pN_plusequals_ANi (delta_w, i, dir);
-                delta_w[i] = lcp.AiC_times_qC<1> (i, delta_x) + lcp.Aii(i) * dirf;
+                lcp.pN_plusequals_ANi (delta_w, i, dir_positive);
+                delta_w[i] = dir_positive 
+                    ? lcp.AiC_times_qC<1> (i, delta_x) + lcp.Aii(i)
+                    : lcp.AiC_times_qC<1> (i, delta_x) - lcp.Aii(i);
 
                 // find largest step we can take (size=s), either to drive x(i),w(i)
                 // to the valid LCP region or to drive an already-valid variable
@@ -986,10 +979,14 @@ void dxSolveLCP_Generic (dxWorldProcessMemArena *memarena, unsigned n, dReal *A,
 
                 int cmd = 1;		// index switching command
                 unsigned si = 0;		// si = index to switch if cmd>3
-                dReal s = -w[i] / delta_w[i];
-                if (dir > 0) {
+
+                dReal s = delta_w[i] != REAL(0.0)
+                    ? -w[i] / delta_w[i]
+                    : (w[i] != REAL(0.0) ? dCopySign(dInfinity, -w[i]) : REAL(0.0));
+                    
+                if (dir_positive) {
                     if (currlh[PLH_HI] < dInfinity) {
-                        dReal s2 = (currlh[PLH_HI] - currbx[PBX_X]) * dirf;	// was (hi[i]-x[i])/dirf	// step to x(i)=hi(i)
+                        dReal s2 = (currlh[PLH_HI] - currbx[PBX_X]);	// was (hi[i]-x[i])/dirf	// step to x(i)=hi(i)
                         if (s2 < s) {
                             s = s2;
                             cmd = 3;
@@ -998,7 +995,7 @@ void dxSolveLCP_Generic (dxWorldProcessMemArena *memarena, unsigned n, dReal *A,
                 }
                 else {
                     if (currlh[PLH_LO] > -dInfinity) {
-                        dReal s2 = (currlh[PLH_LO] - currbx[PBX_X]) * dirf;	// was (lo[i]-x[i])/dirf	// step to x(i)=lo(i)
+                        dReal s2 = (currbx[PBX_X] - currlh[PLH_LO]); // was (lo[i]-x[i])/dirf	// step to x(i)=lo(i)
                         if (s2 < s) {
                             s = s2;
                             cmd = 2;
@@ -1068,7 +1065,9 @@ void dxSolveLCP_Generic (dxWorldProcessMemArena *memarena, unsigned n, dReal *A,
 
                 // apply x = x + s * delta_x
                 lcp.pC_plusequals_s_times_qC<PBX__MAX> (pairsbx + PBX_X, s, delta_x);
-                currbx[PBX_X] += s * dirf;
+                currbx[PBX_X] = dir_positive 
+                    ? currbx[PBX_X] + s
+                    : currbx[PBX_X] - s;
 
                 // apply w = w + s * delta_w
                 lcp.pN_plusequals_s_times_qN (w, s, delta_w);
