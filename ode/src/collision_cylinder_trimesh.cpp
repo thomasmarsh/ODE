@@ -880,7 +880,7 @@ void sCylinderTrimeshColliderData::TestOneTriangleVsCylinder(
     // if best separation axis is not found
     if ( m_iBestAxis == 0 ) 
     {
-        // this should not happen (we should already exit in that case)
+        // this should not happen (the function should have already returned in this case)
         dIASSERT(false);
         // do nothing
         return;
