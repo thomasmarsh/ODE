@@ -27,19 +27,31 @@
 #include "error.h"
 
 
-int  dxSafeNormalize3 (dVector3 a);
-int  dxSafeNormalize4 (dVector4 a);
+bool dxSafeNormalize3 (dVector3 a);
+bool dxSafeNormalize4 (dVector4 a);
 
-ODE_PURE_INLINE void dxNormalize3(dVector3 a)
+ODE_PURE_INLINE 
+void dxNormalize3(dVector3 a)
 {
-    int bNormalizationResult = dxSafeNormalize3(a);
-    dIVERIFY(bNormalizationResult);
+    bool bSafeNormalize3Fault;
+    if ((bSafeNormalize3Fault = !dxSafeNormalize3(a)))
+    {
+        dIVERIFY(!bSafeNormalize3Fault);
+
+        a[0] = REAL(1.0); a[2] = a[1] = REAL(0.0);
+    }
 }
 
-ODE_PURE_INLINE void dxNormalize4(dVector4 a)
+ODE_PURE_INLINE 
+void dxNormalize4(dVector4 a)
 {
-    int bNormalizationResult = dxSafeNormalize4(a);
-    dIVERIFY(bNormalizationResult);
+    bool bSafeNormalize4Fault;
+    if ((bSafeNormalize4Fault = !dxSafeNormalize4(a)))
+    {
+        dIVERIFY(!bSafeNormalize4Fault);
+
+        a[0] = REAL(1.0); a[3] = a[2] = a[1] = REAL(0.0);
+    }
 }
 
 void dxPlaneSpace (const dVector3 n, dVector3 p, dVector3 q);
