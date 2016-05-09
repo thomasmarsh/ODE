@@ -70,7 +70,7 @@ struct LineContactSet
 
 
 // static void GetTriangleGeometryCallback(udword, VertexPointers&, udword); -- not used
-inline void dMakeMatrix4(const dVector3 Position, const dMatrix3 Rotation, dMatrix4 &B);
+static inline void dMakeMatrix4(const dVector3 Position, const dMatrix3 Rotation, dMatrix4 &B);
 //static void dInvertMatrix4( dMatrix4& B, dMatrix4& Binv );
 //static int IntersectLineSegmentRay(dVector3, dVector3, dVector3, dVector3,  dVector3);
 static void ClipConvexPolygonAgainstPlane( const dVector3, dReal, LineContactSet& );
@@ -121,8 +121,8 @@ static inline dReal dMin(const dReal x, const dReal y)
 }
 
 
-inline void
-SwapNormals(dVector3 *&pen_v, dVector3 *&col_v, dVector3* v1, dVector3* v2,
+static inline 
+void SwapNormals(dVector3 *&pen_v, dVector3 *&col_v, dVector3* v1, dVector3* v2,
             dVector3 *&pen_elt, dVector3 *elt_f1, dVector3 *elt_f2,
             dVector3 n, dVector3 n1, dVector3 n2)
 {
@@ -151,6 +151,7 @@ SwapNormals(dVector3 *&pen_v, dVector3 *&col_v, dVector3* v1, dVector3* v2,
 #define CONTACT_POS_HASH_QUOTIENT REAL(10000.0)
 #define dSQRT3	REAL(1.7320508075688773)
 
+static 
 void UpdateContactKey(CONTACT_KEY & key, dContactGeom * contact)
 {
     key.m_contact = contact;
@@ -191,7 +192,8 @@ void UpdateContactKey(CONTACT_KEY & key, dContactGeom * contact)
 }
 
 
-static inline unsigned int MakeContactIndex(unsigned int key)
+static inline 
+unsigned int MakeContactIndex(unsigned int key)
 {
     dIASSERT(CONTACTS_HASHSIZE == 256);
 
@@ -201,6 +203,7 @@ static inline unsigned int MakeContactIndex(unsigned int key)
     return index;
 }
 
+static 
 dContactGeom *AddContactToNode(const CONTACT_KEY * contactkey,CONTACT_KEY_HASH_NODE * node)
 {
     for(int i=0;i<node->m_keycount;i++)
@@ -229,6 +232,7 @@ dContactGeom *AddContactToNode(const CONTACT_KEY * contactkey,CONTACT_KEY_HASH_N
     return contactkey->m_contact;
 }
 
+static 
 void RemoveNewContactFromNode(const CONTACT_KEY * contactkey, CONTACT_KEY_HASH_NODE * node)
 {
     dIASSERT(node->m_keycount > 0);
@@ -243,6 +247,7 @@ void RemoveNewContactFromNode(const CONTACT_KEY * contactkey, CONTACT_KEY_HASH_N
     }
 }
 
+static 
 void RemoveArbitraryContactFromNode(const CONTACT_KEY *contactkey, CONTACT_KEY_HASH_NODE *node)
 {
     dIASSERT(node->m_keycount > 0);
@@ -265,6 +270,7 @@ void RemoveArbitraryContactFromNode(const CONTACT_KEY *contactkey, CONTACT_KEY_H
     node->m_keycount = lastkeyindex;
 }
 
+static 
 void UpdateArbitraryContactInNode(const CONTACT_KEY *contactkey, CONTACT_KEY_HASH_NODE *node,
                                   dContactGeom *pwithcontact)
 {
@@ -287,12 +293,14 @@ void UpdateArbitraryContactInNode(const CONTACT_KEY *contactkey, CONTACT_KEY_HAS
     node->m_keyarray[keyindex].m_contact = pwithcontact;
 }
 
+static 
 void ClearContactSet(CONTACT_KEY_HASH_TABLE &hashcontactset)
 {
     memset(&hashcontactset, 0, sizeof(CONTACT_KEY_HASH_TABLE));
 }
 
 //return true if found
+static 
 dContactGeom *InsertContactInSet(CONTACT_KEY_HASH_TABLE &hashcontactset, const CONTACT_KEY &newkey)
 {
     unsigned int index = MakeContactIndex(newkey.m_key);
@@ -300,6 +308,7 @@ dContactGeom *InsertContactInSet(CONTACT_KEY_HASH_TABLE &hashcontactset, const C
     return AddContactToNode(&newkey, &hashcontactset[index]);
 }
 
+static 
 void RemoveNewContactFromSet(CONTACT_KEY_HASH_TABLE &hashcontactset, const CONTACT_KEY &contactkey)
 {
     unsigned int index = MakeContactIndex(contactkey.m_key);
@@ -307,6 +316,7 @@ void RemoveNewContactFromSet(CONTACT_KEY_HASH_TABLE &hashcontactset, const CONTA
     RemoveNewContactFromNode(&contactkey, &hashcontactset[index]);
 }
 
+static 
 void RemoveArbitraryContactFromSet(CONTACT_KEY_HASH_TABLE &hashcontactset, const CONTACT_KEY &contactkey)
 {
     unsigned int index = MakeContactIndex(contactkey.m_key);
@@ -314,6 +324,7 @@ void RemoveArbitraryContactFromSet(CONTACT_KEY_HASH_TABLE &hashcontactset, const
     RemoveArbitraryContactFromNode(&contactkey, &hashcontactset[index]);
 }
 
+static 
 void UpdateArbitraryContactInSet(CONTACT_KEY_HASH_TABLE &hashcontactset, const CONTACT_KEY &contactkey, 
                                  dContactGeom *pwithcontact)
 {
@@ -322,6 +333,7 @@ void UpdateArbitraryContactInSet(CONTACT_KEY_HASH_TABLE &hashcontactset, const C
     UpdateArbitraryContactInNode(&contactkey, &hashcontactset[index], pwithcontact);
 }
 
+static 
 bool AllocNewContact(
                      const dVector3 newpoint, dContactGeom *& out_pcontact,
                      int Flags, CONTACT_KEY_HASH_TABLE &hashcontactset,
@@ -362,6 +374,7 @@ bool AllocNewContact(
     return allocated_new;
 }
 
+static 
 void FreeExistingContact(dContactGeom *pcontact,
                          int Flags, CONTACT_KEY_HASH_TABLE &hashcontactset, 
                          dContactGeom *Contacts, int Stride, int &contactcount)
@@ -388,6 +401,7 @@ void FreeExistingContact(dContactGeom *pcontact,
 }
 
 
+static 
 dContactGeom *  PushNewContact( dxGeom* g1, dxGeom* g2, int TriIndex1, int TriIndex2,
                                const dVector3 point,
                                dVector3 normal,
@@ -471,8 +485,7 @@ dContactGeom *  PushNewContact( dxGeom* g1, dxGeom* g2, int TriIndex1, int TriIn
 
 
 
-int
-dCollideTTL(dxGeom* g1, dxGeom* g2, int Flags, dContactGeom* Contacts, int Stride)
+int dCollideTTL(dxGeom* g1, dxGeom* g2, int Flags, dContactGeom* Contacts, int Stride)
 {
     dIASSERT (Stride >= (int)sizeof(dContactGeom));
     dIASSERT (g1->type == dTriMeshClass);
@@ -622,8 +635,8 @@ GetTriangleGeometryCallback(udword triangleindex, VertexPointers& triangle, udwo
 #define Binv43   Binv[14]
 #define Binv44   Binv[15]
 
-inline void
-dMakeMatrix4(const dVector3 Position, const dMatrix3 Rotation, dMatrix4 &B)
+static inline 
+void dMakeMatrix4(const dVector3 Position, const dMatrix3 Rotation, dMatrix4 &B)
 {
     B11 = Rotation[0]; B21 = Rotation[1]; B31 = Rotation[2];    B41 = Position[0];
     B12 = Rotation[4]; B22 = Rotation[5]; B32 = Rotation[6];    B42 = Position[1];
@@ -844,22 +857,22 @@ bool BuildPlane(const dVector3 s0, const dVector3 s1,const dVector3 s2,
 
 }
 
-bool BuildEdgesDir(const dVector3 s0, const dVector3 s1,
-                   const dVector3 t0, const dVector3 t1,
-                   dVector3 crossdir)
-{
-    dVector3 e0,e1;
-
-    SUB(e0,s1,s0);
-    SUB(e1,t1,t0);
-    CROSS(crossdir,e0,e1);
-
-    if (!dSafeNormalize3(crossdir))
-    {
-        return false;
-    }
-    return true;
-}
+// bool BuildEdgesDir(const dVector3 s0, const dVector3 s1,
+//                    const dVector3 t0, const dVector3 t1,
+//                    dVector3 crossdir)
+// {
+//     dVector3 e0,e1;
+// 
+//     SUB(e0,s1,s0);
+//     SUB(e1,t1,t0);
+//     CROSS(crossdir,e0,e1);
+// 
+//     if (!dSafeNormalize3(crossdir))
+//     {
+//         return false;
+//     }
+//     return true;
+// }
 
 
 
