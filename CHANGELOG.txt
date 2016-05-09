@@ -8,6 +8,11 @@ the rules for this file:
   * keep the format consistent (79 char width, M/D/Y date format).
 
 ------------------------------------------------------------------------------
+05/10/2016 Oleh Derevenko
+        * dSafeNormalize3 and dSafeNormalize4 functions changed to leave the
+          parameter intact instead of replacing it with the X-axis unit in case 
+          of fault.
+
 04/12/2016 Oleh Derevenko
         * A function to create a self-threaded threading implementation object
           has been moved back to public headers as there could be a use for it
