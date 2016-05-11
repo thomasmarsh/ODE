@@ -360,13 +360,17 @@ void dBodySetRotation (dBodyID b, const dMatrix3 R)
     dAASSERT (b && R);
 
     memcpy(b->posr.R, R, sizeof(dMatrix3));
-    dOrthogonalizeR(b->posr.R);
+    
+    bool bOrthogonalizeResult = dxOrthogonalizeR(b->posr.R);
+    dAVERIFY(bOrthogonalizeResult);
+
     dRtoQ (R, b->q);
     dNormalize4 (b->q);
 
     // notify all attached geoms that this body has moved
-    for (dxGeom *geom = b->geom; geom; geom = dGeomGetBodyNext (geom))
+    for (dxGeom *geom = b->geom; geom; geom = dGeomGetBodyNext (geom)) {
         dGeomMoved (geom);
+    }
 }
 
 
