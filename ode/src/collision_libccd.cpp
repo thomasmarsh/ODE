@@ -127,9 +127,9 @@ static void ccdGeomToBox(const dGeomID g, ccd_box_t *box)
     ccdGeomToObj(g, (ccd_obj_t *)box);
 
     dGeomBoxGetLengths(g, dim);
-    box->dim[0] = dim[0] / 2.;
-    box->dim[1] = dim[1] / 2.;
-    box->dim[2] = dim[2] / 2.;
+    box->dim[0] = (ccd_real_t)(dim[0] * 0.5);
+    box->dim[1] = (ccd_real_t)(dim[1] * 0.5);
+    box->dim[2] = (ccd_real_t)(dim[2] * 0.5);
 }
 
 static void ccdGeomToCap(const dGeomID g, ccd_cap_t *cap)
@@ -287,7 +287,7 @@ static int ccdCollide(
     int res;
     ccd_real_t depth;
     ccd_vec3_t dir, pos;
-    int max_contacts = (flags & 0xffff);
+    int max_contacts = (flags & NUMC_MASK);
 
     if (max_contacts < 1)
         return 0;
@@ -423,186 +423,11 @@ int dCollideConvexConvexCCD(dxGeom *o1, dxGeom *o2, int flags, dContactGeom *con
         &c2, ccdSupportConvex, ccdCenter);
 }
 
-// Adds a contact between 2 cylinders provided its depth is >= 0
-int addContact(dxGeom *o1, dxGeom *o2, ccd_vec3_t* axis, dContactGeom *contacts,
-               ccd_vec3_t* p, dReal normaldir, dReal depth, int j, int flags, int skip) {
-    if (depth >= 0) {
-        dContactGeom* contact = SAFECONTACT(flags, contacts, j++, skip);
-        contact->g1 = o1;
-        contact->g2 = o2;
-        contact->side1 = -1;
-        contact->side2 = -1;
-        contact->normal[0] = normaldir * ccdVec3X(axis);
-        contact->normal[1] = normaldir * ccdVec3Y(axis);
-        contact->normal[2] = normaldir * ccdVec3Z(axis);
-        contact->depth = depth;
-        contact->pos[0] = ccdVec3X(p);
-        contact->pos[1] = ccdVec3Y(p);
-        contact->pos[2] = ccdVec3Z(p);
-    }
-    return j;
-}
 
-int collideCylCyl(dxGeom *o1, dxGeom *o2, ccd_cyl_t* cyl1, ccd_cyl_t* cyl2, int flags, dContactGeom *contacts, int skip) {
-    int maxContacts = (flags & 0xffff);
-    if (maxContacts == 0) {
-        return 0;
-    }
-    maxContacts = maxContacts > 8 ? 8 : maxContacts;
-    dReal d = dFabs(ccdVec3Dot(&cyl1->axis, &cyl2->axis));
-    // Check if cylinders' axes are in line
-    if (1 - d < 1e-3f) {
-        ccd_vec3_t p, proj;
-        dReal r1, l1;
-        dReal r2, l2;
-        dGeomCylinderGetParams(o1, &r1, & l1);
-        dGeomCylinderGetParams(o2, &r2, & l2);
-        l1 *= 0.5f;
-        l2 *= 0.5f;
-        // Determine the cylinder with smaller radius (minCyl) and bigger radius (maxCyl) and their respective properties: radius, length
-        dReal rmin = fmin(r1, r2);
-        dReal rmax = fmax(r1, r2);
-        ccd_cyl_t* minCyl = rmin == r1 ? cyl1 : cyl2;
-        ccd_cyl_t* maxCyl = rmin == r1 ? cyl2 : cyl1;
-        ccdVec3Copy(&p, &minCyl->o.pos);
-        ccdVec3Sub(&p, &maxCyl->o.pos);
-        dReal dot = ccdVec3Dot(&p, &maxCyl->axis);
-        // Maximum possible contact depth
-        dReal depth_v = l1 + l2 - dFabs(dot) + dSqrt(fmax(0, 1 - d * d)) * rmin;
-        if (depth_v < 0) {
-            return 0;
-        }
-        // Project the smaller cylinder's center onto the larger cylinder's plane
-        ccdVec3Copy(&proj, &maxCyl->axis);
-        ccdVec3Scale(&proj, -dot);
-        ccdVec3Add(&proj, &p);
-        d = sqrt(ccdVec3Len2(&proj));
-        dReal depth_h = r1 + r2 - d;
-        // Check the distance between cylinders' centers
-        if (depth_h < 0) {
-            return 0;
-        }
-        // Check if "vertical" contact depth is less than "horizontal" contact depth
-        if (depth_v < depth_h) {
-            int contactCount = 0;
-            dReal dot2 = -ccdVec3Dot(&p, &minCyl->axis);
-            // lmin, lmax - distances from cylinders' centers to potential contact points relative to cylinders' axes
-            dReal lmax = rmin == r1 ? l2 : l1;
-            dReal lmin = rmin == r1 ? l1 : l2;
-            lmax = dot < 0 ? -lmax : lmax;
-            lmin = dot2 < 0 ? -lmin : lmin;
-            // Contact normal direction, relative to o1's axis
-            dReal normaldir = dot < 0 ? 1 : -1;
-            normaldir = rmin == r1 ? -normaldir : normaldir;
-            if (rmin + d <= rmax) {
-                // Case 1: The smaller disc is fully contained within the larger one
-                // Simply generate N points on the rim of the smaller disc
-                for (int i = 0; i < maxContacts; i++) {
-                    ccd_vec3_t p2;
-                    dReal a = M_PI * 2 * i / maxContacts;
-                    ccdVec3Set(&p, dCos(a) * rmin, dSin(a) * rmin, 0);
-                    // Transform to world coordinates
-                    ccdQuatRotVec(&p, &minCyl->o.rot);
-                    ccdVec3Add(&p, &minCyl->o.pos);
-                    ccdVec3Copy(&p2, &p);
-                    ccdVec3Sub(&p2, &maxCyl->o.pos);
-                    // Calculate contact depth
-                    dReal depth = l1 + l2 - dFabs(ccdVec3Dot(&p2, &maxCyl->axis));
-                    // Contact point
-                    ccdVec3Copy(&p2, &minCyl->axis);
-                    ccdVec3Scale(&p2, lmin);
-                    ccdVec3Add(&p, &p2);
-                    contactCount = addContact(o1, o2, &maxCyl->axis, contacts, &p, normaldir, depth, contactCount, flags,skip);
-                }
-                return contactCount;
-            } else {
-                // Case 2: Discs intersect
-                // Firstly, find intersections assuming the larger cylinder is placed at (0,0,0)
-                // http://math.stackexchange.com/questions/256100/how-can-i-find-the-points-at-which-two-circles-intersect
-                ccd_vec3_t proj2;
-                ccdVec3Copy(&proj2, &proj);
-                ccdQuatRotVec(&proj, &maxCyl->o.rot_inv);
-                d = dSqrt(ccdVec3X(&proj) * ccdVec3X(&proj) + ccdVec3Y(&proj) * ccdVec3Y(&proj));
-                dReal l = (rmax * rmax - rmin * rmin + d * d) / (2 * d);
-                dReal h = dSqrt(rmax * rmax - l * l);
-                dReal x1 = l/d * ccdVec3X(&proj) + h/d * ccdVec3Y(&proj);
-                dReal y1 = l/d * ccdVec3Y(&proj) - h/d * ccdVec3X(&proj);
-                dReal x2 = l/d * ccdVec3X(&proj) - h/d * ccdVec3Y(&proj);
-                dReal y2 = l/d * ccdVec3Y(&proj) + h/d * ccdVec3X(&proj);
-                // Map the intersection points to angles
-                dReal ap1 = atan2(y1, x1);
-                dReal ap2 = atan2(y2, x2);
-                dReal minA = fmin(ap1, ap2);
-                dReal maxA = fmax(ap1, ap2);
-                // If the segment connecting cylinders' centers does not intersect the arc, change the angles
-                dReal a = atan2(ccdVec3Y(&proj), ccdVec3X(&proj));
-                if (a < minA || a > maxA) {
-                    a = maxA;
-                    maxA = minA + M_PI * 2;
-                    minA = a;
-                }
-                dReal diffA = maxA - minA;
-                // Do the same for the smaller cylinder assuming it is placed at (0,0,0) now
-                ccdVec3Copy(&proj, &proj2);
-                ccdVec3Scale(&proj, -1);
-                ccdQuatRotVec(&proj, &minCyl->o.rot_inv);
-                l = (rmin * rmin - rmax * rmax + d * d) / (2 * d);
-                h = dSqrt(rmin * rmin - l * l);
-                x1 = l/d * ccdVec3X(&proj) + h/d * ccdVec3Y(&proj);
-                y1 = l/d * ccdVec3Y(&proj) - h/d * ccdVec3X(&proj);
-                x2 = l/d * ccdVec3X(&proj) - h/d * ccdVec3Y(&proj);
-                y2 = l/d * ccdVec3Y(&proj) + h/d * ccdVec3X(&proj);
-                ap1 = atan2(y1, x1);
-                ap2 = atan2(y2, x2);
-                dReal minB = fmin(ap1, ap2);
-                dReal maxB = fmax(ap1, ap2);
-                a = atan2(ccdVec3Y(&proj), ccdVec3X(&proj));
-                if (a < minB || a > maxB) {
-                    a = maxB;
-                    maxB = minB + M_PI * 2;
-                    minB = a;
-                }
-                dReal diffB = maxB - minB;
-                // Find contact point distribution ratio based on arcs lengths
-                dReal ratio = diffA * rmax  / (diffA  * rmax + diffB  * rmin);
-                int nMax = round(ratio * maxContacts);
-                int nMin = maxContacts - nMax;
-                // Larger disc first, + additional point as the start/end points of arcs overlap
-                for (int i = 0; i < nMax + 1; i++) {
-                    ccd_vec3_t p2;
-                    a = minA + diffA  * i / nMax;
-                    ccdVec3Set(&p, dCos(a) * rmax, dSin(a) * rmax, 0);
-                    ccdQuatRotVec(&p, &maxCyl->o.rot);
-                    ccdVec3Add(&p, &maxCyl->o.pos);
-                    ccdVec3Copy(&p2, &p);
-                    ccdVec3Sub(&p2, &minCyl->o.pos);
-                    dReal depth = l1 + l2 - dFabs(ccdVec3Dot(&p2, &minCyl->axis));
-                    ccdVec3Copy(&p2, &maxCyl->axis);
-                    ccdVec3Scale(&p2, lmax);
-                    ccdVec3Add(&p, &p2);
-                    contactCount = addContact(o1, o2, &maxCyl->axis, contacts, &p, normaldir, depth, contactCount, flags,skip);
-                }
-                // Smaller disc second, skipping the overlapping point
-                for (int i = 1; i < nMin; i++) {
-                    ccd_vec3_t p2;
-                    a = minB + diffB  * i / nMin;
-                    ccdVec3Set(&p, dCos(a) * rmin, dSin(a) * rmin, 0);
-                    ccdQuatRotVec(&p, &minCyl->o.rot);
-                    ccdVec3Add(&p, &minCyl->o.pos);
-                    ccdVec3Copy(&p2, &p);
-                    ccdVec3Sub(&p2, &maxCyl->o.pos);
-                    dReal depth = l1 + l2 - dFabs(ccdVec3Dot(&p2, &maxCyl->axis));
-                    ccdVec3Copy(&p2, &minCyl->axis);
-                    ccdVec3Scale(&p2, lmin);
-                    ccdVec3Add(&p, &p2);
-                    contactCount = addContact(o1, o2, &maxCyl->axis, contacts, &p, normaldir, depth, contactCount, flags,skip);
-                }
-                return contactCount;
-            }
-        }
-    }
-    return -1;
-}
+static int collideCylCyl(dxGeom *o1, dxGeom *o2, ccd_cyl_t* cyl1, ccd_cyl_t* cyl2, int flags, dContactGeom *contacts, int skip);
+static bool testAndPrepareDiscContactForAngle(dReal angle, dReal radius, dReal length, dReal lSum, ccd_cyl_t *priCyl, ccd_cyl_t *secCyl, ccd_vec3_t &p, dReal &out_depth);
+// Adds a contact between 2 cylinders
+static int addContact(dxGeom *o1, dxGeom *o2, ccd_vec3_t* axis, dContactGeom *contacts, ccd_vec3_t* p, dReal normaldir, dReal depth, int j, int flags, int skip);
 
 int dCollideCylinderCylinder(dxGeom *o1, dxGeom *o2, int flags, dContactGeom *contact, int skip)
 {
@@ -619,6 +444,265 @@ int dCollideCylinderCylinder(dxGeom *o1, dxGeom *o2, int flags, dContactGeom *co
     }
     return numContacts;
 }
+
+static 
+int collideCylCyl(dxGeom *o1, dxGeom *o2, ccd_cyl_t* cyl1, ccd_cyl_t* cyl2, int flags, dContactGeom *contacts, int skip) {
+    int maxContacts = (flags & NUMC_MASK);
+    dAASSERT(maxContacts != 0);
+
+    maxContacts = maxContacts > 8 ? 8 : maxContacts;
+    
+    dReal axesProd = dFabs(ccdVec3Dot(&cyl1->axis, &cyl2->axis));
+    // Check if cylinders' axes are in line
+    if (REAL(1.0) - axesProd < 1e-3f) {
+        ccd_vec3_t p, proj;
+        dReal r1, l1;
+        dReal r2, l2;
+        dGeomCylinderGetParams(o1, &r1, &l1);
+        dGeomCylinderGetParams(o2, &r2, &l2);
+        l1 *= 0.5f;
+        l2 *= 0.5f;
+       
+        // Determine the cylinder with smaller radius (minCyl) and bigger radius (maxCyl) and their respective properties: radius, length
+        bool r1IsMin;
+        dReal rmin, rmax;
+        ccd_cyl_t *minCyl, *maxCyl;
+        if (r1 <= r2) {
+            rmin = r1; rmax = r2;
+            minCyl = cyl1; maxCyl = cyl2;
+            r1IsMin = true;
+        }
+        else {
+            rmin = r2; rmax = r1;
+            minCyl = cyl2; maxCyl = cyl1;
+            r1IsMin = false;
+        }
+
+        dReal lSum = l1 + l2;
+
+        ccdVec3Copy(&p, &minCyl->o.pos);
+        ccdVec3Sub(&p, &maxCyl->o.pos);
+        dReal dot = ccdVec3Dot(&p, &maxCyl->axis);
+        
+        // Maximum possible contact depth
+        dReal depth_v = lSum - dFabs(dot) + dSqrt(dMax(0, REAL(1.0) - axesProd * axesProd)) * rmin;
+        if (depth_v < 0) {
+            return 0;
+        }
+
+        // Project the smaller cylinder's center onto the larger cylinder's plane
+        ccdVec3Copy(&proj, &maxCyl->axis);
+        ccdVec3Scale(&proj, -dot);
+        ccdVec3Add(&proj, &p);
+        dReal radiiDiff = (dReal)sqrt(ccdVec3Len2(&proj));
+        dReal depth_h = r1 + r2 - radiiDiff;
+
+        // Check the distance between cylinders' centers
+        if (depth_h < 0) {
+            return 0;
+        }
+
+        // Check if "vertical" contact depth is less than "horizontal" contact depth
+        if (depth_v < depth_h) {
+            int contactCount = 0;
+            dReal dot2 = -ccdVec3Dot(&p, &minCyl->axis);
+            // lmin, lmax - distances from cylinders' centers to potential contact points relative to cylinders' axes
+            dReal lmax = r1IsMin ? l2 : l1;
+            dReal lmin = r1IsMin ? l1 : l2;
+            lmin = dot2 < 0 ? -lmin : lmin;
+            lmax = dot < 0 ? -lmax : lmax;
+            // Contact normal direction, relative to o1's axis
+            dReal normaldir = (dot < 0) != r1IsMin ? REAL(1.0) : -REAL(1.0);
+            
+            if (rmin + radiiDiff <= rmax) {
+                // Case 1: The smaller disc is fully contained within the larger one
+                // Simply generate N points on the rim of the smaller disc
+                dReal maxContactsRecip = (dReal)(0 < maxContacts ? (2.0 * M_PI / maxContacts) : (2.0 * M_PI)); // The 'else' value does not matter. Just try helping the optimizer.
+                for (int i = 0; i < maxContacts; i++) {
+                    dReal depth;
+                    dReal a = maxContactsRecip * i;
+                    if (testAndPrepareDiscContactForAngle(a, rmin, lmin, lSum, minCyl, maxCyl, p, depth)) {
+                        contactCount = addContact(o1, o2, &maxCyl->axis, contacts, &p, normaldir, depth, contactCount, flags, skip);
+                        if (flags & CONTACTS_UNIMPORTANT) {
+                            dIASSERT(contactCount != 0);
+                            break;
+                        }
+                    }
+                }
+                return contactCount;
+
+            } else {
+                // Case 2: Discs intersect
+                // Firstly, find intersections assuming the larger cylinder is placed at (0,0,0)
+                // http://math.stackexchange.com/questions/256100/how-can-i-find-the-points-at-which-two-circles-intersect
+                ccd_vec3_t proj2;
+                ccdVec3Copy(&proj2, &proj);
+                ccdQuatRotVec(&proj, &maxCyl->o.rot_inv);
+                dReal d = dSqrt(ccdVec3X(&proj) * ccdVec3X(&proj) + ccdVec3Y(&proj) * ccdVec3Y(&proj));
+                dIASSERT(d != REAL(0.0));
+                
+                dReal dRecip = REAL(1.0) / d;
+                dReal rmaxSquare = rmax * rmax, rminSquare = rmin * rmin, dSquare = d * d;
+
+                dReal minA, diffA, minB, diffB;
+
+                {
+                    dReal l = (rmaxSquare - rminSquare + dSquare) * (REAL(0.5) * dRecip);
+                    dReal h = dSqrt(rmaxSquare - l * l);
+                    dReal divLbyD = l * dRecip, divHbyD = h * dRecip;
+                    dReal x1 = divLbyD * ccdVec3X(&proj) + divHbyD * ccdVec3Y(&proj);
+                    dReal y1 = divLbyD * ccdVec3Y(&proj) - divHbyD * ccdVec3X(&proj);
+                    dReal x2 = divLbyD * ccdVec3X(&proj) - divHbyD * ccdVec3Y(&proj);
+                    dReal y2 = divLbyD * ccdVec3Y(&proj) + divHbyD * ccdVec3X(&proj);
+                    // Map the intersection points to angles
+                    dReal ap1 = dAtan2(y1, x1);
+                    dReal ap2 = dAtan2(y2, x2);
+                    minA = dMin(ap1, ap2);
+                    dReal maxA = dMax(ap1, ap2);
+                    // If the segment connecting cylinders' centers does not intersect the arc, change the angles
+                    dReal a = dAtan2(ccdVec3Y(&proj), ccdVec3X(&proj));
+                    if (a < minA || a > maxA) {
+                        a = maxA;
+                        maxA = (dReal)(minA + M_PI * 2.0);
+                        minA = a;
+                    }
+                    diffA = maxA - minA;
+                }
+                
+                // Do the same for the smaller cylinder assuming it is placed at (0,0,0) now
+                ccdVec3Copy(&proj, &proj2);
+                ccdVec3Scale(&proj, -1);
+                ccdQuatRotVec(&proj, &minCyl->o.rot_inv);
+                
+                {
+                    dReal l = (rminSquare - rmaxSquare + dSquare) * (REAL(0.5) * dRecip);
+                    dReal h = dSqrt(rminSquare - l * l);
+                    dReal divLbyD = l * dRecip, divHbyD = h * dRecip;
+                    dReal x1 = divLbyD * ccdVec3X(&proj) + divHbyD * ccdVec3Y(&proj);
+                    dReal y1 = divLbyD * ccdVec3Y(&proj) - divHbyD * ccdVec3X(&proj);
+                    dReal x2 = divLbyD * ccdVec3X(&proj) - divHbyD * ccdVec3Y(&proj);
+                    dReal y2 = divLbyD * ccdVec3Y(&proj) + divHbyD * ccdVec3X(&proj);
+                    dReal ap1 = dAtan2(y1, x1);
+                    dReal ap2 = dAtan2(y2, x2);
+                    minB = dMin(ap1, ap2);
+                    dReal maxB = dMax(ap1, ap2);
+                    dReal a = dAtan2(ccdVec3Y(&proj), ccdVec3X(&proj));
+                    if (a < minB || a > maxB) {
+                        a = maxB;
+                        maxB = (dReal)(minB + M_PI * 2.0);
+                        minB = a;
+                    }
+                    diffB = maxB - minB;
+                }
+
+                // Find contact point distribution ratio based on arcs lengths
+                dReal ratio = diffA * rmax  / (diffA  * rmax + diffB  * rmin);
+                ratio = dMin(ratio, REAL(1.0)); ratio = dMax(ratio, REAL(0.0));
+
+                bool maxCouldBe0 = false;
+                int nMax = (int)dFloor(ratio * maxContacts + REAL(0.5));
+                int nMin = maxContacts - nMax;
+                dIASSERT(nMax <= maxContacts);
+                dIASSERT(nMax != 0); // ratio seems to be >= 0.5, so with maxContacts >= 1 it should result in nMax >= 1
+
+                if (nMin == 0) {
+                    nMin = 1; nMax -= 1;
+                    maxCouldBe0 = true;
+                }
+
+                if (maxCouldBe0 && 0 == nMax) {
+                    dIASSERT(maxContacts == 1);
+
+                    // Add a single contact in the middle of the larger disc
+                    dReal depth;
+                    dReal a = dReal(minA + diffA * REAL(0.5));
+                    if (testAndPrepareDiscContactForAngle(a, rmax, lmax, lSum, maxCyl, minCyl, p, depth)) {
+                        contactCount = addContact(o1, o2, &maxCyl->axis, contacts, &p, normaldir, depth, contactCount, flags, skip);
+                    }
+                }
+                else {
+                    dReal nMaxRecip = diffA / nMax;
+
+                    // Larger disc first, + additional point as the start/end points of arcs overlap
+                    dIASSERT(nMax < maxContacts);
+                    for (int i = 0; i < nMax + 1; i++) {
+                        dReal depth;
+                        dReal a = minA + nMaxRecip * i;
+                        if (testAndPrepareDiscContactForAngle(a, rmax, lmax, lSum, maxCyl, minCyl, p, depth)) {
+                            contactCount = addContact(o1, o2, &maxCyl->axis, contacts, &p, normaldir, depth, contactCount, flags, skip);
+                            if (flags & CONTACTS_UNIMPORTANT) {
+                                dIASSERT(contactCount != 0);
+                                break;
+                            }
+                        }
+                    }
+                }
+
+                if (!(flags & CONTACTS_UNIMPORTANT)) {
+                    // Smaller disc second, skipping the overlapping point
+                    dReal nMinRecip = 1 < nMin ? diffB / nMin : diffB; // The 'else' value does not matter. Just try helping the optimizer.
+                    for (int i = 1; i < nMin; i++) {
+                        dReal depth;
+                        dReal a = minB + nMinRecip * i;
+                        if (testAndPrepareDiscContactForAngle(a, rmin, lmin, lSum, minCyl, maxCyl, p, depth)) {
+                            contactCount = addContact(o1, o2, &maxCyl->axis, contacts, &p, normaldir, depth, contactCount, flags, skip);
+                        }
+                    }
+                }
+
+                return contactCount;
+            }
+        }
+    }
+    return -1;
+}
+
+static 
+bool testAndPrepareDiscContactForAngle(dReal angle, dReal radius, dReal length, dReal lSum, ccd_cyl_t *priCyl, ccd_cyl_t *secCyl, ccd_vec3_t &p, dReal &out_depth)
+{
+    bool ret = false;
+
+    ccd_vec3_t p2;
+    ccdVec3Set(&p, dCos(angle) * radius, dSin(angle) * radius, 0);
+    ccdQuatRotVec(&p, &priCyl->o.rot);
+    ccdVec3Add(&p, &priCyl->o.pos);
+    ccdVec3Copy(&p2, &p);
+    ccdVec3Sub(&p2, &secCyl->o.pos);
+    dReal depth = lSum - dFabs(ccdVec3Dot(&p2, &secCyl->axis));
+
+    if (depth >= 0) {
+        ccdVec3Copy(&p2, &priCyl->axis);
+        ccdVec3Scale(&p2, length);
+        ccdVec3Add(&p, &p2);
+
+        out_depth = depth;
+        ret = true;
+    }
+
+    return ret;
+}
+
+static 
+int addContact(dxGeom *o1, dxGeom *o2, ccd_vec3_t* axis, dContactGeom *contacts,
+               ccd_vec3_t* p, dReal normaldir, dReal depth, int j, int flags, int skip) {
+    dIASSERT(depth >= 0);
+
+    dContactGeom* contact = SAFECONTACT(flags, contacts, j, skip);
+    contact->g1 = o1;
+    contact->g2 = o2;
+    contact->side1 = -1;
+    contact->side2 = -1;
+    contact->normal[0] = normaldir * ccdVec3X(axis);
+    contact->normal[1] = normaldir * ccdVec3Y(axis);
+    contact->normal[2] = normaldir * ccdVec3Z(axis);
+    contact->depth = depth;
+    contact->pos[0] = ccdVec3X(p);
+    contact->pos[1] = ccdVec3Y(p);
+    contact->pos[2] = ccdVec3Z(p);
+
+    return j + 1;
+}
+
 
 #if dTRIMESH_ENABLED
 
@@ -681,7 +765,7 @@ static
 int addPerturbedContacts(dxGeom* o1, dxGeom* o2, int flags, dContactGeom *contacts, int skip,
         ccd_convex_t* c1, ccd_triangle_t* c2, dVector3* triangle, dContactGeom* contact, int contactcount)
 {
-    int maxcontacts = (flags & 0xffff);
+    int maxcontacts = (flags & NUMC_MASK);
     dVector3 upAxis, cross;
     dVector3 pos;
     
@@ -739,7 +823,7 @@ int dCollideConvexTrimeshTrianglesCCD(dxGeom *o1, dxGeom *o2, int* indices, int 
     ccd_convex_t c1;
     ccd_triangle_t c2;
     dVector3 triangle[3];
-    int maxcontacts = (flags & 0xffff);
+    int maxcontacts = (flags & NUMC_MASK);
     int contactcount = 0;
     ccdGeomToConvex(o1, &c1);
     ccdGeomToObj(o2, (ccd_obj_t *)&c2);
