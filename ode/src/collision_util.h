@@ -221,17 +221,17 @@ void dMatrix3Inv( const dMatrix3& ma, dMatrix3& dst )
 
     double detRecip = REAL(1.0) / det;
 
-    dst[0] =  ( ma[5]*ma[10] - ma[6]*ma[9]  ) * detRecip;
-    dst[1] =  ( ma[9]*ma[2]  - ma[1]*ma[10] ) * detRecip;
-    dst[2] =  ( ma[1]*ma[6]  - ma[5]*ma[2]  ) * detRecip;
+    dst[0] =  (dReal)(( ma[5]*ma[10] - ma[6]*ma[9]  ) * detRecip);
+    dst[1] =  (dReal)(( ma[9]*ma[2]  - ma[1]*ma[10] ) * detRecip);
+    dst[2] =  (dReal)(( ma[1]*ma[6]  - ma[5]*ma[2]  ) * detRecip);
 
-    dst[4] =  ( ma[6]*ma[8]  - ma[4]*ma[10] ) * detRecip;
-    dst[5] =  ( ma[0]*ma[10] - ma[8]*ma[2]  ) * detRecip;
-    dst[6] =  ( ma[4]*ma[2]  - ma[0]*ma[6]  ) * detRecip;
+    dst[4] =  (dReal)(( ma[6]*ma[8]  - ma[4]*ma[10] ) * detRecip);
+    dst[5] =  (dReal)(( ma[0]*ma[10] - ma[8]*ma[2]  ) * detRecip);
+    dst[6] =  (dReal)(( ma[4]*ma[2]  - ma[0]*ma[6]  ) * detRecip);
 
-    dst[8] =  ( ma[4]*ma[9]  - ma[8]*ma[5]  ) * detRecip;
-    dst[9] =  ( ma[8]*ma[1]  - ma[0]*ma[9]  ) * detRecip;
-    dst[10] = ( ma[0]*ma[5]  - ma[1]*ma[4]  ) * detRecip;
+    dst[8] =  (dReal)(( ma[4]*ma[9]  - ma[8]*ma[5]  ) * detRecip);
+    dst[9] =  (dReal)(( ma[8]*ma[1]  - ma[0]*ma[9]  ) * detRecip);
+    dst[10] = (dReal)(( ma[0]*ma[5]  - ma[1]*ma[4]  ) * detRecip);
 }
 
 static inline 
