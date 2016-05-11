@@ -342,6 +342,9 @@ typedef dReal dQuaternion[dQUE__MAX];
 #error You must #define dSINGLE or dDOUBLE
 #endif
 
+static __inline dReal dMin(dReal x, dReal y) { return x <= y ? x : y; }
+static __inline dReal dMax(dReal x, dReal y) { return x <= y ? y : x; }
+
 
 /* internal object types (all prefixed with `dx') */
 

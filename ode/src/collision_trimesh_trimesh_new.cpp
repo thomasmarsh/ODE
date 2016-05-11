@@ -115,11 +115,6 @@ static bool TriTriContacts(const dVector3 tr1[3],
 
 #define DEPTH(d, p, q, n) d = dCalcPointDepth3(q, p, n)
 
-static inline dReal dMin(const dReal x, const dReal y)
-{
-    return x < y ? x : y;
-}
-
 
 static inline 
 void SwapNormals(dVector3 *&pen_v, dVector3 *&col_v, dVector3* v1, dVector3* v2,

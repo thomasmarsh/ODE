@@ -113,11 +113,6 @@ static int RayTriangleIntersect(const dVector3 orig, const dVector3 dir,
 
 #define DEPTH(d, p, q, n) d = dCalcPointDepth3(q, p, n)
 
-static inline const dReal dMin(const dReal x, const dReal y)
-{
-    return x < y ? x : y;
-}
-
 
 inline void
 SwapNormals(dVector3 *&pen_v, dVector3 *&col_v, dVector3* v1, dVector3* v2,
