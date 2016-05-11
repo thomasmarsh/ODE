@@ -59,11 +59,13 @@
       msg " (%s:%u)", __FILE__,__LINE__); }
 #  endif
 #  define dIVERIFY(a) dIASSERT(a)
+#  define dUVERIFY(a, msg) dUASSERT(a, msg)
 #else
 #  define dIASSERT(a) ((void)0)
 #  define dUASSERT(a,msg) ((void)0)
 #  define dDEBUGMSG(msg) ((void)0)
 #  define dIVERIFY(a) ((void)(a))
+#  define dUVERIFY(a, msg) ((void)(a))
 #endif
 
 #ifdef __GNUC__
@@ -91,7 +93,8 @@
 #  endif
 
 // Argument assert is a special case of user assert
-#define dAASSERT(a) dUASSERT(a,"Bad argument(s)")
+#define dAASSERT(a) dUASSERT(a, "Bad argument(s)")
+#define dAVERIFY(a) dUVERIFY(a, "Bad argument(s)")
 
 
 #endif
