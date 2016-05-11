@@ -27,7 +27,9 @@
 #include "error.h"
 
 
+bool dxCouldBeNormalized3(const dVector3 a);
 bool dxSafeNormalize3 (dVector3 a);
+bool dxCouldBeNormalized4(const dVector4 a);
 bool dxSafeNormalize4 (dVector4 a);
 
 ODE_PURE_INLINE 
@@ -55,7 +57,7 @@ void dxNormalize4(dVector4 a)
 }
 
 void dxPlaneSpace (const dVector3 n, dVector3 p, dVector3 q);
-void dxOrthogonalizeR(dMatrix3 m);
+bool dxOrthogonalizeR(dMatrix3 m);
 
 // For internal use
 #define dSafeNormalize3(a) dxSafeNormalize3(a)

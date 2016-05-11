@@ -60,11 +60,28 @@ void dPlaneSpace(const dVector3 n, dVector3 p, dVector3 q)
     return dxPlaneSpace(n, p, q);
 }
 
-void dOrthogonalizeR(dMatrix3 m)
+int dOrthogonalizeR(dMatrix3 m)
 {
-    dxOrthogonalizeR(m);
+    return dxOrthogonalizeR(m);
 }
 
+
+/*extern */
+bool dxCouldBeNormalized3(const dVector3 a)
+{
+    dAASSERT (a);
+
+    bool ret = false;
+
+    for (unsigned axis = dV3E__AXES_MIN; axis != dV3E__AXES_MAX; ++axis) {
+        if (a[axis] != REAL(0.0)) {
+            ret = true;
+            break;
+        }
+    }
+
+    return ret;
+}
 
 // this may be called for vectors `a' with extremely small magnitude, for
 // example the result of a cross product on two nearly perpendicular vectors.
@@ -74,6 +91,7 @@ void dOrthogonalizeR(dMatrix3 m)
 // scale the components by 1/l. this has been verified to work with vectors
 // containing the smallest representable numbers.
 
+/*extern */
 bool dxSafeNormalize3 (dVector3 a)
 {
     dAASSERT (a);
@@ -81,22 +99,22 @@ bool dxSafeNormalize3 (dVector3 a)
     bool ret = false;
 
     do {
-        dReal abs_a0 = dFabs(a[0]);
-        dReal abs_a1 = dFabs(a[1]);
-        dReal abs_a2 = dFabs(a[2]);
+        dReal abs_a0 = dFabs(a[dV3E_X]);
+        dReal abs_a1 = dFabs(a[dV3E_Y]);
+        dReal abs_a2 = dFabs(a[dV3E_Z]);
 
-        int idx;
+        dVec3Element idx;
 
         if (abs_a1 > abs_a0) {
             if (abs_a2 > abs_a1) { // abs_a2 is the largest
-                idx = 2;
+                idx = dV3E_Z;
             }
             else {              // abs_a1 is the largest
-                idx = 1;
+                idx = dV3E_Y;
             }
         }
         else if (abs_a2 > abs_a0) {// abs_a2 is the largest
-            idx = 2;
+            idx = dV3E_Z;
         }
         else {              // aa[0] might be the largest
             if (!(abs_a0 > REAL(0.0))) { 
@@ -106,35 +124,35 @@ bool dxSafeNormalize3 (dVector3 a)
             }
 
             // abs_a0 is the largest
-            idx = 0;
+            idx = dV3E_X;
         }
 
-        if (idx == 0) {
+        if (idx == dV3E_X) {
             dReal aa0_recip = dRecip(abs_a0);
-            dReal a1 = a[1] * aa0_recip;
-            dReal a2 = a[2] * aa0_recip;
+            dReal a1 = a[dV3E_Y] * aa0_recip;
+            dReal a2 = a[dV3E_Z] * aa0_recip;
             dReal l = dRecipSqrt(REAL(1.0) + a1 * a1 + a2 * a2);
-            a[1] = a1 * l;
-            a[2] = a2 * l;
-            a[0] = dCopySign(l, a[0]);
+            a[dV3E_Y] = a1 * l;
+            a[dV3E_Z] = a2 * l;
+            a[dV3E_X] = dCopySign(l, a[dV3E_X]);
         }
-        else if (idx == 1) {
+        else if (idx == dV3E_Y) {
             dReal aa1_recip = dRecip(abs_a1);
-            dReal a0 = a[0] * aa1_recip;
-            dReal a2 = a[2] * aa1_recip;
+            dReal a0 = a[dV3E_X] * aa1_recip;
+            dReal a2 = a[dV3E_Z] * aa1_recip;
             dReal l = dRecipSqrt(REAL(1.0) + a0 * a0 + a2 * a2);
-            a[0] = a0 * l;
-            a[2] = a2 * l;
-            a[1] = dCopySign(l, a[1]);
+            a[dV3E_X] = a0 * l;
+            a[dV3E_Z] = a2 * l;
+            a[dV3E_Y] = dCopySign(l, a[dV3E_Y]);
         }
         else {
             dReal aa2_recip = dRecip(abs_a2);
-            dReal a0 = a[0] * aa2_recip;
-            dReal a1 = a[1] * aa2_recip;
+            dReal a0 = a[dV3E_X] * aa2_recip;
+            dReal a1 = a[dV3E_Y] * aa2_recip;
             dReal l = dRecipSqrt(REAL(1.0) + a0 * a0 + a1 * a1);
-            a[0] = a0 * l;
-            a[1] = a1 * l;
-            a[2] = dCopySign(l, a[2]);
+            a[dV3E_X] = a0 * l;
+            a[dV3E_Y] = a1 * l;
+            a[dV3E_Z] = dCopySign(l, a[dV3E_Z]);
         }
 
         ret = true;
@@ -164,19 +182,37 @@ void dNormalize3 (dVector3 a)
 }
 */
 
+/*extern */
+bool dxCouldBeNormalized4(const dVector4 a)
+{
+    dAASSERT (a);
+
+    bool ret = false;
+
+    for (unsigned axis = dV4E__MIN; axis != dV4E__MAX; ++axis) {
+        if (a[axis] != REAL(0.0)) {
+            ret = true;
+            break;
+        }
+    }
+
+    return ret;
+}
+
+/*extern */
 bool dxSafeNormalize4 (dVector4 a)
 {
     dAASSERT (a);
 
     bool ret = false;
 
-    dReal l = dCalcVectorDot3(a,a)+a[3]*a[3];
+    dReal l = a[dV4E_X] * a[dV4E_X] + a[dV4E_Y] * a[dV4E_Y] + a[dV4E_Z] * a[dV4E_Z] + a[dV4E_O] * a[dV4E_O];
     if (l > 0) {
         l = dRecipSqrt(l);
-        a[0] *= l;
-        a[1] *= l;
-        a[2] *= l;
-        a[3] *= l;
+        a[dV4E_X] *= l;
+        a[dV4E_Y] *= l;
+        a[dV4E_Z] *= l;
+        a[dV4E_O] *= l;
         
         ret = true;
     }
@@ -221,31 +257,56 @@ void dxPlaneSpace (const dVector3 n, dVector3 p, dVector3 q)
 * Note: this operates on rows, not columns, because for rotations
 * both ways give equivalent results.
 */
-void dxOrthogonalizeR(dMatrix3 m)
+bool dxOrthogonalizeR(dMatrix3 m)
 {
-    dReal n0 = dCalcVectorLengthSquare3(m);
-    if (n0 != REAL(1.0)) {
-        bool row0_norm_fault = !dxSafeNormalize3(m);
-        dICHECK(!row0_norm_fault);
-    }
+    bool ret = false;
 
-    // project row[0] on row[1], should be zero
-    dReal proj = dCalcVectorDot3(m, m+4);
-    if (proj != 0) {
-        // Gram-Schmidt step on row[1]
-        m[4] -= proj * m[0];
-        m[5] -= proj * m[1];
-        m[6] -= proj * m[2];
-    }
+    do {
+        if (!dxCouldBeNormalized3(m + dM3E__X_MIN)) {
+            break;
+        }
 
-    dReal n1 = dCalcVectorLengthSquare3(m+4);
-    if (n1 != REAL(1.0)) {
-        bool row1_norm_fault = !dxSafeNormalize3(m+4);
-        dICHECK(!row1_norm_fault);
-    }
+        dReal n0 = dCalcVectorLengthSquare3(m + dM3E__X_MIN);
 
-    /* just overwrite row[2], this makes sure the matrix is not
-    a reflection */
-    dCalcVectorCross3(m+8, m, m+4);
-    m[3] = m[4+3] = m[8+3] = 0;
+        dVector3 row2_store;
+        dReal *row2 = m + dM3E__Y_MIN;
+        // project row[0] on row[1], should be zero
+        dReal proj = dCalcVectorDot3(m + dM3E__X_MIN, m + dM3E__Y_MIN);
+        if (proj != 0) {
+            // Gram-Schmidt step on row[1]
+            dReal proj_div_n0 = proj / n0;
+            row2_store[dV3E_X] = m[dM3E__Y_MIN + dV3E_X] - proj_div_n0 * m[dM3E__X_MIN + dV3E_X] ;
+            row2_store[dV3E_Y] = m[dM3E__Y_MIN + dV3E_Y] - proj_div_n0 * m[dM3E__X_MIN + dV3E_Y];
+            row2_store[dV3E_Z] = m[dM3E__Y_MIN + dV3E_Z] - proj_div_n0 * m[dM3E__X_MIN + dV3E_Z];
+            row2 = row2_store;
+        }
+
+        if (!dxCouldBeNormalized3(row2)) {
+            break;
+        }
+
+        if (n0 != REAL(1.0)) {
+            bool row0_norm_fault = !dxSafeNormalize3(m + dM3E__X_MIN);
+            dIVERIFY(!row0_norm_fault);
+        }
+
+        dReal n1 = dCalcVectorLengthSquare3(row2);
+        if (n1 != REAL(1.0)) {
+            bool row1_norm_fault = !dxSafeNormalize3(row2);
+            dICHECK(!row1_norm_fault);
+        }
+
+        dIASSERT(dFabs(dCalcVectorDot3(m + dM3E__X_MIN, row2)) < 1e-6);
+
+        /* just overwrite row[2], this makes sure the matrix is not
+        a reflection */
+        dCalcVectorCross3(m + dM3E__Z_MIN, m + dM3E__X_MIN, row2);
+        
+        m[dM3E_XPAD] = m[dM3E_YPAD] = m[dM3E_ZPAD] = 0;
+
+        ret = true;
+    }
+    while (false);
+
+    return ret;
 }
