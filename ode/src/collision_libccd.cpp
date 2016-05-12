@@ -446,7 +446,8 @@ int dCollideCylinderCylinder(dxGeom *o1, dxGeom *o2, int flags, dContactGeom *co
 }
 
 static 
-int collideCylCyl(dxGeom *o1, dxGeom *o2, ccd_cyl_t* cyl1, ccd_cyl_t* cyl2, int flags, dContactGeom *contacts, int skip) {
+int collideCylCyl(dxGeom *o1, dxGeom *o2, ccd_cyl_t* cyl1, ccd_cyl_t* cyl2, int flags, dContactGeom *contacts, int skip) 
+{
     int maxContacts = (flags & NUMC_MASK);
     dAASSERT(maxContacts != 0);
 
@@ -523,7 +524,7 @@ int collideCylCyl(dxGeom *o1, dxGeom *o2, ccd_cyl_t* cyl1, ccd_cyl_t* cyl2, int 
                     dReal a = maxContactsRecip * i;
                     if (testAndPrepareDiscContactForAngle(a, rmin, lmin, lSum, minCyl, maxCyl, p, depth)) {
                         contactCount = addContact(o1, o2, &maxCyl->axis, contacts, &p, normaldir, depth, contactCount, flags, skip);
-                        if (flags & CONTACTS_UNIMPORTANT) {
+                        if ((flags & CONTACTS_UNIMPORTANT) != 0) {
                             dIASSERT(contactCount != 0);
                             break;
                         }
@@ -596,56 +597,52 @@ int collideCylCyl(dxGeom *o1, dxGeom *o2, ccd_cyl_t* cyl1, ccd_cyl_t* cyl2, int 
                 }
 
                 // Find contact point distribution ratio based on arcs lengths
-                dReal ratio = diffA * rmax  / (diffA  * rmax + diffB  * rmin);
-                ratio = dMin(ratio, REAL(1.0)); ratio = dMax(ratio, REAL(0.0));
+                dReal ratio = diffA * rmax  / (diffA * rmax + diffB  * rmin);
+                dIASSERT(ratio <= REAL(1.0)); 
+                dIASSERT(ratio >= REAL(0.0));
 
-                bool maxCouldBe0 = false;
                 int nMax = (int)dFloor(ratio * maxContacts + REAL(0.5));
                 int nMin = maxContacts - nMax;
                 dIASSERT(nMax <= maxContacts);
-                dIASSERT(nMax != 0); // ratio seems to be >= 0.5, so with maxContacts >= 1 it should result in nMax >= 1
 
-                if (nMin == 0) {
+                // Make sure there is at least one point on the smaller radius rim
+                if (nMin < 1) {
                     nMin = 1; nMax -= 1;
-                    maxCouldBe0 = true;
+                }
+                // Otherwise transfer one point to the larger radius rim as it is going to fill the rim intersection points
+                else if (nMin > 1) {
+                    nMin -= 1; nMax += 1;
                 }
 
-                if (maxCouldBe0 && 0 == nMax) {
-                    dIASSERT(maxContacts == 1);
-
-                    // Add a single contact in the middle of the larger disc
+                // Smaller disc first, skipping the overlapping points
+                dReal nMinRecip = 0 < nMin ? diffB / (nMin + 1) : diffB; // The 'else' value does not matter. Just try helping the optimizer.
+                for (int i = 1; i <= nMin; i++) {
                     dReal depth;
-                    dReal a = dReal(minA + diffA * REAL(0.5));
-                    if (testAndPrepareDiscContactForAngle(a, rmax, lmax, lSum, maxCyl, minCyl, p, depth)) {
+                    dReal a = minB + nMinRecip * i;
+                    if (testAndPrepareDiscContactForAngle(a, rmin, lmin, lSum, minCyl, maxCyl, p, depth)) {
                         contactCount = addContact(o1, o2, &maxCyl->axis, contacts, &p, normaldir, depth, contactCount, flags, skip);
-                    }
-                }
-                else {
-                    dReal nMaxRecip = diffA / nMax;
-
-                    // Larger disc first, + additional point as the start/end points of arcs overlap
-                    dIASSERT(nMax < maxContacts);
-                    for (int i = 0; i < nMax + 1; i++) {
-                        dReal depth;
-                        dReal a = minA + nMaxRecip * i;
-                        if (testAndPrepareDiscContactForAngle(a, rmax, lmax, lSum, maxCyl, minCyl, p, depth)) {
-                            contactCount = addContact(o1, o2, &maxCyl->axis, contacts, &p, normaldir, depth, contactCount, flags, skip);
-                            if (flags & CONTACTS_UNIMPORTANT) {
-                                dIASSERT(contactCount != 0);
-                                break;
-                            }
+                        if ((flags & CONTACTS_UNIMPORTANT) != 0) {
+                            dIASSERT(contactCount != 0);
+                            break;
                         }
                     }
                 }
 
-                if (!(flags & CONTACTS_UNIMPORTANT)) {
-                    // Smaller disc second, skipping the overlapping point
-                    dReal nMinRecip = 1 < nMin ? diffB / nMin : diffB; // The 'else' value does not matter. Just try helping the optimizer.
-                    for (int i = 1; i < nMin; i++) {
+                if (contactCount == 0 || (flags & CONTACTS_UNIMPORTANT) == 0) {
+                    // Then the larger disc, + additional point as the start/end points of arcs overlap
+                    // (or a single contact at the arc middle point if just one is required)
+                    dReal nMaxRecip = nMax > 1 ? diffA / (nMax - 1) : diffA; // The 'else' value does not matter. Just try helping the optimizer.
+                    dReal adjustedMinA = nMax == 1 ? minA + REAL(0.5) * diffA : minA;
+
+                    for (int i = 0; i < nMax; i++) {
                         dReal depth;
-                        dReal a = minB + nMinRecip * i;
-                        if (testAndPrepareDiscContactForAngle(a, rmin, lmin, lSum, minCyl, maxCyl, p, depth)) {
+                        dReal a = adjustedMinA + nMaxRecip * i;
+                        if (testAndPrepareDiscContactForAngle(a, rmax, lmax, lSum, maxCyl, minCyl, p, depth)) {
                             contactCount = addContact(o1, o2, &maxCyl->axis, contacts, &p, normaldir, depth, contactCount, flags, skip);
+                            if ((flags & CONTACTS_UNIMPORTANT) != 0) {
+                                dIASSERT(contactCount != 0);
+                                break;
+                            }
                         }
                     }
                 }
@@ -684,7 +681,8 @@ bool testAndPrepareDiscContactForAngle(dReal angle, dReal radius, dReal length, 
 
 static 
 int addContact(dxGeom *o1, dxGeom *o2, ccd_vec3_t* axis, dContactGeom *contacts,
-               ccd_vec3_t* p, dReal normaldir, dReal depth, int j, int flags, int skip) {
+               ccd_vec3_t* p, dReal normaldir, dReal depth, int j, int flags, int skip)
+{
     dIASSERT(depth >= 0);
 
     dContactGeom* contact = SAFECONTACT(flags, contacts, j, skip);
