@@ -610,23 +610,26 @@ bool AABBQuantizedTree::Build(AABBTree* tree)
 	// Quantize
 	{
 		mNodes = new AABBQuantizedNode[NbNodes];
-		CHECKALLOC(mNodes);
 
-		// Get max values
-		FIND_MAX_VALUES
-
-		// Quantization
-		INIT_QUANTIZATION
-
-		// Quantize
-		size_t Data;
-		for(udword i=0;i<NbNodes;i++)
+		if (mNodes != null)
 		{
-			PERFORM_QUANTIZATION
-			REMAP_DATA(mData, AABBCollisionNode)
+			// Get max values
+			FIND_MAX_VALUES
+
+			// Quantization
+			INIT_QUANTIZATION
+
+			// Quantize
+			size_t Data;
+			for(udword i=0;i<NbNodes;i++)
+			{
+				PERFORM_QUANTIZATION
+					REMAP_DATA(mData, AABBCollisionNode)
+			}
 		}
 
 		DELETEARRAY(Nodes);
+		CHECKALLOC(mNodes);
 	}
 
 	return true;
@@ -726,24 +729,27 @@ bool AABBQuantizedNoLeafTree::Build(AABBTree* tree)
 	// Quantize
 	{
 		mNodes = new AABBQuantizedNoLeafNode[NbNodes];
-		CHECKALLOC(mNodes);
 
-		// Get max values
-		FIND_MAX_VALUES
-
-		// Quantization
-		INIT_QUANTIZATION
-
-		// Quantize
-		size_t Data;
-		for(udword i=0;i<NbNodes;i++)
+		if (mNodes != null)
 		{
-			PERFORM_QUANTIZATION
-			REMAP_DATA(mPosData, AABBNoLeafNode)
-			REMAP_DATA(mNegData, AABBNoLeafNode)
+			// Get max values
+			FIND_MAX_VALUES
+
+			// Quantization
+			INIT_QUANTIZATION
+
+			// Quantize
+			size_t Data;
+			for(udword i=0;i<NbNodes;i++)
+			{
+				PERFORM_QUANTIZATION
+				REMAP_DATA(mPosData, AABBNoLeafNode)
+				REMAP_DATA(mNegData, AABBNoLeafNode)
+			}
 		}
 
 		DELETEARRAY(Nodes);
+		CHECKALLOC(mNodes);
 	}
 
 	return true;
