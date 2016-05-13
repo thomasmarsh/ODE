@@ -71,6 +71,15 @@
   #define ODE_EXTERN_C
 #endif
 
+#if defined(__GNUC__)
+#define ODE_NORETURN __attribute__((noreturn))
+#elif defined(_MSC_VER)
+#define ODE_NORETURN __declspec(noreturn)
+#else // #if !defined(_MSC_VER)
+#define ODE_NORETURN
+#endif // #if !defined(__GNUC__)
+
+
 /* Well-defined common data types...need to define for 64 bit systems */
 #if defined(_M_IA64) || defined(__ia64__) || defined(_M_AMD64) || defined(__x86_64__)
   #define X86_64_SYSTEM   1
