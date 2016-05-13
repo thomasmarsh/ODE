@@ -47,7 +47,11 @@
 		inline_	Container&		Add(udword entry)
 								{
 									// Resize if needed
-									if(mCurNbEntries==mMaxNbEntries)	Resize();
+									if (mCurNbEntries == mMaxNbEntries 
+										&& !Resize())
+									{
+										IceAbort();
+									}
 
 									// Add new entry
 									mEntries[mCurNbEntries++]	= entry;
@@ -57,7 +61,11 @@
 		inline_	Container&		Add(const uword* entries, udword nb)
 								{
 									// Resize if needed
-									if(mCurNbEntries+nb>mMaxNbEntries)	Resize(nb);
+									if (mCurNbEntries + nb > mMaxNbEntries
+										 && !Resize(nb))
+									{
+										IceAbort();
+									}
 
 									// Add new entry
 									CopyMemory(&mEntries[mCurNbEntries], entries, nb*sizeof(uword));
@@ -68,7 +76,11 @@
 		inline_	Container&		Add(const udword* entries, udword nb)
 								{
 									// Resize if needed
-									if(mCurNbEntries+nb>mMaxNbEntries)	Resize(nb);
+									if (mCurNbEntries + nb > mMaxNbEntries 
+										&& !Resize(nb))
+									{
+										IceAbort();
+									}
 
 									// Add new entry
 									CopyMemory(&mEntries[mCurNbEntries], entries, nb*sizeof(udword));
@@ -92,7 +104,11 @@
 		inline_	Container&		Add(float entry)
 								{
 									// Resize if needed
-									if(mCurNbEntries==mMaxNbEntries)	Resize();
+									if (mCurNbEntries == mMaxNbEntries
+										&& !Resize())
+									{
+										IceAbort();
+									}
 
 									// Add new entry
 									mEntries[mCurNbEntries++]	= IR(entry);
@@ -102,7 +118,11 @@
 		inline_	Container&		Add(const float* entries, udword nb)
 								{
 									// Resize if needed
-									if(mCurNbEntries+nb>mMaxNbEntries)	Resize(nb);
+									if (mCurNbEntries + nb > mMaxNbEntries
+										&& !Resize(nb))
+									{
+										IceAbort();
+									}
 
 									// Add new entry
 									CopyMemory(&mEntries[mCurNbEntries], entries, nb*sizeof(float));
