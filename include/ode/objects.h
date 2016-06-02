@@ -1962,16 +1962,38 @@ ODE_API void dJointAddSliderForce(dJointID joint, dReal force);
 ODE_API void dJointSetHinge2Anchor (dJointID, dReal x, dReal y, dReal z);
 
 /**
- * @brief set axis
+ * @brief set both axes (optionally)
+ *
+ * This can change both axes at once avoiding transitions via invalid states
+ * while changing axes one by one and having the first changed axis coincide 
+ * with the other axis existing direction.
+ *
+ * At least one of the axes must be not NULL. If NULL is passed, the corresponding 
+ * axis retains its existing value.
+ * 
  * @ingroup joints
  */
-ODE_API void dJointSetHinge2Axis1 (dJointID, dReal x, dReal y, dReal z);
+ODE_API void dJointSetHinge2Axes (dJointID j, const dReal *axis1/*=[dSA__MAX],=NULL*/, const dReal *axis2/*=[dSA__MAX],=NULL*/);
 
 /**
  * @brief set axis
+ *
+ * Deprecated. Use @fn dJointSetHinge2Axes instead.
+ * 
  * @ingroup joints
+ * @see dJointSetHinge2Axes
  */
-ODE_API void dJointSetHinge2Axis2 (dJointID, dReal x, dReal y, dReal z);
+ODE_API_DEPRECATED ODE_API void dJointSetHinge2Axis1 (dJointID j, dReal x, dReal y, dReal z);
+
+/**
+ * @brief set axis
+ *
+ * Deprecated. Use @fn dJointSetHinge2Axes instead.
+ * 
+ * @ingroup joints
+ * @see dJointSetHinge2Axes
+ */
+ODE_API_DEPRECATED ODE_API void dJointSetHinge2Axis2 (dJointID j, dReal x, dReal y, dReal z);
 
 /**
  * @brief set joint parameter

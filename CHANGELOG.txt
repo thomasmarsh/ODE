@@ -8,6 +8,11 @@ the rules for this file:
   * keep the format consistent (79 char width, M/D/Y date format).
 
 ------------------------------------------------------------------------------
+06/03/2016 Oleh Derevenko
+        * dJointSetHinge2Axes public function has been added and 
+          dJointSetHinge2Axis1/2 have been marked deprecated due to being 
+          unsafe.
+
 05/13/2016 Oleh Derevenko
         * ICE Container class allocation strategy fixed to avoid reserving 
           excess memory with large collections.

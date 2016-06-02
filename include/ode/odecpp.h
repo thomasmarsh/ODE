@@ -831,6 +831,8 @@ public:
     { dJointSetHinge2Anchor (get_id(), x, y, z); }
   void setAnchor (const dVector3 a)
     { setAnchor(a[0], a[1], a[2]); }
+  void setAxes (const dReal *axis1/*=NULL*/, const dReal *axis2/*=NULL*/)
+    {  dJointSetHinge2Axes (get_id(), axis1, axis2); }
   void setAxis1 (dReal x, dReal y, dReal z)
     { dJointSetHinge2Axis1 (get_id(), x, y, z); }
   void setAxis1 (const dVector3 a)
