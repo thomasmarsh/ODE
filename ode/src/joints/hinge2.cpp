@@ -234,6 +234,9 @@ dxJointHinge2::makeV1andV2()
             dMultiply1_331( v1, node[0].body->posr.R, ax2 );
             dMultiply1_331( v2, node[0].body->posr.R, v );
         }
+        else {
+            dUASSERT(false, "Hinge2 axes must be chosen to be linearly independent");
+        }
     }
 }
 
@@ -259,55 +262,71 @@ dxJointHinge2::makeW1andW2()
             dMultiply1_331( w1, node[1].body->posr.R, ax1 );
             dMultiply1_331( w2, node[1].body->posr.R, w );
         }
+        else {
+            dUASSERT(false, "Hinge2 axes must be chosen to be linearly independent");
+        }
     }
 }
 
 
+/*ODE_API */
 void dJointSetHinge2Anchor( dJointID j, dReal x, dReal y, dReal z )
 {
     dxJointHinge2* joint = ( dxJointHinge2* )j;
     dUASSERT( joint, "bad joint argument" );
     checktype( joint, Hinge2 );
+
     setAnchors( joint, x, y, z, joint->anchor1, joint->anchor2 );
+    
     joint->makeV1andV2();
     joint->makeW1andW2();
 }
 
 
+/*ODE_API */
+void dJointSetHinge2Axes (dJointID j, const dReal *axis1/*=[dSA__MAX],=NULL*/, const dReal *axis2/*=[dSA__MAX],=NULL*/)
+{
+    dxJointHinge2* joint = ( dxJointHinge2* )j;
+    dUASSERT( joint, "bad joint argument" );
+    checktype( joint, Hinge2 );
+
+    dAASSERT(axis1 != NULL || axis2 != NULL);
+    dAASSERT(joint->node[0].body != NULL || axis1 == NULL);
+    dAASSERT(joint->node[1].body != NULL || axis2 == NULL);
+
+    if ( axis1 != NULL )
+    {
+        setAxes(joint, axis1[dSA_X], axis1[dSA_Y], axis1[dSA_Z], joint->axis1, NULL);
+    }
+    
+    if ( axis2 != NULL )
+    {
+        setAxes(joint, axis2[dSA_X], axis2[dSA_Y], axis2[dSA_Z], NULL, joint->axis2);
+    }
+
+    // compute the sin and cos of the angle between axis 1 and axis 2
+    dVector3 ax1, ax2, ax;
+    joint->getAxisInfo( ax1, ax2, ax, joint->s0, joint->c0 );
+
+    joint->makeV1andV2();
+    joint->makeW1andW2();
+}
+
+
+/*ODE_API_DEPRECATED ODE_API */
 void dJointSetHinge2Axis1( dJointID j, dReal x, dReal y, dReal z )
 {
-    dxJointHinge2* joint = ( dxJointHinge2* )j;
-    dUASSERT( joint, "bad joint argument" );
-    checktype( joint, Hinge2 );
-    if ( joint->node[0].body )
-    {
-        setAxes(joint, x, y, z, joint->axis1, NULL);
-
-        // compute the sin and cos of the angle between axis 1 and axis 2
-        dVector3 ax1, ax2, ax;
-        joint->getAxisInfo( ax1, ax2, ax, joint->s0, joint->c0 );
-    }
-    joint->makeV1andV2();
-    joint->makeW1andW2();
+    dVector3 axis1;
+    axis1[dSA_X] = x; axis1[dSA_Y] = y; axis1[dSA_Z] = z;
+    dJointSetHinge2Axes(j, axis1, NULL);
 }
 
-
+/*ODE_API_DEPRECATED ODE_API */
 void dJointSetHinge2Axis2( dJointID j, dReal x, dReal y, dReal z )
 {
-    dxJointHinge2* joint = ( dxJointHinge2* )j;
-    dUASSERT( joint, "bad joint argument" );
-    checktype( joint, Hinge2 );
-    if ( joint->node[1].body )
-    {
-        setAxes(joint, x, y, z, NULL, joint->axis2);
-
-
-        // compute the sin and cos of the angle between axis 1 and axis 2
-        dVector3 ax1, ax2, ax;;
-        joint->getAxisInfo( ax1, ax2, ax, joint->s0, joint->c0 );
-    }
-    joint->makeV1andV2();
-    joint->makeW1andW2();
+    dVector3 axis2;
+    axis2[dSA_X] = x; axis2[dSA_Y] = y; axis2[dSA_Z] = z;
+    dJointSetHinge2Axes(j, NULL, axis2);
 }
 
 
