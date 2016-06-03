@@ -540,7 +540,9 @@ void dLCP::transfer_i_to_C (unsigned i)
             dReal *const Ltgt = m_L + (size_t)m_nskip * nC, *ell = m_ell;
             memcpy(Ltgt, ell, nC * sizeof(dReal));
 
-            m_d[nC] = dRecip (AROW(i)[i] - dxDot(m_ell,m_Dell,nC));
+            dReal ell_Dell_dot = dxDot(m_ell, m_Dell, nC);
+            dReal AROW_i_i = AROW(i)[i] != ell_Dell_dot ? AROW(i)[i] : dNextAfter(AROW(i)[i], dInfinity); // A hack to avoid getting a zero in the denominator
+            m_d[nC] = dRecip (AROW_i_i - ell_Dell_dot);
         }
         else {
             m_d[0] = dRecip (AROW(i)[i]);
@@ -579,12 +581,18 @@ void dLCP::transfer_i_from_N_to_C (unsigned i)
 #   endif
             }
             dxSolveL1 (m_L, m_Dell, nC, m_nskip);
-            {
-                dReal *const Ltgt = m_L + (size_t)m_nskip * nC;
-                dReal *ell = m_ell, *Dell = m_Dell, *d = m_d;
-                for (unsigned j = 0; j < nC; ++j) Ltgt[j] = ell[j] = Dell[j] * d[j];
+
+            dReal ell_Dell_dot = REAL(0.0);
+            dReal *const Ltgt = m_L + (size_t)m_nskip * nC;
+            dReal *ell = m_ell, *Dell = m_Dell, *d = m_d;
+            for (unsigned j = 0; j < nC; ++j) {
+                dReal ell_j, Dell_j = Dell[j];
+                Ltgt[j] = ell[j] = ell_j = Dell_j * d[j];
+                ell_Dell_dot += ell_j * Dell_j;
             }
-            m_d[nC] = dRecip (AROW(i)[i] - dxDot(m_ell, m_Dell, nC));
+            
+            dReal AROW_i_i = AROW(i)[i] != ell_Dell_dot ? AROW(i)[i] : dNextAfter(AROW(i)[i], dInfinity); // A hack to avoid getting a zero in the denominator
+            m_d[nC] = dRecip (AROW_i_i - ell_Dell_dot);
         }
         else {
             m_d[0] = dRecip (AROW(i)[i]);
