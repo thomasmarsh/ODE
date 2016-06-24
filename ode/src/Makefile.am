@@ -31,6 +31,7 @@ libode_la_SOURCES =     nextafterf.c \
                         collision_trimesh_disabled.cpp \
                         collision_trimesh_internal.h \
                         collision_util.cpp collision_util.h \
+                        common.h \
                         convex.cpp \
                         cylinder.cpp \
                         error.cpp error.h \

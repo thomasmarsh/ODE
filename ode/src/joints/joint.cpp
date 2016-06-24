@@ -64,6 +64,12 @@ dxJoint::~dxJoint()
 { }
 
 
+/*virtual */
+void dxJoint::setRelativeValues()
+{
+    // Do nothing
+}
+
 bool dxJoint::isEnabled() const
 {
     return ( (flags & dJOINT_DISABLED) == 0 &&
@@ -540,7 +546,7 @@ void dxJointLimitMotor::set( int num, dReal value )
 }
 
 
-dReal dxJointLimitMotor::get( int num )
+dReal dxJointLimitMotor::get( int num ) const
 {
     switch ( num )
     {
@@ -568,24 +574,24 @@ dReal dxJointLimitMotor::get( int num )
 }
 
 
-int dxJointLimitMotor::testRotationalLimit( dReal angle )
+bool dxJointLimitMotor::testRotationalLimit( dReal angle )
 {
     if ( angle <= lostop )
     {
         limit = 1;
         limit_err = angle - lostop;
-        return 1;
+        return true;
     }
     else if ( angle >= histop )
     {
         limit = 2;
         limit_err = angle - histop;
-        return 1;
+        return true;
     }
     else
     {
         limit = 0;
-        return 0;
+        return false;
     }
 }
 

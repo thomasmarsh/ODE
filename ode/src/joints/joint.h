@@ -25,6 +25,7 @@
 
 
 #include <ode/contact.h>
+#include "../common.h"
 #include "../objects.h"
 #include "../obstack.h"
 
@@ -47,6 +48,52 @@ enum
 
     dJOINT_DISABLED = 8
 };
+
+
+enum dJOINTCONNECTEDBODY
+{
+    dJCB__MIN,
+
+    dJCB_FIRST_BODY = dJCB__MIN,
+    dJCB_SECOND_BODY,
+
+    dJCB__MAX,
+
+};
+
+/* joint body relativity enumeration */
+enum dJOINTBODYRELATIVITY 
+{
+    dJBR__MIN,
+
+    dJBR_GLOBAL = dJBR__MIN,
+
+    dJBR__BODIES_MIN,
+
+    dJBR_BODY1 = dJBR__BODIES_MIN + dJCB_FIRST_BODY,
+    dJBR_BODY2 = dJBR__BODIES_MIN + dJCB_SECOND_BODY,
+
+    dJBR__BODIES_MAX = dJBR__BODIES_MIN + dJCB__MAX,
+
+    dJBR__MAX,
+
+    dJBR__DEFAULT = dJBR_GLOBAL,
+    dJBR__BODIES_COUNT = dJBR__BODIES_MAX - dJBR__BODIES_MIN,
+
+};
+
+ODE_PURE_INLINE int dJBREncodeBodyRelativityStatus(int relativity)
+{
+    return dIN_RANGE(relativity, dJBR__BODIES_MIN, dJBR__BODIES_MAX);
+}
+
+ODE_PURE_INLINE dJOINTBODYRELATIVITY dJBRSwapBodyRelativity(int relativity)
+{
+    dIASSERT(dIN_RANGE(relativity, dJBR__BODIES_MIN, dJBR__BODIES_MAX));
+    return (dJOINTBODYRELATIVITY)(dJBR_BODY1 + dJBR_BODY2 - relativity);
+}
+
+
 
 
 // there are two of these nodes in the joint, one for each connection to a
@@ -179,7 +226,7 @@ struct dxJoint : public dObject
 
     /// Set values which are relative with respect to bodies.
     /// Each dxJoint should redefine it if needed.
-    virtual void setRelativeValues() {};
+    virtual void setRelativeValues();
 
     // Test if this joint should be used in the simulation step
     // (has the enabled flag set, and is attached to at least one dynamic body)
@@ -234,8 +281,8 @@ struct dxJointLimitMotor
 
     void init( dxWorld * );
     void set( int num, dReal value );
-    dReal get( int num );
-    int testRotationalLimit( dReal angle );
+    dReal get( int num ) const;
+    bool testRotationalLimit( dReal angle );
 
     enum
     {
@@ -257,14 +304,6 @@ struct dxJointLimitMotor
         dReal *J1, dReal *J2, dReal *pairRhsCfm, dReal *pairLoHi,
         const dVector3 ax1, const dVector3 pt1, const dVector3 pt2 );
 };
-
-
-
-
-
-
-
-
 
 
 #endif
