@@ -1382,24 +1382,24 @@ void dJointAttach (dxJoint *joint, dxBody *body1, dxBody *body2)
 {
     // check arguments
     dUASSERT (joint,"bad joint argument");
-    dUASSERT (body1 == 0 || body1 != body2,"can't have body1==body2");
+    dUASSERT (body1 == NULL || body1 != body2, "can't have body1==body2");
     dxWorld *world = joint->world;
-    dUASSERT ( (!body1 || body1->world == world) &&
-        (!body2 || body2->world == world),
+    dUASSERT ( (body1 == NULL || body1->world == world) &&
+        (body2 == NULL || body2->world == world),
         "joint and bodies must be in same world");
 
     // check if the joint can not be attached to just one body
     dUASSERT (!((joint->flags & dJOINT_TWOBODIES) &&
-        ((body1 != 0) ^ (body2 != 0))),
+        ((body1 != NULL) != (body2 != NULL))),
         "joint can not be attached to just one body");
 
     // remove any existing body attachments
-    if (joint->node[0].body || joint->node[1].body) {
+    if (joint->node[0].body != NULL || joint->node[1].body != NULL) {
         removeJointReferencesFromAttachedBodies (joint);
     }
 
     // if a body is zero, make sure that it is body2, so 0 --> node[1].body
-    if (body1==0) {
+    if (body1 == NULL) {
         body1 = body2;
         body2 = 0;
         joint->flags |= dJOINT_REVERSE;
@@ -1411,24 +1411,29 @@ void dJointAttach (dxJoint *joint, dxBody *body1, dxBody *body2)
     // attach to new bodies
     joint->node[0].body = body1;
     joint->node[1].body = body2;
-    if (body1) {
+    
+    if (body1 != NULL) {
         joint->node[1].next = body1->firstjoint;
         body1->firstjoint = &joint->node[1];
     }
-    else joint->node[1].next = 0;
-    if (body2) {
+    else {
+        joint->node[1].next = NULL;
+    }
+    
+    if (body2 != NULL) {
         joint->node[0].next = body2->firstjoint;
         body2->firstjoint = &joint->node[0];
     }
     else {
-        joint->node[0].next = 0;
+        joint->node[0].next = NULL;
     }
 
     // Since the bodies are now set.
     // Calculate the values depending on the bodies.
     // Only need to calculate relative value if a body exist
-    if (body1 || body2)
+    if (body1 != NULL || body2 != NULL) {
         joint->setRelativeValues();
+    }
 }
 
 void dJointEnable (dxJoint *joint)
