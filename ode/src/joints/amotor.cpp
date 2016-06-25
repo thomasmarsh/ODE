@@ -212,7 +212,7 @@ dxJointAMotor::dxJointAMotor(dxWorld *w) :
     std::fill(m_rel, m_rel + dARRAY_SIZE(m_rel), dJBR__DEFAULT);
     { for (int i = 0; i != dARRAY_SIZE(m_axis); ++i) { dZeroVector3(m_axis[i]); } }
     { for (int i = 0; i != dARRAY_SIZE(m_limot); ++i) { m_limot[i].init(w); } }
-    std::fill(m_angle, m_angle + dARRAY_SIZE(m_angle), REAL(0));
+    std::fill(m_angle, m_angle + dARRAY_SIZE(m_angle), REAL(0.0));
     { for (int i = 0; i != dARRAY_SIZE(m_references); ++i) { dZeroVector3(m_references[i]); } }
 }
 
