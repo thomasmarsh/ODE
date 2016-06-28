@@ -8,6 +8,10 @@ the rules for this file:
   * keep the format consistent (79 char width, M/D/Y date format).
 
 ------------------------------------------------------------------------------
+06/29/2016 Oleh Derevenko
+        * A bug fixed with HashSpace calling big boxes collision twice 
+          (both straight and reverse geometries order) since revision #1831.
+
 06/03/2016 Oleh Derevenko
         * dJointSetHinge2Axes public function has been added and 
           dJointSetHinge2Axis1/2 have been marked deprecated due to being 
