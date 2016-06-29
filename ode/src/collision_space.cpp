@@ -592,7 +592,7 @@ void dxHashSpace::collide (void *data, dNearCallback *callback)
 
     // intersected all AABBs in the big_boxes list together
     for (AABBlist::iterator aabb = big_boxes.begin(); aabb != bigend; ++aabb) {
-        AABBlist::iterator aabb2 = aabb; // Allow aabb test with itself to collide subspaces. For body geometries, collideAABBs() is going to exit with no action.
+        AABBlist::iterator aabb2 = aabb;
         while (++aabb2 != bigend) {
             collideAABBs (aabb->geom, aabb2->geom, data, callback);
         }
