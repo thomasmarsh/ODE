@@ -44,6 +44,11 @@ internal data structures and functions for collision detection.
 #define IS_SPACE(geom) \
     ((geom)->type >= dFirstSpaceClass && (geom)->type <= dLastSpaceClass)
 
+#define CHECK_NOT_LOCKED(space) \
+    dUASSERT ((space) == NULL || (space)->lock_count == 0, \
+        "Invalid operation for locked space")
+
+
 //****************************************************************************
 // geometry object base class
 
@@ -159,6 +164,8 @@ struct dxGeom : public dBase {
         }
     }
 
+    inline void markAABBBad();
+
     // add and remove this geom from a linked list maintained by a space.
 
     void spaceAdd (dxGeom **first_ptr) {
@@ -244,6 +251,15 @@ struct dxSpace : public dxGeom {
     virtual void collide (void *data, dNearCallback *callback)=0;
     virtual void collide2 (void *data, dxGeom *geom, dNearCallback *callback)=0;
 };
+
+
+//////////////////////////////////////////////////////////////////////////
+
+/*inline */
+void dxGeom::markAABBBad() {
+    gflags |= (GEOM_DIRTY | GEOM_AABB_BAD);
+    CHECK_NOT_LOCKED(parent_space);
+}
 
 
 //****************************************************************************

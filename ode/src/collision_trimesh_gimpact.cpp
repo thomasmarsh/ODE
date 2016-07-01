@@ -288,7 +288,7 @@ void dGeomTriMeshSetData(dGeomID g, dTriMeshDataID Data)
     dxTriMesh* mesh = (dxTriMesh*) g;
     mesh->Data = Data;
     // I changed my data -- I know nothing about my own AABB anymore.
-    ((dxTriMesh*)g)->gflags |= (GEOM_DIRTY|GEOM_AABB_BAD);
+    ((dxTriMesh*)g)->markAABBBad();
 
     // GIMPACT only supports stride 12, so we need to catch the error early.
     dUASSERT

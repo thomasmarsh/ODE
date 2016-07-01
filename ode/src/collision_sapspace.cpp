@@ -405,8 +405,12 @@ void dxSAPSpace::cleanGeoms()
         if( IS_SPACE(g) ) {
             ((dxSpace*)g)->cleanGeoms();
         }
+        
         g->recomputeAABB();
-        g->gflags &= (~(GEOM_DIRTY|GEOM_AABB_BAD));
+        dIASSERT((g->gflags & GEOM_AABB_BAD) == 0);
+        
+        g->gflags &= ~GEOM_DIRTY;
+        
         // remove from dirty list, add to geom list
         GEOM_SET_DIRTY_IDX( g, GEOM_INVALID_IDX );
         GEOM_SET_GEOM_IDX( g, geomSize + i );

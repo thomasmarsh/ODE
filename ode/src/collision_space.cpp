@@ -60,8 +60,7 @@ void dGeomMoved (dxGeom *geom)
     dxSpace *parent = geom->parent_space;
 
     while (parent && (geom->gflags & GEOM_DIRTY)==0) {
-        CHECK_NOT_LOCKED (parent);
-        geom->gflags |= GEOM_DIRTY | GEOM_AABB_BAD;
+        geom->markAABBBad();
         parent->dirty (geom);
         geom = parent;
         parent = parent->parent_space;
@@ -70,8 +69,7 @@ void dGeomMoved (dxGeom *geom)
     // all the remaining dirty geoms must have their AABB_BAD flags set, to
     // ensure that their AABBs get recomputed
     while (geom) {
-        geom->gflags |= GEOM_DIRTY | GEOM_AABB_BAD;
-        CHECK_NOT_LOCKED (geom->parent_space);
+        geom->markAABBBad();
         geom = geom->parent_space;
     }
 }
@@ -176,10 +174,6 @@ void dxSpace::add (dxGeom *geom)
     // enumerator has been invalidated
     current_geom = 0;
 
-    // new geoms are added to the front of the list and are always
-    // considered to be dirty. as a consequence, this space and all its
-    // parents are dirty too.
-    geom->gflags |= GEOM_DIRTY | GEOM_AABB_BAD;
     dGeomMoved (this);
 }
 
@@ -239,8 +233,11 @@ void dxSimpleSpace::cleanGeoms()
         if (IS_SPACE(g)) {
             ((dxSpace*)g)->cleanGeoms();
         }
+
         g->recomputeAABB();
-        g->gflags &= (~(GEOM_DIRTY|GEOM_AABB_BAD));
+        dIASSERT((g->gflags & GEOM_AABB_BAD) == 0);
+
+        g->gflags &= ~GEOM_DIRTY;
     }
     lock_count--;
 }
@@ -411,8 +408,11 @@ void dxHashSpace::cleanGeoms()
         if (IS_SPACE(g)) {
             ((dxSpace*)g)->cleanGeoms();
         }
+
         g->recomputeAABB();
-        g->gflags &= (~(GEOM_DIRTY|GEOM_AABB_BAD));
+        dIASSERT((g->gflags & GEOM_AABB_BAD) == 0);
+        
+        g->gflags &= ~GEOM_DIRTY;
     }
     lock_count--;
 }
