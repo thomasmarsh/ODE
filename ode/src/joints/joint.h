@@ -50,7 +50,7 @@ enum
 };
 
 
-enum dJOINTCONNECTEDBODY
+enum dJointConnectedBody
 {
     dJCB__MIN,
 
@@ -62,7 +62,7 @@ enum dJOINTCONNECTEDBODY
 };
 
 /* joint body relativity enumeration */
-enum dJOINTBODYRELATIVITY 
+enum dJointBodyRelativity 
 {
     dJBR__MIN,
 
@@ -87,10 +87,10 @@ ODE_PURE_INLINE int dJBREncodeBodyRelativityStatus(int relativity)
     return dIN_RANGE(relativity, dJBR__BODIES_MIN, dJBR__BODIES_MAX);
 }
 
-ODE_PURE_INLINE dJOINTBODYRELATIVITY dJBRSwapBodyRelativity(int relativity)
+ODE_PURE_INLINE dJointBodyRelativity dJBRSwapBodyRelativity(int relativity)
 {
     dIASSERT(dIN_RANGE(relativity, dJBR__BODIES_MIN, dJBR__BODIES_MAX));
-    return (dJOINTBODYRELATIVITY)(dJBR_BODY1 + dJBR_BODY2 - relativity);
+    return (dJointBodyRelativity)(dJBR_BODY1 + dJBR_BODY2 - relativity);
 }
 
 

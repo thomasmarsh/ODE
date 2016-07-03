@@ -50,9 +50,9 @@ public:
     void setNumAxes(unsigned num);
     int getNumAxes() const { return m_num; }
 
-    dJOINTBODYRELATIVITY getAxisBodyRelativity(unsigned anum) const;
+    dJointBodyRelativity getAxisBodyRelativity(unsigned anum) const;
 
-    void setAxisValue(unsigned anum, dJOINTBODYRELATIVITY rel, dReal x, dReal y, dReal z);
+    void setAxisValue(unsigned anum, dJointBodyRelativity rel, dReal x, dReal y, dReal z);
     void getAxisValue(dVector3 result, unsigned anum) const;
 
 private:
@@ -88,7 +88,7 @@ private:
 private:
     unsigned m_num;                               // number of axes (0..3)
     int m_mode;                                   // a dAMotorXXX constant
-    dJOINTBODYRELATIVITY m_rel[dSA__MAX];         // what the axes are relative to (global,b1,b2)
+    dJointBodyRelativity m_rel[dSA__MAX];         // what the axes are relative to (global,b1,b2)
     dVector3 m_axis[dSA__MAX];                    // three axes
     dxJointLimitMotor m_limot[dJBR__MAX];         // limit+motor info for axes
     dReal m_angle[dSA__MAX];                      // user-supplied angles for axes
