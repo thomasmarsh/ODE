@@ -34,6 +34,8 @@ internal data structures and functions for collision detection.
 #include <ode/collision.h>
 #include "objects.h"
 #include "odetls.h"
+#include "common.h"
+
 
 //****************************************************************************
 // constants and macros
@@ -42,7 +44,7 @@ internal data structures and functions for collision detection.
 #define NUMC_MASK (0xffff)
 
 #define IS_SPACE(geom) \
-    ((geom)->type >= dFirstSpaceClass && (geom)->type <= dLastSpaceClass)
+    dIN_RANGE((geom)->type, dFirstSpaceClass, dLastSpaceClass + 1)
 
 #define CHECK_NOT_LOCKED(space) \
     dUASSERT ((space) == NULL || (space)->lock_count == 0, \
