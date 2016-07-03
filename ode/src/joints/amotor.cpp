@@ -53,7 +53,7 @@ void dJointSetAMotorAxis(dJointID j, int anum, int rel/*=dJOINTBODYRELATION*/,
 
     anum = dCLAMP(anum, dSA__MIN, dSA__MAX - 1);
 
-    joint->setAxisValue(anum, (dJOINTBODYRELATIVITY)rel, x, y, z);
+    joint->setAxisValue(anum, (dJointBodyRelativity)rel, x, y, z);
 }
 
 /*extern */
@@ -334,11 +334,11 @@ void dxJointAMotor::setNumAxes(unsigned num)
 }
 
 
-dJOINTBODYRELATIVITY dxJointAMotor::getAxisBodyRelativity(unsigned anum) const
+dJointBodyRelativity dxJointAMotor::getAxisBodyRelativity(unsigned anum) const
 {
     dAASSERT(dIN_RANGE(anum, dSA__MIN, dSA__MAX));
 
-    dJOINTBODYRELATIVITY rel = m_rel[anum];
+    dJointBodyRelativity rel = m_rel[anum];
     if ((this->flags & dJOINT_REVERSE) != 0 && dJBREncodeBodyRelativityStatus(rel))
     {
         rel = dJBRSwapBodyRelativity(rel); // turns 1 into 2, 2 into 1
@@ -348,7 +348,7 @@ dJOINTBODYRELATIVITY dxJointAMotor::getAxisBodyRelativity(unsigned anum) const
 }
 
 
-void dxJointAMotor::setAxisValue(unsigned anum, dJOINTBODYRELATIVITY rel, 
+void dxJointAMotor::setAxisValue(unsigned anum, dJointBodyRelativity rel, 
     dReal x, dReal y, dReal z)
 {
     dAASSERT(dIN_RANGE(anum, dSA__MIN, dSA__MAX));
