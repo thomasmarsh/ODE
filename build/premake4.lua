@@ -314,22 +314,28 @@
       "../ode/src/collision_std.cpp",
     }
 
+    includedirs { "../ou/include" }
+    files   { "../ou/include/**.h", "../ou/src/**.h", "../ou/src/**.cpp" }
+    defines { "_OU_NAMESPACE=odeou" }
+
+    if _OPTIONS["with-ou"] then
+      defines { "_OU_FEATURE_SET=_OU_FEATURE_SET_TLS" }
+    elseif not _OPTIONS["no-threading-intf"] then
+      defines { "_OU_FEATURE_SET=_OU_FEATURE_SET_ATOMICS" }
+    else
+      defines { "_OU_FEATURE_SET=_OU_FEATURE_SET_BASICS" }
+    end
+
     if _OPTIONS["with-ou"] or not _OPTIONS["no-threading-intf"] then
-      includedirs { "../ou/include" }
-      files   { "../ou/include/**.h", "../ou/src/**.h", "../ou/src/**.cpp" }
-      defines { "_OU_NAMESPACE=odeou" }
-
-      if _ACTION == "gmake" and ( os.get() == "linux" or os.get() == "bsd" ) then
-        buildoptions { "-pthread" }
-        linkoptions { "-pthread" }
+      if _ACTION == "gmake" then
+        if os.get() == "windows" then
+          buildoptions { "-mthreads" }
+          linkoptions { "-mthreads" }
+        else
+          buildoptions { "-pthread" }
+          linkoptions { "-pthread" }
+        end
       end
-
-      if _ACTION == "gmake" and os.get() == "windows" then
-        buildoptions { "-mthreads" }
-        linkoptions { "-mthreads" }
-      end
-
-      -- TODO: MacOSX probably needs something too
     end
 
       
@@ -416,8 +422,8 @@
       text = string.gsub(text, "#define dTRIMESH_OPCODE 1", "#define dTRIMESH_GIMPACT 1")
     end
 
+    text = string.gsub(text, "/%* #define dOU_ENABLED 1 %*/", "#define dOU_ENABLED 1")
     if _OPTIONS["with-ou"] or not _OPTIONS["no-threading-intf"] then
-      text = string.gsub(text, "/%* #define dOU_ENABLED 1 %*/", "#define dOU_ENABLED 1")
       text = string.gsub(text, "/%* #define dATOMICS_ENABLED 1 %*/", "#define dATOMICS_ENABLED 1")
     end
 

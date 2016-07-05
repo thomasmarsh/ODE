@@ -302,57 +302,74 @@ if test x$use_ou_tls = xyes -o x$threading_intf = xyes
 then
     use_ou="yes"
 fi
+
+OU_NAMESPACE=odeou
+AC_CONFIG_COMMANDS_POST([export OU_NAMESPACE=$OU_NAMESPACE])
+AC_DEFINE([_OU_NAMESPACE],[odeou],[libou namespace for ODE])
+AC_DEFINE([dOU_ENABLED],[1],[Generic OU features are enabled])
+
+if test x$use_ou_tls = xyes
+then
+    OU_FEATURE_SET=_OU_FEATURE_SET_TLS
+    AC_DEFINE([_OU_FEATURE_SET],[_OU_FEATURE_SET_TLS],[OU features enabled])
+elif test x$use_ou = xyes
+then
+    OU_FEATURE_SET=_OU_FEATURE_SET_ATOMICS
+    AC_DEFINE([_OU_FEATURE_SET],[_OU_FEATURE_SET_ATOMICS],[OU features enabled])
+else
+    OU_FEATURE_SET=_OU_FEATURE_SET_BASICS
+    AC_DEFINE([_OU_FEATURE_SET],[_OU_FEATURE_SET_BASICS],[OU features enabled])
+fi
+AC_CONFIG_COMMANDS_POST([export OU_FEATURE_SET=$OU_FEATURE_SET])
+
 if test x$use_ou = xyes
 then
-    OU_NAMESPACE=odeou
-    AC_CONFIG_COMMANDS_POST([export OU_NAMESPACE=odeou])
-    AC_DEFINE([_OU_NAMESPACE],[odeou],[libou namespace for ODE])
-    AC_DEFINE([dOU_ENABLED],[1],[Generic OU features are enabled])
     AC_DEFINE([dATOMICS_ENABLED],[1],[Atomic API of OU is enabled])
     if test x$use_ou_tls = xyes
     then
       AC_DEFINE([dTLS_ENABLED],[1],[Thread Local Storage API of OU is enabled])
     fi
-
-    case "$host_os" in
-      cygwin* | mingw*)
-        targetos=_OU_TARGET_OS_WINDOWS
-        ;;
-      *qnx*)
-        targetos=_OU_TARGET_OS_QNX
-        ;;
-      *apple* | *darwin*)
-        targetos=_OU_TARGET_OS_MAC
-        ;;
-      *sunos*)
-        targetos=_OU_TARGET_OS_SUNOS
-        ;;
-      *aix*)
-        targetos=_OU_TARGET_OS_AIX
-        ;;
-      *)
-        targetos=_OU_TARGET_OS_GENUNIX
-        ;;
-    esac
-
-    if test $targetos = _OU_TARGET_OS_MAC
-    then
-        MAC_OS_X_VERSION=1000
-        AC_CHECK_FUNC([OSAtomicAdd32Barrier], [MAC_OS_X_VERSION=1040])
-        AC_CHECK_FUNC([OSAtomicAnd32OrigBarrier], [MAC_OS_X_VERSION=1050])
-        AC_DEFINE_UNQUOTED(MAC_OS_X_VERSION, $MAC_OS_X_VERSION, [Mac OS X version setting for OU Library])
-    fi
-    
-    if test $targetos = _OU_TARGET_OS_SUNOS
-    then
-        AC_CHECK_FUNC(atomic_inc_32_nv, [],
-            [targetos=_OU_TARGET_OS_GENUNIX])
-    fi
-    
-    AC_DEFINE_UNQUOTED(_OU_TARGET_OS, $targetos, [Target OS setting for OU Library])
 fi
+
+case "$host_os" in
+  cygwin* | mingw*)
+    targetos=_OU_TARGET_OS_WINDOWS
+    ;;
+  *qnx*)
+    targetos=_OU_TARGET_OS_QNX
+    ;;
+  *apple* | *darwin*)
+    targetos=_OU_TARGET_OS_MAC
+    ;;
+  *sunos*)
+    targetos=_OU_TARGET_OS_SUNOS
+    ;;
+  *aix*)
+    targetos=_OU_TARGET_OS_AIX
+    ;;
+  *)
+    targetos=_OU_TARGET_OS_GENUNIX
+    ;;
+esac
+
+if test $targetos = _OU_TARGET_OS_MAC
+then
+    MAC_OS_X_VERSION=1000
+    AC_CHECK_FUNC([OSAtomicAdd32Barrier], [MAC_OS_X_VERSION=1040])
+    AC_CHECK_FUNC([OSAtomicAnd32OrigBarrier], [MAC_OS_X_VERSION=1050])
+    AC_DEFINE_UNQUOTED(MAC_OS_X_VERSION, $MAC_OS_X_VERSION, [Mac OS X version setting for OU Library])
+fi
+
+if test $targetos = _OU_TARGET_OS_SUNOS
+then
+    AC_CHECK_FUNC(atomic_inc_32_nv, [],
+        [targetos=_OU_TARGET_OS_GENUNIX])
+fi
+
+AC_DEFINE_UNQUOTED(_OU_TARGET_OS, $targetos, [Target OS setting for OU Library])
+
 AC_CONFIG_SUBDIRS([ou])
-AM_CONDITIONAL(ENABLE_OU, test x$use_ou = xyes)
+AM_CONDITIONAL(ENABLE_OU, true)
 
 if test x$threading_intf = xyes
 then
@@ -479,11 +496,7 @@ AC_ARG_ENABLE([asserts],
         asserts=$enableval,asserts=yes)
 if test x$asserts = xno
 then
-    CPPFLAGS="$CPPFLAGS -DdNODEBUG"
-    if test x$use_ou = xyes
-    then
-        CPPFLAGS="$CPPFLAGS -DNDEBUG"
-    fi
+    CPPFLAGS="$CPPFLAGS -DdNODEBUG -DNDEBUG"
 fi
 
 

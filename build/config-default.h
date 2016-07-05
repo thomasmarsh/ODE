@@ -120,7 +120,7 @@ typedef size_t intP;
 
 /* Basic OU functionality is required if either atomic API or TLS support
  * is enabled. */
-#if dATOMICS_ENABLED || dTLS_ENABLED
+#if (dATOMICS_ENABLED || dTLS_ENABLED) && !dOU_ENABLED
 #undef dOU_ENABLED
 #define dOU_ENABLED 1
 #endif
