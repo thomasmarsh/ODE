@@ -85,10 +85,13 @@ public:
 };
 
 
-#else // !dOU_ENABLED
+#endif 
+
+
+#if !dOU_ENABLED || !dATOMICS_ENABLED
 
 typedef unsigned int atomicord32;
-typedef size_t atomicptr;
+typedef void *atomicptr;
 
 
 #endif // dOU_ENABLED
