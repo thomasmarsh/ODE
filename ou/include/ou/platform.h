@@ -344,12 +344,12 @@
 
 #if _OU_COMPILER == _OU_COMPILER_GCC
 
-#define _OU_ALWAYSINLINE__DEFINITION __attribute__((always_inline))
+#define _OU_ALWAYSINLINE__DEFINITION inline __attribute__((always_inline))
 
 
 #elif _OU_COMPILER == _OU_COMPILER_MSVC
 
-#define _OU_ALWAYSINLINE__DEFINITION __forceinline
+#define _OU_ALWAYSINLINE__DEFINITION inline __forceinline
 
 
 #else // if _OU_COMPILER == _OU_COMPILER_OTHER
@@ -369,7 +369,7 @@
 
 #else // #if !defined(_DEBUG)
 
-#define _OU_ALWAYSINLINE inline _OU_ALWAYSINLINE__DEFINITION
+#define _OU_ALWAYSINLINE _OU_ALWAYSINLINE__DEFINITION
 
 #define _OU_INLINE inline
 
