@@ -93,6 +93,10 @@
  *	only.
  */
 
+#include <ou/features.h>
+
+
+#if _OU_FEATURE_SET >= _OU_FEATURE_SET_ATOMICS
 
 #include <ou/inttypes.h>
 #include <ou/namespace.h>
@@ -1687,6 +1691,8 @@ static _OU_INLINE void _OU_CONVENTION_API FinalizeAtomicAPI()
 
 END_NAMESPACE_OU();
 
+
+#endif // #if _OU_FEATURE_SET >= _OU_FEATURE_SET_ATOMICS
 
 
 #endif // #ifndef __OU_ATOMIC_H_INCLUDED
