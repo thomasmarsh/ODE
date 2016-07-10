@@ -8,6 +8,10 @@ the rules for this file:
   * keep the format consistent (79 char width, M/D/Y date format).
 
 ------------------------------------------------------------------------------
+07/10/2016 Oleh Derevenko
+        * The correct handling of dJOINT_REVERSE mode for AngularMotor Joint 
+          implemented (issue #37).
+
 06/29/2016 Oleh Derevenko
         * A bug fixed with HashSpace calling big boxes collision twice 
           (both straight and reverse geometries order) since revision #1831.

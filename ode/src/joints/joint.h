@@ -61,6 +61,15 @@ enum dJointConnectedBody
 
 };
 
+static inline 
+dJointConnectedBody EncodeJointOtherConnectedBody(dJointConnectedBody cbBodyKind)
+{
+    dIASSERT(dIN_RANGE(cbBodyKind, dJCB__MIN, dJCB__MAX));
+    dSASSERT(dJCB__MAX == 2);
+
+    return (dJointConnectedBody)(dJCB_FIRST_BODY + dJCB_SECOND_BODY - cbBodyKind);
+}
+
 /* joint body relativity enumeration */
 enum dJointBodyRelativity 
 {
@@ -191,6 +200,8 @@ struct dxJoint : public dObject
 
     dxJoint( dxWorld *w );
     virtual ~dxJoint();
+
+    bool GetIsJointReverse() const { return (this->flags & dJOINT_REVERSE) != 0; }
 
     virtual void getInfo1( Info1* info ) = 0;
 
