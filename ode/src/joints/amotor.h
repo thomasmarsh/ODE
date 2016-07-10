@@ -47,6 +47,9 @@ public:
     virtual size_t size() const;
 
 public:
+    void setOperationMode(int mode);
+    int getOperationMode() const { return m_mode; }
+
     void setNumAxes(unsigned num);
     int getNumAxes() const { return m_num; }
 
@@ -68,9 +71,6 @@ public:
     void setLimotParameter(unsigned anum, int limotParam, dReal value) { dAASSERT(dIN_RANGE(anum, dSA__MIN, dSA__MAX)); m_limot[anum].set(limotParam, value); }
     dReal getLimotParameter(unsigned anum, int limotParam) const { dAASSERT(dIN_RANGE(anum, dSA__MIN, dSA__MAX)); return m_limot[anum].get(limotParam); }
 
-    void setOperationMode(int mode);
-    int getOperationMode() const { return m_mode; }
-
 public:
     void addTorques(dReal torque1, dReal torque2, dReal torque3);
 
@@ -83,17 +83,21 @@ private:
     void setEulerReferenceVectors();
 
 private:
+    inline dSpaceAxis BuildFirstBodyEulerAxis() const;
+    inline dJointConnectedBody BuildFirstEulerAxisBody() const;
+
+private:
     friend struct dxAMotorJointPrinter;
 
 private:
-    unsigned m_num;                               // number of axes (0..3)
     int m_mode;                                   // a dAMotorXXX constant
+    unsigned m_num;                               // number of axes (0..3)
     dJointBodyRelativity m_rel[dSA__MAX];         // what the axes are relative to (global,b1,b2)
     dVector3 m_axis[dSA__MAX];                    // three axes
-    dxJointLimitMotor m_limot[dJBR__MAX];         // limit+motor info for axes
-    dReal m_angle[dSA__MAX];                      // user-supplied angles for axes
     // these vectors are used for calculating Euler angles
-    dVector3 m_references[dJCB__MAX];    // original axis[2], relative to body 1; original axis[0], relative to body 2
+    dVector3 m_references[dJCB__MAX];             // original axis[2], relative to body 1; original axis[0], relative to body 2
+    dReal m_angle[dSA__MAX];                      // user-supplied angles for axes
+    dxJointLimitMotor m_limot[dJBR__MAX];         // limit+motor info for axes
 };
 
 
