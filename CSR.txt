@@ -113,7 +113,7 @@ must be implemented as a method of that other class.
 ----------------------------------------------------------------------------
 
 All the work with class fields (including fields of own class) must be 
-performed with aid of dedicated methods (accessors) that return and asign 
+performed with aid of dedicated methods (accessors) that return and assign 
 field values. Exceptions can be made for constructors/destructors and methods
 dedicated to field initialization/finalization.
 
@@ -177,7 +177,7 @@ Following are general function structures encouraged to be used for coding
 all the program logic. Any algorithm with branching can be implemented
 with these types of functions.
 
-Using these function structures helps to make code clear and error-prone.
+Using these function structures helps to make code clear and error-proof.
 
 
 1. A Boolean Function
