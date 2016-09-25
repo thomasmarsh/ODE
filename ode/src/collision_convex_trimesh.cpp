@@ -57,26 +57,29 @@ int dCollideConvexTrimesh( dxGeom *o1, dxGeom *o2, int flags, dContactGeom* cont
 #if dLIBCCD_ENABLED
 
 #if dTRIMESH_OPCODE
-    const dVector3& tPosition = *(const dVector3*)dGeomGetPosition(o2);
+    const dVector3 &meshPosition = *(const dVector3 *)dGeomGetPosition(o2);
     // Find convex OBB in trimesh coordinates
-    Point min(o1->aabb[0] - tPosition[0], o1->aabb[2] - tPosition[1], o1->aabb[4] - tPosition[2]);
-    Point max(o1->aabb[1] - tPosition[0], o1->aabb[3] - tPosition[1], o1->aabb[5] - tPosition[2]);
-    OBB obbConvex;
-    obbConvex.mCenter.Set(0.5f * (max + min));
-    obbConvex.mExtents.Set(0.5f * (max - min));
-    obbConvex.mRot.Set(1, 0, 0, 0, 1, 0, 0, 0, 1);
+    Point convexAABBMin(o1->aabb[0] - meshPosition[0], o1->aabb[2] - meshPosition[1], o1->aabb[4] - meshPosition[2]);
+    Point convexAABBMax(o1->aabb[1] - meshPosition[0], o1->aabb[3] - meshPosition[1], o1->aabb[5] - meshPosition[2]);
+    
+    const Point convexCenter = 0.5f * (convexAABBMax + convexAABBMin);
+    const Point convexExtents = 0.5f * (convexAABBMax - convexAABBMin);
+    const Matrix3x3 convexRotation(1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f);
+    OBB convexOOB(convexCenter, convexExtents, convexRotation);
 
-    Matrix4x4 matrix;
-    const dMatrix3& tRotation = *(const dMatrix3*)dGeomGetRotation(o2);
-    const dVector3 ZeroVector3 = { REAL(0.0), };
-    MakeMatrix(ZeroVector3, tRotation, matrix);
+    Matrix4x4 meshTransformation;
+    const dMatrix3 &meshRotation = *(const dMatrix3 *)dGeomGetRotation(o2);
+    const dVector3 zeroVector = { REAL(0.0), };
+    MakeMatrix(zeroVector, meshRotation, meshTransformation);
+    
     OBBCollider collider;
     collider.SetFirstContact(false);
     collider.SetTemporalCoherence(false);
     collider.SetPrimitiveTests(false);
+    
     OBBCache cache;
     dxTriMesh *trimesh = (dxTriMesh *)o2;
-    if (collider.Collide(cache, obbConvex, trimesh->Data->BVTree, null, &matrix)) {
+    if (collider.Collide(cache, convexOOB, trimesh->Data->BVTree, null, &meshTransformation)) {
         int triCount = collider.GetNbTouchedPrimitives();
         if (triCount > 0) {
             int* triangles = (int*)collider.GetTouchedPrimitives();
