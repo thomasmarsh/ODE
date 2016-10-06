@@ -27,9 +27,7 @@
 #include "odemath.h"
 #include "collision_libccd.h"
 #include "collision_std.h"
-#if dTRIMESH_ENABLED
 #include "collision_util.h"
-#endif
 
 
 struct _ccd_obj_t {
@@ -298,7 +296,7 @@ static int ccdCollide(
     ccd.center1  = cen1;
     ccd.center2  = cen2;
     ccd.max_iterations = 500;
-    ccd.mpr_tolerance = 1E-6;
+    ccd.mpr_tolerance = (ccd_real_t)1E-6;
 
 
     if (flags & CONTACTS_UNIMPORTANT){
