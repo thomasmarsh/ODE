@@ -64,8 +64,8 @@ ODE_API void* dGeomTriMeshDataGet(dTriMeshDataID g, int data_id);
  * accurate collision response. These functions get and set that transform.
  * It is stored per geom instance, rather than per dTriMeshDataID.
  */
-ODE_API void dGeomTriMeshSetLastTransform( dGeomID g, dMatrix4 last_trans );
-ODE_API dReal* dGeomTriMeshGetLastTransform( dGeomID g );
+ODE_API void dGeomTriMeshSetLastTransform( dGeomID g, const dMatrix4 last_trans );
+ODE_API const dReal* dGeomTriMeshGetLastTransform( dGeomID g );
 
 /*
  * Build a TriMesh data object with single precision vertex data.

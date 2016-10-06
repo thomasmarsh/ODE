@@ -126,8 +126,21 @@ struct dxGeom : public dBase {
     // Get parent space TLS kind
     unsigned getParentSpaceTLSKind() const;
 
-    // calculate our new final position from our offset and body
-    void computePosr();
+    const dVector3 &buildUpdatedPosition()
+    {
+        dIASSERT(gflags & GEOM_PLACEABLE);
+        
+        recomputePosr();
+        return final_posr->pos;
+    }
+
+    const dMatrix3 &buildUpdatedRotation()
+    {
+        dIASSERT(gflags & GEOM_PLACEABLE);
+
+        recomputePosr();
+        return final_posr->R;
+    }
 
     // recalculate our new final position if needed
     void recomputePosr()
@@ -137,6 +150,9 @@ struct dxGeom : public dBase {
             gflags &= ~GEOM_POSR_BAD;
         }
     }
+
+    // calculate our new final position from our offset and body
+    void computePosr();
 
     bool checkControlValueSizeValidity(void *dataValue, int *dataSize, int iRequiresSize) { return (*dataSize == iRequiresSize && dataValue != 0) ? true : !(*dataSize = iRequiresSize); } // Here it is the intent to return true for 0 required size in any case
     virtual bool controlGeometry(int controlClass, int controlCode, void *dataValue, int *dataSize);

@@ -33,8 +33,11 @@
 #include "config.h"
 #endif
 
+
 #if dTRIMESH_ENABLED
+
 #include "collision_trimesh_internal.h"
+
 
 #if dTRIMESH_OPCODE
 
@@ -252,7 +255,7 @@ int dCollideSTL(dxGeom* g1, dxGeom* SphereGeom, int Flags, dContactGeom* Contact
     const unsigned uiTLSKind = TriMesh->getParentSpaceTLSKind();
     dIASSERT(uiTLSKind == SphereGeom->getParentSpaceTLSKind()); // The colliding spaces must use matching cleanup method
     TrimeshCollidersCache *pccColliderCache = GetTrimeshCollidersCache(uiTLSKind);
-    SphereCollider& Collider = pccColliderCache->_SphereCollider;
+    SphereCollider& Collider = pccColliderCache->m_SphereCollider;
 
     const dVector3& TLPosition = *(const dVector3*)dGeomGetPosition(TriMesh);
     const dMatrix3& TLRotation = *(const dMatrix3*)dGeomGetRotation(TriMesh);
@@ -274,30 +277,30 @@ int dCollideSTL(dxGeom* g1, dxGeom* SphereGeom, int Flags, dContactGeom* Contact
 
 
     // TC results
-    if (TriMesh->doSphereTC) {
+    if (TriMesh->getDoTC(dxTriMesh::TTC_SPHERE)) {
         dxTriMesh::SphereTC* sphereTC = 0;
-        const int sphereCacheSize = TriMesh->SphereTCCache.size();
+        const int sphereCacheSize = TriMesh->m_SphereTCCache.size();
         for (int i = 0; i != sphereCacheSize; i++){
-            if (TriMesh->SphereTCCache[i].Geom == SphereGeom){
-                sphereTC = &TriMesh->SphereTCCache[i];
+            if (TriMesh->m_SphereTCCache[i].Geom == SphereGeom){
+                sphereTC = &TriMesh->m_SphereTCCache[i];
                 break;
             }
         }
 
         if (!sphereTC) {
-            TriMesh->SphereTCCache.push(dxTriMesh::SphereTC());
+            TriMesh->m_SphereTCCache.push(dxTriMesh::SphereTC());
 
-            sphereTC = &TriMesh->SphereTCCache[TriMesh->SphereTCCache.size() - 1];
+            sphereTC = &TriMesh->m_SphereTCCache[TriMesh->m_SphereTCCache.size() - 1];
             sphereTC->Geom = SphereGeom;
         }
 
         // Intersect
         Collider.SetTemporalCoherence(true);
-        Collider.Collide(*sphereTC, Sphere, TriMesh->Data->BVTree, null, &MeshMatrix);
+        Collider.Collide(*sphereTC, Sphere, TriMesh->m_Data->m_BVTree, null, &MeshMatrix);
     }
     else {
         Collider.SetTemporalCoherence(false);
-        Collider.Collide(pccColliderCache->defaultSphereCache, Sphere, TriMesh->Data->BVTree, null, &MeshMatrix);
+        Collider.Collide(pccColliderCache->m_DefaultSphereCache, Sphere, TriMesh->m_Data->m_BVTree, null, &MeshMatrix);
     }
 
     if (! Collider.GetContactStatus()) {
@@ -310,8 +313,8 @@ int dCollideSTL(dxGeom* g1, dxGeom* SphereGeom, int Flags, dContactGeom* Contact
     const int* Triangles = (const int*)Collider.GetTouchedPrimitives();
 
     if (TriCount != 0){
-        if (TriMesh->ArrayCallback != null){
-            TriMesh->ArrayCallback(TriMesh, SphereGeom, Triangles, TriCount);
+        if (TriMesh->m_ArrayCallback != null){
+            TriMesh->m_ArrayCallback(TriMesh, SphereGeom, Triangles, TriCount);
         }
 
         int OutTriCount = 0;
@@ -323,10 +326,10 @@ int dCollideSTL(dxGeom* g1, dxGeom* SphereGeom, int Flags, dContactGeom* Contact
             const int TriIndex = Triangles[i];
 
             dVector3 dv[3];
-            if (!Callback(TriMesh, SphereGeom, TriIndex))
+            if (!TriMesh->invokeCallback(SphereGeom, TriIndex))
                 continue;
 
-            FetchTriangle(TriMesh, TriIndex, TLPosition, TLRotation, dv);
+            TriMesh->fetchMeshTriangle(dv, TriIndex, TLPosition, TLRotation);
 
             dVector3& v0 = dv[0];
             dVector3& v1 = dv[1];
@@ -427,7 +430,7 @@ int dCollideSTL(dxGeom* g1, dxGeom* SphereGeom, int Flags, dContactGeom* Contact
             OutTriCount++;
         }
         if (OutTriCount > 0){
-            if (TriMesh->SphereContactsMergeOption == MERGE_CONTACTS_FULLY) {
+            if (TriMesh->m_SphereContactsMergeOption == MERGE_CONTACTS_FULLY) {
                 dContactGeom* Contact = SAFECONTACT(Flags, Contacts, 0, Stride);
                 Contact->g1 = TriMesh;
                 Contact->g2 = SphereGeom;
@@ -458,7 +461,7 @@ int dCollideSTL(dxGeom* g1, dxGeom* SphereGeom, int Flags, dContactGeom* Contact
                         normal[1] += TempContact->normal[1] * TempContact->depth;
                         normal[2] += TempContact->normal[2] * TempContact->depth;
 
-                        TriIndex = (TriMesh->TriMergeCallback) ? TriMesh->TriMergeCallback(TriMesh, TriIndex, TempContact->side1) : -1;
+                        TriIndex = (TriMesh->m_TriMergeCallback) ? TriMesh->m_TriMergeCallback(TriMesh, TriIndex, TempContact->side1) : -1;
                     }
 
                     Contact->side1 = TriIndex;
@@ -496,7 +499,7 @@ int dCollideSTL(dxGeom* g1, dxGeom* SphereGeom, int Flags, dContactGeom* Contact
 
                 return 1;
             }
-            else if (TriMesh->SphereContactsMergeOption == MERGE_CONTACT_NORMALS) {
+            else if (TriMesh->m_SphereContactsMergeOption == MERGE_CONTACT_NORMALS) {
                 if (OutTriCount != 1 && !(Flags & CONTACTS_UNIMPORTANT)){
                     dVector3 Normal;
 
@@ -530,7 +533,7 @@ int dCollideSTL(dxGeom* g1, dxGeom* SphereGeom, int Flags, dContactGeom* Contact
                 return OutTriCount;
             }
             else {
-                dIASSERT(TriMesh->SphereContactsMergeOption == DONT_MERGE_CONTACTS);
+                dIASSERT(TriMesh->m_SphereContactsMergeOption == DONT_MERGE_CONTACTS);
                 return OutTriCount;
             }
         }
@@ -538,9 +541,17 @@ int dCollideSTL(dxGeom* g1, dxGeom* SphereGeom, int Flags, dContactGeom* Contact
     }
     else return 0;
 }
+
+
 #endif // dTRIMESH_OPCODE
 
+
 #if dTRIMESH_GIMPACT
+
+#include "gimpact_contact_export_helper.h"
+#include "gimpact_gim_contact_accessor.h"
+
+
 int dCollideSTL(dxGeom* g1, dxGeom* SphereGeom, int Flags, dContactGeom* Contacts, int Stride)
 {
     dIASSERT (Stride >= (int)sizeof(dContactGeom));
@@ -577,6 +588,9 @@ int dCollideSTL(dxGeom* g1, dxGeom* SphereGeom, int Flags, dContactGeom* Contact
 
     return (int)contactcount;
 }
+
+
 #endif // dTRIMESH_GIMPACT
+
 
 #endif // dTRIMESH_ENABLED

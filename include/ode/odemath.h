@@ -40,25 +40,33 @@
 #define dVALIDMAT4(m) (!(dIsNan(m[0]) || dIsNan(m[1]) || dIsNan(m[2]) || dIsNan(m[3]) || dIsNan(m[4]) || dIsNan(m[5]) || dIsNan(m[6]) || dIsNan(m[7]) || dIsNan(m[8]) || dIsNan(m[9]) || dIsNan(m[10]) || dIsNan(m[11]) || dIsNan(m[12]) || dIsNan(m[13]) || dIsNan(m[14]) || dIsNan(m[15]) ))
 
 
-ODE_PURE_INLINE void dZeroVector3(dReal *res)
+ODE_PURE_INLINE void dZeroVector3(dVector3 res)
 {
     res[dV3E_X] = REAL(0.0);
     res[dV3E_Y] = REAL(0.0);
     res[dV3E_Z] = REAL(0.0);
 }
 
-ODE_PURE_INLINE void dAssignVector3(dReal *res, dReal x, dReal y, dReal z)
+ODE_PURE_INLINE void dAssignVector3(dVector3 res, dReal x, dReal y, dReal z)
 {
     res[dV3E_X] = x;
     res[dV3E_Y] = y;
     res[dV3E_Z] = z;
 }
 
-ODE_PURE_INLINE void dZeroMatrix3(dReal *res)
+ODE_PURE_INLINE void dZeroMatrix3(dMatrix3 res)
 {
     res[dM3E_XX] = REAL(0.0); res[dM3E_XY] = REAL(0.0); res[dM3E_XZ] = REAL(0.0);
     res[dM3E_YX] = REAL(0.0); res[dM3E_YY] = REAL(0.0); res[dM3E_YZ] = REAL(0.0);
     res[dM3E_ZX] = REAL(0.0); res[dM3E_ZY] = REAL(0.0); res[dM3E_ZZ] = REAL(0.0);
+}
+
+ODE_PURE_INLINE void dZeroMatrix4(dMatrix4 res)
+{
+    res[dM4E_XX] = REAL(0.0); res[dM4E_XY] = REAL(0.0); res[dM4E_XZ] = REAL(0.0); res[dM4E_XO] = REAL(0.0);
+    res[dM4E_YX] = REAL(0.0); res[dM4E_YY] = REAL(0.0); res[dM4E_YZ] = REAL(0.0); res[dM4E_YO] = REAL(0.0);
+    res[dM4E_ZX] = REAL(0.0); res[dM4E_ZY] = REAL(0.0); res[dM4E_ZZ] = REAL(0.0); res[dM4E_ZO] = REAL(0.0);
+    res[dM4E_OX] = REAL(0.0); res[dM4E_OY] = REAL(0.0); res[dM4E_OZ] = REAL(0.0); res[dM4E_OO] = REAL(0.0);
 }
 
 /* Some vector math */

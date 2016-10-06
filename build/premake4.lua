@@ -345,16 +345,20 @@
     configuration { "no-trimesh" }
       excludes {
         "../ode/src/collision_trimesh_colliders.h",
-        "../ode/src/collision_trimesh_internal.h",
+        "../ode/src/gimpact_contact_export_helper.cpp",
+        "../ode/src/gimpact_contact_export_helper.h",
+        "../ode/src/gimpact_gim_contact_accessor.h",
+        "../ode/src/gimpact_plane_contact_accessor.h",
+        "../ode/src/collision_trimesh_internal.cpp",
         "../ode/src/collision_trimesh_opcode.cpp",
         "../ode/src/collision_trimesh_gimpact.cpp",
         "../ode/src/collision_trimesh_box.cpp",
         "../ode/src/collision_trimesh_ccylinder.cpp",
         "../ode/src/collision_cylinder_trimesh.cpp",
-        "../ode/src/collision_trimesh_distance.cpp",
         "../ode/src/collision_trimesh_ray.cpp",
         "../ode/src/collision_trimesh_sphere.cpp",
         "../ode/src/collision_trimesh_trimesh.cpp",
+        "../ode/src/collision_trimesh_trimesh_old.cpp",
         "../ode/src/collision_trimesh_plane.cpp",
         "../ode/src/collision_convex_trimesh.cpp"
       }
@@ -364,6 +368,20 @@
     
     configuration { "not no-trimesh", "not with-gimpact" }
       files   { "../OPCODE/**.h", "../OPCODE/**.cpp" }
+
+    configuration { "not no-trimesh", "not all-collis-libs", "with-gimpact" }
+      excludes {
+        "../ode/src/collision_trimesh_opcode.cpp"
+      }
+    
+    configuration { "not no-trimesh", "not all-collis-libs", "not with-gimpact" }
+      excludes {
+        "../ode/src/gimpact_contact_export_helper.cpp",
+        "../ode/src/gimpact_contact_export_helper.h",
+        "../ode/src/gimpact_gim_contact_accessor.h",
+        "../ode/src/gimpact_plane_contact_accessor.h",
+        "../ode/src/collision_trimesh_gimpact.cpp"
+      }
  
     configuration { "with-libccd" }
       files   { "../libccd/src/ccd/*.h", "../libccd/src/*.c" }

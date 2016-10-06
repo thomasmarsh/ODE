@@ -34,7 +34,9 @@
 #include "collision_std.h"
 #include "collision_trimesh_internal.h"
 
+
 #if dTRIMESH_OPCODE
+
 int dCollideTrimeshPlane( dxGeom *o1, dxGeom *o2, int flags, dContactGeom* contacts, int skip )
 {
     dIASSERT( skip >= (int)sizeof( dContactGeom ) );
@@ -72,20 +74,20 @@ int dCollideTrimeshPlane( dxGeom *o1, dxGeom *o2, int flags, dContactGeom* conta
     const unsigned uiTLSKind = trimesh->getParentSpaceTLSKind();
     dIASSERT(uiTLSKind == plane->getParentSpaceTLSKind()); // The colliding spaces must use matching cleanup method
     TrimeshCollidersCache *pccColliderCache = GetTrimeshCollidersCache(uiTLSKind);
-    VertexUseCache &vertex_use_cache = pccColliderCache->VertexUses;
+    VertexUseCache &vertex_use_cache = pccColliderCache->m_VertexUses;
 
     // Reallocate vertex use cache if necessary
-    const int vertex_count = trimesh->Data->Mesh.GetNbVertices();
-    const bool cache_status = vertex_use_cache.ResizeAndResetVertexUSEDFlags(vertex_count);
+    const int vertex_count = trimesh->m_Data->m_Mesh.GetNbVertices();
+    const bool cache_status = vertex_use_cache.resizeAndResetVertexUSEDFlags(vertex_count);
 
     // Cache the triangle count.
-    const int tri_count = trimesh->Data->Mesh.GetNbTriangles();
+    const int tri_count = trimesh->m_Data->m_Mesh.GetNbTriangles();
 
     // For each triangle
     for ( int t = 0; t < tri_count; ++t )
     {
         // Get triangle, which should also use callback.
-        bool ex_avail = trimesh->Data->Mesh.GetExTriangle( VPE, t, VC);
+        bool ex_avail = trimesh->m_Data->m_Mesh.GetExTriangle( VPE, t, VC);
 
         // For each vertex.
         for ( int v = 0; v < 3; ++v )
@@ -94,10 +96,10 @@ int dCollideTrimeshPlane( dxGeom *o1, dxGeom *o2, int flags, dContactGeom* conta
             if (cache_status && ex_avail)
             {
                 unsigned VIndex = VPE.Index[v];
-                if (vertex_use_cache.GetVertexUSEDFlag(VIndex))
+                if (vertex_use_cache.getVertexUSEDFlag(VIndex))
                     continue;
                 // mark this point as used
-                vertex_use_cache.SetVertexUSEDFlag(VIndex);
+                vertex_use_cache.setVertexUSEDFlag(VIndex);
             }
 
             //
@@ -164,9 +166,17 @@ int dCollideTrimeshPlane( dxGeom *o1, dxGeom *o2, int flags, dContactGeom* conta
     // Return contact count.
     return contact_count;
 }
+
+
 #endif // dTRIMESH_OPCODE
 
+
 #if dTRIMESH_GIMPACT
+
+#include "gimpact_contact_export_helper.h"
+#include "gimpact_plane_contact_accessor.h"
+
+
 int dCollideTrimeshPlane( dxGeom *o1, dxGeom *o2, int flags, dContactGeom* contacts, int skip )
 {
     dIASSERT( skip >= (int)sizeof( dContactGeom ) );
@@ -206,6 +216,8 @@ int dCollideTrimeshPlane( dxGeom *o1, dxGeom *o2, int flags, dContactGeom* conta
 
     return (int)contactcount;
 }
+
+
 #endif // dTRIMESH_GIMPACT
 
 
