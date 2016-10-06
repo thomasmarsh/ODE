@@ -30,6 +30,8 @@ libode_la_SOURCES =     nextafterf.c \
                         collision_trimesh_colliders.h \
                         collision_trimesh_disabled.cpp \
                         collision_trimesh_internal.h \
+                        collision_trimesh_opcode.h \
+                        collision_trimesh_gimpact.h \
                         collision_util.cpp collision_util.h \
                         common.h \
                         convex.cpp \
@@ -97,16 +99,18 @@ endif
 
 if GIMPACT
 AM_CPPFLAGS += -DdTRIMESH_ENABLED -DdTRIMESH_GIMPACT -I$(top_srcdir)/GIMPACT/include
-libode_la_SOURCES+= collision_trimesh_gimpact.cpp
 
 libode_la_LIBADD += $(top_builddir)/GIMPACT/src/libGIMPACT.la
-libode_la_SOURCES +=    collision_trimesh_trimesh.cpp \
+libode_la_SOURCES +=    collision_trimesh_gimpact.cpp \
+                        collision_trimesh_internal.cpp \
+                        gimpact_contact_export_helper.cpp gimpact_contact_export_helper.h \
+                        gimpact_gim_contact_accessor.h \
+                        gimpact_plane_contact_accessor.h \
+                        collision_trimesh_trimesh.cpp \
                         collision_trimesh_sphere.cpp \
                         collision_trimesh_ray.cpp \
-                        collision_trimesh_opcode.cpp \
                         collision_trimesh_box.cpp \
                         collision_trimesh_ccylinder.cpp \
-                        collision_trimesh_distance.cpp \
                         collision_trimesh_internal.h \
                         collision_cylinder_trimesh.cpp \
                         collision_trimesh_plane.cpp \
@@ -125,14 +129,14 @@ AM_CPPFLAGS += -I$(top_srcdir)/OPCODE -I$(top_srcdir)/OPCODE/Ice -DdTRIMESH_ENAB
 libode_la_LIBADD += $(top_builddir)/OPCODE/libOPCODE.la \
                     $(top_builddir)/OPCODE/Ice/libIce.la
 
-libode_la_SOURCES+=     collision_trimesh_trimesh.cpp \
-                        collision_trimesh_trimesh_new.cpp \
+libode_la_SOURCES+=     collision_trimesh_opcode.cpp \
+                        collision_trimesh_internal.cpp \
+                        collision_trimesh_trimesh.cpp \
+                        collision_trimesh_trimesh_old.cpp \
                         collision_trimesh_sphere.cpp \
                         collision_trimesh_ray.cpp \
-                        collision_trimesh_opcode.cpp \
                         collision_trimesh_box.cpp \
                         collision_trimesh_ccylinder.cpp \
-                        collision_trimesh_distance.cpp \
                         collision_trimesh_internal.h \
                         collision_cylinder_trimesh.cpp \
                         collision_trimesh_plane.cpp \

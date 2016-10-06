@@ -325,10 +325,11 @@ void dQuatInv(const dQuaternion& source, dQuaternion& dest)
 
     if (norm > 0.0f)
     {
-        dest[0] = source[0] / norm;
-        dest[1] = -source[1] / norm;
-        dest[2] = -source[2] / norm;
-        dest[3] = -source[3] / norm;	
+        dReal neg_norm_recip = -REAL(1.0) / norm;
+        dest[0] = -source[0] * neg_norm_recip;
+        dest[1] = source[1] * neg_norm_recip;
+        dest[2] = source[2] * neg_norm_recip;
+        dest[3] = source[3] * neg_norm_recip;	
     }
     else
     {
@@ -339,6 +340,19 @@ void dQuatInv(const dQuaternion& source, dQuaternion& dest)
         dest[3] = REAL(0.0);
     }
 }
+
+// Finds barycentric
+static inline 
+void GetPointFromBarycentric(const dVector3 dv[3], dReal u, dReal v, dVector3 Out){
+    dReal w = REAL(1.0) - u - v;
+
+    Out[0] = (dv[0][0] * w) + (dv[1][0] * u) + (dv[2][0] * v);
+    Out[1] = (dv[0][1] * w) + (dv[1][1] * u) + (dv[2][1] * v);
+    Out[2] = (dv[0][2] * w) + (dv[1][2] * u) + (dv[2][2] * v);
+    Out[3] = (dv[0][3] * w) + (dv[1][3] * u) + (dv[2][3] * v);
+}
+
+
 
 
 #endif

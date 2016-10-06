@@ -45,7 +45,7 @@ int dCollideRTL(dxGeom* g1, dxGeom* RayGeom, int Flags, dContactGeom* Contacts, 
     const unsigned uiTLSKind = TriMesh->getParentSpaceTLSKind();
     dIASSERT(uiTLSKind == RayGeom->getParentSpaceTLSKind()); // The colliding spaces must use matching cleanup method
     TrimeshCollidersCache *pccColliderCache = GetTrimeshCollidersCache(uiTLSKind);
-    RayCollider& Collider = pccColliderCache->_RayCollider;
+    RayCollider& Collider = pccColliderCache->m_RayCollider;
 
     dReal Length = dGeomRayGetLength(RayGeom);
 
@@ -78,30 +78,30 @@ int dCollideRTL(dxGeom* g1, dxGeom* RayGeom, int Flags, dContactGeom* Contacts, 
 
     /* Intersect */
     int TriCount = 0;
-    if (Collider.Collide(WorldRay, TriMesh->Data->BVTree, &MeshMatrix)) {
-        TriCount = pccColliderCache->Faces.GetNbFaces();
+    if (Collider.Collide(WorldRay, TriMesh->m_Data->m_BVTree, &MeshMatrix)) {
+        TriCount = pccColliderCache->m_Faces.GetNbFaces();
     }
 
     if (TriCount == 0) {
         return 0;
     }
 
-    const CollisionFace* Faces = pccColliderCache->Faces.GetFaces();
+    const CollisionFace* Faces = pccColliderCache->m_Faces.GetFaces();
 
     int OutTriCount = 0;
     for (int i = 0; i < TriCount; i++) {
-        if (TriMesh->RayCallback == null ||
-            TriMesh->RayCallback(TriMesh, RayGeom, Faces[i].mFaceID,
+        if (TriMesh->m_RayCallback == null ||
+            TriMesh->m_RayCallback(TriMesh, RayGeom, Faces[i].mFaceID,
             Faces[i].mU, Faces[i].mV)) {
                 const int& TriIndex = Faces[i].mFaceID;
-                if (!Callback(TriMesh, RayGeom, TriIndex)) {
+                if (!TriMesh->invokeCallback(RayGeom, TriIndex)) {
                     continue;
                 }
 
                 dContactGeom* Contact = SAFECONTACT(Flags, Contacts, OutTriCount, Stride);
 
                 dVector3 dv[3];
-                FetchTriangle(TriMesh, TriIndex, TLPosition, TLRotation, dv);
+                TriMesh->fetchMeshTriangle(dv, TriIndex, TLPosition, TLRotation);
 
                 dVector3 vu;
                 vu[0] = dv[1][0] - dv[0][0];
@@ -186,8 +186,8 @@ int dCollideRTL(dxGeom* g1, dxGeom* RayGeom, int Flags, dContactGeom* Contacts, 
     }
 
 
-    if(!TriMesh->RayCallback || 
-        TriMesh->RayCallback(TriMesh, RayGeom, contact_data.m_face_id, contact_data.u , contact_data.v))
+    if(!TriMesh->m_RayCallback || 
+        TriMesh->m_RayCallback(TriMesh, RayGeom, contact_data.m_face_id, contact_data.u , contact_data.v))
     {
         dContactGeom* Contact = &( Contacts[ 0 ] );
         VEC_COPY(Contact->pos,contact_data.m_point);

@@ -59,10 +59,12 @@
 #include "collision_trimesh_internal.h"
 #include "util.h"
 
+
 #if dTRIMESH_ENABLED
 
 // OPCODE version
 #if dTRIMESH_OPCODE
+
 // largest number, double or float
 #if defined(dSINGLE)
 #define MAX_REAL	FLT_MAX
@@ -995,30 +997,30 @@ static void dQueryCCTLPotentialCollisionTriangles(OBBCollider &Collider,
         mCapsuleRot[2], mCapsuleRot[6], mCapsuleRot[10]);
 
     // TC results
-    if (TriMesh->doBoxTC) {
+    if (TriMesh->getDoTC(dxTriMesh::TTC_BOX)) {
         dxTriMesh::BoxTC* BoxTC = 0;
-        const int iBoxCacheSize = TriMesh->BoxTCCache.size();
+        const int iBoxCacheSize = TriMesh->m_BoxTCCache.size();
         for (int i = 0; i != iBoxCacheSize; i++){
-            if (TriMesh->BoxTCCache[i].Geom == Capsule){
-                BoxTC = &TriMesh->BoxTCCache[i];
+            if (TriMesh->m_BoxTCCache[i].Geom == Capsule){
+                BoxTC = &TriMesh->m_BoxTCCache[i];
                 break;
             }
         }
         if (!BoxTC){
-            TriMesh->BoxTCCache.push(dxTriMesh::BoxTC());
+            TriMesh->m_BoxTCCache.push(dxTriMesh::BoxTC());
 
-            BoxTC = &TriMesh->BoxTCCache[TriMesh->BoxTCCache.size() - 1];
+            BoxTC = &TriMesh->m_BoxTCCache[TriMesh->m_BoxTCCache.size() - 1];
             BoxTC->Geom = Capsule;
             BoxTC->FatCoeff = 1.0f;
         }
 
         // Intersect
         Collider.SetTemporalCoherence(true);
-        Collider.Collide(*BoxTC, obbCapsule, TriMesh->Data->BVTree, null, &MeshMatrix);
+        Collider.Collide(*BoxTC, obbCapsule, TriMesh->m_Data->m_BVTree, null, &MeshMatrix);
     }
     else {
         Collider.SetTemporalCoherence(false);
-        Collider.Collide(BoxCache, obbCapsule, TriMesh->Data->BVTree, null, &MeshMatrix);
+        Collider.Collide(BoxCache, obbCapsule, TriMesh->m_Data->m_BVTree, null, &MeshMatrix);
     }
 }
 
@@ -1042,11 +1044,11 @@ int dCollideCCTL(dxGeom *o1, dxGeom *o2, int flags, dContactGeom *contact, int s
     const unsigned uiTLSKind = TriMesh->getParentSpaceTLSKind();
     dIASSERT(uiTLSKind == Capsule->getParentSpaceTLSKind()); // The colliding spaces must use matching cleanup method
     TrimeshCollidersCache *pccColliderCache = GetTrimeshCollidersCache(uiTLSKind);
-    OBBCollider& Collider = pccColliderCache->_OBBCollider;
+    OBBCollider& Collider = pccColliderCache->m_OBBCollider;
 
     // Will it better to use LSS here? -> confirm Pierre.
     dQueryCCTLPotentialCollisionTriangles(Collider, cData, 
-        TriMesh, Capsule, pccColliderCache->defaultBoxCache);
+        TriMesh, Capsule, pccColliderCache->m_DefaultBoxCache);
 
     if (Collider.GetContactStatus()) 
     {
@@ -1057,9 +1059,9 @@ int dCollideCCTL(dxGeom *o1, dxGeom *o2, int flags, dContactGeom *contact, int s
         {
             const int* Triangles = (const int*)Collider.GetTouchedPrimitives();
 
-            if (TriMesh->ArrayCallback != null)
+            if (TriMesh->m_ArrayCallback != null)
             {
-                TriMesh->ArrayCallback(TriMesh, Capsule, Triangles, TriCount);
+                TriMesh->m_ArrayCallback(TriMesh, Capsule, Triangles, TriCount);
             }
 
             // allocate buffer for local contacts on stack
@@ -1067,16 +1069,16 @@ int dCollideCCTL(dxGeom *o1, dxGeom *o2, int flags, dContactGeom *contact, int s
 
             unsigned int ctContacts0 = cData.m_ctContacts;
 
-            uint8* UseFlags = TriMesh->Data->UseFlags;
+            uint8* UseFlags = TriMesh->m_Data->m_UseFlags;
 
             // loop through all intersecting triangles
             for (int i = 0; i < TriCount; i++)
             {
                 const int Triint = Triangles[i];
-                if (!Callback(TriMesh, Capsule, Triint)) continue;
+                if (!TriMesh->invokeCallback(Capsule, Triint)) continue;
 
                 dVector3 dv[3];
-                FetchTriangle(TriMesh, Triint, cData.m_vTriMeshPos, cData.m_mTriMeshRot, dv);
+                TriMesh->fetchMeshTriangle(dv, Triint, cData.m_vTriMeshPos, cData.m_mTriMeshRot);
 
                 uint8 flags = UseFlags ? UseFlags[Triint] : (uint8)dxTriMeshData::kUseAll;
 
@@ -1098,11 +1100,19 @@ int dCollideCCTL(dxGeom *o1, dxGeom *o2, int flags, dContactGeom *contact, int s
 
     return nContactCount;
 }
+
+
 #endif
+
 
 // GIMPACT version
 #if dTRIMESH_GIMPACT
+
+#include "gimpact_contact_export_helper.h"
+#include "gimpact_gim_contact_accessor.h"
+
 #define nCAPSULE_AXIS 2
+
 // capsule - trimesh  By francisco leon
 int dCollideCCTL(dxGeom *o1, dxGeom *o2, int flags, dContactGeom *contact, int skip)
 {
@@ -1165,6 +1175,9 @@ int dCollideCCTL(dxGeom *o1, dxGeom *o2, int flags, dContactGeom *contact, int s
 
     return (int)contactcount;
 }
-#endif
+
+
+#endif // dTRIMESH_GIMPACT
+
 
 #endif // dTRIMESH_ENABLED

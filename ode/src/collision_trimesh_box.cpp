@@ -1233,30 +1233,30 @@ static void dQueryBTLPotentialCollisionTriangles(OBBCollider &Collider,
         mRotBox[2], mRotBox[6], mRotBox[10]);
 
     // TC results
-    if (TriMesh->doBoxTC) {
+    if (TriMesh->getDoTC(dxTriMesh::TTC_BOX)) {
         dxTriMesh::BoxTC* BoxTC = 0;
-        const int iBoxCacheSize = TriMesh->BoxTCCache.size();
+        const int iBoxCacheSize = TriMesh->m_BoxTCCache.size();
         for (int i = 0; i != iBoxCacheSize; i++){
-            if (TriMesh->BoxTCCache[i].Geom == BoxGeom){
-                BoxTC = &TriMesh->BoxTCCache[i];
+            if (TriMesh->m_BoxTCCache[i].Geom == BoxGeom){
+                BoxTC = &TriMesh->m_BoxTCCache[i];
                 break;
             }
         }
         if (!BoxTC){
-            TriMesh->BoxTCCache.push(dxTriMesh::BoxTC());
+            TriMesh->m_BoxTCCache.push(dxTriMesh::BoxTC());
 
-            BoxTC = &TriMesh->BoxTCCache[TriMesh->BoxTCCache.size() - 1];
+            BoxTC = &TriMesh->m_BoxTCCache[TriMesh->m_BoxTCCache.size() - 1];
             BoxTC->Geom = BoxGeom;
             BoxTC->FatCoeff = 1.1f; // Pierre recommends this, instead of 1.0
         }
 
         // Intersect
         Collider.SetTemporalCoherence(true);
-        Collider.Collide(*BoxTC, Box, TriMesh->Data->BVTree, null, &MeshMatrix);
+        Collider.Collide(*BoxTC, Box, TriMesh->m_Data->m_BVTree, null, &MeshMatrix);
     }
     else {
         Collider.SetTemporalCoherence(false);
-        Collider.Collide(BoxCache, Box, TriMesh->Data->BVTree, null, &MeshMatrix);
+        Collider.Collide(BoxCache, Box, TriMesh->m_Data->m_BVTree, null, &MeshMatrix);
     }
 }
 
@@ -1274,10 +1274,10 @@ int dCollideBTL(dxGeom* g1, dxGeom* BoxGeom, int Flags, dContactGeom* Contacts, 
     const unsigned uiTLSKind = TriMesh->getParentSpaceTLSKind();
     dIASSERT(uiTLSKind == BoxGeom->getParentSpaceTLSKind()); // The colliding spaces must use matching cleanup method
     TrimeshCollidersCache *pccColliderCache = GetTrimeshCollidersCache(uiTLSKind);
-    OBBCollider& Collider = pccColliderCache->_OBBCollider;
+    OBBCollider& Collider = pccColliderCache->m_OBBCollider;
 
     dQueryBTLPotentialCollisionTriangles(Collider, cData, TriMesh, BoxGeom,
-        pccColliderCache->defaultBoxCache);
+        pccColliderCache->m_DefaultBoxCache);
 
     if (!Collider.GetContactStatus()) {
         // no collision occurred
@@ -1289,8 +1289,8 @@ int dCollideBTL(dxGeom* g1, dxGeom* BoxGeom, int Flags, dContactGeom* Contacts, 
     const int* Triangles = (const int*)Collider.GetTouchedPrimitives();
 
     if (TriCount != 0){
-        if (TriMesh->ArrayCallback != null){
-            TriMesh->ArrayCallback(TriMesh, BoxGeom, Triangles, TriCount);
+        if (TriMesh->m_ArrayCallback != null){
+            TriMesh->m_ArrayCallback(TriMesh, BoxGeom, Triangles, TriCount);
         }
 
         // get destination hull position and orientation
@@ -1300,10 +1300,10 @@ int dCollideBTL(dxGeom* g1, dxGeom* BoxGeom, int Flags, dContactGeom* Contacts, 
         // loop through all intersecting triangles
         for (int i = 0; i < TriCount; i++){
             const int Triint = Triangles[i];
-            if (!Callback(TriMesh, BoxGeom, Triint)) continue;
+            if (!TriMesh->invokeCallback(BoxGeom, Triint)) continue;
 
             dVector3 dv[3];
-            FetchTriangle(TriMesh, Triint, vPosMesh, mRotMesh, dv);
+            TriMesh->fetchMeshTriangle(dv, Triint, vPosMesh, mRotMesh);
 
             bool bFinishSearching;
             cData.TestCollisionForSingleTriangle(Triint, dv, bFinishSearching);
