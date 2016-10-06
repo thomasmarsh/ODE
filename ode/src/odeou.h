@@ -57,6 +57,7 @@ ODE interface to OU library functions.
 
 
 using _OU_NAMESPACE::CEnumUnsortedElementArray;
+using _OU_NAMESPACE::CEnumSortedElementArray;
 
 #if dATOMICS_ENABLED
 using _OU_NAMESPACE::atomicord32;
