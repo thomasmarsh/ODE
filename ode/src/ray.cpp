@@ -643,7 +643,7 @@ int dCollideRayCylinder( dxGeom *o1, dxGeom *o2, int flags, dContactGeom *contac
                 tmp[2] = (flipDir)?-half_length:half_length;
                 tmpNorm[0]=0;
                 tmpNorm[1]=0;
-                tmpNorm[2]=(flipDir!=flipNormals)?-1:1;
+                tmpNorm[2]=(flipDir!=flipNormals)?-REAL(1.0):REAL(1.0);
                 checkCyl = 0;  // Short circuit cylinder check
             } else {
                 // Ray hits cap plane outside of cap circle
