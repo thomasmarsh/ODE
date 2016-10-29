@@ -167,31 +167,67 @@ struct TrimeshCollidersCache
 };
 
 
+typedef dxTriDataBase dxTriMeshData_Parent;
 struct dxTriMeshData:
-    public dxTriDataBase
+    public dxTriMeshData_Parent
 {
 public:
     dxTriMeshData():
-        dxTriDataBase(),
+        dxTriMeshData_Parent(),
         m_UseFlags(NULL)
     {
     }
 
     ~dxTriMeshData();
 
-    void build(const Point *Vertices, int VertexStide, unsigned VertexCount,
+    void buildData(const Point *Vertices, int VertexStide, unsigned VertexCount,
         const IndexedTriangle *Indices, unsigned IndexCount, int TriStride,
         const dReal *in_Normals,
         bool Single);
 
+private:
+    void dxTriMeshData::calculateDataAABB(dVector3 &AABBMax, dVector3 &AABBMin);
+    template<typename treal>
+    void templateCalculateDataAABB(dVector3 &AABBMax, dVector3 &AABBMin);
+
+public:
     /* Setup the UseFlags array */
-    void preprocess();
+    bool preprocessData();
+
+private:
+    bool meaningfulPreprocessData();
+
+    struct EdgeRecord
+    {
+    public:
+        void SetupEdge(dMeshTriangleVertex edgeIdx, int triIdx, const dTriIndex* vertIdxs);
+        const Point *GetOppositeVert(const Point *vertices[]) const;
+
+    public:
+        static int CompareEdges(const void* edge1, const void* edge2);
+
+    public:
+        int m_VertIdx1;	// Index into vertex array for this edges vertices
+        int m_VertIdx2;
+        int m_TriIdx;		// Index into triangle array for triangle this edge belongs to
+
+        uint8 m_EdgeFlags;	
+        uint8 m_Vert1Flags;
+        uint8 m_Vert2Flags;
+        bool m_Concave;
+    };
+
+    void meaningfulPreprocess_SetupEdgeRecords(EdgeRecord *records, size_t numEdges);
+    void meaningfulPreprocess_buildEdgeFlags(uint8 *useFlags, EdgeRecord *records, size_t numEdges);
+    void meaningfulPreprocess_markConcaves(uint8 *useFlags, EdgeRecord *records, size_t numEdges);
+
+public:
     /* For when app changes the vertices */
     void updateData();
 
 public:
-    void assignNormals(const dReal *normals) { m_Normals = normals; }
-    const dReal *retrieveNormals() const { return m_Normals; }
+    void assignNormals(const dReal *normals) { dxTriMeshData_Parent::assignNormals(normals); }
+    const dReal *retrieveNormals() const { return (const dReal *)dxTriMeshData_Parent::retrieveNormals(); }
 
     void assignUseFlagsBuffer(uint8 *buffer) { m_UseFlags = buffer; }
     uint8 *retrieveUseFlagsBuffer(unsigned &out_bufLen) const
@@ -209,7 +245,6 @@ public:
     dVector3 m_AABBExtents;
 
     // data for use in collision resolution
-    const dReal *m_Normals;
     uint8 *m_UseFlags;
 };
 

@@ -181,9 +181,10 @@ void dGeomTriMeshDataBuildSimple1(dTriMeshDataID g,
 
 
 /*extern */
-void dGeomTriMeshDataPreprocess(dTriMeshDataID g)
+int dGeomTriMeshDataPreprocess(dTriMeshDataID g)
 {
     // Do nothing
+    return 1;
 }
 
 /*extern */

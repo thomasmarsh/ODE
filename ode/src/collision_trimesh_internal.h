@@ -63,17 +63,33 @@ TrimeshCollidersCache *GetTrimeshCollidersCache(unsigned uiTLSKind)
 }
 
 
-
+typedef dBase dxTriDataBase_Parent;
 struct dxTriDataBase:
-    public dBase 
+    public dxTriDataBase_Parent
 {
 public:
-    dxTriDataBase()
+    dxTriDataBase():
+        dxTriDataBase_Parent(),
+        m_Vertices(NULL),
+        m_VertexStride(0),
+        m_VertexCount(0),
+        m_Indices(NULL),
+        m_TriangleCount(0),
+        m_TriStride(0),
+        m_Single(false)
     {
 #if !dTRIMESH_ENABLED
         dUASSERT(false, "dTRIMESH_ENABLED is not defined. Trimesh geoms will not work");
 #endif
     }
+
+    ~dxTriDataBase();
+
+    void buildData(const void *Vertices, int VertexStide, unsigned VertexCount, 
+        const void *Indices, unsigned IndexCount, int TriStride, 
+        const void *Normals, 
+        bool Single);
+
 
     /* Array of flags for which edges and vertices should be used on each triangle */
     enum m_UseFlags
@@ -87,8 +103,23 @@ public:
 
         kUseAll = 0xFF
     };
-};
 
+public:
+    void assignNormals(const void *normals) { m_Normals = normals; }
+    const void *retrieveNormals() const { return m_Normals; }
+
+public:
+    const void *m_Vertices;
+    int m_VertexStride;
+    unsigned m_VertexCount;
+    const void *m_Indices;
+    unsigned m_TriangleCount;
+    int m_TriStride;
+    bool m_Single;
+
+private:
+    const void *m_Normals;
+};
 
 
 typedef dxGeom dxMeshBase_Parent;

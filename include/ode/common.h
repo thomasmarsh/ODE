@@ -145,6 +145,8 @@ typedef enum {
     dV3E_PAD = dV3E__AXES_MAX,
 
     dV3E__MAX,
+
+    dV3E__AXES_COUNT = dV3E__AXES_MAX - dV3E__AXES_MIN,
 } dVec3Element;
 
 typedef enum {

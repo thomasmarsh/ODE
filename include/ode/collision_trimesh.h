@@ -44,6 +44,19 @@ extern "C" {
 struct dxTriMeshData;
 typedef struct dxTriMeshData* dTriMeshDataID;
 
+
+typedef enum 
+{
+    dMTV__MIN,
+
+    dMTV_FIRST = dMTV__MIN,
+    dMTV_SECOND,
+    dMTV_THIRD,
+
+    dMTV__MAX,
+
+} dMeshTriangleVertex;
+
 /*
  * These dont make much sense now, but they will later when we add more
  * features.
@@ -102,8 +115,11 @@ ODE_API void dGeomTriMeshDataBuildSimple1(dTriMeshDataID g,
                                   const dTriIndex* Indices, int IndexCount,
                                   const int* Normals);
 
-/* Preprocess the trimesh data to remove mark unnecessary edges and vertices */
-ODE_API void dGeomTriMeshDataPreprocess(dTriMeshDataID g);
+/* 
+ * Preprocess the trimesh data to remove mark unnecessary edges and vertices.
+ * The function returns a boolean status (may fail in case of insufficient memory)
+ */
+ODE_API int dGeomTriMeshDataPreprocess(dTriMeshDataID g);
 /* Get and set the internal preprocessed trimesh data buffer, for loading and saving */
 ODE_API void dGeomTriMeshDataGetBuffer(dTriMeshDataID g, unsigned char** buf, int* bufLen);
 ODE_API void dGeomTriMeshDataSetBuffer(dTriMeshDataID g, unsigned char* buf);
