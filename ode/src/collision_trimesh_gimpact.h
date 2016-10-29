@@ -50,31 +50,21 @@ struct TrimeshCollidersCache // Required for compatibility with OPCODE
 };
 
 
+typedef dxTriDataBase dxTriMeshData_Parent;
 struct dxTriMeshData:
-    public dxTriDataBase
+    public dxTriMeshData_Parent
 {
 public:
     dxTriMeshData():
-        dxTriDataBase(),
-        m_Vertices(NULL),
-        m_VertexStride(3 * sizeof(GREAL)),
-        m_VertexCount(0),
-        m_Indices(NULL),
-        m_TriangleCount(0),
-        m_TriStride(3 * sizeof(GINT32)),
-        m_single(true)
+        dxTriMeshData_Parent()
     {
     }
 
     ~dxTriMeshData() { /* Do nothing */ }
 
-    void build(const void *Vertices, int VertexStide, unsigned VertexCount, 
-        const void *Indices, unsigned IndexCount, int TriStride, 
-        const void *Normals, 
-        bool Single);
-
+    using dxTriMeshData_Parent::buildData;
     /* Setup the UseFlags array */
-    void preprocess() { /* Do nothing */ }
+    bool preprocessData() { /* Do nothing */ return true; }
     /* For when app changes the vertices */
     void updateData() { /* Do nothing */ }
 
@@ -109,14 +99,6 @@ public:
     //     out_triindices[2] = ind[2];
     // }
 
-public:
-    const uint8 *m_Vertices;
-    int m_VertexStride;
-    unsigned m_VertexCount;
-    const uint8 *m_Indices;
-    unsigned m_TriangleCount;
-    int m_TriStride;
-    bool m_single;
 };
 
 

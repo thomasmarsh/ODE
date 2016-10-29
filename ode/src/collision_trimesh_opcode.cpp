@@ -37,113 +37,6 @@
 
 
 //////////////////////////////////////////////////////////////////////////
-
-struct EdgeRecord
-{
-public:
-    void SetupEdge(int edgeIdx, int triIdx, const dTriIndex* vertIdxs);
-    const Point *GetOppositeVert(const Point *vertices[]) const;
-
-public:
-    static int CompareEdges(const void* edge1, const void* edge2);
-
-public:
-    int m_VertIdx1;	// Index into vertex array for this edges vertices
-    int m_VertIdx2;
-    int m_TriIdx;		// Index into triangle array for triangle this edge belongs to
-
-    uint8 m_EdgeFlags;	
-    uint8 m_Vert1Flags;
-    uint8 m_Vert2Flags;
-    bool m_Concave;
-};
-
-
-void EdgeRecord::SetupEdge(int edgeIdx, int triIdx, const dTriIndex* vertIdxs)
-{
-    if (edgeIdx < 1)
-    {
-        dIASSERT(edgeIdx == 0);
-
-        m_EdgeFlags  = dxTriMeshData::kEdge0;
-        m_Vert1Flags = dxTriMeshData::kVert0;
-        m_Vert2Flags = dxTriMeshData::kVert1;
-        m_VertIdx1 = vertIdxs[0];
-        m_VertIdx2 = vertIdxs[1];
-    }
-    else if (edgeIdx == 1)
-    {
-        m_EdgeFlags  = dxTriMeshData::kEdge1;
-        m_Vert1Flags = dxTriMeshData::kVert1;
-        m_Vert2Flags = dxTriMeshData::kVert2;
-        m_VertIdx1 = vertIdxs[1];
-        m_VertIdx2 = vertIdxs[2];
-    }
-    else
-    {
-        dIASSERT(edgeIdx == 2);
-
-        m_EdgeFlags  = dxTriMeshData::kEdge2;
-        m_Vert1Flags = dxTriMeshData::kVert2;
-        m_Vert2Flags = dxTriMeshData::kVert0;
-        m_VertIdx1 = vertIdxs[2];
-        m_VertIdx2 = vertIdxs[0];
-    }
-
-    // Make sure vert index 1 is less than index 2 (for easier sorting)
-    if (m_VertIdx1 > m_VertIdx2)
-    {
-        unsigned int tempIdx = m_VertIdx1;
-        m_VertIdx1 = m_VertIdx2;
-        m_VertIdx2 = tempIdx;
-
-        uint8 tempFlags = m_Vert1Flags;
-        m_Vert1Flags = m_Vert2Flags;
-        m_Vert2Flags = tempFlags;
-    }
-
-    m_TriIdx = triIdx;
-    m_Concave = false;
-}
-
-// Get the vertex opposite this edge in the triangle
-const Point *EdgeRecord::GetOppositeVert(const Point *vertices[]) const
-{
-    const Point *result;
-
-    if ((m_Vert1Flags == dxTriMeshData::kVert0 && m_Vert2Flags == dxTriMeshData::kVert1) ||
-        (m_Vert1Flags == dxTriMeshData::kVert1 && m_Vert2Flags == dxTriMeshData::kVert0))
-    {
-        result = vertices[2];
-    }
-    else if ((m_Vert1Flags == dxTriMeshData::kVert1 && m_Vert2Flags == dxTriMeshData::kVert2) ||
-        (m_Vert1Flags == dxTriMeshData::kVert2 && m_Vert2Flags == dxTriMeshData::kVert1))
-    {
-        result = vertices[0];
-    }
-    else
-    {
-        result = vertices[1];
-    }
-
-    return result;
-}
-
-
-// Edge comparison function for qsort
-/*static */
-int EdgeRecord::CompareEdges(const void* edge1, const void* edge2)
-{
-    const EdgeRecord *e1 = (const EdgeRecord *)edge1;
-    const EdgeRecord *e2 = (const EdgeRecord *)edge2;
-
-    return e1->m_VertIdx1 - e2->m_VertIdx1 == 0
-        ? e1->m_VertIdx2 - e2->m_VertIdx2
-        : e1->m_VertIdx1 - e2->m_VertIdx1;
-}
-
-
-//////////////////////////////////////////////////////////////////////////
 // TrimeshCollidersCache
 
 void TrimeshCollidersCache::initOPCODECaches()
@@ -194,122 +87,263 @@ void TrimeshCollidersCache::clearOPCODECaches()
 
 dxTriMeshData::~dxTriMeshData()
 {
-    if ( m_UseFlags )
+    if ( m_UseFlags != NULL )
     {
-        delete [] m_UseFlags;
+        const unsigned int numTris = m_Mesh.GetNbTriangles();
+        dFree(m_UseFlags, numTris * sizeof(m_UseFlags[0]));
     }
 }
 
-void dxTriMeshData::build(const Point *Vertices, int VertexStide, unsigned VertexCount,
+void dxTriMeshData::buildData(const Point *Vertices, int VertexStide, unsigned VertexCount,
     const IndexedTriangle *Indices, unsigned IndexCount, int TriStride,
     const dReal *in_Normals,
     bool Single)
 {
-    dAASSERT(IndexCount % 3 == 0);
+    dxTriMeshData_Parent::buildData(Vertices, VertexStide, VertexCount, Indices, IndexCount, TriStride, in_Normals, Single);
+    dAASSERT(IndexCount % dMTV__MAX == 0);
 
-    m_Mesh.SetNbTriangles(IndexCount / 3);
+    m_Mesh.SetNbTriangles(IndexCount / dMTV__MAX);
     m_Mesh.SetNbVertices(VertexCount);
     m_Mesh.SetPointers(Indices, Vertices);
     m_Mesh.SetStrides(TriStride, VertexStide);
     m_Mesh.SetSingle(Single);
 
     // Build tree
-    BuildSettings Settings;
     // recommended in Opcode User Manual
     //Settings.mRules = SPLIT_COMPLETE | SPLIT_SPLATTERPOINTS | SPLIT_GEOMCENTER;
     // used in ODE, why?
     //Settings.mRules = SPLIT_BEST_AXIS;
-
     // best compromise?
-    Settings.mRules = SPLIT_BEST_AXIS | SPLIT_SPLATTER_POINTS | SPLIT_GEOM_CENTER;
+    BuildSettings Settings(SPLIT_BEST_AXIS | SPLIT_SPLATTER_POINTS | SPLIT_GEOM_CENTER);
 
-
-    OPCODECREATE TreeBuilder;
-    TreeBuilder.mIMesh = &m_Mesh;
-
-    TreeBuilder.mSettings = Settings;
-    TreeBuilder.mNoLeaf = true;
-    TreeBuilder.mQuantized = false;
-
-    TreeBuilder.mKeepOriginal = false;
-    TreeBuilder.mCanRemap = false;
-
-
+    OPCODECREATE TreeBuilder(&m_Mesh, Settings, true, false);
 
     m_BVTree.Build(TreeBuilder);
 
     // compute model space AABB
     dVector3 AABBMax, AABBMin;
-    AABBMax[0] = AABBMax[1] = AABBMax[2] = (dReal) -dInfinity;
-    AABBMin[0] = AABBMin[1] = AABBMin[2] = (dReal) dInfinity;
-    if( Single ) {
-        const uint8 *verts = (const uint8 *)Vertices;
-        for( unsigned i = 0; i < VertexCount; ++i ) {
-            const float* v = (const float*)verts;
-            if( v[0] > AABBMax[0] ) AABBMax[0] = v[0];
-            if( v[1] > AABBMax[1] ) AABBMax[1] = v[1];
-            if( v[2] > AABBMax[2] ) AABBMax[2] = v[2];
-            if( v[0] < AABBMin[0] ) AABBMin[0] = v[0];
-            if( v[1] < AABBMin[1] ) AABBMin[1] = v[1];
-            if( v[2] < AABBMin[2] ) AABBMin[2] = v[2];
-            verts += VertexStide;
-        }
-    } else {
-        const uint8 *verts = (const uint8 *)Vertices;
-        for( unsigned i = 0; i < VertexCount; ++i ) {
-            const double* v = (const double*)verts;
-            if( v[0] > AABBMax[0] ) AABBMax[0] = (dReal) v[0];
-            if( v[1] > AABBMax[1] ) AABBMax[1] = (dReal) v[1];
-            if( v[2] > AABBMax[2] ) AABBMax[2] = (dReal) v[2];
-            if( v[0] < AABBMin[0] ) AABBMin[0] = (dReal) v[0];
-            if( v[1] < AABBMin[1] ) AABBMin[1] = (dReal) v[1];
-            if( v[2] < AABBMin[2] ) AABBMin[2] = (dReal) v[2];
-            verts += VertexStide;
-        }
-    }
-    m_AABBCenter[0] = (AABBMin[0] + AABBMax[0]) * REAL(0.5);
-    m_AABBCenter[1] = (AABBMin[1] + AABBMax[1]) * REAL(0.5);
-    m_AABBCenter[2] = (AABBMin[2] + AABBMax[2]) * REAL(0.5);
-    m_AABBExtents[0] = AABBMax[0] - m_AABBCenter[0];
-    m_AABBExtents[1] = AABBMax[1] - m_AABBCenter[1];
-    m_AABBExtents[2] = AABBMax[2] - m_AABBCenter[2];
+    calculateDataAABB(AABBMax, AABBMin);
+
+    dAddVectors3(m_AABBCenter, AABBMin, AABBMax);
+    dScaleVector3(m_AABBCenter, REAL(0.5));
+
+    dSubtractVectors3(m_AABBExtents, AABBMax, m_AABBCenter);
 
     // user data (not used by OPCODE)
-    m_Normals = in_Normals;
-
     dIASSERT(m_UseFlags == NULL);
 }
 
-void dxTriMeshData::preprocess()
+
+void dxTriMeshData::calculateDataAABB(dVector3 &AABBMax, dVector3 &AABBMin)
+{
+    if( m_Single ) 
+    {
+        templateCalculateDataAABB<float>(AABBMax, AABBMin);
+    } 
+    else 
+    {
+        templateCalculateDataAABB<double>(AABBMax, AABBMin);
+    }
+}
+
+template<typename treal>
+void dxTriMeshData::templateCalculateDataAABB(dVector3 &AABBMax, dVector3 &AABBMin)
+{
+    dIASSERT(m_Single == (sizeof(treal) == sizeof(float)));
+
+    const Point *Vertices = (const Point *)m_Vertices;
+    const int VertexStide = m_VertexStride;
+    const unsigned VertexCount = m_VertexCount;
+
+    AABBMax[dV3E_X] = AABBMax[dV3E_Y] = AABBMax[dV3E_Z] = -dInfinity;
+    AABBMin[dV3E_X] = AABBMin[dV3E_Y] = AABBMin[dV3E_Z] = dInfinity;
+    dSASSERT(dV3E__AXES_COUNT == 3);
+
+    const uint8 *verts = (const uint8 *)Vertices;
+    for( unsigned i = 0; i < VertexCount; ++i ) 
+    {
+        const treal *v = (const treal *)verts;
+        if( v[dSA_X] > AABBMax[dV3E_X] ) AABBMax[dV3E_X] = (dReal)v[dSA_X];
+        if( v[dSA_X] < AABBMin[dV3E_X] ) AABBMin[dV3E_X] = (dReal)v[dSA_X];
+        if( v[dSA_Y] > AABBMax[dV3E_Y] ) AABBMax[dV3E_Y] = (dReal)v[dSA_Y];
+        if( v[dSA_Y] < AABBMin[dV3E_Y] ) AABBMin[dV3E_Y] = (dReal)v[dSA_Y];
+        if( v[dSA_Z] > AABBMax[dV3E_Z] ) AABBMax[dV3E_Z] = (dReal)v[dSA_Z];
+        if( v[dSA_Z] < AABBMin[dV3E_Z] ) AABBMin[dV3E_Z] = (dReal)v[dSA_Z];
+        verts += VertexStide;
+    }
+}
+
+
+bool dxTriMeshData::preprocessData()
 {
     // If this mesh has already been preprocessed, exit
-    if (m_UseFlags)
-        return;
+    bool result = (m_UseFlags != NULL) || meaningfulPreprocessData();
+    return result;
+}
 
-    unsigned int numTris = m_Mesh.GetNbTriangles();
-    size_t numEdges = (size_t)numTris * 3;
+bool dxTriMeshData::meaningfulPreprocessData()
+{
+    dIASSERT(m_UseFlags == NULL);
 
-    m_UseFlags = new uint8[numTris];
-    memset(m_UseFlags, 0, sizeof(uint8) * numTris);
+    bool result = false;
 
-    EdgeRecord *records = new EdgeRecord[numEdges];
+    uint8 *useFlags/* = NULL*/;
+    size_t flagsMemoryRequired/* = 0*/;
+    bool flagsAllocated = false;
 
+    do 
+    {
+        const unsigned int numTris = m_Mesh.GetNbTriangles();
+        flagsMemoryRequired = numTris * sizeof(uint8);
+        useFlags = (uint8 *)dAlloc(flagsMemoryRequired);
+
+        if (useFlags == NULL)
+        {
+            break;
+        }
+
+        flagsAllocated = true;
+
+        size_t numEdges = (size_t)numTris * dMTV__MAX;
+        const size_t recordsMemoryRequired = numEdges * sizeof(EdgeRecord);
+        EdgeRecord *records = (EdgeRecord *)dAlloc(recordsMemoryRequired);
+        
+        if (records = NULL)
+        {
+            break;
+        }
+
+        memset(useFlags, 0, sizeof(useFlags[0]) * numTris);
+
+        meaningfulPreprocess_SetupEdgeRecords(records, numEdges);
+
+        // Sort the edges, so the ones sharing the same verts are beside each other
+        qsort(records, numEdges, sizeof(EdgeRecord), &EdgeRecord::CompareEdges);
+
+        meaningfulPreprocess_buildEdgeFlags(useFlags, records, numEdges);
+        meaningfulPreprocess_markConcaves(useFlags, records, numEdges);
+
+        dFree(records, recordsMemoryRequired);
+    	
+        m_UseFlags = useFlags;
+        result = true;
+    }
+    while (false);
+
+    if (!result)
+    {
+        if (flagsAllocated)
+        {
+            dFree(useFlags, flagsMemoryRequired);
+        }
+    }
+
+    return result;
+}
+
+
+void dxTriMeshData::EdgeRecord::SetupEdge(dMeshTriangleVertex edgeIdx, int triIdx, const dTriIndex* vertIdxs)
+{
+    if (edgeIdx < dMTV_SECOND)
+    {
+        dIASSERT(edgeIdx == dMTV_FIRST);
+
+        m_EdgeFlags  = dxTriMeshData::kEdge0;
+        m_Vert1Flags = dxTriMeshData::kVert0;
+        m_Vert2Flags = dxTriMeshData::kVert1;
+        m_VertIdx1 = vertIdxs[dMTV_FIRST];
+        m_VertIdx2 = vertIdxs[dMTV_SECOND];
+    }
+    else if (edgeIdx == dMTV_SECOND)
+    {
+        m_EdgeFlags  = dxTriMeshData::kEdge1;
+        m_Vert1Flags = dxTriMeshData::kVert1;
+        m_Vert2Flags = dxTriMeshData::kVert2;
+        m_VertIdx1 = vertIdxs[dMTV_SECOND];
+        m_VertIdx2 = vertIdxs[dMTV_THIRD];
+    }
+    else
+    {
+        dIASSERT(edgeIdx == dMTV_THIRD);
+
+        m_EdgeFlags  = dxTriMeshData::kEdge2;
+        m_Vert1Flags = dxTriMeshData::kVert2;
+        m_Vert2Flags = dxTriMeshData::kVert0;
+        m_VertIdx1 = vertIdxs[dMTV_THIRD];
+        m_VertIdx2 = vertIdxs[dMTV_FIRST];
+    }
+
+    // Make sure vertex index 1 is less than index 2 (for easier sorting)
+    if (m_VertIdx1 > m_VertIdx2)
+    {
+        unsigned int tempIdx = m_VertIdx1;
+        m_VertIdx1 = m_VertIdx2;
+        m_VertIdx2 = tempIdx;
+
+        uint8 tempFlags = m_Vert1Flags;
+        m_Vert1Flags = m_Vert2Flags;
+        m_Vert2Flags = tempFlags;
+    }
+
+    m_TriIdx = triIdx;
+    m_Concave = false;
+}
+
+// Get the vertex opposite this edge in the triangle
+const Point *dxTriMeshData::EdgeRecord::GetOppositeVert(const Point *vertices[]) const
+{
+    const Point *result;
+
+    if ((m_Vert1Flags == dxTriMeshData::kVert0 && m_Vert2Flags == dxTriMeshData::kVert1) ||
+        (m_Vert1Flags == dxTriMeshData::kVert1 && m_Vert2Flags == dxTriMeshData::kVert0))
+    {
+        result = vertices[2];
+    }
+    else if ((m_Vert1Flags == dxTriMeshData::kVert1 && m_Vert2Flags == dxTriMeshData::kVert2) ||
+        (m_Vert1Flags == dxTriMeshData::kVert2 && m_Vert2Flags == dxTriMeshData::kVert1))
+    {
+        result = vertices[0];
+    }
+    else
+    {
+        result = vertices[1];
+    }
+
+    return result;
+}
+
+
+// Edge comparison function for qsort
+/*static */
+int dxTriMeshData::EdgeRecord::CompareEdges(const void* edge1, const void* edge2)
+{
+    const EdgeRecord *e1 = (const EdgeRecord *)edge1;
+    const EdgeRecord *e2 = (const EdgeRecord *)edge2;
+
+    return e1->m_VertIdx1 - e2->m_VertIdx1 == 0
+        ? e1->m_VertIdx2 - e2->m_VertIdx2
+        : e1->m_VertIdx1 - e2->m_VertIdx1;
+}
+
+
+void dxTriMeshData::meaningfulPreprocess_SetupEdgeRecords(EdgeRecord *records, size_t numEdges)
+{
     // Make a list of every edge in the mesh
     const IndexedTriangle *tris = m_Mesh.GetTris();
     const unsigned tristride = m_Mesh.GetTriStride();
     unsigned triangleIdx = 0;
     for (size_t edgeIdx = 0; edgeIdx != numEdges; ++triangleIdx, edgeIdx += 3)
     {
-        records[edgeIdx + 0].SetupEdge(0, triangleIdx, tris->mVRef);
-        records[edgeIdx + 1].SetupEdge(1, triangleIdx, tris->mVRef);
-        records[edgeIdx + 2].SetupEdge(2, triangleIdx, tris->mVRef);
+        records[edgeIdx + dMTV_FIRST].SetupEdge(dMTV_FIRST, triangleIdx, tris->mVRef);
+        records[edgeIdx + dMTV_SECOND].SetupEdge(dMTV_SECOND, triangleIdx, tris->mVRef);
+        records[edgeIdx + dMTV_THIRD].SetupEdge(dMTV_THIRD, triangleIdx, tris->mVRef);
 
         tris = (const IndexedTriangle*)(((uint8 *)tris) + tristride);
     }
+}
 
-    // Sort the edges, so the ones sharing the same verts are beside each other
-    qsort(records, numEdges, sizeof(EdgeRecord), &EdgeRecord::CompareEdges);
-
+void dxTriMeshData::meaningfulPreprocess_buildEdgeFlags(uint8 *useFlags, EdgeRecord *records, size_t numEdges)
+{
     // Go through the sorted list of edges and flag all the edges and vertices that we need to use
     for (unsigned int i = 0; i < numEdges; i++)
     {
@@ -348,7 +382,7 @@ void dxTriMeshData::preprocess()
                 rec1->m_Concave = true;
             // If this is a convex edge, mark its vertices and edge as used
             else
-                m_UseFlags[rec1->m_TriIdx] |= rec1->m_Vert1Flags | rec1->m_Vert2Flags | rec1->m_EdgeFlags;
+                useFlags[rec1->m_TriIdx] |= rec1->m_Vert1Flags | rec1->m_Vert2Flags | rec1->m_EdgeFlags;
 
             // Skip the second edge
             i++;
@@ -356,10 +390,13 @@ void dxTriMeshData::preprocess()
         // This is a boundary edge
         else
         {
-            m_UseFlags[rec1->m_TriIdx] |= rec1->m_Vert1Flags | rec1->m_Vert2Flags | rec1->m_EdgeFlags;
+            useFlags[rec1->m_TriIdx] |= rec1->m_Vert1Flags | rec1->m_Vert2Flags | rec1->m_EdgeFlags;
         }
     }
+}
 
+void dxTriMeshData::meaningfulPreprocess_markConcaves(uint8 *useFlags, EdgeRecord *records, size_t numEdges)
+{
     // Go through the list once more, and take any edge we marked as concave and
     // clear it's vertices flags in any triangles they're used in
     for (unsigned int i = 0; i < numEdges; i++)
@@ -374,22 +411,22 @@ void dxTriMeshData::preprocess()
 
                 if (curER.m_VertIdx1 == er.m_VertIdx1 ||
                     curER.m_VertIdx1 == er.m_VertIdx2)
-                    m_UseFlags[curER.m_TriIdx] &= ~curER.m_Vert1Flags;
+                    useFlags[curER.m_TriIdx] &= ~curER.m_Vert1Flags;
 
                 if (curER.m_VertIdx2 == er.m_VertIdx1 ||
                     curER.m_VertIdx2 == er.m_VertIdx2)
-                    m_UseFlags[curER.m_TriIdx] &= ~curER.m_Vert2Flags;
+                    useFlags[curER.m_TriIdx] &= ~curER.m_Vert2Flags;
             }
         }
     }
-
-    delete [] records;
 }
+
 
 void dxTriMeshData::updateData()
 {
     m_BVTree.Refit();
 }
+
 
 
 //////////////////////////////////////////////////////////////////////////
@@ -658,7 +695,7 @@ void dGeomTriMeshDataBuildSingle1(dTriMeshDataID g,
     dUASSERT(g, "The argument is not a trimesh data");
 
     dxTriMeshData *data = g;
-    data->build((const Point *)Vertices, VertexStride, VertexCount, 
+    data->buildData((const Point *)Vertices, VertexStride, VertexCount, 
         (const IndexedTriangle *)Indices, IndexCount, TriStride, 
         (const dReal *)Normals, 
         true);
@@ -672,7 +709,7 @@ void dGeomTriMeshDataBuildDouble1(dTriMeshDataID g,
 {
     dUASSERT(g, "The argument is not a trimesh data");
 
-    g->build((const Point *)Vertices, VertexStride, VertexCount, 
+    g->buildData((const Point *)Vertices, VertexStride, VertexCount, 
         (const IndexedTriangle *)Indices, IndexCount, TriStride, 
         (const dReal *)Normals, 
         false);

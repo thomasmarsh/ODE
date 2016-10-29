@@ -141,8 +141,8 @@ dCollideTTL(dxGeom* g1, dxGeom* g2, int Flags, dContactGeom* Contacts, int Strid
     dxTriMesh* TriMesh1 = (dxTriMesh*) g1;
     dxTriMesh* TriMesh2 = (dxTriMesh*) g2;
 
-    dReal * TriNormals1 = (dReal *) TriMesh1->m_Data->m_Normals;
-    dReal * TriNormals2 = (dReal *) TriMesh2->m_Data->m_Normals;
+    const dReal* TriNormals1 = TriMesh1->m_Data->retrieveNormals();
+    const dReal* TriNormals2 = TriMesh2->m_Data->retrieveNormals();
 
     const dVector3& TLPosition1 = *(const dVector3*) dGeomGetPosition(TriMesh1);
     // TLRotation1 = column-major order

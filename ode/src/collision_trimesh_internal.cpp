@@ -35,6 +35,37 @@
 
 //////////////////////////////////////////////////////////////////////////
 
+dxTriDataBase::~dxTriDataBase()
+{
+}
+
+
+void dxTriDataBase::buildData(const void *Vertices, int VertexStride, unsigned VertexCount,
+    const void *Indices, unsigned IndexCount, int TriStride,
+    const void *Normals,
+    bool Single)
+{
+    dIASSERT(Vertices);
+    dIASSERT(Indices);
+    dIASSERT(VertexStride);
+    dIASSERT(TriStride);
+    dIASSERT(IndexCount);
+    dIASSERT(IndexCount % dMTV__MAX == 0);
+
+    m_Vertices = Vertices;
+    m_VertexStride = VertexStride;
+    m_VertexCount = VertexCount;
+    m_Indices = Indices;
+    m_TriangleCount = IndexCount / dMTV__MAX;
+    m_TriStride = TriStride;
+    m_Single = Single;
+
+    m_Normals = Normals;
+}
+
+
+//////////////////////////////////////////////////////////////////////////
+
 /*extern */
 void dGeomTriMeshDataBuildSimple1(dTriMeshDataID g,
     const dReal* Vertices, int VertexCount, 
@@ -84,12 +115,12 @@ void dGeomTriMeshDataBuildSimple(dTriMeshDataID g,
 
 
 /*extern */
-void dGeomTriMeshDataPreprocess(dTriMeshDataID g)
+int dGeomTriMeshDataPreprocess(dTriMeshDataID g)
 {
     dUASSERT(g, "The argument is not a trimesh data");
 
     dxTriMeshData *data = g;
-    data->preprocess();
+    return data->preprocessData();
 }
 
 /*extern */

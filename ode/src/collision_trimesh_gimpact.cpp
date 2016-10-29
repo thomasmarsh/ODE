@@ -33,28 +33,6 @@
 #include "collision_trimesh_gimpact.h"
 
 
-void dxTriMeshData::build(const void *Vertices, int VertexStride, unsigned VertexCount,
-    const void *Indices, unsigned IndexCount, int TriStride,
-    const void *Normals,
-    bool Single)
-{
-    dIASSERT(Vertices);
-    dIASSERT(Indices);
-    dIASSERT(VertexStride);
-    dIASSERT(TriStride);
-    dIASSERT(IndexCount);
-    dIASSERT(IndexCount % 3 == 0);
-
-    m_Vertices = (const uint8 *)Vertices;
-    m_VertexStride = VertexStride;
-    m_VertexCount = VertexCount;
-    m_Indices = (const uint8 *)Indices;
-    m_TriangleCount = IndexCount / 3;
-    m_TriStride = TriStride;
-    m_single = Single;
-}
-
-
 //////////////////////////////////////////////////////////////////////////
 
 // Trimesh
@@ -101,10 +79,10 @@ void dxTriMesh::assignMeshData(dxTriMeshData *Data)
         gim_trimesh_create_from_data(
             m_buffer_managers,
             &m_collision_trimesh,		        // gimpact mesh
-            (vec3f *)(&Data->m_Vertices[0]),	// vertices
+            (vec3f *)Data->m_Vertices,	        // vertices
             Data->m_VertexCount,		        // nr of verts
             0,					                // copy verts?
-            (GUINT32 *)(&Data->m_Indices[0]),	// indices
+            (GUINT32 *)Data->m_Indices,	        // indices
             Data->m_TriangleCount * 3,		    // nr of indices
             0,					                // copy indices?
             1					                // transformed reply
@@ -156,7 +134,7 @@ void dGeomTriMeshDataBuildSingle1(dTriMeshDataID g,
 
     dxTriMeshData *data = g;
 
-    data->build(Vertices, VertexStride, VertexCount,
+    data->buildData(Vertices, VertexStride, VertexCount,
         Indices, IndexCount, TriStride,
         Normals,
         true);
@@ -174,7 +152,7 @@ void dGeomTriMeshDataBuildDouble1(dTriMeshDataID g,
 
     dxTriMeshData *data = g;
 
-    data->build(Vertices, VertexStride, VertexCount,
+    data->buildData(Vertices, VertexStride, VertexCount,
         Indices, IndexCount, TriStride,
         Normals,
         false);
