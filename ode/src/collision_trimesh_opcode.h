@@ -186,7 +186,7 @@ public:
         bool Single);
 
 private:
-    void dxTriMeshData::calculateDataAABB(dVector3 &AABBMax, dVector3 &AABBMin);
+    void calculateDataAABB(dVector3 &AABBMax, dVector3 &AABBMin);
     template<typename treal>
     void templateCalculateDataAABB(dVector3 &AABBMax, dVector3 &AABBMin);
 
