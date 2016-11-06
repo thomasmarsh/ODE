@@ -91,19 +91,6 @@ public:
         bool Single);
 
 
-    /* Array of flags for which edges and vertices should be used on each triangle */
-    enum m_UseFlags
-    {
-        kEdge0 = 0x1,
-        kEdge1 = 0x2,
-        kEdge2 = 0x4,
-        kVert0 = 0x8,
-        kVert1 = 0x10,
-        kVert2 = 0x20,
-
-        kUseAll = 0xFF
-    };
-
 public:
     void assignNormals(const void *normals) { m_Normals = normals; }
     const void *retrieveNormals() const { return m_Normals; }

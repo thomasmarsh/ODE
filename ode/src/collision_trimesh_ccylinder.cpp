@@ -775,18 +775,18 @@ void sTrimeshCapsuleColliderData::_cldTestOneTriangleVSCapsule(
         return;
     }
 
-    dVector3 vPnt0;
+    dVector3 vPnt0, vPnt1, vPnt2;
     SET	(vPnt0,v0);
-    dVector3 vPnt1;
-    SET	(vPnt1,v1);
-    dVector3 vPnt2;
-    SET	(vPnt2,v2);
 
-    if (fDistanceCapsuleCenterToPlane < 0 )
+    if (fDistanceCapsuleCenterToPlane < 0)
     {
-        SET	(vPnt0,v0);
         SET	(vPnt1,v2);
         SET	(vPnt2,v1);
+    }
+    else
+    {
+        SET	(vPnt1,v1);
+        SET	(vPnt2,v2);
     }
 
     // do intersection test and find best separating axis
@@ -1069,7 +1069,7 @@ int dCollideCCTL(dxGeom *o1, dxGeom *o2, int flags, dContactGeom *contact, int s
 
             unsigned int ctContacts0 = cData.m_ctContacts;
 
-            uint8* UseFlags = TriMesh->m_Data->m_UseFlags;
+            const uint8 *useFlags = TriMesh->m_Data->smartRetrieveUseFlags();
 
             // loop through all intersecting triangles
             for (int i = 0; i < TriCount; i++)
@@ -1080,7 +1080,7 @@ int dCollideCCTL(dxGeom *o1, dxGeom *o2, int flags, dContactGeom *contact, int s
                 dVector3 dv[3];
                 TriMesh->fetchMeshTriangle(dv, Triint, cData.m_vTriMeshPos, cData.m_mTriMeshRot);
 
-                uint8 flags = UseFlags ? UseFlags[Triint] : (uint8)dxTriMeshData::kUseAll;
+                uint8 flags = useFlags != NULL ? useFlags[Triint] : (uint8)dxTriMeshData::kUseAll;
 
                 bool bFinishSearching;
                 ctContacts0 = cData.TestCollisionForSingleTriangle(ctContacts0, Triint, dv, flags, bFinishSearching);
