@@ -174,7 +174,8 @@ struct dxTriMeshData:
 public:
     dxTriMeshData():
         dxTriMeshData_Parent(),
-        m_UseFlags(NULL)
+        m_ExternalUseFlags(NULL),
+        m_InternalUseFlags(NULL)
     {
     }
 
@@ -197,6 +198,28 @@ public:
 private:
     bool meaningfulPreprocessData();
 
+public:
+    enum UseFlags
+    {
+        kVert_Base = 0x01,
+        kVert0 = kVert_Base << dMTV_FIRST,
+        kVert1 = kVert_Base << dMTV_SECOND,
+        kVert2 = kVert_Base << dMTV_THIRD,
+        kVert_Last = kVert_Base << (dMTV__MAX - 1),
+        kVerts_End = kVert_Base << dMTV__MAX,
+        kAllVerts = kVert0 | kVert1 | kVert2,
+
+        kEdge_Base = kVerts_End,
+        kEdge0 = kEdge_Base << dMTV_FIRST,
+        kEdge1 = kEdge_Base << dMTV_SECOND,
+        kEdge2 = kEdge_Base << dMTV_THIRD,
+        kEdges_End = kEdge_Base << dMTV__MAX,
+        kAllEdges = kEdge0 | kEdge1 | kEdge2,
+
+        kUseAll = kAllVerts | kAllEdges,
+    };
+
+private:
     struct EdgeRecord
     {
     public:
@@ -204,22 +227,33 @@ private:
         const Point *GetOppositeVert(const Point *vertices[]) const;
 
     public:
-        static int CompareEdges(const void* edge1, const void* edge2);
+        bool operator <(const EdgeRecord &anotherEdge) const { return m_VertIdx1 < anotherEdge.m_VertIdx1 || (m_VertIdx1 == anotherEdge.m_VertIdx1 && m_VertIdx2 < anotherEdge.m_VertIdx2); }
 
     public:
-        int m_VertIdx1;	// Index into vertex array for this edges vertices
-        int m_VertIdx2;
-        int m_TriIdx;		// Index into triangle array for triangle this edge belongs to
+        enum
+        {
+            kAbsVertexUsed          = 0x01,
+            kAbsVertHasAConcaveEdge = 0x02,
+        };
+
+    public:
+        unsigned m_VertIdx1;	// Index into vertex array for this edges vertices
+        unsigned m_VertIdx2;
+        unsigned m_TriIdx;		// Index into triangle array for triangle this edge belongs to
 
         uint8 m_EdgeFlags;	
         uint8 m_Vert1Flags;
         uint8 m_Vert2Flags;
-        bool m_Concave;
+        uint8 m_AbsVertexFlags;
     };
 
-    void meaningfulPreprocess_SetupEdgeRecords(EdgeRecord *records, size_t numEdges);
-    void meaningfulPreprocess_buildEdgeFlags(uint8 *useFlags, EdgeRecord *records, size_t numEdges);
-    void meaningfulPreprocess_markConcaves(uint8 *useFlags, EdgeRecord *records, size_t numEdges);
+    struct VertexRecord
+    {
+        unsigned m_UsedFromEdgeIndex;
+    };
+
+    void meaningfulPreprocess_SetupEdgeRecords(EdgeRecord *edges, size_t numEdges);
+    void meaningfulPreprocess_buildEdgeFlags(uint8 *useFlags, EdgeRecord *edges, size_t numEdges, VertexRecord *vertices);
 
 public:
     /* For when app changes the vertices */
@@ -229,11 +263,14 @@ public:
     void assignNormals(const dReal *normals) { dxTriMeshData_Parent::assignNormals(normals); }
     const dReal *retrieveNormals() const { return (const dReal *)dxTriMeshData_Parent::retrieveNormals(); }
 
-    void assignUseFlagsBuffer(uint8 *buffer) { m_UseFlags = buffer; }
-    uint8 *retrieveUseFlagsBuffer(unsigned &out_bufLen) const
+    void assignExternalUseFlagsBuffer(uint8 *buffer) { m_ExternalUseFlags = buffer != m_InternalUseFlags ? buffer : NULL; }
+    const uint8 *smartRetrieveUseFlags() const { return m_ExternalUseFlags != NULL ? m_ExternalUseFlags : m_InternalUseFlags; }
+
+public:
+    size_t calculateUseFlagsMemoryRequirement() const
     {
-        out_bufLen = m_Mesh.GetNbTriangles();
-        return m_UseFlags;
+        const unsigned int numTris = m_Mesh.GetNbTriangles();
+        return numTris * sizeof(m_InternalUseFlags[0]);
     }
 
 public:
@@ -245,7 +282,8 @@ public:
     dVector3 m_AABBExtents;
 
     // data for use in collision resolution
-    uint8 *m_UseFlags;
+    uint8 *m_ExternalUseFlags;
+    uint8 *m_InternalUseFlags;
 };
 
 

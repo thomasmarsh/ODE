@@ -8,9 +8,14 @@ the rules for this file:
   * keep the format consistent (79 char width, M/D/Y date format).
 
 ------------------------------------------------------------------------------
+11/07/2016 Oleh Derevenko
+        * The implementation of OPCODE TriMesh data pre-processing 
+          (dGeomTriMeshDataPreprocess()) has been optimized to only contain
+          a sort and a single pass over edges (used to be a sort and O(N^2)).
+
 10/29/2016 Oleh Derevenko
-        *  dGeomTriMeshDataPreprocess() public function has been changed to 
-           return a boolean status (it can fail in low memory conditions).
+        * dGeomTriMeshDataPreprocess() public function has been changed to 
+          return a boolean status (it can fail in low memory conditions).
 
 07/10/2016 Oleh Derevenko
         * The correct handling of dJOINT_REVERSE mode for AngularMotor Joint 

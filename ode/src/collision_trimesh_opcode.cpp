@@ -87,10 +87,10 @@ void TrimeshCollidersCache::clearOPCODECaches()
 
 dxTriMeshData::~dxTriMeshData()
 {
-    if ( m_UseFlags != NULL )
+    if ( m_InternalUseFlags != NULL )
     {
-        const unsigned int numTris = m_Mesh.GetNbTriangles();
-        dFree(m_UseFlags, numTris * sizeof(m_UseFlags[0]));
+        size_t flagsMemoryRequired = calculateUseFlagsMemoryRequirement();
+        dFree(m_InternalUseFlags, flagsMemoryRequired);
     }
 }
 
@@ -130,7 +130,7 @@ void dxTriMeshData::buildData(const Point *Vertices, int VertexStide, unsigned V
     dSubtractVectors3(m_AABBExtents, AABBMax, m_AABBCenter);
 
     // user data (not used by OPCODE)
-    dIASSERT(m_UseFlags == NULL);
+    dIASSERT(m_InternalUseFlags == NULL);
 }
 
 
@@ -177,13 +177,13 @@ void dxTriMeshData::templateCalculateDataAABB(dVector3 &AABBMax, dVector3 &AABBM
 bool dxTriMeshData::preprocessData()
 {
     // If this mesh has already been preprocessed, exit
-    bool result = (m_UseFlags != NULL) || meaningfulPreprocessData();
+    bool result = (m_InternalUseFlags != NULL) || m_Mesh.GetNbTriangles() == 0 || meaningfulPreprocessData();
     return result;
 }
 
 bool dxTriMeshData::meaningfulPreprocessData()
 {
-    dIASSERT(m_UseFlags == NULL);
+    dIASSERT(m_InternalUseFlags == NULL);
 
     bool result = false;
 
@@ -193,8 +193,7 @@ bool dxTriMeshData::meaningfulPreprocessData()
 
     do 
     {
-        const unsigned int numTris = m_Mesh.GetNbTriangles();
-        flagsMemoryRequired = numTris * sizeof(uint8);
+        flagsMemoryRequired = calculateUseFlagsMemoryRequirement();
         useFlags = (uint8 *)dAlloc(flagsMemoryRequired);
 
         if (useFlags == NULL)
@@ -204,28 +203,36 @@ bool dxTriMeshData::meaningfulPreprocessData()
 
         flagsAllocated = true;
 
+        const unsigned int numTris = m_Mesh.GetNbTriangles();
+        const unsigned int numVertices = m_Mesh.GetNbVertices();
         size_t numEdges = (size_t)numTris * dMTV__MAX;
-        const size_t recordsMemoryRequired = numEdges * sizeof(EdgeRecord);
-        EdgeRecord *records = (EdgeRecord *)dAlloc(recordsMemoryRequired);
+        dIASSERT(numVertices <= numEdges); // Edge records are going to be used for vertex data as well
+
+        const size_t recordsMemoryRequired = dEFFICIENT_SIZE(numEdges * sizeof(EdgeRecord));
+        const size_t verticesMemoryRequired = numVertices * sizeof(VertexRecord); // Skip alignment for the last chunk
+        const size_t totalTempMemoryRequired = recordsMemoryRequired + verticesMemoryRequired;
+        void *tempBuffer = dAlloc(totalTempMemoryRequired);
         
-        if (records = NULL)
+        if (tempBuffer == NULL)
         {
             break;
         }
 
-        memset(useFlags, 0, sizeof(useFlags[0]) * numTris);
+        EdgeRecord *edges = (EdgeRecord *)tempBuffer;
+        VertexRecord *vertices = (VertexRecord *)((uint8 *)tempBuffer + recordsMemoryRequired);
 
-        meaningfulPreprocess_SetupEdgeRecords(records, numEdges);
+        memset(useFlags, 0, flagsMemoryRequired);
+
+        meaningfulPreprocess_SetupEdgeRecords(edges, numEdges);
 
         // Sort the edges, so the ones sharing the same verts are beside each other
-        qsort(records, numEdges, sizeof(EdgeRecord), &EdgeRecord::CompareEdges);
+        std::sort(edges, edges + numEdges);
 
-        meaningfulPreprocess_buildEdgeFlags(useFlags, records, numEdges);
-        meaningfulPreprocess_markConcaves(useFlags, records, numEdges);
+        meaningfulPreprocess_buildEdgeFlags(useFlags, edges, numEdges, vertices);
 
-        dFree(records, recordsMemoryRequired);
+        dFree(tempBuffer, totalTempMemoryRequired);
     	
-        m_UseFlags = useFlags;
+        m_InternalUseFlags = useFlags;
         result = true;
     }
     while (false);
@@ -276,147 +283,217 @@ void dxTriMeshData::EdgeRecord::SetupEdge(dMeshTriangleVertex edgeIdx, int triId
     // Make sure vertex index 1 is less than index 2 (for easier sorting)
     if (m_VertIdx1 > m_VertIdx2)
     {
-        unsigned int tempIdx = m_VertIdx1;
-        m_VertIdx1 = m_VertIdx2;
-        m_VertIdx2 = tempIdx;
-
-        uint8 tempFlags = m_Vert1Flags;
-        m_Vert1Flags = m_Vert2Flags;
-        m_Vert2Flags = tempFlags;
+        dxSwap(m_VertIdx1, m_VertIdx2);
+        dxSwap(m_Vert1Flags, m_Vert2Flags);
     }
 
     m_TriIdx = triIdx;
-    m_Concave = false;
+    m_AbsVertexFlags = 0;
 }
+
+
+BEGIN_NAMESPACE_OU();
+template<>
+const unsigned CEnumUnsortedElementArray<unsigned, dxTriMeshData::kVert_Last / dxTriMeshData::kVert_Base, unsigned, 0x161116DC>::m_aetElementArray[] = 
+{
+    dMTV_FIRST, // kVert0 / kVert_Base
+    dMTV_SECOND, // kVert1 / kVert_Base
+    dMTV__MAX,
+    dMTV_THIRD, // kVert2 / kVert_Base
+};
+END_NAMESPACE_OU();
+static const CEnumUnsortedElementArray<unsigned, dxTriMeshData::kVert_Last / dxTriMeshData::kVert_Base, unsigned, 0x161116DC> g_VertFlagOppositeIndices;
+
 
 // Get the vertex opposite this edge in the triangle
 const Point *dxTriMeshData::EdgeRecord::GetOppositeVert(const Point *vertices[]) const
 {
-    const Point *result;
+    unsigned oppositeIndex = g_VertFlagOppositeIndices.Encode(((m_Vert1Flags | m_Vert2Flags) ^ kAllVerts) / kVert_Base - 1);
+    dIASSERT(dIN_RANGE(oppositeIndex, dMTV__MIN, dMTV__MAX));
 
-    if ((m_Vert1Flags == dxTriMeshData::kVert0 && m_Vert2Flags == dxTriMeshData::kVert1) ||
-        (m_Vert1Flags == dxTriMeshData::kVert1 && m_Vert2Flags == dxTriMeshData::kVert0))
-    {
-        result = vertices[2];
-    }
-    else if ((m_Vert1Flags == dxTriMeshData::kVert1 && m_Vert2Flags == dxTriMeshData::kVert2) ||
-        (m_Vert1Flags == dxTriMeshData::kVert2 && m_Vert2Flags == dxTriMeshData::kVert1))
-    {
-        result = vertices[0];
-    }
-    else
-    {
-        result = vertices[1];
-    }
-
+    const Point *result = vertices[oppositeIndex];
     return result;
 }
 
 
-// Edge comparison function for qsort
-/*static */
-int dxTriMeshData::EdgeRecord::CompareEdges(const void* edge1, const void* edge2)
-{
-    const EdgeRecord *e1 = (const EdgeRecord *)edge1;
-    const EdgeRecord *e2 = (const EdgeRecord *)edge2;
-
-    return e1->m_VertIdx1 - e2->m_VertIdx1 == 0
-        ? e1->m_VertIdx2 - e2->m_VertIdx2
-        : e1->m_VertIdx1 - e2->m_VertIdx1;
-}
-
-
-void dxTriMeshData::meaningfulPreprocess_SetupEdgeRecords(EdgeRecord *records, size_t numEdges)
+void dxTriMeshData::meaningfulPreprocess_SetupEdgeRecords(EdgeRecord *edges, size_t numEdges)
 {
     // Make a list of every edge in the mesh
     const IndexedTriangle *tris = m_Mesh.GetTris();
     const unsigned tristride = m_Mesh.GetTriStride();
     unsigned triangleIdx = 0;
-    for (size_t edgeIdx = 0; edgeIdx != numEdges; ++triangleIdx, edgeIdx += 3)
+    for (size_t edgeIdx = 0; edgeIdx != numEdges; ++triangleIdx, edgeIdx += dMTV__MAX)
     {
-        records[edgeIdx + dMTV_FIRST].SetupEdge(dMTV_FIRST, triangleIdx, tris->mVRef);
-        records[edgeIdx + dMTV_SECOND].SetupEdge(dMTV_SECOND, triangleIdx, tris->mVRef);
-        records[edgeIdx + dMTV_THIRD].SetupEdge(dMTV_THIRD, triangleIdx, tris->mVRef);
+        edges[edgeIdx + dMTV_FIRST].SetupEdge(dMTV_FIRST, triangleIdx, tris->mVRef);
+        edges[edgeIdx + dMTV_SECOND].SetupEdge(dMTV_SECOND, triangleIdx, tris->mVRef);
+        edges[edgeIdx + dMTV_THIRD].SetupEdge(dMTV_THIRD, triangleIdx, tris->mVRef);
 
         tris = (const IndexedTriangle*)(((uint8 *)tris) + tristride);
     }
 }
 
-void dxTriMeshData::meaningfulPreprocess_buildEdgeFlags(uint8 *useFlags, EdgeRecord *records, size_t numEdges)
+void dxTriMeshData::meaningfulPreprocess_buildEdgeFlags(uint8 *useFlags, EdgeRecord *edges, size_t numEdges, VertexRecord *vertices)
 {
+    dIASSERT(numEdges != 0);
+
+    const dReal *const externalNormals = retrieveNormals();
+
     // Go through the sorted list of edges and flag all the edges and vertices that we need to use
-    for (unsigned int i = 0; i < numEdges; i++)
+    EdgeRecord *const lastEdge = edges + (numEdges - 1);
+    for (EdgeRecord *currEdge = edges; ; ++currEdge)
     {
-        EdgeRecord* rec1 = &records[i];
-        EdgeRecord* rec2 = 0;
-        if (i < numEdges - 1)
-            rec2 = &records[i+1];
-
-        if (rec2 &&
-            rec1->m_VertIdx1 == rec2->m_VertIdx1 &&
-            rec1->m_VertIdx2 == rec2->m_VertIdx2)
+        if (currEdge >= lastEdge)
         {
-            VertexPointers vp;
-            ConversionArea vc;
-            m_Mesh.GetTriangle(vp, rec1->m_TriIdx, vc);
+            // This is a boundary edge
+            if (currEdge == lastEdge)
+            {
+                // For the last element EdgeRecord::kAbsVertexUsed assignment can be skipped as noone is going to need it any more
+                useFlags[currEdge[0].m_TriIdx] |= ((edges[currEdge[0].m_VertIdx1].m_AbsVertexFlags & EdgeRecord::kAbsVertexUsed) == 0 ? currEdge[0].m_Vert1Flags : 0) 
+                    | ((edges[currEdge[0].m_VertIdx2].m_AbsVertexFlags & EdgeRecord::kAbsVertexUsed) == 0 ? currEdge[0].m_Vert2Flags : 0)
+                    | currEdge[0].m_EdgeFlags;
+            }
+            
+            break;
+        }
 
-            // Get the normal of the first triangle
-            Point triNorm = (*vp.Vertex[2] - *vp.Vertex[1]) ^ (*vp.Vertex[0] - *vp.Vertex[1]);
-            triNorm.Normalize();
+        unsigned vertIdx1 = currEdge[0].m_VertIdx1;
+        unsigned vertIdx2 = currEdge[0].m_VertIdx2;
 
-            // Get the vert opposite this edge in the first triangle
-            const Point *pOppositeVert1 = rec1->GetOppositeVert(vp.Vertex);
-
-            // Get the vert opposite this edge in the second triangle
-            m_Mesh.GetTriangle(vp, rec2->m_TriIdx, vc);
-            const Point *pOppositeVert2 = rec2->GetOppositeVert(vp.Vertex);
-
-            Point oppositeEdge = *pOppositeVert2 - *pOppositeVert1;
-            float dot = triNorm.Dot(oppositeEdge.Normalize());
-
+        if (vertIdx1 == currEdge[1].m_VertIdx1 &&
+            vertIdx2 == currEdge[1].m_VertIdx2)
+        {
             // We let the dot threshold for concavity get slightly negative to allow for rounding errors
-            const float kConcaveThresh = -0.000001f;
+            const float kConcaveThreshold = 0.000001f;
+
+            VertexPointers vpFirst, vpSecond;
+            ConversionArea vc;
+            m_Mesh.GetTriangle(vpFirst, currEdge[0].m_TriIdx, vc);
+
+            dVector3 triangleNormal, opositeVerticesSegment;
+            dReal nornalLengthSuqare, segmentLengthSquare;
+
+            if (externalNormals != NULL)
+            {
+                const dReal *pTriangleExternalNormal = externalNormals + currEdge[0].m_TriIdx * dSA__MAX;
+                dAssignVector3(triangleNormal, pTriangleExternalNormal[dSA_X], pTriangleExternalNormal[dSA_Y], pTriangleExternalNormal[dSA_Z]);
+                nornalLengthSuqare = REAL(1.0);
+                dUASSERT(dFabs(dCalcVectorLengthSquare3(triangleNormal) - REAL(1.0)) < REAL(0.25) * kConcaveThreshold * kConcaveThreshold, "Mesh triangle normals must be normalized");
+            }
+            else
+            {
+                // Get the normal of the first triangle
+                Point triNormPoint = (*vpFirst.Vertex[2] - *vpFirst.Vertex[1]) ^ (*vpFirst.Vertex[0] - *vpFirst.Vertex[1]);
+                dAssignVector3(triangleNormal, triNormPoint.x, triNormPoint.y, triNormPoint.z);
+                nornalLengthSuqare = dCalcVectorLengthSquare3(triangleNormal);
+            }
+
+            {
+                // Get the vert opposite this edge in the first triangle
+                const Point *pOppositeVert1 = currEdge[0].GetOppositeVert(vpFirst.Vertex);
+
+                // Get the vert opposite this edge in the second triangle
+                m_Mesh.GetTriangle(vpSecond, currEdge[1].m_TriIdx, vc);
+                const Point *pOppositeVert2 = currEdge[1].GetOppositeVert(vpSecond.Vertex);
+
+                Point oppositeEdge = *pOppositeVert2 - *pOppositeVert1;
+                dAssignVector3(opositeVerticesSegment, oppositeEdge.x, oppositeEdge.y, oppositeEdge.z);
+                segmentLengthSquare = dCalcVectorLengthSquare3(opositeVerticesSegment);
+            }
+
+            dReal normalSegmentDot = dCalcVectorDot3(triangleNormal, opositeVerticesSegment);
 
             // This is a concave edge, leave it for the next pass
-            if (dot >= kConcaveThresh)
-                rec1->m_Concave = true;
+            // OD: This is the "dot > -kConcaveThresh" check, but since the vectros were not normalized to save on roots and divisions,
+            // the check against zero is performed first and then the dot product is squared and compared against the threshold multiplied by lengths' squares
+            if (normalSegmentDot >= REAL(0.0) || normalSegmentDot * normalSegmentDot < kConcaveThreshold * kConcaveThreshold * segmentLengthSquare * nornalLengthSuqare)
+            {
+                unsigned absVertexFlags1 = edges[vertIdx1].m_AbsVertexFlags;
+                edges[vertIdx1].m_AbsVertexFlags |= absVertexFlags1 | EdgeRecord::kAbsVertHasAConcaveEdge | EdgeRecord::kAbsVertexUsed;
+              
+                if ((absVertexFlags1 & (EdgeRecord::kAbsVertHasAConcaveEdge | EdgeRecord::kAbsVertexUsed)) == EdgeRecord::kAbsVertexUsed)
+                {
+                    unsigned usedFromEdgeIndex = vertices[vertIdx1].m_UsedFromEdgeIndex;
+                    const EdgeRecord *usedFromEdge = edges + usedFromEdgeIndex;
+                    unsigned usedInTriangleIndex = usedFromEdge->m_TriIdx;
+                    uint8 usedVertFlags = usedFromEdge->m_VertIdx1 == vertIdx1 ? usedFromEdge->m_Vert1Flags : usedFromEdge->m_Vert2Flags;
+                    useFlags[usedInTriangleIndex] ^= usedVertFlags;
+                    dIASSERT((useFlags[usedInTriangleIndex] & usedVertFlags) == 0);
+                }
+
+                unsigned absVertexFlags2 = edges[vertIdx2].m_AbsVertexFlags;
+                edges[vertIdx2].m_AbsVertexFlags = absVertexFlags2 | EdgeRecord::kAbsVertHasAConcaveEdge | EdgeRecord::kAbsVertexUsed;
+
+                if ((absVertexFlags2 & (EdgeRecord::kAbsVertHasAConcaveEdge | EdgeRecord::kAbsVertexUsed)) == EdgeRecord::kAbsVertexUsed)
+                {
+                    unsigned usedFromEdgeIndex = vertices[vertIdx2].m_UsedFromEdgeIndex;
+                    const EdgeRecord *usedFromEdge = edges + usedFromEdgeIndex;
+                    unsigned usedInTriangleIndex = usedFromEdge->m_TriIdx;
+                    uint8 usedVertFlags = usedFromEdge->m_VertIdx1 == vertIdx2 ? usedFromEdge->m_Vert1Flags : usedFromEdge->m_Vert2Flags;
+                    useFlags[usedInTriangleIndex] ^= usedVertFlags;
+                    dIASSERT((useFlags[usedInTriangleIndex] & usedVertFlags) == 0);
+                }
+            }
             // If this is a convex edge, mark its vertices and edge as used
             else
-                useFlags[rec1->m_TriIdx] |= rec1->m_Vert1Flags | rec1->m_Vert2Flags | rec1->m_EdgeFlags;
+            {
+                EdgeRecord *edgeToUse = currEdge;
+                unsigned triIdx = edgeToUse[0].m_TriIdx;
+                unsigned triIdx1 = edgeToUse[1].m_TriIdx;
+                unsigned triUseFlags = useFlags[triIdx];
+                unsigned triUseFlags1 = useFlags[triIdx1];
+                
+                // Choose to add flags to the bitmask that is already larger 
+                // (to group flags in selected triangles rather than scattering them evenly)
+                if (triUseFlags1 > triUseFlags)
+                {
+                    dSASSERT(kAllEdges > kAllVerts); // Otherwise it is necessary to mask with kAllEdges in the comparison of use flags above
+                    
+                    triIdx = triIdx1;
+                    triUseFlags = triUseFlags1;
+                    edgeToUse = edgeToUse + 1;
+                }
+
+                if ((edges[vertIdx1].m_AbsVertexFlags & EdgeRecord::kAbsVertexUsed) == 0)
+                {
+                    edges[vertIdx1].m_AbsVertexFlags |= EdgeRecord::kAbsVertexUsed;
+                    vertices[vertIdx1].m_UsedFromEdgeIndex = (unsigned)(edgeToUse - edges);
+                    triUseFlags |= edgeToUse[0].m_Vert1Flags;
+                }
+
+                if ((edges[vertIdx2].m_AbsVertexFlags & EdgeRecord::kAbsVertexUsed) == 0)
+                {
+                    edges[vertIdx2].m_AbsVertexFlags |= EdgeRecord::kAbsVertexUsed;
+                    vertices[vertIdx2].m_UsedFromEdgeIndex = (unsigned)(edgeToUse - edges);
+                    triUseFlags |= edgeToUse[0].m_Vert2Flags;
+                }
+
+                useFlags[triIdx] = triUseFlags | edgeToUse[0].m_EdgeFlags;
+            }
 
             // Skip the second edge
-            i++;
+            ++currEdge;
         }
         // This is a boundary edge
         else
         {
-            useFlags[rec1->m_TriIdx] |= rec1->m_Vert1Flags | rec1->m_Vert2Flags | rec1->m_EdgeFlags;
-        }
-    }
-}
-
-void dxTriMeshData::meaningfulPreprocess_markConcaves(uint8 *useFlags, EdgeRecord *records, size_t numEdges)
-{
-    // Go through the list once more, and take any edge we marked as concave and
-    // clear it's vertices flags in any triangles they're used in
-    for (unsigned int i = 0; i < numEdges; i++)
-    {
-        EdgeRecord& er = records[i];
-
-        if (er.m_Concave)
-        {
-            for (unsigned int j = 0; j < numEdges; j++)
+            unsigned triIdx = currEdge[0].m_TriIdx;
+            unsigned triUseFlags = useFlags[triIdx];
+            
+            if ((edges[vertIdx1].m_AbsVertexFlags & EdgeRecord::kAbsVertexUsed) == 0)
             {
-                const EdgeRecord &curER = records[j];
-
-                if (curER.m_VertIdx1 == er.m_VertIdx1 ||
-                    curER.m_VertIdx1 == er.m_VertIdx2)
-                    useFlags[curER.m_TriIdx] &= ~curER.m_Vert1Flags;
-
-                if (curER.m_VertIdx2 == er.m_VertIdx1 ||
-                    curER.m_VertIdx2 == er.m_VertIdx2)
-                    useFlags[curER.m_TriIdx] &= ~curER.m_Vert2Flags;
+                edges[vertIdx1].m_AbsVertexFlags |= EdgeRecord::kAbsVertexUsed;
+                vertices[vertIdx1].m_UsedFromEdgeIndex = (unsigned)(currEdge - edges);
+                triUseFlags |= currEdge[0].m_Vert1Flags;
             }
+
+            if ((edges[vertIdx2].m_AbsVertexFlags & EdgeRecord::kAbsVertexUsed) == 0)
+            {
+                edges[vertIdx2].m_AbsVertexFlags |= EdgeRecord::kAbsVertexUsed;
+                vertices[vertIdx2].m_UsedFromEdgeIndex = (unsigned)(currEdge - edges);
+                triUseFlags |= currEdge[0].m_Vert2Flags;
+            }
+
+            useFlags[triIdx] = triUseFlags | currEdge[0].m_EdgeFlags;
         }
     }
 }
@@ -722,7 +799,16 @@ void dGeomTriMeshDataGetBuffer(dTriMeshDataID g, unsigned char **buf, int *bufLe
     dUASSERT(g, "The argument is not a trimesh data");
 
     const dxTriMeshData *data = g;
-    *buf = data->retrieveUseFlagsBuffer(*(unsigned int *)bufLen);
+
+    if (buf != NULL)
+    {
+        *buf = const_cast<uint8 *>(data->smartRetrieveUseFlags());
+    }
+    
+    if (bufLen != NULL)
+    {
+        *(unsigned int *)bufLen = data->calculateUseFlagsMemoryRequirement();
+    }
 }
 
 /*extern */
@@ -731,7 +817,7 @@ void dGeomTriMeshDataSetBuffer(dTriMeshDataID g, unsigned char* buf)
     dUASSERT(g, "The argument is not a trimesh data");
 
     dxTriMeshData *data = g;
-    data->assignUseFlagsBuffer(buf);
+    data->assignExternalUseFlagsBuffer(buf);
 }
 
 
