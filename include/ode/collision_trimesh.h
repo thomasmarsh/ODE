@@ -68,7 +68,7 @@ ODE_API void dGeomTriMeshDataDestroy(dTriMeshDataID g);
 /*
  * The values of data_id that can be used with dGeomTriMeshDataSet/dGeomTriMeshDataGet
  */
-typedef enum 
+enum 
 {
     dTRIMESHDATA_FACE_NORMALS,
     dTRIMESHDATA_USE_FLAGS,
@@ -82,7 +82,7 @@ typedef enum
 /*
  * The flags of the dTRIMESHDATA_USE_FLAGS data elements
  */
-typedef enum 
+enum 
 {
     dMESHDATAUSE_EDGE1      = 0x01,
     dMESHDATAUSE_EDGE2      = 0x02,
