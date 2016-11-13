@@ -8,6 +8,12 @@ the rules for this file:
   * keep the format consistent (79 char width, M/D/Y date format).
 
 ------------------------------------------------------------------------------
+11/13/2016 Oleh Derevenko
+        * dGeomTriMeshDataGetBuff and dGeomTriMeshDataSetBuff have been marked 
+          deprecated and their functionality implemented via 
+          dGeomTriMeshDataGet and dGeomTriMeshDataSet. Extra function variant
+          dGeomTriMeshDataGet2() has been added to allow returning data size.
+
 11/07/2016 Oleh Derevenko
         * The implementation of OPCODE TriMesh data pre-processing 
           (dGeomTriMeshDataPreprocess()) has been optimized to only contain
