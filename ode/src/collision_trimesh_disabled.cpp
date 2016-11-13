@@ -90,6 +90,17 @@ void *dGeomTriMeshDataGet(dTriMeshDataID g, int data_id)
     return NULL;
 }
 
+/*extern */
+void *dGeomTriMeshDataGet2(dTriMeshDataID g, int data_id, size_t *pout_size/*=NULL*/)
+{
+    if (pout_size != NULL)
+    {
+        *pout_size = 0;
+    }
+
+    return NULL;
+}
+
 
 /*extern */
 void dGeomTriMeshSetLastTransform( dGeomID g, const dMatrix4 last_trans )
@@ -186,20 +197,6 @@ int dGeomTriMeshDataPreprocess(dTriMeshDataID g)
     // Do nothing
     return 1;
 }
-
-/*extern */
-void dGeomTriMeshDataGetBuffer(dTriMeshDataID g, unsigned char **buf, int *bufLen)
-{
-    *buf = NULL;
-    *bufLen=0;
-}
-
-/*extern */
-void dGeomTriMeshDataSetBuffer(dTriMeshDataID g, unsigned char* buf)
-{
-    // Do nothing
-}
-
 
 /*extern */
 void dGeomTriMeshSetCallback(dGeomID g, dTriCallback* Callback)

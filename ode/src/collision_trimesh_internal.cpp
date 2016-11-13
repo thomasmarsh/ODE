@@ -327,3 +327,30 @@ void dGeomTriMeshGetPoint(dGeomID g, int index, dReal u, dReal v, dVector3 Out)
 
 #endif // #if dTRIMESH_ENABLED
 
+
+//////////////////////////////////////////////////////////////////////////
+// Deprecated functions
+
+/*extern */
+void dGeomTriMeshDataGetBuffer(dTriMeshDataID g, unsigned char **buf, int *bufLen)
+{
+    size_t dataSizeStorage;
+    void *dataPointer = dGeomTriMeshDataGet2(g, dTRIMESHDATA_USE_FLAGS, (bufLen != NULL ? &dataSizeStorage : NULL));
+
+    if (bufLen != NULL)
+    {
+        *bufLen = (int)dataSizeStorage;
+    }
+
+    if (buf != NULL)
+    {
+        *buf = (unsigned char *)dataPointer;
+    }
+}
+
+/*extern */
+void dGeomTriMeshDataSetBuffer(dTriMeshDataID g, unsigned char* buf)
+{
+    dGeomTriMeshDataSet(g, dTRIMESHDATA_USE_FLAGS, (void *)buf);
+}
+

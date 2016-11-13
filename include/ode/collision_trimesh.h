@@ -58,17 +58,47 @@ typedef enum
 } dMeshTriangleVertex;
 
 /*
- * These dont make much sense now, but they will later when we add more
+ * These don't make much sense now, but they will later when we add more
  * features.
  */
 ODE_API dTriMeshDataID dGeomTriMeshDataCreate(void);
 ODE_API void dGeomTriMeshDataDestroy(dTriMeshDataID g);
 
 
+/*
+ * The values of data_id that can be used with dGeomTriMeshDataSet/dGeomTriMeshDataGet
+ */
+typedef enum 
+{
+    dTRIMESHDATA_FACE_NORMALS,
+    dTRIMESHDATA_USE_FLAGS,
 
-enum { TRIMESH_FACE_NORMALS };
-ODE_API void dGeomTriMeshDataSet(dTriMeshDataID g, int data_id, void* in_data);
-ODE_API void* dGeomTriMeshDataGet(dTriMeshDataID g, int data_id);
+#ifndef TRIMESH_FACE_NORMALS // Define this name during the header inclusion if you need it for something else
+    // Included for backward compatibility -- please use the corrected name above. Sorry.
+    TRIMESH_FACE_NORMALS = dTRIMESHDATA_FACE_NORMALS,
+#endif
+};
+
+/*
+ * The flags of the dTRIMESHDATA_USE_FLAGS data elements
+ */
+typedef enum 
+{
+    dMESHDATAUSE_EDGE1      = 0x01,
+    dMESHDATAUSE_EDGE2      = 0x02,
+    dMESHDATAUSE_EDGE3      = 0x04,
+    dMESHDATAUSE_VERTEX1    = 0x08,
+    dMESHDATAUSE_VERTEX2    = 0x10,
+    dMESHDATAUSE_VERTEX3    = 0x20,
+};
+
+/*
+ *	Set and get the TriMeshData additional data
+ * Note: The data is NOT COPIED on assignment
+ */
+ODE_API void dGeomTriMeshDataSet(dTriMeshDataID g, int data_id, void *in_data);
+ODE_API void *dGeomTriMeshDataGet(dTriMeshDataID g, int data_id);
+ODE_API void *dGeomTriMeshDataGet2(dTriMeshDataID g, int data_id, size_t *pout_size/*=NULL*/);
 
 
 
@@ -116,13 +146,18 @@ ODE_API void dGeomTriMeshDataBuildSimple1(dTriMeshDataID g,
                                   const int* Normals);
 
 /* 
- * Preprocess the trimesh data to remove mark unnecessary edges and vertices.
+ * Pre-process the trimesh data to remove mark unnecessary edges and vertices.
  * The function returns a boolean status (may fail in case of insufficient memory)
  */
 ODE_API int dGeomTriMeshDataPreprocess(dTriMeshDataID g);
-/* Get and set the internal preprocessed trimesh data buffer, for loading and saving */
-ODE_API void dGeomTriMeshDataGetBuffer(dTriMeshDataID g, unsigned char** buf, int* bufLen);
-ODE_API void dGeomTriMeshDataSetBuffer(dTriMeshDataID g, unsigned char* buf);
+
+
+/*
+ * Get and set the internal preprocessed trimesh data buffer (see the enumerated type above), for loading and saving 
+ * These functions are deprecated. Use dGeomTriMeshDataSet/dGeomTriMeshDataGet2 with dTRIMESHDATA_USE_FLAGS instead.
+ */
+ODE_API_DEPRECATED ODE_API void dGeomTriMeshDataGetBuffer(dTriMeshDataID g, unsigned char** buf, int* bufLen);
+ODE_API_DEPRECATED ODE_API void dGeomTriMeshDataSetBuffer(dTriMeshDataID g, unsigned char* buf);
 
 
 /*

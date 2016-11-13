@@ -114,11 +114,30 @@ void dGeomTriMeshDataSet(dTriMeshDataID g, int data_id, void *in_data)
     //stub
 }
 
+static void *geomTriMeshDataGet(dTriMeshDataID g, int dataId, size_t *pOutDataSize) ;
+
 /*extern */
-void *dGeomTriMeshDataGet(dTriMeshDataID g, int data_id) 
+void *dGeomTriMeshDataGet(dTriMeshDataID g, int dataId) 
+{
+    return geomTriMeshDataGet(g, dataId, NULL);
+}
+
+/*extern */
+void *dGeomTriMeshDataGet2(dTriMeshDataID g, int dataId, size_t *pOutDataSize) 
+{
+    return geomTriMeshDataGet(g, dataId, pOutDataSize);
+}
+
+static 
+void *geomTriMeshDataGet(dTriMeshDataID g, int dataId, size_t *pOutDataSize) 
 {
     dUASSERT(g, "The argument is not a trimesh data");
-    
+
+    if (pOutDataSize != NULL)
+    {
+        *pOutDataSize = 0;
+    }
+
     return NULL; // stub
 }
 
@@ -156,23 +175,6 @@ void dGeomTriMeshDataBuildDouble1(dTriMeshDataID g,
         Indices, IndexCount, TriStride,
         Normals,
         false);
-}
-
-
-/*extern */
-void dGeomTriMeshDataGetBuffer(dTriMeshDataID g, unsigned char ** buf, int *bufLen)
-{
-    dUASSERT(g, "The argument is not a trimesh data");
-
-    *buf = NULL;
-    *bufLen = 0;
-}
-
-/*extern */
-void dGeomTriMeshDataSetBuffer(dTriMeshDataID g, unsigned char *buf)
-{
-    dUASSERT(g, "The argument is not a trimesh data");
-    dAASSERT(buf == NULL); // The buffer assignment is not implemented
 }
 
 

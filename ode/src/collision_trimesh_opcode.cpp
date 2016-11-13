@@ -342,6 +342,7 @@ void dxTriMeshData::meaningfulPreprocess_buildEdgeFlags(uint8 *useFlags, EdgeRec
     EdgeRecord *const lastEdge = edges + (numEdges - 1);
     for (EdgeRecord *currEdge = edges; ; ++currEdge)
     {
+        // Handle the last edge separately to have an optimizer friendly loop
         if (currEdge >= lastEdge)
         {
             // This is a boundary edge
@@ -372,6 +373,7 @@ void dxTriMeshData::meaningfulPreprocess_buildEdgeFlags(uint8 *useFlags, EdgeRec
             dVector3 triangleNormal, opositeVerticesSegment;
             dReal nornalLengthSuqare, segmentLengthSquare;
 
+            // Either use the externally supplied normals...
             if (externalNormals != NULL)
             {
                 const dReal *pTriangleExternalNormal = externalNormals + currEdge[0].m_TriIdx * dSA__MAX;
@@ -379,6 +381,7 @@ void dxTriMeshData::meaningfulPreprocess_buildEdgeFlags(uint8 *useFlags, EdgeRec
                 nornalLengthSuqare = REAL(1.0);
                 dUASSERT(dFabs(dCalcVectorLengthSquare3(triangleNormal) - REAL(1.0)) < REAL(0.25) * kConcaveThreshold * kConcaveThreshold, "Mesh triangle normals must be normalized");
             }
+            // ...or calculate the normal from triangle vertices
             else
             {
                 // Get the normal of the first triangle
@@ -407,11 +410,14 @@ void dxTriMeshData::meaningfulPreprocess_buildEdgeFlags(uint8 *useFlags, EdgeRec
             // the check against zero is performed first and then the dot product is squared and compared against the threshold multiplied by lengths' squares
             if (normalSegmentDot >= REAL(0.0) || normalSegmentDot * normalSegmentDot < kConcaveThreshold * kConcaveThreshold * segmentLengthSquare * nornalLengthSuqare)
             {
+                // Mark the vertices of a concave edge to prevent their use
                 unsigned absVertexFlags1 = edges[vertIdx1].m_AbsVertexFlags;
                 edges[vertIdx1].m_AbsVertexFlags |= absVertexFlags1 | EdgeRecord::kAbsVertHasAConcaveEdge | EdgeRecord::kAbsVertexUsed;
               
                 if ((absVertexFlags1 & (EdgeRecord::kAbsVertHasAConcaveEdge | EdgeRecord::kAbsVertexUsed)) == EdgeRecord::kAbsVertexUsed)
                 {
+                    // If the vertex was already used from other triangles but then discovered 
+                    // to have a concave edge, unmark the previous use
                     unsigned usedFromEdgeIndex = vertices[vertIdx1].m_UsedFromEdgeIndex;
                     const EdgeRecord *usedFromEdge = edges + usedFromEdgeIndex;
                     unsigned usedInTriangleIndex = usedFromEdge->m_TriIdx;
@@ -425,6 +431,7 @@ void dxTriMeshData::meaningfulPreprocess_buildEdgeFlags(uint8 *useFlags, EdgeRec
 
                 if ((absVertexFlags2 & (EdgeRecord::kAbsVertHasAConcaveEdge | EdgeRecord::kAbsVertexUsed)) == EdgeRecord::kAbsVertexUsed)
                 {
+                    // Similarly unmark the possible previous use of the edge's second vertex
                     unsigned usedFromEdgeIndex = vertices[vertIdx2].m_UsedFromEdgeIndex;
                     const EdgeRecord *usedFromEdge = edges + usedFromEdgeIndex;
                     unsigned usedInTriangleIndex = usedFromEdge->m_TriIdx;
@@ -442,12 +449,10 @@ void dxTriMeshData::meaningfulPreprocess_buildEdgeFlags(uint8 *useFlags, EdgeRec
                 unsigned triUseFlags = useFlags[triIdx];
                 unsigned triUseFlags1 = useFlags[triIdx1];
                 
-                // Choose to add flags to the bitmask that is already larger 
+                // Choose to add flags to the bitmask that already has more edges
                 // (to group flags in selected triangles rather than scattering them evenly)
-                if (triUseFlags1 > triUseFlags)
+                if ((triUseFlags1 & kAllEdges) > (triUseFlags & kAllEdges))
                 {
-                    dSASSERT(kAllEdges > kAllVerts); // Otherwise it is necessary to mask with kAllEdges in the comparison of use flags above
-                    
                     triIdx = triIdx1;
                     triUseFlags = triUseFlags1;
                     edgeToUse = edgeToUse + 1;
@@ -455,11 +460,15 @@ void dxTriMeshData::meaningfulPreprocess_buildEdgeFlags(uint8 *useFlags, EdgeRec
 
                 if ((edges[vertIdx1].m_AbsVertexFlags & EdgeRecord::kAbsVertexUsed) == 0)
                 {
+                    // Only add each vertex once and set a mark to prevent further additions
                     edges[vertIdx1].m_AbsVertexFlags |= EdgeRecord::kAbsVertexUsed;
+                    // Also remember the index the vertex flags are going to be applied to 
+                    // to allow easily clear the vertex from the use flags if any concave edges are found to connect to it
                     vertices[vertIdx1].m_UsedFromEdgeIndex = (unsigned)(edgeToUse - edges);
                     triUseFlags |= edgeToUse[0].m_Vert1Flags;
                 }
 
+                // Same processing for the second vertex...
                 if ((edges[vertIdx2].m_AbsVertexFlags & EdgeRecord::kAbsVertexUsed) == 0)
                 {
                     edges[vertIdx2].m_AbsVertexFlags |= EdgeRecord::kAbsVertexUsed;
@@ -467,6 +476,7 @@ void dxTriMeshData::meaningfulPreprocess_buildEdgeFlags(uint8 *useFlags, EdgeRec
                     triUseFlags |= edgeToUse[0].m_Vert2Flags;
                 }
 
+                // And finally store the use flags adding the edge flags in
                 useFlags[triIdx] = triUseFlags | edgeToUse[0].m_EdgeFlags;
             }
 
@@ -721,26 +731,50 @@ void dGeomTriMeshDataDestroy(dTriMeshDataID g)
 
 
 /*extern */
-void dGeomTriMeshDataSet(dTriMeshDataID g, int data_id, void* in_data)
+void dGeomTriMeshDataSet(dTriMeshDataID g, int dataId, void *pDataLocation)
 {
     dUASSERT(g, "The argument is not a trimesh data");
 
     dxTriMeshData *data = g;
 
-    switch (data_id)
+    switch (dataId)
     {
-    case TRIMESH_FACE_NORMALS:
-        data->assignNormals((const dReal *)in_data);
-        break;
+        case dTRIMESHDATA_FACE_NORMALS:
+        {
+            data->assignNormals((const dReal *)pDataLocation);
+            break;
+        }
 
-    default:
-        dUASSERT(data_id, "invalid data type");
-        break;
+        case dTRIMESHDATA_USE_FLAGS:
+        {
+            data->assignExternalUseFlagsBuffer((uint8 *)pDataLocation);
+            break;
+        }
+
+        default:
+        {
+            dUASSERT(dataId, "invalid data type");
+            break;
+        }
     }
 }
 
+static void *geomTriMeshDataGet(dTriMeshDataID g, int dataId, size_t *pOutDataSize);
+
 /*extern */
-void *dGeomTriMeshDataGet(dTriMeshDataID g, int data_id)
+void *dGeomTriMeshDataGet(dTriMeshDataID g, int dataId, size_t *pOutDataSize)
+{
+    return geomTriMeshDataGet(g, dataId, NULL);
+}
+
+/*extern */
+void *dGeomTriMeshDataGet2(dTriMeshDataID g, int dataId, size_t *pOutDataSize)
+{
+    return geomTriMeshDataGet(g, dataId, pOutDataSize);
+}
+
+static 
+void *geomTriMeshDataGet(dTriMeshDataID g, int dataId, size_t *pOutDataSize)
 {
     dUASSERT(g, "The argument is not a trimesh data");
 
@@ -748,15 +782,40 @@ void *dGeomTriMeshDataGet(dTriMeshDataID g, int data_id)
 
     void *result = NULL;
 
-    switch (data_id)
+    switch (dataId)
     {
-    case TRIMESH_FACE_NORMALS:
-        result = (void *)data->retrieveNormals();
-        break;
+        case dTRIMESHDATA_FACE_NORMALS:
+        {
+            if (pOutDataSize != NULL)
+            {
+                *pOutDataSize = data->calculateNormalsMemoryRequirement();
+            }
 
-    default:
-        dUASSERT(data_id, "invalid data type");
-        break;
+            result = (void *)data->retrieveNormals();
+            break;
+        }
+
+        case dTRIMESHDATA_USE_FLAGS:
+        {
+            if (pOutDataSize != NULL)
+            {
+                *pOutDataSize = data->calculateUseFlagsMemoryRequirement();
+            }
+
+            result = const_cast<uint8 *>(data->smartRetrieveUseFlags());
+            break;
+        }
+
+        default:
+        {
+            if (pOutDataSize != NULL)
+            {
+                *pOutDataSize = 0;
+            }
+
+            dUASSERT(dataId, "invalid data type");
+            break;
+        }
     }
 
     return result;
@@ -790,34 +849,6 @@ void dGeomTriMeshDataBuildDouble1(dTriMeshDataID g,
         (const IndexedTriangle *)Indices, IndexCount, TriStride, 
         (const dReal *)Normals, 
         false);
-}
-
-
-/*extern */
-void dGeomTriMeshDataGetBuffer(dTriMeshDataID g, unsigned char **buf, int *bufLen)
-{
-    dUASSERT(g, "The argument is not a trimesh data");
-
-    const dxTriMeshData *data = g;
-
-    if (buf != NULL)
-    {
-        *buf = const_cast<uint8 *>(data->smartRetrieveUseFlags());
-    }
-    
-    if (bufLen != NULL)
-    {
-        *(unsigned int *)bufLen = data->calculateUseFlagsMemoryRequirement();
-    }
-}
-
-/*extern */
-void dGeomTriMeshDataSetBuffer(dTriMeshDataID g, unsigned char* buf)
-{
-    dUASSERT(g, "The argument is not a trimesh data");
-
-    dxTriMeshData *data = g;
-    data->assignExternalUseFlagsBuffer(buf);
 }
 
 

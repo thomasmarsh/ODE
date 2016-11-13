@@ -201,7 +201,14 @@ private:
 public:
     enum UseFlags
     {
-        kVert_Base = 0x01,
+        kEdge_Base = 0x01,
+        kEdge0 = kEdge_Base << dMTV_FIRST,
+        kEdge1 = kEdge_Base << dMTV_SECOND,
+        kEdge2 = kEdge_Base << dMTV_THIRD,
+        kEdges_End = kEdge_Base << dMTV__MAX,
+        kAllEdges = kEdge0 | kEdge1 | kEdge2,
+
+        kVert_Base = kEdges_End,
         kVert0 = kVert_Base << dMTV_FIRST,
         kVert1 = kVert_Base << dMTV_SECOND,
         kVert2 = kVert_Base << dMTV_THIRD,
@@ -209,15 +216,16 @@ public:
         kVerts_End = kVert_Base << dMTV__MAX,
         kAllVerts = kVert0 | kVert1 | kVert2,
 
-        kEdge_Base = kVerts_End,
-        kEdge0 = kEdge_Base << dMTV_FIRST,
-        kEdge1 = kEdge_Base << dMTV_SECOND,
-        kEdge2 = kEdge_Base << dMTV_THIRD,
-        kEdges_End = kEdge_Base << dMTV__MAX,
-        kAllEdges = kEdge0 | kEdge1 | kEdge2,
-
         kUseAll = kAllVerts | kAllEdges,
     };
+
+    // Make sure that the flags match the values declared in public interface
+    dSASSERT((unsigned)kEdge0 == dMESHDATAUSE_EDGE1);
+    dSASSERT((unsigned)kEdge1 == dMESHDATAUSE_EDGE2);
+    dSASSERT((unsigned)kEdge2 == dMESHDATAUSE_EDGE3);
+    dSASSERT((unsigned)kVert0 == dMESHDATAUSE_VERTEX1);
+    dSASSERT((unsigned)kVert1 == dMESHDATAUSE_VERTEX2);
+    dSASSERT((unsigned)kVert2 == dMESHDATAUSE_VERTEX3);
 
 private:
     struct EdgeRecord
@@ -262,6 +270,7 @@ public:
 public:
     void assignNormals(const dReal *normals) { dxTriMeshData_Parent::assignNormals(normals); }
     const dReal *retrieveNormals() const { return (const dReal *)dxTriMeshData_Parent::retrieveNormals(); }
+    size_t calculateNormalsMemoryRequirement() const { return m_TriangleCount * (sizeof(dReal) * dSA__MAX); }
 
     void assignExternalUseFlagsBuffer(uint8 *buffer) { m_ExternalUseFlags = buffer != m_InternalUseFlags ? buffer : NULL; }
     const uint8 *smartRetrieveUseFlags() const { return m_ExternalUseFlags != NULL ? m_ExternalUseFlags : m_InternalUseFlags; }
