@@ -24,6 +24,7 @@
 #define _ODE_UTIL_H_
 
 #include "objects.h"
+#include "common.h"
 
 
 /* the efficient alignment. most platforms align data structures to some
@@ -58,20 +59,6 @@
  */
 #define dALLOCA16(n) \
     dEFFICIENT_PTR(alloca((n)+(EFFICIENT_ALIGNMENT)))
-
-
-#ifndef SIZE_MAX
-#define SIZE_MAX  ((size_t)(-1))
-#endif
-
-template<typename val_type>
-inline
-void dxSwap(val_type &one, val_type &another)
-{
-    val_type temp = one;
-    one = another;
-    another = temp;
-}
 
 
 void dInternalHandleAutoDisabling (dxWorld *world, dReal stepsize);

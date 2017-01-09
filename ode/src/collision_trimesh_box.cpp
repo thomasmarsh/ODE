@@ -1340,14 +1340,7 @@ int dCollideBTL(dxGeom* g1, dxGeom* BoxGeom, int Flags, dContactGeom* Contacts, 
     //*****at first , collide box aabb******//
 
     GIM_TRIMESH * ptrimesh = &TriMesh->m_collision_trimesh;
-    aabb3f test_aabb;
-
-    test_aabb.minX = BoxGeom->aabb[0];
-    test_aabb.maxX = BoxGeom->aabb[1];
-    test_aabb.minY = BoxGeom->aabb[2];
-    test_aabb.maxY = BoxGeom->aabb[3];
-    test_aabb.minZ = BoxGeom->aabb[4];
-    test_aabb.maxZ = BoxGeom->aabb[5];
+    aabb3f test_aabb(BoxGeom->aabb[0], BoxGeom->aabb[1], BoxGeom->aabb[2], BoxGeom->aabb[3], BoxGeom->aabb[4], BoxGeom->aabb[5]);
 
     GDYNAMIC_ARRAY collision_result;
     GIM_CREATE_BOXQUERY_LIST(collision_result);

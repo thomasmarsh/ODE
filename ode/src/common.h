@@ -28,6 +28,11 @@
 #include <algorithm>
 
 
+#ifndef SIZE_MAX
+#define SIZE_MAX  ((size_t)(-1))
+#endif
+
+
 #ifndef offsetof
 #define offsetof(s, m) ((size_t)&(((s *)8)->m) - (size_t)8)
 #endif
@@ -71,6 +76,20 @@ inline TTargetType templateCAST_TO_SMALLER(const TSourceType &stSourceValue)
 
 #endif // #if !defined(__GNUC__)
 
+
+template<typename value_type>
+inline 
+void dxSwap(value_type &one, value_type &another)
+{
+    std::swap(one, another);
+}
+
+template<typename value_type, typename lo_type, typename hi_type>
+inline 
+value_type dxClamp(const value_type &value, const lo_type &lo, const hi_type &hi)
+{
+    return value < lo ? (value_type)lo : value > hi ? (value_type)hi : value;
+}
 
 
 template <typename Type>
@@ -186,7 +205,7 @@ struct _make_unsigned
 #define __dIN_RANGE_TYPENAME__
 #endif
 #define dIN_RANGE(aval, amin, amax) ((__dIN_RANGE_TYPENAME__ _sized_unsigned<dMACRO_MAX(sizeof(aval), sizeof(amin))>::type)((__dIN_RANGE_TYPENAME__ _sized_unsigned<dMACRO_MAX(sizeof(aval), sizeof(amin))>::type)(aval) - (__dIN_RANGE_TYPENAME__ _sized_unsigned<dMACRO_MAX(sizeof(aval), sizeof(amin))>::type)(amin)) < (__dIN_RANGE_TYPENAME__ _sized_unsigned<dMACRO_MAX(sizeof(amax), sizeof(amin))>::type)((__dIN_RANGE_TYPENAME__ _sized_unsigned<dMACRO_MAX(sizeof(amax), sizeof(amin))>::type)(amax) - (__dIN_RANGE_TYPENAME__ _sized_unsigned<dMACRO_MAX(sizeof(amax), sizeof(amin))>::type)(amin)))
-#define dCLAMP(aval, alo, ahi) ((aval) <= (alo) ? (alo) : (aval) >= (ahi) ? (ahi) : (aval))
+#define dCLAMP(aval, alo, ahi) dxClamp(aval, alo, ahi)
 #define dARRAY_SIZE(aarr) (sizeof(aarr) / sizeof((aarr)[0]))
 
 
