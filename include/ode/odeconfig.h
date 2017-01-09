@@ -96,6 +96,12 @@
   typedef unsigned short  duint16;
   typedef signed char     dint8;
   typedef unsigned char   duint8;
+
+  typedef dint64          dintptr;
+  typedef duint64         duintptr;
+  typedef dint64          ddiffint;
+  typedef duint64         dsizeint;
+
 #else
 #if defined(_MSC_VER)
   typedef __int64         dint64;
@@ -110,6 +116,12 @@
   typedef unsigned short  duint16;
   typedef signed char     dint8;
   typedef unsigned char   duint8;
+
+  typedef dint32          dintptr;
+  typedef duint32         duintptr;
+  typedef dint32          ddiffint;
+  typedef duint32         dsizeint;
+
 #endif
 
 

@@ -25,8 +25,6 @@ typedef unsigned char uint8;
 typedef int int32;
 typedef unsigned int uint32;
 
-/* an integer type that we can safely cast a pointer to and from without loss of bits. */
-typedef unsigned int intP;
 
 #ifdef PRECISION_DOUBLE
 

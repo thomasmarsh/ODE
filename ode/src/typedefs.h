@@ -39,5 +39,10 @@ typedef duint16 uint16;
 typedef dint8 int8;
 typedef duint8 uint8;
 
+typedef dintptr intptr;
+typedef duintptr uintptr;
+typedef ddiffint diffint;
+typedef dsizeint sizeint;
+
 
 #endif

@@ -105,10 +105,6 @@
        #define dEpsilon  DBL_EPSILON
 #endif
 
-/* An integer type that can be safely cast to a pointer. This definition
- * should be safe even on 64-bit systems */
-typedef size_t intP;
-
 /* The efficient alignment. most platforms align data structures to some
  * number of bytes, but this is not always the most efficient alignment.
  * for example, many x86 compilers align to 4 bytes, but on a pentium it is
