@@ -303,13 +303,6 @@ inline bool ClosestPointInRay(const dVector3 Origin1,
     return true;
 }
 
-/*! \brief Clamp n to lie within the range [min, max] */
-inline float Clamp(float n, float min, float max)
-{
-    if (n < min) return min;
-    if (n > max) return max;
-    return n;
-}
 /*! \brief Returns the Closest Points from Segment 1 to Segment 2
   \param p1 start of segment 1
   \param q1 end of segment 1
@@ -320,7 +313,7 @@ inline float Clamp(float n, float min, float max)
   \return true if there is a closest point, false if the rays are paralell.
   \note Adapted from Christer Ericson's Real Time Collision Detection Book.
 */
-inline float ClosestPointBetweenSegments(dVector3& p1,
+inline dReal ClosestPointBetweenSegments(dVector3& p1,
                                          dVector3& q1,
                                          dVector3& p2,
                                          dVector3& q2,
@@ -329,8 +322,8 @@ inline float ClosestPointBetweenSegments(dVector3& p1,
 {
     // s & t were originaly part of the output args, but since
     // we don't really need them, we'll just declare them in here
-    float s;
-    float t;
+    dReal s;
+    dReal t;
     dVector3 d1 = {q1[0] - p1[0],
         q1[1] - p1[1],
         q1[2] - p1[2]};
@@ -340,9 +333,9 @@ inline float ClosestPointBetweenSegments(dVector3& p1,
     dVector3 r  = {p1[0] - p2[0],
         p1[1] - p2[1],
         p1[2] - p2[2]};
-    float a = dCalcVectorDot3(d1, d1);
-    float e = dCalcVectorDot3(d2, d2);
-    float f = dCalcVectorDot3(d2, r);
+    dReal a = dCalcVectorDot3(d1, d1);
+    dReal e = dCalcVectorDot3(d2, d2);
+    dReal f = dCalcVectorDot3(d2, r);
     // Check if either or both segments degenerate into points
     if (a <= dEpsilon && e <= dEpsilon)
     {
@@ -359,28 +352,28 @@ inline float ClosestPointBetweenSegments(dVector3& p1,
         // First segment degenerates into a point
         s = 0.0f;
         t = f / e; // s = 0 => t = (b*s + f) / e = f / e
-        t = Clamp(t, 0.0f, 1.0f);
+        t = dxClamp(t, 0.0f, 1.0f);
     }
     else
     {
-        float c = dCalcVectorDot3(d1, r);
+        dReal c = dCalcVectorDot3(d1, r);
         if (e <= dEpsilon)
         {
             // Second segment degenerates into a point
             t = 0.0f;
-            s = Clamp(-c / a, 0.0f, 1.0f); // t = 0 => s = (b*t - c) / a = -c / a
+            s = dxClamp(-c / a, 0.0f, 1.0f); // t = 0 => s = (b*t - c) / a = -c / a
         }
         else
         {
             // The general non degenerate case starts here
-            float b = dCalcVectorDot3(d1, d2);
-            float denom = a*e-b*b; // Always nonnegative
+            dReal b = dCalcVectorDot3(d1, d2);
+            dReal denom = a*e-b*b; // Always nonnegative
 
             // If segments not parallel, compute closest point on L1 to L2, and
             // clamp to segment S1. Else pick arbitrary s (here 0)
             if (denom != 0.0f)
             {
-                s = Clamp((b*f - c*e) / denom, 0.0f, 1.0f);
+                s = dxClamp((b*f - c*e) / denom, 0.0f, 1.0f);
             }
             else s = 0.0f;
 #if 0
@@ -393,22 +386,22 @@ inline float ClosestPointBetweenSegments(dVector3& p1,
             // and clamp s to [0, 1]
             if (t < 0.0f) {
                 t = 0.0f;
-                s = Clamp(-c / a, 0.0f, 1.0f);
+                s = dxClamp(-c / a, 0.0f, 1.0f);
             } else if (t > 1.0f) {
                 t = 1.0f;
-                s = Clamp((b - c) / a, 0.0f, 1.0f);
+                s = dxClamp((b - c) / a, 0.0f, 1.0f);
             }
 #else
-            float tnom = b*s + f;
+            dReal tnom = b*s + f;
             if (tnom < 0.0f)
             {
                 t = 0.0f;
-                s = Clamp(-c / a, 0.0f, 1.0f);
+                s = dxClamp(-c / a, 0.0f, 1.0f);
             }
             else if (tnom > e)
             {
                 t = 1.0f;
-                s = Clamp((b - c) / a, 0.0f, 1.0f);
+                s = dxClamp((b - c) / a, 0.0f, 1.0f);
             }
             else
             {
@@ -430,13 +423,13 @@ inline float ClosestPointBetweenSegments(dVector3& p1,
 }
 
 #if 0
-float tnom = b*s + f;
+dReal tnom = b*s + f;
 if (tnom < 0.0f) {
     t = 0.0f;
-    s = Clamp(-c / a, 0.0f, 1.0f);
+    s = dxClamp(-c / a, 0.0f, 1.0f);
 } else if (tnom > e) {
     t = 1.0f;
-    s = Clamp((b - c) / a, 0.0f, 1.0f);
+    s = dxClamp((b - c) / a, 0.0f, 1.0f);
 } else {
     t = tnom / e;
 }
@@ -1365,7 +1358,6 @@ int TestConvexIntersection(dxConvex& cvx1,dxConvex& cvx2, int flags,
         else if(ccso.depth_type==2) // edge-edge
         {
             dVector3 c1,c2;
-            //float s,t;
             SAFECONTACT(flags, contact, contacts, skip)->depth = 
                 dSqrt(ClosestPointBetweenSegments(ccso.e1a,ccso.e1b,ccso.e2a,ccso.e2b,c1,c2));
             SAFECONTACT(flags, contact, contacts, skip)->g1=&cvx1;

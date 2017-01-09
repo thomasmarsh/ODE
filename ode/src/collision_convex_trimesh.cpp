@@ -90,13 +90,7 @@ int dCollideConvexTrimesh( dxGeom *o1, dxGeom *o2, int flags, dContactGeom* cont
 #elif dTRIMESH_GIMPACT
     dxTriMesh *trimesh = (dxTriMesh *)o2;
 
-    aabb3f test_aabb;
-    test_aabb.minX = o1->aabb[0];
-    test_aabb.maxX = o1->aabb[1];
-    test_aabb.minY = o1->aabb[2];
-    test_aabb.maxY = o1->aabb[3];
-    test_aabb.minZ = o1->aabb[4];
-    test_aabb.maxZ = o1->aabb[5];
+    aabb3f test_aabb(o1->aabb[0], o1->aabb[1], o1->aabb[2], o1->aabb[3], o1->aabb[4], o1->aabb[5]);
 
     GDYNAMIC_ARRAY collision_result;
     GIM_CREATE_BOXQUERY_LIST(collision_result);
