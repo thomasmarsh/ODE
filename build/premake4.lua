@@ -243,7 +243,7 @@
       
     -- disable Visual Studio security warnings
     configuration { "vs*" }
-      defines { "_CRT_SECURE_NO_DEPRECATE" }
+      defines { "_CRT_SECURE_NO_DEPRECATE", "_SCL_SECURE_NO_WARNINGS" }
 
     -- enable M_* macros from math.h
     configuration { "vs*" }
