@@ -287,6 +287,7 @@ typedef dReal dQuaternion[dQUE__MAX];
 #define dCos(x) (cosf(x))				/* cosine */
 #define dFabs(x) (fabsf(x))			/* absolute value */
 #define dAtan2(y,x) (atan2f(y,x))		/* arc tangent with 2 args */
+#define dAsin(x) (asinf(x))
 #define dAcos(x) (acosf(x))
 #define dFMod(a,b) (fmodf(a,b))		/* modulo */
 #define dFloor(x) floorf(x)			/* floor */
@@ -323,6 +324,7 @@ typedef dReal dQuaternion[dQUE__MAX];
 #define dCos(x) cos(x)
 #define dFabs(x) fabs(x)
 #define dAtan2(y,x) atan2((y),(x))
+#define dAsin(x) asin(x)
 #define dAcos(x) acos(x)
 #define dFMod(a,b) (fmod((a),(b)))
 #define dFloor(x) floor(x)

@@ -28,9 +28,80 @@
 #include <algorithm>
 
 
+#ifndef offsetof
+#define offsetof(s, m) ((size_t)&(((s *)8)->m) - (size_t)8)
+#endif
+#ifndef membersize
+#define membersize(s, m) (sizeof(((s *)8)->m))
+#endif
+#ifndef endoffsetof
+#define endoffsetof(s, m)   ((size_t)((size_t)&(((s *)8)->m) - (size_t)8) + sizeof(((s *)8)->m))
+#endif
+
 #define dMACRO_MAX(a, b) ((a) > (b) ? (a) : (b))
 #define dMACRO_MIN(a, b) ((a) < (b) ? (a) : (b))
 
+#define dMAKE_PADDING_SIZE(DataType, ElementType) ((sizeof(DataType) + sizeof(ElementType) - 1) / sizeof(ElementType))
+
+
+template<typename DstType, typename SrcType>
+inline 
+bool _cast_to_smaller(DstType &dtOutResult, const SrcType &stArgument)
+{
+    return (SrcType)(dtOutResult = (DstType)stArgument) == stArgument;
+}
+
+#if defined(__GNUC__)
+
+#define dCAST_TO_SMALLER(TargetType, SourceValue) ({ TargetType ttCastSmallerValue; dIVERIFY(_cast_to_smaller(ttCastSmallerValue, SourceValue)); ttCastSmallerValue; })
+
+
+#else // #if !defined(__GNUC__)
+
+#define dCAST_TO_SMALLER(TargetType, SourceValue) templateCAST_TO_SMALLER<TargetType>(SourceValue)
+
+template <typename TTargetType, typename TSourceType>
+inline TTargetType templateCAST_TO_SMALLER(const TSourceType &stSourceValue)
+{
+    TTargetType ttCastSmallerValue;
+    dIVERIFY(_cast_to_smaller(ttCastSmallerValue, stSourceValue));
+    return ttCastSmallerValue;
+}
+
+
+#endif // #if !defined(__GNUC__)
+
+
+
+template <typename Type>
+union _const_type_cast_union
+{
+    explicit _const_type_cast_union(const void *psvCharBuffer): m_psvCharBuffer(psvCharBuffer) {}
+
+    operator const Type *() const { return m_pstTypedPointer; }
+    const Type &operator *() const { return *m_pstTypedPointer; }
+    const Type *operator ->() const { return m_pstTypedPointer; }
+    const Type &operator [](ptrdiff_t diElementIndex) const { return m_pstTypedPointer[diElementIndex]; }
+    const Type &operator [](size_t siElementIndex) const { return m_pstTypedPointer[siElementIndex]; }
+
+    const void 		*m_psvCharBuffer;
+    const Type		*m_pstTypedPointer;
+};
+
+template <typename Type>
+union _type_cast_union
+{
+    explicit _type_cast_union(void *psvCharBuffer): m_psvCharBuffer(psvCharBuffer) {}
+
+    operator Type *() const { return m_pstTypedPointer; }
+    Type &operator *() const { return *m_pstTypedPointer; }
+    Type *operator ->() const { return m_pstTypedPointer; }
+    Type &operator [](ptrdiff_t diElementIndex) const { return m_pstTypedPointer[diElementIndex]; }
+    Type &operator [](size_t siElementIndex) const { return m_pstTypedPointer[siElementIndex]; }
+
+    void			*m_psvCharBuffer;
+    Type			*m_pstTypedPointer;
+};
 
 
 template<size_t tsiTypeSize>
