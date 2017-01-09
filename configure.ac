@@ -520,11 +520,6 @@ AH_BOTTOM([
 #include <inttypes.h>
 #endif
 
-/* an integer type that we can safely cast a pointer to and
- * from without loss of bits.
- */
-typedef uintptr_t intP;
-
 
 #ifdef dSINGLE
        #define dEpsilon  FLT_EPSILON
