@@ -23,6 +23,7 @@
 // TriMesh code by Erwin de Vries.
 // Modified for FreeSOLID Compatibility by Rodrigo Hernandez
 // Trimesh caches separation by Oleh Derevenko
+// TriMesh storage classes refactoring and face angle computation code by Oleh Derevenko (C) 2016-2017
 
 
 #ifndef _ODE_COLLISION_TRIMESH_OPCODE_H_
@@ -192,95 +193,29 @@ private:
     void templateCalculateDataAABB(dVector3 &AABBMax, dVector3 &AABBMin);
 
 public:
-    /* Setup the UseFlags array */
-    bool preprocessData();
+    /* Setup the UseFlags array and/or build face angles*/
+    bool preprocessData(bool buildUseFlags/*=false*/, FaceAngleStorageMethod faceAndgesRequirement/*=ASM__INVALID*/);
 
 private:
-    bool meaningfulPreprocessData();
-
-public:
-    enum UseFlags
-    {
-        kEdge_Base = 0x01,
-        kEdge0 = kEdge_Base << dMTV_FIRST,
-        kEdge1 = kEdge_Base << dMTV_SECOND,
-        kEdge2 = kEdge_Base << dMTV_THIRD,
-        kEdges_End = kEdge_Base << dMTV__MAX,
-        kAllEdges = kEdge0 | kEdge1 | kEdge2,
-
-        kVert_Base = kEdges_End,
-        kVert0 = kVert_Base << dMTV_FIRST,
-        kVert1 = kVert_Base << dMTV_SECOND,
-        kVert2 = kVert_Base << dMTV_THIRD,
-        kVert_Last = kVert_Base << (dMTV__MAX - 1),
-        kVerts_End = kVert_Base << dMTV__MAX,
-        kAllVerts = kVert0 | kVert1 | kVert2,
-
-        kUseAll = kAllVerts | kAllEdges,
-    };
-
-    // Make sure that the flags match the values declared in public interface
-    dSASSERT((unsigned)kEdge0 == dMESHDATAUSE_EDGE1);
-    dSASSERT((unsigned)kEdge1 == dMESHDATAUSE_EDGE2);
-    dSASSERT((unsigned)kEdge2 == dMESHDATAUSE_EDGE3);
-    dSASSERT((unsigned)kVert0 == dMESHDATAUSE_VERTEX1);
-    dSASSERT((unsigned)kVert1 == dMESHDATAUSE_VERTEX2);
-    dSASSERT((unsigned)kVert2 == dMESHDATAUSE_VERTEX3);
-
-private:
-    struct EdgeRecord
-    {
-    public:
-        void SetupEdge(dMeshTriangleVertex edgeIdx, int triIdx, const dTriIndex* vertIdxs);
-        const Point *GetOppositeVert(const Point *vertices[]) const;
-
-    public:
-        bool operator <(const EdgeRecord &anotherEdge) const { return m_VertIdx1 < anotherEdge.m_VertIdx1 || (m_VertIdx1 == anotherEdge.m_VertIdx1 && m_VertIdx2 < anotherEdge.m_VertIdx2); }
-
-    public:
-        enum
-        {
-            kAbsVertexUsed          = 0x01,
-            kAbsVertHasAConcaveEdge = 0x02,
-        };
-
-    public:
-        unsigned m_VertIdx1;	// Index into vertex array for this edges vertices
-        unsigned m_VertIdx2;
-        unsigned m_TriIdx;		// Index into triangle array for triangle this edge belongs to
-
-        uint8 m_EdgeFlags;	
-        uint8 m_Vert1Flags;
-        uint8 m_Vert2Flags;
-        uint8 m_AbsVertexFlags;
-    };
-
-    struct VertexRecord
-    {
-        unsigned m_UsedFromEdgeIndex;
-    };
-
-    void meaningfulPreprocess_SetupEdgeRecords(EdgeRecord *edges, size_t numEdges);
-    void meaningfulPreprocess_buildEdgeFlags(uint8 *useFlags, EdgeRecord *edges, size_t numEdges, VertexRecord *vertices);
+    bool meaningfulPreprocessData(bool buildUseFlags/*=false*/, FaceAngleStorageMethod faceAndgesRequirement/*=ASM__INVALID*/);
 
 public:
     /* For when app changes the vertices */
     void updateData();
 
 public:
-    void assignNormals(const dReal *normals) { dxTriMeshData_Parent::assignNormals(normals); }
-    const dReal *retrieveNormals() const { return (const dReal *)dxTriMeshData_Parent::retrieveNormals(); }
-    size_t calculateNormalsMemoryRequirement() const { return m_TriangleCount * (sizeof(dReal) * dSA__MAX); }
-
-    void assignExternalUseFlagsBuffer(uint8 *buffer) { m_ExternalUseFlags = buffer != m_InternalUseFlags ? buffer : NULL; }
-    const uint8 *smartRetrieveUseFlags() const { return m_ExternalUseFlags != NULL ? m_ExternalUseFlags : m_InternalUseFlags; }
+    const Point *retrieveVertexInstances() const { return (const Point *)dxTriMeshData_Parent::retrieveVertexInstances(); }
 
 public:
-    size_t calculateUseFlagsMemoryRequirement() const
-    {
-        const unsigned int numTris = m_Mesh.GetNbTriangles();
-        return numTris * sizeof(m_InternalUseFlags[0]);
-    }
+    void assignNormals(const dReal *normals) { dxTriMeshData_Parent::assignNormals(normals); }
+    const dReal *retrieveNormals() const { return (const dReal *)dxTriMeshData_Parent::retrieveNormals(); }
+    size_t calculateNormalsMemoryRequirement() const { return retrieveTriangleCount() * (sizeof(dReal) * dSA__MAX); }
+
+public:
+    void assignExternalUseFlagsBuffer(uint8 *buffer) { m_ExternalUseFlags = buffer != m_InternalUseFlags ? buffer : NULL; }
+    const uint8 *smartRetrieveUseFlags() const { return m_ExternalUseFlags != NULL ? m_ExternalUseFlags : m_InternalUseFlags; }
+    bool haveUseFlagsBeenBuilt() const { return m_InternalUseFlags != NULL; }
+    size_t calculateUseFlagsMemoryRequirement() const { return m_Mesh.GetNbTriangles() * sizeof(m_InternalUseFlags[0]); }
 
 public:
     Model m_BVTree;
@@ -293,6 +228,7 @@ public:
     // data for use in collision resolution
     uint8 *m_ExternalUseFlags;
     uint8 *m_InternalUseFlags;
+
 };
 
 

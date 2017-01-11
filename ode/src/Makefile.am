@@ -102,7 +102,7 @@ AM_CPPFLAGS += -DdTRIMESH_ENABLED -DdTRIMESH_GIMPACT -I$(top_srcdir)/GIMPACT/inc
 
 libode_la_LIBADD += $(top_builddir)/GIMPACT/src/libGIMPACT.la
 libode_la_SOURCES +=    collision_trimesh_gimpact.cpp \
-                        collision_trimesh_internal.cpp \
+                        collision_trimesh_internal.cpp collision_trimesh_internal_impl.h \
                         gimpact_contact_export_helper.cpp gimpact_contact_export_helper.h \
                         gimpact_gim_contact_accessor.h \
                         gimpact_plane_contact_accessor.h \
@@ -130,7 +130,7 @@ libode_la_LIBADD += $(top_builddir)/OPCODE/libOPCODE.la \
                     $(top_builddir)/OPCODE/Ice/libIce.la
 
 libode_la_SOURCES+=     collision_trimesh_opcode.cpp \
-                        collision_trimesh_internal.cpp \
+                        collision_trimesh_internal.cpp collision_trimesh_internal_impl.h \
                         collision_trimesh_trimesh.cpp \
                         collision_trimesh_trimesh_old.cpp \
                         collision_trimesh_sphere.cpp \

@@ -8,6 +8,11 @@ the rules for this file:
   * keep the format consistent (79 char width, M/D/Y date format).
 
 ------------------------------------------------------------------------------
+01/09/2017 Oleh Derevenko
+        * dGeomTriMeshDataPreprocess2() public function has been added to 
+          replace dGeomTriMeshDataPreprocess(). Face angles pre-computation
+          for triangle meshes has been implemented.
+
 11/13/2016 Oleh Derevenko
         * dGeomTriMeshDataGetBuff and dGeomTriMeshDataSetBuff have been marked 
           deprecated and their functionality implemented via 

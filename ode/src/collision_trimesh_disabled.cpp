@@ -191,8 +191,15 @@ void dGeomTriMeshDataBuildSimple1(dTriMeshDataID g,
 }
 
 
-/*extern */
+/*extern ODE_API */
 int dGeomTriMeshDataPreprocess(dTriMeshDataID g)
+{
+    // Do nothing
+    return 1;
+}
+
+/*extern ODE_API */
+int dGeomTriMeshDataPreprocess2(dTriMeshDataID g, unsigned int buildRequestFlags, const dintptr *requestExtraData/*=NULL | const dintptr (*)[dTRIDATAPREPROCESS_BUILD__MAX]*/)
 {
     // Do nothing
     return 1;
