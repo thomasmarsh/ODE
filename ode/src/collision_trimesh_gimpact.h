@@ -23,6 +23,7 @@
 // TriMesh code by Erwin de Vries.
 // Modified for FreeSOLID Compatibility by Rodrigo Hernandez
 // Trimesh caches separation by Oleh Derevenko
+// TriMesh storage classes refactoring and face angle computation code by Oleh Derevenko (C) 2016-2017
 
 
 #ifndef _ODE_COLLISION_TRIMESH_GIMPACT_H_
@@ -63,42 +64,25 @@ public:
     ~dxTriMeshData() { /* Do nothing */ }
 
     using dxTriMeshData_Parent::buildData;
-    /* Setup the UseFlags array */
-    bool preprocessData() { /* Do nothing */ return true; }
+    
+    /* Setup the UseFlags array and/or build face angles*/
+    bool preprocessData(bool buildUseFlags/*=false*/, FaceAngleStorageMethod faceAndgesRequirement/*=ASM__INVALID*/);
+    
+private:
+    bool meaningfulPreprocessData(FaceAngleStorageMethod faceAndgesRequirement/*=ASM__INVALID*/);
+
+public:
     /* For when app changes the vertices */
     void updateData() { /* Do nothing */ }
 
 public:
-    // -- Not used
-    // void getVertex(dVector3 out_vertex, unsigned int index) const
-    // {
-    //     if (m_single)
-    //     {
-    //         const float *fverts = (const float *)(m_Vertices + m_VertexStride * index);
-    //         out_vertex[dV3E_X] = (dReal)fverts[0];
-    //         out_vertex[dV3E_Y] = (dReal)fverts[1];
-    //         out_vertex[dV3E_Z] = (dReal)fverts[2];
-    //         out_vertex[dV3E_PAD] = REAL(0.0);
-    //     }
-    //     else
-    //     {
-    //         const double *dverts = (const double *)(m_Vertices + m_VertexStride * index);
-    //         out_vertex[dV3E_X] = (dReal)dverts[0];
-    //         out_vertex[dV3E_Y] = (dReal)dverts[1];
-    //         out_vertex[dV3E_Z] = (dReal)dverts[2];
-    //         out_vertex[dV3E_PAD] = REAL(0.0);
-    //     }
-    // }
+    const vec3f *retrieveVertexInstances() const { return (const vec3f *)dxTriMeshData_Parent::retrieveVertexInstances(); }
+    const GUINT32 *retrieveTriangleVertexIndices() const { return (const GUINT32 *)dxTriMeshData_Parent::retrieveTriangleVertexIndices(); }
 
-    // -- Not used
-    // void getTriIndices(unsigned int out_triindices[3], unsigned int itriangle) const
-    // {
-    //     const unsigned int *ind = (const unsigned int * )(m_Indices + m_TriStride * itriangle);
-    //     out_triindices[0] = ind[0];
-    //     out_triindices[1] = ind[1];
-    //     out_triindices[2] = ind[2];
-    // }
-
+public:
+    void assignNormals(const dReal *normals) { dxTriMeshData_Parent::assignNormals(normals); }
+    const dReal *retrieveNormals() const { return (const dReal *)dxTriMeshData_Parent::retrieveNormals(); }
+    size_t calculateNormalsMemoryRequirement() const { return retrieveTriangleCount() * (sizeof(dReal) * dSA__MAX); }
 };
 
 
@@ -241,6 +225,12 @@ public:
     }
 
 public:
+    enum
+    {
+        VERTEXINSTANCE_STRIDE = sizeof(vec3f),
+        TRIANGLEINDEX_STRIDE = sizeof(GUINT32) * dMTV__MAX,
+    };
+
     void assignMeshData(dxTriMeshData *Data);
 
 public:

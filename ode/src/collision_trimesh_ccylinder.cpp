@@ -509,7 +509,7 @@ BOOL sTrimeshCapsuleColliderData::_cldTestSeparatingAxesOfCapsule(
         return FALSE; 
     }
 
-    if (flags & dxTriMeshData::kEdge0)
+    if (flags & dxTriMeshData::CUF_USE_FIRST_EDGE)
     {
         // axis CxE0 - Edge 0
         dCalcVectorCross3(vAxis,m_vCapsuleAxis,m_vE0);
@@ -521,7 +521,7 @@ BOOL sTrimeshCapsuleColliderData::_cldTestSeparatingAxesOfCapsule(
         }
     }
 
-    if (flags & dxTriMeshData::kEdge1)
+    if (flags & dxTriMeshData::CUF_USE_SECOND_EDGE)
     {
         // axis CxE1 - Edge 1
         dCalcVectorCross3(vAxis,m_vCapsuleAxis,m_vE1);
@@ -533,7 +533,7 @@ BOOL sTrimeshCapsuleColliderData::_cldTestSeparatingAxesOfCapsule(
         }
     }
 
-    if (flags & dxTriMeshData::kEdge2)
+    if (flags & dxTriMeshData::CUF_USE_THIRD_EDGE)
     {
         // axis CxE2 - Edge 2
         //vAxis = ( m_vCapsuleAxis cross m_vE2 );
@@ -545,7 +545,7 @@ BOOL sTrimeshCapsuleColliderData::_cldTestSeparatingAxesOfCapsule(
         }
     }
 
-    if (flags & dxTriMeshData::kEdge0)
+    if (flags & dxTriMeshData::CUF_USE_FIRST_EDGE)
     {
         // first capsule point
         // axis ((Cp0-V0) x E0) x E0
@@ -558,7 +558,7 @@ BOOL sTrimeshCapsuleColliderData::_cldTestSeparatingAxesOfCapsule(
         }
     }
 
-    if (flags & dxTriMeshData::kEdge1)
+    if (flags & dxTriMeshData::CUF_USE_SECOND_EDGE)
     {
         // axis ((Cp0-V1) x E1) x E1
         _CalculateAxis(vCp0,v1,m_vE1,m_vE1,vAxis);
@@ -570,7 +570,7 @@ BOOL sTrimeshCapsuleColliderData::_cldTestSeparatingAxesOfCapsule(
         }
     }
 
-    if (flags & dxTriMeshData::kEdge2)
+    if (flags & dxTriMeshData::CUF_USE_THIRD_EDGE)
     {
         // axis ((Cp0-V2) x E2) x E2
         _CalculateAxis(vCp0,v2,m_vE2,m_vE2,vAxis);
@@ -582,7 +582,7 @@ BOOL sTrimeshCapsuleColliderData::_cldTestSeparatingAxesOfCapsule(
         }
     }
 
-    if (flags & dxTriMeshData::kEdge0)
+    if (flags & dxTriMeshData::CUF_USE_FIRST_EDGE)
     {
         // second capsule point
         // axis ((Cp1-V0) x E0) x E0
@@ -595,7 +595,7 @@ BOOL sTrimeshCapsuleColliderData::_cldTestSeparatingAxesOfCapsule(
         }
     }
 
-    if (flags & dxTriMeshData::kEdge1)
+    if (flags & dxTriMeshData::CUF_USE_SECOND_EDGE)
     {
         // axis ((Cp1-V1) x E1) x E1
         _CalculateAxis(vCp1,v1,m_vE1,m_vE1,vAxis);
@@ -607,7 +607,7 @@ BOOL sTrimeshCapsuleColliderData::_cldTestSeparatingAxesOfCapsule(
         }
     }
 
-    if (flags & dxTriMeshData::kEdge2)
+    if (flags & dxTriMeshData::CUF_USE_THIRD_EDGE)
     {
         // axis ((Cp1-V2) x E2) x E2
         _CalculateAxis(vCp1,v2,m_vE2,m_vE2,vAxis);
@@ -619,7 +619,7 @@ BOOL sTrimeshCapsuleColliderData::_cldTestSeparatingAxesOfCapsule(
         }
     }
 
-    if (flags & dxTriMeshData::kVert0)
+    if (flags & dxTriMeshData::CUF_USE_FIRST_VERTEX)
     {
         // first vertex on triangle
         // axis ((V0-Cp0) x C) x C
@@ -632,7 +632,7 @@ BOOL sTrimeshCapsuleColliderData::_cldTestSeparatingAxesOfCapsule(
         }
     }
 
-    if (flags & dxTriMeshData::kVert1)
+    if (flags & dxTriMeshData::CUF_USE_SECOND_VERTEX)
     {
         // second vertex on triangle
         // axis ((V1-Cp0) x C) x C
@@ -645,7 +645,7 @@ BOOL sTrimeshCapsuleColliderData::_cldTestSeparatingAxesOfCapsule(
         }
     }
 
-    if (flags & dxTriMeshData::kVert2)
+    if (flags & dxTriMeshData::CUF_USE_THIRD_VERTEX)
     {
         // third vertex on triangle
         // axis ((V2-Cp0) x C) x C
@@ -661,7 +661,7 @@ BOOL sTrimeshCapsuleColliderData::_cldTestSeparatingAxesOfCapsule(
     // Test as separating axes direction vectors between each triangle
     // edge and each capsule's cap center
 
-    if (flags & dxTriMeshData::kVert0)
+    if (flags & dxTriMeshData::CUF_USE_FIRST_VERTEX)
     {
         // first triangle vertex and first capsule point
         //vAxis = v0 - vCp0;
@@ -673,7 +673,7 @@ BOOL sTrimeshCapsuleColliderData::_cldTestSeparatingAxesOfCapsule(
         }
     }
 
-    if (flags & dxTriMeshData::kVert1)
+    if (flags & dxTriMeshData::CUF_USE_SECOND_VERTEX)
     {
         // second triangle vertex and first capsule point
         //vAxis = v1 - vCp0;
@@ -685,7 +685,7 @@ BOOL sTrimeshCapsuleColliderData::_cldTestSeparatingAxesOfCapsule(
         }
     }
 
-    if (flags & dxTriMeshData::kVert2)
+    if (flags & dxTriMeshData::CUF_USE_THIRD_VERTEX)
     {
         // third triangle vertex and first capsule point
         //vAxis = v2 - vCp0;
@@ -697,7 +697,7 @@ BOOL sTrimeshCapsuleColliderData::_cldTestSeparatingAxesOfCapsule(
         }
     }
 
-    if (flags & dxTriMeshData::kVert0)
+    if (flags & dxTriMeshData::CUF_USE_FIRST_VERTEX)
     {
         // first triangle vertex and second capsule point
         //vAxis = v0 - vCp1;
@@ -709,7 +709,7 @@ BOOL sTrimeshCapsuleColliderData::_cldTestSeparatingAxesOfCapsule(
         }
     }
 
-    if (flags & dxTriMeshData::kVert1)
+    if (flags & dxTriMeshData::CUF_USE_SECOND_VERTEX)
     {
         // second triangle vertex and second capsule point
         //vAxis = v1 - vCp1;
@@ -721,7 +721,7 @@ BOOL sTrimeshCapsuleColliderData::_cldTestSeparatingAxesOfCapsule(
         }
     }
 
-    if (flags & dxTriMeshData::kVert2)
+    if (flags & dxTriMeshData::CUF_USE_THIRD_VERTEX)
     {
         // third triangle vertex and second capsule point
         //vAxis = v2 - vCp1;
@@ -1080,7 +1080,7 @@ int dCollideCCTL(dxGeom *o1, dxGeom *o2, int flags, dContactGeom *contact, int s
                 dVector3 dv[3];
                 TriMesh->fetchMeshTriangle(dv, Triint, cData.m_vTriMeshPos, cData.m_mTriMeshRot);
 
-                uint8 flags = useFlags != NULL ? useFlags[Triint] : (uint8)dxTriMeshData::kUseAll;
+                uint8 flags = useFlags != NULL ? useFlags[Triint] : (uint8)dxTriMeshData::CUF__USE_ALL_COMPONENTS;
 
                 bool bFinishSearching;
                 ctContacts0 = cData.TestCollisionForSingleTriangle(ctContacts0, Triint, dv, flags, bFinishSearching);

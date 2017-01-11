@@ -70,8 +70,12 @@ ODE_API void dGeomTriMeshDataDestroy(dTriMeshDataID g);
  */
 enum 
 {
-    dTRIMESHDATA_FACE_NORMALS,
+    dTRIMESHDATA__MIN,
+
+    dTRIMESHDATA_FACE_NORMALS = dTRIMESHDATA__MIN,
     dTRIMESHDATA_USE_FLAGS,
+
+    dTRIMESHDATA__MAX,
 
 #ifndef TRIMESH_FACE_NORMALS // Define this name during the header inclusion if you need it for something else
     // Included for backward compatibility -- please use the corrected name above. Sorry.
@@ -145,11 +149,56 @@ ODE_API void dGeomTriMeshDataBuildSimple1(dTriMeshDataID g,
                                   const dTriIndex* Indices, int IndexCount,
                                   const int* Normals);
 
-/* 
- * Pre-process the trimesh data to remove mark unnecessary edges and vertices.
- * The function returns a boolean status (may fail in case of insufficient memory)
+
+/*
+ * Data preprocessing build request flags.
+ */
+enum
+{
+    dTRIDATAPREPROCESS_BUILD__MIN,
+
+    dTRIDATAPREPROCESS_BUILD_CONCAVE_EDGES = dTRIDATAPREPROCESS_BUILD__MIN, // Used to optimize OPCODE trimesh-capsule collisions; allocates 1 byte per triangle; no extra data associated
+    dTRIDATAPREPROCESS_BUILD_FACE_ANGLES,   // Used to aid trimesh-convex collisions; memory requirements depend on extra data
+    
+    dTRIDATAPREPROCESS_BUILD__MAX,
+};
+
+/*
+ * Data preprocessing extra values for dTRIDATAPREPROCESS_BUILD_FACE_ANGLES.
+ */
+enum 
+{
+    dTRIDATAPREPROCESS_FACE_ANGLES_EXTRA__MIN,
+
+    dTRIDATAPREPROCESS_FACE_ANGLES_EXTRA_BYTE_POSITIVE = dTRIDATAPREPROCESS_FACE_ANGLES_EXTRA__MIN, // Build angles for convex edges only and store as bytes; allocates 3 bytes per triangle; stores angles (0..180] in 1/254 fractions leaving two values for the flat and all the concaves
+    dTRIDATAPREPROCESS_FACE_ANGLES_EXTRA_BYTE_ALL, // Build angles for all the edges and store in bytes; allocates 3 bytes per triangle; stores angles [-180..0) and (0..180] in 1/127 fractions plus a value for the flat angle
+    dTRIDATAPREPROCESS_FACE_ANGLES_EXTRA_WORD_ALL, // Build angles for all the edges and store in words; allocates 6 bytes per triangle; stores angles [-180..0) and (0..180] in 1/32767 fractions plus a value for the flat angle
+
+    dTRIDATAPREPROCESS_FACE_ANGLES_EXTRA__MAX,
+
+    dTRIDATAPREPROCESS_FACE_ANGLES_EXTRA__DEFAULT = dTRIDATAPREPROCESS_FACE_ANGLES_EXTRA_BYTE_POSITIVE, // The default value assumed if the extra data is not provided
+};
+
+
+/*
+ * Pre-process the trimesh data according to the request flags.
+ *
+ * buildRequestFlags is a bitmask of 1U << dTRIDATAPREPROCESS_BUILD_...
+ * It is allowed to call the function multiple times provided the bitmasks are different each time.
+ *
+ * requestExtraData is an optional pointer to array of extra parameters per bitmask bits 
+ * (only the elements indexed by positions of raised bits are examined; 
+ * defaults are assumed if the pointer is NULL)
+ *
+ * The function returns a boolean status the only failure reason being insufficient memory.
+ */
+ODE_API int dGeomTriMeshDataPreprocess2(dTriMeshDataID g, unsigned int buildRequestFlags, const dintptr *requestExtraData/*=NULL | const dintptr (*)[dTRIDATAPREPROCESS_BUILD__MAX]*/);
+
+/*
+ * Obsolete. Equivalent to calling dGeomTriMeshDataPreprocess2(g, (1U << dTRIDATAPREPROCESS_BUILD_CONCAVE_EDGES), NULL)
  */
 ODE_API int dGeomTriMeshDataPreprocess(dTriMeshDataID g);
+
 
 
 /*

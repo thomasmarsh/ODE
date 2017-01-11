@@ -22,7 +22,8 @@
 
 // TriMesh code by Erwin de Vries.
 // Modified for FreeSOLID Compatibility by Rodrigo Hernandez
-// Trimesh caches separation by Oleh Derevenko
+// TriMesh caches separation by Oleh Derevenko
+// TriMesh storage classes refactoring and face angle computation code by Oleh Derevenko (C) 2016-2017
 
 
 #ifndef _ODE_COLLISION_TRIMESH_INTERNAL_H_
@@ -41,8 +42,6 @@
 #if dTLS_ENABLED
 #include "odetls.h"
 #endif
-
-#include "util.h"
 
 
 struct TrimeshCollidersCache;
@@ -63,6 +62,53 @@ TrimeshCollidersCache *GetTrimeshCollidersCache(unsigned uiTLSKind)
 }
 
 
+enum FaceAngleStorageMethod
+{
+    ASM__MIN,
+
+    ASM_BYTE_SIGNED = ASM__MIN,
+    ASM_BYTE_POSITIVE,
+    ASM_WORD_SIGNED,
+
+    ASM__MAX,
+
+    ASM__INVALID = ASM__MAX,
+};
+
+enum FaceAngleDomain
+{
+    FAD__MIN,
+
+    FAD_CONCAVE = FAD__MIN,
+
+    FAD__SIGNSTORED_IMPLICITVALUE_MIN,
+
+    FAD_FLAT = FAD__SIGNSTORED_IMPLICITVALUE_MIN,
+
+    FAD__SIGNSTORED_IMPLICITVALUE_MAX,
+
+    FAD__BYTEPOS_STORED_MIN = FAD__SIGNSTORED_IMPLICITVALUE_MAX,
+
+    FAD_CONVEX = FAD__BYTEPOS_STORED_MIN,
+
+    FAD__BYTEPOS_STORED_MAX,
+
+    EAD__MAX = FAD__BYTEPOS_STORED_MAX,
+};
+
+class IFaceAngleStorage
+{
+public:
+    virtual void disposeStorage() = 0;
+
+    virtual bool areNegativeAnglesStored() const = 0;
+
+    // This is to store angles between neighbor triangle normals as positive value for convex and negative for concave edges
+    virtual void assignFacesAngleIntoStorage(unsigned triangleIndex, dMeshTriangleVertex vertexIndex, dReal dAngleValue) = 0;
+    virtual FaceAngleDomain retrieveFacesAngleFromStorage(dReal &out_AngleValue, unsigned triangleIndex, dMeshTriangleVertex vertexIndex) = 0;
+};
+
+
 typedef dBase dxTriDataBase_Parent;
 struct dxTriDataBase:
     public dxTriDataBase_Parent
@@ -76,7 +122,9 @@ public:
         m_Indices(NULL),
         m_TriangleCount(0),
         m_TriStride(0),
-        m_Single(false)
+        m_Single(false),
+        m_Normals(NULL),
+        m_FaceAngles(NULL)
     {
 #if !dTRIMESH_ENABLED
         dUASSERT(false, "dTRIMESH_ENABLED is not defined. Trimesh geoms will not work");
@@ -92,10 +140,144 @@ public:
 
 
 public:
+    unsigned retrieveVertexCount() const { return m_VertexCount; }
+    int retrieveVertexStride() const { return m_VertexStride; }
+
+    unsigned retrieveTriangleCount() const { return m_TriangleCount; }
+    int retrieveTriangleStride() const { return m_TriStride; }
+
+protected:
+    const void *retrieveVertexInstances() const { return m_Vertices; }
+    const void *retrieveTriangleVertexIndices() const { return m_Indices; }
+    bool isSingle() const { return m_Single; }
+
+public:
+    template<typename tcoordfloat, typename tindexint>
+    static void retrieveTriangleVertexPoints(dVector3 out_Points[dMTV__MAX], unsigned triangleIndex,
+        const tcoordfloat *vertexInstances, int vertexStride, const tindexint *triangleVertexIndices, int triangleStride);
+
+public:
     void assignNormals(const void *normals) { m_Normals = normals; }
     const void *retrieveNormals() const { return m_Normals; }
 
+    IFaceAngleStorage *retrieveFaceAngles() const { return m_FaceAngles; }
+
+protected:
+    bool allocateFaceAngles(FaceAngleStorageMethod storageMethod);
+    void freeFaceAngles();
+
+    bool haveFaceAnglesBeenBuilt() const { return m_FaceAngles != NULL; }
+
 public:
+    enum MeshComponentUseFlags
+    {
+        CUF__USE_EDGES_MIN = 0x01,
+        CUF_USE_FIRST_EDGE = CUF__USE_EDGES_MIN << dMTV_FIRST,
+        CUF_USE_SECOND_EDGE = CUF__USE_EDGES_MIN << dMTV_SECOND,
+        CUF_USE_THIRD_EDGE = CUF__USE_EDGES_MIN << dMTV_THIRD,
+        CUF__USE_EDGES_MAX = CUF__USE_EDGES_MIN << dMTV__MAX,
+        CUF__USE_ALL_EDGES = CUF_USE_FIRST_EDGE | CUF_USE_SECOND_EDGE | CUF_USE_THIRD_EDGE,
+
+        CUF__USE_VERTICES_MIN = CUF__USE_EDGES_MAX,
+        CUF_USE_FIRST_VERTEX = CUF__USE_VERTICES_MIN << dMTV_FIRST,
+        CUF_USE_SECOND_VERTEX = CUF__USE_VERTICES_MIN << dMTV_SECOND,
+        CUF_USE_THIRD_VERTEX = CUF__USE_VERTICES_MIN << dMTV_THIRD,
+        CUF__USE_VERTICES_LAST = CUF__USE_VERTICES_MIN << (dMTV__MAX - 1),
+        CUF__USE_VERTICES_MAX = CUF__USE_VERTICES_MIN << dMTV__MAX,
+        CUF__USE_ALL_VERTICES = CUF_USE_FIRST_VERTEX | CUF_USE_SECOND_VERTEX | CUF_USE_THIRD_VERTEX,
+
+        CUF__USE_ALL_COMPONENTS = CUF__USE_ALL_VERTICES | CUF__USE_ALL_EDGES,
+    };
+
+    // Make sure that the flags match the values declared in public interface
+    dSASSERT((unsigned)CUF_USE_FIRST_EDGE == dMESHDATAUSE_EDGE1);
+    dSASSERT((unsigned)CUF_USE_SECOND_EDGE == dMESHDATAUSE_EDGE2);
+    dSASSERT((unsigned)CUF_USE_THIRD_EDGE == dMESHDATAUSE_EDGE3);
+    dSASSERT((unsigned)CUF_USE_FIRST_VERTEX == dMESHDATAUSE_VERTEX1);
+    dSASSERT((unsigned)CUF_USE_SECOND_VERTEX == dMESHDATAUSE_VERTEX2);
+    dSASSERT((unsigned)CUF_USE_THIRD_VERTEX == dMESHDATAUSE_VERTEX3);
+
+protected:
+    struct EdgeRecord
+    {
+    public:
+        void setupEdge(dMeshTriangleVertex edgeIdx, int triIdx, const unsigned vertexIndices[dMTV__MAX]);
+
+        // Get the vertex opposite this edge in the triangle
+        dMeshTriangleVertex getOppositeVertexIndex() const
+        {
+            extern const CEnumUnsortedElementArray<unsigned, dxTriDataBase::CUF__USE_VERTICES_LAST / dxTriDataBase::CUF__USE_VERTICES_MIN, dMeshTriangleVertex, 0x161116DC> g_VertFlagOppositeIndices;
+
+            dMeshTriangleVertex oppositeIndex = g_VertFlagOppositeIndices.Encode(((m_Vert1Flags | m_Vert2Flags) ^ CUF__USE_ALL_VERTICES) / CUF__USE_VERTICES_MIN - 1);
+            dIASSERT(dIN_RANGE(oppositeIndex, dMTV__MIN, dMTV__MAX));
+
+            return oppositeIndex;
+        }
+
+        dMeshTriangleVertex getEdgeStartVertexIndex() const
+        {
+            extern const CEnumUnsortedElementArray<unsigned, dxTriDataBase::CUF__USE_VERTICES_LAST / dxTriDataBase::CUF__USE_VERTICES_MIN, dMeshTriangleVertex, 0x161225E9> g_VertFlagEdgeStartIndices;
+
+            dMeshTriangleVertex startIndex = g_VertFlagEdgeStartIndices.Encode(((m_Vert1Flags | m_Vert2Flags) ^ CUF__USE_ALL_VERTICES) / CUF__USE_VERTICES_MIN - 1);
+            dIASSERT(dIN_RANGE(startIndex, dMTV__MIN, dMTV__MAX));
+
+            return startIndex;
+        }
+
+    public:
+        bool operator <(const EdgeRecord &anotherEdge) const { return m_VertIdx1 < anotherEdge.m_VertIdx1 || (m_VertIdx1 == anotherEdge.m_VertIdx1 && m_VertIdx2 < anotherEdge.m_VertIdx2); }
+
+    public:
+        enum
+        {
+            AVF_VERTEX_USED             = 0x01,
+            AVF_VERTEX_HAS_CONCAVE_EDGE = 0x02,
+        };
+
+    public:
+        unsigned m_VertIdx1;	// Index into vertex array for this edges vertices
+        unsigned m_VertIdx2;
+        unsigned m_TriIdx;		// Index into triangle array for triangle this edge belongs to
+
+        uint8 m_EdgeFlags;	
+        uint8 m_Vert1Flags;
+        uint8 m_Vert2Flags;
+        uint8 m_AbsVertexFlags;
+    };
+
+    struct VertexRecord
+    {
+        unsigned m_UsedFromEdgeIndex;
+    };
+
+    template<class TMeshDataAccessor>
+    static void meaningfulPreprocess_SetupEdgeRecords(EdgeRecord *edges, size_t numEdges, const TMeshDataAccessor &dataAccessor);
+    template<class TMeshDataAccessor>
+    static void meaningfulPreprocess_buildEdgeFlags(uint8 *useFlags/*=NULL*/, IFaceAngleStorage *faceAngles/*=NULL*/, 
+        EdgeRecord *edges, size_t numEdges, VertexRecord *vertices, 
+        const dReal *externalNormals, const TMeshDataAccessor &dataAccessor);
+    static void buildBoundaryEdgeAngle(IFaceAngleStorage *faceAngles, EdgeRecord *currEdge);
+    template<class TMeshDataAccessor>
+    static void buildConcaveEdgeAngle(IFaceAngleStorage *faceAngles, bool negativeAnglesStored, 
+        EdgeRecord *currEdge, const dReal &normalSegmentDot, const dReal &lengthSquareProduct,
+        const dVector3 &triangleNormal, const dVector3 &secondOppositeVertexSegment,
+        const dVector3 *pSecondTriangleMatchingEdge/*=NULL*/, const dVector3 *pFirstTriangle/*=NULL*/, 
+        const TMeshDataAccessor &dataAccessor);
+    template<class TMeshDataAccessor>
+    static 
+    void buildConvexEdgeAngle(IFaceAngleStorage *faceAngles, 
+        EdgeRecord *currEdge, const dReal &normalSegmentDot, const dReal &lengthSquareProduct,
+        const dVector3 &triangleNormal, const dVector3 &secondOppositeVertexSegment,
+        const dVector3 *pSecondTriangleMatchingEdge/*=NULL*/, const dVector3 *pFirstTriangle/*=NULL*/, 
+        const TMeshDataAccessor &dataAccessor);
+    template<class TMeshDataAccessor>
+    static dReal calculateEdgeAngleValidated(unsigned firstVertexStartIndex,
+        EdgeRecord *currEdge, const dReal &normalSegmentDot, const dReal &lengthSquareProduct,
+        const dVector3 &triangleNormal, const dVector3 &secondOppositeVertexSegment,
+        const dVector3 *pSecondTriangleMatchingEdge/*=NULL*/, const dVector3 *pFirstTriangle/*=NULL*/, 
+        const TMeshDataAccessor &dataAccessor);
+
+private:
     const void *m_Vertices;
     int m_VertexStride;
     unsigned m_VertexCount;
@@ -106,6 +288,7 @@ public:
 
 private:
     const void *m_Normals;
+    IFaceAngleStorage *m_FaceAngles;
 };
 
 
