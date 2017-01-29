@@ -326,7 +326,7 @@ bool dxTriMeshData::meaningfulPreprocessData(bool buildUseFlags/*=false*/, FaceA
 
         TrimeshDataTrianglePointAccessor_OPCODE pointAccessor(m_Mesh);
         const dReal *const externalNormals = retrieveNormals();
-        IFaceAngleStorage *faceAngles = retrieveFaceAngles();
+        IFaceAngleStorageControl *faceAngles = retrieveFaceAngles();
         meaningfulPreprocess_buildEdgeFlags(useFlags, faceAngles, edges, numEdges, vertices, externalNormals, pointAccessor);
 
         dFree(tempBuffer, totalTempMemoryRequired);
@@ -481,22 +481,22 @@ bool dxTriMesh::controlGeometry_GetMergeSphereContacts(int &returnValue)
 /*virtual */
 void dxTriMesh::computeAABB() 
 {
-    const dxTriMeshData* d = m_Data;
+    const dxTriMeshData *meshData = getMeshData();
     dVector3 c;
     const dMatrix3& R = final_posr->R;
     const dVector3& pos = final_posr->pos;
 
-    dMultiply0_331( c, R, d->m_AABBCenter );
+    dMultiply0_331( c, R, meshData->m_AABBCenter );
 
-    dReal xrange = dFabs(R[0] * m_Data->m_AABBExtents[0]) +
-        dFabs(R[1] * m_Data->m_AABBExtents[1]) + 
-        dFabs(R[2] * m_Data->m_AABBExtents[2]);
-    dReal yrange = dFabs(R[4] * m_Data->m_AABBExtents[0]) +
-        dFabs(R[5] * m_Data->m_AABBExtents[1]) + 
-        dFabs(R[6] * m_Data->m_AABBExtents[2]);
-    dReal zrange = dFabs(R[8] * m_Data->m_AABBExtents[0]) +
-        dFabs(R[9] * m_Data->m_AABBExtents[1]) + 
-        dFabs(R[10] * m_Data->m_AABBExtents[2]);
+    dReal xrange = dFabs(R[0] * meshData->m_AABBExtents[0]) +
+        dFabs(R[1] * meshData->m_AABBExtents[1]) + 
+        dFabs(R[2] * meshData->m_AABBExtents[2]);
+    dReal yrange = dFabs(R[4] * meshData->m_AABBExtents[0]) +
+        dFabs(R[5] * meshData->m_AABBExtents[1]) + 
+        dFabs(R[6] * meshData->m_AABBExtents[2]);
+    dReal zrange = dFabs(R[8] * meshData->m_AABBExtents[0]) +
+        dFabs(R[9] * meshData->m_AABBExtents[1]) + 
+        dFabs(R[10] * meshData->m_AABBExtents[2]);
 
     aabb[0] = c[0] + pos[0] - xrange;
     aabb[1] = c[0] + pos[0] + xrange;
@@ -527,7 +527,9 @@ void dxTriMesh::fetchMeshTriangle(dVector3 *const pout_triangle[3], unsigned ind
 
     VertexPointers VP;
     ConversionArea VC;
-    m_Data->m_Mesh.GetTriangle(VP, index, VC);
+
+    const dxTriMeshData *meshData = getMeshData();
+    meshData->m_Mesh.GetTriangle(VP, index, VC);
 
     for (unsigned i = 0; i != 3; ++i)
     {
@@ -552,7 +554,9 @@ void dxTriMesh::fetchMeshTriangle(dVector3 out_triangle[3], unsigned index, cons
 
     VertexPointers VP;
     ConversionArea VC;
-    m_Data->m_Mesh.GetTriangle(VP, index, VC);
+
+    const dxTriMeshData *meshData = getMeshData();
+    meshData->m_Mesh.GetTriangle(VP, index, VC);
 
     for (unsigned i = 0; i != 3; ++i)
     {

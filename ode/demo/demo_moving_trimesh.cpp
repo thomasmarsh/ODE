@@ -307,6 +307,8 @@ static void command (int cmd)
             dTriMeshDataID new_tmdata = dGeomTriMeshDataCreate();
             dGeomTriMeshDataBuildSingle(new_tmdata, &Vertices[0], 3 * sizeof(float), VertexCount, 
                                         (dTriIndex*)&Indices[0], IndexCount, 3 * sizeof(dTriIndex));
+            dGeomTriMeshDataPreprocess2(new_tmdata, (1U << dTRIDATAPREPROCESS_BUILD_FACE_ANGLES), NULL);
+
 
             obj[i].geom[0] = dCreateTriMesh(space, new_tmdata, 0, 0, 0);
 
@@ -630,12 +632,13 @@ int main (int argc, char **argv)
   memset (obj,0,sizeof(obj));
 
   // note: can't share tridata if intending to trimesh-trimesh collide
+  const unsigned preprocessFlags = (1U << dTRIDATAPREPROCESS_BUILD_CONCAVE_EDGES) | (1U << dTRIDATAPREPROCESS_BUILD_FACE_ANGLES);
   TriData1 = dGeomTriMeshDataCreate();
   dGeomTriMeshDataBuildSingle(TriData1, &Vertices[0], 3 * sizeof(float), VertexCount, (dTriIndex*)&Indices[0], IndexCount, 3 * sizeof(dTriIndex));
-  dGeomTriMeshDataPreprocess(TriData1);
+  dGeomTriMeshDataPreprocess2(TriData1, preprocessFlags, NULL);
   TriData2 = dGeomTriMeshDataCreate();
   dGeomTriMeshDataBuildSingle(TriData2, &Vertices[0], 3 * sizeof(float), VertexCount, (dTriIndex*)&Indices[0], IndexCount, 3 * sizeof(dTriIndex));
-  dGeomTriMeshDataPreprocess(TriData2);
+  dGeomTriMeshDataPreprocess2(TriData2, preprocessFlags, NULL);
   
   TriMesh1 = dCreateTriMesh(space, TriData1, 0, 0, 0);
   TriMesh2 = dCreateTriMesh(space, TriData2, 0, 0, 0);

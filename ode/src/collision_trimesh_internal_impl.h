@@ -69,7 +69,7 @@ void dxTriDataBase::meaningfulPreprocess_SetupEdgeRecords(EdgeRecord *edges, siz
 
 template<class TMeshDataAccessor>
 /*static */
-void dxTriDataBase::meaningfulPreprocess_buildEdgeFlags(uint8 *useFlags/*=NULL*/, IFaceAngleStorage *faceAngles/*=NULL*/, 
+void dxTriDataBase::meaningfulPreprocess_buildEdgeFlags(uint8 *useFlags/*=NULL*/, IFaceAngleStorageControl *faceAngles/*=NULL*/, 
     EdgeRecord *edges, size_t numEdges, VertexRecord *vertices, 
     const dReal *externalNormals/*=NULL*/, const TMeshDataAccessor &dataAccessor)
 {
@@ -311,7 +311,7 @@ void dxTriDataBase::meaningfulPreprocess_buildEdgeFlags(uint8 *useFlags/*=NULL*/
 }
 
 /*static */
-void dxTriDataBase::buildBoundaryEdgeAngle(IFaceAngleStorage *faceAngles, 
+void dxTriDataBase::buildBoundaryEdgeAngle(IFaceAngleStorageControl *faceAngles, 
     EdgeRecord *currEdge)
 {
     const dReal faceAngle = REAL(0.0);
@@ -324,7 +324,7 @@ void dxTriDataBase::buildBoundaryEdgeAngle(IFaceAngleStorage *faceAngles,
 
 template<class TMeshDataAccessor>
 /*static */
-void dxTriDataBase::buildConcaveEdgeAngle(IFaceAngleStorage *faceAngles, bool negativeAnglesStored, 
+void dxTriDataBase::buildConcaveEdgeAngle(IFaceAngleStorageControl *faceAngles, bool negativeAnglesStored, 
     EdgeRecord *currEdge, const dReal &normalSegmentDot, const dReal &lengthSquareProduct,
     const dVector3 &triangleNormal, const dVector3 &secondOppositeVertexSegment,
     const dVector3 *pSecondTriangleMatchingEdge/*=NULL*/, const dVector3 *pFirstTriangle/*=NULL*/, 
@@ -362,7 +362,7 @@ void dxTriDataBase::buildConcaveEdgeAngle(IFaceAngleStorage *faceAngles, bool ne
 
 template<class TMeshDataAccessor>
 /*static */
-void dxTriDataBase::buildConvexEdgeAngle(IFaceAngleStorage *faceAngles, 
+void dxTriDataBase::buildConvexEdgeAngle(IFaceAngleStorageControl *faceAngles, 
     EdgeRecord *currEdge, const dReal &normalSegmentDot, const dReal &lengthSquareProduct,
     const dVector3 &triangleNormal, const dVector3 &secondOppositeVertexSegment,
     const dVector3 *pSecondTriangleMatchingEdge/*=NULL*/, const dVector3 *pFirstTriangle/*=NULL*/, 

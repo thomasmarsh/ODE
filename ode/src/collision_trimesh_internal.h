@@ -96,7 +96,7 @@ enum FaceAngleDomain
     EAD__MAX = FAD__BYTEPOS_STORED_MAX,
 };
 
-class IFaceAngleStorage
+class IFaceAngleStorageControl
 {
 public:
     virtual void disposeStorage() = 0;
@@ -105,6 +105,11 @@ public:
 
     // This is to store angles between neighbor triangle normals as positive value for convex and negative for concave edges
     virtual void assignFacesAngleIntoStorage(unsigned triangleIndex, dMeshTriangleVertex vertexIndex, dReal dAngleValue) = 0;
+};
+
+class IFaceAngleStorageView
+{
+public:
     virtual FaceAngleDomain retrieveFacesAngleFromStorage(dReal &out_AngleValue, unsigned triangleIndex, dMeshTriangleVertex vertexIndex) = 0;
 };
 
@@ -124,7 +129,8 @@ public:
         m_TriStride(0),
         m_Single(false),
         m_Normals(NULL),
-        m_FaceAngles(NULL)
+        m_FaceAngles(NULL),
+        m_FaceAngleView(NULL)
     {
 #if !dTRIMESH_ENABLED
         dUASSERT(false, "dTRIMESH_ENABLED is not defined. Trimesh geoms will not work");
@@ -160,7 +166,8 @@ public:
     void assignNormals(const void *normals) { m_Normals = normals; }
     const void *retrieveNormals() const { return m_Normals; }
 
-    IFaceAngleStorage *retrieveFaceAngles() const { return m_FaceAngles; }
+    IFaceAngleStorageControl *retrieveFaceAngles() const { return m_FaceAngles; }
+    IFaceAngleStorageView *retrieveFaceAngleView() const { return m_FaceAngleView; }
 
 protected:
     bool allocateFaceAngles(FaceAngleStorageMethod storageMethod);
@@ -253,19 +260,19 @@ protected:
     template<class TMeshDataAccessor>
     static void meaningfulPreprocess_SetupEdgeRecords(EdgeRecord *edges, size_t numEdges, const TMeshDataAccessor &dataAccessor);
     template<class TMeshDataAccessor>
-    static void meaningfulPreprocess_buildEdgeFlags(uint8 *useFlags/*=NULL*/, IFaceAngleStorage *faceAngles/*=NULL*/, 
+    static void meaningfulPreprocess_buildEdgeFlags(uint8 *useFlags/*=NULL*/, IFaceAngleStorageControl *faceAngles/*=NULL*/, 
         EdgeRecord *edges, size_t numEdges, VertexRecord *vertices, 
         const dReal *externalNormals, const TMeshDataAccessor &dataAccessor);
-    static void buildBoundaryEdgeAngle(IFaceAngleStorage *faceAngles, EdgeRecord *currEdge);
+    static void buildBoundaryEdgeAngle(IFaceAngleStorageControl *faceAngles, EdgeRecord *currEdge);
     template<class TMeshDataAccessor>
-    static void buildConcaveEdgeAngle(IFaceAngleStorage *faceAngles, bool negativeAnglesStored, 
+    static void buildConcaveEdgeAngle(IFaceAngleStorageControl *faceAngles, bool negativeAnglesStored, 
         EdgeRecord *currEdge, const dReal &normalSegmentDot, const dReal &lengthSquareProduct,
         const dVector3 &triangleNormal, const dVector3 &secondOppositeVertexSegment,
         const dVector3 *pSecondTriangleMatchingEdge/*=NULL*/, const dVector3 *pFirstTriangle/*=NULL*/, 
         const TMeshDataAccessor &dataAccessor);
     template<class TMeshDataAccessor>
     static 
-    void buildConvexEdgeAngle(IFaceAngleStorage *faceAngles, 
+    void buildConvexEdgeAngle(IFaceAngleStorageControl *faceAngles, 
         EdgeRecord *currEdge, const dReal &normalSegmentDot, const dReal &lengthSquareProduct,
         const dVector3 &triangleNormal, const dVector3 &secondOppositeVertexSegment,
         const dVector3 *pSecondTriangleMatchingEdge/*=NULL*/, const dVector3 *pFirstTriangle/*=NULL*/, 
@@ -288,7 +295,8 @@ private:
 
 private:
     const void *m_Normals;
-    IFaceAngleStorage *m_FaceAngles;
+    IFaceAngleStorageControl *m_FaceAngles;
+    IFaceAngleStorageView *m_FaceAngleView; 
 };
 
 
@@ -297,7 +305,7 @@ struct dxMeshBase:
     public dxMeshBase_Parent
 {
 public:
-    dxMeshBase(dxSpace *Space, dxTriMeshData *Data, 
+    dxMeshBase(dxSpace *Space, dxTriDataBase *Data, 
         dTriCallback *Callback, dTriArrayCallback *ArrayCallback, dTriRayCallback *RayCallback, 
         bool doTCs=false):
         dxMeshBase_Parent(Space, 1),
@@ -341,13 +349,16 @@ public:
     void assignTriMergeCallback(dTriTriMergeCallback *value) { m_TriMergeCallback = value; }
     dTriTriMergeCallback *retrieveTriMergeCallback() const { return m_TriMergeCallback; }
 
-    void assignMeshData(dxTriMeshData *instance)
+    void assignMeshData(dxTriDataBase *instance)
     {
         setMeshData(instance);
         // I changed my data -- I know nothing about my own AABB anymore.
         markAABBBad();
     }
-    dxTriMeshData *retrieveMeshData() const { return getMeshData(); }
+    dxTriDataBase *retrieveMeshData() const { return getMeshData(); }
+
+    IFaceAngleStorageControl *retrieveFaceAngleStorage() const { return m_Data->retrieveFaceAngles(); }
+    IFaceAngleStorageView *retrieveFaceAngleView() const { return m_Data->retrieveFaceAngleView(); }
 
     void assignDoTC(TRIMESHTC tc, bool value) { setDoTC(tc, value); }
     bool retrieveDoTC(TRIMESHTC tc) const { return getDoTC(tc); }
@@ -357,8 +368,10 @@ public:
     bool getDoTC(TRIMESHTC tc) const { dIASSERT(dIN_RANGE(tc, TTC__MIN, TTC__MAX)); return m_DoTCs[tc]; }
 
 private:
-    void setMeshData(dxTriMeshData *Data) { m_Data = Data; }
-    dxTriMeshData *getMeshData() const { return m_Data; }
+    void setMeshData(dxTriDataBase *Data) { m_Data = Data; }
+
+protected:
+    dxTriDataBase *getMeshData() const { return m_Data; }
 
 public:
     // Callbacks
@@ -367,11 +380,16 @@ public:
     dTriRayCallback *m_RayCallback;
     dTriTriMergeCallback *m_TriMergeCallback;
 
+private:
     // Data types
-    dxTriMeshData *m_Data;
+    dxTriDataBase *m_Data;
 
+public:
     bool m_DoTCs[TTC__MAX];
 };
+
+
+IFaceAngleStorageView *dxGeomTriMeshGetFaceAngleView(dxGeom *triMeshGeom);
 
 
 #include "collision_trimesh_gimpact.h"

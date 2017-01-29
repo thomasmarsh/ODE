@@ -208,6 +208,8 @@ public:
     virtual void computeAABB();
 
 public:
+    dxTriMeshData *retrieveMeshData() const { return getMeshData(); }
+
     unsigned getMeshTriangleCount() const { return gim_trimesh_get_triangle_count(const_cast<GIM_TRIMESH *>(&m_collision_trimesh)); }
 
     void fetchMeshTransformedTriangle(dVector3 *const pout_triangle[3], unsigned index)
@@ -223,6 +225,9 @@ public:
         gim_trimesh_get_triangle_vertices(&m_collision_trimesh, (GUINT32)index, out_triangle[0], out_triangle[1], out_triangle[2]);
         gim_trimesh_unlocks_work_data(&m_collision_trimesh);
     }
+
+private:
+    dxTriMeshData *getMeshData() const { return static_cast<dxTriMeshData *>(dxTriMesh_Parent::getMeshData()); }
 
 public:
     enum

@@ -296,11 +296,11 @@ int dCollideSTL(dxGeom* g1, dxGeom* SphereGeom, int Flags, dContactGeom* Contact
 
         // Intersect
         Collider.SetTemporalCoherence(true);
-        Collider.Collide(*sphereTC, Sphere, TriMesh->m_Data->m_BVTree, null, &MeshMatrix);
+        Collider.Collide(*sphereTC, Sphere, TriMesh->retrieveMeshBVTreeRef(), null, &MeshMatrix);
     }
     else {
         Collider.SetTemporalCoherence(false);
-        Collider.Collide(pccColliderCache->m_DefaultSphereCache, Sphere, TriMesh->m_Data->m_BVTree, null, &MeshMatrix);
+        Collider.Collide(pccColliderCache->m_DefaultSphereCache, Sphere, TriMesh->retrieveMeshBVTreeRef(), null, &MeshMatrix);
     }
 
     if (! Collider.GetContactStatus()) {

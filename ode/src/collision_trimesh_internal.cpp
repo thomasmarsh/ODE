@@ -145,7 +145,8 @@ public:
 
 template<class TStorageCodec>
 class FaceAnglesWrapper:
-    public IFaceAngleStorage
+    public IFaceAngleStorageControl,
+    public IFaceAngleStorageView
 {
 protected:
     FaceAnglesWrapper(unsigned triangleCount) { setAllocatedTriangleCount(triangleCount); }
@@ -153,7 +154,7 @@ protected:
 public:
     virtual ~FaceAnglesWrapper();
 
-    static IFaceAngleStorage *allocateInstance(unsigned triangleCount);
+    static IFaceAngleStorageControl *allocateInstance(unsigned triangleCount, IFaceAngleStorageView *&out_StorageView);
 
     static bool calculateInstanceSizeRequired(size_t &out_SizeRequired, unsigned triangleCount);
 
@@ -166,27 +167,19 @@ private:
 
     struct StorageHeader
     {
-        void initialize() { m_TriangleCount = 0; }
+        StorageHeader(): m_TriangleCount(0) {}
 
         unsigned        m_TriangleCount;
     };
 
-    union HeaderUnion
-    {
-        HeaderUnion() { m_HeaderRecord.initialize(); }
-
-        enum { PADDING_ELEMENT_COUNT = dMAKE_PADDING_SIZE(StorageHeader, TriangleFaceAngles), };
-
-        StorageHeader   m_HeaderRecord;
-        TriangleFaceAngles m_PaddingArray[PADDING_ELEMENT_COUNT];
-    };
-
-private: // IFaceAnglesStorage
+private: // IFaceAngleStorageControl
     virtual void disposeStorage();
 
     virtual bool areNegativeAnglesStored() const;
 
     virtual void assignFacesAngleIntoStorage(unsigned triangleIndex, dMeshTriangleVertex vertexIndex, dReal dAngleValue);
+
+private: // IFaceAngleStorageView
     virtual FaceAngleDomain retrieveFacesAngleFromStorage(dReal &out_AngleValue, unsigned triangleIndex, dMeshTriangleVertex vertexIndex);
 
 public:
@@ -211,11 +204,11 @@ public:
     }
 
 private:
-    unsigned getAllocatedTriangleCount() const { return m_Header.m_HeaderRecord.m_TriangleCount; }
-    void setAllocatedTriangleCount(unsigned triangleCount) { m_Header.m_HeaderRecord.m_TriangleCount = triangleCount; }
+    unsigned getAllocatedTriangleCount() const { return m_Header.m_TriangleCount; }
+    void setAllocatedTriangleCount(unsigned triangleCount) { m_Header.m_TriangleCount = triangleCount; }
 
 private:
-    HeaderUnion         m_Header;
+    StorageHeader       m_Header;
     TriangleFaceAngles  m_TriangleFaceAngles[1];
 };
 
@@ -228,7 +221,7 @@ FaceAnglesWrapper<TStorageCodec>::~FaceAnglesWrapper()
 
 template<class TStorageCodec>
 /*static */
-IFaceAngleStorage *FaceAnglesWrapper<TStorageCodec>::allocateInstance(unsigned triangleCount)
+IFaceAngleStorageControl *FaceAnglesWrapper<TStorageCodec>::allocateInstance(unsigned triangleCount, IFaceAngleStorageView *&out_StorageView)
 {
     FaceAnglesWrapper<TStorageCodec> *result = NULL;
 
@@ -248,6 +241,8 @@ IFaceAngleStorage *FaceAnglesWrapper<TStorageCodec>::allocateInstance(unsigned t
 
         result = (FaceAnglesWrapper<TStorageCodec> *)bufferPointer;
         new(result) FaceAnglesWrapper<TStorageCodec>(triangleCount);
+
+        out_StorageView = result;
     }
     while (false);
 
@@ -262,26 +257,17 @@ bool FaceAnglesWrapper<TStorageCodec>::calculateInstanceSizeRequired(size_t &out
 
     do
     {
-        size_t classSize = offsetof(FaceAnglesWrapper<TStorageCodec>, m_TriangleFaceAngles);
+        size_t classHeaderSize = offsetof(FaceAnglesWrapper<TStorageCodec>, m_TriangleFaceAngles);
         const size_t singleTriangleSize = membersize(FaceAnglesWrapper<TStorageCodec>, m_TriangleFaceAngles[0]);
-        const size_t classInTriangles = classSize / singleTriangleSize;
-        dIASSERT(classSize % singleTriangleSize == 0);
+        const size_t classInTriangles = classHeaderSize / singleTriangleSize;
+        dIASSERT(triangleCount <= (SIZE_MAX - classHeaderSize) / singleTriangleSize);
 
-        dIASSERT(triangleCount <= SIZE_MAX - classInTriangles);
-
-        if (triangleCount > SIZE_MAX - classInTriangles) // Check for overflow
+        if (triangleCount > (SIZE_MAX - classHeaderSize) / singleTriangleSize) // Check for overflow
         {
             break;
         }
 
-        size_t adjustedTriangleCount = triangleCount + classInTriangles;
-
-        if (adjustedTriangleCount > SIZE_MAX / singleTriangleSize) // Check for another overflow
-        {
-            break;
-        }
-
-        out_SizeRequired = adjustedTriangleCount * singleTriangleSize;
+        out_SizeRequired = classHeaderSize + triangleCount * singleTriangleSize; // Trailing alignment is going to be added aby memory manager automatically
         result = true;
     }
     while (false);
@@ -296,13 +282,11 @@ void FaceAnglesWrapper<TStorageCodec>::freeInstance()
 
     FaceAnglesWrapper<TStorageCodec>::~FaceAnglesWrapper();
 
-    size_t classSize = offsetof(FaceAnglesWrapper<TStorageCodec>, m_TriangleFaceAngles);
+    size_t classHeaderSize = offsetof(FaceAnglesWrapper<TStorageCodec>, m_TriangleFaceAngles);
     const size_t singleTriangleSize = membersize(FaceAnglesWrapper<TStorageCodec>, m_TriangleFaceAngles[0]);
-    const size_t classInTriangles = classSize / singleTriangleSize;
-    dIASSERT(classSize % singleTriangleSize == 0);
 
-    size_t adjustedTriangleCount = triangleCount + classInTriangles;
-    dFree(this, adjustedTriangleCount * singleTriangleSize);
+    size_t memoryBlockSize = classHeaderSize + triangleCount * singleTriangleSize;
+    dFree(this, memoryBlockSize);
 }
 
 
@@ -335,7 +319,7 @@ FaceAngleDomain FaceAnglesWrapper<TStorageCodec>::retrieveFacesAngleFromStorage(
 }
 
 
-typedef IFaceAngleStorage *(FAngleStorageAllocProc)(unsigned triangleCount);
+typedef IFaceAngleStorageControl *(FAngleStorageAllocProc)(unsigned triangleCount, IFaceAngleStorageView *&out_StorageView);
 
 BEGIN_NAMESPACE_OU();
 template<>
@@ -387,14 +371,17 @@ bool dxTriDataBase::allocateFaceAngles(FaceAngleStorageMethod storageMethod)
 
     dIASSERT(m_FaceAngles == NULL);
     
+    IFaceAngleStorageView *storageView;
+
     unsigned triangleCount = m_TriangleCount;
 
     FAngleStorageAllocProc *allocProc = g_AngleStorageAllocProcs.Encode(storageMethod);
-    IFaceAngleStorage *storageInstance = allocProc(triangleCount);
+    IFaceAngleStorageControl *storageInstance = allocProc(triangleCount, storageView);
 
     if (storageInstance != NULL)
     {
         m_FaceAngles = storageInstance;
+        m_FaceAngleView = storageView;
         result = true;
     }
 
@@ -407,6 +394,7 @@ void dxTriDataBase::freeFaceAngles()
     {
         m_FaceAngles->disposeStorage();
         m_FaceAngles = NULL;
+        m_FaceAngleView = NULL;
     }
 }
 
@@ -575,7 +563,7 @@ void dGeomTriMeshDataUpdate(dTriMeshDataID g)
 
 //////////////////////////////////////////////////////////////////////////
 
-/*extern */
+/*extern ODE_API */
 void dGeomTriMeshSetCallback(dGeomID g, dTriCallback* Callback)
 {
     dUASSERT(g && g->type == dTriMeshClass, "The argument is not a trimesh");
@@ -584,7 +572,7 @@ void dGeomTriMeshSetCallback(dGeomID g, dTriCallback* Callback)
     mesh->assignCallback(Callback);
 }
 
-/*extern */
+/*extern ODE_API */
 dTriCallback* dGeomTriMeshGetCallback(dGeomID g)
 {
     dUASSERT(g && g->type == dTriMeshClass, "The argument is not a trimesh");
@@ -593,7 +581,7 @@ dTriCallback* dGeomTriMeshGetCallback(dGeomID g)
     return mesh->retrieveCallback();
 }
 
-/*extern */
+/*extern ODE_API */
 void dGeomTriMeshSetArrayCallback(dGeomID g, dTriArrayCallback* ArrayCallback)
 {
     dUASSERT(g && g->type == dTriMeshClass, "The argument is not a trimesh");
@@ -602,8 +590,8 @@ void dGeomTriMeshSetArrayCallback(dGeomID g, dTriArrayCallback* ArrayCallback)
     mesh->assignArrayCallback(ArrayCallback);
 }
 
-/*extern */
-dTriArrayCallback* dGeomTriMeshGetArrayCallback(dGeomID g)
+/*extern ODE_API */
+dTriArrayCallback *dGeomTriMeshGetArrayCallback(dGeomID g)
 {
     dUASSERT(g && g->type == dTriMeshClass, "The argument is not a trimesh");
 
@@ -611,7 +599,7 @@ dTriArrayCallback* dGeomTriMeshGetArrayCallback(dGeomID g)
     return mesh->retrieveArrayCallback();
 }
 
-/*extern */
+/*extern ODE_API */
 void dGeomTriMeshSetRayCallback(dGeomID g, dTriRayCallback* Callback)
 {
     dUASSERT(g && g->type == dTriMeshClass, "The argument is not a trimesh");
@@ -620,7 +608,7 @@ void dGeomTriMeshSetRayCallback(dGeomID g, dTriRayCallback* Callback)
     mesh->assignRayCallback(Callback);
 }
 
-/*extern */
+/*extern ODE_API */
 dTriRayCallback* dGeomTriMeshGetRayCallback(dGeomID g)
 {
     dUASSERT(g && g->type == dTriMeshClass, "The argument is not a trimesh");	
@@ -629,7 +617,7 @@ dTriRayCallback* dGeomTriMeshGetRayCallback(dGeomID g)
     return mesh->retrieveRayCallback();
 }
 
-/*extern */
+/*extern ODE_API */
 void dGeomTriMeshSetTriMergeCallback(dGeomID g, dTriTriMergeCallback* Callback)
 {
     dUASSERT(g && g->type == dTriMeshClass, "The argument is not a trimesh");
@@ -638,8 +626,8 @@ void dGeomTriMeshSetTriMergeCallback(dGeomID g, dTriTriMergeCallback* Callback)
     mesh->assignTriMergeCallback(Callback);
 }
 
-/*extern */
-dTriTriMergeCallback* dGeomTriMeshGetTriMergeCallback(dGeomID g)
+/*extern ODE_API */
+dTriTriMergeCallback *dGeomTriMeshGetTriMergeCallback(dGeomID g)
 {
     dUASSERT(g && g->type == dTriMeshClass, "The argument is not a trimesh");	
 
@@ -647,7 +635,7 @@ dTriTriMergeCallback* dGeomTriMeshGetTriMergeCallback(dGeomID g)
     return mesh->retrieveTriMergeCallback();
 }
 
-/*extern */
+/*extern ODE_API */
 void dGeomTriMeshSetData(dGeomID g, dTriMeshDataID Data)
 {
     dUASSERT(g && g->type == dTriMeshClass, "The argument is not a trimesh");
@@ -656,7 +644,7 @@ void dGeomTriMeshSetData(dGeomID g, dTriMeshDataID Data)
     mesh->assignMeshData(Data);
 }
 
-/*extern */
+/*extern ODE_API */
 dTriMeshDataID dGeomTriMeshGetData(dGeomID g)
 {
     dUASSERT(g && g->type == dTriMeshClass, "The argument is not a trimesh");
@@ -677,7 +665,7 @@ const int CEnumSortedElementArray<dxTriMesh::TRIMESHTC, dxTriMesh::TTC__MAX, int
 END_NAMESPACE_OU();
 static const CEnumSortedElementArray<dxTriMesh::TRIMESHTC, dxTriMesh::TTC__MAX, int, 0x161003D5> g_asiMeshTCGeomClasses;
 
-/*extern */
+/*extern ODE_API */
 void dGeomTriMeshEnableTC(dGeomID g, int geomClass, int enable)
 {
     dUASSERT(g && g->type == dTriMeshClass, "The argument is not a trimesh");
@@ -692,7 +680,7 @@ void dGeomTriMeshEnableTC(dGeomID g, int geomClass, int enable)
     }
 }
 
-/*extern */
+/*extern ODE_API */
 int dGeomTriMeshIsTCEnabled(dGeomID g, int geomClass)
 {
     dUASSERT(g && g->type == dTriMeshClass, "The argument is not a trimesh");
@@ -707,7 +695,7 @@ int dGeomTriMeshIsTCEnabled(dGeomID g, int geomClass)
 }
 
 
-/*extern */
+/*extern ODE_API */
 dTriMeshDataID dGeomTriMeshGetTriMeshDataID(dGeomID g)
 {
     dUASSERT(g && g->type == dTriMeshClass, "The argument is not a trimesh");
@@ -717,7 +705,7 @@ dTriMeshDataID dGeomTriMeshGetTriMeshDataID(dGeomID g)
 }
 
 
-/*extern */
+/*extern ODE_API */
 void dGeomTriMeshClearTCCache(dGeomID g)
 {
     dUASSERT(g && g->type == dTriMeshClass, "The argument is not a trimesh");
@@ -727,7 +715,7 @@ void dGeomTriMeshClearTCCache(dGeomID g)
 }
 
 
-/*extern */
+/*extern ODE_API */
 int dGeomTriMeshGetTriangleCount(dGeomID g)
 {
     dUASSERT(g && g->type == dTriMeshClass, "The argument is not a trimesh");
@@ -738,7 +726,7 @@ int dGeomTriMeshGetTriangleCount(dGeomID g)
 }
 
 
-/*extern */
+/*extern ODE_API */
 void dGeomTriMeshGetTriangle(dGeomID g, int index, dVector3 *v0/*=NULL*/, dVector3 *v1/*=NULL*/, dVector3 *v2/*=NULL*/)
 {
     dUASSERT(g && g->type == dTriMeshClass, "The argument is not a trimesh");
@@ -750,7 +738,7 @@ void dGeomTriMeshGetTriangle(dGeomID g, int index, dVector3 *v0/*=NULL*/, dVecto
     mesh->fetchMeshTransformedTriangle(pv, index);
 }
 
-/*extern */
+/*extern ODE_API */
 void dGeomTriMeshGetPoint(dGeomID g, int index, dReal u, dReal v, dVector3 Out)
 {
     dUASSERT(g && g->type == dTriMeshClass, "The argument is not a trimesh");
@@ -761,6 +749,16 @@ void dGeomTriMeshGetPoint(dGeomID g, int index, dReal u, dReal v, dVector3 Out)
     mesh->fetchMeshTransformedTriangle(dv, index);
 
     GetPointFromBarycentric(dv, u, v, Out);
+}
+
+
+/*extern */
+IFaceAngleStorageView *dxGeomTriMeshGetFaceAngleView(dxGeom *triMeshGeom)
+{
+    dUASSERT(triMeshGeom && triMeshGeom->type == dTriMeshClass, "The argument is not a trimesh");
+
+    dxTriMesh *mesh = static_cast<dxTriMesh *>(triMeshGeom);
+    return mesh->retrieveFaceAngleView();
 }
 
 

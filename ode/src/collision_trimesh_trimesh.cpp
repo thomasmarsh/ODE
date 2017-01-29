@@ -508,8 +508,8 @@ int dCollideTTL(dxGeom* g1, dxGeom* g2, int Flags, dContactGeom* Contacts, int S
     BVTCache &ColCache = pccColliderCache->ColCache;
     CONTACT_KEY_HASH_TABLE &hashcontactset = pccColliderCache->m_hashcontactset;
 
-    ColCache.Model0 = &TriMesh1->m_Data->m_BVTree;
-    ColCache.Model1 = &TriMesh2->m_Data->m_BVTree;
+    ColCache.Model0 = &TriMesh1->retrieveMeshBVTreeRef();
+    ColCache.Model1 = &TriMesh2->retrieveMeshBVTreeRef();
 
     ////Prepare contact list
     ClearContactSet(hashcontactset);

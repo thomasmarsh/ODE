@@ -77,17 +77,18 @@ int dCollideTrimeshPlane( dxGeom *o1, dxGeom *o2, int flags, dContactGeom* conta
     VertexUseCache &vertex_use_cache = pccColliderCache->m_VertexUses;
 
     // Reallocate vertex use cache if necessary
-    const int vertex_count = trimesh->m_Data->m_Mesh.GetNbVertices();
+    const dxTriMeshData *meshData = trimesh->retrieveMeshData();
+    const int vertex_count = meshData->m_Mesh.GetNbVertices();
     const bool cache_status = vertex_use_cache.resizeAndResetVertexUSEDFlags(vertex_count);
 
     // Cache the triangle count.
-    const int tri_count = trimesh->m_Data->m_Mesh.GetNbTriangles();
+    const int tri_count = meshData->m_Mesh.GetNbTriangles();
 
     // For each triangle
     for ( int t = 0; t < tri_count; ++t )
     {
         // Get triangle, which should also use callback.
-        bool ex_avail = trimesh->m_Data->m_Mesh.GetExTriangle( VPE, t, VC);
+        bool ex_avail = meshData->m_Mesh.GetExTriangle( VPE, t, VC);
 
         // For each vertex.
         for ( int v = 0; v < 3; ++v )
