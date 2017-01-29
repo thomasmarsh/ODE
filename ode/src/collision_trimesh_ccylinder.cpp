@@ -1016,11 +1016,11 @@ static void dQueryCCTLPotentialCollisionTriangles(OBBCollider &Collider,
 
         // Intersect
         Collider.SetTemporalCoherence(true);
-        Collider.Collide(*BoxTC, obbCapsule, TriMesh->m_Data->m_BVTree, null, &MeshMatrix);
+        Collider.Collide(*BoxTC, obbCapsule, TriMesh->retrieveMeshBVTreeRef(), null, &MeshMatrix);
     }
     else {
         Collider.SetTemporalCoherence(false);
-        Collider.Collide(BoxCache, obbCapsule, TriMesh->m_Data->m_BVTree, null, &MeshMatrix);
+        Collider.Collide(BoxCache, obbCapsule, TriMesh->retrieveMeshBVTreeRef(), null, &MeshMatrix);
     }
 }
 
@@ -1069,7 +1069,7 @@ int dCollideCCTL(dxGeom *o1, dxGeom *o2, int flags, dContactGeom *contact, int s
 
             unsigned int ctContacts0 = cData.m_ctContacts;
 
-            const uint8 *useFlags = TriMesh->m_Data->smartRetrieveUseFlags();
+            const uint8 *useFlags = TriMesh->retrieveMeshSmartUseFlags();
 
             // loop through all intersecting triangles
             for (int i = 0; i < TriCount; i++)

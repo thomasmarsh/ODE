@@ -46,9 +46,9 @@ struct dxDisabledTriMesh:
 {
 public:
     // Functions
-    dxDisabledTriMesh(dxSpace *Space, dxTriMeshData *Data, 
+    dxDisabledTriMesh(dxSpace *Space, 
         dTriCallback *Callback, dTriArrayCallback *ArrayCallback, dTriRayCallback *RayCallback):
-        dxDisabledTriMesh_Parent(Space, Data, Callback, ArrayCallback, RayCallback, false)
+        dxDisabledTriMesh_Parent(Space, NULL, Callback, ArrayCallback, RayCallback, false)
     {
     }
 
@@ -122,7 +122,7 @@ dGeomID dCreateTriMesh(dSpaceID space,
     dTriArrayCallback* ArrayCallback,
     dTriRayCallback* RayCallback)
 {
-    return new dxDisabledTriMesh(space, Data, Callback, ArrayCallback, RayCallback); // Oleh_Derevenko: I'm not sure if a NULL can be returned here -- keep on returning an object for backward compatibility
+    return new dxDisabledTriMesh(space, Callback, ArrayCallback, RayCallback); // Oleh_Derevenko: I'm not sure if a NULL can be returned here -- keep on returning an object for backward compatibility
 }
 
 

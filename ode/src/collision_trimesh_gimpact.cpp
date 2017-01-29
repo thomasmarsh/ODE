@@ -156,7 +156,7 @@ bool dxTriMeshData::meaningfulPreprocessData(FaceAngleStorageMethod faceAndgesRe
 
         TrimeshDataTrianglePointAccessor_GIMPACT pointAccessor(this);
         const dReal *const externalNormals = retrieveNormals();
-        IFaceAngleStorage *faceAngles = retrieveFaceAngles();
+        IFaceAngleStorageControl *faceAngles = retrieveFaceAngles();
         meaningfulPreprocess_buildEdgeFlags(NULL, faceAngles, edges, numEdges, vertices, externalNormals, pointAccessor);
 
         dFree(tempBuffer, totalTempMemoryRequired);

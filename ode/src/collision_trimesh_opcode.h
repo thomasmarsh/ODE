@@ -256,7 +256,11 @@ public:
     virtual void computeAABB();
 
 public:
-    unsigned getMeshTriangleCount() const { return m_Data->m_Mesh.GetNbTriangles(); }
+    dxTriMeshData *retrieveMeshData() const { return getMeshData(); }
+    Model &retrieveMeshBVTreeRef() const { return getMeshData()->m_BVTree; }
+    const uint8 *retrieveMeshSmartUseFlags() const { return getMeshData()->smartRetrieveUseFlags(); }
+
+    unsigned getMeshTriangleCount() const { return getMeshData()->m_Mesh.GetNbTriangles(); }
     void fetchMeshTransformedTriangle(dVector3 *const pout_triangle[3], unsigned index)/* const*/;
     void fetchMeshTransformedTriangle(dVector3 out_triangle[3], unsigned index)/* const*/;
     void fetchMeshTriangle(dVector3 *const pout_triangle[3], unsigned index, const dVector3 position, const dMatrix3 rotation) const;
@@ -274,6 +278,9 @@ private:
 
     bool controlGeometry_SetMergeSphereContacts(int dataValue);
     bool controlGeometry_GetMergeSphereContacts(int &returnValue);
+
+private:
+    dxTriMeshData *getMeshData() const { return static_cast<dxTriMeshData *>(dxTriMesh_Parent::getMeshData()); }
 
 public:
     // Some constants

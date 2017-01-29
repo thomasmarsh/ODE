@@ -78,7 +78,7 @@ int dCollideRTL(dxGeom* g1, dxGeom* RayGeom, int Flags, dContactGeom* Contacts, 
 
     /* Intersect */
     int TriCount = 0;
-    if (Collider.Collide(WorldRay, TriMesh->m_Data->m_BVTree, &MeshMatrix)) {
+    if (Collider.Collide(WorldRay, TriMesh->retrieveMeshBVTreeRef(), &MeshMatrix)) {
         TriCount = pccColliderCache->m_Faces.GetNbFaces();
     }
 

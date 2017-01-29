@@ -183,15 +183,16 @@ int ccdGJKPenetration(const void *obj1, const void *obj2, const ccd_t *ccd,
 
     // set separation vector
     if (ret == 0 && nearest){
-        // compute depth of penetration
-        *depth = CCD_SQRT(nearest->dist);
-
         // store normalized direction vector
         ccdVec3Copy(dir, &nearest->witness);
-        ccdVec3Normalize(dir);
+        ret = ccdVec3Normalize(dir);
 
-        // compute position
-        penEPAPos(&polytope, nearest, pos);
+        if (ret == 0) {
+            // compute depth of penetration
+            *depth = CCD_SQRT(nearest->dist);
+            // compute position
+            penEPAPos(&polytope, nearest, pos);
+        }
     }
 
     ccdPtDestroy(&polytope);

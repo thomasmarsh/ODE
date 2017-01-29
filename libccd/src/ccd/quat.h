@@ -66,9 +66,14 @@ _ccd_inline int ccdQuatInvert2(ccd_quat_t *dest, const ccd_quat_t *src);
 
 
 /**
+ * Rotate vector s by quaternion q and put result into d.
+ */
+_ccd_inline void ccdQuatRotVec2(ccd_vec3_t *d, const ccd_vec3_t *s, const ccd_quat_t *q);
+
+/**
  * Rotate vector v by quaternion q.
  */
-_ccd_inline void ccdQuatRotVec(ccd_vec3_t *v, const ccd_quat_t *q);
+_ccd_inline void ccdQuatRotVec(ccd_vec3_t *v, const ccd_quat_t *q) { ccdQuatRotVec2(v, v, q); }
 
 
 /**** INLINES ****/
@@ -197,18 +202,18 @@ _ccd_inline int ccdQuatInvert2(ccd_quat_t *dest, const ccd_quat_t *src)
     return ccdQuatInvert(dest);
 }
 
-_ccd_inline void ccdQuatRotVec(ccd_vec3_t *v, const ccd_quat_t *q)
+_ccd_inline void ccdQuatRotVec2(ccd_vec3_t *d, const ccd_vec3_t *s, const ccd_quat_t *q)
 {
     // original version: 31 mul + 21 add
     // optimized version: 18 mul + 12 add
-    // formula: v = v + 2 * cross(q.xyz, cross(q.xyz, v) + q.w * v)
+    // formula: d = s + 2 * cross(q.xyz, cross(q.xyz, v) + q.w * s)
     ccd_real_t cross1_x, cross1_y, cross1_z, cross2_x, cross2_y, cross2_z;
     ccd_real_t x, y, z, w;
     ccd_real_t vx, vy, vz;
 
-    vx = ccdVec3X(v);
-    vy = ccdVec3Y(v);
-    vz = ccdVec3Z(v);
+    vx = ccdVec3X(s);
+    vy = ccdVec3Y(s);
+    vz = ccdVec3Z(s);
 
     w = q->q[3];
     x = q->q[0];
@@ -221,7 +226,7 @@ _ccd_inline void ccdQuatRotVec(ccd_vec3_t *v, const ccd_quat_t *q)
     cross2_x = y * cross1_z - z * cross1_y;
     cross2_y = z * cross1_x - x * cross1_z;
     cross2_z = x * cross1_y - y * cross1_x;
-    ccdVec3Set(v, vx + 2 * cross2_x, vy + 2 * cross2_y, vz + 2 * cross2_z);
+    ccdVec3Set(d, vx + 2 * cross2_x, vy + 2 * cross2_y, vz + 2 * cross2_z);
 }
 
 #ifdef __cplusplus

@@ -1018,12 +1018,12 @@ static void dQueryCTLPotentialCollisionTriangles(OBBCollider &Collider,
 
         // Intersect
         Collider.SetTemporalCoherence(true);
-        Collider.Collide(*BoxTC, obbCylinder, Trimesh->m_Data->m_BVTree, null, &MeshMatrix);
+        Collider.Collide(*BoxTC, obbCylinder, Trimesh->retrieveMeshBVTreeRef(), null, &MeshMatrix);
     }
     else 
     {
         Collider.SetTemporalCoherence(false);
-        Collider.Collide(BoxCache, obbCylinder, Trimesh->m_Data->m_BVTree, null, &MeshMatrix);
+        Collider.Collide(BoxCache, obbCylinder, Trimesh->retrieveMeshBVTreeRef(), null, &MeshMatrix);
     }
 }
 
