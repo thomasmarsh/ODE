@@ -318,8 +318,9 @@ void dxTriDataBase::buildBoundaryEdgeAngle(IFaceAngleStorageControl *faceAngles,
 
     dMeshTriangleVertex firstVertexStartIndex = currEdge[0].getEdgeStartVertexIndex();
     faceAngles->assignFacesAngleIntoStorage(currEdge[0].m_TriIdx, firstVertexStartIndex, faceAngle);
-    dMeshTriangleVertex secondVertexStartIndex = currEdge[1].getEdgeStartVertexIndex();
-    faceAngles->assignFacesAngleIntoStorage(currEdge[1].m_TriIdx, secondVertexStartIndex, faceAngle);
+    // -- For boundary edges, only the first element is valid
+    // dMeshTriangleVertex secondVertexStartIndex = currEdge[1].getEdgeStartVertexIndex();
+    // faceAngles->assignFacesAngleIntoStorage(currEdge[1].m_TriIdx, secondVertexStartIndex, faceAngle);
 }
 
 template<class TMeshDataAccessor>
