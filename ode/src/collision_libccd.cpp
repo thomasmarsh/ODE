@@ -902,7 +902,7 @@ bool correctTriangleContactNormal(ccd_triangle_t *t, dContactGeom *contact,
     ccdVec3Sub2(&edges[dMTV_FIRST], &t->vertices[1], &t->vertices[0]);
     dSASSERT(dMTV__MAX == 3);
 
-    bool contactGenerated = false;
+    bool contactGenerated = false, contactPreserved = false;
     // Triangle face normal
     ccd_vec3_t triNormal;
     ccdVec3Cross(&triNormal, &edges[dMTV_FIRST], &edges[dMTV_SECOND]);
@@ -941,60 +941,54 @@ bool correctTriangleContactNormal(ccd_triangle_t *t, dContactGeom *contact,
             if (ccdVec3Dot(&edgeNormal, &v) > 0) {
                 // This is an edge contact
     
-                bool renormalizationFault = false;
+                ccd_real_t x = ccdVec3Dot(&triNormal, &cntNormal);
+                ccd_real_t y = ccdVec3Dot(&edgeNormal, &cntNormal);
+                ccd_real_t contactNormalToTriangleNormalAngle = CCD_ATAN2(y, x);
 
-                dReal angleValue;
-                FaceAngleDomain angleDomain = meshFaceAngleView->retrieveFacesAngleFromStorage(angleValue, contact->side2, (dMeshTriangleVertex)testEdgeIndex);
+                dReal angleValueAsDRead;
+                FaceAngleDomain angleDomain = meshFaceAngleView->retrieveFacesAngleFromStorage(angleValueAsDRead, contact->side2, (dMeshTriangleVertex)testEdgeIndex);
+                ccd_real_t angleValue = (ccd_real_t)angleValueAsDRead;
+
+                ccd_real_t targetAngle;
+                contactGenerated = false, contactPreserved = false; // re-assign to make optimizer's task easier
 
                 if (angleDomain != FAD_CONCAVE) {
-                    // Convex - ensure the contact normal is within the allowed range
+                    // Convex or flat - ensure the contact normal is within the allowed range
                     // formed by the two triangles' normals.
-
-                    // Adjust the contact normal to be in plane perpendicular to the edge
-                    // (as anyway all the inner contacts are forced to the triangle normal 
-                    // without any inclinations).
-                    ccd_real_t contactNormalProjectionOnEdge = ccdVec3Dot(&edgeAxis, &cntNormal);
-                    if (CCD_FABS(contactNormalProjectionOnEdge) >= NORMAL_PROJ_EPSILON) {
-                        ccdVec3AddScaled(&cntNormal, &cntNormal, &edgeAxis, -contactNormalProjectionOnEdge);
-                        if (ccdVec3Normalize(&cntNormal) != 0) {
-                            renormalizationFault = true;
-                        }
+                    if (contactNormalToTriangleNormalAngle < CCD_ZERO) {
+                        targetAngle = CCD_ZERO;
                     }
-
-                    if (!renormalizationFault) {
-                        ccd_real_t x = ccdVec3Dot(&triNormal, &cntNormal);
-                        ccd_real_t y = ccdVec3Dot(&edgeNormal, &cntNormal);
-                        dReal contactNormalToTriangleNormalAngle = atan2(y, x);
-
-                        // If angle is negative or zero, let the execution proceed to use the triangle normal
-                        if (contactNormalToTriangleNormalAngle > 0.0) {
-                            // if angle is greater than the edge angle, derive the neighbor triangle normal instead 
-                            if (contactNormalToTriangleNormalAngle > angleValue) {
-                                ccd_quat_t q;
-                                ccdQuatSetAngleAxis(&q, angleValue, &edgeAxis);
-                                ccdQuatRotVec2(&cntNormal, &triNormal, &q);
-                            }
-
-                            contactGenerated = true;
-                        }
+                    else if (contactNormalToTriangleNormalAngle > angleValue) {
+                        targetAngle = angleValue;
+                    }
+                    else {
+                        contactPreserved = true;
                     }
                 }
                 else {
-                    // Concave - nothing to be done - the face normal is to be used
+                    // Concave - rotate the contact normal to the face angle bisect plane
+                    // (or to triangle normal-edge plane if negative angles are not stored)
+                    targetAngle = angleValue != 0 ? CCD_REAL(0.5) * angleValue : CCD_ZERO;
+                    // There is little chance the normal will initially match the correct plane, but still, a small check could save lots of calculations
+                    if (contactNormalToTriangleNormalAngle == targetAngle) {
+                        contactPreserved = true;
+                    }
                 }
 
-                if (!renormalizationFault) {
-                    // Calculated successfully
-                    break;
+                if (!contactPreserved) {
+                    ccd_quat_t q;
+                    ccdQuatSetAngleAxis(&q, targetAngle - contactNormalToTriangleNormalAngle, &edgeAxis);
+                    ccdQuatRotVec2(&cntNormal, &cntNormal, &q);
+                    contactGenerated = true;
                 }
-                else {
-                    // In case it did not work out wit one edge proceed in hope it may work better with the others
-                }
+
+                // Calculated successfully
+                break;
             }
         }
     }
 
-    if (!anyFault) {
+    if (!anyFault && !contactPreserved) {
         // No edge contact detected, set contact normal to triangle normal
         const ccd_vec3_t &cntNormalToUse = !contactGenerated ? triNormal : cntNormal;
 
