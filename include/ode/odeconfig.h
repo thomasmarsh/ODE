@@ -152,8 +152,18 @@
 
 
 /* Define the dNaN macro */
-#ifdef NAN
+#if defined(NAN)
   #define dNaN NAN
+#elif defined(__GNUC__)
+  #define dNaN ({ union { duint32 m_ui; float m_f; } un; un.m_ui = 0x7FC00000; un.m_f; })
+#elif defined(__cplusplus)
+  union _dNaNUnion
+  {
+      _dNaNUnion(): m_ui(0x7FC00000) {}
+      duint32 m_ui; 
+      float m_f;
+  };
+  #define dNaN (_dNaNUnion().m_f)
 #else
   #ifdef dSINGLE
     #define dNaN ((float)(dInfinity - dInfinity))
