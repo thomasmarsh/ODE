@@ -65,6 +65,7 @@ typedef float ccd_real_t;
 # define CCD_FABS(x) (fabsf(x)) /*!< absolute value */
 # define CCD_FMAX(x, y) (fmaxf((x), (y))) /*!< maximum of two floats */
 # define CCD_FMIN(x, y) (fminf((x), (y))) /*!< minimum of two floats */
+# define CCD_ATAN2(x, y) (atan2f((x), (y))) /*!< atan2 of two floats */
 #endif /* CCD_SINGLE */
 
 #ifdef CCD_DOUBLE
@@ -80,6 +81,7 @@ typedef double ccd_real_t;
 # define CCD_FABS(x) (fabs(x)) /*!< absolute value */
 # define CCD_FMAX(x, y) (fmax((x), (y))) /*!< maximum of two floats */
 # define CCD_FMIN(x, y) (fmin((x), (y))) /*!< minimum of two floats */
+# define CCD_ATAN2(x, y) (atan2((x), (y))) /*!< atan2 of two floats */
 #endif /* CCD_DOUBLE */
 
 #define CCD_ONE CCD_REAL(1.)
