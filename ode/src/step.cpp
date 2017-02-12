@@ -251,7 +251,7 @@ struct dxStepperStage0JointsCallContext
 };
 
 static int dxStepIsland_Stage0_Bodies_Callback(void *callContext, dcallindex_t callInstanceIndex, dCallReleaseeID callThisReleasee);
-static int dxStepIsland_Stage0_Joints_Callback(void *callContext, dcallindex_t callInstanceIndex, dCallReleaseeID callThisReleasee);
+// static int dxStepIsland_Stage0_Joints_Callback(void *callContext, dcallindex_t callInstanceIndex, dCallReleaseeID callThisReleasee);
 static int dxStepIsland_Stage1_Callback(void *callContext, dcallindex_t callInstanceIndex, dCallReleaseeID callThisReleasee);
 
 static void dxStepIsland_Stage0_Bodies(dxStepperStage0BodiesCallContext *callContext);
@@ -529,7 +529,8 @@ void dxStepIsland(const dxStepperProcessingCallContext *callContext)
 
         world->PostThreadedCallsGroup(NULL, bodyThreads, stage1CallReleasee, &dxStepIsland_Stage0_Bodies_Callback, stage0BodiesCallContext, "StepIsland Stage0-Bodies");
 
-        world->PostThreadedCall(NULL, NULL, 0, stage1CallReleasee, NULL, &dxStepIsland_Stage0_Joints_Callback, stage0JointsCallContext, 0, "StepIsland Stage0-Joints");
+        dxStepIsland_Stage0_Joints(stage0JointsCallContext);
+        world->AlterThreadedCallDependenciesCount(stage1CallReleasee, -1);
         dIASSERT(jointThreads == 1);
     }
 }    
@@ -683,15 +684,15 @@ void dxStepIsland_Stage0_Bodies(dxStepperStage0BodiesCallContext *callContext)
     }
 }
 
-static 
-int dxStepIsland_Stage0_Joints_Callback(void *_callContext, dcallindex_t callInstanceIndex, dCallReleaseeID callThisReleasee)
-{
-    (void)callInstanceIndex; // unused
-    (void)callThisReleasee; // unused
-    dxStepperStage0JointsCallContext *callContext = (dxStepperStage0JointsCallContext *)_callContext;
-    dxStepIsland_Stage0_Joints(callContext);
-    return 1;
-}
+// static 
+// int dxStepIsland_Stage0_Joints_Callback(void *_callContext, dcallindex_t callInstanceIndex, dCallReleaseeID callThisReleasee)
+// {
+//     (void)callInstanceIndex; // unused
+//     (void)callThisReleasee; // unused
+//     dxStepperStage0JointsCallContext *callContext = (dxStepperStage0JointsCallContext *)_callContext;
+//     dxStepIsland_Stage0_Joints(callContext);
+//     return 1;
+// }
 
 static 
 void dxStepIsland_Stage0_Joints(dxStepperStage0JointsCallContext *callContext)
@@ -958,7 +959,11 @@ void dxStepIsland_Stage1(dxStepperStage1CallContext *stage1CallContext)
             world->PostThreadedCall(NULL, &stage2aSyncReleasee, allowedThreads, stage2bSyncReleasee, 
                 NULL, &dxStepIsland_Stage2aSync_Callback, stage2CallContext, 0, "StepIsland Stage2a Sync");
 
-            world->PostThreadedCallsGroup(NULL, allowedThreads, stage2aSyncReleasee, &dxStepIsland_Stage2a_Callback, stage2CallContext, "StepIsland Stage2a");
+            dIASSERT(allowedThreads > 1); /*if (allowedThreads > 1) */{
+                world->PostThreadedCallsGroup(NULL, allowedThreads - 1, stage2aSyncReleasee, &dxStepIsland_Stage2a_Callback, stage2CallContext, "StepIsland Stage2a");
+            }
+            dxStepIsland_Stage2a(stage2CallContext);
+            world->AlterThreadedCallDependenciesCount(stage2aSyncReleasee, -1);
         }
     }
     else {
@@ -1075,11 +1080,14 @@ int dxStepIsland_Stage2aSync_Callback(void *_stage2CallContext, dcallindex_t cal
     (void)callInstanceIndex; // unused
     dxStepperStage2CallContext *stage2CallContext = (dxStepperStage2CallContext *)_stage2CallContext;
     const dxStepperProcessingCallContext *callContext = stage2CallContext->m_stepperCallContext;
-    dxWorld *world = callContext->m_world;
     const unsigned allowedThreads = callContext->m_stepperAllowedThreads;
 
-    world->AlterThreadedCallDependenciesCount(callThisReleasee, allowedThreads);
-    world->PostThreadedCallsGroup(NULL, allowedThreads, callThisReleasee, &dxStepIsland_Stage2b_Callback, stage2CallContext, "StepIsland Stage2b");
+    dIASSERT(allowedThreads > 1); /*if (allowedThreads > 1) */{ // The allowed thread count is greater than one as otherwise current function would not be scheduled for execution from the previous stage
+        dxWorld *world = callContext->m_world;
+        world->AlterThreadedCallDependenciesCount(callThisReleasee, allowedThreads - 1);
+        world->PostThreadedCallsGroup(NULL, allowedThreads - 1, callThisReleasee, &dxStepIsland_Stage2b_Callback, stage2CallContext, "StepIsland Stage2b");
+    }
+    dxStepIsland_Stage2b(stage2CallContext);
 
     return 1;
 }
@@ -1217,11 +1225,14 @@ int dxStepIsland_Stage2bSync_Callback(void *_stage2CallContext, dcallindex_t cal
     (void)callInstanceIndex; // unused
     dxStepperStage2CallContext *stage2CallContext = (dxStepperStage2CallContext *)_stage2CallContext;
     const dxStepperProcessingCallContext *callContext = stage2CallContext->m_stepperCallContext;
-    dxWorld *world = callContext->m_world;
     const unsigned allowedThreads = callContext->m_stepperAllowedThreads;
 
-    world->AlterThreadedCallDependenciesCount(callThisReleasee, allowedThreads);
-    world->PostThreadedCallsGroup(NULL, allowedThreads, callThisReleasee, &dxStepIsland_Stage2c_Callback, stage2CallContext, "StepIsland Stage2c");
+    dIASSERT(allowedThreads > 1); /*if (allowedThreads > 1) */{ // The allowed thread count is greater than one as otherwise current function would not be scheduled for execution from the previous stage
+        dxWorld *world = callContext->m_world;
+        world->AlterThreadedCallDependenciesCount(callThisReleasee, allowedThreads - 1);
+        world->PostThreadedCallsGroup(NULL, allowedThreads - 1, callThisReleasee, &dxStepIsland_Stage2c_Callback, stage2CallContext, "StepIsland Stage2c");
+    }
+    dxStepIsland_Stage2c(stage2CallContext);
 
     return 1;
 }
@@ -1430,7 +1441,7 @@ void dxStepIsland_Stage3(dxStepperStage3CallContext *stage3CallContext)
 
                 dJointFeedback *fb = joint->feedback;
 
-                if (fb) {
+                if (fb != NULL) {
                     // the user has requested feedback on the amount of force that this
                     // joint is applying to the bodies. we use a slightly slower
                     // computation that splits out the force components and puts them
@@ -1438,7 +1449,7 @@ void dxStepIsland_Stage3(dxStepperStage3CallContext *stage3CallContext)
                     dReal data[CFE__MAX];
                     MultiplyJxLambdaIntoCForce (data, JRow, rowRhsLambda, infom);
 
-                    dxBody* b1 = joint->node[0].body;
+                    dxBody *b1 = joint->node[0].body;
                     dReal *cf1 = cforce + (size_t)(unsigned)b1->tag * CFE__MAX;
                     cf1[CFE_LX] += (fb->f1[dV3E_X] = data[CFE_LX]);
                     cf1[CFE_LY] += (fb->f1[dV3E_Y] = data[CFE_LY]);
@@ -1447,8 +1458,8 @@ void dxStepIsland_Stage3(dxStepperStage3CallContext *stage3CallContext)
                     cf1[CFE_AY] += (fb->t1[dV3E_Y] = data[CFE_AY]);
                     cf1[CFE_AZ] += (fb->t1[dV3E_Z] = data[CFE_AZ]);
 
-                    dxBody* b2 = joint->node[1].body;
-                    if (b2) {
+                    dxBody *b2 = joint->node[1].body;
+                    if (b2 != NULL) {
                         MultiplyJxLambdaIntoCForce (data, JRow + infom * JME__MAX, rowRhsLambda, infom);
 
                         dReal *cf2 = cforce + (size_t)(unsigned)b2->tag * CFE__MAX;
@@ -1462,12 +1473,12 @@ void dxStepIsland_Stage3(dxStepperStage3CallContext *stage3CallContext)
                 }
                 else {
                     // no feedback is required, let's compute cforce the faster way
-                    dxBody* b1 = joint->node[0].body;
+                    dxBody *b1 = joint->node[0].body;
                     dReal *cf1 = cforce + (size_t)(unsigned)b1->tag * CFE__MAX;
                     MultiplyAddJxLambdaToCForce (cf1, JRow, rowRhsLambda, infom);
 
-                    dxBody* b2 = joint->node[1].body;
-                    if (b2) {
+                    dxBody *b2 = joint->node[1].body;
+                    if (b2 != NULL) {
                         dReal *cf2 = cforce + (size_t)(unsigned)b2->tag * CFE__MAX;
                         MultiplyAddJxLambdaToCForce (cf2, JRow + infom * JME__MAX, rowRhsLambda, infom);
                     }
