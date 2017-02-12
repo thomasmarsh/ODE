@@ -1537,14 +1537,12 @@ int dxQuickStepIsland_Stage2aSync_Callback(void *_stage2CallContext, dcallindex_
     const unsigned allowedThreads = callContext->m_stepperAllowedThreads;
     unsigned int stage2b_allowedThreads = CalculateOptimalThreadsCount<dxQUICKSTEPISLAND_STAGE2B_STEP>(nb, allowedThreads);
 
-    dxWorld *world = callContext->m_world;
-    world->AlterThreadedCallDependenciesCount(callThisReleasee, stage2b_allowedThreads);
-    
     if (stage2b_allowedThreads > 1) {
+        dxWorld *world = callContext->m_world;
+        world->AlterThreadedCallDependenciesCount(callThisReleasee, stage2b_allowedThreads - 1);
         world->PostThreadedCallsGroup(NULL, stage2b_allowedThreads - 1, callThisReleasee, &dxQuickStepIsland_Stage2b_Callback, stage2CallContext, "QuickStepIsland Stage2b");
     }
     dxQuickStepIsland_Stage2b(stage2CallContext);
-    world->AlterThreadedCallDependenciesCount(callThisReleasee, -1);
 
     return 1;
 }
@@ -1621,14 +1619,12 @@ int dxQuickStepIsland_Stage2bSync_Callback(void *_stage2CallContext, dcallindex_
 
     unsigned int stage2c_allowedThreads = CalculateOptimalThreadsCount<dxQUICKSTEPISLAND_STAGE2C_STEP>(m, allowedThreads);
 
-    dxWorld *world = callContext->m_world;
-    world->AlterThreadedCallDependenciesCount(callThisReleasee, stage2c_allowedThreads);
-    
     if (stage2c_allowedThreads > 1) {
+        dxWorld *world = callContext->m_world;
+        world->AlterThreadedCallDependenciesCount(callThisReleasee, stage2c_allowedThreads - 1);
         world->PostThreadedCallsGroup(NULL, stage2c_allowedThreads - 1, callThisReleasee, &dxQuickStepIsland_Stage2c_Callback, stage2CallContext, "QuickStepIsland Stage2c");
     }
     dxQuickStepIsland_Stage2c(stage2CallContext);
-    world->AlterThreadedCallDependenciesCount(callThisReleasee, -1);
 
     return 1;
 }
@@ -1903,17 +1899,19 @@ int dxQuickStepIsland_Stage4LCP_iMJSync_Callback(void *_stage4CallContext, dcall
 
     unsigned int stage4LCP_Ad_allowedThreads = CalculateOptimalThreadsCount<dxQUICKSTEPISLAND_STAGE4LCP_AD_STEP>(m, allowedThreads);
 
-    dxWorld *world = callContext->m_world;
 #ifdef WARM_STARTING
-    world->AlterThreadedCallDependenciesCount(stage4CallContext->m_LCP_fcStartReleasee, -1);
+    {
+        dxWorld *world = callContext->m_world;
+        world->AlterThreadedCallDependenciesCount(stage4CallContext->m_LCP_fcStartReleasee, -1);
+    }
 #endif
-    world->AlterThreadedCallDependenciesCount(callThisReleasee, stage4LCP_Ad_allowedThreads);
     
     if (stage4LCP_Ad_allowedThreads > 1) {
+        dxWorld *world = callContext->m_world;
+        world->AlterThreadedCallDependenciesCount(callThisReleasee, stage4LCP_Ad_allowedThreads - 1);
         world->PostThreadedCallsGroup(NULL, stage4LCP_Ad_allowedThreads - 1, callThisReleasee, &dxQuickStepIsland_Stage4LCP_Ad_Callback, stage4CallContext, "QuickStepIsland Stage4LCP_Ad");
     }
     dxQuickStepIsland_Stage4LCP_AdComputation(stage4CallContext);
-    world->AlterThreadedCallDependenciesCount(callThisReleasee, -1);
 
     return 1;
 }
@@ -1943,14 +1941,12 @@ int dxQuickStepIsland_Stage4LCP_fcStart_Callback(void *_stage4CallContext, dcall
     dxQuickStepIsland_Stage4LCP_MTfcComputation_warmZeroArrays(stage4CallContext);
 #endif
 
-    dxWorld *world = callContext->m_world;
-    world->AlterThreadedCallDependenciesCount(callThisReleasee, stage4LCP_fcPrepare_allowedThreads);
-
     if (stage4LCP_fcPrepare_allowedThreads > 1) {
+        dxWorld *world = callContext->m_world;
+        world->AlterThreadedCallDependenciesCount(callThisReleasee, stage4LCP_fcPrepare_allowedThreads - 1);
         world->PostThreadedCallsGroup(NULL, stage4LCP_fcPrepare_allowedThreads - 1, callThisReleasee, &dxQuickStepIsland_Stage4LCP_fc_Callback, stage4CallContext, "QuickStepIsland Stage4LCP_fc");
     }
     dxQuickStepIsland_Stage4LCP_MTfcComputation(stage4CallContext, callThisReleasee);
-    world->AlterThreadedCallDependenciesCount(callThisReleasee, -1);
 
     return 1;
 }
@@ -1988,14 +1984,12 @@ void dxQuickStepIsland_Stage4LCP_MTfcComputation_warm(dxQuickStepperStage4CallCo
         const dxStepperProcessingCallContext *callContext = stage4CallContext->m_stepperCallContext;
         unsigned int stage4LCP_fcComplete_allowedThreads = stage4CallContext->m_LCP_fcCompleteThreadsTotal;
 
-        dxWorld *world = callContext->m_world;
-        world->AlterThreadedCallDependenciesCount(callThisReleasee, stage4LCP_fcComplete_allowedThreads);
-
         if (stage4LCP_fcComplete_allowedThreads > 1) {
+            dxWorld *world = callContext->m_world;
+            world->AlterThreadedCallDependenciesCount(callThisReleasee, stage4LCP_fcComplete_allowedThreads - 1);
             world->PostThreadedCallsGroup(NULL, stage4LCP_fcComplete_allowedThreads - 1, callThisReleasee, &dxQuickStepIsland_Stage4LCP_fcWarmComplete_Callback, stage4CallContext, "QuickStepIsland Stage4LCP_fcWarmComplete");
         }
         dxQuickStepIsland_Stage4LCP_MTfcComputation_warmComplete(stage4CallContext);
-        world->AlterThreadedCallDependenciesCount(callThisReleasee, -1);
     }
 }
 
@@ -2549,15 +2543,13 @@ int dxQuickStepIsland_Stage4LCP_ConstraintsReorderingSync_Callback(void *_stage4
 
     stage4CallContext->RecordLCP_IterationStart(stage4LCP_Iteration_allowedThreads, callThisReleasee);
 
-    dxWorld *world = callContext->m_world;
-    world->AlterThreadedCallDependenciesCount(callThisReleasee, stage4LCP_Iteration_allowedThreads);
-
     unsigned knownToBeCompletedLevel = dxHEAD_INDEX;
     if (stage4LCP_Iteration_allowedThreads > 1) {
+        dxWorld *world = callContext->m_world;
+        world->AlterThreadedCallDependenciesCount(callThisReleasee, stage4LCP_Iteration_allowedThreads - 1);
         world->PostThreadedCallsIndexOverridenGroup(NULL, stage4LCP_Iteration_allowedThreads - 1, callThisReleasee, &dxQuickStepIsland_Stage4LCP_Iteration_Callback, stage4CallContext, knownToBeCompletedLevel, "QuickStepIsland Stage4LCP_Iteration");
     }
     dxQuickStepIsland_Stage4LCP_MTIteration(stage4CallContext, knownToBeCompletedLevel);
-    world->AlterThreadedCallDependenciesCount(callThisReleasee, -1);
 
     return 1;
 }
@@ -2817,14 +2809,12 @@ int dxQuickStepIsland_Stage4LCP_IterationSync_Callback(void *_stage4CallContext,
         stage4b_allowedThreads += CalculateOptimalThreadsCount<dxQUICKSTEPISLAND_STAGE4B_STEP>(localContext->m_nj, allowedThreads - stage4b_allowedThreads);
     }
 
-    dxWorld *world = callContext->m_world;
-    world->AlterThreadedCallDependenciesCount(callThisReleasee, stage4b_allowedThreads);
-
     if (stage4b_allowedThreads > 1) {
+        dxWorld *world = callContext->m_world;
+        world->AlterThreadedCallDependenciesCount(callThisReleasee, stage4b_allowedThreads - 1);
         world->PostThreadedCallsGroup(NULL, stage4b_allowedThreads - 1, callThisReleasee, &dxQuickStepIsland_Stage4b_Callback, stage4CallContext, "QuickStepIsland Stage4b");
     }
     dxQuickStepIsland_Stage4b(stage4CallContext);
-    world->AlterThreadedCallDependenciesCount(callThisReleasee, -1);
     
     return 1;
 }
@@ -3052,14 +3042,12 @@ int dxQuickStepIsland_Stage6aSync_Callback(void *_stage6CallContext, dcallindex_
     unsigned int nb = callContext->m_islandBodiesCount;
     unsigned int stage6b_allowedThreads = CalculateOptimalThreadsCount<dxQUICKSTEPISLAND_STAGE6B_STEP>(nb, allowedThreads);
 
-    dxWorld *world = callContext->m_world;
-    world->AlterThreadedCallDependenciesCount(callThisReleasee, stage6b_allowedThreads);
-
     if (stage6b_allowedThreads > 1) {
+        dxWorld *world = callContext->m_world;
+        world->AlterThreadedCallDependenciesCount(callThisReleasee, stage6b_allowedThreads - 1);
         world->PostThreadedCallsGroup(NULL, stage6b_allowedThreads - 1, callThisReleasee, &dxQuickStepIsland_Stage6b_Callback, stage6CallContext, "QuickStepIsland Stage6b");
     }
     dxQuickStepIsland_Stage6b(stage6CallContext);
-    world->AlterThreadedCallDependenciesCount(callThisReleasee, -1);
 
     return 1;
 }
