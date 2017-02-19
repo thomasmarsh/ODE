@@ -226,7 +226,7 @@ dxJointHinge2::makeV1andV2()
 
         // modify axis 2 so it's perpendicular to axis 1
         dReal k = dCalcVectorDot3( ax1, ax2 );
-        dAddScaledVectors3(ax2, ax2, ax1, REAL(1.0), -k);
+        dAddVectorScaledVector3(ax2, ax2, ax1, -k);
         
         if (dxSafeNormalize3( ax2 )) {
             // make v1 = modified axis2, v2 = axis1 x (modified axis2)
@@ -254,7 +254,7 @@ dxJointHinge2::makeW1andW2()
 
         // modify axis 1 so it's perpendicular to axis 2
         dReal k = dCalcVectorDot3( ax2, ax1 );
-        dAddScaledVectors3(ax1, ax1, ax2, REAL(1.0), -k);
+        dAddVectorScaledVector3(ax1, ax1, ax2, -k);
         
         if (dxSafeNormalize3( ax1 )) {
             // make w1 = modified axis1, w2 = axis2 x (modified axis1)

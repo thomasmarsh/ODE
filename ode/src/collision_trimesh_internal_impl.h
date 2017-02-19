@@ -139,7 +139,7 @@ void dxTriDataBase::meaningfulPreprocess_buildEdgeFlags(uint8 *useFlags/*=NULL*/
                     dVector3 secondTriangleOppositeEdge;
                     dSubtractVectors3(secondTriangleOppositeEdge, secondTriangle[secondOppositeVertex], secondTriangle[secondEdgeStart]);
                     dReal dProjectionLength = dCalcVectorDot3(secondTriangleOppositeEdge, secondTriangleMatchingEdge);
-                    dAddScaledVectors3(secondOppositeVertexSegment, secondTriangleOppositeEdge, secondTriangleMatchingEdge, REAL(1.0), -dProjectionLength);
+                    dAddVectorScaledVector3(secondOppositeVertexSegment, secondTriangleOppositeEdge, secondTriangleMatchingEdge, -dProjectionLength);
                 }
                 else
                 {

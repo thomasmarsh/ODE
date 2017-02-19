@@ -88,6 +88,15 @@ ODE_PURE_INLINE void dSubtractVectors3(dReal *res, const dReal *a, const dReal *
   res[0] = res_0; res[1] = res_1; res[2] = res_2;
 }
 
+ODE_PURE_INLINE void dAddVectorScaledVector3(dReal *res, const dReal *a, const dReal *b, dReal b_scale)
+{
+    const dReal res_0 = a[0] + b_scale * b[0];
+    const dReal res_1 = a[1] + b_scale * b[1];
+    const dReal res_2 = a[2] + b_scale * b[2];
+    /* Only assign after all the calculations are over to avoid incurring memory aliasing*/
+    res[0] = res_0; res[1] = res_1; res[2] = res_2;
+}
+
 ODE_PURE_INLINE void dAddScaledVectors3(dReal *res, const dReal *a, const dReal *b, dReal a_scale, dReal b_scale)
 {
   const dReal res_0 = a_scale * a[0] + b_scale * b[0];
