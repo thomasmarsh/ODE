@@ -106,13 +106,13 @@
   }
 
   newoption {
-    trigger     = "with-builtin-threading-impl",
-    description = "Include built-in multithreaded threading implementation (still must be created and assigned to be used)"
+    trigger     = "no-builtin-threading-impl",
+    description = "Disable built-in multithreaded threading implementation"
   }
 
   newoption {
     trigger     = "no-threading-intf",
-    description = "Disable threading interface support (external implementations may not be assigned; overrides with-builtin-threading-impl)"
+    description = "Disable threading interface support (external implementations cannot be assigned)"
   }
 
   newoption {
@@ -451,7 +451,7 @@
 
     if _OPTIONS["no-threading-intf"] then
       text = string.gsub(text, "/%* #define dTHREADING_INTF_DISABLED 1 %*/", "#define dTHREADING_INTF_DISABLED 1")
-    elseif _OPTIONS["with-builtin-threading-impl"] then
+    elseif not _OPTIONS["no-builtin-threading-impl"] then
       text = string.gsub(text, "/%* #define dBUILTIN_THREADING_IMPL_ENABLED 1 %*/", "#define dBUILTIN_THREADING_IMPL_ENABLED 1")
     end
 

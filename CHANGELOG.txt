@@ -8,6 +8,10 @@ the rules for this file:
   * keep the format consistent (79 char width, M/D/Y date format).
 
 ------------------------------------------------------------------------------
+02/20/2017 Oleh Derevenko
+        * Project generation options have been changed to have built-in
+          multithreaded threading implementation enabled by default.
+
 02/19/2017 Oleh Derevenko
         * dWorldStep threaded implementation has been extended to the final 
           steps of constraint force applications and body position updates
