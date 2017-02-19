@@ -378,7 +378,7 @@ END_NAMESPACE_OU();
 BEGIN_NAMESPACE_OU();
 
 
-typedef LONG atomicord32;
+typedef ULONG atomicord32;
 typedef PVOID atomicptr;
 
 
@@ -402,11 +402,11 @@ typedef PVOID atomicptr;
 
 #else // other compilers
 
-#define __ou_intlck_value_t atomicord32
-#define __ou_intlck_target_t volatile atomicord32 *
+#define __ou_intlck_value_t LONG
+#define __ou_intlck_target_t volatile LONG *
 #define __ou_xchgadd_target_t LPLONG
-#define __ou_cmpxchg_value_t atomicord32
-#define __ou_cmpxchg_target_t volatile atomicord32 *
+#define __ou_cmpxchg_value_t LONG
+#define __ou_cmpxchg_target_t volatile LONG *
 
 
 #endif // #if _OU_COMPILER == _OU_COMPILER_GCC
@@ -686,10 +686,13 @@ END_NAMESPACE_OU();
 BEGIN_NAMESPACE_OU();
 
 
-typedef int32_t atomicord32;
+typedef uint32_t atomicord32;
 typedef void *atomicptr;
 
 
+#define __ou_intlck_target_t volatile int32_t *
+#define __ou_xchgadd_target_t volatile int32_t *
+#define __ou_cmpxchg_target_t volatile int32_t *
 #define __ou_bitmsk_target_t volatile uint32_t *
 
 
@@ -698,20 +701,20 @@ typedef void *atomicptr;
 static _OU_ALWAYSINLINE atomicord32 _OU_CONVENTION_API 
 /*atomicord32 */AtomicIncrement(volatile atomicord32 *paoDestination)
 {
-	return OSAtomicIncrement32Barrier(paoDestination);
+	return OSAtomicIncrement32Barrier((__ou_intlck_target_t)paoDestination);
 }
 
 static _OU_ALWAYSINLINE atomicord32 _OU_CONVENTION_API 
 /*atomicord32 */AtomicDecrement(volatile atomicord32 *paoDestination)
 {
-	return OSAtomicDecrement32Barrier(paoDestination);
+	return OSAtomicDecrement32Barrier((__ou_intlck_target_t)paoDestination);
 }
 
 
 static _OU_ALWAYSINLINE atomicord32 _OU_CONVENTION_API 
 /*atomicord32 */AtomicExchange(volatile atomicord32 *paoDestination, atomicord32 aoExchange)
 {
-	atomicord32 aoOldValue = *paoDestination;
+	__ou_cmpxchg_value_t aoOldValue = *paoDestination;
 
 	/*
 	 *	Implementation Note:
@@ -721,8 +724,8 @@ static _OU_ALWAYSINLINE atomicord32 _OU_CONVENTION_API
 	 *	threads will be using this API set for manipulations with paoDestination as well
 	 *	and hence will not issue writes after/without memory barrier.
 	 */
-	for (bool bSwapExecuted = OSAtomicCompareAndSwap32Barrier(aoOldValue, aoExchange, paoDestination);
-		!bSwapExecuted; bSwapExecuted = OSAtomicCompareAndSwap32(aoOldValue, aoExchange, paoDestination))
+	for (bool bSwapExecuted = OSAtomicCompareAndSwap32Barrier(aoOldValue, aoExchange, (__ou_cmpxchg_target_t)paoDestination);
+		!bSwapExecuted; bSwapExecuted = OSAtomicCompareAndSwap32(aoOldValue, aoExchange, (__ou_cmpxchg_target_t)paoDestination))
 	{
 		aoOldValue = *paoDestination;
 	}
@@ -733,13 +736,13 @@ static _OU_ALWAYSINLINE atomicord32 _OU_CONVENTION_API
 static _OU_ALWAYSINLINE atomicord32 _OU_CONVENTION_API 
 /*atomicord32 */AtomicExchangeAdd(volatile atomicord32 *paoDestination, atomicord32 aoAddend)
 {
-	return (OSAtomicAdd32Barrier(aoAddend, paoDestination) - aoAddend);
+	return (OSAtomicAdd32Barrier(aoAddend, (__ou_xchgadd_target_t)paoDestination) - aoAddend);
 }
 
 static _OU_ALWAYSINLINE bool _OU_CONVENTION_API 
 /*bool */AtomicCompareExchange(volatile atomicord32 *paoDestination, atomicord32 aoComparand, atomicord32 aoExchange)
 {
-	return OSAtomicCompareAndSwap32Barrier(aoComparand, aoExchange, paoDestination);
+	return OSAtomicCompareAndSwap32Barrier(aoComparand, aoExchange, (__ou_cmpxchg_target_t)paoDestination);
 }
 
 
@@ -865,19 +868,19 @@ static _OU_ALWAYSINLINE bool _OU_CONVENTION_API
 static _OU_ALWAYSINLINE void _OU_CONVENTION_API 
 /*void */AtomicIncrementNoResult(volatile atomicord32 *paoDestination)
 {
-	OSAtomicIncrement32Barrier(paoDestination);
+	OSAtomicIncrement32Barrier((__ou_intlck_target_t)paoDestination);
 }
 
 static _OU_ALWAYSINLINE void _OU_CONVENTION_API 
 /*void */AtomicDecrementNoResult(volatile atomicord32 *paoDestination)
 {
-	OSAtomicDecrement32Barrier(paoDestination);
+	OSAtomicDecrement32Barrier((__ou_intlck_target_t)paoDestination);
 }
 
 static _OU_ALWAYSINLINE void _OU_CONVENTION_API 
 /*void */AtomicExchangeAddNoResult(volatile atomicord32 *paoDestination, atomicord32 aoAddend)
 {
-	OSAtomicAdd32Barrier(aoAddend, paoDestination);
+	OSAtomicAdd32Barrier(aoAddend, (__ou_xchgadd_target_t)paoDestination);
 }
 
 static _OU_ALWAYSINLINE void _OU_CONVENTION_API 
@@ -903,6 +906,9 @@ static _OU_ALWAYSINLINE void _OU_CONVENTION_API
 
 
 #undef __ou_bitmsk_target_t
+#undef __ou_cmpxchg_target_t
+#undef __ou_xchgadd_target_t
+#undef __ou_intlck_target_t
 
 #endif // #if _OU_TARGET_OS == _OU_TARGET_OS_MAC
 
@@ -922,8 +928,11 @@ END_NAMESPACE_OU();
 BEGIN_NAMESPACE_OU();
 
 
-typedef int atomicord32;
+typedef unsigned int atomicord32;
 typedef void *atomicptr;
+
+#define __ou_cas_value_t int
+#define __ou_caslp_value_t long
 
 
 #define __OU_ATOMIC_ORD32_FUNCTIONS_DEFINED
@@ -944,7 +953,7 @@ static _OU_ALWAYSINLINE atomicord32 _OU_CONVENTION_API
 static _OU_ALWAYSINLINE atomicord32 _OU_CONVENTION_API 
 /*atomicord32 */AtomicExchange(volatile atomicord32 *paoDestination, atomicord32 aoExchange)
 {
-	atomicord32 aoOldValue = *paoDestination;
+	__ou_cas_value_t aoOldValue = *paoDestination;
 
 	while (!compare_and_swap((atomic_p)paoDestination, &aoOldValue, aoExchange))
 	{
@@ -963,7 +972,7 @@ static _OU_ALWAYSINLINE atomicord32 _OU_CONVENTION_API
 static _OU_ALWAYSINLINE bool _OU_CONVENTION_API 
 /*bool */AtomicCompareExchange(volatile atomicord32 *paoDestination, atomicord32 aoComparand, atomicord32 aoExchange)
 {
-	atomicord32 aoOldValue = aoComparand;
+	__ou_cas_value_t aoOldValue = aoComparand;
 
 	return compare_and_swap((atomic_p)paoDestination, &aoOldValue, aoExchange);
 }
@@ -986,7 +995,7 @@ static _OU_ALWAYSINLINE atomicord32 _OU_CONVENTION_API
 static _OU_ALWAYSINLINE atomicord32 _OU_CONVENTION_API 
 /*atomicord32 */AtomicXor(volatile atomicord32 *paoDestination, atomicord32 aoBitMask)
 {
-	volatile atomicord32 aoOldValue = *paoDestination;
+	volatile __ou_cas_value_t aoOldValue = *paoDestination;
 	
 	while (!compare_and_swap((atomic_p)paoDestination, &aoOldValue, aoOldValue ^ aoBitMask))
 	{
@@ -1004,9 +1013,9 @@ static _OU_ALWAYSINLINE atomicord32 _OU_CONVENTION_API
 static _OU_ALWAYSINLINE atomicptr _OU_CONVENTION_API 
 /*atomicptr */AtomicExchangePointer(volatile atomicptr *papDestination, atomicptr apExchange)
 {
-	long liOldValue = (long)*papDestination;
+	__ou_caslp_value_t liOldValue = (__ou_caslp_value_t)*papDestination;
 	
-	while (!compare_and_swaplp((atomic_l)papDestination, &liOldValue, (long)apExchange))
+	while (!compare_and_swaplp((atomic_l)papDestination, &liOldValue, (__ou_caslp_value_t)apExchange))
 	{
 		// Do nothing
 	}
@@ -1017,13 +1026,17 @@ static _OU_ALWAYSINLINE atomicptr _OU_CONVENTION_API
 static _OU_ALWAYSINLINE bool _OU_CONVENTION_API 
 /*bool */AtomicCompareExchangePointer(volatile atomicptr *papDestination, atomicptr apComparand, atomicptr apExchange)
 {
-	long liOldValue = (long)apComparand;
+	__ou_caslp_value_t liOldValue = (__ou_caslp_value_t)apComparand;
 	
-	return compare_and_swaplp((atomic_l)papDestination, &liOldValue, (long)apExchange);
+	return compare_and_swaplp((atomic_l)papDestination, &liOldValue, (__ou_caslp_value_t)apExchange);
 }
 
 
 #endif // #if _OU_TARGET_BITS == _OU_TARGET_BITS_64
+
+
+#undef __ou_caslp_value_t
+#undef __ou_cas_value_t
 
 
 #endif // #if _OU_TARGET_OS == _OU_TARGET_OS_AIX
