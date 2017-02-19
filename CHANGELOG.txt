@@ -8,6 +8,10 @@ the rules for this file:
   * keep the format consistent (79 char width, M/D/Y date format).
 
 ------------------------------------------------------------------------------
+02/19/2017 Oleh Derevenko
+        * OU atomicord32 type has been fixed to be unsigned on all supported
+          platforms.
+
 01/09/2017 Oleh Derevenko
         * dGeomTriMeshDataPreprocess2() public function has been added to 
           replace dGeomTriMeshDataPreprocess(). Face angles pre-computation
