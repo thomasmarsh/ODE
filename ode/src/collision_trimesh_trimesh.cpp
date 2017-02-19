@@ -109,7 +109,7 @@ static bool TriTriContacts(const dVector3 tr1[3],
 
 #define SMULT(p,q,s) dCopyScaledVector3(p, q, s)
 
-#define COMBO(combo,p,t,q) dAddScaledVectors3(combo, p, q, REAL(1.0), t)
+#define COMBO(combo,p,t,q) dAddVectorScaledVector3(combo, p, q, t)
 
 #define LENGTH(x) dCalcVectorLength3(x)
 

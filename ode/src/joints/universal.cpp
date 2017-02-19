@@ -323,7 +323,7 @@ dxJointUniversal::getInfo2( dReal worldFPS, dReal worldERP,
     dReal k = dCalcVectorDot3( ax1, ax2 );
 
     dVector3 ax2_temp;
-    dAddScaledVectors3(ax2_temp, ax2, ax1, 1, -k);
+    dAddVectorScaledVector3(ax2_temp, ax2, ax1, -k);
     dCalcVectorCross3( p, ax1, ax2_temp );
     dNormalize3( p );
 

@@ -124,7 +124,7 @@ dxJointTransmission::getInfo2( dReal worldFPS, dReal /*worldERP*/,
         dIASSERT (ratio > 0);
         
         dSubtractVectors3(d, a[1], a[0]);
-        dAddScaledVectors3(c[0], a[0], d, 1, ratio / (1 + ratio));
+        dAddVectorScaledVector3(c[0], a[0], d, ratio / (1 + ratio));
         dCopyVector3(c[1], c[0]);
         
         dNormalize3(d);
@@ -161,7 +161,7 @@ dxJointTransmission::getInfo2( dReal worldFPS, dReal /*worldERP*/,
         for (i = 0 ; i < 2 ; i += 1) {
             dSubtractVectors3(d, a[i], O);
             m = dCalcVectorDot3(d, l[i]);        
-            dAddScaledVectors3(c[i], O, l[i], 1, m);
+            dAddVectorScaledVector3(c[i], O, l[i], m);
         }
 
         break;
