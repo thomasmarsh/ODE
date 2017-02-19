@@ -32,5 +32,3 @@ See the [COPYING](http://bitbucket.org/odedevs/ode/raw/default/COPYING) file for
 
  * Coding style requirements can be found in the [CSR.txt](http://bitbucket.org/odedevs/ode/raw/default/CSR.txt) file.
 
-
-[![Build Status](https://drone.io/bitbucket.org/odedevs/ode/status.png)](https://drone.io/bitbucket.org/odedevs/ode/latest)
