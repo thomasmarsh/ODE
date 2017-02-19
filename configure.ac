@@ -289,7 +289,7 @@ AC_FUNC_ALLOCA
 
 AC_ARG_ENABLE([threading-intf],
         AS_HELP_STRING([--disable-threading-intf],
-            [disable threading interface support (external implementations may not be assigned; overrides --enable-builtin-threading-impl)]
+            [disable threading interface support (external implementations cannot be assigned)]
         ),
         threading_intf=$enableval,threading_intf=yes)
 AC_ARG_ENABLE([ou],
@@ -374,13 +374,13 @@ AM_CONDITIONAL(ENABLE_OU, true)
 if test x$threading_intf = xyes
 then
     AC_ARG_ENABLE([builtin-threading-impl],
-        AS_HELP_STRING([--enable-builtin-threading-impl],
-            [include built-in multithreaded threading implementation (still must be created and assigned to be used)]
+        AS_HELP_STRING([--disable-builtin-threading-impl],
+            [disable built-in multithreaded threading implementation]
         ),
-        use_builtin_threading_impl=$enableval,use_builtin_threading_impl=no)
+        use_builtin_threading_impl=$enableval,use_builtin_threading_impl=yes)
     if test x$use_builtin_threading_impl = xyes
     then
-        AC_DEFINE([dBUILTIN_THREADING_IMPL_ENABLED],[1],[Built-in multithreaded threading implementation included])
+        AC_DEFINE([dBUILTIN_THREADING_IMPL_ENABLED],[1],[Built-in multithreaded threading implementation is included])
     fi
 else
     AC_DEFINE([dTHREADING_INTF_DISABLED],[1],[Threading interface is disabled])
