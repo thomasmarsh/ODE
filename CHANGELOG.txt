@@ -9,6 +9,10 @@ the rules for this file:
 
 ------------------------------------------------------------------------------
 02/19/2017 Oleh Derevenko
+        * dWorldStep threaded implementation has been extended to the final 
+          steps of constraint force applications and body position updates
+          after the LCP solving. Note that body callbacks (if set) may be
+          called from multiple threads if threaded execution is enabled.
         * OU atomicord32 type has been fixed to be unsigned on all supported
           platforms.
 
