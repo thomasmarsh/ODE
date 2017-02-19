@@ -210,10 +210,12 @@ struct dxStepperStage0Outputs
 
 struct dxStepperStage1CallContext
 {
-    dxStepperStage1CallContext(const dxStepperProcessingCallContext *stepperCallContext, void *stageMemArenaState, dReal *invI, dJointWithInfo1 *jointinfos):
-        m_stepperCallContext(stepperCallContext), m_stageMemArenaState(stageMemArenaState), 
-        m_invI(invI), m_jointinfos(jointinfos)
+    void Initialize(const dxStepperProcessingCallContext *stepperCallContext, void *stageMemArenaState, dReal *invI, dJointWithInfo1 *jointinfos)
     {
+        m_stepperCallContext = stepperCallContext;
+        m_stageMemArenaState = stageMemArenaState;
+        m_invI = invI;
+        m_jointinfos = jointinfos;
     }
 
     const dxStepperProcessingCallContext *m_stepperCallContext;
@@ -225,10 +227,13 @@ struct dxStepperStage1CallContext
 
 struct dxStepperStage0BodiesCallContext
 {
-    dxStepperStage0BodiesCallContext(const dxStepperProcessingCallContext *stepperCallContext, dReal *invI):
-        m_stepperCallContext(stepperCallContext), m_invI(invI), 
-        m_tagsTaken(0), m_gravityTaken(0), m_inertiaBodyIndex(0)
+    void Initialize(const dxStepperProcessingCallContext *stepperCallContext, dReal *invI)
     {
+        m_stepperCallContext = stepperCallContext;
+        m_invI = invI;
+        m_tagsTaken = 0;
+        m_gravityTaken = 0;
+        m_inertiaBodyIndex = 0;
     }
 
     const dxStepperProcessingCallContext *m_stepperCallContext;
@@ -240,9 +245,11 @@ struct dxStepperStage0BodiesCallContext
 
 struct dxStepperStage0JointsCallContext
 {
-    dxStepperStage0JointsCallContext(const dxStepperProcessingCallContext *stepperCallContext, dJointWithInfo1 *jointinfos, dxStepperStage0Outputs *stage0Outputs):
-        m_stepperCallContext(stepperCallContext), m_jointinfos(jointinfos), m_stage0Outputs(stage0Outputs)
+    void Initialize(const dxStepperProcessingCallContext *stepperCallContext, dJointWithInfo1 *jointinfos, dxStepperStage0Outputs *stage0Outputs)
     {
+        m_stepperCallContext = stepperCallContext;
+        m_jointinfos = jointinfos;
+        m_stage0Outputs = stage0Outputs;
     }
 
     const dxStepperProcessingCallContext *m_stepperCallContext;
@@ -263,7 +270,8 @@ struct dxStepperLocalContext
 {
     void Initialize(dReal *invI, dJointWithInfo1 *jointinfos, unsigned int nj, 
         unsigned int m, unsigned int nub, const unsigned int *mindex, int *findex, 
-        dReal *J, dReal *A, dReal *pairsRhsCfm, dReal *pairsLoHi)
+        dReal *J, dReal *A, dReal *pairsRhsCfm, dReal *pairsLoHi, 
+        atomicord32 *bodyStartJoints, atomicord32 *bodyJointLinks)
     {
         m_invI = invI;
         m_jointinfos = jointinfos;
@@ -276,6 +284,8 @@ struct dxStepperLocalContext
         m_A = A;
         m_pairsRhsCfm = pairsRhsCfm;
         m_pairsLoHi = pairsLoHi;
+        m_bodyStartJoints = bodyStartJoints;
+        m_bodyJointLinks = bodyJointLinks;
     }
 
     dReal                           *m_invI;
@@ -289,21 +299,8 @@ struct dxStepperLocalContext
     dReal                           *m_A;
     dReal                           *m_pairsRhsCfm;
     dReal                           *m_pairsLoHi;
-};
-
-struct dxStepperStage3CallContext
-{
-    void Initialize(const dxStepperProcessingCallContext *callContext, const dxStepperLocalContext *localContext, 
-        void *stage1MemArenaState)
-    {
-        m_stepperCallContext = callContext;
-        m_localContext = localContext;
-        m_stage1MemArenaState = stage1MemArenaState;
-    }
-
-    const dxStepperProcessingCallContext *m_stepperCallContext;
-    const dxStepperLocalContext     *m_localContext;
-    void                            *m_stage1MemArenaState;
+    atomicord32                     *m_bodyStartJoints;
+    atomicord32                     *m_bodyJointLinks;
 };
 
 struct dxStepperStage2CallContext
@@ -335,6 +332,38 @@ struct dxStepperStage2CallContext
     volatile atomicord32            m_ji_rhs;
 };
 
+struct dxStepperStage3CallContext
+{
+    void Initialize(const dxStepperProcessingCallContext *callContext, const dxStepperLocalContext *localContext, 
+        void *stage1MemArenaState)
+    {
+        m_stepperCallContext = callContext;
+        m_localContext = localContext;
+        m_stage1MemArenaState = stage1MemArenaState;
+    }
+
+    const dxStepperProcessingCallContext *m_stepperCallContext;
+    const dxStepperLocalContext     *m_localContext;
+    void                            *m_stage1MemArenaState;
+};
+
+struct dxStepperStage4CallContext
+{
+    void Initialize(const dxStepperProcessingCallContext *callContext, const dxStepperLocalContext *localContext/*, 
+        void *stage3MemarenaState*/)
+    {
+        m_stepperCallContext = callContext;
+        m_localContext = localContext;
+        // m_stage3MemarenaState = stage3MemarenaState;
+        m_bi_constrForce = 0;
+    }
+
+    const dxStepperProcessingCallContext *m_stepperCallContext;
+    const dxStepperLocalContext     *m_localContext;
+    // void                            *m_stage3MemarenaState;
+    volatile atomicord32            m_bi_constrForce;
+};
+
 static int dxStepIsland_Stage2a_Callback(void *callContext, dcallindex_t callInstanceIndex, dCallReleaseeID callThisReleasee);
 static int dxStepIsland_Stage2aSync_Callback(void *callContext, dcallindex_t callInstanceIndex, dCallReleaseeID callThisReleasee);
 static int dxStepIsland_Stage2b_Callback(void *callContext, dcallindex_t callInstanceIndex, dCallReleaseeID callThisReleasee);
@@ -346,6 +375,9 @@ static void dxStepIsland_Stage2a(dxStepperStage2CallContext *callContext);
 static void dxStepIsland_Stage2b(dxStepperStage2CallContext *callContext);
 static void dxStepIsland_Stage2c(dxStepperStage2CallContext *callContext);
 static void dxStepIsland_Stage3(dxStepperStage3CallContext *callContext);
+
+static int dxStepIsland_Stage4_Callback(void *_stage4CallContext, dcallindex_t callInstanceIndex, dCallReleaseeID callThisReleasee);
+static void dxStepIsland_Stage4(dxStepperStage4CallContext *stage4CallContext);
 
 
 //****************************************************************************
@@ -504,13 +536,13 @@ void dxStepIsland(const dxStepperProcessingCallContext *callContext)
     void *stagesMemArenaState = memarena->SaveState();
 
     dxStepperStage1CallContext *stage1CallContext = (dxStepperStage1CallContext *)memarena->AllocateBlock(sizeof(dxStepperStage1CallContext));
-    new(stage1CallContext) dxStepperStage1CallContext(callContext, stagesMemArenaState, invI, jointinfos);
+    stage1CallContext->Initialize(callContext, stagesMemArenaState, invI, jointinfos);
 
     dxStepperStage0BodiesCallContext *stage0BodiesCallContext = (dxStepperStage0BodiesCallContext *)memarena->AllocateBlock(sizeof(dxStepperStage0BodiesCallContext));
-    new(stage0BodiesCallContext) dxStepperStage0BodiesCallContext(callContext, invI);
+    stage0BodiesCallContext->Initialize(callContext, invI);
     
     dxStepperStage0JointsCallContext *stage0JointsCallContext = (dxStepperStage0JointsCallContext *)memarena->AllocateBlock(sizeof(dxStepperStage0JointsCallContext));
-    new(stage0JointsCallContext) dxStepperStage0JointsCallContext(callContext, jointinfos, &stage1CallContext->m_stage0Outputs);
+    stage0JointsCallContext->Initialize(callContext, jointinfos, &stage1CallContext->m_stage0Outputs);
 
     if (allowedThreads == 1)
     {
@@ -570,7 +602,7 @@ void dxStepIsland_Stage0_Bodies(dxStepperStage0BodiesCallContext *callContext)
             for (dxBody *const *bodycurr = body; bodycurr != bodyend; ++bodycurr) {
                 dxBody *b = *bodycurr;
                 if ((b->flags & dxBodyNoGravity) == 0) {
-                    b->facc[0] += b->mass.mass * gravity_x;
+                    b->facc[dV3E_X] += b->mass.mass * gravity_x;
                 }
             }
         }
@@ -579,7 +611,7 @@ void dxStepIsland_Stage0_Bodies(dxStepperStage0BodiesCallContext *callContext)
             for (dxBody *const *bodycurr = body; bodycurr != bodyend; ++bodycurr) {
                 dxBody *b = *bodycurr;
                 if ((b->flags & dxBodyNoGravity) == 0) {
-                    b->facc[1] += b->mass.mass * gravity_y;
+                    b->facc[dV3E_Y] += b->mass.mass * gravity_y;
                 }
             }
         }
@@ -588,7 +620,7 @@ void dxStepIsland_Stage0_Bodies(dxStepperStage0BodiesCallContext *callContext)
             for (dxBody *const *bodycurr = body; bodycurr != bodyend; ++bodycurr) {
                 dxBody *b = *bodycurr;
                 if ((b->flags & dxBodyNoGravity) == 0) {
-                    b->facc[2] += b->mass.mass * gravity_z;
+                    b->facc[dV3E_Z] += b->mass.mass * gravity_z;
                 }
             }
         }
@@ -883,7 +915,6 @@ void dxStepIsland_Stage1(dxStepperStage1CallContext *stage1CallContext)
         memarena->ShrinkArray<dJointWithInfo1>(_jointinfos, ji_reserve_count, ji_end);
     }
 
-    dxWorld *world = callContext->m_world;
     dJointWithInfo1 *jointinfos = _jointinfos + ji_start;
     unsigned int nj = (unsigned int)(ji_end - ji_start);
     dIASSERT((size_t)(ji_end - ji_start) <= (size_t)UINT_MAX);
@@ -891,8 +922,9 @@ void dxStepIsland_Stage1(dxStepperStage1CallContext *stage1CallContext)
     unsigned int *mindex = NULL;
     dReal *J = NULL, *A = NULL, *pairsRhsCfm = NULL, *pairsLoHi = NULL;
     int *findex = NULL;
+    atomicord32 *bodyStartJoints = NULL, *bodyJointLinks = NULL;
 
-    // if there are constraints, compute cforce
+    // if there are constraints, compute constrForce
     if (m > 0) {
         mindex = memarena->AllocateArray<unsigned int>((size_t)(nj + 1));
         {
@@ -918,10 +950,14 @@ void dxStepIsland_Stage1(dxStepperStage1CallContext *stage1CallContext)
         A = memarena->AllocateOveralignedArray<dReal>((size_t)m * dPAD(m), AMATRIX_ALIGNMENT);
         pairsRhsCfm = memarena->AllocateArray<dReal>((size_t)m * RCE__RHS_CFM_MAX);
         pairsLoHi = memarena->AllocateArray<dReal>((size_t)m * LHE__LO_HI_MAX);
+        const unsigned int nb = callContext->m_islandBodiesCount;
+        bodyStartJoints = memarena->AllocateArray<atomicord32>(nb);
+        bodyJointLinks = memarena->AllocateArray<atomicord32>((size_t)nj * dJCB__MAX);
+        dICHECK(nj < ~((atomicord32)0) / dJCB__MAX); // If larger joint counts are to be used, pointers (or size_t) need to be stored rather than atomicord32 indices
     }
 
     dxStepperLocalContext *localContext = (dxStepperLocalContext *)memarena->AllocateBlock(sizeof(dxStepperLocalContext));
-    localContext->Initialize(invI, jointinfos, nj, m, nub, mindex, findex, J, A, pairsRhsCfm, pairsLoHi);
+    localContext->Initialize(invI, jointinfos, nj, m, nub, mindex, findex, J, A, pairsRhsCfm, pairsLoHi, bodyStartJoints, bodyJointLinks);
 
     void *stage1MemarenaState = memarena->SaveState();
     dxStepperStage3CallContext *stage3CallContext = (dxStepperStage3CallContext*)memarena->AllocateBlock(sizeof(dxStepperStage3CallContext));
@@ -938,15 +974,17 @@ void dxStepIsland_Stage1(dxStepperStage1CallContext *stage1CallContext)
         const unsigned allowedThreads = callContext->m_stepperAllowedThreads;
         dIASSERT(allowedThreads != 0);
 
-        if (allowedThreads == 1)
-        {
+        if (allowedThreads == 1) {
+            IFTIMING(dTimerNow("create J"));
             dxStepIsland_Stage2a(stage2CallContext);
+            IFTIMING(dTimerNow("compute Adiag, JinvM and rhs_tmp"));
             dxStepIsland_Stage2b(stage2CallContext);
+            IFTIMING(dTimerNow("compute A and rhs"));
             dxStepIsland_Stage2c(stage2CallContext);
             dxStepIsland_Stage3(stage3CallContext);
         }
-        else
-        {
+        else {
+            dxWorld *world = callContext->m_world;
             dCallReleaseeID stage3CallReleasee;
             world->PostThreadedCallForUnawareReleasee(NULL, &stage3CallReleasee, 1, callContext->m_finalReleasee, 
                 NULL, &dxStepIsland_Stage3_Callback, stage3CallContext, 0, "StepIsland Stage3");
@@ -1000,7 +1038,6 @@ void dxStepIsland_Stage2a(dxStepperStage2CallContext *stage2CallContext)
         dReal *pairsRhsCfm = localContext->m_pairsRhsCfm;
         dReal *pairsLoHi = localContext->m_pairsLoHi;
 
-        IFTIMING(dTimerNow ("create J"));
         // get jacobian data from constraints. a (2*m)x8 matrix will be created
         // to store the two jacobian blocks from each constraint. it has this
         // format:
@@ -1148,7 +1185,6 @@ void dxStepIsland_Stage2b(dxStepperStage2CallContext *stage2CallContext)
         const dReal *J = localContext->m_J;
         dReal *JinvM = stage2CallContext->m_JinvM;
 
-        IFTIMING(dTimerNow ("compute JinvM"));
         // compute A = J*invM*J'. first compute JinvM = J*invM. this has the same
         // format as J so we just go through the constraints in J multiplying by
         // the appropriate scalars and matrices.
@@ -1199,10 +1235,10 @@ void dxStepIsland_Stage2b(dxStepperStage2CallContext *stage2CallContext)
         dxBody * const *const body = callContext->m_islandBodiesStart;
         const unsigned int nb = callContext->m_islandBodiesCount;
         const dReal *invI = localContext->m_invI;
+        atomicord32 *bodyStartJoints = localContext->m_bodyStartJoints;
         dReal *rhs_tmp = stage2CallContext->m_rhs_tmp;
 
         // compute the right hand side `rhs'
-        IFTIMING(dTimerNow ("compute rhs_tmp"));
         const dReal stepsizeRecip = dRecip(callContext->m_stepSize);
 
         // put v/h + invM*fe into rhs_tmp
@@ -1215,6 +1251,8 @@ void dxStepIsland_Stage2b(dxStepperStage2CallContext *stage2CallContext)
             for (unsigned int j = dSA__MIN; j != dSA__MAX; ++j) tmp1curr[dDA__L_MIN + j] = b->facc[dV3E__AXES_MIN + j] * b->invMass + b->lvel[dV3E__AXES_MIN + j] * stepsizeRecip;
             dMultiply0_331 (tmp1curr + dDA__A_MIN, invIrow, b->tacc);
             for (unsigned int k = dSA__MIN; k != dSA__MAX; ++k) tmp1curr[dDA__A_MIN + k] += b->avel[dV3E__AXES_MIN + k] * stepsizeRecip;
+            // Initialize body start joint indices -- this will be needed later for building body related joint list in dxStepIsland_Stage2c
+            bodyStartJoints[bi] = 0;
         }
     }
 }
@@ -1339,10 +1377,10 @@ void dxStepIsland_Stage2c(dxStepperStage2CallContext *stage2CallContext)
         const dReal *J = localContext->m_J;
         const dReal *rhs_tmp = stage2CallContext->m_rhs_tmp;
         dReal *pairsRhsCfm = localContext->m_pairsRhsCfm;
+        atomicord32 *bodyStartJoints = localContext->m_bodyStartJoints;
+        atomicord32 *bodyJointLinks = localContext->m_bodyJointLinks;
 
         // compute the right hand side `rhs'
-        IFTIMING(dTimerNow ("compute rhs"));
-
         // put J*rhs_tmp into rhs
         unsigned ji;
         while ((ji = ThrsafeIncrementIntUpToLimit(&stage2CallContext->m_ji_rhs, nj)) != nj) {
@@ -1356,12 +1394,32 @@ void dxStepIsland_Stage2c(dxStepperStage2CallContext *stage2CallContext)
 
             dxBody *jb0 = joint->node[0].body;
             if (true || jb0 != NULL) { // -- always true
-                MultiplySubJxRhsTmpFromRHS (currRhsCfm, JRow, rhs_tmp + (size_t)(unsigned)jb0->tag * dDA__MAX, infom);
+                unsigned bodyIndex = (unsigned)jb0->tag;
+                MultiplySubJxRhsTmpFromRHS (currRhsCfm, JRow, rhs_tmp + (size_t)bodyIndex * dDA__MAX, infom);
+
+                // Link joints connected to each body into a list to be used on results incorporation. The bodyStartJoints have been initialized in dxStepIsland_Stage2b.
+                const atomicord32 linkIndex = (atomicord32)((size_t)ji * dJCB__MAX + dJCB_FIRST_BODY); // It is asserted at links buffer allocation that the indices can't overflow atomicord32
+                for (atomicord32 oldStartIndex = bodyStartJoints[bodyIndex]; ; oldStartIndex = bodyStartJoints[bodyIndex]) {
+                    bodyJointLinks[linkIndex] = oldStartIndex;
+                    if (ThrsafeCompareExchange(&bodyStartJoints[bodyIndex], oldStartIndex, linkIndex + 1)) { // The link index is stored incremented to allow 0 as end indicator
+                        break;
+                    }
+                }
             }
 
             dxBody *jb1 = joint->node[1].body;
             if (jb1 != NULL) {
-                MultiplySubJxRhsTmpFromRHS (currRhsCfm, JRow + infom * JME__MAX, rhs_tmp + (size_t)(unsigned)jb1->tag * dDA__MAX, infom);
+                unsigned bodyIndex = (unsigned)jb1->tag;
+                MultiplySubJxRhsTmpFromRHS (currRhsCfm, JRow + infom * JME__MAX, rhs_tmp + (size_t)bodyIndex * dDA__MAX, infom);
+
+                // Link joints connected to each body into a list to be used on results incorporation. The bodyStartJoints have been initialized in dxStepIsland_Stage2b
+                const atomicord32 linkIndex = (atomicord32)((size_t)ji * dJCB__MAX + dJCB_SECOND_BODY); // It is asserted at links buffer allocation that the indices can't overflow atomicord32
+                for (atomicord32 oldStartIndex = bodyStartJoints[bodyIndex]; ; oldStartIndex = bodyStartJoints[bodyIndex]) {
+                    bodyJointLinks[linkIndex] = oldStartIndex;
+                    if (ThrsafeCompareExchange(&bodyStartJoints[bodyIndex], oldStartIndex, linkIndex + 1)) { // The link index is stored incremented to allow 0 as end indicator
+                        break;
+                    }
+                }
             }
         }
     }
@@ -1401,13 +1459,12 @@ void dxStepIsland_Stage3(dxStepperStage3CallContext *stage3CallContext)
     dReal *pairsRhsLambda = localContext->m_pairsRhsCfm; // Reuse cfm buffer for lambdas as the former values are not needed any more
     dReal *pairsLoHi = localContext->m_pairsLoHi;
 
-    //dxWorld *world = callContext->m_world;
     dxBody * const *body = callContext->m_islandBodiesStart;
     unsigned int nb = callContext->m_islandBodiesCount;
 
     if (m > 0) {
         BEGIN_STATE_SAVE(memarena, lcpstate) {
-            IFTIMING(dTimerNow ("solving LCP problem"));
+            IFTIMING(dTimerNow ("solve LCP problem"));
 
             // solve the LCP problem and get lambda.
             // this will destroy A but that's OK
@@ -1418,134 +1475,144 @@ void dxStepIsland_Stage3(dxStepperStage3CallContext *stage3CallContext)
         } END_STATE_SAVE(memarena, lcpstate);
     }
 
-    // this will be set to the force due to the constraints
-    const size_t cfelements = (size_t)nb * CFE__MAX;
-    dReal *cforce = memarena->AllocateArray<dReal>(cfelements);
-    dSetZero (cforce, cfelements);
+    // void *stage3MemarenaState = memarena->SaveState();
 
-    if (m > 0) {
-        {
-            IFTIMING(dTimerNow ("compute constraint force"));
+    dxStepperStage4CallContext *stage4CallContext = (dxStepperStage4CallContext *)memarena->AllocateBlock(sizeof(dxStepperStage4CallContext));
+    stage4CallContext->Initialize(callContext, localContext/*, stage3MemarenaState*/);
 
-            // compute the constraint force `cforce'
-            // compute cforce = J'*lambda
-            unsigned ofsi = 0;
-            const dJointWithInfo1 *jicurr = jointinfos;
-            const dJointWithInfo1 *const jiend = jicurr + nj;
-            for (; jicurr != jiend; ++jicurr) {
-                const unsigned int infom = jicurr->info.m;
-                dxJoint *joint = jicurr->joint;
+    const unsigned allowedThreads = callContext->m_stepperAllowedThreads;
+    dIASSERT(allowedThreads != 0);
 
-                const dReal *JRow = J + (size_t)ofsi * (2 * JME__MAX);
-                const dReal *rowRhsLambda = pairsRhsLambda + (size_t)ofsi * RLE__RHS_LAMBDA_MAX;
+    if (allowedThreads == 1) {
+        IFTIMING(dTimerNow ("compute and apply constraint force"));
+        dxStepIsland_Stage4(stage4CallContext);
+        IFTIMING(dTimerEnd());
 
-                dJointFeedback *fb = joint->feedback;
+        if (m > 0) {
+            IFTIMING(dTimerReport(stdout,1));
+        }
+    }
+    else {
+        dCallReleaseeID finalReleasee = callContext->m_finalReleasee;
+        dxWorld *world = callContext->m_world;
+        world->AlterThreadedCallDependenciesCount(finalReleasee, allowedThreads - 1);
+        world->PostThreadedCallsGroup(NULL, allowedThreads - 1, finalReleasee, &dxStepIsland_Stage4_Callback, stage4CallContext, "StepIsland Stage4");
+        // Note: Adding another dependency for the finalReleasee is not necessary as it already depends on the current call
+        dxStepIsland_Stage4(stage4CallContext);
+    }
+}
 
-                if (fb != NULL) {
-                    // the user has requested feedback on the amount of force that this
-                    // joint is applying to the bodies. we use a slightly slower
-                    // computation that splits out the force components and puts them
-                    // in the feedback structure.
-                    dReal data[CFE__MAX];
-                    MultiplyJxLambdaIntoCForce (data, JRow, rowRhsLambda, infom);
+static 
+int dxStepIsland_Stage4_Callback(void *_stage4CallContext, dcallindex_t callInstanceIndex, dCallReleaseeID callThisReleasee)
+{
+    (void)callInstanceIndex; // unused
+    (void)callThisReleasee; // unused
+    dxStepperStage4CallContext *stage4CallContext = (dxStepperStage4CallContext *)_stage4CallContext;
+    dxStepIsland_Stage4(stage4CallContext);
+    return 1;
+}
 
-                    dxBody *b1 = joint->node[0].body;
-                    dReal *cf1 = cforce + (size_t)(unsigned)b1->tag * CFE__MAX;
-                    cf1[CFE_LX] += (fb->f1[dV3E_X] = data[CFE_LX]);
-                    cf1[CFE_LY] += (fb->f1[dV3E_Y] = data[CFE_LY]);
-                    cf1[CFE_LZ] += (fb->f1[dV3E_Z] = data[CFE_LZ]);
-                    cf1[CFE_AX] += (fb->t1[dV3E_X] = data[CFE_AX]);
-                    cf1[CFE_AY] += (fb->t1[dV3E_Y] = data[CFE_AY]);
-                    cf1[CFE_AZ] += (fb->t1[dV3E_Z] = data[CFE_AZ]);
+static 
+void dxStepIsland_Stage4(dxStepperStage4CallContext *stage4CallContext)
+{
+    const dxStepperProcessingCallContext *callContext = stage4CallContext->m_stepperCallContext;
+    const dxStepperLocalContext *localContext = stage4CallContext->m_localContext;
 
-                    dxBody *b2 = joint->node[1].body;
-                    if (b2 != NULL) {
-                        MultiplyJxLambdaIntoCForce (data, JRow + infom * JME__MAX, rowRhsLambda, infom);
+    const dReal stepSize = callContext->m_stepSize;
+    dxBody *const *bodies = callContext->m_islandBodiesStart;
+    dReal *invI = localContext->m_invI;
+    dJointWithInfo1 *jointInfos = localContext->m_jointinfos;
+    dReal *J = localContext->m_J;
+    dReal *pairsRhsLambda = localContext->m_pairsRhsCfm;
+    const unsigned int *mIndex = localContext->m_mindex;
+    atomicord32 *bodyStartJoints = localContext->m_bodyStartJoints;
+    atomicord32 *bodyJointLinks = localContext->m_bodyJointLinks;
+    const unsigned int nb = callContext->m_islandBodiesCount;
 
-                        dReal *cf2 = cforce + (size_t)(unsigned)b2->tag * CFE__MAX;
-                        cf2[CFE_LX] += (fb->f2[dV3E_X] = data[CFE_LX]);
-                        cf2[CFE_LY] += (fb->f2[dV3E_Y] = data[CFE_LY]);
-                        cf2[CFE_LZ] += (fb->f2[dV3E_Z] = data[CFE_LZ]);
-                        cf2[CFE_AX] += (fb->t2[dV3E_X] = data[CFE_AX]);
-                        cf2[CFE_AY] += (fb->t2[dV3E_Y] = data[CFE_AY]);
-                        cf2[CFE_AZ] += (fb->t2[dV3E_Z] = data[CFE_AZ]);
-                    }
-                }
-                else {
-                    // no feedback is required, let's compute cforce the faster way
-                    dxBody *b1 = joint->node[0].body;
-                    dReal *cf1 = cforce + (size_t)(unsigned)b1->tag * CFE__MAX;
-                    MultiplyAddJxLambdaToCForce (cf1, JRow, rowRhsLambda, infom);
+    unsigned bi;
+    while ((bi = ThrsafeIncrementIntUpToLimit(&stage4CallContext->m_bi_constrForce, nb)) != nb) {
+        dVector3 angularForceAccumulator;
+        dxBody *b = bodies[bi];
+        const dReal *invIrow = invI + (size_t)bi * dM3E__MAX;
+        dReal body_invMass_mul_stepSize = stepSize * b->invMass;
 
-                    dxBody *b2 = joint->node[1].body;
-                    if (b2 != NULL) {
-                        dReal *cf2 = cforce + (size_t)(unsigned)b2->tag * CFE__MAX;
-                        MultiplyAddJxLambdaToCForce (cf2, JRow + infom * JME__MAX, rowRhsLambda, infom);
-                    }
-                }
+        dReal bodyConstrForce[CFE__MAX];
+        bool constrForceAvailable = false;
+        
+        unsigned linkIndex = bodyStartJoints != NULL ? bodyStartJoints[bi] : 0;
+        if (linkIndex != 0) {
+            dSetZero(bodyConstrForce, dARRAY_SIZE(bodyConstrForce));
+        }
 
-                ofsi += infom;
+        // compute the constraint force as constrForce = J'*lambda
+        for (; linkIndex != 0; constrForceAvailable = true, linkIndex = bodyJointLinks[linkIndex - 1]) {
+            unsigned jointIndex = (linkIndex - 1) / dJCB__MAX;
+            unsigned jointBodyIndex = (linkIndex - 1) % dJCB__MAX;
+
+            const dJointWithInfo1 *currJointInfo = jointInfos + jointIndex;
+            unsigned ofsi = mIndex[jointIndex];
+            dIASSERT(dIN_RANGE(jointIndex, 0, localContext->m_nj));
+
+            const dReal *JRow = J + (size_t)ofsi * (2 * JME__MAX);
+            const dReal *rowRhsLambda = pairsRhsLambda + (size_t)ofsi * RLE__RHS_LAMBDA_MAX;
+
+            dxJoint *joint = currJointInfo->joint;
+            const unsigned int infom = currJointInfo->info.m;
+
+            // unsigned jRowExtraOffset = jointBodyIndex * infom * JME__MAX;
+            unsigned jRowExtraOffset = jointBodyIndex != dJCB__MIN ? infom * JME__MAX : 0;
+            dSASSERT(dJCB__MAX == 2);
+
+            dJointFeedback *fb = joint->feedback;
+
+            if (fb != NULL) {
+                // the user has requested feedback on the amount of force that this
+                // joint is applying to the bodies. we use a slightly slower
+                // computation that splits out the force components and puts them
+                // in the feedback structure.
+                dReal jointForce[CFE__MAX];
+                MultiplyJxLambdaIntoCForce (jointForce, JRow + jRowExtraOffset, rowRhsLambda, infom);
+
+                bodyConstrForce[CFE_LX] += (fb->f1[dV3E_X] = jointForce[CFE_LX]);
+                bodyConstrForce[CFE_LY] += (fb->f1[dV3E_Y] = jointForce[CFE_LY]);
+                bodyConstrForce[CFE_LZ] += (fb->f1[dV3E_Z] = jointForce[CFE_LZ]);
+                bodyConstrForce[CFE_AX] += (fb->t1[dV3E_X] = jointForce[CFE_AX]);
+                bodyConstrForce[CFE_AY] += (fb->t1[dV3E_Y] = jointForce[CFE_AY]);
+                bodyConstrForce[CFE_AZ] += (fb->t1[dV3E_Z] = jointForce[CFE_AZ]);
+            }
+            else {
+                MultiplyAddJxLambdaToCForce (bodyConstrForce, JRow + jRowExtraOffset, rowRhsLambda, infom);
             }
         }
-    } // if (m > 0)
 
-    {
         // compute the velocity update
-        IFTIMING(dTimerNow ("compute velocity update"));
-
-        const dReal stepsize = callContext->m_stepSize;
-
-        // add fe to cforce and multiply cforce by stepsize
-        dReal data[dSA__MAX];
-        const dReal *invIrow = invI;
-        dReal *cforcecurr = cforce;
-        dxBody *const *const bodyend = body + nb;
-        for (dxBody *const *bodycurr = body; bodycurr != bodyend; invIrow += dM3E__MAX, cforcecurr += CFE__MAX, ++bodycurr) {
-            dxBody *b = *bodycurr;
-
-            dReal body_invMass_mul_stepsize = stepsize * b->invMass;
-            for (unsigned int j = dSA__MIN; j != dSA__MAX; ++j) b->lvel[dV3E__AXES_MIN + j] += (cforcecurr[CFE__L_MIN + j] + b->facc[dV3E__AXES_MIN + j]) * body_invMass_mul_stepsize;
-
-            for (unsigned int k = dSA__MIN; k != dSA__MAX; ++k) data[k] = (cforcecurr[CFE__A_MIN + k] + b->tacc[dV3E__AXES_MIN + k]) * stepsize;
-            dMultiplyAdd0_331 (b->avel, invIrow, data);
+        if (constrForceAvailable) {
+            // add fe to cforce and multiply cforce by stepSize
+            for (unsigned int j = dSA__MIN; j != dSA__MAX; ++j) {
+                b->lvel[dV3E__AXES_MIN + j] += (bodyConstrForce[CFE__L_MIN + j] + b->facc[dV3E__AXES_MIN + j]) * body_invMass_mul_stepSize;
+            }
+            for (unsigned int k = dSA__MIN; k != dSA__MAX; ++k) {
+                angularForceAccumulator[dV3E__AXES_MIN + k] = (bodyConstrForce[CFE__A_MIN + k] + b->tacc[dV3E__AXES_MIN + k]) * stepSize;
+            }
         }
-    }
+        else {
+            // add fe to cforce and multiply cforce by stepSize
+            dAddVectorScaledVector3(b->lvel, b->lvel, b->facc, body_invMass_mul_stepSize);
+            dCopyScaledVector3(angularForceAccumulator, b->tacc, stepSize);
+        }
 
-    {
+        dMultiplyAdd0_331 (b->avel, invIrow, angularForceAccumulator + dV3E__AXES_MIN);
+
         // update the position and orientation from the new linear/angular velocity
-        // (over the given timestep)
-        IFTIMING(dTimerNow ("update position"));
-
-        const dReal stepsize = callContext->m_stepSize;
-
-        dxBody *const *const bodyend = body + nb;
-        for (dxBody *const *bodycurr = body; bodycurr != bodyend; ++bodycurr) {
-            dxBody *b = *bodycurr;
-            dxStepBody (b, stepsize);
-        }
-    }
-
-    {
-        IFTIMING(dTimerNow ("tidy up"));
+        // (over the given time step)
+        dxStepBody (b, stepSize);
 
         // zero all force accumulators
-        dxBody *const *const bodyend = body + nb;
-        for (dxBody *const *bodycurr = body; bodycurr != bodyend; ++bodycurr) {
-            dxBody *b = *bodycurr;
-            b->facc[0] = 0;
-            b->facc[1] = 0;
-            b->facc[2] = 0;
-            b->facc[3] = 0;
-            b->tacc[0] = 0;
-            b->tacc[1] = 0;
-            b->tacc[2] = 0;
-            b->tacc[3] = 0;
-        }
+        dZeroVector3(b->facc);
+        dZeroVector3(b->tacc);
     }
-
-    IFTIMING(dTimerEnd());
-    if (m > 0) IFTIMING(dTimerReport (stdout,1));
 }
+
 
 //****************************************************************************
 
@@ -1585,33 +1652,32 @@ size_t dxEstimateStepMemoryRequirements (dxBody * const *body, unsigned int nb, 
         sub1_res2 += dEFFICIENT_SIZE(sizeof(dxStepperLocalContext)); //for dxStepperLocalContext
         if (m > 0) {
             sub1_res2 += dEFFICIENT_SIZE(sizeof(unsigned int) * (nj + 1)); // for mindex
+            sub1_res2 += dEFFICIENT_SIZE(sizeof(int) * m); // for findex
             sub1_res2 += dEFFICIENT_SIZE(sizeof(dReal) * 2 * JME__MAX * m); // for J
             unsigned int mskip = dPAD(m);
             sub1_res2 += dOVERALIGNED_SIZE(sizeof(dReal) * mskip * m, AMATRIX_ALIGNMENT); // for A
             sub1_res2 += dEFFICIENT_SIZE(sizeof(dReal) * RCE__RHS_CFM_MAX * m); // for pairsRhsCfm
             sub1_res2 += dEFFICIENT_SIZE(sizeof(dReal) * LHE__LO_HI_MAX * m); // for pairsLoHi
-            sub1_res2 += dEFFICIENT_SIZE(sizeof(int) * m); // for findex
-            {
-                size_t sub2_res1 = dEFFICIENT_SIZE(sizeof(dxStepperStage3CallContext)); //for dxStepperStage3CallContext
+            sub1_res2 += dEFFICIENT_SIZE(sizeof(atomicord32) * nb); // for bodyStartJoints
+            sub1_res2 += dEFFICIENT_SIZE(sizeof(atomicord32)* dJCB__MAX * nj); // for bodyJointLinks
+        }
+
+        {
+            size_t sub2_res1 = dEFFICIENT_SIZE(sizeof(dxStepperStage3CallContext)); // for dxStepperStage3CallContext
+
+            size_t sub2_res2 = 0;
+
+            size_t sub2_res3 = dEFFICIENT_SIZE(sizeof(dxStepperStage4CallContext)); // for dxStepperStage4CallContext
+
+            if (m > 0) {
                 sub2_res1 += dOVERALIGNED_SIZE(sizeof(dReal) * 2 * JIM__MAX * m, JINVM_ALIGNMENT); // for JinvM
                 sub2_res1 += dEFFICIENT_SIZE(sizeof(dReal) * dDA__MAX * nb); // for rhs_tmp
                 sub2_res1 += dEFFICIENT_SIZE(sizeof(dxStepperStage2CallContext)); // for dxStepperStage2CallContext
 
-                size_t sub2_res2; 
-                {
-                    size_t sub3_res1 = dxEstimateSolveLCPMemoryReq(m, false);
-
-                    size_t sub3_res2 = dEFFICIENT_SIZE(sizeof(dReal) * CFE__MAX * nb); // for cforce
-
-                    sub2_res2 = dMAX(sub3_res1, sub3_res2);
-                }
-
-                sub1_res2 += dMAX(sub2_res1, sub2_res2);
+                sub2_res2 += dxEstimateSolveLCPMemoryReq(m, false);
             }
-        }
-        else {
-            sub1_res2 += dEFFICIENT_SIZE(sizeof(dxStepperStage3CallContext)); // for dxStepperStage3CallContext
-            sub1_res2 += dEFFICIENT_SIZE(sizeof(dReal) * CFE__MAX * nb); // for cforce
+
+            sub1_res2 += dMAX(sub2_res1, dMAX(sub2_res2, sub2_res3));
         }
 
         size_t sub1_res12_max = dMAX(sub1_res1, sub1_res2);
