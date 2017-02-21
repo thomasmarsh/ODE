@@ -154,9 +154,9 @@ protected:
 public:
     virtual ~FaceAnglesWrapper();
 
-    static IFaceAngleStorageControl *allocateInstance(unsigned triangleCount, IFaceAngleStorageView *&out_StorageView);
+    static IFaceAngleStorageControl *allocateInstance(unsigned triangleCount, IFaceAngleStorageView *&out_storageView);
 
-    static bool calculateInstanceSizeRequired(size_t &out_SizeRequired, unsigned triangleCount);
+    static bool calculateInstanceSizeRequired(size_t &out_sizeRequired, unsigned triangleCount);
 
 private:
     void freeInstance();
@@ -165,12 +165,29 @@ private:
     typedef typename TStorageCodec::storage_type storage_type;
     typedef storage_type TriangleFaceAngles[dMTV__MAX];
 
-    struct StorageHeader
+    struct StorageRecord
     {
-        StorageHeader(): m_TriangleCount(0) {}
+        StorageRecord(): m_triangleCount(0) {}
 
-        unsigned        m_TriangleCount;
+        unsigned        m_triangleCount;
+        TriangleFaceAngles  m_triangleFaceAngles[1];
     };
+
+    static size_t calculateStorageSizeForTriangleCount(unsigned triangleCount)
+    {
+        const unsigned baseIncludedTriangleCount = dSTATIC_ARRAY_SIZE(FaceAnglesWrapper<TStorageCodec>::StorageRecord, m_triangleFaceAngles);
+        const size_t singleTriangleSize = membersize(FaceAnglesWrapper<TStorageCodec>::StorageRecord, m_triangleFaceAngles[0]);
+        return sizeof(FaceAnglesWrapper<TStorageCodec>) + (triangleCount > baseIncludedTriangleCount ? (triangleCount - baseIncludedTriangleCount) * singleTriangleSize : 0U);
+    }
+
+    static size_t calculateTriangleCountForStorageSize(size_t storageSize)
+    {
+        dIASSERT(storageSize >= sizeof(FaceAnglesWrapper<TStorageCodec>));
+
+        const unsigned baseIncludedTriangleCount = dSTATIC_ARRAY_SIZE(FaceAnglesWrapper<TStorageCodec>::StorageRecord, m_triangleFaceAngles);
+        const size_t singleTriangleSize = membersize(FaceAnglesWrapper<TStorageCodec>::StorageRecord, m_triangleFaceAngles[0]);
+        return (storageSize - sizeof(FaceAnglesWrapper<TStorageCodec>)) / singleTriangleSize + baseIncludedTriangleCount;
+    }
 
 private: // IFaceAngleStorageControl
     virtual void disposeStorage();
@@ -180,7 +197,7 @@ private: // IFaceAngleStorageControl
     virtual void assignFacesAngleIntoStorage(unsigned triangleIndex, dMeshTriangleVertex vertexIndex, dReal dAngleValue);
 
 private: // IFaceAngleStorageView
-    virtual FaceAngleDomain retrieveFacesAngleFromStorage(dReal &out_AngleValue, unsigned triangleIndex, dMeshTriangleVertex vertexIndex);
+    virtual FaceAngleDomain retrieveFacesAngleFromStorage(dReal &out_angleValue, unsigned triangleIndex, dMeshTriangleVertex vertexIndex);
 
 public:
     void setFaceAngle(unsigned triangleIndex, dMeshTriangleVertex vertexIndex, dReal dAngleValue)
@@ -188,28 +205,27 @@ public:
         dIASSERT(dIN_RANGE(triangleIndex, 0, getAllocatedTriangleCount()));
         dIASSERT(dIN_RANGE(vertexIndex, dMTV__MIN, dMTV__MAX));
 
-        m_TriangleFaceAngles[triangleIndex][vertexIndex] = TStorageCodec::encodeForStorage(dAngleValue);
+        m_record.m_triangleFaceAngles[triangleIndex][vertexIndex] = TStorageCodec::encodeForStorage(dAngleValue);
     }
 
-    FaceAngleDomain getFaceAngle(dReal &out_AngleValue, unsigned triangleIndex, dMeshTriangleVertex vertexIndex) const
+    FaceAngleDomain getFaceAngle(dReal &out_angleValue, unsigned triangleIndex, dMeshTriangleVertex vertexIndex) const
     {
         dIASSERT(dIN_RANGE(triangleIndex, 0, getAllocatedTriangleCount()));
         dIASSERT(dIN_RANGE(vertexIndex, dMTV__MIN, dMTV__MAX));
 
-        storage_type storedValue = m_TriangleFaceAngles[triangleIndex][vertexIndex];
+        storage_type storedValue = m_record.m_triangleFaceAngles[triangleIndex][vertexIndex];
         FaceAngleDomain resultDomain = TStorageCodec::classifyStorageValue(storedValue);
 
-        out_AngleValue = TStorageCodec::isAngleDomainStored(resultDomain) ? TStorageCodec::decodeStorageValue(storedValue) : REAL(0.0);
+        out_angleValue = TStorageCodec::isAngleDomainStored(resultDomain) ? TStorageCodec::decodeStorageValue(storedValue) : REAL(0.0);
         return resultDomain;
     }
 
 private:
-    unsigned getAllocatedTriangleCount() const { return m_Header.m_TriangleCount; }
-    void setAllocatedTriangleCount(unsigned triangleCount) { m_Header.m_TriangleCount = triangleCount; }
+    unsigned getAllocatedTriangleCount() const { return m_record.m_triangleCount; }
+    void setAllocatedTriangleCount(unsigned triangleCount) { m_record.m_triangleCount = triangleCount; }
 
 private:
-    StorageHeader       m_Header;
-    TriangleFaceAngles  m_TriangleFaceAngles[1];
+    StorageRecord       m_record;
 };
 
 
@@ -221,7 +237,7 @@ FaceAnglesWrapper<TStorageCodec>::~FaceAnglesWrapper()
 
 template<class TStorageCodec>
 /*static */
-IFaceAngleStorageControl *FaceAnglesWrapper<TStorageCodec>::allocateInstance(unsigned triangleCount, IFaceAngleStorageView *&out_StorageView)
+IFaceAngleStorageControl *FaceAnglesWrapper<TStorageCodec>::allocateInstance(unsigned triangleCount, IFaceAngleStorageView *&out_storageView)
 {
     FaceAnglesWrapper<TStorageCodec> *result = NULL;
 
@@ -242,7 +258,7 @@ IFaceAngleStorageControl *FaceAnglesWrapper<TStorageCodec>::allocateInstance(uns
         result = (FaceAnglesWrapper<TStorageCodec> *)bufferPointer;
         new(result) FaceAnglesWrapper<TStorageCodec>(triangleCount);
 
-        out_StorageView = result;
+        out_storageView = result;
     }
     while (false);
 
@@ -251,23 +267,21 @@ IFaceAngleStorageControl *FaceAnglesWrapper<TStorageCodec>::allocateInstance(uns
 
 template<class TStorageCodec>
 /*static */
-bool FaceAnglesWrapper<TStorageCodec>::calculateInstanceSizeRequired(size_t &out_SizeRequired, unsigned triangleCount)
+bool FaceAnglesWrapper<TStorageCodec>::calculateInstanceSizeRequired(size_t &out_sizeRequired, unsigned triangleCount)
 {
     bool result = false;
 
     do
     {
-        size_t classHeaderSize = offsetof(FaceAnglesWrapper<TStorageCodec>, m_TriangleFaceAngles);
-        const size_t singleTriangleSize = membersize(FaceAnglesWrapper<TStorageCodec>, m_TriangleFaceAngles[0]);
-        const size_t classInTriangles = classHeaderSize / singleTriangleSize;
-        dIASSERT(triangleCount <= (SIZE_MAX - classHeaderSize) / singleTriangleSize);
+        size_t triangleMaximumCount = calculateTriangleCountForStorageSize(SIZE_MAX);
+        dIASSERT(triangleCount <= triangleMaximumCount);
 
-        if (triangleCount > (SIZE_MAX - classHeaderSize) / singleTriangleSize) // Check for overflow
+        if (triangleCount > triangleMaximumCount) // Check for overflow
         {
             break;
         }
 
-        out_SizeRequired = classHeaderSize + triangleCount * singleTriangleSize; // Trailing alignment is going to be added aby memory manager automatically
+        out_sizeRequired = calculateStorageSizeForTriangleCount(triangleCount); // Trailing alignment is going to be added by memory manager automatically
         result = true;
     }
     while (false);
@@ -282,10 +296,7 @@ void FaceAnglesWrapper<TStorageCodec>::freeInstance()
 
     FaceAnglesWrapper<TStorageCodec>::~FaceAnglesWrapper();
 
-    size_t classHeaderSize = offsetof(FaceAnglesWrapper<TStorageCodec>, m_TriangleFaceAngles);
-    const size_t singleTriangleSize = membersize(FaceAnglesWrapper<TStorageCodec>, m_TriangleFaceAngles[0]);
-
-    size_t memoryBlockSize = classHeaderSize + triangleCount * singleTriangleSize;
+    size_t memoryBlockSize = calculateStorageSizeForTriangleCount(triangleCount);
     dFree(this, memoryBlockSize);
 }
 
@@ -313,13 +324,13 @@ void FaceAnglesWrapper<TStorageCodec>::assignFacesAngleIntoStorage(unsigned tria
 
 template<class TStorageCodec>
 /*virtual */
-FaceAngleDomain FaceAnglesWrapper<TStorageCodec>::retrieveFacesAngleFromStorage(dReal &out_AngleValue, unsigned triangleIndex, dMeshTriangleVertex vertexIndex)
+FaceAngleDomain FaceAnglesWrapper<TStorageCodec>::retrieveFacesAngleFromStorage(dReal &out_angleValue, unsigned triangleIndex, dMeshTriangleVertex vertexIndex)
 {
-    return getFaceAngle(out_AngleValue, triangleIndex, vertexIndex);
+    return getFaceAngle(out_angleValue, triangleIndex, vertexIndex);
 }
 
 
-typedef IFaceAngleStorageControl *(FAngleStorageAllocProc)(unsigned triangleCount, IFaceAngleStorageView *&out_StorageView);
+typedef IFaceAngleStorageControl *(FAngleStorageAllocProc)(unsigned triangleCount, IFaceAngleStorageView *&out_storageView);
 
 BEGIN_NAMESPACE_OU();
 template<>
@@ -341,27 +352,27 @@ dxTriDataBase::~dxTriDataBase()
 }
 
 
-void dxTriDataBase::buildData(const void *Vertices, int VertexStride, unsigned VertexCount,
-    const void *Indices, unsigned IndexCount, int TriStride,
-    const void *Normals,
-    bool Single)
+void dxTriDataBase::buildData(const void *vertices, int vertexStride, unsigned vertexCount,
+    const void *indices, unsigned indexCount, int triStride,
+    const void *normals,
+    bool single)
 {
-    dIASSERT(Vertices);
-    dIASSERT(Indices);
-    dIASSERT(VertexStride);
-    dIASSERT(TriStride);
-    dIASSERT(IndexCount);
-    dIASSERT(IndexCount % dMTV__MAX == 0);
+    dIASSERT(vertices);
+    dIASSERT(indices);
+    dIASSERT(vertexStride);
+    dIASSERT(triStride);
+    dIASSERT(indexCount);
+    dIASSERT(indexCount % dMTV__MAX == 0);
 
-    m_Vertices = Vertices;
-    m_VertexStride = VertexStride;
-    m_VertexCount = VertexCount;
-    m_Indices = Indices;
-    m_TriangleCount = IndexCount / dMTV__MAX;
-    m_TriStride = TriStride;
-    m_Single = Single;
+    m_vertices = vertices;
+    m_vertexStride = vertexStride;
+    m_vertexCount = vertexCount;
+    m_indices = indices;
+    m_triangleCount = indexCount / dMTV__MAX;
+    m_triStride = triStride;
+    m_single = single;
 
-    m_Normals = Normals;
+    m_normals = normals;
 }
 
 
@@ -369,19 +380,19 @@ bool dxTriDataBase::allocateFaceAngles(FaceAngleStorageMethod storageMethod)
 {
     bool result = false;
 
-    dIASSERT(m_FaceAngles == NULL);
+    dIASSERT(m_faceAngles == NULL);
     
     IFaceAngleStorageView *storageView;
 
-    unsigned triangleCount = m_TriangleCount;
+    unsigned triangleCount = m_triangleCount;
 
     FAngleStorageAllocProc *allocProc = g_AngleStorageAllocProcs.Encode(storageMethod);
     IFaceAngleStorageControl *storageInstance = allocProc(triangleCount, storageView);
 
     if (storageInstance != NULL)
     {
-        m_FaceAngles = storageInstance;
-        m_FaceAngleView = storageView;
+        m_faceAngles = storageInstance;
+        m_faceAngleView = storageView;
         result = true;
     }
 
@@ -390,11 +401,11 @@ bool dxTriDataBase::allocateFaceAngles(FaceAngleStorageMethod storageMethod)
 
 void dxTriDataBase::freeFaceAngles()
 {
-    if (m_FaceAngles != NULL)
+    if (m_faceAngles != NULL)
     {
-        m_FaceAngles->disposeStorage();
-        m_FaceAngles = NULL;
-        m_FaceAngleView = NULL;
+        m_faceAngles->disposeStorage();
+        m_faceAngles = NULL;
+        m_faceAngleView = NULL;
     }
 }
 
@@ -405,40 +416,40 @@ void dxTriDataBase::EdgeRecord::setupEdge(dMeshTriangleVertex edgeIdx, int triId
     {
         dIASSERT(edgeIdx == dMTV_FIRST);
 
-        m_EdgeFlags  = dxTriMeshData::CUF_USE_FIRST_EDGE;
-        m_Vert1Flags = dxTriMeshData::CUF_USE_FIRST_VERTEX;
-        m_Vert2Flags = dxTriMeshData::CUF_USE_SECOND_VERTEX;
-        m_VertIdx1 = vertexIndices[dMTV_FIRST];
-        m_VertIdx2 = vertexIndices[dMTV_SECOND];
+        m_edgeFlags  = dxTriMeshData::CUF_USE_FIRST_EDGE;
+        m_vert1Flags = dxTriMeshData::CUF_USE_FIRST_VERTEX;
+        m_vert2Flags = dxTriMeshData::CUF_USE_SECOND_VERTEX;
+        m_vertIdx1 = vertexIndices[dMTV_FIRST];
+        m_vertIdx2 = vertexIndices[dMTV_SECOND];
     }
     else if (edgeIdx == dMTV_SECOND)
     {
-        m_EdgeFlags  = dxTriMeshData::CUF_USE_SECOND_EDGE;
-        m_Vert1Flags = dxTriMeshData::CUF_USE_SECOND_VERTEX;
-        m_Vert2Flags = dxTriMeshData::CUF_USE_THIRD_VERTEX;
-        m_VertIdx1 = vertexIndices[dMTV_SECOND];
-        m_VertIdx2 = vertexIndices[dMTV_THIRD];
+        m_edgeFlags  = dxTriMeshData::CUF_USE_SECOND_EDGE;
+        m_vert1Flags = dxTriMeshData::CUF_USE_SECOND_VERTEX;
+        m_vert2Flags = dxTriMeshData::CUF_USE_THIRD_VERTEX;
+        m_vertIdx1 = vertexIndices[dMTV_SECOND];
+        m_vertIdx2 = vertexIndices[dMTV_THIRD];
     }
     else
     {
         dIASSERT(edgeIdx == dMTV_THIRD);
 
-        m_EdgeFlags  = dxTriMeshData::CUF_USE_THIRD_EDGE;
-        m_Vert1Flags = dxTriMeshData::CUF_USE_THIRD_VERTEX;
-        m_Vert2Flags = dxTriMeshData::CUF_USE_FIRST_VERTEX;
-        m_VertIdx1 = vertexIndices[dMTV_THIRD];
-        m_VertIdx2 = vertexIndices[dMTV_FIRST];
+        m_edgeFlags  = dxTriMeshData::CUF_USE_THIRD_EDGE;
+        m_vert1Flags = dxTriMeshData::CUF_USE_THIRD_VERTEX;
+        m_vert2Flags = dxTriMeshData::CUF_USE_FIRST_VERTEX;
+        m_vertIdx1 = vertexIndices[dMTV_THIRD];
+        m_vertIdx2 = vertexIndices[dMTV_FIRST];
     }
 
     // Make sure vertex index 1 is less than index 2 (for easier sorting)
-    if (m_VertIdx1 > m_VertIdx2)
+    if (m_vertIdx1 > m_vertIdx2)
     {
-        dxSwap(m_VertIdx1, m_VertIdx2);
-        dxSwap(m_Vert1Flags, m_Vert2Flags);
+        dxSwap(m_vertIdx1, m_vertIdx2);
+        dxSwap(m_vert1Flags, m_vert2Flags);
     }
 
-    m_TriIdx = triIdx;
-    m_AbsVertexFlags = 0;
+    m_triIdx = triIdx;
+    m_absVertexFlags = 0;
 }
 
 

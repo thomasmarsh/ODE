@@ -96,20 +96,20 @@ void dxTriDataBase::meaningfulPreprocess_buildEdgeFlags(uint8 *useFlags/*=NULL*/
                 if (useFlags != NULL)
                 {
                     // For the last element EdgeRecord::kAbsVertexUsed assignment can be skipped as noone is going to need it any more
-                    useFlags[currEdge[0].m_TriIdx] |= ((edges[currEdge[0].m_VertIdx1].m_AbsVertexFlags & EdgeRecord::AVF_VERTEX_USED) == 0 ? currEdge[0].m_Vert1Flags : 0) 
-                        | ((edges[currEdge[0].m_VertIdx2].m_AbsVertexFlags & EdgeRecord::AVF_VERTEX_USED) == 0 ? currEdge[0].m_Vert2Flags : 0)
-                        | currEdge[0].m_EdgeFlags;
+                    useFlags[currEdge[0].m_triIdx] |= ((edges[currEdge[0].m_vertIdx1].m_absVertexFlags & EdgeRecord::AVF_VERTEX_USED) == 0 ? currEdge[0].m_vert1Flags : 0) 
+                        | ((edges[currEdge[0].m_vertIdx2].m_absVertexFlags & EdgeRecord::AVF_VERTEX_USED) == 0 ? currEdge[0].m_vert2Flags : 0)
+                        | currEdge[0].m_edgeFlags;
                 }
             }
 
             break;
         }
 
-        unsigned vertIdx1 = currEdge[0].m_VertIdx1;
-        unsigned vertIdx2 = currEdge[0].m_VertIdx2;
+        unsigned vertIdx1 = currEdge[0].m_vertIdx1;
+        unsigned vertIdx2 = currEdge[0].m_vertIdx2;
 
-        if (vertIdx2 == currEdge[1].m_VertIdx2 // Check second vertex first as it is more likely to change taking the sorting rules into account
-            && vertIdx1 == currEdge[1].m_VertIdx1)
+        if (vertIdx2 == currEdge[1].m_vertIdx2 // Check second vertex first as it is more likely to change taking the sorting rules into account
+            && vertIdx1 == currEdge[1].m_vertIdx1)
         {
             // We let the dot threshold for concavity get slightly negative to allow for rounding errors
             const float kConcaveThreshold = 0.000001f;
@@ -123,7 +123,7 @@ void dxTriDataBase::meaningfulPreprocess_buildEdgeFlags(uint8 *useFlags/*=NULL*/
             // Calculate orthogonal vector from the matching edge of the second triangle to its opposite point
             {
                 dVector3 secondTriangle[dMTV__MAX];
-                dataAccessor.getTriangleVertexPoints(secondTriangle, currEdge[1].m_TriIdx);
+                dataAccessor.getTriangleVertexPoints(secondTriangle, currEdge[1].m_triIdx);
 
                 // Get the vertex opposite this edge in the second triangle
                 dMeshTriangleVertex secondOppositeVertex = currEdge[1].getOppositeVertexIndex();
@@ -153,7 +153,7 @@ void dxTriDataBase::meaningfulPreprocess_buildEdgeFlags(uint8 *useFlags/*=NULL*/
             if (externalNormals == NULL)
             {
                 // Get the normal of the first triangle
-                dataAccessor.getTriangleVertexPoints(firstTriangle, currEdge[0].m_TriIdx);
+                dataAccessor.getTriangleVertexPoints(firstTriangle, currEdge[0].m_triIdx);
                 pFirstTriangleToUse = &firstTriangle[dMTV__MIN];
 
                 dVector3 firstEdge, secondEdge;
@@ -166,7 +166,7 @@ void dxTriDataBase::meaningfulPreprocess_buildEdgeFlags(uint8 *useFlags/*=NULL*/
             // ...or use the externally supplied normals
             else
             {
-                const dReal *pTriangleExternalNormal = externalNormals + currEdge[0].m_TriIdx * dSA__MAX;
+                const dReal *pTriangleExternalNormal = externalNormals + currEdge[0].m_triIdx * dSA__MAX;
                 dAssignVector3(triangleNormal, pTriangleExternalNormal[dSA_X], pTriangleExternalNormal[dSA_Y], pTriangleExternalNormal[dSA_Z]);
                 // normalLengthSuqare = REAL(1.0);
                 dUASSERT(dFabs(dCalcVectorLengthSquare3(triangleNormal) - REAL(1.0)) < REAL(0.25) * kConcaveThreshold * kConcaveThreshold, "Mesh triangle normals must be normalized");
@@ -193,8 +193,8 @@ void dxTriDataBase::meaningfulPreprocess_buildEdgeFlags(uint8 *useFlags/*=NULL*/
                 if (useFlags != NULL)
                 {
                     // Mark the vertices of a concave edge to prevent their use
-                    unsigned absVertexFlags1 = edges[vertIdx1].m_AbsVertexFlags;
-                    edges[vertIdx1].m_AbsVertexFlags |= absVertexFlags1 | EdgeRecord::AVF_VERTEX_HAS_CONCAVE_EDGE | EdgeRecord::AVF_VERTEX_USED;
+                    unsigned absVertexFlags1 = edges[vertIdx1].m_absVertexFlags;
+                    edges[vertIdx1].m_absVertexFlags |= absVertexFlags1 | EdgeRecord::AVF_VERTEX_HAS_CONCAVE_EDGE | EdgeRecord::AVF_VERTEX_USED;
 
                     if ((absVertexFlags1 & (EdgeRecord::AVF_VERTEX_HAS_CONCAVE_EDGE | EdgeRecord::AVF_VERTEX_USED)) == EdgeRecord::AVF_VERTEX_USED)
                     {
@@ -202,22 +202,22 @@ void dxTriDataBase::meaningfulPreprocess_buildEdgeFlags(uint8 *useFlags/*=NULL*/
                         // to have a concave edge, unmark the previous use
                         unsigned usedFromEdgeIndex = vertices[vertIdx1].m_UsedFromEdgeIndex;
                         const EdgeRecord *usedFromEdge = edges + usedFromEdgeIndex;
-                        unsigned usedInTriangleIndex = usedFromEdge->m_TriIdx;
-                        uint8 usedVertFlags = usedFromEdge->m_VertIdx1 == vertIdx1 ? usedFromEdge->m_Vert1Flags : usedFromEdge->m_Vert2Flags;
+                        unsigned usedInTriangleIndex = usedFromEdge->m_triIdx;
+                        uint8 usedVertFlags = usedFromEdge->m_vertIdx1 == vertIdx1 ? usedFromEdge->m_vert1Flags : usedFromEdge->m_vert2Flags;
                         useFlags[usedInTriangleIndex] ^= usedVertFlags;
                         dIASSERT((useFlags[usedInTriangleIndex] & usedVertFlags) == 0);
                     }
 
-                    unsigned absVertexFlags2 = edges[vertIdx2].m_AbsVertexFlags;
-                    edges[vertIdx2].m_AbsVertexFlags = absVertexFlags2 | EdgeRecord::AVF_VERTEX_HAS_CONCAVE_EDGE | EdgeRecord::AVF_VERTEX_USED;
+                    unsigned absVertexFlags2 = edges[vertIdx2].m_absVertexFlags;
+                    edges[vertIdx2].m_absVertexFlags = absVertexFlags2 | EdgeRecord::AVF_VERTEX_HAS_CONCAVE_EDGE | EdgeRecord::AVF_VERTEX_USED;
 
                     if ((absVertexFlags2 & (EdgeRecord::AVF_VERTEX_HAS_CONCAVE_EDGE | EdgeRecord::AVF_VERTEX_USED)) == EdgeRecord::AVF_VERTEX_USED)
                     {
                         // Similarly unmark the possible previous use of the edge's second vertex
                         unsigned usedFromEdgeIndex = vertices[vertIdx2].m_UsedFromEdgeIndex;
                         const EdgeRecord *usedFromEdge = edges + usedFromEdgeIndex;
-                        unsigned usedInTriangleIndex = usedFromEdge->m_TriIdx;
-                        uint8 usedVertFlags = usedFromEdge->m_VertIdx1 == vertIdx2 ? usedFromEdge->m_Vert1Flags : usedFromEdge->m_Vert2Flags;
+                        unsigned usedInTriangleIndex = usedFromEdge->m_triIdx;
+                        uint8 usedVertFlags = usedFromEdge->m_vertIdx1 == vertIdx2 ? usedFromEdge->m_vert1Flags : usedFromEdge->m_vert2Flags;
                         useFlags[usedInTriangleIndex] ^= usedVertFlags;
                         dIASSERT((useFlags[usedInTriangleIndex] & usedVertFlags) == 0);
                     }
@@ -236,8 +236,8 @@ void dxTriDataBase::meaningfulPreprocess_buildEdgeFlags(uint8 *useFlags/*=NULL*/
                 if (useFlags != NULL)
                 {
                     EdgeRecord *edgeToUse = currEdge;
-                    unsigned triIdx = edgeToUse[0].m_TriIdx;
-                    unsigned triIdx1 = edgeToUse[1].m_TriIdx;
+                    unsigned triIdx = edgeToUse[0].m_triIdx;
+                    unsigned triIdx1 = edgeToUse[1].m_triIdx;
                     
                     unsigned triUseFlags = useFlags[triIdx];
                     unsigned triUseFlags1 = useFlags[triIdx1];
@@ -251,26 +251,26 @@ void dxTriDataBase::meaningfulPreprocess_buildEdgeFlags(uint8 *useFlags/*=NULL*/
                         edgeToUse = edgeToUse + 1;
                     }
 
-                    if ((edges[vertIdx1].m_AbsVertexFlags & EdgeRecord::AVF_VERTEX_USED) == 0)
+                    if ((edges[vertIdx1].m_absVertexFlags & EdgeRecord::AVF_VERTEX_USED) == 0)
                     {
                         // Only add each vertex once and set a mark to prevent further additions
-                        edges[vertIdx1].m_AbsVertexFlags |= EdgeRecord::AVF_VERTEX_USED;
+                        edges[vertIdx1].m_absVertexFlags |= EdgeRecord::AVF_VERTEX_USED;
                         // Also remember the index the vertex flags are going to be applied to 
                         // to allow easily clear the vertex from the use flags if any concave edges are found to connect to it
                         vertices[vertIdx1].m_UsedFromEdgeIndex = (unsigned)(edgeToUse - edges);
-                        triUseFlags |= edgeToUse[0].m_Vert1Flags;
+                        triUseFlags |= edgeToUse[0].m_vert1Flags;
                     }
 
                     // Same processing for the second vertex...
-                    if ((edges[vertIdx2].m_AbsVertexFlags & EdgeRecord::AVF_VERTEX_USED) == 0)
+                    if ((edges[vertIdx2].m_absVertexFlags & EdgeRecord::AVF_VERTEX_USED) == 0)
                     {
-                        edges[vertIdx2].m_AbsVertexFlags |= EdgeRecord::AVF_VERTEX_USED;
+                        edges[vertIdx2].m_absVertexFlags |= EdgeRecord::AVF_VERTEX_USED;
                         vertices[vertIdx2].m_UsedFromEdgeIndex = (unsigned)(edgeToUse - edges);
-                        triUseFlags |= edgeToUse[0].m_Vert2Flags;
+                        triUseFlags |= edgeToUse[0].m_vert2Flags;
                     }
 
                     // And finally store the use flags adding the edge flags in
-                    useFlags[triIdx] = triUseFlags | edgeToUse[0].m_EdgeFlags;
+                    useFlags[triIdx] = triUseFlags | edgeToUse[0].m_edgeFlags;
                 }
             }
 
@@ -287,24 +287,24 @@ void dxTriDataBase::meaningfulPreprocess_buildEdgeFlags(uint8 *useFlags/*=NULL*/
 
             if (useFlags != NULL)
             {
-                unsigned triIdx = currEdge[0].m_TriIdx;
+                unsigned triIdx = currEdge[0].m_triIdx;
                 unsigned triUseExtraFlags = 0;
                 
-                if ((edges[vertIdx1].m_AbsVertexFlags & EdgeRecord::AVF_VERTEX_USED) == 0)
+                if ((edges[vertIdx1].m_absVertexFlags & EdgeRecord::AVF_VERTEX_USED) == 0)
                 {
-                    edges[vertIdx1].m_AbsVertexFlags |= EdgeRecord::AVF_VERTEX_USED;
+                    edges[vertIdx1].m_absVertexFlags |= EdgeRecord::AVF_VERTEX_USED;
                     vertices[vertIdx1].m_UsedFromEdgeIndex = (unsigned)(currEdge - edges);
-                    triUseExtraFlags |= currEdge[0].m_Vert1Flags;
+                    triUseExtraFlags |= currEdge[0].m_vert1Flags;
                 }
 
-                if ((edges[vertIdx2].m_AbsVertexFlags & EdgeRecord::AVF_VERTEX_USED) == 0)
+                if ((edges[vertIdx2].m_absVertexFlags & EdgeRecord::AVF_VERTEX_USED) == 0)
                 {
-                    edges[vertIdx2].m_AbsVertexFlags |= EdgeRecord::AVF_VERTEX_USED;
+                    edges[vertIdx2].m_absVertexFlags |= EdgeRecord::AVF_VERTEX_USED;
                     vertices[vertIdx2].m_UsedFromEdgeIndex = (unsigned)(currEdge - edges);
-                    triUseExtraFlags |= currEdge[0].m_Vert2Flags;
+                    triUseExtraFlags |= currEdge[0].m_vert2Flags;
                 }
 
-                useFlags[triIdx] |= triUseExtraFlags | currEdge[0].m_EdgeFlags;
+                useFlags[triIdx] |= triUseExtraFlags | currEdge[0].m_edgeFlags;
             }
         }
     }
@@ -317,7 +317,7 @@ void dxTriDataBase::buildBoundaryEdgeAngle(IFaceAngleStorageControl *faceAngles,
     const dReal faceAngle = REAL(0.0);
 
     dMeshTriangleVertex firstVertexStartIndex = currEdge[0].getEdgeStartVertexIndex();
-    faceAngles->assignFacesAngleIntoStorage(currEdge[0].m_TriIdx, firstVertexStartIndex, faceAngle);
+    faceAngles->assignFacesAngleIntoStorage(currEdge[0].m_triIdx, firstVertexStartIndex, faceAngle);
     // -- For boundary edges, only the first element is valid
     // dMeshTriangleVertex secondVertexStartIndex = currEdge[1].getEdgeStartVertexIndex();
     // faceAngles->assignFacesAngleIntoStorage(currEdge[1].m_TriIdx, secondVertexStartIndex, faceAngle);
@@ -356,9 +356,9 @@ void dxTriDataBase::buildConcaveEdgeAngle(IFaceAngleStorageControl *faceAngles, 
         faceAngle = -(dReal)M_PI;
     }
 
-    faceAngles->assignFacesAngleIntoStorage(currEdge[0].m_TriIdx, firstVertexStartIndex, faceAngle);
+    faceAngles->assignFacesAngleIntoStorage(currEdge[0].m_triIdx, firstVertexStartIndex, faceAngle);
     dMeshTriangleVertex secondVertexStartIndex = currEdge[1].getEdgeStartVertexIndex();
-    faceAngles->assignFacesAngleIntoStorage(currEdge[1].m_TriIdx, secondVertexStartIndex, faceAngle);
+    faceAngles->assignFacesAngleIntoStorage(currEdge[1].m_triIdx, secondVertexStartIndex, faceAngle);
 }
 
 template<class TMeshDataAccessor>
@@ -385,9 +385,9 @@ void dxTriDataBase::buildConvexEdgeAngle(IFaceAngleStorageControl *faceAngles,
         faceAngle = REAL(0.0);
     }
 
-    faceAngles->assignFacesAngleIntoStorage(currEdge[0].m_TriIdx, firstVertexStartIndex, faceAngle);
+    faceAngles->assignFacesAngleIntoStorage(currEdge[0].m_triIdx, firstVertexStartIndex, faceAngle);
     dMeshTriangleVertex secondVertexStartIndex = currEdge[1].getEdgeStartVertexIndex();
-    faceAngles->assignFacesAngleIntoStorage(currEdge[1].m_TriIdx, secondVertexStartIndex, faceAngle);
+    faceAngles->assignFacesAngleIntoStorage(currEdge[1].m_triIdx, secondVertexStartIndex, faceAngle);
 }
 
 template<class TMeshDataAccessor>
@@ -427,7 +427,7 @@ dReal dxTriDataBase::calculateEdgeAngleValidated(unsigned firstVertexStartIndex,
 
             if (pFirstTriangle == NULL)
             {
-                dataAccessor.getTriangleVertexPoints(firstTriangleStorage, currEdge[0].m_TriIdx);
+                dataAccessor.getTriangleVertexPoints(firstTriangleStorage, currEdge[0].m_triIdx);
                 pFirstTriangleToUse = &firstTriangleStorage[dMTV__MIN];
             }
 

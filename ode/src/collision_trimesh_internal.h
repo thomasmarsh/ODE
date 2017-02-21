@@ -121,16 +121,16 @@ struct dxTriDataBase:
 public:
     dxTriDataBase():
         dxTriDataBase_Parent(),
-        m_Vertices(NULL),
-        m_VertexStride(0),
-        m_VertexCount(0),
-        m_Indices(NULL),
-        m_TriangleCount(0),
-        m_TriStride(0),
-        m_Single(false),
-        m_Normals(NULL),
-        m_FaceAngles(NULL),
-        m_FaceAngleView(NULL)
+        m_vertices(NULL),
+        m_vertexStride(0),
+        m_vertexCount(0),
+        m_indices(NULL),
+        m_triangleCount(0),
+        m_triStride(0),
+        m_single(false),
+        m_normals(NULL),
+        m_faceAngles(NULL),
+        m_faceAngleView(NULL)
     {
 #if !dTRIMESH_ENABLED
         dUASSERT(false, "dTRIMESH_ENABLED is not defined. Trimesh geoms will not work");
@@ -146,16 +146,16 @@ public:
 
 
 public:
-    unsigned retrieveVertexCount() const { return m_VertexCount; }
-    int retrieveVertexStride() const { return m_VertexStride; }
+    unsigned retrieveVertexCount() const { return m_vertexCount; }
+    int retrieveVertexStride() const { return m_vertexStride; }
 
-    unsigned retrieveTriangleCount() const { return m_TriangleCount; }
-    int retrieveTriangleStride() const { return m_TriStride; }
+    unsigned retrieveTriangleCount() const { return m_triangleCount; }
+    int retrieveTriangleStride() const { return m_triStride; }
 
 protected:
-    const void *retrieveVertexInstances() const { return m_Vertices; }
-    const void *retrieveTriangleVertexIndices() const { return m_Indices; }
-    bool isSingle() const { return m_Single; }
+    const void *retrieveVertexInstances() const { return m_vertices; }
+    const void *retrieveTriangleVertexIndices() const { return m_indices; }
+    bool isSingle() const { return m_single; }
 
 public:
     template<typename tcoordfloat, typename tindexint>
@@ -163,17 +163,17 @@ public:
         const tcoordfloat *vertexInstances, int vertexStride, const tindexint *triangleVertexIndices, int triangleStride);
 
 public:
-    void assignNormals(const void *normals) { m_Normals = normals; }
-    const void *retrieveNormals() const { return m_Normals; }
+    void assignNormals(const void *normals) { m_normals = normals; }
+    const void *retrieveNormals() const { return m_normals; }
 
-    IFaceAngleStorageControl *retrieveFaceAngles() const { return m_FaceAngles; }
-    IFaceAngleStorageView *retrieveFaceAngleView() const { return m_FaceAngleView; }
+    IFaceAngleStorageControl *retrieveFaceAngles() const { return m_faceAngles; }
+    IFaceAngleStorageView *retrieveFaceAngleView() const { return m_faceAngleView; }
 
 protected:
     bool allocateFaceAngles(FaceAngleStorageMethod storageMethod);
     void freeFaceAngles();
 
-    bool haveFaceAnglesBeenBuilt() const { return m_FaceAngles != NULL; }
+    bool haveFaceAnglesBeenBuilt() const { return m_faceAngles != NULL; }
 
 public:
     enum MeshComponentUseFlags
@@ -215,7 +215,7 @@ protected:
         {
             extern const CEnumUnsortedElementArray<unsigned, dxTriDataBase::CUF__USE_VERTICES_LAST / dxTriDataBase::CUF__USE_VERTICES_MIN, dMeshTriangleVertex, 0x161116DC> g_VertFlagOppositeIndices;
 
-            dMeshTriangleVertex oppositeIndex = g_VertFlagOppositeIndices.Encode(((m_Vert1Flags | m_Vert2Flags) ^ CUF__USE_ALL_VERTICES) / CUF__USE_VERTICES_MIN - 1);
+            dMeshTriangleVertex oppositeIndex = g_VertFlagOppositeIndices.Encode(((m_vert1Flags | m_vert2Flags) ^ CUF__USE_ALL_VERTICES) / CUF__USE_VERTICES_MIN - 1);
             dIASSERT(dIN_RANGE(oppositeIndex, dMTV__MIN, dMTV__MAX));
 
             return oppositeIndex;
@@ -225,14 +225,14 @@ protected:
         {
             extern const CEnumUnsortedElementArray<unsigned, dxTriDataBase::CUF__USE_VERTICES_LAST / dxTriDataBase::CUF__USE_VERTICES_MIN, dMeshTriangleVertex, 0x161225E9> g_VertFlagEdgeStartIndices;
 
-            dMeshTriangleVertex startIndex = g_VertFlagEdgeStartIndices.Encode(((m_Vert1Flags | m_Vert2Flags) ^ CUF__USE_ALL_VERTICES) / CUF__USE_VERTICES_MIN - 1);
+            dMeshTriangleVertex startIndex = g_VertFlagEdgeStartIndices.Encode(((m_vert1Flags | m_vert2Flags) ^ CUF__USE_ALL_VERTICES) / CUF__USE_VERTICES_MIN - 1);
             dIASSERT(dIN_RANGE(startIndex, dMTV__MIN, dMTV__MAX));
 
             return startIndex;
         }
 
     public:
-        bool operator <(const EdgeRecord &anotherEdge) const { return m_VertIdx1 < anotherEdge.m_VertIdx1 || (m_VertIdx1 == anotherEdge.m_VertIdx1 && m_VertIdx2 < anotherEdge.m_VertIdx2); }
+        bool operator <(const EdgeRecord &anotherEdge) const { return m_vertIdx1 < anotherEdge.m_vertIdx1 || (m_vertIdx1 == anotherEdge.m_vertIdx1 && m_vertIdx2 < anotherEdge.m_vertIdx2); }
 
     public:
         enum
@@ -242,14 +242,14 @@ protected:
         };
 
     public:
-        unsigned m_VertIdx1;	// Index into vertex array for this edges vertices
-        unsigned m_VertIdx2;
-        unsigned m_TriIdx;		// Index into triangle array for triangle this edge belongs to
+        unsigned m_vertIdx1;	// Index into vertex array for this edges vertices
+        unsigned m_vertIdx2;
+        unsigned m_triIdx;		// Index into triangle array for triangle this edge belongs to
 
-        uint8 m_EdgeFlags;	
-        uint8 m_Vert1Flags;
-        uint8 m_Vert2Flags;
-        uint8 m_AbsVertexFlags;
+        uint8 m_edgeFlags;	
+        uint8 m_vert1Flags;
+        uint8 m_vert2Flags;
+        uint8 m_absVertexFlags;
     };
 
     struct VertexRecord
@@ -285,18 +285,18 @@ protected:
         const TMeshDataAccessor &dataAccessor);
 
 private:
-    const void *m_Vertices;
-    int m_VertexStride;
-    unsigned m_VertexCount;
-    const void *m_Indices;
-    unsigned m_TriangleCount;
-    int m_TriStride;
-    bool m_Single;
+    const void *m_vertices;
+    int m_vertexStride;
+    unsigned m_vertexCount;
+    const void *m_indices;
+    unsigned m_triangleCount;
+    int m_triStride;
+    bool m_single;
 
 private:
-    const void *m_Normals;
-    IFaceAngleStorageControl *m_FaceAngles;
-    IFaceAngleStorageView *m_FaceAngleView; 
+    const void *m_normals;
+    IFaceAngleStorageControl *m_faceAngles;
+    IFaceAngleStorageView *m_faceAngleView; 
 };
 
 
