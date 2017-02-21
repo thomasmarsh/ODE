@@ -12,4 +12,3 @@ pipelines:
           - ./bootstrap
           - ./configure --enable-double-precision --enable-ou --enable-libccd
           - make
-          - make tests
