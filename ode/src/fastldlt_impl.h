@@ -239,7 +239,6 @@ void dxtFactorLDLT(dReal *A, dReal *d, unsigned rowCount, unsigned rowSkip)
         for (; columnCounter >= 2; columnCounter -= 2) 
         {
             dReal p1, p2, q1, q2, dd1, dd2;
-            dReal m11, m22;
 
             p1 = ptrAElement[0];
             p2 = ptrAElement[1];
