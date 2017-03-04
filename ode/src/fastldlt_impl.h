@@ -43,7 +43,7 @@ void dxtFactorLDLT(dReal *A, dReal *d, unsigned rowCount, unsigned rowSkip)
     for (blockStartRow = 0; blockStartRow < lastRowIndex; blockStartRow += 2) 
     {
         /* solve L*(D*l)=a, l is scaled elements in 2 x i block at A(i,0) */
-        dxSolveL1_2 (A, A + (size_t)rowSkip * blockStartRow, blockStartRow, rowSkip);
+        dxSolveL1_2(A, A + (size_t)rowSkip * blockStartRow, blockStartRow, rowSkip);
 
         dReal *ptrAElement = A + (size_t)rowSkip * blockStartRow;
         dReal *ptrDElement = d;
@@ -128,7 +128,7 @@ void dxtFactorLDLT(dReal *A, dReal *d, unsigned rowCount, unsigned rowSkip)
         }
 
         /* compute left-over iterations */
-        for (; columnCounter >= 2; columnCounter -= 2) 
+        for (; columnCounter != 0; columnCounter -= 2) 
         {
             dReal p1, q1, p2, q2, dd;
 
@@ -158,8 +158,6 @@ void dxtFactorLDLT(dReal *A, dReal *d, unsigned rowCount, unsigned rowSkip)
             ptrDElement += 2 * d_stride;
         }
 
-        dIASSERT(columnCounter == 0);
-
         /* solve for diagonal 2 x 2 block at A(i,i) */
         dReal Y11 = ptrAElement[0] - Z11;
         dReal Y21 = ptrAElement[rowSkip] - Z21;
@@ -184,7 +182,7 @@ void dxtFactorLDLT(dReal *A, dReal *d, unsigned rowCount, unsigned rowSkip)
     /* compute the (less than 2) rows at the bottom */
     if (blockStartRow != rowCount)
     {
-        dxSolveL1_1 (A, A + (size_t)rowSkip * blockStartRow, blockStartRow, rowSkip);
+        dxSolveL1_1(A, A + (size_t)rowSkip * blockStartRow, blockStartRow, rowSkip);
 
         dReal *ptrAElement = A + (size_t)rowSkip * blockStartRow;
         dReal *ptrDElement = d;
@@ -236,7 +234,7 @@ void dxtFactorLDLT(dReal *A, dReal *d, unsigned rowCount, unsigned rowSkip)
         }
 
         /* compute left-over iterations */
-        for (; columnCounter >= 2; columnCounter -= 2) 
+        for (; columnCounter != 0; columnCounter -= 2) 
         {
             dReal p1, p2, q1, q2, dd1, dd2;
 
@@ -254,8 +252,6 @@ void dxtFactorLDLT(dReal *A, dReal *d, unsigned rowCount, unsigned rowSkip)
             ptrAElement += 2;
             ptrDElement += 2 * d_stride;
         }
-
-        dIASSERT(columnCounter == 0);
 
         /* solve for diagonal 1 x 1 block at A(i,i) */
         dReal Y11 = ptrAElement[0] - (Z11 + Z22);
@@ -293,7 +289,8 @@ void dxSolveL1_2(const dReal *L, dReal *B, unsigned rowCount, unsigned lSkip)
 
         /* the inner loop that computes outer products and adds them to Z */
         unsigned columnCounter;
-        for (columnCounter = blockStartRow; columnCounter >= 2; columnCounter -= 2) 
+        // The iteration starts with even number and decreases it by 2. So, it must end in zero
+        for (columnCounter = blockStartRow; columnCounter != 0; columnCounter -= 2) 
         {
             /* declare p and q vectors, etc */
             dReal p1, q1, p2, q2;
@@ -323,9 +320,6 @@ void dxSolveL1_2(const dReal *L, dReal *B, unsigned rowCount, unsigned lSkip)
             ptrBElement += 2;
             /* end of inner loop */
         }
-        
-        // The iteration starts with even number and decreases it by 2. So, it must end in zero
-        dIASSERT(columnCounter == 0);
 
         /* finish computing the X(i) block */
         
@@ -341,7 +335,7 @@ void dxSolveL1_2(const dReal *L, dReal *B, unsigned rowCount, unsigned lSkip)
         dReal Y22 = ptrBElement[1 + lSkip] - Z22 - p2 * Y12;
 
         ptrBElement[1] = Y21;
-        ptrBElement[1+lSkip] = Y22;
+        ptrBElement[1 + lSkip] = Y22;
         /* end of outer loop */
     }
 }
@@ -374,7 +368,8 @@ void dxSolveL1_1(const dReal *L, dReal *B, unsigned rowCount, unsigned lSkip)
         
         /* the inner loop that computes outer products and adds them to Z */
         unsigned columnCounter;
-        for (columnCounter = blockStartRow; columnCounter >= 2; columnCounter -= 2) 
+        // The iteration starts with even number and decreases it by 2. So, it must end in zero
+        for (columnCounter = blockStartRow; columnCounter != 0; columnCounter -= 2) 
         {
             /* declare p and q vectors, etc */
             dReal p1, q1, p2;
@@ -399,9 +394,6 @@ void dxSolveL1_1(const dReal *L, dReal *B, unsigned rowCount, unsigned lSkip)
             /* end of inner loop */
         }
         
-        // The iteration starts with even number and decreases it by 2. So, it must end in zero
-        dIASSERT(columnCounter == 0);
-
         /* finish computing the X(i) block */
         dReal p2 = ptrLElement[lSkip];
 
