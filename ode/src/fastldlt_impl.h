@@ -56,7 +56,6 @@ void dxtFactorLDLT(dReal *A, dReal *d, unsigned rowCount, unsigned rowSkip)
         for (columnCounter = blockStartRow; columnCounter >= 6; columnCounter -= 6) 
         {
             dReal p1, q1, p2, q2, dd;
-            dReal m11, m21, m22;
 
             p1 = ptrAElement[0];
             p2 = ptrAElement[rowSkip];
@@ -65,12 +64,9 @@ void dxtFactorLDLT(dReal *A, dReal *d, unsigned rowCount, unsigned rowSkip)
             q2 = p2 * dd;
             ptrAElement[0] = q1;
             ptrAElement[rowSkip] = q2;
-            m11 = p1 * q1;
-            m21 = p2 * q1;
-            m22 = p2 * q2;
-            Z11 += m11;
-            Z21 += m21;
-            Z22 += m22;
+            Z11 += p1 * q1;
+            Z21 += p2 * q1;
+            Z22 += p2 * q2;
 
             p1 = ptrAElement[1];
             p2 = ptrAElement[1 + rowSkip];
@@ -79,12 +75,9 @@ void dxtFactorLDLT(dReal *A, dReal *d, unsigned rowCount, unsigned rowSkip)
             q2 = p2 * dd;
             ptrAElement[1] = q1;
             ptrAElement[1 + rowSkip] = q2;
-            m11 = p1 * q1;
-            m21 = p2 * q1;
-            m22 = p2 * q2;
-            Z11 += m11;
-            Z21 += m21;
-            Z22 += m22;
+            Z11 += p1 * q1;
+            Z21 += p2 * q1;
+            Z22 += p2 * q2;
 
             p1 = ptrAElement[2];
             p2 = ptrAElement[2 + rowSkip];
@@ -93,12 +86,9 @@ void dxtFactorLDLT(dReal *A, dReal *d, unsigned rowCount, unsigned rowSkip)
             q2 = p2 * dd;
             ptrAElement[2] = q1;
             ptrAElement[2 + rowSkip] = q2;
-            m11 = p1 * q1;
-            m21 = p2 * q1;
-            m22 = p2 * q2;
-            Z11 += m11;
-            Z21 += m21;
-            Z22 += m22;
+            Z11 += p1 * q1;
+            Z21 += p2 * q1;
+            Z22 += p2 * q2;
 
             p1 = ptrAElement[3];
             p2 = ptrAElement[3 + rowSkip];
@@ -107,12 +97,9 @@ void dxtFactorLDLT(dReal *A, dReal *d, unsigned rowCount, unsigned rowSkip)
             q2 = p2 * dd;
             ptrAElement[3] = q1;
             ptrAElement[3 + rowSkip] = q2;
-            m11 = p1 * q1;
-            m21 = p2 * q1;
-            m22 = p2 * q2;
-            Z11 += m11;
-            Z21 += m21;
-            Z22 += m22;
+            Z11 += p1 * q1;
+            Z21 += p2 * q1;
+            Z22 += p2 * q2;
 
             p1 = ptrAElement[4];
             p2 = ptrAElement[4 + rowSkip];
@@ -121,12 +108,9 @@ void dxtFactorLDLT(dReal *A, dReal *d, unsigned rowCount, unsigned rowSkip)
             q2 = p2 * dd;
             ptrAElement[4] = q1;
             ptrAElement[4 + rowSkip] = q2;
-            m11 = p1 * q1;
-            m21 = p2 * q1;
-            m22 = p2 * q2;
-            Z11 += m11;
-            Z21 += m21;
-            Z22 += m22;
+            Z11 += p1 * q1;
+            Z21 += p2 * q1;
+            Z22 += p2 * q2;
 
             p1 = ptrAElement[5];
             p2 = ptrAElement[5 + rowSkip];
@@ -135,12 +119,9 @@ void dxtFactorLDLT(dReal *A, dReal *d, unsigned rowCount, unsigned rowSkip)
             q2 = p2 * dd;
             ptrAElement[5] = q1;
             ptrAElement[5 + rowSkip] = q2;
-            m11 = p1 * q1;
-            m21 = p2 * q1;
-            m22 = p2 * q2;
-            Z11 += m11;
-            Z21 += m21;
-            Z22 += m22;
+            Z11 += p1 * q1;
+            Z21 += p2 * q1;
+            Z22 += p2 * q2;
 
             ptrAElement += 6;
             ptrDElement += 6 * d_stride;
@@ -150,7 +131,6 @@ void dxtFactorLDLT(dReal *A, dReal *d, unsigned rowCount, unsigned rowSkip)
         for (; columnCounter >= 2; columnCounter -= 2) 
         {
             dReal p1, q1, p2, q2, dd;
-            dReal m11, m21, m22;
 
             p1 = ptrAElement[0];
             p2 = ptrAElement[rowSkip];
@@ -159,12 +139,9 @@ void dxtFactorLDLT(dReal *A, dReal *d, unsigned rowCount, unsigned rowSkip)
             q2 = p2 * dd;
             ptrAElement[0] = q1;
             ptrAElement[rowSkip] = q2;
-            m11 = p1 * q1;
-            m21 = p2 * q1;
-            m22 = p2 * q2;
-            Z11 += m11;
-            Z21 += m21;
-            Z22 += m22;
+            Z11 += p1 * q1;
+            Z21 += p2 * q1;
+            Z22 += p2 * q2;
 
             p1 = ptrAElement[1];
             p2 = ptrAElement[1 + rowSkip];
@@ -173,12 +150,9 @@ void dxtFactorLDLT(dReal *A, dReal *d, unsigned rowCount, unsigned rowSkip)
             q2 = p2 * dd;
             ptrAElement[1] = q1;
             ptrAElement[1 + rowSkip] = q2;
-            m11 = p1 * q1;
-            m21 = p2 * q1;
-            m22 = p2 * q2;
-            Z11 += m11;
-            Z21 += m21;
-            Z22 += m22;
+            Z11 += p1 * q1;
+            Z21 += p2 * q1;
+            Z22 += p2 * q2;
 
             ptrAElement += 2;
             ptrDElement += 2 * d_stride;
@@ -223,7 +197,6 @@ void dxtFactorLDLT(dReal *A, dReal *d, unsigned rowCount, unsigned rowSkip)
         for (columnCounter = blockStartRow; columnCounter >= 6; columnCounter -= 6) 
         {
             dReal p1, p2, q1, q2, dd1, dd2;
-            dReal m11, m22;
 
             p1 = ptrAElement[0];
             p2 = ptrAElement[1];
@@ -233,10 +206,8 @@ void dxtFactorLDLT(dReal *A, dReal *d, unsigned rowCount, unsigned rowSkip)
             q2 = p2 * dd2;
             ptrAElement[0] = q1;
             ptrAElement[1] = q2;
-            m11 = p1 * q1;
-            m22 = p2 * q2;
-            Z11 += m11;
-            Z22 += m22;
+            Z11 += p1 * q1;
+            Z22 += p2 * q2;
 
             p1 = ptrAElement[2];
             p2 = ptrAElement[3];
@@ -246,10 +217,8 @@ void dxtFactorLDLT(dReal *A, dReal *d, unsigned rowCount, unsigned rowSkip)
             q2 = p2 * dd2;
             ptrAElement[2] = q1;
             ptrAElement[3] = q2;
-            m11 = p1 * q1;
-            m22 = p2 * q2;
-            Z11 += m11;
-            Z22 += m22;
+            Z11 += p1 * q1;
+            Z22 += p2 * q2;
 
             p1 = ptrAElement[4];
             p2 = ptrAElement[5];
@@ -259,10 +228,8 @@ void dxtFactorLDLT(dReal *A, dReal *d, unsigned rowCount, unsigned rowSkip)
             q2 = p2 * dd2;
             ptrAElement[4] = q1;
             ptrAElement[5] = q2;
-            m11 = p1 * q1;
-            m22 = p2 * q2;
-            Z11 += m11;
-            Z22 += m22;
+            Z11 += p1 * q1;
+            Z22 += p2 * q2;
 
             ptrAElement += 6;
             ptrDElement += 6 * d_stride;
@@ -282,10 +249,8 @@ void dxtFactorLDLT(dReal *A, dReal *d, unsigned rowCount, unsigned rowSkip)
             q2 = p2 * dd2;
             ptrAElement[0] = q1;
             ptrAElement[1] = q2;
-            m11 = p1 * q1;
-            m22 = p2 * q2;
-            Z11 += m11;
-            Z22 += m22;
+            Z11 += p1 * q1;
+            Z22 += p2 * q2;
 
             ptrAElement += 2;
             ptrDElement += 2 * d_stride;
@@ -333,39 +298,30 @@ void dxSolveL1_2(const dReal *L, dReal *B, unsigned rowCount, unsigned lSkip)
         {
             /* declare p and q vectors, etc */
             dReal p1, q1, p2, q2;
-            dReal m11, m12, m21, m22;
 
             /* compute outer product and add it to the Z matrix */
             p1 = ptrLElement[0];
             q1 = ptrBElement[0];
-            m11 = p1 * q1;
+            Z11 += p1 * q1;
             q2 = ptrBElement[lSkip];
-            m12 = p1 * q2;
+            Z12 += p1 * q2;
             p2 = ptrLElement[lSkip];
-            m21 = p2 * q1;
-            m22 = p2 * q2;
-            Z11 += m11;
-            Z12 += m12;
-            Z21 += m21;
-            Z22 += m22;
+            Z21 += p2 * q1;
+            Z22 += p2 * q2;
 
             /* compute outer product and add it to the Z matrix */
             p1 = ptrLElement[1];
             q1 = ptrBElement[1];
-            m11 = p1 * q1;
+            Z11 += p1 * q1;
             q2 = ptrBElement[1 + lSkip];
-            m12 = p1 * q2;
+            Z12 += p1 * q2;
             p2 = ptrLElement[1 + lSkip];
-            m21 = p2 * q1;
-            m22 = p2 * q2;
+            Z21 += p2 * q1;
+            Z22 += p2 * q2;
 
             /* advance pointers */
             ptrLElement += 2;
             ptrBElement += 2;
-            Z11 += m11;
-            Z12 += m12;
-            Z21 += m21;
-            Z22 += m22;
             /* end of inner loop */
         }
         
@@ -423,29 +379,24 @@ void dxSolveL1_1(const dReal *L, dReal *B, unsigned rowCount, unsigned lSkip)
         {
             /* declare p and q vectors, etc */
             dReal p1, q1, p2;
-            dReal m11, m21;
 
             /* compute outer product and add it to the Z matrix */
             p1 = ptrLElement[0];
             q1 = ptrBElement[0];
-            m11 = p1 * q1;
+            Z11 += p1 * q1;
             p2 = ptrLElement[lSkip];
-            m21 = p2 * q1;
-            Z11 += m11;
-            Z21 += m21;
+            Z21 += p2 * q1;
             
             /* compute outer product and add it to the Z matrix */
             p1 = ptrLElement[1];
             q1 = ptrBElement[1];
-            m11 = p1 * q1;
+            Z11 += p1 * q1;
             p2 = ptrLElement[1 + lSkip];
-            m21 = p2 * q1;
+            Z21 += p2 * q1;
 
             /* advance pointers */
             ptrLElement += 2;
             ptrBElement += 2;
-            Z11 += m11;
-            Z21 += m21;
             /* end of inner loop */
         }
         

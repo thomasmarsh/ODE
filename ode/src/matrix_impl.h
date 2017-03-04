@@ -30,24 +30,64 @@
 #include "fastltsolve_impl.h"
 
 
-template<unsigned a_stride, unsigned d_stride>
-void dxtVectorScale (dReal *a, const dReal *d, unsigned n)
+template<unsigned int a_stride, unsigned int d_stride>
+void dxtVectorScale (dReal *aStart, const dReal *dStart, unsigned elementCount)
 {
-    dAASSERT (a && d && n >= 0);
-    const dReal *const d_end = d + (size_t)n * d_stride;
-    for (; d != d_end; a += a_stride, d += d_stride) {
-        *a *= *d;
+    dAASSERT (aStart && dStart && elementCount >= 0);
+    
+    const unsigned step = 4;
+
+    dReal *ptrA = aStart;
+    const dReal *ptrD = dStart;
+    const dReal *const dStepsEnd = dStart + (size_t)(elementCount & ~(step - 1)) * d_stride;
+    for (; ptrD != dStepsEnd; ptrA += step * a_stride, ptrD += step * d_stride) 
+    {
+        dReal a0 = ptrA[0], a1 = ptrA[1 * a_stride], a2 = ptrA[2 * a_stride], a3 = ptrA[3 * a_stride];
+        dReal d0 = ptrD[0], d1 = ptrD[1 * d_stride], d2 = ptrD[2 * d_stride], d3 = ptrD[3 * d_stride];
+        a0 *= d0;
+        a1 *= d1;
+        a2 *= d2;
+        a3 *= d3;
+        ptrA[0] = a0; ptrA[1 * a_stride] = a1; ptrA[2 * a_stride] = a2; ptrA[3 * a_stride] = a3;
+        dSASSERT(step == 4);
+    }
+
+    switch (elementCount & (step - 1))
+    {
+        case 3:
+        {
+            dReal a2 = ptrA[2 * a_stride];
+            dReal d2 = ptrD[2 * d_stride];
+            ptrA[2 * a_stride] = a2 * d2;
+            // break; -- proceed to case 2
+        }
+
+        case 2:
+        {
+            dReal a1 = ptrA[1 * a_stride];
+            dReal d1 = ptrD[1 * d_stride];
+            ptrA[1 * a_stride] = a1 * d1;
+            // break; -- proceed to case 1
+        }
+
+        case 1:
+        {
+            dReal a0 = ptrA[0];
+            dReal d0 = ptrD[0];
+            ptrA[0] = a0 * d0;
+            break;
+        }
     }
 }
 
 
-template<unsigned d_stride, unsigned b_stride>
-void dxtSolveLDLT (const dReal *L, const dReal *d, dReal *b, unsigned n, unsigned nskip)
+template<unsigned int d_stride, unsigned int b_stride>
+void dxtSolveLDLT (const dReal *L, const dReal *d, dReal *b, unsigned rowCount, unsigned rowSkip)
 {
-    dAASSERT (L && d && b && n > 0 && nskip >= n);
-    dxtSolveL1<b_stride> (L, b, n, nskip);
-    dxtVectorScale<b_stride, d_stride> (b, d, n);
-    dxtSolveL1T<b_stride> (L, b, n, nskip);
+    dAASSERT (L && d && b && rowCount > 0 && rowSkip >= rowCount);
+    dxtSolveL1<b_stride> (L, b, rowCount, rowSkip);
+    dxtVectorScale<b_stride, d_stride> (b, d, rowCount);
+    dxtSolveL1T<b_stride> (L, b, rowCount, rowSkip);
 }
 
 

@@ -36,290 +36,419 @@
  * if this is in the factorizer source file, n must be a multiple of 4.
  */
 
-template<unsigned b_stride>
-void dxtSolveL1 (const dReal *L, dReal *B, unsigned n, unsigned lskip1)
-{  
-    /* declare variables - Z matrix, p and q vectors, etc */
-    dReal Z11, Z21, Z31, Z41, p1, q1, p2, p3, p4, *ex;
-    const dReal *ell;
-    unsigned lskip2, lskip3, i, j;
-    /* compute lskip values */
-    lskip2 = 2 * lskip1;
-    lskip3 = 3 * lskip1;
+template<unsigned int b_stride>
+void dxtSolveL1 (const dReal *L, dReal *B, unsigned rowCount, unsigned rowSkip)
+{
     /* compute all 4 x 1 blocks of X */
-    i = 0;
-    bool loop4 = n >= 4;
-    unsigned n4 = loop4 ? n - 4 : 0;
-    for (; loop4; loop4 = (i += 4) <= n4) {
+    unsigned blockStartRow = 0;
+    bool goForLoopX4 = rowCount >= 4;
+    const unsigned loopX4LastRow = goForLoopX4 ? rowCount - 4 : 0;
+    for (; goForLoopX4; goForLoopX4 = (blockStartRow += 4) <= loopX4LastRow) 
+    {
+        const dReal *ptrLElement = L + rowSkip + blockStartRow * rowSkip;
+        dReal *ptrBElement = B;
+
         /* compute all 4 x 1 block of X, from rows i..i+4-1 */
+
+        /* declare variables - Z matrix, p and q vectors, etc */
         /* set the Z matrix to 0 */
-        Z11=0;
-        Z21=0;
-        Z31=0;
-        Z41=0;
-        ell = L + i * lskip1;
-        ex = B;
+        dReal Z11 = 0, Z21 = 0, Z31 = 0, Z41 = 0;
+
+        unsigned columnCounter;
         /* the inner loop that computes outer products and adds them to Z */
-        for (j = i; j >= 12; j -= 12) {
+        for (columnCounter = blockStartRow; columnCounter >= 12; columnCounter -= 12) 
+        {
+            dReal q1, p1, p2, p3, p4;
+
             /* load p and q values */
-            p1=ell[0];
-            q1=ex[0 * b_stride];
-            p2=ell[lskip1];
-            p3=ell[lskip2];
-            p4=ell[lskip3];
+            q1 = ptrBElement[0 * b_stride];
+            p1 = (ptrLElement - rowSkip)[0];
+            p2 = ptrLElement[0];
+            ptrLElement += rowSkip;
+            p3 = ptrLElement[0];
+            p4 = ptrLElement[0 + rowSkip];
+
             /* compute outer product and add it to the Z matrix */
             Z11 += p1 * q1;
             Z21 += p2 * q1;
             Z31 += p3 * q1;
             Z41 += p4 * q1;
+
             /* load p and q values */
-            p1=ell[1];
-            q1=ex[1 * b_stride];
-            p2=ell[1+lskip1];
-            p3=ell[1+lskip2];
-            p4=ell[1+lskip3];
+            q1 = ptrBElement[1 * b_stride];
+            p3 = ptrLElement[1];
+            p4 = ptrLElement[1 + rowSkip];
+            ptrLElement -= rowSkip;
+            p1 = (ptrLElement - rowSkip)[1];
+            p2 = ptrLElement[1];
+
             /* compute outer product and add it to the Z matrix */
             Z11 += p1 * q1;
             Z21 += p2 * q1;
             Z31 += p3 * q1;
             Z41 += p4 * q1;
+
             /* load p and q values */
-            p1=ell[2];
-            q1=ex[2 * b_stride];
-            p2=ell[2+lskip1];
-            p3=ell[2+lskip2];
-            p4=ell[2+lskip3];
+            q1 = ptrBElement[2 * b_stride];
+            p1 = (ptrLElement - rowSkip)[2];
+            p2 = ptrLElement[2];
+            ptrLElement += rowSkip;
+            p3 = ptrLElement[2];
+            p4 = ptrLElement[2 + rowSkip];
+
             /* compute outer product and add it to the Z matrix */
             Z11 += p1 * q1;
             Z21 += p2 * q1;
             Z31 += p3 * q1;
             Z41 += p4 * q1;
+
             /* load p and q values */
-            p1=ell[3];
-            q1=ex[3 * b_stride];
-            p2=ell[3+lskip1];
-            p3=ell[3+lskip2];
-            p4=ell[3+lskip3];
+            q1 = ptrBElement[3 * b_stride];
+            p3 = ptrLElement[3];
+            p4 = ptrLElement[3 + rowSkip];
+            ptrLElement -= rowSkip;
+            p1 = (ptrLElement - rowSkip)[3];
+            p2 = ptrLElement[3];
+
             /* compute outer product and add it to the Z matrix */
             Z11 += p1 * q1;
             Z21 += p2 * q1;
             Z31 += p3 * q1;
             Z41 += p4 * q1;
+
             /* load p and q values */
-            p1=ell[4];
-            q1=ex[4 * b_stride];
-            p2=ell[4+lskip1];
-            p3=ell[4+lskip2];
-            p4=ell[4+lskip3];
+            q1 = ptrBElement[4 * b_stride];
+            p1 = (ptrLElement - rowSkip)[4];
+            p2 = ptrLElement[4];
+            ptrLElement += rowSkip;
+            p3 = ptrLElement[4];
+            p4 = ptrLElement[4 + rowSkip];
+
             /* compute outer product and add it to the Z matrix */
             Z11 += p1 * q1;
             Z21 += p2 * q1;
             Z31 += p3 * q1;
             Z41 += p4 * q1;
+
             /* load p and q values */
-            p1=ell[5];
-            q1=ex[5 * b_stride];
-            p2=ell[5+lskip1];
-            p3=ell[5+lskip2];
-            p4=ell[5+lskip3];
+            q1 = ptrBElement[5 * b_stride];
+            p3 = ptrLElement[5];
+            p4 = ptrLElement[5 + rowSkip];
+            ptrLElement -= rowSkip;
+            p1 = (ptrLElement - rowSkip)[5];
+            p2 = ptrLElement[5];
+
             /* compute outer product and add it to the Z matrix */
             Z11 += p1 * q1;
             Z21 += p2 * q1;
             Z31 += p3 * q1;
             Z41 += p4 * q1;
+
             /* load p and q values */
-            p1=ell[6];
-            q1=ex[6 * b_stride];
-            p2=ell[6+lskip1];
-            p3=ell[6+lskip2];
-            p4=ell[6+lskip3];
+            q1 = ptrBElement[6 * b_stride];
+            p1 = (ptrLElement - rowSkip)[6];
+            p2 = ptrLElement[6];
+            ptrLElement += rowSkip;
+            p3 = ptrLElement[6];
+            p4 = ptrLElement[6 + rowSkip];
+
             /* compute outer product and add it to the Z matrix */
             Z11 += p1 * q1;
             Z21 += p2 * q1;
             Z31 += p3 * q1;
             Z41 += p4 * q1;
+
             /* load p and q values */
-            p1=ell[7];
-            q1=ex[7 * b_stride];
-            p2=ell[7+lskip1];
-            p3=ell[7+lskip2];
-            p4=ell[7+lskip3];
+            q1 = ptrBElement[7 * b_stride];
+            p3 = ptrLElement[7];
+            p4 = ptrLElement[7 + rowSkip];
+            ptrLElement -= rowSkip;
+            p1 = (ptrLElement - rowSkip)[7];
+            p2 = ptrLElement[7];
+
             /* compute outer product and add it to the Z matrix */
             Z11 += p1 * q1;
             Z21 += p2 * q1;
             Z31 += p3 * q1;
             Z41 += p4 * q1;
+
             /* load p and q values */
-            p1=ell[8];
-            q1=ex[8 * b_stride];
-            p2=ell[8+lskip1];
-            p3=ell[8+lskip2];
-            p4=ell[8+lskip3];
+            q1 = ptrBElement[8 * b_stride];
+            p1 = (ptrLElement - rowSkip)[8];
+            p2 = ptrLElement[8];
+            ptrLElement += rowSkip;
+            p3 = ptrLElement[8];
+            p4 = ptrLElement[8 + rowSkip];
+
             /* compute outer product and add it to the Z matrix */
             Z11 += p1 * q1;
             Z21 += p2 * q1;
             Z31 += p3 * q1;
             Z41 += p4 * q1;
+
             /* load p and q values */
-            p1=ell[9];
-            q1=ex[9 * b_stride];
-            p2=ell[9+lskip1];
-            p3=ell[9+lskip2];
-            p4=ell[9+lskip3];
+            q1 = ptrBElement[9 * b_stride];
+            p3 = ptrLElement[9];
+            p4 = ptrLElement[9 + rowSkip];
+            ptrLElement -= rowSkip;
+            p1 = (ptrLElement - rowSkip)[9];
+            p2 = ptrLElement[9];
+
             /* compute outer product and add it to the Z matrix */
             Z11 += p1 * q1;
             Z21 += p2 * q1;
             Z31 += p3 * q1;
             Z41 += p4 * q1;
+
             /* load p and q values */
-            p1=ell[10];
-            q1=ex[10 * b_stride];
-            p2=ell[10+lskip1];
-            p3=ell[10+lskip2];
-            p4=ell[10+lskip3];
+            q1 = ptrBElement[10 * b_stride];
+            p1 = (ptrLElement - rowSkip)[10];
+            p2 = ptrLElement[10];
+            ptrLElement += rowSkip;
+            p3 = ptrLElement[10];
+            p4 = ptrLElement[10 + rowSkip];
+
             /* compute outer product and add it to the Z matrix */
             Z11 += p1 * q1;
             Z21 += p2 * q1;
             Z31 += p3 * q1;
             Z41 += p4 * q1;
+
             /* load p and q values */
-            p1=ell[11];
-            q1=ex[11 * b_stride];
-            p2=ell[11+lskip1];
-            p3=ell[11+lskip2];
-            p4=ell[11+lskip3];
+            q1 = ptrBElement[11 * b_stride];
+            p3 = ptrLElement[11];
+            p4 = ptrLElement[11 + rowSkip];
+            ptrLElement -= rowSkip;
+            p1 = (ptrLElement - rowSkip)[11];
+            p2 = ptrLElement[11];
+
             /* compute outer product and add it to the Z matrix */
             Z11 += p1 * q1;
             Z21 += p2 * q1;
             Z31 += p3 * q1;
             Z41 += p4 * q1;
+
             /* advance pointers */
-            ell += 12;
-            ex += 12 * b_stride;
+            ptrLElement += 12;
+            ptrBElement += 12 * b_stride;
             /* end of inner loop */
         }
+
         /* compute left-over iterations */
-        for (; j > 0; --j) {
+        for (; columnCounter > 0; columnCounter -= 4) 
+        {
+            dReal p1, q1, p2, p3, p4;
+
             /* load p and q values */
-            p1=ell[0];
-            q1=ex[0 * b_stride];
-            p2=ell[lskip1];
-            p3=ell[lskip2];
-            p4=ell[lskip3];
+            q1 = ptrBElement[0 * b_stride];
+            p1 = (ptrLElement - rowSkip)[0];
+            p2 = ptrLElement[0];
+            ptrLElement += rowSkip;
+            p3 = ptrLElement[0];
+            p4 = ptrLElement[0 + rowSkip];
+
             /* compute outer product and add it to the Z matrix */
             Z11 += p1 * q1;
             Z21 += p2 * q1;
             Z31 += p3 * q1;
             Z41 += p4 * q1;
+
+            /* load p and q values */
+            q1 = ptrBElement[1 * b_stride];
+            p3 = ptrLElement[1];
+            p4 = ptrLElement[1 + rowSkip];
+            ptrLElement -= rowSkip;
+            p1 = (ptrLElement - rowSkip)[1];
+            p2 = ptrLElement[1];
+
+            /* compute outer product and add it to the Z matrix */
+            Z11 += p1 * q1;
+            Z21 += p2 * q1;
+            Z31 += p3 * q1;
+            Z41 += p4 * q1;
+
+            /* load p and q values */
+            q1 = ptrBElement[2 * b_stride];
+            p1 = (ptrLElement - rowSkip)[2];
+            p2 = ptrLElement[2];
+            ptrLElement += rowSkip;
+            p3 = ptrLElement[2];
+            p4 = ptrLElement[2 + rowSkip];
+
+            /* compute outer product and add it to the Z matrix */
+            Z11 += p1 * q1;
+            Z21 += p2 * q1;
+            Z31 += p3 * q1;
+            Z41 += p4 * q1;
+
+            /* load p and q values */
+            q1 = ptrBElement[3 * b_stride];
+            p3 = ptrLElement[3];
+            p4 = ptrLElement[3 + rowSkip];
+            ptrLElement -= rowSkip;
+            p1 = (ptrLElement - rowSkip)[3];
+            p2 = ptrLElement[3];
+
+            /* compute outer product and add it to the Z matrix */
+            Z11 += p1 * q1;
+            Z21 += p2 * q1;
+            Z31 += p3 * q1;
+            Z41 += p4 * q1;
+
             /* advance pointers */
-            ell += 1;
-            ex += 1 * b_stride;
+            ptrLElement += 4;
+            ptrBElement += 4 * b_stride;
         }
+
         /* finish computing the X(i) block */
-        Z11 = ex[0 * b_stride] - Z11;
-        ex[0 * b_stride] = Z11;
-        p1 = ell[lskip1];
-        Z21 = ex[1 * b_stride] - Z21 - p1*Z11;
-        ex[1 * b_stride] = Z21;
-        p1 = ell[lskip2];
-        p2 = ell[1+lskip2];
-        Z31 = ex[2 * b_stride] - Z31 - p1*Z11 - p2*Z21;
-        ex[2 * b_stride] = Z31;
-        p1 = ell[lskip3];
-        p2 = ell[1+lskip3];
-        p3 = ell[2+lskip3];
-        Z41 = ex[3 * b_stride] - Z41 - p1*Z11 - p2*Z21 - p3*Z31;
-        ex[3 * b_stride] = Z41;
+        dReal Y11, Y21, Y31, Y41;
+        {
+            Y11 = ptrBElement[0 * b_stride] - Z11;
+            ptrBElement[0 * b_stride] = Y11;
+        }
+        {
+            dReal p2 = ptrLElement[0];
+            Y21 = ptrBElement[1 * b_stride] - Z21 - p2 * Y11;
+            ptrBElement[1 * b_stride] = Y21;
+        }
+        {
+            ptrLElement += rowSkip;
+            dReal p3 = ptrLElement[0];
+            dReal p3_1 = ptrLElement[1];
+            Y31 = ptrBElement[2 * b_stride] - Z31 - p3 * Y11 - p3_1 * Y21;
+            ptrBElement[2 * b_stride] = Y31;
+        }
+        {
+            dReal p4 = ptrLElement[rowSkip];
+            dReal p4_1 = ptrLElement[1 + rowSkip];
+            dReal p4_2 = ptrLElement[2 + rowSkip];
+            Y41 = ptrBElement[3 * b_stride] - Z41 - p4 * Y11 - p4_1 * Y21 - p4_2 * Y31;
+            ptrBElement[3 * b_stride] = Y41;
+        }
         /* end of outer loop */
     }
+
     /* compute rows at end that are not a multiple of block size */
-    for (; i < n; ++i) {
+    for (; blockStartRow < rowCount; ++blockStartRow) 
+    {
+        const dReal *ptrLElement = L + blockStartRow * rowSkip;
+        dReal *ptrBElement = B;
+
         /* compute all 1 x 1 block of X, from rows i..i+1-1 */
         /* set the Z matrix to 0 */
-        Z11=0;
-        ell = L + i*lskip1;
-        ex = B;
+        dReal Z11 = 0, Z12 = 0;
+
+        unsigned columnCounter;
         /* the inner loop that computes outer products and adds them to Z */
-        for (j = i; j >= 12; j -= 12) {
+        for (columnCounter = blockStartRow; columnCounter >= 12; columnCounter -= 12) 
+        {
+            dReal p1, p2, q1, q2;
+
             /* load p and q values */
-            p1=ell[0];
-            q1=ex[0 * b_stride];
+            p1 = ptrLElement[0];
+            p2 = ptrLElement[1];
+            q1 = ptrBElement[0 * b_stride];
+            q2 = ptrBElement[1 * b_stride];
+
             /* compute outer product and add it to the Z matrix */
             Z11 += p1 * q1;
+            Z12 += p2 * q2;
+
             /* load p and q values */
-            p1=ell[1];
-            q1=ex[1 * b_stride];
+            p1 = ptrLElement[2];
+            p2 = ptrLElement[3];
+            q1 = ptrBElement[2 * b_stride];
+            q2 = ptrBElement[3 * b_stride];
+
             /* compute outer product and add it to the Z matrix */
             Z11 += p1 * q1;
+            Z12 += p2 * q2;
+
             /* load p and q values */
-            p1=ell[2];
-            q1=ex[2 * b_stride];
+            p1 = ptrLElement[4];
+            p2 = ptrLElement[5];
+            q1 = ptrBElement[4 * b_stride];
+            q2 = ptrBElement[5 * b_stride];
+
             /* compute outer product and add it to the Z matrix */
             Z11 += p1 * q1;
+            Z12 += p2 * q2;
+
             /* load p and q values */
-            p1=ell[3];
-            q1=ex[3 * b_stride];
+            p1 = ptrLElement[6];
+            p2 = ptrLElement[7];
+            q1 = ptrBElement[6 * b_stride];
+            q2 = ptrBElement[7 * b_stride];
+
             /* compute outer product and add it to the Z matrix */
             Z11 += p1 * q1;
+            Z12 += p2 * q2;
+
             /* load p and q values */
-            p1=ell[4];
-            q1=ex[4 * b_stride];
+            p1 = ptrLElement[8];
+            p2 = ptrLElement[9];
+            q1 = ptrBElement[8 * b_stride];
+            q2 = ptrBElement[9 * b_stride];
+
             /* compute outer product and add it to the Z matrix */
             Z11 += p1 * q1;
+            Z12 += p2 * q2;
+
             /* load p and q values */
-            p1=ell[5];
-            q1=ex[5 * b_stride];
+            p1 = ptrLElement[10];
+            p2 = ptrLElement[11];
+            q1 = ptrBElement[10 * b_stride];
+            q2 = ptrBElement[11 * b_stride];
+
             /* compute outer product and add it to the Z matrix */
             Z11 += p1 * q1;
-            /* load p and q values */
-            p1=ell[6];
-            q1=ex[6 * b_stride];
-            /* compute outer product and add it to the Z matrix */
-            Z11 += p1 * q1;
-            /* load p and q values */
-            p1=ell[7];
-            q1=ex[7 * b_stride];
-            /* compute outer product and add it to the Z matrix */
-            Z11 += p1 * q1;
-            /* load p and q values */
-            p1=ell[8];
-            q1=ex[8 * b_stride];
-            /* compute outer product and add it to the Z matrix */
-            Z11 += p1 * q1;
-            /* load p and q values */
-            p1=ell[9];
-            q1=ex[9 * b_stride];
-            /* compute outer product and add it to the Z matrix */
-            Z11 += p1 * q1;
-            /* load p and q values */
-            p1=ell[10];
-            q1=ex[10 * b_stride];
-            /* compute outer product and add it to the Z matrix */
-            Z11 += p1 * q1;
-            /* load p and q values */
-            p1=ell[11];
-            q1=ex[11 * b_stride];
-            /* compute outer product and add it to the Z matrix */
-            Z11 += p1 * q1;
+            Z12 += p2 * q2;
+
             /* advance pointers */
-            ell += 12;
-            ex += 12 * b_stride;
+            ptrLElement += 12;
+            ptrBElement += 12 * b_stride;
             /* end of inner loop */
         }
+
         /* compute left-over iterations */
-        for (; j > 0; --j) {
+        for (; columnCounter >= 2; columnCounter -= 2) 
+        {
+            dReal p1, p2, q1, q2;
+
             /* load p and q values */
-            p1=ell[0];
-            q1=ex[0 * b_stride];
+            p1 = ptrLElement[0];
+            p2 = ptrLElement[1];
+            q1 = ptrBElement[0 * b_stride];
+            q2 = ptrBElement[1 * b_stride];
+
             /* compute outer product and add it to the Z matrix */
             Z11 += p1 * q1;
+            Z12 += p2 * q2;
+
             /* advance pointers */
-            ell += 1;
-            ex += 1 * b_stride;
+            ptrLElement += 2;
+            ptrBElement += 2 * b_stride;
         }
+
+        if (columnCounter != 0)
+        {
+            dReal p1, q1;
+
+            /* load p and q values */
+            p1 = ptrLElement[0];
+            q1 = ptrBElement[0 * b_stride];
+
+            /* compute outer product and add it to the Z matrix */
+            Z11 += p1 * q1;
+
+            /* advance pointers */
+            // ptrLElement += 1; -- not needed any more
+            ptrBElement += 1 * b_stride;
+        }
+
         /* finish computing the X(i) block */
-        Z11 = ex[0 * b_stride] - Z11;
-        ex[0 * b_stride] = Z11;
+        dReal Y11 = ptrBElement[0 * b_stride] - (Z11 + Z12);
+        ptrBElement[0 * b_stride] = Y11;
     }
 }
 
