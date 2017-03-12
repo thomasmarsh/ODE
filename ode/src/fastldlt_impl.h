@@ -33,7 +33,16 @@
 
 
 static void dxSolveL1_2 (const dReal *L, dReal *B, unsigned rowCount, unsigned rowSkip);
+template<unsigned int d_stride>
+void dxScaleAndFactorizeL1_2(dReal *ARow, dReal *d, unsigned rowIndex, unsigned rowSkip);
+template<unsigned int d_stride>
+inline void dxScaleAndFactorizeFirstL1Row_2(dReal *ARow, dReal *d, unsigned rowSkip);
+
 static void dxSolveL1_1 (const dReal *L, dReal *B, unsigned rowCount, unsigned rowSkip);
+template<unsigned int d_stride>
+void dxScaleAndFactorizeL1_1(dReal *ARow, dReal *d, unsigned rowIndex);
+template<unsigned int d_stride>
+inline void dxScaleAndFactorizeFirstL1Row_1(dReal *ARow, dReal *d);
 
 
 template<unsigned int d_stride>
@@ -43,235 +52,37 @@ void dxtFactorLDLT(dReal *A, dReal *d, unsigned rowCount, unsigned rowSkip)
 
     const unsigned lastRowIndex = rowCount - 1;
 
+    dReal *ARow = A;
     unsigned blockStartRow = 0;
+    /* compute blocks of 2 rows */
     bool subsequentPass = false;
-    for (; blockStartRow < lastRowIndex; subsequentPass = true, blockStartRow += 2) 
+    for (; blockStartRow < lastRowIndex; subsequentPass = true, ARow += 2 * rowSkip, blockStartRow += 2) 
     {
-        dReal *ptrAElement, *ptrDElement;
-
-        dReal Z11, Z21, Z22;
-
         if (subsequentPass)
         {
             /* solve L*(D*l)=a, l is scaled elements in 2 x i block at A(i,0) */
-            dxSolveL1_2(A, A + (size_t)rowSkip * blockStartRow, blockStartRow, rowSkip);
-
-            ptrAElement = A + (size_t)rowSkip * blockStartRow;
-            ptrDElement = d;
-
-            /* scale the elements in a 2 x i block at A(i,0), and also */
-            /* compute Z = the outer product matrix that we'll need. */
-            Z11 = 0; Z21 = 0; Z22 = 0;
-
-            for (unsigned columnCounter = blockStartRow; ; ) 
-            {
-                dReal p1, q1, p2, q2, dd;
-
-                p1 = ptrAElement[0];
-                p2 = ptrAElement[rowSkip];
-                dd = ptrDElement[0 * d_stride];
-                q1 = p1 * dd;
-                q2 = p2 * dd;
-                ptrAElement[0] = q1;
-                ptrAElement[rowSkip] = q2;
-                Z11 += p1 * q1;
-                Z21 += p2 * q1;
-                Z22 += p2 * q2;
-
-                p1 = ptrAElement[1];
-                p2 = ptrAElement[1 + rowSkip];
-                dd = ptrDElement[1 * d_stride];
-                q1 = p1 * dd;
-                q2 = p2 * dd;
-                ptrAElement[1] = q1;
-                ptrAElement[1 + rowSkip] = q2;
-                Z11 += p1 * q1;
-                Z21 += p2 * q1;
-                Z22 += p2 * q2;
-
-                if (columnCounter > 6)
-                {
-                    columnCounter -= 6;
-
-                    ptrAElement += 6;
-                    ptrDElement += 6 * d_stride;
-
-                    p1 = ptrAElement[-4];
-                    p2 = ptrAElement[-4 + rowSkip];
-                    dd = ptrDElement[-4 * (int)d_stride];
-                    q1 = p1 * dd;
-                    q2 = p2 * dd;
-                    ptrAElement[-4] = q1;
-                    ptrAElement[-4 + rowSkip] = q2;
-                    Z11 += p1 * q1;
-                    Z21 += p2 * q1;
-                    Z22 += p2 * q2;
-
-                    p1 = ptrAElement[-3];
-                    p2 = ptrAElement[-3 + rowSkip];
-                    dd = ptrDElement[-3 * (int)d_stride];
-                    q1 = p1 * dd;
-                    q2 = p2 * dd;
-                    ptrAElement[-3] = q1;
-                    ptrAElement[-3 + rowSkip] = q2;
-                    Z11 += p1 * q1;
-                    Z21 += p2 * q1;
-                    Z22 += p2 * q2;
-
-                    p1 = ptrAElement[-2];
-                    p2 = ptrAElement[-2 + rowSkip];
-                    dd = ptrDElement[-2 * (int)d_stride];
-                    q1 = p1 * dd;
-                    q2 = p2 * dd;
-                    ptrAElement[-2] = q1;
-                    ptrAElement[-2 + rowSkip] = q2;
-                    Z11 += p1 * q1;
-                    Z21 += p2 * q1;
-                    Z22 += p2 * q2;
-
-                    p1 = ptrAElement[-1];
-                    p2 = ptrAElement[-1 + rowSkip];
-                    dd = ptrDElement[-1 * (int)d_stride];
-                    q1 = p1 * dd;
-                    q2 = p2 * dd;
-                    ptrAElement[-1] = q1;
-                    ptrAElement[-1 + rowSkip] = q2;
-                    Z11 += p1 * q1;
-                    Z21 += p2 * q1;
-                    Z22 += p2 * q2;
-                }
-                else
-                {
-                    ptrAElement += 2;
-                    ptrDElement += 2 * d_stride;
-
-                    if ((columnCounter -= 2) == 0)
-                    {
-                        break;
-                    }
-                }
-            }
+            dxSolveL1_2(A, ARow, blockStartRow, rowSkip);
+            dxScaleAndFactorizeL1_2<d_stride>(ARow, d, blockStartRow, rowSkip);
         }
         else
         {
-            ptrAElement = A/* + (size_t)rowSkip * blockStartRow*/; dIASSERT(blockStartRow == 0);
-            ptrDElement = d;
-
-            Z11 = 0; Z21 = 0; Z22 = 0;
+            dxScaleAndFactorizeFirstL1Row_2<d_stride>(ARow, d, rowSkip);
         }
-
-        /* solve for diagonal 2 x 2 block at A(i,i) */
-        dReal Y11 = ptrAElement[0] - Z11;
-        dReal Y21 = ptrAElement[rowSkip] - Z21;
-        dReal Y22 = ptrAElement[1 + rowSkip] - Z22;
-
-        /* factorize 2 x 2 block Y, ptrDElement */
-        /* factorize row 1 */
-        dReal dd = dRecip(Y11);
-
-        ptrDElement[0 * d_stride] = dd;
-        dIASSERT(ptrDElement == d + (size_t)blockStartRow * d_stride);
-
-        /* factorize row 2 */
-        dReal q2 = Y21 * dd;
-        ptrAElement[rowSkip] = q2;
-        
-        dReal sum = Y21 * q2;
-        ptrDElement[1 * d_stride] = dRecip(Y22 - sum);
         /* done factorizing 2 x 2 block */
     }
 
     /* compute the (less than 2) rows at the bottom */
     if (!subsequentPass || blockStartRow == lastRowIndex)
     {
-        dReal *ptrAElement, *ptrDElement;
-        
-        dReal Z1;
-
         if (subsequentPass)
         {
-            dxSolveL1_1(A, A + (size_t)rowSkip * blockStartRow, blockStartRow, rowSkip);
-
-            ptrAElement = A + (size_t)rowSkip * blockStartRow;
-            ptrDElement = d;
-
-            /* scale the elements in a 1 x i block at A(i,0), and also */
-            /* compute Z = the outer product matrix that we'll need. */
-            dReal Z11 = 0, Z22 = 0;
-
-            for (unsigned columnCounter = blockStartRow; ; ) 
-            {
-                dReal p1, p2, q1, q2, dd1, dd2;
-
-                p1 = ptrAElement[0];
-                p2 = ptrAElement[1];
-                dd1 = ptrDElement[0 * d_stride];
-                dd2 = ptrDElement[1 * d_stride];
-                q1 = p1 * dd1;
-                q2 = p2 * dd2;
-                ptrAElement[0] = q1;
-                ptrAElement[1] = q2;
-                Z11 += p1 * q1;
-                Z22 += p2 * q2;
-
-                if (columnCounter > 6)
-                {
-                    columnCounter -= 6;
-
-                    ptrAElement += 6;
-                    ptrDElement += 6 * d_stride;
-
-                    p1 = ptrAElement[-4];
-                    p2 = ptrAElement[-3];
-                    dd1 = ptrDElement[-4 * (int)d_stride];
-                    dd2 = ptrDElement[-3 * (int)d_stride];
-                    q1 = p1 * dd1;
-                    q2 = p2 * dd2;
-                    ptrAElement[-4] = q1;
-                    ptrAElement[-3] = q2;
-                    Z11 += p1 * q1;
-                    Z22 += p2 * q2;
-
-                    p1 = ptrAElement[-2];
-                    p2 = ptrAElement[-1];
-                    dd1 = ptrDElement[-2 * (int)d_stride];
-                    dd2 = ptrDElement[-1 * (int)d_stride];
-                    q1 = p1 * dd1;
-                    q2 = p2 * dd2;
-                    ptrAElement[-2] = q1;
-                    ptrAElement[-1] = q2;
-                    Z11 += p1 * q1;
-                    Z22 += p2 * q2;
-                }
-                else
-                {
-                    ptrAElement += 2;
-                    ptrDElement += 2 * d_stride;
-
-                    if ((columnCounter -= 2) == 0)
-                    {
-                        break;
-                    }
-                }
-            }
-            
-            Z1 = Z11 + Z22;
+            dxSolveL1_1(A, ARow, blockStartRow, rowSkip);
+            dxScaleAndFactorizeL1_1<d_stride>(ARow, d, blockStartRow);
         }
         else
         {
-            ptrAElement = A/* + (size_t)rowSkip * blockStartRow*/; dIASSERT(blockStartRow == 0);
-            ptrDElement = d;
-
-            Z1 = 0;
+            dxScaleAndFactorizeFirstL1Row_1<d_stride>(ARow, d);
         }
-
-        dReal Y11 = ptrAElement[0] - Z1;
-
-        /* solve for diagonal 1 x 1 block at A(i,i) */
-        dIASSERT(ptrDElement == d + (size_t)blockStartRow * d_stride);
-        /* factorize 1 x 1 block Y, ptrDElement */
-        /* factorize row 1 */
-        ptrDElement[0 * d_stride] = dRecip(Y11);
         /* done factorizing 1 x 1 block */
     }
 }
@@ -427,6 +238,154 @@ void dxSolveL1_2(const dReal *L, dReal *B, unsigned rowCount, unsigned rowSkip)
     }
 }
 
+template<unsigned int d_stride>
+void dxScaleAndFactorizeL1_2(dReal *ARow, dReal *d, unsigned factorizationRow, unsigned rowSkip)
+{
+    dIASSERT(factorizationRow != 0);
+    dIASSERT(factorizationRow % 2 == 0);
+
+    dReal *ptrAElement = ARow;
+    dReal *ptrDElement = d;
+
+    /* scale the elements in a 2 x i block at A(i,0), and also */
+    /* compute Z = the outer product matrix that we'll need. */
+    dReal Z11 = 0, Z21 = 0, Z22 = 0;
+
+    for (unsigned columnCounter = factorizationRow; ; ) 
+    {
+        dReal p1, q1, p2, q2, dd;
+
+        p1 = ptrAElement[0];
+        p2 = ptrAElement[rowSkip];
+        dd = ptrDElement[0 * d_stride];
+        q1 = p1 * dd;
+        q2 = p2 * dd;
+        ptrAElement[0] = q1;
+        ptrAElement[rowSkip] = q2;
+        Z11 += p1 * q1;
+        Z21 += p2 * q1;
+        Z22 += p2 * q2;
+
+        p1 = ptrAElement[1];
+        p2 = ptrAElement[1 + rowSkip];
+        dd = ptrDElement[1 * d_stride];
+        q1 = p1 * dd;
+        q2 = p2 * dd;
+        ptrAElement[1] = q1;
+        ptrAElement[1 + rowSkip] = q2;
+        Z11 += p1 * q1;
+        Z21 += p2 * q1;
+        Z22 += p2 * q2;
+
+        if (columnCounter > 6)
+        {
+            columnCounter -= 6;
+
+            ptrAElement += 6;
+            ptrDElement += 6 * d_stride;
+
+            p1 = ptrAElement[-4];
+            p2 = ptrAElement[-4 + rowSkip];
+            dd = ptrDElement[-4 * (int)d_stride];
+            q1 = p1 * dd;
+            q2 = p2 * dd;
+            ptrAElement[-4] = q1;
+            ptrAElement[-4 + rowSkip] = q2;
+            Z11 += p1 * q1;
+            Z21 += p2 * q1;
+            Z22 += p2 * q2;
+
+            p1 = ptrAElement[-3];
+            p2 = ptrAElement[-3 + rowSkip];
+            dd = ptrDElement[-3 * (int)d_stride];
+            q1 = p1 * dd;
+            q2 = p2 * dd;
+            ptrAElement[-3] = q1;
+            ptrAElement[-3 + rowSkip] = q2;
+            Z11 += p1 * q1;
+            Z21 += p2 * q1;
+            Z22 += p2 * q2;
+
+            p1 = ptrAElement[-2];
+            p2 = ptrAElement[-2 + rowSkip];
+            dd = ptrDElement[-2 * (int)d_stride];
+            q1 = p1 * dd;
+            q2 = p2 * dd;
+            ptrAElement[-2] = q1;
+            ptrAElement[-2 + rowSkip] = q2;
+            Z11 += p1 * q1;
+            Z21 += p2 * q1;
+            Z22 += p2 * q2;
+
+            p1 = ptrAElement[-1];
+            p2 = ptrAElement[-1 + rowSkip];
+            dd = ptrDElement[-1 * (int)d_stride];
+            q1 = p1 * dd;
+            q2 = p2 * dd;
+            ptrAElement[-1] = q1;
+            ptrAElement[-1 + rowSkip] = q2;
+            Z11 += p1 * q1;
+            Z21 += p2 * q1;
+            Z22 += p2 * q2;
+        }
+        else
+        {
+            ptrAElement += 2;
+            ptrDElement += 2 * d_stride;
+
+            if ((columnCounter -= 2) == 0)
+            {
+                break;
+            }
+        }
+    }
+
+    /* solve for diagonal 2 x 2 block at A(i,i) */
+    dReal Y11 = ptrAElement[0] - Z11;
+    dReal Y21 = ptrAElement[rowSkip] - Z21;
+    dReal Y22 = ptrAElement[1 + rowSkip] - Z22;
+
+    /* factorize 2 x 2 block Y, ptrDElement */
+    /* factorize row 1 */
+    dReal dd = dRecip(Y11);
+
+    ptrDElement[0 * d_stride] = dd;
+    dIASSERT(ptrDElement == d + (size_t)factorizationRow * d_stride);
+
+    /* factorize row 2 */
+    dReal q2 = Y21 * dd;
+    ptrAElement[rowSkip] = q2;
+
+    dReal sum = Y21 * q2;
+    ptrDElement[1 * d_stride] = dRecip(Y22 - sum);
+}
+
+template<unsigned int d_stride>
+void dxScaleAndFactorizeFirstL1Row_2(dReal *ARow, dReal *d, unsigned rowSkip)
+{
+    dReal *ptrAElement = ARow;
+    dReal *ptrDElement = d;
+
+    /* solve for diagonal 2 x 2 block at A(0,0) */
+    dReal Y11 = ptrAElement[0]/* - Z11*/;
+    dReal Y21 = ptrAElement[rowSkip]/* - Z21*/;
+    dReal Y22 = ptrAElement[1 + rowSkip]/* - Z22*/;
+
+    /* factorize 2 x 2 block Y, ptrDElement */
+    /* factorize row 1 */
+    dReal dd = dRecip(Y11);
+
+    ptrDElement[0 * d_stride] = dd;
+    dIASSERT(ptrDElement == d/* + (size_t)factorizationRow * d_stride*/);
+
+    /* factorize row 2 */
+    dReal q2 = Y21 * dd;
+    ptrAElement[rowSkip] = q2;
+
+    dReal sum = Y21 * q2;
+    ptrDElement[1 * d_stride] = dRecip(Y22 - sum);
+}
+
 
 /* solve L*X=B, with B containing 1 right hand sides.
  * L is an n*n lower triangular matrix with ones on the diagonal.
@@ -439,7 +398,7 @@ void dxSolveL1_2(const dReal *L, dReal *B, unsigned rowCount, unsigned rowSkip)
  */
 static 
 void dxSolveL1_1(const dReal *L, dReal *B, unsigned rowCount, unsigned rowSkip)
-{  
+{
     dIASSERT(rowCount != 0);
     dIASSERT(rowCount % 2 == 0);
 
@@ -553,6 +512,95 @@ void dxSolveL1_1(const dReal *L, dReal *B, unsigned rowCount, unsigned rowSkip)
         ptrBElement[1] = Y21;
         /* end of outer loop */
     }
+}
+
+template<unsigned int d_stride>
+void dxScaleAndFactorizeL1_1(dReal *ARow, dReal *d, unsigned factorizationRow)
+{
+    dReal *ptrAElement = ARow;
+    dReal *ptrDElement = d;
+
+    /* scale the elements in a 1 x i block at A(i,0), and also */
+    /* compute Z = the outer product matrix that we'll need. */
+    dReal Z11 = 0, Z22 = 0;
+
+    for (unsigned columnCounter = factorizationRow; ; ) 
+    {
+        dReal p1, p2, q1, q2, dd1, dd2;
+
+        p1 = ptrAElement[0];
+        p2 = ptrAElement[1];
+        dd1 = ptrDElement[0 * d_stride];
+        dd2 = ptrDElement[1 * d_stride];
+        q1 = p1 * dd1;
+        q2 = p2 * dd2;
+        ptrAElement[0] = q1;
+        ptrAElement[1] = q2;
+        Z11 += p1 * q1;
+        Z22 += p2 * q2;
+
+        if (columnCounter > 6)
+        {
+            columnCounter -= 6;
+
+            ptrAElement += 6;
+            ptrDElement += 6 * d_stride;
+
+            p1 = ptrAElement[-4];
+            p2 = ptrAElement[-3];
+            dd1 = ptrDElement[-4 * (int)d_stride];
+            dd2 = ptrDElement[-3 * (int)d_stride];
+            q1 = p1 * dd1;
+            q2 = p2 * dd2;
+            ptrAElement[-4] = q1;
+            ptrAElement[-3] = q2;
+            Z11 += p1 * q1;
+            Z22 += p2 * q2;
+
+            p1 = ptrAElement[-2];
+            p2 = ptrAElement[-1];
+            dd1 = ptrDElement[-2 * (int)d_stride];
+            dd2 = ptrDElement[-1 * (int)d_stride];
+            q1 = p1 * dd1;
+            q2 = p2 * dd2;
+            ptrAElement[-2] = q1;
+            ptrAElement[-1] = q2;
+            Z11 += p1 * q1;
+            Z22 += p2 * q2;
+        }
+        else
+        {
+            ptrAElement += 2;
+            ptrDElement += 2 * d_stride;
+
+            if ((columnCounter -= 2) == 0)
+            {
+                break;
+            }
+        }
+    }
+
+    dReal Y11 = ptrAElement[0] - (Z11 + Z22);
+
+    /* solve for diagonal 1 x 1 block at A(i,i) */
+    dIASSERT(ptrDElement == d + (size_t)factorizationRow * d_stride);
+    /* factorize 1 x 1 block Y, ptrDElement */
+    /* factorize row 1 */
+    ptrDElement[0 * d_stride] = dRecip(Y11);
+}
+
+template<unsigned int d_stride>
+void dxScaleAndFactorizeFirstL1Row_1(dReal *ARow, dReal *d)
+{
+    dReal *ptrAElement = ARow;
+    dReal *ptrDElement = d;
+
+    dReal Y11 = ptrAElement[0];
+
+    /* solve for diagonal 1 x 1 block at A(0,0) */
+    /* factorize 1 x 1 block Y, ptrDElement */
+    /* factorize row 1 */
+    ptrDElement[0 * d_stride] = dRecip(Y11);
 }
 
 
