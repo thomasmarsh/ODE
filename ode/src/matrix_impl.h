@@ -84,7 +84,12 @@ void dxtVectorScale (dReal *aStart, const dReal *dStart, unsigned elementCount)
 template<unsigned int d_stride, unsigned int b_stride>
 void dxtSolveLDLT (const dReal *L, const dReal *d, dReal *b, unsigned rowCount, unsigned rowSkip)
 {
-    dAASSERT (L && d && b && rowCount > 0 && rowSkip >= rowCount);
+    dAASSERT(L != NULL);
+    dAASSERT(d != NULL);
+    dAASSERT(b != NULL);
+    dAASSERT(rowCount > 0);
+    dAASSERT(rowSkip >= rowCount);
+
     dxtSolveL1<b_stride> (L, b, rowCount, rowSkip);
     dxtVectorScale<b_stride, d_stride> (b, d, rowCount);
     dxtSolveL1T<b_stride> (L, b, rowCount, rowSkip);

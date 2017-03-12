@@ -829,7 +829,9 @@ void dxSolveLCP (dxWorldProcessMemArena *memarena, unsigned n, dReal *A, dReal p
 static 
 void dxSolveLCP_AllUnbounded (dxWorldProcessMemArena *memarena, unsigned n, dReal *A, dReal pairsbx[PBX__MAX])
 {
-    dAASSERT (n > 0 && A && pairsbx);
+    dAASSERT(A != NULL);
+    dAASSERT(pairsbx != NULL);
+    dAASSERT(n != 0);
 
     transfer_b_to_x<true> (pairsbx, n);    
 

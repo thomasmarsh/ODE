@@ -25,20 +25,31 @@
 #include <ode/common.h>
 #include "config.h"
 #include "matrix.h"
+#include "error.h"
 
 #include "fastsolve_impl.h"
 
 
-void dxSolveL1 (const dReal *L, dReal *b, unsigned n, unsigned lskip1)
+void dxSolveL1(const dReal *L, dReal *b, unsigned n, unsigned lskip1)
 {
-    dxtSolveL1<1> (L, b, n, lskip1);
+    dIASSERT(n != 0);
+
+    dxtSolveL1<1>(L, b, n, lskip1);
 }
 
 
 #undef dSolveL1
 
-void dSolveL1 (const dReal *L, dReal *B, int n, int lskip1)
+void dSolveL1(const dReal *L, dReal *B, int n, int lskip1)
 {
-    dxSolveL1 (L, B, n, lskip1);
+    dAASSERT(n != 0);
+
+    if (n != 0)
+    {
+        dAASSERT(L != NULL);
+        dAASSERT(B != NULL);
+
+        dxSolveL1(L, B, n, lskip1);
+    }
 }
 

@@ -22,6 +22,9 @@
  *                                                                       *
  *************************************************************************/
 
+// Code style improvements and optimizations by Oleh Derevenko ????-2017
+
+
 #ifndef _ODE_FASTLDLT_IMPL_H_
 #define _ODE_FASTLDLT_IMPL_H_
 
@@ -29,8 +32,8 @@
 #include "error.h"
 
 
-static void dxSolveL1_2 (const dReal *L, dReal *B, unsigned rowCount, unsigned lSkip);
-static void dxSolveL1_1 (const dReal *L, dReal *B, unsigned rowCount, unsigned lSkip);
+static void dxSolveL1_2 (const dReal *L, dReal *B, unsigned rowCount, unsigned rowSkip);
+static void dxSolveL1_1 (const dReal *L, dReal *B, unsigned rowCount, unsigned rowSkip);
 
 
 template<unsigned int d_stride>
@@ -38,124 +41,123 @@ void dxtFactorLDLT(dReal *A, dReal *d, unsigned rowCount, unsigned rowSkip)
 {
     if (rowCount < 1) return;
 
-    unsigned blockStartRow;
     const unsigned lastRowIndex = rowCount - 1;
-    for (blockStartRow = 0; blockStartRow < lastRowIndex; blockStartRow += 2) 
+
+    unsigned blockStartRow = 0;
+    bool subsequentPass = false;
+    for (; blockStartRow < lastRowIndex; subsequentPass = true, blockStartRow += 2) 
     {
-        /* solve L*(D*l)=a, l is scaled elements in 2 x i block at A(i,0) */
-        dxSolveL1_2(A, A + (size_t)rowSkip * blockStartRow, blockStartRow, rowSkip);
+        dReal *ptrAElement, *ptrDElement;
 
-        dReal *ptrAElement = A + (size_t)rowSkip * blockStartRow;
-        dReal *ptrDElement = d;
+        dReal Z11, Z21, Z22;
 
-        /* scale the elements in a 2 x i block at A(i,0), and also */
-        /* compute Z = the outer product matrix that we'll need. */
-        dReal Z11 = 0, Z21 = 0, Z22 = 0;
-
-        unsigned columnCounter;
-        for (columnCounter = blockStartRow; columnCounter >= 6; columnCounter -= 6) 
+        if (subsequentPass)
         {
-            dReal p1, q1, p2, q2, dd;
+            /* solve L*(D*l)=a, l is scaled elements in 2 x i block at A(i,0) */
+            dxSolveL1_2(A, A + (size_t)rowSkip * blockStartRow, blockStartRow, rowSkip);
 
-            p1 = ptrAElement[0];
-            p2 = ptrAElement[rowSkip];
-            dd = ptrDElement[0 * d_stride];
-            q1 = p1 * dd;
-            q2 = p2 * dd;
-            ptrAElement[0] = q1;
-            ptrAElement[rowSkip] = q2;
-            Z11 += p1 * q1;
-            Z21 += p2 * q1;
-            Z22 += p2 * q2;
+            ptrAElement = A + (size_t)rowSkip * blockStartRow;
+            ptrDElement = d;
 
-            p1 = ptrAElement[1];
-            p2 = ptrAElement[1 + rowSkip];
-            dd = ptrDElement[1 * d_stride];
-            q1 = p1 * dd;
-            q2 = p2 * dd;
-            ptrAElement[1] = q1;
-            ptrAElement[1 + rowSkip] = q2;
-            Z11 += p1 * q1;
-            Z21 += p2 * q1;
-            Z22 += p2 * q2;
+            /* scale the elements in a 2 x i block at A(i,0), and also */
+            /* compute Z = the outer product matrix that we'll need. */
+            Z11 = 0; Z21 = 0; Z22 = 0;
 
-            p1 = ptrAElement[2];
-            p2 = ptrAElement[2 + rowSkip];
-            dd = ptrDElement[2 * d_stride];
-            q1 = p1 * dd;
-            q2 = p2 * dd;
-            ptrAElement[2] = q1;
-            ptrAElement[2 + rowSkip] = q2;
-            Z11 += p1 * q1;
-            Z21 += p2 * q1;
-            Z22 += p2 * q2;
+            for (unsigned columnCounter = blockStartRow; ; ) 
+            {
+                dReal p1, q1, p2, q2, dd;
 
-            p1 = ptrAElement[3];
-            p2 = ptrAElement[3 + rowSkip];
-            dd = ptrDElement[3 * d_stride];
-            q1 = p1 * dd;
-            q2 = p2 * dd;
-            ptrAElement[3] = q1;
-            ptrAElement[3 + rowSkip] = q2;
-            Z11 += p1 * q1;
-            Z21 += p2 * q1;
-            Z22 += p2 * q2;
+                p1 = ptrAElement[0];
+                p2 = ptrAElement[rowSkip];
+                dd = ptrDElement[0 * d_stride];
+                q1 = p1 * dd;
+                q2 = p2 * dd;
+                ptrAElement[0] = q1;
+                ptrAElement[rowSkip] = q2;
+                Z11 += p1 * q1;
+                Z21 += p2 * q1;
+                Z22 += p2 * q2;
 
-            p1 = ptrAElement[4];
-            p2 = ptrAElement[4 + rowSkip];
-            dd = ptrDElement[4 * d_stride];
-            q1 = p1 * dd;
-            q2 = p2 * dd;
-            ptrAElement[4] = q1;
-            ptrAElement[4 + rowSkip] = q2;
-            Z11 += p1 * q1;
-            Z21 += p2 * q1;
-            Z22 += p2 * q2;
+                p1 = ptrAElement[1];
+                p2 = ptrAElement[1 + rowSkip];
+                dd = ptrDElement[1 * d_stride];
+                q1 = p1 * dd;
+                q2 = p2 * dd;
+                ptrAElement[1] = q1;
+                ptrAElement[1 + rowSkip] = q2;
+                Z11 += p1 * q1;
+                Z21 += p2 * q1;
+                Z22 += p2 * q2;
 
-            p1 = ptrAElement[5];
-            p2 = ptrAElement[5 + rowSkip];
-            dd = ptrDElement[5 * d_stride];
-            q1 = p1 * dd;
-            q2 = p2 * dd;
-            ptrAElement[5] = q1;
-            ptrAElement[5 + rowSkip] = q2;
-            Z11 += p1 * q1;
-            Z21 += p2 * q1;
-            Z22 += p2 * q2;
+                if (columnCounter > 6)
+                {
+                    columnCounter -= 6;
 
-            ptrAElement += 6;
-            ptrDElement += 6 * d_stride;
+                    ptrAElement += 6;
+                    ptrDElement += 6 * d_stride;
+
+                    p1 = ptrAElement[-4];
+                    p2 = ptrAElement[-4 + rowSkip];
+                    dd = ptrDElement[-4 * (int)d_stride];
+                    q1 = p1 * dd;
+                    q2 = p2 * dd;
+                    ptrAElement[-4] = q1;
+                    ptrAElement[-4 + rowSkip] = q2;
+                    Z11 += p1 * q1;
+                    Z21 += p2 * q1;
+                    Z22 += p2 * q2;
+
+                    p1 = ptrAElement[-3];
+                    p2 = ptrAElement[-3 + rowSkip];
+                    dd = ptrDElement[-3 * (int)d_stride];
+                    q1 = p1 * dd;
+                    q2 = p2 * dd;
+                    ptrAElement[-3] = q1;
+                    ptrAElement[-3 + rowSkip] = q2;
+                    Z11 += p1 * q1;
+                    Z21 += p2 * q1;
+                    Z22 += p2 * q2;
+
+                    p1 = ptrAElement[-2];
+                    p2 = ptrAElement[-2 + rowSkip];
+                    dd = ptrDElement[-2 * (int)d_stride];
+                    q1 = p1 * dd;
+                    q2 = p2 * dd;
+                    ptrAElement[-2] = q1;
+                    ptrAElement[-2 + rowSkip] = q2;
+                    Z11 += p1 * q1;
+                    Z21 += p2 * q1;
+                    Z22 += p2 * q2;
+
+                    p1 = ptrAElement[-1];
+                    p2 = ptrAElement[-1 + rowSkip];
+                    dd = ptrDElement[-1 * (int)d_stride];
+                    q1 = p1 * dd;
+                    q2 = p2 * dd;
+                    ptrAElement[-1] = q1;
+                    ptrAElement[-1 + rowSkip] = q2;
+                    Z11 += p1 * q1;
+                    Z21 += p2 * q1;
+                    Z22 += p2 * q2;
+                }
+                else
+                {
+                    ptrAElement += 2;
+                    ptrDElement += 2 * d_stride;
+
+                    if ((columnCounter -= 2) == 0)
+                    {
+                        break;
+                    }
+                }
+            }
         }
-
-        /* compute left-over iterations */
-        for (; columnCounter != 0; columnCounter -= 2) 
+        else
         {
-            dReal p1, q1, p2, q2, dd;
+            ptrAElement = A/* + (size_t)rowSkip * blockStartRow*/; dIASSERT(blockStartRow == 0);
+            ptrDElement = d;
 
-            p1 = ptrAElement[0];
-            p2 = ptrAElement[rowSkip];
-            dd = ptrDElement[0 * d_stride];
-            q1 = p1 * dd;
-            q2 = p2 * dd;
-            ptrAElement[0] = q1;
-            ptrAElement[rowSkip] = q2;
-            Z11 += p1 * q1;
-            Z21 += p2 * q1;
-            Z22 += p2 * q2;
-
-            p1 = ptrAElement[1];
-            p2 = ptrAElement[1 + rowSkip];
-            dd = ptrDElement[1 * d_stride];
-            q1 = p1 * dd;
-            q2 = p2 * dd;
-            ptrAElement[1] = q1;
-            ptrAElement[1 + rowSkip] = q2;
-            Z11 += p1 * q1;
-            Z21 += p2 * q1;
-            Z22 += p2 * q2;
-
-            ptrAElement += 2;
-            ptrDElement += 2 * d_stride;
+            Z11 = 0; Z21 = 0; Z22 = 0;
         }
 
         /* solve for diagonal 2 x 2 block at A(i,i) */
@@ -180,81 +182,92 @@ void dxtFactorLDLT(dReal *A, dReal *d, unsigned rowCount, unsigned rowSkip)
     }
 
     /* compute the (less than 2) rows at the bottom */
-    if (blockStartRow != rowCount)
+    if (!subsequentPass || blockStartRow == lastRowIndex)
     {
-        dxSolveL1_1(A, A + (size_t)rowSkip * blockStartRow, blockStartRow, rowSkip);
+        dReal *ptrAElement, *ptrDElement;
+        
+        dReal Z1;
 
-        dReal *ptrAElement = A + (size_t)rowSkip * blockStartRow;
-        dReal *ptrDElement = d;
-
-        /* scale the elements in a 1 x i block at A(i,0), and also */
-        /* compute Z = the outer product matrix that we'll need. */
-        dReal Z11 = 0, Z22 = 0;
-
-        unsigned columnCounter;
-        for (columnCounter = blockStartRow; columnCounter >= 6; columnCounter -= 6) 
+        if (subsequentPass)
         {
-            dReal p1, p2, q1, q2, dd1, dd2;
+            dxSolveL1_1(A, A + (size_t)rowSkip * blockStartRow, blockStartRow, rowSkip);
 
-            p1 = ptrAElement[0];
-            p2 = ptrAElement[1];
-            dd1 = ptrDElement[0 * d_stride];
-            dd2 = ptrDElement[1 * d_stride];
-            q1 = p1 * dd1;
-            q2 = p2 * dd2;
-            ptrAElement[0] = q1;
-            ptrAElement[1] = q2;
-            Z11 += p1 * q1;
-            Z22 += p2 * q2;
+            ptrAElement = A + (size_t)rowSkip * blockStartRow;
+            ptrDElement = d;
 
-            p1 = ptrAElement[2];
-            p2 = ptrAElement[3];
-            dd1 = ptrDElement[2 * d_stride];
-            dd2 = ptrDElement[3 * d_stride];
-            q1 = p1 * dd1;
-            q2 = p2 * dd2;
-            ptrAElement[2] = q1;
-            ptrAElement[3] = q2;
-            Z11 += p1 * q1;
-            Z22 += p2 * q2;
+            /* scale the elements in a 1 x i block at A(i,0), and also */
+            /* compute Z = the outer product matrix that we'll need. */
+            dReal Z11 = 0, Z22 = 0;
 
-            p1 = ptrAElement[4];
-            p2 = ptrAElement[5];
-            dd1 = ptrDElement[4 * d_stride];
-            dd2 = ptrDElement[5 * d_stride];
-            q1 = p1 * dd1;
-            q2 = p2 * dd2;
-            ptrAElement[4] = q1;
-            ptrAElement[5] = q2;
-            Z11 += p1 * q1;
-            Z22 += p2 * q2;
+            for (unsigned columnCounter = blockStartRow; ; ) 
+            {
+                dReal p1, p2, q1, q2, dd1, dd2;
 
-            ptrAElement += 6;
-            ptrDElement += 6 * d_stride;
+                p1 = ptrAElement[0];
+                p2 = ptrAElement[1];
+                dd1 = ptrDElement[0 * d_stride];
+                dd2 = ptrDElement[1 * d_stride];
+                q1 = p1 * dd1;
+                q2 = p2 * dd2;
+                ptrAElement[0] = q1;
+                ptrAElement[1] = q2;
+                Z11 += p1 * q1;
+                Z22 += p2 * q2;
+
+                if (columnCounter > 6)
+                {
+                    columnCounter -= 6;
+
+                    ptrAElement += 6;
+                    ptrDElement += 6 * d_stride;
+
+                    p1 = ptrAElement[-4];
+                    p2 = ptrAElement[-3];
+                    dd1 = ptrDElement[-4 * (int)d_stride];
+                    dd2 = ptrDElement[-3 * (int)d_stride];
+                    q1 = p1 * dd1;
+                    q2 = p2 * dd2;
+                    ptrAElement[-4] = q1;
+                    ptrAElement[-3] = q2;
+                    Z11 += p1 * q1;
+                    Z22 += p2 * q2;
+
+                    p1 = ptrAElement[-2];
+                    p2 = ptrAElement[-1];
+                    dd1 = ptrDElement[-2 * (int)d_stride];
+                    dd2 = ptrDElement[-1 * (int)d_stride];
+                    q1 = p1 * dd1;
+                    q2 = p2 * dd2;
+                    ptrAElement[-2] = q1;
+                    ptrAElement[-1] = q2;
+                    Z11 += p1 * q1;
+                    Z22 += p2 * q2;
+                }
+                else
+                {
+                    ptrAElement += 2;
+                    ptrDElement += 2 * d_stride;
+
+                    if ((columnCounter -= 2) == 0)
+                    {
+                        break;
+                    }
+                }
+            }
+            
+            Z1 = Z11 + Z22;
+        }
+        else
+        {
+            ptrAElement = A/* + (size_t)rowSkip * blockStartRow*/; dIASSERT(blockStartRow == 0);
+            ptrDElement = d;
+
+            Z1 = 0;
         }
 
-        /* compute left-over iterations */
-        for (; columnCounter != 0; columnCounter -= 2) 
-        {
-            dReal p1, p2, q1, q2, dd1, dd2;
-
-            p1 = ptrAElement[0];
-            p2 = ptrAElement[1];
-            dd1 = ptrDElement[0 * d_stride];
-            dd2 = ptrDElement[1 * d_stride];
-            q1 = p1 * dd1;
-            q2 = p2 * dd2;
-            ptrAElement[0] = q1;
-            ptrAElement[1] = q2;
-            Z11 += p1 * q1;
-            Z22 += p2 * q2;
-
-            ptrAElement += 2;
-            ptrDElement += 2 * d_stride;
-        }
+        dReal Y11 = ptrAElement[0] - Z1;
 
         /* solve for diagonal 1 x 1 block at A(i,i) */
-        dReal Y11 = ptrAElement[0] - (Z11 + Z22);
         dIASSERT(ptrDElement == d + (size_t)blockStartRow * d_stride);
         /* factorize 1 x 1 block Y, ptrDElement */
         /* factorize row 1 */
@@ -263,79 +276,153 @@ void dxtFactorLDLT(dReal *A, dReal *d, unsigned rowCount, unsigned rowSkip)
     }
 }
 
-
 /* solve L*X=B, with B containing 2 right hand sides.
  * L is an n*n lower triangular matrix with ones on the diagonal.
- * L is stored by rows and its leading dimension is lSkip.
+ * L is stored by rows and its leading dimension is rowSkip.
  * B is an n*2 matrix that contains the right hand sides.
- * B is stored by columns and its leading dimension is also lSkip.
+ * B is stored by columns and its leading dimension is also rowSkip.
  * B is overwritten with X.
  * this processes blocks of 2*2.
  * if this is in the factorizer source file, n must be a multiple of 2.
  */
 static 
-void dxSolveL1_2(const dReal *L, dReal *B, unsigned rowCount, unsigned lSkip)
+void dxSolveL1_2(const dReal *L, dReal *B, unsigned rowCount, unsigned rowSkip)
 {
+    dIASSERT(rowCount != 0);
+    dIASSERT(rowCount % 2 == 0);
+
     /* compute all 2 x 2 blocks of X */
-    unsigned blockStartRow;
-    for (blockStartRow = 0; blockStartRow < rowCount; blockStartRow += 2) 
+    unsigned blockStartRow = 0;
+    for (bool exitLoop = false, subsequentPass = false; !exitLoop; subsequentPass = true, exitLoop = (blockStartRow += 2) == rowCount) 
     {
+        const dReal *ptrLElement;
+        dReal *ptrBElement;
+
+        /* declare variables - Z matrix */
+        dReal Z11, Z12, Z21, Z22;
+
         /* compute all 2 x 2 block of X, from rows i..i+2-1 */
-        const dReal *ptrLElement = L + blockStartRow * lSkip;
-        dReal *ptrBElement = B;
-
-        /* declare variables - Z matrix and set it to 0 */
-        dReal Z11 = 0, Z12 = 0, Z21 = 0, Z22 = 0;
-
-        /* the inner loop that computes outer products and adds them to Z */
-        unsigned columnCounter;
-        // The iteration starts with even number and decreases it by 2. So, it must end in zero
-        for (columnCounter = blockStartRow; columnCounter != 0; columnCounter -= 2) 
+        if (subsequentPass)
         {
-            /* declare p and q vectors, etc */
-            dReal p1, q1, p2, q2;
+            ptrLElement = L + blockStartRow * rowSkip;
+            ptrBElement = B;
 
-            /* compute outer product and add it to the Z matrix */
-            p1 = ptrLElement[0];
-            q1 = ptrBElement[0];
-            Z11 += p1 * q1;
-            q2 = ptrBElement[lSkip];
-            Z12 += p1 * q2;
-            p2 = ptrLElement[lSkip];
-            Z21 += p2 * q1;
-            Z22 += p2 * q2;
+            /* set Z matrix to 0 */
+            Z11 = 0; Z12 = 0; Z21 = 0; Z22 = 0;
 
-            /* compute outer product and add it to the Z matrix */
-            p1 = ptrLElement[1];
-            q1 = ptrBElement[1];
-            Z11 += p1 * q1;
-            q2 = ptrBElement[1 + lSkip];
-            Z12 += p1 * q2;
-            p2 = ptrLElement[1 + lSkip];
-            Z21 += p2 * q1;
-            Z22 += p2 * q2;
+            /* the inner loop that computes outer products and adds them to Z */
+            // The iteration starts with even number and decreases it by 2. So, it must end in zero
+            for (unsigned columnCounter = blockStartRow; ;) 
+            {
+                /* declare p and q vectors, etc */
+                dReal p1, q1, p2, q2;
 
-            /* advance pointers */
-            ptrLElement += 2;
-            ptrBElement += 2;
-            /* end of inner loop */
+                /* compute outer product and add it to the Z matrix */
+                p1 = ptrLElement[0];
+                q1 = ptrBElement[0];
+                Z11 += p1 * q1;
+                q2 = ptrBElement[rowSkip];
+                Z12 += p1 * q2;
+                p2 = ptrLElement[rowSkip];
+                Z21 += p2 * q1;
+                Z22 += p2 * q2;
+
+                /* compute outer product and add it to the Z matrix */
+                p1 = ptrLElement[1];
+                q1 = ptrBElement[1];
+                Z11 += p1 * q1;
+                q2 = ptrBElement[1 + rowSkip];
+                Z12 += p1 * q2;
+                p2 = ptrLElement[1 + rowSkip];
+                Z21 += p2 * q1;
+                Z22 += p2 * q2;
+
+                if (columnCounter > 6)
+                {
+                    columnCounter -= 6;
+
+                    /* advance pointers */
+                    ptrLElement += 6;
+                    ptrBElement += 6;
+
+                    /* compute outer product and add it to the Z matrix */
+                    p1 = ptrLElement[-4];
+                    q1 = ptrBElement[-4];
+                    Z11 += p1 * q1;
+                    q2 = ptrBElement[-4 + rowSkip];
+                    Z12 += p1 * q2;
+                    p2 = ptrLElement[-4 + rowSkip];
+                    Z21 += p2 * q1;
+                    Z22 += p2 * q2;
+
+                    /* compute outer product and add it to the Z matrix */
+                    p1 = ptrLElement[-3];
+                    q1 = ptrBElement[-3];
+                    Z11 += p1 * q1;
+                    q2 = ptrBElement[-3 + rowSkip];
+                    Z12 += p1 * q2;
+                    p2 = ptrLElement[-3 + rowSkip];
+                    Z21 += p2 * q1;
+                    Z22 += p2 * q2;
+
+                    /* compute outer product and add it to the Z matrix */
+                    p1 = ptrLElement[-2];
+                    q1 = ptrBElement[-2];
+                    Z11 += p1 * q1;
+                    q2 = ptrBElement[-2 + rowSkip];
+                    Z12 += p1 * q2;
+                    p2 = ptrLElement[-2 + rowSkip];
+                    Z21 += p2 * q1;
+                    Z22 += p2 * q2;
+
+                    /* compute outer product and add it to the Z matrix */
+                    p1 = ptrLElement[-1];
+                    q1 = ptrBElement[-1];
+                    Z11 += p1 * q1;
+                    q2 = ptrBElement[-1 + rowSkip];
+                    Z12 += p1 * q2;
+                    p2 = ptrLElement[-1 + rowSkip];
+                    Z21 += p2 * q1;
+                    Z22 += p2 * q2;
+                }
+                else
+                {
+                    /* advance pointers */
+                    ptrLElement += 2;
+                    ptrBElement += 2;
+
+                    if ((columnCounter -= 2) == 0)
+                    {
+                        break;
+                    }
+                }
+                /* end of inner loop */
+            }
+        }
+        else
+        {
+            ptrLElement = L/* + blockStartRow * rowSkip*/; dIASSERT(blockStartRow == 0);
+            ptrBElement = B;
+
+            /* set Z matrix to 0 */
+            Z11 = 0; Z12 = 0; Z21 = 0; Z22 = 0;
         }
 
         /* finish computing the X(i) block */
         
         dReal Y11 = ptrBElement[0] - Z11;
-        dReal Y12 = ptrBElement[lSkip] - Z12;
+        dReal Y12 = ptrBElement[rowSkip] - Z12;
+
+        dReal p2 = ptrLElement[rowSkip];
 
         ptrBElement[0] = Y11;
-        ptrBElement[lSkip] = Y12;
-
-        dReal p2 = ptrLElement[lSkip];
+        ptrBElement[rowSkip] = Y12;
 
         dReal Y21 = ptrBElement[1] - Z21 - p2 * Y11;
-        dReal Y22 = ptrBElement[1 + lSkip] - Z22 - p2 * Y12;
+        dReal Y22 = ptrBElement[1 + rowSkip] - Z22 - p2 * Y12;
 
         ptrBElement[1] = Y21;
-        ptrBElement[1 + lSkip] = Y22;
+        ptrBElement[1 + rowSkip] = Y22;
         /* end of outer loop */
     }
 }
@@ -351,51 +438,113 @@ void dxSolveL1_2(const dReal *L, dReal *B, unsigned rowCount, unsigned lSkip)
  * if this is in the factorizer source file, n must be a multiple of 2.
  */
 static 
-void dxSolveL1_1(const dReal *L, dReal *B, unsigned rowCount, unsigned lSkip)
+void dxSolveL1_1(const dReal *L, dReal *B, unsigned rowCount, unsigned rowSkip)
 {  
+    dIASSERT(rowCount != 0);
+    dIASSERT(rowCount % 2 == 0);
+
     /* compute all 2 x 1 blocks of X */
-    unsigned blockStartRow;
-    for (blockStartRow = 0; blockStartRow < rowCount; blockStartRow += 2) 
+    unsigned blockStartRow = 0;
+    for (bool exitLoop = false, subsequentPass = false; !exitLoop; subsequentPass = true, exitLoop = (blockStartRow += 2) == rowCount) 
     {
-        const dReal *ptrLElement = L + (size_t)blockStartRow * lSkip;
-        dReal *ptrBElement = B;
+        const dReal *ptrLElement;
+        dReal *ptrBElement;
 
-        /* variables - Z matrix and set it to 0 */
-        dReal Z11 = 0, Z21 = 0;
+        /* declare variables - Z matrix */
+        dReal Z11, Z21;
 
-        /* compute all 2 x 1 block of X, from rows i..i+2-1 */
-        /* set the Z matrix to 0 */
-        
-        /* the inner loop that computes outer products and adds them to Z */
-        unsigned columnCounter;
-        // The iteration starts with even number and decreases it by 2. So, it must end in zero
-        for (columnCounter = blockStartRow; columnCounter != 0; columnCounter -= 2) 
+        if (subsequentPass)
         {
-            /* declare p and q vectors, etc */
-            dReal p1, q1, p2;
+            ptrLElement = L + (size_t)blockStartRow * rowSkip;
+            ptrBElement = B;
 
-            /* compute outer product and add it to the Z matrix */
-            p1 = ptrLElement[0];
-            q1 = ptrBElement[0];
-            Z11 += p1 * q1;
-            p2 = ptrLElement[lSkip];
-            Z21 += p2 * q1;
+            /* set the Z matrix to 0 */
+            Z11 = 0; Z21 = 0;
+
+            /* compute all 2 x 1 block of X, from rows i..i+2-1 */
             
-            /* compute outer product and add it to the Z matrix */
-            p1 = ptrLElement[1];
-            q1 = ptrBElement[1];
-            Z11 += p1 * q1;
-            p2 = ptrLElement[1 + lSkip];
-            Z21 += p2 * q1;
+            /* the inner loop that computes outer products and adds them to Z */
+            // The iteration starts with even number and decreases it by 2. So, it must end in zero
+            for (unsigned columnCounter = blockStartRow; ; ) 
+            {
+                /* declare p and q vectors, etc */
+                dReal p1, q1, p2;
 
-            /* advance pointers */
-            ptrLElement += 2;
-            ptrBElement += 2;
-            /* end of inner loop */
+                /* compute outer product and add it to the Z matrix */
+                p1 = ptrLElement[0];
+                q1 = ptrBElement[0];
+                Z11 += p1 * q1;
+                p2 = ptrLElement[rowSkip];
+                Z21 += p2 * q1;
+                
+                /* compute outer product and add it to the Z matrix */
+                p1 = ptrLElement[1];
+                q1 = ptrBElement[1];
+                Z11 += p1 * q1;
+                p2 = ptrLElement[1 + rowSkip];
+                Z21 += p2 * q1;
+
+                if (columnCounter > 6)
+                {
+                    columnCounter -= 6;
+
+                    /* advance pointers */
+                    ptrLElement += 6;
+                    ptrBElement += 6;
+
+                    /* compute outer product and add it to the Z matrix */
+                    p1 = ptrLElement[-4];
+                    q1 = ptrBElement[-4];
+                    Z11 += p1 * q1;
+                    p2 = ptrLElement[-4 + rowSkip];
+                    Z21 += p2 * q1;
+
+                    /* compute outer product and add it to the Z matrix */
+                    p1 = ptrLElement[-3];
+                    q1 = ptrBElement[-3];
+                    Z11 += p1 * q1;
+                    p2 = ptrLElement[-3 + rowSkip];
+                    Z21 += p2 * q1;
+
+                    /* compute outer product and add it to the Z matrix */
+                    p1 = ptrLElement[-2];
+                    q1 = ptrBElement[-2];
+                    Z11 += p1 * q1;
+                    p2 = ptrLElement[-2 + rowSkip];
+                    Z21 += p2 * q1;
+
+                    /* compute outer product and add it to the Z matrix */
+                    p1 = ptrLElement[-1];
+                    q1 = ptrBElement[-1];
+                    Z11 += p1 * q1;
+                    p2 = ptrLElement[-1 + rowSkip];
+                    Z21 += p2 * q1;
+                }
+                else
+                {
+                    /* advance pointers */
+                    ptrLElement += 2;
+                    ptrBElement += 2;
+
+                    if ((columnCounter -= 2) == 0)
+                    {
+                        break;
+                    }
+                }
+                /* end of inner loop */
+            }
+        }
+        else
+        {
+            ptrLElement = L/* + (size_t)blockStartRow * rowSkip*/; dIASSERT(blockStartRow == 0);
+            ptrBElement = B;
+
+            /* set the Z matrix to 0 */
+            Z11 = 0; Z21 = 0;
         }
         
         /* finish computing the X(i) block */
-        dReal p2 = ptrLElement[lSkip];
+        dReal p2 = ptrLElement[rowSkip];
 
         dReal Y11 = ptrBElement[0] - Z11;
         dReal Y21 = ptrBElement[1] - Z21 - p2 * Y11;
