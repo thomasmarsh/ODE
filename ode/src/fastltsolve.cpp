@@ -25,13 +25,14 @@
 #include <ode/common.h>
 #include "config.h"
 #include "matrix.h"
+#include "error.h"
 
 #include "fastltsolve_impl.h"
 
 
-void dxSolveL1T (const dReal *L, dReal *b, unsigned n, unsigned lskip1)
+void dxSolveL1T(const dReal *L, dReal *b, unsigned n, unsigned lskip1)
 {
-    dxtSolveL1T<1> (L, b, n, lskip1);
+    dxtSolveL1T<1>(L, b, n, lskip1);
 }
 
 
@@ -39,6 +40,14 @@ void dxSolveL1T (const dReal *L, dReal *b, unsigned n, unsigned lskip1)
 
 void dSolveL1T (const dReal *L, dReal *B, int n, int lskip1)
 {
-    dxSolveL1T (L, B, n, lskip1);
+    dAASSERT(n != 0);
+
+    if (n != 0)
+    {
+        dAASSERT(L != NULL);
+        dAASSERT(B != NULL);
+
+        dxSolveL1T(L, B, n, lskip1);
+    }
 }
 

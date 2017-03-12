@@ -232,7 +232,9 @@ void dxVectorScale (dReal *a, const dReal *d, unsigned n)
 /*extern */
 void dxSolveLDLT (const dReal *L, const dReal *d, dReal *b, unsigned n, int nskip)
 {
-    dxtSolveLDLT<1, 1> (L, d, b, n, nskip);
+    dIASSERT(n != 0);
+
+    dxtSolveLDLT<1, 1>(L, d, b, n, nskip);
 }
 
 /*extern */
@@ -506,7 +508,16 @@ void dVectorScale (dReal *a, const dReal *d, int n)
 /*extern */
 void dSolveLDLT (const dReal *L, const dReal *d, dReal *b, int n, int nskip)
 {
-    dxSolveLDLT (L, d, b, n, nskip);
+    dAASSERT(n != 0);
+
+    if (n != 0)
+    {
+        dAASSERT(L != NULL);
+        dAASSERT(d != NULL);
+        dAASSERT(b != NULL);
+
+        dxSolveLDLT(L, d, b, n, nskip);
+    }
 }
 
 /*extern */
