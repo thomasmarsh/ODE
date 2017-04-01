@@ -44,7 +44,7 @@ libode_la_SOURCES =     nextafterf.c \
                         mat.cpp mat.h \
                         matrix.cpp matrix_impl.h matrix.h \
                         fastldlt.cpp fastldlt_impl.h \
-                        fastlsolve.cpp fastlsolve_impl.h \
+                        fastlsolve.cpp fastsolve_impl.h \
                         fastltsolve.cpp fastltsolve_impl.h \
                         fastdot.cpp fastdot_impl.h \
                         memory.cpp \
