@@ -1,6 +1,6 @@
 CODING STYLE REQUIREMENTS
 
-Copyright (c) 2011-2016 Oleh Derevenko
+Copyright (c) 2011-2017 Oleh Derevenko
 This article is provided to you under the terms of Artistic License 2.0
 (http://www.opensource.org/licenses/artistic-license-2.0).
 
@@ -35,11 +35,11 @@ definition. If a function returns a value, return operator must be the last
 syntactical construction in the function.
 
 
-4. Zero value means the failure
+4. Zero value means failure
 ----------------------------------------------------------------------------
 
-Function results must be chosen the way that binary zero value meant the 
-failure. Similarly, the types must be designed so that binary zero element 
+Function results must be chosen the way that binary zero value had a meaning
+of failure. Similarly, types must be designed so that binary zero element 
 had the meaning of an invalid value (if invalid element concept is applicable
 for the type).
 
@@ -48,9 +48,9 @@ for the type).
 ----------------------------------------------------------------------------
 
 Variables and class fields must be initialized with values of binary zero 
-presentation. Enumerated types must be designed to have zero element and that
-element to be the default element. Function default parameters must be chosen
-in the form to have binary zero value.
+presentation. Public enumerated types must be designed to have zero element 
+and that element is to be the default element. Function default parameters 
+must be chosen in the form to have binary zero value.
 
 
 6. Variables are not reused
@@ -71,7 +71,7 @@ be treated as if they have been implicitly declared with const modifier.
 pointer to an object being deleted).
 
 
-8. Result assignment is performed at the end of the function
+8. Result assignment is performed at the end of function
 ----------------------------------------------------------------------------
 
 Every function returning a result must have a variable to contain the result
@@ -90,12 +90,11 @@ performance measuring after result variable assignment.
 9. Parameters by reference are not used in expressions
 ----------------------------------------------------------------------------
 
-Parameters of simple types passed by reference must be copied to local 
-variables at function entry and then assigned their final values at function
-exit.
-Output parameters must be initialized at function entry and 
-assigned their final values immediately before the function result variable 
-assignment.
+Parameters of simple types passed by reference must be copied into local 
+variables at function entry and then be assigned their final values at 
+function exit.
+Output parameters can be initialized at function entry and must be assigned
+their final values immediately before the function result variable assignment.
 
 
 (II) Class Design Requirements
@@ -104,9 +103,9 @@ assignment.
 1. Classes work with their fields on their own
 ----------------------------------------------------------------------------
 
-A function or method must not call several methods of other class some of
-which used to return and the others used to assign its fields. Such a code 
-must be implemented as a method of that other class.
+A function or method must not call several methods of other class, some of
+them being used to return and the others being used to assign the class fields.
+Such a code must be implemented as a method of that other class.
 
 
 2. No direct access to the fields
@@ -115,7 +114,7 @@ must be implemented as a method of that other class.
 All the work with class fields (including fields of own class) must be 
 performed with aid of dedicated methods (accessors) that return and assign 
 field values. Exceptions can be made for constructors/destructors and methods
-dedicated to field initialization/finalization.
+dedicated for field initialization/finalization.
 
 
 3. Private fields only
@@ -132,8 +131,7 @@ initialization. If creation of contained objects is necessary or other
 operations need to be done they are to be performed via calls to the class 
 methods rather than placed directly in constructor. Initial zero-assignment
 to a field is always required even if that field is later to be 
-unconditionally assigned with a pointer to the contained object being 
-created.
+unconditionally assigned in methods called from the constructor.
 Similarly, a destructor must free contained objects with calls to the class 
 methods rather than containing that code inline.
 
@@ -145,7 +143,7 @@ Event handlers, callback interface methods and static callback methods must
 not have meaningful code within them. Their implementation should validate 
 input arguments, convert them to proper internal types if necessary, and call 
 one or more other methods of the class. These methods must not be declated in
-a public section.
+public section.
 
 
 6. No public virtual methods
