@@ -199,12 +199,8 @@ struct _make_unsigned
 // }
 // #define dIN_RANGE(aval, amin, amax) dxInRange(aval, amin, amax)
 
-#if defined(__GNUC__)
-#define __dIN_RANGE_TYPENAME__ typename
-#else
-#define __dIN_RANGE_TYPENAME__
-#endif
-#define dIN_RANGE(aval, amin, amax) ((__dIN_RANGE_TYPENAME__ _sized_unsigned<dMACRO_MAX(sizeof(aval), sizeof(amin))>::type)((__dIN_RANGE_TYPENAME__ _sized_unsigned<dMACRO_MAX(sizeof(aval), sizeof(amin))>::type)(aval) - (__dIN_RANGE_TYPENAME__ _sized_unsigned<dMACRO_MAX(sizeof(aval), sizeof(amin))>::type)(amin)) < (__dIN_RANGE_TYPENAME__ _sized_unsigned<dMACRO_MAX(sizeof(amax), sizeof(amin))>::type)((__dIN_RANGE_TYPENAME__ _sized_unsigned<dMACRO_MAX(sizeof(amax), sizeof(amin))>::type)(amax) - (__dIN_RANGE_TYPENAME__ _sized_unsigned<dMACRO_MAX(sizeof(amax), sizeof(amin))>::type)(amin)))
+#define dIN_RANGE(aval, amin, amax) ((_sized_unsigned<dMACRO_MAX(sizeof(aval), sizeof(amin))>::type)((_sized_unsigned<dMACRO_MAX(sizeof(aval), sizeof(amin))>::type)(aval) - (_sized_unsigned<dMACRO_MAX(sizeof(aval), sizeof(amin))>::type)(amin)) < (_sized_unsigned<dMACRO_MAX(sizeof(amax), sizeof(amin))>::type)((_sized_unsigned<dMACRO_MAX(sizeof(amax), sizeof(amin))>::type)(amax) - (_sized_unsigned<dMACRO_MAX(sizeof(amax), sizeof(amin))>::type)(amin)))
+#define dTMPL_IN_RANGE(aval, amin, amax) ((typename _sized_unsigned<dMACRO_MAX(sizeof(aval), sizeof(amin))>::type)((typename _sized_unsigned<dMACRO_MAX(sizeof(aval), sizeof(amin))>::type)(aval) - (typename _sized_unsigned<dMACRO_MAX(sizeof(aval), sizeof(amin))>::type)(amin)) < (typename _sized_unsigned<dMACRO_MAX(sizeof(amax), sizeof(amin))>::type)((typename _sized_unsigned<dMACRO_MAX(sizeof(amax), sizeof(amin))>::type)(amax) - (typename _sized_unsigned<dMACRO_MAX(sizeof(amax), sizeof(amin))>::type)(amin)))
 #define dCLAMP(aval, alo, ahi) dxClamp(aval, alo, ahi)
 #define dARRAY_SIZE(aarr) (sizeof(aarr) / sizeof((aarr)[0]))
 #define dSTATIC_ARRAY_SIZE(aclass, aarr) dARRAY_SIZE(((aclass *)sizeof(void *))->aarr)
