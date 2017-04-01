@@ -1,4 +1,4 @@
-SUBDIRS = . testsuites
+SUBDIRS = testsuites
 
 AM_CFLAGS = -std=c99
 
