@@ -85,7 +85,7 @@ public:
 
     static bool isAngleDomainStored(FaceAngleDomain domainValue)
     {
-        return !dIN_RANGE(domainValue, FAD__SIGNSTORED_IMPLICITVALUE_MIN, FAD__SIGNSTORED_IMPLICITVALUE_MAX);
+        return !dTMPL_IN_RANGE(domainValue, FAD__SIGNSTORED_IMPLICITVALUE_MIN, FAD__SIGNSTORED_IMPLICITVALUE_MAX);
     }
 
     static dReal decodeStorageValue(storage_type storedValue)
@@ -132,7 +132,7 @@ public:
 
     static bool isAngleDomainStored(FaceAngleDomain domainValue)
     {
-        return dIN_RANGE(domainValue, FAD__BYTEPOS_STORED_MIN, FAD__BYTEPOS_STORED_MAX);
+        return dTMPL_IN_RANGE(domainValue, FAD__BYTEPOS_STORED_MIN, FAD__BYTEPOS_STORED_MAX);
     }
 
     static dReal decodeStorageValue(storage_type storedValue)
@@ -202,16 +202,16 @@ private: // IFaceAngleStorageView
 public:
     void setFaceAngle(unsigned triangleIndex, dMeshTriangleVertex vertexIndex, dReal dAngleValue)
     {
-        dIASSERT(dIN_RANGE(triangleIndex, 0, getAllocatedTriangleCount()));
-        dIASSERT(dIN_RANGE(vertexIndex, dMTV__MIN, dMTV__MAX));
+        dIASSERT(dTMPL_IN_RANGE(triangleIndex, 0, getAllocatedTriangleCount()));
+        dIASSERT(dTMPL_IN_RANGE(vertexIndex, dMTV__MIN, dMTV__MAX));
 
         m_record.m_triangleFaceAngles[triangleIndex][vertexIndex] = TStorageCodec::encodeForStorage(dAngleValue);
     }
 
     FaceAngleDomain getFaceAngle(dReal &out_angleValue, unsigned triangleIndex, dMeshTriangleVertex vertexIndex) const
     {
-        dIASSERT(dIN_RANGE(triangleIndex, 0, getAllocatedTriangleCount()));
-        dIASSERT(dIN_RANGE(vertexIndex, dMTV__MIN, dMTV__MAX));
+        dIASSERT(dTMPL_IN_RANGE(triangleIndex, 0, getAllocatedTriangleCount()));
+        dIASSERT(dTMPL_IN_RANGE(vertexIndex, dMTV__MIN, dMTV__MAX));
 
         storage_type storedValue = m_record.m_triangleFaceAngles[triangleIndex][vertexIndex];
         FaceAngleDomain resultDomain = TStorageCodec::classifyStorageValue(storedValue);
@@ -294,7 +294,7 @@ void FaceAnglesWrapper<TStorageCodec>::freeInstance()
 {
     unsigned triangleCount = getAllocatedTriangleCount();
 
-    FaceAnglesWrapper<TStorageCodec>::~FaceAnglesWrapper();
+    this->FaceAnglesWrapper<TStorageCodec>::~FaceAnglesWrapper();
 
     size_t memoryBlockSize = calculateStorageSizeForTriangleCount(triangleCount);
     dFree(this, memoryBlockSize);
