@@ -284,7 +284,8 @@ AC_TYPE_UINT32_T
 dnl Check for autoscan sugested functions
 AC_CHECK_LIB(m, [main])
 AC_CHECK_LIB(sunmath, [main])
-AC_CHECK_FUNCS([floor memmove memset sqrt sqrtf sinf cosf fabsf atan2f fmodf copysignf copysign snprintf vsnprintf gettimeofday isnan isnanf _isnan _isnanf __isnan __isnanf strchr strstr pthread_attr_setstacklazy clock_gettime])
+AC_CHECK_LIB(rt, [main])
+AC_CHECK_FUNCS([floor memmove memset sqrt sqrtf sinf cosf fabsf atan2f fmodf copysignf copysign snprintf vsnprintf gettimeofday clock_gettime isnan isnanf _isnan _isnanf __isnan __isnanf strchr strstr pthread_attr_setstacklazy])
 AC_FUNC_ALLOCA 
 
 AC_ARG_ENABLE([threading-intf],
@@ -469,13 +470,8 @@ then
     fi
 fi
 
-if test x$use_libccd = xyes
-then
-     if test x$libccd_source = xinternal
-     then
-        AC_CONFIG_SUBDIRS([libccd])
-     fi
-fi
+# Configure libccd unconditionally as that may be needed for special make targets
+AC_CONFIG_SUBDIRS([libccd])
 
 AM_CONDITIONAL(LIBCCD, test x$use_libccd != xno)
 AM_CONDITIONAL(LIBCCD_INTERNAL, test x$libccd_source = xinternal)
