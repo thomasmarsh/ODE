@@ -49,6 +49,11 @@ typedef unsigned dmutexindex_t;
 struct dxMutexGroup;
 typedef struct dxMutexGroup *dMutexGroupID;
 
+
+#define dTHREADING_THREAD_COUNT_UNLIMITED       0U
+
+
+
 /**
  * @brief Allocates a group of muteces.
  *

@@ -134,7 +134,7 @@ ODE_API void dWorldSetCFM (dWorldID, dReal cfm);
 ODE_API dReal dWorldGetCFM (dWorldID);
 
 
-#define dWORLDSTEP_THREADCOUNT_UNLIMITED	0U
+#define dWORLDSTEP_THREADCOUNT_UNLIMITED	dTHREADING_THREAD_COUNT_UNLIMITED
 
 /**
  * @brief Set maximum threads to be used for island stepping
