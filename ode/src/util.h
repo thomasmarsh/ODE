@@ -27,39 +27,7 @@
 #include "common.h"
 
 
-/* the efficient alignment. most platforms align data structures to some
- * number of bytes, but this is not always the most efficient alignment.
- * for example, many x86 compilers align to 4 bytes, but on a pentium it
- * is important to align doubles to 8 byte boundaries (for speed), and
- * the 4 floats in a SIMD register to 16 byte boundaries. many other
- * platforms have similar behavior. setting a larger alignment can waste
- * a (very) small amount of memory. NOTE: this number must be a power of
- * two. this is set to 16 by default.
- */
-#ifndef EFFICIENT_ALIGNMENT
-#define EFFICIENT_ALIGNMENT 16
-#endif
-
-
 /* utility */
-
-
-/* round something up to be a multiple of the EFFICIENT_ALIGNMENT */
-
-#define dEFFICIENT_SIZE(x) (((x) + (EFFICIENT_ALIGNMENT - 1)) & (int)(~(EFFICIENT_ALIGNMENT - 1))) // Casting the mask to int ensures sign-extension to larger integer sizes
-#define dEFFICIENT_PTR(p) ((void *)dEFFICIENT_SIZE((uintptr_t)(p)))
-#define dOFFSET_EFFICIENTLY(p, b) ((void *)((uintptr_t)(p) + dEFFICIENT_SIZE(b)))
-
-#define dOVERALIGNED_SIZE(size, alignment) dEFFICIENT_SIZE((size) + ((alignment) - EFFICIENT_ALIGNMENT))
-#define dOVERALIGNED_PTR(buf_ptr, alignment) ((void *)(((uintptr_t)(buf_ptr) + ((alignment) - 1)) & (int)(~(alignment - 1)))) // Casting the mask to int ensures sign-extension to larger integer sizes
-#define dOFFSET_OVERALIGNEDLY(buf_ptr, size, alignment) ((void *)((uintptr_t)(buf_ptr) + dOVERALIGNED_SIZE(size, alignment)))
-
-/* alloca aligned to the EFFICIENT_ALIGNMENT. note that this can waste
- * up to 15 bytes per allocation, depending on what alloca() returns.
- */
-#define dALLOCA16(n) \
-    dEFFICIENT_PTR(alloca((n)+(EFFICIENT_ALIGNMENT)))
-
 
 void dInternalHandleAutoDisabling (dxWorld *world, dReal stepsize);
 void dxStepBody (dxBody *b, dReal h);
