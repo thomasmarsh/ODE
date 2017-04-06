@@ -325,7 +325,9 @@ void testSmallMatrixMultiply()
 
 void testCholeskyFactorization()
 {
-  dReal A[MSIZE4*MSIZE], B[MSIZE4*MSIZE], C[MSIZE4*MSIZE], diff;
+  size_t matrixSize = sizeof(dReal) * MSIZE4 * MSIZE;
+  dReal *A = (dReal *)dAlloc(matrixSize), *B = (dReal *)dAlloc(matrixSize), *C = (dReal *)dAlloc(matrixSize), diff;
+
   HEADER;
   dMakeRandomMatrix (A,MSIZE,MSIZE,1.0);
   dMultiply2 (B,A,A,MSIZE,MSIZE,MSIZE);
@@ -337,12 +339,19 @@ void testCholeskyFactorization()
   diff = dMaxDifference(A,C,MSIZE,MSIZE);
   printf ("\tmaximum difference = %.6e - %s (2)\n",diff,
 	  diff > tol ? "FAILED" : "passed");
+
+  dFree(C, matrixSize);
+  dFree(B, matrixSize);
+  dFree(A, matrixSize);
 }
 
 
 void testCholeskySolve()
 {
-  dReal A[MSIZE4*MSIZE], L[MSIZE4*MSIZE], b[MSIZE],x[MSIZE],btest[MSIZE],diff;
+  size_t matrixSize = sizeof(dReal) * MSIZE4 * MSIZE, vectorSize = sizeof(dReal) * MSIZE;
+  dReal *A = (dReal *)dAlloc(matrixSize), *L = (dReal *)dAlloc(matrixSize);
+  dReal *b = (dReal *)dAlloc(vectorSize), *x = (dReal *)dAlloc(vectorSize), *btest = (dReal *)dAlloc(vectorSize), diff;
+  
   HEADER;
 
   // get A,L = PD matrix
@@ -367,13 +376,21 @@ void testCholeskySolve()
   diff = dMaxDifference(b,btest,MSIZE,1);
   printf ("\tmaximum difference = %.6e - %s (2)\n",diff,
 	  diff > tol ? "FAILED" : "passed");
+
+  dFree(btest, vectorSize);
+  dFree(x, vectorSize);
+  dFree(b, vectorSize);
+  dFree(L, matrixSize);
+  dFree(A, matrixSize);
 }
 
 
 void testInvertPDMatrix()
 {
   int i,j,ok;
-  dReal A[MSIZE4*MSIZE], Ainv[MSIZE4*MSIZE], I[MSIZE4*MSIZE];
+  size_t matrixSize = sizeof(dReal) * MSIZE4 * MSIZE;
+  dReal *A = (dReal *)dAlloc(matrixSize), *Ainv = (dReal *)dAlloc(matrixSize), *I = (dReal *)dAlloc(matrixSize);
+
   HEADER;
 
   dMakeRandomMatrix (A,MSIZE,MSIZE,1.0);
@@ -396,31 +413,45 @@ void testInvertPDMatrix()
     if (cmp (I[i*MSIZE4+i],1.0)==0) ok = 0;
   }
   if (ok) printf ("\tpassed (2)\n"); else printf ("\tFAILED (2)\n");
+
+  dFree(I, matrixSize);
+  dFree(Ainv, matrixSize);
+  dFree(A, matrixSize);
 }
 
 
 void testIsPositiveDefinite()
 {
-  dReal A[MSIZE4*MSIZE], B[MSIZE4*MSIZE];
+  size_t matrixSize = sizeof(dReal) * MSIZE4 * MSIZE;
+  dReal *A = (dReal *)dAlloc(matrixSize), *B = (dReal *)dAlloc(matrixSize);
+  
   HEADER;
+  
   dMakeRandomMatrix (A,MSIZE,MSIZE,1.0);
   dMultiply2 (B,A,A,MSIZE,MSIZE,MSIZE);
   printf ("\t%s\n",dIsPositiveDefinite(A,MSIZE) ? "FAILED (1)":"passed (1)");
   printf ("\t%s\n",dIsPositiveDefinite(B,MSIZE) ? "passed (2)":"FAILED (2)");
+
+  dFree(B, matrixSize);
+  dFree(A, matrixSize);
 }
 
 
 void testFastLDLTFactorization()
 {
   int i,j;
-  dReal A[MSIZE4*MSIZE], L[MSIZE4*MSIZE], DL[MSIZE4*MSIZE],
-    ATEST[MSIZE4*MSIZE], d[MSIZE], diff;
+  size_t matrixSize = sizeof(dReal) * MSIZE4 * MSIZE, vectorSize = sizeof(dReal) * MSIZE;
+  dReal *A = (dReal *)dAlloc(matrixSize), *L = (dReal *)dAlloc(matrixSize), *DL = (dReal *)dAlloc(matrixSize),
+    *ATEST = (dReal *)dAlloc(matrixSize), *d = (dReal *)dAlloc(vectorSize), diff;
+  
   HEADER;
+
   dMakeRandomMatrix (A,MSIZE,MSIZE,1.0);
   dMultiply2 (L,A,A,MSIZE,MSIZE,MSIZE);
   memcpy (A,L,MSIZE4*MSIZE*sizeof(dReal));
 
   dFactorLDLT (L,d,MSIZE,MSIZE4);
+
   dClearUpperTriangle (L,MSIZE);
   for (i=0; i<MSIZE; i++) L[i*MSIZE4+i] = 1.0;
 
@@ -433,14 +464,24 @@ void testFastLDLTFactorization()
   diff = dMaxDifference(A,ATEST,MSIZE,MSIZE);
   printf ("\tmaximum difference = %.6e - %s\n",diff,
 	  diff > tol ? "FAILED" : "passed");
+
+  dFree(d, vectorSize);
+  dFree(ATEST, matrixSize);
+  dFree(DL, matrixSize);
+  dFree(L, matrixSize);
+  dFree(A, matrixSize);
 }
 
 
 void testSolveLDLT()
 {
-  dReal A[MSIZE4*MSIZE], L[MSIZE4*MSIZE], d[MSIZE], x[MSIZE],
-    b[MSIZE], btest[MSIZE], diff;
+  size_t matrixSize = sizeof(dReal) * MSIZE4 * MSIZE, vectorSize = sizeof(dReal) * MSIZE;
+  dReal *A = (dReal *)dAlloc(matrixSize), *L = (dReal *)dAlloc(matrixSize), 
+      *d = (dReal *)dAlloc(vectorSize), *x = (dReal *)dAlloc(vectorSize), 
+      *b = (dReal *)dAlloc(vectorSize), *btest = (dReal *)dAlloc(vectorSize), diff;
+
   HEADER;
+
   dMakeRandomMatrix (A,MSIZE,MSIZE,1.0);
   dMultiply2 (L,A,A,MSIZE,MSIZE,MSIZE);
   memcpy (A,L,MSIZE4*MSIZE*sizeof(dReal));
@@ -455,14 +496,24 @@ void testSolveLDLT()
   diff = dMaxDifference(b,btest,MSIZE,1);
   printf ("\tmaximum difference = %.6e - %s\n",diff,
 	  diff > tol ? "FAILED" : "passed");
+
+  dFree(btest, vectorSize);
+  dFree(b, vectorSize);
+  dFree(x, vectorSize);
+  dFree(d, vectorSize);
+  dFree(L, matrixSize);
+  dFree(A, matrixSize);
 }
 
 
 void testLDLTAddTL()
 {
   int i,j;
-  dReal A[MSIZE4*MSIZE], L[MSIZE4*MSIZE], d[MSIZE], a[MSIZE],
-    DL[MSIZE4*MSIZE], ATEST[MSIZE4*MSIZE], diff;
+  size_t matrixSize = sizeof(dReal) * MSIZE4 * MSIZE, vectorSize = sizeof(dReal) * MSIZE;
+  dReal *A = (dReal *)dAlloc(matrixSize), *L = (dReal *)dAlloc(matrixSize), 
+      *DL = (dReal *)dAlloc(matrixSize), *ATEST = (dReal *)dAlloc(matrixSize), 
+      *d = (dReal *)dAlloc(vectorSize), *a = (dReal *)dAlloc(vectorSize), diff;
+
   HEADER;
 
   dMakeRandomMatrix (A,MSIZE,MSIZE,1.0);
@@ -492,15 +543,26 @@ void testLDLTAddTL()
   diff = dMaxDifference(A,ATEST,MSIZE,MSIZE);
   printf ("\tmaximum difference = %.6e - %s\n",diff,
 	  diff > tol ? "FAILED" : "passed");
+
+  dFree(a, vectorSize);
+  dFree(d, vectorSize);
+  dFree(ATEST, matrixSize);
+  dFree(DL, matrixSize);
+  dFree(L, matrixSize);
+  dFree(A, matrixSize);
 }
 
 
 void testLDLTRemove()
 {
-  int i,j,r,p[MSIZE];
-  dReal A[MSIZE4*MSIZE], L[MSIZE4*MSIZE], d[MSIZE],
-    L2[MSIZE4*MSIZE], d2[MSIZE], DL2[MSIZE4*MSIZE],
-    Atest1[MSIZE4*MSIZE], Atest2[MSIZE4*MSIZE], diff, maxdiff;
+  int i,j,r;
+  size_t intVectorSize = sizeof(int) * MSIZE, matrixSize = sizeof(dReal) * MSIZE4 * MSIZE, vectorSize = sizeof(dReal) * MSIZE;
+  int *p = (int *)dAlloc(intVectorSize);
+  dReal *A = (dReal *)dAlloc(matrixSize), *L = (dReal *)dAlloc(matrixSize), 
+      *L2 = (dReal *)dAlloc(matrixSize), *DL2 = (dReal *)dAlloc(matrixSize), 
+      *Atest1 = (dReal *)dAlloc(matrixSize), *Atest2 = (dReal *)dAlloc(matrixSize), 
+      *d = (dReal *)dAlloc(vectorSize), *d2 = (dReal *)dAlloc(vectorSize), diff, maxdiff;
+
   HEADER;
 
   // make array of A row pointers
@@ -571,6 +633,15 @@ void testLDLTRemove()
   }
   printf ("\tmaximum difference = %.6e - %s\n",maxdiff,
 	  maxdiff > tol ? "FAILED" : "passed");
+
+  dFree(d2, vectorSize);
+  dFree(d, vectorSize);
+  dFree(Atest2, matrixSize);
+  dFree(Atest1, matrixSize);
+  dFree(DL2, matrixSize);
+  dFree(L2, matrixSize);
+  dFree(L, matrixSize);
+  dFree(A, matrixSize);
 }
 
 //****************************************************************************
@@ -1026,7 +1097,7 @@ void dMatrixComparison::dump()
 
 // static jmp_buf jump_buffer;
 
-static void myDebug (int /*num*/, const char */*msg*/, va_list /*ap*/)
+static void myDebug (int /*num*/, const char* /*msg*/, va_list /*ap*/)
 {
   // printf ("(Error %d: ",num);
   // vprintf (msg,ap);
