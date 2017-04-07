@@ -456,7 +456,9 @@ void MultiplySubJxRhsTmpFromRHS (dReal *rowRhsCfm, const dReal *JRow, const dRea
 
 
 static inline 
-void MultiplyAddJxLambdaToCForce (dReal cforce[CFE__MAX], const dReal *JRow, const dReal *rowRhsLambda, unsigned int infom)
+void MultiplyAddJxLambdaToCForce(dReal cforce[CFE__MAX], 
+    const dReal *JRow, const dReal *rowRhsLambda, unsigned int infom, 
+    dJointFeedback *fb/*=NULL*/, unsigned jointBodyIndex)
 {
     dIASSERT (infom > 0 && cforce && JRow && rowRhsLambda);
     dReal sumLX = 0, sumLY = 0, sumLZ = 0, sumAX=0, sumAY = 0, sumAZ = 0;
@@ -474,6 +476,27 @@ void MultiplyAddJxLambdaToCForce (dReal cforce[CFE__MAX], const dReal *JRow, con
         }
         currJ += JME__MAX;
         currLambda += RLE__RHS_LAMBDA_MAX;
+    }
+    if (fb != NULL) {
+        if (jointBodyIndex == dJCB__MIN) {
+            fb->f1[dV3E_X] = sumLX;
+            fb->f1[dV3E_Y] = sumLY;
+            fb->f1[dV3E_Z] = sumLZ;
+            fb->t1[dV3E_X] = sumAX;
+            fb->t1[dV3E_Y] = sumAY;
+            fb->t1[dV3E_Z] = sumAZ;
+        }
+        else {
+            dIASSERT(jointBodyIndex == dJCB__MIN + 1);
+            dSASSERT(dJCB__MAX == 2);
+
+            fb->f2[dV3E_X] = sumLX;
+            fb->f2[dV3E_Y] = sumLY;
+            fb->f2[dV3E_Z] = sumLZ;
+            fb->t2[dV3E_X] = sumAX;
+            fb->t2[dV3E_Y] = sumAY;
+            fb->t2[dV3E_Z] = sumAZ;
+        }
     }
     cforce[CFE_LX] += sumLX;
     cforce[CFE_LY] += sumLY;
@@ -483,34 +506,6 @@ void MultiplyAddJxLambdaToCForce (dReal cforce[CFE__MAX], const dReal *JRow, con
     cforce[CFE_AZ] += sumAZ;
 }
 
-
-static inline 
-void MultiplyJxLambdaIntoCForce (dReal cforce[CFE__MAX], const dReal *JRow, const dReal *rowRhsLambda, unsigned int infom)
-{
-    dIASSERT (infom > 0 && cforce && JRow && rowRhsLambda);
-    dReal sumLX = 0, sumLY = 0, sumLZ = 0, sumAX=0, sumAY = 0, sumAZ = 0;
-    const dReal *currJ = JRow, *currLambda = rowRhsLambda + RLE_LAMBDA;
-    for (unsigned int k = infom; ; ) {
-        const dReal lambda = *currLambda;
-        sumLX += currJ[JME_JLX] * lambda;
-        sumLY += currJ[JME_JLY] * lambda;
-        sumLZ += currJ[JME_JLZ] * lambda;
-        sumAX += currJ[JME_JAX] * lambda;
-        sumAY += currJ[JME_JAY] * lambda;
-        sumAZ += currJ[JME_JAZ] * lambda;
-        if (--k == 0) {
-            break;
-        }
-        currJ += JME__MAX;
-        currLambda += RLE__RHS_LAMBDA_MAX;
-    }
-    cforce[CFE_LX] = sumLX;
-    cforce[CFE_LY] = sumLY;
-    cforce[CFE_LZ] = sumLZ;
-    cforce[CFE_AX] = sumAX;
-    cforce[CFE_AY] = sumAY;
-    cforce[CFE_AZ] = sumAZ;
-}
 
 //****************************************************************************
 
@@ -1564,25 +1559,7 @@ void dxStepIsland_Stage4(dxStepperStage4CallContext *stage4CallContext)
             dSASSERT(dJCB__MAX == 2);
 
             dJointFeedback *fb = joint->feedback;
-
-            if (fb != NULL) {
-                // the user has requested feedback on the amount of force that this
-                // joint is applying to the bodies. we use a slightly slower
-                // computation that splits out the force components and puts them
-                // in the feedback structure.
-                dReal jointForce[CFE__MAX];
-                MultiplyJxLambdaIntoCForce (jointForce, JRow + jRowExtraOffset, rowRhsLambda, infom);
-
-                bodyConstrForce[CFE_LX] += (fb->f1[dV3E_X] = jointForce[CFE_LX]);
-                bodyConstrForce[CFE_LY] += (fb->f1[dV3E_Y] = jointForce[CFE_LY]);
-                bodyConstrForce[CFE_LZ] += (fb->f1[dV3E_Z] = jointForce[CFE_LZ]);
-                bodyConstrForce[CFE_AX] += (fb->t1[dV3E_X] = jointForce[CFE_AX]);
-                bodyConstrForce[CFE_AY] += (fb->t1[dV3E_Y] = jointForce[CFE_AY]);
-                bodyConstrForce[CFE_AZ] += (fb->t1[dV3E_Z] = jointForce[CFE_AZ]);
-            }
-            else {
-                MultiplyAddJxLambdaToCForce (bodyConstrForce, JRow + jRowExtraOffset, rowRhsLambda, infom);
-            }
+            MultiplyAddJxLambdaToCForce(bodyConstrForce, JRow + jRowExtraOffset, rowRhsLambda, infom, fb, jointBodyIndex);
         }
 
         // compute the velocity update
