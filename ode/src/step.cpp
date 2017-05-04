@@ -1442,20 +1442,13 @@ void dxStepIsland_Stage3(dxStepperStage3CallContext *stage3CallContext)
     stage3CallContext = NULL; // WARNING! stage3CallContext is not valid after this point!
     dIVERIFY(stage3CallContext == NULL); // To suppress unused variable assignment warnings
 
-    dReal *invI = localContext->m_invI;
-    dJointWithInfo1 *jointinfos = localContext->m_jointinfos;
-    unsigned int nj = localContext->m_nj;
     unsigned int m = localContext->m_m;
     unsigned int nub = localContext->m_nub;
     //const unsigned int *mindex = localContext->m_mindex;
     int *findex = localContext->m_findex;
-    dReal *J = localContext->m_J;
     dReal *A = localContext->m_A;
     dReal *pairsRhsLambda = localContext->m_pairsRhsCfm; // Reuse cfm buffer for lambdas as the former values are not needed any more
     dReal *pairsLoHi = localContext->m_pairsLoHi;
-
-    dxBody * const *body = callContext->m_islandBodiesStart;
-    unsigned int nb = callContext->m_islandBodiesCount;
 
     if (m > 0) {
         BEGIN_STATE_SAVE(memarena, lcpstate) {

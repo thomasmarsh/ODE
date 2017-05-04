@@ -1204,22 +1204,31 @@ int TestConvexIntersection(dxConvex& cvx1,dxConvex& cvx2, int flags,
                         plane[3];
                     if(d1*d2<0)
                     {
+                        out = false;
+
                         // Edge intersects plane
-                        IntersectSegmentPlane(r1,r2,plane,t,p);
-                        // Check the resulting point again to make sure it is inside the reference convex
-                        out=false;
-                        for(unsigned int k=0;k<cvx1.planecount;++k)
+                        if (!IntersectSegmentPlane(r1,r2,plane,t,p))
                         {
-                            d = p[0]*cvx1.planes[(k*4)+0]+
-                                p[1]*cvx1.planes[(k*4)+1]+
-                                p[2]*cvx1.planes[(k*4)+2]-
-                                cvx1.planes[(k*4)+3];
-                            if(d>0)
-                            {
-                                out = true;
-                                break;
-                            };
+                            out = true;
                         }
+
+                        if (!out)
+                        {
+                            // Check the resulting point again to make sure it is inside the reference convex
+                            for (unsigned int k = 0; k < cvx1.planecount; ++k)
+                            {
+                                d = p[0]*cvx1.planes[(k*4)+0]+
+                                    p[1]*cvx1.planes[(k*4)+1]+
+                                    p[2]*cvx1.planes[(k*4)+2]-
+                                    cvx1.planes[(k*4)+3];
+                                if(d>0)
+                                {
+                                    out = true;
+                                    break;
+                                }
+                            }
+                        }
+
                         if(!out)
                         {
 #if 0

@@ -295,7 +295,7 @@ void dxSimpleSpace::collide2 (void *data, dxGeom *geom,
 
 // prime[i] is the largest prime smaller than 2^i
 #define NUM_PRIMES 31
-static const long int prime[NUM_PRIMES] = {1L,2L,3L,7L,13L,31L,61L,127L,251L,509L,
+static const unsigned long int prime[NUM_PRIMES] = {1L,2L,3L,7L,13L,31L,61L,127L,251L,509L,
 1021L,2039L,4093L,8191L,16381L,32749L,65521L,131071L,262139L,
 524287L,1048573L,2097143L,4194301L,8388593L,16777213L,33554393L,
 67108859L,134217689L,268435399L,536870909L,1073741789L};
@@ -490,7 +490,7 @@ void dxHashSpace::collide (void *data, dNearCallback *callback)
         i = NUM_PRIMES-1;	// probably pointless
     }
 
-    const int sz = prime[i];
+    const unsigned long sz = prime[i];
 
     // allocate and initialize hash table node pointers
     typedef std::vector<Node*> HashTable;
@@ -507,7 +507,7 @@ void dxHashSpace::collide (void *data, dNearCallback *callback)
                 int zbegin = dbounds[4];
                 unsigned long hi = (getVirtualAddressBase(aabb->level,xi,yi) + zbegin) % sz;
                 const int zend = dbounds[5];
-                for (int zi = zbegin; zi <= zend; (hi = hi + 1 != sz ? hi + 1 : 0), zi++) {
+                for (int zi = zbegin; zi <= zend; (hi = hi + 1U != sz ? hi + 1U : 0UL), zi++) {
                     // get the hash index
                     // add a new node to the hash table
                     Node *node = new Node;
@@ -541,7 +541,7 @@ void dxHashSpace::collide (void *data, dNearCallback *callback)
                     // get the hash index
                     unsigned long hi = (getVirtualAddressBase(level, xi, yi) + zbegin) % sz;
                     const int zend = db[5];
-                    for (int zi = zbegin; zi <= zend; (hi = hi + 1 != sz ? hi + 1 : 0), zi++) {
+                    for (int zi = zbegin; zi <= zend; (hi = hi + 1U != sz ? hi + 1U : 0UL), zi++) {
                         // search all nodes at this index
                         for (Node* node = table[hi]; node; node=node->next) {
                             // node points to an AABB that may intersect aabb

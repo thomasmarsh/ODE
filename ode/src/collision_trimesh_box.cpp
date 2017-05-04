@@ -40,13 +40,6 @@
 #if dTRIMESH_ENABLED
 
 
-static void
-GenerateContact(int in_Flags, dContactGeom* in_Contacts, int in_Stride,
-                dxGeom* in_g1,  dxGeom* in_g2, int TriIndex,
-                const dVector3 in_ContactPos, const dVector3 in_Normal, dReal in_Depth,
-                int& OutTriCount);
-
-
 // largest number, double or float
 #if defined(dSINGLE)
 #define MAXVALUE FLT_MAX

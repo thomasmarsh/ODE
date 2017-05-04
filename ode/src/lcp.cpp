@@ -1065,7 +1065,6 @@ void dxSolveLCP_Generic (dxWorldProcessMemArena *memarena, unsigned n, dReal *A,
                 if (s <= REAL(0.0)) {
                     dMessage (d_ERR_LCP, "LCP internal error, s <= 0 (s=%.4e)",(double)s);
                     if (i < n) {
-                        dReal *const endbx = pairsbx + (size_t)n * PBX__MAX;
                         dxtSetZero<PBX__MAX>(currbx + PBX_X, n - i);
                         dxSetZero (w + i, n - i);
                     }

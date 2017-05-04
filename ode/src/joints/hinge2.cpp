@@ -384,6 +384,11 @@ void dJointGetHinge2Axis1( dJointID j, dVector3 result )
     {
         dMultiply0_331( result, joint->node[0].body->posr.R, joint->axis1 );
     }
+    else
+    {
+        dZeroVector3(result);
+        dUASSERT( false, "the joint does not have first body attached" );
+    }
 }
 
 
@@ -396,6 +401,11 @@ void dJointGetHinge2Axis2( dJointID j, dVector3 result )
     if ( joint->node[1].body )
     {
         dMultiply0_331( result, joint->node[1].body->posr.R, joint->axis2 );
+    }
+    else
+    {
+        dZeroVector3(result);
+        dUASSERT( false, "the joint does not have second body attached" );
     }
 }
 

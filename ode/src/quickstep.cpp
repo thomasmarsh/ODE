@@ -726,7 +726,9 @@ static int dxQuickStepIsland_Stage4LCP_iMJ_Callback(void *callContext, dcallinde
 static int dxQuickStepIsland_Stage4LCP_iMJSync_Callback(void *callContext, dcallindex_t callInstanceIndex, dCallReleaseeID callThisReleasee);
 static int dxQuickStepIsland_Stage4LCP_fcStart_Callback(void *callContext, dcallindex_t callInstanceIndex, dCallReleaseeID callThisReleasee);
 static int dxQuickStepIsland_Stage4LCP_fc_Callback(void *callContext, dcallindex_t callInstanceIndex, dCallReleaseeID callThisReleasee);
+#ifdef WARM_STARTING
 static int dxQuickStepIsland_Stage4LCP_fcWarmComplete_Callback(void *_stage4CallContext, dcallindex_t callInstanceIndex, dCallReleaseeID callThisReleasee);
+#endif
 static int dxQuickStepIsland_Stage4LCP_Ad_Callback(void *callContext, dcallindex_t callInstanceIndex, dCallReleaseeID callThisReleasee);
 static int dxQuickStepIsland_Stage4LCP_ReorderPrep_Callback(void *callContext, dcallindex_t callInstanceIndex, dCallReleaseeID callThisReleasee);
 static int dxQuickStepIsland_Stage4LCP_IterationStart_Callback(void *callContext, dcallindex_t callInstanceIndex, dCallReleaseeID callThisReleasee);
@@ -740,10 +742,12 @@ static int dxQuickStepIsland_Stage5_Callback(void *callContext, dcallindex_t cal
 static void dxQuickStepIsland_Stage4a(dxQuickStepperStage4CallContext *stage4CallContext);
 static void dxQuickStepIsland_Stage4LCP_iMJComputation(dxQuickStepperStage4CallContext *stage4CallContext);
 static void dxQuickStepIsland_Stage4LCP_MTfcComputation(dxQuickStepperStage4CallContext *stage4CallContext, dCallReleaseeID callThisReleasee);
+#ifdef WARM_STARTING
 static void dxQuickStepIsland_Stage4LCP_MTfcComputation_warm(dxQuickStepperStage4CallContext *stage4CallContext, dCallReleaseeID callThisReleasee);
 static void dxQuickStepIsland_Stage4LCP_MTfcComputation_warmZeroArrays(dxQuickStepperStage4CallContext *stage4CallContext);
 static void dxQuickStepIsland_Stage4LCP_MTfcComputation_warmPrepare(dxQuickStepperStage4CallContext *stage4CallContext);
 static void dxQuickStepIsland_Stage4LCP_MTfcComputation_warmComplete(dxQuickStepperStage4CallContext *stage4CallContext);
+#endif
 static void dxQuickStepIsland_Stage4LCP_MTfcComputation_cold(dxQuickStepperStage4CallContext *stage4CallContext);
 static void dxQuickStepIsland_Stage4LCP_STfcComputation(dxQuickStepperStage4CallContext *stage4CallContext);
 static void dxQuickStepIsland_Stage4LCP_AdComputation(dxQuickStepperStage4CallContext *stage4CallContext);
@@ -1815,7 +1819,6 @@ int dxQuickStepIsland_Stage4a_Callback(void *_stage4CallContext, dcallindex_t ca
 static 
 void dxQuickStepIsland_Stage4a(dxQuickStepperStage4CallContext *stage4CallContext)
 {
-    const dxStepperProcessingCallContext *callContext = stage4CallContext->m_stepperCallContext;
     const dxQuickStepperLocalContext *localContext = stage4CallContext->m_localContext;
 
     dReal *lambda = stage4CallContext->m_lambda;
@@ -2308,8 +2311,6 @@ int dxQuickStepIsland_Stage4LCP_ConstraintsReordering_Callback(void *_stage4Call
 static 
 void dxQuickStepIsland_Stage4LCP_ConstraintsReordering(dxQuickStepperStage4CallContext *stage4CallContext)
 {
-    const dxStepperProcessingCallContext *callContext = stage4CallContext->m_stepperCallContext;
-
     unsigned int iteration = stage4CallContext->m_LCP_iteration - 1; // Iteration is pre-incremented before scheduled tasks are released for execution
     if (dxQuickStepIsland_Stage4LCP_ConstraintsShuffling(stage4CallContext, iteration)) {
 
@@ -2474,7 +2475,6 @@ void dxQuickStepIsland_Stage4LCP_DependencyMapForNewOrderRebuilding(dxQuickStepp
 
     IndexError *order = stage4CallContext->m_order;
     const dxJBodiesItem *jb = localContext->m_jb;
-    const int *findex = localContext->m_findex;
 
     unsigned int m = localContext->m_m;
     for (unsigned int i = 0; i != m; ++i) {
