@@ -8,6 +8,11 @@ the rules for this file:
   * keep the format consistent (79 char width, M/D/Y date format).
 
 ------------------------------------------------------------------------------
+05/09/2017 Oleh Derevenko
+        * AtomicReadReorderBarrier, AtomicStore, AtomicStorePointer functions 
+          have been added and some atomic function implementations have been 
+          improved in OU.
+
 02/20/2017 Oleh Derevenko
         * Project generation options have been changed to have built-in
           multithreaded threading implementation enabled by default.
