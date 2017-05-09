@@ -35,18 +35,22 @@ libode_la_SOURCES =     nextafterf.c \
                         collision_util.cpp collision_util.h \
                         common.h \
                         convex.cpp \
+                        coop_matrix_types.h \
                         cylinder.cpp \
+                        default_threading.cpp default_threading.h \
                         error.cpp error.h \
                         export-dif.cpp \
+                        fastdot.cpp fastdot_impl.h \
+                        fastldltfactor.cpp fastldltfactor_impl.h \
+                        fastldltsolve.cpp fastldltsolve_impl.h \
+                        fastlsolve.cpp fastlsolve_impl.h \
+                        fastltsolve.cpp fastltsolve_impl.h \
+                        fastvecscale.cpp fastvecscale_impl.h \
                         heightfield.cpp heightfield.h \
                         lcp.cpp lcp.h \
                         mass.cpp \
                         mat.cpp mat.h \
-                        matrix.cpp matrix_impl.h matrix.h \
-                        fastldlt.cpp fastldlt_impl.h \
-                        fastlsolve.cpp fastsolve_impl.h \
-                        fastltsolve.cpp fastltsolve_impl.h \
-                        fastdot.cpp fastdot_impl.h \
+                        matrix.cpp matrix.h \
                         memory.cpp \
                         misc.cpp \
                         objects.cpp objects.h \
@@ -59,10 +63,13 @@ libode_la_SOURCES =     nextafterf.c \
                         plane.cpp \
                         quickstep.cpp quickstep.h \
                         ray.cpp \
+                        resource_control.cpp resource_control.h \
                         rotation.cpp \
+                        simple_cooperative.cpp simple_cooperative.h \
                         sphere.cpp \
                         step.cpp step.h \
                         timer.cpp \
+                        threaded_solver_ldlt.h \
                         threading_atomics_provs.h \
                         threading_base.cpp threading_base.h \
                         threading_fake_sync.h \

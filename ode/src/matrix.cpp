@@ -23,9 +23,9 @@
 #include <ode/common.h>
 #include "config.h"
 #include "matrix.h"
-#include "util.h"
+#include "objects.h"
+#include "threaded_solver_ldlt.h"
 
-#include "matrix_impl.h"
 #include <ode/memory.h>
 
 
@@ -254,7 +254,7 @@ int dxInvertPDMatrix(const dReal *A, dReal *Ainv, unsigned n, void *tmpBuf/*[nsk
         dFree(alloctedBuf, allocatedSize);
     }
 
-    return success ? 1 : 0;  
+    return success ? 1 : 0;
 }
 
 
@@ -290,19 +290,6 @@ int dxIsPositiveDefinite(const dReal *A, unsigned n, void *tmpBuf/*[nskip*(n+1)]
     return factorResult;
 }
 
-/*extern */
-void dxVectorScale(dReal *a, const dReal *d, unsigned n)
-{
-    dxtVectorScale<1, 1> (a, d, n);
-}
-
-/*extern */
-void dxSolveLDLT(const dReal *L, const dReal *d, dReal *b, unsigned n, int nskip)
-{
-    dIASSERT(n != 0);
-
-    dxtSolveLDLT<1, 1>(L, d, b, n, nskip);
-}
 
 /*extern */
 void dxLDLTAddTL(dReal *L, dReal *d, const dReal *a, unsigned n, unsigned nskip, void *tmpBuf/*[2*nskip]*/)
@@ -523,113 +510,84 @@ void dxRemoveRowCol(dReal *A, unsigned n, unsigned nskip, unsigned r)
 #undef dSolveCholesky
 #undef dInvertPDMatrix
 #undef dIsPositiveDefinite
-//#undef dFactorLDLT
-//#undef dSolveL1
-//#undef dSolveL1T
-#undef dVectorScale
-#undef dSolveLDLT
 #undef dLDLTAddTL
 #undef dLDLTRemove
 #undef dRemoveRowCol
 
 
-/*extern */
-void dSetZero (dReal *a, int n)
+/*extern ODE_API */
+void dSetZero(dReal *a, int n)
 {
-    dxSetZero (a, n);
+    dxSetZero(a, n);
 }
 
-/*extern */
-void dSetValue (dReal *a, int n, dReal value)
+/*extern ODE_API */
+void dSetValue(dReal *a, int n, dReal value)
 {
-    dxSetValue (a, n, value);
+    dxSetValue(a, n, value);
 }
 
 // dReal dDot (const dReal *a, const dReal *b, int n);
 
-/*extern */
-void dMultiply0 (dReal *A, const dReal *B, const dReal *C, int p,int q,int r)
+/*extern ODE_API */
+void dMultiply0(dReal *A, const dReal *B, const dReal *C, int p,int q,int r)
 {
-    dxMultiply0 (A, B, C, p, q, r);
+    dxMultiply0(A, B, C, p, q, r);
 }
 
-/*extern */
-void dMultiply1 (dReal *A, const dReal *B, const dReal *C, int p,int q,int r)
+/*extern ODE_API */
+void dMultiply1(dReal *A, const dReal *B, const dReal *C, int p,int q,int r)
 {
-    dxMultiply1 (A, B, C, p, q, r);
+    dxMultiply1(A, B, C, p, q, r);
 }
 
-/*extern */
-void dMultiply2 (dReal *A, const dReal *B, const dReal *C, int p,int q,int r)
+/*extern ODE_API */
+void dMultiply2(dReal *A, const dReal *B, const dReal *C, int p,int q,int r)
 {
-    dxMultiply2 (A, B, C, p, q, r);
+    dxMultiply2(A, B, C, p, q, r);
 }
 
-/*extern */
-int dFactorCholesky (dReal *A, int n)
+/*extern ODE_API */
+int dFactorCholesky(dReal *A, int n)
 {
-    return dxFactorCholesky (A, n, NULL);
+    return dxFactorCholesky(A, n, NULL);
 }
 
-/*extern */
-void dSolveCholesky (const dReal *L, dReal *b, int n)
+/*extern ODE_API */
+void dSolveCholesky(const dReal *L, dReal *b, int n)
 {
-    dxSolveCholesky (L, b, n, NULL);
+    dxSolveCholesky(L, b, n, NULL);
 }
 
-/*extern */
+/*extern ODE_API */
 int dInvertPDMatrix (const dReal *A, dReal *Ainv, int n)
 {
-    return dxInvertPDMatrix (A, Ainv, n, NULL);
+    return dxInvertPDMatrix(A, Ainv, n, NULL);
 }
 
-/*extern */
-int dIsPositiveDefinite (const dReal *A, int n)
+/*extern ODE_API */
+int dIsPositiveDefinite(const dReal *A, int n)
 {
-    return dxIsPositiveDefinite (A, n, NULL);
+    return dxIsPositiveDefinite(A, n, NULL);
 }
 
-// void dFactorLDLT (dReal *A, dReal *d, int n, int nskip);
-// void dSolveL1 (const dReal *L, dReal *b, int n, int nskip);
-// void dSolveL1T (const dReal *L, dReal *b, int n, int nskip);
 
-/*extern */
-void dVectorScale (dReal *a, const dReal *d, int n)
+/*extern ODE_API */
+void dLDLTAddTL(dReal *L, dReal *d, const dReal *a, int n, int nskip)
 {
-    dxVectorScale (a, d, n);
+    dxLDLTAddTL(L, d, a, n, nskip, NULL);
 }
 
-/*extern */
-void dSolveLDLT (const dReal *L, const dReal *d, dReal *b, int n, int nskip)
+/*extern ODE_API */
+void dLDLTRemove(dReal **A, const int *p, dReal *L, dReal *d, int n1, int n2, int r, int nskip)
 {
-    dAASSERT(n != 0);
-
-    if (n != 0)
-    {
-        dAASSERT(L != NULL);
-        dAASSERT(d != NULL);
-        dAASSERT(b != NULL);
-
-        dxSolveLDLT(L, d, b, n, nskip);
-    }
-}
-
-/*extern */
-void dLDLTAddTL (dReal *L, dReal *d, const dReal *a, int n, int nskip)
-{
-    dxLDLTAddTL (L, d, a, n, nskip, NULL);
-}
-
-/*extern */
-void dLDLTRemove (dReal **A, const int *p, dReal *L, dReal *d, int n1, int n2, int r, int nskip)
-{
-    dxLDLTRemove (A, (const unsigned *)p, L, d, n1, n2, r, nskip, NULL);
+    dxLDLTRemove(A, (const unsigned *)p, L, d, n1, n2, r, nskip, NULL);
     dSASSERT(sizeof(unsigned) == sizeof(*p));
 }
 
-/*extern */
-void dRemoveRowCol (dReal *A, int n, int nskip, int r)
+/*extern ODE_API */
+void dRemoveRowCol(dReal *A, int n, int nskip, int r)
 {
-    dxRemoveRowCol (A, n, nskip, r);
+    dxRemoveRowCol(A, n, nskip, r);
 }
 

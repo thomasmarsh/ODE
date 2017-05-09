@@ -26,63 +26,13 @@
 #define _ODE_MATRIX_IMPL_H_
 
 
-#include "fastsolve_impl.h"
+#include "fastlsolve_impl.h"
 #include "fastltsolve_impl.h"
-
-
-template<unsigned int a_stride, unsigned int d_stride>
-void dxtVectorScale (dReal *aStart, const dReal *dStart, unsigned elementCount)
-{
-    dAASSERT (aStart && dStart && elementCount >= 0);
-    
-    const unsigned step = 4;
-
-    dReal *ptrA = aStart;
-    const dReal *ptrD = dStart;
-    const dReal *const dStepsEnd = dStart + (size_t)(elementCount & ~(step - 1)) * d_stride;
-    for (; ptrD != dStepsEnd; ptrA += step * a_stride, ptrD += step * d_stride) 
-    {
-        dReal a0 = ptrA[0], a1 = ptrA[1 * a_stride], a2 = ptrA[2 * a_stride], a3 = ptrA[3 * a_stride];
-        dReal d0 = ptrD[0], d1 = ptrD[1 * d_stride], d2 = ptrD[2 * d_stride], d3 = ptrD[3 * d_stride];
-        a0 *= d0;
-        a1 *= d1;
-        a2 *= d2;
-        a3 *= d3;
-        ptrA[0] = a0; ptrA[1 * a_stride] = a1; ptrA[2 * a_stride] = a2; ptrA[3 * a_stride] = a3;
-        dSASSERT(step == 4);
-    }
-
-    switch (elementCount & (step - 1))
-    {
-        case 3:
-        {
-            dReal a2 = ptrA[2 * a_stride];
-            dReal d2 = ptrD[2 * d_stride];
-            ptrA[2 * a_stride] = a2 * d2;
-            // break; -- proceed to case 2
-        }
-
-        case 2:
-        {
-            dReal a1 = ptrA[1 * a_stride];
-            dReal d1 = ptrD[1 * d_stride];
-            ptrA[1 * a_stride] = a1 * d1;
-            // break; -- proceed to case 1
-        }
-
-        case 1:
-        {
-            dReal a0 = ptrA[0];
-            dReal d0 = ptrD[0];
-            ptrA[0] = a0 * d0;
-            break;
-        }
-    }
-}
+#include "fastvecscale_impl.h"
 
 
 template<unsigned int d_stride, unsigned int b_stride>
-void dxtSolveLDLT (const dReal *L, const dReal *d, dReal *b, unsigned rowCount, unsigned rowSkip)
+void solveEquationSystemWithLDLT(const dReal *L, const dReal *d, dReal *b, unsigned rowCount, unsigned rowSkip)
 {
     dAASSERT(L != NULL);
     dAASSERT(d != NULL);
@@ -90,9 +40,9 @@ void dxtSolveLDLT (const dReal *L, const dReal *d, dReal *b, unsigned rowCount, 
     dAASSERT(rowCount > 0);
     dAASSERT(rowSkip >= rowCount);
 
-    dxtSolveL1<b_stride> (L, b, rowCount, rowSkip);
-    dxtVectorScale<b_stride, d_stride> (b, d, rowCount);
-    dxtSolveL1T<b_stride> (L, b, rowCount, rowSkip);
+    solveL1Straight<b_stride>(L, b, rowCount, rowSkip);
+    scaleLargeVector<b_stride, d_stride>(b, d, rowCount);
+    solveL1Transposed<b_stride>(L, b, rowCount, rowSkip);
 }
 
 

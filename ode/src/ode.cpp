@@ -1818,7 +1818,7 @@ void dWorldSetStepThreadingImplementation(dWorldID w,
 #if dTHREADING_INTF_DISABLED
     dUASSERT(functions_info == NULL && threading_impl == NULL, "Threading interface is not available");
 #else
-    w->AssignThreadingImpl(functions_info, threading_impl);
+    w->assignThreadingImpl(functions_info, threading_impl);
 #endif
 }
 

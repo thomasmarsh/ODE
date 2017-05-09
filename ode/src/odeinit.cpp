@@ -36,8 +36,7 @@ ODE initialization/finalization code
 #include "collision_trimesh_internal.h"
 #include "odetls.h"
 #include "odeou.h"
-#include "objects.h"
-#include "util.h"
+#include "default_threading.h"
 
 
 //****************************************************************************
@@ -287,7 +286,7 @@ static bool InitODEForMode(EODEINITMODE imInitMode)
 
         if (!bAnyModeAlreadyInitialized)
         {
-            if (!dxWorld::InitializeDefaultThreading())
+            if (!DefaultThreadingHolder::initializeDefaultThreading())
             {
                 break;
             }
@@ -316,7 +315,7 @@ static bool InitODEForMode(EODEINITMODE imInitMode)
     {
         if (bWorldThreadingInitialized)
         {
-            dxWorld::FinalizeDefaultThreading();
+            DefaultThreadingHolder::finalizeDefaultThreading();
         }
 
 #if dTLS_ENABLED
@@ -406,7 +405,7 @@ static void CloseODEForMode(EODEINITMODE imInitMode)
         Opcode::CloseOpcode();
 #endif
 
-        dxWorld::FinalizeDefaultThreading();
+        DefaultThreadingHolder::finalizeDefaultThreading();
     }
 
 #if dTLS_ENABLED

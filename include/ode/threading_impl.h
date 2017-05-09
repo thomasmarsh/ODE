@@ -53,6 +53,10 @@ typedef struct dxThreadingThreadPool *dThreadingThreadPoolID;
  * processing of posted calls by means of caller thread itself. This type of 
  * implementation does not need thread pool to serve it.
  * 
+ * Note that since May 9th, 2017 (rev. #2066) the Self-Threaded implementation 
+ * returns 0 rather than 1 as available thread count to distinguish from 
+ * thread pools with just one thread in them.
+ *
  * The processing is arranged in a way to prevent call stack depth growth 
  * as more and more nested calls are posted.
  *

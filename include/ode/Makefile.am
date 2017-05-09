@@ -6,10 +6,11 @@ libode_la_include_HEADERS = \
     common.h \
     compatibility.h \
     contact.h \
+    cooperative.h \
     error.h \
     export-dif.h \
     mass.h \
-    matrix.h \
+    matrix.h matrix_coop.h \
     memory.h \
     misc.h \
     objects.h \

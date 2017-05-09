@@ -88,19 +88,6 @@ void dxSetValue (dReal *a, size_t n, dReal value)
 #endif // #ifdef __cplusplus
 
 
-template<unsigned b_stride>
-dReal dxtDot (const dReal *a, const dReal *b, unsigned n);
-template<unsigned d_stride>
-void dxtFactorLDLT (dReal *A, dReal *d, unsigned n, unsigned nskip);
-template<unsigned b_stride>
-void dxtSolveL1 (const dReal *L, dReal *b, unsigned n, unsigned lskip1);
-template<unsigned b_stride>
-void dxtSolveL1T (const dReal *L, dReal *b, unsigned n, unsigned lskip1);
-template<unsigned a_stride, unsigned d_stride>
-void dxtVectorScale (dReal *a, const dReal *d, unsigned n);
-template<unsigned d_stride, unsigned b_stride>
-void dxtSolveLDLT (const dReal *L, const dReal *d, dReal *b, unsigned n, unsigned nskip);
-
 dReal dxDot (const dReal *a, const dReal *b, unsigned n);
 void dxMultiply0 (dReal *A, const dReal *B, const dReal *C, unsigned p, unsigned q, unsigned r);
 void dxMultiply1 (dReal *A, const dReal *B, const dReal *C, unsigned p, unsigned q, unsigned r);
@@ -109,11 +96,6 @@ int dxFactorCholesky (dReal *A, unsigned n, void *tmpbuf);
 void dxSolveCholesky (const dReal *L, dReal *b, unsigned n, void *tmpbuf);
 int dxInvertPDMatrix (const dReal *A, dReal *Ainv, unsigned n, void *tmpbuf);
 int dxIsPositiveDefinite (const dReal *A, unsigned n, void *tmpbuf);
-void dxFactorLDLT (dReal *A, dReal *d, unsigned n, unsigned nskip);
-void dxSolveL1 (const dReal *L, dReal *b, unsigned n, unsigned lskip1);
-void dxSolveL1T (const dReal *L, dReal *b, unsigned n, unsigned lskip1);
-void dxVectorScale (dReal *a, const dReal *d, unsigned n);
-void dxSolveLDLT (const dReal *L, const dReal *d, dReal *b, unsigned n, unsigned nskip);
 void dxLDLTAddTL (dReal *L, dReal *d, const dReal *a, unsigned n, unsigned nskip, void *tmpbuf);
 void dxLDLTRemove (dReal **A, const unsigned *p, dReal *L, dReal *d, unsigned n1, unsigned n2, unsigned r, unsigned nskip, void *tmpbuf);
 void dxRemoveRowCol (dReal *A, unsigned n, unsigned nskip, unsigned r);
@@ -162,11 +144,6 @@ ODE_PURE_INLINE size_t dxEstimateLDLTRemoveTmpbufSize(unsigned n2, unsigned nski
 #define dSolveCholesky(L, b, n, tmpbuf) dxSolveCholesky(L, b, n, tmpbuf)
 #define dInvertPDMatrix(A, Ainv, n, tmpbuf) dxInvertPDMatrix(A, Ainv, n, tmpbuf)
 #define dIsPositiveDefinite(A, n, tmpbuf) dxIsPositiveDefinite(A, n, tmpbuf)
-#define dFactorLDLT(A, d, n, nskip) dxFactorLDLT(A, d, n, nskip)
-#define dSolveL1(L, b, n, nskip) dxSolveL1(L, b, n, nskip)
-#define dSolveL1T(L, b, n, nskip) dxSolveL1T(L, b, n, nskip)
-#define dVectorScale(a, d, n) dxVectorScale(a, d, n)
-#define dSolveLDLT(L, d, b, n, nskip) dxSolveLDLT(L, d, b, n, nskip)
 #define dLDLTAddTL(L, d, a, n, nskip, tmpbuf) dxLDLTAddTL(L, d, a, n, nskip, tmpbuf)
 #define dLDLTRemove(A, p, L, d, n1, n2, r, nskip, tmpbuf) dxLDLTRemove(A, p, L, d, n1, n2, r, nskip, tmpbuf)
 #define dRemoveRowCol(A, n, nskip, r) dxRemoveRowCol(A, n, nskip, r)

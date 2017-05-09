@@ -120,7 +120,10 @@ unsigned int ThrsafeIncrementIntUpToLimit(volatile atomicord32 *storagePointer, 
     unsigned int resultValue;
     while (true) {
         resultValue = *storagePointer;
-        if (resultValue == limitValue) {
+        // The ">=" comparison is used here to allow continuing incrementing the destination 
+        // without waiting for all the threads to pass the barrier of checking its value
+        if (resultValue >= limitValue) {
+            resultValue = limitValue;
             break;
         }
         if (ThrsafeCompareExchange(storagePointer, (atomicord32)resultValue, (atomicord32)(resultValue + 1))) {
@@ -136,7 +139,10 @@ size_t ThrsafeIncrementSizeUpToLimit(volatile size_t *storagePointer, size_t lim
     size_t resultValue;
     while (true) {
         resultValue = *storagePointer;
-        if (resultValue == limitValue) {
+        // The ">=" comparison is not required here at present ("==" could be used). 
+        // It is just used this way to match the other function above.
+        if (resultValue >= limitValue) {
+            resultValue = limitValue;
             break;
         }
         if (ThrsafeCompareExchangePointer((volatile atomicptr *)storagePointer, (atomicptr)resultValue, (atomicptr)(resultValue + 1))) {

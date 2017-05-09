@@ -27,7 +27,7 @@
 
 
 template<unsigned b_stride>
-dReal dxtDot (const dReal *a, const dReal *b, unsigned n)
+dReal calculateLargeVectorDot (const dReal *a, const dReal *b, unsigned n)
 {
     dReal sum = 0;
     const dReal *a_end = a + (n & (int)(~3));

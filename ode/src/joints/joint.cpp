@@ -672,7 +672,7 @@ bool dxJointLimitMotor::addLimot( dxJoint *joint,
                 dReal fm_ax1_0 = fm*ax1[0], fm_ax1_1 = fm*ax1[1], fm_ax1_2 = fm*ax1[2];
                 
                 dxBody *b0 = joint->node[0].body;
-                dxWorldProcessContext *world_process_context = b0->world->UnsafeGetWorldProcessingContext(); 
+                dxWorldProcessContext *world_process_context = b0->world->unsafeGetWorldProcessingContext(); 
 
                 world_process_context->LockForAddLimotSerialization();
 

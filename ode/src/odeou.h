@@ -64,12 +64,17 @@ using _OU_NAMESPACE::atomicord32;
 using _OU_NAMESPACE::atomicptr;
 using _OU_NAMESPACE::InitializeAtomicAPI;
 using _OU_NAMESPACE::FinalizeAtomicAPI;
+using _OU_NAMESPACE::AtomicIncrement;
+using _OU_NAMESPACE::AtomicDecrement;
 using _OU_NAMESPACE::AtomicCompareExchange;
 using _OU_NAMESPACE::AtomicExchange;
 using _OU_NAMESPACE::AtomicExchangeAddNoResult;
 using _OU_NAMESPACE::AtomicExchangeAdd;
 using _OU_NAMESPACE::AtomicCompareExchangePointer;
 using _OU_NAMESPACE::AtomicExchangePointer;
+using _OU_NAMESPACE::AtomicReadReorderBarrier;
+using _OU_NAMESPACE::AtomicStore;
+using _OU_NAMESPACE::AtomicStorePointer;
 #endif
 
 

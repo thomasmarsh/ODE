@@ -26,16 +26,20 @@
 #ifndef _ODE__PRIVATE_OBJECTS_H_
 #define _ODE__PRIVATE_OBJECTS_H_
 
+
 #include <ode/common.h>
 #include <ode/memory.h>
 #include <ode/mass.h>
 #include "error.h"
 #include "array.h"
+#include "common.h"
 #include "threading_base.h"
 
 
+struct dxJointNode;
 class dxStepWorkingMemory;
 class dxWorldProcessContext;
+
 
 // some body flags
 
@@ -178,17 +182,24 @@ struct dxWorld : public dBase, public dxThreadingBase, private dxIThreadingDefau
     void* userdata;
 
     dxWorld();
-    virtual ~dxWorld(); // Compilers emit warnings if a class with virtual methods does not have a virtual destructor :(
+    virtual ~dxWorld(); // Compilers issue warnings if a class with virtual methods does not have a virtual destructor :(
 
-    static bool InitializeDefaultThreading();
-    static void FinalizeDefaultThreading();
-
-    void AssignThreadingImpl(const dxThreadingFunctionsInfo *functions_info, dThreadingImplementationID threading_impl);
-    unsigned GetThreadingIslandsMaxThreadsCount(unsigned *out_active_thread_count_ptr=NULL) const;
-    dxWorldProcessContext *UnsafeGetWorldProcessingContext() const;
+    void assignThreadingImpl(const dxThreadingFunctionsInfo *functions_info, dThreadingImplementationID threading_impl);
+    
+    unsigned calculateIslandProcessingMaxThreadCount(unsigned *ptrOut_activeThreadCount=NULL) const 
+    {
+        unsigned activeThreadCount, *ptrActiveThreadCountToUse = ptrOut_activeThreadCount != NULL ? &activeThreadCount : NULL;
+        unsigned limitedCount = calculateThreadingLimitedThreadCount(islands_max_threads, false, ptrActiveThreadCountToUse);
+        if (ptrOut_activeThreadCount != NULL) {
+            *ptrOut_activeThreadCount = dMACRO_MAX(activeThreadCount, 1U);
+        }
+        return dMACRO_MAX(limitedCount, 1U); 
+    }
+    
+    dxWorldProcessContext *unsafeGetWorldProcessingContext() const;
 
 private: // dxIThreadingDefaultImplProvider
-    virtual const dxThreadingFunctionsInfo *RetrieveThreadingDefaultImpl(dThreadingImplementationID &out_default_impl);
+    virtual const dxThreadingFunctionsInfo *retrieveThreadingDefaultImpl(dThreadingImplementationID &out_defaultImpl);
 };
 
 

@@ -26,6 +26,7 @@
 #define _ODE__PRIVATE_ERROR_H_
 
 #include <ode/error.h>
+#include <ode/common.h>
 
 
 

@@ -34,38 +34,70 @@
 #define _ODE_THREADING_BASE_H_
 
 
+#include "common.h"
 #include <ode/threading.h>
 
-
-struct dxThreadingBase;
 
 struct dxIThreadingDefaultImplProvider
 {
 public:
-    virtual const dxThreadingFunctionsInfo *RetrieveThreadingDefaultImpl(dThreadingImplementationID &out_default_impl) = 0;
+    virtual const dxThreadingFunctionsInfo *retrieveThreadingDefaultImpl(dThreadingImplementationID &out_defaultImpl) = 0;
 };
 
 
-struct dxThreadingBase
+class dxThreadingBase
 {
 protected:
     dxThreadingBase():
          m_default_impl_provider(NULL),
          m_functions_info(NULL), 
-         m_threading_impl(NULL)
+         m_threading_impl(NULL),
+         m_stock_call_wait(NULL)
      {
      }
 
      // This ought to be done via constructor, but passing 'this' in base class initializer emits a warning in MSVC :(
-     void SetThreadingDefaultImplProvider(dxIThreadingDefaultImplProvider *default_impl_provider) { m_default_impl_provider = default_impl_provider; }
+     void setThreadingDefaultImplProvider(dxIThreadingDefaultImplProvider *default_impl_provider)
+     {
+         m_default_impl_provider = default_impl_provider;
+         dIASSERT(GetStockCallWait() == NULL);
+     }
+
+     ~dxThreadingBase();
 
 public:
-    void AssignThreadingImpl(const dxThreadingFunctionsInfo *functions_info, dThreadingImplementationID threading_impl)
+    void assignThreadingImpl(const dxThreadingFunctionsInfo *functions_info, dThreadingImplementationID threading_impl)
     {
         dAASSERT((functions_info == NULL) == (threading_impl == NULL));
 
+        // Free the stock call wait first to have it executed before new pointer values are assigned
+        DoFreeStockCallWait();
+
         m_functions_info = functions_info;
         m_threading_impl = threading_impl;
+    }
+
+public:
+    unsigned calculateThreadingLimitedThreadCount(unsigned limitValue, bool countCallerAsExtraThread, unsigned *ptrOut_activeThreadCount=NULL) const
+    {
+        unsigned activeThreadCount = RetrieveThreadingThreadCount();
+
+        if (ptrOut_activeThreadCount != NULL)
+        {
+            *ptrOut_activeThreadCount = activeThreadCount;
+        }
+
+        unsigned adjustedActiveThreads = countCallerAsExtraThread && activeThreadCount != UINT_MAX ? activeThreadCount + 1 : activeThreadCount;
+        return limitValue == dTHREADING_THREAD_COUNT_UNLIMITED 
+            ? adjustedActiveThreads 
+            : dMACRO_MIN(limitValue, adjustedActiveThreads);
+    }
+
+public:
+    dCallWaitID AllocateOrRetrieveStockCallWaitID()
+    {
+        dCallWaitID stock_wait_id = GetStockCallWait();
+        return stock_wait_id != NULL ? (ResetThreadedCallWait(stock_wait_id), stock_wait_id) : DoAllocateStockCallWait(); 
     }
 
 public:
@@ -196,13 +228,21 @@ protected:
     const dxThreadingFunctionsInfo *FindThreadingImpl(dThreadingImplementationID &out_impl_found) const;
 
 private:
+    dCallWaitID DoAllocateStockCallWait();
+    void DoFreeStockCallWait();
+
+private:
     const dxThreadingFunctionsInfo *GetFunctionsInfo() const { return m_functions_info; }
     dThreadingImplementationID GetThreadingImpl() const { return m_threading_impl; }
+
+    void SetStockCallWait(dCallWaitID value) { m_stock_call_wait = value; }
+    dCallWaitID GetStockCallWait() const { return m_stock_call_wait; }
 
 private:
     dxIThreadingDefaultImplProvider   *m_default_impl_provider;
     const dxThreadingFunctionsInfo    *m_functions_info;
     dThreadingImplementationID        m_threading_impl;
+    dCallWaitID                       m_stock_call_wait;
 };
 
 class dxMutexGroupLockHelper

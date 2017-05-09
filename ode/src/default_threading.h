@@ -1,7 +1,11 @@
 /*************************************************************************
  *                                                                       *
- * Open Dynamics Engine, Copyright (C) 2001,2002 Russell L. Smith.       *
+ * Open Dynamics Engine, Copyright (C) 2001-2003 Russell L. Smith.       *
  * All rights reserved.  Email: russ@q12.org   Web: www.q12.org          *
+ *                                                                       *
+ * Threading base wrapper class header file.                             *
+ * Copyright (C) 2011-2012 Oleh Derevenko. All rights reserved.          *
+ * e-mail: odar@eleks.com (change all "a" to "e")                        *
  *                                                                       *
  * This library is free software; you can redistribute it and/or         *
  * modify it under the terms of EITHER:                                  *
@@ -20,26 +24,32 @@
  *                                                                       *
  *************************************************************************/
 
-/* generated code, do not edit. */
-
-#include <ode/common.h>
-#include "config.h"
-#include "matrix.h"
-
-#include "fastldlt_impl.h"
+/*
+ * A default threading instance holder class definition
+ * Copyright (c) 2017 Oleh Derevenko, odar@eleks.com (change all "a" to "e")
+ */
 
 
-/*extern */
-void dxFactorLDLT (dReal *A, dReal *d, unsigned n, unsigned nskip1)
+#ifndef _ODE__PRIVATE_DEFAULT_THREADING_H_
+#define _ODE__PRIVATE_DEFAULT_THREADING_H_
+
+
+#include <ode/threading.h>
+
+
+class DefaultThreadingHolder
 {
-    dxtFactorLDLT<1> (A, d, n, nskip1);
-}
+public:
+    static bool initializeDefaultThreading();
+    static void finalizeDefaultThreading();
+
+    static dThreadingImplementationID getDefaultThreadingImpl() { return m_defaultThreadingImpl; }
+    static const dThreadingFunctionsInfo *getDefaultThreadingFunctions() { return m_defaultThreadingFunctions; }
+
+private:
+    static dThreadingImplementationID       m_defaultThreadingImpl;
+    static const dThreadingFunctionsInfo    *m_defaultThreadingFunctions;
+};
 
 
-#undef dFactorLDLT
-
-void dFactorLDLT (dReal *A, dReal *d, int n, int nskip1)
-{
-    dxFactorLDLT (A, d, n, nskip1);
-}
-
+#endif // #ifndef _ODE__PRIVATE_DEFAULT_THREADING_H_

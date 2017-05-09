@@ -22,9 +22,9 @@
 
 #include <ode/ode.h>
 #include "config.h"
+#include "util.h"
 #include "objects.h"
 #include "joints/joint.h"
-#include "util.h"
 #include "threadingutils.h"
 
 #include <new>
@@ -69,7 +69,7 @@ dxWorldProcessContext::~dxWorldProcessContext()
     if (m_pswObjectsAllocWorld != NULL)
     {
         m_pswObjectsAllocWorld->FreeMutexGroup(m_pmgStepperMutexGroup);
-        m_pswObjectsAllocWorld->FreeThreadedCallWait(m_pcwIslandsSteppingWait);
+        // m_pswObjectsAllocWorld->FreeThreadedCallWait(m_pcwIslandsSteppingWait); -- The stock call wait can not be freed
     }
 
     dxWorldProcessMemArena *pmaStepperArenas = m_pmaStepperArenas;
@@ -92,7 +92,7 @@ void dxWorldProcessContext::CleanupWorldReferences(dxWorld *pswWorldInstance)
     if (m_pswObjectsAllocWorld == pswWorldInstance)
     {
         m_pswObjectsAllocWorld->FreeMutexGroup(m_pmgStepperMutexGroup);
-        m_pswObjectsAllocWorld->FreeThreadedCallWait(m_pcwIslandsSteppingWait);
+        // m_pswObjectsAllocWorld->FreeThreadedCallWait(m_pcwIslandsSteppingWait); -- The stock call wait can not be freed
 
         m_pswObjectsAllocWorld = NULL;
         m_pmgStepperMutexGroup = NULL;
@@ -115,15 +115,15 @@ bool dxWorldProcessContext::EnsureStepperSyncObjectsAreAllocated(dxWorld *pswWor
         if (m_pswObjectsAllocWorld == NULL)
         {
             pmbStepperMutexGroup = pswWorldInstance->AllocMutexGroup(dxPCM__MAX, m_aszContextMutexNames);
-            if (!pmbStepperMutexGroup)
+            if (pmbStepperMutexGroup == NULL)
             {
                 break;
             }
 
             bStepperMutexGroupAllocated = true;
 
-            dCallWaitID pcwIslandsSteppingWait = pswWorldInstance->AllocThreadedCallWait();
-            if (!pcwIslandsSteppingWait)
+            dCallWaitID pcwIslandsSteppingWait = pswWorldInstance->AllocateOrRetrieveStockCallWaitID();
+            if (pcwIslandsSteppingWait == NULL)
             {
                 break;
             }
@@ -660,7 +660,7 @@ void dxStepBody (dxBody *b, dReal h)
     dQtoR (b->q,b->posr.R);
 
     // notify all attached geoms that this body has moved
-    dxWorldProcessContext *world_process_context = b->world->UnsafeGetWorldProcessingContext(); 
+    dxWorldProcessContext *world_process_context = b->world->unsafeGetWorldProcessingContext(); 
     for (dxGeom *geom = b->geom; geom; geom = dGeomGetBodyNext (geom)) {
         world_process_context->LockForStepbodySerialization();
         dGeomMoved (geom);
@@ -900,7 +900,7 @@ bool dxProcessIslands (dxWorld *world, const dxWorldProcessIslandsInfo &islandsI
         int summaryFault = 0;
 
         unsigned activeThreadCount;
-        const unsigned islandsAllowedThreadCount = world->GetThreadingIslandsMaxThreadsCount(&activeThreadCount);
+        const unsigned islandsAllowedThreadCount = world->calculateIslandProcessingMaxThreadCount(&activeThreadCount);
         dIASSERT(islandsAllowedThreadCount != 0);
         dIASSERT(activeThreadCount >= islandsAllowedThreadCount);
 
@@ -961,7 +961,7 @@ int dxIslandsProcessingCallContext::ThreadedProcessJobStart_Callback(void *callC
 
 void dxIslandsProcessingCallContext::ThreadedProcessJobStart()
 {
-    dxWorldProcessContext *context = m_world->UnsafeGetWorldProcessingContext(); 
+    dxWorldProcessContext *context = m_world->unsafeGetWorldProcessingContext(); 
 
     dxWorldProcessMemArena *stepperArena = context->ObtainStepperMemArena();
     dIASSERT(stepperArena != NULL && stepperArena->IsStructureValid());
@@ -1046,7 +1046,7 @@ void dxIslandsProcessingCallContext::ThreadedProcessIslandSearch(dxSingleIslandC
         dxWorldProcessMemArena *stepperArena = stepperCallContext->m_stepperArena;
         stepperCallContext->dxSingleIslandCallContext::~dxSingleIslandCallContext();
 
-        dxWorldProcessContext *context = m_world->UnsafeGetWorldProcessingContext(); 
+        dxWorldProcessContext *context = m_world->unsafeGetWorldProcessingContext(); 
         context->ReturnStepperMemArena(stepperArena);
     }
 }
@@ -1201,7 +1201,7 @@ bool dxReallocateWorldProcessContext (dxWorld *world, dxWorldProcessIslandsInfo 
 
         size_t stepperReqWithCallContext = stepperReq + dEFFICIENT_SIZE(sizeof(dxSingleIslandCallContext));
 
-        unsigned islandThreadsCount = world->GetThreadingIslandsMaxThreadsCount();
+        unsigned islandThreadsCount = world->calculateIslandProcessingMaxThreadCount();
         if (!context->ReallocateStepperMemArenas(world, islandThreadsCount, stepperReqWithCallContext, 
             memmgr, reserveInfo->m_fReserveFactor, reserveInfo->m_uiReserveMinimum))
         {

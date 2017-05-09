@@ -25,6 +25,8 @@
 
 
 #include "typedefs.h"
+#include "error.h"
+#include <ode/memory.h>
 #include <algorithm>
 
 
@@ -46,8 +48,6 @@
 #define dMACRO_MAX(a, b) ((a) > (b) ? (a) : (b))
 #define dMACRO_MIN(a, b) ((a) < (b) ? (a) : (b))
 
-#define dMAKE_PADDING_SIZE(DataType, ElementType) ((sizeof(DataType) + sizeof(ElementType) - 1) / sizeof(ElementType))
-
 
 /* the efficient alignment. most platforms align data structures to some
  * number of bytes, but this is not always the most efficient alignment.
@@ -62,21 +62,99 @@
 #define EFFICIENT_ALIGNMENT 16
 #endif
 
+#define dALIGN_SIZE(buf_size, alignment) (((buf_size) + (alignment - 1)) & (int)(~(alignment - 1))) // Casting the mask to int ensures sign-extension to larger integer sizes
+#define dALIGN_PTR(buf_ptr, alignment) ((void *)(((uintptr)(buf_ptr) + ((alignment) - 1)) & (int)(~(alignment - 1)))) // Casting the mask to int ensures sign-extension to larger integer sizes
 
 /* round something up to be a multiple of the EFFICIENT_ALIGNMENT */
-#define dEFFICIENT_SIZE(x) (((x) + (EFFICIENT_ALIGNMENT - 1)) & (int)(~(EFFICIENT_ALIGNMENT - 1))) // Casting the mask to int ensures sign-extension to larger integer sizes
-#define dEFFICIENT_PTR(p) ((void *)dEFFICIENT_SIZE((uintptr_t)(p)))
-#define dOFFSET_EFFICIENTLY(p, b) ((void *)((uintptr_t)(p) + dEFFICIENT_SIZE(b)))
+#define dEFFICIENT_SIZE(x) dALIGN_SIZE(x, EFFICIENT_ALIGNMENT)
+#define dEFFICIENT_PTR(p) dALIGN_PTR(p, EFFICIENT_ALIGNMENT)
+#define dOFFSET_EFFICIENTLY(p, b) ((void *)((uintptr)(p) + dEFFICIENT_SIZE(b)))
 
 #define dOVERALIGNED_SIZE(size, alignment) dEFFICIENT_SIZE((size) + ((alignment) - EFFICIENT_ALIGNMENT))
-#define dOVERALIGNED_PTR(buf_ptr, alignment) ((void *)(((uintptr_t)(buf_ptr) + ((alignment) - 1)) & (int)(~(alignment - 1)))) // Casting the mask to int ensures sign-extension to larger integer sizes
-#define dOFFSET_OVERALIGNEDLY(buf_ptr, size, alignment) ((void *)((uintptr_t)(buf_ptr) + dOVERALIGNED_SIZE(size, alignment)))
+#define dOVERALIGNED_PTR(buf_ptr, alignment) dALIGN_PTR(buf_ptr, alignment)
+#define dOFFSET_OVERALIGNEDLY(buf_ptr, size, alignment) ((void *)((uintptr)(buf_ptr) + dOVERALIGNED_SIZE(size, alignment)))
+
+
+
+#define dDERIVE_SIZE_UNION_PADDING_ELEMENTS(DataSize, ElementType) (((DataSize) + sizeof(ElementType) - 1) / sizeof(ElementType))
+#define dDERIVE_TYPE_UNION_PADDING_ELEMENTS(DataType, ElementType) dDERIVE_SIZE_UNION_PADDING_ELEMENTS(sizeof(DataType), ElementType)
+#define dDERIVE_SIZE_EXTRA_PADDING_ELEMENTS(DataSize, AlignmentSize, ElementType) (((dALIGN_SIZE(DataSize, dMACRO_MAX(AlignmentSize, sizeof(ElementType))) - (DataSize)) / sizeof(ElementType))
+
+
 
 /* alloca aligned to the EFFICIENT_ALIGNMENT. note that this can waste
  * up to 15 bytes per allocation, depending on what alloca() returns.
  */
 #define dALLOCA16(n) \
     dEFFICIENT_PTR(alloca((n)+(EFFICIENT_ALIGNMENT)))
+
+
+class dxAlignedAllocation
+{
+public:
+    dxAlignedAllocation(): m_userAreaPointer(NULL), m_bufferAllocated(NULL), m_sizeUsed(0) {}
+    ~dxAlignedAllocation() { freeAllocation(); }
+
+    void *allocAligned(size_t sizeRequired, unsigned alignmentRequired)
+    {
+        dIASSERT((alignmentRequired & (alignmentRequired - 1)) == 0);
+        dIASSERT(alignmentRequired <= SIZE_MAX - sizeRequired);
+
+        size_t sizeToUse = sizeRequired + alignmentRequired;
+        void *bufferPointer = dAlloc(sizeToUse);
+        void *userAreaPointer = bufferPointer != NULL && alignmentRequired != 0 ? dALIGN_PTR(bufferPointer, alignmentRequired) : bufferPointer;
+        assignData(userAreaPointer, bufferPointer, sizeToUse);
+
+        return userAreaPointer;
+    }
+
+    void *getUserAreaPointer() const { return m_userAreaPointer; }
+    size_t getUserAreaSize() const { return m_sizeUsed - ((uint8 *)m_userAreaPointer - (uint8 *)m_bufferAllocated); }
+
+    void freeAllocation()
+    {
+        size_t sizeUsed;
+        void *bufferPointer = extractData(sizeUsed);
+        
+        if (bufferPointer != NULL)
+        {
+            dFree(bufferPointer, sizeUsed);
+        }
+    }
+
+private:
+    void assignData(void *userAreaPointer, void *bufferAllocated, size_t sizeUsed)
+    {
+        dIASSERT(m_userAreaPointer == NULL);
+        dIASSERT(m_bufferAllocated == NULL);
+        dIASSERT(m_sizeUsed == 0);
+
+        m_userAreaPointer = userAreaPointer;
+        m_bufferAllocated = bufferAllocated;
+        m_sizeUsed = sizeUsed;
+    }
+
+    void *extractData(size_t &out_sizeUsed)
+    {
+        void *bufferPointer = m_bufferAllocated;
+
+        if (bufferPointer != NULL)
+        {
+            out_sizeUsed = m_sizeUsed;
+
+            m_userAreaPointer = NULL;
+            m_bufferAllocated = NULL;
+            m_sizeUsed = 0;
+        }
+
+        return bufferPointer;
+    }
+
+private:
+    void *m_userAreaPointer;
+    void *m_bufferAllocated;
+    size_t m_sizeUsed;
+};
 
 
 template<typename DstType, typename SrcType>

@@ -47,8 +47,6 @@
 #include "Opcode.h"
 using namespace Opcode;
 
-#include "util.h"
-
 
 #if !dTRIMESH_OPCODE_USE_OLD_TRIMESH_TRIMESH_COLLIDER
 

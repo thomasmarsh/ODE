@@ -32,7 +32,7 @@
 /*extern */
 dReal dxDot (const dReal *a, const dReal *b, unsigned n)
 {
-    return dxtDot<1>(a, b, n);
+    return calculateLargeVectorDot<1>(a, b, n);
 }
 
 

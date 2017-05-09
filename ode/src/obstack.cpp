@@ -25,7 +25,7 @@
 #include <ode/memory.h>
 #include "config.h"
 #include "obstack.h"
-#include "util.h"
+
 
 //****************************************************************************
 // macros and constants

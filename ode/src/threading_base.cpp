@@ -36,6 +36,12 @@
 #include "threading_base.h"
 
 
+dxThreadingBase::~dxThreadingBase()
+{
+    DoFreeStockCallWait();
+}
+
+
 void dxThreadingBase::PostThreadedCallsGroup(
     int *out_summary_fault/*=NULL*/, 
     ddependencycount_t member_count, dCallReleaseeID dependent_releasee/*=NULL*/, 
@@ -83,6 +89,7 @@ void dxThreadingBase::PostThreadedCallForUnawareReleasee(
     functions->post_call(impl, out_summary_fault, out_post_releasee, dependencies_count, dependent_releasee, call_wait, call_func, call_context, instance_index, call_name);
 }
 
+
 const dxThreadingFunctionsInfo *dxThreadingBase::FindThreadingImpl(dThreadingImplementationID &out_impl_found) const
 {
     const dxThreadingFunctionsInfo *functions_found = GetFunctionsInfo();
@@ -93,8 +100,36 @@ const dxThreadingFunctionsInfo *dxThreadingBase::FindThreadingImpl(dThreadingImp
     }
     else
     {
-        functions_found = m_default_impl_provider->RetrieveThreadingDefaultImpl(out_impl_found);
+        functions_found = m_default_impl_provider->retrieveThreadingDefaultImpl(out_impl_found);
     }
 
     return functions_found;
 }
+
+
+dCallWaitID dxThreadingBase::DoAllocateStockCallWait()
+{
+    dIASSERT(GetStockCallWait() == NULL);
+
+    dCallWaitID stock_wait_id = AllocThreadedCallWait();
+
+    if (stock_wait_id != NULL)
+    {
+        SetStockCallWait(stock_wait_id);
+    }
+
+    return stock_wait_id;
+}
+
+void dxThreadingBase::DoFreeStockCallWait()
+{
+    dCallWaitID stock_wait_id = GetStockCallWait();
+
+    if (stock_wait_id != NULL)
+    {
+        FreeThreadedCallWait(stock_wait_id);
+        
+        SetStockCallWait(NULL);
+    }
+}
+

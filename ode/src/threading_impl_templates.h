@@ -1045,7 +1045,7 @@ void dxtemplateJobListSelfHandler<tThreadWakeup, tJobListContainer>::PrepareForW
 template<class tThreadWakeup, class tJobListContainer>
 unsigned dxtemplateJobListSelfHandler<tThreadWakeup, tJobListContainer>::RetrieveActiveThreadsCount()
 {
-    return 1U; // Self-Handling is always performed by a single thread
+    return 0U; // Return zero to indicate that there are no actual active threads provided.
 }
 
 template<class tThreadWakeup, class tJobListContainer>

@@ -112,14 +112,15 @@ rows/columns and manipulate C.
 #include <ode/misc.h>
 #include <ode/timer.h>		// for testing
 #include "config.h"
-#include "matrix.h"
 #include "lcp.h"
-#include "mat.h"		// for testing
 #include "util.h"
+#include "matrix.h"
+#include "mat.h"		// for testing
+#include "threaded_solver_ldlt.h"
 
 #include "fastdot_impl.h"
-#include "matrix_impl.h"
-#include "fastldlt_impl.h"
+#include "fastldltfactor_impl.h"
+#include "fastldltsolve_impl.h"
 
 
 //***************************************************************************
@@ -393,9 +394,9 @@ struct dLCP {
     unsigned indexN (unsigned i) const { return i+m_nC; }
     dReal Aii (unsigned i) const  { return AROW(i)[i]; }
     template<unsigned q_stride>
-    dReal AiC_times_qC (unsigned i, dReal *q) const { return dxtDot<q_stride> (AROW(i), q, m_nC); }
+    dReal AiC_times_qC (unsigned i, dReal *q) const { return calculateLargeVectorDot<q_stride> (AROW(i), q, m_nC); }
     template<unsigned q_stride>
-    dReal AiN_times_qN (unsigned i, dReal *q) const { return dxtDot<q_stride> (AROW(i) + m_nC, q + (size_t)m_nC * q_stride, m_nN); }
+    dReal AiN_times_qN (unsigned i, dReal *q) const { return calculateLargeVectorDot<q_stride> (AROW(i) + m_nC, q + (size_t)m_nC * q_stride, m_nN); }
     void pN_equals_ANC_times_qC (dReal *p, dReal *q);
     void pN_plusequals_ANi (dReal *p, unsigned i, bool dir_positive);
     template<unsigned p_stride>
@@ -490,8 +491,8 @@ dLCP::dLCP (unsigned _n, unsigned _nskip, unsigned _nub, dReal *_Adata, dReal *_
             for (unsigned j = 0; j < nub; Lrow += nskip, ++j) memcpy(Lrow, AROW(j), (j + 1) * sizeof(dReal));
         }
         transfer_b_to_x<false> (m_pairsbx, nub);
-        dxtFactorLDLT<1> (m_L, m_d, nub, m_nskip);
-        dxtSolveLDLT<1, PBX__MAX> (m_L, m_d, m_pairsbx + PBX_X, nub, m_nskip);
+        factorMatrixAsLDLT<1> (m_L, m_d, nub, m_nskip);
+        solveEquationSystemWithLDLT<1, PBX__MAX> (m_L, m_d, m_pairsbx + PBX_X, nub, m_nskip);
         dSetZero (m_w, nub);
         {
             unsigned *C = m_C;
@@ -580,7 +581,7 @@ void dLCP::transfer_i_from_N_to_C (unsigned i)
                 for (unsigned j=0; j<nC; ++j) Dell[j] = aptr[C[j]];
 #   endif
             }
-            dxSolveL1 (m_L, m_Dell, nC, m_nskip);
+            solveL1Straight<1>(m_L, m_Dell, nC, m_nskip);
 
             dReal ell_Dell_dot = REAL(0.0);
             dReal *const Ltgt = m_L + (size_t)m_nskip * nC;
@@ -738,7 +739,7 @@ void dLCP::solve1 (dReal *a, unsigned i, bool dir_positive, int only_transfer)
             for (unsigned j = 0; j < nC; ++j) Dell[j] = aptr[C[j]];
 #   endif
         }
-        dxSolveL1 (m_L, m_Dell, nC, m_nskip);
+        solveL1Straight<1>(m_L, m_Dell, nC, m_nskip);
         {
             dReal *ell = m_ell, *Dell = m_Dell, *d = m_d;
             for (unsigned j = 0; j < nC; ++j) ell[j] = Dell[j] * d[j];
@@ -749,7 +750,7 @@ void dLCP::solve1 (dReal *a, unsigned i, bool dir_positive, int only_transfer)
             {
                 for (unsigned j = 0; j < nC; ++j) tmp[j] = ell[j];
             }
-            dxSolveL1T (m_L, tmp, nC, m_nskip);
+            solveL1Transposed<1>(m_L, tmp, nC, m_nskip);
             if (dir_positive) {
                 unsigned *C = m_C;
                 dReal *tmp = m_tmp;
@@ -833,11 +834,11 @@ void dxSolveLCP_AllUnbounded (dxWorldProcessMemArena *memarena, unsigned n, dRea
     dAASSERT(pairsbx != NULL);
     dAASSERT(n != 0);
 
-    transfer_b_to_x<true> (pairsbx, n);    
+    transfer_b_to_x<true>(pairsbx, n);    
 
     unsigned nskip = dPAD(n);
-    dxtFactorLDLT<PBX__MAX> (A, pairsbx + PBX_B, n, nskip);
-    dxtSolveLDLT<PBX__MAX, PBX__MAX> (A, pairsbx + PBX_B, pairsbx + PBX_X, n, nskip);
+    factorMatrixAsLDLT<PBX__MAX> (A, pairsbx + PBX_B, n, nskip);
+    solveEquationSystemWithLDLT<PBX__MAX, PBX__MAX> (A, pairsbx + PBX_B, pairsbx + PBX_X, n, nskip);
 }
 
 //***************************************************************************
