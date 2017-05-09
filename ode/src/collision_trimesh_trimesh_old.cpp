@@ -141,8 +141,8 @@ dCollideTTL(dxGeom* g1, dxGeom* g2, int Flags, dContactGeom* Contacts, int Strid
     dxTriMesh* TriMesh1 = (dxTriMesh*) g1;
     dxTriMesh* TriMesh2 = (dxTriMesh*) g2;
 
-    const dReal* TriNormals1 = TriMesh1->m_Data->retrieveNormals();
-    const dReal* TriNormals2 = TriMesh2->m_Data->retrieveNormals();
+    const dReal* TriNormals1 = TriMesh1->retrieveMeshNormals();
+    const dReal* TriNormals2 = TriMesh2->retrieveMeshNormals();
 
     const dVector3& TLPosition1 = *(const dVector3*) dGeomGetPosition(TriMesh1);
     // TLRotation1 = column-major order
@@ -158,8 +158,8 @@ dCollideTTL(dxGeom* g1, dxGeom* g2, int Flags, dContactGeom* Contacts, int Strid
     AABBTreeCollider& Collider = pccColliderCache->m_AABBTreeCollider;
     BVTCache &ColCache = pccColliderCache->ColCache;
 
-    ColCache.Model0 = &TriMesh1->m_Data->m_BVTree;
-    ColCache.Model1 = &TriMesh2->m_Data->m_BVTree;
+    ColCache.Model0 = &TriMesh1->retrieveMeshBVTreeRef();
+    ColCache.Model1 = &TriMesh2->retrieveMeshBVTreeRef();
 
     // Collision query
     Matrix4x4 amatrix, bmatrix;

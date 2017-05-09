@@ -257,6 +257,7 @@ public:
 
 public:
     dxTriMeshData *retrieveMeshData() const { return getMeshData(); }
+    const dReal *retrieveMeshNormals() const { return getMeshData()->retrieveNormals(); }
     Model &retrieveMeshBVTreeRef() const { return getMeshData()->m_BVTree; }
     const uint8 *retrieveMeshSmartUseFlags() const { return getMeshData()->smartRetrieveUseFlags(); }
 
