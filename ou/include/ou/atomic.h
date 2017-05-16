@@ -737,6 +737,7 @@ typedef void *atomicptr;
 
 #define __ou_intlck_target_t volatile int32_t *
 #define __ou_xchgadd_target_t volatile int32_t *
+#define __ou_cmpxchg_value_t int32_t
 #define __ou_cmpxchg_target_t volatile int32_t *
 #define __ou_bitmsk_target_t volatile uint32_t *
 
@@ -952,6 +953,7 @@ static _OU_ALWAYSINLINE void _OU_CONVENTION_API
 
 #undef __ou_bitmsk_target_t
 #undef __ou_cmpxchg_target_t
+#undef __ou_cmpxchg_value_t
 #undef __ou_xchgadd_target_t
 #undef __ou_intlck_target_t
 
