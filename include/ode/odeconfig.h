@@ -81,7 +81,23 @@
 
 
 /* Well-defined common data types...need to define for 64 bit systems */
-#if defined(_M_IA64) || defined(__ia64__) || defined(_M_AMD64) || defined(__x86_64__)
+#if defined(__aarch64__)
+    #include <stdint.h>
+    typedef int64_t         dint64;
+    typedef uint64_t        duint64;
+    typedef int32_t         dint32;
+    typedef uint32_t        duint32;
+    typedef int16_t         dint16;
+    typedef uint16_t        duint16;
+    typedef int8_t          dint8;
+    typedef uint8_t         duint8;
+
+    typedef intptr_t        dintptr;
+    typedef uintptr_t       duintptr;
+    typedef ptrdiff_t       ddiffint;
+    typedef size_t          dsizeint;
+
+#elif defined(_M_IA64) || defined(__ia64__) || defined(_M_AMD64) || defined(__x86_64__)
   #define X86_64_SYSTEM   1
 #if defined(_MSC_VER)
   typedef __int64         dint64;
