@@ -298,6 +298,7 @@
       "../ode/src/joints",
       "../OPCODE",
       "../GIMPACT/include",
+      "../libccd/src/custom",
       "../libccd/src"
     }
 
@@ -384,7 +385,7 @@
       }
  
     configuration { "with-libccd" }
-      files   { "../libccd/src/ccd/*.h", "../libccd/src/*.c" }
+      files   { "../libccd/src/custom/ccdcustom/*.h", "../libccd/src/ccd/*.h", "../libccd/src/*.c" }
       defines { "dLIBCCD_ENABLED", "dLIBCCD_INTERNAL", 
         "dLIBCCD_BOX_CYL", "dLIBCCD_CYL_CYL", "dLIBCCD_CAP_CYL", "dLIBCCD_CONVEX_BOX",
         "dLIBCCD_CONVEX_CAP", "dLIBCCD_CONVEX_CYL", "dLIBCCD_CONVEX_SPHERE", "dLIBCCD_CONVEX_CONVEX" }

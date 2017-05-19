@@ -18,7 +18,7 @@
 #include <stdio.h>
 #include <float.h>
 #include <ccd/ccd.h>
-#include <ccd/vec3.h>
+#include <ccdcustom/vec3.h>
 #include <ccd/simplex.h>
 #include <ccd/polytope.h>
 #include <ccd/alloc.h>
@@ -185,7 +185,7 @@ int ccdGJKPenetration(const void *obj1, const void *obj2, const ccd_t *ccd,
     if (ret == 0 && nearest){
         // store normalized direction vector
         ccdVec3Copy(dir, &nearest->witness);
-        ret = ccdVec3Normalize(dir);
+        ret = ccdVec3SafeNormalize(dir);
 
         if (ret == 0) {
             // compute depth of penetration

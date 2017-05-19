@@ -65,7 +65,6 @@ typedef float ccd_real_t;
 # define CCD_FABS(x) (fabsf(x)) /*!< absolute value */
 # define CCD_FMAX(x, y) (fmaxf((x), (y))) /*!< maximum of two floats */
 # define CCD_FMIN(x, y) (fminf((x), (y))) /*!< minimum of two floats */
-# define CCD_ATAN2(x, y) (atan2f((x), (y))) /*!< atan2 of two floats */
 #endif /* CCD_SINGLE */
 
 #ifdef CCD_DOUBLE
@@ -81,7 +80,6 @@ typedef double ccd_real_t;
 # define CCD_FABS(x) (fabs(x)) /*!< absolute value */
 # define CCD_FMAX(x, y) (fmax((x), (y))) /*!< maximum of two floats */
 # define CCD_FMIN(x, y) (fmin((x), (y))) /*!< minimum of two floats */
-# define CCD_ATAN2(x, y) (atan2((x), (y))) /*!< atan2 of two floats */
 #endif /* CCD_DOUBLE */
 
 #define CCD_ONE CCD_REAL(1.)
@@ -161,30 +159,15 @@ _ccd_inline void ccdVec3Add(ccd_vec3_t *v, const ccd_vec3_t *w);
 _ccd_inline void ccdVec3Sub2(ccd_vec3_t *d, const ccd_vec3_t *v, const ccd_vec3_t *w);
 
 /**
- * d = v + w
- */
-_ccd_inline void ccdVec3Add2(ccd_vec3_t *d, const ccd_vec3_t *v, const ccd_vec3_t *w);
-
-/**
  * d = d * k;
  */
 _ccd_inline void ccdVec3Scale(ccd_vec3_t *d, ccd_real_t k);
-
-/**
- * d = s * k;
- */
-_ccd_inline void ccdVec3CopyScaled(ccd_vec3_t *d, const ccd_vec3_t *s, ccd_real_t k);
-
-/**
- * d = v + s * k;
- */
-_ccd_inline void ccdVec3AddScaled(ccd_vec3_t *d, const ccd_vec3_t *v, const ccd_vec3_t *s, ccd_real_t k);
 
 
 /**
  * Normalizes given vector to unit length.
  */
-_ccd_inline int ccdVec3Normalize(ccd_vec3_t *d);
+_ccd_inline void ccdVec3Normalize(ccd_vec3_t *d);
 
 
 /**
@@ -306,13 +289,6 @@ _ccd_inline void ccdVec3Sub(ccd_vec3_t *v, const ccd_vec3_t *w)
     v->v[2] -= w->v[2];
 }
 
-_ccd_inline void ccdVec3Add(ccd_vec3_t *v, const ccd_vec3_t *w)
-{
-    v->v[0] += w->v[0];
-    v->v[1] += w->v[1];
-    v->v[2] += w->v[2];
-}
-
 _ccd_inline void ccdVec3Sub2(ccd_vec3_t *d, const ccd_vec3_t *v, const ccd_vec3_t *w)
 {
     d->v[0] = v->v[0] - w->v[0];
@@ -320,11 +296,11 @@ _ccd_inline void ccdVec3Sub2(ccd_vec3_t *d, const ccd_vec3_t *v, const ccd_vec3_
     d->v[2] = v->v[2] - w->v[2];
 }
 
-_ccd_inline void ccdVec3Add2(ccd_vec3_t *d, const ccd_vec3_t *v, const ccd_vec3_t *w)
+_ccd_inline void ccdVec3Add(ccd_vec3_t *v, const ccd_vec3_t *w)
 {
-    d->v[0] = v->v[0] + w->v[0];
-    d->v[1] = v->v[1] + w->v[1];
-    d->v[2] = v->v[2] + w->v[2];
+    v->v[0] += w->v[0];
+    v->v[1] += w->v[1];
+    v->v[2] += w->v[2];
 }
 
 _ccd_inline void ccdVec3Scale(ccd_vec3_t *d, ccd_real_t k)
@@ -334,31 +310,10 @@ _ccd_inline void ccdVec3Scale(ccd_vec3_t *d, ccd_real_t k)
     d->v[2] *= k;
 }
 
-_ccd_inline void ccdVec3CopyScaled(ccd_vec3_t *d, const ccd_vec3_t *s, ccd_real_t k)
+_ccd_inline void ccdVec3Normalize(ccd_vec3_t *d)
 {
-    d->v[0] = s->v[0] * k;
-    d->v[1] = s->v[1] * k;
-    d->v[2] = s->v[2] * k;
-}
-
-_ccd_inline void ccdVec3AddScaled(ccd_vec3_t *d, const ccd_vec3_t *v, const ccd_vec3_t *s, ccd_real_t k)
-{
-    d->v[0] = v->v[0] + s->v[0] * k;
-    d->v[1] = v->v[1] + s->v[1] * k;
-    d->v[2] = v->v[2] + s->v[2] * k;
-}
-
-_ccd_inline int ccdVec3Normalize(ccd_vec3_t *d)
-{
-    int result = -1;
-
-    ccd_real_t len = CCD_SQRT(ccdVec3Len2(d));
-    if (len >= CCD_EPS) {
-        ccdVec3Scale(d, CCD_ONE / len);
-        result = 0;
-    }
-
-    return result;
+    ccd_real_t k = CCD_ONE / CCD_SQRT(ccdVec3Len2(d));
+    ccdVec3Scale(d, k);
 }
 
 _ccd_inline ccd_real_t ccdVec3Dot(const ccd_vec3_t *a, const ccd_vec3_t *b)

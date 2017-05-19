@@ -17,6 +17,7 @@
 
 #include <stdlib.h>
 #include <ccd/ccd.h>
+#include <ccdcustom/vec3.h>
 #include <ccd/simplex.h>
 #include <ccd/dbg.h>
 
@@ -189,7 +190,7 @@ static int discoverPortal(const void *obj1, const void *obj2,
     // vertex 1 = support in direction of origin
     ccdVec3Copy(&dir, &ccdSimplexPoint(portal, 0)->v);
     ccdVec3Scale(&dir, CCD_REAL(-1.));
-    if (ccdVec3Normalize(&dir) != 0) {
+    if (ccdVec3SafeNormalize(&dir) != 0) {
         return -1;
     }
     __ccdSupport(obj1, obj2, &dir, ccd, ccdSimplexPointW(portal, 1));
@@ -214,7 +215,7 @@ static int discoverPortal(const void *obj1, const void *obj2,
         }
     }
 
-    if (ccdVec3Normalize(&dir) != 0) {
+    if (ccdVec3SafeNormalize(&dir) != 0) {
         return -1;
     }
     __ccdSupport(obj1, obj2, &dir, ccd, ccdSimplexPointW(portal, 2));
@@ -231,7 +232,7 @@ static int discoverPortal(const void *obj1, const void *obj2,
     ccdVec3Sub2(&vb, &ccdSimplexPoint(portal, 2)->v,
                      &ccdSimplexPoint(portal, 0)->v);
     ccdVec3Cross(&dir, &va, &vb);
-    if (ccdVec3Normalize(&dir) != 0) {
+    if (ccdVec3SafeNormalize(&dir) != 0) {
         return -1;
     }
 
@@ -279,7 +280,7 @@ static int discoverPortal(const void *obj1, const void *obj2,
             ccdVec3Sub2(&vb, &ccdSimplexPoint(portal, 2)->v,
                              &ccdSimplexPoint(portal, 0)->v);
             ccdVec3Cross(&dir, &va, &vb);
-            if (ccdVec3Normalize(&dir) != 0) {
+            if (ccdVec3SafeNormalize(&dir) != 0) {
                 return -1;
             }
         }else{
@@ -352,7 +353,7 @@ static int findPenetr(const void *obj1, const void *obj2, const ccd_t *ccd,
                                           &ccdSimplexPoint(portal, 3)->v,
                                           pdir);
             *depth = CCD_SQRT(*depth);
-            if (ccdVec3Normalize(pdir) != 0) {
+            if (ccdVec3SafeNormalize(pdir) != 0) {
                 return -1;
             }
 
@@ -412,7 +413,7 @@ static int findPenetrSegment(const void *obj1, const void *obj2, const ccd_t *cc
 
     ccdVec3Copy(dir, &ccdSimplexPoint(portal, 1)->v);
     *depth = CCD_SQRT(ccdVec3Len2(dir));
-    if (ccdVec3Normalize(dir) != 0) {
+    if (ccdVec3SafeNormalize(dir) != 0) {
         return -1;
     }
     return 0;
@@ -522,7 +523,7 @@ _ccd_inline int portalDir(const ccd_simplex_t *portal, ccd_vec3_t *dir)
     ccdVec3Sub2(&v3v1, &ccdSimplexPoint(portal, 3)->v,
                        &ccdSimplexPoint(portal, 1)->v);
     ccdVec3Cross(dir, &v2v1, &v3v1);
-    if (ccdVec3Normalize(dir) != 0) {
+    if (ccdVec3SafeNormalize(dir) != 0) {
         return -1;
     }
     return 0;
