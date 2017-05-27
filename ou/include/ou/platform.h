@@ -55,8 +55,9 @@
 #define _OU_TARGET_ARCH_POWERPC 5
 #define _OU_TARGET_ARCH_SPARC   6
 #define _OU_TARGET_ARCH_ARM     7
+#define _OU_TARGET_ARCH_AARCH64	8
 
-#define _OU_TARGET_ARCH__MAX    8
+#define _OU_TARGET_ARCH__MAX    9
 
 
 //////////////////////////////////////////////////////////////////////////
@@ -198,9 +199,14 @@
 #define _OU_TARGET_ARCH			_OU_TARGET_ARCH_SPARC
 
 
-#elif defined(TARGET_OS_IPHONE)
+#elif defined(__arm__) || defined(_M_ARM) || defined(TARGET_OS_IPHONE)
  
 #define _OU_TARGET_ARCH         _OU_TARGET_ARCH_ARM
+
+
+#elif defined(__aarch64__)
+
+#define _OU_TARGET_ARCH         _OU_TARGET_ARCH_AARCH64
 
 
 #else // Unknown architecture
