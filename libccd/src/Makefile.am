@@ -1,6 +1,6 @@
 SUBDIRS = testsuites
 
-AM_CPPFLAGS = -I./custom
+AM_CPPFLAGS = -I$(top_srcdir)/src/custom
 AM_CFLAGS = -std=c99
 
 noinst_LTLIBRARIES = libccd.la

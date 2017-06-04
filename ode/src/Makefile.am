@@ -154,7 +154,7 @@ endif
 if LIBCCD
 
 AM_CPPFLAGS += -DdLIBCCD_ENABLED
-AM_CPPFLAGS += -I$(top_srcdir)/libccd/src/custom -I$(top_builddir)/libccd/src/custom
+AM_CPPFLAGS += -I$(top_srcdir)/libccd/src/custom
 
 if LIBCCD_INTERNAL
 AM_CPPFLAGS += -I$(top_srcdir)/libccd/src -I$(top_builddir)/libccd/src 
