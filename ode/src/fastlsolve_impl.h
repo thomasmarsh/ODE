@@ -448,14 +448,14 @@ void solveL1Straight (const dReal *L, dReal *B, unsigned rowCount, unsigned rowS
 
 template<unsigned int block_step>
 /*static */
-size_t ThreadedEquationSolverLDLT::estimateCooperativelySolvingL1StraightMemoryRequirement(unsigned rowCount, SolvingL1StraightMemoryEstimates &ref_solvingMemoryEstimates)
+sizeint ThreadedEquationSolverLDLT::estimateCooperativelySolvingL1StraightMemoryRequirement(unsigned rowCount, SolvingL1StraightMemoryEstimates &ref_solvingMemoryEstimates)
 {
     unsigned blockCount = deriveSolvingL1StraightBlockCount(rowCount, block_step);
-    size_t descriptorSizeRequired = dEFFICIENT_SIZE(sizeof(cellindexint) * blockCount);
-    size_t contextSizeRequired = dEFFICIENT_SIZE(sizeof(SolveL1StraightCellContext) * (CCI__MAX + 1) * blockCount);
+    sizeint descriptorSizeRequired = dEFFICIENT_SIZE(sizeof(cellindexint) * blockCount);
+    sizeint contextSizeRequired = dEFFICIENT_SIZE(sizeof(SolveL1StraightCellContext) * (CCI__MAX + 1) * blockCount);
     ref_solvingMemoryEstimates.assignData(descriptorSizeRequired, contextSizeRequired);
 
-    size_t totalSizeRequired = descriptorSizeRequired + contextSizeRequired;
+    sizeint totalSizeRequired = descriptorSizeRequired + contextSizeRequired;
     return totalSizeRequired;
 }
 
@@ -631,8 +631,8 @@ void ThreadedEquationSolverLDLT::participateSolvingL1Straight(const dReal *L, dR
 
                 if (currentBlock != 0)
                 {
-                    ptrLElement = L + (size_t)(1 + currentBlock * block_step) * rowSkip + completedColumnBlock * block_step;
-                    ptrBElement = B + (size_t)(completedColumnBlock * block_step) * b_stride;
+                    ptrLElement = L + (sizeint)(1 + currentBlock * block_step) * rowSkip + completedColumnBlock * block_step;
+                    ptrBElement = B + (sizeint)(completedColumnBlock * block_step) * b_stride;
 
                     /* the inner loop that computes outer products and adds them to Z */
                     finalColumnBlock = dMACRO_MIN(currentBlock, completedBlocks);
@@ -852,8 +852,8 @@ void ThreadedEquationSolverLDLT::participateSolvingL1Straight(const dReal *L, dR
                 }
                 else
                 {
-                    ptrLElement = L + (size_t)(1/* + currentBlock * block_step*/) * rowSkip/* + completedColumnBlock * block_step*/;
-                    ptrBElement = B/* + (size_t)(completedColumnBlock * block_step) * b_stride*/;
+                    ptrLElement = L + (sizeint)(1/* + currentBlock * block_step*/) * rowSkip/* + completedColumnBlock * block_step*/;
+                    ptrBElement = B/* + (sizeint)(completedColumnBlock * block_step) * b_stride*/;
                     dIASSERT(completedColumnBlock == 0);
 
                     rowEndReached = true;
@@ -867,8 +867,8 @@ void ThreadedEquationSolverLDLT::participateSolvingL1Straight(const dReal *L, dR
                 {
                     dReal tempZ[dMACRO_MAX(block_step - 1U, 1U)] = { REAL(0.0), };
 
-                    ptrLElement = L + (size_t)(/*1 + */currentBlock * block_step) * rowSkip + completedColumnBlock * block_step;
-                    ptrBElement = B + (size_t)(completedColumnBlock * block_step) * b_stride;
+                    ptrLElement = L + (sizeint)(/*1 + */currentBlock * block_step) * rowSkip + completedColumnBlock * block_step;
+                    ptrBElement = B + (sizeint)(completedColumnBlock * block_step) * b_stride;
 
                     /* the inner loop that computes outer products and adds them to Z */
                     finalColumnBlock = dMACRO_MIN(currentBlock, completedBlocks);
@@ -982,7 +982,7 @@ void ThreadedEquationSolverLDLT::participateSolvingL1Straight(const dReal *L, dR
                                     // Note, that ff there is just one partial row, it does not matter that 
                                     // the LElement will remain pointing at the first row, 
                                     // since the former is not going to be used in that case.
-                                    ptrLElement -= /*(size_t)*/rowSkip/* * (loopX1RowCount - 2)*/; dIASSERT(loopX1RowCount == 3);
+                                    ptrLElement -= /*(sizeint)*/rowSkip/* * (loopX1RowCount - 2)*/; dIASSERT(loopX1RowCount == 3);
                                 }
                                 dSASSERT(block_step == 4);
 
@@ -1003,7 +1003,7 @@ void ThreadedEquationSolverLDLT::participateSolvingL1Straight(const dReal *L, dR
                             partialRow = 0;
 
                             // Correct the LElement pointer to continue at the first partial row
-                            ptrLElement -= (size_t)rowSkip * (loopX1RowCount - 1);
+                            ptrLElement -= (sizeint)rowSkip * (loopX1RowCount - 1);
 
                             // ...continue if so.
                             columnCompletedSoFar = finalColumnBlock;
@@ -1012,15 +1012,15 @@ void ThreadedEquationSolverLDLT::participateSolvingL1Straight(const dReal *L, dR
                         else
                         {
                             ptrLElement += rowSkip - (finalColumnBlock - columnCompletedSoFar) * block_step;
-                            ptrBElement -= (size_t)((finalColumnBlock - columnCompletedSoFar) * block_step) * b_stride;
+                            ptrBElement -= (sizeint)((finalColumnBlock - columnCompletedSoFar) * block_step) * b_stride;
                         }
                         /* end of loop by individual rows */
                     }
                 }
                 else
                 {
-                    ptrLElement = L + (size_t)(1/* + currentBlock * block_step*/) * rowSkip/* + completedColumnBlock * block_step*/;
-                    ptrBElement = B/* + (size_t)(completedColumnBlock * block_step) * b_stride*/;
+                    ptrLElement = L + (sizeint)(1/* + currentBlock * block_step*/) * rowSkip/* + completedColumnBlock * block_step*/;
+                    ptrBElement = B/* + (sizeint)(completedColumnBlock * block_step) * b_stride*/;
                     dIASSERT(completedColumnBlock == 0);
 
                     rowEndReached = true;
@@ -1118,7 +1118,7 @@ void ThreadedEquationSolverLDLT::participateSolvingL1Straight(const dReal *L, dR
                 if (!CooperativeAtomics::AtomicCompareExchangeCellindexint(&blockProgressDescriptors[currentBlock], oldDescriptor, newDescriptor))
                 {
                     // Adjust the ptrBElement to point to the result area...
-                    ptrBElement = B + (size_t)(currentBlock * block_step) * b_stride;
+                    ptrBElement = B + (sizeint)(currentBlock * block_step) * b_stride;
                     // ...and go on handling the case
                     handleComputationTakenOver = true;
                 }
@@ -1163,8 +1163,8 @@ void ThreadedEquationSolverLDLT::participateSolvingL1Straight(const dReal *L, dR
                 {
                     partialBlock = false;
 
-                    ptrLElement = L + (size_t)(1 + currentBlock * block_step) * rowSkip + completedColumnBlock * block_step;
-                    ptrBElement = B + (size_t)(completedColumnBlock * block_step) * b_stride;
+                    ptrLElement = L + (sizeint)(1 + currentBlock * block_step) * rowSkip + completedColumnBlock * block_step;
+                    ptrBElement = B + (sizeint)(completedColumnBlock * block_step) * b_stride;
 
                     /* the inner loop that computes outer products and adds them to Z */
                     unsigned finalColumnBlock = currentBlock;
@@ -1282,8 +1282,8 @@ void ThreadedEquationSolverLDLT::participateSolvingL1Straight(const dReal *L, dR
 
                     dReal tempZ[dMACRO_MAX(block_step - 1U, 1U)] = { REAL(0.0), };
 
-                    ptrLElement = L + (size_t)(/*1 + */currentBlock * block_step) * rowSkip + completedColumnBlock * block_step;
-                    ptrBElement = B + (size_t)(completedColumnBlock * block_step) * b_stride;
+                    ptrLElement = L + (sizeint)(/*1 + */currentBlock * block_step) * rowSkip + completedColumnBlock * block_step;
+                    ptrBElement = B + (sizeint)(completedColumnBlock * block_step) * b_stride;
 
                     /* the inner loop that computes outer products and adds them to Z */
                     unsigned finalColumnBlock = currentBlock;
@@ -1383,7 +1383,7 @@ void ThreadedEquationSolverLDLT::participateSolvingL1Straight(const dReal *L, dR
                                     // Note, that if there is just one partial row, it does not matter that 
                                     // the LElement will remain pointing at the first row, 
                                     // since the former is not going to be used in that case.
-                                    ptrLElement -= /*(size_t)*/rowSkip/* * (loopX1RowCount - 2)*/; dIASSERT(loopX1RowCount == 3);
+                                    ptrLElement -= /*(sizeint)*/rowSkip/* * (loopX1RowCount - 2)*/; dIASSERT(loopX1RowCount == 3);
                                 }
                             }
                             dSASSERT(block_step == 4);
@@ -1392,7 +1392,7 @@ void ThreadedEquationSolverLDLT::participateSolvingL1Straight(const dReal *L, dR
                         }
 
                         /* advance pointers */
-                        ptrLElement -= (size_t)rowSkip * (loopX1RowCount - 1);
+                        ptrLElement -= (sizeint)rowSkip * (loopX1RowCount - 1);
                         /* end of inner loop */
                     }
                 }
@@ -1412,8 +1412,8 @@ void ThreadedEquationSolverLDLT::participateSolvingL1Straight(const dReal *L, dR
                 partialBlock = rowCount < block_step;
 
                 /* assign the pointers appropriately and go on computing the results */
-                ptrLElement = L + (size_t)(1/* + currentBlock * block_step*/) * rowSkip/* + completedColumnBlock * block_step*/;
-                ptrBElement = B/* + (size_t)(completedColumnBlock * block_step) * b_stride*/;
+                ptrLElement = L + (sizeint)(1/* + currentBlock * block_step*/) * rowSkip/* + completedColumnBlock * block_step*/;
+                ptrBElement = B/* + (sizeint)(completedColumnBlock * block_step) * b_stride*/;
             }
 
             if (!skipToHandlingSubsequentRows)
@@ -1499,7 +1499,7 @@ void ThreadedEquationSolverLDLT::participateSolvingL1Straight(const dReal *L, dR
                         const SolveL1StraightCellContext &resultContext = buildResultContextRef(cellContexts, currentBlock, blockCount);
                         resultContext.loadPrecalculatedZs(Y);
 
-                        ptrBElement = B + (size_t)(currentBlock * block_step) * b_stride;
+                        ptrBElement = B + (sizeint)(currentBlock * block_step) * b_stride;
                     }
 
                     goAssigningTheResult = true;

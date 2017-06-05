@@ -684,7 +684,7 @@ dxJointPiston::type() const
 }
 
 
-size_t
+sizeint
 dxJointPiston::size() const
 {
     return sizeof ( *this );

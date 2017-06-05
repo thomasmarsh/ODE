@@ -298,7 +298,7 @@ dxJointDBall::type() const
     return dJointTypeDBall;
 }
 
-size_t
+sizeint
 dxJointDBall::size() const
 {
     return sizeof( *this );

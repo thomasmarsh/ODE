@@ -213,7 +213,7 @@ dxJointDHinge::type() const
     return dJointTypeDHinge;
 }
 
-size_t
+sizeint
 dxJointDHinge::size() const
 {
     return sizeof( *this );

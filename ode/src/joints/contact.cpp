@@ -313,7 +313,7 @@ dxJointContact::type() const
 }
 
 
-size_t
+sizeint
 dxJointContact::size() const
 {
     return sizeof( *this );

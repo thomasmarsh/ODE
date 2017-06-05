@@ -514,8 +514,8 @@ template<class tThreadMutex>
 {
     dAASSERT(Mutex_count != 0);
 
-    const dxtemplateMutexGroup<tThreadMutex> *const dummy_group = (dxtemplateMutexGroup<tThreadMutex> *)(size_t)8;
-    const size_t size_requited = ((size_t)(&dummy_group->m_Mutex_array) - (size_t)dummy_group) + Mutex_count * sizeof(tThreadMutex);
+    const dxtemplateMutexGroup<tThreadMutex> *const dummy_group = (dxtemplateMutexGroup<tThreadMutex> *)(sizeint)8;
+    const sizeint size_requited = ((sizeint)(&dummy_group->m_Mutex_array) - (sizeint)dummy_group) + Mutex_count * sizeof(tThreadMutex);
     dxtemplateMutexGroup<tThreadMutex> *mutex_group = (dxtemplateMutexGroup<tThreadMutex> *)dAlloc(size_requited);
 
     if (mutex_group != NULL)
@@ -540,9 +540,9 @@ template<class tThreadMutex>
         dmutexindex_t Mutex_count = mutex_group->m_un.m_mutex_count;
         mutex_group->FinalizeMutexArray(Mutex_count);
 
-        const size_t anyting_not_zero = 2 * sizeof(size_t);
+        const sizeint anyting_not_zero = 2 * sizeof(sizeint);
         const dxtemplateMutexGroup<tThreadMutex> *const dummy_group = (dxtemplateMutexGroup<tThreadMutex> *)anyting_not_zero;
-        const size_t size_requited = ((size_t)(&dummy_group->m_Mutex_array) - (size_t)dummy_group) + Mutex_count * sizeof(tThreadMutex);
+        const sizeint size_requited = ((sizeint)(&dummy_group->m_Mutex_array) - (sizeint)dummy_group) + Mutex_count * sizeof(tThreadMutex);
         dFree((void *)mutex_group, size_requited);
     }
 }

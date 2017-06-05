@@ -91,7 +91,7 @@ dxTriMeshData::~dxTriMeshData()
 {
     if ( m_InternalUseFlags != NULL )
     {
-        size_t flagsMemoryRequired = calculateUseFlagsMemoryRequirement();
+        sizeint flagsMemoryRequired = calculateUseFlagsMemoryRequirement();
         dFree(m_InternalUseFlags, flagsMemoryRequired);
     }
 }
@@ -214,7 +214,7 @@ struct TrimeshDataVertexIndexAccessor_OPCODE
         const IndexedTriangle *triIndicesBegin = m_TriIndicesBegin;
         const unsigned triStride = m_TriStride;
 
-        const IndexedTriangle *triIndicesOfInterest = (const IndexedTriangle *)((const uint8 *)triIndicesBegin + triangleIdx * (size_t)triStride);
+        const IndexedTriangle *triIndicesOfInterest = (const IndexedTriangle *)((const uint8 *)triIndicesBegin + triangleIdx * (sizeint)triStride);
         std::copy(triIndicesOfInterest->mVRef, triIndicesOfInterest->mVRef + dMTV__MAX, out_VertexIndices);
         dSASSERT(dMTV__MAX == dARRAY_SIZE(triIndicesOfInterest->mVRef));
         dSASSERT(dMTV_FIRST == 0);
@@ -264,7 +264,7 @@ bool dxTriMeshData::meaningfulPreprocessData(bool buildUseFlags/*=false*/, FaceA
     bool result = false;
 
     uint8 *useFlags = NULL;
-    size_t flagsMemoryRequired = 0;
+    sizeint flagsMemoryRequired = 0;
     bool flagsAllocated = false, anglesAllocated = false;
 
     do 
@@ -294,12 +294,12 @@ bool dxTriMeshData::meaningfulPreprocessData(bool buildUseFlags/*=false*/, FaceA
 
         const unsigned int numTris = m_Mesh.GetNbTriangles();
         const unsigned int numVertices = m_Mesh.GetNbVertices();
-        size_t numEdges = (size_t)numTris * dMTV__MAX;
+        sizeint numEdges = (sizeint)numTris * dMTV__MAX;
         dIASSERT(numVertices <= numEdges); // Edge records are going to be used for vertex data as well
 
-        const size_t recordsMemoryRequired = dEFFICIENT_SIZE(numEdges * sizeof(EdgeRecord));
-        const size_t verticesMemoryRequired = /*dEFFICIENT_SIZE*/(numVertices * sizeof(VertexRecord)); // Skip alignment for the last chunk
-        const size_t totalTempMemoryRequired = recordsMemoryRequired + verticesMemoryRequired;
+        const sizeint recordsMemoryRequired = dEFFICIENT_SIZE(numEdges * sizeof(EdgeRecord));
+        const sizeint verticesMemoryRequired = /*dEFFICIENT_SIZE*/(numVertices * sizeof(VertexRecord)); // Skip alignment for the last chunk
+        const sizeint totalTempMemoryRequired = recordsMemoryRequired + verticesMemoryRequired;
         void *tempBuffer = dAlloc(totalTempMemoryRequired);
         
         if (tempBuffer == NULL)
@@ -618,22 +618,22 @@ void dGeomTriMeshDataSet(dTriMeshDataID g, int dataId, void *pDataLocation)
     }
 }
 
-static void *geomTriMeshDataGet(dTriMeshDataID g, int dataId, size_t *pOutDataSize);
+static void *geomTriMeshDataGet(dTriMeshDataID g, int dataId, sizeint *pOutDataSize);
 
 /*extern */
-void *dGeomTriMeshDataGet(dTriMeshDataID g, int dataId, size_t *pOutDataSize)
+void *dGeomTriMeshDataGet(dTriMeshDataID g, int dataId, sizeint *pOutDataSize)
 {
     return geomTriMeshDataGet(g, dataId, NULL);
 }
 
 /*extern */
-void *dGeomTriMeshDataGet2(dTriMeshDataID g, int dataId, size_t *pOutDataSize)
+void *dGeomTriMeshDataGet2(dTriMeshDataID g, int dataId, sizeint *pOutDataSize)
 {
     return geomTriMeshDataGet(g, dataId, pOutDataSize);
 }
 
 static 
-void *geomTriMeshDataGet(dTriMeshDataID g, int dataId, size_t *pOutDataSize)
+void *geomTriMeshDataGet(dTriMeshDataID g, int dataId, sizeint *pOutDataSize)
 {
     dUASSERT(g, "The argument is not a trimesh data");
 

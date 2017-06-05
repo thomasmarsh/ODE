@@ -76,6 +76,6 @@ void dxSolveLCP (dxWorldProcessMemArena *memarena,
     unsigned n, dReal *A, dReal pairsbx[PBX__MAX], dReal *w,
     unsigned nub, dReal pairslh[PLH__MAX], int *findex);
 
-size_t dxEstimateSolveLCPMemoryReq(unsigned n, bool outer_w_avail);
+sizeint dxEstimateSolveLCPMemoryReq(unsigned n, bool outer_w_avail);
 
 #endif

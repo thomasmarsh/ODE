@@ -250,7 +250,7 @@ extern int      main
 
         g_globals_ptr->dyn_bodies[b].create (g_globals_ptr->dyn_world);
         g_globals_ptr->dyn_bodies[b].setPosition (x, y, z/2);
-        g_globals_ptr->dyn_bodies[b].setData ((void*) (size_t)b);
+        g_globals_ptr->dyn_bodies[b].setData ((void*) (dsizeint)b);
         dBodySetLinearVel (g_globals_ptr->dyn_bodies[b].id (),
             dReal( 3 * (drand48 () - 0.5) ), 
 			dReal( 3 * (drand48 () - 0.5) ), 0);

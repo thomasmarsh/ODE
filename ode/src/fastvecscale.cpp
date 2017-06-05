@@ -98,7 +98,7 @@ void ThreadedEquationSolverLDLT::doEstimateCooperativeScalingVectorResourceRequi
 {
     unsigned simultaneousCallCount = 1 + (allowedThreadCount - 1);
 
-    size_t scalingMemoryRequired = 0;
+    sizeint scalingMemoryRequired = 0;
     const unsigned scalingAlignmentRequired = 0;
 
     unsigned featureRequirement = dxResourceRequirementDescriptor::STOCK_CALLWAIT_REQUIRED;

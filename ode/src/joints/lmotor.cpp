@@ -206,7 +206,7 @@ dxJointLMotor::type() const
 }
 
 
-size_t
+sizeint
 dxJointLMotor::size() const
 {
     return sizeof( *this );

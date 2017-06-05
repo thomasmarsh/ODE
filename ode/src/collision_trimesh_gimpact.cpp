@@ -75,7 +75,7 @@ struct TrimeshDataVertexIndexAccessor_GIMPACT
         const GUINT32 *triIndicesBegin = m_TriangleVertexIndices;
         const unsigned triStride = TRIANGLEINDEX_STRIDE;
 
-        const GUINT32 *triIndicesOfInterest = (const GUINT32 *)((const uint8 *)triIndicesBegin + (size_t)triangleIdx * triStride);
+        const GUINT32 *triIndicesOfInterest = (const GUINT32 *)((const uint8 *)triIndicesBegin + (sizeint)triangleIdx * triStride);
         std::copy(triIndicesOfInterest, triIndicesOfInterest + dMTV__MAX, out_VertexIndices);
     }
 
@@ -132,12 +132,12 @@ bool dxTriMeshData::meaningfulPreprocessData(FaceAngleStorageMethod faceAndgesRe
 
         const unsigned int numTris = retrieveTriangleCount();
         const unsigned int numVertices = retrieveVertexCount();
-        size_t numEdges = (size_t)numTris * dMTV__MAX;
+        sizeint numEdges = (sizeint)numTris * dMTV__MAX;
         dIASSERT(numVertices <= numEdges); // Edge records are going to be used for vertex data as well
 
-        const size_t recordsMemoryRequired = dEFFICIENT_SIZE(numEdges * sizeof(EdgeRecord));
-        const size_t verticesMemoryRequired = /*dEFFICIENT_SIZE*/(numVertices * sizeof(VertexRecord)); // Skip alignment for the last chunk
-        const size_t totalTempMemoryRequired = recordsMemoryRequired + verticesMemoryRequired;
+        const sizeint recordsMemoryRequired = dEFFICIENT_SIZE(numEdges * sizeof(EdgeRecord));
+        const sizeint verticesMemoryRequired = /*dEFFICIENT_SIZE*/(numVertices * sizeof(VertexRecord)); // Skip alignment for the last chunk
+        const sizeint totalTempMemoryRequired = recordsMemoryRequired + verticesMemoryRequired;
         void *tempBuffer = dAlloc(totalTempMemoryRequired);
 
         if (tempBuffer == NULL)
@@ -226,8 +226,8 @@ void dxTriMesh::assignMeshData(dxTriMeshData *Data)
     {
         const GUINT32 *triangleVertexIndices = Data->retrieveTriangleVertexIndices();
 
-        size_t vertexInstanceCount = Data->retrieveVertexCount();
-        size_t triangleVertexCount = (size_t)Data->retrieveTriangleCount() * dMTV__MAX;
+        sizeint vertexInstanceCount = Data->retrieveVertexCount();
+        sizeint triangleVertexCount = (sizeint)Data->retrieveTriangleCount() * dMTV__MAX;
 
         gim_trimesh_create_from_data(
             m_buffer_managers,
@@ -288,7 +288,7 @@ void dGeomTriMeshDataSet(dTriMeshDataID g, int dataId, void *pDataLocation)
     }
 }
 
-static void *geomTriMeshDataGet(dTriMeshDataID g, int dataId, size_t *pOutDataSize) ;
+static void *geomTriMeshDataGet(dTriMeshDataID g, int dataId, sizeint *pOutDataSize) ;
 
 /*extern */
 void *dGeomTriMeshDataGet(dTriMeshDataID g, int dataId) 
@@ -297,13 +297,13 @@ void *dGeomTriMeshDataGet(dTriMeshDataID g, int dataId)
 }
 
 /*extern */
-void *dGeomTriMeshDataGet2(dTriMeshDataID g, int dataId, size_t *pOutDataSize) 
+void *dGeomTriMeshDataGet2(dTriMeshDataID g, int dataId, sizeint *pOutDataSize) 
 {
     return geomTriMeshDataGet(g, dataId, pOutDataSize);
 }
 
 static 
-void *geomTriMeshDataGet(dTriMeshDataID g, int dataId, size_t *pOutDataSize) 
+void *geomTriMeshDataGet(dTriMeshDataID g, int dataId, sizeint *pOutDataSize) 
 {
     dUASSERT(g, "The argument is not a trimesh data");
 

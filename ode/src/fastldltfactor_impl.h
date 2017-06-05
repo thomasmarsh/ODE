@@ -359,7 +359,7 @@ void scaleAndFactorizeL1Stripe_2(dReal *ARow, dReal *d, unsigned factorizationRo
     dReal dd = dRecip(Y11);
 
     ptrDElement[0 * d_stride] = dd;
-    dIASSERT(ptrDElement == d + (size_t)factorizationRow * d_stride);
+    dIASSERT(ptrDElement == d + (sizeint)factorizationRow * d_stride);
 
     /* factorize row 2 */
     dReal q2 = Y21 * dd;
@@ -385,7 +385,7 @@ void scaleAndFactorizeL1FirstRowStripe_2(dReal *ARow, dReal *d, unsigned rowSkip
     dReal dd = dRecip(Y11);
 
     ptrDElement[0 * d_stride] = dd;
-    dIASSERT(ptrDElement == d/* + (size_t)factorizationRow * d_stride*/);
+    dIASSERT(ptrDElement == d/* + (sizeint)factorizationRow * d_stride*/);
 
     /* factorize row 2 */
     dReal q2 = Y21 * dd;
@@ -423,7 +423,7 @@ void solveStripeL1_1(const dReal *L, dReal *B, unsigned rowCount, unsigned rowSk
 
         if (subsequentPass)
         {
-            ptrLElement = L + (size_t)blockStartRow * rowSkip;
+            ptrLElement = L + (sizeint)blockStartRow * rowSkip;
             ptrBElement = B;
 
             /* set the Z matrix to 0 */
@@ -504,7 +504,7 @@ void solveStripeL1_1(const dReal *L, dReal *B, unsigned rowCount, unsigned rowSk
         }
         else
         {
-            ptrLElement = L/* + (size_t)blockStartRow * rowSkip*/; dIASSERT(blockStartRow == 0);
+            ptrLElement = L/* + (sizeint)blockStartRow * rowSkip*/; dIASSERT(blockStartRow == 0);
             ptrBElement = B;
 
             /* set the Z matrix to 0 */
@@ -592,7 +592,7 @@ void scaleAndFactorizeL1Stripe_1(dReal *ARow, dReal *d, unsigned factorizationRo
     dReal Y11 = ptrAElement[0] - (Z11 + Z22);
 
     /* solve for diagonal 1 x 1 block at A(i,i) */
-    dIASSERT(ptrDElement == d + (size_t)factorizationRow * d_stride);
+    dIASSERT(ptrDElement == d + (sizeint)factorizationRow * d_stride);
     /* factorize 1 x 1 block Y, ptrDElement */
     /* factorize row 1 */
     ptrDElement[0 * d_stride] = dRecip(Y11);
@@ -1512,7 +1512,7 @@ void ThreadedEquationSolverLDLT::participateScalingAndFactorizingL1Stripe_X(dRea
         dReal dd = dRecip(Y11);
 
         ptrDElement[0 * d_stride] = dd;
-        dIASSERT(ptrDElement == d + (size_t)factorizationRow * d_stride);
+        dIASSERT(ptrDElement == d + (sizeint)factorizationRow * d_stride);
 
         if (a_rows >= 2)
         {

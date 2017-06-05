@@ -115,9 +115,9 @@ void ThreadedEquationSolverLDLT::doEstimateCooperativeFactoringLDLTResourceRequi
 
     FactorizationSolvingL1StripeMemoryEstimates solvingMemoryEstimates;
     FactorizationScalingAndFactorizingL1StripeMemoryEstimates scalingAndFactorizingEstimates;
-    size_t solvingMemoryRequired = estimateCooperativelySolvingL1Stripe_XMemoryRequirement(solvingTotalBlockCount, solvingMemoryEstimates);
-    size_t factorizingMemoryRequired = estimateCooperativelyScalingAndFactorizingL1Stripe_XMemoryRequirement(blockFactorizingMaximumThreads, scalingAndFactorizingEstimates);
-    size_t totalSizeRequired = solvingMemoryRequired + factorizingMemoryRequired;
+    sizeint solvingMemoryRequired = estimateCooperativelySolvingL1Stripe_XMemoryRequirement(solvingTotalBlockCount, solvingMemoryEstimates);
+    sizeint factorizingMemoryRequired = estimateCooperativelyScalingAndFactorizingL1Stripe_XMemoryRequirement(blockFactorizingMaximumThreads, scalingAndFactorizingEstimates);
+    sizeint totalSizeRequired = solvingMemoryRequired + factorizingMemoryRequired;
     const unsigned memoryAlignmentRequired = ALLOCATION_DEFAULT_ALIGNMENT;
 
     unsigned featureRequirement = dxResourceRequirementDescriptor::STOCK_CALLWAIT_REQUIRED;
@@ -147,9 +147,9 @@ void ThreadedEquationSolverLDLT::doCooperativelyFactorLDLTValidated(
 
     FactorizationSolvingL1StripeMemoryEstimates solvingMemoryEstimates;
     FactorizationScalingAndFactorizingL1StripeMemoryEstimates scalingAndFactorizingEstimates;
-    size_t solvingMemoryRequired = estimateCooperativelySolvingL1Stripe_XMemoryRequirement(solvingTotalBlockCount, solvingMemoryEstimates);
-    size_t factorizingMemoryRequired = estimateCooperativelyScalingAndFactorizingL1Stripe_XMemoryRequirement(blockFactorizingMaximumThreads, scalingAndFactorizingEstimates);
-    size_t totalSizeRequired = solvingMemoryRequired + factorizingMemoryRequired;
+    sizeint solvingMemoryRequired = estimateCooperativelySolvingL1Stripe_XMemoryRequirement(solvingTotalBlockCount, solvingMemoryEstimates);
+    sizeint factorizingMemoryRequired = estimateCooperativelyScalingAndFactorizingL1Stripe_XMemoryRequirement(blockFactorizingMaximumThreads, scalingAndFactorizingEstimates);
+    sizeint totalSizeRequired = solvingMemoryRequired + factorizingMemoryRequired;
     dIASSERT(totalSizeRequired <= resourceContainer->getMemoryBufferSize());
 
     void *bufferAllocated = resourceContainer->getMemoryBufferPointer();

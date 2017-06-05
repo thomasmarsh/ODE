@@ -31,10 +31,10 @@
 // macros and constants
 
 #define ROUND_UP_OFFSET_TO_EFFICIENT_SIZE(arena,ofs) \
-    ofs = (size_t) (dEFFICIENT_SIZE( ((size_t)(arena)) + ofs ) - ((size_t)(arena)) )
+    ofs = (sizeint) (dEFFICIENT_SIZE( ((sizeint)(arena)) + ofs ) - ((sizeint)(arena)) )
 
 #define MAX_ALLOC_SIZE \
-    ((size_t)(dOBSTACK_ARENA_SIZE - sizeof (Arena) - EFFICIENT_ALIGNMENT + 1))
+    ((sizeint)(dOBSTACK_ARENA_SIZE - sizeof (Arena) - EFFICIENT_ALIGNMENT + 1))
 
 //****************************************************************************
 // dObStack
@@ -59,7 +59,7 @@ dObStack::~dObStack()
 }
 
 
-void *dObStack::alloc (size_t num_bytes)
+void *dObStack::alloc (sizeint num_bytes)
 {
     if (num_bytes > MAX_ALLOC_SIZE) dDebug (0,"num_bytes too large");
 
@@ -124,7 +124,7 @@ void *dObStack::rewind()
     return switch_to_arena(m_first);
 }
 
-void *dObStack::next (size_t num_bytes)
+void *dObStack::next (sizeint num_bytes)
 {
     // this functions like alloc, except that no new storage is ever allocated
     if (!m_current_arena) {

@@ -768,7 +768,7 @@ dxJointUniversal::type() const
 }
 
 
-size_t
+sizeint
 dxJointUniversal::size() const
 {
     return sizeof( *this );

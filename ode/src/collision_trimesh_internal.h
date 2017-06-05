@@ -258,10 +258,10 @@ protected:
     };
 
     template<class TMeshDataAccessor>
-    static void meaningfulPreprocess_SetupEdgeRecords(EdgeRecord *edges, size_t numEdges, const TMeshDataAccessor &dataAccessor);
+    static void meaningfulPreprocess_SetupEdgeRecords(EdgeRecord *edges, sizeint numEdges, const TMeshDataAccessor &dataAccessor);
     template<class TMeshDataAccessor>
     static void meaningfulPreprocess_buildEdgeFlags(uint8 *useFlags/*=NULL*/, IFaceAngleStorageControl *faceAngles/*=NULL*/, 
-        EdgeRecord *edges, size_t numEdges, VertexRecord *vertices, 
+        EdgeRecord *edges, sizeint numEdges, VertexRecord *vertices, 
         const dReal *externalNormals, const TMeshDataAccessor &dataAccessor);
     static void buildBoundaryEdgeAngle(IFaceAngleStorageControl *faceAngles, EdgeRecord *currEdge);
     template<class TMeshDataAccessor>

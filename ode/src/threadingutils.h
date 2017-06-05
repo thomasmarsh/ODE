@@ -134,9 +134,9 @@ unsigned int ThrsafeIncrementIntUpToLimit(volatile atomicord32 *storagePointer, 
 }
 
 static inline 
-size_t ThrsafeIncrementSizeUpToLimit(volatile size_t *storagePointer, size_t limitValue)
+sizeint ThrsafeIncrementSizeUpToLimit(volatile sizeint *storagePointer, sizeint limitValue)
 {
-    size_t resultValue;
+    sizeint resultValue;
     while (true) {
         resultValue = *storagePointer;
         // The ">=" comparison is not required here at present ("==" could be used). 

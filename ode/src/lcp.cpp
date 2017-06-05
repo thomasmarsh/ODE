@@ -161,7 +161,7 @@ template<bool zero_b>
 inline 
 void transfer_b_to_x(dReal pairsbx[PBX__MAX], unsigned n)
 {
-    dReal *const endbx = pairsbx + (size_t)n * PBX__MAX;
+    dReal *const endbx = pairsbx + (sizeint)n * PBX__MAX;
     for (dReal *currbx = pairsbx; currbx != endbx; currbx += PBX__MAX) {
         currbx[PBX_X] = currbx[PBX_B];
         if (zero_b) {
@@ -211,8 +211,8 @@ void swapRowsAndCols (ATYPE A, unsigned n, unsigned i1, unsigned i2, unsigned ns
         dxSwap(A_j[i1], A_j[i2]);
     }
 # else
-    dReal *A_i1 = A + (size_t)nskip * i1;
-    dReal *A_i2 = A + (size_t)nskip * i2;
+    dReal *A_i1 = A + (sizeint)nskip * i1;
+    dReal *A_i2 = A + (sizeint)nskip * i2;
 
     for (unsigned k = 0; k < i1; ++k) {
         dxSwap(A_i1[k], A_i2[k]);
@@ -246,14 +246,14 @@ void swapProblem (ATYPE A, dReal pairsbx[PBX__MAX], dReal *w, dReal pairslh[PLH_
     if (i1 != i2) {
         swapRowsAndCols (A, n, i1, i2, nskip, do_fast_row_swaps);
 
-        dxSwap((pairsbx + (size_t)i1 * PBX__MAX)[PBX_B], (pairsbx + (size_t)i2 * PBX__MAX)[PBX_B]);
-        dxSwap((pairsbx + (size_t)i1 * PBX__MAX)[PBX_X], (pairsbx + (size_t)i2 * PBX__MAX)[PBX_X]);
+        dxSwap((pairsbx + (sizeint)i1 * PBX__MAX)[PBX_B], (pairsbx + (sizeint)i2 * PBX__MAX)[PBX_B]);
+        dxSwap((pairsbx + (sizeint)i1 * PBX__MAX)[PBX_X], (pairsbx + (sizeint)i2 * PBX__MAX)[PBX_X]);
         dSASSERT(PBX__MAX == 2);
 
         dxSwap(w[i1], w[i2]);
 
-        dxSwap((pairslh + (size_t)i1 * PLH__MAX)[PLH_LO], (pairslh + (size_t)i2 * PLH__MAX)[PLH_LO]);
-        dxSwap((pairslh + (size_t)i1 * PLH__MAX)[PLH_HI], (pairslh + (size_t)i2 * PLH__MAX)[PLH_HI]);
+        dxSwap((pairslh + (sizeint)i1 * PLH__MAX)[PLH_LO], (pairslh + (sizeint)i2 * PLH__MAX)[PLH_LO]);
+        dxSwap((pairslh + (sizeint)i1 * PLH__MAX)[PLH_HI], (pairslh + (sizeint)i2 * PLH__MAX)[PLH_HI]);
         dSASSERT(PLH__MAX == 2);
 
         dxSwap(p[i1], p[i2]);
@@ -387,7 +387,7 @@ struct dLCP {
     void transfer_i_to_N (unsigned /*i*/) { m_nN++; }			// because we can assume C and N span 1:i-1
     void transfer_i_from_N_to_C (unsigned i);
     void transfer_i_from_C_to_N (unsigned i, void *tmpbuf);
-    static size_t estimate_transfer_i_from_C_to_N_mem_req(unsigned nC, unsigned nskip) { return dEstimateLDLTRemoveTmpbufSize(nC, nskip); }
+    static sizeint estimate_transfer_i_from_C_to_N_mem_req(unsigned nC, unsigned nskip) { return dEstimateLDLTRemoveTmpbufSize(nC, nskip); }
     unsigned numC() const { return m_nC; }
     unsigned numN() const { return m_nN; }
     unsigned indexC (unsigned i) const { return i; }
@@ -396,7 +396,7 @@ struct dLCP {
     template<unsigned q_stride>
     dReal AiC_times_qC (unsigned i, dReal *q) const { return calculateLargeVectorDot<q_stride> (AROW(i), q, m_nC); }
     template<unsigned q_stride>
-    dReal AiN_times_qN (unsigned i, dReal *q) const { return calculateLargeVectorDot<q_stride> (AROW(i) + m_nC, q + (size_t)m_nC * q_stride, m_nN); }
+    dReal AiN_times_qN (unsigned i, dReal *q) const { return calculateLargeVectorDot<q_stride> (AROW(i) + m_nC, q + (sizeint)m_nC * q_stride, m_nN); }
     void pN_equals_ANC_times_qC (dReal *p, dReal *q);
     void pN_plusequals_ANi (dReal *p, unsigned i, bool dir_positive);
     template<unsigned p_stride>
@@ -474,7 +474,7 @@ dLCP::dLCP (unsigned _n, unsigned _nskip, unsigned _nub, dReal *_Adata, dReal *_
         const unsigned n = m_n;
         for (unsigned k = m_nub; k < n; ++k) {
             if (findex && findex[k] >= 0) continue;
-            if ((pairslh + (size_t)k * PLH__MAX)[PLH_LO] == -dInfinity && (pairslh + (size_t)k * PLH__MAX)[PLH_HI] == dInfinity) {
+            if ((pairslh + (sizeint)k * PLH__MAX)[PLH_LO] == -dInfinity && (pairslh + (sizeint)k * PLH__MAX)[PLH_HI] == dInfinity) {
                 swapProblem (m_A, m_pairsbx, m_w, pairslh, m_p, m_state, findex, n, m_nub, k, m_nskip, 0);
                 m_nub++;
             }
@@ -522,7 +522,7 @@ dLCP::dLCP (unsigned _n, unsigned _nskip, unsigned _nub, dReal *_Adata, dReal *_
     const unsigned nub = m_nub;
     for (unsigned k=0; k<n; k++) {
     if (k<nub) printf ("C");
-    else if ((m_pairslh + (size_t)k * PLH__MAX)[PLH_LO] == -dInfinity && (m_pairslh + (size_t)k * PLH__MAX)[PLH_HI] == dInfinity) printf ("c");
+    else if ((m_pairslh + (sizeint)k * PLH__MAX)[PLH_LO] == -dInfinity && (m_pairslh + (sizeint)k * PLH__MAX)[PLH_HI] == dInfinity) printf ("c");
     else printf (".");
     }
     printf ("\n");
@@ -538,7 +538,7 @@ void dLCP::transfer_i_to_C (unsigned i)
 
         if (nC > 0) {
             // ell,Dell were computed by solve1(). note, ell = D \ L1solve (L,A(i,C))
-            dReal *const Ltgt = m_L + (size_t)m_nskip * nC, *ell = m_ell;
+            dReal *const Ltgt = m_L + (sizeint)m_nskip * nC, *ell = m_ell;
             memcpy(Ltgt, ell, nC * sizeof(dReal));
 
             dReal ell_Dell_dot = dxDot(m_ell, m_Dell, nC);
@@ -584,7 +584,7 @@ void dLCP::transfer_i_from_N_to_C (unsigned i)
             solveL1Straight<1>(m_L, m_Dell, nC, m_nskip);
 
             dReal ell_Dell_dot = REAL(0.0);
-            dReal *const Ltgt = m_L + (size_t)m_nskip * nC;
+            dReal *const Ltgt = m_L + (sizeint)m_nskip * nC;
             dReal *ell = m_ell, *Dell = m_Dell, *d = m_d;
             for (unsigned j = 0; j < nC; ++j) {
                 dReal ell_j, Dell_j = Dell[j];
@@ -774,9 +774,9 @@ void dLCP::unpermute_X()
         unsigned k = p[j];
         if (k != j) {
             // p[j] = j; -- not going to be checked anymore anyway
-            dReal x_j = (pairsbx + (size_t)j * PBX__MAX)[PBX_X];
+            dReal x_j = (pairsbx + (sizeint)j * PBX__MAX)[PBX_X];
             for (;;) {
-                dxSwap(x_j, (pairsbx + (size_t)k * PBX__MAX)[PBX_X]);
+                dxSwap(x_j, (pairsbx + (sizeint)k * PBX__MAX)[PBX_X]);
 
                 unsigned orig_k = p[k];
                 p[k] = k;
@@ -785,7 +785,7 @@ void dLCP::unpermute_X()
                 }
                 k = orig_k;
             }
-            (pairsbx + (size_t)j * PBX__MAX)[PBX_X] = x_j;
+            (pairsbx + (sizeint)j * PBX__MAX)[PBX_X] = x_j;
         }
     }
 }
@@ -852,13 +852,13 @@ void dxSolveLCP_Generic (dxWorldProcessMemArena *memarena, unsigned n, dReal *A,
 # ifndef dNODEBUG
     {
         // check restrictions on lo and hi
-        dReal *endlh = pairslh + (size_t)n * PLH__MAX;
+        dReal *endlh = pairslh + (sizeint)n * PLH__MAX;
         for (dReal *currlh = pairslh; currlh != endlh; currlh += PLH__MAX) dIASSERT (currlh[PLH_LO] <= 0 && currlh[PLH_HI] >= 0);
     }
 # endif
 
     const unsigned nskip = dPAD(n);
-    dReal *L = memarena->AllocateOveralignedArray<dReal> ((size_t)nskip * n, LMATRIX_ALIGNMENT);
+    dReal *L = memarena->AllocateOveralignedArray<dReal> ((sizeint)nskip * n, LMATRIX_ALIGNMENT);
     dReal *d = memarena->AllocateArray<dReal> (n);
     dReal *w = outer_w != NULL ? outer_w : memarena->AllocateArray<dReal> (n);
     dReal *delta_w = memarena->AllocateArray<dReal> (n);
@@ -908,11 +908,11 @@ void dxSolveLCP_Generic (dxWorldProcessMemArena *memarena, unsigned n, dReal *A,
 
         if (!hit_first_friction_index && findex && findex[i] >= 0) {
             // un-permute x into delta_w, which is not being used at the moment
-            for (unsigned j = 0; j < n; ++j) delta_w[p[j]] = (pairsbx + (size_t)j * PBX__MAX)[PBX_X];
+            for (unsigned j = 0; j < n; ++j) delta_w[p[j]] = (pairsbx + (sizeint)j * PBX__MAX)[PBX_X];
 
             // set lo and hi values
             for (unsigned k = i; k < n; ++k) {
-                dReal *currlh = pairslh + (size_t)k * PLH__MAX;
+                dReal *currlh = pairslh + (sizeint)k * PLH__MAX;
                 dReal wfk = delta_w[findex[k]];
                 if (wfk == 0) {
                     currlh[PLH_HI] = 0;
@@ -930,7 +930,7 @@ void dxSolveLCP_Generic (dxWorldProcessMemArena *memarena, unsigned n, dReal *A,
         // greater than i, so compute w[i] now.
         dReal wPrep = lcp.AiC_times_qC<PBX__MAX> (i, pairsbx + PBX_X) + lcp.AiN_times_qN<PBX__MAX> (i, pairsbx + PBX_X);
 
-        dReal *currbx = pairsbx + (size_t)i * PBX__MAX;
+        dReal *currbx = pairsbx + (sizeint)i * PBX__MAX;
 
         w[i] = wPrep - currbx[PBX_B];
 
@@ -944,7 +944,7 @@ void dxSolveLCP_Generic (dxWorldProcessMemArena *memarena, unsigned n, dReal *A,
         // will never be checked for set changes. this means that the state for
         // these indexes may be incorrect, but that doesn't matter.
 
-        dReal *currlh = pairslh + (size_t)i * PLH__MAX;
+        dReal *currlh = pairslh + (sizeint)i * PLH__MAX;
 
         // see if x(i),w(i) is in a valid region
         if (currlh[PLH_LO] == 0 && w[i] >= 0) {
@@ -1020,7 +1020,7 @@ void dxSolveLCP_Generic (dxWorldProcessMemArena *memarena, unsigned n, dReal *A,
                         const unsigned indexN_k = lcp.indexN(k);
                         if (!state[indexN_k] ? delta_w[indexN_k] < 0 : delta_w[indexN_k] > 0) {
                             // don't bother checking if lo=hi=0
-                            dReal *indexlh = pairslh + (size_t)indexN_k * PLH__MAX;
+                            dReal *indexlh = pairslh + (sizeint)indexN_k * PLH__MAX;
                             if (indexlh[PLH_LO] == 0 && indexlh[PLH_HI] == 0) continue;
                             dReal s2 = -w[indexN_k] / delta_w[indexN_k];
                             if (s2 < s) {
@@ -1036,9 +1036,9 @@ void dxSolveLCP_Generic (dxWorldProcessMemArena *memarena, unsigned n, dReal *A,
                     const unsigned numC = lcp.numC();
                     for (unsigned k = adj_nub; k < numC; ++k) {
                         const unsigned indexC_k = lcp.indexC(k);
-                        dReal *indexlh = pairslh + (size_t)indexC_k * PLH__MAX;
+                        dReal *indexlh = pairslh + (sizeint)indexC_k * PLH__MAX;
                         if (delta_x[indexC_k] < 0 && indexlh[PLH_LO] > -dInfinity) {
-                            dReal s2 = (indexlh[PLH_LO] - (pairsbx + (size_t)indexC_k * PBX__MAX)[PBX_X]) / delta_x[indexC_k];
+                            dReal s2 = (indexlh[PLH_LO] - (pairsbx + (sizeint)indexC_k * PBX__MAX)[PBX_X]) / delta_x[indexC_k];
                             if (s2 < s) {
                                 s = s2;
                                 cmd = 5;
@@ -1046,7 +1046,7 @@ void dxSolveLCP_Generic (dxWorldProcessMemArena *memarena, unsigned n, dReal *A,
                             }
                         }
                         if (delta_x[indexC_k] > 0 && indexlh[PLH_HI] < dInfinity) {
-                            dReal s2 = (indexlh[PLH_HI] - (pairsbx + (size_t)indexC_k * PBX__MAX)[PBX_X]) / delta_x[indexC_k];
+                            dReal s2 = (indexlh[PLH_HI] - (pairsbx + (sizeint)indexC_k * PBX__MAX)[PBX_X]) / delta_x[indexC_k];
                             if (s2 < s) {
                                 s = s2;
                                 cmd = 6;
@@ -1105,13 +1105,13 @@ void dxSolveLCP_Generic (dxWorldProcessMemArena *memarena, unsigned n, dReal *A,
                     lcp.transfer_i_from_N_to_C (si);
                     break;
                 case 5:		// keep going
-                    (pairsbx + (size_t)si * PBX__MAX)[PBX_X] = (pairslh + (size_t)si * PLH__MAX)[PLH_LO];
+                    (pairsbx + (sizeint)si * PBX__MAX)[PBX_X] = (pairslh + (sizeint)si * PLH__MAX)[PLH_LO];
                     state[si] = false;
                     tmpbuf = memarena->PeekBufferRemainder();
                     lcp.transfer_i_from_C_to_N (si, tmpbuf);
                     break;
                 case 6:		// keep going
-                    (pairsbx + (size_t)si * PBX__MAX)[PBX_X] = (pairslh + (size_t)si * PLH__MAX)[PLH_HI];
+                    (pairsbx + (sizeint)si * PBX__MAX)[PBX_X] = (pairslh + (sizeint)si * PLH__MAX)[PLH_HI];
                     state[si] = true;
                     tmpbuf = memarena->PeekBufferRemainder();
                     lcp.transfer_i_from_C_to_N (si, tmpbuf);
@@ -1134,13 +1134,13 @@ void dxSolveLCP_Generic (dxWorldProcessMemArena *memarena, unsigned n, dReal *A,
     lcp.unpermute_X(); // This destroys p[] and must be done last
 }
 
-size_t dxEstimateSolveLCPMemoryReq(unsigned n, bool outer_w_avail)
+sizeint dxEstimateSolveLCPMemoryReq(unsigned n, bool outer_w_avail)
 {
     const unsigned nskip = dPAD(n);
 
-    size_t res = 0;
+    sizeint res = 0;
 
-    res += dOVERALIGNED_SIZE(sizeof(dReal) * ((size_t)n * nskip), LMATRIX_ALIGNMENT); // for L
+    res += dOVERALIGNED_SIZE(sizeof(dReal) * ((sizeint)n * nskip), LMATRIX_ALIGNMENT); // for L
     res += 5 * dEFFICIENT_SIZE(sizeof(dReal) * n); // for d, delta_w, delta_x, Dell, ell
     if (!outer_w_avail) {
         res += dEFFICIENT_SIZE(sizeof(dReal) * n); // for w
@@ -1152,7 +1152,7 @@ size_t dxEstimateSolveLCPMemoryReq(unsigned n, bool outer_w_avail)
     res += dEFFICIENT_SIZE(sizeof(bool) * n); // for state
 
     // Use n instead of nC as nC varies at runtime while n is greater or equal to nC
-    size_t lcp_transfer_req = dLCP::estimate_transfer_i_from_C_to_N_mem_req(n, nskip);
+    sizeint lcp_transfer_req = dLCP::estimate_transfer_i_from_C_to_N_mem_req(n, nskip);
     res += dEFFICIENT_SIZE(lcp_transfer_req); // for dLCP::transfer_i_from_C_to_N
 
     return res;
@@ -1162,13 +1162,13 @@ size_t dxEstimateSolveLCPMemoryReq(unsigned n, bool outer_w_avail)
 //***************************************************************************
 // accuracy and timing test
 
-static size_t EstimateTestSolveLCPMemoryReq(unsigned n)
+static sizeint EstimateTestSolveLCPMemoryReq(unsigned n)
 {
     const unsigned nskip = dPAD(n);
 
-    size_t res = 0;
+    sizeint res = 0;
 
-    res += 2 * dEFFICIENT_SIZE(sizeof(dReal) * ((size_t)n * nskip)); // for A, A2
+    res += 2 * dEFFICIENT_SIZE(sizeof(dReal) * ((sizeint)n * nskip)); // for A, A2
     res += 7 * dEFFICIENT_SIZE(sizeof(dReal) * n); // for x, b, w, lo, hi, tmp1, tmp2
     res += dEFFICIENT_SIZE(sizeof(dReal) * PBX__MAX * n); // for pairsbx, 
     res += dEFFICIENT_SIZE(sizeof(dReal) * PLH__MAX * n); // for pairslh
@@ -1182,7 +1182,7 @@ extern "C" ODE_API int dTestSolveLCP()
 {
     const unsigned n = 100;
 
-    size_t memreq = EstimateTestSolveLCPMemoryReq(n);
+    sizeint memreq = EstimateTestSolveLCPMemoryReq(n);
     dxWorldProcessMemArena *arena = dxAllocateTemporaryWorldProcessMemArena(memreq, NULL, NULL);
     if (arena == NULL) {
         return 0;

@@ -156,7 +156,7 @@ public:
 
     static IFaceAngleStorageControl *allocateInstance(unsigned triangleCount, IFaceAngleStorageView *&out_storageView);
 
-    static bool calculateInstanceSizeRequired(size_t &out_sizeRequired, unsigned triangleCount);
+    static bool calculateInstanceSizeRequired(sizeint &out_sizeRequired, unsigned triangleCount);
 
 private:
     void freeInstance();
@@ -173,19 +173,19 @@ private:
         TriangleFaceAngles  m_triangleFaceAngles[1];
     };
 
-    static size_t calculateStorageSizeForTriangleCount(unsigned triangleCount)
+    static sizeint calculateStorageSizeForTriangleCount(unsigned triangleCount)
     {
         const unsigned baseIncludedTriangleCount = dSTATIC_ARRAY_SIZE(FaceAnglesWrapper<TStorageCodec>::StorageRecord, m_triangleFaceAngles);
-        const size_t singleTriangleSize = membersize(FaceAnglesWrapper<TStorageCodec>::StorageRecord, m_triangleFaceAngles[0]);
+        const sizeint singleTriangleSize = membersize(FaceAnglesWrapper<TStorageCodec>::StorageRecord, m_triangleFaceAngles[0]);
         return sizeof(FaceAnglesWrapper<TStorageCodec>) + (triangleCount > baseIncludedTriangleCount ? (triangleCount - baseIncludedTriangleCount) * singleTriangleSize : 0U);
     }
 
-    static size_t calculateTriangleCountForStorageSize(size_t storageSize)
+    static sizeint calculateTriangleCountForStorageSize(sizeint storageSize)
     {
         dIASSERT(storageSize >= sizeof(FaceAnglesWrapper<TStorageCodec>));
 
         const unsigned baseIncludedTriangleCount = dSTATIC_ARRAY_SIZE(FaceAnglesWrapper<TStorageCodec>::StorageRecord, m_triangleFaceAngles);
-        const size_t singleTriangleSize = membersize(FaceAnglesWrapper<TStorageCodec>::StorageRecord, m_triangleFaceAngles[0]);
+        const sizeint singleTriangleSize = membersize(FaceAnglesWrapper<TStorageCodec>::StorageRecord, m_triangleFaceAngles[0]);
         return (storageSize - sizeof(FaceAnglesWrapper<TStorageCodec>)) / singleTriangleSize + baseIncludedTriangleCount;
     }
 
@@ -243,7 +243,7 @@ IFaceAngleStorageControl *FaceAnglesWrapper<TStorageCodec>::allocateInstance(uns
 
     do
     {
-        size_t sizeRequired;
+        sizeint sizeRequired;
         if (!FaceAnglesWrapper<TStorageCodec>::calculateInstanceSizeRequired(sizeRequired, triangleCount))
         {
             break;
@@ -267,13 +267,13 @@ IFaceAngleStorageControl *FaceAnglesWrapper<TStorageCodec>::allocateInstance(uns
 
 template<class TStorageCodec>
 /*static */
-bool FaceAnglesWrapper<TStorageCodec>::calculateInstanceSizeRequired(size_t &out_sizeRequired, unsigned triangleCount)
+bool FaceAnglesWrapper<TStorageCodec>::calculateInstanceSizeRequired(sizeint &out_sizeRequired, unsigned triangleCount)
 {
     bool result = false;
 
     do
     {
-        size_t triangleMaximumCount = calculateTriangleCountForStorageSize(SIZE_MAX);
+        sizeint triangleMaximumCount = calculateTriangleCountForStorageSize(SIZE_MAX);
         dIASSERT(triangleCount <= triangleMaximumCount);
 
         if (triangleCount > triangleMaximumCount) // Check for overflow
@@ -296,7 +296,7 @@ void FaceAnglesWrapper<TStorageCodec>::freeInstance()
 
     this->FaceAnglesWrapper<TStorageCodec>::~FaceAnglesWrapper();
 
-    size_t memoryBlockSize = calculateStorageSizeForTriangleCount(triangleCount);
+    sizeint memoryBlockSize = calculateStorageSizeForTriangleCount(triangleCount);
     dFree(this, memoryBlockSize);
 }
 
@@ -548,7 +548,7 @@ END_NAMESPACE_OU();
 static const CEnumUnsortedElementArray<unsigned, dTRIDATAPREPROCESS_FACE_ANGLES_EXTRA__MAX, FaceAngleStorageMethod, 0x17010902> g_TriMeshDataPreprocess_FaceAndlesExtraDataAngleStorageMethods;
 
 /*extern ODE_API */
-int dGeomTriMeshDataPreprocess2(dTriMeshDataID g, unsigned int buildRequestFlags, const dintptr *requestExtraData/*=NULL | const dintptr (*)[dTRIDATAPREPROCESS_BUILD__MAX]*/)
+int dGeomTriMeshDataPreprocess2(dTriMeshDataID g, unsigned int buildRequestFlags, const intptr *requestExtraData/*=NULL | const intptr (*)[dTRIDATAPREPROCESS_BUILD__MAX]*/)
 {
     dUASSERT(g, "The argument is not a trimesh data");
     dAASSERT((buildRequestFlags & (1U << dTRIDATAPREPROCESS_BUILD_FACE_ANGLES)) == 0 || requestExtraData == NULL || dIN_RANGE(requestExtraData[dTRIDATAPREPROCESS_BUILD_FACE_ANGLES], dTRIDATAPREPROCESS_FACE_ANGLES_EXTRA__MIN, dTRIDATAPREPROCESS_FACE_ANGLES_EXTRA__MAX));
@@ -782,7 +782,7 @@ IFaceAngleStorageView *dxGeomTriMeshGetFaceAngleView(dxGeom *triMeshGeom)
 /*extern */
 void dGeomTriMeshDataGetBuffer(dTriMeshDataID g, unsigned char **buf, int *bufLen)
 {
-    size_t dataSizeStorage;
+    sizeint dataSizeStorage;
     void *dataPointer = dGeomTriMeshDataGet2(g, dTRIMESHDATA_USE_FLAGS, (bufLen != NULL ? &dataSizeStorage : NULL));
 
     if (bufLen != NULL)

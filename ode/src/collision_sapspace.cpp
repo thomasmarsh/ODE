@@ -62,16 +62,16 @@ public:
 
 private:
     void FreeRanks();
-    void AllocateRanks(size_t nNewSize);
+    void AllocateRanks(sizeint nNewSize);
 
-    void ReallocateRanksIfNecessary(size_t nNewSize);
+    void ReallocateRanksIfNecessary(sizeint nNewSize);
 
 private:
-    void SetCurrentSize(size_t nValue) { mCurrentSize = nValue; }
-    size_t GetCurrentSize() const { return mCurrentSize; }
+    void SetCurrentSize(sizeint nValue) { mCurrentSize = nValue; }
+    sizeint GetCurrentSize() const { return mCurrentSize; }
 
-    void SetCurrentUtilization(size_t nValue) { mCurrentUtilization = nValue; }
-    size_t GetCurrentUtilization() const { return mCurrentUtilization; }
+    void SetCurrentUtilization(sizeint nValue) { mCurrentUtilization = nValue; }
+    sizeint GetCurrentUtilization() const { return mCurrentUtilization; }
 
     uint32 *GetRanks1() const { return mPrimaryRanks; }
     uint32 *GetRanks2() const { return mRanksBuffer + ((mRanksBuffer + mCurrentSize) - mPrimaryRanks); }
@@ -82,14 +82,14 @@ private:
     void ValidateRanks() { mRanksValid = true; }
 
 private:
-    size_t mCurrentSize;						//!< Current size of the indices list
-    size_t mCurrentUtilization;					//!< Current utilization of the indices list
+    sizeint mCurrentSize;						//!< Current size of the indices list
+    sizeint mCurrentUtilization;					//!< Current utilization of the indices list
     bool mRanksValid;
     uint32* mRanksBuffer;						//!< Two lists allocated sequentially in a single block
     uint32* mPrimaryRanks;
 };
 
-void RaixSortContext::AllocateRanks(size_t nNewSize)
+void RaixSortContext::AllocateRanks(sizeint nNewSize)
 {
     dIASSERT(GetCurrentSize() == 0);
 
@@ -106,13 +106,13 @@ void RaixSortContext::FreeRanks()
     delete[] mRanksBuffer;
 }
 
-void RaixSortContext::ReallocateRanksIfNecessary(size_t nNewSize)
+void RaixSortContext::ReallocateRanksIfNecessary(sizeint nNewSize)
 {
-    size_t nCurUtilization = GetCurrentUtilization();
+    sizeint nCurUtilization = GetCurrentUtilization();
 
     if (nNewSize != nCurUtilization)
     {
-        size_t nCurSize = GetCurrentSize();
+        sizeint nCurSize = GetCurrentSize();
 
         if ( nNewSize > nCurSize )
         {
@@ -220,10 +220,10 @@ dSpaceID dSweepAndPruneSpaceCreate( dxSpace* space, int axisorder ) {
 #define GEOM_ENABLED(g) (((g)->gflags & GEOM_ENABLE_TEST_MASK) == GEOM_ENABLE_TEST_VALUE)
 
 // HACK: We abuse 'next' and 'tome' members of dxGeom to store indices into dirty/geom lists.
-#define GEOM_SET_DIRTY_IDX(g,idx) { (g)->next_ex = (dxGeom*)(size_t)(idx); }
-#define GEOM_SET_GEOM_IDX(g,idx) { (g)->tome_ex = (dxGeom**)(size_t)(idx); }
-#define GEOM_GET_DIRTY_IDX(g) ((int)(size_t)(g)->next_ex)
-#define GEOM_GET_GEOM_IDX(g) ((int)(size_t)(g)->tome_ex)
+#define GEOM_SET_DIRTY_IDX(g,idx) { (g)->next_ex = (dxGeom*)(sizeint)(idx); }
+#define GEOM_SET_GEOM_IDX(g,idx) { (g)->tome_ex = (dxGeom**)(sizeint)(idx); }
+#define GEOM_GET_DIRTY_IDX(g) ((int)(sizeint)(g)->next_ex)
+#define GEOM_GET_GEOM_IDX(g) ((int)(sizeint)(g)->tome_ex)
 #define GEOM_INVALID_IDX (-1)
 
 

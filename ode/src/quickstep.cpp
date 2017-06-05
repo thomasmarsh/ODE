@@ -805,21 +805,21 @@ void compute_invM_JT (volatile atomicord32 *mi_storage, dReal *iMJ,
         unsigned int mi = mi_step * step_size;
         const unsigned int miend = mi + dMIN(step_size, m - mi);
 
-        dReal *iMJ_ptr = iMJ + (size_t)mi * IMJ__MAX;
-        const dReal *J_ptr = J + (size_t)mi * JME__MAX;
+        dReal *iMJ_ptr = iMJ + (sizeint)mi * IMJ__MAX;
+        const dReal *J_ptr = J + (sizeint)mi * JME__MAX;
         while (true) {
             int b1 = jb[mi].first;
             int b2 = jb[mi].second;
 
             dReal k1 = body[(unsigned)b1]->invMass;
             for (unsigned int j = 0; j != JVE__L_COUNT; j++) iMJ_ptr[IMJ__1L_MIN + j] = k1 * J_ptr[JME__J1L_MIN + j];
-            const dReal *invIrow1 = invI + (size_t)(unsigned)b1 * IIE__MAX + IIE__MATRIX_MIN;
+            const dReal *invIrow1 = invI + (sizeint)(unsigned)b1 * IIE__MAX + IIE__MATRIX_MIN;
             dMultiply0_331 (iMJ_ptr + IMJ__1A_MIN, invIrow1, J_ptr + JME__J1A_MIN);
 
             if (b2 != -1) {
                 dReal k2 = body[(unsigned)b2]->invMass;
                 for (unsigned int j = 0; j != JVE__L_COUNT; ++j) iMJ_ptr[IMJ__2L_MIN + j] = k2 * J_ptr[JME__J2L_MIN + j];
-                const dReal *invIrow2 = invI + (size_t)(unsigned)b2 * IIE__MAX + IIE__MATRIX_MIN;
+                const dReal *invIrow2 = invI + (sizeint)(unsigned)b2 * IIE__MAX + IIE__MATRIX_MIN;
                 dMultiply0_331 (iMJ_ptr + IMJ__2A_MIN, invIrow2, J_ptr + JME__J2A_MIN);
             }
         
@@ -862,11 +862,11 @@ void multiply_invM_JT_prepare(volatile atomicord32 *mi_storage,
 
             const unsigned encoded_mi = dxENCODE_INDEX(mi);
             unsigned oldIndex_b1 = ThrsafeExchange(&bi_links[b1], encoded_mi);
-            mi_links[(size_t)mi * 2] = oldIndex_b1;
+            mi_links[(sizeint)mi * 2] = oldIndex_b1;
 
             if (b2 != -1) {
                 unsigned oldIndex_b2 = ThrsafeExchange(&bi_links[b2], encoded_mi);
-                mi_links[(size_t)mi * 2 + 1] = oldIndex_b2;
+                mi_links[(sizeint)mi * 2 + 1] = oldIndex_b2;
             }
 
             if (++mi == miend) {
@@ -890,7 +890,7 @@ void multiply_invM_JT_complete(volatile atomicord32 *bi_storage, dReal *out,
         unsigned int bi = bi_step * step_size;
         const unsigned int biend = bi + dMIN(step_size, nb - bi);
 
-        dReal *out_ptr = out + (size_t)bi * out_stride + out_offset;
+        dReal *out_ptr = out + (sizeint)bi * out_stride + out_offset;
         while (true) {
             dReal psum0 = REAL(0.0), psum1 = REAL(0.0), psum2 = REAL(0.0), psum3 = REAL(0.0), psum4 = REAL(0.0), psum5 = REAL(0.0);
 
@@ -900,14 +900,14 @@ void multiply_invM_JT_complete(volatile atomicord32 *bi_storage, dReal *out,
                 const dReal *iMJ_ptr;
                 
                 if (bi == jb[mi].first) {
-                    iMJ_ptr = iMJ + (size_t)mi * IMJ__MAX + IMJ__1_MIN;
-                    businessIndex = mi_links[(size_t)mi * 2];
+                    iMJ_ptr = iMJ + (sizeint)mi * IMJ__MAX + IMJ__1_MIN;
+                    businessIndex = mi_links[(sizeint)mi * 2];
                 }
                 else {
                     dIASSERT(bi == jb[mi].second);
 
-                    iMJ_ptr = iMJ + (size_t)mi * IMJ__MAX + IMJ__2_MIN;
-                    businessIndex = mi_links[(size_t)mi * 2 + 1];
+                    iMJ_ptr = iMJ + (sizeint)mi * IMJ__MAX + IMJ__2_MIN;
+                    businessIndex = mi_links[(sizeint)mi * 2 + 1];
                 }
 
                 const dReal in_i = in[mi];
@@ -930,20 +930,20 @@ template<unsigned int out_offset, unsigned int out_stride>
 void _multiply_invM_JT (dReal *out, 
     unsigned int m, unsigned int nb, dReal *iMJ, const dxJBodiesItem *jb, const dReal *in)
 {
-    dSetZero (out, (size_t)nb * out_stride);
+    dSetZero (out, (sizeint)nb * out_stride);
     const dReal *iMJ_ptr = iMJ;
     for (unsigned int i=0; i<m; i++) {
         int b1 = jb[i].first;
         int b2 = jb[i].second;
         const dReal in_i = in[i];
 
-        dReal *out_ptr = out + (size_t)(unsigned)b1 * out_stride + out_offset;
+        dReal *out_ptr = out + (sizeint)(unsigned)b1 * out_stride + out_offset;
         for (unsigned int j = JVE__MIN; j != JVE__MAX; j++) out_ptr[j - JVE__MIN] += iMJ_ptr[IMJ__1_MIN + j] * in_i;
         dSASSERT(out_stride - out_offset >= JVE__MAX);
         dSASSERT(JVE__MAX == (int)dDA__MAX);
 
         if (b2 != -1) {
-            out_ptr = out + (size_t)(unsigned)b2 * out_stride + out_offset;
+            out_ptr = out + (sizeint)(unsigned)b2 * out_stride + out_offset;
             for (unsigned int j = JVE__MIN; j != JVE__MAX; j++) out_ptr[j - JVE__MIN] += iMJ_ptr[IMJ__2_MIN + j] * in_i;
             dSASSERT(out_stride - out_offset >= JVE__MAX);
             dSASSERT(JVE__MAX == (int)dDA__MAX);
@@ -966,17 +966,17 @@ void multiplyAdd_J (volatile atomicord32 *mi_storage,
         unsigned int mi = mi_step * step_size;
         const unsigned int miend = mi + dMIN(step_size, m - mi);
 
-        dReal *J_ptr = J + (size_t)mi * JME__MAX;
+        dReal *J_ptr = J + (sizeint)mi * JME__MAX;
         while (true) {
             int b1 = jb[mi].first;
             int b2 = jb[mi].second;
             dReal sum = REAL(0.0);
-            const dReal *in_ptr = in + (size_t)(unsigned)b1 * in_stride + in_offset;
+            const dReal *in_ptr = in + (sizeint)(unsigned)b1 * in_stride + in_offset;
             for (unsigned int j = 0; j != JME__J1_COUNT; ++j) sum += J_ptr[j + JME__J1_MIN] * in_ptr[j];
             dSASSERT(in_offset + JME__J1_COUNT <= in_stride);
 
             if (b2 != -1) {
-                in_ptr = in + (size_t)(unsigned)b2 * in_stride + in_offset;
+                in_ptr = in + (sizeint)(unsigned)b2 * in_stride + in_offset;
                 for (unsigned int j = 0; j != JME__J2_COUNT; ++j) sum += J_ptr[j + JME__J2_MIN] * in_ptr[j];
                 dSASSERT(in_offset + JME__J2_COUNT <= in_stride);
             }
@@ -1037,7 +1037,7 @@ void dxQuickStepIsland(const dxStepperProcessingCallContext *callContext)
     unsigned int nb = callContext->m_islandBodiesCount;
     unsigned int _nj = callContext->m_islandJointsCount;
 
-    dReal *invI = memarena->AllocateOveralignedArray<dReal>((size_t)nb * IIE__MAX, INVI_ALIGNMENT);
+    dReal *invI = memarena->AllocateOveralignedArray<dReal>((sizeint)nb * IIE__MAX, INVI_ALIGNMENT);
     dJointWithInfo1 *const jointinfos = memarena->AllocateArray<dJointWithInfo1>(_nj);
 
     const unsigned allowedThreads = callContext->m_stepperAllowedThreads;
@@ -1150,7 +1150,7 @@ void dxQuickStepIsland_Stage0_Bodies(dxQuickStepperStage0BodiesCallContext *call
         dReal *invI = callContext->m_invI;
         unsigned int bodyIndex;
         while ((bodyIndex = ThrsafeIncrementIntUpToLimit(&callContext->m_inertiaBodyIndex, nb)) != nb) {
-            dReal *invIrow = invI + (size_t)bodyIndex * IIE__MAX;
+            dReal *invIrow = invI + (sizeint)bodyIndex * IIE__MAX;
             dxBody *b = body[bodyIndex];
 
             dMatrix3 tmp;
@@ -1268,7 +1268,7 @@ void dxQuickStepIsland_Stage0_Joints(dxQuickStepperStage0JointsCallContext *call
         callContext->m_stage0Outputs->m = mcurr;
         callContext->m_stage0Outputs->mfb = mfbcurr;
         callContext->m_stage0Outputs->nj = (unsigned int)(jicurr - callContext->m_jointinfos); 
-        dIASSERT((size_t)(jicurr - callContext->m_jointinfos) < UINT_MAX || (size_t)(jicurr - callContext->m_jointinfos) == UINT_MAX); // to avoid "...always evaluates to true" warnings
+        dIASSERT((sizeint)(jicurr - callContext->m_jointinfos) < UINT_MAX || (sizeint)(jicurr - callContext->m_jointinfos) == UINT_MAX); // to avoid "...always evaluates to true" warnings
     }
 }
 
@@ -1330,8 +1330,8 @@ void dxQuickStepIsland_Stage1(dxQuickStepperStage1CallContext *stage1CallContext
 
         jb = memarena->AllocateArray<dxJBodiesItem>(m);
         findex = memarena->AllocateArray<int>(m);
-        J = memarena->AllocateOveralignedArray<dReal>((size_t)m * JME__MAX, JACOBIAN_ALIGNMENT);
-        Jcopy = memarena->AllocateOveralignedArray<dReal>((size_t)mfb * JCE__MAX, JCOPY_ALIGNMENT);
+        J = memarena->AllocateOveralignedArray<dReal>((sizeint)m * JME__MAX, JACOBIAN_ALIGNMENT);
+        Jcopy = memarena->AllocateOveralignedArray<dReal>((sizeint)mfb * JCE__MAX, JCOPY_ALIGNMENT);
     }
 
     dxQuickStepperLocalContext *localContext = (dxQuickStepperLocalContext *)memarena->AllocateBlock(sizeof(dxQuickStepperLocalContext));
@@ -1346,7 +1346,7 @@ void dxQuickStepIsland_Stage1(dxQuickStepperStage1CallContext *stage1CallContext
         // create a constraint equation right hand side vector `rhs', a constraint
         // force mixing vector `cfm', and LCP low and high bound vectors, and an
         // 'findex' vector.
-        dReal *rhs_tmp = memarena->AllocateArray<dReal>((size_t)nb * RHS__MAX);
+        dReal *rhs_tmp = memarena->AllocateArray<dReal>((sizeint)nb * RHS__MAX);
 
         dxQuickStepperStage2CallContext *stage2CallContext = (dxQuickStepperStage2CallContext*)memarena->AllocateBlock(sizeof(dxQuickStepperStage2CallContext));
         stage2CallContext->Initialize(callContext, localContext, rhs_tmp);
@@ -1443,7 +1443,7 @@ void dxQuickStepIsland_Stage2a(dxQuickStepperStage2CallContext *stage2CallContex
             const unsigned ofsi = mindex[ji].mIndex;
             const unsigned int infom = mindex[ji + 1].mIndex - ofsi;
 
-            dReal *const JRow = J + (size_t)ofsi * JME__MAX;
+            dReal *const JRow = J + (sizeint)ofsi * JME__MAX;
             {
                 dReal *const JEnd = JRow + infom * JME__MAX;
                 for (dReal *JCurr = JRow; JCurr != JEnd; JCurr += JME__MAX) {
@@ -1488,7 +1488,7 @@ void dxQuickStepIsland_Stage2a(dxQuickStepperStage2CallContext *stage2CallContex
                 // for joints, that requested feedback (which is normally much less)
                 unsigned mfbCount = mindex[ji + 1].fbIndex - mindex[ji].fbIndex;
                 if (mfbCount != 0) {
-                    dReal *const JEnd = JRow + (size_t)mfbCount * JME__MAX;
+                    dReal *const JEnd = JRow + (sizeint)mfbCount * JME__MAX;
                     for (const dReal *JCurr = JRow; ; ) {
                         for (unsigned i = 0; i != JME__J1_COUNT; ++i) { JCopy[i + JCE__J1_MIN] = JCurr[i + JME__J1_MIN]; }
                         for (unsigned j = 0; j != JME__J2_COUNT; ++j) { JCopy[j + JCE__J2_MIN] = JCurr[j + JME__J2_MIN]; }
@@ -1591,8 +1591,8 @@ void dxQuickStepIsland_Stage2b(dxQuickStepperStage2CallContext *stage2CallContex
             unsigned int bi = bi_step * step_size;
             const unsigned int biend = bi + dMIN(step_size, nb - bi);
 
-            dReal *rhscurr = rhs_tmp + (size_t)bi * RHS__MAX;
-            const dReal *invIrow = invI + (size_t)bi * IIE__MAX;
+            dReal *rhscurr = rhs_tmp + (sizeint)bi * RHS__MAX;
+            const dReal *invIrow = invI + (sizeint)bi * IIE__MAX;
             while (true) {
                 dxBody *b = body[bi];
                 dReal body_invMass = b->invMass;
@@ -1700,8 +1700,8 @@ void dxQuickStepIsland_Stage3(dxQuickStepperStage3CallContext *stage3CallContext
         dReal *lambda = memarena->AllocateArray<dReal>(m);
 
         unsigned int nb = callContext->m_islandBodiesCount;
-        dReal *cforce = memarena->AllocateArray<dReal>((size_t)nb * CFE__MAX);
-        dReal *iMJ = memarena->AllocateOveralignedArray<dReal>((size_t)m * IMJ__MAX, INVMJ_ALIGNMENT);
+        dReal *cforce = memarena->AllocateArray<dReal>((sizeint)nb * CFE__MAX);
+        dReal *iMJ = memarena->AllocateOveralignedArray<dReal>((sizeint)m * IMJ__MAX, INVMJ_ALIGNMENT);
         // order to solve constraint rows in
         IndexError *order = memarena->AllocateArray<IndexError>(m);
         dReal *last_lambda = NULL;
@@ -1719,7 +1719,7 @@ void dxQuickStepIsland_Stage3(dxQuickStepperStage3CallContext *stage3CallContext
         atomicord32 *mi_links = NULL;
 #if !dTHREADING_INTF_DISABLED
         bi_links_or_mi_levels = memarena->AllocateArray<atomicord32>(dMAX(nb, m));
-        mi_links = memarena->AllocateArray<atomicord32>(2 * ((size_t)m + 1));
+        mi_links = memarena->AllocateArray<atomicord32>(2 * ((sizeint)m + 1));
 #else
         dIASSERT(singleThreadedExecution);
 #endif
@@ -2066,7 +2066,7 @@ void dxQuickStepIsland_Stage4LCP_MTfcComputation_cold(dxQuickStepperStage4CallCo
     while ((bi_step = ThrsafeIncrementIntUpToLimit(&stage4CallContext->m_mi_fc, nb_steps)) != nb_steps) {
         unsigned int bi = bi_step * step_size;
         unsigned int bicnt = dMIN(step_size, nb - bi);
-        dSetZero(fc + (size_t)bi * CFE__MAX, (size_t)bicnt * CFE__MAX);
+        dSetZero(fc + (sizeint)bi * CFE__MAX, (sizeint)bicnt * CFE__MAX);
     }
 }
 
@@ -2095,7 +2095,7 @@ void dxQuickStepIsland_Stage4LCP_STfcComputation(dxQuickStepperStage4CallContext
     const dxStepperProcessingCallContext *callContext = stage4CallContext->m_stepperCallContext;
     unsigned int nb = callContext->m_islandBodiesCount;
 
-    dSetZero(fc, (size_t)nb * CFE__MAX);
+    dSetZero(fc, (sizeint)nb * CFE__MAX);
 #endif
 
 }
@@ -2134,8 +2134,8 @@ void dxQuickStepIsland_Stage4LCP_AdComputation(dxQuickStepperStage4CallContext *
         unsigned int mi = mi_step * step_size;
         const unsigned int miend = mi + dMIN(step_size, m - mi);
 
-        const dReal *iMJ_ptr = iMJ + (size_t)mi * IMJ__MAX;
-        dReal *J_ptr = J + (size_t)mi * JME__MAX;
+        const dReal *iMJ_ptr = iMJ + (sizeint)mi * IMJ__MAX;
+        dReal *J_ptr = J + (sizeint)mi * JME__MAX;
         while (true) {
             dReal sum = REAL(0.0);
             {
@@ -2505,9 +2505,9 @@ void dxQuickStepIsland_Stage4LCP_DependencyMapForNewOrderRebuilding(dxQuickStepp
         // Check that the dependency targets an earlier "i"
         dIASSERT(encoded_depi < encioded_i);
 
-        unsigned encoded_downi = mi_links[(size_t)encoded_depi * 2 + 1];
-        mi_links[(size_t)encoded_depi * 2 + 1] = encioded_i; // Link i as down-dependency for depi
-        mi_links[(size_t)encioded_i * 2] = encoded_downi; // Link previous down-chain as the level-dependency with i
+        unsigned encoded_downi = mi_links[(sizeint)encoded_depi * 2 + 1];
+        mi_links[(sizeint)encoded_depi * 2 + 1] = encioded_i; // Link i as down-dependency for depi
+        mi_links[(sizeint)encioded_i * 2] = encoded_downi; // Link previous down-chain as the level-dependency with i
     }
 }
 
@@ -2522,10 +2522,10 @@ void dxQuickStepIsland_Stage4LCP_DependencyMapFromSavedLevelsReconstruction(dxQu
     unsigned int m = localContext->m_m;
     for (unsigned int i = 0; i != m; ++i) {
         unsigned int currentLevelRoot = mi_levels[i];
-        unsigned int currentLevelFirstLink = mi_links[2 * (size_t)currentLevelRoot + 1];
+        unsigned int currentLevelFirstLink = mi_links[2 * (sizeint)currentLevelRoot + 1];
         unsigned int encoded_i = dxENCODE_INDEX(i);
-        mi_links[2 * (size_t)currentLevelRoot + 1] = encoded_i;
-        mi_links[2 * (size_t)encoded_i + 0] = currentLevelFirstLink;
+        mi_links[2 * (sizeint)currentLevelRoot + 1] = encoded_i;
+        mi_links[2 * (sizeint)encoded_i + 0] = currentLevelFirstLink;
     }
 
     // Additionally reset available level root's list head
@@ -2582,29 +2582,29 @@ void dxQuickStepIsland_Stage4LCP_MTIteration(dxQuickStepperStage4CallContext *st
             break;
         }
         
-        for (unsigned int currentLevelRoot = initialLevelRoot; ; currentLevelRoot = mi_links[2 * (size_t)currentLevelRoot + 0]) {
+        for (unsigned int currentLevelRoot = initialLevelRoot; ; currentLevelRoot = mi_links[2 * (sizeint)currentLevelRoot + 0]) {
             while (true) {
                 const unsigned invalid_link = dxENCODE_INDEX(-1);
 
-                unsigned currentLevelFirstLink = mi_links[2 * (size_t)currentLevelRoot + 1];
+                unsigned currentLevelFirstLink = mi_links[2 * (sizeint)currentLevelRoot + 1];
                 if (currentLevelFirstLink == invalid_link) {
                     break;
                 }
                 
                 // Try to extract first record from linked list
-                unsigned currentLevelNextLink = mi_links[2 * (size_t)currentLevelFirstLink + 0];
-                if (ThrsafeCompareExchange(&mi_links[2 * (size_t)currentLevelRoot + 1], currentLevelFirstLink, currentLevelNextLink)) {
+                unsigned currentLevelNextLink = mi_links[2 * (sizeint)currentLevelFirstLink + 0];
+                if (ThrsafeCompareExchange(&mi_links[2 * (sizeint)currentLevelRoot + 1], currentLevelFirstLink, currentLevelNextLink)) {
                     // if succeeded, execute selected iteration step...
                     dxQuickStepIsland_Stage4LCP_IterationStep(stage4CallContext, dxDECODE_INDEX(currentLevelFirstLink));
 
                     // Check if there are any dependencies
-                    unsigned level0DownLink = mi_links[2 * (size_t)currentLevelFirstLink + 1];
+                    unsigned level0DownLink = mi_links[2 * (sizeint)currentLevelFirstLink + 1];
                     if (level0DownLink != invalid_link) {
                         // ...and if yes, insert the record into the list of available level roots
                         unsigned int levelRootsFirst;
                         do {
                             levelRootsFirst = mi_links[2 * dxHEAD_INDEX + 0];
-                            mi_links[2 * (size_t)currentLevelFirstLink + 0] = levelRootsFirst;
+                            mi_links[2 * (sizeint)currentLevelFirstLink + 0] = levelRootsFirst;
                         }
                         while (!ThrsafeCompareExchange(&mi_links[2 * dxHEAD_INDEX + 0], levelRootsFirst, currentLevelFirstLink));
 
@@ -2693,7 +2693,7 @@ void dxQuickStepIsland_Stage4LCP_IterationStep(dxQuickStepperStage4CallContext *
     dReal old_lambda = lambda[index];
 
     dReal *J = localContext->m_J;
-    const dReal *J_ptr = J + (size_t)index * JME__MAX;
+    const dReal *J_ptr = J + (sizeint)index * JME__MAX;
 
     {
         delta = J_ptr[JME_RHS] - old_lambda * J_ptr[JME_CFM];
@@ -2705,14 +2705,14 @@ void dxQuickStepIsland_Stage4LCP_IterationStep(dxQuickStepperStage4CallContext *
         int b1 = jb[index].first;
 
         // @@@ potential optimization: SIMD-ize this and the b2 >= 0 case
-        fc_ptr1 = fc + (size_t)(unsigned)b1 * CFE__MAX;
+        fc_ptr1 = fc + (sizeint)(unsigned)b1 * CFE__MAX;
         delta -= fc_ptr1[CFE_LX] * J_ptr[JME_J1LX] + fc_ptr1[CFE_LY] * J_ptr[JME_J1LY] +
             fc_ptr1[CFE_LZ] * J_ptr[JME_J1LZ] + fc_ptr1[CFE_AX] * J_ptr[JME_J1AX] +
             fc_ptr1[CFE_AY] * J_ptr[JME_J1AY] + fc_ptr1[CFE_AZ] * J_ptr[JME_J1AZ];
         // @@@ potential optimization: handle 1-body constraints in a separate
         //     loop to avoid the cost of test & jump?
         if (b2 != -1) {
-            fc_ptr2 = fc + (size_t)(unsigned)b2 * CFE__MAX;
+            fc_ptr2 = fc + (sizeint)(unsigned)b2 * CFE__MAX;
             delta -= fc_ptr2[CFE_LX] * J_ptr[JME_J2LX] + fc_ptr2[CFE_LY] * J_ptr[JME_J2LY] +
                 fc_ptr2[CFE_LZ] * J_ptr[JME_J2LZ] + fc_ptr2[CFE_AX] * J_ptr[JME_J2AX] +
                 fc_ptr2[CFE_AY] * J_ptr[JME_J2AY] + fc_ptr2[CFE_AZ] * J_ptr[JME_J2AZ];
@@ -2761,7 +2761,7 @@ void dxQuickStepIsland_Stage4LCP_IterationStep(dxQuickStepperStage4CallContext *
 
     {
         dReal *iMJ = stage4CallContext->m_iMJ;
-        const dReal *iMJ_ptr = iMJ + (size_t)index * IMJ__MAX;
+        const dReal *iMJ_ptr = iMJ + (sizeint)index * IMJ__MAX;
         // update fc.
         // @@@ potential optimization: SIMD for this and the b2 >= 0 case
         fc_ptr1[CFE_LX] += delta * iMJ_ptr[IMJ_1LX];
@@ -2871,7 +2871,7 @@ void dxQuickStepIsland_Stage4b(dxQuickStepperStage4CallContext *stage4CallContex
         while ((ji_step = ThrsafeIncrementIntUpToLimit(&stage4CallContext->m_ji_4b, nj_steps)) != nj_steps) {
             unsigned int ji = ji_step * step_size;
             const dReal *lambdacurr = lambda + mindex[ji].mIndex;
-            const dReal *Jcopycurr = Jcopy + (size_t)mindex[ji].fbIndex * JCE__MAX;
+            const dReal *Jcopycurr = Jcopy + (sizeint)mindex[ji].fbIndex * JCE__MAX;
             const dJointWithInfo1 *jicurr = jointinfos + ji;
             const dJointWithInfo1 *const jiend = jicurr + dMIN(step_size, nj - ji);
 
@@ -3005,7 +3005,7 @@ void dxQuickStepIsland_Stage6a(dxQuickStepperStage6CallContext *stage6CallContex
         unsigned int bi = bi_step * step_size;
         unsigned int bicnt = dMIN(step_size, nb - bi);
 
-        const dReal *invIrow = invI + (size_t)bi * IIE__MAX;
+        const dReal *invIrow = invI + (sizeint)bi * IIE__MAX;
         dxBody *const *bodycurr = body + bi;
         dxBody *const *bodyend = bodycurr + bicnt;
         while (true) {
@@ -3132,7 +3132,7 @@ void dxQuickStepIsland_Stage6b(dxQuickStepperStage6CallContext *stage6CallContex
 
 
 /*extern */
-size_t dxEstimateQuickStepMemoryRequirements (dxBody * const *body,
+sizeint dxEstimateQuickStepMemoryRequirements (dxBody * const *body,
                                               unsigned int nb,
                                               dxJoint * const *_joint,
                                               unsigned int _nj)
@@ -3160,14 +3160,14 @@ size_t dxEstimateQuickStepMemoryRequirements (dxBody * const *body,
         nj = njcurr; m = mcurr; mfb = mfbcurr;
     }
 
-    size_t res = 0;
+    sizeint res = 0;
 
     res += dOVERALIGNED_SIZE(sizeof(dReal) * IIE__MAX * nb, INVI_ALIGNMENT); // for invI
 
     {
-        size_t sub1_res1 = dEFFICIENT_SIZE(sizeof(dJointWithInfo1) * _nj); // for initial jointinfos
+        sizeint sub1_res1 = dEFFICIENT_SIZE(sizeof(dJointWithInfo1) * _nj); // for initial jointinfos
 
-        size_t sub1_res2 = dEFFICIENT_SIZE(sizeof(dJointWithInfo1) * nj); // for shrunk jointinfos
+        sizeint sub1_res2 = dEFFICIENT_SIZE(sizeof(dJointWithInfo1) * nj); // for shrunk jointinfos
         sub1_res2 += dEFFICIENT_SIZE(sizeof(dxQuickStepperLocalContext)); // for dxQuickStepLocalContext
         if (m > 0) {
             sub1_res2 += dEFFICIENT_SIZE(sizeof(dxMIndexItem) * (nj + 1)); // for mindex
@@ -3176,13 +3176,13 @@ size_t dxEstimateQuickStepMemoryRequirements (dxBody * const *body,
             sub1_res2 += dOVERALIGNED_SIZE(sizeof(dReal) * JME__MAX * m, JACOBIAN_ALIGNMENT); // for J
             sub1_res2 += dOVERALIGNED_SIZE(sizeof(dReal) * JCE__MAX * mfb, JCOPY_ALIGNMENT); // for Jcopy
             {
-                size_t sub2_res1 = dEFFICIENT_SIZE(sizeof(dxQuickStepperStage3CallContext)); // for dxQuickStepperStage3CallContext
+                sizeint sub2_res1 = dEFFICIENT_SIZE(sizeof(dxQuickStepperStage3CallContext)); // for dxQuickStepperStage3CallContext
                 sub2_res1 += dEFFICIENT_SIZE(sizeof(dReal) * RHS__MAX * nb); // for rhs_tmp
                 sub2_res1 += dEFFICIENT_SIZE(sizeof(dxQuickStepperStage2CallContext)); // for dxQuickStepperStage2CallContext
 
-                size_t sub2_res2 = 0;
+                sizeint sub2_res2 = 0;
                 {
-                    size_t sub3_res1 = dEFFICIENT_SIZE(sizeof(dxQuickStepperStage5CallContext)); // for dxQuickStepperStage5CallContext;
+                    sizeint sub3_res1 = dEFFICIENT_SIZE(sizeof(dxQuickStepperStage5CallContext)); // for dxQuickStepperStage5CallContext;
                     sub3_res1 += dEFFICIENT_SIZE(sizeof(dReal) * m); // for lambda
                     sub3_res1 += dEFFICIENT_SIZE(sizeof(dReal) * CFE__MAX * nb); // for cforce
                     sub3_res1 += dOVERALIGNED_SIZE(sizeof(dReal) * IMJ__MAX * m, INVMJ_ALIGNMENT); // for iMJ
@@ -3192,11 +3192,11 @@ size_t dxEstimateQuickStepMemoryRequirements (dxBody * const *body,
 #endif
 #if !dTHREADING_INTF_DISABLED
                     sub3_res1 += dEFFICIENT_SIZE(sizeof(atomicord32) * dMAX(nb, m)); // for bi_links_or_mi_levels
-                    sub3_res1 += dEFFICIENT_SIZE(sizeof(atomicord32) * 2 * ((size_t)m + 1)); // for mi_links
+                    sub3_res1 += dEFFICIENT_SIZE(sizeof(atomicord32) * 2 * ((sizeint)m + 1)); // for mi_links
 #endif
                     sub3_res1 += dEFFICIENT_SIZE(sizeof(dxQuickStepperStage4CallContext)); // for dxQuickStepperStage4CallContext;
 
-                    size_t sub3_res2 = dEFFICIENT_SIZE(sizeof(dxQuickStepperStage6CallContext)); // for dxQuickStepperStage6CallContext;
+                    sizeint sub3_res2 = dEFFICIENT_SIZE(sizeof(dxQuickStepperStage6CallContext)); // for dxQuickStepperStage6CallContext;
                     
                     sub2_res2 += dMAX(sub3_res1, sub3_res2);
                 }
@@ -3208,8 +3208,8 @@ size_t dxEstimateQuickStepMemoryRequirements (dxBody * const *body,
             sub1_res2 += dEFFICIENT_SIZE(sizeof(dxQuickStepperStage3CallContext)); // for dxQuickStepperStage3CallContext
         }
 
-        size_t sub1_res12_max = dMAX(sub1_res1, sub1_res2);
-        size_t stage01_contexts = dEFFICIENT_SIZE(sizeof(dxQuickStepperStage0BodiesCallContext))
+        sizeint sub1_res12_max = dMAX(sub1_res1, sub1_res2);
+        sizeint stage01_contexts = dEFFICIENT_SIZE(sizeof(dxQuickStepperStage0BodiesCallContext))
             + dEFFICIENT_SIZE(sizeof(dxQuickStepperStage0JointsCallContext))
             + dEFFICIENT_SIZE(sizeof(dxQuickStepperStage1CallContext));
         res += dMAX(sub1_res12_max, stage01_contexts);

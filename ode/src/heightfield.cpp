@@ -631,9 +631,9 @@ dxHeightfield::~dxHeightfield()
     resetHeightBuffer();
 }
 
-void dxHeightfield::allocateTriangleBuffer(size_t numTri)
+void dxHeightfield::allocateTriangleBuffer(sizeint numTri)
 {
-    size_t alignedNumTri = AlignBufferSize(numTri, TEMP_TRIANGLE_BUFFER_ELEMENT_COUNT_ALIGNMENT);
+    sizeint alignedNumTri = AlignBufferSize(numTri, TEMP_TRIANGLE_BUFFER_ELEMENT_COUNT_ALIGNMENT);
     tempTriangleBufferSize = alignedNumTri;
     tempTriangleBuffer = new HeightFieldTriangle[alignedNumTri];
 }
@@ -643,15 +643,15 @@ void dxHeightfield::resetTriangleBuffer()
     delete[] tempTriangleBuffer;
 }
 
-void dxHeightfield::allocatePlaneBuffer(size_t numTri)
+void dxHeightfield::allocatePlaneBuffer(sizeint numTri)
 {
-    size_t alignedNumTri = AlignBufferSize(numTri, TEMP_PLANE_BUFFER_ELEMENT_COUNT_ALIGNMENT);
+    sizeint alignedNumTri = AlignBufferSize(numTri, TEMP_PLANE_BUFFER_ELEMENT_COUNT_ALIGNMENT);
     tempPlaneBufferSize = alignedNumTri;
     tempPlaneBuffer = new HeightFieldPlane *[alignedNumTri];
     tempPlaneInstances = new HeightFieldPlane[alignedNumTri];
 
     HeightFieldPlane *ptrPlaneMatrix = tempPlaneInstances;
-    for (size_t indexTri = 0; indexTri != alignedNumTri; indexTri++)
+    for (sizeint indexTri = 0; indexTri != alignedNumTri; indexTri++)
     {
         tempPlaneBuffer[indexTri] = ptrPlaneMatrix;
         ptrPlaneMatrix += 1;
@@ -664,18 +664,18 @@ void dxHeightfield::resetPlaneBuffer()
     delete[] tempPlaneBuffer;
 }
 
-void dxHeightfield::allocateHeightBuffer(size_t numX, size_t numZ)
+void dxHeightfield::allocateHeightBuffer(sizeint numX, sizeint numZ)
 {
-    size_t alignedNumX = AlignBufferSize(numX, TEMP_HEIGHT_BUFFER_ELEMENT_COUNT_ALIGNMENT_X);
-    size_t alignedNumZ = AlignBufferSize(numZ, TEMP_HEIGHT_BUFFER_ELEMENT_COUNT_ALIGNMENT_Z);
+    sizeint alignedNumX = AlignBufferSize(numX, TEMP_HEIGHT_BUFFER_ELEMENT_COUNT_ALIGNMENT_X);
+    sizeint alignedNumZ = AlignBufferSize(numZ, TEMP_HEIGHT_BUFFER_ELEMENT_COUNT_ALIGNMENT_Z);
     tempHeightBufferSizeX = alignedNumX;
     tempHeightBufferSizeZ = alignedNumZ;
     tempHeightBuffer = new HeightFieldVertex *[alignedNumX];
-    size_t numCells = alignedNumX * alignedNumZ;
+    sizeint numCells = alignedNumX * alignedNumZ;
     tempHeightInstances = new HeightFieldVertex [numCells];
 
     HeightFieldVertex *ptrHeightMatrix = tempHeightInstances;
-    for (size_t indexX = 0; indexX != alignedNumX; indexX++)
+    for (sizeint indexX = 0; indexX != alignedNumX; indexX++)
     {
         tempHeightBuffer[indexX] = ptrHeightMatrix;
         ptrHeightMatrix += alignedNumZ;
@@ -930,13 +930,13 @@ static inline bool DescendingPlaneSort(const HeightFieldPlane * const A, const H
     return ((A->maxAAAB - B->maxAAAB) > dEpsilon);
 }
 
-void dxHeightfield::sortPlanes(const size_t numPlanes)
+void dxHeightfield::sortPlanes(const sizeint numPlanes)
 {
     bool has_swapped = true;
     do
     {
         has_swapped = false;//reset flag
-        for (size_t i = 0; i < numPlanes - 1; i++)
+        for (sizeint i = 0; i < numPlanes - 1; i++)
         {
             //if they are in the wrong order
             if (DescendingPlaneSort(tempPlaneBuffer[i], tempPlaneBuffer[i + 1]))
@@ -1495,13 +1495,13 @@ int dxHeightfield::dCollideHeightfieldZone( const int minX, const int maxX, cons
             // find collision and compute contact points
             bool didCollide = false;
             const int numPlaneContacts = geomNPlaneCollider (o2, sliding_plane, planeTestFlags, PlaneContact, sizeof(dContactGeom));
-            const size_t planeTriListSize = itPlane->trianglelistCurrentSize;
+            const sizeint planeTriListSize = itPlane->trianglelistCurrentSize;
             for (i = 0; i < numPlaneContacts; i++)
             {
                 dContactGeom *planeCurrContact = PlaneContact + i;
                 // Check if contact point found in plane is inside Triangle.
                 const dVector3 &pCPos = planeCurrContact->pos;
-                for (size_t b = 0; planeTriListSize > b; b++)
+                for (sizeint b = 0; planeTriListSize > b; b++)
                 {  
                     if (m_p_data->IsOnHeightfield2 (itPlane->trianglelist[b]->vertices[0], 
                         pCPos, 
@@ -1532,7 +1532,7 @@ int dxHeightfield::dCollideHeightfieldZone( const int minX, const int maxX, cons
                 planeTestFlags = (flags & ~NUMC_MASK) | numMaxContactsPerPlane;
                 dIASSERT((HEIGHTFIELDMAXCONTACTPERCELL & ~NUMC_MASK) == 0);
 #endif        
-                for (size_t b = 0; planeTriListSize > b; b++)
+                for (sizeint b = 0; planeTriListSize > b; b++)
                 {                      
                     // flag Triangles Vertices as collided 
                     // to prevent any collision test of those
@@ -1544,7 +1544,7 @@ int dxHeightfield::dCollideHeightfieldZone( const int minX, const int maxX, cons
             {
                 // flag triangle as not collided so that Vertices or Edge
                 // of that triangles will be checked.
-                for (size_t b = 0; planeTriListSize > b; b++)
+                for (sizeint b = 0; planeTriListSize > b; b++)
                 { 
                     itPlane->trianglelist[b]->state = false;
                 }
@@ -1573,7 +1573,7 @@ int dxHeightfield::dCollideHeightfieldZone( const int minX, const int maxX, cons
             if (itTriangle->state == true)
                 continue;// plane triangle did already collide.
 
-            for (size_t i = 0; i < 3; i++)
+            for (sizeint i = 0; i < 3; i++)
             {
                 HeightFieldVertex *vertex = itTriangle->vertices[i];
                 if (vertex->state == true)
@@ -1645,9 +1645,9 @@ int dxHeightfield::dCollideHeightfieldZone( const int minX, const int maxX, cons
             if (itTriangle->state == true)
                 continue;// plane did already collide.
 
-            for (size_t m = 0; m < 3; m++)
+            for (sizeint m = 0; m < 3; m++)
             {
-                const size_t next = (m + 1) % 3;
+                const sizeint next = (m + 1) % 3;
                 HeightFieldVertex *vertex0 = itTriangle->vertices[m];
                 HeightFieldVertex *vertex1 = itTriangle->vertices[next];
 

@@ -718,7 +718,7 @@ dxJointPU::type() const
 }
 
 
-size_t
+sizeint
 dxJointPU::size() const
 {
     return sizeof( *this );

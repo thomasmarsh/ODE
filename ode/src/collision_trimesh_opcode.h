@@ -90,7 +90,7 @@ public:
     bool resizeAndResetVertexUSEDFlags(unsigned VertexCount)
     {
         bool Result = false;
-        size_t VertexNewElements = (VertexCount + 7) / 8;
+        sizeint VertexNewElements = (VertexCount + 7) / 8;
         if (VertexNewElements <= m_VertexUseElements || reallocVertexUSEDFlags(VertexNewElements)) {
             memset(m_VertexUseBits, 0, VertexNewElements);
             Result = true;
@@ -102,7 +102,7 @@ public:
     void setVertexUSEDFlag(unsigned VertexIndex) { m_VertexUseBits[VertexIndex / 8] |= (1 << (VertexIndex % 8)); }
 
 private:
-    bool reallocVertexUSEDFlags(size_t VertexNewElements)
+    bool reallocVertexUSEDFlags(sizeint VertexNewElements)
     {
         bool Result = false;
         uint8 *VertexNewBits = (uint8 *)dRealloc(m_VertexUseBits, m_VertexUseElements * sizeof(m_VertexUseBits[0]), VertexNewElements * sizeof(m_VertexUseBits[0]));
@@ -123,7 +123,7 @@ private:
 
 private:
     uint8 *m_VertexUseBits;
-    size_t m_VertexUseElements;
+    sizeint m_VertexUseElements;
 };
 
 
@@ -207,13 +207,13 @@ public:
 public:
     void assignNormals(const dReal *normals) { dxTriMeshData_Parent::assignNormals(normals); }
     const dReal *retrieveNormals() const { return (const dReal *)dxTriMeshData_Parent::retrieveNormals(); }
-    size_t calculateNormalsMemoryRequirement() const { return retrieveTriangleCount() * (sizeof(dReal) * dSA__MAX); }
+    sizeint calculateNormalsMemoryRequirement() const { return retrieveTriangleCount() * (sizeof(dReal) * dSA__MAX); }
 
 public:
     void assignExternalUseFlagsBuffer(uint8 *buffer) { m_ExternalUseFlags = buffer != m_InternalUseFlags ? buffer : NULL; }
     const uint8 *smartRetrieveUseFlags() const { return m_ExternalUseFlags != NULL ? m_ExternalUseFlags : m_InternalUseFlags; }
     bool haveUseFlagsBeenBuilt() const { return m_InternalUseFlags != NULL; }
-    size_t calculateUseFlagsMemoryRequirement() const { return m_Mesh.GetNbTriangles() * sizeof(m_InternalUseFlags[0]); }
+    sizeint calculateUseFlagsMemoryRequirement() const { return m_Mesh.GetNbTriangles() * sizeof(m_InternalUseFlags[0]); }
 
 public:
     Model m_BVTree;

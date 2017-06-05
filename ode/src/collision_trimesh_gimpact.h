@@ -82,7 +82,7 @@ public:
 public:
     void assignNormals(const dReal *normals) { dxTriMeshData_Parent::assignNormals(normals); }
     const dReal *retrieveNormals() const { return (const dReal *)dxTriMeshData_Parent::retrieveNormals(); }
-    size_t calculateNormalsMemoryRequirement() const { return retrieveTriangleCount() * (sizeof(dReal) * dSA__MAX); }
+    sizeint calculateNormalsMemoryRequirement() const { return retrieveTriangleCount() * (sizeof(dReal) * dSA__MAX); }
 };
 
 

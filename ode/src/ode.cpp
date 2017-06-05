@@ -1324,13 +1324,13 @@ void dJointGroupEmpty (dJointGroupID group)
 {
     dAASSERT (group);
 
-    const size_t num_joints = group->getJointCount();
+    const sizeint num_joints = group->getJointCount();
     if (num_joints != 0) {
         // Local array is used since ALLOCA leads to mysterious NULL values in first array element and crashes under VS2005 :)
-        const size_t max_stack_jlist_size = 1024;
+        const sizeint max_stack_jlist_size = 1024;
         dxJoint *stack_jlist[max_stack_jlist_size];
 
-        const size_t jlist_size = num_joints * sizeof(dxJoint*);
+        const sizeint jlist_size = num_joints * sizeof(dxJoint*);
         dxJoint **jlist = num_joints <= max_stack_jlist_size ? stack_jlist : (dxJoint **)dAlloc(jlist_size);
 
         if (jlist != NULL) {
@@ -1338,17 +1338,17 @@ void dJointGroupEmpty (dJointGroupID group)
             // added (at the top of the stack). this helps ensure that the various
             // linked lists are not traversed too much, as the joints will hopefully
             // be at the start of those lists.
-            size_t num_exported = group->exportJoints(jlist);
+            sizeint num_exported = group->exportJoints(jlist);
             dIVERIFY(num_exported == num_joints);
 
-            for (size_t i = num_joints; i != 0; ) {
+            for (sizeint i = num_joints; i != 0; ) {
                 --i;
                 dxJoint *j = jlist[i];
                 FinalizeAndDestroyJointInstance(j, false);
             }
         } else {
             // ...else if there is no memory, go on detaching the way it is possible
-            size_t joint_bytes;
+            sizeint joint_bytes;
             for (dxJoint *j = (dxJoint *)group->beginEnum(); j != NULL; j = (dxJoint *)group->continueEnum(joint_bytes)) {
                 joint_bytes = j->size(); // Get size before object is destroyed!
                 FinalizeAndDestroyJointInstance(j, false);
@@ -1610,7 +1610,7 @@ void dWorldDestroy (dxWorld *w)
         }
         else {
             // TODO: shouldn't we call dJointDestroy()?
-            size_t sz = j->size();
+            sizeint sz = j->size();
             j->~dxJoint();
             dFree (j,sz);
         }
@@ -2295,7 +2295,7 @@ int dCheckConfiguration( const char* extension )
 
     const char* config = dGetConfiguration();
 
-    const size_t ext_length = strlen(extension);
+    const sizeint ext_length = strlen(extension);
 
     /* It takes a bit of care to be fool-proof. Don't be fooled by sub-strings, etc. */
     start = config;

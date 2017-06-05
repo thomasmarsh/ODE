@@ -274,7 +274,7 @@ void ccdSupportConvex(const void *obj, const ccd_vec3_t *_dir, ccd_vec3_t *v)
     const ccd_convex_t *c = (const ccd_convex_t *)obj;
     ccd_vec3_t dir, p;
     ccd_real_t maxdot, dot;
-    size_t i;
+    sizeint i;
     const dReal *curp;
 
     ccdVec3Copy(&dir, _dir);

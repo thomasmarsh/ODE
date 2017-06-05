@@ -59,7 +59,7 @@ bool dxRequiredResourceContainer::allocateResources(const dxResourceRequirementD
 
     do
     {
-        size_t memorySizeRequirement = requirementDescriptor.getMemorySizeRequirement();
+        sizeint memorySizeRequirement = requirementDescriptor.getMemorySizeRequirement();
         
         if (memorySizeRequirement != 0)
         {

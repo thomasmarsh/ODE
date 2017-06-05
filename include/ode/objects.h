@@ -315,9 +315,9 @@ ODE_API int dWorldSetStepMemoryReservationPolicy(dWorldID w, const dWorldStepRes
 typedef struct 
 {
   unsigned struct_size;
-  void *(*alloc_block)(size_t block_size);
-  void *(*shrink_block)(void *block_pointer, size_t block_current_size, size_t block_smaller_size);
-  void (*free_block)(void *block_pointer, size_t block_current_size);
+  void *(*alloc_block)(dsizeint block_size);
+  void *(*shrink_block)(void *block_pointer, dsizeint block_current_size, dsizeint block_smaller_size);
+  void (*free_block)(void *block_pointer, dsizeint block_current_size);
 
 } dWorldStepMemoryFunctionsInfo;
 

@@ -351,7 +351,7 @@ dxJointHinge::type() const
 
 
 
-size_t
+sizeint
 dxJointHinge::size() const
 {
     return sizeof( *this );

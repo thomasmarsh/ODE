@@ -65,7 +65,7 @@ dxJointNull::type() const
     return dJointTypeNull;
 }
 
-size_t
+sizeint
 dxJointNull::size() const
 {
     return sizeof( *this );

@@ -38,11 +38,11 @@ template<typename tcoordfloat, typename tindexint>
 void dxTriDataBase::retrieveTriangleVertexPoints(dVector3 out_Points[dMTV__MAX], unsigned triangleIndex,
     const tcoordfloat *vertexInstances, int vertexStride, const tindexint *triangleVertexIndices, int triangleStride)
 {
-    const tindexint *triangleIndicesOfInterest = (const tindexint *)((uint8 *)triangleVertexIndices + (size_t)triangleIndex * triangleStride);
+    const tindexint *triangleIndicesOfInterest = (const tindexint *)((uint8 *)triangleVertexIndices + (sizeint)triangleIndex * triangleStride);
     for (unsigned trianglePoint = dMTV__MIN; trianglePoint != dMTV__MAX; ++trianglePoint)
     {
         unsigned vertexIndex = triangleIndicesOfInterest[trianglePoint];
-        tcoordfloat *pointVertex = (tcoordfloat *)((uint8 *)vertexInstances + (size_t)vertexIndex * vertexStride);
+        tcoordfloat *pointVertex = (tcoordfloat *)((uint8 *)vertexInstances + (sizeint)vertexIndex * vertexStride);
         dAssignVector3(out_Points[trianglePoint], (dReal)pointVertex[dSA_X], (dReal)pointVertex[dSA_Y], (dReal)pointVertex[dSA_Z]);
         dSASSERT(dSA_X == 0);
         dSASSERT(dSA_Y == 1);
@@ -53,12 +53,12 @@ void dxTriDataBase::retrieveTriangleVertexPoints(dVector3 out_Points[dMTV__MAX],
 
 template<class TMeshDataAccessor>
 /*static */
-void dxTriDataBase::meaningfulPreprocess_SetupEdgeRecords(EdgeRecord *edges, size_t numEdges, const TMeshDataAccessor &dataAccessor)
+void dxTriDataBase::meaningfulPreprocess_SetupEdgeRecords(EdgeRecord *edges, sizeint numEdges, const TMeshDataAccessor &dataAccessor)
 {
     unsigned vertexIndices[dMTV__MAX];
     // Make a list of every edge in the mesh
     unsigned triangleIdx = 0;
-    for (size_t edgeIdx = 0; edgeIdx != numEdges; ++triangleIdx, edgeIdx += dMTV__MAX)
+    for (sizeint edgeIdx = 0; edgeIdx != numEdges; ++triangleIdx, edgeIdx += dMTV__MAX)
     {
         dataAccessor.getTriangleVertexIndices(vertexIndices, triangleIdx);
         edges[edgeIdx + dMTV_FIRST].setupEdge(dMTV_FIRST, triangleIdx, vertexIndices);
@@ -70,7 +70,7 @@ void dxTriDataBase::meaningfulPreprocess_SetupEdgeRecords(EdgeRecord *edges, siz
 template<class TMeshDataAccessor>
 /*static */
 void dxTriDataBase::meaningfulPreprocess_buildEdgeFlags(uint8 *useFlags/*=NULL*/, IFaceAngleStorageControl *faceAngles/*=NULL*/, 
-    EdgeRecord *edges, size_t numEdges, VertexRecord *vertices, 
+    EdgeRecord *edges, sizeint numEdges, VertexRecord *vertices, 
     const dReal *externalNormals/*=NULL*/, const TMeshDataAccessor &dataAccessor)
 {
     dIASSERT(useFlags != NULL || faceAngles != NULL);

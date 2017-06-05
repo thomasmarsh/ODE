@@ -107,7 +107,7 @@ void ThreadedEquationSolverLDLT::doEstimateCooperativeSolvingL1TransposedResourc
     unsigned simultaneousCallCount = 1 + (threadCountToUse - 1);
 
     SolvingL1TransposedMemoryEstimates solvingMemoryEstimates;
-    size_t solvingMemoryRequired = estimateCooperativelySolvingL1TransposedMemoryRequirement<blockStep>(rowCount, solvingMemoryEstimates);
+    sizeint solvingMemoryRequired = estimateCooperativelySolvingL1TransposedMemoryRequirement<blockStep>(rowCount, solvingMemoryEstimates);
     const unsigned solvingAlignmentRequired = ALLOCATION_DEFAULT_ALIGNMENT;
 
     unsigned featureRequirement = dxResourceRequirementDescriptor::STOCK_CALLWAIT_REQUIRED;
@@ -136,7 +136,7 @@ void ThreadedEquationSolverLDLT::doCooperativelySolveL1TransposedValidated(
     SolveL1TransposedCellContext *cellContexts;
 
     SolvingL1TransposedMemoryEstimates solvingMemoryEstimates;
-    size_t solvingMemoryRequired = estimateCooperativelySolvingL1TransposedMemoryRequirement<blockStep>(rowCount, solvingMemoryEstimates);
+    sizeint solvingMemoryRequired = estimateCooperativelySolvingL1TransposedMemoryRequirement<blockStep>(rowCount, solvingMemoryEstimates);
     dIASSERT(solvingMemoryRequired <= resourceContainer->getMemoryBufferSize());
 
     void *bufferAllocated = resourceContainer->getMemoryBufferPointer();

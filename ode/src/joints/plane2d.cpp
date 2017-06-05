@@ -155,7 +155,7 @@ dxJointPlane2D::type() const
 }
 
 
-size_t
+sizeint
 dxJointPlane2D::size() const
 {
     return sizeof( *this );

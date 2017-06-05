@@ -61,9 +61,9 @@ testing procedure:
 static dSpaceID space;
 static dGeomID geom[NUM];
 static dReal bounds[NUM][6];
-static size_t good_matrix[NUM][NUM];	// correct collision matrix
-static size_t test_matrix[NUM][NUM];	// testing collision matrix
-static size_t hits[NUM];		// number of collisions a box has
+static dsizeint good_matrix[NUM][NUM];	// correct collision matrix
+static dsizeint test_matrix[NUM][NUM];	// testing collision matrix
+static dsizeint hits[NUM];		// number of collisions a box has
 static unsigned long seed=37;
 
 
@@ -91,7 +91,7 @@ static void init_test()
 		      (bounds[i][0] + bounds[i][1])*0.5,
 		      (bounds[i][2] + bounds[i][3])*0.5,
 		      (bounds[i][4] + bounds[i][5])*0.5);
-    dGeomSetData (geom[i],(void*)(size_t)(i));
+    dGeomSetData (geom[i],(void*)(dsizeint)(i));
   }
 
   // compute all intersections and put the results in "good_matrix"
@@ -124,9 +124,9 @@ static void init_test()
 
 static void nearCallback (void *, dGeomID o1, dGeomID o2)
 {
-  size_t i,j;
-  i = (size_t) dGeomGetData (o1);
-  j = (size_t) dGeomGetData (o2);
+  dsizeint i,j;
+  i = (dsizeint) dGeomGetData (o1);
+  j = (dsizeint) dGeomGetData (o2);
   if (i==j)
     printf ("collision (%d,%d) is between the same object\n",(int)i,(int)j);
   if (!good_matrix[i][j] || !good_matrix[j][i])

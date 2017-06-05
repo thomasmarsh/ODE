@@ -52,7 +52,7 @@
 
 #if dBUILTIN_THREADING_IMPL_ENABLED
 
-#define THREAD_STACK_MAX  ((size_t)(UINT_MAX - 1)) // The absolute maximum would be UINT_MAX but let it be a little bit less to avoid "Comparison is always false" warnings. ;)
+#define THREAD_STACK_MAX  ((sizeint)(UINT_MAX - 1)) // The absolute maximum would be UINT_MAX but let it be a little bit less to avoid "Comparison is always false" warnings. ;)
 
 
 struct dxEventObject
@@ -126,7 +126,7 @@ public:
     dxThreadPoolThreadInfo();
     ~dxThreadPoolThreadInfo();
 
-    bool Initialize(size_t stack_size, unsigned int ode_data_allocate_flags);
+    bool Initialize(sizeint stack_size, unsigned int ode_data_allocate_flags);
 
 private:
     bool WaitInitStatus();
@@ -192,7 +192,7 @@ dxThreadPoolThreadInfo::~dxThreadPoolThreadInfo()
 }
 
 
-bool dxThreadPoolThreadInfo::Initialize(size_t stack_size, unsigned int ode_data_allocate_flags)
+bool dxThreadPoolThreadInfo::Initialize(sizeint stack_size, unsigned int ode_data_allocate_flags)
 {
     bool result = false;
 
@@ -277,7 +277,7 @@ bool dxThreadPoolThreadInfo::WaitInitStatus()
     bool acknowledgement_wait_result = m_acknowledgement_event.WaitInfinitely();
     dICHECK(acknowledgement_wait_result);
 
-    DWORD error_code = (DWORD)(size_t)m_command_param;
+    DWORD error_code = (DWORD)(sizeint)m_command_param;
 
     bool init_status = error_code == ERROR_SUCCESS ? true : (SetLastError(error_code), false);
     return init_status;
@@ -352,7 +352,7 @@ void dxThreadPoolThreadInfo::ThreadProcedure()
 void dxThreadPoolThreadInfo::ReportInitStatus(bool init_result)
 {
     DWORD error_code;
-    m_command_param = (void *)(size_t)(init_result ? ERROR_SUCCESS : ((error_code = GetLastError()) != ERROR_SUCCESS ? error_code : ERROR_INTERNAL_ERROR));
+    m_command_param = (void *)(sizeint)(init_result ? ERROR_SUCCESS : ((error_code = GetLastError()) != ERROR_SUCCESS ? error_code : ERROR_INTERNAL_ERROR));
 
     m_acknowledgement_event.SetEvent();
 }
@@ -427,15 +427,15 @@ public:
     dxThreadingThreadPool();
     ~dxThreadingThreadPool();
 
-    bool InitializeThreads(size_t thread_count, size_t stack_size, unsigned int ode_data_allocate_flags);
+    bool InitializeThreads(sizeint thread_count, sizeint stack_size, unsigned int ode_data_allocate_flags);
 
 private:
     void FinalizeThreads();
 
-    bool InitializeIndividualThreadInfos(dxThreadPoolThreadInfo *thread_infos, size_t thread_count, size_t stack_size, unsigned int ode_data_allocate_flags);
-    void FinalizeIndividualThreadInfos(dxThreadPoolThreadInfo *thread_infos, size_t thread_count);
+    bool InitializeIndividualThreadInfos(dxThreadPoolThreadInfo *thread_infos, sizeint thread_count, sizeint stack_size, unsigned int ode_data_allocate_flags);
+    void FinalizeIndividualThreadInfos(dxThreadPoolThreadInfo *thread_infos, sizeint thread_count);
 
-    bool InitializeSingleThreadInfo(dxThreadPoolThreadInfo *thread_info, size_t stack_size, unsigned int ode_data_allocate_flags);
+    bool InitializeSingleThreadInfo(dxThreadPoolThreadInfo *thread_info, sizeint stack_size, unsigned int ode_data_allocate_flags);
     void FinalizeSingleThreadInfo(dxThreadPoolThreadInfo *thread_info);
 
 public:
@@ -444,7 +444,7 @@ public:
 
 private:
     dxThreadPoolThreadInfo  *m_thread_infos;
-    size_t                  m_thread_count;
+    sizeint                  m_thread_count;
     dxEventObject           m_ready_wait_event;
 };
 
@@ -462,7 +462,7 @@ dxThreadingThreadPool::~dxThreadingThreadPool()
 }
 
 
-bool dxThreadingThreadPool::InitializeThreads(size_t thread_count, size_t stack_size, unsigned int ode_data_allocate_flags)
+bool dxThreadingThreadPool::InitializeThreads(sizeint thread_count, sizeint stack_size, unsigned int ode_data_allocate_flags)
 {
     dIASSERT(m_thread_infos == NULL);
 
@@ -522,7 +522,7 @@ void dxThreadingThreadPool::FinalizeThreads()
     dxThreadPoolThreadInfo *thread_infos = m_thread_infos;
     if (thread_infos != NULL)
     {
-        size_t thread_count = m_thread_count;
+        sizeint thread_count = m_thread_count;
 
         FinalizeIndividualThreadInfos(thread_infos, thread_count);
         dFree(thread_infos, thread_count * sizeof(dxThreadPoolThreadInfo));
@@ -532,7 +532,7 @@ void dxThreadingThreadPool::FinalizeThreads()
 }
 
 
-bool dxThreadingThreadPool::InitializeIndividualThreadInfos(dxThreadPoolThreadInfo *thread_infos, size_t thread_count, size_t stack_size, unsigned int ode_data_allocate_flags)
+bool dxThreadingThreadPool::InitializeIndividualThreadInfos(dxThreadPoolThreadInfo *thread_infos, sizeint thread_count, sizeint stack_size, unsigned int ode_data_allocate_flags)
 {
     bool any_fault = false;
 
@@ -552,7 +552,7 @@ bool dxThreadingThreadPool::InitializeIndividualThreadInfos(dxThreadPoolThreadIn
     return result;
 }
 
-void dxThreadingThreadPool::FinalizeIndividualThreadInfos(dxThreadPoolThreadInfo *thread_infos, size_t thread_count)
+void dxThreadingThreadPool::FinalizeIndividualThreadInfos(dxThreadPoolThreadInfo *thread_infos, sizeint thread_count)
 {
     dxThreadPoolThreadInfo *const infos_end = thread_infos + thread_count;
     for (dxThreadPoolThreadInfo *current_info = thread_infos; current_info != infos_end; ++current_info)
@@ -562,7 +562,7 @@ void dxThreadingThreadPool::FinalizeIndividualThreadInfos(dxThreadPoolThreadInfo
 }
 
 
-bool dxThreadingThreadPool::InitializeSingleThreadInfo(dxThreadPoolThreadInfo *thread_info, size_t stack_size, unsigned int ode_data_allocate_flags)
+bool dxThreadingThreadPool::InitializeSingleThreadInfo(dxThreadPoolThreadInfo *thread_info, sizeint stack_size, unsigned int ode_data_allocate_flags)
 {
     bool result = false;
 
@@ -617,7 +617,7 @@ void dxThreadingThreadPool::WaitIdleState()
 
 
 /*extern */dThreadingThreadPoolID dThreadingAllocateThreadPool(unsigned thread_count, 
-                                                               size_t stack_size, unsigned int ode_data_allocate_flags, void *reserved/*=NULL*/)
+                                                               sizeint stack_size, unsigned int ode_data_allocate_flags, void *reserved/*=NULL*/)
 {
     dAASSERT(thread_count != 0);
 

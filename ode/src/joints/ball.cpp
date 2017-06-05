@@ -168,7 +168,7 @@ dxJointBall::type() const
     return dJointTypeBall;
 }
 
-size_t
+sizeint
 dxJointBall::size() const
 {
     return sizeof( *this );

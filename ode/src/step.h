@@ -28,7 +28,7 @@
 struct dxStepperProcessingCallContext;
 
 
-size_t dxEstimateStepMemoryRequirements(
+sizeint dxEstimateStepMemoryRequirements(
     dxBody * const *body, unsigned int nb, dxJoint * const *_joint, unsigned int _nj);
 unsigned dxEstimateStepMaxCallCount(
     unsigned activeThreadCount, unsigned allowedThreadCount);

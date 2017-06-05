@@ -31,18 +31,18 @@
 
 
 #ifndef SIZE_MAX
-#define SIZE_MAX  ((size_t)(-1))
+#define SIZE_MAX  ((sizeint)(-1))
 #endif
 
 
 #ifndef offsetof
-#define offsetof(s, m) ((size_t)&(((s *)8)->m) - (size_t)8)
+#define offsetof(s, m) ((sizeint)&(((s *)8)->m) - (sizeint)8)
 #endif
 #ifndef membersize
 #define membersize(s, m) (sizeof(((s *)8)->m))
 #endif
 #ifndef endoffsetof
-#define endoffsetof(s, m)   ((size_t)((size_t)&(((s *)8)->m) - (size_t)8) + sizeof(((s *)8)->m))
+#define endoffsetof(s, m)   ((sizeint)((sizeint)&(((s *)8)->m) - (sizeint)8) + sizeof(((s *)8)->m))
 #endif
 
 #define dMACRO_MAX(a, b) ((a) > (b) ? (a) : (b))
@@ -95,12 +95,12 @@ public:
     dxAlignedAllocation(): m_userAreaPointer(NULL), m_bufferAllocated(NULL), m_sizeUsed(0) {}
     ~dxAlignedAllocation() { freeAllocation(); }
 
-    void *allocAligned(size_t sizeRequired, unsigned alignmentRequired)
+    void *allocAligned(sizeint sizeRequired, unsigned alignmentRequired)
     {
         dIASSERT((alignmentRequired & (alignmentRequired - 1)) == 0);
         dIASSERT(alignmentRequired <= SIZE_MAX - sizeRequired);
 
-        size_t sizeToUse = sizeRequired + alignmentRequired;
+        sizeint sizeToUse = sizeRequired + alignmentRequired;
         void *bufferPointer = dAlloc(sizeToUse);
         void *userAreaPointer = bufferPointer != NULL && alignmentRequired != 0 ? dALIGN_PTR(bufferPointer, alignmentRequired) : bufferPointer;
         assignData(userAreaPointer, bufferPointer, sizeToUse);
@@ -109,11 +109,11 @@ public:
     }
 
     void *getUserAreaPointer() const { return m_userAreaPointer; }
-    size_t getUserAreaSize() const { return m_sizeUsed - ((uint8 *)m_userAreaPointer - (uint8 *)m_bufferAllocated); }
+    sizeint getUserAreaSize() const { return m_sizeUsed - ((uint8 *)m_userAreaPointer - (uint8 *)m_bufferAllocated); }
 
     void freeAllocation()
     {
-        size_t sizeUsed;
+        sizeint sizeUsed;
         void *bufferPointer = extractData(sizeUsed);
         
         if (bufferPointer != NULL)
@@ -123,7 +123,7 @@ public:
     }
 
 private:
-    void assignData(void *userAreaPointer, void *bufferAllocated, size_t sizeUsed)
+    void assignData(void *userAreaPointer, void *bufferAllocated, sizeint sizeUsed)
     {
         dIASSERT(m_userAreaPointer == NULL);
         dIASSERT(m_bufferAllocated == NULL);
@@ -134,7 +134,7 @@ private:
         m_sizeUsed = sizeUsed;
     }
 
-    void *extractData(size_t &out_sizeUsed)
+    void *extractData(sizeint &out_sizeUsed)
     {
         void *bufferPointer = m_bufferAllocated;
 
@@ -153,7 +153,7 @@ private:
 private:
     void *m_userAreaPointer;
     void *m_bufferAllocated;
-    size_t m_sizeUsed;
+    sizeint m_sizeUsed;
 };
 
 
@@ -208,8 +208,8 @@ union _const_type_cast_union
     operator const Type *() const { return m_pstTypedPointer; }
     const Type &operator *() const { return *m_pstTypedPointer; }
     const Type *operator ->() const { return m_pstTypedPointer; }
-    const Type &operator [](ptrdiff_t diElementIndex) const { return m_pstTypedPointer[diElementIndex]; }
-    const Type &operator [](size_t siElementIndex) const { return m_pstTypedPointer[siElementIndex]; }
+    const Type &operator [](diffint diElementIndex) const { return m_pstTypedPointer[diElementIndex]; }
+    const Type &operator [](sizeint siElementIndex) const { return m_pstTypedPointer[siElementIndex]; }
 
     const void 		*m_psvCharBuffer;
     const Type		*m_pstTypedPointer;
@@ -223,15 +223,15 @@ union _type_cast_union
     operator Type *() const { return m_pstTypedPointer; }
     Type &operator *() const { return *m_pstTypedPointer; }
     Type *operator ->() const { return m_pstTypedPointer; }
-    Type &operator [](ptrdiff_t diElementIndex) const { return m_pstTypedPointer[diElementIndex]; }
-    Type &operator [](size_t siElementIndex) const { return m_pstTypedPointer[siElementIndex]; }
+    Type &operator [](diffint diElementIndex) const { return m_pstTypedPointer[diElementIndex]; }
+    Type &operator [](sizeint siElementIndex) const { return m_pstTypedPointer[siElementIndex]; }
 
     void			*m_psvCharBuffer;
     Type			*m_pstTypedPointer;
 };
 
 
-template<size_t tsiTypeSize>
+template<sizeint tsiTypeSize>
 struct _sized_signed;
 
 template<>
@@ -265,7 +265,7 @@ struct _make_signed
 };
 
 
-template<size_t tsiTypeSize>
+template<sizeint tsiTypeSize>
 struct _sized_unsigned;
 
 template<>

@@ -233,7 +233,7 @@ struct dxJoint : public dObject
     // See comments at definition of SureMaxInfo for details.
     virtual void getSureMaxInfo( SureMaxInfo* info ) = 0;
     virtual dJointType type() const = 0;
-    virtual size_t size() const = 0;
+    virtual sizeint size() const = 0;
 
     /// Set values which are relative with respect to bodies.
     /// Each dxJoint should redefine it if needed.
@@ -264,16 +264,16 @@ struct dxJointGroup : public dBase
         return j;
     }
 
-    size_t getJointCount() const { return m_num; }
-    size_t exportJoints(dxJoint **jlist);
+    sizeint getJointCount() const { return m_num; }
+    sizeint exportJoints(dxJoint **jlist);
 
     void *beginEnum() { return m_stack.rewind(); }
-    void *continueEnum(size_t num_bytes) { return m_stack.next(num_bytes); }
+    void *continueEnum(sizeint num_bytes) { return m_stack.next(num_bytes); }
 
     void freeAll();
 
 private:
-    size_t m_num;        // number of joints on the stack
+    sizeint m_num;        // number of joints on the stack
     dObStack m_stack; // a stack of (possibly differently sized) dxJoint objects.
 };
 

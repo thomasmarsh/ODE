@@ -100,7 +100,7 @@ void COdeTls::CleanupForThread()
 
 bool COdeTls::AssignDataAllocationFlags(EODETLSKIND tkTLSKind, unsigned uInitializationFlags)
 {
-    bool bResult = CThreadLocalStorage::SetStorageValue(m_ahtkStorageKeys[tkTLSKind], OTI_DATA_ALLOCATION_FLAGS, (tlsvaluetype)(size_t)uInitializationFlags);
+    bool bResult = CThreadLocalStorage::SetStorageValue(m_ahtkStorageKeys[tkTLSKind], OTI_DATA_ALLOCATION_FLAGS, (tlsvaluetype)(sizeint)uInitializationFlags);
     return bResult;
 }
 

@@ -151,11 +151,11 @@ public:
 
     inline void setMinMax()
     {
-        const size_t asize = trianglelistCurrentSize;
+        const sizeint asize = trianglelistCurrentSize;
         if (asize > 0)
         {  
             maxAAAB = trianglelist[0]->maxAAAB;
-            for (size_t k = 1; asize > k; k++)
+            for (sizeint k = 1; asize > k; k++)
             {   
                 if (trianglelist[k]->maxAAAB >  maxAAAB)
                     maxAAAB = trianglelist[k]->maxAAAB;
@@ -163,7 +163,7 @@ public:
         }
     };
 
-    void resetTriangleListSize(const size_t newSize)
+    void resetTriangleListSize(const sizeint newSize)
     {
         if (trianglelistReservedSize < newSize)
         {
@@ -182,8 +182,8 @@ public:
     }
 
     HeightFieldTriangle **trianglelist;
-    size_t              trianglelistReservedSize;
-    size_t              trianglelistCurrentSize;
+    sizeint             trianglelistReservedSize;
+    sizeint             trianglelistCurrentSize;
 
     dReal   maxAAAB;
     dReal   planeDef[4];
@@ -215,28 +215,28 @@ struct dxHeightfield : public dxGeom
         TEMP_TRIANGLE_BUFFER_ELEMENT_COUNT_ALIGNMENT = 1 // Triangles are easy to reallocate and hard to predict
     };
 
-    static inline size_t AlignBufferSize(size_t value, size_t alignment) { dIASSERT((alignment & (alignment - 1)) == 0); return (value + (alignment - 1)) & ~(alignment - 1); }
+    static inline sizeint AlignBufferSize(sizeint value, sizeint alignment) { dIASSERT((alignment & (alignment - 1)) == 0); return (value + (alignment - 1)) & ~(alignment - 1); }
 
-    void  allocateTriangleBuffer(size_t numTri);
+    void  allocateTriangleBuffer(sizeint numTri);
     void  resetTriangleBuffer();
-    void  allocatePlaneBuffer(size_t numTri);
+    void  allocatePlaneBuffer(sizeint numTri);
     void  resetPlaneBuffer();
-    void  allocateHeightBuffer(size_t numX, size_t numZ);
+    void  allocateHeightBuffer(sizeint numX, sizeint numZ);
     void  resetHeightBuffer();
 
-    void  sortPlanes(const size_t numPlanes);
+    void  sortPlanes(const sizeint numPlanes);
 
     HeightFieldPlane    **tempPlaneBuffer;
     HeightFieldPlane    *tempPlaneInstances;
-    size_t              tempPlaneBufferSize;
+    sizeint             tempPlaneBufferSize;
 
     HeightFieldTriangle *tempTriangleBuffer;
-    size_t              tempTriangleBufferSize;
+    sizeint             tempTriangleBufferSize;
 
     HeightFieldVertex   **tempHeightBuffer;
     HeightFieldVertex   *tempHeightInstances;
-    size_t              tempHeightBufferSizeX;
-    size_t              tempHeightBufferSizeZ;
+    sizeint             tempHeightBufferSizeX;
+    sizeint             tempHeightBufferSizeZ;
 
 };
 

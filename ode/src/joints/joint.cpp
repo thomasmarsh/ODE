@@ -78,9 +78,9 @@ bool dxJoint::isEnabled() const
 }
 
 
-size_t dxJointGroup::exportJoints(dxJoint **jlist)
+sizeint dxJointGroup::exportJoints(dxJoint **jlist)
 {
-    size_t i=0;
+    sizeint i=0;
     dxJoint *j = (dxJoint*) m_stack.rewind();
     while (j != NULL) {
         jlist[i++] = j;

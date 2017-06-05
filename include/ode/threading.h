@@ -150,9 +150,9 @@ typedef struct dxCallReleasee *dCallReleaseeID;
 struct dxCallWait;
 typedef struct dxCallWait *dCallWaitID;
 
-typedef size_t ddependencycount_t;
-typedef ptrdiff_t ddependencychange_t;
-typedef size_t dcallindex_t;
+typedef dsizeint ddependencycount_t;
+typedef ddiffint ddependencychange_t;
+typedef dsizeint dcallindex_t;
 typedef int dThreadedCallFunction(void *call_context, dcallindex_t instance_index, 
   dCallReleaseeID this_releasee);
 

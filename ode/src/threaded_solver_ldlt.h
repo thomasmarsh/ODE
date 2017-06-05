@@ -111,14 +111,14 @@ private:
 
     struct FactorizationSolvingL1StripeMemoryEstimates
     {
-        void assignData(size_t descriptorSizeRequired, size_t contextSizeRequired)
+        void assignData(sizeint descriptorSizeRequired, sizeint contextSizeRequired)
         {
             m_descriptorSizeRequired = descriptorSizeRequired;
             m_contextSizeRequired = contextSizeRequired;
         }
 
-        size_t  m_descriptorSizeRequired;
-        size_t  m_contextSizeRequired;
+        sizeint  m_descriptorSizeRequired;
+        sizeint  m_contextSizeRequired;
     };
 
     static unsigned deriveSolvingL1StripeThreadCount(unsigned blockCount, unsigned allowedThreadCount)
@@ -129,14 +129,14 @@ private:
         return maximumCount >= allowedThreadCount ? allowedThreadCount : dMACRO_MAX(maximumCount, 1U);
     }
 
-    static size_t estimateCooperativelySolvingL1Stripe_XMemoryRequirement(unsigned blockCount, 
+    static sizeint estimateCooperativelySolvingL1Stripe_XMemoryRequirement(unsigned blockCount, 
         FactorizationSolvingL1StripeMemoryEstimates &ref_memoryEstimates)
     {
-        size_t descriptorSizeRequired = dOVERALIGNED_SIZE(sizeof(cellindexint) * blockCount, COOP_THREAD_DATA_ALIGNMENT_SIZE);
-        size_t contextSizeRequired = dOVERALIGNED_SIZE(sizeof(FactorizationSolveL1StripeCellContext) * (CCI__MAX + 1) * blockCount, COOP_THREAD_DATA_ALIGNMENT_SIZE);
+        sizeint descriptorSizeRequired = dOVERALIGNED_SIZE(sizeof(cellindexint) * blockCount, COOP_THREAD_DATA_ALIGNMENT_SIZE);
+        sizeint contextSizeRequired = dOVERALIGNED_SIZE(sizeof(FactorizationSolveL1StripeCellContext) * (CCI__MAX + 1) * blockCount, COOP_THREAD_DATA_ALIGNMENT_SIZE);
         ref_memoryEstimates.assignData(descriptorSizeRequired, contextSizeRequired);
 
-        size_t totalSizeRequired = descriptorSizeRequired + contextSizeRequired;
+        sizeint totalSizeRequired = descriptorSizeRequired + contextSizeRequired;
         return totalSizeRequired;
     }
 
@@ -196,23 +196,23 @@ private:
 
     struct FactorizationScalingAndFactorizingL1StripeMemoryEstimates
     {
-        void assignData(size_t contextSizeRequired)
+        void assignData(sizeint contextSizeRequired)
         {
             m_contextSizeRequired = contextSizeRequired;
         }
 
-        size_t  m_contextSizeRequired;
+        sizeint  m_contextSizeRequired;
     };
 
-    static size_t estimateCooperativelyScalingAndFactorizingL1Stripe_XMemoryRequirement(unsigned factorizingMaximumThreads, 
+    static sizeint estimateCooperativelyScalingAndFactorizingL1Stripe_XMemoryRequirement(unsigned factorizingMaximumThreads, 
         FactorizationScalingAndFactorizingL1StripeMemoryEstimates &ref_memoryEstimates)
     {
         dIASSERT(factorizingMaximumThreads != 0);
 
-        size_t contextSizeRequired = dOVERALIGNED_SIZE(sizeof(FactorizationFactorizeL1StripeContext) + sizeof(FactorizationFactorizeL1StripeThreadContext) * (factorizingMaximumThreads - 1), COOP_THREAD_DATA_ALIGNMENT_SIZE);
+        sizeint contextSizeRequired = dOVERALIGNED_SIZE(sizeof(FactorizationFactorizeL1StripeContext) + sizeof(FactorizationFactorizeL1StripeThreadContext) * (factorizingMaximumThreads - 1), COOP_THREAD_DATA_ALIGNMENT_SIZE);
         ref_memoryEstimates.assignData(contextSizeRequired);
 
-        size_t totalSizeRequired = contextSizeRequired;
+        sizeint totalSizeRequired = contextSizeRequired;
         return totalSizeRequired;
     }
 
@@ -470,14 +470,14 @@ private:
 
     struct SolvingL1StraightMemoryEstimates
     {
-        void assignData(size_t descriptorSizeRequired, size_t contextSizeRequired)
+        void assignData(sizeint descriptorSizeRequired, sizeint contextSizeRequired)
         {
             m_descriptorSizeRequired = descriptorSizeRequired;
             m_contextSizeRequired = contextSizeRequired;
         }
 
-        size_t  m_descriptorSizeRequired;
-        size_t  m_contextSizeRequired;
+        sizeint  m_descriptorSizeRequired;
+        sizeint  m_contextSizeRequired;
     };
 
     static unsigned deriveSolvingL1StraightThreadCount(unsigned blockCount, unsigned allowedThreadCount)
@@ -489,7 +489,7 @@ private:
     }
 
     template<unsigned int block_step>
-    static size_t estimateCooperativelySolvingL1StraightMemoryRequirement(unsigned rowCount, SolvingL1StraightMemoryEstimates &ref_solvingMemoryEstimates);
+    static sizeint estimateCooperativelySolvingL1StraightMemoryRequirement(unsigned rowCount, SolvingL1StraightMemoryEstimates &ref_solvingMemoryEstimates);
 
     static void *markCooperativelySolvingL1StraightMemoryStructuresOut(void *buffer, 
         const SolvingL1StraightMemoryEstimates &solvingMemoryEstimates, 
@@ -606,14 +606,14 @@ private:
 
     struct SolvingL1TransposedMemoryEstimates
     {
-        void assignData(size_t descriptorSizeRequired, size_t contextSizeRequired)
+        void assignData(sizeint descriptorSizeRequired, sizeint contextSizeRequired)
         {
             m_descriptorSizeRequired = descriptorSizeRequired;
             m_contextSizeRequired = contextSizeRequired;
         }
 
-        size_t  m_descriptorSizeRequired;
-        size_t  m_contextSizeRequired;
+        sizeint  m_descriptorSizeRequired;
+        sizeint  m_contextSizeRequired;
     };
 
     static unsigned deriveSolvingL1TransposedThreadCount(unsigned blockCount, unsigned allowedThreadCount)
@@ -624,7 +624,7 @@ private:
     }
 
     template<unsigned int block_step>
-    static size_t estimateCooperativelySolvingL1TransposedMemoryRequirement(unsigned rowCount, SolvingL1TransposedMemoryEstimates &ref_solvingMemoryEstimates);
+    static sizeint estimateCooperativelySolvingL1TransposedMemoryRequirement(unsigned rowCount, SolvingL1TransposedMemoryEstimates &ref_solvingMemoryEstimates);
 
     static void *markCooperativelySolvingL1TransposedMemoryStructuresOut(void *buffer, 
         const SolvingL1TransposedMemoryEstimates &solvingMemoryEstimates, 
@@ -638,7 +638,7 @@ private:
     }
 
     template<unsigned int block_step>
-    static void *allocateCooperativelySolveL1TransposedMemoryStructures(size_t &out_sizeAllocated, unsigned rowCount, 
+    static void *allocateCooperativelySolveL1TransposedMemoryStructures(sizeint &out_sizeAllocated, unsigned rowCount, 
         cellindexint *&out_blockProgressDescriptors, SolveL1TransposedCellContext *&out_cellContexts);
     template<unsigned int block_step>
     static void initializeCooperativelySolveL1TransposedMemoryStructures(unsigned rowCount, 

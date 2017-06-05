@@ -221,7 +221,7 @@ ODE_API void dExternalThreadingServeMultiThreadedImplementation(dThreadingImplem
  * @see dThreadingFreeThreadPool
  */
 ODE_API dThreadingThreadPoolID dThreadingAllocateThreadPool(unsigned thread_count, 
-  size_t stack_size, unsigned int ode_data_allocate_flags, void *reserved/*=NULL*/);
+  dsizeint stack_size, unsigned int ode_data_allocate_flags, void *reserved/*=NULL*/);
 
 /**
  * @brief Commands an instance of built-in thread pool to serve a built-in multi-threaded 

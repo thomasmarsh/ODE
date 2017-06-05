@@ -68,7 +68,7 @@ public:
     }
 
     template<unsigned type_size>
-    static size_t AddValueToTarget(volatile void *value_accumulator_ptr, ptrdiff_t value_addend);
+    static sizeint AddValueToTarget(volatile void *value_accumulator_ptr, diffint value_addend);
 
     static bool CompareExchangeTargetPtr(volatile atomicptr_t *pointer_storage_ptr, 
         atomicptr_t comparand_value, atomicptr_t new_value)
@@ -89,7 +89,7 @@ public:
 };
 
 template<>
-inline size_t dxFakeAtomicsProvider::AddValueToTarget<sizeof(dxFakeAtomicsProvider::atomicord_t)>(volatile void *value_accumulator_ptr, ptrdiff_t value_addend)
+inline sizeint dxFakeAtomicsProvider::AddValueToTarget<sizeof(dxFakeAtomicsProvider::atomicord_t)>(volatile void *value_accumulator_ptr, diffint value_addend)
 {
     atomicord_t original_value = *(volatile atomicord_t *)value_accumulator_ptr;
 
@@ -99,13 +99,13 @@ inline size_t dxFakeAtomicsProvider::AddValueToTarget<sizeof(dxFakeAtomicsProvid
 }
 
 template<>
-inline size_t dxFakeAtomicsProvider::AddValueToTarget<2 * sizeof(dxFakeAtomicsProvider::atomicord_t)>(volatile void *value_accumulator_ptr, ptrdiff_t value_addend)
+inline sizeint dxFakeAtomicsProvider::AddValueToTarget<2 * sizeof(dxFakeAtomicsProvider::atomicord_t)>(volatile void *value_accumulator_ptr, diffint value_addend)
 {
     atomicptr_t original_value = *(volatile atomicptr_t *)value_accumulator_ptr;
 
-    *(volatile atomicptr_t *)value_accumulator_ptr = (atomicptr_t)((size_t)original_value + (size_t)value_addend);
+    *(volatile atomicptr_t *)value_accumulator_ptr = (atomicptr_t)((sizeint)original_value + (sizeint)value_addend);
 
-    return (size_t)original_value;
+    return (sizeint)original_value;
 }
 
 
@@ -153,7 +153,7 @@ public:
     }
 
     template<unsigned type_size>
-    static size_t AddValueToTarget(volatile void *value_accumulator_ptr, ptrdiff_t value_addend);
+    static sizeint AddValueToTarget(volatile void *value_accumulator_ptr, diffint value_addend);
 
     static bool CompareExchangeTargetPtr(volatile atomicptr_t *pointer_storage_ptr, 
         atomicptr_t comparand_value, atomicptr_t new_value)
@@ -163,13 +163,13 @@ public:
 };
 
 template<>
-inline size_t dxOUAtomicsProvider::AddValueToTarget<sizeof(dxOUAtomicsProvider::atomicord_t)>(volatile void *value_accumulator_ptr, ptrdiff_t value_addend)
+inline sizeint dxOUAtomicsProvider::AddValueToTarget<sizeof(dxOUAtomicsProvider::atomicord_t)>(volatile void *value_accumulator_ptr, diffint value_addend)
 {
     return _OU_NAMESPACE::AtomicExchangeAdd((volatile atomicord_t *)value_accumulator_ptr, (atomicord_t)value_addend);
 }
 
 template<>
-inline size_t dxOUAtomicsProvider::AddValueToTarget<2 * sizeof(dxOUAtomicsProvider::atomicord_t)>(volatile void *value_accumulator_ptr, ptrdiff_t value_addend)
+inline sizeint dxOUAtomicsProvider::AddValueToTarget<2 * sizeof(dxOUAtomicsProvider::atomicord_t)>(volatile void *value_accumulator_ptr, diffint value_addend)
 {
     atomicptr_t original_value;
 
@@ -177,14 +177,14 @@ inline size_t dxOUAtomicsProvider::AddValueToTarget<2 * sizeof(dxOUAtomicsProvid
     {
         original_value = *(volatile atomicptr_t *)value_accumulator_ptr;
 
-        atomicptr_t new_value = (atomicptr_t)((size_t)original_value + (size_t)value_addend);
+        atomicptr_t new_value = (atomicptr_t)((sizeint)original_value + (sizeint)value_addend);
         if (_OU_NAMESPACE::AtomicCompareExchangePointer((volatile atomicptr_t *)value_accumulator_ptr, original_value, new_value))
         {
             break;
         }
     }
 
-    return (size_t)original_value;
+    return (sizeint)original_value;
 }
 
 

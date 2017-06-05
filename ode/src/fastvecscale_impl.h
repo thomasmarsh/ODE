@@ -39,7 +39,7 @@ void scaleLargeVector(dReal *aStart, const dReal *dStart, unsigned elementCount)
 
     dReal *ptrA = aStart;
     const dReal *ptrD = dStart;
-    const dReal *const dStepsEnd = dStart + (size_t)(elementCount & ~(step - 1)) * d_stride;
+    const dReal *const dStepsEnd = dStart + (sizeint)(elementCount & ~(step - 1)) * d_stride;
     for (; ptrD != dStepsEnd; ptrA += step * a_stride, ptrD += step * d_stride) 
     {
         dReal a0 = ptrA[0], a1 = ptrA[1 * a_stride], a2 = ptrA[2 * a_stride], a3 = ptrA[3 * a_stride];
@@ -100,11 +100,11 @@ void ThreadedEquationSolverLDLT::participateScalingVector(dReal *ptrAStart, cons
     unsigned blockIndex;
     while ((blockIndex = ThrsafeIncrementIntUpToLimit(&refBlockCompletionProgress, completeBlockCount)) != completeBlockCount)
     {
-        dReal *ptrAElement = ptrAStart + (size_t)(blockIndex * block_step) * a_stride;
-        const dReal *ptrDElement = ptrDStart + (size_t)(blockIndex * block_step) * d_stride;
+        dReal *ptrAElement = ptrAStart + (sizeint)(blockIndex * block_step) * a_stride;
+        const dReal *ptrDElement = ptrDStart + (sizeint)(blockIndex * block_step) * d_stride;
         const dReal *const ptrDBlockEnd = ptrDElement + block_step * d_stride;
-        dSASSERT((size_t)block_step * a_stride < UINT_MAX);
-        dSASSERT((size_t)block_step * d_stride < UINT_MAX);
+        dSASSERT((sizeint)block_step * a_stride < UINT_MAX);
+        dSASSERT((sizeint)block_step * d_stride < UINT_MAX);
 
         for (; ptrDElement != ptrDBlockEnd; ptrAElement += wrapSize * a_stride, ptrDElement += wrapSize * d_stride)
         {
@@ -121,8 +121,8 @@ void ThreadedEquationSolverLDLT::participateScalingVector(dReal *ptrAStart, cons
 
     if (trailingBlockElements != 0 && (blockIndex = ThrsafeIncrementIntUpToLimit(&refBlockCompletionProgress, completeBlockCount + 1)) != completeBlockCount + 1)
     {
-        dReal *ptrAElement = ptrAStart + (size_t)(completeBlockCount * block_step) * a_stride;
-        const dReal *ptrDElement = ptrDStart + (size_t)(completeBlockCount * block_step) * d_stride;
+        dReal *ptrAElement = ptrAStart + (sizeint)(completeBlockCount * block_step) * a_stride;
+        const dReal *ptrDElement = ptrDStart + (sizeint)(completeBlockCount * block_step) * d_stride;
         const dReal *const ptrDBlockEnd = ptrDElement + (trailingBlockElements & ~(wrapSize - 1)) * d_stride;
 
         for (; ptrDElement != ptrDBlockEnd; ptrAElement += wrapSize * a_stride, ptrDElement += wrapSize * d_stride)

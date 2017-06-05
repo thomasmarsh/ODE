@@ -33,7 +33,7 @@ struct dObStack : public dBase {
     dObStack();
     ~dObStack();
 
-    void *alloc (size_t num_bytes);
+    void *alloc (sizeint num_bytes);
     // allocate a block in the last arena, allocating a new arena if necessary.
     // it is a runtime error if num_bytes is larger than the arena size.
 
@@ -45,7 +45,7 @@ struct dObStack : public dBase {
     // rewind the obstack iterator, and return the address of the first
     // allocated block. return 0 if there are no allocated blocks.
 
-    void *next (size_t num_bytes);
+    void *next (sizeint num_bytes);
     // return the address of the next allocated block. 'num_bytes' is the size
     // of the previous block. this returns null if there are no more arenas.
     // the sequence of 'num_bytes' parameters passed to next() during a
@@ -54,7 +54,7 @@ struct dObStack : public dBase {
 private:
     struct Arena {
         Arena *m_next;	// next arena in linked list
-        size_t m_used;		// total number of bytes used in this arena, counting
+        sizeint m_used;		// total number of bytes used in this arena, counting
     };			//   this header
 
 private:
@@ -66,7 +66,7 @@ private:
 
     // used for iterator
     Arena *m_current_arena;
-    size_t m_current_ofs;
+    sizeint m_current_ofs;
 };
 
 

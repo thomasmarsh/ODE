@@ -68,7 +68,7 @@ public:
         mergeAnotherDescriptorIn(anotherDescriptor.m_memorySizeRequirement, anotherDescriptor.m_memoryAlignmentRequirement, anotherDescriptor.m_simultaneousCallRequirement, allOtherFeatureFlags);
     }
 
-    void mergeAnotherDescriptorIn(size_t memorySizeRequirement/*=0*/, unsigned memoryAlignmentRequirement,
+    void mergeAnotherDescriptorIn(sizeint memorySizeRequirement/*=0*/, unsigned memoryAlignmentRequirement,
         unsigned simultaneousCallRequirement/*=0*/, unsigned featureRequirement/*=0*/)
     {
         m_memorySizeRequirement = dMACRO_MAX(m_memorySizeRequirement, memorySizeRequirement);
@@ -79,7 +79,7 @@ public:
 
 public:
     dxThreadingBase *getrelatedThreading() const { return m_relatedThreading; }
-    size_t getMemorySizeRequirement() const { return m_memorySizeRequirement; }
+    sizeint getMemorySizeRequirement() const { return m_memorySizeRequirement; }
     unsigned getMemoryAlignmentRequirement() const { return m_memoryAlignmentRequirement; }
 
     unsigned getSimultaneousCallRequirement() const { return m_simultaneousCallRequirement; }
@@ -99,7 +99,7 @@ private:
 
 private:
     dxThreadingBase     *m_relatedThreading;
-    size_t              m_memorySizeRequirement;
+    sizeint              m_memorySizeRequirement;
     unsigned            m_memoryAlignmentRequirement;
     unsigned            m_simultaneousCallRequirement;
     CSimpleFlags        m_featureRequirements;
@@ -133,7 +133,7 @@ public:
     dxThreadingBase *getThreadingInstance() const { return m_relatedThreading; }
     dCallWaitID getStockCallWait() const { return m_stockCallWait; }
     void *getMemoryBufferPointer() const { return m_memoryAllocation.getUserAreaPointer(); }
-    size_t getMemoryBufferSize() const { return m_memoryAllocation.getUserAreaSize(); }
+    sizeint getMemoryBufferSize() const { return m_memoryAllocation.getUserAreaSize(); }
 
 private:
     dxThreadingBase     *m_relatedThreading;

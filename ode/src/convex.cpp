@@ -851,7 +851,7 @@ bool CheckEdgeIntersection(dxConvex& cvx1,dxConvex& cvx2, int flags,int& curc,
         e2[1]+=cvx1.final_posr->pos[1];
         e2[2]+=cvx1.final_posr->pos[2];
         const unsigned int* pPoly=cvx2.polygons;
-        for(size_t j=0;j<cvx2.planecount;++j)
+        for(sizeint j=0;j<cvx2.planecount;++j)
         {
             // Rotate
             dMultiply0_331(plane,cvx2.final_posr->R,cvx2.planes+(j*4));
@@ -870,7 +870,7 @@ bool CheckEdgeIntersection(dxConvex& cvx1,dxConvex& cvx2, int flags,int& curc,
                 if(IsPointInPolygon(target->pos,pPoly,plane,&cvx2,q))
                 {
                     target->depth = dInfinity;
-                    for(size_t k=0;k<cvx2.planecount;++k)
+                    for(sizeint k=0;k<cvx2.planecount;++k)
                     {
                         if(k==j) continue; // we're already at 0 depth on this plane
                         // Rotate

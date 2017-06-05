@@ -44,7 +44,7 @@ struct dxJointBall : public dxJoint
         int pairskip, dReal *pairRhsCfm, dReal *pairLoHi, 
         int *findex );
     virtual dJointType type() const;
-    virtual size_t size() const;
+    virtual sizeint size() const;
 
     virtual void setRelativeValues();
 };

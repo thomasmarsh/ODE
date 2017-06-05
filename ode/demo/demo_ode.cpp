@@ -31,7 +31,7 @@
 // matrix sizes
 
 #define dALIGN_SIZE(buf_size, alignment) (((buf_size) + (alignment - 1)) & (int)(~(alignment - 1))) // Casting the mask to int ensures sign-extension to larger integer sizes
-#define dALIGN_PTR(buf_ptr, alignment) ((void *)(((uintptr_t)(buf_ptr) + ((alignment) - 1)) & (int)(~(alignment - 1)))) // Casting the mask to int ensures sign-extension to larger integer sizes
+#define dALIGN_PTR(buf_ptr, alignment) ((void *)(((duintptr)(buf_ptr) + ((alignment) - 1)) & (int)(~(alignment - 1)))) // Casting the mask to int ensures sign-extension to larger integer sizes
 
 #define MSIZE 21
 #define MSIZE4 dALIGN_SIZE(MSIZE, 4)	// MSIZE rounded up to 4
@@ -331,7 +331,7 @@ void testSmallMatrixMultiply()
 
 void testCholeskyFactorization()
 {
-    size_t matrixSize = sizeof(dReal) * MSIZE4 * MSIZE;
+    dsizeint matrixSize = sizeof(dReal) * MSIZE4 * MSIZE;
     dReal *A = (dReal *)dAlloc(matrixSize), *B = (dReal *)dAlloc(matrixSize), *C = (dReal *)dAlloc(matrixSize), diff;
 
     HEADER;
@@ -354,7 +354,7 @@ void testCholeskyFactorization()
 
 void testCholeskySolve()
 {
-    size_t matrixSize = sizeof(dReal) * MSIZE4 * MSIZE, vectorSize = sizeof(dReal) * MSIZE;
+    dsizeint matrixSize = sizeof(dReal) * MSIZE4 * MSIZE, vectorSize = sizeof(dReal) * MSIZE;
     dReal *A = (dReal *)dAlloc(matrixSize), *L = (dReal *)dAlloc(matrixSize);
     dReal *b = (dReal *)dAlloc(vectorSize), *x = (dReal *)dAlloc(vectorSize), *btest = (dReal *)dAlloc(vectorSize), diff;
 
@@ -394,7 +394,7 @@ void testCholeskySolve()
 void testInvertPDMatrix()
 {
     int i,j,ok;
-    size_t matrixSize = sizeof(dReal) * MSIZE4 * MSIZE;
+    dsizeint matrixSize = sizeof(dReal) * MSIZE4 * MSIZE;
     dReal *A = (dReal *)dAlloc(matrixSize), *Ainv = (dReal *)dAlloc(matrixSize), *I = (dReal *)dAlloc(matrixSize);
 
     HEADER;
@@ -428,7 +428,7 @@ void testInvertPDMatrix()
 
 void testIsPositiveDefinite()
 {
-    size_t matrixSize = sizeof(dReal) * MSIZE4 * MSIZE;
+    dsizeint matrixSize = sizeof(dReal) * MSIZE4 * MSIZE;
     dReal *A = (dReal *)dAlloc(matrixSize), *B = (dReal *)dAlloc(matrixSize);
 
     HEADER;
@@ -446,7 +446,7 @@ void testIsPositiveDefinite()
 void testFastLDLTFactorization()
 {
     int i,j;
-    size_t matrixSize = sizeof(dReal) * MSIZE4 * MSIZE, vectorSize = sizeof(dReal) * MSIZE;
+    dsizeint matrixSize = sizeof(dReal) * MSIZE4 * MSIZE, vectorSize = sizeof(dReal) * MSIZE;
     dReal *A = (dReal *)dAlloc(matrixSize), *L = (dReal *)dAlloc(matrixSize), *DL = (dReal *)dAlloc(matrixSize),
         *ATEST = (dReal *)dAlloc(matrixSize), *d = (dReal *)dAlloc(vectorSize), diff;
 
@@ -483,9 +483,9 @@ void testCoopLDLTFactorization()
 {
     int i,j;
 
-    const size_t COOP_MSIZE = MSIZE * 51, COOP_MSIZE4 = dALIGN_SIZE(COOP_MSIZE, 4);
+    const dsizeint COOP_MSIZE = MSIZE * 51, COOP_MSIZE4 = dALIGN_SIZE(COOP_MSIZE, 4);
 
-    size_t matrixSize = sizeof(dReal) * COOP_MSIZE4 * COOP_MSIZE, vectorSize = sizeof(dReal) * COOP_MSIZE;
+    dsizeint matrixSize = sizeof(dReal) * COOP_MSIZE4 * COOP_MSIZE, vectorSize = sizeof(dReal) * COOP_MSIZE;
     dReal *A = (dReal *)dAlloc(matrixSize), *L = (dReal *)dAlloc(matrixSize), *DL = (dReal *)dAlloc(matrixSize),
         *ATEST = (dReal *)dAlloc(matrixSize), *d = (dReal *)dAlloc(vectorSize), diff;
 
@@ -551,7 +551,7 @@ void testCoopLDLTFactorization()
 
 void testSolveLDLT()
 {
-    size_t matrixSize = sizeof(dReal) * MSIZE4 * MSIZE, vectorSize = sizeof(dReal) * MSIZE;
+    dsizeint matrixSize = sizeof(dReal) * MSIZE4 * MSIZE, vectorSize = sizeof(dReal) * MSIZE;
     dReal *A = (dReal *)dAlloc(matrixSize), *L = (dReal *)dAlloc(matrixSize), 
         *d = (dReal *)dAlloc(vectorSize), *x = (dReal *)dAlloc(vectorSize), 
         *b = (dReal *)dAlloc(vectorSize), *btest = (dReal *)dAlloc(vectorSize), diff;
@@ -583,9 +583,9 @@ void testSolveLDLT()
 
 void testCoopSolveLDLT()
 {
-    const size_t COOP_MSIZE = MSIZE * 51, COOP_MSIZE4 = dALIGN_SIZE(COOP_MSIZE, 4);
+    const dsizeint COOP_MSIZE = MSIZE * 51, COOP_MSIZE4 = dALIGN_SIZE(COOP_MSIZE, 4);
 
-    size_t matrixSize = sizeof(dReal) * COOP_MSIZE4 * COOP_MSIZE, vectorSize = sizeof(dReal) * COOP_MSIZE;
+    dsizeint matrixSize = sizeof(dReal) * COOP_MSIZE4 * COOP_MSIZE, vectorSize = sizeof(dReal) * COOP_MSIZE;
     dReal *A = (dReal *)dAlloc(matrixSize), *L = (dReal *)dAlloc(matrixSize), 
         *d = (dReal *)dAlloc(vectorSize), *x = (dReal *)dAlloc(vectorSize), 
         *b = (dReal *)dAlloc(vectorSize), *btest = (dReal *)dAlloc(vectorSize), diff;
@@ -653,7 +653,7 @@ void testCoopSolveLDLT()
 void testLDLTAddTL()
 {
     int i,j;
-    size_t matrixSize = sizeof(dReal) * MSIZE4 * MSIZE, vectorSize = sizeof(dReal) * MSIZE;
+    dsizeint matrixSize = sizeof(dReal) * MSIZE4 * MSIZE, vectorSize = sizeof(dReal) * MSIZE;
     dReal *A = (dReal *)dAlloc(matrixSize), *L = (dReal *)dAlloc(matrixSize), 
         *DL = (dReal *)dAlloc(matrixSize), *ATEST = (dReal *)dAlloc(matrixSize), 
         *d = (dReal *)dAlloc(vectorSize), *a = (dReal *)dAlloc(vectorSize), diff;
@@ -700,7 +700,7 @@ void testLDLTAddTL()
 void testLDLTRemove()
 {
     int i,j,r;
-    size_t intVectorSize = sizeof(int) * MSIZE, matrixSize = sizeof(dReal) * MSIZE4 * MSIZE, vectorSize = sizeof(dReal) * MSIZE;
+    dsizeint intVectorSize = sizeof(int) * MSIZE, matrixSize = sizeof(dReal) * MSIZE4 * MSIZE, vectorSize = sizeof(dReal) * MSIZE;
     int *p = (int *)dAlloc(intVectorSize);
     dReal *A = (dReal *)dAlloc(matrixSize), *L = (dReal *)dAlloc(matrixSize), 
         *L2 = (dReal *)dAlloc(matrixSize), *DL2 = (dReal *)dAlloc(matrixSize), 

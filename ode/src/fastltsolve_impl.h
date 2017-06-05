@@ -46,8 +46,8 @@ void solveL1Transposed(const dReal *L, dReal *B, unsigned rowCount, unsigned row
     dIASSERT(rowCount != 0);
 
     /* special handling for L and B because we're solving L1 *transpose* */
-    const dReal *lastLElement = L + (size_t)(rowCount - 1) * (rowSkip + 1);
-    dReal *lastBElement = B + (size_t)(rowCount - 1) * b_stride;
+    const dReal *lastLElement = L + (sizeint)(rowCount - 1) * (rowSkip + 1);
+    dReal *lastBElement = B + (sizeint)(rowCount - 1) * b_stride;
 
     /* compute rows at end that are not a multiple of block size */
     const unsigned loopX1RowCount = rowCount % 4;
@@ -393,14 +393,14 @@ void solveL1Transposed(const dReal *L, dReal *B, unsigned rowCount, unsigned row
 
 template<unsigned int block_step>
 /*static */
-size_t ThreadedEquationSolverLDLT::estimateCooperativelySolvingL1TransposedMemoryRequirement(unsigned rowCount, SolvingL1TransposedMemoryEstimates &ref_solvingMemoryEstimates)
+sizeint ThreadedEquationSolverLDLT::estimateCooperativelySolvingL1TransposedMemoryRequirement(unsigned rowCount, SolvingL1TransposedMemoryEstimates &ref_solvingMemoryEstimates)
 {
     unsigned blockCount = deriveSolvingL1TransposedBlockCount(rowCount, block_step);
-    size_t descriptorSizeRequired = dEFFICIENT_SIZE(sizeof(cellindexint) * blockCount);
-    size_t contextSizeRequired = dEFFICIENT_SIZE(sizeof(SolveL1TransposedCellContext) * (CCI__MAX + 1) * blockCount);
+    sizeint descriptorSizeRequired = dEFFICIENT_SIZE(sizeof(cellindexint) * blockCount);
+    sizeint contextSizeRequired = dEFFICIENT_SIZE(sizeof(SolveL1TransposedCellContext) * (CCI__MAX + 1) * blockCount);
     ref_solvingMemoryEstimates.assignData(descriptorSizeRequired, contextSizeRequired);
 
-    size_t totalSizeRequired = descriptorSizeRequired + contextSizeRequired;
+    sizeint totalSizeRequired = descriptorSizeRequired + contextSizeRequired;
     return totalSizeRequired;
 }
 
@@ -427,13 +427,13 @@ void ThreadedEquationSolverLDLT::participateSolvingL1Transposed(const dReal *L, 
     const unsigned loopX1RowCount = rowCount % block_step;
 
     /* special handling for L and B because we're solving L1 *transpose* */
-    const dReal *lastLElement = L + (rowCount - 1) * ((size_t)rowSkip + 1);
-    dReal *lastBElement = B + (rowCount - 1) * (size_t)b_stride;
+    const dReal *lastLElement = L + (rowCount - 1) * ((sizeint)rowSkip + 1);
+    dReal *lastBElement = B + (rowCount - 1) * (sizeint)b_stride;
 
     /* elements adjusted as if the last block was full block_step elements */
     unsigned x1AdjustmentElements = (block_step - loopX1RowCount) % block_step;
     const dReal *columnAdjustedLastLElement = lastLElement + x1AdjustmentElements;
-    const dReal *fullyAdjustedLastLElement = columnAdjustedLastLElement + (size_t)rowSkip * x1AdjustmentElements;
+    const dReal *fullyAdjustedLastLElement = columnAdjustedLastLElement + (sizeint)rowSkip * x1AdjustmentElements;
     dReal *adjustedLastBElement = lastBElement + b_stride * x1AdjustmentElements;
 
     BlockProcessingState blockProcessingState = BPS_NO_BLOCKS_PROCESSED;
@@ -586,10 +586,10 @@ void ThreadedEquationSolverLDLT::participateSolvingL1Transposed(const dReal *L, 
                 partialBlock = false;
 
                 ptrLElement = completedRowBlock != 0 
-                    ? fullyAdjustedLastLElement - currentBlock * block_step - (size_t)(completedRowBlock * block_step) * rowSkip 
+                    ? fullyAdjustedLastLElement - currentBlock * block_step - (sizeint)(completedRowBlock * block_step) * rowSkip 
                     : columnAdjustedLastLElement - currentBlock * block_step;
                 ptrBElement = completedRowBlock != 0 
-                    ? adjustedLastBElement - (size_t)(completedRowBlock * block_step) * b_stride 
+                    ? adjustedLastBElement - (sizeint)(completedRowBlock * block_step) * b_stride 
                     : lastBElement;
 
                 finalRowBlock = dMACRO_MIN(currentBlock, completedBlocks);
@@ -1002,7 +1002,7 @@ void ThreadedEquationSolverLDLT::participateSolvingL1Transposed(const dReal *L, 
                 if (!CooperativeAtomics::AtomicCompareExchangeCellindexint(&blockProgressDescriptors[currentBlock], oldDescriptor, newDescriptor))
                 {
                     // Adjust the ptrBElement to point to the result area...
-                    ptrBElement = adjustedLastBElement - (size_t)(currentBlock * block_step) * b_stride;
+                    ptrBElement = adjustedLastBElement - (sizeint)(currentBlock * block_step) * b_stride;
                     dIASSERT(currentBlock != 0 || adjustedLastBElement == lastBElement);
                     // ...and go on handling the case
                     handleComputationTakenOver = true;
@@ -1046,10 +1046,10 @@ void ThreadedEquationSolverLDLT::participateSolvingL1Transposed(const dReal *L, 
                 partialBlock = false;
 
                 ptrLElement = completedRowBlock != 0 
-                    ? fullyAdjustedLastLElement - currentBlock * block_step - (size_t)(completedRowBlock * block_step) * rowSkip
+                    ? fullyAdjustedLastLElement - currentBlock * block_step - (sizeint)(completedRowBlock * block_step) * rowSkip
                     : columnAdjustedLastLElement - currentBlock * block_step;
                 ptrBElement = completedRowBlock != 0 
-                    ? adjustedLastBElement - (size_t)(completedRowBlock * block_step) * b_stride 
+                    ? adjustedLastBElement - (sizeint)(completedRowBlock * block_step) * b_stride 
                     : lastBElement;
 
                 unsigned finalRowBlock = currentBlock/*std::min(currentBlock, completedBlocks)*/;
@@ -1329,7 +1329,7 @@ void ThreadedEquationSolverLDLT::participateSolvingL1Transposed(const dReal *L, 
                         const SolveL1TransposedCellContext &resultContext = buildResultContextRef(cellContexts, currentBlock, blockCount);
                         resultContext.loadPrecalculatedZs(Y);
 
-                        ptrBElement = currentBlock != 0 ? adjustedLastBElement - (size_t)(currentBlock * block_step) * b_stride : lastBElement;
+                        ptrBElement = currentBlock != 0 ? adjustedLastBElement - (sizeint)(currentBlock * block_step) * b_stride : lastBElement;
                     }
 
                     goAssigningTheResult = true;

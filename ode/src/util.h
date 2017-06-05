@@ -36,9 +36,9 @@ void dxStepBody (dxBody *b, dReal h);
 struct dxWorldProcessMemoryManager:
     public dBase
 {
-    typedef void *(*alloc_block_fn_t)(size_t block_size);
-    typedef void *(*shrink_block_fn_t)(void *block_pointer, size_t block_current_size, size_t block_smaller_size);
-    typedef void (*free_block_fn_t)(void *block_pointer, size_t block_current_size);
+    typedef void *(*alloc_block_fn_t)(sizeint block_size);
+    typedef void *(*shrink_block_fn_t)(void *block_pointer, sizeint block_current_size, sizeint block_smaller_size);
+    typedef void (*free_block_fn_t)(void *block_pointer, sizeint block_current_size);
 
     dxWorldProcessMemoryManager(alloc_block_fn_t fnAlloc, shrink_block_fn_t fnShrink, free_block_fn_t fnFree)
     {
@@ -85,17 +85,17 @@ class dxWorldProcessMemArena:
 {
 public:
 #define BUFFER_TO_ARENA_EXTRA (EFFICIENT_ALIGNMENT + dEFFICIENT_SIZE(sizeof(dxWorldProcessMemArena)))
-    static bool IsArenaPossible(size_t nBufferSize)
+    static bool IsArenaPossible(sizeint nBufferSize)
     {
         return SIZE_MAX - BUFFER_TO_ARENA_EXTRA >= nBufferSize; // This ensures there will be no overflow
     }
 
-    static size_t MakeBufferSize(size_t nArenaSize)
+    static sizeint MakeBufferSize(sizeint nArenaSize)
     {
         return nArenaSize - BUFFER_TO_ARENA_EXTRA;
     }
 
-    static size_t MakeArenaSize(size_t nBufferSize)
+    static sizeint MakeArenaSize(sizeint nBufferSize)
     {
         return BUFFER_TO_ARENA_EXTRA + nBufferSize;
     }
@@ -108,9 +108,9 @@ public:
             && m_pArenaBegin != NULL && m_pArenaBegin <= m_pAllocBegin; 
     }
 
-    size_t GetMemorySize() const
+    sizeint GetMemorySize() const
     {
-        return (size_t)m_pAllocEnd - (size_t)m_pAllocBegin;
+        return (sizeint)m_pAllocEnd - (sizeint)m_pAllocBegin;
     }
 
     void *SaveState() const
@@ -133,7 +133,7 @@ public:
         return m_pAllocCurrentOrNextArena;
     }
 
-    void *AllocateBlock(size_t size)
+    void *AllocateBlock(sizeint size)
     {
         void *arena = m_pAllocCurrentOrNextArena;
         m_pAllocCurrentOrNextArena = dOFFSET_EFFICIENTLY(arena, size);
@@ -143,7 +143,7 @@ public:
         return arena;
     }
 
-    void *AllocateOveralignedBlock(size_t size, unsigned alignment)
+    void *AllocateOveralignedBlock(sizeint size, unsigned alignment)
     {
         void *arena = m_pAllocCurrentOrNextArena;
         m_pAllocCurrentOrNextArena = dOFFSET_OVERALIGNEDLY(arena, size, alignment);
@@ -154,19 +154,19 @@ public:
     }
 
     template<typename ElementType>
-    ElementType *AllocateArray(size_t count)
+    ElementType *AllocateArray(sizeint count)
     {
         return (ElementType *)AllocateBlock(count * sizeof(ElementType));
     }
 
     template<typename ElementType>
-    ElementType *AllocateOveralignedArray(size_t count, unsigned alignment)
+    ElementType *AllocateOveralignedArray(sizeint count, unsigned alignment)
     {
         return (ElementType *)AllocateOveralignedBlock(count * sizeof(ElementType), alignment);
     }
 
     template<typename ElementType>
-    void ShrinkArray(ElementType *arr, size_t oldcount, size_t newcount)
+    void ShrinkArray(ElementType *arr, sizeint oldcount, sizeint newcount)
     {
         dIASSERT(newcount <= oldcount);
         dIASSERT(dOFFSET_EFFICIENTLY(arr, oldcount * sizeof(ElementType)) == m_pAllocCurrentOrNextArena);
@@ -175,7 +175,7 @@ public:
 
 public:
     static dxWorldProcessMemArena *ReallocateMemArena (
-        dxWorldProcessMemArena *oldarena, size_t memreq, 
+        dxWorldProcessMemArena *oldarena, sizeint memreq, 
         const dxWorldProcessMemoryManager *memmgr, float rsrvfactor, unsigned rsrvminimum);
     static void FreeMemArena (dxWorldProcessMemArena *arena);
 
@@ -183,7 +183,7 @@ public:
     void SetNextMemArena(dxWorldProcessMemArena *pArenaInstance) { m_pAllocCurrentOrNextArena = pArenaInstance; }
 
 private:
-    static size_t AdjustArenaSizeForReserveRequirements(size_t arenareq, float rsrvfactor, unsigned rsrvminimum);
+    static sizeint AdjustArenaSizeForReserveRequirements(sizeint arenareq, float rsrvfactor, unsigned rsrvminimum);
 
 private:
     void *m_pAllocCurrentOrNextArena;
@@ -211,9 +211,9 @@ public:
     dxWorldProcessMemArena *ObtainStepperMemArena();
     void ReturnStepperMemArena(dxWorldProcessMemArena *pmaArenaInstance);
 
-    dxWorldProcessMemArena *ReallocateIslandsMemArena(size_t nMemoryRequirement, 
+    dxWorldProcessMemArena *ReallocateIslandsMemArena(sizeint nMemoryRequirement, 
         const dxWorldProcessMemoryManager *pmmMemortManager, float fReserveFactor, unsigned uiReserveMinimum);
-    bool ReallocateStepperMemArenas(dxWorld *world, unsigned nIslandThreadsCount, size_t nMemoryRequirement, 
+    bool ReallocateStepperMemArenas(dxWorld *world, unsigned nIslandThreadsCount, sizeint nMemoryRequirement, 
         const dxWorldProcessMemoryManager *pmmMemortManager, float fReserveFactor, unsigned uiReserveMinimum);
 
 private:
@@ -258,7 +258,7 @@ private:
 
 struct dxWorldProcessIslandsInfo
 {
-    void AssignInfo(size_t islandcount, unsigned int const *islandsizes, dxBody *const *bodies, dxJoint *const *joints)
+    void AssignInfo(sizeint islandcount, unsigned int const *islandsizes, dxBody *const *bodies, dxJoint *const *joints)
     {
         m_IslandCount = islandcount;
         m_pIslandSizes = islandsizes;
@@ -266,13 +266,13 @@ struct dxWorldProcessIslandsInfo
         m_pJoints = joints;
     }
 
-    size_t GetIslandsCount() const { return m_IslandCount; }
+    sizeint GetIslandsCount() const { return m_IslandCount; }
     unsigned int const *GetIslandSizes() const { return m_pIslandSizes; }
     dxBody *const *GetBodiesArray() const { return m_pBodies; }
     dxJoint *const *GetJointsArray() const { return m_pJoints; }
 
 private:
-    size_t                  m_IslandCount;
+    sizeint                  m_IslandCount;
     unsigned int const      *m_pIslandSizes;
     dxBody *const           *m_pBodies;
     dxJoint *const          *m_pJoints;
@@ -326,14 +326,14 @@ bool dxProcessIslands (dxWorld *world, const dxWorldProcessIslandsInfo &islandsI
                        dReal stepSize, dstepper_fn_t stepper, dmaxcallcountestimate_fn_t maxCallCountEstimator);
 
 
-typedef size_t (*dmemestimate_fn_t) (dxBody * const *body, unsigned int nb, 
+typedef sizeint (*dmemestimate_fn_t) (dxBody * const *body, unsigned int nb, 
                                      dxJoint * const *_joint, unsigned int _nj);
 
 bool dxReallocateWorldProcessContext (dxWorld *world, dxWorldProcessIslandsInfo &islandsinfo, 
                                       dReal stepsize, dmemestimate_fn_t stepperestimate);
 
 dxWorldProcessMemArena *dxAllocateTemporaryWorldProcessMemArena(
-    size_t memreq, const dxWorldProcessMemoryManager *memmgr/*=NULL*/, const dxWorldProcessMemoryReserveInfo *reserveinfo/*=NULL*/);
+    sizeint memreq, const dxWorldProcessMemoryManager *memmgr/*=NULL*/, const dxWorldProcessMemoryReserveInfo *reserveinfo/*=NULL*/);
 void dxFreeTemporaryWorldProcessMemArena(dxWorldProcessMemArena *arena);
 
 

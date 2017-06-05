@@ -194,7 +194,7 @@ static void command( int cmd )
 			dRFromAxisAndAngle( R,0,0,1,dRandReal()*10.0-5.0 );
 		}
 		dBodySetRotation( obj[i].body,R );
-		dBodySetData( obj[i].body,( void* )( size_t )i );
+		dBodySetData( obj[i].body,( void* )( dsizeint )i );
 
 		if ( cmd == 'b' )
 		{

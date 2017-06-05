@@ -325,7 +325,7 @@ void dxJointAMotor::getInfo2(dReal worldFPS, dReal /*worldERP*/,
         axptr[dSA_X] = &ax1_cross_ax2;
     }
 
-    size_t rowTotalSkip = 0, pairTotalSkip = 0;
+    sizeint rowTotalSkip = 0, pairTotalSkip = 0;
     
     const unsigned num = m_num;
     for (unsigned i = 0; i != num; ++i) 
@@ -345,7 +345,7 @@ dJointType dxJointAMotor::type() const
 }
 
 /*virtual */
-size_t dxJointAMotor::size() const
+sizeint dxJointAMotor::size() const
 {
     return sizeof(*this);
 }

@@ -361,7 +361,7 @@ dxJointSlider::type() const
 }
 
 
-size_t
+sizeint
 dxJointSlider::size() const
 {
     return sizeof ( *this );

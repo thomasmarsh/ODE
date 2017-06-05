@@ -110,7 +110,7 @@ int dxFactorCholesky(dReal *A, unsigned n, void *tmpBuf/*[n]*/)
     bool failure = false;
     
     dReal *alloctedBuf = NULL;
-    size_t allocatedSize;
+    sizeint allocatedSize;
 
     const unsigned nskip = dPAD (n);
     
@@ -165,7 +165,7 @@ void dxSolveCholesky(const dReal *L, dReal *b, unsigned n, void *tmpBuf/*[n]*/)
     dAASSERT (n > 0 && L && b);
 
     dReal *alloctedBuf = NULL;
-    size_t allocatedSize;
+    sizeint allocatedSize;
 
     const unsigned nskip = dPAD (n);
 
@@ -214,15 +214,15 @@ int dxInvertPDMatrix(const dReal *A, dReal *Ainv, unsigned n, void *tmpBuf/*[nsk
     bool success = false;
 
     dReal *alloctedBuf = NULL;
-    size_t allocatedSize;
+    sizeint allocatedSize;
 
-    size_t choleskyFactorSize = dxEstimateFactorCholeskyTmpbufSize(n);
-    size_t choleskySolveSize = dxEstimateSolveCholeskyTmpbufSize(n);
-    size_t choleskyMaxSize = dMACRO_MAX(choleskyFactorSize, choleskySolveSize);
+    sizeint choleskyFactorSize = dxEstimateFactorCholeskyTmpbufSize(n);
+    sizeint choleskySolveSize = dxEstimateSolveCholeskyTmpbufSize(n);
+    sizeint choleskyMaxSize = dMACRO_MAX(choleskyFactorSize, choleskySolveSize);
     dIASSERT(choleskyMaxSize % sizeof(dReal) == 0);
 
     const unsigned nskip = dPAD (n);
-    const size_t nskip_mul_n = (size_t)nskip * n;
+    const sizeint nskip_mul_n = (sizeint)nskip * n;
     
     dReal *tmp = (dReal *)tmpBuf;
     if (tmpBuf == NULL) {
@@ -264,13 +264,13 @@ int dxIsPositiveDefinite(const dReal *A, unsigned n, void *tmpBuf/*[nskip*(n+1)]
     dAASSERT (n > 0 && A);
 
     dReal *alloctedBuf = NULL;
-    size_t allocatedSize;
+    sizeint allocatedSize;
 
-    size_t choleskyFactorSize = dxEstimateFactorCholeskyTmpbufSize(n);
+    sizeint choleskyFactorSize = dxEstimateFactorCholeskyTmpbufSize(n);
     dIASSERT(choleskyFactorSize % sizeof(dReal) == 0);
 
     const unsigned nskip = dPAD (n);
-    const size_t nskip_mul_n = (size_t)nskip * n;
+    const sizeint nskip_mul_n = (sizeint)nskip * n;
     
     dReal *tmp = (dReal *)tmpBuf;
     if (tmpBuf == NULL) {
@@ -299,7 +299,7 @@ void dxLDLTAddTL(dReal *L, dReal *d, const dReal *a, unsigned n, unsigned nskip,
     if (n < 2) return;
 
     dReal *alloctedBuf = NULL;
-    size_t allocatedSize;
+    sizeint allocatedSize;
 
     dReal *W1 = (dReal *)tmpBuf;
     if (tmpBuf == NULL) {
@@ -409,9 +409,9 @@ void dxLDLTRemove(dReal **A, const unsigned *p, dReal *L, dReal *d,
     }
 
     dReal *alloctedBuf = NULL;
-    size_t allocatedSize;
+    sizeint allocatedSize;
 
-    size_t LDLTAddTLSize = dxEstimateLDLTAddTLTmpbufSize(nskip);
+    sizeint LDLTAddTLSize = dxEstimateLDLTAddTLTmpbufSize(nskip);
     dIASSERT(LDLTAddTLSize % sizeof(dReal) == 0);
     
     dReal *tmp = (dReal *)tmpBuf;
@@ -449,7 +449,7 @@ void dxLDLTRemove(dReal **A, const unsigned *p, dReal *L, dReal *d,
             }
         }
         a[0] += REAL(1.0);
-        dxLDLTAddTL (L + (size_t)(nskip + 1) * r, d + r, a, n2 - r, nskip, tmp);
+        dxLDLTAddTL (L + (sizeint)(nskip + 1) * r, d + r, a, n2 - r, nskip, tmp);
     }
 
     // snip out row/column r from L and d
@@ -469,7 +469,7 @@ void dxRemoveRowCol(dReal *A, unsigned n, unsigned nskip, unsigned r)
     if (r >= n - 1) return;
     if (r > 0) {
         {
-            const size_t move_size = (n - r - 1) * sizeof(dReal);
+            const sizeint move_size = (n - r - 1) * sizeof(dReal);
             dReal *Adst = A + r;
             for (unsigned i = 0; i < r; Adst += nskip, ++i) {
                 dReal *Asrc = Adst + 1;
@@ -477,8 +477,8 @@ void dxRemoveRowCol(dReal *A, unsigned n, unsigned nskip, unsigned r)
             }
         }
         {
-            const size_t cpy_size = r * sizeof(dReal);
-            dReal *Adst = A + (size_t)nskip * r;
+            const sizeint cpy_size = r * sizeof(dReal);
+            dReal *Adst = A + (sizeint)nskip * r;
             unsigned n1 = n - 1;
             for (unsigned i = r; i < n1; ++i) {
                 dReal *Asrc = Adst + nskip;
@@ -488,8 +488,8 @@ void dxRemoveRowCol(dReal *A, unsigned n, unsigned nskip, unsigned r)
         }
     }
     {
-        const size_t cpy_size = (n - r - 1) * sizeof(dReal);
-        dReal *Adst = A + (size_t)(nskip + 1) * r;
+        const sizeint cpy_size = (n - r - 1) * sizeof(dReal);
+        dReal *Adst = A + (sizeint)(nskip + 1) * r;
         unsigned n1 = n - 1;
         for (unsigned i = r; i < n1; ++i) {
             dReal *Asrc = Adst + (nskip + 1);

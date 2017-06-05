@@ -583,7 +583,7 @@ dxJointPR::type() const
     return dJointTypePR;
 }
 
-size_t
+sizeint
 dxJointPR::size() const
 {
     return sizeof( *this );

@@ -691,7 +691,7 @@ dxJointTransmission::type() const
     return dJointTypeTransmission;
 }
 
-size_t
+sizeint
 dxJointTransmission::size() const
 {
     return sizeof( *this );

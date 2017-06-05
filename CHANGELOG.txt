@@ -8,6 +8,10 @@ the rules for this file:
   * keep the format consistent (79 char width, M/D/Y date format).
 
 ------------------------------------------------------------------------------
+06/06/2017 Oleh Derevenko
+        * Memory and pointer size integer type use has been changed so that 
+          internal typedefs are used instead of "_t" suffixed types.
+
 05/09/2017 Oleh Derevenko
         * Introduction of cooperative algorithms API. 
           L*D*LT cooperative factorization and linear equation system 

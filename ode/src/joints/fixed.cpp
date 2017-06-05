@@ -188,7 +188,7 @@ dxJointFixed::type() const
 }
 
 
-size_t
+sizeint
 dxJointFixed::size() const
 {
     return sizeof ( *this );

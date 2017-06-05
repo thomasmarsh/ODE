@@ -306,7 +306,7 @@ struct dxAABB {
     int level;		// the level this is stored in (cell size = 2^level)
     int dbounds[6];	// AABB bounds, discretized to cell size
     dxGeom *geom;		// corresponding geometry object (AABB stored here)
-    size_t index;		// index of this AABB, starting from 0
+    sizeint index;		// index of this AABB, starting from 0
 };
 
 
@@ -470,7 +470,7 @@ void dxHashSpace::collide (void *data, dNearCallback *callback)
         }
     }
 
-    size_t n = hash_boxes.size(); // number of AABBs in main list
+    sizeint n = hash_boxes.size(); // number of AABBs in main list
 
     // for `n' objects, an n*n array of bits is used to record if those objects
     // have been intersection-tested against each other yet. this array can
@@ -484,7 +484,7 @@ void dxHashSpace::collide (void *data, dNearCallback *callback)
 
     // compute hash table size sz to be a prime > 8*n
     for (i=0; i<NUM_PRIMES; i++) {
-        if ((size_t)prime[i] >= (8*n)) break;
+        if ((sizeint)prime[i] >= (8*n)) break;
     }
     if (i >= NUM_PRIMES) {
         i = NUM_PRIMES-1;	// probably pointless
@@ -560,7 +560,7 @@ void dxHashSpace::collide (void *data, dNearCallback *callback)
                                         i = (node->aabb->index * tested_rowsize)+(aabb->index >> 3);
                                         mask = 1 << (aabb->index & 7);
                                     }
-                                    dIASSERT (i >= 0 && (size_t)i < (tested_rowsize*n));
+                                    dIASSERT (i >= 0 && (sizeint)i < (tested_rowsize*n));
                                     if ((tested[i] & mask)==0) {
                                         tested[i] |= mask;
                                         collideAABBs (aabb->geom,node->aabb->geom,data,callback);

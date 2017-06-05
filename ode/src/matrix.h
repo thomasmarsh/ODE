@@ -36,7 +36,7 @@
 
 template <unsigned a_stride, typename element_type>
 ODE_INLINE
-void dxtSetZero (element_type *a, size_t n)
+void dxtSetZero (element_type *a, sizeint n)
 {
     element_type *const aend = a + n * a_stride;
     for (element_type *acurr = a; acurr != aend; acurr += a_stride) {
@@ -46,14 +46,14 @@ void dxtSetZero (element_type *a, size_t n)
 
 template <typename element_type>
 ODE_INLINE
-void dxSetZero (element_type *a, size_t n)
+void dxSetZero (element_type *a, sizeint n)
 {
     dxtSetZero<1>(a, n);
 }
 
 template <typename element_type>
 ODE_INLINE
-void dxSetValue (element_type *a, size_t n, element_type value)
+void dxSetValue (element_type *a, sizeint n, element_type value)
 {
     element_type *const aend = a + n;
     for (element_type *acurr = a; acurr != aend; ++acurr) {
@@ -65,7 +65,7 @@ void dxSetValue (element_type *a, size_t n, element_type value)
 #else // #ifndef __cplusplus
 
 ODE_PURE_INLINE
-void dxSetZero (dReal *a, size_t n)
+void dxSetZero (dReal *a, sizeint n)
 {
     dReal *const aend = a + n;
     dReal *acurr;
@@ -75,7 +75,7 @@ void dxSetZero (dReal *a, size_t n)
 }
 
 ODE_PURE_INLINE
-void dxSetValue (dReal *a, size_t n, dReal value)
+void dxSetValue (dReal *a, sizeint n, dReal value)
 {
     dReal *const aend = a + n;
     dReal *acurr;
@@ -100,35 +100,35 @@ void dxLDLTAddTL (dReal *L, dReal *d, const dReal *a, unsigned n, unsigned nskip
 void dxLDLTRemove (dReal **A, const unsigned *p, dReal *L, dReal *d, unsigned n1, unsigned n2, unsigned r, unsigned nskip, void *tmpbuf);
 void dxRemoveRowCol (dReal *A, unsigned n, unsigned nskip, unsigned r);
 
-ODE_PURE_INLINE size_t dxEstimateFactorCholeskyTmpbufSize(unsigned n)
+ODE_PURE_INLINE sizeint dxEstimateFactorCholeskyTmpbufSize(unsigned n)
 {
     return dPAD(n) * sizeof(dReal);
 }
 
-ODE_PURE_INLINE size_t dxEstimateSolveCholeskyTmpbufSize(unsigned n)
+ODE_PURE_INLINE sizeint dxEstimateSolveCholeskyTmpbufSize(unsigned n)
 {
     return dPAD(n) * sizeof(dReal);
 }
 
-ODE_PURE_INLINE size_t dxEstimateInvertPDMatrixTmpbufSize(unsigned n)
+ODE_PURE_INLINE sizeint dxEstimateInvertPDMatrixTmpbufSize(unsigned n)
 {
-    size_t FactorCholesky_size = dxEstimateFactorCholeskyTmpbufSize(n);
-    size_t SolveCholesky_size = dxEstimateSolveCholeskyTmpbufSize(n);
-    size_t MaxCholesky_size = FactorCholesky_size > SolveCholesky_size ? FactorCholesky_size : SolveCholesky_size;
-    return (size_t)dPAD(n) * (n + 1) * sizeof(dReal) + MaxCholesky_size;
+    sizeint FactorCholesky_size = dxEstimateFactorCholeskyTmpbufSize(n);
+    sizeint SolveCholesky_size = dxEstimateSolveCholeskyTmpbufSize(n);
+    sizeint MaxCholesky_size = FactorCholesky_size > SolveCholesky_size ? FactorCholesky_size : SolveCholesky_size;
+    return (sizeint)dPAD(n) * (n + 1) * sizeof(dReal) + MaxCholesky_size;
 }
 
-ODE_PURE_INLINE size_t dxEstimateIsPositiveDefiniteTmpbufSize(unsigned n)
+ODE_PURE_INLINE sizeint dxEstimateIsPositiveDefiniteTmpbufSize(unsigned n)
 {
-    return (size_t)dPAD(n) * n * sizeof(dReal) + dxEstimateFactorCholeskyTmpbufSize(n);
+    return (sizeint)dPAD(n) * n * sizeof(dReal) + dxEstimateFactorCholeskyTmpbufSize(n);
 }
 
-ODE_PURE_INLINE size_t dxEstimateLDLTAddTLTmpbufSize(unsigned nskip)
+ODE_PURE_INLINE sizeint dxEstimateLDLTAddTLTmpbufSize(unsigned nskip)
 {
     return nskip * (2 * sizeof(dReal));
 }
 
-ODE_PURE_INLINE size_t dxEstimateLDLTRemoveTmpbufSize(unsigned n2, unsigned nskip)
+ODE_PURE_INLINE sizeint dxEstimateLDLTRemoveTmpbufSize(unsigned n2, unsigned nskip)
 {
     return n2 * sizeof(dReal) + dxEstimateLDLTAddTLTmpbufSize(nskip);
 }

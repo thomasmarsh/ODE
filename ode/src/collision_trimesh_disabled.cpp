@@ -91,7 +91,7 @@ void *dGeomTriMeshDataGet(dTriMeshDataID g, int data_id)
 }
 
 /*extern */
-void *dGeomTriMeshDataGet2(dTriMeshDataID g, int data_id, size_t *pout_size/*=NULL*/)
+void *dGeomTriMeshDataGet2(dTriMeshDataID g, int data_id, sizeint *pout_size/*=NULL*/)
 {
     if (pout_size != NULL)
     {
@@ -199,7 +199,7 @@ int dGeomTriMeshDataPreprocess(dTriMeshDataID g)
 }
 
 /*extern ODE_API */
-int dGeomTriMeshDataPreprocess2(dTriMeshDataID g, unsigned int buildRequestFlags, const dintptr *requestExtraData/*=NULL | const dintptr (*)[dTRIDATAPREPROCESS_BUILD__MAX]*/)
+int dGeomTriMeshDataPreprocess2(dTriMeshDataID g, unsigned int buildRequestFlags, const intptr *requestExtraData/*=NULL | const intptr (*)[dTRIDATAPREPROCESS_BUILD__MAX]*/)
 {
     // Do nothing
     return 1;

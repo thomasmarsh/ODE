@@ -212,7 +212,7 @@ static char locase(char c)
 
 static void command(int cmd)
 {
-    size_t i;
+    dsizeint i;
     int j,k;
     dReal sides[3];
     dMass m;

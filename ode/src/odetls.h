@@ -83,19 +83,19 @@ public:
     static unsigned GetDataAllocationFlags(EODETLSKIND tkTLSKind)
     {
         // Must be a safe call as it is used to test if TLS slot is allocated at all
-        return (unsigned)(size_t)CThreadLocalStorage::GetStorageValue(m_ahtkStorageKeys[tkTLSKind], OTI_DATA_ALLOCATION_FLAGS);
+        return (unsigned)(sizeint)CThreadLocalStorage::GetStorageValue(m_ahtkStorageKeys[tkTLSKind], OTI_DATA_ALLOCATION_FLAGS);
     }
 
     static void SignalDataAllocationFlags(EODETLSKIND tkTLSKind, unsigned uFlagsMask)
     {
-        unsigned uCurrentFlags = (unsigned)(size_t)CThreadLocalStorage::UnsafeGetStorageValue(m_ahtkStorageKeys[tkTLSKind], OTI_DATA_ALLOCATION_FLAGS);
-        CThreadLocalStorage::UnsafeSetStorageValue(m_ahtkStorageKeys[tkTLSKind], OTI_DATA_ALLOCATION_FLAGS, (tlsvaluetype)(size_t)(uCurrentFlags | uFlagsMask));
+        unsigned uCurrentFlags = (unsigned)(sizeint)CThreadLocalStorage::UnsafeGetStorageValue(m_ahtkStorageKeys[tkTLSKind], OTI_DATA_ALLOCATION_FLAGS);
+        CThreadLocalStorage::UnsafeSetStorageValue(m_ahtkStorageKeys[tkTLSKind], OTI_DATA_ALLOCATION_FLAGS, (tlsvaluetype)(sizeint)(uCurrentFlags | uFlagsMask));
     }
 
     static void DropDataAllocationFlags(EODETLSKIND tkTLSKind, unsigned uFlagsMask)
     {
-        unsigned uCurrentFlags = (unsigned)(size_t)CThreadLocalStorage::UnsafeGetStorageValue(m_ahtkStorageKeys[tkTLSKind], OTI_DATA_ALLOCATION_FLAGS);
-        CThreadLocalStorage::UnsafeSetStorageValue(m_ahtkStorageKeys[tkTLSKind], OTI_DATA_ALLOCATION_FLAGS, (tlsvaluetype)(size_t)(uCurrentFlags & ~uFlagsMask));
+        unsigned uCurrentFlags = (unsigned)(sizeint)CThreadLocalStorage::UnsafeGetStorageValue(m_ahtkStorageKeys[tkTLSKind], OTI_DATA_ALLOCATION_FLAGS);
+        CThreadLocalStorage::UnsafeSetStorageValue(m_ahtkStorageKeys[tkTLSKind], OTI_DATA_ALLOCATION_FLAGS, (tlsvaluetype)(sizeint)(uCurrentFlags & ~uFlagsMask));
     }
 
     static TrimeshCollidersCache *GetTrimeshCollidersCache(EODETLSKIND tkTLSKind)

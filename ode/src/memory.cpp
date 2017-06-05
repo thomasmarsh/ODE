@@ -75,20 +75,20 @@ dFreeFunction *dGetFreeHandler()
 }
 
 
-void * dAlloc (size_t size)
+void * dAlloc (sizeint size)
 {
     if (allocfn) return allocfn (size); else return malloc (size);
 }
 
 
-void * dRealloc (void *ptr, size_t oldsize, size_t newsize)
+void * dRealloc (void *ptr, sizeint oldsize, sizeint newsize)
 {
     if (reallocfn) return reallocfn (ptr,oldsize,newsize);
     else return realloc (ptr,newsize);
 }
 
 
-void dFree (void *ptr, size_t size)
+void dFree (void *ptr, sizeint size)
 {
     if (!ptr) return;
     if (freefn) freefn (ptr,size); else free (ptr);
