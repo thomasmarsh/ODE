@@ -43,6 +43,7 @@
 #include "threading_fake_sync.h"
 #include "threading_atomics_provs.h"
 
+
 #if dBUILTIN_THREADING_IMPL_ENABLED
 
 #include <pthread.h>
@@ -54,7 +55,20 @@
 #endif
 
 
-#if !HAVE_CLOCK_GETTIME
+#if HAVE_PTHREAD_CONDATTR_SETCLOCK
+
+static inline 
+int _condvar_clock_gettime(int clock_type, timespec *ts)
+{
+    return clock_gettime(clock_type, ts);
+}
+
+
+#else // #if !HAVE_PTHREAD_CONDATTR_SETCLOCK
+
+#if defined(__APPLE__)
+
+#if HAVE_GETTIMEOFDAY
 
 #include <sys/time.h>
 
@@ -63,7 +77,7 @@
 #endif
 
 static inline 
-int clock_gettime(int clock_type, timespec *ts)
+int _condvar_clock_gettime(int clock_type, timespec *ts)
 {
     (void)clock_type; // Unused
     timeval tv;
@@ -71,13 +85,25 @@ int clock_gettime(int clock_type, timespec *ts)
 }
 
 
-#endif // #if !HAVE_CLOCK_GETTIME
+#else // #if !HAVE_GETTIMEOFDAY
+
+#error It is necessary to check manuals for the correct way of getting condvar wait time for this Apple system
 
 
-#endif // #if dBUILTIN_THREADING_IMPL_ENABLED
+#endif // #if !HAVE_GETTIMEOFDAY
 
 
-#if dBUILTIN_THREADING_IMPL_ENABLED
+#else // #if !defined(__APPLE__)
+
+
+#error It is necessary to check manuals for the correct way of getting condvar wait time for this system
+
+
+#endif // #if !defined(__APPLE__)
+
+
+#endif // #if !HAVE_PTHREAD_CONDATTR_SETCLOCK
+
 
 /************************************************************************/
 /* dxCondvarWakeup class implementation                                 */
@@ -162,14 +188,14 @@ bool dxCondvarWakeup::DoInitializeObject()
 
         condattr_initialized = true;
 
-#if HAVE_CLOCK_GETTIME
+#if HAVE_PTHREAD_CONDATTR_SETCLOCK
         int condattr_clock_result = pthread_condattr_setclock(&cond_condattr, CLOCK_MONOTONIC);
         if (condattr_clock_result != EOK)
         {
             errno = condattr_clock_result;
             break;
         }
-#endif // #if HAVE_CLOCK_GETTIME
+#endif // #if HAVE_PTHREAD_CONDATTR_SETCLOCK
 
         int cond_result = pthread_cond_init(&m_wakeup_cond, &cond_condattr);
         if (cond_result != EOK)
@@ -328,7 +354,7 @@ bool dxCondvarWakeup::BlockAsAWaiter(const dThreadedWaitTime *timeout_time_ptr)
     {
         timespec current_time;
 
-        int clock_result = clock_gettime(CLOCK_MONOTONIC, &current_time);
+        int clock_result = _condvar_clock_gettime(CLOCK_MONOTONIC, &current_time);
         dICHECK(clock_result != -1);
 
         time_t wakeup_sec = current_time.tv_sec + timeout_time_ptr->wait_sec;
