@@ -75,8 +75,10 @@
 #define _OU_TARGET_OS			_OU_TARGET_OS_QNX
 
 
-#elif defined(TARGET_OS_IPHONE)
- 
+#elif defined(__APPLE__)
+
+#if TARGET_OS_IPHONE || TARGET_IPHONE_SIMULATOR
+
 #define _OU_TARGET_OS			_OU_TARGET_OS_IOS
 
 #if !defined(MAC_OS_X_VERSION)
@@ -84,10 +86,17 @@
 #endif
 
 
-#elif defined(__APPLE__)
+#elif TARGET_OS_MAC
 
 #define _OU_TARGET_OS			_OU_TARGET_OS_MAC
 
+
+#else // An unknown Apple target
+
+#error Build Apple target is not supported
+
+
+#endif // // An unknown Apple target
 
 #elif defined(__aix__)
 
