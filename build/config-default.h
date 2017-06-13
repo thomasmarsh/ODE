@@ -99,12 +99,6 @@
 #endif
 
 
-#ifdef dSINGLE
-       #define dEpsilon  FLT_EPSILON
-#else
-       #define dEpsilon  DBL_EPSILON
-#endif
-
 /* The efficient alignment. most platforms align data structures to some
  * number of bytes, but this is not always the most efficient alignment.
  * for example, many x86 compilers align to 4 bytes, but on a pentium it is

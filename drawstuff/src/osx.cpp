@@ -27,10 +27,11 @@
 // Not thoroughly tested and is certain to contain deficiencies and bugs
 
 #include <ode/odeconfig.h>
-#include "config.h"
 #include <stdlib.h>
 #include <string.h>
 #include <stdarg.h>
+#include "config.h"
+#include "common.h"
 
 #ifdef HAVE_SYS_TIME_H
 #include <sys/time.h>

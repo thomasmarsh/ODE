@@ -23,7 +23,6 @@
 // main window and event handling for X11
 
 #include <ode/odeconfig.h>
-#include "config.h"
 #include <stdlib.h>
 #include <string.h>
 #include <stdarg.h>
@@ -31,6 +30,8 @@
 #include <X11/Xatom.h>
 #include <X11/keysym.h>
 #include <GL/glx.h>
+#include "config.h"
+#include "common.h"
 
 #ifdef HAVE_SYS_TIME_H
 #include <sys/time.h>

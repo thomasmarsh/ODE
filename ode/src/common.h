@@ -34,6 +34,43 @@
 #define SIZE_MAX  ((sizeint)(-1))
 #endif
 
+#define dMACRO_MAX(a, b) ((a) > (b) ? (a) : (b))
+#define dMACRO_MIN(a, b) ((a) < (b) ? (a) : (b))
+
+
+#ifdef dSINGLE
+#define dEpsilon  FLT_EPSILON
+#else
+#define dEpsilon  DBL_EPSILON
+#endif
+
+
+#ifdef dSINGLE
+
+#if !defined(FLT_MANT_DIG)
+#define FLT_MANT_DIG 24
+#endif
+
+#define dMaxExact   ((float)((1UL << FLT_MANT_DIG) - 1))
+#define dMinExact   ((float)(-dMaxExact))
+
+
+#else // #ifndef dSINGLE
+
+#if !defined(DBL_MANT_DIG)
+#define DBL_MANT_DIG 53
+#endif
+
+#define dMaxExact   (double)((1ULL << DBL_MANT_DIG) - 1)
+#define dMinExact   ((double)(-dMaxExact))
+
+
+#endif // #ifndef dSINGLE
+
+
+#define dMaxIntExact dMACRO_MIN(dMaxExact, (dReal)INT_MAX)
+#define dMinIntExact dMACRO_MAX(dMinExact, (dReal)INT_MIN)
+
 
 #ifndef offsetof
 #define offsetof(s, m) ((sizeint)&(((s *)8)->m) - (sizeint)8)
@@ -44,9 +81,6 @@
 #ifndef endoffsetof
 #define endoffsetof(s, m)   ((sizeint)((sizeint)&(((s *)8)->m) - (sizeint)8) + sizeof(((s *)8)->m))
 #endif
-
-#define dMACRO_MAX(a, b) ((a) > (b) ? (a) : (b))
-#define dMACRO_MIN(a, b) ((a) < (b) ? (a) : (b))
 
 
 /* the efficient alignment. most platforms align data structures to some

@@ -517,13 +517,6 @@ AH_BOTTOM([
 #endif
 
 
-#ifdef dSINGLE
-       #define dEpsilon  FLT_EPSILON
-#else
-       #define dEpsilon  DBL_EPSILON
-#endif
-
-
 #include "typedefs.h"
 
 

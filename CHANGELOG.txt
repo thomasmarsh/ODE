@@ -8,6 +8,10 @@ the rules for this file:
   * keep the format consistent (79 char width, M/D/Y date format).
 
 ------------------------------------------------------------------------------
+06/14/2017 Oleh Derevenko
+        * dxHashSpace::collide() has been changed to fault host program 
+          if scene gets too large and causes integer overflow.
+
 06/06/2017 Oleh Derevenko
         * Memory and pointer size integer type use has been changed so that 
           internal typedefs are used instead of "_t" suffixed types.

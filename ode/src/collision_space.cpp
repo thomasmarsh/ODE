@@ -453,10 +453,13 @@ void dxHashSpace::collide (void *data, dNearCallback *callback)
             aabb.level = level;
             if (level > maxlevel) maxlevel = level;
             // cellsize = 2^level
-            dReal cellSizeRecip = dRecip((dReal) ldexp(1.0, level));
+            dReal cellSizeRecip = dRecip(ldexp(REAL(1.0), level)); // No computational errors here!
             // discretize AABB position to cell size
             for (i=0; i < 6; i++) {
-                aabb.dbounds[i] = (int) floor(geom->aabb[i] * cellSizeRecip);
+                dReal aabbBound = geom->aabb[i] * cellSizeRecip; // No computational errors so far!
+                dICHECK(aabbBound >= dMinIntExact && aabbBound </*=*/ dMaxIntExact); // Otherwise the scene is too large for integer types used 
+
+                aabb.dbounds[i] = (int) dFloor(aabbBound);
             }
             // set AABB index
             aabb.index = hash_boxes.size();
