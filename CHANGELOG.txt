@@ -8,6 +8,9 @@ the rules for this file:
   * keep the format consistent (79 char width, M/D/Y date format).
 
 ------------------------------------------------------------------------------
+10/09/2017 Markus Rickert
+        * CMake support for project file generation has been added.
+
 06/14/2017 Oleh Derevenko
         * dxHashSpace::collide() has been changed to fault host program 
           if scene gets too large and causes integer overflow.

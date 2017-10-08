@@ -5,6 +5,7 @@ just about everything else.
 2. Building with Autotools (Linux, OS X, MSYS, etc.)
 3. Building with Code::Blocks
 4. Building with Something Else
+5. Building with CMake
 
 
 
@@ -27,6 +28,9 @@ just about everything else.
 
  Note that Visual Studio 6 is not supported and users are advised to upgrade
  to at least Visual Studio 2005 Express (it's free!)
+
+ Using CMake is another option for generating project files for Visual Studio.
+ See section 5 below for more details on this.
 
 
 
@@ -116,6 +120,9 @@ just about everything else.
    $ cd build
    $ premake4 --help
 
+ Using CMake is another option for generating project files for Code::Blocks.
+ See section 5 below for more details on this.
+
 
 
 
@@ -128,4 +135,39 @@ just about everything else.
  and then follow the directions for Code::Blocks above, substituting your
  toolset target in place of `codeblocks`.
 
+ Using CMake is another option for generating project files for other
+ toolsets. See section 5 below for more details on this.
+
+
+
+
+5. BUILDING WITH CMAKE
+======================
+
+ ODE includes support for CMake to generate project files for various platforms
+ and IDEs including Unix Makefiles, Ninja, Code::Blocks, Visual Studio. A full
+ overview of all supported generators can be found at the latest version of the
+ manual at https://cmake.org/cmake/help/latest/manual/cmake-generators.7.html
+
+ CMake supports and encourages out-of-source builds. In order to generate build
+ files for your platform, create a build directory at your preferred location
+ and then call CMake with the path to ODE's source directory as argument, e.g.,
+ one level above the source directory:
  
+   $ cd ..
+   $ mkdir ode-build 
+   $ cmake ../ode-src
+
+ The existing build directory in the source directory can also be used as a
+ location for the project files. A different generator than the default one
+ for the system can be specified as well:
+
+   $ cd build
+   $ cmake -G"Visual Studio 15 2017 Win64" ..
+
+ QtCreator, CLion, and Visual Studio 2017 also offer the option to open the
+ source directory with the CMakeLists.txt file directly in the IDE.
+
+
+
+
