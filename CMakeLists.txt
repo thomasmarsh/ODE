@@ -875,6 +875,9 @@ install(
 	COMPONENT development
 )
 
+configure_file(cmake/cmake_uninstall.cmake.in cmake_uninstall.cmake @ONLY)
+add_custom_target(uninstall ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake)
+
 set(CPACK_DEBIAN_PACKAGE_DESCRIPTION "ODE is a free, industrial quality library for simulating articulated rigid body dynamics - for example ground vehicles, legged creatures, and moving objects in VR environments. It is fast, flexible, robust and platform independent, with advanced joints, contact with friction, and built-in collision detection.")
 
 set(CPACK_COMPONENT_DEVELOPMENT_DEPENDS runtime)
