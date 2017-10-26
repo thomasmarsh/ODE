@@ -660,6 +660,16 @@ endif()
 
 install(FILES ${HDRS} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/ode COMPONENT development)
 
+set(prefix ${CMAKE_INSTALL_PREFIX})
+set(exec_prefix "\${prefix}")
+set(libdir "\${exec_prefix}/${CMAKE_INSTALL_LIBDIR}")
+set(includedir "\${prefix}/${CMAKE_INSTALL_INCLUDEDIR}")
+configure_file(ode.pc.in ode.pc @ONLY)
+configure_file(ode-config.in ode-config @ONLY)
+
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/ode.pc DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig COMPONENT development)
+install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/ode-config DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT development)
+
 if(ODE_WITH_DEMOS)
 	set(
 		DRAWSTUFF_SRCS
