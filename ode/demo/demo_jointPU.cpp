@@ -575,8 +575,8 @@ int main (int argc, char **argv)
 
       if (0 == strcmp ("-t", argv[i]) || 0 == strcmp ("--texture-path", argv[i]) ) {
         int j = i+1;
-        if ( j+1 > argc      ||  // Check if we have enough arguments
-             argv[j] == '\0' ||  // We should have a path here
+        if ( j >= argc      ||  // Check if we have enough arguments
+             argv[j][0] == '\0' ||  // We should have a path here
              argv[j][0] == '-' ) // We should have a path not a command line
           Help (argv);
         else
