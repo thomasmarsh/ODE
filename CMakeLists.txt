@@ -724,6 +724,7 @@ if(ODE_WITH_DEMOS)
 		ode/demo/demo_chain1.c
 		ode/demo/demo_chain2.cpp
 		ode/demo/demo_collision.cpp
+		ode/demo/demo_convex.cpp
 		ode/demo/demo_crash.cpp
 		ode/demo/demo_cylvssphere.cpp
 		ode/demo/demo_dball.cpp
