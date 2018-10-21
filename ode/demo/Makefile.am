@@ -11,7 +11,7 @@ LDADD = $(top_builddir)/drawstuff/src/libdrawstuff.la \
         $(top_builddir)/ode/src/libode.la @GL_LIBS@
 
 noinst_HEADERS = basket_geom.h texturepath.h world_geom3.h bunny_geom.h convex_bunny_geom.h \
-                 icosahedron_geom.h
+                 icosahedron_geom.h halton235_geom.h
 
 AM_DEFAULT_SOURCE_EXT = .cpp
 
@@ -22,6 +22,7 @@ noinst_PROGRAMS = \
                 demo_chain1 \
                 demo_chain2 \
                 demo_collision \
+                demo_convex \
                 demo_crash \
                 demo_cylvssphere \
                 demo_dball \
