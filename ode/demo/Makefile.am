@@ -22,6 +22,7 @@ noinst_PROGRAMS = \
                 demo_chain1 \
                 demo_chain2 \
                 demo_collision \
+                demo_convex \
                 demo_crash \
                 demo_cylvssphere \
                 demo_dball \
@@ -48,8 +49,7 @@ noinst_PROGRAMS = \
                 demo_space \
                 demo_space_stress \
                 demo_step \
-                demo_tracks \
-                demo_convex
+                demo_tracks
 
 demo_chain1_SOURCES = demo_chain1.c
 demo_chain1_LDADD = $(LDADD) -lstdc++ 

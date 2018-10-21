@@ -18,6 +18,7 @@
     "chain1",
     "chain2",
     "collision",
+    "convex",
     "crash",
     "cylvssphere",
     "dball",
