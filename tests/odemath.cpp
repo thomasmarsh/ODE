@@ -176,7 +176,7 @@ TEST(test_dNormalization3)
     v[1] = REAL(9999.0);
     v[2] = REAL(9.0);
     dSafeNormalize3(v);
-    CHECK_EQUAL(dCalcVectorLength3(v), REAL(1.0));
+    CHECK_CLOSE(dCalcVectorLength3(v), REAL(1.0),REAL(0.001));
 
 }
 

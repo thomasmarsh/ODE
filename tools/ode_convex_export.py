@@ -14,7 +14,6 @@ This script Exports a Blender scene as a series of ODE Convex Geom data stored i
 """
 import Blender
 import bpy
-#import struct
 
 def WriteMesh(file,ob):
 	mesh = ob.getData(mesh=1)

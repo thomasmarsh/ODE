@@ -1,5 +1,6 @@
 #include <UnitTest++.h>
 #include <ode/ode.h>
+#include "common.h"
 
 TEST(test_collision_trimesh_sphere_exact)
 {
@@ -125,3 +126,99 @@ TEST(test_collision_heightfield_ray_fail)
     }
 }
 
+#include "../ode/demo/convex_prism.h"
+
+TEST(test_collision_ray_convex)
+{
+    /*
+     * Issue 55: ray vs convex collider does not consider the position of the convex geometry.
+     */
+    {
+		dContact contact{};
+
+        // Create convex
+	    dGeomID convex = dCreateConvex(0, 
+            prism_planes, 
+            prism_planecount, 
+            prism_points, 
+            prism_pointcount,
+            prism_polygons);
+        dGeomSetPosition(convex,0,0,0);
+
+        // Create ray
+        dGeomID ray = dCreateRay(0, 20);
+
+        dGeomRaySet(ray, 0, -10, 0, 0, 1, 0);
+
+        int count = dCollide(ray, convex, 1, &contact.geom, sizeof(dContact));
+
+		CHECK_EQUAL(1,count);
+		CHECK_CLOSE(0.0,contact.geom.pos[0], dEpsilon);
+		CHECK_CLOSE(-1.0,contact.geom.pos[1], dEpsilon);
+		CHECK_CLOSE(0.0,contact.geom.pos[2], dEpsilon);
+		CHECK_CLOSE(0.0, contact.geom.normal[0], dEpsilon);
+		CHECK_CLOSE(-1.0, contact.geom.normal[1], dEpsilon);
+		CHECK_CLOSE(0.0, contact.geom.normal[2], dEpsilon);
+		CHECK_CLOSE(9.0, contact.geom.depth, dEpsilon);
+
+		// Move Ray
+		dGeomRaySet(ray, 5, -10, 0, 0, 1, 0);
+
+		count = dCollide(ray, convex, 1, &contact.geom, sizeof(dContact));
+
+		CHECK_EQUAL(1,count);
+		CHECK_CLOSE(5.0, contact.geom.pos[0], dEpsilon);
+		CHECK_CLOSE(-1.0, contact.geom.pos[1], dEpsilon);
+		CHECK_CLOSE(0.0, contact.geom.pos[2], dEpsilon);
+		CHECK_CLOSE(0.0, contact.geom.normal[0], dEpsilon);
+		CHECK_CLOSE(-1.0, contact.geom.normal[1], dEpsilon);
+		CHECK_CLOSE(0.0, contact.geom.normal[2], dEpsilon);
+		CHECK_CLOSE(9.0, contact.geom.depth, dEpsilon);
+
+		// Rotate Convex
+		dMatrix3 rotate90z
+		{
+			0,-1,0,0,
+			1,0,0,0,
+			0,0,1,0 
+		};
+		dGeomSetRotation(convex, rotate90z);
+
+		count = dCollide(ray, convex, 1, &contact.geom, sizeof(dContact));
+
+		CHECK_EQUAL(0,count);
+
+		// Move Ray
+		dGeomRaySet(ray, 10, 0, 0, -1, 0, 0);
+		count = dCollide(ray, convex, 1, &contact.geom, sizeof(dContact));
+
+		CHECK_EQUAL(1,count);
+		CHECK_CLOSE(1.0, contact.geom.pos[0], dEpsilon);
+		CHECK_CLOSE(0.0, contact.geom.pos[1], dEpsilon);
+		CHECK_CLOSE(0.0, contact.geom.pos[2], dEpsilon);
+		CHECK_CLOSE(1.0, contact.geom.normal[0], dEpsilon);
+		CHECK_CLOSE(0.0, contact.geom.normal[1], dEpsilon);
+		CHECK_CLOSE(0.0, contact.geom.normal[2], dEpsilon);
+		CHECK_CLOSE(9.0,contact.geom.depth, dEpsilon);
+
+
+		// Move Ray
+		dGeomRaySet(ray, 10, 1000, 1000, -1, 0, 0);
+		// Move Geom
+		dGeomSetPosition(convex, 0, 1000, 1000);
+
+		count = dCollide(ray, convex, 1, &contact.geom, sizeof(dContact));
+
+		CHECK_EQUAL(1, count);
+		CHECK_CLOSE(1.0, contact.geom.pos[0], dEpsilon);
+		CHECK_CLOSE(1000.0, contact.geom.pos[1], dEpsilon);
+		CHECK_CLOSE(1000.0, contact.geom.pos[2], dEpsilon);
+		CHECK_CLOSE(1.0, contact.geom.normal[0], dEpsilon);
+		CHECK_CLOSE(0.0, contact.geom.normal[1], dEpsilon);
+		CHECK_CLOSE(0.0, contact.geom.normal[2], dEpsilon);
+		CHECK_CLOSE(9.0, contact.geom.depth, dEpsilon);
+
+		dGeomDestroy(convex);
+        dGeomDestroy(ray);
+    }
+}
