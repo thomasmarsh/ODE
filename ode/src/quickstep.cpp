@@ -74,6 +74,24 @@
 #endif
 
 
+#if CONSTRAINTS_REORDERING_METHOD == REORDERING_METHOD__RANDOMLY
+#if !defined(RANDOM_CONSTRAINTS_REORDERING_FREQUENCY)
+#define RANDOM_CONSTRAINTS_REORDERING_FREQUENCY 8U
+#endif
+dSASSERT(RANDOM_CONSTRAINTS_REORDERING_FREQUENCY != 0);
+#endif
+
+enum dxRandomReorderStage
+{
+    RRS__MIN,
+
+    RRS_REORDERING = RRS__MIN,
+    RRS_REVERSAL,
+
+    RRS__MAX,
+};
+
+
 //***************************************************************************
 // macros, typedefs, forwards and inlines
 
@@ -1016,17 +1034,31 @@ static inline
 bool IsSORConstraintsReorderRequiredForIteration(unsigned iteration)
 {
     bool result = false;
+
 #if CONSTRAINTS_REORDERING_METHOD == REORDERING_METHOD__BY_ERROR
+
     result = true;
+
+
 #elif CONSTRAINTS_REORDERING_METHOD == REORDERING_METHOD__RANDOMLY
-    if ((iteration & 7) == 0) {
+
+    // This logic is intended to skip randomization on the very first iteration
+    if (!dIN_RANGE(iteration, 0, RANDOM_CONSTRAINTS_REORDERING_FREQUENCY) 
+        ? dIN_RANGE(iteration % RANDOM_CONSTRAINTS_REORDERING_FREQUENCY, RRS__MIN, RRS__MAX) 
+        : iteration == 0) {
         result = true;
     }
+
+
 #else  // #if CONSTRAINTS_REORDERING_METHOD != REORDERING_METHOD__BY_ERROR && CONSTRAINTS_REORDERING_METHOD != REORDERING_METHOD__RANDOMLY
+
     if (iteration == 0) {
         result = true;
     }
+
+
 #endif
+
     return result;
 }
 
@@ -2199,7 +2231,7 @@ void dxQuickStepIsland_Stage4LCP_ReorderPrep(dxQuickStepperStage4CallContext *st
 
     {
         // make sure constraints with findex < 0 come first.
-        IndexError *orderhead = order, *ordertail = order + (m - valid_findices);
+        IndexError *orderhead = order, *ordertail = order + m;
         const int *findex = localContext->m_findex;
 
         // Fill the array from both ends
@@ -2208,12 +2240,16 @@ void dxQuickStepIsland_Stage4LCP_ReorderPrep(dxQuickStepperStage4CallContext *st
                 orderhead->index = i; // Place them at the front
                 ++orderhead;
             } else {
+                // WARNING!!!
+                // The dependent constraints are put in reverse order here (backwards to front).
+                // They MUST be ordered this way.
+                // Putting them in normal order makes simulation less stable for some mysterious reason.
+                --ordertail;
                 ordertail->index = i; // Place them at the end
-                ++ordertail;
             }
         }
         dIASSERT(orderhead == order + (m - valid_findices));
-        dIASSERT(ordertail == order + m);
+        dIASSERT(ordertail == order + (m - valid_findices));
     }
 }
 
@@ -2238,13 +2274,13 @@ int dxQuickStepIsland_Stage4LCP_IterationStart_Callback(void *_stage4CallContext
         unsigned int stage4LCP_Iteration_allowedThreads = stage4CallContext->m_LCP_IterationAllowedThreads;
 
         bool reorderRequired = false;
-        unsigned syncCallDependencies = stage4LCP_Iteration_allowedThreads;
 
         if (IsSORConstraintsReorderRequiredForIteration(iteration))
         {
-            syncCallDependencies = 1;
             reorderRequired = true;
         }
+
+        unsigned syncCallDependencies = reorderRequired ? 1 : stage4LCP_Iteration_allowedThreads;
 
         // Increment iterations counter in advance as anyway it needs to be incremented 
         // before independent tasks (the reordering or the iteration) are posted
@@ -2320,6 +2356,13 @@ void dxQuickStepIsland_Stage4LCP_ConstraintsReordering(dxQuickStepperStage4CallC
             dxQuickStepIsland_Stage4LCP_DependencyMapForNewOrderRebuilding(stage4CallContext);
         }
     }
+    else {
+        // NOTE: So far, this branch is only called in CONSTRAINTS_REORDERING_METHOD == REORDERING_METHOD__BY_ERROR case
+        if (ThrsafeExchangeAdd(&stage4CallContext->m_SOR_reorderThreadsRemaining, (atomicord32)(-1)) == 1) { // If last thread has exited the reordering routine...
+            dIASSERT(iteration != 0);
+            dxQuickStepIsland_Stage4LCP_DependencyMapFromSavedLevelsReconstruction(stage4CallContext);
+        }
+    }
 }
 
 static 
@@ -2328,6 +2371,7 @@ bool dxQuickStepIsland_Stage4LCP_ConstraintsShuffling(dxQuickStepperStage4CallCo
     bool result = false;
 
 #if CONSTRAINTS_REORDERING_METHOD == REORDERING_METHOD__BY_ERROR
+
     struct ConstraintsReorderingHelper
     {
         void operator ()(dxQuickStepperStage4CallContext *stage4CallContext, unsigned int startIndex, unsigned int endIndex)
@@ -2395,42 +2439,64 @@ bool dxQuickStepIsland_Stage4LCP_ConstraintsShuffling(dxQuickStepperStage4CallCo
 
         // result = false; -- already 'false'
     } 
-    else if (iteration < 1) {
-        result = true; // return true on 0th iteration to build dependency map for initial order 
+    else /*if (iteration < 1) */{
+        result = true; // return true on 0th iteration to build dependency map for the initial order 
     }
-#elif CONSTRAINTS_REORDERING_METHOD == REORDERING_METHOD__RANDOMLY
-    struct ConstraintsReorderingHelper
-    {
-        void operator ()(dxQuickStepperStage4CallContext *stage4CallContext, unsigned int startIndex, unsigned int indicesCount)
-        {
-            IndexError *order = stage4CallContext->m_order + startIndex;
 
-            for (unsigned int index = 1; index < indicesCount; ++index) {
-                int swapIndex = dRandInt(index + 1);
-                IndexError tmp = order[index];
-                order[index] = order[swapIndex];
-                order[swapIndex] = tmp;
+
+#elif CONSTRAINTS_REORDERING_METHOD == REORDERING_METHOD__RANDOMLY
+
+    if (iteration != 0) {
+        dIASSERT(!dIN_RANGE(iteration, 0, RANDOM_CONSTRAINTS_REORDERING_FREQUENCY));
+
+        if (iteration % RANDOM_CONSTRAINTS_REORDERING_FREQUENCY == RRS_REORDERING) {
+            struct ConstraintsReorderingHelper
+            {
+                void operator ()(dxQuickStepperStage4CallContext *stage4CallContext, unsigned int startIndex, unsigned int indicesCount)
+                {
+                    IndexError *order = stage4CallContext->m_order + startIndex;
+
+                    for (unsigned int index = 1; index < indicesCount; ++index) {
+                        int swapIndex = dRandInt(index + 1);
+                        IndexError tmp = order[index];
+                        order[index] = order[swapIndex];
+                        order[swapIndex] = tmp;
+                    }
+                }
+            };
+
+            if (ThrsafeExchange(&stage4CallContext->m_SOR_reorderHeadTaken, 1) == 0) {
+                // Process the head
+                const dxQuickStepperLocalContext *localContext = stage4CallContext->m_localContext;
+                ConstraintsReorderingHelper()(stage4CallContext, 0, localContext->m_m - localContext->m_valid_findices);
+            }
+
+            if (ThrsafeExchange(&stage4CallContext->m_SOR_reorderTailTaken, 1) == 0) {
+                // Process the tail
+                const dxQuickStepperLocalContext *localContext = stage4CallContext->m_localContext;
+                ConstraintsReorderingHelper()(stage4CallContext, localContext->m_m - localContext->m_valid_findices, localContext->m_valid_findices);
             }
         }
-    };
+        else {
+            dIASSERT(iteration % RANDOM_CONSTRAINTS_REORDERING_FREQUENCY == RRS_REVERSAL);
 
-    if (ThrsafeExchange(&stage4CallContext->m_SOR_reorderHeadTaken, 1) == 0) {
-        // Process the head
-        const dxQuickStepperLocalContext *localContext = stage4CallContext->m_localContext;
-        ConstraintsReorderingHelper()(stage4CallContext, 0, localContext->m_m - localContext->m_valid_findices);
+            // Revert to the normal order on the next step after the shuffling
+            dxQuickStepIsland_Stage4LCP_ReorderPrep(stage4CallContext);
+        }
+        dIASSERT((RRS__MAX, true)); // A reference to RRS__MAX to be located by Find in Files
     }
-
-    if (ThrsafeExchange(&stage4CallContext->m_SOR_reorderTailTaken, 1) == 0) {
-        // Process the tail
-        const dxQuickStepperLocalContext *localContext = stage4CallContext->m_localContext;
-        ConstraintsReorderingHelper()(stage4CallContext, localContext->m_m - localContext->m_valid_findices, localContext->m_valid_findices);
+    else {
+        // Just return true and skip the randomization for the very first iteration
     }
 
     result = true;
+
 #else // #if CONSTRAINTS_REORDERING_METHOD != REORDERING_METHOD__BY_ERROR && CONSTRAINTS_REORDERING_METHOD != REORDERING_METHOD__RANDOMLY
-    if (iteration == 0) {
-        result = true; // return true on 0th iteration to build dependency map for initial order 
-    }
+
+    dIASSERT(iteration == 0);  // The reordering request is only returned for the first iteration
+    result = true;
+
+
 #endif
 
     return result;

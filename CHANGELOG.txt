@@ -8,6 +8,17 @@ the rules for this file:
   * keep the format consistent (79 char width, M/D/Y date format).
 
 ------------------------------------------------------------------------------
+11/05/2018 Oleh Derevenko
+        * An unintended change from commit #1898 has been reverted.
+          The QuickStep used to solve with randomized constraint order 
+          each 8th iteration. The other iterations, the constraints 
+          were reset to their natural order, as generated, with the dependent
+          constraints gathered in reverse order at end (the reverse order is 
+          somehow important). With the commit #1898 the constraints were
+          randomly reordered each 8th iteration but then remained 
+          in that randomized order and only were re-randomized on subsequent
+          multiples of 8.
+
 10/09/2017 Markus Rickert
         * CMake support for project file generation has been added.
 
