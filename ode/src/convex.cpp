@@ -53,7 +53,7 @@ dxConvex::dxConvex (dSpaceID space,
                     const dReal *_points,
                     unsigned int _pointcount,
                     const unsigned int *_polygons) :
-    dxGeom (space,1)
+dxGeom (space,1)
 {
     dAASSERT (_planes != NULL);
     dAASSERT (_points != NULL);
@@ -502,7 +502,7 @@ inline bool IsPointInConvex(dVector3 p,
 */
 inline bool IsPointInPolygon(dVector3 p,
                              const unsigned int *polygon,
-			                 dReal *plane,
+                             dReal *plane,
                              dxConvex *convex,
                              dVector3 out)
 {
@@ -527,7 +527,7 @@ inline bool IsPointInPolygon(dVector3 p,
     b[0]=convex->final_posr->pos[0]+b[0];
     b[1]=convex->final_posr->pos[1]+b[1];
     b[2]=convex->final_posr->pos[2]+b[2];
-    
+
     for(unsigned i=0; i != pointcount; ++i)
     {
         a[0] = b[0];
@@ -552,7 +552,7 @@ inline bool IsPointInPolygon(dVector3 p,
         {
             dReal ab_m2 = dCalcVectorDot3(ab, ab);
             dReal s = ab_m2 != REAL(0.0) ? dCalcVectorDot3(ab, ap) / ab_m2 : REAL(0.0);
-            
+
             if (s <= REAL(0.0))
             {
                 out[0] = a[0];
@@ -917,7 +917,7 @@ struct ConvexConvexSATOutput
   \param min_depth [IN/OUT] Used to input as well as output the minimum depth so far, must be set to a huge value such as dInfinity for initialization.
   \param g1 [OUT] Pointer to the convex which should be used in the returned contact as g1
   \param g2 [OUT] Pointer to the convex which should be used in the returned contact as g2
- */
+*/
 inline bool CheckSATConvexFaces(dxConvex& cvx1,
                                 dxConvex& cvx2,
                                 ConvexConvexSATOutput& ccso)
@@ -964,7 +964,7 @@ inline bool CheckSATConvexFaces(dxConvex& cvx1,
   \param min_depth [IN/OUT] Used to input as well as output the minimum depth so far, must be set to a huge value such as dInfinity for initialization.
   \param g1 [OUT] Pointer to the convex which should be used in the returned contact as g1
   \param g2 [OUT] Pointer to the convex which should be used in the returned contact as g2
- */
+*/
 inline bool CheckSATConvexEdges(dxConvex& cvx1,
                                 dxConvex& cvx2,
                                 ConvexConvexSATOutput& ccso)
@@ -1459,149 +1459,149 @@ int dCollideRayConvex (dxGeom *o1, dxGeom *o2, int flags,
 #else
 // Ray - Convex collider by David Walters, June 2006
 int dCollideRayConvex(dxGeom *o1, dxGeom *o2,
-	int flags, dContactGeom *contact, int skip)
+                      int flags, dContactGeom *contact, int skip)
 {
-	dIASSERT(skip >= (int)sizeof(dContactGeom));
-	dIASSERT(o1->type == dRayClass);
-	dIASSERT(o2->type == dConvexClass);
-	dIASSERT((flags & NUMC_MASK) >= 1);
+    dIASSERT(skip >= (int)sizeof(dContactGeom));
+    dIASSERT(o1->type == dRayClass);
+    dIASSERT(o2->type == dConvexClass);
+    dIASSERT((flags & NUMC_MASK) >= 1);
 
-	dxRay* ray = (dxRay*)o1;
-	dxConvex* convex = (dxConvex*)o2;
+    dxRay* ray = (dxRay*)o1;
+    dxConvex* convex = (dxConvex*)o2;
 
-	contact->g1 = ray;
-	contact->g2 = convex;
-	contact->side1 = -1;
-	contact->side2 = -1; // TODO: set plane index?
+    contact->g1 = ray;
+    contact->g2 = convex;
+    contact->side1 = -1;
+    contact->side2 = -1; // TODO: set plane index?
 
-	dReal alpha, beta, nsign;
-	int flag = 0;
+    dReal alpha, beta, nsign;
+    int flag = 0;
 
-	//
-	// Compute some useful info
-	//
+    //
+    // Compute some useful info
+    //
 
-	dVector3 ray_pos{
-		ray->final_posr->pos[0] - convex->final_posr->pos[0],
-		ray->final_posr->pos[1] - convex->final_posr->pos[1],
-		ray->final_posr->pos[2] - convex->final_posr->pos[2],
-	};
+    dVector3 ray_pos = {
+        ray->final_posr->pos[0] - convex->final_posr->pos[0],
+        ray->final_posr->pos[1] - convex->final_posr->pos[1],
+        ray->final_posr->pos[2] - convex->final_posr->pos[2]
+    };
 
-	dVector3 ray_dir{
-		ray->final_posr->R[0 * 4 + 2],
-		ray->final_posr->R[1 * 4 + 2],
-		ray->final_posr->R[2 * 4 + 2]
-	};
+    dVector3 ray_dir = {
+        ray->final_posr->R[0 * 4 + 2],
+        ray->final_posr->R[1 * 4 + 2],
+        ray->final_posr->R[2 * 4 + 2]
+    };
 
-	dMultiply1_331(ray_pos, convex->final_posr->R, ray_pos);
-	dMultiply1_331(ray_dir, convex->final_posr->R, ray_dir);
+    dMultiply1_331(ray_pos, convex->final_posr->R, ray_pos);
+    dMultiply1_331(ray_dir, convex->final_posr->R, ray_dir);
 
-	for (unsigned int i = 0; i < convex->planecount; ++i)
-	{
-		// Alias this plane.
-		const dReal* plane = convex->planes + (i * 4);
+    for (unsigned int i = 0; i < convex->planecount; ++i)
+    {
+        // Alias this plane.
+        const dReal* plane = convex->planes + (i * 4);
 
-		// If alpha >= 0 then start point is outside of plane.
-		alpha = dCalcVectorDot3(plane, ray_pos) - plane[3];
+        // If alpha >= 0 then start point is outside of plane.
+        alpha = dCalcVectorDot3(plane, ray_pos) - plane[3];
 
-		// If any alpha is positive, then
-		// the ray start is _outside_ of the hull
-		if (alpha >= 0)
-		{
-			flag = 1;
-			break;
-		}
-	}
+        // If any alpha is positive, then
+        // the ray start is _outside_ of the hull
+        if (alpha >= 0)
+        {
+            flag = 1;
+            break;
+        }
+    }
 
-	// If the ray starts inside the convex hull, then everything is flipped.
-	nsign = (flag) ? REAL(1.0) : REAL(-1.0);
+    // If the ray starts inside the convex hull, then everything is flipped.
+    nsign = (flag) ? REAL(1.0) : REAL(-1.0);
 
 
-	//
-	// Find closest contact point
-	//
+    //
+    // Find closest contact point
+    //
 
-	// Assume no contacts.
-	contact->depth = dInfinity;
+    // Assume no contacts.
+    contact->depth = dInfinity;
 
-	for (unsigned int i = 0; i < convex->planecount; ++i)
-	{
-		// Alias this plane.
-		const dReal* plane = convex->planes + (i * 4);
+    for (unsigned int i = 0; i < convex->planecount; ++i)
+    {
+        // Alias this plane.
+        const dReal* plane = convex->planes + (i * 4);
 
-		// If alpha >= 0 then point is outside of plane.
-		alpha = nsign * (dCalcVectorDot3(plane, ray_pos) - plane[3]);
+        // If alpha >= 0 then point is outside of plane.
+        alpha = nsign * (dCalcVectorDot3(plane, ray_pos) - plane[3]);
 
-		// Compute [ plane-normal DOT ray-normal ], (/flip)
-		beta = dCalcVectorDot3(plane, ray_dir) * nsign;
+        // Compute [ plane-normal DOT ray-normal ], (/flip)
+        beta = dCalcVectorDot3(plane, ray_dir) * nsign;
 
-		// Ray is pointing at the plane? ( beta < 0 )
-		// Ray start to plane is within maximum ray length?
-		// Ray start to plane is closer than the current best distance?
-		if (beta < -dEpsilon &&
-			alpha >= 0 && alpha <= ray->length &&
-			alpha < contact->depth)
-		{
-			// Compute contact point on convex hull surface.
-			contact->pos[0] = ray_pos[0] + alpha * ray_dir[0];
-			contact->pos[1] = ray_pos[1] + alpha * ray_dir[1];
-			contact->pos[2] = ray_pos[2] + alpha * ray_dir[2];
+        // Ray is pointing at the plane? ( beta < 0 )
+        // Ray start to plane is within maximum ray length?
+        // Ray start to plane is closer than the current best distance?
+        if (beta < -dEpsilon &&
+            alpha >= 0 && alpha <= ray->length &&
+            alpha < contact->depth)
+        {
+            // Compute contact point on convex hull surface.
+            contact->pos[0] = ray_pos[0] + alpha * ray_dir[0];
+            contact->pos[1] = ray_pos[1] + alpha * ray_dir[1];
+            contact->pos[2] = ray_pos[2] + alpha * ray_dir[2];
 
-			flag = 0;
+            flag = 0;
 
-			// For all _other_ planes.
-			for (unsigned int j = 0; j < convex->planecount; ++j)
-			{
-				if (i == j)
-					continue;	// Skip self.
+            // For all _other_ planes.
+            for (unsigned int j = 0; j < convex->planecount; ++j)
+            {
+                if (i == j)
+                    continue;	// Skip self.
 
-				// Alias this plane.
-				const dReal* planej = convex->planes + (j * 4);
+                // Alias this plane.
+                const dReal* planej = convex->planes + (j * 4);
 
-				// If beta >= 0 then start is outside of plane.
-				beta = dCalcVectorDot3(planej, contact->pos) - planej[3];
+                // If beta >= 0 then start is outside of plane.
+                beta = dCalcVectorDot3(planej, contact->pos) - planej[3];
 
-				// If any beta is positive, then the contact point
-				// is not on the surface of the convex hull - it's just
-				// intersecting some part of its infinite extent.
-				if (beta > dEpsilon)
-				{
-					flag = 1;
-					break;
-				}
-			}
+                // If any beta is positive, then the contact point
+                // is not on the surface of the convex hull - it's just
+                // intersecting some part of its infinite extent.
+                if (beta > dEpsilon)
+                {
+                    flag = 1;
+                    break;
+                }
+            }
 
-			// Contact point isn't outside hull's surface? then it's a good contact!
-			if (flag == 0)
-			{
-				// Store the contact normal, possibly flipped.
-				contact->normal[0] = nsign * plane[0];
-				contact->normal[1] = nsign * plane[1];
-				contact->normal[2] = nsign * plane[2];
+            // Contact point isn't outside hull's surface? then it's a good contact!
+            if (flag == 0)
+            {
+                // Store the contact normal, possibly flipped.
+                contact->normal[0] = nsign * plane[0];
+                contact->normal[1] = nsign * plane[1];
+                contact->normal[2] = nsign * plane[2];
 
-				// Store depth
-				contact->depth = alpha;
+                // Store depth
+                contact->depth = alpha;
 
-				if ((flags & CONTACTS_UNIMPORTANT) && contact->depth <= ray->length)
-				{
-					// Break on any contact if contacts are not important
-					break;
-				}
-			}
-		}
-	}
-	// Contact?
-	if (contact->depth <= ray->length)
-	{
-		// Adjust contact position and normal back to global space
-		dMultiply0_331(contact->pos, convex->final_posr->R, contact->pos);
-		dMultiply0_331(contact->normal, convex->final_posr->R, contact->normal);
-		contact->pos[0] += convex->final_posr->pos[0];
-		contact->pos[1] += convex->final_posr->pos[1];
-		contact->pos[2] += convex->final_posr->pos[2];
-		return true;
-	}
-	return false;
+                if ((flags & CONTACTS_UNIMPORTANT) && contact->depth <= ray->length)
+                {
+                    // Break on any contact if contacts are not important
+                    break;
+                }
+            }
+        }
+    }
+    // Contact?
+    if (contact->depth <= ray->length)
+    {
+        // Adjust contact position and normal back to global space
+        dMultiply0_331(contact->pos, convex->final_posr->R, contact->pos);
+        dMultiply0_331(contact->normal, convex->final_posr->R, contact->normal);
+        contact->pos[0] += convex->final_posr->pos[0];
+        contact->pos[1] += convex->final_posr->pos[1];
+        contact->pos[2] += convex->final_posr->pos[2];
+        return true;
+    }
+    return false;
 }
 
 #endif
