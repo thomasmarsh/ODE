@@ -45,8 +45,8 @@
 #if defined(_MSC_VER) || (defined(__GNUC__) && defined(_WIN32))
   #if defined(ODE_DLL)
     #define ODE_API __declspec(dllexport)
-  #elif !defined(ODE_LIB)
-    #define ODE_API __declspec(dllimport)
+  #else
+    #define ODE_API
   #endif
 #endif
 
