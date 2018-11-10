@@ -494,7 +494,7 @@ void dBodySetMass (dBodyID b, const dMass *mass)
         fabs( mass->c[1] ) <= dEpsilon &&
         fabs( mass->c[2] ) <= dEpsilon, "The centre of mass must be at the origin." );
 
-    memcpy (&b->mass,mass,sizeof(dMass));
+    b->mass = *mass;
     if (dInvertPDMatrix (b->mass.I,b->invI,3,NULL)==0) {
         dDEBUGMSG ("inertia must be positive definite!");
         dRSetIdentity (b->invI);
@@ -506,7 +506,7 @@ void dBodySetMass (dBodyID b, const dMass *mass)
 void dBodyGetMass (dBodyID b, dMass *mass)
 {
     dAASSERT (b && mass);
-    memcpy (mass,&b->mass,sizeof(dMass));
+    *mass = b->mass;
 }
 
 
