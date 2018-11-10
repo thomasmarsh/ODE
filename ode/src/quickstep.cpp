@@ -1518,13 +1518,14 @@ void dxQuickStepIsland_Stage2a(dxQuickStepperStage2CallContext *stage2CallContex
                 // because it gets destroyed by SOR solver
                 // instead of saving all Jacobian, we can save just rows
                 // for joints, that requested feedback (which is normally much less)
-                unsigned mfbCount = mindex[ji + 1].fbIndex - mindex[ji].fbIndex;
-                if (mfbCount != 0) {
-                    dReal *const JEnd = JRow + (sizeint)mfbCount * JME__MAX;
+                unsigned mfbIndex = mindex[ji].fbIndex;
+                if (mfbIndex != mindex[ji + 1].fbIndex) {
+                    dReal *const JEnd = JRow + infom * JME__MAX;
+                    dReal *JCopyRow = JCopy + mfbIndex * JCE__MAX; // Random access by mfbIndex here! Do not optimize!
                     for (const dReal *JCurr = JRow; ; ) {
-                        for (unsigned i = 0; i != JME__J1_COUNT; ++i) { JCopy[i + JCE__J1_MIN] = JCurr[i + JME__J1_MIN]; }
-                        for (unsigned j = 0; j != JME__J2_COUNT; ++j) { JCopy[j + JCE__J2_MIN] = JCurr[j + JME__J2_MIN]; }
-                        JCopy += JCE__MAX;
+                        for (unsigned i = 0; i != JME__J1_COUNT; ++i) { JCopyRow[i + JCE__J1_MIN] = JCurr[i + JME__J1_MIN]; }
+                        for (unsigned j = 0; j != JME__J2_COUNT; ++j) { JCopyRow[j + JCE__J2_MIN] = JCurr[j + JME__J2_MIN]; }
+                        JCopyRow += JCE__MAX;
                         dSASSERT((unsigned)JCE__J1_COUNT == JME__J1_COUNT);
                         dSASSERT((unsigned)JCE__J2_COUNT == JME__J2_COUNT);
                         dSASSERT(JCE__J1_COUNT + JCE__J2_COUNT == JCE__MAX);

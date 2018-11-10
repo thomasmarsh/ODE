@@ -8,6 +8,11 @@ the rules for this file:
   * keep the format consistent (79 char width, M/D/Y date format).
 
 ------------------------------------------------------------------------------
+11/10/2018 Oleh Derevenko
+        * An incorrect optimization to Jacobian Copy building code from #1938
+          that resulted in corrupt data in multi-threaded execution mode was 
+          fixed.
+
 11/05/2018 Oleh Derevenko
         * An unintended change from commit #1898 has been reverted.
           The QuickStep used to solve with randomized constraint order 
