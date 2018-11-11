@@ -2937,35 +2937,29 @@ void dxQuickStepIsland_Stage4b(dxQuickStepperStage4CallContext *stage4CallContex
         unsigned ji_step;
         while ((ji_step = ThrsafeIncrementIntUpToLimit(&stage4CallContext->m_ji_4b, nj_steps)) != nj_steps) {
             unsigned int ji = ji_step * step_size;
-            const dReal *lambdacurr = lambda + mindex[ji].mIndex;
+            const unsigned int jiend = ji + dMIN(step_size, nj - ji);
+
             const dReal *Jcopycurr = Jcopy + (sizeint)mindex[ji].fbIndex * JCE__MAX;
-            const dJointWithInfo1 *jicurr = jointinfos + ji;
-            const dJointWithInfo1 *const jiend = jicurr + dMIN(step_size, nj - ji);
 
             while (true) {
-                dxJoint *joint = jicurr->joint;
-                unsigned int infom = jicurr->info.m;
-#ifdef WARM_STARTING
-                memcpy(joint->lambda, lambdacurr, infom * sizeof(dReal));
-#endif
-
                 // straightforward computation of joint constraint forces:
                 // multiply related lambdas with respective J' block for joints
                 // where feedback was requested
-                dJointFeedback *fb = joint->feedback;
-                if (fb != NULL) {
-                    Multiply1_12q1 (data, Jcopycurr + JCE__J1_MIN, lambdacurr, infom);
-                    dSASSERT(JCE__MAX == 12);
+                const unsigned int fb_infom = mindex[ji + 1].fbIndex - mindex[ji].fbIndex;
+                if (fb_infom != 0) {
+                    dIASSERT(fb_infom == mindex[ji + 1].mIndex - mindex[ji].mIndex);
 
-                    fb->f1[dSA_X] = data[JVE_LX];
-                    fb->f1[dSA_Y] = data[JVE_LY];
-                    fb->f1[dSA_Z] = data[JVE_LZ];
-                    fb->t1[dSA_X] = data[JVE_AX];
-                    fb->t1[dSA_Y] = data[JVE_AY];
-                    fb->t1[dSA_Z] = data[JVE_AZ];
+                    const dReal *lambdacurr = lambda + mindex[ji].mIndex;
+                    dxJoint *joint = jointinfos[ji].joint;
+
+#ifdef WARM_STARTING
+                    memcpy(joint->lambda, lambdacurr, fb_infom * sizeof(dReal));
+#endif
+
+                    dJointFeedback *fb = joint->feedback;
 
                     if (joint->node[1].body) {
-                        Multiply1_12q1 (data, Jcopycurr + JCE__J2_MIN, lambdacurr, infom);
+                        Multiply1_12q1 (data, Jcopycurr + JCE__J2_MIN, lambdacurr, fb_infom);
                         dSASSERT(JCE__MAX == 12);
 
                         fb->f2[dSA_X] = data[JVE_LX];
@@ -2976,13 +2970,30 @@ void dxQuickStepIsland_Stage4b(dxQuickStepperStage4CallContext *stage4CallContex
                         fb->t2[dSA_Z] = data[JVE_AZ];
                     }
 
-                    Jcopycurr += infom * JCE__MAX;
+                    Multiply1_12q1 (data, Jcopycurr + JCE__J1_MIN, lambdacurr, fb_infom);
+                    dSASSERT(JCE__MAX == 12);
+
+                    fb->f1[dSA_X] = data[JVE_LX];
+                    fb->f1[dSA_Y] = data[JVE_LY];
+                    fb->f1[dSA_Z] = data[JVE_LZ];
+                    fb->t1[dSA_X] = data[JVE_AX];
+                    fb->t1[dSA_Y] = data[JVE_AY];
+                    fb->t1[dSA_Z] = data[JVE_AZ];
+
+                    Jcopycurr += fb_infom * JCE__MAX;
+                }
+                else {
+#ifdef WARM_STARTING
+                    const dReal *lambdacurr = lambda + mindex[ji].mIndex;
+                    const unsigned int infom = mindex[ji + 1].mIndex - mindex[ji].mIndex;
+                    dxJoint *joint = jointinfos[ji].joint;
+                    memcpy(joint->lambda, lambdacurr, infom * sizeof(dReal));
+#endif
                 }
 
-                if (++jicurr == jiend) {
+                if (++ji == jiend) {
                     break;
                 }
-                lambdacurr += infom;
             }
         }
     }
