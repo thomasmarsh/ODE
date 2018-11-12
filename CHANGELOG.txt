@@ -8,6 +8,13 @@ the rules for this file:
   * keep the format consistent (79 char width, M/D/Y date format).
 
 ------------------------------------------------------------------------------
+11/12/2018 Oleh Derevenko
+        * The commentary from 11/05/2018 was wrong. The constraints were not
+          reset to their natural order and remained randomized.
+          The other thing that was missing was full contraint reorder without 
+          separation into independent and dependent ones. The algorithm doesn't
+          converge without it well.
+
 11/10/2018 Oleh Derevenko
         * An incorrect optimization to Jacobian Copy building code from #1938
           that resulted in corrupt data in multi-threaded execution mode was 

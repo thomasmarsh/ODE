@@ -86,7 +86,6 @@ enum dxRandomReorderStage
     RRS__MIN,
 
     RRS_REORDERING = RRS__MIN,
-    RRS_REVERSAL,
 
     RRS__MAX,
 };
@@ -2232,7 +2231,7 @@ void dxQuickStepIsland_Stage4LCP_ReorderPrep(dxQuickStepperStage4CallContext *st
 
     {
         // make sure constraints with findex < 0 come first.
-        IndexError *orderhead = order, *ordertail = order + m;
+        IndexError *orderhead = order, *ordertail = order + (m - valid_findices);
         const int *findex = localContext->m_findex;
 
         // Fill the array from both ends
@@ -2241,16 +2240,12 @@ void dxQuickStepIsland_Stage4LCP_ReorderPrep(dxQuickStepperStage4CallContext *st
                 orderhead->index = i; // Place them at the front
                 ++orderhead;
             } else {
-                // WARNING!!!
-                // The dependent constraints are put in reverse order here (backwards to front).
-                // They MUST be ordered this way.
-                // Putting them in normal order makes simulation less stable for some mysterious reason.
-                --ordertail;
                 ordertail->index = i; // Place them at the end
+                ++ordertail;
             }
         }
         dIASSERT(orderhead == order + (m - valid_findices));
-        dIASSERT(ordertail == order + (m - valid_findices));
+        dIASSERT(ordertail == order + m);
     }
 }
 
@@ -2405,18 +2400,19 @@ bool dxQuickStepIsland_Stage4LCP_ConstraintsShuffling(dxQuickStepperStage4CallCo
     if (iteration > 1) { // Only reorder starting from iteration #2
         // sort the constraints so that the ones converging slowest
         // get solved last. use the absolute (not relative) error.
+        /*
+         *  Full reorder needs to be done.
+         *  Even though this contradicts the initial idea of moving dependent constraints
+         *  to the order end the algorithm does not work the other way well.
+         *  It looks like the iterative method needs a shake after it already found
+         *  some initial approximations and those incurred errors help it to converge even better.
+         */
         if (ThrsafeExchange(&stage4CallContext->m_SOR_reorderHeadTaken, 1) == 0) {
             // Process the head
             const dxQuickStepperLocalContext *localContext = stage4CallContext->m_localContext;
-            ConstraintsReorderingHelper()(stage4CallContext, 0, localContext->m_m - localContext->m_valid_findices);
+            ConstraintsReorderingHelper()(stage4CallContext, 0, localContext->m_m);
         }
         
-        if (ThrsafeExchange(&stage4CallContext->m_SOR_reorderTailTaken, 1) == 0) {
-            // Process the tail
-            const dxQuickStepperLocalContext *localContext = stage4CallContext->m_localContext;
-            ConstraintsReorderingHelper()(stage4CallContext, localContext->m_m - localContext->m_valid_findices, localContext->m_m);
-        }
-
         result = true;
     }
     else if (iteration == 1) {
@@ -2450,7 +2446,7 @@ bool dxQuickStepIsland_Stage4LCP_ConstraintsShuffling(dxQuickStepperStage4CallCo
     if (iteration != 0) {
         dIASSERT(!dIN_RANGE(iteration, 0, RANDOM_CONSTRAINTS_REORDERING_FREQUENCY));
 
-        if (iteration % RANDOM_CONSTRAINTS_REORDERING_FREQUENCY == RRS_REORDERING) {
+        dIASSERT(iteration % RANDOM_CONSTRAINTS_REORDERING_FREQUENCY == RRS_REORDERING); {
             struct ConstraintsReorderingHelper
             {
                 void operator ()(dxQuickStepperStage4CallContext *stage4CallContext, unsigned int startIndex, unsigned int indicesCount)
@@ -2466,23 +2462,18 @@ bool dxQuickStepIsland_Stage4LCP_ConstraintsShuffling(dxQuickStepperStage4CallCo
                 }
             };
 
+            /*
+             *  Full reorder needs to be done.
+             *  Even though this contradicts the initial idea of moving dependent constraints
+             *  to the order end the algorithm does not work the other way well.
+             *  It looks like the iterative method needs a shake after it already found
+             *  some initial approximations and those incurred errors help it to converge even better.
+             */
             if (ThrsafeExchange(&stage4CallContext->m_SOR_reorderHeadTaken, 1) == 0) {
                 // Process the head
                 const dxQuickStepperLocalContext *localContext = stage4CallContext->m_localContext;
-                ConstraintsReorderingHelper()(stage4CallContext, 0, localContext->m_m - localContext->m_valid_findices);
+                ConstraintsReorderingHelper()(stage4CallContext, 0, localContext->m_m);
             }
-
-            if (ThrsafeExchange(&stage4CallContext->m_SOR_reorderTailTaken, 1) == 0) {
-                // Process the tail
-                const dxQuickStepperLocalContext *localContext = stage4CallContext->m_localContext;
-                ConstraintsReorderingHelper()(stage4CallContext, localContext->m_m - localContext->m_valid_findices, localContext->m_valid_findices);
-            }
-        }
-        else {
-            dIASSERT(iteration % RANDOM_CONSTRAINTS_REORDERING_FREQUENCY == RRS_REVERSAL);
-
-            // Revert to the normal order on the next step after the shuffling
-            dxQuickStepIsland_Stage4LCP_ReorderPrep(stage4CallContext);
         }
         dIASSERT((RRS__MAX, true)); // A reference to RRS__MAX to be located by Find in Files
     }
