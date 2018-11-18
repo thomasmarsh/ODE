@@ -2833,7 +2833,7 @@ void dxQuickStepIsland_Stage4LCP_IterationStep(dxQuickStepperStage4CallContext *
         // already been computed.
         const int *findex = localContext->m_findex;
         if (findex[index] != -1) {
-            hi_act = dFabs (J_ptr[JME_HI] * lambda[findex[index]]);
+            hi_act = dFabs (J_ptr[JME_HI] * lambda[(unsigned)findex[index]]);
             lo_act = -hi_act;
         } else {
             hi_act = J_ptr[JME_HI];
