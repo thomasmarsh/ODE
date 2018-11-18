@@ -2565,7 +2565,7 @@ void dxQuickStepIsland_Stage4LCP_DependencyMapForNewOrderRebuilding(dxQuickStepp
 
         unsigned encoded_downi = mi_links[(sizeint)encoded_depi * 2 + 1];
         mi_links[(sizeint)encoded_depi * 2 + 1] = encioded_i; // Link i as down-dependency for depi
-        mi_links[(sizeint)encioded_i * 2] = encoded_downi; // Link previous down-chain as the level-dependency with i
+        mi_links[(sizeint)encioded_i * 2 + 0] = encoded_downi; // Link previous down-chain as the level-dependency with i
     }
 }
 
@@ -2577,6 +2577,23 @@ void dxQuickStepIsland_Stage4LCP_DependencyMapFromSavedLevelsReconstruction(dxQu
     atomicord32 *mi_levels = stage4CallContext->m_bi_links_or_mi_levels;/*=[m]*/
     atomicord32 *mi_links = stage4CallContext->m_mi_links;/*=[2*(m + 1)]*/
 
+    // NOTE! 
+    // OD: The mi_links array is not zero-filled before the reconstruction.
+    // Iteration ends with all the down links zeroed. And since down links
+    // are moved to the next level links when parent-child relations are established,
+    // the horizontal levels are properly terminated. 
+    // The leaf nodes had their links zero-initialized initially 
+    // and those zeros remain intact during the solving. This way the down links
+    // are properly terminated as well.
+    // This is very obscure and error prone and would need an assertion check at least
+    // but the simplest assertion approach I can imagine would be 
+    // zero filling and building another tree with the memory buffer comparison afterwards.
+    // That would be stupid, obviously.
+    //
+    // NOTE!
+    // OD: This routine can be threaded. However having two threads messing 
+    // in one integer array with random access and kicking each other memory lines 
+    // out of cache would probably work worse than letting a single thread do the whole job.
     unsigned int m = localContext->m_m;
     for (unsigned int i = 0; i != m; ++i) {
         unsigned int currentLevelRoot = mi_levels[i];
@@ -2625,6 +2642,33 @@ int dxQuickStepIsland_Stage4LCP_Iteration_Callback(void *_stage4CallContext, dca
     return 1;
 }
 
+/*
+ *	       +0                +0
+ * Root───┬─────────────────┬──...
+ *      +1│               +1│
+ *       ┌┴┐+0   ┌─┐+0      .
+ *       │A├─────┤B├─...
+ *       └┬┘     └┬┘
+ *      +1│     +1│
+ *       ┌┴┐+0    .
+ *       │C├─...
+ *       └┬┘
+ *      +1│
+ *        .
+ *
+ *  Lower tree levels depend on their parents. Same level nodes are independent with respect to each other.
+ *
+ *  1. B is linked in place of A
+ *  2. A is processed
+ *  3. C is inserted at the Root level
+ *
+ *  The tree starts with a single child subtree at the root level ("down" link of slot #0 is used for that). 
+ *  Then, additional "C" nodes are added to the root level by building horizontal link via slots of 
+ *  their former parent "A"s that had become free.
+ *  The "level" link of slot #0 is used to find the root level head.
+ *
+ *  Since the tree is altered during iteration, mi_levels record each node parents so that the tree could be reconstructed.
+ */
 static 
 void dxQuickStepIsland_Stage4LCP_MTIteration(dxQuickStepperStage4CallContext *stage4CallContext, unsigned int initiallyKnownToBeCompletedLevel)
 {
