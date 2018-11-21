@@ -313,7 +313,7 @@ inline bool ClosestPointInRay(const dVector3 Origin1,
   \return true if there is a closest point, false if the rays are paralell.
   \note Adapted from Christer Ericson's Real Time Collision Detection Book.
 */
-inline dReal ClosestPointBetweenSegments(dVector3& p1,
+inline void ClosestPointBetweenSegments(dVector3& p1,
                                          dVector3& q1,
                                          dVector3& p2,
                                          dVector3& q2,
@@ -343,9 +343,7 @@ inline dReal ClosestPointBetweenSegments(dVector3& p1,
         s = t = 0.0f;
         dVector3Copy(p1,c1);
         dVector3Copy(p2,c2);
-        return (c1[0] - c2[0])*(c1[0] - c2[0])+
-            (c1[1] - c2[1])*(c1[1] - c2[1])+
-            (c1[2] - c2[2])*(c1[2] - c2[2]);
+        return;
     }
     if (a <= dEpsilon)
     {
@@ -417,9 +415,6 @@ inline dReal ClosestPointBetweenSegments(dVector3& p1,
     c2[0] = p2[0] + d2[0] * t;
     c2[1] = p2[1] + d2[1] * t;
     c2[2] = p2[2] + d2[2] * t;
-    return (c1[0] - c2[0])*(c1[0] - c2[0])+
-        (c1[1] - c2[1])*(c1[1] - c2[1])+
-        (c1[2] - c2[2])*(c1[2] - c2[2]);
 }
 
 #if 0
@@ -1101,9 +1096,7 @@ int TestConvexIntersection(dxConvex& cvx1,dxConvex& cvx2, int flags,
     ccso.min_depth=dInfinity; // Min not min at all
     ccso.depth_type=0; // no type
     // precompute distance vector
-    ccso.dist[0] = cvx2.final_posr->pos[0]-cvx1.final_posr->pos[0];
-    ccso.dist[1] = cvx2.final_posr->pos[1]-cvx1.final_posr->pos[1];
-    ccso.dist[2] = cvx2.final_posr->pos[2]-cvx1.final_posr->pos[2];
+    dSubtractVectors3(ccso.dist, cvx2.final_posr->pos, cvx1.final_posr->pos);
     int maxc = flags & NUMC_MASK;
     dIASSERT(maxc != 0);
     dVector3 i1,i2,r1,r2; // edges of incident and reference faces respectively
@@ -1139,9 +1132,7 @@ int TestConvexIntersection(dxConvex& cvx1,dxConvex& cvx2, int flags,
             bool outside,out;
             dVector3Copy(ccso.dist,dist);
             reference_side = GetSupportSide(dist,cvx1);
-            dist[0]=-dist[0];
-            dist[1]=-dist[1];
-            dist[2]=-dist[2];
+            dNegateVector3(dist);
             incident_side = GetSupportSide(dist,cvx2);
 
             pReferencePoly = cvx1.polygons;
@@ -1251,11 +1242,12 @@ int TestConvexIntersection(dxConvex& cvx1,dxConvex& cvx2, int flags,
                                 rplane[3];
                             if(d>0)
                             {
-                                dVector3Copy(p,SAFECONTACT(flags, contact, contacts, skip)->pos);
-                                dVector3Copy(rplane,SAFECONTACT(flags, contact, contacts, skip)->normal);
-                                SAFECONTACT(flags, contact, contacts, skip)->g1=&cvx1;
-                                SAFECONTACT(flags, contact, contacts, skip)->g2=&cvx2;
-                                SAFECONTACT(flags, contact, contacts, skip)->depth=d;
+                                dContactGeom *target = SAFECONTACT(flags, contact, contacts, skip);
+                                dVector3Copy(p, target->pos);
+                                dVector3Copy(rplane, target->normal);
+                                target->g1 = &cvx1;
+                                target->g2 = &cvx2;
+                                target->depth = d;
                                 ++contacts;
                                 if (contacts==maxc) return contacts;
                             }
@@ -1273,11 +1265,12 @@ int TestConvexIntersection(dxConvex& cvx1,dxConvex& cvx2, int flags,
                     rplane[3];
                 if(d>0)
                 {
-                    dVector3Copy(i1,SAFECONTACT(flags, contact, contacts, skip)->pos);
-                    dVector3Copy(rplane,SAFECONTACT(flags, contact, contacts, skip)->normal);
-                    SAFECONTACT(flags, contact, contacts, skip)->g1=&cvx1;
-                    SAFECONTACT(flags, contact, contacts, skip)->g2=&cvx2;
-                    SAFECONTACT(flags, contact, contacts, skip)->depth=d;
+                    dContactGeom *target = SAFECONTACT(flags, contact, contacts, skip);
+                    dVector3Copy(i1, target->pos);
+                    dVector3Copy(rplane, target->normal);
+                    target->g1 = &cvx1;
+                    target->g2 = &cvx2;
+                    target->depth = d;
                     ++contacts;
                     if (contacts==maxc) return contacts;
                 }
@@ -1337,9 +1330,10 @@ int TestConvexIntersection(dxConvex& cvx1,dxConvex& cvx2, int flags,
                     outside = false;
                     for(int j=0;j<contacts;++j)
                     {
-                        if((SAFECONTACT(flags, contact, j, skip)->pos[0]==i1[0])&&
-                            (SAFECONTACT(flags, contact, j, skip)->pos[1]==i1[1])&&
-                            (SAFECONTACT(flags, contact, j, skip)->pos[2]==i1[2]))
+                        dContactGeom *cur_contact = SAFECONTACT(flags, contact, j, skip);
+                        if((cur_contact->pos[0] == i1[0]) &&
+                            (cur_contact->pos[1] == i1[1]) &&
+                            (cur_contact->pos[2] == i1[2]))
                         {
                             outside=true;
                         }
@@ -1352,11 +1346,12 @@ int TestConvexIntersection(dxConvex& cvx1,dxConvex& cvx2, int flags,
                             rplane[3];
                         if(d>0)
                         {
-                            dVector3Copy(i1,SAFECONTACT(flags, contact, contacts, skip)->pos);
-                            dVector3Copy(rplane,SAFECONTACT(flags, contact, contacts, skip)->normal);
-                            SAFECONTACT(flags, contact, contacts, skip)->g1=&cvx1;
-                            SAFECONTACT(flags, contact, contacts, skip)->g2=&cvx2;
-                            SAFECONTACT(flags, contact, contacts, skip)->depth=d;
+                            dContactGeom *target = SAFECONTACT(flags, contact, contacts, skip);
+                            dVector3Copy(i1, target->pos);
+                            dVector3Copy(rplane, target->normal);
+                            target->g1 = &cvx1;
+                            target->g2 = &cvx2;
+                            target->depth = d;
                             ++contacts;
                             if (contacts==maxc) return contacts;
                         }
@@ -1364,18 +1359,36 @@ int TestConvexIntersection(dxConvex& cvx1,dxConvex& cvx2, int flags,
                 }
             }
         }
-        else if(ccso.depth_type==2) // edge-edge
+        else if (ccso.depth_type == 2) // edge-edge
         {
-            dVector3 c1,c2;
-            SAFECONTACT(flags, contact, contacts, skip)->depth = 
-                dSqrt(ClosestPointBetweenSegments(ccso.e1a,ccso.e1b,ccso.e2a,ccso.e2b,c1,c2));
-            SAFECONTACT(flags, contact, contacts, skip)->g1=&cvx1;
-            SAFECONTACT(flags, contact, contacts, skip)->g2=&cvx2;
-            dVector3Copy(c1,SAFECONTACT(flags, contact, contacts, skip)->pos);
-            SAFECONTACT(flags, contact, contacts, skip)->normal[0] = c2[0]-c1[0];
-            SAFECONTACT(flags, contact, contacts, skip)->normal[1] = c2[1]-c1[1];
-            SAFECONTACT(flags, contact, contacts, skip)->normal[2] = c2[2]-c1[2];    
-            dNormalize3(SAFECONTACT(flags, contact, contacts, skip)->normal);
+            dVector3 c1, c2;
+            ClosestPointBetweenSegments(ccso.e1a, ccso.e1b, ccso.e2a, ccso.e2b, c1, c2);
+
+            dContactGeom *target = SAFECONTACT(flags, contact, contacts, skip);
+            dSubtractVectors3(target->normal, c2, c1);
+            dReal depth_square = dCalcVectorLengthSquare3(target->normal);
+
+            if (dxSafeNormalize3(target->normal))
+            {
+                target->depth = dSqrt(depth_square);
+            }
+            else
+            {
+                // If edges coincide return direction from one center to the other as the contact normal
+                dVector3Copy(ccso.dist, target->normal);
+
+                if (!dxSafeNormalize3(target->normal))
+                {
+                    // If the both centers coincide as well return an arbitrary vector. The depth is going to be zero anyway.
+                    dAssignVector3(target->normal, 1, 0, 0);
+                }
+
+                target->depth = 0; // Since the edges coincide, return a contact of zero depth
+            }
+
+            target->g1 = &cvx1;
+            target->g2 = &cvx2;
+            dVector3Copy(c1, target->pos);
             contacts++;
         }
         return contacts;
