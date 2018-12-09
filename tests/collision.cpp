@@ -134,7 +134,7 @@ TEST(test_collision_ray_convex)
      * Issue 55: ray vs convex collider does not consider the position of the convex geometry.
      */
     {
-		dContact contact{};
+		dContact contact;
 
         // Create convex
 	    dGeomID convex = dCreateConvex(0, 
@@ -176,7 +176,7 @@ TEST(test_collision_ray_convex)
 		CHECK_CLOSE(9.0, contact.geom.depth, dEpsilon);
 
 		// Rotate Convex
-		dMatrix3 rotate90z
+		dMatrix3 rotate90z = 
 		{
 			0,-1,0,0,
 			1,0,0,0,
