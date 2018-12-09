@@ -41,7 +41,8 @@ release: dist-gzip dist-bzip2
 EXTRA_DIST = bootstrap build tools \
         CHANGELOG.txt COPYING INSTALL.txt CSR.txt README.md \
         LICENSE.TXT LICENSE-BSD.TXT \
-        bindings
+        bindings \
+        CMakeLists.txt ode-config.cmake.in config.h.cmake.in cmake
 
 pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = ode.pc
