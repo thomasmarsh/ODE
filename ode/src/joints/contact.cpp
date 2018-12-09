@@ -210,7 +210,7 @@ dxJointContact::getInfo2(dReal worldFPS, dReal worldERP,
 
     // set LCP limits for normal
     pairLoHi[ROW_NORMAL * pairskip + GI2_LO] = 0;
-    dIASSERT(pairLoHi[ROW_NORMAL * pairskip + GI2_HI] == dInfinity); // pairLoHi[ROW_NORMAL * pairskip + GI2_HI] = dInfinity;
+    pairLoHi[ROW_NORMAL * pairskip + GI2_HI] = dInfinity;
 
 
     if (the_m > 1) { // if no friction, there is nothing else to do
