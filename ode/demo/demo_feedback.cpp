@@ -144,7 +144,7 @@ void drawGeom (dGeomID g)
 
 static void inspectJoints(void)
 {
-  const dReal forcelimit = 2000.0;
+  const dReal forcelimit = 4000.0;
   int i;
   for (i=0; i<SEGMCNT-1; i++)
   {
@@ -291,9 +291,9 @@ int main (int argc, char **argv)
     colours[i]=0.0;
 
   // run simulation
-  dsSimulationLoop (argc,argv,352,288,&fn);
+  dsSimulationLoop (argc,argv,1280,720,&fn);
 
-  dJointGroupEmpty (contactgroup);
+  dJointGroupEmpty(contactgroup);
   dJointGroupDestroy (contactgroup);
 
   // First destroy seggeoms, then space, then the world.
