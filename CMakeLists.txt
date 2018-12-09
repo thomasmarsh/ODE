@@ -8,8 +8,8 @@ include(CMakeDependentOption)
 include(GNUInstallDirs)
 
 set(VERSION_MAJOR 0)
-set(VERSION_MINOR 15)
-set(VERSION_PATCH 2)
+set(VERSION_MINOR 16)
+set(VERSION_PATCH 0)
 set(VERSION ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH})
 
 option(BUILD_SHARED_LIBS "Build shared libraries." ON)
