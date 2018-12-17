@@ -288,6 +288,12 @@ AC_CHECK_LIB(rt, [main])
 AC_CHECK_FUNCS([atan2f clock_gettime copysign copysignf cosf fabsf floor fmodf gettimeofday isnan _isnan __isnan isnanf _isnanf __isnanf memmove memset pthread_attr_setstacklazy pthread_condattr_setclock sinf snprintf sqrt sqrtf strchr strstr vsnprintf])
 AC_FUNC_ALLOCA 
 
+dnl This trick allows having additional define in case if a function is not found.
+dnl It fakes cached value for an inexistent function which is then used to fool function check to produce desired result.
+AC_CHECK_FUNC(pthread_condattr_setclock,,ac_cv_func_no_pthread_condattr_setclock=yes)
+AC_CHECK_FUNCS(no_pthread_condattr_setclock)
+
+
 AC_ARG_ENABLE([threading-intf],
         AS_HELP_STRING([--disable-threading-intf],
             [disable threading interface support (external implementations cannot be assigned)]
