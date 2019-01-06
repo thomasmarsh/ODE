@@ -20,7 +20,7 @@
  *                                                                       *
  *************************************************************************/
 
-// TriMesh storage classes refactoring and face angle computation code by Oleh Derevenko (C) 2016-2017
+// TriMesh storage classes refactoring and face angle computation code by Oleh Derevenko (C) 2016-2019
 
 #include <ode/collision.h>
 #include <ode/rotation.h>

@@ -4,7 +4,7 @@
  * All rights reserved.  Email: russ@q12.org   Web: www.q12.org          *
  *                                                                       *
  * Threading POSIX thread pool implementation file.                      *
- * Copyright (C) 2011-2012 Oleh Derevenko. All rights reserved.          *
+ * Copyright (C) 2011-2019 Oleh Derevenko. All rights reserved.          *
  * e-mail: odar@eleks.com (change all "a" to "e")                        *
  *                                                                       *
  * This library is free software; you can redistribute it and/or         *

@@ -23,8 +23,8 @@
  *************************************************************************/
 
 /*
- * Code style improvements and optimizations by Oleh Derevenko ????-2017
- * L1Straight cooperative solving code of ThreadedEquationSolverLDLT copyright (c) 2017 Oleh Derevenko, odar@eleks.com (change all "a" to "e")  
+ * Code style improvements and optimizations by Oleh Derevenko ????-2019
+ * L1Straight cooperative solving code of ThreadedEquationSolverLDLT copyright (c) 2017-2019 Oleh Derevenko, odar@eleks.com (change all "a" to "e")  
  */
 
 #ifndef _ODE_FASTLSOLVE_IMPL_H_

@@ -22,7 +22,7 @@
 
 /*
  * Resource accounting/preallocation class declarations
- * Copyright (c) 2017 Oleh Derevenko, odar@eleks.com (change all "a" to "e")
+ * Copyright (c) 2017-2019 Oleh Derevenko, odar@eleks.com (change all "a" to "e")
  */
 
 #ifndef _ODE__PRIVATE_RESOURCE_CONTRIOL_H_
