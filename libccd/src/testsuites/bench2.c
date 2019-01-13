@@ -252,7 +252,7 @@ int main(int argc, char *argv[])
         cycles = atol(argv[1]);
     }
 
-    fprintf(stdout, "Cycles: %u\n", cycles);
+    fprintf(stdout, "Cycles: %zu\n", cycles);
     fprintf(stdout, "\n");
 
     boxbox();

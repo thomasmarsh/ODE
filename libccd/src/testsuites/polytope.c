@@ -101,7 +101,7 @@ TEST(ptCreate2)
     ccd_pt_face_t *f[4];
     ccd_vec3_t u;
     int res;
-    size_t i;
+    unsigned int i;
 
     DBG2("------");
 
