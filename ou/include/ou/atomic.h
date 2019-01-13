@@ -1630,7 +1630,7 @@ END_NAMESPACE_OU();
 BEGIN_NAMESPACE_OU();
 
 
-typedef int32_t atomicord32;
+typedef uint32_t atomicord32;
 typedef void *atomicptr;
 
 
