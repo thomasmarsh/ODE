@@ -83,7 +83,8 @@
 /* Well-defined common data types...need to be defined for 64 bit systems */
 #if defined(__aarch64__) || defined(__alpha__) || defined(__ppc64__) \
     || defined(__s390__) || defined(__s390x__) || defined(__zarch__) \
-    || defined(__mips__) || defined(__powerpc64__) || defined(__riscv) || defined(__sparc64__)
+    || defined(__mips__) || defined(__powerpc64__) || defined(__riscv) \
+    || (defined(__sparc__) && defined(__arch64__))
     #include <stdint.h>
     typedef int64_t         dint64;
     typedef uint64_t        duint64;
