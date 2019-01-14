@@ -265,11 +265,16 @@
     for _, name in ipairs(demos) do
     
       project ( "demo_" .. name )
-      
-        kind      "ConsoleApp"
+
+        if name ~= "collision" and name ~= "ode" then
+          kind      "WindowedApp"
+        else
+          kind      "ConsoleApp"
+        end
+
         location  ( _OPTIONS["to"] or _ACTION )
-        files     { "../ode/demo/demo_" .. name .. ".*" }
-		links     { "ode", "drawstuff" }        
+          files     { "../ode/demo/demo_" .. name .. ".*" }
+          links     { "ode", "drawstuff" }        
         
         configuration { "Windows" }
           files   { "../drawstuff/src/resources.rc" }
