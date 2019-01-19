@@ -266,7 +266,7 @@
     
       project ( "demo_" .. name )
 
-        if name ~= "collision" and name ~= "ode" then
+        if name ~= "ode" then
           kind      "WindowedApp"
         else
           kind      "ConsoleApp"

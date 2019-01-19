@@ -30,6 +30,9 @@
 
 // supplied by platform specific code
 
+void dsPlatformInitializeConsole();
+void dsPlatformFinalizeConsole();
+
 void dsPlatformSimLoop (int window_width, int window_height,
 			dsFunctions *fn, int initial_pause);
 

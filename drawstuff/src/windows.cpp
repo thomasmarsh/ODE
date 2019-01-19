@@ -306,46 +306,23 @@ static LRESULT CALLBACK mainWndProc(HWND hWnd, UINT msg, WPARAM wParam,
     return 0;
 }
 
+static void drawStuffStartup();
+static HWND GetConsoleHwnd();
+static void drawStuffAllocateConsole();
+static void drawStuffPromptAKeyToExit();
 
-// this comes from an MSDN example. believe it or not, this is the recommended
-// way to get the console window handle.
-
-static HWND GetConsoleHwnd()
-{
-    // the console window title to a "unique" value, then find the window
-    // that has this title.
-    char title[1024];
-    wsprintf(title, "DrawStuff:%d/%d", GetTickCount(), GetCurrentProcessId());
-    SetConsoleTitle(title);
-    Sleep(40);			// ensure window title has been updated
-    return FindWindow(NULL, title);
-}
-
-static void drawStuffStartup()
+static
+void drawStuffStartup()
 {
     static int startup_called = 0;
     if (startup_called) return;
     startup_called = 1;
+
     if (!ghInstance)
         ghInstance = GetModuleHandleA(NULL);
     gnCmdShow = SW_SHOWNORMAL;		// @@@ fix this later
 
-    if (!AllocConsole()) {
-        dsError("AllocConsole() failed");
-    }
-
-    BringWindowToTop(GetConsoleHwnd());
-    SetConsoleTitle("DrawStuff Messages");
-
-    if (freopen("CONOUT$", "wt", stdout) == 0) {
-        dsError("could not open stdout");
-    }
-    if (freopen("CONIN$", "rt", stdin) == 0) {
-        dsError("could not open stdin");
-    }
-    if (freopen("CONOUT$", "wt", stderr) == 0) {
-        dsError("could not open stderr");
-    }
+    drawStuffAllocateConsole();
 
     // register the window class
     WNDCLASS wc;
@@ -367,7 +344,75 @@ static void drawStuffStartup()
     if (accelerators == NULL) dsError("could not load accelerators");
 }
 
+// this comes from an MSDN example. believe it or not, this is the recommended
+// way to get the console window handle.
 
+static
+HWND GetConsoleHwnd()
+{
+    // the console window title to a "unique" value, then find the window
+    // that has this title.
+    char title[1024];
+    wsprintf(title, "DrawStuff:%d/%d", GetTickCount(), GetCurrentProcessId());
+    SetConsoleTitle(title);
+    Sleep(40);			// ensure window title has been updated
+    return FindWindow(NULL, title);
+}
+
+static
+void drawStuffAllocateConsole()
+{
+    if (!AllocConsole()) {
+        dsError("AllocConsole() failed");
+    }
+
+    BringWindowToTop(GetConsoleHwnd());
+    SetConsoleTitle("DrawStuff Messages");
+
+    if (freopen("CONOUT$", "wt", stdout) == 0) {
+        dsError("could not open stdout");
+    }
+    if (freopen("CONIN$", "rt", stdin) == 0) {
+        dsError("could not open stdin");
+    }
+    if (freopen("CONOUT$", "wt", stderr) == 0) {
+        dsError("could not open stderr");
+    }
+
+}
+
+static 
+void drawStuffPromptAKeyToExit()
+{
+    HANDLE consoleInput = GetStdHandle(STD_INPUT_HANDLE);
+    if (consoleInput != INVALID_HANDLE_VALUE && consoleInput != NULL) {
+        FlushConsoleInputBuffer(consoleInput);
+
+        fprintf(stderr, "Press any key to close this window . . .");
+
+        INPUT_RECORD inputEvent;
+        for (DWORD eventsRead = 0; ReadConsoleInput(consoleInput, &inputEvent, 1, &eventsRead); eventsRead = 0) {
+            if (eventsRead == 1 && inputEvent.EventType == KEY_EVENT && inputEvent.Event.KeyEvent.bKeyDown) {
+                break;
+            }
+        }
+    }
+}
+
+
+/*extern */
+void dsPlatformInitializeConsole()
+{
+    drawStuffAllocateConsole();
+}
+
+/*extern */
+void dsPlatformFinalizeConsole()
+{
+    drawStuffPromptAKeyToExit();
+}
+
+/*extern */
 void dsPlatformSimLoop(int window_width, int window_height,
     dsFunctions *fn, int initial_pause)
 {
@@ -474,8 +519,8 @@ void dsPlatformSimLoop(int window_width, int window_height,
     DestroyWindow(main_window);
 }
 
-
-extern "C" void dsStop()
+/*extern */
+void dsStop()
 {
     // just calling PostQuitMessage() here wont work, as this function is
     // typically called from the rendering thread, not the GUI thread.
@@ -485,7 +530,8 @@ extern "C" void dsStop()
 }
 
 
-extern "C" double dsElapsedTime()
+/*extern */
+double dsElapsedTime()
 {
     static double prev = 0.0;
     double curr = timeGetTime() / 1000.0;
@@ -502,6 +548,7 @@ extern "C" double dsElapsedTime()
 // JPerkins: if running as a DLL, grab my module handle at load time so
 // I can find the accelerators table later
 
+/*extern */
 BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpReserved)
 {
     switch (fdwReason)

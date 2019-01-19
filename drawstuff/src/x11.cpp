@@ -355,6 +355,19 @@ void microsleep(int usecs)
 #endif
 }
 
+/*extern */
+void dsPlatformInitializeConsole()
+{
+  // Do nothing
+}
+
+/*extern */
+void dsPlatformFinalizeConsole()
+{
+  // Do nothing
+}
+
+/*extern */
 void dsPlatformSimLoop (int window_width, int window_height, dsFunctions *fn,
 			int initial_pause)
 {

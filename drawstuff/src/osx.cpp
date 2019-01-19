@@ -305,7 +305,20 @@ int  osxInstallEventHandlers()
     return GL_TRUE;
 }
 
-extern void dsPlatformSimLoop( int givenWindowWidth, int givenWindowHeight, dsFunctions *fn, int givenPause ){
+/*extern */
+void dsPlatformInitializeConsole()
+{
+	// Do nothing
+}
+
+/*extern */
+void dsPlatformFinalizeConsole()
+{
+	// Do nothing
+}
+
+/*extern */
+void dsPlatformSimLoop( int givenWindowWidth, int givenWindowHeight, dsFunctions *fn, int givenPause ){
 	
 	functions = fn;
 	
