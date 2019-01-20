@@ -152,6 +152,11 @@
 	description = "Only use double-precision math"
   }
   
+  newoption {
+    trigger     = "no-sse2",
+	description = "Disable SSE2 use for x86 targets in favor to FPU"
+  }
+  
   -- always clean all of the optional components and toolsets
   if _ACTION == "clean" then
     _OPTIONS["with-demos"] = ""
@@ -223,6 +228,10 @@
     configuration { "Release*" }
       defines { "NDEBUG", "dNODEBUG" }
       flags   { "OptimizeSpeed", "NoFramePointer" }
+
+    if not _OPTIONS["no-sse2"] then
+      flags { "EnableSSE2" }
+    end
 
     configuration { "*Single*" }
       defines { "dIDESINGLE", "CCD_IDESINGLE" }
