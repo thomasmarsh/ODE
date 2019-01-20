@@ -77,9 +77,9 @@ static void nearCallback (void *data, dGeomID o1, dGeomID o2)
   const int N = 32;
   dContact contact[N];
   int n = dCollide (o1,o2,N,&(contact[0].geom),sizeof(dContact));
-  if (n > 0) 
+  if (n > 0)
   {
-    for (int i=0; i<n; i++) 
+    for (int i=0; i<n; i++)
     {
 	  // Paranoia  <-- not working for some people, temporarily removed for 0.6
       //dIASSERT(dVALIDVEC3(contact[i].geom.pos));
@@ -106,8 +106,8 @@ static void start()
 {
   dAllocateODEDataForThread(dAllocateMaskAll);
 
-  static float xyz[3] = {-8,0,5};
-  static float hpr[3] = {0.0f,-29.5000f,0.0000f};
+  float xyz[3] = {-8,0,5};
+  float hpr[3] = {0.0f,-29.5000f,0.0000f};
   dsSetViewpoint (xyz,hpr);
 }
 
@@ -130,7 +130,7 @@ static void reset_ball(void)
 
 static void command (int cmd)
 {
-  switch (cmd) 
+  switch (cmd)
   {
     case ' ':
 	  reset_ball();
@@ -163,8 +163,8 @@ static void simLoop (int pause)
   float srot[12] = { SRot[0], SRot[1], SRot[2], SRot[3], SRot[4], SRot[5], SRot[6], SRot[7], SRot[8], SRot[9], SRot[10], SRot[11] };
   dsDrawSphere
   (
-    spos, 
-    srot, 
+    spos,
+    srot,
     RADIUS
   );
 
@@ -228,12 +228,12 @@ int main (int argc, char **argv)
 
   dGeomTriMeshDataBuildSingle
   (
-    Data, 
-    world_vertices, 
-    3 * sizeof(float), 
-    numv, 
-    world_indices, 
-    numi, 
+    Data,
+    world_vertices,
+    3 * sizeof(float),
+    numv,
+    world_indices,
+    numi,
     3 * sizeof(dTriIndex)
   );
 

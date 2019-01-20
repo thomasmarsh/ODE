@@ -103,7 +103,7 @@ void dLineClosestApproach(const dVector3 pa, const dVector3 ua,
 //****************************************************************************
 // draw all objects in a space, and draw all the collision contact points
 
-static 
+static
 void nearCallback(void *, dGeomID o1, dGeomID o2)
 {
     int i, j, n;
@@ -131,7 +131,7 @@ void nearCallback(void *, dGeomID o1, dGeomID o2)
 }
 
 
-static 
+static
 void draw_all_objects(dSpaceID space)
 {
     int i, j;
@@ -227,7 +227,7 @@ void draw_all_objects(dSpaceID space)
 //****************************************************************************
 // point depth tests
 
-static 
+static
 int test_sphere_point_depth()
 {
     int j;
@@ -272,7 +272,7 @@ int test_sphere_point_depth()
 }
 
 
-static 
+static
 int test_box_point_depth()
 {
     int i, j;
@@ -342,7 +342,7 @@ int test_box_point_depth()
 }
 
 
-static 
+static
 int test_ccylinder_point_depth()
 {
     int j;
@@ -430,7 +430,7 @@ int test_ccylinder_point_depth()
 }
 
 
-static 
+static
 int test_plane_point_depth()
 {
     int j;
@@ -480,7 +480,7 @@ int test_plane_point_depth()
 //****************************************************************************
 // ray tests
 
-static 
+static
 int test_ray_and_sphere()
 {
     int j;
@@ -624,7 +624,7 @@ int test_ray_and_sphere()
 }
 
 
-static 
+static
 int test_ray_and_box()
 {
     int i, j;
@@ -753,7 +753,7 @@ int test_ray_and_box()
 }
 
 
-static 
+static
 int test_ray_and_ccylinder()
 {
     int j;
@@ -870,7 +870,7 @@ int test_ray_and_ccylinder()
   -exiting through corner
   Test rays outside the cylinder
 */
-static 
+static
 int test_ray_and_cylinder()
 {
     dVector3 a, b;
@@ -918,7 +918,7 @@ int test_ray_and_cylinder()
 }
 
 
-static 
+static
 int test_ray_and_plane()
 {
     int j;
@@ -1034,7 +1034,7 @@ int test_ray_and_plane()
 
 // return 1 if edge v1 -> v2 hits the rectangle described by p1,p2,p3
 
-static 
+static
 int edgeIntersectsRect(dVector3 v1, dVector3 v2,
     dVector3 p1, dVector3 p2, dVector3 p3)
 {
@@ -1068,7 +1068,7 @@ int edgeIntersectsRect(dVector3 v1, dVector3 v2,
 
 // return 1 if box 1 is completely inside box 2
 
-static 
+static
 int box1inside2(const dVector3 p1, const dMatrix3 R1,
     const dVector3 side1, const dVector3 p2,
     const dMatrix3 R2, const dVector3 side2)
@@ -1097,7 +1097,7 @@ int box1inside2(const dVector3 p1, const dMatrix3 R1,
 
 // test if any edge from box 1 hits a face from box 2
 
-static 
+static
 int testBoxesTouch2(const dVector3 p1, const dMatrix3 R1,
     const dVector3 side1, const dVector3 p2,
     const dMatrix3 R2, const dVector3 side2)
@@ -1167,7 +1167,7 @@ int testBoxesTouch2(const dVector3 p1, const dMatrix3 R1,
 //****************************************************************************
 // dBoxTouchesBox() test
 
-static 
+static
 int test_dBoxTouchesBox()
 {
     int k, bt1, bt2;
@@ -1220,7 +1220,7 @@ int test_dBoxTouchesBox()
 //****************************************************************************
 // test box-box collision
 
-static 
+static
 int test_dBoxBox()
 {
     int k, bt;
@@ -1302,20 +1302,20 @@ int space_pressed = 0;
 
 // start simulation - set viewpoint
 
-static 
+static
 void start()
 {
     dAllocateODEDataForThread(dAllocateMaskAll);
 
-    static float xyz[3] = { 2.4807,-1.8023,2.7600 };
-    static float hpr[3] = { 141.5000,-18.5000,0.0000 };
+    float xyz[3] = { 2.4807,-1.8023,2.7600 };
+    float hpr[3] = { 141.5000,-18.5000,0.0000 };
     dsSetViewpoint(xyz, hpr);
 }
 
 
 // called when a key pressed
 
-static 
+static
 void command(int cmd)
 {
     if (cmd == ' ') space_pressed = 1;
@@ -1324,7 +1324,7 @@ void command(int cmd)
 
 // simulation loop
 
-static 
+static
 void simLoop(int)
 {
     do {
@@ -1340,7 +1340,7 @@ void simLoop(int)
 //****************************************************************************
 // do all the tests
 
-static 
+static
 void do_tests(int argc, char **argv)
 {
     int i, j;

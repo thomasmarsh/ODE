@@ -117,8 +117,8 @@ static void start()
 {
   dAllocateODEDataForThread(dAllocateMaskAll);
 
-  static float xyz[3] = {0.8317f,-0.9817f,0.8000f};
-  static float hpr[3] = {121.0000f,-27.5000f,0.0000f};
+  float xyz[3] = {0.8317f,-0.9817f,0.8000f};
+  float hpr[3] = {121.0000f,-27.5000f,0.0000f};
   dsSetViewpoint (xyz,hpr);
   printf ("Press:\t'a' to increase speed.\n"
 	  "\t'z' to decrease speed.\n"
