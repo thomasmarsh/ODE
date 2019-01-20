@@ -8,6 +8,10 @@ the rules for this file:
   * keep the format consistent (79 char width, M/D/Y date format).
 
 ------------------------------------------------------------------------------
+01/20/2019 Oleh Derevenko
+        * x86 targets have been changed to generate SSE2 code for calculations
+          by default with possibility to explicitly configure back for FPU.
+
 11/12/2018 Oleh Derevenko
         * The commentary from 11/05/2018 was wrong. The constraints were not
           reset to their natural order and remained randomized.

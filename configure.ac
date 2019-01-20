@@ -273,6 +273,24 @@ else
     AC_MSG_RESULT(no)
 fi
 
+AC_ARG_ENABLE([sse2],
+        AS_HELP_STRING([--disable-sse2],
+            [disable generating SSE2 code on x86 in favor of FPU]
+        ),
+        sse2=$enableval,sse2=yes)
+fpuarch_flags=
+if test x$pentium=xyes -a x$cpu64=xno
+then
+    if test x$sse2=xyes
+    then
+        fpuarch_flags="-mmmx -msse -msse2 -mfpmath=sse -mstackrealign"
+    fi
+else
+    sse2=
+fi
+CFLAGS="$fpuarch_flags $CFLAGS"
+CXXFLAGS="$fpuarch_flags $CXXFLAGS"
+
 # Checks for typedefs, structures, and compiler characteristics.
 AC_HEADER_STDBOOL
 AC_C_INLINE
@@ -476,6 +494,9 @@ then
     fi
 fi
 
+CCD_FPUARCH_FLAGS="$fpuarch_flags"
+AC_CONFIG_COMMANDS_POST([export CCD_FPUARCH_FLAGS="$CCD_FPUARCH_FLAGS"])
+
 # Configure libccd unconditionally as that may be needed for special make targets
 AC_CONFIG_SUBDIRS([libccd])
 
@@ -594,6 +615,10 @@ echo "        convex-sphere:     $col_convex_sphere"
 echo "        convex-convex:     $col_convex_convex"
 echo "  Is target a Pentium:     $pentium"
 echo "  Is target x86-64:        $cpu64"
+if test x$sse2 != x
+then
+echo "  Is SSE2 code generated:  $sse2"
+fi
 echo "  Use old opcode trimesh collider: $old_trimesh"
 echo "  TLS for global caches:   $use_ou_tls"
 echo "  Threading intf enabled:  $threading_intf"

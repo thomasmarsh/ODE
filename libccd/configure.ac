@@ -29,6 +29,10 @@ AC_TYPE_SIZE_T
 AC_FUNC_FORK
 AC_CHECK_FUNCS([clock_gettime])
 
+AC_ARG_VAR([CCD_FPUARCH_FLAGS], [FPU Architecture Flags])
+CFLAGS="$CCD_FPUARCH_FLAGS $CFLAGS"
+CXXFLAGS="$CCD_FPUARCH_FLAGS $CXXFLAGS"
+
 use_double=no
 AC_ARG_ENABLE(double-precision,
               AS_HELP_STRING([--enable-double-precision],
