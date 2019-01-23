@@ -118,8 +118,8 @@ const int catBits[LAST_INDEX_CNT] =
 
 
 //camera view
-static float xyz[3] = {6.0f,0.0f,6.0000f};
-static float hpr[3] = {-180.000f,-25.5000f,0.0000f};
+static const float xyz[3] = {6.0f,0.0f,6.0000f};
+static const float hpr[3] = {-180.000f,-25.5000f,0.0000f};
 
 
 //world,space,body & geom

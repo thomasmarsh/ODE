@@ -163,7 +163,7 @@ DS_API void dsPrint (const char *msg, ...);
  * points along the x axis, pitch=0 is looking towards the horizon, and
  * roll 0 is "unrotated".
  */
-DS_API void dsSetViewpoint (float xyz[3], float hpr[3]);
+DS_API void dsSetViewpoint (const float xyz[3], const float hpr[3]);
 
 
 /**

@@ -66,8 +66,8 @@ static void start()
 {
   dAllocateODEDataForThread(dAllocateMaskAll);
 
-  static float xyz[3] = {0,-4.0f,3.0f};
-  static float hpr[3] = {90.0000,-15.0000,0.0000};
+  float xyz[3] = {0,-4.0f,3.0f};
+  float hpr[3] = {90.0000,-15.0000,0.0000};
   dsSetViewpoint (xyz,hpr);
   printf ("Press:\n"
       "\t'a' to apply a torque\n"

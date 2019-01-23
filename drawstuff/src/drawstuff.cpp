@@ -1345,7 +1345,7 @@ void dsSimulationLoop(int argc, char **argv,
 
 
 /*extern */
-void dsSetViewpoint(float xyz[3], float hpr[3])
+void dsSetViewpoint(const float xyz[3], const float hpr[3])
 {
     if (current_state < 1) dsError("dsSetViewpoint() called before simulation started");
     if (xyz) {

@@ -100,8 +100,8 @@ const int catBits[NUM_PARTS+1] =
 
 
 //camera view
-static float xyz[3] = {2.0f,-3.5f,2.0000f};
-static float hpr[3] = {90.000f,-25.5000f,0.0000f};
+static const float xyz[3] = {2.0f,-3.5f,2.0000f};
+static const float hpr[3] = {90.000f,-25.5000f,0.0000f};
 
 
 //world,space,body & geom
