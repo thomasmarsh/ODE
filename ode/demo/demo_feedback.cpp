@@ -291,7 +291,7 @@ int main (int argc, char **argv)
     colours[i]=0.0;
 
   // run simulation
-  dsSimulationLoop (argc,argv,1280,720,&fn);
+  dsSimulationLoop (argc, argv, DS_SIMULATION_DEFAULT_WIDTH, DS_SIMULATION_DEFAULT_HEIGHT, &fn);
 
   dJointGroupEmpty(contactgroup);
   dJointGroupDestroy (contactgroup);

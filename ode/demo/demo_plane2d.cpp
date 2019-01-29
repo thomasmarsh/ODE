@@ -62,7 +62,7 @@ static void     cb_start ()
 {
     dAllocateODEDataForThread(dAllocateMaskAll);
 
-    static float    xyz[3] = { 0.5f*STAGE_SIZE, 0.5f*STAGE_SIZE, 0.65f*STAGE_SIZE};
+    static float    xyz[3] = { 0.5f*STAGE_SIZE, 0.5f*STAGE_SIZE, 0.85f*STAGE_SIZE};
     static float    hpr[3] = { 90.0f, -90.0f, 0 };
 
     dsSetViewpoint (xyz, hpr);
@@ -293,7 +293,7 @@ extern int      main
         drawstuff_functions.stop = 0;
         drawstuff_functions.path_to_textures = DRAWSTUFF_TEXTURE_PATH;
 
-        dsSimulationLoop (argc, argv, 352,288,&drawstuff_functions);
+        dsSimulationLoop (argc, argv, DS_SIMULATION_DEFAULT_WIDTH, DS_SIMULATION_DEFAULT_HEIGHT, &drawstuff_functions);
     }
 
     delete g_globals_ptr;

@@ -56,7 +56,7 @@ static void start()
   dAllocateODEDataForThread(dAllocateMaskAll);
 
   float xyz[3] = {1.0382f,-1.0811f,1.4700f};
-  float hpr[3] = {135.0000f,-19.5000f,0.0000f};
+  float hpr[3] = {135.0000f,0.0000f,0.0000f};
   dsSetViewpoint (xyz,hpr);
   printf ("Press 'q,a,z' to control one axis of lmotor connectiong two bodies. (q is +,a is 0, z is -)\n");
   printf ("Press 'w,e,r' to control one axis of lmotor connectiong first body with world. (w is +,e is 0, r is -)\n");
@@ -199,7 +199,7 @@ int main (int argc, char **argv)
   }
 
   // run simulation
-  dsSimulationLoop (argc,argv,352,288,&fn);
+  dsSimulationLoop (argc, argv, DS_SIMULATION_DEFAULT_WIDTH, DS_SIMULATION_DEFAULT_HEIGHT, &fn);
 
   dJointGroupDestroy(contactgroup);
   dSpaceDestroy (space);

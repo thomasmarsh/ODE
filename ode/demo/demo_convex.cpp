@@ -292,9 +292,7 @@ int main (int argc, char **argv)
 	}
 
 	// run simulation
-	const int w=1280;
-	const int h=720;
-	dsSimulationLoop (argc,argv,w,h,&fn);
+	dsSimulationLoop (argc, argv, DS_SIMULATION_DEFAULT_WIDTH, DS_SIMULATION_DEFAULT_HEIGHT, &fn);
 
 	dJointGroupEmpty (contactgroup);
 	dJointGroupDestroy (contactgroup);

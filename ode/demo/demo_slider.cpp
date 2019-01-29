@@ -163,7 +163,7 @@ int main (int argc, char **argv)
   dJointSetSliderAxis (slider,1,1,1);
 
   // run simulation
-  dsSimulationLoop (argc,argv,352,288,&fn);
+  dsSimulationLoop (argc, argv, DS_SIMULATION_DEFAULT_WIDTH, DS_SIMULATION_DEFAULT_HEIGHT, &fn);
 
   dWorldDestroy (world);
   dCloseODE();

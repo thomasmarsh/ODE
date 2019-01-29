@@ -424,7 +424,7 @@ int main (int argc, char **argv)
     dSpaceAdd(box1_space,box1[0]);
 
     // run simulation
-    dsSimulationLoop (argc,argv,400,300,&fn);
+    dsSimulationLoop (argc, argv, DS_SIMULATION_DEFAULT_WIDTH, DS_SIMULATION_DEFAULT_HEIGHT, &fn);
     dJointGroupDestroy (contactgroup);
     dSpaceDestroy (space);
     dWorldDestroy (world);

@@ -223,7 +223,7 @@ int main(int argc, char **argv)
     place_cards();
     
     // run simulation
-    dsSimulationLoop (argc, argv, 640, 480, &fn);
+    dsSimulationLoop (argc, argv, DS_SIMULATION_DEFAULT_WIDTH, DS_SIMULATION_DEFAULT_HEIGHT, &fn);
     
     levels = 0;
     place_cards();

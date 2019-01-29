@@ -145,7 +145,7 @@ static void start()
   dAllocateODEDataForThread(dAllocateMaskAll);
 
   float xyz[3] = {2.1640f,-1.3079f,1.7600f};
-  float hpr[3] = {125.5000f,-17.0000f,0.0000f};
+  float hpr[3] = {135.5000f,-17.0000f,0.0000f};
   dsSetViewpoint (xyz,hpr);
 }
 
@@ -224,7 +224,7 @@ int main (int argc, char **argv)
   init_test();
 
   // run simulation
-  dsSimulationLoop (argc,argv,352,288,&fn);
+  dsSimulationLoop (argc, argv, DS_SIMULATION_DEFAULT_WIDTH, DS_SIMULATION_DEFAULT_HEIGHT, &fn);
 
   dSpaceDestroy (space);
   dCloseODE();

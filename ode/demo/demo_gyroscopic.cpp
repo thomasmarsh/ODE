@@ -242,7 +242,7 @@ int main (int argc, char **argv)
     reset();
 
     // run simulation
-    dsSimulationLoop (argc,argv,512,384,&fn);
+    dsSimulationLoop (argc, argv, DS_SIMULATION_DEFAULT_WIDTH, DS_SIMULATION_DEFAULT_HEIGHT, &fn);
 
     delete g1;
     delete g2;

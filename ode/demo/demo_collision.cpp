@@ -1371,7 +1371,7 @@ void do_tests(int argc, char **argv)
 
         dsSetSphereQuality(3);
         dsSetCapsuleQuality(8);
-        dsSimulationLoop(argc, argv, 1280, 900, &fn);
+        dsSimulationLoop(argc, argv, DS_SIMULATION_DEFAULT_WIDTH, DS_SIMULATION_DEFAULT_HEIGHT, &fn);
     }
     else {
         // do all tests noninteractively

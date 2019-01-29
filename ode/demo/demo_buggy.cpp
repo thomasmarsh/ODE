@@ -294,7 +294,7 @@ int main (int argc, char **argv)
   dGeomSetRotation (ground_box,R);
 
   // run simulation
-  dsSimulationLoop (argc,argv,352,288,&fn);
+  dsSimulationLoop (argc, argv, DS_SIMULATION_DEFAULT_WIDTH,  DS_SIMULATION_DEFAULT_HEIGHT, &fn);
 
   dGeomDestroy (box[0]);
   dGeomDestroy (sphere[0]);

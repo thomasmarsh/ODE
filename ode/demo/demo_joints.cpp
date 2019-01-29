@@ -1034,7 +1034,7 @@ void doTest (int argc, char **argv, int n, int fatal_if_bad_n)
 
   // run simulation
   if (cmd_graphics) {
-    dsSimulationLoop (argc,argv,352,288,&fn);
+    dsSimulationLoop (argc, argv, DS_SIMULATION_DEFAULT_WIDTH, DS_SIMULATION_DEFAULT_HEIGHT, &fn);
   }
   else {
     for (int i=0; i < max_iterations; i++) simLoop (0);

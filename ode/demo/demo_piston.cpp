@@ -100,8 +100,8 @@ const int catBits[NUM_PARTS+1] =
 
 
 //camera view
-static const float xyz[3] = {2.0f,-3.5f,2.0000f};
-static const float hpr[3] = {90.000f,-25.5000f,0.0000f};
+static const float xyz[3] = {2.0f,-5.5f,2.0000f};
+static const float hpr[3] = {90.000f,-15.5000f,0.0000f};
 
 
 //world,space,body & geom
@@ -798,7 +798,7 @@ int main (int argc, char **argv)
 
 
     // run simulation
-    dsSimulationLoop (argc,argv,400,300,&fn);
+    dsSimulationLoop (argc, argv, DS_SIMULATION_DEFAULT_WIDTH, DS_SIMULATION_DEFAULT_HEIGHT, &fn);
 
     delete joint;
     dJointGroupDestroy (contactgroup);

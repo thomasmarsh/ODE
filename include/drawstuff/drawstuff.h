@@ -120,6 +120,9 @@ DS_API void dsInitializeConsole(int argc, char **argv);
 DS_API void dsFinalizeConsole();
 
 
+#define DS_SIMULATION_DEFAULT_WIDTH 1280
+#define DS_SIMULATION_DEFAULT_HEIGHT 720
+
 /**
  * @brief Does the complete simulation.
  * @ingroup drawstuff

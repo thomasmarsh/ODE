@@ -257,7 +257,7 @@ int main (int argc, char **argv)
   dSpaceAdd (space, sphgeom);
 
   // run simulation
-  dsSimulationLoop (argc,argv,352,288,&fn);
+  dsSimulationLoop (argc, argv, DS_SIMULATION_DEFAULT_WIDTH, DS_SIMULATION_DEFAULT_HEIGHT, &fn);
 
   // Causes segm violation? Why?
   // (because dWorldDestroy() destroys body connected to geom; must call first!)

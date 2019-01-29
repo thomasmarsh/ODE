@@ -512,7 +512,7 @@ int main (int argc, char **argv)
     dGeomSetCollideBits(platform, ~1ul);
 
     // run simulation
-    dsSimulationLoop (argc,argv,352,288,&fn);
+    dsSimulationLoop(argc, argv, DS_SIMULATION_DEFAULT_WIDTH, DS_SIMULATION_DEFAULT_HEIGHT, &fn);
 
     dJointGroupDestroy (contactgroup);
     dSpaceDestroy (space);

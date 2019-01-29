@@ -187,7 +187,7 @@ int main(int argc, char **argv)
     dInitODE();
 
     // run demo
-    dsSimulationLoop (argc, argv, 800, 600, &fn);
+    dsSimulationLoop (argc, argv, DS_SIMULATION_DEFAULT_WIDTH, DS_SIMULATION_DEFAULT_HEIGHT, &fn);
 
     dCloseODE();
     return 0;

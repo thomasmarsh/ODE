@@ -233,7 +233,7 @@ int main(int argc, char **argv)
     hinge->setAnchor(kx, ky, kz+1);
     hinge->setAxis(0, 0, 1);
     
-    dsSimulationLoop (argc, argv, 640, 480, &fn);
+    dsSimulationLoop (argc, argv, DS_SIMULATION_DEFAULT_WIDTH, DS_SIMULATION_DEFAULT_HEIGHT, &fn);
     
     dCloseODE();
 }
