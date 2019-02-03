@@ -222,9 +222,20 @@ int main(int argc, char **argv)
     
     place_cards();
     
+    dThreadingImplementationID threading = dThreadingAllocateMultiThreadedImplementation();
+    dThreadingThreadPoolID pool = dThreadingAllocateThreadPool(4, 0, dAllocateFlagBasicData, NULL);
+    dThreadingThreadPoolServeMultiThreadedImplementation(pool, threading);
+    // dWorldSetStepIslandsProcessingMaxThreadCount(world, 1);
+    dWorldSetStepThreadingImplementation(world, dThreadingImplementationGetFunctions(threading), threading);
+
     // run simulation
     dsSimulationLoop (argc, argv, DS_SIMULATION_DEFAULT_WIDTH, DS_SIMULATION_DEFAULT_HEIGHT, &fn);
     
+    dThreadingImplementationShutdownProcessing(threading);
+    dThreadingFreeThreadPool(pool);
+    dWorldSetStepThreadingImplementation(world, NULL, NULL);
+    dThreadingFreeImplementation(threading);
+
     levels = 0;
     place_cards();
     
