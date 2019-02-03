@@ -314,7 +314,7 @@ ODE_PURE_INLINE dReal dCalcPointsDistance3(const dReal *a, const dReal *b)
  * special case matrix multiplication, with operator selection
  */
 
-ODE_PURE_INLINE void dMultiplyHelper0_331(dReal *res, const dReal *a, const dReal *b)
+ODE_PURE_INLINE void _dMultiplyHelper0_331(dReal *res, const dReal *a, const dReal *b)
 {
   const dReal res_0 = dCalcVectorDot3(a, b);
   const dReal res_1 = dCalcVectorDot3(a + 4, b);
@@ -323,7 +323,7 @@ ODE_PURE_INLINE void dMultiplyHelper0_331(dReal *res, const dReal *a, const dRea
   res[0] = res_0; res[1] = res_1; res[2] = res_2;
 }
 
-ODE_PURE_INLINE void dMultiplyHelper1_331(dReal *res, const dReal *a, const dReal *b)
+ODE_PURE_INLINE void _dMultiplyHelper1_331(dReal *res, const dReal *a, const dReal *b)
 {
   const dReal res_0 = dCalcVectorDot3_41(a, b);
   const dReal res_1 = dCalcVectorDot3_41(a + 1, b);
@@ -332,12 +332,12 @@ ODE_PURE_INLINE void dMultiplyHelper1_331(dReal *res, const dReal *a, const dRea
   res[0] = res_0; res[1] = res_1; res[2] = res_2;
 }
 
-ODE_PURE_INLINE void dMultiplyHelper0_133(dReal *res, const dReal *a, const dReal *b)
+ODE_PURE_INLINE void _dMultiplyHelper0_133(dReal *res, const dReal *a, const dReal *b)
 {
-  dMultiplyHelper1_331(res, b, a);
+  _dMultiplyHelper1_331(res, b, a);
 }
 
-ODE_PURE_INLINE void dMultiplyHelper1_133(dReal *res, const dReal *a, const dReal *b)
+ODE_PURE_INLINE void _dMultiplyHelper1_133(dReal *res, const dReal *a, const dReal *b)
 {
   const dReal res_0 = dCalcVectorDot3_44(a, b);
   const dReal res_1 = dCalcVectorDot3_44(a + 1, b);
@@ -353,91 +353,91 @@ it is not equivalent to A*=B.
 
 ODE_PURE_INLINE void dMultiply0_331(dReal *res, const dReal *a, const dReal *b)
 {
-  dMultiplyHelper0_331(res, a, b);
+  _dMultiplyHelper0_331(res, a, b);
 }
 
 ODE_PURE_INLINE void dMultiply1_331(dReal *res, const dReal *a, const dReal *b)
 {
-  dMultiplyHelper1_331(res, a, b);
+  _dMultiplyHelper1_331(res, a, b);
 }
 
 ODE_PURE_INLINE void dMultiply0_133(dReal *res, const dReal *a, const dReal *b)
 {
-  dMultiplyHelper0_133(res, a, b);
+  _dMultiplyHelper0_133(res, a, b);
 }
 
 ODE_PURE_INLINE void dMultiply0_333(dReal *res, const dReal *a, const dReal *b)
 {
-  dMultiplyHelper0_133(res + 0, a + 0, b);
-  dMultiplyHelper0_133(res + 4, a + 4, b);
-  dMultiplyHelper0_133(res + 8, a + 8, b);
+  _dMultiplyHelper0_133(res + 0, a + 0, b);
+  _dMultiplyHelper0_133(res + 4, a + 4, b);
+  _dMultiplyHelper0_133(res + 8, a + 8, b);
 }
 
 ODE_PURE_INLINE void dMultiply1_333(dReal *res, const dReal *a, const dReal *b)
 {
-  dMultiplyHelper1_133(res + 0, b, a + 0);
-  dMultiplyHelper1_133(res + 4, b, a + 1);
-  dMultiplyHelper1_133(res + 8, b, a + 2);
+  _dMultiplyHelper1_133(res + 0, b, a + 0);
+  _dMultiplyHelper1_133(res + 4, b, a + 1);
+  _dMultiplyHelper1_133(res + 8, b, a + 2);
 }
 
 ODE_PURE_INLINE void dMultiply2_333(dReal *res, const dReal *a, const dReal *b)
 {
-  dMultiplyHelper0_331(res + 0, b, a + 0);
-  dMultiplyHelper0_331(res + 4, b, a + 4);
-  dMultiplyHelper0_331(res + 8, b, a + 8);
+  _dMultiplyHelper0_331(res + 0, b, a + 0);
+  _dMultiplyHelper0_331(res + 4, b, a + 4);
+  _dMultiplyHelper0_331(res + 8, b, a + 8);
 }
 
 ODE_PURE_INLINE void dMultiplyAdd0_331(dReal *res, const dReal *a, const dReal *b)
 {
   dReal tmp[3];
-  dMultiplyHelper0_331(tmp, a, b);
+  _dMultiplyHelper0_331(tmp, a, b);
   dAddVectors3(res, res, tmp);
 }
 
 ODE_PURE_INLINE void dMultiplyAdd1_331(dReal *res, const dReal *a, const dReal *b)
 {
   dReal tmp[3];
-  dMultiplyHelper1_331(tmp, a, b);
+  _dMultiplyHelper1_331(tmp, a, b);
   dAddVectors3(res, res, tmp);
 }
 
 ODE_PURE_INLINE void dMultiplyAdd0_133(dReal *res, const dReal *a, const dReal *b)
 {
   dReal tmp[3];
-  dMultiplyHelper0_133(tmp, a, b);
+  _dMultiplyHelper0_133(tmp, a, b);
   dAddVectors3(res, res, tmp);
 }
 
 ODE_PURE_INLINE void dMultiplyAdd0_333(dReal *res, const dReal *a, const dReal *b)
 {
   dReal tmp[3];
-  dMultiplyHelper0_133(tmp, a + 0, b);
+  _dMultiplyHelper0_133(tmp, a + 0, b);
   dAddVectors3(res+ 0, res + 0, tmp);
-  dMultiplyHelper0_133(tmp, a + 4, b);
+  _dMultiplyHelper0_133(tmp, a + 4, b);
   dAddVectors3(res + 4, res + 4, tmp);
-  dMultiplyHelper0_133(tmp, a + 8, b);
+  _dMultiplyHelper0_133(tmp, a + 8, b);
   dAddVectors3(res + 8, res + 8, tmp);
 }
 
 ODE_PURE_INLINE void dMultiplyAdd1_333(dReal *res, const dReal *a, const dReal *b)
 {
   dReal tmp[3];
-  dMultiplyHelper1_133(tmp, b, a + 0);
+  _dMultiplyHelper1_133(tmp, b, a + 0);
   dAddVectors3(res + 0, res + 0, tmp);
-  dMultiplyHelper1_133(tmp, b, a + 1);
+  _dMultiplyHelper1_133(tmp, b, a + 1);
   dAddVectors3(res + 4, res + 4, tmp);
-  dMultiplyHelper1_133(tmp, b, a + 2);
+  _dMultiplyHelper1_133(tmp, b, a + 2);
   dAddVectors3(res + 8, res + 8, tmp);
 }
 
 ODE_PURE_INLINE void dMultiplyAdd2_333(dReal *res, const dReal *a, const dReal *b)
 {
   dReal tmp[3];
-  dMultiplyHelper0_331(tmp, b, a + 0);
+  _dMultiplyHelper0_331(tmp, b, a + 0);
   dAddVectors3(res + 0, res + 0, tmp);
-  dMultiplyHelper0_331(tmp, b, a + 4);
+  _dMultiplyHelper0_331(tmp, b, a + 4);
   dAddVectors3(res + 4, res + 4, tmp);
-  dMultiplyHelper0_331(tmp, b, a + 8);
+  _dMultiplyHelper0_331(tmp, b, a + 8);
   dAddVectors3(res + 8, res + 8, tmp);
 }
 
