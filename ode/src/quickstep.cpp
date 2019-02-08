@@ -764,8 +764,9 @@ static void dxQuickStepIsland_Stage4LCP_MTfcComputation_warm(dxQuickStepperStage
 static void dxQuickStepIsland_Stage4LCP_MTfcComputation_warmZeroArrays(dxQuickStepperStage4CallContext *stage4CallContext);
 static void dxQuickStepIsland_Stage4LCP_MTfcComputation_warmPrepare(dxQuickStepperStage4CallContext *stage4CallContext);
 static void dxQuickStepIsland_Stage4LCP_MTfcComputation_warmComplete(dxQuickStepperStage4CallContext *stage4CallContext);
-#endif
+#else
 static void dxQuickStepIsland_Stage4LCP_MTfcComputation_cold(dxQuickStepperStage4CallContext *stage4CallContext);
+#endif
 static void dxQuickStepIsland_Stage4LCP_STfcComputation(dxQuickStepperStage4CallContext *stage4CallContext);
 static void dxQuickStepIsland_Stage4LCP_AdComputation(dxQuickStepperStage4CallContext *stage4CallContext);
 static void dxQuickStepIsland_Stage4LCP_ReorderPrep(dxQuickStepperStage4CallContext *stage4CallContext);
@@ -1145,30 +1146,30 @@ void dxQuickStepIsland_Stage0_Bodies(dxQuickStepperStage0BodiesCallContext *call
         // since gravity does normally have only one component it's more efficient
         // to run three loops for each individual component
         dxBody *const *const bodyend = body + nb;
-        dReal gravity_x = world->gravity[0];
+        dReal gravity_x = world->gravity[dSA_X];
         if (gravity_x) {
             for (dxBody *const *bodycurr = body; bodycurr != bodyend; bodycurr++) {
                 dxBody *b = *bodycurr;
                 if ((b->flags & dxBodyNoGravity) == 0) {
-                    b->facc[0] += b->mass.mass * gravity_x;
+                    b->facc[dSA_X] += b->mass.mass * gravity_x;
                 }
             }
         }
-        dReal gravity_y = world->gravity[1];
+        dReal gravity_y = world->gravity[dSA_Y];
         if (gravity_y) {
             for (dxBody *const *bodycurr = body; bodycurr != bodyend; bodycurr++) {
                 dxBody *b = *bodycurr;
                 if ((b->flags & dxBodyNoGravity) == 0) {
-                    b->facc[1] += b->mass.mass * gravity_y;
+                    b->facc[dSA_Y] += b->mass.mass * gravity_y;
                 }
             }
         }
-        dReal gravity_z = world->gravity[2];
+        dReal gravity_z = world->gravity[dSA_Z];
         if (gravity_z) {
             for (dxBody *const *bodycurr = body; bodycurr != bodyend; bodycurr++) {
                 dxBody *b = *bodycurr;
                 if ((b->flags & dxBodyNoGravity) == 0) {
-                    b->facc[2] += b->mass.mass * gravity_z;
+                    b->facc[dSA_Z] += b->mass.mass * gravity_z;
                 }
             }
         }
