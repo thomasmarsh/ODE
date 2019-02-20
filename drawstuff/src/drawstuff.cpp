@@ -510,7 +510,7 @@ void drawPatch(float p1[3], float p2[3], float p3[3], int level)
 {
     int i;
     if (level > 0) {
-        float q1[3], q2[3], q3[3];		 // sub-vertices
+        float q1[4], q2[4], q3[4];		 // sub-vertices
         for (i = 0; i < 3; i++) {
             q1[i] = 0.5f*(p1[i] + p2[i]);
             q2[i] = 0.5f*(p2[i] + p3[i]);
@@ -635,7 +635,7 @@ void drawSphereShadow(float px, float py, float pz, float radius)
 static
 void drawTriangle(const float *v0, const float *v1, const float *v2, int solid)
 {
-    float u[3], v[3], normal[3];
+    float u[4], v[4], normal[4];
     u[0] = v1[0] - v0[0];
     u[1] = v1[1] - v0[1];
     u[2] = v1[2] - v0[2];
@@ -656,7 +656,7 @@ void drawTriangle(const float *v0, const float *v1, const float *v2, int solid)
 static
 void drawTriangleD(const double *v0, const double *v1, const double *v2, int solid)
 {
-    float u[3], v[3], normal[3];
+    float u[4], v[4], normal[4];
     u[0] = float(v1[0] - v0[0]);
     u[1] = float(v1[1] - v0[1]);
     u[2] = float(v1[2] - v0[2]);
@@ -842,8 +842,8 @@ void drawCylinder(float l, float r, float zoffset)
 // motion model
 
 // current camera position and orientation
-static float view_xyz[3];	// position x,y,z
-static float view_hpr[3];	// heading, pitch, roll (degrees)
+static float view_xyz[4];	// position x,y,z
+static float view_hpr[4];	// heading, pitch, roll (degrees)
 
 
 // initialize the above variables
@@ -1166,8 +1166,8 @@ void dsDrawFrame(int width, int height, dsFunctions *fn, int pause)
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     // snapshot camera position (in MS Windows it is changed by the GUI thread)
-    float view2_xyz[3];
-    float view2_hpr[3];
+    float view2_xyz[4];
+    float view2_hpr[4];
     memcpy(view2_xyz, view_xyz, sizeof(float) * 3);
     memcpy(view2_hpr, view_hpr, sizeof(float) * 3);
 
@@ -1605,7 +1605,7 @@ void dsDrawBoxD(const double pos[3], const double R[12],
     const double sides[3])
 {
     int i;
-    float pos2[3], R2[12], fsides[3];
+    float pos2[4], R2[12], fsides[4];
     for (i = 0; i < 3; i++) pos2[i] = (float)pos[i];
     for (i = 0; i < 12; i++) R2[i] = (float)R[i];
     for (i = 0; i < 3; i++) fsides[i] = (float)sides[i];
@@ -1640,7 +1640,7 @@ void dsDrawConvexD(const double pos[3], const double R[12],
 void dsDrawSphereD(const double pos[3], const double R[12], float radius)
 {
     int i;
-    float pos2[3], R2[12];
+    float pos2[4], R2[12];
     for (i = 0; i < 3; i++) pos2[i] = (float)pos[i];
     for (i = 0; i < 12; i++) R2[i] = (float)R[i];
     dsDrawSphere(pos2, R2, radius);
@@ -1653,7 +1653,7 @@ void dsDrawTriangleD(const double pos[3], const double R[12],
     const double *v2, int solid)
 {
     int i;
-    float pos2[3], R2[12];
+    float pos2[4], R2[12];
     for (i = 0; i < 3; i++) pos2[i] = (float)pos[i];
     for (i = 0; i < 12; i++) R2[i] = (float)R[i];
 
@@ -1670,7 +1670,7 @@ void dsDrawTrianglesD(const double pos[3], const double R[12],
     const double *v, int n, int solid)
 {
     int i;
-    float pos2[3], R2[12];
+    float pos2[4], R2[12];
     for (i = 0; i < 3; i++) pos2[i] = (float)pos[i];
     for (i = 0; i < 12; i++) R2[i] = (float)R[i];
 
@@ -1689,7 +1689,7 @@ void dsDrawCylinderD(const double pos[3], const double R[12],
     float length, float radius)
 {
     int i;
-    float pos2[3], R2[12];
+    float pos2[4], R2[12];
     for (i = 0; i < 3; i++) pos2[i] = (float)pos[i];
     for (i = 0; i < 12; i++) R2[i] = (float)R[i];
     dsDrawCylinder(pos2, R2, length, radius);
@@ -1701,7 +1701,7 @@ void dsDrawCapsuleD(const double pos[3], const double R[12],
     float length, float radius)
 {
     int i;
-    float pos2[3], R2[12];
+    float pos2[4], R2[12];
     for (i = 0; i < 3; i++) pos2[i] = (float)pos[i];
     for (i = 0; i < 12; i++) R2[i] = (float)R[i];
     dsDrawCapsule(pos2, R2, length, radius);
@@ -1712,7 +1712,7 @@ void dsDrawCapsuleD(const double pos[3], const double R[12],
 void dsDrawLineD(const double _pos1[3], const double _pos2[3])
 {
     int i;
-    float pos1[3], pos2[3];
+    float pos1[4], pos2[4];
     for (i = 0; i < 3; i++) pos1[i] = (float)_pos1[i];
     for (i = 0; i < 3; i++) pos2[i] = (float)_pos2[i];
     dsDrawLine(pos1, pos2);
