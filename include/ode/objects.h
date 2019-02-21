@@ -448,6 +448,8 @@ ODE_API void dWorldImpulseToForce
  );
 
 
+#define dWORLDQUICKSTEP_ITERATION_COUNT_DEFAULT                     20U
+
 /**
  * @brief Set the number of iterations that the QuickStep method performs per
  *        step.
@@ -455,10 +457,9 @@ ODE_API void dWorldImpulseToForce
  * @remarks
  * More iterations will give a more accurate solution, but will take
  * longer to compute.
- * @param num The default is 20 iterations.
+ * @param num The default is dWORLDQUICKSTEP_ITERATION_COUNT_DEFAULT iterations.
  */
-ODE_API void dWorldSetQuickStepNumIterations (dWorldID, int num);
-
+ODE_API void dWorldSetQuickStepNumIterations (dWorldID w, int num);
 
 /**
  * @brief Get the number of iterations that the QuickStep method performs per
@@ -467,6 +468,65 @@ ODE_API void dWorldSetQuickStepNumIterations (dWorldID, int num);
  * @return nr of iterations
  */
 ODE_API int dWorldGetQuickStepNumIterations (dWorldID);
+
+
+#define dWORLDQUICKSTEP_ITERATION_PREMATURE_EXIT_DELTA_DEFAULT      1e-8f
+#define dWORLDQUICKSTEP_MAXIMAL_EXTRA_ITERATION_COUNT_FACTOR_DEFAULT 1.0f
+#define dWORLDQUICKSTEP_EXTRA_ITERATION_REQUIREMENT_DELTA_DEFAULT   1e-2f
+
+/**
+ * @brief Configure QuickStep method dynamic iteration count adjustment.
+ * @ingroup world
+ * @remarks
+ * The function controls dynamic iteration count adjustment basing on maximal contact force change
+ * per iteration in matrix.
+ *
+ * If Premature Exit Delta is configured with @p ptr_iteration_premature_exit_delta
+ * and the maximal contact force adjustment does not exceed the value the iterations are abandoned
+ * prematurely and computations complete in fewer steps than it would take normally.
+ * Passing zero in @p ptr_iteration_premature_exit_delta will disable the premature exit and enforce
+ * unconditional execution of iteration count set by @fn dWorldSetQuickStepNumIterations.
+ *
+ * If extra iterations are enabled by passing  a positive fraction in @p ptr_max_num_extra_factor
+ * and, after the normal number of iterations is executed, the maximal contact force adjustment is still
+ * larger than the limit set with the @ptr_extra_iteration_requirement_delta, up to that fraction of
+ * normal iteration count is executed extra until the maximal contact force change falls below the margin.
+ *
+ * At least one parameter must be not NULL for the call.
+ * If NULL is passed for any of the parameters the corresponding parameter will retain its previous value.
+ * If the standard number of iterations is changed with @fn dWorldSetQuickStepNumIterations call and
+ * an extra iteration count was configured with @p ptr_max_num_extra_factor the extra absolute value will be
+ * adjusted accordingly.
+ *
+ * @param ptr_iteration_premature_exit_delta A margin value such that, if contact force adjustment value maximum in an iteration 
+ * becomes less, the method is allowed to terminate prematurely.
+ * @param ptr_max_num_extra_factor A non-negative coefficient that defines fraction of the standard iteration count to be executed extra
+ * if contact force still significantly changes after the standard iterations complete.
+ * @param ptr_extra_iteration_requirement_delta A margin that defines when the extra iterations are not needed or can be abandoned after 
+ * the start.
+ * @see dWorldGetQuickStepDynamicIterationParameters
+ */
+ODE_API void dWorldSetQuickStepDynamicIterationParameters(dWorldID w, const dReal *ptr_iteration_premature_exit_delta/*=NULL*/,
+    const dReal *ptr_max_num_extra_factor/*=NULL*/, const dReal *ptr_extra_iteration_requirement_delta/*=NULL*/);
+
+/**
+ * @brief Retrieve QuickStep method dynamic iteration count adjustment parameters.
+ * @ingroup world
+ * @remarks
+ * The function retrieves dynamic iteration count adjustment parameters.
+ *
+ * See @fn dWorldSetQuickStepDynamicIterationParameters for the parameters description.
+ *
+ * At least one parameter must be not NULL for the call.
+ *
+ * @param out_iteration_premature_exit_delta Premature Exit Delta value (can be NULL if the value is not needed).
+ * @param out_max_num_extra_factor Maximum Extra Iteration Number Factor value (can be NULL if the value is not needed).
+ * @param out_extra_iteration_requirement_delta Extra Iteration Requirement Delta value (can be NULL if the value is not needed).
+ * @see dWorldSetQuickStepDynamicIterationParameters
+ */
+ODE_API void dWorldGetQuickStepDynamicIterationParameters(dWorldID w, dReal *out_iteration_premature_exit_delta/*=NULL*/,
+    dReal *out_max_num_extra_factor/*=NULL*/, dReal *out_extra_iteration_requirement_delta/*=NULL*/);
+
 
 /**
  * @brief Set the SOR over-relaxation parameter

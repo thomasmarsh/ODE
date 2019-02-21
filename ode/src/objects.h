@@ -70,59 +70,126 @@ struct dBase {
 // base class for bodies and joints
 
 struct dObject : public dBase {
+    explicit dObject(dxWorld *w) : world(w), next(NULL), tome(NULL), tag(0), userdata(NULL) {}
+    virtual ~dObject();
+
     dxWorld *world;		// world this object is in
     dObject *next;		// next object of this type in list
     dObject **tome;		// pointer to previous object's next ptr
     int tag;			// used by dynamics algorithms
     void *userdata;		// user settable data
-
-    explicit dObject(dxWorld *w): world(w), next(NULL), tome(NULL), tag(0), userdata(NULL) {}
-    virtual ~dObject();
 };
 
 
 // auto disable parameters
 struct dxAutoDisable {
+    dxAutoDisable() {}
+    explicit dxAutoDisable(void *);
+
     dReal idle_time;		// time the body needs to be idle to auto-disable it
     int idle_steps;		// steps the body needs to be idle to auto-disable it
     unsigned int average_samples;     // size of the average_lvel and average_avel buffers
     dReal linear_average_threshold;   // linear (squared) average velocity threshold
     dReal angular_average_threshold;  // angular (squared) average velocity threshold
-
-    dxAutoDisable() {}
-    explicit dxAutoDisable(void *);
 };
 
 
 // damping parameters
 struct dxDampingParameters {
+    dxDampingParameters() {}
+    explicit dxDampingParameters(void *);
+
     dReal linear_scale;  // multiply the linear velocity by (1 - scale)
     dReal angular_scale; // multiply the angular velocity by (1 - scale)
     dReal linear_threshold;   // linear (squared) average speed threshold
     dReal angular_threshold;  // angular (squared) average speed threshold
-
-    dxDampingParameters() {}
-    explicit dxDampingParameters(void *);
 };
 
 
-// quick-step parameters
-struct dxQuickStepParameters {
-    int num_iterations;		// number of SOR iterations to perform
-    dReal w;			// the SOR over-relaxation parameter
+enum dxMarginalDeltaKind {
+    MDK__MIN,
 
+    MDK_EXTRA_ITERATIONS_REQUIREMENT_DELTA = MDK__MIN,
+    MDK_PREMATURE_EXIT_DELTA,
+
+    MDK__MAX,
+};
+
+// quick-step parameters
+class dxQuickStepParameters 
+{
+public:
     dxQuickStepParameters() {}
     explicit dxQuickStepParameters(void *);
+
+    void AssignNumIterations(unsigned iterationCount)
+    {
+        dIASSERT(iterationCount != 0); // QuickStep implementation relies of number of iteration not being zero
+
+        m_iterationCount = iterationCount;
+        m_maxExtraIterationCount = DeriveExtraIterationCount(iterationCount, m_maxExtraIterationsFactor);
+        UpdateDynamicIterationCountAdjustmentEnabledState();
+    }
+
+    unsigned GetNumIterations() const { return m_iterationCount; }
+
+    void AssignPrematureExitDelta(dReal deltaValue)
+    {
+        dIASSERT(deltaValue >= 0); 
+        m_marginalDeltaValues[MDK_PREMATURE_EXIT_DELTA] = deltaValue;
+        UpdateDynamicIterationCountAdjustmentEnabledState();
+    }
+
+    dReal GetPrematureExitDelta() const { return m_marginalDeltaValues[MDK_PREMATURE_EXIT_DELTA]; }
+
+    void AssignExtraIterationsRequirementDelta(dReal deltaValue) { dIASSERT(deltaValue >= 0); m_marginalDeltaValues[MDK_EXTRA_ITERATIONS_REQUIREMENT_DELTA] = deltaValue; }
+    dReal GetExtraIterationsRequirementDelta() const { return m_marginalDeltaValues[MDK_EXTRA_ITERATIONS_REQUIREMENT_DELTA]; }
+
+    void AssignMaxNumExtraFactor(dReal maxNumExtraFactor)
+    {
+        dIASSERT(maxNumExtraFactor >= 0);
+
+        m_maxExtraIterationsFactor = maxNumExtraFactor;
+        m_maxExtraIterationCount = DeriveExtraIterationCount(m_iterationCount, maxNumExtraFactor);
+        UpdateDynamicIterationCountAdjustmentEnabledState();
+    }
+
+    dReal GetMaxNumExtraFactor() const { return m_maxExtraIterationsFactor; }
+
+    bool GetIsDynamicIterationCountAdjustmentEnabled() const { return m_dynamicIterationCountAdjustmentEnabled; }
+
+private:
+    static unsigned DeriveExtraIterationCount(unsigned iterationCount, dReal extraIterationCountFactor)
+    {
+        dIASSERT(iterationCount != 0);
+        dIASSERT(extraIterationCountFactor >= 0);
+        
+        dReal extraIterationCount = iterationCount * extraIterationCountFactor; 
+        return extraIterationCount < UINT_MAX ? (unsigned)extraIterationCount : UINT_MAX;
+    }
+
+    void UpdateDynamicIterationCountAdjustmentEnabledState()
+    {
+        m_dynamicIterationCountAdjustmentEnabled = m_maxExtraIterationCount != 0 || m_marginalDeltaValues[MDK_PREMATURE_EXIT_DELTA] != 0;
+    }
+
+public:
+    unsigned int m_iterationCount;		// number of SOR iterations to perform
+    unsigned int m_maxExtraIterationCount; // maximal number of extra iterations that can be performed until maximal delta falls below the upper margin
+    dReal m_maxExtraIterationsFactor;         // factor of maximal extra iteration count with respect to standard iteration count
+    dReal m_marginalDeltaValues[MDK__MAX]; // marginal values for LCP iteration maximal delta
+    bool m_dynamicIterationCountAdjustmentEnabled;
+    dReal w;			                // the SOR over-relaxation parameter
 };
 
 
 // contact generation parameters
 struct dxContactParameters {
-    dReal max_vel;		// maximum correcting velocity
-    dReal min_depth;		// thickness of 'surface layer'
-
     dxContactParameters() {}
     explicit dxContactParameters(void *);
+
+    dReal max_vel;		// maximum correcting velocity
+    dReal min_depth;		// thickness of 'surface layer'
 };
 
 // position vector and rotation matrix for geometry objects that are not
@@ -133,6 +200,8 @@ struct dxPosR {
 };
 
 struct dxBody : public dObject {
+    dxBody(dxWorld *w);
+
     dxJointNode *firstjoint;	// list of attached joints
     unsigned flags;			// some dxBodyFlagXXX flags
     dGeomID geom;			// first collision geom associated with body
@@ -157,12 +226,32 @@ struct dxBody : public dObject {
     void (*moved_callback)(dxBody*); // let the user know the body moved
     dxDampingParameters dampingp; // damping parameters, depends on flags
     dReal max_angular_speed;      // limit the angular velocity to this magnitude
-
-    dxBody(dxWorld *w);
 };
 
 
 struct dxWorld : public dBase, public dxThreadingBase, private dxIThreadingDefaultImplProvider {
+public:
+    dxWorld();
+    virtual ~dxWorld(); // Compilers issue warnings if a class with virtual methods does not have a virtual destructor :(
+
+    void assignThreadingImpl(const dxThreadingFunctionsInfo *functions_info, dThreadingImplementationID threading_impl);
+
+    unsigned calculateIslandProcessingMaxThreadCount(unsigned *ptrOut_activeThreadCount = NULL) const
+    {
+        unsigned activeThreadCount, *ptrActiveThreadCountToUse = ptrOut_activeThreadCount != NULL ? &activeThreadCount : NULL;
+        unsigned limitedCount = calculateThreadingLimitedThreadCount(islands_max_threads, false, ptrActiveThreadCountToUse);
+        if (ptrOut_activeThreadCount != NULL) {
+            *ptrOut_activeThreadCount = dMACRO_MAX(activeThreadCount, 1U);
+        }
+        return dMACRO_MAX(limitedCount, 1U);
+    }
+
+    dxWorldProcessContext *unsafeGetWorldProcessingContext() const;
+
+private: // dxIThreadingDefaultImplProvider
+    virtual const dxThreadingFunctionsInfo *retrieveThreadingDefaultImpl(dThreadingImplementationID &out_defaultImpl);
+
+public:
     dxBody *firstbody;		// body linked list
     dxJoint *firstjoint;		// joint linked list
     int nb,nj;			// number of bodies and joints in lists
@@ -180,26 +269,6 @@ struct dxWorld : public dBase, public dxThreadingBase, private dxIThreadingDefau
     dReal max_angular_speed;      // limit the angular velocity to this magnitude
 
     void* userdata;
-
-    dxWorld();
-    virtual ~dxWorld(); // Compilers issue warnings if a class with virtual methods does not have a virtual destructor :(
-
-    void assignThreadingImpl(const dxThreadingFunctionsInfo *functions_info, dThreadingImplementationID threading_impl);
-    
-    unsigned calculateIslandProcessingMaxThreadCount(unsigned *ptrOut_activeThreadCount=NULL) const 
-    {
-        unsigned activeThreadCount, *ptrActiveThreadCountToUse = ptrOut_activeThreadCount != NULL ? &activeThreadCount : NULL;
-        unsigned limitedCount = calculateThreadingLimitedThreadCount(islands_max_threads, false, ptrActiveThreadCountToUse);
-        if (ptrOut_activeThreadCount != NULL) {
-            *ptrOut_activeThreadCount = dMACRO_MAX(activeThreadCount, 1U);
-        }
-        return dMACRO_MAX(limitedCount, 1U); 
-    }
-    
-    dxWorldProcessContext *unsafeGetWorldProcessingContext() const;
-
-private: // dxIThreadingDefaultImplProvider
-    virtual const dxThreadingFunctionsInfo *retrieveThreadingDefaultImpl(dThreadingImplementationID &out_defaultImpl);
 };
 
 

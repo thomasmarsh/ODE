@@ -88,6 +88,22 @@ void dxSetValue (dReal *a, sizeint n, dReal value)
 #endif // #ifdef __cplusplus
 
 
+ODE_PURE_INLINE
+dReal dxCalculateModuloMaximum(const dReal *valueStorage, sizeint valueCount)
+{
+    dIASSERT(valueCount != 0);
+
+    dReal moduleMaximum = dFabs(*valueStorage);
+
+    const dReal *const storageEnd = valueStorage + valueCount;
+    for (const dReal *currentValue = valueStorage + 1; currentValue != storageEnd; ++currentValue) {
+        moduleMaximum = dMax(moduleMaximum, dFabs(*currentValue));
+    }
+
+    return moduleMaximum;
+}
+
+
 dReal dxDot (const dReal *a, const dReal *b, unsigned n);
 void dxMultiply0 (dReal *A, const dReal *B, const dReal *C, unsigned p, unsigned q, unsigned r);
 void dxMultiply1 (dReal *A, const dReal *B, const dReal *C, unsigned p, unsigned q, unsigned r);

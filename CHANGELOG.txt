@@ -8,6 +8,17 @@ the rules for this file:
   * keep the format consistent (79 char width, M/D/Y date format).
 
 ------------------------------------------------------------------------------
+02/21/2019 Oleh Derevenko
+        * Dynamic step count adjustment was implemented for dWorldQuickStep
+          with dWorldSetQuickStepDynamicIterationParameters and 
+          dWorldGetQuickStepDynamicIterationParameters new API functions
+          to control the feature.
+          The solver estimates per body resulting contact force maximal 
+          absolute adjustment value and may exit after fewer iterations if
+          the adjustments get smaller than the given threshold, or iterate 
+          longer if the adjustments are still significant after the default
+          iteration count is executed.
+
 01/20/2019 Oleh Derevenko
         * x86 targets have been changed to generate SSE2 code for calculations
           by default with possibility to explicitly configure back for FPU.

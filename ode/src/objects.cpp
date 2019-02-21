@@ -68,10 +68,23 @@ dxDampingParameters::dxDampingParameters(void *):
 {
 }
 
-dxQuickStepParameters::dxQuickStepParameters(void *):
-    num_iterations(20),
+static const dReal g_QuickStepParameters_marginalDeltaValuesInitializer[/*MDK__MAX*/] = 
+{
+    dWORLDQUICKSTEP_EXTRA_ITERATION_REQUIREMENT_DELTA_DEFAULT, // MDK_EXTRA_ITERATIONS_REQUIREMENT_DELTA,
+    dWORLDQUICKSTEP_ITERATION_PREMATURE_EXIT_DELTA_DEFAULT, // MDK_PREMATURE_EXIT_DELTA,
+};
+dSASSERT(dARRAY_SIZE(g_QuickStepParameters_marginalDeltaValuesInitializer) == MDK__MAX);
+
+dxQuickStepParameters::dxQuickStepParameters(void *) :
+    m_iterationCount(dWORLDQUICKSTEP_ITERATION_COUNT_DEFAULT),
+    m_maxExtraIterationCount(DeriveExtraIterationCount(dWORLDQUICKSTEP_ITERATION_COUNT_DEFAULT, dWORLDQUICKSTEP_MAXIMAL_EXTRA_ITERATION_COUNT_FACTOR_DEFAULT)),
+    m_maxExtraIterationsFactor(dWORLDQUICKSTEP_MAXIMAL_EXTRA_ITERATION_COUNT_FACTOR_DEFAULT),
     w(REAL(1.3))
 {
+    std::copy(g_QuickStepParameters_marginalDeltaValuesInitializer, g_QuickStepParameters_marginalDeltaValuesInitializer + dARRAY_SIZE(g_QuickStepParameters_marginalDeltaValuesInitializer), m_marginalDeltaValues);
+    dSASSERT(dARRAY_SIZE(g_QuickStepParameters_marginalDeltaValuesInitializer) == dARRAY_SIZE(m_marginalDeltaValues));
+
+    UpdateDynamicIterationCountAdjustmentEnabledState();
 }
 
 dxContactParameters::dxContactParameters(void *):

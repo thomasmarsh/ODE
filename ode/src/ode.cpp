@@ -43,6 +43,8 @@
 // misc defines
 #define ALLOCA dALLOCA16
 
+#define dMAX(x, y) ((x) > (y) ? (x) : (y))
+
 //****************************************************************************
 // utility
 
@@ -2049,14 +2051,60 @@ void dWorldSetMaxAngularSpeed(dWorldID w, dReal max_speed)
 void dWorldSetQuickStepNumIterations (dWorldID w, int num)
 {
     dAASSERT(w);
-    w->qs.num_iterations = num;
-}
+    dAASSERT(num > 0);
 
+    w->qs.AssignNumIterations(dMAX(num, 1)); // QuickStep implementation relies of number of iteration not being zero
+}
 
 int dWorldGetQuickStepNumIterations (dWorldID w)
 {
     dAASSERT(w);
-    return w->qs.num_iterations;
+    
+    return w->qs.GetNumIterations();
+}
+
+
+/*extern */
+void dWorldSetQuickStepDynamicIterationParameters(dWorldID w, const dReal *ptr_iteration_premature_exit_delta/*=NULL*/,
+    const dReal *ptr_max_num_extra_factor/*=NULL*/, const dReal *ptr_extra_iteration_requirement_delta/*=NULL*/)
+{
+    dAASSERT(w);
+    dAASSERT(ptr_iteration_premature_exit_delta != NULL || ptr_max_num_extra_factor != NULL || ptr_extra_iteration_requirement_delta != NULL);
+    dAASSERT(ptr_iteration_premature_exit_delta == NULL || *ptr_iteration_premature_exit_delta >= 0);
+    dAASSERT(ptr_max_num_extra_factor == NULL || *ptr_max_num_extra_factor >= 0);
+    dAASSERT(ptr_extra_iteration_requirement_delta == NULL || *ptr_extra_iteration_requirement_delta >= 0);
+
+    if (ptr_iteration_premature_exit_delta != NULL) {
+        w->qs.AssignPrematureExitDelta(dMAX(*ptr_iteration_premature_exit_delta, REAL(0.0)));
+    }
+
+    if (ptr_extra_iteration_requirement_delta != NULL) {
+        w->qs.AssignExtraIterationsRequirementDelta(dMAX(*ptr_extra_iteration_requirement_delta, REAL(0.0)));
+    }
+
+    if (ptr_max_num_extra_factor != NULL) {
+        w->qs.AssignMaxNumExtraFactor(dMAX(*ptr_max_num_extra_factor, REAL(0.0)));
+    }
+}
+
+/*extern */
+void dWorldGetQuickStepDynamicIterationParameters(dWorldID w, dReal *out_iteration_premature_exit_delta/*=NULL*/,
+    dReal *out_max_num_extra_factor/*=NULL*/, dReal *out_extra_iteration_requirement_delta/*=NULL*/)
+{
+    dAASSERT(w);
+    dAASSERT(out_iteration_premature_exit_delta != NULL || out_max_num_extra_factor != NULL || out_extra_iteration_requirement_delta != NULL);
+
+    if (out_iteration_premature_exit_delta != NULL) {
+        *out_iteration_premature_exit_delta = w->qs.GetPrematureExitDelta();
+    }
+
+    if (out_extra_iteration_requirement_delta != NULL) {
+        *out_extra_iteration_requirement_delta = w->qs.GetExtraIterationsRequirementDelta();
+    }
+
+    if (out_max_num_extra_factor != NULL) {
+        *out_max_num_extra_factor = w->qs.GetMaxNumExtraFactor();
+    }
 }
 
 
