@@ -144,7 +144,7 @@ void drawGeom (dGeomID g)
 
 static void inspectJoints(void)
 {
-  const dReal forcelimit = 4000.0;
+  const dReal forcelimit = 5000.0;
   int i;
   for (i=0; i<SEGMCNT-1; i++)
   {
