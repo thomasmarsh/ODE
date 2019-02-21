@@ -1821,6 +1821,7 @@ void dxQuickStepIsland_Stage3(dxQuickStepperStage3CallContext *stage3CallContext
             dxQuickStepIsland_Stage4LCP_ReorderPrep(stage4CallContext);
 
             dxWorld *world = callContext->m_world;
+            const bool dynamicIterationCountAdjustmentEnabled = world->qs.GetIsDynamicIterationCountAdjustmentEnabled();
             dReal prematureExitDelta = world->qs.GetPrematureExitDelta();
             const unsigned int num_iterations = world->qs.m_iterationCount;
 
@@ -1842,7 +1843,7 @@ void dxQuickStepIsland_Stage3(dxQuickStepperStage3CallContext *stage3CallContext
                     prematureExitDelta = world->qs.GetExtraIterationsRequirementDelta();
                 }
 
-                if (CheckForMaximumToBeLessThanLimitAndResetMaxAdjustments(stage4CallContext->m_forceMaxAdjustments, nb, prematureExitDelta)) {
+                if (dynamicIterationCountAdjustmentEnabled && CheckForMaximumToBeLessThanLimitAndResetMaxAdjustments(stage4CallContext->m_forceMaxAdjustments, nb, prematureExitDelta)) {
 #if WITH_DYNAMIC_ADJUSTMENT_STATS
                     if (iteration < num_iterations) {
                         ++g_uiPrematureExits;
@@ -2370,6 +2371,7 @@ int dxQuickStepIsland_Stage4LCP_IterationStart_Callback(void *_stage4CallContext
 
     bool abortIterating = false;
     if (iteration != 0 
+        && world->qs.GetIsDynamicIterationCountAdjustmentEnabled()
         && CheckForMaximumToBeLessThanLimitAndResetMaxAdjustments(stage4CallContext->m_forceMaxAdjustments, callContext->m_islandBodiesCount, stage4CallContext->m_LCP_iteration_premature_exit_delta)) {
 #if WITH_DYNAMIC_ADJUSTMENT_STATS
         if (iteration < num_iterations) {
