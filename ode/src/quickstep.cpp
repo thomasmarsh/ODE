@@ -147,7 +147,7 @@ inline unsigned int CalculateOptimalThreadsCount(unsigned int complexity, unsign
 
 
 #if WITH_DYNAMIC_ADJUSTMENT_STATS
-static unsigned g_uiPrematureExits = 0, g_uiProlongedExecs = 0, g_uiIterationIndex = 0;
+static unsigned g_uiPrematureExits = 0, g_uiProlongedExecs = 0, g_uiFullExtraExecs = 0, g_uiIterationIndex = 0;
 #endif
 
 
@@ -1836,6 +1836,11 @@ void dxQuickStepIsland_Stage3(dxQuickStepperStage3CallContext *stage3CallContext
 
                 if (iteration - extra_num_iterations == num_iterations) {
                     if (extra_num_iterations != 0 || world->qs.m_maxExtraIterationCount == 0) {
+#if WITH_DYNAMIC_ADJUSTMENT_STATS
+                        if (extra_num_iterations != 0) {
+                            ++g_uiFullExtraExecs;
+                        }
+#endif
                         break;
                     }
 
@@ -2407,6 +2412,11 @@ int dxQuickStepIsland_Stage4LCP_IterationStart_Callback(void *_stage4CallContext
         bool lastIteration = false;
         if (iteration + 1 - stage4CallContext->m_LCP_extra_num_iterations == num_iterations) {
             if (stage4CallContext->m_LCP_extra_num_iterations != 0 || world->qs.m_maxExtraIterationCount == 0) {
+#if WITH_DYNAMIC_ADJUSTMENT_STATS
+                if (stage4CallContext->m_LCP_extra_num_iterations != 0) {
+                    ++g_uiFullExtraExecs;
+                }
+#endif
                 lastIteration = true;
             }
             else {
@@ -3197,7 +3207,7 @@ void dxQuickStepIsland_Stage5(dxQuickStepperStage5CallContext *stage5CallContext
 #if WITH_DYNAMIC_ADJUSTMENT_STATS
     if (++g_uiIterationIndex % 256 == 0)
     {
-        printf("Iteration %08u: PE=%u LE=%u\r", g_uiIterationIndex, g_uiPrematureExits, g_uiProlongedExecs);
+        printf("Iteration %08u: PE=%u LE=%u, FE=%u\r", g_uiIterationIndex, g_uiPrematureExits, g_uiProlongedExecs, g_uiFullExtraExecs);
     }
 #endif
     dxWorldProcessMemArena *memarena = callContext->m_stepperArena;
