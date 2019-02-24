@@ -215,4 +215,18 @@ typedef unsigned long     duint64;
 #endif
 
 
+#if defined(_MSC_VER) && _MSC_VER < 1700 // Also mind similar defines in ccd/vec3.h 
+/* Define fmin, fmax, fminf, fmaxf which are missing from MSVC (up to VS2008 at least) */
+  static __inline double _ode_fmin(double x, double y) { return __min(x, y); }
+  static __inline double _ode_fmax(double x, double y) { return __max(x, y); }
+  static __inline float _ode_fminf(float x, float y) { return __min(x, y); }
+  static __inline float _ode_fmaxf(float x, float y) { return __max(x, y); }
+#else // #if !defined(_MSC_VER) || _MSC_VER >= 1700
+  #define _ode_fmin(x, y) fmin(x, y)
+  #define _ode_fmax(x, y) fmax(x, y)
+  #define _ode_fminf(x, y) fminf(x, y)
+  #define _ode_fmaxf(x, y) fmaxf(x, y)
+#endif // #if !defined(_MSC_VER) || _MSC_VER >= 1700
+
+
 #endif
