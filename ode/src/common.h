@@ -30,13 +30,41 @@
 #include <algorithm>
 
 
+/*
+ *	Some reliability re-definitions
+ */
+
+#ifndef offsetof
+#define offsetof(s, m) ((sizeint)&(((s *)8)->m) - (sizeint)8)
+#endif
+#ifndef membersize
+#define membersize(s, m) (sizeof(((s *)8)->m))
+#endif
+#ifndef endoffsetof
+#define endoffsetof(s, m)   ((sizeint)((sizeint)&(((s *)8)->m) - (sizeint)8) + sizeof(((s *)8)->m))
+#endif
+
+
+/*
+ *	SIZE_MAX reliability re-definition
+ */
+
 #ifndef SIZE_MAX
 #define SIZE_MAX  ((sizeint)(-1))
 #endif
 
+
+/*
+ *	Macros for minimum and maximum (to be surly the macros
+ */
+
 #define dMACRO_MAX(a, b) ((a) > (b) ? (a) : (b))
 #define dMACRO_MIN(a, b) ((a) < (b) ? (a) : (b))
 
+
+/*
+ *	Floating point related definitions
+ */
 
 #ifdef dSINGLE
 #define dEpsilon  FLT_EPSILON
@@ -71,17 +99,9 @@
 #define dMaxIntExact dMACRO_MIN(dMaxExact, (dReal)INT_MAX)
 #define dMinIntExact dMACRO_MAX(dMinExact, (dReal)INT_MIN)
 
-
-#ifndef offsetof
-#define offsetof(s, m) ((sizeint)&(((s *)8)->m) - (sizeint)8)
-#endif
-#ifndef membersize
-#define membersize(s, m) (sizeof(((s *)8)->m))
-#endif
-#ifndef endoffsetof
-#define endoffsetof(s, m)   ((sizeint)((sizeint)&(((s *)8)->m) - (sizeint)8) + sizeof(((s *)8)->m))
-#endif
-
+/*
+ *	Alignment related helpers
+ */
 
 /* the efficient alignment. most platforms align data structures to some
  * number of bytes, but this is not always the most efficient alignment.
@@ -191,6 +211,10 @@ private:
 };
 
 
+/*
+ *	Type casting related helpers
+ */
+
 template<typename DstType, typename SrcType>
 inline 
 bool _cast_to_smaller(DstType &dtOutResult, const SrcType &stArgument)
@@ -217,21 +241,6 @@ inline TTargetType templateCAST_TO_SMALLER(const TSourceType &stSourceValue)
 
 
 #endif // #if !defined(__GNUC__)
-
-
-template<typename value_type>
-inline 
-void dxSwap(value_type &one, value_type &another)
-{
-    std::swap(one, another);
-}
-
-template<typename value_type, typename lo_type, typename hi_type>
-inline 
-value_type dxClamp(const value_type &value, const lo_type &lo, const hi_type &hi)
-{
-    return value < lo ? (value_type)lo : value > hi ? (value_type)hi : value;
-}
 
 
 template <typename Type>
@@ -331,6 +340,25 @@ struct _make_unsigned
 {
     typedef typename _sized_unsigned<sizeof(tintergraltype)>::type type;
 };
+
+
+/*
+ *	Some handy utilities
+ */
+
+template<typename value_type>
+inline 
+void dxSwap(value_type &one, value_type &another)
+{
+    std::swap(one, another);
+}
+
+template<typename value_type, typename lo_type, typename hi_type>
+inline 
+value_type dxClamp(const value_type &value, const lo_type &lo, const hi_type &hi)
+{
+    return value < lo ? (value_type)lo : value > hi ? (value_type)hi : value;
+}
 
 
 // template<typename tvalueint, typename tminint, typename tmaxint>

@@ -294,8 +294,13 @@ typedef dReal dQuaternion[dQUE__MAX];
 #define dCeil(x) ceilf(x)			/* ceil */
 #define dCopySign(a,b) _ode_copysignf(a, b) /* copy value sign */
 #define dNextAfter(x, y) _ode_nextafterf(x, y) /* next value after */
+#if !defined(_MSC_VER) || _MSC_VER >= 1800
 #define dMax(a, b) fmaxf(a, b)
 #define dMin(a, b) fminf(a, b)
+#else
+#define dMax(a, b) ((dReal)(a) >= (dReal)(b) ? (dReal)(a) : (dReal)(b))
+#define dMin(a, b) ((dReal)(a) <= (dReal)(b) ? (dReal)(a) : (dReal)(b))
+#endif
 
 #ifdef HAVE___ISNANF
 #define dIsNan(x) (__isnanf(x))
@@ -333,8 +338,13 @@ typedef dReal dQuaternion[dQUE__MAX];
 #define dCeil(x) ceil(x)
 #define dCopySign(a,b) _ode_copysign(a, b)
 #define dNextAfter(x, y) _ode_nextafter(x, y)
+#if !defined(_MSC_VER) || _MSC_VER >= 1800
 #define dMax(a, b) fmax(a, b)
 #define dMin(a, b) fmin(a, b)
+#else
+#define dMax(a, b) ((dReal)(a) >= (dReal)(b) ? (dReal)(a) : (dReal)(b))
+#define dMin(a, b) ((dReal)(a) <= (dReal)(b) ? (dReal)(a) : (dReal)(b))
+#endif
 
 #ifdef HAVE___ISNAN
 #define dIsNan(x) (__isnan(x))
