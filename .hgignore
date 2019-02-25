@@ -47,3 +47,16 @@ syntax: regexp
 ode/demo/demo_.+\.exe$
 ode/demo/demo_[^\.]+$
 ode/doc/html/.*
+
+#ingnore folders created by premake
+build/codeblocks
+build/codelite
+build/gmake
+build/vs2002
+build/vs2003
+build/vs2005
+build/vs2008
+build/vs2010
+
+#ingnore folder created during compilation
+lib
