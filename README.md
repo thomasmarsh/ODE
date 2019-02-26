@@ -25,7 +25,7 @@ See the [COPYING](http://bitbucket.org/odedevs/ode/raw/default/COPYING) file for
 
  * The ODE web pages are at [ode.org](http://www.ode.org/).
 
- * An online manual is at [the Wiki](http://ode-wiki.org/wiki/index.php?title=Manual).
+ * An online manual is at [the Wiki](http://ode.org/wiki/index.php?title=Manual).
 
  * API documentation is in the file ode/docs/index.html, or you
    can view it on the web at [opende.sf.net/docs/index.html](http://opende.sf.net/docs/index.html).
