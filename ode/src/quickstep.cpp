@@ -37,7 +37,7 @@
 #include <new>
 
 
-#define WITH_DYNAMIC_ADJUSTMENT_STATS   0
+#define PRINT_DYNAMIC_ADJUSTMENT_STATS   0
 
 
 //***************************************************************************
@@ -144,11 +144,6 @@ inline unsigned int CalculateOptimalThreadsCount(unsigned int complexity, unsign
 #define dxENCODE_INDEX(index)   ((unsigned int)((index) + 1))
 #define dxDECODE_INDEX(code)    ((unsigned int)((code) - 1))
 #define dxHEAD_INDEX            0
-
-
-#if WITH_DYNAMIC_ADJUSTMENT_STATS
-static unsigned g_uiPrematureExits = 0, g_uiProlongedExecs = 0, g_uiFullExtraExecs = 0, g_uiIterationIndex = 0;
-#endif
 
 
 //****************************************************************************
@@ -1836,11 +1831,10 @@ void dxQuickStepIsland_Stage3(dxQuickStepperStage3CallContext *stage3CallContext
 
                 if (iteration - extra_num_iterations == num_iterations) {
                     if (extra_num_iterations != 0 || world->qs.m_maxExtraIterationCount == 0) {
-#if WITH_DYNAMIC_ADJUSTMENT_STATS
                         if (extra_num_iterations != 0) {
-                            ++g_uiFullExtraExecs;
+                            volatile atomicord32 *fullExtraExecutionsStorage = world->qs.GetStatisticsFullExtraExecutionsStorage();
+                            ThrsafeIncrementNoResult(fullExtraExecutionsStorage);
                         }
-#endif
                         break;
                     }
 
@@ -1849,14 +1843,14 @@ void dxQuickStepIsland_Stage3(dxQuickStepperStage3CallContext *stage3CallContext
                 }
 
                 if (dynamicIterationCountAdjustmentEnabled && CheckForMaximumToBeLessThanLimitAndResetMaxAdjustments(stage4CallContext->m_forceMaxAdjustments, nb, prematureExitDelta)) {
-#if WITH_DYNAMIC_ADJUSTMENT_STATS
                     if (iteration < num_iterations) {
-                        ++g_uiPrematureExits;
+                        volatile atomicord32 *prematureExitsStorage = world->qs.GetStatisticsPrematureExitsStorage();
+                        ThrsafeIncrementNoResult(prematureExitsStorage);
                     }
                     else if (iteration > num_iterations) {
-                        ++g_uiProlongedExecs;
+                        volatile atomicord32 *prolongedExecutionsStorage = world->qs.GetStatisticsProlongedExecutionsStorage();
+                        ThrsafeIncrementNoResult(prolongedExecutionsStorage);
                     }
-#endif
                     break;
                 }
             }
@@ -2101,7 +2095,7 @@ void dxQuickStepIsland_Stage4LCP_MTfcComputation_warm(dxQuickStepperStage4CallCo
 {
     dxQuickStepIsland_Stage4LCP_MTfcComputation_warmPrepare(stage4CallContext);
 
-    if (ThrsafeExchangeAdd(&stage4CallContext->m_LCP_fcPrepareThreadsRemaining, (atomicord32)(-1)) == 1) {
+    if (ThrsafeDecrement(&stage4CallContext->m_LCP_fcPrepareThreadsRemaining) == 0) {
         stage4CallContext->ResetLCP_fcComputationIndex();
 
         const dxStepperProcessingCallContext *callContext = stage4CallContext->m_stepperCallContext;
@@ -2378,14 +2372,14 @@ int dxQuickStepIsland_Stage4LCP_IterationStart_Callback(void *_stage4CallContext
     if (iteration != 0 
         && world->qs.GetIsDynamicIterationCountAdjustmentEnabled()
         && CheckForMaximumToBeLessThanLimitAndResetMaxAdjustments(stage4CallContext->m_forceMaxAdjustments, callContext->m_islandBodiesCount, stage4CallContext->m_LCP_iteration_premature_exit_delta)) {
-#if WITH_DYNAMIC_ADJUSTMENT_STATS
         if (iteration < num_iterations) {
-            ++g_uiPrematureExits;
+            volatile atomicord32 *prematureExitsStorage = world->qs.GetStatisticsPrematureExitsStorage();
+            ThrsafeIncrementNoResult(prematureExitsStorage);
         }
         else if (iteration > num_iterations) {
-            ++g_uiProlongedExecs;
+            volatile atomicord32 *prolongedExecutionsStorage = world->qs.GetStatisticsProlongedExecutionsStorage();
+            ThrsafeIncrementNoResult(prolongedExecutionsStorage);
         }
-#endif
         abortIterating = true;
     }
 
@@ -2412,11 +2406,10 @@ int dxQuickStepIsland_Stage4LCP_IterationStart_Callback(void *_stage4CallContext
         bool lastIteration = false;
         if (iteration + 1 - stage4CallContext->m_LCP_extra_num_iterations == num_iterations) {
             if (stage4CallContext->m_LCP_extra_num_iterations != 0 || world->qs.m_maxExtraIterationCount == 0) {
-#if WITH_DYNAMIC_ADJUSTMENT_STATS
                 if (stage4CallContext->m_LCP_extra_num_iterations != 0) {
-                    ++g_uiFullExtraExecs;
+                    volatile atomicord32 *fullExtraExecutionsStorage = world->qs.GetStatisticsFullExtraExecutionsStorage();
+                    ThrsafeIncrementNoResult(fullExtraExecutionsStorage);
                 }
-#endif
                 lastIteration = true;
             }
             else {
@@ -2488,14 +2481,14 @@ void dxQuickStepIsland_Stage4LCP_ConstraintsReordering(dxQuickStepperStage4CallC
     if (dxQuickStepIsland_Stage4LCP_ConstraintsShuffling(stage4CallContext, iteration)) {
 
         dxQuickStepIsland_Stage4LCP_LinksArraysZeroing(stage4CallContext);
-        if (ThrsafeExchangeAdd(&stage4CallContext->m_SOR_reorderThreadsRemaining, (atomicord32)(-1)) == 1) { // If last thread has exited the reordering routine...
+        if (ThrsafeDecrement(&stage4CallContext->m_SOR_reorderThreadsRemaining) == 0) { // If last thread has exited the reordering routine...
             // Rebuild the object dependency map
             dxQuickStepIsland_Stage4LCP_DependencyMapForNewOrderRebuilding(stage4CallContext);
         }
     }
     else {
         // NOTE: So far, this branch is only called in CONSTRAINTS_REORDERING_METHOD == REORDERING_METHOD__BY_ERROR case
-        if (ThrsafeExchangeAdd(&stage4CallContext->m_SOR_reorderThreadsRemaining, (atomicord32)(-1)) == 1) { // If last thread has exited the reordering routine...
+        if (ThrsafeDecrement(&stage4CallContext->m_SOR_reorderThreadsRemaining) == 0) { // If last thread has exited the reordering routine...
             dIASSERT(iteration != 0);
             dxQuickStepIsland_Stage4LCP_DependencyMapFromSavedLevelsReconstruction(stage4CallContext);
         }
@@ -2893,7 +2886,7 @@ void dxQuickStepIsland_Stage4LCP_MTIteration(dxQuickStepperStage4CallContext *st
     }
 
     // Decrement running threads count on exit
-    ThrsafeAdd(&stage4CallContext->m_LCP_iterationThreadsRemaining, (atomicord32)(-1));
+    ThrsafeDecrementNoResult(&stage4CallContext->m_LCP_iterationThreadsRemaining);
 }
 
 static 
@@ -3204,12 +3197,20 @@ void dxQuickStepIsland_Stage5(dxQuickStepperStage5CallContext *stage5CallContext
     const dxStepperProcessingCallContext *callContext = stage5CallContext->m_stepperCallContext;
     const dxQuickStepperLocalContext *localContext = stage5CallContext->m_localContext;
 
-#if WITH_DYNAMIC_ADJUSTMENT_STATS
-    if (++g_uiIterationIndex % 256 == 0)
-    {
-        printf("Iteration %08u: PE=%u LE=%u, FE=%u\r", g_uiIterationIndex, g_uiPrematureExits, g_uiProlongedExecs, g_uiFullExtraExecs);
+    dxWorld *world = callContext->m_world;
+    volatile atomicord32 *iterationCountStorage = world->qs.GetStatisticsIterationCountStorage();
+#if !PRINT_DYNAMIC_ADJUSTMENT_STATS
+    ThrsafeIncrementNoResult(iterationCountStorage);
+#else
+    unsigned iterationCount = ThrsafeIncrement(iterationCountStorage);
+    if (iterationCount % 256 == 0) {
+        printf("Iteration %08u: PE=%u LE=%u, FE=%u\r", iterationCount, 
+            (unsigned)*world->qs.GetStatisticsPrematureExitsStorage(), 
+            (unsigned)*world->qs.GetStatisticsProlongedExecutionsStorage(), 
+            (unsigned)*world->qs.GetStatisticsFullExtraExecutionsStorage());
     }
 #endif
+
     dxWorldProcessMemArena *memarena = callContext->m_stepperArena;
     memarena->RestoreState(stage5CallContext->m_stage3MemArenaState);
     stage5CallContext = NULL; // WARNING! stage3CallContext is not valid after this point!

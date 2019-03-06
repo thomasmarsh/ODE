@@ -529,6 +529,54 @@ ODE_API void dWorldGetQuickStepDynamicIterationParameters(dWorldID w, dReal *out
 
 
 /**
+ * @brief Statistics structure to accumulate QuickStep iteration couunt dynamic adjustment data.
+ * @ingroup world
+ *
+ * @see @fn dWorldAttachQuickStepDynamicIterationStatisticsSink
+ *
+ */
+typedef struct
+{
+    unsigned struct_size;         /*< to be initialized with the structure size */
+
+    duint32 iteration_count;      /*< number of iterations executed */
+
+    duint32 premature_exits;      /*< number of times solution took fewer than the regular iteration count */
+    duint32 prolonged_execs;      /*< number of times solution took more  than the regular iteration count */
+    duint32 full_extra_execs;     /*< number of times the assigned exit criteria were not achieved even after all extra iterations allowed */
+
+} dWorldQuickStepIterationCount_DynamicAdjustmentStatistics;
+
+ODE_PURE_INLINE
+void dWorldInitializeQuickStepIterationCount_DynamicAdjustmentStatistics(dWorldQuickStepIterationCount_DynamicAdjustmentStatistics *ptr_stat)
+{
+    memset(ptr_stat, 0, sizeof(*ptr_stat));
+    ptr_stat->struct_size = sizeof(*ptr_stat);
+}
+
+
+/**
+ * @brief Attach or remove a structure to collect QuickStep iteration count dynamic adjustment statistics.
+ * @ingroup world
+ * @remarks
+ * The function can be used to attach or remove a structure instance that will be updated with iteration count dynamic adjustment statistics
+ * of QuickStep. To break the attachment, the function must be called with NULL for the @p var_stats.
+ *
+ * See @fn dWorldSetQuickStepDynamicIterationParameters for information on the iteration count dynamic adjustment options.
+ *
+ * The caller is responsible for initializing the structure before assignment. The structure must persist in memory until unattached or 
+ * the host world object is destroyed. The same structure instance may be shared among multiple worlds if that makes sense.
+ *
+ * The assignment may fail if the feature is not configured within the library, or if the structure was not initialized properly.
+ *
+ * @param var_stats A pointer to structure instance to assigned or NULL to break the previous attachment for the world.
+ * @return Boolean status indicating whether the function succeeded
+ * @see dWorldQuickStepIterationCount_DynamicAdjustmentStatistics
+ */
+ODE_API int dWorldAttachQuickStepDynamicIterationStatisticsSink(dWorldID w, dWorldQuickStepIterationCount_DynamicAdjustmentStatistics *var_stats/*=NULL*/);
+
+
+/**
  * @brief Set the SOR over-relaxation parameter
  * @ingroup world
  * @param over_relaxation value to use by SOR

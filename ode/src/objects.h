@@ -20,7 +20,7 @@
  *                                                                       *
  *************************************************************************/
 
-// object, body, and world structs.
+ // object, body, and world structures.
 
 
 #ifndef _ODE__PRIVATE_OBJECTS_H_
@@ -30,10 +30,12 @@
 #include <ode/common.h>
 #include <ode/memory.h>
 #include <ode/mass.h>
+#include <ode/objects.h>
 #include "error.h"
 #include "array.h"
 #include "common.h"
 #include "threading_base.h"
+#include "odeou.h"
 
 
 struct dxJointNode;
@@ -44,26 +46,26 @@ class dxWorldProcessContext;
 // some body flags
 
 enum {
-    dxBodyFlagFiniteRotation =        1,  // use finite rotations
-    dxBodyFlagFiniteRotationAxis =    2,  // use finite rotations only along axis
-    dxBodyDisabled =                  4,  // body is disabled
-    dxBodyNoGravity =                 8,  // body is not influenced by gravity
-    dxBodyAutoDisable =               16, // enable auto-disable on body
-    dxBodyLinearDamping =             32, // use linear damping
-    dxBodyAngularDamping =            64, // use angular damping
-    dxBodyMaxAngularSpeed =           128,// use maximum angular speed
-    dxBodyGyroscopic =                256 // use gyroscopic term
+    dxBodyFlagFiniteRotation = 1,  // use finite rotations
+    dxBodyFlagFiniteRotationAxis = 2,  // use finite rotations only along axis
+    dxBodyDisabled = 4,  // body is disabled
+    dxBodyNoGravity = 8,  // body is not influenced by gravity
+    dxBodyAutoDisable = 16, // enable auto-disable on body
+    dxBodyLinearDamping = 32, // use linear damping
+    dxBodyAngularDamping = 64, // use angular damping
+    dxBodyMaxAngularSpeed = 128,// use maximum angular speed
+    dxBodyGyroscopic = 256 // use gyroscopic term
 };
 
 
 // base class that does correct object allocation / deallocation
 
 struct dBase {
-    void *operator new (size_t size) { return dAlloc (size); }
+    void *operator new (size_t size) { return dAlloc(size); }
     void *operator new (size_t, void *p) { return p; }
-    void operator delete (void *ptr, size_t size) { dFree (ptr,size); }
-    void *operator new[] (size_t size) { return dAlloc (size); }
-    void operator delete[] (void *ptr, size_t size) { dFree (ptr,size); }
+    void operator delete (void *ptr, size_t size) { dFree(ptr, size); }
+    void *operator new[](size_t size) { return dAlloc(size); }
+    void operator delete[](void *ptr, size_t size) { dFree(ptr, size); }
 };
 
 
@@ -116,12 +118,17 @@ enum dxMarginalDeltaKind {
 };
 
 // quick-step parameters
-class dxQuickStepParameters 
+class dxQuickStepParameters
 {
 public:
     dxQuickStepParameters() {}
     explicit dxQuickStepParameters(void *);
 
+private:
+    dxQuickStepParameters(const dxQuickStepParameters &anotherInstance) { dIASSERT(false); } // disabled
+    dxQuickStepParameters &operator =(const dxQuickStepParameters &anotherInstance) { dIASSERT(false); return *this; } // disabled
+
+public:
     void AssignNumIterations(unsigned iterationCount)
     {
         dIASSERT(iterationCount != 0); // QuickStep implementation relies of number of iteration not being zero
@@ -135,7 +142,7 @@ public:
 
     void AssignPrematureExitDelta(dReal deltaValue)
     {
-        dIASSERT(deltaValue >= 0); 
+        dIASSERT(deltaValue >= 0);
         m_marginalDeltaValues[MDK_PREMATURE_EXIT_DELTA] = deltaValue;
         UpdateDynamicIterationCountAdjustmentEnabledState();
     }
@@ -158,13 +165,21 @@ public:
 
     bool GetIsDynamicIterationCountAdjustmentEnabled() const { return m_dynamicIterationCountAdjustmentEnabled; }
 
+    void AssignStatisticsSink(dWorldQuickStepIterationCount_DynamicAdjustmentStatistics *statistics) { m_statistics = statistics; }
+    void ClearStatisticsSink() { m_statistics = &m_internal_statistics; }
+
+    volatile atomicord32 *GetStatisticsIterationCountStorage() const { dSASSERT(sizeof(atomicord32) == membersize(dWorldQuickStepIterationCount_DynamicAdjustmentStatistics, iteration_count)); return _type_cast_union<atomicord32>(&m_statistics->iteration_count); }
+    volatile atomicord32 *GetStatisticsPrematureExitsStorage() const { dSASSERT(sizeof(atomicord32) == membersize(dWorldQuickStepIterationCount_DynamicAdjustmentStatistics, premature_exits)); return _type_cast_union<atomicord32>(&m_statistics->premature_exits); }
+    volatile atomicord32 *GetStatisticsProlongedExecutionsStorage() const { dSASSERT(sizeof(atomicord32) == membersize(dWorldQuickStepIterationCount_DynamicAdjustmentStatistics, prolonged_execs)); return _type_cast_union<atomicord32>(&m_statistics->prolonged_execs); }
+    volatile atomicord32 *GetStatisticsFullExtraExecutionsStorage() const { dSASSERT(sizeof(atomicord32) == membersize(dWorldQuickStepIterationCount_DynamicAdjustmentStatistics, full_extra_execs)); return _type_cast_union<atomicord32>(&m_statistics->full_extra_execs); }
+
 private:
     static unsigned DeriveExtraIterationCount(unsigned iterationCount, dReal extraIterationCountFactor)
     {
         dIASSERT(iterationCount != 0);
         dIASSERT(extraIterationCountFactor >= 0);
-        
-        dReal extraIterationCount = iterationCount * extraIterationCountFactor; 
+
+        dReal extraIterationCount = iterationCount * extraIterationCountFactor;
         return extraIterationCount < UINT_MAX ? (unsigned)extraIterationCount : UINT_MAX;
     }
 
@@ -174,12 +189,16 @@ private:
     }
 
 public:
-    unsigned int m_iterationCount;		// number of SOR iterations to perform
+    unsigned int m_iterationCount;         // number of SOR iterations to perform
     unsigned int m_maxExtraIterationCount; // maximal number of extra iterations that can be performed until maximal delta falls below the upper margin
-    dReal m_maxExtraIterationsFactor;         // factor of maximal extra iteration count with respect to standard iteration count
+    dReal m_maxExtraIterationsFactor;      // factor of maximal extra iteration count with respect to standard iteration count
     dReal m_marginalDeltaValues[MDK__MAX]; // marginal values for LCP iteration maximal delta
     bool m_dynamicIterationCountAdjustmentEnabled;
-    dReal w;			                // the SOR over-relaxation parameter
+    dWorldQuickStepIterationCount_DynamicAdjustmentStatistics *m_statistics; // Adjustment statistics (the internal one or an externally assigned)
+    dReal w;                               // the SOR over-relaxation parameter
+
+private:
+    dWorldQuickStepIterationCount_DynamicAdjustmentStatistics m_internal_statistics; // The internal statistics is used to not have to check m_statistics for NULL; the local instance is used instead of a global one to avoid cache line conflicts between different threads possibly serving separate worlds.
 };
 
 
@@ -210,8 +229,8 @@ struct dxBody : public dObject {
     dReal invMass;		// 1 / mass.mass
     dxPosR posr;			// position and orientation of point of reference
     dQuaternion q;		// orientation quaternion
-    dVector3 lvel,avel;		// linear and angular velocity of POR
-    dVector3 facc,tacc;		// force and torque accumulators
+    dVector3 lvel, avel;		// linear and angular velocity of POR
+    dVector3 facc, tacc;		// force and torque accumulators
     dVector3 finite_rot_axis;	// finite rotation axis, unit length or 0=none
 
     // auto-disable information
@@ -223,7 +242,7 @@ struct dxBody : public dObject {
     unsigned int average_counter;      // counter/index to fill the average-buffers
     int average_ready;            // indicates ( with = 1 ), if the Body's buffers are ready for average-calculations
 
-    void (*moved_callback)(dxBody*); // let the user know the body moved
+    void(*moved_callback)(dxBody*); // let the user know the body moved
     dxDampingParameters dampingp; // damping parameters, depends on flags
     dReal max_angular_speed;      // limit the angular velocity to this magnitude
 };
@@ -254,7 +273,7 @@ private: // dxIThreadingDefaultImplProvider
 public:
     dxBody *firstbody;		// body linked list
     dxJoint *firstjoint;		// joint linked list
-    int nb,nj;			// number of bodies and joints in lists
+    int nb, nj;			// number of bodies and joints in lists
     dVector3 gravity;		// gravity vector (m/s/s)
     dReal global_erp;		// global error reduction parameter
     dReal global_cfm;		// global constraint force mixing parameter

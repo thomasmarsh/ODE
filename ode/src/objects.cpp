@@ -79,10 +79,13 @@ dxQuickStepParameters::dxQuickStepParameters(void *) :
     m_iterationCount(dWORLDQUICKSTEP_ITERATION_COUNT_DEFAULT),
     m_maxExtraIterationCount(DeriveExtraIterationCount(dWORLDQUICKSTEP_ITERATION_COUNT_DEFAULT, dWORLDQUICKSTEP_MAXIMAL_EXTRA_ITERATION_COUNT_FACTOR_DEFAULT)),
     m_maxExtraIterationsFactor(dWORLDQUICKSTEP_MAXIMAL_EXTRA_ITERATION_COUNT_FACTOR_DEFAULT),
+    m_statistics(&m_internal_statistics),
     w(REAL(1.3))
 {
     std::copy(g_QuickStepParameters_marginalDeltaValuesInitializer, g_QuickStepParameters_marginalDeltaValuesInitializer + dARRAY_SIZE(g_QuickStepParameters_marginalDeltaValuesInitializer), m_marginalDeltaValues);
     dSASSERT(dARRAY_SIZE(g_QuickStepParameters_marginalDeltaValuesInitializer) == dARRAY_SIZE(m_marginalDeltaValues));
+
+    dWorldInitializeQuickStepIterationCount_DynamicAdjustmentStatistics(&m_internal_statistics);
 
     UpdateDynamicIterationCountAdjustmentEnabledState();
 }

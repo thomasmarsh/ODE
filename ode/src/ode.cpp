@@ -2107,6 +2107,30 @@ void dWorldGetQuickStepDynamicIterationParameters(dWorldID w, dReal *out_iterati
     }
 }
 
+/*extern */
+int dWorldAttachQuickStepDynamicIterationStatisticsSink(dWorldID w, dWorldQuickStepIterationCount_DynamicAdjustmentStatistics *var_stats/*=NULL*/)
+{
+    dAASSERT(w);
+    dAASSERT(var_stats == NULL || (var_stats->struct_size >= sizeof(*var_stats) && var_stats->struct_size % sizeof(duint32) == 0));
+    dSASSERT(sizeof(dWorldQuickStepIterationCount_DynamicAdjustmentStatistics) % sizeof(duint32) == 0);
+
+    bool result = false;
+
+    if (var_stats != NULL) {
+        if (var_stats->struct_size >= sizeof(*var_stats) && var_stats->struct_size % sizeof(duint32) == 0) {
+
+            w->qs.AssignStatisticsSink(var_stats);
+            result = true;
+        }
+    }
+    else {
+        w->qs.ClearStatisticsSink();
+        result = true;
+    }
+
+    return result;
+}
+
 
 void dWorldSetQuickStepW (dWorldID w, dReal param)
 {

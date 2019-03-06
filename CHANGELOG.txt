@@ -8,6 +8,11 @@ the rules for this file:
   * keep the format consistent (79 char width, M/D/Y date format).
 
 ------------------------------------------------------------------------------
+03/06/2016 Oleh Derevenko
+        * dWorldAttachQuickStepDynamicIterationStatisticsSink public function 
+          was added to allow dynamic step count adjustment monitoring for
+          world instances.
+
 02/21/2019 Oleh Derevenko
         * Dynamic step count adjustment was implemented for dWorldQuickStep
           with dWorldSetQuickStepDynamicIterationParameters and 

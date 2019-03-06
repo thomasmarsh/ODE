@@ -66,6 +66,8 @@ using _OU_NAMESPACE::InitializeAtomicAPI;
 using _OU_NAMESPACE::FinalizeAtomicAPI;
 using _OU_NAMESPACE::AtomicIncrement;
 using _OU_NAMESPACE::AtomicDecrement;
+using _OU_NAMESPACE::AtomicIncrementNoResult;
+using _OU_NAMESPACE::AtomicDecrementNoResult;
 using _OU_NAMESPACE::AtomicCompareExchange;
 using _OU_NAMESPACE::AtomicExchange;
 using _OU_NAMESPACE::AtomicExchangeAddNoResult;
