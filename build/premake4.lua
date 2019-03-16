@@ -573,7 +573,8 @@
       location ( _OPTIONS["to"] or _ACTION )
 
       includedirs { 
-        "../tests/UnitTest++/src" 
+        "../ou/include",
+        "../tests/UnitTest++/src"
       }
     
       files { 
