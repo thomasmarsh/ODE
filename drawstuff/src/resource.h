@@ -15,6 +15,9 @@
 #define IDM_TEXTURES                    40006
 #define IDM_SAVE_SETTINGS               40007
 #define IDM_SINGLE_STEP                 40008
+#ifndef IDC_STATIC
+#define IDC_STATIC				-1
+#endif
 
 // Next default values for new objects
 // 
