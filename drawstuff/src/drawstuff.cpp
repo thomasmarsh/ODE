@@ -878,18 +878,18 @@ void wrapCameraAngles()
 void dsMotion(int mode, int deltax, int deltay)
 {
     float side = 0.01f * float(deltax);
-    float fwd = (mode == 4) ? (0.01f * float(deltay)) : 0.0f;
+    float fwd = (mode == dsMOTIONMODE_RBUTTONDOWN) ? (0.01f * float(deltay)) : 0.0f;
     float s = (float)sin(view_hpr[0] * DEG_TO_RAD);
     float c = (float)cos(view_hpr[0] * DEG_TO_RAD);
 
-    if (mode == 1) {
+    if (mode == dsMOTIONMODE_LBUTTONDOWN) {
         view_hpr[0] += float(deltax) * 0.5f;
         view_hpr[1] += float(deltay) * 0.5f;
     }
     else {
         view_xyz[0] += -s * side + c * fwd;
         view_xyz[1] += c * side + s * fwd;
-        if (mode == 2 || mode == 5) view_xyz[2] += 0.01f * float(deltay);
+        if (mode == dsMOTIONMODE_MBUTTONDOWN || mode == (dsMOTIONMODE_LBUTTONDOWN | dsMOTIONMODE_RBUTTONDOWN)) view_xyz[2] += 0.01f * float(deltay);
     }
     wrapCameraAngles();
 }
