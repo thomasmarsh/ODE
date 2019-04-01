@@ -512,6 +512,7 @@ LRESULT CALLBACK mainWndProc(HWND hWnd, UINT msg, WPARAM wParam,
             }
 
             // PostQuitMessage(0); -- The WM_QUIT from PostQuitMessage() call is, for some reason, not removed by the PeekMessage() loop in MainWindowExternalAborter::registerForAborts() on next window creations
+            //                     -- Probably the PostQuitMessage() was intentively made the way so that its WM_QUIT is not removed by PeekMessage() to make the call final and avoid accidental posted message loss in careless programming.
             PostMessage(NULL, WM_QUIT, 0, 0);
             break;
         }
