@@ -371,7 +371,9 @@ bool dxThreadPoolThreadInfo::InitializeThreadAttributes(pthread_attr_t *thread_a
 
         int set_result;
         if ((set_result = pthread_attr_setdetachstate(thread_attr, PTHREAD_CREATE_JOINABLE)) != EOK
+#if (HAVE_PTHREAD_ATTR_SETINHERITSCHED)
             || (set_result = pthread_attr_setinheritsched(thread_attr, PTHREAD_INHERIT_SCHED)) != EOK
+#endif
 #if (HAVE_PTHREAD_ATTR_SETSTACKLAZY)
             || (set_result = pthread_attr_setstacklazy(thread_attr, PTHREAD_STACK_NOTLAZY)) != EOK
 #endif

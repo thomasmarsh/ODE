@@ -303,7 +303,7 @@ dnl Check for autoscan sugested functions
 AC_CHECK_LIB(m, [main])
 AC_CHECK_LIB(sunmath, [main])
 AC_CHECK_LIB(rt, [main])
-AC_CHECK_FUNCS([atan2f clock_gettime copysign copysignf cosf fabsf floor fmodf gettimeofday isnan _isnan __isnan isnanf _isnanf __isnanf memmove memset pthread_attr_setstacklazy pthread_condattr_setclock sinf snprintf sqrt sqrtf strchr strstr vsnprintf])
+AC_CHECK_FUNCS([atan2f clock_gettime copysign copysignf cosf fabsf floor fmodf gettimeofday isnan _isnan __isnan isnanf _isnanf __isnanf memmove memset pthread_attr_setstacklazy pthread_attr_setinheritsched pthread_condattr_setclock sinf snprintf sqrt sqrtf strchr strstr vsnprintf])
 AC_FUNC_ALLOCA 
 
 dnl This trick allows having additional define in case if a function is not found.
