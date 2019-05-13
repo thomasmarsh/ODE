@@ -347,6 +347,7 @@
         if os.get() == "windows" then
           buildoptions { "-mthreads" }
           linkoptions { "-mthreads" }
+          defines { "HAVE_PTHREAD_ATTR_SETINHERITSCHED=1", "HAVE_PTHREAD_ATTR_SETSTACKLAZY=1" }
         else
           buildoptions { "-pthread" }
           linkoptions { "-pthread" }
