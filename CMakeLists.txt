@@ -767,10 +767,15 @@ if(ODE_WITH_DEMOS)
 	
 	foreach(DEMO_SRC ${DEMO_SRCS})
 		get_filename_component(DEMO ${DEMO_SRC} NAME_WE)
-		add_executable(${DEMO} ${DEMO_SRC})
+
+		if(NOT WIN32 OR ${DEMO} STREQUAL "demo_ode")
+			add_executable(${DEMO} ${DEMO_SRC})
+		else()
+			add_executable(${DEMO} WIN32 ${DEMO_SRC})
+		endif()
 		target_link_libraries(${DEMO} drawstuff)
 		
-		if(NOT WIN32 AND ${DEMO} MATCHES "demo_chain1")
+		if(NOT WIN32 AND ${DEMO} STREQUAL "demo_chain1")
 			target_link_libraries(${DEMO} m)
 		endif()
 	endforeach()
