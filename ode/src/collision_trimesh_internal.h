@@ -23,7 +23,7 @@
 // TriMesh code by Erwin de Vries.
 // Modified for FreeSOLID Compatibility by Rodrigo Hernandez
 // TriMesh caches separation by Oleh Derevenko
-// TriMesh storage classes refactoring and face angle computation code by Oleh Derevenko (C) 2016-2019
+// TriMesh storage classes refactoring and face angle computation code by Oleh Derevenko (C) 2016-2020
 
 
 #ifndef _ODE_COLLISION_TRIMESH_INTERNAL_H_

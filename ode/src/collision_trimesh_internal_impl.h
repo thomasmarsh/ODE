@@ -20,7 +20,7 @@
  *                                                                       *
  *************************************************************************/
 
-// TriMesh base template method implementations by Oleh Derevenko (C) 2016-2019
+// TriMesh base template method implementations by Oleh Derevenko (C) 2016-2020
 
 
 #ifndef _ODE_COLLISION_TRIMESH_INTERNAL_IMPL_H_

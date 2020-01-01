@@ -23,8 +23,8 @@
  *************************************************************************/
 
 /*
- * Code style improvements and optimizations by Oleh Derevenko ????-2019
- * L1Transposed cooperative solving code of ThreadedEquationSolverLDLT copyright (c) 2017-2019 Oleh Derevenko, odar@eleks.com (change all "a" to "e")  
+ * Code style improvements and optimizations by Oleh Derevenko ????-2020
+ * L1Transposed cooperative solving code of ThreadedEquationSolverLDLT copyright (c) 2017-2020 Oleh Derevenko, odar@eleks.com (change all "a" to "e")  
  */
 
 

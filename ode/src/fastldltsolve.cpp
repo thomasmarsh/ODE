@@ -22,7 +22,7 @@
 
 /* 
  * LDLT solving related code of ThreadedEquationSolverLDLT 
- * Copyright (c) 2017-2019 Oleh Derevenko, odar@eleks.com (change all "a" to "e")
+ * Copyright (c) 2017-2020 Oleh Derevenko, odar@eleks.com (change all "a" to "e")
  */
 
 #include <ode/common.h>

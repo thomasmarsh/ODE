@@ -1,6 +1,6 @@
 /*************************************************************************
  *                                                                       *
- * ODER's Utilities Library. Copyright (C) 2008-2019 Oleh Derevenko.     *
+ * ODER's Utilities Library. Copyright (C) 2008-2020 Oleh Derevenko.     *
  * All rights reserved.  e-mail: odar@eleks.com (change all "a" to "e")  *
  *                                                                       *
  * This library is free software; you can redistribute it and/or         *

@@ -21,7 +21,7 @@
  *************************************************************************/
 
 // Cooperative matrix algorithm types
-// Copyright (C) 2017-2019 Oleh Derevenko (odar@eleks.com - change all "a" to "e")
+// Copyright (C) 2017-2020 Oleh Derevenko (odar@eleks.com - change all "a" to "e")
 
 
 #ifndef _ODE_COOP_MATRIX_TYPES_H_

@@ -1,7 +1,7 @@
 /*************************************************************************
  *                                                                       *
  * Thread local storage access stub for Open Dynamics Engine,            *
- * Copyright (C) 2008-2019 Oleh Derevenko. All rights reserved.          *
+ * Copyright (C) 2008-2020 Oleh Derevenko. All rights reserved.          *
  * Email: odar@eleks.com (change all "a" to "e")                         *
  *                                                                       *
  * Open Dynamics Engine, Copyright (C) 2001,2002 Russell L. Smith.       *
