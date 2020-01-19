@@ -1040,28 +1040,54 @@ int edgeIntersectsRect(dVector3 v1, dVector3 v2,
 {
     int k;
     dVector3 u1, u2, n, tmp;
+
     for (k = 0; k < 3; k++) u1[k] = p3[k] - p1[k];
     for (k = 0; k < 3; k++) u2[k] = p2[k] - p1[k];
+
     dReal d1 = dSqrt(dCalcVectorDot3(u1, u1));
     dReal d2 = dSqrt(dCalcVectorDot3(u2, u2));
     dNormalize3(u1);
     dNormalize3(u2);
-    if (dFabs(dCalcVectorDot3(u1, u2)) > 1e-6) dDebug(0, "bad u1/u2");
+
+    dReal error;
+#ifdef dSINGLE
+    const dReal uEpsilon = 1e-5, pEpsilon = 1e-6, tmpEpsilon = 1.5e-4;
+#else
+    const dReal uEpsilon = 1e-6, pEpsilon = 1e-8, tmpEpsilon = 1e-6;
+#endif
+
+    error = dFabs(dCalcVectorDot3(u1, u2));
+    if (error > uEpsilon) dDebug(0, "bad u1/u2");
+
     dCalcVectorCross3(n, u1, u2);
+
     for (k = 0; k < 3; k++) tmp[k] = v2[k] - v1[k];
+
     dReal d = -dCalcVectorDot3(n, p1);
-    if (dFabs(dCalcVectorDot3(n, p1) + d) > 1e-8) dDebug(0, "bad n wrt p1");
-    if (dFabs(dCalcVectorDot3(n, p2) + d) > 1e-8) dDebug(0, "bad n wrt p2");
-    if (dFabs(dCalcVectorDot3(n, p3) + d) > 1e-8) dDebug(0, "bad n wrt p3");
+
+    error = dFabs(dCalcVectorDot3(n, p1) + d);
+    if (error > pEpsilon) dDebug(0, "bad n wrt p1");
+
+    error = dFabs(dCalcVectorDot3(n, p2) + d);
+    if (error > pEpsilon) dDebug(0, "bad n wrt p2");
+
+    error = dFabs(dCalcVectorDot3(n, p3) + d);
+    if (error > pEpsilon) dDebug(0, "bad n wrt p3");
+
     dReal alpha = -(d + dCalcVectorDot3(n, v1)) / dCalcVectorDot3(n, tmp);
     for (k = 0; k < 3; k++) tmp[k] = v1[k] + alpha * (v2[k] - v1[k]);
-    if (dFabs(dCalcVectorDot3(n, tmp) + d) > 1e-6) dDebug(0, "bad tmp");
+
+    error = dFabs(dCalcVectorDot3(n, tmp) + d);
+    if (error > tmpEpsilon) dDebug(0, "bad tmp");
+
     if (alpha < 0) return 0;
     if (alpha > 1) return 0;
+    
     for (k = 0; k < 3; k++) tmp[k] -= p1[k];
     dReal a1 = dCalcVectorDot3(u1, tmp);
     dReal a2 = dCalcVectorDot3(u2, tmp);
     if (a1<0 || a2<0 || a1>d1 || a2>d2) return 0;
+    
     return 1;
 }
 
