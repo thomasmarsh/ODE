@@ -8,7 +8,11 @@ the rules for this file:
   * keep the format consistent (79 char width, M/D/Y date format).
 
 ------------------------------------------------------------------------------
-03/06/2016 Oleh Derevenko
+02/19/2020 Oleh Derevenko
+        * libCCD configuration description strings have been added for 
+          use with dGetConfiguration() and dCheckConfiguration().
+
+03/06/2019 Oleh Derevenko
         * dWorldAttachQuickStepDynamicIterationStatisticsSink public function 
           was added to allow dynamic step count adjustment monitoring for
           world instances.

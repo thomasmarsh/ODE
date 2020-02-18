@@ -546,6 +546,16 @@ dGeomID dGeomGetBodyNext (dGeomID);
  * ODE_EXT_gimpact
  * ODE_OPC_16bit_indices
  * ODE_OPC_new_collider
+ * ODE_EXT_libccd
+ * ODE_CCD_IMPL_internal
+ * ODE_CCD_COLL_box_cyl
+ * ODE_CCD_COLL_cyl_cyl
+ * ODE_CCD_COLL_cap_cyl
+ * ODE_CCD_COLL_box_conv
+ * ODE_CCD_COLL_cap_conv
+ * ODE_CCD_COLL_conv_cyl
+ * ODE_CCD_COLL_conv_sph
+ * ODE_CCD_COLL_conv_conv
  * ODE_EXT_mt_collisions
  * ODE_EXT_threading
  * ODE_THR_builtin_impl
