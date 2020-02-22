@@ -140,12 +140,15 @@ dReal dJointGetPUPositionRate( dJointID j )
         // anchor point.
 
         // r will be used to find the distance between body1 and the anchor point
-        dVector3 r;
-        dVector3 anchor2 = {0,0,0};
+        dVector3 r, anchor2;
+
         if ( joint->node[1].body )
         {
             // Find joint->anchor2 in global coordinates
-            dMultiply0_331( anchor2, joint->node[1].body->posr.R, joint->anchor2 );
+            
+            // NOTE! anchor2 needs a volatile assignment on the multiplication to discard computation errors.
+            // Otherwise, tests fail for single type on x86.
+            dVolatileMultiply0_331(anchor2, joint->node[1].body->posr.R, joint->anchor2);
 
             r[0] = ( joint->node[0].body->posr.pos[0] -
                 ( anchor2[0] + joint->node[1].body->posr.pos[0] ) );
@@ -156,6 +159,8 @@ dReal dJointGetPUPositionRate( dJointID j )
         }
         else
         {
+            dZeroVector3(anchor2);
+
             //N.B. When there is no body 2 the joint->anchor2 is already in
             //     global coordinates
             // r = joint->node[0].body->posr.pos -  joint->anchor2;
