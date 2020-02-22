@@ -69,4 +69,29 @@ bool dxOrthogonalizeR(dMatrix3 m);
 #define dOrthogonalizeR(m) dxOrthogonalizeR(m)
 
 
+//////////////////////////////////////////////////////////////////////////
+
+namespace dxTruncToType
+{
+
+ODE_PURE_INLINE 
+void _dMultiplyHelper0_331(volatile dReal *res, const dReal *a, const dReal *b)
+{
+    const dReal res_0 = dCalcVectorDot3(a, b);
+    const dReal res_1 = dCalcVectorDot3(a + 4, b);
+    const dReal res_2 = dCalcVectorDot3(a + 8, b);
+    /* Only assign after all the calculations are over to avoid incurring memory aliasing*/
+    res[0] = res_0; res[1] = res_1; res[2] = res_2;
+}
+
+ODE_PURE_INLINE 
+void dMultiply0_331(volatile dReal *res, const dReal *a, const dReal *b)
+{
+    _dMultiplyHelper0_331(res, a, b);
+}
+
+
+}; // namespace dxTruncToType
+
+
 #endif

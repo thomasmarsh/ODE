@@ -323,15 +323,6 @@ ODE_PURE_INLINE void _dMultiplyHelper0_331(dReal *res, const dReal *a, const dRe
   res[0] = res_0; res[1] = res_1; res[2] = res_2;
 }
 
-ODE_PURE_INLINE void _dVolatileMultiplyHelper0_331(volatile dReal *res, const dReal *a, const dReal *b)
-{
-    const dReal res_0 = dCalcVectorDot3(a, b);
-    const dReal res_1 = dCalcVectorDot3(a + 4, b);
-    const dReal res_2 = dCalcVectorDot3(a + 8, b);
-    /* Only assign after all the calculations are over to avoid incurring memory aliasing*/
-    res[0] = res_0; res[1] = res_1; res[2] = res_2;
-}
-
 ODE_PURE_INLINE void _dMultiplyHelper1_331(dReal *res, const dReal *a, const dReal *b)
 {
   const dReal res_0 = dCalcVectorDot3_41(a, b);
@@ -341,23 +332,9 @@ ODE_PURE_INLINE void _dMultiplyHelper1_331(dReal *res, const dReal *a, const dRe
   res[0] = res_0; res[1] = res_1; res[2] = res_2;
 }
 
-ODE_PURE_INLINE void _dVolatileMultiplyHelper1_331(volatile dReal *res, const dReal *a, const dReal *b)
-{
-    const dReal res_0 = dCalcVectorDot3_41(a, b);
-    const dReal res_1 = dCalcVectorDot3_41(a + 1, b);
-    const dReal res_2 = dCalcVectorDot3_41(a + 2, b);
-    /* Only assign after all the calculations are over to avoid incurring memory aliasing*/
-    res[0] = res_0; res[1] = res_1; res[2] = res_2;
-}
-
 ODE_PURE_INLINE void _dMultiplyHelper0_133(dReal *res, const dReal *a, const dReal *b)
 {
   _dMultiplyHelper1_331(res, b, a);
-}
-
-ODE_PURE_INLINE void _dVolatileMultiplyHelper0_133(volatile dReal *res, const dReal *a, const dReal *b)
-{
-    _dVolatileMultiplyHelper1_331(res, b, a);
 }
 
 ODE_PURE_INLINE void _dMultiplyHelper1_133(dReal *res, const dReal *a, const dReal *b)
@@ -379,29 +356,14 @@ ODE_PURE_INLINE void dMultiply0_331(dReal *res, const dReal *a, const dReal *b)
   _dMultiplyHelper0_331(res, a, b);
 }
 
-ODE_PURE_INLINE void dVolatileMultiply0_331(volatile dReal *res, const dReal *a, const dReal *b)
-{
-    _dVolatileMultiplyHelper0_331(res, a, b);
-}
-
 ODE_PURE_INLINE void dMultiply1_331(dReal *res, const dReal *a, const dReal *b)
 {
   _dMultiplyHelper1_331(res, a, b);
 }
 
-ODE_PURE_INLINE void dVolatileMultiply1_331(volatile dReal *res, const dReal *a, const dReal *b)
-{
-    _dVolatileMultiplyHelper1_331(res, a, b);
-}
-
 ODE_PURE_INLINE void dMultiply0_133(dReal *res, const dReal *a, const dReal *b)
 {
   _dMultiplyHelper0_133(res, a, b);
-}
-
-ODE_PURE_INLINE void dVolatileMultiply0_133(volatile dReal *res, const dReal *a, const dReal *b)
-{
-    _dVolatileMultiplyHelper0_133(res, a, b);
 }
 
 ODE_PURE_INLINE void dMultiply0_333(dReal *res, const dReal *a, const dReal *b)

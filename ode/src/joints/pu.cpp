@@ -148,7 +148,7 @@ dReal dJointGetPUPositionRate( dJointID j )
             
             // NOTE! anchor2 needs a volatile assignment on the multiplication to discard computation errors.
             // Otherwise, tests fail for single type on x86.
-            dVolatileMultiply0_331(anchor2, joint->node[1].body->posr.R, joint->anchor2);
+            dxTruncToType::dMultiply0_331(anchor2, joint->node[1].body->posr.R, joint->anchor2);
 
             r[0] = ( joint->node[0].body->posr.pos[0] -
                 ( anchor2[0] + joint->node[1].body->posr.pos[0] ) );
