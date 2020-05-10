@@ -313,7 +313,7 @@ void gim_trimesh_set_tranform(GIM_TRIMESH * trimesh, mat4f transform)
     GUINT32 i;
     for (i=0;i<16;i++)
     {
-    	diff += fabs(originaltrans[i]-newtrans[i]);
+    	diff += GIM_FABS_FN(originaltrans[i]-newtrans[i]);
     }
 
 //    if(IS_ZERO(diff)) return ;///don't need to update

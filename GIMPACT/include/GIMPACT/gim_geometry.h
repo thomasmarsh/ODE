@@ -333,7 +333,7 @@ Operations for vectors : vec2f,vec3f and vec4f
 /// Vector length
 #define VEC_CONJUGATE_LENGTH(a,l)\
 {\
-    GREAL _pp = 1.0 - a[0]*a[0] - a[1]*a[1] - a[2]*a[2];\
+    GREAL _pp = 1.0f - a[0]*a[0] - a[1]*a[1] - a[2]*a[2];\
     GIM_SQRT(_pp,l);\
 }\
 
@@ -1267,7 +1267,7 @@ Last column is added as the position
  */
 #define ADJOINT_4X4(a,m)					\
 {								\
-   char _i_,_j_;							\
+   int _i_,_j_;							\
 								\
    for (_i_=0; _i_<4; _i_++) {					\
       for (_j_=0; _j_<4; _j_++) {					\
@@ -1316,7 +1316,7 @@ Last column is added as the position
  */
 #define SCALE_ADJOINT_4X4(a,s,m)				\
 {								\
-   char _i_,_j_; \
+   int _i_,_j_; \
    for (_i_=0; _i_<4; _i_++) {					\
       for (_j_=0; _j_<4; _j_++) {					\
          COFACTOR_4X4_IJ (a[_j_][_i_], m, _i_, _j_);			\
@@ -1334,7 +1334,7 @@ Last column is added as the position
 {						\
    GREAL _tmp_;					\
    DETERMINANT_2X2 (det, a);			\
-   _tmp_ = 1.0 / (det);				\
+   _tmp_ = 1.0f / (det);				\
    SCALE_ADJOINT_2X2 (b, _tmp_, a);		\
 }\
 
@@ -1348,7 +1348,7 @@ Last column is added as the position
 {						\
    GREAL _tmp_;					\
    DETERMINANT_3X3 (det, a);			\
-   _tmp_ = 1.0 / (det);				\
+   _tmp_ = 1.0f / (det);				\
    SCALE_ADJOINT_3X3 (b, _tmp_, a);		\
 }\
 
@@ -1362,7 +1362,7 @@ Last column is added as the position
 {						\
    GREAL _tmp_;					\
    DETERMINANT_4X4 (det, a);			\
-   _tmp_ = 1.0 / (det);				\
+   _tmp_ = 1.0f / (det);				\
    SCALE_ADJOINT_4X4 (b, _tmp_, a);		\
 }\
 
@@ -1513,9 +1513,9 @@ Last column is added as the position
     \
     GREAL _extend[] = {aabb.maxX-_center[0],aabb.maxY-_center[1],aabb.maxZ-_center[2]};\
     GREAL _fOrigin =  VEC_DOT(direction,_center);\
-	GREAL _fMaximumExtent = _extend[0]*fabsf(direction[0]) + \
-                            _extend[1]*fabsf(direction[1]) + \
-                            _extend[2]*fabsf(direction[2]); \
+	GREAL _fMaximumExtent = _extend[0]*GIM_FABS_FN(direction[0]) + \
+                            _extend[1]*GIM_FABS_FN(direction[1]) + \
+                            _extend[2]*GIM_FABS_FN(direction[2]); \
 \
     vmin = _fOrigin - _fMaximumExtent; \
     vmax = _fOrigin + _fMaximumExtent; \
@@ -1704,7 +1704,7 @@ intersection_type must have the following values
 //! Finds the 2 smallest cartesian coordinates of a plane normal
 #define PLANE_MINOR_AXES(plane, i0, i1)\
 {\
-    GREAL A[] = {fabs(plane[0]),fabs(plane[1]),fabs(plane[2])};\
+    GREAL A[] = {GIM_FABS_FN(plane[0]),GIM_FABS_FN(plane[1]),GIM_FABS_FN(plane[2])};\
     if(A[0]>A[1])\
 	{\
 		if(A[0]>A[2])\

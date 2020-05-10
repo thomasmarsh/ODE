@@ -56,6 +56,8 @@ Constants starting with G_
 //! @{
 /*! Types */
 #define GREAL float
+#define GIM_FABS_FN(va) fabsf(va)
+#define GIM_SQRT_FN(va) sqrtf(va)
 #define GINT32 int32_t
 #define GUINT32 uint32_t
 
@@ -91,16 +93,16 @@ mathematical functions
 #define G_RADTODEG(X) ((X)*180.0f/3.1415926f)
 
 //! Integer representation of a floating-point value.
-#define IR(x)					((GUINT32&)(x))
+// #define IR(x)					((GUINT32&)(x)) -- Type aliasing
 
 //! Signed integer representation of a floating-point value.
-#define SIR(x)					((GINT32&)(x))
+// #define SIR(x)					((GINT32&)(x)) -- Type aliasing
 
 //! Absolute integer representation of a floating-point value
-#define AIR(x)					(IR(x)&0x7fffffff)
+// #define AIR(x)					(IR(x)&0x7fffffff) -- Type aliasing
 
 //! Floating-point representation of an integer value.
-#define FR(x)					((GREAL&)(x))
+// #define FR(x)					((GREAL&)(x)) -- Type aliasing
 
 #define MAX(a,b) ((a)<(b)?(b):(a))
 #define MIN(a,b) ((a)>(b)?(b):(a))
@@ -119,31 +121,22 @@ mathematical functions
 
 ///Swap numbers
 #define SWAP_NUMBERS(a,b){ \
-    (a) = (a)+(b); \
-    (b) = (a)-(b); \
-    (a) = (a)-(b); \
-}\
+    GREAL _swap_tmp = (a); \
+    (a) = (b); \
+    (b) = _swap_tmp; \
+}
 
-#define GIM_INV_SQRT(va,isva)\
-{\
-    if((va)<=0.0000001f)\
-    {\
-        (isva) = G_REAL_INFINITY;\
-    }\
-    else\
-    {\
-        GREAL _x = (va) * 0.5f;\
-        GUINT32 _y = 0x5f3759df - ( IR(va) >> 1);\
-        (isva) = FR(_y);\
-        (isva) = (isva) * ( 1.5f - ( _x * (isva) * (isva) ) );\
-    }\
-}\
 
 #define GIM_SQRT(va,sva)\
 {\
-    GIM_INV_SQRT(va,sva);\
-    (sva) = 1.0f/(sva);\
-}\
+    (sva) = GIM_SQRT_FN(va);\
+}
+
+#define GIM_INV_SQRT(va,isva)\
+{\
+    (isva) = 1.0f / GIM_SQRT_FN(va);\
+}
+
 
 //! Computes 1.0f / sqrtf(x). Comes from Quake3. See http://www.magic-software.com/3DGEDInvSqrt.html
 GREAL gim_inv_sqrt(GREAL f);

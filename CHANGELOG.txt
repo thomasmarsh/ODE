@@ -8,6 +8,10 @@ the rules for this file:
   * keep the format consistent (79 char width, M/D/Y date format).
 
 ------------------------------------------------------------------------------
+05/11/2020 Oleh Derevenko
+        * GIMPACT math macros were changed to use standard floating point math
+          rather than custom "optimized" implementations.
+
 02/19/2020 Oleh Derevenko
         * libCCD configuration description strings have been added for 
           use with dGetConfiguration() and dCheckConfiguration().
