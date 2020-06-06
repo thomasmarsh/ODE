@@ -154,8 +154,8 @@ just about everything else.
  and then call CMake with the path to ODE's source directory as argument, e.g.,
  one level above the source directory:
  
-   $ cd ..
-   $ mkdir ode-build 
+   $ mkdir ../ode-build 
+   $ cd ../ode-build
    $ cmake ../ode-src
 
  The existing build directory in the source directory can also be used as a
