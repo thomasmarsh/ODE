@@ -1,7 +1,7 @@
 The Open Dynamics Engine (ODE)
 ==============================
 
-![ODE logo](http://bitbucket.org/odedevs/ode/raw/default/web/ODElogo.png)
+![ODE logo](https://bitbucket.org/odedevs/ode/raw/master/web/ODElogo.png)
 
 Copyright (C) 2001-2007 Russell L. Smith.
 
@@ -19,16 +19,16 @@ modify it under the terms of EITHER:
 
  * The BSD-style License.
 
-See the [COPYING](http://bitbucket.org/odedevs/ode/raw/default/COPYING) file for more details.
+See the [COPYING](https://bitbucket.org/odedevs/ode/raw/master/COPYING) file for more details.
 
- * Installation instructions are in the [INSTALL.txt](http://bitbucket.org/odedevs/ode/raw/default/INSTALL.txt) file.
+ * Installation instructions are in the [INSTALL.txt](https://bitbucket.org/odedevs/ode/raw/master/INSTALL.txt) file.
 
- * The ODE web pages are at [ode.org](http://www.ode.org/).
+ * The ODE web pages are at [ode.org](https://www.ode.org/).
 
- * An online manual is at [the Wiki](http://ode.org/wiki/index.php?title=Manual).
+ * An online manual is at [the Wiki](https://ode.org/wiki/index.php?title=Manual).
 
  * API documentation is in the file ode/docs/index.html, or you
    can view it on the web at [opende.sf.net/docs/index.html](http://opende.sf.net/docs/index.html).
 
- * Coding style requirements can be found in the [CSR.txt](http://bitbucket.org/odedevs/ode/raw/default/CSR.txt) file.
+ * Coding style requirements can be found in the [CSR.txt](https://bitbucket.org/odedevs/ode/raw/master/CSR.txt) file.
 
