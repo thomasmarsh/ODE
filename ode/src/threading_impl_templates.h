@@ -660,18 +660,23 @@ void dxtemplateJobListContainer<tThreadLull, tThreadMutex, tAtomicsProvider>::Re
             break;
         }
 
+        int call_fault = current_job->m_call_fault;
+
+        // Assign the accumulated fault state first...
+        if (current_job->m_fault_accumulator_ptr)
+        {
+            *current_job->m_fault_accumulator_ptr = call_fault;
+        }
+        
+        // ...and only then release the entity waiting on the job.
+        // The entity can be waiting for the fault state 
+        // and may start accessing it and/or dispose the storage 
+        // immediately after having been awakened.
         void *job_call_wait = current_job->m_call_wait;
 
         if (job_call_wait != NULL)
         {
             wait_signal_proc_ptr(job_call_wait);
-        }
-
-        int call_fault = current_job->m_call_fault;
-
-        if (current_job->m_fault_accumulator_ptr)
-        {
-            *current_job->m_fault_accumulator_ptr = call_fault;
         }
 
         dxThreadedJobInfo *dependent_job = current_job->m_dependent_job;
