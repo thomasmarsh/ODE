@@ -8,6 +8,12 @@ the rules for this file:
   * keep the format consistent (79 char width, M/D/Y date format).
 
 ------------------------------------------------------------------------------
+07/28/2020 Oleh Derevenko
+        * A threaded job data race fixed on job release (issue #70). 
+          The bug could cause writes to functions's stack area after 
+          the function returned and World simulation errors not being reported
+          with the function result if the simulation failed.
+
 05/11/2020 Oleh Derevenko
         * GIMPACT math macros were changed to use standard floating point math
           rather than custom "optimized" implementations.
