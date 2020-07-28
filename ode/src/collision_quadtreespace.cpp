@@ -265,15 +265,21 @@ void Block::AddObject(dGeomID Object){
 
 void Block::DelObject(dGeomID Object){
     // Del the geom
-    dxGeom* g = mFirst;
-    dxGeom* Last = 0;
-    while (g){
-        if (g == Object){
-            if (Last){
-                Last->next_ex = g->next_ex;
-            }
-            else mFirst = g->next_ex;
+    dxGeom *Last, *g = mFirst;
+    bool Found = false;
 
+    if (g == Object){
+        mFirst = g->next_ex;
+        Found = true;
+    }
+    else {
+        Last = g;
+        g = g->next_ex;
+    }
+
+    for (; !Found && g; Found = false){
+        if (g == Object){
+            Last->next_ex = g->next_ex;
             break;
         }
         Last = g;
@@ -281,6 +287,7 @@ void Block::DelObject(dGeomID Object){
     }
 
     Object->tome_ex = 0;
+    dUASSERT((Object->next_ex = 0, true), "Needed for an assertion check only");
 
     // Now traverse upwards to tell that we have lost a geom
     Block* Block = this;

@@ -351,6 +351,9 @@ void dxSAPSpace::remove( dxGeom* g )
         GeomList.setSize( geomSize-1 );
     }
 
+    g->tome_ex = 0;
+    dUASSERT((g->next_ex = 0, true), "Needed for an assertion check only");
+
     dxSpace::remove(g);
 }
 
