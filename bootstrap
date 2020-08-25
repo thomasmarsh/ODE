@@ -9,7 +9,8 @@ fi
 echo "Running aclocal"
 aclocal -I m4 --install || exit 1
 echo "Running libtoolize"
-libtoolize --copy --automake --install || exit 1
+which glibtoolize >/dev/null 2>&1 &&! which libtoolize >/dev/null 2>&1 &&LIBTOOLIZE=glibtoolize ||LIBTOOLIZE=libtoolize
+$LIBTOOLIZE --copy --automake --install || exit 1
 echo "Running autoheader"
 autoheader || exit 1
 echo "Running automake"
