@@ -199,7 +199,7 @@ void testNormalize3()
         dMakeRandomVector (n1,3,1.0);
         for (j=0; j<3; j++) n2[j]=n1[j];
         dNormalize3 (n2);
-        if (dFabs(dCalcVectorDot3(n2,n2) - 1.0) > tol) bad |= 1;
+        if (dFabs(dCalcVectorDot3(n2,n2) - 1.0f) > tol) bad |= 1;
         if (dFabs(n2[0]/n1[0] - n2[1]/n1[1]) > tol) bad |= 2;
         if (dFabs(n2[0]/n1[0] - n2[2]/n1[2]) > tol) bad |= 4;
         if (dFabs(n2[1]/n1[1] - n2[2]/n1[2]) > tol) bad |= 8;

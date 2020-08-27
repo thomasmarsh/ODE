@@ -6,10 +6,20 @@ AM_CPPFLAGS = -I$(srcdir)/UnitTest++/src \
               -I$(top_srcdir)/ode/src
 
 if GIMPACT
-    AM_CPPFLAGS += -DdTRIMESH_ENABLED -DdTRIMESH_GIMPACT
+AM_CPPFLAGS += -DdTRIMESH_ENABLED -DdTRIMESH_GIMPACT
+
 endif
+
+
 if OPCODE
-    AM_CPPFLAGS += -DdTRIMESH_ENABLED -DdTRIMESH_OPCODE
+AM_CPPFLAGS += -DdTRIMESH_ENABLED -DdTRIMESH_OPCODE
+
+endif
+
+
+if ENABLE_OU
+AM_CPPFLAGS += -I$(top_srcdir)/ou/include
+
 endif
 
 

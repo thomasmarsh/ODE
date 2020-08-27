@@ -7,6 +7,7 @@ AM_CPPFLAGS = -I$(top_srcdir)/include \
         -I$(top_builddir)/include \
         -I$(top_srcdir)/ode/src \
         -DDEFAULT_PATH_TO_TEXTURES='"$(top_srcdir)/drawstuff/textures/"' \
+        -DGL_SILENCE_DEPRECATION \
         $(X11_CFLAGS)
 
 if WIN32

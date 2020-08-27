@@ -298,7 +298,7 @@ int test_box_point_depth()
 
     ss = 1e9;
     for (j = 0; j < 3; j++) if (s[j] < ss) ss = s[j];
-    if (dFabs(dGeomBoxPointDepth(box, p[0], p[1], p[2]) - 0.5*ss) > tol)
+    if (dFabs(dGeomBoxPointDepth(box, p[0], p[1], p[2]) - 0.5f*ss) > tol)
         FAILED();
 
     // ********** test point on surface has depth 0
@@ -738,9 +738,9 @@ int test_ray_and_box()
         // check position of contact point
         for (j = 0; j < 3; j++) contact.pos[j] -= p[j];
         dMultiply1(q, dGeomGetRotation(box), contact.pos, 3, 3, 1);
-        if (dFabs(dFabs(q[0]) - 0.5*s[0]) > tol &&
-            dFabs(dFabs(q[1]) - 0.5*s[1]) > tol &&
-            dFabs(dFabs(q[2]) - 0.5*s[2]) > tol) {
+        if (dFabs(dFabs(q[0]) - 0.5f*s[0]) > tol &&
+            dFabs(dFabs(q[1]) - 0.5f*s[1]) > tol &&
+            dFabs(dFabs(q[2]) - 0.5f*s[2]) > tol) {
             FAILED();
         }
         // also check normal signs

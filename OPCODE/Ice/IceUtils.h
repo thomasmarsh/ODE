@@ -223,7 +223,7 @@
 	#define IS_ALIGNED_4(x)		((x&3)==0)
 	#define IS_ALIGNED_8(x)		((x&7)==0)
 
-	inline_ void _prefetch(void const* ptr)		{ (void)*(char const volatile *)ptr;	}
+	inline_ void _prefetch(void const* ptr)		{ char c = *(char const volatile *)ptr; (void)c; }
 
 	// Compute implicit coords from an index:
 	// The idea is to get back 2D coords from a 1D index.
