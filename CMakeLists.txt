@@ -670,6 +670,8 @@ configure_file(ode-config.in ode-config @ONLY)
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/ode.pc DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig COMPONENT development)
 install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/ode-config DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT development)
 
+unset(DRAWSTUFF_RSRC)
+
 if(ODE_WITH_DEMOS)
 	set(
 		DRAWSTUFF_SRCS
@@ -680,11 +682,12 @@ if(ODE_WITH_DEMOS)
 	)
 	
 	if(WIN32)
+		set(DRAWSTUFF_RSRC drawstuff/src/resources.rc)
 		list(
 			APPEND DRAWSTUFF_SRCS
 			drawstuff/src/resource.h
-			drawstuff/src/resources.rc
 			drawstuff/src/windows.cpp
+			${DRAWSTUFF_RSRC}
 		)
 	elseif(APPLE)
 		list(APPEND DRAWSTUFF_SRCS drawstuff/src/osx.cpp)
@@ -717,7 +720,7 @@ if(ODE_WITH_DEMOS)
 	endif()
 	
 	set(
-		DEMO_SRCS
+		ALL_DEMO_SRCS
 		ode/demo/demo_boxstack.cpp
 		ode/demo/demo_buggy.cpp
 		ode/demo/demo_cards.cpp
@@ -755,7 +758,7 @@ if(ODE_WITH_DEMOS)
 	
 	if(NOT ODE_NO_TRIMESH)
 		list(
-			APPEND DEMO_SRCS
+			APPEND ALL_DEMO_SRCS
 			ode/demo/demo_basket.cpp
 			ode/demo/demo_cyl.cpp
 			ode/demo/demo_moving_convex.cpp
@@ -765,12 +768,23 @@ if(ODE_WITH_DEMOS)
 		)
 	endif()
 	
-	foreach(DEMO_SRC ${DEMO_SRCS})
-		get_filename_component(DEMO ${DEMO_SRC} NAME_WE)
+	foreach(MAIN_DEMO_SRC ${ALL_DEMO_SRCS})
+		get_filename_component(DEMO ${MAIN_DEMO_SRC} NAME_WE)
+		set(
+			DEMO_SRC
+			${MAIN_DEMO_SRC}
+		)
 
 		if(NOT WIN32 OR ${DEMO} STREQUAL "demo_ode")
 			add_executable(${DEMO} ${DEMO_SRC})
 		else()
+			if(NOT BUILD_SHARED_LIBS)
+				list(
+					APPEND DEMO_SRC 
+					${DRAWSTUFF_RSRC}
+				)
+			endif()
+
 			add_executable(${DEMO} WIN32 ${DEMO_SRC})
 			if(WIN32 AND MSVC)
 				set_target_properties(${DEMO} PROPERTIES LINK_FLAGS /ENTRY:mainCRTStartup)
