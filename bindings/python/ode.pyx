@@ -1827,7 +1827,9 @@ cdef class Joint:
         raise NotImplementedError("Joint base class can't be used directly")
 
     def __dealloc__(self):
-        self.setFeedback(False)
+        if self.feedback != NULL:
+            dJointSetFeedback(self.jid, NULL)
+            free(self.feedback)
         if self.jid != NULL:
             dJointDestroy(self.jid)
 

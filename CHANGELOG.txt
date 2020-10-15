@@ -8,6 +8,10 @@ the rules for this file:
   * keep the format consistent (79 char width, M/D/Y date format).
 
 ------------------------------------------------------------------------------
+10/16/2020 Oleh Derevenko
+        * A fault on method call from within Joint class destructor in Python
+          bindings fixed (by Tyler Limkemann)
+
 07/28/2020 Oleh Derevenko
         * A threaded job data race fixed on job release (issue #70). 
           The bug could cause writes to functions's stack area after 
