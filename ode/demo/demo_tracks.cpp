@@ -190,9 +190,9 @@ void start()
     // tracks made out of boxes
     dGeomID trk;
     dMatrix3 r1, r2, r3;
-    dVector3 ro = {0, -(0.5*track_gauge + 0.5*track_width), track_elevation};
+    dVector3 ro = {0, -(0.5f*track_gauge + 0.5f*track_width), track_elevation};
     dMatrix3 s1, s2, s3;
-    dVector3 so = {0, 0.5*track_gauge + 0.5*track_width, track_elevation};
+    dVector3 so = {0, 0.5f*track_gauge + 0.5f*track_width, track_elevation};
 
     dRFromAxisAndAngle(r1, 1, 0, 0,  track_angle);
     dRFromAxisAndAngle(r2, 0, 1, 0, -track_incl);
