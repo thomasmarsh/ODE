@@ -1618,7 +1618,7 @@ int dxHeightfield::dCollideHeightfieldZone( const int minX, const int maxX, cons
                 {
                     pContact = CONTACT(contact, numTerrainContacts*skip);
                     //create contact using vertices
-                    dAddVectorScaledVector3(pContact->pos, triVertex, itTriangle->planeDef, depth);
+                    dCopyVector3(pContact->pos, triVertex);
                     //create contact using Plane Normal
                     dOPESIGN(pContact->normal, =, -, itTriangle->planeDef);
                     pContact->depth = depth;
