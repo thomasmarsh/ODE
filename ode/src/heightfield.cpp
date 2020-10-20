@@ -1360,12 +1360,14 @@ int dxHeightfield::dCollideHeightfieldZone( const int minX, const int maxX, cons
         }
     }
 
-    // at least on triangle should intersect geom
+    // at least one triangle should intersect the geom
     dIASSERT (numTri != 0);
+
     // pass1: VS triangle as Planes
     // Group Triangle by same plane definition
     // as Terrain often has many triangles using same plane definition
     // then collide against that list of triangles.
+    bool anyIntersectingButNotCollided = false;
     {
 
         dVector3 Edge1, Edge2;
@@ -1475,7 +1477,7 @@ int dxHeightfield::dCollideHeightfieldZone( const int minX, const int maxX, cons
         remaining and HEIGHTFIELDMAXCONTACTPERCELL.
         */
         int planeTestFlags = (flags & ~NUMC_MASK) | HEIGHTFIELDMAXCONTACTPERCELL;
-        dIASSERT((HEIGHTFIELDMAXCONTACTPERCELL & ~NUMC_MASK) == 0);
+        dSASSERT((HEIGHTFIELDMAXCONTACTPERCELL & ~NUMC_MASK) == 0);
 
         for (unsigned int k = 0; k < numPlanes; k++)
         {
@@ -1551,22 +1553,24 @@ int dxHeightfield::dCollideHeightfieldZone( const int minX, const int maxX, cons
                     {
                         itPlane->trianglelist[b]->state = false;
                     }
+
+                    anyIntersectingButNotCollided = true;
                 }
             }
         }
     }
 
-
     // pass2: VS triangle vertices
-    if (needFurtherPasses)
+    if (/*needFurtherPasses && */anyIntersectingButNotCollided)
     {
+        dIASSERT(needFurtherPasses);
+
         dxRay tempRay(0, 1); 
         dReal depth;
-        bool vertexCollided;
 
         // Only one contact is necessary for ray test
         int rayTestFlags = (flags & ~NUMC_MASK) | 1;
-        dIASSERT((1 & ~NUMC_MASK) == 0);
+        dSASSERT((1 & ~NUMC_MASK) == 0);
         //
         // Find Contact Penetration Depth of each vertices
         //
@@ -1575,7 +1579,7 @@ int dxHeightfield::dCollideHeightfieldZone( const int minX, const int maxX, cons
             const HeightFieldTriangle * const itTriangle = &tempTriangleBuffer[k];
             if (itTriangle->state)
             {
-                continue;// plane triangle did already collide.
+                continue; // the triangle plane already collided
             }
 
             for (unsigned int i = 0; i < 3; i++)
@@ -1583,18 +1587,19 @@ int dxHeightfield::dCollideHeightfieldZone( const int minX, const int maxX, cons
                 HeightFieldVertex *vertex = itTriangle->vertices[i];
                 if (vertex->state)
                 {
-                    continue; // vertices did already collide.
+                    continue; // the vertex already collided
                 }
 
-                vertexCollided = false;
+                bool vertexCollided = false;
                 const dVector3 &triVertex = vertex->vertex;
                 
-                if ( geomNDepthGetter )
+                bool depthGetterAvailable = false; // geomNDepthGetter != NULL;
+                dIASSERT(geomNDepthGetter == NULL);
+
+                if (depthGetterAvailable)
                 {
-                    depth = geomNDepthGetter( o2,
-                        triVertex[0], triVertex[1], triVertex[2] );
-                    if (depth > dEpsilon)
-                        vertexCollided = true;
+                    depth = geomNDepthGetter( o2, triVertex[0], triVertex[1], triVertex[2] );
+                    vertexCollided = depth >= dEpsilon;
                 }
                 else
                 {
@@ -1607,10 +1612,10 @@ int dxHeightfield::dCollideHeightfieldZone( const int minX, const int maxX, cons
                     //    - itTriangle->Normal[0], - itTriangle->Normal[1], - itTriangle->Normal[2] );
                     dGeomRaySetNoNormalize(tempRay, triVertex, itTriangle->planeDef);
 
-                    if ( geomRayNCollider( &tempRay, o2, rayTestFlags, planeContacts, sizeof( dContactGeom ) ) )
+                    if (geomRayNCollider(&tempRay, o2, rayTestFlags, planeContacts, sizeof(dContactGeom)))
                     {
                         depth = planeContacts[0].depth;
-                        vertexCollided = true;
+                        vertexCollided = depth >= dEpsilon;
                     }
                 }
                 
@@ -1632,7 +1637,7 @@ int dxHeightfield::dCollideHeightfieldZone( const int minX, const int maxX, cons
                     }
 
                     vertex->state = true;
-                }
+                    }
             }
         }
     }
@@ -1646,7 +1651,7 @@ int dxHeightfield::dCollideHeightfieldZone( const int minX, const int maxX, cons
 
         int numMaxContactsPerTri = dMIN(numMaxContactsPossible - numTerrainContacts, HEIGHTFIELDMAXCONTACTPERCELL);
         int triTestFlags = (flags & ~NUMC_MASK) | numMaxContactsPerTri;
-        dIASSERT((HEIGHTFIELDMAXCONTACTPERCELL & ~NUMC_MASK) == 0);
+        dSASSERT((HEIGHTFIELDMAXCONTACTPERCELL & ~NUMC_MASK) == 0);
 
         for (unsigned int k = 0; k < numTri; k++)
         {
@@ -1654,7 +1659,7 @@ int dxHeightfield::dCollideHeightfieldZone( const int minX, const int maxX, cons
 
             if (itTriangle->state)
             {
-                continue;// plane did already collide.
+                continue; // the triangle plane already collided
             }
 
             for (unsigned int m = 0; m < 3; m++)
@@ -1666,7 +1671,9 @@ int dxHeightfield::dCollideHeightfieldZone( const int minX, const int maxX, cons
                 // not concave or under the AABB 
                 // nor triangle already collided against vertices
                 if (vertex0->state && vertex1->state)
-                    continue;// plane did already collide.
+                {
+                    continue; // the edge is not to be considered
+                }
 
                 dVector3Subtract(vertex1->vertex, vertex0->vertex, edgeVector);
                 edgeRay.length = dVector3Length(edgeVector);
@@ -1700,7 +1707,7 @@ int dxHeightfield::dCollideHeightfieldZone( const int minX, const int maxX, cons
 
                         numMaxContactsPerTri = dMIN(numMaxContactsPossible - numTerrainContacts, HEIGHTFIELDMAXCONTACTPERCELL);
                         triTestFlags = (flags & ~NUMC_MASK) | numMaxContactsPerTri;
-                        dIASSERT((HEIGHTFIELDMAXCONTACTPERCELL & ~NUMC_MASK) == 0);
+                        dSASSERT((HEIGHTFIELDMAXCONTACTPERCELL & ~NUMC_MASK) == 0);
                     }
                 }
             }
@@ -1723,7 +1730,7 @@ int dCollideHeightfield( dxGeom *o1, dxGeom *o2, int flags, dContactGeom* contac
     int i;
 
     // if ((flags & NUMC_MASK) == 0) -- An assertion check is made on entry
-    //	{ flags = (flags & ~NUMC_MASK) | 1; dIASSERT((1 & ~NUMC_MASK) == 0); }
+    //	{ flags = (flags & ~NUMC_MASK) | 1; dSASSERT((1 & ~NUMC_MASK) == 0); }
 
     int numMaxTerrainContacts = (flags & NUMC_MASK);
 
