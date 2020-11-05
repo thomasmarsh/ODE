@@ -802,6 +802,7 @@ if(ODE_WITH_TESTS)
 	set(
 		TEST_SRCS
 		tests/collision.cpp
+		tests/collision_point_depth.cpp
 		tests/friction.cpp
 		tests/joint.cpp
 		tests/main.cpp
