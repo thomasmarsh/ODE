@@ -181,6 +181,19 @@ TEST(test_collision_box_point_depth)
         CHECK_EQUAL(-0.5 * length, dGeomBoxPointDepth(cube, -0.3, -1.5,    0));
         CHECK_EQUAL(-0.5 * length, dGeomBoxPointDepth(cube,    0, -0.3, -1.5));
         CHECK_EQUAL(-0.5 * length, dGeomBoxPointDepth(cube, -1.5,    0, -0.3));
+        // half-length from surface edge (negative depth)
+        CHECK_CLOSE(-0.5 * length, dGeomBoxPointDepth(cube, 1.3, 1.4,   0), 1e-12);
+        CHECK_CLOSE(-0.5 * length, dGeomBoxPointDepth(cube,   0, 1.3, 1.4), 1e-12);
+        CHECK_CLOSE(-0.5 * length, dGeomBoxPointDepth(cube, 1.4,   0, 1.3), 1e-12);
+        CHECK_CLOSE(-0.5 * length, dGeomBoxPointDepth(cube, -1.3,  1.4,    0), 1e-12);
+        CHECK_CLOSE(-0.5 * length, dGeomBoxPointDepth(cube,    0, -1.3,  1.4), 1e-12);
+        CHECK_CLOSE(-0.5 * length, dGeomBoxPointDepth(cube,  1.4,    0, -1.3), 1e-12);
+        CHECK_CLOSE(-0.5 * length, dGeomBoxPointDepth(cube,  1.3, -1.4,    0), 1e-12);
+        CHECK_CLOSE(-0.5 * length, dGeomBoxPointDepth(cube,    0,  1.3, -1.4), 1e-12);
+        CHECK_CLOSE(-0.5 * length, dGeomBoxPointDepth(cube, -1.4,    0,  1.3), 1e-12);
+        CHECK_CLOSE(-0.5 * length, dGeomBoxPointDepth(cube, -1.3, -1.4,    0), 1e-12);
+        CHECK_CLOSE(-0.5 * length, dGeomBoxPointDepth(cube,    0, -1.3, -1.4), 1e-12);
+        CHECK_CLOSE(-0.5 * length, dGeomBoxPointDepth(cube, -1.4,    0, -1.3), 1e-12);
         // 0.6 length from corner (negative depth)
         CHECK_CLOSE(-0.6 * length, dGeomBoxPointDepth(cube, 1.2, 1.4, 1.4), 1e-12);
         CHECK_CLOSE(-0.6 * length, dGeomBoxPointDepth(cube, 1.4, 1.2, 1.4), 1e-12);
