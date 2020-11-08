@@ -159,17 +159,22 @@ dReal dGeomBoxPointDepth (dGeomID g, dReal x, dReal y, dReal z)
         return smallest_dist;
     }
 
-    // Otherwise, if point is outside the box, the depth is the largest
-    // distance to any side.  This is an approximation to the 'proper'
-    // solution (the proper solution may be larger in some cases).
+    // Otherwise, if point is outside the box, use Pythagorean theorem
+    // the add the squared lengths that lie outside of a side and return
+    // the sqrt of the sum.
+    // If 1 value is negative, this is the distance to a face.
+    // If 2 values are negative, this is the distance to an edge.
+    // If 3 values are negative, this is the distance to corner.
+    // No more than three dist values can be negative, since a point can't
+    // be on opposite sides of a box at the same time.
 
-    dReal largest_dist = 0;
+    dReal squared_distance = 0.;
 
     for (i=0; i < 6; i++) {
-        if (dist[i] > largest_dist) largest_dist = dist[i];
+        if (dist[i] < 0) squared_distance += dist[i] * dist[i];
     }
 
-    return -largest_dist;
+    return -sqrt(squared_distance);
 }
 
 //****************************************************************************
