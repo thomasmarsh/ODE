@@ -154,47 +154,47 @@ dReal dGeomBoxPointDepth (dGeomID g, dReal x, dReal y, dReal z)
         }
     }
 
-    // If point is inside the box, the depth is the smallest positive distance
-    // to any side
-    if (!outside) {
-        dReal smallestDist = dist[0];
-        for (unsigned int i = 1; i != 6; ++i) {
-            if (dist[i] < smallestDist) {
-                smallestDist = dist[i];
-            }
-        }
+    if (outside) {
+        // If the point is outside the box, use Pythagorean theorem
+        // the add the squared lengths that lie outside of a side and return
+        // the sqrt of the sum.
+        // If 1 value is negative, this is the distance to a face.
+        // If 2 values are negative, this is the distance to an edge.
+        // If 3 values are negative, this is the distance to corner.
+        // No more than three dist values can be negative, since a point can't
+        // be on opposite sides of a box at the same time.
+        dReal squaredDistance = 0;
 
-        return smallestDist;
-    }
+        for (++sideIndex; sideIndex != 3; ++sideIndex) {
+            dReal side = b->side[sideIndex] * REAL(0.5);
 
-    // Otherwise, if point is outside the box, use Pythagorean theorem
-    // the add the squared lengths that lie outside of a side and return
-    // the sqrt of the sum.
-    // If 1 value is negative, this is the distance to a face.
-    // If 2 values are negative, this is the distance to an edge.
-    // If 3 values are negative, this is the distance to corner.
-    // No more than three dist values can be negative, since a point can't
-    // be on opposite sides of a box at the same time.
-    dReal squaredDistance = 0;
-
-    for (++sideIndex; sideIndex != 3; ++sideIndex) {
-        dReal side = b->side[sideIndex] * REAL(0.5);
-
-        dReal positiveDirectionDistance = side - q[sideIndex];
-        if (positiveDirectionDistance < 0) {
-            squaredDistance += lastOuterOffset * lastOuterOffset;
-            lastOuterOffset = positiveDirectionDistance;
-        }
-        else {
-            dReal negativeDirectionDistance = side + q[sideIndex];
-            if (negativeDirectionDistance < 0) {
+            dReal positiveDirectionDistance = side - q[sideIndex];
+            if (positiveDirectionDistance < 0) {
                 squaredDistance += lastOuterOffset * lastOuterOffset;
-                lastOuterOffset = negativeDirectionDistance;
+                lastOuterOffset = positiveDirectionDistance;
             }
+            else {
+                dReal negativeDirectionDistance = side + q[sideIndex];
+                if (negativeDirectionDistance < 0) {
+                    squaredDistance += lastOuterOffset * lastOuterOffset;
+                    lastOuterOffset = negativeDirectionDistance;
+                }
+            }
+        }
+
+        dReal outerDistance = squaredDistance != 0 ? -sqrt(squaredDistance + lastOuterOffset * lastOuterOffset) : lastOuterOffset;
+        return outerDistance;
+    }
+
+    // Otherwise, if the point is inside the box, the depth is the smallest positive distance among all the sides
+    dReal smallestDist = dist[0];
+    for (unsigned int i = 1; i != 6; ++i) {
+        if (dist[i] < smallestDist) {
+            smallestDist = dist[i];
         }
     }
 
-    return squaredDistance != 0 ? -sqrt(squaredDistance + lastOuterOffset * lastOuterOffset) : lastOuterOffset;
+    return smallestDist;
 }
 
 //****************************************************************************

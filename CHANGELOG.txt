@@ -8,6 +8,10 @@ the rules for this file:
   * keep the format consistent (79 char width, M/D/Y date format).
 
 ------------------------------------------------------------------------------
+11/08/2020 Steve Peters
+        * dGeomBoxPointDepth implementation was fixed for locations outside of
+          the box.
+
 10/16/2020 Oleh Derevenko
         * A fault on method call from within Joint class destructor in Python
           bindings fixed (by Tyler Limkemann)
