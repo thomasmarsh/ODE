@@ -131,32 +131,40 @@ dReal dGeomBoxPointDepth (dGeomID g, dReal x, dReal y, dReal z)
     // if the point is inside all six sides
 
     dReal dist[6];
-    int   i;
 
-    bool inside = true;
+    bool outside = false;
+    dReal lastOuterOffset;
+    unsigned int sideIndex;
 
-    for (i=0; i < 3; i++) {
-        dReal side = b->side[i] * REAL(0.5);
+    for (sideIndex = 0; sideIndex != 3; ++sideIndex) {
+        dReal side = b->side[sideIndex] * REAL(0.5);
 
-        dist[i  ] = side - q[i];
-        dist[i+3] = side + q[i];
+        dist[sideIndex] = side - q[sideIndex];
+        if (dist[sideIndex] < 0) {
+            lastOuterOffset = dist[sideIndex];
+            outside = true;
+            break;
+        }
 
-        if ((dist[i] < 0) || (dist[i+3] < 0)) {
-            inside = false;
+        dist[sideIndex + 3] = side + q[sideIndex];
+        if (dist[sideIndex + 3] < 0) {
+            lastOuterOffset = dist[sideIndex + 3];
+            outside = true;
+            break;
         }
     }
 
     // If point is inside the box, the depth is the smallest positive distance
     // to any side
-
-    if (inside) {
-        dReal smallest_dist = (dReal) (unsigned) -1;
-
-        for (i=0; i < 6; i++) {
-            if (dist[i] < smallest_dist) smallest_dist = dist[i];
+    if (!outside) {
+        dReal smallestDist = dist[0];
+        for (unsigned int i = 1; i != 6; ++i) {
+            if (dist[i] < smallestDist) {
+                smallestDist = dist[i];
+            }
         }
 
-        return smallest_dist;
+        return smallestDist;
     }
 
     // Otherwise, if point is outside the box, use Pythagorean theorem
@@ -167,14 +175,26 @@ dReal dGeomBoxPointDepth (dGeomID g, dReal x, dReal y, dReal z)
     // If 3 values are negative, this is the distance to corner.
     // No more than three dist values can be negative, since a point can't
     // be on opposite sides of a box at the same time.
+    dReal squaredDistance = 0;
 
-    dReal squared_distance = 0.;
+    for (++sideIndex; sideIndex != 3; ++sideIndex) {
+        dReal side = b->side[sideIndex] * REAL(0.5);
 
-    for (i=0; i < 6; i++) {
-        if (dist[i] < 0) squared_distance += dist[i] * dist[i];
+        dReal positiveDirectionDistance = side - q[sideIndex];
+        if (positiveDirectionDistance < 0) {
+            squaredDistance += lastOuterOffset * lastOuterOffset;
+            lastOuterOffset = positiveDirectionDistance;
+        }
+        else {
+            dReal negativeDirectionDistance = side + q[sideIndex];
+            if (negativeDirectionDistance < 0) {
+                squaredDistance += lastOuterOffset * lastOuterOffset;
+                lastOuterOffset = negativeDirectionDistance;
+            }
+        }
     }
 
-    return -sqrt(squared_distance);
+    return squaredDistance != 0 ? -sqrt(squaredDistance + lastOuterOffset * lastOuterOffset) : lastOuterOffset;
 }
 
 //****************************************************************************
