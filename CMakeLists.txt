@@ -4,6 +4,10 @@ if(POLICY CMP0072)
 	cmake_policy(SET CMP0072 NEW)
 endif()
 
+if(POLICY CMP0075)
+	cmake_policy(SET CMP0075 NEW)
+endif()
+
 project(ODE)
 
 include(CheckFunctionExists)
