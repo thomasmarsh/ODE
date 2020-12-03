@@ -1,4 +1,12 @@
-cmake_minimum_required(VERSION 2.8.11)
+cmake_minimum_required(VERSION 2.8.12)
+
+if(POLICY CMP0072)
+	cmake_policy(SET CMP0072 NEW)
+endif()
+
+if(POLICY CMP0075)
+	cmake_policy(SET CMP0075 NEW)
+endif()
 
 project(ODE)
 
@@ -669,7 +677,9 @@ endif()
 
 install(FILES ${HDRS} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/ode COMPONENT development)
 
-set(prefix ${CMAKE_INSTALL_PREFIX})
+file(RELATIVE_PATH PACKAGE_RELATIVE_PATH "${CMAKE_INSTALL_FULL_LIBDIR}/pkgconfig" "${CMAKE_INSTALL_PREFIX}")
+string(REGEX REPLACE "/$" "" PACKAGE_RELATIVE_PATH "${PACKAGE_RELATIVE_PATH}")
+set(prefix "\${pcfiledir}/${PACKAGE_RELATIVE_PATH}")
 set(exec_prefix "\${prefix}")
 set(libdir "\${exec_prefix}/${CMAKE_INSTALL_LIBDIR}")
 set(includedir "\${prefix}/${CMAKE_INSTALL_INCLUDEDIR}")
