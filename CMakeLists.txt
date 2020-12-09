@@ -684,6 +684,7 @@ set(exec_prefix "\${prefix}")
 set(libdir "\${exec_prefix}/${CMAKE_INSTALL_LIBDIR}")
 set(includedir "\${prefix}/${CMAKE_INSTALL_INCLUDEDIR}")
 configure_file(ode.pc.in ode.pc @ONLY)
+set(prefix "\$(cd \"\$(dirname \"\$0\")\"; pwd -P)/..")
 configure_file(ode-config.in ode-config @ONLY)
 
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/ode.pc DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig COMPONENT development)
