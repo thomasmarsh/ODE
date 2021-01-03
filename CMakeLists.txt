@@ -575,9 +575,18 @@ endif()
 
 if(ODE_WITH_LIBCCD)
 	if(ODE_WITH_LIBCCD_SYSTEM)
-		find_package(ccd)
-		target_compile_definitions(ode PRIVATE -DdLIBCCD_ENABLED -DdLIBCCD_SYSTEM)
-		target_link_libraries(ODE ccd::ccd)
+		find_package(ccd REQUIRED)
+		target_compile_definitions(ODE PRIVATE -DdLIBCCD_ENABLED -DdLIBCCD_SYSTEM)
+		target_include_directories(
+			ODE
+			PRIVATE
+			$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/libccd/src/custom>
+		)
+		if(TARGET ccd::ccd)
+			target_link_libraries(ODE PRIVATE ccd::ccd)
+		else()
+			target_link_libraries(ODE PRIVATE ccd)
+		endif()
 	else()
 		target_compile_definitions(ODE PRIVATE -DdLIBCCD_ENABLED -DdLIBCCD_INTERNAL)
 		target_include_directories(

@@ -30,3 +30,9 @@ set(ODE_DEFINITIONS "")
 set(ODE_INCLUDE_DIRS "${PACKAGE_PREFIX_DIR}/include")
 set(ODE_LIBRARY_DIRS "${PACKAGE_PREFIX_DIR}/lib")
 set(ODE_LIBRARIES "ODE::ODE")
+
+include(CMakeFindDependencyMacro)
+
+if(ODE_WITH_LIBCCD_SYSTEM)
+	find_dependency(ccd)
+endif()
