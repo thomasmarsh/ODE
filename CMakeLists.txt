@@ -652,7 +652,7 @@ elseif(NOT ODE_NO_THREADING_INTF)
 endif()
 
 if(ODE_WITH_OU OR NOT ODE_NO_THREADING_INTF)
-	target_link_libraries(ODE ${CMAKE_THREAD_LIBS_INIT})
+	target_link_libraries(ODE PRIVATE ${CMAKE_THREAD_LIBS_INIT})
 endif()
 
 if(NOT CMAKE_VERSION VERSION_LESS 3.12)
@@ -733,19 +733,21 @@ if(ODE_WITH_DEMOS)
 		target_compile_definitions(drawstuff PRIVATE -DDS_LIB)
 	endif()
 	
-	target_include_directories(drawstuff PUBLIC ${OPENGL_INCLUDE_DIR})
-	target_link_libraries(drawstuff ODE ${OPENGL_LIBRARIES})
+	target_link_libraries(drawstuff PUBLIC ODE)
+	
+	target_include_directories(drawstuff PRIVATE ${OPENGL_INCLUDE_DIRS})
+	target_link_libraries(drawstuff PRIVATE ${OPENGL_LIBRARIES})
 	
 	if(WIN32)
-		target_link_libraries(drawstuff winmm)
+		target_link_libraries(drawstuff PRIVATE winmm)
 	elseif(APPLE)
 		find_package(GLUT)
-		target_include_directories(drawstuff PUBLIC ${GLUT_INCLUDE_DIR})
-		target_link_libraries(drawstuff ${GLUT_LIBRARIES})
+		target_include_directories(drawstuff PRIVATE ${GLUT_INCLUDE_DIR})
+		target_link_libraries(drawstuff PRIVATE ${GLUT_LIBRARIES})
 	else()
 		find_package(X11)
-		target_include_directories(drawstuff PUBLIC ${X11_INCLUDE_DIR})
-		target_link_libraries(drawstuff ${X11_LIBRARIES})
+		target_include_directories(drawstuff PRIVATE ${X11_INCLUDE_DIR})
+		target_link_libraries(drawstuff PRIVATE ${X11_LIBRARIES})
 	endif()
 	
 	set(
