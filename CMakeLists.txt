@@ -1,5 +1,9 @@
 cmake_minimum_required(VERSION 2.8.12)
 
+if(POLICY CMP0042)
+	cmake_policy(SET CMP0042 NEW)
+endif()
+
 if(POLICY CMP0072)
 	cmake_policy(SET CMP0072 NEW)
 endif()
@@ -13,6 +17,7 @@ project(ODE)
 include(CheckFunctionExists)
 include(CheckIncludeFiles)
 include(CMakeDependentOption)
+include(CMakePushCheckState)
 include(GNUInstallDirs)
 
 set(VERSION_MAJOR 0)
@@ -48,14 +53,21 @@ else()
 	option(ODE_DOUBLE_PRECISION "Use double-precision math." ON)
 endif()
 
-find_package(OpenGL)
-find_package(Threads)
+cmake_push_check_state(RESET)
 
-set(CMAKE_REQUIRED_INCLUDES ${OPENGL_INCLUDE_DIR})
-set(CMAKE_REQUIRED_LIBRARIES ${CMAKE_THREAD_LIBS_INIT} ${OPENGL_LIBRARIES})
+if(ODE_WITH_DEMOS)
+	find_package(OpenGL REQUIRED)
+	list(APPEND CMAKE_REQUIRED_INCLUDES ${OPENGL_INCLUDE_DIR})
+	list(APPEND CMAKE_REQUIRED_LIBRARIES ${OPENGL_LIBRARIES})
+endif()
 
-if(APPLE AND OPENGL_FOUND)
-	set(HAVE_APPLE_OPENGL_FRAMEWORK ON)
+if(ODE_WITH_OU OR NOT ODE_NO_THREADING_INTF)
+	find_package(Threads REQUIRED)
+	list(APPEND CMAKE_REQUIRED_LIBRARIES ${CMAKE_THREAD_LIBS_INIT})
+endif()
+
+if(APPLE)
+	check_include_files("OpenGL/gl.h;OpenGL/glu.h" HAVE_APPLE_OPENGL_FRAMEWORK)
 endif()
 check_include_files(alloca.h HAVE_ALLOCA_H)
 check_function_exists(gettimeofday HAVE_GETTIMEOFDAY)
@@ -109,6 +121,8 @@ elseif(CMAKE_SYSTEM MATCHES "SunOS-4")
 else()
 	set(_OU_TARGET_OS _OU_TARGET_OS_GENUNIX)
 endif()
+
+cmake_pop_check_state()
 
 configure_file(config.h.cmake.in ode/src/config.h)
 
@@ -575,9 +589,18 @@ endif()
 
 if(ODE_WITH_LIBCCD)
 	if(ODE_WITH_LIBCCD_SYSTEM)
-		find_package(ccd)
-		target_compile_definitions(ode PRIVATE -DdLIBCCD_ENABLED -DdLIBCCD_SYSTEM)
-		target_link_libraries(ODE ccd::ccd)
+		find_package(ccd REQUIRED)
+		target_compile_definitions(ODE PRIVATE -DdLIBCCD_ENABLED -DdLIBCCD_SYSTEM)
+		target_include_directories(
+			ODE
+			PRIVATE
+			$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/libccd/src/custom>
+		)
+		if(TARGET ccd::ccd)
+			target_link_libraries(ODE PRIVATE ccd::ccd)
+		else()
+			target_link_libraries(ODE PRIVATE ccd)
+		endif()
 	else()
 		target_compile_definitions(ODE PRIVATE -DdLIBCCD_ENABLED -DdLIBCCD_INTERNAL)
 		target_include_directories(
@@ -643,7 +666,7 @@ elseif(NOT ODE_NO_THREADING_INTF)
 endif()
 
 if(ODE_WITH_OU OR NOT ODE_NO_THREADING_INTF)
-	target_link_libraries(ODE ${CMAKE_THREAD_LIBS_INIT})
+	target_link_libraries(ODE PRIVATE ${CMAKE_THREAD_LIBS_INIT})
 endif()
 
 if(NOT CMAKE_VERSION VERSION_LESS 3.12)
@@ -724,19 +747,21 @@ if(ODE_WITH_DEMOS)
 		target_compile_definitions(drawstuff PRIVATE -DDS_LIB)
 	endif()
 	
-	target_include_directories(drawstuff PUBLIC ${OPENGL_INCLUDE_DIR})
-	target_link_libraries(drawstuff ODE ${OPENGL_LIBRARIES})
+	target_link_libraries(drawstuff PUBLIC ODE)
+	
+	target_include_directories(drawstuff PRIVATE ${OPENGL_INCLUDE_DIRS})
+	target_link_libraries(drawstuff PRIVATE ${OPENGL_LIBRARIES})
 	
 	if(WIN32)
-		target_link_libraries(drawstuff winmm)
+		target_link_libraries(drawstuff PRIVATE winmm)
 	elseif(APPLE)
-		find_package(GLUT)
-		target_include_directories(drawstuff PUBLIC ${GLUT_INCLUDE_DIR})
-		target_link_libraries(drawstuff ${GLUT_LIBRARIES})
+		find_package(GLUT REQUIRED)
+		target_include_directories(drawstuff PRIVATE ${GLUT_INCLUDE_DIR})
+		target_link_libraries(drawstuff PRIVATE ${GLUT_LIBRARIES})
 	else()
-		find_package(X11)
-		target_include_directories(drawstuff PUBLIC ${X11_INCLUDE_DIR})
-		target_link_libraries(drawstuff ${X11_LIBRARIES})
+		find_package(X11 REQUIRED)
+		target_include_directories(drawstuff PRIVATE ${X11_INCLUDE_DIR})
+		target_link_libraries(drawstuff PRIVATE ${X11_LIBRARIES})
 	endif()
 	
 	set(
