@@ -73,6 +73,8 @@
   #define ODE_PLATFORM_LINUX
 #elif defined(__APPLE__) && defined(__MACH__)
   #define ODE_PLATFORM_OSX
+#elif defined(__FreeBSD__)
+  #define ODE_PLATFORM_FREEBSD
 #else
   #error "Need some help identifying the platform!"
 #endif
