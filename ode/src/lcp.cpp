@@ -378,10 +378,10 @@ struct dLCP {
     int *const m_findex;
     unsigned *const m_p, *const m_C;
 
-    dLCP (unsigned _n, unsigned _nskip, unsigned _nub, dReal *_Adata, dReal *_pairsbx, dReal *_w,
-        dReal *_pairslh, dReal *_L, dReal *_d,
-        dReal *_Dell, dReal *_ell, dReal *_tmp,
-        bool *_state, int *_findex, unsigned *_p, unsigned *_C, dReal **Arows);
+    dLCP (unsigned n, unsigned nskip, unsigned nub, dReal *Adata, dReal *pairsbx, dReal *w,
+        dReal *pairslh, dReal *L, dReal *d,
+        dReal *Dell, dReal *ell, dReal *tmp,
+        bool *state, int *findex, unsigned *p, unsigned *C, dReal **Arows);
     unsigned getNub() const { return m_nub; }
     void transfer_i_to_C (unsigned i);
     void transfer_i_to_N (unsigned /*i*/) { m_nN++; }			// because we can assume C and N span 1:i-1
@@ -408,43 +408,38 @@ struct dLCP {
 };
 
 
-dLCP::dLCP (unsigned _n, unsigned _nskip, unsigned _nub, dReal *_Adata, dReal *_pairsbx, dReal *_w,
-            dReal *_pairslh, dReal *_L, dReal *_d,
-            dReal *_Dell, dReal *_ell, dReal *_tmp,
-            bool *_state, int *_findex, unsigned *_p, unsigned *_C, dReal **Arows):
-    m_n(_n), m_nskip(_nskip), m_nub(_nub), m_nC(0), m_nN(0),
+dLCP::dLCP (unsigned n, unsigned nskip, unsigned nub, dReal *Adata, dReal *pairsbx, dReal *w,
+            dReal *pairslh, dReal *L, dReal *d,
+            dReal *Dell, dReal *ell, dReal *tmp,
+            bool *state, int *findex, unsigned *p, unsigned *C, dReal **Arows):
+    m_n(n), m_nskip(nskip), m_nub(nub), m_nC(0), m_nN(0),
 # ifdef ROWPTRS
     m_A(Arows),
 #else
-    m_A(_Adata),
+    m_A(Adata),
 #endif
-    m_pairsbx(_pairsbx), m_w(_w), m_pairslh(_pairslh), 
-    m_L(_L), m_d(_d), m_Dell(_Dell), m_ell(_ell), m_tmp(_tmp),
-    m_state(_state), m_findex(_findex), m_p(_p), m_C(_C)
+    m_pairsbx(pairsbx), m_w(w), m_pairslh(pairslh), 
+    m_L(L), m_d(d), m_Dell(Dell), m_ell(ell), m_tmp(tmp),
+    m_state(state), m_findex(findex), m_p(p), m_C(C)
 {
-    dxtSetZero<PBX__MAX>(m_pairsbx + PBX_X, m_n);
+    dxtSetZero<PBX__MAX>(pairsbx + PBX_X, n);
 
     {
 # ifdef ROWPTRS
         // make matrix row pointers
-        dReal *aptr = _Adata;
+        dReal *aptr = Adata;
         ATYPE A = m_A;
-        const unsigned n = m_n, nskip = m_nskip;
         for (unsigned k=0; k<n; aptr+=nskip, ++k) A[k] = aptr;
 # endif
     }
 
     {
-        unsigned *p = m_p;
-        const unsigned n = m_n;
         for (unsigned k=0; k != n; ++k) p[k] = k;		// initially unpermutted
     }
 
     /*
     // for testing, we can do some random swaps in the area i > nub
     {
-    const unsigned n = m_n;
-    const unsigned nub = m_nub;
     if (nub < n) {
     for (unsigned k=0; k<100; k++) {
     unsigned i1,i2;
@@ -468,48 +463,42 @@ dLCP::dLCP (unsigned _n, unsigned _nskip, unsigned _nub, dReal *_Adata, dReal *_
     // if lo=-inf and hi=inf - this is because these limits may change during the
     // solution process.
 
+	unsigned currNub = nub;
     {
-        int *findex = m_findex;
-        dReal *pairslh = m_pairslh;
-        const unsigned n = m_n;
-        for (unsigned k = m_nub; k < n; ++k) {
+        for (unsigned k = currNub; k < n; ++k) {
             if (findex && findex[k] >= 0) continue;
             if ((pairslh + (sizeint)k * PLH__MAX)[PLH_LO] == -dInfinity && (pairslh + (sizeint)k * PLH__MAX)[PLH_HI] == dInfinity) {
-                swapProblem (m_A, m_pairsbx, m_w, pairslh, m_p, m_state, findex, n, m_nub, k, m_nskip, 0);
-                m_nub++;
+                swapProblem (m_A, m_pairsbx, m_w, pairslh, m_p, m_state, findex, n, currNub, k, nskip, 0);
+                m_nub = ++currNub;
             }
         }
     }
 
     // if there are unbounded variables at the start, factorize A up to that
-    // point and solve for x. this puts all indexes 0..nub-1 into C.
-    if (m_nub > 0) {
-        const unsigned nub = m_nub;
+    // point and solve for x. this puts all indexes 0..currNub-1 into C.
+    if (currNub > 0) {
         {
             dReal *Lrow = m_L;
-            const unsigned nskip = m_nskip;
-            for (unsigned j = 0; j < nub; Lrow += nskip, ++j) memcpy(Lrow, AROW(j), (j + 1) * sizeof(dReal));
+            for (unsigned j = 0; j < currNub; Lrow += nskip, ++j) memcpy(Lrow, AROW(j), (j + 1) * sizeof(dReal));
         }
-        transfer_b_to_x<false> (m_pairsbx, nub);
-        factorMatrixAsLDLT<1> (m_L, m_d, nub, m_nskip);
-        solveEquationSystemWithLDLT<1, PBX__MAX> (m_L, m_d, m_pairsbx + PBX_X, nub, m_nskip);
-        dSetZero (m_w, nub);
+        transfer_b_to_x<false> (m_pairsbx, currNub);
+        factorMatrixAsLDLT<1> (m_L, m_d, currNub, nskip);
+        solveEquationSystemWithLDLT<1, PBX__MAX> (m_L, m_d, m_pairsbx + PBX_X, currNub, nskip);
+        dSetZero (m_w, currNub);
         {
             unsigned *C = m_C;
-            for (unsigned k = 0; k < nub; ++k) C[k] = k;
+            for (unsigned k = 0; k < currNub; ++k) C[k] = k;
         }
-        m_nC = nub;
+        m_nC = currNub;
     }
 
-    // permute the indexes > nub such that all findex variables are at the end
-    if (m_findex) {
-        const unsigned nub = m_nub;
-        int *findex = m_findex;
+    // permute the indexes > currNub such that all findex variables are at the end
+    if (findex) {
         unsigned num_at_end = 0;
-        for (unsigned k = m_n; k > nub; ) {
+        for (unsigned k = m_n; k > currNub; ) {
             --k;
             if (findex[k] >= 0) {
-                swapProblem (m_A, m_pairsbx, m_w, m_pairslh, m_p, m_state, findex, m_n, k, m_n - 1 - num_at_end, m_nskip, 1);
+                swapProblem (m_A, m_pairsbx, m_w, m_pairslh, m_p, m_state, findex, m_n, k, m_n - 1 - num_at_end, nskip, 1);
                 num_at_end++;
             }
         }
@@ -518,10 +507,8 @@ dLCP::dLCP (unsigned _n, unsigned _nskip, unsigned _nub, dReal *_Adata, dReal *_
     // print info about indexes
     /*
     {
-    const unsigned n = m_n;
-    const unsigned nub = m_nub;
     for (unsigned k=0; k<n; k++) {
-    if (k<nub) printf ("C");
+    if (k<currNub) printf ("C");
     else if ((m_pairslh + (sizeint)k * PLH__MAX)[PLH_LO] == -dInfinity && (m_pairslh + (sizeint)k * PLH__MAX)[PLH_HI] == dInfinity) printf ("c");
     else printf (".");
     }
