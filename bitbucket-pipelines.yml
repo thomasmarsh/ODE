@@ -1,14 +1,11 @@
-# This is a sample build configuration for C++.
-# Check our guides at https://confluence.atlassian.com/x/VYk8Lw for more examples.
-# Only use spaces to indent your .yml configuration.
-# -----
-# You can specify a custom docker image from Docker Hub as your build environment.
-image: gcc:6.1
+image: atlassian/default-image:2
 
 pipelines:
   default:
     - step:
-        script: # Modify the commands below to build your repository.
+        script:
+          - apt-get update
+          - apt-get -y install autoconf automake libtool
           - ./bootstrap
           - ./configure --enable-double-precision --enable-ou --enable-libccd
           - make
