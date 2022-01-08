@@ -65,7 +65,7 @@
 #define ODE_PLATFORM_PSP
 #elif defined(SN_TARGET_PS3)
 #define ODE_PLATFORM_PS3
-#elif defined(_MSC_VER) || defined(__CYGWIN32__) || defined(__MINGW32__)
+#elif defined(_MSC_VER) || defined(__CYGWIN__) || defined(__MINGW32__)
 #define ODE_PLATFORM_WINDOWS
 #elif defined(__linux__)
 #define ODE_PLATFORM_LINUX
@@ -82,7 +82,7 @@
 #define WIN32
 #endif
 
-#if defined(__CYGWIN32__) || defined(__MINGW32__)
+#if defined(__CYGWIN__) || defined(__MINGW32__)
 #define CYGWIN
 #endif
 
