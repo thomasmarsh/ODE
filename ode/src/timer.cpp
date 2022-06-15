@@ -42,7 +42,7 @@ TODO
 //****************************************************************************
 // implementation for windows based on the multimedia performance counter.
 
-#ifdef WIN32
+#ifdef _WIN32
 
 #include "windows.h"
 
@@ -88,7 +88,6 @@ double dTimerTicksPerSecond()
     return hz;
 }
 
-#endif
 
 //****************************************************************************
 // implementation based on the pentium time stamp counter. the timer functions
@@ -96,7 +95,7 @@ double dTimerTicksPerSecond()
 // instructions have executed and data has been written back before the cpu
 // time stamp counter is read. the CPUID instruction is used to serialize.
 
-#if defined(PENTIUM) && !defined(WIN32)
+#elif defined(PENTIUM)
 
 // we need to know the clock rate so that the timing function can report
 // accurate times. this number only needs to be set accurately if we're
@@ -169,31 +168,62 @@ double dTimerTicksPerSecond()
     return PENTIUM_HZ;
 }
 
-#endif
 
 //****************************************************************************
-// otherwise, do the implementation based on gettimeofday().
+// Implementation based on OSX mach_absolute_time()
 
-#if !defined(PENTIUM) && !defined(WIN32)
+#elif defined(__APPLE__) && defined(__MACH__)
 
-#ifndef macintosh
-
-#include <sys/time.h>
+#include <CoreServices/CoreServices.h>
+#include <mach/mach.h>
+#include <mach/mach_time.h>
 #include <unistd.h>
-
 
 static inline void getClockCount (unsigned long cc[2])
 {
-    struct timeval tv;
-    gettimeofday (&tv,0);
-    cc[0] = tv.tv_usec;
-    cc[1] = tv.tv_sec;
+    uint64_t absTime = mach_absolute_time();
+    cc[1] = (uint32_t)((absTime >> 32) & 0xFFFFFFFF);
+    cc[0] = (uint32_t)(absTime & 0xFFFFFFFF);
 }
 
-#else // macintosh
+static inline void serialize()
+{
+}
+
+
+static inline double loadClockCount (unsigned long a[2])
+{
+    uint64_t absTime = (uint64_t)(a[0] | ((uint64_t)a[1] << 32));
+
+    uint64_t nsTime;
+    absolutetime_to_nanoseconds(absTime, &nsTime);
+
+    return nsTime;
+}
+
+double dTimerResolution()
+{
+    mach_timebase_info_data_t timeInfo;
+    (void) mach_timebase_info(&timeInfo);
+
+    return 1e-9 * timeInfo.numer / timeInfo.denom;
+}
+
+double dTimerTicksPerSecond()
+{
+    return 1e9;
+}
+
+
+//****************************************************************************
+// Otherwise, do the implementation based on Macintosh Microseconds 
+// or POSIX gettimeofday().
+
+#else 
+
+#if defined(macintosh)
 
 #include <CoreServices/CoreServices.h>
-#include <ode/Timer.h>
 
 static inline void getClockCount (unsigned long cc[2])
 {
@@ -203,7 +233,21 @@ static inline void getClockCount (unsigned long cc[2])
     cc[0] = ms.lo - ( cc[1] * 1000000 );
 }
 
-#endif
+
+#else // POSIX
+
+#include <sys/time.h>
+#include <unistd.h>
+
+static inline void getClockCount (unsigned long cc[2])
+{
+    struct timeval tv;
+    gettimeofday (&tv,0);
+    cc[0] = tv.tv_usec;
+    cc[1] = tv.tv_sec;
+}
+
+#endif // POSIX
 
 
 static inline void serialize()
