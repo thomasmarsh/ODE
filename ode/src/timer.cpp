@@ -195,18 +195,19 @@ static inline double loadClockCount (unsigned long a[2])
 {
     uint64_t absTime = (uint64_t)(a[0] | ((uint64_t)a[1] << 32));
 
-    uint64_t nsTime;
-    absolutetime_to_nanoseconds(absTime, &nsTime);
+    mach_timebase_info_data_t timeInfo;
+    double resultTime = mach_timebase_info(&timeInfo) == 0 ? absTime * ((double)timeInfo.numer / timeInfo.denom) : 0.0;
 
-    return nsTime;
+    return resultTime;
 }
 
 double dTimerResolution()
 {
     mach_timebase_info_data_t timeInfo;
-    (void) mach_timebase_info(&timeInfo);
+    double nanoResolution = 1e-9;
+    double resultResolution = mach_timebase_info(&timeInfo) == 0 ? nanoResolution * ((double)timeInfo.numer / timeInfo.denom) : nanoResolution;
 
-    return 1e-9 * timeInfo.numer / timeInfo.denom;
+    return resultResolution;
 }
 
 double dTimerTicksPerSecond()
