@@ -574,7 +574,15 @@ static _OU_ALWAYSINLINE bool _OU_CONVENTION_API
 
 #define __OU_ATOMIC_READREORDERBARRIER_FUNCTION_DEFINED
 
+
+END_NAMESPACE_OU();
+
+
 #include <intrin.h>
+
+
+BEGIN_NAMESPACE_OU();
+
 
 static _OU_ALWAYSINLINE void _OU_CONVENTION_API 
 /*void */AtomicReadReorderBarrier()
