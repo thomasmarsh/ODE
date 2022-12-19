@@ -546,6 +546,12 @@ target_compile_definitions(
 
 if(APPLE)
 	target_compile_definitions(ODE PRIVATE -DMAC_OS_X_VERSION=${MAC_OS_X_VERSION})
+	if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
+		find_library(CORESERVICES_FW NAMES CoreServices)
+		if (CORESERVICES_FW)
+			target_link_libraries(ODE PRIVATE ${CORESERVICES_FW})
+		endif()
+	endif()
 endif()
 
 if(WIN32)
