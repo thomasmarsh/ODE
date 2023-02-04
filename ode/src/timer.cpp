@@ -174,7 +174,9 @@ double dTimerTicksPerSecond()
 
 #elif defined(__APPLE__) && defined(__MACH__)
 
+#define uint64 _uint64
 #include <CoreServices/CoreServices.h>
+#undef uint64
 #include <mach/mach.h>
 #include <mach/mach_time.h>
 #include <unistd.h>
