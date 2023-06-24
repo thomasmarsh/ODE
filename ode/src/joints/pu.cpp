@@ -508,13 +508,6 @@ void dJointSetPUAxis2( dJointID j, dReal x, dReal y, dReal z )
 }
 
 
-void dJointSetPUAxisP( dJointID id, dReal x, dReal y, dReal z )
-{
-    dJointSetPUAxis3( id, x, y, z );
-}
-
-
-
 void dJointSetPUAxis3( dJointID j, dReal x, dReal y, dReal z )
 {
     dxJointPU* joint = ( dxJointPU* ) j;
@@ -527,6 +520,31 @@ void dJointSetPUAxis3( dJointID j, dReal x, dReal y, dReal z )
 }
 
 
+void dJointSetPUAxisP(dJointID id, dReal x, dReal y, dReal z)
+{
+    dJointSetPUAxis3(id, x, y, z);
+}
+
+
+void dJointSetPUParam(dJointID j, int parameter, dReal value)
+{
+    dxJointPU *joint = (dxJointPU *)j;
+    dUASSERT(joint, "bad joint argument");
+    checktype(joint, PU);
+
+    switch (parameter & 0xff00)
+    {
+        case dParamGroup1:
+            joint->limot1.set(parameter, value);
+            break;
+        case dParamGroup2:
+            joint->limot2.set(parameter & 0xff, value);
+            break;
+        case dParamGroup3:
+            joint->limotP.set(parameter & 0xff, value);
+            break;
+    }
+}
 
 
 void dJointGetPUAngles( dJointID j, dReal *angle1, dReal *angle2 )
@@ -610,26 +628,6 @@ dReal dJointGetPUAngle2Rate( dJointID j )
     return 0;
 }
 
-
-void dJointSetPUParam( dJointID j, int parameter, dReal value )
-{
-    dxJointPU* joint = ( dxJointPU* ) j;
-    dUASSERT( joint, "bad joint argument" );
-    checktype( joint, PU );
-
-    switch ( parameter & 0xff00 )
-    {
-    case dParamGroup1:
-        joint->limot1.set( parameter, value );
-        break;
-    case dParamGroup2:
-        joint->limot2.set( parameter & 0xff, value );
-        break;
-    case dParamGroup3:
-        joint->limotP.set( parameter & 0xff, value );
-        break;
-    }
-}
 
 void dJointGetPUAnchor( dJointID j, dVector3 result )
 {

@@ -347,8 +347,9 @@ case 'h' : case 'H' : case '?' :
         dWorldSetGravity(world, 0, 0, -0.5);
 
     }
+    break;
 
-case 'p' :case 'P' : {
+  case 'p' :case 'P' : {
       switch (joint->getType() ) {
         case dJointTypeSlider : {
           dSliderJoint *sj = reinterpret_cast<dSliderJoint *> (joint);

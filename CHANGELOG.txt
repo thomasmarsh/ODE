@@ -8,6 +8,14 @@ the rules for this file:
   * keep the format consistent (79 char width, M/D/Y date format).
 
 ------------------------------------------------------------------------------
+06/24/2023 Oleh Derevenko (by Tilmann)
+        * Fixed a missing break in a switch statement in demo_jointPU.cpp while
+          handling gravity switching request.
+        * Fixed wrong face index being returned in convex-trimesh libCCD 
+          collision check routine.
+        * Fixed use of potentially outdated AABBs in GIIMPACT cylinder-trimesh
+          collision check routine.
+
 11/08/2020 Steve Peters
         * dGeomBoxPointDepth implementation was fixed for locations outside of
           the box.

@@ -1110,22 +1110,23 @@ int dCollideCylinderTrimesh(dxGeom *o1, dxGeom *o2, int flags, dContactGeom *con
     dxGeom *Cylinder = o1;
     dxTriMesh *Trimesh = (dxTriMesh *)o2;
 
-    // Main data holder
-    sCylinderTrimeshColliderData cData(flags, skip);
-    cData._InitCylinderTrimeshData(Cylinder, Trimesh);
-
-    //*****at first , collide box aabb******//
-
-    aabb3f test_aabb(o1->aabb[0], o1->aabb[1], o1->aabb[2], o1->aabb[3], o1->aabb[4], o1->aabb[5]);
-
-
     GDYNAMIC_ARRAY collision_result;
     GIM_CREATE_BOXQUERY_LIST(collision_result);
 
+    Cylinder->recomputeAABB();
+    Trimesh->recomputeAABB();
+
+    //*****at first , collide box aabb******//
+
+    aabb3f test_aabb(Cylinder->aabb[0], Cylinder->aabb[1], Cylinder->aabb[2], Cylinder->aabb[3], Cylinder->aabb[4], Cylinder->aabb[5]);
     gim_aabbset_box_collision(&test_aabb, &Trimesh->m_collision_trimesh.m_aabbset , &collision_result);
 
     if (collision_result.m_size != 0)
     {
+        // Main data holder
+        sCylinderTrimeshColliderData cData(flags, skip);
+        cData._InitCylinderTrimeshData(Cylinder, Trimesh);
+
         //*****Set globals for box collision******//
 
         int ctContacts0 = 0;

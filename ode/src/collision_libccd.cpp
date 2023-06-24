@@ -765,7 +765,7 @@ unsigned dCollideConvexTrimeshTrianglesCCD(dxGeom *o1, dxGeom *o2, const int *in
         setObjPosToTriangleCenter(&c2);
 
         if (ccdCollide(o1, o2, flags, &tempContact, skip, &c1, &ccdSupportConvex, &ccdCenter, &c2, &ccdSupportTriangle, &ccdCenter) == 1) {
-            tempContact.side2 = i;
+            tempContact.side2 = indices[i];
             
             if (meshFaceAngleView == NULL || correctTriangleContactNormal(&c2, &tempContact, meshFaceAngleView, indices, numIndices)) {
                 contactCount = addUniqueContact(contacts, &tempContact, contactCount, maxContacts, flags, skip);
