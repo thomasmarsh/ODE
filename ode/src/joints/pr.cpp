@@ -42,7 +42,7 @@ dxJointPR::dxJointPR( dxWorld *w ) :
     //  |+---------+   -                +-----------+
     //  |
     // X.-----------------------------------------> Y
-    // N.B. X is comming out of the page
+    // N.B. X is coming out of the page
     dSetZero( anchor2, 4 );
 
     dSetZero( axisR1, 4 );
@@ -558,12 +558,13 @@ dReal dJointGetPRParam( dJointID j, int parameter )
 void dJointAddPRTorque( dJointID j, dReal torque )
 {
     dxJointPR* joint = ( dxJointPR* ) j;
-    dVector3 axis;
     dAASSERT( joint );
     checktype( joint, PR );
 
     if ( joint->flags & dJOINT_REVERSE )
         torque = -torque;
+
+    dVector3 axis;
 
     getAxis( joint, axis, joint->axisR1 );
     axis[0] *= torque;
