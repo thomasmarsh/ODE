@@ -38,15 +38,16 @@ struct dxJointUniversal : public dxJoint
     dxJointLimitMotor limot1; // limit and motor information for axis1
     dxJointLimitMotor limot2; // limit and motor information for axis2
 
+    dxJointUniversal(dxWorld *w);
 
     void getAxes( dVector3 ax1, dVector3 ax2 );
     void getAngles( dReal *angle1, dReal *angle2 );
     dReal getAngle1();
     dReal getAngle2();
+    
     void computeInitialRelativeRotations();
+    void buildFirstBodyTorqueVector(dVector3 torqueVector, dReal torque1, dReal torque2);
 
-
-    dxJointUniversal( dxWorld *w );
     virtual void getSureMaxInfo( SureMaxInfo* info );
     virtual void getInfo1( Info1* info );
     virtual void getInfo2( dReal worldFPS, dReal worldERP, 

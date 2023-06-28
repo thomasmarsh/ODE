@@ -2352,14 +2352,16 @@ ODE_API void dJointSetPUAxisP (dJointID id, dReal x, dReal y, dReal z);
 ODE_API void dJointSetPUParam (dJointID, int parameter, dReal value);
 
 /**
- * @brief Applies the torque about the rotoide axis of the PU joint
+ * @brief Applies torques about the rotoide axes of PU joint
  *
- * That is, it applies a torque with specified magnitude in the direction
- * of the rotoide axis, to body 1, and with the same magnitude but in opposite
- * direction to body 2. This function is just a wrapper for dBodyAddTorque()}
+ * That is, it applies torque1 about the universal axis 1 and torque2 about the
+ * universal axis 2 to body 1, and with the same magnitude but in opposite
+ * direction to body 2.
+ * @ingroup joints
+ * @remarks This function is just a wrapper for dBodyAddTorque().
  * @ingroup joints
  */
-ODE_API void dJointAddPUTorque (dJointID j, dReal torque);
+ODE_API void dJointAddPUTorques (dJointID joint, dReal torque1, dReal torque2);
 
 
 

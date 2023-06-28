@@ -8,6 +8,10 @@ the rules for this file:
   * keep the format consistent (79 char width, M/D/Y date format).
 
 ------------------------------------------------------------------------------
+06/28/2023 Oleh Derevenko
+        * dJointAddPUTorques() was added to replace orphaned declaration of 
+          dJointAddPUTorque()
+
 06/24/2023 Oleh Derevenko (by Tilmann)
         * Fixed a missing break in a switch statement in demo_jointPU.cpp while
           handling gravity switching request.

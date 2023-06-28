@@ -38,7 +38,7 @@
  * anchor1: Vector from body1 to the anchor point
  *          This vector is calculated when the body are attached or
  *          when the anchor point is set. It is like the offset of the Slider
- *          joint. Since their is a prismatic between the anchor and the body1
+ *          joint. Since there is a prismatic between the anchor and the body1
  *          the distance might change as the simulation goes on.
  * anchor2: Vector from body2 to the anchor point.
  * <PRE>

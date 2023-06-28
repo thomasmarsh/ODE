@@ -546,6 +546,21 @@ void dJointSetPUParam(dJointID j, int parameter, dReal value)
     }
 }
 
+void dJointAddPUTorques(dJointID j, dReal torque1, dReal torque2)
+{
+    dxJointPU *joint = (dxJointPU *)j;
+    dAASSERT(joint);
+    checktype(joint, PU);
+
+    dVector3 axis;
+    joint->buildFirstBodyTorqueVector(axis, torque1, torque2);
+
+    if (joint->node[0].body != 0)
+        dBodyAddTorque(joint->node[0].body, axis[0], axis[1], axis[2]);
+    if (joint->node[1].body != 0)
+        dBodyAddTorque(joint->node[1].body, -axis[0], -axis[1], -axis[2]);
+}
+
 
 void dJointGetPUAngles( dJointID j, dReal *angle1, dReal *angle2 )
 {

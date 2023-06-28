@@ -400,6 +400,23 @@ dxJointUniversal::computeInitialRelativeRotations()
     }
 }
 
+void 
+dxJointUniversal::buildFirstBodyTorqueVector(dVector3 torqueVector, dReal torque1, dReal torque2)
+{
+    if (this->flags & dJOINT_REVERSE)
+    {
+        dReal temp = torque1;
+        torque1 = -torque2;
+        torque2 = -temp;
+    }
+
+    dVector3 axis1, axis2;
+    getAxis(this, axis1, this->axis1);
+    getAxis2(this, axis2, this->axis2);
+    torqueVector[0] = axis1[0] * torque1 + axis2[0] * torque2;
+    torqueVector[1] = axis1[1] * torque1 + axis2[1] * torque2;
+    torqueVector[2] = axis1[2] * torque1 + axis2[2] * torque2;
+}
 
 void dJointSetUniversalAnchor( dJointID j, dReal x, dReal y, dReal z )
 {
@@ -737,27 +754,16 @@ dReal dJointGetUniversalAngle2Rate( dJointID j )
 void dJointAddUniversalTorques( dJointID j, dReal torque1, dReal torque2 )
 {
     dxJointUniversal* joint = ( dxJointUniversal* )j;
-    dVector3 axis1, axis2;
     dAASSERT( joint );
     checktype( joint, Universal );
 
-    if ( joint->flags & dJOINT_REVERSE )
-    {
-        dReal temp = torque1;
-        torque1 = - torque2;
-        torque2 = - temp;
-    }
-
-    getAxis( joint, axis1, joint->axis1 );
-    getAxis2( joint, axis2, joint->axis2 );
-    axis1[0] = axis1[0] * torque1 + axis2[0] * torque2;
-    axis1[1] = axis1[1] * torque1 + axis2[1] * torque2;
-    axis1[2] = axis1[2] * torque1 + axis2[2] * torque2;
+    dVector3 axis;
+    joint->buildFirstBodyTorqueVector(axis, torque1, torque2);
 
     if ( joint->node[0].body != 0 )
-        dBodyAddTorque( joint->node[0].body, axis1[0], axis1[1], axis1[2] );
+        dBodyAddTorque( joint->node[0].body, axis[0], axis[1], axis[2] );
     if ( joint->node[1].body != 0 )
-        dBodyAddTorque( joint->node[1].body, -axis1[0], -axis1[1], -axis1[2] );
+        dBodyAddTorque( joint->node[1].body, -axis[0], -axis[1], -axis[2] );
 }
 
 
