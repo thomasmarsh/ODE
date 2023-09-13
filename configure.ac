@@ -279,9 +279,9 @@ AC_ARG_ENABLE([sse2],
         ),
         sse2=$enableval,sse2=yes)
 fpuarch_flags=
-if test x$pentium=xyes -a x$cpu64=xno
+if test x$pentium = xyes -a x$cpu64 = xno
 then
-    if test x$sse2=xyes
+    if test x$sse2 = xyes
     then
         fpuarch_flags="-mmmx -msse -msse2 -mfpmath=sse -mstackrealign"
     fi
