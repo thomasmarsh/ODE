@@ -84,7 +84,7 @@
 #if defined(__aarch64__) || defined(__alpha__) || defined(__ppc64__) \
     || defined(__s390__) || defined(__s390x__) || defined(__zarch__) \
     || defined(__mips__) || defined(__powerpc64__) || defined(__riscv) \
-    || defined(__loongarch64) \
+    || defined(__loongarch64) || defined(__e2k__) \
     || (defined(__sparc__) && defined(__arch64__))
     #include <stdint.h>
     typedef int64_t         dint64;
