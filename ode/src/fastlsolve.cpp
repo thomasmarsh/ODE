@@ -22,7 +22,7 @@
 
 /*
  * L1Straight Equation Solving Routines
- * Copyright (c) 2017-2022 Oleh Derevenko, odar@eleks.com (change all "a" to "e")
+ * Copyright (c) 2017-2024 Oleh Derevenko, odar@eleks.com (change all "a" to "e")
  */
 
 #include <ode/common.h>
