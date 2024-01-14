@@ -42,7 +42,7 @@
 
 #if dBUILTIN_THREADING_IMPL_ENABLED
 
-#include <Windows.h>
+#include <windows.h>
 #include <process.h>
 #include <new>
 

@@ -379,10 +379,10 @@ public:
   void get (dVector3 start, dVector3 dir)
     { dGeomRayGet (_id, start, dir); }
 
-#ifdef WIN32
+#ifdef _MSC_VER
 #pragma warning( push )
 #pragma warning( disable : 4996 )
-#else
+#elif defined(__GNUC__)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 #endif
@@ -393,9 +393,9 @@ public:
   ODE_API_DEPRECATED
   void getParams (int *firstContact, int *backfaceCull)
     { dGeomRayGetParams (_id, firstContact, backfaceCull); }
-#ifdef WIN32
+#ifdef _MSC_VER
 #pragma warning( pop )
-#else
+#elif defined(__GNUC__)
 #pragma GCC diagnostic pop
 #endif
   void setBackfaceCull (int backfaceCull)
@@ -414,10 +414,10 @@ public:
     { return dGeomRayGetClosestHit (_id); }
 };
 
-#ifdef WIN32
+#ifdef _MSC_VER
 #pragma warning( push )
 #pragma warning( disable : 4996 )
-#else
+#elif defined(__GNUC__)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 #endif
@@ -455,9 +455,9 @@ public:
     { return dGeomTransformGetInfo (_id); }
 };
 
-#ifdef WIN32
+#ifdef _MSC_VER
 #pragma warning( pop )
-#else
+#elif defined(__GNUC__)
 #pragma GCC diagnostic pop
 #endif
 
