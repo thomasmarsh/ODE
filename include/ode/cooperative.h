@@ -178,7 +178,7 @@ ODE_API dResourceRequirementsID dResourceRequirementsClone(/*const */dResourceRe
  *
  * The function updates @a summaryRequirements requirements to be also sufficient
  * for the purposes @a extraRequirements could be used for. The @a extraRequirements
- * object is not changed. The both objects should normally have had been created 
+ * object is not changed. Both objects should normally have been created 
  * with the same Cooperative object.
  *
  * @param summaryRequirements A ResourceRequirements object to be changed

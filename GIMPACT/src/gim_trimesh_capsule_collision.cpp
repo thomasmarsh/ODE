@@ -28,7 +28,7 @@ email: projectileman@yahoo.com
 
 #include "GIMPACT/gim_trimesh.h"
 
-//! Utility function for find the closest point between a segment and a triangle
+//! Utility function to find the closest point between a segment and a triangle
 /*!
 
 \param triangle
@@ -36,7 +36,7 @@ email: projectileman@yahoo.com
 \param s2
 \param contacts Contains the closest points on the segment (1,2), and the normal points to segment, and m_depth contains the distance
 
-\post The contacts array is not set to 0. It adds aditional contacts
+\post The contacts array is not set to 0. It adds additional contacts
 */
 void gim_closest_point_triangle_segment(GIM_TRIANGLE_DATA * triangle, vec3f s1,vec3f s2, GDYNAMIC_ARRAY * contacts)
 {
@@ -166,14 +166,14 @@ void gim_closest_point_triangle_segment(GIM_TRIANGLE_DATA * triangle, vec3f s1,v
 }
 
 
-//! Utility function for find the closest point between a capsule and a triangle
+//! Utility function to find the closest point between a capsule and a triangle
 /*!
 
 \param triangle
 \param capsule
 \param contacts Contains the closest points on the capsule, and the normal points to triangle
 
-\post The contacts array is not set to 0. It adds aditional contacts
+\post The contacts array is not set to 0. It adds additional contacts
 */
 int gim_triangle_capsule_collision(GIM_TRIANGLE_DATA * triangle, GIM_CAPSULE_DATA * capsule, GDYNAMIC_ARRAY * contacts)
 {
@@ -215,7 +215,7 @@ int gim_triangle_capsule_collision(GIM_TRIANGLE_DATA * triangle, GIM_CAPSULE_DAT
 
 //! Trimesh Capsule collision
 /*!
-Find the closest primitive collided by the ray
+Finds the closest primitive collided by the ray
 \param trimesh
 \param capsule
 \param contact

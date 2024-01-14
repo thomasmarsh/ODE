@@ -41,7 +41,7 @@ GUINT32 gim_trimesh_get_triangle_count(GIM_TRIMESH * trimesh)
 \param trimesh
 \param vertex_array
 \param triindex_array
-\param transformed_reply If 1, then the m_transformed_vertices is a reply of the source vertices. Else it just be a reference to the original array.
+\param transformed_reply If 1, then the m_transformed_vertices is a reply of the source vertices. Else it just is a reference to the original array.
 \post it copies the arrays by reference, and creates the auxiliary data (m_aabbset,m_planes_cache_buffer)
 */
 void gim_trimesh_create_from_arrays(GBUFFER_MANAGER_DATA buffer_managers[],
@@ -84,14 +84,14 @@ void gim_trimesh_create_from_arrays(GBUFFER_MANAGER_DATA buffer_managers[],
 //! Create a trimesh from vertex array and an index array
 /*!
 
-\param trimesh An uninitialized GIM_TRIMESH  structure
+\param trimesh An uninitialized GIM_TRIMESH structure
 \param vertex_array A buffer to a vec3f array
 \param vertex_count
 \param triindex_array
 \param index_count
-\param copy_vertices If 1, it copies the source vertices in another buffer. Else (0) it constructs a reference to the data.
-\param copy_indices If 1, it copies the source vertices in another buffer. Else (0) it constructs a reference to the data.
-\param transformed_reply If , then the m_transformed_vertices is a reply of the source vertices. Else it just be a reference to the original array.
+\param copy_vertices If 1, it copies the source vertices to another buffer. Else (0) it constructs a reference to the data.
+\param copy_indices If 1, it copies the source vertices to another buffer. Else (0) it constructs a reference to the data.
+\param transformed_reply If 1, then the m_transformed_vertices is a reply of the source vertices. Else (0) it just is a reference to the original array.
 */
 void gim_trimesh_create_from_data(GBUFFER_MANAGER_DATA buffer_managers[],
 	GIM_TRIMESH * trimesh, vec3f * vertex_array, GUINT32 vertex_count,char copy_vertices, 
@@ -154,8 +154,8 @@ void gim_trimesh_destroy(GIM_TRIMESH * trimesh)
 \post dest_trimesh will be created
 \param source_trimesh
 \param dest_trimesh
-\param copy_by_reference If 1, it attach a reference to the source vertices, else it copies the vertices
-\param transformed_reply IF 1, then it forces the m_trasnformed_vertices to be  a reply of the source vertices
+\param copy_by_reference If 1, it attaches a reference to the source vertices, else it copies the vertices
+\param transformed_reply IF 1, then it forces the m_trasnformed_vertices to be a reply of the source vertices
 */
 void gim_trimesh_copy(GIM_TRIMESH * source_trimesh,
 	GBUFFER_MANAGER_DATA dest_buffer_managers[], GIM_TRIMESH * dest_trimesh, 
@@ -229,7 +229,7 @@ char gim_trimesh_needs_update(GIM_TRIMESH * trimesh)
 
 //! Change the state of the trimesh for force it to update
 /*!
-Call it after made changes to the trimesh.
+Call it after having made changes to the trimesh.
 \post gim_trimesh_need_update(trimesh) will return 1
 */
 void gim_trimesh_post_update(GIM_TRIMESH * trimesh)

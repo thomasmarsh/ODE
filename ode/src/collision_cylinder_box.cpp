@@ -262,7 +262,7 @@ int sCylinderBoxData::_cldTestAxis( dVector3& vInputNormal, int iAxis )
         return 0; 
     } 
 
-    // Finalyze the depth calculation
+    // Finalize the depth calculation
     fDepth -= dFabs(fd);
 
     // get maximum depth

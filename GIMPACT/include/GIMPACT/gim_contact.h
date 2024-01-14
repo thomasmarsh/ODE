@@ -2,7 +2,7 @@
 #define GIM_CONTACT_H_INCLUDED
 
 /*! \file gim_contact.h
-\author Francisco León
+\author Francisco Leï¿½n
 */
 /*
 -----------------------------------------------------------------------------
@@ -39,9 +39,9 @@ email: projectileman@yahoo.com
 \brief
 Functions for managing and sorting contacts resulting from a collision query.
 <ul>
-<li> Contact lists must be create by calling \ref GIM_CREATE_CONTACT_LIST
+<li> Contact lists must be created by calling \ref GIM_CREATE_CONTACT_LIST
 <li> After querys, contact lists must be destroy by calling \ref GIM_DYNARRAY_DESTROY
-<li> Contacts can be merge for avoid duplicate results by calling \ref gim_merge_contacts
+<li> Contacts can be merged to avoid duplicate results by calling \ref gim_merge_contacts
 </ul>
 
 */

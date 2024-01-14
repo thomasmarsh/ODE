@@ -36,7 +36,7 @@ struct dContactGeom;
  *
  * @param data The user data object, as passed to dSpaceCollide.
  * @param o1   The first geom being tested.
- * @param o2   The second geom being test.
+ * @param o2   The second geom being tested.
  *
  * @remarks The callback function can call dCollide on o1 and o2 to generate
  * contact points between each pair. Then these contact points may be added

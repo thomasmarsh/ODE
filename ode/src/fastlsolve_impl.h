@@ -434,7 +434,7 @@ void solveL1Straight (const dReal *L, dReal *B, unsigned rowCount, unsigned rowS
                 Z11 += p1 * q1;
 
                 /* advance pointers */
-                // ptrLElement += 1; -- not needed any more
+                // ptrLElement += 1; -- not needed anymore
                 ptrBElement += 1 * b_stride;
             }
 
@@ -832,7 +832,7 @@ void ThreadedEquationSolverLDLT::participateSolvingL1Straight(const dReal *L, dR
                                     break;
                                 }
 
-                                // Take a look if any more columns have been completed...
+                                // Take a look if anymore columns have been completed...
                                 completedBlocks = refBlockCompletionProgress;
                                 dIASSERT(completedBlocks >= finalColumnBlock);
 
@@ -990,7 +990,7 @@ void ThreadedEquationSolverLDLT::participateSolvingL1Straight(const dReal *L, dR
                                 break;
                             }
 
-                            // Take a look if any more columns have been completed...
+                            // Take a look if anymore columns have been completed...
                             completedBlocks = refBlockCompletionProgress;
                             dIASSERT(completedBlocks >= finalColumnBlock);
 
@@ -1581,7 +1581,7 @@ void ThreadedEquationSolverLDLT::participateSolvingL1Straight(const dReal *L, dR
 
             if (lookaheadBoundaryReached)
             {
-                dIASSERT(blockProcessingState != BPS_COMPETING_FOR_A_BLOCK); // Why did not we compete???
+                dIASSERT(blockProcessingState != BPS_COMPETING_FOR_A_BLOCK); // Why did we not compete???
 
                 // If no row has been processed in the previous pass, compete for the next row to avoid cycling uselessly
                 if (blockProcessingState <= BPS_NO_BLOCKS_PROCESSED)

@@ -1309,7 +1309,7 @@ void dJointDestroy (dxJoint *j)
 
 dJointGroupID dJointGroupCreate (int /*max_size*/)
 {
-    // not any more ... dUASSERT (max_size > 0,"max size must be > 0");
+    // not anymore ... dUASSERT (max_size > 0,"max size must be > 0");
     dxJointGroup *group = new dxJointGroup();
     return group;
 }

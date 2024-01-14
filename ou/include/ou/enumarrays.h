@@ -65,7 +65,7 @@ struct CTypeStandardLess
 /*
  *	Implementation Note:
  *	The array is intended to store static constant data. 
- *	Therefore CElementEqualType should not ever need a nontrivial constructor
+ *	Therefore CElementEqualType should never need a nontrivial constructor
  *	and it is acceptable to have it as template parameter.
  */
 
@@ -148,7 +148,7 @@ private:
 /*
  *	Implementation Note:
  *	The array is intended to store static constant data. 
- *	Therefore CElementLessType and CElementEqualType should not ever need 
+ *	Therefore CElementLessType and CElementEqualType should never need 
  *	a nontrivial constructor and it is acceptable to have them 
  *	as template parameters.
  */

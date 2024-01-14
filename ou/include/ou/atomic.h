@@ -51,7 +51,7 @@
  *	All atomic API implementations are inlined, Exceptions are implementations via
  *	mutex locks for which it is not reasonable to generate inlined code.
  *
- *	Atomic functions' prototypes were selected to to provide maximal possible 
+ *	Atomic functions' prototypes were selected to provide maximal possible 
  *	functionality available on all the platforms mentioned above in common. Function
  *	names were chosen as a mix of Windows and UNIX naming traditions (more closely 
  *	to Windows though).
@@ -209,8 +209,8 @@
  *	\return \c true if exchange was performed and \c false otherwise.
  *
  *	The function performs comparison of \a aoComparand value with the value pointed
- *	by \a paoDestination. If the values match an \a aoExchange is assigned to 
- *	destination location. If values do not match, the restination remains unchanged.
+ *	by \a paoDestination. If the values match the \a aoExchange is assigned to the
+ *	destination location. If values do not match the destination remains unchanged.
  *	Function returns boolean status whether the match and assignment occurred or not.
  *	The most common uses are relaxed synchronization and construction of LIFO lists.
  *	\see AtomicExchange
@@ -226,7 +226,7 @@
  *
  *	\c AtomicAnd updates variable pointed to by \a paoDestination with result of
  *	 bitwise AND of \a aoBitMask and existing \a paoDestination target. The result 
- *	is original value that was pointed to by \a paoDestination before the operation
+ *	is the original value that was pointed to by \a paoDestination before the operation
  *	was performed. Common applications are object state manipulations.
  *	\see AtomicOr
  *	\see AtomicXor
@@ -234,7 +234,7 @@
 
 /**
  *	\fn atomicord32 _OU_CONVENTION_API AtomicOr(volatile atomicord32 *paoDestination, atomicord32 aoBitMask)
- *	\brief Applies a mask with bitwise OR to the destination and returns original 
+ *	\brief Applies a mask with bitwise OR to the destination and returns the original 
  *	value of destination.
  *	\param paoDestination A pointer to a variable the bitmask is to be applied to.
  *	\param aoBitMask A bitmask to be used in operation.
@@ -242,7 +242,7 @@
  *
  *	\c AtomicOr updates variable pointed to by \a paoDestination with result of
  *	 bitwise OR of \a aoBitMask and existing \a paoDestination target. The result 
- *	is original value that was pointed to by \a paoDestination before the operation 
+ *	is the original value that was pointed to by \a paoDestination before the operation 
  *	was performed. Common applications are object state manipulations.
  *	\see AtomicAnd
  *	\see AtomicXor
@@ -250,7 +250,7 @@
 
 /**
  *	\fn atomicord32 _OU_CONVENTION_API AtomicXor(volatile atomicord32 *paoDestination, atomicord32 aoBitMask)
- *	\brief Applies a mask with bitwise XOR to the destination and returns original 
+ *	\brief Applies a mask with bitwise XOR to the destination and returns the original 
  *	value of destination.
  *	\param paoDestination A pointer to a variable the bitmask is to be applied to.
  *	\param aoBitMask A bitmask to be used in operation.
@@ -258,7 +258,7 @@
  *
  *	\c AtomicXor updates variable pointed to by \a paoDestination with result of
  *	 bitwise XOR of \a aoBitMask and existing \a paoDestination target. The result 
- *	is original value that was pointed to by \a paoDestination before the operation 
+ *	is the original value that was pointed to by \a paoDestination before the operation 
  *	was performed. Common applications are object state manipulations.
  *	\see AtomicAnd
  *	\see AtomicOr
@@ -290,8 +290,8 @@
  *	\brief The function is identical to \c AtomicIncrement but does not return a result.
  *
  *	The function implementation can be faster on some platforms and it is recommended
- *	to use "NoResult" variants in cases when the result of operation or previous value 
- *	of destination is not used.
+ *	to use "NoResult" variants in cases when the result of the operation or the previous value 
+ *	of the destination is not used.
  *	\see AtomicIncrement
  */
 
@@ -300,8 +300,8 @@
  *	\brief The function is identical to \c AtomicDecrement but does not return a result.
  *
  *	The function implementation can be faster on some platforms and it is recommended
- *	to use "NoResult" variants in cases when the result of operation or previous value 
- *	of destination is not used.
+ *	to use "NoResult" variants in cases when the result of the operation or the previous value 
+ *	of the destination is not used.
  *	\see AtomicDecrement
  */
 
@@ -310,8 +310,8 @@
  *	\brief The function is identical to \c AtomicExchangeAdd but does not return a result.
  *
  *	The function implementation can be faster on some platforms and it is recommended
- *	to use "NoResult" variants in cases when the result of operation or previous value 
- *	of destination is not used.
+ *	to use "NoResult" variants in cases when the result of the operation or the previous value 
+ *	of the destination is not used.
  *	\see AtomicExchangeAdd
  */
 
@@ -320,8 +320,8 @@
  *	\brief The function is identical to \c AtomicAnd but does not return a result.
  *
  *	The function implementation can be faster on some platforms and it is recommended
- *	to use "NoResult" variants in cases when the result of operation or previous value 
- *	of destination is not used.
+ *	to use "NoResult" variants in cases when the result of the operation or the previous value 
+ *	of the destination is not used.
  *	\see AtomicAnd
  */
 
@@ -330,8 +330,8 @@
  *	\brief The function is identical to \c AtomicOr but does not return a result.
  *
  *	The function implementation can be faster on some platforms and it is recommended
- *	to use "NoResult" variants in cases when the result of operation or previous value 
- *	of destination is not used.
+ *	to use "NoResult" variants in cases when the result of the operation or the previous value 
+ *	of the destination is not used.
  *	\see AtomicOr
  */
 
@@ -340,8 +340,8 @@
  *	\brief The function is identical to \c AtomicXor but does not return a result.
  *
  *	The function implementation can be faster on some platforms and it is recommended
- *	to use "NoResult" variants in cases when the result of operation or previous value 
- *	of destination is not used.
+ *	to use "NoResult" variants in cases when the result of the operation or the previous value 
+ *	of the destination is not used.
  *	\see AtomicXor
  */
 
@@ -357,7 +357,7 @@
  *	\brief Performs initialization tasks to allow using atomic functions.
  *	\return Boolean initialization status.
  *
- *	The function is required to be called before first use of atomic functions.
+ *	The function is required to be called before the first use of atomic functions.
  *	The initialization uses reference counting, so multiple calls to \c InitializeAtomicAPI
  *	are allowed. However the counter is not thread safe. Therefore it is recommended
  *	that the function is always called from main thread on program startup or
@@ -365,7 +365,7 @@
  *
  *	The function returns initialization status. If initialization succeeds, 
  *	\c FinalizeAtomicAPI is to be called for each call to \c InitializeAtomicAPI after
- *	atomic functions are not needed any more. If \c InitializeAtomicAPI returns 
+ *	atomic functions are not needed anymore. If \c InitializeAtomicAPI returns 
  *	\c false, the atomic functions may not be used and \c FinalizeAtomicAPI must not be called.
  *	\see FinalizeAtomicAPI
  */

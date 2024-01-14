@@ -28,7 +28,7 @@
 // @@@ TODO:
 //	* export all spaces, and geoms in spaces, not just ones attached to bodies
 //	  (separate export function?)
-//	* say the space each geom is in, so reader can construct space heirarchy
+//	* say the space each geom is in, so reader can construct space hierarchy
 //	* limot --> separate out into limits and motors?
 //	* make sure ODE-specific parameters divided out
 

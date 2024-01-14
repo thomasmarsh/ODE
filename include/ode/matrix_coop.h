@@ -74,7 +74,7 @@ ODE_API void dEstimateCooperativelyFactorLDLTResourceRequirements(dResourceRequi
  * estimated in @c dEstimateCooperativelyFactorLDLTResourceRequirements.
  * 
  * The operation is performed cooperatively by up to @a allowedThreadCount threads
- * from thread pool available in @a resources. The threading must must not be simultaneously
+ * from thread pool available in @a resources. The threading must not be simultaneously
  * used (via other @c dResourceContainerID instances) in other calls that employ its features.
  *
  * @param resources The resources allocated for the function
@@ -123,7 +123,7 @@ ODE_API void dEstimateCooperativelySolveLDLTResourceRequirements(dResourceRequir
  * estimated in @c dEstimateCooperativelySolveLDLTResourceRequirements.
  * 
  * The operation is performed cooperatively by up to @a allowedThreadCount threads
- * from thread pool available in @a resources. The threading must must not be simultaneously
+ * from thread pool available in @a resources. The threading must not be simultaneously
  * used (via other @c dResourceContainerID instances) in other calls that employ its features.
  *
  * @param resources The resources allocated for the function
@@ -172,7 +172,7 @@ ODE_API void dEstimateCooperativelySolveL1StraightResourceRequirements(dResource
  * estimated in @c dEstimateCooperativelySolveL1StraightResourceRequirements.
  * 
  * The operation is performed cooperatively by up to @a allowedThreadCount threads
- * from thread pool available in @a resources. The threading must must not be simultaneously
+ * from thread pool available in @a resources. The threading must not be simultaneously
  * used (via other @c dResourceContainerID instances) in other calls that employ its features.
  *
  * @param resources The resources allocated for the function
@@ -220,7 +220,7 @@ ODE_API void dEstimateCooperativelySolveL1TransposedResourceRequirements(dResour
  * estimated in @c dEstimateCooperativelySolveL1TransposedResourceRequirements.
  * 
  * The operation is performed cooperatively by up to @a allowedThreadCount threads
- * from thread pool available in @a resources. The threading must must not be simultaneously
+ * from thread pool available in @a resources. The threading must not be simultaneously
  * used (via other @c dResourceContainerID instances) in other calls that employ its features.
  *
  * @param resources The resources allocated for the function
@@ -266,7 +266,7 @@ ODE_API void dEstimateCooperativelyScaleVectorResourceRequirements(dResourceRequ
  * estimated in @c dEstimateCooperativelyScaleVectorResourceRequirements.
  * 
  * The operation is performed cooperatively by up to @a allowedThreadCount threads
- * from thread pool available in @a resources. The threading must must not be simultaneously
+ * from thread pool available in @a resources. The threading must not be simultaneously
  * used (via other @c dResourceContainerID instances) in other calls that employ its features.
  *
  * @param resources The resources allocated for the function

@@ -24,7 +24,7 @@
 //        1         2         3         4         5         6         7
 
 ////////////////////////////////////////////////////////////////////////////////
-// This file create unit test for some of the functions found in:
+// This file creates unit tests for some of the functions found in:
 // ode/src/joinst/slider.cpp
 //
 //
@@ -148,7 +148,7 @@ SUITE (TestdxJointSlider)
 
 
 
-    // The 2 bodies are positionned at (0, 0, 0), with no rotation
+    // The 2 bodies are positioned at (0, 0, 0) with no rotation
     // The joint is a Slider Joint
     // Axis is along the X axis
     // Anchor at (0, 0, 0)
@@ -280,7 +280,7 @@ SUITE (TestdxJointSlider)
 
 
 
-    // The 2 bodies are positionned at (0, 0, 0), with no rotation
+    // The 2 bodies are positioned at (0, 0, 0) with no rotation
     // The joint is a Slider Joint
     // Axis is the opposite of the X axis
     // Anchor at (0, 0, 0)
@@ -412,7 +412,7 @@ SUITE (TestdxJointSlider)
 
 
     // Only body 1
-    // The body are positionned at (0, 0, 0), with no rotation
+    // The body is positioned at (0, 0, 0) with no rotation
     // The joint is a Slider Joint
     // Axis is along the X axis
     // Anchor at (0, 0, 0)
@@ -485,7 +485,7 @@ SUITE (TestdxJointSlider)
 
 
     // Only body 1
-    // The body are positionned at (0, 0, 0), with no rotation
+    // The body is positioned at (0, 0, 0) with no rotation
     // The joint is a Slider Joint
     // Axis is in the oppsite X axis
     // Anchor at (0, 0, 0)
@@ -558,7 +558,7 @@ SUITE (TestdxJointSlider)
 
 
     // Only body 2
-    // The body are positionned at (0, 0, 0), with no rotation
+    // The body is positioned at (0, 0, 0) with no rotation
     // The joint is a Slider Joint
     // Axis is along the X axis
     // Anchor at (0, 0, 0)
@@ -630,7 +630,7 @@ SUITE (TestdxJointSlider)
     }
 
     // Only body 2
-    // The body are positionned at (0, 0, 0), with no rotation
+    // The body is positioned at (0, 0, 0) with no rotation
     // The joint is a Slider Joint
     // Axis is in the oppsite X axis
     // Anchor at (0, 0, 0)
@@ -706,7 +706,7 @@ SUITE (TestdxJointSlider)
     // ==========================================================================
 
 
-    // Apply force on 1st body in the X direction also the Axis direction
+    // Apply force on 1st body in the X direction that also is the axis direction
     //
     //  X------->       X---------> Axis -->
     //  B1  F->      =>     B1
@@ -741,7 +741,7 @@ SUITE (TestdxJointSlider)
     }
 
 
-    // Apply force on 1st body in the X direction also the Axis direction
+    // Apply force on 1st body in the X direction that also is the axis direction
     //
     //  X------->       X---------> <-- Axis
     //  B1  F->      =>     B1
@@ -775,7 +775,7 @@ SUITE (TestdxJointSlider)
         CHECK_CLOSE (1, dJointGetSliderPositionRate(jId), 1e-4);
     }
 
-    // Apply force on 1st body in the X direction also the Axis direction
+    // Apply force on 1st body in the X direction that also is the axis direction
     //
     //  X------->       X---------> Axis -->
     //  B1          =>  B1
@@ -810,7 +810,7 @@ SUITE (TestdxJointSlider)
     }
 
 
-    // Apply force on 1st body in the X direction also the Axis direction
+    // Apply force on 1st body in the X direction that also is the axis direction
     //
     //  X------->       X---------> <-- Axis
     //  B1          =>  B1
@@ -846,7 +846,7 @@ SUITE (TestdxJointSlider)
 
 
 
-    // Apply force on 1st body in the X direction also the Axis direction
+    // Apply force on 1st body in the X direction that also is the axis direction
     //
     //  X------->       X---------> Axis -->
     //  B1  F->      =>     B1
@@ -879,7 +879,7 @@ SUITE (TestdxJointSlider)
     }
 
 
-    // Apply force on 1st body in the X direction also the Axis direction
+    // Apply force on 1st body in the X direction that also is the axis direction
     //
     //  X------->       X---------> <-- Axis
     //  B1  F->      =>     B1
@@ -912,7 +912,7 @@ SUITE (TestdxJointSlider)
     }
 
 
-    // Apply force on body 2 in the X direction also the Axis direction
+    // Apply force on body 2 in the X direction that also is the axis direction
     //
     //  X------->       X---------> Axis -->
     //  B2 F->             B2
@@ -945,7 +945,7 @@ SUITE (TestdxJointSlider)
     }
 
 
-    // Apply force on body 2 in the X direction also the Axis direction
+    // Apply force on body 2 in the X direction that also is the axis direction
     //
     //  X------->       X---------> <-- Axis
     //  B2 F->             B2
@@ -983,7 +983,7 @@ SUITE (TestdxJointSlider)
 
 
     // Create 2 bodies attached by a Slider joint
-    // Axis is along the X axis (Default value
+    // Axis is along the X axis (Default value)
     // Anchor at (0, 0, 0)      (Default value)
     //
     //       ^Y
@@ -1110,7 +1110,7 @@ SUITE (TestdxJointSlider)
 
     // Compare Only body 1 to 2 bodies with one fixed.
     //
-    // The body are positionned at (0, 0, 0), with no rotation
+    // The body are positioned at (0, 0, 0) with no rotation
     // The joint is a Slider Joint
     // Axis is along the X axis
     // Anchor at (0, 0, 0)
@@ -1163,11 +1163,11 @@ SUITE (TestdxJointSlider)
         dJointID jId;    // Joint with one body
     };
 
-    // This test compare the result of a slider with 2 bodies where body body 2 is
+    // This test compares the result of a slider with 2 bodies where body 2 is
     // fixed to the world to a slider with only one body at position 1.
     //
-    // Test the limits [-1, 0.25] when only one body at is attached to the joint
-    // using dJointAttache(jId, bId, 0);
+    // Test the limits [-1, 0.25] when only one body is attached to the joint
+    // using dJointAttach(jId, bId, 0);
     //
     TEST_FIXTURE(Fixture_dxJointSlider_Compare_Body_At_Zero_Axis_Along_X,
                  test_Limit_minus1_025_One_Body_on_left)
@@ -1201,11 +1201,11 @@ SUITE (TestdxJointSlider)
 
 
 
-    // This test compare the result of a slider with 2 bodies where body body 1 is
+    // This test compares the result of a slider with 2 bodies where body 1 is
     // fixed to the world to a slider with only one body at position 2.
     //
-    // Test the limits [-1, 0.25] when only one body at is attached to the joint
-    // using dJointAttache(jId, 0, bId);
+    // Test the limits [-1, 0.25] when only one body is attached to the joint
+    // using dJointAttach(jId, 0, bId);
     //
     TEST_FIXTURE(Fixture_dxJointSlider_Compare_Body_At_Zero_Axis_Along_X,
                  test_Limit_minus1_025_One_Body_on_right)
@@ -1241,11 +1241,11 @@ SUITE (TestdxJointSlider)
 
 
 
-    // This test compare the result of a slider with 2 bodies where body body 2 is
+    // This test compares the result of a slider with 2 bodies where body 2 is
     // fixed to the world to a slider with only one body at position 1.
     //
-    // Test the limits [0, 0] when only one body at is attached to the joint
-    // using dJointAttache(jId, bId, 0);
+    // Test the limits [0, 0] when only one body is attached to the joint
+    // using dJointAttach(jId, bId, 0);
     //
     // The body should not move since their is no room between the two limits
     //
@@ -1284,11 +1284,11 @@ SUITE (TestdxJointSlider)
     }
 
 
-    // This test compare the result of a slider with 2 bodies where body body 1 is
+    // This test compares the result of a slider with 2 bodies where body 1 is
     // fixed to the world to a slider with only one body at position 2.
     //
-    // Test the limits [0, 0] when only one body at is attached to the joint
-    // using dJointAttache(jId, 0, bId);
+    // Test the limits [0, 0] when only one body is attached to the joint
+    // using dJointAttach(jId, 0, bId);
     //
     // The body should not move since their is no room between the two limits
     //

@@ -25,7 +25,7 @@
 
 
 /*
- *	These macros are not used any more inside of ODE
+ *	These macros are not used anymore inside of ODE
  *  They are kept for backward compatibility with external code that
  *  might still be using them.
  */
@@ -153,7 +153,7 @@ it is not equivalent to A*=B.
 
 
 /*
- *	These macros are not used any more inside of ODE
+ *	These macros are not used anymore inside of ODE
  *  They are kept for backward compatibility with external code that
  *  might still be using them.
  */

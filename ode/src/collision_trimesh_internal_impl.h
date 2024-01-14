@@ -95,7 +95,7 @@ void dxTriDataBase::meaningfulPreprocess_buildEdgeFlags(uint8 *useFlags/*=NULL*/
 
                 if (useFlags != NULL)
                 {
-                    // For the last element EdgeRecord::kAbsVertexUsed assignment can be skipped as noone is going to need it any more
+                    // For the last element EdgeRecord::kAbsVertexUsed assignment can be skipped as noone is going to need it anymore
                     useFlags[currEdge[0].m_triIdx] |= ((edges[currEdge[0].m_vertIdx1].m_absVertexFlags & EdgeRecord::AVF_VERTEX_USED) == 0 ? currEdge[0].m_vert1Flags : 0) 
                         | ((edges[currEdge[0].m_vertIdx2].m_absVertexFlags & EdgeRecord::AVF_VERTEX_USED) == 0 ? currEdge[0].m_vert2Flags : 0)
                         | currEdge[0].m_edgeFlags;
@@ -177,7 +177,7 @@ void dxTriDataBase::meaningfulPreprocess_buildEdgeFlags(uint8 *useFlags/*=NULL*/
             dReal normalSegmentDot = dCalcVectorDot3(triangleNormal, secondOppositeVertexSegment);
 
             // This is a concave edge, leave it for the next pass
-            // OD: This is the "dot >= kConcaveThresh" check, but since the vectros were not normalized to save on roots and divisions,
+            // OD: This is the "dot >= kConcaveThresh" check, but since the vectors were not normalized to save on roots and divisions,
             // the check against zero is performed first and then the dot product is squared and compared against the threshold multiplied by lengths' squares
             // OD: Originally, there was dot > -kConcaveThresh check, but this does not seem to be a good idea
             // as it can mark all edges on potentially large (nearly) flat surfaces concave.

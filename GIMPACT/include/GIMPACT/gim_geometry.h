@@ -2,7 +2,7 @@
 #define GIM_VECTOR_H_INCLUDED
 
 /*! \file gim_geometry.h
-\author Francisco León
+\author Francisco Leï¿½n
 */
 /*
 -----------------------------------------------------------------------------
@@ -934,9 +934,9 @@ Last column is added as the position
 /** inverse transpose of matrix times vector
  *
  * This macro computes inverse transpose of matrix m,
- * and multiplies vector v into it, to yeild vector p
+ * and multiplies vector v into it, to yield vector p
  *
- * DANGER !!! Do Not use this on normal vectors!!!
+ * DANGER !!! Do not use this on normal vectors!!!
  * It will leave normals the wrong length !!!
  * See macro below for use on normals.
  */
@@ -948,7 +948,7 @@ Last column is added as the position
    p[0] = m[1][1]*v[0] - m[1][0]*v[1];				\
    p[1] = - m[0][1]*v[0] + m[0][0]*v[1];			\
 								\
-   /* if matrix not singular, and not orthonormal, then renormalize */ \
+   /* if matrix is not singular, and not orthonormal, then renormalize */ \
    if ((det!=1.0f) && (det != 0.0f)) {				\
       det = 1.0f / det;						\
       p[0] *= det;						\
@@ -961,7 +961,7 @@ Last column is added as the position
  * and then renormalize the vector
  *
  * This macro computes inverse transpose of matrix m,
- * and multiplies vector v into it, to yeild vector p
+ * and multiplies vector v into it, to yield vector p
  * Vector p is then normalized.
  */
 #define NORM_XFORM_2X2(p,m,v)					\
@@ -986,7 +986,7 @@ Last column is added as the position
 
 /** outer product of vector times vector transpose
  *
- * The outer product of vector v and vector transpose t yeilds
+ * The outer product of vector v and vector transpose t yields
  * dyadic matrix m.
  */
 #define OUTER_PRODUCT_2X2(m,v,t)				\
@@ -1001,7 +1001,7 @@ Last column is added as the position
 
 /** outer product of vector times vector transpose
  *
- * The outer product of vector v and vector transpose t yeilds
+ * The outer product of vector v and vector transpose t yields
  * dyadic matrix m.
  */
 #define OUTER_PRODUCT_3X3(m,v,t)				\
@@ -1022,7 +1022,7 @@ Last column is added as the position
 
 /** outer product of vector times vector transpose
  *
- * The outer product of vector v and vector transpose t yeilds
+ * The outer product of vector v and vector transpose t yields
  * dyadic matrix m.
  */
 #define OUTER_PRODUCT_4X4(m,v,t)				\
@@ -1051,7 +1051,7 @@ Last column is added as the position
 
 /** outer product of vector times vector transpose
  *
- * The outer product of vector v and vector transpose t yeilds
+ * The outer product of vector v and vector transpose t yields
  * dyadic matrix m.
  */
 #define ACCUM_OUTER_PRODUCT_2X2(m,v,t)				\
@@ -1066,7 +1066,7 @@ Last column is added as the position
 
 /** outer product of vector times vector transpose
  *
- * The outer product of vector v and vector transpose t yeilds
+ * The outer product of vector v and vector transpose t yields
  * dyadic matrix m.
  */
 #define ACCUM_OUTER_PRODUCT_3X3(m,v,t)				\
@@ -1087,7 +1087,7 @@ Last column is added as the position
 
 /** outer product of vector times vector transpose
  *
- * The outer product of vector v and vector transpose t yeilds
+ * The outer product of vector v and vector transpose t yields
  * dyadic matrix m.
  */
 #define ACCUM_OUTER_PRODUCT_4X4(m,v,t)				\
@@ -1405,7 +1405,7 @@ Last column is added as the position
     (dest_aabb).maxZ = (src_aabb).maxZ;\
 }\
 
-//! Computes an Axis aligned box from  a triangle
+//! Computes an Axis aligned box from a triangle
 #define COMPUTEAABB_FOR_TRIANGLE(aabb,V1,V2,V3) {\
     (aabb).minX = MIN3(V1[0],V2[0],V3[0]);\
     (aabb).maxX = MAX3(V1[0],V2[0],V3[0]);\
@@ -1614,7 +1614,7 @@ classify values:
 	VEC_SUM(clipped,clipped,s1);	\
 }\
 
-//! Confirms if the plane intersect the edge or nor
+//! Confirms if the plane intersects the edge or not
 /*!
 intersection type must have the following values
 <ul>
@@ -1769,7 +1769,7 @@ intersection_type must have the following values
   \param p2 Plane 2
   \param p Contains the origin of the ray upon returning if planes intersect
   \param d Contains the direction of the ray upon returning if planes intersect
-  \param dointersect 1 if the planes intersect, 0 if paralell.
+  \param dointersect 1 if the planes intersect, 0 if parallel.
 
 */
 #define INTERSECT_PLANES(p1,p2,p,d,dointersect) \
@@ -1829,7 +1829,7 @@ intersection_type must have the following values
 \param point2 Point of line 2
 \param t1 Result Parameter for line 1
 \param t2 Result Parameter for line 2
-\param dointersect  0  if the lines won't intersect, else 1
+\param dointersect  0 if the lines won't intersect, else 1
 
 */
 #define LINE_INTERSECTION_PARAMS(dir1,point1, dir2, point2,t1,t2,dointersect) {\

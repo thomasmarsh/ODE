@@ -27,7 +27,7 @@ Compile And Install
 Simply type 'make' and 'make install' in src/ directory.
 
 Library libccd is by default compiled in double precision of floating point
-numbers - you can controll this by options USE_SINGLE/USE_DOUBLE, i.e.:
+numbers - you can control this by options USE_SINGLE/USE_DOUBLE, i.e.:
     $ make USE_SINGLE=yes
 will compile library in single precision.
 

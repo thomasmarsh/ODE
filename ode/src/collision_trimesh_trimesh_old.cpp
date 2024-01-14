@@ -1977,7 +1977,7 @@ GenerateContact(int in_Flags, dContactGeom* in_Contacts, int in_Stride,
     This function is called after maximal number of contacts has already been 
     collected because it has a side effect of replacing penetration depth of
     existing contact with larger penetration depth of another matching normal contact.
-    If this logic is not necessary any more, you can bail out on reach of contact
+    If this logic is not necessary anymore, you can bail out on reach of contact
     number maximum immediately in dCollideTTL(). You will also need to correct 
     conditional statements after invocations of GenerateContact() in dCollideTTL().
     */

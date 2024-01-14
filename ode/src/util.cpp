@@ -598,7 +598,7 @@ void dxStepBody (dxBody *b, dReal h)
     for (unsigned int j=0; j<3; j++) b->posr.pos[j] += h * b->lvel[j];
 
     if (b->flags & dxBodyFlagFiniteRotation) {
-        dVector3 irv;	// infitesimal rotation vector
+        dVector3 irv;	// infinitesimal rotation vector
         dQuaternion q;	// quaternion for finite rotation
 
         if (b->flags & dxBodyFlagFiniteRotationAxis) {
@@ -641,7 +641,7 @@ void dxStepBody (dxBody *b, dReal h)
         dQMultiply0 (q2,q,b->q);
         for (unsigned int j=0; j<4; j++) b->q[j] = q2[j];
 
-        // do the infitesimal rotation if required
+        // do the infinitesimal rotation if required
         if (b->flags & dxBodyFlagFiniteRotationAxis) {
             dReal dq[4];
             dWtoDQ (irv,b->q,dq);
@@ -649,7 +649,7 @@ void dxStepBody (dxBody *b, dReal h)
         }
     }
     else {
-        // the normal way - do an infitesimal rotation
+        // the normal way - do an infinitesimal rotation
         dReal dq[4];
         dWtoDQ (b->avel,b->q,dq);
         for (unsigned int j=0; j<4; j++) b->q[j] += h * dq[j];

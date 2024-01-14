@@ -45,7 +45,7 @@ char cu_out_prefix[CU_OUT_PREFIX_LENGTH+1] = "";
 /* globally used file descriptor for reading/writing messages */
 int fd;
 
-/* indicate if test was failed */
+/* indicate if test has failed */
 int test_failed;
 
 /* codes of messages */
@@ -170,7 +170,7 @@ static void cu_run_fork(const char *ts_name, cu_test_suite_t *ts)
                 fprintf(stdout, "Test suite terminated abnormaly!\n");
             }
 
-            /* mark this test suite as failed, because was terminated
+            /* mark this test suite as failed, because it was terminated
              * prematurely */
             cu_fail_test_suites++;
         }

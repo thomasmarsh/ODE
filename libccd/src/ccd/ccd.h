@@ -96,7 +96,7 @@ int ccdGJKIntersect(const void *obj1, const void *obj2, const ccd_t *ccd);
 
 /**
  * This function computes separation vector of two objects. Separation
- * vector is minimal translation of obj2 to get obj1 and obj2 speparated
+ * vector is minimal translation of obj2 to get obj1 and obj2 separated
  * (without intersection).
  * Returns 0 if obj1 and obj2 intersect and sep is filled with translation
  * vector. If obj1 and obj2 don't intersect -1 is returned.
@@ -130,8 +130,8 @@ int ccdMPRIntersect(const void *obj1, const void *obj2, const ccd_t *ccd);
  * Computes penetration of obj2 into obj1.
  * Depth of penetration, direction and position is returned, i.e. if obj2
  * is translated by computed depth in resulting direction obj1 and obj2
- * would have touching contact. Position is point in global coordinates
- * where force should be take a place.
+ * would have touching contact. Position is a point in global coordinates
+ * where force should take place.
  *
  * Minkowski Portal Refinement algorithm is used (MPR, a.k.a. XenoCollide,
  * see Game Programming Gem 7).

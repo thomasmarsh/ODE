@@ -382,7 +382,7 @@ ODE_API void dGeomEnable (dGeomID geom);
  * the enabled state.
  *
  * @param geom   the geom to disable
- * @sa dGeomDisable
+ * @sa dGeomEnable
  * @sa dGeomIsEnabled
  * @ingroup collide
  */
@@ -399,7 +399,7 @@ ODE_API void dGeomDisable (dGeomID geom);
  * @param geom   the geom to query
  * @returns Non-zero if the geom is enabled, zero otherwise.
  * @sa dGeomDisable
- * @sa dGeomIsEnabled
+ * @sa dGeomEnable
  * @ingroup collide
  */
 ODE_API int dGeomIsEnabled (dGeomID geom);
@@ -439,7 +439,7 @@ enum
  * dGeomCommonAnyControlCode applies to any control class and returns success if 
  * at least one control code is available for the given class with given geom.
  *
- * Currently there are the folliwing control classes supported:
+ * Currently there are the following control classes supported:
  *  @li dGeomColliderControlClass
  *
  * For dGeomColliderControlClass there are the following codes available:
@@ -945,7 +945,7 @@ ODE_API dReal dGeomSphereGetRadius (dGeomID sphere);
 
 
 /**
- * @brief Calculate the depth of the a given point within a sphere.
+ * @brief Calculate the depth of the given point within a sphere.
  *
  * @param sphere  the sphere to query.
  * @param x       the X coordinate of the point.

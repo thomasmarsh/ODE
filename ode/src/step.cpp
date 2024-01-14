@@ -1293,7 +1293,7 @@ void dxStepIsland_Stage2c(dxStepperStage2CallContext *stage2CallContext)
     {
         // Warning!!!
         // This code depends on A elements and JinvM elements and therefore 
-        // must be in different sub-stage from A initialization and JinvM calculation in Stage2b 
+        // must be in a different sub-stage from A initialization and JinvM calculation in Stage2b 
         // to ensure proper synchronization and avoid accessing numbers being modified.
         // Warning!!!
         dReal *A = localContext->m_A;
@@ -1447,7 +1447,7 @@ void dxStepIsland_Stage3(dxStepperStage3CallContext *stage3CallContext)
     //const unsigned int *mindex = localContext->m_mindex;
     int *findex = localContext->m_findex;
     dReal *A = localContext->m_A;
-    dReal *pairsRhsLambda = localContext->m_pairsRhsCfm; // Reuse cfm buffer for lambdas as the former values are not needed any more
+    dReal *pairsRhsLambda = localContext->m_pairsRhsCfm; // Reuse cfm buffer for lambdas as the former values are not needed anymore
     dReal *pairsLoHi = localContext->m_pairsLoHi;
 
     if (m > 0) {

@@ -1046,7 +1046,7 @@ int dCollideCCTL(dxGeom *o1, dxGeom *o2, int flags, dContactGeom *contact, int s
     TrimeshCollidersCache *pccColliderCache = GetTrimeshCollidersCache(uiTLSKind);
     OBBCollider& Collider = pccColliderCache->m_OBBCollider;
 
-    // Will it better to use LSS here? -> confirm Pierre.
+    // Will it be better to use LSS here? -> confirm Pierre.
     dQueryCCTLPotentialCollisionTriangles(Collider, cData, 
         TriMesh, Capsule, pccColliderCache->m_DefaultBoxCache);
 

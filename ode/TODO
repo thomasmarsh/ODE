@@ -622,7 +622,7 @@ groups/spaces can be told that the internal contents self-intersect or not.
 actually an old ODE group is the equivalent of an old ODE simple space.
 	- just call dCollide() or not.
 
-the group doesn't get passed to the space callback any more ... only the
+the group doesn't get passed to the space callback anymore ... only the
 intersecting geoms get passed? maybe the callback can initiate the extra
 intersection tests itself? (because we want programmable flexibility to
 determine what gets intersected and what doesn't)

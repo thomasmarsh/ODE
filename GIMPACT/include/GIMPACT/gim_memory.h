@@ -1,7 +1,7 @@
 #ifndef GIM_MEMORY_H_INCLUDED
 #define GIM_MEMORY_H_INCLUDED
 /*! \file gim_memory.h
-\author Francisco León
+\author Francisco Leï¿½n
 */
 /*
 -----------------------------------------------------------------------------
@@ -130,7 +130,7 @@ gim_free_function  *gim_get_free_handler (void);
 //! @}
 
 /*! \defgroup MEMORY_FUNCTIONS
-Standar Memory functions
+Standard Memory functions
 */
 //! @{
 void * gim_alloc(size_t size);
@@ -418,7 +418,7 @@ Buffer operations and structs.
 <ul>
 <li> Before using buffers you must initializes GIMPACT buffer managers by calling \ref gimpact_init.
 <li> For initializes a buffer, use  \ref gim_create_buffer, \ref gim_create_buffer_from_data , \ref gim_create_common_buffer, \ref gim_create_common_buffer_from_data or \ref gim_create_shared_buffer_from_data.
-<li> For accessing to the buffer memory, you must call \ref gim_lock_buffer, and then \ref gim_unlock_buffer for finish the access.
+<li> For accessing the buffer memory, you must call \ref gim_lock_buffer, and then \ref gim_unlock_buffer to finish the access.
 <li> When a buffer is no longer needed, you must free it by calling \ref gim_buffer_free.
 <li> You must call \ref gimpact_terminate when finish your application.
 <li> For a safe manipulation of buffers, use \ref BUFFER_ARRAYS
@@ -553,7 +553,7 @@ void gim_terminate_buffer_managers(GBUFFER_MANAGER_DATA buffer_managers[]);
 \param buffer_manager_id
 \param buffer_size
 \param usage An usage constant. Use G_MU_DYNAMIC_READ_WRITE as default.
-\param buffer_id a pointer for receive the new buffer id
+\param buffer_id a pointer to receive the new buffer id
 \return An error code. 0 if success.
 \post m_refcount = 0
 */
@@ -570,7 +570,7 @@ GUINT32 gim_create_buffer(
 \param pdata Data for allocating
 \param buffer_size Size of the data buffer
 \param usage An usage constant. Use G_MU_DYNAMIC_READ_WRITE as default.
-\param buffer_id a pointer for receive the new buffer id
+\param buffer_id a pointer to receive the new buffer id
 \return An error code. 0 if success.
 \post m_refcount = 0
 */
@@ -661,7 +661,7 @@ Buffered Arrays, for manip elements on a buffer and treat it as an array.
 <li> Before using buffer arrays you must initializes GIMPACT buffer managers by calling gimpact_init.
 <li> Before creating buffer arrays, you must create a buffer. see \ref BUFFERS.
 <li> Create a buffer narray by calling \ref GIM_BUFFER_ARRAY_INIT_TYPE, \ref GIM_BUFFER_ARRAY_INIT_TYPE_OFFSET or \ref GIM_BUFFER_ARRAY_INIT_OFFSET_STRIDE.
-<li> For accessing to the array elements, you must call \ref gim_buffer_array_lock, and then \ref gim_buffer_array_unlock for finish the access.
+<li> For accessing to the array elements, you must call \ref gim_buffer_array_lock, and then \ref gim_buffer_array_unlock to finish the access.
 <li> When a buffer array is no longer needed, you must free it by calling \ref GIM_BUFFER_ARRAY_DESTROY.
 </ul>
 The following example shows how Buffer arrays can be used:
@@ -785,7 +785,7 @@ struct GBUFFER_ARRAY
 
 //! Pushes a new element at last position
 /*!
-\pre array_data must be unlocked, and must be the aligned (GIM_BUFFER_ARRAY_IS_ALIGNED )
+\pre array_data must be unlocked, and must be aligned (GIM_BUFFER_ARRAY_IS_ALIGNED )
 */
 #define GIM_BUFFER_ARRAY_PUSH_EMPTY(type, array_data) \
 {\
@@ -795,7 +795,7 @@ struct GBUFFER_ARRAY
 
 //! Inserts an element
 /*!
-\pre array_data must be unlocked, and must be the aligned (GIM_BUFFER_ARRAY_IS_ALIGNED )
+\pre array_data must be unlocked, and must be aligned (GIM_BUFFER_ARRAY_IS_ALIGNED )
 */
 #define GIM_BUFFER_ARRAY_INSERT_ITEM(type, array_data, item, index) \
 { \
@@ -813,7 +813,7 @@ struct GBUFFER_ARRAY
 
 //! Deletes an element
 /*!
-\pre array_data must be unlocked, and must be the aligned (GIM_BUFFER_ARRAY_IS_ALIGNED )
+\pre array_data must be unlocked, and must be aligned (GIM_BUFFER_ARRAY_IS_ALIGNED )
 */
 #define GIM_BUFFER_ARRAY_DELETE_ITEM(type, array_data, index) \
 { \
@@ -829,7 +829,7 @@ struct GBUFFER_ARRAY
 
 //! Deletes an element at last position
 /*!
-\pre array_data must be unlocked, and must be the aligned (GIM_BUFFER_ARRAY_IS_ALIGNED )
+\pre array_data must be unlocked, and must be aligned (GIM_BUFFER_ARRAY_IS_ALIGNED )
 */
 #define GIM_BUFFER_ARRAY_POP_ITEM(array_data) \
 { \
@@ -842,12 +842,12 @@ struct GBUFFER_ARRAY
 
 //! Initializes an GBUFFER_ARRAY object from a buffer ID
 /*!
-m_buffer_data will be 0, for acces to the elements, you'd need to call lock_array
+m_buffer_data will be 0, for access to the elements, you'd need to call lock_array
 \param array_data Array structure to be filled
 \param buffer_id A GBUFFER_ID structure which this array_daya will refer to
 \param element_count Number of elements
 \param offset element offset, it isn't byte offset. 0 is recomended
-\param byte_stride size of each element.  0 is recomended.
+\param byte_stride size of each element. 0 is recomended.
 \post Adds reference to the buffer
 \sa gim_buffer_add_ref
 */
@@ -864,7 +864,7 @@ m_buffer_data will be 0, for acces to the elements, you'd need to call lock_arra
 
 //! Initializes an GBUFFER_ARRAY object from a buffer ID and a Given type
 /*!
-m_buffer_data will be 0, for acces to the elements, you'd need to call lock_array
+m_buffer_data will be 0, for access to the elements, you'd need to call lock_array
 \param type Type of the Array. It determines the stride.
 \param array_data Array structure to be filled
 \param buffer_id A GBUFFER_ID structure which this array_daya will refer to
@@ -886,7 +886,7 @@ m_buffer_data will be 0, for acces to the elements, you'd need to call lock_arra
 
 //! Initializes a buffer array giving a data type and a buffer id
 /*!
-m_buffer_data will be 0, for acces to the elements, you'd need to call lock_array.
+m_buffer_data will be 0, for access to the elements, you'd need to call lock_array.
 \param type Type of the Array. It determines the stride.
 \param array_data Array structure to be filled
 \param buffer_id A GBUFFER_ID structure which this array_daya will refer to
@@ -965,7 +965,7 @@ void GIM_BUFFER_ARRAY_DESTROY(GBUFFER_ARRAY & array_data);
     } \
 } \
 
-//! Upload the content of a a pointer to a buffered array
+//! Upload the content of a pointer to a buffered array
 /*!
 \pre source_data must have the same size as the array_data
 \param type
@@ -1011,7 +1011,7 @@ This macro executes a kernel macro or function for each element of the streams
 
 \param _uniform_data An argument to be passed to the Kernel function
 \param _src_array An GBUFFER_ARRAY structure passed as the source stream
-\param _dst_array An GBUFFER_ARRAY  structure passed as the source stream
+\param _dst_array An GBUFFER_ARRAY structure passed as the source stream
 \param _kernel Macro or function of the kernel
 \param _src_type Required. Type of all elements of the source stream
 \param _dst_type Required. Type of all elements of the dest stream

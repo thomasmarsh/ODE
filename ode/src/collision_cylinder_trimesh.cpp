@@ -121,7 +121,7 @@ static const dReal fSameContactPositionEpsilon = REAL(0.0001); // 1e-4
 // Use to classify contacts to be "near" in normal direction
 static const dReal fSameContactNormalEpsilon = REAL(0.0001); // 1e-4
 
-// If this two contact can be classified as "near"
+// If these two contact can be classified as "near"
 inline int _IsNearContacts(sLocalContactData& c1,sLocalContactData& c2)
 {
     int bPosNear = 0;

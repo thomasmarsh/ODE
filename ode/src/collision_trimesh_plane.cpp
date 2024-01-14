@@ -131,7 +131,7 @@ int dCollideTrimeshPlane( dxGeom *o1, dxGeom *o2, int flags, dContactGeom* conta
             // Collision?
             //
 
-            // If alpha < 0 then point is if front of plane. i.e. no contact
+            // If alpha < 0 then point is in front of plane. i.e. no contact
             // If alpha = 0 then the point is on the plane
             alpha = plane->p[ 3 ] - dCalcVectorDot3( plane->p, vertex );
 

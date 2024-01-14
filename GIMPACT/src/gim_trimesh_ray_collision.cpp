@@ -92,7 +92,7 @@ int gim_trimesh_ray_collision(GIM_TRIMESH * trimesh,vec3f origin,vec3f dir, GREA
 
 //! Trimesh Ray Collisions closest
 /*!
-Find the closest primitive collided by the ray
+Finds the closest primitive collided by the ray
 \param trimesh
 \param contact
 \return 1 if the ray collides, else 0

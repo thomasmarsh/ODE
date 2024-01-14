@@ -91,7 +91,7 @@ dxJointUniversal::getAngles( dReal *angle1, dReal *angle2 )
         // constraints won't be perfectly satisfied, or even very well
         // satisfied.)
         //
-        // However, we'd need a version of getHingeAngleFromRElativeQuat()
+        // However, we'd need a version of getHingeAngleFromRelativeQuat()
         // that CAN handle when its relative quat is rotated along a direction
         // other than the given axis.  What I have here works,
         // although it's probably much slower than need be.
@@ -114,7 +114,7 @@ dxJointUniversal::getAngles( dReal *angle1, dReal *angle2 )
         // dRFrom2Axes(R, ax2[0], ax2[1], ax2[2], ax1[0], ax1[1], ax1[2]);
         // You see that the R is constructed from the same 2 axis as for angle1
         // but the first and second axis are swapped.
-        // So we can take the first R and rapply a rotation to it.
+        // So we can take the first R and reapply a rotation to it.
         // The rotation is around the axis between the 2 axes (ax1 and ax2).
         // We do a rotation of 180deg.
 
@@ -188,7 +188,7 @@ dxJointUniversal::getAngle1()
         // constraints won't be perfectly satisfied, or even very well
         // satisfied.)
         //
-        // However, we'd need a version of getHingeAngleFromRElativeQuat()
+        // However, we'd need a version of getHingeAngleFromRelativeQuat()
         // that CAN handle when its relative quat is rotated along a direction
         // other than the given axis.  What I have here works,
         // although it's probably much slower than need be.
@@ -230,7 +230,7 @@ dxJointUniversal::getAngle2()
         // constraints won't be perfectly satisfied, or even very well
         // satisfied.)
         //
-        // However, we'd need a version of getHingeAngleFromRElativeQuat()
+        // However, we'd need a version of getHingeAngleFromRelativeQuat()
         // that CAN handle when its relative quat is rotated along a direction
         // other than the given axis.  What I have here works,
         // although it's probably much slower than need be.

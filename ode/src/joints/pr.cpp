@@ -498,7 +498,7 @@ void dJointSetPRParam( dJointID j, int parameter, dReal value )
     if (( parameter & 0xff00 ) == 0x100 )
     {
         joint->limotR.set( parameter & 0xff, value );  // Take only lower part of the
-    }                                              // parameter alue
+    }                                              // parameter value
     else
     {
         joint->limotP.set( parameter, value );

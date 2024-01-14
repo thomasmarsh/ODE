@@ -2,7 +2,7 @@
 #define GIM_BOXPRUNING_H_INCLUDED
 
 /*! \file gim_boxpruning.h
-\author Francisco León
+\author Francisco Leï¿½n
 */
 /*
 -----------------------------------------------------------------------------
@@ -137,17 +137,17 @@ void gim_aabbset_bipartite_intersections_brute_force(GIM_AABB_SET * aabbset1,GIM
 /*
                 Brute-Force Vs Sorted pruning
 Different approaches must be applied when colliding sets with different number of
-elements. When sets have less of 100 boxes, is often better to apply force brute
+elements. When sets have less of 100 boxes, it is often better to apply brute force
 approach instead of sorted methods, because at lowlevel bruteforce routines gives
-better perormance and consumes less resources, due of their simplicity.
-But when sets are larger, the complexiity of bruteforce increases exponencially.
+better performance and consumes less resources, due of their simplicity.
+But when sets are larger, the complexiity of bruteforce increases exponentially.
 In the case of large sets, sorted approach is applied. So GIMPACT has the following
 strategies:
 
 On Sorting sets:
 !) When sets have more of 140 boxes, the boxes are sorted by its coded min coord
 and the global box is calculated. But when sets are smaller (less of 140 boxes),
-Is convenient to apply brute force approach.
+it is convenient to apply brute force approach.
 
 *******************************************************************************/
 
@@ -159,7 +159,7 @@ Is convenient to apply brute force approach.
 
 //Use these functions for general initialization
 
-//! Initalizes the set. Sort Boxes if needed.
+//! Initalizes the set. Sort boxes if needed.
 /*!
 \pre aabbset must be allocated. And the boxes must be already set.
 \post If the set has less of GIM_MIN_SORTED_BIPARTITE_PRUNING_BOXES boxes, only calcs the global box,
@@ -236,7 +236,7 @@ void gim_aabbset_box_collision(aabb3f *test_aabb, GIM_AABB_SET * aabbset, GDYNAM
 \param vorigin Origin point of ray.
 \param vdir Direction vector of ray.
 \param tmax Max distance param for ray.
-\param aabbset Set of boxes .Global bound is required.
+\param aabbset Set of boxes. Global bound is required.
 \param collided Array of GUINT elements, indices of boxes. Must be initialized before (Reserve size ~ 100)
 */
 void gim_aabbset_ray_collision(vec3f vorigin,vec3f vdir, GREAL tmax, GIM_AABB_SET * aabbset, GDYNAMIC_ARRAY * collided);
@@ -274,7 +274,7 @@ So the maximum size of a room should be about 3276x3276 . Its dimensions must li
     uint_key = (uint_key<<16) + _z;\
 }\
 
-//! Converts a vector coordinate to an integer for box sorting,rounding to the upper int
+//! Converts a vector coordinate to an integer for box sorting, rounding to the upper int
 /*!
 \param vx X component
 \param vz Z component

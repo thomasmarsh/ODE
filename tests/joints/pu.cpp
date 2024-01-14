@@ -23,7 +23,7 @@
 //        1         2         3         4         5         6         7
 
 ////////////////////////////////////////////////////////////////////////////////
-// This file create unit test for some of the functions found in:
+// This file creates unit tests for some of the functions found in:
 // ode/src/joinst/pu.cpp
 //
 //
@@ -37,7 +37,7 @@
 
 SUITE (TestdxJointPU)
 {
-    // The 2 bodies are positionned at (0, 0, 0),  and (0, 0, 0)
+    // The 2 bodies are positioned at (0, 0, 0)  and (0, 0, 0)
     // The second body has a rotation of 27deg around X axis.
     // The joint is a PU Joint
     // Axis is along the X axis
@@ -130,7 +130,7 @@ SUITE (TestdxJointPU)
 
     // The joint is a PU Joint
     // Default joint value
-    // The two bodies at at (0, 0, 0)
+    // The two bodies are at (0, 0, 0)
     struct Fixture_dxJointPU_B1_and_B2_At_Zero
     {
         Fixture_dxJointPU_B1_and_B2_At_Zero()
@@ -326,7 +326,7 @@ SUITE (TestdxJointPU)
         CHECK_CLOSE (0.0, dJointGetPUPosition (jId), 1e-4);
     }
 
-    // Attache only one body at position 1 to the joint dJointAttach (jId, bId, 0)
+    // Attach only one body at position 1 to the joint dJointAttach (jId, bId, 0)
     // Move 1st body offset unit in the opposite X direction
     //
     //  X------->          X---------> Axis -->
@@ -359,7 +359,7 @@ SUITE (TestdxJointPU)
 
 
 
-    // Attache only one body at position 2 to the joint dJointAttach (jId, 0, bId)
+    // Attach only one body at position 2 to the joint dJointAttach (jId, 0, bId)
     // Move 1st body offset unit in the X direction
     //
     //  X------->       X---------> Axis -->
@@ -390,7 +390,7 @@ SUITE (TestdxJointPU)
         CHECK_CLOSE (0.0, dJointGetPUPosition (jId), 1e-4);
     }
 
-    // Attache only one body at position 2 to the joint dJointAttach (jId, 0, bId)
+    // Attach only one body at position 2 to the joint dJointAttach (jId, 0, bId)
     // Move 1st body offset unit in the opposite X direction
     //
     //  X------->          X---------> Axis -->
@@ -425,7 +425,7 @@ SUITE (TestdxJointPU)
 
 
     // Only one body
-    // The body are positionned at (0, 0, 0), with no rotation
+    // The body is positioned at (0, 0, 0) with no rotation
     // The joint is a PU Joint
     // Axis is in the oppsite X axis
     // Anchor at (0, 0, 0)
@@ -538,7 +538,7 @@ SUITE (TestdxJointPU)
                   test_dJointSetPUAxisOffset_B2_OffsetUnit)
     {
         // By default it is attached to position 1
-        // Now attach the body at positiojn 2
+        // Now attach the body at position 2
         dJointAttach(jId, 0, bId);
 
         CHECK_CLOSE (0.0, dJointGetPUPosition (jId), 1e-4);
@@ -568,7 +568,7 @@ SUITE (TestdxJointPU)
                   test_dJointSetPUAxisOffset_B2_Minus_OffsetUnit)
     {
         // By default it is attached to position 1
-        // Now attach the body at positiojn 2
+        // Now attach the body at position 2
         dJointAttach(jId, 0, bId);
 
         CHECK_CLOSE (0.0, dJointGetPUPosition (jId), 1e-4);
@@ -595,7 +595,7 @@ SUITE (TestdxJointPU)
 
     // Compare only one body to 2 bodies with one fixed.
     //
-    // The body are positionned at (0, 0, 0), with no rotation
+    // The bodies are positioned at (0, 0, 0) with no rotation
     // The joint is a PU Joint with default values
     struct Fixture_dxJointPU_Compare_One_Body_To_Two_Bodies_At_Zero
     {
@@ -698,11 +698,11 @@ SUITE (TestdxJointPU)
 
 
 
-    // This test compare the result of a pu joint with 2 bodies where body body 2 is
+    // This test compares the result of a pu joint with 2 bodies where body 2 is
     // fixed to the world to a pu joint with only one body at position 1.
     //
-    // Test the limits [-1, 0.25] when only one body at is attached to the joint
-    // using dJointAttache(jId, bId, 0);
+    // Test the limits [-1, 0.25] when only one body is attached to the joint
+    // using dJointAttach(jId, bId, 0);
     //
     TEST_FIXTURE(Fixture_dxJointPU_Compare_One_Body_To_Two_Bodies_At_Zero,
                  test_Limit_minus1_025_One_Body_on_left)
@@ -753,11 +753,11 @@ SUITE (TestdxJointPU)
 
 
 
-    // This test compare the result of a pu joint with 2 bodies where body body 1 is
+    // This test compares the result of a pu joint with 2 bodies where body 1 is
     // fixed to the world to a pu joint with only one body at position 2.
     //
-    // Test the limits [-1, 0.25] when only one body at is attached to the joint
-    // using dJointAttache(jId, 0, bId);
+    // Test the limits [-1, 0.25] when only one body is attached to the joint
+    // using dJointAttach(jId, 0, bId);
     //
     TEST_FIXTURE(Fixture_dxJointPU_Compare_One_Body_To_Two_Bodies_At_Zero,
                  test_Limit_minus1_025_One_Body_on_right)
@@ -809,11 +809,11 @@ SUITE (TestdxJointPU)
 
 
 
-    // This test compare the result of a pu joint with 2 bodies where body 2 is
+    // This test compares the result of a pu joint with 2 bodies where body 2 is
     // fixed to the world to a pu joint with only one body at position 1.
     //
-    // Test the limits [0, 0] when only one body at is attached to the joint
-    // using dJointAttache(jId, bId, 0);
+    // Test the limits [0, 0] when only one body is attached to the joint
+    // using dJointAttach(jId, bId, 0);
     //
     // The body should not move since their is no room between the two limits
     //
@@ -863,11 +863,11 @@ SUITE (TestdxJointPU)
     }
 
 
-    // This test compare the result of a pu joint with 2 bodies where body body 1 is
+    // This test compares the result of a pu joint with 2 bodies where body 1 is
     // fixed to the world to a pu joint with only one body at position 2.
     //
-    // Test the limits [0, 0] when only one body at is attached to the joint
-    // using dJointAttache(jId, 0, bId);
+    // Test the limits [0, 0] when only one body is attached to the joint
+    // using dJointAttach(jId, 0, bId);
     //
     // The body should not move since their is no room between the two limits
     //

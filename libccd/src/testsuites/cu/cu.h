@@ -73,8 +73,8 @@ extern "C" {
 
 /**
  * Assertations
- * Assertations with suffix 'M' (e.g. assertTrueM) is variation of macro
- * where is possible to specify error message.
+ * Assertations with suffix 'M' (e.g. assertTrueM) are variations of macros
+ * where it is possible to specify error message.
  */
 #define assertTrueM(a, message) \
     if (a){ \

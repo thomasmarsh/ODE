@@ -116,7 +116,7 @@ int _gim_triangle_triangle_collision(
 
 
 
-    //State variabnles
+    //State variables
 	GUINT32 mostdir=0;
 	GUINT32 clipped2_count=0;
 
@@ -129,7 +129,7 @@ int _gim_triangle_triangle_collision(
 	     return 0;//Reject
 	}
 
-	//find most deep interval face1
+	//find deepest interval face1
 	GUINT32 deep2_count=0;
 
 	GREAL maxdeep;

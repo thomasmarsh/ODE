@@ -471,14 +471,14 @@ bool CTLSStorageArray::FindFreeStorageBlockIndex(unsigned int &nOutFreeBlockInde
 
 	else if (!bIsManualCleanup)
 	{
-		// Execution gets here is all slots were already occupied or
-		// they become occupied during search (otherwise why 
+		// If execution gets here it means that all slots were already occupied or
+		// they becomed occupied during the search (otherwise why has
 		// FindFreeStorageBlockIndexWithPossibilityVerified call failed???).
 		// In Automatic cleanup mode a block can't become free by itself -
 		// it is just re-allocated for new thread and remains busy.
 		OU_ASSERT(GetAreAllBlocksOccupied());
 		
-		// The locking is performed to avoid more than one threads checking
+		// The locking is performed to avoid more than one thread checking
 		// for abandoned handles simultaneously.
 		// If locking fails, execution just proceeds to next array in the chain
 		if (SetArrayLockedFlag())
@@ -610,7 +610,7 @@ unsigned int CTLSStorageArray::TranslateClientHandles(CClientHandleArray haTrans
 		
 		if (nSourceCurrentIndex == TLS_ARRAY_ELEMENT__MAX)
 		{
-			// Start indice can be equal if and only if no invalid handles have been found
+			// Start indices can be equal if and only if no invalid handles have been found
 			if (nSourceStartIndex != nTargetStartIndex)
 			{
 				const HANDLE *ph_BlockThreadHandles = GetBlockThreadHandlesStorage();

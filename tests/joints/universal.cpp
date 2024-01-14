@@ -21,7 +21,7 @@
   *************************************************************************/
 
 ////////////////////////////////////////////////////////////////////////////////
-// This file create unit test for some of the functions found in:
+// This file creates unit tests for some of the functions found in:
 // ode/src/joinst/universal.cpp
 //
 //
@@ -46,8 +46,8 @@ dReal r2d(dReal degree)
 
 SUITE (TestdxJointUniversal)
 {
-    // The 2 bodies are positionned at (0, 0, 0)
-    // The bodis have no rotation.
+    // The 2 bodies are positioned at (0, 0, 0)
+    // The bodies have no rotation.
     // The joint is a Universal Joint
     // Axis1 is along the X axis
     // Axis2 is along the Y axis
@@ -89,8 +89,8 @@ SUITE (TestdxJointUniversal)
     };
 
 
-    // The 2 bodies are positionned at (-1, -2, -3),  and (11, 22, 33)
-    // The bodis have rotation of 27deg around some axis.
+    // The 2 bodies are positioned at (-1, -2, -3) and (11, 22, 33)
+    // The bodies have rotation of 27deg around some axis.
     // The joint is a Universal Joint
     // Axis is along the X axis
     // Anchor at (0, 0, 0)
@@ -597,7 +597,7 @@ SUITE (TestdxJointUniversal)
 
 
     // Create 2 bodies attached by a Universal joint
-    // Axis is along the X axis (Default value
+    // Axis is along the X axis (Default value)
     // Anchor at (0, 0, 0)      (Default value)
     //
     //       ^Y
@@ -1141,7 +1141,7 @@ SUITE (TestdxJointUniversal)
 
     // Rotate 1st body 0.23rad around X axis and 2nd body 0.37rad around Y (Axis2)
     // then back to their original position.
-    // The Axis offset are set one at a time
+    // The Axis offsets are set one at a time
     //
     //    ^  ^    ^         ^          Z ^   ^ Y (N.B. Y is going in the screen)
     //    |  |  => \      /             |  /
@@ -1227,7 +1227,7 @@ SUITE (TestdxJointUniversal)
 
 
 
-//  The 2 bodies are positionned at (0, 0, 0), with no rotation
+//  The 2 bodies are positioned at (0, 0, 0) with no rotation
 //  The joint is an Universal Joint.
 //  Axis in the inverse direction of the X axis
 //  Anchor at (0, 0, 0)
@@ -1687,7 +1687,7 @@ SUITE (TestdxJointUniversal)
 
     // Rotate the body by 90deg around X then back to original position.
     // The body is attached at the second position of the joint:
-    // dJointAttache(jId, 0, bId);
+    // dJointAttach(jId, 0, bId);
     //
     //   ^
     //   |  => <---
@@ -1723,7 +1723,7 @@ SUITE (TestdxJointUniversal)
 
     // Rotate the body by -0.23rad around X then back to original position.
     // The body is attached at the second position of the joint:
-    // dJointAttache(jId, 0, bId);
+    // dJointAttach(jId, 0, bId);
     //
     //   ^         ^
     //   |  =>    /
@@ -1997,8 +1997,8 @@ SUITE (TestdxJointUniversal)
 
 
 
-    // The 2 bodies are positionned at (0,0,0),  and (0,0,0)
-    // The bodis have no rotation.
+    // The 2 bodies are positioned at (0,0,0) and (0,0,0)
+    // The bodies have no rotation.
     // The joint is a Universal Joint
     // The axis of the joint are at random (Still at 90deg w.r.t each other)
     // Anchor at (0, 0, 0)

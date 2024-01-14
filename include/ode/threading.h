@@ -55,7 +55,7 @@ typedef struct dxMutexGroup *dMutexGroupID;
 
 
 /**
- * @brief Allocates a group of muteces.
+ * @brief Allocates a group of mutexes.
  *
  * The Mutex allocated do not need to support recursive locking.
  *
@@ -74,7 +74,7 @@ typedef struct dxMutexGroup *dMutexGroupID;
 typedef dMutexGroupID dMutexGroupAllocFunction (dThreadingImplementationID impl, dmutexindex_t Mutex_count, const char *const *Mutex_names_ptr/*=NULL*/);
 
 /**
- * @brief Deletes a group of muteces.
+ * @brief Deletes a group of mutexes.
  *
  * @param impl Threading implementation ID
  * @param mutex_group Mutex group to deallocate
@@ -87,7 +87,7 @@ typedef dMutexGroupID dMutexGroupAllocFunction (dThreadingImplementationID impl,
 typedef void dMutexGroupFreeFunction (dThreadingImplementationID impl, dMutexGroupID mutex_group);
 
 /**
- * @brief Locks a mutex in a group of muteces.
+ * @brief Locks a mutex in a group of mutexes.
  *
  * The function is to block execution until requested mutex can be locked.
  *
@@ -106,7 +106,7 @@ typedef void dMutexGroupFreeFunction (dThreadingImplementationID impl, dMutexGro
 typedef void dMutexGroupMutexLockFunction (dThreadingImplementationID impl, dMutexGroupID mutex_group, dmutexindex_t mutex_index);
 
 /**
- * @brief Attempts to lock a mutex in a group of muteces.
+ * @brief Attempts to lock a mutex in a group of mutexes.
  *
  * The function is to lock the requested mutex if it is unoccupied or 
  * immediately return failure if mutex is already locked by other thread.
@@ -128,7 +128,7 @@ typedef void dMutexGroupMutexLockFunction (dThreadingImplementationID impl, dMut
 /* typedef int dMutexGroupMutexTryLockFunction (dThreadingImplementationID impl, dMutexGroupID mutex_group, dmutexindex_t mutex_index);*/
 
 /**
- * @brief Unlocks a mutex in a group of muteces.
+ * @brief Unlocks a mutex in a group of mutexes.
  *
  * The function is to unlock the given mutex provided it had been locked before.
  *

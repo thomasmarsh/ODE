@@ -50,7 +50,7 @@ typedef struct _ccd_list_t ccd_list_t;
              item = (item)->next)
 
 /**
- * Iterates over list safe against remove of list entry
+ * Iterates over list safe against removal of list entry
  */
 #define ccdListForEachSafe(list, item, tmp) \
 	    for (item = (list)->next, tmp = (item)->next; \

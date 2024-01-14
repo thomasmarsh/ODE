@@ -873,7 +873,7 @@ void ThreadedEquationSolverLDLT::participateSolvingL1Stripe_X(const dReal *L, dR
                                 break;
                             }
 
-                            // Take a look if any more rows have been completed...
+                            // Take a look if anymore rows have been completed...
                             completedBlocks = refBlockCompletionProgress;
                             dIASSERT(completedBlocks >= finalColumnBlock);
 
@@ -1249,7 +1249,7 @@ void ThreadedEquationSolverLDLT::participateSolvingL1Stripe_X(const dReal *L, dR
 
             if (lookaheadBoundaryReached)
             {
-                dIASSERT(blockProcessingState != BPS_COMPETING_FOR_A_BLOCK); // Why did not we compete???
+                dIASSERT(blockProcessingState != BPS_COMPETING_FOR_A_BLOCK); // Why did we not compete???
 
                 // If no row has been processed in the previous pass, compete for the next row to avoid cycling uselessly
                 if (blockProcessingState <= BPS_NO_BLOCKS_PROCESSED)

@@ -23,7 +23,7 @@
 //        1         2         3         4         5         6         7
 
 ////////////////////////////////////////////////////////////////////////////////
-// This file create unit test for some of the functions found in:
+// This file creates unit tests for some of the functions found in:
 // ode/src/joinst/hinge.cpp
 //
 //
@@ -37,7 +37,7 @@
 
 SUITE (TestdxJointHinge)
 {
-  // The 2 bodies are positionned at (0, 0, 0), with no rotation
+  // The 2 bodies are positioned at (0, 0, 0) with no rotation
   // The joint is an Hinge Joint
   // Axis is along the X axis
   // Anchor at (0, 0, 0)
@@ -226,7 +226,7 @@ SUITE (TestdxJointHinge)
   }
 
 
-  // The 2 bodies are positionned at (0, 0, 0), with no rotation
+  // The 2 bodies are positioned at (0, 0, 0) with no rotation
   // The joint is an Hinge Joint.
   // Axis in the inverse direction of the X axis
   // Anchor at (0, 0, 0)

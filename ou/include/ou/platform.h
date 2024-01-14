@@ -138,7 +138,7 @@
 
 #if !defined(MAC_OS_X_VERSION)
 
-#error Please defile preprocessor symbol MAC_OS_X_VERSION in command line (e.g. "-DMAC_OS_X_VERSION=1050" for MacOS 10.5)
+#error Please define preprocessor symbol MAC_OS_X_VERSION in command line (e.g. "-DMAC_OS_X_VERSION=1050" for MacOS 10.5)
 
 
 #endif // #if !defined(MAC_OS_X_VERSION)

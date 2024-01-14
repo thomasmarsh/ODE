@@ -85,7 +85,7 @@ typedef struct _ccd_cyl_t ccd_cyl_t;
 
 /**
  * Returns supporting vertex via v.
- * Supporting vertex is fathest vertex from object in direction dir.
+ * Supporting vertex is farthest vertex from object in direction dir.
  */
 void ccdSupport(const void *obj, const ccd_vec3_t *dir,
                 ccd_vec3_t *v);

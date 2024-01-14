@@ -78,7 +78,7 @@ static int simplexToPolytope2(const void *obj1, const void *obj2,
 static void expandPolytope(ccd_pt_t *pt, ccd_pt_el_t *el,
                            const ccd_support_t *newv);
 
-/** Finds next support point (at stores it in out argument).
+/** Finds next support point (and stores it in out argument).
  *  Returns 0 on success, -1 otherwise */
 static int nextSupport(const void *obj1, const void *obj2, const ccd_t *ccd,
                        const ccd_pt_el_t *el,
@@ -221,7 +221,7 @@ static int __ccdGJK(const void *obj1, const void *obj2,
     // and add this point to simplex as last one
     ccdSimplexAdd(simplex, &last);
 
-    // set up direction vector to as (O - last) which is exactly -last
+    // set up direction vector as (O - last) which is exactly -last
     ccdVec3Copy(&dir, &last.v);
     ccdVec3Scale(&dir, -CCD_ONE);
 
@@ -367,7 +367,7 @@ static int doSimplex3(ccd_simplex_t *simplex, ccd_vec3_t *dir)
     }
 
     // check if triangle is really triangle (has area > 0)
-    // if not simplex can't be expanded and thus no itersection is found
+    // if not simplex can't be expanded and thus no intersection is found
     if (ccdVec3Eq(&A->v, &B->v) || ccdVec3Eq(&A->v, &C->v)){
         return -1;
     }
@@ -376,7 +376,7 @@ static int doSimplex3(ccd_simplex_t *simplex, ccd_vec3_t *dir)
     ccdVec3Copy(&AO, &A->v);
     ccdVec3Scale(&AO, -CCD_ONE);
 
-    // compute AB and AC segments and ABC vector (perpendircular to triangle)
+    // compute AB and AC segments and ABC vector (perpendicular to triangle)
     ccdVec3Sub2(&AB, &B->v, &A->v);
     ccdVec3Sub2(&AC, &C->v, &A->v);
     ccdVec3Cross(&ABC, &AB, &AC);
@@ -710,7 +710,7 @@ static int simplexToPolytope2(const void *obj1, const void *obj2,
 
     // This situation is a bit tricky. If only one segment comes from
     // previous run of GJK - it means that either this segment is on
-    // minkowski edge (and thus we have touch contact) or it it isn't and
+    // minkowski edge (and thus we have touch contact) or it isn't and
     // therefore segment is somewhere *inside* minkowski sum and it *must*
     // be possible to fully enclose this segment with polyhedron formed by
     // at least 8 triangle faces.
@@ -916,7 +916,7 @@ static void expandPolytope(ccd_pt_t *pt, ccd_pt_el_t *el,
     }
 }
 
-/** Finds next support point (at stores it in out argument).
+/** Finds next support point (and stores it in out argument).
  *  Returns 0 on success, -1 otherwise */
 static int nextSupport(const void *obj1, const void *obj2, const ccd_t *ccd,
                        const ccd_pt_el_t *el,

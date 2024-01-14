@@ -653,10 +653,10 @@ ODE_API dReal dWorldGetContactSurfaceLayer (dWorldID);
  * A body is considered to be idle when the magnitudes of both its
  * linear average velocity and angular average velocity are below given thresholds.
  * The sample size for the average defaults to one and can be disabled by setting
- * to zero with 
+ * to zero with @c dWorldSetAutoDisableAverageSamplesCount
  *
- * Thus, every body has six auto-disable parameters: an enabled flag, a idle step
- * count, an idle time, linear/angular average velocity thresholds, and the
+ * Thus, every body has six auto-disable parameters: enabled flag, idle step
+ * count, idle time, linear/angular average velocity thresholds and 
  * average samples count.
  *
  * Newly created bodies get these parameters from world.
@@ -1342,7 +1342,7 @@ ODE_API void dBodySetFiniteRotationMode (dBodyID, int mode);
  * @brief sets the finite rotation axis for a body.
  * @ingroup bodies
  * @remarks
- * This is axis only has meaning when the finite rotation mode is set
+ * This axis only has meaning when the finite rotation mode is set
  * If this axis is zero (0,0,0), full finite rotations are performed on
  * the body.
  * If this axis is nonzero, the body is rotated by performing a partial finite
@@ -1359,7 +1359,7 @@ ODE_API void dBodySetFiniteRotationAxis (dBodyID, dReal x, dReal y, dReal z);
 /**
  * @brief Get the way a body's orientation is updated each timestep.
  * @ingroup bodies
- * @return the mode 0 (infitesimal) or 1 (finite).
+ * @return the mode 0 (infinitesimal) or 1 (finite).
  */
 ODE_API int dBodyGetFiniteRotationMode (dBodyID);
 
@@ -1380,7 +1380,7 @@ ODE_API int dBodyGetNumJoints (dBodyID b);
 /**
  * @brief Return a joint attached to this body, given by index.
  * @ingroup bodies
- * @param index valid range is  0 to n-1 where n is the value returned by
+ * @param index valid range is 0 to n-1 where n is the value returned by
  * dBodyGetNumJoints().
  */
 ODE_API dJointID dBodyGetJoint (dBodyID, int index);
@@ -2134,7 +2134,7 @@ ODE_API void dJointSetUniversalAxis1 (dJointID, dReal x, dReal y, dReal z);
  *        offset1 and offset2 appart with respect to axis1 and axis2.
  * @ingroup joints
  *
- * This function initialize the axis1 and the relative orientation of 
+ * This function initializes the axis1 and the relative orientation of 
  * each body as if body1 was rotated around the new axis1 by the offset1 
  * value and as if body2 was rotated around the axis2 by offset2. \br
  * Ex:
@@ -2284,7 +2284,7 @@ ODE_API_DEPRECATED ODE_API void dJointSetPUAnchorDelta (dJointID, dReal x, dReal
  * @brief Set the PU anchor as if the 2 bodies were already at [dx, dy, dz] appart.
  * @ingroup joints
  *
- * This function initialize the anchor and the relative position of each body
+ * This function initializes the anchor and the relative position of each body
  * as if the position between body1 and body2 was already the projection of [dx, dy, dz]
  * along the Piston axis. (i.e as if the body1 was at its current position - [dx,dy,dy] when the
  * axis is set).
@@ -2376,7 +2376,7 @@ ODE_API void dJointSetPistonAnchor (dJointID, dReal x, dReal y, dReal z);
  * @brief Set the Piston anchor as if the 2 bodies were already at [dx,dy, dz] appart.
  * @ingroup joints
  *
- * This function initialize the anchor and the relative position of each body
+ * This function initializes the anchor and the relative position of each body
  * as if the position between body1 and body2 was already the projection of [dx, dy, dz]
  * along the Piston axis. (i.e as if the body1 was at its current position - [dx,dy,dy] when the
  * axis is set).
@@ -2419,9 +2419,9 @@ ODE_API void dJointSetPistonAxis (dJointID, dReal x, dReal y, dReal z);
  * @param x The x component of the axis
  * @param y The y component of the axis
  * @param z The z component of the axis
- * @param dx The Initial position of the prismatic join in the x direction
- * @param dy The Initial position of the prismatic join in the y direction
- * @param dz The Initial position of the prismatic join in the z direction
+ * @param dx The Initial position of the prismatic joint in the x direction
+ * @param dy The Initial position of the prismatic joint in the y direction
+ * @param dz The Initial position of the prismatic joint in the z direction
  */
 ODE_API_DEPRECATED ODE_API void dJointSetPistonAxisDelta (dJointID j, dReal x, dReal y, dReal z, dReal ax, dReal ay, dReal az);
 
@@ -2985,7 +2985,7 @@ ODE_API dReal dJointGetPistonPosition (dJointID);
 ODE_API dReal dJointGetPistonPositionRate (dJointID);
 
 /**
- * @brief Get the Piston angular position (i.e. the  twist between the 2 bodies)
+ * @brief Get the Piston angular position (i.e. the twist between the 2 bodies)
  *
  * When the axis is set, the current position of the attached bodies is
  * examined and that position will be the zero position.

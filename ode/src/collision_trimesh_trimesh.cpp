@@ -21,7 +21,7 @@
  *************************************************************************/
 
 // OPCODE TriMesh/TriMesh collision code
-// Written at 2006-10-28 by Francisco León (http://gimpact.sourceforge.net)
+// Written at 2006-10-28 by Francisco Leï¿½n (http://gimpact.sourceforge.net)
 
 #ifdef _MSC_VER
 #pragma warning(disable:4244 4305)  // for VC++, no precision loss complaints
@@ -136,7 +136,7 @@ void SwapNormals(dVector3 *&pen_v, dVector3 *&col_v, dVector3* v1, dVector3* v2,
 }
 
 ///////////////////////MECHANISM FOR AVOID CONTACT REDUNDANCE///////////////////////////////
-////* Written by Francisco León (http://gimpact.sourceforge.net) *///
+////* Written by Francisco Leï¿½n (http://gimpact.sourceforge.net) *///
 #define CONTACT_DIFF_EPSILON REAL(0.00001)
 #if defined(dDOUBLE)
 #define CONTACT_NORMAL_ZERO REAL(0.0000001)
@@ -434,7 +434,7 @@ dContactGeom *  PushNewContact( dxGeom* g1, dxGeom* g2, int TriIndex1, int TriIn
                 MULT(normal,normal, REAL(-1.0));
                 int tempInt = TriIndex1; TriIndex1 = TriIndex2; TriIndex2 = tempInt;
                 // This should be discarded by optimizer as g1 and g2 are 
-                // not used any more but it's preferable to keep this line for 
+                // not used anymore but it's preferable to keep this line for 
                 // the sake of consistency in variable values.
                 dxGeom *tempGeom = g1; g1 = g2; g2 = tempGeom;
             }
@@ -675,7 +675,7 @@ dInvertMatrix4( dMatrix4& B, dMatrix4& Binv )
 #endif
 
 
-// Find the intersectiojn point between a coplanar line segement,
+// Find the intersection point between a coplanar line segement,
 // defined by X1 and X2, and a ray defined by X3 and direction N.
 //
 // This forumla for this calculation is:

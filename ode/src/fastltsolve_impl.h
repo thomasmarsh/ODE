@@ -672,7 +672,7 @@ void ThreadedEquationSolverLDLT::participateSolvingL1Transposed(const dReal *L, 
                                 break;
                             }
 
-                            // Take a look if any more columns have been completed...
+                            // Take a look if anymore columns have been completed...
                             completedBlocks = refBlockCompletionProgress;
                             dIASSERT(completedBlocks >= finalRowBlock);
 
@@ -883,7 +883,7 @@ void ThreadedEquationSolverLDLT::participateSolvingL1Transposed(const dReal *L, 
                                 break;
                             }
 
-                            // Take a look if any more columns have been completed...
+                            // Take a look if anymore columns have been completed...
                             completedBlocks = refBlockCompletionProgress;
                             dIASSERT(completedBlocks >= finalRowBlock);
 
@@ -1411,7 +1411,7 @@ void ThreadedEquationSolverLDLT::participateSolvingL1Transposed(const dReal *L, 
 
             if (lookaheadBoundaryReached)
             {
-                dIASSERT(blockProcessingState != BPS_COMPETING_FOR_A_BLOCK); // Why did not we compete???
+                dIASSERT(blockProcessingState != BPS_COMPETING_FOR_A_BLOCK); // Why did we not compete???
 
                 // If no row has been processed in the previous pass, compete for the next row to avoid cycling uselessly
                 if (blockProcessingState <= BPS_NO_BLOCKS_PROCESSED)

@@ -2,7 +2,7 @@
 #define GIM_TRI_COLLISION_H_INCLUDED
 
 /*! \file gim_tri_collision.h
-\author Francisco León Nájera
+\author Francisco Leï¿½n Nï¿½jera
 */
 /*
 -----------------------------------------------------------------------------
@@ -148,7 +148,7 @@ int gim_triangle_triangle_overlap_fast(
 //! Finds the contact points from a collision of two triangles
 /*!
 Returns the contact points, the penetration depth and the separating normal of the collision
-between two triangles. The normal is pointing toward triangle 1 from triangle 2
+between two triangles. The normal is pointing towards triangle 1 from triangle 2
 */
 int gim_triangle_triangle_collision(
 							GIM_TRIANGLE_DATA *tri1,

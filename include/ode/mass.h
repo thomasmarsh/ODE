@@ -34,7 +34,7 @@ typedef struct dMass dMass;
 
 /**
  * Check if a mass structure has valid value.
- * The function check if the mass and innertia matrix are positive definits
+ * The function check if the mass and inertia matrix are positive definits
  *
  * @param m A mass structure to check
  *

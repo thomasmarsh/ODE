@@ -213,7 +213,7 @@ struct dxGeom : public dBase {
 // the contained geoms are divided into two kinds: clean and dirty.
 // the clean geoms have not moved since they were put in the list,
 // and their AABBs are valid. the dirty geoms have changed position, and
-// their AABBs are may not be valid. the two types are distinguished by the
+// their AABBs may not be valid. the two types are distinguished by the
 // GEOM_DIRTY flag. all dirty geoms come *before* all clean geoms in the list.
 
 #if dTLS_ENABLED

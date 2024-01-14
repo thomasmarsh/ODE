@@ -23,7 +23,7 @@
 //        1         2         3         4         5         6         7
 
 ////////////////////////////////////////////////////////////////////////////////
-// This file create unit test for some of the functions found in:
+// This file creates unit tests for some of the functions found in:
 // ode/src/joinst/ball.cpp
 //
 //
@@ -40,8 +40,8 @@ using namespace std;
 
 SUITE (TestdxJointBall)
 {
-  // The 2 bodies are positionned at (-1, -2, -3),  and (11, 22, 33)
-  // The bodis have rotation of 27deg around some axis.
+  // The 2 bodies are positioned at (-1, -2, -3) and (11, 22, 33)
+  // The bodies have rotation of 27deg around some axis.
   // The joint is a Ball Joint
   // Axis is along the X axis
   // Anchor at (0, 0, 0)

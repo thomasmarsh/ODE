@@ -23,7 +23,7 @@
 //        1         2         3         4         5         6         7
 
 ////////////////////////////////////////////////////////////////////////////////
-// This file create unit test for some of the functions found in:
+// This file creates unit tests for some of the functions found in:
 // ode/src/joinst/pr.cpp
 //
 //
@@ -37,7 +37,7 @@
 
 SUITE (TestdxJointPR)
 {
-    // The 2 bodies are positionned at (0, 0, 0), with no rotation
+    // The 2 bodies are positioned at (0, 0, 0) with no rotation
     // The joint is a PR Joint
     // Axis is along the X axis
     // Anchor at (0, 0, 0)
@@ -219,7 +219,7 @@ SUITE (TestdxJointPR)
 
 
     // Only body 1
-    // The body are positionned at (0, 0, 0), with no rotation
+    // The body are positioned at (0, 0, 0) with no rotation
     // The joint is a PR Joint
     // Axis is along the X axis
     // Anchor at (0, 0, 0)
@@ -320,7 +320,7 @@ SUITE (TestdxJointPR)
     }
 
     // Only body 1
-    // The body are positionned at (0, 0, 0), with no rotation
+    // The body are positioned at (0, 0, 0) with no rotation
     // The joint is a PR Joint
     // Axis is in the oppsite X axis
     // Anchor at (0, 0, 0)
@@ -425,7 +425,7 @@ SUITE (TestdxJointPR)
 
     // Compare only one body to 2 bodies with one fixed.
     //
-    // The body are positionned at (0, 0, 0), with no rotation
+    // The body are positioned at (0, 0, 0) with no rotation
     // The joint is a PR Joint
     // Axis is along the X axis
     // Anchor at (0, 0, 0)
@@ -528,7 +528,7 @@ SUITE (TestdxJointPR)
 
 
     // Only body 2
-    // The body are positionned at (0, 0, 0), with no rotation
+    // The body are positioned at (0, 0, 0) with no rotation
     // The joint is a PR Joint
     // Axis is along the X axis
     // Anchor at (0, 0, 0)
@@ -629,7 +629,7 @@ SUITE (TestdxJointPR)
     }
 
     // Only body 2
-    // The body are positionned at (0, 0, 0), with no rotation
+    // The body are positioned at (0, 0, 0) with no rotation
     // The joint is a PR Joint
     // Axis is in the opposite X axis
     // Anchor at (0, 0, 0)
@@ -731,8 +731,8 @@ SUITE (TestdxJointPR)
     }
 
 
-    // The 2 bodies are positionned at (0, 0, 0),  and (0, 0, 0)
-    // The bodis have rotation of 27deg around some axis.
+    // The 2 bodies are positioned at (0, 0, 0) and (0, 0, 0)
+    // The bodies have rotation of 27deg around some axis.
     // The joint is a PR Joint
     // Axis is along the X axis
     // Anchor at (0, 0, 0)
@@ -949,11 +949,11 @@ SUITE (TestdxJointPR)
 
 
 
-    // This test compare the result of a slider with 2 bodies where body body 2 is
+    // This test compares the result of a slider with 2 bodies where body 2 is
     // fixed to the world to a slider with only one body at position 1.
     //
-    // Test the limits [-1, 0.25] when only one body at is attached to the joint
-    // using dJointAttache(jId, bId, 0);
+    // Test the limits [-1, 0.25] when only one body is attached to the joint
+    // using dJointAttach(jId, bId, 0);
     //
     TEST_FIXTURE(Fixture_dxJointPR_Compare_Body_At_Zero_AxisP_Along_Y,
                  test_Limit_minus1_025_One_Body_on_left)
@@ -997,11 +997,11 @@ SUITE (TestdxJointPR)
 
 
 
-    // This test compare the result of a slider with 2 bodies where body body 1 is
+    // This test compares the result of a slider with 2 bodies where body 1 is
     // fixed to the world to a slider with only one body at position 2.
     //
-    // Test the limits [-1, 0.25] when only one body at is attached to the joint
-    // using dJointAttache(jId, 0, bId);
+    // Test the limits [-1, 0.25] when only one body is attached to the joint
+    // using dJointAttach(jId, 0, bId);
     //
     TEST_FIXTURE(Fixture_dxJointPR_Compare_Body_At_Zero_AxisP_Along_Y,
                  test_Limit_minus1_025_One_Body_on_right)
@@ -1046,11 +1046,11 @@ SUITE (TestdxJointPR)
 
 
 
-    // This test compare the result of a slider with 2 bodies where body body 2 is
+    // This test compares the result of a slider with 2 bodies where body 2 is
     // fixed to the world to a slider with only one body at position 1.
     //
-    // Test the limits [0, 0] when only one body at is attached to the joint
-    // using dJointAttache(jId, bId, 0);
+    // Test the limits [0, 0] when only one body is attached to the joint
+    // using dJointAttach(jId, bId, 0);
     //
     // The body should not move since their is no room between the two limits
     //
@@ -1101,11 +1101,11 @@ SUITE (TestdxJointPR)
     }
 
 
-    // This test compare the result of a slider with 2 bodies where body body 1 is
+    // This test compares the result of a slider with 2 bodies where body 1 is
     // fixed to the world to a slider with only one body at position 2.
     //
-    // Test the limits [0, 0] when only one body at is attached to the joint
-    // using dJointAttache(jId, 0, bId);
+    // Test the limits [0, 0] when only one body is attached to the joint
+    // using dJointAttach(jId, 0, bId);
     //
     // The body should not move since their is no room between the two limits
     //

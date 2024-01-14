@@ -170,7 +170,7 @@ int dCollideCylinderSphere(dxGeom* Cylinder, dxGeom* Sphere,
     }
     else if( (radius - t) <= s && (radius - t) <= (length - s) )
     {
-        // 1. collsision
+        // 1. collision
         if(t > (radius2 + toleranz))
         {
             // cylinder-axis is outside the sphere
@@ -230,7 +230,7 @@ int dCollideCylinderSphere(dxGeom* Cylinder, dxGeom* Sphere,
         // 2. collision
         if(s <= (length * REAL(0.5)) )
         {
-            // collsision with the first disc
+            // collision with the first disc
             contact->depth = s + radius2;
             if(contact->depth < 0)
             {
@@ -252,7 +252,7 @@ int dCollideCylinderSphere(dxGeom* Cylinder, dxGeom* Sphere,
         }
         else
         {
-            // collsision with the second disc
+            // collision with the second disc
             contact->depth = (radius2 + length - s);
             if(contact->depth < 0)
             {

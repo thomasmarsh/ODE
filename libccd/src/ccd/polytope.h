@@ -228,7 +228,7 @@ _ccd_inline int ccdPtDelFace(ccd_pt_t *pt, ccd_pt_face_t *f)
     ccd_pt_edge_t *e;
     size_t i;
 
-    // remove face from edges' recerence lists
+    // remove face from edges' reference lists
     for (i = 0; i < 3; i++){
         e = f->edge[i];
         if (e->faces[0] == f){

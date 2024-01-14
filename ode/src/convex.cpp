@@ -278,7 +278,7 @@ bool IntersectSegmentPlane(dVector3 a,
   \param Direction1 The direction of Ray 3
   \param t the time "t" in Ray 1 that gives us the closest point
   (closest_point=Origin1+(Direction1*t).
-  \return true if there is a closest point, false if the rays are paralell.
+  \return true if there is a closest point, false if the rays are parallel.
 */
 inline bool ClosestPointInRay(const dVector3 Origin1,
                               const dVector3 Direction1,
@@ -310,7 +310,7 @@ inline bool ClosestPointInRay(const dVector3 Origin1,
   \param q2 end of segment 2
   \param t the time "t" in Ray 1 that gives us the closest point
   (closest_point=Origin1+(Direction1*t).
-  \return true if there is a closest point, false if the rays are paralell.
+  \return true if there is a closest point, false if the rays are parallel.
   \note Adapted from Christer Ericson's Real Time Collision Detection Book.
 */
 inline void ClosestPointBetweenSegments(dVector3& p1,
@@ -435,7 +435,7 @@ if (tnom < 0.0f) {
   \param p2 Plane 2
   \param p Contains the origin of the ray upon returning if planes intersect
   \param d Contains the direction of the ray upon returning if planes intersect
-  \return true if the planes intersect, false if paralell.
+  \return true if the planes intersect, false if parallel.
 */
 inline bool IntersectPlanes(const dVector4 p1, const dVector4 p2, dVector3 p, dVector3 d)
 {
@@ -624,7 +624,7 @@ int dCollideConvexPlane (dxGeom *o1, dxGeom *o2, int flags,
         // Check if contacts are full and both signs have been already found
         if (((contacts ^ maxc) | totalsign) == BOTH_SIGNS) // harder to comprehend but requires one register less
         {
-            break; // Nothing can be changed any more
+            break; // Nothing can be changed anymore
         }
     }
     if (totalsign == BOTH_SIGNS) return contacts;
@@ -819,7 +819,7 @@ inline void ComputeInterval(dxConvex& cvx,dVector4 axis,dReal& min,dReal& max)
         }
     }
     // *: usually using the distance part of the plane (axis) is
-    // not necesary, however, here we need it here in order to know
+    // not necesary, however, here we need it in order to know
     // which face to pick when there are 2 parallel sides.
 }
 
@@ -941,7 +941,7 @@ inline bool CheckSATConvexFaces(dxConvex& cvx1,
         Take only into account the faces that penetrate cvx1 to determine
         minimum depth
         ((max2*min2)<=0) = different sign, or one is zero and thus
-        cvx2 barelly touches cvx1
+        cvx2 barely touches cvx1
         */
         if (((max2*min2)<=0) && (dFabs(depth)<dFabs(ccso.min_depth)))
         {
@@ -1229,7 +1229,7 @@ int TestConvexIntersection(dxConvex& cvx1,dxConvex& cvx2, int flags,
                             p[2] = i1[2]+((i2[2]-i1[2])*t);
 #else
                             // Apply reference convex transformations to p
-                            // The commented out piece of code is likelly to
+                            // The commented out piece of code is likely to
                             // produce less operations than this one, but
                             // this way we know we are getting the right data
                             dMultiply0_331(tmp,cvx1.final_posr->R,p);

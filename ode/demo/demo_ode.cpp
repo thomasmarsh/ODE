@@ -1354,7 +1354,7 @@ int main()
     testCrossProduct();
     testSetZero();
     testNormalize3();
-    //testReorthonormalize();     ... not any more
+    //testReorthonormalize();     ... not anymore
     testPlaneSpace();
     testMatrixMultiply();
     testSmallMatrixMultiply();
